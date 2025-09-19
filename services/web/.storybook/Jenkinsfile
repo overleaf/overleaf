@@ -1,0 +1,55 @@
+pipeline {
+  agent {
+    node {
+      // Select a VM with the given tabel.
+      label 'jenkins-agent-web'
+      // Use the monorepo checkout in /workspace.
+      customWorkspace '/workspace'
+    }
+  }
+  options {
+    // Print timestamp next to each log line.
+    timestamps()
+    retry(3)
+    timeout(time: 15, unit: 'MINUTES')
+  }
+  environment {
+    BRANCH_NAME = "${env.CHANGE_BRANCH ? env.CHANGE_BRANCH : env.BRANCH_NAME}"
+    BUCKET = "gs://overleaf-dev-storybook"
+  }
+  stages {
+    stage('Install') {
+      steps {
+        sh 'make install'
+      }
+    }
+    stage('Build') {
+      steps {
+        sh 'bin/run -e BRANCH_NAME -w /overleaf/services/web monorepo make build_storybook'
+      }
+    }
+    stage('Copy stories') {
+      steps {
+        sh 'gsutil -m copy -r services/web/data/storybook/* "${BUCKET}/"'
+      }
+    }
+    stage('Generate index') {
+      steps {
+        dir('services/web') {
+          sh 'make storybook_index'
+        }
+      }
+    }
+    stage('Copy index') {
+      steps {
+        sh 'gsutil copy services/web/data/storybook/index.html "${BUCKET}/index.html"'
+      }
+    }
+  }
+  post {
+    cleanup {
+      sh 'rm -rf services/web/data/storybook/'
+      sh 'make clean_jenkins'
+    }
+  }
+}

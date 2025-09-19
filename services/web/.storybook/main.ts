@@ -83,6 +83,7 @@ const config: StorybookConfig = {
     return {
       ...options,
       plugins: [
+        ['@babel/plugin-proposal-decorators', { legacy: true }],
         // ensure that TSX files are transformed before other plugins run
         ['@babel/plugin-transform-typescript', { isTSX: true }],
         ...(options.plugins ?? []),
@@ -106,6 +107,11 @@ const config: StorybookConfig = {
           ...storybookConfig.resolve?.alias,
           // custom prefixes for import paths
           '@': path.join(rootDir, 'frontend/js/'),
+          '@ol-types': path.join(rootDir, 'types/'),
+          '@wf': path.join(
+            rootDir,
+            'modules/writefull/frontend/js/integration/src/'
+          ),
         },
       },
       module: {

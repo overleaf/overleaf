@@ -604,13 +604,19 @@ tar:
 
 build_storybook:
 	npm run lezer-latex:generate
-	npm run build-storybook
-	if [ -n "$(BRANCH_NAME)" ]; then \
-	  echo "Renaming storybook-static -> $(BRANCH_NAME)."; \
-	  d=$$(dirname "$(BRANCH_NAME)"); \
-	  mkdir -p "storybook-output/$$d"; \
-	  mv storybook-static "storybook-output/$$d/$$(basename "$(BRANCH_NAME)")/"; \
-	fi
+	mkdir -p data/storybook/
+	npm run build-storybook -- --output-dir data/storybook/$(BRANCH_NAME)
+
+storybook_index:
+	mkdir -p data/storybook/
+	m4 \
+		-DLIST="$(shell gsutil ls "${BUCKET}/" \
+										| sed -E "s@^${BUCKET}/([^/]+)/@\1@" \
+										| grep -v -e index.html \
+										| sort \
+										| tr '\n' ,)" \
+		-DBRANCH_NAME="$BRANCH_NAME" .storybook/index.html.m4 \
+	> data/storybook/index.html
 
 MODULE_TARGETS = \
 	$(TEST_ACCEPTANCE_MODULES_SAAS) \
