@@ -143,18 +143,10 @@ export class ProjectSnapshot {
   ): Promise<any> {
     const file = this.snapshot.getFile(path)
     const hash = file?.getHash()
-    const byteLength = file?.getByteLength()
     if (hash == null) {
       return null
     }
-    if (byteLength == null) {
-      return null
-    }
-    let blobStoreOptions
-    if (options?.maxSize != null && byteLength > options?.maxSize) {
-      blobStoreOptions = { maxSize: options.maxSize }
-    }
-    return await this.blobStore.getString(hash, blobStoreOptions)
+    return await this.blobStore.getString(hash, options)
   }
 
   getDocs(): Map<string, File> {
@@ -331,20 +323,44 @@ async function fetchBlob(
   options?: { maxSize?: number }
 ): Promise<string> {
   const url = `/project/${projectId}/blob/${hash}`
-  let fetchOpts
-  if (options?.maxSize === 0) {
-    return ''
-  }
   if (options?.maxSize) {
-    fetchOpts = {
-      headers: {
-        Range: `bytes=0-${options.maxSize - 1}`,
-      },
-    }
+    return await fetchTextFileWithSizeLimit(url, options.maxSize)
   }
-  const res = await fetch(url, fetchOpts)
+  const res = await fetch(url)
   if (!res.ok) {
     throw new FetchError('Failed to fetch blob', url, undefined, res)
   }
   return await res.text()
+}
+
+async function fetchTextFileWithSizeLimit(url: string, maxSize: number) {
+  let result = ''
+  try {
+    const abortController = new AbortController()
+    const response = await fetch(url, {
+      signal: abortController.signal,
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch blob')
+    }
+    if (!response.body) {
+      throw new Error('Response body is empty')
+    }
+
+    const reader = response.body.pipeThrough(new TextDecoderStream())
+    for await (const chunk of reader) {
+      result += chunk
+      if (result.length > maxSize) {
+        abortController.abort()
+      }
+    }
+  } catch (error: any) {
+    if (error?.name === 'AbortError') {
+      // This is fine, we just return the result we have so far
+    } else {
+      throw error
+    }
+  }
+  return result.slice(0, maxSize)
 }

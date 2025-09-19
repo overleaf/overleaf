@@ -207,7 +207,6 @@ async function requestBlob(historyId, hash, method = 'GET', range = '') {
     url,
     stream,
     contentLength: parseInt(response.headers.get('Content-Length'), 10),
-    contentRange: response.headers.get('Content-Range'),
   }
 }
 

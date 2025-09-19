@@ -284,22 +284,21 @@ async function headProjectBlob(req, res) {
 }
 
 // Support simple, singular ranges starting from zero only, up-to 2MB = 2_000_000, 7 digits
-const RANGE_HEADER = /^bytes=(\d{1,7})-(\d{1,7})$/
+const RANGE_HEADER = /^bytes=0-(\d{1,7})$/
 
 /**
  * @param {string} header
- * @return {undefined | {start: number, end: number}}
+ * @return {{}|{start: number, end: number}}
  * @private
  */
 function _getRangeOpts(header) {
-  if (!header) return undefined
+  if (!header) return {}
   const match = header.match(RANGE_HEADER)
   if (match) {
-    const start = parseInt(match[1], 10)
-    const end = parseInt(match[2], 10)
-    return { start, end }
+    const end = parseInt(match[1], 10)
+    return { start: 0, end }
   }
-  return undefined
+  return {}
 }
 
 async function getProjectBlob(req, res, next) {
@@ -312,31 +311,6 @@ async function getProjectBlob(req, res, next) {
   try {
     let stream
     try {
-      if (opts) {
-        // This is a range request, so we need to set the appropriate headers
-        // Browser caching only works if the total size is known, so we have
-        // to fetch the blob metadata first.
-        const metaData = await blobStore.getBlob(hash)
-        if (metaData) {
-          const blobLength = metaData.getByteLength()
-          if (opts.start > opts.end || opts.start >= blobLength) {
-            return res
-              .status(416) // Requested Range Not Satisfiable
-              .set('Content-Range', `bytes */${blobLength}`)
-              .set('Content-Length', '0')
-              .end()
-          }
-          // Valid range request
-          const actualEnd = Math.min(opts.end, blobLength - 1)
-          const returnedSize = actualEnd - opts.start + 1
-          res.set('Content-Length', returnedSize)
-          res.set(
-            'Content-Range',
-            `bytes ${opts.start}-${actualEnd}/${blobLength}`
-          )
-          res.status(206)
-        }
-      }
       stream = await blobStore.getStream(hash, opts)
     } catch (err) {
       if (err instanceof Blob.NotFoundError) {
