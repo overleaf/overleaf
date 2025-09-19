@@ -141,7 +141,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
 
   const { pdfPreviewOpen } = useLayoutContext()
 
-  const { features, alphaProgram, labsProgram } = useUserContext()
+  const { features, alphaProgram } = useUserContext()
 
   const { fileTreeData } = useFileTreeData()
   const { findEntityByPath } = useFileTreePathContext()
@@ -532,7 +532,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
                 )
               }
 
-              if (hasCompileLogsEvents || labsProgram) {
+              if (hasCompileLogsEvents) {
                 const ruleCounts = buildRuleCounts(
                   result.logEntries.all
                 ) as Record<string, number>
@@ -629,7 +629,6 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
     joinedOnce,
     data,
     alphaProgram,
-    labsProgram,
     features,
     hasCompileLogsEvents,
     hasPremiumCompile,
