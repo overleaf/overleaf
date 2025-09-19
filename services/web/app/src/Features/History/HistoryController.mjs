@@ -66,9 +66,9 @@ async function requestBlob(method, req, res) {
   }
 
   const range = req.get('Range')
-  let stream, contentLength
+  let stream, contentLength, contentRange
   try {
-    ;({ stream, contentLength } =
+    ;({ stream, contentLength, contentRange } =
       await HistoryManager.promises.requestBlobWithProjectId(
         projectId,
         hash,
@@ -80,7 +80,11 @@ async function requestBlob(method, req, res) {
     throw err
   }
 
-  if (contentLength) res.setHeader('Content-Length', contentLength) // set on HEAD
+  if (contentLength) res.setHeader('Content-Length', contentLength)
+  if (contentRange) {
+    res.setHeader('Content-Range', contentRange)
+    res.status(206) // Partial Content
+  }
   res.setHeader('Content-Type', 'application/octet-stream')
   setBlobCacheHeaders(res, hash)
 

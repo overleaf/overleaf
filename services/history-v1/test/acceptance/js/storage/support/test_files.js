@@ -19,6 +19,9 @@ exports.NON_BMP_TXT_BYTE_LENGTH = 57
 exports.NULL_CHARACTERS_TXT_HASH = '4227ca4e8736af63036e7457e2db376ddf7e5795'
 exports.NULL_CHARACTERS_TXT_BYTE_LENGTH = 3
 
+exports.EMPTY_FILE_HASH = 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'
+exports.EMPTY_FILE_BYTE_LENGTH = 0
+
 // git hashes of some short strings for testing
 exports.STRING_A_HASH = '2e65efe2a145dda7ee51d1741299f848e5bf752e'
 exports.STRING_AB_HASH = '9ae9e86b7bd6cb1472d9373702d8249973da0832'

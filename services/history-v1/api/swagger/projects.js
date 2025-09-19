@@ -190,6 +190,12 @@ exports.paths = {
             type: 'file',
           },
         },
+        206: {
+          description: 'Success',
+          schema: {
+            type: 'file',
+          },
+        },
         404: {
           description: 'Not Found',
           schema: {

@@ -12,7 +12,8 @@ describe('HistoryController', function () {
   beforeEach(async function (ctx) {
     ctx.callback = sinon.stub()
     ctx.user_id = 'user-id-123'
-    ctx.project_id = 'mock-project-id'
+    ctx.project_id = '000000000000000012345678'
+    ctx.blobHash = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
     ctx.stream = sinon.stub()
     ctx.fetchResponse = {
       headers: {
@@ -32,6 +33,7 @@ describe('HistoryController', function () {
     ctx.HistoryManager = {
       promises: {
         injectUserDetails: sinon.stub(),
+        requestBlobWithProjectId: sinon.stub(),
       },
     }
 
@@ -294,6 +296,91 @@ describe('HistoryController', function () {
 
       it('responds with a 204', function (ctx) {
         ctx.res.sendStatus.should.have.been.calledWith(204)
+      })
+    })
+  })
+
+  describe('requestBlob', function () {
+    describe('With Range header', function () {
+      beforeEach(async function (ctx) {
+        ctx.req = {
+          params: {
+            project_id: ctx.project_id,
+            hash: ctx.blobHash,
+          },
+          query: {},
+          body: {},
+          get: sinon.stub(),
+        }
+        ctx.req.get.withArgs('Range').returns('bytes=0-42')
+        ctx.res = { setHeader: sinon.stub(), status: sinon.stub() }
+        ctx.HistoryManager.promises.requestBlobWithProjectId.resolves({
+          stream: null,
+          contentLength: '43',
+          contentRange: 'bytes 0-42/100',
+        })
+        await ctx.HistoryController.getBlob(ctx.req, ctx.res, ctx.next)
+      })
+
+      it('should forward the range request', function (ctx) {
+        ctx.HistoryManager.promises.requestBlobWithProjectId.should.have.been.calledWith(
+          sinon.match(val => val.toString() === ctx.project_id),
+          ctx.blobHash,
+          'GET',
+          'bytes=0-42'
+        )
+      })
+
+      it('should forward the Content-Range header', function (ctx) {
+        ctx.res.setHeader.should.have.been.calledWith(
+          'Content-Range',
+          'bytes 0-42/100'
+        )
+      })
+
+      it('should forward the Content-Length header', function (ctx) {
+        ctx.res.setHeader.should.have.been.calledWith('Content-Length', '43')
+      })
+
+      it('should have status 206', function (ctx) {
+        ctx.res.status.should.have.been.calledWith(206)
+      })
+    })
+
+    describe('Without Range header', function () {
+      beforeEach(async function (ctx) {
+        ctx.req = {
+          params: {
+            project_id: ctx.project_id,
+            hash: ctx.blobHash,
+          },
+          query: {},
+          body: {},
+          get: sinon.stub(),
+        }
+        ctx.req.get.withArgs('Range').returns(null)
+        ctx.res = { setHeader: sinon.stub(), status: sinon.stub() }
+        ctx.HistoryManager.promises.requestBlobWithProjectId.resolves({
+          stream: null,
+          contentLength: '100',
+          range: null,
+        })
+        await ctx.HistoryController.getBlob(ctx.req, ctx.res, ctx.next)
+      })
+
+      it('should not have a Content-Range header', function (ctx) {
+        expect(ctx.res.setHeader).to.not.have.been.calledWith(
+          'Content-Range',
+          sinon.match.string
+        )
+      })
+
+      it('should forward the Content-Length header', function (ctx) {
+        ctx.res.setHeader.should.have.been.calledWith('Content-Length', '100')
+      })
+
+      it('should not have status 206', function (ctx) {
+        ctx.res.status.should.not.have.been.calledWith(206)
       })
     })
   })

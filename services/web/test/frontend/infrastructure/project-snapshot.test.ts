@@ -44,6 +44,10 @@ describe('ProjectSnapshot', function () {
         ), // 6.5MB
       hash: 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
     },
+    'empty.png': {
+      contents: '',
+      hash: 'ffffffffffffffffffffffffffffffffffffffff',
+    },
   }
 
   const chunk = {
@@ -80,6 +84,13 @@ describe('ProjectSnapshot', function () {
               file: {
                 hash: files['bibliography.bib'].hash,
                 byteLength: files['bibliography.bib'].contents.length,
+              },
+            },
+            {
+              pathname: 'empty.png',
+              file: {
+                hash: files['empty.png'].hash,
+                byteLength: files['empty.png'].contents.length,
               },
             },
           ],
@@ -145,10 +156,24 @@ describe('ProjectSnapshot', function () {
     })
   }
 
+  // fetch-mock doesn't seem to expose the header to the response function,
+  // so we just use a constant here
+  const MOCKED_MAX_SIZE = 100
+
   function mockBlobs(paths = Object.keys(files) as (keyof typeof files)[]) {
     for (const path of paths) {
       const file = files[path]
-      fetchMock.get(`/project/${projectId}/blob/${file.hash}`, file.contents)
+      fetchMock
+        .get({
+          url: `/project/${projectId}/blob/${file.hash}`,
+          missingHeaders: ['Range'],
+          response: file.contents,
+        })
+        .get({
+          url: `/project/${projectId}/blob/${file.hash}`,
+          headers: { Range: `bytes=0-${MOCKED_MAX_SIZE - 1}` },
+          response: file.contents.slice(0, MOCKED_MAX_SIZE),
+        })
     }
   }
 
@@ -243,13 +268,18 @@ describe('ProjectSnapshot', function () {
             hash: files['bibliography.bib'].hash,
             size: files['bibliography.bib'].contents.length,
           },
+          {
+            path: 'empty.png',
+            hash: 'ffffffffffffffffffffffffffffffffffffffff',
+            size: 0,
+          },
         ])
       })
     })
 
     describe('getBinaryFileContents', function () {
       beforeEach(function () {
-        mockBlobs(['bibliography.bib'])
+        mockBlobs(['bibliography.bib', 'empty.png'])
       })
 
       it('can fetch whole file', async function () {
@@ -257,14 +287,20 @@ describe('ProjectSnapshot', function () {
         expect(blob).to.equal(files['bibliography.bib'].contents)
       })
 
-      // NOTE: fetch-mock does not support the .response.body.pipeThrough API,
-      // so this test is skipped for now.
-      // eslint-disable-next-line mocha/no-skipped-tests
-      it.skip('can fetch part of file', async function () {
+      it('can fetch part of file', async function () {
         const blob = await snapshot.getBinaryFileContents('bibliography.bib', {
-          maxSize: 100,
+          maxSize: MOCKED_MAX_SIZE,
         })
-        expect(blob).to.equal(files['bibliography.bib'].contents.slice(0, 100))
+        expect(blob).to.equal(
+          files['bibliography.bib'].contents.slice(0, MOCKED_MAX_SIZE)
+        )
+      })
+
+      it('can fetch empty file with maxSize', async function () {
+        const blob = await snapshot.getBinaryFileContents('empty.png', {
+          maxSize: 200,
+        })
+        expect(blob).to.equal(files['empty.png'].contents)
       })
     })
   })
