@@ -14,6 +14,7 @@ import {
 import {
   isNewUser,
   useIsNewEditorEnabled,
+  useIsNewErrorLogsPositionEnabled,
 } from '@/features/ide-redesign/utils/new-editor-utils'
 import { getSplitTestVariant } from '@/utils/splitTestUtils'
 
@@ -78,6 +79,7 @@ const CompileTimeout = memo(function CompileTimeout({
   segmentation,
 }: CompileTimeoutProps) {
   const { t } = useTranslation()
+  const newLogsPosition = useIsNewErrorLogsPositionEnabled()
 
   const extraSearchParams = useMemo(() => {
     if (!isNewUser()) {
@@ -97,7 +99,7 @@ const CompileTimeout = memo(function CompileTimeout({
 
   return (
     <PdfLogEntry
-      autoExpand
+      autoExpand={!newLogsPosition}
       headerTitle={t('your_compile_timed_out')}
       formattedContent={
         getMeta('ol-ExposedSettings').enableSubscriptions && (
@@ -159,6 +161,7 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
 }: PreventTimeoutHelpMessageProps) {
   const { t } = useTranslation()
   const { sendEvent } = useEditorAnalytics()
+  const newLogsPosition = useIsNewErrorLogsPositionEnabled()
 
   function sendInfoClickEvent() {
     sendEvent('paywall-info-click', {
@@ -181,7 +184,7 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
 
   return (
     <PdfLogEntry
-      autoExpand
+      autoExpand={!newLogsPosition}
       headerTitle={t('reasons_for_compile_timeouts')}
       formattedContent={
         <>
