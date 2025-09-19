@@ -116,7 +116,7 @@ describe('Project blobs API', function () {
       expect(payload).to.equal(fileContents.toString())
     })
 
-    it('supports range request', async function () {
+    it('supports range request from beginning', async function () {
       const url = new URL(
         testServer.url(
           `/api/projects/${projectId}/blobs/${testFiles.HELLO_TXT_HASH}`
@@ -125,7 +125,127 @@ describe('Project blobs API', function () {
       url.searchParams.append('token', token)
       const response = await fetch(url, { headers: { Range: 'bytes=0-4' } })
       const payload = await response.text()
-      expect(payload).to.equal(fileContents.toString().slice(0, 4))
+      // 0-4 is inclusive, so 5 bytes
+      expect(payload).to.equal(fileContents.slice(0, 5).toString())
+      expect(response.headers.get('Content-Range')).to.equal(
+        `bytes 0-4/${testFiles.HELLO_TXT_BYTE_LENGTH}`
+      )
+      expect(response.headers.get('Content-Length')).to.equal('5')
+      expect(response.status).to.equal(HTTPStatus.PARTIAL_CONTENT)
+    })
+
+    it('supports range request in middle', async function () {
+      const url = new URL(
+        testServer.url(
+          `/api/projects/${projectId}/blobs/${testFiles.HELLO_TXT_HASH}`
+        )
+      )
+      url.searchParams.append('token', token)
+      const response = await fetch(url, { headers: { Range: 'bytes=5-9' } })
+      const payload = await response.text()
+      // 5-9 is inclusive, so 5 bytes
+      expect(payload).to.equal(fileContents.slice(5, 10).toString())
+      expect(response.headers.get('Content-Range')).to.equal(
+        `bytes 5-9/${testFiles.HELLO_TXT_BYTE_LENGTH}`
+      )
+      expect(response.headers.get('Content-Length')).to.equal('5')
+      expect(response.status).to.equal(HTTPStatus.PARTIAL_CONTENT)
+    })
+
+    it('supports range request past end', async function () {
+      const url = new URL(
+        testServer.url(
+          `/api/projects/${projectId}/blobs/${testFiles.HELLO_TXT_HASH}`
+        )
+      )
+      url.searchParams.append('token', token)
+      const response = await fetch(url, { headers: { Range: 'bytes=5-100' } })
+      const payload = await response.text()
+      expect(payload).to.equal(fileContents.slice(5).toString())
+      // Response range should be capped to the actual file size
+      expect(response.headers.get('Content-Range')).to.equal(
+        `bytes 5-10/${testFiles.HELLO_TXT_BYTE_LENGTH}`
+      )
+      expect(response.headers.get('Content-Length')).to.equal('6')
+      expect(response.status).to.equal(HTTPStatus.PARTIAL_CONTENT)
+    })
+
+    describe('with invalid request ranges', async function () {
+      async function testInvalidRange(range) {
+        const url = new URL(
+          testServer.url(
+            `/api/projects/${projectId}/blobs/${testFiles.HELLO_TXT_HASH}`
+          )
+        )
+        url.searchParams.append('token', token)
+        const response = await fetch(url, { headers: { Range: range } })
+
+        expect(response.headers.get('Content-Range')).to.equal(
+          `bytes */${testFiles.HELLO_TXT_BYTE_LENGTH}`
+        )
+        expect(response.headers.get('Content-Length')).to.equal('0')
+        expect(response.status).to.equal(
+          HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE
+        )
+      }
+
+      it('should fail on invalid range where start > end', async function () {
+        testInvalidRange('bytes=10-5')
+      })
+
+      it('should fail on invalid range where start = length', async function () {
+        testInvalidRange(`bytes=${testFiles.HELLO_TXT_BYTE_LENGTH + 1}-105`)
+      })
+
+      it('should fail on invalid range where start > length', async function () {
+        testInvalidRange(`bytes=${testFiles.HELLO_TXT_BYTE_LENGTH}-105`)
+      })
+    })
+
+    describe('with an empty blob', async function () {
+      beforeEach(async function () {
+        const response = await fetch(
+          testServer.url(
+            `/api/projects/${projectId}/blobs/${testFiles.EMPTY_FILE_HASH}`
+          ),
+          {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${token}` },
+            body: '',
+          }
+        )
+        expect(response.ok).to.be.true
+      })
+
+      it('should not handle range requests', async function () {
+        const url = new URL(
+          testServer.url(
+            `/api/projects/${projectId}/blobs/${testFiles.EMPTY_FILE_HASH}`
+          )
+        )
+        url.searchParams.append('token', token)
+        const response = await fetch(url, { headers: { Range: 'bytes=0-0' } })
+        expect(response.headers.get('Content-Range')).to.equal(
+          `bytes */${testFiles.EMPTY_FILE_BYTE_LENGTH}`
+        )
+        expect(response.headers.get('Content-Length')).to.equal('0')
+        expect(response.status).to.equal(
+          HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE
+        )
+      })
+
+      it('should handle full requests', async function () {
+        const url = new URL(
+          testServer.url(
+            `/api/projects/${projectId}/blobs/${testFiles.EMPTY_FILE_HASH}`
+          )
+        )
+        url.searchParams.append('token', token)
+        const response = await fetch(url)
+        const payload = await response.text()
+        expect(payload).to.equal('')
+        expect(response.status).to.equal(HTTPStatus.OK)
+      })
     })
 
     it('supports HEAD request', async function () {
