@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ElementType, memo, useMemo, useState } from 'react'
+import { ElementType, memo, useCallback, useMemo, useState } from 'react'
 import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-preview-provider'
 import StopOnFirstErrorPrompt from '@/features/pdf-preview/components/stop-on-first-error-prompt'
 import PdfPreviewError from '@/features/pdf-preview/components/pdf-preview-error'
@@ -57,6 +57,15 @@ function ErrorLogs({
 
   const [activeTab, setActiveTab] = useState<string | null>('all')
 
+  const changeTab = useCallback(
+    (key: string | null) => {
+      if (tabs.some(tab => tab.key === key)) {
+        setActiveTab(key)
+      }
+    },
+    [tabs]
+  )
+
   const entries = useMemo(() => {
     return tabs.find(tab => tab.key === activeTab)?.entries || []
   }, [activeTab, tabs])
@@ -65,7 +74,7 @@ function ErrorLogs({
   const includeWarnings = activeTab === 'all' || activeTab === 'warnings'
 
   return (
-    <TabContainer onSelect={setActiveTab} defaultActiveKey={activeTab ?? 'all'}>
+    <TabContainer onSelect={changeTab} defaultActiveKey={activeTab ?? 'all'}>
       <Nav defaultActiveKey="all" className="error-logs-tabs">
         {tabs.map(tab => (
           <TabHeader key={tab.key} tab={tab} active={activeTab === tab.key} />
