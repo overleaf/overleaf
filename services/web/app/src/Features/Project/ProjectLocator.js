@@ -95,7 +95,10 @@ function findElement(options, _callback) {
   const path = { fileSystem: '', mongo: 'rootFolder.0' }
 
   const startSearch = project => {
-    if (elementId + '' === project.rootFolder[0]._id + '') {
+    if (
+      elementId + '' === project.rootFolder[0]._id + '' &&
+      elementType === 'folders'
+    ) {
       callback(null, project.rootFolder[0], path, null)
     } else {
       search(project.rootFolder[0], path)

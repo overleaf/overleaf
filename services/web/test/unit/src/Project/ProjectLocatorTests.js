@@ -112,6 +112,30 @@ describe('ProjectLocator', function () {
       foundElement._id.should.equal(rootFolder._id)
     })
 
+    it('should not return root folder when searching for docs', async function () {
+      await expect(
+        this.locator.promises.findElement({
+          project_id: project._id,
+          element_id: rootFolder._id,
+          type: 'docs',
+        })
+      )
+        .to.eventually.be.rejectedWith(Errors.NotFoundError)
+        .and.eventually.have.property('message', 'entity not found')
+    })
+
+    it('should not return root folder when searching for files', async function () {
+      await expect(
+        this.locator.promises.findElement({
+          project_id: project._id,
+          element_id: rootFolder._id,
+          type: 'files',
+        })
+      )
+        .to.eventually.be.rejectedWith(Errors.NotFoundError)
+        .and.eventually.have.property('message', 'entity not found')
+    })
+
     it('when at root', async function () {
       const {
         element: foundElement,
