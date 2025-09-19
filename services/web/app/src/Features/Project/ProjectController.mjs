@@ -513,7 +513,7 @@ const _ProjectController = {
         req,
         projectId
       )
-      const allowedImageNames = ProjectHelper.getAllowedImagesForUser(user)
+      const imageNames = ProjectHelper.getAllowedImagesForUser(user)
 
       const privilegeLevel =
         await AuthorizationManager.promises.getPrivilegeLevelForProject(
@@ -847,7 +847,7 @@ const _ProjectController = {
         maxReconnectGracefullyIntervalMs:
           Settings.maxReconnectGracefullyIntervalMs,
         brandVariation,
-        allowedImageNames,
+        imageNames,
         gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
         gitBridgeEnabled: Features.hasFeature('git-bridge'),
         wsUrl,
