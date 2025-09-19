@@ -5,7 +5,7 @@ import { UserSettings } from '../../../types/user-settings'
 import { OAuthProviders } from '../../../types/oauth-providers'
 import { ExposedSettings } from '../../../types/exposed-settings'
 import {
-  type ImageName,
+  type AllowedImageName,
   OverallThemeMeta,
   type SpellCheckLanguage,
 } from '../../../types/project-settings'
@@ -80,6 +80,7 @@ export interface Meta {
   'ol-algolia': AlgoliaConfig | undefined
   'ol-allInReconfirmNotificationPeriods': UserEmailData[]
   'ol-allowedExperiments': string[]
+  'ol-allowedImageNames': AllowedImageName[]
   'ol-anonymous': boolean
   'ol-baseAssetPath': string
   'ol-brandVariation': Record<string, any>
@@ -162,7 +163,6 @@ export interface Meta {
     owned?: boolean
   }[]
   'ol-i18n': { currentLangCode: string }
-  'ol-imageNames': ImageName[]
   'ol-inactiveTutorials': string[]
   'ol-institutionEmailNonCanonical': string | undefined
   'ol-institutionLinked': InstitutionLink | undefined

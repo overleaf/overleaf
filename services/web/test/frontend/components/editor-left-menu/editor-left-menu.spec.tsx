@@ -1,6 +1,6 @@
 import EditorLeftMenu from '../../../../frontend/js/features/editor-left-menu/components/editor-left-menu'
 import {
-  ImageName,
+  AllowedImageName,
   OverallThemeMeta,
   SpellCheckLanguage,
 } from '../../../../types/project-settings'
@@ -35,22 +35,20 @@ describe('<EditorLeftMenu />', function () {
       },
     ]
 
-    const ImageNames: ImageName[] = [
+    const allowedImageNames: AllowedImageName[] = [
       {
         imageDesc: 'Image 1',
         imageName: 'img-1',
-        allowed: true,
       },
       {
         imageDesc: 'Image 2',
         imageName: 'img-2',
-        allowed: true,
       },
     ]
 
     beforeEach(function () {
       window.metaAttributesCache.set('ol-overallThemes', overallThemes)
-      window.metaAttributesCache.set('ol-imageNames', ImageNames)
+      window.metaAttributesCache.set('ol-allowedImageNames', allowedImageNames)
       window.metaAttributesCache.set('ol-anonymous', false)
       window.metaAttributesCache.set('ol-gitBridgeEnabled', true)
       window.metaAttributesCache.set('ol-showSupport', true)

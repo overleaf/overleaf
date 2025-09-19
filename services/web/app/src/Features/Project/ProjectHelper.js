@@ -148,27 +148,11 @@ function _addNumericSuffixToProjectName(name, allProjectNames, maxLength) {
   return null
 }
 
-function _imageAllowed(user, image) {
-  if (image.alphaOnly) {
-    return Boolean(user?.alphaProgram)
-  }
-  if (image.monthlyExperimental) {
-    return Boolean(
-      user?.labsProgram && user.labsExperiments.includes('monthly-texlive')
-    )
-  }
-  return true
-}
-
 function getAllowedImagesForUser(user) {
-  let images = Settings.allowedImageNames || []
-
-  images = images.map(image => {
-    return {
-      ...image,
-      allowed: _imageAllowed(user, image),
-    }
-  })
-
-  return images
+  const images = Settings.allowedImageNames || []
+  if (user?.alphaProgram) {
+    return images
+  } else {
+    return images.filter(image => !image.alphaOnly)
+  }
 }

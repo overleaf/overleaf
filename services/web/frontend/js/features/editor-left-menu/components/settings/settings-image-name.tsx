@@ -11,18 +11,18 @@ export default function SettingsImageName() {
   const { imageName, setImageName } = useProjectSettingsContext()
   const { write } = usePermissionsContext()
 
-  const allowedImageNames = useMemo(() => getMeta('ol-imageNames') || [], [])
+  const allowedImageNames = useMemo(
+    () => getMeta('ol-allowedImageNames') || [],
+    []
+  )
 
   const options: Array<Option> = useMemo(
     () =>
-      allowedImageNames
-        // filter out images that aren't allowed, unless thats the current image the project is on
-        .filter(image => image.allowed || image.imageName === imageName)
-        .map(({ imageName, imageDesc }) => ({
-          value: imageName,
-          label: imageDesc,
-        })),
-    [allowedImageNames, imageName]
+      allowedImageNames.map(({ imageName, imageDesc }) => ({
+        value: imageName,
+        label: imageDesc,
+      })),
+    [allowedImageNames]
   )
 
   if (allowedImageNames.length === 0) {
