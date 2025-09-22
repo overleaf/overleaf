@@ -246,7 +246,11 @@ async function getChangesSinceVersion(projectId, since) {
   const result = await redisBackend.getChangesSinceVersion(projectId, since)
   if (result.status === 'ok') {
     // Successfully got changes from Redis, no more changes available beyond what Redis has
-    metrics.inc('chunk_store.get_changes_since_version', 1, { source: 'redis' })
+    metrics.inc('chunk_store.get_changes_since_version', 1, {
+      source: 'redis',
+      hasMore: 'false',
+      status: result.status,
+    })
     return { changes: result.changes || [], hasMore: false }
   }
 
