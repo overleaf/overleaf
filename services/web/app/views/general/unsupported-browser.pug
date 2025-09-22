@@ -1,5 +1,8 @@
 extends ../layout/layout-no-js
 
+block append meta
+	meta(name='robots' content='noindex')
+
 block vars
 	- metadata = {title: 'Unsupported browser'}
 
