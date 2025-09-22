@@ -10,6 +10,7 @@ import { FC, useCallback, useEffect } from 'react'
 import {
   canUseNewEditor,
   useIsNewEditorEnabled,
+  useIsNewEditorEnabledViaPrimaryFeatureFlag,
 } from '../../utils/new-editor-utils'
 import Notification from '@/shared/components/notification'
 import { useSwitchEnableNewEditorState } from '../../hooks/use-switch-enable-new-editor-state'
@@ -30,14 +31,15 @@ export const IdeRedesignIntroModal: FC = () => {
       name: TUTORIAL_KEY,
     }
   )
+  const hasAccess = useIsNewEditorEnabledViaPrimaryFeatureFlag()
 
   useEffect(() => {
+    if (!hasAccess) return
     if (!inactiveTutorials.includes(TUTORIAL_KEY)) {
       tryShowingPopup()
     }
-  }, [tryShowingPopup, inactiveTutorials])
+  }, [tryShowingPopup, inactiveTutorials, hasAccess])
 
-  const hasAccess = canUseNewEditor()
   if (!hasAccess) {
     return null
   }
