@@ -9,33 +9,20 @@ export default function HeaderLogoOrTitle({
   overleafLogo?: string
 }) {
   const { appName } = getMeta('ol-ExposedSettings')
-  if (customLogo) {
-    return (
-      // eslint-disable-next-line jsx-a11y/anchor-has-content
-      <a
-        href="/"
-        aria-label={appName}
-        className="navbar-brand"
-        style={{ backgroundImage: `url("${customLogo}")` }}
-      />
-    )
-  } else if (title) {
-    return (
-      <a href="/" aria-label={appName} className="navbar-title">
-        {title}
-      </a>
-    )
-  } else {
-    const style = overleafLogo
-      ? {
-          style: {
-            backgroundImage: `url("${overleafLogo}")`,
-          },
-        }
-      : null
-    return (
-      // eslint-disable-next-line jsx-a11y/anchor-has-content
-      <a href="/" aria-label={appName} className="navbar-brand" {...style} />
-    )
-  }
+  const logoUrl = customLogo ?? overleafLogo
+  return (
+    <a href="/" aria-label={appName} className="navbar-brand">
+      {(customLogo || !title) && (
+        <div
+          className="navbar-logo"
+          style={logoUrl ? { backgroundImage: `url("${logoUrl}")` } : {}}
+        />
+      )}
+      {title && (
+        <div className="navbar-title">
+          <span>{title}</span>
+        </div>
+      )}
+    </a>
+  )
 }

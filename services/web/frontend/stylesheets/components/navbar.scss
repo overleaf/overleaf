@@ -5,6 +5,8 @@
 
 // Default navbar
 .navbar-default {
+  --bs-navbar-brand-padding-y: 0;
+
   background-color: var(--navbar-bg);
   border-color: var(--navbar-border);
   padding: var(--navbar-padding);
@@ -22,27 +24,48 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
   }
 
   .navbar-brand {
-    width: var(--navbar-brand-width);
     height: $header-height;
-    padding: 0;
-    background: var(--navbar-brand-image-url) no-repeat left center;
-    background-size: contain;
-  }
-
-  .navbar-title {
-    display: inline-block;
-    font-size: var(--navbar-title-font-size);
-    color: var(--navbar-title-color);
     text-decoration: none;
+    z-index: 15;
+    display: flex;
+    gap: var(--spacing-08);
+    max-width: 100%;
+    min-width: 0;
 
     &:hover,
     &:active,
     &:focus {
-      color: var(--navbar-title-color-hover);
+      text-decoration: none;
+    }
+
+    .navbar-logo {
+      flex: 0 0 auto;
+      width: var(--navbar-brand-width);
+      height: $header-height;
+      padding: 0;
+      background: var(--navbar-brand-image-url) no-repeat left center;
+      background-size: contain;
+    }
+
+    .navbar-title {
+      display: inline-block;
+      font-size: var(--navbar-title-font-size);
+      color: var(--navbar-title-color);
+      text-decoration: none;
+      align-self: center;
+      text-overflow: ellipsis;
+      overflow: hidden;
+
+      &:hover,
+      &:active,
+      &:focus {
+        color: var(--navbar-title-color-hover);
+      }
     }
   }
 
@@ -129,6 +152,10 @@
   .navbar-collapse,
   .navbar-form {
     border-color: var(--navbar-border);
+  }
+
+  .navbar-collapse:not(.show, .collapsing) {
+    flex: 0 0 auto; // allow navbar title to expand without overflowing
   }
 }
 

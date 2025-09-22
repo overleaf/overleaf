@@ -18,18 +18,10 @@
     --navbar-toggler-expanded-bg: none;
     --navbar-toggler-expanded-color: var(--content-secondary);
 
-    .navbar-header > a {
-      position: relative;
-      z-index: 15;
-
+    .navbar-header .navbar-logo {
       @include media-breakpoint-up(md) {
-        &.navbar-brand {
-          top: var(--spacing-05);
-        }
-
-        &.navbar-title {
-          padding-top: var(--spacing-05);
-        }
+        position: relative;
+        top: var(--spacing-05);
       }
     }
 

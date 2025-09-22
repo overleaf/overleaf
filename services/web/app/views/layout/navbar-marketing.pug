@@ -9,16 +9,13 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(
 )
 	.container-fluid.navbar-container
 		.navbar-header
-			if settings.nav.custom_logo
-				a.navbar-brand(
-					href='/'
-					aria-label=settings.appName
-					style='background-image:url("' + settings.nav.custom_logo + '")'
-				)
-			else if nav.title
-				a.navbar-title(href='/' aria-label=settings.appName) #{nav.title}
-			else
-				a.navbar-brand(href='/' aria-label=settings.appName)
+			a.navbar-brand(href='/' aria-label=settings.appName)
+				if settings.nav.custom_logo
+					.navbar-logo(style=`background-image:url("${settings.nav.custom_logo}")`)
+				if nav.title
+					.navbar-title #{nav.title}
+				if !nav.title && !settings.nav.custom_logo
+					.navbar-logo
 
 			- var enableUpgradeButton = projectDashboardReact && usersBestSubscription && (usersBestSubscription.type === 'free' || usersBestSubscription.type === 'standalone-ai-add-on')
 			if enableUpgradeButton
