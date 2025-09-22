@@ -6,4 +6,3 @@ document-updater
 --esmock-loader=False
 --node-version=22.18.0
 --public-repo=True
---script-version=4.7.0

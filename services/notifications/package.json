@@ -8,13 +8,14 @@
     "start": "node app.js",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
-    "test:unit:_run": "vitest ${NO_CACHE:+\"--no-cache\"} $@ test/unit/js",
-    "test:unit": "npm run test:unit:_run",
+    "test:unit:_run": "vitest --config ./vitest.config.unit.cjs",
+    "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "lint": "eslint --max-warnings 0 --format unix .",
     "format": "prettier --list-different $PWD/'**/{*.*js,Jenkinsfile}'",
     "format:fix": "prettier --write $PWD/'**/{*.*js,Jenkinsfile}'",
     "lint:fix": "eslint --fix .",
-    "types:check": "tsc --noEmit"
+    "types:check": "tsc --noEmit",
+    "nodemon": "node --watch app.js"
   },
   "author": "",
   "license": "ISC",
@@ -33,7 +34,9 @@
     "mongodb-legacy": "6.1.3"
   },
   "devDependencies": {
+    "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
+    "mocha": "^11.1.0",
     "typescript": "^5.0.4",
     "vitest": "^3.2.4"
   }

@@ -4,6 +4,7 @@
     "allowJs": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
+    "allowImportingTsExtensions": true,
     "noEmit": true,
     "noImplicitAny": false,
     "paths": {

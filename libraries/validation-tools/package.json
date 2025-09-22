@@ -16,7 +16,7 @@
     "lint": "eslint --ext .js --ext .cjs --ext .ts --max-warnings 0 --format unix .",
     "lint:fix": "eslint --fix --ext .js --ext .cjs --ext .ts .",
     "test:ci": "npm run test:unit",
-    "test:unit": "vitest test/unit/src/*.test.ts --isolate=false",
+    "test:unit": "vitest test/unit --isolate=false",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {

@@ -2,12 +2,13 @@
   "extends": "../../tsconfig.backend.json",
   "include": [
     "app.js",
-    "vitest.config.cjs",
     "app/js/**/*",
     "benchmarks/**/*",
     "config/**/*",
     "scripts/**/*",
     "test/**/*",
-    "types"
+    "types",
+    "vitest.config.acceptance.cjs",
+    "vitest.config.unit.cjs"
   ]
 }

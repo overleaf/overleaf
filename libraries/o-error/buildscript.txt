@@ -7,4 +7,3 @@ o-error
 --is-library=True
 --node-version=22.18.0
 --public-repo=False
---script-version=4.7.0

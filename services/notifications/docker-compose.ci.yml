@@ -15,6 +15,7 @@ services:
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      VITEST_NO_CACHE: true
     depends_on:
       mongo:
         condition: service_started

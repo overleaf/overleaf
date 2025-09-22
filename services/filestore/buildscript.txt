@@ -7,6 +7,5 @@ filestore
 --esmock-loader=False
 --node-version=22.18.0
 --public-repo=True
---script-version=4.7.0
 --test-acceptance-shards=SHARD_01_,SHARD_02_,SHARD_03_
 --use-large-ci-runner=True

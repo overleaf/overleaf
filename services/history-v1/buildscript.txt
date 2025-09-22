@@ -6,5 +6,4 @@ history-v1
 --esmock-loader=False
 --node-version=22.18.0
 --public-repo=False
---script-version=4.7.0
 --tsconfig-extra-includes=backup-deletion-app.mjs,backup-verifier-app.mjs,backup-worker-app.mjs,api/**/*,migrations/**/*,storage/**/*

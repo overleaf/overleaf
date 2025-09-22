@@ -7,4 +7,5 @@ validation-tools
 --is-library=True
 --node-version=22.18.0
 --public-repo=False
---script-version=4.7.0
+--test-acceptance-vitest=True
+--test-unit-vitest=True
