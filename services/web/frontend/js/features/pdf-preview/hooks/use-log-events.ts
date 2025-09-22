@@ -8,6 +8,15 @@ import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
 import { useEditorContext } from '@/shared/context/editor-context'
 import useEventListener from '@/shared/hooks/use-event-listener'
 
+function scrollIntoView(element: Element) {
+  setTimeout(() => {
+    element.scrollIntoView({
+      block: 'start',
+      inline: 'nearest',
+    })
+  })
+}
+
 /**
  * This hook adds an event listener for events dispatched from the editor to the compile logs pane
  */
@@ -25,10 +34,7 @@ export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
       )
 
       if (element) {
-        element.scrollIntoView({
-          block: 'start',
-          inline: 'nearest',
-        })
+        scrollIntoView(element)
 
         if (suggestFix) {
           // if they are paywalled, click that instead
@@ -37,10 +43,7 @@ export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
           )
 
           if (paywall) {
-            paywall.scrollIntoView({
-              block: 'start',
-              inline: 'nearest',
-            })
+            scrollIntoView(paywall)
             paywall.click()
           } else {
             element
@@ -66,10 +69,7 @@ export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
         )
 
         if (logEntry) {
-          logEntry.scrollIntoView({
-            block: 'start',
-            inline: 'nearest',
-          })
+          scrollIntoView(logEntry)
 
           const expandCollapseButton =
             logEntry.querySelector<HTMLButtonElement>(
