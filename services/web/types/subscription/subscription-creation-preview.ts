@@ -7,6 +7,8 @@ export type SubscriptionCreationPreview = {
   taxRate: number
   billingCycleInterval: 'month' | 'year'
   coupon: PaymentProviderCoupon
+  priceId: string
+  lookupKey: string
   trialLength: number | null
   plan: Plan
 }
