@@ -831,8 +831,20 @@ function recurlyCallback(req, res, next) {
       return res.sendStatus(200)
     }
 
+    // A manual charge may have no subscription, in which case we get a
+    // <subscription_id nil="true"/> element, which produces an object instead
+    // of a string subscription_id.
+    const subscriptionId = eventData.transaction?.subscription_id
+    if (!subscriptionId || typeof subscriptionId !== 'string') {
+      logger.info(
+        { transactionId: eventData.transaction?.id },
+        'ignoring failed_payment_notification without subscription_id'
+      )
+      return res.sendStatus(200)
+    }
+
     SubscriptionHandler.getSubscriptionRestorePoint(
-      eventData.transaction.subscription_id,
+      subscriptionId,
       function (err, lastSubscription) {
         if (err) {
           return next(err)
