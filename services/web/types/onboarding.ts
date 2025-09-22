@@ -1,4 +1,4 @@
-export type UsedLatex = 'never' | 'occasionally' | 'often'
+export type UsedLatex = 'never' | 'occasionally' | 'often' | 'aware'
 export type Occupation =
   | 'university'
   | 'company'
