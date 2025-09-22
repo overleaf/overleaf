@@ -506,6 +506,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit(rateLimiters.openDashboard),
     AsyncLocalStorage.middleware,
+    await Modules.middleware('domainCaptureTestSession'),
     PermissionsController.useCapabilities(),
     ProjectListController.projectListPage
   )

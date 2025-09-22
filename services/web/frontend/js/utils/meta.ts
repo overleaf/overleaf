@@ -113,6 +113,7 @@ export interface Meta {
   'ol-detachRole': 'detached' | 'detacher' | ''
   'ol-dictionariesRoot': 'string'
   'ol-domainCaptureEnabled': boolean | undefined
+  'ol-domainCaptureTestURL': string | undefined
   'ol-dropbox': { error: boolean; registered: boolean }
   'ol-editorThemes': string[]
   'ol-email': string

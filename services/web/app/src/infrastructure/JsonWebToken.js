@@ -14,8 +14,15 @@ async function sign(payload, options = {}) {
   return token
 }
 
+function getDecoded(token) {
+  const key = Settings.jwt.key
+  const decoded = JWT.verify(token, key)
+  return decoded
+}
+
 module.exports = {
   sign: callbackify(sign),
+  getDecoded,
   promises: {
     sign,
   },
