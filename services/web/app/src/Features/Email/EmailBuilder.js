@@ -280,9 +280,7 @@ templates.projectInvite = ctaTemplate({
     const safeEmail = SpamSafe.isSafeEmail(opts.owner.email)
 
     if (safeName && safeEmail) {
-      return `"${_.escape(opts.project.name)}" — shared by ${_.escape(
-        opts.owner.email
-      )}`
+      return `"${opts.project.name}" — shared by ${_.escape(opts.owner.email)}`
     }
     if (safeName) {
       return `${settings.appName} project shared with you — "${_.escape(
