@@ -14,6 +14,8 @@ export type SubscriptionState =
   | 'expired'
   | 'paused'
   | 'past_due'
+  | 'incomplete'
+  | 'incomplete_expired'
 
 // when puchasing a new add-on in recurly, we only need to provide the code
 export type PurchasingAddOnCode = {
