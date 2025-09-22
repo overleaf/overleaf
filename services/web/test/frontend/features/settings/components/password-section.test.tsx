@@ -30,7 +30,7 @@ describe('<PasswordSection />', function () {
     )
     render(<PasswordSection />)
 
-    screen.getByText('Password settings are managed externally')
+    screen.getByText('Password settings are managed externally.')
   })
 
   it('shows no existing password message', async function () {

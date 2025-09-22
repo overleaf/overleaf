@@ -105,7 +105,7 @@ describe('PasswordUpdate', function () {
       })
       it('should return error message', async function () {
         const body = await response.json()
-        expect(body.message).to.equal('Passwords do not match')
+        expect(body.message).to.equal('Passwords do not match.')
       })
       it('should not update audit log', async function () {
         const auditLog = userHelper.getAuditLogWithoutNoise()
@@ -136,7 +136,7 @@ describe('PasswordUpdate', function () {
         expect(body.message).to.deep.equal({
           type: 'error',
           key: 'password-too-short',
-          text: 'Password too short, minimum 8',
+          text: 'Password too short, minimum 8.',
         })
       })
       it('should not update audit log', async function () {
@@ -168,7 +168,7 @@ describe('PasswordUpdate', function () {
         expect(body.message).to.deep.equal({
           key: 'password-contains-email',
           type: 'error',
-          text: 'Password cannot contain parts of email address',
+          text: 'Password cannot contain parts of email address.',
         })
       })
       it('should not update audit log', async function () {
@@ -200,7 +200,7 @@ describe('PasswordUpdate', function () {
         expect(body.message).to.deep.equal({
           key: 'password-too-similar',
           type: 'error',
-          text: 'Password is too similar to parts of email address',
+          text: 'Password is too similar to parts of email address.',
         })
       })
       it('should not update audit log', async function () {
