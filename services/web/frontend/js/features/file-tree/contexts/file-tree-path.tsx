@@ -29,22 +29,34 @@ export const FileTreePathProvider: FC<React.PropsWithChildren> = ({
   const projectId = getMeta('ol-project_id')
 
   const pathInFileTree = useCallback(
-    (id: string) => pathInFolder(fileTreeData, id),
+    (id: string) => {
+      if (!fileTreeData) return null
+      return pathInFolder(fileTreeData, id)
+    },
     [fileTreeData]
   )
 
   const findEntityByPathInFileTree = useCallback(
-    (path: string) => findEntityByPath(fileTreeData, path),
+    (path: string) => {
+      if (!fileTreeData) return null
+      return findEntityByPath(fileTreeData, path)
+    },
     [fileTreeData]
   )
 
   const previewByPathInFileTree = useCallback(
-    (path: string) => previewByPath(fileTreeData, projectId, path),
+    (path: string) => {
+      if (!fileTreeData) return null
+      return previewByPath(fileTreeData, projectId, path)
+    },
     [fileTreeData, projectId]
   )
 
   const dirnameInFileTree = useCallback(
-    (id: string) => dirname(fileTreeData, id),
+    (id: string) => {
+      if (!fileTreeData) return null
+      return dirname(fileTreeData, id)
+    },
     [fileTreeData]
   )
 
