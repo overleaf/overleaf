@@ -22,6 +22,7 @@
 
     overflow-y: auto;
     background-color: var(--logs-pane-bg);
+    color: var(--content-primary-themed);
     flex: 1;
 
     .logs-pane-content {
