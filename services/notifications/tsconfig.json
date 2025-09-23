@@ -1,8 +1,5 @@
 {
   "extends": "../../tsconfig.backend.json",
-  "compilerOptions": {
-    "allowImportingTsExtensions": true
-  },
   "include": [
     "app.js",
     "app/js/**/*",
