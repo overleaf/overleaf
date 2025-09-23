@@ -69,6 +69,7 @@ describe('RestoreManager', function () {
                 },
               },
             },
+            timestamp: new Date().toISOString(),
           }),
         },
       }),
@@ -161,12 +162,22 @@ describe('RestoreManager', function () {
           getFile: pathname => ({
             getStringLength: sinon.stub().returns(100),
             getByteLength: sinon.stub().returns(100),
-            getContent: sinon.stub().returns('file content'),
+            getContent: sinon.stub().returns('foo\nbar\nbaz'),
             isEditable: sinon.stub().returns(true),
             getMetadata: sinon
               .stub()
               .returns(snapshotData?.files?.[pathname]?.metadata),
           }),
+          getFilePathnames: sinon
+            .stub()
+            .returns(Object.keys(snapshotData.files || {})),
+          getTimestamp: sinon
+            .stub()
+            .returns(
+              snapshotData?.timestamp
+                ? new Date(snapshotData.timestamp)
+                : new Date()
+            ),
         })),
       },
       getDocUpdaterCompatibleRanges: (ctx.getDocUpdaterCompatibleRanges = sinon
@@ -189,9 +200,7 @@ describe('RestoreManager', function () {
         meta: { end_ts: new Date('2024-01-01T00:00:00.000Z') },
       },
     ])
-    ctx.RestoreManager.promises._getProjectPathsAtVersion = sinon
-      .stub()
-      .resolves([])
+
     ctx.RestoreManager.promises._writeFileVersionToDisk = sinon
       .stub()
       .resolves('/tmp/mock-file-path')
@@ -699,9 +708,17 @@ describe('RestoreManager', function () {
             {
               getFile: sinon.stub().returns({
                 getMetadata: sinon.stub().returns(undefined),
-                getContent: sinon.stub().returns('file content'),
+                getContent: sinon.stub().returns('foo\nbar\nbaz'),
                 isEditable: sinon.stub().returns(true),
               }),
+            },
+            {
+              origin: {
+                kind: 'file-restore',
+                path: 'foo.tex',
+                timestamp: new Date(ctx.endTs).toISOString(),
+                version: 42,
+              },
             }
           )
         })
@@ -770,9 +787,17 @@ describe('RestoreManager', function () {
             {
               getFile: sinon.stub().returns({
                 getMetadata: sinon.stub().returns(undefined),
-                getContent: sinon.stub().returns('file content'),
+                getContent: sinon.stub().returns('foo\nbar\nbaz'),
                 isEditable: sinon.stub().returns(true),
               }),
+            },
+            {
+              origin: {
+                kind: 'file-restore',
+                path: 'foo.tex',
+                timestamp: new Date(ctx.endTs).toISOString(),
+                version: 42,
+              },
             }
           )
         })
@@ -1128,15 +1153,41 @@ describe('RestoreManager', function () {
 
     describe('for a project with overlap in current files and old files', function () {
       beforeEach(async function (ctx) {
+        ctx.HistoryManager.promises.getContentAtVersion = sinon
+          .stub()
+          .resolves({
+            files: {
+              'main.tex': {
+                hash: 'abcdef1234567890abcdef1234567890abcdef12',
+                stringLength: 100,
+                metadata: {
+                  editorId: 'test-editor',
+                },
+              },
+              'figures/image.png': {
+                hash: 'abcdef1234567890abcdef1234567890abcdef12',
+                stringLength: 100,
+                metadata: {
+                  provider: 'bar',
+                },
+              },
+              'since-deleted.tex': {
+                hash: 'abcdef1234567890abcdef1234567890abcdef12',
+                stringLength: 100,
+                metadata: {
+                  editorId: 'test-editor',
+                },
+              },
+            },
+            timestamp: new Date().toISOString(),
+          })
+
         ctx.ProjectEntityHandler.promises.getAllEntities = sinon
           .stub()
           .resolves({
             docs: [{ path: '/main.tex' }, { path: '/new-file.tex' }],
             files: [{ path: '/figures/image.png' }],
           })
-        ctx.RestoreManager.promises._getProjectPathsAtVersion = sinon
-          .stub()
-          .resolves(['main.tex', 'figures/image.png', 'since-deleted.tex'])
 
         await ctx.RestoreManager.promises.revertProject(
           ctx.user_id,

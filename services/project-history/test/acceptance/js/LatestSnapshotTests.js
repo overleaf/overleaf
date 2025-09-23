@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import mongodb from 'mongodb-legacy'
 import nock from 'nock'
+import { readFileSync } from 'node:fs'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
 const { ObjectId } = mongodb
@@ -50,6 +51,12 @@ describe('LatestSnapshot', function () {
       .get(`/api/projects/${this.historyId}/latest/history`)
       .replyWithFile(200, fixture('chunks/0-3.json'))
 
+    const fixtureData = JSON.parse(
+      readFileSync(fixture('chunks/0-3.json'), 'utf8')
+    )
+    const changes = fixtureData.chunk.history.changes
+    const lastTimestamp = changes[changes.length - 1].timestamp
+
     ProjectHistoryClient.getLatestSnapshot(this.projectId, (error, body) => {
       if (error) {
         throw error
@@ -69,6 +76,7 @@ describe('LatestSnapshot', function () {
               operations: [{ textOperation: [26, '\n\nFour five six'] }],
             },
           },
+          timestamp: lastTimestamp,
         },
         version: 3,
       })

@@ -294,6 +294,8 @@ class Change {
     if (this.v2DocVersions) {
       snapshot.updateV2DocVersions(this.v2DocVersions)
     }
+
+    snapshot.setTimestamp(this.timestamp)
   }
 
   /**
