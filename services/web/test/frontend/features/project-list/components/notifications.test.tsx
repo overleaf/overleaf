@@ -509,8 +509,43 @@ describe('<UserNotifications />', function () {
       render(<Institution />)
       fetchMock.delete(`/notifications/${institution._id}`, 200)
 
-      screen.getByRole('alert')
-      screen.getByText(/has been linked to your/i)
+      const notificationEl = screen.getByRole('alert')
+      expect(notificationEl.textContent).to.match(
+        new RegExp(
+          `your Overleaf account on ${notificationsInstitution.email} ` +
+            `has been linked to your ${notificationsInstitution.institutionName} ` +
+            `institutional account.`,
+          'i'
+        )
+      )
+
+      const closeBtn = screen.getByRole('button', { name: /close/i })
+      fireEvent.click(closeBtn)
+
+      expect(fetchMock.callHistory.called()).to.be.true
+      expect(screen.queryByRole('alert')).to.be.null
+    })
+
+    it('shows sso linked to group with domain capture enabled', function () {
+      const institution: DeepPartial<InstitutionType> = {
+        _id: 1,
+        templateKey: 'notification_group_sso_linked',
+      }
+      window.metaAttributesCache.set('ol-notificationsInstitution', [
+        { ...notificationsInstitution, ...institution },
+      ])
+      render(<Institution />)
+      fetchMock.delete(`/notifications/${institution._id}`, 200)
+
+      const notificationEl = screen.getByRole('alert')
+      expect(notificationEl.textContent).to.match(
+        new RegExp(
+          `your Overleaf account on ${notificationsInstitution.email} ` +
+            `has been linked to your ${notificationsInstitution.institutionName} ` +
+            `account.`,
+          'i'
+        )
+      )
 
       const closeBtn = screen.getByRole('button', { name: /close/i })
       fireEvent.click(closeBtn)

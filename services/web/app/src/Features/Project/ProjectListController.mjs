@@ -319,7 +319,9 @@ async function projectListPage(req, res, next) {
           institutionName:
             samlSession.linked.universityName ||
             samlSession.linked.providerName,
-          templateKey: 'notification_institution_sso_linked',
+          templateKey: samlSession.domainCaptureEnabled
+            ? 'notification_group_sso_linked'
+            : 'notification_institution_sso_linked',
         })
       }
 

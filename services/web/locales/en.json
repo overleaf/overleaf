@@ -56,6 +56,7 @@
   "account": "Account",
   "account_already_managed": "Your account is already managed.",
   "account_billed_manually": "Account billed manually",
+  "account_has_been_link_to_group_account": "Your __appName__ account on <b>__email__</b> has been linked to your <b>__institutionName__</b> account.",
   "account_has_been_link_to_institution_account": "Your __appName__ account on <b>__email__</b> has been linked to your <b>__institutionName__</b> institutional account.",
   "account_has_past_due_invoice_change_plan_warning": "Your account currently has a past due invoice. You will not be able to change your plan until this is resolved.",
   "account_help": "Account and help",

@@ -88,6 +88,21 @@ function Institution() {
                 }
               />
             )}
+            {templateKey === 'notification_group_sso_linked' && (
+              <Notification
+                type="info"
+                onDismiss={() => id && handleDismiss(id)}
+                content={
+                  <Trans
+                    i18nKey="account_has_been_link_to_group_account"
+                    components={{ b: <b /> }}
+                    values={{ appName, email, institutionName }}
+                    shouldUnescape
+                    tOptions={{ interpolation: { escapeValue: true } }}
+                  />
+                }
+              />
+            )}
             {templateKey === 'notification_institution_sso_non_canonical' && (
               <Notification
                 type="warning"
