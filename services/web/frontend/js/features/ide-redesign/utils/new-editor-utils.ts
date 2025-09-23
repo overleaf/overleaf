@@ -5,8 +5,8 @@ import { isSplitTestEnabled, getSplitTestVariant } from '@/utils/splitTestUtils'
 export const ignoringUserCutoffDate =
   new URLSearchParams(window.location.search).get('skip-new-user-check') ===
   'true'
-// TODO: change this when we have a launch date
-const NEW_USER_CUTOFF_DATE = new Date('2100-01-01')
+
+const NEW_USER_CUTOFF_DATE = new Date(Date.UTC(2025, 8, 23, 13, 0, 0)) // 2pm British Summer Time on September 23, 2025
 
 export const isNewUser = () => {
   if (ignoringUserCutoffDate) return true
