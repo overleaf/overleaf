@@ -163,20 +163,18 @@ function getUserAffiliations(userId, callback) {
       if (body?.length > 0) {
         const concurrencyLimit = 10
         await promiseMapWithLimit(concurrencyLimit, body, async affiliation => {
-          if (!affiliation.institution.commonsAccount) {
-            const group = (
-              await Modules.promises.hooks.fire(
-                'getGroupWithDomainCaptureByV1Id',
-                affiliation.institution.id
-              )
-            )?.[0]
+          const group = (
+            await Modules.promises.hooks.fire(
+              'getGroupWithDomainCaptureByV1Id',
+              affiliation.institution.id
+            )
+          )?.[0]
 
-            if (group) {
-              affiliation.group = {
-                _id: group._id,
-                managedUsersEnabled: Boolean(group.managedUsersEnabled),
-                domainCaptureEnabled: Boolean(group.domainCaptureEnabled),
-              }
+          if (group) {
+            affiliation.group = {
+              _id: group._id,
+              managedUsersEnabled: Boolean(group.managedUsersEnabled),
+              domainCaptureEnabled: Boolean(group.domainCaptureEnabled),
             }
           }
 

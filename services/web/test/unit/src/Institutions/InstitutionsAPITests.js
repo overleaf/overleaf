@@ -145,7 +145,7 @@ describe('InstitutionsAPI', function () {
       requestOptions.url.should.equal(expectedUrl)
       requestOptions.method.should.equal('GET')
       requestOptions.maxAttempts.should.equal(3)
-      this.Modules.promises.hooks.fire.should.not.have.been.called
+      this.Modules.promises.hooks.fire.should.have.been.called
       expect(requestOptions.body).not.to.exist
       expect(body).to.deep.equal(responseBody)
     })
