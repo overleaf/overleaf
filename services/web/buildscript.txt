@@ -1,0 +1,10 @@
+web
+--only-jenkins-include-file=True
+--dependencies=
+--docker-repos=us-east1-docker.pkg.dev/overleaf-ops/ol-docker
+--env-add=
+--env-pass-through=
+--esmock-loader=False
+--node-version=22.18.0
+--public-repo=False
+--script-version=4.7.0

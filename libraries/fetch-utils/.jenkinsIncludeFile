@@ -2,12 +2,7 @@
 .eslint*
 .prettier*
 libraries/fetch-utils/**
-libraries/logger/**
-libraries/metrics/**
-libraries/mongo-utils/**
 libraries/o-error/**
-libraries/settings/**
 package-lock.json
 package.json
 patches/**
-services/contacts/**

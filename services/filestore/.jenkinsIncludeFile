@@ -4,10 +4,11 @@
 libraries/fetch-utils/**
 libraries/logger/**
 libraries/metrics/**
-libraries/mongo-utils/**
 libraries/o-error/**
+libraries/object-persistor/**
 libraries/settings/**
+libraries/stream-utils/**
 package-lock.json
 package.json
 patches/**
-services/contacts/**
+services/filestore/**

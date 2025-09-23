@@ -6,8 +6,13 @@ libraries/logger/**
 libraries/metrics/**
 libraries/mongo-utils/**
 libraries/o-error/**
+libraries/object-persistor/**
+libraries/overleaf-editor-core/**
+libraries/promise-utils/**
+libraries/redis-wrapper/**
 libraries/settings/**
+libraries/stream-utils/**
 package-lock.json
 package.json
 patches/**
-services/contacts/**
+services/history-v1/**

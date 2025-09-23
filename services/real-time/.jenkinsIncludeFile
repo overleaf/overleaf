@@ -4,10 +4,10 @@
 libraries/fetch-utils/**
 libraries/logger/**
 libraries/metrics/**
-libraries/mongo-utils/**
 libraries/o-error/**
+libraries/redis-wrapper/**
 libraries/settings/**
 package-lock.json
 package.json
 patches/**
-services/contacts/**
+services/real-time/**

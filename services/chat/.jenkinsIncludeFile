@@ -10,4 +10,4 @@ libraries/settings/**
 package-lock.json
 package.json
 patches/**
-services/contacts/**
+services/chat/**
