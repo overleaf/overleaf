@@ -36,8 +36,7 @@ class Snapshot {
     return new Snapshot(
       FileMap.fromRaw(raw.files),
       raw.projectVersion,
-      V2DocVersions.fromRaw(raw.v2DocVersions),
-      raw.timestamp ? new Date(raw.timestamp) : undefined
+      V2DocVersions.fromRaw(raw.v2DocVersions)
     )
   }
 
@@ -46,15 +45,8 @@ class Snapshot {
     const raw = {
       files: this.fileMap.toRaw(),
     }
-    if (this.projectVersion) {
-      raw.projectVersion = this.projectVersion
-    }
-    if (this.v2DocVersions) {
-      raw.v2DocVersions = this.v2DocVersions.toRaw()
-    }
-    if (this.timestamp != null) {
-      raw.timestamp = this.timestamp.toISOString()
-    }
+    if (this.projectVersion) raw.projectVersion = this.projectVersion
+    if (this.v2DocVersions) raw.v2DocVersions = this.v2DocVersions.toRaw()
     return raw
   }
 
@@ -62,15 +54,13 @@ class Snapshot {
    * @param {FileMap} [fileMap]
    * @param {string} [projectVersion]
    * @param {V2DocVersions} [v2DocVersions]
-   * @param {Date} [timestamp]
    */
-  constructor(fileMap, projectVersion, v2DocVersions, timestamp) {
+  constructor(fileMap, projectVersion, v2DocVersions) {
     assert.maybe.instance(fileMap, FileMap, 'bad fileMap')
 
     this.fileMap = fileMap || new FileMap({})
     this.projectVersion = projectVersion
     this.v2DocVersions = v2DocVersions
-    this.timestamp = timestamp ?? null
   }
 
   /**
@@ -117,17 +107,6 @@ class Snapshot {
   updateV2DocVersions(v2DocVersions) {
     // merge new v2DocVersions into this.v2DocVersions
     v2DocVersions.applyTo(this)
-  }
-
-  getTimestamp() {
-    return this.timestamp
-  }
-
-  /**
-   * @param {Date} timestamp
-   */
-  setTimestamp(timestamp) {
-    this.timestamp = timestamp
   }
 
   /**
@@ -289,7 +268,6 @@ class Snapshot {
       files: rawFiles,
       projectVersion,
       v2DocVersions: rawV2DocVersions,
-      timestamp: this.getTimestamp() ?? undefined,
     }
   }
 

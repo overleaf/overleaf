@@ -28,7 +28,6 @@ const withTmpDir = require('./with_tmp_dir')
 const StreamSizeLimit = require('./stream_size_limit')
 const { getProjectBlobsBatch } = require('../../storage/lib/blob_store')
 const assert = require('../../storage/lib/assert')
-const { getChunkMetadataForVersion } = require('../../storage/lib/chunk_store')
 
 const pipeline = promisify(Stream.pipeline)
 
@@ -397,28 +396,7 @@ async function getSnapshotAtVersion(projectId, version) {
     chunk.getChanges(),
     chunk.getEndVersion() - version
   )
-
-  if (changes.length > 0) {
-    snapshot.applyAll(changes)
-  } else {
-    // There are no changes in this chunk; we need to look at the previous chunk
-    // to get the snapshot's timestamp
-    let chunkMetadata
-    try {
-      chunkMetadata = await getChunkMetadataForVersion(projectId, version)
-    } catch (err) {
-      if (err instanceof Chunk.VersionNotFoundError) {
-        // The snapshot is the first snapshot of the first chunk, so we can't
-        // find a timestamp. This shouldn't happen often. Ignore the error and
-        // leave the timestamp empty.
-      } else {
-        throw err
-      }
-    }
-
-    snapshot.setTimestamp(chunkMetadata.endTimestamp)
-  }
-
+  snapshot.applyAll(changes)
   return snapshot
 }
 
