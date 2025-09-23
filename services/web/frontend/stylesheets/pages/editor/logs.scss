@@ -25,6 +25,8 @@
     color: var(--content-primary-themed);
     flex: 1;
 
+    @include themed-links;
+
     .logs-pane-content {
       display: flex;
       flex-direction: column;
