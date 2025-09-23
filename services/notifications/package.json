@@ -9,7 +9,7 @@
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
     "test:unit:_run": "vitest --config ./vitest.config.unit.cjs",
-    "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
+    "test:unit": "npm run test:unit:_run",
     "lint": "eslint --max-warnings 0 --format unix .",
     "format": "prettier --list-different $PWD/'**/{*.*js,Jenkinsfile}'",
     "format:fix": "prettier --write $PWD/'**/{*.*js,Jenkinsfile}'",
