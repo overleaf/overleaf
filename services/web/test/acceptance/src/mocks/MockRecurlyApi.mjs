@@ -1,5 +1,5 @@
 import AbstractMockApi from './AbstractMockApi.mjs'
-import SubscriptionController from '../../../../app/src/Features/Subscription/SubscriptionController.js'
+import SubscriptionController from '../../../../app/src/Features/Subscription/SubscriptionController.mjs'
 import { xmlResponse } from '../../../../app/src/infrastructure/Response.js'
 
 class MockRecurlyApi extends AbstractMockApi {

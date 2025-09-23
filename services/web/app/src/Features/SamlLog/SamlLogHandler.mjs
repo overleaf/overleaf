@@ -1,9 +1,9 @@
-const { SamlLog } = require('../../models/SamlLog')
-const SessionManager = require('../Authentication/SessionManager')
-const logger = require('@overleaf/logger')
-const { err: errSerializer } = require('@overleaf/logger/serializers')
-const { callbackify } = require('util')
-const Settings = require('@overleaf/settings')
+import { SamlLog } from '../../models/SamlLog.js'
+import SessionManager from '../Authentication/SessionManager.js'
+import logger from '@overleaf/logger'
+import loggerSerializers from '@overleaf/logger/serializers.js'
+import { callbackify } from 'node:util'
+import Settings from '@overleaf/settings'
 
 const ALLOWED_PATHS = Settings.saml?.logAllowList || ['/saml/']
 
@@ -33,7 +33,7 @@ async function log(req, data, samlAssertion) {
     data.samlSession = saml
 
     if (data.error instanceof Error) {
-      const errSerialized = errSerializer(data.error)
+      const errSerialized = loggerSerializers.err(data.error)
       if (data.error.tryAgain) {
         errSerialized.tryAgain = data.error.tryAgain
       }
@@ -82,4 +82,4 @@ const SamlLogHandler = {
   },
 }
 
-module.exports = SamlLogHandler
+export default SamlLogHandler

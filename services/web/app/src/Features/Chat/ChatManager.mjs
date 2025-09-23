@@ -1,6 +1,6 @@
-const UserInfoController = require('../User/UserInfoController')
-const UserGetter = require('../User/UserGetter')
-const { callbackify } = require('@overleaf/promise-utils')
+import UserInfoController from '../User/UserInfoController.js'
+import UserGetter from '../User/UserGetter.js'
+import { callbackify } from '@overleaf/promise-utils'
 
 async function injectUserInfoIntoThreads(threads) {
   const userIds = new Set()
@@ -38,7 +38,7 @@ async function injectUserInfoIntoThreads(threads) {
   return threads
 }
 
-module.exports = {
+export default {
   injectUserInfoIntoThreads: callbackify(injectUserInfoIntoThreads),
   promises: {
     injectUserInfoIntoThreads,

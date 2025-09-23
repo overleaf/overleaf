@@ -1,48 +1,48 @@
 // @ts-check
 
-const SessionManager = require('../Authentication/SessionManager')
-const SubscriptionHandler = require('./SubscriptionHandler')
-const SubscriptionHelper = require('./SubscriptionHelper')
-const SubscriptionViewModelBuilder = require('./SubscriptionViewModelBuilder')
-const LimitationsManager = require('./LimitationsManager')
-const RecurlyWrapper = require('./RecurlyWrapper')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const GeoIpLookup = require('../../infrastructure/GeoIpLookup')
-const FeaturesUpdater = require('./FeaturesUpdater')
-const GroupPlansData = require('./GroupPlansData')
-const V1SubscriptionManager = require('./V1SubscriptionManager')
-const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const RecurlyEventHandler = require('./RecurlyEventHandler')
-const { expressify } = require('@overleaf/promise-utils')
-const OError = require('@overleaf/o-error')
+import SessionManager from '../Authentication/SessionManager.js'
+import SubscriptionHandler from './SubscriptionHandler.js'
+import SubscriptionHelper from './SubscriptionHelper.js'
+import SubscriptionViewModelBuilder from './SubscriptionViewModelBuilder.js'
+import LimitationsManager from './LimitationsManager.js'
+import RecurlyWrapper from './RecurlyWrapper.js'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import GeoIpLookup from '../../infrastructure/GeoIpLookup.js'
+import FeaturesUpdater from './FeaturesUpdater.js'
+import GroupPlansData from './GroupPlansData.js'
+import V1SubscriptionManager from './V1SubscriptionManager.js'
+import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import RecurlyEventHandler from './RecurlyEventHandler.js'
+import { expressify } from '@overleaf/promise-utils'
+import OError from '@overleaf/o-error'
+import Errors from './Errors.js'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
+import AuthorizationManager from '../Authorization/AuthorizationManager.js'
+import Modules from '../../infrastructure/Modules.js'
+import async from 'async'
+import HttpErrorHandler from '../Errors/HttpErrorHandler.js'
+import RecurlyClient from './RecurlyClient.js'
+import {
+  AI_ADD_ON_CODE,
+  subscriptionChangeIsAiAssistUpgrade,
+} from './AiHelper.js'
+import PlansLocator from './PlansLocator.js'
+import { User } from '../../models/User.js'
+import UserGetter from '../User/UserGetter.js'
+import PermissionsManager from '../Authorization/PermissionsManager.js'
+import { sanitizeSessionUserForFrontEnd } from '../../infrastructure/FrontEndUser.js'
+import { z, validateReq } from '../../infrastructure/Validation.js'
+import { IndeterminateInvoiceError } from '../Errors/Errors.js'
+import SubscriptionLocator from './SubscriptionLocator.js'
+
 const {
   DuplicateAddOnError,
   AddOnNotPresentError,
   PaymentActionRequiredError,
   PaymentFailedError,
   MissingBillingInfoError,
-} = require('./Errors')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
-const AuthorizationManager = require('../Authorization/AuthorizationManager')
-const Modules = require('../../infrastructure/Modules')
-const async = require('async')
-const HttpErrorHandler = require('../Errors/HttpErrorHandler')
-const RecurlyClient = require('./RecurlyClient')
-const {
-  AI_ADD_ON_CODE,
-  subscriptionChangeIsAiAssistUpgrade,
-} = require('./AiHelper')
-const PlansLocator = require('./PlansLocator')
-const { User } = require('../../models/User')
-const UserGetter = require('../User/UserGetter')
-const PermissionsManager = require('../Authorization/PermissionsManager')
-const {
-  sanitizeSessionUserForFrontEnd,
-} = require('../../infrastructure/FrontEndUser')
-const { z, validateReq } = require('../../infrastructure/Validation')
-const { IndeterminateInvoiceError } = require('../Errors/Errors')
-const SubscriptionLocator = require('./SubscriptionLocator')
+} = Errors
 
 const SUBSCRIPTION_PAUSED_REDIRECT_PATH =
   '/user/subscription?redirect-reason=subscription-paused'
@@ -1101,7 +1101,7 @@ function makeChangePreview(
   }
 }
 
-module.exports = {
+export default {
   userSubscriptionPage: expressify(userSubscriptionPage),
   successfulSubscription: expressify(successfulSubscription),
   cancelSubscription,

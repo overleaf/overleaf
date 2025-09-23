@@ -1,6 +1,6 @@
 import AuthenticationController from '../Authentication/AuthenticationController.js'
 import PermissionsController from '../Authorization/PermissionsController.mjs'
-import SubscriptionController from './SubscriptionController.js'
+import SubscriptionController from './SubscriptionController.mjs'
 import SubscriptionGroupController from './SubscriptionGroupController.mjs'
 import TeamInvitesController from './TeamInvitesController.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'

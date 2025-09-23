@@ -5,7 +5,7 @@ import Settings from '@overleaf/settings'
 import TpdsUpdateSender from '../ThirdPartyDataStore/TpdsUpdateSender.js'
 import TpdsProjectFlusher from '../ThirdPartyDataStore/TpdsProjectFlusher.js'
 import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
-import SystemMessageManager from '../SystemMessages/SystemMessageManager.js'
+import SystemMessageManager from '../SystemMessages/SystemMessageManager.mjs'
 
 const AdminController = {
   _sendDisconnectAllUsersMessage: delay => {

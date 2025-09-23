@@ -15,21 +15,7 @@ import Settings from '@overleaf/settings'
 import _ from 'lodash'
 import AnalyticsManager from '../../../../app/src/Features/Analytics/AnalyticsManager.js'
 import LinkedFilesHandler from './LinkedFilesHandler.mjs'
-import {
-  CompileFailedError,
-  UrlFetchFailedError,
-  InvalidUrlError,
-  AccessDeniedError,
-  BadEntityTypeError,
-  BadDataError,
-  ProjectNotFoundError,
-  V1ProjectNotFoundError,
-  SourceFileNotFoundError,
-  NotOriginalImporterError,
-  FeatureNotAvailableError,
-  RemoteServiceError,
-  FileCannotRefreshError,
-} from './LinkedFilesErrors.js'
+import LinkedFilesErrors from './LinkedFilesErrors.mjs'
 import {
   OutputFileFetchFailedError,
   FileTooLargeError,
@@ -44,6 +30,22 @@ import { expressify } from '@overleaf/promise-utils'
 import ProjectOutputFileAgent from './ProjectOutputFileAgent.mjs'
 import ProjectFileAgent from './ProjectFileAgent.mjs'
 import UrlAgent from './UrlAgent.mjs'
+
+const {
+  CompileFailedError,
+  UrlFetchFailedError,
+  InvalidUrlError,
+  AccessDeniedError,
+  BadEntityTypeError,
+  BadDataError,
+  ProjectNotFoundError,
+  V1ProjectNotFoundError,
+  SourceFileNotFoundError,
+  NotOriginalImporterError,
+  FeatureNotAvailableError,
+  RemoteServiceError,
+  FileCannotRefreshError,
+} = LinkedFilesErrors
 
 let LinkedFilesController
 

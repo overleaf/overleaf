@@ -1,9 +1,7 @@
-const { SystemMessage } = require('../../models/SystemMessage')
-const {
-  addRequiredCleanupHandlerBeforeDrainingConnections,
-} = require('../../infrastructure/GracefulShutdown')
-const { callbackifyAll } = require('@overleaf/promise-utils')
-const logger = require('@overleaf/logger')
+import { SystemMessage } from '../../models/SystemMessage.js'
+import { addRequiredCleanupHandlerBeforeDrainingConnections } from '../../infrastructure/GracefulShutdown.js'
+import { callbackifyAll } from '@overleaf/promise-utils'
+import logger from '@overleaf/logger'
 
 const SystemMessageManager = {
   _cachedMessages: [],
@@ -52,7 +50,7 @@ addRequiredCleanupHandlerBeforeDrainingConnections(
   }
 )
 
-module.exports = {
+export default {
   getMessages: SystemMessageManager.getMessages.bind(SystemMessageManager),
   ...callbackifyAll(SystemMessageManager, { without: ['getMessages'] }),
   promises: SystemMessageManager,

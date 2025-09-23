@@ -1,16 +1,16 @@
-const AuthenticationController = require('../Authentication/AuthenticationController')
-const TemplatesController = require('./TemplatesController')
-const TemplatesMiddleware = require('./TemplatesMiddleware')
-const { RateLimiter } = require('../../infrastructure/RateLimiter')
-const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
-const AnalyticsRegistrationSourceMiddleware = require('../Analytics/AnalyticsRegistrationSourceMiddleware')
+import AuthenticationController from '../Authentication/AuthenticationController.js'
+import TemplatesController from './TemplatesController.js'
+import TemplatesMiddleware from './TemplatesMiddleware.js'
+import { RateLimiter } from '../../infrastructure/RateLimiter.js'
+import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
+import AnalyticsRegistrationSourceMiddleware from '../Analytics/AnalyticsRegistrationSourceMiddleware.js'
 
 const rateLimiter = new RateLimiter('create-project-from-template', {
   points: 20,
   duration: 60,
 })
 
-module.exports = {
+export default {
   rateLimiter,
   apply(app) {
     app.get(

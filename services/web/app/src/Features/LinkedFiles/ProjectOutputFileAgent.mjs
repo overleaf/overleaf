@@ -1,16 +1,15 @@
 import AuthorizationManager from '../Authorization/AuthorizationManager.js'
-import CompileManager from '../Compile/CompileManager.js'
+import CompileManager from '../Compile/CompileManager.mjs'
 import ClsiManager from '../Compile/ClsiManager.js'
 import ProjectFileAgent from './ProjectFileAgent.mjs'
 import _ from 'lodash'
-import {
-  CompileFailedError,
-  BadDataError,
-  AccessDeniedError,
-} from './LinkedFilesErrors.js'
+import LinkedFilesErrors from './LinkedFilesErrors.mjs'
 import { OutputFileFetchFailedError } from '../Errors/Errors.js'
 import LinkedFilesHandler from './LinkedFilesHandler.mjs'
 import { promisify } from '@overleaf/promise-utils'
+
+const { CompileFailedError, BadDataError, AccessDeniedError } =
+  LinkedFilesErrors
 
 function _prepare(projectId, linkedFileData, userId, callback) {
   _checkAuth(projectId, linkedFileData, userId, (err, allowed) => {

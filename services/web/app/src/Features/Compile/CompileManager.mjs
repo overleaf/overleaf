@@ -1,19 +1,16 @@
+import Crypto from 'node:crypto'
+import Settings from '@overleaf/settings'
+import RedisWrapper from '../../infrastructure/RedisWrapper.js'
+import ProjectGetter from '../Project/ProjectGetter.js'
+import ProjectRootDocManager from '../Project/ProjectRootDocManager.js'
+import UserGetter from '../User/UserGetter.js'
+import ClsiManager from './ClsiManager.js'
+import Metrics from '@overleaf/metrics'
+import { RateLimiter } from '../../infrastructure/RateLimiter.js'
+import UserAnalyticsIdCache from '../Analytics/UserAnalyticsIdCache.js'
+import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
 let CompileManager
-const Crypto = require('crypto')
-const Settings = require('@overleaf/settings')
-const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const rclient = RedisWrapper.client('clsi_recently_compiled')
-const ProjectGetter = require('../Project/ProjectGetter')
-const ProjectRootDocManager = require('../Project/ProjectRootDocManager')
-const UserGetter = require('../User/UserGetter')
-const ClsiManager = require('./ClsiManager')
-const Metrics = require('@overleaf/metrics')
-const { RateLimiter } = require('../../infrastructure/RateLimiter')
-const UserAnalyticsIdCache = require('../Analytics/UserAnalyticsIdCache')
-const {
-  callbackify,
-  callbackifyMultiResult,
-} = require('@overleaf/promise-utils')
 
 function instrumentWithTimer(fn, key) {
   return async (...args) => {
@@ -196,7 +193,7 @@ async function deleteAuxFiles(projectId, userId, clsiserverid) {
   )
 }
 
-module.exports = CompileManager = {
+export default CompileManager = {
   promises: {
     compile: instrumentedCompile,
     deleteAuxFiles,

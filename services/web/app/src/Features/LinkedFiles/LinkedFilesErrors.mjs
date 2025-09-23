@@ -1,4 +1,4 @@
-const { BackwardCompatibleError } = require('../Errors/Errors')
+import { BackwardCompatibleError } from '../Errors/Errors.js'
 
 class UrlFetchFailedError extends BackwardCompatibleError {}
 
@@ -26,7 +26,7 @@ class RemoteServiceError extends BackwardCompatibleError {}
 
 class FileCannotRefreshError extends BackwardCompatibleError {}
 
-module.exports = {
+export default {
   CompileFailedError,
   UrlFetchFailedError,
   InvalidUrlError,

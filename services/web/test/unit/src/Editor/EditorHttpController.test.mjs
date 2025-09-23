@@ -252,9 +252,12 @@ describe('EditorHttpController', function () {
         default: ctx.SplitTestHandler,
       })
     )
-    vi.doMock('../../../../app/src/Features/Compile/CompileManager.js', () => ({
-      default: {},
-    }))
+    vi.doMock(
+      '../../../../app/src/Features/Compile/CompileManager.mjs',
+      () => ({
+        default: {},
+      })
+    )
     vi.doMock('../../../../app/src/Features/User/UserGetter.js', () => ({
       default: ctx.UserGetter,
     }))

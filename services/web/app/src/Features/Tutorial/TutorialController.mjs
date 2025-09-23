@@ -1,5 +1,5 @@
 import SessionManager from '../Authentication/SessionManager.js'
-import TutorialHandler from './TutorialHandler.js'
+import TutorialHandler from './TutorialHandler.mjs'
 import { expressify } from '@overleaf/promise-utils'
 
 const VALID_KEYS = [

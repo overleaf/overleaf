@@ -1,27 +1,31 @@
-const SandboxedModule = require('sandboxed-module')
-const sinon = require('sinon')
-const { expect } = require('chai')
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
 
-const modulePath = '../../../../app/src/Features/SamlLog/SamlLogHandler'
+const modulePath = '../../../../app/src/Features/SamlLog/SamlLogHandler.mjs'
 
 describe('SamlLogHandler', function () {
-  let SamlLog, SamlLogHandler, SamlLogModel
+  let SamlLog, SamlLogHandler
 
   let data, providerId, samlLog, sessionId
 
-  beforeEach(function () {
+  beforeEach(async function (ctx) {
     samlLog = {
       save: sinon.stub(),
     }
     SamlLog = function () {
       return samlLog
     }
-    SamlLogModel = { SamlLog }
-    SamlLogHandler = SandboxedModule.require(modulePath, {
-      requires: {
-        '../../models/SamlLog': SamlLogModel,
-      },
-    })
+
+    ctx.logger = {
+      error: sinon.stub(),
+    }
+    vi.doMock('@overleaf/logger', () => ({
+      default: ctx.logger,
+    }))
+
+    vi.doMock('../../../../app/src/models/SamlLog', () => ({ SamlLog }))
+
+    SamlLogHandler = (await import(modulePath)).default
 
     data = { foo: true }
     providerId = 'provider-id'
@@ -69,13 +73,13 @@ describe('SamlLogHandler', function () {
       )
     })
 
-    it('should log without data and log error', function () {
+    it('should log without data and log error', function (ctx) {
       samlLog.providerId.should.equal(providerId)
       samlLog.sessionId.should.equal(sessionId.substr(0, 8))
       expect(samlLog.data).to.be.undefined
       expect(samlLog.jsonData).to.be.undefined
       samlLog.save.should.have.been.calledOnce
-      this.logger.error.should.have.been.calledOnce.and.calledWithMatch(
+      ctx.logger.error.should.have.been.calledOnce.and.calledWithMatch(
         { providerId, sessionId: sessionId.substr(0, 8) },
         'SamlLog JSON.stringify Error'
       )
@@ -99,8 +103,8 @@ describe('SamlLogHandler', function () {
       )
     })
 
-    it('should log error', function () {
-      this.logger.error.should.have.been.calledOnce.and.calledWithMatch(
+    it('should log error', function (ctx) {
+      ctx.logger.error.should.have.been.calledOnce.and.calledWithMatch(
         {
           err,
           sessionId: sessionId.substr(0, 8),
@@ -127,8 +131,8 @@ describe('SamlLogHandler', function () {
       )
     })
 
-    it('should log error', function () {
-      this.logger.error.should.have.been.calledOnce.and.calledWithMatch(
+    it('should log error', function (ctx) {
+      ctx.logger.error.should.have.been.calledOnce.and.calledWithMatch(
         {
           err,
           sessionId: sessionId.substr(0, 8),
@@ -155,8 +159,8 @@ describe('SamlLogHandler', function () {
       )
     })
 
-    it('should not log any error', function () {
-      this.logger.error.should.not.have.been.called
+    it('should not log any error', function (ctx) {
+      ctx.logger.error.should.not.have.been.called
     })
   })
 })

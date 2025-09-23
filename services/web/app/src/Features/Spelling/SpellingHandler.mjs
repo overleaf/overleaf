@@ -1,9 +1,9 @@
-const OError = require('@overleaf/o-error')
-const Metrics = require('@overleaf/metrics')
-const { promisifyAll } = require('@overleaf/promise-utils')
-const LearnedWordsManager = require('./LearnedWordsManager')
+import OError from '@overleaf/o-error'
+import Metrics from '@overleaf/metrics'
+import { promisifyAll } from '@overleaf/promise-utils'
+import LearnedWordsManager from './LearnedWordsManager.js'
 
-module.exports = {
+const SpellingHandler = {
   getUserDictionary(userId, callback) {
     const timer = new Metrics.Timer('spelling_get_dict')
     LearnedWordsManager.getLearnedWords(userId, (error, words) => {
@@ -26,4 +26,4 @@ module.exports = {
   },
 }
 
-module.exports.promises = promisifyAll(module.exports)
+export default { ...SpellingHandler, promises: promisifyAll(SpellingHandler) }

@@ -3,12 +3,11 @@ import EditorController from '../Editor/EditorController.js'
 import ProjectLocator from '../Project/ProjectLocator.js'
 import { Project } from '../../models/Project.js'
 import ProjectGetter from '../Project/ProjectGetter.js'
-import {
-  ProjectNotFoundError,
-  V1ProjectNotFoundError,
-  BadDataError,
-} from './LinkedFilesErrors.js'
+import LinkedFilesErrors from './LinkedFilesErrors.mjs'
 import { callbackifyAll } from '@overleaf/promise-utils'
+
+const { ProjectNotFoundError, V1ProjectNotFoundError, BadDataError } =
+  LinkedFilesErrors
 
 const LinkedFilesHandler = {
   async getFileById(projectId, fileId) {

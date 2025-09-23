@@ -1,14 +1,14 @@
-const { callbackify } = require('util')
-const _ = require('lodash')
-const fsPromises = require('fs/promises')
-const fs = require('fs')
-const logger = require('@overleaf/logger')
-const EditorController = require('../Editor/EditorController')
-const FileTypeManager = require('../Uploads/FileTypeManager')
-const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
-const crypto = require('crypto')
-const Settings = require('@overleaf/settings')
-const { pipeline } = require('stream/promises')
+import { callbackify } from 'node:util'
+import _ from 'lodash'
+import fsPromises from 'node:fs/promises'
+import fs from 'node:fs'
+import logger from '@overleaf/logger'
+import EditorController from '../Editor/EditorController.js'
+import FileTypeManager from '../Uploads/FileTypeManager.js'
+import ProjectEntityHandler from '../Project/ProjectEntityHandler.js'
+import crypto from 'node:crypto'
+import Settings from '@overleaf/settings'
+import { pipeline } from 'node:stream/promises'
 
 async function mergeUpdate(userId, projectId, path, updateRequest, source) {
   const fsPath = await writeUpdateToDisk(projectId, updateRequest)
@@ -185,7 +185,7 @@ async function createFolder(projectId, path, userId) {
   return folder
 }
 
-module.exports = {
+export default {
   mergeUpdate: callbackify(mergeUpdate),
   _mergeUpdate: callbackify(_mergeUpdate),
   deleteUpdate: callbackify(deleteUpdate),

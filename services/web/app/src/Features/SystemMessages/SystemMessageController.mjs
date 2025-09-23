@@ -1,6 +1,6 @@
 import Settings from '@overleaf/settings'
 import SessionManager from '../Authentication/SessionManager.js'
-import SystemMessageManager from './SystemMessageManager.js'
+import SystemMessageManager from './SystemMessageManager.mjs'
 
 const ProjectController = {
   getMessages(req, res, next) {

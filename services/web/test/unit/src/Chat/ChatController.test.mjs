@@ -33,7 +33,7 @@ describe('ChatController', function () {
       default: ctx.ChatApiHandler,
     }))
 
-    vi.doMock('../../../../app/src/Features/Chat/ChatManager.js', () => ({
+    vi.doMock('../../../../app/src/Features/Chat/ChatManager.mjs', () => ({
       default: ctx.ChatManager,
     }))
 

@@ -1,6 +1,6 @@
 import { expressify } from '@overleaf/promise-utils'
 import TpdsUpdateHandler from './TpdsUpdateHandler.mjs'
-import UpdateMerger from './UpdateMerger.js'
+import UpdateMerger from './UpdateMerger.mjs'
 import Errors from '../Errors/Errors.js'
 import logger from '@overleaf/logger'
 import Path from 'node:path'

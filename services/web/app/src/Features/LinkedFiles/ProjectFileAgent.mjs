@@ -16,16 +16,16 @@ import DocstoreManager from '../Docstore/DocstoreManager.js'
 import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.js'
 import _ from 'lodash'
 import LinkedFilesHandler from './LinkedFilesHandler.mjs'
+import LinkedFilesErrors from './LinkedFilesErrors.mjs'
+import { promisify } from '@overleaf/promise-utils'
+import HistoryManager from '../History/HistoryManager.js'
 
-import {
+const {
   BadDataError,
   AccessDeniedError,
   BadEntityTypeError,
   SourceFileNotFoundError,
-} from './LinkedFilesErrors.js'
-
-import { promisify } from '@overleaf/promise-utils'
-import HistoryManager from '../History/HistoryManager.js'
+} = LinkedFilesErrors
 
 let ProjectFileAgent
 

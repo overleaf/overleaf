@@ -5,7 +5,7 @@ import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
 import SessionManager from '../Authentication/SessionManager.js'
 import UserInfoManager from '../User/UserInfoManager.js'
 import UserInfoController from '../User/UserInfoController.js'
-import ChatManager from './ChatManager.js'
+import ChatManager from './ChatManager.mjs'
 
 async function sendMessage(req, res) {
   const { project_id: projectId } = req.params

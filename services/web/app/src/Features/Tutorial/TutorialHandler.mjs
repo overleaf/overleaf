@@ -1,4 +1,4 @@
-const UserUpdater = require('../User/UserUpdater')
+import UserUpdater from '../User/UserUpdater.js'
 
 const POSTPONE_DURATION_MS = 24 * 60 * 60 * 1000 // 1 day
 
@@ -59,4 +59,4 @@ function getInactiveTutorials(user, tutorialKey) {
   return inactiveTutorials
 }
 
-module.exports = { setTutorialState, getInactiveTutorials }
+export default { setTutorialState, getInactiveTutorials }
