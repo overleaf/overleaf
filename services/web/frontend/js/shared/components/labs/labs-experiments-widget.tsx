@@ -9,7 +9,8 @@ import getMeta from '@/utils/meta'
 type IntegrationLinkingWidgetProps = {
   logo: ReactNode
   title: string
-  description: string
+  description: string | ReactNode
+  optedInDescription?: string | ReactNode
   helpPath?: string
   labsEnabled?: boolean
   experimentName: string
@@ -22,6 +23,7 @@ export function LabsExperimentWidget({
   logo,
   title,
   description,
+  optedInDescription,
   helpPath,
   labsEnabled,
   experimentName,
@@ -69,7 +71,7 @@ export function LabsExperimentWidget({
           {optedIn && <OLBadge bg="info">{t('enabled')}</OLBadge>}
         </div>
         <p className="small">
-          {description}{' '}
+          {optedIn && optedInDescription ? optedInDescription : description}{' '}
           {helpPath && (
             <a href={helpPath} target="_blank" rel="noreferrer">
               {t('learn_more')}

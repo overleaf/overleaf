@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import LabsExperimentWidget from '../../shared/components/labs/labs-experiments-widget'
 import { isInExperiment } from '@/utils/labs-utils'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, Trans } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { postJSON } from '@/infrastructure/fetch-json'
@@ -43,9 +43,25 @@ const MonthlyTexliveLabsWidget = ({
       className="rounded bg-primary-subtle"
     />
   )
+
+  const optedInDescription = (
+    <Trans
+      i18nKey="thank_you_for_joining_the_rolling_texlive"
+      components={[
+        // eslint-disable-next-line jsx-a11y/anchor-has-content
+        <a
+          href="/learn/latex/Overleaf_and_TeX_Live#How_do_I_change_a_project’s_TeX_Live_version?"
+          target="_blank"
+          key="getting-started-link"
+        />,
+      ]}
+    />
+  )
+
   return (
     <LabsExperimentWidget
-      description={t('test_more_recent_versions_of_texlive')}
+      description={t('get_regular_access_to_new_versions_of_tex_live')}
+      optedInDescription={optedInDescription}
       experimentName="monthly-texlive"
       logo={logo}
       labsEnabled={labsProgram}
