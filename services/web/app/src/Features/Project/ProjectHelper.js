@@ -167,6 +167,7 @@ function getAllowedImagesForUser(user) {
     return {
       ...image,
       allowed: _imageAllowed(user, image),
+      rolling: image.monthlyExperimental,
     }
   })
 

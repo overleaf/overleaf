@@ -1006,6 +1006,7 @@ module.exports = {
     v1ImportDataScreen: [],
     snapshotUtils: [],
     usGovBanner: [],
+    rollingBuildsUpdatedAlert: [],
     offlineModeToolbarButtons: [],
     settingsEntries: [],
     autoCompleteExtensions: [],

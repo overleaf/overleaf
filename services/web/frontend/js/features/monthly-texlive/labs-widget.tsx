@@ -1,9 +1,13 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import LabsExperimentWidget from '../../shared/components/labs/labs-experiments-widget'
 import { isInExperiment } from '@/utils/labs-utils'
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import { postJSON } from '@/infrastructure/fetch-json'
+import { debugConsole } from '@/utils/debugging'
+
+export const TUTORIAL_KEY = 'rolling-compile-image-changed'
 
 const MonthlyTexliveLabsWidget = ({
   labsProgram,
@@ -14,6 +18,18 @@ const MonthlyTexliveLabsWidget = ({
 }) => {
   const { t } = useTranslation()
   const [optedIn, setOptedIn] = useState(isInExperiment('monthly-texlive'))
+
+  const optInWithCompletedTutorial = useCallback(
+    async (shouldOptIn: boolean) => {
+      try {
+        await postJSON(`/tutorial/${TUTORIAL_KEY}/complete`)
+      } catch (err) {
+        debugConsole.error(err)
+      }
+      setOptedIn(shouldOptIn)
+    },
+    [setOptedIn]
+  )
 
   const monthlyTexLiveSplitTestEnabled = isSplitTestEnabled('monthly-texlive')
   if (!monthlyTexLiveSplitTestEnabled) {
@@ -35,7 +51,7 @@ const MonthlyTexliveLabsWidget = ({
       labsEnabled={labsProgram}
       setErrorMessage={setErrorMessage}
       optedIn={optedIn}
-      setOptedIn={setOptedIn}
+      setOptedIn={optInWithCompletedTutorial}
       title={t('rolling_texlive_build')}
     />
   )

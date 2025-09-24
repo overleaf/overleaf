@@ -2,9 +2,16 @@ import { useTranslation } from 'react-i18next'
 import { LostConnectionAlert } from './lost-connection-alert'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import { debugging } from '@/utils/debugging'
+import { ElementType } from 'react'
 import { createPortal } from 'react-dom'
 import { useGlobalAlertsContainer } from '@/features/ide-react/context/global-alerts-context'
 import OLNotification from '@/shared/components/ol/ol-notification'
+import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+
+const rollingBuildsUpdatedAlert: Array<{
+  import: { default: ElementType }
+  path: string
+}> = importOverleafModules('rollingBuildsUpdatedAlert')
 
 export function Alerts() {
   const { t } = useTranslation()
@@ -23,6 +30,12 @@ export function Alerts() {
 
   return createPortal(
     <>
+      {rollingBuildsUpdatedAlert.map(
+        ({ import: { default: Component }, path }) => (
+          <Component key={path} />
+        )
+      )}
+
       {connectionState.forceDisconnected &&
       // hide "disconnected" banner when displaying out of sync modal
       connectionState.error !== 'out-of-sync' ? (

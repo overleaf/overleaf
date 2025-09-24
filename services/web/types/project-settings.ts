@@ -5,6 +5,7 @@ export type ImageName = {
   imageDesc: string
   imageName: string
   allowed: boolean
+  rolling?: boolean
 }
 
 export type DocId = Brand<string, 'DocId'>
