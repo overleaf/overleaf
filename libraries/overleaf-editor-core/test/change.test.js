@@ -1,10 +1,15 @@
 'use strict'
 
 const { expect } = require('chai')
-const core = require('..')
-const Change = core.Change
-const File = core.File
-const Operation = core.Operation
+const {
+  Change,
+  File,
+  Operation,
+  AddFileOperation,
+  Snapshot,
+  Origin,
+  RestoreFileOrigin,
+} = require('..')
 
 describe('Change', function () {
   describe('findBlobHashes', function () {
@@ -37,9 +42,9 @@ describe('Change', function () {
 
   describe('RestoreFileOrigin', function () {
     it('should convert to and from raw', function () {
-      const origin = new core.RestoreFileOrigin(1, 'path', new Date())
+      const origin = new RestoreFileOrigin(1, 'path', new Date())
       const raw = origin.toRaw()
-      const newOrigin = core.Origin.fromRaw(raw)
+      const newOrigin = Origin.fromRaw(raw)
       expect(newOrigin).to.eql(origin)
     })
 
@@ -56,7 +61,19 @@ describe('Change', function () {
         },
       })
 
-      expect(change.getOrigin()).to.be.an.instanceof(core.RestoreFileOrigin)
+      expect(change.getOrigin()).to.be.an.instanceof(RestoreFileOrigin)
+    })
+  })
+
+  describe('applyTo', function () {
+    it('sets the timestamp on the snapshot', function () {
+      const snapshot = new Snapshot()
+      snapshot.addFile('main.tex', File.fromString(''))
+      const operation = new AddFileOperation('main.tex', File.fromString(''))
+      const now = new Date()
+      const change = new Change([operation], now)
+      change.applyTo(snapshot)
+      expect(snapshot.getTimestamp().toISOString()).to.equal(now.toISOString())
     })
   })
 })

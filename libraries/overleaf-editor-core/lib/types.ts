@@ -74,6 +74,7 @@ export type RawSnapshot = {
   files: RawFileMap
   projectVersion?: string
   v2DocVersions?: RawV2DocVersions | null
+  timestamp?: string
 }
 
 export type RawHistory = {

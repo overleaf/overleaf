@@ -108,6 +108,7 @@ describe('persistChanges', function () {
           content: '',
         },
       },
+      timestamp: thirdChange.getTimestamp().toISOString(),
     })
     const history = new History(snapshot, [thirdChange])
     const currentChunk = new Chunk(history, 2)

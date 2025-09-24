@@ -7,7 +7,6 @@ import EditorController from '../Editor/EditorController.js'
 import Errors from '../Errors/Errors.js'
 import moment from 'moment'
 import { callbackifyAll } from '@overleaf/promise-utils'
-import { fetchJson } from '@overleaf/fetch-utils'
 import ProjectLocator from '../Project/ProjectLocator.js'
 import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.js'
 import ChatApiHandler from '../Chat/ChatApiHandler.js'
@@ -69,6 +68,13 @@ const RestoreManager = {
     )
     const snapshot = Snapshot.fromRaw(snapshotRaw)
 
+    const origin = options.origin ?? {
+      kind: 'file-restore',
+      path: pathname,
+      version,
+      timestamp: snapshot.getTimestamp()?.toISOString(),
+    }
+
     return await RestoreManager._revertSingleFile(
       userId,
       projectId,
@@ -76,7 +82,7 @@ const RestoreManager = {
       pathname,
       threadIds,
       snapshot,
-      options
+      { origin }
     )
   },
 
@@ -131,17 +137,9 @@ const RestoreManager = {
       })
       .catch(() => null)
 
-    const updates = await RestoreManager._getUpdatesFromHistory(
-      projectId,
-      version
-    )
-    const updateAtVersion = updates.find(update => update.toV === version)
-
-    const origin = options.origin || {
-      kind: 'file-restore',
-      path: pathname,
-      version,
-      timestamp: new Date(updateAtVersion.meta.end_ts).toISOString(),
+    const snapshotFile = projectSnapshotAtVersion.getFile(pathname)
+    if (!snapshotFile) {
+      throw new OError('file not found in snapshot', { pathname })
     }
 
     const importInfo = await FileSystemImportManager.promises.importFile(
@@ -162,7 +160,7 @@ const RestoreManager = {
         projectId,
         file.element._id,
         file.type,
-        origin,
+        options.origin,
         userId
       )
 
@@ -177,25 +175,24 @@ const RestoreManager = {
       threadIds.delete(file.element._id.toString())
     }
 
-    const snapshotFile = projectSnapshotAtVersion.getFile(pathname)
-    if (!snapshotFile) {
-      throw new OError('file not found in snapshot', { pathname })
-    }
-
     // Look for metadata indicating a linked file.
     const fileMetadata = snapshotFile.getMetadata()
     const isFileMetadata = fileMetadata && 'provider' in fileMetadata
 
     logger.debug({ fileMetadata }, 'metadata from history')
 
-    if (importInfo.type === 'file' || isFileMetadata) {
+    if (
+      !snapshotFile.isEditable() ||
+      importInfo.type === 'file' ||
+      isFileMetadata
+    ) {
       const newFile = await EditorController.promises.upsertFile(
         projectId,
         parentFolderId,
         basename,
         fsPath,
         fileMetadata,
-        origin,
+        options.origin,
         userId
       )
 
@@ -296,13 +293,17 @@ const RestoreManager = {
       newCommentThreadData
     )
 
+    const lines = snapshotFile
+      .getContent({ filterTrackedDeletes: true })
+      .split('\n')
+
     const { _id } = await EditorController.promises.addDocWithRanges(
       projectId,
       parentFolderId,
       basename,
-      importInfo.lines,
+      lines,
       newRanges,
-      origin,
+      options.origin,
       userId
     )
 
@@ -362,30 +363,20 @@ const RestoreManager = {
       throw new OError('project does not have ranges support', { projectId })
     }
 
-    // Get project paths at version
-    const pathsAtPastVersion = await RestoreManager._getProjectPathsAtVersion(
-      projectId,
-      version
-    )
-
-    const updates = await RestoreManager._getUpdatesFromHistory(
-      projectId,
-      version
-    )
-    const updateAtVersion = updates.find(update => update.toV === version)
-
-    const origin = {
-      kind: 'project-restore',
-      version,
-      timestamp: new Date(updateAtVersion.meta.end_ts).toISOString(),
-    }
-    const threadIds = await getCommentThreadIds(projectId)
-
     const snapshotRaw = await HistoryManager.promises.getContentAtVersion(
       projectId,
       version
     )
     const snapshot = Snapshot.fromRaw(snapshotRaw)
+
+    const pathsAtPastVersion = snapshot.getFilePathnames()
+
+    const origin = {
+      kind: 'project-restore',
+      version,
+      timestamp: snapshot.getTimestamp()?.toISOString(),
+    }
+    const threadIds = await getCommentThreadIds(projectId)
 
     const reverted = []
     for (const pathname of pathsAtPastVersion) {
@@ -436,18 +427,6 @@ const RestoreManager = {
       Settings.apis.project_history.url
     }/project/${projectId}/version/${version}/${encodeURIComponent(pathname)}`
     return await FileWriter.promises.writeUrlToDisk(projectId, url)
-  },
-
-  async _getUpdatesFromHistory(projectId, version) {
-    const url = `${Settings.apis.project_history.url}/project/${projectId}/updates?before=${version}&min_count=1`
-    const res = await fetchJson(url)
-    return res.updates
-  },
-
-  async _getProjectPathsAtVersion(projectId, version) {
-    const url = `${Settings.apis.project_history.url}/project/${projectId}/paths/version/${version}`
-    const res = await fetchJson(url)
-    return res.paths
   },
 }
 
