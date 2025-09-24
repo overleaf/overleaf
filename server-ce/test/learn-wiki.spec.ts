@@ -47,8 +47,8 @@ describe('LearnWiki', function () {
 
     it('should render wiki page', () => {
       login(REGULAR_USER)
+
       cy.visit(UPLOADING_A_PROJECT_URL)
-      // Wiki content
       cy.findByRole('heading', { name: 'Uploading a project' })
       cy.contains(/how to create an Overleaf project/)
       cy.findByRole('img', { name: 'Creating a new project on Overleaf' })
@@ -56,20 +56,28 @@ describe('LearnWiki', function () {
         .and((el: any) => {
           expect(el[0].naturalWidth, 'renders image').to.be.greaterThan(0)
         })
-      // Wiki navigation
-      cy.findByRole('link', { name: 'Copying a project' }).should('exist')
+
+      cy.visit(COPYING_A_PROJECT_URL)
+      cy.findByRole('heading', { name: 'Copying a project' })
+      cy.findByRole('link', {
+        name: '1 How to copy a project (option 1)',
+      }).should('exist')
+      cy.findByRole('link', {
+        name: '2 How to copy a project (option 2)',
+      }).should('exist')
     })
 
-    it('should navigate back and forth', function () {
+    it('should navigate within wiki page using table of contents', function () {
       login(REGULAR_USER)
       cy.visit(COPYING_A_PROJECT_URL)
       cy.findByRole('heading', { name: 'Copying a project' })
-      cy.findByRole('link', { name: 'Uploading a project' }).click()
-      cy.url().should('contain', UPLOADING_A_PROJECT_URL)
-      cy.findByRole('heading', { name: 'Uploading a project' })
-      cy.findByRole('link', { name: 'Copying a project' }).click()
+      cy.findByRole('link', {
+        name: '2 How to copy a project (option 2)',
+      }).click()
       cy.url().should('contain', COPYING_A_PROJECT_URL)
-      cy.findByRole('heading', { name: 'Copying a project' })
+      cy.findByRole('heading', {
+        name: 'How to copy a project (option 2)',
+      }).should('be.visible')
     })
   })
 
