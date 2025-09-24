@@ -62,6 +62,7 @@ const db = {
   projectHistoryFailures: internalDb.collection('projectHistoryFailures'),
   projectHistoryGlobalBlobs: internalDb.collection('projectHistoryGlobalBlobs'),
   projectHistoryLabels: internalDb.collection('projectHistoryLabels'),
+  projectHistorySizes: internalDb.collection('projectHistorySizes'),
   projectHistorySyncState: internalDb.collection('projectHistorySyncState'),
   projectInvites: internalDb.collection('projectInvites'),
   projects: internalDb.collection('projects'),

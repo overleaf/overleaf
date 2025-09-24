@@ -7,6 +7,7 @@ const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 const { File } = require('../../models/File')
 const OError = require('@overleaf/o-error')
 const { promisifyAll } = require('@overleaf/promise-utils')
+const Modules = require('../../infrastructure/Modules')
 
 const FileStoreHandler = {
   RETRY_ATTEMPTS: 3,
@@ -69,24 +70,47 @@ const FileStoreHandler = {
         )
         return callback(new Error('can not upload symlink'))
       }
-      FileHashManager.computeHash(fsPath, function (err, hash) {
-        if (err) {
-          return callback(err)
-        }
-        FileStoreHandler._uploadToHistory(
-          historyId,
-          hash,
-          stat.size,
-          fsPath,
-          function (err) {
+      const size = stat.size
+      Modules.hooks.fire(
+        'preUploadFile',
+        { projectId, historyId, fileArgs, fsPath, size },
+        preUploadErr => {
+          if (preUploadErr) {
+            return callback(preUploadErr)
+          }
+          FileHashManager.computeHash(fsPath, function (err, hash) {
             if (err) {
               return callback(err)
             }
-            fileArgs = { ...fileArgs, hash }
-            callback(err, new File(fileArgs), true)
-          }
-        )
-      })
+            FileStoreHandler._uploadToHistory(
+              historyId,
+              hash,
+              stat.size,
+              fsPath,
+              function (err) {
+                if (err) {
+                  return callback(err)
+                }
+                const fileRef = new File({ ...fileArgs, hash })
+                Modules.hooks.fire(
+                  'postUploadFile',
+                  {
+                    projectId,
+                    fileRef,
+                    size,
+                  },
+                  postUploadErr => {
+                    if (postUploadErr) {
+                      return callback(postUploadErr)
+                    }
+                    callback(err, fileRef, true, size)
+                  }
+                )
+              }
+            )
+          })
+        }
+      )
     })
   },
 }
@@ -94,7 +118,7 @@ const FileStoreHandler = {
 module.exports = FileStoreHandler
 module.exports.promises = promisifyAll(FileStoreHandler, {
   multiResult: {
-    uploadFileFromDisk: ['fileRef', 'createdBlob'],
-    uploadFileFromDiskWithHistoryId: ['fileRef', 'createdBlob'],
+    uploadFileFromDisk: ['fileRef', 'createdBlob', 'size'],
+    uploadFileFromDiskWithHistoryId: ['fileRef', 'createdBlob', 'size'],
   },
 })

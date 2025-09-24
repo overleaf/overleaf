@@ -71,6 +71,12 @@ describe('FileStoreHandler', function () {
       hasFeature: sinon.stub(),
     }
 
+    this.Modules = {
+      hooks: {
+        fire: sinon.stub().callsArgWith(2, null),
+      },
+    }
+
     this.handler = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '@overleaf/settings': this.settings,
@@ -79,6 +85,7 @@ describe('FileStoreHandler', function () {
         '../Project/ProjectDetailsHandler': this.ProjectDetailsHandler,
         './FileHashManager': this.FileHashManager,
         '../../infrastructure/Features': this.Features,
+        '../../infrastructure/Modules': this.Modules,
         // FIXME: need to stub File object here
         '../../models/File': {
           File: this.FileModel,
@@ -131,6 +138,31 @@ describe('FileStoreHandler', function () {
         .should.equal(true)
     })
 
+    it('should call the preUploadFile hook', async function () {
+      this.fs.createReadStream.returns({
+        pipe() {},
+        on(type, cb) {
+          if (type === 'open') {
+            cb()
+          }
+        },
+      })
+      await this.handler.promises.uploadFileFromDisk(
+        this.projectId,
+        this.fileArgs,
+        this.fsPath
+      )
+      this.Modules.hooks.fire
+        .calledWith('preUploadFile', {
+          projectId: this.projectId,
+          historyId: this.historyId,
+          fileArgs: this.fileArgs,
+          fsPath: this.fsPath,
+          size: this.fileSize,
+        })
+        .should.equal(true)
+    })
+
     it('should upload the file to the history store as a blob', async function () {
       this.fs.createReadStream.returns({
         pipe() {},
@@ -167,6 +199,29 @@ describe('FileStoreHandler', function () {
       )
 
       expect(this.request).to.not.have.been.called
+    })
+
+    it('should call the postUploadFile hook', async function () {
+      this.fs.createReadStream.returns({
+        pipe() {},
+        on(type, cb) {
+          if (type === 'open') {
+            cb()
+          }
+        },
+      })
+      await this.handler.promises.uploadFileFromDisk(
+        this.projectId,
+        this.fileArgs,
+        this.fsPath
+      )
+      this.Modules.hooks.fire
+        .calledWith('postUploadFile', {
+          projectId: this.projectId,
+          fileRef: sinon.match.instanceOf(this.FileModel),
+          size: this.fileSize,
+        })
+        .should.equal(true)
     })
 
     it('should resolve with the url and fileRef', async function () {
