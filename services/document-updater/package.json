@@ -12,8 +12,8 @@
     "nodemon": "node --watch app.js",
     "benchmark:apply": "node benchmarks/apply",
     "lint": "eslint --max-warnings 0 --format unix .",
-    "format": "prettier --list-different $PWD/'**/{*.*js,Jenkinsfile}'",
-    "format:fix": "prettier --write $PWD/'**/{*.*js,Jenkinsfile}'",
+    "format": "prettier --list-different $PWD/'**/{*.*js,*.ts,Jenkinsfile}'",
+    "format:fix": "prettier --write $PWD/'**/{*.*js,*.ts,Jenkinsfile}'",
     "lint:fix": "eslint --fix .",
     "types:check": "tsc --noEmit"
   },
