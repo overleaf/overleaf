@@ -10,6 +10,7 @@ import {
 } from '@/shared/components/dropdown/dropdown-menu'
 import Button from '@/shared/components/button/button'
 import { ButtonGroup } from 'react-bootstrap'
+import { figmaDesignUrl } from '../../../.storybook/utils/figma-design-url'
 
 export const Sizes = () => {
   const { t } = useTranslation()
@@ -54,6 +55,9 @@ const meta: Meta<typeof Dropdown> = {
   args: {
     align: { sm: 'start' },
   },
+  parameters: figmaDesignUrl(
+    'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3460-194077&m=dev'
+  ),
 }
 
 export default meta

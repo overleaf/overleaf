@@ -1,25 +1,38 @@
 import fetchMock from 'fetch-mock'
-import Notification from '../js/shared/components/notification'
-import { postJSON } from '../js/infrastructure/fetch-json'
-import useAsync from '../js/shared/hooks/use-async'
+import Notification from '../../js/shared/components/notification'
+import { postJSON } from '../../js/infrastructure/fetch-json'
+import useAsync from '../../js/shared/hooks/use-async'
+import { figmaDesignUrl } from '../../../.storybook/utils/figma-design-url'
 
 type Args = React.ComponentProps<typeof Notification>
 
 export const NotificationInfo = (args: Args) => {
   return <Notification {...args} isDismissible />
 }
+NotificationInfo.parameters = figmaDesignUrl(
+  'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3488-103958&m=dev'
+)
 
 export const NotificationSuccess = (args: Args) => {
   return <Notification {...args} isDismissible type="success" />
 }
+NotificationSuccess.parameters = figmaDesignUrl(
+  'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3489-110077&m=dev'
+)
 
 export const NotificationWarning = (args: Args) => {
   return <Notification {...args} isDismissible type="warning" />
 }
+NotificationWarning.parameters = figmaDesignUrl(
+  'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3489-112036&m=dev'
+)
 
 export const NotificationError = (args: Args) => {
   return <Notification {...args} isDismissible type="error" />
 }
+NotificationError.parameters = figmaDesignUrl(
+  'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3489-112059&m=dev'
+)
 
 export const NotificationOffer = (args: Args) => {
   return <Notification {...args} isDismissible type="offer" />
@@ -43,18 +56,30 @@ export const NotificationWithActionBelowContent = (args: Args) => {
     />
   )
 }
+NotificationWithActionBelowContent.parameters = figmaDesignUrl(
+  'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3489-118816&m=dev'
+)
 
 export const NotificationWithTitle = (args: Args) => {
   return <Notification {...args} title="Some title" />
 }
+NotificationWithTitle.parameters = figmaDesignUrl(
+  'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3489-115045&m=dev'
+)
 
 export const NotificationWithAction = (args: Args) => {
   return <Notification {...args} isDismissible={false} />
 }
+NotificationWithAction.parameters = figmaDesignUrl(
+  'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3489-117190&m=dev'
+)
 
 export const NotificationDismissible = (args: Args) => {
   return <Notification {...args} action={undefined} />
 }
+NotificationDismissible.parameters = figmaDesignUrl(
+  'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3489-116677&m=dev'
+)
 
 export const APlainNotification = (args: Args) => {
   return <Notification {...args} action={undefined} isDismissible={false} />
@@ -383,5 +408,30 @@ export default {
     ),
     action: <button className="btn btn-secondary">An action</button>,
     isDismissible: true,
+    title: undefined,
+  },
+  argTypes: {
+    content: {
+      control: 'text',
+    },
+    action: {
+      control: 'text',
+    },
+    title: {
+      control: 'text',
+    },
+  },
+  parameters: {
+    controls: {
+      include: [
+        'content',
+        'title',
+        'action',
+        'ariaLive',
+        'type',
+        'isDismissible',
+        'isActionBelowContent',
+      ],
+    },
   },
 }

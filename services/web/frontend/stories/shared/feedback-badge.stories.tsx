@@ -1,4 +1,4 @@
-import { ScopeDecorator } from './decorators/scope'
+import { ScopeDecorator } from '../decorators/scope'
 import { FeedbackBadge } from '@/shared/components/feedback-badge'
 
 export const WithDefaultText = () => {

@@ -3,10 +3,16 @@ import type { Meta, StoryObj } from '@storybook/react'
 import FormGroup from '@/shared/components/form/form-group'
 import FormText from '@/shared/components/form/form-text'
 import FormControl from '@/shared/components/form/form-control'
+import { figmaDesignUrl } from '../../../../.storybook/utils/figma-design-url'
 
 const meta: Meta<React.ComponentProps<typeof FormControl>> = {
   title: 'Shared / Components / Form / Textarea',
   component: FormControl,
+  parameters: {
+    controls: {
+      include: ['disabled'],
+    },
+  },
 }
 export default meta
 
@@ -50,6 +56,9 @@ export const Default: Story = {
 Default.args = {
   disabled: false,
 }
+Default.parameters = figmaDesignUrl(
+  'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3489-176397&m=dev'
+)
 
 export const Info: Story = {
   render: args => {
@@ -91,6 +100,9 @@ export const Info: Story = {
         </FormGroup>
       </>
     )
+  },
+  args: {
+    disabled: false,
   },
 }
 
@@ -138,7 +150,13 @@ export const Error: Story = {
       </>
     )
   },
+  args: {
+    disabled: false,
+  },
 }
+Error.parameters = figmaDesignUrl(
+  'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3489-176403&m=dev'
+)
 
 export const Warning: Story = {
   render: args => {
@@ -181,7 +199,13 @@ export const Warning: Story = {
       </>
     )
   },
+  args: {
+    disabled: false,
+  },
 }
+Warning.parameters = figmaDesignUrl(
+  'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3489-176403&m=dev'
+)
 
 export const Success: Story = {
   render: args => {
@@ -224,4 +248,10 @@ export const Success: Story = {
       </>
     )
   },
+  args: {
+    disabled: false,
+  },
 }
+Success.parameters = figmaDesignUrl(
+  'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3489-176403&m=dev'
+)

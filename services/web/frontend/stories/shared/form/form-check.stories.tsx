@@ -1,25 +1,14 @@
 import { useRef, useLayoutEffect } from 'react'
 import { Form } from 'react-bootstrap'
 import type { Meta, StoryObj } from '@storybook/react'
+import { figmaDesignUrl } from '../../../../.storybook/utils/figma-design-url'
 
 const meta: Meta<(typeof Form)['Check']> = {
   title: 'Shared / Components / Form',
   component: Form.Check,
-  argTypes: {
-    id: {
-      table: {
-        disable: true,
-      },
-    },
-    label: {
-      table: {
-        disable: true,
-      },
-    },
-    defaultChecked: {
-      table: {
-        disable: true,
-      },
+  parameters: {
+    controls: {
+      include: ['disabled'],
     },
   },
 }
@@ -33,6 +22,9 @@ export const Checkbox: Story = {
     label: 'Label',
     disabled: false,
   },
+  parameters: figmaDesignUrl(
+    'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3494-247203&m=dev'
+  ),
 }
 
 export const CheckboxChecked: Story = {
@@ -42,6 +34,9 @@ export const CheckboxChecked: Story = {
     disabled: false,
     defaultChecked: true,
   },
+  parameters: figmaDesignUrl(
+    'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3495-249055&m=dev'
+  ),
 }
 
 export const CheckboxIndeterminate = (args: Story['args']) => {
@@ -60,3 +55,6 @@ CheckboxIndeterminate.args = {
   label: 'Label',
   disabled: false,
 }
+CheckboxIndeterminate.parameters = figmaDesignUrl(
+  'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3495-249055&m=dev'
+)

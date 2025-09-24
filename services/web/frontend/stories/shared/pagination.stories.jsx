@@ -1,4 +1,4 @@
-import Pagination from '../js/shared/components/pagination'
+import Pagination from '../../js/shared/components/pagination'
 
 export const Interactive = args => {
   return <Pagination {...args} />
@@ -14,6 +14,10 @@ export default {
   },
   argTypes: {
     currentPage: { control: { type: 'number', min: 1, max: 10, step: 1 } },
-    totalPages: { control: { disable: true } },
+  },
+  parameters: {
+    controls: {
+      include: ['currentPage'],
+    },
   },
 }

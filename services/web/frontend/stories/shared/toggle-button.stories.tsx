@@ -1,7 +1,8 @@
 import OLToggleButton from '@/shared/components/ol/ol-toggle-button'
 import OLToggleButtonGroup from '@/shared/components/ol/ol-toggle-button-group'
+import { figmaDesignUrl } from '../../../.storybook/utils/figma-design-url'
 
-export const Base = () => {
+export const Default = () => {
   return (
     <OLToggleButtonGroup
       type="radio"
@@ -52,4 +53,7 @@ export const Disabled = () => {
 export default {
   title: 'Shared / Components / Toggle Button Group',
   component: OLToggleButtonGroup,
+  parameters: figmaDesignUrl(
+    'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3460-191910&m=dev'
+  ),
 }

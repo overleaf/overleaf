@@ -24,7 +24,7 @@ const meta: Meta<typeof OLButton> = {
   title: 'Shared / Components / Button',
   component: OLButton,
   args: {
-    children: 'A Button',
+    children: 'Button',
     disabled: false,
     isLoading: false,
   },
@@ -47,9 +47,14 @@ const meta: Meta<typeof OLButton> = {
       ],
     },
   },
-  parameters: figmaDesignUrl(
-    'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3458-22412&m=dev'
-  ),
+  parameters: {
+    controls: {
+      include: ['children', 'disabled', 'isLoading', 'size', 'variant'],
+    },
+    ...figmaDesignUrl(
+      'https://www.figma.com/design/V7Ogph1Ocs4ux2A4WMNAh7/Overleaf---Components?node-id=3458-22412&m=dev'
+    ),
+  },
 }
 
 export default meta

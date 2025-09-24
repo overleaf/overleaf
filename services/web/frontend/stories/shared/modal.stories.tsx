@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { figmaDesignUrl } from './../../../.storybook/utils/figma-design-url'
+import { figmaDesignUrl } from '../../../.storybook/utils/figma-design-url'
 import OLModal, {
   OLModalHeader,
   OLModalBody,
@@ -81,14 +81,16 @@ export const Danger: Story = {
 const meta: Meta<typeof OLModal> = {
   title: 'Shared / Components / Modal',
   component: OLModal,
+  parameters: {
+    controls: {
+      include: ['size', 'title'],
+    },
+  },
   argTypes: {
     size: {
       control: 'radio',
       options: ['lg', 'md', 'sm'],
     },
-    title: { control: 'text' },
-    children: { control: false },
-    footer: { control: false },
   },
   args: {
     show: true,

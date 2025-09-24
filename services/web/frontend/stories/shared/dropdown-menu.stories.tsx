@@ -221,14 +221,12 @@ export const TrailingIcon = () => {
 const meta: Meta<typeof DropdownMenu> = {
   title: 'Shared / Components / DropdownMenu',
   component: DropdownMenu,
-  argTypes: {
-    disabled: {
-      control: 'boolean',
-    },
-    show: {
-      table: {
-        disable: true,
-      },
+  args: {
+    disabled: false,
+  },
+  parameters: {
+    controls: {
+      include: ['disabled'],
     },
   },
 }

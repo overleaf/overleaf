@@ -1,4 +1,4 @@
-import { Select } from '../js/shared/components/select'
+import { Select } from '../../js/shared/components/select'
 
 const items = [1, 2, 3, 4].map(index => ({
   key: index,
@@ -12,7 +12,6 @@ export const Base = () => {
       items={items}
       itemToString={x => String(x?.value)}
       itemToKey={x => String(x.key)}
-      defaultText="Choose an item"
     />
   )
 }
@@ -24,7 +23,6 @@ export const WithSubtitles = () => {
       itemToString={x => String(x?.value)}
       itemToKey={x => String(x.key)}
       itemToSubtitle={x => x?.group ?? ''}
-      defaultText="Choose an item"
     />
   )
 }
@@ -36,7 +34,6 @@ export const WithSelectedIcon = () => {
       itemToString={x => String(x?.value)}
       itemToKey={x => String(x.key)}
       itemToSubtitle={x => x?.group ?? ''}
-      defaultText="Choose an item"
       selectedIcon
     />
   )
@@ -50,7 +47,6 @@ export const WithDisabledItem = () => {
       itemToKey={x => String(x.key)}
       itemToDisabled={x => x?.key === 1}
       itemToSubtitle={x => x?.group ?? ''}
-      defaultText="Choose an item"
     />
   )
 }
@@ -58,4 +54,13 @@ export const WithDisabledItem = () => {
 export default {
   title: 'Shared / Components / Select',
   component: Select,
+  parameters: {
+    controls: {
+      include: ['disabled', 'defaultText'],
+    },
+  },
+  args: {
+    disabled: false,
+    defaultText: 'Choose an item',
+  },
 }
