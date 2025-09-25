@@ -345,6 +345,61 @@ $z-index-group-member-picker-list: 1;
     }
   }
 
+  .group-discount-banner {
+    border: 1px solid var(--neutral-20);
+    border-radius: var(--border-radius-base);
+    width: 50%;
+    max-width: 576px;
+    margin: auto;
+    margin-top: var(--spacing-06);
+    margin-bottom: var(--spacing-10);
+    display: flex;
+    gap: var(--spacing-06);
+    padding: var(--spacing-06);
+
+    @include media-breakpoint-down(md) {
+      width: 100%;
+    }
+
+    .group-icon {
+      flex-grow: 2;
+    }
+
+    .text-and-cta {
+      flex-grow: 8;
+      display: flex;
+      gap: var(--spacing-06);
+
+      @include media-breakpoint-down(lg) {
+        flex-direction: column;
+      }
+
+      .group-discount-text {
+        flex-grow: 6;
+
+        p {
+          margin-bottom: 0;
+        }
+
+        h3 {
+          margin-top: 0;
+        }
+
+        .group-discount-text-heading {
+          font-size: var(--font-size-03);
+          font-weight: 600;
+          line-height: var(--line-height-02);
+          margin-bottom: var(--spacing-02);
+          color: var(--neutral-90);
+        }
+      }
+
+      .group-discount-cta {
+        flex-grow: 3;
+      }
+    }
+  }
+
   .plans-new-table {
     width: 100%;
 
