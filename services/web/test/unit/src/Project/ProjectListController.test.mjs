@@ -20,7 +20,8 @@ describe('ProjectListController', function () {
       first_name: 'bjkdsjfk',
       features: {},
       emails: [{ email: 'test@overleaf.com' }],
-      lastActive: new Date(1),
+      lastActive: new Date(2),
+      signUpDate: new Date(1),
       lastLoginIp: '111.111.111.112',
     }
     ctx.users = {

@@ -3,7 +3,7 @@ if(customerIoEnabled && ExposedSettings.cioWriteKey && ExposedSettings.cioSiteId
 		function boolAttr(value) {
 			return value !== undefined ? String(value) : null;
 		}
-	script(type="text/javascript", id="cio-loader", nonce=scriptNonce, data-best-subscription=(usersBestSubscription && usersBestSubscription.type), data-ai-blocked=boolAttr(aiBlocked), data-has-ai-assist=boolAttr(hasAiAssist), data-cio-write-key=ExposedSettings.cioWriteKey, data-cio-site-id=ExposedSettings.cioSiteId, data-session-analytics-id=getSessionAnalyticsId(), data-user-id=getLoggedInUserId(), data-last-active=lastActive).
+	script(type="text/javascript", id="cio-loader", nonce=scriptNonce, data-best-subscription=(usersBestSubscription && usersBestSubscription.type), data-ai-blocked=boolAttr(aiBlocked), data-has-ai-assist=boolAttr(hasAiAssist), data-cio-write-key=ExposedSettings.cioWriteKey, data-cio-site-id=ExposedSettings.cioSiteId, data-session-analytics-id=getSessionAnalyticsId(), data-user-id=getLoggedInUserId(), data-last-active=lastActive, data-sign-up-date=signUpDate).
 		
 		function parseBool(value) {
 			return value === 'true' ? true : value === 'false' ? false : undefined;
@@ -18,6 +18,7 @@ if(customerIoEnabled && ExposedSettings.cioWriteKey && ExposedSettings.cioSiteId
 		var aiBlocked = parseBool(cioSettings.aiBlocked);
 		var hasAiAssist = parseBool(cioSettings.hasAiAssist);
 		var lastActive = cioSettings.lastActive;
+		var signUpDate = cioSettings.signUpDate;
 
 
 		!function(){var i="cioanalytics", analytics=(window[i]=window[i]||[]);if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware"];analytics.factory=function(e){return function(){var t=Array.prototype.slice.call(arguments);t.unshift(e);analytics.push(t);return analytics}};for(var e=0;e<analytics.methods.length;e++){var key=analytics.methods[e];analytics[key]=analytics.factory(key)}analytics.load=function(key,e){var t=document.createElement("script");t.type="text/javascript";t.async=!0;t.setAttribute('data-global-customerio-analytics-key', i);t.src="https://cdp.customer.io/v1/analytics-js/snippet/" + key + "/analytics.min.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n);analytics._writeKey=key;analytics._loadOptions=e};analytics.SNIPPET_VERSION="4.15.3";
@@ -40,7 +41,7 @@ if(customerIoEnabled && ExposedSettings.cioWriteKey && ExposedSettings.cioSiteId
 				if (typeof value !== 'undefined') obj[key] = value;
 			}
 			
-			var identifyData = {overleafId: userId, lastActive};
+			var identifyData = {overleafId: userId, lastActive, signUpDate};
 			addIfDefined(identifyData, 'best-subscription-type', usersBestSubscription);
 			addIfDefined(identifyData, 'aiBlocked', aiBlocked);
 			addIfDefined(identifyData, 'hasAiAssist', hasAiAssist);

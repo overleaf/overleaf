@@ -536,6 +536,7 @@ async function projectListPage(req, res, next) {
     aiBlocked,
     hasAiAssist,
     lastActive: user.lastActive,
+    signUpDate: user.signUpDate,
   })
 }
 
