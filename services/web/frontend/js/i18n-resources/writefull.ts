@@ -13,10 +13,12 @@ const en = {
     cancel: 'Cancel',
     yes: 'Yes',
     no: 'No',
+    'do-not-know': 'Don’t know',
     equation: 'equation',
     table: 'table',
     or: 'or',
     close: 'Close',
+    submit: 'Submit',
     'add-unlimited-ai': 'Add unlimited AI',
     'accept-and-continue': 'Accept and continue',
     'copy-code': 'Copy code',
@@ -249,6 +251,21 @@ const en = {
     'create-modal.disclaimer':
       'AI can make mistakes. Review the code before applying it.',
     'create-modal.your-result': 'Your __name__ suggestion:',
+    'fake-door-test.text-to-speech.try': 'Try Text to Speech',
+    'fake-door-test.text-to-speech.title':
+      'Sorry, text to speech isn’t available yet',
+    'fake-door-test.text-to-speech.introduction_p1':
+      'We are considering adding text to speech to language suggestions in Overleaf and are gathering feedback.',
+    'fake-door-test.text-to-speech.introduction_p2':
+      'Is text to speech something that would help you with your writing in Overleaf?',
+    'fake-door-test.text-to-speech.more-information-if-yes':
+      'How would text to speech help you with your writing?',
+    'fake-door-test.text-to-speech.more-information-if-no':
+      'What would help you with your writing in Overleaf?',
+    'fake-door-test.text-to-speech.closing.title':
+      'Thank you for your feedback!',
+    'fake-door-test.text-to-speech.closing.body':
+      'We’ll use this to assess whether we add text to speech functionality to language suggestions in Overleaf.',
     'language-model.using-this-feature':
       'Using this feature means your text is sent to OpenAI’s servers and may be kept there for up to 30 days. It is not used to train OpenAI’s models. Writefull does not store or train on your texts.',
     'language-model.learn-more': 'Learn more',
@@ -386,10 +403,12 @@ const es = {
     cancel: 'Cancelar',
     yes: 'Sí',
     no: 'No',
+    'do-not-know': 'No lo sé',
     equation: 'equación',
     table: 'tabla',
     or: 'o',
     close: 'Cerrar',
+    submit: 'Enviar',
     'add-unlimited-ai': 'Añadir IA ilimitada',
     'accept-and-continue': 'Aceptar y continuar',
     'copy-code': 'Copiar código',
@@ -640,6 +659,21 @@ const es = {
     'create-modal.disclaimer':
       'AI can make mistakes. Review the code before apply it.',
     'create-modal.your-result': 'Your __name__ suggestion:',
+    'fake-door-test.text-to-speech.try': 'Probar texto a voz',
+    'fake-door-test.text-to-speech.title':
+      'Lo sentimos, el texto a voz aún no está disponible',
+    'fake-door-test.text-to-speech.introduction_p1':
+      'Estamos considerando agregar texto a voz a las sugerencias de idioma en Overleaf y estamos recopilando comentarios.',
+    'fake-door-test.text-to-speech.introduction_p2':
+      '¿Es el texto a voz algo que te ayudaría con tu escritura en Overleaf?',
+    'fake-door-test.text-to-speech.more-information-if-yes':
+      '¿Cómo te ayudaría el texto a voz con tu escritura?',
+    'fake-door-test.text-to-speech.more-information-if-no':
+      '¿Qué te ayudaría con tu escritura en Overleaf?',
+    'fake-door-test.text-to-speech.closing.title':
+      '¡Gracias por tus comentarios!',
+    'fake-door-test.text-to-speech.closing.body':
+      'Los utilizaremos para evaluar si agregamos la funcionalidad de texto a voz a las sugerencias de idioma en Overleaf.',
     'language-model.using-this-feature':
       'Usar esta función significa que su texto se envía a los servidores de OpenAI y puede mantenerse allí hasta por 30 días. No se utiliza para entrenar los modelos de OpenAI. Writefull no almacena ni entrena con sus textos.',
     'language-model.learn-more': 'Aprende más',
