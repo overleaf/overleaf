@@ -884,7 +884,7 @@ describe('<UserNotifications />', function () {
         screen.getByRole('button', { name: 'Send confirmation code' })
       )
 
-      await waitForElementToBeRemoved(() => screen.getByText(/loading/i))
+      await waitForElementToBeRemoved(() => screen.getByText(/sending/i))
       screen.getByText(/Enter the 6-digit code sent to foo@overleaf.com/i)
       expect(sendReconfirmationMock.callHistory.called()).to.be.true
       fireEvent.click(

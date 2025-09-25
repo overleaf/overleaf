@@ -36,6 +36,7 @@ function DetachCompileButton() {
           })}
           size="sm"
           isLoading={compiling}
+          loadingLabel={t('compiling')}
         >
           {t('recompile')}
         </OLButton>

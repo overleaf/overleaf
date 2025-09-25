@@ -118,6 +118,7 @@ function AddLabelModal({ show, setShow, version }: AddLabelModalProps) {
             variant="primary"
             disabled={isLoading || !comment.length}
             isLoading={isLoading}
+            loadingLabel={t('adding')}
           >
             {t('history_add_label')}
           </OLButton>

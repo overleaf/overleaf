@@ -78,7 +78,11 @@ function RegisterForm({
           lg={4}
           className="mt-3 mt-lg-0 d-flex align-items-center flex-column flex-lg-row"
         >
-          <OLButton type="submit" isLoading={isLoading}>
+          <OLButton
+            type="submit"
+            isLoading={isLoading}
+            loadingLabel={t('registering')}
+          >
             Register
           </OLButton>
         </OLCol>

@@ -77,6 +77,7 @@ export function FileTreeModalCreateFileFooterContent({
           form="create-file"
           disabled={inFlight || !valid}
           isLoading={inFlight}
+          loadingLabel={t('creating')}
         >
           {t('create')}
         </OLButton>

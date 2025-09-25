@@ -220,7 +220,7 @@ describe('<EmailsSection />', function () {
 
     await waitForElementToBeRemoved(() =>
       screen.getByRole('button', {
-        name: 'Loading',
+        name: /adding/i,
       })
     )
 

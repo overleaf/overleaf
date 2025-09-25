@@ -58,6 +58,7 @@ function ReconfirmAffiliation({
           <OLButton
             variant="secondary"
             isLoading={isPending}
+            loadingLabel={t('reconfirming')}
             disabled={isPending}
             onClick={() => {
               setIsPending(true)

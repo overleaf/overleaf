@@ -128,6 +128,7 @@ export default function RemoveManagedUserModal({
             variant="danger"
             disabled={isLoading || isSuccess || !shouldEnableRemoveUserButton}
             isLoading={isLoading}
+            loadingLabel={t('removing')}
           >
             {t('remove_user')}
           </OLButton>

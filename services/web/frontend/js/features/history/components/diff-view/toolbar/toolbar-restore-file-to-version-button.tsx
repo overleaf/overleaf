@@ -37,6 +37,7 @@ function ToolbarRestoreFileToVersionButton({
         variant="secondary"
         size="sm"
         isLoading={isLoading}
+        loadingLabel={t('restoring')}
         onClick={() => setShowConfirmModal(true)}
       >
         {t('restore_file_version')}

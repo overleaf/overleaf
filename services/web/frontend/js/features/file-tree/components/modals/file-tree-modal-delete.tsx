@@ -59,7 +59,12 @@ function FileTreeModalDelete() {
 
       <OLModalFooter>
         {inFlight ? (
-          <OLButton variant="danger" disabled isLoading />
+          <OLButton
+            variant="danger"
+            disabled
+            isLoading
+            loadingLabel={t('deleting')}
+          />
         ) : (
           <>
             <OLButton variant="secondary" onClick={handleHide}>

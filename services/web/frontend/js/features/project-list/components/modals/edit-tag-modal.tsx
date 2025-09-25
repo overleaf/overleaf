@@ -139,6 +139,7 @@ export function EditTagModal({ id, tag, onEdit, onClose }: EditTagModalProps) {
             !!validationError
           }
           isLoading={isLoading}
+          loadingLabel={t('saving')}
         >
           {t('save')}
         </OLButton>

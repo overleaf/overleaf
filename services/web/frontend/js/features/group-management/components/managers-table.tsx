@@ -265,6 +265,7 @@ export function ManagersTable({
                           variant="primary"
                           onClick={addManagers}
                           isLoading={inviteUserInflightCount > 0}
+                          loadingLabel={t('adding')}
                         >
                           {t('add')}
                         </OLButton>

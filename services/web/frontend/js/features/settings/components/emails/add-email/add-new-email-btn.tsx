@@ -22,6 +22,7 @@ function AddNewEmailBtn({
       variant="primary"
       disabled={(disabled && !isLoading) || !isValidEmail(email)}
       isLoading={isLoading}
+      loadingLabel={t('adding')}
       {...props}
     >
       {t('add_new_email')}

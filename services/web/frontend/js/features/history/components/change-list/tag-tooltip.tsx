@@ -122,6 +122,7 @@ const ChangeTag = forwardRef<HTMLElement, TagProps>(
                 variant="danger"
                 disabled={isLoading}
                 isLoading={isLoading}
+                loadingLabel={t('deleting')}
                 onClick={localDeleteHandler}
               >
                 {t('history_delete_label')}

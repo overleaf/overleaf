@@ -51,6 +51,7 @@ export const RestoreProjectModal = ({
           onClick={onRestore}
           disabled={isRestoring}
           isLoading={isRestoring}
+          loadingLabel={t('restoring')}
         >
           {t('restore')}
         </OLButton>

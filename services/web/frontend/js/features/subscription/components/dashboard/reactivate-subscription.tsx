@@ -31,6 +31,7 @@ function ReactivateSubscription() {
       disabled={isLoading || isSuccess}
       onClick={handleReactivate}
       isLoading={isLoading}
+      loadingLabel={t('reactivating')}
     >
       {t('reactivate_subscription')}
     </OLButton>

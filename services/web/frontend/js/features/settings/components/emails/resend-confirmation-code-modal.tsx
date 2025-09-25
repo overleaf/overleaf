@@ -96,6 +96,7 @@ function ResendConfirmationCodeModal({
         variant={triggerVariant}
         disabled={groupLoading}
         isLoading={isLoading}
+        loadingLabel={t('sending')}
         onClick={handleResendConfirmationEmail}
         className={triggerVariant === 'link' ? 'btn-inline-link' : undefined}
       >

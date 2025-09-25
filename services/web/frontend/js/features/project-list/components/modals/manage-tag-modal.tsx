@@ -127,6 +127,7 @@ export function ManageTagModal({
           className="me-auto"
           disabled={isDeleteLoading || isUpdateLoading}
           isLoading={isDeleteLoading}
+          loadingLabel={t('deleting')}
         >
           {t('delete_tag')}
         </OLButton>
@@ -147,6 +148,7 @@ export function ManageTagModal({
               (newTagName === tag?.name && selectedColor === getTagColor(tag))
           )}
           isLoading={isUpdateLoading}
+          loadingLabel={t('saving')}
         >
           {t('save_or_cancel-save')}
         </OLButton>

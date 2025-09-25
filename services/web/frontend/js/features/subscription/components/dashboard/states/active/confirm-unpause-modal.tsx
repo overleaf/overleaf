@@ -93,6 +93,7 @@ export function ConfirmUnpauseSubscriptionModal() {
           variant="primary"
           disabled={inflight}
           isLoading={inflight}
+          loadingLabel={t('unpausing')}
           onClick={handleConfirmUnpause}
         >
           {t('unpause_subscription')}

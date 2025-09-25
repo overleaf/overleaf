@@ -72,6 +72,7 @@ export default function DeleteTagModal({
           variant="danger"
           disabled={isLoading}
           isLoading={isLoading}
+          loadingLabel={t('deleting')}
         >
           {t('delete')}
         </OLButton>

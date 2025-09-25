@@ -129,6 +129,7 @@ export default function CreateTagModal({
             status === 'pending' || !tagName?.length || !!validationError
           }
           isLoading={isLoading}
+          loadingLabel={t('creating')}
         >
           {t('create')}
         </OLButton>
