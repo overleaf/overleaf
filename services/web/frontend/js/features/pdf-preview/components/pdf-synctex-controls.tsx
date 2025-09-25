@@ -6,10 +6,10 @@ import { useTranslation } from 'react-i18next'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import OLButton from '@/shared/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
-import { Spinner } from 'react-bootstrap'
 import { Placement } from 'react-bootstrap/types'
 import useSynctex from '../hooks/use-synctex'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import OLSpinner from '@/shared/components/ol/ol-spinner'
 
 const GoToCodeButton = memo(function GoToCodeButton({
   syncToCode,
@@ -27,9 +27,7 @@ const GoToCodeButton = memo(function GoToCodeButton({
 
   let buttonIcon = null
   if (syncToCodeInFlight) {
-    buttonIcon = (
-      <Spinner animation="border" aria-hidden="true" size="sm" role="status" />
-    )
+    buttonIcon = <OLSpinner size="sm" />
   } else if (!isDetachLayout) {
     buttonIcon = (
       <MaterialIcon type="arrow_left_alt" className="synctex-control-icon" />
@@ -89,9 +87,7 @@ const GoToPdfButton = memo(function GoToPdfButton({
 
   let buttonIcon = null
   if (syncToPdfInFlight) {
-    buttonIcon = (
-      <Spinner animation="border" aria-hidden="true" size="sm" role="status" />
-    )
+    buttonIcon = <OLSpinner size="sm" />
   } else if (!isDetachLayout) {
     buttonIcon = (
       <MaterialIcon type="arrow_right_alt" className="synctex-control-icon" />

@@ -19,8 +19,8 @@ import { useGroupMembersContext } from '../../context/group-members-context'
 import getMeta from '@/utils/meta'
 import MaterialIcon from '@/shared/components/material-icon'
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
-import { Spinner } from 'react-bootstrap'
 import { sendMB } from '@/infrastructure/event-tracking'
+import OLSpinner from '@/shared/components/ol/ol-spinner'
 
 type resendInviteResponse = {
   success: boolean
@@ -322,16 +322,7 @@ function MenuItemButton({
         as="button"
         tabIndex={-1}
         onClick={onClick}
-        leadingIcon={
-          isLoading ? (
-            <Spinner
-              animation="border"
-              aria-hidden="true"
-              size="sm"
-              role="status"
-            />
-          ) : null
-        }
+        leadingIcon={isLoading ? <OLSpinner size="sm" /> : null}
         data-testid={dataTestId}
         variant={variant}
       >

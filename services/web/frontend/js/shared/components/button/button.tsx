@@ -1,9 +1,10 @@
 import { forwardRef } from 'react'
-import { Button as BS5Button, Spinner } from 'react-bootstrap'
+import { Button as BS5Button } from 'react-bootstrap'
 import type { ButtonProps } from '@/shared/components/types/button-props'
 import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
+import OLSpinner from '../ol/ol-spinner'
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
@@ -56,13 +57,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {isLoading && (
           <span className="spinner-container">
-            <Spinner
-              animation="border"
-              aria-hidden="true"
-              as="span"
-              className={loadingSpinnerClassName}
-              role="status"
-            />
+            <OLSpinner size="sm" className={loadingSpinnerClassName} />
             <span className="visually-hidden">
               {loadingLabel ?? t('loading')}
             </span>

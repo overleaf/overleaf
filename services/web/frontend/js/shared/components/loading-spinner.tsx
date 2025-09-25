@@ -42,6 +42,7 @@ function LoadingSpinner({
 
   return (
     <div
+      role="status"
       className={classNames(
         'loading',
         className,
@@ -49,7 +50,6 @@ function LoadingSpinner({
       )}
     >
       <OLSpinner size={size} />
-      &nbsp;
       {loadingText || `${t('loading')}…`}
     </div>
   )

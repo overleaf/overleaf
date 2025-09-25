@@ -4,7 +4,6 @@ import { useIdeRedesignSwitcherContext } from '../ide-react/context/ide-redesign
 import { useTranslation } from 'react-i18next'
 import { canUseNewEditorViaPrimaryFeatureFlag } from '../ide-redesign/utils/new-editor-utils'
 import { useSwitchEnableNewEditorState } from '../ide-redesign/hooks/use-switch-enable-new-editor-state'
-import { Spinner } from 'react-bootstrap'
 
 const TryNewEditorButton = () => {
   const { t } = useTranslation()
@@ -27,17 +26,9 @@ const TryNewEditorButton = () => {
         onClick={onClick}
         size="sm"
         variant="secondary"
+        isLoading={loading}
       >
-        {loading ? (
-          <Spinner
-            animation="border"
-            aria-hidden="true"
-            size="sm"
-            role="status"
-          />
-        ) : (
-          t('try_the_new_editor')
-        )}
+        {t('try_the_new_editor')}
       </OLButton>
     </div>
   )

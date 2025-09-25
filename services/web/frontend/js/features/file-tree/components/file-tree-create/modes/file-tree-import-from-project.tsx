@@ -24,7 +24,7 @@ import OLFormGroup from '@/shared/components/ol/ol-form-group'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLForm from '@/shared/components/ol/ol-form'
 import OLFormSelect from '@/shared/components/ol/ol-form-select'
-import { Spinner } from 'react-bootstrap'
+import OLSpinner from '@/shared/components/ol/ol-spinner'
 
 export default function FileTreeImportFromProject() {
   const { t } = useTranslation()
@@ -209,20 +209,8 @@ function SelectProject({
 
   return (
     <OLFormGroup controlId="project-select">
-      <OLFormLabel>{t('select_a_project')}</OLFormLabel>
-
-      {loading && (
-        <span>
-          &nbsp;
-          <Spinner
-            animation="border"
-            aria-hidden="true"
-            size="sm"
-            role="status"
-          />
-        </span>
-      )}
-
+      <OLFormLabel className="me-1">{t('select_a_project')}</OLFormLabel>
+      {loading && <OLSpinner size="sm" />}
       <OLFormSelect
         disabled={!data}
         value={selectedProject ? selectedProject._id : ''}
@@ -275,20 +263,8 @@ function SelectProjectOutputFile({
       className="row-spaced-small"
       controlId="project-output-file-select"
     >
-      <OLFormLabel>{t('select_an_output_file')}</OLFormLabel>
-
-      {loading && (
-        <span>
-          &nbsp;
-          <Spinner
-            animation="border"
-            aria-hidden="true"
-            size="sm"
-            role="status"
-          />
-        </span>
-      )}
-
+      <OLFormLabel className="me-1">{t('select_an_output_file')}</OLFormLabel>
+      {loading && <OLSpinner size="sm" />}
       <OLFormSelect
         disabled={!data}
         value={selectedProjectOutputFile?.path || ''}
@@ -334,20 +310,8 @@ function SelectProjectEntity({
 
   return (
     <OLFormGroup className="row-spaced-small" controlId="project-entity-select">
-      <OLFormLabel>{t('select_a_file')}</OLFormLabel>
-
-      {loading && (
-        <span>
-          &nbsp;
-          <Spinner
-            animation="border"
-            aria-hidden="true"
-            size="sm"
-            role="status"
-          />
-        </span>
-      )}
-
+      <OLFormLabel className="me-1">{t('select_a_file')}</OLFormLabel>
+      {loading && <OLSpinner size="sm" />}
       <OLFormSelect
         disabled={!data}
         value={selectedProjectEntity?.path || ''}

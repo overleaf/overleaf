@@ -9,7 +9,7 @@ import PdfHybridDownloadButton from './pdf-hybrid-download-button'
 import PdfHybridCodeCheckButton from './pdf-hybrid-code-check-button'
 import PdfOrphanRefreshButton from './pdf-orphan-refresh-button'
 import { DetachedSynctexControl } from './detach-synctex-control'
-import { Spinner } from 'react-bootstrap'
+import LoadingSpinner from '@/shared/components/loading-spinner'
 
 const ORPHAN_UI_TIMEOUT_MS = 5000
 
@@ -91,14 +91,7 @@ function PdfPreviewHybridToolbarConnectingInner() {
   return (
     <>
       <div className="toolbar-pdf-orphan">
-        <Spinner
-          animation="border"
-          aria-hidden="true"
-          size="sm"
-          role="status"
-        />
-        &nbsp;
-        {t('tab_connecting')}…
+        <LoadingSpinner size="sm" loadingText={`${t('tab_connecting')}…`} />
       </div>
     </>
   )

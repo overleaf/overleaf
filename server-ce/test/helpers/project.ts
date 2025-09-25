@@ -210,7 +210,7 @@ export function openFile(fileName: string, waitFor: string) {
     .click({ force: true })
 
   // wait until we've switched to the selected file
-  cy.findByText('Loading…').should('not.exist')
+  cy.findByRole('status').should('not.exist')
   cy.findByText(waitFor)
 }
 
@@ -230,7 +230,10 @@ export function createNewFile() {
     .click({ force: true })
 
   // wait until we've switched to the newly created empty file
-  cy.findByText('Loading…').should('not.exist')
+  cy.findByRole('textbox', { name: 'Source Editor editing' }).within(() => {
+    cy.findByRole('status').should('not.exist')
+    cy.get('.cm-line').should('have.length', 1)
+  })
   cy.get('.cm-line').should('have.length', 1)
 
   return fileName

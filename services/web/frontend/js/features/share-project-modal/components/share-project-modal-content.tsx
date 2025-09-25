@@ -11,7 +11,7 @@ import OLModal, {
 } from '@/shared/components/ol/ol-modal'
 import OLNotification from '@/shared/components/ol/ol-notification'
 import OLButton from '@/shared/components/ol/ol-button'
-import { Spinner } from 'react-bootstrap'
+import OLSpinner from '@/shared/components/ol/ol-spinner'
 
 const ReadOnlyTokenLink = lazy(() =>
   import('./link-sharing').then(({ ReadOnlyTokenLink }) => ({
@@ -67,16 +67,7 @@ export default function ShareProjectModalContent({
       </OLModalBody>
 
       <OLModalFooter>
-        <div className="me-auto">
-          {inFlight && (
-            <Spinner
-              animation="border"
-              aria-hidden="true"
-              size="sm"
-              role="status"
-            />
-          )}
-        </div>
+        <div className="me-auto">{inFlight && <OLSpinner size="sm" />}</div>
 
         <ClickableElementEnhancer
           onClick={cancel}

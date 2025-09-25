@@ -9,10 +9,11 @@ import {
 import classNames from 'classnames'
 import { useSelect } from 'downshift'
 import { useTranslation } from 'react-i18next'
-import { Form, Spinner } from 'react-bootstrap'
+import { Form } from 'react-bootstrap'
 import FormControl from '@/shared/components/form/form-control'
 import MaterialIcon from '@/shared/components/material-icon'
 import { DropdownItem } from '@/shared/components/dropdown/dropdown-menu'
+import OLSpinner from './ol/ol-spinner'
 
 export type SelectProps<T> = {
   // The items rendered as dropdown options.
@@ -152,17 +153,7 @@ export const Select = <T,>({
           {optionalLabel && (
             <span className="fw-normal">({t('optional')})</span>
           )}{' '}
-          {loading && (
-            <span data-testid="spinner">
-              <Spinner
-                animation="border"
-                aria-hidden="true"
-                as="span"
-                role="status"
-                size="sm"
-              />
-            </span>
-          )}
+          {loading && <OLSpinner size="sm" />}
         </Form.Label>
       ) : null}
       <FormControl

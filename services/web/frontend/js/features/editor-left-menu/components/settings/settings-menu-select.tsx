@@ -2,8 +2,8 @@ import OLFormGroup from '@/shared/components/ol/ol-form-group'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLFormSelect from '@/shared/components/ol/ol-form-select'
 import { ChangeEventHandler, useCallback, useEffect, useRef } from 'react'
-import { Spinner } from 'react-bootstrap'
 import { useEditorLeftMenuContext } from '@/features/editor-left-menu/components/editor-left-menu-context'
+import OLSpinner from '@/shared/components/ol/ol-spinner'
 
 type PossibleValue = string | number | boolean
 
@@ -82,14 +82,7 @@ export default function SettingsMenuSelect<T extends PossibleValue = string>({
     >
       <OLFormLabel>{label}</OLFormLabel>
       {loading ? (
-        <p className="mb-0">
-          <Spinner
-            animation="border"
-            aria-hidden="true"
-            size="sm"
-            role="status"
-          />
-        </p>
+        <OLSpinner size="sm" />
       ) : (
         <OLFormSelect
           size="sm"

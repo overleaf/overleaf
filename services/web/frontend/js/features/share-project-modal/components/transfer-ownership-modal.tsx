@@ -11,8 +11,8 @@ import OLModal, {
 } from '@/shared/components/ol/ol-modal'
 import OLNotification from '@/shared/components/ol/ol-notification'
 import OLButton from '@/shared/components/ol/ol-button'
-import { Spinner } from 'react-bootstrap'
 import { ProjectMember } from '@/shared/context/types/project-metadata'
+import OLSpinner from '@/shared/components/ol/ol-spinner'
 
 export default function TransferOwnershipModal({
   member,
@@ -68,16 +68,7 @@ export default function TransferOwnershipModal({
         )}
       </OLModalBody>
       <OLModalFooter>
-        <div className="me-auto">
-          {inflight && (
-            <Spinner
-              animation="border"
-              aria-hidden="true"
-              size="sm"
-              role="status"
-            />
-          )}
-        </div>
+        <div className="me-auto">{inflight && <OLSpinner size="sm" />}</div>
         <OLButton variant="secondary" onClick={cancel} disabled={inflight}>
           {t('cancel')}
         </OLButton>

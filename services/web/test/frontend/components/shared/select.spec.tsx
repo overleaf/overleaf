@@ -63,7 +63,7 @@ describe('<Select />', function () {
   describe('initial rendering', function () {
     it('renders default text', function () {
       render({ defaultText: 'Choose an item' })
-      cy.findByTestId('spinner').should('not.exist')
+      cy.findByTestId('ol-spinner').should('not.exist')
       cy.findByRole('combobox').should('have.value', 'Choose an item')
     })
 
@@ -102,7 +102,7 @@ describe('<Select />', function () {
         label: 'test label',
         loading: true,
       })
-      cy.findByTestId('spinner')
+      cy.findByTestId('ol-spinner')
     })
 
     it('does not render a spinner while loading if there is no label', function () {
@@ -110,7 +110,7 @@ describe('<Select />', function () {
         defaultText: 'Choose an item',
         loading: true,
       })
-      cy.findByTestId('spinner').should('not.exist')
+      cy.findByTestId('ol-spinner').should('not.exist')
     })
   })
 

@@ -434,7 +434,7 @@ describe('<PdfSynctexControls/>', function () {
         'not.be.disabled'
       )
 
-      cy.findByRole('status', { hidden: true }).should('not.exist')
+      cy.findByTestId('ol-spinner').should('not.exist')
 
       cy.wrap(null).then(() => {
         testDetachChannel.postMessage({
@@ -448,7 +448,7 @@ describe('<PdfSynctexControls/>', function () {
         'be.disabled'
       )
 
-      cy.findByRole('status', { hidden: true }).should('have.length', 1)
+      cy.findByTestId('ol-spinner').should('have.length', 1)
 
       cy.wrap(null).then(() => {
         testDetachChannel.postMessage({

@@ -2,13 +2,20 @@ import { Spinner } from 'react-bootstrap'
 
 export type OLSpinnerSize = 'sm' | 'lg'
 
-function OLSpinner({ size = 'sm' }: { size: OLSpinnerSize }) {
+function OLSpinner({
+  size = 'sm',
+  className,
+}: {
+  size?: OLSpinnerSize
+  className?: string
+}) {
   return (
     <Spinner
       size={size === 'sm' ? 'sm' : undefined}
       animation="border"
       aria-hidden="true"
-      role="status"
+      className={className}
+      data-testid="ol-spinner"
     />
   )
 }

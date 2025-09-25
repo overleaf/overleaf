@@ -1,6 +1,5 @@
 import { FC, useEffect, useMemo, useState } from 'react'
 import { WordCountData } from '@/features/word-count-modal/components/word-count-data'
-import { WordCountLoading } from '@/features/word-count-modal/components/word-count-loading'
 import { WordCountError } from '@/features/word-count-modal/components/word-count-error'
 import { useProjectContext } from '@/shared/context/project-context'
 import useAbortController from '@/shared/hooks/use-abort-controller'
@@ -14,6 +13,7 @@ import { isMainFile } from '@/features/pdf-preview/util/editor-files'
 import { countWordsInFile } from '@/features/word-count-modal/utils/count-words-in-file'
 import { createSegmenters } from '@/features/word-count-modal/utils/segmenters'
 import { WordCountsClient } from './word-counts-client'
+import LoadingSpinner from '@/shared/components/loading-spinner'
 
 export const WordCountClient: FC = () => {
   const [loading, setLoading] = useState(true)
@@ -107,7 +107,7 @@ export const WordCountClient: FC = () => {
 
   return (
     <>
-      {loading && !error && <WordCountLoading />}
+      {loading && !error && <LoadingSpinner />}
       {error && <WordCountError />}
       {data && <WordCountsClient data={data} />}
     </>

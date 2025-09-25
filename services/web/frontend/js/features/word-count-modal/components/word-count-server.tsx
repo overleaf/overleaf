@@ -1,6 +1,5 @@
 import { FC, useEffect, useState } from 'react'
 import { ServerWordCountData } from '@/features/word-count-modal/components/word-count-data'
-import { WordCountLoading } from '@/features/word-count-modal/components/word-count-loading'
 import { WordCountError } from '@/features/word-count-modal/components/word-count-error'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useLocalCompileContext } from '@/shared/context/local-compile-context'
@@ -8,6 +7,7 @@ import useAbortController from '@/shared/hooks/use-abort-controller'
 import { getJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
 import { WordCounts } from '@/features/word-count-modal/components/word-counts'
+import LoadingSpinner from '@/shared/components/loading-spinner'
 
 export const WordCountServer: FC = () => {
   const { projectId } = useProjectContext()
@@ -40,7 +40,7 @@ export const WordCountServer: FC = () => {
 
   return (
     <>
-      {loading && !error && <WordCountLoading />}
+      {loading && !error && <LoadingSpinner />}
       {error && <WordCountError />}
       {data && <WordCounts data={data} />}
     </>

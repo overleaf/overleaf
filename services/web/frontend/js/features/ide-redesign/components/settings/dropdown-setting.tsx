@@ -2,7 +2,7 @@ import OLFormSelect from '@/shared/components/ol/ol-form-select'
 import { ChangeEventHandler, useCallback } from 'react'
 import Setting from './setting'
 import classNames from 'classnames'
-import { Spinner } from 'react-bootstrap'
+import OLSpinner from '@/shared/components/ol/ol-spinner'
 
 type PossibleValue = string | number | boolean
 
@@ -64,12 +64,7 @@ export default function DropdownSetting<T extends PossibleValue = string>({
   return (
     <Setting controlId={id} label={label} description={description}>
       {loading ? (
-        <Spinner
-          animation="border"
-          aria-hidden="true"
-          size="sm"
-          role="status"
-        />
+        <OLSpinner size="sm" />
       ) : (
         <OLFormSelect
           id={id}
