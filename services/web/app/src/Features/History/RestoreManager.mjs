@@ -114,6 +114,7 @@ const RestoreManager = {
     if (!project?.overleaf?.history?.rangesSupportEnabled) {
       throw new OError('project does not have ranges support', { projectId })
     }
+    const historyId = project.overleaf.history.id
 
     const basename = Path.basename(pathname)
     let dirname = Path.dirname(pathname)
@@ -179,10 +180,9 @@ const RestoreManager = {
         filename: pathname,
       })
     ) {
-      const fsPath = await RestoreManager._writeFileVersionToDisk(
-        projectId,
-        version,
-        pathname
+      const fsPath = await RestoreManager._writeSnapshotFileToDisk(
+        historyId,
+        snapshotFile
       )
       const newFile = await EditorController.promises.upsertFile(
         projectId,
@@ -425,6 +425,22 @@ const RestoreManager = {
       Settings.apis.project_history.url
     }/project/${projectId}/version/${version}/${encodeURIComponent(pathname)}`
     return await FileWriter.promises.writeUrlToDisk(projectId, url)
+  },
+
+  async _writeSnapshotFileToDisk(historyId, file) {
+    if (file.isEditable()) {
+      return await FileWriter.promises.writeContentToDisk(
+        historyId,
+        file.getContent()
+      )
+    } else {
+      const hash = file.getHash()
+      const { stream } = await HistoryManager.promises.requestBlob(
+        historyId,
+        hash
+      )
+      return await FileWriter.promises.writeStreamToDisk(historyId, stream)
+    }
   },
 }
 

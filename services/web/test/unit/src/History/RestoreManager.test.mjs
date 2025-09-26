@@ -16,6 +16,9 @@ describe('RestoreManager', function () {
   beforeEach(async function (ctx) {
     tk.freeze(Date.now()) // freeze the time for these tests
 
+    ctx.fsPath = '/tmp/path/on/disk'
+    ctx.blobStream = 'blob-stream'
+
     vi.doMock('../../../../app/src/Features/Errors/Errors.js', () => ({
       default: Errors,
     }))
@@ -71,6 +74,7 @@ describe('RestoreManager', function () {
             },
             timestamp: new Date().toISOString(),
           }),
+          requestBlob: sinon.stub().resolves({ stream: ctx.blobStream }),
         },
       }),
     }))
@@ -91,7 +95,12 @@ describe('RestoreManager', function () {
     }))
 
     vi.doMock('../../../../app/src/infrastructure/FileWriter', () => ({
-      default: (ctx.FileWriter = { promises: {} }),
+      default: (ctx.FileWriter = {
+        promises: {
+          writeStreamToDisk: sinon.stub().resolves(ctx.fsPath),
+          writeContentToDisk: sinon.stub().resolves(ctx.fsPath),
+        },
+      }),
     }))
 
     vi.doMock(
@@ -167,6 +176,7 @@ describe('RestoreManager', function () {
             getMetadata: sinon
               .stub()
               .returns(snapshotData?.files?.[pathname]?.metadata),
+            getHash: sinon.stub().returns((ctx.hash = 'somehash')),
           }),
           getFilePathnames: sinon
             .stub()
@@ -380,9 +390,6 @@ describe('RestoreManager', function () {
         overleaf: { history: { rangesSupportEnabled: true } },
         rootDoc_id: 'root-doc-id',
       })
-      ctx.RestoreManager.promises._writeFileVersionToDisk = sinon
-        .stub()
-        .resolves((ctx.fsPath = '/tmp/path/on/disk'))
       ctx.RestoreManager.promises._findOrCreateFolder = sinon
         .stub()
         .resolves((ctx.folder_id = 'mock-folder-id'))
