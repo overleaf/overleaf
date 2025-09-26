@@ -443,7 +443,7 @@ app.get('/redis/keys', (req, res) => {
 app.delete('/data/user_files', (req, res) => {
   runDockerCompose(
     'exec',
-    ['sharelatex', 'rm', '-rf', '/var/lib/overleaf/data/user_files'],
+    ['sharelatex', 'rm', '-vrf', '/var/lib/overleaf/data/user_files'],
     (error, stdout, stderr) => {
       res.json({ error, stdout, stderr })
     }

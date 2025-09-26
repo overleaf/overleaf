@@ -305,6 +305,22 @@ pipeline {
             }
           }
         }
+        stage('PRO custom 5') {
+          environment {
+            CYPRESS_SHARD = "PRO_CUSTOM_5"
+            COMPOSE_PROJECT_NAME = "test-pro-custom-5"
+          }
+          steps {
+            script {
+              waitUntil {
+                return job_npm_install_done && job_server_pro_build_done && job_prefetch_default_done && job_prefetch_custom_done
+              }
+            }
+            dir('server-ce/test') {
+              sh 'make test-e2e'
+            }
+          }
+        }
       }
     }
   }

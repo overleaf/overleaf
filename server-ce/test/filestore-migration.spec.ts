@@ -28,7 +28,7 @@ function activateUserVersion1x(url: string, password = DEFAULT_PASSWORD) {
 }
 
 describe('filestore migration', function () {
-  if (isExcludedBySharding('LOCAL_ONLY')) return
+  if (isExcludedBySharding('PRO_CUSTOM_5')) return
   const email = 'user@example.com'
   // Branding of env vars changed in 5.x
   const sharelatexBrandedVars = {
@@ -385,15 +385,39 @@ describe('filestore migration', function () {
 
         describe('purge filestore data', function () {
           before(async function () {
-            await purgeFilestoreData()
+            const deleted = await purgeFilestoreData()
+            expect(deleted).to.have.length.greaterThan(
+              previousBinaryFiles.length
+            )
+            expect(deleted).to.include(
+              "removed directory '/var/lib/overleaf/data/user_files'"
+            )
           })
           checkFilesAreAccessible()
+
+          describe('after next restart', function () {
+            startWith({
+              version: '5.5.5',
+              pro: true,
+              withDataDir: true,
+              vars: {
+                OVERLEAF_APP_NAME: 'change-config',
+                OVERLEAF_FILESTORE_MIGRATION_LEVEL: '2',
+              },
+            })
+            it('should not recreate the user_files folder', async function () {
+              expect(await purgeFilestoreData()).to.deep.equal([])
+            })
+          })
 
           describe('latest', function () {
             startWith({
               pro: true,
               withDataDir: true,
               vars: { OVERLEAF_FILESTORE_MIGRATION_LEVEL: '2' },
+            })
+            it('should not recreate the user_files folder', async function () {
+              expect(await purgeFilestoreData()).to.deep.equal([])
             })
             checkFilesAreAccessible()
           })

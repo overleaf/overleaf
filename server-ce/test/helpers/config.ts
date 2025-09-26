@@ -15,6 +15,7 @@ export function isExcludedBySharding(
     | 'PRO_CUSTOM_2'
     | 'PRO_CUSTOM_3'
     | 'PRO_CUSTOM_4'
+    | 'PRO_CUSTOM_5'
 ) {
   const SHARD = Cypress.env('SHARD')
   return SHARD && shard !== SHARD

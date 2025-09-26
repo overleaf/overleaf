@@ -1,0 +1,12 @@
+--- a/etc/my_init.d/100_make_overleaf_data_dirs.sh
++++ b/etc/my_init.d/100_make_overleaf_data_dirs.sh
+@@ -4,8 +4,10 @@ set -e
+ mkdir -p /var/lib/overleaf/data
+ chown www-data:www-data /var/lib/overleaf/data
+
+-mkdir -p /var/lib/overleaf/data/user_files
+-chown www-data:www-data /var/lib/overleaf/data/user_files
++if [[ "${OVERLEAF_FILESTORE_MIGRATION_LEVEL:-0}" != "2" ]]; then
++  mkdir -p /var/lib/overleaf/data/user_files
++  chown www-data:www-data /var/lib/overleaf/data/user_files
++fi
