@@ -33,6 +33,16 @@ if (process.env.CYPRESS_SHARD && !process.env.SPEC_PATTERN) {
 
 const specPattern = process.env.SPEC_PATTERN || './**/*.spec.ts'
 
+let reporterOptions = {}
+if (process.env.CI) {
+  reporterOptions = {
+    reporter: '/overleaf/server-ce/test/node_modules/cypress-multi-reporters',
+    reporterOptions: {
+      configFile: 'cypress/cypress-multi-reporters.json',
+    },
+  }
+}
+
 module.exports = defineConfig({
   defaultCommandTimeout: 10_000,
   fixturesFolder: 'cypress/fixtures',
@@ -55,4 +65,5 @@ module.exports = defineConfig({
   retries: {
     runMode: 3,
   },
+  ...reporterOptions,
 })

@@ -1,0 +1,10 @@
+{
+  "reporterEnabled": "spec, mocha-junit-reporter",
+  "mochaJunitReporterReporterOptions": {
+    "mochaFile": "cypress-reports/junit-[hash]-[suiteFilename].xml",
+    "includePending": true,
+    "useFullSuiteTitle": true,
+    "jenkinsMode": true,
+    "rootSuiteTitle": "Server Pro E2E tests"
+  }
+}

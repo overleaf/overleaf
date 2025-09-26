@@ -70,9 +70,9 @@ services:
     stop_grace_period: 0s
     entrypoint: npm
     command: run cypress:run
-    working_dir: /e2e
+    working_dir: /overleaf/server-ce/test
     volumes:
-      - ./:/e2e
+      - ./:/overleaf/server-ce/test
     user: "${DOCKER_USER:-1000:1000}"
     environment:
       CYPRESS_SHARD:

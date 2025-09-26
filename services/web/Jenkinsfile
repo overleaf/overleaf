@@ -486,7 +486,7 @@ pipeline {
     // Ensure tear down of test containers, then run general Jenkins VM cleanup.
     cleanup {
       dir('services/web') {
-        sh 'make clean'
+        sh 'make clean -j10'
       }
       sh 'make clean_jenkins'
     }
