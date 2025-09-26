@@ -142,7 +142,7 @@ test_unit_module: mongo_migrations_for_tests
 	$(MAKE) modules/$(MODULE_NAME)/test_unit
 
 mongo_migrations_for_tests:
-	$(DOCKER_COMPOSE) run --rm test_unit npm run migrations -- migrate -t saas || { $(DOCKER_COMPOSE) logs mongo; exit 42; }
+	$(DOCKER_COMPOSE) run --rm test_unit npm run migrations -- migrate -t saas
 
 #
 # Frontend tests
@@ -222,7 +222,7 @@ test_acceptance_app_server_pro: export COMPOSE_PROJECT_NAME=acceptance_test_serv
 test_acceptance_app_server_pro: export OVERLEAF_CONFIG=$(CFG_SERVER_PRO)
 
 $(TEST_ACCEPTANCE_APP):
-	$(DOCKER_COMPOSE) run --rm test_acceptance || { $(DOCKER_COMPOSE) logs mongo; exit 42; }
+	$(DOCKER_COMPOSE) run --rm test_acceptance
 	$(DOCKER_COMPOSE) down -v -t 0
 
 # We are using _make magic_ for turning these file-targets into calls to
@@ -369,7 +369,7 @@ TEST_ACCEPTANCE_MODULES_MERGED_VARIANTS = \
 	test_acceptance_modules_merged_server_pro \
 
 $(TEST_ACCEPTANCE_MODULES_MERGED_VARIANTS):
-	$(DOCKER_COMPOSE) run --rm test_acceptance make test_acceptance_modules_merged_inner || { $(DOCKER_COMPOSE) logs mongo; exit 42; }
+	$(DOCKER_COMPOSE) run --rm test_acceptance make test_acceptance_modules_merged_inner
 	$(DOCKER_COMPOSE) down -v -t 0
 
 # outer loop for running saas tests in parallel
@@ -390,7 +390,7 @@ test_acceptance_modules_merged_saas_4: export COMPOSE_PROJECT_NAME = \
 $(TEST_ACCEPTANCE_MODULES_MERGED_SPLIT_SAAS): export BASE_CONFIG = $(CFG_SAAS)
 
 $(TEST_ACCEPTANCE_MODULES_MERGED_SPLIT_SAAS): test_acceptance_modules_merged_saas_%:
-	$(DOCKER_COMPOSE) run --rm test_acceptance make test_acceptance_modules_merged_inner_$* || { $(DOCKER_COMPOSE) logs mongo; exit 42; }
+	$(DOCKER_COMPOSE) run --rm test_acceptance make test_acceptance_modules_merged_inner_$*
 	$(DOCKER_COMPOSE) down -v -t 0
 
 test_acceptance_modules: $(TEST_ACCEPTANCE_MODULES_MERGED_VARIANTS)
