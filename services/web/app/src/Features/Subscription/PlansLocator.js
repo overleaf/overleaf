@@ -151,8 +151,8 @@ function isGroupPlanCode(planCode) {
  * into its corresponding Stripe-compatible plan code (e.g., `group_professional_educational`),
  * extracting the license quantity where applicable.
  *
- *  @param {RecurlyPlanCode} planCode
- * @returns {{ planCode: RecurlyPlanCode, quantity: number }}
+ *  @param {string} planCode
+ * @returns {{ planCode: string, quantity: number }}
  */
 function convertLegacyGroupPlanCodeToConsolidatedGroupPlanCodeIfNeeded(
   planCode
