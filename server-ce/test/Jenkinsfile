@@ -37,7 +37,9 @@ pipeline {
     OVERLEAF_LATEST = "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-internal:main"
     OVERLEAF_TAG = "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-internal:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}"
     IMAGE_TAG_CE = "${OVERLEAF_TAG}"
-    IMAGE_TAG_PRO = "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pro:main"
+    IMAGE_TAG_PRO = "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pro:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}"
+    OVERLEAF_PRO_TAG_BRANCH = "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pro-internal:${BRANCH_NAME}"
+    OVERLEAF_PRO_TAG_LATEST = "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pro-internal:main"
   }
   stages {
     // Retries will use the same pipeline instance. Reset the vars.
@@ -135,6 +137,18 @@ pipeline {
             }
             script {
               job_server_pro_build_done = true
+            }
+          }
+        }
+        stage('Push Pro to internal') {
+          steps {
+            script {
+              waitUntil {
+                return job_server_pro_build_done
+              }
+            }
+            dir('server-pro') {
+              sh 'make push_branch'
             }
           }
         }
@@ -296,6 +310,9 @@ pipeline {
         sh 'make clean'
       }
       dir('server-ce') {
+        sh 'make clean'
+      }
+      dir('server-pro') {
         sh 'make clean'
       }
       sh 'make clean_jenkins'
