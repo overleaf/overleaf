@@ -310,7 +310,7 @@ describe('PubSubRace', function () {
               //  - disconnect goes through one process.nextTick
               // We have to inject the disconnect event into a different event loop
               //  cycle.
-              3
+              1
             )
           },
 
