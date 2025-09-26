@@ -96,7 +96,7 @@ async function addFolderContents(
   }
   const entries = (await fs.promises.readdir(folderPath)) || []
   for (const entry of entries) {
-    if (await FileTypeManager.promises.shouldIgnore(entry)) {
+    if (FileTypeManager.shouldIgnore(entry)) {
       continue
     }
     await addEntity(
@@ -227,7 +227,7 @@ async function* _walkDir(dirPath) {
   const entries = await fs.promises.readdir(dirPath)
   for (const entry of entries) {
     const entryPath = Path.join(dirPath, entry)
-    if (await FileTypeManager.promises.shouldIgnore(entryPath)) {
+    if (FileTypeManager.shouldIgnore(entryPath)) {
       continue
     }
 

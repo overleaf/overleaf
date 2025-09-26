@@ -1,96 +1,101 @@
-const fs = require('fs')
+// @ts-check
+
+const fs = require('fs/promises')
 const Path = require('path')
+const { callbackify } = require('util')
 const isUtf8 = require('utf-8-validate')
-const { promisifyAll } = require('@overleaf/promise-utils')
 const Settings = require('@overleaf/settings')
 const Minimatch = require('minimatch').Minimatch
 
-const fileIgnoreMatcher = new Minimatch(Settings.fileIgnorePattern, {
-  nocase: true, // make the whole path matching case-insensitive
-  // (previously we were only matching the extension case-insensitively but it seems safer to match the whole path)
-  dot: true, // allows matching on paths containing a dot e.g. /.git/foo/bar.txt
+const FILE_IGNORE_MATCHER = new Minimatch(Settings.fileIgnorePattern, {
+  // make the whole path matching case-insensitive (previously we were only
+  // matching the extension case-insensitively but it seems safer to match the
+  // whole path)
+  nocase: true,
+  // allows matching on paths containing a dot e.g. /.git/foo/bar.txt
+  dot: true,
 })
 
-const FileTypeManager = {
-  TEXT_EXTENSIONS: new Set(Settings.textExtensions.map(ext => `.${ext}`)),
-  EDITABLE_FILENAMES: Settings.editableFilenames,
+const TEXT_EXTENSIONS = new Set(Settings.textExtensions.map(ext => `.${ext}`))
+const EDITABLE_FILENAMES = Settings.editableFilenames
 
-  MAX_TEXT_FILE_SIZE: 3 * Settings.max_doc_length, // allow 3 bytes for every character
+// allow 3 bytes for every character
+const MAX_TEXT_FILE_SIZE = 3 * Settings.max_doc_length
 
-  isDirectory(path, callback) {
-    fs.stat(path, (error, stats) => {
-      if (error != null) {
-        return callback(error)
-      }
-      callback(null, stats.isDirectory())
-    })
-  },
+async function isDirectory(path) {
+  const stats = await fs.stat(path)
+  return stats.isDirectory()
+}
 
-  // returns charset as understood by fs.readFile,
-  getType(name, fsPath, existingFileType, callback) {
-    if (!name) {
-      return callback(
-        new Error(
-          '[FileTypeManager] getType requires a non-null "name" parameter'
-        )
-      )
-    }
-    if (!fsPath) {
-      return callback(
-        new Error(
-          '[FileTypeManager] getType requires a non-null "fsPath" parameter'
-        )
-      )
-    }
-    const basename = Path.basename(name)
-    if (existingFileType !== 'doc' && !_isTextFilename(basename)) {
-      return callback(null, { binary: true })
-    }
+/**
+ * Determine whether a string can be stored as an editable doc
+ *
+ * @param {string} content
+ * @param {object} [opts]
+ * @param {string} [opts.filename] - if a filename is given, the algorithm also
+ * checks whether the filename matches the list of editable filenames
+ */
+function isEditable(content, opts = {}) {
+  if (opts.filename != null && !_isTextFilename(opts.filename)) {
+    return false
+  }
 
-    fs.stat(fsPath, (err, stat) => {
-      if (err != null) {
-        return callback(err)
-      }
-      if (stat.size > FileTypeManager.MAX_TEXT_FILE_SIZE) {
-        return callback(null, { binary: true }) // Treat large text file as binary
-      }
+  if (content.length >= Settings.max_doc_length) {
+    return false
+  }
 
-      fs.readFile(fsPath, (err, bytes) => {
-        if (err != null) {
-          return callback(err)
-        }
-        const encoding = _detectEncoding(bytes)
-        const text = bytes.toString(encoding)
-        if (text.length >= Settings.max_doc_length) {
-          return callback(null, { binary: true }) // Treat large text file as binary
-        }
-        // For compatibility with the history service, only accept valid utf8 with no
-        // nulls or non-BMP characters as text, eveything else is binary.
-        if (text.includes('\x00')) {
-          return callback(null, { binary: true })
-        }
-        if (/[\uD800-\uDFFF]/.test(text)) {
-          // non-BMP characters (high and low surrogate characters)
-          return callback(null, { binary: true })
-        }
-        callback(null, { binary: false, encoding })
-      })
-    })
-  },
+  // For compatibility with the history service, only accept valid utf8 with no
+  // nulls or non-BMP characters as text, eveything else is binary.
+  if (content.includes('\x00')) {
+    return false
+  }
+  // non-BMP characters (high and low surrogate characters)
+  if (/[\uD800-\uDFFF]/.test(content)) {
+    return false
+  }
+  return true
+}
 
-  // FIXME: we can convert this to a synchronous function if we want to
-  shouldIgnore(path, callback) {
-    // use minimatch file matching to check if the path should be ignored
-    const ignore = fileIgnoreMatcher.match(path)
-    callback(null, ignore)
-  },
+/**
+ * Determine whether a file can be stored as an editable doc
+ *
+ * @param {string} name - target filename
+ * @param {string} fsPath - path of the file on the filesystem
+ * @param {'file' | 'doc' | null} existingFileType - current type of the file at
+ * the target location
+ */
+async function getType(name, fsPath, existingFileType) {
+  if (existingFileType !== 'doc' && !_isTextFilename(name)) {
+    return { binary: true }
+  }
+
+  const stat = await fs.stat(fsPath)
+  if (stat.size > MAX_TEXT_FILE_SIZE) {
+    return { binary: true }
+  }
+
+  const bytes = await fs.readFile(fsPath)
+  const encoding = _detectEncoding(bytes)
+  const text = bytes.toString(encoding)
+
+  if (isEditable(text)) {
+    return { binary: false, encoding }
+  } else {
+    return { binary: true }
+  }
+}
+
+function shouldIgnore(path) {
+  // use minimatch file matching to check if the path should be ignored
+  return FILE_IGNORE_MATCHER.match(path)
 }
 
 function _isTextFilename(filename) {
+  const basename = Path.basename(filename)
   const extension = Path.extname(filename).toLowerCase()
   return (
-    FileTypeManager.TEXT_EXTENSIONS.has(extension) ||
-    FileTypeManager.EDITABLE_FILENAMES.includes(filename.toLowerCase())
+    TEXT_EXTENSIONS.has(extension) ||
+    EDITABLE_FILENAMES.includes(basename.toLowerCase())
   )
 }
 
@@ -105,7 +110,13 @@ function _detectEncoding(bytes) {
   return 'latin1'
 }
 
-module.exports = FileTypeManager
-module.exports.promises = promisifyAll(FileTypeManager, {
-  without: ['getStrictTypeFromContent'],
-})
+module.exports = {
+  shouldIgnore,
+  isEditable,
+  getType: callbackify(getType),
+  isDirectory: callbackify(isDirectory),
+  promises: {
+    getType,
+    isDirectory,
+  },
+}

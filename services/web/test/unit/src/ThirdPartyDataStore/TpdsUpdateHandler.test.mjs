@@ -45,9 +45,7 @@ describe('TpdsUpdateHandler', function () {
       },
     }
     ctx.FileTypeManager = {
-      promises: {
-        shouldIgnore: sinon.stub().resolves(false),
-      },
+      shouldIgnore: sinon.stub().returns(false),
     }
     ctx.Modules = {
       promises: {
@@ -225,7 +223,7 @@ describe('TpdsUpdateHandler', function () {
     describe('update to a file that should be ignored', async function () {
       setupMatchingProjects(['active1'])
       beforeEach(function (ctx) {
-        ctx.FileTypeManager.promises.shouldIgnore.resolves(true)
+        ctx.FileTypeManager.shouldIgnore.returns(true)
       })
       receiveUpdate()
       expectProjectNotCreated()

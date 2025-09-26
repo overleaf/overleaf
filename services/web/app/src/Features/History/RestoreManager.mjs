@@ -3,6 +3,7 @@ import Path from 'node:path'
 import FileWriter from '../../infrastructure/FileWriter.js'
 import Metrics from '../../infrastructure/Metrics.js'
 import FileSystemImportManager from '../Uploads/FileSystemImportManager.js'
+import FileTypeManager from '../Uploads/FileTypeManager.js'
 import EditorController from '../Editor/EditorController.js'
 import Errors from '../Errors/Errors.js'
 import moment from 'moment'
@@ -114,11 +115,6 @@ const RestoreManager = {
       throw new OError('project does not have ranges support', { projectId })
     }
 
-    const fsPath = await RestoreManager._writeFileVersionToDisk(
-      projectId,
-      version,
-      pathname
-    )
     const basename = Path.basename(pathname)
     let dirname = Path.dirname(pathname)
     if (dirname === '.') {
@@ -142,18 +138,13 @@ const RestoreManager = {
       throw new OError('file not found in snapshot', { pathname })
     }
 
-    const importInfo = await FileSystemImportManager.promises.importFile(
-      fsPath,
-      pathname
-    )
-
     let hadDeletedRootFile = false
     if (file) {
       if (file.type !== 'doc' && file.type !== 'file') {
         throw new OError('unexpected file type', { type: file.type })
       }
       logger.debug(
-        { projectId, fileId: file.element._id, type: importInfo.type },
+        { projectId, fileId: file.element._id },
         'deleting entity before reverting it'
       )
       await EditorController.promises.deleteEntity(
@@ -177,15 +168,22 @@ const RestoreManager = {
 
     // Look for metadata indicating a linked file.
     const fileMetadata = snapshotFile.getMetadata()
-    const isFileMetadata = fileMetadata && 'provider' in fileMetadata
+    const isLinkedFile = fileMetadata && 'provider' in fileMetadata
 
     logger.debug({ fileMetadata }, 'metadata from history')
 
     if (
+      isLinkedFile ||
       !snapshotFile.isEditable() ||
-      importInfo.type === 'file' ||
-      isFileMetadata
+      !FileTypeManager.isEditable(snapshotFile.getContent(), {
+        filename: pathname,
+      })
     ) {
+      const fsPath = await RestoreManager._writeFileVersionToDisk(
+        projectId,
+        version,
+        pathname
+      )
       const newFile = await EditorController.promises.upsertFile(
         projectId,
         parentFolderId,
@@ -320,7 +318,7 @@ const RestoreManager = {
     endTimer({ type: 'doc' })
     return {
       _id,
-      type: importInfo.type,
+      type: 'doc',
     }
   },
 

@@ -3,58 +3,59 @@ const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const isUtf8 = require('utf-8-validate')
 const Settings = require('@overleaf/settings')
-const modulePath = '../../../../app/src/Features/Uploads/FileTypeManager.js'
+
+const MODULE_PATH = '../../../../app/src/Features/Uploads/FileTypeManager.js'
 
 describe('FileTypeManager', function () {
+  const fileContents = 'Ich bin eine kleine Teekanne, kurz und kräftig.'
+
   beforeEach(function () {
     this.isUtf8 = sinon.spy(isUtf8)
     this.stats = {
       isDirectory: sinon.stub().returns(false),
       size: 100,
     }
-    const fileContents = 'Ich bin eine kleine Teekanne, kurz und kräftig.'
     this.fs = {
-      stat: sinon.stub().yields(null, this.stats),
+      stat: sinon.stub().resolves(this.stats),
       readFile: sinon.stub(),
     }
     this.fs.readFile
       .withArgs('utf8.tex')
-      .yields(null, Buffer.from(fileContents, 'utf-8'))
+      .resolves(Buffer.from(fileContents, 'utf-8'))
     this.fs.readFile
       .withArgs('utf16.tex')
-      .yields(null, Buffer.from(`\uFEFF${fileContents}`, 'utf-16le'))
+      .resolves(Buffer.from(`\uFEFF${fileContents}`, 'utf-16le'))
     this.fs.readFile
       .withArgs('latin1.tex')
-      .yields(null, Buffer.from(fileContents, 'latin1'))
+      .resolves(Buffer.from(fileContents, 'latin1'))
     this.fs.readFile
       .withArgs('latin1-null.tex')
-      .yields(null, Buffer.from(`${fileContents}\x00${fileContents}`, 'utf-8'))
+      .resolves(Buffer.from(`${fileContents}\x00${fileContents}`, 'utf-8'))
     this.fs.readFile
       .withArgs('utf8-null.tex')
-      .yields(null, Buffer.from(`${fileContents}\x00${fileContents}`, 'utf-8'))
+      .resolves(Buffer.from(`${fileContents}\x00${fileContents}`, 'utf-8'))
     this.fs.readFile
       .withArgs('utf8-non-bmp.tex')
-      .yields(null, Buffer.from(`${fileContents}😈`))
+      .resolves(Buffer.from(`${fileContents}😈`))
     this.fs.readFile
       .withArgs('utf8-control-chars.tex')
-      .yields(null, Buffer.from(`${fileContents}\x0c${fileContents}`))
+      .resolves(Buffer.from(`${fileContents}\x0c${fileContents}`))
     this.fs.readFile
       .withArgs('text-short.tex')
-      .yields(null, Buffer.from('a'.repeat(0.5 * 1024 * 1024), 'utf-8'))
+      .resolves(Buffer.from('a'.repeat(0.5 * 1024 * 1024), 'utf-8'))
     this.fs.readFile
       .withArgs('text-smaller.tex')
-      .yields(null, Buffer.from('a'.repeat(2 * 1024 * 1024 - 1), 'utf-8'))
+      .resolves(Buffer.from('a'.repeat(2 * 1024 * 1024 - 1), 'utf-8'))
     this.fs.readFile
       .withArgs('text-exact.tex')
-      .yields(null, Buffer.from('a'.repeat(2 * 1024 * 1024), 'utf-8'))
+      .resolves(Buffer.from('a'.repeat(2 * 1024 * 1024), 'utf-8'))
     this.fs.readFile
       .withArgs('text-long.tex')
-      .yields(null, Buffer.from('a'.repeat(3 * 1024 * 1024), 'utf-8'))
-    this.callback = sinon.stub()
-    this.DocumentHelper = { getEncodingFromTexContent: sinon.stub() }
-    this.FileTypeManager = SandboxedModule.require(modulePath, {
+      .resolves(Buffer.from('a'.repeat(3 * 1024 * 1024), 'utf-8'))
+
+    this.FileTypeManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        fs: this.fs,
+        'fs/promises': this.fs,
         'utf-8-validate': this.isUtf8,
         '@overleaf/settings': Settings,
       },
@@ -85,6 +86,32 @@ describe('FileTypeManager', function () {
           await this.FileTypeManager.promises.isDirectory('/some/path')
         expect(result).to.equal(false)
       })
+    })
+  })
+
+  describe('isEditable', function () {
+    it('classifies simple UTF-8 as editable', function () {
+      expect(this.FileTypeManager.isEditable(fileContents)).to.be.true
+    })
+
+    it('classifies text with non-BMP characters as binary', function () {
+      expect(this.FileTypeManager.isEditable(`${fileContents}😈`)).to.be.false
+    })
+
+    it('classifies a .tex file as editable', function () {
+      expect(
+        this.FileTypeManager.isEditable(fileContents, {
+          filename: 'some/file.tex',
+        })
+      ).to.be.true
+    })
+
+    it('classifies a .exe file as binary', function () {
+      expect(
+        this.FileTypeManager.isEditable(fileContents, {
+          filename: 'command.exe',
+        })
+      ).to.be.false
     })
   })
 
@@ -335,76 +362,58 @@ describe('FileTypeManager', function () {
 
   describe('shouldIgnore', function () {
     it('should ignore tex auxiliary files', async function () {
-      const ignore =
-        await this.FileTypeManager.promises.shouldIgnore('file.aux')
+      const ignore = this.FileTypeManager.shouldIgnore('file.aux')
       ignore.should.equal(true)
     })
 
     it('should ignore dotfiles', async function () {
-      const ignore =
-        await this.FileTypeManager.promises.shouldIgnore('path/.git')
-
+      const ignore = this.FileTypeManager.shouldIgnore('path/.git')
       ignore.should.equal(true)
     })
 
     it('should ignore .git directories and contained files', async function () {
-      const ignore =
-        await this.FileTypeManager.promises.shouldIgnore('path/.git/info')
-
+      const ignore = await this.FileTypeManager.shouldIgnore('path/.git/info')
       ignore.should.equal(true)
     })
 
     it('should not ignore .latexmkrc dotfile', async function () {
-      const ignore =
-        await this.FileTypeManager.promises.shouldIgnore('path/.latexmkrc')
-
+      const ignore = this.FileTypeManager.shouldIgnore('path/.latexmkrc')
       ignore.should.equal(false)
     })
 
     it('should ignore __MACOSX', async function () {
-      const ignore =
-        await this.FileTypeManager.promises.shouldIgnore('path/__MACOSX')
-
+      const ignore = this.FileTypeManager.shouldIgnore('path/__MACOSX')
       ignore.should.equal(true)
     })
 
     it('should ignore synctex files', async function () {
-      const ignore =
-        await this.FileTypeManager.promises.shouldIgnore('file.synctex')
-
+      const ignore = this.FileTypeManager.shouldIgnore('file.synctex')
       ignore.should.equal(true)
     })
 
     it('should ignore synctex(busy) files', async function () {
-      const ignore =
-        await this.FileTypeManager.promises.shouldIgnore('file.synctex(busy)')
-
+      const ignore = this.FileTypeManager.shouldIgnore('file.synctex(busy)')
       ignore.should.equal(true)
     })
 
     it('should not ignore .tex files', async function () {
-      const ignore =
-        await this.FileTypeManager.promises.shouldIgnore('file.tex')
-
+      const ignore = this.FileTypeManager.shouldIgnore('file.tex')
       ignore.should.equal(false)
     })
 
     it('should ignore the case of the extension', async function () {
-      const ignore =
-        await this.FileTypeManager.promises.shouldIgnore('file.AUX')
-
+      const ignore = this.FileTypeManager.shouldIgnore('file.AUX')
       ignore.should.equal(true)
     })
 
     it('should not ignore files with an ignored extension as full name', async function () {
-      const ignore = await this.FileTypeManager.promises.shouldIgnore('dvi')
+      const ignore = this.FileTypeManager.shouldIgnore('dvi')
       ignore.should.equal(false)
     })
 
     it('should not ignore directories with an ignored extension as full name', async function () {
       this.stats.isDirectory.returns(true)
-      const ignore = await this.FileTypeManager.promises.shouldIgnore('dvi')
-
+      const ignore = this.FileTypeManager.shouldIgnore('dvi')
       ignore.should.equal(false)
     })
   })

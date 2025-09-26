@@ -487,9 +487,6 @@ describe('RestoreManager', function () {
             metadata: { ts: '2024-01-01T00:00:00.000Z', user_id: 'user-2' },
           },
         ]
-        ctx.FileSystemImportManager.promises.importFile = sinon
-          .stub()
-          .resolves({ type: 'doc', lines: ['foo', 'bar', 'baz'] })
         ctx.getDocUpdaterCompatibleRanges.returns({
           changes: ctx.tracked_changes,
           comments: ctx.comments,
@@ -933,9 +930,6 @@ describe('RestoreManager', function () {
       describe('when reverting a linked file', function () {
         beforeEach(async function (ctx) {
           ctx.pathname = 'foo.png'
-          ctx.FileSystemImportManager.promises.importFile = sinon
-            .stub()
-            .resolves({ type: 'file' })
           ctx.result = await ctx.RestoreManager.promises.revertFile(
             ctx.user_id,
             ctx.project_id,
@@ -979,9 +973,6 @@ describe('RestoreManager', function () {
       describe('when reverting a linked document with provider', function () {
         beforeEach(async function (ctx) {
           ctx.pathname = 'linkedFile.bib'
-          ctx.FileSystemImportManager.promises.importFile = sinon
-            .stub()
-            .resolves({ type: 'doc', lines: ['foo', 'bar', 'baz'] })
           ctx.result = await ctx.RestoreManager.promises.revertFile(
             ctx.user_id,
             ctx.project_id,
@@ -1025,9 +1016,6 @@ describe('RestoreManager', function () {
       describe('when reverting a linked document with { main: true }', function () {
         beforeEach(async function (ctx) {
           ctx.pathname = 'withMainTrue.tex'
-          ctx.FileSystemImportManager.promises.importFile = sinon
-            .stub()
-            .resolves({ type: 'doc', lines: ['foo', 'bar', 'baz'] })
           ctx.result = await ctx.RestoreManager.promises.revertFile(
             ctx.user_id,
             ctx.project_id,
@@ -1065,9 +1053,6 @@ describe('RestoreManager', function () {
     describe('when reverting a binary file', function () {
       beforeEach(async function (ctx) {
         ctx.pathname = 'foo.png'
-        ctx.FileSystemImportManager.promises.importFile = sinon
-          .stub()
-          .resolves({ type: 'file' })
         ctx.EditorController.promises.upsertFile = sinon
           .stub()
           .resolves({ _id: 'mock-file-id', type: 'file' })

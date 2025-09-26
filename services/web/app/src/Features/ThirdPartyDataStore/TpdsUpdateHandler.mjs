@@ -31,7 +31,7 @@ async function newUpdate(
     throw new Errors.TooManyRequestsError('project on cooldown')
   }
 
-  const shouldIgnore = await FileTypeManager.promises.shouldIgnore(path)
+  const shouldIgnore = FileTypeManager.shouldIgnore(path)
   if (shouldIgnore) {
     return null
   }
@@ -175,7 +175,7 @@ async function createFolder(userId, projectId, projectName, path) {
     throw new Errors.TooManyRequestsError('project on cooldown')
   }
 
-  const shouldIgnore = await FileTypeManager.promises.shouldIgnore(path)
+  const shouldIgnore = FileTypeManager.shouldIgnore(path)
   if (shouldIgnore) {
     return null
   }
