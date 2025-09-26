@@ -278,6 +278,7 @@ export interface Meta {
     customerId: string
     subscriptionState: string | null
     paymentProviderService: StripePaymentProviderService | null
+    segment: string | null
   }
   'ol-subscription': any // TODO: mixed types, split into two fields
   'ol-subscriptionChangePreview': SubscriptionChangePreview

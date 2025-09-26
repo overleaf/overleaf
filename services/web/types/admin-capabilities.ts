@@ -26,6 +26,7 @@ export type AdminCapability =
   | 'view-split-test'
   | 'view-user-additional-info'
   | 'create-stripe-account'
+  | 'update-stripe-customer-segment'
 
 export type AdminRole =
   | 'engagement'
