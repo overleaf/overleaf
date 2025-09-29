@@ -14,6 +14,7 @@ export type LogEntry = {
   type?: string
   messageComponent?: React.ReactNode
   contentDetails?: string[]
+  command?: string
 }
 
 export type ErrorLevel =

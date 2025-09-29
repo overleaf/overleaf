@@ -64,7 +64,7 @@ const parserReducer = function (maxErrors: number | null) {
   }
 }
 
-type BibLogEntry = {
+export type BibLogEntry = {
   file: string
   level: string
   message: string

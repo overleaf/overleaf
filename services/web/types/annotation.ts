@@ -6,6 +6,6 @@ export type Annotation = {
   ruleId?: string
   id: string
   entryIndex: number
-  firstOnLine: boolean
+  firstOnLine?: boolean
   command?: string
 }

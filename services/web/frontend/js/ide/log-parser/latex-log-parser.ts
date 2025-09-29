@@ -19,7 +19,7 @@ export type LatexParserOptions = {
   ignoreDuplicates?: boolean
 }
 
-type LatexLogEntry = {
+export type LatexLogEntry = {
   line: string | number | null
   file: string | undefined
   level: 'error' | 'warning' | 'typesetting'
