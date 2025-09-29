@@ -295,6 +295,58 @@
       margin-top: var(--spacing-08);
     }
   }
+
+  &.stripe-payment-container {
+    .payment-checkout {
+      .checkout-form-inputs {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      // Everything under .form-group is to make the form better match
+      // Stripe's payment inputs
+      .form-group {
+        // we can't use "Noto Sans" as the font within PaymentElement,
+        // so we're using sans-serif for the text elsewhere in the page
+        font-family: sans-serif;
+
+        .form-control {
+          padding: 10px 12px;
+          font-size: 16px;
+          line-height: 20px;
+          border: 1px solid #e6e6e6;
+          transition:
+            box-shadow 0.15s ease,
+            border-color 0.15s ease;
+          box-shadow: 0 1px 3px 0 rgb(0 0 0 / 2%);
+
+          &:focus {
+            outline: none;
+            border-color: #046530; // brand primary color
+            box-shadow:
+              0 1px 1px rgb(0 0 0 / 3%),
+              0 3px 6px rgb(0 0 0 / 2%),
+              0 0 0 3px rgb(11 107 39 / 25%),
+              0 1px 1px 0 rgb(0 0 0 / 8%);
+          }
+
+          &.is-invalid {
+            border-color: var(--bs-form-invalid-border-color);
+            box-shadow:
+              0 1px 3px 0 rgb(0 0 0 / 10%),
+              0 0 0 1px var(--bs-form-invalid-border-color);
+          }
+        }
+
+        .invalid-feedback {
+          .material-symbols {
+            display: none;
+          }
+        }
+      }
+    }
+  }
 }
 
 .group-heading {
