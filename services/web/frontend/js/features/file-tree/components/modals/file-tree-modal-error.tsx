@@ -8,7 +8,8 @@ import {
   DuplicateFilenameError,
   DuplicateFilenameMoveError,
 } from '../../errors'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,

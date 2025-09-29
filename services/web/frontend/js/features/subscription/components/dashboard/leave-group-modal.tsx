@@ -4,7 +4,8 @@ import { deleteJSON } from '../../../../infrastructure/fetch-json'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import { useLocation } from '../../../../shared/hooks/use-location'
 import { debugConsole } from '@/utils/debugging'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,

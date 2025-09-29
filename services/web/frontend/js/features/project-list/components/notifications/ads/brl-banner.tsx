@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import bannerImage from '../../../images/brl-banner.png'
 import usePersistedState from '../../../../../shared/hooks/use-persisted-state'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -90,7 +91,7 @@ export default function BRLBanner() {
 
   return (
     <OLModal show={showModal} onHide={handleHide}>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('latam_discount_modal_title')}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>

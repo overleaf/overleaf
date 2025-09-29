@@ -1,7 +1,8 @@
 import { useTranslation, Trans } from 'react-i18next'
 import { MergeAndOverride } from '../../../../../../../../types/utils'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -32,7 +33,7 @@ function ConfirmationModal({
 
   return (
     <OLModal show={show} onHide={onHide}>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('confirm_primary_email_change')}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody className="pb-0">

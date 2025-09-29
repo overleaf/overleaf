@@ -19,7 +19,7 @@ export default function ViewOnlyAccessModalContent({
 
   return (
     <>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('view_only_access')}</OLModalTitle>
       </OLModalHeader>
 

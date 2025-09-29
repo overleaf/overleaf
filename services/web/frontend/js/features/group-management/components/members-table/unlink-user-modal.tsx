@@ -8,7 +8,8 @@ import NotificationScrolledTo from '@/shared/components/notification-scrolled-to
 import { debugConsole } from '@/utils/debugging'
 import { GroupUserAlert } from '../../utils/types'
 import { useGroupMembersContext } from '../../context/group-members-context'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,

@@ -1,4 +1,5 @@
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalHeader,
   OLModalTitle,
@@ -37,7 +38,7 @@ const SettingsModal = () => {
           : undefined
       }
     >
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('settings')}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody className="ide-settings-modal-body">

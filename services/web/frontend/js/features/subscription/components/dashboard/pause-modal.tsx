@@ -3,7 +3,8 @@ import { useSubscriptionDashboardContext } from '../../context/subscription-dash
 import { useCallback, useMemo, useState } from 'react'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { useLocation } from '@/shared/hooks/use-location'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalHeader,
 } from '@/shared/components/ol/ol-modal'
@@ -88,7 +89,7 @@ export default function PauseSubscriptionModal() {
       backdrop="static"
     >
       <OLModalBody>
-        <OLModalHeader closeButton style={{ border: 0 }} />
+        <OLModalHeader style={{ border: 0 }} />
         <img
           src={PauseDuck}
           alt="Need to duck out for a while?"

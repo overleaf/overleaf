@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,

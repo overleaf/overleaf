@@ -1,5 +1,6 @@
 import OLButton from '@/shared/components/ol/ol-button'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -28,7 +29,7 @@ function LeaveProjectModal({
       id="action-project-modal"
       backdrop="static"
     >
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('leave_project')}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>

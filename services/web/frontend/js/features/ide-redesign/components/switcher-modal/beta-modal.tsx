@@ -1,6 +1,7 @@
 import { useIdeRedesignSwitcherContext } from '@/features/ide-react/context/ide-redesign-switcher-context'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -50,7 +51,7 @@ export const IdeRedesignIntroModal: FC = () => {
       onHide={dismissTutorial}
       className="ide-redesign-switcher-modal"
     >
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>
           {t('the_new_overleaf_editor_try_now_in_beta')}
         </OLModalTitle>
@@ -99,7 +100,7 @@ export const IdeRedesignSwitcherModal = () => {
       onHide={onHide}
       className="ide-redesign-switcher-modal"
     >
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>
           {enabled
             ? t('beta_program_the_new_overleaf_editor')

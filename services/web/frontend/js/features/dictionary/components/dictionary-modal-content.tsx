@@ -52,7 +52,7 @@ export default function DictionaryModalContent({
 
   return (
     <>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('edit_dictionary')}</OLModalTitle>
       </OLModalHeader>
 

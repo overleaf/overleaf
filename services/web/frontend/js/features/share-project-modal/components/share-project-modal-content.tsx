@@ -3,7 +3,8 @@ import { useEditorContext } from '@/shared/context/editor-context'
 import { lazy, Suspense } from 'react'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import ClickableElementEnhancer from '@/shared/components/clickable-element-enhancer'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -43,7 +44,7 @@ export default function ShareProjectModalContent({
 
   return (
     <OLModal show={show} onHide={cancel} animation={animation}>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('share_project')}</OLModalTitle>
       </OLModalHeader>
 

@@ -5,7 +5,8 @@ import {
   DropdownToggle,
 } from '@/shared/components/dropdown/dropdown-menu'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,

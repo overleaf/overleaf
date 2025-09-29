@@ -6,7 +6,8 @@ import GoogleLogo from '../../../../shared/svgs/google-logo'
 import OrcidLogo from '../../../../shared/svgs/orcid-logo'
 import LinkingStatus from './status'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -168,7 +169,7 @@ function UnlinkConfirmModal({
 
   return (
     <OLModal show={show} onHide={handleHide}>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>
           {t('unlink_provider_account_title', { provider: title })}
         </OLModalTitle>

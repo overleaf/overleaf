@@ -5,7 +5,8 @@ import { postJSON } from '../../../../../../../../infrastructure/fetch-json'
 import { useSubscriptionDashboardContext } from '../../../../../../context/subscription-dashboard-context'
 import { cancelPendingSubscriptionChangeUrl } from '../../../../../../data/subscription-url'
 import { useLocation } from '../../../../../../../../shared/hooks/use-location'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,

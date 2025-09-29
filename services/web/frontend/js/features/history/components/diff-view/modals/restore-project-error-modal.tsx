@@ -1,4 +1,5 @@
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -16,7 +17,7 @@ export function RestoreProjectErrorModal({
 
   return (
     <OLModal show onHide={resetErrorBoundary}>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>
           {t('an_error_occured_while_restoring_project')}
         </OLModalTitle>

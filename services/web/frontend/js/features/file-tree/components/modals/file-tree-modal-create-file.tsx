@@ -3,7 +3,8 @@ import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 import FileTreeCreateFormProvider from '../../contexts/file-tree-create-form'
 import FileTreeModalCreateFileBody from '../file-tree-create/file-tree-modal-create-file-body'
 import FileTreeModalCreateFileFooter from '../file-tree-create/file-tree-modal-create-file-footer'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -22,7 +23,7 @@ export default function FileTreeModalCreateFile() {
   return (
     <FileTreeCreateFormProvider>
       <OLModal size="lg" onHide={cancel} show>
-        <OLModalHeader closeButton>
+        <OLModalHeader>
           <OLModalTitle>{t('add_files')}</OLModalTitle>
         </OLModalHeader>
 

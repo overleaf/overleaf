@@ -1,4 +1,5 @@
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -16,7 +17,7 @@ export function RestoreFileErrorModal({
 
   return (
     <OLModal show onHide={resetErrorBoundary}>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('restore_file_error_title')}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>{t('restore_file_error_message')}</OLModalBody>

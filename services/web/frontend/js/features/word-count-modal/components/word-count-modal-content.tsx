@@ -21,7 +21,7 @@ export default function WordCountModalContent({
 
   return (
     <>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>
           {t('word_count_lower')}{' '}
           <SplitTestBadge

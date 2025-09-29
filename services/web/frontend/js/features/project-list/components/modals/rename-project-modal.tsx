@@ -16,7 +16,8 @@ import { getUserFacingMessage } from '../../../../infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
 import { isSmallDevice } from '../../../../infrastructure/event-tracking'
 import Notification from '@/shared/components/notification'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -104,7 +105,7 @@ function RenameProjectModal({
       id="rename-project-modal"
       backdrop="static"
     >
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('rename_project')}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>

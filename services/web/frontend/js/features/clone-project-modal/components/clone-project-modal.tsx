@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useState } from 'react'
 import CloneProjectModalContent from './clone-project-modal-content'
-import OLModal from '@/shared/components/ol/ol-modal'
+import { OLModal } from '@/shared/components/ol/ol-modal'
 import { ClonedProject } from '../../../../../types/project/dashboard/api'
 import { Tag } from '../../../../../app/src/Features/Tags/types'
 

@@ -20,7 +20,7 @@ export default function EditorOverLimitModalContent({
 
   return (
     <>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('do_you_need_edit_access')}</OLModalTitle>
       </OLModalHeader>
 

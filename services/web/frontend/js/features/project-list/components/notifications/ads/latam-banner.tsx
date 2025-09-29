@@ -5,7 +5,8 @@ import clpBannerImage from '../../../images/clp-banner.png'
 import penBannerImage from '../../../images/pen-banner.png'
 import usePersistedState from '../../../../../shared/hooks/use-persisted-state'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -133,7 +134,7 @@ export default function LATAMBanner() {
 
   return (
     <OLModal show={showModal} onHide={handleHide} backdrop="static">
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('latam_discount_modal_title')}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>

@@ -3,7 +3,8 @@ import { Trans, useTranslation } from 'react-i18next'
 import { transferProjectOwnership } from '../utils/api'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useLocation } from '@/shared/hooks/use-location'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -45,7 +46,7 @@ export default function TransferOwnershipModal({
 
   return (
     <OLModal show onHide={cancel}>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('change_project_owner')}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>

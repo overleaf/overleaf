@@ -74,7 +74,7 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
 
   return (
     <>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('new_project')}</OLModalTitle>
       </OLModalHeader>
 

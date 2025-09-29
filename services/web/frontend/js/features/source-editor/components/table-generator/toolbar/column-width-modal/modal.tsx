@@ -16,7 +16,8 @@ import { setColumnWidth } from '../commands'
 import { UNITS, WidthSelection, WidthUnit } from './column-width'
 import { useCodeMirrorViewContext } from '../../../codemirror-context'
 import { CopyToClipboard } from '@/shared/components/copy-to-clipboard'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -137,7 +138,7 @@ const ColumnWidthModalBody = () => {
       onHide={closeColumnWidthModal}
       className="table-generator-width-modal"
     >
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('set_column_width')}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>

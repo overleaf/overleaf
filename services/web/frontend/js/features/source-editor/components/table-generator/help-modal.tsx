@@ -1,4 +1,5 @@
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -19,7 +20,7 @@ export const TableGeneratorHelpModal = () => {
       onHide={hideHelp}
       className="table-generator-help-modal"
     >
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('help')}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>

@@ -12,7 +12,8 @@ import GenericErrorAlert from '../../../../generic-error-alert'
 import { subscriptionUpdateUrl } from '../../../../../../data/subscription-url'
 import { getRecurlyGroupPlanCode } from '../../../../../../util/recurly-group-plan-code'
 import { useLocation } from '../../../../../../../../shared/hooks/use-location'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -175,7 +176,7 @@ export function ChangeToGroupModal() {
         onHide={handleCloseModal}
         backdrop="static"
       >
-        <OLModalHeader closeButton>
+        <OLModalHeader>
           <OLModalTitle className="lh-sm">
             {t('customize_your_group_subscription')}
             {showGroupDiscount && (

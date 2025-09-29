@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { SubscriptionDashModalIds } from '../../../../../../../../../../types/subscription/dashboard/modal-ids'
 import { useSubscriptionDashboardContext } from '../../../../../../context/subscription-dashboard-context'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,

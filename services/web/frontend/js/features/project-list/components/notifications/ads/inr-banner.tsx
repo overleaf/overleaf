@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import bannerImage from '../../../images/inr-banner.png'
 import usePersistedState from '../../../../../shared/hooks/use-persisted-state'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -88,7 +89,7 @@ export default function INRBanner() {
 
   return (
     <OLModal show={showModal} onHide={handleHide} backdrop="static">
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('inr_discount_modal_title')}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>

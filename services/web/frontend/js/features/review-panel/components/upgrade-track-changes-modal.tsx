@@ -5,7 +5,8 @@ import teaserVideo from '../images/teaser-track-changes.mp4'
 import teaserImage from '../images/teaser-track-changes.gif'
 import { startFreeTrial, upgradePlan } from '@/main/account-upgrade'
 import { memo } from 'react'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -31,7 +32,7 @@ function UpgradeTrackChangesModal({
 
   return (
     <OLModal show={show} onHide={() => setShow(false)}>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('upgrade_to_review')}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody className="upgrade-track-changes-modal">

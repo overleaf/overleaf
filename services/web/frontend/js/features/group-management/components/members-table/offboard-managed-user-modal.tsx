@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { useLocation } from '@/shared/hooks/use-location'
 import { FetchError, postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,

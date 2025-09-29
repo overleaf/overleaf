@@ -4,7 +4,8 @@ import LoadingSpinner from '../../../../../../../../shared/components/loading-sp
 import { useSubscriptionDashboardContext } from '../../../../../../context/subscription-dashboard-context'
 import { ChangeToGroupPlan } from '../change-to-group-plan'
 import { IndividualPlansTable } from '../individual-plans-table'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalHeader,
   OLModalTitle,
@@ -43,7 +44,7 @@ export function ChangePlanModal() {
 
   return (
     <OLModal id={modalId} show animation onHide={handleCloseModal} size="lg">
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('change_plan')}</OLModalTitle>
       </OLModalHeader>
 

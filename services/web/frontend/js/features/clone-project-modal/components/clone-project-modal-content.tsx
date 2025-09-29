@@ -89,7 +89,7 @@ export default function CloneProjectModalContent({
 
   return (
     <>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('copy_project')}</OLModalTitle>
       </OLModalHeader>
 

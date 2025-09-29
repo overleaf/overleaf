@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { figmaDesignUrl } from '../../../.storybook/utils/figma-design-url'
-import OLModal, {
+import { figmaDesignUrl } from './../../../.storybook/utils/figma-design-url'
+import {
+  OLModal,
   OLModalHeader,
   OLModalBody,
   OLModalFooter,
@@ -99,7 +100,7 @@ const meta: Meta<typeof OLModal> = {
   },
   render: ({ title, children, footer, ...args }) => (
     <OLModal {...args}>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{title}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>{children}</OLModalBody>

@@ -8,7 +8,8 @@ import { postJSON } from '../../../../../../infrastructure/fetch-json'
 import { isSmallDevice } from '../../../../../../infrastructure/event-tracking'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLModal, {
+import {
+  OLModal,
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
@@ -120,7 +121,7 @@ function CompileErrorModal({
   return (
     <>
       <OLModal show onHide={handleClose}>
-        <OLModalHeader closeButton>
+        <OLModalHeader>
           <OLModalTitle>
             {project.name}: {t('pdf_unavailable_for_download')}
           </OLModalTitle>

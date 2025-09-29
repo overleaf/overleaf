@@ -12,12 +12,24 @@ type OLModalProps = ModalProps & {
   onHide: () => void
 }
 
-export default function OLModal({ children, ...props }: OLModalProps) {
+type OLModalHeaderProps = ModalHeaderProps & {
+  closeButton?: boolean
+}
+
+export function OLModal({ children, ...props }: OLModalProps) {
   return <Modal {...props}>{children}</Modal>
 }
 
-export function OLModalHeader({ children, ...props }: ModalHeaderProps) {
-  return <Modal.Header {...props}>{children}</Modal.Header>
+export function OLModalHeader({
+  children,
+  closeButton = true,
+  ...props
+}: OLModalHeaderProps) {
+  return (
+    <Modal.Header closeButton={closeButton} {...props}>
+      {children}
+    </Modal.Header>
+  )
 }
 
 export function OLModalTitle({ children, ...props }: ModalTitleProps) {

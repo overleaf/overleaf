@@ -71,7 +71,7 @@ function LeaveModalContent({
 
   return (
     <>
-      <OLModalHeader closeButton>
+      <OLModalHeader>
         <OLModalTitle>{t('delete_account')}</OLModalTitle>
       </OLModalHeader>
 
