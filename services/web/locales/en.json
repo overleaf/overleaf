@@ -2274,6 +2274,7 @@
   "sync_with_a_github_repository": "Sync with a GitHub repository.",
   "synctex_error_recompile_and_try_again": "That didn’t work. Recompile and try again.",
   "synctex_failed": "Couldn’t find the corresponding source file",
+  "syntax_checks": "Syntax checks",
   "syntax_validation": "Code check",
   "tab_connecting": "Connecting with the editor",
   "tab_no_longer_connected": "This tab is no longer connected with the editor",

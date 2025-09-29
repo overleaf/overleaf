@@ -165,7 +165,7 @@ function PdfCompileButton() {
           </DropdownItem>
         </li>
         <DropdownDivider />
-        <DropdownHeader>Syntax Checks</DropdownHeader>
+        <DropdownHeader>{t('syntax_checks')}</DropdownHeader>
         <li role="none">
           <DropdownItem
             as="button"
