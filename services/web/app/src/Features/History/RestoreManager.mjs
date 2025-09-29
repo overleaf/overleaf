@@ -136,7 +136,11 @@ const RestoreManager = {
 
     const snapshotFile = projectSnapshotAtVersion.getFile(pathname)
     if (!snapshotFile) {
-      throw new OError('file not found in snapshot', { pathname })
+      throw new OError('file not found in snapshot', {
+        projectId,
+        version,
+        pathname,
+      })
     }
 
     let hadDeletedRootFile = false
