@@ -5,7 +5,6 @@ export interface WritefullEvents {
   }
   'writefull-received-suggestions': { numberOfSuggestions: number }
   'writefull-register-as-auto-account': { email: string }
-  'writefull-shared-analytics': { eventName: string; segmentation: object }
   'writefull-ai-assist-show-paywall': { origin?: string }
 }
 
