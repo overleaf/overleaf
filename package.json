@@ -43,6 +43,8 @@
   "scripts": {
     "format": "prettier --list-different $PWD/'**/*.js'",
     "format:fix": "prettier --write $PWD/'**/*.js'",
+    "format:jenkins": "prettier --list-different $PWD/'**/Jenkinsfile'",
+    "format:jenkins:fix": "prettier --write $PWD/'**/Jenkinsfile'",
     "lint": "eslint --max-warnings 0 --format unix .",
     "lint:fix": "eslint --fix .",
     "postinstall": "patch-package"
