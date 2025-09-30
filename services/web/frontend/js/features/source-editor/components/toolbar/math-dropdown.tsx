@@ -13,21 +13,19 @@ import { memo } from 'react'
 import OLListGroupItem from '@/shared/components/ol/ol-list-group-item'
 import sparkleWhite from '@/shared/svgs/sparkle-small-white.svg'
 import sparkle from '@/shared/svgs/ai-sparkle-text.svg'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 export const MathDropdown = memo(function MathDropdown() {
   const { t } = useTranslation()
   const view = useCodeMirrorViewContext()
   const { writefullInstance } = useEditorContext()
 
-  const wfRebrandEnabled = isSplitTestEnabled('overleaf-assist-bundle')
   return (
     <ToolbarButtonMenu
       id="toolbar-math"
       label={t('toolbar_insert_math')}
       icon={<MaterialIcon type="calculate" />}
     >
-      {wfRebrandEnabled && writefullInstance && (
+      {writefullInstance && (
         <>
           <DropdownHeader className="ol-cm-toolbar-header mx-2">
             {t('toolbar_insert_math_lowercase')}

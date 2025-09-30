@@ -151,60 +151,6 @@ const en = {
     'errors.error-hit-limit-freemium.heading': 'You’re on fire!',
     'errors.error-hit-limit-freemium.body':
       'You’ve hit your Writefull quota. Upgrade now for unlimited language suggestions and LaTeX support, and early access to upcoming features like TikZ generation.',
-    'checkout.need-more-info': "Need more info? We're here to help.",
-    'checkout.free-plan-question': 'What’s included in the Free plan?',
-    'checkout.free-plan-answer':
-      "The Free plan offers a limited number of language edits a day, restricted use of the writing features (to paraphrase, change style, explain or summarize, and more), and limited access to TeXGPT and the LaTeX generation options. You're notified when you've hit your daily limit. Please note that limits might change daily so that we can maintain certain levels of quality of service.",
-    'checkout.premium-plan-question':
-      'Do I get different language edits if I upgrade to Premium?',
-    'checkout.premium-plan-answer':
-      'Both the Free and Premium plans let you choose the language model that revises your text: Writefull’s model, which is ideal for research writing in English, or GPT, which works with any language or text type. With the Free plan, you get a limited number of edits each day, but Premium gives you unlimited access. Plus, when you upgrade to Premium, you can add custom prompts to GPT, giving you more control over how your text is revised.',
-    'checkout.custom-prompt-question':
-      "What does the 'custom prompt for GPT language edits' mean?",
-    'checkout.custom-prompt-answer':
-      'With this feature, you can give the GPT model specific instructions on how to revise your text. For example, you can ask it to keep certain terms unchanged, make your writing more assertive, or focus only on essential language corrections. It’s a great way to tailor the edits to your needs! This option is available with the Premium plan.',
-    'checkout.supercomplete-question': "What is the 'Supercomplete' feature?",
-    'checkout.supercomplete-answer':
-      "The 'Supercomplete' feature makes your writing even more efficient by completing your sentences and LaTeX code when prompted. This is a fully Premium feature.",
-    'checkout.upcoming-features-question':
-      'What other features are likely to come?',
-    'checkout.upcoming-features-answer':
-      'We have a long list of upcoming features! Two of these are translation and diagram generation using TikZ.',
-    'checkout.overleaf-subscription-question':
-      'I already pay for Overleaf. Do I still need Writefull Premium?',
-    'checkout.overleaf-subscription-answer':
-      'Yes, Writefull and Overleaf have integrated, but are two separate services with their own subscriptions.',
-    'checkout.group-discounts-question': 'Do you offer group discounts?',
-    'checkout.group-discounts-answer':
-      'We do! Go here to calculate pricing depending on your group size. Select a plan and invite others to join.',
-    'checkout.fair-usage-policy': '* Fair usage policy applies.',
-    'checkout.still-have-questions': 'Do you still have questions?',
-    'checkout.contact-us': 'Contact Us',
-    'checkout.monthly': 'Monthly',
-    'checkout.yearly': 'Yearly',
-    'checkout.free': 'FREE',
-    'checkout.basic-access': 'Basic access to Writefull',
-    'checkout.features': 'Features:',
-    'checkout.limited-language-edits': 'Limited language edits',
-    'checkout.limited-writing-features': 'Limited usage of writing features',
-    'checkout.limited-texgpt': 'Limited usage of TeXGPT',
-    'checkout.custom-prompt': 'Custom prompt for GPT language edits',
-    'checkout.supercomplete': 'Supercomplete',
-    'checkout.supercomplete-coming': 'Supercomplete (coming soon)',
-    'checkout.priority-access': 'Priority access to new Writefull features',
-    'checkout.premium': 'WRITEFULL PREMIUM',
-    'checkout.all-unlocked': 'All of Writefull unlocked',
-    'checkout.unlimited-language-edits': 'Unlimited language edits*',
-    'checkout.unlimited-writing-features':
-      'Unlimited usage of writing features*',
-    'checkout.unlimited-texgpt': 'Unlimited usage of TeXGPT',
-    'checkout.redirecting': 'Redirecting...',
-    'checkout.select-plan': 'Select Writefull plan',
-    'checkout.looking-for': 'Looking for',
-    'checkout.group-licenses': 'group licenses',
-    'checkout.per-month': 'Per month',
-    'checkout.your-current-plan': 'Your current plan',
-    'checkout.billed-as-one-payment-of': 'billed as one payment of',
     'toolbar.abstract-generator.name': 'Abstract Generator',
     'toolbar.title-generator.name': 'Title Generator',
     'toolbar.create-table.name': 'Create tables',
@@ -554,64 +500,6 @@ const es = {
     'errors.error-hit-limit-freemium.heading': 'Estás que ardes',
     'errors.error-hit-limit-freemium.body':
       'Has agotado tu cuota de Writefull. Actualiza ahora para obtener sugerencias de lenguaje ilimitadas y soporte en LaTeX, y acceso anticipado a las próximas funciones de generación como TikZ.',
-    'checkout.need-more-info':
-      '¿Necesitas más información? Estamos aquí para ayudar.',
-    'checkout.free-plan-question': '¿Qué incluye el plan gratuito?',
-    'checkout.free-plan-answer':
-      'El plan gratuito ofrece un número limitado de ediciones de lenguaje al día, uso restringido de las funciones de escritura (para parafrasear, cambiar el estilo, explicar o resumir, y más), y acceso limitado a TeXGPT y las opciones de generación de LaTeX. Se te notificará cuando hayas alcanzado tu límite diario. Ten en cuenta que los límites pueden cambiar diariamente para que podamos mantener ciertos niveles de calidad de servicio.',
-    'checkout.premium-plan-question':
-      '¿Obtengo diferentes sugerencias de lenguaje si actualizo a Premium?',
-    'checkout.premium-plan-answer':
-      'Tanto los planes gratuitos como los Premium te permiten elegir el modelo de lenguaje que revisa tu texto: el modelo de Writefull, que es ideal para la escritura de investigación en inglés, o GPT, que funciona con cualquier idioma o tipo de texto. Con el plan gratuito, obtienes un número limitado de sugerencias, pero Premium te da acceso ilimitado. Además, cuando actualizas a Premium, puedes agregar prompts personalizados a GPT, dándote más control sobre cómo se revisa tu texto.',
-    'checkout.custom-prompt-question':
-      "¿Qué significa el 'prompt personalizado para ediciones de lenguaje GPT'?",
-    'checkout.custom-prompt-answer':
-      'Con esta función, puedes dar al modelo GPT instrucciones específicas sobre cómo revisar tu texto. Por ejemplo, puedes pedirle que mantenga ciertos términos sin cambios, que haga tu escritura más asertiva, o que se enfoque solo en correcciones esenciales del lenguaje. ¡Es una excelente manera de adaptar las sugerencias a tus necesidades! Esta opción está disponible con el plan Premium.',
-    'checkout.supercomplete-question': "¿Qué es la función 'Supercomplete'?",
-    'checkout.supercomplete-answer':
-      "La función 'Supercomplete' hace que tu escritura sea aún más eficiente al completar tus oraciones y código LaTeX cuando se le solicita. Esta es una función completamente Premium.",
-    'checkout.upcoming-features-question':
-      '¿Qué otras funciones es probable que vengan?',
-    'checkout.upcoming-features-answer':
-      '¡Tenemos una larga lista de funciones próximas! Dos de estas son la traducción y la generación de diagramas usando TikZ.',
-    'checkout.overleaf-subscription-question':
-      'Ya pago por Overleaf. ¿Aún necesito Writefull Premium?',
-    'checkout.overleaf-subscription-answer':
-      'Sí, Writefull y Overleaf se han integrado, pero son dos servicios separados con sus propias suscripciones.',
-    'checkout.group-discounts-question': '¿Ofrecen descuentos para grupos?',
-    'checkout.group-discounts-answer':
-      '¡Sí! Ve aquí para calcular el precio dependiendo del tamaño de tu grupo. Selecciona un plan e invita a otros a unirse.',
-    'checkout.fair-usage-policy': '* Se aplica la política de uso justo.',
-    'checkout.still-have-questions': '¿Aún tienes preguntas?',
-    'checkout.contact-us': 'Contáctanos',
-    'checkout.monthly': 'Mensual',
-    'checkout.yearly': 'Anual',
-    'checkout.free': 'GRATIS',
-    'checkout.basic-access': 'Acceso básico a Writefull',
-    'checkout.features': 'Características:',
-    'checkout.limited-language-edits': 'Ediciones de lenguaje limitadas',
-    'checkout.limited-writing-features':
-      'Uso limitado de funciones de escritura',
-    'checkout.limited-texgpt': 'Uso limitado de TeXGPT',
-    'checkout.custom-prompt':
-      'Prompt personalizado para sugerencias de lenguaje GPT',
-    'checkout.supercomplete': 'Supercomplete',
-    'checkout.supercomplete-coming': 'Supercomplete (pronto)',
-    'checkout.priority-access':
-      'Acceso prioritario a nuevas funciones de Writefull',
-    'checkout.premium': 'WRITEFULL PREMIUM',
-    'checkout.all-unlocked': 'Todo Writefull desbloqueado',
-    'checkout.unlimited-language-edits': 'Sugerencias de lenguaje ilimitadas*',
-    'checkout.unlimited-writing-features':
-      'Uso ilimitado de funciones de escritura*',
-    'checkout.unlimited-texgpt': 'Uso ilimitado de TeXGPT',
-    'checkout.redirecting': 'Redirigiendo...',
-    'checkout.select-plan': 'Seleccionar plan de Writefull',
-    'checkout.looking-for': 'Buscando',
-    'checkout.group-licenses': 'licencias grupales',
-    'checkout.per-month': 'Por mes',
-    'checkout.your-current-plan': 'Tu plan actual',
-    'checkout.billed-as-one-payment-of': 'facturado como un solo pago de',
     'toolbar.abstract-generator.name': 'Generar Abstract',
     'toolbar.title-generator.name': 'Generar Título',
     'toolbar.create-table.name': 'Crear tablas',

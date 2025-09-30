@@ -8,29 +8,8 @@ export interface WritefullEvents {
   'writefull-ai-assist-show-paywall': { origin?: string }
 }
 
-type InsertPosition = {
-  parentSelector: string
-  insertBeforeSelector?: string
-}
-
 export interface WritefullAPI {
-  init({
-    toolbarPosition,
-    iconPosition,
-    hasAgreedToTOS,
-    overleafUserId,
-    overleafLabels,
-  }: {
-    toolbarPosition: InsertPosition
-    iconPosition: InsertPosition
-    hasAgreedToTOS: boolean
-    overleafUserId: string
-    overleafLabels: {
-      autoImport: boolean
-      autoCreatedAccount: boolean
-      splitTests: Record<string, boolean>
-    }
-  }): Promise<void>
+  init(): Promise<void>
   addEventListener<eventName extends keyof WritefullEvents>(
     name: eventName,
     callback: (detail: WritefullEvents[eventName]) => void

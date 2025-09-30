@@ -12,7 +12,6 @@ import { MathDropdown } from './math-dropdown'
 import { TableDropdown } from './table-dropdown'
 import { LegacyTableDropdown } from './table-inserter-dropdown-legacy'
 import { withinFormattingCommand } from '@/features/source-editor/utils/tree-operations/formatting'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { isMac } from '@/shared/utils/os'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
@@ -41,8 +40,6 @@ export const ToolbarItems: FC<{
 
   const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
   const showGroup = (group: string) => !overflowed || overflowed.has(group)
-
-  const wfRebrandEnabled = isSplitTestEnabled('overleaf-assist-bundle')
 
   return (
     <>
@@ -155,11 +152,7 @@ export const ToolbarItems: FC<{
                 icon="book_5"
               />
               <InsertFigureDropdown />
-              {wfRebrandEnabled && writefullInstance ? (
-                <TableDropdown />
-              ) : (
-                <LegacyTableDropdown />
-              )}
+              {writefullInstance ? <TableDropdown /> : <LegacyTableDropdown />}
             </div>
           )}
           {showGroup('group-list') && (
