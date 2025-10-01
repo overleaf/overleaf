@@ -10,6 +10,7 @@
  */
 import { app } from '../../../../app/js/server.js'
 import { mongoClient } from '../../../../app/js/mongodb.js'
+import { promisify } from '@overleaf/promise-utils'
 
 let running = false
 let initing = false
@@ -42,4 +43,8 @@ export function ensureRunning(callback) {
       }
     })
   })
+}
+
+export const promises = {
+  ensureRunning: promisify(ensureRunning),
 }

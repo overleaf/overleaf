@@ -3,6 +3,7 @@ import request from 'request'
 import Settings from '@overleaf/settings'
 import RedisWrapper from '@overleaf/redis-wrapper'
 import { db } from '../../../../app/js/mongodb.js'
+import { promisify } from '@overleaf/promise-utils'
 
 const rclient = RedisWrapper.createClient(Settings.redis.project_history)
 const Keys = Settings.redis.project_history.key_schema
@@ -351,4 +352,8 @@ export function deleteProject(projectId, callback) {
     expect(res.statusCode).to.equal(204)
     callback()
   })
+}
+
+export const promises = {
+  initializeProject: promisify(initializeProject),
 }
