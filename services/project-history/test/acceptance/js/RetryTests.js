@@ -1,7 +1,6 @@
-import async from 'async'
 import nock from 'nock'
 import { expect } from 'chai'
-import request from 'request'
+import { fetchStringWithResponse } from '@overleaf/fetch-utils'
 import assert from 'node:assert'
 import mongodb from 'mongodb-legacy'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
@@ -16,42 +15,39 @@ const MockCallback = () => nock('http://127.0.0.1')
 describe('Retrying failed projects', function () {
   const historyId = new ObjectId().toString()
 
-  beforeEach(function (done) {
+  beforeEach(async function () {
     this.timestamp = new Date()
 
-    ProjectHistoryApp.ensureRunning(error => {
-      if (error) {
-        throw error
-      }
-      this.project_id = new ObjectId().toString()
-      this.doc_id = new ObjectId().toString()
-      this.file_id = new ObjectId().toString()
+    await ProjectHistoryApp.promises.ensureRunning()
 
-      MockHistoryStore().post('/api/projects').reply(200, {
-        projectId: historyId,
-      })
-      MockWeb()
-        .get(`/project/${this.project_id}/details`)
-        .reply(200, {
-          name: 'Test Project',
-          overleaf: {
-            history: {
-              id: historyId,
-            },
-          },
-        })
-      MockHistoryStore()
-        .get(`/api/projects/${historyId}/latest/history`)
-        .reply(200, {
-          chunk: {
-            startVersion: 0,
-            history: {
-              changes: [],
-            },
-          },
-        })
-      ProjectHistoryClient.initializeProject(historyId, done)
+    this.project_id = new ObjectId().toString()
+    this.doc_id = new ObjectId().toString()
+    this.file_id = new ObjectId().toString()
+
+    MockHistoryStore().post('/api/projects').reply(200, {
+      projectId: historyId,
     })
+    MockWeb()
+      .get(`/project/${this.project_id}/details`)
+      .reply(200, {
+        name: 'Test Project',
+        overleaf: {
+          history: {
+            id: historyId,
+          },
+        },
+      })
+    MockHistoryStore()
+      .get(`/api/projects/${historyId}/latest/history`)
+      .reply(200, {
+        chunk: {
+          startVersion: 0,
+          history: {
+            changes: [],
+          },
+        },
+      })
+    await ProjectHistoryClient.promises.initializeProject(historyId)
   })
 
   afterEach(function () {
@@ -60,7 +56,7 @@ describe('Retrying failed projects', function () {
 
   describe('retrying project history', function () {
     describe('when there is a soft failure', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.flushCall = MockHistoryStore()
           .put(
             `/api/projects/${historyId}/blobs/0a207c060e61f3b88eaee0a8cd0696f46fb155eb`
@@ -74,82 +70,69 @@ describe('Retrying failed projects', function () {
           doc: this.doc_id,
           meta: { user_id: this.user_id, ts: new Date() },
         }
-        async.series(
-          [
-            cb =>
-              ProjectHistoryClient.pushRawUpdate(this.project_id, update, cb),
-            cb =>
-              ProjectHistoryClient.setFailure(
-                {
-                  project_id: this.project_id,
-                  attempts: 1,
-                  error: 'soft-error',
-                },
-                cb
-              ),
-          ],
-          done
+
+        await ProjectHistoryClient.promises.pushRawUpdate(
+          this.project_id,
+          update
         )
+        await ProjectHistoryClient.promises.setFailure({
+          project_id: this.project_id,
+          attempts: 1,
+          error: 'soft-error',
+        })
       })
 
-      it('flushes the project history queue', function (done) {
-        request.post(
+      it('flushes the project history queue', async function () {
+        const { response } = await fetchStringWithResponse(
+          'http://127.0.0.1:3054/retry/failures?failureType=soft&limit=1&timeout=10000',
           {
-            url: 'http://127.0.0.1:3054/retry/failures?failureType=soft&limit=1&timeout=10000',
-          },
-          (error, res, body) => {
-            if (error) {
-              return done(error)
-            }
-            expect(res.statusCode).to.equal(200)
-            assert(
-              this.flushCall.isDone(),
-              'made calls to history service to store updates'
-            )
-            done()
+            method: 'POST',
           }
         )
+        expect(response.status).to.equal(200)
+        assert(
+          this.flushCall.isDone(),
+          'made calls to history service to store updates'
+        )
       })
 
-      it('retries in the background when requested', function (done) {
+      it('retries in the background when requested', async function () {
         this.callback = MockCallback()
           .matchHeader('Authorization', '123')
           .get('/ping')
           .reply(200)
-        request.post(
+
+        const { body, response } = await fetchStringWithResponse(
+          'http://127.0.0.1:3054/retry/failures?failureType=soft&limit=1&timeout=10000&callbackUrl=http%3A%2F%2F127.0.0.1%2Fping',
           {
-            url: 'http://127.0.0.1:3054/retry/failures?failureType=soft&limit=1&timeout=10000&callbackUrl=http%3A%2F%2F127.0.0.1%2Fping',
+            method: 'POST',
             headers: {
               'X-CALLBACK-Authorization': '123',
             },
-          },
-          (error, res, body) => {
-            if (error) {
-              return done(error)
-            }
-            expect(res.statusCode).to.equal(200)
-            expect(body).to.equal(
-              '{"retryStatus":"running retryFailures in background"}'
-            )
-            assert(
-              !this.flushCall.isDone(),
-              'did not make calls to history service to store updates in the foreground'
-            )
-            setTimeout(() => {
-              assert(
-                this.flushCall.isDone(),
-                'made calls to history service to store updates in the background'
-              )
-              assert(this.callback.isDone(), 'hit the callback url')
-              done()
-            }, 100)
           }
         )
+
+        expect(response.status).to.equal(200)
+        expect(body).to.equal(
+          '{"retryStatus":"running retryFailures in background"}'
+        )
+        assert(
+          !this.flushCall.isDone(),
+          'did not make calls to history service to store updates in the foreground'
+        )
+
+        await new Promise(resolve => setTimeout(resolve, 100))
+
+        assert(
+          this.flushCall.isDone(),
+          'made calls to history service to store updates in the background'
+        )
+        assert(this.callback.isDone(), 'hit the callback url')
       })
     })
 
     describe('when there is a hard failure', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         MockWeb()
           .get(`/project/${this.project_id}/details`)
           .reply(200, {
@@ -160,34 +143,27 @@ describe('Retrying failed projects', function () {
               },
             },
           })
-        ProjectHistoryClient.setFailure(
-          {
-            project_id: this.project_id,
-            attempts: 100,
-            error: 'hard-error',
-          },
-          done
-        )
+        await ProjectHistoryClient.promises.setFailure({
+          project_id: this.project_id,
+          attempts: 100,
+          error: 'hard-error',
+        })
       })
 
-      it('calls web to resync the project', function (done) {
+      it('calls web to resync the project', async function () {
         const resyncCall = MockWeb()
           .post(`/project/${this.project_id}/history/resync`)
           .reply(200)
 
-        request.post(
+        const { response } = await fetchStringWithResponse(
+          'http://127.0.0.1:3054/retry/failures?failureType=hard&limit=1&timeout=10000',
           {
-            url: 'http://127.0.0.1:3054/retry/failures?failureType=hard&limit=1&timeout=10000',
-          },
-          (error, res, body) => {
-            if (error) {
-              return done(error)
-            }
-            expect(res.statusCode).to.equal(200)
-            assert(resyncCall.isDone(), 'made a call to web to resync project')
-            done()
+            method: 'POST',
           }
         )
+
+        expect(response.status).to.equal(200)
+        assert(resyncCall.isDone(), 'made a call to web to resync project')
       })
     })
   })

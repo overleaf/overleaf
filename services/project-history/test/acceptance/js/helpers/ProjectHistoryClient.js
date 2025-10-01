@@ -361,4 +361,5 @@ export const promises = {
   setFirstOpTimestamp: promisify(setFirstOpTimestamp),
   getFirstOpTimestamp: promisify(getFirstOpTimestamp),
   getDump: promisify(getDump),
+  setFailure: promisify(setFailure),
 }
