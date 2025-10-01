@@ -363,4 +363,5 @@ export const promises = {
   getDump: promisify(getDump),
   setFailure: promisify(setFailure),
   getDiff: promisify(getDiff),
+  flushProject: promisify(flushProject),
 }
