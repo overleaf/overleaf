@@ -10,7 +10,7 @@ const MockWeb = () => nock('http://127.0.0.1:3000')
 const fixture = path => new URL(`../fixtures/${path}`, import.meta.url)
 
 describe('Deleting project', function () {
-  beforeEach(function (done) {
+  beforeEach(async function () {
     this.projectId = new ObjectId().toString()
     this.historyId = new ObjectId().toString()
     MockWeb()
@@ -23,61 +23,40 @@ describe('Deleting project', function () {
       .get(`/api/projects/${this.historyId}/latest/history`)
       .replyWithFile(200, fixture('chunks/0-3.json'))
     MockHistoryStore().delete(`/api/projects/${this.historyId}`).reply(204)
-    ProjectHistoryApp.ensureRunning(done)
+    await ProjectHistoryApp.promises.ensureRunning()
   })
 
-  describe('when the project has no pending updates', function (done) {
-    it('successfully deletes the project', function (done) {
-      ProjectHistoryClient.deleteProject(this.projectId, done)
+  describe('when the project has no pending updates', function () {
+    it('successfully deletes the project', async function () {
+      await ProjectHistoryClient.promises.deleteProject(this.projectId)
     })
   })
 
-  describe('when the project has pending updates', function (done) {
-    beforeEach(function (done) {
-      ProjectHistoryClient.pushRawUpdate(
+  describe('when the project has pending updates', function () {
+    beforeEach(async function () {
+      await ProjectHistoryClient.promises.pushRawUpdate(this.projectId, {
+        pathname: '/main.tex',
+        docLines: 'hello',
+        doc: this.docId,
+        meta: { userId: this.userId, ts: new Date() },
+      })
+      await ProjectHistoryClient.promises.setFirstOpTimestamp(
         this.projectId,
-        {
-          pathname: '/main.tex',
-          docLines: 'hello',
-          doc: this.docId,
-          meta: { userId: this.userId, ts: new Date() },
-        },
-        err => {
-          if (err) {
-            return done(err)
-          }
-          ProjectHistoryClient.setFirstOpTimestamp(
-            this.projectId,
-            Date.now(),
-            err => {
-              if (err) {
-                return done(err)
-              }
-              ProjectHistoryClient.deleteProject(this.projectId, done)
-            }
-          )
-        }
+        Date.now()
       )
+      await ProjectHistoryClient.promises.deleteProject(this.projectId)
     })
 
-    it('clears pending updates', function (done) {
-      ProjectHistoryClient.getDump(this.projectId, (err, dump) => {
-        if (err) {
-          return done(err)
-        }
-        expect(dump.updates).to.deep.equal([])
-        done()
-      })
+    it('clears pending updates', async function () {
+      const dump = await ProjectHistoryClient.promises.getDump(this.projectId)
+      expect(dump.updates).to.deep.equal([])
     })
 
-    it('clears the first op timestamp', function (done) {
-      ProjectHistoryClient.getFirstOpTimestamp(this.projectId, (err, ts) => {
-        if (err) {
-          return done(err)
-        }
-        expect(ts).to.be.null
-        done()
-      })
+    it('clears the first op timestamp', async function () {
+      const ts = await ProjectHistoryClient.promises.getFirstOpTimestamp(
+        this.projectId
+      )
+      expect(ts).to.be.null
     })
   })
 })

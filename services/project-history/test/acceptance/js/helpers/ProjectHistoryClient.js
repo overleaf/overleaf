@@ -356,4 +356,9 @@ export function deleteProject(projectId, callback) {
 
 export const promises = {
   initializeProject: promisify(initializeProject),
+  deleteProject: promisify(deleteProject),
+  pushRawUpdate: promisify(pushRawUpdate),
+  setFirstOpTimestamp: promisify(setFirstOpTimestamp),
+  getFirstOpTimestamp: promisify(getFirstOpTimestamp),
+  getDump: promisify(getDump),
 }
