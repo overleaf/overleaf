@@ -1,20 +1,9 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const express = require('express')
 const Path = require('node:path')
 const Client = require('./helpers/Client')
 const sinon = require('sinon')
 const ClsiApp = require('./helpers/ClsiApp')
-const request = require('request')
+const { fetchString } = require('@overleaf/fetch-utils')
 const Settings = require('@overleaf/settings')
 
 const Server = {
@@ -44,18 +33,18 @@ const Server = {
 
     app.get('/project/:projectId/file/:fileId', (req, res, next) => {
       this.getFile(req.url)
-      return res.send(`${req.params.projectId}:${req.params.fileId}`)
+      res.send(`${req.params.projectId}:${req.params.fileId}`)
     })
 
     app.get('/bucket/:bucket/key/*', (req, res, next) => {
       this.getFile(req.url)
-      return res.send(`${req.params.bucket}:${req.params[0]}`)
+      res.send(`${req.params.bucket}:${req.params[0]}`)
     })
 
     app.get('/:random_id/*', (req, res, next) => {
       this.getFile(req.url)
       req.url = `/${req.params[0]}`
-      return staticServer(req, res, next)
+      staticServer(req, res, next)
     })
 
     Client.startFakeFilestoreApp(app)
@@ -72,7 +61,7 @@ describe('Url Caching', function () {
   Server.run()
 
   describe('Retries', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = Client.randomId()
       this.happyFile = `${Server.randomId()}/lion.png`
       this.retryFileOnce = `fail/1/${Server.randomId()}`
@@ -110,14 +99,8 @@ describe('Url Caching', function () {
       }
 
       sinon.spy(Server, 'getFile')
-      ClsiApp.ensureRunning(() => {
-        Client.compile(this.project_id, this.request, (error, res, body) => {
-          this.error = error
-          this.res = res
-          this.body = body
-          done()
-        })
-      })
+      await ClsiApp.ensureRunning()
+      this.body = await Client.compile(this.project_id, this.request)
     })
 
     after(function () {
@@ -139,7 +122,7 @@ describe('Url Caching', function () {
   })
 
   describe('Downloading an image for the first time', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = Client.randomId()
       this.file = `${Server.randomId()}/lion.png`
       this.request = {
@@ -162,31 +145,21 @@ describe('Url Caching', function () {
       }
 
       sinon.spy(Server, 'getFile')
-      return ClsiApp.ensureRunning(() => {
-        return Client.compile(
-          this.project_id,
-          this.request,
-          (error, res, body) => {
-            this.error = error
-            this.res = res
-            this.body = body
-            return done()
-          }
-        )
-      })
+      await ClsiApp.ensureRunning()
+      this.body = await Client.compile(this.project_id, this.request)
     })
 
     afterEach(function () {
-      return Server.getFile.restore()
+      Server.getFile.restore()
     })
 
-    return it('should download the image', function () {
-      return Server.getFile.calledWith(`/${this.file}`).should.equal(true)
+    it('should download the image', function () {
+      Server.getFile.calledWith(`/${this.file}`).should.equal(true)
     })
   })
 
   describe('When an image is in the cache and the last modified date is unchanged', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = Client.randomId()
       this.file = `${Server.randomId()}/lion.png`
       this.request = {
@@ -209,54 +182,34 @@ describe('Url Caching', function () {
         ],
       }
 
-      return Client.compile(
-        this.project_id,
-        this.request,
-        (error, res, body) => {
-          this.error = error
-          this.res = res
-          this.body = body
-          sinon.spy(Server, 'getFile')
-          return Client.compile(
-            this.project_id,
-            this.request,
-            (error1, res1, body1) => {
-              this.error = error1
-              this.res = res1
-              this.body = body1
-              return done()
-            }
-          )
-        }
-      )
+      await Client.compile(this.project_id, this.request)
+      sinon.spy(Server, 'getFile')
+      await Client.compile(this.project_id, this.request)
     })
 
     after(function () {
-      return Server.getFile.restore()
+      Server.getFile.restore()
     })
 
     it('should not download the image again', function () {
-      return Server.getFile.called.should.equal(false)
+      Server.getFile.called.should.equal(false)
     })
 
-    it('should gather metrics', function (done) {
-      request.get(`${Settings.apis.clsi.url}/metrics`, (err, res, body) => {
-        if (err) return done(err)
-        body
-          .split('\n')
-          .some(line => {
-            return (
-              line.startsWith('url_source') && line.includes('path="unknown"')
-            )
-          })
-          .should.equal(true)
-        done()
-      })
+    it('should gather metrics', async function () {
+      const body = await fetchString(`${Settings.apis.clsi.url}/metrics`)
+      body
+        .split('\n')
+        .some(line => {
+          return (
+            line.startsWith('url_source') && line.includes('path="unknown"')
+          )
+        })
+        .should.equal(true)
     })
   })
 
   describe('When an image is in the cache and the last modified date is advanced', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = Client.randomId()
       this.file = `${Server.randomId()}/lion.png`
       this.request = {
@@ -279,40 +232,25 @@ describe('Url Caching', function () {
         ],
       }
 
-      return Client.compile(
-        this.project_id,
-        this.request,
-        (error, res, body) => {
-          this.error = error
-          this.res = res
-          this.body = body
-          sinon.spy(Server, 'getFile')
-          this.image_resource.modified = new Date(this.last_modified + 3000)
-          return Client.compile(
-            this.project_id,
-            this.request,
-            (error1, res1, body1) => {
-              this.error = error1
-              this.res = res1
-              this.body = body1
-              return done()
-            }
-          )
-        }
-      )
+      await Client.compile(this.project_id, this.request)
+
+      sinon.spy(Server, 'getFile')
+      this.image_resource.modified = new Date(this.last_modified + 3000)
+
+      await Client.compile(this.project_id, this.request)
     })
 
     afterEach(function () {
-      return Server.getFile.restore()
+      Server.getFile.restore()
     })
 
-    return it('should download the image again', function () {
-      return Server.getFile.called.should.equal(true)
+    it('should download the image again', function () {
+      Server.getFile.called.should.equal(true)
     })
   })
 
   describe('When an image is in the cache and the last modified date is further in the past', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = Client.randomId()
       this.file = `${Server.randomId()}/lion.png`
       this.request = {
@@ -335,40 +273,25 @@ describe('Url Caching', function () {
         ],
       }
 
-      return Client.compile(
-        this.project_id,
-        this.request,
-        (error, res, body) => {
-          this.error = error
-          this.res = res
-          this.body = body
-          sinon.spy(Server, 'getFile')
-          this.image_resource.modified = new Date(this.last_modified - 3000)
-          return Client.compile(
-            this.project_id,
-            this.request,
-            (error1, res1, body1) => {
-              this.error = error1
-              this.res = res1
-              this.body = body1
-              return done()
-            }
-          )
-        }
-      )
+      await Client.compile(this.project_id, this.request)
+
+      sinon.spy(Server, 'getFile')
+      this.image_resource.modified = new Date(this.last_modified - 3000)
+
+      await Client.compile(this.project_id, this.request)
     })
 
     afterEach(function () {
-      return Server.getFile.restore()
+      Server.getFile.restore()
     })
 
-    return it('should download the other revision', function () {
-      return Server.getFile.called.should.equal(true)
+    it('should download the other revision', function () {
+      Server.getFile.called.should.equal(true)
     })
   })
 
   describe('When an image is in the cache and the last modified date is not specified', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = Client.randomId()
       this.file = `${Server.randomId()}/lion.png`
       this.request = {
@@ -391,40 +314,25 @@ describe('Url Caching', function () {
         ],
       }
 
-      return Client.compile(
-        this.project_id,
-        this.request,
-        (error, res, body) => {
-          this.error = error
-          this.res = res
-          this.body = body
-          sinon.spy(Server, 'getFile')
-          delete this.image_resource.modified
-          return Client.compile(
-            this.project_id,
-            this.request,
-            (error1, res1, body1) => {
-              this.error = error1
-              this.res = res1
-              this.body = body1
-              return done()
-            }
-          )
-        }
-      )
+      await Client.compile(this.project_id, this.request)
+
+      sinon.spy(Server, 'getFile')
+      delete this.image_resource.modified
+
+      await Client.compile(this.project_id, this.request)
     })
 
     afterEach(function () {
-      return Server.getFile.restore()
+      Server.getFile.restore()
     })
 
-    return it('should download the image again', function () {
-      return Server.getFile.called.should.equal(true)
+    it('should download the image again', function () {
+      Server.getFile.called.should.equal(true)
     })
   })
 
   describe('After clearing the cache', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = Client.randomId()
       this.file = `${Server.randomId()}/lion.png`
       this.request = {
@@ -447,41 +355,26 @@ describe('Url Caching', function () {
         ],
       }
 
-      return Client.compile(this.project_id, this.request, error => {
-        if (error != null) {
-          throw error
-        }
-        return Client.clearCache(this.project_id, (error, res, body) => {
-          if (error != null) {
-            throw error
-          }
-          sinon.spy(Server, 'getFile')
-          return Client.compile(
-            this.project_id,
-            this.request,
-            (error1, res1, body1) => {
-              this.error = error1
-              this.res = res1
-              this.body = body1
-              return done()
-            }
-          )
-        })
-      })
+      await Client.compile(this.project_id, this.request)
+      await Client.clearCache(this.project_id)
+
+      sinon.spy(Server, 'getFile')
+
+      await Client.compile(this.project_id, this.request)
     })
 
     afterEach(function () {
-      return Server.getFile.restore()
+      Server.getFile.restore()
     })
 
-    return it('should download the image again', function () {
-      return Server.getFile.called.should.equal(true)
+    it('should download the image again', function () {
+      Server.getFile.called.should.equal(true)
     })
   })
 
   describe('fallbackURL', function () {
     describe('when the primary resource is available', function () {
-      before(function (done) {
+      before(async function () {
         this.project_id = Client.randomId()
         this.file = `/project/${Server.randomId()}/file/${Server.randomId()}`
         this.fallback = `/bucket/project-blobs/key/ab/cd/${Server.randomId()}`
@@ -506,22 +399,12 @@ describe('Url Caching', function () {
         }
 
         sinon.spy(Server, 'getFile')
-        return ClsiApp.ensureRunning(() => {
-          return Client.compile(
-            this.project_id,
-            this.request,
-            (error, res, body) => {
-              this.error = error
-              this.res = res
-              this.body = body
-              return done()
-            }
-          )
-        })
+        await ClsiApp.ensureRunning()
+        await Client.compile(this.project_id, this.request)
       })
 
       after(function () {
-        return Server.getFile.restore()
+        Server.getFile.restore()
       })
 
       it('should download from the primary', function () {
@@ -531,25 +414,22 @@ describe('Url Caching', function () {
         Server.getFile.calledWith(this.fallback).should.equal(false)
       })
 
-      it('should gather metrics', function (done) {
-        request.get(`${Settings.apis.clsi.url}/metrics`, (err, res, body) => {
-          if (err) return done(err)
-          body
-            .split('\n')
-            .some(line => {
-              return (
-                line.startsWith('url_source') &&
-                line.includes('path="user-files"')
-              )
-            })
-            .should.equal(true)
-          done()
-        })
+      it('should gather metrics', async function () {
+        const body = await fetchString(`${Settings.apis.clsi.url}/metrics`)
+        body
+          .split('\n')
+          .some(line => {
+            return (
+              line.startsWith('url_source') &&
+              line.includes('path="user-files"')
+            )
+          })
+          .should.equal(true)
       })
     })
 
     describe('when the primary resource is not available', function () {
-      before(function (done) {
+      before(async function () {
         this.project_id = Client.randomId()
         this.file = `/project/${Server.randomId()}/file/${Server.randomId()}`
         this.fallback = `/bucket/project-blobs/key/ab/cd/${Server.randomId()}`
@@ -574,22 +454,12 @@ describe('Url Caching', function () {
         }
 
         sinon.spy(Server, 'getFile')
-        return ClsiApp.ensureRunning(() => {
-          return Client.compile(
-            this.project_id,
-            this.request,
-            (error, res, body) => {
-              this.error = error
-              this.res = res
-              this.body = body
-              return done()
-            }
-          )
-        })
+        await ClsiApp.ensureRunning()
+        await Client.compile(this.project_id, this.request)
       })
 
       after(function () {
-        return Server.getFile.restore()
+        Server.getFile.restore()
       })
 
       it('should download from the fallback', function () {
@@ -597,20 +467,17 @@ describe('Url Caching', function () {
         Server.getFile.calledWith(this.fallback).should.equal(true)
       })
 
-      it('should gather metrics', function (done) {
-        request.get(`${Settings.apis.clsi.url}/metrics`, (err, res, body) => {
-          if (err) return done(err)
-          body
-            .split('\n')
-            .some(line => {
-              return (
-                line.startsWith('url_source') &&
-                line.includes('path="project-blobs"')
-              )
-            })
-            .should.equal(true)
-          done()
-        })
+      it('should gather metrics', async function () {
+        const body = await fetchString(`${Settings.apis.clsi.url}/metrics`)
+        body
+          .split('\n')
+          .some(line => {
+            return (
+              line.startsWith('url_source') &&
+              line.includes('path="project-blobs"')
+            )
+          })
+          .should.equal(true)
       })
     })
   })

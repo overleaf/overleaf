@@ -1,17 +1,10 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const Client = require('./helpers/Client')
-const request = require('request')
+const { fetchString, fetchNothing } = require('@overleaf/fetch-utils')
 const ClsiApp = require('./helpers/ClsiApp')
 const Settings = require('@overleaf/settings')
 
 describe('Simple LaTeX file', function () {
-  before(function (done) {
+  before(async function () {
     this.project_id = Client.randomId()
     this.request = {
       resources: [
@@ -30,62 +23,48 @@ Hello world
         metricsMethod: 'priority',
       },
     }
-    return ClsiApp.ensureRunning(() => {
-      return Client.compile(
-        this.project_id,
-        this.request,
-        (error, res, body) => {
-          this.error = error
-          this.res = res
-          this.body = body
-          return done()
-        }
-      )
-    })
+
+    await ClsiApp.ensureRunning()
+    try {
+      this.body = await Client.compile(this.project_id, this.request)
+    } catch (error) {
+      this.error = error
+    }
   })
 
   it('should return the PDF', function () {
     const pdf = Client.getOutputFile(this.body, 'pdf')
-    return pdf.type.should.equal('pdf')
+    pdf.type.should.equal('pdf')
   })
 
   it('should return the log', function () {
     const log = Client.getOutputFile(this.body, 'log')
-    return log.type.should.equal('log')
+    log.type.should.equal('log')
   })
 
-  it('should provide the pdf for download', function (done) {
+  it('should provide the pdf for download', async function () {
     const pdf = Client.getOutputFile(this.body, 'pdf')
-    return request.get(pdf.url, (error, res, body) => {
-      if (error) return done(error)
-      res.statusCode.should.equal(200)
-      return done()
-    })
+    const response = await fetchNothing(pdf.url)
+    response.status.should.equal(200)
   })
 
-  it('should provide the log for download', function (done) {
+  it('should provide the log for download', async function () {
     const log = Client.getOutputFile(this.body, 'pdf')
-    return request.get(log.url, (error, res, body) => {
-      if (error) return done(error)
-      res.statusCode.should.equal(200)
-      return done()
-    })
+    const response = await fetchNothing(log.url)
+    response.status.should.equal(200)
   })
 
-  it('should gather personalized metrics', function (done) {
-    request.get(`${Settings.apis.clsi.url}/metrics`, (err, res, body) => {
-      if (err) return done(err)
-      body
-        .split('\n')
-        .some(line => {
-          return (
-            line.startsWith('compile') &&
-            line.includes('path="clsi-perf"') &&
-            line.includes('method="priority"')
-          )
-        })
-        .should.equal(true)
-      done()
-    })
+  it('should gather personalized metrics', async function () {
+    const body = await fetchString(`${Settings.apis.clsi.url}/metrics`)
+    body
+      .split('\n')
+      .some(line => {
+        return (
+          line.startsWith('compile') &&
+          line.includes('path="clsi-perf"') &&
+          line.includes('method="priority"')
+        )
+      })
+      .should.equal(true)
   })
 })

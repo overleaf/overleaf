@@ -1,258 +1,195 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let Client
 const express = require('express')
-const request = require('request')
+const { fetchJson, fetchNothing } = require('@overleaf/fetch-utils')
 const fs = require('node:fs')
+const fsPromises = require('node:fs/promises')
 const Settings = require('@overleaf/settings')
 
-module.exports = Client = {
-  host: Settings.apis.clsi.url,
+const host = Settings.apis.clsi.url
 
-  randomId() {
-    return Math.random().toString(16).slice(2)
-  },
+function randomId() {
+  return Math.random().toString(16).slice(2)
+}
 
-  compile(projectId, data, callback) {
-    if (callback == null) {
-      callback = function () {}
+function compile(projectId, data) {
+  if (data) {
+    // Enable pdf caching unless disabled explicitly.
+    data.options = Object.assign({}, { enablePdfCaching: true }, data.options)
+  }
+  return fetchJson(`${host}/project/${projectId}/compile`, {
+    method: 'POST',
+    json: {
+      compile: data,
+    },
+  })
+}
+
+async function stopCompile(projectId) {
+  return await fetchNothing(`${host}/project/${projectId}/compile/stop`, {
+    method: 'POST',
+  })
+}
+
+async function clearCache(projectId) {
+  await fetchNothing(`${host}/project/${projectId}`, {
+    method: 'DELETE',
+  })
+}
+
+function getOutputFile(response, type) {
+  for (const file of response.compile.outputFiles) {
+    if (file.type === type && file.url.match(`output.${type}`)) {
+      return file
     }
-    if (data) {
-      // Enable pdf caching unless disabled explicitly.
-      data.options = Object.assign({}, { enablePdfCaching: true }, data.options)
-    }
-    return request.post(
-      {
-        url: `${this.host}/project/${projectId}/compile`,
-        json: {
-          compile: data,
-        },
-      },
-      callback
-    )
-  },
+  }
+  return null
+}
 
-  stopCompile(projectId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return request.post(
-      { url: `${this.host}/project/${projectId}/compile/stop` },
-      callback
-    )
-  },
+function runFakeFilestoreService(directory) {
+  const app = express()
+  app.use(express.static(directory))
+  this.startFakeFilestoreApp(app)
+}
 
-  clearCache(projectId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return request.del(`${this.host}/project/${projectId}`, callback)
-  },
-
-  getOutputFile(response, type) {
-    for (const file of Array.from(response.compile.outputFiles)) {
-      if (file.type === type && file.url.match(`output.${type}`)) {
-        return file
+function startFakeFilestoreApp(app) {
+  let server
+  before(function (done) {
+    server = app.listen(error => {
+      if (error) {
+        done(new Error('error starting server: ' + error.message))
+      } else {
+        const addr = server.address()
+        Settings.filestoreDomainOveride = `http://127.0.0.1:${addr.port}`
+        done()
       }
-    }
-    return null
-  },
-
-  runFakeFilestoreService(directory) {
-    const app = express()
-    app.use(express.static(directory))
-    this.startFakeFilestoreApp(app)
-  },
-
-  startFakeFilestoreApp(app) {
-    let server
-    before(function (done) {
-      server = app.listen(error => {
-        if (error) {
-          done(new Error('error starting server: ' + error.message))
-        } else {
-          const addr = server.address()
-          Settings.filestoreDomainOveride = `http://127.0.0.1:${addr.port}`
-          done()
-        }
-      })
     })
-    after(function (done) {
-      server.close(done)
-    })
-  },
+  })
+  after(function (done) {
+    server.close(done)
+  })
+}
 
-  syncFromCode(projectId, file, line, column, callback) {
-    Client.syncFromCodeWithImage(projectId, file, line, column, '', callback)
-  },
+function syncFromCode(projectId, file, line, column) {
+  return syncFromCodeWithImage(projectId, file, line, column, '')
+}
 
-  syncFromCodeWithImage(projectId, file, line, column, imageName, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return request.get(
-      {
-        url: `${this.host}/project/${projectId}/sync/code`,
-        qs: {
-          imageName,
-          file,
-          line,
-          column,
-        },
-        json: true,
-      },
-      (error, response, body) => {
-        if (error != null) {
-          return callback(error)
-        }
-        if (response.statusCode !== 200) {
-          return callback(new Error(`statusCode=${response.statusCode}`), body)
-        }
-        return callback(null, body)
-      }
-    )
-  },
+async function syncFromCodeWithImage(projectId, file, line, column, imageName) {
+  const url = new URL(`${host}/project/${projectId}/sync/code`)
+  url.searchParams.append('imageName', imageName)
+  url.searchParams.append('file', file)
+  url.searchParams.append('line', line)
+  url.searchParams.append('column', column)
+  return await fetchJson(url)
+}
 
-  syncFromPdf(projectId, page, h, v, callback) {
-    Client.syncFromPdfWithImage(projectId, page, h, v, '', callback)
-  },
+function syncFromPdf(projectId, page, h, v) {
+  return syncFromPdfWithImage(projectId, page, h, v, '')
+}
 
-  syncFromPdfWithImage(projectId, page, h, v, imageName, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return request.get(
-      {
-        url: `${this.host}/project/${projectId}/sync/pdf`,
-        qs: {
-          imageName,
-          page,
-          h,
-          v,
-        },
-        json: true,
-      },
-      (error, response, body) => {
-        if (error != null) {
-          return callback(error)
-        }
-        if (response.statusCode !== 200) {
-          return callback(new Error(`statusCode=${response.statusCode}`), body)
-        }
-        return callback(null, body)
-      }
-    )
-  },
+function syncFromPdfWithImage(projectId, page, h, v, imageName) {
+  const url = new URL(`${host}/project/${projectId}/sync/pdf`)
+  url.searchParams.append('imageName', imageName)
+  url.searchParams.append('page', page)
+  url.searchParams.append('h', h)
+  url.searchParams.append('v', v)
+  return fetchJson(url)
+}
 
-  compileDirectory(projectId, baseDirectory, directory, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    const resources = []
-    let entities = fs.readdirSync(`${baseDirectory}/${directory}`)
-    let rootResourcePath = 'main.tex'
-    while (entities.length > 0) {
-      const entity = entities.pop()
-      const stat = fs.statSync(`${baseDirectory}/${directory}/${entity}`)
-      if (stat.isDirectory()) {
-        entities = entities.concat(
-          fs
-            .readdirSync(`${baseDirectory}/${directory}/${entity}`)
-            .map(subEntity => {
-              if (subEntity === 'main.tex') {
-                rootResourcePath = `${entity}/${subEntity}`
-              }
-              return `${entity}/${subEntity}`
-            })
-        )
-      } else if (stat.isFile() && entity !== 'output.pdf') {
-        const extension = entity.split('.').pop()
-        if (
-          [
-            'tex',
-            'bib',
-            'cls',
-            'sty',
-            'pdf_tex',
-            'Rtex',
-            'ist',
-            'md',
-            'Rmd',
-            'Rnw',
-          ].indexOf(extension) > -1
-        ) {
-          resources.push({
-            path: entity,
-            content: fs
-              .readFileSync(`${baseDirectory}/${directory}/${entity}`)
-              .toString(),
+function wordcount(projectId, file) {
+  const image = undefined
+  return wordcountWithImage(projectId, file, image)
+}
+
+async function wordcountWithImage(projectId, file, image) {
+  const url = new URL(`${host}/project/${projectId}/wordcount`)
+  if (image) {
+    url.searchParams.append('image', image)
+  }
+  url.searchParams.append('file', file)
+  return await fetchJson(url)
+}
+
+async function compileDirectory(projectId, baseDirectory, directory) {
+  const resources = []
+  let entities = fs.readdirSync(`${baseDirectory}/${directory}`)
+  let rootResourcePath = 'main.tex'
+  while (entities.length > 0) {
+    const entity = entities.pop()
+    const stat = fs.statSync(`${baseDirectory}/${directory}/${entity}`)
+    if (stat.isDirectory()) {
+      entities = entities.concat(
+        fs
+          .readdirSync(`${baseDirectory}/${directory}/${entity}`)
+          .map(subEntity => {
+            if (subEntity === 'main.tex') {
+              rootResourcePath = `${entity}/${subEntity}`
+            }
+            return `${entity}/${subEntity}`
           })
-        } else if (
-          ['eps', 'ttf', 'png', 'jpg', 'pdf', 'jpeg'].indexOf(extension) > -1
-        ) {
-          resources.push({
-            path: entity,
-            url: `http://filestore/${directory}/${entity}`,
-            modified: stat.mtime,
-          })
-        }
+      )
+    } else if (stat.isFile() && entity !== 'output.pdf') {
+      const extension = entity.split('.').pop()
+      if (
+        [
+          'tex',
+          'bib',
+          'cls',
+          'sty',
+          'pdf_tex',
+          'Rtex',
+          'ist',
+          'md',
+          'Rmd',
+          'Rnw',
+        ].indexOf(extension) > -1
+      ) {
+        resources.push({
+          path: entity,
+          content: fs
+            .readFileSync(`${baseDirectory}/${directory}/${entity}`)
+            .toString(),
+        })
+      } else if (
+        ['eps', 'ttf', 'png', 'jpg', 'pdf', 'jpeg'].indexOf(extension) > -1
+      ) {
+        resources.push({
+          path: entity,
+          url: `http://filestore/${directory}/${entity}`,
+          modified: stat.mtime,
+        })
       }
     }
+  }
 
-    return fs.readFile(
-      `${baseDirectory}/${directory}/options.json`,
-      (error, body) => {
-        const req = {
-          resources,
-          rootResourcePath,
-        }
+  const req = {
+    resources,
+    rootResourcePath,
+  }
 
-        if (error == null) {
-          body = JSON.parse(body)
-          req.options = body
-        }
-
-        return this.compile(projectId, req, callback)
-      }
+  try {
+    const options = await fsPromises.readFile(
+      `${baseDirectory}/${directory}/options.json`
     )
-  },
+    req.options = JSON.parse(options)
+  } catch (error) {
+    // noop
+  }
 
-  wordcount(projectId, file, callback) {
-    const image = undefined
-    Client.wordcountWithImage(projectId, file, image, callback)
-  },
+  return await compile(projectId, req)
+}
 
-  wordcountWithImage(projectId, file, image, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return request.get(
-      {
-        url: `${this.host}/project/${projectId}/wordcount`,
-        qs: {
-          image,
-          file,
-        },
-      },
-      (error, response, body) => {
-        if (error != null) {
-          return callback(error)
-        }
-        if (response.statusCode !== 200) {
-          return callback(new Error(`statusCode=${response.statusCode}`), body)
-        }
-        return callback(null, JSON.parse(body))
-      }
-    )
-  },
+module.exports = {
+  randomId,
+  compile,
+  stopCompile,
+  clearCache,
+  getOutputFile,
+  runFakeFilestoreService,
+  startFakeFilestoreApp,
+  syncFromCode,
+  syncFromCodeWithImage,
+  syncFromPdf,
+  syncFromPdfWithImage,
+  compileDirectory,
+  wordcount,
+  wordcountWithImage,
 }
