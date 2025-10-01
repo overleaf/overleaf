@@ -1,8 +1,11 @@
 import { expect } from 'chai'
-import request from 'request'
 import crypto from 'node:crypto'
 import mongodb from 'mongodb-legacy'
 import nock from 'nock'
+import {
+  fetchJsonWithResponse,
+  RequestFailedError,
+} from '@overleaf/fetch-utils'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
 const { ObjectId } = mongodb
@@ -20,39 +23,30 @@ function createMockBlob(historyId, content) {
 }
 
 describe('Diffs', function () {
-  beforeEach(function (done) {
-    ProjectHistoryApp.ensureRunning(error => {
-      if (error) {
-        throw error
-      }
+  beforeEach(async function () {
+    await ProjectHistoryApp.promises.ensureRunning()
 
-      this.historyId = new ObjectId().toString()
-      this.projectId = new ObjectId().toString()
+    this.historyId = new ObjectId().toString()
+    this.projectId = new ObjectId().toString()
 
-      MockHistoryStore().post('/api/projects').reply(200, {
-        projectId: this.historyId,
-      })
-      MockWeb()
-        .get(`/project/${this.projectId}/details`)
-        .reply(200, {
-          name: 'Test Project',
-          overleaf: { history: { id: this.historyId } },
-        })
-
-      ProjectHistoryClient.initializeProject(this.historyId, error => {
-        if (error) {
-          return done(error)
-        }
-        done()
-      })
+    MockHistoryStore().post('/api/projects').reply(200, {
+      projectId: this.historyId,
     })
+    MockWeb()
+      .get(`/project/${this.projectId}/details`)
+      .reply(200, {
+        name: 'Test Project',
+        overleaf: { history: { id: this.historyId } },
+      })
+
+    await ProjectHistoryClient.promises.initializeProject(this.historyId)
   })
 
   afterEach(function () {
     nock.cleanAll()
   })
 
-  it('should return a diff of the updates to a doc from a single chunk', function (done) {
+  it('should return a diff of the updates to a doc from a single chunk', async function () {
     this.blob = 'one two three five'
     this.sha = createMockBlob(this.historyId, this.blob)
     this.v2AuthorId = '123456789'
@@ -107,58 +101,52 @@ describe('Diffs', function () {
         authors: [31],
       })
 
-    ProjectHistoryClient.getDiff(
+    const diff = await ProjectHistoryClient.promises.getDiff(
       this.projectId,
       'foo.tex',
       3,
-      6,
-      (error, diff) => {
-        if (error) {
-          throw error
-        }
-        expect(diff).to.deep.equal({
-          diff: [
-            {
-              u: 'one ',
-            },
-            {
-              d: 'two ',
-              meta: {
-                users: [31],
-                start_ts: 1512383362905,
-                end_ts: 1512383362905,
-              },
-            },
-            {
-              u: 'three',
-            },
-            {
-              i: ' four',
-              meta: {
-                users: [31],
-                start_ts: 1512383357786,
-                end_ts: 1512383357786,
-              },
-            },
-            {
-              u: ' five',
-            },
-            {
-              i: ' six',
-              meta: {
-                users: [this.v2AuthorId],
-                start_ts: 1512383366120,
-                end_ts: 1512383366120,
-              },
-            },
-          ],
-        })
-        done()
-      }
+      6
     )
+    expect(diff).to.deep.equal({
+      diff: [
+        {
+          u: 'one ',
+        },
+        {
+          d: 'two ',
+          meta: {
+            users: [31],
+            start_ts: 1512383362905,
+            end_ts: 1512383362905,
+          },
+        },
+        {
+          u: 'three',
+        },
+        {
+          i: ' four',
+          meta: {
+            users: [31],
+            start_ts: 1512383357786,
+            end_ts: 1512383357786,
+          },
+        },
+        {
+          u: ' five',
+        },
+        {
+          i: ' six',
+          meta: {
+            users: [this.v2AuthorId],
+            start_ts: 1512383366120,
+            end_ts: 1512383366120,
+          },
+        },
+      ],
+    })
   })
 
-  it('should return a diff of the updates to a doc across multiple chunks', function (done) {
+  it('should return a diff of the updates to a doc across multiple chunks', async function () {
     MockHistoryStore()
       .get(`/api/projects/${this.historyId}/versions/5/history`)
       .reply(200, {
@@ -240,47 +228,41 @@ describe('Diffs', function () {
         authors: [{ id: 31, email: 'james.allen@overleaf.com', name: 'James' }],
       })
 
-    ProjectHistoryClient.getDiff(
+    const diff = await ProjectHistoryClient.promises.getDiff(
       this.projectId,
       'foo.tex',
       4,
-      6,
-      (error, diff) => {
-        if (error) {
-          throw error
-        }
-        expect(diff).to.deep.equal({
-          diff: [
-            {
-              u: 'one ',
-            },
-            {
-              d: 'two ',
-              meta: {
-                users: [31],
-                start_ts: 1512383362905,
-                end_ts: 1512383362905,
-              },
-            },
-            {
-              u: 'three four five',
-            },
-            {
-              i: ' six',
-              meta: {
-                users: [31],
-                start_ts: 1512383366120,
-                end_ts: 1512383366120,
-              },
-            },
-          ],
-        })
-        done()
-      }
+      6
     )
+    expect(diff).to.deep.equal({
+      diff: [
+        {
+          u: 'one ',
+        },
+        {
+          d: 'two ',
+          meta: {
+            users: [31],
+            start_ts: 1512383362905,
+            end_ts: 1512383362905,
+          },
+        },
+        {
+          u: 'three four five',
+        },
+        {
+          i: ' six',
+          meta: {
+            users: [31],
+            start_ts: 1512383366120,
+            end_ts: 1512383366120,
+          },
+        },
+      ],
+    })
   })
 
-  it('should return a 404 when there are no changes for the file in the range', function (done) {
+  it('should return a 404 when there are no changes for the file in the range', async function () {
     this.blob = 'one two three five'
     this.sha = createMockBlob(this.historyId, this.blob)
     MockHistoryStore()
@@ -314,27 +296,18 @@ describe('Diffs', function () {
         authors: [31],
       })
 
-    request.get(
-      {
-        url: `http://127.0.0.1:3054/project/${this.projectId}/diff`,
-        qs: {
-          pathname: 'not_here.tex',
-          from: 3,
-          to: 6,
-        },
-        json: true,
-      },
-      (error, res, body) => {
-        if (error) {
-          throw error
-        }
-        expect(res.statusCode).to.equal(404)
-        done()
-      }
-    )
+    try {
+      await fetchJsonWithResponse(
+        `http://127.0.0.1:3054/project/${this.projectId}/diff?pathname=not_here.tex&from=3&to=6`
+      )
+      expect.fail('Expected a 404 error')
+    } catch (error) {
+      expect(error).to.be.instanceOf(RequestFailedError)
+      expect(error.response.status).to.equal(404)
+    }
   })
 
-  it('should return a binary flag with a diff of a binary file', function (done) {
+  it('should return a binary flag with a diff of a binary file', async function () {
     this.blob = 'one two three five'
     this.sha = createMockBlob(this.historyId, this.blob)
     this.binaryBlob = Buffer.from([1, 2, 3, 4])
@@ -394,22 +367,16 @@ describe('Diffs', function () {
         authors: [{ id: 31, email: 'james.allen@overleaf.com', name: 'James' }],
       })
 
-    ProjectHistoryClient.getDiff(
+    const diff = await ProjectHistoryClient.promises.getDiff(
       this.projectId,
       'binary.tex',
       3,
-      6,
-      (error, diff) => {
-        if (error) {
-          throw error
-        }
-        expect(diff).to.deep.equal({
-          diff: {
-            binary: true,
-          },
-        })
-        done()
-      }
+      6
     )
+    expect(diff).to.deep.equal({
+      diff: {
+        binary: true,
+      },
+    })
   })
 })
