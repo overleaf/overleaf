@@ -109,7 +109,7 @@ describe('ChatContext', function () {
       await waitFor(() => {
         const message = result.current.messages[0]
         expect(message.id).to.equal('msg_1')
-        expect(message.contents).to.deep.equal(['new message'])
+        expect(message.content).to.deep.equal('new message')
       })
     })
 
@@ -161,7 +161,7 @@ describe('ChatContext', function () {
 
       const message = result.current.messages[0]
       expect(message.id).to.equal('msg_1')
-      expect(message.contents).to.deep.equal(['new message'])
+      expect(message.content).to.deep.equal('new message')
     })
 
     it('deduplicate messages from websocket', async function () {
@@ -209,7 +209,7 @@ describe('ChatContext', function () {
 
       const message = result.current.messages[0]
       expect(message.id).to.equal('msg_1')
-      expect(message.contents).to.deep.equal(['new message'])
+      expect(message.content).to.deep.equal('new message')
     })
 
     it("doesn't add received messages from the current user if a message was just sent", async function () {
@@ -225,14 +225,14 @@ describe('ChatContext', function () {
       )
 
       // Send a message from the current user
-      const sentMsg = 'sent message'
-      result.current.sendMessage(sentMsg)
+      const content = 'sent message'
+      result.current.sendMessage(content)
 
       act(() => {
         // Receive a message from the current user
         socket.emitToClient('new-chat-message', {
           id: 'msg_1',
-          content: 'received message',
+          content,
           timestamp: Date.now(),
           user,
           clientId: uuidValue,
@@ -243,7 +243,7 @@ describe('ChatContext', function () {
 
       const [message] = result.current.messages
 
-      expect(message.contents).to.deep.equal([sentMsg])
+      expect(message.content).to.deep.equal(content)
     })
 
     it('adds the new message from the current user if another message was received after sending', async function () {
@@ -259,13 +259,13 @@ describe('ChatContext', function () {
       )
 
       // Send a message from the current user
-      const sentMsg = 'sent message from current user'
+      const content = 'sent message from current user'
       act(() => {
-        result.current.sendMessage(sentMsg)
+        result.current.sendMessage(content)
       })
 
       const [sentMessageFromCurrentUser] = result.current.messages
-      expect(sentMessageFromCurrentUser.contents).to.deep.equal([sentMsg])
+      expect(sentMessageFromCurrentUser.content).to.deep.equal(content)
 
       const otherMsg = 'new message from other user'
 
@@ -285,24 +285,104 @@ describe('ChatContext', function () {
       })
 
       const [, messageFromOtherUser] = result.current.messages
-      expect(messageFromOtherUser.contents).to.deep.equal([otherMsg])
+      expect(messageFromOtherUser.content).to.deep.equal(otherMsg)
 
+      const receivedMessageTimestamp = Date.now()
       act(() => {
         // Receive a message from the current user
         socket.emitToClient('new-chat-message', {
           id: 'msg_2',
-          content: 'received message from current user',
-          timestamp: Date.now(),
+          content,
+          timestamp: receivedMessageTimestamp,
           user,
           clientId: uuidValue,
         })
       })
 
-      // Since the current user didn't just send a message, it is now shown
+      // Since this message has the same clientId, it should update the pending message
+      const updatedSentMessage = {
+        ...sentMessageFromCurrentUser,
+        id: 'msg_2',
+        content,
+        pending: false,
+        user,
+        timestamp: receivedMessageTimestamp,
+      }
       expect(result.current.messages).to.deep.equal([
-        sentMessageFromCurrentUser,
+        updatedSentMessage,
         messageFromOtherUser,
       ])
+    })
+
+    it('handles multiple pending messages correctly when confirmed out of order', async function () {
+      const socket = new SocketIOMock()
+      const { result } = renderChatContextHook({
+        socket: socket as any as Socket,
+      })
+
+      // Wait until initial messages have loaded
+      result.current.loadInitialMessages()
+      await waitFor(
+        () => expect(result.current.initialMessagesLoaded).to.be.true
+      )
+
+      // Send first message
+      act(() => {
+        result.current.sendMessage('first message')
+      })
+
+      // Send second message quickly
+      act(() => {
+        result.current.sendMessage('second message')
+      })
+
+      // At this point we should have 2 pending messages
+      expect(result.current.messages).to.have.length(2)
+      expect(result.current.messages[0].content).to.equal('first message')
+      expect(result.current.messages[0].pending).to.be.true
+      expect(result.current.messages[1].content).to.equal('second message')
+      expect(result.current.messages[1].pending).to.be.true
+
+      // Server confirms the second message first
+      const secondMessageTimestamp = Date.now()
+      act(() => {
+        socket.emitToClient('new-chat-message', {
+          id: 'server-id-2',
+          content: 'second message',
+          user,
+          timestamp: secondMessageTimestamp,
+          clientId: uuidValue,
+        })
+      })
+
+      await waitFor(() => {
+        expect(result.current.messages[0].content).to.equal('first message')
+        expect(result.current.messages[0].pending).to.be.true // Still pending
+        expect(result.current.messages[1].content).to.equal('second message')
+        expect(result.current.messages[1].pending).to.be.false // Confirmed
+        expect(result.current.messages[1].id).to.equal('server-id-2')
+      })
+
+      // Server confirms the first message
+      const firstMessageTimestamp = Date.now()
+      act(() => {
+        socket.emitToClient('new-chat-message', {
+          id: 'server-id-1',
+          content: 'first message',
+          user,
+          timestamp: firstMessageTimestamp,
+          clientId: uuidValue,
+        })
+      })
+
+      await waitFor(() => {
+        expect(result.current.messages[0].content).to.equal('first message')
+        expect(result.current.messages[0].pending).to.be.false // Now confirmed
+        expect(result.current.messages[0].id).to.equal('server-id-1')
+        expect(result.current.messages[1].content).to.equal('second message')
+        expect(result.current.messages[1].pending).to.be.false // Still confirmed
+        expect(result.current.messages[1].id).to.equal('server-id-2')
+      })
     })
   })
 
@@ -323,7 +403,7 @@ describe('ChatContext', function () {
 
       result.current.loadInitialMessages()
       await waitFor(() =>
-        expect(result.current.messages[0].contents).to.deep.equal(['a message'])
+        expect(result.current.messages[0].content).to.deep.equal('a message')
       )
     })
 
@@ -374,9 +454,9 @@ describe('ChatContext', function () {
 
       result.current.loadMoreMessages()
       await waitFor(() =>
-        expect(result.current.messages[0].contents).to.deep.equal([
-          'first message',
-        ])
+        expect(result.current.messages[0].content).to.deep.equal(
+          'first message'
+        )
       )
 
       // The before query param is not set
@@ -403,9 +483,7 @@ describe('ChatContext', function () {
       const { result } = renderChatContextHook({})
 
       result.current.loadMoreMessages()
-      await waitFor(() =>
-        expect(result.current.messages[0].contents).to.have.length(50)
-      )
+      await waitFor(() => expect(result.current.messages).to.have.length(50))
 
       // Call a second time
       result.current.loadMoreMessages()
@@ -414,7 +492,7 @@ describe('ChatContext', function () {
       // Since both messages from the same user, they are collapsed into the
       // same "message"
       await waitFor(() =>
-        expect(result.current.messages[0].contents).to.include(
+        expect(result.current.messages[0].content).to.include(
           'message from second page'
         )
       )
@@ -439,9 +517,7 @@ describe('ChatContext', function () {
       const { result } = renderChatContextHook({})
 
       result.current.loadMoreMessages()
-      await waitFor(() =>
-        expect(result.current.messages[0].contents).to.have.length(49)
-      )
+      await waitFor(() => expect(result.current.messages).to.have.length(49))
 
       result.current.loadMoreMessages()
 
@@ -497,7 +573,7 @@ describe('ChatContext', function () {
         // Although the loaded message was resolved last, it appears first (since
         // requested messages must have come first)
         const messageContents = result.current.messages.map(
-          ({ contents }) => contents[0]
+          ({ content }) => content
         )
         expect(messageContents).to.deep.equal([
           'loaded message',
@@ -532,9 +608,7 @@ describe('ChatContext', function () {
       result.current.sendMessage('sent message')
 
       await waitFor(() =>
-        expect(result.current.messages[0].contents).to.deep.equal([
-          'sent message',
-        ])
+        expect(result.current.messages[0].content).to.deep.equal('sent message')
       )
     })
 

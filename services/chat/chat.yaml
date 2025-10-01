@@ -82,6 +82,13 @@ paths:
           description: Message not found
       operationId: getGlobalMessage
       description: Get a single global message by message ID for the project with Project ID provided
+    delete:
+      summary: Delete global message
+      operationId: deleteGlobalMessage
+      responses:
+        '204':
+          description: No Content
+      description: 'Delete global message'
   '/project/{projectId}/thread/{threadId}/messages':
     parameters:
       - schema:
@@ -179,6 +186,46 @@ paths:
           - user_id: Id of the user (optional)
       description: |
         Update message with Message ID provided from the Thread ID and Project ID provided
+  '/project/{projectId}/messages/{messageId}/edit':
+    parameters:
+      - schema:
+          type: string
+        name: projectId
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: messageId
+        in: path
+        required: true
+    post:
+      summary: Edit global message
+      operationId: editGlobalMessage
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                user_id:
+                  type: string
+                  readOnly: true
+              required:
+                - content
+            examples: {}
+        description: |-
+          JSON object with :
+          - content: Content of the message to edit
+          - user_id: Id of the user (optional)
+      description: |
+        Update global message with Message ID provided from the Project ID provided
   '/project/{projectId}/thread/{threadId}/messages/{messageId}':
     parameters:
       - schema:

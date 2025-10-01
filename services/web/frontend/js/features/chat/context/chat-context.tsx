@@ -11,8 +11,18 @@ import {
 import clientIdGenerator from '@/utils/client-id'
 import { useUserContext } from '../../../shared/context/user-context'
 import { useProjectContext } from '../../../shared/context/project-context'
-import { getJSON, postJSON } from '../../../infrastructure/fetch-json'
-import { appendMessage, prependMessages } from '../utils/message-list-appender'
+import {
+  deleteJSON,
+  getJSON,
+  postJSON,
+} from '../../../infrastructure/fetch-json'
+import {
+  appendMessage,
+  confirmMessage,
+  deleteMessage,
+  editMessage,
+  prependMessages,
+} from '../utils/message-list-utils'
 import useBrowserWindow from '../../../shared/hooks/use-browser-window'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import { useIdeContext } from '@/shared/context/ide-context'
@@ -27,12 +37,16 @@ const PAGE_SIZE = 50
 export type Message = {
   id: string
   timestamp: number
-  contents: string[]
+  content: string
   user?: User
+  edited?: boolean
+  deleted?: boolean
+  pending?: boolean
 }
 
-export type ServerMessageEntry = Omit<Message, 'contents'> & {
+export type ServerMessageEntry = Message & {
   content: string
+  edited_at?: number
 }
 
 type State = {
@@ -44,6 +58,7 @@ type State = {
   unreadMessageCount: number
   error?: Error | null
   uniqueMessageIds: string[]
+  idOfMessageBeingEdited: Message['id'] | null
 }
 
 type Action =
@@ -67,7 +82,27 @@ type Action =
       message: ServerMessageEntry
     }
   | {
+      type: 'RECEIVE_OWN_MESSAGE'
+      message: any
+    }
+  | {
       type: 'MARK_MESSAGES_AS_READ'
+    }
+  | {
+      type: 'DELETE_MESSAGE'
+      messageId: Message['id']
+    }
+  | {
+      type: 'START_EDITING_MESSAGE'
+      messageId: Message['id']
+    }
+  | {
+      type: 'CANCEL_MESSAGE_EDIT'
+    }
+  | {
+      type: 'RECEIVE_MESSAGE_EDIT'
+      messageId: Message['id']
+      content: string
     }
   | {
       type: 'CLEAR'
@@ -125,6 +160,7 @@ function chatReducer(state: State, action: Action): State {
             user: action.user,
             content: action.content,
             timestamp: Date.now(),
+            pending: true,
           },
           state.uniqueMessageIds
         ),
@@ -139,6 +175,36 @@ function chatReducer(state: State, action: Action): State {
           state.uniqueMessageIds
         ),
         unreadMessageCount: state.unreadMessageCount + 1,
+      }
+
+    case 'RECEIVE_OWN_MESSAGE':
+      return {
+        ...state,
+        ...confirmMessage(action.message, state.messages),
+      }
+
+    case 'DELETE_MESSAGE':
+      return {
+        ...state,
+        ...deleteMessage(action.messageId, state.messages),
+      }
+
+    case 'START_EDITING_MESSAGE':
+      return {
+        ...state,
+        idOfMessageBeingEdited: action.messageId,
+      }
+
+    case 'CANCEL_MESSAGE_EDIT':
+      return {
+        ...state,
+        idOfMessageBeingEdited: null,
+      }
+
+    case 'RECEIVE_MESSAGE_EDIT':
+      return {
+        ...state,
+        ...editMessage(action.messageId, action.content, state.messages),
       }
 
     case 'MARK_MESSAGES_AS_READ':
@@ -171,6 +237,7 @@ const initialState: State = {
   unreadMessageCount: 0,
   error: null,
   uniqueMessageIds: [],
+  idOfMessageBeingEdited: null,
 }
 
 export const ChatContext = createContext<
@@ -180,10 +247,15 @@ export const ChatContext = createContext<
       initialMessagesLoaded: boolean
       atEnd: boolean
       unreadMessageCount: number
+      idOfMessageBeingEdited: State['idOfMessageBeingEdited']
       loadInitialMessages: () => void
       loadMoreMessages: () => void
       sendMessage: (message: any) => void
       markMessagesAsRead: () => void
+      deleteMessage: (messageId: Message['id']) => void
+      startedEditingMessage: (messageId: Message['id']) => void
+      cancelMessageEdit: () => void
+      editMessage: (messageId: Message['id'], content: string) => void
       reset: () => void
       error?: Error | null
     }
@@ -314,6 +386,32 @@ export const ChatProvider: FC<React.PropsWithChildren> = ({ children }) => {
     [chatEnabled, projectId, user]
   )
 
+  const startedEditingMessage = useCallback(
+    (messageId: Message['id']) => {
+      if (!chatEnabled) {
+        debugConsole.warn(`chat is disabled, won't send message`)
+        return
+      }
+
+      dispatch({
+        type: 'START_EDITING_MESSAGE',
+        messageId,
+      })
+    },
+    [chatEnabled]
+  )
+
+  const cancelMessageEdit = useCallback(() => {
+    if (!chatEnabled) {
+      debugConsole.warn(`chat is disabled, won't cancel message edit`)
+      return
+    }
+
+    dispatch({
+      type: 'CANCEL_MESSAGE_EDIT',
+    })
+  }, [chatEnabled])
+
   const markMessagesAsRead = useCallback(() => {
     if (!chatEnabled) {
       debugConsole.warn(`chat is disabled, won't mark messages as read`)
@@ -322,26 +420,114 @@ export const ChatProvider: FC<React.PropsWithChildren> = ({ children }) => {
     dispatch({ type: 'MARK_MESSAGES_AS_READ' })
   }, [chatEnabled])
 
-  // Handling receiving messages over the socket
+  const deleteMessage = useCallback(
+    (messageId: Message['id']) => {
+      if (!chatEnabled) {
+        debugConsole.warn(`chat is disabled, won't delete message`)
+        return
+      }
+      if (!messageId) return
+
+      dispatch({
+        type: 'DELETE_MESSAGE',
+        messageId,
+      })
+
+      deleteJSON(`/project/${projectId}/messages/${messageId}`).catch(error => {
+        dispatch({
+          type: 'ERROR',
+          error,
+        })
+      })
+    },
+    [chatEnabled, projectId]
+  )
+
+  const editMessage = useCallback(
+    (messageId: Message['id'], content: string) => {
+      if (!chatEnabled) {
+        debugConsole.warn(`chat is disabled, won't edit message`)
+        return
+      }
+      if (!messageId || !content) return
+
+      dispatch({
+        type: 'RECEIVE_MESSAGE_EDIT',
+        messageId,
+        content,
+      })
+
+      dispatch({
+        type: 'CANCEL_MESSAGE_EDIT',
+      })
+
+      postJSON(`/project/${projectId}/messages/${messageId}/edit`, {
+        body: { content },
+      }).catch(error => {
+        dispatch({
+          type: 'ERROR',
+          error,
+        })
+      })
+    },
+    [chatEnabled, projectId]
+  )
+
+  // Handling receiving and deleting messages over the socket
   const { socket } = useIdeContext()
   useEffect(() => {
     if (!chatEnabled || !socket) return
 
     function receivedMessage(message: any) {
-      // If the message is from the current client id, then we are receiving the sent message back from the socket.
+      // If the message is from the current client id, then we are receiving the
+      // sent message back from the socket. In this case, we want to update the
+      // message in our local state with the ID of the message on the server.
       // Ignore it to prevent double message.
-      if (message.clientId === clientId.current) return
+      if (message.clientId === clientId.current) {
+        dispatch({ type: 'RECEIVE_OWN_MESSAGE', message })
+      } else {
+        dispatch({ type: 'RECEIVE_MESSAGE', message })
+      }
+    }
 
-      dispatch({ type: 'RECEIVE_MESSAGE', message })
+    function deletedMessage(message: {
+      messageId: Message['id']
+      userId: User['id']
+    }) {
+      if (message.userId === user.id) return
+
+      dispatch({
+        type: 'DELETE_MESSAGE',
+        messageId: message.messageId,
+      })
+    }
+
+    function editedMessage(message: {
+      messageId: Message['id']
+      userId: User['id']
+      content: string
+    }) {
+      if (message.userId === user.id) return
+
+      dispatch({
+        type: 'RECEIVE_MESSAGE_EDIT',
+        messageId: message.messageId,
+        content: message.content,
+      })
     }
 
     socket.on('new-chat-message', receivedMessage)
+    socket.on('delete-global-message', deletedMessage)
+    socket.on('edit-global-message', editedMessage)
+
     return () => {
       if (!socket) return
 
       socket.removeListener('new-chat-message', receivedMessage)
+      socket.removeListener('delete-global-message', deletedMessage)
+      socket.removeListener('edit-global-message', editedMessage)
     }
-  }, [chatEnabled, socket])
+  }, [chatEnabled, socket, user.id])
 
   // Handle unread messages
   useEffect(() => {
@@ -370,17 +556,26 @@ export const ChatProvider: FC<React.PropsWithChildren> = ({ children }) => {
       initialMessagesLoaded: state.initialMessagesLoaded,
       atEnd: state.atEnd,
       unreadMessageCount: state.unreadMessageCount,
+      idOfMessageBeingEdited: state.idOfMessageBeingEdited,
       loadInitialMessages,
       loadMoreMessages,
       reset,
       sendMessage,
       markMessagesAsRead,
+      deleteMessage,
+      startedEditingMessage,
+      cancelMessageEdit,
+      editMessage,
       error: state.error,
     }),
     [
       loadInitialMessages,
       loadMoreMessages,
       markMessagesAsRead,
+      deleteMessage,
+      startedEditingMessage,
+      cancelMessageEdit,
+      editMessage,
       reset,
       sendMessage,
       state.atEnd,
@@ -389,6 +584,7 @@ export const ChatProvider: FC<React.PropsWithChildren> = ({ children }) => {
       state.messages,
       state.status,
       state.unreadMessageCount,
+      state.idOfMessageBeingEdited,
     ]
   )
 

@@ -91,6 +91,16 @@ async function editMessage(projectId, threadId, messageId, userId, content) {
   )
 }
 
+async function editGlobalMessage(projectId, messageId, userId, content) {
+  await fetchNothing(
+    chatApiUrl(`/project/${projectId}/messages/${messageId}/edit`),
+    {
+      method: 'POST',
+      json: { content, userId },
+    }
+  )
+}
+
 async function deleteMessage(projectId, threadId, messageId) {
   await fetchNothing(
     chatApiUrl(
@@ -105,6 +115,13 @@ async function deleteUserMessage(projectId, threadId, userId, messageId) {
     chatApiUrl(
       `/project/${projectId}/thread/${threadId}/user/${userId}/messages/${messageId}`
     ),
+    { method: 'DELETE' }
+  )
+}
+
+async function deleteGlobalMessage(projectId, messageId) {
+  await fetchNothing(
+    chatApiUrl(`/project/${projectId}/messages/${messageId}`),
     { method: 'DELETE' }
   )
 }
@@ -154,8 +171,10 @@ module.exports = {
   reopenThread: callbackify(reopenThread),
   deleteThread: callbackify(deleteThread),
   editMessage: callbackify(editMessage),
+  editGlobalMessage: callbackify(editGlobalMessage),
   deleteMessage: callbackify(deleteMessage),
   deleteUserMessage: callbackify(deleteUserMessage),
+  deleteGlobalMessage: callbackify(deleteGlobalMessage),
   getResolvedThreadIds: callbackify(getResolvedThreadIds),
   duplicateCommentThreads: callbackify(duplicateCommentThreads),
   generateThreadData: callbackify(generateThreadData),
@@ -171,8 +190,10 @@ module.exports = {
     reopenThread,
     deleteThread,
     editMessage,
+    editGlobalMessage,
     deleteMessage,
     deleteUserMessage,
+    deleteGlobalMessage,
     getResolvedThreadIds,
     duplicateCommentThreads,
     generateThreadData,

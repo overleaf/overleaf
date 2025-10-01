@@ -109,6 +109,18 @@
           border-radius: var(--border-radius-base);
           position: relative;
 
+          .message-and-dropdown {
+            clear: both;
+
+            &.pending-message {
+              opacity: 0.6;
+            }
+          }
+
+          .message-dropdown:not(.show) {
+            visibility: hidden;
+          }
+
           .message-content {
             padding: var(--spacing-03) var(--spacing-05);
             overflow-x: auto;
@@ -117,6 +129,12 @@
 
             a {
               color: var(--white);
+            }
+
+            .message-edited {
+              @include body-xs;
+
+              font-weight: normal;
             }
           }
 
@@ -133,6 +151,28 @@
             border-top-color: transparent !important;
             border-bottom-color: transparent !important;
             border-width: 10px;
+          }
+
+          .message-dropdown-menu {
+            min-width: var(--bs-dropdown-min-width);
+          }
+
+          .message-dropdown-menu-btn {
+            @include reset-button;
+            @include action-button;
+
+            color: var(--white);
+            padding: 0;
+            width: 30px;
+            height: 30px;
+          }
+        }
+
+        &.own-message-wrapper .message-and-dropdown:hover {
+          background-color: rgb($neutral-90, 0.08);
+
+          .message-dropdown {
+            visibility: visible;
           }
         }
 
@@ -273,6 +313,30 @@
   .message-container {
     display: flex;
     justify-content: flex-start;
+
+    .message-dropdown:not(.show) {
+      visibility: hidden;
+    }
+
+    &.pending-message {
+      opacity: 0.6;
+    }
+
+    &:hover {
+      .message-dropdown {
+        visibility: visible;
+      }
+    }
+
+    .message-dropdown-menu-btn {
+      @include reset-button;
+      @include action-button;
+
+      color: var(--content-primary-themed);
+      padding: 0;
+      width: 30px;
+      height: 30px;
+    }
   }
 
   .message-author {
@@ -291,6 +355,12 @@
 
     p {
       margin: 0;
+    }
+
+    .message-edited {
+      @include body-xs;
+
+      font-weight: normal;
     }
   }
 

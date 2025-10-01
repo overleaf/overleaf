@@ -1,5 +1,6 @@
 import type { ElementType, ReactNode, PropsWithChildren } from 'react'
 import type { ButtonProps } from '@/shared/components/types/button-props'
+import type { DropdownMenuProps as BS5DropdownMenuProps } from 'react-bootstrap'
 
 type SplitButtonVariants = Extract<
   ButtonProps['variant'],
@@ -71,6 +72,7 @@ export type DropdownMenuProps = PropsWithChildren<{
   flip?: boolean
   id?: string
   renderOnMount?: boolean
+  popperConfig?: BS5DropdownMenuProps['popperConfig']
 }>
 
 export type DropdownDividerProps = PropsWithChildren<{

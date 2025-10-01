@@ -979,6 +979,20 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
       RateLimiterMiddleware.rateLimit(rateLimiters.sendChatMessage),
       ChatController.sendMessage
     )
+    webRouter.delete(
+      '/project/:project_id/messages/:message_id',
+      AuthorizationMiddleware.blockRestrictedUserFromProject,
+      AuthorizationMiddleware.ensureUserCanReadProject,
+      PermissionsController.requirePermission('chat'),
+      ChatController.deleteMessage
+    )
+    webRouter.post(
+      '/project/:project_id/messages/:message_id/edit',
+      AuthorizationMiddleware.blockRestrictedUserFromProject,
+      AuthorizationMiddleware.ensureUserCanReadProject,
+      PermissionsController.requirePermission('chat'),
+      ChatController.editMessage
+    )
   }
 
   webRouter.post(

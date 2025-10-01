@@ -48,11 +48,6 @@ export const ChatPane = () => {
 
   const shouldDisplayPlaceholder = status !== 'pending' && messages.length === 0
 
-  const messageContentCount = messages.reduce(
-    (acc, { contents }) => acc + contents.length,
-    0
-  )
-
   if (error) {
     // let user try recover from fetch errors
     if (error instanceof FetchError) {
@@ -75,7 +70,7 @@ export const ChatPane = () => {
             className="messages"
             fetchData={loadMoreMessages}
             isLoading={status === 'pending'}
-            itemCount={messageContentCount}
+            itemCount={messages.length}
           >
             <div className={classNames({ 'h-100': shouldDisplayPlaceholder })}>
               <h2 className="visually-hidden">{t('chat')}</h2>

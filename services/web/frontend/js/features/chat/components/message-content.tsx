@@ -1,12 +1,26 @@
-import { useRef, useEffect, type FC } from 'react'
+import { useRef, useEffect, type FC, useCallback, useState } from 'react'
 import Linkify from 'react-linkify'
 import useIsMounted from '../../../shared/hooks/use-is-mounted'
 import { loadMathJax } from '../../mathjax/load-mathjax'
 import { debugConsole } from '@/utils/debugging'
+import { Message, useChatContext } from '@/features/chat/context/chat-context'
+import OLButton from '@/shared/components/ol/ol-button'
+import { useTranslation } from 'react-i18next'
+import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
 
-const MessageContent: FC<{ content: string }> = ({ content }) => {
+const MessageContent: FC<{
+  content: Message['content']
+  messageId: Message['id']
+  edited: Message['edited']
+}> = ({ content, messageId, edited }) => {
+  const { t } = useTranslation()
   const root = useRef<HTMLDivElement | null>(null)
   const mounted = useIsMounted()
+  const { idOfMessageBeingEdited, cancelMessageEdit, editMessage } =
+    useChatContext()
+  const [editedContent, setEditedContent] = useState(content)
+
+  const editing = idOfMessageBeingEdited === messageId
 
   useEffect(() => {
     if (root.current) {
@@ -33,9 +47,70 @@ const MessageContent: FC<{ content: string }> = ({ content }) => {
     }
   }, [content, mounted])
 
-  return (
+  const completeEdit = useCallback(() => {
+    editMessage(messageId, editedContent)
+  }, [editMessage, editedContent, messageId])
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        completeEdit()
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        cancelMessageEdit()
+        setEditedContent(content)
+      }
+    },
+    [cancelMessageEdit, completeEdit, content]
+  )
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setEditedContent(e.target.value)
+    },
+    []
+  )
+
+  const handleAutoFocus = useCallback(
+    (textarea: HTMLTextAreaElement) => textarea.select(),
+    []
+  )
+
+  return editing ? (
+    <>
+      <AutoExpandingTextArea
+        value={editedContent}
+        style={{ width: '100%' }}
+        onKeyDown={handleKeyDown}
+        onChange={handleChange}
+        autoFocus // eslint-disable-line jsx-a11y/no-autofocus
+        onAutoFocus={handleAutoFocus}
+      />
+      <br />
+      <OLButton
+        size="sm"
+        variant="secondary"
+        onClick={() => {
+          cancelMessageEdit()
+          setEditedContent(content)
+        }}
+      >
+        {t('cancel')}
+      </OLButton>
+      <OLButton size="sm" variant="secondary" onClick={() => completeEdit()}>
+        {t('save')}
+      </OLButton>
+    </>
+  ) : (
     <p ref={root} translate="no">
       <Linkify>{content}</Linkify>
+      {edited ? (
+        <>
+          {' '}
+          <span className="message-edited">({t('edited')})</span>
+        </>
+      ) : null}
     </p>
   )
 }

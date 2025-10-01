@@ -78,12 +78,20 @@ export async function editMessage(context) {
   return await callMessageHttpController(context, _editMessage)
 }
 
+export async function editGlobalMessage(context) {
+  return await callMessageHttpController(context, _editGlobalMessage)
+}
+
 export async function deleteMessage(context) {
   return await callMessageHttpController(context, _deleteMessage)
 }
 
 export async function deleteUserMessage(context) {
   return await callMessageHttpController(context, _deleteUserMessage)
+}
+
+export async function deleteGlobalMessage(context) {
+  return await callMessageHttpController(context, _deleteGlobalMessage)
 }
 
 export async function getResolvedThreadIds(context) {
@@ -242,6 +250,28 @@ const _editMessage = async (req, res) => {
   res.status(204)
 }
 
+const _editGlobalMessage = async (req, res) => {
+  const { content, userId } = req.body
+  const { projectId, messageId } = req.params
+  logger.debug({ projectId, messageId, content }, 'editing global message')
+  const room = await ThreadManager.findOrCreateThread(
+    projectId,
+    ThreadManager.GLOBAL_THREAD
+  )
+  const found = await MessageManager.updateMessage(
+    room._id,
+    messageId,
+    userId,
+    content,
+    Date.now()
+  )
+  if (!found) {
+    res.status(404)
+    return
+  }
+  res.status(204)
+}
+
 const _deleteMessage = async (req, res) => {
   const { projectId, threadId, messageId } = req.params
   logger.debug({ projectId, threadId, messageId }, 'deleting message')
@@ -254,6 +284,16 @@ const _deleteUserMessage = async (req, res) => {
   const { projectId, threadId, userId, messageId } = req.params
   const room = await ThreadManager.findOrCreateThread(projectId, threadId)
   await MessageManager.deleteUserMessage(userId, room._id, messageId)
+  res.status(204)
+}
+
+const _deleteGlobalMessage = async (req, res) => {
+  const { projectId, messageId } = req.params
+  const room = await ThreadManager.findOrCreateThread(
+    projectId,
+    ThreadManager.GLOBAL_THREAD
+  )
+  await MessageManager.deleteMessage(room._id, messageId)
   res.status(204)
 }
 
@@ -307,6 +347,7 @@ async function _sendMessage(userId, projectId, content, clientThreadId, res) {
   )
   message = MessageFormatter.formatMessageForClientSide(message)
   message.room_id = projectId
+
   res.status(201).setBody(message)
 }
 

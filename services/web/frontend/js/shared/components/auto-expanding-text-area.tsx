@@ -105,7 +105,7 @@ function AutoExpandingTextArea({
     }
   }, [onResize])
 
-  // Maintain a copy onAutoFocus in a ref for use in the autofocus effect
+  // Maintain a copy of onAutoFocus in a ref for use in the autofocus effect
   // below so that the effect doesn't run when onAutoFocus changes
   const onAutoFocusRef = useRef(onAutoFocus)
   useEffect(() => {
