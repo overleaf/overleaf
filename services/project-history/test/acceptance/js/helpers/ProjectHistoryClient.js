@@ -103,23 +103,21 @@ export async function getFileTreeDiff(projectId, from, to) {
   }
 }
 
-export function getChangesInChunkSince(projectId, since, options, callback) {
-  request.get(
-    {
-      url: `http://127.0.0.1:3054/project/${projectId}/changes-in-chunk`,
-      qs: {
-        since,
-      },
-      json: true,
-    },
-    (error, res, body) => {
-      if (error) return callback(error)
-      if (!options.allowErrors) {
-        expect(res.statusCode).to.equal(200)
-      }
-      callback(null, body, res.statusCode)
-    }
+export async function getChangesInChunkSince(projectId, since, options = {}) {
+  const url = new URL(
+    `http://127.0.0.1:3054/project/${projectId}/changes-in-chunk`
   )
+  url.searchParams.set('since', since)
+
+  try {
+    const { response, json } = await fetchJsonWithResponse(url.toString())
+    return { body: json, statusCode: response.status }
+  } catch (error) {
+    if (options.allowErrors && error instanceof RequestFailedError) {
+      return { body: null, statusCode: error.response.status }
+    }
+    throw error
+  }
 }
 
 export function getLatestSnapshot(projectId, callback) {
