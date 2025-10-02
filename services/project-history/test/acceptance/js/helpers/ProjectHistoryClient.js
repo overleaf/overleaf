@@ -114,20 +114,12 @@ export async function getChangesInChunkSince(projectId, since, options = {}) {
   }
 }
 
-export function getLatestSnapshot(projectId, callback) {
-  request.get(
-    {
-      url: `http://127.0.0.1:3054/project/${projectId}/snapshot`,
-      json: true,
-    },
-    (error, res, body) => {
-      if (error) {
-        return callback(error)
-      }
-      expect(res.statusCode).to.equal(200)
-      callback(null, body)
-    }
+export async function getLatestSnapshot(projectId) {
+  const { response, json } = await fetchJsonWithResponse(
+    `http://127.0.0.1:3054/project/${projectId}/snapshot`
   )
+  expect(response.status).to.equal(200)
+  return json
 }
 
 export function getSnapshot(projectId, pathname, version, options, callback) {
