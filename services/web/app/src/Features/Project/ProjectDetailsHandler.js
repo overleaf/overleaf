@@ -233,7 +233,7 @@ async function clearTokens(projectId) {
   ).exec()
 }
 
-async function _generateTokens(project, callback) {
+async function _generateTokens(project) {
   if (!project.tokens) {
     project.tokens = {}
   }
