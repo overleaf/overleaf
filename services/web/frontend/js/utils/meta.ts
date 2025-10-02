@@ -289,6 +289,7 @@ export interface Meta {
     domainCapture?: boolean
   }
   'ol-subscriptionId': string
+  'ol-subscriptionPaymentErrorCode': string | null
   'ol-suggestedLanguage': SuggestedLanguage | undefined
   'ol-survey': Survey | undefined
   'ol-symbolPaletteAvailable': boolean
