@@ -7,6 +7,7 @@ import { promisify } from '@overleaf/promise-utils'
 import {
   fetchJsonWithResponse,
   fetchNothing,
+  fetchStringWithResponse,
   RequestFailedError,
 } from '@overleaf/fetch-utils'
 
@@ -122,30 +123,23 @@ export async function getLatestSnapshot(projectId) {
   return json
 }
 
-export function getSnapshot(projectId, pathname, version, options, callback) {
-  if (typeof options === 'function') {
-    callback = options
-    options = null
-  }
-  if (!options) {
-    options = { allowErrors: false }
-  }
-  request.get(
-    {
-      url: `http://127.0.0.1:3054/project/${projectId}/version/${version}/${encodeURIComponent(
-        pathname
-      )}`,
-    },
-    (error, res, body) => {
-      if (error) {
-        return callback(error)
-      }
-      if (!options.allowErrors) {
-        expect(res.statusCode).to.equal(200)
-      }
-      callback(error, body, res.statusCode)
+export async function getSnapshot(projectId, pathname, version, options = {}) {
+  const url = `http://127.0.0.1:3054/project/${projectId}/version/${version}/${encodeURIComponent(
+    pathname
+  )}`
+
+  try {
+    const { response, body } = await fetchStringWithResponse(url)
+    if (!options.allowErrors) {
+      expect(response.status).to.equal(200)
     }
-  )
+    return { body, statusCode: response.status }
+  } catch (error) {
+    if (options.allowErrors && error instanceof RequestFailedError) {
+      return { body: null, statusCode: error.response.status }
+    }
+    throw error
+  }
 }
 
 export function pushRawUpdate(projectId, update, callback) {

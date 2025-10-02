@@ -11,34 +11,24 @@ const MockWeb = () => nock('http://127.0.0.1:3000')
 const fixture = path => new URL(`../fixtures/${path}`, import.meta.url)
 
 describe('ReadSnapshot', function () {
-  beforeEach(function (done) {
-    ProjectHistoryApp.ensureRunning(error => {
-      if (error) {
-        throw error
-      }
+  beforeEach(async function () {
+    await ProjectHistoryApp.promises.ensureRunning()
 
-      this.historyId = new ObjectId().toString()
-      MockHistoryStore().post('/api/projects').reply(200, {
-        projectId: this.historyId,
-      })
-
-      ProjectHistoryClient.initializeProject(
-        this.historyId,
-        (error, v1Project) => {
-          if (error) {
-            throw error
-          }
-          this.projectId = new ObjectId().toString()
-          MockWeb()
-            .get(`/project/${this.projectId}/details`)
-            .reply(200, {
-              name: 'Test Project',
-              overleaf: { history: { id: v1Project.id } },
-            })
-          done()
-        }
-      )
+    this.historyId = new ObjectId().toString()
+    MockHistoryStore().post('/api/projects').reply(200, {
+      projectId: this.historyId,
     })
+
+    const v1Project = await ProjectHistoryClient.promises.initializeProject(
+      this.historyId
+    )
+    this.projectId = new ObjectId().toString()
+    MockWeb()
+      .get(`/project/${this.projectId}/details`)
+      .reply(200, {
+        name: 'Test Project',
+        overleaf: { history: { id: v1Project.id } },
+      })
   })
 
   afterEach(function () {
@@ -46,7 +36,7 @@ describe('ReadSnapshot', function () {
   })
 
   describe('of a text file', function () {
-    it('should return the snapshot of a doc at the given version', function (done) {
+    it('should return the snapshot of a doc at the given version', async function () {
       MockHistoryStore()
         .get(`/api/projects/${this.historyId}/versions/5/history`)
         .replyWithFile(200, fixture('chunks/4-6.json'))
@@ -59,16 +49,13 @@ describe('ReadSnapshot', function () {
           fixture('blobs/c6654ea913979e13e22022653d284444f284a172')
         )
 
-      ProjectHistoryClient.getSnapshot(
+      const { body } = await ProjectHistoryClient.getSnapshot(
         this.projectId,
         'foo.tex',
-        5,
-        (error, body) => {
-          if (error) {
-            throw error
-          }
-          expect(body).to.deep.equal(
-            `\
+        5
+      )
+      expect(body).to.deep.equal(
+        `\
 Hello world
 
 One two three
@@ -77,13 +64,10 @@ Four five six
 
 Seven eight nine\
 `.replace(/^\t/g, '')
-          )
-          done()
-        }
       )
     })
 
-    it('should return the snapshot of a doc at a different version', function (done) {
+    it('should return the snapshot of a doc at a different version', async function () {
       MockHistoryStore()
         .get(`/api/projects/${this.historyId}/versions/4/history`)
         .replyWithFile(200, fixture('chunks/4-6.json'))
@@ -96,16 +80,13 @@ Seven eight nine\
           fixture('blobs/c6654ea913979e13e22022653d284444f284a172')
         )
 
-      ProjectHistoryClient.getSnapshot(
+      const { body } = await ProjectHistoryClient.getSnapshot(
         this.projectId,
         'foo.tex',
-        4,
-        (error, body) => {
-          if (error) {
-            throw error
-          }
-          expect(body).to.deep.equal(
-            `\
+        4
+      )
+      expect(body).to.deep.equal(
+        `\
 Hello world
 
 One two three
@@ -114,13 +95,10 @@ Four five six
 
 Seven eight nince\
 `.replace(/^\t/g, '')
-          )
-          done()
-        }
       )
     })
 
-    it('should return the snapshot of a doc after a rename version', function (done) {
+    it('should return the snapshot of a doc after a rename version', async function () {
       MockHistoryStore()
         .get(`/api/projects/${this.historyId}/versions/6/history`)
         .replyWithFile(200, fixture('chunks/4-6.json'))
@@ -133,16 +111,13 @@ Seven eight nince\
           fixture('blobs/c6654ea913979e13e22022653d284444f284a172')
         )
 
-      ProjectHistoryClient.getSnapshot(
+      const { body } = await ProjectHistoryClient.getSnapshot(
         this.projectId,
         'bar.tex',
-        6,
-        (error, body) => {
-          if (error) {
-            throw error
-          }
-          expect(body).to.deep.equal(
-            `\
+        6
+      )
+      expect(body).to.deep.equal(
+        `\
 Hello world
 
 One two three
@@ -151,9 +126,6 @@ Four five six
 
 Seven eight nine\
 `.replace(/^\t/g, '')
-          )
-          done()
-        }
       )
     })
   })
@@ -181,7 +153,7 @@ Seven eight nine\
         })
     })
 
-    it('should return the snapshot of the file at the given version', function (done) {
+    it('should return the snapshot of the file at the given version', async function () {
       MockHistoryStore()
         .get(
           `/api/projects/${this.historyId}/blobs/c6654ea913979e13e22022653d284444f284a172`
@@ -191,29 +163,23 @@ Seven eight nine\
           fixture('blobs/c6654ea913979e13e22022653d284444f284a172')
         )
 
-      ProjectHistoryClient.getSnapshot(
+      const { body } = await ProjectHistoryClient.getSnapshot(
         this.projectId,
         'binary_file',
-        4,
-        (error, body) => {
-          if (error) {
-            throw error
-          }
-          expect(body).to.deep.equal(
-            `\
+        4
+      )
+      expect(body).to.deep.equal(
+        `\
 Hello world
 
 One two three
 
 Four five six\
 `.replace(/^\t/g, '')
-          )
-          done()
-        }
       )
     })
 
-    it("should return an error when the blob doesn't exist", function (done) {
+    it("should return an error when the blob doesn't exist", async function () {
       MockHistoryStore()
         .get(`/api/projects/${this.historyId}/versions/4/history`)
         .reply(200, {
@@ -239,22 +205,16 @@ Four five six\
         )
         .reply(404)
 
-      ProjectHistoryClient.getSnapshot(
+      const { statusCode } = await ProjectHistoryClient.getSnapshot(
         this.projectId,
         'binary_file',
         4,
-        { allowErrors: true },
-        (error, body, statusCode) => {
-          if (error) {
-            throw error
-          }
-          expect(statusCode).to.equal(500)
-          done()
-        }
+        { allowErrors: true }
       )
+      expect(statusCode).to.equal(500)
     })
 
-    it('should return an error when the blob request errors', function (done) {
+    it('should return an error when the blob request errors', async function () {
       MockHistoryStore()
         .get(`/api/projects/${this.historyId}/versions/4/history`)
         .reply(200, {
@@ -280,19 +240,13 @@ Four five six\
         )
         .replyWithError('oh no!')
 
-      ProjectHistoryClient.getSnapshot(
+      const { statusCode } = await ProjectHistoryClient.getSnapshot(
         this.projectId,
         'binary_file',
         4,
-        { allowErrors: true },
-        (error, body, statusCode) => {
-          if (error) {
-            throw error
-          }
-          expect(statusCode).to.equal(500)
-          done()
-        }
+        { allowErrors: true }
       )
+      expect(statusCode).to.equal(500)
     })
   })
 })
