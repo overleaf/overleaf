@@ -4,7 +4,11 @@ import Settings from '@overleaf/settings'
 import RedisWrapper from '@overleaf/redis-wrapper'
 import { db } from '../../../../app/js/mongodb.js'
 import { promisify } from '@overleaf/promise-utils'
-import { fetchJsonWithResponse, fetchNothing } from '@overleaf/fetch-utils'
+import {
+  fetchJsonWithResponse,
+  fetchNothing,
+  RequestFailedError,
+} from '@overleaf/fetch-utils'
 
 const rclient = RedisWrapper.createClient(Settings.redis.project_history)
 const Keys = Settings.redis.project_history.key_schema
@@ -81,23 +85,22 @@ export async function getDiff(projectId, pathname, from, to) {
   return json
 }
 
-export function getFileTreeDiff(projectId, from, to, callback) {
-  request.get(
-    {
-      url: `http://127.0.0.1:3054/project/${projectId}/filetree/diff`,
-      qs: {
-        from,
-        to,
-      },
-      json: true,
-    },
-    (error, res, body) => {
-      if (error) {
-        return callback(error)
-      }
-      callback(error, body, res.statusCode)
-    }
+export async function getFileTreeDiff(projectId, from, to) {
+  const url = new URL(
+    `http://127.0.0.1:3054/project/${projectId}/filetree/diff`
   )
+  url.searchParams.set('from', from)
+  url.searchParams.set('to', to)
+
+  try {
+    const { response, json } = await fetchJsonWithResponse(url.toString())
+    return { diff: json, statusCode: response.status }
+  } catch (error) {
+    if (error instanceof RequestFailedError) {
+      return { diff: null, statusCode: error.response.status }
+    }
+    throw error
+  }
 }
 
 export function getChangesInChunkSince(projectId, since, options, callback) {

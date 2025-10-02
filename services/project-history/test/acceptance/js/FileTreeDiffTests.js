@@ -1,72 +1,41 @@
-/* eslint-disable
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-import sinon from 'sinon'
 import { expect } from 'chai'
-import Settings from '@overleaf/settings'
-import request from 'request'
-import assert from 'node:assert'
-import Path from 'node:path'
 import crypto from 'node:crypto'
 import mongodb from 'mongodb-legacy'
 import nock from 'nock'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
-import * as HistoryId from './helpers/HistoryId.js'
 const { ObjectId } = mongodb
 
 const MockHistoryStore = () => nock('http://127.0.0.1:3100')
-const MockFileStore = () => nock('http://127.0.0.1:3009')
 const MockWeb = () => nock('http://127.0.0.1:3000')
 
 const sha = data => crypto.createHash('sha1').update(data).digest('hex')
 
 describe('FileTree Diffs', function () {
-  beforeEach(function (done) {
-    return ProjectHistoryApp.ensureRunning(error => {
-      if (error != null) {
-        throw error
-      }
+  beforeEach(async function () {
+    await ProjectHistoryApp.promises.ensureRunning()
 
-      this.historyId = new ObjectId().toString()
-      this.projectId = new ObjectId().toString()
+    this.historyId = new ObjectId().toString()
+    this.projectId = new ObjectId().toString()
 
-      MockHistoryStore().post('/api/projects').reply(200, {
-        projectId: this.historyId,
-      })
-      MockWeb()
-        .get(`/project/${this.projectId}/details`)
-        .reply(200, {
-          name: 'Test Project',
-          overleaf: { history: { id: this.historyId } },
-        })
-
-      return ProjectHistoryClient.initializeProject(
-        this.historyId,
-        (error, olProject) => {
-          if (error != null) {
-            throw error
-          }
-          return done()
-        }
-      )
+    MockHistoryStore().post('/api/projects').reply(200, {
+      projectId: this.historyId,
     })
+    MockWeb()
+      .get(`/project/${this.projectId}/details`)
+      .reply(200, {
+        name: 'Test Project',
+        overleaf: { history: { id: this.historyId } },
+      })
+
+    await ProjectHistoryClient.promises.initializeProject(this.historyId)
   })
 
   afterEach(function () {
     return nock.cleanAll()
   })
 
-  it('should return a diff of the updates to a doc from a single chunk', function (done) {
+  it('should return a diff of the updates to a doc from a single chunk', async function () {
     MockHistoryStore()
       .get(`/api/projects/${this.historyId}/versions/7/history`)
       .reply(200, {
@@ -139,45 +108,39 @@ describe('FileTree Diffs', function () {
         authors: [{ id: 31, email: 'james.allen@overleaf.com', name: 'James' }],
       })
 
-    return ProjectHistoryClient.getFileTreeDiff(
+    const { diff } = await ProjectHistoryClient.getFileTreeDiff(
       this.projectId,
       3,
-      7,
-      (error, diff) => {
-        if (error != null) {
-          throw error
-        }
-        expect(diff).to.deep.equal({
-          diff: [
-            {
-              pathname: 'foo.tex',
-              operation: 'edited',
-            },
-            {
-              pathname: 'deleted.tex',
-              operation: 'removed',
-              deletedAtV: 5,
-              editable: true,
-            },
-            {
-              newPathname: 'newName.tex',
-              pathname: 'renamed.tex',
-              operation: 'renamed',
-              editable: true,
-            },
-            {
-              pathname: 'added.tex',
-              operation: 'added',
-              editable: true,
-            },
-          ],
-        })
-        return done()
-      }
+      7
     )
+    expect(diff).to.deep.equal({
+      diff: [
+        {
+          pathname: 'foo.tex',
+          operation: 'edited',
+        },
+        {
+          pathname: 'deleted.tex',
+          operation: 'removed',
+          deletedAtV: 5,
+          editable: true,
+        },
+        {
+          newPathname: 'newName.tex',
+          pathname: 'renamed.tex',
+          operation: 'renamed',
+          editable: true,
+        },
+        {
+          pathname: 'added.tex',
+          operation: 'added',
+          editable: true,
+        },
+      ],
+    })
   })
 
-  it('should return a diff of the updates to a doc across multiple chunks', function (done) {
+  it('should return a diff of the updates to a doc across multiple chunks', async function () {
     MockHistoryStore()
       .get(`/api/projects/${this.historyId}/versions/5/history`)
       .reply(200, {
@@ -299,53 +262,47 @@ describe('FileTree Diffs', function () {
         authors: [{ id: 31, email: 'james.allen@overleaf.com', name: 'James' }],
       })
 
-    return ProjectHistoryClient.getFileTreeDiff(
+    const { diff } = await ProjectHistoryClient.getFileTreeDiff(
       this.projectId,
       2,
-      7,
-      (error, diff) => {
-        if (error != null) {
-          throw error
-        }
-        expect(diff).to.deep.equal({
-          diff: [
-            {
-              pathname: 'foo.tex',
-              operation: 'edited',
-            },
-            {
-              pathname: 'bar.tex',
-              operation: 'edited',
-            },
-            {
-              pathname: 'baz.tex',
-              editable: true,
-            },
-            {
-              pathname: 'deleted.tex',
-              operation: 'removed',
-              deletedAtV: 4,
-              editable: true,
-            },
-            {
-              newPathname: 'newName.tex',
-              pathname: 'renamed.tex',
-              operation: 'renamed',
-              editable: true,
-            },
-            {
-              pathname: 'added.tex',
-              operation: 'added',
-              editable: true,
-            },
-          ],
-        })
-        return done()
-      }
+      7
     )
+    expect(diff).to.deep.equal({
+      diff: [
+        {
+          pathname: 'foo.tex',
+          operation: 'edited',
+        },
+        {
+          pathname: 'bar.tex',
+          operation: 'edited',
+        },
+        {
+          pathname: 'baz.tex',
+          editable: true,
+        },
+        {
+          pathname: 'deleted.tex',
+          operation: 'removed',
+          deletedAtV: 4,
+          editable: true,
+        },
+        {
+          newPathname: 'newName.tex',
+          pathname: 'renamed.tex',
+          operation: 'renamed',
+          editable: true,
+        },
+        {
+          pathname: 'added.tex',
+          operation: 'added',
+          editable: true,
+        },
+      ],
+    })
   })
 
-  it('should return a diff that includes multiple renames', function (done) {
+  it('should return a diff that includes multiple renames', async function () {
     MockHistoryStore()
       .get(`/api/projects/${this.historyId}/versions/5/history`)
       .reply(200, {
@@ -387,30 +344,24 @@ describe('FileTree Diffs', function () {
         authors: [{ id: 31, email: 'james.allen@overleaf.com', name: 'James' }],
       })
 
-    return ProjectHistoryClient.getFileTreeDiff(
+    const { diff } = await ProjectHistoryClient.getFileTreeDiff(
       this.projectId,
       3,
-      5,
-      (error, diff) => {
-        if (error != null) {
-          throw error
-        }
-        expect(diff).to.deep.equal({
-          diff: [
-            {
-              newPathname: 'three.tex',
-              pathname: 'one.tex',
-              operation: 'renamed',
-              editable: true,
-            },
-          ],
-        })
-        return done()
-      }
+      5
     )
+    expect(diff).to.deep.equal({
+      diff: [
+        {
+          newPathname: 'three.tex',
+          pathname: 'one.tex',
+          operation: 'renamed',
+          editable: true,
+        },
+      ],
+    })
   })
 
-  it('should handle deleting then re-adding a file', function (done) {
+  it('should handle deleting then re-adding a file', async function () {
     MockHistoryStore()
       .get(`/api/projects/${this.historyId}/versions/5/history`)
       .reply(200, {
@@ -454,29 +405,23 @@ describe('FileTree Diffs', function () {
         authors: [{ id: 31, email: 'james.allen@overleaf.com', name: 'James' }],
       })
 
-    return ProjectHistoryClient.getFileTreeDiff(
+    const { diff } = await ProjectHistoryClient.getFileTreeDiff(
       this.projectId,
       3,
-      5,
-      (error, diff) => {
-        if (error != null) {
-          throw error
-        }
-        expect(diff).to.deep.equal({
-          diff: [
-            {
-              pathname: 'one.tex',
-              operation: 'added',
-              editable: null,
-            },
-          ],
-        })
-        return done()
-      }
+      5
     )
+    expect(diff).to.deep.equal({
+      diff: [
+        {
+          pathname: 'one.tex',
+          operation: 'added',
+          editable: null,
+        },
+      ],
+    })
   })
 
-  it('should handle deleting the renaming a file to the same place', function (done) {
+  it('should handle deleting the renaming a file to the same place', async function () {
     MockHistoryStore()
       .get(`/api/projects/${this.historyId}/versions/5/history`)
       .reply(200, {
@@ -522,30 +467,24 @@ describe('FileTree Diffs', function () {
         authors: [{ id: 31, email: 'james.allen@overleaf.com', name: 'James' }],
       })
 
-    return ProjectHistoryClient.getFileTreeDiff(
+    const { diff } = await ProjectHistoryClient.getFileTreeDiff(
       this.projectId,
       3,
-      5,
-      (error, diff) => {
-        if (error != null) {
-          throw error
-        }
-        expect(diff).to.deep.equal({
-          diff: [
-            {
-              pathname: 'two.tex',
-              newPathname: 'one.tex',
-              operation: 'renamed',
-              editable: true,
-            },
-          ],
-        })
-        return done()
-      }
+      5
     )
+    expect(diff).to.deep.equal({
+      diff: [
+        {
+          pathname: 'two.tex',
+          newPathname: 'one.tex',
+          operation: 'renamed',
+          editable: true,
+        },
+      ],
+    })
   })
 
-  it('should handle adding then renaming a file', function (done) {
+  it('should handle adding then renaming a file', async function () {
     MockHistoryStore()
       .get(`/api/projects/${this.historyId}/versions/5/history`)
       .reply(200, {
@@ -585,29 +524,23 @@ describe('FileTree Diffs', function () {
         authors: [{ id: 31, email: 'james.allen@overleaf.com', name: 'James' }],
       })
 
-    return ProjectHistoryClient.getFileTreeDiff(
+    const { diff } = await ProjectHistoryClient.getFileTreeDiff(
       this.projectId,
       3,
-      5,
-      (error, diff) => {
-        if (error != null) {
-          throw error
-        }
-        expect(diff).to.deep.equal({
-          diff: [
-            {
-              pathname: 'two.tex',
-              operation: 'added',
-              editable: true,
-            },
-          ],
-        })
-        return done()
-      }
+      5
     )
+    expect(diff).to.deep.equal({
+      diff: [
+        {
+          pathname: 'two.tex',
+          operation: 'added',
+          editable: true,
+        },
+      ],
+    })
   })
 
-  it('should return 422 with a chunk with an invalid rename', function (done) {
+  it('should return 422 with a chunk with an invalid rename', async function () {
     MockHistoryStore()
       .get(`/api/projects/${this.historyId}/versions/6/history`)
       .reply(200, {
@@ -643,21 +576,15 @@ describe('FileTree Diffs', function () {
         authors: [{ id: 31, email: 'james.allen@overleaf.com', name: 'James' }],
       })
 
-    return ProjectHistoryClient.getFileTreeDiff(
+    const { statusCode } = await ProjectHistoryClient.getFileTreeDiff(
       this.projectId,
       5,
-      6,
-      (error, diff, statusCode) => {
-        if (error != null) {
-          throw error
-        }
-        expect(statusCode).to.equal(422)
-        return done()
-      }
+      6
     )
+    expect(statusCode).to.equal(422)
   })
 
-  it('should return 200 with a chunk with an invalid add', function (done) {
+  it('should return 200 with a chunk with an invalid add', async function () {
     MockHistoryStore()
       .get(`/api/projects/${this.historyId}/versions/6/history`)
       .reply(200, {
@@ -691,30 +618,24 @@ describe('FileTree Diffs', function () {
         authors: [{ id: 31, email: 'james.allen@overleaf.com', name: 'James' }],
       })
 
-    return ProjectHistoryClient.getFileTreeDiff(
+    const { diff, statusCode } = await ProjectHistoryClient.getFileTreeDiff(
       this.projectId,
       5,
-      6,
-      (error, diff, statusCode) => {
-        if (error != null) {
-          throw error
-        }
-        expect(diff).to.deep.equal({
-          diff: [
-            {
-              pathname: 'foo.tex',
-              operation: 'added',
-              editable: null,
-            },
-          ],
-        })
-        expect(statusCode).to.equal(200)
-        return done()
-      }
+      6
     )
+    expect(diff).to.deep.equal({
+      diff: [
+        {
+          pathname: 'foo.tex',
+          operation: 'added',
+          editable: null,
+        },
+      ],
+    })
+    expect(statusCode).to.equal(200)
   })
 
-  it('should handle edits of missing/invalid files ', function (done) {
+  it('should handle edits of missing/invalid files ', async function () {
     MockHistoryStore()
       .get(`/api/projects/${this.historyId}/versions/5/history`)
       .reply(200, {
@@ -751,28 +672,22 @@ describe('FileTree Diffs', function () {
         authors: [{ id: 31, email: 'james.allen@overleaf.com', name: 'James' }],
       })
 
-    return ProjectHistoryClient.getFileTreeDiff(
+    const { diff } = await ProjectHistoryClient.getFileTreeDiff(
       this.projectId,
       3,
-      5,
-      (error, diff) => {
-        if (error != null) {
-          throw error
-        }
-        expect(diff).to.deep.equal({
-          diff: [
-            {
-              operation: 'edited',
-              pathname: 'new.tex',
-            },
-          ],
-        })
-        return done()
-      }
+      5
     )
+    expect(diff).to.deep.equal({
+      diff: [
+        {
+          operation: 'edited',
+          pathname: 'new.tex',
+        },
+      ],
+    })
   })
 
-  it('should handle deletions of missing/invalid files ', function (done) {
+  it('should handle deletions of missing/invalid files ', async function () {
     MockHistoryStore()
       .get(`/api/projects/${this.historyId}/versions/5/history`)
       .reply(200, {
@@ -809,23 +724,17 @@ describe('FileTree Diffs', function () {
         authors: [{ id: 31, email: 'james.allen@overleaf.com', name: 'James' }],
       })
 
-    return ProjectHistoryClient.getFileTreeDiff(
+    const { diff } = await ProjectHistoryClient.getFileTreeDiff(
       this.projectId,
       3,
-      5,
-      (error, diff) => {
-        if (error != null) {
-          throw error
-        }
-        expect(diff).to.deep.equal({
-          diff: [],
-        })
-        return done()
-      }
+      5
     )
+    expect(diff).to.deep.equal({
+      diff: [],
+    })
   })
 
-  return it('should handle renames of missing/invalid files ', function (done) {
+  return it('should handle renames of missing/invalid files ', async function () {
     MockHistoryStore()
       .get(`/api/projects/${this.historyId}/versions/5/history`)
       .reply(200, {
@@ -862,19 +771,13 @@ describe('FileTree Diffs', function () {
         authors: [{ id: 31, email: 'james.allen@overleaf.com', name: 'James' }],
       })
 
-    return ProjectHistoryClient.getFileTreeDiff(
+    const { diff } = await ProjectHistoryClient.getFileTreeDiff(
       this.projectId,
       3,
-      5,
-      (error, diff) => {
-        if (error != null) {
-          throw error
-        }
-        expect(diff).to.deep.equal({
-          diff: [],
-        })
-        return done()
-      }
+      5
     )
+    expect(diff).to.deep.equal({
+      diff: [],
+    })
   })
 })
