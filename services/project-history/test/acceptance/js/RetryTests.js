@@ -75,7 +75,7 @@ describe('Retrying failed projects', function () {
           this.project_id,
           update
         )
-        await ProjectHistoryClient.promises.setFailure({
+        await ProjectHistoryClient.setFailure({
           project_id: this.project_id,
           attempts: 1,
           error: 'soft-error',
@@ -143,7 +143,7 @@ describe('Retrying failed projects', function () {
               },
             },
           })
-        await ProjectHistoryClient.promises.setFailure({
+        await ProjectHistoryClient.setFailure({
           project_id: this.project_id,
           attempts: 100,
           error: 'hard-error',

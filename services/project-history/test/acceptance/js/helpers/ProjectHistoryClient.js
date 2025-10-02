@@ -4,6 +4,7 @@ import Settings from '@overleaf/settings'
 import RedisWrapper from '@overleaf/redis-wrapper'
 import { db } from '../../../../app/js/mongodb.js'
 import { promisify } from '@overleaf/promise-utils'
+import { fetchJsonWithResponse, fetchNothing } from '@overleaf/fetch-utils'
 
 const rclient = RedisWrapper.createClient(Settings.redis.project_history)
 const Keys = Settings.redis.project_history.key_schema
@@ -69,25 +70,15 @@ export function getSummarizedUpdates(projectId, query, callback) {
   )
 }
 
-export function getDiff(projectId, pathname, from, to, callback) {
-  request.get(
-    {
-      url: `http://127.0.0.1:3054/project/${projectId}/diff`,
-      qs: {
-        pathname,
-        from,
-        to,
-      },
-      json: true,
-    },
-    (error, res, body) => {
-      if (error) {
-        return callback(error)
-      }
-      expect(res.statusCode).to.equal(200)
-      callback(error, body)
-    }
-  )
+export async function getDiff(projectId, pathname, from, to) {
+  const url = new URL(`http://127.0.0.1:3054/project/${projectId}/diff`)
+  url.searchParams.set('pathname', pathname)
+  url.searchParams.set('from', from)
+  url.searchParams.set('to', to)
+
+  const { response, json } = await fetchJsonWithResponse(url.toString())
+  expect(response.status).to.equal(200)
+  return json
 }
 
 export function getFileTreeDiff(projectId, from, to, callback) {
@@ -300,16 +291,9 @@ export function deleteLabel(projectId, labelId, callback) {
   )
 }
 
-export function setFailure(failureEntry, callback) {
-  db.projectHistoryFailures.deleteOne(
-    { project_id: { $exists: true } },
-    (err, result) => {
-      if (err) {
-        return callback(err)
-      }
-      db.projectHistoryFailures.insertOne(failureEntry, callback)
-    }
-  )
+export async function setFailure(failureEntry) {
+  await db.projectHistoryFailures.deleteOne({ project_id: { $exists: true } })
+  return await db.projectHistoryFailures.insertOne(failureEntry)
 }
 
 export function getFailure(projectId, callback) {
@@ -331,37 +315,26 @@ export function transferLabelOwnership(fromUser, toUser, callback) {
   )
 }
 
-export function getDump(projectId, callback) {
-  request.get(
-    `http://127.0.0.1:3054/project/${projectId}/dump`,
-    (err, res, body) => {
-      if (err) {
-        return callback(err)
-      }
-      expect(res.statusCode).to.equal(200)
-      callback(null, JSON.parse(body))
-    }
+export async function getDump(projectId) {
+  const { response, json } = await fetchJsonWithResponse(
+    `http://127.0.0.1:3054/project/${projectId}/dump`
   )
+  expect(response.status).to.equal(200)
+  return json
 }
 
-export function deleteProject(projectId, callback) {
-  request.delete(`http://127.0.0.1:3054/project/${projectId}`, (err, res) => {
-    if (err) {
-      return callback(err)
-    }
-    expect(res.statusCode).to.equal(204)
-    callback()
-  })
+export async function deleteProject(projectId) {
+  const response = await fetchNothing(
+    `http://127.0.0.1:3054/project/${projectId}`,
+    { method: 'DELETE' }
+  )
+  expect(response.status).to.equal(204)
 }
 
 export const promises = {
   initializeProject: promisify(initializeProject),
-  deleteProject: promisify(deleteProject),
   pushRawUpdate: promisify(pushRawUpdate),
   setFirstOpTimestamp: promisify(setFirstOpTimestamp),
   getFirstOpTimestamp: promisify(getFirstOpTimestamp),
-  getDump: promisify(getDump),
-  setFailure: promisify(setFailure),
-  getDiff: promisify(getDiff),
   flushProject: promisify(flushProject),
 }

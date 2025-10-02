@@ -28,7 +28,7 @@ describe('Deleting project', function () {
 
   describe('when the project has no pending updates', function () {
     it('successfully deletes the project', async function () {
-      await ProjectHistoryClient.promises.deleteProject(this.projectId)
+      await ProjectHistoryClient.deleteProject(this.projectId)
     })
   })
 
@@ -44,11 +44,11 @@ describe('Deleting project', function () {
         this.projectId,
         Date.now()
       )
-      await ProjectHistoryClient.promises.deleteProject(this.projectId)
+      await ProjectHistoryClient.deleteProject(this.projectId)
     })
 
     it('clears pending updates', async function () {
-      const dump = await ProjectHistoryClient.promises.getDump(this.projectId)
+      const dump = await ProjectHistoryClient.getDump(this.projectId)
       expect(dump.updates).to.deep.equal([])
     })
 

@@ -101,7 +101,7 @@ describe('Diffs', function () {
         authors: [31],
       })
 
-    const diff = await ProjectHistoryClient.promises.getDiff(
+    const diff = await ProjectHistoryClient.getDiff(
       this.projectId,
       'foo.tex',
       3,
@@ -228,7 +228,7 @@ describe('Diffs', function () {
         authors: [{ id: 31, email: 'james.allen@overleaf.com', name: 'James' }],
       })
 
-    const diff = await ProjectHistoryClient.promises.getDiff(
+    const diff = await ProjectHistoryClient.getDiff(
       this.projectId,
       'foo.tex',
       4,
@@ -367,7 +367,7 @@ describe('Diffs', function () {
         authors: [{ id: 31, email: 'james.allen@overleaf.com', name: 'James' }],
       })
 
-    const diff = await ProjectHistoryClient.promises.getDiff(
+    const diff = await ProjectHistoryClient.getDiff(
       this.projectId,
       'binary.tex',
       3,
