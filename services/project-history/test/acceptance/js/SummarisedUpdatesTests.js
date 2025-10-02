@@ -48,7 +48,7 @@ describe('Summarized updates', function () {
   })
 
   it('should return the latest summarized updates from a single chunk', async function () {
-    const updates = await ProjectHistoryClient.promises.getSummarizedUpdates(
+    const updates = await ProjectHistoryClient.getSummarizedUpdates(
       this.projectId,
       { min_count: 1 }
     )
@@ -73,7 +73,7 @@ describe('Summarized updates', function () {
   })
 
   it('should return the latest summarized updates, with min_count spanning multiple chunks', async function () {
-    const updates = await ProjectHistoryClient.promises.getSummarizedUpdates(
+    const updates = await ProjectHistoryClient.getSummarizedUpdates(
       this.projectId,
       { min_count: 5 }
     )
@@ -165,7 +165,7 @@ describe('Summarized updates', function () {
       .get(`/api/projects/${this.historyId}/versions/4/history`)
       .replyWithFile(200, fixture('chunks/4-6.json'))
 
-    const updates = await ProjectHistoryClient.promises.getSummarizedUpdates(
+    const updates = await ProjectHistoryClient.getSummarizedUpdates(
       this.projectId,
       { before: 4 }
     )
@@ -178,7 +178,7 @@ describe('Summarized updates', function () {
       .get(`/api/projects/${this.historyId}/versions/5/history`)
       .replyWithFile(200, fixture('chunks/4-6.json'))
 
-    const updates = await ProjectHistoryClient.promises.getSummarizedUpdates(
+    const updates = await ProjectHistoryClient.getSummarizedUpdates(
       this.projectId,
       { before: 5 }
     )
@@ -191,7 +191,7 @@ describe('Summarized updates', function () {
       .get(`/api/projects/${this.historyId}/versions/6/history`)
       .replyWithFile(200, fixture('chunks/4-6.json'))
 
-    const updates = await ProjectHistoryClient.promises.getSummarizedUpdates(
+    const updates = await ProjectHistoryClient.getSummarizedUpdates(
       this.projectId,
       { before: 6 }
     )

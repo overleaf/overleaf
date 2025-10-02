@@ -57,21 +57,15 @@ export function flushProject(projectId, options, callback) {
   )
 }
 
-export function getSummarizedUpdates(projectId, query, callback) {
-  request.get(
-    {
-      url: `http://127.0.0.1:3054/project/${projectId}/updates`,
-      qs: query,
-      json: true,
-    },
-    (error, res, body) => {
-      if (error) {
-        return callback(error)
-      }
-      expect(res.statusCode).to.equal(200)
-      callback(error, body)
-    }
-  )
+export async function getSummarizedUpdates(projectId, query) {
+  const url = new URL(`http://127.0.0.1:3054/project/${projectId}/updates`)
+  Object.keys(query).forEach(key => {
+    url.searchParams.set(key, query[key])
+  })
+
+  const { response, json } = await fetchJsonWithResponse(url.toString())
+  expect(response.status).to.equal(200)
+  return json
 }
 
 export async function getDiff(projectId, pathname, from, to) {
@@ -223,73 +217,46 @@ export function resyncHistory(projectId, callback) {
   )
 }
 
-export function createLabel(
+export async function createLabel(
   projectId,
   userId,
   version,
   comment,
-  createdAt,
-  callback
+  createdAt
 ) {
-  request.post(
+  const { response, json } = await fetchJsonWithResponse(
+    `http://127.0.0.1:3054/project/${projectId}/labels`,
     {
-      url: `http://127.0.0.1:3054/project/${projectId}/labels`,
+      method: 'POST',
       json: { comment, version, created_at: createdAt, user_id: userId },
-    },
-    (error, res, body) => {
-      if (error) {
-        return callback(error)
-      }
-      expect(res.statusCode).to.equal(200)
-      callback(null, body)
     }
   )
+  expect(response.status).to.equal(200)
+  return json
 }
 
-export function getLabels(projectId, callback) {
-  request.get(
-    {
-      url: `http://127.0.0.1:3054/project/${projectId}/labels`,
-      json: true,
-    },
-    (error, res, body) => {
-      if (error) {
-        return callback(error)
-      }
-      expect(res.statusCode).to.equal(200)
-      callback(null, body)
-    }
+export async function getLabels(projectId) {
+  const { response, json } = await fetchJsonWithResponse(
+    `http://127.0.0.1:3054/project/${projectId}/labels`
   )
+  expect(response.status).to.equal(200)
+  return json
 }
 
-export function deleteLabelForUser(projectId, userId, labelId, callback) {
-  request.delete(
-    {
-      url: `http://127.0.0.1:3054/project/${projectId}/user/${userId}/labels/${labelId}`,
-    },
-    (error, res, body) => {
-      if (error) {
-        return callback(error)
-      }
-      expect(res.statusCode).to.equal(204)
-      callback(null, body)
-    }
+export async function deleteLabelForUser(projectId, userId, labelId) {
+  const response = await fetchNothing(
+    `http://127.0.0.1:3054/project/${projectId}/user/${userId}/labels/${labelId}`,
+    { method: 'DELETE' }
   )
+  expect(response.status).to.equal(204)
 }
 
-export function deleteLabel(projectId, labelId, callback) {
-  request.delete(
-    {
-      url: `http://127.0.0.1:3054/project/${projectId}/labels/${labelId}`,
-    },
-    (error, res, body) => {
-      if (error) {
-        return callback(error)
-      }
-      expect(res.statusCode).to.equal(204)
-      callback(null, body)
-    }
+export async function deleteLabel(projectId, labelId) {
+  const response = await fetchNothing(
+    `http://127.0.0.1:3054/project/${projectId}/labels/${labelId}`,
+    { method: 'DELETE' }
   )
+  expect(response.status).to.equal(204)
 }
 
 export async function setFailure(failureEntry) {
@@ -301,19 +268,12 @@ export function getFailure(projectId, callback) {
   db.projectHistoryFailures.findOne({ project_id: projectId }, callback)
 }
 
-export function transferLabelOwnership(fromUser, toUser, callback) {
-  request.post(
-    {
-      url: `http://127.0.0.1:3054/user/${fromUser}/labels/transfer/${toUser}`,
-    },
-    (error, res, body) => {
-      if (error) {
-        return callback(error)
-      }
-      expect(res.statusCode).to.equal(204)
-      callback(null, body)
-    }
+export async function transferLabelOwnership(fromUser, toUser) {
+  const response = await fetchNothing(
+    `http://127.0.0.1:3054/user/${fromUser}/labels/transfer/${toUser}`,
+    { method: 'POST' }
   )
+  expect(response.status).to.equal(204)
 }
 
 export async function getDump(projectId) {
