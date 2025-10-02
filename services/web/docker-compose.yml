@@ -15,6 +15,8 @@ services:
     environment:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
+      CI:
+      MOCHA_ROOT_SUITE_NAME:
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
@@ -40,6 +42,8 @@ services:
     environment:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
+      CI:
+      MOCHA_ROOT_SUITE_NAME:
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ${LOG_LEVEL:-}
       MONGO_SERVER_SELECTION_TIMEOUT: 600000
@@ -68,6 +72,8 @@ services:
       - ../../libraries:/overleaf/libraries
     working_dir: /overleaf/services/web
     environment:
+      CI:
+      MOCHA_ROOT_SUITE_NAME:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_OPTIONS: "--unhandled-rejections=strict"
       VERBOSE_LOGGING:
@@ -79,8 +85,11 @@ services:
     volumes:
       - ../../:/overleaf
     working_dir: /overleaf/services/web
+    user: "${DOCKER_USER:-1000:1000}"
     environment:
       VERBOSE_LOGGING:
+      CI:
+      MOCHA_ROOT_SUITE_NAME:
       CYPRESS_SPEC_PATTERN: ${CYPRESS_SPEC_PATTERN:-}
       CYPRESS_EXCLUDE_SPEC_PATTERN: ${CYPRESS_EXCLUDE_SPEC_PATTERN:-}
     entrypoint: npm
@@ -99,6 +108,8 @@ services:
       - ../../libraries:/overleaf/libraries
     working_dir: /overleaf/services/web
     environment:
+      CI:
+      MOCHA_ROOT_SUITE_NAME:
       NODE_OPTIONS: "--unhandled-rejections=strict"
       VERBOSE_LOGGING:
     command: npm run --silent test:writefull

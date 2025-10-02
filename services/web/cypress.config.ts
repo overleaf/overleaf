@@ -1,11 +1,21 @@
 import { defineConfig } from 'cypress'
 import { webpackConfig } from './cypress/support/webpack.cypress'
 
+let reporterOptions = {}
+if (process.env.CI) {
+  reporterOptions = {
+    reporter: '/overleaf/node_modules/cypress-multi-reporters',
+    reporterOptions: {
+      configFile: 'cypress/cypress-multi-reporters.json',
+    },
+  }
+}
+
 export default defineConfig({
   fixturesFolder: 'cypress/fixtures',
   video: process.env.CYPRESS_VIDEO === 'true',
-  screenshotsFolder: 'cypress/results',
-  videosFolder: 'cypress/results',
+  screenshotsFolder: process.env.CYPRESS_RESULTS || 'cypress/results',
+  videosFolder: process.env.CYPRESS_RESULTS || 'cypress/results',
   viewportHeight: 800,
   viewportWidth: 800,
   component: {
@@ -25,4 +35,5 @@ export default defineConfig({
   retries: {
     runMode: 3,
   },
+  ...reporterOptions,
 })

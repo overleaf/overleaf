@@ -13,11 +13,14 @@ services:
     user: node
     volumes:
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
+      - ./data/reports:/overleaf/services/web/data/reports
     entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: npm run test:unit:app
     working_dir: /overleaf/services/web
     env_file: docker-compose.common.env
     environment:
+      CI:
+      MOCHA_ROOT_SUITE_NAME:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
       NODE_ENV: test
@@ -38,6 +41,8 @@ services:
     working_dir: /overleaf/services/web
     env_file: docker-compose.common.env
     environment:
+      CI:
+      MOCHA_ROOT_SUITE_NAME:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
       REDIS_HOST: redis_test
@@ -45,6 +50,7 @@ services:
       - 'www.overleaf.test:127.0.0.1'
     volumes:
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
+      - ./data/reports:/overleaf/services/web/data/reports
     entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: npm run test:acceptance:app
     user: root
@@ -61,6 +67,8 @@ services:
       context: ../..
       dockerfile: services/web/Dockerfile
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    volumes:
+      - ./data/reports:/overleaf/services/web/data/reports
     logging:
       driver: local
     user: node
@@ -68,18 +76,23 @@ services:
     command: npm run test:frontend
     environment:
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      CI:
+      MOCHA_ROOT_SUITE_NAME:
 
   test_frontend_ct:
     image: cypress/included:13.13.2
     logging:
       driver: local
     working_dir: /overleaf/services/web
+    user: "${DOCKER_USER:-1000:1000}"
     environment:
-      CYPRESS_SPEC_PATTERN: ${CYPRESS_SPEC_PATTERN:-}
-      CYPRESS_EXCLUDE_SPEC_PATTERN: ${CYPRESS_EXCLUDE_SPEC_PATTERN:-}
+      CI:
+      CYPRESS_RESULTS:
+      CYPRESS_SPEC_PATTERN:
+      CYPRESS_EXCLUDE_SPEC_PATTERN:
     volumes:
-      - ${CYPRESS_RESULTS:-./cypress/results}:/overleaf/services/web/cypress/results/
       - /dev/shm/overleaf:/overleaf
+      - ./data/reports:/overleaf/services/web/data/reports
     entrypoint: npm
     command:
       - "run"
@@ -95,7 +108,11 @@ services:
     user: node
     working_dir: /overleaf/services/web
     command: npm run test:writefull
+    volumes:
+      - ./data/reports:/overleaf/services/web/data/reports
     environment:
+      CI:
+      MOCHA_ROOT_SUITE_NAME:
       NODE_OPTIONS: "--unhandled-rejections=strict"
 
   tar:
