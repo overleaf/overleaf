@@ -1,7 +1,6 @@
 const crypto = require('crypto')
 const { db } = require('../../infrastructure/mongodb')
 const Errors = require('../Errors/Errors')
-const { promisifyAll } = require('@overleaf/promise-utils')
 const { callbackify } = require('util')
 
 const ONE_HOUR_IN_S = 60 * 60
@@ -32,106 +31,92 @@ async function peekValueFromToken(use, token) {
   return { data: tokenDoc.data, remainingPeeks }
 }
 
-const OneTimeTokenHandler = {
-  MAX_PEEKS: 4,
+async function getNewToken(use, data, options = {}) {
+  const expiresIn = options.expiresIn || ONE_HOUR_IN_S
+  const createdAt = new Date()
+  const expiresAt = new Date(createdAt.getTime() + expiresIn * 1000)
+  const token = crypto.randomBytes(32).toString('hex')
 
-  getNewToken(use, data, options, callback) {
-    // options is optional
-    if (!options) {
-      options = {}
-    }
-    if (typeof options === 'function') {
-      callback = options
-      options = {}
-    }
-    const expiresIn = options.expiresIn || ONE_HOUR_IN_S
-    const createdAt = new Date()
-    const expiresAt = new Date(createdAt.getTime() + expiresIn * 1000)
-    const token = crypto.randomBytes(32).toString('hex')
-    db.tokens.insertOne(
-      {
-        use,
-        token,
-        data,
-        createdAt,
-        expiresAt,
-      },
-      function (error) {
-        if (error) {
-          return callback(error)
-        }
-        callback(null, token)
-      }
-    )
-  },
+  await db.tokens.insertOne({
+    use,
+    token,
+    data,
+    createdAt,
+    expiresAt,
+  })
 
-  getValueFromTokenAndExpire(use, token, callback) {
-    const now = new Date()
-    db.tokens.findOneAndUpdate(
-      {
-        use,
-        token,
-        expiresAt: { $gt: now },
-        usedAt: { $exists: false },
-        peekCount: { $not: { $gte: OneTimeTokenHandler.MAX_PEEKS } },
-      },
-      {
-        $set: {
-          usedAt: now,
-        },
-      },
-      function (error, token) {
-        if (error) {
-          return callback(error)
-        }
-        if (!token) {
-          return callback(new Errors.NotFoundError('no token found'))
-        }
-        callback(null, token.data)
-      }
-    )
-  },
-
-  peekValueFromToken: callbackify(peekValueFromToken),
-
-  expireToken(use, token, callback) {
-    const now = new Date()
-    db.tokens.updateOne(
-      {
-        use,
-        token,
-      },
-      {
-        $set: {
-          usedAt: now,
-        },
-      },
-      error => {
-        callback(error)
-      }
-    )
-  },
-
-  expireAllTokensForUser(userId, use, callback) {
-    const now = new Date()
-    db.tokens.updateMany(
-      {
-        use,
-        'data.user_id': userId.toString(),
-        usedAt: { $exists: false },
-      },
-      {
-        $set: {
-          usedAt: now,
-        },
-      },
-      error => {
-        callback(error)
-      }
-    )
-  },
+  return token
 }
 
-OneTimeTokenHandler.promises = promisifyAll(OneTimeTokenHandler)
+async function getValueFromTokenAndExpire(use, token) {
+  const now = new Date()
+  const tokenDoc = await db.tokens.findOneAndUpdate(
+    {
+      use,
+      token,
+      expiresAt: { $gt: now },
+      usedAt: { $exists: false },
+      peekCount: { $not: { $gte: OneTimeTokenHandler.MAX_PEEKS } },
+    },
+    {
+      $set: {
+        usedAt: now,
+      },
+    }
+  )
+
+  if (!tokenDoc) {
+    throw new Errors.NotFoundError('no token found')
+  }
+
+  return tokenDoc.data
+}
+
+async function expireToken(use, token) {
+  const now = new Date()
+  await db.tokens.updateOne(
+    {
+      use,
+      token,
+    },
+    {
+      $set: {
+        usedAt: now,
+      },
+    }
+  )
+}
+
+async function expireAllTokensForUser(userId, use) {
+  const now = new Date()
+  await db.tokens.updateMany(
+    {
+      use,
+      'data.user_id': userId.toString(),
+      usedAt: { $exists: false },
+    },
+    {
+      $set: {
+        usedAt: now,
+      },
+    }
+  )
+}
+
+const OneTimeTokenHandler = {
+  MAX_PEEKS: 4,
+  getNewToken: callbackify(getNewToken),
+  getValueFromTokenAndExpire: callbackify(getValueFromTokenAndExpire),
+  peekValueFromToken: callbackify(peekValueFromToken),
+  expireToken: callbackify(expireToken),
+  expireAllTokensForUser: callbackify(expireAllTokensForUser),
+  promises: {
+    getNewToken,
+    getValueFromTokenAndExpire,
+    peekValueFromToken,
+    expireToken,
+    expireAllTokensForUser,
+  },
+}
 
 module.exports = OneTimeTokenHandler
