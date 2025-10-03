@@ -142,6 +142,17 @@ async function doCompile(request, stats, timings) {
     // override default texlive max_print_line environment variable
     env.max_print_line = Settings.texliveMaxPrintLine
   }
+
+  // Fix for subdirectory compilation: configure TEXINPUTS to resolve relative paths.
+  // When compiling files in subdirectories (part of fix for issue #1374), we need
+  // to ensure LaTeX can find relative includes/graphics from the file's directory.
+  if (request.rootResourcePath && request.rootResourcePath.includes('/')) {
+    const relDir = Path.dirname(request.rootResourcePath)
+    // Set TEXINPUTS to search recursively in the file's directory first.
+    // The '//' suffix enables recursive search, ':' separates paths (kpsewhich format)
+    const texinputsPrefix = `${relDir}//:`
+    env.TEXINPUTS = env.TEXINPUTS ? `${texinputsPrefix}${env.TEXINPUTS}` : texinputsPrefix
+  }
   // only run chktex on LaTeX files (not knitr .Rtex files or any others)
   const isLaTeXFile = request.rootResourcePath?.match(/\.tex$/i)
   if (request.check != null && isLaTeXFile) {
