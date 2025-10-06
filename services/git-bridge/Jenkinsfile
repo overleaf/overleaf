@@ -1,0 +1,88 @@
+pipeline {
+  agent {
+    node {
+      label 'jenkins-agent-web'
+      customWorkspace '/workspace'
+    }
+  }
+  options {
+    timestamps()
+    parallelsAlwaysFailFast()
+    timeout(time: 15, unit: 'MINUTES')
+  }
+  environment {
+    BRANCH_NAME = "${env.CHANGE_BRANCH ? env.CHANGE_BRANCH : env.BRANCH_NAME}"
+    JENKINS_BUILD_NUMBER = "${BUILD_NUMBER}"
+    BUILD_NUMBER = "${SHORT_SHA}_${BUILD_NUMBER}"
+    COMMIT_SHA = "${GIT_COMMIT}"
+    SHORT_SHA = "${GIT_COMMIT.take(7)}"
+  }
+  stages {
+    stage('Stage 1') {
+      parallel {
+        stage('Build') {
+          steps {
+            dir('services/git-bridge') {
+              sh 'make docker_build_base'
+            }
+          }
+        }
+        stage('Install monorepo') {
+          steps {
+            sh 'make monorepo_setup'
+          }
+        }
+      }
+    }
+    stage('Stage 2') {
+      parallel {
+        stage('Build production and push') {
+          steps {
+            dir('services/git-bridge') {
+              sh 'make docker_build'
+              sh 'make push_branch'
+            }
+          }
+        }
+        stage('Format Java') {
+          steps {
+            dir('services/git-bridge') {
+              sh 'make docker_format'
+            }
+          }
+        }
+        stage('Format Jenkinsfile') {
+          steps {
+            sh 'bin/run monorepo npm run format:jenkins'
+          }
+        }
+        stage('Test') {
+          steps {
+            dir('services/git-bridge') {
+              sh 'make docker_test'
+            }
+          }
+        }
+      }
+    }
+    stage('Push Production') {
+      steps {
+        dir('services/git-bridge') {
+          sh 'make push'
+        }
+      }
+    }
+  }
+  post {
+    // Collect junit test results for both success and failure case.
+    always {
+      junit checksName: 'git-bridge test results', testResults: 'services/git-bridge/target/surefire-reports/*.xml'
+    }
+    cleanup {
+      dir('services/git-bridge') {
+        sh 'make clean_ci'
+      }
+      sh 'make clean_jenkins'
+    }
+  }
+}
