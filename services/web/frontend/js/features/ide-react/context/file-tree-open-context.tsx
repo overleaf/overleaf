@@ -134,12 +134,7 @@ export const FileTreeOpenProvider: FC<React.PropsWithChildren> = ({
   // Open a document once the file tree and project are ready
   const initialOpenDoneRef = useRef(false)
   useEffect(() => {
-    if (
-      rootDocId &&
-      fileTreeReady &&
-      projectJoined &&
-      !initialOpenDoneRef.current
-    ) {
+    if (fileTreeReady && projectJoined && !initialOpenDoneRef.current) {
       initialOpenDoneRef.current = true
       openInitialDoc(rootDocId)
     }
