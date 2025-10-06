@@ -65,40 +65,36 @@ async function importInvite(subscription, inviterName, email, token, sentAt) {
   return subscription.save()
 }
 
-async function _deleteUserSubscription(userId, ipAddress) {
+async function _deleteUserSubscription(subscription, userId, ipAddress) {
   // Delete released user subscription to make it on a free plan
-  const subscription =
-    await SubscriptionLocator.promises.getUsersSubscription(userId)
 
-  if (subscription) {
-    logger.debug(
-      {
-        subscriptionId: subscription._id,
-      },
-      'deleting user subscription'
-    )
+  logger.debug(
+    {
+      subscriptionId: subscription._id,
+    },
+    'deleting user subscription'
+  )
 
-    const deleterData = {
-      id: userId,
-      ip: ipAddress,
-    }
-    await SubscriptionUpdater.promises.deleteSubscription(
-      subscription,
-      deleterData
-    )
+  const deleterData = {
+    id: userId,
+    ip: ipAddress,
+  }
+  await SubscriptionUpdater.promises.deleteSubscription(
+    subscription,
+    deleterData
+  )
 
-    // Terminate the subscription in Recurly
-    if (subscription.recurlySubscription_id) {
-      try {
-        await RecurlyClient.promises.terminateSubscriptionByUuid(
-          subscription.recurlySubscription_id
-        )
-      } catch (err) {
-        logger.error(
-          { err, subscriptionId: subscription._id },
-          'terminating subscription failed'
-        )
-      }
+  // Terminate the subscription in Recurly
+  if (subscription.recurlySubscription_id) {
+    try {
+      await RecurlyClient.promises.terminateSubscriptionByUuid(
+        subscription.recurlySubscription_id
+      )
+    } catch (err) {
+      logger.error(
+        { err, subscriptionId: subscription._id },
+        'terminating subscription failed'
+      )
     }
   }
 }
@@ -117,7 +113,17 @@ async function acceptInvite(token, userId, ipAddress) {
   )
 
   if (subscription.managedUsersEnabled) {
-    await _deleteUserSubscription(userId, ipAddress)
+    // check if user has a personal subscription
+    const userSubscription =
+      await SubscriptionLocator.promises.getUsersSubscription(userId)
+
+    if (userSubscription) {
+      // if user has a personal subscription and joins a managed group, delete their personal subscription
+      // but make sure that it's not the same subscription as the group one.
+      if (!userSubscription._id.equals(subscription._id)) {
+        await _deleteUserSubscription(userSubscription, userId, ipAddress)
+      }
+    }
     await Modules.promises.hooks.fire(
       'enrollInManagedSubscription',
       userId,

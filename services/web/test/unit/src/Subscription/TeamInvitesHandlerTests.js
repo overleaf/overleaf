@@ -344,11 +344,26 @@ describe('TeamInvitesHandler', function () {
         email: 'tyrion@example.com',
       }
 
+      this.user_subscription = {
+        id: '66264b9125930b976cc0811e',
+        _id: new ObjectId('66264b9125930b976cc0811e'),
+        groupPlan: false,
+        recurlySubscription_id: 'fa1b2cfa156gh',
+        admin_id: '123456789',
+        member_ids: [],
+        teamInvites: [],
+        save: sinon.stub().resolves(),
+      }
+
       this.ipAddress = '127.0.0.1'
 
       this.UserGetter.promises.getUserByAnyEmail
         .withArgs(this.user.email)
         .resolves(this.user)
+
+      this.SubscriptionLocator.promises.getUsersSubscription
+        .withArgs(this.user.id)
+        .resolves(this.user_subscription)
 
       this.subscription.teamInvites.push({
         email: 'john.snow@example.com',
@@ -421,18 +436,35 @@ describe('TeamInvitesHandler', function () {
         )
         sinon.assert.calledWith(
           this.SubscriptionUpdater.promises.deleteSubscription,
-          this.subscription,
+          this.user_subscription,
           { id: this.user.id, ip: this.ipAddress }
         )
         sinon.assert.calledWith(
           this.RecurlyClient.promises.terminateSubscriptionByUuid,
-          this.subscription.recurlySubscription_id
+          this.user_subscription.recurlySubscription_id
         )
         sinon.assert.calledWith(
           this.Modules.promises.hooks.fire,
           'enrollInManagedSubscription',
           this.user.id,
           this.subscription
+        )
+      })
+
+      it('should not delete the users subscription if that subscription is also the join target', async function () {
+        this.subscription.managedUsersEnabled = true
+        this.SubscriptionLocator.promises.getUsersSubscription
+          .withArgs(this.user.id)
+          .resolves(this.subscription)
+
+        await this.TeamInvitesHandler.promises.acceptInvite(
+          'dddddddd',
+          this.user.id,
+          this.ipAddress
+        )
+
+        sinon.assert.notCalled(
+          this.SubscriptionUpdater.promises.deleteSubscription
         )
       })
     })
