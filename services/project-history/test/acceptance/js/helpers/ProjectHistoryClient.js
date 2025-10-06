@@ -5,6 +5,7 @@ import RedisWrapper from '@overleaf/redis-wrapper'
 import { db } from '../../../../app/js/mongodb.js'
 import { promisify } from '@overleaf/promise-utils'
 import {
+  fetchJson,
   fetchJsonWithResponse,
   fetchNothing,
   fetchStringWithResponse,
@@ -64,9 +65,7 @@ export async function getSummarizedUpdates(projectId, query) {
     url.searchParams.set(key, query[key])
   })
 
-  const { response, json } = await fetchJsonWithResponse(url.toString())
-  expect(response.status).to.equal(200)
-  return json
+  return await fetchJson(url.toString())
 }
 
 export async function getDiff(projectId, pathname, from, to) {
@@ -75,9 +74,7 @@ export async function getDiff(projectId, pathname, from, to) {
   url.searchParams.set('from', from)
   url.searchParams.set('to', to)
 
-  const { response, json } = await fetchJsonWithResponse(url.toString())
-  expect(response.status).to.equal(200)
-  return json
+  return await fetchJson(url.toString())
 }
 
 export async function getFileTreeDiff(projectId, from, to) {
@@ -116,11 +113,7 @@ export async function getChangesInChunkSince(projectId, since, options = {}) {
 }
 
 export async function getLatestSnapshot(projectId) {
-  const { response, json } = await fetchJsonWithResponse(
-    `http://127.0.0.1:3054/project/${projectId}/snapshot`
-  )
-  expect(response.status).to.equal(200)
-  return json
+  return await fetchJson(`http://127.0.0.1:3054/project/${projectId}/snapshot`)
 }
 
 export async function getSnapshot(projectId, pathname, version, options = {}) {
@@ -210,23 +203,14 @@ export async function createLabel(
   comment,
   createdAt
 ) {
-  const { response, json } = await fetchJsonWithResponse(
-    `http://127.0.0.1:3054/project/${projectId}/labels`,
-    {
-      method: 'POST',
-      json: { comment, version, created_at: createdAt, user_id: userId },
-    }
-  )
-  expect(response.status).to.equal(200)
-  return json
+  return await fetchJson(`http://127.0.0.1:3054/project/${projectId}/labels`, {
+    method: 'POST',
+    json: { comment, version, created_at: createdAt, user_id: userId },
+  })
 }
 
 export async function getLabels(projectId) {
-  const { response, json } = await fetchJsonWithResponse(
-    `http://127.0.0.1:3054/project/${projectId}/labels`
-  )
-  expect(response.status).to.equal(200)
-  return json
+  return await fetchJson(`http://127.0.0.1:3054/project/${projectId}/labels`)
 }
 
 export async function deleteLabelForUser(projectId, userId, labelId) {
@@ -263,11 +247,7 @@ export async function transferLabelOwnership(fromUser, toUser) {
 }
 
 export async function getDump(projectId) {
-  const { response, json } = await fetchJsonWithResponse(
-    `http://127.0.0.1:3054/project/${projectId}/dump`
-  )
-  expect(response.status).to.equal(200)
-  return json
+  return await fetchJson(`http://127.0.0.1:3054/project/${projectId}/dump`)
 }
 
 export async function deleteProject(projectId) {
