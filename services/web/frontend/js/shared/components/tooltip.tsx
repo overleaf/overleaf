@@ -78,7 +78,7 @@ function Tooltip({
   const delay = overlayProps?.delay
   let delayShow = DEFAULT_DELAY_SHOW
   let delayHide = DEFAULT_DELAY_HIDE
-  if (delay) {
+  if (delay !== undefined) {
     delayShow = typeof delay === 'number' ? delay : delay.show
     delayHide = typeof delay === 'number' ? Math.max(delay - 10, 0) : delay.hide
   }
