@@ -3,6 +3,7 @@ import AddSeats, {
   MAX_NUMBER_OF_PO_NUMBER_CHARACTERS,
 } from '@/features/group-management/components/add-seats/add-seats'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
+import { cloneDeep } from 'lodash'
 
 describe('<AddSeats />', function () {
   beforeEach(function () {
@@ -405,6 +406,40 @@ describe('<AddSeats />', function () {
 
           cy.findByText(
             /This does not include your current discounts, which will be applied automatically before your next payment/i
+          )
+        })
+      })
+
+      it('handles double digit numbers of licenses gracefully', function () {
+        const { promise, resolve } = Promise.withResolvers<void>()
+        const body = cloneDeep(this.body)
+        cy.intercept(
+          'POST',
+          '/user/subscription/group/add-users/preview',
+          async req => {
+            await promise
+            // make the response reflect back whatever quantity was sent in the request
+            // we don't really care about the rest of the body for this test
+            const { adding } = req.body
+            body.change.addOn.quantity = body.change.addOn.prevQuantity + adding
+            req.reply({
+              statusCode: 200,
+              body,
+            })
+          }
+        ).as('addUsersRequest')
+
+        cy.get('@input').type('1')
+        cy.get('@input').type('2')
+        resolve()
+
+        cy.findByTestId('adding-licenses-summary').within(() => {
+          cy.findByText((_, el) =>
+            Boolean(
+              el?.textContent?.includes(
+                'You’re adding 12 licenses to your plan giving you a total of 17 licenses'
+              )
+            )
           )
         })
       })

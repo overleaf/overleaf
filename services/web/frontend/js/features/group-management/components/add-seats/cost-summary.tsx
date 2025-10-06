@@ -28,7 +28,7 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
       data-testid="cost-summary"
     >
       <Card.Body className="d-grid gap-2 p-3">
-        <div>
+        <div data-testid="adding-licenses-summary">
           <div className="fw-bold">{t('cost_summary')}</div>
           {subscriptionChange ? (
             <Trans
