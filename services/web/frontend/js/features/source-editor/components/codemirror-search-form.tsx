@@ -37,6 +37,7 @@ import { debounce } from 'lodash'
 import { EditorSelection, EditorState } from '@codemirror/state'
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
 import { FullProjectSearchButton } from './full-project-search-button'
+import { isInvalidRegExp } from '../utils/regexp'
 
 const MATCH_COUNT_DEBOUNCE_WAIT = 100 // the amount of ms to wait before counting matches
 const MAX_MATCH_COUNT = 999 // the maximum number of matches to count
@@ -253,8 +254,7 @@ const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
       <div className="ol-cm-search-controls">
         <span
           className={classnames('ol-cm-search-input-group', {
-            'ol-cm-search-input-error':
-              query.regexp && isInvalidRegExp(query.search),
+            'ol-cm-search-input-error': query.regexp && isInvalidRegExp(query),
           })}
         >
           <OLFormControl
@@ -493,15 +493,6 @@ const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
       </div>
     </form>
   )
-}
-
-function isInvalidRegExp(source: string) {
-  try {
-    RegExp(source)
-    return false
-  } catch {
-    return true
-  }
 }
 
 export default CodeMirrorSearchForm

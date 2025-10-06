@@ -5,3 +5,12 @@ export const createRegExp = (searchQuery: SearchQuery) => {
 
   return new RegExp(searchQuery.search, flags)
 }
+
+export const isInvalidRegExp = (searchQuery: SearchQuery): boolean => {
+  try {
+    createRegExp(searchQuery)
+    return false
+  } catch {
+    return true
+  }
+}
