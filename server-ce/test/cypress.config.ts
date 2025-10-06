@@ -1,6 +1,6 @@
-const { defineConfig } = require('cypress')
-const { readPdf, readFileInZip } = require('./helpers/read-file')
-const fs = require('node:fs')
+import { defineConfig } from 'cypress'
+import { readFileInZip, readPdf } from './helpers/read-file'
+import fs from 'node:fs'
 
 if (process.env.CYPRESS_SHARD && !process.env.SPEC_PATTERN) {
   // Running Cypress on all the specs is wasteful (~1min) when only few of them
@@ -36,20 +36,19 @@ const specPattern = process.env.SPEC_PATTERN || './**/*.spec.ts'
 let reporterOptions = {}
 if (process.env.CI) {
   reporterOptions = {
-    reporter: '/overleaf/server-ce/test/node_modules/cypress-multi-reporters',
+    reporter: `${process.env.MONOREPO}/node_modules/cypress-multi-reporters`,
     reporterOptions: {
       configFile: 'cypress/cypress-multi-reporters.json',
     },
   }
 }
 
-module.exports = defineConfig({
+export default defineConfig({
   defaultCommandTimeout: 10_000,
   fixturesFolder: 'cypress/fixtures',
   video: process.env.CYPRESS_VIDEO === 'true',
   screenshotsFolder: 'cypress/results',
   videosFolder: 'cypress/results',
-  videoUploadOnPasses: false,
   viewportHeight: 768,
   viewportWidth: 1024,
   e2e: {

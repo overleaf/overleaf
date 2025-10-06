@@ -1,22 +1,23 @@
 {
-  "name": "@overleaf/server-ce/test",
+  "name": "@overleaf/server-ce-test",
   "description": "e2e tests for Overleaf Community Edition",
   "private": true,
+  "type": "module",
   "scripts": {
     "cypress:open": "cypress open --e2e --browser chrome",
     "cypress:run": "cypress run --e2e --browser chrome",
     "format": "prettier --list-different $PWD/'**/*.{js,mjs,ts,tsx,json}'",
     "format:fix": "prettier --write $PWD/'**/*.{js,mjs,ts,tsx,json}'"
   },
-  "dependencies": {
+  "devDependencies": {
     "@isomorphic-git/lightning-fs": "^4.6.0",
+    "@overleaf/validation-tools": "*",
     "@testing-library/cypress": "^10.0.3",
     "@types/adm-zip": "^0.5.7",
     "@types/pdf-parse": "^1.1.5",
     "@types/uuid": "^9.0.8",
     "adm-zip": "^0.5.12",
     "body-parser": "^1.20.3",
-    "celebrate": "^15.0.3",
     "cypress": "13.13.2",
     "cypress-multi-reporters": "^2.0.5",
     "express": "^4.21.2",
@@ -24,7 +25,7 @@
     "js-yaml": "^4.1.0",
     "mocha-junit-reporter": "^2.2.1",
     "pdf-parse": "^1.1.1",
-    "typescript": "^5.0.4",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "zod-validation-error": "^4.0.1"
   }
 }

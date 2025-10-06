@@ -1,10 +1,9 @@
 import fs from 'fs'
 import path from 'path'
-import pdf from 'pdf-parse'
+// @ts-ignore broken package entrypoint
+import pdf from 'pdf-parse/lib/pdf-parse.js'
 import AdmZip from 'adm-zip'
-import { promisify } from 'util'
-
-const sleep = promisify(setTimeout)
+import { setTimeout } from 'timers/promises'
 
 const MAX_ATTEMPTS = 15
 const POLL_INTERVAL = 500
@@ -31,7 +30,7 @@ export async function readFileInZip({
         throw new Error(`${fileToRead} not found in ${pathToZip}`)
       }
     }
-    await sleep(POLL_INTERVAL)
+    await setTimeout(POLL_INTERVAL)
     attempt++
   }
   throw new Error(`${pathToZip} not found`)
@@ -45,7 +44,7 @@ export async function readPdf(file: string) {
       const { text } = await pdf(dataBuffer)
       return text
     }
-    await sleep(POLL_INTERVAL)
+    await setTimeout(POLL_INTERVAL)
     attempt++
   }
   throw new Error(`${file} not found`)

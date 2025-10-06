@@ -64,8 +64,7 @@ pipeline {
       parallel {
         stage('Install deps') {
           steps {
-            sh 'make install -j10'
-            sh 'make -C server-ce/test npm_install_in_docker'
+            sh 'make monorepo_setup'
             script {
               job_npm_install_done = true
             }
@@ -85,9 +84,7 @@ pipeline {
                 return job_npm_install_done
               }
             }
-            dir('server-ce/test') {
-              sh 'make format_in_docker'
-            }
+            sh 'bin/run -w /overleaf/server-ce/test monorepo npm run format'
           }
         }
         stage('Copybara') {

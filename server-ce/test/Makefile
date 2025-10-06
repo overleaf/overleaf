@@ -5,6 +5,7 @@ all: test-e2e
 # We need to have both file-system layouts agree on the path for the docker compose project.
 # Notable the container labels com.docker.compose.project.working_dir and com.docker.compose.project.config_files need to match when creating containers from the docker host (how you started things) and from host-admin (how tests reconfigure the instance).
 export PWD = $(shell pwd)
+export MONOREPO = $(shell cd ../../ && pwd)
 
 export TEX_LIVE_DOCKER_IMAGE ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2023.1
 export ALL_TEX_LIVE_DOCKER_IMAGES ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2023.1,us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2022.1
@@ -95,15 +96,5 @@ prefetch_default_compose_build: build_mailtrap
 build_mailtrap:
 	git clone https://github.com/dbck/docker-mailtrap.git || true && cd docker-mailtrap && git checkout v1.5.0
 	docker build -t mailtrap docker-mailtrap/build
-
-npm_install_in_docker: export COMPOSE_PROJECT_NAME=
-npm_install_in_docker:
-	$(MAKE) -C ../../ .metadata/docker-image/monorepo
-	cd ../../ && bin/run --no-deps --workdir /overleaf/server-ce/test monorepo npm --no-dry-run install
-
-format_in_docker: export COMPOSE_PROJECT_NAME=
-format_in_docker:
-	$(MAKE) -C ../../ .metadata/docker-image/monorepo
-	cd ../../ && bin/run --no-deps --workdir /overleaf/server-ce/test monorepo npm run format
 
 .PHONY: test-e2e test-e2e-open

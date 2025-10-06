@@ -1,17 +1,14 @@
-const fs = require('fs')
-const Path = require('path')
-const { execFile } = require('child_process')
-const express = require('express')
-const bodyParser = require('body-parser')
-const {
-  celebrate: validate,
-  Joi,
-  errors: handleValidationErrors,
-} = require('celebrate')
-const YAML = require('js-yaml')
+import fs from 'node:fs'
+import Path from 'node:path'
+import { execFile } from 'node:child_process'
+import bodyParser from 'body-parser'
+import express from 'express'
+import YAML from 'js-yaml'
+import { isZodErrorLike } from 'zod-validation-error'
+import { ParamsError, validateReq, z } from '@overleaf/validation-tools'
 
 const DATA_DIR = Path.join(
-  __dirname,
+  import.meta.dirname,
   'data',
   // Give each shard their own data dir.
   process.env.CYPRESS_SHARD || 'default'
@@ -108,84 +105,80 @@ app.use((req, res, next) => {
   next()
 })
 
-app.post(
-  '/run/script',
-  validate(
-    {
-      body: {
-        cwd: Joi.string().required(),
-        script: Joi.string().required(),
-        args: Joi.array().items(Joi.string()),
-        user: Joi.string().required(),
-        hasOverleafEnv: Joi.boolean().required(),
-      },
-    },
-    { allowUnknown: false }
-  ),
-  (req, res) => {
-    const { cwd, script, args, user, hasOverleafEnv } = req.body
+app.post('/run/script', (req, res) => {
+  const {
+    body: { cwd, script, args, user, hasOverleafEnv },
+  } = validateReq(
+    req,
+    z.object({
+      body: z.object({
+        cwd: z.string(),
+        script: z.string(),
+        args: z.array(z.string()),
+        user: z.string(),
+        hasOverleafEnv: z.boolean(),
+      }),
+    })
+  )
 
-    const env = hasOverleafEnv
-      ? 'source /etc/overleaf/env.sh || source /etc/sharelatex/env.sh'
-      : 'true'
+  const env = hasOverleafEnv
+    ? 'source /etc/overleaf/env.sh || source /etc/sharelatex/env.sh'
+    : 'true'
 
-    runDockerCompose(
-      'exec',
-      [
-        '--workdir',
-        `/overleaf/${cwd}`,
-        'sharelatex',
-        'bash',
-        '-c',
-        `source /etc/container_environment.sh && ${env} && /sbin/setuser ${user} node ${script} ${args.map(a => JSON.stringify(a)).join(' ')}`,
-      ],
-      (error, stdout, stderr) => {
-        res.json({
-          error,
-          stdout,
-          stderr,
-        })
-      }
-    )
-  }
-)
+  runDockerCompose(
+    'exec',
+    [
+      '--workdir',
+      `/overleaf/${cwd}`,
+      'sharelatex',
+      'bash',
+      '-c',
+      `source /etc/container_environment.sh && ${env} && /sbin/setuser ${user} node ${script} ${args.map(a => JSON.stringify(a)).join(' ')}`,
+    ],
+    (error, stdout, stderr) => {
+      res.json({
+        error,
+        stdout,
+        stderr,
+      })
+    }
+  )
+})
 
-app.post(
-  '/run/gruntTask',
-  validate(
-    {
-      body: {
-        task: Joi.string().required(),
-        args: Joi.array().items(Joi.string()),
-      },
-    },
-    { allowUnknown: false }
-  ),
-  (req, res) => {
-    const { task, args } = req.body
+app.post('/run/gruntTask', (req, res) => {
+  const {
+    body: { task, args },
+  } = validateReq(
+    req,
+    z.object({
+      body: z.object({
+        task: z.string(),
+        args: z.array(z.string()),
+      }),
+    })
+  )
 
-    runDockerCompose(
-      'exec',
-      [
-        '--workdir',
-        '/var/www/sharelatex',
-        'sharelatex',
-        'bash',
-        '-c',
-        `source /etc/container_environment.sh && /sbin/setuser www-data grunt ${JSON.stringify(task)} ${args.map(a => JSON.stringify(a)).join(' ')}`,
-      ],
-      (error, stdout, stderr) => {
-        res.json({
-          error,
-          stdout,
-          stderr,
-        })
-      }
-    )
-  }
-)
+  runDockerCompose(
+    'exec',
+    [
+      '--workdir',
+      '/var/www/sharelatex',
+      'sharelatex',
+      'bash',
+      '-c',
+      `source /etc/container_environment.sh && /sbin/setuser www-data grunt ${JSON.stringify(task)} ${args.map(a => JSON.stringify(a)).join(' ')}`,
+    ],
+    (error, stdout, stderr) => {
+      res.json({
+        error,
+        stdout,
+        stderr,
+      })
+    }
+  )
+})
 
-const allowedVars = Joi.object(
+const allowedVars = z.object(
   Object.fromEntries(
     [
       'OVERLEAF_APP_NAME',
@@ -227,7 +220,7 @@ const allowedVars = Joi.object(
       'SHARELATEX_SITE_URL',
       'SHARELATEX_MONGO_URL',
       'SHARELATEX_REDIS_HOST',
-    ].map(name => [name, Joi.string()])
+    ].map(name => [name, z.string().optional()])
   )
 )
 
@@ -296,36 +289,37 @@ function setVarsDockerCompose({
   writeDockerComposeOverride(cfg)
 }
 
-app.post(
-  '/docker/compose/:cmd',
-  validate(
-    {
-      body: {
-        args: Joi.array().allow(
-          '--detach',
-          '--wait',
-          '--volumes',
-          '--timeout=60',
-          'sharelatex',
-          'git-bridge',
-          'mongo',
-          'redis'
+app.post('/docker/compose/:cmd', (req, res) => {
+  const {
+    params: { cmd },
+    body: { args },
+  } = validateReq(
+    req,
+    z.object({
+      params: z.object({
+        cmd: z.literal(['up', 'stop', 'down', 'ps', 'logs']),
+      }),
+      body: z.object({
+        args: z.array(
+          z.literal([
+            '--detach',
+            '--wait',
+            '--volumes',
+            '--timeout=60',
+            'sharelatex',
+            'git-bridge',
+            'mongo',
+            'redis',
+          ])
         ),
-      },
-      params: {
-        cmd: Joi.allow('up', 'stop', 'down', 'ps', 'logs'),
-      },
-    },
-    { allowUnknown: false }
-  ),
-  (req, res) => {
-    const { cmd } = req.params
-    const { args } = req.body
-    runDockerCompose(cmd, args, (error, stdout, stderr) => {
-      res.json({ error, stdout, stderr })
+      }),
     })
-  }
-)
+  )
+
+  runDockerCompose(cmd, args, (error, stdout, stderr) => {
+    res.json({ error, stdout, stderr })
+  })
+})
 
 function maybeResetData(resetData, callback) {
   if (!resetData) return callback()
@@ -347,88 +341,78 @@ function maybeResetData(resetData, callback) {
   )
 }
 
-app.post(
-  '/reconfigure',
-  validate(
-    {
-      body: {
-        pro: Joi.boolean().required(),
-        mongoVersion: Joi.string().allow('').optional(),
-        version: Joi.string().required(),
+app.post('/reconfigure', (req, res) => {
+  const {
+    body: { pro, version, vars, withDataDir, resetData, mongoVersion },
+  } = validateReq(
+    req,
+    z.object({
+      body: z.object({
+        pro: z.boolean(),
+        version: z.string(),
         vars: allowedVars,
-        withDataDir: Joi.boolean().optional(),
-        resetData: Joi.boolean().optional(),
-      },
-    },
-    { allowUnknown: false }
-  ),
-  (req, res) => {
-    const { pro, version, vars, withDataDir, resetData, mongoVersion } =
-      req.body
-    maybeResetData(resetData, (error, stdout, stderr) => {
-      if (error) return res.json({ error, stdout, stderr })
-
-      const previousConfigServer = previousConfig
-      const newConfig = JSON.stringify(req.body)
-      if (previousConfig === newConfig) {
-        return res.json({ previousConfigServer })
-      }
-
-      try {
-        setVarsDockerCompose({ pro, version, vars, withDataDir, mongoVersion })
-      } catch (error) {
-        return res.json({ error })
-      }
-
-      if (error) return res.json({ error, stdout, stderr })
-      runDockerCompose(
-        'up',
-        ['--detach', '--wait', 'sharelatex'],
-        (error, stdout, stderr) => {
-          previousConfig = newConfig
-          res.json({ error, stdout, stderr, previousConfigServer })
-        }
-      )
+        withDataDir: z.boolean(),
+        resetData: z.boolean(),
+        mongoVersion: z.string(),
+      }),
     })
-  }
-)
+  )
+  maybeResetData(resetData, (error, stdout, stderr) => {
+    if (error) return res.json({ error, stdout, stderr })
 
-app.post(
-  '/mongo/setFeatureCompatibilityVersion',
-  validate(
-    {
-      body: {
-        mongoVersion: Joi.string().required(),
-      },
-    },
-    { allowUnknown: false }
-  ),
-  (req, res) => {
-    const { mongoVersion } = req.body
-    const mongosh = mongoVersion > '5' ? 'mongosh' : 'mongo'
-    const params = {
-      setFeatureCompatibilityVersion: mongoVersion,
+    const previousConfigServer = previousConfig
+    const newConfig = JSON.stringify(req.body)
+    if (previousConfig === newConfig) {
+      return res.json({ previousConfigServer })
     }
-    if (mongoVersion >= '7.0') {
-      // MongoServerError: Once you have upgraded to 7.0, you will not be able to downgrade FCV and binary version without support assistance. Please re-run this command with 'confirm: true' to acknowledge this and continue with the FCV upgrade.
-      // NOTE: 6.0 does not know about this flag. So conditionally add it.
-      // MongoServerError: BSON field 'setFeatureCompatibilityVersion.confirm' is an unknown field.
-      params.confirm = true
+
+    try {
+      setVarsDockerCompose({ pro, version, vars, withDataDir, mongoVersion })
+    } catch (error) {
+      return res.json({ error })
     }
+
+    if (error) return res.json({ error, stdout, stderr })
     runDockerCompose(
-      'exec',
-      [
-        'mongo',
-        mongosh,
-        '--eval',
-        `db.adminCommand(${JSON.stringify(params)})`,
-      ],
+      'up',
+      ['--detach', '--wait', 'sharelatex'],
       (error, stdout, stderr) => {
-        res.json({ error, stdout, stderr })
+        previousConfig = newConfig
+        res.json({ error, stdout, stderr, previousConfigServer })
       }
     )
+  })
+})
+
+app.post('/mongo/setFeatureCompatibilityVersion', (req, res) => {
+  const {
+    body: { mongoVersion },
+  } = validateReq(
+    req,
+    z.object({
+      body: z.object({
+        mongoVersion: z.string(),
+      }),
+    })
+  )
+  const mongosh = mongoVersion > '5' ? 'mongosh' : 'mongo'
+  const params = {
+    setFeatureCompatibilityVersion: mongoVersion,
   }
-)
+  if (mongoVersion >= '7.0') {
+    // MongoServerError: Once you have upgraded to 7.0, you will not be able to downgrade FCV and binary version without support assistance. Please re-run this command with 'confirm: true' to acknowledge this and continue with the FCV upgrade.
+    // NOTE: 6.0 does not know about this flag. So conditionally add it.
+    // MongoServerError: BSON field 'setFeatureCompatibilityVersion.confirm' is an unknown field.
+    params.confirm = true
+  }
+  runDockerCompose(
+    'exec',
+    ['mongo', mongosh, '--eval', `db.adminCommand(${JSON.stringify(params)})`],
+    (error, stdout, stderr) => {
+      res.json({ error, stdout, stderr })
+    }
+  )
+})
 
 app.get('/redis/keys', (req, res) => {
   runDockerCompose(
@@ -450,7 +434,14 @@ app.delete('/data/user_files', (req, res) => {
   )
 })
 
-app.use(handleValidationErrors())
+app.use((error, req, res, next) => {
+  if (error instanceof ParamsError) {
+    res.status(404).json({ error })
+  } else if (isZodErrorLike(error)) {
+    res.status(400).json({ error })
+  }
+  next(error)
+})
 
 purgeDataDir()
 writeDockerComposeOverride(defaultDockerComposeOverride())

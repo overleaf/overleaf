@@ -52,6 +52,7 @@
   "workspaces": [
     "jobs/mirror-documentation",
     "libraries/*",
+    "server-ce/test",
     "services/analytics",
     "services/chat",
     "services/clsi",

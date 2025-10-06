@@ -70,11 +70,15 @@ services:
     stop_grace_period: 0s
     entrypoint: npm
     command: run cypress:run
-    working_dir: /overleaf/server-ce/test
+    # See comment in Makefile regarding matching file paths
+    working_dir: $PWD
     volumes:
-      - ./:/overleaf/server-ce/test
+      - $PWD:$PWD
+      - $MONOREPO/libraries:$MONOREPO/libraries:ro
+      - $MONOREPO/node_modules:$MONOREPO/node_modules:ro
     user: "${DOCKER_USER:-1000:1000}"
     environment:
+      MONOREPO:
       CYPRESS_SHARD:
       CYPRESS_BASE_URL: http://sharelatex
       CYPRESS_FULL_FILESTORE_MIGRATION:
@@ -101,11 +105,14 @@ services:
     working_dir: $PWD
     volumes:
       - $PWD:$PWD
+      - $MONOREPO/libraries:$MONOREPO/libraries:ro
+      - $MONOREPO/node_modules:$MONOREPO/node_modules:ro
       - /var/run/docker.sock:/var/run/docker.sock
     stop_grace_period: 0s
     environment:
       CI:
       PWD:
+      MONOREPO:
       CYPRESS_SHARD:
       COMPOSE_PROJECT_NAME:
       TEX_LIVE_DOCKER_IMAGE:
