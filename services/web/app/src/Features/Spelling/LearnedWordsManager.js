@@ -1,94 +1,98 @@
+// @ts-check
+
 const { db } = require('../../infrastructure/mongodb')
-const { promisify } = require('util')
-const OError = require('@overleaf/o-error')
+const { callbackify } = require('util')
 const Settings = require('@overleaf/settings')
 const { InvalidError } = require('../Errors/Errors')
 
 const LearnedWordsManager = {
-  learnWord(userToken, word, callback) {
-    LearnedWordsManager.getLearnedWordsSize(userToken, (error, wordsSize) => {
-      if (error != null) {
-        return callback(OError.tag(error))
+  /**
+   * @param {string} userToken
+   * @param {string} word
+   */
+  async learnWord(userToken, word) {
+    const wordsSize = await LearnedWordsManager.getLearnedWordsSize(userToken)
+
+    const wordSize = Buffer.from(word).length
+    if (wordsSize + wordSize > Settings.maxDictionarySize) {
+      throw new InvalidError('Max dictionary size reached')
+    }
+
+    return await db.spellingPreferences.updateOne(
+      {
+        token: userToken,
+      },
+      {
+        $addToSet: { learnedWords: word },
+      },
+      {
+        upsert: true,
       }
-      const wordSize = Buffer.from(word).length
-      if (wordsSize + wordSize > Settings.maxDictionarySize) {
-        return callback(new InvalidError('Max dictionary size reached'))
-      }
-      db.spellingPreferences.updateOne(
-        {
-          token: userToken,
-        },
-        {
-          $addToSet: { learnedWords: word },
-        },
-        {
-          upsert: true,
-        },
-        callback
-      )
-    })
+    )
   },
 
-  unlearnWord(userToken, word, callback) {
-    return db.spellingPreferences.updateOne(
+  /**
+   * @param {string} userToken
+   * @param {string} word
+   */
+  async unlearnWord(userToken, word) {
+    return await db.spellingPreferences.updateOne(
       {
         token: userToken,
       },
       {
         $pull: { learnedWords: word },
-      },
-      callback
-    )
-  },
-
-  getLearnedWords(userToken, callback) {
-    db.spellingPreferences.findOne(
-      { token: userToken },
-      function (error, preferences) {
-        if (error != null) {
-          return callback(OError.tag(error))
-        }
-        let words =
-          (preferences != null ? preferences.learnedWords : undefined) || []
-        if (words) {
-          // remove duplicates
-          words = words.filter(
-            (value, index, self) => self.indexOf(value) === index
-          )
-        }
-        callback(null, words)
       }
     )
   },
 
-  getLearnedWordsSize(userToken, callback) {
-    db.spellingPreferences.findOne(
-      { token: userToken },
-      function (error, preferences) {
-        if (error != null) {
-          return callback(OError.tag(error))
-        }
-        const words = (preferences && preferences.learnedWords) || []
-        const wordsSize = Buffer.from(JSON.stringify(words)).length
-        callback(null, wordsSize)
-      }
-    )
+  /**
+   * @param {string} userToken
+   */
+  async getLearnedWords(userToken) {
+    const preferences = await db.spellingPreferences.findOne({
+      token: userToken,
+    })
+
+    let words =
+      (preferences != null ? preferences.learnedWords : undefined) || []
+
+    if (words) {
+      // remove duplicates
+      words = words.filter(
+        (value, index, self) => self.indexOf(value) === index
+      )
+    }
+    return words
   },
 
-  deleteUsersLearnedWords(userToken, callback) {
-    db.spellingPreferences.deleteOne({ token: userToken }, callback)
+  /**
+   * @param {string} userToken
+   */
+  async getLearnedWordsSize(userToken) {
+    const preferences = await db.spellingPreferences.findOne({
+      token: userToken,
+    })
+
+    const words = (preferences && preferences.learnedWords) || []
+    return Buffer.from(JSON.stringify(words)).length
+  },
+
+  /**
+   * @param {string} userToken
+   */
+  async deleteUsersLearnedWords(userToken) {
+    return await db.spellingPreferences.deleteOne({ token: userToken })
   },
 }
 
-const promises = {
-  learnWord: promisify(LearnedWordsManager.learnWord),
-  unlearnWord: promisify(LearnedWordsManager.unlearnWord),
-  getLearnedWords: promisify(LearnedWordsManager.getLearnedWords),
-  deleteUsersLearnedWords: promisify(
+module.exports = {
+  learnWord: callbackify(LearnedWordsManager.learnWord),
+  unlearnWord: callbackify(LearnedWordsManager.unlearnWord),
+  getLearnedWords: callbackify(LearnedWordsManager.getLearnedWords),
+  getLearnedWordsSize: callbackify(LearnedWordsManager.getLearnedWordsSize),
+  deleteUsersLearnedWords: callbackify(
     LearnedWordsManager.deleteUsersLearnedWords
   ),
+  promises: LearnedWordsManager,
 }
-
-LearnedWordsManager.promises = promises
-
-module.exports = LearnedWordsManager

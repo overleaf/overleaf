@@ -10,11 +10,10 @@ const { InvalidError } = require('../../../../app/src/Features/Errors/Errors')
 describe('LearnedWordsManager', function () {
   beforeEach(function () {
     this.token = 'a6b3cd919ge'
-    this.callback = sinon.stub()
     this.db = {
       spellingPreferences: {
-        updateOne: sinon.stub().yields(),
-        findOne: sinon.stub().yields(null, ['pear']),
+        updateOne: sinon.stub().resolves(),
+        findOne: sinon.stub().resolves(['pear']),
       },
     }
     this.LearnedWordsManager = SandboxedModule.require(modulePath, {
@@ -32,9 +31,9 @@ describe('LearnedWordsManager', function () {
 
   describe('learnWord', function () {
     describe('under size limit', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.word = 'instanton'
-        this.LearnedWordsManager.learnWord(this.token, this.word, this.callback)
+        await this.LearnedWordsManager.promises.learnWord(this.token, this.word)
       })
 
       it('should insert the word in the word list in the database', function () {
@@ -52,34 +51,26 @@ describe('LearnedWordsManager', function () {
           )
         ).to.equal(true)
       })
-
-      it('should call the callback without error', function () {
-        sinon.assert.called(this.callback)
-        expect(this.callback.lastCall.args.length).to.equal(0)
-      })
     })
 
     describe('over size limit', function () {
       beforeEach(function () {
         this.word = 'superlongwordthatwillgobeyondthelimit'
-        this.LearnedWordsManager.learnWord(this.token, this.word, this.callback)
       })
 
-      it('should not insert the word in the word list in the database', function () {
+      it('should throw an error and not insert the word in the word list in the database', async function () {
+        await expect(
+          this.LearnedWordsManager.promises.learnWord(this.token, this.word)
+        ).to.be.rejectedWith(InvalidError)
         expect(this.db.spellingPreferences.updateOne.notCalled).to.equal(true)
-      })
-
-      it('should call the callback with error', function () {
-        sinon.assert.called(this.callback)
-        expect(this.callback.lastCall.args[0]).to.be.instanceof(InvalidError)
       })
     })
   })
 
   describe('unlearnWord', function () {
-    beforeEach(function () {
+    beforeEach(async function () {
       this.word = 'instanton'
-      this.LearnedWordsManager.unlearnWord(this.token, this.word, this.callback)
+      await this.LearnedWordsManager.promises.unlearnWord(this.token, this.word)
     })
 
     it('should remove the word from the word list in the database', function () {
@@ -94,22 +85,19 @@ describe('LearnedWordsManager', function () {
         )
       ).to.equal(true)
     })
-
-    it('should call the callback', function () {
-      expect(this.callback.called).to.equal(true)
-    })
   })
 
   describe('getLearnedWords', function () {
-    beforeEach(function () {
+    beforeEach(async function () {
       this.wordList = ['apples', 'bananas', 'pears']
       this.wordListWithDuplicates = this.wordList.slice()
       this.wordListWithDuplicates.push('bananas')
-      this.db.spellingPreferences.findOne = (conditions, callback) => {
-        callback(null, { learnedWords: this.wordListWithDuplicates })
+      this.db.spellingPreferences.findOne = conditions => {
+        return Promise.resolve({ learnedWords: this.wordListWithDuplicates })
       }
       sinon.spy(this.db.spellingPreferences, 'findOne')
-      this.LearnedWordsManager.getLearnedWords(this.token, this.callback)
+      this.learnedWords =
+        await this.LearnedWordsManager.promises.getLearnedWords(this.token)
     })
 
     it('should get the word list for the given user', function () {
@@ -118,35 +106,36 @@ describe('LearnedWordsManager', function () {
       ).to.equal(true)
     })
 
-    it('should return the word list in the callback without duplicates', function () {
-      expect(this.callback.calledWith(null, this.wordList)).to.equal(true)
+    it('should return the word list without duplicates', function () {
+      expect(this.learnedWords).to.deep.equal(this.wordList)
     })
   })
 
   describe('getLearnedWordsSize', function () {
-    it('should return the word list size in the callback', function () {
-      this.db.spellingPreferences.findOne = (conditions, callback) => {
-        callback(null, {
+    it('should return the word list size in the callback', async function () {
+      this.db.spellingPreferences.findOne = conditions => {
+        return Promise.resolve({
           learnedWords: ['apples', 'bananas', 'pears', 'bananas'],
         })
       }
-      this.LearnedWordsManager.getLearnedWordsSize(this.token, this.callback)
-      sinon.assert.calledWith(this.callback, null, 38)
+      const learnedWordsSize =
+        await this.LearnedWordsManager.promises.getLearnedWordsSize(this.token)
+      expect(learnedWordsSize).to.equal(38)
     })
   })
 
   describe('deleteUsersLearnedWords', function () {
     beforeEach(function () {
-      this.db.spellingPreferences.deleteOne = sinon.stub().callsArgWith(1)
+      this.db.spellingPreferences.deleteOne = sinon.stub().resolves()
     })
 
-    it('should get the word list for the given user', function (done) {
-      this.LearnedWordsManager.deleteUsersLearnedWords(this.token, () => {
-        this.db.spellingPreferences.deleteOne
-          .calledWith({ token: this.token })
-          .should.equal(true)
-        done()
-      })
+    it('should get the word list for the given user', async function () {
+      await this.LearnedWordsManager.promises.deleteUsersLearnedWords(
+        this.token
+      )
+      expect(
+        this.db.spellingPreferences.deleteOne.calledWith({ token: this.token })
+      ).to.equal(true)
     })
   })
 })
