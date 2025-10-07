@@ -95,13 +95,13 @@ class SAMLAlreadyLinkedError extends OError {
 
 class SAMLEmailNotAffiliatedError extends OError {
   get i18nKey() {
-    return 'institution_account_tried_to_add_not_affiliated'
+    return 'institution_account_tried_to_add_not_affiliated_2'
   }
 }
 
 class SAMLEmailAffiliatedWithAnotherInstitutionError extends OError {
   get i18nKey() {
-    return 'institution_account_tried_to_add_affiliated_with_another_institution'
+    return 'institution_account_tried_to_add_affiliated_with_another_institution_2'
   }
 }
 
