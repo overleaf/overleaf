@@ -2,7 +2,6 @@ const { callbackify } = require('util')
 const { db } = require('../../infrastructure/mongodb')
 const moment = require('moment')
 const settings = require('@overleaf/settings')
-const { promisifyAll } = require('@overleaf/promise-utils')
 const {
   promises: InstitutionsAPIPromises,
 } = require('../Institutions/InstitutionsAPI')
@@ -163,141 +162,113 @@ async function getWritefullData(userId) {
   }
 }
 
+async function getUser(query, projection = {}) {
+  query = normalizeQuery(query)
+  return await db.users.findOne(query, { projection })
+}
+
+async function getUserEmail(userId) {
+  const user = await UserGetter.promises.getUser(userId, { email: 1 })
+  return user && user.email
+}
+
+async function getUserByMainEmail(email, projection = {}) {
+  email = email.trim()
+  return await db.users.findOne({ email }, { projection })
+}
+
+async function getUserByAnyEmail(email, projection = {}) {
+  email = email.trim()
+
+  // $exists: true MUST be set to use the partial index
+  const query = { emails: { $exists: true }, 'emails.email': email }
+  const user = await db.users.findOne(query, { projection })
+  if (user) return user
+
+  // While multiple emails are being rolled out, check for the main email as
+  // well
+  return await getUserByMainEmail(email, projection)
+}
+
+async function getUsersByAnyConfirmedEmail(emails, projection = {}) {
+  const query = {
+    'emails.email': { $in: emails }, // use the index on emails.email
+    emails: {
+      $exists: true,
+      $elemMatch: {
+        email: { $in: emails },
+        confirmedAt: { $exists: true },
+      },
+    },
+  }
+
+  return await db.users.find(query, { projection }).toArray()
+}
+
+async function getUsersByV1Ids(v1Ids, projection = {}) {
+  const query = { 'overleaf.id': { $in: v1Ids } }
+  return await db.users.find(query, { projection }).toArray()
+}
+
+async function getUsersByHostname(hostname, projection) {
+  const reversedHostname = hostname.trim().split('').reverse().join('')
+  const query = {
+    emails: { $exists: true },
+    'emails.reversedHostname': reversedHostname,
+  }
+  return await db.users.find(query, { projection }).toArray()
+}
+
+async function getInstitutionUsersByHostname(hostname) {
+  const projection = {
+    _id: 1,
+    email: 1,
+    emails: 1,
+    samlIdentifiers: 1,
+  }
+
+  const users = await UserGetter.getUsersByHostname(hostname, projection)
+  users.forEach(user => {
+    user.emails = decorateFullEmails(
+      user.email,
+      user.emails,
+      [],
+      user.samlIdentifiers || []
+    )
+  })
+  return users
+}
+
+async function getUsers(query, projection) {
+  query = normalizeMultiQuery(query)
+  if (query?._id?.$in?.length === 0) return [] // shortcut for getUsers([])
+  return await db.users.find(query, { projection }).toArray()
+}
+
+// check for duplicate email address. This is also enforced at the DB level
+async function ensureUniqueEmailAddress(newEmail) {
+  const user = await UserGetter.promises.getUserByAnyEmail(newEmail)
+  if (user) {
+    throw new Errors.EmailExistsError()
+  }
+}
+
 const UserGetter = {
   getSsoUsersAtInstitution: callbackify(getSsoUsersAtInstitution),
-
-  getUser(query, projection, callback) {
-    if (arguments.length === 2) {
-      callback = projection
-      projection = {}
-    }
-    try {
-      query = normalizeQuery(query)
-      db.users.findOne(query, { projection }, callback)
-    } catch (err) {
-      callback(err)
-    }
-  },
-
+  getUser: callbackify(getUser),
   getUserFeatures: callbackify(getUserFeatures),
-
-  getUserEmail(userId, callback) {
-    this.getUser(userId, { email: 1 }, (error, user) =>
-      callback(error, user && user.email)
-    )
-  },
-
+  getUserEmail: callbackify(getUserEmail),
   getUserFullEmails: callbackify(getUserFullEmails),
-
   getUserConfirmedEmails: callbackify(getUserConfirmedEmails),
-
-  getUserByMainEmail(email, projection, callback) {
-    email = email.trim()
-    if (arguments.length === 2) {
-      callback = projection
-      projection = {}
-    }
-    db.users.findOne({ email }, { projection }, callback)
-  },
-
-  getUserByAnyEmail(email, projection, callback) {
-    email = email.trim()
-    if (arguments.length === 2) {
-      callback = projection
-      projection = {}
-    }
-    // $exists: true MUST be set to use the partial index
-    const query = { emails: { $exists: true }, 'emails.email': email }
-    db.users.findOne(query, { projection }, (error, user) => {
-      if (error || user) {
-        return callback(error, user)
-      }
-
-      // While multiple emails are being rolled out, check for the main email as
-      // well
-      this.getUserByMainEmail(email, projection, callback)
-    })
-  },
-
-  getUsersByAnyConfirmedEmail(emails, projection, callback) {
-    if (arguments.length === 2) {
-      callback = projection
-      projection = {}
-    }
-
-    const query = {
-      'emails.email': { $in: emails }, // use the index on emails.email
-      emails: {
-        $exists: true,
-        $elemMatch: {
-          email: { $in: emails },
-          confirmedAt: { $exists: true },
-        },
-      },
-    }
-
-    db.users.find(query, { projection }).toArray(callback)
-  },
-
-  getUsersByV1Ids(v1Ids, projection, callback) {
-    if (arguments.length === 2) {
-      callback = projection
-      projection = {}
-    }
-    const query = { 'overleaf.id': { $in: v1Ids } }
-    db.users.find(query, { projection }).toArray(callback)
-  },
-
-  getUsersByHostname(hostname, projection, callback) {
-    const reversedHostname = hostname.trim().split('').reverse().join('')
-    const query = {
-      emails: { $exists: true },
-      'emails.reversedHostname': reversedHostname,
-    }
-    db.users.find(query, { projection }).toArray(callback)
-  },
-
-  getInstitutionUsersByHostname(hostname, callback) {
-    const projection = {
-      _id: 1,
-      email: 1,
-      emails: 1,
-      samlIdentifiers: 1,
-    }
-    UserGetter.getUsersByHostname(hostname, projection, (err, users) => {
-      if (err) return callback(err)
-
-      users.forEach(user => {
-        user.emails = decorateFullEmails(
-          user.email,
-          user.emails,
-          [],
-          user.samlIdentifiers || []
-        )
-      })
-      callback(null, users)
-    })
-  },
-
-  getUsers(query, projection, callback) {
-    try {
-      query = normalizeMultiQuery(query)
-      if (query?._id?.$in?.length === 0) return callback(null, []) // shortcut for getUsers([])
-      db.users.find(query, { projection }).toArray(callback)
-    } catch (err) {
-      callback(err)
-    }
-  },
-
+  getUserByMainEmail: callbackify(getUserByMainEmail),
+  getUserByAnyEmail: callbackify(getUserByAnyEmail),
+  getUsersByAnyConfirmedEmail: callbackify(getUsersByAnyConfirmedEmail),
+  getUsersByV1Ids: callbackify(getUsersByV1Ids),
+  getUsersByHostname: callbackify(getUsersByHostname),
+  getInstitutionUsersByHostname: callbackify(getInstitutionUsersByHostname),
+  getUsers: callbackify(getUsers),
   // check for duplicate email address. This is also enforced at the DB level
-  ensureUniqueEmailAddress(newEmail, callback) {
-    this.getUserByAnyEmail(newEmail, function (error, user) {
-      if (user) {
-        return callback(new Errors.EmailExistsError())
-      }
-      callback(error)
-    })
-  },
+  ensureUniqueEmailAddress: callbackify(ensureUniqueEmailAddress),
   getWritefullData: callbackify(getWritefullData),
 }
 
@@ -378,17 +349,20 @@ const decorateFullEmails = (
 }
 
 UserGetter.promises = {
-  ...promisifyAll(UserGetter, {
-    without: [
-      'getSsoUsersAtInstitution',
-      'getUserFullEmails',
-      'getUserFeatures',
-      'getWritefullData',
-    ],
-  }),
-  getUserFullEmails,
   getSsoUsersAtInstitution,
+  getUser,
   getUserFeatures,
+  getUserEmail,
+  getUserFullEmails,
+  getUserConfirmedEmails,
+  getUserByMainEmail,
+  getUserByAnyEmail,
+  getUsersByAnyConfirmedEmail,
+  getUsersByV1Ids,
+  getUsersByHostname,
+  getInstitutionUsersByHostname,
+  getUsers,
+  ensureUniqueEmailAddress,
   getWritefullData,
 }
 
