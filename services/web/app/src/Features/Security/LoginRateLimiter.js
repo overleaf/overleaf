@@ -1,5 +1,5 @@
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
-const { promisifyAll } = require('@overleaf/promise-utils')
+const { callbackify } = require('@overleaf/promise-utils')
 const Settings = require('@overleaf/settings')
 
 const rateLimiterLoginEmail = new RateLimiter(
@@ -10,36 +10,32 @@ const rateLimiterLoginEmail = new RateLimiter(
   }
 )
 
-function processLoginRequest(email, callback) {
-  rateLimiterLoginEmail
-    .consume(email.trim().toLowerCase(), 1, { method: 'email' })
-    .then(() => {
-      callback(null, true)
+async function processLoginRequest(email) {
+  try {
+    await rateLimiterLoginEmail.consume(email.trim().toLowerCase(), 1, {
+      method: 'email',
     })
-    .catch(err => {
-      if (err instanceof Error) {
-        callback(err)
-      } else {
-        callback(null, false)
-      }
-    })
+    return true
+  } catch (err) {
+    if (err instanceof Error) {
+      throw err
+    } else {
+      return false
+    }
+  }
 }
 
-function recordSuccessfulLogin(email, callback) {
-  rateLimiterLoginEmail
-    .delete(email)
-    .then(() => {
-      callback()
-    })
-    .catch(err => {
-      callback(err)
-    })
+async function recordSuccessfulLogin(email) {
+  await rateLimiterLoginEmail.delete(email)
 }
 
 const LoginRateLimiter = {
+  processLoginRequest: callbackify(processLoginRequest),
+  recordSuccessfulLogin: callbackify(recordSuccessfulLogin),
+}
+LoginRateLimiter.promises = {
   processLoginRequest,
   recordSuccessfulLogin,
 }
-LoginRateLimiter.promises = promisifyAll(LoginRateLimiter)
 
 module.exports = LoginRateLimiter
