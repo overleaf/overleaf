@@ -104,7 +104,6 @@ async function getRootKeyEncryptionKeys() {
 
 export const backupPersistor = new PerProjectEncryptedS3Persistor({
   ...persistorConfig.s3SSEC,
-  disableMultiPartUpload: true,
   dataEncryptionKeyBucketName: deksBucket,
   pathToProjectFolder,
   getRootKeyEncryptionKeys,

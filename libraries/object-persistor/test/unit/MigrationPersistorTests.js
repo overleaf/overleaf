@@ -197,19 +197,11 @@ describe('MigrationPersistorTests', function () {
         expect(fallbackPersistor.getObjectStream).to.have.been.calledOnce
       })
 
-      it('should get the md5 hash from the source', function () {
-        expect(fallbackPersistor.getObjectMd5Hash).to.have.been.calledWith(
-          fallbackBucket,
-          key
-        )
-      })
-
       it('should send a stream to the primary', function () {
         expect(primaryPersistor.sendStream).to.have.been.calledWithExactly(
           bucket,
           key,
-          sinon.match.instanceOf(Stream.PassThrough),
-          { sourceMd5: md5 }
+          sinon.match.instanceOf(Stream.PassThrough)
         )
       })
 
@@ -476,19 +468,11 @@ describe('MigrationPersistorTests', function () {
         ).not.to.have.been.calledWithExactly(fallbackBucket, key)
       })
 
-      it('should get the md5 hash from the source', function () {
-        expect(fallbackPersistor.getObjectMd5Hash).to.have.been.calledWith(
-          fallbackBucket,
-          key
-        )
-      })
-
       it('should send the file to the primary', function () {
         expect(primaryPersistor.sendStream).to.have.been.calledWithExactly(
           bucket,
           destKey,
-          sinon.match.instanceOf(Stream.PassThrough),
-          { sourceMd5: md5 }
+          sinon.match.instanceOf(Stream.PassThrough)
         )
       })
     })

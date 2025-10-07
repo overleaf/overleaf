@@ -70,7 +70,6 @@ export async function downloadBlobToDir(historyId, blob, tmpDir) {
  * @return {Promise<void>}
  */
 export async function uploadBlobToBackup(historyId, blob, path, persistor) {
-  const md5 = Crypto.createHash('md5')
   const filePathCompressed = path + '.gz'
   let backupSource
   let contentEncoding
@@ -86,7 +85,6 @@ export async function uploadBlobToBackup(historyId, blob, path, persistor) {
         async function* (source) {
           for await (const chunk of source) {
             size += chunk.byteLength
-            md5.update(chunk)
             yield chunk
           }
         },
@@ -97,10 +95,6 @@ export async function uploadBlobToBackup(historyId, blob, path, persistor) {
     } else {
       backupSource = path
       size = blob.getByteLength()
-      await Stream.promises.pipeline(
-        fs.createReadStream(path, { highWaterMark: HIGHWATER_MARK }),
-        md5
-      )
     }
     const key = makeProjectKey(historyId, blob.getHash())
     await persistor.sendStream(
@@ -111,7 +105,6 @@ export async function uploadBlobToBackup(historyId, blob, path, persistor) {
         contentEncoding,
         contentType: 'application/octet-stream',
         contentLength: size,
-        sourceMd5: md5.digest('hex'),
         ifNoneMatch: '*',
       }
     )

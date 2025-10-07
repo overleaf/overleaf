@@ -171,19 +171,7 @@ module.exports = class MigrationPersistor extends AbstractPersistor {
     destKey
   ) {
     try {
-      let sourceMd5
-      try {
-        sourceMd5 = await this.fallbackPersistor.getObjectMd5Hash(
-          sourceBucket,
-          sourceKey
-        )
-      } catch (err) {
-        Logger.warn(err, 'error getting md5 hash from fallback persistor')
-      }
-
-      await this.primaryPersistor.sendStream(destBucket, destKey, stream, {
-        sourceMd5,
-      })
+      await this.primaryPersistor.sendStream(destBucket, destKey, stream)
     } catch (err) {
       const error = new WriteError(
         'unable to copy file to destination persistor',

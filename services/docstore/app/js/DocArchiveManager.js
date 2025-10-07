@@ -74,11 +74,15 @@ async function archiveDoc(projectId, docId) {
     throw error
   }
 
-  const md5 = crypto.createHash('md5').update(json).digest('hex')
   const stream = new ReadableString(json)
-  await PersistorManager.sendStream(Settings.docstore.bucket, key, stream, {
-    sourceMd5: md5,
-  })
+  if (Settings.docstore.backend === 's3') {
+    await PersistorManager.sendStream(Settings.docstore.bucket, key, stream)
+  } else {
+    await PersistorManager.sendStream(Settings.docstore.bucket, key, stream, {
+      sourceMd5: crypto.createHash('md5').update(json).digest('hex'),
+    })
+  }
+
   await MongoManager.markDocAsArchived(projectId, docId, doc.rev)
 }
 
@@ -112,25 +116,31 @@ async function unArchiveAllDocs(projectId) {
 // get the doc from the PersistorManager without storing it in mongo
 async function getDoc(projectId, docId) {
   const key = `${projectId}/${docId}`
-  const sourceMd5 = await PersistorManager.getObjectMd5Hash(
-    Settings.docstore.bucket,
-    key
-  )
   const stream = await PersistorManager.getObjectStream(
     Settings.docstore.bucket,
     key
   )
-  stream.resume()
-  const buffer = await streamToBuffer(projectId, docId, stream)
-  const md5 = crypto.createHash('md5').update(buffer).digest('hex')
-  if (sourceMd5 !== md5) {
-    throw new Errors.Md5MismatchError('md5 mismatch when downloading doc', {
-      key,
-      sourceMd5,
-      md5,
-    })
-  }
 
+  let buffer
+  if (Settings.docstore.backend === 's3') {
+    stream.resume()
+    buffer = await streamToBuffer(projectId, docId, stream)
+  } else {
+    const sourceMd5 = await PersistorManager.getObjectMd5Hash(
+      Settings.docstore.bucket,
+      key
+    )
+    stream.resume()
+    buffer = await streamToBuffer(projectId, docId, stream)
+    const md5 = crypto.createHash('md5').update(buffer).digest('hex')
+    if (sourceMd5 !== md5) {
+      throw new Errors.Md5MismatchError('md5 mismatch when downloading doc', {
+        key,
+        sourceMd5,
+        md5,
+      })
+    }
+  }
   return _deserializeArchivedDoc(buffer)
 }
 

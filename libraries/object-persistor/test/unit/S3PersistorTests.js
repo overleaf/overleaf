@@ -549,27 +549,6 @@ describe('S3PersistorTests', function () {
       })
     })
 
-    describe('when a hash is supplied', function () {
-      beforeEach(async function () {
-        await S3Persistor.sendStream(bucket, key, ReadStream, {
-          sourceMd5: 'aaaaaaaabbbbbbbbaaaaaaaabbbbbbbb',
-        })
-      })
-
-      it('sends the hash in base64', function () {
-        expect(awsLibStorageUpload).to.have.been.calledWith({
-          client: S3.s3ClientStub,
-          params: {
-            Bucket: bucket,
-            Key: key,
-            Body: sinon.match.instanceOf(Transform),
-            ContentMD5: 'qqqqqru7u7uqqqqqu7u7uw==',
-          },
-          partSize: 100 * 1024 * 1024,
-        })
-      })
-    })
-
     describe('when metadata is supplied', function () {
       const contentType = 'text/csv'
       const contentEncoding = 'gzip'
@@ -596,23 +575,23 @@ describe('S3PersistorTests', function () {
       })
     })
 
-    describe('when multipart upload is disabled', function () {
-      const contentType = 'text/csv'
-      const contentEncoding = 'gzip'
-
+    describe('with sourceMd5 option', function () {
+      let error
       beforeEach(async function () {
-        S3.mockSend(S3.PutObjectCommand, {})
-        settings.disableMultiPartUpload = true
-        await S3Persistor.sendStream(bucket, key, ReadStream, {
-          contentType,
-          contentEncoding,
-        })
+        try {
+          await S3Persistor.sendStream(bucket, key, ReadStream, {
+            sourceMd5: 'ffffffff',
+          })
+        } catch (err) {
+          error = err
+        }
       })
 
-      it('configures the options to not to retry requests', function () {
-        expect(S3.S3Client).to.have.been.calledWithMatch({
-          maxAttempts: 1,
-        })
+      it('should throw an error', function () {
+        expect(error.message).to.equal('upload to S3 failed')
+        expect(error.cause.message).to.equal(
+          'sourceMd5 option is not supported, S3 provides its own integrity protection mechanism'
+        )
       })
     })
 

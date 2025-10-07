@@ -232,6 +232,25 @@ describe('DocArchiveManager', function () {
       )
     })
 
+    describe('with S3 persistor', function () {
+      beforeEach(async function () {
+        Settings.docstore.backend = 's3'
+        await DocArchiveManager.archiveDoc(projectId, mongoDocs[0]._id)
+      })
+
+      it('should not calculate the hex md5 sum of the content', function () {
+        expect(Crypto.createHash).not.to.have.been.called
+        expect(HashUpdate).not.to.have.been.called
+        expect(HashDigest).not.to.have.been.called
+      })
+
+      it('should not pass an md5 hash to the object persistor for verification', function () {
+        expect(PersistorManager.sendStream).not.to.have.been.calledWithMatch({
+          sourceMd5: sinon.match.any,
+        })
+      })
+    })
+
     it('should pass the correct bucket and key to the persistor', async function () {
       await DocArchiveManager.archiveDoc(projectId, mongoDocs[0]._id)
 

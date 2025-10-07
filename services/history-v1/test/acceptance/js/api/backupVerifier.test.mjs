@@ -131,7 +131,6 @@ async function backupChunk(historyId) {
     historyId,
     newChunkMetadata.id
   )
-  const md5 = Crypto.createHash('md5').update(chunkBuffer)
   await backupPersistor.sendStream(
     chunksBucket,
     path.join(
@@ -143,7 +142,6 @@ async function backupChunk(historyId) {
       contentType: 'application/json',
       contentEncoding: 'gzip',
       contentLength: chunkBuffer.byteLength,
-      sourceMd5: md5.digest('hex'),
     }
   )
 }

@@ -433,7 +433,6 @@ class CachedPerProjectEncryptedS3Persistor {
    * @param {number} [opts.contentLength]
    * @param {'*'} [opts.ifNoneMatch]
    * @param {SSECOptions} [opts.ssecOptions]
-   * @param {string} [opts.sourceMd5]
    * @return {Promise<void>}
    */
   async sendStream(bucketName, path, sourceStream, opts = {}) {

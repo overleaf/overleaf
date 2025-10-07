@@ -42,6 +42,7 @@ services:
       POSTGRES_HOST: postgres
       AWS_S3_ENDPOINT: https://minio:9000
       AWS_S3_PATH_STYLE: 'true'
+      DELETE_OBJECTS_MD5_FALLBACK: true
       AWS_ACCESS_KEY_ID: OVERLEAF_FILESTORE_S3_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY: OVERLEAF_FILESTORE_S3_SECRET_ACCESS_KEY
       MINIO_ROOT_USER: MINIO_ROOT_USER
@@ -146,7 +147,10 @@ services:
                 "Action": [
                   "s3:PutObject",
                   "s3:GetObject",
-                  "s3:DeleteObject"
+                  "s3:DeleteObject",
+                  "s3:AbortMultipartUpload",
+                  "s3:ListMultipartUploadParts",
+                  "s3:ListBucketMultipartUploads"
                 ],
                 "Resource": "arn:aws:s3:::fake-user-files/*"
               },
@@ -162,7 +166,10 @@ services:
                 "Action": [
                   "s3:PutObject",
                   "s3:GetObject",
-                  "s3:DeleteObject"
+                  "s3:DeleteObject",
+                  "s3:AbortMultipartUpload",
+                  "s3:ListMultipartUploadParts",
+                  "s3:ListBucketMultipartUploads"
                 ],
                 "Resource": "arn:aws:s3:::fake-user-files-dek/*"
               },
@@ -178,7 +185,10 @@ services:
                 "Action": [
                   "s3:PutObject",
                   "s3:GetObject",
-                  "s3:DeleteObject"
+                  "s3:DeleteObject",
+                  "s3:AbortMultipartUpload",
+                  "s3:ListMultipartUploadParts",
+                  "s3:ListBucketMultipartUploads"
                 ],
                 "Resource": "arn:aws:s3:::fake-template-files/*"
               },
@@ -194,7 +204,10 @@ services:
                 "Action": [
                   "s3:PutObject",
                   "s3:GetObject",
-                  "s3:DeleteObject"
+                  "s3:DeleteObject",
+                  "s3:AbortMultipartUpload",
+                  "s3:ListMultipartUploadParts",
+                  "s3:ListBucketMultipartUploads"
                 ],
                 "Resource": "arn:aws:s3:::random-bucket-*"
               }

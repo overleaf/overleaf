@@ -81,9 +81,6 @@ class S3Persistor extends AbstractPersistor {
   /** @type {Map<string, S3Client>} */
   #clients = new Map()
 
-  /** @type {Map<string, S3Client>} */
-  #noRetryClients = new Map()
-
   constructor(settings = {}) {
     super()
 
@@ -111,7 +108,6 @@ class S3Persistor extends AbstractPersistor {
    * @param {number} [opts.contentLength]
    * @param {'*'} [opts.ifNoneMatch]
    * @param {SSECOptions} [opts.ssecOptions]
-   * @param {string} [opts.sourceMd5]
    * @return {Promise<void>}
    */
   async sendStream(bucketName, key, readStream, opts = {}) {
@@ -136,6 +132,12 @@ class S3Persistor extends AbstractPersistor {
         uploadOptions.StorageClass = this.settings.storageClass[bucketName]
       }
 
+      if ('sourceMd5' in opts) {
+        // we fail straight away to prevent the client from wasting CPU/IO precomputing the hash
+        throw new Error(
+          'sourceMd5 option is not supported, S3 provides its own integrity protection mechanism'
+        )
+      }
       if (opts.contentType) {
         uploadOptions.ContentType = opts.contentType
       }
@@ -152,32 +154,12 @@ class S3Persistor extends AbstractPersistor {
         Object.assign(uploadOptions, opts.ssecOptions.getPutOptions())
       }
 
-      // if we have an md5 hash, pass this to S3 to verify the upload - otherwise
-      // we rely on the S3 client's checksum calculation to validate the upload
-      let computeChecksums = false
-      if (opts.sourceMd5) {
-        uploadOptions.ContentMD5 = PersistorHelper.hexToBase64(opts.sourceMd5)
-      } else {
-        computeChecksums = true
-      }
-
-      if (this.settings.disableMultiPartUpload) {
-        // retries are disabled for `PutObjectCommand` when using streams
-        // https://github.com/aws/aws-sdk-js-v3/issues/6770
-        const noRetry = true
-        await this._getClientForBucket(
-          bucketName,
-          computeChecksums,
-          noRetry
-        ).send(new PutObjectCommand(uploadOptions))
-      } else {
-        const upload = new Upload({
-          client: this._getClientForBucket(bucketName, computeChecksums),
-          params: uploadOptions,
-          partSize: this.settings.partSize,
-        })
-        await upload.done()
-      }
+      const upload = new Upload({
+        client: this._getClientForBucket(bucketName),
+        params: uploadOptions,
+        partSize: this.settings.partSize,
+      })
+      await upload.done()
     } catch (err) {
       throw PersistorHelper.wrapError(
         err,
@@ -555,34 +537,31 @@ class S3Persistor extends AbstractPersistor {
 
   /**
    * @param {string} bucket
-   * @param {boolean} computeChecksums
-   * @param {boolean} noRetries
    * @return {S3Client}
    * @private
    */
-  _getClientForBucket(bucket, computeChecksums = false, noRetries = false) {
+  _getClientForBucket(bucket) {
     /** @type {import('@aws-sdk/client-s3').S3ClientConfig} */
     const clientOptions = {}
-    const cacheKey = `${bucket}:${computeChecksums}`
-    if (computeChecksums) {
-      clientOptions.requestChecksumCalculation = 'WHEN_SUPPORTED'
-      clientOptions.responseChecksumValidation = 'WHEN_SUPPORTED'
-    }
+    const cacheKey = bucket
 
-    const clientMap = noRetries ? this.#noRetryClients : this.#clients
-    let client = clientMap.get(cacheKey)
+    let client = this.#clients.get(cacheKey)
     if (!client) {
       client = new S3Client(
         this._buildClientOptions(
           this.settings.bucketCreds?.[bucket],
-          clientOptions,
-          noRetries
+          clientOptions
         )
       )
-      clientMap.set(cacheKey, client)
+      this.#clients.set(cacheKey, client)
 
+      // Some third-party S3-compatible services (as MinIO) do not support the default checksums
+      // for object integrity in `DeleteObjectsCommand`. We add a fallback for those cases.
       // https://github.com/aws/aws-sdk-js-v3/blob/main/supplemental-docs/MD5_FALLBACK.md
-      addMd5Middleware(client)
+      const useMd5Fallback = process.env.DELETE_OBJECTS_MD5_FALLBACK === 'true'
+      if (useMd5Fallback) {
+        addMd5Middleware(client)
+      }
     }
 
     return client
@@ -591,11 +570,10 @@ class S3Persistor extends AbstractPersistor {
   /**
    * @param {Object} bucketCredentials
    * @param {import('@aws-sdk/client-s3').S3ClientConfig} clientOptions
-   * @param {boolean} noRetries
    * @return {import('@aws-sdk/client-s3').S3ClientConfig}
    * @private
    */
-  _buildClientOptions(bucketCredentials, clientOptions, noRetries = false) {
+  _buildClientOptions(bucketCredentials, clientOptions) {
     const options = clientOptions || {}
 
     if (bucketCredentials) {
@@ -633,10 +611,6 @@ class S3Persistor extends AbstractPersistor {
     // we're keeping the existing setting for backwards compatibility
     if (this.settings.maxRetries) {
       options.maxAttempts = this.settings.maxRetries + 1
-    }
-
-    if (noRetries) {
-      options.maxAttempts = 1
     }
 
     const requestHandlerParams = this.settings.httpOptions || {}
