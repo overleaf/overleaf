@@ -1,7 +1,7 @@
 import metrics from '@overleaf/metrics'
 import AnalyticsManager from './AnalyticsManager.js'
 import SessionManager from '../Authentication/SessionManager.js'
-import GeoIpLookup from '../../infrastructure/GeoIpLookup.js'
+import GeoIpLookup from '../../infrastructure/GeoIpLookup.mjs'
 import Features from '../../infrastructure/Features.js'
 import { expressify } from '@overleaf/promise-utils'
 import AccountMappingHelper from './AccountMappingHelper.js'

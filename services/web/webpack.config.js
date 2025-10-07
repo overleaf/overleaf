@@ -8,7 +8,7 @@ const {
   LezerGrammarCompilerPlugin,
 } = require('./webpack-plugins/lezer-grammar-compiler')
 
-const PackageVersions = require('./app/src/infrastructure/PackageVersions')
+const PackageVersions = require('./app/src/infrastructure/PackageVersions.js')
 const invalidateBabelCacheIfNeeded = require('./frontend/macros/invalidate-babel-cache-if-needed')
 
 // Make sure that babel-macros are re-evaluated after changing the modules config

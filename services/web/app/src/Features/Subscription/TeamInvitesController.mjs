@@ -15,7 +15,7 @@ import EmailHandler from '../Email/EmailHandler.js'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
 import Modules from '../../infrastructure/Modules.js'
 import UserAuditLogHandler from '../User/UserAuditLogHandler.js'
-import { sanitizeSessionUserForFrontEnd } from '../../infrastructure/FrontEndUser.js'
+import { sanitizeSessionUserForFrontEnd } from '../../infrastructure/FrontEndUser.mjs'
 
 const rateLimiters = {
   resendGroupInvite: new RateLimiter('resend-group-invite', {

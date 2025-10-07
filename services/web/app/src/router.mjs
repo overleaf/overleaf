@@ -58,7 +58,7 @@ import SystemMessageController from './Features/SystemMessages/SystemMessageCont
 import AnalyticsRegistrationSourceMiddleware from './Features/Analytics/AnalyticsRegistrationSourceMiddleware.mjs'
 import AnalyticsUTMTrackingMiddleware from './Features/Analytics/AnalyticsUTMTrackingMiddleware.mjs'
 import CaptchaMiddleware from './Features/Captcha/CaptchaMiddleware.mjs'
-import UnsupportedBrowserMiddleware from './infrastructure/UnsupportedBrowserMiddleware.js'
+import UnsupportedBrowserMiddleware from './infrastructure/UnsupportedBrowserMiddleware.mjs'
 import logger from '@overleaf/logger'
 import _ from 'lodash'
 import { plainTextResponse } from './infrastructure/Response.js'

@@ -1,5 +1,5 @@
 import App from '../../../../app.mjs'
-import QueueWorkers from '../../../../app/src/infrastructure/QueueWorkers.js'
+import QueueWorkers from '../../../../app/src/infrastructure/QueueWorkers.mjs'
 import MongoHelper from './MongoHelper.mjs'
 import RedisHelper from './RedisHelper.mjs'
 import Settings from '@overleaf/settings'

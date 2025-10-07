@@ -37,7 +37,7 @@ describe('AnalyticsController', function () {
       default: ctx.Features,
     }))
 
-    vi.doMock('../../../../app/src/infrastructure/GeoIpLookup.js', () => ({
+    vi.doMock('../../../../app/src/infrastructure/GeoIpLookup.mjs', () => ({
       default: (ctx.GeoIpLookup = {
         promises: {
           getDetails: sinon.stub().resolves(),
