@@ -32,6 +32,7 @@ async function createUser(email) {
       $set: {
         // Set admin flag.
         isAdmin: email.startsWith('admin+'),
+        adminRoles: email.startsWith('admin+') ? ['engineering'] : [],
         // Disable spell-checking for performance and flakiness reasons.
         'ace.spellCheckLanguage': '',
         // Override features.

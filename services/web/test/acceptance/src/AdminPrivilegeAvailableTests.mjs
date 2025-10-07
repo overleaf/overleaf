@@ -16,6 +16,7 @@ describe('AdminPrivilegeAvailable', function () {
     adminUser = new User()
     await adminUser.ensureUserExists()
     await adminUser.ensureAdmin()
+    await adminUser.ensureAdminRole('engineering')
     await adminUser.login()
   })
 

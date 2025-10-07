@@ -579,6 +579,10 @@ class User {
     this.mongoUpdate({ $set: { isAdmin: true } }, callback)
   }
 
+  ensureAdminRole(role, callback) {
+    this.mongoUpdate({ $addToSet: { adminRoles: 'engineering' } }, callback)
+  }
+
   ensureStaffAccess(flag, callback) {
     const update = { $set: {} }
     update.$set[`staffAccess.${flag}`] = true
