@@ -1,6 +1,6 @@
-const settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const { fetchJson } = require('@overleaf/fetch-utils')
+import settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import { fetchJson } from '@overleaf/fetch-utils'
 
 const DEFAULT_CURRENCY_CODE = 'USD'
 
@@ -104,7 +104,7 @@ async function getCurrencyCode(ip) {
   return { currencyCode, countryCode }
 }
 
-module.exports = {
+export default {
   isValidCurrencyParam,
   promises: {
     getDetails,

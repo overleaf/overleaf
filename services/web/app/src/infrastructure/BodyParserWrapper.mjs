@@ -1,5 +1,5 @@
-const bodyParser = require('body-parser')
-const HttpErrorHandler = require('../Features/Errors/HttpErrorHandler')
+import bodyParser from 'body-parser'
+import HttpErrorHandler from '../Features/Errors/HttpErrorHandler.js'
 
 function isBodyParserError(nextArg) {
   if (nextArg instanceof Error) {
@@ -29,7 +29,7 @@ const wrapBodyParser = method => opts => {
   }
 }
 
-module.exports = {
+export default {
   urlencoded: wrapBodyParser('urlencoded'),
   json: wrapBodyParser('json'),
 }

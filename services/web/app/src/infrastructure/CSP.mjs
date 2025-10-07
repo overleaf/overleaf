@@ -1,7 +1,7 @@
-const crypto = require('crypto')
-const path = require('path')
+import crypto from 'node:crypto'
+import path from 'node:path'
 
-module.exports = function ({
+export default function ({
   reportUri,
   reportPercentage,
   reportOnly = false,
@@ -57,7 +57,7 @@ module.exports = function ({
   }
 }
 
-const buildDefaultPolicy = (reportUri, styleSrc) => {
+export const buildDefaultPolicy = (reportUri, styleSrc) => {
   const directives = [
     `base-uri 'none'`, // forbid setting a "base" element
     `default-src 'none'`, // forbid loading anything from a "src" attribute
@@ -104,7 +104,7 @@ const buildViewPolicy = (
   return directives.join('; ')
 }
 
-const webRoot = path.resolve(__dirname, '..', '..', '..')
+const webRoot = path.resolve(import.meta.dirname, '..', '..', '..')
 
 // build the view path relative to the web root
 function relativeViewPath(view) {
@@ -113,7 +113,7 @@ function relativeViewPath(view) {
     : path.join('app', 'views', view)
 }
 
-function removeCSPHeaders(res) {
+export function removeCSPHeaders(res) {
   res.removeHeader('Content-Security-Policy')
   res.removeHeader('Content-Security-Policy-Report-Only')
 }
@@ -122,13 +122,9 @@ function removeCSPHeaders(res) {
  * WARNING: allowing inline styles can open a security hole;
  * this is intended only for use in specific circumstances, such as Safari's built-in PDF viewer.
  */
-function allowUnsafeInlineStyles(res) {
+export function allowUnsafeInlineStyles(res) {
   res.set(
     'Content-Security-Policy',
     buildDefaultPolicy(undefined, "'unsafe-inline'")
   )
 }
-
-module.exports.buildDefaultPolicy = buildDefaultPolicy
-module.exports.removeCSPHeaders = removeCSPHeaders
-module.exports.allowUnsafeInlineStyles = allowUnsafeInlineStyles

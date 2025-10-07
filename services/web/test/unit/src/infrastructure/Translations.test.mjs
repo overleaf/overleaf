@@ -1,31 +1,38 @@
-const { expect } = require('chai')
-const SandboxedModule = require('sandboxed-module')
+import { describe, expect, it, vi } from 'vitest'
 
-const MODULE_PATH = '../../../../app/src/infrastructure/Translations.js'
+const MODULE_PATH = '../../../../app/src/infrastructure/Translations.mjs'
 
 describe('Translations', function () {
   let req, res, translations
-  function runMiddlewares(cb) {
-    translations.i18nMiddleware(req, res, () => {
-      translations.setLangBasedOnDomainMiddleware(req, res, cb)
-    })
+  async function runMiddlewares(cb) {
+    return await new Promise((resolve, reject) =>
+      translations.i18nMiddleware(req, res, () => {
+        translations.setLangBasedOnDomainMiddleware(req, res, (err, result) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(result)
+          }
+        })
+      })
+    )
   }
 
-  beforeEach(function () {
-    translations = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        '@overleaf/settings': {
-          i18n: {
-            escapeHTMLInVars: false,
-            subdomainLang: {
-              www: { lngCode: 'en', url: 'https://www.overleaf.com' },
-              fr: { lngCode: 'fr', url: 'https://fr.overleaf.com' },
-              da: { lngCode: 'da', url: 'https://da.overleaf.com' },
-            },
+  beforeEach(async function () {
+    vi.doMock('@overleaf/settings', () => ({
+      default: {
+        i18n: {
+          escapeHTMLInVars: false,
+          subdomainLang: {
+            www: { lngCode: 'en', url: 'https://www.overleaf.com' },
+            fr: { lngCode: 'fr', url: 'https://fr.overleaf.com' },
+            da: { lngCode: 'da', url: 'https://da.overleaf.com' },
           },
         },
       },
-    })
+    }))
+
+    translations = (await import(MODULE_PATH)).default
 
     req = {
       url: '/',
@@ -41,8 +48,8 @@ describe('Translations', function () {
   })
 
   describe('translate', function () {
-    beforeEach(function (done) {
-      runMiddlewares(done)
+    beforeEach(async function () {
+      await runMiddlewares()
     })
 
     it('works', function () {
@@ -55,8 +62,8 @@ describe('Translations', function () {
   })
 
   describe('interpolation', function () {
-    beforeEach(function (done) {
-      runMiddlewares(done)
+    beforeEach(async function () {
+      await runMiddlewares()
     })
 
     it('works', function () {
@@ -94,34 +101,28 @@ describe('Translations', function () {
   })
 
   describe('setLangBasedOnDomainMiddleware', function () {
-    it('should set the lang to french if the domain is fr', function (done) {
+    it('should set the lang to french if the domain is fr', async function () {
       req.headers.host = 'fr.overleaf.com'
-      runMiddlewares(() => {
-        expect(req.lng).to.equal('fr')
-        done()
-      })
+      await runMiddlewares()
+      expect(req.lng).to.equal('fr')
     })
 
     describe('suggestedLanguageSubdomainConfig', function () {
-      it('should set suggestedLanguageSubdomainConfig if the detected lang is different to subdomain lang', function (done) {
+      it('should set suggestedLanguageSubdomainConfig if the detected lang is different to subdomain lang', async function () {
         req.headers['accept-language'] = 'da, en-gb;q=0.8, en;q=0.7'
         req.headers.host = 'fr.overleaf.com'
-        runMiddlewares(() => {
-          expect(res.locals.suggestedLanguageSubdomainConfig).to.exist
-          expect(res.locals.suggestedLanguageSubdomainConfig.lngCode).to.equal(
-            'da'
-          )
-          done()
-        })
+        await runMiddlewares()
+        expect(res.locals.suggestedLanguageSubdomainConfig).to.exist
+        expect(res.locals.suggestedLanguageSubdomainConfig.lngCode).to.equal(
+          'da'
+        )
       })
 
-      it('should not set suggestedLanguageSubdomainConfig if the detected lang is the same as subdomain lang', function (done) {
+      it('should not set suggestedLanguageSubdomainConfig if the detected lang is the same as subdomain lang', async function () {
         req.headers['accept-language'] = 'da, en-gb;q=0.8, en;q=0.7'
         req.headers.host = 'da.overleaf.com'
-        runMiddlewares(() => {
-          expect(res.locals.suggestedLanguageSubdomainConfig).to.not.exist
-          done()
-        })
+        await runMiddlewares()
+        expect(res.locals.suggestedLanguageSubdomainConfig).to.not.exist
       })
     })
   })

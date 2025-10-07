@@ -1,13 +1,15 @@
-const logger = require('@overleaf/logger')
-const settings = require('@overleaf/settings')
-const fs = require('fs')
-const {
+import logger from '@overleaf/logger'
+import settings from '@overleaf/settings'
+import fs from 'node:fs'
+
+import {
   addOptionalCleanupHandlerAfterDrainingConnections,
   addRequiredCleanupHandlerBeforeDrainingConnections,
-} = require('./GracefulShutdown')
-const Features = require('./Features')
-const UserHandler = require('../Features/User/UserHandler')
-const metrics = require('@overleaf/metrics')
+} from './GracefulShutdown.js'
+
+import Features from './Features.js'
+import UserHandler from '../Features/User/UserHandler.js'
+import metrics from '@overleaf/metrics'
 
 // Monitor a site maintenance file (e.g. /etc/site_status) periodically and
 // close the site if the file contents contain the string "closed".
@@ -56,7 +58,7 @@ function publishActiveUsersMetric() {
     .catch(error => logger.error({ error }, 'error counting active users'))
 }
 
-module.exports = {
+export default {
   initialise() {
     if (settings.enabledServices.includes('web') && statusFile) {
       logger.debug(

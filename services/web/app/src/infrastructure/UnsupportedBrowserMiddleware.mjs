@@ -1,7 +1,7 @@
-const Bowser = require('bowser')
-const Settings = require('@overleaf/settings')
-const Url = require('url')
-const { getSafeRedirectPath } = require('../Features/Helpers/UrlHelper')
+import Bowser from 'bowser'
+import Settings from '@overleaf/settings'
+import Url from 'node:url'
+import { getSafeRedirectPath } from '../Features/Helpers/UrlHelper.js'
 
 function unsupportedBrowserMiddleware(req, res, next) {
   if (!Settings.unsupportedBrowsers) return next()
@@ -44,7 +44,7 @@ function renderUnsupportedBrowserPage(req, res) {
   res.render('general/unsupported-browser', { fromURL })
 }
 
-module.exports = {
+export default {
   renderUnsupportedBrowserPage,
   unsupportedBrowserMiddleware,
 }

@@ -3,7 +3,7 @@ import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import metrics from '@overleaf/metrics'
 import Validation from './Validation.js'
-import csp from './CSP.mjs'
+import csp, { removeCSPHeaders } from './CSP.mjs'
 import Router from '../router.mjs'
 import helmet from 'helmet'
 import UserSessionsRedis from '../Features/User/UserSessionsRedis.js'
@@ -125,7 +125,7 @@ webRouter.use(
     fileURLToPath(new URL('../../../public', import.meta.url)),
     {
       maxAge: STATIC_CACHE_AGE,
-      setHeaders: csp.removeCSPHeaders,
+      setHeaders: removeCSPHeaders,
     }
   )
 )
@@ -257,7 +257,7 @@ if (Settings.cookieRollingSession) {
 }
 
 webRouter.use(ReferalConnect.use)
-expressLocals(webRouter, privateApiRouter, publicApiRouter)
+await expressLocals(webRouter, privateApiRouter, publicApiRouter)
 webRouter.use(SessionAutostartMiddleware.invokeCallbackMiddleware)
 
 webRouter.use(function checkIfSiteClosed(req, res, next) {

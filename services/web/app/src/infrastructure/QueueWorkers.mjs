@@ -1,16 +1,18 @@
-const Features = require('./Features')
-const Queues = require('./Queues')
-const UserOnboardingEmailManager = require('../Features/User/UserOnboardingEmailManager')
-const UserPostRegistrationAnalyticsManager = require('../Features/User/UserPostRegistrationAnalyticsManager')
-const FeaturesUpdater = require('../Features/Subscription/FeaturesUpdater')
-const {
+import Features from './Features.js'
+import Queues from './Queues.js'
+import UserOnboardingEmailManager from '../Features/User/UserOnboardingEmailManager.js'
+import UserPostRegistrationAnalyticsManager from '../Features/User/UserPostRegistrationAnalyticsManager.js'
+import FeaturesUpdater from '../Features/Subscription/FeaturesUpdater.js'
+
+import {
   addOptionalCleanupHandlerBeforeStoppingTraffic,
   addRequiredCleanupHandlerBeforeDrainingConnections,
-} = require('./GracefulShutdown')
-const EmailHandler = require('../Features/Email/EmailHandler')
-const logger = require('@overleaf/logger')
-const OError = require('@overleaf/o-error')
-const Modules = require('./Modules')
+} from './GracefulShutdown.js'
+
+import EmailHandler from '../Features/Email/EmailHandler.js'
+import logger from '@overleaf/logger'
+import OError from '@overleaf/o-error'
+import Modules from './Modules.js'
 
 /**
  * @typedef {{
@@ -124,4 +126,4 @@ function registerCleanup(queue) {
   // Disconnect from redis is scheduled in queue setup.
 }
 
-module.exports = { start, registerQueue }
+export default { start, registerQueue }

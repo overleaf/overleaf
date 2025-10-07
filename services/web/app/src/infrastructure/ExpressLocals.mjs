@@ -1,36 +1,43 @@
-const logger = require('@overleaf/logger')
-const Metrics = require('@overleaf/metrics')
-const Settings = require('@overleaf/settings')
-const _ = require('lodash')
-const { URL } = require('url')
-const Path = require('path')
-const moment = require('moment')
-const { fetchJson } = require('@overleaf/fetch-utils')
-const contentDisposition = require('content-disposition')
-const Features = require('./Features')
-const SessionManager = require('../Features/Authentication/SessionManager')
-const PackageVersions = require('./PackageVersions')
-const Modules = require('./Modules')
-const Errors = require('../Features/Errors/Errors')
-const {
+import logger from '@overleaf/logger'
+import Metrics from '@overleaf/metrics'
+import Settings from '@overleaf/settings'
+import _ from 'lodash'
+import { URL } from 'node:url'
+import Path from 'node:path'
+import moment from 'moment'
+import { fetchJson } from '@overleaf/fetch-utils'
+import contentDisposition from 'content-disposition'
+import Features from './Features.js'
+import SessionManager from '../Features/Authentication/SessionManager.js'
+import PackageVersions from './PackageVersions.js'
+import Modules from './Modules.js'
+import Errors from '../Features/Errors/Errors.js'
+
+import {
   canRedirectToAdminDomain,
   hasAdminAccess,
   useAdminCapabilities,
   useHasAdminCapability,
-} = require('../Features/Helpers/AdminAuthorizationHelper')
-const {
-  addOptionalCleanupHandlerAfterDrainingConnections,
-} = require('./GracefulShutdown')
-const { sanitizeSessionUserForFrontEnd } = require('./FrontEndUser')
+} from '../Features/Helpers/AdminAuthorizationHelper.js'
+
+import { addOptionalCleanupHandlerAfterDrainingConnections } from './GracefulShutdown.js'
+import { sanitizeSessionUserForFrontEnd } from './FrontEndUser.mjs'
+import { expressify } from '@overleaf/promise-utils'
 
 const IEEE_BRAND_ID = Settings.ieeeBrandId
 
 let webpackManifest
-function loadManifest() {
+async function loadManifest() {
   switch (process.env.NODE_ENV) {
     case 'production':
+      /* eslint-disable import/no-unresolved */
       // Only load webpack manifest file in production.
-      webpackManifest = require('../../../public/manifest.json')
+      webpackManifest = (
+        await import('../../../public/manifest.json', {
+          with: { type: 'json' },
+        })
+      ).default
+      /* eslint-enable import/no-unresolved */
       break
     case 'development': {
       // In dev, fetch the manifest from the webpack container.
@@ -76,8 +83,8 @@ function getWebpackAssets(entrypoint, section) {
   return webpackManifest.entrypoints[entrypoint].assets[section] || []
 }
 
-module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
-  loadManifest()
+export default async function (webRouter, privateApiRouter, publicApiRouter) {
+  await loadManifest()
   if (process.env.NODE_ENV === 'development') {
     // In the dev-env, delay requests until we fetched the manifest once.
     webRouter.use(function (req, res, next) {
@@ -253,10 +260,14 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     next()
   })
 
-  webRouter.use(function (req, res, next) {
-    res.locals.StringHelper = require('../Features/Helpers/StringHelper')
-    next()
-  })
+  webRouter.use(
+    expressify(async function (req, res, next) {
+      res.locals.StringHelper = (
+        await import('../Features/Helpers/StringHelper.js')
+      ).default
+      next()
+    })
+  )
 
   webRouter.use(function (req, res, next) {
     res.locals.csrfToken = req != null ? req.csrfToken() : undefined

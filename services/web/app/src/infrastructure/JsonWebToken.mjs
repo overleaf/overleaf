@@ -1,6 +1,6 @@
-const { callbackify, promisify } = require('util')
-const JWT = require('jsonwebtoken')
-const Settings = require('@overleaf/settings')
+import { callbackify, promisify } from 'node:util'
+import JWT from 'jsonwebtoken'
+import Settings from '@overleaf/settings'
 
 const jwtSign = promisify(JWT.sign)
 
@@ -20,7 +20,7 @@ function getDecoded(token) {
   return decoded
 }
 
-module.exports = {
+export default {
   sign: callbackify(sign),
   getDecoded,
   promises: {

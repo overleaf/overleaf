@@ -1,12 +1,12 @@
-const i18n = require('i18next')
-const fsBackend = require('i18next-fs-backend')
-const middleware = require('i18next-http-middleware')
-const path = require('path')
-const Settings = require('@overleaf/settings')
-const { URL } = require('url')
-const pug = require('pug-runtime')
-const logger = require('@overleaf/logger')
-const SafeHTMLSubstitution = require('../Features/Helpers/SafeHTMLSubstitution')
+import i18n from 'i18next'
+import fsBackend from 'i18next-fs-backend'
+import middleware from 'i18next-http-middleware'
+import path from 'node:path'
+import Settings from '@overleaf/settings'
+import { URL } from 'node:url'
+import pug from 'pug-runtime'
+import logger from '@overleaf/logger'
+import SafeHTMLSubstitution from '../Features/Helpers/SafeHTMLSubstitution.js'
 
 const fallbackLanguageCode = Settings.i18n.defaultLng || 'en'
 const availableLanguageCodes = []
@@ -35,7 +35,7 @@ if (!availableLanguageCodes.includes(fallbackLanguageCode)) {
 if (process.argv.includes('--watch-locales')) {
   // Dummy imports for setting up watching of locales files.
   for (const lngCode of availableLanguageCodes) {
-    require(`../../../locales/${lngCode}.json`)
+    await import(`../../../locales/${lngCode}.json`, { with: { type: 'json' } })
   }
 }
 
@@ -44,7 +44,7 @@ i18n
   .use(middleware.LanguageDetector)
   .init({
     backend: {
-      loadPath: path.join(__dirname, '../../../locales/__lng__.json'),
+      loadPath: path.join(import.meta.dirname, '../../../locales/__lng__.json'),
     },
 
     // still using the v3 plural suffixes
@@ -140,7 +140,7 @@ function setLangBasedOnDomainMiddleware(req, res, next) {
 // in direct usage
 i18n.translate = i18n.t
 
-module.exports = {
+export default {
   i18nMiddleware: middleware.handle(i18n),
   setLangBasedOnDomainMiddleware,
   i18n,

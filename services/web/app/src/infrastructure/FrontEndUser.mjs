@@ -1,4 +1,4 @@
-function sanitizeSessionUserForFrontEnd(sessionUser) {
+export function sanitizeSessionUserForFrontEnd(sessionUser) {
   if (sessionUser != null) {
     return {
       email: sessionUser.email,
@@ -8,8 +8,4 @@ function sanitizeSessionUserForFrontEnd(sessionUser) {
   }
 
   return null
-}
-
-module.exports = {
-  sanitizeSessionUserForFrontEnd,
 }

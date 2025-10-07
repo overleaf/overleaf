@@ -1,10 +1,11 @@
-const session = require('express-session')
-const RedisStore = require('connect-redis')(session)
-const metrics = require('@overleaf/metrics')
-const logger = require('@overleaf/logger')
-const Settings = require('@overleaf/settings')
-const SessionManager = require('../Features/Authentication/SessionManager')
-const Metrics = require('@overleaf/metrics')
+import session from 'express-session'
+import RedisStoreFactory from 'connect-redis'
+import logger from '@overleaf/logger'
+import Settings from '@overleaf/settings'
+import SessionManager from '../Features/Authentication/SessionManager.js'
+import Metrics from '@overleaf/metrics'
+
+const RedisStore = RedisStoreFactory(session)
 
 const MAX_SESSION_SIZE_THRESHOLD = 4096
 
@@ -37,14 +38,14 @@ class CustomSessionStore extends RedisStore {
     }
     const size = sess ? JSON.stringify(sess).length : 0
     // record the number of redis session operations
-    metrics.inc('session.store.count', 1, {
+    Metrics.inc('session.store.count', 1, {
       method,
       type,
       status: size > MAX_SESSION_SIZE_THRESHOLD ? 'oversize' : 'normal',
     })
     // record the redis session bandwidth for get/set operations
     if (method === 'get' || method === 'set') {
-      metrics.count('session.store.bytes', size, { method, type })
+      Metrics.count('session.store.bytes', size, { method, type })
     }
     // log the largest anonymous session seen so far
     if (type === 'anonymous' && size > CustomSessionStore.largestSessionSize) {
@@ -153,7 +154,7 @@ class CustomSetRedisClient {
   set(args, cb) {
     args.push(this.#flag)
     this.#client.set(args, (err, ok) => {
-      metrics.inc('session.store.set', 1, {
+      Metrics.inc('session.store.set', 1, {
         path: this.#flag,
         status: err ? 'error' : ok ? 'success' : 'failure',
       })
@@ -162,4 +163,4 @@ class CustomSetRedisClient {
   }
 }
 
-module.exports = CustomSessionStore
+export default CustomSessionStore

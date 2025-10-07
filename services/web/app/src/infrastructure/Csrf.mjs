@@ -1,22 +1,9 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+import csurf from 'csurf'
+import { promisify } from 'node:util'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
 
-const csurf = require('csurf')
 const csrf = csurf()
-const { promisify } = require('util')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
 
 // Wrapper for `csurf` middleware that provides a list of routes that can be excluded from csrf checks.
 //
@@ -53,7 +40,7 @@ class Csrf {
     if (!this.excluded_routes[route]) {
       this.excluded_routes[route] = {}
     }
-    return (this.excluded_routes[route][method] = 1)
+    this.excluded_routes[route][method] = 1
   }
 
   middleware(req, res, next) {
@@ -62,21 +49,17 @@ class Csrf {
     // token' error from csurf and continue on...
 
     // check whether the request method is excluded for the specified route
-    if (
-      (this.excluded_routes[req.path] != null
-        ? this.excluded_routes[req.path][req.method]
-        : undefined) === 1
-    ) {
+    if (this.excluded_routes[req.path]?.[req.method] === 1) {
       // ignore the error if it's due to a bad csrf token, and continue
-      return csrf(req, res, err => {
+      csrf(req, res, err => {
         if (err && err.code !== 'EBADCSRFTOKEN') {
-          return next(err)
+          next(err)
         } else {
-          return next()
+          next()
         }
       })
     } else {
-      return csrf(req, res, next)
+      csrf(req, res, next)
     }
   }
 
@@ -85,7 +68,7 @@ class Csrf {
     if (cb == null) {
       cb = function (valid) {}
     }
-    return csrf(req, null, err => cb(err))
+    csrf(req, null, err => cb(err))
   }
 
   static validateToken(token, session, cb) {
@@ -102,7 +85,7 @@ class Csrf {
       method: 'POST',
       session,
     }
-    return Csrf.validateRequest(req, cb)
+    Csrf.validateRequest(req, cb)
   }
 }
 
@@ -111,4 +94,4 @@ Csrf.promises = {
   validateToken: promisify(Csrf.validateToken),
 }
 
-module.exports = Csrf
+export default Csrf

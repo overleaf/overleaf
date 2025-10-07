@@ -1,5 +1,5 @@
-const Settings = require('@overleaf/settings')
-const metrics = require('@overleaf/metrics')
+import Settings from '@overleaf/settings'
+import metrics from '@overleaf/metrics'
 
 /**
  * Middleware function to record session cookie metrics.  This allows us to
@@ -27,4 +27,4 @@ function middleware(req, res, next) {
   next()
 }
 
-module.exports = { middleware }
+export default { middleware }

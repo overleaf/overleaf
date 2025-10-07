@@ -1,5 +1,5 @@
-const Settings = require('@overleaf/settings')
-const OError = require('@overleaf/o-error')
+import Settings from '@overleaf/settings'
+import OError from '@overleaf/o-error'
 
 const botUserAgents = [
   'kube-probe',
@@ -125,4 +125,4 @@ class SessionAutostartMiddleware {
   }
 }
 
-module.exports = SessionAutostartMiddleware
+export default SessionAutostartMiddleware
