@@ -1,50 +1,37 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import { app } from '../../../../app/js/server.js'
 import { mongoClient } from '../../../../app/js/mongodb.js'
-import { promisify } from '@overleaf/promise-utils'
 
 let running = false
-let initing = false
-const callbacks = []
+let initPromise = null
 
-export function ensureRunning(callback) {
-  if (callback == null) {
-    callback = function () {}
-  }
-  if (running) {
-    return callback()
-  } else if (initing) {
-    return callbacks.push(callback)
-  }
-  initing = true
-  callbacks.push(callback)
-  app.listen(3054, '127.0.0.1', error => {
-    if (error != null) {
-      throw error
-    }
+async function initialize() {
+  try {
+    await new Promise((resolve, reject) => {
+      app.listen(3054, '127.0.0.1', error => {
+        if (error) return reject(error)
+        resolve()
+      })
+    })
 
     // Wait for mongo
-    mongoClient.connect(error => {
-      if (error != null) {
-        throw error
-      }
-      running = true
-      for (callback of Array.from(callbacks)) {
-        callback()
-      }
-    })
-  })
+    await mongoClient.connect()
+
+    running = true
+  } catch (error) {
+    initPromise = null
+    throw error
+  }
 }
 
-export const promises = {
-  ensureRunning: promisify(ensureRunning),
+export async function ensureRunning() {
+  if (running) {
+    return
+  }
+
+  if (initPromise) {
+    return await initPromise
+  }
+
+  initPromise = initialize()
+  return await initPromise
 }

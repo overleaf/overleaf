@@ -11,7 +11,7 @@ describe('DiscardingUpdates', function () {
   beforeEach(async function () {
     this.timestamp = new Date()
 
-    await ProjectHistoryApp.promises.ensureRunning()
+    await ProjectHistoryApp.ensureRunning()
     this.user_id = new ObjectId().toString()
     this.project_id = new ObjectId().toString()
     this.doc_id = new ObjectId().toString()
@@ -22,7 +22,7 @@ describe('DiscardingUpdates', function () {
     MockWeb()
       .get(`/project/${this.project_id}/details`)
       .reply(200, { name: 'Test Project' })
-    await ProjectHistoryClient.promises.initializeProject(this.project_id)
+    await ProjectHistoryClient.initializeProject(this.project_id)
   })
 
   it('should discard updates', async function () {
@@ -32,7 +32,7 @@ describe('DiscardingUpdates', function () {
       doc: this.doc_id,
       meta: { user_id: this.user_id, ts: new Date() },
     }
-    await ProjectHistoryClient.promises.pushRawUpdate(this.project_id, update)
-    await ProjectHistoryClient.promises.flushProject(this.project_id)
+    await ProjectHistoryClient.pushRawUpdate(this.project_id, update)
+    await ProjectHistoryClient.flushProject(this.project_id)
   })
 })

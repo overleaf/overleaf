@@ -24,7 +24,7 @@ function createMockBlob(historyId, content) {
 
 describe('Diffs', function () {
   beforeEach(async function () {
-    await ProjectHistoryApp.promises.ensureRunning()
+    await ProjectHistoryApp.ensureRunning()
 
     this.historyId = new ObjectId().toString()
     this.projectId = new ObjectId().toString()
@@ -39,7 +39,7 @@ describe('Diffs', function () {
         overleaf: { history: { id: this.historyId } },
       })
 
-    await ProjectHistoryClient.promises.initializeProject(this.historyId)
+    await ProjectHistoryClient.initializeProject(this.historyId)
   })
 
   afterEach(function () {

@@ -15,13 +15,13 @@ describe('Summarized updates', function () {
     this.projectId = new ObjectId().toString()
     this.historyId = new ObjectId().toString()
 
-    await ProjectHistoryApp.promises.ensureRunning()
+    await ProjectHistoryApp.ensureRunning()
 
     MockHistoryStore().post('/api/projects').reply(200, {
       projectId: this.historyId,
     })
 
-    const olProject = await ProjectHistoryClient.promises.initializeProject(
+    const olProject = await ProjectHistoryClient.initializeProject(
       this.historyId
     )
 

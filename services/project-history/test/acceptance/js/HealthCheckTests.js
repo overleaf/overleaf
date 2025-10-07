@@ -16,7 +16,7 @@ describe('Health Check', function () {
     const historyId = new ObjectId().toString()
     settings.history.healthCheck = { project_id: projectId }
 
-    await ProjectHistoryApp.promises.ensureRunning()
+    await ProjectHistoryApp.ensureRunning()
 
     MockHistoryStore().post('/api/projects').reply(200, {
       projectId: historyId,
@@ -43,7 +43,7 @@ describe('Health Check', function () {
         },
       })
 
-    await ProjectHistoryClient.promises.initializeProject(historyId)
+    await ProjectHistoryClient.initializeProject(historyId)
   })
 
   it('should respond to the health check', async function () {

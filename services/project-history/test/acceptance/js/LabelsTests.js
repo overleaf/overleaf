@@ -12,14 +12,14 @@ const fixture = path => new URL(`../fixtures/${path}`, import.meta.url)
 
 describe('Labels', function () {
   beforeEach(async function () {
-    await ProjectHistoryApp.promises.ensureRunning()
+    await ProjectHistoryApp.ensureRunning()
 
     this.historyId = new ObjectId().toString()
     MockHistoryStore().post('/api/projects').reply(200, {
       projectId: this.historyId,
     })
 
-    const olProject = await ProjectHistoryClient.promises.initializeProject(
+    const olProject = await ProjectHistoryClient.initializeProject(
       this.historyId
     )
     this.project_id = new ObjectId().toString()

@@ -19,14 +19,13 @@ describe('GetChangesInChunkSince', function () {
   beforeEach(async function () {
     projectId = new ObjectId().toString()
     historyId = new ObjectId().toString()
-    await ProjectHistoryApp.promises.ensureRunning()
+    await ProjectHistoryApp.ensureRunning()
 
     MockHistoryStore().post('/api/projects').reply(200, {
       projectId: historyId,
     })
 
-    const olProject =
-      await ProjectHistoryClient.promises.initializeProject(historyId)
+    const olProject = await ProjectHistoryClient.initializeProject(historyId)
     MockWeb()
       .get(`/project/${projectId}/details`)
       .reply(200, {

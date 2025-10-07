@@ -23,7 +23,7 @@ describe('Deleting project', function () {
       .get(`/api/projects/${this.historyId}/latest/history`)
       .replyWithFile(200, fixture('chunks/0-3.json'))
     MockHistoryStore().delete(`/api/projects/${this.historyId}`).reply(204)
-    await ProjectHistoryApp.promises.ensureRunning()
+    await ProjectHistoryApp.ensureRunning()
   })
 
   describe('when the project has no pending updates', function () {
@@ -34,16 +34,13 @@ describe('Deleting project', function () {
 
   describe('when the project has pending updates', function () {
     beforeEach(async function () {
-      await ProjectHistoryClient.promises.pushRawUpdate(this.projectId, {
+      await ProjectHistoryClient.pushRawUpdate(this.projectId, {
         pathname: '/main.tex',
         docLines: 'hello',
         doc: this.docId,
         meta: { userId: this.userId, ts: new Date() },
       })
-      await ProjectHistoryClient.promises.setFirstOpTimestamp(
-        this.projectId,
-        Date.now()
-      )
+      await ProjectHistoryClient.setFirstOpTimestamp(this.projectId, Date.now())
       await ProjectHistoryClient.deleteProject(this.projectId)
     })
 
@@ -53,9 +50,7 @@ describe('Deleting project', function () {
     })
 
     it('clears the first op timestamp', async function () {
-      const ts = await ProjectHistoryClient.promises.getFirstOpTimestamp(
-        this.projectId
-      )
+      const ts = await ProjectHistoryClient.getFirstOpTimestamp(this.projectId)
       expect(ts).to.be.null
     })
   })

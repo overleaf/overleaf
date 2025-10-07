@@ -3,7 +3,6 @@ import request from 'request'
 import Settings from '@overleaf/settings'
 import RedisWrapper from '@overleaf/redis-wrapper'
 import { db } from '../../../../app/js/mongodb.js'
-import { promisify } from '@overleaf/promise-utils'
 import {
   fetchJson,
   fetchJsonWithResponse,
@@ -19,44 +18,34 @@ export function resetDatabase(callback) {
   rclient.flushdb(callback)
 }
 
-export function initializeProject(historyId, callback) {
-  request.post(
+export async function initializeProject(historyId) {
+  const response = await fetchJsonWithResponse(
+    'http://127.0.0.1:3054/project',
     {
-      url: 'http://127.0.0.1:3054/project',
+      method: 'POST',
       json: { historyId },
-    },
-    (error, res, body) => {
-      if (error) {
-        return callback(error)
-      }
-      expect(res.statusCode).to.equal(200)
-      callback(null, body.project)
     }
   )
+  expect(response.response.status).to.equal(200)
+  return response.json.project
 }
 
-export function flushProject(projectId, options, callback) {
-  if (typeof options === 'function') {
-    callback = options
-    options = null
-  }
-  if (!options) {
-    options = { allowErrors: false }
-  }
-  request.post(
-    {
-      url: `http://127.0.0.1:3054/project/${projectId}/flush`,
-    },
-    (error, res, body) => {
-      if (error) {
-        return callback(error)
-      }
-      if (!options.allowErrors) {
-        expect(res.statusCode).to.equal(204)
-      }
-      callback(error, res)
+export async function flushProject(projectId, options = {}) {
+  try {
+    const response = await fetchNothing(
+      `http://127.0.0.1:3054/project/${projectId}/flush`,
+      { method: 'POST' }
+    )
+    if (!options.allowErrors) {
+      expect(response.status).to.equal(204)
     }
-  )
+    return { statusCode: response.status }
+  } catch (error) {
+    if (options.allowErrors && error instanceof RequestFailedError) {
+      return { statusCode: error.response.status }
+    }
+    throw error
+  }
 }
 
 export async function getSummarizedUpdates(projectId, query) {
@@ -135,33 +124,29 @@ export async function getSnapshot(projectId, pathname, version, options = {}) {
   }
 }
 
-export function pushRawUpdate(projectId, update, callback) {
-  rclient.rpush(
+export async function pushRawUpdate(projectId, update) {
+  await rclient.rpush(
     Keys.projectHistoryOps({ project_id: projectId }),
-    JSON.stringify(update),
-    callback
+    JSON.stringify(update)
   )
 }
 
-export function setFirstOpTimestamp(projectId, timestamp, callback) {
-  rclient.set(
+export async function setFirstOpTimestamp(projectId, timestamp) {
+  await rclient.set(
     Keys.projectHistoryFirstOpTimestamp({ project_id: projectId }),
-    timestamp,
-    callback
+    timestamp
   )
 }
 
-export function getFirstOpTimestamp(projectId, callback) {
-  rclient.get(
-    Keys.projectHistoryFirstOpTimestamp({ project_id: projectId }),
-    callback
+export async function getFirstOpTimestamp(projectId) {
+  return await rclient.get(
+    Keys.projectHistoryFirstOpTimestamp({ project_id: projectId })
   )
 }
 
-export function clearFirstOpTimestamp(projectId, callback) {
-  rclient.del(
-    Keys.projectHistoryFirstOpTimestamp({ project_id: projectId }),
-    callback
+export async function clearFirstOpTimestamp(projectId) {
+  await rclient.del(
+    Keys.projectHistoryFirstOpTimestamp({ project_id: projectId })
   )
 }
 
@@ -179,21 +164,15 @@ export function getQueueCounts(callback) {
   )
 }
 
-export function resyncHistory(projectId, callback) {
-  request.post(
+export async function resyncHistory(projectId) {
+  const response = await fetchNothing(
+    `http://127.0.0.1:3054/project/${projectId}/resync`,
     {
-      url: `http://127.0.0.1:3054/project/${projectId}/resync`,
-      json: true,
-      body: { origin: { kind: 'test-origin' } },
-    },
-    (error, res, body) => {
-      if (error) {
-        return callback(error)
-      }
-      expect(res.statusCode).to.equal(204)
-      callback(error)
+      method: 'POST',
+      json: { origin: { kind: 'test-origin' } },
     }
   )
+  expect(response.status).to.equal(204)
 }
 
 export async function createLabel(
@@ -256,12 +235,4 @@ export async function deleteProject(projectId) {
     { method: 'DELETE' }
   )
   expect(response.status).to.equal(204)
-}
-
-export const promises = {
-  initializeProject: promisify(initializeProject),
-  pushRawUpdate: promisify(pushRawUpdate),
-  setFirstOpTimestamp: promisify(setFirstOpTimestamp),
-  getFirstOpTimestamp: promisify(getFirstOpTimestamp),
-  flushProject: promisify(flushProject),
 }

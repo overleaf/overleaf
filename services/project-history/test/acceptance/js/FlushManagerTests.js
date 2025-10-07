@@ -17,7 +17,7 @@ describe('Flushing old queues', function () {
   beforeEach(async function () {
     this.timestamp = new Date()
 
-    await ProjectHistoryApp.promises.ensureRunning()
+    await ProjectHistoryApp.ensureRunning()
     this.projectId = new ObjectId().toString()
     this.docId = new ObjectId().toString()
     this.fileId = new ObjectId().toString()
@@ -45,7 +45,7 @@ describe('Flushing old queues', function () {
           },
         },
       })
-    await ProjectHistoryClient.promises.initializeProject(historyId)
+    await ProjectHistoryClient.initializeProject(historyId)
   })
 
   afterEach(function () {
@@ -68,11 +68,8 @@ describe('Flushing old queues', function () {
           doc: this.docId,
           meta: { user_id: this.user_id, ts: new Date() },
         }
-        await ProjectHistoryClient.promises.pushRawUpdate(
-          this.projectId,
-          update
-        )
-        await ProjectHistoryClient.promises.setFirstOpTimestamp(
+        await ProjectHistoryClient.pushRawUpdate(this.projectId, update)
+        await ProjectHistoryClient.setFirstOpTimestamp(
           this.projectId,
           Date.now() - 24 * 3600 * 1000
         )
@@ -131,11 +128,8 @@ describe('Flushing old queues', function () {
           doc: this.docId,
           meta: { user_id: this.user_id, ts: new Date() },
         }
-        await ProjectHistoryClient.promises.pushRawUpdate(
-          this.projectId,
-          update
-        )
-        await ProjectHistoryClient.promises.setFirstOpTimestamp(
+        await ProjectHistoryClient.pushRawUpdate(this.projectId, update)
+        await ProjectHistoryClient.setFirstOpTimestamp(
           this.projectId,
           Date.now() - 60 * 1000
         )
@@ -177,11 +171,8 @@ describe('Flushing old queues', function () {
           doc: this.docId,
           meta: { user_id: this.user_id, ts: new Date() },
         }
-        await ProjectHistoryClient.promises.pushRawUpdate(
-          this.projectId,
-          update
-        )
-        await ProjectHistoryClient.promises.setFirstOpTimestamp(
+        await ProjectHistoryClient.pushRawUpdate(this.projectId, update)
+        await ProjectHistoryClient.setFirstOpTimestamp(
           this.projectId,
           Date.now() - 60 * 1000
         )
@@ -241,16 +232,8 @@ describe('Flushing old queues', function () {
           meta: { user_id: this.user_id, ts: new Date() },
         }
         this.startDate = Date.now()
-        await ProjectHistoryClient.promises.pushRawUpdate(
-          this.projectId,
-          update
-        )
-        await new Promise((resolve, reject) => {
-          ProjectHistoryClient.clearFirstOpTimestamp(this.projectId, err => {
-            if (err) reject(err)
-            else resolve()
-          })
-        })
+        await ProjectHistoryClient.pushRawUpdate(this.projectId, update)
+        await ProjectHistoryClient.clearFirstOpTimestamp(this.projectId)
       })
 
       it('flushes the project history queue anyway', async function () {
@@ -266,15 +249,9 @@ describe('Flushing old queues', function () {
           'made calls to history service to store updates'
         )
 
-        const result = await new Promise((resolve, reject) => {
-          ProjectHistoryClient.getFirstOpTimestamp(
-            this.projectId,
-            (err, result) => {
-              if (err) reject(err)
-              else resolve(result)
-            }
-          )
-        })
+        const result = await ProjectHistoryClient.getFirstOpTimestamp(
+          this.projectId
+        )
         expect(result).to.be.null
       })
     })

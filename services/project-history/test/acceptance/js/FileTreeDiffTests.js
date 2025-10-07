@@ -13,7 +13,7 @@ const sha = data => crypto.createHash('sha1').update(data).digest('hex')
 
 describe('FileTree Diffs', function () {
   beforeEach(async function () {
-    await ProjectHistoryApp.promises.ensureRunning()
+    await ProjectHistoryApp.ensureRunning()
 
     this.historyId = new ObjectId().toString()
     this.projectId = new ObjectId().toString()
@@ -28,7 +28,7 @@ describe('FileTree Diffs', function () {
         overleaf: { history: { id: this.historyId } },
       })
 
-    await ProjectHistoryClient.promises.initializeProject(this.historyId)
+    await ProjectHistoryClient.initializeProject(this.historyId)
   })
 
   afterEach(function () {

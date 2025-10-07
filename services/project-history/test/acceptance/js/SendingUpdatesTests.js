@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import Settings from '@overleaf/settings'
 import assert from 'node:assert'
-import async from 'async'
 import crypto from 'node:crypto'
 import mongodb from 'mongodb-legacy'
 import nock from 'nock'
@@ -202,38 +201,35 @@ function olAddFileUpdate(file, userId, ts, fileHash) {
 describe('Sending Updates', function () {
   const historyId = new ObjectId().toString()
 
-  beforeEach(function (done) {
+  beforeEach(async function () {
     this.timestamp = new Date()
 
-    ProjectHistoryApp.ensureRunning(error => {
-      if (error) {
-        return done(error)
-      }
-      this.userId = new ObjectId().toString()
-      this.projectId = new ObjectId().toString()
-      this.docId = new ObjectId().toString()
+    await ProjectHistoryApp.ensureRunning()
 
-      this.doc = {
-        id: this.docId,
-        pathname: '/main.tex',
-        length: 5,
-      }
+    this.userId = new ObjectId().toString()
+    this.projectId = new ObjectId().toString()
+    this.docId = new ObjectId().toString()
 
-      MockHistoryStore().post('/api/projects').reply(200, {
-        projectId: historyId,
-      })
-      MockWeb()
-        .get(`/project/${this.projectId}/details`)
-        .reply(200, {
-          name: 'Test Project',
-          overleaf: {
-            history: {
-              id: historyId,
-            },
-          },
-        })
-      ProjectHistoryClient.initializeProject(historyId, done)
+    this.doc = {
+      id: this.docId,
+      pathname: '/main.tex',
+      length: 5,
+    }
+
+    MockHistoryStore().post('/api/projects').reply(200, {
+      projectId: historyId,
     })
+    MockWeb()
+      .get(`/project/${this.projectId}/details`)
+      .reply(200, {
+        name: 'Test Project',
+        overleaf: {
+          history: {
+            id: historyId,
+          },
+        },
+      })
+    await ProjectHistoryClient.initializeProject(historyId)
   })
 
   afterEach(function () {
@@ -255,7 +251,7 @@ describe('Sending Updates', function () {
         })
     })
 
-    it('should send add doc updates to the history store', function (done) {
+    it('should send add doc updates to the history store', async function () {
       const fileHash = '0a207c060e61f3b88eaee0a8cd0696f46fb155eb'
 
       const createBlob = MockHistoryStore()
@@ -272,43 +268,24 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slAddDocUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                this.timestamp,
-                'a\nb'
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createBlob.isDone(),
-            '/api/projects/:historyId/blobs/:hash should have been called'
-          )
-          assert(
-            addFile.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slAddDocUpdate(historyId, this.doc, this.userId, this.timestamp, 'a\nb')
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createBlob.isDone(),
+        '/api/projects/:historyId/blobs/:hash should have been called'
+      )
+      assert(
+        addFile.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
 
-    it('should send ranges to the history store', function (done) {
+    it('should send ranges to the history store', async function () {
       const fileHash = '49e886093b3eacbc12b99a1eb5aeaa44a6b9d90e'
       const rangesHash = 'fa9a429ff518bc9e5b2507a96ff0646b566eca65'
 
@@ -356,68 +333,55 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slAddDocUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                this.timestamp,
-                'foo barbaz',
-                {
-                  changes: [
-                    {
-                      op: { p: 4, d: 'bar' },
-                      metadata: {
-                        ts: 1704067200000,
-                        user_id: 'user-id-1',
-                      },
-                    },
-                  ],
-                  comments: [
-                    {
-                      op: {
-                        p: 0,
-                        c: 'foo',
-                        t: 'comment-id-1',
-                      },
-                      metadata: { resolved: false },
-                    },
-                  ],
-                }
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slAddDocUpdate(
+          historyId,
+          this.doc,
+          this.userId,
+          this.timestamp,
+          'foo barbaz',
+          {
+            changes: [
+              {
+                op: { p: 4, d: 'bar' },
+                metadata: {
+                  ts: 1704067200000,
+                  user_id: 'user-id-1',
+                },
+              },
+            ],
+            comments: [
+              {
+                op: {
+                  p: 0,
+                  c: 'foo',
+                  t: 'comment-id-1',
+                },
+                metadata: { resolved: false },
+              },
+            ],
           }
-          assert(
-            createBlob.isDone(),
-            '/api/projects/:historyId/blobs/:hash should have been called to create content blob'
-          )
-          assert(
-            createRangesBlob.isDone(),
-            '/api/projects/:historyId/blobs/:hash should have been called to create ranges blob'
-          )
-          assert(
-            addFile.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+        )
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createBlob.isDone(),
+        '/api/projects/:historyId/blobs/:hash should have been called to create content blob'
+      )
+      assert(
+        createRangesBlob.isDone(),
+        '/api/projects/:historyId/blobs/:hash should have been called to create ranges blob'
+      )
+      assert(
+        addFile.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
 
-    it('should strip non-BMP characters in add doc updates before sending to the history store', function (done) {
+    it('should strip non-BMP characters in add doc updates before sending to the history store', async function () {
       const fileHash = '11509fe05a41f9cdc51ea081342b5a4fc7c8d0fc'
 
       const createBlob = MockHistoryStore()
@@ -437,43 +401,30 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slAddDocUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                this.timestamp,
-                'a\nb\uD800\uDC00c'
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createBlob.isDone(),
-            '/api/projects/:historyId/blobs/:hash should have been called'
-          )
-          assert(
-            addFile.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slAddDocUpdate(
+          historyId,
+          this.doc,
+          this.userId,
+          this.timestamp,
+          'a\nb\uD800\uDC00c'
+        )
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createBlob.isDone(),
+        '/api/projects/:historyId/blobs/:hash should have been called'
+      )
+      assert(
+        addFile.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
 
-    it('should send text updates to the history store', function (done) {
+    it('should send text updates to the history store', async function () {
       const createChange = MockHistoryStore()
         .post(`/api/projects/${historyId}/legacy_changes`, body => {
           expect(body).to.deep.equal([
@@ -484,40 +435,22 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                1,
-                this.timestamp,
-                [{ p: 3, i: '\nc' }]
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createChange.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 1, this.timestamp, [
+          { p: 3, i: '\nc' },
+        ])
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createChange.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
 
-    it('should send renames to the history store', function (done) {
+    it('should send renames to the history store', async function () {
       const createChange = MockHistoryStore()
         .post(`/api/projects/${historyId}/legacy_changes`, body => {
           expect(body).to.deep.equal([
@@ -534,40 +467,27 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slRenameUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                this.timestamp,
-                '/main.tex',
-                '/main2.tex'
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createChange.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slRenameUpdate(
+          historyId,
+          this.doc,
+          this.userId,
+          this.timestamp,
+          '/main.tex',
+          '/main2.tex'
+        )
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createChange.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
 
-    it('should not get file from filestore if no url provided', function (done) {
+    it('should not get file from filestore if no url provided', async function () {
       const file = {
         id: new ObjectId().toString(),
         pathname: '/test.png',
@@ -593,48 +513,35 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              createdBlobFileUpdate(
-                historyId,
-                file,
-                this.userId,
-                this.timestamp,
-                this.projectId
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            !fileStoreRequest.isDone(),
-            'filestore should not have been called'
-          )
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        createdBlobFileUpdate(
+          historyId,
+          file,
+          this.userId,
+          this.timestamp,
+          this.projectId
+        )
+      )
 
-          assert(
-            checkBlob.isDone(),
-            `HEAD /api/projects/${historyId}/blobs/${file.hash} should have been called`
-          )
-          assert(
-            addFile.isDone(),
-            `/api/projects/${historyId}/latest/files should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        !fileStoreRequest.isDone(),
+        'filestore should not have been called'
+      )
+
+      assert(
+        checkBlob.isDone(),
+        `HEAD /api/projects/${historyId}/blobs/${file.hash} should have been called`
+      )
+      assert(
+        addFile.isDone(),
+        `/api/projects/${historyId}/latest/files should have been called`
       )
     })
 
-    it('should send add file updates to the history store', function (done) {
+    it('should send add file updates to the history store', async function () {
       const file = {
         id: new ObjectId().toString(),
         pathname: '/test.png',
@@ -660,47 +567,34 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slAddFileUpdate(
-                historyId,
-                file,
-                this.userId,
-                this.timestamp,
-                this.projectId
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            fileStoreRequest.isDone(),
-            `/project/${this.projectId}/file/${file.id} should have been called`
-          )
-          assert(
-            createBlob.isDone(),
-            `/api/projects/${historyId}/latest/files should have been called`
-          )
-          assert(
-            addFile.isDone(),
-            `/api/projects/${historyId}/latest/files should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slAddFileUpdate(
+          historyId,
+          file,
+          this.userId,
+          this.timestamp,
+          this.projectId
+        )
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        fileStoreRequest.isDone(),
+        `/project/${this.projectId}/file/${file.id} should have been called`
+      )
+      assert(
+        createBlob.isDone(),
+        `/api/projects/${historyId}/latest/files should have been called`
+      )
+      assert(
+        addFile.isDone(),
+        `/api/projects/${historyId}/latest/files should have been called`
       )
     })
 
-    it('should send a stub to the history store when the file is large', function (done) {
+    it('should send a stub to the history store when the file is large', async function () {
       const fileContents = Buffer.alloc(Settings.maxFileSizeInBytes + 1, 'X')
       const fileSize = Buffer.byteLength(fileContents)
 
@@ -757,47 +651,34 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slAddFileUpdate(
-                historyId,
-                file,
-                this.userId,
-                this.timestamp,
-                this.projectId
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            addFile.isDone(),
-            `/api/projects/${historyId}/latest/files should have been called`
-          )
-          assert(
-            createBlob.isDone(),
-            `/api/projects/${historyId}/latest/files should have been called`
-          )
-          assert(
-            fileStoreRequest.isDone(),
-            `/project/${this.projectId}/file/${file.id} should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slAddFileUpdate(
+          historyId,
+          file,
+          this.userId,
+          this.timestamp,
+          this.projectId
+        )
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        addFile.isDone(),
+        `/api/projects/${historyId}/latest/files should have been called`
+      )
+      assert(
+        createBlob.isDone(),
+        `/api/projects/${historyId}/latest/files should have been called`
+      )
+      assert(
+        fileStoreRequest.isDone(),
+        `/project/${this.projectId}/file/${file.id} should have been called`
       )
     })
 
-    it('should handle comment ops', function (done) {
+    it('should handle comment ops', async function () {
       const createChange = MockHistoryStore()
         .post(`/api/projects/${historyId}/legacy_changes`, body => {
           expect(body).to.deep.equal([
@@ -818,57 +699,30 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                1,
-                this.timestamp,
-                [
-                  { p: 3, i: '\nc' },
-                  { p: 3, c: '\nc', t: 'comment-id-1' },
-                ]
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                2,
-                this.timestamp,
-                [{ p: 2, c: 'b', t: 'comment-id-2' }]
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createChange.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 1, this.timestamp, [
+          { p: 3, i: '\nc' },
+          { p: 3, c: '\nc', t: 'comment-id-1' },
+        ])
+      )
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 2, this.timestamp, [
+          { p: 2, c: 'b', t: 'comment-id-2' },
+        ])
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createChange.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
 
-    it('should be able to process lots of updates in batches', function (done) {
+    it('should be able to process lots of updates in batches', async function () {
       const BATCH_SIZE = 500
       const createFirstChangeBatch = MockHistoryStore()
         .post(`/api/projects/${historyId}/legacy_changes`, body => {
@@ -923,40 +777,26 @@ describe('Sending Updates', function () {
           },
         })
 
-      const pushChange = (n, cb) => {
+      // Push updates in a loop instead of using async.times
+      for (let n = 0; n < BATCH_SIZE + 50; n++) {
         this.doc.length += 1
-        ProjectHistoryClient.pushRawUpdate(
+        await ProjectHistoryClient.pushRawUpdate(
           this.projectId,
           slTextUpdate(historyId, this.doc, this.userId, n, this.timestamp, [
             { p: 0, i: 'a' },
-          ]),
-          cb
+          ])
         )
       }
 
-      async.series(
-        [
-          cb => {
-            async.times(BATCH_SIZE + 50, pushChange, cb)
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createFirstChangeBatch.isDone(),
-            `/api/projects/${historyId}/changes should have been called for the first batch`
-          )
-          assert(
-            createSecondChangeBatch.isDone(),
-            `/api/projects/${historyId}/changes should have been called for the second batch`
-          )
-          done()
-        }
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createFirstChangeBatch.isDone(),
+        `/api/projects/${historyId}/changes should have been called for the first batch`
+      )
+      assert(
+        createSecondChangeBatch.isDone(),
+        `/api/projects/${historyId}/changes should have been called for the second batch`
       )
     })
   })
@@ -976,7 +816,7 @@ describe('Sending Updates', function () {
         })
     })
 
-    it('should concat adjacent text updates', function (done) {
+    it('should concat adjacent text updates', async function () {
       const createChange = MockHistoryStore()
         .post(`/api/projects/${historyId}/legacy_changes`, body => {
           expect(body).to.deep.equal([
@@ -993,58 +833,31 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                1,
-                this.timestamp,
-                [
-                  { p: 3, i: 'foobar' },
-                  { p: 6, d: 'bar' },
-                ]
-              ),
-              cb
-            )
-            this.doc.length += 3
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                2,
-                this.timestamp,
-                [{ p: 6, i: 'baz' }]
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createChange.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 1, this.timestamp, [
+          { p: 3, i: 'foobar' },
+          { p: 6, d: 'bar' },
+        ])
+      )
+      this.doc.length += 3
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 2, this.timestamp, [
+          { p: 6, i: 'baz' },
+        ])
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createChange.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
 
-    it('should take the timestamp of the first update', function (done) {
+    it('should take the timestamp of the first update', async function () {
       const timestamp1 = new Date(this.timestamp)
       const timestamp2 = new Date(this.timestamp.getTime() + 10000)
       const createChange = MockHistoryStore()
@@ -1063,45 +876,30 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(historyId, this.doc, this.userId, 1, timestamp1, [
-                { p: 3, i: 'foo' },
-              ]),
-              cb
-            )
-            this.doc.length += 3
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(historyId, this.doc, this.userId, 2, timestamp2, [
-                { p: 6, i: 'baz' },
-              ]),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createChange.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 1, timestamp1, [
+          { p: 3, i: 'foo' },
+        ])
+      )
+      this.doc.length += 3
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 2, timestamp2, [
+          { p: 6, i: 'baz' },
+        ])
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createChange.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
 
-    it('should not concat updates more than 60 seconds apart', function (done) {
+    it('should not concat updates more than 60 seconds apart', async function () {
       const timestamp1 = new Date(this.timestamp)
       const timestamp2 = new Date(this.timestamp.getTime() + 120000)
       const createChange = MockHistoryStore()
@@ -1115,45 +913,30 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(historyId, this.doc, this.userId, 1, timestamp1, [
-                { p: 3, i: 'foo' },
-              ]),
-              cb
-            )
-            this.doc.length += 3
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(historyId, this.doc, this.userId, 2, timestamp2, [
-                { p: 6, i: 'baz' },
-              ]),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createChange.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 1, timestamp1, [
+          { p: 3, i: 'foo' },
+        ])
+      )
+      this.doc.length += 3
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 2, timestamp2, [
+          { p: 6, i: 'baz' },
+        ])
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createChange.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
 
-    it('should not concat updates with different user_ids', function (done) {
+    it('should not concat updates with different user_ids', async function () {
       const userId1 = new ObjectId().toString()
       const userId2 = new ObjectId().toString()
 
@@ -1168,45 +951,30 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(historyId, this.doc, userId1, 1, this.timestamp, [
-                { p: 3, i: 'foo' },
-              ]),
-              cb
-            )
-            this.doc.length += 3
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(historyId, this.doc, userId2, 2, this.timestamp, [
-                { p: 6, i: 'baz' },
-              ]),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createChange.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, userId1, 1, this.timestamp, [
+          { p: 3, i: 'foo' },
+        ])
+      )
+      this.doc.length += 3
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, userId2, 2, this.timestamp, [
+          { p: 6, i: 'baz' },
+        ])
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createChange.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
 
-    it('should not concat updates with different docs', function (done) {
+    it('should not concat updates with different docs', async function () {
       const doc1 = {
         id: new ObjectId().toString(),
         pathname: '/doc1.tex',
@@ -1229,44 +997,29 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(historyId, doc1, this.userId, 1, this.timestamp, [
-                { p: 3, i: 'foo' },
-              ]),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(historyId, doc2, this.userId, 2, this.timestamp, [
-                { p: 6, i: 'baz' },
-              ]),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createChange.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, doc1, this.userId, 1, this.timestamp, [
+          { p: 3, i: 'foo' },
+        ])
+      )
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, doc2, this.userId, 2, this.timestamp, [
+          { p: 6, i: 'baz' },
+        ])
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createChange.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
 
-    it('should not send updates without any ops', function (done) {
+    it('should not send updates without any ops', async function () {
       const createChange = MockHistoryStore()
         .post(`/api/projects/${historyId}/legacy_changes`, body => {
           expect(body).to.deep.equal([])
@@ -1275,41 +1028,21 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            // These blank ops can get sent by doc-updater on setDocs from Dropbox that don't change anything
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                1,
-                this.timestamp,
-                []
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            !createChange.isDone(),
-            `/api/projects/${historyId}/changes should not have been called`
-          )
-          done()
-        }
+      // These blank ops can get sent by doc-updater on setDocs from Dropbox that don't change anything
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 1, this.timestamp, [])
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        !createChange.isDone(),
+        `/api/projects/${historyId}/changes should not have been called`
       )
     })
 
-    it('should not send ops that compress to nothing', function (done) {
+    it('should not send ops that compress to nothing', async function () {
       const createChange = MockHistoryStore()
         .post(`/api/projects/${historyId}/legacy_changes`, body => {
           expect(body).to.deep.equal([])
@@ -1318,55 +1051,30 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                1,
-                this.timestamp,
-                [{ i: 'foo', p: 3 }]
-              ),
-              cb
-            )
-            this.doc.length += 3
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                2,
-                this.timestamp,
-                [{ d: 'foo', p: 3 }]
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            !createChange.isDone(),
-            `/api/projects/${historyId}/changes should not have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 1, this.timestamp, [
+          { i: 'foo', p: 3 },
+        ])
+      )
+      this.doc.length += 3
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 2, this.timestamp, [
+          { d: 'foo', p: 3 },
+        ])
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        !createChange.isDone(),
+        `/api/projects/${historyId}/changes should not have been called`
       )
     })
 
-    it('should not send ops from a diff that are blank', function (done) {
+    it('should not send ops from a diff that are blank', async function () {
       this.doc.length = 300
       // Test case taken from a real life document where it was generating blank insert and
       // delete ops from a diff, and the blank delete was erroring on the OL history from
@@ -1394,49 +1102,29 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                1,
-                this.timestamp,
-                [
-                  {
-                    p: 73,
-                    d: '\\begin{table}[h]\n\\centering\n\\caption{My caption}\n\\label{my-label}\n\\begin{tabular}{lll}\n               & A   & B   \\\\\nLiter t up     & 2   & 1   \\\\\nLiter Whiskey  & 1   & 2   \\\\\nPris pr. liter & 200 & 250\n\\end{tabular}\n\\end{table}',
-                  },
-                  {
-                    p: 73,
-                    i: '\\begin{table}[]\n\\centering\n\\caption{My caption}\n\\label{my-label}\n\\begin{tabular}{|l|ll|}\n\\hline\n               & A   & B   \\\\ \\hline\nLiter t up     & 2   & 1   \\\\\nLiter Whiskey  & 1   & 2   \\\\\nPris pr. liter & 200 & 250 \\\\ \\hline\n\\end{tabular}\n\\end{table}',
-                  },
-                ]
-              ),
-              cb
-            )
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 1, this.timestamp, [
+          {
+            p: 73,
+            d: '\\begin{table}[h]\n\\centering\n\\caption{My caption}\n\\label{my-label}\n\\begin{tabular}{lll}\n               & A   & B   \\\\\nLiter t up     & 2   & 1   \\\\\nLiter Whiskey  & 1   & 2   \\\\\nPris pr. liter & 200 & 250\n\\end{tabular}\n\\end{table}',
           },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
+          {
+            p: 73,
+            i: '\\begin{table}[]\n\\centering\n\\caption{My caption}\n\\label{my-label}\n\\begin{tabular}{|l|ll|}\n\\hline\n               & A   & B   \\\\ \\hline\nLiter t up     & 2   & 1   \\\\\nLiter Whiskey  & 1   & 2   \\\\\nPris pr. liter & 200 & 250 \\\\ \\hline\n\\end{tabular}\n\\end{table}',
           },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createChange.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+        ])
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createChange.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
 
-    it('should not concat text updates across project structure ops', function (done) {
+    it('should not concat text updates across project structure ops', async function () {
       const newDoc = {
         id: new ObjectId().toString(),
         pathname: '/main.tex',
@@ -1472,71 +1160,42 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                1,
-                this.timestamp,
-                [
-                  { p: 3, i: 'foobar' },
-                  { p: 6, d: 'bar' },
-                ]
-              ),
-              cb
-            )
-            this.doc.length += 3
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slAddDocUpdate(
-                historyId,
-                newDoc,
-                this.userId,
-                this.timestamp,
-                newDoc.docLines
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                2,
-                this.timestamp,
-                [{ p: 6, i: 'baz' }]
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createChange.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 1, this.timestamp, [
+          { p: 3, i: 'foobar' },
+          { p: 6, d: 'bar' },
+        ])
+      )
+      this.doc.length += 3
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slAddDocUpdate(
+          historyId,
+          newDoc,
+          this.userId,
+          this.timestamp,
+          newDoc.docLines
+        )
+      )
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 2, this.timestamp, [
+          { p: 6, i: 'baz' },
+        ])
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createChange.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
 
-    it('should track the doc length when splitting ops', function (done) {
+    it('should track the doc length when splitting ops', async function () {
       this.doc.length = 10
 
       const createChange = MockHistoryStore()
@@ -1556,53 +1215,26 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                1,
-                this.timestamp,
-                [
-                  { p: 3, d: 'foo' },
-                  { p: 3, i: 'bar' }, // Make sure the length of the op generated from this is 7, not 10
-                ]
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                2,
-                this.timestamp,
-                [{ p: 6, i: 'baz' }]
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createChange.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 1, this.timestamp, [
+          { p: 3, d: 'foo' },
+          { p: 3, i: 'bar' }, // Make sure the length of the op generated from this is 7, not 10
+        ])
+      )
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 2, this.timestamp, [
+          { p: 6, i: 'baz' },
+        ])
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createChange.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
   })
@@ -1622,7 +1254,7 @@ describe('Sending Updates', function () {
         })
     })
 
-    it('should replace \\ with _ and workaround * in pathnames', function (done) {
+    it('should replace \\\\ with _ and workaround * in pathnames', async function () {
       const doc = {
         id: this.doc.id,
         pathname: '\\main.tex',
@@ -1671,78 +1303,59 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slAddDocUpdate(
-                historyId,
-                doc,
-                this.userId,
-                this.timestamp,
-                doc.docLines
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slRenameUpdate(
-                historyId,
-                doc,
-                this.userId,
-                this.timestamp,
-                '/\\main.tex',
-                '/\\main2.tex'
-              ),
-              cb
-            )
-            doc.pathname = '\\main2.tex'
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(historyId, doc, this.userId, 2, this.timestamp, [
-                { p: 3, i: 'foo' },
-              ]),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slRenameUpdate(
-                historyId,
-                doc,
-                this.userId,
-                this.timestamp,
-                '/\\main2.tex',
-                '/\\main*.tex'
-              ),
-              cb
-            )
-            doc.pathname = '\\main*.tex'
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createChange.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slAddDocUpdate(
+          historyId,
+          doc,
+          this.userId,
+          this.timestamp,
+          doc.docLines
+        )
+      )
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slRenameUpdate(
+          historyId,
+          doc,
+          this.userId,
+          this.timestamp,
+          '/\\main.tex',
+          '/\\main2.tex'
+        )
+      )
+      doc.pathname = '\\main2.tex'
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, doc, this.userId, 2, this.timestamp, [
+          { p: 3, i: 'foo' },
+        ])
+      )
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slRenameUpdate(
+          historyId,
+          doc,
+          this.userId,
+          this.timestamp,
+          '/\\main2.tex',
+          '/\\main*.tex'
+        )
+      )
+      doc.pathname = '\\main*.tex'
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createChange.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
 
-    it('should workaround pathnames beginning with spaces', function (done) {
+    it('should workaround pathnames beginning with spaces', async function () {
       const doc = {
         id: this.doc.id,
         pathname: 'main.tex',
@@ -1777,50 +1390,35 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slAddDocUpdate(
-                historyId,
-                doc,
-                this.userId,
-                this.timestamp,
-                doc.docLines
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slRenameUpdate(
-                historyId,
-                doc,
-                this.userId,
-                this.timestamp,
-                '/main.tex',
-                '/foo/ main.tex'
-              ),
-              cb
-            )
-            doc.pathname = '/foo/ main.tex'
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createChange.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slAddDocUpdate(
+          historyId,
+          doc,
+          this.userId,
+          this.timestamp,
+          doc.docLines
+        )
+      )
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slRenameUpdate(
+          historyId,
+          doc,
+          this.userId,
+          this.timestamp,
+          '/main.tex',
+          '/foo/ main.tex'
+        )
+      )
+      doc.pathname = '/foo/ main.tex'
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createChange.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
   })
@@ -1840,7 +1438,7 @@ describe('Sending Updates', function () {
         })
     })
 
-    it('should return a 500 if the filestore returns a 500', function (done) {
+    it('should return a 500 if the filestore returns a 500', async function () {
       const file = {
         id: new ObjectId().toString(),
         pathname: '/test.png',
@@ -1866,57 +1464,37 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slAddFileUpdate(
-                historyId,
-                file,
-                this.userId,
-                this.timestamp,
-                this.projectId
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(
-              this.projectId,
-              { allowErrors: true },
-              (error, res) => {
-                if (error) {
-                  return cb(error)
-                }
-                expect(res.statusCode).to.equal(500)
-                cb()
-              }
-            )
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            fileStoreRequest.isDone(),
-            `/project/${this.projectId}/file/${file.id} should have been called`
-          )
-          assert(
-            !createBlob.isDone(),
-            `/api/projects/${historyId}/latest/files should not have been called`
-          )
-          assert(
-            !addFile.isDone(),
-            `/api/projects/${historyId}/latest/files should not have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slAddFileUpdate(
+          historyId,
+          file,
+          this.userId,
+          this.timestamp,
+          this.projectId
+        )
+      )
+
+      const res = await ProjectHistoryClient.flushProject(this.projectId, {
+        allowErrors: true,
+      })
+      expect(res.statusCode).to.equal(500)
+
+      assert(
+        fileStoreRequest.isDone(),
+        `/project/${this.projectId}/file/${file.id} should have been called`
+      )
+      assert(
+        !createBlob.isDone(),
+        `/api/projects/${historyId}/latest/files should not have been called`
+      )
+      assert(
+        !addFile.isDone(),
+        `/api/projects/${historyId}/latest/files should not have been called`
       )
     })
 
-    it('should return a 500 if the filestore request errors', function (done) {
+    it('should return a 500 if the filestore request errors', async function () {
       const file = {
         id: new ObjectId().toString(),
         pathname: '/test.png',
@@ -1942,53 +1520,33 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slAddFileUpdate(
-                historyId,
-                file,
-                this.userId,
-                this.timestamp,
-                this.projectId
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(
-              this.projectId,
-              { allowErrors: true },
-              (error, res) => {
-                if (error) {
-                  return cb(error)
-                }
-                expect(res.statusCode).to.equal(500)
-                cb()
-              }
-            )
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            fileStoreRequest.isDone(),
-            `/project/${this.projectId}/file/${file.id} should have been called`
-          )
-          assert(
-            !createBlob.isDone(),
-            `/api/projects/${historyId}/latest/files should not have been called`
-          )
-          assert(
-            !addFile.isDone(),
-            `/api/projects/${historyId}/latest/files should not have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slAddFileUpdate(
+          historyId,
+          file,
+          this.userId,
+          this.timestamp,
+          this.projectId
+        )
+      )
+
+      const res = await ProjectHistoryClient.flushProject(this.projectId, {
+        allowErrors: true,
+      })
+      expect(res.statusCode).to.equal(500)
+
+      assert(
+        fileStoreRequest.isDone(),
+        `/project/${this.projectId}/file/${file.id} should have been called`
+      )
+      assert(
+        !createBlob.isDone(),
+        `/api/projects/${historyId}/latest/files should not have been called`
+      )
+      assert(
+        !addFile.isDone(),
+        `/api/projects/${historyId}/latest/files should not have been called`
       )
     })
   })
@@ -2008,7 +1566,7 @@ describe('Sending Updates', function () {
         })
     })
 
-    it('should discard project structure updates which have already been applied', function (done) {
+    it('should discard project structure updates which have already been applied', async function () {
       const newDoc = []
       for (let i = 0; i <= 2; i++) {
         newDoc[i] = {
@@ -2047,64 +1605,47 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slAddDocUpdateWithVersion(
-                historyId,
-                newDoc[0],
-                this.userId,
-                this.timestamp,
-                newDoc[0].docLines,
-                '100.0'
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slAddDocUpdateWithVersion(
-                historyId,
-                newDoc[1],
-                this.userId,
-                this.timestamp,
-                newDoc[1].docLines,
-                '101.0'
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slAddDocUpdateWithVersion(
-                historyId,
-                newDoc[2],
-                this.userId,
-                this.timestamp,
-                newDoc[2].docLines,
-                '102.0'
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createChange.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slAddDocUpdateWithVersion(
+          historyId,
+          newDoc[0],
+          this.userId,
+          this.timestamp,
+          newDoc[0].docLines,
+          '100.0'
+        )
+      )
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slAddDocUpdateWithVersion(
+          historyId,
+          newDoc[1],
+          this.userId,
+          this.timestamp,
+          newDoc[1].docLines,
+          '101.0'
+        )
+      )
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slAddDocUpdateWithVersion(
+          historyId,
+          newDoc[2],
+          this.userId,
+          this.timestamp,
+          newDoc[2].docLines,
+          '102.0'
+        )
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createChange.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
   })
@@ -2124,7 +1665,7 @@ describe('Sending Updates', function () {
         })
     })
 
-    it('should discard doc updates which have already been applied', function (done) {
+    it('should discard doc updates which have already been applied', async function () {
       const createChange = MockHistoryStore()
         .post(`/api/projects/${historyId}/legacy_changes`, body => {
           expect(body).to.deep.equal([
@@ -2141,56 +1682,27 @@ describe('Sending Updates', function () {
         .query({ end_version: 0 })
         .reply(204)
 
-      async.series(
-        [
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                100,
-                this.timestamp,
-                [
-                  { p: 3, i: 'foobar' }, // these ops should be skipped
-                  { p: 6, d: 'bar' },
-                ]
-              ),
-              cb
-            )
-            this.doc.length += 3
-          },
-          cb => {
-            ProjectHistoryClient.pushRawUpdate(
-              this.projectId,
-              slTextUpdate(
-                historyId,
-                this.doc,
-                this.userId,
-                101,
-                this.timestamp,
-                [
-                  { p: 6, i: 'baz' }, // this op should be applied
-                ]
-              ),
-              cb
-            )
-          },
-          cb => {
-            ProjectHistoryClient.flushProject(this.projectId, cb)
-          },
-        ],
-        error => {
-          if (error) {
-            return done(error)
-          }
-          assert(
-            createChange.isDone(),
-            `/api/projects/${historyId}/changes should have been called`
-          )
-          done()
-        }
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 100, this.timestamp, [
+          { p: 3, i: 'foobar' }, // these ops should be skipped
+          { p: 6, d: 'bar' },
+        ])
+      )
+      this.doc.length += 3
+
+      await ProjectHistoryClient.pushRawUpdate(
+        this.projectId,
+        slTextUpdate(historyId, this.doc, this.userId, 101, this.timestamp, [
+          { p: 6, i: 'baz' }, // this op should be applied
+        ])
+      )
+
+      await ProjectHistoryClient.flushProject(this.projectId)
+
+      assert(
+        createChange.isDone(),
+        `/api/projects/${historyId}/changes should have been called`
       )
     })
   })

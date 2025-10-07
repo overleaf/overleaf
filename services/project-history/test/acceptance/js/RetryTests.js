@@ -18,7 +18,7 @@ describe('Retrying failed projects', function () {
   beforeEach(async function () {
     this.timestamp = new Date()
 
-    await ProjectHistoryApp.promises.ensureRunning()
+    await ProjectHistoryApp.ensureRunning()
 
     this.project_id = new ObjectId().toString()
     this.doc_id = new ObjectId().toString()
@@ -47,7 +47,7 @@ describe('Retrying failed projects', function () {
           },
         },
       })
-    await ProjectHistoryClient.promises.initializeProject(historyId)
+    await ProjectHistoryClient.initializeProject(historyId)
   })
 
   afterEach(function () {
@@ -71,10 +71,7 @@ describe('Retrying failed projects', function () {
           meta: { user_id: this.user_id, ts: new Date() },
         }
 
-        await ProjectHistoryClient.promises.pushRawUpdate(
-          this.project_id,
-          update
-        )
+        await ProjectHistoryClient.pushRawUpdate(this.project_id, update)
         await ProjectHistoryClient.setFailure({
           project_id: this.project_id,
           attempts: 1,
