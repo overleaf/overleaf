@@ -1,176 +1,77 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const sinon = require('sinon')
 const { expect } = require('chai')
 
 const MockWebApi = require('./helpers/MockWebApi')
 const DocUpdaterClient = require('./helpers/DocUpdaterClient')
 const DocUpdaterApp = require('./helpers/DocUpdaterApp')
+const { RequestFailedError } = require('@overleaf/fetch-utils')
 
 describe('Getting documents for project', function () {
-  before(function (done) {
+  before(async function () {
     this.lines = ['one', 'two', 'three']
     this.version = 42
-    return DocUpdaterApp.ensureRunning(done)
+    await DocUpdaterApp.ensureRunning()
   })
 
   describe('when project state hash does not match', function () {
-    before(function (done) {
-      this.projectStateHash = DocUpdaterClient.randomId()
-      ;[this.project_id, this.doc_id] = Array.from([
-        DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId(),
-      ])
-
-      MockWebApi.insertDoc(this.project_id, this.doc_id, {
+    it('should return a 409 Conflict response', async function () {
+      const projectStateHash = DocUpdaterClient.randomId()
+      const projectId = DocUpdaterClient.randomId()
+      const docId = DocUpdaterClient.randomId()
+      MockWebApi.insertDoc(projectId, docId, {
         lines: this.lines,
         version: this.version,
       })
-      return DocUpdaterClient.preloadDoc(
-        this.project_id,
-        this.doc_id,
-        error => {
-          if (error != null) {
-            throw error
-          }
-          return DocUpdaterClient.getProjectDocs(
-            this.project_id,
-            this.projectStateHash,
-            (error, res, returnedDocs) => {
-              if (error) return done(error)
-              this.res = res
-              this.returnedDocs = returnedDocs
-              return done()
-            }
-          )
-        }
-      )
-    })
-
-    return it('should return a 409 Conflict response', function () {
-      return this.res.statusCode.should.equal(409)
+      await DocUpdaterClient.preloadDoc(projectId, docId)
+      await expect(DocUpdaterClient.getProjectDocs(projectId, projectStateHash))
+        .to.be.rejectedWith(RequestFailedError)
+        .and.eventually.have.nested.property('response.status', 409)
     })
   })
 
   describe('when project state hash matches', function () {
-    before(function (done) {
-      this.projectStateHash = DocUpdaterClient.randomId()
-      ;[this.project_id, this.doc_id] = Array.from([
-        DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId(),
-      ])
-
-      MockWebApi.insertDoc(this.project_id, this.doc_id, {
+    it('should return the documents', async function () {
+      const projectStateHash = DocUpdaterClient.randomId()
+      const projectId = DocUpdaterClient.randomId()
+      const docId = DocUpdaterClient.randomId()
+      MockWebApi.insertDoc(projectId, docId, {
         lines: this.lines,
         version: this.version,
       })
-      return DocUpdaterClient.preloadDoc(
-        this.project_id,
-        this.doc_id,
-        error => {
-          if (error != null) {
-            throw error
-          }
-          return DocUpdaterClient.getProjectDocs(
-            this.project_id,
-            this.projectStateHash,
-            (error, res0, returnedDocs0) => {
-              if (error) return done(error)
-              // set the hash
-              this.res0 = res0
-              this.returnedDocs0 = returnedDocs0
-              return DocUpdaterClient.getProjectDocs(
-                this.project_id,
-                this.projectStateHash,
-                (error, res, returnedDocs) => {
-                  if (error) return done(error)
-                  // the hash should now match
-                  this.res = res
-                  this.returnedDocs = returnedDocs
-                  return done()
-                }
-              )
-            }
-          )
-        }
+      await DocUpdaterClient.preloadDoc(projectId, docId)
+      // set the hash
+      await expect(DocUpdaterClient.getProjectDocs(projectId, projectStateHash))
+        .to.be.rejectedWith(RequestFailedError)
+        .and.eventually.have.nested.property('response.status', 409)
+
+      const returnedDocs1 = await DocUpdaterClient.getProjectDocs(
+        projectId,
+        projectStateHash
       )
-    })
-
-    it('should return a 200 response', function () {
-      return this.res.statusCode.should.equal(200)
-    })
-
-    return it('should return the documents', function () {
-      return this.returnedDocs.should.deep.equal([
-        { _id: this.doc_id, lines: this.lines, v: this.version },
+      // the hash should now match
+      returnedDocs1.should.deep.equal([
+        { _id: docId, lines: this.lines, v: this.version },
       ])
     })
   })
 
-  return describe('when the doc has been removed', function () {
-    before(function (done) {
-      this.projectStateHash = DocUpdaterClient.randomId()
-      ;[this.project_id, this.doc_id] = Array.from([
-        DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId(),
-      ])
-
-      MockWebApi.insertDoc(this.project_id, this.doc_id, {
+  describe('when the doc has been removed', function () {
+    it('should return a 409 Conflict response', async function () {
+      const projectStateHash = DocUpdaterClient.randomId()
+      const projectId = DocUpdaterClient.randomId()
+      const docId = DocUpdaterClient.randomId()
+      MockWebApi.insertDoc(projectId, docId, {
         lines: this.lines,
         version: this.version,
       })
-      return DocUpdaterClient.preloadDoc(
-        this.project_id,
-        this.doc_id,
-        error => {
-          if (error != null) {
-            throw error
-          }
-          return DocUpdaterClient.getProjectDocs(
-            this.project_id,
-            this.projectStateHash,
-            (error, res0, returnedDocs0) => {
-              if (error) return done(error)
-              // set the hash
-              this.res0 = res0
-              this.returnedDocs0 = returnedDocs0
-              return DocUpdaterClient.deleteDoc(
-                this.project_id,
-                this.doc_id,
-                (error, res, body) => {
-                  if (error) return done(error)
-                  // delete the doc
-                  return DocUpdaterClient.getProjectDocs(
-                    this.project_id,
-                    this.projectStateHash,
-                    (error, res1, returnedDocs) => {
-                      if (error) return done(error)
-                      // the hash would match, but the doc has been deleted
-                      this.res = res1
-                      this.returnedDocs = returnedDocs
-                      return done()
-                    }
-                  )
-                }
-              )
-            }
-          )
-        }
-      )
-    })
-
-    return it('should return a 409 Conflict response', function () {
-      return this.res.statusCode.should.equal(409)
+      await DocUpdaterClient.preloadDoc(projectId, docId)
+      await expect(DocUpdaterClient.getProjectDocs(projectId, projectStateHash))
+        .to.be.rejectedWith(RequestFailedError)
+        .and.eventually.have.nested.property('response.status', 409)
+      await DocUpdaterClient.deleteDoc(projectId, docId)
+      // the hash would match, but the doc has been deleted
+      await expect(DocUpdaterClient.getProjectDocs(projectId, projectStateHash))
+        .to.be.rejectedWith(RequestFailedError)
+        .and.eventually.have.nested.property('response.status', 409)
     })
   })
 })

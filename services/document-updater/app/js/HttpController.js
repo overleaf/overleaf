@@ -226,7 +226,11 @@ async function setDoc(req, res) {
   )
   timer.done()
   logger.debug({ projectId, docId }, 'set doc via http')
-  res.json(result)
+
+  // If the document is unchanged and hasn't been updated, `result` will be
+  // undefined, which leads to an invalid JSON response, so we send an empty
+  // object instead.
+  res.json(result || {})
 }
 
 async function appendToDoc(req, res) {

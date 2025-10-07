@@ -1,4 +1,5 @@
 const sinon = require('sinon')
+const { setTimeout } = require('node:timers/promises')
 const Settings = require('@overleaf/settings')
 const rclientProjectHistory = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.project_history
@@ -10,6 +11,13 @@ const MockWebApi = require('./helpers/MockWebApi')
 const DocUpdaterClient = require('./helpers/DocUpdaterClient')
 const DocUpdaterApp = require('./helpers/DocUpdaterApp')
 
+async function sendProjectUpdateAndWait(projectId, docId, update, version) {
+  await DocUpdaterClient.sendProjectUpdate(projectId, docId, update, version)
+
+  // It seems that we need to wait for a little while
+  await setTimeout(200)
+}
+
 describe("Applying updates to a project's structure", function () {
   before(function () {
     this.user_id = 'user-id-123'
@@ -17,7 +25,7 @@ describe("Applying updates to a project's structure", function () {
   })
 
   describe('renaming a file', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = DocUpdaterClient.randomId()
       this.fileUpdate = {
         type: 'rename-file',
@@ -26,23 +34,13 @@ describe("Applying updates to a project's structure", function () {
         newPathname: '/new-file-path',
       }
       this.updates = [this.fileUpdate]
-      DocUpdaterApp.ensureRunning(error => {
-        if (error) {
-          return done(error)
-        }
-        DocUpdaterClient.sendProjectUpdate(
-          this.project_id,
-          this.user_id,
-          this.updates,
-          this.version,
-          error => {
-            if (error) {
-              return done(error)
-            }
-            setTimeout(done, 200)
-          }
-        )
-      })
+      await DocUpdaterApp.ensureRunning()
+      await sendProjectUpdateAndWait(
+        this.project_id,
+        this.user_id,
+        this.updates,
+        this.version
+      )
     })
 
     it('should push the applied file renames to the project history api', function (done) {
@@ -70,7 +68,7 @@ describe("Applying updates to a project's structure", function () {
   })
 
   describe('deleting a file', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = DocUpdaterClient.randomId()
       this.fileUpdate = {
         type: 'rename-file',
@@ -79,17 +77,11 @@ describe("Applying updates to a project's structure", function () {
         newPathname: '',
       }
       this.updates = [this.fileUpdate]
-      DocUpdaterClient.sendProjectUpdate(
+      await sendProjectUpdateAndWait(
         this.project_id,
         this.user_id,
         this.updates,
-        this.version,
-        error => {
-          if (error) {
-            return done(error)
-          }
-          setTimeout(done, 200)
-        }
+        this.version
       )
     })
 
@@ -129,19 +121,13 @@ describe("Applying updates to a project's structure", function () {
     })
 
     describe('when the document is not loaded', function () {
-      before(function (done) {
+      before(async function () {
         this.project_id = DocUpdaterClient.randomId()
-        DocUpdaterClient.sendProjectUpdate(
+        await sendProjectUpdateAndWait(
           this.project_id,
           this.user_id,
           this.updates,
-          this.version,
-          error => {
-            if (error) {
-              return done(error)
-            }
-            setTimeout(done, 200)
-          }
+          this.version
         )
       })
 
@@ -170,45 +156,29 @@ describe("Applying updates to a project's structure", function () {
     })
 
     describe('when the document is loaded', function () {
-      before(function (done) {
+      before(async function () {
         this.project_id = DocUpdaterClient.randomId()
         MockWebApi.insertDoc(this.project_id, this.update.id, {})
-        DocUpdaterClient.preloadDoc(this.project_id, this.update.id, error => {
-          if (error) {
-            return done(error)
-          }
-          sinon.spy(MockWebApi, 'getDocument')
-          DocUpdaterClient.sendProjectUpdate(
-            this.project_id,
-            this.user_id,
-            this.updates,
-            this.version,
-            error => {
-              if (error) {
-                return done(error)
-              }
-              setTimeout(done, 200)
-            }
-          )
-        })
+        await DocUpdaterClient.preloadDoc(this.project_id, this.update.id)
+        sinon.spy(MockWebApi, 'getDocument')
+        await sendProjectUpdateAndWait(
+          this.project_id,
+          this.user_id,
+          this.updates,
+          this.version
+        )
       })
 
       after(function () {
         MockWebApi.getDocument.restore()
       })
 
-      it('should update the doc', function (done) {
-        DocUpdaterClient.getDoc(
+      it('should update the doc', async function () {
+        const doc = await DocUpdaterClient.getDoc(
           this.project_id,
-          this.update.id,
-          (error, res, doc) => {
-            if (error) {
-              return done(error)
-            }
-            doc.pathname.should.equal(this.update.newPathname)
-            done()
-          }
+          this.update.id
         )
+        doc.pathname.should.equal(this.update.newPathname)
       })
 
       it('should push the applied doc renames to the project history api', function (done) {
@@ -271,19 +241,13 @@ describe("Applying updates to a project's structure", function () {
     })
 
     describe('when the documents are not loaded', function () {
-      before(function (done) {
+      before(async function () {
         this.project_id = DocUpdaterClient.randomId()
-        DocUpdaterClient.sendProjectUpdate(
+        await sendProjectUpdateAndWait(
           this.project_id,
           this.user_id,
           this.updates,
-          this.version,
-          error => {
-            if (error) {
-              return done(error)
-            }
-            setTimeout(done, 200)
-          }
+          this.version
         )
       })
 
@@ -348,19 +312,13 @@ describe("Applying updates to a project's structure", function () {
     })
 
     describe('when the document is not loaded', function () {
-      before(function (done) {
+      before(async function () {
         this.project_id = DocUpdaterClient.randomId()
-        DocUpdaterClient.sendProjectUpdate(
+        await sendProjectUpdateAndWait(
           this.project_id,
           this.user_id,
           this.updates,
-          this.version,
-          error => {
-            if (error) {
-              return done(error)
-            }
-            setTimeout(done, 200)
-          }
+          this.version
         )
       })
 
@@ -389,46 +347,29 @@ describe("Applying updates to a project's structure", function () {
     })
 
     describe('when the document is loaded', function () {
-      before(function (done) {
+      before(async function () {
         this.project_id = DocUpdaterClient.randomId()
         MockWebApi.insertDoc(this.project_id, this.update.id, {})
-        DocUpdaterClient.preloadDoc(this.project_id, this.update.id, error => {
-          if (error) {
-            return done(error)
-          }
-          sinon.spy(MockWebApi, 'getDocument')
-          DocUpdaterClient.sendProjectUpdate(
-            this.project_id,
-            this.user_id,
-            this.updates,
-            this.version,
-            error => {
-              if (error) {
-                return done(error)
-              }
-              setTimeout(done, 200)
-            }
-          )
-        })
+        await DocUpdaterClient.preloadDoc(this.project_id, this.update.id)
+        sinon.spy(MockWebApi, 'getDocument')
+        await sendProjectUpdateAndWait(
+          this.project_id,
+          this.user_id,
+          this.updates,
+          this.version
+        )
       })
 
       after(function () {
         MockWebApi.getDocument.restore()
       })
 
-      it('should not modify the doc', function (done) {
-        DocUpdaterClient.getDoc(
+      it('should not modify the doc', async function () {
+        const doc = await DocUpdaterClient.getDoc(
           this.project_id,
-          this.update.id,
-          (error, res, doc) => {
-            if (error) {
-              return done(error)
-            }
-
-            doc.pathname.should.equal('/a/b/c.tex') // default pathname from MockWebApi
-            done()
-          }
+          this.update.id
         )
+        doc.pathname.should.equal('/a/b/c.tex') // default pathname from MockWebApi
       })
 
       it('should push the applied doc update to the project history api', function (done) {
@@ -457,7 +398,7 @@ describe("Applying updates to a project's structure", function () {
   })
 
   describe('adding a file', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = DocUpdaterClient.randomId()
       this.fileUpdate = {
         type: 'add-file',
@@ -466,17 +407,11 @@ describe("Applying updates to a project's structure", function () {
         url: 'filestore.example.com',
       }
       this.updates = [this.fileUpdate]
-      DocUpdaterClient.sendProjectUpdate(
+      await sendProjectUpdateAndWait(
         this.project_id,
         this.user_id,
         this.updates,
-        this.version,
-        error => {
-          if (error) {
-            return done(error)
-          }
-          setTimeout(done, 200)
-        }
+        this.version
       )
     })
 
@@ -505,7 +440,7 @@ describe("Applying updates to a project's structure", function () {
   })
 
   describe('adding a doc', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = DocUpdaterClient.randomId()
       this.docUpdate = {
         type: 'add-doc',
@@ -514,17 +449,11 @@ describe("Applying updates to a project's structure", function () {
         docLines: 'a\nb',
       }
       this.updates = [this.docUpdate]
-      DocUpdaterClient.sendProjectUpdate(
+      await sendProjectUpdateAndWait(
         this.project_id,
         this.user_id,
         this.updates,
-        this.version,
-        error => {
-          if (error) {
-            return done(error)
-          }
-          setTimeout(done, 200)
-        }
+        this.version
       )
     })
 
@@ -553,7 +482,7 @@ describe("Applying updates to a project's structure", function () {
   })
 
   describe('with enough updates to flush to the history service', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = DocUpdaterClient.randomId()
       this.user_id = DocUpdaterClient.randomId()
       this.version0 = 12345
@@ -574,29 +503,19 @@ describe("Applying updates to a project's structure", function () {
       // Send updates in chunks to causes multiple flushes
       const projectId = this.project_id
       const userId = this.project_id
-      DocUpdaterClient.sendProjectUpdate(
+      await DocUpdaterClient.sendProjectUpdate(
         projectId,
         userId,
         updates.slice(0, 250),
-        this.version0,
-        function (error) {
-          if (error) {
-            return done(error)
-          }
-          DocUpdaterClient.sendProjectUpdate(
-            projectId,
-            userId,
-            updates.slice(250),
-            this.version1,
-            error => {
-              if (error) {
-                return done(error)
-              }
-              setTimeout(done, 2000)
-            }
-          )
-        }
+        this.version0
       )
+      await DocUpdaterClient.sendProjectUpdate(
+        projectId,
+        userId,
+        updates.slice(250),
+        this.version1
+      )
+      await setTimeout(200)
     })
 
     after(function () {
@@ -611,7 +530,7 @@ describe("Applying updates to a project's structure", function () {
   })
 
   describe('with too few updates to flush to the history service', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = DocUpdaterClient.randomId()
       this.user_id = DocUpdaterClient.randomId()
       this.version0 = 12345
@@ -633,29 +552,19 @@ describe("Applying updates to a project's structure", function () {
       // Send updates in chunks
       const projectId = this.project_id
       const userId = this.project_id
-      DocUpdaterClient.sendProjectUpdate(
+      await DocUpdaterClient.sendProjectUpdate(
         projectId,
         userId,
         updates.slice(0, 10),
-        this.version0,
-        function (error) {
-          if (error) {
-            return done(error)
-          }
-          DocUpdaterClient.sendProjectUpdate(
-            projectId,
-            userId,
-            updates.slice(10),
-            this.version1,
-            error => {
-              if (error) {
-                return done(error)
-              }
-              setTimeout(done, 2000)
-            }
-          )
-        }
+        this.version0
       )
+      await DocUpdaterClient.sendProjectUpdate(
+        projectId,
+        userId,
+        updates.slice(10),
+        this.version1
+      )
+      await setTimeout(200)
     })
 
     after(function () {

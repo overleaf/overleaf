@@ -1,5 +1,6 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
+const { setTimeout } = require('node:timers/promises')
 const Settings = require('@overleaf/settings')
 const docUpdaterRedis = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
@@ -10,10 +11,11 @@ const MockProjectHistoryApi = require('./helpers/MockProjectHistoryApi')
 const MockWebApi = require('./helpers/MockWebApi')
 const DocUpdaterClient = require('./helpers/DocUpdaterClient')
 const DocUpdaterApp = require('./helpers/DocUpdaterApp')
+const { RequestFailedError } = require('@overleaf/fetch-utils')
 
 describe('Setting a document', function () {
   let numberOfReceivedUpdates = 0
-  before(function (done) {
+  before(async function () {
     DocUpdaterClient.subscribeToAppliedOps(() => {
       numberOfReceivedUpdates++
     })
@@ -36,7 +38,7 @@ describe('Setting a document', function () {
 
     sinon.spy(MockProjectHistoryApi, 'flushProject')
     sinon.spy(MockWebApi, 'setDocument')
-    DocUpdaterApp.ensureRunning(done)
+    await DocUpdaterApp.ensureRunning()
   })
 
   after(function () {
@@ -45,7 +47,7 @@ describe('Setting a document', function () {
   })
 
   describe('when the updated doc exists in the doc updater', function () {
-    before(function (done) {
+    before(async function () {
       numberOfReceivedUpdates = 0
       this.project_id = DocUpdaterClient.randomId()
       this.doc_id = DocUpdaterClient.randomId()
@@ -53,48 +55,26 @@ describe('Setting a document', function () {
         lines: this.lines,
         version: this.version,
       })
-      DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
-        if (error) {
-          throw error
-        }
-        DocUpdaterClient.sendUpdate(
-          this.project_id,
-          this.doc_id,
-          this.update,
-          error => {
-            if (error) {
-              throw error
-            }
-            setTimeout(() => {
-              DocUpdaterClient.setDocLines(
-                this.project_id,
-                this.doc_id,
-                this.newLines,
-                this.source,
-                this.user_id,
-                false,
-                (error, res, body) => {
-                  if (error) {
-                    return done(error)
-                  }
-                  this.statusCode = res.statusCode
-                  this.body = body
-                  done()
-                }
-              )
-            }, 200)
-          }
-        )
-      })
+      await DocUpdaterClient.preloadDoc(this.project_id, this.doc_id)
+      await DocUpdaterClient.sendUpdate(
+        this.project_id,
+        this.doc_id,
+        this.update
+      )
+      await setTimeout(200)
+      this.body = await DocUpdaterClient.setDocLines(
+        this.project_id,
+        this.doc_id,
+        this.newLines,
+        this.source,
+        this.user_id,
+        false
+      )
     })
 
     after(function () {
       MockProjectHistoryApi.flushProject.resetHistory()
       MockWebApi.setDocument.resetHistory()
-    })
-
-    it('should return a 200 status code', function () {
-      this.statusCode.should.equal(200)
     })
 
     it('should emit two updates (from sendUpdate and setDocLines)', function () {
@@ -107,32 +87,14 @@ describe('Setting a document', function () {
         .should.equal(true)
     })
 
-    it('should update the lines in the doc updater', function (done) {
-      DocUpdaterClient.getDoc(
-        this.project_id,
-        this.doc_id,
-        (error, res, doc) => {
-          if (error) {
-            return done(error)
-          }
-          doc.lines.should.deep.equal(this.newLines)
-          done()
-        }
-      )
+    it('should update the lines in the doc updater', async function () {
+      const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc_id)
+      doc.lines.should.deep.equal(this.newLines)
     })
 
-    it('should bump the version in the doc updater', function (done) {
-      DocUpdaterClient.getDoc(
-        this.project_id,
-        this.doc_id,
-        (error, res, doc) => {
-          if (error) {
-            return done(error)
-          }
-          doc.version.should.equal(this.version + 2)
-          done()
-        }
-      )
+    it('should bump the version in the doc updater', async function () {
+      const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc_id)
+      doc.version.should.equal(this.version + 2)
     })
 
     it('should leave the document in redis', function (done) {
@@ -153,51 +115,33 @@ describe('Setting a document', function () {
     })
 
     describe('when doc has the same contents', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         numberOfReceivedUpdates = 0
-        DocUpdaterClient.setDocLines(
+        await DocUpdaterClient.setDocLines(
           this.project_id,
           this.doc_id,
           this.newLines,
           this.source,
           this.user_id,
-          false,
-          (error, res, body) => {
-            if (error) {
-              return done(error)
-            }
-            this.statusCode = res.statusCode
-            this.body = body
-            done()
-          }
+          false
         )
       })
 
-      it('should not bump the version in doc updater', function (done) {
-        DocUpdaterClient.getDoc(
-          this.project_id,
-          this.doc_id,
-          (error, res, doc) => {
-            if (error) {
-              return done(error)
-            }
-            doc.version.should.equal(this.version + 2)
-            done()
-          }
-        )
+      it('should not bump the version in doc updater', async function () {
+        const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc_id)
+        doc.version.should.equal(this.version + 2)
       })
 
-      it('should not emit any updates', function (done) {
-        setTimeout(() => {
-          expect(numberOfReceivedUpdates).to.equal(0)
-          done()
-        }, 100) // delay by 100ms: make sure we do not check too early!
+      it('should not emit any updates', async function () {
+        // delay by 100ms: make sure we do not check too early!
+        await setTimeout(100)
+        expect(numberOfReceivedUpdates).to.equal(0)
       })
     })
   })
 
   describe('when the updated doc exists in the doc updater (history-ot)', function () {
-    before(function (done) {
+    before(async function () {
       numberOfReceivedUpdates = 0
       this.project_id = DocUpdaterClient.randomId()
       this.doc_id = DocUpdaterClient.randomId()
@@ -212,48 +156,26 @@ describe('Setting a document', function () {
         version: this.version,
         otMigrationStage: 1,
       })
-      DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
-        if (error) {
-          throw error
-        }
-        DocUpdaterClient.sendUpdate(
-          this.project_id,
-          this.doc_id,
-          this.historyOTUpdate,
-          error => {
-            if (error) {
-              throw error
-            }
-            setTimeout(() => {
-              DocUpdaterClient.setDocLines(
-                this.project_id,
-                this.doc_id,
-                this.newLines,
-                this.source,
-                this.user_id,
-                false,
-                (error, res, body) => {
-                  if (error) {
-                    return done(error)
-                  }
-                  this.statusCode = res.statusCode
-                  this.body = body
-                  done()
-                }
-              )
-            }, 200)
-          }
-        )
-      })
+      await DocUpdaterClient.preloadDoc(this.project_id, this.doc_id)
+      await DocUpdaterClient.sendUpdate(
+        this.project_id,
+        this.doc_id,
+        this.historyOTUpdate
+      )
+      await setTimeout(200)
+      this.body = await DocUpdaterClient.setDocLines(
+        this.project_id,
+        this.doc_id,
+        this.newLines,
+        this.source,
+        this.user_id,
+        false
+      )
     })
 
     after(function () {
       MockProjectHistoryApi.flushProject.resetHistory()
       MockWebApi.setDocument.resetHistory()
-    })
-
-    it('should return a 200 status code', function () {
-      this.statusCode.should.equal(200)
     })
 
     it('should emit two updates (from sendUpdate and setDocLines)', function () {
@@ -266,32 +188,14 @@ describe('Setting a document', function () {
         .should.equal(true)
     })
 
-    it('should update the lines in the doc updater', function (done) {
-      DocUpdaterClient.getDoc(
-        this.project_id,
-        this.doc_id,
-        (error, res, doc) => {
-          if (error) {
-            return done(error)
-          }
-          doc.lines.should.deep.equal(this.newLines)
-          done()
-        }
-      )
+    it('should update the lines in the doc updater', async function () {
+      const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc_id)
+      doc.lines.should.deep.equal(this.newLines)
     })
 
-    it('should bump the version in the doc updater', function (done) {
-      DocUpdaterClient.getDoc(
-        this.project_id,
-        this.doc_id,
-        (error, res, doc) => {
-          if (error) {
-            return done(error)
-          }
-          doc.version.should.equal(this.version + 2)
-          done()
-        }
-      )
+    it('should bump the version in the doc updater', async function () {
+      const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc_id)
+      doc.version.should.equal(this.version + 2)
     })
 
     it('should leave the document in redis', function (done) {
@@ -314,51 +218,33 @@ describe('Setting a document', function () {
     })
 
     describe('when doc has the same contents', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         numberOfReceivedUpdates = 0
-        DocUpdaterClient.setDocLines(
+        this.body = await DocUpdaterClient.setDocLines(
           this.project_id,
           this.doc_id,
           this.newLines,
           this.source,
           this.user_id,
-          false,
-          (error, res, body) => {
-            if (error) {
-              return done(error)
-            }
-            this.statusCode = res.statusCode
-            this.body = body
-            done()
-          }
+          false
         )
       })
 
-      it('should not bump the version in doc updater', function (done) {
-        DocUpdaterClient.getDoc(
-          this.project_id,
-          this.doc_id,
-          (error, res, doc) => {
-            if (error) {
-              return done(error)
-            }
-            doc.version.should.equal(this.version + 2)
-            done()
-          }
-        )
+      it('should not bump the version in doc updater', async function () {
+        const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc_id)
+        doc.version.should.equal(this.version + 2)
       })
 
-      it('should not emit any updates', function (done) {
-        setTimeout(() => {
-          expect(numberOfReceivedUpdates).to.equal(0)
-          done()
-        }, 100) // delay by 100ms: make sure we do not check too early!
+      it('should not emit any updates', async function () {
+        // delay by 100ms: make sure we do not check too early!
+        await setTimeout(100)
+        expect(numberOfReceivedUpdates).to.equal(0)
       })
     })
   })
 
   describe('when the updated doc does not exist in the doc updater', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = DocUpdaterClient.randomId()
       this.doc_id = DocUpdaterClient.randomId()
       numberOfReceivedUpdates = 0
@@ -366,31 +252,20 @@ describe('Setting a document', function () {
         lines: this.lines,
         version: this.version,
       })
-      DocUpdaterClient.setDocLines(
+      this.body = await DocUpdaterClient.setDocLines(
         this.project_id,
         this.doc_id,
         this.newLines,
         this.source,
         this.user_id,
-        false,
-        (error, res, body) => {
-          if (error) {
-            return done(error)
-          }
-          this.statusCode = res.statusCode
-          this.body = body
-          setTimeout(done, 200)
-        }
+        false
       )
+      await setTimeout(200)
     })
 
     after(function () {
       MockProjectHistoryApi.flushProject.resetHistory()
       MockWebApi.setDocument.resetHistory()
-    })
-
-    it('should return a 200 status code', function () {
-      this.statusCode.should.equal(200)
     })
 
     it('should emit an update', function () {
@@ -442,7 +317,7 @@ describe('Setting a document', function () {
 
   DOC_TOO_LARGE_TEST_CASES.forEach(testCase => {
     describe(testCase.desc, function () {
-      before(function (done) {
+      before(async function () {
         this.project_id = DocUpdaterClient.randomId()
         this.doc_id = DocUpdaterClient.randomId()
         MockWebApi.insertDoc(this.project_id, this.doc_id, {
@@ -453,21 +328,24 @@ describe('Setting a document', function () {
         while (JSON.stringify(this.newLines).length <= testCase.size) {
           this.newLines.push('(a long line of text)'.repeat(10000))
         }
-        DocUpdaterClient.setDocLines(
-          this.project_id,
-          this.doc_id,
-          this.newLines,
-          this.source,
-          this.user_id,
-          false,
-          (error, res, body) => {
-            if (error) {
-              return done(error)
-            }
-            this.statusCode = res.statusCode
-            setTimeout(done, 200)
+        try {
+          await DocUpdaterClient.setDocLines(
+            this.project_id,
+            this.doc_id,
+            this.newLines,
+            this.source,
+            this.user_id,
+            false
+          )
+          this.statusCode = 200
+        } catch (err) {
+          if (err instanceof RequestFailedError) {
+            this.statusCode = err.response.status
+          } else {
+            throw err
           }
-        )
+        }
+        await setTimeout(200)
       })
 
       after(function () {
@@ -490,7 +368,7 @@ describe('Setting a document', function () {
   })
 
   describe('when the updated doc is large but under the bodyParser and HTTPController size limit', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = DocUpdaterClient.randomId()
       this.doc_id = DocUpdaterClient.randomId()
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
@@ -504,31 +382,20 @@ describe('Setting a document', function () {
         this.newLines.push('(a long line of text)'.repeat(10000))
       }
       this.newLines.pop() // remove the line which took it over the limit
-      DocUpdaterClient.setDocLines(
+      this.body = await DocUpdaterClient.setDocLines(
         this.project_id,
         this.doc_id,
         this.newLines,
         this.source,
         this.user_id,
-        false,
-        (error, res, body) => {
-          if (error) {
-            return done(error)
-          }
-          this.statusCode = res.statusCode
-          this.body = body
-          setTimeout(done, 200)
-        }
+        false
       )
+      await setTimeout(200)
     })
 
     after(function () {
       MockProjectHistoryApi.flushProject.resetHistory()
       MockWebApi.setDocument.resetHistory()
-    })
-
-    it('should return a 200 status code', function () {
-      this.statusCode.should.equal(200)
     })
 
     it('should send the updated doc lines to the web api', function () {
@@ -563,44 +430,29 @@ describe('Setting a document', function () {
     })
 
     describe('with the undo flag', function () {
-      before(function (done) {
+      before(async function () {
         this.project_id = DocUpdaterClient.randomId()
         this.doc_id = DocUpdaterClient.randomId()
         MockWebApi.insertDoc(this.project_id, this.doc_id, {
           lines: this.lines,
           version: this.version,
         })
-        DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
-          if (error) {
-            throw error
-          }
-          DocUpdaterClient.sendUpdate(
-            this.project_id,
-            this.doc_id,
-            this.update,
-            error => {
-              if (error) {
-                throw error
-              }
-              // Go back to old lines, with undo flag
-              DocUpdaterClient.setDocLines(
-                this.project_id,
-                this.doc_id,
-                this.lines,
-                this.source,
-                this.user_id,
-                true,
-                (error, res, body) => {
-                  if (error) {
-                    return done(error)
-                  }
-                  this.statusCode = res.statusCode
-                  setTimeout(done, 200)
-                }
-              )
-            }
-          )
-        })
+        await DocUpdaterClient.preloadDoc(this.project_id, this.doc_id)
+        await DocUpdaterClient.sendUpdate(
+          this.project_id,
+          this.doc_id,
+          this.update
+        )
+        // Go back to old lines, with undo flag
+        await DocUpdaterClient.setDocLines(
+          this.project_id,
+          this.doc_id,
+          this.lines,
+          this.source,
+          this.user_id,
+          true
+        )
+        await setTimeout(200)
       })
 
       after(function () {
@@ -608,61 +460,36 @@ describe('Setting a document', function () {
         MockWebApi.setDocument.resetHistory()
       })
 
-      it('should undo the tracked changes', function (done) {
-        DocUpdaterClient.getDoc(
-          this.project_id,
-          this.doc_id,
-          (error, res, data) => {
-            if (error) {
-              throw error
-            }
-            const { ranges } = data
-            expect(ranges.changes).to.be.undefined
-            done()
-          }
-        )
+      it('should undo the tracked changes', async function () {
+        const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc_id)
+        expect(doc.ranges.changes).to.be.undefined
       })
     })
 
     describe('without the undo flag', function () {
-      before(function (done) {
+      before(async function () {
         this.project_id = DocUpdaterClient.randomId()
         this.doc_id = DocUpdaterClient.randomId()
         MockWebApi.insertDoc(this.project_id, this.doc_id, {
           lines: this.lines,
           version: this.version,
         })
-        DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
-          if (error) {
-            throw error
-          }
-          DocUpdaterClient.sendUpdate(
-            this.project_id,
-            this.doc_id,
-            this.update,
-            error => {
-              if (error) {
-                throw error
-              }
-              // Go back to old lines, without undo flag
-              DocUpdaterClient.setDocLines(
-                this.project_id,
-                this.doc_id,
-                this.lines,
-                this.source,
-                this.user_id,
-                false,
-                (error, res, body) => {
-                  if (error) {
-                    return done(error)
-                  }
-                  this.statusCode = res.statusCode
-                  setTimeout(done, 200)
-                }
-              )
-            }
-          )
-        })
+        await DocUpdaterClient.preloadDoc(this.project_id, this.doc_id)
+        await DocUpdaterClient.sendUpdate(
+          this.project_id,
+          this.doc_id,
+          this.update
+        )
+        // Go back to old lines, without undo flag
+        await DocUpdaterClient.setDocLines(
+          this.project_id,
+          this.doc_id,
+          this.lines,
+          this.source,
+          this.user_id,
+          false
+        )
+        await setTimeout(200)
       })
 
       after(function () {
@@ -670,19 +497,9 @@ describe('Setting a document', function () {
         MockWebApi.setDocument.resetHistory()
       })
 
-      it('should not undo the tracked changes', function (done) {
-        DocUpdaterClient.getDoc(
-          this.project_id,
-          this.doc_id,
-          (error, res, data) => {
-            if (error) {
-              throw error
-            }
-            const { ranges } = data
-            expect(ranges.changes.length).to.equal(1)
-            done()
-          }
-        )
+      it('should not undo the tracked changes', async function () {
+        const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc_id)
+        expect(doc.ranges.changes.length).to.equal(1)
       })
     })
   })
@@ -691,7 +508,8 @@ describe('Setting a document', function () {
     const lines = ['one', 'one and a half', 'two', 'three']
     const userId = DocUpdaterClient.randomId()
     const ts = new Date().toISOString()
-    beforeEach(function (done) {
+
+    beforeEach(async function () {
       numberOfReceivedUpdates = 0
       this.newLines = ['one', 'two', 'three']
       this.project_id = DocUpdaterClient.randomId()
@@ -722,32 +540,20 @@ describe('Setting a document', function () {
         version: this.version,
         otMigrationStage: 1,
       })
-      DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
-        if (error) {
-          throw error
-        }
-        DocUpdaterClient.sendUpdate(
-          this.project_id,
-          this.doc_id,
-          this.historyOTUpdate,
-          error => {
-            if (error) {
-              throw error
-            }
-            DocUpdaterClient.waitForPendingUpdates(
-              this.project_id,
-              this.doc_id,
-              done
-            )
-          }
-        )
-      })
+      await DocUpdaterClient.preloadDoc(this.project_id, this.doc_id)
+      await DocUpdaterClient.sendUpdate(
+        this.project_id,
+        this.doc_id,
+        this.historyOTUpdate
+      )
+      await DocUpdaterClient.waitForPendingUpdates(this.doc_id)
     })
 
     afterEach(function () {
       MockProjectHistoryApi.flushProject.resetHistory()
       MockWebApi.setDocument.resetHistory()
     })
+
     it('should record tracked changes', function (done) {
       docUpdaterRedis.get(
         Keys.docLines({ doc_id: this.doc_id }),
@@ -776,19 +582,11 @@ describe('Setting a document', function () {
       )
     })
 
-    it('should apply the change', function (done) {
-      DocUpdaterClient.getDoc(
-        this.project_id,
-        this.doc_id,
-        (error, res, data) => {
-          if (error) {
-            throw error
-          }
-          expect(data.lines).to.deep.equal(this.newLines)
-          done()
-        }
-      )
+    it('should apply the change', async function () {
+      const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc_id)
+      expect(doc.lines).to.deep.equal(this.newLines)
     })
+
     const cases = [
       {
         name: 'when resetting the content',
@@ -934,22 +732,14 @@ describe('Setting a document', function () {
 
     for (const { name, lines, want } of cases) {
       describe(name, function () {
-        beforeEach(function (done) {
-          DocUpdaterClient.setDocLines(
+        beforeEach(async function () {
+          this.body = await DocUpdaterClient.setDocLines(
             this.project_id,
             this.doc_id,
             lines,
             this.source,
             userId,
-            false,
-            (error, res, body) => {
-              if (error) {
-                return done(error)
-              }
-              this.statusCode = res.statusCode
-              this.body = body
-              done()
-            }
+            false
           )
         })
         it('should update accordingly', function (done) {

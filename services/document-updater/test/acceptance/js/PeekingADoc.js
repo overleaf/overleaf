@@ -2,16 +2,18 @@ const sinon = require('sinon')
 const MockWebApi = require('./helpers/MockWebApi')
 const DocUpdaterClient = require('./helpers/DocUpdaterClient')
 const DocUpdaterApp = require('./helpers/DocUpdaterApp')
+const { expect } = require('chai')
+const { RequestFailedError } = require('@overleaf/fetch-utils')
 
 describe('Peeking a document', function () {
-  before(function (done) {
+  before(async function () {
     this.lines = ['one', 'two', 'three']
     this.version = 42
-    return DocUpdaterApp.ensureRunning(done)
+    await DocUpdaterApp.ensureRunning()
   })
 
   describe('when the document is not loaded', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = DocUpdaterClient.randomId()
       this.doc_id = DocUpdaterClient.randomId()
       sinon.spy(MockWebApi, 'getDocument')
@@ -20,34 +22,22 @@ describe('Peeking a document', function () {
         lines: this.lines,
         version: this.version,
       })
-
-      return DocUpdaterClient.peekDoc(
-        this.project_id,
-        this.doc_id,
-        (error, res, returnedDoc) => {
-          this.error = error
-          this.res = res
-          this.returnedDoc = returnedDoc
-          return done()
-        }
-      )
     })
 
     after(function () {
-      return MockWebApi.getDocument.restore()
+      MockWebApi.getDocument.restore()
     })
 
-    it('should return a 404 response', function () {
-      this.res.statusCode.should.equal(404)
-    })
-
-    it('should not load the document from the web API', function () {
-      return MockWebApi.getDocument.called.should.equal(false)
+    it('should not load the document from the web API and should return a 404 response', async function () {
+      await expect(DocUpdaterClient.peekDoc(this.project_id, this.doc_id))
+        .to.be.rejectedWith(RequestFailedError)
+        .and.eventually.have.nested.property('response.status', 404)
+      MockWebApi.getDocument.called.should.equal(false)
     })
   })
 
   describe('when the document is already loaded', function () {
-    before(function (done) {
+    before(async function () {
       this.project_id = DocUpdaterClient.randomId()
       this.doc_id = DocUpdaterClient.randomId()
 
@@ -55,46 +45,28 @@ describe('Peeking a document', function () {
         lines: this.lines,
         version: this.version,
       })
-      return DocUpdaterClient.preloadDoc(
+      await DocUpdaterClient.preloadDoc(this.project_id, this.doc_id)
+      sinon.spy(MockWebApi, 'getDocument')
+      this.returnedDoc = await DocUpdaterClient.peekDoc(
         this.project_id,
-        this.doc_id,
-        error => {
-          if (error != null) {
-            throw error
-          }
-          sinon.spy(MockWebApi, 'getDocument')
-          return DocUpdaterClient.getDoc(
-            this.project_id,
-            this.doc_id,
-            (error, res, returnedDoc) => {
-              if (error) return done(error)
-              this.res = res
-              this.returnedDoc = returnedDoc
-              return done()
-            }
-          )
-        }
+        this.doc_id
       )
     })
 
     after(function () {
-      return MockWebApi.getDocument.restore()
-    })
-
-    it('should return a 200 response', function () {
-      this.res.statusCode.should.equal(200)
+      MockWebApi.getDocument.restore()
     })
 
     it('should return the document lines', function () {
-      return this.returnedDoc.lines.should.deep.equal(this.lines)
+      this.returnedDoc.lines.should.deep.equal(this.lines)
     })
 
     it('should return the document version', function () {
-      return this.returnedDoc.version.should.equal(this.version)
+      this.returnedDoc.version.should.equal(this.version)
     })
 
     it('should not load the document from the web API', function () {
-      return MockWebApi.getDocument.called.should.equal(false)
+      MockWebApi.getDocument.called.should.equal(false)
     })
   })
 })

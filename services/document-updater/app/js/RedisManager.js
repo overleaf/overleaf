@@ -542,7 +542,7 @@ const RedisManager = {
     )
     // return if no projects ready to be processed
     if (!projectsReady || projectsReady.length === 0) {
-      return
+      return {}
     }
     // pop the oldest entry (get and remove in a multi)
     const multi = rclient.multi()
@@ -552,7 +552,7 @@ const RedisManager = {
     multi.zcard(keys.flushAndDeleteQueue()) // the total length of the queue (for metrics)
     const reply = await multi.exec()
     if (!reply || reply.length === 0) {
-      return
+      return {}
     }
     const [key, timestamp] = reply[0]
     const queueLength = reply[2]
