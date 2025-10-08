@@ -32,15 +32,7 @@ Options:
   }
   console.log('Flushing all projects with options:', options)
 
-  return await new Promise((resolve, reject) => {
-    ProjectFlusher.flushAllProjects(options, err => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve()
-      }
-    })
-  })
+  await ProjectFlusher.promises.flushAllProjects(options)
 }
 
 main()
