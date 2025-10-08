@@ -76,8 +76,15 @@
 }
 
 .write-and-cite-pros-list-wrapper {
-  max-width: 450px;
+  max-width: 560px;
   margin: 0 auto;
+}
+
+.write-and-cite-pros-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-04);
+  margin-bottom: var(--spacing-07);
 }
 
 .write-and-cite-pros-list li {
@@ -101,6 +108,7 @@
 
 .write-and-cite-pro {
   flex: 0 1 100%;
+  margin-bottom: 0;
 }
 
 .write-and-cite-upgrade-prompt-header {
