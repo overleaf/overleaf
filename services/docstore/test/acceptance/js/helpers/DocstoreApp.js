@@ -1,26 +1,31 @@
 const app = require('../../../../app')
-const settings = require('@overleaf/settings')
+const Settings = require('@overleaf/settings')
+
+function startApp() {
+  return new Promise((resolve, reject) => {
+    app.listen(
+      Settings.internal.docstore.port,
+      Settings.internal.docstore.host,
+      error => {
+        if (error) {
+          reject(error)
+        } else {
+          resolve()
+        }
+      }
+    )
+  })
+}
+
+let appStartedPromise
+
+async function ensureRunning() {
+  if (!appStartedPromise) {
+    appStartedPromise = startApp()
+  }
+  await appStartedPromise
+}
 
 module.exports = {
-  running: false,
-  initing: false,
-  callbacks: [],
-  ensureRunning(callback) {
-    if (this.running) {
-      return callback()
-    } else if (this.initing) {
-      return this.callbacks.push(callback)
-    }
-    this.initing = true
-    this.callbacks.push(callback)
-    app.listen(settings.internal.docstore.port, '127.0.0.1', error => {
-      if (error != null) {
-        throw error
-      }
-      this.running = true
-      for (callback of Array.from(this.callbacks)) {
-        callback()
-      }
-    })
-  },
+  ensureRunning,
 }

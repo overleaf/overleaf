@@ -1,5 +1,9 @@
 let DocstoreClient
-const request = require('request').defaults({ jar: false })
+const {
+  fetchNothing,
+  fetchJson,
+  fetchJsonWithResponse,
+} = require('@overleaf/fetch-utils')
 const settings = require('@overleaf/settings')
 const Persistor = require('../../../../app/js/PersistorManager')
 
@@ -19,204 +23,156 @@ async function getStringFromPersistor(persistor, bucket, key) {
 }
 
 module.exports = DocstoreClient = {
-  createDoc(projectId, docId, lines, version, ranges, callback) {
-    return DocstoreClient.updateDoc(
+  async createDoc(projectId, docId, lines, version, ranges) {
+    return await DocstoreClient.updateDoc(
       projectId,
       docId,
       lines,
       version,
-      ranges,
-      callback
+      ranges
     )
   },
 
-  getDoc(projectId, docId, qs, callback) {
-    request.get(
-      {
-        url: `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}`,
-        json: true,
-        qs,
-      },
-      callback
+  async getDoc(projectId, docId, qs = {}) {
+    const url = new URL(
+      `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}`
+    )
+    for (const [key, value] of Object.entries(qs)) {
+      url.searchParams.append(key, value)
+    }
+    return await fetchJson(url)
+  },
+
+  async peekDoc(projectId, docId, qs = {}) {
+    const url = new URL(
+      `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}/peek`
+    )
+    for (const [key, value] of Object.entries(qs)) {
+      url.searchParams.append(key, value)
+    }
+    const { response, json } = await fetchJsonWithResponse(url)
+    return { res: response, doc: json }
+  },
+
+  async isDocDeleted(projectId, docId) {
+    const { response, json } = await fetchJsonWithResponse(
+      `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}/deleted`
+    )
+    return { res: response, body: json }
+  },
+
+  async getAllDocs(projectId) {
+    return await fetchJson(
+      `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc`
     )
   },
 
-  peekDoc(projectId, docId, qs, callback) {
-    request.get(
-      {
-        url: `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}/peek`,
-        json: true,
-        qs,
-      },
-      callback
+  async getAllDeletedDocs(projectId, callback) {
+    return await fetchJson(
+      `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc-deleted`
     )
   },
 
-  isDocDeleted(projectId, docId, callback) {
-    request.get(
-      {
-        url: `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}/deleted`,
-        json: true,
-      },
-      callback
+  async getAllRanges(projectId) {
+    return await fetchJson(
+      `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/ranges`
     )
   },
 
-  getAllDocs(projectId, callback) {
-    request.get(
-      {
-        url: `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc`,
-        json: true,
-      },
-      (req, res, body) => {
-        callback(req, res, body)
-      }
+  async getCommentThreadIds(projectId, callback) {
+    return await fetchJson(
+      `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/comment-thread-ids`
     )
   },
 
-  getAllDeletedDocs(projectId, callback) {
-    request.get(
-      {
-        url: `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc-deleted`,
-        json: true,
-      },
-      (error, res, body) => {
-        if (error) return callback(error)
-        if (res.statusCode !== 200) {
-          return callback(new Error('unexpected statusCode'))
-        }
-        callback(null, body)
-      }
+  async getTrackedChangesUserIds(projectId) {
+    return await fetchJson(
+      `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/tracked-changes-user-ids`
     )
   },
 
-  getAllRanges(projectId, callback) {
-    request.get(
+  async updateDoc(projectId, docId, lines, version, ranges) {
+    const res = await fetchJson(
+      `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}`,
       {
-        url: `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/ranges`,
-        json: true,
-      },
-      callback
-    )
-  },
-
-  getCommentThreadIds(projectId, callback) {
-    request.get(
-      {
-        url: `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/comment-thread-ids`,
-        json: true,
-      },
-      callback
-    )
-  },
-
-  getTrackedChangesUserIds(projectId, callback) {
-    request.get(
-      {
-        url: `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/tracked-changes-user-ids`,
-        json: true,
-      },
-      callback
-    )
-  },
-
-  updateDoc(projectId, docId, lines, version, ranges, callback) {
-    return request.post(
-      {
-        url: `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}`,
+        method: 'POST',
         json: {
           lines,
           version,
           ranges,
         },
-      },
-      callback
+      }
     )
+    return res
   },
 
-  deleteDoc(projectId, docId, callback) {
-    DocstoreClient.deleteDocWithDateAndName(
+  async deleteDoc(projectId, docId) {
+    return await DocstoreClient.deleteDocWithDateAndName(
       projectId,
       docId,
       new Date(),
-      'main.tex',
-      callback
+      'main.tex'
     )
   },
 
-  deleteDocWithDate(projectId, docId, date, callback) {
-    DocstoreClient.deleteDocWithDateAndName(
+  async deleteDocWithDate(projectId, docId, date) {
+    return await DocstoreClient.deleteDocWithDateAndName(
       projectId,
       docId,
       date,
-      'main.tex',
-      callback
+      'main.tex'
     )
   },
 
-  deleteDocWithName(projectId, docId, name, callback) {
-    DocstoreClient.deleteDocWithDateAndName(
+  async deleteDocWithName(projectId, docId, name) {
+    return await DocstoreClient.deleteDocWithDateAndName(
       projectId,
       docId,
       new Date(),
-      name,
-      callback
+      name
     )
   },
 
-  deleteDocWithDateAndName(projectId, docId, deletedAt, name, callback) {
-    request.patch(
-      {
-        url: `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}`,
-        json: { name, deleted: true, deletedAt },
-      },
-      callback
+  async deleteDocWithDateAndName(projectId, docId, deletedAt, name) {
+    return await fetchNothing(
+      `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}`,
+      { method: 'PATCH', json: { name, deleted: true, deletedAt } }
     )
   },
 
-  archiveAllDoc(projectId, callback) {
-    request.post(
-      {
-        url: `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/archive`,
-      },
-      callback
+  async archiveAllDoc(projectId) {
+    return await fetchNothing(
+      `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/archive`,
+      { method: 'POST' }
     )
   },
 
-  archiveDoc(projectId, docId, callback) {
-    request.post(
-      {
-        url: `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}/archive`,
-      },
-      callback
+  async archiveDoc(projectId, docId) {
+    return await fetchNothing(
+      `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/doc/${docId}/archive`,
+      { method: 'POST' }
     )
   },
 
-  destroyAllDoc(projectId, callback) {
-    request.post(
-      {
-        url: `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/destroy`,
-      },
-      callback
+  async destroyAllDoc(projectId) {
+    await fetchNothing(
+      `http://127.0.0.1:${settings.internal.docstore.port}/project/${projectId}/destroy`,
+      { method: 'POST' }
     )
   },
 
-  healthCheck(callback) {
-    request.get(
-      `http://127.0.0.1:${settings.internal.docstore.port}/health_check`,
-      callback
+  async healthCheck() {
+    return await fetchNothing(
+      `http://127.0.0.1:${settings.internal.docstore.port}/health_check`
     )
   },
 
-  getS3Doc(projectId, docId, callback) {
-    getStringFromPersistor(
+  async getS3Doc(projectId, docId) {
+    const data = await getStringFromPersistor(
       Persistor,
       settings.docstore.bucket,
       `${projectId}/${docId}`
     )
-      .then(data => {
-        callback(null, JSON.parse(data))
-      })
-      .catch(callback)
+    return JSON.parse(data)
   },
 }

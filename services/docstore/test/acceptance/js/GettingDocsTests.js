@@ -1,22 +1,11 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const sinon = require('sinon')
 const { ObjectId } = require('mongodb-legacy')
+const { expect } = require('chai')
 const DocstoreApp = require('./helpers/DocstoreApp')
 
 const DocstoreClient = require('./helpers/DocstoreClient')
 
 describe('Getting a doc', function () {
-  beforeEach(function (done) {
+  beforeEach(async function () {
     this.project_id = new ObjectId()
     this.doc_id = new ObjectId()
     this.lines = ['original', 'lines']
@@ -49,105 +38,63 @@ describe('Getting a doc', function () {
         { ...this.ranges.comments[0], id: this.ranges.comments[0].op.t },
       ],
     }
-    return DocstoreApp.ensureRunning(() => {
-      return DocstoreClient.createDoc(
-        this.project_id,
-        this.doc_id,
-        this.lines,
-        this.version,
-        this.ranges,
-        error => {
-          if (error != null) {
-            throw error
-          }
-          return done()
-        }
-      )
-    })
+    await DocstoreApp.ensureRunning()
+    await DocstoreClient.createDoc(
+      this.project_id,
+      this.doc_id,
+      this.lines,
+      this.version,
+      this.ranges
+    )
   })
 
   describe('when the doc exists', function () {
-    return it('should get the doc lines and version', function (done) {
-      return DocstoreClient.getDoc(
-        this.project_id,
-        this.doc_id,
-        {},
-        (error, res, doc) => {
-          if (error) return done(error)
-          doc.lines.should.deep.equal(this.lines)
-          doc.version.should.equal(this.version)
-          doc.ranges.should.deep.equal(this.fixedRanges)
-          return done()
-        }
-      )
+    it('should get the doc lines and version', async function () {
+      const doc = await DocstoreClient.getDoc(this.project_id, this.doc_id)
+      doc.lines.should.deep.equal(this.lines)
+      doc.version.should.equal(this.version)
+      doc.ranges.should.deep.equal(this.fixedRanges)
     })
   })
 
   describe('when the doc does not exist', function () {
-    return it('should return a 404', function (done) {
+    it('should return a 404', async function () {
       const missingDocId = new ObjectId()
-      return DocstoreClient.getDoc(
-        this.project_id,
-        missingDocId,
-        {},
-        (error, res, doc) => {
-          if (error) return done(error)
-          res.statusCode.should.equal(404)
-          return done()
-        }
-      )
+      await expect(DocstoreClient.getDoc(this.project_id, missingDocId))
+        .to.eventually.be.rejected.and.have.property('info')
+        .to.contain({ status: 404 })
     })
   })
 
-  return describe('when the doc is a deleted doc', function () {
-    beforeEach(function (done) {
+  describe('when the doc is a deleted doc', function () {
+    beforeEach(async function () {
       this.deleted_doc_id = new ObjectId()
-      return DocstoreClient.createDoc(
+      await DocstoreClient.createDoc(
         this.project_id,
         this.deleted_doc_id,
         this.lines,
         this.version,
-        this.ranges,
-        error => {
-          if (error != null) {
-            throw error
-          }
-          return DocstoreClient.deleteDoc(
-            this.project_id,
-            this.deleted_doc_id,
-            done
-          )
-        }
+        this.ranges
       )
+      await DocstoreClient.deleteDoc(this.project_id, this.deleted_doc_id)
     })
 
-    it('should return the doc', function (done) {
-      return DocstoreClient.getDoc(
+    it('should return the doc', async function () {
+      const doc = await DocstoreClient.getDoc(
         this.project_id,
         this.deleted_doc_id,
-        { include_deleted: true },
-        (error, res, doc) => {
-          if (error) return done(error)
-          doc.lines.should.deep.equal(this.lines)
-          doc.version.should.equal(this.version)
-          doc.ranges.should.deep.equal(this.fixedRanges)
-          doc.deleted.should.equal(true)
-          return done()
-        }
+        { include_deleted: true }
       )
+      doc.lines.should.deep.equal(this.lines)
+      doc.version.should.equal(this.version)
+      doc.ranges.should.deep.equal(this.fixedRanges)
+      doc.deleted.should.equal(true)
     })
 
-    return it('should return a 404 when the query string is not set', function (done) {
-      return DocstoreClient.getDoc(
-        this.project_id,
-        this.deleted_doc_id,
-        {},
-        (error, res, doc) => {
-          if (error) return done(error)
-          res.statusCode.should.equal(404)
-          return done()
-        }
-      )
+    it('should return a 404 when the query string is not set', async function () {
+      await expect(DocstoreClient.getDoc(this.project_id, this.deleted_doc_id))
+        .to.eventually.be.rejected.and.have.property('info')
+        .to.contain({ status: 404 })
     })
   })
 })

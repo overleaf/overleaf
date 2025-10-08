@@ -1,19 +1,7 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const sinon = require('sinon')
 const { ObjectId } = require('mongodb-legacy')
 const async = require('async')
 const DocstoreApp = require('./helpers/DocstoreApp')
+const { callbackify } = require('node:util')
 
 const DocstoreClient = require('./helpers/DocstoreClient')
 
@@ -90,10 +78,10 @@ describe('Getting all docs', function () {
       rev: 8,
     }
     const version = 42
-    const jobs = Array.from(this.docs).map(doc =>
-      (doc => {
-        return callback => {
-          return DocstoreClient.createDoc(
+    const jobs = this.docs.map(doc =>
+      (
+        doc => callback =>
+          callbackify(DocstoreClient.createDoc)(
             this.project_id,
             doc._id,
             doc.lines,
@@ -101,11 +89,10 @@ describe('Getting all docs', function () {
             doc.ranges,
             callback
           )
-        }
-      })(doc)
+      )(doc)
     )
-    jobs.push(cb => {
-      return DocstoreClient.createDoc(
+    jobs.push(cb =>
+      callbackify(DocstoreClient.createDoc)(
         this.project_id,
         this.deleted_doc._id,
         this.deleted_doc.lines,
@@ -113,72 +100,48 @@ describe('Getting all docs', function () {
         this.deleted_doc.ranges,
         err => {
           if (err) return done(err)
-          return DocstoreClient.deleteDoc(
+          callbackify(DocstoreClient.deleteDoc)(
             this.project_id,
             this.deleted_doc._id,
             cb
           )
         }
       )
-    })
-    jobs.unshift(cb => DocstoreApp.ensureRunning(cb))
-    return async.series(jobs, done)
-  })
-
-  it('getAllDocs should return all the (non-deleted) docs', function (done) {
-    return DocstoreClient.getAllDocs(this.project_id, (error, res, docs) => {
-      if (error != null) {
-        throw error
-      }
-      docs.length.should.equal(this.docs.length)
-      for (let i = 0; i < docs.length; i++) {
-        const doc = docs[i]
-        doc.lines.should.deep.equal(this.docs[i].lines)
-      }
-      return done()
-    })
-  })
-
-  it('getAllRanges should return all the (non-deleted) doc ranges', function (done) {
-    return DocstoreClient.getAllRanges(this.project_id, (error, res, docs) => {
-      if (error != null) {
-        throw error
-      }
-      docs.length.should.equal(this.docs.length)
-      for (let i = 0; i < docs.length; i++) {
-        const doc = docs[i]
-        doc.ranges.should.deep.equal(this.fixedRanges[i])
-      }
-      return done()
-    })
-  })
-
-  it('getTrackedChangesUserIds should return all the user ids from (non-deleted) ranges', function (done) {
-    DocstoreClient.getTrackedChangesUserIds(
-      this.project_id,
-      (error, res, userIds) => {
-        if (error != null) {
-          throw error
-        }
-        userIds.should.deep.equal(['user-id-1', 'user-id-2'])
-        done()
-      }
     )
+    jobs.unshift(cb => callbackify(DocstoreApp.ensureRunning)(cb))
+    async.series(jobs, done)
   })
 
-  it('getCommentThreadIds should return all the thread ids from (non-deleted) ranges', function (done) {
-    DocstoreClient.getCommentThreadIds(
-      this.project_id,
-      (error, res, threadIds) => {
-        if (error != null) {
-          throw error
-        }
-        threadIds.should.deep.equal({
-          [this.docs[0]._id.toString()]: [this.threadId1],
-          [this.docs[2]._id.toString()]: [this.threadId2],
-        })
-        done()
-      }
+  it('getAllDocs should return all the (non-deleted) docs', async function () {
+    const docs = await DocstoreClient.getAllDocs(this.project_id)
+    docs.length.should.equal(this.docs.length)
+    for (let i = 0; i < docs.length; i++) {
+      const doc = docs[i]
+      doc.lines.should.deep.equal(this.docs[i].lines)
+    }
+  })
+
+  it('getAllRanges should return all the (non-deleted) doc ranges', async function () {
+    const docs = await DocstoreClient.getAllRanges(this.project_id)
+    docs.length.should.equal(this.docs.length)
+    for (let i = 0; i < docs.length; i++) {
+      const doc = docs[i]
+      doc.ranges.should.deep.equal(this.fixedRanges[i])
+    }
+  })
+
+  it('getTrackedChangesUserIds should return all the user ids from (non-deleted) ranges', async function () {
+    const userIds = await DocstoreClient.getTrackedChangesUserIds(
+      this.project_id
     )
+    userIds.should.deep.equal(['user-id-1', 'user-id-2'])
+  })
+
+  it('getCommentThreadIds should return all the thread ids from (non-deleted) ranges', async function () {
+    const threadIds = await DocstoreClient.getCommentThreadIds(this.project_id)
+    threadIds.should.deep.equal({
+      [this.docs[0]._id.toString()]: [this.threadId1],
+      [this.docs[2]._id.toString()]: [this.threadId2],
+    })
   })
 })

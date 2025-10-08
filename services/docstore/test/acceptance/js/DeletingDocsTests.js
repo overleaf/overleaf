@@ -4,6 +4,9 @@ const DocstoreApp = require('./helpers/DocstoreApp')
 const Errors = require('../../../app/js/Errors')
 const Settings = require('@overleaf/settings')
 const { Storage } = require('@google-cloud/storage')
+const { promisify } = require('node:util')
+
+const sleep = promisify(setTimeout)
 
 const DocstoreClient = require('./helpers/DocstoreClient')
 
@@ -24,85 +27,63 @@ function deleteTestSuite(deleteDoc) {
     await storage.bucket(`${Settings.docstore.bucket}-deleted`).delete()
   })
 
-  beforeEach(function (done) {
+  beforeEach(async function () {
     this.project_id = new ObjectId()
     this.doc_id = new ObjectId()
     this.lines = ['original', 'lines']
     this.version = 42
     this.ranges = []
-    DocstoreApp.ensureRunning(() => {
-      DocstoreClient.createDoc(
-        this.project_id,
-        this.doc_id,
-        this.lines,
-        this.version,
-        this.ranges,
-        error => {
-          if (error) {
-            throw error
-          }
-          done()
-        }
-      )
-    })
-  })
-
-  it('should show as not deleted on /deleted', function (done) {
-    DocstoreClient.isDocDeleted(
+    await DocstoreApp.ensureRunning()
+    await DocstoreClient.createDoc(
       this.project_id,
       this.doc_id,
-      (error, res, body) => {
-        if (error) return done(error)
-        expect(res.statusCode).to.equal(200)
-        expect(body).to.have.property('deleted').to.equal(false)
-        done()
-      }
+      this.lines,
+      this.version,
+      this.ranges
     )
   })
 
+  it('should show as not deleted on /deleted', async function () {
+    const { res, body } = await DocstoreClient.isDocDeleted(
+      this.project_id,
+      this.doc_id
+    )
+    expect(res.status).to.equal(200)
+    expect(body).to.have.property('deleted').to.equal(false)
+  })
+
   describe('when the doc exists', function () {
-    beforeEach(function (done) {
-      deleteDoc(this.project_id, this.doc_id, (error, res, doc) => {
-        if (error) return done(error)
-        this.res = res
-        done()
-      })
+    beforeEach(async function () {
+      this.res = await deleteDoc(this.project_id, this.doc_id)
     })
 
-    afterEach(function (done) {
-      db.docs.deleteOne({ _id: this.doc_id }, done)
+    afterEach(async function () {
+      await db.docs.deleteOne({ _id: this.doc_id })
     })
 
-    it('should mark the doc as deleted on /deleted', function (done) {
-      DocstoreClient.isDocDeleted(
+    it('should mark the doc as deleted on /deleted', async function () {
+      const { res, body } = await DocstoreClient.isDocDeleted(
         this.project_id,
-        this.doc_id,
-        (error, res, body) => {
-          if (error) return done(error)
-          expect(res.statusCode).to.equal(200)
-          expect(body).to.have.property('deleted').to.equal(true)
-          done()
-        }
+        this.doc_id
       )
+      expect(res.status).to.equal(200)
+      expect(body).to.have.property('deleted').to.equal(true)
     })
 
-    it('should insert a deleted doc into the docs collection', function (done) {
-      db.docs.find({ _id: this.doc_id }).toArray((error, docs) => {
-        if (error) return done(error)
-        docs[0]._id.should.deep.equal(this.doc_id)
-        docs[0].lines.should.deep.equal(this.lines)
-        docs[0].deleted.should.equal(true)
-        done()
-      })
+    it('should insert a deleted doc into the docs collection', async function () {
+      const docs = await db.docs.find({ _id: this.doc_id }).toArray()
+      docs[0]._id.should.deep.equal(this.doc_id)
+      docs[0].lines.should.deep.equal(this.lines)
+      docs[0].deleted.should.equal(true)
     })
 
-    it('should not export the doc to s3', function (done) {
-      setTimeout(() => {
-        DocstoreClient.getS3Doc(this.project_id, this.doc_id, error => {
-          expect(error).to.be.instanceOf(Errors.NotFoundError)
-          done()
-        })
-      }, 1000)
+    it('should not export the doc to s3', async function () {
+      await sleep(1000)
+      try {
+        await DocstoreClient.getS3Doc(this.project_id, this.doc_id)
+      } catch (error) {
+        expect(error).to.be.instanceOf(Errors.NotFoundError)
+      }
     })
   })
 
@@ -116,12 +97,8 @@ function deleteTestSuite(deleteDoc) {
       Settings.docstore.archiveOnSoftDelete = archiveOnSoftDelete
     })
 
-    beforeEach('delete Doc', function (done) {
-      deleteDoc(this.project_id, this.doc_id, (error, res) => {
-        if (error) return done(error)
-        this.res = res
-        done()
-      })
+    beforeEach('delete Doc', async function () {
+      this.res = await deleteDoc(this.project_id, this.doc_id)
     })
 
     beforeEach(function waitForBackgroundFlush(done) {
@@ -132,81 +109,54 @@ function deleteTestSuite(deleteDoc) {
       db.docs.deleteOne({ _id: this.doc_id }, done)
     })
 
-    it('should set the deleted flag in the doc', function (done) {
-      db.docs.findOne({ _id: this.doc_id }, (error, doc) => {
-        if (error) {
-          return done(error)
-        }
-        expect(doc.deleted).to.equal(true)
-        done()
-      })
+    it('should set the deleted flag in the doc', async function () {
+      const doc = await db.docs.findOne({ _id: this.doc_id })
+      expect(doc.deleted).to.equal(true)
     })
 
-    it('should set inS3 and unset lines and ranges in the doc', function (done) {
-      db.docs.findOne({ _id: this.doc_id }, (error, doc) => {
-        if (error) {
-          return done(error)
-        }
-        expect(doc.lines).to.not.exist
-        expect(doc.ranges).to.not.exist
-        expect(doc.inS3).to.equal(true)
-        done()
-      })
+    it('should set inS3 and unset lines and ranges in the doc', async function () {
+      const doc = await db.docs.findOne({ _id: this.doc_id })
+      expect(doc.lines).to.not.exist
+      expect(doc.ranges).to.not.exist
+      expect(doc.inS3).to.equal(true)
     })
 
-    it('should set the doc in s3 correctly', function (done) {
-      DocstoreClient.getS3Doc(this.project_id, this.doc_id, (error, s3doc) => {
-        if (error) {
-          return done(error)
-        }
-        expect(s3doc.lines).to.deep.equal(this.lines)
-        expect(s3doc.ranges).to.deep.equal(this.ranges)
-        done()
-      })
+    it('should set the doc in s3 correctly', async function () {
+      const s3doc = await DocstoreClient.getS3Doc(this.project_id, this.doc_id)
+      expect(s3doc.lines).to.deep.equal(this.lines)
+      expect(s3doc.ranges).to.deep.equal(this.ranges)
     })
   })
 
   describe('when the doc exists in another project', function () {
     const otherProjectId = new ObjectId()
 
-    it('should show as not existing on /deleted', function (done) {
-      DocstoreClient.isDocDeleted(otherProjectId, this.doc_id, (error, res) => {
-        if (error) return done(error)
-        expect(res.statusCode).to.equal(404)
-        done()
-      })
+    it('should show as not existing on /deleted', async function () {
+      expect(DocstoreClient.isDocDeleted(otherProjectId, this.doc_id))
+        .to.eventually.be.rejected.and.have.property('info')
+        .to.contain({ status: 404 })
     })
 
-    it('should return a 404 when trying to delete', function (done) {
-      deleteDoc(otherProjectId, this.doc_id, (error, res) => {
-        if (error) return done(error)
-        expect(res.statusCode).to.equal(404)
-        done()
-      })
+    it('should return a 404 when trying to delete', async function () {
+      expect(deleteDoc(otherProjectId, this.doc_id))
+        .to.eventually.be.rejected.and.have.property('info')
+        .to.contain({ status: 404 })
     })
   })
 
   describe('when the doc does not exist', function () {
-    it('should show as not existing on /deleted', function (done) {
+    it('should show as not existing on /deleted', async function () {
       const missingDocId = new ObjectId()
-      DocstoreClient.isDocDeleted(
-        this.project_id,
-        missingDocId,
-        (error, res) => {
-          if (error) return done(error)
-          expect(res.statusCode).to.equal(404)
-          done()
-        }
-      )
+      expect(DocstoreClient.isDocDeleted(this.project_id, missingDocId))
+        .to.eventually.be.rejected.and.have.property('info')
+        .to.contain({ status: 404 })
     })
 
-    it('should return a 404', function (done) {
+    it('should return a 404', async function () {
       const missingDocId = new ObjectId()
-      deleteDoc(this.project_id, missingDocId, (error, res, doc) => {
-        if (error) return done(error)
-        res.statusCode.should.equal(404)
-        done()
-      })
+      await expect(deleteDoc(this.project_id, missingDocId))
+        .to.eventually.be.rejected.and.have.property('info')
+        .to.contain({ status: 404 })
     })
   })
 }
@@ -215,21 +165,17 @@ describe('Delete via PATCH', function () {
   deleteTestSuite(DocstoreClient.deleteDoc)
 
   describe('when providing a custom doc name in the delete request', function () {
-    beforeEach(function (done) {
-      DocstoreClient.deleteDocWithName(
+    beforeEach(async function () {
+      await DocstoreClient.deleteDocWithName(
         this.project_id,
         this.doc_id,
-        'wombat.tex',
-        done
+        'wombat.tex'
       )
     })
 
-    it('should insert the doc name into the docs collection', function (done) {
-      db.docs.find({ _id: this.doc_id }).toArray((error, docs) => {
-        if (error) return done(error)
-        expect(docs[0].name).to.equal('wombat.tex')
-        done()
-      })
+    it('should insert the doc name into the docs collection', async function () {
+      const docs = await db.docs.find({ _id: this.doc_id }).toArray()
+      expect(docs[0].name).to.equal('wombat.tex')
     })
   })
 
@@ -239,172 +185,130 @@ describe('Delete via PATCH', function () {
       setTimeout(done, 5)
     })
 
-    beforeEach('perform deletion with past date', function (done) {
-      DocstoreClient.deleteDocWithDate(
+    beforeEach('perform deletion with past date', async function () {
+      await DocstoreClient.deleteDocWithDate(
         this.project_id,
         this.doc_id,
-        this.deletedAt,
-        done
+        this.deletedAt
       )
     })
 
-    it('should insert the date into the docs collection', function (done) {
-      db.docs.find({ _id: this.doc_id }).toArray((error, docs) => {
-        if (error) return done(error)
-        expect(docs[0].deletedAt.toISOString()).to.equal(
-          this.deletedAt.toISOString()
-        )
-        done()
-      })
+    it('should insert the date into the docs collection', async function () {
+      const docs = await db.docs.find({ _id: this.doc_id }).toArray()
+      expect(docs[0].deletedAt.toISOString()).to.equal(
+        this.deletedAt.toISOString()
+      )
     })
   })
 
   describe('when providing no doc name in the delete request', function () {
-    beforeEach(function (done) {
-      DocstoreClient.deleteDocWithName(
-        this.project_id,
-        this.doc_id,
-        '',
-        (error, res) => {
-          this.res = res
-          done(error)
-        }
-      )
-    })
-
     it('should reject the request', function () {
-      expect(this.res.statusCode).to.equal(400)
+      expect(DocstoreClient.deleteDocWithName(this.project_id, this.doc_id))
+        .to.eventually.be.rejected.and.have.property('info')
+        .to.contain({ status: 400 })
     })
   })
 
   describe('when providing no date in the delete request', function () {
-    beforeEach(function (done) {
-      DocstoreClient.deleteDocWithDate(
-        this.project_id,
-        this.doc_id,
-        '',
-        (error, res) => {
-          this.res = res
-          done(error)
-        }
-      )
-    })
-
     it('should reject the request', function () {
-      expect(this.res.statusCode).to.equal(400)
+      expect(DocstoreClient.deleteDocWithDate(this.project_id, this.doc_id))
+        .to.eventually.be.rejected.and.have.property('info')
+        .to.contain({ status: 400 })
     })
   })
 
   describe('before deleting anything', function () {
-    it('should show nothing in deleted docs response', function (done) {
-      DocstoreClient.getAllDeletedDocs(
-        this.project_id,
-        (error, deletedDocs) => {
-          if (error) return done(error)
-          expect(deletedDocs).to.deep.equal([])
-          done()
-        }
+    it('should show nothing in deleted docs response', async function () {
+      const deletedDocs = await DocstoreClient.getAllDeletedDocs(
+        this.project_id
       )
+      expect(deletedDocs).to.deep.equal([])
     })
   })
 
   describe('when the doc gets a name on delete', function () {
-    beforeEach(function (done) {
+    beforeEach(async function () {
       this.deletedAt = new Date()
-      DocstoreClient.deleteDocWithDate(
+      await DocstoreClient.deleteDocWithDate(
         this.project_id,
         this.doc_id,
-        this.deletedAt,
-        done
+        this.deletedAt
       )
     })
 
-    it('should show the doc in deleted docs response', function (done) {
-      DocstoreClient.getAllDeletedDocs(
-        this.project_id,
-        (error, deletedDocs) => {
-          if (error) return done(error)
-          expect(deletedDocs).to.deep.equal([
-            {
-              _id: this.doc_id.toString(),
-              name: 'main.tex',
-              deletedAt: this.deletedAt.toISOString(),
-            },
-          ])
-          done()
-        }
+    it('should show the doc in deleted docs response', async function () {
+      const deletedDocs = await DocstoreClient.getAllDeletedDocs(
+        this.project_id
       )
+      expect(deletedDocs).to.deep.equal([
+        {
+          _id: this.doc_id.toString(),
+          name: 'main.tex',
+          deletedAt: this.deletedAt.toISOString(),
+        },
+      ])
     })
 
     describe('after deleting multiple docs', function () {
-      beforeEach('create doc2', function (done) {
+      beforeEach('create doc2', async function () {
         this.doc_id2 = new ObjectId()
-        DocstoreClient.createDoc(
+        await DocstoreClient.createDoc(
           this.project_id,
           this.doc_id2,
           this.lines,
           this.version,
-          this.ranges,
-          done
+          this.ranges
         )
       })
-      beforeEach('delete doc2', function (done) {
+      beforeEach('delete doc2', async function () {
         this.deletedAt2 = new Date()
-        DocstoreClient.deleteDocWithDateAndName(
+        await DocstoreClient.deleteDocWithDateAndName(
           this.project_id,
           this.doc_id2,
           this.deletedAt2,
-          'two.tex',
-          done
+          'two.tex'
         )
       })
-      beforeEach('create doc3', function (done) {
+      beforeEach('create doc3', async function () {
         this.doc_id3 = new ObjectId()
-        DocstoreClient.createDoc(
+        await DocstoreClient.createDoc(
           this.project_id,
           this.doc_id3,
           this.lines,
           this.version,
-          this.ranges,
-          done
+          this.ranges
         )
       })
-      beforeEach('delete doc3', function (done) {
+      beforeEach('delete doc3', async function () {
         this.deletedAt3 = new Date()
-        DocstoreClient.deleteDocWithDateAndName(
+        await DocstoreClient.deleteDocWithDateAndName(
           this.project_id,
           this.doc_id3,
           this.deletedAt3,
-          'three.tex',
-          done
+          'three.tex'
         )
       })
-      it('should show all the docs as deleted', function (done) {
-        DocstoreClient.getAllDeletedDocs(
-          this.project_id,
-          (error, deletedDocs) => {
-            if (error) return done(error)
-
-            expect(deletedDocs).to.deep.equal([
-              {
-                _id: this.doc_id3.toString(),
-                name: 'three.tex',
-                deletedAt: this.deletedAt3.toISOString(),
-              },
-              {
-                _id: this.doc_id2.toString(),
-                name: 'two.tex',
-                deletedAt: this.deletedAt2.toISOString(),
-              },
-              {
-                _id: this.doc_id.toString(),
-                name: 'main.tex',
-                deletedAt: this.deletedAt.toISOString(),
-              },
-            ])
-            done()
-          }
+      it('should show all the docs as deleted', async function () {
+        const deletedDocs = await DocstoreClient.getAllDeletedDocs(
+          this.project_id
         )
+        expect(deletedDocs).to.deep.equal([
+          {
+            _id: this.doc_id3.toString(),
+            name: 'three.tex',
+            deletedAt: this.deletedAt3.toISOString(),
+          },
+          {
+            _id: this.doc_id2.toString(),
+            name: 'two.tex',
+            deletedAt: this.deletedAt2.toISOString(),
+          },
+          {
+            _id: this.doc_id.toString(),
+            name: 'main.tex',
+            deletedAt: this.deletedAt.toISOString(),
+          },
+        ])
       })
 
       describe('with one more than max_deleted_docs permits', function () {
@@ -417,28 +321,23 @@ describe('Delete via PATCH', function () {
           Settings.max_deleted_docs = maxDeletedDocsBefore
         })
 
-        it('should omit the first deleted doc', function (done) {
-          DocstoreClient.getAllDeletedDocs(
-            this.project_id,
-            (error, deletedDocs) => {
-              if (error) return done(error)
-
-              expect(deletedDocs).to.deep.equal([
-                {
-                  _id: this.doc_id3.toString(),
-                  name: 'three.tex',
-                  deletedAt: this.deletedAt3.toISOString(),
-                },
-                {
-                  _id: this.doc_id2.toString(),
-                  name: 'two.tex',
-                  deletedAt: this.deletedAt2.toISOString(),
-                },
-                // dropped main.tex
-              ])
-              done()
-            }
+        it('should omit the first deleted doc', async function () {
+          const deletedDocs = await DocstoreClient.getAllDeletedDocs(
+            this.project_id
           )
+          expect(deletedDocs).to.deep.equal([
+            {
+              _id: this.doc_id3.toString(),
+              name: 'three.tex',
+              deletedAt: this.deletedAt3.toISOString(),
+            },
+            {
+              _id: this.doc_id2.toString(),
+              name: 'two.tex',
+              deletedAt: this.deletedAt2.toISOString(),
+            },
+            // dropped main.tex
+          ])
         })
       })
     })
@@ -446,66 +345,54 @@ describe('Delete via PATCH', function () {
 })
 
 describe("Destroying a project's documents", function () {
-  beforeEach(function (done) {
+  beforeEach(async function () {
     this.project_id = new ObjectId()
     this.doc_id = new ObjectId()
     this.lines = ['original', 'lines']
     this.version = 42
     this.ranges = []
-    DocstoreApp.ensureRunning(() => {
-      DocstoreClient.createDoc(
-        this.project_id,
-        this.doc_id,
-        this.lines,
-        this.version,
-        this.ranges,
-        error => {
-          if (error) {
-            throw error
-          }
-          done()
-        }
-      )
-    })
+    await DocstoreApp.ensureRunning()
+    await DocstoreClient.createDoc(
+      this.project_id,
+      this.doc_id,
+      this.lines,
+      this.version,
+      this.ranges
+    )
   })
 
   describe('when the doc exists', function () {
-    beforeEach(function (done) {
-      DocstoreClient.destroyAllDoc(this.project_id, done)
+    beforeEach(async function () {
+      await DocstoreClient.destroyAllDoc(this.project_id)
     })
 
-    it('should remove the doc from the docs collection', function (done) {
-      db.docs.find({ _id: this.doc_id }).toArray((err, docs) => {
-        expect(err).not.to.exist
-        expect(docs).to.deep.equal([])
-        done()
-      })
+    it('should remove the doc from the docs collection', async function () {
+      const docs = await db.docs.find({ _id: this.doc_id }).toArray()
+      expect(docs).to.deep.equal([])
     })
   })
 
   describe('when the doc is archived', function () {
-    beforeEach(function (done) {
-      DocstoreClient.archiveAllDoc(this.project_id, err => {
-        if (err) {
-          return done(err)
-        }
-        DocstoreClient.destroyAllDoc(this.project_id, done)
-      })
+    beforeEach(async function () {
+      try {
+        await DocstoreClient.archiveAllDoc(this.project_id)
+      } catch (error) {
+        // noop
+      }
+      await DocstoreClient.destroyAllDoc(this.project_id)
     })
 
-    it('should remove the doc from the docs collection', function (done) {
-      db.docs.find({ _id: this.doc_id }).toArray((err, docs) => {
-        expect(err).not.to.exist
-        expect(docs).to.deep.equal([])
-        done()
-      })
+    it('should remove the doc from the docs collection', async function () {
+      const docs = await db.docs.find({ _id: this.doc_id }).toArray()
+      expect(docs).to.deep.equal([])
     })
 
-    it('should remove the doc contents from s3', function (done) {
-      DocstoreClient.getS3Doc(this.project_id, this.doc_id, error => {
+    it('should remove the doc contents from s3', async function () {
+      try {
+        await DocstoreClient.getS3Doc(this.project_id, this.doc_id)
+      } catch (error) {
         expect(error).to.be.instanceOf(Errors.NotFoundError)
-        done()
-      })
+      }
     })
   })
 })
