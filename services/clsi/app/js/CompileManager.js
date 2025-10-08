@@ -23,6 +23,7 @@ const {
   downloadLatestCompileCache,
   downloadOutputDotSynctexFromCompileCache,
 } = require('./CLSICacheHandler')
+const StatsManager = require('./StatsManager')
 const { callbackifyMultiResult } = require('@overleaf/promise-utils')
 
 const COMPILE_TIME_BUCKETS = [
@@ -191,6 +192,26 @@ async function doCompile(request, stats, timings) {
   Metrics.inc(`compiles-with-image.${tag}`, 1, request.metricsOpts)
   const compileName = getCompileName(request.project_id, request.user_id)
 
+  // Record latexmk -time stats for a subset of users
+  const recordPerformanceMetrics =
+    request.user_id != null &&
+    Settings.performanceLogSamplingPercentage > 0 &&
+    StatsManager.sampleByHash(
+      request.user_id,
+      Settings.performanceLogSamplingPercentage
+    )
+  // For selected users, define a `latexmk` property on the stats object
+  // to collect latexmk -time stats.
+  if (recordPerformanceMetrics) {
+    // To prevent any changes to the existing compile responses being sent
+    // to web, exclude latexmk stats from being exported by marking them
+    // non-enumerable. This prevents them being serialised by JSON.stringify().
+    Object.defineProperty(stats, 'latexmk', {
+      value: {},
+      enumerable: false,
+    })
+  }
+
   try {
     await LatexRunner.promises.runLatex(compileName, {
       directory: compileDir,
@@ -257,11 +278,15 @@ async function doCompile(request, stats, timings) {
   Metrics.inc('compiles-succeeded', 1, request.metricsOpts)
   for (const metricKey in stats) {
     const metricValue = stats[metricKey]
-    Metrics.count(metricKey, metricValue, 1, request.metricsOpts)
+    if (typeof metricValue === 'number') {
+      Metrics.count(metricKey, metricValue, 1, request.metricsOpts)
+    }
   }
   for (const metricKey in timings) {
     const metricValue = timings[metricKey]
-    Metrics.timing(metricKey, metricValue, 1, request.metricsOpts)
+    if (typeof metricValue === 'number') {
+      Metrics.timing(metricKey, metricValue, 1, request.metricsOpts)
+    }
   }
   const loadavg = typeof os.loadavg === 'function' ? os.loadavg() : undefined
   if (loadavg != null) {
@@ -318,6 +343,27 @@ async function doCompile(request, stats, timings) {
 
   if (stats['pdf-size']) {
     emitPdfStats(stats, timings, request)
+  }
+
+  // Record compile performance for a subset of users
+  if (recordPerformanceMetrics) {
+    logger.info(
+      {
+        userId: request.user_id,
+        projectId: request.project_id,
+        timeTaken: ts,
+        clsiRequest: request,
+        stats,
+        timings,
+        // explicitly include latexmk stats to bypass the non-enumerable property
+        latexmk: stats.latexmk,
+        loadavg1m: loadavg?.[0],
+        loadavg5m: loadavg?.[1],
+        loadavg15m: loadavg?.[2],
+        samplingPercentage: Settings.performanceLogSamplingPercentage,
+      },
+      'sampled performance log'
+    )
   }
 
   return { outputFiles, buildId }

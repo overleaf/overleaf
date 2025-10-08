@@ -1,6 +1,8 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
+const fs = require('node:fs')
+const path = require('node:path')
 
 const MODULE_PATH = require('node:path').join(
   __dirname,
@@ -87,6 +89,7 @@ describe('LatexRunner', function () {
             '-outdir=$COMPILE_DIR',
             '-synctex=1',
             '-interaction=batchmode',
+            '-time',
             '-f',
             '-pdf',
             '$COMPILE_DIR/main-file.tex',
@@ -140,6 +143,7 @@ describe('LatexRunner', function () {
           '-outdir=$COMPILE_DIR',
           '-synctex=1',
           '-interaction=batchmode',
+          '-time',
           '-f',
           '-lualatex',
           '$COMPILE_DIR/main-file.tex',
@@ -209,10 +213,74 @@ describe('LatexRunner', function () {
           '-outdir=$COMPILE_DIR',
           '-synctex=1',
           '-interaction=batchmode',
+          '-time',
           '-halt-on-error',
           '-pdf',
           '$COMPILE_DIR/main-file.tex',
         ])
+      })
+    })
+
+    describe('with old latexmk timing output', function () {
+      beforeEach(function (done) {
+        this.commandRunnerOutput.stdout = fs.readFileSync(
+          path.join(__dirname, 'fixtures', 'latexmk1.txt'),
+          'utf-8'
+        )
+        // pass in the `latexmk` property to signal that we want to receive parsed stats
+        this.stats.latexmk = {}
+        this.call(done)
+      })
+
+      it('should parse latexmk 4.52c (2017) timing information', function () {
+        expect(this.stats.latexmk).to.deep.equal({
+          'latexmk-rule-times': [
+            { rule: 'makeindex', time_ms: 30 },
+            { rule: 'bibtex', time_ms: 40 },
+            { rule: 'latex', time_ms: 690 },
+            { rule: 'makeindex', time_ms: 40 },
+            { rule: 'bibtex', time_ms: 39 },
+            { rule: 'latex', time_ms: 750 },
+            { rule: 'makeindex', time_ms: 39 },
+            { rule: 'bibtex', time_ms: 20 },
+            { rule: 'latex', time_ms: 770 },
+          ],
+          'latexmk-rule-signature':
+            'makeindex,bibtex,latex,makeindex,bibtex,latex,makeindex,bibtex,latex',
+          'latexmk-rules-run': 9,
+          'latexmk-time': { total: 2930 },
+        })
+      })
+    })
+
+    describe('with modern latexmk timing output', function () {
+      beforeEach(function (done) {
+        this.commandRunnerOutput.stdout = fs.readFileSync(
+          path.join(__dirname, 'fixtures', 'latexmk2.txt'),
+          'utf-8'
+        )
+        // pass in the `latexmk` property to signal that we want to receive parsed stats
+        this.stats.latexmk = {}
+        this.call(done)
+      })
+
+      it('should parse latexmk 4.83 (2024) timing information', function () {
+        expect(this.stats.latexmk).to.deep.equal({
+          'latexmk-rule-times': [
+            { rule: 'latex', time_ms: 1880 },
+            { rule: 'makeindex', time_ms: 50 },
+            { rule: 'bibtex', time_ms: 50 },
+            { rule: 'latex', time_ms: 2180 },
+          ],
+          'latexmk-rule-signature': 'latex,makeindex,bibtex,latex',
+          'latexmk-time': {
+            total: 4770,
+            invoked: 4160,
+            other: 610,
+          },
+          'latexmk-clock-time': 4870,
+          'latexmk-rules-run': 4,
+        })
       })
     })
   })

@@ -1,0 +1,7 @@
+'latex': time = 1.88
+'makeindex TeXbyTopic.idx': time = 0.05
+'bibtex TeXbyTopic': time = 0.05
+'latex': time = 2.18
+Processing time = 4.77, of which invoked processes = 4.16, other = 0.61.
+Elapsed clock time = 4.87.
+Number of rules run = 4

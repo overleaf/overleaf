@@ -81,6 +81,8 @@ module.exports = {
   pdfCachingWorkerPoolBackLogLimit:
     parseInt(process.env.PDF_CACHING_WORKER_POOL_BACK_LOG_LIMIT, 10) || 40,
   compileConcurrencyLimit: isPreEmptible ? 32 : 64,
+  performanceLogSamplingPercentage:
+    parseFloat(process.env.CLSI_PERFORMANCE_LOG_SAMPLING, 10) || 0,
 }
 
 if (process.env.ALLOWED_COMPILE_GROUPS) {

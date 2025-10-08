@@ -6,6 +6,9 @@ const ContentController = require('./app/js/ContentController')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 logger.initialize('clsi')
+const LoggerSerializers = require('./app/js/LoggerSerializers')
+logger.logger.serializers.clsiRequest = LoggerSerializers.clsiRequest
+
 const Metrics = require('@overleaf/metrics')
 
 const smokeTest = require('./test/smoke/js/SmokeTests')

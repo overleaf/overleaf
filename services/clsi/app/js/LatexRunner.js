@@ -3,15 +3,16 @@ const { promisify } = require('node:util')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const CommandRunner = require('./CommandRunner')
+const { addLatexMkMetrics } = require('./LatexMetrics')
 const fs = require('node:fs')
 
 const ProcessTable = {} // table of currently running jobs (pids or docker container names)
 
-const TIME_V_METRICS = Object.entries({
-  'cpu-percent': /Percent of CPU this job got: (\d+)/m,
-  'cpu-time': /User time.*: (\d+.\d+)/m,
-  'sys-time': /System time.*: (\d+.\d+)/m,
-})
+const TIME_V_METRICS = [
+  ['cpu-percent', /Percent of CPU this job got: (\d+)/m],
+  ['cpu-time', /User time.*: (\d+.\d+)/m],
+  ['sys-time', /System time.*: (\d+.\d+)/m],
+]
 
 const COMPILER_FLAGS = {
   latex: '-pdfdvi',
@@ -75,6 +76,14 @@ function runLatex(projectId, options, callback) {
       if (error) {
         return callback(error)
       }
+      if (stats.latexmk) {
+        try {
+          addLatexMkMetrics(output, stats)
+        } catch (err) {
+          logger.error({ err, projectId }, 'error adding latexmk metrics')
+        }
+      }
+      // number of latex runs and whether there were errors
       const runs =
         output?.stderr?.match(/^Run number \d+ of .*latex/gm)?.length || 0
       const failed = output?.stdout?.match(/^Latexmk: Errors/m) != null ? 1 : 0
@@ -161,7 +170,8 @@ function _buildLatexCommand(mainFile, opts = {}) {
     '-auxdir=$COMPILE_DIR',
     '-outdir=$COMPILE_DIR',
     '-synctex=1',
-    '-interaction=batchmode'
+    '-interaction=batchmode',
+    '-time'
   )
 
   // Stop on first error option

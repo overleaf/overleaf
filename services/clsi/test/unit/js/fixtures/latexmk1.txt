@@ -1,0 +1,12 @@
+Latexmk: Found bibliography file(s) [tex.bib]
+Latexmk: All targets (TeXbyTopic.dvi) are up-to-date
+'makeindex  -o "TeXbyTopic.ind" "TeXbyTopic.idx"': time = 0.03
+'bibtex  "TeXbyTopic"': time = 0.04
+'latex  -recorder  "TeXbyTopic.tex"': time = 0.69
+'makeindex  -o "TeXbyTopic.ind" "TeXbyTopic.idx"': time = 0.04
+'bibtex  "TeXbyTopic"': time = 0.0399999999999998
+'latex  -recorder  "TeXbyTopic.tex"': time = 0.75
+'makeindex  -o "TeXbyTopic.ind" "TeXbyTopic.idx"': time = 0.0399999999999996
+'bibtex  "TeXbyTopic"': time = 0.02
+'latex  -recorder  "TeXbyTopic.tex"': time = 0.77
+Accumulated processing time = 2.93

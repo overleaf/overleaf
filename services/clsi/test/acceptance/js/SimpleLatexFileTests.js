@@ -67,4 +67,31 @@ Hello world
       })
       .should.equal(true)
   })
+
+  it('should return only the expected keys for stats and timings', function () {
+    const { stats, timings } = this.body.compile
+    // Note: chai's all.keys assertion rejects extra keys
+    stats.should.have.all.keys(
+      'isInitialCompile',
+      'latexmk-errors',
+      'latex-runs',
+      'latex-runs-with-errors',
+      'latex-runs-2',
+      'latex-runs-with-errors-2',
+      'pdf-caching-total-ranges-size',
+      'pdf-caching-reclaimed-space',
+      'pdf-caching-new-ranges-size',
+      'pdf-caching-n-ranges',
+      'pdf-caching-n-new-ranges',
+      'pdf-size'
+    )
+    timings.should.have.all.keys(
+      'sync',
+      'compile',
+      'output',
+      'compileE2E',
+      'compute-pdf-caching',
+      'pdf-caching-overhead-delete-stale-hashes'
+    )
+  })
 })
