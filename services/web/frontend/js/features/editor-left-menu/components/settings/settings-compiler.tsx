@@ -3,15 +3,20 @@ import type { ProjectCompiler } from '../../../../../../types/project-settings'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { useProjectSettingsContext } from '../../context/project-settings-context'
 import SettingsMenuSelect from './settings-menu-select'
+import { useSetCompilationSettingWithEvent } from '../../hooks/use-set-compilation-setting'
 
 export default function SettingsCompiler() {
   const { t } = useTranslation()
   const { write } = usePermissionsContext()
   const { compiler, setCompiler } = useProjectSettingsContext()
+  const changeCompiler = useSetCompilationSettingWithEvent(
+    'compiler',
+    setCompiler
+  )
 
   return (
     <SettingsMenuSelect<ProjectCompiler>
-      onChange={setCompiler}
+      onChange={changeCompiler}
       value={compiler}
       disabled={!write}
       options={[

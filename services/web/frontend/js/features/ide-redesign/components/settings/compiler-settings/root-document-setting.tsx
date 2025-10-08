@@ -6,12 +6,18 @@ import { useTranslation } from 'react-i18next'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { isValidTeXFile } from '@/main/is-valid-tex-file'
+import { useSetCompilationSettingWithEvent } from '@/features/editor-left-menu/hooks/use-set-compilation-setting'
 
 export default function RootDocumentSetting() {
   const { rootDocId, setRootDocId } = useProjectSettingsContext()
   const { t } = useTranslation()
   const { write } = usePermissionsContext()
   const { docs } = useFileTreeData()
+  const changeRootDocId = useSetCompilationSettingWithEvent(
+    'root-doc-id',
+    setRootDocId,
+    { omitValueInEvent: true }
+  )
 
   const validDocsOptions = useMemo(() => {
     const filteredDocs =
@@ -42,7 +48,7 @@ export default function RootDocumentSetting() {
       description={t('the_primary_file_for_compiling_your_project')}
       disabled={!write}
       options={validDocsOptions}
-      onChange={setRootDocId}
+      onChange={changeRootDocId}
       value={rootDocId ?? ''}
       translateOptions="no"
     />

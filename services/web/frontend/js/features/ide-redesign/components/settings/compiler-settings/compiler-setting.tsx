@@ -4,6 +4,7 @@ import type { Option } from '../dropdown-setting'
 import { useTranslation } from 'react-i18next'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { ProjectCompiler } from '../../../../../../../types/project-settings'
+import { useSetCompilationSettingWithEvent } from '@/features/editor-left-menu/hooks/use-set-compilation-setting'
 
 const OPTIONS: Option<ProjectCompiler>[] = [
   {
@@ -28,6 +29,10 @@ export default function CompilerSetting() {
   const { compiler, setCompiler } = useProjectSettingsContext()
   const { t } = useTranslation()
   const { write } = usePermissionsContext()
+  const changeCompiler = useSetCompilationSettingWithEvent(
+    'compiler',
+    setCompiler
+  )
 
   return (
     <DropdownSetting
@@ -36,7 +41,7 @@ export default function CompilerSetting() {
       description={t('the_latex_engine_used_for_compiling')}
       disabled={!write}
       options={OPTIONS}
-      onChange={setCompiler}
+      onChange={changeCompiler}
       value={compiler}
       translateOptions="no"
     />

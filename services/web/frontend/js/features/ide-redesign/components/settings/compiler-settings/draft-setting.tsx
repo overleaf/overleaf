@@ -1,22 +1,15 @@
 import { useTranslation } from 'react-i18next'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
-import { useCallback, useMemo } from 'react'
-import * as eventTracking from '../../../../../infrastructure/event-tracking'
+import { useMemo } from 'react'
 import DropdownSetting from '../dropdown-setting'
+import { useSetCompilationSettingWithEvent } from '@/features/editor-left-menu/hooks/use-set-compilation-setting'
 
 export default function DraftSetting() {
   const { draft, setDraft } = useCompileContext()
   const { t } = useTranslation()
-
-  const sendEventAndSet = useCallback(
-    (value: boolean) => {
-      eventTracking.sendMB('recompile-setting-changed', {
-        setting: 'compile-mode',
-        settingVal: value,
-      })
-      setDraft(value)
-    },
-    [setDraft]
+  const changeDraft = useSetCompilationSettingWithEvent(
+    'compile-mode',
+    setDraft
   )
 
   const options = useMemo(
@@ -37,7 +30,7 @@ export default function DraftSetting() {
       options={options}
       description={t('switch_compile_mode_for_faster_draft_compilation')}
       value={draft}
-      onChange={sendEventAndSet}
+      onChange={changeDraft}
     />
   )
 }

@@ -5,11 +5,16 @@ import { useTranslation } from 'react-i18next'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { useMemo } from 'react'
 import getMeta from '@/utils/meta'
+import { useSetCompilationSettingWithEvent } from '@/features/editor-left-menu/hooks/use-set-compilation-setting'
 
 export default function ImageNameSetting() {
   const { imageName, setImageName } = useProjectSettingsContext()
   const { t } = useTranslation()
   const { write } = usePermissionsContext()
+  const changeImageName = useSetCompilationSettingWithEvent(
+    'image-name',
+    setImageName
+  )
 
   const imageNames = useMemo(() => getMeta('ol-imageNames') || [], [])
 
@@ -36,7 +41,7 @@ export default function ImageNameSetting() {
       description={t('the_version_of_tex_live_used_for_compiling')}
       disabled={!write}
       options={options}
-      onChange={setImageName}
+      onChange={changeImageName}
       value={imageName}
       translateOptions="no"
     />

@@ -6,12 +6,18 @@ import { useProjectSettingsContext } from '../../context/project-settings-contex
 import SettingsMenuSelect from './settings-menu-select'
 import type { Option } from './settings-menu-select'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
+import { useSetCompilationSettingWithEvent } from '../../hooks/use-set-compilation-setting'
 
 export default function SettingsDocument() {
   const { t } = useTranslation()
   const { write } = usePermissionsContext()
   const { docs } = useFileTreeData()
   const { rootDocId, setRootDocId } = useProjectSettingsContext()
+  const changeRootDoc = useSetCompilationSettingWithEvent(
+    'root-doc-id',
+    setRootDocId,
+    { omitValueInEvent: true }
+  )
 
   const validDocsOptions = useMemo(() => {
     const filteredDocs =
@@ -37,7 +43,7 @@ export default function SettingsDocument() {
 
   return (
     <SettingsMenuSelect
-      onChange={setRootDocId}
+      onChange={changeRootDoc}
       value={rootDocId ?? ''}
       disabled={!write}
       options={validDocsOptions}
