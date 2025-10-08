@@ -1,7 +1,6 @@
 // @ts-check
 const { ObjectId } = require('mongodb-legacy')
 const _ = require('lodash')
-const { promisify } = require('util')
 const Settings = require('@overleaf/settings')
 
 /**
@@ -20,11 +19,8 @@ module.exports = {
   isArchived,
   isTrashed,
   isArchivedOrTrashed,
-  ensureNameIsUnique,
   getAllowedImagesForUser,
-  promises: {
-    ensureNameIsUnique: promisify(ensureNameIsUnique),
-  },
+  ensureNameIsUnique,
 }
 
 function compilerFromV1Engine(engine) {
@@ -67,8 +63,9 @@ function isArchivedOrTrashed(project, userId) {
  * @param {string} name
  * @param {string[]} suffixes
  * @param {number} maxLength
+ * @returns string
  */
-function ensureNameIsUnique(nameList, name, suffixes, maxLength, callback) {
+function ensureNameIsUnique(nameList, name, suffixes, maxLength) {
   // create a set of all project names
   if (suffixes == null) {
     suffixes = []
@@ -77,21 +74,21 @@ function ensureNameIsUnique(nameList, name, suffixes, maxLength, callback) {
   const isUnique = x => !allNames.has(x)
   // check if the supplied name is already unique
   if (isUnique(name)) {
-    return callback(null, name)
+    return name
   }
   // the name already exists, try adding the user-supplied suffixes to generate a unique name
   for (const suffix of suffixes) {
     const candidateName = _addSuffixToProjectName(name, suffix, maxLength)
     if (isUnique(candidateName)) {
-      return callback(null, candidateName)
+      return candidateName
     }
   }
   // if there are no (more) suffixes, use a numeric one
   const uniqueName = _addNumericSuffixToProjectName(name, allNames, maxLength)
   if (uniqueName != null) {
-    callback(null, uniqueName)
+    return uniqueName
   } else {
-    callback(new Error(`Failed to generate a unique name for: ${name}`))
+    throw new Error(`Failed to generate a unique name for: ${name}`)
   }
 }
 
