@@ -128,7 +128,7 @@ services:
     build:
       dockerfile_inline: |
         FROM node:22.18.0
-        RUN wget -O /certgen "https://github.com/minio/certgen/releases/download/v1.3.0/certgen-linux-$(dpkg --print-architecture)"
+        RUN wget -O /certgen "https://github.com/minio/certgen/releases/download/v1.3.0/certgen-linux-"`dpkg --print-architecture`
         RUN chmod +x /certgen
     volumes:
       - minio-certs:/certs
