@@ -1,9 +1,6 @@
-const request = require('request')
 const settings = require('@overleaf/settings')
-const _ = require('lodash')
 const logger = require('@overleaf/logger')
-const { URL } = require('url')
-const { promisify, promisifyMultiResult } = require('@overleaf/promise-utils')
+const { fetchJson } = require('@overleaf/fetch-utils')
 
 const DEFAULT_CURRENCY_CODE = 'USD'
 
@@ -65,7 +62,9 @@ const EuroCountries = [
   'ES',
 ]
 
-_.forEach(EuroCountries, country => (currencyMappings[country] = 'EUR'))
+for (const country of EuroCountries) {
+  currencyMappings[country] = 'EUR'
+}
 
 function isValidCurrencyParam(currency) {
   if (!currency) {
@@ -74,54 +73,42 @@ function isValidCurrencyParam(currency) {
   return validCurrencyParams.includes(currency)
 }
 
-function getDetails(ip, callback) {
+async function getDetails(ip, callback) {
   if (!ip) {
     return callback(new Error('no ip passed'))
   }
   ip = ip.trim().split(' ')[0]
-  const opts = {
-    url: new URL(ip, settings.apis.geoIpLookup.url).href,
-    timeout: 1000,
-    json: true,
-  }
-  logger.debug({ ip, opts }, 'getting geo ip details')
-  request.get(opts, function (err, res, ipDetails) {
-    if (err) {
-      logger.warn({ err, ip }, 'error getting ip details')
-    }
-    callback(err, ipDetails)
-  })
+  const url = new URL(settings.apis.geoIpLookup.url)
+  url.pathname += ip
+  logger.debug({ ip, url }, 'getting geo ip details')
+  return await fetchJson(url, { signal: AbortSignal.timeout(1_000) })
 }
 
-function getCurrencyCode(ip, callback) {
-  getDetails(ip, function (err, ipDetails) {
-    if (err || !ipDetails) {
-      logger.err(
-        { err, ip },
-        `problem getting currencyCode for ip, defaulting to ${DEFAULT_CURRENCY_CODE}`
-      )
-      return callback(null, DEFAULT_CURRENCY_CODE)
-    }
-    const countryCode =
-      ipDetails && ipDetails.country_code
-        ? ipDetails.country_code.toUpperCase()
-        : undefined
-    const currencyCode = currencyMappings[countryCode] || DEFAULT_CURRENCY_CODE
-    logger.debug({ ip, currencyCode, ipDetails }, 'got currencyCode for ip')
-    callback(err, currencyCode, countryCode)
-  })
+async function getCurrencyCode(ip) {
+  let ipDetails
+  try {
+    ipDetails = await getDetails(ip)
+  } catch (err) {
+    logger.err(
+      { err, ip },
+      `problem getting currencyCode for ip, defaulting to ${DEFAULT_CURRENCY_CODE}`
+    )
+    return { currencyCode: DEFAULT_CURRENCY_CODE }
+  }
+  const countryCode =
+    ipDetails && ipDetails.country_code
+      ? ipDetails.country_code.toUpperCase()
+      : undefined
+  const currencyCode = currencyMappings[countryCode] || DEFAULT_CURRENCY_CODE
+  logger.debug({ ip, currencyCode, ipDetails }, 'got currencyCode for ip')
+  return { currencyCode, countryCode }
 }
 
 module.exports = {
-  getDetails,
-  getCurrencyCode,
   isValidCurrencyParam,
   promises: {
-    getDetails: promisify(getDetails),
-    getCurrencyCode: promisifyMultiResult(getCurrencyCode, [
-      'currencyCode',
-      'countryCode',
-    ]),
+    getDetails,
+    getCurrencyCode,
   },
   DEFAULT_CURRENCY_CODE,
 }

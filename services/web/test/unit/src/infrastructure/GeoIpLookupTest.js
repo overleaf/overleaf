@@ -10,20 +10,6 @@ const modulePath = path.join(
 
 describe('GeoIpLookup', function () {
   beforeEach(function () {
-    this.request = { get: sinon.stub() }
-    this.settings = {
-      apis: {
-        geoIpLookup: {
-          url: 'http://lookup.com',
-        },
-      },
-    }
-    this.GeoIpLookup = SandboxedModule.require(modulePath, {
-      requires: {
-        request: this.request,
-        '@overleaf/settings': this.settings,
-      },
-    })
     this.ipAddress = '12.34.56.78'
 
     this.stubbedResponse = {
@@ -39,6 +25,22 @@ describe('GeoIpLookup', function () {
       metro_code: '',
       area_code: '',
     }
+    this.fetchUtils = {
+      fetchJson: sinon.stub().resolves(this.stubbedResponse),
+    }
+    this.settings = {
+      apis: {
+        geoIpLookup: {
+          url: 'http://lookup.com/',
+        },
+      },
+    }
+    this.GeoIpLookup = SandboxedModule.require(modulePath, {
+      requires: {
+        '@overleaf/fetch-utils': this.fetchUtils,
+        '@overleaf/settings': this.settings,
+      },
+    })
   })
 
   describe('isValidCurrencyParam', function () {
@@ -56,60 +58,15 @@ describe('GeoIpLookup', function () {
 
   describe('getDetails', function () {
     beforeEach(function () {
-      this.request.get.callsArgWith(1, null, null, this.stubbedResponse)
-    })
-
-    describe('callback', function () {
-      it('should request the details using the ip', function (done) {
-        this.GeoIpLookup.getDetails(this.ipAddress, err => {
-          assert.equal(err, null)
-          this.request.get
-            .calledWith({
-              url: this.settings.apis.geoIpLookup.url + '/' + this.ipAddress,
-              timeout: 1000,
-              json: true,
-            })
-            .should.equal(true)
-          done()
-        })
-      })
-
-      it('should return the ip details', function (done) {
-        this.GeoIpLookup.getDetails(this.ipAddress, (err, returnedDetails) => {
-          assert.equal(err, null)
-          assert.deepEqual(returnedDetails, this.stubbedResponse)
-          done()
-        })
-      })
-
-      it('should take the first ip in the string', function (done) {
-        this.GeoIpLookup.getDetails(
-          ` ${this.ipAddress} 123.123.123.123 234.234.234.234`,
-          err => {
-            assert.equal(err, null)
-            this.request.get
-              .calledWith({
-                url: this.settings.apis.geoIpLookup.url + '/' + this.ipAddress,
-                timeout: 1000,
-                json: true,
-              })
-              .should.equal(true)
-            done()
-          }
-        )
-      })
+      this.fetchUtils.fetchJson.resolves(this.stubbedResponse)
     })
 
     describe('async', function () {
       it('should request the details using the ip', async function () {
         await this.GeoIpLookup.promises.getDetails(this.ipAddress)
-        this.request.get
-          .calledWith({
-            url: this.settings.apis.geoIpLookup.url + '/' + this.ipAddress,
-            timeout: 1000,
-            json: true,
-          })
-          .should.equal(true)
+        this.fetchUtils.fetchJson.should.have.been.calledWith(
+          new URL(this.settings.apis.geoIpLookup.url + this.ipAddress)
+        )
       })
 
       it('should return the ip details', async function () {
@@ -123,111 +80,16 @@ describe('GeoIpLookup', function () {
         await this.GeoIpLookup.promises.getDetails(
           ` ${this.ipAddress} 123.123.123.123 234.234.234.234`
         )
-        this.request.get
-          .calledWith({
-            url: this.settings.apis.geoIpLookup.url + '/' + this.ipAddress,
-            timeout: 1000,
-            json: true,
-          })
-          .should.equal(true)
+        this.fetchUtils.fetchJson.should.have.been.calledWith(
+          new URL(this.settings.apis.geoIpLookup.url + this.ipAddress)
+        )
       })
     })
   })
 
   describe('getCurrencyCode', function () {
-    describe('callback', function () {
-      it('should return GBP for GB country', function (done) {
-        this.request.get.callsArgWith(1, null, null, this.stubbedResponse)
-        this.GeoIpLookup.getCurrencyCode(
-          this.ipAddress,
-          (err, currencyCode) => {
-            assert.equal(err, null)
-            currencyCode.should.equal('GBP')
-            done()
-          }
-        )
-      })
-
-      it('should return GBP for gb country', function (done) {
-        this.stubbedResponse.country_code = 'gb'
-        this.request.get.callsArgWith(1, null, null, this.stubbedResponse)
-        this.GeoIpLookup.getCurrencyCode(
-          this.ipAddress,
-          (err, currencyCode) => {
-            assert.equal(err, null)
-            currencyCode.should.equal('GBP')
-            done()
-          }
-        )
-      })
-
-      it('should return USD for US', function (done) {
-        this.stubbedResponse.country_code = 'US'
-        this.request.get.callsArgWith(1, null, null, this.stubbedResponse)
-        this.GeoIpLookup.getCurrencyCode(
-          this.ipAddress,
-          (err, currencyCode) => {
-            assert.equal(err, null)
-            currencyCode.should.equal('USD')
-            done()
-          }
-        )
-      })
-
-      it('should return EUR for DE', function (done) {
-        this.stubbedResponse.country_code = 'DE'
-        this.request.get.callsArgWith(1, null, null, this.stubbedResponse)
-        this.GeoIpLookup.getCurrencyCode(
-          this.ipAddress,
-          (err, currencyCode) => {
-            assert.equal(err, null)
-            currencyCode.should.equal('EUR')
-            done()
-          }
-        )
-      })
-
-      it('should default to USD if there is an error', function (done) {
-        this.request.get.callsArgWith(1, null, null, { error: true })
-        this.GeoIpLookup.getCurrencyCode(
-          this.ipAddress,
-          (err, currencyCode) => {
-            assert.equal(err, null)
-            currencyCode.should.equal('USD')
-            done()
-          }
-        )
-      })
-
-      it('should default to USD if there are no details', function (done) {
-        this.request.get.callsArgWith(1, null, null, {})
-        this.GeoIpLookup.getCurrencyCode(
-          this.ipAddress,
-          (err, currencyCode) => {
-            assert.equal(err, null)
-            currencyCode.should.equal('USD')
-            done()
-          }
-        )
-      })
-
-      it('should default to USD if there is no match for their country', function (done) {
-        this.stubbedResponse.country_code = 'Non existant'
-        this.request.get.callsArgWith(1, null, null, this.stubbedResponse)
-        this.GeoIpLookup.getCurrencyCode(
-          this.ipAddress,
-          (err, currencyCode) => {
-            assert.equal(err, null)
-            currencyCode.should.equal('USD')
-            done()
-          }
-        )
-      })
-    })
-
     describe('async', function () {
       it('should return GBP for GB country', async function () {
-        this.request.get.callsArgWith(1, null, null, this.stubbedResponse)
         const { currencyCode, countryCode } =
           await this.GeoIpLookup.promises.getCurrencyCode(this.ipAddress)
         currencyCode.should.equal('GBP')
@@ -236,7 +98,6 @@ describe('GeoIpLookup', function () {
 
       it('should return GBP for gb country', async function () {
         this.stubbedResponse.country_code = 'gb'
-        this.request.get.callsArgWith(1, null, null, this.stubbedResponse)
         const { currencyCode, countryCode } =
           await this.GeoIpLookup.promises.getCurrencyCode(this.ipAddress)
         currencyCode.should.equal('GBP')
@@ -245,7 +106,6 @@ describe('GeoIpLookup', function () {
 
       it('should return USD for US', async function () {
         this.stubbedResponse.country_code = 'US'
-        this.request.get.callsArgWith(1, null, null, this.stubbedResponse)
         const { currencyCode, countryCode } =
           await this.GeoIpLookup.promises.getCurrencyCode(this.ipAddress)
         currencyCode.should.equal('USD')
@@ -254,7 +114,6 @@ describe('GeoIpLookup', function () {
 
       it('should return EUR for DE', async function () {
         this.stubbedResponse.country_code = 'DE'
-        this.request.get.callsArgWith(1, null, null, this.stubbedResponse)
         const { currencyCode, countryCode } =
           await this.GeoIpLookup.promises.getCurrencyCode(this.ipAddress)
         currencyCode.should.equal('EUR')
@@ -262,7 +121,7 @@ describe('GeoIpLookup', function () {
       })
 
       it('should default to USD if there is an error', async function () {
-        this.request.get.callsArgWith(1, null, null, { error: true })
+        this.fetchUtils.fetchJson.rejects(new Error('foo'))
         const { currencyCode, countryCode } =
           await this.GeoIpLookup.promises.getCurrencyCode(this.ipAddress)
         currencyCode.should.equal('USD')
@@ -270,7 +129,7 @@ describe('GeoIpLookup', function () {
       })
 
       it('should default to USD if there are no details', async function () {
-        this.request.get.callsArgWith(1, null, null, {})
+        this.fetchUtils.fetchJson.resolves({})
         const { currencyCode, countryCode } =
           await this.GeoIpLookup.promises.getCurrencyCode(this.ipAddress)
         currencyCode.should.equal('USD')
@@ -279,7 +138,6 @@ describe('GeoIpLookup', function () {
 
       it('should default to USD if there is no match for their country', async function () {
         this.stubbedResponse.country_code = 'Non existant'
-        this.request.get.callsArgWith(1, null, null, this.stubbedResponse)
         const { currencyCode, countryCode } =
           await this.GeoIpLookup.promises.getCurrencyCode(this.ipAddress)
         currencyCode.should.equal('USD')
