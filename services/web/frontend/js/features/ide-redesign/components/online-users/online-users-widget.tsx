@@ -78,7 +78,6 @@ const OnlineUserWidget = ({
       overlayProps={{
         placement: 'bottom',
         trigger: ['hover', 'focus'],
-        delay: 0,
       }}
     >
       <button className="online-users-row-button" onClick={onClick}>

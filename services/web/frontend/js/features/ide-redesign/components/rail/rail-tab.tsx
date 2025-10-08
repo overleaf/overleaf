@@ -21,7 +21,7 @@ const RailTab = forwardRef<
     <OLTooltip
       id={`rail-tab-tooltip-${eventKey}`}
       description={title}
-      overlayProps={{ delay: 0, placement: 'right' }}
+      overlayProps={{ placement: 'right' }}
     >
       <NavLink
         ref={ref}

@@ -186,7 +186,7 @@ const ColumnWidthModalBody = () => {
                 <OLTooltip
                   id="table-generator-unit-tooltip"
                   description={unitHelp.tooltip}
-                  overlayProps={{ delay: 0, placement: 'top' }}
+                  overlayProps={{ placement: 'top' }}
                 >
                   <span>
                     <MaterialIcon type="help" className="align-middle" />

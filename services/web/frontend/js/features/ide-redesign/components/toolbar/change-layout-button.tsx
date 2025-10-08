@@ -23,7 +23,7 @@ export default function ChangeLayoutButton() {
         <OLTooltip
           id="tooltip-open-layout-options"
           description={t('layout_options')}
-          overlayProps={{ delay: 0, placement: 'bottom' }}
+          overlayProps={{ placement: 'bottom' }}
         >
           <span>
             <DropdownToggle

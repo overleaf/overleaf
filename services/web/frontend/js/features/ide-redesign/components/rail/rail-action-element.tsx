@@ -43,7 +43,7 @@ export default function RailActionElement({ action }: { action: RailAction }) {
         <OLTooltip
           id={`rail-dropdown-tooltip-${action.key}`}
           description={action.title}
-          overlayProps={{ delay: 0, placement: 'right' }}
+          overlayProps={{ placement: 'right' }}
         >
           <span>
             <DropdownToggle
@@ -68,7 +68,7 @@ export default function RailActionElement({ action }: { action: RailAction }) {
       <OLTooltip
         id={`rail-tab-tooltip-${action.key}`}
         description={action.title}
-        overlayProps={{ delay: 0, placement: 'right' }}
+        overlayProps={{ placement: 'right' }}
       >
         <button
           onClick={onActionClick}

@@ -30,6 +30,7 @@ import { UserFeaturesProvider } from '@/shared/context/user-features-context'
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 import { IdeRedesignSwitcherProvider } from './ide-redesign-switcher-context'
 import { CommandRegistryProvider } from './command-registry-context'
+import { TooltipProvider } from '@/shared/context/tooltip-provider'
 
 export const ReactContextRoot: FC<
   React.PropsWithChildren<{
@@ -68,6 +69,7 @@ export const ReactContextRoot: FC<
     IdeRedesignSwitcherProvider,
     CommandRegistryProvider,
     UserFeaturesProvider,
+    TooltipProvider,
     ...providers,
   }
 
@@ -103,7 +105,9 @@ export const ReactContextRoot: FC<
                                                             <Providers.OutlineProvider>
                                                               <Providers.IdeRedesignSwitcherProvider>
                                                                 <Providers.CommandRegistryProvider>
-                                                                  {children}
+                                                                  <Providers.TooltipProvider>
+                                                                    {children}
+                                                                  </Providers.TooltipProvider>
                                                                 </Providers.CommandRegistryProvider>
                                                               </Providers.IdeRedesignSwitcherProvider>
                                                             </Providers.OutlineProvider>

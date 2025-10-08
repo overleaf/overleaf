@@ -15,7 +15,7 @@ export const ToolbarLogos = ({ cobranding }: ToolbarLogosProps) => {
       <OLTooltip
         id="tooltip-home-button"
         description={t('back_to_your_projects')}
-        overlayProps={{ delay: 0, placement: 'bottom' }}
+        overlayProps={{ placement: 'bottom' }}
       >
         <div className="ide-redesign-toolbar-home-button">
           <a href="/project" className="ide-redesign-toolbar-home-link">
