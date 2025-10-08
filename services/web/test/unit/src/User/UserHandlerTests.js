@@ -12,7 +12,9 @@ describe('UserHandler', function () {
     }
 
     this.TeamInvitesHandler = {
-      createTeamInvitesForLegacyInvitedEmail: sinon.stub().yields(),
+      promises: {
+        createTeamInvitesForLegacyInvitedEmail: sinon.stub().resolves(),
+      },
     }
 
     this.db = {
@@ -30,12 +32,12 @@ describe('UserHandler', function () {
   })
 
   describe('populateTeamInvites', function () {
-    beforeEach(function (done) {
-      this.UserHandler.populateTeamInvites(this.user, done)
+    beforeEach(async function () {
+      await this.UserHandler.promises.populateTeamInvites(this.user)
     })
 
     it('notifies the user about legacy team invites', function () {
-      this.TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail
+      this.TeamInvitesHandler.promises.createTeamInvitesForLegacyInvitedEmail
         .calledWith(this.user.email)
         .should.eq(true)
     })

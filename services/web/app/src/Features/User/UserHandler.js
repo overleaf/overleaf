@@ -1,14 +1,13 @@
-const { callbackify, promisify } = require('@overleaf/promise-utils')
+const { callbackify } = require('util')
 const TeamInvitesHandler = require('../Subscription/TeamInvitesHandler')
 const {
   db,
   READ_PREFERENCE_SECONDARY,
 } = require('../../infrastructure/mongodb')
 
-function populateTeamInvites(user, callback) {
-  TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail(
-    user.email,
-    callback
+async function populateTeamInvites(user) {
+  return await TeamInvitesHandler.promises.createTeamInvitesForLegacyInvitedEmail(
+    user.email
   )
 }
 
@@ -22,10 +21,10 @@ async function countActiveUsers() {
 }
 
 module.exports = {
-  populateTeamInvites,
+  populateTeamInvites: callbackify(populateTeamInvites),
   countActiveUsers: callbackify(countActiveUsers),
-}
-module.exports.promises = {
-  populateTeamInvites: promisify(populateTeamInvites),
-  countActiveUsers,
+  promises: {
+    populateTeamInvites,
+    countActiveUsers,
+  },
 }

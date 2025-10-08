@@ -654,10 +654,8 @@ function _afterLoginSessionSetup(req, user, callback) {
 const _afterLoginSessionSetupAsync = promisify(_afterLoginSessionSetup)
 
 function _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser) {
-  UserHandler.populateTeamInvites(user, err => {
-    if (err != null) {
-      logger.warn({ err }, 'error setting up login data')
-    }
+  UserHandler.promises.populateTeamInvites(user).catch(err => {
+    logger.warn({ err }, 'error setting up login data')
   })
   LoginRateLimiter.recordSuccessfulLogin(user.email, () => {})
   AuthenticationController._recordSuccessfulLogin(user._id, () => {})
