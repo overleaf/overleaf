@@ -19,11 +19,11 @@ async function sendProjectUpdateAndWait(projectId, docId, update, version) {
 }
 
 describe("Applying updates to a project's structure", function () {
-  before(function (done) {
+  before(async function () {
     this.user_id = 'user-id-123'
     this.version = 1234
 
-    DocUpdaterApp.ensureRunning(done)
+    await DocUpdaterApp.ensureRunning()
   })
 
   describe('renaming a file', function () {
@@ -36,7 +36,6 @@ describe("Applying updates to a project's structure", function () {
         newPathname: '/new-file-path',
       }
       this.updates = [this.fileUpdate]
-      await DocUpdaterApp.ensureRunning()
       await sendProjectUpdateAndWait(
         this.project_id,
         this.user_id,
