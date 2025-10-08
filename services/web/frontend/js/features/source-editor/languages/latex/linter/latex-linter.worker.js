@@ -338,11 +338,20 @@ const readOptionalArgumentWithUnderscores = function (TokeniseResult, k) {
   }
 
   let label = ''
+  let groupDepth = 0
   let j, tok
   for (j = k + 1; (tok = Tokens[j]); j++) {
     if (tok[1] === '{') {
-      // unclosed label
-      break
+      if (label.length === 0) {
+        // We haven't seen a [ yet, so there is no optional argument
+        break
+      }
+      groupDepth++
+    } else if (tok[1] === '}') {
+      groupDepth--
+      if (groupDepth < 0) {
+        break
+      }
     } else if (tok[1] === 'Text') {
       const str = text.substring(tok[2], tok[3])
       label = label + str
@@ -356,6 +365,13 @@ const readOptionalArgumentWithUnderscores = function (TokeniseResult, k) {
     } else {
       break // breaking due to unrecognised token
     }
+  }
+  if (groupDepth !== 0) {
+    const missing = groupDepth > 0 ? '{' : '}'
+    // mismatched braces
+    const e = new Error(`Unmatched ${missing} in label`)
+    e.pos = j + 1
+    return e
   }
 
   if (label.length === 0) {

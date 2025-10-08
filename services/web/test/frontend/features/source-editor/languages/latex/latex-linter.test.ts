@@ -473,9 +473,8 @@ describe('LatexLinter', function () {
 
   it('should reject an unclosed hyperref label', function () {
     const { errors } = Parse('\\hyperref[foo_bar{foo bar}')
-    assert.equal(errors.length, 2)
+    assert.equal(errors.length, 1)
     assert.equal(errors[0].text, 'invalid hyperref label')
-    assert.equal(errors[1].text, 'unexpected close group }')
   })
 
   it('should accept a hyperref command without an optional argument', function () {
@@ -509,6 +508,26 @@ describe('LatexLinter', function () {
       '\\documentclass[my_custom_document_class_option]{my-custom-class}'
     )
     assert.equal(errors.length, 0)
+  })
+
+  it('should accept a documentclass with braces in options', function () {
+    const { errors } = Parse(
+      '\\documentclass[a4paper,margin={1in,0.5in}]{article}'
+    )
+    assert.equal(errors.length, 0)
+  })
+
+  it('should reject documentclass with unbalanced braces in options', function () {
+    const { errors } = Parse('\\documentclass[foo={bar]{article}')
+    assert.equal(errors.length, 2)
+    assert.equal(errors[0].text, 'invalid documentclass option')
+    assert.equal(errors[1].text, 'unexpected close group }')
+  })
+
+  it('should reject documentclass with out of order braces in options', function () {
+    const { errors } = Parse('\\documentclass[foo=}bar{]{article}')
+    assert.equal(errors.length, 1)
+    assert.equal(errors[0].text, 'invalid documentclass option')
   })
 
   // %novalidate
