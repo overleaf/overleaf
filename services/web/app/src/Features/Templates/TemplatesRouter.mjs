@@ -1,9 +1,9 @@
 import AuthenticationController from '../Authentication/AuthenticationController.js'
-import TemplatesController from './TemplatesController.js'
-import TemplatesMiddleware from './TemplatesMiddleware.js'
+import TemplatesController from './TemplatesController.mjs'
+import TemplatesMiddleware from './TemplatesMiddleware.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
-import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
-import AnalyticsRegistrationSourceMiddleware from '../Analytics/AnalyticsRegistrationSourceMiddleware.js'
+import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'
+import AnalyticsRegistrationSourceMiddleware from '../Analytics/AnalyticsRegistrationSourceMiddleware.mjs'
 
 const rateLimiter = new RateLimiter('create-project-from-template', {
   points: 20,

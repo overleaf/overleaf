@@ -1,6 +1,6 @@
 // @ts-check
 import { ForbiddenError, UserNotFoundError } from '../Errors/Errors.js'
-import PermissionsManager from './PermissionsManager.js'
+import PermissionsManager from './PermissionsManager.mjs'
 import Modules from '../../infrastructure/Modules.js'
 import { expressify } from '@overleaf/promise-utils'
 import Features from '../../infrastructure/Features.js'
@@ -9,7 +9,7 @@ import Features from '../../infrastructure/Features.js'
  * @typedef {(import('express').Request)} Request
  * @typedef {(import('express').Response)} Response
  * @typedef {(import('express').NextFunction)} NextFunction
- * @typedef {import('./PermissionsManager').Capability} Capability
+ * @typedef {import('./PermissionsManager.mjs').Capability} Capability
  */
 
 const {

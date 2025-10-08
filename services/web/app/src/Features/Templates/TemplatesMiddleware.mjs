@@ -8,10 +8,11 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
+import settings from '@overleaf/settings'
 
-module.exports = {
+import logger from '@overleaf/logger'
+
+export default {
   saveTemplateDataInSession(req, res, next) {
     if (req.query.templateName) {
       req.session.templateData = req.query

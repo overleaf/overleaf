@@ -1,7 +1,7 @@
-const logger = require('@overleaf/logger')
-const SessionManager = require('../Authentication/SessionManager')
-const LoginRateLimiter = require('./LoginRateLimiter')
-const settings = require('@overleaf/settings')
+import logger from '@overleaf/logger'
+import SessionManager from '../Authentication/SessionManager.js'
+import LoginRateLimiter from './LoginRateLimiter.js'
+import settings from '@overleaf/settings'
 
 /**
  * Return a rate limiting middleware
@@ -88,4 +88,4 @@ const RateLimiterMiddleware = {
   loginRateLimitEmail,
 }
 
-module.exports = RateLimiterMiddleware
+export default RateLimiterMiddleware

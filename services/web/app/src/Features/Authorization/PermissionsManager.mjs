@@ -41,9 +41,12 @@
  *     }
  */
 
-const { callbackify } = require('util')
-const { ForbiddenError } = require('../Errors/Errors')
-const Modules = require('../../infrastructure/Modules')
+import { callbackify } from 'node:util'
+
+import Errors from '../Errors/Errors.js'
+import Modules from '../../infrastructure/Modules.js'
+
+const { ForbiddenError } = Errors
 
 /**
  * @typedef {(import('../../../../types/capabilities').Capability)} Capability
@@ -466,7 +469,7 @@ async function checkUserListPermissions(userList, capabilities) {
   return true
 }
 
-module.exports = {
+export default {
   validatePolicies,
   registerCapability,
   registerPolicy,

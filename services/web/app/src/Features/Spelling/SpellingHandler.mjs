@@ -1,7 +1,7 @@
 import OError from '@overleaf/o-error'
 import Metrics from '@overleaf/metrics'
 import { promisifyAll } from '@overleaf/promise-utils'
-import LearnedWordsManager from './LearnedWordsManager.js'
+import LearnedWordsManager from './LearnedWordsManager.mjs'
 
 const SpellingHandler = {
   getUserDictionary(userId, callback) {

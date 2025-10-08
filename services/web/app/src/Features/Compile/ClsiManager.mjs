@@ -1,33 +1,35 @@
-const { callbackify } = require('util')
-const { callbackifyMultiResult } = require('@overleaf/promise-utils')
-const {
+import { callbackify } from 'node:util'
+import { callbackifyMultiResult } from '@overleaf/promise-utils'
+import {
   fetchString,
   fetchStringWithResponse,
   fetchStream,
   RequestFailedError,
-} = require('@overleaf/fetch-utils')
-const Settings = require('@overleaf/settings')
-const ProjectGetter = require('../Project/ProjectGetter')
-const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
-const logger = require('@overleaf/logger')
-const OError = require('@overleaf/o-error')
-const { Cookie } = require('tough-cookie')
-const ClsiCookieManager = require('./ClsiCookieManager')(
+} from '@overleaf/fetch-utils'
+import Settings from '@overleaf/settings'
+import ProjectGetter from '../Project/ProjectGetter.js'
+import ProjectEntityHandler from '../Project/ProjectEntityHandler.js'
+import logger from '@overleaf/logger'
+import OError from '@overleaf/o-error'
+import { Cookie } from 'tough-cookie'
+import ClsiCookieManagerFactory from './ClsiCookieManager.js'
+import ClsiStateManager from './ClsiStateManager.js'
+import _ from 'lodash'
+import ClsiFormatChecker from './ClsiFormatChecker.js'
+import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.js'
+import Metrics from '@overleaf/metrics'
+import Errors from '../Errors/Errors.js'
+import ClsiCacheHandler from './ClsiCacheHandler.js'
+import HistoryManager from '../History/HistoryManager.js'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
+import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+
+const ClsiCookieManager = ClsiCookieManagerFactory(
   Settings.apis.clsi?.backendGroupName
 )
-const NewBackendCloudClsiCookieManager = require('./ClsiCookieManager')(
+const NewBackendCloudClsiCookieManager = ClsiCookieManagerFactory(
   Settings.apis.clsi_new?.backendGroupName
 )
-const ClsiStateManager = require('./ClsiStateManager')
-const _ = require('lodash')
-const ClsiFormatChecker = require('./ClsiFormatChecker')
-const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const Metrics = require('@overleaf/metrics')
-const Errors = require('../Errors/Errors')
-const ClsiCacheHandler = require('./ClsiCacheHandler')
-const { getFilestoreBlobURL } = require('../History/HistoryManager')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
-const AnalyticsManager = require('../Analytics/AnalyticsManager')
 
 const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
 const OUTPUT_FILE_TIMEOUT_MS = 60000
@@ -843,7 +845,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
     path = path.replace(/^\//, '') // Remove leading /
     resources.push({
       path,
-      url: getFilestoreBlobURL(historyId, file.hash),
+      url: HistoryManager.getFilestoreBlobURL(historyId, file.hash),
       modified: file.created?.getTime(),
     })
   }
@@ -975,7 +977,7 @@ function _getClsiServerIdFromResponse(response) {
   return null
 }
 
-module.exports = {
+export default {
   sendRequest: callbackifyMultiResult(sendRequest, [
     'status',
     'outputFiles',

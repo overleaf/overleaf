@@ -1,7 +1,7 @@
-const logger = require('@overleaf/logger')
-const OError = require('@overleaf/o-error')
-const AnalyticsRegistrationSourceHelper = require('./AnalyticsRegistrationSourceHelper')
-const SessionManager = require('../../Features/Authentication/SessionManager')
+import logger from '@overleaf/logger'
+import OError from '@overleaf/o-error'
+import AnalyticsRegistrationSourceHelper from './AnalyticsRegistrationSourceHelper.js'
+import SessionManager from '../../Features/Authentication/SessionManager.js'
 
 function setSource(medium, source) {
   return function (req, res, next) {
@@ -51,7 +51,7 @@ function setInbound() {
   }
 }
 
-module.exports = {
+export default {
   setSource,
   clearSource,
   setInbound,

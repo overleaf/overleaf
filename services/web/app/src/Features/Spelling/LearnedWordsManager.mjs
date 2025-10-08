@@ -1,9 +1,9 @@
-// @ts-check
+import mongodb from '../../infrastructure/mongodb.js'
+import { callbackify } from 'node:util'
+import Settings from '@overleaf/settings'
+import Errors from '../Errors/Errors.js'
 
-const { db } = require('../../infrastructure/mongodb')
-const { callbackify } = require('util')
-const Settings = require('@overleaf/settings')
-const { InvalidError } = require('../Errors/Errors')
+const { db } = mongodb
 
 const LearnedWordsManager = {
   /**
@@ -15,7 +15,7 @@ const LearnedWordsManager = {
 
     const wordSize = Buffer.from(word).length
     if (wordsSize + wordSize > Settings.maxDictionarySize) {
-      throw new InvalidError('Max dictionary size reached')
+      throw new Errors.InvalidError('Max dictionary size reached')
     }
 
     return await db.spellingPreferences.updateOne(
@@ -86,7 +86,7 @@ const LearnedWordsManager = {
   },
 }
 
-module.exports = {
+export default {
   learnWord: callbackify(LearnedWordsManager.learnWord),
   unlearnWord: callbackify(LearnedWordsManager.unlearnWord),
   getLearnedWords: callbackify(LearnedWordsManager.getLearnedWords),

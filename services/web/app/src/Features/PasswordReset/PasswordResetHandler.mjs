@@ -5,7 +5,7 @@ import OneTimeTokenHandler from '../Security/OneTimeTokenHandler.js'
 import EmailHandler from '../Email/EmailHandler.js'
 import AuthenticationManager from '../Authentication/AuthenticationManager.js'
 import { callbackify, promisify } from 'node:util'
-import PermissionsManager from '../Authorization/PermissionsManager.js'
+import PermissionsManager from '../Authorization/PermissionsManager.mjs'
 
 const assertUserPermissions = PermissionsManager.promises.assertUserPermissions
 

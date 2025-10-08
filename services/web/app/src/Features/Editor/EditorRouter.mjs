@@ -2,7 +2,7 @@ import EditorHttpController from './EditorHttpController.mjs'
 import AuthenticationController from '../Authentication/AuthenticationController.js'
 import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
-import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
+import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'
 
 const rateLimiters = {
   addDocToProject: new RateLimiter('add-doc-to-project', {

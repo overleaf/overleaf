@@ -2,7 +2,7 @@ import AuthenticationController from './../Authentication/AuthenticationControll
 import AnalyticsController from './AnalyticsController.mjs'
 import AnalyticsProxy from './AnalyticsProxy.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
-import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
+import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'
 
 const rateLimiters = {
   recordEvent: new RateLimiter('analytics-record-event', {

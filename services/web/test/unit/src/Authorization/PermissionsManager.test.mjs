@@ -1,44 +1,43 @@
-const sinon = require('sinon')
-const { expect } = require('chai')
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+
 const modulePath =
-  '../../../../app/src/Features/Authorization/PermissionsManager.js'
-const SandboxedModule = require('sandboxed-module')
-const { ForbiddenError } = require('../../../../app/src/Features/Errors/Errors')
+  '../../../../app/src/Features/Authorization/PermissionsManager.mjs'
 
 describe('PermissionsManager', function () {
-  beforeEach(function () {
-    this.PermissionsManager = SandboxedModule.require(modulePath, {
-      requires: {
-        '../../infrastructure/Modules': (this.Modules = {
-          promises: {
-            hooks: {
-              fire: (this.hooksFire = sinon.stub().resolves([[]])),
-            },
+  beforeEach(async function (ctx) {
+    vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
+      default: (ctx.Modules = {
+        promises: {
+          hooks: {
+            fire: (ctx.hooksFire = sinon.stub().resolves([[]])),
           },
-        }),
-      },
-    })
-    this.PermissionsManager.registerCapability('capability1', {
+        },
+      }),
+    }))
+
+    ctx.PermissionsManager = (await import(modulePath)).default
+    ctx.PermissionsManager.registerCapability('capability1', {
       default: true,
     })
-    this.PermissionsManager.registerCapability('capability2', {
+    ctx.PermissionsManager.registerCapability('capability2', {
       default: true,
     })
-    this.PermissionsManager.registerCapability('capability3', {
+    ctx.PermissionsManager.registerCapability('capability3', {
       default: true,
     })
-    this.PermissionsManager.registerCapability('capability4', {
+    ctx.PermissionsManager.registerCapability('capability4', {
       default: false,
     })
-    this.PermissionsManager.registerPolicy('openPolicy', {
+    ctx.PermissionsManager.registerPolicy('openPolicy', {
       capability1: true,
       capability2: true,
     })
-    this.PermissionsManager.registerPolicy('restrictivePolicy', {
+    ctx.PermissionsManager.registerPolicy('restrictivePolicy', {
       capability1: true,
       capability2: false,
     })
-    this.openPolicyResponseSet = [
+    ctx.openPolicyResponseSet = [
       [
         {
           managedUsersEnabled: true,
@@ -50,7 +49,7 @@ describe('PermissionsManager', function () {
         },
       ],
     ]
-    this.restrictivePolicyResponseSet = [
+    ctx.restrictivePolicyResponseSet = [
       [
         {
           managedUsersEnabled: true,
@@ -65,40 +64,40 @@ describe('PermissionsManager', function () {
   })
 
   describe('validatePolicies', function () {
-    it('accepts empty object', function () {
-      expect(() => this.PermissionsManager.validatePolicies({})).not.to.throw
+    it('accepts empty object', function (ctx) {
+      expect(() => ctx.PermissionsManager.validatePolicies({})).not.to.throw
     })
 
-    it('accepts object with registered policies', function () {
+    it('accepts object with registered policies', function (ctx) {
       expect(() =>
-        this.PermissionsManager.validatePolicies({
+        ctx.PermissionsManager.validatePolicies({
           openPolicy: true,
           restrictivePolicy: false,
         })
       ).not.to.throw
     })
 
-    it('accepts object with policies containing non-boolean values', function () {
+    it('accepts object with policies containing non-boolean values', function (ctx) {
       expect(() =>
-        this.PermissionsManager.validatePolicies({
+        ctx.PermissionsManager.validatePolicies({
           openPolicy: 1,
         })
       ).to.throw('policy value must be a boolean: openPolicy = 1')
       expect(() =>
-        this.PermissionsManager.validatePolicies({
+        ctx.PermissionsManager.validatePolicies({
           openPolicy: undefined,
         })
       ).to.throw('policy value must be a boolean: openPolicy = undefined')
       expect(() =>
-        this.PermissionsManager.validatePolicies({
+        ctx.PermissionsManager.validatePolicies({
           openPolicy: null,
         })
       ).to.throw('policy value must be a boolean: openPolicy = null')
     })
 
-    it('throws error on object with policies that are not registered', function () {
+    it('throws error on object with policies that are not registered', function (ctx) {
       expect(() =>
-        this.PermissionsManager.validatePolicies({
+        ctx.PermissionsManager.validatePolicies({
           openPolicy: true,
           unregisteredPolicy: false,
         })
@@ -108,20 +107,20 @@ describe('PermissionsManager', function () {
 
   describe('hasPermission', function () {
     describe('when no policies apply to the user', function () {
-      it('should return true if default permission is true', function () {
+      it('should return true if default permission is true', function (ctx) {
         const groupPolicy = {}
         const capability = 'capability1'
-        const result = this.PermissionsManager.hasPermission(
+        const result = ctx.PermissionsManager.hasPermission(
           groupPolicy,
           capability
         )
         expect(result).to.be.true
       })
 
-      it('should return false if the default permission is false', function () {
+      it('should return false if the default permission is false', function (ctx) {
         const groupPolicy = {}
         const capability = 'capability4'
-        const result = this.PermissionsManager.hasPermission(
+        const result = ctx.PermissionsManager.hasPermission(
           groupPolicy,
           capability
         )
@@ -130,8 +129,8 @@ describe('PermissionsManager', function () {
     })
 
     describe('when a policy applies to the user', function () {
-      it('should return true if the user has the capability after the policy is applied', function () {
-        this.PermissionsManager.registerPolicy('policy', {
+      it('should return true if the user has the capability after the policy is applied', function (ctx) {
+        ctx.PermissionsManager.registerPolicy('policy', {
           capability1: true,
           capability2: false,
         })
@@ -139,15 +138,15 @@ describe('PermissionsManager', function () {
           policy: true,
         }
         const capability = 'capability1'
-        const result = this.PermissionsManager.hasPermission(
+        const result = ctx.PermissionsManager.hasPermission(
           groupPolicy,
           capability
         )
         expect(result).to.be.true
       })
 
-      it('should return false if the user does not have the capability after the policy is applied', function () {
-        this.PermissionsManager.registerPolicy('policy', {
+      it('should return false if the user does not have the capability after the policy is applied', function (ctx) {
+        ctx.PermissionsManager.registerPolicy('policy', {
           capability1: true,
           capability2: false,
         })
@@ -155,15 +154,15 @@ describe('PermissionsManager', function () {
           policy: true,
         }
         const capability = 'capability2'
-        const result = this.PermissionsManager.hasPermission(
+        const result = ctx.PermissionsManager.hasPermission(
           groupPolicy,
           capability
         )
         expect(result).to.be.false
       })
 
-      it('should return the default permission if the policy does not apply to the capability', function () {
-        this.PermissionsManager.registerPolicy('policy', {
+      it('should return the default permission if the policy does not apply to the capability', function (ctx) {
+        ctx.PermissionsManager.registerPolicy('policy', {
           capability1: true,
           capability2: false,
         })
@@ -172,7 +171,7 @@ describe('PermissionsManager', function () {
         }
         {
           const capability = 'capability3'
-          const result = this.PermissionsManager.hasPermission(
+          const result = ctx.PermissionsManager.hasPermission(
             groupPolicy,
             capability
           )
@@ -180,7 +179,7 @@ describe('PermissionsManager', function () {
         }
         {
           const capability = 'capability4'
-          const result = this.PermissionsManager.hasPermission(
+          const result = ctx.PermissionsManager.hasPermission(
             groupPolicy,
             capability
           )
@@ -188,8 +187,8 @@ describe('PermissionsManager', function () {
         }
       })
 
-      it('should return the default permission if the policy is not enforced', function () {
-        this.PermissionsManager.registerPolicy('policy', {
+      it('should return the default permission if the policy is not enforced', function (ctx) {
+        ctx.PermissionsManager.registerPolicy('policy', {
           capability1: true,
           capability2: false,
         })
@@ -197,12 +196,12 @@ describe('PermissionsManager', function () {
           policy: false,
         }
         const capability1 = 'capability1'
-        const result1 = this.PermissionsManager.hasPermission(
+        const result1 = ctx.PermissionsManager.hasPermission(
           groupPolicy,
           capability1
         )
         const capability2 = 'capability2'
-        const result2 = this.PermissionsManager.hasPermission(
+        const result2 = ctx.PermissionsManager.hasPermission(
           groupPolicy,
           capability2
         )
@@ -212,13 +211,13 @@ describe('PermissionsManager', function () {
     })
 
     describe('when multiple policies apply to the user', function () {
-      it('should return true if all policies allow the capability', function () {
-        this.PermissionsManager.registerPolicy('policy1', {
+      it('should return true if all policies allow the capability', function (ctx) {
+        ctx.PermissionsManager.registerPolicy('policy1', {
           capability1: true,
           capability2: true,
         })
 
-        this.PermissionsManager.registerPolicy('policy2', {
+        ctx.PermissionsManager.registerPolicy('policy2', {
           capability1: true,
           capability2: true,
         })
@@ -227,20 +226,20 @@ describe('PermissionsManager', function () {
           policy2: true,
         }
         const capability = 'capability1'
-        const result = this.PermissionsManager.hasPermission(
+        const result = ctx.PermissionsManager.hasPermission(
           groupPolicy,
           capability
         )
         expect(result).to.be.true
       })
 
-      it('should return false if any policy denies the capability', function () {
-        this.PermissionsManager.registerPolicy('policy1', {
+      it('should return false if any policy denies the capability', function (ctx) {
+        ctx.PermissionsManager.registerPolicy('policy1', {
           capability1: true,
           capability2: true,
         })
 
-        this.PermissionsManager.registerPolicy('policy2', {
+        ctx.PermissionsManager.registerPolicy('policy2', {
           capability1: false,
           capability2: true,
         })
@@ -249,20 +248,20 @@ describe('PermissionsManager', function () {
           policy2: true,
         }
         const capability = 'capability1'
-        const result = this.PermissionsManager.hasPermission(
+        const result = ctx.PermissionsManager.hasPermission(
           groupPolicy,
           capability
         )
         expect(result).to.be.false
       })
 
-      it('should return the default permssion when the applicable policy is not enforced', function () {
-        this.PermissionsManager.registerPolicy('policy1', {
+      it('should return the default permssion when the applicable policy is not enforced', function (ctx) {
+        ctx.PermissionsManager.registerPolicy('policy1', {
           capability1: true,
           capability2: true,
         })
 
-        this.PermissionsManager.registerPolicy('policy2', {
+        ctx.PermissionsManager.registerPolicy('policy2', {
           capability1: false,
           capability2: true,
         })
@@ -271,15 +270,15 @@ describe('PermissionsManager', function () {
           policy2: false,
         }
         const capability = 'capability1'
-        const result = this.PermissionsManager.hasPermission(
+        const result = ctx.PermissionsManager.hasPermission(
           groupPolicy,
           capability
         )
         expect(result).to.be.true
       })
 
-      it('should return the default permission if the policies do not restrict to the capability', function () {
-        this.PermissionsManager.registerPolicy('policy', {
+      it('should return the default permission if the policies do not restrict to the capability', function (ctx) {
+        ctx.PermissionsManager.registerPolicy('policy', {
           capability1: true,
           capability2: false,
         })
@@ -288,7 +287,7 @@ describe('PermissionsManager', function () {
         }
         {
           const capability = 'capability3'
-          const result = this.PermissionsManager.hasPermission(
+          const result = ctx.PermissionsManager.hasPermission(
             groupPolicy,
             capability
           )
@@ -296,7 +295,7 @@ describe('PermissionsManager', function () {
         }
         {
           const capability = 'capability4'
-          const result = this.PermissionsManager.hasPermission(
+          const result = ctx.PermissionsManager.hasPermission(
             groupPolicy,
             capability
           )
@@ -307,17 +306,17 @@ describe('PermissionsManager', function () {
   })
 
   describe('getUserCapabilities', function () {
-    it('should return the default capabilities when no group policy is provided', function () {
+    it('should return the default capabilities when no group policy is provided', function (ctx) {
       const groupPolicy = {}
       const capabilities =
-        this.PermissionsManager.getUserCapabilities(groupPolicy)
+        ctx.PermissionsManager.getUserCapabilities(groupPolicy)
       expect(capabilities).to.deep.equal(
         new Set(['capability1', 'capability2', 'capability3'])
       )
     })
 
-    it('should return a reduced capability set when a group policy is provided', function () {
-      this.PermissionsManager.registerPolicy('policy', {
+    it('should return a reduced capability set when a group policy is provided', function (ctx) {
+      ctx.PermissionsManager.registerPolicy('policy', {
         capability1: true,
         capability2: false,
       })
@@ -325,18 +324,18 @@ describe('PermissionsManager', function () {
         policy: true,
       }
       const capabilities =
-        this.PermissionsManager.getUserCapabilities(groupPolicy)
+        ctx.PermissionsManager.getUserCapabilities(groupPolicy)
       expect(capabilities).to.deep.equal(
         new Set(['capability1', 'capability3'])
       )
     })
 
-    it('should return a reduced capability set when multiple group policies are provided', function () {
-      this.PermissionsManager.registerPolicy('policy1', {
+    it('should return a reduced capability set when multiple group policies are provided', function (ctx) {
+      ctx.PermissionsManager.registerPolicy('policy1', {
         capability1: true,
         capability2: false,
       })
-      this.PermissionsManager.registerPolicy('policy2', {
+      ctx.PermissionsManager.registerPolicy('policy2', {
         capability1: false,
         capability2: true,
       })
@@ -346,20 +345,20 @@ describe('PermissionsManager', function () {
         policy2: true,
       }
       const capabilities =
-        this.PermissionsManager.getUserCapabilities(groupPolicy)
+        ctx.PermissionsManager.getUserCapabilities(groupPolicy)
       expect(capabilities).to.deep.equal(new Set(['capability3']))
     })
 
-    it('should return an empty capability set when group policies remove all permissions', function () {
-      this.PermissionsManager.registerPolicy('policy1', {
+    it('should return an empty capability set when group policies remove all permissions', function (ctx) {
+      ctx.PermissionsManager.registerPolicy('policy1', {
         capability1: true,
         capability2: false,
       })
-      this.PermissionsManager.registerPolicy('policy2', {
+      ctx.PermissionsManager.registerPolicy('policy2', {
         capability1: false,
         capability2: true,
       })
-      this.PermissionsManager.registerPolicy('policy3', {
+      ctx.PermissionsManager.registerPolicy('policy3', {
         capability1: true,
         capability2: true,
         capability3: false,
@@ -370,14 +369,14 @@ describe('PermissionsManager', function () {
         policy3: true,
       }
       const capabilities =
-        this.PermissionsManager.getUserCapabilities(groupPolicy)
+        ctx.PermissionsManager.getUserCapabilities(groupPolicy)
       expect(capabilities).to.deep.equal(new Set())
     })
   })
 
   describe('getUserValidationStatus', function () {
-    it('should return the status for the policy when the user conforms', async function () {
-      this.PermissionsManager.registerPolicy(
+    it('should return the status for the policy when the user conforms', async function (ctx) {
+      ctx.PermissionsManager.registerPolicy(
         'policy',
         {},
         {
@@ -392,7 +391,7 @@ describe('PermissionsManager', function () {
       const user = { prop: 'allowed' }
       const subscription = { prop: 'managed' }
       const result =
-        await this.PermissionsManager.promises.getUserValidationStatus({
+        await ctx.PermissionsManager.promises.getUserValidationStatus({
           user,
           groupPolicy,
           subscription,
@@ -400,8 +399,8 @@ describe('PermissionsManager', function () {
       expect(result).to.deep.equal(new Map([['policy', true]]))
     })
 
-    it('should return the status for the policy when the user does not conform', async function () {
-      this.PermissionsManager.registerPolicy(
+    it('should return the status for the policy when the user does not conform', async function (ctx) {
+      ctx.PermissionsManager.registerPolicy(
         'policy',
         {},
         {
@@ -416,15 +415,15 @@ describe('PermissionsManager', function () {
       const user = { prop: 'not allowed' }
       const subscription = { prop: 'managed' }
       const result =
-        await this.PermissionsManager.promises.getUserValidationStatus({
+        await ctx.PermissionsManager.promises.getUserValidationStatus({
           user,
           groupPolicy,
           subscription,
         })
       expect(result).to.deep.equal(new Map([['policy', false]]))
     })
-    it('should return the status for multiple policies according to whether the user conforms', async function () {
-      this.PermissionsManager.registerPolicy(
+    it('should return the status for multiple policies according to whether the user conforms', async function (ctx) {
+      ctx.PermissionsManager.registerPolicy(
         'policy1',
         {},
         {
@@ -433,7 +432,7 @@ describe('PermissionsManager', function () {
           },
         }
       )
-      this.PermissionsManager.registerPolicy(
+      ctx.PermissionsManager.registerPolicy(
         'policy2',
         {},
         {
@@ -442,7 +441,7 @@ describe('PermissionsManager', function () {
           },
         }
       )
-      this.PermissionsManager.registerPolicy(
+      ctx.PermissionsManager.registerPolicy(
         'policy3',
         {},
         {
@@ -460,7 +459,7 @@ describe('PermissionsManager', function () {
       const user = { prop: 'allowed' }
       const subscription = { prop: 'managed' }
       const result =
-        await this.PermissionsManager.promises.getUserValidationStatus({
+        await ctx.PermissionsManager.promises.getUserValidationStatus({
           user,
           groupPolicy,
           subscription,
@@ -475,20 +474,20 @@ describe('PermissionsManager', function () {
   })
   describe('assertUserPermissions', function () {
     describe('allowed', function () {
-      it('should not error when managedUsersEnabled is not enabled for user', async function () {
+      it('should not error when managedUsersEnabled is not enabled for user', async function (ctx) {
         const result =
-          await this.PermissionsManager.promises.assertUserPermissions(
+          await ctx.PermissionsManager.promises.assertUserPermissions(
             { _id: 'user123' },
             ['add-secondary-email']
           )
         expect(result).to.be.undefined
       })
 
-      it('should not error when default capability is true', async function () {
-        this.PermissionsManager.registerCapability('some-policy-to-check', {
+      it('should not error when default capability is true', async function (ctx) {
+        ctx.PermissionsManager.registerCapability('some-policy-to-check', {
           default: true,
         })
-        this.hooksFire.resolves([
+        ctx.hooksFire.resolves([
           [
             {
               managedUsersEnabled: true,
@@ -497,21 +496,21 @@ describe('PermissionsManager', function () {
           ],
         ])
         const result =
-          await this.PermissionsManager.promises.assertUserPermissions(
+          await ctx.PermissionsManager.promises.assertUserPermissions(
             { _id: 'user123' },
             ['some-policy-to-check']
           )
         expect(result).to.be.undefined
       })
 
-      it('should not error when default permission is false but user has permission', async function () {
-        this.PermissionsManager.registerCapability('some-policy-to-check', {
+      it('should not error when default permission is false but user has permission', async function (ctx) {
+        ctx.PermissionsManager.registerCapability('some-policy-to-check', {
           default: false,
         })
-        this.PermissionsManager.registerPolicy('userCanDoSomePolicy', {
+        ctx.PermissionsManager.registerPolicy('userCanDoSomePolicy', {
           'some-policy-to-check': true,
         })
-        this.hooksFire.resolves([
+        ctx.hooksFire.resolves([
           [
             {
               managedUsersEnabled: true,
@@ -522,7 +521,7 @@ describe('PermissionsManager', function () {
           ],
         ])
         const result =
-          await this.PermissionsManager.promises.assertUserPermissions(
+          await ctx.PermissionsManager.promises.assertUserPermissions(
             { _id: 'user123' },
             ['some-policy-to-check']
           )
@@ -531,21 +530,21 @@ describe('PermissionsManager', function () {
     })
 
     describe('not allowed', function () {
-      it('should return error when managedUsersEnabled is enabled for user but there is no group policy', async function () {
-        this.hooksFire.resolves([[{ managedUsersEnabled: true }]])
+      it('should return error when managedUsersEnabled is enabled for user but there is no group policy', async function (ctx) {
+        ctx.hooksFire.resolves([[{ managedUsersEnabled: true }]])
         await expect(
-          this.PermissionsManager.promises.assertUserPermissions(
+          ctx.PermissionsManager.promises.assertUserPermissions(
             { _id: 'user123' },
             ['add-secondary-email']
           )
         ).to.be.rejectedWith(Error, 'unknown capability: add-secondary-email')
       })
 
-      it('should return error when default permission is false', async function () {
-        this.PermissionsManager.registerCapability('some-policy-to-check', {
+      it('should return error when default permission is false', async function (ctx) {
+        ctx.PermissionsManager.registerCapability('some-policy-to-check', {
           default: false,
         })
-        this.hooksFire.resolves([
+        ctx.hooksFire.resolves([
           [
             {
               managedUsersEnabled: true,
@@ -554,21 +553,23 @@ describe('PermissionsManager', function () {
           ],
         ])
         await expect(
-          this.PermissionsManager.promises.assertUserPermissions(
+          ctx.PermissionsManager.promises.assertUserPermissions(
             { _id: 'user123' },
             ['some-policy-to-check']
           )
-        ).to.be.rejectedWith(ForbiddenError)
+        ).to.be.rejectedWith(
+          'user does not have one or more permissions within some-policy-to-check'
+        )
       })
 
-      it('should return error when default permission is true but user does not have permission', async function () {
-        this.PermissionsManager.registerCapability('some-policy-to-check', {
+      it('should return error when default permission is true but user does not have permission', async function (ctx) {
+        ctx.PermissionsManager.registerCapability('some-policy-to-check', {
           default: true,
         })
-        this.PermissionsManager.registerPolicy('userCannotDoSomePolicy', {
+        ctx.PermissionsManager.registerPolicy('userCannotDoSomePolicy', {
           'some-policy-to-check': false,
         })
-        this.hooksFire.resolves([
+        ctx.hooksFire.resolves([
           [
             {
               managedUsersEnabled: true,
@@ -577,33 +578,35 @@ describe('PermissionsManager', function () {
           ],
         ])
         await expect(
-          this.PermissionsManager.promises.assertUserPermissions(
+          ctx.PermissionsManager.promises.assertUserPermissions(
             { _id: 'user123' },
             ['some-policy-to-check']
           )
-        ).to.be.rejectedWith(ForbiddenError)
+        ).to.be.rejectedWith(
+          'user does not have one or more permissions within some-policy-to-check'
+        )
       })
     })
   })
 
   describe('registerAllowedProperty', function () {
-    it('allows us to register a property', async function () {
-      this.PermissionsManager.registerAllowedProperty('metadata1')
-      const result = await this.PermissionsManager.getAllowedProperties()
+    it('allows us to register a property', async function (ctx) {
+      ctx.PermissionsManager.registerAllowedProperty('metadata1')
+      const result = await ctx.PermissionsManager.getAllowedProperties()
       expect(result).to.deep.equal(new Set(['metadata1']))
     })
 
     // used if multiple modules would require the same prop, since we dont know which will load first, both must register
-    it('should handle multiple registrations of the same property', async function () {
-      this.PermissionsManager.registerAllowedProperty('metadata1')
-      this.PermissionsManager.registerAllowedProperty('metadata1')
-      const result = await this.PermissionsManager.getAllowedProperties()
+    it('should handle multiple registrations of the same property', async function (ctx) {
+      ctx.PermissionsManager.registerAllowedProperty('metadata1')
+      ctx.PermissionsManager.registerAllowedProperty('metadata1')
+      const result = await ctx.PermissionsManager.getAllowedProperties()
       expect(result).to.deep.equal(new Set(['metadata1']))
     })
   })
 
   describe('combineAllowedProperties', function () {
-    it('should handle multiple occurences of the same property, preserving the first occurence', async function () {
+    it('should handle multiple occurences of the same property, preserving the first occurence', async function (ctx) {
       const policy1 = {
         groupPolicy: {
           policy: false,
@@ -618,17 +621,17 @@ describe('PermissionsManager', function () {
       }
 
       const results = [policy1, policy2]
-      this.PermissionsManager.registerAllowedProperty('prop1')
+      ctx.PermissionsManager.registerAllowedProperty('prop1')
 
       const combinedProps =
-        this.PermissionsManager.combineAllowedProperties(results)
+        ctx.PermissionsManager.combineAllowedProperties(results)
 
       expect(combinedProps).to.deep.equal({
         prop1: 'some other value here',
       })
     })
 
-    it('should add registered properties to the set', async function () {
+    it('should add registered properties to the set', async function (ctx) {
       const policy = {
         groupPolicy: {
           policy: false,
@@ -645,11 +648,11 @@ describe('PermissionsManager', function () {
       }
 
       const results = [policy, policy2]
-      this.PermissionsManager.registerAllowedProperty('prop1')
-      this.PermissionsManager.registerAllowedProperty('prop2')
+      ctx.PermissionsManager.registerAllowedProperty('prop1')
+      ctx.PermissionsManager.registerAllowedProperty('prop2')
 
       const combinedProps =
-        this.PermissionsManager.combineAllowedProperties(results)
+        ctx.PermissionsManager.combineAllowedProperties(results)
 
       expect(combinedProps).to.deep.equal({
         prop1: 'some value here',
@@ -657,7 +660,7 @@ describe('PermissionsManager', function () {
       })
     })
 
-    it('should not add unregistered properties to the req object', async function () {
+    it('should not add unregistered properties to the req object', async function (ctx) {
       const policy = {
         groupPolicy: {
           policy: false,
@@ -671,36 +674,36 @@ describe('PermissionsManager', function () {
         },
         prop2: 'some value here',
       }
-      this.PermissionsManager.registerAllowedProperty('prop1')
+      ctx.PermissionsManager.registerAllowedProperty('prop1')
 
       const results = [policy, policy2]
 
       const combinedProps =
-        this.PermissionsManager.combineAllowedProperties(results)
+        ctx.PermissionsManager.combineAllowedProperties(results)
 
       expect(combinedProps).to.deep.equal({ prop1: 'some value here' })
     })
 
-    it('should handle an empty array', async function () {
+    it('should handle an empty array', async function (ctx) {
       const results = []
 
       const combinedProps =
-        this.PermissionsManager.combineAllowedProperties(results)
+        ctx.PermissionsManager.combineAllowedProperties(results)
 
       expect(combinedProps).to.deep.equal({})
     })
   })
 
   describe('combineGroupPolicies', function () {
-    it('should return an empty object when an empty array is passed', async function () {
+    it('should return an empty object when an empty array is passed', async function (ctx) {
       const results = []
 
       const combinedPolicy =
-        this.PermissionsManager.combineGroupPolicies(results)
+        ctx.PermissionsManager.combineGroupPolicies(results)
       expect(combinedPolicy).to.deep.equal({})
     })
 
-    it('should combine multiple group policies into a single policy object', async function () {
+    it('should combine multiple group policies into a single policy object', async function (ctx) {
       const groupPolicy = {
         policy1: true,
       }
@@ -709,12 +712,12 @@ describe('PermissionsManager', function () {
         policy2: false,
         policy3: true,
       }
-      this.PermissionsManager.registerAllowedProperty('prop1')
+      ctx.PermissionsManager.registerAllowedProperty('prop1')
 
       const results = [groupPolicy, groupPolicy2]
 
       const combinedPolicy =
-        this.PermissionsManager.combineGroupPolicies(results)
+        ctx.PermissionsManager.combineGroupPolicies(results)
 
       expect(combinedPolicy).to.deep.equal({
         policy1: true,
@@ -722,7 +725,7 @@ describe('PermissionsManager', function () {
       })
     })
 
-    it('should handle duplicate enforced policies across different group policies', async function () {
+    it('should handle duplicate enforced policies across different group policies', async function (ctx) {
       const groupPolicy = {
         policy1: false,
         policy2: true,
@@ -732,12 +735,12 @@ describe('PermissionsManager', function () {
         policy2: true,
         policy3: true,
       }
-      this.PermissionsManager.registerAllowedProperty('prop1')
+      ctx.PermissionsManager.registerAllowedProperty('prop1')
 
       const results = [groupPolicy, groupPolicy2]
 
       const combinedPolicy =
-        this.PermissionsManager.combineGroupPolicies(results)
+        ctx.PermissionsManager.combineGroupPolicies(results)
 
       expect(combinedPolicy).to.deep.equal({
         policy2: true,
@@ -745,7 +748,7 @@ describe('PermissionsManager', function () {
       })
     })
 
-    it('should handle group policies with no enforced policies', async function () {
+    it('should handle group policies with no enforced policies', async function (ctx) {
       const groupPolicy = {
         policy1: false,
         policy2: false,
@@ -755,17 +758,17 @@ describe('PermissionsManager', function () {
         policy2: false,
         policy3: true,
       }
-      this.PermissionsManager.registerAllowedProperty('prop1')
+      ctx.PermissionsManager.registerAllowedProperty('prop1')
 
       const results = [groupPolicy, groupPolicy2]
 
       const combinedPolicy =
-        this.PermissionsManager.combineGroupPolicies(results)
+        ctx.PermissionsManager.combineGroupPolicies(results)
 
       expect(combinedPolicy).to.deep.equal({ policy3: true })
     })
 
-    it('should choose the stricter option between two policy values', async function () {
+    it('should choose the stricter option between two policy values', async function (ctx) {
       const groupPolicy = {
         policy1: false,
         policy2: true,
@@ -777,12 +780,12 @@ describe('PermissionsManager', function () {
         policy3: true,
         policy4: false,
       }
-      this.PermissionsManager.registerAllowedProperty('prop1')
+      ctx.PermissionsManager.registerAllowedProperty('prop1')
 
       const results = [groupPolicy, groupPolicy2]
 
       const combinedPolicy =
-        this.PermissionsManager.combineGroupPolicies(results)
+        ctx.PermissionsManager.combineGroupPolicies(results)
 
       expect(combinedPolicy).to.deep.equal({
         policy2: true,
@@ -793,30 +796,30 @@ describe('PermissionsManager', function () {
   })
 
   describe('checkUserListPermissions', function () {
-    it('should return true when all users have permissions required', async function () {
+    it('should return true when all users have permissions required', async function (ctx) {
       const userList = ['user1', 'user2', 'user3']
       const capabilities = ['capability1', 'capability2']
-      this.hooksFire.onCall(0).resolves(this.openPolicyResponseSet)
-      this.hooksFire.onCall(1).resolves(this.openPolicyResponseSet)
-      this.hooksFire.onCall(2).resolves(this.openPolicyResponseSet)
+      ctx.hooksFire.onCall(0).resolves(ctx.openPolicyResponseSet)
+      ctx.hooksFire.onCall(1).resolves(ctx.openPolicyResponseSet)
+      ctx.hooksFire.onCall(2).resolves(ctx.openPolicyResponseSet)
 
       const usersHavePermission =
-        await this.PermissionsManager.promises.checkUserListPermissions(
+        await ctx.PermissionsManager.promises.checkUserListPermissions(
           userList,
           capabilities
         )
       expect(usersHavePermission).to.equal(true)
     })
 
-    it('should return false if any user does not have permission', async function () {
+    it('should return false if any user does not have permission', async function (ctx) {
       const userList = ['user1', 'user2', 'user3']
       const capabilities = ['capability1', 'capability2']
-      this.hooksFire.onCall(0).resolves(this.openPolicyResponseSet)
-      this.hooksFire.onCall(1).resolves(this.restrictivePolicyResponseSet)
-      this.hooksFire.onCall(2).resolves(this.openPolicyResponseSet)
+      ctx.hooksFire.onCall(0).resolves(ctx.openPolicyResponseSet)
+      ctx.hooksFire.onCall(1).resolves(ctx.restrictivePolicyResponseSet)
+      ctx.hooksFire.onCall(2).resolves(ctx.openPolicyResponseSet)
 
       const usersHavePermission =
-        await this.PermissionsManager.promises.checkUserListPermissions(
+        await ctx.PermissionsManager.promises.checkUserListPermissions(
           userList,
           capabilities
         )

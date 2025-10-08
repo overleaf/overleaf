@@ -1,8 +1,10 @@
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
-const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const SubscriptionEmailHandler = require('./SubscriptionEmailHandler')
-const { AI_ADD_ON_CODE } = require('./AiHelper')
-const { ObjectId } = require('mongodb-legacy')
+import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
+import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import SubscriptionEmailHandler from './SubscriptionEmailHandler.js'
+import { AI_ADD_ON_CODE } from './AiHelper.js'
+import mongodb from 'mongodb-legacy'
+
+const { ObjectId } = mongodb
 
 const INVOICE_SUBSCRIPTION_LIMIT = 10
 
@@ -389,6 +391,6 @@ function _getSubscriptionData(eventData) {
   }
 }
 
-module.exports = {
+export default {
   sendRecurlyAnalyticsEvent,
 }

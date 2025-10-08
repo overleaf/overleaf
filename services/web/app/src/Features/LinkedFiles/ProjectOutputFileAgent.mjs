@@ -1,6 +1,6 @@
 import AuthorizationManager from '../Authorization/AuthorizationManager.js'
 import CompileManager from '../Compile/CompileManager.mjs'
-import ClsiManager from '../Compile/ClsiManager.js'
+import ClsiManager from '../Compile/ClsiManager.mjs'
 import ProjectFileAgent from './ProjectFileAgent.mjs'
 import _ from 'lodash'
 import LinkedFilesErrors from './LinkedFilesErrors.mjs'

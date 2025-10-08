@@ -41,7 +41,7 @@ import {
   openProjectRateLimiter,
   overleafLoginRateLimiter,
 } from './infrastructure/RateLimiter.js'
-import RateLimiterMiddleware from './Features/Security/RateLimiterMiddleware.js'
+import RateLimiterMiddleware from './Features/Security/RateLimiterMiddleware.mjs'
 import InactiveProjectController from './Features/InactiveData/InactiveProjectController.mjs'
 import ContactRouter from './Features/Contacts/ContactRouter.mjs'
 import ReferencesController from './Features/References/ReferencesController.mjs'
@@ -55,7 +55,7 @@ import LinkedFilesRouter from './Features/LinkedFiles/LinkedFilesRouter.mjs'
 import TemplatesRouter from './Features/Templates/TemplatesRouter.mjs'
 import UserMembershipRouter from './Features/UserMembership/UserMembershipRouter.mjs'
 import SystemMessageController from './Features/SystemMessages/SystemMessageController.mjs'
-import AnalyticsRegistrationSourceMiddleware from './Features/Analytics/AnalyticsRegistrationSourceMiddleware.js'
+import AnalyticsRegistrationSourceMiddleware from './Features/Analytics/AnalyticsRegistrationSourceMiddleware.mjs'
 import AnalyticsUTMTrackingMiddleware from './Features/Analytics/AnalyticsUTMTrackingMiddleware.mjs'
 import CaptchaMiddleware from './Features/Captcha/CaptchaMiddleware.mjs'
 import UnsupportedBrowserMiddleware from './infrastructure/UnsupportedBrowserMiddleware.js'

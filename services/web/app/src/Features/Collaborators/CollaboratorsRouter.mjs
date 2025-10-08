@@ -3,9 +3,9 @@ import AuthenticationController from '../Authentication/AuthenticationController
 import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.mjs'
 import CollaboratorsInviteController from './CollaboratorsInviteController.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
-import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
+import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'
 import CaptchaMiddleware from '../Captcha/CaptchaMiddleware.mjs'
-import AnalyticsRegistrationSourceMiddleware from '../Analytics/AnalyticsRegistrationSourceMiddleware.js'
+import AnalyticsRegistrationSourceMiddleware from '../Analytics/AnalyticsRegistrationSourceMiddleware.mjs'
 
 const rateLimiters = {
   inviteToProjectByProjectId: new RateLimiter(

@@ -3,7 +3,7 @@ import UserMembershipController from './UserMembershipController.mjs'
 import SubscriptionGroupController from '../Subscription/SubscriptionGroupController.mjs'
 import TeamInvitesController from '../Subscription/TeamInvitesController.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
-import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
+import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'
 
 const rateLimiters = {
   createTeamInvite: new RateLimiter('create-team-invite', {

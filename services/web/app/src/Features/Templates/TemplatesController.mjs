@@ -1,9 +1,9 @@
-const path = require('path')
-const SessionManager = require('../Authentication/SessionManager')
-const TemplatesManager = require('./TemplatesManager')
-const ProjectHelper = require('../Project/ProjectHelper')
-const logger = require('@overleaf/logger')
-const { expressify } = require('@overleaf/promise-utils')
+import path from 'node:path'
+import SessionManager from '../Authentication/SessionManager.js'
+import TemplatesManager from './TemplatesManager.js'
+import ProjectHelper from '../Project/ProjectHelper.js'
+import logger from '@overleaf/logger'
+import { expressify } from '@overleaf/promise-utils'
 
 const TemplatesController = {
   async getV1Template(req, res) {
@@ -27,7 +27,7 @@ const TemplatesController = {
     }
     res.render(
       path.resolve(
-        __dirname,
+        import.meta.dirname,
         '../../../views/project/editor/new_from_template'
       ),
       data
@@ -54,7 +54,7 @@ const TemplatesController = {
   },
 }
 
-module.exports = {
+export default {
   getV1Template: expressify(TemplatesController.getV1Template),
   createProjectFromV1Template: expressify(
     TemplatesController.createProjectFromV1Template

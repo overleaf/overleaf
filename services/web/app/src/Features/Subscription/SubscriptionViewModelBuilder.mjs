@@ -1,23 +1,24 @@
 // ts-check
-const Settings = require('@overleaf/settings')
-const PlansLocator = require('./PlansLocator')
-const { isStandaloneAiAddOnPlanCode } = require('./AiHelper')
-const { MEMBERS_LIMIT_ADD_ON_CODE } = require('./PaymentProviderEntities')
-const SubscriptionFormatters = require('./SubscriptionFormatters')
-const SubscriptionLocator = require('./SubscriptionLocator')
-const InstitutionsGetter = require('../Institutions/InstitutionsGetter')
-const InstitutionsManager = require('../Institutions/InstitutionsManager')
-const PublishersGetter = require('../Publishers/PublishersGetter')
-const sanitizeHtml = require('sanitize-html')
-const _ = require('lodash')
-const async = require('async')
-const SubscriptionHelper = require('./SubscriptionHelper')
-const { callbackify } = require('@overleaf/promise-utils')
-const { V1ConnectionError } = require('../Errors/Errors')
-const FeaturesHelper = require('./FeaturesHelper')
-const { formatCurrency } = require('../../util/currency')
-const Modules = require('../../infrastructure/Modules')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+import Settings from '@overleaf/settings'
+
+import PlansLocator from './PlansLocator.js'
+import { isStandaloneAiAddOnPlanCode } from './AiHelper.js'
+import { MEMBERS_LIMIT_ADD_ON_CODE } from './PaymentProviderEntities.js'
+import SubscriptionFormatters from './SubscriptionFormatters.js'
+import SubscriptionLocator from './SubscriptionLocator.js'
+import InstitutionsGetter from '../Institutions/InstitutionsGetter.js'
+import InstitutionsManager from '../Institutions/InstitutionsManager.js'
+import PublishersGetter from '../Publishers/PublishersGetter.js'
+import sanitizeHtml from 'sanitize-html'
+import _ from 'lodash'
+import async from 'async'
+import SubscriptionHelper from './SubscriptionHelper.js'
+import { callbackify } from '@overleaf/promise-utils'
+import { V1ConnectionError } from '../Errors/Errors.js'
+import FeaturesHelper from './FeaturesHelper.js'
+import { formatCurrency } from '../../util/currency.js'
+import Modules from '../../infrastructure/Modules.js'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 
 /**
  * @import { Subscription } from "../../../../types/project/dashboard/subscription"
@@ -629,7 +630,7 @@ function buildPlansListForSubscriptionDash(currentPlan, isInTrial) {
   }
 }
 
-module.exports = {
+export default {
   buildUsersSubscriptionViewModel: callbackify(buildUsersSubscriptionViewModel),
   buildPlansList,
   buildPlansListForSubscriptionDash,
