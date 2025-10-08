@@ -74,6 +74,7 @@ export default function DictionaryModalContent({
                 <OLTooltip
                   id={`tooltip-remove-learned-word-${learnedWord}`}
                   description={t('edit_dictionary_remove')}
+                  overlayProps={{ delay: 0 }}
                 >
                   <OLIconButton
                     variant="danger"

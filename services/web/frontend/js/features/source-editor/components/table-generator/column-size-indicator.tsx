@@ -40,7 +40,7 @@ export const ColumnSizeIndicator = ({
               width: formattedWidth,
             })
       }
-      overlayProps={{ placement: 'bottom' }}
+      overlayProps={{ delay: 0, placement: 'bottom' }}
     >
       <button
         className="btn table-generator-column-indicator-button"

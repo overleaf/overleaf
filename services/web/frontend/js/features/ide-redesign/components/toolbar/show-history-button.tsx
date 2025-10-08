@@ -25,7 +25,7 @@ export default function ShowHistoryButton() {
       <OLTooltip
         id="tooltip-open-history"
         description={t('history')}
-        overlayProps={{ placement: 'bottom' }}
+        overlayProps={{ delay: 0, placement: 'bottom' }}
       >
         <OLIconButton
           icon="history"

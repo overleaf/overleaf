@@ -3,7 +3,6 @@ import {
   useEffect,
   forwardRef,
   useState,
-  useMemo,
   useCallback,
 } from 'react'
 import {
@@ -13,7 +12,6 @@ import {
   TooltipProps as BSTooltipProps,
 } from 'react-bootstrap'
 import { callFnsInSequence } from '@/utils/functions'
-import { useTooltipContext } from '@/shared/context/tooltip-provider'
 
 const DEFAULT_DELAY_SHOW = 300
 // Slightly lower value avoids flickering when an adjacent tooltip is shown before the previous one hides
@@ -36,26 +34,6 @@ const UpdatingTooltip = forwardRef<HTMLDivElement, BSTooltipProps>(
 )
 UpdatingTooltip.displayName = 'UpdatingTooltip'
 
-const chooseDelayOptions = (
-  delay?: number | { show: number; hide: number }
-): { show: number; hide: number } => {
-  if (typeof delay === 'object') {
-    return delay
-  }
-
-  if (typeof delay === 'number') {
-    return {
-      show: delay,
-      hide: Math.max(delay - 10, 0),
-    }
-  }
-
-  return {
-    show: DEFAULT_DELAY_SHOW,
-    hide: DEFAULT_DELAY_HIDE,
-  }
-}
-
 export type TooltipProps = {
   description: React.ReactNode
   id: string
@@ -75,22 +53,20 @@ function Tooltip({
 }: TooltipProps) {
   const [show, setShow] = useState(false)
 
-  const tooltipContext = useTooltipContext()
-
-  useEffect(() => {
-    const listener = (e: KeyboardEvent) => {
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
       if (show && e.key === 'Escape') {
         setShow(false)
         e.stopPropagation()
       }
-    }
+    },
+    [show, setShow]
+  )
 
-    document.addEventListener('keydown', listener, true)
-
-    return () => {
-      document.removeEventListener('keydown', listener, true)
-    }
-  }, [show])
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown, true)
+    return () => document.removeEventListener('keydown', handleKeyDown, true)
+  }, [handleKeyDown])
 
   const hideTooltip = (e: React.MouseEvent) => {
     if (e.currentTarget instanceof HTMLElement) {
@@ -99,22 +75,13 @@ function Tooltip({
     setShow(false)
   }
 
-  const delayProps = useMemo(() => {
-    const delayOptions = chooseDelayOptions(overlayProps?.delay)
-    if (tooltipContext?.isTooltipOpen) {
-      delayOptions.show = 0
-      delayOptions.hide = 0
-    }
-    return delayOptions
-  }, [overlayProps?.delay, tooltipContext])
-
-  const handleToggle = useCallback(
-    (value: boolean) => {
-      tooltipContext?.setIsTooltipOpen(value)
-      setShow(value)
-    },
-    [tooltipContext]
-  )
+  const delay = overlayProps?.delay
+  let delayShow = DEFAULT_DELAY_SHOW
+  let delayHide = DEFAULT_DELAY_HIDE
+  if (delay !== undefined) {
+    delayShow = typeof delay === 'number' ? delay : delay.show
+    delayHide = typeof delay === 'number' ? Math.max(delay - 10, 0) : delay.hide
+  }
 
   return (
     <OverlayTrigger
@@ -128,11 +95,10 @@ function Tooltip({
         </UpdatingTooltip>
       }
       {...overlayProps}
-      delay={delayProps}
+      delay={{ show: delayShow, hide: delayHide }}
       placement={overlayProps?.placement || 'top'}
       show={show}
-      onToggle={handleToggle}
-      transition={!tooltipContext?.isTooltipOpen}
+      onToggle={setShow}
     >
       {overlayProps?.trigger === 'click'
         ? children
