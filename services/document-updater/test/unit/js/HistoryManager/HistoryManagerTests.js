@@ -13,6 +13,9 @@ describe('HistoryManager', function () {
     this.HistoryManager = SandboxedModule.require(modulePath, {
       requires: {
         request: (this.request = {}),
+        '@overleaf/fetch-utils': (this.fetchUtils = {
+          fetchNothing: sinon.stub().resolves(),
+        }),
         '@overleaf/settings': (this.Settings = {
           shortHistoryQueues: [],
           apis: {
@@ -21,74 +24,69 @@ describe('HistoryManager', function () {
             },
           },
         }),
-        './DocumentManager': (this.DocumentManager = {}),
+        './DocumentManager': (this.DocumentManager = {
+          promises: {
+            resyncDocContentsWithLock: sinon.stub().resolves(),
+          },
+        }),
         './RedisManager': (this.RedisManager = {}),
-        './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
+        './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {
+          promises: {
+            queueResyncProjectStructure: sinon.stub().resolves(),
+          },
+        }),
         './Metrics': (this.metrics = { inc: sinon.stub() }),
       },
     })
     this.project_id = 'mock-project-id'
-    this.callback = sinon.stub()
   })
 
   describe('flushProjectChangesAsync', function () {
     beforeEach(function () {
-      this.request.post = sinon
-        .stub()
-        .callsArgWith(1, null, { statusCode: 204 })
-
       this.HistoryManager.flushProjectChangesAsync(this.project_id)
     })
 
     it('should send a request to the project history api', function () {
-      this.request.post
-        .calledWith({
-          url: `${this.Settings.apis.project_history.url}/project/${this.project_id}/flush`,
-          qs: { background: true },
-        })
-        .should.equal(true)
+      this.fetchUtils.fetchNothing.should.have.been.calledWith(
+        new URL(
+          `${this.Settings.apis.project_history.url}/project/${this.project_id}/flush?background=true`
+        )
+      )
     })
   })
 
   describe('flushProjectChanges', function () {
     describe('in the normal case', function () {
-      beforeEach(function (done) {
-        this.request.post = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 204 })
-        this.HistoryManager.flushProjectChanges(
+      beforeEach(async function () {
+        await this.HistoryManager.promises.flushProjectChanges(
           this.project_id,
           {
             background: true,
-          },
-          done
+          }
         )
       })
 
       it('should send a request to the project history api', function () {
-        this.request.post
-          .calledWith({
-            url: `${this.Settings.apis.project_history.url}/project/${this.project_id}/flush`,
-            qs: { background: true },
-          })
-          .should.equal(true)
+        this.fetchUtils.fetchNothing.should.have.been.calledWith(
+          new URL(
+            `${this.Settings.apis.project_history.url}/project/${this.project_id}/flush?background=true`
+          )
+        )
       })
     })
 
     describe('with the skip_history_flush option', function () {
-      beforeEach(function (done) {
-        this.request.post = sinon.stub()
-        this.HistoryManager.flushProjectChanges(
+      beforeEach(async function () {
+        await this.HistoryManager.promises.flushProjectChanges(
           this.project_id,
           {
             skip_history_flush: true,
-          },
-          done
+          }
         )
       })
 
       it('should not send a request to the project history api', function () {
-        this.request.post.called.should.equal(false)
+        this.fetchUtils.fetchNothing.should.not.have.been.called
       })
     })
   })
@@ -96,7 +94,7 @@ describe('HistoryManager', function () {
   describe('recordAndFlushHistoryOps', function () {
     beforeEach(function () {
       this.ops = ['mock-ops']
-      this.project_ops_length = 10
+      this.project_ops_length = 500
 
       this.HistoryManager.flushProjectChangesAsync = sinon.stub()
     })
@@ -111,17 +109,12 @@ describe('HistoryManager', function () {
       })
 
       it('should not flush project changes', function () {
-        this.HistoryManager.flushProjectChangesAsync.called.should.equal(false)
+        this.fetchUtils.fetchNothing.should.not.have.been.called
       })
     })
 
     describe('with enough ops to flush project changes', function () {
       beforeEach(function () {
-        this.HistoryManager.shouldFlushHistoryOps = sinon.stub()
-        this.HistoryManager.shouldFlushHistoryOps
-          .withArgs(this.project_id, this.project_ops_length)
-          .returns(true)
-
         this.HistoryManager.recordAndFlushHistoryOps(
           this.project_id,
           this.ops,
@@ -130,28 +123,11 @@ describe('HistoryManager', function () {
       })
 
       it('should flush project changes', function () {
-        this.HistoryManager.flushProjectChangesAsync
-          .calledWith(this.project_id)
-          .should.equal(true)
-      })
-    })
-
-    describe('with enough ops to flush doc changes', function () {
-      beforeEach(function () {
-        this.HistoryManager.shouldFlushHistoryOps = sinon.stub()
-        this.HistoryManager.shouldFlushHistoryOps
-          .withArgs(this.project_id, this.project_ops_length)
-          .returns(false)
-
-        this.HistoryManager.recordAndFlushHistoryOps(
-          this.project_id,
-          this.ops,
-          this.project_ops_length
+        this.fetchUtils.fetchNothing.should.have.been.calledWith(
+          new URL(
+            `${this.Settings.apis.project_history.url}/project/${this.project_id}/flush?background=true`
+          )
         )
-      })
-
-      it('should not flush project changes', function () {
-        this.HistoryManager.flushProjectChangesAsync.called.should.equal(false)
       })
     })
 
@@ -228,78 +204,61 @@ describe('HistoryManager', function () {
           url: `www.filestore.test/${this.project_id}/mock-file-id`,
         },
       ]
-      this.ProjectHistoryRedisManager.queueResyncProjectStructure = sinon
-        .stub()
-        .yields()
-      this.DocumentManager.resyncDocContentsWithLock = sinon.stub().yields()
     })
 
     describe('full sync', function () {
-      beforeEach(function () {
-        this.HistoryManager.resyncProjectHistory(
+      beforeEach(async function () {
+        await this.HistoryManager.promises.resyncProjectHistory(
           this.project_id,
           this.projectHistoryId,
           this.docs,
           this.files,
-          {},
-          this.callback
+          {}
         )
       })
 
       it('should queue a project structure reync', function () {
-        this.ProjectHistoryRedisManager.queueResyncProjectStructure
-          .calledWith(
-            this.project_id,
-            this.projectHistoryId,
-            this.docs,
-            this.files
-          )
-          .should.equal(true)
+        this.ProjectHistoryRedisManager.promises.queueResyncProjectStructure.should.have.been.calledWith(
+          this.project_id,
+          this.projectHistoryId,
+          this.docs,
+          this.files
+        )
       })
 
       it('should queue doc content reyncs', function () {
-        this.DocumentManager.resyncDocContentsWithLock
-          .calledWith(this.project_id, this.docs[0].doc, this.docs[0].path)
-          .should.equal(true)
-      })
-
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
+        this.DocumentManager.promises.resyncDocContentsWithLock.should.have.been.calledWith(
+          this.project_id,
+          this.docs[0].doc,
+          this.docs[0].path
+        )
       })
     })
 
     describe('resyncProjectStructureOnly=true', function () {
-      beforeEach(function () {
-        this.HistoryManager.resyncProjectHistory(
+      beforeEach(async function () {
+        await this.HistoryManager.promises.resyncProjectHistory(
           this.project_id,
           this.projectHistoryId,
           this.docs,
           this.files,
-          { resyncProjectStructureOnly: true },
-          this.callback
+          { resyncProjectStructureOnly: true }
         )
       })
 
       it('should queue a project structure reync', function () {
-        this.ProjectHistoryRedisManager.queueResyncProjectStructure
-          .calledWith(
-            this.project_id,
-            this.projectHistoryId,
-            this.docs,
-            this.files,
-            { resyncProjectStructureOnly: true }
-          )
-          .should.equal(true)
-      })
-
-      it('should not queue doc content reyncs', function () {
-        this.DocumentManager.resyncDocContentsWithLock.called.should.equal(
-          false
+        this.ProjectHistoryRedisManager.promises.queueResyncProjectStructure.should.have.been.calledWith(
+          this.project_id,
+          this.projectHistoryId,
+          this.docs,
+          this.files,
+          { resyncProjectStructureOnly: true }
         )
       })
 
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
+      it('should not queue doc content reyncs', function () {
+        this.DocumentManager.promises.resyncDocContentsWithLock.should.not.have
+          .been.called
       })
     })
   })

@@ -228,8 +228,7 @@ async function updateProjectWithLocks(
     HistoryManager.shouldFlushHistoryOps(
       projectId,
       projectOpsLength,
-      updates.length,
-      HistoryManager.FLUSH_PROJECT_EVERY_N_OPS
+      updates.length
     )
   ) {
     HistoryManager.flushProjectChangesAsync(projectId)

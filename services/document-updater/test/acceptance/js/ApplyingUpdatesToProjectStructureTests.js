@@ -19,9 +19,11 @@ async function sendProjectUpdateAndWait(projectId, docId, update, version) {
 }
 
 describe("Applying updates to a project's structure", function () {
-  before(function () {
+  before(function (done) {
     this.user_id = 'user-id-123'
     this.version = 1234
+
+    DocUpdaterApp.ensureRunning(done)
   })
 
   describe('renaming a file', function () {
