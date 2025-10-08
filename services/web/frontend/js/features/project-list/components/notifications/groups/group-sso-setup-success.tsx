@@ -30,7 +30,7 @@ function GroupSsoSetupSuccess() {
         type="success"
         content={
           <Trans
-            i18nKey="success_youve_successfully_join_group"
+            i18nKey="success_youve_successfully_joined_group"
             components={[<b />]} // eslint-disable-line react/jsx-key
             values={{ groupName: joinedGroupName }}
             shouldUnescape

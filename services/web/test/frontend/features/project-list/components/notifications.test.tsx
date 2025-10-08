@@ -1089,7 +1089,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupSsoSetupSuccess)
       const alert = screen.getByRole('alert')
       expect(alert.textContent).to.contain(
-        `Success! You’ve joined the ${groupName} group subscription. Your group has SSO enabled so you can log in without needing to remember a password.`
+        `Success! You’ve joined the ${groupName} group subscription. Your group has SSO enabled.`
       )
     })
   })
