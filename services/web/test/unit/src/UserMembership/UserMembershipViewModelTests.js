@@ -1,15 +1,3 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { expect } = require('chai')
 const sinon = require('sinon')
 const assertCalledWith = sinon.assert.calledWith
@@ -25,7 +13,7 @@ const {
 
 describe('UserMembershipViewModel', function () {
   beforeEach(function () {
-    this.UserGetter = { getUsers: sinon.stub() }
+    this.UserGetter = { promises: { getUsers: sinon.stub() } }
     this.UserMembershipViewModel = SandboxedModule.require(modulePath, {
       requires: {
         'mongodb-legacy': { ObjectId },
@@ -54,7 +42,7 @@ describe('UserMembershipViewModel', function () {
   describe('build', function () {
     it('build email', function () {
       const viewModel = this.UserMembershipViewModel.build(this.email)
-      return expect(viewModel).to.deep.equal({
+      expect(viewModel).to.deep.equal({
         email: this.email,
         invite: true,
         last_active_at: null,
@@ -83,67 +71,49 @@ describe('UserMembershipViewModel', function () {
 
   describe('build async', function () {
     beforeEach(function () {
-      return (this.UserMembershipViewModel.build = sinon.stub())
+      this.UserMembershipViewModel.build = sinon.stub()
     })
 
-    it('build email', function (done) {
-      this.UserGetter.getUsers.yields(null, [])
-      return this.UserMembershipViewModel.buildAsync(
-        [this.email],
-        (error, [viewModel]) => {
-          assertCalledWith(this.UserMembershipViewModel.build, this.email)
-          return done()
-        }
-      )
+    it('build email', async function () {
+      this.UserGetter.promises.getUsers.resolves([])
+      await this.UserMembershipViewModel.buildAsync([this.email])
+      assertCalledWith(this.UserMembershipViewModel.build, this.email)
     })
 
-    it('build user', function (done) {
-      this.UserGetter.getUsers.yields(null, [])
-      return this.UserMembershipViewModel.buildAsync(
-        [this.user],
-        (error, [viewModel]) => {
-          assertCalledWith(this.UserMembershipViewModel.build, this.user)
-          return done()
-        }
-      )
+    it('build user', async function () {
+      this.UserGetter.promises.getUsers.resolves([])
+      await this.UserMembershipViewModel.buildAsync([this.user])
+      assertCalledWith(this.UserMembershipViewModel.build, this.user)
     })
 
-    it('build user id', function (done) {
+    it('build user id', async function () {
       const user = {
         ...this.user,
         _id: new ObjectId(),
       }
-      this.UserGetter.getUsers.yields(null, [user])
-      return this.UserMembershipViewModel.buildAsync(
-        [user._id],
-        (error, [viewModel]) => {
-          expect(error).not.to.exist
-          assertNotCalled(this.UserMembershipViewModel.build)
-          expect(viewModel._id.toString()).to.equal(user._id.toString())
-          expect(viewModel.email).to.equal(user.email)
-          expect(viewModel.first_name).to.equal(user.first_name)
-          expect(viewModel.invite).to.equal(false)
-          expect(viewModel.email).to.exist
-          expect(viewModel.enrollment).to.exist
-          expect(viewModel.enrollment).to.deep.equal(user.enrollment)
-          return done()
-        }
-      )
+      this.UserGetter.promises.getUsers.resolves([user])
+      const [viewModel] = await this.UserMembershipViewModel.buildAsync([
+        user._id,
+      ])
+      assertNotCalled(this.UserMembershipViewModel.build)
+      expect(viewModel._id.toString()).to.equal(user._id.toString())
+      expect(viewModel.email).to.equal(user.email)
+      expect(viewModel.first_name).to.equal(user.first_name)
+      expect(viewModel.invite).to.equal(false)
+      expect(viewModel.email).to.exist
+      expect(viewModel.enrollment).to.exist
+      expect(viewModel.enrollment).to.deep.equal(user.enrollment)
     })
 
-    it('build user id with error', function (done) {
-      this.UserGetter.getUsers.yields(new Error('nope'), [])
+    it('build user id with error', async function () {
+      this.UserGetter.promises.getUsers.rejects(new Error('nope'))
       const userId = new ObjectId()
-      return this.UserMembershipViewModel.buildAsync(
-        [userId],
-        (error, [viewModel]) => {
-          expect(error).not.to.exist
-          assertNotCalled(this.UserMembershipViewModel.build)
-          expect(viewModel._id).to.equal(userId.toString())
-          expect(viewModel.email).not.to.exist
-          return done()
-        }
-      )
+      const [viewModel] = await this.UserMembershipViewModel.buildAsync([
+        userId,
+      ])
+      assertNotCalled(this.UserMembershipViewModel.build)
+      expect(viewModel._id).to.equal(userId.toString())
+      expect(viewModel.email).not.to.exist
     })
   })
 })
