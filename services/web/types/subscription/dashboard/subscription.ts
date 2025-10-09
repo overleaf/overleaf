@@ -142,3 +142,10 @@ export type SubscriptionBillingAddress = {
   postal_code: string
   country: string
 }
+
+export type StripeBusinessDetails = {
+  name?: string
+  taxIdType?: string
+  taxIdValue?: string
+  isTaxExempt?: boolean
+}
