@@ -157,7 +157,7 @@ function ipMatcherAffiliation(userId) {
           if (error != null) {
             return callback(error)
           }
-          if (response.statusCode !== 200) {
+          if (response.statusCode !== 200 || !body) {
             return callback()
           }
 
