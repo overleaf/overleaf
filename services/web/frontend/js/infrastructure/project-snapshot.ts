@@ -2,6 +2,7 @@ import pLimit from 'p-limit'
 import { Change, Chunk, Snapshot, File } from 'overleaf-editor-core'
 import { RawChange, RawChunk } from 'overleaf-editor-core/lib/types'
 import { FetchError, getJSON, postJSON } from '@/infrastructure/fetch-json'
+import path from 'path-browserify'
 
 const DOWNLOAD_BLOBS_CONCURRENCY = 10
 
@@ -101,21 +102,21 @@ export class ProjectSnapshot {
 
     const snapshotPaths = new Set(this.snapshot.getFilePathnames())
 
-    const baseURLs = [
+    const basePaths = [
       // relative to the root of the compile directory
-      new URL('https://overleaf.invalid'),
+      '/',
     ]
 
     if (currentPath !== '/') {
       // relative to the current directory
-      baseURLs.push(new URL(currentPath, 'https://overleaf.invalid'))
+      basePaths.push(currentPath)
     }
 
     const extensionsToTest = ['', ...extensions]
 
-    for (const baseURL of baseURLs) {
+    for (const basePath of basePaths) {
       for (const extension of extensionsToTest) {
-        const { pathname } = new URL(`${filePath}${extension}`, baseURL)
+        const pathname = path.resolve(basePath, `${filePath}${extension}`)
         const snapshotPath = pathname.substring(1) // remove leading slash
         if (snapshotPaths.has(snapshotPath)) {
           return snapshotPath
