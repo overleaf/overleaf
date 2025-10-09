@@ -77,6 +77,34 @@ export type PaymentIntentPaymentFailedWebhookEvent = {
   request: Stripe.Event.Request
 }
 
+export type SetupIntentSetupFailedWebhookEvent = {
+  type: 'setup_intent.setup_failed'
+  data: {
+    object: Stripe.SetupIntent & {
+      metadata: {
+        userId?: string
+        isTrial?: string
+        checkoutSource?: 'hosted-checkout' | 'elements-checkout' | undefined
+      }
+    }
+  }
+  request: Stripe.Event.Request
+}
+
+export type SetupIntentSucceededWebhookEvent = {
+  type: 'setup_intent.succeeded'
+  data: {
+    object: Stripe.SetupIntent & {
+      metadata: {
+        userId?: string
+        isTrial?: string
+        checkoutSource?: 'hosted-checkout' | 'elements-checkout' | undefined
+      }
+    }
+  }
+  request: Stripe.Event.Request
+}
+
 export type InvoiceVoidedWebhookEvent = {
   type: 'invoice.voided'
   data: {
@@ -122,6 +150,8 @@ export type WebhookEvent =
   | InvoicePaidWebhookEvent
   | InvoiceVoidedWebhookEvent
   | PaymentIntentPaymentFailedWebhookEvent
+  | SetupIntentSetupFailedWebhookEvent
+  | SetupIntentSucceededWebhookEvent
   | InvoiceOverdueWebhookEvent
   | CheckoutSessionCompletedWebhookEvent
   | CustomerCreatedWebhookEvent
