@@ -30,6 +30,7 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(
 
 		- var canDisplayAdminMenu = hasAdminAccess()
 		- var canDisplayAdminRedirect = canRedirectToAdminDomain()
+		- var canDisplayProjectUrlLookup = hasFeature('saas') && canDisplayAdminMenu && hasAdminCapability('view-project-setting', false)
 		- var canDisplaySplitTestMenu = hasFeature('saas') && ((canDisplayAdminMenu && hasAdminCapability('view-split-test')) || (getSessionUser() && getSessionUser().staffAccess && (getSessionUser().staffAccess.splitTestMetrics || getSessionUser().staffAccess.splitTestManagement)))
 		- var canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu && hasAdminCapability('manage-survey', false)
 		- var canDisplayScriptLogMenu = hasFeature('saas') && hasAdminCapability('view-script-log', false) && canDisplayAdminMenu
@@ -47,7 +48,7 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(
 
 			#navbar-main-collapse.navbar-collapse.collapse
 				ul.nav.navbar-nav.navbar-right.ms-auto(role='menubar')
-					if canDisplayAdminMenu || canDisplayAdminRedirect || canDisplaySplitTestMenu
+					if canDisplayAdminMenu || canDisplayAdminRedirect || canDisplayProjectUrlLookup || canDisplaySplitTestMenu
 						+nav-item.dropdown.subdued
 							button.dropdown-toggle(
 								aria-haspopup='true'
@@ -64,6 +65,7 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(
 								if canDisplayAdminMenu
 									+dropdown-menu-link-item(href='/admin') Manage Site
 									+dropdown-menu-link-item(href='/admin/user') Manage Users
+								if canDisplayProjectUrlLookup
 									+dropdown-menu-link-item(href='/admin/project') Project URL Lookup
 								if canDisplayAdminRedirect
 									+dropdown-menu-link-item(href=settings.adminUrl) Switch to Admin

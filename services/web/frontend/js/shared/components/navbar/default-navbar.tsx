@@ -26,6 +26,7 @@ function DefaultNavbar(
     title,
     canDisplayAdminMenu,
     canDisplayAdminRedirect,
+    canDisplayProjectUrlLookup,
     canDisplaySplitTestMenu,
     canDisplaySurveyMenu,
     canDisplayScriptLogMenu,
@@ -112,6 +113,7 @@ function DefaultNavbar(
                     <AdminMenu
                       canDisplayAdminMenu={canDisplayAdminMenu}
                       canDisplayAdminRedirect={canDisplayAdminRedirect}
+                      canDisplayProjectUrlLookup={canDisplayProjectUrlLookup}
                       canDisplaySplitTestMenu={canDisplaySplitTestMenu}
                       canDisplaySurveyMenu={canDisplaySurveyMenu}
                       canDisplayScriptLogMenu={canDisplayScriptLogMenu}

@@ -8,6 +8,7 @@ export type DefaultNavbarMetadata = {
   title?: string
   canDisplayAdminMenu: boolean
   canDisplayAdminRedirect: boolean
+  canDisplayProjectUrlLookup: boolean
   canDisplaySplitTestMenu: boolean
   canDisplaySurveyMenu: boolean
   canDisplayScriptLogMenu: boolean
