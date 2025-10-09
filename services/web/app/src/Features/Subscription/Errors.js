@@ -30,6 +30,8 @@ class HasPastDueInvoiceError extends OError {}
 
 class HasNoAdditionalLicenseWhenManuallyCollectedError extends OError {}
 
+class InvalidTaxIdError extends OError {}
+
 /**
  * @typedef {Object} PaymentActionRequiredInfo
  * @property {string} PaymentActionRequiredInfo.clientSecret
@@ -72,4 +74,5 @@ module.exports = {
   SubtotalLimitExceededError,
   HasPastDueInvoiceError,
   HasNoAdditionalLicenseWhenManuallyCollectedError,
+  InvalidTaxIdError,
 }
