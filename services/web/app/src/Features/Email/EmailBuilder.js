@@ -974,6 +974,35 @@ templates.removeGroupMember = NoCTAEmailTemplate({
   },
 })
 
+templates.taxExemptCertificateRequired = NoCTAEmailTemplate({
+  subject(opts) {
+    return `Action required: Tax exemption verification for Overleaf [${opts.ein}]`
+  },
+  title() {
+    return 'Action required: Tax exemption verification'
+  },
+  greeting() {
+    return ''
+  },
+  message(opts) {
+    return [
+      'Thanks for letting us know your organization is tax exempt. To confirm this, we need some additional verification.',
+      'Please reply to this email with one of the following documents attached:',
+      '<ul>',
+      '<li>Your IRS determination letter (for non-profits and similar organizations)</li>',
+      '<li>Your state resale or exemption certificate</li>',
+      '</ul>',
+      `These should match the EIN you provided:${opts.ein}.`,
+      'If you have any questions, let us know by replying to this email.',
+      '<br/>',
+      'Best wishes,',
+      'Team Overleaf',
+      '<br/>',
+      `Our reference:${opts.stripeCustomerId}`,
+    ]
+  },
+})
+
 function _formatUserNameAndEmail(user, placeholder) {
   if (user.first_name && user.last_name) {
     const fullName = `${user.first_name} ${user.last_name}`

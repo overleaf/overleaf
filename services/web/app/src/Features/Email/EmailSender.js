@@ -104,6 +104,9 @@ async function sendEmail(options, emailType) {
       replyTo: options.replyTo || EMAIL_SETTINGS.replyToAddress,
       socketTimeout: 30 * 1000,
     }
+    if (options.cc) {
+      sendMailOptions.cc = options.cc
+    }
     if (EMAIL_SETTINGS.textEncoding != null) {
       sendMailOptions.textEncoding = EMAIL_SETTINGS.textEncoding
     }

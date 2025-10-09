@@ -880,6 +880,57 @@ describe('EmailBuilder', function () {
           })
         })
       })
+
+      describe('taxExemptCertificateRequired', function () {
+        beforeEach(function () {
+          this.emailAddress = 'customer@example.com'
+          this.opts = {
+            to: this.emailAddress,
+            ein: '12-3456789',
+            stripeCustomerId: 'cus_123456789',
+          }
+          this.email = this.EmailBuilder.buildEmail(
+            'taxExemptCertificateRequired',
+            this.opts
+          )
+          this.dom = cheerio.load(this.email.html)
+        })
+
+        it('should build the email', function () {
+          expect(this.email.html).to.exist
+          expect(this.email.text).to.exist
+        })
+
+        describe('HTML email', function () {
+          it('should include the EIN', function () {
+            expect(this.email.html).to.contain(this.opts.ein)
+          })
+
+          it('should include the Stripe customer ID', function () {
+            expect(this.email.html).to.contain(this.opts.stripeCustomerId)
+          })
+
+          it('should include tax exemption verification text', function () {
+            expect(this.email.html).to.contain('tax exempt')
+            expect(this.email.html).to.contain('verification')
+          })
+        })
+
+        describe('plain text email', function () {
+          it('should include the EIN', function () {
+            expect(this.email.text).to.contain(this.opts.ein)
+          })
+
+          it('should include the Stripe customer ID', function () {
+            expect(this.email.text).to.contain(this.opts.stripeCustomerId)
+          })
+
+          it('should include tax exemption verification text', function () {
+            expect(this.email.text).to.contain('tax exempt')
+            expect(this.email.text).to.contain('verification')
+          })
+        })
+      })
     })
   })
 })
