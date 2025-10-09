@@ -227,7 +227,10 @@ async function getInstitutionUsersByHostname(hostname) {
     samlIdentifiers: 1,
   }
 
-  const users = await UserGetter.getUsersByHostname(hostname, projection)
+  const users = await UserGetter.promises.getUsersByHostname(
+    hostname,
+    projection
+  )
   users.forEach(user => {
     user.emails = decorateFullEmails(
       user.email,
