@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
 import classnames from 'classnames'
+import RollingBuildSelectedReminder from './rolling-build-selected-reminder'
 import PdfValidationIssue from './pdf-validation-issue'
 import StopOnFirstErrorPrompt from './stop-on-first-error-prompt'
 import TimeoutUpgradePromptNew from './timeout-upgrade-prompt-new'
@@ -41,6 +42,8 @@ function PdfLogsViewer({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
       data-testid="logs-pane"
     >
       <div className="logs-pane-content">
+        <RollingBuildSelectedReminder />
+
         {codeCheckFailed && <PdfCodeCheckFailedNotice />}
 
         {stoppedOnFirstError && <StopOnFirstErrorPrompt />}
