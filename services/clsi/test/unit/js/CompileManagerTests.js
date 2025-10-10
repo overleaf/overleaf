@@ -296,24 +296,28 @@ describe('CompileManager', function () {
         )
       })
 
-      it('should not enable latexmk metrics when sampleRequest returns false', async function () {
+      it('should enable latexmk metrics when sampleRequest returns false', async function () {
         this.StatsManager.sampleRequest.returns(false)
         await this.CompileManager.promises.doCompileWithLock(
           this.request,
           {},
           {}
         )
-        expect(this.LatexMetrics.enableLatexMkMetrics).not.to.have.been.called
+        expect(this.LatexMetrics.enableLatexMkMetrics).to.have.been.calledWith(
+          sinon.match.object
+        )
       })
 
-      it('should not enable latexmk metrics when sampleRequest returns undefined', async function () {
+      it('should enable latexmk metrics when sampleRequest returns undefined', async function () {
         this.StatsManager.sampleRequest.returns(undefined)
         await this.CompileManager.promises.doCompileWithLock(
           this.request,
           {},
           {}
         )
-        expect(this.LatexMetrics.enableLatexMkMetrics).not.to.have.been.called
+        expect(this.LatexMetrics.enableLatexMkMetrics).to.have.been.calledWith(
+          sinon.match.object
+        )
       })
     })
 

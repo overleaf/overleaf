@@ -46,10 +46,18 @@ const processOutputFilesDurationSeconds = new prom.Histogram({
   labelNames: ['compile', 'group'],
 })
 
+const latexmkRuleDurationSeconds = new prom.Histogram({
+  name: 'clsi_latexmk_rule_duration_seconds',
+  help: 'Duration of a latexmk rule execution',
+  buckets: COMPILE_TIME_BUCKETS,
+  labelNames: ['group', 'rule'],
+})
+
 module.exports = {
   compilesTotal,
   compileDurationSeconds,
   e2eCompileDurationSeconds,
   syncResourcesDurationSeconds,
   processOutputFilesDurationSeconds,
+  latexmkRuleDurationSeconds,
 }

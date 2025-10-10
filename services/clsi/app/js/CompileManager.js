@@ -6,7 +6,6 @@ const { callbackify } = require('node:util')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const OError = require('@overleaf/o-error')
-const Metrics = require('@overleaf/metrics')
 
 const ResourceWriter = require('./ResourceWriter')
 const LatexRunner = require('./LatexRunner')
@@ -29,11 +28,17 @@ const SafeReader = require('./SafeReader')
 const { enableLatexMkMetrics, addLatexFdbMetrics } = require('./LatexMetrics')
 const { callbackifyMultiResult } = require('@overleaf/promise-utils')
 
-const COMPILE_TIME_BUCKETS = [
-  // NOTE: These buckets are locked in per metric name.
-  //       If you want to change them, you will need to rename metrics.
-  0, 1, 2, 3, 4, 6, 8, 11, 15, 22, 31, 43, 61, 86, 121, 170, 240,
-].map(seconds => seconds * 1000)
+const KNOWN_LATEXMK_RULES = new Set([
+  'biber',
+  'bibtex',
+  'dvipdf',
+  'latex',
+  'lualatex',
+  'makeindex',
+  'pdflatex',
+  'xdvipdfmx',
+  'xelatex',
+])
 
 function getCompileName(projectId, userId) {
   if (userId != null) {
@@ -174,18 +179,6 @@ async function doCompile(request, stats, timings) {
 
   const compileStart = Date.now()
 
-  // find the image tag to log it as a metric, e.g. 2015.1
-  let tag = 'default'
-  if (request.imageName != null) {
-    const match = request.imageName.match(/:(.*)/)
-    if (match != null) {
-      tag = match[1]
-    }
-  }
-  // exclude smoke test
-  if (!request.project_id.match(/^[0-9a-f]{24}$/)) {
-    tag = 'other'
-  }
   const compileName = getCompileName(request.project_id, request.user_id)
 
   // Record latexmk -time stats for a subset of users
@@ -193,11 +186,10 @@ async function doCompile(request, stats, timings) {
     request,
     Settings.performanceLogSamplingPercentage
   )
-  // For selected users, define a `latexmk` property on the stats object
+
+  // Define a `latexmk` property on the stats object
   // to collect latexmk -time stats.
-  if (recordPerformanceMetrics) {
-    enableLatexMkMetrics(stats)
-  }
+  enableLatexMkMetrics(stats)
 
   try {
     await LatexRunner.promises.runLatex(compileName, {
@@ -260,30 +252,12 @@ async function doCompile(request, stats, timings) {
           ? 'terminated'
           : 'failure'
       timings.compile = Date.now() - compileStart
-      ClsiMetrics.compilesTotal.inc({
-        status,
-        engine: request.compiler,
-        image: tag,
-        compile: request.metricsOpts.compile,
-        group: request.compileGroup,
-        draft: request.draft ? 'true' : 'false',
-        stop_on_first_error: request.stopOnFirstError ? 'true' : 'false',
-      })
-      ClsiMetrics.compileDurationSeconds.observe(
-        {
-          status,
-          engine: request.compiler,
-          compile: request.metricsOpts.compile,
-          group: request.compileGroup,
-        },
-        timings.compile / 1000
-      )
+      _emitMetrics(request, status, stats, timings)
     }
     throw error
   }
 
   timings.compile = Date.now() - compileStart
-  const status = stats['latexmk-errors'] ? 'error' : 'success'
 
   logger.debug(
     {
@@ -296,29 +270,6 @@ async function doCompile(request, stats, timings) {
     'done compile'
   )
 
-  if (stats['latex-runs'] > 0) {
-    Metrics.histogram(
-      'avg-compile-per-pass-v2',
-      timings.compile / stats['latex-runs'],
-      COMPILE_TIME_BUCKETS,
-      request.metricsOpts
-    )
-    Metrics.timing(
-      'avg-compile-per-pass-v2',
-      timings.compile / stats['latex-runs'],
-      1,
-      request.metricsOpts
-    )
-  }
-  if (stats['latex-runs'] > 0 && timings['cpu-time'] > 0) {
-    Metrics.timing(
-      'run-compile-cpu-time-per-pass',
-      timings['cpu-time'] / stats['latex-runs'],
-      1,
-      request.metricsOpts
-    )
-  }
-
   const { outputFiles, buildId } = await _saveOutputFiles({
     request,
     compileDir,
@@ -328,35 +279,8 @@ async function doCompile(request, stats, timings) {
   })
   timings.compileE2E = Date.now() - e2eCompileStart
 
-  if (!_shouldSkipMetrics(request)) {
-    ClsiMetrics.compilesTotal.inc({
-      status,
-      engine: request.compiler,
-      image: tag,
-      compile: request.metricsOpts.compile,
-      group: request.compileGroup,
-      draft: request.draft ? 'true' : 'false',
-      stop_on_first_error: request.stopOnFirstError ? 'true' : 'false',
-    })
-    ClsiMetrics.compileDurationSeconds.observe(
-      {
-        status,
-        engine: request.compiler,
-        compile: request.metricsOpts.compile,
-        group: request.compileGroup,
-      },
-      timings.compile / 1000
-    )
-    ClsiMetrics.syncResourcesDurationSeconds.observe(
-      {
-        type: request.syncType,
-        compile: request.metricsOpts.compile,
-        group: request.compileGroup,
-      },
-      timings.sync / 1000
-    )
-    ClsiMetrics.e2eCompileDurationSeconds.observe(timings.compileE2E / 1000)
-  }
+  const status = stats['latexmk-errors'] ? 'error' : 'success'
+  _emitMetrics(request, status, stats, timings)
 
   if (stats['pdf-size']) {
     emitPdfStats(stats, timings, request)
@@ -424,15 +348,6 @@ async function _saveOutputFiles({
     )
 
   timings.output = Date.now() - start
-  if (!_shouldSkipMetrics(request)) {
-    ClsiMetrics.processOutputFilesDurationSeconds.observe(
-      {
-        compile: request.metricsOpts.compile,
-        group: request.compileGroup,
-      },
-      timings.output / 1000
-    )
-  }
   return { outputFiles, allEntries, buildId }
 }
 
@@ -804,6 +719,82 @@ function _isImageNameAllowed(imageName) {
 
 function _shouldSkipMetrics(request) {
   return ['clsi-perf', 'health-check'].includes(request.metricsOpts.path)
+}
+
+function _emitMetrics(request, status, stats, timings) {
+  if (_shouldSkipMetrics(request)) {
+    return
+  }
+
+  // find the image tag to log it as a metric, e.g. 2015.1
+  let tag = 'default'
+  if (request.imageName != null) {
+    const match = request.imageName.match(/:(.*)/)
+    if (match != null) {
+      tag = match[1]
+    }
+  }
+
+  ClsiMetrics.compilesTotal.inc({
+    status,
+    engine: request.compiler,
+    image: tag,
+    compile: request.metricsOpts.compile,
+    group: request.compileGroup,
+    draft: request.draft ? 'true' : 'false',
+    stop_on_first_error: request.stopOnFirstError ? 'true' : 'false',
+  })
+
+  if (timings.sync != null) {
+    ClsiMetrics.syncResourcesDurationSeconds.observe(
+      {
+        type: request.syncType,
+        compile: request.metricsOpts.compile,
+        group: request.compileGroup,
+      },
+      timings.sync / 1000
+    )
+  }
+
+  if (timings.compile != null) {
+    ClsiMetrics.compileDurationSeconds.observe(
+      {
+        status,
+        engine: request.compiler,
+        compile: request.metricsOpts.compile,
+        group: request.compileGroup,
+      },
+      timings.compile / 1000
+    )
+  }
+
+  if (timings.output != null) {
+    ClsiMetrics.processOutputFilesDurationSeconds.observe(
+      {
+        compile: request.metricsOpts.compile,
+        group: request.compileGroup,
+      },
+      timings.output / 1000
+    )
+  }
+
+  if (timings.compileE2E != null) {
+    ClsiMetrics.e2eCompileDurationSeconds.observe(timings.compileE2E / 1000)
+  }
+
+  const runs = stats.latexmk?.['latexmk-rule-times']
+  if (runs != null) {
+    for (const run of runs) {
+      const rule = KNOWN_LATEXMK_RULES.has(run.rule) ? run.rule : 'other'
+      ClsiMetrics.latexmkRuleDurationSeconds.observe(
+        {
+          group: request.compileGroup,
+          rule,
+        },
+        run.time_ms / 1000
+      )
+    }
+  }
 }
 
 module.exports = {
