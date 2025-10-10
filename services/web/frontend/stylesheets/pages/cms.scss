@@ -685,6 +685,11 @@
   padding-bottom: var(--spacing-08);
 }
 
+.message-received {
+  color: var(--neutral-70);
+  margin-bottom: 0;
+}
+
 // Desktop layout options depdendent on mobile breakpoint
 @include media-breakpoint-up(lg) {
   .row-equal-column-heights > div[class*='col-'] > .card,
