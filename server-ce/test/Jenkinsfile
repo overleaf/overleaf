@@ -362,7 +362,7 @@ pipeline {
       dir('server-pro') {
         sh 'make clean'
       }
-      sh 'make clean_jenkins'
+      sh 'make clean_jenkins -j10'
     }
   }
 }

@@ -77,7 +77,7 @@ pipeline {
       dir('services/git-bridge') {
         sh 'make clean_ci'
       }
-      sh 'make clean_jenkins'
+      sh 'make clean_jenkins -j10'
     }
   }
 }
