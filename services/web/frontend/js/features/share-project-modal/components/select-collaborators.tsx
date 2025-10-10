@@ -237,12 +237,18 @@ export default function SelectCollaborators({
                     const emails = data
                       .split(/[\r\n,; ]+/)
                       .filter(item => item.includes('@'))
+                      .map(email => email.replace(matchAllSpaces, ''))
 
                     if (emails.length) {
                       // pasted comma-separated email addresses
                       event.preventDefault()
 
-                      for (const email of emails) {
+                      // dedupe emails in pasted content and previously-entered items
+                      const uniqueEmails = [...new Set(emails)].filter(
+                        email => !selectedEmails.includes(email)
+                      )
+
+                      for (const email of uniqueEmails) {
                         addNewItem(email)
                       }
                     }
