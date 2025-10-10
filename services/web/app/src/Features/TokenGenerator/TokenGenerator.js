@@ -1,20 +1,7 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const crypto = require('crypto')
 const V1Api = require('../V1/V1Api')
 const Features = require('../../infrastructure/Features')
-const Async = require('async')
-const { promisify } = require('util')
+const { callbackify } = require('util')
 
 // (From Overleaf `random_token.rb`)
 //   Letters (not numbers! see generate_token) used in tokens. They're all
@@ -30,80 +17,81 @@ const TOKEN_ALPHANUMERICS =
 // for the purposes of implementing token-based project access, like the
 // 'unlisted-projects' feature in Overleaf
 
-const TokenGenerator = {
-  _randomString(length, alphabet) {
-    const result = crypto
-      .randomBytes(length)
-      .toJSON()
-      .data.map(b => alphabet[b % alphabet.length])
-      .join('')
-    return result
-  },
+function _randomString(length, alphabet) {
+  const result = crypto
+    .randomBytes(length)
+    .toJSON()
+    .data.map(b => alphabet[b % alphabet.length])
+    .join('')
+  return result
+}
 
-  // Generate a 12-char token with only characters from TOKEN_LOWERCASE_ALPHA,
-  // suitable for use as a read-only token for a project
-  readOnlyToken() {
-    return TokenGenerator._randomString(12, TOKEN_LOWERCASE_ALPHA)
-  },
+// Generate a 12-char token with only characters from TOKEN_LOWERCASE_ALPHA,
+// suitable for use as a read-only token for a project
+function readOnlyToken() {
+  return _randomString(12, TOKEN_LOWERCASE_ALPHA)
+}
 
-  // Generate a longer token, with a numeric prefix,
-  // suitable for use as a read-and-write token for a project
-  readAndWriteToken() {
-    const numerics = TokenGenerator._randomString(10, TOKEN_NUMERICS)
-    const token = TokenGenerator._randomString(12, TOKEN_LOWERCASE_ALPHA)
-    const fullToken = `${numerics}${token}`
-    return { token: fullToken, numericPrefix: numerics }
-  },
+// Generate a longer token, with a numeric prefix,
+// suitable for use as a read-and-write token for a project
+function readAndWriteToken() {
+  const numerics = _randomString(10, TOKEN_NUMERICS)
+  const token = _randomString(12, TOKEN_LOWERCASE_ALPHA)
+  const fullToken = `${numerics}${token}`
+  return { token: fullToken, numericPrefix: numerics }
+}
 
-  generateReferralId() {
-    return TokenGenerator._randomString(16, TOKEN_ALPHANUMERICS)
-  },
+function generateReferralId() {
+  return _randomString(16, TOKEN_ALPHANUMERICS)
+}
 
-  generateUniqueReadOnlyToken(callback) {
-    if (callback == null) {
-      callback = function () {}
+async function generateUniqueReadOnlyToken() {
+  const retryOperation = async () => {
+    const token = readOnlyToken()
+
+    if (!Features.hasFeature('saas')) {
+      return token
     }
-    return Async.retry(
-      10,
-      function (cb) {
-        const token = TokenGenerator.readOnlyToken()
 
-        if (!Features.hasFeature('saas')) {
-          return cb(null, token)
-        }
+    const { response, body } = await V1Api.promises.request({
+      url: `/api/v1/overleaf/docs/read_token/${token}/exists`,
+      json: true,
+    })
 
-        return V1Api.request(
-          {
-            url: `/api/v1/overleaf/docs/read_token/${token}/exists`,
-            json: true,
-          },
-          function (err, response, body) {
-            if (err != null) {
-              return cb(err)
-            }
-            if (response.statusCode !== 200) {
-              return cb(
-                new Error(
-                  `non-200 response from v1 read-token-exists api: ${response.statusCode}`
-                )
-              )
-            }
-            if (body.exists === true) {
-              return cb(new Error(`token already exists in v1: ${token}`))
-            } else {
-              return cb(null, token)
-            }
-          }
-        )
-      },
-      callback
-    )
-  },
+    if (response.statusCode !== 200) {
+      throw new Error(
+        `non-200 response from v1 read-token-exists api: ${response.statusCode}`
+      )
+    }
+
+    if (body.exists === true) {
+      throw new Error(`token already exists in v1: ${token}`)
+    }
+
+    return token
+  }
+
+  const MAX_RETRIES = 10
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      return await retryOperation()
+    } catch (err) {
+      if (attempt === MAX_RETRIES) {
+        throw err
+      }
+    }
+  }
+}
+
+const TokenGenerator = {
+  _randomString,
+  readOnlyToken,
+  readAndWriteToken,
+  generateReferralId,
+  generateUniqueReadOnlyToken: callbackify(generateUniqueReadOnlyToken),
 }
 
 TokenGenerator.promises = {
-  generateUniqueReadOnlyToken: promisify(
-    TokenGenerator.generateUniqueReadOnlyToken
-  ),
+  generateUniqueReadOnlyToken,
 }
 module.exports = TokenGenerator
