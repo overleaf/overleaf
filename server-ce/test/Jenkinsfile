@@ -23,7 +23,6 @@ pipeline {
     timestamps()
     // Abort build after hitting first failure.
     parallelsAlwaysFailFast()
-    retry(3)
     timeout(time: 15, unit: 'MINUTES')
   }
   environment {
@@ -64,7 +63,9 @@ pipeline {
       parallel {
         stage('Install deps') {
           steps {
-            sh 'make monorepo_setup'
+            retry(count: 3) {
+              sh 'make monorepo_setup'
+            }
             script {
               job_npm_install_done = true
             }
@@ -103,8 +104,12 @@ pipeline {
               }
             }
             dir('copybara/public/repo/server-ce') {
-              sh 'make build-base'
-              sh 'make build-community'
+              retry(count: 3) {
+                sh 'make build-base'
+              }
+              retry(count: 3) {
+                sh 'make build-community'
+              }
             }
             script {
               job_server_ce_build_done = true
@@ -135,7 +140,9 @@ pipeline {
               }
             }
             dir('server-pro') {
-              sh 'make build-ci'
+              retry(count: 3) {
+                sh 'make build-ci'
+              }
             }
             script {
               job_server_pro_build_done = true
@@ -186,7 +193,9 @@ pipeline {
               }
             }
             dir('server-ce/test') {
-              sh 'make test-e2e'
+              retry(count: 3) {
+                sh 'make test-e2e'
+              }
             }
           }
         }
@@ -202,7 +211,9 @@ pipeline {
               }
             }
             dir('server-ce/test') {
-              sh 'make test-e2e'
+              retry(count: 3) {
+                sh 'make test-e2e'
+              }
             }
           }
         }
@@ -218,7 +229,9 @@ pipeline {
               }
             }
             dir('server-ce/test') {
-              sh 'make test-e2e'
+              retry(count: 3) {
+                sh 'make test-e2e'
+              }
             }
           }
         }
@@ -234,7 +247,9 @@ pipeline {
               }
             }
             dir('server-ce/test') {
-              sh 'make test-e2e'
+              retry(count: 3) {
+                sh 'make test-e2e'
+              }
             }
           }
         }
@@ -250,7 +265,9 @@ pipeline {
               }
             }
             dir('server-ce/test') {
-              sh 'make test-e2e'
+              retry(count: 3) {
+                sh 'make test-e2e'
+              }
             }
           }
         }
@@ -266,7 +283,9 @@ pipeline {
               }
             }
             dir('server-ce/test') {
-              sh 'make test-e2e'
+              retry(count: 3) {
+                sh 'make test-e2e'
+              }
             }
           }
         }
@@ -282,7 +301,9 @@ pipeline {
               }
             }
             dir('server-ce/test') {
-              sh 'make test-e2e'
+              retry(count: 3) {
+                sh 'make test-e2e'
+              }
             }
           }
         }
@@ -298,7 +319,9 @@ pipeline {
               }
             }
             dir('server-ce/test') {
-              sh 'make test-e2e'
+              retry(count: 3) {
+                sh 'make test-e2e'
+              }
             }
           }
         }
@@ -314,7 +337,9 @@ pipeline {
               }
             }
             dir('server-ce/test') {
-              sh 'make test-e2e'
+              retry(count: 3) {
+                sh 'make test-e2e'
+              }
             }
           }
         }

@@ -1,7 +1,7 @@
 {
   "reporterEnabled": "spec, mocha-junit-reporter",
   "mochaJunitReporterReporterOptions": {
-    "mochaFile": "data/reports/junit-cypress-[hash].xml",
+    "mochaFile": "data/reports/junit-cypress-[suiteFilename].xml",
     "includePending": true,
     "jenkinsMode": true,
     "jenkinsClassnamePrefix": "Web Cypress tests",

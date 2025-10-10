@@ -10,7 +10,6 @@ pipeline {
   options {
     // Print timestamp next to each log line.
     timestamps()
-    retry(3)
     timeout(time: 15, unit: 'MINUTES')
   }
   environment {
@@ -20,7 +19,9 @@ pipeline {
   stages {
     stage('Install') {
       steps {
-        sh 'make install'
+        retry(count: 3) {
+          sh 'make monorepo_setup'
+        }
       }
     }
     stage('Build') {

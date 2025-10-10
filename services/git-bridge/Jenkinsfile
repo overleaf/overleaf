@@ -7,7 +7,6 @@ pipeline {
   }
   options {
     timestamps()
-    parallelsAlwaysFailFast()
     timeout(time: 15, unit: 'MINUTES')
   }
   environment {
@@ -23,13 +22,10 @@ pipeline {
         stage('Build') {
           steps {
             dir('services/git-bridge') {
-              sh 'make docker_build_base'
+              retry(count: 3) {
+                sh 'make docker_build_base'
+              }
             }
-          }
-        }
-        stage('Install monorepo') {
-          steps {
-            sh 'make monorepo_setup'
           }
         }
       }
@@ -39,7 +35,9 @@ pipeline {
         stage('Build production and push') {
           steps {
             dir('services/git-bridge') {
-              sh 'make docker_build'
+              retry(count: 3) {
+                sh 'make docker_build'
+              }
               sh 'make push_branch'
             }
           }
@@ -51,15 +49,12 @@ pipeline {
             }
           }
         }
-        stage('Format Jenkinsfile') {
-          steps {
-            sh 'bin/run monorepo npm run format:jenkins'
-          }
-        }
         stage('Test') {
           steps {
             dir('services/git-bridge') {
-              sh 'make docker_test'
+              retry(count: 3) {
+                sh 'make docker_test'
+              }
             }
           }
         }

@@ -20,6 +20,7 @@ services:
     env_file: docker-compose.common.env
     environment:
       CI:
+      MODULE_NAME:
       MOCHA_ROOT_SUITE_NAME:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
@@ -42,6 +43,7 @@ services:
     env_file: docker-compose.common.env
     environment:
       CI:
+      MODULE_NAME:
       MOCHA_ROOT_SUITE_NAME:
       BASE_CONFIG:
       OVERLEAF_CONFIG:

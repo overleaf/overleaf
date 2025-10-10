@@ -1,0 +1,13 @@
+diff --git a/node_modules/cypress-multi-reporters/lib/MultiReporters.js b/node_modules/cypress-multi-reporters/lib/MultiReporters.js
+index 98dc4ef..b2a97bf 100644
+--- a/node_modules/cypress-multi-reporters/lib/MultiReporters.js
++++ b/node_modules/cypress-multi-reporters/lib/MultiReporters.js
+@@ -160,7 +160,7 @@ MultiReporters.prototype.getCustomOptions = function (options) {
+         debug('options file (custom)', customOptionsFile);
+ 
+         try {
+-            if ('.js' === path.extname(customOptionsFile)) {
++            if (['.js', '.cjs'].includes(path.extname(customOptionsFile))) {
+                 customOptions = require(customOptionsFile);
+             }
+             else {

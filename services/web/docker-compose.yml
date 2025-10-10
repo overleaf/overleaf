@@ -16,6 +16,7 @@ services:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
       CI:
+      MODULE_NAME:
       MOCHA_ROOT_SUITE_NAME:
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ${LOG_LEVEL:-}
@@ -43,6 +44,7 @@ services:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
       CI:
+      MODULE_NAME:
       MOCHA_ROOT_SUITE_NAME:
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ${LOG_LEVEL:-}

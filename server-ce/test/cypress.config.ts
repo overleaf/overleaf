@@ -38,7 +38,7 @@ if (process.env.CI) {
   reporterOptions = {
     reporter: `${process.env.MONOREPO}/node_modules/cypress-multi-reporters`,
     reporterOptions: {
-      configFile: 'cypress/cypress-multi-reporters.json',
+      configFile: 'cypress/cypress-multi-reporters.cjs',
     },
   }
 }

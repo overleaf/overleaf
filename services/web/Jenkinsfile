@@ -10,7 +10,6 @@ pipeline {
   options {
     // Print timestamp next to each log line.
     timestamps()
-    retry(3)
     timeout(time: 15, unit: 'MINUTES')
   }
   environment {
@@ -42,8 +41,12 @@ pipeline {
           steps {
             dir('services/web') {
               sh 'bin/copy_external_pages'
-              sh 'make build_deps'
-              sh 'make build_dev'
+              retry(count: 3) {
+                sh 'make build_deps'
+              }
+              retry(count: 3) {
+                sh 'make build_dev'
+              }
               sh 'make build_test_frontend_ct'
             }
           }
@@ -89,77 +92,99 @@ pipeline {
         stage('Acceptance SaaS') {
           steps {
             dir('services/web') {
-              sh 'make test_acceptance_app_saas'
+              retry(count: 3) {
+                sh 'make test_acceptance_app_saas'
+              }
             }
           }
         }
         stage('Acceptance Server CE') {
           steps {
             dir('services/web') {
-              sh "make test_acceptance_app_server_ce"
+              retry(count: 3) {
+                sh "make test_acceptance_app_server_ce"
+              }
             }
           }
         }
         stage('Acceptance Server Pro') {
           steps {
             dir('services/web') {
-              sh "make test_acceptance_app_server_pro"
+              retry(count: 3) {
+                sh "make test_acceptance_app_server_pro"
+              }
             }
           }
         }
         stage('test_acceptance_modules_merged_saas_1') {
           steps {
             dir('services/web') {
-              sh "make test_acceptance_modules_merged_saas_1"
+              retry(count: 3) {
+                sh "make test_acceptance_modules_merged_saas_1"
+              }
             }
           }
         }
         stage('test_acceptance_modules_merged_saas_2') {
           steps {
             dir('services/web') {
-              sh "make test_acceptance_modules_merged_saas_2"
+              retry(count: 3) {
+                sh "make test_acceptance_modules_merged_saas_2"
+              }
             }
           }
         }
         stage('test_acceptance_modules_merged_saas_3') {
           steps {
             dir('services/web') {
-              sh "make test_acceptance_modules_merged_saas_3"
+              retry(count: 3) {
+                sh "make test_acceptance_modules_merged_saas_3"
+              }
             }
           }
         }
         stage('test_acceptance_modules_merged_saas_4') {
           steps {
             dir('services/web') {
-              sh "make test_acceptance_modules_merged_saas_4"
+              retry(count: 3) {
+                sh "make test_acceptance_modules_merged_saas_4"
+              }
             }
           }
         }
         stage('test_acceptance_modules_merged_server_ce') {
           steps {
             dir('services/web') {
-              sh "make test_acceptance_modules_merged_server_ce"
+              retry(count: 3) {
+                sh "make test_acceptance_modules_merged_server_ce"
+              }
             }
           }
         }
         stage('test_acceptance_modules_merged_server_pro') {
           steps {
             dir('services/web') {
-              sh "make test_acceptance_modules_merged_server_pro"
+              retry(count: 3) {
+                sh "make test_acceptance_modules_merged_server_pro"
+              }
             }
           }
         }
         stage('test_frontend') {
           steps {
             dir('services/web') {
-              sh "make test_frontend"
+              retry(count: 3) {
+                sh "make test_frontend"
+              }
             }
           }
         }
         stage('test_writefull') {
           steps {
             dir('services/web') {
-              sh "make test_writefull"
+              retry(count: 3) {
+                sh "make test_writefull"
+              }
             }
           }
         }
@@ -169,7 +194,9 @@ pipeline {
           }
           steps {
             dir('services/web') {
-              sh "make test_frontend_ct_core_other"
+              retry(count: 3) {
+                sh "make test_frontend_ct_core_other"
+              }
             }
           }
         }
@@ -179,7 +206,9 @@ pipeline {
           }
           steps {
             dir('services/web') {
-              sh "make test_frontend_ct_core_features"
+              retry(count: 3) {
+                sh "make test_frontend_ct_core_features"
+              }
             }
           }
         }
@@ -189,35 +218,45 @@ pipeline {
           }
           steps {
             dir('services/web') {
-              sh "make test_frontend_ct_modules"
+              retry(count: 3) {
+                sh "make test_frontend_ct_modules"
+              }
             }
           }
         }
         stage('test_frontend_ct_editor_visual') {
           steps {
             dir('services/web') {
-              sh "make test_frontend_ct_editor_visual"
+              retry(count: 3) {
+                sh "make test_frontend_ct_editor_visual"
+              }
             }
           }
         }
         stage('test_frontend_ct_editor_other') {
           steps {
             dir('services/web') {
-              sh "make test_frontend_ct_editor_other"
+              retry(count: 3) {
+                sh "make test_frontend_ct_editor_other"
+              }
             }
           }
         }
         stage('Test Unit ESM') {
           steps {
             dir('services/web') {
-              sh "make test_unit_esm"
+              retry(count: 3) {
+                sh "make test_unit_esm"
+              }
             }
           }
         }
         stage('Test Unit Mocha') {
           steps {
             dir('services/web') {
-              sh "make test_unit_mocha"
+              retry(count: 3) {
+                sh "make test_unit_mocha"
+              }
             }
           }
         }
@@ -225,7 +264,7 @@ pipeline {
           stages {
             stage('Wait a bit to give tests all the CPU capacity') {
               steps {
-                sh 'sleep 120'
+                sh 'sleep 90'
               }
             }
             stage('Build Webpack') {
@@ -246,7 +285,9 @@ pipeline {
               steps {
                 dir('services/web') {
                   sh 'make tar'
-                  sh 'bin/cdn_upload'
+                  retry(count: 3) {
+                    sh 'bin/cdn_upload'
+                  }
                 }
               }
             }
@@ -261,7 +302,9 @@ pipeline {
               steps {
                 dir('services/web') {
                   sh 'gcloud secrets versions access latest --secret=web-sentryclirc > .sentryclirc'
-                  sh 'make sentry_upload'
+                  retry(count: 3) {
+                    sh 'make sentry_upload'
+                  }
                 }
               }
               post {
@@ -286,7 +329,7 @@ pipeline {
   }
   post {
     always {
-      junit checksName: 'Web test results', testResults: 'services/web/data/reports/junit-*.xml'
+      junit checksName: 'Web test results', testResults: 'services/web/data/reports/junit-*.xml,services/web/data/reports/junit-*/**/*.xml'
     }
     // Ensure tear down of test containers, then run general Jenkins VM cleanup.
     cleanup {

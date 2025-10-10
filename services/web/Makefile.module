@@ -1,5 +1,5 @@
 BUILD_DIR_NAME ?= web
-MODULE_NAME := $(notdir $(shell pwd))
+export MODULE_NAME := $(notdir $(shell pwd))
 MODULE_DIR := modules/$(MODULE_NAME)
 PROJECT_NAME = web
 
