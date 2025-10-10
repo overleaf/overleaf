@@ -880,6 +880,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         pdfCachingMinChunkSize: options.pdfCachingMinChunkSize,
         flags,
         metricsMethod: options.compileGroup,
+        metricsPath: options.metricsPath,
       },
       rootResourcePath,
       resources,

@@ -1159,7 +1159,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
       CompileManager.compile(
         projectId,
         testUserId,
-        {},
+        { metricsPath: 'health-check' },
         function (error, status, _outputFiles, clsiServerId) {
           if (handler) {
             clearTimeout(handler)
