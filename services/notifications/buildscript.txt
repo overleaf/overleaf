@@ -8,4 +8,5 @@ notifications
 --public-repo=True
 --test-acceptance-vitest=True
 --test-unit-vitest=True
+--ts-app=True
 --tsconfig-extra-includes=vitest.config.unit.cjs,vitest.config.acceptance.cjs

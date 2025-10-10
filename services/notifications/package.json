@@ -2,10 +2,10 @@
   "name": "@overleaf/notifications",
   "description": "An API to handle user notifications",
   "private": true,
-  "main": "app.js",
+  "main": "app.ts",
   "type": "module",
   "scripts": {
-    "start": "node app.js",
+    "start": "node app.ts",
     "test:acceptance:_run": "vitest --config ./vitest.config.acceptance.cjs",
     "test:acceptance": "npm run test:acceptance:_run",
     "test:unit:_run": "vitest --config ./vitest.config.unit.cjs",
@@ -15,7 +15,7 @@
     "format:fix": "prettier --write $PWD/'**/{*.*js,*.ts}'",
     "lint:fix": "eslint --fix .",
     "types:check": "tsc --noEmit",
-    "nodemon": "node --watch app.js"
+    "nodemon": "node --watch app.ts"
   },
   "author": "",
   "license": "ISC",
@@ -38,6 +38,7 @@
     "zod-validation-error": "^4.0.1"
   },
   "devDependencies": {
+    "@types/method-override": "^3.0.0",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "mocha": "^11.1.0",

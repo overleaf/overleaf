@@ -9,4 +9,4 @@ fi
 source /etc/overleaf/env.sh
 export LISTEN_ADDRESS=127.0.0.1
 
-exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/notifications/app.js >> /var/log/overleaf/notifications.log 2>&1
+exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/notifications/app.ts >> /var/log/overleaf/notifications.log 2>&1

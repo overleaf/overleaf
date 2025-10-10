@@ -80,14 +80,14 @@ services:
       - ../services/history-v1/migrations:/overleaf/services/history-v1/migrations
 
   notifications:
-    command: ["node", "--watch", "app.js"]
+    command: ["node", "--watch", "app.ts"]
     environment:
       - NODE_OPTIONS=--inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9236:9229"
     volumes:
       - ../services/notifications/app:/overleaf/services/notifications/app
-      - ../services/notifications/app.js:/overleaf/services/notifications/app.js
+      - ../services/notifications/app.ts:/overleaf/services/notifications/app.ts
       - ../services/notifications/config:/overleaf/services/notifications/config
 
   project-history:

@@ -75,4 +75,4 @@ class RequestLogger {
   }
 }
 
-module.exports.monitor = monitor
+module.exports = { monitor, RequestLogger }

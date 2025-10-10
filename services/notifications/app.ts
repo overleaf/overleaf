@@ -3,7 +3,12 @@ import '@overleaf/metrics/initialize.js'
 import metrics from '@overleaf/metrics'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
-import express from 'express'
+import express, {
+  type Request,
+  type Response,
+  type ErrorRequestHandler,
+  type NextFunction,
+} from 'express'
 import methodOverride from 'method-override'
 import { mongoClient } from './app/js/mongodb.js'
 import NotificationsController from './app/js/NotificationsController.ts'
@@ -44,9 +49,12 @@ app.get('/health_check', HealthCheckController.check)
 
 app.get('*', (req, res) => res.sendStatus(404))
 
-app.use(handleApiError)
-
-function handleApiError(err, req, res, next) {
+const handleApiError: ErrorRequestHandler = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   req.logger.addFields({ err })
   if (err instanceof ParamsError) {
     req.logger.setLevel('warn')
@@ -59,6 +67,8 @@ function handleApiError(err, req, res, next) {
     res.sendStatus(500)
   }
 }
+
+app.use(handleApiError)
 
 const host = Settings.internal.notifications?.host || '127.0.0.1'
 const port = Settings.internal.notifications?.port || 3042

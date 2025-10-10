@@ -24,4 +24,5 @@ COPY services/notifications/ /overleaf/services/notifications/
 FROM app
 USER node
 
-CMD ["node", "--expose-gc", "app.js"]
+CMD ["node", "--expose-gc", "app.ts"]
+
