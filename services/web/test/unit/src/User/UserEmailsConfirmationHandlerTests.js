@@ -49,7 +49,7 @@ describe('UserEmailsConfirmationHandler', function () {
             getUser: sinon.stub().resolves(this.mockUser),
           },
         }),
-        '../Email/EmailHandler': (this.EmailHandler = {}),
+        '../Email/EmailHandler': (this.EmailHandler = { promises: {} }),
         '../Helpers/EmailHelper': EmailHelper,
         '../Authentication/SessionManager': (this.SessionManager = {
           getLoggedInUserId: sinon.stub().returns(this.mockUser._id),
@@ -61,23 +61,22 @@ describe('UserEmailsConfirmationHandler', function () {
 
   describe('sendConfirmationEmail', function () {
     beforeEach(function () {
-      this.OneTimeTokenHandler.getNewToken = sinon
+      this.OneTimeTokenHandler.promises.getNewToken = sinon
         .stub()
-        .yields(null, (this.token = 'new-token'))
-      return (this.EmailHandler.sendEmail = sinon.stub().yields())
+        .resolves((this.token = 'new-token'))
+      return (this.EmailHandler.promises.sendEmail = sinon.stub().resolves())
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        return this.UserEmailsConfirmationHandler.sendConfirmationEmail(
+      beforeEach(async function () {
+        await this.UserEmailsConfirmationHandler.promises.sendConfirmationEmail(
           this.user_id,
-          this.email,
-          this.callback
+          this.email
         )
       })
 
       it('should generate a token for the user which references their id and email', function () {
-        return this.OneTimeTokenHandler.getNewToken
+        return this.OneTimeTokenHandler.promises.getNewToken
           .calledWith(
             'email_confirmation',
             { user_id: this.user_id, email: this.email },
@@ -87,7 +86,7 @@ describe('UserEmailsConfirmationHandler', function () {
       })
 
       it('should send an email to the user', function () {
-        return this.EmailHandler.sendEmail
+        return this.EmailHandler.promises.sendEmail
           .calledWith('confirmEmail', {
             to: this.email,
             confirmEmailUrl:
@@ -96,40 +95,30 @@ describe('UserEmailsConfirmationHandler', function () {
           })
           .should.equal(true)
       })
-
-      it('should call the callback', function () {
-        return this.callback.called.should.equal(true)
-      })
     })
 
     describe('with invalid email', function () {
-      beforeEach(function () {
-        return this.UserEmailsConfirmationHandler.sendConfirmationEmail(
-          this.user_id,
-          '!"£$%^&*()',
-          this.callback
-        )
-      })
-
-      it('should return an error', function () {
-        return this.callback
-          .calledWith(sinon.match.instanceOf(Error))
-          .should.equal(true)
+      it('should reject with an error', async function () {
+        await expect(
+          this.UserEmailsConfirmationHandler.promises.sendConfirmationEmail(
+            this.user_id,
+            '!"£$%^&*()'
+          )
+        ).to.be.rejectedWith(Error)
       })
     })
 
     describe('a custom template', function () {
-      beforeEach(function () {
-        return this.UserEmailsConfirmationHandler.sendConfirmationEmail(
+      beforeEach(async function () {
+        await this.UserEmailsConfirmationHandler.promises.sendConfirmationEmail(
           this.user_id,
           this.email,
-          'myCustomTemplate',
-          this.callback
+          'myCustomTemplate'
         )
       })
 
       it('should send an email with the given template', function () {
-        return this.EmailHandler.sendEmail
+        return this.EmailHandler.promises.sendEmail
           .calledWith('myCustomTemplate')
           .should.equal(true)
       })

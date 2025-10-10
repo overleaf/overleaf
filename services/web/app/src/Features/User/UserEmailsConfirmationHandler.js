@@ -5,7 +5,7 @@ const settings = require('@overleaf/settings')
 const Errors = require('../Errors/Errors')
 const UserUpdater = require('./UserUpdater')
 const UserGetter = require('./UserGetter')
-const { callbackify, promisify } = require('util')
+const { callbackify } = require('util')
 const crypto = require('crypto')
 const SessionManager = require('../Authentication/SessionManager')
 
@@ -14,33 +14,27 @@ const TOKEN_EXPIRY_IN_S = 90 * 24 * 60 * 60
 const TOKEN_USE = 'email_confirmation'
 const CONFIRMATION_CODE_EXPIRY_IN_S = 10 * 60
 
-function sendConfirmationEmail(userId, email, emailTemplate, callback) {
-  if (arguments.length === 3) {
-    callback = emailTemplate
-    emailTemplate = 'confirmEmail'
-  }
-
+async function sendConfirmationEmail(
+  userId,
+  email,
+  emailTemplate = 'confirmEmail'
+) {
   email = EmailHelper.parseEmail(email)
   if (!email) {
-    return callback(new Error('invalid email'))
+    throw new Error('invalid email')
   }
   const data = { user_id: userId, email }
-  OneTimeTokenHandler.getNewToken(
+  const token = await OneTimeTokenHandler.promises.getNewToken(
     TOKEN_USE,
     data,
-    { expiresIn: TOKEN_EXPIRY_IN_S },
-    function (err, token) {
-      if (err) {
-        return callback(err)
-      }
-      const emailOptions = {
-        to: email,
-        confirmEmailUrl: `${settings.siteUrl}/user/emails/confirm?token=${token}`,
-        sendingUser_id: userId,
-      }
-      EmailHandler.sendEmail(emailTemplate, emailOptions, callback)
-    }
+    { expiresIn: TOKEN_EXPIRY_IN_S }
   )
+  const emailOptions = {
+    to: email,
+    confirmEmailUrl: `${settings.siteUrl}/user/emails/confirm?token=${token}`,
+    sendingUser_id: userId,
+  }
+  await EmailHandler.promises.sendEmail(emailTemplate, emailOptions)
 }
 
 async function sendConfirmationCode(email, welcomeUser) {
@@ -100,12 +94,12 @@ async function confirmEmailFromToken(req, token) {
 }
 
 const UserEmailsConfirmationHandler = {
-  sendConfirmationEmail,
   confirmEmailFromToken: callbackify(confirmEmailFromToken),
+  sendConfirmationEmail: callbackify(sendConfirmationEmail),
 }
 
 UserEmailsConfirmationHandler.promises = {
-  sendConfirmationEmail: promisify(sendConfirmationEmail),
+  sendConfirmationEmail,
   confirmEmailFromToken,
   sendConfirmationCode,
 }
