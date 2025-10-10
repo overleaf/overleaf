@@ -24,7 +24,8 @@ const {
   downloadOutputDotSynctexFromCompileCache,
 } = require('./CLSICacheHandler')
 const StatsManager = require('./StatsManager')
-const { enableLatexMkMetrics } = require('./LatexMetrics')
+const SafeReader = require('./SafeReader')
+const { enableLatexMkMetrics, addLatexFdbMetrics } = require('./LatexMetrics')
 const { callbackifyMultiResult } = require('@overleaf/promise-utils')
 
 const COMPILE_TIME_BUCKETS = [
@@ -339,6 +340,19 @@ async function doCompile(request, stats, timings) {
 
   // Record compile performance for a subset of users
   if (recordPerformanceMetrics) {
+    // Add fdb metrics if available
+    try {
+      const fdbFileContent = await _readFdbFile(compileDir)
+      if (fdbFileContent) {
+        addLatexFdbMetrics(fdbFileContent, stats)
+      }
+    } catch (err) {
+      // ignore errors reading fdb file
+      logger.warn(
+        { err, projectId, userId },
+        'error reading fdb file for performance metrics'
+      )
+    }
     logger.info(
       {
         userId: request.user_id,
@@ -388,6 +402,21 @@ async function _saveOutputFiles({
 
   timings.output = timer.done()
   return { outputFiles, allEntries, buildId }
+}
+
+// Set a maximum size for reading output.fdb_latexmk files
+// This limit is chosen to prevent excessive memory usage and ensure performance,
+// as fdb files are typically much smaller and only metrics are extracted from them.
+const MAX_FDB_FILE_SIZE = 1024 * 1024 // 1 MB
+
+async function _readFdbFile(compileDir) {
+  const fdbFile = Path.join(compileDir, 'output.fdb_latexmk')
+  const { result } = await SafeReader.promises.readFile(
+    fdbFile,
+    MAX_FDB_FILE_SIZE,
+    'utf8'
+  )
+  return result
 }
 
 async function stopCompile(projectId, userId) {

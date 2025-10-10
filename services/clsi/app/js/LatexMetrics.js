@@ -132,4 +132,141 @@ function enableLatexMkMetrics(stats) {
   })
 }
 
-module.exports = { enableLatexMkMetrics, addLatexMkMetrics }
+/**
+ * Parses the content of a latexmk .fdb file to extract and record metrics
+ * about the files used during compilation.
+ *
+ * It categorizes files into 'system' (paths starting with '/') and 'user'
+ * files. For each category, it aggregates the count and total size of files
+ * grouped by their extension. The results are added to the provided stats
+ * object under `stats.latexmk['fdb-file-types']`.
+ *
+ * Each file is counted only once, even if it appears multiple times in the
+ * .fdb content. Files without a valid extension are counted as 'other'.
+ *
+ * @param {string | null | undefined} fdbContent - The content of the .fdb_latexmk file.
+ * @param {object} stats - The statistics object to be populated. The metrics will be added to `stats.latexmk`.
+ * @returns {void}
+ */
+function addLatexFdbMetrics(fdbContent, stats) {
+  if (!fdbContent) {
+    return
+  }
+  const { systemFileTypes, userFileTypes } = parseFdbContent(fdbContent)
+
+  if (
+    Object.keys(systemFileTypes).length === 0 &&
+    Object.keys(userFileTypes).length === 0
+  ) {
+    return
+  }
+
+  const userSummary = summarizeFileTypes(userFileTypes)
+  const systemSummary = summarizeFileTypes(systemFileTypes)
+
+  stats.latexmk['fdb-file-types'] = {
+    total: {
+      systemFileCount: systemSummary.total.count,
+      systemFileSize: systemSummary.total.size,
+      imageFileCount: userSummary.image.count,
+      imageFileSize: userSummary.image.size,
+      textFileCount: userSummary.text.count,
+      textFileSize: userSummary.text.size,
+      fontFileCount: userSummary.font.count,
+      fontFileSize: userSummary.font.size,
+      otherFileCount: userSummary.other.count,
+      otherFileSize: userSummary.other.size,
+    },
+    system: convertToArray(systemFileTypes),
+    user: convertToArray(userFileTypes),
+  }
+}
+
+function parseFdbContent(fdbContent) {
+  const systemFileTypes = {}
+  const userFileTypes = {}
+  const seenFiles = new Set()
+  // Extract the file path and size from lines like:
+  //  FILENAME TIMESTAMP SIZE CHECKSUM ...
+  //  "main.tex" 1760016467 6147 9da336eb1132ecb1d61cd1f5a70cfa62 ""
+  // The timestamp can be an integer or a float
+  const lineRegex = /^\s*"([^"]+)"\s+\d+(?:\.\d*)?\s+(\d+)/gm
+
+  for (const match of fdbContent.matchAll(lineRegex)) {
+    // strip leading /compile/ from paths
+    const filePath = match[1].replace(/^\/compile\//, '')
+    if (seenFiles.has(filePath)) {
+      continue
+    }
+    const fileSize = parseInt(match[2], 10)
+    const isSystemFile = filePath.startsWith('/')
+    const extMatch = filePath.match(/\.([a-z]{1,4})$/i)
+    const ext = extMatch ? extMatch[1].toLowerCase() : 'other'
+    const fileTypes = isSystemFile ? systemFileTypes : userFileTypes
+    if (!fileTypes[ext]) {
+      fileTypes[ext] = { count: 0, size: 0 }
+    }
+    fileTypes[ext].count++
+    fileTypes[ext].size += fileSize
+    seenFiles.add(filePath)
+  }
+  return { systemFileTypes, userFileTypes }
+}
+
+function getFileTypeCategory(ext) {
+  switch (ext) {
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'tif':
+    case 'tiff':
+    case 'bmp':
+    case 'gif':
+    case 'svg':
+    case 'eps':
+      return 'image'
+    case 'tex':
+    case 'sty':
+    case 'cls':
+    case 'bib':
+      return 'text'
+    case 'ttf':
+    case 'otf':
+    case 'pfb':
+      return 'font'
+    default:
+      return 'other'
+  }
+}
+
+function summarizeFileTypes(fileTypes) {
+  const summary = {
+    image: { count: 0, size: 0 },
+    text: { count: 0, size: 0 },
+    font: { count: 0, size: 0 },
+    other: { count: 0, size: 0 },
+    total: { count: 0, size: 0 },
+  }
+
+  for (const [ext, info] of Object.entries(fileTypes)) {
+    const category = getFileTypeCategory(ext)
+    summary[category].count += info.count
+    summary[category].size += info.size
+    summary.total.count += info.count
+    summary.total.size += info.size
+  }
+
+  return summary
+}
+
+function convertToArray(object) {
+  return Object.entries(object)
+    .map(([ext, value]) => ({
+      ext,
+      count: value.count,
+      size: value.size,
+    }))
+    .sort((a, b) => b.size - a.size) // sort by size descending
+}
+
+module.exports = { enableLatexMkMetrics, addLatexMkMetrics, addLatexFdbMetrics }

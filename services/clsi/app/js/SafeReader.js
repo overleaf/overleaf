@@ -14,6 +14,7 @@
 let SafeReader
 const fs = require('node:fs')
 const logger = require('@overleaf/logger')
+const { promisifyMultiResult } = require('@overleaf/promise-utils')
 
 module.exports = SafeReader = {
   // safely read up to size bytes from a file and return result as a
@@ -59,4 +60,8 @@ module.exports = SafeReader = {
       )
     })
   },
+}
+
+module.exports.promises = {
+  readFile: promisifyMultiResult(SafeReader.readFile, ['result', 'bytesRead']),
 }
