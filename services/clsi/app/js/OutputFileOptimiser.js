@@ -17,7 +17,7 @@ const fs = require('node:fs')
 const Path = require('node:path')
 const { spawn } = require('node:child_process')
 const logger = require('@overleaf/logger')
-const Metrics = require('./Metrics')
+const Metrics = require('@overleaf/metrics')
 const _ = require('lodash')
 
 module.exports = OutputFileOptimiser = {

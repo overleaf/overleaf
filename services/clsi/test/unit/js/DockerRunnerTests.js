@@ -51,7 +51,7 @@ describe('DockerRunner', function () {
             },
           }),
         }),
-        './Metrics': {
+        '@overleaf/metrics': {
           Timer: (Timer = class Timer {
             done() {}
           }),

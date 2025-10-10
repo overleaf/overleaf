@@ -27,7 +27,7 @@ describe('OutputFileOptimiser', function () {
         fs: (this.fs = {}),
         path: (this.Path = {}),
         child_process: { spawn: (this.spawn = sinon.stub()) },
-        './Metrics': {},
+        '@overleaf/metrics': {},
       },
       globals: { Math }, // used by lodash
     })

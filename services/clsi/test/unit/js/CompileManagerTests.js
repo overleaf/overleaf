@@ -2,6 +2,7 @@ const Path = require('node:path')
 const SandboxedModule = require('sandboxed-module')
 const { expect } = require('chai')
 const sinon = require('sinon')
+const Metrics = require('../../../app/js/Metrics')
 
 const MODULE_PATH = require('node:path').join(
   __dirname,
@@ -177,6 +178,7 @@ describe('CompileManager', function () {
         './CLSICacheHandler': this.CLSICacheHandler,
         './LatexMetrics': this.LatexMetrics,
         './StatsManager': this.StatsManager,
+        './Metrics': Metrics,
       },
     })
   })

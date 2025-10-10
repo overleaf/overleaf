@@ -15,7 +15,7 @@ const Settings = require('@overleaf/settings')
 const fs = require('node:fs')
 const Path = require('node:path')
 const { callbackify } = require('node:util')
-const Metrics = require('./Metrics')
+const Metrics = require('@overleaf/metrics')
 
 const PENDING_DOWNLOADS = new Map()
 

@@ -6,12 +6,13 @@ const { callbackify } = require('node:util')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const OError = require('@overleaf/o-error')
+const Metrics = require('@overleaf/metrics')
 
 const ResourceWriter = require('./ResourceWriter')
 const LatexRunner = require('./LatexRunner')
 const OutputFileFinder = require('./OutputFileFinder')
 const OutputCacheManager = require('./OutputCacheManager')
-const Metrics = require('./Metrics')
+const ClsiMetrics = require('./Metrics')
 const DraftModeManager = require('./DraftModeManager')
 const TikzManager = require('./TikzManager')
 const LockManager = require('./LockManager')
@@ -67,12 +68,8 @@ async function doCompile(request, stats, timings) {
   const { project_id: projectId, user_id: userId } = request
   const compileDir = getCompileDir(request.project_id, request.user_id)
 
-  const timerE2E = new Metrics.Timer(
-    'compile-e2e-v2',
-    1,
-    request.metricsOpts,
-    COMPILE_TIME_BUCKETS
-  )
+  const e2eCompileStart = Date.now()
+
   if (request.isInitialCompile) {
     stats.isInitialCompile = 1
     request.metricsOpts.compile = 'initial'
@@ -92,11 +89,8 @@ async function doCompile(request, stats, timings) {
   } else {
     request.metricsOpts.compile = 'recompile'
   }
-  const writeToDiskTimer = new Metrics.Timer(
-    'write-to-disk',
-    1,
-    request.metricsOpts
-  )
+
+  const syncStart = Date.now()
   logger.debug(
     { projectId: request.project_id, userId: request.user_id },
     'syncing resources to disk'
@@ -123,15 +117,16 @@ async function doCompile(request, stats, timings) {
     }
     throw error
   }
+
+  timings.sync = Date.now() - syncStart
   logger.debug(
     {
       projectId: request.project_id,
       userId: request.user_id,
-      timeTaken: Date.now() - writeToDiskTimer.start,
+      timeTaken: timings.sync,
     },
     'written files to disk'
   )
-  timings.sync = writeToDiskTimer.done()
 
   // set up environment variables for chktex
   const env = {
@@ -177,21 +172,20 @@ async function doCompile(request, stats, timings) {
     )
   }
 
-  const compileTimer = new Metrics.Timer('run-compile', 1, request.metricsOpts)
-  // find the image tag to log it as a metric, e.g. 2015.1 (convert . to - for graphite)
+  const compileStart = Date.now()
+
+  // find the image tag to log it as a metric, e.g. 2015.1
   let tag = 'default'
   if (request.imageName != null) {
     const match = request.imageName.match(/:(.*)/)
     if (match != null) {
-      tag = match[1].replace(/\./g, '-')
+      tag = match[1]
     }
   }
   // exclude smoke test
   if (!request.project_id.match(/^[0-9a-f]{24}$/)) {
     tag = 'other'
   }
-  Metrics.inc('compiles', 1, request.metricsOpts)
-  Metrics.inc(`compiles-with-image.${tag}`, 1, request.metricsOpts)
   const compileName = getCompileName(request.project_id, request.user_id)
 
   // Record latexmk -time stats for a subset of users
@@ -241,11 +235,6 @@ async function doCompile(request, stats, timings) {
       error.validate = 'fail'
     }
 
-    // record timeout errors as a separate counter, success is recorded later
-    if (error.timedout) {
-      Metrics.inc('compiles-timeout', 1, request.metricsOpts)
-    }
-
     const { outputFiles, allEntries, buildId } = await _saveOutputFiles({
       request,
       compileDir,
@@ -264,49 +253,59 @@ async function doCompile(request, stats, timings) {
       )
     }
 
+    if (!_shouldSkipMetrics(request)) {
+      const status = error.timedout
+        ? 'timeout'
+        : error.terminated
+          ? 'terminated'
+          : 'failure'
+      timings.compile = Date.now() - compileStart
+      ClsiMetrics.compilesTotal.inc({
+        status,
+        engine: request.compiler,
+        image: tag,
+        compile: request.metricsOpts.compile,
+        group: request.compileGroup,
+        draft: request.draft ? 'true' : 'false',
+        stop_on_first_error: request.stopOnFirstError ? 'true' : 'false',
+      })
+      ClsiMetrics.compileDurationSeconds.observe(
+        {
+          status,
+          engine: request.compiler,
+          compile: request.metricsOpts.compile,
+          group: request.compileGroup,
+        },
+        timings.compile / 1000
+      )
+    }
     throw error
   }
 
-  // compile completed normally
-  Metrics.inc('compiles-succeeded', 1, request.metricsOpts)
-  for (const metricKey in stats) {
-    const metricValue = stats[metricKey]
-    if (typeof metricValue === 'number') {
-      Metrics.count(metricKey, metricValue, 1, request.metricsOpts)
-    }
-  }
-  for (const metricKey in timings) {
-    const metricValue = timings[metricKey]
-    if (typeof metricValue === 'number') {
-      Metrics.timing(metricKey, metricValue, 1, request.metricsOpts)
-    }
-  }
-  const loadavg = typeof os.loadavg === 'function' ? os.loadavg() : undefined
-  if (loadavg != null) {
-    Metrics.gauge('load-avg', loadavg[0])
-  }
-  const ts = compileTimer.done()
+  timings.compile = Date.now() - compileStart
+  const status = stats['latexmk-errors'] ? 'error' : 'success'
+
   logger.debug(
     {
       projectId: request.project_id,
       userId: request.user_id,
-      timeTaken: ts,
+      timeTaken: timings.compile,
       stats,
       timings,
-      loadavg,
     },
     'done compile'
   )
+
   if (stats['latex-runs'] > 0) {
     Metrics.histogram(
       'avg-compile-per-pass-v2',
-      ts / stats['latex-runs'],
+      timings.compile / stats['latex-runs'],
       COMPILE_TIME_BUCKETS,
       request.metricsOpts
     )
     Metrics.timing(
       'avg-compile-per-pass-v2',
-      ts / stats['latex-runs'],
+      timings.compile / stats['latex-runs'],
       1,
       request.metricsOpts
     )
@@ -319,8 +318,6 @@ async function doCompile(request, stats, timings) {
       request.metricsOpts
     )
   }
-  // Emit compile time.
-  timings.compile = ts
 
   const { outputFiles, buildId } = await _saveOutputFiles({
     request,
@@ -329,10 +326,37 @@ async function doCompile(request, stats, timings) {
     stats,
     timings,
   })
+  timings.compileE2E = Date.now() - e2eCompileStart
 
-  // Emit e2e compile time.
-  timings.compileE2E = timerE2E.done()
-  Metrics.timing('compile-e2e-v2', timings.compileE2E, 1, request.metricsOpts)
+  if (!_shouldSkipMetrics(request)) {
+    ClsiMetrics.compilesTotal.inc({
+      status,
+      engine: request.compiler,
+      image: tag,
+      compile: request.metricsOpts.compile,
+      group: request.compileGroup,
+      draft: request.draft ? 'true' : 'false',
+      stop_on_first_error: request.stopOnFirstError ? 'true' : 'false',
+    })
+    ClsiMetrics.compileDurationSeconds.observe(
+      {
+        status,
+        engine: request.compiler,
+        compile: request.metricsOpts.compile,
+        group: request.compileGroup,
+      },
+      timings.compile / 1000
+    )
+    ClsiMetrics.syncResourcesDurationSeconds.observe(
+      {
+        type: request.syncType,
+        compile: request.metricsOpts.compile,
+        group: request.compileGroup,
+      },
+      timings.sync / 1000
+    )
+    ClsiMetrics.e2eCompileDurationSeconds.observe(timings.compileE2E / 1000)
+  }
 
   if (stats['pdf-size']) {
     emitPdfStats(stats, timings, request)
@@ -353,11 +377,14 @@ async function doCompile(request, stats, timings) {
         'error reading fdb file for performance metrics'
       )
     }
+
+    const loadavg = typeof os.loadavg === 'function' ? os.loadavg() : undefined
+
     logger.info(
       {
         userId: request.user_id,
         projectId: request.project_id,
-        timeTaken: ts,
+        timeTaken: timings.compile,
         clsiRequest: request,
         stats,
         timings,
@@ -382,11 +409,7 @@ async function _saveOutputFiles({
   stats,
   timings,
 }) {
-  const timer = new Metrics.Timer(
-    'process-output-files',
-    1,
-    request.metricsOpts
-  )
+  const start = Date.now()
   const outputDir = getOutputDir(request.project_id, request.user_id)
 
   const { outputFiles: rawOutputFiles, allEntries } =
@@ -400,7 +423,16 @@ async function _saveOutputFiles({
       outputDir
     )
 
-  timings.output = timer.done()
+  timings.output = Date.now() - start
+  if (!_shouldSkipMetrics(request)) {
+    ClsiMetrics.processOutputFilesDurationSeconds.observe(
+      {
+        compile: request.metricsOpts.compile,
+        group: request.compileGroup,
+      },
+      timings.output / 1000
+    )
+  }
   return { outputFiles, allEntries, buildId }
 }
 
@@ -768,6 +800,10 @@ function _isImageNameAllowed(imageName) {
   const ALLOWED_IMAGES =
     Settings.clsi && Settings.clsi.docker && Settings.clsi.docker.allowedImages
   return !ALLOWED_IMAGES || ALLOWED_IMAGES.includes(imageName)
+}
+
+function _shouldSkipMetrics(request) {
+  return ['clsi-perf', 'health-check'].includes(request.metricsOpts.path)
 }
 
 module.exports = {

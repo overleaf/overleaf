@@ -1,5 +1,5 @@
 const logger = require('@overleaf/logger')
-const Metrics = require('./Metrics')
+const Metrics = require('@overleaf/metrics')
 const os = require('node:os')
 
 let CACHED_LOAD = {

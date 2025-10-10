@@ -34,7 +34,7 @@ describe('ResourceWriter', function () {
           createProjectDir: sinon.stub().yields(),
         }),
         './OutputFileFinder': (this.OutputFileFinder = {}),
-        './Metrics': (this.Metrics = {
+        '@overleaf/metrics': (this.Metrics = {
           inc: sinon.stub(),
           Timer: (Timer = (function () {
             Timer = class Timer {

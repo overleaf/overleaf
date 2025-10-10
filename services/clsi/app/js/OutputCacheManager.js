@@ -7,7 +7,7 @@ const logger = require('@overleaf/logger')
 const _ = require('lodash')
 const Settings = require('@overleaf/settings')
 const crypto = require('node:crypto')
-const Metrics = require('./Metrics')
+const Metrics = require('@overleaf/metrics')
 
 const OutputFileOptimiser = require('./OutputFileOptimiser')
 const ContentCacheManager = require('./ContentCacheManager')

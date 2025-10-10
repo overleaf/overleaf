@@ -20,7 +20,7 @@ const fs = require('node:fs')
 const async = require('async')
 const OutputFileFinder = require('./OutputFileFinder')
 const ResourceStateManager = require('./ResourceStateManager')
-const Metrics = require('./Metrics')
+const Metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 const settings = require('@overleaf/settings')
 

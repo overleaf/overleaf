@@ -1,3 +1,55 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-module.exports = require('@overleaf/metrics')
+const { prom } = require('@overleaf/metrics')
+
+const COMPILE_TIME_BUCKETS = [
+  0.5, 1, 1.5, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25, 30, 45, 60, 75, 90, 120, 150,
+  180, 210, 240,
+]
+
+const compilesTotal = new prom.Counter({
+  name: 'clsi_compiles_total',
+  help: 'Number of compiles',
+  labelNames: [
+    'status',
+    'engine',
+    'compile',
+    'group',
+    'image',
+    'draft',
+    'stop_on_first_error',
+  ],
+})
+
+const compileDurationSeconds = new prom.Histogram({
+  name: 'clsi_compile_duration_seconds',
+  help: 'Duration of the latexmkrc invocation',
+  buckets: COMPILE_TIME_BUCKETS,
+  labelNames: ['status', 'engine', 'compile', 'group'],
+})
+
+const e2eCompileDurationSeconds = new prom.Histogram({
+  name: 'clsi_e2e_compile_duration_seconds',
+  help: 'Duration of the entire compile request in clsi (sync, latexmk, output)',
+  buckets: COMPILE_TIME_BUCKETS,
+})
+
+const syncResourcesDurationSeconds = new prom.Histogram({
+  name: 'clsi_sync_resources_duration_seconds',
+  help: 'Time it takes to prepare files for a compile',
+  buckets: [0.1, 0.25, 0.5, 0.75, 1, 2, 3, 5, 10, 15, 30, 45, 60],
+  labelNames: ['type', 'compile', 'group'],
+})
+
+const processOutputFilesDurationSeconds = new prom.Histogram({
+  name: 'clsi_process_output_files_duration_seconds',
+  help: 'Time it takes to process output files of a compile',
+  buckets: [0.1, 0.25, 0.5, 0.75, 1, 2, 3, 5, 7.5, 10],
+  labelNames: ['compile', 'group'],
+})
+
+module.exports = {
+  compilesTotal,
+  compileDurationSeconds,
+  e2eCompileDurationSeconds,
+  syncResourcesDurationSeconds,
+  processOutputFilesDurationSeconds,
+}
