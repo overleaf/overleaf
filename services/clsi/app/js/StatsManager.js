@@ -21,4 +21,30 @@ function sampleByHash(key, samplePercentage) {
   return percentile < samplePercentage
 }
 
-module.exports = { sampleByHash }
+const EXCLUDED_METRICS_OPTS_PATHS = new Set(['health-check', 'clsi-perf'])
+
+/**
+ * Determines whether a given request should be sampled based on user ID and sampling percentage.
+ * The request will not be sampled if it lacks a user_id, if its metrics path is in the exclusion list,
+ * or if the sampling percentage is zero or less.
+ *
+ * @param {object} request - The request object to check.
+ * @param {string} [request.user_id] - The ID of the user making the request.
+ * @param {object} [request.metricsOpts] - Metrics options for the request.
+ * @param {string} [request.metricsOpts.path] - The path associated with the request metrics.
+ * @param {number} samplingPercentage - The percentage of requests to sample (e.g., 10 for 10%).
+ * @returns {boolean|undefined} The result from sampleByHash if the request is eligible for sampling, otherwise undefined.
+ */
+function sampleRequest(request, samplingPercentage) {
+  if (!request.user_id) {
+    return
+  }
+  if (EXCLUDED_METRICS_OPTS_PATHS.has(request.metricsOpts?.path)) {
+    return
+  }
+  if (samplingPercentage > 0) {
+    return sampleByHash(request.user_id, samplingPercentage)
+  }
+}
+
+module.exports = { sampleByHash, sampleRequest }

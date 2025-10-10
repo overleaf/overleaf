@@ -1,5 +1,5 @@
 const { expect } = require('chai')
-const { sampleByHash } = require('../../../app/js/StatsManager')
+const { sampleByHash, sampleRequest } = require('../../../app/js/StatsManager')
 
 describe('StatsManager', function () {
   describe('sampleByHash', function () {
@@ -80,6 +80,86 @@ describe('StatsManager', function () {
           expect(result, `percentage ${i} should be true`).to.be.true
         }
       }
+    })
+  })
+
+  describe('sampleRequest', function () {
+    it('should return undefined if there is no user_id', function () {
+      const request = {}
+      const percentage = 50
+      expect(sampleRequest(request, percentage)).to.be.undefined
+    })
+
+    it('should return undefined if the path is health-check', function () {
+      const request = {
+        user_id: 'some-user',
+        metricsOpts: { path: 'health-check' },
+      }
+      const percentage = 100
+      expect(sampleRequest(request, percentage)).to.be.undefined
+    })
+
+    it('should return undefined if the path is clsi-perf', function () {
+      const request = {
+        user_id: 'some-user',
+        metricsOpts: { path: 'clsi-perf' },
+      }
+      const percentage = 100
+      expect(sampleRequest(request, percentage)).to.be.undefined
+    })
+
+    it('should return undefined for a health-check even if the user would be sampled', function () {
+      const request = {
+        user_id: 'test-key-in', // percentile 13
+        metricsOpts: { path: 'health-check' },
+      }
+      const percentage = 40
+      expect(sampleRequest(request, percentage)).to.be.undefined
+    })
+
+    it('should return undefined for clsi-perf even if the user would be sampled', function () {
+      const request = {
+        user_id: 'test-key-in', // percentile 13
+        metricsOpts: { path: 'clsi-perf' },
+      }
+      const percentage = 40
+      expect(sampleRequest(request, percentage)).to.be.undefined
+    })
+
+    it('should return undefined if the sampling percentage is 0', function () {
+      const request = { user_id: 'some-user' }
+      const percentage = 0
+      expect(sampleRequest(request, percentage)).to.be.undefined
+    })
+
+    it('should return undefined if the sampling percentage is negative', function () {
+      const request = { user_id: 'some-user' }
+      const percentage = -10
+      expect(sampleRequest(request, percentage)).to.be.undefined
+    })
+
+    it('should sample if there are no metricsOpts', function () {
+      const request = { user_id: 'test-key-in' } // percentile 13
+      const percentage = 40
+      expect(sampleRequest(request, percentage)).to.be.true
+    })
+
+    it('should sample if metricsOpts has no path', function () {
+      const request = { user_id: 'test-key-in', metricsOpts: {} } // percentile 13
+      const percentage = 40
+      expect(sampleRequest(request, percentage)).to.be.true
+    })
+
+    it('should return true for a request that should be sampled', function () {
+      const request = { user_id: 'test-key-in' } // percentile 13
+      const percentage = 40
+      expect(sampleRequest(request, percentage)).to.be.true
+    })
+
+    it('should return false for a request that should not be sampled', function () {
+      const request = { user_id: 'test-key-outer' } // percentile 47
+      const percentage = 40
+      expect(sampleRequest(request, percentage)).to.be.false
     })
   })
 })

@@ -97,6 +97,15 @@ const LATEX_MK_METRICS = [
   ],
 ]
 
+/**
+ * Parses latexmk stdout for metrics and adds them to the stats object.
+ * It iterates through a predefined list of metric matchers (LATEX_MK_METRICS),
+ * applies them to the stdout, and adds any successful matches to the
+ * `stats.latexmk` object.
+ *
+ * @param {{stdout?: string}} output - The output from the latexmk process.
+ * @param {{latexmk: object}} stats - The statistics object to update. This object is mutated.
+ */
 function addLatexMkMetrics(output, stats) {
   for (const [stat, matcher] of LATEX_MK_METRICS) {
     const match = matcher(output?.stdout || '', stats.latexmk)
@@ -106,4 +115,21 @@ function addLatexMkMetrics(output, stats) {
   }
 }
 
-module.exports = { addLatexMkMetrics }
+/**
+ * Adds a non-enumerable `latexmk` property to the stats object.
+ *
+ * This property is used to store statistics from the latexmk compilation
+ * process. It is made non-enumerable to prevent it from being serialized by
+ * `JSON.stringify()`, which means it is not sent in the compile response
+ * to web where it would added to the analytics events.
+ *
+ * @param {object} stats - The compile stats object to be modified.
+ */
+function enableLatexMkMetrics(stats) {
+  Object.defineProperty(stats, 'latexmk', {
+    value: {},
+    enumerable: false,
+  })
+}
+
+module.exports = { enableLatexMkMetrics, addLatexMkMetrics }

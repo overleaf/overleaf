@@ -24,6 +24,7 @@ const {
   downloadOutputDotSynctexFromCompileCache,
 } = require('./CLSICacheHandler')
 const StatsManager = require('./StatsManager')
+const { enableLatexMkMetrics } = require('./LatexMetrics')
 const { callbackifyMultiResult } = require('@overleaf/promise-utils')
 
 const COMPILE_TIME_BUCKETS = [
@@ -193,23 +194,14 @@ async function doCompile(request, stats, timings) {
   const compileName = getCompileName(request.project_id, request.user_id)
 
   // Record latexmk -time stats for a subset of users
-  const recordPerformanceMetrics =
-    request.user_id != null &&
-    Settings.performanceLogSamplingPercentage > 0 &&
-    StatsManager.sampleByHash(
-      request.user_id,
-      Settings.performanceLogSamplingPercentage
-    )
+  const recordPerformanceMetrics = StatsManager.sampleRequest(
+    request,
+    Settings.performanceLogSamplingPercentage
+  )
   // For selected users, define a `latexmk` property on the stats object
   // to collect latexmk -time stats.
   if (recordPerformanceMetrics) {
-    // To prevent any changes to the existing compile responses being sent
-    // to web, exclude latexmk stats from being exported by marking them
-    // non-enumerable. This prevents them being serialised by JSON.stringify().
-    Object.defineProperty(stats, 'latexmk', {
-      value: {},
-      enumerable: false,
-    })
+    enableLatexMkMetrics(stats)
   }
 
   try {

@@ -150,6 +150,10 @@ describe('CompileManager', function () {
       downloadOutputDotSynctexFromCompileCache: sinon.stub().resolves(),
     }
 
+    this.LatexMetrics = { enableLatexMkMetrics: sinon.stub() }
+
+    this.StatsManager = { sampleRequest: sinon.stub().returns(false) }
+
     this.CompileManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './LatexRunner': this.LatexRunner,
@@ -171,6 +175,8 @@ describe('CompileManager', function () {
         './SynctexOutputParser': this.SynctexOutputParser,
         'fs/promises': this.fsPromises,
         './CLSICacheHandler': this.CLSICacheHandler,
+        './LatexMetrics': this.LatexMetrics,
+        './StatsManager': this.StatsManager,
       },
     })
   })
@@ -272,6 +278,40 @@ describe('CompileManager', function () {
       it('should not inject draft mode by default', function () {
         expect(this.DraftModeManager.promises.injectDraftMode).not.to.have.been
           .called
+      })
+    })
+
+    describe('with performance metric collection', function () {
+      it('should enable latexmk metrics when sampleRequest returns true', async function () {
+        this.StatsManager.sampleRequest.returns(true)
+        await this.CompileManager.promises.doCompileWithLock(
+          this.request,
+          {},
+          {}
+        )
+        expect(this.LatexMetrics.enableLatexMkMetrics).to.have.been.calledWith(
+          sinon.match.object
+        )
+      })
+
+      it('should not enable latexmk metrics when sampleRequest returns false', async function () {
+        this.StatsManager.sampleRequest.returns(false)
+        await this.CompileManager.promises.doCompileWithLock(
+          this.request,
+          {},
+          {}
+        )
+        expect(this.LatexMetrics.enableLatexMkMetrics).not.to.have.been.called
+      })
+
+      it('should not enable latexmk metrics when sampleRequest returns undefined', async function () {
+        this.StatsManager.sampleRequest.returns(undefined)
+        await this.CompileManager.promises.doCompileWithLock(
+          this.request,
+          {},
+          {}
+        )
+        expect(this.LatexMetrics.enableLatexMkMetrics).not.to.have.been.called
       })
     })
 
