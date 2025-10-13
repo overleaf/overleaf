@@ -5,6 +5,8 @@
 services:
   test_unit:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    volumes:
+      - ./reports:/overleaf/services/clsi/reports
     command: npm run test:unit:_run
     environment:
       CI:

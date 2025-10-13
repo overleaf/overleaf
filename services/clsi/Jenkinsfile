@@ -31,6 +31,12 @@ pipeline {
             }
           }
         }
+        stage('Pull TL2017') {
+          steps {
+            // Remove after new worker VM image is live.
+            sh 'docker pull us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2017.1'
+          }
+        }
         stage('Create reports folder') {
           steps {
             sh 'mkdir services/clsi/reports'
