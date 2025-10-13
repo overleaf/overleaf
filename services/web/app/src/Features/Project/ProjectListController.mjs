@@ -535,8 +535,12 @@ async function projectListPage(req, res, next) {
     customerIoEnabled,
     aiBlocked,
     hasAiAssist,
-    lastActive: user.lastActive,
-    signUpDate: user.signUpDate,
+    lastActive: user.lastActive
+      ? Math.floor(user.lastActive.getTime() / 1000)
+      : null,
+    signUpDate: user.signUpDate
+      ? Math.floor(user.signUpDate.getTime() / 1000)
+      : null,
   })
 }
 
