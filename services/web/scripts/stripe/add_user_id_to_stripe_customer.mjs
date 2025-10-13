@@ -80,6 +80,12 @@ async function processSubscription(
 
     // Get customer details to check current metadata
     const customer = subscription.customer
+    if (customer.deleted) {
+      if (verbose) {
+        console.info(`Customer ${customer.id} is deleted, skipping`)
+      }
+      return
+    }
 
     if (customer.metadata?.userId === adminUserId) {
       if (verbose) {
@@ -164,6 +170,7 @@ async function main(trackProgress) {
   const listParams = {
     limit: 100, // Stripe's maximum limit per request
     expand: ['data.customer'], // Expand customer data to reduce additional API calls
+    status: 'all', // Include subscriptions in all statuses (active, past_due, unpaid, canceled, etc.)
   }
 
   let hasMore = true
