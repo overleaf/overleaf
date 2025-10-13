@@ -129,11 +129,18 @@ html(
 
 	script(type='text/javascript' nonce=scriptNonce).
 		window.addEventListener('DOMContentLoaded', function () {
+			var bots = ['Bytespider', 'TikTokSpider', 'bingbot', 'Baiduspider', 'Amazonbot', 'Googlebot']
 			//- Look for bundle
 			var cdnBlocked = typeof Frontend === 'undefined'
 			//- Prevent loops
 			var noCdnAlreadyInUrl = window.location.href.indexOf('nocdn=true') != -1
-			if (cdnBlocked && !noCdnAlreadyInUrl && navigator.userAgent.indexOf('Googlebot') == -1) {
+			if (
+				cdnBlocked &&
+				!noCdnAlreadyInUrl &&
+				!bots.some(function (bot) {
+					return navigator.userAgent.indexOf(bot) !== -1
+				})
+			) {
 				//- Set query param, server will not set CDN url
 				window.location.search += '&nocdn=true'
 			}
