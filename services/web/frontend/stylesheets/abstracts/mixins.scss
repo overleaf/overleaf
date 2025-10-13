@@ -18,7 +18,10 @@
   $border: $background,
   $hover-background: $background,
   $hover-border: $hover-background,
-  $borderless: true
+  $borderless: true,
+  $disabled-color: $content-disabled,
+  $disabled-background: $bg-light-disabled,
+  $disabled-border: $bg-light-disabled
 ) {
   --bs-btn-color: #{$color};
   --bs-btn-bg: #{$background};
@@ -29,9 +32,9 @@
   --bs-btn-active-color: #{$color};
   --bs-btn-active-bg: #{$hover-background};
   --bs-btn-active-border-color: #{$hover-border};
-  --bs-btn-disabled-color: var(--content-disabled);
-  --bs-btn-disabled-bg: var(--bg-light-disabled);
-  --bs-btn-disabled-border-color: var(--bg-light-disabled);
+  --bs-btn-disabled-color: #{$disabled-color};
+  --bs-btn-disabled-bg: #{$disabled-background};
+  --bs-btn-disabled-border-color: #{$disabled-border};
 
   @if $borderless {
     --bs-btn-border-width: 0;

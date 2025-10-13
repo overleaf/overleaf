@@ -30,7 +30,10 @@ body {
       transparent,
       var(--ide-rail-header-subdued-button-hover-background),
       transparent,
-      true
+      true,
+      var(--content-disabled-themed),
+      var(--bg-disabled-themed),
+      var(--bg-disabled-themed)
     );
   }
 }
