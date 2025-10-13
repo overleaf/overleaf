@@ -992,13 +992,13 @@ templates.taxExemptCertificateRequired = NoCTAEmailTemplate({
       '<li>Your IRS determination letter (for non-profits and similar organizations)</li>',
       '<li>Your state resale or exemption certificate</li>',
       '</ul>',
-      `These should match the EIN you provided:${opts.ein}.`,
+      `These should match the EIN you provided: ${opts.ein}.`,
       'If you have any questions, let us know by replying to this email.',
       '<br/>',
       'Best wishes,',
       'Team Overleaf',
       '<br/>',
-      `Our reference:${opts.stripeCustomerId}`,
+      `Our reference: ${opts.stripeCustomerId}`,
     ]
   },
 })
