@@ -11,6 +11,7 @@ services:
     user: node
     command: npm run test:unit:_run
     environment:
+      CI:
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
@@ -20,6 +21,7 @@ services:
     build: .
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     environment:
+      CI:
       ELASTIC_SEARCH_DSN: es:9200
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
@@ -45,6 +47,7 @@ services:
       GCS_USER_FILES_BUCKET_NAME: fake-gcs-user-files
       GCS_TEMPLATE_FILES_BUCKET_NAME: fake-gcs-template-files
     volumes:
+      - ./reports:/overleaf/services/filestore/reports
       - minio-certs:/certs
     depends_on:
       certs:

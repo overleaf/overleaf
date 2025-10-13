@@ -35,6 +35,8 @@
     "@types/node": "^18.19.123",
     "chai": "^4.3.6",
     "mocha": "^11.1.0",
+    "mocha-junit-reporter": "^2.2.1",
+    "mocha-multi-reporters": "^1.5.1",
     "typescript": "^5.0.4"
   }
 }

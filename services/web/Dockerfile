@@ -1,5 +1,6 @@
-# the base image is suitable for running web with /overleaf/services/web bind
-# mounted
+# This file was auto-generated, do not edit it directly.
+# Instead run internal$ services/web/build_scripts
+
 FROM node:22.18.0 AS base
 
 WORKDIR /overleaf/services/web
@@ -22,8 +23,22 @@ RUN mkdir -p /overleaf/services/web/data/dumpFolder \
 FROM base AS deps-prod
 
 COPY package.json package-lock.json /overleaf/
-COPY services/web/package.json /overleaf/services/web/
-COPY libraries/ /overleaf/libraries/
+COPY libraries/access-token-encryptor/package.json /overleaf/libraries/access-token-encryptor/package.json
+COPY libraries/eslint-plugin/package.json /overleaf/libraries/eslint-plugin/package.json
+COPY libraries/fetch-utils/package.json /overleaf/libraries/fetch-utils/package.json
+COPY libraries/logger/package.json /overleaf/libraries/logger/package.json
+COPY libraries/metrics/package.json /overleaf/libraries/metrics/package.json
+COPY libraries/mongo-utils/package.json /overleaf/libraries/mongo-utils/package.json
+COPY libraries/o-error/package.json /overleaf/libraries/o-error/package.json
+COPY libraries/object-persistor/package.json /overleaf/libraries/object-persistor/package.json
+COPY libraries/overleaf-editor-core/package.json /overleaf/libraries/overleaf-editor-core/package.json
+COPY libraries/promise-utils/package.json /overleaf/libraries/promise-utils/package.json
+COPY libraries/ranges-tracker/package.json /overleaf/libraries/ranges-tracker/package.json
+COPY libraries/redis-wrapper/package.json /overleaf/libraries/redis-wrapper/package.json
+COPY libraries/settings/package.json /overleaf/libraries/settings/package.json
+COPY libraries/stream-utils/package.json /overleaf/libraries/stream-utils/package.json
+COPY libraries/validation-tools/package.json /overleaf/libraries/validation-tools/package.json
+COPY services/web/package.json /overleaf/services/web/package.json
 COPY patches/ /overleaf/patches/
 
 RUN cd /overleaf && NODE_ENV=production npm ci --quiet
@@ -41,7 +56,22 @@ FROM deps AS dev
 
 ARG SENTRY_RELEASE
 ENV SENTRY_RELEASE=$SENTRY_RELEASE
-COPY services/web /overleaf/services/web
+COPY libraries/access-token-encryptor/ /overleaf/libraries/access-token-encryptor/
+COPY libraries/eslint-plugin/ /overleaf/libraries/eslint-plugin/
+COPY libraries/fetch-utils/ /overleaf/libraries/fetch-utils/
+COPY libraries/logger/ /overleaf/libraries/logger/
+COPY libraries/metrics/ /overleaf/libraries/metrics/
+COPY libraries/mongo-utils/ /overleaf/libraries/mongo-utils/
+COPY libraries/o-error/ /overleaf/libraries/o-error/
+COPY libraries/object-persistor/ /overleaf/libraries/object-persistor/
+COPY libraries/overleaf-editor-core/ /overleaf/libraries/overleaf-editor-core/
+COPY libraries/promise-utils/ /overleaf/libraries/promise-utils/
+COPY libraries/ranges-tracker/ /overleaf/libraries/ranges-tracker/
+COPY libraries/redis-wrapper/ /overleaf/libraries/redis-wrapper/
+COPY libraries/settings/ /overleaf/libraries/settings/
+COPY libraries/stream-utils/ /overleaf/libraries/stream-utils/
+COPY libraries/validation-tools/ /overleaf/libraries/validation-tools/
+COPY services/web/ /overleaf/services/web/
 
 # Build the latex parser
 RUN cd /overleaf/services/web && npm run 'lezer-latex:generate'
@@ -62,7 +92,23 @@ RUN nice find /overleaf/services/web/public -name '*.js.map' -delete
 
 # copy source code and precompile pug images
 FROM deps-prod AS pug
-COPY services/web /overleaf/services/web
+COPY libraries/access-token-encryptor/ /overleaf/libraries/access-token-encryptor/
+COPY libraries/eslint-plugin/ /overleaf/libraries/eslint-plugin/
+COPY libraries/fetch-utils/ /overleaf/libraries/fetch-utils/
+COPY libraries/logger/ /overleaf/libraries/logger/
+COPY libraries/metrics/ /overleaf/libraries/metrics/
+COPY libraries/mongo-utils/ /overleaf/libraries/mongo-utils/
+COPY libraries/o-error/ /overleaf/libraries/o-error/
+COPY libraries/object-persistor/ /overleaf/libraries/object-persistor/
+COPY libraries/overleaf-editor-core/ /overleaf/libraries/overleaf-editor-core/
+COPY libraries/promise-utils/ /overleaf/libraries/promise-utils/
+COPY libraries/ranges-tracker/ /overleaf/libraries/ranges-tracker/
+COPY libraries/redis-wrapper/ /overleaf/libraries/redis-wrapper/
+COPY libraries/settings/ /overleaf/libraries/settings/
+COPY libraries/stream-utils/ /overleaf/libraries/stream-utils/
+COPY libraries/validation-tools/ /overleaf/libraries/validation-tools/
+COPY services/web/ /overleaf/services/web/
+
 # Omit Server Pro/CE specific scripts from SaaS image
 RUN rm /overleaf/services/web/modules/server-ce-scripts -rf
 RUN OVERLEAF_CONFIG=/overleaf/services/web/config/settings.overrides.saas.js nice npm run precompile-pug

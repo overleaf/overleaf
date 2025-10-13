@@ -1,5 +1,0 @@
-{
-  "ui": "bdd",
-  "recursive": "true",
-  "reporter": "spec"
-}

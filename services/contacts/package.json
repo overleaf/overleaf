@@ -6,9 +6,9 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "test:acceptance:_run": "mocha --loader=esmock --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
+    "test:acceptance:_run": "mocha --loader=esmock --recursive --timeout 15000 --exit $@ test/acceptance/js",
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
-    "test:unit:_run": "mocha --loader=esmock --recursive --reporter spec --exit $@ test/unit/js",
+    "test:unit:_run": "mocha --loader=esmock --recursive --exit $@ test/unit/js",
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "nodemon": "node --watch app.js",
     "lint": "eslint --max-warnings 0 --format unix .",
@@ -35,6 +35,8 @@
     "chai-as-promised": "^7.1.1",
     "esmock": "^2.6.3",
     "mocha": "^11.1.0",
+    "mocha-junit-reporter": "^2.2.1",
+    "mocha-multi-reporters": "^1.5.1",
     "sinon": "~9.0.1",
     "sinon-chai": "^3.7.0",
     "typescript": "^5.0.4"

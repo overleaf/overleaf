@@ -21,6 +21,8 @@
     "@types/path-browserify": "^1.0.3",
     "chai": "^3.3.0",
     "mocha": "^11.1.0",
+    "mocha-junit-reporter": "^2.2.1",
+    "mocha-multi-reporters": "^1.5.1",
     "sinon": "^9.2.4",
     "typescript": "^5.0.4"
   },

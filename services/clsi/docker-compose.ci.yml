@@ -7,6 +7,7 @@ services:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     command: npm run test:unit:_run
     environment:
+      CI:
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
@@ -16,6 +17,7 @@ services:
     build: .
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     environment:
+      CI:
       ELASTIC_SEARCH_DSN: es:9200
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
@@ -32,6 +34,7 @@ services:
       SANDBOXED_COMPILES_HOST_DIR_COMPILES: $PWD/compiles
       SANDBOXED_COMPILES_HOST_DIR_OUTPUT: $PWD/output
     volumes:
+      - ./reports:/overleaf/services/clsi/reports
       - ./compiles:/overleaf/services/clsi/compiles
       - /var/run/docker.sock:/var/run/docker.sock
     command: npm run test:acceptance

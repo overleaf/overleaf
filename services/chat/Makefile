@@ -27,14 +27,15 @@ clean:
 	-docker rmi us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	-$(DOCKER_COMPOSE_TEST_UNIT) down --remove-orphans --rmi local --timeout 0 --volumes
 	-$(DOCKER_COMPOSE_TEST_ACCEPTANCE) down --remove-orphans --rmi local --timeout 0 --volumes
+	-rm -rf reports/
 
 HERE=$(shell pwd)
-MONOREPO=$(shell cd ../../ && pwd)
+export MONOREPO ?= $(shell cd ../../ && pwd)
 # Run the linting commands in the scope of the monorepo.
 # Eslint and prettier (plus some configs) are on the root.
 RUN_LINTING = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(HERE) node:22.18.0 npm run --silent
 
-RUN_LINTING_CI = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) npm run --silent
+RUN_LINTING_CI = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/chat/reports:/overleaf/services/chat/reports ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) npm run --silent
 
 # Same but from the top of the monorepo
 RUN_LINTING_MONOREPO = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(MONOREPO) node:22.18.0 npm run --silent
@@ -70,7 +71,8 @@ lint:
 	$(RUN_LINTING) lint
 
 lint_ci:
-	$(RUN_LINTING_CI) lint
+	-$(RUN_LINTING_CI) lint -- --format json --output-file reports/eslint.json
+	sed -i 's_"filePath":"/overleaf_"filePath":"$(MONOREPO)_g' reports/eslint.json
 
 lint_fix:
 	$(RUN_LINTING) lint:fix
@@ -137,10 +139,11 @@ build:
 tar:
 	$(DOCKER_COMPOSE) up tar
 
-publish:
+push:
+	docker push us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 
-	docker push $(DOCKER_REPO)/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
-
+push_branch:
+	docker push us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)
 
 .PHONY: clean \
 	format format_fix \

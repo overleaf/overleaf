@@ -1,4 +1,4 @@
 #!/bin/bash
 set -e;
-MOCHA="node_modules/.bin/mocha --recursive --reporter spec --timeout 15000"
+MOCHA="node_modules/.bin/mocha --recursive --timeout 15000"
 $MOCHA "$@"

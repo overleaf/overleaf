@@ -23,7 +23,7 @@ pipeline {
     timestamps()
     // Abort build after hitting first failure.
     parallelsAlwaysFailFast()
-    timeout(time: 15, unit: 'MINUTES')
+    timeout(time: 20, unit: 'MINUTES')
   }
   environment {
     BRANCH_NAME = "${GIT_BRANCH.replace('origin/', '')}"

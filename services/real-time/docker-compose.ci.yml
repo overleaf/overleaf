@@ -8,6 +8,7 @@ services:
     user: node
     command: npm run test:unit:_run
     environment:
+      CI:
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
@@ -24,6 +25,7 @@ services:
     build: .
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     environment:
+      CI:
       ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis_test
       QUEUES_REDIS_HOST: redis_test
@@ -34,6 +36,8 @@ services:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+    volumes:
+      - ./reports:/overleaf/services/real-time/reports
     depends_on:
       redis_test:
         condition: service_healthy

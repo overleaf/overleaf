@@ -1,5 +1,4 @@
 web
---only-jenkins-include-file=True
 --dependencies=
 --docker-repos=us-east1-docker.pkg.dev/overleaf-ops/ol-docker
 --env-add=

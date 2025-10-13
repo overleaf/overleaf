@@ -24,6 +24,8 @@
     "bunyan": "^1.0.0",
     "chai": "^4.3.6",
     "mocha": "^11.1.0",
+    "mocha-junit-reporter": "^2.2.1",
+    "mocha-multi-reporters": "^1.5.1",
     "sandboxed-module": "^2.0.4",
     "sinon": "^9.2.4",
     "typescript": "^5.0.4"
@@ -32,7 +34,7 @@
     "lint": "eslint --ext .js --ext .cjs --ext .ts --max-warnings 0 --format unix .",
     "lint:fix": "eslint --fix --ext .js --ext .cjs --ext .ts .",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
-    "test:acceptance": "mocha --reporter spec --recursive --exit --grep=$MOCHA_GREP test/acceptance",
+    "test:acceptance": "mocha --recursive --exit --grep=$MOCHA_GREP test/acceptance",
     "test": "npm run lint && npm run format && npm run types:check && npm run test:unit",
     "format": "prettier --list-different $PWD/'**/*.{js,cjs,ts}'",
     "format:fix": "prettier --write $PWD/'**/*.{js,cjs,ts}'",

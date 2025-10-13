@@ -38,6 +38,8 @@
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "mocha": "^11.1.0",
+    "mocha-junit-reporter": "^2.2.1",
+    "mocha-multi-reporters": "^1.5.1",
     "mock-fs": "^5.2.0",
     "mongodb": "6.12.0",
     "sandboxed-module": "^2.0.4",

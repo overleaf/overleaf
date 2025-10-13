@@ -7,11 +7,13 @@ services:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     user: node
     volumes:
+      - ./reports:/overleaf/services/notifications/reports
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
       - ../../tsconfig.backend.json:/overleaf/tsconfig.backend.json
     entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: npm run test:unit:_run
     environment:
+      CI:
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
@@ -25,6 +27,7 @@ services:
     build: .
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     environment:
+      CI:
       ELASTIC_SEARCH_DSN: es:9200
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
@@ -32,6 +35,7 @@ services:
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
     volumes:
+      - ./reports:/overleaf/services/notifications/reports
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
       - ../../tsconfig.backend.json:/overleaf/tsconfig.backend.json
     depends_on:
