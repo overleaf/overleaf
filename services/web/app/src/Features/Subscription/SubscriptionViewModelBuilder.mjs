@@ -36,20 +36,6 @@ function serializeMongooseObject(object) {
     : object
 }
 
-async function isEligibleForGroupPlan(service, isInTrial) {
-  if (isInTrial) {
-    return false
-  }
-
-  if (service === 'recurly') {
-    return true
-  }
-  const [result] = await Modules.promises.hooks.fire(
-    'canUpgradeFromIndividualToGroup'
-  )
-  return result
-}
-
 async function buildUsersSubscriptionViewModel(user, locale = 'en') {
   let {
     personalSubscription,
@@ -310,10 +296,7 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
       pausedAt: paymentRecord.subscription.pausePeriodStart,
       remainingPauseCycles: paymentRecord.subscription.remainingPauseCycles,
       isEligibleForPause,
-      isEligibleForGroupPlan: await isEligibleForGroupPlan(
-        paymentRecord.subscription.service,
-        isInTrial
-      ),
+      isEligibleForGroupPlan: !isInTrial,
     }
 
     const isMonthlyCollaboratorPlan =

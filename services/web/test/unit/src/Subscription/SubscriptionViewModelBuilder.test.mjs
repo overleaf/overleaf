@@ -723,20 +723,6 @@ describe('SubscriptionViewModelBuilder', function () {
       })
 
       describe('isEligibleForGroupPlan', function () {
-        it('is false for Stripe subscriptions', async function (ctx) {
-          ctx.paymentRecord.service = 'stripe-us'
-          ctx.Modules.promises.hooks.fire
-            .withArgs('canUpgradeFromIndividualToGroup')
-            .resolves([false])
-          const result =
-            await ctx.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
-              ctx.user
-            )
-          assert.isFalse(
-            result.personalSubscription.payment.isEligibleForGroupPlan
-          )
-        })
-
         it('is false when in trial', async function (ctx) {
           const msIn24Hours = 24 * 60 * 60 * 1000
           const tomorrow = new Date(Date.now() + msIn24Hours)
@@ -751,8 +737,7 @@ describe('SubscriptionViewModelBuilder', function () {
           )
         })
 
-        it('is true when not in trial and for a Recurly subscription', async function (ctx) {
-          ctx.paymentRecord.service = 'recurly'
+        it('is true when not in trial', async function (ctx) {
           const result =
             await ctx.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
               ctx.user
