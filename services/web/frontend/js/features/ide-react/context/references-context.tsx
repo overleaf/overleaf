@@ -42,7 +42,8 @@ export const ReferencesProvider: FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const { fileTreeData } = useFileTreeData()
-  const { eventEmitter, projectId } = useIdeReactContext()
+  const { eventEmitter, projectId, permissionsLevel, projectJoined } =
+    useIdeReactContext()
   const { socket } = useConnectionContext()
   const { projectSnapshot } = useProjectContext()
   const { openDocs } = useEditorManagerContext()
@@ -82,6 +83,10 @@ export const ReferencesProvider: FC<React.PropsWithChildren> = ({
 
   const indexAllReferencesLocally = useCallback(
     async (shouldBroadcast: boolean) => {
+      if (permissionsLevel === 'readOnly') {
+        // Not going to search the references, so let's not index them.
+        return
+      }
       sendMBOnce('client-side-references-index')
       abortControllerRef.current?.abort()
 
@@ -115,7 +120,7 @@ export const ReferencesProvider: FC<React.PropsWithChildren> = ({
         })
       }
     },
-    [projectSnapshot, openDocs, projectId]
+    [projectSnapshot, openDocs, projectId, permissionsLevel]
   )
 
   const indexAllReferences = clientSideReferences
@@ -175,6 +180,16 @@ export const ReferencesProvider: FC<React.PropsWithChildren> = ({
     }, [indexAllReferences])
   )
 
+  const doneInitialIndex = useRef(false)
+  useEffect(() => {
+    // We wait for projectJoined to ensure that the correct permission level
+    // has been received and stored on the client.
+    if (projectJoined && !doneInitialIndex.current) {
+      doneInitialIndex.current = true
+      indexAllReferences(false)
+    }
+  }, [projectJoined, indexAllReferences])
+
   useEffect(() => {
     const handleProjectJoined = () => {
       // We only need to grab the references when the editor first loads,
@@ -192,7 +207,6 @@ export const ReferencesProvider: FC<React.PropsWithChildren> = ({
           )
         }
       })
-      indexAllReferences(false)
     }
 
     eventEmitter.once('project:joined', handleProjectJoined)
