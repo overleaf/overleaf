@@ -112,7 +112,7 @@ function WritefullGrantedAddOn({
   )
 }
 
-export function WritefullManagedBundleAddOn() {
+function WritefullManagedBundleAddOn() {
   const { setModalIdShown } = useSubscriptionDashboardContext()
   const handleManageOnWritefull = () => setModalIdShown('manage-on-writefull')
   return (

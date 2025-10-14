@@ -21,10 +21,6 @@ export const addNewCommentRangeEffect = StateEffect.define<Range<Decoration>>()
 
 export const removeNewCommentRangeEffect = StateEffect.define<string>()
 
-export const textSelectedEffect = StateEffect.define<null>()
-
-export const removeReviewPanelTooltipEffect = StateEffect.define()
-
 const mouseDownEffect = StateEffect.define()
 const mouseUpEffect = StateEffect.define()
 const mouseDownStateField = StateField.define<boolean>({

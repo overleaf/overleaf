@@ -6,11 +6,7 @@ export type {
   Outline,
 } from './tree-operations/outline'
 
-export {
-  iterateDescendantsOf,
-  previousSiblingIs,
-  nextSiblingIs,
-} from './tree-operations/common'
+export { previousSiblingIs } from './tree-operations/common'
 
 export {
   cursorIsAtBeginEnvironment,
@@ -19,7 +15,6 @@ export {
 } from './tree-operations/environments'
 
 export {
-  getAncestorStack,
   ancestorNodeOfType,
   ancestorOfNodeWithType,
   getBibkeyArgumentNode,

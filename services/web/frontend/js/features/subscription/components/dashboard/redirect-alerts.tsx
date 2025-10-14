@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import OLNotification from '@/shared/components/ol/ol-notification'
 
-export function RedirectAlerts() {
+function RedirectAlerts() {
   const queryParams = new URLSearchParams(window.location.search)
   const redirectReason = queryParams.get('redirect-reason')
   const { t } = useTranslation()

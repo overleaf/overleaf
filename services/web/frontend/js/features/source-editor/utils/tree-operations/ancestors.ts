@@ -1,67 +1,7 @@
-import { ensureSyntaxTree, syntaxTree } from '@codemirror/language'
+import { syntaxTree } from '@codemirror/language'
 import { EditorSelection, EditorState, SelectionRange } from '@codemirror/state'
 import { SyntaxNode, Tree } from '@lezer/common'
 import { ListEnvironment } from '../../lezer-latex/latex.terms.mjs'
-
-const HUNDRED_MS = 100
-
-export type AncestorItem = {
-  node: SyntaxNode
-  label: string
-  type?: string
-  from: number
-  to: number
-}
-
-/**
- * Get the stack of 'ancestor' nodes at the given position.
- * The first element is the most distant ancestor, while the last element
- * is the node at the position.
- */
-export function getAncestorStack(
-  state: EditorState,
-  pos: number
-): AncestorItem[] | null {
-  const tree = ensureSyntaxTree(state, pos, HUNDRED_MS)
-
-  if (!tree) {
-    return null
-  }
-
-  const stack: AncestorItem[] = []
-  const selectedNode = tree.resolve(pos, 0)
-
-  let node: SyntaxNode | null = selectedNode
-  while (node) {
-    const name = node.type.name
-    switch (name) {
-      case 'Environment':
-        {
-          const data: AncestorItem = {
-            node,
-            label: name,
-            from: node.from,
-            to: node.to,
-          }
-
-          const child = node.getChild('EnvNameGroup')
-          if (child) {
-            data.type = state.doc.sliceString(child.from + 1, child.to - 1)
-          }
-          stack.push(data)
-        }
-        break
-
-      default:
-        stack.push({ node, label: name, from: node.from, to: node.to })
-        break
-    }
-
-    node = node.parent
-  }
-
-  return stack.reverse()
-}
 
 export const wrappedNodeOfType = (
   state: EditorState,

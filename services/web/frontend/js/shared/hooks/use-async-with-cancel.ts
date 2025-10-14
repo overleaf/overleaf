@@ -121,5 +121,4 @@ function useAsync<T = any, E extends Error | FetchError = Error>(
 }
 
 export default useAsync
-export type UseAsyncReturnType = ReturnType<typeof useAsync>
 export { useAsync, abortError }

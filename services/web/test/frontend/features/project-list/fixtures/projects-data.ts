@@ -94,9 +94,9 @@ export const trashedAndNotOwnedProject = {
   owner: users.picard,
 } as Project
 
-export const sharedProject = archiveableProject
+export const sharedProject = { ...archiveableProject }
 
-export const ownedProject = copyableProject
+export const ownedProject = { ...copyableProject }
 
 export const projectsData: Array<Project> = [
   copyableProject,

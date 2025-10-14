@@ -19,6 +19,7 @@ type IntegrationLinkingWidgetProps = {
   setOptedIn: (optedIn: boolean) => void
 }
 
+/** @knipignore */
 export function LabsExperimentWidget({
   logo,
   title,

@@ -1,15 +1,8 @@
-import {
-  Extension,
-  Facet,
-  StateEffect,
-  StateField,
-  TransactionSpec,
-} from '@codemirror/state'
+import { Extension, Facet, StateEffect, StateField } from '@codemirror/state'
 import {
   Decoration,
   EditorView,
   ViewPlugin,
-  ViewUpdate,
   WidgetType,
 } from '@codemirror/view'
 
@@ -222,30 +215,3 @@ const topPaddingDecoration = EditorView.decorations.compute(
     ])
   }
 )
-
-export function setVerticalOverflow(padding: VerticalPadding): TransactionSpec {
-  return {
-    effects: [setOverflowPaddingEffect.of(padding)],
-  }
-}
-
-export function updateSetsVerticalOverflow(update: ViewUpdate): boolean {
-  return update.transactions.some(tr => {
-    return tr.effects.some(effect => effect.is(setOverflowPaddingEffect))
-  })
-}
-
-export function updateChangesTopPadding(update: ViewUpdate): boolean {
-  return (
-    update.state.field(overflowPaddingState).top !==
-    update.startState.field(overflowPaddingState).top
-  )
-}
-
-export function editorVerticalTopPadding(view: EditorView): number {
-  return view.state.field(overflowPaddingState, false)?.top ?? 0
-}
-
-export function editorOverflowPadding(view: EditorView) {
-  return view.state.field(overflowPaddingState, false)
-}

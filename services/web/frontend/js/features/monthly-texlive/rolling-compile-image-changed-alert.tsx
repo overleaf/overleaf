@@ -1,4 +1,4 @@
-import { useTutorial } from '@/shared/hooks/promotions/use-tutorial'
+import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { useProjectContext } from '@/shared/context/project-context'
 import OLNotification from '@/shared/components/ol/ol-notification'

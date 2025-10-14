@@ -6,6 +6,7 @@ import classNames from 'classnames'
 import { useCallback, useEffect } from 'react'
 import { Overlay, OverlayProps, Popover } from 'react-bootstrap'
 
+/** @knipignore keep this file around even when there is no current promo using it */
 export default function TooltipPromotion({
   target,
   tutorialKey,

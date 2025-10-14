@@ -71,7 +71,8 @@
     "local:test:acceptance": "npm run local:test:acceptance:app && npm run local:test:acceptance:modules",
     "local:test:unit": "npm run test:unit:all",
     "local:test:frontend": "npm run test:frontend",
-    "local:test": "npm run local:test:unit && npm run local:test:frontend && npm run local:test:acceptance"
+    "local:test": "npm run local:test:unit && npm run local:test:frontend && npm run local:test:acceptance",
+    "knip": "knip --config knip.ts"
   },
   "browserslist": [
     "defaults and supports woff2",
@@ -255,6 +256,7 @@
     "@types/express": "^4.17.23",
     "@types/mocha": "^9.1.0",
     "@types/mocha-each": "^2.0.4",
+    "@types/node": "^24.5.2",
     "@types/react": "^18.3.20",
     "@types/react-color": "^3.0.13",
     "@types/react-dom": "^18.3.6",
@@ -338,6 +340,7 @@
     "jscodeshift": "^17.0.0",
     "jsdom": "^19.0.0",
     "jsdom-global": "^3.0.2",
+    "knip": "^5.64.1",
     "match-sorter": "^6.2.0",
     "mathjax": "^3.2.2",
     "mediatr-ts": "^2.0.1",

@@ -27,19 +27,3 @@ type AbsoluteWidth = {
 }
 
 export type WidthSelection = PercentageWidth | CustomWidth | AbsoluteWidth
-
-export const isPercentageWidth = (
-  width: WidthSelection
-): width is PercentageWidth => {
-  return width.unit === '%'
-}
-
-export const isAbsoluteWidth = (
-  width: WidthSelection
-): width is AbsoluteWidth => {
-  return (ABSOLUTE_UNITS as readonly string[]).includes(width.unit)
-}
-
-export const isCustomWidth = (width: WidthSelection): width is CustomWidth => {
-  return width.unit === 'custom'
-}

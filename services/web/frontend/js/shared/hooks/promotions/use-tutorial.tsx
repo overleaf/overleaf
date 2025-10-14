@@ -4,7 +4,7 @@ import { postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
 import { useEditorContext } from '@/shared/context/editor-context'
 
-export const useTutorial = (
+const useTutorial = (
   tutorialKey: string,
   eventData: Record<string, any> = {}
 ) => {

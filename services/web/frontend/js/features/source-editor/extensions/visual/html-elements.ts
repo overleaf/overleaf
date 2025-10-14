@@ -88,11 +88,6 @@ const inlineElements = new Set([
 export const isInlineElement = (node: Node): node is HTMLElement =>
   inlineElements.has(node.nodeName)
 
-const codeElements = new Set(['CODE', 'PRE'])
-
-export const isCodeElement = (node: Node): node is HTMLElement =>
-  codeElements.has(node.nodeName)
-
 const keepEmptyBlockElements = new Set(['TD', 'TH', 'CANVAS', 'DT', 'DD', 'HR'])
 
 export const shouldRemoveEmptyBlockElement = (

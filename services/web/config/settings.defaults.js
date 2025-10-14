@@ -978,7 +978,6 @@ module.exports = {
     tprFileViewRefreshButton: [],
     tprFileViewNotOriginalImporter: [],
     contactUsModal: [],
-    editorToolbarButtons: [],
     sourceEditorExtensions: [],
     sourceEditorComponents: [],
     pdfLogEntryHeaderActionComponents: [],
