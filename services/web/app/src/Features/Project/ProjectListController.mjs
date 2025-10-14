@@ -29,6 +29,7 @@ import TutorialHandler from '../Tutorial/TutorialHandler.mjs'
 import SubscriptionHelper from '../Subscription/SubscriptionHelper.js'
 import PermissionsManager from '../Authorization/PermissionsManager.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import { OnboardingDataCollection } from '../../models/OnboardingDataCollection.js'
 
 /**
  * @import { GetProjectsRequest, GetProjectsResponse, AllUsersProjects, MongoProject, FormattedProject, MongoTag } from "./types"
@@ -463,6 +464,12 @@ async function projectListPage(req, res, next) {
     affiliation => affiliation.institution?.enterpriseCommons
   )
 
+  let onboardingDataCollection
+  let subjectArea
+  let usedLatex
+  let primaryOccupation
+  let role
+
   // customer.io: Premium nudge experiment
   // Only do customer-io-trial-conversion assignment for users not in India/China and not in group/commons
   let customerIoEnabled = false
@@ -482,6 +489,18 @@ async function projectListPage(req, res, next) {
           )
         if (cioAssignment.variant === 'enabled') {
           customerIoEnabled = true
+          onboardingDataCollection = await OnboardingDataCollection.findById(
+            userId,
+            'subjectArea usedLatex primaryOccupation role'
+          )
+
+          if (onboardingDataCollection) {
+            subjectArea = onboardingDataCollection.subjectArea
+            usedLatex = onboardingDataCollection.usedLatex
+            primaryOccupation = onboardingDataCollection.primaryOccupation
+            role = onboardingDataCollection.role
+          }
+
           AnalyticsManager.setUserPropertyForUserInBackground(
             userId,
             'customer-io-integration',
@@ -541,6 +560,10 @@ async function projectListPage(req, res, next) {
     signUpDate: user.signUpDate
       ? Math.floor(user.signUpDate.getTime() / 1000)
       : null,
+    subjectArea,
+    primaryOccupation,
+    role,
+    usedLatex,
   })
 }
 

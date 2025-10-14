@@ -54,6 +54,22 @@ describe('ProjectListController', function () {
     ctx.settings = {
       siteUrl: 'https://overleaf.com',
     }
+    ctx.onboardingDataCollection = {
+      companyDivisionDepartment: '',
+      companyJobTitle: '',
+      firstName: 'Dos',
+      governmentJobTitle: '',
+      institutionName: '',
+      lastName: 'Mukasan',
+      nonprofitDivisionDepartment: '',
+      nonprofitJobTitle: '',
+      otherJobTitle: '',
+      primaryOccupation: 'company',
+      role: 'conductor',
+      subjectArea: 'music',
+      updatedAt: '2025-09-04T12:12:21.628Z',
+      usedLatex: 'occasionally',
+    }
     ctx.TagsHandler = {
       promises: {
         getAllTags: sinon.stub().resolves(ctx.tags),
@@ -66,6 +82,9 @@ describe('ProjectListController', function () {
     }
     ctx.UserModel = {
       findById: sinon.stub().resolves(ctx.user),
+    }
+    ctx.OnboardingDataCollectionModel = {
+      findById: sinon.stub().resolves(ctx.onboardingDataCollection),
     }
     ctx.UserPrimaryEmailCheckHandler = {
       requiresPrimaryEmailCheck: sinon.stub().returns(false),
@@ -207,6 +226,10 @@ describe('ProjectListController', function () {
 
     vi.doMock('../../../../app/src/models/User', () => ({
       User: ctx.UserModel,
+    }))
+
+    vi.doMock('../../../../app/src/models/OnboardingDataCollection', () => ({
+      OnboardingDataCollection: ctx.OnboardingDataCollectionModel,
     }))
 
     vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
