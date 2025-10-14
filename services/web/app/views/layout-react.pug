@@ -12,7 +12,7 @@ block append meta
 	- const canDisplayAdminRedirect = canRedirectToAdminDomain()
 	- const sessionUser = getSessionUser()
 	- const staffAccess = sessionUser?.staffAccess
-	- const canDisplayProjectUrlLookup = hasFeature('saas') && canDisplayAdminMenu && hasAdminCapability('view-project-setting', false)
+	- const canDisplayProjectUrlLookup = settings.adminPrivilegeAvailable && canDisplayAdminMenu && hasAdminCapability('view-project-setting', false)
 	- const canDisplaySplitTestMenu = hasFeature('saas') && ((canDisplayAdminMenu && hasAdminCapability('view-split-test')) || staffAccess?.splitTestMetrics || staffAccess?.splitTestManagement)
 	- const canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu && hasAdminCapability('manage-survey', false)
 	- const canDisplayScriptLogMenu = hasFeature('saas') && hasAdminCapability('view-script-log', false) && canDisplayAdminMenu

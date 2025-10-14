@@ -135,6 +135,24 @@ describe('admin panel', function () {
       )
     })
 
+    describe('admin menu items', () => {
+      beforeEach(() => {
+        login(admin)
+        cy.visit('/project')
+      })
+
+      it('displays expected admin menu items', () => {
+        const menuitems = ['Manage Site', 'Manage Users', 'Project URL Lookup']
+        menuitems.forEach(name => {
+          cy.findByRole('menuitem', { name: 'Admin' }).click()
+          cy.get('ul[role="menu"]')
+            .findAllByRole('menuitem')
+            .should('have.length', menuitems.length)
+          cy.get('ul[role="menu"]').findByRole('menuitem', { name }).click()
+        })
+      })
+    })
+
     describe('manage site', () => {
       beforeEach(() => {
         login(admin)
