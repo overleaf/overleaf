@@ -88,6 +88,23 @@ function start() {
       throw error
     }
   })
+
+  registerQueue('deferred-subscription-webhook-event', async job => {
+    const { eventId, eventType, serviceId } = job.data
+    try {
+      await Modules.promises.hooks.fire(
+        'handleDeferredSubscriptionWebhookEvent',
+        job.data
+      )
+    } catch (e) {
+      const error = OError.tag(
+        e,
+        'failed to handle deferred subscription webhook event'
+      )
+      logger.warn({ error, eventId, eventType, serviceId }, error.message)
+      throw error
+    }
+  })
 }
 
 function registerCleanup(queue) {

@@ -1,6 +1,7 @@
 import Stripe from 'stripe'
 
-export type CustomerSubscriptionUpdatedWebhookEvent = {
+export interface CustomerSubscriptionUpdatedWebhookEvent
+  extends Stripe.EventBase {
   type: 'customer.subscription.updated'
   data: {
     object: Stripe.Subscription & {
@@ -29,7 +30,8 @@ export type CustomerSubscriptionUpdatedWebhookEvent = {
   }
 }
 
-export type CustomerSubscriptionCreatedWebhookEvent = {
+export interface CustomerSubscriptionCreatedWebhookEvent
+  extends Stripe.EventBase {
   type: 'customer.subscription.created'
   data: {
     object: Stripe.Subscription & {
@@ -41,7 +43,8 @@ export type CustomerSubscriptionCreatedWebhookEvent = {
   }
 }
 
-export type CustomerSubscriptionsDeletedWebhookEvent = {
+export interface CustomerSubscriptionsDeletedWebhookEvent
+  extends Stripe.EventBase {
   type: 'customer.subscription.deleted'
   data: {
     object: Stripe.Subscription & {
@@ -53,7 +56,7 @@ export type CustomerSubscriptionsDeletedWebhookEvent = {
   }
 }
 
-export type InvoicePaidWebhookEvent = {
+export interface InvoicePaidWebhookEvent extends Stripe.EventBase {
   type: 'invoice.paid'
   data: {
     object: Stripe.Invoice & {
@@ -66,10 +69,10 @@ export type InvoicePaidWebhookEvent = {
       }
     }
   }
-  request: Stripe.Event.Request
 }
 
-export type PaymentIntentPaymentFailedWebhookEvent = {
+export interface PaymentIntentPaymentFailedWebhookEvent
+  extends Stripe.EventBase {
   type: 'payment_intent.payment_failed'
   data: {
     object: Stripe.PaymentIntent
@@ -77,7 +80,7 @@ export type PaymentIntentPaymentFailedWebhookEvent = {
   request: Stripe.Event.Request
 }
 
-export type SetupIntentSetupFailedWebhookEvent = {
+export interface SetupIntentSetupFailedWebhookEvent extends Stripe.EventBase {
   type: 'setup_intent.setup_failed'
   data: {
     object: Stripe.SetupIntent & {
@@ -88,10 +91,9 @@ export type SetupIntentSetupFailedWebhookEvent = {
       }
     }
   }
-  request: Stripe.Event.Request
 }
 
-export type SetupIntentSucceededWebhookEvent = {
+export interface SetupIntentSucceededWebhookEvent extends Stripe.EventBase {
   type: 'setup_intent.succeeded'
   data: {
     object: Stripe.SetupIntent & {
@@ -102,26 +104,23 @@ export type SetupIntentSucceededWebhookEvent = {
       }
     }
   }
-  request: Stripe.Event.Request
 }
 
-export type InvoiceVoidedWebhookEvent = {
+export interface InvoiceVoidedWebhookEvent extends Stripe.EventBase {
   type: 'invoice.voided'
   data: {
     object: Stripe.Invoice
   }
-  request: Stripe.Event.Request
 }
 
-export type InvoiceOverdueWebhookEvent = {
+export interface InvoiceOverdueWebhookEvent extends Stripe.EventBase {
   type: 'invoice.overdue'
   data: {
     object: Stripe.Invoice
   }
-  request: Stripe.Event.Request
 }
 
-export type CheckoutSessionCompletedWebhookEvent = {
+export interface CheckoutSessionCompletedWebhookEvent extends Stripe.EventBase {
   type: 'checkout.session.completed'
   data: {
     object: Stripe.Checkout.Session & {
@@ -130,10 +129,9 @@ export type CheckoutSessionCompletedWebhookEvent = {
       }
     }
   }
-  request: Stripe.Event.Request
 }
 
-export type CustomerCreatedWebhookEvent = {
+export interface CustomerCreatedWebhookEvent extends Stripe.EventBase {
   type: 'customer.created'
   data: {
     object: Stripe.Customer
