@@ -1,6 +1,6 @@
 import { OLToast, OLToastProps } from '@/shared/components/ol/ol-toast'
 import useEventListener from '@/shared/hooks/use-event-listener'
-import { Fragment, ReactElement, useCallback, useState } from 'react'
+import { Fragment, memo, ReactElement, useCallback, useState } from 'react'
 
 import { debugConsole } from '@/utils/debugging'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
@@ -30,7 +30,7 @@ const GENERATOR_MAP: Map<string, GlobalToastGenerator> = new Map(
 
 let toastCounter = 1
 
-export const GlobalToasts = () => {
+export const GlobalToasts = memo(function GlobalToasts() {
   const [toasts, setToasts] = useState<
     { component: ReactElement; id: string }[]
   >([])
@@ -96,4 +96,4 @@ export const GlobalToasts = () => {
       ))}
     </OLToastContainer>
   )
-}
+})

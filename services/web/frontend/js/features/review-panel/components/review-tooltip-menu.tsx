@@ -1,6 +1,7 @@
 import {
   CSSProperties,
   FC,
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -94,166 +95,168 @@ const ReviewTooltipMenu: FC = () => {
   )
 }
 
-const ReviewTooltipMenuContent: FC<{ onAddComment: () => void }> = ({
-  onAddComment,
-}) => {
-  const { t } = useTranslation()
-  const view = useCodeMirrorViewContext()
-  const state = useCodeMirrorStateContext()
-  const { reviewPanelOpen } = useLayoutContext()
-  const ranges = useRangesContext()
-  const { acceptChanges, rejectChanges } = useRangesActionsContext()
-  const { showGenericConfirmModal } = useModalsContext()
-  const { wantTrackChanges } = useEditorPropertiesContext()
-  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties | undefined>()
-  const [visible, setVisible] = useState(false)
+const ReviewTooltipMenuContent = memo<{ onAddComment: () => void }>(
+  function ReviewTooltipMenuContent({ onAddComment }) {
+    const { t } = useTranslation()
+    const view = useCodeMirrorViewContext()
+    const state = useCodeMirrorStateContext()
+    const { reviewPanelOpen } = useLayoutContext()
+    const ranges = useRangesContext()
+    const { acceptChanges, rejectChanges } = useRangesActionsContext()
+    const { showGenericConfirmModal } = useModalsContext()
+    const { wantTrackChanges } = useEditorPropertiesContext()
+    const [tooltipStyle, setTooltipStyle] = useState<
+      CSSProperties | undefined
+    >()
+    const [visible, setVisible] = useState(false)
 
-  const changesInSelection = useMemo(() => {
-    return (ranges?.changes ?? []).filter(({ op }) => {
-      const opFrom = op.p
-      const opLength = isInsertOperation(op) ? op.i.length : 0
-      const opTo = opFrom + opLength
-      const selection = state.selection.main
-      return opFrom >= selection.from && opTo <= selection.to
-    })
-  }, [ranges, state.selection.main])
+    const changesInSelection = useMemo(() => {
+      return (ranges?.changes ?? []).filter(({ op }) => {
+        const opFrom = op.p
+        const opLength = isInsertOperation(op) ? op.i.length : 0
+        const opTo = opFrom + opLength
+        const selection = state.selection.main
+        return opFrom >= selection.from && opTo <= selection.to
+      })
+    }, [ranges, state.selection.main])
 
-  const acceptChangesHandler = useCallback(() => {
-    const nChanges = numberOfChangesInSelection(
+    const acceptChangesHandler = useCallback(() => {
+      const nChanges = numberOfChangesInSelection(
+        ranges,
+        view.state.selection.main
+      )
+      showGenericConfirmModal({
+        message: t('confirm_accept_selected_changes', { count: nChanges }),
+        title: t('accept_selected_changes'),
+        onConfirm: async () => {
+          await acceptChanges(...changesInSelection)
+        },
+        primaryVariant: 'danger',
+      })
+    }, [
+      acceptChanges,
+      changesInSelection,
       ranges,
-      view.state.selection.main
-    )
-    showGenericConfirmModal({
-      message: t('confirm_accept_selected_changes', { count: nChanges }),
-      title: t('accept_selected_changes'),
-      onConfirm: async () => {
-        await acceptChanges(...changesInSelection)
-      },
-      primaryVariant: 'danger',
-    })
-  }, [
-    acceptChanges,
-    changesInSelection,
-    ranges,
-    showGenericConfirmModal,
-    view,
-    t,
-  ])
+      showGenericConfirmModal,
+      view,
+      t,
+    ])
 
-  const rejectChangesHandler = useCallback(() => {
-    const nChanges = numberOfChangesInSelection(
+    const rejectChangesHandler = useCallback(() => {
+      const nChanges = numberOfChangesInSelection(
+        ranges,
+        view.state.selection.main
+      )
+      showGenericConfirmModal({
+        message: t('confirm_reject_selected_changes', { count: nChanges }),
+        title: t('reject_selected_changes'),
+        onConfirm: async () => {
+          await rejectChanges(...changesInSelection)
+        },
+        primaryVariant: 'danger',
+      })
+    }, [
+      showGenericConfirmModal,
+      t,
       ranges,
-      view.state.selection.main
-    )
-    showGenericConfirmModal({
-      message: t('confirm_reject_selected_changes', { count: nChanges }),
-      title: t('reject_selected_changes'),
-      onConfirm: async () => {
-        await rejectChanges(...changesInSelection)
-      },
-      primaryVariant: 'danger',
-    })
-  }, [
-    showGenericConfirmModal,
-    t,
-    ranges,
-    view,
-    rejectChanges,
-    changesInSelection,
-  ])
+      view,
+      rejectChanges,
+      changesInSelection,
+    ])
 
-  const showChangesButtons = changesInSelection.length > 0
+    const showChangesButtons = changesInSelection.length > 0
 
-  useEffect(() => {
-    view.requestMeasure({
-      key: 'review-tooltip-outside-viewport',
-      read(view) {
-        const cursorCoords = view.coordsAtPos(view.state.selection.main.head)
+    useEffect(() => {
+      view.requestMeasure({
+        key: 'review-tooltip-outside-viewport',
+        read(view) {
+          const cursorCoords = view.coordsAtPos(view.state.selection.main.head)
 
-        if (!cursorCoords) {
-          return
-        }
+          if (!cursorCoords) {
+            return
+          }
 
-        const scrollDomRect = view.scrollDOM.getBoundingClientRect()
-        const contentDomRect = view.contentDOM.getBoundingClientRect()
-        const editorRightPos = contentDomRect.right - CM_LINE_RIGHT_PADDING
+          const scrollDomRect = view.scrollDOM.getBoundingClientRect()
+          const contentDomRect = view.contentDOM.getBoundingClientRect()
+          const editorRightPos = contentDomRect.right - CM_LINE_RIGHT_PADDING
 
-        if (
-          cursorCoords.top > scrollDomRect.top &&
-          cursorCoords.top < scrollDomRect.bottom
-        ) {
-          return
-        }
+          if (
+            cursorCoords.top > scrollDomRect.top &&
+            cursorCoords.top < scrollDomRect.bottom
+          ) {
+            return
+          }
 
-        return {
-          position: 'fixed' as const,
-          top: scrollDomRect.top + EDIT_MODE_SWITCH_WIDGET_HEIGHT,
-          right: window.innerWidth - editorRightPos,
-        }
-      },
-      write(res) {
-        setTooltipStyle(res)
-      },
-    })
-  }, [view, reviewPanelOpen, wantTrackChanges])
+          return {
+            position: 'fixed' as const,
+            top: scrollDomRect.top + EDIT_MODE_SWITCH_WIDGET_HEIGHT,
+            right: window.innerWidth - editorRightPos,
+          }
+        },
+        write(res) {
+          setTooltipStyle(res)
+        },
+      })
+    }, [view, reviewPanelOpen, wantTrackChanges])
 
-  useEffect(() => {
-    setVisible(false)
-    const timeout = setTimeout(() => {
-      setVisible(true)
-    }, TOOLTIP_SHOW_DELAY)
+    useEffect(() => {
+      setVisible(false)
+      const timeout = setTimeout(() => {
+        setVisible(true)
+      }, TOOLTIP_SHOW_DELAY)
 
-    return () => {
-      clearTimeout(timeout)
-    }
-  }, [])
+      return () => {
+        clearTimeout(timeout)
+      }
+    }, [])
 
-  return (
-    <div
-      className={classNames('review-tooltip-menu', {
-        'review-tooltip-menu-visible': visible,
-      })}
-      style={tooltipStyle}
-    >
-      <button
-        className="review-tooltip-menu-button review-tooltip-add-comment-button"
-        onClick={onAddComment}
+    return (
+      <div
+        className={classNames('review-tooltip-menu', {
+          'review-tooltip-menu-visible': visible,
+        })}
+        style={tooltipStyle}
       >
-        <MaterialIcon type="chat" />
-        {t('add_comment')}
-      </button>
-      {showChangesButtons && (
-        <>
-          <div className="review-tooltip-menu-divider" />
-          <OLTooltip
-            id="accept-all-changes"
-            description={t('accept_selected_changes')}
-          >
-            <button
-              className="review-tooltip-menu-button"
-              onClick={acceptChangesHandler}
-              aria-label={t('accept_selected_changes')}
+        <button
+          className="review-tooltip-menu-button review-tooltip-add-comment-button"
+          onClick={onAddComment}
+        >
+          <MaterialIcon type="chat" />
+          {t('add_comment')}
+        </button>
+        {showChangesButtons && (
+          <>
+            <div className="review-tooltip-menu-divider" />
+            <OLTooltip
+              id="accept-all-changes"
+              description={t('accept_selected_changes')}
             >
-              <MaterialIcon type="check" />
-            </button>
-          </OLTooltip>
+              <button
+                className="review-tooltip-menu-button"
+                onClick={acceptChangesHandler}
+                aria-label={t('accept_selected_changes')}
+              >
+                <MaterialIcon type="check" />
+              </button>
+            </OLTooltip>
 
-          <OLTooltip
-            id="reject-all-changes"
-            description={t('reject_selected_changes')}
-          >
-            <button
-              className="review-tooltip-menu-button"
-              onClick={rejectChangesHandler}
-              aria-label={t('reject_selected_changes')}
+            <OLTooltip
+              id="reject-all-changes"
+              description={t('reject_selected_changes')}
             >
-              <MaterialIcon type="clear" />
-            </button>
-          </OLTooltip>
-        </>
-      )}
-    </div>
-  )
-}
+              <button
+                className="review-tooltip-menu-button"
+                onClick={rejectChangesHandler}
+                aria-label={t('reject_selected_changes')}
+              >
+                <MaterialIcon type="clear" />
+              </button>
+            </OLTooltip>
+          </>
+        )}
+      </div>
+    )
+  }
+)
 
 export default ReviewTooltipMenu

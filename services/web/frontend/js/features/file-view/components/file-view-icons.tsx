@@ -1,7 +1,7 @@
 import MaterialIcon, { IconProps } from '@/shared/components/material-icon'
 
 export const LinkedFileIcon = (
-  props: Omit<IconProps, 'type' | 'modifier' | 'className' | 'unfilled'>
+  props: Omit<IconProps, 'type' | 'modifier' | 'className' | 'unfilled' | 'ref'>
 ) => {
   return (
     <MaterialIcon

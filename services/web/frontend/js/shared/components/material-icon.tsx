@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import React from 'react'
+import React, { memo } from 'react'
 import unfilledIconTypes from '../../../fonts/material-symbols/unfilled-symbols.mjs'
 
 export type AvailableUnfilledIcon = (typeof unfilledIconTypes)[number]
@@ -53,4 +53,4 @@ function MaterialIcon({
   )
 }
 
-export default MaterialIcon
+export default memo(MaterialIcon)

@@ -7,20 +7,20 @@ import { OLToast } from '@/shared/components/ol/ol-toast'
 import { OLToastContainer } from '@/shared/components/ol/ol-toast-container'
 import { useEditorContext } from '@/shared/context/editor-context'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import { useTranslation } from 'react-i18next'
 
 type EditorSurveyPage = 'ease-of-use' | 'meets-my-needs' | 'thank-you'
 
-export default function EditorSurvey() {
+export default memo(function EditorSurvey() {
   return (
     <OLToastContainer className="editor-survey-toast">
       <EditorSurveyContent />
     </OLToastContainer>
   )
-}
+})
 
 const TUTORIAL_KEY = 'editor-popup-ux-survey'
 

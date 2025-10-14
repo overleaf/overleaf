@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import HotkeysModalBottomText from './hotkeys-modal-bottom-text'
 import {
@@ -11,7 +12,7 @@ import OLButton from '@/shared/components/ol/ol-button'
 import OLRow from '@/shared/components/ol/ol-row'
 import OLCol from '@/shared/components/ol/ol-col'
 
-export default function HotkeysModal({
+export default memo(function HotkeysModal({
   animation = true,
   handleHide,
   show,
@@ -205,7 +206,7 @@ export default function HotkeysModal({
       </OLModalFooter>
     </OLModal>
   )
-}
+})
 
 function Hotkey({
   combination,
