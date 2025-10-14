@@ -634,6 +634,7 @@
   "project_approaching_file_limit": "Detta projekt närmar sig gränsen för antalet filer",
   "project_flagged_too_many_compiles": "Detta projekt har kompilerats för ofta. Begränsningen kommer snart tas bort igen.",
   "project_has_too_many_files": "Detta projekt har nått gränsen på 2000 filer",
+  "project_has_too_many_files_limit": "Detta projekt har nått gränsen på __limit__ filer",
   "project_last_published_at": "Ditt projekt blev publicerat senast den",
   "project_name": "Projekt namn",
   "project_not_linked_to_github": "Detta projekt är inte länkat till ett GitHub repo. Du kan skapa ett repo för det på GitHub:",

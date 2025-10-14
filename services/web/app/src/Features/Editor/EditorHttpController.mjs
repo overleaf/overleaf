@@ -152,7 +152,11 @@ async function addDoc(req, res, next) {
     res.json(doc)
   } catch (err) {
     if (err.message === 'project_has_too_many_files') {
-      res.status(400).json(req.i18n.translate('project_has_too_many_files'))
+      res.status(400).json(
+        req.i18n.translate('project_has_too_many_files_limit', {
+          limit: Settings.maxEntitiesPerProject,
+        })
+      )
     } else {
       next(err)
     }
@@ -178,7 +182,11 @@ async function addFolder(req, res, next) {
     res.json(doc)
   } catch (err) {
     if (err.message === 'project_has_too_many_files') {
-      res.status(400).json(req.i18n.translate('project_has_too_many_files'))
+      res.status(400).json(
+        req.i18n.translate('project_has_too_many_files_limit', {
+          limit: Settings.maxEntitiesPerProject,
+        })
+      )
     } else if (err.message === 'invalid element name') {
       res.status(400).json(req.i18n.translate('invalid_file_name'))
     } else {

@@ -1643,6 +1643,7 @@
   "project_files": "项目文件",
   "project_flagged_too_many_compiles": "因频繁编译，项目被标旗。编译上限会稍后解除。",
   "project_has_too_many_files": "此项目已达到 2000 个文件限制",
+  "project_has_too_many_files_limit": "此项目已达到 __limit__ 个文件限制",
   "project_last_published_at": "您的项目最近一次被发布在",
   "project_layout_sharing_submission": "项目布局、分享和提交",
   "project_linked_to": "该项目链接到",

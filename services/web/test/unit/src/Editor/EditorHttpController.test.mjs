@@ -524,7 +524,7 @@ describe('EditorHttpController', function () {
         )
         await new Promise(resolve => {
           ctx.res.callback = () => {
-            expect(ctx.res.body).to.equal('"project_has_too_many_files"')
+            expect(ctx.res.body).to.equal('"project_has_too_many_files_limit"')
             expect(ctx.res.status).to.have.been.calledWith(400)
             resolve()
           }
@@ -584,7 +584,7 @@ describe('EditorHttpController', function () {
             new Error('project_has_too_many_files')
           )
           ctx.res.callback = () => {
-            expect(ctx.res.body).to.equal('"project_has_too_many_files"')
+            expect(ctx.res.body).to.equal('"project_has_too_many_files_limit"')
             expect(ctx.res.statusCode).to.equal(400)
             resolve()
           }

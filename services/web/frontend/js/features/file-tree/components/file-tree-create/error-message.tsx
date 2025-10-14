@@ -16,7 +16,7 @@ export default function ErrorMessage({
   error: string | Record<string, any>
 }) {
   const { t } = useTranslation()
-  const { isOverleaf } = getMeta('ol-ExposedSettings')
+  const { isOverleaf, maxEntitiesPerProject } = getMeta('ol-ExposedSettings')
   const fileNameLimit = 150
 
   // the error is a string
@@ -27,7 +27,13 @@ export default function ErrorMessage({
         return <DangerMessage>{t('file_already_exists')}</DangerMessage>
 
       case 'too-many-files':
-        return <DangerMessage>{t('project_has_too_many_files')}</DangerMessage>
+        return (
+          <DangerMessage>
+            {t('project_has_too_many_files_limit', {
+              limit: maxEntitiesPerProject,
+            })}
+          </DangerMessage>
+        )
 
       case 'remote-service-error':
         return <DangerMessage>{t('remote_service_error')}</DangerMessage>

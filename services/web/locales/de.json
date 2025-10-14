@@ -976,6 +976,7 @@
   "project_approaching_file_limit": "Dieses Projekt nähert sich dem Dateilimit",
   "project_flagged_too_many_compiles": "Dieses Projekt wurde zu häufig zum Kompilieren vermerkt. Das Limit wird in Kürze aufgehoben.",
   "project_has_too_many_files": "Dieses Projekt hat das Limit von 2000 Dateien erreicht",
+  "project_has_too_many_files_limit": "Dieses Projekt hat das Limit von __limit__ Dateien erreicht",
   "project_last_published_at": "Dein Projekt wurde zuletzt veröffentlicht am",
   "project_layout_sharing_submission": "Projektlayout, Freigabe und Einreichung",
   "project_name": "Projektname",

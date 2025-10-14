@@ -1387,6 +1387,7 @@
   "project_files": "Projektfiler",
   "project_flagged_too_many_compiles": "Dette projekt er blevet markeret for at kompilere for ofte. Grænsen bliver snart løftet.",
   "project_has_too_many_files": "Dette projekt har nået grænsen på 2000 filer",
+  "project_has_too_many_files_limit": "Dette projekt har nået grænsen på __limit__ filer",
   "project_last_published_at": "Dit projekt var sidst blevet offentliggjort den",
   "project_layout_sharing_submission": "Projektlayout, deling og indsendelse",
   "project_name": "Projektnavn",

@@ -11,6 +11,7 @@ import importOverleafModules from '../../../../../macros/import-overleaf-module.
 import { ElementType, lazy, Suspense } from 'react'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import getMeta from '@/utils/meta'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 const createFileModeModules = importOverleafModules('createFileModes') as {
   import: { CreateFilePane: ElementType; CreateFileMode: ElementType }
@@ -30,10 +31,20 @@ export default function FileTreeModalCreateFileBody() {
     hasLinkUrlFeature,
   } = getMeta('ol-ExposedSettings')
 
-  if (
-    !fileCount ||
-    (typeof fileCount === 'object' && fileCount.status === 'error')
-  ) {
+  if (typeof fileCount !== 'number' && fileCount.status === 'error') {
+    return (
+      <div className="p-4">
+        <OLNotification
+          type="error"
+          content={t('project_has_too_many_files_limit', {
+            limit: fileCount.limit,
+          })}
+        />
+      </div>
+    )
+  }
+
+  if (!fileCount) {
     return null
   }
 
@@ -83,6 +94,19 @@ export default function FileTreeModalCreateFileBody() {
           <td
             className={`modal-new-file-body modal-new-file-body-${newFileCreateMode}`}
           >
+            {typeof fileCount !== 'number' &&
+              fileCount.status === 'warning' && (
+                <OLNotification
+                  type="warning"
+                  className={`mb-3 ${newFileCreateMode === 'upload' ? 'mt-0' : 'mt-3'}`}
+                  content={
+                    <>
+                      {t('project_approaching_file_limit')} ({fileCount.value}/
+                      {fileCount.limit})
+                    </>
+                  }
+                />
+              )}
             {newFileCreateMode === 'doc' && (
               <FileTreeCreateNameProvider initialName="name.tex">
                 <FileTreeCreateNewDoc />

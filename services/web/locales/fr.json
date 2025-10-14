@@ -880,6 +880,7 @@
   "project_approaching_file_limit": "Ce projet approche la limite de fichiers",
   "project_flagged_too_many_compiles": "Ce projet a été compilé trop fréquemment. Cette limite sera levée sous peu.",
   "project_has_too_many_files": "La limite des 2 000 fichiers a été atteinte pour ce projet",
+  "project_has_too_many_files_limit": "La limite des __limit__ fichiers a été atteinte pour ce projet",
   "project_last_published_at": "Votre projet a été édité pour la dernière fois le",
   "project_name": "Nom du projet",
   "project_not_linked_to_github": "Ce projet n’est pas lié à un dépôt GitHub. Vous pouvez lui créer un dépôt dans GitHub :",
