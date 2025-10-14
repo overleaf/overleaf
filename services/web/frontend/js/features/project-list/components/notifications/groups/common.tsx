@@ -192,7 +192,7 @@ function CommonNotification({ notification }: CommonNotificationProps) {
         />
       ) : templateKey === 'notification_tpds_file_limit' ? (
         <Notification
-          type="error"
+          type="warning"
           onDismiss={() => id && handleDismiss(id)}
           title={`${notification?.messageOpts?.projectName || 'A project'} exceeds the 2000 file limit`}
           content={
