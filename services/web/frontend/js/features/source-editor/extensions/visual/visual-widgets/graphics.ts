@@ -122,6 +122,7 @@ export class GraphicsWidget extends WidgetType {
   }
 
   createImage(view: EditorView, url: string) {
+    const wrapper = document.createElement('div')
     const image = document.createElement('img')
     image.classList.add('ol-cm-graphics')
     image.classList.add('ol-cm-graphics-loading')
@@ -135,8 +136,33 @@ export class GraphicsWidget extends WidgetType {
       this.height = image.height // for estimatedHeight
       view.requestMeasure()
     })
+    image.addEventListener('error', () => {
+      const errorElement = this.createErrorElement(view)
+      wrapper.replaceChildren(errorElement)
+      this.height = wrapper.clientHeight
+      view.requestMeasure()
+    })
 
-    return image
+    wrapper.appendChild(image)
+    return wrapper
+  }
+
+  createErrorElement(view: EditorView): HTMLElement {
+    const wrapper = document.createElement('div')
+    wrapper.classList.add('ol-cm-graphics-loading-error')
+    const title = document.createElement('span')
+    title.classList.add('ol-cm-graphics-loading-error-title')
+    title.textContent = view.state.phrase(
+      'the_visual_editor_cant_preview_this_type_of_image_file'
+    )
+    const subtitle = document.createElement('span')
+    subtitle.classList.add('ol-cm-graphics-loading-error-subtitle')
+    subtitle.textContent = view.state.phrase(
+      'click_recompile_and_check_your_pdf_to_see_how_its_looking'
+    )
+    wrapper.appendChild(title)
+    wrapper.appendChild(subtitle)
+    return wrapper
   }
 
   async renderPDF(view: EditorView, canvas: HTMLCanvasElement, url: string) {

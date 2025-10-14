@@ -11,6 +11,7 @@ import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-pat
 import { TestContainer } from '../helpers/test-container'
 import getMeta from '@/utils/meta'
 import { mockProject } from '../helpers/mock-project'
+import { base64image } from '../fixtures/image'
 
 const clickToolbarButton = (text: string) => {
   cy.findByLabelText(text).click()
@@ -64,7 +65,7 @@ describe('<FigureModal />', function () {
           previewByPath: cy
             .stub()
             .as('previewByPath')
-            .returns({ url: 'frog.jpg', extension: 'jpg' }),
+            .returns({ url: base64image, extension: 'png' }),
         }}
       >
         {children}
@@ -631,20 +632,22 @@ text below`,
     })
 
     it('Opens figure modal on pasting image', function () {
-      cy.fixture<Uint8Array>('images/gradient.png').then(gradientBuffer => {
-        const gradientFile = new File([gradientBuffer], 'gradient.png', {
-          type: 'image/png',
-        })
-        const clipboardData = new DataTransfer()
-        clipboardData.items.add(gradientFile)
-        cy.wrap(clipboardData.files).should('have.length', 1)
-        cy.get('.cm-content').trigger('paste', { clipboardData })
-        cy.findByText('Upload from computer').should('be.visible')
-        cy.findByLabelText('File name in this project').should(
-          'have.value',
-          'gradient.png'
-        )
-      })
+      cy.fixture<Uint8Array<ArrayBuffer>>('images/gradient.png').then(
+        gradientBuffer => {
+          const gradientFile = new File([gradientBuffer], 'gradient.png', {
+            type: 'image/png',
+          })
+          const clipboardData = new DataTransfer()
+          clipboardData.items.add(gradientFile)
+          cy.wrap(clipboardData.files).should('have.length', 1)
+          cy.get('.cm-content').trigger('paste', { clipboardData })
+          cy.findByText('Upload from computer').should('be.visible')
+          cy.findByLabelText('File name in this project').should(
+            'have.value',
+            'gradient.png'
+          )
+        }
+      )
     })
 
     // TODO: Add tests for replacing image when we can match on image path

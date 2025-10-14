@@ -26,6 +26,15 @@ export const visualHighlightStyle = syntaxHighlighting(
   ])
 )
 
+const graphicsErrorColorTheme = EditorView.baseTheme({
+  '&dark .ol-cm-graphics-loading-error': {
+    '--graphics-loading-error-color': 'var(--content-placeholder-dark)',
+  },
+  '&light .ol-cm-graphics-loading-error': {
+    '--graphics-loading-error-color': 'var(--content-placeholder)',
+  },
+})
+
 const mainVisualTheme = EditorView.theme({
   '&.cm-editor': {
     '--visual-font-family':
@@ -351,6 +360,30 @@ const mainVisualTheme = EditorView.theme({
     border: '1px solid red',
     padding: '8px',
   },
+  '.ol-cm-graphics-loading-error': {
+    color: 'var(--graphics-loading-error-color)',
+    minHeight: '300px',
+    textAlign: 'left',
+    fontFamily: 'var(--font-sans)',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    gap: 'var(--spacing-03)',
+    padding: '0 var(--spacing-10)',
+    maxWidth: '500px',
+    margin: '0 auto',
+  },
+  '.ol-cm-graphics-loading-error-title, .ol-cm-graphics-loading-error-subtitle':
+    {
+      display: 'block',
+    },
+  '.ol-cm-graphics-loading-error-title': {
+    fontSize: 'var(--font-size-04)',
+    fontWeight: '600',
+  },
+  '.ol-cm-graphics-loading-error-subtitle': {
+    fontSize: 'var(--font-size-02)',
+  },
   '.ol-cm-environment-centered .ol-cm-graphics': {
     margin: '0 auto',
   },
@@ -491,5 +524,6 @@ const contentWidthSetter = EditorView.updateListener.of(update => {
 export const visualTheme: Extension = [
   contentWidthThemeConf.of(createContentWidthTheme('100%')),
   mainVisualTheme,
+  graphicsErrorColorTheme,
   contentWidthSetter,
 ]
