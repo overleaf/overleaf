@@ -28,10 +28,22 @@ $(MVN_TARGET): $(shell find src -type f) pom.xml
 build: $(MVN_TARGET)
 
 docker_build_base:
-	docker build --tag $(IMAGE_CI) --target base .
+	docker build --pull \
+		--build-arg BUILDKIT_INLINE_CACHE=1 \
+		--cache-from $(IMAGE_REPO_BRANCH) \
+		--cache-from $(IMAGE_REPO_MAIN) \
+		--tag $(IMAGE_CI) \
+		--target base \
+	.
 
 docker_build:
-	docker build --tag $(IMAGE_REPO_BRANCH) --tag $(IMAGE_REPO_FINAL) .
+	docker build --pull \
+		--build-arg BUILDKIT_INLINE_CACHE=1 \
+		--cache-from $(IMAGE_REPO_BRANCH) \
+		--cache-from $(IMAGE_REPO_MAIN) \
+		--tag $(IMAGE_REPO_BRANCH) \
+		--tag $(IMAGE_REPO_FINAL) \
+	.
 
 format:
 	mvn $(MVN_OPTS) com.spotify.fmt:fmt-maven-plugin:check
@@ -56,6 +68,13 @@ clean:
 package: clean
 	mvn $(MVN_OPTS) package -DskipTests
 
+refresh_cache: refresh_cache_branch
+refresh_cache_branch:
+	docker inspect $(IMAGE_REPO_BRANCH) > /dev/null && docker pull $(IMAGE_REPO_BRANCH) || true
+refresh_cache: refresh_cache_latest
+refresh_cache_latest:
+	docker inspect $(IMAGE_REPO_MAIN) > /dev/null && docker pull $(IMAGE_REPO_MAIN) || true
+
 push:
 	docker push $(IMAGE_REPO_FINAL)
 
@@ -63,7 +82,7 @@ push_branch:
 	docker push $(IMAGE_REPO_BRANCH)
 
 clean_ci:
-	-docker rmi -f $(IMAGE_CI) $(IMAGE_REPO_BRANCH) $(IMAGE_REPO_FINAL)
+	-docker rmi -f $(IMAGE_CI) $(IMAGE_REPO_FINAL)
 	-git clean -xdf .
 
 .PHONY: run package build clean test runtime-conf

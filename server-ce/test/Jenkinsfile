@@ -104,6 +104,7 @@ pipeline {
               }
             }
             dir('copybara/public/repo/server-ce') {
+              sh 'make refresh-cache -j2'
               retry(count: 3) {
                 sh 'make build-base'
               }

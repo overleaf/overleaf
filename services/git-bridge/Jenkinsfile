@@ -22,6 +22,7 @@ pipeline {
         stage('Build') {
           steps {
             dir('services/git-bridge') {
+              sh 'make refresh_cache -j2'
               retry(count: 3) {
                 sh 'make docker_build_base'
               }

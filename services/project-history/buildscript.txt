@@ -1,6 +1,5 @@
 project-history
 --dependencies=mongo,redis
---docker-repos=us-east1-docker.pkg.dev/overleaf-ops/ol-docker
 --env-add=
 --env-pass-through=
 --esmock-loader=True

@@ -546,18 +546,36 @@ shellcheck_fix:
 
 IMAGE_CI ?= ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 IMAGE_REPO ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME)
-IMAGE_REPO_BRANCH ?= $(IMAGE_REPO):$(BRANCH_NAME)
-IMAGE_REPO_MAIN ?= $(IMAGE_REPO):main
-IMAGE_REPO_FINAL ?= $(IMAGE_REPO_BRANCH)-$(BUILD_NUMBER)
+IMAGE_REPO_FINAL ?= $(IMAGE_REPO):main-$(BUILD_NUMBER)
+export IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
+	$(MONOREPO)/package.json \
+	$(MONOREPO)/package-lock.json \
+	$(MONOREPO)/libraries/access-token-encryptor/package.json \
+  $(MONOREPO)/libraries/eslint-plugin/package.json \
+  $(MONOREPO)/libraries/fetch-utils/package.json \
+  $(MONOREPO)/libraries/logger/package.json \
+  $(MONOREPO)/libraries/metrics/package.json \
+  $(MONOREPO)/libraries/mongo-utils/package.json \
+  $(MONOREPO)/libraries/o-error/package.json \
+  $(MONOREPO)/libraries/object-persistor/package.json \
+  $(MONOREPO)/libraries/overleaf-editor-core/package.json \
+  $(MONOREPO)/libraries/promise-utils/package.json \
+  $(MONOREPO)/libraries/ranges-tracker/package.json \
+  $(MONOREPO)/libraries/redis-wrapper/package.json \
+  $(MONOREPO)/libraries/settings/package.json \
+  $(MONOREPO)/libraries/stream-utils/package.json \
+  $(MONOREPO)/libraries/validation-tools/package.json \
+	$(MONOREPO)/services/web/package.json \
+	$(MONOREPO)/patches/* \
+| sha256sum | cut -d '-' -f1)
 
 export SENTRY_RELEASE ?= ${COMMIT_SHA}
 
 build_deps:
 	docker build --pull \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
-		--cache-from $(IMAGE_REPO_BRANCH)-deps \
-		--cache-from $(IMAGE_REPO_MAIN)-deps \
-		--tag $(IMAGE_REPO_BRANCH)-deps \
+		--cache-from $(IMAGE_CACHE) \
+		--tag $(IMAGE_CACHE) \
 		--target deps \
 		--file Dockerfile \
 		../..
@@ -578,8 +596,6 @@ build_webpack:
 build_webpack_once:
 	docker build \
 		--build-arg SENTRY_RELEASE \
-		--cache-from $(IMAGE_CI)-dev \
-		--cache-from $(IMAGE_CI)-webpack \
 		--tag $(IMAGE_CI)-webpack \
 		--target webpack \
 		--file Dockerfile \
@@ -588,7 +604,6 @@ build_webpack_once:
 build_pug:
 	docker build \
 		--build-arg SENTRY_RELEASE \
-		--cache-from $(IMAGE_CI)-dev \
 		--tag $(IMAGE_CI)-pug \
 		--target pug \
 		--file Dockerfile \
@@ -597,9 +612,6 @@ build_pug:
 build:
 	docker build \
 		--build-arg SENTRY_RELEASE \
-		--cache-from $(IMAGE_CI)-webpack \
-		--cache-from $(IMAGE_CI)-pug \
-		--cache-from $(IMAGE_REPO_FINAL) \
 		--tag $(IMAGE_REPO_FINAL) \
 		--target app \
 		--file Dockerfile \
@@ -607,6 +619,9 @@ build:
 
 publish:
 	docker push $(IMAGE_REPO_FINAL)
+
+push_branch:
+	docker push $(IMAGE_CACHE)
 
 SENTRY_IMAGE=getsentry/sentry-cli:2.16.1
 sentry_prefetch:

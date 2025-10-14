@@ -1,6 +1,5 @@
 history-v1
 --dependencies=postgres,gcs,mongo,redis,s3
---docker-repos=us-east1-docker.pkg.dev/overleaf-ops/ol-docker
 --env-add=
 --env-pass-through=
 --esmock-loader=False

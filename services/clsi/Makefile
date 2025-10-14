@@ -6,6 +6,24 @@ BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
 PROJECT_NAME = clsi
 BUILD_DIR_NAME = $(shell pwd | xargs basename | tr -cd '[a-zA-Z0-9_.\-]')
+HERE=$(shell pwd)
+export MONOREPO ?= $(shell cd ../../ && pwd)
+IMAGE_CI ?= ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+IMAGE_REPO ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME)
+IMAGE_REPO_FINAL ?= $(IMAGE_REPO):$(BRANCH_NAME)-$(BUILD_NUMBER)
+export IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
+	$(MONOREPO)/package.json \
+	$(MONOREPO)/package-lock.json \
+	$(MONOREPO)/libraries/fetch-utils/package.json \
+	$(MONOREPO)/libraries/logger/package.json \
+	$(MONOREPO)/libraries/metrics/package.json \
+	$(MONOREPO)/libraries/o-error/package.json \
+	$(MONOREPO)/libraries/promise-utils/package.json \
+	$(MONOREPO)/libraries/settings/package.json \
+	$(MONOREPO)/libraries/stream-utils/package.json \
+	$(MONOREPO)/services/clsi/package.json \
+	$(MONOREPO)/patches/* \
+| sha256sum | cut -d '-' -f1)
 
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
 DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
@@ -23,20 +41,18 @@ DOCKER_COMPOSE_TEST_UNIT = \
 	COMPOSE_PROJECT_NAME=$(COMPOSE_PROJECT_NAME_TEST_UNIT) $(DOCKER_COMPOSE)
 
 clean:
-	-docker rmi ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
-	-docker rmi us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+	-docker rmi $(IMAGE_CI)
+	-docker rmi $(IMAGE_REPO_FINAL)
 	-$(DOCKER_COMPOSE_TEST_UNIT) down --remove-orphans --rmi local --timeout 0 --volumes
 	-$(DOCKER_COMPOSE_TEST_ACCEPTANCE) down --remove-orphans --rmi local --timeout 0 --volumes
 	-rm -rf reports/
 	-git clean -dfX cache compiles output
 
-HERE=$(shell pwd)
-export MONOREPO ?= $(shell cd ../../ && pwd)
 # Run the linting commands in the scope of the monorepo.
 # Eslint and prettier (plus some configs) are on the root.
 RUN_LINTING = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(HERE) node:22.18.0 npm run --silent
 
-RUN_LINTING_CI = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/clsi/reports:/overleaf/services/clsi/reports ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) npm run --silent
+RUN_LINTING_CI = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/clsi/reports:/overleaf/services/clsi/reports $(IMAGE_CI) npm run --silent
 
 # Same but from the top of the monorepo
 RUN_LINTING_MONOREPO = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(MONOREPO) node:22.18.0 npm run --silent
@@ -129,11 +145,10 @@ build:
 	docker build \
 		--pull \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
-		--tag ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
-		--tag us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
-		--tag us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME) \
-		--cache-from us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME) \
-		--cache-from us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):main \
+		--tag $(IMAGE_CI) \
+		--tag $(IMAGE_CACHE) \
+		--tag $(IMAGE_REPO_FINAL) \
+		--cache-from $(IMAGE_CACHE) \
 		--file Dockerfile \
 		../..
 
@@ -141,10 +156,10 @@ tar:
 	$(DOCKER_COMPOSE) up tar
 
 push:
-	docker push us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+	docker push $(IMAGE_REPO_FINAL)
 
 push_branch:
-	docker push us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)
+	docker push $(IMAGE_CACHE)
 
 .PHONY: clean \
 	format format_fix \

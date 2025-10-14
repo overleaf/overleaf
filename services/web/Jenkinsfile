@@ -58,7 +58,7 @@ pipeline {
         stage('Push Deps') {
           steps {
             dir('services/web') {
-              sh 'docker push ${AR_URL}/${IMAGE_NAME}:${BRANCH_NAME}-deps'
+              sh 'make push_branch'
             }
           }
         }
