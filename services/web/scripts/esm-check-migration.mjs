@@ -4,6 +4,50 @@ import minimist from 'minimist'
 
 const APP_CODE_PATH = ['app', 'modules', 'migrations', 'scripts', 'test']
 
+// These have already been converted but don't have a `.mjs` extension
+const converted = new Set([
+  'scripts/ukamf/check-certs.js',
+  'scripts/ukamf/check-idp-metadata.js',
+  'scripts/ukamf/metadata-processor.js',
+  'scripts/ukamf/ukamf-db.js',
+  'scripts/ukamf/ukamf-entity.js',
+  'scripts/translations/checkCoverage.js',
+  'scripts/translations/checkSanitizeOptions.js',
+  'scripts/translations/checkVariables.js',
+  'scripts/translations/cleanupUnusedLocales.js',
+  'scripts/translations/config.js',
+  'scripts/translations/download.js',
+  'scripts/translations/insertHTMLFragments.js',
+  'scripts/translations/replaceLinkFragments.js',
+  'scripts/translations/sanitize.js',
+  'scripts/translations/sort.js',
+  'scripts/translations/transformLocales.js',
+  'scripts/translations/translateLocales.js',
+  'scripts/translations/upload.js',
+  'scripts/translations/uploadNonEnglish.js',
+  'scripts/translations/utils.js',
+])
+// These files are not to be converted (e.g. they use CommonJS features that are not available in ES Modules)
+const excluded = new Set([
+  'modules/server-ce-scripts/scripts/create-user.js', // must be CJS for backwards compatibility
+  'test/acceptance/config/settings.test.saas.js', // must be CJS for @overleaf/settings module
+  'test/acceptance/config/settings.test.server-pro.js', // must be CJS for @overleaf/settings module
+  'app/src/infrastructure/PackageVersions.js', // required by webpack
+])
+
+function fileIsESM(file) {
+  const relativePath = file.replace(process.cwd() + '/', '')
+  return file.endsWith('.mjs') || converted.has(relativePath)
+}
+
+function fileCanBeConvertedToESM(file) {
+  const relativePath = file.replace(process.cwd() + '/', '')
+  if (fileIsESM(relativePath)) {
+    return false
+  }
+  return !excluded.has(relativePath)
+}
+
 const {
   _: args,
   files,
@@ -149,7 +193,7 @@ function printDirectoriesReport(allFilesAndImports) {
   // collect all files that are imported via CommonJS in the entire backend codebase
   const filesImportedViaCjs = new Set()
   allFilesAndImports.forEach((imports, file) => {
-    if (!file.endsWith('.mjs')) {
+    if (!fileIsESM(file)) {
       imports.forEach(imprt => filesImportedViaCjs.add(imprt))
     }
   })
@@ -158,10 +202,8 @@ function printDirectoriesReport(allFilesAndImports) {
   const selectedFiles = Array.from(
     findJSAndImports(paths.map(dir => path.resolve(dir))).keys()
   ).filter(file => !file.endsWith('settings.test.js'))
-  const nonMigratedFiles = selectedFiles.filter(file => !file.endsWith('.mjs'))
-  const migratedFileCount = selectedFiles.filter(file =>
-    file.endsWith('.mjs')
-  ).length
+  const nonMigratedFiles = selectedFiles.filter(fileCanBeConvertedToESM)
+  const migratedFileCount = selectedFiles.filter(fileIsESM).length
 
   // collect files in the selected paths that are not imported via CommonJs in the entire backend codebase
   const filesNotImportedViaCjs = nonMigratedFiles.filter(
@@ -196,7 +238,7 @@ function printDirectoriesReport(allFilesAndImports) {
 
 function printFileReport(allFilesAndImports) {
   const filePath = path.resolve(paths[0])
-  if (filePath.endsWith('.mjs')) {
+  if (fileIsESM(filePath)) {
     console.log(`${filePath} is already migrated to ESM`)
     return
   }
@@ -204,7 +246,7 @@ function printFileReport(allFilesAndImports) {
 
   const importingFiles = []
   allFilesAndImports.forEach((imports, file) => {
-    if (file.endsWith('.mjs')) {
+    if (fileIsESM(file)) {
       return
     }
     if (
