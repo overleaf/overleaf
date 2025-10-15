@@ -46,7 +46,7 @@ function filterByType(type: 'file' | 'doc' | 'folder') {
 export const filterFiles = filterByType('file')
 export const filterFolders = filterByType('folder')
 
-const IMAGE_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'pdf']
+const IMAGE_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'pdf', 'eps']
 
 export const hasImageExtension = (filename: string) => {
   const parts = filename.split('.')
