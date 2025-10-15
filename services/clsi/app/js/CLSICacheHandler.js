@@ -62,10 +62,8 @@ function notifyCLSICacheAboutBuild({
    * @param {[{path: string}]} files
    */
   const enqueue = files => {
-    Metrics.count('clsi_cache_enqueue_files', files.length)
-    fetchNothing(`${url}/enqueue`, {
-      method: 'POST',
-      json: {
+    const body = Buffer.from(
+      JSON.stringify({
         projectId,
         userId,
         buildId,
@@ -75,7 +73,29 @@ function notifyCLSICacheAboutBuild({
         clsiServerId: Settings.apis.clsi.clsiServerId,
         compileGroup,
         options,
-      },
+      })
+    )
+    const bodySize = body.byteLength
+    if (bodySize > 10_000_000) {
+      const outputPDF = files.find(f => f.path === 'output.pdf')
+      logger.warn(
+        {
+          projectId,
+          userId,
+          bodySize,
+          nFiles: files.length,
+          outputPDFSize:
+            outputPDF && Buffer.from(JSON.stringify(outputPDF)).byteLength,
+          nPDFCachingRanges: outputPDF?.ranges?.length,
+        },
+        'large clsi-cache request'
+      )
+    }
+    Metrics.count('clsi_cache_enqueue_files', files.length)
+    fetchNothing(`${url}/enqueue`, {
+      method: 'POST',
+      body,
+      headers: { 'Content-Type': 'application/json' },
       signal: AbortSignal.timeout(15_000),
     }).catch(err => {
       logger.warn(
