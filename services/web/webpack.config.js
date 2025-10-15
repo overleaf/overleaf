@@ -237,6 +237,30 @@ module.exports = {
             ],
           },
           {
+            // CSS from writefull module - inject directly into DOM
+            include: path.resolve(__dirname, 'modules/writefull/'),
+            use: [
+              'style-loader',
+              {
+                loader: 'css-loader',
+                options: {
+                  importLoaders: 1,
+                },
+              },
+              {
+                loader: 'postcss-loader',
+                options: {
+                  postcssOptions: {
+                    config: path.resolve(
+                      __dirname,
+                      'modules/writefull/frontend/js/integration/postcss.config.js'
+                    ),
+                  },
+                },
+              },
+            ],
+          },
+          {
             // Standard CSS processing (extracted into separate file)
             use: [MiniCssExtractPlugin.loader, 'css-loader'],
           },

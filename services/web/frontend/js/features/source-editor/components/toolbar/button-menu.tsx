@@ -13,6 +13,7 @@ export const ToolbarButtonMenu: FC<
     id: string
     label: string
     icon: React.ReactNode
+    disabled?: boolean
     disablePopover?: boolean
     altCommand?: (view: EditorView) => void
   }>
@@ -21,6 +22,7 @@ export const ToolbarButtonMenu: FC<
   id,
   label,
   altCommand,
+  disabled,
   disablePopover,
   children,
 }) {
@@ -39,11 +41,16 @@ export const ToolbarButtonMenu: FC<
       type="button"
       className="ol-cm-toolbar-button"
       aria-label={label}
+      aria-disabled={disabled}
       onMouseDown={event => {
         event.preventDefault()
         event.stopPropagation()
       }}
       onClick={event => {
+        if (disabled) {
+          event.preventDefault()
+          return
+        }
         if (event.altKey && altCommand && open === false) {
           emitToolbarEvent(view, id)
           event.preventDefault()

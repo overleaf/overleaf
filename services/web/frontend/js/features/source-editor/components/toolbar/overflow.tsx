@@ -12,8 +12,16 @@ export const ToolbarOverflow: FC<
     overflowOpen: boolean
     setOverflowOpen: (open: boolean) => void
     overflowRef?: React.Ref<HTMLDivElement>
+    popoverClassName?: string
   }>
-> = ({ overflowed, overflowOpen, setOverflowOpen, overflowRef, children }) => {
+> = ({
+  overflowed,
+  overflowOpen,
+  setOverflowOpen,
+  overflowRef,
+  popoverClassName,
+  children,
+}) => {
   const { t } = useTranslation()
   const buttonRef = useRef<HTMLButtonElement>(null)
   const keyboardInputRef = useRef(false)
@@ -104,7 +112,11 @@ export const ToolbarOverflow: FC<
           ref={overflowRef}
           role="toolbar"
         >
-          <div className="ol-cm-toolbar-overflow">{children}</div>
+          <div
+            className={classnames(popoverClassName, 'ol-cm-toolbar-overflow')}
+          >
+            {children}
+          </div>
         </OLPopover>
       </OLOverlay>
     </>

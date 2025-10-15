@@ -27,10 +27,6 @@ const sourceEditorComponents = importOverleafModules(
   'sourceEditorComponents'
 ) as { import: { default: ElementType }; path: string }[]
 
-const sourceEditorToolbarComponents = importOverleafModules(
-  'sourceEditorToolbarComponents'
-) as { import: { default: ElementType }; path: string }[]
-
 function CodeMirrorEditor() {
   // create the initial state
   const [state, setState] = useState(() => {
@@ -77,11 +73,6 @@ function CodeMirrorEditorComponents() {
       <FigureModal />
       <CodeMirrorSearch />
       <CodeMirrorToolbar />
-      {sourceEditorToolbarComponents.map(
-        ({ import: { default: Component }, path }) => (
-          <Component key={path} />
-        )
-      )}
       <CodeMirrorCommandTooltip />
 
       <MathPreviewTooltip />
