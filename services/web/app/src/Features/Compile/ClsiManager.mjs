@@ -451,10 +451,10 @@ async function _makeNewBackendRequest(
   let newCompileBackendClass
   switch (currentCompileBackendClass) {
     case 'n2d':
-      newCompileBackendClass = 'c2d'
+      newCompileBackendClass = 'n4'
       break
     case 'c2d':
-      newCompileBackendClass = 'c4d'
+      newCompileBackendClass = 'n4'
       break
     default:
       throw new Error('unknown ?compileBackendClass')

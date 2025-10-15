@@ -878,7 +878,7 @@ describe('ClsiManager', function () {
           sinon.match(
             url =>
               url.toString() ===
-              `${ctx.Settings.apis.clsi_new.url}/project/${ctx.project._id}/user/${ctx.user_id}/compile?compileBackendClass=c4d&compileGroup=priority`
+              `${ctx.Settings.apis.clsi_new.url}/project/${ctx.project._id}/user/${ctx.user_id}/compile?compileBackendClass=n4&compileGroup=priority`
           )
         )
       })
@@ -888,7 +888,7 @@ describe('ClsiManager', function () {
         ).to.have.been.calledWith(ctx.user_id, 'double-compile-result', {
           projectId: 'project-id',
           compileBackendClass: 'c2d',
-          newCompileBackendClass: 'c4d',
+          newCompileBackendClass: 'n4',
           status: 'success',
           compileTime: 1337,
           newCompileTime: 1337,
@@ -1083,7 +1083,7 @@ describe('ClsiManager', function () {
               url.host === 'compiles.somewhere.test' &&
               url.pathname ===
                 `/project/${ctx.project._id}/user/${ctx.user_id}` &&
-              url.searchParams.get('compileBackendClass') === 'c4d' &&
+              url.searchParams.get('compileBackendClass') === 'n4' &&
               url.searchParams.get('compileGroup') === 'priority' &&
               !url.searchParams.has('clsiserverid')
           ),
@@ -1180,7 +1180,7 @@ describe('ClsiManager', function () {
           sinon.match(
             url =>
               url.toString() ===
-              `${ctx.Settings.apis.clsi_new.url}/project/${ctx.project._id}/user/${ctx.user_id}/wordcount?compileBackendClass=c4d&compileGroup=priority&file=main.tex&image=mock-image-name`
+              `${ctx.Settings.apis.clsi_new.url}/project/${ctx.project._id}/user/${ctx.user_id}/wordcount?compileBackendClass=n4&compileGroup=priority&file=main.tex&image=mock-image-name`
           )
         )
       })
