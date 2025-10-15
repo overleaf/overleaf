@@ -45,7 +45,7 @@
     "cypress:run-ct": "OVERLEAF_CONFIG=$PWD/config/settings.webpack.js cypress run --component --browser chrome",
     "cypress:docker:open-ct": "DOCKER_USER=\"$(id -u):$(id -g)\" docker compose -f docker-compose.cypress.yml run --rm cypress run cypress:open-ct",
     "cypress:docker:run-ct": "DOCKER_USER=\"$(id -u):$(id -g)\" docker compose -f docker-compose.cypress.yml run --rm cypress run cypress:run-ct --browser chrome",
-    "lezer-latex:generate": "node scripts/lezer-latex/generate.js",
+    "lezer-latex:generate": "node scripts/lezer-latex/generate.mjs",
     "lezer-latex:run": "node scripts/lezer-latex/run.mjs",
     "lezer-latex:benchmark": "node scripts/lezer-latex/benchmark.mjs",
     "lezer-latex:benchmark-incremental": "node scripts/lezer-latex/test-incremental-parser.mjs",

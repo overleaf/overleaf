@@ -6,7 +6,7 @@ import cheerio from 'cheerio'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import prettier from 'prettier'
 import sanitizeHtml from 'sanitize-html'
-import { sanitizeOptions } from '../../../modules/learn/app/src/sanitizeOptions.js'
+import { sanitizeOptions } from '../../../modules/learn/app/src/sanitizeOptions.mjs'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = Path.dirname(fileURLToPath(import.meta.url))

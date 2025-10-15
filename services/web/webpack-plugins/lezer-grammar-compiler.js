@@ -1,10 +1,13 @@
 const fs = require('fs')
 const path = require('path')
-const modulePath = path.resolve(__dirname, '../scripts/lezer-latex/generate.js')
+const modulePath = path.resolve(
+  __dirname,
+  '../scripts/lezer-latex/generate.mjs'
+)
 
 try {
   fs.accessSync(modulePath, fs.constants.W_OK)
-  const { compile, grammars } = require(modulePath)
+  const { compile, grammars } = require(modulePath).default
   const PLUGIN_NAME = 'lezer-grammar-compiler'
   class LezerGrammarCompilerPlugin {
     apply(compiler) {
