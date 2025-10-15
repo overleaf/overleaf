@@ -22,7 +22,7 @@ const SubmitProjectButton = publishModalModules?.import.NewPublishToolbarButton
 
 export const Toolbar = () => {
   const { view, restoreView } = useLayoutContext()
-  const { cobranding } = useEditorContext()
+  const { cobranding, isRestrictedTokenMember } = useEditorContext()
   const { permissionsLevel } = useIdeReactContext()
   const { t } = useTranslation()
   const shouldDisplaySubmitButton =
@@ -56,7 +56,7 @@ export const Toolbar = () => {
       <div className="ide-redesign-toolbar-actions">
         <BetaActions />
         <OnlineUsers />
-        <ShowHistoryButton />
+        {!isRestrictedTokenMember && <ShowHistoryButton />}
         <ChangeLayoutButton />
         {shouldDisplaySubmitButton && cobranding && (
           <SubmitProjectButton cobranding={cobranding} />
