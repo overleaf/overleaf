@@ -1,8 +1,7 @@
-const csv = require('csv')
-const fs = require('fs')
-const {
-  OnboardingDataCollection,
-} = require('../app/src/models/OnboardingDataCollection')
+import { scriptRunner } from './lib/ScriptRunner.mjs'
+import * as csv from 'csv'
+import fs from 'node:fs'
+import { OnboardingDataCollection } from '../app/src/models/OnboardingDataCollection.js'
 
 /**
  * This script extracts the OnboardingDataCollection collection from the database
@@ -90,7 +89,7 @@ const runScript = async () => {
   csvWriter.on('error', err => console.error('CSV Writer Error:', err))
 }
 
-runScript().catch(err => {
+scriptRunner(runScript).catch(err => {
   console.error(err)
   process.exit(1)
 })

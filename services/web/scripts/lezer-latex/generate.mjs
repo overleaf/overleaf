@@ -1,33 +1,35 @@
-const { buildParserFile } = require('@lezer/generator')
-const { writeFileSync, readFileSync } = require('fs')
-const path = require('path')
+/* eslint-disable @overleaf/require-script-runner */
+// This script doesn't work with ScriptRunner because it is run during the build process.
+import { buildParserFile } from '@lezer/generator'
+import { writeFileSync, readFileSync } from 'node:fs'
+import path from 'node:path'
 
 const grammars = [
   {
     grammarPath: path.resolve(
-      __dirname,
+      import.meta.dirname,
       '../../frontend/js/features/source-editor/lezer-latex/latex.grammar'
     ),
     parserOutputPath: path.resolve(
-      __dirname,
+      import.meta.dirname,
       '../../frontend/js/features/source-editor/lezer-latex/latex.mjs'
     ),
     termsOutputPath: path.resolve(
-      __dirname,
+      import.meta.dirname,
       '../../frontend/js/features/source-editor/lezer-latex/latex.terms.mjs'
     ),
   },
   {
     grammarPath: path.resolve(
-      __dirname,
+      import.meta.dirname,
       '../../frontend/js/features/source-editor/lezer-bibtex/bibtex.grammar'
     ),
     parserOutputPath: path.resolve(
-      __dirname,
+      import.meta.dirname,
       '../../frontend/js/features/source-editor/lezer-bibtex/bibtex.mjs'
     ),
     termsOutputPath: path.resolve(
-      __dirname,
+      import.meta.dirname,
       '../../frontend/js/features/source-editor/lezer-bibtex/bibtex.terms.mjs'
     ),
   },
@@ -56,9 +58,12 @@ function compile(grammar) {
   console.info('Done!')
 }
 
-module.exports = { compile, grammars }
+export default { compile, grammars }
 
-if (require.main === module) {
+if (
+  import.meta.url === process.argv[1] ||
+  import.meta.url === `file://${process.argv[1]}`
+) {
   try {
     grammars.forEach(compile)
     process.exit(0)

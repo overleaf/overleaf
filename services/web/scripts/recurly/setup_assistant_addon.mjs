@@ -1,9 +1,9 @@
 // @ts-check
-
-const _ = require('lodash')
-const recurly = require('recurly')
-const minimist = require('minimist')
-const Settings = require('@overleaf/settings')
+import { scriptRunner } from '../lib/ScriptRunner.mjs'
+import _ from 'lodash'
+import recurly from 'recurly'
+import minimist from 'minimist'
+import Settings from '@overleaf/settings'
 
 const ADD_ON_CODE = 'assistant'
 const ADD_ON_NAME = 'AI Assist'
@@ -209,7 +209,7 @@ function getAddOnConfig(prices) {
   }
 }
 
-main()
+scriptRunner(main)
   .then(() => {
     process.exit(0)
   })

@@ -1,13 +1,12 @@
-const csv = require('csv')
-const fs = require('fs')
-const minimist = require('minimist')
-const {
-  OnboardingDataCollection,
-} = require('../app/src/models/OnboardingDataCollection')
-const { User } = require('../app/src/models/User')
-const SubscriptionLocator = require('../app/src/Features/Subscription/SubscriptionLocator')
-const Settings = require('@overleaf/settings')
-const { fetchJson } = require('@overleaf/fetch-utils')
+import { scriptRunner } from './lib/ScriptRunner.mjs'
+import * as csv from 'csv'
+import fs from 'node:fs'
+import minimist from 'minimist'
+import { OnboardingDataCollection } from '../app/src/models/OnboardingDataCollection.js'
+import { User } from '../app/src/models/User.js'
+import SubscriptionLocator from '../app/src/Features/Subscription/SubscriptionLocator.js'
+import Settings from '@overleaf/settings'
+import { fetchJson } from '@overleaf/fetch-utils'
 
 /**
  * This script extracts ODC data with some extra fields, and filters on registration date and LaTeX experience
@@ -146,11 +145,10 @@ async function getUserCountries(institutions) {
   }
   return countryCodes
 }
+const args = parseArgs()
 
 async function runScript() {
   const columns = ['email']
-
-  const args = parseArgs()
 
   if (args.includeSignUpDate) {
     columns.push('signUpDate')
@@ -196,7 +194,7 @@ async function runScript() {
   )
 }
 
-runScript().catch(err => {
+scriptRunner(runScript, args).catch(err => {
   console.error(err)
   process.exit(1)
 })

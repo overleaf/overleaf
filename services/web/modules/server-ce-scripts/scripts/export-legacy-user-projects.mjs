@@ -1,18 +1,19 @@
-const minimist = require('minimist')
-const {
+/* eslint-disable @overleaf/require-script-runner */
+import minimist from 'minimist'
+import {
   mkdirSync,
   createWriteStream,
   existsSync,
   unlinkSync,
   renameSync,
-} = require('fs')
-const mongodb = require('../app/src/infrastructure/mongodb')
-const DocumentUpdaterHandler = require('../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js')
-const ProjectZipStreamManager = require('../app/src/Features/Downloads/ProjectZipStreamManager.js')
-const logger = require('logger-sharelatex')
-const { Project } = require('../app/src/models/Project.js')
-const { User } = require('../app/src/models/User.js')
-const readline = require('readline')
+} from 'fs'
+import mongodb from '../../../app/src/infrastructure/mongodb.js'
+import DocumentUpdaterHandler from '../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js'
+import ProjectZipStreamManager from '../../../app/src/Features/Downloads/ProjectZipStreamManager.js'
+import logger from 'logger-sharelatex'
+import { Project } from '../../../app/src/models/Project.js'
+import { User } from '../../../app/src/models/User.js'
+import readline from 'readline'
 
 function parseArgs() {
   return minimist(process.argv.slice(2), {

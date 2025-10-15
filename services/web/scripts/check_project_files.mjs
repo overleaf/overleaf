@@ -1,19 +1,22 @@
-const Path = require('path')
-const DocstoreManager = require('../app/src/Features/Docstore/DocstoreManager')
-const DocumentUpdaterHandler = require('../app/src/Features/DocumentUpdater/DocumentUpdaterHandler')
-const ProjectGetter = require('../app/src/Features/Project/ProjectGetter')
-const ProjectEntityMongoUpdateHandler = require('../app/src/Features/Project/ProjectEntityMongoUpdateHandler')
-const { waitForDb, db, ObjectId } = require('../app/src/infrastructure/mongodb')
-const HistoryManager = require('../app/src/Features/History/HistoryManager')
-const logger = require('@overleaf/logger').logger
+import { scriptRunner } from './lib/ScriptRunner.mjs'
+import Path from 'node:path'
+import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
+import DocumentUpdaterHandler from '../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js'
+import ProjectGetter from '../app/src/Features/Project/ProjectGetter.js'
+import ProjectEntityMongoUpdateHandler from '../app/src/Features/Project/ProjectEntityMongoUpdateHandler.js'
+import { waitForDb, db, ObjectId } from '../app/src/infrastructure/mongodb.js'
+import HistoryManager from '../app/src/Features/History/HistoryManager.js'
+import logger from '@overleaf/logger'
+import minimist from 'minimist'
 
-const args = require('minimist')(process.argv.slice(2), {
+const args = minimist(process.argv.slice(2), {
   boolean: ['verbose', 'fix'],
 })
+
 const verbose = args.verbose
 
 if (!verbose) {
-  logger.level('error')
+  logger.logger.level('error')
 }
 
 // no remaining arguments, print usage
@@ -254,7 +257,7 @@ async function main() {
   }
 }
 
-main()
+scriptRunner(main, args)
   .then(() => {
     console.log('DONE')
     process.exit(0)

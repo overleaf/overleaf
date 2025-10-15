@@ -1,7 +1,8 @@
-const csv = require('csv')
-const fs = require('fs')
-const minimist = require('minimist')
-const { User } = require('../app/src/models/User')
+import { scriptRunner } from './lib/ScriptRunner.mjs'
+import * as csv from 'csv'
+import fs from 'node:fs'
+import minimist from 'minimist'
+import { User } from '../app/src/models/User.js'
 
 /**
  * This script extracts users who churned after day 1 - ie. their last session was within 24 hours of registering
@@ -205,9 +206,9 @@ async function getDay1ChurnUsers({
   return allChurnUsers
 }
 
-async function runScript() {
-  const args = parseArgs()
+const args = parseArgs()
 
+async function runScript() {
   console.log(
     `Starting Day 1 churn extraction with lookback period: ${args.lookbackMonths} months`
   )
@@ -268,7 +269,7 @@ async function runScript() {
   )
 }
 
-runScript().catch(err => {
+scriptRunner(runScript, args).catch(err => {
   console.error('Script failed:', err)
   process.exit(1)
 })
