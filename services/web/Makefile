@@ -547,7 +547,7 @@ shellcheck_fix:
 IMAGE_CI ?= ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 IMAGE_REPO ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME)
 IMAGE_REPO_FINAL ?= $(IMAGE_REPO):main-$(BUILD_NUMBER)
-export IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
+IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/package.json \
 	$(MONOREPO)/package-lock.json \
 	$(MONOREPO)/libraries/access-token-encryptor/package.json \
