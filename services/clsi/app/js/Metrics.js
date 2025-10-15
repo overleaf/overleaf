@@ -16,6 +16,7 @@ const compilesTotal = new prom.Counter({
     'image',
     'draft',
     'stop_on_first_error',
+    'passes',
   ],
 })
 
@@ -23,7 +24,7 @@ const compileDurationSeconds = new prom.Histogram({
   name: 'clsi_compile_duration_seconds',
   help: 'Duration of the latexmkrc invocation',
   buckets: COMPILE_TIME_BUCKETS,
-  labelNames: ['status', 'engine', 'compile', 'group'],
+  labelNames: ['status', 'engine', 'compile', 'group', 'passes'],
 })
 
 const e2eCompileDurationSeconds = new prom.Histogram({
