@@ -17,9 +17,13 @@ function recordUTMTags() {
       if (utmValues) {
         const path = new URL(req.url, Settings.siteUrl).pathname
 
+        const host = req.headers.host
+        const domain = host?.split('.')[0]
+
         AnalyticsManager.recordEventForSession(req.session, 'page-view', {
           path,
           ...utmValues,
+          domain,
         })
 
         const propertyValue = `${utmValues.utm_source || 'N/A'};${

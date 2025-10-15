@@ -213,7 +213,16 @@ async function userSubscriptionPage(req, res) {
       isInTrial
     )
 
-  AnalyticsManager.recordEventForSession(req.session, 'subscription-page-view')
+  const host = req.headers.host
+  const domain = host?.split('.')[0]
+
+  AnalyticsManager.recordEventForSession(
+    req.session,
+    'subscription-page-view',
+    {
+      domain,
+    }
+  )
 
   const groupPlansDataForDash = formatGroupPlansDataForDash()
 

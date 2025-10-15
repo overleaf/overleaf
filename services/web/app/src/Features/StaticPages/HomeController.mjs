@@ -28,8 +28,15 @@ async function index(req, res) {
 
 async function home(req, res) {
   if (Features.hasFeature('homepage') && homepageExists) {
+    const acceptLanguage = req.headers['accept-language'] || 'en' // returns in format => en-GB,en-US;q=0.9,en;q=0.8
+    const language = acceptLanguage.split(',')[0].split(';')[0].trim() // filters the first language
+    const host = req.headers.host
+    const domain = host?.split('.')[0]
+
     AnalyticsManager.recordEventForSession(req.session, 'home-page-view', {
       page: req.path,
+      language,
+      domain,
     })
 
     const hotjarAssignment = await SplitTestHandler.promises.getAssignment(

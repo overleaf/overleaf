@@ -77,6 +77,10 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
         utm_content: 'foo-bar',
         utm_term: 'overridden',
       }
+
+      ctx.req.headers = {
+        host: 'test-domain.overleaf.com',
+      }
       ctx.middleware(ctx.req, ctx.res, ctx.next)
     })
 
@@ -101,6 +105,7 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
           utm_campaign: 'Some Campaign',
           utm_content: 'foo-bar',
           utm_term: 'overridden',
+          domain: 'test-domain',
         }
       )
     })
@@ -124,6 +129,9 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
         utm_campaign: 'Some Campaign',
         utm_term: 'foo',
       }
+      ctx.req.headers = {
+        host: 'test-domain.overleaf.com',
+      }
       ctx.middleware(ctx.req, ctx.res, ctx.next)
     })
 
@@ -146,6 +154,7 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
           utm_medium: 'Facebook',
           utm_campaign: 'Some Campaign',
           utm_term: 'foo',
+          domain: 'test-domain',
         }
       )
     })
@@ -169,6 +178,9 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
         utm_campaign: 'Some Campaign',
         other_param: 'some-value',
       }
+      ctx.req.headers = {
+        host: 'test-domain.overleaf.com',
+      }
       ctx.middleware(ctx.req, ctx.res, ctx.next)
     })
 
@@ -190,6 +202,7 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
           path: '/project',
           utm_medium: 'Facebook',
           utm_campaign: 'Some Campaign',
+          domain: 'test-domain',
         }
       )
     })
