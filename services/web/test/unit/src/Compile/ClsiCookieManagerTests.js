@@ -7,6 +7,7 @@ describe('ClsiCookieManager', function () {
   beforeEach(function () {
     this.redis = {
       auth() {},
+      del: sinon.stub(),
       get: sinon.stub(),
       setex: sinon.stub().resolves(),
     }
@@ -178,6 +179,20 @@ describe('ClsiCookieManager', function () {
         )
         this.redis.setex.called.should.equal(false)
       })
+    })
+  })
+
+  describe('clearServerId', function () {
+    it('should clear both keys', async function () {
+      await this.ClsiCookieManager.promises.clearServerId(
+        this.project_id,
+        this.user_id,
+        'n2d'
+      )
+      this.redis.del.should.have.been.calledWith(
+        `clsiserver:n2d:${this.project_id}:${this.user_id}`,
+        `clsiserver:${this.project_id}:${this.user_id}`
+      )
     })
   })
 

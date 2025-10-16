@@ -798,7 +798,7 @@ describe('ClsiManager', function () {
         ctx.result = await ctx.ClsiManager.promises.sendRequest(
           ctx.project._id,
           ctx.user_id,
-          {}
+          { compileBackendClass: 'n2d' }
         )
       })
 
@@ -823,7 +823,7 @@ describe('ClsiManager', function () {
       it('should clear the CLSI server id cookie', function (ctx) {
         expect(
           ctx.ClsiCookieManager.promises.clearServerId
-        ).to.have.been.calledWith(ctx.project._id, ctx.user_id)
+        ).to.have.been.calledWith(ctx.project._id, ctx.user_id, 'n2d')
       })
 
       it('should return a success status', function (ctx) {
@@ -1039,7 +1039,7 @@ describe('ClsiManager', function () {
 
       it('should clear the clsi persistance', function (ctx) {
         ctx.ClsiCookieManager.promises.clearServerId
-          .calledWith(ctx.project._id, ctx.user_id)
+          .calledWith(ctx.project._id, ctx.user_id, 'n2d')
           .should.equal(true)
       })
 
@@ -1060,6 +1060,15 @@ describe('ClsiManager', function () {
         )
         // wait for the background task to finish
         await setTimeout(0)
+      })
+
+      it('should clear both cookies', function (ctx) {
+        expect(
+          ctx.ClsiCookieManager.promises.clearServerId
+        ).to.have.been.calledWith(ctx.project._id, ctx.user_id, 'c2d')
+        expect(
+          ctx.ClsiCookieManager.promises.clearServerId
+        ).to.have.been.calledWith(ctx.project._id, ctx.user_id, 'n4')
       })
 
       it('should forward delete request', function (ctx) {

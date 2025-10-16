@@ -224,12 +224,15 @@ const ClsiCookieManagerFactory = function (backendGroup) {
     )
   }
 
-  async function clearServerId(projectId, userId) {
+  async function clearServerId(projectId, userId, compileBackendClass) {
     if (!clsiCookiesEnabled) {
       return
     }
     try {
-      await rclient.del(buildKey(projectId, userId))
+      await rclient.del(
+        buildKey(projectId, userId, compileBackendClass),
+        buildOldKey(projectId, userId)
+      )
     } catch (err) {
       // redis errors need wrapping as the instance may be shared
       throw new OError(

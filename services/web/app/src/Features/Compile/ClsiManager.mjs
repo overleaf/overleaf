@@ -81,7 +81,8 @@ async function clearClsiServerId(projectId, userId, compileBackendClass) {
       jobs.push(
         NewBackendCloudClsiCookieManager.promises.clearServerId(
           projectId,
-          userId
+          userId,
+          newCompileBackendClass
         )
       )
     }
