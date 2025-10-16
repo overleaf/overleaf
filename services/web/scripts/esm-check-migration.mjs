@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import minimist from 'minimist'
 
-const APP_CODE_PATH = ['app', 'modules', 'migrations', 'scripts', 'test']
+const APP_CODE_PATH = ['app', 'modules', 'scripts', 'test']
 
 // These have already been converted but don't have a `.mjs` extension
 const converted = new Set([
