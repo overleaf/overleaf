@@ -34,7 +34,7 @@ services:
     working_dir: /overleaf/services/clsi
     environment:
       ELASTIC_SEARCH_DSN: es:9200
-      MONGO_HOST: mongo
+      MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ${LOG_LEVEL:-}

@@ -24,7 +24,9 @@ COPY libraries/ranges-tracker/package.json /overleaf/libraries/ranges-tracker/pa
 COPY libraries/redis-wrapper/package.json /overleaf/libraries/redis-wrapper/package.json
 COPY libraries/settings/package.json /overleaf/libraries/settings/package.json
 COPY services/document-updater/package.json /overleaf/services/document-updater/package.json
+COPY tools/migrations/package.json /overleaf/tools/migrations/package.json
 COPY patches/ /overleaf/patches/
+COPY tools/migrations/ /overleaf/tools/migrations/
 
 RUN cd /overleaf && npm ci --quiet
 COPY libraries/fetch-utils/ /overleaf/libraries/fetch-utils/
@@ -38,6 +40,7 @@ COPY libraries/ranges-tracker/ /overleaf/libraries/ranges-tracker/
 COPY libraries/redis-wrapper/ /overleaf/libraries/redis-wrapper/
 COPY libraries/settings/ /overleaf/libraries/settings/
 COPY services/document-updater/ /overleaf/services/document-updater/
+COPY tools/migrations/ /overleaf/tools/migrations/
 
 FROM app
 USER node

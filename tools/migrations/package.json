@@ -1,0 +1,19 @@
+{
+  "name": "@overleaf/migrations",
+  "scripts": {
+    "migrations": "MONGO_SOCKET_TIMEOUT=0 east --es-modules",
+    "lint": "eslint --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix --ext .cjs,.js,.jsx,.mjs,.ts .",
+    "format": "prettier --list-different $PWD/'**/*.{mjs,js,cjs,ts}'",
+    "format:fix": "prettier --write $PWD/'**/*.{mjs,js,cjs,ts}'"
+  },
+  "dependencies": {
+    "@overleaf/logger": "*",
+    "@overleaf/mongo-utils": "*",
+    "@overleaf/o-error": "*",
+    "@overleaf/promise-utils": "*",
+    "@overleaf/settings": "*",
+    "east": "2.0.3",
+    "mongodb": "6.12.0"
+  }
+}

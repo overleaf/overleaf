@@ -2,7 +2,9 @@ const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
 const config = require('config')
 const fetch = require('node-fetch')
-const { knex, mongodb, redis } = require('../storage')
+const { knex, redis } = require('../storage')
+const { exec } = require('node:child_process')
+const { promisify } = require('node:util')
 
 // ensure every ObjectId has the id string as a property for correct comparisons
 require('mongodb').ObjectId.cacheHexString = true
@@ -17,19 +19,9 @@ async function setupPostgresDatabase() {
 
 async function setupMongoDatabase() {
   this.timeout(60_000)
-  await mongodb.db.collection('projectHistoryChunks').createIndexes([
-    {
-      key: { projectId: 1, startVersion: 1 },
-      name: 'projectId_1_startVersion_1',
-      partialFilterExpression: { state: { $in: ['active', 'closed'] } },
-      unique: true,
-    },
-    {
-      key: { state: 1 },
-      name: 'state_1',
-      partialFilterExpression: { state: 'deleted' },
-    },
-  ])
+  await promisify(exec)(
+    `cd ../../tools/migrations && npm run migrations -- migrate -t server-ce`
+  )
 }
 
 async function createGcsBuckets() {

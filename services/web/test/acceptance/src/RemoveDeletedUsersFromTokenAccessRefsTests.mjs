@@ -22,9 +22,8 @@ describe('RemoveDeletedUsersFromTokenAccessRefsTests', function () {
   const projectId3 = new ObjectId('65d726e807c024c8db43be24')
   const projectId4 = new ObjectId('65d726e807c024c8db43be25')
 
-  let insertedProjects
   beforeEach('insert projects', async function () {
-    insertedProjects = await db.projects.insertMany([
+    await db.projects.insertMany([
       {
         _id: projectId1,
         tokenAccessReadAndWrite_refs: [userId1],
@@ -47,17 +46,11 @@ describe('RemoveDeletedUsersFromTokenAccessRefsTests', function () {
 
   let stdOut
 
-  const runScript = async (dryRun, projectsList) => {
+  const runScript = async () => {
     let result
     try {
       result = await promisify(exec)(
-        [
-          'VERBOSE_LOGGING=true',
-          'node',
-          'scripts/remove_deleted_users_from_token_access_refs.mjs',
-          dryRun,
-          projectsList,
-        ].join(' ')
+        'cd ../../tools/migrations && east migrate -t saas --force 20240220130452_remove_deleted_users_from_token_access_refs'
       )
     } catch (error) {
       // dump details like exit code, stdErr and stdOut
@@ -69,91 +62,6 @@ describe('RemoveDeletedUsersFromTokenAccessRefsTests', function () {
 
     expect(stdOut).to.match(new RegExp(`User ids count: ${insertedUsersCount}`))
   }
-
-  describe('dry-run=true', function () {
-    beforeEach('run script', async function () {
-      await runScript('--dry-run=true')
-      expect(stdOut).to.match(/doing dry run/i)
-    })
-
-    it('should show current user id to be removed', function () {
-      expect(stdOut).to.match(
-        new RegExp(
-          `Found deleted user id: ${userId2.toString()} in project: ${projectId2.toString()}`
-        )
-      )
-      expect(stdOut).to.match(
-        new RegExp(
-          `DRY RUN - would remove deleted ${userId2.toString()} from all projects \\(found in project ${projectId2.toString()}\\)`
-        )
-      )
-      expect(stdOut).to.match(
-        new RegExp(
-          `Found deleted user id: ${userId3.toString()} in project: ${projectId3.toString()}`
-        )
-      )
-      expect(stdOut).to.match(
-        new RegExp(
-          `DRY RUN - would remove deleted ${userId3.toString()} from all projects \\(found in project ${projectId3.toString()}\\)`
-        )
-      )
-    })
-
-    it('should show projects with non-existing token access fields', function () {
-      expect(stdOut)
-        .to.match(
-          new RegExp(
-            `DRY RUN - would fix non-existing token access fields in project ${projectId3.toString()}`
-          )
-        )
-        .and.match(
-          new RegExp(
-            `DRY RUN - would fix non-existing token access fields in project ${projectId4.toString()}`
-          )
-        )
-    })
-
-    it('should show the user ids (and their count) to be deleted', function () {
-      expect(stdOut).to.match(
-        new RegExp(
-          `DRY RUN - would delete user ids \\(2\\)\\n${userId2.toString()}\\n${userId3.toString()}`
-        )
-      )
-    })
-
-    it('should show the project ids (and their count) that needs fixing', function () {
-      expect(stdOut).to.match(
-        new RegExp(
-          `Projects with deleted user ids \\(2\\)\\n${projectId2.toString()}\\n${projectId3.toString()}`
-        )
-      )
-    })
-
-    it('should not fix the token access fields of projects', async function () {
-      const projects = await db.projects
-        .find({}, { $sort: { _id: 1 } })
-        .toArray()
-      expect(projects).to.deep.equal([
-        {
-          _id: projectId1,
-          tokenAccessReadAndWrite_refs: [userId1],
-          tokenAccessReadOnly_refs: [],
-        },
-        {
-          _id: projectId2,
-          tokenAccessReadAndWrite_refs: [userId2],
-          tokenAccessReadOnly_refs: [],
-        },
-        {
-          _id: projectId3,
-          tokenAccessReadAndWrite_refs: [userId3],
-        },
-        {
-          _id: projectId4,
-        },
-      ])
-    })
-  })
 
   describe('dry-run=false', function () {
     beforeEach('run script', async function () {
@@ -235,22 +143,6 @@ describe('RemoveDeletedUsersFromTokenAccessRefsTests', function () {
           tokenAccessReadAndWrite_refs: [],
         },
       ])
-    })
-  })
-
-  describe('projects=projectId2', function () {
-    beforeEach('run script', async function () {
-      const projectId2 = insertedProjects.insertedIds[1]
-      await runScript('--dry-run=false', `--projects=${projectId2.toString()}`)
-    })
-
-    it('should fix only the projects provided', async function () {
-      const [project1, project2, project3] = await db.projects
-        .find({}, { $sort: { _id: 1 } })
-        .toArray()
-      expect(project1.tokenAccessReadAndWrite_refs.length).to.be.gt(0)
-      expect(project2.tokenAccessReadAndWrite_refs.length).to.eq(0) // deleted user removed
-      expect(project3.tokenAccessReadAndWrite_refs.length).to.be.gt(0)
     })
   })
 })

@@ -1,4 +1,5 @@
 const app = require('../../../../app')
+require('./MongoHelper')
 
 function startApp() {
   return new Promise((resolve, reject) => {

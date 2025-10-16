@@ -20,3 +20,4 @@ package-lock.json
 package.json
 patches/**
 services/web/**
+tools/migrations/**

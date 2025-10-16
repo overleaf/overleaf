@@ -19,8 +19,10 @@ IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/libraries/metrics/package.json \
 	$(MONOREPO)/libraries/mongo-utils/package.json \
 	$(MONOREPO)/libraries/o-error/package.json \
+	$(MONOREPO)/libraries/promise-utils/package.json \
 	$(MONOREPO)/libraries/settings/package.json \
 	$(MONOREPO)/services/chat/package.json \
+	$(MONOREPO)/tools/migrations/package.json \
 	$(MONOREPO)/patches/* \
 | sha256sum | cut -d '-' -f1)
 

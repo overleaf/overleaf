@@ -6,8 +6,10 @@ libraries/logger/**
 libraries/metrics/**
 libraries/mongo-utils/**
 libraries/o-error/**
+libraries/promise-utils/**
 libraries/settings/**
 package-lock.json
 package.json
 patches/**
 services/chat/**
+tools/migrations/**

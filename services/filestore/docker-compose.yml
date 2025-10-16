@@ -38,7 +38,7 @@ services:
     working_dir: /overleaf/services/filestore
     environment:
       ELASTIC_SEARCH_DSN: es:9200
-      MONGO_HOST: mongo
+      MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       POSTGRES_HOST: postgres
       AWS_S3_ENDPOINT: https://minio:9000
       AWS_S3_PATH_STYLE: 'true'

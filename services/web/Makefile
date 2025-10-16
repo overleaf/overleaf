@@ -146,7 +146,7 @@ test_unit_module: mongo_migrations_for_tests
 	$(MAKE) modules/$(MODULE_NAME)/test_unit
 
 mongo_migrations_for_tests:
-	$(DOCKER_COMPOSE) run --rm test_unit npm run migrations -- migrate -t saas
+	$(DOCKER_COMPOSE) run --rm --workdir /overleaf/tools/migrations test_unit npm run migrations -- migrate -t saas
 
 #
 # Frontend tests

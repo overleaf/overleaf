@@ -1,5 +1,5 @@
 web
---dependencies=
+--dependencies=mongo
 --docker-repos=us-east1-docker.pkg.dev/overleaf-ops/ol-docker
 --env-add=
 --env-pass-through=

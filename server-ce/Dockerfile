@@ -14,6 +14,7 @@ ADD server-ce/services.js /overleaf/services.js
 ADD package.json package-lock.json /overleaf/
 ADD libraries/ /overleaf/libraries/
 ADD services/ /overleaf/services/
+ADD tools/migrations/ /overleaf/tools/migrations/
 
 # Add npm patches
 # -----------------------

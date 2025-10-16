@@ -16,3 +16,4 @@ package-lock.json
 package.json
 patches/**
 services/history-v1/**
+tools/migrations/**

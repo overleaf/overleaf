@@ -1,5 +1,6 @@
 import { createServer } from '../../../../app/js/server.js'
 import { promisify } from 'node:util'
+import './MongoHelper.js'
 
 export { db } from '../../../../app/js/mongodb.js'
 

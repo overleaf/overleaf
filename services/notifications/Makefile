@@ -23,6 +23,7 @@ IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/libraries/settings/package.json \
 	$(MONOREPO)/libraries/validation-tools/package.json \
 	$(MONOREPO)/services/notifications/package.json \
+	$(MONOREPO)/tools/migrations/package.json \
 	$(MONOREPO)/patches/* \
 | sha256sum | cut -d '-' -f1)
 

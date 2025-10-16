@@ -68,7 +68,6 @@ services/web/config/settings.defaults.js
 services/web/config/settings.overrides.server-pro.js
 services/web/frontend/**
 services/web/locales/**
-services/web/migrations/**
 services/web/modules/*/*
 services/web/modules/*/app/**
 services/web/modules/*/frontend/**
@@ -77,6 +76,8 @@ services/web/modules/*/types/**
 services/web/public/**
 services/web/types/**
 services/web/webpack-plugins/**
+
+tools/migrations/**
 
 .dockerignore
 .eslint*

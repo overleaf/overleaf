@@ -1,4 +1,4 @@
-import Adapter from '../migrations/lib/adapter.mjs'
+import Adapter from '../../../tools/migrations/lib/adapter.mjs'
 import { promises as fs } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'

@@ -13,3 +13,4 @@ package-lock.json
 package.json
 patches/**
 services/notifications/**
+tools/migrations/**

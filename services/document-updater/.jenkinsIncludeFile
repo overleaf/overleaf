@@ -15,3 +15,4 @@ package-lock.json
 package.json
 patches/**
 services/document-updater/**
+tools/migrations/**

@@ -1,5 +1,6 @@
 import { app } from '../../../../app/js/server.js'
 import { mongoClient } from '../../../../app/js/mongodb.js'
+import './MongoHelper.js'
 
 let running = false
 let initPromise = null

@@ -28,7 +28,7 @@ describe('ConvertEmailConfirmedAtToDates', function () {
 
   beforeEach('run migration', function (done) {
     exec(
-      'east migrate -t saas --force 20210726083523_convert_confirmedAt_strings_to_dates',
+      'cd ../../tools/migrations && east migrate -t saas --force 20210726083523_convert_confirmedAt_strings_to_dates',
       done
     )
   })

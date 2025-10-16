@@ -120,7 +120,7 @@ describe('ConvertArchivedState', function () {
 
   beforeEach(function (done) {
     exec(
-      'east migrate --tag server-ce --force 20221111111111_ce_sp_convert_archived_state',
+      'cd ../../tools/migrations && east migrate --tag server-ce --force 20221111111111_ce_sp_convert_archived_state',
       error => {
         if (error) {
           return done(error)

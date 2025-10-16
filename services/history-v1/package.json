@@ -47,6 +47,7 @@
     "utf-8-validate": "^5.0.4"
   },
   "devDependencies": {
+    "@overleaf/migrations": "*",
     "benny": "^3.7.1",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",

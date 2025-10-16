@@ -39,6 +39,7 @@ COPY libraries/settings/package.json /overleaf/libraries/settings/package.json
 COPY libraries/stream-utils/package.json /overleaf/libraries/stream-utils/package.json
 COPY libraries/validation-tools/package.json /overleaf/libraries/validation-tools/package.json
 COPY services/web/package.json /overleaf/services/web/package.json
+COPY tools/migrations/package.json /overleaf/tools/migrations/package.json
 COPY patches/ /overleaf/patches/
 
 RUN cd /overleaf && NODE_ENV=production npm ci --quiet
@@ -72,6 +73,7 @@ COPY libraries/settings/ /overleaf/libraries/settings/
 COPY libraries/stream-utils/ /overleaf/libraries/stream-utils/
 COPY libraries/validation-tools/ /overleaf/libraries/validation-tools/
 COPY services/web/ /overleaf/services/web/
+COPY tools/migrations/ /overleaf/tools/migrations/
 
 # Build the latex parser
 RUN cd /overleaf/services/web && npm run 'lezer-latex:generate'
@@ -108,6 +110,7 @@ COPY libraries/settings/ /overleaf/libraries/settings/
 COPY libraries/stream-utils/ /overleaf/libraries/stream-utils/
 COPY libraries/validation-tools/ /overleaf/libraries/validation-tools/
 COPY services/web/ /overleaf/services/web/
+COPY tools/migrations/ /overleaf/tools/migrations/
 
 # Omit Server Pro/CE specific scripts from SaaS image
 RUN rm /overleaf/services/web/modules/server-ce-scripts -rf

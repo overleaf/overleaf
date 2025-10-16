@@ -30,7 +30,9 @@ COPY libraries/redis-wrapper/package.json /overleaf/libraries/redis-wrapper/pack
 COPY libraries/settings/package.json /overleaf/libraries/settings/package.json
 COPY libraries/stream-utils/package.json /overleaf/libraries/stream-utils/package.json
 COPY services/history-v1/package.json /overleaf/services/history-v1/package.json
+COPY tools/migrations/package.json /overleaf/tools/migrations/package.json
 COPY patches/ /overleaf/patches/
+COPY tools/migrations/ /overleaf/tools/migrations/
 
 RUN cd /overleaf && npm ci --quiet
 COPY libraries/fetch-utils/ /overleaf/libraries/fetch-utils/
@@ -45,6 +47,7 @@ COPY libraries/redis-wrapper/ /overleaf/libraries/redis-wrapper/
 COPY libraries/settings/ /overleaf/libraries/settings/
 COPY libraries/stream-utils/ /overleaf/libraries/stream-utils/
 COPY services/history-v1/ /overleaf/services/history-v1/
+COPY tools/migrations/ /overleaf/tools/migrations/
 
 FROM app
 USER node

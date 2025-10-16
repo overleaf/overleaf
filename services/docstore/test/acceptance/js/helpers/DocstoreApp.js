@@ -1,5 +1,6 @@
 const app = require('../../../../app')
 const Settings = require('@overleaf/settings')
+require('./MongoHelper')
 
 function startApp() {
   return new Promise((resolve, reject) => {

@@ -1,5 +1,0 @@
-{
-  "adapter": "./migrations/lib/adapter.mjs",
-  "migrationNumberFormat": "dateTime",
-  "migrationExtension": "mjs"
-}

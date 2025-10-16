@@ -38,6 +38,7 @@
     "zod-validation-error": "^4.0.1"
   },
   "devDependencies": {
+    "@overleaf/migrations": "*",
     "@types/method-override": "^3.0.0",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",

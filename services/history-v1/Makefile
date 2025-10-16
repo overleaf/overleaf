@@ -26,6 +26,7 @@ IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/libraries/settings/package.json \
 	$(MONOREPO)/libraries/stream-utils/package.json \
 	$(MONOREPO)/services/history-v1/package.json \
+	$(MONOREPO)/tools/migrations/package.json \
 	$(MONOREPO)/patches/* \
 | sha256sum | cut -d '-' -f1)
 

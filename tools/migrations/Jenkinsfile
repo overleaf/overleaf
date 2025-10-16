@@ -1,0 +1,64 @@
+pipeline {
+  agent {
+    node {
+      label 'jenkins-agent-web'
+      customWorkspace '/workspace'
+    }
+  }
+  options {
+    timestamps()
+    parallelsAlwaysFailFast()
+    timeout(time: 15, unit: 'MINUTES')
+  }
+  environment {
+    BRANCH_NAME = "${env.CHANGE_BRANCH ? env.CHANGE_BRANCH : env.BRANCH_NAME}"
+    JENKINS_BUILD_NUMBER = "${BUILD_NUMBER}"
+    BUILD_NUMBER = "${SHORT_SHA}_${BUILD_NUMBER}"
+    COMMIT_SHA = "${GIT_COMMIT}"
+    SHORT_SHA = "${GIT_COMMIT.take(7)}"
+  }
+  stages {
+    stage('Stage 1') {
+      parallel {
+        stage('Install monorepo') {
+          steps {
+            sh 'make monorepo_setup'
+          }
+        }
+        stage('Create reports folder') {
+          steps {
+            sh 'mkdir tools/migrations/reports'
+          }
+        }
+      }
+    }
+    stage('Stage 2') {
+      parallel {
+        stage('Lint') {
+          steps {
+            sh 'bin/run -w /overleaf/tools/migrations monorepo npm run lint -- --format json --output-file reports/eslint.json'
+          }
+          post {
+            always {
+              sh """
+                sed -i 's_"filePath":"/overleaf_"filePath":"/workspace_g' tools/migrations/reports/eslint.json
+              """
+              recordIssues checksAnnotationScope: 'ALL', enabledForFailure: true, failOnError: true, id: 'migrations-eslint', name: 'migrations eslint', qualityGates: [[integerThreshold: 1, threshold: 1.0, type: 'TOTAL']], sourceCodeRetention: 'LAST_BUILD', tools: [esLint(pattern: 'tools/migrations/reports/eslint.json')]
+            }
+          }
+        }
+        stage('Format') {
+          steps {
+            sh 'bin/run -w /overleaf/tools/migrations monorepo npm run format'
+          }
+        }
+      }
+    }
+  }
+  post {
+    cleanup {
+      sh 'rm -rf tools/migrations/reports'
+      sh 'make clean_jenkins'
+    }
+  }
+}

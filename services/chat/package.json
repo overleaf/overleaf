@@ -29,6 +29,7 @@
     "mongodb": "6.12.0"
   },
   "devDependencies": {
+    "@overleaf/migrations": "*",
     "acorn": "^7.1.1",
     "ajv": "^6.12.0",
     "chai": "^4.3.6",

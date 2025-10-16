@@ -7,8 +7,6 @@ import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.js'
 
 const DUMMY_NAME = 'unknown.tex'
 const DUMMY_TIME = new Date('2021-04-12T00:00:00.000Z')
-const ONE_DAY_IN_S = 60 * 60 * 24
-const BATCH_SIZE = 3
 
 function getObjectIdFromDate(date) {
   const seconds = new Date(date).getTime() / 1000
@@ -18,7 +16,6 @@ function getObjectIdFromDate(date) {
 describe('BackFillDummyDocMeta', function () {
   let docIds
   let projectIds
-  let stopAtSeconds
   beforeEach('create docs', async function () {
     docIds = []
     docIds[0] = getObjectIdFromDate('2021-04-01T00:00:00.000Z')
@@ -48,11 +45,15 @@ describe('BackFillDummyDocMeta', function () {
     // two docs in the same project
     projectIds[10] = projectIds[9]
     projectIds[11] = projectIds[4]
-
-    stopAtSeconds = new Date('2021-04-17T00:00:00.000Z').getTime() / 1000
   })
   const now = new Date()
   beforeEach('insert doc stubs into docs collection', async function () {
+    // don't look here, just drop duplicates from the list of projectIds :)
+    await db.projects.insertMany(
+      Array.from(new Set(projectIds.map(id => id.toString()))).map(_id => ({
+        _id: new ObjectId(_id),
+      }))
+    )
     await db.docs.insertMany([
       // incomplete, without deletedDocs context
       { _id: docIds[0], project_id: projectIds[0], deleted: true },
@@ -104,33 +105,18 @@ describe('BackFillDummyDocMeta', function () {
     ])
   })
 
-  let options
-  async function runScript(dryRun) {
-    options = {
-      BATCH_SIZE,
-      CACHE_SIZE: 100,
-      DRY_RUN: dryRun,
-      FIRST_PROJECT_ID: projectIds[0].toString(),
-      INCREMENT_BY_S: ONE_DAY_IN_S,
-      STOP_AT_S: stopAtSeconds,
-      // start right away
-      LET_USER_DOUBLE_CHECK_INPUTS_FOR: 1,
-    }
+  async function runScript() {
     let result
     try {
       result = await promisify(exec)(
-        Object.entries(options)
-          .map(([key, value]) => `${key}=${value}`)
-          .concat(['node', 'scripts/back_fill_dummy_doc_meta.mjs'])
-          .join(' ')
+        'cd ../../tools/migrations && east migrate -t saas --force 20210728115327_ce_sp_backfill_dummy_doc_meta'
       )
     } catch (error) {
       // dump details like exit code, stdErr and stdOut
       logger.error({ error }, 'script failed')
       throw error
     }
-    let { stderr: stdErr, stdout: stdOut } = result
-    stdErr = stdErr.split('\n')
+    let { stdout: stdOut } = result
     stdOut = stdOut.split('\n').filter(filterOutput)
 
     expect(stdOut.filter(filterOutput)).to.include.members([
@@ -145,41 +131,7 @@ describe('BackFillDummyDocMeta', function () {
       `Orphaned deleted doc ${docIds[9]} (no deletedProjects entry)`,
       `Orphaned deleted doc ${docIds[10]} (no deletedProjects entry)`,
     ])
-    expect(stdErr.filter(filterOutput)).to.include.members([
-      `Processed 9 until ${projectIds[9]}`,
-      'Done.',
-    ])
   }
-
-  describe('DRY_RUN=true', function () {
-    beforeEach('run script', async function () {
-      await runScript(true)
-    })
-
-    it('should leave docs as is', async function () {
-      const docs = await db.docs.find({}).toArray()
-      expect(docs).to.deep.equal([
-        { _id: docIds[0], project_id: projectIds[0], deleted: true },
-        { _id: docIds[1], project_id: projectIds[1], deleted: true },
-        { _id: docIds[2], project_id: projectIds[2], deleted: true },
-        { _id: docIds[3], project_id: projectIds[3], deleted: true },
-        { _id: docIds[4], project_id: projectIds[4], deleted: true },
-        {
-          _id: docIds[5],
-          project_id: projectIds[5],
-          deleted: true,
-          name: 'foo.tex',
-          deletedAt: now,
-        },
-        { _id: docIds[6], project_id: projectIds[6] },
-        { _id: docIds[7], project_id: projectIds[7], deleted: true },
-        { _id: docIds[8], project_id: projectIds[8], deleted: true },
-        { _id: docIds[9], project_id: projectIds[9], deleted: true },
-        { _id: docIds[10], project_id: projectIds[10], deleted: true },
-        { _id: docIds[11], project_id: projectIds[11], deleted: true },
-      ])
-    })
-  })
 
   describe('DRY_RUN=false', function () {
     beforeEach('run script', async function () {

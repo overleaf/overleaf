@@ -41,6 +41,7 @@
     "requestretry": "^7.1.0"
   },
   "devDependencies": {
+    "@overleaf/migrations": "*",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "cluster-key-slot": "^1.0.5",

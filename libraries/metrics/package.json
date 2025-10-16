@@ -31,8 +31,8 @@
     "typescript": "^5.0.4"
   },
   "scripts": {
-    "lint": "eslint --ext .js --ext .cjs --ext .ts --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --fix --ext .js --ext .cjs --ext .ts .",
+    "lint": "eslint --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix --ext .cjs,.js,.jsx,.mjs,.ts .",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
     "test:acceptance": "mocha --recursive --exit --grep=$MOCHA_GREP test/acceptance",
     "test": "npm run lint && npm run format && npm run types:check && npm run test:unit",

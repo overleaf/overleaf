@@ -1,0 +1,6 @@
+tools/migrations/**
+
+package.json
+package-lock.json
+
+Makefile

@@ -22,7 +22,9 @@ COPY libraries/promise-utils/package.json /overleaf/libraries/promise-utils/pack
 COPY libraries/settings/package.json /overleaf/libraries/settings/package.json
 COPY libraries/validation-tools/package.json /overleaf/libraries/validation-tools/package.json
 COPY services/notifications/package.json /overleaf/services/notifications/package.json
+COPY tools/migrations/package.json /overleaf/tools/migrations/package.json
 COPY patches/ /overleaf/patches/
+COPY tools/migrations/ /overleaf/tools/migrations/
 
 RUN cd /overleaf && npm ci --quiet
 COPY libraries/fetch-utils/ /overleaf/libraries/fetch-utils/
@@ -34,6 +36,7 @@ COPY libraries/promise-utils/ /overleaf/libraries/promise-utils/
 COPY libraries/settings/ /overleaf/libraries/settings/
 COPY libraries/validation-tools/ /overleaf/libraries/validation-tools/
 COPY services/notifications/ /overleaf/services/notifications/
+COPY tools/migrations/ /overleaf/tools/migrations/
 
 FROM app
 USER node
