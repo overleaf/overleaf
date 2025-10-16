@@ -541,6 +541,101 @@ describe('ProjectListController', function () {
       })
     })
 
+    describe('when user linked to SSO', function () {
+      const linkedEmail = 'picard@starfleet.com'
+      const universityName = 'Starfleet'
+      const notificationData = {
+        email: linkedEmail,
+        institutionName: universityName,
+      }
+      beforeEach(function (ctx) {
+        ctx.Features.hasFeature.withArgs('saml').returns(true)
+        ctx.req.session.saml = {
+          institutionEmail: linkedEmail,
+          linked: {
+            universityName,
+          },
+        }
+      })
+
+      it('should render with Commons template when Commons was linked', async function (ctx) {
+        await new Promise(resolve => {
+          ctx.res.render = (pageName, opts) => {
+            expect(opts.notificationsInstitution).to.deep.equal([
+              Object.assign(
+                { templateKey: 'notification_institution_sso_linked' },
+                notificationData
+              ),
+            ])
+            resolve()
+          }
+          ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+        })
+      })
+
+      describe('when via domain capture', function () {
+        beforeEach(function (ctx) {
+          ctx.req.session.saml.domainCaptureEnabled = true
+        })
+
+        it('should render with group template', async function (ctx) {
+          await new Promise(resolve => {
+            ctx.res.render = (pageName, opts) => {
+              expect(opts.notificationsInstitution).to.deep.equal([
+                Object.assign(
+                  { templateKey: 'notification_group_sso_linked' },
+                  notificationData
+                ),
+              ])
+              resolve()
+            }
+            ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+          })
+        })
+
+        describe('user created via domain capture and group is managed', function () {
+          beforeEach(function (ctx) {
+            ctx.req.session.saml.userCreatedViaDomainCapture = true
+          })
+          it('should render with notification_group_sso_linked', async function (ctx) {
+            await new Promise(resolve => {
+              ctx.res.render = (pageName, opts) => {
+                expect(opts.notificationsInstitution).to.deep.equal([
+                  Object.assign(
+                    {
+                      templateKey: 'notification_group_sso_linked',
+                    },
+                    notificationData
+                  ),
+                ])
+                resolve()
+              }
+              ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+            })
+          })
+
+          it('should render with notification_account_created_via_group_domain_capture_and_managed_users_enabled when managed user is enabled', async function (ctx) {
+            ctx.req.session.saml.managedUsersEnabled = true
+            await new Promise(resolve => {
+              ctx.res.render = (pageName, opts) => {
+                expect(opts.notificationsInstitution).to.deep.equal([
+                  Object.assign(
+                    {
+                      templateKey:
+                        'notification_account_created_via_group_domain_capture_and_managed_users_enabled',
+                    },
+                    notificationData
+                  ),
+                ])
+                resolve()
+              }
+              ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+            })
+          })
+        })
+      })
+    })
+
     describe('With Institution SSO feature', function () {
       beforeEach(async function (ctx) {
         await new Promise(resolve => {

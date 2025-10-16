@@ -321,14 +321,23 @@ async function projectListPage(req, res, next) {
     if (samlSession) {
       // Notification institution SSO: After SSO Linked
       if (samlSession.linked) {
+        let templateKey = 'notification_institution_sso_linked'
+
+        if (
+          samlSession.userCreatedViaDomainCapture &&
+          samlSession.managedUsersEnabled
+        ) {
+          templateKey =
+            'notification_account_created_via_group_domain_capture_and_managed_users_enabled'
+        } else if (samlSession.domainCaptureEnabled) {
+          templateKey = 'notification_group_sso_linked'
+        }
         notificationsInstitution.push({
           email: samlSession.institutionEmail,
           institutionName:
             samlSession.linked.universityName ||
             samlSession.linked.providerName,
-          templateKey: samlSession.domainCaptureEnabled
-            ? 'notification_group_sso_linked'
-            : 'notification_institution_sso_linked',
+          templateKey,
         })
       }
 

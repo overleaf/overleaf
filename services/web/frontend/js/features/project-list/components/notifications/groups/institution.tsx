@@ -103,6 +103,34 @@ function Institution() {
                 }
               />
             )}
+            {templateKey ===
+              'notification_account_created_via_group_domain_capture_and_managed_users_enabled' && (
+              <Notification
+                type="info"
+                onDismiss={() => id && handleDismiss(id)}
+                content={
+                  <>
+                    <Trans
+                      i18nKey="account_managed_by_group_teamname"
+                      components={
+                        /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
+                        [<strong />]
+                      }
+                      values={{ appName, email, teamName: institutionName }}
+                      shouldUnescape
+                      tOptions={{ interpolation: { escapeValue: true } }}
+                    />
+                    &nbsp;
+                    <a
+                      href="/learn/how-to/Understanding_Managed_Overleaf_Accounts"
+                      target="_blank"
+                    >
+                      {t('read_more_about_managed_users')}
+                    </a>
+                  </>
+                }
+              />
+            )}
             {templateKey === 'notification_institution_sso_non_canonical' && (
               <Notification
                 type="warning"
