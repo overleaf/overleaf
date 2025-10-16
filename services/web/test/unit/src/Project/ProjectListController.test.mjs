@@ -799,6 +799,29 @@ describe('ProjectListController', function () {
           ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
         })
       })
+      describe('group domain capture enabled for domain', function () {
+        it('does not show institution SSO available notification', function (ctx) {
+          ctx.UserGetter.promises.getUserFullEmails.resolves([
+            {
+              email: 'test@overleaf.com',
+              affiliation: {
+                group: { domainCaptureEnabled: true },
+                institution: {
+                  id: 1,
+                  confirmed: true,
+                  name: 'Overleaf',
+                  ssoBeta: false,
+                  ssoEnabled: true,
+                },
+              },
+            },
+          ])
+          ctx.res.render = (pageName, opts) => {
+            expect(opts.notificationsInstitution).to.deep.equal([])
+            ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+          }
+        })
+      })
     })
 
     describe('Without Institution SSO feature', function () {

@@ -110,6 +110,15 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
     )
   }
 
+  const domainAlsoForGroupWithDomainCapture =
+    userEmailData?.affiliation?.group?.domainCaptureEnabled
+
+  if (domainAlsoForGroupWithDomainCapture) {
+    // user is not linked via Commons and should link via groups
+    // do not show UI to link to Commons
+    return null
+  }
+
   return (
     <OLRow>
       <OLCol lg={{ span: 8, offset: 4 }}>

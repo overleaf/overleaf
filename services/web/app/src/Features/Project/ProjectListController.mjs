@@ -53,6 +53,11 @@ const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   // Do not show SSO UI for unconfirmed domains
   if (!affiliation.institution.confirmed) return false
 
+  // If ssoEnabled = true and group.domainCaptureEnabled = true
+  // then Commons is migrating to group subscription and we do not want to prompt
+  // linking through Commons SSO
+  if (affiliation?.group?.domainCaptureEnabled) return false
+
   // Could have multiple emails at the same institution, and if any are
   // linked to the institution then do not show notification for others
   if (
