@@ -1,8 +1,3 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -13,11 +8,8 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let ClsiStateManager
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const crypto = require('crypto')
-const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
+import crypto from 'node:crypto'
+import ProjectEntityHandler from '../Project/ProjectEntityHandler.js'
 
 // The "state" of a project is a hash of the relevant attributes in the
 // project object in this case we only need the rootFolder.
@@ -36,7 +28,7 @@ const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 const buildState = s =>
   crypto.createHash('sha1').update(s, 'utf8').digest('hex')
 
-module.exports = ClsiStateManager = {
+export default {
   computeHash(project, options) {
     const { docs, files } =
       ProjectEntityHandler.getAllEntitiesFromProject(project)

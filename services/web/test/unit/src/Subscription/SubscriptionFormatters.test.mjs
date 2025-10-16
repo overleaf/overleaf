@@ -1,7 +1,5 @@
-const chai = require('chai')
-const SubscriptionFormatters = require('../../../../app/src/Features/Subscription/SubscriptionFormatters')
-
-const { expect } = chai
+import { expect } from 'vitest'
+import SubscriptionFormatters from '../../../../app/src/Features/Subscription/SubscriptionFormatters.mjs'
 
 describe('SubscriptionFormatters', function () {
   describe('formatDateTime', function () {

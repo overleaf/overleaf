@@ -1,24 +1,23 @@
-const sinon = require('sinon')
-const { expect } = require('chai')
-const modulePath = '../../../../app/src/Features/Compile/ClsiCookieManager.js'
-const SandboxedModule = require('sandboxed-module')
+import sinon from 'sinon'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+const modulePath = '../../../../app/src/Features/Compile/ClsiCookieManager.mjs'
 
 describe('ClsiCookieManager', function () {
-  beforeEach(function () {
-    this.redis = {
+  beforeEach(async function (ctx) {
+    ctx.redis = {
       auth() {},
       del: sinon.stub(),
       get: sinon.stub(),
       setex: sinon.stub().resolves(),
     }
-    this.project_id = '123423431321-proj-id'
-    this.user_id = 'abc-user-id'
-    this.fetchUtils = {
+    ctx.project_id = '123423431321-proj-id'
+    ctx.user_id = 'abc-user-id'
+    ctx.fetchUtils = {
       fetchNothing: sinon.stub().returns(Promise.resolve()),
       fetchStringWithResponse: sinon.stub().returns(Promise.resolve()),
     }
-    this.metrics = { inc: sinon.stub() }
-    this.settings = {
+    ctx.metrics = { inc: sinon.stub() }
+    ctx.settings = {
       redis: {
         web: 'redis.something',
       },
@@ -33,314 +32,319 @@ describe('ClsiCookieManager', function () {
         key: 'coooookie',
       },
     }
-    this.requires = {
-      '../../infrastructure/RedisWrapper': (this.RedisWrapper = {
-        client: () => this.redis,
+    vi.doMock('../../../../app/src/infrastructure/RedisWrapper', () => ({
+      default: (ctx.RedisWrapper = {
+        client: () => ctx.redis,
       }),
-      '@overleaf/settings': this.settings,
-      '@overleaf/fetch-utils': this.fetchUtils,
-      '@overleaf/metrics': this.metrics,
-    }
-    this.ClsiCookieManager = SandboxedModule.require(modulePath, {
-      requires: this.requires,
-    })()
+    }))
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.settings,
+    }))
+    vi.doMock('@overleaf/fetch-utils', () => ctx.fetchUtils)
+    vi.doMock('@overleaf/metrics', () => ({
+      default: ctx.metrics,
+    }))
+
+    ctx.ClsiCookieManager = (await import(modulePath)).default()
   })
 
   describe('getServerId', function () {
-    it('should call get for the key', async function () {
-      this.redis.get.resolves('clsi-7')
-      const serverId = await this.ClsiCookieManager.promises.getServerId(
-        this.project_id,
-        this.user_id,
+    it('should call get for the key', async function (ctx) {
+      ctx.redis.get.resolves('clsi-7')
+      const serverId = await ctx.ClsiCookieManager.promises.getServerId(
+        ctx.project_id,
+        ctx.user_id,
         '',
         'n2d'
       )
-      this.redis.get
-        .calledWith(`clsiserver:n2d:${this.project_id}:${this.user_id}`)
+      ctx.redis.get
+        .calledWith(`clsiserver:n2d:${ctx.project_id}:${ctx.user_id}`)
         .should.equal(true)
       serverId.should.equal('clsi-7')
     })
 
-    it('should fallback to old key', async function () {
-      this.redis.get
-        .withArgs(`clsiserver:n2d:${this.project_id}:${this.user_id}`)
+    it('should fallback to old key', async function (ctx) {
+      ctx.redis.get
+        .withArgs(`clsiserver:n2d:${ctx.project_id}:${ctx.user_id}`)
         .resolves(null)
-      this.redis.get
-        .withArgs(`clsiserver:${this.project_id}:${this.user_id}`)
+      ctx.redis.get
+        .withArgs(`clsiserver:${ctx.project_id}:${ctx.user_id}`)
         .resolves('clsi-7')
-      const serverId = await this.ClsiCookieManager.promises.getServerId(
-        this.project_id,
-        this.user_id,
+      const serverId = await ctx.ClsiCookieManager.promises.getServerId(
+        ctx.project_id,
+        ctx.user_id,
         '',
         'n2d'
       )
-      this.redis.get
-        .calledWith(`clsiserver:n2d:${this.project_id}:${this.user_id}`)
+      ctx.redis.get
+        .calledWith(`clsiserver:n2d:${ctx.project_id}:${ctx.user_id}`)
         .should.equal(true)
-      this.redis.get
-        .calledWith(`clsiserver:${this.project_id}:${this.user_id}`)
+      ctx.redis.get
+        .calledWith(`clsiserver:${ctx.project_id}:${ctx.user_id}`)
         .should.equal(true)
       serverId.should.equal('clsi-7')
     })
 
-    it('should _populateServerIdViaRequest if no key is found', async function () {
-      this.ClsiCookieManager.promises._populateServerIdViaRequest = sinon
+    it('should _populateServerIdViaRequest if no key is found', async function (ctx) {
+      ctx.ClsiCookieManager.promises._populateServerIdViaRequest = sinon
         .stub()
         .resolves()
-      this.redis.get.resolves(null)
-      await this.ClsiCookieManager.promises.getServerId(
-        this.project_id,
-        this.user_id,
+      ctx.redis.get.resolves(null)
+      await ctx.ClsiCookieManager.promises.getServerId(
+        ctx.project_id,
+        ctx.user_id,
         ''
       )
-      this.ClsiCookieManager.promises._populateServerIdViaRequest
-        .calledWith(this.project_id, this.user_id)
+      ctx.ClsiCookieManager.promises._populateServerIdViaRequest
+        .calledWith(ctx.project_id, ctx.user_id)
         .should.equal(true)
     })
 
-    it('should _populateServerIdViaRequest if no key is blank', async function () {
-      this.ClsiCookieManager.promises._populateServerIdViaRequest = sinon
+    it('should _populateServerIdViaRequest if no key is blank', async function (ctx) {
+      ctx.ClsiCookieManager.promises._populateServerIdViaRequest = sinon
         .stub()
         .resolves(null)
-      this.redis.get.resolves('')
-      await this.ClsiCookieManager.promises.getServerId(
-        this.project_id,
-        this.user_id,
+      ctx.redis.get.resolves('')
+      await ctx.ClsiCookieManager.promises.getServerId(
+        ctx.project_id,
+        ctx.user_id,
         '',
         'n2d'
       )
-      this.ClsiCookieManager.promises._populateServerIdViaRequest
-        .calledWith(this.project_id, this.user_id)
+      ctx.ClsiCookieManager.promises._populateServerIdViaRequest
+        .calledWith(ctx.project_id, ctx.user_id)
         .should.equal(true)
     })
   })
 
   describe('_populateServerIdViaRequest', function () {
-    beforeEach(function () {
-      this.clsiServerId = 'server-id'
-      this.ClsiCookieManager.promises.setServerId = sinon.stub().resolves()
+    beforeEach(function (ctx) {
+      ctx.clsiServerId = 'server-id'
+      ctx.ClsiCookieManager.promises.setServerId = sinon.stub().resolves()
     })
 
     describe('with a server id in the response', function () {
-      beforeEach(function () {
-        this.response = {
+      beforeEach(function (ctx) {
+        ctx.response = {
           headers: {
             'set-cookie': [
-              `${this.settings.clsiCookie.key}=${this.clsiServerId}`,
+              `${ctx.settings.clsiCookie.key}=${ctx.clsiServerId}`,
             ],
           },
         }
-        this.fetchUtils.fetchNothing.returns(this.response)
+        ctx.fetchUtils.fetchNothing.returns(ctx.response)
       })
 
-      it('should make a request to the clsi', async function () {
-        await this.ClsiCookieManager.promises._populateServerIdViaRequest(
-          this.project_id,
-          this.user_id,
+      it('should make a request to the clsi', async function (ctx) {
+        await ctx.ClsiCookieManager.promises._populateServerIdViaRequest(
+          ctx.project_id,
+          ctx.user_id,
           'standard',
           'n2d'
         )
-        const args = this.ClsiCookieManager.promises.setServerId.args[0]
-        args[0].should.equal(this.project_id)
-        args[1].should.equal(this.user_id)
+        const args = ctx.ClsiCookieManager.promises.setServerId.args[0]
+        args[0].should.equal(ctx.project_id)
+        args[1].should.equal(ctx.user_id)
         args[2].should.equal('standard')
         args[3].should.equal('n2d')
-        args[4].should.deep.equal(this.clsiServerId)
+        args[4].should.deep.equal(ctx.clsiServerId)
       })
 
-      it('should return the server id', async function () {
+      it('should return the server id', async function (ctx) {
         const serverId =
-          await this.ClsiCookieManager.promises._populateServerIdViaRequest(
-            this.project_id,
-            this.user_id,
+          await ctx.ClsiCookieManager.promises._populateServerIdViaRequest(
+            ctx.project_id,
+            ctx.user_id,
             '',
             'n2d'
           )
-        serverId.should.equal(this.clsiServerId)
+        serverId.should.equal(ctx.clsiServerId)
       })
     })
 
     describe('without a server id in the response', function () {
-      beforeEach(function () {
-        this.response = { headers: {} }
-        this.fetchUtils.fetchNothing.returns(this.response)
+      beforeEach(function (ctx) {
+        ctx.response = { headers: {} }
+        ctx.fetchUtils.fetchNothing.returns(ctx.response)
       })
-      it('should not set the server id there is no server id in the response', async function () {
-        this.ClsiCookieManager._parseServerIdFromResponse = sinon
+      it('should not set the server id there is no server id in the response', async function (ctx) {
+        ctx.ClsiCookieManager._parseServerIdFromResponse = sinon
           .stub()
           .returns(null)
-        await this.ClsiCookieManager.promises.setServerId(
-          this.project_id,
-          this.user_id,
+        await ctx.ClsiCookieManager.promises.setServerId(
+          ctx.project_id,
+          ctx.user_id,
           'standard',
           'n2d',
-          this.clsiServerId,
+          ctx.clsiServerId,
           null
         )
-        this.redis.setex.called.should.equal(false)
+        ctx.redis.setex.called.should.equal(false)
       })
     })
   })
 
   describe('clearServerId', function () {
-    it('should clear both keys', async function () {
-      await this.ClsiCookieManager.promises.clearServerId(
-        this.project_id,
-        this.user_id,
+    it('should clear both keys', async function (ctx) {
+      await ctx.ClsiCookieManager.promises.clearServerId(
+        ctx.project_id,
+        ctx.user_id,
         'n2d'
       )
-      this.redis.del.should.have.been.calledWith(
-        `clsiserver:n2d:${this.project_id}:${this.user_id}`,
-        `clsiserver:${this.project_id}:${this.user_id}`
+      ctx.redis.del.should.have.been.calledWith(
+        `clsiserver:n2d:${ctx.project_id}:${ctx.user_id}`,
+        `clsiserver:${ctx.project_id}:${ctx.user_id}`
       )
     })
   })
 
   describe('setServerId', function () {
-    beforeEach(function () {
-      this.clsiServerId = 'server-id'
-      this.ClsiCookieManager._parseServerIdFromResponse = sinon
+    beforeEach(function (ctx) {
+      ctx.clsiServerId = 'server-id'
+      ctx.ClsiCookieManager._parseServerIdFromResponse = sinon
         .stub()
         .returns('clsi-8')
     })
 
-    it('should set the server id with a ttl', async function () {
-      await this.ClsiCookieManager.promises.setServerId(
-        this.project_id,
-        this.user_id,
+    it('should set the server id with a ttl', async function (ctx) {
+      await ctx.ClsiCookieManager.promises.setServerId(
+        ctx.project_id,
+        ctx.user_id,
         'standard',
         'n2d',
-        this.clsiServerId,
+        ctx.clsiServerId,
         null
       )
-      this.redis.setex.should.have.been.calledWith(
-        `clsiserver:n2d:${this.project_id}:${this.user_id}`,
-        this.settings.clsiCookie.ttlInSeconds,
-        this.clsiServerId
+      ctx.redis.setex.should.have.been.calledWith(
+        `clsiserver:n2d:${ctx.project_id}:${ctx.user_id}`,
+        ctx.settings.clsiCookie.ttlInSeconds,
+        ctx.clsiServerId
       )
     })
 
-    it('should set the server id with the regular ttl for reg instance', async function () {
-      this.clsiServerId = 'clsi-reg-8'
-      await this.ClsiCookieManager.promises.setServerId(
-        this.project_id,
-        this.user_id,
+    it('should set the server id with the regular ttl for reg instance', async function (ctx) {
+      ctx.clsiServerId = 'clsi-reg-8'
+      await ctx.ClsiCookieManager.promises.setServerId(
+        ctx.project_id,
+        ctx.user_id,
         'standard',
         'n2d',
-        this.clsiServerId,
+        ctx.clsiServerId,
         null
       )
-      expect(this.redis.setex).to.have.been.calledWith(
-        `clsiserver:n2d:${this.project_id}:${this.user_id}`,
-        this.settings.clsiCookie.ttlInSecondsRegular,
-        this.clsiServerId
+      expect(ctx.redis.setex).to.have.been.calledWith(
+        `clsiserver:n2d:${ctx.project_id}:${ctx.user_id}`,
+        ctx.settings.clsiCookie.ttlInSecondsRegular,
+        ctx.clsiServerId
       )
     })
 
-    it('should not set the server id if clsiCookies are not enabled', async function () {
-      delete this.settings.clsiCookie.key
-      this.ClsiCookieManager2 = SandboxedModule.require(modulePath, {
-        globals: {
-          console,
-        },
-        requires: this.requires,
-      })()
-      await this.ClsiCookieManager2.promises.setServerId(
-        this.project_id,
-        this.user_id,
-        'standard',
-        'n2d',
-        this.clsiServerId,
-        null
-      )
-      this.redis.setex.called.should.equal(false)
+    describe('when clsiCookies are not enabled', function (ctx) {
+      let oldKey
+      beforeEach(async function (ctx) {
+        oldKey = ctx.settings.clsiCookie.key
+        delete ctx.settings.clsiCookie.key
+        vi.resetModules()
+        ctx.ClsiCookieManager2 = (await import(modulePath)).default()
+      })
+      afterEach(function (ctx) {
+        ctx.settings.clsiCookie.key = oldKey
+      })
+
+      it('should not set the server id if clsiCookies are not enabled', async function (ctx) {
+        await ctx.ClsiCookieManager2.promises.setServerId(
+          ctx.project_id,
+          ctx.user_id,
+          'standard',
+          'n2d',
+          ctx.clsiServerId,
+          null
+        )
+        ctx.redis.setex.called.should.equal(false)
+      })
     })
 
-    it('should also set in the secondary if secondary redis is enabled', async function () {
-      this.redis_secondary = { setex: sinon.stub().resolves() }
-      this.settings.redis.clsi_cookie_secondary = {}
-      this.RedisWrapper.client = sinon.stub()
-      this.RedisWrapper.client.withArgs('clsi_cookie').returns(this.redis)
-      this.RedisWrapper.client
+    it('should also set in the secondary if secondary redis is enabled', async function (ctx) {
+      ctx.redis_secondary = { setex: sinon.stub().resolves() }
+      ctx.settings.redis.clsi_cookie_secondary = {}
+      ctx.RedisWrapper.client = sinon.stub()
+      ctx.RedisWrapper.client.withArgs('clsi_cookie').returns(ctx.redis)
+      ctx.RedisWrapper.client
         .withArgs('clsi_cookie_secondary')
-        .returns(this.redis_secondary)
-      this.ClsiCookieManager2 = SandboxedModule.require(modulePath, {
-        globals: {
-          console,
-        },
-        requires: this.requires,
-      })()
-      this.ClsiCookieManager2._parseServerIdFromResponse = sinon
+        .returns(ctx.redis_secondary)
+      vi.resetModules()
+      ctx.ClsiCookieManager2 = (await import(modulePath)).default()
+      ctx.ClsiCookieManager2._parseServerIdFromResponse = sinon
         .stub()
         .returns('clsi-8')
-      await this.ClsiCookieManager2.promises.setServerId(
-        this.project_id,
-        this.user_id,
+      await ctx.ClsiCookieManager2.promises.setServerId(
+        ctx.project_id,
+        ctx.user_id,
         'standard',
         'n2d',
-        this.clsiServerId,
+        ctx.clsiServerId,
         null
       )
-      this.redis_secondary.setex.should.have.been.calledWith(
-        `clsiserver:n2d:${this.project_id}:${this.user_id}`,
-        this.settings.clsiCookie.ttlInSeconds,
-        this.clsiServerId
+      ctx.redis_secondary.setex.should.have.been.calledWith(
+        `clsiserver:n2d:${ctx.project_id}:${ctx.user_id}`,
+        ctx.settings.clsiCookie.ttlInSeconds,
+        ctx.clsiServerId
       )
     })
 
     describe('checkIsLoadSheddingEvent', function () {
-      beforeEach(function () {
-        this.fetchUtils.fetchStringWithResponse.reset()
-        this.call = async () => {
-          await this.ClsiCookieManager.promises.setServerId(
-            this.project_id,
-            this.user_id,
+      beforeEach(function (ctx) {
+        ctx.fetchUtils.fetchStringWithResponse.reset()
+        ctx.call = async () => {
+          await ctx.ClsiCookieManager.promises.setServerId(
+            ctx.project_id,
+            ctx.user_id,
             'standard',
             'n2d',
-            this.clsiServerId,
+            ctx.clsiServerId,
             'previous-clsi-server-id'
           )
           expect(
-            this.fetchUtils.fetchStringWithResponse
+            ctx.fetchUtils.fetchStringWithResponse
           ).to.have.been.calledWith(
-            `${this.settings.apis.clsi.url}/instance-state?clsiserverid=previous-clsi-server-id&compileGroup=standard&compileBackendClass=n2d`,
+            `${ctx.settings.apis.clsi.url}/instance-state?clsiserverid=previous-clsi-server-id&compileGroup=standard&compileBackendClass=n2d`,
             { method: 'GET', signal: sinon.match.instanceOf(AbortSignal) }
           )
         }
       })
 
-      it('should report "load-shedding" when previous is UP', async function () {
-        this.fetchUtils.fetchStringWithResponse.resolves({
+      it('should report "load-shedding" when previous is UP', async function (ctx) {
+        ctx.fetchUtils.fetchStringWithResponse.resolves({
           response: { status: 200 },
           body: 'previous-clsi-server-id,UP\n',
         })
-        await this.call()
-        expect(this.metrics.inc).to.have.been.calledWith(
+        await ctx.call()
+        expect(ctx.metrics.inc).to.have.been.calledWith(
           'clsi-lb-switch-backend',
           1,
           { status: 'load-shedding' }
         )
       })
 
-      it('should report "cycle" when other is UP', async function () {
-        this.fetchUtils.fetchStringWithResponse.resolves({
+      it('should report "cycle" when other is UP', async function (ctx) {
+        ctx.fetchUtils.fetchStringWithResponse.resolves({
           response: { status: 200 },
           body: 'other-clsi-server-id,UP\n',
         })
-        await this.call()
-        expect(this.metrics.inc).to.have.been.calledWith(
+        await ctx.call()
+        expect(ctx.metrics.inc).to.have.been.calledWith(
           'clsi-lb-switch-backend',
           1,
           { status: 'cycle' }
         )
       })
 
-      it('should report "cycle" when previous is 404', async function () {
-        this.fetchUtils.fetchStringWithResponse.resolves({
+      it('should report "cycle" when previous is 404', async function (ctx) {
+        ctx.fetchUtils.fetchStringWithResponse.resolves({
           response: { status: 404 },
         })
-        await this.call()
-        expect(this.metrics.inc).to.have.been.calledWith(
+        await ctx.call()
+        expect(ctx.metrics.inc).to.have.been.calledWith(
           'clsi-lb-switch-backend',
           1,
           { status: 'cycle' }

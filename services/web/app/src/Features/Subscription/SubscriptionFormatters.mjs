@@ -1,4 +1,4 @@
-import dateformat from 'dateformat';
+import dateformat from 'dateformat'
 
 function formatDateTime(date) {
   if (!date) {
@@ -17,4 +17,4 @@ function formatDate(date) {
 export default {
   formatDateTime,
   formatDate,
-};
+}

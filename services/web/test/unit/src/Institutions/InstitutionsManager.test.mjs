@@ -1,270 +1,311 @@
-const SandboxedModule = require('sandboxed-module')
-const path = require('path')
-const sinon = require('sinon')
-const { expect } = require('chai')
-const { ObjectId } = require('mongodb-legacy')
+import { vi, expect } from 'vitest'
+import path from 'path'
+import sinon from 'sinon'
+import mongodb from 'mongodb-legacy'
+import Features from '../../../../app/src/infrastructure/Features.js'
 const modulePath = path.join(
-  __dirname,
+  import.meta.dirname,
   '../../../../app/src/Features/Institutions/InstitutionsManager'
 )
-const Features = require('../../../../app/src/infrastructure/Features')
+
+const { ObjectId } = mongodb
 
 describe('InstitutionsManager', function () {
-  beforeEach(function () {
-    this.institutionId = 123
-    this.user = {}
+  beforeEach(async function (ctx) {
+    ctx.institutionId = 123
+    ctx.user = {}
     const lapsedUser = {
       _id: '657300a08a14461b3d1aac3e',
       features: {},
     }
-    this.users = [
+    ctx.users = [
       lapsedUser,
       { _id: '657300a08a14461b3d1aac3f', features: {} },
       { _id: '657300a08a14461b3d1aac40', features: {} },
       { _id: '657300a08a14461b3d1aac41', features: {} },
     ]
-    this.ssoUsers = [
+    ctx.ssoUsers = [
       {
         _id: '657300a08a14461b3d1aac3f',
-        samlIdentifiers: [{ providerId: this.institutionId.toString() }],
+        samlIdentifiers: [{ providerId: ctx.institutionId.toString() }],
       },
       {
         _id: '657300a08a14461b3d1aac40',
         samlIdentifiers: [
           {
-            providerId: this.institutionId.toString(),
+            providerId: ctx.institutionId.toString(),
             hasEntitlement: true,
           },
         ],
       },
       {
         _id: '657300a08a14461b3d1aac3e',
-        samlIdentifiers: [{ providerId: this.institutionId.toString() }],
+        samlIdentifiers: [{ providerId: ctx.institutionId.toString() }],
         hasEntitlement: true,
       },
     ]
 
-    this.UserGetter = {
+    ctx.UserGetter = {
       promises: {
-        getUser: sinon.stub().resolves(this.user),
-        getUsers: sinon.stub().resolves(this.users),
+        getUser: sinon.stub().resolves(ctx.user),
+        getUsers: sinon.stub().resolves(ctx.users),
         getUsersByAnyConfirmedEmail: sinon.stub().resolves(),
-        getSsoUsersAtInstitution: (this.getSsoUsersAtInstitution = sinon
+        getSsoUsersAtInstitution: (ctx.getSsoUsersAtInstitution = sinon
           .stub()
-          .resolves(this.ssoUsers)),
+          .resolves(ctx.ssoUsers)),
       },
     }
-    this.creator = { create: sinon.stub().resolves() }
-    this.NotificationsBuilder = {
+    ctx.creator = { create: sinon.stub().resolves() }
+    ctx.NotificationsBuilder = {
       promises: {
-        featuresUpgradedByAffiliation: sinon.stub().returns(this.creator),
-        redundantPersonalSubscription: sinon.stub().returns(this.creator),
+        featuresUpgradedByAffiliation: sinon.stub().returns(ctx.creator),
+        redundantPersonalSubscription: sinon.stub().returns(ctx.creator),
       },
     }
-    this.SubscriptionLocator = {
+    ctx.SubscriptionLocator = {
       promises: {
         getUsersSubscription: sinon.stub().resolves(),
       },
     }
-    this.institutionWithV1Data = { name: 'Wombat University' }
-    this.institution = {
-      fetchV1DataPromise: sinon.stub().resolves(this.institutionWithV1Data),
+    ctx.institutionWithV1Data = { name: 'Wombat University' }
+    ctx.institution = {
+      fetchV1DataPromise: sinon.stub().resolves(ctx.institutionWithV1Data),
     }
-    this.InstitutionModel = {
+    ctx.InstitutionModel = {
       Institution: {
         findOne: sinon.stub().returns({
-          exec: sinon.stub().resolves(this.institution),
+          exec: sinon.stub().resolves(ctx.institution),
         }),
       },
     }
-    this.subscriptionExec = sinon.stub().resolves()
+    ctx.subscriptionExec = sinon.stub().resolves()
     const SubscriptionModel = {
       Subscription: {
         find: () => ({
           populate: () => ({
-            exec: this.subscriptionExec,
+            exec: ctx.subscriptionExec,
           }),
         }),
       },
     }
 
-    this.Mongo = {
+    ctx.Mongo = {
       ObjectId,
     }
 
-    this.v1Counts = {
-      user_ids: this.users.map(user => user._id),
+    ctx.v1Counts = {
+      user_ids: ctx.users.map(user => user._id),
       current_users_count: 3,
       lapsed_user_ids: [lapsedUser._id],
       entitled_via_sso: 1, // 2 entitled, but 1 lapsed
       with_confirmed_email: 2, // 1 non entitled SSO + 1 email user
     }
 
-    this.InstitutionsManager = SandboxedModule.require(modulePath, {
-      requires: {
-        './InstitutionsAPI': {
+    vi.doMock(
+      '../../../../app/src/Features/Institutions/InstitutionsAPI',
+      () => ({
+        default: {
           promises: {
-            addAffiliation: (this.addAffiliationPromise = sinon
+            addAffiliation: (ctx.addAffiliationPromise = sinon
               .stub()
               .resolves()),
-            getInstitutionAffiliations:
-              (this.getInstitutionAffiliationsPromise = sinon
-                .stub()
-                .resolves(this.affiliations)),
+            getInstitutionAffiliations: (ctx.getInstitutionAffiliationsPromise =
+              sinon.stub().resolves(ctx.affiliations)),
             getConfirmedInstitutionAffiliations:
-              (this.getConfirmedInstitutionAffiliationsPromise = sinon
+              (ctx.getConfirmedInstitutionAffiliationsPromise = sinon
                 .stub()
-                .resolves(this.affiliations)),
+                .resolves(ctx.affiliations)),
             getInstitutionAffiliationsCounts:
-              (this.getInstitutionAffiliationsCounts = sinon
+              (ctx.getInstitutionAffiliationsCounts = sinon
                 .stub()
-                .resolves(this.v1Counts)),
+                .resolves(ctx.v1Counts)),
           },
         },
-        '../Subscription/FeaturesUpdater': {
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/FeaturesUpdater',
+      () => ({
+        default: {
           promises: {
-            refreshFeatures: (this.refreshFeaturesPromise = sinon
+            refreshFeatures: (ctx.refreshFeaturesPromise = sinon
               .stub()
               .resolves()),
           },
         },
-        '../Subscription/FeaturesHelper': {
-          isFeatureSetBetter: (this.isFeatureSetBetter = sinon.stub()),
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/FeaturesHelper',
+      () => ({
+        default: {
+          isFeatureSetBetter: (ctx.isFeatureSetBetter = sinon.stub()),
         },
-        '../User/UserGetter': this.UserGetter,
-        '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
-        '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
-        '../../models/Institution': this.InstitutionModel,
-        '../../models/Subscription': SubscriptionModel,
-        'mongodb-legacy': this.Mongo,
-        '@overleaf/settings': {
-          features: { professional: { 'test-feature': true } },
-        },
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
+      default: ctx.UserGetter,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Notifications/NotificationsBuilder',
+      () => ({
+        default: ctx.NotificationsBuilder,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionLocator',
+      () => ({
+        default: ctx.SubscriptionLocator,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/models/Institution',
+      () => ctx.InstitutionModel
+    )
+
+    vi.doMock(
+      '../../../../app/src/models/Subscription',
+      () => SubscriptionModel
+    )
+
+    vi.doMock('mongodb-legacy', () => ({
+      default: ctx.Mongo,
+    }))
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: {
+        features: { professional: { 'test-feature': true } },
       },
-    })
+    }))
+
+    ctx.InstitutionsManager = (await import(modulePath)).default
   })
 
   describe('refreshInstitutionUsers', function () {
-    beforeEach(function () {
-      this.user1Id = '123abc123abc123abc123abc'
-      this.user2Id = '456def456def456def456def'
-      this.user3Id = '789abd789abd789abd789abd'
-      this.user4Id = '321cba321cba321cba321cba'
-      this.affiliations = [
-        { user_id: this.user1Id },
-        { user_id: this.user2Id },
-        { user_id: this.user3Id },
-        { user_id: this.user4Id },
+    beforeEach(function (ctx) {
+      ctx.user1Id = '123abc123abc123abc123abc'
+      ctx.user2Id = '456def456def456def456def'
+      ctx.user3Id = '789abd789abd789abd789abd'
+      ctx.user4Id = '321cba321cba321cba321cba'
+      ctx.affiliations = [
+        { user_id: ctx.user1Id },
+        { user_id: ctx.user2Id },
+        { user_id: ctx.user3Id },
+        { user_id: ctx.user4Id },
       ]
-      this.user1 = { _id: this.user1Id }
-      this.user2 = { _id: this.user2Id }
-      this.user3 = { _id: this.user3Id }
-      this.user4 = { _id: this.user4Id }
+      ctx.user1 = { _id: ctx.user1Id }
+      ctx.user2 = { _id: ctx.user2Id }
+      ctx.user3 = { _id: ctx.user3Id }
+      ctx.user4 = { _id: ctx.user4Id }
 
-      this.UserGetter.promises.getUser
-        .withArgs(new ObjectId(this.user1Id))
-        .resolves(this.user1)
-      this.UserGetter.promises.getUser
-        .withArgs(new ObjectId(this.user2Id))
-        .resolves(this.user2)
-      this.UserGetter.promises.getUser
-        .withArgs(new ObjectId(this.user3Id))
-        .resolves(this.user3)
-      this.UserGetter.promises.getUser
-        .withArgs(new ObjectId(this.user4Id))
-        .resolves(this.user4)
+      ctx.UserGetter.promises.getUser
+        .withArgs(new ObjectId(ctx.user1Id))
+        .resolves(ctx.user1)
+      ctx.UserGetter.promises.getUser
+        .withArgs(new ObjectId(ctx.user2Id))
+        .resolves(ctx.user2)
+      ctx.UserGetter.promises.getUser
+        .withArgs(new ObjectId(ctx.user3Id))
+        .resolves(ctx.user3)
+      ctx.UserGetter.promises.getUser
+        .withArgs(new ObjectId(ctx.user4Id))
+        .resolves(ctx.user4)
 
-      this.SubscriptionLocator.promises.getUsersSubscription
-        .withArgs(this.user2)
+      ctx.SubscriptionLocator.promises.getUsersSubscription
+        .withArgs(ctx.user2)
         .resolves({
           planCode: 'pro',
           groupPlan: false,
         })
-      this.SubscriptionLocator.promises.getUsersSubscription
-        .withArgs(this.user3)
+      ctx.SubscriptionLocator.promises.getUsersSubscription
+        .withArgs(ctx.user3)
         .resolves({
           planCode: 'collaborator_free_trial_7_days',
           groupPlan: false,
         })
-      this.SubscriptionLocator.promises.getUsersSubscription
-        .withArgs(this.user4)
+      ctx.SubscriptionLocator.promises.getUsersSubscription
+        .withArgs(ctx.user4)
         .resolves({
           planCode: 'collaborator-annual',
           groupPlan: true,
         })
 
-      this.refreshFeaturesPromise.resolves({
+      ctx.refreshFeaturesPromise.resolves({
         newFeatures: {},
         featuresChanged: false,
       })
-      this.refreshFeaturesPromise
-        .withArgs(new ObjectId(this.user1Id))
+      ctx.refreshFeaturesPromise
+        .withArgs(new ObjectId(ctx.user1Id))
         .resolves({ newFeatures: {}, featuresChanged: true })
-      this.getInstitutionAffiliationsPromise.resolves(this.affiliations)
-      this.getConfirmedInstitutionAffiliationsPromise.resolves(
-        this.affiliations
-      )
+      ctx.getInstitutionAffiliationsPromise.resolves(ctx.affiliations)
+      ctx.getConfirmedInstitutionAffiliationsPromise.resolves(ctx.affiliations)
     })
 
-    it('refresh all users Features', async function () {
-      await this.InstitutionsManager.promises.refreshInstitutionUsers(
-        this.institutionId,
+    it('refresh all users Features', async function (ctx) {
+      await ctx.InstitutionsManager.promises.refreshInstitutionUsers(
+        ctx.institutionId,
         false
       )
-      sinon.assert.callCount(this.refreshFeaturesPromise, 4)
+      sinon.assert.callCount(ctx.refreshFeaturesPromise, 4)
       // expect no notifications
       sinon.assert.notCalled(
-        this.NotificationsBuilder.promises.featuresUpgradedByAffiliation
+        ctx.NotificationsBuilder.promises.featuresUpgradedByAffiliation
       )
       sinon.assert.notCalled(
-        this.NotificationsBuilder.promises.redundantPersonalSubscription
+        ctx.NotificationsBuilder.promises.redundantPersonalSubscription
       )
     })
 
-    it('notifies users if their features have been upgraded', async function () {
-      await this.InstitutionsManager.promises.refreshInstitutionUsers(
-        this.institutionId,
+    it('notifies users if their features have been upgraded', async function (ctx) {
+      await ctx.InstitutionsManager.promises.refreshInstitutionUsers(
+        ctx.institutionId,
         true
       )
       sinon.assert.calledOnce(
-        this.NotificationsBuilder.promises.featuresUpgradedByAffiliation
+        ctx.NotificationsBuilder.promises.featuresUpgradedByAffiliation
       )
       sinon.assert.calledWith(
-        this.NotificationsBuilder.promises.featuresUpgradedByAffiliation,
-        this.affiliations[0],
-        this.user1
+        ctx.NotificationsBuilder.promises.featuresUpgradedByAffiliation,
+        ctx.affiliations[0],
+        ctx.user1
       )
     })
 
-    it('notifies users if they have a subscription, or a trial subscription, that should be cancelled', async function () {
-      await this.InstitutionsManager.promises.refreshInstitutionUsers(
-        this.institutionId,
+    it('notifies users if they have a subscription, or a trial subscription, that should be cancelled', async function (ctx) {
+      await ctx.InstitutionsManager.promises.refreshInstitutionUsers(
+        ctx.institutionId,
         true
       )
 
       sinon.assert.calledTwice(
-        this.NotificationsBuilder.promises.redundantPersonalSubscription
+        ctx.NotificationsBuilder.promises.redundantPersonalSubscription
       )
       sinon.assert.calledWith(
-        this.NotificationsBuilder.promises.redundantPersonalSubscription,
-        this.affiliations[1],
-        this.user2
+        ctx.NotificationsBuilder.promises.redundantPersonalSubscription,
+        ctx.affiliations[1],
+        ctx.user2
       )
       sinon.assert.calledWith(
-        this.NotificationsBuilder.promises.redundantPersonalSubscription,
-        this.affiliations[2],
-        this.user3
+        ctx.NotificationsBuilder.promises.redundantPersonalSubscription,
+        ctx.affiliations[2],
+        ctx.user3
       )
     })
   })
 
   describe('checkInstitutionUsers', function () {
-    it('returns entitled/not, sso/not, lapsed/current, and pro counts', async function () {
+    it('returns entitled/not, sso/not, lapsed/current, and pro counts', async function (ctx) {
       if (Features.hasFeature('saas')) {
-        this.isFeatureSetBetter.returns(true)
+        ctx.isFeatureSetBetter.returns(true)
         const usersSummary =
-          await this.InstitutionsManager.promises.checkInstitutionUsers(
-            this.institutionId
+          await ctx.InstitutionsManager.promises.checkInstitutionUsers(
+            ctx.institutionId
           )
         expect(usersSummary).to.deep.equal({
           emailUsers: {
@@ -300,13 +341,13 @@ describe('InstitutionsManager', function () {
       }
     })
 
-    it('includes withConfirmedEmailMismatch when v1 and v2 counts do not add up', async function () {
+    it('includes withConfirmedEmailMismatch when v1 and v2 counts do not add up', async function (ctx) {
       if (Features.hasFeature('saas')) {
-        this.isFeatureSetBetter.returns(true)
-        this.v1Counts.with_confirmed_email = 100
+        ctx.isFeatureSetBetter.returns(true)
+        ctx.v1Counts.with_confirmed_email = 100
         const usersSummary =
-          await this.InstitutionsManager.promises.checkInstitutionUsers(
-            this.institutionId
+          await ctx.InstitutionsManager.promises.checkInstitutionUsers(
+            ctx.institutionId
           )
         expect(usersSummary).to.deep.equal({
           emailUsers: {
@@ -350,116 +391,115 @@ describe('InstitutionsManager', function () {
   })
 
   describe('getInstitutionUsersSubscriptions', function () {
-    it('returns all institution users subscriptions', async function () {
+    it('returns all institution users subscriptions', async function (ctx) {
       const stubbedUsers = [
         { user_id: '123abc123abc123abc123abc' },
         { user_id: '456def456def456def456def' },
         { user_id: '789def789def789def789def' },
       ]
-      this.getInstitutionAffiliationsPromise.resolves(stubbedUsers)
-      await this.InstitutionsManager.promises.getInstitutionUsersSubscriptions(
-        this.institutionId
+      ctx.getInstitutionAffiliationsPromise.resolves(stubbedUsers)
+      await ctx.InstitutionsManager.promises.getInstitutionUsersSubscriptions(
+        ctx.institutionId
       )
-      sinon.assert.calledOnce(this.subscriptionExec)
+      sinon.assert.calledOnce(ctx.subscriptionExec)
     })
   })
 
   describe('addAffiliations', function () {
-    beforeEach(function () {
-      this.host = 'mit.edu'.split('').reverse().join('')
-      this.stubbedUser1 = {
+    beforeEach(function (ctx) {
+      ctx.host = 'mit.edu'.split('').reverse().join('')
+      ctx.stubbedUser1 = {
         _id: '6573014d8a14461b3d1aac3f',
         name: 'bob',
         email: 'hello@world.com',
         emails: [
-          { email: 'stubb1@mit.edu', reversedHostname: this.host },
+          { email: 'stubb1@mit.edu', reversedHostname: ctx.host },
           { email: 'test@test.com', reversedHostname: 'test.com' },
-          { email: 'another@mit.edu', reversedHostname: this.host },
+          { email: 'another@mit.edu', reversedHostname: ctx.host },
         ],
       }
-      this.stubbedUser1DecoratedEmails = [
+      ctx.stubbedUser1DecoratedEmails = [
         {
           email: 'stubb1@mit.edu',
-          reversedHostname: this.host,
+          reversedHostname: ctx.host,
           samlIdentifier: { hasEntitlement: false },
         },
         { email: 'test@test.com', reversedHostname: 'test.com' },
         {
           email: 'another@mit.edu',
-          reversedHostname: this.host,
+          reversedHostname: ctx.host,
           samlIdentifier: { hasEntitlement: true },
         },
       ]
-      this.stubbedUser2 = {
+      ctx.stubbedUser2 = {
         _id: '6573014d8a14461b3d1aac40',
         name: 'test',
         email: 'hello2@world.com',
-        emails: [{ email: 'subb2@mit.edu', reversedHostname: this.host }],
+        emails: [{ email: 'subb2@mit.edu', reversedHostname: ctx.host }],
       }
-      this.stubbedUser2DecoratedEmails = [
+      ctx.stubbedUser2DecoratedEmails = [
         {
           email: 'subb2@mit.edu',
-          reversedHostname: this.host,
+          reversedHostname: ctx.host,
         },
       ]
 
-      this.getInstitutionUsersByHostname = sinon.stub().resolves([
+      ctx.getInstitutionUsersByHostname = sinon.stub().resolves([
         {
-          _id: this.stubbedUser1._id,
-          emails: this.stubbedUser1DecoratedEmails,
+          _id: ctx.stubbedUser1._id,
+          emails: ctx.stubbedUser1DecoratedEmails,
         },
         {
-          _id: this.stubbedUser2._id,
-          emails: this.stubbedUser2DecoratedEmails,
+          _id: ctx.stubbedUser2._id,
+          emails: ctx.stubbedUser2DecoratedEmails,
         },
       ])
-      this.UserGetter.promises.getInstitutionUsersByHostname =
-        this.getInstitutionUsersByHostname
+      ctx.UserGetter.promises.getInstitutionUsersByHostname =
+        ctx.getInstitutionUsersByHostname
     })
 
     describe('affiliateUsers', function () {
-      it('should add affiliations for matching users', async function () {
-        await this.InstitutionsManager.promises.affiliateUsers('mit.edu')
+      it('should add affiliations for matching users', async function (ctx) {
+        await ctx.InstitutionsManager.promises.affiliateUsers('mit.edu')
 
-        this.getInstitutionUsersByHostname.calledOnce.should.equal(true)
-        this.addAffiliationPromise.calledThrice.should.equal(true)
-        this.addAffiliationPromise
+        ctx.getInstitutionUsersByHostname.calledOnce.should.equal(true)
+        ctx.addAffiliationPromise.calledThrice.should.equal(true)
+        ctx.addAffiliationPromise
           .calledWithMatch(
-            this.stubbedUser1._id,
-            this.stubbedUser1.emails[0].email,
+            ctx.stubbedUser1._id,
+            ctx.stubbedUser1.emails[0].email,
             { entitlement: false }
           )
           .should.equal(true)
-        this.addAffiliationPromise
+        ctx.addAffiliationPromise
           .calledWithMatch(
-            this.stubbedUser1._id,
-            this.stubbedUser1.emails[2].email,
+            ctx.stubbedUser1._id,
+            ctx.stubbedUser1.emails[2].email,
             { entitlement: true }
           )
           .should.equal(true)
-        this.addAffiliationPromise
+        ctx.addAffiliationPromise
           .calledWithMatch(
-            this.stubbedUser2._id,
-            this.stubbedUser2.emails[0].email,
+            ctx.stubbedUser2._id,
+            ctx.stubbedUser2.emails[0].email,
             { entitlement: undefined }
           )
           .should.equal(true)
-        this.refreshFeaturesPromise
-          .calledWith(this.stubbedUser1._id)
+        ctx.refreshFeaturesPromise
+          .calledWith(ctx.stubbedUser1._id)
           .should.equal(true)
-        this.refreshFeaturesPromise
-          .calledWith(this.stubbedUser2._id)
+        ctx.refreshFeaturesPromise
+          .calledWith(ctx.stubbedUser2._id)
           .should.equal(true)
-        this.refreshFeaturesPromise.should.have.been.calledTwice
+        ctx.refreshFeaturesPromise.should.have.been.calledTwice
       })
 
-      it('should return errors if last affiliation cannot be added', async function () {
-        this.addAffiliationPromise.onCall(2).rejects()
-        await expect(
-          this.InstitutionsManager.promises.affiliateUsers('mit.edu')
-        ).to.be.rejected
+      it('should return errors if last affiliation cannot be added', async function (ctx) {
+        ctx.addAffiliationPromise.onCall(2).rejects()
+        await expect(ctx.InstitutionsManager.promises.affiliateUsers('mit.edu'))
+          .to.be.rejected
 
-        this.getInstitutionUsersByHostname.calledOnce.should.equal(true)
+        ctx.getInstitutionUsersByHostname.calledOnce.should.equal(true)
       })
     })
   })

@@ -1,21 +1,20 @@
-const {
-  callbackifyAll,
-  promiseMapWithLimit,
-} = require('@overleaf/promise-utils')
-const { ObjectId } = require('mongodb-legacy')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const { fetchJson } = require('@overleaf/fetch-utils')
-const InstitutionsAPI = require('./InstitutionsAPI')
-const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
-const FeaturesHelper = require('../Subscription/FeaturesHelper')
-const UserGetter = require('../User/UserGetter')
-const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
-const NotificationsHandler = require('../Notifications/NotificationsHandler')
-const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
-const { Institution } = require('../../models/Institution')
-const { Subscription } = require('../../models/Subscription')
-const OError = require('@overleaf/o-error')
+import { callbackifyAll, promiseMapWithLimit } from '@overleaf/promise-utils'
+import mongodb from 'mongodb-legacy'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import { fetchJson } from '@overleaf/fetch-utils'
+import InstitutionsAPI from './InstitutionsAPI.js'
+import FeaturesUpdater from '../Subscription/FeaturesUpdater.js'
+import FeaturesHelper from '../Subscription/FeaturesHelper.js'
+import UserGetter from '../User/UserGetter.js'
+import NotificationsBuilder from '../Notifications/NotificationsBuilder.js'
+import NotificationsHandler from '../Notifications/NotificationsHandler.js'
+import SubscriptionLocator from '../Subscription/SubscriptionLocator.js'
+import { Institution } from '../../models/Institution.js'
+import { Subscription } from '../../models/Subscription.js'
+import OError from '@overleaf/o-error'
+
+const { ObjectId } = mongodb
 
 const ASYNC_LIMIT = parseInt(process.env.ASYNC_LIMIT, 10) || 5
 
@@ -355,7 +354,7 @@ async function affiliateUserByReversedHostname(user, reversedHostname) {
   )
 }
 
-module.exports = {
+export default {
   ...callbackifyAll(InstitutionsManager),
   promises: InstitutionsManager,
 }

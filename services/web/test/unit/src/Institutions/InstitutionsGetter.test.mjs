@@ -1,31 +1,39 @@
-const SandboxedModule = require('sandboxed-module')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const modulePath = require('path').join(
-  __dirname,
-  '../../../../app/src/Features/Institutions/InstitutionsGetter.js'
-)
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+const modulePath =
+  '../../../../app/src/Features/Institutions/InstitutionsGetter.mjs'
 
 describe('InstitutionsGetter', function () {
-  beforeEach(function () {
-    this.UserGetter = {
+  beforeEach(async function (ctx) {
+    ctx.UserGetter = {
       getUserFullEmails: sinon.stub(),
       promises: {
         getUserFullEmails: sinon.stub(),
       },
     }
-    this.InstitutionsGetter = SandboxedModule.require(modulePath, {
-      requires: {
-        '../User/UserGetter': this.UserGetter,
-        '../UserMembership/UserMembershipsHandler':
-          (this.UserMembershipsHandler = {}),
-        '../UserMembership/UserMembershipEntityConfigs':
-          (this.UserMembershipEntityConfigs = {}),
-      },
-    })
 
-    this.userId = '12345abcde'
-    this.confirmedAffiliation = {
+    vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
+      default: ctx.UserGetter,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/UserMembership/UserMembershipsHandler',
+      () => ({
+        default: (ctx.UserMembershipsHandler = {}),
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/UserMembership/UserMembershipEntityConfigs',
+      () => ({
+        default: (ctx.UserMembershipEntityConfigs = {}),
+      })
+    )
+
+    ctx.InstitutionsGetter = (await import(modulePath)).default
+
+    ctx.userId = '12345abcde'
+    ctx.confirmedAffiliation = {
       confirmedAt: new Date(),
       affiliation: {
         institution: { id: 456, confirmed: true },
@@ -33,7 +41,7 @@ describe('InstitutionsGetter', function () {
         pastReconfirmDate: false,
       },
     }
-    this.confirmedAffiliationPastReconfirmation = {
+    ctx.confirmedAffiliationPastReconfirmation = {
       confirmedAt: new Date('2000-01-01'),
       affiliation: {
         institution: { id: 135, confirmed: true },
@@ -41,7 +49,7 @@ describe('InstitutionsGetter', function () {
         pastReconfirmDate: true,
       },
     }
-    this.licencedAffiliation = {
+    ctx.licencedAffiliation = {
       confirmedAt: new Date(),
       affiliation: {
         licence: 'pro_plus',
@@ -50,7 +58,7 @@ describe('InstitutionsGetter', function () {
         pastReconfirmDate: false,
       },
     }
-    this.licencedAffiliationPastReconfirmation = {
+    ctx.licencedAffiliationPastReconfirmation = {
       confirmedAt: new Date('2000-01-01'),
       affiliation: {
         licence: 'pro_plus',
@@ -59,7 +67,7 @@ describe('InstitutionsGetter', function () {
         pastReconfirmDate: true,
       },
     }
-    this.unconfirmedEmailLicensedAffiliation = {
+    ctx.unconfirmedEmailLicensedAffiliation = {
       confirmedAt: null,
       affiliation: {
         licence: 'pro_plus',
@@ -71,7 +79,7 @@ describe('InstitutionsGetter', function () {
         },
       },
     }
-    this.unconfirmedDomainLicensedAffiliation = {
+    ctx.unconfirmedDomainLicensedAffiliation = {
       confirmedAt: new Date(),
       affiliation: {
         licence: 'pro_plus',
@@ -83,7 +91,7 @@ describe('InstitutionsGetter', function () {
         },
       },
     }
-    this.userEmails = [
+    ctx.userEmails = [
       {
         confirmedAt: null,
         affiliation: {
@@ -95,9 +103,9 @@ describe('InstitutionsGetter', function () {
           },
         },
       },
-      this.confirmedAffiliation,
-      this.confirmedAffiliation,
-      this.confirmedAffiliationPastReconfirmation,
+      ctx.confirmedAffiliation,
+      ctx.confirmedAffiliation,
+      ctx.confirmedAffiliationPastReconfirmation,
       {
         confirmedAt: new Date(),
         affiliation: null,
@@ -124,41 +132,41 @@ describe('InstitutionsGetter', function () {
         },
       },
     ]
-    this.fullEmailCollection = [
-      this.licencedAffiliation,
-      this.licencedAffiliation,
-      this.licencedAffiliationPastReconfirmation,
-      this.confirmedAffiliation,
-      this.confirmedAffiliationPastReconfirmation,
-      this.unconfirmedDomainLicensedAffiliation,
-      this.unconfirmedEmailLicensedAffiliation,
+    ctx.fullEmailCollection = [
+      ctx.licencedAffiliation,
+      ctx.licencedAffiliation,
+      ctx.licencedAffiliationPastReconfirmation,
+      ctx.confirmedAffiliation,
+      ctx.confirmedAffiliationPastReconfirmation,
+      ctx.unconfirmedDomainLicensedAffiliation,
+      ctx.unconfirmedEmailLicensedAffiliation,
     ]
   })
 
   describe('getCurrentInstitutionIds', function () {
-    it('filters unconfirmed affiliations, those past reconfirmation, and returns only 1 result per institution', async function () {
-      this.UserGetter.promises.getUserFullEmails.resolves(this.userEmails)
+    it('filters unconfirmed affiliations, those past reconfirmation, and returns only 1 result per institution', async function (ctx) {
+      ctx.UserGetter.promises.getUserFullEmails.resolves(ctx.userEmails)
       const institutions =
-        await this.InstitutionsGetter.promises.getCurrentInstitutionIds(
-          this.userId
+        await ctx.InstitutionsGetter.promises.getCurrentInstitutionIds(
+          ctx.userId
         )
       expect(institutions.length).to.equal(1)
       expect(institutions[0]).to.equal(456)
     })
-    it('handles empty response', async function () {
-      this.UserGetter.promises.getUserFullEmails.resolves([])
+    it('handles empty response', async function (ctx) {
+      ctx.UserGetter.promises.getUserFullEmails.resolves([])
       const institutions =
-        await this.InstitutionsGetter.promises.getCurrentInstitutionIds(
-          this.userId
+        await ctx.InstitutionsGetter.promises.getCurrentInstitutionIds(
+          ctx.userId
         )
       expect(institutions).to.deep.equal([])
     })
-    it('handles errors', async function () {
-      this.UserGetter.promises.getUserFullEmails.rejects(new Error('oops'))
+    it('handles errors', async function (ctx) {
+      ctx.UserGetter.promises.getUserFullEmails.rejects(new Error('oops'))
       let e
       try {
-        await this.InstitutionsGetter.promises.getCurrentInstitutionIds(
-          this.userId
+        await ctx.InstitutionsGetter.promises.getCurrentInstitutionIds(
+          ctx.userId
         )
       } catch (error) {
         e = error
@@ -168,37 +176,37 @@ describe('InstitutionsGetter', function () {
   })
 
   describe('getCurrentAndPastAffiliationIds', function () {
-    it('filters unconfirmed affiliations, preserves those past reconfirmation, and returns only 1 result per institution', async function () {
-      this.UserGetter.promises.getUserFullEmails.resolves(
-        this.fullEmailCollection
+    it('filters unconfirmed affiliations, preserves those past reconfirmation, and returns only 1 result per institution', async function (ctx) {
+      ctx.UserGetter.promises.getUserFullEmails.resolves(
+        ctx.fullEmailCollection
       )
       const institutions =
-        await this.InstitutionsGetter.promises.getCurrentAndPastAffiliationIds(
-          this.userId
+        await ctx.InstitutionsGetter.promises.getCurrentAndPastAffiliationIds(
+          ctx.userId
         )
       expect(institutions).to.deep.equal([777, 888, 456, 135])
     })
-    it('handles empty response', async function () {
-      this.UserGetter.promises.getUserFullEmails.resolves([])
+    it('handles empty response', async function (ctx) {
+      ctx.UserGetter.promises.getUserFullEmails.resolves([])
       const institutions =
-        await this.InstitutionsGetter.promises.getCurrentInstitutionIds(
-          this.userId
+        await ctx.InstitutionsGetter.promises.getCurrentInstitutionIds(
+          ctx.userId
         )
       expect(institutions).to.deep.equal([])
     })
   })
 
   describe('getCurrentInstitutionsWithLicence', function () {
-    it('returns one result per institution and filters out affiliations without license', async function () {
-      this.UserGetter.promises.getUserFullEmails.resolves(
-        this.fullEmailCollection
+    it('returns one result per institution and filters out affiliations without license', async function (ctx) {
+      ctx.UserGetter.promises.getUserFullEmails.resolves(
+        ctx.fullEmailCollection
       )
       const institutions =
-        await this.InstitutionsGetter.promises.getCurrentInstitutionsWithLicence(
-          this.userId
+        await ctx.InstitutionsGetter.promises.getCurrentInstitutionsWithLicence(
+          ctx.userId
         )
       expect(institutions.map(institution => institution.id)).to.deep.equal([
-        this.licencedAffiliation.affiliation.institution.id,
+        ctx.licencedAffiliation.affiliation.institution.id,
       ])
     })
   })

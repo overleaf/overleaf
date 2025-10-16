@@ -1,7 +1,7 @@
-const { promisify, callbackify } = require('util')
-const UserGetter = require('../User/UserGetter')
-const UserMembershipsHandler = require('../UserMembership/UserMembershipsHandler')
-const UserMembershipEntityConfigs = require('../UserMembership/UserMembershipEntityConfigs')
+import { promisify, callbackify } from 'node:util'
+import UserGetter from '../User/UserGetter.js'
+import UserMembershipsHandler from '../UserMembership/UserMembershipsHandler.js'
+import UserMembershipEntityConfigs from '../UserMembership/UserMembershipEntityConfigs.js'
 
 async function getCurrentAffiliations(userId) {
   const fullEmails = await UserGetter.promises.getUserFullEmails(userId)
@@ -98,4 +98,4 @@ InstitutionsGetter.promises = {
   getManagedInstitutions: promisify(InstitutionsGetter.getManagedInstitutions),
 }
 
-module.exports = InstitutionsGetter
+export default InstitutionsGetter

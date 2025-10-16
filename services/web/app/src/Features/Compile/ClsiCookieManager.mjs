@@ -1,15 +1,15 @@
-const { URL, URLSearchParams } = require('url')
-const OError = require('@overleaf/o-error')
-const Settings = require('@overleaf/settings')
-const {
+import { URL, URLSearchParams } from 'node:url'
+import OError from '@overleaf/o-error'
+import Settings from '@overleaf/settings'
+import {
   fetchNothing,
   fetchStringWithResponse,
   RequestFailedError,
-} = require('@overleaf/fetch-utils')
-const RedisWrapper = require('../../infrastructure/RedisWrapper')
-const Cookie = require('cookie')
-const logger = require('@overleaf/logger')
-const Metrics = require('@overleaf/metrics')
+} from '@overleaf/fetch-utils'
+import RedisWrapper from '../../infrastructure/RedisWrapper.js'
+import Cookie from 'cookie'
+import logger from '@overleaf/logger'
+import Metrics from '@overleaf/metrics'
 
 const clsiCookiesEnabled = (Settings.clsiCookie?.key ?? '') !== ''
 
@@ -256,4 +256,4 @@ const ClsiCookieManagerFactory = function (backendGroup) {
   return cookieManager
 }
 
-module.exports = ClsiCookieManagerFactory
+export default ClsiCookieManagerFactory

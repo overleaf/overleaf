@@ -1,5 +1,5 @@
-const _ = require('lodash')
-const settings = require('@overleaf/settings')
+import _ from 'lodash'
+import settings from '@overleaf/settings'
 
 const ClsiFormatChecker = {
   checkRecoursesForProblems(resources) {
@@ -56,4 +56,4 @@ const ClsiFormatChecker = {
   },
 }
 
-module.exports = ClsiFormatChecker
+export default ClsiFormatChecker
