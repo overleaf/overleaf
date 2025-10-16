@@ -1,5 +1,5 @@
 import minimist from 'minimist'
-import InstitutionsManager from '../app/src/Features/Institutions/InstitutionsManager.js'
+import InstitutionsManager from '../app/src/Features/Institutions/InstitutionsManager.mjs'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const institutionId = parseInt(process.argv[2])

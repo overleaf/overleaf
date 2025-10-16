@@ -1,5 +1,5 @@
 import { promisify } from 'node:util'
-import InstitutionsManager from '../app/src/Features/Institutions/InstitutionsManager.js'
+import InstitutionsManager from '../app/src/Features/Institutions/InstitutionsManager.mjs'
 import { fileURLToPath } from 'node:url'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 const sleep = promisify(setTimeout)

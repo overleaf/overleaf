@@ -1,6 +1,6 @@
 import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import AnalyticsManager from '../Analytics/AnalyticsManager.js'
-import SubscriptionEmailHandler from './SubscriptionEmailHandler.js'
+import SubscriptionEmailHandler from './SubscriptionEmailHandler.mjs'
 import { AI_ADD_ON_CODE } from './AiHelper.js'
 import mongodb from 'mongodb-legacy'
 

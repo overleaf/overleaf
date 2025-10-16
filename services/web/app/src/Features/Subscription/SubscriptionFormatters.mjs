@@ -1,4 +1,4 @@
-const dateformat = require('dateformat')
+import dateformat from 'dateformat';
 
 function formatDateTime(date) {
   if (!date) {
@@ -14,7 +14,7 @@ function formatDate(date) {
   return dateformat(date, 'mmmm dS, yyyy', true)
 }
 
-module.exports = {
+export default {
   formatDateTime,
   formatDate,
-}
+};

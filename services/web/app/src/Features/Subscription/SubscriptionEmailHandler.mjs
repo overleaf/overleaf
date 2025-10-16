@@ -1,8 +1,8 @@
-const EmailHandler = require('../Email/EmailHandler')
-const UserGetter = require('../User/UserGetter')
-require('./SubscriptionEmailBuilder')
-const PlansLocator = require('./PlansLocator')
-const Settings = require('@overleaf/settings')
+import EmailHandler from '../Email/EmailHandler.js'
+import UserGetter from '../User/UserGetter.js'
+import './SubscriptionEmailBuilder.js'
+import PlansLocator from './PlansLocator.js'
+import Settings from '@overleaf/settings'
 
 const SubscriptionEmailHandler = {
   async sendTrialOnboardingEmail(userId, planCode) {
@@ -26,4 +26,4 @@ const SubscriptionEmailHandler = {
   },
 }
 
-module.exports = SubscriptionEmailHandler
+export default SubscriptionEmailHandler

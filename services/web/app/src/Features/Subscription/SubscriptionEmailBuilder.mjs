@@ -1,6 +1,6 @@
-const EmailBuilder = require('../Email/EmailBuilder')
-const EmailMessageHelper = require('../Email/EmailMessageHelper')
-const settings = require('@overleaf/settings')
+import EmailBuilder from '../Email/EmailBuilder.js'
+import EmailMessageHelper from '../Email/EmailMessageHelper.js'
+import settings from '@overleaf/settings'
 
 EmailBuilder.templates.trialOnboarding = EmailBuilder.NoCTAEmailTemplate({
   subject(opts) {
