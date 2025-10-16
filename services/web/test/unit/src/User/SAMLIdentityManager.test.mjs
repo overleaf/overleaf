@@ -1,108 +1,153 @@
-const { ObjectId } = require('mongodb-legacy')
-const sinon = require('sinon')
-const { expect } = require('chai')
-const SandboxedModule = require('sandboxed-module')
-const Errors = require('../../../../app/src/Features/Errors/Errors')
-const modulePath = '../../../../app/src/Features/User/SAMLIdentityManager.js'
+import { vi, expect } from 'vitest'
+import mongodb from 'mongodb-legacy'
+import sinon from 'sinon'
+import Errors from '../../../../app/src/Features/Errors/Errors.js'
+
+const { ObjectId } = mongodb
+
+const modulePath = '../../../../app/src/Features/User/SAMLIdentityManager.mjs'
+
+vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
+  vi.importActual('../../../../app/src/Features/Errors/Errors.js')
+)
 
 describe('SAMLIdentityManager', function () {
   const linkedEmail = 'another@example.com'
 
-  beforeEach(function () {
-    this.userId = '6005c75b12cbcaf771f4a105'
-    this.user = {
-      _id: this.userId,
+  beforeEach(async function (ctx) {
+    ctx.userId = '6005c75b12cbcaf771f4a105'
+    ctx.user = {
+      _id: ctx.userId,
       email: 'not-linked@overleaf.com',
       emails: [{ email: 'not-linked@overleaf.com' }],
       samlIdentifiers: [],
     }
-    this.auditLog = {
-      initiatorId: this.userId,
+    ctx.auditLog = {
+      initiatorId: ctx.userId,
       ipAddress: '0:0:0:0',
     }
-    this.userAlreadyLinked = {
+    ctx.userAlreadyLinked = {
       _id: '6005c7a012cbcaf771f4a106',
       email: 'linked@overleaf.com',
       emails: [{ email: 'linked@overleaf.com', samlProviderId: '1' }],
       samlIdentifiers: [{ externalUserId: 'linked-id', providerId: '1' }],
     }
-    this.userEmailExists = {
+    ctx.userEmailExists = {
       _id: '6005c7a012cbcaf771f4a107',
       email: 'exists@overleaf.com',
       emails: [{ email: 'exists@overleaf.com' }],
       samlIdentifiers: [],
     }
-    this.institution = {
+    ctx.institution = {
       name: 'Overleaf University',
     }
-    this.InstitutionsAPI = {
+    ctx.InstitutionsAPI = {
       promises: {
         addEntitlement: sinon.stub().resolves(),
         removeEntitlement: sinon.stub().resolves(),
       },
     }
-    this.SAMLIdentityManager = SandboxedModule.require(modulePath, {
-      requires: {
-        'mongodb-legacy': { ObjectId },
-        '../Email/EmailHandler': (this.EmailHandler = {
-          sendEmail: sinon.stub().yields(),
-        }),
-        '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {
+
+    ctx.logger = {
+      error: sinon.stub(),
+    }
+    vi.doMock('@overleaf/logger', () => ({
+      default: ctx.logger,
+    }))
+
+    vi.doMock('mongodb-legacy', () => ({
+      default: { ObjectId },
+    }))
+
+    vi.doMock('../../../../app/src/Features/Email/EmailHandler', () => ({
+      default: (ctx.EmailHandler = {
+        sendEmail: sinon.stub().yields(),
+      }),
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Notifications/NotificationsBuilder',
+      () => ({
+        default: (ctx.NotificationsBuilder = {
           promises: {
             redundantPersonalSubscription: sinon
               .stub()
               .returns({ create: sinon.stub().resolves() }),
           },
         }),
-        '../Subscription/SubscriptionLocator': (this.SubscriptionLocator = {
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionLocator',
+      () => ({
+        default: (ctx.SubscriptionLocator = {
           promises: {
             getUserIndividualSubscription: sinon.stub().resolves(),
           },
         }),
-        '../../models/User': {
-          User: (this.User = {
-            findOneAndUpdate: sinon.stub().returns({
-              exec: sinon.stub().resolves(this.user),
-            }),
-            findOne: sinon.stub().returns({
-              exec: sinon.stub().resolves(),
-            }),
-            updateOne: sinon.stub().returns({
-              exec: sinon.stub().resolves(),
-            }),
-          }),
+      })
+    )
+
+    vi.doMock('../../../../app/src/models/User', () => ({
+      User: (ctx.User = {
+        findOneAndUpdate: sinon.stub().returns({
+          exec: sinon.stub().resolves(ctx.user),
+        }),
+        findOne: sinon.stub().returns({
+          exec: sinon.stub().resolves(),
+        }),
+        updateOne: sinon.stub().returns({
+          exec: sinon.stub().resolves(),
+        }),
+      }),
+    }))
+
+    vi.doMock('../../../../app/src/Features/User/UserAuditLogHandler', () => ({
+      default: (ctx.UserAuditLogHandler = {
+        promises: {
+          addEntry: sinon.stub().resolves(),
         },
-        '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
-          promises: {
-            addEntry: sinon.stub().resolves(),
-          },
-        }),
-        '../User/UserGetter': (this.UserGetter = {
-          getUser: sinon.stub(),
-          promises: {
-            getUser: sinon.stub().resolves(this.user),
-            getUserByAnyEmail: sinon.stub().resolves(),
-            getUserFullEmails: sinon.stub().resolves(),
-          },
-        }),
-        '../User/UserUpdater': (this.UserUpdater = {
-          addEmailAddress: sinon.stub(),
-          promises: {
-            addEmailAddress: sinon.stub().resolves(),
-            confirmEmail: sinon.stub().resolves(),
-            updateUser: sinon.stub().resolves(),
-          },
-        }),
-        '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
-      },
-    })
+      }),
+    }))
+
+    vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
+      default: (ctx.UserGetter = {
+        getUser: sinon.stub(),
+        promises: {
+          getUser: sinon.stub().resolves(ctx.user),
+          getUserByAnyEmail: sinon.stub().resolves(),
+          getUserFullEmails: sinon.stub().resolves(),
+        },
+      }),
+    }))
+
+    vi.doMock('../../../../app/src/Features/User/UserUpdater', () => ({
+      default: (ctx.UserUpdater = {
+        addEmailAddress: sinon.stub(),
+        promises: {
+          addEmailAddress: sinon.stub().resolves(),
+          confirmEmail: sinon.stub().resolves(),
+          updateUser: sinon.stub().resolves(),
+        },
+      }),
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Institutions/InstitutionsAPI',
+      () => ({
+        default: ctx.InstitutionsAPI,
+      })
+    )
+
+    ctx.SAMLIdentityManager = (await import(modulePath)).default
   })
 
   describe('getUser', function () {
-    it('should throw an error if missing all of: provider ID, external user ID, attribute', async function () {
+    it('should throw an error if missing all of: provider ID, external user ID, attribute', async function (ctx) {
       let error
       try {
-        await this.SAMLIdentityManager.getUser(undefined, undefined, undefined)
+        await ctx.SAMLIdentityManager.getUser(undefined, undefined, undefined)
       } catch (e) {
         error = e
       } finally {
@@ -112,10 +157,10 @@ describe('SAMLIdentityManager', function () {
         )
       }
     })
-    it('should throw an error if missing provider ID', async function () {
+    it('should throw an error if missing provider ID', async function (ctx) {
       let error
       try {
-        await this.SAMLIdentityManager.getUser(undefined, 'id123', 'someAttr')
+        await ctx.SAMLIdentityManager.getUser(undefined, 'id123', 'someAttr')
       } catch (e) {
         error = e
       } finally {
@@ -125,20 +170,20 @@ describe('SAMLIdentityManager', function () {
         )
       }
     })
-    it('should throw an error if missing external user ID', async function () {
+    it('should throw an error if missing external user ID', async function (ctx) {
       let error
       try {
-        await this.SAMLIdentityManager.getUser('123', null, 'someAttr')
+        await ctx.SAMLIdentityManager.getUser('123', null, 'someAttr')
       } catch (e) {
         error = e
       } finally {
         expect(error).to.exist
       }
     })
-    it('should throw an error if missing attribute', async function () {
+    it('should throw an error if missing attribute', async function (ctx) {
       let error
       try {
-        await this.SAMLIdentityManager.getUser('123', 'id123', undefined)
+        await ctx.SAMLIdentityManager.getUser('123', 'id123', undefined)
       } catch (e) {
         error = e
       } finally {
@@ -152,16 +197,16 @@ describe('SAMLIdentityManager', function () {
 
   describe('linkAccounts', function () {
     describe('errors', function () {
-      beforeEach(function () {
+      beforeEach(function (ctx) {
         // first call is to get userWithProvider; should be falsy
-        this.UserGetter.promises.getUser.onFirstCall().resolves()
-        this.UserGetter.promises.getUser.onSecondCall().resolves(this.user)
+        ctx.UserGetter.promises.getUser.onFirstCall().resolves()
+        ctx.UserGetter.promises.getUser.onSecondCall().resolves(ctx.user)
       })
 
-      it('should throw an error if missing all data', async function () {
+      it('should throw an error if missing all data', async function (ctx) {
         let error
         try {
-          await this.SAMLIdentityManager.linkAccounts(null, null, null)
+          await ctx.SAMLIdentityManager.linkAccounts(null, null, null)
         } catch (e) {
           error = e
         } finally {
@@ -180,9 +225,9 @@ describe('SAMLIdentityManager', function () {
           const testData = { ...requiredData }
           delete testData[data]
           let error
-          it(`should throw an error when missing ${data}`, async function () {
+          it(`should throw an error when missing ${data}`, async function (ctx) {
             try {
-              await this.SAMLIdentityManager.linkAccounts('123', testData, {})
+              await ctx.SAMLIdentityManager.linkAccounts('123', testData, {})
             } catch (e) {
               error = e
             } finally {
@@ -196,17 +241,17 @@ describe('SAMLIdentityManager', function () {
       })
 
       describe('when email is already associated with another Overleaf account', function () {
-        beforeEach(function () {
-          this.UserGetter.promises.getUserByAnyEmail.resolves(
-            this.userEmailExists
+        beforeEach(function (ctx) {
+          ctx.UserGetter.promises.getUserByAnyEmail.resolves(
+            ctx.userEmailExists
           )
         })
 
-        it('should throw an EmailExistsError error', async function () {
+        it('should throw an EmailExistsError error', async function (ctx) {
           let error
 
           try {
-            await this.SAMLIdentityManager.linkAccounts(
+            await ctx.SAMLIdentityManager.linkAccounts(
               '6005c75b12cbcaf771f4a105',
               {
                 externalUserId: 'not-linked-id',
@@ -225,25 +270,25 @@ describe('SAMLIdentityManager', function () {
             error = e
           } finally {
             expect(error).to.be.instanceof(Errors.EmailExistsError)
-            expect(this.User.findOneAndUpdate).to.not.have.been.called
+            expect(ctx.User.findOneAndUpdate).to.not.have.been.called
           }
         })
       })
 
       describe('when email is not affiliated', function () {
-        beforeEach(function () {
-          this.UserGetter.promises.getUserByAnyEmail.resolves(this.user)
-          this.UserGetter.promises.getUserFullEmails.resolves([
+        beforeEach(function (ctx) {
+          ctx.UserGetter.promises.getUserByAnyEmail.resolves(ctx.user)
+          ctx.UserGetter.promises.getUserFullEmails.resolves([
             {
               email: 'not-affiliated@overleaf.com',
             },
           ])
         })
 
-        it('should throw SAMLEmailNotAffiliatedError', async function () {
+        it('should throw SAMLEmailNotAffiliatedError', async function (ctx) {
           let error
           try {
-            await this.SAMLIdentityManager.linkAccounts(
+            await ctx.SAMLIdentityManager.linkAccounts(
               '6005c75b12cbcaf771f4a105',
               {
                 externalUserId: 'not-linked-id',
@@ -262,15 +307,15 @@ describe('SAMLIdentityManager', function () {
             error = e
           } finally {
             expect(error).to.be.instanceof(Errors.SAMLEmailNotAffiliatedError)
-            expect(this.User.findOneAndUpdate).to.not.have.been.called
+            expect(ctx.User.findOneAndUpdate).to.not.have.been.called
           }
         })
       })
 
       describe('when email is affiliated with another institution', function () {
-        beforeEach(function () {
-          this.UserGetter.promises.getUserByAnyEmail.resolves(this.user)
-          this.UserGetter.promises.getUserFullEmails.resolves([
+        beforeEach(function (ctx) {
+          ctx.UserGetter.promises.getUserByAnyEmail.resolves(ctx.user)
+          ctx.UserGetter.promises.getUserFullEmails.resolves([
             {
               email: 'affiliated@overleaf.com',
               affiliation: { institution: { id: '987' } },
@@ -278,10 +323,10 @@ describe('SAMLIdentityManager', function () {
           ])
         })
 
-        it('should throw SAMLEmailAffiliatedWithAnotherInstitutionError', async function () {
+        it('should throw SAMLEmailAffiliatedWithAnotherInstitutionError', async function (ctx) {
           let error
           try {
-            await this.SAMLIdentityManager.linkAccounts(
+            await ctx.SAMLIdentityManager.linkAccounts(
               '6005c75b12cbcaf771f4a105',
               {
                 externalUserId: 'not-linked-id',
@@ -302,22 +347,22 @@ describe('SAMLIdentityManager', function () {
             expect(error).to.be.instanceof(
               Errors.SAMLEmailAffiliatedWithAnotherInstitutionError
             )
-            expect(this.User.findOneAndUpdate).to.not.have.been.called
+            expect(ctx.User.findOneAndUpdate).to.not.have.been.called
           }
         })
       })
 
       describe('when institution identifier is already associated with another Overleaf account', function () {
-        beforeEach(function () {
-          this.UserGetter.promises.getUserByAnyEmail.resolves(
-            this.userAlreadyLinked
+        beforeEach(function (ctx) {
+          ctx.UserGetter.promises.getUserByAnyEmail.resolves(
+            ctx.userAlreadyLinked
           )
         })
 
-        it('should throw an SAMLIdentityExistsError error', async function () {
+        it('should throw an SAMLIdentityExistsError error', async function (ctx) {
           let error
           try {
-            await this.SAMLIdentityManager.linkAccounts(
+            await ctx.SAMLIdentityManager.linkAccounts(
               '6005c75b12cbcaf771f4a105',
               {
                 externalUserId: 'already-linked-id',
@@ -336,21 +381,21 @@ describe('SAMLIdentityManager', function () {
             error = e
           } finally {
             expect(error).to.be.instanceof(Errors.SAMLIdentityExistsError)
-            expect(this.User.findOneAndUpdate).to.not.have.been.called
+            expect(ctx.User.findOneAndUpdate).to.not.have.been.called
           }
         })
       })
 
       describe('when institution provider is already associated with the user', function () {
-        beforeEach(function () {
+        beforeEach(function (ctx) {
           // first call is to get userWithProvider; resolves with any user
-          this.UserGetter.promises.getUser.onFirstCall().resolves(this.user)
+          ctx.UserGetter.promises.getUser.onFirstCall().resolves(ctx.user)
         })
 
-        it('should throw an SAMLAlreadyLinkedError error', async function () {
+        it('should throw an SAMLAlreadyLinkedError error', async function (ctx) {
           let error
           try {
-            await this.SAMLIdentityManager.linkAccounts(
+            await ctx.SAMLIdentityManager.linkAccounts(
               '6005c75b12cbcaf771f4a105',
               {
                 externalUserId: 'already-linked-id',
@@ -369,27 +414,27 @@ describe('SAMLIdentityManager', function () {
             error = e
           } finally {
             expect(
-              this.UserGetter.promises.getUser
+              ctx.UserGetter.promises.getUser
             ).to.have.been.calledWithMatch({
               _id: new ObjectId('6005c75b12cbcaf771f4a105'),
               'samlIdentifiers.providerId': '123456',
             })
             expect(error).to.be.instanceof(Errors.SAMLAlreadyLinkedError)
-            expect(this.User.findOneAndUpdate).to.not.have.been.called
+            expect(ctx.User.findOneAndUpdate).to.not.have.been.called
           }
         })
       })
 
-      it('should pass back errors via UserAuditLogHandler', async function () {
+      it('should pass back errors via UserAuditLogHandler', async function (ctx) {
         let error
         const anError = new Error('oops')
-        this.UserAuditLogHandler.promises.addEntry.rejects(anError)
+        ctx.UserAuditLogHandler.promises.addEntry.rejects(anError)
         try {
-          await this.SAMLIdentityManager.linkAccounts(
-            this.user._id,
+          await ctx.SAMLIdentityManager.linkAccounts(
+            ctx.user._id,
             {
               externalUserId: 'externalUserId',
-              institutionEmail: this.user.email,
+              institutionEmail: ctx.user.email,
               universityId: '1',
               universityName: 'Overleaf University',
               hasEntitlement: false,
@@ -405,29 +450,29 @@ describe('SAMLIdentityManager', function () {
         } finally {
           expect(error).to.exist
           expect(error).to.equal(anError)
-          expect(this.EmailHandler.sendEmail).to.not.have.been.called
-          expect(this.User.updateOne).to.not.have.been.called
+          expect(ctx.EmailHandler.sendEmail).to.not.have.been.called
+          expect(ctx.User.updateOne).to.not.have.been.called
         }
       })
     })
 
     describe('success', function () {
-      beforeEach(function () {
+      beforeEach(function (ctx) {
         // first call is to get userWithProvider; should be falsy
-        this.UserGetter.promises.getUser.onFirstCall().resolves()
-        this.UserGetter.promises.getUser.onSecondCall().resolves(this.user)
+        ctx.UserGetter.promises.getUser.onFirstCall().resolves()
+        ctx.UserGetter.promises.getUser.onSecondCall().resolves(ctx.user)
       })
 
-      it('should update the user audit log', async function () {
+      it('should update the user audit log', async function (ctx) {
         const auditLog = {
           initiatorId: '6005c75b12cbcaf771f4a105',
           ipAddress: '0:0:0:0',
         }
-        await this.SAMLIdentityManager.linkAccounts(
-          this.user._id,
+        await ctx.SAMLIdentityManager.linkAccounts(
+          ctx.user._id,
           {
             externalUserId: 'externalUserId',
-            institutionEmail: this.user.email,
+            institutionEmail: ctx.user.email,
             universityId: '1',
             universityName: 'Overleaf University',
             hasEntitlement: false,
@@ -437,14 +482,14 @@ describe('SAMLIdentityManager', function () {
         )
 
         expect(
-          this.UserAuditLogHandler.promises.addEntry
+          ctx.UserAuditLogHandler.promises.addEntry
         ).to.have.been.calledWith(
-          this.user._id,
+          ctx.user._id,
           'link-institution-sso',
           auditLog.initiatorId,
           auditLog.ipAddress,
           {
-            institutionEmail: this.user.email,
+            institutionEmail: ctx.user.email,
             providerId: '1',
             providerName: 'Overleaf University',
             userIdAttribute: 'uniqueId',
@@ -453,12 +498,12 @@ describe('SAMLIdentityManager', function () {
         )
       })
 
-      it('should send an email notification', async function () {
-        await this.SAMLIdentityManager.linkAccounts(
-          this.user._id,
+      it('should send an email notification', async function (ctx) {
+        await ctx.SAMLIdentityManager.linkAccounts(
+          ctx.user._id,
           {
             externalUserId: 'externalUserId',
-            institutionEmail: this.user.email,
+            institutionEmail: ctx.user.email,
             universityId: '1',
             universityName: 'Overleaf University',
             hasEntitlement: false,
@@ -470,35 +515,35 @@ describe('SAMLIdentityManager', function () {
           }
         )
 
-        expect(this.User.findOneAndUpdate).to.have.been.called
-        expect(this.EmailHandler.sendEmail).to.have.been.calledOnce
-        const emailArgs = this.EmailHandler.sendEmail.lastCall.args
+        expect(ctx.User.findOneAndUpdate).to.have.been.called
+        expect(ctx.EmailHandler.sendEmail).to.have.been.calledOnce
+        const emailArgs = ctx.EmailHandler.sendEmail.lastCall.args
         expect(emailArgs[0]).to.equal('securityAlert')
-        expect(emailArgs[1].to).to.equal(this.user.email)
+        expect(emailArgs[1].to).to.equal(ctx.user.email)
         expect(emailArgs[1].actionDescribed).to.contain('was linked')
         expect(emailArgs[1].message[0]).to.contain('Linked')
-        expect(emailArgs[1].message[0]).to.contain(this.user.email)
+        expect(emailArgs[1].message[0]).to.contain(ctx.user.email)
       })
     })
   })
 
   describe('unlinkAccounts', function () {
-    it('should update the audit log', async function () {
-      await this.SAMLIdentityManager.unlinkAccounts(
-        this.user._id,
+    it('should update the audit log', async function (ctx) {
+      await ctx.SAMLIdentityManager.unlinkAccounts(
+        ctx.user._id,
         linkedEmail,
-        this.user.email,
+        ctx.user.email,
         '1',
         'Overleaf University',
-        this.auditLog
+        ctx.auditLog
       )
       expect(
-        this.UserAuditLogHandler.promises.addEntry
+        ctx.UserAuditLogHandler.promises.addEntry
       ).to.have.been.calledOnce.and.calledWithMatch(
-        this.user._id,
+        ctx.user._id,
         'unlink-institution-sso',
-        this.auditLog.initiatorId,
-        this.auditLog.ipAddress,
+        ctx.auditLog.initiatorId,
+        ctx.auditLog.ipAddress,
         {
           institutionEmail: linkedEmail,
           providerId: '1',
@@ -506,17 +551,17 @@ describe('SAMLIdentityManager', function () {
         }
       )
     })
-    it('should remove the identifier', async function () {
-      await this.SAMLIdentityManager.unlinkAccounts(
-        this.user._id,
+    it('should remove the identifier', async function (ctx) {
+      await ctx.SAMLIdentityManager.unlinkAccounts(
+        ctx.user._id,
         linkedEmail,
-        this.user.email,
+        ctx.user.email,
         '1',
         'Overleaf University',
-        this.auditLog
+        ctx.auditLog
       )
       const query = {
-        _id: this.user._id,
+        _id: ctx.user._id,
       }
       const update = {
         $pull: {
@@ -525,94 +570,94 @@ describe('SAMLIdentityManager', function () {
           },
         },
       }
-      expect(this.User.updateOne).to.have.been.calledOnce.and.calledWithMatch(
+      expect(ctx.User.updateOne).to.have.been.calledOnce.and.calledWithMatch(
         query,
         update
       )
     })
-    it('should send an email notification', async function () {
-      await this.SAMLIdentityManager.unlinkAccounts(
-        this.user._id,
+    it('should send an email notification', async function (ctx) {
+      await ctx.SAMLIdentityManager.unlinkAccounts(
+        ctx.user._id,
         linkedEmail,
-        this.user.email,
+        ctx.user.email,
         '1',
         'Overleaf University',
-        this.auditLog
+        ctx.auditLog
       )
-      expect(this.User.updateOne).to.have.been.called
-      expect(this.EmailHandler.sendEmail).to.have.been.calledOnce
-      const emailArgs = this.EmailHandler.sendEmail.lastCall.args
+      expect(ctx.User.updateOne).to.have.been.called
+      expect(ctx.EmailHandler.sendEmail).to.have.been.calledOnce
+      const emailArgs = ctx.EmailHandler.sendEmail.lastCall.args
       expect(emailArgs[0]).to.equal('securityAlert')
-      expect(emailArgs[1].to).to.equal(this.user.email)
+      expect(emailArgs[1].to).to.equal(ctx.user.email)
       expect(emailArgs[1].actionDescribed).to.contain('was unlinked')
       expect(emailArgs[1].message[0]).to.contain('No longer linked')
       expect(emailArgs[1].message[0]).to.contain(linkedEmail)
     })
 
     describe('errors', function () {
-      it('should pass back errors via UserAuditLogHandler', async function () {
+      it('should pass back errors via UserAuditLogHandler', async function (ctx) {
         let error
         const anError = new Error('oops')
-        this.UserAuditLogHandler.promises.addEntry.rejects(anError)
+        ctx.UserAuditLogHandler.promises.addEntry.rejects(anError)
         try {
-          await this.SAMLIdentityManager.unlinkAccounts(
-            this.user._id,
+          await ctx.SAMLIdentityManager.unlinkAccounts(
+            ctx.user._id,
             linkedEmail,
-            this.user.email,
+            ctx.user.email,
             '1',
             'Overleaf University',
-            this.auditLog
+            ctx.auditLog
           )
         } catch (e) {
           error = e
         } finally {
           expect(error).to.exist
           expect(error).to.equal(anError)
-          expect(this.EmailHandler.sendEmail).to.not.have.been.called
-          expect(this.User.updateOne).to.not.have.been.called
+          expect(ctx.EmailHandler.sendEmail).to.not.have.been.called
+          expect(ctx.User.updateOne).to.not.have.been.called
         }
       })
     })
   })
 
   describe('entitlementAttributeMatches', function () {
-    it('should return true when entitlement matches on string', function () {
-      this.SAMLIdentityManager.entitlementAttributeMatches(
+    it('should return true when entitlement matches on string', function (ctx) {
+      ctx.SAMLIdentityManager.entitlementAttributeMatches(
         'foo bar',
         'bar'
       ).should.equal(true)
     })
 
-    it('should return false when entitlement does not match on string', function () {
-      this.SAMLIdentityManager.entitlementAttributeMatches(
+    it('should return false when entitlement does not match on string', function (ctx) {
+      ctx.SAMLIdentityManager.entitlementAttributeMatches(
         'foo bar',
         'bam'
       ).should.equal(false)
     })
 
-    it('should return false on an invalid matcher', function () {
-      this.SAMLIdentityManager.entitlementAttributeMatches(
+    it('should return false on an invalid matcher', function (ctx) {
+      ctx.SAMLIdentityManager.entitlementAttributeMatches(
         'foo bar',
         '('
       ).should.equal(false)
     })
 
-    it('should log error on an invalid matcher', function () {
-      this.SAMLIdentityManager.entitlementAttributeMatches('foo bar', '(')
-      this.logger.error.firstCall.args[0].err.message.should.equal(
+    it('should log error on an invalid matcher', function (ctx) {
+      ctx.SAMLIdentityManager.entitlementAttributeMatches('foo bar', '(')
+      ctx.logger.error.firstCall.args[0].err.message.should.equal(
         'Invalid regular expression: /(/: Unterminated group'
       )
     })
 
-    it('should return true when entitlement matches on array', function () {
-      this.SAMLIdentityManager.entitlementAttributeMatches(
+    it('should return true when entitlement matches on array', function (ctx) {
+      ctx.SAMLIdentityManager.entitlementAttributeMatches(
         ['foo', 'bar'],
         'bar'
       ).should.equal(true)
     })
 
-    it('should return false when entitlement does not match array', function () {
-      this.SAMLIdentityManager.entitlementAttributeMatches(
+    it('should return false when entitlement does not match array', function (ctx) {
+      ctx.SAMLIdentityManager.entitlementAttributeMatches(
         ['foo', 'bar'],
         'bam'
       ).should.equal(false)
@@ -636,18 +681,18 @@ describe('SAMLIdentityManager', function () {
     }
     const userIdAttribute = 'newUniqueId'
 
-    it('should remove the old identifier and add the new identifier', async function () {
-      this.UserGetter.promises.getUser.resolves()
-      this.UserGetter.promises.getUserByAnyEmail
+    it('should remove the old identifier and add the new identifier', async function (ctx) {
+      ctx.UserGetter.promises.getUser.resolves()
+      ctx.UserGetter.promises.getUserByAnyEmail
         .withArgs(institutionEmail)
         .resolves({ _id: userId, emails: [{ email: institutionEmail }] })
-      this.UserGetter.promises.getUserFullEmails.withArgs(userId).resolves([
+      ctx.UserGetter.promises.getUserFullEmails.withArgs(userId).resolves([
         {
           email: institutionEmail,
           affiliation: { institution: { id: providerId } },
         },
       ])
-      await this.SAMLIdentityManager.migrateIdentifier(
+      await ctx.SAMLIdentityManager.migrateIdentifier(
         userId,
         externalUserId,
         providerId,
@@ -658,7 +703,7 @@ describe('SAMLIdentityManager', function () {
         userIdAttribute
       )
 
-      expect(this.User.updateOne).to.have.been.calledOnce
+      expect(ctx.User.updateOne).to.have.been.calledOnce
       const query = {
         _id: userId,
         'samlIdentifiers.providerId': providerId.toString(),
@@ -671,7 +716,7 @@ describe('SAMLIdentityManager', function () {
         },
       }
 
-      expect(this.User.updateOne.lastCall.args).to.deep.equal([query, update])
+      expect(ctx.User.updateOne.lastCall.args).to.deep.equal([query, update])
     })
   })
 
@@ -684,22 +729,22 @@ describe('SAMLIdentityManager', function () {
       ipAddress: 'N/A',
     }
 
-    it('should remove the identifier om samlIdentifiers and samlProviderId on the email', async function () {
-      this.User.findOneAndUpdate = sinon.stub().returns({
+    it('should remove the identifier om samlIdentifiers and samlProviderId on the email', async function (ctx) {
+      ctx.User.findOneAndUpdate = sinon.stub().returns({
         exec: sinon.stub().resolves({
           _id: userId,
           emails: [{ email: institutionEmail, samlProviderId: providerId }],
         }),
       })
 
-      await this.SAMLIdentityManager.unlinkNotMigrated(
+      await ctx.SAMLIdentityManager.unlinkNotMigrated(
         userId,
         providerId,
         providerName,
         auditLog
       )
 
-      expect(this.User.findOneAndUpdate).to.have.been.calledOnce
+      expect(ctx.User.findOneAndUpdate).to.have.been.calledOnce
       const query = {
         _id: userId,
         'emails.samlProviderId': providerId,
@@ -714,14 +759,14 @@ describe('SAMLIdentityManager', function () {
           'emails.$.samlProviderId': 1,
         },
       }
-      expect(this.User.findOneAndUpdate.lastCall.args).to.deep.equal([
+      expect(ctx.User.findOneAndUpdate.lastCall.args).to.deep.equal([
         query,
         update,
       ])
 
-      expect(this.UserAuditLogHandler.promises.addEntry).to.have.been.calledOnce
+      expect(ctx.UserAuditLogHandler.promises.addEntry).to.have.been.calledOnce
       expect(
-        this.UserAuditLogHandler.promises.addEntry.lastCall.args
+        ctx.UserAuditLogHandler.promises.addEntry.lastCall.args
       ).to.deep.equal([
         userId,
         'unlink-institution-sso-not-migrated',
@@ -730,10 +775,10 @@ describe('SAMLIdentityManager', function () {
         { providerId, providerName },
       ])
 
-      expect(this.InstitutionsAPI.promises.removeEntitlement).to.have.been
+      expect(ctx.InstitutionsAPI.promises.removeEntitlement).to.have.been
         .calledOnce
       expect(
-        this.InstitutionsAPI.promises.removeEntitlement.lastCall.args
+        ctx.InstitutionsAPI.promises.removeEntitlement.lastCall.args
       ).to.deep.equal([userId, institutionEmail])
     })
   })

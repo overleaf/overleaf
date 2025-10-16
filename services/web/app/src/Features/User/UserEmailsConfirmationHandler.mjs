@@ -1,13 +1,13 @@
-const EmailHelper = require('../Helpers/EmailHelper')
-const EmailHandler = require('../Email/EmailHandler')
-const OneTimeTokenHandler = require('../Security/OneTimeTokenHandler')
-const settings = require('@overleaf/settings')
-const Errors = require('../Errors/Errors')
-const UserUpdater = require('./UserUpdater')
-const UserGetter = require('./UserGetter')
-const { callbackify } = require('util')
-const crypto = require('crypto')
-const SessionManager = require('../Authentication/SessionManager')
+import EmailHelper from '../Helpers/EmailHelper.js'
+import EmailHandler from '../Email/EmailHandler.js'
+import OneTimeTokenHandler from '../Security/OneTimeTokenHandler.js'
+import settings from '@overleaf/settings'
+import Errors from '../Errors/Errors.js'
+import UserUpdater from './UserUpdater.js'
+import UserGetter from './UserGetter.js'
+import { callbackify } from 'node:util'
+import crypto from 'node:crypto'
+import SessionManager from '../Authentication/SessionManager.js'
 
 // Reject email confirmation tokens after 90 days
 const TOKEN_EXPIRY_IN_S = 90 * 24 * 60 * 60
@@ -104,4 +104,4 @@ UserEmailsConfirmationHandler.promises = {
   sendConfirmationCode,
 }
 
-module.exports = UserEmailsConfirmationHandler
+export default UserEmailsConfirmationHandler

@@ -1,25 +1,25 @@
-const AuthenticationController = require('../Authentication/AuthenticationController')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const SessionManager = require('../Authentication/SessionManager')
-const UserGetter = require('./UserGetter')
-const UserUpdater = require('./UserUpdater')
-const UserSessionsManager = require('./UserSessionsManager')
-const EmailHandler = require('../Email/EmailHandler')
-const EmailHelper = require('../Helpers/EmailHelper')
-const UserEmailsConfirmationHandler = require('./UserEmailsConfirmationHandler')
-const { endorseAffiliation } = require('../Institutions/InstitutionsAPI')
-const Errors = require('../Errors/Errors')
-const HttpErrorHandler = require('../Errors/HttpErrorHandler')
-const { expressify } = require('@overleaf/promise-utils')
-const AsyncFormHelper = require('../Helpers/AsyncFormHelper')
-const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandler')
-const UserAuditLogHandler = require('./UserAuditLogHandler')
-const { RateLimiter } = require('../../infrastructure/RateLimiter')
-const Features = require('../../infrastructure/Features')
-const tsscmp = require('tsscmp')
-const Modules = require('../../infrastructure/Modules')
+import AuthenticationController from '../Authentication/AuthenticationController.js'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import SessionManager from '../Authentication/SessionManager.js'
+import UserGetter from './UserGetter.js'
+import UserUpdater from './UserUpdater.js'
+import UserSessionsManager from './UserSessionsManager.js'
+import EmailHandler from '../Email/EmailHandler.js'
+import EmailHelper from '../Helpers/EmailHelper.js'
+import UserEmailsConfirmationHandler from './UserEmailsConfirmationHandler.mjs'
+import InstitutionsAPI from '../Institutions/InstitutionsAPI.js'
+import Errors from '../Errors/Errors.js'
+import HttpErrorHandler from '../Errors/HttpErrorHandler.js'
+import { expressify } from '@overleaf/promise-utils'
+import AsyncFormHelper from '../Helpers/AsyncFormHelper.js'
+import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import UserPrimaryEmailCheckHandler from '../User/UserPrimaryEmailCheckHandler.mjs'
+import UserAuditLogHandler from './UserAuditLogHandler.js'
+import { RateLimiter } from '../../infrastructure/RateLimiter.js'
+import Features from '../../infrastructure/Features.js'
+import tsscmp from 'tsscmp'
+import Modules from '../../infrastructure/Modules.js'
 
 const AUDIT_LOG_TOKEN_PREFIX_LENGTH = 10
 
@@ -615,7 +615,7 @@ const UserEmailsController = {
       return res.sendStatus(422)
     }
 
-    endorseAffiliation(
+    InstitutionsAPI.endorseAffiliation(
       userId,
       email,
       req.body.role,
@@ -729,4 +729,4 @@ const UserEmailsController = {
   },
 }
 
-module.exports = UserEmailsController
+export default UserEmailsController

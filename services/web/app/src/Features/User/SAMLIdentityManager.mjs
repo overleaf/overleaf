@@ -1,16 +1,18 @@
-const { ObjectId } = require('mongodb-legacy')
-const EmailHandler = require('../Email/EmailHandler')
-const Errors = require('../Errors/Errors')
-const InstitutionsAPI = require('../Institutions/InstitutionsAPI')
-const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
-const OError = require('@overleaf/o-error')
-const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
-const UserAuditLogHandler = require('../User/UserAuditLogHandler')
-const UserGetter = require('../User/UserGetter')
-const UserUpdater = require('../User/UserUpdater')
-const logger = require('@overleaf/logger')
-const { User } = require('../../models/User')
-const { promiseMapWithLimit } = require('@overleaf/promise-utils')
+import mongodb from 'mongodb-legacy'
+import EmailHandler from '../Email/EmailHandler.js'
+import Errors from '../Errors/Errors.js'
+import InstitutionsAPI from '../Institutions/InstitutionsAPI.js'
+import NotificationsBuilder from '../Notifications/NotificationsBuilder.js'
+import OError from '@overleaf/o-error'
+import SubscriptionLocator from '../Subscription/SubscriptionLocator.js'
+import UserAuditLogHandler from '../User/UserAuditLogHandler.js'
+import UserGetter from '../User/UserGetter.js'
+import UserUpdater from '../User/UserUpdater.js'
+import logger from '@overleaf/logger'
+import { User } from '../../models/User.js'
+import { promiseMapWithLimit } from '@overleaf/promise-utils'
+
+const { ObjectId } = mongodb
 
 async function _addAuditLogEntry(operation, userId, auditLog, extraInfo) {
   await UserAuditLogHandler.promises.addEntry(
@@ -469,4 +471,4 @@ const SAMLIdentityManager = {
   userHasEntitlement,
 }
 
-module.exports = SAMLIdentityManager
+export default SAMLIdentityManager

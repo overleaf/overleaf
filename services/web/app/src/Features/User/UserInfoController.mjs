@@ -1,7 +1,9 @@
-const UserGetter = require('./UserGetter')
-const SessionManager = require('../Authentication/SessionManager')
-const { ObjectId } = require('mongodb-legacy')
-const { expressify } = require('@overleaf/promise-utils')
+import UserGetter from './UserGetter.js'
+import SessionManager from '../Authentication/SessionManager.js'
+import mongodb from 'mongodb-legacy'
+import { expressify } from '@overleaf/promise-utils'
+
+const { ObjectId } = mongodb
 
 function getLoggedInUsersPersonalInfo(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -88,7 +90,7 @@ async function getUserFeatures(req, res, next) {
   return res.json(features)
 }
 
-module.exports = {
+export default {
   getLoggedInUsersPersonalInfo,
   getPersonalInfo,
   sendFormattedPersonalInfo,

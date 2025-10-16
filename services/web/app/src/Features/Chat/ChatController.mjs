@@ -3,8 +3,8 @@ import Modules from '../../infrastructure/Modules.js'
 import ChatApiHandler from './ChatApiHandler.js'
 import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
 import SessionManager from '../Authentication/SessionManager.js'
-import UserInfoManager from '../User/UserInfoManager.js'
-import UserInfoController from '../User/UserInfoController.js'
+import UserInfoManager from '../User/UserInfoManager.mjs'
+import UserInfoController from '../User/UserInfoController.mjs'
 import ChatManager from './ChatManager.mjs'
 
 async function sendMessage(req, res) {

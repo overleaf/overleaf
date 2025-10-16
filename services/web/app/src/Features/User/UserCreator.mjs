@@ -1,15 +1,15 @@
-const logger = require('@overleaf/logger')
-const util = require('util')
-const { AffiliationError } = require('../Errors/Errors')
-const Features = require('../../infrastructure/Features')
-const { User } = require('../../models/User')
-const UserDeleter = require('./UserDeleter')
-const UserGetter = require('./UserGetter')
-const UserUpdater = require('./UserUpdater')
-const Analytics = require('../Analytics/AnalyticsManager')
-const UserOnboardingEmailManager = require('./UserOnboardingEmailManager')
-const UserPostRegistrationAnalyticsManager = require('./UserPostRegistrationAnalyticsManager')
-const OError = require('@overleaf/o-error')
+import logger from '@overleaf/logger'
+import util from 'node:util'
+import { AffiliationError } from '../Errors/Errors.js'
+import Features from '../../infrastructure/Features.js'
+import { User } from '../../models/User.js'
+import UserDeleter from './UserDeleter.js'
+import UserGetter from './UserGetter.js'
+import UserUpdater from './UserUpdater.js'
+import Analytics from '../Analytics/AnalyticsManager.js'
+import UserOnboardingEmailManager from './UserOnboardingEmailManager.js'
+import UserPostRegistrationAnalyticsManager from './UserPostRegistrationAnalyticsManager.js'
+import OError from '@overleaf/o-error'
 
 async function _addAffiliation(user, affiliationOptions) {
   try {
@@ -142,4 +142,4 @@ const UserCreator = {
   },
 }
 
-module.exports = UserCreator
+export default UserCreator

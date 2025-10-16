@@ -35,7 +35,7 @@ describe('UserActivateController', function () {
     }))
 
     vi.doMock(
-      '../../../../../app/src/Features/User/UserRegistrationHandler.js',
+      '../../../../../app/src/Features/User/UserRegistrationHandler.mjs',
       () => ({
         default: ctx.UserRegistrationHandler,
       })

@@ -1,4 +1,4 @@
-const Settings = require('@overleaf/settings')
+import Settings from '@overleaf/settings'
 
 function requiresPrimaryEmailCheck({
   email,
@@ -28,6 +28,6 @@ function requiresPrimaryEmailCheck({
   }
 }
 
-module.exports = {
+export default {
   requiresPrimaryEmailCheck,
 }

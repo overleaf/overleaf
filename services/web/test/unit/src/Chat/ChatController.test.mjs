@@ -51,12 +51,12 @@ describe('ChatController', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/Features/User/UserInfoManager.js', () => ({
+    vi.doMock('../../../../app/src/Features/User/UserInfoManager.mjs', () => ({
       default: ctx.UserInfoManager,
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/User/UserInfoController.js',
+      '../../../../app/src/Features/User/UserInfoController.mjs',
       () => ({
         default: ctx.UserInfoController,
       })

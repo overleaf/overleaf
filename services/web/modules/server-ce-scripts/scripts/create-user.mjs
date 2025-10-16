@@ -1,6 +1,6 @@
 import minimist from 'minimist'
 import { db } from '../../../app/src/infrastructure/mongodb.js'
-import UserRegistrationHandler from '../../../app/src/Features/User/UserRegistrationHandler.js'
+import UserRegistrationHandler from '../../../app/src/Features/User/UserRegistrationHandler.mjs'
 import { fileURLToPath } from 'url'
 
 const filename = fileURLToPath(import.meta.url)

@@ -1,5 +1,5 @@
-const UserGetter = require('./UserGetter')
-const { callbackify } = require('@overleaf/promise-utils')
+import UserGetter from './UserGetter.js'
+import { callbackify } from '@overleaf/promise-utils'
 
 async function getPersonalInfo(userId) {
   return UserGetter.promises.getUser(userId, {
@@ -10,7 +10,7 @@ async function getPersonalInfo(userId) {
   })
 }
 
-module.exports = {
+export default {
   getPersonalInfo: callbackify(getPersonalInfo),
   promises: {
     getPersonalInfo,

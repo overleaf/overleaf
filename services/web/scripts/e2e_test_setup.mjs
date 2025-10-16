@@ -8,7 +8,7 @@ import GracefulShutdown from '../app/src/infrastructure/GracefulShutdown.js'
 import ProjectDeleter from '../app/src/Features/Project/ProjectDeleter.js'
 import SplitTestManager from '../app/src/Features/SplitTests/SplitTestManager.js'
 import UserDeleter from '../app/src/Features/User/UserDeleter.js'
-import UserRegistrationHandler from '../app/src/Features/User/UserRegistrationHandler.js'
+import UserRegistrationHandler from '../app/src/Features/User/UserRegistrationHandler.mjs'
 
 const MONOREPO = Path.dirname(
   Path.dirname(Path.dirname(Path.dirname(fileURLToPath(import.meta.url))))

@@ -1,19 +1,16 @@
-const { User } = require('../../models/User')
-const UserCreator = require('./UserCreator')
-const UserGetter = require('./UserGetter')
-const AuthenticationManager = require('../Authentication/AuthenticationManager')
-const NewsletterManager = require('../Newsletter/NewsletterManager')
-const logger = require('@overleaf/logger')
-const crypto = require('crypto')
-const EmailHandler = require('../Email/EmailHandler')
-const OneTimeTokenHandler = require('../Security/OneTimeTokenHandler')
-const settings = require('@overleaf/settings')
-const EmailHelper = require('../Helpers/EmailHelper')
-const {
-  callbackify,
-  callbackifyMultiResult,
-} = require('@overleaf/promise-utils')
-const OError = require('@overleaf/o-error')
+import { User } from '../../models/User.js'
+import UserCreator from './UserCreator.mjs'
+import UserGetter from './UserGetter.js'
+import AuthenticationManager from '../Authentication/AuthenticationManager.js'
+import NewsletterManager from '../Newsletter/NewsletterManager.js'
+import logger from '@overleaf/logger'
+import crypto from 'node:crypto'
+import EmailHandler from '../Email/EmailHandler.js'
+import OneTimeTokenHandler from '../Security/OneTimeTokenHandler.js'
+import settings from '@overleaf/settings'
+import EmailHelper from '../Helpers/EmailHelper.js'
+import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
+import OError from '@overleaf/o-error'
 
 const UserRegistrationHandler = {
   _registrationRequestIsValid(body) {
@@ -126,7 +123,7 @@ const UserRegistrationHandler = {
   },
 }
 
-module.exports = {
+export default {
   registerNewUser: callbackify(UserRegistrationHandler.registerNewUser),
   registerNewUserAndSendActivationEmail: callbackifyMultiResult(
     UserRegistrationHandler.registerNewUserAndSendActivationEmail,
