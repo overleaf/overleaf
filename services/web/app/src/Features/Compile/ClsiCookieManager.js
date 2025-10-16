@@ -20,7 +20,21 @@ if (Settings.redis.clsi_cookie_secondary != null) {
 }
 
 const ClsiCookieManagerFactory = function (backendGroup) {
-  function buildKey(projectId, userId) {
+  /**
+   * @param {string} projectId
+   * @param {string | null} userId
+   * @param {string} compileBackendClass
+   * @return {string}
+   */
+  function buildKey(projectId, userId, compileBackendClass) {
+    if (backendGroup != null) {
+      return `clsiserver:${backendGroup}:${compileBackendClass}:${projectId}:${userId}`
+    } else {
+      return `clsiserver:${compileBackendClass}:${projectId}:${userId}`
+    }
+  }
+
+  function buildOldKey(projectId, userId) {
     if (backendGroup != null) {
       return `clsiserver:${backendGroup}:${projectId}:${userId}`
     } else {
@@ -37,7 +51,14 @@ const ClsiCookieManagerFactory = function (backendGroup) {
     if (!clsiCookiesEnabled) {
       return
     }
-    const serverId = await rclient.get(buildKey(projectId, userId))
+    let serverId = await rclient.get(
+      buildKey(projectId, userId, compileBackendClass)
+    )
+    if (!serverId) {
+      // Fallback to the old key.
+      // TODO(das7pad): remove this in 24h.
+      serverId = await rclient.get(buildOldKey(projectId, userId))
+    }
 
     if (!serverId) {
       return await cookieManager.promises._populateServerIdViaRequest(
@@ -157,7 +178,7 @@ const ClsiCookieManagerFactory = function (backendGroup) {
     if (serverId == null) {
       // We don't get a cookie back if it hasn't changed
       return await rclient.expire(
-        buildKey(projectId, userId),
+        buildKey(projectId, userId, compileBackendClass),
         _getTTLInSeconds(previous)
       )
     }
@@ -176,15 +197,28 @@ const ClsiCookieManagerFactory = function (backendGroup) {
         rclientSecondary,
         projectId,
         userId,
+        compileBackendClass,
         serverId
       ).catch(() => {})
     }
-    await _setServerIdInRedis(rclient, projectId, userId, serverId)
+    await _setServerIdInRedis(
+      rclient,
+      projectId,
+      userId,
+      compileBackendClass,
+      serverId
+    )
   }
 
-  async function _setServerIdInRedis(rclient, projectId, userId, serverId) {
+  async function _setServerIdInRedis(
+    rclient,
+    projectId,
+    userId,
+    compileBackendClass,
+    serverId
+  ) {
     await rclient.setex(
-      buildKey(projectId, userId),
+      buildKey(projectId, userId, compileBackendClass),
       _getTTLInSeconds(serverId),
       serverId
     )

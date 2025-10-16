@@ -38,13 +38,53 @@ const CLSI_COOKIES_ENABLED = (Settings.clsiCookie?.key ?? '') !== ''
 // The timeout in services/clsi/app.js is 10 minutes, so we'll be on the safe side with 12 minutes
 const COMPILE_REQUEST_TIMEOUT_MS = 12 * 60 * 1000
 
-async function clearClsiServerId(projectId, userId) {
-  const jobs = [ClsiCookieManager.promises.clearServerId(projectId, userId)]
+function getNewCompileBackendClass(projectId, compileBackendClass) {
+  // Sample x% of projects to move up one bracket.
+  if (
+    SplitTestHandler.getPercentile(projectId, 'double-compile', 'release') >=
+    Settings.apis.clsi_new.sample
+  ) {
+    return null
+  }
+
+  switch (compileBackendClass) {
+    case 'n2d':
+      return 'n4'
+    case 'c2d':
+      return 'n4'
+    default:
+      throw new Error('unknown ?compileBackendClass')
+  }
+}
+
+/**
+ * @param {string} projectId
+ * @param {string | null} userId
+ * @param {string} compileBackendClass
+ * @return {Promise<void>}
+ */
+async function clearClsiServerId(projectId, userId, compileBackendClass) {
+  const jobs = [
+    ClsiCookieManager.promises.clearServerId(
+      projectId,
+      userId,
+      compileBackendClass
+    ),
+  ]
   if (Settings.apis.clsi_new?.url) {
     // Mirror resetting the clsiserverid in both backends.
-    jobs.push(
-      NewBackendCloudClsiCookieManager.promises.clearServerId(projectId, userId)
+    const newCompileBackendClass = getNewCompileBackendClass(
+      projectId,
+      compileBackendClass
     )
+    if (newCompileBackendClass) {
+      jobs.push(
+        NewBackendCloudClsiCookieManager.promises.clearServerId(
+          projectId,
+          userId
+        )
+      )
+    }
   }
   await Promise.all(jobs)
 }
@@ -176,14 +216,14 @@ async function deleteAuxFiles(projectId, userId, options, clsiserverid) {
       await DocumentUpdaterHandler.promises.clearProjectState(projectId)
     } finally {
       // always clear the clsi server id, even if prior actions failed
-      await clearClsiServerId(projectId, userId)
+      await clearClsiServerId(projectId, userId, compileBackendClass)
     }
   }
 }
 
 async function _sendBuiltRequest(projectId, userId, req, options) {
   if (options.forceNewClsiServer) {
-    await clearClsiServerId(projectId, userId)
+    await clearClsiServerId(projectId, userId, options.compileBackendClass)
   }
   const validationProblems = ClsiFormatChecker.checkRecoursesForProblems(
     req.compile?.resources
@@ -436,28 +476,15 @@ async function _makeNewBackendRequest(
   if (Settings.apis.clsi_new?.url == null) {
     return null
   }
+  const newCompileBackendClass = getNewCompileBackendClass(
+    projectId,
+    currentCompileBackendClass
+  )
+  if (!newCompileBackendClass) return null
+
   url = new URL(
     url.toString().replace(Settings.apis.clsi.url, Settings.apis.clsi_new.url)
   )
-
-  // Sample x% of projects to move up one bracket.
-  if (
-    SplitTestHandler.getPercentile(projectId, 'double-compile', 'release') >=
-    Settings.apis.clsi_new.sample
-  )
-    return null
-
-  let newCompileBackendClass
-  switch (currentCompileBackendClass) {
-    case 'n2d':
-      newCompileBackendClass = 'n4'
-      break
-    case 'c2d':
-      newCompileBackendClass = 'n4'
-      break
-    default:
-      throw new Error('unknown ?compileBackendClass')
-  }
   url.searchParams.set('compileBackendClass', newCompileBackendClass)
 
   const clsiServerId =

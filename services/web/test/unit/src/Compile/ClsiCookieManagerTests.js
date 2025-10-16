@@ -55,6 +55,28 @@ describe('ClsiCookieManager', function () {
         'n2d'
       )
       this.redis.get
+        .calledWith(`clsiserver:n2d:${this.project_id}:${this.user_id}`)
+        .should.equal(true)
+      serverId.should.equal('clsi-7')
+    })
+
+    it('should fallback to old key', async function () {
+      this.redis.get
+        .withArgs(`clsiserver:n2d:${this.project_id}:${this.user_id}`)
+        .resolves(null)
+      this.redis.get
+        .withArgs(`clsiserver:${this.project_id}:${this.user_id}`)
+        .resolves('clsi-7')
+      const serverId = await this.ClsiCookieManager.promises.getServerId(
+        this.project_id,
+        this.user_id,
+        '',
+        'n2d'
+      )
+      this.redis.get
+        .calledWith(`clsiserver:n2d:${this.project_id}:${this.user_id}`)
+        .should.equal(true)
+      this.redis.get
         .calledWith(`clsiserver:${this.project_id}:${this.user_id}`)
         .should.equal(true)
       serverId.should.equal('clsi-7')
@@ -177,7 +199,7 @@ describe('ClsiCookieManager', function () {
         null
       )
       this.redis.setex.should.have.been.calledWith(
-        `clsiserver:${this.project_id}:${this.user_id}`,
+        `clsiserver:n2d:${this.project_id}:${this.user_id}`,
         this.settings.clsiCookie.ttlInSeconds,
         this.clsiServerId
       )
@@ -194,7 +216,7 @@ describe('ClsiCookieManager', function () {
         null
       )
       expect(this.redis.setex).to.have.been.calledWith(
-        `clsiserver:${this.project_id}:${this.user_id}`,
+        `clsiserver:n2d:${this.project_id}:${this.user_id}`,
         this.settings.clsiCookie.ttlInSecondsRegular,
         this.clsiServerId
       )
@@ -245,7 +267,7 @@ describe('ClsiCookieManager', function () {
         null
       )
       this.redis_secondary.setex.should.have.been.calledWith(
-        `clsiserver:${this.project_id}:${this.user_id}`,
+        `clsiserver:n2d:${this.project_id}:${this.user_id}`,
         this.settings.clsiCookie.ttlInSeconds,
         this.clsiServerId
       )
