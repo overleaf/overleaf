@@ -1,48 +1,20 @@
-/* eslint-disable
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let ClsiFormatChecker
 const _ = require('lodash')
-const async = require('async')
 const settings = require('@overleaf/settings')
-const { promisifyAll } = require('@overleaf/promise-utils')
 
-module.exports = ClsiFormatChecker = {
-  checkRecoursesForProblems(resources, callback) {
-    const jobs = {
-      conflictedPaths(cb) {
-        return ClsiFormatChecker._checkForConflictingPaths(resources, cb)
-      },
-
-      sizeCheck(cb) {
-        return ClsiFormatChecker._checkDocsAreUnderSizeLimit(resources, cb)
-      },
+const ClsiFormatChecker = {
+  checkRecoursesForProblems(resources) {
+    let problems = {
+      conflictedPaths: ClsiFormatChecker._checkForConflictingPaths(resources),
+      sizeCheck: ClsiFormatChecker._checkDocsAreUnderSizeLimit(resources),
     }
 
-    return async.series(jobs, function (err, problems) {
-      if (err != null) {
-        return callback(err)
-      }
-
-      problems = _.omitBy(problems, _.isEmpty)
-
-      if (_.isEmpty(problems)) {
-        return callback()
-      } else {
-        return callback(null, problems)
-      }
-    })
+    problems = _.omitBy(problems, _.isEmpty)
+    if (!_.isEmpty(problems)) {
+      return problems
+    }
   },
 
-  _checkForConflictingPaths(resources, callback) {
+  _checkForConflictingPaths(resources) {
     const paths = resources.map(resource => resource.path)
 
     const conflicts = _.filter(paths, function (path) {
@@ -56,10 +28,10 @@ module.exports = ClsiFormatChecker = {
 
     const conflictObjects = conflicts.map(conflict => ({ path: conflict }))
 
-    return callback(null, conflictObjects)
+    return conflictObjects
   },
 
-  _checkDocsAreUnderSizeLimit(resources, callback) {
+  _checkDocsAreUnderSizeLimit(resources) {
     const sizeLimit = 1000 * 1000 * settings.compileBodySizeLimitMb
 
     let totalSize = 0
@@ -77,13 +49,11 @@ module.exports = ClsiFormatChecker = {
     })
 
     const tooLarge = totalSize > sizeLimit
-    if (!tooLarge) {
-      return callback()
-    } else {
+    if (tooLarge) {
       sizedResources = _.sortBy(sizedResources, 'size').reverse().slice(0, 10)
-      return callback(null, { resources: sizedResources, totalSize })
+      return { resources: sizedResources, totalSize }
     }
   },
 }
 
-module.exports.promises = promisifyAll(module.exports)
+module.exports = ClsiFormatChecker

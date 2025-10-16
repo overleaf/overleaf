@@ -1,16 +1,3 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Compile/ClsiFormatChecker.js'
@@ -50,14 +37,11 @@ describe('ClsiFormatChecker', function () {
     it('should call _checkDocsAreUnderSizeLimit and _checkForConflictingPaths', async function () {
       this.ClsiFormatChecker._checkForConflictingPaths = sinon
         .stub()
-        .callsArgWith(1, null)
+        .returns(null)
       this.ClsiFormatChecker._checkDocsAreUnderSizeLimit = sinon
         .stub()
-        .callsArgWith(1)
-      const problems =
-        await this.ClsiFormatChecker.promises.checkRecoursesForProblems(
-          this.resources
-        )
+        .returns(null)
+      this.ClsiFormatChecker.checkRecoursesForProblems(this.resources)
       this.ClsiFormatChecker._checkForConflictingPaths.called.should.equal(true)
       this.ClsiFormatChecker._checkDocsAreUnderSizeLimit.called.should.equal(
         true
@@ -67,28 +51,26 @@ describe('ClsiFormatChecker', function () {
     it('should remove undefined errors', async function () {
       this.ClsiFormatChecker._checkForConflictingPaths = sinon
         .stub()
-        .callsArgWith(1, null, [])
+        .returns([])
       this.ClsiFormatChecker._checkDocsAreUnderSizeLimit = sinon
         .stub()
-        .callsArgWith(1, null, {})
-      const problems =
-        await this.ClsiFormatChecker.promises.checkRecoursesForProblems(
-          this.resources
-        )
+        .returns({})
+      const problems = this.ClsiFormatChecker.checkRecoursesForProblems(
+        this.resources
+      )
       expect(problems).to.not.exist
     })
 
     it('should keep populated arrays', async function () {
       this.ClsiFormatChecker._checkForConflictingPaths = sinon
         .stub()
-        .callsArgWith(1, null, [{ path: 'somewhere/main.tex' }])
+        .returns([{ path: 'somewhere/main.tex' }])
       this.ClsiFormatChecker._checkDocsAreUnderSizeLimit = sinon
         .stub()
-        .callsArgWith(1, null, {})
-      const problems =
-        await this.ClsiFormatChecker.promises.checkRecoursesForProblems(
-          this.resources
-        )
+        .returns({})
+      const problems = this.ClsiFormatChecker.checkRecoursesForProblems(
+        this.resources
+      )
       problems.conflictedPaths[0].path.should.equal('somewhere/main.tex')
       expect(problems.sizeCheck).to.not.exist
     })
@@ -96,17 +78,16 @@ describe('ClsiFormatChecker', function () {
     it('should keep populated object', async function () {
       this.ClsiFormatChecker._checkForConflictingPaths = sinon
         .stub()
-        .callsArgWith(1, null, [])
+        .returns([])
       this.ClsiFormatChecker._checkDocsAreUnderSizeLimit = sinon
         .stub()
-        .callsArgWith(1, null, {
+        .returns({
           resources: [{ 'a.tex': 'a.tex' }, { 'b.tex': 'b.tex' }],
           totalSize: 1000000,
         })
-      const problems =
-        await this.ClsiFormatChecker.promises.checkRecoursesForProblems(
-          this.resources
-        )
+      const problems = this.ClsiFormatChecker.checkRecoursesForProblems(
+        this.resources
+      )
       problems.sizeCheck.resources.length.should.equal(2)
       problems.sizeCheck.totalSize.should.equal(1000000)
       expect(problems.conflictedPaths).to.not.exist
@@ -132,9 +113,7 @@ describe('ClsiFormatChecker', function () {
         })
 
         const conflictPathErrors =
-          await this.ClsiFormatChecker.promises._checkForConflictingPaths(
-            this.resources
-          )
+          this.ClsiFormatChecker._checkForConflictingPaths(this.resources)
         conflictPathErrors.length.should.equal(1)
         conflictPathErrors[0].path.should.equal('stuff/image')
       })
@@ -146,9 +125,7 @@ describe('ClsiFormatChecker', function () {
         })
 
         const conflictPathErrors =
-          await this.ClsiFormatChecker.promises._checkForConflictingPaths(
-            this.resources
-          )
+          this.ClsiFormatChecker._checkForConflictingPaths(this.resources)
         conflictPathErrors.length.should.equal(1)
         conflictPathErrors[0].path.should.equal('stuff')
       })
@@ -160,9 +137,7 @@ describe('ClsiFormatChecker', function () {
         })
 
         const conflictPathErrors =
-          await this.ClsiFormatChecker.promises._checkForConflictingPaths(
-            this.resources
-          )
+          this.ClsiFormatChecker._checkForConflictingPaths(this.resources)
         conflictPathErrors.length.should.equal(0)
       })
     })
@@ -181,10 +156,9 @@ describe('ClsiFormatChecker', function () {
           })
         }
 
-        const sizeError =
-          await this.ClsiFormatChecker.promises._checkDocsAreUnderSizeLimit(
-            this.resources
-          )
+        const sizeError = this.ClsiFormatChecker._checkDocsAreUnderSizeLimit(
+          this.resources
+        )
         sizeError.totalSize.should.equal(16 + 833333 * 11) // 16 is for earlier resources
         sizeError.resources.length.should.equal(10)
         sizeError.resources[0].path.should.equal('massive.tex')
@@ -204,10 +178,9 @@ describe('ClsiFormatChecker', function () {
           })
         }
 
-        const sizeError =
-          await this.ClsiFormatChecker.promises._checkDocsAreUnderSizeLimit(
-            this.resources
-          )
+        const sizeError = this.ClsiFormatChecker._checkDocsAreUnderSizeLimit(
+          this.resources
+        )
         expect(sizeError).to.not.exist
       })
     })

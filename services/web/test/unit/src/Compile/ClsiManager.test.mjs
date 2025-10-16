@@ -108,9 +108,7 @@ describe('ClsiManager', function () {
       computeHash: sinon.stub().returns('01234567890abcdef'),
     }
     ctx.ClsiFormatChecker = {
-      promises: {
-        checkRecoursesForProblems: sinon.stub().resolves(),
-      },
+      checkRecoursesForProblems: sinon.stub().returns(),
     }
     ctx.Project = {}
     ctx.ProjectEntityHandler = {
@@ -835,7 +833,7 @@ describe('ClsiManager', function () {
 
     describe('when the resources fail the precompile check', function () {
       beforeEach(function (ctx) {
-        ctx.ClsiFormatChecker.promises.checkRecoursesForProblems.rejects(
+        ctx.ClsiFormatChecker.checkRecoursesForProblems.throws(
           new Error('failed')
         )
       })
@@ -983,7 +981,7 @@ describe('ClsiManager', function () {
 
     describe('when the resources fail the precompile check', function () {
       beforeEach(async function (ctx) {
-        ctx.ClsiFormatChecker.promises.checkRecoursesForProblems.rejects(
+        ctx.ClsiFormatChecker.checkRecoursesForProblems.throws(
           new Error('failed')
         )
         ctx.responseBody.compile.status = 'failure'

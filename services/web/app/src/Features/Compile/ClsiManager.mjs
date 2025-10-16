@@ -185,10 +185,9 @@ async function _sendBuiltRequest(projectId, userId, req, options) {
   if (options.forceNewClsiServer) {
     await clearClsiServerId(projectId, userId)
   }
-  const validationProblems =
-    await ClsiFormatChecker.promises.checkRecoursesForProblems(
-      req.compile?.resources
-    )
+  const validationProblems = ClsiFormatChecker.checkRecoursesForProblems(
+    req.compile?.resources
+  )
   if (validationProblems != null) {
     logger.debug(
       { projectId, validationProblems },
