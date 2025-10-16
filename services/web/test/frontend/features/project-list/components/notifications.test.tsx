@@ -949,6 +949,8 @@ describe('<UserNotifications />', function () {
         'ol-groupsAndEnterpriseBannerVariant',
         'on-premise'
       )
+
+      window.metaAttributesCache.set('ol-inactiveTutorials', '[]')
     })
 
     afterEach(function () {
@@ -974,9 +976,9 @@ describe('<UserNotifications />', function () {
       await screen.findByRole('link', { name: 'Contact sales' })
     })
 
-    it('shows the banner for users that have dismissed the banner more than 30 days ago', async function () {
+    it('does not show the banner for users that have dismissed the banner within the last 30 days and before server-side state', async function () {
       const dismissed = new Date()
-      dismissed.setDate(dismissed.getDate() - 31) // 31 days
+      dismissed.setDate(dismissed.getDate() - 29) // 29 days
       window.metaAttributesCache.set('ol-showGroupsAndEnterpriseBanner', true)
       localStorage.setItem(
         'has_dismissed_groups_and_enterprise_banner',
@@ -986,17 +988,28 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.callHistory.flush(true)
 
-      await screen.findByRole('link', { name: 'Contact sales' })
+      expect(screen.queryByRole('link', { name: 'Contact sales' })).to.be.null
     })
 
-    it('does not show the banner for users that have dismissed the banner within the last 30 days', async function () {
-      const dismissed = new Date()
-      dismissed.setDate(dismissed.getDate() - 29) // 29 days
-      window.metaAttributesCache.set('ol-showGroupsAndEnterpriseBanner', true)
-      localStorage.setItem(
-        'has_dismissed_groups_and_enterprise_banner',
-        dismissed
+    it('shows the banner for users who have not dismissed the repeat appearance', async function () {
+      window.metaAttributesCache.set(
+        'ol-inactiveTutorials',
+        '["groups-enterprise-banner"]'
       )
+      window.metaAttributesCache.set('ol-showGroupsAndEnterpriseBanner', true)
+
+      renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
+      await fetchMock.callHistory.flush(true)
+
+      expect(screen.queryByRole('link', { name: 'Contact sales' })).to.be.null
+    })
+
+    it('does not show the banner for users with both inactive tutorials', async function () {
+      window.metaAttributesCache.set(
+        'ol-inactiveTutorials',
+        '["groups-enterprise-banner", "groups-enterprise-banner-repeat"]'
+      )
+      window.metaAttributesCache.set('ol-showGroupsAndEnterpriseBanner', true)
 
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.callHistory.flush(true)

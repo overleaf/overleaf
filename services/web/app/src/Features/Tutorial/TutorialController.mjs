@@ -22,6 +22,8 @@ const VALID_KEYS = [
   'ide-redesign-beta-intro',
   'ide-redesign-labs-user-beta-promo',
   'rolling-compile-image-changed',
+  'groups-enterprise-banner',
+  'groups-enterprise-banner-repeat',
 ]
 
 async function completeTutorial(req, res, next) {

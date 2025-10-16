@@ -1,5 +1,6 @@
 // @ts-check
 import _ from 'lodash'
+import moment from 'moment'
 
 import Metrics from '@overleaf/metrics'
 import Settings from '@overleaf/settings'
@@ -414,11 +415,15 @@ async function projectListPage(req, res, next) {
 
   const { showUSGovBanner, usGovBannerVariant } = usGovBanner
 
+  const isUser30DaysOld = moment.utc().diff(user.signUpDate, 'days') > 30
+
   const showGroupsAndEnterpriseBanner =
     Features.hasFeature('saas') &&
     !showUSGovBanner &&
     !userIsMemberOfGroupSubscription &&
-    !hasPaidAffiliation
+    !hasPaidAffiliation &&
+    !inactiveTutorials.includes('groups-enterprise-banner-repeat') &&
+    isUser30DaysOld
 
   const groupsAndEnterpriseBannerVariant =
     showGroupsAndEnterpriseBanner &&
@@ -564,6 +569,7 @@ async function projectListPage(req, res, next) {
     primaryOccupation,
     role,
     usedLatex,
+    inactiveTutorials,
   })
 }
 

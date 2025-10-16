@@ -10,6 +10,9 @@ import {
   GroupsAndEnterpriseBannerVariants,
 } from '../../../../../../types/project/dashboard/notification'
 import OLButton from '@/shared/components/ol/ol-button'
+import { postJSON } from '@/infrastructure/fetch-json'
+import moment from 'moment'
+import { debugConsole } from '@/utils/debugging'
 
 type urlForVariantsType = {
   [key in GroupsAndEnterpriseBannerVariant]: string // eslint-disable-line no-unused-vars
@@ -19,6 +22,9 @@ const urlForVariants: urlForVariantsType = {
   'on-premise': '/for/contact-sales-2',
   FOMO: '/for/contact-sales-4',
 }
+
+const INITIAL_TUTORIAL_KEY = 'groups-enterprise-banner'
+const REPEAT_TUTORIAL_KEY = 'groups-enterprise-banner-repeat'
 
 let viewEventSent = false
 
@@ -32,23 +38,35 @@ export default function GroupsAndEnterpriseBanner() {
   const groupsAndEnterpriseBannerVariant = getMeta(
     'ol-groupsAndEnterpriseBannerVariant'
   )
+  const inactiveTutorials = getMeta('ol-inactiveTutorials')
 
-  const hasDismissedGroupsAndEnterpriseBanner = hasRecentlyDismissedBanner()
-
+  const locallyDismissedBanner = hasLocallyDismissedBanner()
   const contactSalesUrl = urlForVariants[groupsAndEnterpriseBannerVariant]
 
   const shouldRenderBanner =
     showGroupsAndEnterpriseBanner &&
     totalProjectsCount !== 0 &&
-    !hasDismissedGroupsAndEnterpriseBanner &&
+    !inactiveTutorials.includes(REPEAT_TUTORIAL_KEY) &&
+    !locallyDismissedBanner &&
     isVariantValid(groupsAndEnterpriseBannerVariant)
 
-  const handleClose = useCallback(() => {
-    customLocalStorage.setItem(
-      'has_dismissed_groups_and_enterprise_banner',
-      new Date()
-    )
-  }, [])
+  const handleClose = useCallback(async () => {
+    if (!inactiveTutorials.includes(INITIAL_TUTORIAL_KEY)) {
+      await postJSON(`/tutorial/${REPEAT_TUTORIAL_KEY}/postpone`, {
+        body: {
+          postponedUntil: moment().add(60, 'days').toISOString(),
+        },
+      }).catch(debugConsole.error)
+
+      await postJSON(`/tutorial/${INITIAL_TUTORIAL_KEY}/complete`).catch(
+        debugConsole.error
+      )
+    } else {
+      await postJSON(`/tutorial/${REPEAT_TUTORIAL_KEY}/complete`).catch(
+        debugConsole.error
+      )
+    }
+  }, [inactiveTutorials])
 
   const handleClickContact = useCallback(() => {
     eventTracking.sendMB('groups-and-enterprise-banner-click', {
@@ -66,6 +84,16 @@ export default function GroupsAndEnterpriseBanner() {
       viewEventSent = true
     }
   }, [shouldRenderBanner, groupsAndEnterpriseBannerVariant])
+
+  useEffect(() => {
+    // Persist local dismissal status from previous banner versions to the backend
+    if (
+      locallyDismissedBanner &&
+      !inactiveTutorials.includes(REPEAT_TUTORIAL_KEY)
+    ) {
+      handleClose()
+    }
+  }, [handleClose, locallyDismissedBanner, inactiveTutorials])
 
   if (!shouldRenderBanner) {
     return null
@@ -120,7 +148,7 @@ function BannerContent({
   }
 }
 
-function hasRecentlyDismissedBanner() {
+function hasLocallyDismissedBanner() {
   const dismissed = customLocalStorage.getItem(
     'has_dismissed_groups_and_enterprise_banner'
   )
