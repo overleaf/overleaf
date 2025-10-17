@@ -1,46 +1,53 @@
-const Path = require('path')
-const SandboxedModule = require('sandboxed-module')
-const sinon = require('sinon')
-const { expect } = require('chai')
-const { ObjectId } = require('mongodb-legacy')
-const { Project } = require('../helpers/models/Project')
-const Errors = require('../../../../app/src/Features/Errors/Errors')
+import { vi, expect } from 'vitest'
+import Path from 'path'
+import sinon from 'sinon'
+import mongodb from 'mongodb-legacy'
+import indirectlyImportModels from '../helpers/indirectlyImportModels.js'
+import Errors from '../../../../app/src/Features/Errors/Errors.js'
+
+const { Project } = indirectlyImportModels(['Project'])
+
+const { ObjectId } = mongodb
+
+vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
+  vi.importActual('../../../../app/src/Features/Errors/Errors.js')
+)
 
 const MODULE_PATH = Path.join(
-  __dirname,
+  import.meta.dirname,
   '../../../../app/src/Features/Collaborators/CollaboratorsGetter'
 )
 
 describe('CollaboratorsGetter', function () {
-  beforeEach(function () {
-    this.userId = 'efb93a186e9a06f15fea5abd'
-    this.ownerRef = new ObjectId()
-    this.readOnlyRef1 = new ObjectId()
-    this.readOnlyRef2 = new ObjectId()
-    this.pendingEditorRef = new ObjectId()
-    this.pendingReviewerRef = new ObjectId()
-    this.readWriteRef1 = new ObjectId()
-    this.readWriteRef2 = new ObjectId()
-    this.reviewer1Ref = new ObjectId()
-    this.reviewer2Ref = new ObjectId()
-    this.readOnlyTokenRef = new ObjectId()
-    this.readWriteTokenRef = new ObjectId()
-    this.nonMemberRef = new ObjectId()
-    this.project = {
+  beforeEach(async function (ctx) {
+    ctx.userId = 'efb93a186e9a06f15fea5abd'
+    ctx.ownerRef = new ObjectId()
+    ctx.readOnlyRef1 = new ObjectId()
+    ctx.readOnlyRef2 = new ObjectId()
+    ctx.pendingEditorRef = new ObjectId()
+    ctx.pendingReviewerRef = new ObjectId()
+    ctx.readWriteRef1 = new ObjectId()
+    ctx.readWriteRef2 = new ObjectId()
+    ctx.reviewer1Ref = new ObjectId()
+    ctx.reviewer2Ref = new ObjectId()
+    ctx.readOnlyTokenRef = new ObjectId()
+    ctx.readWriteTokenRef = new ObjectId()
+    ctx.nonMemberRef = new ObjectId()
+    ctx.project = {
       _id: new ObjectId(),
-      owner_ref: [this.ownerRef],
+      owner_ref: [ctx.ownerRef],
       readOnly_refs: [
-        this.readOnlyRef1,
-        this.readOnlyRef2,
-        this.pendingEditorRef,
-        this.pendingReviewerRef,
+        ctx.readOnlyRef1,
+        ctx.readOnlyRef2,
+        ctx.pendingEditorRef,
+        ctx.pendingReviewerRef,
       ],
-      pendingEditor_refs: [this.pendingEditorRef],
-      pendingReviewer_refs: [this.pendingReviewerRef],
-      collaberator_refs: [this.readWriteRef1, this.readWriteRef2],
-      reviewer_refs: [this.reviewer1Ref, this.reviewer2Ref],
-      tokenAccessReadAndWrite_refs: [this.readWriteTokenRef],
-      tokenAccessReadOnly_refs: [this.readOnlyTokenRef],
+      pendingEditor_refs: [ctx.pendingEditorRef],
+      pendingReviewer_refs: [ctx.pendingReviewerRef],
+      collaberator_refs: [ctx.readWriteRef1, ctx.readWriteRef2],
+      reviewer_refs: [ctx.reviewer1Ref, ctx.reviewer2Ref],
+      tokenAccessReadAndWrite_refs: [ctx.readWriteTokenRef],
+      tokenAccessReadOnly_refs: [ctx.readOnlyTokenRef],
       publicAccesLevel: 'tokenBased',
       tokens: {
         readOnly: 'ro',
@@ -49,98 +56,114 @@ describe('CollaboratorsGetter', function () {
       },
     }
 
-    this.UserGetter = {
+    ctx.UserGetter = {
       promises: {
         getUser: sinon.stub().resolves(null),
         getUsers: sinon.stub().resolves([]),
       },
     }
-    this.ProjectMock = sinon.mock(Project)
-    this.ProjectGetter = {
+    ctx.ProjectMock = sinon.mock(Project)
+    ctx.ProjectGetter = {
       promises: {
-        getProject: sinon.stub().resolves(this.project),
+        getProject: sinon.stub().resolves(ctx.project),
       },
     }
-    this.ProjectEditorHandler = {
+    ctx.ProjectEditorHandler = {
       buildUserModelView: sinon.stub(),
     }
-    this.CollaboratorsGetter = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        'mongodb-legacy': { ObjectId },
-        '../User/UserGetter': this.UserGetter,
-        '../../models/Project': { Project },
-        '../Project/ProjectGetter': this.ProjectGetter,
-        '../Project/ProjectEditorHandler': this.ProjectEditorHandler,
-      },
-    })
+
+    vi.doMock('mongodb-legacy', () => ({
+      default: { ObjectId },
+    }))
+
+    vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
+      default: ctx.UserGetter,
+    }))
+
+    vi.doMock('../../../../app/src/models/Project', () => ({
+      Project,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
+      default: ctx.ProjectGetter,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectEditorHandler',
+      () => ({
+        default: ctx.ProjectEditorHandler,
+      })
+    )
+
+    ctx.CollaboratorsGetter = (await import(MODULE_PATH)).default
   })
 
-  afterEach(function () {
-    this.ProjectMock.verify()
+  afterEach(function (ctx) {
+    ctx.ProjectMock.verify()
   })
 
   describe('getMemberIdsWithPrivilegeLevels', function () {
     describe('with project', function () {
-      it('should return an array of member ids with their privilege levels', async function () {
+      it('should return an array of member ids with their privilege levels', async function (ctx) {
         const result =
-          await this.CollaboratorsGetter.promises.getMemberIdsWithPrivilegeLevels(
-            this.project._id
+          await ctx.CollaboratorsGetter.promises.getMemberIdsWithPrivilegeLevels(
+            ctx.project._id
           )
         expect(result).to.have.deep.members([
           {
-            id: this.ownerRef.toString(),
+            id: ctx.ownerRef.toString(),
             privilegeLevel: 'owner',
             source: 'owner',
           },
           {
-            id: this.readWriteRef1.toString(),
+            id: ctx.readWriteRef1.toString(),
             privilegeLevel: 'readAndWrite',
             source: 'invite',
           },
           {
-            id: this.readWriteRef2.toString(),
+            id: ctx.readWriteRef2.toString(),
             privilegeLevel: 'readAndWrite',
             source: 'invite',
           },
           {
-            id: this.readOnlyRef1.toString(),
+            id: ctx.readOnlyRef1.toString(),
             privilegeLevel: 'readOnly',
             source: 'invite',
           },
           {
-            id: this.readOnlyRef2.toString(),
+            id: ctx.readOnlyRef2.toString(),
             privilegeLevel: 'readOnly',
             source: 'invite',
           },
           {
-            id: this.pendingEditorRef.toString(),
+            id: ctx.pendingEditorRef.toString(),
             privilegeLevel: 'readOnly',
             source: 'invite',
             pendingEditor: true,
           },
           {
-            id: this.pendingReviewerRef.toString(),
+            id: ctx.pendingReviewerRef.toString(),
             privilegeLevel: 'readOnly',
             source: 'invite',
             pendingReviewer: true,
           },
           {
-            id: this.readOnlyTokenRef.toString(),
+            id: ctx.readOnlyTokenRef.toString(),
             privilegeLevel: 'readOnly',
             source: 'token',
           },
           {
-            id: this.readWriteTokenRef.toString(),
+            id: ctx.readWriteTokenRef.toString(),
             privilegeLevel: 'readAndWrite',
             source: 'token',
           },
           {
-            id: this.reviewer1Ref.toString(),
+            id: ctx.reviewer1Ref.toString(),
             privilegeLevel: 'review',
             source: 'invite',
           },
           {
-            id: this.reviewer2Ref.toString(),
+            id: ctx.reviewer2Ref.toString(),
             privilegeLevel: 'review',
             source: 'invite',
           },
@@ -149,14 +172,14 @@ describe('CollaboratorsGetter', function () {
     })
 
     describe('with a missing project', function () {
-      beforeEach(function () {
-        this.ProjectGetter.promises.getProject.resolves(null)
+      beforeEach(function (ctx) {
+        ctx.ProjectGetter.promises.getProject.resolves(null)
       })
 
-      it('should return a NotFoundError', async function () {
+      it('should return a NotFoundError', async function (ctx) {
         await expect(
-          this.CollaboratorsGetter.promises.getMemberIdsWithPrivilegeLevels(
-            this.project._id
+          ctx.CollaboratorsGetter.promises.getMemberIdsWithPrivilegeLevels(
+            ctx.project._id
           )
         ).to.be.rejectedWith(Errors.NotFoundError)
       })
@@ -164,89 +187,89 @@ describe('CollaboratorsGetter', function () {
   })
 
   describe('getMemberIds', function () {
-    it('should return the ids', async function () {
-      const memberIds = await this.CollaboratorsGetter.promises.getMemberIds(
-        this.project._id
+    it('should return the ids', async function (ctx) {
+      const memberIds = await ctx.CollaboratorsGetter.promises.getMemberIds(
+        ctx.project._id
       )
       expect(memberIds).to.have.members([
-        this.ownerRef.toString(),
-        this.readOnlyRef1.toString(),
-        this.readOnlyRef2.toString(),
-        this.readWriteRef1.toString(),
-        this.readWriteRef2.toString(),
-        this.pendingEditorRef.toString(),
-        this.pendingReviewerRef.toString(),
-        this.readWriteTokenRef.toString(),
-        this.readOnlyTokenRef.toString(),
-        this.reviewer1Ref.toString(),
-        this.reviewer2Ref.toString(),
+        ctx.ownerRef.toString(),
+        ctx.readOnlyRef1.toString(),
+        ctx.readOnlyRef2.toString(),
+        ctx.readWriteRef1.toString(),
+        ctx.readWriteRef2.toString(),
+        ctx.pendingEditorRef.toString(),
+        ctx.pendingReviewerRef.toString(),
+        ctx.readWriteTokenRef.toString(),
+        ctx.readOnlyTokenRef.toString(),
+        ctx.reviewer1Ref.toString(),
+        ctx.reviewer2Ref.toString(),
       ])
     })
   })
 
   describe('getInvitedMemberIds', function () {
-    it('should return the invited ids', async function () {
+    it('should return the invited ids', async function (ctx) {
       const memberIds =
-        await this.CollaboratorsGetter.promises.getInvitedMemberIds(
-          this.project._id
+        await ctx.CollaboratorsGetter.promises.getInvitedMemberIds(
+          ctx.project._id
         )
       expect(memberIds).to.have.members([
-        this.ownerRef.toString(),
-        this.readOnlyRef1.toString(),
-        this.readOnlyRef2.toString(),
-        this.readWriteRef1.toString(),
-        this.readWriteRef2.toString(),
-        this.pendingEditorRef.toString(),
-        this.pendingReviewerRef.toString(),
-        this.reviewer1Ref.toString(),
-        this.reviewer2Ref.toString(),
+        ctx.ownerRef.toString(),
+        ctx.readOnlyRef1.toString(),
+        ctx.readOnlyRef2.toString(),
+        ctx.readWriteRef1.toString(),
+        ctx.readWriteRef2.toString(),
+        ctx.pendingEditorRef.toString(),
+        ctx.pendingReviewerRef.toString(),
+        ctx.reviewer1Ref.toString(),
+        ctx.reviewer2Ref.toString(),
       ])
     })
   })
 
   describe('getMemberIdPrivilegeLevel', function () {
-    it('should return the privilege level if it exists', async function () {
+    it('should return the privilege level if it exists', async function (ctx) {
       const level =
-        await this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
-          this.readOnlyRef1,
-          this.project._id
+        await ctx.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
+          ctx.readOnlyRef1,
+          ctx.project._id
         )
       expect(level).to.equal('readOnly')
     })
 
-    it('should return review privilege level', async function () {
+    it('should return review privilege level', async function (ctx) {
       const level =
-        await this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
-          this.reviewer1Ref,
-          this.project._id
+        await ctx.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
+          ctx.reviewer1Ref,
+          ctx.project._id
         )
       expect(level).to.equal('review')
     })
 
-    it('should return false if the member has no privilege level', async function () {
+    it('should return false if the member has no privilege level', async function (ctx) {
       const level =
-        await this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
-          this.nonMemberRef,
-          this.project._id
+        await ctx.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
+          ctx.nonMemberRef,
+          ctx.project._id
         )
       expect(level).to.equal(false)
     })
 
-    it('should return review privilege level when user is both reviewer and token member', async function () {
+    it('should return review privilege level when user is both reviewer and token member', async function (ctx) {
       const userWhoIsBothReviewerAndToken = new ObjectId()
 
       const projectWithDuplicateUser = {
-        ...this.project,
+        ...ctx.project,
         reviewer_refs: [userWhoIsBothReviewerAndToken],
         tokenAccessReadAndWrite_refs: [userWhoIsBothReviewerAndToken],
       }
 
-      this.ProjectGetter.promises.getProject.resolves(projectWithDuplicateUser)
+      ctx.ProjectGetter.promises.getProject.resolves(projectWithDuplicateUser)
 
       const level =
-        await this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
+        await ctx.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
           userWhoIsBothReviewerAndToken,
-          this.project._id
+          ctx.project._id
         )
 
       expect(level).to.equal('review')
@@ -255,20 +278,20 @@ describe('CollaboratorsGetter', function () {
 
   describe('isUserInvitedMemberOfProject', function () {
     describe('when user is a member of the project', function () {
-      it('should return true and the privilegeLevel', async function () {
+      it('should return true and the privilegeLevel', async function (ctx) {
         const isMember =
-          await this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
-            this.readOnlyRef1
+          await ctx.CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
+            ctx.readOnlyRef1
           )
         expect(isMember).to.equal(true)
       })
     })
 
     describe('when user is not a member of the project', function () {
-      it('should return false', async function () {
+      it('should return false', async function (ctx) {
         const isMember =
-          await this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
-            this.nonMemberRef
+          await ctx.CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
+            ctx.nonMemberRef
           )
         expect(isMember).to.equal(false)
       })
@@ -277,30 +300,30 @@ describe('CollaboratorsGetter', function () {
 
   describe('isUserInvitedReadWriteMemberOfProject', function () {
     describe('when user is a read write member of the project', function () {
-      it('should return true', async function () {
+      it('should return true', async function (ctx) {
         const isMember =
-          await this.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject(
-            this.readWriteRef1
+          await ctx.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject(
+            ctx.readWriteRef1
           )
         expect(isMember).to.equal(true)
       })
     })
 
     describe('when user is a read only member of the project', function () {
-      it('should return false', async function () {
+      it('should return false', async function (ctx) {
         const isMember =
-          await this.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject(
-            this.readOnlyRef1
+          await ctx.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject(
+            ctx.readOnlyRef1
           )
         expect(isMember).to.equal(false)
       })
     })
 
     describe('when user is not a member of the project', function () {
-      it('should return false', async function () {
+      it('should return false', async function (ctx) {
         const isMember =
-          await this.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject(
-            this.nonMemberRef
+          await ctx.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject(
+            ctx.nonMemberRef
           )
         expect(isMember).to.equal(false)
       })
@@ -308,42 +331,42 @@ describe('CollaboratorsGetter', function () {
   })
 
   describe('getProjectsUserIsMemberOf', function () {
-    beforeEach(function () {
-      this.fields = 'mock fields'
-      this.ProjectMock.expects('find')
-        .withArgs({ collaberator_refs: this.userId }, this.fields)
+    beforeEach(function (ctx) {
+      ctx.fields = 'mock fields'
+      ctx.ProjectMock.expects('find')
+        .withArgs({ collaberator_refs: ctx.userId }, ctx.fields)
         .chain('exec')
         .resolves(['mock-read-write-project-1', 'mock-read-write-project-2'])
 
-      this.ProjectMock.expects('find')
-        .withArgs({ readOnly_refs: this.userId }, this.fields)
+      ctx.ProjectMock.expects('find')
+        .withArgs({ readOnly_refs: ctx.userId }, ctx.fields)
         .chain('exec')
         .resolves(['mock-read-only-project-1', 'mock-read-only-project-2'])
 
-      this.ProjectMock.expects('find')
-        .withArgs({ reviewer_refs: this.userId }, this.fields)
+      ctx.ProjectMock.expects('find')
+        .withArgs({ reviewer_refs: ctx.userId }, ctx.fields)
         .chain('exec')
         .resolves(['mock-review-project-1', 'mock-review-project-2'])
-      this.ProjectMock.expects('find')
+      ctx.ProjectMock.expects('find')
         .withArgs(
           {
-            tokenAccessReadAndWrite_refs: this.userId,
+            tokenAccessReadAndWrite_refs: ctx.userId,
             publicAccesLevel: 'tokenBased',
           },
-          this.fields
+          ctx.fields
         )
         .chain('exec')
         .resolves([
           'mock-token-read-write-project-1',
           'mock-token-read-write-project-2',
         ])
-      this.ProjectMock.expects('find')
+      ctx.ProjectMock.expects('find')
         .withArgs(
           {
-            tokenAccessReadOnly_refs: this.userId,
+            tokenAccessReadOnly_refs: ctx.userId,
             publicAccesLevel: 'tokenBased',
           },
-          this.fields
+          ctx.fields
         )
         .chain('exec')
         .resolves([
@@ -352,11 +375,11 @@ describe('CollaboratorsGetter', function () {
         ])
     })
 
-    it('should call the callback with the projects', async function () {
+    it('should call the callback with the projects', async function (ctx) {
       const projects =
-        await this.CollaboratorsGetter.promises.getProjectsUserIsMemberOf(
-          this.userId,
-          this.fields
+        await ctx.CollaboratorsGetter.promises.getProjectsUserIsMemberOf(
+          ctx.userId,
+          ctx.fields
         )
       expect(projects).to.deep.equal({
         readAndWrite: [
@@ -378,101 +401,98 @@ describe('CollaboratorsGetter', function () {
   })
 
   describe('getAllInvitedMembers', function () {
-    beforeEach(async function () {
-      this.owningUser = {
-        _id: this.ownerRef,
+    beforeEach(async function (ctx) {
+      ctx.owningUser = {
+        _id: ctx.ownerRef,
         email: 'owner@example.com',
         features: { a: 1 },
       }
-      this.readWriteUser = {
-        _id: this.readWriteRef1,
+      ctx.readWriteUser = {
+        _id: ctx.readWriteRef1,
         email: 'readwrite@example.com',
       }
-      this.reviewUser = {
-        _id: this.reviewer1Ref,
+      ctx.reviewUser = {
+        _id: ctx.reviewer1Ref,
         email: 'review@example.com',
       }
-      this.members = [
-        { user: this.owningUser, privilegeLevel: 'owner' },
-        { user: this.readWriteUser, privilegeLevel: 'readAndWrite' },
-        { user: this.reviewUser, privilegeLevel: 'review' },
+      ctx.members = [
+        { user: ctx.owningUser, privilegeLevel: 'owner' },
+        { user: ctx.readWriteUser, privilegeLevel: 'readAndWrite' },
+        { user: ctx.reviewUser, privilegeLevel: 'review' },
       ]
-      this.memberViews = [
-        { _id: this.readWriteUser._id, email: this.readWriteUser.email },
-        { _id: this.reviewUser._id, email: this.reviewUser.email },
+      ctx.memberViews = [
+        { _id: ctx.readWriteUser._id, email: ctx.readWriteUser.email },
+        { _id: ctx.reviewUser._id, email: ctx.reviewUser.email },
       ]
-      this.UserGetter.promises.getUsers.resolves([
-        this.owningUser,
-        this.readWriteUser,
-        this.reviewUser,
+      ctx.UserGetter.promises.getUsers.resolves([
+        ctx.owningUser,
+        ctx.readWriteUser,
+        ctx.reviewUser,
       ])
-      this.ProjectEditorHandler.buildUserModelView
-        .withArgs(this.members[1])
-        .returns(this.memberViews[0])
-      this.ProjectEditorHandler.buildUserModelView
-        .withArgs(this.members[2])
-        .returns(this.memberViews[1])
-      this.result =
-        await this.CollaboratorsGetter.promises.getAllInvitedMembers(
-          this.project._id
-        )
+      ctx.ProjectEditorHandler.buildUserModelView
+        .withArgs(ctx.members[1])
+        .returns(ctx.memberViews[0])
+      ctx.ProjectEditorHandler.buildUserModelView
+        .withArgs(ctx.members[2])
+        .returns(ctx.memberViews[1])
+      ctx.result = await ctx.CollaboratorsGetter.promises.getAllInvitedMembers(
+        ctx.project._id
+      )
     })
 
-    it('should produce a list of members', function () {
-      expect(this.result).to.deep.equal(this.memberViews)
+    it('should produce a list of members', function (ctx) {
+      expect(ctx.result).to.deep.equal(ctx.memberViews)
     })
 
-    it('should call ProjectEditorHandler.buildUserModelView', function () {
-      expect(this.ProjectEditorHandler.buildUserModelView).to.have.been
+    it('should call ProjectEditorHandler.buildUserModelView', function (ctx) {
+      expect(ctx.ProjectEditorHandler.buildUserModelView).to.have.been
         .calledTwice
       expect(
-        this.ProjectEditorHandler.buildUserModelView
-      ).to.have.been.calledWith(this.members[1])
+        ctx.ProjectEditorHandler.buildUserModelView
+      ).to.have.been.calledWith(ctx.members[1])
       expect(
-        this.ProjectEditorHandler.buildUserModelView
-      ).to.have.been.calledWith(this.members[2])
+        ctx.ProjectEditorHandler.buildUserModelView
+      ).to.have.been.calledWith(ctx.members[2])
     })
   })
 
   describe('userIsTokenMember', function () {
-    it('should return true when the project is found', async function () {
-      this.ProjectMock.expects('findOne').chain('exec').resolves(this.project)
-      const isMember =
-        await this.CollaboratorsGetter.promises.userIsTokenMember(
-          this.userId,
-          this.project._id
-        )
+    it('should return true when the project is found', async function (ctx) {
+      ctx.ProjectMock.expects('findOne').chain('exec').resolves(ctx.project)
+      const isMember = await ctx.CollaboratorsGetter.promises.userIsTokenMember(
+        ctx.userId,
+        ctx.project._id
+      )
       expect(isMember).to.be.true
     })
 
-    it('should return false when the project is not found', async function () {
-      this.ProjectMock.expects('findOne').chain('exec').resolves(null)
-      const isMember =
-        await this.CollaboratorsGetter.promises.userIsTokenMember(
-          this.userId,
-          this.project._id
-        )
+    it('should return false when the project is not found', async function (ctx) {
+      ctx.ProjectMock.expects('findOne').chain('exec').resolves(null)
+      const isMember = await ctx.CollaboratorsGetter.promises.userIsTokenMember(
+        ctx.userId,
+        ctx.project._id
+      )
       expect(isMember).to.be.false
     })
   })
 
   describe('userIsReadWriteTokenMember', function () {
-    it('should return true when the project is found', async function () {
-      this.ProjectMock.expects('findOne').chain('exec').resolves(this.project)
+    it('should return true when the project is found', async function (ctx) {
+      ctx.ProjectMock.expects('findOne').chain('exec').resolves(ctx.project)
       const isMember =
-        await this.CollaboratorsGetter.promises.userIsReadWriteTokenMember(
-          this.userId,
-          this.project._id
+        await ctx.CollaboratorsGetter.promises.userIsReadWriteTokenMember(
+          ctx.userId,
+          ctx.project._id
         )
       expect(isMember).to.be.true
     })
 
-    it('should return false when the project is not found', async function () {
-      this.ProjectMock.expects('findOne').chain('exec').resolves(null)
+    it('should return false when the project is not found', async function (ctx) {
+      ctx.ProjectMock.expects('findOne').chain('exec').resolves(null)
       const isMember =
-        await this.CollaboratorsGetter.promises.userIsReadWriteTokenMember(
-          this.userId,
-          this.project._id
+        await ctx.CollaboratorsGetter.promises.userIsReadWriteTokenMember(
+          ctx.userId,
+          ctx.project._id
         )
       expect(isMember).to.be.false
     })
@@ -481,53 +501,53 @@ describe('CollaboratorsGetter', function () {
   describe('getPublicShareTokens', function () {
     const userMock = new ObjectId()
 
-    it('should return null when the project is not found', async function () {
-      this.ProjectMock.expects('findOne').chain('exec').resolves(undefined)
+    it('should return null when the project is not found', async function (ctx) {
+      ctx.ProjectMock.expects('findOne').chain('exec').resolves(undefined)
       const tokens =
-        await this.CollaboratorsGetter.promises.getPublicShareTokens(
+        await ctx.CollaboratorsGetter.promises.getPublicShareTokens(
           userMock,
-          this.project._id
+          ctx.project._id
         )
       expect(tokens).to.be.null
     })
 
-    it('should return an empty object when the user is not owner or read-only collaborator', async function () {
-      this.ProjectMock.expects('findOne').chain('exec').resolves(this.project)
+    it('should return an empty object when the user is not owner or read-only collaborator', async function (ctx) {
+      ctx.ProjectMock.expects('findOne').chain('exec').resolves(ctx.project)
       const tokens =
-        await this.CollaboratorsGetter.promises.getPublicShareTokens(
+        await ctx.CollaboratorsGetter.promises.getPublicShareTokens(
           userMock,
-          this.project._id
+          ctx.project._id
         )
       expect(tokens).to.deep.equal({})
     })
 
     describe('when the user is a read-only token collaborator', function () {
-      it('should return the read-only token', async function () {
-        this.ProjectMock.expects('findOne')
+      it('should return the read-only token', async function (ctx) {
+        ctx.ProjectMock.expects('findOne')
           .chain('exec')
-          .resolves({ hasTokenReadOnlyAccess: true, ...this.project })
+          .resolves({ hasTokenReadOnlyAccess: true, ...ctx.project })
 
         const tokens =
-          await this.CollaboratorsGetter.promises.getPublicShareTokens(
+          await ctx.CollaboratorsGetter.promises.getPublicShareTokens(
             userMock,
-            this.project._id
+            ctx.project._id
           )
         expect(tokens).to.deep.equal({ readOnly: tokens.readOnly })
       })
     })
 
     describe('when the user is the owner of the project', function () {
-      beforeEach(function () {
-        this.ProjectMock.expects('findOne')
+      beforeEach(function (ctx) {
+        ctx.ProjectMock.expects('findOne')
           .chain('exec')
-          .resolves({ isOwner: true, ...this.project })
+          .resolves({ isOwner: true, ...ctx.project })
       })
 
-      it('should return all the tokens', async function () {
+      it('should return all the tokens', async function (ctx) {
         const tokens =
-          await this.CollaboratorsGetter.promises.getPublicShareTokens(
+          await ctx.CollaboratorsGetter.promises.getPublicShareTokens(
             userMock,
-            this.project._id
+            ctx.project._id
           )
         expect(tokens).to.deep.equal(tokens)
       })
@@ -535,20 +555,20 @@ describe('CollaboratorsGetter', function () {
   })
 
   describe('getInvitedEditCollaboratorCount', function () {
-    it('should return the count of invited edit collaborators (readAndWrite, review)', async function () {
+    it('should return the count of invited edit collaborators (readAndWrite, review)', async function (ctx) {
       const count =
-        await this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount(
-          this.project._id
+        await ctx.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount(
+          ctx.project._id
         )
       expect(count).to.equal(4)
     })
   })
 
   describe('getInvitedPendingEditorCount', function () {
-    it('should return the count of pending editors and reviewers', async function () {
+    it('should return the count of pending editors and reviewers', async function (ctx) {
       const count =
-        await this.CollaboratorsGetter.promises.getInvitedPendingEditorCount(
-          this.project._id
+        await ctx.CollaboratorsGetter.promises.getInvitedPendingEditorCount(
+          ctx.project._id
         )
       expect(count).to.equal(2)
     })
@@ -556,11 +576,11 @@ describe('CollaboratorsGetter', function () {
 
   describe('ProjectAccess', function () {
     describe('privilegeLevelForUser', function () {
-      it('should return reviewer privilege when user is both reviewer and token member', function () {
+      it('should return reviewer privilege when user is both reviewer and token member', function (ctx) {
         const userWhoIsBothReviewerAndToken = new ObjectId()
 
         const projectWithDuplicateUser = {
-          owner_ref: this.ownerRef,
+          owner_ref: ctx.ownerRef,
           collaberator_refs: [],
           readOnly_refs: [],
           tokenAccessReadAndWrite_refs: [userWhoIsBothReviewerAndToken],
@@ -571,7 +591,7 @@ describe('CollaboratorsGetter', function () {
           pendingReviewer_refs: [],
         }
 
-        const projectAccess = new this.CollaboratorsGetter.ProjectAccess(
+        const projectAccess = new ctx.CollaboratorsGetter.ProjectAccess(
           projectWithDuplicateUser
         )
         const privilegeLevel = projectAccess.privilegeLevelForUser(
@@ -581,11 +601,11 @@ describe('CollaboratorsGetter', function () {
         expect(privilegeLevel).to.equal('review')
       })
 
-      it('should return readOnly privilege when user is both readOnly and token readAndWrite member', function () {
+      it('should return readOnly privilege when user is both readOnly and token readAndWrite member', function (ctx) {
         const userWhoIsBothReadOnlyAndTokenRW = new ObjectId()
 
         const projectWithDuplicateUser = {
-          owner_ref: this.ownerRef,
+          owner_ref: ctx.ownerRef,
           collaberator_refs: [],
           readOnly_refs: [userWhoIsBothReadOnlyAndTokenRW],
           tokenAccessReadAndWrite_refs: [userWhoIsBothReadOnlyAndTokenRW],
@@ -596,7 +616,7 @@ describe('CollaboratorsGetter', function () {
           pendingReviewer_refs: [],
         }
 
-        const projectAccess = new this.CollaboratorsGetter.ProjectAccess(
+        const projectAccess = new ctx.CollaboratorsGetter.ProjectAccess(
           projectWithDuplicateUser
         )
         const privilegeLevel = projectAccess.privilegeLevelForUser(
@@ -607,12 +627,12 @@ describe('CollaboratorsGetter', function () {
         expect(privilegeLevel).to.equal('readOnly')
       })
 
-      it('should return none for non-members', function () {
-        const projectAccess = new this.CollaboratorsGetter.ProjectAccess(
-          this.project
+      it('should return none for non-members', function (ctx) {
+        const projectAccess = new ctx.CollaboratorsGetter.ProjectAccess(
+          ctx.project
         )
         const privilegeLevel = projectAccess.privilegeLevelForUser(
-          this.nonMemberRef
+          ctx.nonMemberRef
         )
 
         expect(privilegeLevel).to.equal(false)

@@ -476,13 +476,10 @@ describe('CollaboratorsController', function () {
     })
 
     it('returns 204 on success', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.res.sendStatus = status => {
-          expect(status).to.equal(204)
-          resolve()
-        }
-        ctx.CollaboratorsController.transferOwnership(ctx.req, ctx.res)
-      })
+      ctx.res.sendStatus = vi.fn()
+
+      await ctx.CollaboratorsController.transferOwnership(ctx.req, ctx.res)
+      expect(ctx.res.sendStatus).toHaveBeenCalledWith(204)
     })
 
     it('returns 404 if the project does not exist', async function (ctx) {

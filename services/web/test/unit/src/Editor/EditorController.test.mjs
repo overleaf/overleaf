@@ -1,234 +1,250 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const SandboxedModule = require('sandboxed-module')
-const sinon = require('sinon')
-const { expect } = require('chai')
-const OError = require('@overleaf/o-error')
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import sinon from 'sinon'
+import OError from '@overleaf/o-error'
+import mongodb from 'mongodb-legacy'
 
-const modulePath = require('path').join(
-  __dirname,
-  '../../../../app/src/Features/Editor/EditorController'
-)
-const MockClient = require('../helpers/MockClient')
-const assert = require('assert')
-const { ObjectId } = require('mongodb-legacy')
+const modulePath = '../../../../app/src/Features/Editor/EditorController'
+
+const { ObjectId } = mongodb
 
 describe('EditorController', function () {
-  beforeEach(function () {
-    this.project_id = 'test-project-id'
-    this.source = 'dropbox'
-    this.user_id = new ObjectId()
+  beforeEach(async function (ctx) {
+    ctx.project_id = 'test-project-id'
+    ctx.source = 'dropbox'
+    ctx.user_id = new ObjectId()
 
-    this.doc = { _id: (this.doc_id = 'test-doc-id') }
-    this.docName = 'doc.tex'
-    this.docLines = ['1234', 'dskl']
-    this.file = { _id: (this.file_id = 'dasdkjk') }
-    this.fileName = 'file.png'
-    this.fsPath = '/folder/file.png'
-    this.linkedFileData = { provider: 'url' }
+    ctx.doc = { _id: (ctx.doc_id = 'test-doc-id') }
+    ctx.docName = 'doc.tex'
+    ctx.docLines = ['1234', 'dskl']
+    ctx.file = { _id: (ctx.file_id = 'dasdkjk') }
+    ctx.fileName = 'file.png'
+    ctx.fsPath = '/folder/file.png'
+    ctx.linkedFileData = { provider: 'url' }
 
-    this.newFile = { _id: 'new-file-id' }
+    ctx.newFile = { _id: 'new-file-id' }
 
-    this.folder_id = '123ksajdn'
-    this.folder = { _id: this.folder_id }
-    this.folderName = 'folder'
+    ctx.folder_id = '123ksajdn'
+    ctx.folder = { _id: ctx.folder_id }
+    ctx.folderName = 'folder'
 
-    this.callback = sinon.stub()
+    ctx.callback = sinon.stub()
 
-    return (this.EditorController = SandboxedModule.require(modulePath, {
-      requires: {
-        '../Project/ProjectEntityUpdateHandler':
-          (this.ProjectEntityUpdateHandler = {}),
-        '../Project/ProjectOptionsHandler': (this.ProjectOptionsHandler = {
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectEntityUpdateHandler',
+      () => ({
+        default: (ctx.ProjectEntityUpdateHandler = {}),
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectOptionsHandler',
+      () => ({
+        default: (ctx.ProjectOptionsHandler = {
           setCompiler: sinon.stub().yields(),
           setImageName: sinon.stub().yields(),
           setSpellCheckLanguage: sinon.stub().yields(),
         }),
-        '../Project/ProjectDetailsHandler': (this.ProjectDetailsHandler = {
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectDetailsHandler',
+      () => ({
+        default: (ctx.ProjectDetailsHandler = {
           setProjectDescription: sinon.stub().yields(),
           renameProject: sinon.stub().yields(),
           setPublicAccessLevel: sinon.stub().yields(),
         }),
-        '../Project/ProjectDeleter': (this.ProjectDeleter = {}),
-        '../DocumentUpdater/DocumentUpdaterHandler':
-          (this.DocumentUpdaterHandler = {
-            flushDocToMongo: sinon.stub().yields(),
-            setDocument: sinon.stub().yields(),
-          }),
-        './EditorRealTimeController': (this.EditorRealTimeController = {
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectDeleter', () => ({
+      default: (ctx.ProjectDeleter = {
+        deleteProject: sinon.stub(),
+      }),
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler',
+      () => ({
+        default: (ctx.DocumentUpdaterHandler = {
+          flushDocToMongo: sinon.stub().yields(),
+          setDocument: sinon.stub().yields(),
+        }),
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Editor/EditorRealTimeController',
+      () => ({
+        default: (ctx.EditorRealTimeController = {
           emitToRoom: sinon.stub(),
         }),
-        '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
-      },
+      })
+    )
+
+    vi.doMock('@overleaf/metrics', () => ({
+      default: (ctx.Metrics = { inc: sinon.stub() }),
     }))
+
+    ctx.EditorController = (await import(modulePath)).default
   })
 
   describe('addDoc', function () {
-    beforeEach(function () {
-      this.ProjectEntityUpdateHandler.addDocWithRanges = sinon
+    beforeEach(function (ctx) {
+      ctx.ProjectEntityUpdateHandler.addDocWithRanges = sinon
         .stub()
-        .yields(null, this.doc, this.folder_id)
-      return this.EditorController.addDoc(
-        this.project_id,
-        this.folder_id,
-        this.docName,
-        this.docLines,
-        this.source,
-        this.user_id,
-        this.callback
+        .yields(null, ctx.doc, ctx.folder_id)
+      return ctx.EditorController.addDoc(
+        ctx.project_id,
+        ctx.folder_id,
+        ctx.docName,
+        ctx.docLines,
+        ctx.source,
+        ctx.user_id,
+        ctx.callback
       )
     })
 
-    it('should add the doc using the project entity handler', function () {
-      return this.ProjectEntityUpdateHandler.addDocWithRanges
+    it('should add the doc using the project entity handler', function (ctx) {
+      return ctx.ProjectEntityUpdateHandler.addDocWithRanges
         .calledWith(
-          this.project_id,
-          this.folder_id,
-          this.docName,
-          this.docLines,
+          ctx.project_id,
+          ctx.folder_id,
+          ctx.docName,
+          ctx.docLines,
           {},
-          this.user_id,
-          this.source
+          ctx.user_id,
+          ctx.source
         )
         .should.equal(true)
     })
 
-    it('should send the update out to the users in the project', function () {
-      return this.EditorRealTimeController.emitToRoom
+    it('should send the update out to the users in the project', function (ctx) {
+      return ctx.EditorRealTimeController.emitToRoom
         .calledWith(
-          this.project_id,
+          ctx.project_id,
           'reciveNewDoc',
-          this.folder_id,
-          this.doc,
-          this.source,
-          this.user_id
+          ctx.folder_id,
+          ctx.doc,
+          ctx.source,
+          ctx.user_id
         )
         .should.equal(true)
     })
 
-    it('calls the callback', function () {
-      return this.callback.calledWith(null, this.doc).should.equal(true)
+    it('calls the callback', function (ctx) {
+      return ctx.callback.calledWith(null, ctx.doc).should.equal(true)
     })
   })
 
   describe('addFile', function () {
-    beforeEach(function () {
-      this.ProjectEntityUpdateHandler.addFile = sinon
+    beforeEach(function (ctx) {
+      ctx.ProjectEntityUpdateHandler.addFile = sinon
         .stub()
-        .yields(null, this.file, this.folder_id)
-      return this.EditorController.addFile(
-        this.project_id,
-        this.folder_id,
-        this.fileName,
-        this.fsPath,
-        this.linkedFileData,
-        this.source,
-        this.user_id,
-        this.callback
+        .yields(null, ctx.file, ctx.folder_id)
+      return ctx.EditorController.addFile(
+        ctx.project_id,
+        ctx.folder_id,
+        ctx.fileName,
+        ctx.fsPath,
+        ctx.linkedFileData,
+        ctx.source,
+        ctx.user_id,
+        ctx.callback
       )
     })
 
-    it('should add the folder using the project entity handler', function () {
-      return this.ProjectEntityUpdateHandler.addFile
+    it('should add the folder using the project entity handler', function (ctx) {
+      return ctx.ProjectEntityUpdateHandler.addFile
         .calledWith(
-          this.project_id,
-          this.folder_id,
-          this.fileName,
-          this.fsPath,
-          this.linkedFileData,
-          this.user_id,
-          this.source
+          ctx.project_id,
+          ctx.folder_id,
+          ctx.fileName,
+          ctx.fsPath,
+          ctx.linkedFileData,
+          ctx.user_id,
+          ctx.source
         )
         .should.equal(true)
     })
 
-    it('should send the update of a new folder out to the users in the project', function () {
-      return this.EditorRealTimeController.emitToRoom
+    it('should send the update of a new folder out to the users in the project', function (ctx) {
+      return ctx.EditorRealTimeController.emitToRoom
         .calledWith(
-          this.project_id,
+          ctx.project_id,
           'reciveNewFile',
-          this.folder_id,
-          this.file,
-          this.source,
-          this.linkedFileData,
-          this.user_id
+          ctx.folder_id,
+          ctx.file,
+          ctx.source,
+          ctx.linkedFileData,
+          ctx.user_id
         )
         .should.equal(true)
     })
 
-    it('calls the callback', function () {
-      return this.callback.calledWith(null, this.file).should.equal(true)
+    it('calls the callback', function (ctx) {
+      return ctx.callback.calledWith(null, ctx.file).should.equal(true)
     })
   })
 
   describe('upsertDoc', function () {
-    beforeEach(function () {
-      this.ProjectEntityUpdateHandler.upsertDoc = sinon
+    beforeEach(function (ctx) {
+      ctx.ProjectEntityUpdateHandler.upsertDoc = sinon
         .stub()
-        .yields(null, this.doc, false)
-      return this.EditorController.upsertDoc(
-        this.project_id,
-        this.folder_id,
-        this.docName,
-        this.docLines,
-        this.source,
-        this.user_id,
-        this.callback
+        .yields(null, ctx.doc, false)
+      return ctx.EditorController.upsertDoc(
+        ctx.project_id,
+        ctx.folder_id,
+        ctx.docName,
+        ctx.docLines,
+        ctx.source,
+        ctx.user_id,
+        ctx.callback
       )
     })
 
-    it('upserts the doc using the project entity handler', function () {
-      return this.ProjectEntityUpdateHandler.upsertDoc
+    it('upserts the doc using the project entity handler', function (ctx) {
+      return ctx.ProjectEntityUpdateHandler.upsertDoc
         .calledWith(
-          this.project_id,
-          this.folder_id,
-          this.docName,
-          this.docLines,
-          this.source
+          ctx.project_id,
+          ctx.folder_id,
+          ctx.docName,
+          ctx.docLines,
+          ctx.source
         )
         .should.equal(true)
     })
 
-    it('returns the doc', function () {
-      return this.callback.calledWith(null, this.doc).should.equal(true)
+    it('returns the doc', function (ctx) {
+      return ctx.callback.calledWith(null, ctx.doc).should.equal(true)
     })
 
     describe('doc does not exist', function () {
-      beforeEach(function () {
-        this.ProjectEntityUpdateHandler.upsertDoc = sinon
+      beforeEach(function (ctx) {
+        ctx.ProjectEntityUpdateHandler.upsertDoc = sinon
           .stub()
-          .yields(null, this.doc, true)
-        return this.EditorController.upsertDoc(
-          this.project_id,
-          this.folder_id,
-          this.docName,
-          this.docLines,
-          this.source,
-          this.user_id,
-          this.callback
+          .yields(null, ctx.doc, true)
+        return ctx.EditorController.upsertDoc(
+          ctx.project_id,
+          ctx.folder_id,
+          ctx.docName,
+          ctx.docLines,
+          ctx.source,
+          ctx.user_id,
+          ctx.callback
         )
       })
 
-      it('sends an update out to users in the project', function () {
-        return this.EditorRealTimeController.emitToRoom
+      it('sends an update out to users in the project', function (ctx) {
+        return ctx.EditorRealTimeController.emitToRoom
           .calledWith(
-            this.project_id,
+            ctx.project_id,
             'reciveNewDoc',
-            this.folder_id,
-            this.doc,
-            this.source,
-            this.user_id
+            ctx.folder_id,
+            ctx.doc,
+            ctx.source,
+            ctx.user_id
           )
           .should.equal(true)
       })
@@ -236,67 +252,67 @@ describe('EditorController', function () {
   })
 
   describe('upsertFile', function () {
-    beforeEach(function () {
-      this.ProjectEntityUpdateHandler.upsertFile = sinon
+    beforeEach(function (ctx) {
+      ctx.ProjectEntityUpdateHandler.upsertFile = sinon
         .stub()
-        .yields(null, this.newFile, false, this.file)
-      return this.EditorController.upsertFile(
-        this.project_id,
-        this.folder_id,
-        this.fileName,
-        this.fsPath,
-        this.linkedFileData,
-        this.source,
-        this.user_id,
-        this.callback
+        .yields(null, ctx.newFile, false, ctx.file)
+      return ctx.EditorController.upsertFile(
+        ctx.project_id,
+        ctx.folder_id,
+        ctx.fileName,
+        ctx.fsPath,
+        ctx.linkedFileData,
+        ctx.source,
+        ctx.user_id,
+        ctx.callback
       )
     })
 
-    it('upserts the file using the project entity handler', function () {
-      return this.ProjectEntityUpdateHandler.upsertFile
+    it('upserts the file using the project entity handler', function (ctx) {
+      return ctx.ProjectEntityUpdateHandler.upsertFile
         .calledWith(
-          this.project_id,
-          this.folder_id,
-          this.fileName,
-          this.fsPath,
-          this.linkedFileData,
-          this.user_id,
-          this.source
+          ctx.project_id,
+          ctx.folder_id,
+          ctx.fileName,
+          ctx.fsPath,
+          ctx.linkedFileData,
+          ctx.user_id,
+          ctx.source
         )
         .should.equal(true)
     })
 
-    it('returns the file', function () {
-      return this.callback.calledWith(null, this.newFile).should.equal(true)
+    it('returns the file', function (ctx) {
+      return ctx.callback.calledWith(null, ctx.newFile).should.equal(true)
     })
 
     describe('file does not exist', function () {
-      beforeEach(function () {
-        this.ProjectEntityUpdateHandler.upsertFile = sinon
+      beforeEach(function (ctx) {
+        ctx.ProjectEntityUpdateHandler.upsertFile = sinon
           .stub()
-          .yields(null, this.file, true)
-        return this.EditorController.upsertFile(
-          this.project_id,
-          this.folder_id,
-          this.fileName,
-          this.fsPath,
-          this.linkedFileData,
-          this.source,
-          this.user_id,
-          this.callback
+          .yields(null, ctx.file, true)
+        return ctx.EditorController.upsertFile(
+          ctx.project_id,
+          ctx.folder_id,
+          ctx.fileName,
+          ctx.fsPath,
+          ctx.linkedFileData,
+          ctx.source,
+          ctx.user_id,
+          ctx.callback
         )
       })
 
-      it('should send the update out to users in the project', function () {
-        return this.EditorRealTimeController.emitToRoom
+      it('should send the update out to users in the project', function (ctx) {
+        return ctx.EditorRealTimeController.emitToRoom
           .calledWith(
-            this.project_id,
+            ctx.project_id,
             'reciveNewFile',
-            this.folder_id,
-            this.file,
-            this.source,
-            this.linkedFileData,
-            this.user_id
+            ctx.folder_id,
+            ctx.file,
+            ctx.source,
+            ctx.linkedFileData,
+            ctx.user_id
           )
           .should.equal(true)
       })
@@ -304,91 +320,91 @@ describe('EditorController', function () {
   })
 
   describe('upsertDocWithPath', function () {
-    beforeEach(function () {
-      this.docPath = '/folder/doc'
+    beforeEach(function (ctx) {
+      ctx.docPath = '/folder/doc'
 
-      this.ProjectEntityUpdateHandler.upsertDocWithPath = sinon
+      ctx.ProjectEntityUpdateHandler.upsertDocWithPath = sinon
         .stub()
-        .yields(null, this.doc, false, [], this.folder)
-      return this.EditorController.upsertDocWithPath(
-        this.project_id,
-        this.docPath,
-        this.docLines,
-        this.source,
-        this.user_id,
-        this.callback
+        .yields(null, ctx.doc, false, [], ctx.folder)
+      return ctx.EditorController.upsertDocWithPath(
+        ctx.project_id,
+        ctx.docPath,
+        ctx.docLines,
+        ctx.source,
+        ctx.user_id,
+        ctx.callback
       )
     })
 
-    it('upserts the doc using the project entity handler', function () {
-      return this.ProjectEntityUpdateHandler.upsertDocWithPath
-        .calledWith(this.project_id, this.docPath, this.docLines, this.source)
+    it('upserts the doc using the project entity handler', function (ctx) {
+      return ctx.ProjectEntityUpdateHandler.upsertDocWithPath
+        .calledWith(ctx.project_id, ctx.docPath, ctx.docLines, ctx.source)
         .should.equal(true)
     })
 
     describe('doc does not exist', function () {
-      beforeEach(function () {
-        this.ProjectEntityUpdateHandler.upsertDocWithPath = sinon
+      beforeEach(function (ctx) {
+        ctx.ProjectEntityUpdateHandler.upsertDocWithPath = sinon
           .stub()
-          .yields(null, this.doc, true, [], this.folder)
-        return this.EditorController.upsertDocWithPath(
-          this.project_id,
-          this.docPath,
-          this.docLines,
-          this.source,
-          this.user_id,
-          this.callback
+          .yields(null, ctx.doc, true, [], ctx.folder)
+        return ctx.EditorController.upsertDocWithPath(
+          ctx.project_id,
+          ctx.docPath,
+          ctx.docLines,
+          ctx.source,
+          ctx.user_id,
+          ctx.callback
         )
       })
 
-      it('should send the update for the doc out to users in the project', function () {
-        return this.EditorRealTimeController.emitToRoom
+      it('should send the update for the doc out to users in the project', function (ctx) {
+        return ctx.EditorRealTimeController.emitToRoom
           .calledWith(
-            this.project_id,
+            ctx.project_id,
             'reciveNewDoc',
-            this.folder_id,
-            this.doc,
-            this.source,
-            this.user_id
+            ctx.folder_id,
+            ctx.doc,
+            ctx.source,
+            ctx.user_id
           )
           .should.equal(true)
       })
     })
 
     describe('folders required for doc do not exist', function () {
-      beforeEach(function () {
+      beforeEach(function (ctx) {
         const folders = [
-          (this.folderA = { _id: 2, parentFolder_id: 1 }),
-          (this.folderB = { _id: 3, parentFolder_id: 2 }),
+          (ctx.folderA = { _id: 2, parentFolder_id: 1 }),
+          (ctx.folderB = { _id: 3, parentFolder_id: 2 }),
         ]
-        this.ProjectEntityUpdateHandler.upsertDocWithPath = sinon
+        ctx.ProjectEntityUpdateHandler.upsertDocWithPath = sinon
           .stub()
-          .yields(null, this.doc, true, folders, this.folderB)
-        return this.EditorController.upsertDocWithPath(
-          this.project_id,
-          this.docPath,
-          this.docLines,
-          this.source,
-          this.user_id,
-          this.callback
+          .yields(null, ctx.doc, true, folders, ctx.folderB)
+        return ctx.EditorController.upsertDocWithPath(
+          ctx.project_id,
+          ctx.docPath,
+          ctx.docLines,
+          ctx.source,
+          ctx.user_id,
+          ctx.callback
         )
       })
 
-      it('should send the update for each folder to users in the project', function () {
-        this.EditorRealTimeController.emitToRoom
+      it('should send the update for each folder to users in the project', function (ctx) {
+        ctx.EditorRealTimeController.emitToRoom
           .calledWith(
-            this.project_id,
+            ctx.project_id,
             'reciveNewFolder',
-            this.folderA.parentFolder_id,
-            this.folderA
+            ctx.folderA.parentFolder_id,
+            ctx.folderA
           )
           .should.equal(true)
-        return this.EditorRealTimeController.emitToRoom
+        return ctx.EditorRealTimeController.emitToRoom
           .calledWith(
-            this.project_id,
+            ctx.project_id,
             'reciveNewFolder',
-            this.folderB.parentFolder_id,
-            this.folderB
+            ctx.folderB.parentFolder_id,
+            ctx.folderB
           )
           .should.equal(true)
       })
@@ -396,102 +412,102 @@ describe('EditorController', function () {
   })
 
   describe('upsertFileWithPath', function () {
-    beforeEach(function () {
-      this.filePath = '/folder/file'
+    beforeEach(function (ctx) {
+      ctx.filePath = '/folder/file'
 
-      this.ProjectEntityUpdateHandler.upsertFileWithPath = sinon
+      ctx.ProjectEntityUpdateHandler.upsertFileWithPath = sinon
         .stub()
-        .yields(null, this.newFile, false, this.file, [], this.folder)
-      return this.EditorController.upsertFileWithPath(
-        this.project_id,
-        this.filePath,
-        this.fsPath,
-        this.linkedFileData,
-        this.source,
-        this.user_id,
-        this.callback
+        .yields(null, ctx.newFile, false, ctx.file, [], ctx.folder)
+      return ctx.EditorController.upsertFileWithPath(
+        ctx.project_id,
+        ctx.filePath,
+        ctx.fsPath,
+        ctx.linkedFileData,
+        ctx.source,
+        ctx.user_id,
+        ctx.callback
       )
     })
 
-    it('upserts the file using the project entity handler', function () {
-      return this.ProjectEntityUpdateHandler.upsertFileWithPath
+    it('upserts the file using the project entity handler', function (ctx) {
+      return ctx.ProjectEntityUpdateHandler.upsertFileWithPath
         .calledWith(
-          this.project_id,
-          this.filePath,
-          this.fsPath,
-          this.linkedFileData,
-          this.user_id,
-          this.source
+          ctx.project_id,
+          ctx.filePath,
+          ctx.fsPath,
+          ctx.linkedFileData,
+          ctx.user_id,
+          ctx.source
         )
         .should.equal(true)
     })
 
     describe('file does not exist', function () {
-      beforeEach(function () {
-        this.ProjectEntityUpdateHandler.upsertFileWithPath = sinon
+      beforeEach(function (ctx) {
+        ctx.ProjectEntityUpdateHandler.upsertFileWithPath = sinon
           .stub()
-          .yields(null, this.file, true, undefined, [], this.folder)
-        return this.EditorController.upsertFileWithPath(
-          this.project_id,
-          this.filePath,
-          this.fsPath,
-          this.linkedFileData,
-          this.source,
-          this.user_id,
-          this.callback
+          .yields(null, ctx.file, true, undefined, [], ctx.folder)
+        return ctx.EditorController.upsertFileWithPath(
+          ctx.project_id,
+          ctx.filePath,
+          ctx.fsPath,
+          ctx.linkedFileData,
+          ctx.source,
+          ctx.user_id,
+          ctx.callback
         )
       })
 
-      it('should send the update for the file out to users in the project', function () {
-        return this.EditorRealTimeController.emitToRoom
+      it('should send the update for the file out to users in the project', function (ctx) {
+        return ctx.EditorRealTimeController.emitToRoom
           .calledWith(
-            this.project_id,
+            ctx.project_id,
             'reciveNewFile',
-            this.folder_id,
-            this.file,
-            this.source,
-            this.linkedFileData,
-            this.user_id
+            ctx.folder_id,
+            ctx.file,
+            ctx.source,
+            ctx.linkedFileData,
+            ctx.user_id
           )
           .should.equal(true)
       })
     })
 
     describe('folders required for file do not exist', function () {
-      beforeEach(function () {
+      beforeEach(function (ctx) {
         const folders = [
-          (this.folderA = { _id: 2, parentFolder_id: 1 }),
-          (this.folderB = { _id: 3, parentFolder_id: 2 }),
+          (ctx.folderA = { _id: 2, parentFolder_id: 1 }),
+          (ctx.folderB = { _id: 3, parentFolder_id: 2 }),
         ]
-        this.ProjectEntityUpdateHandler.upsertFileWithPath = sinon
+        ctx.ProjectEntityUpdateHandler.upsertFileWithPath = sinon
           .stub()
-          .yields(null, this.file, true, undefined, folders, this.folderB)
-        return this.EditorController.upsertFileWithPath(
-          this.project_id,
-          this.filePath,
-          this.fsPath,
-          this.linkedFileData,
-          this.source,
-          this.user_id,
-          this.callback
+          .yields(null, ctx.file, true, undefined, folders, ctx.folderB)
+        return ctx.EditorController.upsertFileWithPath(
+          ctx.project_id,
+          ctx.filePath,
+          ctx.fsPath,
+          ctx.linkedFileData,
+          ctx.source,
+          ctx.user_id,
+          ctx.callback
         )
       })
 
-      it('should send the update for each folder to users in the project', function () {
-        this.EditorRealTimeController.emitToRoom
+      it('should send the update for each folder to users in the project', function (ctx) {
+        ctx.EditorRealTimeController.emitToRoom
           .calledWith(
-            this.project_id,
+            ctx.project_id,
             'reciveNewFolder',
-            this.folderA.parentFolder_id,
-            this.folderA
+            ctx.folderA.parentFolder_id,
+            ctx.folderA
           )
           .should.equal(true)
-        return this.EditorRealTimeController.emitToRoom
+        return ctx.EditorRealTimeController.emitToRoom
           .calledWith(
-            this.project_id,
+            ctx.project_id,
             'reciveNewFolder',
-            this.folderB.parentFolder_id,
-            this.folderB
+            ctx.folderB.parentFolder_id,
+            ctx.folderB
           )
           .should.equal(true)
       })
@@ -499,377 +515,364 @@ describe('EditorController', function () {
   })
 
   describe('addFolder', function () {
-    beforeEach(function () {
-      this.EditorController._notifyProjectUsersOfNewFolder = sinon
+    beforeEach(function (ctx) {
+      ctx.EditorController._notifyProjectUsersOfNewFolder = sinon
         .stub()
         .yields()
-      this.ProjectEntityUpdateHandler.addFolder = sinon
+      ctx.ProjectEntityUpdateHandler.addFolder = sinon
         .stub()
-        .yields(null, this.folder, this.folder_id)
-      return this.EditorController.addFolder(
-        this.project_id,
-        this.folder_id,
-        this.folderName,
-        this.source,
-        this.user_id,
-        this.callback
+        .yields(null, ctx.folder, ctx.folder_id)
+      return ctx.EditorController.addFolder(
+        ctx.project_id,
+        ctx.folder_id,
+        ctx.folderName,
+        ctx.source,
+        ctx.user_id,
+        ctx.callback
       )
     })
 
-    it('should add the folder using the project entity handler', function () {
-      return this.ProjectEntityUpdateHandler.addFolder
-        .calledWith(
-          this.project_id,
-          this.folder_id,
-          this.folderName,
-          this.user_id
-        )
+    it('should add the folder using the project entity handler', function (ctx) {
+      return ctx.ProjectEntityUpdateHandler.addFolder
+        .calledWith(ctx.project_id, ctx.folder_id, ctx.folderName, ctx.user_id)
         .should.equal(true)
     })
 
-    it('should notifyProjectUsersOfNewFolder', function () {
-      return this.EditorController._notifyProjectUsersOfNewFolder
-        .calledWith(this.project_id, this.folder_id, this.folder, this.user_id)
+    it('should notifyProjectUsersOfNewFolder', function (ctx) {
+      return ctx.EditorController._notifyProjectUsersOfNewFolder
+        .calledWith(ctx.project_id, ctx.folder_id, ctx.folder, ctx.user_id)
         .should.equal(true)
     })
 
-    it('should return the folder in the callback', function () {
-      return this.callback.calledWith(null, this.folder).should.equal(true)
+    it('should return the folder in the callback', function (ctx) {
+      return ctx.callback.calledWith(null, ctx.folder).should.equal(true)
     })
   })
 
   describe('mkdirp', function () {
-    beforeEach(function () {
-      this.path = 'folder1/folder2'
-      this.folders = [
-        (this.folderA = { _id: 2, parentFolder_id: 1 }),
-        (this.folderB = { _id: 3, parentFolder_id: 2 }),
+    beforeEach(function (ctx) {
+      ctx.path = 'folder1/folder2'
+      ctx.folders = [
+        (ctx.folderA = { _id: 2, parentFolder_id: 1 }),
+        (ctx.folderB = { _id: 3, parentFolder_id: 2 }),
       ]
-      this.userId = new ObjectId().toString()
-      this.EditorController._notifyProjectUsersOfNewFolders = sinon
+      ctx.userId = new ObjectId().toString()
+      ctx.EditorController._notifyProjectUsersOfNewFolders = sinon
         .stub()
         .yields()
-      this.ProjectEntityUpdateHandler.mkdirp = sinon
+      ctx.ProjectEntityUpdateHandler.mkdirp = sinon
         .stub()
-        .yields(null, this.folders, this.folder)
-      return this.EditorController.mkdirp(
-        this.project_id,
-        this.path,
-        this.userId,
-        this.callback
+        .yields(null, ctx.folders, ctx.folder)
+      return ctx.EditorController.mkdirp(
+        ctx.project_id,
+        ctx.path,
+        ctx.userId,
+        ctx.callback
       )
     })
 
-    it('should create the folder using the project entity handler', function () {
-      return this.ProjectEntityUpdateHandler.mkdirp
-        .calledWith(this.project_id, this.path, this.userId)
+    it('should create the folder using the project entity handler', function (ctx) {
+      return ctx.ProjectEntityUpdateHandler.mkdirp
+        .calledWith(ctx.project_id, ctx.path, ctx.userId)
         .should.equal(true)
     })
 
-    it('should notifyProjectUsersOfNewFolder', function () {
-      return this.EditorController._notifyProjectUsersOfNewFolders.calledWith(
-        this.project_id,
-        this.folders
+    it('should notifyProjectUsersOfNewFolder', function (ctx) {
+      return ctx.EditorController._notifyProjectUsersOfNewFolders.calledWith(
+        ctx.project_id,
+        ctx.folders
       )
     })
 
-    it('should return the folder in the callback', function () {
-      return this.callback
-        .calledWith(null, this.folders, this.folder)
+    it('should return the folder in the callback', function (ctx) {
+      return ctx.callback
+        .calledWith(null, ctx.folders, ctx.folder)
         .should.equal(true)
     })
   })
 
   describe('deleteEntity', function () {
-    beforeEach(function () {
-      this.entity_id = 'entity_id_here'
-      this.type = 'doc'
-      this.ProjectEntityUpdateHandler.deleteEntity = sinon.stub().yields()
-      return this.EditorController.deleteEntity(
-        this.project_id,
-        this.entity_id,
-        this.type,
-        this.source,
-        this.user_id,
-        this.callback
+    beforeEach(function (ctx) {
+      ctx.entity_id = 'entity_id_here'
+      ctx.type = 'doc'
+      ctx.ProjectEntityUpdateHandler.deleteEntity = sinon.stub().yields()
+      return ctx.EditorController.deleteEntity(
+        ctx.project_id,
+        ctx.entity_id,
+        ctx.type,
+        ctx.source,
+        ctx.user_id,
+        ctx.callback
       )
     })
 
-    it('should delete the folder using the project entity handler', function () {
-      return this.ProjectEntityUpdateHandler.deleteEntity
+    it('should delete the folder using the project entity handler', function (ctx) {
+      return ctx.ProjectEntityUpdateHandler.deleteEntity
         .calledWith(
-          this.project_id,
-          this.entity_id,
-          this.type,
-          this.user_id,
-          this.source
+          ctx.project_id,
+          ctx.entity_id,
+          ctx.type,
+          ctx.user_id,
+          ctx.source
         )
         .should.equal(true)
     })
 
-    it('notify users an entity has been deleted', function () {
-      return this.EditorRealTimeController.emitToRoom
-        .calledWith(
-          this.project_id,
-          'removeEntity',
-          this.entity_id,
-          this.source
-        )
+    it('notify users an entity has been deleted', function (ctx) {
+      return ctx.EditorRealTimeController.emitToRoom
+        .calledWith(ctx.project_id, 'removeEntity', ctx.entity_id, ctx.source)
         .should.equal(true)
     })
   })
 
   describe('deleteEntityWithPath', function () {
-    beforeEach(function () {
-      this.entity_id = 'entity_id_here'
-      this.ProjectEntityUpdateHandler.deleteEntityWithPath = sinon
+    beforeEach(function (ctx) {
+      ctx.entity_id = 'entity_id_here'
+      ctx.ProjectEntityUpdateHandler.deleteEntityWithPath = sinon
         .stub()
-        .yields(null, this.entity_id)
-      this.path = 'folder1/folder2'
-      return this.EditorController.deleteEntityWithPath(
-        this.project_id,
-        this.path,
-        this.source,
-        this.user_id,
-        this.callback
+        .yields(null, ctx.entity_id)
+      ctx.path = 'folder1/folder2'
+      return ctx.EditorController.deleteEntityWithPath(
+        ctx.project_id,
+        ctx.path,
+        ctx.source,
+        ctx.user_id,
+        ctx.callback
       )
     })
 
-    it('should delete the folder using the project entity handler', function () {
-      return this.ProjectEntityUpdateHandler.deleteEntityWithPath
-        .calledWith(this.project_id, this.path, this.user_id, this.source)
+    it('should delete the folder using the project entity handler', function (ctx) {
+      return ctx.ProjectEntityUpdateHandler.deleteEntityWithPath
+        .calledWith(ctx.project_id, ctx.path, ctx.user_id, ctx.source)
         .should.equal(true)
     })
 
-    it('notify users an entity has been deleted', function () {
-      return this.EditorRealTimeController.emitToRoom
-        .calledWith(
-          this.project_id,
-          'removeEntity',
-          this.entity_id,
-          this.source
-        )
+    it('notify users an entity has been deleted', function (ctx) {
+      return ctx.EditorRealTimeController.emitToRoom
+        .calledWith(ctx.project_id, 'removeEntity', ctx.entity_id, ctx.source)
         .should.equal(true)
     })
   })
 
   describe('updateProjectDescription', function () {
-    beforeEach(function () {
-      this.description = 'new description'
-      return this.EditorController.updateProjectDescription(
-        this.project_id,
-        this.description,
-        this.callback
+    beforeEach(function (ctx) {
+      ctx.description = 'new description'
+      return ctx.EditorController.updateProjectDescription(
+        ctx.project_id,
+        ctx.description,
+        ctx.callback
       )
     })
 
-    it('should send the new description to the project details handler', function () {
-      return this.ProjectDetailsHandler.setProjectDescription
-        .calledWith(this.project_id, this.description)
+    it('should send the new description to the project details handler', function (ctx) {
+      return ctx.ProjectDetailsHandler.setProjectDescription
+        .calledWith(ctx.project_id, ctx.description)
         .should.equal(true)
     })
 
-    it('should notify the other clients about the updated description', function () {
-      return this.EditorRealTimeController.emitToRoom
+    it('should notify the other clients about the updated description', function (ctx) {
+      return ctx.EditorRealTimeController.emitToRoom
         .calledWith(
-          this.project_id,
+          ctx.project_id,
           'projectDescriptionUpdated',
-          this.description
+          ctx.description
         )
         .should.equal(true)
     })
   })
 
   describe('deleteProject', function () {
-    beforeEach(function () {
-      this.err = 'errro'
-      return (this.ProjectDeleter.deleteProject = sinon
-        .stub()
-        .callsArgWith(1, this.err))
+    beforeEach(function (ctx) {
+      ctx.err = 'errro'
+      ctx.ProjectDeleter.deleteProject.callsArgWith(1, ctx.err)
     })
 
-    it('should call the project handler', function (done) {
-      return this.EditorController.deleteProject(this.project_id, err => {
-        err.should.equal(this.err)
-        this.ProjectDeleter.deleteProject
-          .calledWith(this.project_id)
-          .should.equal(true)
-        return done()
+    it('should call the project handler', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.EditorController.deleteProject(ctx.project_id, err => {
+          err.should.equal(ctx.err)
+          ctx.ProjectDeleter.deleteProject
+            .calledWith(ctx.project_id)
+            .should.equal(true)
+          resolve()
+        })
       })
     })
   })
 
   describe('renameEntity', function () {
-    beforeEach(function (done) {
-      this.entity_id = 'entity_id_here'
-      this.entityType = 'doc'
-      this.newName = 'bobsfile.tex'
-      this.ProjectEntityUpdateHandler.renameEntity = sinon.stub().yields()
+    beforeEach(async function (ctx) {
+      await new Promise(resolve => {
+        ctx.entity_id = 'entity_id_here'
+        ctx.entityType = 'doc'
+        ctx.newName = 'bobsfile.tex'
+        ctx.ProjectEntityUpdateHandler.renameEntity = sinon.stub().yields()
 
-      return this.EditorController.renameEntity(
-        this.project_id,
-        this.entity_id,
-        this.entityType,
-        this.newName,
-        this.user_id,
-        this.source,
-        done
-      )
+        return ctx.EditorController.renameEntity(
+          ctx.project_id,
+          ctx.entity_id,
+          ctx.entityType,
+          ctx.newName,
+          ctx.user_id,
+          ctx.source,
+          resolve
+        )
+      })
     })
 
-    it('should call the project handler', function () {
-      return this.ProjectEntityUpdateHandler.renameEntity
+    it('should call the project handler', function (ctx) {
+      return ctx.ProjectEntityUpdateHandler.renameEntity
         .calledWith(
-          this.project_id,
-          this.entity_id,
-          this.entityType,
-          this.newName,
-          this.user_id,
-          this.source
+          ctx.project_id,
+          ctx.entity_id,
+          ctx.entityType,
+          ctx.newName,
+          ctx.user_id,
+          ctx.source
         )
         .should.equal(true)
     })
 
-    it('should emit the update to the room', function () {
-      return this.EditorRealTimeController.emitToRoom
+    it('should emit the update to the room', function (ctx) {
+      return ctx.EditorRealTimeController.emitToRoom
         .calledWith(
-          this.project_id,
+          ctx.project_id,
           'reciveEntityRename',
-          this.entity_id,
-          this.newName
+          ctx.entity_id,
+          ctx.newName
         )
         .should.equal(true)
     })
   })
 
   describe('moveEntity', function () {
-    beforeEach(function () {
-      this.entity_id = 'entity_id_here'
-      this.entityType = 'doc'
-      this.ProjectEntityUpdateHandler.moveEntity = sinon.stub().yields()
-      return this.EditorController.moveEntity(
-        this.project_id,
-        this.entity_id,
-        this.folder_id,
-        this.entityType,
-        this.user_id,
-        this.source,
-        this.callback
+    beforeEach(function (ctx) {
+      ctx.entity_id = 'entity_id_here'
+      ctx.entityType = 'doc'
+      ctx.ProjectEntityUpdateHandler.moveEntity = sinon.stub().yields()
+      return ctx.EditorController.moveEntity(
+        ctx.project_id,
+        ctx.entity_id,
+        ctx.folder_id,
+        ctx.entityType,
+        ctx.user_id,
+        ctx.source,
+        ctx.callback
       )
     })
 
-    it('should call the ProjectEntityUpdateHandler', function () {
-      return this.ProjectEntityUpdateHandler.moveEntity
+    it('should call the ProjectEntityUpdateHandler', function (ctx) {
+      return ctx.ProjectEntityUpdateHandler.moveEntity
         .calledWith(
-          this.project_id,
-          this.entity_id,
-          this.folder_id,
-          this.entityType,
-          this.user_id,
-          this.source
+          ctx.project_id,
+          ctx.entity_id,
+          ctx.folder_id,
+          ctx.entityType,
+          ctx.user_id,
+          ctx.source
         )
         .should.equal(true)
     })
 
-    it('should emit the update to the room', function () {
-      return this.EditorRealTimeController.emitToRoom
+    it('should emit the update to the room', function (ctx) {
+      return ctx.EditorRealTimeController.emitToRoom
         .calledWith(
-          this.project_id,
+          ctx.project_id,
           'reciveEntityMove',
-          this.entity_id,
-          this.folder_id
+          ctx.entity_id,
+          ctx.folder_id
         )
         .should.equal(true)
     })
 
-    it('calls the callback', function () {
-      return this.callback.called.should.equal(true)
+    it('calls the callback', function (ctx) {
+      return ctx.callback.called.should.equal(true)
     })
   })
 
   describe('renameProject', function () {
-    beforeEach(function () {
-      this.err = 'errro'
-      this.newName = 'new name here'
-      return this.EditorController.renameProject(
-        this.project_id,
-        this.newName,
-        this.callback
+    beforeEach(function (ctx) {
+      ctx.err = 'errro'
+      ctx.newName = 'new name here'
+      return ctx.EditorController.renameProject(
+        ctx.project_id,
+        ctx.newName,
+        ctx.callback
       )
     })
 
-    it('should call the EditorController', function () {
-      return this.ProjectDetailsHandler.renameProject
-        .calledWith(this.project_id, this.newName)
+    it('should call the EditorController', function (ctx) {
+      return ctx.ProjectDetailsHandler.renameProject
+        .calledWith(ctx.project_id, ctx.newName)
         .should.equal(true)
     })
 
-    it('should emit the update to the room', function () {
-      return this.EditorRealTimeController.emitToRoom
-        .calledWith(this.project_id, 'projectNameUpdated', this.newName)
+    it('should emit the update to the room', function (ctx) {
+      return ctx.EditorRealTimeController.emitToRoom
+        .calledWith(ctx.project_id, 'projectNameUpdated', ctx.newName)
         .should.equal(true)
     })
   })
 
   describe('setCompiler', function () {
-    beforeEach(function () {
-      this.compiler = 'latex'
-      return this.EditorController.setCompiler(
-        this.project_id,
-        this.compiler,
-        this.callback
+    beforeEach(function (ctx) {
+      ctx.compiler = 'latex'
+      return ctx.EditorController.setCompiler(
+        ctx.project_id,
+        ctx.compiler,
+        ctx.callback
       )
     })
 
-    it('should send the new compiler and project id to the project options handler', function () {
-      this.ProjectOptionsHandler.setCompiler
-        .calledWith(this.project_id, this.compiler)
+    it('should send the new compiler and project id to the project options handler', function (ctx) {
+      ctx.ProjectOptionsHandler.setCompiler
+        .calledWith(ctx.project_id, ctx.compiler)
         .should.equal(true)
-      return this.EditorRealTimeController.emitToRoom
-        .calledWith(this.project_id, 'compilerUpdated', this.compiler)
+      return ctx.EditorRealTimeController.emitToRoom
+        .calledWith(ctx.project_id, 'compilerUpdated', ctx.compiler)
         .should.equal(true)
     })
   })
 
   describe('setImageName', function () {
-    beforeEach(function () {
-      this.imageName = 'texlive-1234.5'
-      return this.EditorController.setImageName(
-        this.project_id,
-        this.imageName,
-        this.callback
+    beforeEach(function (ctx) {
+      ctx.imageName = 'texlive-1234.5'
+      return ctx.EditorController.setImageName(
+        ctx.project_id,
+        ctx.imageName,
+        ctx.callback
       )
     })
 
-    it('should send the new imageName and project id to the project options handler', function () {
-      this.ProjectOptionsHandler.setImageName
-        .calledWith(this.project_id, this.imageName)
+    it('should send the new imageName and project id to the project options handler', function (ctx) {
+      ctx.ProjectOptionsHandler.setImageName
+        .calledWith(ctx.project_id, ctx.imageName)
         .should.equal(true)
-      return this.EditorRealTimeController.emitToRoom
-        .calledWith(this.project_id, 'imageNameUpdated', this.imageName)
+      return ctx.EditorRealTimeController.emitToRoom
+        .calledWith(ctx.project_id, 'imageNameUpdated', ctx.imageName)
         .should.equal(true)
     })
   })
 
   describe('setSpellCheckLanguage', function () {
-    beforeEach(function () {
-      this.languageCode = 'fr'
-      return this.EditorController.setSpellCheckLanguage(
-        this.project_id,
-        this.languageCode,
-        this.callback
+    beforeEach(function (ctx) {
+      ctx.languageCode = 'fr'
+      return ctx.EditorController.setSpellCheckLanguage(
+        ctx.project_id,
+        ctx.languageCode,
+        ctx.callback
       )
     })
 
-    it('should send the new languageCode and project id to the project options handler', function () {
-      this.ProjectOptionsHandler.setSpellCheckLanguage
-        .calledWith(this.project_id, this.languageCode)
+    it('should send the new languageCode and project id to the project options handler', function (ctx) {
+      ctx.ProjectOptionsHandler.setSpellCheckLanguage
+        .calledWith(ctx.project_id, ctx.languageCode)
         .should.equal(true)
-      return this.EditorRealTimeController.emitToRoom
+      return ctx.EditorRealTimeController.emitToRoom
         .calledWith(
-          this.project_id,
+          ctx.project_id,
           'spellCheckLanguageUpdated',
-          this.languageCode
+          ctx.languageCode
         )
         .should.equal(true)
     })
@@ -877,212 +880,210 @@ describe('EditorController', function () {
 
   describe('setPublicAccessLevel', function () {
     describe('when setting to private', function () {
-      beforeEach(function () {
-        this.newAccessLevel = 'private'
-        this.ProjectDetailsHandler.ensureTokensArePresent = sinon
-          .stub()
-          .yields()
-        return this.EditorController.setPublicAccessLevel(
-          this.project_id,
-          this.newAccessLevel,
-          this.callback
+      beforeEach(function (ctx) {
+        ctx.newAccessLevel = 'private'
+        ctx.ProjectDetailsHandler.ensureTokensArePresent = sinon.stub().yields()
+        return ctx.EditorController.setPublicAccessLevel(
+          ctx.project_id,
+          ctx.newAccessLevel,
+          ctx.callback
         )
       })
 
-      it('should set the access level', function () {
-        return this.ProjectDetailsHandler.setPublicAccessLevel
-          .calledWith(this.project_id, this.newAccessLevel)
+      it('should set the access level', function (ctx) {
+        return ctx.ProjectDetailsHandler.setPublicAccessLevel
+          .calledWith(ctx.project_id, ctx.newAccessLevel)
           .should.equal(true)
       })
 
-      it('should broadcast the access level change', function () {
-        return this.EditorRealTimeController.emitToRoom
-          .calledWith(this.project_id, 'project:publicAccessLevel:changed')
+      it('should broadcast the access level change', function (ctx) {
+        return ctx.EditorRealTimeController.emitToRoom
+          .calledWith(ctx.project_id, 'project:publicAccessLevel:changed')
           .should.equal(true)
       })
 
-      it('should not ensure tokens are present for project', function () {
-        return this.ProjectDetailsHandler.ensureTokensArePresent
-          .calledWith(this.project_id)
+      it('should not ensure tokens are present for project', function (ctx) {
+        return ctx.ProjectDetailsHandler.ensureTokensArePresent
+          .calledWith(ctx.project_id)
           .should.equal(false)
       })
     })
 
     describe('when setting to tokenBased', function () {
-      beforeEach(function () {
-        this.newAccessLevel = 'tokenBased'
-        this.tokens = { readOnly: 'aaa', readAndWrite: '42bbb' }
-        this.ProjectDetailsHandler.ensureTokensArePresent = sinon
-          .stub()
-          .yields()
-        return this.EditorController.setPublicAccessLevel(
-          this.project_id,
-          this.newAccessLevel,
-          this.callback
+      beforeEach(function (ctx) {
+        ctx.newAccessLevel = 'tokenBased'
+        ctx.tokens = { readOnly: 'aaa', readAndWrite: '42bbb' }
+        ctx.ProjectDetailsHandler.ensureTokensArePresent = sinon.stub().yields()
+        return ctx.EditorController.setPublicAccessLevel(
+          ctx.project_id,
+          ctx.newAccessLevel,
+          ctx.callback
         )
       })
 
-      it('should set the access level', function () {
-        return this.ProjectDetailsHandler.setPublicAccessLevel
-          .calledWith(this.project_id, this.newAccessLevel)
+      it('should set the access level', function (ctx) {
+        return ctx.ProjectDetailsHandler.setPublicAccessLevel
+          .calledWith(ctx.project_id, ctx.newAccessLevel)
           .should.equal(true)
       })
 
-      it('should broadcast the access level change', function () {
-        return this.EditorRealTimeController.emitToRoom
-          .calledWith(this.project_id, 'project:publicAccessLevel:changed')
+      it('should broadcast the access level change', function (ctx) {
+        return ctx.EditorRealTimeController.emitToRoom
+          .calledWith(ctx.project_id, 'project:publicAccessLevel:changed')
           .should.equal(true)
       })
 
-      it('should ensure tokens are present for project', function () {
-        return this.ProjectDetailsHandler.ensureTokensArePresent
-          .calledWith(this.project_id)
+      it('should ensure tokens are present for project', function (ctx) {
+        return ctx.ProjectDetailsHandler.ensureTokensArePresent
+          .calledWith(ctx.project_id)
           .should.equal(true)
       })
     })
   })
 
   describe('setRootDoc', function () {
-    beforeEach(function () {
-      this.newRootDocID = '21312321321'
-      this.ProjectEntityUpdateHandler.setRootDoc = sinon.stub().yields()
-      return this.EditorController.setRootDoc(
-        this.project_id,
-        this.newRootDocID,
-        this.callback
+    beforeEach(function (ctx) {
+      ctx.newRootDocID = '21312321321'
+      ctx.ProjectEntityUpdateHandler.setRootDoc = sinon.stub().yields()
+      return ctx.EditorController.setRootDoc(
+        ctx.project_id,
+        ctx.newRootDocID,
+        ctx.callback
       )
     })
 
-    it('should call the ProjectEntityUpdateHandler', function () {
-      return this.ProjectEntityUpdateHandler.setRootDoc
-        .calledWith(this.project_id, this.newRootDocID)
+    it('should call the ProjectEntityUpdateHandler', function (ctx) {
+      return ctx.ProjectEntityUpdateHandler.setRootDoc
+        .calledWith(ctx.project_id, ctx.newRootDocID)
         .should.equal(true)
     })
 
-    it('should emit the update to the room', function () {
-      return this.EditorRealTimeController.emitToRoom
-        .calledWith(this.project_id, 'rootDocUpdated', this.newRootDocID)
+    it('should emit the update to the room', function (ctx) {
+      return ctx.EditorRealTimeController.emitToRoom
+        .calledWith(ctx.project_id, 'rootDocUpdated', ctx.newRootDocID)
         .should.equal(true)
     })
   })
 
   describe('setMainBibliographyDoc', function () {
     describe('on success', function () {
-      beforeEach(function (done) {
-        this.mainBibliographyId = 'bib-doc-id'
-        this.ProjectEntityUpdateHandler.setMainBibliographyDoc = sinon
-          .stub()
-          .yields()
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
+          ctx.mainBibliographyId = 'bib-doc-id'
+          ctx.ProjectEntityUpdateHandler.setMainBibliographyDoc = sinon
+            .stub()
+            .yields()
 
-        this.callback = sinon.stub().callsFake(done)
-        this.EditorController.setMainBibliographyDoc(
-          this.project_id,
-          this.mainBibliographyId,
-          this.callback
-        )
+          ctx.callback = sinon.stub().callsFake(resolve)
+          ctx.EditorController.setMainBibliographyDoc(
+            ctx.project_id,
+            ctx.mainBibliographyId,
+            ctx.callback
+          )
+        })
       })
 
-      it('should forward the call to the ProjectEntityUpdateHandler', function () {
+      it('should forward the call to the ProjectEntityUpdateHandler', function (ctx) {
         expect(
-          this.ProjectEntityUpdateHandler.setMainBibliographyDoc
-        ).to.have.been.calledWith(this.project_id, this.mainBibliographyId)
+          ctx.ProjectEntityUpdateHandler.setMainBibliographyDoc
+        ).to.have.been.calledWith(ctx.project_id, ctx.mainBibliographyId)
       })
 
-      it('should emit the update to the room', function () {
-        expect(
-          this.EditorRealTimeController.emitToRoom
-        ).to.have.been.calledWith(
-          this.project_id,
+      it('should emit the update to the room', function (ctx) {
+        expect(ctx.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
+          ctx.project_id,
           'mainBibliographyDocUpdated',
-          this.mainBibliographyId
+          ctx.mainBibliographyId
         )
       })
 
-      it('should return nothing', function () {
-        expect(this.callback).to.have.been.calledWithExactly()
+      it('should return nothing', function (ctx) {
+        expect(ctx.callback).to.have.been.calledWithExactly()
       })
     })
 
     describe('on error', function () {
-      beforeEach(function (done) {
-        this.mainBibliographyId = 'bib-doc-id'
-        this.error = new Error('oh no')
-        this.ProjectEntityUpdateHandler.setMainBibliographyDoc = sinon
-          .stub()
-          .yields(this.error)
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
+          ctx.mainBibliographyId = 'bib-doc-id'
+          ctx.error = new Error('oh no')
+          ctx.ProjectEntityUpdateHandler.setMainBibliographyDoc = sinon
+            .stub()
+            .yields(ctx.error)
 
-        this.callback = sinon.stub().callsFake(() => done())
-        this.EditorController.setMainBibliographyDoc(
-          this.project_id,
-          this.mainBibliographyId,
-          this.callback
-        )
+          ctx.callback = sinon.stub().callsFake(() => resolve())
+          ctx.EditorController.setMainBibliographyDoc(
+            ctx.project_id,
+            ctx.mainBibliographyId,
+            ctx.callback
+          )
+        })
       })
 
-      it('should forward the call to the ProjectEntityUpdateHandler', function () {
+      it('should forward the call to the ProjectEntityUpdateHandler', function (ctx) {
         expect(
-          this.ProjectEntityUpdateHandler.setMainBibliographyDoc
-        ).to.have.been.calledWith(this.project_id, this.mainBibliographyId)
+          ctx.ProjectEntityUpdateHandler.setMainBibliographyDoc
+        ).to.have.been.calledWith(ctx.project_id, ctx.mainBibliographyId)
       })
 
-      it('should return the error', function () {
-        expect(this.callback).to.have.been.calledWithExactly(this.error)
+      it('should return the error', function (ctx) {
+        expect(ctx.callback).to.have.been.calledWithExactly(ctx.error)
       })
 
-      it('should not emit the update to the room', function () {
-        expect(this.EditorRealTimeController.emitToRoom).to.not.have.been.called
+      it('should not emit the update to the room', function (ctx) {
+        expect(ctx.EditorRealTimeController.emitToRoom).to.not.have.been.called
       })
     })
   })
 
   describe('appendToDoc', function () {
     describe('on success', function () {
-      beforeEach(function () {
-        this.docId = 'doc-1'
-        this.ProjectEntityUpdateHandler.appendToDoc = sinon
+      beforeEach(function (ctx) {
+        ctx.docId = 'doc-1'
+        ctx.ProjectEntityUpdateHandler.appendToDoc = sinon
           .stub()
           .yields(null, { rev: '1' })
-        this.EditorController.appendToDoc(
-          this.project_id,
-          this.docId,
-          this.docLines,
-          this.source,
-          this.user_id,
-          this.callback
+        ctx.EditorController.appendToDoc(
+          ctx.project_id,
+          ctx.docId,
+          ctx.docLines,
+          ctx.source,
+          ctx.user_id,
+          ctx.callback
         )
       })
 
-      it('appends to the doc using the project entity handler', function () {
-        this.ProjectEntityUpdateHandler.appendToDoc
-          .calledWith(this.project_id, this.docId, this.docLines, this.source)
+      it('appends to the doc using the project entity handler', function (ctx) {
+        ctx.ProjectEntityUpdateHandler.appendToDoc
+          .calledWith(ctx.project_id, ctx.docId, ctx.docLines, ctx.source)
           .should.equal(true)
       })
     })
 
     describe('on error', function () {
-      beforeEach(function () {
-        this.docId = 'doc-1'
-        this.ProjectEntityUpdateHandler.appendToDoc = sinon
+      beforeEach(function (ctx) {
+        ctx.docId = 'doc-1'
+        ctx.ProjectEntityUpdateHandler.appendToDoc = sinon
           .stub()
           .yields(new Error('foo'))
-        this.EditorController.appendToDoc(
-          this.project_id,
-          this.docId,
-          this.docLines,
-          this.source,
-          this.user_id,
-          this.callback
+        ctx.EditorController.appendToDoc(
+          ctx.project_id,
+          ctx.docId,
+          ctx.docLines,
+          ctx.source,
+          ctx.user_id,
+          ctx.callback
         )
       })
 
-      it('tries to append to the doc using the project entity handler', function () {
-        this.ProjectEntityUpdateHandler.appendToDoc
-          .calledWith(this.project_id, this.docId, this.docLines, this.source)
+      it('tries to append to the doc using the project entity handler', function (ctx) {
+        ctx.ProjectEntityUpdateHandler.appendToDoc
+          .calledWith(ctx.project_id, ctx.docId, ctx.docLines, ctx.source)
           .should.equal(true)
       })
 
-      it('tags the error', function () {
-        this.callback.calledWith(sinon.match.instanceOf(OError))
+      it('tags the error', function (ctx) {
+        ctx.callback.calledWith(sinon.match.instanceOf(OError))
       })
     })
   })

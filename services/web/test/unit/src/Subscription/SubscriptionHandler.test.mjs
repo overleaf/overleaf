@@ -1,11 +1,7 @@
-const SandboxedModule = require('sandboxed-module')
-const sinon = require('sinon')
-const chai = require('chai')
-const { expect } = chai
-const {
-  PaymentProviderSubscription,
-} = require('../../../../app/src/Features/Subscription/PaymentProviderEntities')
-const SubscriptionHelper = require('../../../../app/src/Features/Subscription/SubscriptionHelper')
+import { expect, vi } from 'vitest'
+import sinon from 'sinon'
+import { PaymentProviderSubscription } from '../../../../app/src/Features/Subscription/PaymentProviderEntities.js'
+import SubscriptionHelper from '../../../../app/src/Features/Subscription/SubscriptionHelper.js'
 
 const MODULE_PATH =
   '../../../../app/src/Features/Subscription/SubscriptionHandler'
@@ -47,8 +43,8 @@ const mockSubscriptionChanges = {
 }
 
 describe('SubscriptionHandler', function () {
-  beforeEach(function () {
-    this.Settings = {
+  beforeEach(async function (ctx) {
+    ctx.Settings = {
       plans: [
         {
           planCode: 'collaborator',
@@ -69,49 +65,49 @@ describe('SubscriptionHandler', function () {
         versioning: false,
       },
     }
-    this.activeRecurlySubscription =
+    ctx.activeRecurlySubscription =
       mockRecurlySubscriptions['subscription-123-active']
-    this.activeRecurlyClientSubscription =
+    ctx.activeRecurlyClientSubscription =
       mockRecurlyClientSubscriptions['subscription-123-active']
-    this.activeRecurlySubscriptionChange =
+    ctx.activeRecurlySubscriptionChange =
       mockSubscriptionChanges['subscription-123-active']
-    this.User = {}
-    this.user = { _id: (this.user_id = 'user_id_here_') }
-    this.subscription = {
-      recurlySubscription_id: this.activeRecurlySubscription.uuid,
+    ctx.User = {}
+    ctx.user = { _id: (ctx.user_id = 'user_id_here_') }
+    ctx.subscription = {
+      recurlySubscription_id: ctx.activeRecurlySubscription.uuid,
     }
-    this.RecurlyWrapper = {
+    ctx.RecurlyWrapper = {
       promises: {
-        getSubscription: sinon.stub().resolves(this.activeRecurlySubscription),
+        getSubscription: sinon.stub().resolves(ctx.activeRecurlySubscription),
         redeemCoupon: sinon.stub().resolves(),
         createSubscription: sinon
           .stub()
-          .resolves(this.activeRecurlySubscription),
+          .resolves(ctx.activeRecurlySubscription),
         getBillingInfo: sinon.stub().resolves(),
         getAccountPastDueInvoices: sinon.stub().resolves(),
         attemptInvoiceCollection: sinon.stub().resolves(),
         listAccountActiveSubscriptions: sinon.stub().resolves([]),
       },
     }
-    this.RecurlyClient = {
+    ctx.RecurlyClient = {
       promises: {
         reactivateSubscriptionByUuid: sinon
           .stub()
-          .resolves(this.activeRecurlyClientSubscription),
+          .resolves(ctx.activeRecurlyClientSubscription),
         cancelSubscriptionByUuid: sinon.stub().resolves(),
         applySubscriptionChangeRequest: sinon
           .stub()
-          .resolves(this.activeRecurlySubscriptionChange),
+          .resolves(ctx.activeRecurlySubscriptionChange),
         getSubscription: sinon
           .stub()
-          .resolves(this.activeRecurlyClientSubscription),
+          .resolves(ctx.activeRecurlyClientSubscription),
         pauseSubscriptionByUuid: sinon.stub().resolves(),
         resumeSubscriptionByUuid: sinon.stub().resolves(),
         failInvoice: sinon.stub(),
         getPastDueInvoices: sinon.stub(),
       },
     }
-    this.SubscriptionUpdater = {
+    ctx.SubscriptionUpdater = {
       promises: {
         updateSubscriptionFromRecurly: sinon.stub().resolves(),
         syncSubscription: sinon.stub().resolves(),
@@ -121,139 +117,189 @@ describe('SubscriptionHandler', function () {
       },
     }
 
-    this.LimitationsManager = {
+    ctx.LimitationsManager = {
       promises: {
         userHasSubscription: sinon.stub().resolves(),
       },
     }
 
-    this.SubscriptionLocator = {
+    ctx.SubscriptionLocator = {
       promises: {
-        getUsersSubscription: sinon.stub().resolves(this.subscription),
+        getUsersSubscription: sinon.stub().resolves(ctx.subscription),
       },
     }
 
-    this.EmailHandler = {
+    ctx.EmailHandler = {
       sendEmail: sinon.stub(),
       sendDeferredEmail: sinon.stub(),
     }
 
-    this.UserUpdater = {
+    ctx.UserUpdater = {
       promises: {
         updateUser: sinon.stub().resolves(),
       },
     }
 
-    this.SubscriptionHandler = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        './RecurlyWrapper': this.RecurlyWrapper,
-        './RecurlyClient': this.RecurlyClient,
-        '@overleaf/settings': this.Settings,
-        '../../models/User': {
-          User: this.User,
-        },
-        './SubscriptionHelper': SubscriptionHelper,
-        './SubscriptionUpdater': this.SubscriptionUpdater,
-        './SubscriptionLocator': this.SubscriptionLocator,
-        './LimitationsManager': this.LimitationsManager,
-        '../Email/EmailHandler': this.EmailHandler,
-        '../Analytics/AnalyticsManager': this.AnalyticsManager,
-        '../User/UserUpdater': this.UserUpdater,
-        '../../infrastructure/Modules': (this.Modules = {
-          promises: {
-            hooks: {
-              fire: sinon.stub(),
-            },
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/RecurlyWrapper',
+      () => ({
+        default: ctx.RecurlyWrapper,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/RecurlyClient',
+      () => ({
+        default: ctx.RecurlyClient,
+      })
+    )
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.Settings,
+    }))
+
+    vi.doMock('../../../../app/src/models/User', () => ({
+      User: ctx.User,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionHelper',
+      () => ({
+        default: SubscriptionHelper,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionUpdater',
+      () => ({
+        default: ctx.SubscriptionUpdater,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionLocator',
+      () => ({
+        default: ctx.SubscriptionLocator,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/LimitationsManager',
+      () => ({
+        default: ctx.LimitationsManager,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/Email/EmailHandler', () => ({
+      default: ctx.EmailHandler,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Analytics/AnalyticsManager',
+      () => ({
+        default: ctx.AnalyticsManager,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/User/UserUpdater', () => ({
+      default: ctx.UserUpdater,
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
+      default: (ctx.Modules = {
+        promises: {
+          hooks: {
+            fire: sinon.stub(),
           },
-        }),
-      },
-    })
+        },
+      }),
+    }))
+
+    ctx.SubscriptionHandler = (await import(MODULE_PATH)).default
   })
 
   describe('createSubscription', function () {
-    beforeEach(function () {
-      this.subscriptionDetails = {
+    beforeEach(function (ctx) {
+      ctx.subscriptionDetails = {
         cvv: '123',
         number: '12345',
       }
-      this.recurlyTokenIds = { billing: '45555666' }
+      ctx.recurlyTokenIds = { billing: '45555666' }
     })
 
     describe('successfully', function () {
-      beforeEach(async function () {
-        await this.SubscriptionHandler.promises.createSubscription(
-          this.user,
-          this.subscriptionDetails,
-          this.recurlyTokenIds
+      beforeEach(async function (ctx) {
+        await ctx.SubscriptionHandler.promises.createSubscription(
+          ctx.user,
+          ctx.subscriptionDetails,
+          ctx.recurlyTokenIds
         )
       })
 
-      it('should create the subscription with the wrapper', function () {
-        this.RecurlyWrapper.promises.createSubscription
-          .calledWith(this.user, this.subscriptionDetails, this.recurlyTokenIds)
+      it('should create the subscription with the wrapper', function (ctx) {
+        ctx.RecurlyWrapper.promises.createSubscription
+          .calledWith(ctx.user, ctx.subscriptionDetails, ctx.recurlyTokenIds)
           .should.equal(true)
       })
 
-      it('should sync the subscription to the user', function () {
-        this.SubscriptionUpdater.promises.syncSubscription.calledOnce.should.equal(
+      it('should sync the subscription to the user', function (ctx) {
+        ctx.SubscriptionUpdater.promises.syncSubscription.calledOnce.should.equal(
           true
         )
-        this.SubscriptionUpdater.promises.syncSubscription.args[0][0].should.deep.equal(
-          this.activeRecurlySubscription
+        ctx.SubscriptionUpdater.promises.syncSubscription.args[0][0].should.deep.equal(
+          ctx.activeRecurlySubscription
         )
-        this.SubscriptionUpdater.promises.syncSubscription.args[0][1].should.deep.equal(
-          this.user._id
+        ctx.SubscriptionUpdater.promises.syncSubscription.args[0][1].should.deep.equal(
+          ctx.user._id
         )
       })
 
-      it('should not set last trial date if not a trial/the trial_started_at is not set', function () {
-        this.UserUpdater.promises.updateUser.should.not.have.been.called
+      it('should not set last trial date if not a trial/the trial_started_at is not set', function (ctx) {
+        ctx.UserUpdater.promises.updateUser.should.not.have.been.called
       })
     })
 
     describe('when the subscription is a trial and has a trial_started_at date', function () {
-      beforeEach(async function () {
-        this.activeRecurlySubscription.trial_started_at =
+      beforeEach(async function (ctx) {
+        ctx.activeRecurlySubscription.trial_started_at =
           '2024-01-01T09:58:35.531+00:00'
-        await this.SubscriptionHandler.promises.createSubscription(
-          this.user,
-          this.subscriptionDetails,
-          this.recurlyTokenIds
+        await ctx.SubscriptionHandler.promises.createSubscription(
+          ctx.user,
+          ctx.subscriptionDetails,
+          ctx.recurlyTokenIds
         )
       })
-      it('should set the users lastTrial date', function () {
-        this.UserUpdater.promises.updateUser.should.have.been.calledOnce
-        expect(this.UserUpdater.promises.updateUser.args[0][0]).to.deep.equal({
-          _id: this.user_id,
+      it('should set the users lastTrial date', function (ctx) {
+        ctx.UserUpdater.promises.updateUser.should.have.been.calledOnce
+        expect(ctx.UserUpdater.promises.updateUser.args[0][0]).to.deep.equal({
+          _id: ctx.user_id,
           lastTrial: {
             $not: {
-              $gt: new Date(this.activeRecurlySubscription.trial_started_at),
+              $gt: new Date(ctx.activeRecurlySubscription.trial_started_at),
             },
           },
         })
-        expect(this.UserUpdater.promises.updateUser.args[0][1]).to.deep.equal({
+        expect(ctx.UserUpdater.promises.updateUser.args[0][1]).to.deep.equal({
           $set: {
-            lastTrial: new Date(
-              this.activeRecurlySubscription.trial_started_at
-            ),
+            lastTrial: new Date(ctx.activeRecurlySubscription.trial_started_at),
           },
         })
       })
     })
 
     describe('when there is already a subscription in Recurly', function () {
-      beforeEach(function () {
-        this.RecurlyWrapper.promises.listAccountActiveSubscriptions.resolves([
-          this.subscription,
+      beforeEach(function (ctx) {
+        ctx.RecurlyWrapper.promises.listAccountActiveSubscriptions.resolves([
+          ctx.subscription,
         ])
       })
 
-      it('should an error', function () {
+      it('should an error', function (ctx) {
         expect(
-          this.SubscriptionHandler.promises.createSubscription(
-            this.user,
-            this.subscriptionDetails,
-            this.recurlyTokenIds
+          ctx.SubscriptionHandler.promises.createSubscription(
+            ctx.user,
+            ctx.subscriptionDetails,
+            ctx.recurlyTokenIds
           )
         ).to.be.rejectedWith('user already has subscription in recurly')
       })
@@ -261,26 +307,26 @@ describe('SubscriptionHandler', function () {
   })
 
   describe('updateSubscription', function () {
-    beforeEach(function () {
-      this.user.id = this.activeRecurlySubscription.account.account_code
-      this.User.findById = (userId, projection) => ({
+    beforeEach(function (ctx) {
+      ctx.user.id = ctx.activeRecurlySubscription.account.account_code
+      ctx.User.findById = (userId, projection) => ({
         exec: () => {
-          userId.should.equal(this.user.id)
-          return Promise.resolve(this.user)
+          userId.should.equal(ctx.user.id)
+          return Promise.resolve(ctx.user)
         },
       })
     })
 
-    it('should not fire updatePaidSubscription hook if user has no subscription', async function () {
-      this.LimitationsManager.promises.userHasSubscription.resolves({
+    it('should not fire updatePaidSubscription hook if user has no subscription', async function (ctx) {
+      ctx.LimitationsManager.promises.userHasSubscription.resolves({
         hasSubscription: false,
         subscription: null,
       })
-      await this.SubscriptionHandler.promises.updateSubscription(
-        this.user,
-        this.plan_code
+      await ctx.SubscriptionHandler.promises.updateSubscription(
+        ctx.user,
+        ctx.plan_code
       )
-      expect(this.Modules.promises.hooks.fire).to.not.have.been.calledWith(
+      expect(ctx.Modules.promises.hooks.fire).to.not.have.been.calledWith(
         'updatePaidSubscription',
         sinon.match.any,
         sinon.match.any,
@@ -288,16 +334,16 @@ describe('SubscriptionHandler', function () {
       )
     })
 
-    it('should not fire updatePaidSubscription hook if user has custom subscription', async function () {
-      this.LimitationsManager.promises.userHasSubscription.resolves({
+    it('should not fire updatePaidSubscription hook if user has custom subscription', async function (ctx) {
+      ctx.LimitationsManager.promises.userHasSubscription.resolves({
         hasSubscription: true,
         subscription: { customAccount: true },
       })
-      await this.SubscriptionHandler.promises.updateSubscription(
-        this.user,
-        this.plan_code
+      await ctx.SubscriptionHandler.promises.updateSubscription(
+        ctx.user,
+        ctx.plan_code
       )
-      expect(this.Modules.promises.hooks.fire).to.not.have.been.calledWith(
+      expect(ctx.Modules.promises.hooks.fire).to.not.have.been.calledWith(
         'updatePaidSubscription',
         sinon.match.any,
         sinon.match.any,
@@ -305,104 +351,104 @@ describe('SubscriptionHandler', function () {
       )
     })
 
-    it('should fire updatePaidSubscription to update a valid subscription', async function () {
-      this.LimitationsManager.promises.userHasSubscription.resolves({
+    it('should fire updatePaidSubscription to update a valid subscription', async function (ctx) {
+      ctx.LimitationsManager.promises.userHasSubscription.resolves({
         hasSubscription: true,
-        subscription: this.subscription,
+        subscription: ctx.subscription,
       })
-      await this.SubscriptionHandler.promises.updateSubscription(
-        this.user,
-        this.plan_code
+      await ctx.SubscriptionHandler.promises.updateSubscription(
+        ctx.user,
+        ctx.plan_code
       )
-      expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
         'updatePaidSubscription',
-        this.subscription,
-        this.plan_code,
-        this.user._id
+        ctx.subscription,
+        ctx.plan_code,
+        ctx.user._id
       )
     })
   })
 
   describe('cancelPendingSubscriptionChange', function () {
-    beforeEach(function () {
-      this.user.id = this.activeRecurlySubscription.account.account_code
-      this.User.findById = (userId, projection) => ({
+    beforeEach(function (ctx) {
+      ctx.user.id = ctx.activeRecurlySubscription.account.account_code
+      ctx.User.findById = (userId, projection) => ({
         exec: () => {
-          userId.should.equal(this.user.id)
-          return Promise.resolve(this.user)
+          userId.should.equal(ctx.user.id)
+          return Promise.resolve(ctx.user)
         },
       })
     })
 
-    it('should not fire cancelPendingPaidSubscriptionChange hook if user has no subscription', async function () {
-      this.LimitationsManager.promises.userHasSubscription.resolves({
+    it('should not fire cancelPendingPaidSubscriptionChange hook if user has no subscription', async function (ctx) {
+      ctx.LimitationsManager.promises.userHasSubscription.resolves({
         hasSubscription: false,
         subscription: null,
       })
-      await this.SubscriptionHandler.promises.cancelPendingSubscriptionChange(
-        this.user,
-        this.plan_code
+      await ctx.SubscriptionHandler.promises.cancelPendingSubscriptionChange(
+        ctx.user,
+        ctx.plan_code
       )
-      expect(this.Modules.promises.hooks.fire).to.not.have.been.calledWith(
+      expect(ctx.Modules.promises.hooks.fire).to.not.have.been.calledWith(
         'cancelPendingPaidSubscriptionChange',
         sinon.match.any
       )
     })
 
-    it('should fire cancelPendingPaidSubscriptionChange to update a valid subscription', async function () {
-      this.LimitationsManager.promises.userHasSubscription.resolves({
+    it('should fire cancelPendingPaidSubscriptionChange to update a valid subscription', async function (ctx) {
+      ctx.LimitationsManager.promises.userHasSubscription.resolves({
         hasSubscription: true,
-        subscription: this.subscription,
+        subscription: ctx.subscription,
       })
-      await this.SubscriptionHandler.promises.cancelPendingSubscriptionChange(
-        this.user,
-        this.plan_code
+      await ctx.SubscriptionHandler.promises.cancelPendingSubscriptionChange(
+        ctx.user,
+        ctx.plan_code
       )
-      expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
         'cancelPendingPaidSubscriptionChange',
-        this.subscription
+        ctx.subscription
       )
     })
   })
 
   describe('cancelSubscription', function () {
     describe('with a user without a subscription', function () {
-      beforeEach(async function () {
-        this.LimitationsManager.promises.userHasSubscription.resolves({
+      beforeEach(async function (ctx) {
+        ctx.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: false,
-          subscription: this.subscription,
+          subscription: ctx.subscription,
         })
-        await this.SubscriptionHandler.promises.cancelSubscription(this.user)
+        await ctx.SubscriptionHandler.promises.cancelSubscription(ctx.user)
       })
 
-      it('should redirect to the subscription dashboard', function () {
-        this.RecurlyClient.promises.cancelSubscriptionByUuid.called.should.equal(
+      it('should redirect to the subscription dashboard', function (ctx) {
+        ctx.RecurlyClient.promises.cancelSubscriptionByUuid.called.should.equal(
           false
         )
       })
     })
 
     describe('with a user with a subscription', function () {
-      beforeEach(async function () {
-        this.LimitationsManager.promises.userHasSubscription.resolves({
+      beforeEach(async function (ctx) {
+        ctx.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: true,
-          subscription: this.subscription,
+          subscription: ctx.subscription,
         })
-        await this.SubscriptionHandler.promises.cancelSubscription(this.user)
+        await ctx.SubscriptionHandler.promises.cancelSubscription(ctx.user)
       })
 
-      it('should cancel the subscription', function () {
-        expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+      it('should cancel the subscription', function (ctx) {
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
           'cancelPaidSubscription',
-          this.subscription
+          ctx.subscription
         )
       })
 
-      it('should send the email after 1 hour', function () {
+      it('should send the email after 1 hour', function (ctx) {
         const ONE_HOUR_IN_MS = 1000 * 60 * 60
-        expect(this.EmailHandler.sendDeferredEmail).to.have.been.calledWith(
+        expect(ctx.EmailHandler.sendDeferredEmail).to.have.been.calledWith(
           'canceledSubscription',
-          { to: this.user.email, first_name: this.user.first_name },
+          { to: ctx.user.email, first_name: ctx.user.first_name },
           ONE_HOUR_IN_MS
         )
       })
@@ -411,40 +457,40 @@ describe('SubscriptionHandler', function () {
 
   describe('resumeSubscription', function () {
     describe('for a user without a subscription', function () {
-      beforeEach(async function () {
-        this.LimitationsManager.promises.userHasSubscription.resolves({
+      beforeEach(async function (ctx) {
+        ctx.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: false,
-          subscription: this.subscription,
+          subscription: ctx.subscription,
         })
       })
-      it('should not make a resume call to recurly', async function () {
+      it('should not make a resume call to recurly', async function (ctx) {
         expect(
-          this.SubscriptionHandler.promises.resumeSubscription(this.user)
+          ctx.SubscriptionHandler.promises.resumeSubscription(ctx.user)
         ).to.be.rejectedWith('No active subscription to resume')
-        this.RecurlyClient.promises.resumeSubscriptionByUuid.called.should.equal(
+        ctx.RecurlyClient.promises.resumeSubscriptionByUuid.called.should.equal(
           false
         )
       })
     })
 
     describe('for a user with a subscription', function () {
-      beforeEach(async function () {
-        this.LimitationsManager.promises.userHasSubscription.resolves({
+      beforeEach(async function (ctx) {
+        ctx.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: true,
           subscription: {
-            recurlySubscription_id: this.activeRecurlySubscription.uuid,
+            recurlySubscription_id: ctx.activeRecurlySubscription.uuid,
             recurlyStatus: { state: 'non-trial' },
             planCode: 'collaborator',
           },
         })
       })
-      it('should call resume hook', async function () {
-        await this.SubscriptionHandler.promises.resumeSubscription(this.user)
+      it('should call resume hook', async function (ctx) {
+        await ctx.SubscriptionHandler.promises.resumeSubscription(ctx.user)
 
-        expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
           'resumePaidSubscription',
           {
-            recurlySubscription_id: this.activeRecurlySubscription.uuid,
+            recurlySubscription_id: ctx.activeRecurlySubscription.uuid,
             recurlyStatus: { state: 'non-trial' },
             planCode: 'collaborator',
           }
@@ -455,62 +501,62 @@ describe('SubscriptionHandler', function () {
 
   describe('pauseSubscription', function () {
     describe('for a user without a subscription', function () {
-      beforeEach(async function () {
-        this.LimitationsManager.promises.userHasSubscription.resolves({
+      beforeEach(async function (ctx) {
+        ctx.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: false,
-          subscription: this.subscription,
+          subscription: ctx.subscription,
         })
       })
-      it('should not make a pause call to recurly', async function () {
+      it('should not make a pause call to recurly', async function (ctx) {
         expect(
-          this.SubscriptionHandler.promises.pauseSubscription(this.user, 3)
+          ctx.SubscriptionHandler.promises.pauseSubscription(ctx.user, 3)
         ).to.be.rejectedWith('No active subscription to pause')
-        this.RecurlyClient.promises.pauseSubscriptionByUuid.called.should.equal(
+        ctx.RecurlyClient.promises.pauseSubscriptionByUuid.called.should.equal(
           false
         )
       })
     })
 
     describe('for a user with an annual subscription', function () {
-      beforeEach(async function () {
-        this.LimitationsManager.promises.userHasSubscription.resolves({
+      beforeEach(async function (ctx) {
+        ctx.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: false,
           subscription: {
-            recurlySubscription_id: this.activeRecurlySubscription.uuid,
+            recurlySubscription_id: ctx.activeRecurlySubscription.uuid,
             recurlyStatus: { state: 'non-trial' },
             planCode: 'collaborator-annual',
           },
         })
       })
-      it('should not make a pause call to recurly', async function () {
+      it('should not make a pause call to recurly', async function (ctx) {
         expect(
-          this.SubscriptionHandler.promises.pauseSubscription(this.user, 3)
+          ctx.SubscriptionHandler.promises.pauseSubscription(ctx.user, 3)
         ).to.be.rejectedWith('Can only pause monthly individual plans')
-        this.RecurlyClient.promises.pauseSubscriptionByUuid.called.should.equal(
+        ctx.RecurlyClient.promises.pauseSubscriptionByUuid.called.should.equal(
           false
         )
       })
     })
 
     describe('for a user with a subscription', function () {
-      beforeEach(async function () {
-        this.LimitationsManager.promises.userHasSubscription.resolves({
+      beforeEach(async function (ctx) {
+        ctx.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: true,
           subscription: {
-            recurlySubscription_id: this.activeRecurlySubscription.uuid,
+            recurlySubscription_id: ctx.activeRecurlySubscription.uuid,
             recurlyStatus: { state: 'non-trial' },
             planCode: 'collaborator',
             addOns: [],
           },
         })
       })
-      it('should call pause hook', async function () {
-        await this.SubscriptionHandler.promises.pauseSubscription(this.user, 3)
+      it('should call pause hook', async function (ctx) {
+        await ctx.SubscriptionHandler.promises.pauseSubscription(ctx.user, 3)
 
-        expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
           'pausePaidSubscription',
           {
-            recurlySubscription_id: this.activeRecurlySubscription.uuid,
+            recurlySubscription_id: ctx.activeRecurlySubscription.uuid,
             recurlyStatus: { state: 'non-trial' },
             planCode: 'collaborator',
             addOns: [],
@@ -521,11 +567,11 @@ describe('SubscriptionHandler', function () {
     })
 
     describe('for a user in a trial', function () {
-      beforeEach(async function () {
-        this.LimitationsManager.promises.userHasSubscription.resolves({
+      beforeEach(async function (ctx) {
+        ctx.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: true,
           subscription: {
-            recurlySubscription_id: this.activeRecurlySubscription.uuid,
+            recurlySubscription_id: ctx.activeRecurlySubscription.uuid,
             recurlyStatus: {
               state: 'trial',
               trialEndsAt: Date.now() + 1000000,
@@ -534,33 +580,33 @@ describe('SubscriptionHandler', function () {
           },
         })
       })
-      it('should not make a pause call to recurly', async function () {
+      it('should not make a pause call to recurly', async function (ctx) {
         expect(
-          this.SubscriptionHandler.promises.pauseSubscription(this.user, 3)
+          ctx.SubscriptionHandler.promises.pauseSubscription(ctx.user, 3)
         ).to.be.rejectedWith('Cannot pause a subscription in a trial')
-        this.RecurlyClient.promises.pauseSubscriptionByUuid.called.should.equal(
+        ctx.RecurlyClient.promises.pauseSubscriptionByUuid.called.should.equal(
           false
         )
       })
     })
 
     describe('for a user with addons', function () {
-      beforeEach(async function () {
-        this.LimitationsManager.promises.userHasSubscription.resolves({
+      beforeEach(async function (ctx) {
+        ctx.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: true,
           subscription: {
-            recurlySubscription_id: this.activeRecurlySubscription.uuid,
+            recurlySubscription_id: ctx.activeRecurlySubscription.uuid,
             recurlyStatus: { state: 'non-trial' },
             planCode: 'collaborator',
             addOns: ['mock-addon'],
           },
         })
       })
-      it('should not make a pause call to recurly', async function () {
+      it('should not make a pause call to recurly', async function (ctx) {
         expect(
-          this.SubscriptionHandler.promises.pauseSubscription(this.user, 3)
+          ctx.SubscriptionHandler.promises.pauseSubscription(ctx.user, 3)
         ).to.be.rejectedWith('Cannot pause a subscription with addons')
-        this.RecurlyClient.promises.pauseSubscriptionByUuid.called.should.equal(
+        ctx.RecurlyClient.promises.pauseSubscriptionByUuid.called.should.equal(
           false
         )
       })
@@ -569,48 +615,44 @@ describe('SubscriptionHandler', function () {
 
   describe('reactivateSubscription', function () {
     describe('with a user without a subscription', function () {
-      beforeEach(async function () {
-        this.LimitationsManager.promises.userHasSubscription.resolves({
+      beforeEach(async function (ctx) {
+        ctx.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: false,
-          subscription: this.subscription,
+          subscription: ctx.subscription,
         })
-        await this.SubscriptionHandler.promises.reactivateSubscription(
-          this.user
-        )
+        await ctx.SubscriptionHandler.promises.reactivateSubscription(ctx.user)
       })
 
-      it('should redirect to the subscription dashboard', function () {
-        this.RecurlyClient.promises.reactivateSubscriptionByUuid.called.should.equal(
+      it('should redirect to the subscription dashboard', function (ctx) {
+        ctx.RecurlyClient.promises.reactivateSubscriptionByUuid.called.should.equal(
           false
         )
       })
 
-      it('should not send a notification email', function () {
-        sinon.assert.notCalled(this.EmailHandler.sendEmail)
+      it('should not send a notification email', function (ctx) {
+        sinon.assert.notCalled(ctx.EmailHandler.sendEmail)
       })
     })
 
     describe('with a user with a subscription', function () {
-      beforeEach(async function () {
-        this.LimitationsManager.promises.userHasSubscription.resolves({
+      beforeEach(async function (ctx) {
+        ctx.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: true,
-          subscription: this.subscription,
+          subscription: ctx.subscription,
         })
-        await this.SubscriptionHandler.promises.reactivateSubscription(
-          this.user
-        )
+        await ctx.SubscriptionHandler.promises.reactivateSubscription(ctx.user)
       })
 
-      it('should reactivate the subscription', function () {
-        expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+      it('should reactivate the subscription', function (ctx) {
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
           'reactivatePaidSubscription',
-          this.subscription
+          ctx.subscription
         )
       })
 
-      it('should send a notification email', function () {
+      it('should send a notification email', function (ctx) {
         sinon.assert.calledWith(
-          this.EmailHandler.sendEmail,
+          ctx.EmailHandler.sendEmail,
           'reactivatedSubscription'
         )
       })
@@ -619,42 +661,42 @@ describe('SubscriptionHandler', function () {
 
   describe('syncSubscription', function () {
     describe('with an actionable request', function () {
-      beforeEach(async function () {
-        this.user.id = this.activeRecurlySubscription.account.account_code
+      beforeEach(async function (ctx) {
+        ctx.user.id = ctx.activeRecurlySubscription.account.account_code
 
-        this.User.findById = (userId, projection) => ({
+        ctx.User.findById = (userId, projection) => ({
           exec: () => {
-            userId.should.equal(this.user.id)
-            return Promise.resolve(this.user)
+            userId.should.equal(ctx.user.id)
+            return Promise.resolve(ctx.user)
           },
         })
 
-        await this.SubscriptionHandler.promises.syncSubscription(
-          this.activeRecurlySubscription,
+        await ctx.SubscriptionHandler.promises.syncSubscription(
+          ctx.activeRecurlySubscription,
           {}
         )
       })
 
-      it('should request the affected subscription from the API', function () {
-        this.RecurlyWrapper.promises.getSubscription
-          .calledWith(this.activeRecurlySubscription.uuid)
+      it('should request the affected subscription from the API', function (ctx) {
+        ctx.RecurlyWrapper.promises.getSubscription
+          .calledWith(ctx.activeRecurlySubscription.uuid)
           .should.equal(true)
       })
 
-      it('should request the account details of the subscription', function () {
-        const options = this.RecurlyWrapper.promises.getSubscription.args[0][1]
+      it('should request the account details of the subscription', function (ctx) {
+        const options = ctx.RecurlyWrapper.promises.getSubscription.args[0][1]
         options.includeAccount.should.equal(true)
       })
 
-      it('should sync the subscription to the user', function () {
-        this.SubscriptionUpdater.promises.syncSubscription.calledOnce.should.equal(
+      it('should sync the subscription to the user', function (ctx) {
+        ctx.SubscriptionUpdater.promises.syncSubscription.calledOnce.should.equal(
           true
         )
-        this.SubscriptionUpdater.promises.syncSubscription.args[0][0].should.deep.equal(
-          this.activeRecurlySubscription
+        ctx.SubscriptionUpdater.promises.syncSubscription.args[0][0].should.deep.equal(
+          ctx.activeRecurlySubscription
         )
-        this.SubscriptionUpdater.promises.syncSubscription.args[0][1].should.deep.equal(
-          this.user._id
+        ctx.SubscriptionUpdater.promises.syncSubscription.args[0][1].should.deep.equal(
+          ctx.user._id
         )
       })
     })
@@ -662,52 +704,52 @@ describe('SubscriptionHandler', function () {
 
   describe('attemptPaypalInvoiceCollection', function () {
     describe('for credit card users', function () {
-      beforeEach(async function () {
-        this.RecurlyWrapper.promises.getBillingInfo.resolves({
+      beforeEach(async function (ctx) {
+        ctx.RecurlyWrapper.promises.getBillingInfo.resolves({
           paypal_billing_agreement_id: null,
         })
-        await this.SubscriptionHandler.promises.attemptPaypalInvoiceCollection(
-          this.activeRecurlySubscription.account.account_code
+        await ctx.SubscriptionHandler.promises.attemptPaypalInvoiceCollection(
+          ctx.activeRecurlySubscription.account.account_code
         )
       })
 
-      it('gets billing infos', function () {
+      it('gets billing infos', function (ctx) {
         sinon.assert.calledWith(
-          this.RecurlyWrapper.promises.getBillingInfo,
-          this.activeRecurlySubscription.account.account_code
+          ctx.RecurlyWrapper.promises.getBillingInfo,
+          ctx.activeRecurlySubscription.account.account_code
         )
       })
 
-      it('skips user', function () {
+      it('skips user', function (ctx) {
         sinon.assert.notCalled(
-          this.RecurlyWrapper.promises.getAccountPastDueInvoices
+          ctx.RecurlyWrapper.promises.getAccountPastDueInvoices
         )
       })
     })
 
     describe('for paypal users', function () {
-      beforeEach(async function () {
-        this.RecurlyWrapper.promises.getBillingInfo.resolves({
+      beforeEach(async function (ctx) {
+        ctx.RecurlyWrapper.promises.getBillingInfo.resolves({
           paypal_billing_agreement_id: 'mock-billing-agreement',
         })
-        this.RecurlyWrapper.promises.getAccountPastDueInvoices.resolves([
+        ctx.RecurlyWrapper.promises.getAccountPastDueInvoices.resolves([
           { invoice_number: 'mock-invoice-number' },
         ])
-        await this.SubscriptionHandler.promises.attemptPaypalInvoiceCollection(
-          this.activeRecurlySubscription.account.account_code
+        await ctx.SubscriptionHandler.promises.attemptPaypalInvoiceCollection(
+          ctx.activeRecurlySubscription.account.account_code
         )
       })
 
-      it('gets past due invoices', function () {
+      it('gets past due invoices', function (ctx) {
         sinon.assert.calledWith(
-          this.RecurlyWrapper.promises.getAccountPastDueInvoices,
-          this.activeRecurlySubscription.account.account_code
+          ctx.RecurlyWrapper.promises.getAccountPastDueInvoices,
+          ctx.activeRecurlySubscription.account.account_code
         )
       })
 
-      it('calls attemptInvoiceCollection', function () {
+      it('calls attemptInvoiceCollection', function (ctx) {
         sinon.assert.calledWith(
-          this.RecurlyWrapper.promises.attemptInvoiceCollection,
+          ctx.RecurlyWrapper.promises.attemptInvoiceCollection,
           'mock-invoice-number'
         )
       })
@@ -716,159 +758,159 @@ describe('SubscriptionHandler', function () {
 
   describe('validateNoSubscriptionInRecurly', function () {
     describe('with a subscription in recurly', function () {
-      beforeEach(async function () {
-        this.RecurlyWrapper.promises.listAccountActiveSubscriptions.resolves([
-          this.subscription,
+      beforeEach(async function (ctx) {
+        ctx.RecurlyWrapper.promises.listAccountActiveSubscriptions.resolves([
+          ctx.subscription,
         ])
-        this.isValid =
-          await this.SubscriptionHandler.promises.validateNoSubscriptionInRecurly(
-            this.user_id
+        ctx.isValid =
+          await ctx.SubscriptionHandler.promises.validateNoSubscriptionInRecurly(
+            ctx.user_id
           )
       })
 
-      it('should call RecurlyWrapper.promises.listAccountActiveSubscriptions with the user id', function () {
-        this.RecurlyWrapper.promises.listAccountActiveSubscriptions
-          .calledWith(this.user_id)
+      it('should call RecurlyWrapper.promises.listAccountActiveSubscriptions with the user id', function (ctx) {
+        ctx.RecurlyWrapper.promises.listAccountActiveSubscriptions
+          .calledWith(ctx.user_id)
           .should.equal(true)
       })
 
-      it('should sync the subscription', function () {
-        this.SubscriptionUpdater.promises.syncSubscription
-          .calledWith(this.subscription, this.user_id)
+      it('should sync the subscription', function (ctx) {
+        ctx.SubscriptionUpdater.promises.syncSubscription
+          .calledWith(ctx.subscription, ctx.user_id)
           .should.equal(true)
       })
 
-      it('should return false', function () {
-        expect(this.isValid).to.equal(false)
+      it('should return false', function (ctx) {
+        expect(ctx.isValid).to.equal(false)
       })
     })
 
     describe('with no subscription in recurly', function () {
-      beforeEach(async function () {
-        this.isValid =
-          await this.SubscriptionHandler.promises.validateNoSubscriptionInRecurly(
-            this.user_id
+      beforeEach(async function (ctx) {
+        ctx.isValid =
+          await ctx.SubscriptionHandler.promises.validateNoSubscriptionInRecurly(
+            ctx.user_id
           )
       })
 
-      it('should be rejected and not sync the subscription', function () {
-        this.SubscriptionUpdater.promises.syncSubscription.called.should.equal(
+      it('should be rejected and not sync the subscription', function (ctx) {
+        ctx.SubscriptionUpdater.promises.syncSubscription.called.should.equal(
           false
         )
       })
 
-      it('should return true', function () {
-        expect(this.isValid).to.equal(true)
+      it('should return true', function (ctx) {
+        expect(ctx.isValid).to.equal(true)
       })
     })
   })
 
   describe('revertPlanChange', function () {
     describe('with correct invoices', function () {
-      beforeEach(async function () {
-        this.subscriptionRestorePoint = {
+      beforeEach(async function (ctx) {
+        ctx.subscriptionRestorePoint = {
           planCode: 'collaborator',
           addOns: [
             { addOnCode: 'addon-1', quantity: 1, unitAmountInCents: 500 },
           ],
           _id: 'restore-point-id',
         }
-        this.pastDueInvoice = {
+        ctx.pastDueInvoice = {
           id: 'invoice-123',
           dueAt: new Date(),
           collectionMethod: 'automatic',
         }
-        this.user.id = this.activeRecurlySubscription.account.account_code
-        this.User.findById = (userId, projection) => ({
+        ctx.user.id = ctx.activeRecurlySubscription.account.account_code
+        ctx.User.findById = (userId, projection) => ({
           exec: () => {
-            userId.should.equal(this.user.id)
-            return Promise.resolve(this.user)
+            userId.should.equal(ctx.user.id)
+            return Promise.resolve(ctx.user)
           },
         })
-        this.RecurlyClient.promises.getSubscription.resolves(
-          this.activeRecurlyClientSubscription
+        ctx.RecurlyClient.promises.getSubscription.resolves(
+          ctx.activeRecurlyClientSubscription
         )
-        this.RecurlyClient.promises.getPastDueInvoices.resolves([
-          this.pastDueInvoice,
+        ctx.RecurlyClient.promises.getPastDueInvoices.resolves([
+          ctx.pastDueInvoice,
         ])
-        this.RecurlyClient.promises.failInvoice.resolves()
-        this.SubscriptionUpdater.promises.setSubscriptionWasReverted.resolves()
-        this.RecurlyClient.promises.applySubscriptionChangeRequest.resolves()
+        ctx.RecurlyClient.promises.failInvoice.resolves()
+        ctx.SubscriptionUpdater.promises.setSubscriptionWasReverted.resolves()
+        ctx.RecurlyClient.promises.applySubscriptionChangeRequest.resolves()
 
-        await this.SubscriptionHandler.promises.revertPlanChange(
-          this.activeRecurlyClientSubscription.id,
-          this.subscriptionRestorePoint
+        await ctx.SubscriptionHandler.promises.revertPlanChange(
+          ctx.activeRecurlyClientSubscription.id,
+          ctx.subscriptionRestorePoint
         )
       })
 
-      it('should fetch the subscription from recurly', async function () {
+      it('should fetch the subscription from recurly', async function (ctx) {
         expect(
-          this.RecurlyClient.promises.getSubscription.calledWith(
-            this.activeRecurlyClientSubscription.id
+          ctx.RecurlyClient.promises.getSubscription.calledWith(
+            ctx.activeRecurlyClientSubscription.id
           )
         ).to.be.true
       })
 
-      it('should fail the invoice', async function () {
+      it('should fail the invoice', async function (ctx) {
         expect(
-          this.RecurlyClient.promises.failInvoice.calledWith(
-            this.pastDueInvoice.id
+          ctx.RecurlyClient.promises.failInvoice.calledWith(
+            ctx.pastDueInvoice.id
           )
         ).to.be.true
       })
 
-      it('should call setSubscriptionWasReverted', async function () {
+      it('should call setSubscriptionWasReverted', async function (ctx) {
         expect(
-          this.SubscriptionUpdater.promises.setSubscriptionWasReverted.calledWith(
-            this.subscriptionRestorePoint._id
+          ctx.SubscriptionUpdater.promises.setSubscriptionWasReverted.calledWith(
+            ctx.subscriptionRestorePoint._id
           )
         ).to.be.true
       })
 
-      it('should sync the subscription', async function () {
-        this.SubscriptionUpdater.promises.syncSubscription.calledOnce.should.equal(
+      it('should sync the subscription', async function (ctx) {
+        ctx.SubscriptionUpdater.promises.syncSubscription.calledOnce.should.equal(
           true
         )
-        this.SubscriptionUpdater.promises.syncSubscription.args[0][0].should.deep.equal(
-          this.activeRecurlySubscription
+        ctx.SubscriptionUpdater.promises.syncSubscription.args[0][0].should.deep.equal(
+          ctx.activeRecurlySubscription
         )
-        this.SubscriptionUpdater.promises.syncSubscription.args[0][1].should.deep.equal(
-          this.user._id
+        ctx.SubscriptionUpdater.promises.syncSubscription.args[0][1].should.deep.equal(
+          ctx.user._id
         )
       })
     })
 
     describe('should throw an IndeterminateInvoiceError when', function () {
-      beforeEach(function () {
-        this.subscriptionRestorePoint = {
+      beforeEach(function (ctx) {
+        ctx.subscriptionRestorePoint = {
           planCode: 'collaborator',
           addOns: [
             { addOnCode: 'addon-1', quantity: 1, unitAmountInCents: 500 },
           ],
           _id: 'restore-point-id',
         }
-        this.RecurlyClient.promises.getSubscription.resolves(
-          this.activeRecurlyClientSubscription
+        ctx.RecurlyClient.promises.getSubscription.resolves(
+          ctx.activeRecurlyClientSubscription
         )
       })
 
-      it('finds a past due invoice older than 24 hours', async function () {
+      it('finds a past due invoice older than 24 hours', async function (ctx) {
         const oldInvoice = {
           id: 'invoice-123',
           dueAt: new Date(Date.now() - 25 * 60 * 60 * 1000), // 25 hours ago
           collectionMethod: 'automatic',
         }
-        this.RecurlyClient.promises.getPastDueInvoices.resolves([oldInvoice])
+        ctx.RecurlyClient.promises.getPastDueInvoices.resolves([oldInvoice])
 
         await expect(
-          this.SubscriptionHandler.promises.revertPlanChange(
-            this.activeRecurlyClientSubscription.id,
-            this.subscriptionRestorePoint
+          ctx.SubscriptionHandler.promises.revertPlanChange(
+            ctx.activeRecurlyClientSubscription.id,
+            ctx.subscriptionRestorePoint
           )
         ).to.be.rejectedWith('cant determine invoice to fail for plan revert')
       })
 
-      it('finds more than one past due invoice', async function () {
+      it('finds more than one past due invoice', async function (ctx) {
         const invoices = [
           {
             id: 'invoice-123',
@@ -881,28 +923,28 @@ describe('SubscriptionHandler', function () {
             collectionMethod: 'automatic',
           },
         ]
-        this.RecurlyClient.promises.getPastDueInvoices.resolves(invoices)
+        ctx.RecurlyClient.promises.getPastDueInvoices.resolves(invoices)
 
         await expect(
-          this.SubscriptionHandler.promises.revertPlanChange(
-            this.activeRecurlyClientSubscription.id,
-            this.subscriptionRestorePoint
+          ctx.SubscriptionHandler.promises.revertPlanChange(
+            ctx.activeRecurlyClientSubscription.id,
+            ctx.subscriptionRestorePoint
           )
         ).to.be.rejectedWith('cant determine invoice to fail for plan revert')
       })
 
-      it('finds an invoice with a collectionMethod other than automatic', async function () {
+      it('finds an invoice with a collectionMethod other than automatic', async function (ctx) {
         const manualInvoice = {
           id: 'invoice-123',
           dueAt: new Date(),
           collectionMethod: 'manual',
         }
-        this.RecurlyClient.promises.getPastDueInvoices.resolves([manualInvoice])
+        ctx.RecurlyClient.promises.getPastDueInvoices.resolves([manualInvoice])
 
         await expect(
-          this.SubscriptionHandler.promises.revertPlanChange(
-            this.activeRecurlyClientSubscription.id,
-            this.subscriptionRestorePoint
+          ctx.SubscriptionHandler.promises.revertPlanChange(
+            ctx.activeRecurlyClientSubscription.id,
+            ctx.subscriptionRestorePoint
           )
         ).to.be.rejectedWith('cant determine invoice to fail for plan revert')
       })

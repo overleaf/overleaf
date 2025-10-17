@@ -1,31 +1,32 @@
-const sinon = require('sinon')
-const { expect } = require('chai')
+import { beforeEach, describe, it, vi, expect } from 'vitest'
+import sinon from 'sinon'
+import Errors from '../../../../app/src/Features/Errors/Errors.js'
+import PrivilegeLevels from '../../../../app/src/Features/Authorization/PrivilegeLevels.js'
+import PublicAccessLevels from '../../../../app/src/Features/Authorization/PublicAccessLevels.js'
+import mongodb from 'mongodb-legacy'
 const modulePath =
-  '../../../../app/src/Features/Authorization/AuthorizationManager.js'
-const SandboxedModule = require('sandboxed-module')
-const Errors = require('../../../../app/src/Features/Errors/Errors')
-const PrivilegeLevels = require('../../../../app/src/Features/Authorization/PrivilegeLevels')
-const PublicAccessLevels = require('../../../../app/src/Features/Authorization/PublicAccessLevels')
-const { ObjectId } = require('mongodb-legacy')
+  '../../../../app/src/Features/Authorization/AuthorizationManager.mjs'
+
+const { ObjectId } = mongodb
 
 describe('AuthorizationManager', function () {
-  beforeEach(function () {
-    this.user = { _id: new ObjectId() }
-    this.project = { _id: new ObjectId() }
-    this.doc = { _id: new ObjectId() }
-    this.thread = { _id: new ObjectId() }
-    this.token = 'some-token'
+  beforeEach(async function (ctx) {
+    ctx.user = { _id: new ObjectId() }
+    ctx.project = { _id: new ObjectId() }
+    ctx.doc = { _id: new ObjectId() }
+    ctx.thread = { _id: new ObjectId() }
+    ctx.token = 'some-token'
 
-    this.ProjectGetter = {
+    ctx.ProjectGetter = {
       promises: {
         getProject: sinon.stub().resolves(null),
       },
     }
-    this.ProjectGetter.promises.getProject
-      .withArgs(this.project._id)
-      .resolves(this.project)
+    ctx.ProjectGetter.promises.getProject
+      .withArgs(ctx.project._id)
+      .resolves(ctx.project)
 
-    this.CollaboratorsGetter = {
+    ctx.CollaboratorsGetter = {
       promises: {
         getProjectAccess: sinon.stub().resolves({
           publicAccessLevel: sinon.stub().returns(PublicAccessLevels.PRIVATE),
@@ -34,16 +35,16 @@ describe('AuthorizationManager', function () {
       },
     }
 
-    this.CollaboratorsHandler = {}
+    ctx.CollaboratorsHandler = {}
 
-    this.User = {
+    ctx.User = {
       findOne: sinon.stub().returns({ exec: sinon.stub().resolves(null) }),
     }
-    this.User.findOne
-      .withArgs({ _id: this.user._id })
-      .returns({ exec: sinon.stub().resolves(this.user) })
+    ctx.User.findOne
+      .withArgs({ _id: ctx.user._id })
+      .returns({ exec: sinon.stub().resolves(ctx.user) })
 
-    this.TokenAccessHandler = {
+    ctx.TokenAccessHandler = {
       promises: {
         validateTokenForAnonymousAccess: sinon
           .stub()
@@ -51,37 +52,78 @@ describe('AuthorizationManager', function () {
       },
     }
 
-    this.ChatApiHandler = {
+    ctx.ChatApiHandler = {
       promises: {
         getThread: sinon
           .stub()
           .resolves({ messages: [{ user_id: new ObjectId() }] }),
       },
     }
-    this.Modules = { promises: { hooks: { fire: sinon.stub() } } }
-    this.settings = {
+    ctx.Features = {
+      hasFeature: sinon.stub().returns(true),
+    }
+    ctx.Modules = { promises: { hooks: { fire: sinon.stub() } } }
+    ctx.settings = {
       passwordStrengthOptions: {},
       adminPrivilegeAvailable: true,
       adminRolesEnabled: false,
       moduleImportSequence: [],
     }
-    this.AuthorizationManager = SandboxedModule.require(modulePath, {
-      requires: {
-        'mongodb-legacy': { ObjectId },
-        '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
-        '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
-        '../Project/ProjectGetter': this.ProjectGetter,
-        '../../models/User': { User: this.User },
-        '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
-        '../Chat/ChatApiHandler': this.ChatApiHandler,
-        '../../infrastructure/Modules': this.Modules,
-        '@overleaf/settings': this.settings,
-      },
-    })
+
+    vi.doMock('mongodb-legacy', () => ({
+      default: { ObjectId },
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Features', () => ({
+      default: ctx.Features,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Collaborators/CollaboratorsGetter',
+      () => ({
+        default: ctx.CollaboratorsGetter,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Collaborators/CollaboratorsHandler',
+      () => ({
+        default: ctx.CollaboratorsHandler,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
+      default: ctx.ProjectGetter,
+    }))
+
+    vi.doMock('../../../../app/src/models/User', () => ({
+      User: ctx.User,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/TokenAccess/TokenAccessHandler',
+      () => ({
+        default: ctx.TokenAccessHandler,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/Chat/ChatApiHandler', () => ({
+      default: ctx.ChatApiHandler,
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
+      default: ctx.Modules,
+    }))
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.settings,
+    }))
+
+    ctx.AuthorizationManager = (await import(modulePath)).default
   })
 
   describe('isRestrictedUser', function () {
-    it('should produce the correct values', function () {
+    it('should produce the correct values', function (ctx) {
       const notRestrictedScenarios = [
         [null, 'readAndWrite', false, false],
         ['id', 'readAndWrite', true, false],
@@ -100,12 +142,12 @@ describe('AuthorizationManager', function () {
       ]
       for (const notRestrictedArgs of notRestrictedScenarios) {
         expect(
-          this.AuthorizationManager.isRestrictedUser(...notRestrictedArgs)
+          ctx.AuthorizationManager.isRestrictedUser(...notRestrictedArgs)
         ).to.equal(false)
       }
       for (const restrictedArgs of restrictedScenarios) {
         expect(
-          this.AuthorizationManager.isRestrictedUser(...restrictedArgs)
+          ctx.AuthorizationManager.isRestrictedUser(...restrictedArgs)
         ).to.equal(true)
       }
     })
@@ -113,402 +155,402 @@ describe('AuthorizationManager', function () {
 
   describe('getPrivilegeLevelForProject', function () {
     describe('with a token-based project', function () {
-      beforeEach(function () {
-        this.project.publicAccesLevel = 'tokenBased'
+      beforeEach(function (ctx) {
+        ctx.project.publicAccesLevel = 'tokenBased'
       })
 
       describe('with a user id with a privilege level', function () {
-        beforeEach(async function () {
-          this.CollaboratorsGetter.promises.getProjectAccess
-            .withArgs(this.project._id)
+        beforeEach(async function (ctx) {
+          ctx.CollaboratorsGetter.promises.getProjectAccess
+            .withArgs(ctx.project._id)
             .resolves({
               publicAccessLevel: sinon
                 .stub()
                 .returns(PublicAccessLevels.PRIVATE),
               privilegeLevelForUser: sinon
                 .stub()
-                .withArgs(this.user._id)
+                .withArgs(ctx.user._id)
                 .returns(PrivilegeLevels.READ_ONLY),
             })
-          this.result =
-            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-              this.user._id,
-              this.project._id,
-              this.token
+          ctx.result =
+            await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              ctx.user._id,
+              ctx.project._id,
+              ctx.token
             )
         })
 
-        it("should return the user's privilege level", function () {
-          expect(this.result).to.equal('readOnly')
+        it("should return the user's privilege level", function (ctx) {
+          expect(ctx.result).to.equal('readOnly')
         })
       })
 
       describe('with a user id with no privilege level', function () {
-        beforeEach(async function () {
-          this.result =
-            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-              this.user._id,
-              this.project._id,
-              this.token
+        beforeEach(async function (ctx) {
+          ctx.result =
+            await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              ctx.user._id,
+              ctx.project._id,
+              ctx.token
             )
         })
 
-        it('should return false', function () {
-          expect(this.result).to.equal(false)
+        it('should return false', function (ctx) {
+          expect(ctx.result).to.equal(false)
         })
       })
 
       describe('with a user id who is an admin', function () {
-        beforeEach(async function () {
-          this.user.isAdmin = true
-          this.result =
-            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-              this.user._id,
-              this.project._id,
-              this.token
+        beforeEach(async function (ctx) {
+          ctx.user.isAdmin = true
+          ctx.result =
+            await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              ctx.user._id,
+              ctx.project._id,
+              ctx.token
             )
         })
 
-        it('should return the user as an owner', function () {
-          expect(this.result).to.equal('owner')
+        it('should return the user as an owner', function (ctx) {
+          expect(ctx.result).to.equal('owner')
         })
       })
 
       describe('with no user (anonymous)', function () {
         describe('when the token is not valid', function () {
-          beforeEach(async function () {
-            this.result =
-              await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+          beforeEach(async function (ctx) {
+            ctx.result =
+              await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
                 null,
-                this.project._id,
-                this.token
+                ctx.project._id,
+                ctx.token
               )
           })
 
-          it('should not call CollaboratorsGetter.getProjectAccess', function () {
-            this.CollaboratorsGetter.promises.getProjectAccess.called.should.equal(
+          it('should not call CollaboratorsGetter.getProjectAccess', function (ctx) {
+            ctx.CollaboratorsGetter.promises.getProjectAccess.called.should.equal(
               false
             )
           })
 
-          it('should check if the token is valid', function () {
-            this.TokenAccessHandler.promises.validateTokenForAnonymousAccess.should.have.been.calledWith(
-              this.project._id,
-              this.token
+          it('should check if the token is valid', function (ctx) {
+            ctx.TokenAccessHandler.promises.validateTokenForAnonymousAccess.should.have.been.calledWith(
+              ctx.project._id,
+              ctx.token
             )
           })
 
-          it('should return false', function () {
-            expect(this.result).to.equal(false)
+          it('should return false', function (ctx) {
+            expect(ctx.result).to.equal(false)
           })
         })
 
         describe('when the token is valid for read-and-write', function () {
-          beforeEach(async function () {
-            this.TokenAccessHandler.promises.validateTokenForAnonymousAccess =
+          beforeEach(async function (ctx) {
+            ctx.TokenAccessHandler.promises.validateTokenForAnonymousAccess =
               sinon
                 .stub()
-                .withArgs(this.project._id, this.token)
+                .withArgs(ctx.project._id, ctx.token)
                 .resolves({ isValidReadAndWrite: true, isValidReadOnly: false })
-            this.result =
-              await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+            ctx.result =
+              await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
                 null,
-                this.project._id,
-                this.token
+                ctx.project._id,
+                ctx.token
               )
           })
 
-          it('should not call CollaboratorsGetter.getProjectAccess', function () {
-            this.CollaboratorsGetter.promises.getProjectAccess.called.should.equal(
+          it('should not call CollaboratorsGetter.getProjectAccess', function (ctx) {
+            ctx.CollaboratorsGetter.promises.getProjectAccess.called.should.equal(
               false
             )
           })
 
-          it('should check if the token is valid', function () {
-            this.TokenAccessHandler.promises.validateTokenForAnonymousAccess.should.have.been.calledWith(
-              this.project._id,
-              this.token
+          it('should check if the token is valid', function (ctx) {
+            ctx.TokenAccessHandler.promises.validateTokenForAnonymousAccess.should.have.been.calledWith(
+              ctx.project._id,
+              ctx.token
             )
           })
 
-          it('should give read-write access', function () {
-            expect(this.result).to.equal('readAndWrite')
+          it('should give read-write access', function (ctx) {
+            expect(ctx.result).to.equal('readAndWrite')
           })
         })
 
         describe('when the token is valid for read-only', function () {
-          beforeEach(async function () {
-            this.TokenAccessHandler.promises.validateTokenForAnonymousAccess =
+          beforeEach(async function (ctx) {
+            ctx.TokenAccessHandler.promises.validateTokenForAnonymousAccess =
               sinon
                 .stub()
-                .withArgs(this.project._id, this.token)
+                .withArgs(ctx.project._id, ctx.token)
                 .resolves({ isValidReadAndWrite: false, isValidReadOnly: true })
-            this.result =
-              await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+            ctx.result =
+              await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
                 null,
-                this.project._id,
-                this.token
+                ctx.project._id,
+                ctx.token
               )
           })
 
-          it('should not call CollaboratorsGetter.getProjectAccess', function () {
-            this.CollaboratorsGetter.promises.getProjectAccess.called.should.equal(
+          it('should not call CollaboratorsGetter.getProjectAccess', function (ctx) {
+            ctx.CollaboratorsGetter.promises.getProjectAccess.called.should.equal(
               false
             )
           })
 
-          it('should check if the token is valid', function () {
-            this.TokenAccessHandler.promises.validateTokenForAnonymousAccess.should.have.been.calledWith(
-              this.project._id,
-              this.token
+          it('should check if the token is valid', function (ctx) {
+            ctx.TokenAccessHandler.promises.validateTokenForAnonymousAccess.should.have.been.calledWith(
+              ctx.project._id,
+              ctx.token
             )
           })
 
-          it('should give read-only access', function () {
-            expect(this.result).to.equal('readOnly')
+          it('should give read-only access', function (ctx) {
+            expect(ctx.result).to.equal('readOnly')
           })
         })
       })
     })
 
     describe('with a private project', function () {
-      beforeEach(function () {
-        this.project.publicAccesLevel = 'private'
+      beforeEach(function (ctx) {
+        ctx.project.publicAccesLevel = 'private'
       })
 
       describe('with a user id with a privilege level', function () {
-        beforeEach(async function () {
-          this.CollaboratorsGetter.promises.getProjectAccess
-            .withArgs(this.project._id)
+        beforeEach(async function (ctx) {
+          ctx.CollaboratorsGetter.promises.getProjectAccess
+            .withArgs(ctx.project._id)
             .resolves({
               publicAccessLevel: sinon
                 .stub()
                 .returns(PublicAccessLevels.PRIVATE),
               privilegeLevelForUser: sinon
                 .stub()
-                .withArgs(this.user._id)
+                .withArgs(ctx.user._id)
                 .returns(PrivilegeLevels.READ_ONLY),
             })
-          this.result =
-            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-              this.user._id,
-              this.project._id,
-              this.token
+          ctx.result =
+            await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              ctx.user._id,
+              ctx.project._id,
+              ctx.token
             )
         })
 
-        it("should return the user's privilege level", function () {
-          expect(this.result).to.equal('readOnly')
+        it("should return the user's privilege level", function (ctx) {
+          expect(ctx.result).to.equal('readOnly')
         })
       })
 
       describe('with a user id with no privilege level', function () {
-        beforeEach(async function () {
-          this.result =
-            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-              this.user._id,
-              this.project._id,
-              this.token
+        beforeEach(async function (ctx) {
+          ctx.result =
+            await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              ctx.user._id,
+              ctx.project._id,
+              ctx.token
             )
         })
 
-        it('should return false', function () {
-          expect(this.result).to.equal(false)
+        it('should return false', function (ctx) {
+          expect(ctx.result).to.equal(false)
         })
       })
 
       describe('with a user id who is an admin', function () {
-        beforeEach(async function () {
-          this.user.isAdmin = true
-          this.result =
-            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-              this.user._id,
-              this.project._id,
-              this.token
+        beforeEach(async function (ctx) {
+          ctx.user.isAdmin = true
+          ctx.result =
+            await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              ctx.user._id,
+              ctx.project._id,
+              ctx.token
             )
         })
 
-        it('should return the user as an owner', function () {
-          expect(this.result).to.equal('owner')
+        it('should return the user as an owner', function (ctx) {
+          expect(ctx.result).to.equal('owner')
         })
       })
 
       describe('with no user (anonymous)', function () {
-        beforeEach(async function () {
-          this.result =
-            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+        beforeEach(async function (ctx) {
+          ctx.result =
+            await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
               null,
-              this.project._id,
-              this.token
+              ctx.project._id,
+              ctx.token
             )
         })
 
-        it('should not call CollaboratorsGetter.getProjectAccess', function () {
-          this.CollaboratorsGetter.promises.getProjectAccess.called.should.equal(
+        it('should not call CollaboratorsGetter.getProjectAccess', function (ctx) {
+          ctx.CollaboratorsGetter.promises.getProjectAccess.called.should.equal(
             false
           )
         })
 
-        it('should return false', function () {
-          expect(this.result).to.equal(false)
+        it('should return false', function (ctx) {
+          expect(ctx.result).to.equal(false)
         })
       })
     })
 
     describe('with a public project', function () {
-      beforeEach(function () {
-        this.project.publicAccesLevel = 'readAndWrite'
-        this.CollaboratorsGetter.promises.getProjectAccess
-          .withArgs(this.project._id)
+      beforeEach(function (ctx) {
+        ctx.project.publicAccesLevel = 'readAndWrite'
+        ctx.CollaboratorsGetter.promises.getProjectAccess
+          .withArgs(ctx.project._id)
           .resolves({
             publicAccessLevel: sinon
               .stub()
-              .returns(this.project.publicAccesLevel),
+              .returns(ctx.project.publicAccesLevel),
             privilegeLevelForUser: sinon
               .stub()
-              .withArgs(this.user._id)
+              .withArgs(ctx.user._id)
               .returns(PrivilegeLevels.NONE),
           })
       })
 
       describe('with a user id with a privilege level', function () {
-        beforeEach(async function () {
-          this.CollaboratorsGetter.promises.getProjectAccess
-            .withArgs(this.project._id)
+        beforeEach(async function (ctx) {
+          ctx.CollaboratorsGetter.promises.getProjectAccess
+            .withArgs(ctx.project._id)
             .resolves({
               publicAccessLevel: sinon
                 .stub()
-                .returns(this.project.publicAccesLevel),
+                .returns(ctx.project.publicAccesLevel),
               privilegeLevelForUser: sinon
                 .stub()
-                .withArgs(this.user._id)
+                .withArgs(ctx.user._id)
                 .returns(PrivilegeLevels.READ_ONLY),
             })
-          this.result =
-            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-              this.user._id,
-              this.project._id,
-              this.token
+          ctx.result =
+            await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              ctx.user._id,
+              ctx.project._id,
+              ctx.token
             )
         })
 
-        it("should return the user's privilege level", function () {
-          expect(this.result).to.equal('readOnly')
+        it("should return the user's privilege level", function (ctx) {
+          expect(ctx.result).to.equal('readOnly')
         })
       })
 
       describe('with a user id with no privilege level', function () {
-        beforeEach(async function () {
-          this.result =
-            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-              this.user._id,
-              this.project._id,
-              this.token
+        beforeEach(async function (ctx) {
+          ctx.result =
+            await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              ctx.user._id,
+              ctx.project._id,
+              ctx.token
             )
         })
 
-        it('should return the public privilege level', function () {
-          expect(this.result).to.equal('readAndWrite')
+        it('should return the public privilege level', function (ctx) {
+          expect(ctx.result).to.equal('readAndWrite')
         })
       })
 
       describe('with a user id who is an admin', function () {
-        beforeEach(async function () {
-          this.user.isAdmin = true
-          this.result =
-            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-              this.user._id,
-              this.project._id,
-              this.token
+        beforeEach(async function (ctx) {
+          ctx.user.isAdmin = true
+          ctx.result =
+            await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
+              ctx.user._id,
+              ctx.project._id,
+              ctx.token
             )
         })
 
-        it('should return the user as an owner', function () {
-          expect(this.result).to.equal('owner')
+        it('should return the user as an owner', function (ctx) {
+          expect(ctx.result).to.equal('owner')
         })
       })
 
       describe('with no user (anonymous)', function () {
-        beforeEach(async function () {
-          this.result =
-            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+        beforeEach(async function (ctx) {
+          ctx.result =
+            await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
               null,
-              this.project._id,
-              this.token
+              ctx.project._id,
+              ctx.token
             )
         })
 
-        it('should not call CollaboratorsGetter.getProjectAccess', function () {
-          this.CollaboratorsGetter.promises.getProjectAccess.called.should.equal(
+        it('should not call CollaboratorsGetter.getProjectAccess', function (ctx) {
+          ctx.CollaboratorsGetter.promises.getProjectAccess.called.should.equal(
             false
           )
         })
 
-        it('should return the public privilege level', function () {
-          expect(this.result).to.equal('readAndWrite')
+        it('should return the public privilege level', function (ctx) {
+          expect(ctx.result).to.equal('readAndWrite')
         })
       })
 
       describe('with link-sharing disabled', function () {
-        beforeEach(async function () {
-          this.settings.disableLinkSharing = true
-          this.result =
-            await this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+        beforeEach(async function (ctx) {
+          ctx.Features.hasFeature.withArgs('link-sharing').returns(false)
+          ctx.result =
+            await ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
               null,
-              this.project._id,
-              this.token
+              ctx.project._id,
+              ctx.token
             )
         })
 
-        it('should not call CollaboratorsGetter.getProjectAccess', function () {
-          this.CollaboratorsGetter.promises.getProjectAccess.called.should.equal(
+        it('should not call CollaboratorsGetter.getProjectAccess', function (ctx) {
+          ctx.CollaboratorsGetter.promises.getProjectAccess.called.should.equal(
             false
           )
         })
 
-        it('should return false', function () {
-          expect(this.result).to.equal(false)
+        it('should return false', function (ctx) {
+          expect(ctx.result).to.equal(false)
         })
       })
     })
 
     describe("when the project doesn't exist", function () {
-      beforeEach(function () {
-        this.CollaboratorsGetter.promises.getProjectAccess.rejects(
+      beforeEach(function (ctx) {
+        ctx.CollaboratorsGetter.promises.getProjectAccess.rejects(
           new Errors.NotFoundError()
         )
       })
-      it('should return a NotFoundError', async function () {
+      it('should return a NotFoundError', async function (ctx) {
         const someOtherId = new ObjectId()
         await expect(
-          this.AuthorizationManager.promises.getPrivilegeLevelForProject(
-            this.user._id,
+          ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
+            ctx.user._id,
             someOtherId,
-            this.token
+            ctx.token
           )
         ).to.be.rejectedWith(Errors.NotFoundError)
       })
     })
 
     describe('when the project id is not valid', function () {
-      beforeEach(function () {
-        this.CollaboratorsGetter.promises.getProjectAccess
-          .withArgs(this.project._id)
+      beforeEach(function (ctx) {
+        ctx.CollaboratorsGetter.promises.getProjectAccess
+          .withArgs(ctx.project._id)
           .resolves({
             publicAccessLevel: sinon.stub().returns(PublicAccessLevels.PRIVATE),
             privilegeLevelForUser: sinon
               .stub()
-              .withArgs(this.user._id)
+              .withArgs(ctx.user._id)
               .returns(PrivilegeLevels.READ_ONLY),
           })
       })
 
-      it('should return a error', async function () {
+      it('should return a error', async function (ctx) {
         await expect(
-          this.AuthorizationManager.promises.getPrivilegeLevelForProject(
+          ctx.AuthorizationManager.promises.getPrivilegeLevelForProject(
             undefined,
             'not project id',
-            this.token
+            ctx.token
           )
         ).to.be.rejected
       })
@@ -560,128 +602,126 @@ describe('AuthorizationManager', function () {
 
   describe('isUserSiteAdmin', function () {
     describe('when user is admin', function () {
-      beforeEach(function () {
-        this.user.isAdmin = true
+      beforeEach(function (ctx) {
+        ctx.user.isAdmin = true
       })
 
-      it('should return true', async function () {
-        const isAdmin =
-          await this.AuthorizationManager.promises.isUserSiteAdmin(
-            this.user._id
-          )
+      it('should return true', async function (ctx) {
+        const isAdmin = await ctx.AuthorizationManager.promises.isUserSiteAdmin(
+          ctx.user._id
+        )
         expect(isAdmin).to.equal(true)
       })
     })
 
     describe('when user is not admin', function () {
-      it('should return false', async function () {
-        const isAdmin =
-          await this.AuthorizationManager.promises.isUserSiteAdmin(
-            this.user._id
-          )
+      it('should return false', async function (ctx) {
+        const isAdmin = await ctx.AuthorizationManager.promises.isUserSiteAdmin(
+          ctx.user._id
+        )
         expect(isAdmin).to.equal(false)
       })
     })
 
     describe('when user is not found', function () {
-      it('should return false', async function () {
+      it('should return false', async function (ctx) {
         const someOtherId = new ObjectId()
         const isAdmin =
-          await this.AuthorizationManager.promises.isUserSiteAdmin(someOtherId)
+          await ctx.AuthorizationManager.promises.isUserSiteAdmin(someOtherId)
         expect(isAdmin).to.equal(false)
       })
     })
 
     describe('when no user is passed', function () {
-      it('should return false', async function () {
+      it('should return false', async function (ctx) {
         const isAdmin =
-          await this.AuthorizationManager.promises.isUserSiteAdmin(null)
+          await ctx.AuthorizationManager.promises.isUserSiteAdmin(null)
         expect(isAdmin).to.equal(false)
       })
     })
   })
 
   describe('canUserDeleteOrResolveThread', function () {
-    it('should return true when user has write permissions', async function () {
-      this.CollaboratorsGetter.promises.getProjectAccess
-        .withArgs(this.project._id)
+    it('should return true when user has write permissions', async function (ctx) {
+      ctx.CollaboratorsGetter.promises.getProjectAccess
+        .withArgs(ctx.project._id)
         .resolves({
           publicAccessLevel: sinon.stub().returns(PublicAccessLevels.PRIVATE),
           privilegeLevelForUser: sinon
             .stub()
-            .withArgs(this.user._id)
+            .withArgs(ctx.user._id)
             .returns(PrivilegeLevels.READ_AND_WRITE),
         })
 
       const canResolve =
-        await this.AuthorizationManager.promises.canUserDeleteOrResolveThread(
-          this.user._id,
-          this.project._id,
-          this.thread._id,
-          this.token
+        await ctx.AuthorizationManager.promises.canUserDeleteOrResolveThread(
+          ctx.user._id,
+          ctx.project._id,
+          ctx.thread._id,
+          ctx.token
         )
 
       expect(canResolve).to.equal(true)
     })
 
-    it('should return false when user has read permission', async function () {
-      this.CollaboratorsGetter.promises.getProjectAccess
-        .withArgs(this.project._id)
+    it('should return false when user has read permission', async function (ctx) {
+      ctx.CollaboratorsGetter.promises.getProjectAccess
+        .withArgs(ctx.project._id)
         .resolves({
           publicAccessLevel: sinon.stub().returns(PublicAccessLevels.PRIVATE),
           privilegeLevelForUser: sinon
             .stub()
-            .withArgs(this.user._id)
+            .withArgs(ctx.user._id)
             .returns(PrivilegeLevels.READ_ONLY),
         })
 
       const canResolve =
-        await this.AuthorizationManager.promises.canUserDeleteOrResolveThread(
-          this.user._id,
-          this.project._id,
-          this.thread._id,
-          this.token
+        await ctx.AuthorizationManager.promises.canUserDeleteOrResolveThread(
+          ctx.user._id,
+          ctx.project._id,
+          ctx.thread._id,
+          ctx.token
         )
 
       expect(canResolve).to.equal(false)
     })
 
     describe('when user has review permission', function () {
-      beforeEach(function () {
-        this.CollaboratorsGetter.promises.getProjectAccess
-          .withArgs(this.project._id)
+      beforeEach(function (ctx) {
+        ctx.CollaboratorsGetter.promises.getProjectAccess
+          .withArgs(ctx.project._id)
           .resolves({
             publicAccessLevel: sinon.stub().returns(PublicAccessLevels.PRIVATE),
             privilegeLevelForUser: sinon
               .stub()
-              .withArgs(this.user._id)
+              .withArgs(ctx.user._id)
               .returns(PrivilegeLevels.REVIEW),
           })
       })
 
-      it('should return false when user is not the comment author', async function () {
+      it('should return false when user is not the comment author', async function (ctx) {
         const canResolve =
-          await this.AuthorizationManager.promises.canUserDeleteOrResolveThread(
-            this.user._id,
-            this.project._id,
-            this.thread._id,
-            this.token
+          await ctx.AuthorizationManager.promises.canUserDeleteOrResolveThread(
+            ctx.user._id,
+            ctx.project._id,
+            ctx.thread._id,
+            ctx.token
           )
 
         expect(canResolve).to.equal(false)
       })
 
-      it('should return true when user is the thread author', async function () {
-        this.ChatApiHandler.promises.getThread
-          .withArgs(this.project._id, this.thread._id)
-          .resolves({ messages: [{ user_id: this.user._id }] })
+      it('should return true when user is the thread author', async function (ctx) {
+        ctx.ChatApiHandler.promises.getThread
+          .withArgs(ctx.project._id, ctx.thread._id)
+          .resolves({ messages: [{ user_id: ctx.user._id }] })
 
         const canResolve =
-          await this.AuthorizationManager.promises.canUserDeleteOrResolveThread(
-            this.user._id,
-            this.project._id,
-            this.thread._id,
-            this.token
+          await ctx.AuthorizationManager.promises.canUserDeleteOrResolveThread(
+            ctx.user._id,
+            ctx.project._id,
+            ctx.thread._id,
+            ctx.token
           )
 
         expect(canResolve).to.equal(true)
@@ -694,36 +734,37 @@ function testPermission(permission, privilegeLevels) {
   describe(permission, function () {
     describe('when authenticated', function () {
       describe('when user is site admin', function () {
-        beforeEach('set user as site admin', function () {
-          this.user.isAdmin = true
+        beforeEach(function (ctx) {
+          ctx.annotate('Set user as site admin')
+          ctx.user.isAdmin = true
         })
         expectPermission(permission, privilegeLevels.siteAdmin || false)
       })
       describe('admin without permissions', function () {
-        beforeEach(function () {
-          this.user.isAdmin = true
-          this.settings.adminRolesEnabled = true
-          this.Modules.promises.hooks.fire
+        beforeEach(function (ctx) {
+          ctx.user.isAdmin = true
+          ctx.settings.adminRolesEnabled = true
+          ctx.Modules.promises.hooks.fire
             .withArgs('getAdminCapabilities')
             .resolves([])
         })
         expectPermission(permission, false)
       })
       describe('admin with `view-project-content`', function () {
-        beforeEach(function () {
-          this.user.isAdmin = true
-          this.settings.adminRolesEnabled = true
-          this.Modules.promises.hooks.fire
+        beforeEach(function (ctx) {
+          ctx.user.isAdmin = true
+          ctx.settings.adminRolesEnabled = true
+          ctx.Modules.promises.hooks.fire
             .withArgs('getAdminCapabilities')
             .resolves([['view-project-content']])
         })
         expectPermission(permission, privilegeLevels.readOnly || false)
       })
       describe('admin with `modify-project`', function () {
-        beforeEach(function () {
-          this.user.isAdmin = true
-          this.settings.adminRolesEnabled = true
-          this.Modules.promises.hooks.fire
+        beforeEach(function (ctx) {
+          ctx.user.isAdmin = true
+          ctx.settings.adminRolesEnabled = true
+          ctx.Modules.promises.hooks.fire
             .withArgs('getAdminCapabilities')
             .resolves([
               [
@@ -771,12 +812,12 @@ function testPermission(permission, privilegeLevels) {
       })
 
       describe('when user is not found', function () {
-        it('should return false', async function () {
+        it('should return false', async function (ctx) {
           const otherUserId = new ObjectId()
-          const value = await this.AuthorizationManager.promises[permission](
+          const value = await ctx.AuthorizationManager.promises[permission](
             otherUserId,
-            this.project._id,
-            this.token
+            ctx.project._id,
+            ctx.token
           )
           expect(value).to.equal(false)
         })
@@ -784,8 +825,8 @@ function testPermission(permission, privilegeLevels) {
     })
 
     describe('when anonymous', function () {
-      beforeEach(function () {
-        this.user = null
+      beforeEach(function (ctx) {
+        ctx.user = null
       })
 
       describe('with read-write access through a token', function () {
@@ -815,36 +856,39 @@ function testPermission(permission, privilegeLevels) {
 }
 
 function setupUserPrivilegeLevel(privilegeLevel) {
-  beforeEach(`set user privilege level to ${privilegeLevel}`, function () {
-    this.CollaboratorsGetter.promises.getProjectAccess
-      .withArgs(this.project._id)
+  beforeEach(function (ctx) {
+    ctx.annotate(`set user privilege level to ${privilegeLevel}`)
+    ctx.CollaboratorsGetter.promises.getProjectAccess
+      .withArgs(ctx.project._id)
       .resolves({
         publicAccessLevel: sinon.stub().returns(PublicAccessLevels.PRIVATE),
         privilegeLevelForUser: sinon
           .stub()
-          .withArgs(this.user._id)
+          .withArgs(ctx.user._id)
           .returns(privilegeLevel),
       })
   })
 }
 
 function setupPublicAccessLevel(level) {
-  beforeEach(`set public access level to ${level}`, function () {
-    this.project.publicAccesLevel = level
-    this.CollaboratorsGetter.promises.getProjectAccess
-      .withArgs(this.project._id)
+  beforeEach(function (ctx) {
+    ctx.annotate(`set public access level to ${level}`)
+    ctx.project.publicAccesLevel = level
+    ctx.CollaboratorsGetter.promises.getProjectAccess
+      .withArgs(ctx.project._id)
       .resolves({
-        publicAccessLevel: sinon.stub().returns(this.project.publicAccesLevel),
+        publicAccessLevel: sinon.stub().returns(ctx.project.publicAccesLevel),
         privilegeLevelForUser: sinon.stub().returns(PrivilegeLevels.NONE),
       })
   })
 }
 
 function setupTokenAccessLevel(level) {
-  beforeEach(`set token access level to ${level}`, function () {
-    this.project.publicAccesLevel = PublicAccessLevels.TOKEN_BASED
-    this.TokenAccessHandler.promises.validateTokenForAnonymousAccess
-      .withArgs(this.project._id, this.token)
+  beforeEach(function (ctx) {
+    ctx.annotate(`set token access level to ${level}`)
+    ctx.project.publicAccesLevel = PublicAccessLevels.TOKEN_BASED
+    ctx.TokenAccessHandler.promises.validateTokenForAnonymousAccess
+      .withArgs(ctx.project._id, ctx.token)
       .resolves({
         isValidReadAndWrite: level === 'readAndWrite',
         isValidReadOnly: level === 'readOnly',
@@ -853,11 +897,11 @@ function setupTokenAccessLevel(level) {
 }
 
 function expectPermission(permission, expectedValue) {
-  it(`should return ${expectedValue}`, async function () {
-    const value = await this.AuthorizationManager.promises[permission](
-      this.user && this.user._id,
-      this.project._id,
-      this.token
+  it(`should return ${expectedValue}`, async function (ctx) {
+    const value = await ctx.AuthorizationManager.promises[permission](
+      ctx.user && ctx.user._id,
+      ctx.project._id,
+      ctx.token
     )
     expect(value).to.equal(expectedValue)
   })

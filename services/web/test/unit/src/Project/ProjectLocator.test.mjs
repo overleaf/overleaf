@@ -1,8 +1,11 @@
-const { expect } = require('chai')
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+import Errors from '../../../../app/src/Features/Errors/Errors.js'
 const modulePath = '../../../../app/src/Features/Project/ProjectLocator'
-const SandboxedModule = require('sandboxed-module')
-const sinon = require('sinon')
-const Errors = require('../../../../app/src/Features/Errors/Errors')
+
+vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
+  vi.importActual('../../../../app/src/Features/Errors/Errors.js')
+)
 
 const project = { _id: '1234566', rootFolder: [] }
 const rootDoc = { name: 'rootDoc', _id: 'das239djd' }
@@ -38,47 +41,50 @@ project.rootFolder[0] = rootFolder
 project.rootDoc_id = rootDoc._id
 
 describe('ProjectLocator', function () {
-  beforeEach(function () {
-    this.ProjectGetter = {
+  beforeEach(async function (ctx) {
+    ctx.ProjectGetter = {
       getProject: sinon.stub().callsArgWith(2, null, project),
     }
-    this.ProjectHelper = {
+    ctx.ProjectHelper = {
       isArchived: sinon.stub(),
       isTrashed: sinon.stub(),
       isArchivedOrTrashed: sinon.stub(),
     }
-    this.locator = SandboxedModule.require(modulePath, {
-      requires: {
-        '../../models/User': { User: this.User },
-        './ProjectGetter': this.ProjectGetter,
-        './ProjectHelper': this.ProjectHelper,
-      },
-    })
+
+    vi.doMock('../../../../app/src/models/User', () => ({
+      default: { User: ctx.User },
+    }))
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
+      default: ctx.ProjectGetter,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectHelper', () => ({
+      default: ctx.ProjectHelper,
+    }))
+
+    ctx.locator = (await import(modulePath)).default
   })
 
   describe('finding a doc', function () {
-    it('finds one at the root level', async function () {
-      const { element, path, folder } = await this.locator.promises.findElement(
-        {
-          project_id: project._id,
-          element_id: doc2._id,
-          type: 'docs',
-        }
-      )
+    it('finds one at the root level', async function (ctx) {
+      const { element, path, folder } = await ctx.locator.promises.findElement({
+        project_id: project._id,
+        element_id: doc2._id,
+        type: 'docs',
+      })
       element._id.should.equal(doc2._id)
       path.fileSystem.should.equal(`/${doc2.name}`)
       folder._id.should.equal(project.rootFolder[0]._id)
       path.mongo.should.equal('rootFolder.0.docs.1')
     })
 
-    it('when it is nested', async function () {
-      const { element, path, folder } = await this.locator.promises.findElement(
-        {
-          project_id: project._id,
-          element_id: subSubDoc._id,
-          type: 'doc',
-        }
-      )
+    it('when it is nested', async function (ctx) {
+      const { element, path, folder } = await ctx.locator.promises.findElement({
+        project_id: project._id,
+        element_id: subSubDoc._id,
+        type: 'doc',
+      })
       expect(element._id).to.equal(subSubDoc._id)
       path.fileSystem.should.equal(
         `/${subFolder.name}/${secondSubFolder.name}/${subSubDoc.name}`
@@ -87,9 +93,9 @@ describe('ProjectLocator', function () {
       path.mongo.should.equal('rootFolder.0.folders.1.folders.0.docs.0')
     })
 
-    it('should give error if element could not be found', async function () {
+    it('should give error if element could not be found', async function (ctx) {
       await expect(
-        this.locator.promises.findElement({
+        ctx.locator.promises.findElement({
           project_id: project._id,
           element_id: 'ddsd432nj42',
           type: 'docs',
@@ -101,20 +107,18 @@ describe('ProjectLocator', function () {
   })
 
   describe('finding a folder', function () {
-    it('should return root folder when looking for root folder', async function () {
-      const { element: foundElement } = await this.locator.promises.findElement(
-        {
-          project_id: project._id,
-          element_id: rootFolder._id,
-          type: 'folder',
-        }
-      )
+    it('should return root folder when looking for root folder', async function (ctx) {
+      const { element: foundElement } = await ctx.locator.promises.findElement({
+        project_id: project._id,
+        element_id: rootFolder._id,
+        type: 'folder',
+      })
       foundElement._id.should.equal(rootFolder._id)
     })
 
-    it('should not return root folder when searching for docs', async function () {
+    it('should not return root folder when searching for docs', async function (ctx) {
       await expect(
-        this.locator.promises.findElement({
+        ctx.locator.promises.findElement({
           project_id: project._id,
           element_id: rootFolder._id,
           type: 'docs',
@@ -124,9 +128,9 @@ describe('ProjectLocator', function () {
         .and.eventually.have.property('message', 'entity not found')
     })
 
-    it('should not return root folder when searching for files', async function () {
+    it('should not return root folder when searching for files', async function (ctx) {
       await expect(
-        this.locator.promises.findElement({
+        ctx.locator.promises.findElement({
           project_id: project._id,
           element_id: rootFolder._id,
           type: 'files',
@@ -136,12 +140,12 @@ describe('ProjectLocator', function () {
         .and.eventually.have.property('message', 'entity not found')
     })
 
-    it('when at root', async function () {
+    it('when at root', async function (ctx) {
       const {
         element: foundElement,
         path,
         folder: parentFolder,
-      } = await this.locator.promises.findElement({
+      } = await ctx.locator.promises.findElement({
         project_id: project._id,
         element_id: subFolder._id,
         type: 'folder',
@@ -152,12 +156,12 @@ describe('ProjectLocator', function () {
       path.mongo.should.equal('rootFolder.0.folders.1')
     })
 
-    it('when deeply nested', async function () {
+    it('when deeply nested', async function (ctx) {
       const {
         element: foundElement,
         path,
         folder: parentFolder,
-      } = await this.locator.promises.findElement({
+      } = await ctx.locator.promises.findElement({
         project_id: project._id,
         element_id: secondSubFolder._id,
         type: 'folder',
@@ -171,12 +175,12 @@ describe('ProjectLocator', function () {
   })
 
   describe('finding a file', function () {
-    it('when at root', async function () {
+    it('when at root', async function (ctx) {
       const {
         element: foundElement,
         path,
         folder: parentFolder,
-      } = await this.locator.promises.findElement({
+      } = await ctx.locator.promises.findElement({
         project_id: project._id,
         element_id: file1._id,
         type: 'fileRefs',
@@ -187,12 +191,12 @@ describe('ProjectLocator', function () {
       path.mongo.should.equal('rootFolder.0.fileRefs.0')
     })
 
-    it('when deeply nested', async function () {
+    it('when deeply nested', async function (ctx) {
       const {
         element: foundElement,
         path,
         folder: parentFolder,
-      } = await this.locator.promises.findElement({
+      } = await ctx.locator.promises.findElement({
         project_id: project._id,
         element_id: subSubFile._id,
         type: 'fileRefs',
@@ -207,25 +211,21 @@ describe('ProjectLocator', function () {
   })
 
   describe('finding an element with wrong element type', function () {
-    it('should add an s onto the element type', async function () {
-      const { element: foundElement } = await this.locator.promises.findElement(
-        {
-          project_id: project._id,
-          element_id: subSubDoc._id,
-          type: 'doc',
-        }
-      )
+    it('should add an s onto the element type', async function (ctx) {
+      const { element: foundElement } = await ctx.locator.promises.findElement({
+        project_id: project._id,
+        element_id: subSubDoc._id,
+        type: 'doc',
+      })
       foundElement._id.should.equal(subSubDoc._id)
     })
 
-    it('should convert file to fileRefs', async function () {
-      const { element: foundElement } = await this.locator.promises.findElement(
-        {
-          project_id: project._id,
-          element_id: file1._id,
-          type: 'fileRefs',
-        }
-      )
+    it('should convert file to fileRefs', async function (ctx) {
+      const { element: foundElement } = await ctx.locator.promises.findElement({
+        project_id: project._id,
+        element_id: file1._id,
+        type: 'fileRefs',
+      })
       foundElement._id.should.equal(file1._id)
     })
   })
@@ -243,12 +243,12 @@ describe('ProjectLocator', function () {
       _id: '1234566',
       rootFolder: [rootFolder2],
     }
-    it('should find doc in project', async function () {
+    it('should find doc in project', async function (ctx) {
       const {
         element: foundElement,
         path,
         folder: parentFolder,
-      } = await this.locator.promises.findElement({
+      } = await ctx.locator.promises.findElement({
         project: project2,
         element_id: doc3._id,
         type: 'docs',
@@ -261,38 +261,38 @@ describe('ProjectLocator', function () {
   })
 
   describe('finding root doc', function () {
-    it('should return root doc when passed project', async function () {
-      const { element: doc } = await this.locator.promises.findRootDoc(project)
+    it('should return root doc when passed project', async function (ctx) {
+      const { element: doc } = await ctx.locator.promises.findRootDoc(project)
       doc._id.should.equal(rootDoc._id)
     })
 
-    it('should return root doc when passed project_id', async function () {
-      const { element: doc } = await this.locator.promises.findRootDoc(
+    it('should return root doc when passed project_id', async function (ctx) {
+      const { element: doc } = await ctx.locator.promises.findRootDoc(
         project._id
       )
       doc._id.should.equal(rootDoc._id)
     })
 
-    it('should return null when the project has no rootDoc', async function () {
+    it('should return null when the project has no rootDoc', async function (ctx) {
       project.rootDoc_id = null
       const { element: rootDoc } =
-        await this.locator.promises.findRootDoc(project)
+        await ctx.locator.promises.findRootDoc(project)
       expect(rootDoc).to.equal(null)
     })
 
-    it('should return null when the rootDoc_id no longer exists', async function () {
+    it('should return null when the rootDoc_id no longer exists', async function (ctx) {
       project.rootDoc_id = 'doesntexist'
       const { element: rootDoc } =
-        await this.locator.promises.findRootDoc(project)
+        await ctx.locator.promises.findRootDoc(project)
       expect(rootDoc).to.equal(null)
     })
   })
 
   describe('findElementByPath', function () {
-    it('should take a doc path and return the element for a root level document', async function () {
+    it('should take a doc path and return the element for a root level document', async function (ctx) {
       const path = `${doc1.name}`
       const { element, type, folder } =
-        await this.locator.promises.findElementByPath({
+        await ctx.locator.promises.findElementByPath({
           project,
           path,
         })
@@ -301,10 +301,10 @@ describe('ProjectLocator', function () {
       expect(folder).to.equal(rootFolder)
     })
 
-    it('should take a doc path and return the element for a root level document with a starting slash', async function () {
+    it('should take a doc path and return the element for a root level document with a starting slash', async function (ctx) {
       const path = `/${doc1.name}`
       const { element, type, folder } =
-        await this.locator.promises.findElementByPath({
+        await ctx.locator.promises.findElementByPath({
           project,
           path,
         })
@@ -313,10 +313,10 @@ describe('ProjectLocator', function () {
       expect(folder).to.equal(rootFolder)
     })
 
-    it('should take a doc path and return the element for a nested document', async function () {
+    it('should take a doc path and return the element for a nested document', async function (ctx) {
       const path = `${subFolder.name}/${secondSubFolder.name}/${subSubDoc.name}`
       const { element, type, folder } =
-        await this.locator.promises.findElementByPath({
+        await ctx.locator.promises.findElementByPath({
           project,
           path,
         })
@@ -325,10 +325,10 @@ describe('ProjectLocator', function () {
       expect(folder).to.equal(secondSubFolder)
     })
 
-    it('should take a file path and return the element for a root level document', async function () {
+    it('should take a file path and return the element for a root level document', async function (ctx) {
       const path = `${file1.name}`
       const { element, type, folder } =
-        await this.locator.promises.findElementByPath({
+        await ctx.locator.promises.findElementByPath({
           project,
           path,
         })
@@ -337,10 +337,10 @@ describe('ProjectLocator', function () {
       expect(folder).to.equal(rootFolder)
     })
 
-    it('should take a file path and return the element for a nested document', async function () {
+    it('should take a file path and return the element for a nested document', async function (ctx) {
       const path = `${subFolder.name}/${secondSubFolder.name}/${subSubFile.name}`
       const { element, type, folder } =
-        await this.locator.promises.findElementByPath({
+        await ctx.locator.promises.findElementByPath({
           project,
           path,
         })
@@ -349,10 +349,10 @@ describe('ProjectLocator', function () {
       expect(folder).to.equal(secondSubFolder)
     })
 
-    it('should take a file path and return the element for a nested document case insenstive', async function () {
+    it('should take a file path and return the element for a nested document case insenstive', async function (ctx) {
       const path = `${subFolder.name.toUpperCase()}/${secondSubFolder.name.toUpperCase()}/${subSubFile.name.toUpperCase()}`
       const { element, type, folder } =
-        await this.locator.promises.findElementByPath({
+        await ctx.locator.promises.findElementByPath({
           project,
           path,
         })
@@ -361,10 +361,10 @@ describe('ProjectLocator', function () {
       expect(folder).to.equal(secondSubFolder)
     })
 
-    it('should not return elements with a case-insensitive match when exactCaseMatch is true', async function () {
+    it('should not return elements with a case-insensitive match when exactCaseMatch is true', async function (ctx) {
       const path = `${subFolder.name.toUpperCase()}/${secondSubFolder.name.toUpperCase()}/${subSubFile.name.toUpperCase()}`
       await expect(
-        this.locator.promises.findElementByPath({
+        ctx.locator.promises.findElementByPath({
           project,
           path,
           exactCaseMatch: true,
@@ -372,10 +372,10 @@ describe('ProjectLocator', function () {
       ).to.eventually.be.rejected
     })
 
-    it('should take a file path and return the element for a nested folder', async function () {
+    it('should take a file path and return the element for a nested folder', async function (ctx) {
       const path = `${subFolder.name}/${secondSubFolder.name}`
       const { element, type, folder } =
-        await this.locator.promises.findElementByPath({
+        await ctx.locator.promises.findElementByPath({
           project,
           path,
         })
@@ -384,10 +384,10 @@ describe('ProjectLocator', function () {
       expect(folder).to.equal(subFolder)
     })
 
-    it('should take a file path and return the root folder', async function () {
+    it('should take a file path and return the root folder', async function (ctx) {
       const path = '/'
       const { element, type, folder } =
-        await this.locator.promises.findElementByPath({
+        await ctx.locator.promises.findElementByPath({
           project,
           path,
         })
@@ -396,16 +396,16 @@ describe('ProjectLocator', function () {
       expect(folder).to.equal(null)
     })
 
-    it('should return an error if the file can not be found inside know folder', async function () {
+    it('should return an error if the file can not be found inside know folder', async function (ctx) {
       const path = `${subFolder.name}/${secondSubFolder.name}/exist.txt`
-      await expect(this.locator.promises.findElementByPath({ project, path }))
-        .to.eventually.be.rejected
+      await expect(ctx.locator.promises.findElementByPath({ project, path })).to
+        .eventually.be.rejected
     })
 
-    it('should return an error if the file can not be found inside unknown folder', async function () {
+    it('should return an error if the file can not be found inside unknown folder', async function (ctx) {
       const path = 'this/does/not/exist.txt'
       await expect(
-        this.locator.promises.findElementByPath({
+        ctx.locator.promises.findElementByPath({
           project,
           path,
         })
@@ -413,8 +413,8 @@ describe('ProjectLocator', function () {
     })
 
     describe('where duplicate folder exists', function () {
-      beforeEach(function () {
-        this.duplicateFolder = {
+      beforeEach(function (ctx) {
+        ctx.duplicateFolder = {
           name: 'duplicate1',
           _id: '1234',
           folders: [
@@ -425,13 +425,13 @@ describe('ProjectLocator', function () {
               fileRefs: [],
             },
           ],
-          docs: [(this.doc = { name: 'main.tex', _id: '456' })],
+          docs: [(ctx.doc = { name: 'main.tex', _id: '456' })],
           fileRefs: [],
         }
-        this.project = {
+        ctx.project = {
           rootFolder: [
             {
-              folders: [this.duplicateFolder, this.duplicateFolder],
+              folders: [ctx.duplicateFolder, ctx.duplicateFolder],
               fileRefs: [],
               docs: [],
             },
@@ -439,26 +439,26 @@ describe('ProjectLocator', function () {
         }
       })
 
-      it('should not call the callback more than once', async function () {
-        const path = `${this.duplicateFolder.name}/${this.doc.name}`
-        await this.locator.promises.findElementByPath({
-          project: this.project,
+      it('should not call the callback more than once', async function (ctx) {
+        const path = `${ctx.duplicateFolder.name}/${ctx.doc.name}`
+        await ctx.locator.promises.findElementByPath({
+          project: ctx.project,
           path,
         })
       }) // mocha will throw exception if done called multiple times
 
-      it('should not call the callback more than once when the path is longer than 1 level below the duplicate level', async function () {
-        const path = `${this.duplicateFolder.name}/1/main.tex`
-        await this.locator.promises.findElementByPath({
-          project: this.project,
+      it('should not call the callback more than once when the path is longer than 1 level below the duplicate level', async function (ctx) {
+        const path = `${ctx.duplicateFolder.name}/1/main.tex`
+        await ctx.locator.promises.findElementByPath({
+          project: ctx.project,
           path,
         })
       })
     }) // mocha will throw exception if done called multiple times
 
     describe('with a null doc', function () {
-      beforeEach(function () {
-        this.project = {
+      beforeEach(function (ctx) {
+        ctx.project = {
           rootFolder: [
             {
               folders: [],
@@ -469,10 +469,10 @@ describe('ProjectLocator', function () {
         }
       })
 
-      it('should not crash with a null', async function () {
+      it('should not crash with a null', async function (ctx) {
         const path = '/other.tex'
-        const { element } = await this.locator.promises.findElementByPath({
-          project: this.project,
+        const { element } = await ctx.locator.promises.findElementByPath({
+          project: ctx.project,
           path,
         })
         element.name.should.equal('other.tex')
@@ -480,14 +480,14 @@ describe('ProjectLocator', function () {
     })
 
     describe('with a null project', function () {
-      beforeEach(function () {
-        this.ProjectGetter = { getProject: sinon.stub().callsArg(2) }
+      beforeEach(function (ctx) {
+        ctx.ProjectGetter = { getProject: sinon.stub().callsArg(2) }
       })
 
-      it('should not crash with a null', async function () {
+      it('should not crash with a null', async function (ctx) {
         const path = '/other.tex'
         await expect(
-          this.locator.promises.findElementByPath({
+          ctx.locator.promises.findElementByPath({
             project_id: project._id,
             path,
           })
@@ -496,15 +496,13 @@ describe('ProjectLocator', function () {
     })
 
     describe('with a project_id', function () {
-      it('should take a doc path and return the element for a root level document', async function () {
+      it('should take a doc path and return the element for a root level document', async function (ctx) {
         const path = `${doc1.name}`
-        const { element, type } = await this.locator.promises.findElementByPath(
-          {
-            project_id: project._id,
-            path,
-          }
-        )
-        this.ProjectGetter.getProject
+        const { element, type } = await ctx.locator.promises.findElementByPath({
+          project_id: project._id,
+          path,
+        })
+        ctx.ProjectGetter.getProject
           .calledWith(project._id, { rootFolder: true, rootDoc_id: true })
           .should.equal(true)
         element.should.deep.equal(doc1)
@@ -514,17 +512,17 @@ describe('ProjectLocator', function () {
   })
 
   describe('findElementByMongoPath', function () {
-    it('traverses the file tree like Mongo would do', function () {
-      const element = this.locator.findElementByMongoPath(
+    it('traverses the file tree like Mongo would do', function (ctx) {
+      const element = ctx.locator.findElementByMongoPath(
         project,
         'rootFolder.0.folders.1.folders.0.fileRefs.0'
       )
       expect(element).to.equal(subSubFile)
     })
 
-    it('throws an error if no element is found', function () {
+    it('throws an error if no element is found', function (ctx) {
       expect(() =>
-        this.locator.findElementByMongoPath(
+        ctx.locator.findElementByMongoPath(
           project,
           'rootolder.0.folders.0.folders.0.fileRefs.0'
         )

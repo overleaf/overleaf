@@ -168,9 +168,12 @@ describe('EditorHttpController', function () {
     vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
       vi.importActual('../../../../app/src/Features/Errors/Errors.js')
     )
-    vi.doMock('../../../../app/src/Features/Project/ProjectDeleter.mjs', () => ({
-      default: ctx.ProjectDeleter,
-    }))
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectDeleter.mjs',
+      () => ({
+        default: ctx.ProjectDeleter,
+      })
+    )
     vi.doMock('../../../../app/src/Features/Project/ProjectGetter.mjs', () => ({
       default: ctx.ProjectGetter,
     }))

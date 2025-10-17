@@ -1,51 +1,57 @@
-const sinon = require('sinon')
-const { expect } = require('chai')
-const modulePath = '../../../../app/src/Features/User/UserHandler.js'
-const SandboxedModule = require('sandboxed-module')
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+const modulePath = '../../../../app/src/Features/User/UserHandler.mjs'
 
 describe('UserHandler', function () {
-  beforeEach(function () {
-    this.user = {
+  beforeEach(async function (ctx) {
+    ctx.user = {
       _id: '12390i',
       email: 'bob@bob.com',
       remove: sinon.stub().callsArgWith(0),
     }
 
-    this.TeamInvitesHandler = {
+    ctx.TeamInvitesHandler = {
       promises: {
         createTeamInvitesForLegacyInvitedEmail: sinon.stub().resolves(),
       },
     }
 
-    this.db = {
+    ctx.db = {
       users: {
         countDocuments: sinon.stub().resolves(2),
       },
     }
 
-    this.UserHandler = SandboxedModule.require(modulePath, {
-      requires: {
-        '../Subscription/TeamInvitesHandler': this.TeamInvitesHandler,
-        '../../infrastructure/mongodb': { db: this.db },
-      },
-    })
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/TeamInvitesHandler',
+      () => ({
+        default: ctx.TeamInvitesHandler,
+      })
+    )
+
+    vi.doMock('../../../../app/src/infrastructure/mongodb', () => ({
+      db: ctx.db,
+      READ_PREFERENCE_SECONDARY: 'read-preference-secondary',
+    }))
+
+    ctx.UserHandler = (await import(modulePath)).default
   })
 
   describe('populateTeamInvites', function () {
-    beforeEach(async function () {
-      await this.UserHandler.promises.populateTeamInvites(this.user)
+    beforeEach(async function (ctx) {
+      await ctx.UserHandler.promises.populateTeamInvites(ctx.user)
     })
 
-    it('notifies the user about legacy team invites', function () {
-      this.TeamInvitesHandler.promises.createTeamInvitesForLegacyInvitedEmail
-        .calledWith(this.user.email)
+    it('notifies the user about legacy team invites', function (ctx) {
+      ctx.TeamInvitesHandler.promises.createTeamInvitesForLegacyInvitedEmail
+        .calledWith(ctx.user.email)
         .should.eq(true)
     })
   })
 
   describe('countActiveUsers', function () {
-    it('return user count from DB lookup', async function () {
-      expect(await this.UserHandler.promises.countActiveUsers()).to.equal(2)
+    it('return user count from DB lookup', async function (ctx) {
+      expect(await ctx.UserHandler.promises.countActiveUsers()).to.equal(2)
     })
   })
 })

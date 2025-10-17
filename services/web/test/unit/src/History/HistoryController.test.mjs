@@ -82,9 +82,12 @@ describe('HistoryController', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/Features/History/HistoryManager.mjs', () => ({
-      default: ctx.HistoryManager,
-    }))
+    vi.doMock(
+      '../../../../app/src/Features/History/HistoryManager.mjs',
+      () => ({
+        default: ctx.HistoryManager,
+      })
+    )
 
     vi.doMock(
       '../../../../app/src/Features/Project/ProjectDetailsHandler.mjs',

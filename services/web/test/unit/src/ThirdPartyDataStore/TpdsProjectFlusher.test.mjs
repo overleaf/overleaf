@@ -1,176 +1,194 @@
-const { expect } = require('chai')
-const sinon = require('sinon')
-const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongodb-legacy')
-const { Project } = require('../helpers/models/Project')
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+import mongodb from 'mongodb-legacy'
+import indirectlyImportModels from '../helpers/indirectlyImportModels.js'
+
+const { Project } = indirectlyImportModels(['Project'])
+
+const { ObjectId } = mongodb
 
 const MODULE_PATH =
   '../../../../app/src/Features/ThirdPartyDataStore/TpdsProjectFlusher'
 
 describe('TpdsProjectFlusher', function () {
-  beforeEach(function () {
-    this.project = { _id: new ObjectId(), overleaf: { history: { id: 42 } } }
-    this.folder = { _id: new ObjectId() }
-    this.docs = {
+  beforeEach(async function (ctx) {
+    ctx.project = { _id: new ObjectId(), overleaf: { history: { id: 42 } } }
+    ctx.folder = { _id: new ObjectId() }
+    ctx.docs = {
       '/doc/one': {
         _id: 'mock-doc-1',
         lines: ['one'],
         rev: 5,
-        folder: this.folder,
+        folder: ctx.folder,
       },
       '/doc/two': {
         _id: 'mock-doc-2',
         lines: ['two'],
         rev: 6,
-        folder: this.folder,
+        folder: ctx.folder,
       },
     }
-    this.files = {
+    ctx.files = {
       '/file/one': {
         _id: 'mock-file-1',
         rev: 7,
-        folder: this.folder,
+        folder: ctx.folder,
         hash: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
       },
       '/file/two': {
         _id: 'mock-file-2',
         rev: 8,
-        folder: this.folder,
+        folder: ctx.folder,
         hash: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
       },
     }
-    this.DocumentUpdaterHandler = {
+    ctx.DocumentUpdaterHandler = {
       promises: {
         flushProjectToMongo: sinon.stub().resolves(),
       },
     }
-    this.ProjectGetter = {
+    ctx.ProjectGetter = {
       promises: {
-        getProject: sinon.stub().resolves(this.project),
+        getProject: sinon.stub().resolves(ctx.project),
       },
     }
-    this.ProjectEntityHandler = {
+    ctx.ProjectEntityHandler = {
       promises: {
-        getAllDocs: sinon.stub().withArgs(this.project._id).resolves(this.docs),
-        getAllFiles: sinon
-          .stub()
-          .withArgs(this.project._id)
-          .resolves(this.files),
+        getAllDocs: sinon.stub().withArgs(ctx.project._id).resolves(ctx.docs),
+        getAllFiles: sinon.stub().withArgs(ctx.project._id).resolves(ctx.files),
       },
     }
-    this.TpdsUpdateSender = {
+    ctx.TpdsUpdateSender = {
       promises: {
         addDoc: sinon.stub().resolves(),
         addFile: sinon.stub().resolves(),
       },
     }
-    this.ProjectMock = sinon.mock(Project)
+    ctx.ProjectMock = sinon.mock(Project)
 
-    this.TpdsProjectFlusher = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        '../DocumentUpdater/DocumentUpdaterHandler':
-          this.DocumentUpdaterHandler,
-        '../Project/ProjectGetter': this.ProjectGetter,
-        '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
-        '../../models/Project': { Project },
-        './TpdsUpdateSender': this.TpdsUpdateSender,
-      },
-    })
+    vi.doMock(
+      '../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler',
+      () => ({
+        default: ctx.DocumentUpdaterHandler,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
+      default: ctx.ProjectGetter,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectEntityHandler',
+      () => ({
+        default: ctx.ProjectEntityHandler,
+      })
+    )
+
+    vi.doMock('../../../../app/src/models/Project', () => ({
+      Project,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/ThirdPartyDataStore/TpdsUpdateSender',
+      () => ({
+        default: ctx.TpdsUpdateSender,
+      })
+    )
+
+    ctx.TpdsProjectFlusher = (await import(MODULE_PATH)).default
   })
 
-  afterEach(function () {
-    this.ProjectMock.restore()
+  afterEach(function (ctx) {
+    ctx.ProjectMock.restore()
   })
 
   describe('flushProjectToTpds', function () {
     describe('usually', function () {
-      beforeEach(async function () {
-        await this.TpdsProjectFlusher.promises.flushProjectToTpds(
-          this.project._id
+      beforeEach(async function (ctx) {
+        await ctx.TpdsProjectFlusher.promises.flushProjectToTpds(
+          ctx.project._id
         )
       })
 
-      it('should flush the project from the doc updater', function () {
+      it('should flush the project from the doc updater', function (ctx) {
         expect(
-          this.DocumentUpdaterHandler.promises.flushProjectToMongo
-        ).to.have.been.calledWith(this.project._id)
+          ctx.DocumentUpdaterHandler.promises.flushProjectToMongo
+        ).to.have.been.calledWith(ctx.project._id)
       })
 
-      it('should flush each doc to the TPDS', function () {
-        for (const [path, doc] of Object.entries(this.docs)) {
-          expect(this.TpdsUpdateSender.promises.addDoc).to.have.been.calledWith(
-            {
-              projectId: this.project._id,
-              docId: doc._id,
-              projectName: this.project.name,
-              rev: doc.rev,
-              path,
-              folderId: this.folder._id,
-            }
-          )
+      it('should flush each doc to the TPDS', function (ctx) {
+        for (const [path, doc] of Object.entries(ctx.docs)) {
+          expect(ctx.TpdsUpdateSender.promises.addDoc).to.have.been.calledWith({
+            projectId: ctx.project._id,
+            docId: doc._id,
+            projectName: ctx.project.name,
+            rev: doc.rev,
+            path,
+            folderId: ctx.folder._id,
+          })
         }
       })
 
-      it('should flush each file to the TPDS', function () {
-        for (const [path, file] of Object.entries(this.files)) {
-          expect(
-            this.TpdsUpdateSender.promises.addFile
-          ).to.have.been.calledWith({
-            projectId: this.project._id,
-            historyId: this.project.overleaf.history.id,
-            fileId: file._id,
-            hash: file.hash,
-            projectName: this.project.name,
-            rev: file.rev,
-            path,
-            folderId: this.folder._id,
-          })
+      it('should flush each file to the TPDS', function (ctx) {
+        for (const [path, file] of Object.entries(ctx.files)) {
+          expect(ctx.TpdsUpdateSender.promises.addFile).to.have.been.calledWith(
+            {
+              projectId: ctx.project._id,
+              historyId: ctx.project.overleaf.history.id,
+              fileId: file._id,
+              hash: file.hash,
+              projectName: ctx.project.name,
+              rev: file.rev,
+              path,
+              folderId: ctx.folder._id,
+            }
+          )
         }
       })
     })
 
     describe('when a TPDS flush is pending', function () {
-      beforeEach(async function () {
-        this.project.deferredTpdsFlushCounter = 2
-        this.ProjectMock.expects('updateOne')
+      beforeEach(async function (ctx) {
+        ctx.project.deferredTpdsFlushCounter = 2
+        ctx.ProjectMock.expects('updateOne')
           .withArgs(
             {
-              _id: this.project._id,
+              _id: ctx.project._id,
               deferredTpdsFlushCounter: { $lte: 2 },
             },
             { $set: { deferredTpdsFlushCounter: 0 } }
           )
           .chain('exec')
           .resolves()
-        await this.TpdsProjectFlusher.promises.flushProjectToTpds(
-          this.project._id
+        await ctx.TpdsProjectFlusher.promises.flushProjectToTpds(
+          ctx.project._id
         )
       })
 
-      it('resets the deferred flush counter', function () {
-        this.ProjectMock.verify()
+      it('resets the deferred flush counter', function (ctx) {
+        ctx.ProjectMock.verify()
       })
     })
   })
 
   describe('deferProjectFlushToTpds', function () {
-    beforeEach(async function () {
-      this.ProjectMock.expects('updateOne')
+    beforeEach(async function (ctx) {
+      ctx.ProjectMock.expects('updateOne')
         .withArgs(
           {
-            _id: this.project._id,
+            _id: ctx.project._id,
           },
           { $inc: { deferredTpdsFlushCounter: 1 } }
         )
         .chain('exec')
         .resolves()
-      await this.TpdsProjectFlusher.promises.deferProjectFlushToTpds(
-        this.project._id
+      await ctx.TpdsProjectFlusher.promises.deferProjectFlushToTpds(
+        ctx.project._id
       )
     })
 
-    it('increments the deferred flush counter', function () {
-      this.ProjectMock.verify()
+    it('increments the deferred flush counter', function (ctx) {
+      ctx.ProjectMock.verify()
     })
   })
 
@@ -178,24 +196,24 @@ describe('TpdsProjectFlusher', function () {
     let cases = [0, undefined]
     cases.forEach(counterValue => {
       describe(`when the deferred flush counter is ${counterValue}`, function () {
-        beforeEach(async function () {
-          this.project.deferredTpdsFlushCounter = counterValue
-          await this.TpdsProjectFlusher.promises.flushProjectToTpdsIfNeeded(
-            this.project._id
+        beforeEach(async function (ctx) {
+          ctx.project.deferredTpdsFlushCounter = counterValue
+          await ctx.TpdsProjectFlusher.promises.flushProjectToTpdsIfNeeded(
+            ctx.project._id
           )
         })
 
-        it("doesn't flush the project from the doc updater", function () {
-          expect(this.DocumentUpdaterHandler.promises.flushProjectToMongo).not
-            .to.have.been.called
+        it("doesn't flush the project from the doc updater", function (ctx) {
+          expect(ctx.DocumentUpdaterHandler.promises.flushProjectToMongo).not.to
+            .have.been.called
         })
 
-        it("doesn't flush any doc", function () {
-          expect(this.TpdsUpdateSender.promises.addDoc).not.to.have.been.called
+        it("doesn't flush any doc", function (ctx) {
+          expect(ctx.TpdsUpdateSender.promises.addDoc).not.to.have.been.called
         })
 
-        it("doesn't flush any file", function () {
-          expect(this.TpdsUpdateSender.promises.addFile).not.to.have.been.called
+        it("doesn't flush any file", function (ctx) {
+          expect(ctx.TpdsUpdateSender.promises.addFile).not.to.have.been.called
         })
       })
     })
@@ -203,63 +221,63 @@ describe('TpdsProjectFlusher', function () {
     cases = [1, 2]
     cases.forEach(counterValue => {
       describe(`when the deferred flush counter is ${counterValue}`, function () {
-        beforeEach(async function () {
-          this.project.deferredTpdsFlushCounter = counterValue
-          this.ProjectMock.expects('updateOne')
+        beforeEach(async function (ctx) {
+          ctx.project.deferredTpdsFlushCounter = counterValue
+          ctx.ProjectMock.expects('updateOne')
             .withArgs(
               {
-                _id: this.project._id,
+                _id: ctx.project._id,
                 deferredTpdsFlushCounter: { $lte: counterValue },
               },
               { $set: { deferredTpdsFlushCounter: 0 } }
             )
             .chain('exec')
             .resolves()
-          await this.TpdsProjectFlusher.promises.flushProjectToTpdsIfNeeded(
-            this.project._id
+          await ctx.TpdsProjectFlusher.promises.flushProjectToTpdsIfNeeded(
+            ctx.project._id
           )
         })
 
-        it('flushes the project from the doc updater', function () {
+        it('flushes the project from the doc updater', function (ctx) {
           expect(
-            this.DocumentUpdaterHandler.promises.flushProjectToMongo
-          ).to.have.been.calledWith(this.project._id)
+            ctx.DocumentUpdaterHandler.promises.flushProjectToMongo
+          ).to.have.been.calledWith(ctx.project._id)
         })
 
-        it('flushes each doc to the TPDS', function () {
-          for (const [path, doc] of Object.entries(this.docs)) {
+        it('flushes each doc to the TPDS', function (ctx) {
+          for (const [path, doc] of Object.entries(ctx.docs)) {
             expect(
-              this.TpdsUpdateSender.promises.addDoc
+              ctx.TpdsUpdateSender.promises.addDoc
             ).to.have.been.calledWith({
-              projectId: this.project._id,
+              projectId: ctx.project._id,
               docId: doc._id,
-              projectName: this.project.name,
+              projectName: ctx.project.name,
               rev: doc.rev,
               path,
-              folderId: this.folder._id,
+              folderId: ctx.folder._id,
             })
           }
         })
 
-        it('flushes each file to the TPDS', function () {
-          for (const [path, file] of Object.entries(this.files)) {
+        it('flushes each file to the TPDS', function (ctx) {
+          for (const [path, file] of Object.entries(ctx.files)) {
             expect(
-              this.TpdsUpdateSender.promises.addFile
+              ctx.TpdsUpdateSender.promises.addFile
             ).to.have.been.calledWith({
-              projectId: this.project._id,
-              historyId: this.project.overleaf.history.id,
+              projectId: ctx.project._id,
+              historyId: ctx.project.overleaf.history.id,
               fileId: file._id,
               hash: file.hash,
-              projectName: this.project.name,
+              projectName: ctx.project.name,
               rev: file.rev,
               path,
-              folderId: this.folder._id,
+              folderId: ctx.folder._id,
             })
           }
         })
 
-        it('resets the deferred flush counter', function () {
-          this.ProjectMock.verify()
+        it('resets the deferred flush counter', function (ctx) {
+          ctx.ProjectMock.verify()
         })
       })
     })

@@ -1,12 +1,13 @@
-const { ObjectId } = require('mongodb-legacy')
-const SandboxedModule = require('sandboxed-module')
-const path = require('path')
-const sinon = require('sinon')
-const { expect } = require('chai')
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import mongodb from 'mongodb-legacy'
+import path from 'path'
+import sinon from 'sinon'
+
+const { ObjectId } = mongodb
 
 const modulePath = path.join(
-  __dirname,
-  '../../../../app/src/Features/ThirdPartyDataStore/TpdsUpdateSender.js'
+  import.meta.dirname,
+  '../../../../app/src/Features/ThirdPartyDataStore/TpdsUpdateSender.mjs'
 )
 
 const projectId = 'project_id_here'
@@ -21,29 +22,29 @@ const filestoreUrl = 'filestore.overleaf.com'
 const projectHistoryUrl = 'http://project-history:3054'
 
 describe('TpdsUpdateSender', function () {
-  beforeEach(function () {
-    this.fakeUser = {
+  beforeEach(async function (ctx) {
+    ctx.fakeUser = {
       _id: '12390i',
     }
-    this.memberIds = [userId, collaberatorRef, readOnlyRef]
-    this.enqueueUrl = new URL(
+    ctx.memberIds = [userId, collaberatorRef, readOnlyRef]
+    ctx.enqueueUrl = new URL(
       'http://tpdsworker/enqueue/web_to_tpds_http_requests'
     )
 
-    this.CollaboratorsGetter = {
+    ctx.CollaboratorsGetter = {
       promises: {
-        getInvitedMemberIds: sinon.stub().resolves(this.memberIds),
+        getInvitedMemberIds: sinon.stub().resolves(ctx.memberIds),
       },
     }
-    this.docstoreUrl = 'docstore.overleaf.env'
-    this.response = {
+    ctx.docstoreUrl = 'docstore.overleaf.env'
+    ctx.response = {
       ok: true,
       json: sinon.stub(),
     }
-    this.FetchUtils = {
+    ctx.FetchUtils = {
       fetchNothing: sinon.stub().resolves(),
     }
-    this.settings = {
+    ctx.settings = {
       siteUrl,
       apis: {
         thirdPartyDataStore: { url: thirdPartyDataStoreApiUrl },
@@ -51,7 +52,7 @@ describe('TpdsUpdateSender', function () {
           url: filestoreUrl,
         },
         docstore: {
-          pubUrl: this.docstoreUrl,
+          pubUrl: ctx.docstoreUrl,
         },
         project_history: {
           url: projectHistoryUrl,
@@ -62,46 +63,63 @@ describe('TpdsUpdateSender', function () {
     getUsers
       .withArgs({
         _id: {
-          $in: this.memberIds,
+          $in: ctx.memberIds,
         },
         'dropbox.access_token.uid': { $ne: null },
       })
       .resolves(
-        this.memberIds.map(userId => {
+        ctx.memberIds.map(userId => {
           return { _id: userId }
         })
       )
-    this.UserGetter = {
+    ctx.UserGetter = {
       promises: { getUsers },
     }
-    this.TpdsUpdateSender = SandboxedModule.require(modulePath, {
-      requires: {
-        'mongodb-legacy': { ObjectId },
-        '@overleaf/settings': this.settings,
-        '@overleaf/fetch-utils': this.FetchUtils,
-        '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
-        '../User/UserGetter.js': this.UserGetter,
-        '@overleaf/metrics': {
-          inc() {},
-        },
+
+    vi.doMock('mongodb-legacy', () => ({
+      default: { ObjectId },
+    }))
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.settings,
+    }))
+
+    vi.doMock('@overleaf/fetch-utils', () => ctx.FetchUtils)
+
+    vi.doMock(
+      '../../../../app/src/Features/Collaborators/CollaboratorsGetter',
+      () => ({
+        default: ctx.CollaboratorsGetter,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/User/UserGetter.js', () => ({
+      default: ctx.UserGetter,
+    }))
+
+    vi.doMock('@overleaf/metrics', () => ({
+      default: {
+        inc() {},
       },
-    })
+    }))
+
+    ctx.TpdsUpdateSender = (await import(modulePath)).default
   })
 
   describe('enqueue', function () {
-    it('should not call request if there is no tpdsworker url', async function () {
-      await this.TpdsUpdateSender.promises.enqueue(null, null, null)
-      this.FetchUtils.fetchNothing.should.not.have.been.called
+    it('should not call request if there is no tpdsworker url', async function (ctx) {
+      await ctx.TpdsUpdateSender.promises.enqueue(null, null, null)
+      ctx.FetchUtils.fetchNothing.should.not.have.been.called
     })
 
-    it('should post the message to the tpdsworker', async function () {
-      this.settings.apis.tpdsworker = { url: 'http://tpdsworker' }
+    it('should post the message to the tpdsworker', async function (ctx) {
+      ctx.settings.apis.tpdsworker = { url: 'http://tpdsworker' }
       const group0 = 'myproject'
       const method0 = 'somemethod0'
       const job0 = 'do something'
-      await this.TpdsUpdateSender.promises.enqueue(group0, method0, job0)
-      this.FetchUtils.fetchNothing.should.have.been.calledWithMatch(
-        this.enqueueUrl,
+      await ctx.TpdsUpdateSender.promises.enqueue(group0, method0, job0)
+      ctx.FetchUtils.fetchNothing.should.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           method: 'POST',
           json: { group: group0, job: job0, method: method0 },
@@ -111,17 +129,17 @@ describe('TpdsUpdateSender', function () {
   })
 
   describe('sending updates', function () {
-    beforeEach(function () {
-      this.settings.apis.tpdsworker = { url: 'http://tpdsworker' }
+    beforeEach(function (ctx) {
+      ctx.settings.apis.tpdsworker = { url: 'http://tpdsworker' }
     })
 
-    it('queues a post the file with user and file id and hash', async function () {
+    it('queues a post the file with user and file id and hash', async function (ctx) {
       const fileId = '4545345'
       const hash = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
       const historyId = 91525
       const path = '/some/path/here.jpg'
 
-      await this.TpdsUpdateSender.promises.addFile({
+      await ctx.TpdsUpdateSender.promises.addFile({
         projectId,
         historyId,
         fileId,
@@ -130,8 +148,8 @@ describe('TpdsUpdateSender', function () {
         projectName,
       })
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: userId,
@@ -148,8 +166,8 @@ describe('TpdsUpdateSender', function () {
         }
       )
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: collaberatorRef,
@@ -157,8 +175,8 @@ describe('TpdsUpdateSender', function () {
         }
       )
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: readOnlyRef,
@@ -168,12 +186,12 @@ describe('TpdsUpdateSender', function () {
       )
     })
 
-    it('post doc with stream origin of docstore', async function () {
+    it('post doc with stream origin of docstore', async function (ctx) {
       const docId = '4545345'
       const path = '/some/path/here.tex'
       const lines = ['line1', 'line2', 'line3']
 
-      await this.TpdsUpdateSender.promises.addDoc({
+      await ctx.TpdsUpdateSender.promises.addDoc({
         projectId,
         docId,
         path,
@@ -181,8 +199,8 @@ describe('TpdsUpdateSender', function () {
         projectName,
       })
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: userId,
@@ -192,15 +210,15 @@ describe('TpdsUpdateSender', function () {
               uri: `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
                 projectName
               )}${encodeURIComponent(path)}`,
-              streamOrigin: `${this.docstoreUrl}/project/${projectId}/doc/${docId}/raw`,
+              streamOrigin: `${ctx.docstoreUrl}/project/${projectId}/doc/${docId}/raw`,
               headers: {},
             },
           },
         }
       )
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: collaberatorRef,
@@ -211,8 +229,8 @@ describe('TpdsUpdateSender', function () {
         }
       )
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: readOnlyRef,
@@ -224,19 +242,19 @@ describe('TpdsUpdateSender', function () {
       )
     })
 
-    it('deleting entity', async function () {
+    it('deleting entity', async function (ctx) {
       const path = '/path/here/t.tex'
       const subtreeEntityIds = ['id1', 'id2']
 
-      await this.TpdsUpdateSender.promises.deleteEntity({
+      await ctx.TpdsUpdateSender.promises.deleteEntity({
         projectId,
         path,
         projectName,
         subtreeEntityIds,
       })
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: userId,
@@ -253,8 +271,8 @@ describe('TpdsUpdateSender', function () {
         }
       )
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: collaberatorRef,
@@ -265,8 +283,8 @@ describe('TpdsUpdateSender', function () {
         }
       )
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: readOnlyRef,
@@ -278,19 +296,19 @@ describe('TpdsUpdateSender', function () {
       )
     })
 
-    it('moving entity', async function () {
+    it('moving entity', async function (ctx) {
       const startPath = 'staring/here/file.tex'
       const endPath = 'ending/here/file.tex'
 
-      await this.TpdsUpdateSender.promises.moveEntity({
+      await ctx.TpdsUpdateSender.promises.moveEntity({
         projectId,
         startPath,
         endPath,
         projectName,
       })
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: userId,
@@ -308,8 +326,8 @@ describe('TpdsUpdateSender', function () {
         }
       )
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: collaberatorRef,
@@ -320,8 +338,8 @@ describe('TpdsUpdateSender', function () {
         }
       )
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: readOnlyRef,
@@ -333,18 +351,18 @@ describe('TpdsUpdateSender', function () {
       )
     })
 
-    it('should be able to rename a project using the move entity func', async function () {
+    it('should be able to rename a project using the move entity func', async function (ctx) {
       const oldProjectName = '/oldProjectName/'
       const newProjectName = '/newProjectName/'
 
-      await this.TpdsUpdateSender.promises.moveEntity({
+      await ctx.TpdsUpdateSender.promises.moveEntity({
         projectId,
         projectName: oldProjectName,
         newProjectName,
       })
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: userId,
@@ -362,8 +380,8 @@ describe('TpdsUpdateSender', function () {
         }
       )
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: collaberatorRef,
@@ -374,8 +392,8 @@ describe('TpdsUpdateSender', function () {
         }
       )
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: readOnlyRef,
@@ -387,11 +405,11 @@ describe('TpdsUpdateSender', function () {
       )
     })
 
-    it('pollDropboxForUser', async function () {
-      await this.TpdsUpdateSender.promises.pollDropboxForUser(userId)
+    it('pollDropboxForUser', async function (ctx) {
+      await ctx.TpdsUpdateSender.promises.pollDropboxForUser(userId)
 
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
+      expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
+        ctx.enqueueUrl,
         {
           json: {
             group: userId,
@@ -410,24 +428,24 @@ describe('TpdsUpdateSender', function () {
   })
 
   describe('user not linked to dropbox', function () {
-    beforeEach(function () {
-      this.UserGetter.promises.getUsers
+    beforeEach(function (ctx) {
+      ctx.UserGetter.promises.getUsers
         .withArgs({
           _id: {
-            $in: this.memberIds,
+            $in: ctx.memberIds,
           },
           'dropbox.access_token.uid': { $ne: null },
         })
         .resolves([])
     })
 
-    it('does not make request to tpds', async function () {
+    it('does not make request to tpds', async function (ctx) {
       const fileId = '4545345'
       const hash = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
       const historyId = 91525
       const path = '/some/path/here.jpg'
 
-      await this.TpdsUpdateSender.promises.addFile({
+      await ctx.TpdsUpdateSender.promises.addFile({
         projectId,
         historyId,
         hash,
@@ -435,7 +453,7 @@ describe('TpdsUpdateSender', function () {
         path,
         projectName,
       })
-      this.FetchUtils.fetchNothing.should.not.have.been.called
+      ctx.FetchUtils.fetchNothing.should.not.have.been.called
     })
   })
 })

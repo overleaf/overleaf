@@ -1,13 +1,13 @@
-const { expect } = require('chai')
-const sinon = require('sinon')
-const SandboxedModule = require('sandboxed-module')
+import { beforeEach, describe, it, vi, expect } from 'vitest'
+import sinon from 'sinon'
 
-const MODULE_PATH = '../../../../app/src/Features/FileStore/FileStoreHandler.js'
+const MODULE_PATH =
+  '../../../../app/src/Features/FileStore/FileStoreHandler.mjs'
 
 describe('FileStoreHandler', function () {
-  beforeEach(function () {
-    this.fileSize = 999
-    this.fs = {
+  beforeEach(async function (ctx) {
+    ctx.fileSize = 999
+    ctx.fs = {
       createReadStream: sinon.stub(),
       lstat: sinon.stub().callsArgWith(1, null, {
         isFile() {
@@ -16,10 +16,10 @@ describe('FileStoreHandler', function () {
         isDirectory() {
           return false
         },
-        size: this.fileSize,
+        size: ctx.fileSize,
       }),
     }
-    this.writeStream = {
+    ctx.writeStream = {
       my: 'writeStream',
       on(type, fn) {
         if (type === 'response') {
@@ -27,25 +27,24 @@ describe('FileStoreHandler', function () {
         }
       },
     }
-    this.readStream = { my: 'readStream', on: sinon.stub() }
-    this.request = sinon.stub()
-    this.request.head = sinon.stub()
-    this.filestoreUrl = 'http://filestore.overleaf.test'
-    this.settings = {
-      apis: { filestore: { url: this.filestoreUrl } },
+    ctx.readStream = { my: 'readStream', on: sinon.stub() }
+    ctx.request = sinon.stub()
+    ctx.request.head = sinon.stub()
+    ctx.filestoreUrl = 'http://filestore.overleaf.test'
+    ctx.settings = {
+      apis: { filestore: { url: ctx.filestoreUrl } },
     }
-    this.hashValue = '0123456789'
-    this.fileArgs = { name: 'upload-filename' }
-    this.fileId = 'file_id_here'
-    this.projectId = '1312312312'
-    this.historyId = 123
-    this.hashValue = '2aae6c35c94fcfb415dbe95f408b9ce91ee846ed'
-    this.fsPath = 'uploads/myfile.eps'
-    this.getFileUrl = (projectId, fileId) =>
-      `${this.filestoreUrl}/project/${projectId}/file/${fileId}`
-    this.getProjectUrl = projectId =>
-      `${this.filestoreUrl}/project/${projectId}`
-    this.FileModel = class File {
+    ctx.hashValue = '0123456789'
+    ctx.fileArgs = { name: 'upload-filename' }
+    ctx.fileId = 'file_id_here'
+    ctx.projectId = '1312312312'
+    ctx.historyId = 123
+    ctx.hashValue = '2aae6c35c94fcfb415dbe95f408b9ce91ee846ed'
+    ctx.fsPath = 'uploads/myfile.eps'
+    ctx.getFileUrl = (projectId, fileId) =>
+      `${ctx.filestoreUrl}/project/${projectId}/file/${fileId}`
+    ctx.getProjectUrl = projectId => `${ctx.filestoreUrl}/project/${projectId}`
+    ctx.FileModel = class File {
       constructor(options) {
         ;({ name: this.name, hash: this.hash } = options)
         this._id = 'file_id_here'
@@ -55,53 +54,75 @@ describe('FileStoreHandler', function () {
         }
       }
     }
-    this.FileHashManager = {
-      computeHash: sinon.stub().callsArgWith(1, null, this.hashValue),
+    ctx.FileHashManager = {
+      computeHash: sinon.stub().callsArgWith(1, null, ctx.hashValue),
     }
-    this.HistoryManager = {
+    ctx.HistoryManager = {
       uploadBlobFromDisk: sinon.stub().callsArg(4),
     }
-    this.ProjectDetailsHandler = {
+    ctx.ProjectDetailsHandler = {
       getDetails: sinon.stub().callsArgWith(1, null, {
-        overleaf: { history: { id: this.historyId } },
+        overleaf: { history: { id: ctx.historyId } },
       }),
     }
 
-    this.Features = {
+    ctx.Features = {
       hasFeature: sinon.stub(),
     }
 
-    this.Modules = {
+    ctx.Modules = {
       hooks: {
         fire: sinon.stub().callsArgWith(2, null),
       },
     }
 
-    this.handler = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        '@overleaf/settings': this.settings,
-        request: this.request,
-        '../History/HistoryManager': this.HistoryManager,
-        '../Project/ProjectDetailsHandler': this.ProjectDetailsHandler,
-        './FileHashManager': this.FileHashManager,
-        '../../infrastructure/Features': this.Features,
-        '../../infrastructure/Modules': this.Modules,
-        // FIXME: need to stub File object here
-        '../../models/File': {
-          File: this.FileModel,
-        },
-        fs: this.fs,
-      },
-    })
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.settings,
+    }))
+
+    vi.doMock('request', () => ({
+      default: ctx.request,
+    }))
+
+    vi.doMock('../../../../app/src/Features/History/HistoryManager', () => ({
+      default: ctx.HistoryManager,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectDetailsHandler',
+      () => ({
+        default: ctx.ProjectDetailsHandler,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/FileStore/FileHashManager', () => ({
+      default: ctx.FileHashManager,
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Features', () => ({
+      default: ctx.Features,
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
+      default: ctx.Modules,
+    }))
+
+    vi.doMock('../../../../app/src/models/File', () => ({
+      File: ctx.FileModel,
+    }))
+
+    vi.doMock('node:fs', () => ({ default: ctx.fs }))
+
+    ctx.handler = (await import(MODULE_PATH)).default
   })
 
   describe('uploadFileFromDisk', function () {
-    beforeEach(function () {
-      this.request.returns(this.writeStream)
+    beforeEach(function (ctx) {
+      ctx.request.returns(ctx.writeStream)
     })
 
-    it('should get the project details', async function () {
-      this.fs.createReadStream.returns({
+    it('should get the project details', async function (ctx) {
+      ctx.fs.createReadStream.returns({
         pipe() {},
         on(type, cb) {
           if (type === 'open') {
@@ -109,18 +130,18 @@ describe('FileStoreHandler', function () {
           }
         },
       })
-      await this.handler.promises.uploadFileFromDisk(
-        this.projectId,
-        this.fileArgs,
-        this.fsPath
+      await ctx.handler.promises.uploadFileFromDisk(
+        ctx.projectId,
+        ctx.fileArgs,
+        ctx.fsPath
       )
-      this.ProjectDetailsHandler.getDetails
-        .calledWith(this.projectId)
+      ctx.ProjectDetailsHandler.getDetails
+        .calledWith(ctx.projectId)
         .should.equal(true)
     })
 
-    it('should compute the file hash', async function () {
-      this.fs.createReadStream.returns({
+    it('should compute the file hash', async function (ctx) {
+      ctx.fs.createReadStream.returns({
         pipe() {},
         on(type, cb) {
           if (type === 'open') {
@@ -128,18 +149,16 @@ describe('FileStoreHandler', function () {
           }
         },
       })
-      await this.handler.promises.uploadFileFromDisk(
-        this.projectId,
-        this.fileArgs,
-        this.fsPath
+      await ctx.handler.promises.uploadFileFromDisk(
+        ctx.projectId,
+        ctx.fileArgs,
+        ctx.fsPath
       )
-      this.FileHashManager.computeHash
-        .calledWith(this.fsPath)
-        .should.equal(true)
+      ctx.FileHashManager.computeHash.calledWith(ctx.fsPath).should.equal(true)
     })
 
-    it('should call the preUploadFile hook', async function () {
-      this.fs.createReadStream.returns({
+    it('should call the preUploadFile hook', async function (ctx) {
+      ctx.fs.createReadStream.returns({
         pipe() {},
         on(type, cb) {
           if (type === 'open') {
@@ -147,24 +166,24 @@ describe('FileStoreHandler', function () {
           }
         },
       })
-      await this.handler.promises.uploadFileFromDisk(
-        this.projectId,
-        this.fileArgs,
-        this.fsPath
+      await ctx.handler.promises.uploadFileFromDisk(
+        ctx.projectId,
+        ctx.fileArgs,
+        ctx.fsPath
       )
-      this.Modules.hooks.fire
+      ctx.Modules.hooks.fire
         .calledWith('preUploadFile', {
-          projectId: this.projectId,
-          historyId: this.historyId,
-          fileArgs: this.fileArgs,
-          fsPath: this.fsPath,
-          size: this.fileSize,
+          projectId: ctx.projectId,
+          historyId: ctx.historyId,
+          fileArgs: ctx.fileArgs,
+          fsPath: ctx.fsPath,
+          size: ctx.fileSize,
         })
         .should.equal(true)
     })
 
-    it('should upload the file to the history store as a blob', async function () {
-      this.fs.createReadStream.returns({
+    it('should upload the file to the history store as a blob', async function (ctx) {
+      ctx.fs.createReadStream.returns({
         pipe() {},
         on(type, cb) {
           if (type === 'open') {
@@ -172,37 +191,37 @@ describe('FileStoreHandler', function () {
           }
         },
       })
-      await this.handler.promises.uploadFileFromDisk(
-        this.projectId,
-        this.fileArgs,
-        this.fsPath
+      await ctx.handler.promises.uploadFileFromDisk(
+        ctx.projectId,
+        ctx.fileArgs,
+        ctx.fsPath
       )
-      this.HistoryManager.uploadBlobFromDisk
-        .calledWith(this.historyId, this.hashValue, this.fileSize, this.fsPath)
+      ctx.HistoryManager.uploadBlobFromDisk
+        .calledWith(ctx.historyId, ctx.hashValue, ctx.fileSize, ctx.fsPath)
         .should.equal(true)
     })
 
-    it('should not open file handle', async function () {
-      await this.handler.promises.uploadFileFromDisk(
-        this.projectId,
-        this.fileArgs,
-        this.fsPath
+    it('should not open file handle', async function (ctx) {
+      await ctx.handler.promises.uploadFileFromDisk(
+        ctx.projectId,
+        ctx.fileArgs,
+        ctx.fsPath
       )
-      expect(this.fs.createReadStream).to.not.have.been.called
+      expect(ctx.fs.createReadStream).to.not.have.been.called
     })
 
-    it('should not talk to filestore', async function () {
-      await this.handler.promises.uploadFileFromDisk(
-        this.projectId,
-        this.fileArgs,
-        this.fsPath
+    it('should not talk to filestore', async function (ctx) {
+      await ctx.handler.promises.uploadFileFromDisk(
+        ctx.projectId,
+        ctx.fileArgs,
+        ctx.fsPath
       )
 
-      expect(this.request).to.not.have.been.called
+      expect(ctx.request).to.not.have.been.called
     })
 
-    it('should call the postUploadFile hook', async function () {
-      this.fs.createReadStream.returns({
+    it('should call the postUploadFile hook', async function (ctx) {
+      ctx.fs.createReadStream.returns({
         pipe() {},
         on(type, cb) {
           if (type === 'open') {
@@ -210,33 +229,33 @@ describe('FileStoreHandler', function () {
           }
         },
       })
-      await this.handler.promises.uploadFileFromDisk(
-        this.projectId,
-        this.fileArgs,
-        this.fsPath
+      await ctx.handler.promises.uploadFileFromDisk(
+        ctx.projectId,
+        ctx.fileArgs,
+        ctx.fsPath
       )
-      this.Modules.hooks.fire
+      ctx.Modules.hooks.fire
         .calledWith('postUploadFile', {
-          projectId: this.projectId,
-          fileRef: sinon.match.instanceOf(this.FileModel),
-          size: this.fileSize,
+          projectId: ctx.projectId,
+          fileRef: sinon.match.instanceOf(ctx.FileModel),
+          size: ctx.fileSize,
         })
         .should.equal(true)
     })
 
-    it('should resolve with the url and fileRef', async function () {
-      const { fileRef } = await this.handler.promises.uploadFileFromDisk(
-        this.projectId,
-        this.fileArgs,
-        this.fsPath
+    it('should resolve with the url and fileRef', async function (ctx) {
+      const { fileRef } = await ctx.handler.promises.uploadFileFromDisk(
+        ctx.projectId,
+        ctx.fileArgs,
+        ctx.fsPath
       )
-      expect(fileRef._id).to.equal(this.fileId)
-      expect(fileRef.hash).to.equal(this.hashValue)
+      expect(fileRef._id).to.equal(ctx.fileId)
+      expect(fileRef.hash).to.equal(ctx.hashValue)
     })
 
     describe('symlink', function () {
-      it('should not read file if it is symlink', async function () {
-        this.fs.lstat = sinon.stub().callsArgWith(1, null, {
+      it('should not read file if it is symlink', async function (ctx) {
+        ctx.fs.lstat = sinon.stub().callsArgWith(1, null, {
           isFile() {
             return false
           },
@@ -248,10 +267,10 @@ describe('FileStoreHandler', function () {
         let error
 
         try {
-          await this.handler.promises.uploadFileFromDisk(
-            this.projectId,
-            this.fileArgs,
-            this.fsPath
+          await ctx.handler.promises.uploadFileFromDisk(
+            ctx.projectId,
+            ctx.fileArgs,
+            ctx.fsPath
           )
         } catch (err) {
           error = err
@@ -259,18 +278,18 @@ describe('FileStoreHandler', function () {
 
         expect(error).to.exist
 
-        this.fs.createReadStream.called.should.equal(false)
+        ctx.fs.createReadStream.called.should.equal(false)
       })
 
-      it('should not read file stat returns nothing', async function () {
-        this.fs.lstat = sinon.stub().callsArgWith(1, null, null)
+      it('should not read file stat returns nothing', async function (ctx) {
+        ctx.fs.lstat = sinon.stub().callsArgWith(1, null, null)
         let error
 
         try {
-          await this.handler.promises.uploadFileFromDisk(
-            this.projectId,
-            this.fileArgs,
-            this.fsPath
+          await ctx.handler.promises.uploadFileFromDisk(
+            ctx.projectId,
+            ctx.fileArgs,
+            ctx.fsPath
           )
         } catch (err) {
           error = err
@@ -278,7 +297,7 @@ describe('FileStoreHandler', function () {
 
         expect(error).to.exist
 
-        this.fs.createReadStream.called.should.equal(false)
+        ctx.fs.createReadStream.called.should.equal(false)
       })
     })
   })

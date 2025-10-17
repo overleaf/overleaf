@@ -5,10 +5,13 @@ import Errors from '../../../../app/src/Features/Errors/Errors.js'
 
 const ObjectId = mongodb.ObjectId
 
-const MODULE_PATH = new URL(
-  '../../../../app/src/Features/Project/ProjectListController',
-  import.meta.url
-).pathname
+const MODULE_PATH = `${import.meta.dirname}/../../../../app/src/Features/Project/ProjectListController`
+
+// Mock AnalyticsManager as it isn't used in these tests but causes the User model to be imported
+// TODO: remove this once all models are ESM and this kind of mocking is no longer necessary
+vi.mock('../../../../app/src/Features/Analytics/AnalyticsManager.js', () => {
+  return {}
+})
 
 describe('ProjectListController', function () {
   beforeEach(async function (ctx) {

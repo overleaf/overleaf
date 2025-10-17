@@ -236,12 +236,13 @@ describe('TokenAccessController', function () {
       }),
     }))
 
+    ctx.AdminAuthorizationHelper = {
+      canRedirectToAdminDomain: sinon.stub(),
+    }
+
     vi.doMock(
       '../../../../app/src/Features/Helpers/AdminAuthorizationHelper',
-      () =>
-        (ctx.AdminAuthorizationHelper = {
-          canRedirectToAdminDomain: sinon.stub(),
-        })
+      () => ({ default: ctx.AdminAuthorizationHelper })
     )
 
     vi.doMock(
@@ -764,17 +765,12 @@ describe('TokenAccessController', function () {
           .stub()
           .resolves([{ email: 'test@not-overleaf.com' }])
 
-        await new Promise(resolve => {
-          ctx.res.callback = () => {
-            expect(ctx.res.json).to.have.been.calledWith({
-              redirect: `${ctx.Settings.adminUrl}/#prefix`,
-            })
-            resolve()
-          }
-          ctx.TokenAccessController.grantTokenAccessReadAndWrite(
-            ctx.req,
-            ctx.res
-          )
+        await ctx.TokenAccessController.grantTokenAccessReadAndWrite(
+          ctx.req,
+          ctx.res
+        )
+        expect(ctx.res.json).to.have.been.calledWith({
+          redirect: `${ctx.Settings.adminUrl}/#prefix`,
         })
       })
 

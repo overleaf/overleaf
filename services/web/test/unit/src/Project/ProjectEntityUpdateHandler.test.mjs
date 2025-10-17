@@ -1,8 +1,13 @@
-const { expect } = require('chai')
-const sinon = require('sinon')
-const Errors = require('../../../../app/src/Features/Errors/Errors')
-const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongodb-legacy')
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+import Errors from '../../../../app/src/Features/Errors/Errors.js'
+import mongodb from 'mongodb-legacy'
+
+vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
+  vi.importActual('../../../../app/src/Features/Errors/Errors.js')
+)
+
+const { ObjectId } = mongodb
 
 const MODULE_PATH =
   '../../../../app/src/Features/Project/ProjectEntityUpdateHandler'
@@ -16,8 +21,8 @@ describe('ProjectEntityUpdateHandler', function () {
   const newFileId = '4eecaffcbffa66588e000099'
   const userId = 1234
 
-  beforeEach(function () {
-    this.project = {
+  beforeEach(async function (ctx) {
+    ctx.project = {
       _id: projectId,
       name: 'project name',
       overleaf: {
@@ -26,9 +31,9 @@ describe('ProjectEntityUpdateHandler', function () {
         },
       },
     }
-    this.user = { _id: new ObjectId() }
+    ctx.user = { _id: new ObjectId() }
 
-    this.DocModel = class Doc {
+    ctx.DocModel = class Doc {
       constructor(options) {
         this.name = options.name
         this.lines = options.lines
@@ -36,7 +41,7 @@ describe('ProjectEntityUpdateHandler', function () {
         this.rev = options.rev ?? 0
       }
     }
-    this.FileModel = class File {
+    ctx.FileModel = class File {
       constructor(options) {
         this.name = options.name
         // use a new id for replacement files
@@ -54,20 +59,20 @@ describe('ProjectEntityUpdateHandler', function () {
         }
       }
     }
-    this.docName = 'doc-name'
-    this.docLines = ['1234', 'abc']
-    this.doc = { _id: new ObjectId(), name: this.docName }
+    ctx.docName = 'doc-name'
+    ctx.docLines = ['1234', 'abc']
+    ctx.doc = { _id: new ObjectId(), name: ctx.docName }
 
-    this.fileName = 'something.jpg'
-    this.fileSystemPath = 'somehintg'
-    this.file = { _id: new ObjectId(), name: this.fileName, rev: 2 }
+    ctx.fileName = 'something.jpg'
+    ctx.fileSystemPath = 'somehintg'
+    ctx.file = { _id: new ObjectId(), name: ctx.fileName, rev: 2 }
 
-    this.linkedFileData = { provider: 'url' }
+    ctx.linkedFileData = { provider: 'url' }
 
-    this.source = 'editor'
-    this.callback = sinon.stub()
+    ctx.source = 'editor'
+    ctx.callback = sinon.stub()
 
-    this.DocstoreManager = {
+    ctx.DocstoreManager = {
       promises: {
         getDoc: sinon.stub(),
         isDocDeleted: sinon.stub(),
@@ -75,7 +80,7 @@ describe('ProjectEntityUpdateHandler', function () {
         deleteDoc: sinon.stub(),
       },
     }
-    this.DocumentUpdaterHandler = {
+    ctx.DocumentUpdaterHandler = {
       promises: {
         flushDocToMongo: sinon.stub().resolves(),
         flushProjectToMongo: sinon.stub().resolves(),
@@ -85,47 +90,47 @@ describe('ProjectEntityUpdateHandler', function () {
         deleteDoc: sinon.stub().resolves(),
       },
     }
-    this.fs = {
+    ctx.fs = {
       promises: {
         unlink: sinon.stub().resolves(),
       },
     }
-    this.LockManager = {
+    ctx.LockManager = {
       promises: {
         runWithLock: sinon.spy((namespace, id, runner, callback) =>
           runner(callback)
         ),
       },
-      withTimeout: sinon.stub().returns(this.LockManager),
+      withTimeout: sinon.stub().returns(ctx.LockManager),
     }
-    this.ProjectModel = {
+    ctx.ProjectModel = {
       updateOne: sinon.stub().returns({ exec: sinon.stub().resolves() }),
     }
-    this.ProjectGetter = {
+    ctx.ProjectGetter = {
       promises: {
         getProject: sinon.stub(),
         getProjectWithoutDocLines: sinon.stub(),
       },
     }
-    this.ProjectLocator = {
+    ctx.ProjectLocator = {
       promises: {
         findElement: sinon.stub(),
         findElementByPath: sinon.stub(),
       },
     }
-    this.ProjectUpdater = {
+    ctx.ProjectUpdater = {
       promises: {
         markAsUpdated: sinon.stub().resolves(),
       },
     }
-    this.ProjectEntityHandler = {
+    ctx.ProjectEntityHandler = {
       getAllEntitiesFromProject: sinon.stub(),
       promises: {
         getDoc: sinon.stub(),
         getDocPathByProjectIdAndDocId: sinon.stub(),
       },
     }
-    this.ProjectEntityMongoUpdateHandler = {
+    ctx.ProjectEntityMongoUpdateHandler = {
       promises: {
         addDoc: sinon.stub(),
         addFile: sinon.stub(),
@@ -141,7 +146,7 @@ describe('ProjectEntityUpdateHandler', function () {
         replaceFileWithDoc: sinon.stub(),
       },
     }
-    this.TpdsUpdateSender = {
+    ctx.TpdsUpdateSender = {
       promises: {
         addFile: sinon.stub().resolves(),
         addDoc: sinon.stub(),
@@ -149,91 +154,165 @@ describe('ProjectEntityUpdateHandler', function () {
         moveEntity: sinon.stub().resolves(),
       },
     }
-    this.FileStoreHandler = {
+    ctx.FileStoreHandler = {
       promises: {
         uploadFileFromDisk: sinon.stub(),
       },
     }
-    this.FileWriter = {
+    ctx.FileWriter = {
       promises: {
         writeLinesToDisk: sinon.stub(),
       },
     }
-    this.EditorRealTimeController = {
+    ctx.EditorRealTimeController = {
       emitToRoom: sinon.stub(),
     }
-    this.ProjectOptionsHandler = {
+    ctx.ProjectOptionsHandler = {
       setHistoryRangesSupport: sinon.stub().resolves(),
     }
-    this.ProjectEntityUpdateHandler = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        '@overleaf/settings': { validRootDocExtensions: ['tex'] },
-        fs: this.fs,
-        '../../models/Doc': { Doc: this.DocModel },
-        '../Docstore/DocstoreManager': this.DocstoreManager,
-        '../../Features/DocumentUpdater/DocumentUpdaterHandler':
-          this.DocumentUpdaterHandler,
-        '../../models/File': { File: this.FileModel },
-        '../FileStore/FileStoreHandler': this.FileStoreHandler,
-        '../../infrastructure/LockManager': this.LockManager,
-        '../../models/Project': { Project: this.ProjectModel },
-        './ProjectGetter': this.ProjectGetter,
-        './ProjectLocator': this.ProjectLocator,
-        './ProjectUpdateHandler': this.ProjectUpdater,
-        './ProjectEntityHandler': this.ProjectEntityHandler,
-        './ProjectEntityMongoUpdateHandler':
-          this.ProjectEntityMongoUpdateHandler,
-        './ProjectOptionsHandler': this.ProjectOptionsHandler,
-        '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
-        '../Editor/EditorRealTimeController': this.EditorRealTimeController,
-        '../../infrastructure/FileWriter': this.FileWriter,
-      },
-    })
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: { validRootDocExtensions: ['tex'] },
+    }))
+
+    vi.doMock('fs', () => ({
+      default: ctx.fs,
+    }))
+
+    vi.doMock('../../../../app/src/models/Doc', () => ({
+      Doc: ctx.DocModel,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Docstore/DocstoreManager', () => ({
+      default: ctx.DocstoreManager,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler',
+      () => ({
+        default: ctx.DocumentUpdaterHandler,
+      })
+    )
+
+    vi.doMock('../../../../app/src/models/File', () => ({
+      File: ctx.FileModel,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/FileStore/FileStoreHandler',
+      () => ({
+        default: ctx.FileStoreHandler,
+      })
+    )
+
+    vi.doMock('../../../../app/src/infrastructure/LockManager', () => ({
+      default: ctx.LockManager,
+    }))
+
+    vi.doMock('../../../../app/src/models/Project', () => ({
+      Project: ctx.ProjectModel,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
+      default: ctx.ProjectGetter,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectLocator', () => ({
+      default: ctx.ProjectLocator,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectUpdateHandler',
+      () => ({
+        default: ctx.ProjectUpdater,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectEntityHandler',
+      () => ({
+        default: ctx.ProjectEntityHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectEntityMongoUpdateHandler',
+      () => ({
+        default: ctx.ProjectEntityMongoUpdateHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectOptionsHandler',
+      () => ({
+        default: ctx.ProjectOptionsHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/ThirdPartyDataStore/TpdsUpdateSender',
+      () => ({
+        default: ctx.TpdsUpdateSender,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Editor/EditorRealTimeController',
+      () => ({
+        default: ctx.EditorRealTimeController,
+      })
+    )
+
+    vi.doMock('../../../../app/src/infrastructure/FileWriter', () => ({
+      default: ctx.FileWriter,
+    }))
+
+    ctx.ProjectEntityUpdateHandler = (await import(MODULE_PATH)).default
   })
 
   describe('updateDocLines', function () {
-    beforeEach(function () {
-      this.path = '/somewhere/something.tex'
-      this.doc = {
+    beforeEach(function (ctx) {
+      ctx.path = '/somewhere/something.tex'
+      ctx.doc = {
         _id: docId,
       }
-      this.version = 42
-      this.ranges = { mock: 'ranges' }
-      this.lastUpdatedAt = new Date().getTime()
-      this.lastUpdatedBy = 'fake-last-updater-id'
-      this.parentFolder = { _id: new ObjectId() }
-      this.DocstoreManager.promises.isDocDeleted.resolves(false)
-      this.ProjectGetter.promises.getProject.resolves(this.project)
-      this.ProjectLocator.promises.findElement.resolves({
-        element: this.doc,
+      ctx.version = 42
+      ctx.ranges = { mock: 'ranges' }
+      ctx.lastUpdatedAt = new Date().getTime()
+      ctx.lastUpdatedBy = 'fake-last-updater-id'
+      ctx.parentFolder = { _id: new ObjectId() }
+      ctx.DocstoreManager.promises.isDocDeleted.resolves(false)
+      ctx.ProjectGetter.promises.getProject.resolves(ctx.project)
+      ctx.ProjectLocator.promises.findElement.resolves({
+        element: ctx.doc,
         path: {
-          fileSystem: this.path,
+          fileSystem: ctx.path,
         },
-        folder: this.parentFolder,
+        folder: ctx.parentFolder,
       })
-      this.TpdsUpdateSender.promises.addDoc.resolves()
+      ctx.TpdsUpdateSender.promises.addDoc.resolves()
     })
 
     describe('when the doc has been modified', function () {
-      beforeEach(async function () {
-        this.DocstoreManager.promises.updateDoc.resolves({
+      beforeEach(async function (ctx) {
+        ctx.DocstoreManager.promises.updateDoc.resolves({
           modified: true,
-          rev: (this.rev = 5),
+          rev: (ctx.rev = 5),
         })
 
-        await this.ProjectEntityUpdateHandler.promises.updateDocLines(
+        await ctx.ProjectEntityUpdateHandler.promises.updateDocLines(
           projectId,
           docId,
-          this.docLines,
-          this.version,
-          this.ranges,
-          this.lastUpdatedAt,
-          this.lastUpdatedBy
+          ctx.docLines,
+          ctx.version,
+          ctx.ranges,
+          ctx.lastUpdatedAt,
+          ctx.lastUpdatedBy
         )
       })
 
-      it('should get the project with very few fields', function () {
-        this.ProjectGetter.promises.getProject
+      it('should get the project with very few fields', function (ctx) {
+        ctx.ProjectGetter.promises.getProject
           .calledWith(projectId, {
             name: true,
             rootFolder: true,
@@ -241,182 +320,164 @@ describe('ProjectEntityUpdateHandler', function () {
           .should.equal(true)
       })
 
-      it('should find the doc', function () {
-        this.ProjectLocator.promises.findElement
+      it('should find the doc', function (ctx) {
+        ctx.ProjectLocator.promises.findElement
           .calledWith({
-            project: this.project,
+            project: ctx.project,
             type: 'docs',
             element_id: docId,
           })
           .should.equal(true)
       })
 
-      it('should update the doc in the docstore', function () {
-        this.DocstoreManager.promises.updateDoc
-          .calledWith(
-            projectId,
-            docId,
-            this.docLines,
-            this.version,
-            this.ranges
-          )
+      it('should update the doc in the docstore', function (ctx) {
+        ctx.DocstoreManager.promises.updateDoc
+          .calledWith(projectId, docId, ctx.docLines, ctx.version, ctx.ranges)
           .should.equal(true)
       })
 
-      it('should mark the project as updated', function () {
+      it('should mark the project as updated', function (ctx) {
         sinon.assert.calledWith(
-          this.ProjectUpdater.promises.markAsUpdated,
+          ctx.ProjectUpdater.promises.markAsUpdated,
           projectId,
-          this.lastUpdatedAt,
-          this.lastUpdatedBy
+          ctx.lastUpdatedAt,
+          ctx.lastUpdatedBy
         )
       })
 
-      it('should send the doc to the TPDS', function () {
-        this.TpdsUpdateSender.promises.addDoc.should.have.been.calledWith({
+      it('should send the doc to the TPDS', function (ctx) {
+        ctx.TpdsUpdateSender.promises.addDoc.should.have.been.calledWith({
           projectId,
-          projectName: this.project.name,
+          projectName: ctx.project.name,
           docId,
-          rev: this.rev,
-          path: this.path,
-          folderId: this.parentFolder._id,
+          rev: ctx.rev,
+          path: ctx.path,
+          folderId: ctx.parentFolder._id,
         })
       })
     })
 
     describe('when the doc has not been modified', function () {
-      beforeEach(async function () {
-        this.DocstoreManager.promises.updateDoc.resolves({
+      beforeEach(async function (ctx) {
+        ctx.DocstoreManager.promises.updateDoc.resolves({
           modified: false,
-          rev: (this.rev = 5),
+          rev: (ctx.rev = 5),
         })
 
-        await this.ProjectEntityUpdateHandler.promises.updateDocLines(
+        await ctx.ProjectEntityUpdateHandler.promises.updateDocLines(
           projectId,
           docId,
-          this.docLines,
-          this.version,
-          this.ranges,
-          this.lastUpdatedAt,
-          this.lastUpdatedBy
+          ctx.docLines,
+          ctx.version,
+          ctx.ranges,
+          ctx.lastUpdatedAt,
+          ctx.lastUpdatedBy
         )
       })
 
-      it('should not mark the project as updated', function () {
-        this.ProjectUpdater.promises.markAsUpdated.called.should.equal(false)
+      it('should not mark the project as updated', function (ctx) {
+        ctx.ProjectUpdater.promises.markAsUpdated.called.should.equal(false)
       })
 
-      it('should not send the doc the to the TPDS', function () {
-        this.TpdsUpdateSender.promises.addDoc.called.should.equal(false)
+      it('should not send the doc the to the TPDS', function (ctx) {
+        ctx.TpdsUpdateSender.promises.addDoc.called.should.equal(false)
       })
     })
 
     describe('when the doc has been deleted', function () {
-      beforeEach(async function () {
-        this.ProjectGetter.promises.getProject.resolves(this.project)
-        this.ProjectLocator.promises.findElement.rejects(
+      beforeEach(async function (ctx) {
+        ctx.ProjectGetter.promises.getProject.resolves(ctx.project)
+        ctx.ProjectLocator.promises.findElement.rejects(
           new Errors.NotFoundError()
         )
-        this.DocstoreManager.promises.isDocDeleted.resolves(true)
-        this.DocstoreManager.promises.updateDoc.resolves({})
+        ctx.DocstoreManager.promises.isDocDeleted.resolves(true)
+        ctx.DocstoreManager.promises.updateDoc.resolves({})
 
-        await this.ProjectEntityUpdateHandler.promises.updateDocLines(
+        await ctx.ProjectEntityUpdateHandler.promises.updateDocLines(
           projectId,
           docId,
-          this.docLines,
-          this.version,
-          this.ranges,
-          this.lastUpdatedAt,
-          this.lastUpdatedBy
+          ctx.docLines,
+          ctx.version,
+          ctx.ranges,
+          ctx.lastUpdatedAt,
+          ctx.lastUpdatedBy
         )
       })
 
-      it('should update the doc in the docstore', function () {
-        this.DocstoreManager.promises.updateDoc
-          .calledWith(
-            projectId,
-            docId,
-            this.docLines,
-            this.version,
-            this.ranges
-          )
+      it('should update the doc in the docstore', function (ctx) {
+        ctx.DocstoreManager.promises.updateDoc
+          .calledWith(projectId, docId, ctx.docLines, ctx.version, ctx.ranges)
           .should.equal(true)
       })
 
-      it('should not mark the project as updated', function () {
-        this.ProjectUpdater.promises.markAsUpdated.called.should.equal(false)
+      it('should not mark the project as updated', function (ctx) {
+        ctx.ProjectUpdater.promises.markAsUpdated.called.should.equal(false)
       })
 
-      it('should not send the doc the to the TPDS', function () {
-        this.TpdsUpdateSender.promises.addDoc.called.should.equal(false)
+      it('should not send the doc the to the TPDS', function (ctx) {
+        ctx.TpdsUpdateSender.promises.addDoc.called.should.equal(false)
       })
     })
 
     describe('when projects and docs collection are de-synced', function () {
-      beforeEach(async function () {
-        this.ProjectGetter.promises.getProject.resolves(this.project)
+      beforeEach(async function (ctx) {
+        ctx.ProjectGetter.promises.getProject.resolves(ctx.project)
 
         // The doc is not in the file-tree, but also not marked as deleted.
         // This should not happen, but web should handle it.
-        this.ProjectLocator.promises.findElement.rejects(
+        ctx.ProjectLocator.promises.findElement.rejects(
           new Errors.NotFoundError()
         )
-        this.DocstoreManager.promises.isDocDeleted.resolves(false)
+        ctx.DocstoreManager.promises.isDocDeleted.resolves(false)
 
-        this.DocstoreManager.promises.updateDoc.resolves({})
+        ctx.DocstoreManager.promises.updateDoc.resolves({})
 
-        await this.ProjectEntityUpdateHandler.promises.updateDocLines(
+        await ctx.ProjectEntityUpdateHandler.promises.updateDocLines(
           projectId,
           docId,
-          this.docLines,
-          this.version,
-          this.ranges,
-          this.lastUpdatedAt,
-          this.lastUpdatedBy
+          ctx.docLines,
+          ctx.version,
+          ctx.ranges,
+          ctx.lastUpdatedAt,
+          ctx.lastUpdatedBy
         )
       })
 
-      it('should update the doc in the docstore', function () {
-        this.DocstoreManager.promises.updateDoc
-          .calledWith(
-            projectId,
-            docId,
-            this.docLines,
-            this.version,
-            this.ranges
-          )
+      it('should update the doc in the docstore', function (ctx) {
+        ctx.DocstoreManager.promises.updateDoc
+          .calledWith(projectId, docId, ctx.docLines, ctx.version, ctx.ranges)
           .should.equal(true)
       })
 
-      it('should not mark the project as updated', function () {
-        this.ProjectUpdater.promises.markAsUpdated.called.should.equal(false)
+      it('should not mark the project as updated', function (ctx) {
+        ctx.ProjectUpdater.promises.markAsUpdated.called.should.equal(false)
       })
 
-      it('should not send the doc the to the TPDS', function () {
-        this.TpdsUpdateSender.promises.addDoc.called.should.equal(false)
+      it('should not send the doc the to the TPDS', function (ctx) {
+        ctx.TpdsUpdateSender.promises.addDoc.called.should.equal(false)
       })
     })
 
     describe('when the doc is not related to the project', function () {
       let updateDocLinesPromise
-      beforeEach(function () {
-        this.ProjectGetter.promises.getProject.resolves(this.project)
-        this.ProjectLocator.promises.findElement.rejects(
+      beforeEach(function (ctx) {
+        ctx.ProjectGetter.promises.getProject.resolves(ctx.project)
+        ctx.ProjectLocator.promises.findElement.rejects(
           new Errors.NotFoundError()
         )
-        this.DocstoreManager.promises.isDocDeleted.rejects(
+        ctx.DocstoreManager.promises.isDocDeleted.rejects(
           new Errors.NotFoundError()
         )
 
         updateDocLinesPromise =
-          this.ProjectEntityUpdateHandler.promises.updateDocLines(
+          ctx.ProjectEntityUpdateHandler.promises.updateDocLines(
             projectId,
             docId,
-            this.docLines,
-            this.version,
-            this.ranges,
-            this.lastUpdatedAt,
-            this.lastUpdatedBy
+            ctx.docLines,
+            ctx.version,
+            ctx.ranges,
+            ctx.lastUpdatedAt,
+            ctx.lastUpdatedBy
           )
       })
 
@@ -432,7 +493,7 @@ describe('ProjectEntityUpdateHandler', function () {
         expect(error).to.be.instanceOf(Errors.NotFoundError)
       })
 
-      it('should not update the doc', async function () {
+      it('should not update the doc', async function (ctx) {
         let error
 
         try {
@@ -442,10 +503,10 @@ describe('ProjectEntityUpdateHandler', function () {
         }
 
         expect(error).to.exist
-        this.DocstoreManager.promises.updateDoc.called.should.equal(false)
+        ctx.DocstoreManager.promises.updateDoc.called.should.equal(false)
       })
 
-      it('should not send the doc the to the TPDS', async function () {
+      it('should not send the doc the to the TPDS', async function (ctx) {
         let error
 
         try {
@@ -455,25 +516,25 @@ describe('ProjectEntityUpdateHandler', function () {
         }
 
         expect(error).to.exist
-        this.TpdsUpdateSender.promises.addDoc.called.should.equal(false)
+        ctx.TpdsUpdateSender.promises.addDoc.called.should.equal(false)
       })
     })
 
     describe('when the project is not found', function () {
       let error
-      beforeEach(async function () {
-        this.ProjectGetter.promises.getProject.rejects(
+      beforeEach(async function (ctx) {
+        ctx.ProjectGetter.promises.getProject.rejects(
           new Errors.NotFoundError()
         )
         try {
-          await this.ProjectEntityUpdateHandler.promises.updateDocLines(
+          await ctx.ProjectEntityUpdateHandler.promises.updateDocLines(
             projectId,
             docId,
-            this.docLines,
-            this.version,
-            this.ranges,
-            this.lastUpdatedAt,
-            this.lastUpdatedBy
+            ctx.docLines,
+            ctx.version,
+            ctx.ranges,
+            ctx.lastUpdatedAt,
+            ctx.lastUpdatedBy
           )
         } catch (err) {
           error = err
@@ -484,47 +545,47 @@ describe('ProjectEntityUpdateHandler', function () {
         expect(error).to.be.instanceOf(Errors.NotFoundError)
       })
 
-      it('should not update the doc', async function () {
-        this.DocstoreManager.promises.updateDoc.called.should.equal(false)
+      it('should not update the doc', async function (ctx) {
+        ctx.DocstoreManager.promises.updateDoc.called.should.equal(false)
       })
 
-      it('should not send the doc the to the TPDS', function () {
-        this.TpdsUpdateSender.promises.addDoc.called.should.equal(false)
+      it('should not send the doc the to the TPDS', function (ctx) {
+        ctx.TpdsUpdateSender.promises.addDoc.called.should.equal(false)
       })
     })
   })
 
   describe('setRootDoc', function () {
-    beforeEach(function () {
-      this.rootDocId = 'root-doc-id-123123'
+    beforeEach(function (ctx) {
+      ctx.rootDocId = 'root-doc-id-123123'
     })
 
-    it('should call Project.updateOne when the doc exists and has a valid extension', async function () {
-      this.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId.resolves(
+    it('should call Project.updateOne when the doc exists and has a valid extension', async function (ctx) {
+      ctx.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId.resolves(
         `/main.tex`
       )
 
-      await this.ProjectEntityUpdateHandler.promises.setRootDoc(
+      await ctx.ProjectEntityUpdateHandler.promises.setRootDoc(
         projectId,
-        this.rootDocId
+        ctx.rootDocId
       )
 
-      this.ProjectModel.updateOne
-        .calledWith({ _id: projectId }, { rootDoc_id: this.rootDocId })
+      ctx.ProjectModel.updateOne
+        .calledWith({ _id: projectId }, { rootDoc_id: ctx.rootDocId })
         .should.equal(true)
     })
 
-    it("should not call Project.updateOne when the doc doesn't exist", async function () {
-      this.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId.rejects(
+    it("should not call Project.updateOne when the doc doesn't exist", async function (ctx) {
+      ctx.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId.rejects(
         Errors.NotFoundError
       )
 
       let error
 
       try {
-        await this.ProjectEntityUpdateHandler.promises.setRootDoc(
+        await ctx.ProjectEntityUpdateHandler.promises.setRootDoc(
           projectId,
-          this.rootDocId
+          ctx.rootDocId
         )
       } catch (err) {
         error = err
@@ -532,19 +593,19 @@ describe('ProjectEntityUpdateHandler', function () {
 
       expect(error).to.exist
 
-      this.ProjectModel.updateOne
-        .calledWith({ _id: projectId }, { rootDoc_id: this.rootDocId })
+      ctx.ProjectModel.updateOne
+        .calledWith({ _id: projectId }, { rootDoc_id: ctx.rootDocId })
         .should.equal(false)
     })
 
-    it('should call the callback with an UnsupportedFileTypeError when the doc has an unaccepted file extension', function () {
-      this.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId.resolves(
+    it('should call the callback with an UnsupportedFileTypeError when the doc has an unaccepted file extension', function (ctx) {
+      ctx.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId.resolves(
         `/foo/bar.baz`
       )
 
-      this.ProjectEntityUpdateHandler.setRootDoc(
+      ctx.ProjectEntityUpdateHandler.setRootDoc(
         projectId,
-        this.rootDocId,
+        ctx.rootDocId,
         error => {
           expect(error).to.be.an.instanceof(Errors.UnsupportedFileTypeError)
         }
@@ -553,9 +614,9 @@ describe('ProjectEntityUpdateHandler', function () {
   })
 
   describe('unsetRootDoc', function () {
-    it('should call Project.updateOne', async function () {
-      await this.ProjectEntityUpdateHandler.promises.unsetRootDoc(projectId)
-      this.ProjectModel.updateOne
+    it('should call Project.updateOne', async function (ctx) {
+      await ctx.ProjectEntityUpdateHandler.promises.unsetRootDoc(projectId)
+      ctx.ProjectModel.updateOne
         .calledWith({ _id: projectId }, { $unset: { rootDoc_id: true } })
         .should.equal(true)
     })
@@ -563,81 +624,81 @@ describe('ProjectEntityUpdateHandler', function () {
 
   describe('addDoc', function () {
     describe('adding a doc', function () {
-      beforeEach(async function () {
-        this.path = '/path/to/doc'
-        this.rev = 5
+      beforeEach(async function (ctx) {
+        ctx.path = '/path/to/doc'
+        ctx.rev = 5
 
-        this.newDoc = new this.DocModel({
-          name: this.docName,
+        ctx.newDoc = new ctx.DocModel({
+          name: ctx.docName,
           lines: undefined,
           _id: docId,
-          rev: this.rev,
+          rev: ctx.rev,
         })
-        this.DocstoreManager.promises.updateDoc.resolves({
+        ctx.DocstoreManager.promises.updateDoc.resolves({
           lines: false,
-          rev: this.rev,
+          rev: ctx.rev,
         })
-        this.TpdsUpdateSender.promises.addDoc.resolves()
-        this.ProjectEntityMongoUpdateHandler.promises.addDoc.resolves({
-          result: { path: { fileSystem: this.path } },
-          project: this.project,
+        ctx.TpdsUpdateSender.promises.addDoc.resolves()
+        ctx.ProjectEntityMongoUpdateHandler.promises.addDoc.resolves({
+          result: { path: { fileSystem: ctx.path } },
+          project: ctx.project,
         })
-        await this.ProjectEntityUpdateHandler.promises.addDoc(
+        await ctx.ProjectEntityUpdateHandler.promises.addDoc(
           projectId,
           docId,
-          this.docName,
-          this.docLines,
+          ctx.docName,
+          ctx.docLines,
           userId,
-          this.source
+          ctx.source
         )
       })
 
-      it('creates the doc without history', function () {
-        this.DocstoreManager.promises.updateDoc
-          .calledWith(projectId, docId, this.docLines, 0, {})
+      it('creates the doc without history', function (ctx) {
+        ctx.DocstoreManager.promises.updateDoc
+          .calledWith(projectId, docId, ctx.docLines, 0, {})
           .should.equal(true)
       })
 
-      it('sends the change in project structure to the doc updater', function () {
+      it('sends the change in project structure to the doc updater', function (ctx) {
         const newDocs = [
           {
-            doc: this.newDoc,
-            path: this.path,
-            docLines: this.docLines.join('\n'),
+            doc: ctx.newDoc,
+            path: ctx.path,
+            docLines: ctx.docLines.join('\n'),
             ranges: {},
           },
         ]
-        this.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
+        ctx.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
           projectId,
           projectHistoryId,
           userId,
           {
             newDocs,
-            newProject: this.project,
+            newProject: ctx.project,
           },
-          this.source
+          ctx.source
         )
       })
     })
 
     describe('adding a doc with an invalid name', function () {
-      beforeEach(function () {
-        this.path = '/path/to/doc'
+      beforeEach(function (ctx) {
+        ctx.path = '/path/to/doc'
 
-        this.newDoc = { _id: docId }
+        ctx.newDoc = { _id: docId }
       })
 
-      it('returns an error', async function () {
+      it('returns an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.addDoc(
+          await ctx.ProjectEntityUpdateHandler.promises.addDoc(
             projectId,
             folderId,
-            `*${this.docName}`,
-            this.docLines,
+            `*${ctx.docName}`,
+            ctx.docLines,
             userId,
-            this.source
+            ctx.source
           )
         } catch (err) {
           error = err
@@ -650,122 +711,122 @@ describe('ProjectEntityUpdateHandler', function () {
 
   describe('addFile', function () {
     describe('adding a file', function () {
-      beforeEach(async function () {
-        this.path = '/path/to/file'
+      beforeEach(async function (ctx) {
+        ctx.path = '/path/to/file'
 
-        this.newFile = {
+        ctx.newFile = {
           _id: fileId,
           hash: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
           rev: 0,
-          name: this.fileName,
-          linkedFileData: this.linkedFileData,
+          name: ctx.fileName,
+          linkedFileData: ctx.linkedFileData,
         }
-        this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
-          fileRef: this.newFile,
+        ctx.FileStoreHandler.promises.uploadFileFromDisk.resolves({
+          fileRef: ctx.newFile,
           createdBlob: true,
         })
-        this.TpdsUpdateSender.promises.addFile.resolves()
-        this.ProjectEntityMongoUpdateHandler.promises.addFile.resolves({
-          result: { path: { fileSystem: this.path } },
-          project: this.project,
+        ctx.TpdsUpdateSender.promises.addFile.resolves()
+        ctx.ProjectEntityMongoUpdateHandler.promises.addFile.resolves({
+          result: { path: { fileSystem: ctx.path } },
+          project: ctx.project,
         })
-        await this.ProjectEntityUpdateHandler.promises.addFile(
+        await ctx.ProjectEntityUpdateHandler.promises.addFile(
           projectId,
           folderId,
-          this.fileName,
-          this.fileSystemPath,
-          this.linkedFileData,
+          ctx.fileName,
+          ctx.fileSystemPath,
+          ctx.linkedFileData,
           userId,
-          this.source
+          ctx.source
         )
       })
 
-      it('updates the file in the filestore', function () {
-        this.FileStoreHandler.promises.uploadFileFromDisk
+      it('updates the file in the filestore', function (ctx) {
+        ctx.FileStoreHandler.promises.uploadFileFromDisk
           .calledWith(
             projectId,
-            { name: this.fileName, linkedFileData: this.linkedFileData },
-            this.fileSystemPath
+            { name: ctx.fileName, linkedFileData: ctx.linkedFileData },
+            ctx.fileSystemPath
           )
           .should.equal(true)
       })
 
-      it('updates the file in mongo', function () {
+      it('updates the file in mongo', function (ctx) {
         const fileMatcher = sinon.match(file => {
-          return file.name === this.fileName
+          return file.name === ctx.fileName
         })
 
-        this.ProjectEntityMongoUpdateHandler.promises.addFile
+        ctx.ProjectEntityMongoUpdateHandler.promises.addFile
           .calledWithMatch(projectId, folderId, fileMatcher)
           .should.equal(true)
       })
 
-      it('notifies the tpds', function () {
-        this.TpdsUpdateSender.promises.addFile
+      it('notifies the tpds', function (ctx) {
+        ctx.TpdsUpdateSender.promises.addFile
           .calledWith({
             projectId,
-            historyId: this.project.overleaf.history.id,
-            projectName: this.project.name,
+            historyId: ctx.project.overleaf.history.id,
+            projectName: ctx.project.name,
             fileId,
-            hash: this.newFile.hash,
+            hash: ctx.newFile.hash,
             rev: 0,
-            path: this.path,
+            path: ctx.path,
             folderId,
           })
           .should.equal(true)
       })
 
-      it('sends the change in project structure to the doc updater', function () {
+      it('sends the change in project structure to the doc updater', function (ctx) {
         const newFiles = [
           {
-            file: this.newFile,
-            path: this.path,
+            file: ctx.newFile,
+            path: ctx.path,
             createdBlob: true,
           },
         ]
-        this.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
+        ctx.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
           projectId,
           projectHistoryId,
           userId,
           {
             newFiles,
-            newProject: this.project,
+            newProject: ctx.project,
           },
-          this.source
+          ctx.source
         )
       })
     })
 
     describe('adding a file with an invalid name', function () {
-      beforeEach(function () {
-        this.path = '/path/to/file'
+      beforeEach(function (ctx) {
+        ctx.path = '/path/to/file'
 
-        this.newFile = {
+        ctx.newFile = {
           _id: fileId,
           hash: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
           rev: 0,
-          name: this.fileName,
-          linkedFileData: this.linkedFileData,
+          name: ctx.fileName,
+          linkedFileData: ctx.linkedFileData,
         }
-        this.TpdsUpdateSender.promises.addFile.resolves()
-        this.ProjectEntityMongoUpdateHandler.promises.addFile.resolves({
-          result: { path: { fileSystem: this.path } },
-          project: this.project,
+        ctx.TpdsUpdateSender.promises.addFile.resolves()
+        ctx.ProjectEntityMongoUpdateHandler.promises.addFile.resolves({
+          result: { path: { fileSystem: ctx.path } },
+          project: ctx.project,
         })
       })
 
-      it('returns an error', async function () {
+      it('returns an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.addFile(
+          await ctx.ProjectEntityUpdateHandler.promises.addFile(
             projectId,
             folderId,
-            `*${this.fileName}`,
-            this.fileSystemPath,
-            this.linkedFileData,
+            `*${ctx.fileName}`,
+            ctx.fileSystemPath,
+            ctx.linkedFileData,
             userId,
-            this.source
+            ctx.source
           )
         } catch (err) {
           error = err
@@ -778,20 +839,20 @@ describe('ProjectEntityUpdateHandler', function () {
 
   describe('upsertDoc', function () {
     describe('upserting into an invalid folder', function () {
-      beforeEach(function () {
-        this.ProjectLocator.promises.findElement.resolves({ element: null })
+      beforeEach(function (ctx) {
+        ctx.ProjectLocator.promises.findElement.resolves({ element: null })
       })
 
-      it('returns an error', async function () {
+      it('returns an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.upsertDoc(
+          await ctx.ProjectEntityUpdateHandler.promises.upsertDoc(
             projectId,
             folderId,
-            this.docName,
-            this.docLines,
-            this.source,
+            ctx.docName,
+            ctx.docLines,
+            ctx.source,
             userId
           )
         } catch (err) {
@@ -804,36 +865,36 @@ describe('ProjectEntityUpdateHandler', function () {
 
     describe('updating an existing doc', function () {
       let upsertDocResponse
-      beforeEach(async function () {
-        this.existingDoc = { _id: docId, name: this.docName }
-        this.existingFile = {
+      beforeEach(async function (ctx) {
+        ctx.existingDoc = { _id: docId, name: ctx.docName }
+        ctx.existingFile = {
           _id: fileId,
-          name: this.fileName,
+          name: ctx.fileName,
           hash: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
         }
-        this.folder = {
+        ctx.folder = {
           _id: folderId,
-          docs: [this.existingDoc],
-          fileRefs: [this.existingFile],
+          docs: [ctx.existingDoc],
+          fileRefs: [ctx.existingFile],
         }
-        this.ProjectLocator.promises.findElement.resolves({
-          element: this.folder,
+        ctx.ProjectLocator.promises.findElement.resolves({
+          element: ctx.folder,
         })
-        this.DocumentUpdaterHandler.promises.setDocument.resolves()
+        ctx.DocumentUpdaterHandler.promises.setDocument.resolves()
 
         upsertDocResponse =
-          await this.ProjectEntityUpdateHandler.promises.upsertDoc(
+          await ctx.ProjectEntityUpdateHandler.promises.upsertDoc(
             projectId,
             folderId,
-            this.docName,
-            this.docLines,
-            this.source,
+            ctx.docName,
+            ctx.docLines,
+            ctx.source,
             userId
           )
       })
 
-      it('tries to find the folder', function () {
-        this.ProjectLocator.promises.findElement
+      it('tries to find the folder', function (ctx) {
+        ctx.ProjectLocator.promises.findElement
           .calledWith({
             project_id: projectId,
             element_id: folderId,
@@ -842,50 +903,50 @@ describe('ProjectEntityUpdateHandler', function () {
           .should.equal(true)
       })
 
-      it('updates the doc contents', function () {
-        this.DocumentUpdaterHandler.promises.setDocument
+      it('updates the doc contents', function (ctx) {
+        ctx.DocumentUpdaterHandler.promises.setDocument
           .calledWith(
             projectId,
-            this.existingDoc._id,
+            ctx.existingDoc._id,
             userId,
-            this.docLines,
-            this.source
+            ctx.docLines,
+            ctx.source
           )
           .should.equal(true)
       })
 
-      it('returns the doc', function () {
+      it('returns the doc', function (ctx) {
         expect(upsertDocResponse.isNew).to.equal(false)
-        expect(upsertDocResponse.doc).to.eql(this.existingDoc)
+        expect(upsertDocResponse.doc).to.eql(ctx.existingDoc)
       })
     })
 
     describe('creating a new doc', function () {
       let upsertDocResponse
 
-      beforeEach(async function () {
-        this.folder = { _id: folderId, docs: [], fileRefs: [] }
-        this.newDoc = { _id: docId }
-        this.ProjectLocator.promises.findElement.resolves({
-          element: this.folder,
+      beforeEach(async function (ctx) {
+        ctx.folder = { _id: folderId, docs: [], fileRefs: [] }
+        ctx.newDoc = { _id: docId }
+        ctx.ProjectLocator.promises.findElement.resolves({
+          element: ctx.folder,
         })
-        this.ProjectEntityUpdateHandler.promises.addDocWithRanges = {
-          withoutLock: sinon.stub().resolves({ doc: this.newDoc }),
+        ctx.ProjectEntityUpdateHandler.promises.addDocWithRanges = {
+          withoutLock: sinon.stub().resolves({ doc: ctx.newDoc }),
         }
 
         upsertDocResponse =
-          await this.ProjectEntityUpdateHandler.promises.upsertDoc(
+          await ctx.ProjectEntityUpdateHandler.promises.upsertDoc(
             projectId,
             folderId,
-            this.docName,
-            this.docLines,
-            this.source,
+            ctx.docName,
+            ctx.docLines,
+            ctx.source,
             userId
           )
       })
 
-      it('tries to find the folder', function () {
-        this.ProjectLocator.promises.findElement
+      it('tries to find the folder', function (ctx) {
+        ctx.ProjectLocator.promises.findElement
           .calledWith({
             project_id: projectId,
             element_id: folderId,
@@ -894,46 +955,46 @@ describe('ProjectEntityUpdateHandler', function () {
           .should.equal(true)
       })
 
-      it('adds the doc', function () {
-        this.ProjectEntityUpdateHandler.promises.addDocWithRanges.withoutLock.should.have.been.calledWith(
+      it('adds the doc', function (ctx) {
+        ctx.ProjectEntityUpdateHandler.promises.addDocWithRanges.withoutLock.should.have.been.calledWith(
           projectId,
           folderId,
-          this.docName,
-          this.docLines,
+          ctx.docName,
+          ctx.docLines,
           {},
           userId,
-          this.source
+          ctx.source
         )
       })
 
-      it('returns the doc', function () {
+      it('returns the doc', function (ctx) {
         expect(upsertDocResponse.isNew).to.equal(true)
-        expect(upsertDocResponse.doc).to.equal(this.newDoc)
+        expect(upsertDocResponse.doc).to.equal(ctx.newDoc)
       })
     })
 
     describe('upserting a new doc with an invalid name', function () {
-      beforeEach(function () {
-        this.folder = { _id: folderId, docs: [], fileRefs: [] }
-        this.newDoc = { _id: docId }
-        this.ProjectLocator.promises.findElement.resolves({
-          element: this.folder,
+      beforeEach(function (ctx) {
+        ctx.folder = { _id: folderId, docs: [], fileRefs: [] }
+        ctx.newDoc = { _id: docId }
+        ctx.ProjectLocator.promises.findElement.resolves({
+          element: ctx.folder,
         })
-        this.ProjectEntityUpdateHandler.promises.addDocWithRanges = {
-          withoutLock: sinon.stub().resolves({ doc: this.newDoc }),
+        ctx.ProjectEntityUpdateHandler.promises.addDocWithRanges = {
+          withoutLock: sinon.stub().resolves({ doc: ctx.newDoc }),
         }
       })
 
-      it('returns an error', async function () {
+      it('returns an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.upsertDoc(
+          await ctx.ProjectEntityUpdateHandler.promises.upsertDoc(
             projectId,
             folderId,
-            `*${this.docName}`,
-            this.docLines,
-            this.source,
+            `*${ctx.docName}`,
+            ctx.docLines,
+            ctx.source,
             userId
           )
         } catch (err) {
@@ -945,90 +1006,90 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('upserting a doc on top of a file', function () {
-      beforeEach(async function () {
-        this.newProject = {
+      beforeEach(async function (ctx) {
+        ctx.newProject = {
           name: 'new project',
           overleaf: { history: { id: projectHistoryId } },
         }
-        this.existingFile = { _id: fileId, name: 'foo.tex', rev: 12 }
-        this.folder = { _id: folderId, docs: [], fileRefs: [this.existingFile] }
-        this.newDoc = { _id: docId }
-        this.docLines = ['line one', 'line two']
-        this.folderPath = '/path/to/folder'
-        this.filePath = '/path/to/folder/foo.tex'
-        this.ProjectLocator.promises.findElement
+        ctx.existingFile = { _id: fileId, name: 'foo.tex', rev: 12 }
+        ctx.folder = { _id: folderId, docs: [], fileRefs: [ctx.existingFile] }
+        ctx.newDoc = { _id: docId }
+        ctx.docLines = ['line one', 'line two']
+        ctx.folderPath = '/path/to/folder'
+        ctx.filePath = '/path/to/folder/foo.tex'
+        ctx.ProjectLocator.promises.findElement
           .withArgs({
             project_id: projectId,
-            element_id: this.folder._id,
+            element_id: ctx.folder._id,
             type: 'folder',
           })
           .resolves({
-            element: this.folder,
+            element: ctx.folder,
             path: {
-              fileSystem: this.folderPath,
+              fileSystem: ctx.folderPath,
             },
           })
-        this.DocstoreManager.promises.updateDoc.resolves({ rev: null })
-        this.ProjectEntityMongoUpdateHandler.promises.replaceFileWithDoc.resolves(
-          this.newProject
+        ctx.DocstoreManager.promises.updateDoc.resolves({ rev: null })
+        ctx.ProjectEntityMongoUpdateHandler.promises.replaceFileWithDoc.resolves(
+          ctx.newProject
         )
-        this.TpdsUpdateSender.promises.addDoc.resolves()
+        ctx.TpdsUpdateSender.promises.addDoc.resolves()
 
-        await this.ProjectEntityUpdateHandler.promises.upsertDoc(
+        await ctx.ProjectEntityUpdateHandler.promises.upsertDoc(
           projectId,
           folderId,
           'foo.tex',
-          this.docLines,
-          this.source,
+          ctx.docLines,
+          ctx.source,
           userId
         )
       })
 
-      it('notifies docstore of the new doc', function () {
-        expect(this.DocstoreManager.promises.updateDoc).to.have.been.calledWith(
+      it('notifies docstore of the new doc', function (ctx) {
+        expect(ctx.DocstoreManager.promises.updateDoc).to.have.been.calledWith(
           projectId,
-          this.newDoc._id,
-          this.docLines
+          ctx.newDoc._id,
+          ctx.docLines
         )
       })
 
-      it('adds the new doc and removes the file in one go', function () {
+      it('adds the new doc and removes the file in one go', function (ctx) {
         expect(
-          this.ProjectEntityMongoUpdateHandler.promises.replaceFileWithDoc
+          ctx.ProjectEntityMongoUpdateHandler.promises.replaceFileWithDoc
         ).to.have.been.calledWithMatch(
           projectId,
-          this.existingFile._id,
-          this.newDoc
+          ctx.existingFile._id,
+          ctx.newDoc
         )
       })
 
-      it('sends the doc to TPDS', function () {
-        expect(this.TpdsUpdateSender.promises.addDoc).to.have.been.calledWith({
+      it('sends the doc to TPDS', function (ctx) {
+        expect(ctx.TpdsUpdateSender.promises.addDoc).to.have.been.calledWith({
           projectId,
-          docId: this.newDoc._id,
-          path: this.filePath,
-          projectName: this.newProject.name,
-          rev: this.existingFile.rev + 1,
+          docId: ctx.newDoc._id,
+          path: ctx.filePath,
+          projectName: ctx.newProject.name,
+          rev: ctx.existingFile.rev + 1,
           folderId,
         })
       })
 
-      it('sends the updates to the doc updater', function () {
+      it('sends the updates to the doc updater', function (ctx) {
         const oldFiles = [
           {
-            file: this.existingFile,
-            path: this.filePath,
+            file: ctx.existingFile,
+            path: ctx.filePath,
           },
         ]
         const newDocs = [
           {
-            doc: sinon.match(this.newDoc),
-            path: this.filePath,
-            docLines: this.docLines.join('\n'),
+            doc: sinon.match(ctx.newDoc),
+            path: ctx.filePath,
+            docLines: ctx.docLines.join('\n'),
           },
         ]
         expect(
-          this.DocumentUpdaterHandler.promises.updateProjectStructure
+          ctx.DocumentUpdaterHandler.promises.updateProjectStructure
         ).to.have.been.calledWith(
           projectId,
           projectHistoryId,
@@ -1036,19 +1097,17 @@ describe('ProjectEntityUpdateHandler', function () {
           {
             oldFiles,
             newDocs,
-            newProject: this.newProject,
+            newProject: ctx.newProject,
           },
-          this.source
+          ctx.source
         )
       })
 
-      it('should notify everyone of the file deletion', function () {
-        expect(
-          this.EditorRealTimeController.emitToRoom
-        ).to.have.been.calledWith(
+      it('should notify everyone of the file deletion', function (ctx) {
+        expect(ctx.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
           projectId,
           'removeEntity',
-          this.existingFile._id,
+          ctx.existingFile._id,
           'convertFileToDoc'
         )
       })
@@ -1056,30 +1115,30 @@ describe('ProjectEntityUpdateHandler', function () {
   })
 
   describe('upsertFile', function () {
-    beforeEach(function () {
-      this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
-        fileRef: this.file,
+    beforeEach(function (ctx) {
+      ctx.FileStoreHandler.promises.uploadFileFromDisk.resolves({
+        fileRef: ctx.file,
         createdBlob: true,
       })
     })
 
     describe('upserting into an invalid folder', function () {
-      beforeEach(function () {
-        this.ProjectLocator.promises.findElement.resolves({ element: null })
+      beforeEach(function (ctx) {
+        ctx.ProjectLocator.promises.findElement.resolves({ element: null })
       })
 
-      it('returns an error', async function () {
+      it('returns an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.upsertFile(
+          await ctx.ProjectEntityUpdateHandler.promises.upsertFile(
             projectId,
             folderId,
-            this.fileName,
-            this.fileSystemPath,
-            this.linkedFileData,
+            ctx.fileName,
+            ctx.fileSystemPath,
+            ctx.linkedFileData,
             userId,
-            this.source
+            ctx.source
           )
         } catch (err) {
           error = err
@@ -1091,190 +1150,190 @@ describe('ProjectEntityUpdateHandler', function () {
 
     describe('updating an existing file', function () {
       let upsertFileResult
-      beforeEach(async function () {
-        this.existingFile = { _id: fileId, name: this.fileName, rev: 1 }
-        this.newFile = {
+      beforeEach(async function (ctx) {
+        ctx.existingFile = { _id: fileId, name: ctx.fileName, rev: 1 }
+        ctx.newFile = {
           _id: new ObjectId(),
-          name: this.fileName,
+          name: ctx.fileName,
           rev: 3,
           hash: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
         }
-        this.folder = { _id: folderId, fileRefs: [this.existingFile], docs: [] }
-        this.ProjectLocator.promises.findElement.resolves({
-          element: this.folder,
+        ctx.folder = { _id: folderId, fileRefs: [ctx.existingFile], docs: [] }
+        ctx.ProjectLocator.promises.findElement.resolves({
+          element: ctx.folder,
         })
-        this.newProject = 'new-project-stub'
-        this.ProjectEntityMongoUpdateHandler.promises.replaceFileWithNew.resolves(
+        ctx.newProject = 'new-project-stub'
+        ctx.ProjectEntityMongoUpdateHandler.promises.replaceFileWithNew.resolves(
           {
-            oldFileRef: this.existingFile,
-            project: this.project,
-            path: { fileSystem: this.fileSystemPath },
-            newProject: this.newProject,
-            newFileRef: this.newFile,
+            oldFileRef: ctx.existingFile,
+            project: ctx.project,
+            path: { fileSystem: ctx.fileSystemPath },
+            newProject: ctx.newProject,
+            newFileRef: ctx.newFile,
           }
         )
         upsertFileResult =
-          await this.ProjectEntityUpdateHandler.promises.upsertFile(
+          await ctx.ProjectEntityUpdateHandler.promises.upsertFile(
             projectId,
             folderId,
-            this.fileName,
-            this.fileSystemPath,
-            this.linkedFileData,
+            ctx.fileName,
+            ctx.fileSystemPath,
+            ctx.linkedFileData,
             userId,
-            this.source
+            ctx.source
           )
       })
 
-      it('uploads a new version of the file', function () {
-        this.FileStoreHandler.promises.uploadFileFromDisk.should.have.been.calledWith(
+      it('uploads a new version of the file', function (ctx) {
+        ctx.FileStoreHandler.promises.uploadFileFromDisk.should.have.been.calledWith(
           projectId,
           {
-            name: this.fileName,
-            linkedFileData: this.linkedFileData,
+            name: ctx.fileName,
+            linkedFileData: ctx.linkedFileData,
           },
-          this.fileSystemPath
+          ctx.fileSystemPath
         )
       })
 
-      it('replaces the file in mongo', function () {
-        this.ProjectEntityMongoUpdateHandler.promises.replaceFileWithNew.should.have.been.calledWith(
+      it('replaces the file in mongo', function (ctx) {
+        ctx.ProjectEntityMongoUpdateHandler.promises.replaceFileWithNew.should.have.been.calledWith(
           projectId,
-          this.existingFile._id,
-          this.file,
+          ctx.existingFile._id,
+          ctx.file,
           userId
         )
       })
 
-      it('notifies the tpds', function () {
-        this.TpdsUpdateSender.promises.addFile.should.have.been.calledWith({
+      it('notifies the tpds', function (ctx) {
+        ctx.TpdsUpdateSender.promises.addFile.should.have.been.calledWith({
           projectId,
-          historyId: this.project.overleaf.history.id,
-          projectName: this.project.name,
-          fileId: this.newFile._id,
-          hash: this.newFile.hash,
-          rev: this.newFile.rev,
-          path: this.fileSystemPath,
+          historyId: ctx.project.overleaf.history.id,
+          projectName: ctx.project.name,
+          fileId: ctx.newFile._id,
+          hash: ctx.newFile.hash,
+          rev: ctx.newFile.rev,
+          path: ctx.fileSystemPath,
           folderId,
         })
       })
 
-      it('updates the project structure in the doc updater', function () {
+      it('updates the project structure in the doc updater', function (ctx) {
         const oldFiles = [
           {
-            file: this.existingFile,
-            path: this.fileSystemPath,
+            file: ctx.existingFile,
+            path: ctx.fileSystemPath,
           },
         ]
         const newFiles = [
           {
-            file: this.newFile,
-            path: this.fileSystemPath,
+            file: ctx.newFile,
+            path: ctx.fileSystemPath,
             createdBlob: true,
           },
         ]
-        this.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
+        ctx.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
           projectId,
           projectHistoryId,
           userId,
           {
             oldFiles,
             newFiles,
-            newProject: this.newProject,
+            newProject: ctx.newProject,
           },
-          this.source
+          ctx.source
         )
       })
 
-      it('returns the file', function () {
+      it('returns the file', function (ctx) {
         expect(upsertFileResult.isNew).to.be.false
         expect(upsertFileResult.fileRef.toString()).to.eql(
-          this.existingFile.toString()
+          ctx.existingFile.toString()
         )
       })
     })
 
     describe('creating a new file', function () {
       let upsertFileResult
-      beforeEach(async function () {
-        this.folder = { _id: folderId, fileRefs: [], docs: [] }
-        this.newFile = {
+      beforeEach(async function (ctx) {
+        ctx.folder = { _id: folderId, fileRefs: [], docs: [] }
+        ctx.newFile = {
           _id: fileId,
           hash: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
         }
-        this.ProjectLocator.promises.findElement.resolves({
-          element: this.folder,
+        ctx.ProjectLocator.promises.findElement.resolves({
+          element: ctx.folder,
         })
-        this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
-          fileRef: this.newFile,
+        ctx.FileStoreHandler.promises.uploadFileFromDisk.resolves({
+          fileRef: ctx.newFile,
           createdBlob: true,
         })
-        this.ProjectEntityUpdateHandler.promises.addFile = {
-          mainTask: sinon.stub().resolves(this.newFile),
+        ctx.ProjectEntityUpdateHandler.promises.addFile = {
+          mainTask: sinon.stub().resolves(ctx.newFile),
         }
 
         upsertFileResult =
-          await this.ProjectEntityUpdateHandler.promises.upsertFile(
+          await ctx.ProjectEntityUpdateHandler.promises.upsertFile(
             projectId,
             folderId,
-            this.fileName,
-            this.fileSystemPath,
-            this.linkedFileData,
+            ctx.fileName,
+            ctx.fileSystemPath,
+            ctx.linkedFileData,
             userId,
-            this.source
+            ctx.source
           )
       })
 
-      it('tries to find the folder', function () {
-        this.ProjectLocator.promises.findElement.should.have.been.calledWith({
+      it('tries to find the folder', function (ctx) {
+        ctx.ProjectLocator.promises.findElement.should.have.been.calledWith({
           project_id: projectId,
           element_id: folderId,
           type: 'folder',
         })
       })
 
-      it('adds the file', function () {
+      it('adds the file', function (ctx) {
         expect(
-          this.ProjectEntityUpdateHandler.promises.addFile.mainTask
+          ctx.ProjectEntityUpdateHandler.promises.addFile.mainTask
         ).to.have.been.calledWith({
           projectId,
           folderId,
           userId,
-          fileRef: this.newFile,
-          source: this.source,
+          fileRef: ctx.newFile,
+          source: ctx.source,
           createdBlob: true,
         })
       })
 
-      it('returns the file', function () {
-        expect(upsertFileResult.fileRef).to.eql(this.newFile)
+      it('returns the file', function (ctx) {
+        expect(upsertFileResult.fileRef).to.eql(ctx.newFile)
         expect(upsertFileResult.isNew).to.be.true
       })
     })
 
     describe('upserting a new file with an invalid name', function () {
-      beforeEach(function () {
-        this.folder = { _id: folderId, fileRefs: [] }
-        this.newFile = { _id: fileId }
-        this.ProjectLocator.promises.findElement.resolves({
-          element: this.folder,
+      beforeEach(function (ctx) {
+        ctx.folder = { _id: folderId, fileRefs: [] }
+        ctx.newFile = { _id: fileId }
+        ctx.ProjectLocator.promises.findElement.resolves({
+          element: ctx.folder,
         })
-        this.ProjectEntityUpdateHandler.promises.addFile = {
-          mainTask: sinon.stub().resolves(this.newFile),
+        ctx.ProjectEntityUpdateHandler.promises.addFile = {
+          mainTask: sinon.stub().resolves(ctx.newFile),
         }
       })
 
-      it('returns an error', async function () {
+      it('returns an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.upsertFile(
+          await ctx.ProjectEntityUpdateHandler.promises.upsertFile(
             projectId,
             folderId,
-            `*${this.fileName}`,
-            this.fileSystemPath,
-            this.linkedFileData,
+            `*${ctx.fileName}`,
+            ctx.fileSystemPath,
+            ctx.linkedFileData,
             userId,
-            this.source
+            ctx.source
           )
         } catch (err) {
           error = err
@@ -1285,110 +1344,108 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('upserting file on top of a doc', function () {
-      beforeEach(async function () {
-        this.path = '/path/to/doc'
-        this.existingDoc = { _id: new ObjectId(), name: this.fileName }
-        this.folder = {
+      beforeEach(async function (ctx) {
+        ctx.path = '/path/to/doc'
+        ctx.existingDoc = { _id: new ObjectId(), name: ctx.fileName }
+        ctx.folder = {
           _id: folderId,
           fileRefs: [],
-          docs: [this.existingDoc],
+          docs: [ctx.existingDoc],
         }
-        this.ProjectLocator.promises.findElement
+        ctx.ProjectLocator.promises.findElement
           .withArgs({
-            project_id: this.project._id.toString(),
+            project_id: ctx.project._id.toString(),
             element_id: folderId,
             type: 'folder',
           })
-          .resolves({ element: this.folder })
-        this.ProjectLocator.promises.findElement
+          .resolves({ element: ctx.folder })
+        ctx.ProjectLocator.promises.findElement
           .withArgs({
-            project_id: this.project._id.toString(),
-            element_id: this.existingDoc._id,
+            project_id: ctx.project._id.toString(),
+            element_id: ctx.existingDoc._id,
             type: 'doc',
           })
           .resolves({
-            element: this.existingDoc,
-            path: { fileSystem: this.path },
-            folder: this.folder,
+            element: ctx.existingDoc,
+            path: { fileSystem: ctx.path },
+            folder: ctx.folder,
           })
 
-        this.newFile = {
+        ctx.newFile = {
           _id: newFileId,
           name: 'dummy-upload-filename',
           rev: 0,
-          linkedFileData: this.linkedFileData,
+          linkedFileData: ctx.linkedFileData,
         }
-        this.newProject = {
+        ctx.newProject = {
           name: 'new project',
           overleaf: { history: { id: projectHistoryId } },
         }
-        this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
-          fileRef: this.newFile,
+        ctx.FileStoreHandler.promises.uploadFileFromDisk.resolves({
+          fileRef: ctx.newFile,
           createdBlob: true,
         })
-        this.ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile.resolves(
-          this.newProject
+        ctx.ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile.resolves(
+          ctx.newProject
         )
 
-        await this.ProjectEntityUpdateHandler.promises.upsertFile(
+        await ctx.ProjectEntityUpdateHandler.promises.upsertFile(
           projectId,
           folderId,
-          this.fileName,
-          this.fileSystemPath,
-          this.linkedFileData,
+          ctx.fileName,
+          ctx.fileSystemPath,
+          ctx.linkedFileData,
           userId,
-          this.source
+          ctx.source
         )
       })
 
-      it('replaces the existing doc with a file', function () {
+      it('replaces the existing doc with a file', function (ctx) {
         expect(
-          this.ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile
+          ctx.ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile
         ).to.have.been.calledWith(
           projectId,
-          this.existingDoc._id,
-          this.newFile,
+          ctx.existingDoc._id,
+          ctx.newFile,
           userId
         )
       })
 
-      it('updates the doc structure', function () {
+      it('updates the doc structure', function (ctx) {
         const oldDocs = [
           {
-            doc: this.existingDoc,
-            path: this.path,
+            doc: ctx.existingDoc,
+            path: ctx.path,
           },
         ]
         const newFiles = [
           {
-            file: this.newFile,
-            path: this.path,
+            file: ctx.newFile,
+            path: ctx.path,
             createdBlob: true,
           },
         ]
         const updates = {
           oldDocs,
           newFiles,
-          newProject: this.newProject,
+          newProject: ctx.newProject,
         }
         expect(
-          this.DocumentUpdaterHandler.promises.updateProjectStructure
+          ctx.DocumentUpdaterHandler.promises.updateProjectStructure
         ).to.have.been.calledWith(
           projectId,
           projectHistoryId,
           userId,
           updates,
-          this.source
+          ctx.source
         )
       })
 
-      it('tells everyone in the room the doc is removed', function () {
-        expect(
-          this.EditorRealTimeController.emitToRoom
-        ).to.have.been.calledWith(
+      it('tells everyone in the room the doc is removed', function (ctx) {
+        expect(ctx.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
           projectId,
           'removeEntity',
-          this.existingDoc._id,
+          ctx.existingDoc._id,
           'convertDocToFile'
         )
       })
@@ -1398,90 +1455,90 @@ describe('ProjectEntityUpdateHandler', function () {
   describe('upsertDocWithPath', function () {
     describe('upserting a doc', function () {
       let upsertDocWithPathResult
-      beforeEach(async function () {
-        this.path = '/folder/doc.tex'
-        this.newFolders = ['mock-a', 'mock-b']
-        this.folder = { _id: folderId }
-        this.doc = { _id: docId }
-        this.isNewDoc = true
-        this.ProjectEntityUpdateHandler.promises.mkdirp = {
+      beforeEach(async function (ctx) {
+        ctx.path = '/folder/doc.tex'
+        ctx.newFolders = ['mock-a', 'mock-b']
+        ctx.folder = { _id: folderId }
+        ctx.doc = { _id: docId }
+        ctx.isNewDoc = true
+        ctx.ProjectEntityUpdateHandler.promises.mkdirp = {
           withoutLock: sinon
             .stub()
-            .resolves({ newFolders: this.newFolders, folder: this.folder }),
+            .resolves({ newFolders: ctx.newFolders, folder: ctx.folder }),
         }
-        this.ProjectEntityUpdateHandler.promises.upsertDoc = {
+        ctx.ProjectEntityUpdateHandler.promises.upsertDoc = {
           withoutLock: sinon
             .stub()
-            .resolves({ doc: this.doc, isNew: this.isNewDoc }),
+            .resolves({ doc: ctx.doc, isNew: ctx.isNewDoc }),
         }
 
         upsertDocWithPathResult =
-          await this.ProjectEntityUpdateHandler.promises.upsertDocWithPath(
+          await ctx.ProjectEntityUpdateHandler.promises.upsertDocWithPath(
             projectId,
-            this.path,
-            this.docLines,
-            this.source,
+            ctx.path,
+            ctx.docLines,
+            ctx.source,
             userId
           )
       })
 
-      it('creates any necessary folders', function () {
-        this.ProjectEntityUpdateHandler.promises.mkdirp.withoutLock
+      it('creates any necessary folders', function (ctx) {
+        ctx.ProjectEntityUpdateHandler.promises.mkdirp.withoutLock
           .calledWith(projectId, '/folder', userId)
           .should.equal(true)
       })
 
-      it('upserts the doc', function () {
-        this.ProjectEntityUpdateHandler.promises.upsertDoc.withoutLock
+      it('upserts the doc', function (ctx) {
+        ctx.ProjectEntityUpdateHandler.promises.upsertDoc.withoutLock
           .calledWith(
             projectId,
-            this.folder._id,
+            ctx.folder._id,
             'doc.tex',
-            this.docLines,
-            this.source,
+            ctx.docLines,
+            ctx.source,
             userId
           )
           .should.equal(true)
       })
 
-      it('returns a doc, the isNewDoc flag, newFolders and a folder', function () {
+      it('returns a doc, the isNewDoc flag, newFolders and a folder', function (ctx) {
         expect(upsertDocWithPathResult).to.eql({
-          doc: this.doc,
-          isNew: this.isNewDoc,
-          newFolders: this.newFolders,
-          folder: this.folder,
+          doc: ctx.doc,
+          isNew: ctx.isNewDoc,
+          newFolders: ctx.newFolders,
+          folder: ctx.folder,
         })
       })
     })
 
     describe('upserting a doc with an invalid path', function () {
-      beforeEach(function () {
-        this.path = '/*folder/doc.tex'
-        this.newFolders = ['mock-a', 'mock-b']
-        this.folder = { _id: folderId }
-        this.doc = { _id: docId }
-        this.isNewDoc = true
-        this.ProjectEntityUpdateHandler.promises.mkdirp = {
+      beforeEach(function (ctx) {
+        ctx.path = '/*folder/doc.tex'
+        ctx.newFolders = ['mock-a', 'mock-b']
+        ctx.folder = { _id: folderId }
+        ctx.doc = { _id: docId }
+        ctx.isNewDoc = true
+        ctx.ProjectEntityUpdateHandler.promises.mkdirp = {
           withoutLock: sinon
             .stub()
-            .resolves({ newFolders: this.newFolders, folder: this.folder }),
+            .resolves({ newFolders: ctx.newFolders, folder: ctx.folder }),
         }
-        this.ProjectEntityUpdateHandler.promises.upsertDoc = {
+        ctx.ProjectEntityUpdateHandler.promises.upsertDoc = {
           withoutLock: sinon
             .stub()
-            .resolves({ doc: this.doc, isNew: this.isNewDoc }),
+            .resolves({ doc: ctx.doc, isNew: ctx.isNewDoc }),
         }
       })
 
-      it('returns an error', async function () {
+      it('returns an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.upsertDocWithPath(
+          await ctx.ProjectEntityUpdateHandler.promises.upsertDocWithPath(
             projectId,
-            this.path,
-            this.docLines,
-            this.source,
+            ctx.path,
+            ctx.docLines,
+            ctx.source,
             userId
           )
         } catch (err) {
@@ -1493,33 +1550,33 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('upserting a doc with an invalid name', function () {
-      beforeEach(function () {
-        this.path = '/folder/*doc.tex'
-        this.newFolders = ['mock-a', 'mock-b']
-        this.folder = { _id: folderId }
-        this.doc = { _id: docId }
-        this.isNewDoc = true
-        this.ProjectEntityUpdateHandler.promises.mkdirp = {
+      beforeEach(function (ctx) {
+        ctx.path = '/folder/*doc.tex'
+        ctx.newFolders = ['mock-a', 'mock-b']
+        ctx.folder = { _id: folderId }
+        ctx.doc = { _id: docId }
+        ctx.isNewDoc = true
+        ctx.ProjectEntityUpdateHandler.promises.mkdirp = {
           withoutLock: sinon
             .stub()
-            .resolves({ newFolders: this.newFolders, folder: this.folder }),
+            .resolves({ newFolders: ctx.newFolders, folder: ctx.folder }),
         }
-        this.ProjectEntityUpdateHandler.promises.upsertDoc = {
+        ctx.ProjectEntityUpdateHandler.promises.upsertDoc = {
           withoutLock: sinon
             .stub()
-            .resolves({ doc: this.doc, isNew: this.isNewDoc }),
+            .resolves({ doc: ctx.doc, isNew: ctx.isNewDoc }),
         }
       })
 
-      it('returns an error', async function () {
+      it('returns an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.upsertDocWithPath(
+          await ctx.ProjectEntityUpdateHandler.promises.upsertDocWithPath(
             projectId,
-            this.path,
-            this.docLines,
-            this.source,
+            ctx.path,
+            ctx.docLines,
+            ctx.source,
             userId
           )
         } catch (err) {
@@ -1534,101 +1591,101 @@ describe('ProjectEntityUpdateHandler', function () {
   describe('upsertFileWithPath', function () {
     describe('upserting a file', function () {
       let upsertFileWithPathResult
-      beforeEach(async function () {
-        this.path = '/folder/file.png'
-        this.newFolders = ['mock-a', 'mock-b']
-        this.folder = { _id: folderId }
-        this.file = { _id: fileId }
-        this.isNewFile = true
-        this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
-          fileRef: this.newFile,
+      beforeEach(async function (ctx) {
+        ctx.path = '/folder/file.png'
+        ctx.newFolders = ['mock-a', 'mock-b']
+        ctx.folder = { _id: folderId }
+        ctx.file = { _id: fileId }
+        ctx.isNewFile = true
+        ctx.FileStoreHandler.promises.uploadFileFromDisk.resolves({
+          fileRef: ctx.newFile,
           createdBlob: true,
         })
-        this.ProjectEntityUpdateHandler.promises.mkdirp = {
+        ctx.ProjectEntityUpdateHandler.promises.mkdirp = {
           withoutLock: sinon
             .stub()
-            .resolves({ newFolders: this.newFolders, folder: this.folder }),
+            .resolves({ newFolders: ctx.newFolders, folder: ctx.folder }),
         }
-        this.ProjectEntityUpdateHandler.promises.upsertFile = {
+        ctx.ProjectEntityUpdateHandler.promises.upsertFile = {
           mainTask: sinon
             .stub()
-            .resolves({ fileRef: this.file, isNew: this.isNewFile }),
+            .resolves({ fileRef: ctx.file, isNew: ctx.isNewFile }),
         }
 
         upsertFileWithPathResult =
-          await this.ProjectEntityUpdateHandler.promises.upsertFileWithPath(
+          await ctx.ProjectEntityUpdateHandler.promises.upsertFileWithPath(
             projectId,
-            this.path,
-            this.fileSystemPath,
-            this.linkedFileData,
+            ctx.path,
+            ctx.fileSystemPath,
+            ctx.linkedFileData,
             userId,
-            this.source
+            ctx.source
           )
       })
 
-      it('creates any necessary folders', function () {
-        this.ProjectEntityUpdateHandler.promises.mkdirp.withoutLock
+      it('creates any necessary folders', function (ctx) {
+        ctx.ProjectEntityUpdateHandler.promises.mkdirp.withoutLock
           .calledWith(projectId, '/folder', userId)
           .should.equal(true)
       })
 
-      it('upserts the file', function () {
-        this.ProjectEntityUpdateHandler.promises.upsertFile.mainTask.should.have.been.calledWith(
+      it('upserts the file', function (ctx) {
+        ctx.ProjectEntityUpdateHandler.promises.upsertFile.mainTask.should.have.been.calledWith(
           {
             projectId,
-            folderId: this.folder._id,
+            folderId: ctx.folder._id,
             fileName: 'file.png',
-            fsPath: this.fileSystemPath,
-            linkedFileData: this.linkedFileData,
+            fsPath: ctx.fileSystemPath,
+            linkedFileData: ctx.linkedFileData,
             userId,
-            fileRef: this.newFile,
-            source: this.source,
+            fileRef: ctx.newFile,
+            source: ctx.source,
             createdBlob: true,
           }
         )
       })
 
-      it('returns an object with the fileRef, isNew flag, undefined oldFileRef, newFolders, and folder', function () {
+      it('returns an object with the fileRef, isNew flag, undefined oldFileRef, newFolders, and folder', function (ctx) {
         expect(upsertFileWithPathResult).to.eql({
-          fileRef: this.file,
-          isNew: this.isNewFile,
-          newFolders: this.newFolders,
-          folder: this.folder,
+          fileRef: ctx.file,
+          isNew: ctx.isNewFile,
+          newFolders: ctx.newFolders,
+          folder: ctx.folder,
           oldFileRef: undefined,
         })
       })
     })
 
     describe('upserting a file with an invalid path', function () {
-      beforeEach(function () {
-        this.path = '/*folder/file.png'
-        this.newFolders = ['mock-a', 'mock-b']
-        this.folder = { _id: folderId }
-        this.file = { _id: fileId }
-        this.isNewFile = true
-        this.ProjectEntityUpdateHandler.promises.mkdirp = {
+      beforeEach(function (ctx) {
+        ctx.path = '/*folder/file.png'
+        ctx.newFolders = ['mock-a', 'mock-b']
+        ctx.folder = { _id: folderId }
+        ctx.file = { _id: fileId }
+        ctx.isNewFile = true
+        ctx.ProjectEntityUpdateHandler.promises.mkdirp = {
           withoutLock: sinon
             .stub()
-            .resolves({ newFolders: this.newFolders, folder: this.folder }),
+            .resolves({ newFolders: ctx.newFolders, folder: ctx.folder }),
         }
-        this.ProjectEntityUpdateHandler.promises.upsertFile = {
+        ctx.ProjectEntityUpdateHandler.promises.upsertFile = {
           mainTask: sinon
             .stub()
-            .resolves({ doc: this.file, isNew: this.isNewFile }),
+            .resolves({ doc: ctx.file, isNew: ctx.isNewFile }),
         }
       })
 
-      it('returns an error', async function () {
+      it('returns an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.upsertFileWithPath(
+          await ctx.ProjectEntityUpdateHandler.promises.upsertFileWithPath(
             projectId,
-            this.path,
-            this.fileSystemPath,
-            this.linkedFileData,
+            ctx.path,
+            ctx.fileSystemPath,
+            ctx.linkedFileData,
             userId,
-            this.source
+            ctx.source
           )
         } catch (err) {
           error = err
@@ -1639,35 +1696,35 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('upserting a file with an invalid name', function () {
-      beforeEach(function () {
-        this.path = '/folder/*file.png'
-        this.newFolders = ['mock-a', 'mock-b']
-        this.folder = { _id: folderId }
-        this.file = { _id: fileId }
-        this.isNewFile = true
-        this.ProjectEntityUpdateHandler.promises.mkdirp = {
+      beforeEach(function (ctx) {
+        ctx.path = '/folder/*file.png'
+        ctx.newFolders = ['mock-a', 'mock-b']
+        ctx.folder = { _id: folderId }
+        ctx.file = { _id: fileId }
+        ctx.isNewFile = true
+        ctx.ProjectEntityUpdateHandler.promises.mkdirp = {
           withoutLock: sinon
             .stub()
-            .resolves({ newFolders: this.newFolders, folder: this.folder }),
+            .resolves({ newFolders: ctx.newFolders, folder: ctx.folder }),
         }
-        this.ProjectEntityUpdateHandler.promises.upsertFile = {
+        ctx.ProjectEntityUpdateHandler.promises.upsertFile = {
           mainTask: sinon
             .stub()
-            .resolves({ doc: this.file, isNew: this.isNewFile }),
+            .resolves({ doc: ctx.file, isNew: ctx.isNewFile }),
         }
       })
 
-      it('returns an error', async function () {
+      it('returns an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.upsertFileWithPath(
+          await ctx.ProjectEntityUpdateHandler.promises.upsertFileWithPath(
             projectId,
-            this.path,
-            this.fileSystemPath,
-            this.linkedFileData,
+            ctx.path,
+            ctx.fileSystemPath,
+            ctx.linkedFileData,
             userId,
-            this.source
+            ctx.source
           )
         } catch (err) {
           error = err
@@ -1680,65 +1737,65 @@ describe('ProjectEntityUpdateHandler', function () {
 
   describe('deleteEntity', function () {
     let deleteEntityResult
-    beforeEach(async function () {
-      this.path = '/path/to/doc.tex'
-      this.doc = { _id: docId }
-      this.projectBeforeDeletion = { _id: projectId, name: 'project' }
-      this.newProject = 'new-project'
-      this.ProjectEntityMongoUpdateHandler.promises.deleteEntity.resolves({
-        entity: this.doc,
-        path: { fileSystem: this.path },
-        projectBeforeDeletion: this.projectBeforeDeletion,
-        newProject: this.newProject,
+    beforeEach(async function (ctx) {
+      ctx.path = '/path/to/doc.tex'
+      ctx.doc = { _id: docId }
+      ctx.projectBeforeDeletion = { _id: projectId, name: 'project' }
+      ctx.newProject = 'new-project'
+      ctx.ProjectEntityMongoUpdateHandler.promises.deleteEntity.resolves({
+        entity: ctx.doc,
+        path: { fileSystem: ctx.path },
+        projectBeforeDeletion: ctx.projectBeforeDeletion,
+        newProject: ctx.newProject,
       })
-      this.ProjectEntityUpdateHandler._cleanUpEntity = sinon
+      ctx.ProjectEntityUpdateHandler._cleanUpEntity = sinon
         .stub()
-        .resolves([{ type: 'doc', entity: this.doc, path: this.path }])
+        .resolves([{ type: 'doc', entity: ctx.doc, path: ctx.path }])
 
       deleteEntityResult =
-        await this.ProjectEntityUpdateHandler.promises.deleteEntity(
+        await ctx.ProjectEntityUpdateHandler.promises.deleteEntity(
           projectId,
           docId,
           'doc',
           userId,
-          this.source
+          ctx.source
         )
     })
 
-    it('flushes the project to mongo', function () {
-      this.DocumentUpdaterHandler.promises.flushProjectToMongo.should.have.been.calledWith(
+    it('flushes the project to mongo', function (ctx) {
+      ctx.DocumentUpdaterHandler.promises.flushProjectToMongo.should.have.been.calledWith(
         projectId
       )
     })
 
-    it('deletes the entity in mongo', function () {
-      this.ProjectEntityMongoUpdateHandler.promises.deleteEntity
+    it('deletes the entity in mongo', function (ctx) {
+      ctx.ProjectEntityMongoUpdateHandler.promises.deleteEntity
         .calledWith(projectId, docId, 'doc', userId)
         .should.equal(true)
     })
 
-    it('cleans up the doc in the docstore', function () {
-      this.ProjectEntityUpdateHandler._cleanUpEntity
+    it('cleans up the doc in the docstore', function (ctx) {
+      ctx.ProjectEntityUpdateHandler._cleanUpEntity
         .calledWith(
-          this.projectBeforeDeletion,
-          this.newProject,
-          this.doc,
+          ctx.projectBeforeDeletion,
+          ctx.newProject,
+          ctx.doc,
           'doc',
-          this.path,
+          ctx.path,
           userId,
-          this.source
+          ctx.source
         )
         .should.equal(true)
     })
 
-    it('it notifies the tpds', function () {
-      this.TpdsUpdateSender.promises.deleteEntity.should.have.been.calledWith({
+    it('it notifies the tpds', function (ctx) {
+      ctx.TpdsUpdateSender.promises.deleteEntity.should.have.been.calledWith({
         projectId,
-        path: this.path,
-        projectName: this.projectBeforeDeletion.name,
+        path: ctx.path,
+        projectName: ctx.projectBeforeDeletion.name,
         entityId: docId,
         entityType: 'doc',
-        subtreeEntityIds: [this.doc._id],
+        subtreeEntityIds: [ctx.doc._id],
       })
     })
 
@@ -1749,62 +1806,62 @@ describe('ProjectEntityUpdateHandler', function () {
 
   describe('deleteEntityWithPath', function () {
     describe('when the entity exists', function () {
-      beforeEach(async function () {
-        this.doc = { _id: docId }
-        this.ProjectLocator.promises.findElementByPath.resolves({
-          element: this.doc,
+      beforeEach(async function (ctx) {
+        ctx.doc = { _id: docId }
+        ctx.ProjectLocator.promises.findElementByPath.resolves({
+          element: ctx.doc,
           type: 'doc',
         })
-        this.ProjectEntityUpdateHandler.promises.deleteEntity = {
+        ctx.ProjectEntityUpdateHandler.promises.deleteEntity = {
           withoutLock: sinon.stub().resolves(),
         }
-        this.path = '/path/to/doc.tex'
-        await this.ProjectEntityUpdateHandler.promises.deleteEntityWithPath(
+        ctx.path = '/path/to/doc.tex'
+        await ctx.ProjectEntityUpdateHandler.promises.deleteEntityWithPath(
           projectId,
-          this.path,
+          ctx.path,
           userId,
-          this.source
+          ctx.source
         )
       })
 
-      it('finds the entity', function () {
-        this.ProjectLocator.promises.findElementByPath
+      it('finds the entity', function (ctx) {
+        ctx.ProjectLocator.promises.findElementByPath
           .calledWith({
             project_id: projectId,
-            path: this.path,
+            path: ctx.path,
             exactCaseMatch: true,
           })
           .should.equal(true)
       })
 
-      it('deletes the entity', function () {
-        this.ProjectEntityUpdateHandler.promises.deleteEntity.withoutLock.should.have.been.calledWith(
+      it('deletes the entity', function (ctx) {
+        ctx.ProjectEntityUpdateHandler.promises.deleteEntity.withoutLock.should.have.been.calledWith(
           projectId,
-          this.doc._id,
+          ctx.doc._id,
           'doc',
           userId,
-          this.source
+          ctx.source
         )
       })
     })
 
     describe('when the entity does not exist', function () {
-      beforeEach(function () {
-        this.ProjectLocator.promises.findElementByPath.resolves({
+      beforeEach(function (ctx) {
+        ctx.ProjectLocator.promises.findElementByPath.resolves({
           element: null,
         })
-        this.path = '/doc.tex'
+        ctx.path = '/doc.tex'
       })
 
-      it('returns an error', async function () {
+      it('returns an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.deleteEntityWithPath(
+          await ctx.ProjectEntityUpdateHandler.promises.deleteEntityWithPath(
             projectId,
-            this.path,
+            ctx.path,
             userId,
-            this.source
+            ctx.source
           )
         } catch (err) {
           error = err
@@ -1816,77 +1873,77 @@ describe('ProjectEntityUpdateHandler', function () {
   })
 
   describe('mkdirp', function () {
-    beforeEach(async function () {
-      this.docPath = '/folder/doc.tex'
-      this.ProjectEntityMongoUpdateHandler.promises.mkdirp.resolves({})
-      await this.ProjectEntityUpdateHandler.promises.mkdirp(
+    beforeEach(async function (ctx) {
+      ctx.docPath = '/folder/doc.tex'
+      ctx.ProjectEntityMongoUpdateHandler.promises.mkdirp.resolves({})
+      await ctx.ProjectEntityUpdateHandler.promises.mkdirp(
         projectId,
-        this.docPath,
+        ctx.docPath,
         userId
       )
     })
 
-    it('calls ProjectEntityMongoUpdateHandler', function () {
-      this.ProjectEntityMongoUpdateHandler.promises.mkdirp
-        .calledWith(projectId, this.docPath, userId)
+    it('calls ProjectEntityMongoUpdateHandler', function (ctx) {
+      ctx.ProjectEntityMongoUpdateHandler.promises.mkdirp
+        .calledWith(projectId, ctx.docPath, userId)
         .should.equal(true)
     })
   })
 
   describe('mkdirpWithExactCase', function () {
-    beforeEach(async function () {
-      this.docPath = '/folder/doc.tex'
-      this.ProjectEntityMongoUpdateHandler.promises.mkdirp.resolves({})
-      await this.ProjectEntityUpdateHandler.promises.mkdirpWithExactCase(
+    beforeEach(async function (ctx) {
+      ctx.docPath = '/folder/doc.tex'
+      ctx.ProjectEntityMongoUpdateHandler.promises.mkdirp.resolves({})
+      await ctx.ProjectEntityUpdateHandler.promises.mkdirpWithExactCase(
         projectId,
-        this.docPath,
+        ctx.docPath,
         userId
       )
     })
 
-    it('calls ProjectEntityMongoUpdateHandler', function () {
-      this.ProjectEntityMongoUpdateHandler.promises.mkdirp
-        .calledWith(projectId, this.docPath, userId, { exactCaseMatch: true })
+    it('calls ProjectEntityMongoUpdateHandler', function (ctx) {
+      ctx.ProjectEntityMongoUpdateHandler.promises.mkdirp
+        .calledWith(projectId, ctx.docPath, userId, { exactCaseMatch: true })
         .should.equal(true)
     })
   })
 
   describe('addFolder', function () {
     describe('adding a folder', function () {
-      beforeEach(async function () {
-        this.parentFolderId = '123asdf'
-        this.folderName = 'new-folder'
-        this.ProjectEntityMongoUpdateHandler.promises.addFolder.resolves({})
-        await this.ProjectEntityUpdateHandler.promises.addFolder(
+      beforeEach(async function (ctx) {
+        ctx.parentFolderId = '123asdf'
+        ctx.folderName = 'new-folder'
+        ctx.ProjectEntityMongoUpdateHandler.promises.addFolder.resolves({})
+        await ctx.ProjectEntityUpdateHandler.promises.addFolder(
           projectId,
-          this.parentFolderId,
-          this.folderName,
+          ctx.parentFolderId,
+          ctx.folderName,
           userId
         )
       })
 
-      it('calls ProjectEntityMongoUpdateHandler', function () {
-        this.ProjectEntityMongoUpdateHandler.promises.addFolder
-          .calledWith(projectId, this.parentFolderId, this.folderName, userId)
+      it('calls ProjectEntityMongoUpdateHandler', function (ctx) {
+        ctx.ProjectEntityMongoUpdateHandler.promises.addFolder
+          .calledWith(projectId, ctx.parentFolderId, ctx.folderName, userId)
           .should.equal(true)
       })
     })
 
     describe('adding a folder with an invalid name', function () {
-      beforeEach(function () {
-        this.parentFolderId = '123asdf'
-        this.folderName = '*new-folder'
-        this.ProjectEntityMongoUpdateHandler.promises.addFolder.resolves({})
+      beforeEach(function (ctx) {
+        ctx.parentFolderId = '123asdf'
+        ctx.folderName = '*new-folder'
+        ctx.ProjectEntityMongoUpdateHandler.promises.addFolder.resolves({})
       })
 
-      it('returns an error', async function () {
+      it('returns an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.addFolder(
+          await ctx.ProjectEntityUpdateHandler.promises.addFolder(
             projectId,
-            this.parentFolderId,
-            this.folderName
+            ctx.parentFolderId,
+            ctx.folderName
           )
         } catch (err) {
           error = err
@@ -1898,44 +1955,44 @@ describe('ProjectEntityUpdateHandler', function () {
   })
 
   describe('moveEntity', function () {
-    beforeEach(async function () {
-      this.project_name = 'project name'
-      this.startPath = '/a.tex'
-      this.endPath = '/folder/b.tex'
-      this.rev = 2
-      this.changes = { newDocs: ['old-doc'], newFiles: ['old-file'] }
-      this.ProjectEntityMongoUpdateHandler.promises.moveEntity.resolves({
-        project: this.project,
-        startPath: this.startPath,
-        endPath: this.endPath,
-        rev: this.rev,
-        changes: this.changes,
+    beforeEach(async function (ctx) {
+      ctx.project_name = 'project name'
+      ctx.startPath = '/a.tex'
+      ctx.endPath = '/folder/b.tex'
+      ctx.rev = 2
+      ctx.changes = { newDocs: ['old-doc'], newFiles: ['old-file'] }
+      ctx.ProjectEntityMongoUpdateHandler.promises.moveEntity.resolves({
+        project: ctx.project,
+        startPath: ctx.startPath,
+        endPath: ctx.endPath,
+        rev: ctx.rev,
+        changes: ctx.changes,
       })
 
-      await this.ProjectEntityUpdateHandler.promises.moveEntity(
+      await ctx.ProjectEntityUpdateHandler.promises.moveEntity(
         projectId,
         docId,
         folderId,
         'doc',
         userId,
-        this.source
+        ctx.source
       )
     })
 
-    it('moves the entity in mongo', function () {
-      this.ProjectEntityMongoUpdateHandler.promises.moveEntity
+    it('moves the entity in mongo', function (ctx) {
+      ctx.ProjectEntityMongoUpdateHandler.promises.moveEntity
         .calledWith(projectId, docId, folderId, 'doc', userId)
         .should.equal(true)
     })
 
-    it('notifies tpds', function () {
-      this.TpdsUpdateSender.promises.moveEntity
+    it('notifies tpds', function (ctx) {
+      ctx.TpdsUpdateSender.promises.moveEntity
         .calledWith({
           projectId,
-          projectName: this.project_name,
-          startPath: this.startPath,
-          endPath: this.endPath,
-          rev: this.rev,
+          projectName: ctx.project_name,
+          startPath: ctx.startPath,
+          endPath: ctx.endPath,
+          rev: ctx.rev,
           entityId: docId,
           entityType: 'doc',
           folderId,
@@ -1943,14 +2000,14 @@ describe('ProjectEntityUpdateHandler', function () {
         .should.equal(true)
     })
 
-    it('sends the changes in project structure to the doc updater', function () {
-      this.DocumentUpdaterHandler.promises.updateProjectStructure
+    it('sends the changes in project structure to the doc updater', function (ctx) {
+      ctx.DocumentUpdaterHandler.promises.updateProjectStructure
         .calledWith(
           projectId,
           projectHistoryId,
           userId,
-          this.changes,
-          this.source
+          ctx.changes,
+          ctx.source
         )
         .should.equal(true)
     })
@@ -1958,45 +2015,45 @@ describe('ProjectEntityUpdateHandler', function () {
 
   describe('renameEntity', function () {
     describe('renaming an entity', function () {
-      beforeEach(async function () {
-        this.project_name = 'project name'
-        this.startPath = '/folder/a.tex'
-        this.endPath = '/folder/b.tex'
-        this.rev = 2
-        this.changes = { newDocs: ['old-doc'], newFiles: ['old-file'] }
-        this.newDocName = 'b.tex'
-        this.ProjectEntityMongoUpdateHandler.promises.renameEntity.resolves({
-          project: this.project,
-          startPath: this.startPath,
-          endPath: this.endPath,
-          rev: this.rev,
-          changes: this.changes,
+      beforeEach(async function (ctx) {
+        ctx.project_name = 'project name'
+        ctx.startPath = '/folder/a.tex'
+        ctx.endPath = '/folder/b.tex'
+        ctx.rev = 2
+        ctx.changes = { newDocs: ['old-doc'], newFiles: ['old-file'] }
+        ctx.newDocName = 'b.tex'
+        ctx.ProjectEntityMongoUpdateHandler.promises.renameEntity.resolves({
+          project: ctx.project,
+          startPath: ctx.startPath,
+          endPath: ctx.endPath,
+          rev: ctx.rev,
+          changes: ctx.changes,
         })
 
-        await this.ProjectEntityUpdateHandler.promises.renameEntity(
+        await ctx.ProjectEntityUpdateHandler.promises.renameEntity(
           projectId,
           docId,
           'doc',
-          this.newDocName,
+          ctx.newDocName,
           userId,
-          this.source
+          ctx.source
         )
       })
 
-      it('moves the entity in mongo', function () {
-        this.ProjectEntityMongoUpdateHandler.promises.renameEntity
-          .calledWith(projectId, docId, 'doc', this.newDocName, userId)
+      it('moves the entity in mongo', function (ctx) {
+        ctx.ProjectEntityMongoUpdateHandler.promises.renameEntity
+          .calledWith(projectId, docId, 'doc', ctx.newDocName, userId)
           .should.equal(true)
       })
 
-      it('notifies tpds', function () {
-        this.TpdsUpdateSender.promises.moveEntity
+      it('notifies tpds', function (ctx) {
+        ctx.TpdsUpdateSender.promises.moveEntity
           .calledWith({
             projectId,
-            projectName: this.project_name,
-            startPath: this.startPath,
-            endPath: this.endPath,
-            rev: this.rev,
+            projectName: ctx.project_name,
+            startPath: ctx.startPath,
+            endPath: ctx.endPath,
+            rev: ctx.rev,
             entityId: docId,
             entityType: 'doc',
             folderId: null,
@@ -2004,53 +2061,53 @@ describe('ProjectEntityUpdateHandler', function () {
           .should.equal(true)
       })
 
-      it('flushes the project in doc updater', function () {
-        this.DocumentUpdaterHandler.promises.flushProjectToMongo.should.have.been.calledWith(
+      it('flushes the project in doc updater', function (ctx) {
+        ctx.DocumentUpdaterHandler.promises.flushProjectToMongo.should.have.been.calledWith(
           projectId
         )
       })
 
-      it('sends the changes in project structure to the doc updater', function () {
-        this.DocumentUpdaterHandler.promises.updateProjectStructure
+      it('sends the changes in project structure to the doc updater', function (ctx) {
+        ctx.DocumentUpdaterHandler.promises.updateProjectStructure
           .calledWith(
             projectId,
             projectHistoryId,
             userId,
-            this.changes,
-            this.source
+            ctx.changes,
+            ctx.source
           )
           .should.equal(true)
       })
     })
 
     describe('renaming an entity to an invalid name', function () {
-      beforeEach(function () {
-        this.project_name = 'project name'
-        this.startPath = '/folder/a.tex'
-        this.endPath = '/folder/b.tex'
-        this.rev = 2
-        this.changes = { newDocs: ['old-doc'], newFiles: ['old-file'] }
-        this.newDocName = '*b.tex'
-        this.ProjectEntityMongoUpdateHandler.promises.renameEntity.resolves({
-          project: this.project,
-          startPath: this.startPath,
-          endPath: this.endPath,
-          rev: this.rev,
-          changes: this.changes,
+      beforeEach(function (ctx) {
+        ctx.project_name = 'project name'
+        ctx.startPath = '/folder/a.tex'
+        ctx.endPath = '/folder/b.tex'
+        ctx.rev = 2
+        ctx.changes = { newDocs: ['old-doc'], newFiles: ['old-file'] }
+        ctx.newDocName = '*b.tex'
+        ctx.ProjectEntityMongoUpdateHandler.promises.renameEntity.resolves({
+          project: ctx.project,
+          startPath: ctx.startPath,
+          endPath: ctx.endPath,
+          rev: ctx.rev,
+          changes: ctx.changes,
         })
       })
 
-      it('returns an error', async function () {
+      it('returns an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.renameEntity(
+          await ctx.ProjectEntityUpdateHandler.promises.renameEntity(
             projectId,
             docId,
             'doc',
-            this.newDocName,
+            ctx.newDocName,
             userId,
-            this.source
+            ctx.source
           )
         } catch (err) {
           error = err
@@ -2061,33 +2118,33 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('renaming an entity with a non-string value', function () {
-      beforeEach(function () {
-        this.project_name = 'project name'
-        this.startPath = '/folder/a.tex'
-        this.endPath = '/folder/b.tex'
-        this.rev = 2
-        this.changes = { newDocs: ['old-doc'], newFiles: ['old-file'] }
-        this.newDocName = ['hello']
-        this.ProjectEntityMongoUpdateHandler.promises.renameEntity.resolves({
-          project: this.project,
-          startPath: this.startPath,
-          endPath: this.endPath,
-          rev: this.rev,
-          changes: this.changes,
+      beforeEach(function (ctx) {
+        ctx.project_name = 'project name'
+        ctx.startPath = '/folder/a.tex'
+        ctx.endPath = '/folder/b.tex'
+        ctx.rev = 2
+        ctx.changes = { newDocs: ['old-doc'], newFiles: ['old-file'] }
+        ctx.newDocName = ['hello']
+        ctx.ProjectEntityMongoUpdateHandler.promises.renameEntity.resolves({
+          project: ctx.project,
+          startPath: ctx.startPath,
+          endPath: ctx.endPath,
+          rev: ctx.rev,
+          changes: ctx.changes,
         })
       })
 
-      it('returns an error', async function () {
+      it('returns an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.renameEntity(
+          await ctx.ProjectEntityUpdateHandler.promises.renameEntity(
             projectId,
             docId,
             'doc',
-            this.newDocName,
+            ctx.newDocName,
             userId,
-            this.source
+            ctx.source
           )
         } catch (err) {
           error = err
@@ -2095,7 +2152,7 @@ describe('ProjectEntityUpdateHandler', function () {
 
         expect(error).to.be.instanceOf(Error)
         expect(
-          this.ProjectEntityMongoUpdateHandler.promises.renameEntity.called
+          ctx.ProjectEntityMongoUpdateHandler.promises.renameEntity.called
         ).to.equal(false)
       })
     })
@@ -2103,15 +2160,15 @@ describe('ProjectEntityUpdateHandler', function () {
 
   describe('resyncProjectHistory', function () {
     describe('a deleted project', function () {
-      beforeEach(function () {
-        this.ProjectGetter.promises.getProject.resolves({})
+      beforeEach(function (ctx) {
+        ctx.ProjectGetter.promises.getProject.resolves({})
       })
 
-      it('should return an error', async function () {
+      it('should return an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
+          await ctx.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
             projectId,
             {}
           )
@@ -2128,16 +2185,16 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('a project without project-history enabled', function () {
-      beforeEach(function () {
-        this.project.overleaf = {}
-        this.ProjectGetter.promises.getProject.resolves(this.project)
+      beforeEach(function (ctx) {
+        ctx.project.overleaf = {}
+        ctx.ProjectGetter.promises.getProject.resolves(ctx.project)
       })
 
-      it('should return an error', async function () {
+      it('should return an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
+          await ctx.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
             projectId,
             {}
           )
@@ -2161,48 +2218,48 @@ describe('ProjectEntityUpdateHandler', function () {
           path: 'universe.png',
         },
       ]
-      beforeEach(async function () {
-        this.ProjectGetter.promises.getProject.resolves(this.project)
+      beforeEach(async function (ctx) {
+        ctx.ProjectGetter.promises.getProject.resolves(ctx.project)
         const folders = []
-        this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
+        ctx.ProjectEntityHandler.getAllEntitiesFromProject.returns({
           docs,
           files,
           folders,
         })
 
-        await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
+        await ctx.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
           projectId,
           {}
         )
       })
 
-      it('gets the project', function () {
-        this.ProjectGetter.promises.getProject.should.have.been.calledWith(
+      it('gets the project', function (ctx) {
+        ctx.ProjectGetter.promises.getProject.should.have.been.calledWith(
           projectId
         )
       })
 
-      it('gets the entities for the project', function () {
-        this.ProjectEntityHandler.getAllEntitiesFromProject.should.have.been.calledWith(
-          this.project
+      it('gets the entities for the project', function (ctx) {
+        ctx.ProjectEntityHandler.getAllEntitiesFromProject.should.have.been.calledWith(
+          ctx.project
         )
       })
 
-      it('uses an extended timeout', function () {
-        this.LockManager.withTimeout.should.have.been.calledWith(6 * 60)
+      it('uses an extended timeout', function (ctx) {
+        ctx.LockManager.withTimeout.should.have.been.calledWith(6 * 60)
       })
 
-      it('tells the doc updater to sync the project', function () {
-        this.DocumentUpdaterHandler.promises.resyncProjectHistory
+      it('tells the doc updater to sync the project', function (ctx) {
+        ctx.DocumentUpdaterHandler.promises.resyncProjectHistory
           .calledWith(projectId, projectHistoryId, docs, files)
           .should.equal(true)
       })
     })
 
     describe('a project with duplicate filenames', function () {
-      beforeEach(async function () {
-        this.ProjectGetter.promises.getProject.resolves(this.project)
-        this.docs = [
+      beforeEach(async function (ctx) {
+        ctx.ProjectGetter.promises.getProject.resolves(ctx.project)
+        ctx.docs = [
           { doc: { _id: 'doc1', name: 'main.tex' }, path: 'main.tex' },
           {
             doc: { _id: 'doc2', name: 'duplicate.tex' },
@@ -2221,7 +2278,7 @@ describe('ProjectEntityUpdateHandler', function () {
             path: 'a/b/c/duplicate.tex',
           },
         ]
-        this.files = [
+        ctx.files = [
           {
             file: { _id: 'file1', name: 'image.jpg', hash: 'hash1' },
             path: 'image.jpg',
@@ -2239,20 +2296,20 @@ describe('ProjectEntityUpdateHandler', function () {
             path: 'another dupe (22)',
           },
         ]
-        this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
-          docs: this.docs,
-          files: this.files,
+        ctx.ProjectEntityHandler.getAllEntitiesFromProject.returns({
+          docs: ctx.docs,
+          files: ctx.files,
           folders: [],
         })
-        await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
+        await ctx.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
           projectId,
           {}
         )
       })
 
-      it('renames the duplicate files', function () {
+      it('renames the duplicate files', function (ctx) {
         const renameEntity =
-          this.ProjectEntityMongoUpdateHandler.promises.renameEntity
+          ctx.ProjectEntityMongoUpdateHandler.promises.renameEntity
         expect(renameEntity).to.have.callCount(4)
         expect(renameEntity).to.have.been.calledWith(
           projectId,
@@ -2284,8 +2341,8 @@ describe('ProjectEntityUpdateHandler', function () {
         )
       })
 
-      it('tells the doc updater to resync the project', function () {
-        const docs = this.docs.map(d => {
+      it('tells the doc updater to resync the project', function (ctx) {
+        const docs = ctx.docs.map(d => {
           if (d.doc._id === 'doc3') {
             return Object.assign({}, d, { path: 'a/b/c/duplicate.tex (1)' })
           }
@@ -2294,7 +2351,7 @@ describe('ProjectEntityUpdateHandler', function () {
           }
           return d
         })
-        const files = this.files.map(f => {
+        const files = ctx.files.map(f => {
           if (f.file._id === 'file3') {
             return Object.assign({}, f, { path: 'duplicate.jpg (1)' })
           }
@@ -2304,15 +2361,15 @@ describe('ProjectEntityUpdateHandler', function () {
           return f
         })
         expect(
-          this.DocumentUpdaterHandler.promises.resyncProjectHistory
+          ctx.DocumentUpdaterHandler.promises.resyncProjectHistory
         ).to.have.been.calledWith(projectId, projectHistoryId, docs, files)
       })
     })
 
     describe('a project with bad filenames', function () {
-      beforeEach(async function () {
-        this.ProjectGetter.promises.getProject.resolves(this.project)
-        this.docs = [
+      beforeEach(async function (ctx) {
+        ctx.ProjectGetter.promises.getProject.resolves(ctx.project)
+        ctx.docs = [
           {
             doc: { _id: 'doc1', name: '/d/e/f/test.tex' },
             path: 'a/b/c/d/e/f/test.tex',
@@ -2322,7 +2379,7 @@ describe('ProjectEntityUpdateHandler', function () {
             path: 'a',
           },
         ]
-        this.files = [
+        ctx.files = [
           {
             file: { _id: 'file1', name: 'A*.png', hash: 'hash1' },
             path: 'A*.png',
@@ -2332,20 +2389,20 @@ describe('ProjectEntityUpdateHandler', function () {
             path: 'A_.png',
           },
         ]
-        this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
-          docs: this.docs,
-          files: this.files,
+        ctx.ProjectEntityHandler.getAllEntitiesFromProject.returns({
+          docs: ctx.docs,
+          files: ctx.files,
           folders: [],
         })
-        await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
+        await ctx.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
           projectId,
           {}
         )
       })
 
-      it('renames the files', function () {
+      it('renames the files', function (ctx) {
         const renameEntity =
-          this.ProjectEntityMongoUpdateHandler.promises.renameEntity
+          ctx.ProjectEntityMongoUpdateHandler.promises.renameEntity
         expect(renameEntity).to.have.callCount(4)
         expect(renameEntity).to.have.been.calledWith(
           projectId,
@@ -2377,8 +2434,8 @@ describe('ProjectEntityUpdateHandler', function () {
         )
       })
 
-      it('tells the doc updater to resync the project', function () {
-        const docs = this.docs.map(d => {
+      it('tells the doc updater to resync the project', function (ctx) {
+        const docs = ctx.docs.map(d => {
           if (d.doc._id === 'doc1') {
             return Object.assign({}, d, { path: 'a/b/c/_d_e_f_test.tex' })
           }
@@ -2387,7 +2444,7 @@ describe('ProjectEntityUpdateHandler', function () {
           }
           return d
         })
-        const files = this.files.map(f => {
+        const files = ctx.files.map(f => {
           if (f.file._id === 'file1') {
             return Object.assign({}, f, { path: 'A_.png' })
           }
@@ -2397,7 +2454,7 @@ describe('ProjectEntityUpdateHandler', function () {
           return f
         })
         expect(
-          this.DocumentUpdaterHandler.promises.resyncProjectHistory
+          ctx.DocumentUpdaterHandler.promises.resyncProjectHistory
         ).to.have.been.calledWith(projectId, projectHistoryId, docs, files)
       })
     })
@@ -2424,22 +2481,22 @@ describe('ProjectEntityUpdateHandler', function () {
         },
       ]
       const files = []
-      beforeEach(async function () {
-        this.ProjectGetter.promises.getProject.resolves(this.project)
-        this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
+      beforeEach(async function (ctx) {
+        ctx.ProjectGetter.promises.getProject.resolves(ctx.project)
+        ctx.ProjectEntityHandler.getAllEntitiesFromProject.returns({
           docs,
           files,
           folders,
         })
-        await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
+        await ctx.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
           projectId,
           {}
         )
       })
 
-      it('renames the folder', function () {
+      it('renames the folder', function (ctx) {
         const renameEntity =
-          this.ProjectEntityMongoUpdateHandler.promises.renameEntity
+          ctx.ProjectEntityMongoUpdateHandler.promises.renameEntity
         expect(renameEntity).to.have.callCount(1)
         expect(renameEntity).to.have.been.calledWith(
           projectId,
@@ -2450,7 +2507,7 @@ describe('ProjectEntityUpdateHandler', function () {
         )
       })
 
-      it('tells the doc updater to resync the project', function () {
+      it('tells the doc updater to resync the project', function (ctx) {
         const fixedDocs = docs.map(d => {
           if (d.doc._id === 'doc2') {
             return Object.assign({}, d, { path: 'bad_/doc2.tex' })
@@ -2458,7 +2515,7 @@ describe('ProjectEntityUpdateHandler', function () {
           return d
         })
         expect(
-          this.DocumentUpdaterHandler.promises.resyncProjectHistory
+          ctx.DocumentUpdaterHandler.promises.resyncProjectHistory
         ).to.have.been.calledWith(projectId, projectHistoryId, fixedDocs, files)
       })
     })
@@ -2481,22 +2538,22 @@ describe('ProjectEntityUpdateHandler', function () {
         },
       ]
       const files = []
-      beforeEach(async function () {
-        this.ProjectGetter.promises.getProject.resolves(this.project)
-        this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
+      beforeEach(async function (ctx) {
+        ctx.ProjectGetter.promises.getProject.resolves(ctx.project)
+        ctx.ProjectEntityHandler.getAllEntitiesFromProject.returns({
           docs,
           files,
           folders,
         })
-        await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
+        await ctx.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
           projectId,
           {}
         )
       })
 
-      it('renames the doc', function () {
+      it('renames the doc', function (ctx) {
         const renameEntity =
-          this.ProjectEntityMongoUpdateHandler.promises.renameEntity
+          ctx.ProjectEntityMongoUpdateHandler.promises.renameEntity
         expect(renameEntity).to.have.callCount(1)
         expect(renameEntity).to.have.been.calledWith(
           projectId,
@@ -2507,7 +2564,7 @@ describe('ProjectEntityUpdateHandler', function () {
         )
       })
 
-      it('tells the doc updater to resync the project', function () {
+      it('tells the doc updater to resync the project', function (ctx) {
         const fixedDocs = docs.map(d => {
           if (d.doc._id === 'doc1') {
             return Object.assign({}, d, { path: 'chapters (1)' })
@@ -2515,23 +2572,23 @@ describe('ProjectEntityUpdateHandler', function () {
           return d
         })
         expect(
-          this.DocumentUpdaterHandler.promises.resyncProjectHistory
+          ctx.DocumentUpdaterHandler.promises.resyncProjectHistory
         ).to.have.been.calledWith(projectId, projectHistoryId, fixedDocs, files)
       })
     })
 
     describe('a project with an invalid file tree', function () {
-      beforeEach(function () {
-        this.callback = sinon.stub()
-        this.ProjectGetter.promises.getProject.resolves(this.project)
-        this.ProjectEntityHandler.getAllEntitiesFromProject.throws()
+      beforeEach(function (ctx) {
+        ctx.callback = sinon.stub()
+        ctx.ProjectGetter.promises.getProject.resolves(ctx.project)
+        ctx.ProjectEntityHandler.getAllEntitiesFromProject.throws()
       })
 
-      it('calls the callback with an error', async function () {
+      it('calls the callback with an error', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
+          await ctx.ProjectEntityUpdateHandler.promises.resyncProjectHistory(
             projectId,
             {}
           )
@@ -2545,160 +2602,158 @@ describe('ProjectEntityUpdateHandler', function () {
   })
 
   describe('_cleanUpEntity', function () {
-    beforeEach(function () {
-      this.entityId = '4eecaffcbffa66588e000009'
-      this.ProjectEntityUpdateHandler.promises.unsetRootDoc = sinon
+    beforeEach(function (ctx) {
+      ctx.entityId = '4eecaffcbffa66588e000009'
+      ctx.ProjectEntityUpdateHandler.promises.unsetRootDoc = sinon
         .stub()
         .resolves()
     })
 
     describe('a file', function () {
-      beforeEach(async function () {
-        this.path = '/file/system/path.png'
-        this.entity = { _id: this.entityId }
-        this.newProject = 'new-project'
-        this.subtreeListing =
-          await this.ProjectEntityUpdateHandler._cleanUpEntity(
-            this.project,
-            this.newProject,
-            this.entity,
+      beforeEach(async function (ctx) {
+        ctx.path = '/file/system/path.png'
+        ctx.entity = { _id: ctx.entityId }
+        ctx.newProject = 'new-project'
+        ctx.subtreeListing =
+          await ctx.ProjectEntityUpdateHandler._cleanUpEntity(
+            ctx.project,
+            ctx.newProject,
+            ctx.entity,
             'file',
-            this.path,
+            ctx.path,
             userId,
-            this.source
+            ctx.source
           )
       })
 
-      it('should not attempt to delete from the document updater', function () {
-        this.DocumentUpdaterHandler.promises.deleteDoc.called.should.equal(
-          false
-        )
+      it('should not attempt to delete from the document updater', function (ctx) {
+        ctx.DocumentUpdaterHandler.promises.deleteDoc.called.should.equal(false)
       })
 
-      it('should send the update to the doc updater', function () {
-        const oldFiles = [{ file: this.entity, path: this.path }]
-        this.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
+      it('should send the update to the doc updater', function (ctx) {
+        const oldFiles = [{ file: ctx.entity, path: ctx.path }]
+        ctx.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
           projectId,
           projectHistoryId,
           userId,
           {
             oldFiles,
             oldDocs: [],
-            newProject: this.newProject,
+            newProject: ctx.newProject,
           },
-          this.source
+          ctx.source
         )
       })
 
-      it('should return a subtree listing containing only the file', function () {
-        expect(this.subtreeListing).to.deep.equal([
-          { type: 'file', entity: this.entity, path: this.path },
+      it('should return a subtree listing containing only the file', function (ctx) {
+        expect(ctx.subtreeListing).to.deep.equal([
+          { type: 'file', entity: ctx.entity, path: ctx.path },
         ])
       })
     })
 
     describe('a doc', function () {
-      beforeEach(async function () {
-        this.path = '/file/system/path.tex'
-        this.ProjectEntityUpdateHandler._cleanUpDoc = sinon.stub().resolves()
-        this.entity = { _id: this.entityId }
-        this.newProject = 'new-project'
-        this.subtreeListing =
-          await this.ProjectEntityUpdateHandler._cleanUpEntity(
-            this.project,
-            this.newProject,
-            this.entity,
+      beforeEach(async function (ctx) {
+        ctx.path = '/file/system/path.tex'
+        ctx.ProjectEntityUpdateHandler._cleanUpDoc = sinon.stub().resolves()
+        ctx.entity = { _id: ctx.entityId }
+        ctx.newProject = 'new-project'
+        ctx.subtreeListing =
+          await ctx.ProjectEntityUpdateHandler._cleanUpEntity(
+            ctx.project,
+            ctx.newProject,
+            ctx.entity,
             'doc',
-            this.path,
+            ctx.path,
             userId,
-            this.source
+            ctx.source
           )
       })
 
-      it('should clean up the doc', function () {
-        this.ProjectEntityUpdateHandler._cleanUpDoc
-          .calledWith(this.project, this.entity, this.path, userId)
+      it('should clean up the doc', function (ctx) {
+        ctx.ProjectEntityUpdateHandler._cleanUpDoc
+          .calledWith(ctx.project, ctx.entity, ctx.path, userId)
           .should.equal(true)
       })
 
-      it('should send the update to the doc updater', function () {
-        const oldDocs = [{ doc: this.entity, path: this.path }]
-        this.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
+      it('should send the update to the doc updater', function (ctx) {
+        const oldDocs = [{ doc: ctx.entity, path: ctx.path }]
+        ctx.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
           projectId,
           projectHistoryId,
           userId,
           {
             oldDocs,
             oldFiles: [],
-            newProject: this.newProject,
+            newProject: ctx.newProject,
           },
-          this.source
+          ctx.source
         )
       })
 
-      it('should return a subtree listing containing only the doc', function () {
-        expect(this.subtreeListing).to.deep.equal([
-          { type: 'doc', entity: this.entity, path: this.path },
+      it('should return a subtree listing containing only the doc', function (ctx) {
+        expect(ctx.subtreeListing).to.deep.equal([
+          { type: 'doc', entity: ctx.entity, path: ctx.path },
         ])
       })
     })
 
     describe('a folder', function () {
-      beforeEach(async function () {
-        this.folder = {
+      beforeEach(async function (ctx) {
+        ctx.folder = {
           folders: [
             {
               name: 'subfolder',
               fileRefs: [
-                (this.file1 = { _id: 'file-id-1', name: 'file-name-1' }),
+                (ctx.file1 = { _id: 'file-id-1', name: 'file-name-1' }),
               ],
-              docs: [(this.doc1 = { _id: 'doc-id-1', name: 'doc-name-1' })],
+              docs: [(ctx.doc1 = { _id: 'doc-id-1', name: 'doc-name-1' })],
               folders: [],
             },
           ],
-          fileRefs: [(this.file2 = { _id: 'file-id-2', name: 'file-name-2' })],
-          docs: [(this.doc2 = { _id: 'doc-id-2', name: 'doc-name-2' })],
+          fileRefs: [(ctx.file2 = { _id: 'file-id-2', name: 'file-name-2' })],
+          docs: [(ctx.doc2 = { _id: 'doc-id-2', name: 'doc-name-2' })],
         }
 
-        this.ProjectEntityUpdateHandler._cleanUpDoc = sinon.stub().resolves()
+        ctx.ProjectEntityUpdateHandler._cleanUpDoc = sinon.stub().resolves()
         const path = '/folder'
-        this.newProject = 'new-project'
-        this.subtreeListing =
-          await this.ProjectEntityUpdateHandler._cleanUpEntity(
-            this.project,
-            this.newProject,
-            this.folder,
+        ctx.newProject = 'new-project'
+        ctx.subtreeListing =
+          await ctx.ProjectEntityUpdateHandler._cleanUpEntity(
+            ctx.project,
+            ctx.newProject,
+            ctx.folder,
             'folder',
             path,
             userId,
-            this.source
+            ctx.source
           )
       })
 
-      it('should clean up all sub docs', function () {
-        this.ProjectEntityUpdateHandler._cleanUpDoc
+      it('should clean up all sub docs', function (ctx) {
+        ctx.ProjectEntityUpdateHandler._cleanUpDoc
           .calledWith(
-            this.project,
-            this.doc1,
+            ctx.project,
+            ctx.doc1,
             '/folder/subfolder/doc-name-1',
             userId
           )
           .should.equal(true)
-        this.ProjectEntityUpdateHandler._cleanUpDoc
-          .calledWith(this.project, this.doc2, '/folder/doc-name-2', userId)
+        ctx.ProjectEntityUpdateHandler._cleanUpDoc
+          .calledWith(ctx.project, ctx.doc2, '/folder/doc-name-2', userId)
           .should.equal(true)
       })
 
-      it('should should send one update to the doc updater for all docs and files', function () {
+      it('should should send one update to the doc updater for all docs and files', function (ctx) {
         const oldFiles = [
-          { file: this.file2, path: '/folder/file-name-2' },
-          { file: this.file1, path: '/folder/subfolder/file-name-1' },
+          { file: ctx.file2, path: '/folder/file-name-2' },
+          { file: ctx.file1, path: '/folder/subfolder/file-name-1' },
         ]
         const oldDocs = [
-          { doc: this.doc2, path: '/folder/doc-name-2' },
-          { doc: this.doc1, path: '/folder/subfolder/doc-name-1' },
+          { doc: ctx.doc2, path: '/folder/doc-name-2' },
+          { doc: ctx.doc1, path: '/folder/subfolder/doc-name-1' },
         ]
-        this.DocumentUpdaterHandler.promises.updateProjectStructure
+        ctx.DocumentUpdaterHandler.promises.updateProjectStructure
           .calledWith(
             projectId,
             projectHistoryId,
@@ -2706,94 +2761,94 @@ describe('ProjectEntityUpdateHandler', function () {
             {
               oldFiles,
               oldDocs,
-              newProject: this.newProject,
+              newProject: ctx.newProject,
             },
-            this.source
+            ctx.source
           )
           .should.equal(true)
       })
 
-      it('should return a subtree listing containing all sub-entities', function () {
-        expect(this.subtreeListing).to.have.deep.members([
-          { type: 'folder', entity: this.folder, path: '/folder' },
+      it('should return a subtree listing containing all sub-entities', function (ctx) {
+        expect(ctx.subtreeListing).to.have.deep.members([
+          { type: 'folder', entity: ctx.folder, path: '/folder' },
           {
             type: 'folder',
-            entity: this.folder.folders[0],
+            entity: ctx.folder.folders[0],
             path: '/folder/subfolder',
           },
           {
             type: 'file',
-            entity: this.file1,
+            entity: ctx.file1,
             path: '/folder/subfolder/file-name-1',
           },
           {
             type: 'doc',
-            entity: this.doc1,
+            entity: ctx.doc1,
             path: '/folder/subfolder/doc-name-1',
           },
-          { type: 'file', entity: this.file2, path: '/folder/file-name-2' },
-          { type: 'doc', entity: this.doc2, path: '/folder/doc-name-2' },
+          { type: 'file', entity: ctx.file2, path: '/folder/file-name-2' },
+          { type: 'doc', entity: ctx.doc2, path: '/folder/doc-name-2' },
         ])
       })
     })
   })
 
   describe('_cleanUpDoc', function () {
-    beforeEach(function () {
-      this.doc = {
+    beforeEach(function (ctx) {
+      ctx.doc = {
         _id: new ObjectId(),
         name: 'test.tex',
       }
-      this.path = '/path/to/doc'
-      this.ProjectEntityUpdateHandler.promises.unsetRootDoc = sinon
+      ctx.path = '/path/to/doc'
+      ctx.ProjectEntityUpdateHandler.promises.unsetRootDoc = sinon
         .stub()
         .resolves()
-      this.DocstoreManager.promises.deleteDoc.resolves()
+      ctx.DocstoreManager.promises.deleteDoc.resolves()
     })
 
     describe('when the doc is the root doc', function () {
-      beforeEach(async function () {
-        this.project.rootDoc_id = this.doc._id
-        await this.ProjectEntityUpdateHandler._cleanUpDoc(
-          this.project,
-          this.doc,
-          this.path,
+      beforeEach(async function (ctx) {
+        ctx.project.rootDoc_id = ctx.doc._id
+        await ctx.ProjectEntityUpdateHandler._cleanUpDoc(
+          ctx.project,
+          ctx.doc,
+          ctx.path,
           userId
         )
       })
 
-      it('should unset the root doc', function () {
-        this.ProjectEntityUpdateHandler.promises.unsetRootDoc.should.have.been.calledWith(
+      it('should unset the root doc', function (ctx) {
+        ctx.ProjectEntityUpdateHandler.promises.unsetRootDoc.should.have.been.calledWith(
           projectId
         )
       })
 
-      it('should delete the doc in the doc updater', function () {
-        this.DocumentUpdaterHandler.promises.deleteDoc
-          .calledWith(projectId, this.doc._id.toString())
+      it('should delete the doc in the doc updater', function (ctx) {
+        ctx.DocumentUpdaterHandler.promises.deleteDoc
+          .calledWith(projectId, ctx.doc._id.toString())
           .should.equal(true)
       })
 
-      it('should delete the doc in the doc store', function () {
-        this.DocstoreManager.promises.deleteDoc
-          .calledWith(projectId, this.doc._id.toString(), 'test.tex')
+      it('should delete the doc in the doc store', function (ctx) {
+        ctx.DocstoreManager.promises.deleteDoc
+          .calledWith(projectId, ctx.doc._id.toString(), 'test.tex')
           .should.equal(true)
       })
     })
 
     describe('when the doc is not the root doc', function () {
-      beforeEach(async function () {
-        this.project.rootDoc_id = new ObjectId()
-        await this.ProjectEntityUpdateHandler._cleanUpDoc(
-          this.project,
-          this.doc,
-          this.path,
+      beforeEach(async function (ctx) {
+        ctx.project.rootDoc_id = new ObjectId()
+        await ctx.ProjectEntityUpdateHandler._cleanUpDoc(
+          ctx.project,
+          ctx.doc,
+          ctx.path,
           userId
         )
       })
 
-      it('should not unset the root doc', function () {
-        this.ProjectEntityUpdateHandler.promises.unsetRootDoc.called.should.equal(
+      it('should not unset the root doc', function (ctx) {
+        ctx.ProjectEntityUpdateHandler.promises.unsetRootDoc.called.should.equal(
           false
         )
       })
@@ -2801,132 +2856,126 @@ describe('ProjectEntityUpdateHandler', function () {
   })
 
   describe('convertDocToFile', function () {
-    beforeEach(function () {
-      this.docPath = '/folder/doc.tex'
-      this.docLines = ['line one', 'line two']
-      this.tmpFilePath = '/tmp/file'
-      this.fileStoreUrl = 'http://filestore/file'
-      this.folder = { _id: new ObjectId() }
-      this.rev = 3
-      this.ProjectLocator.promises.findElement
+    beforeEach(function (ctx) {
+      ctx.docPath = '/folder/doc.tex'
+      ctx.docLines = ['line one', 'line two']
+      ctx.tmpFilePath = '/tmp/file'
+      ctx.fileStoreUrl = 'http://filestore/file'
+      ctx.folder = { _id: new ObjectId() }
+      ctx.rev = 3
+      ctx.ProjectLocator.promises.findElement
         .withArgs({
-          project_id: this.project._id,
-          element_id: this.doc._id,
+          project_id: ctx.project._id,
+          element_id: ctx.doc._id,
           type: 'doc',
         })
         .resolves({
-          element: this.doc,
-          path: { fileSystem: this.path },
-          folder: this.folder,
+          element: ctx.doc,
+          path: { fileSystem: ctx.path },
+          folder: ctx.folder,
         })
-      this.ProjectLocator.promises.findElement
+      ctx.ProjectLocator.promises.findElement
         .withArgs({
-          project_id: this.project._id.toString(),
-          element_id: this.file._id,
+          project_id: ctx.project._id.toString(),
+          element_id: ctx.file._id,
           type: 'file',
         })
         .resolves({
-          element: this.file,
-          path: this.docPath,
-          folder: this.folder,
+          element: ctx.file,
+          path: ctx.docPath,
+          folder: ctx.folder,
         })
-      this.DocstoreManager.promises.getDoc
-        .withArgs(this.project._id, this.doc._id)
-        .resolves({ lines: this.docLines, rev: this.rev })
-      this.FileWriter.promises.writeLinesToDisk.resolves(this.tmpFilePath)
-      this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
-        fileRef: this.file,
+      ctx.DocstoreManager.promises.getDoc
+        .withArgs(ctx.project._id, ctx.doc._id)
+        .resolves({ lines: ctx.docLines, rev: ctx.rev })
+      ctx.FileWriter.promises.writeLinesToDisk.resolves(ctx.tmpFilePath)
+      ctx.FileStoreHandler.promises.uploadFileFromDisk.resolves({
+        fileRef: ctx.file,
         createdBlob: true,
       })
-      this.ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile.resolves(
-        this.project
+      ctx.ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile.resolves(
+        ctx.project
       )
     })
 
     describe('successfully', function () {
-      beforeEach(async function () {
-        await this.ProjectEntityUpdateHandler.promises.convertDocToFile(
-          this.project._id,
-          this.doc._id,
+      beforeEach(async function (ctx) {
+        await ctx.ProjectEntityUpdateHandler.promises.convertDocToFile(
+          ctx.project._id,
+          ctx.doc._id,
           userId,
-          this.source
+          ctx.source
         )
       })
 
-      it('deletes the document in doc updater', function () {
+      it('deletes the document in doc updater', function (ctx) {
         expect(
-          this.DocumentUpdaterHandler.promises.deleteDoc
-        ).to.have.been.calledWith(this.project._id, this.doc._id)
+          ctx.DocumentUpdaterHandler.promises.deleteDoc
+        ).to.have.been.calledWith(ctx.project._id, ctx.doc._id)
       })
 
-      it('uploads the file to filestore', function () {
+      it('uploads the file to filestore', function (ctx) {
         expect(
-          this.FileStoreHandler.promises.uploadFileFromDisk
+          ctx.FileStoreHandler.promises.uploadFileFromDisk
         ).to.have.been.calledWith(
-          this.project._id,
-          { name: this.doc.name, rev: this.rev + 1 },
-          this.tmpFilePath
+          ctx.project._id,
+          { name: ctx.doc.name, rev: ctx.rev + 1 },
+          ctx.tmpFilePath
         )
       })
 
-      it('cleans up the temporary file', function () {
-        expect(this.fs.promises.unlink).to.have.been.calledWith(
-          this.tmpFilePath
-        )
+      it('cleans up the temporary file', function (ctx) {
+        expect(ctx.fs.promises.unlink).to.have.been.calledWith(ctx.tmpFilePath)
       })
 
-      it('replaces the doc with the file', function () {
+      it('replaces the doc with the file', function (ctx) {
         expect(
-          this.ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile
+          ctx.ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile
         ).to.have.been.calledWith(
-          this.project._id,
-          this.doc._id,
-          this.file,
+          ctx.project._id,
+          ctx.doc._id,
+          ctx.file,
           userId
         )
       })
 
-      it('notifies document updater of changes', function () {
+      it('notifies document updater of changes', function (ctx) {
         expect(
-          this.DocumentUpdaterHandler.promises.updateProjectStructure
+          ctx.DocumentUpdaterHandler.promises.updateProjectStructure
         ).to.have.been.calledWith(
-          this.project._id,
-          this.project.overleaf.history.id,
+          ctx.project._id,
+          ctx.project.overleaf.history.id,
           userId,
           {
-            oldDocs: [{ doc: this.doc, path: this.path }],
+            oldDocs: [{ doc: ctx.doc, path: ctx.path }],
             newFiles: [
               {
-                file: this.file,
-                path: this.path,
+                file: ctx.file,
+                path: ctx.path,
                 createdBlob: true,
               },
             ],
-            newProject: this.project,
+            newProject: ctx.project,
           },
-          this.source
+          ctx.source
         )
       })
 
-      it('should notify real-time of the doc deletion', function () {
-        expect(
-          this.EditorRealTimeController.emitToRoom
-        ).to.have.been.calledWith(
-          this.project._id,
+      it('should notify real-time of the doc deletion', function (ctx) {
+        expect(ctx.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
+          ctx.project._id,
           'removeEntity',
-          this.doc._id,
+          ctx.doc._id,
           'convertDocToFile'
         )
       })
 
-      it('should notify real-time of the file creation', function () {
-        expect(
-          this.EditorRealTimeController.emitToRoom
-        ).to.have.been.calledWith(
-          this.project._id,
+      it('should notify real-time of the file creation', function (ctx) {
+        expect(ctx.EditorRealTimeController.emitToRoom).to.have.been.calledWith(
+          ctx.project._id,
           'reciveNewFile',
-          this.folder._id,
-          this.file,
+          ctx.folder._id,
+          ctx.file,
           'convertDocToFile',
           null
         )
@@ -2934,24 +2983,24 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('when the doc has ranges', function () {
-      it('should throw a DocHasRangesError', async function () {
-        this.ranges = { comments: [{ id: 123 }] }
-        this.DocstoreManager.promises.getDoc
-          .withArgs(this.project._id, this.doc._id)
+      it('should throw a DocHasRangesError', async function (ctx) {
+        ctx.ranges = { comments: [{ id: 123 }] }
+        ctx.DocstoreManager.promises.getDoc
+          .withArgs(ctx.project._id, ctx.doc._id)
           .resolves({
-            lines: this.docLines,
+            lines: ctx.docLines,
             rev: 'rev',
             version: 'version',
-            ranges: this.ranges,
+            ranges: ctx.ranges,
           })
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.convertDocToFile(
-            this.project._id,
-            this.doc._id,
-            this.user._id,
-            this.source
+          await ctx.ProjectEntityUpdateHandler.promises.convertDocToFile(
+            ctx.project._id,
+            ctx.doc._id,
+            ctx.user._id,
+            ctx.source
           )
         } catch (err) {
           error = err
@@ -2963,65 +3012,65 @@ describe('ProjectEntityUpdateHandler', function () {
   })
 
   describe('isPathValidForMainBibliographyDoc', function () {
-    it('should not allow other endings than .bib', function () {
+    it('should not allow other endings than .bib', function (ctx) {
       const endings = ['.tex', '.png', '.jpg', '.pdf', '.docx', '.doc']
       endings.forEach(ending => {
         expect(
-          this.ProjectEntityUpdateHandler.isPathValidForMainBibliographyDoc(
+          ctx.ProjectEntityUpdateHandler.isPathValidForMainBibliographyDoc(
             `/foo/bar/baz${ending}`
           )
         ).to.be.false
       })
     })
 
-    it('should allow a mix of lower and uppercase letters', function () {
+    it('should allow a mix of lower and uppercase letters', function (ctx) {
       const endings = ['.bib', '.BiB', '.BIB', '.bIB']
       endings.forEach(ending => {
         expect(
-          this.ProjectEntityUpdateHandler.isPathValidForMainBibliographyDoc(
+          ctx.ProjectEntityUpdateHandler.isPathValidForMainBibliographyDoc(
             `/foo/bar/baz.${ending}`
           )
         ).to.be.true
       })
     })
 
-    it('should not allow a path without an extension', function () {
+    it('should not allow a path without an extension', function (ctx) {
       expect(
-        this.ProjectEntityUpdateHandler.isPathValidForMainBibliographyDoc(
+        ctx.ProjectEntityUpdateHandler.isPathValidForMainBibliographyDoc(
           '/foo/bar/baz'
         )
       ).to.be.false
     })
 
-    it('should not allow the empty path', function () {
+    it('should not allow the empty path', function (ctx) {
       expect(
-        this.ProjectEntityUpdateHandler.isPathValidForMainBibliographyDoc('')
+        ctx.ProjectEntityUpdateHandler.isPathValidForMainBibliographyDoc('')
       ).to.be.false
     })
   })
 
   describe('setMainBibliographyDoc', function () {
     describe('on success', function () {
-      beforeEach(async function () {
-        this.doc = {
+      beforeEach(async function (ctx) {
+        ctx.doc = {
           _id: new ObjectId(),
           name: 'test.bib',
         }
-        this.path = '/path/to/test.bib'
-        this.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId
-          .withArgs(this.project._id, this.doc._id)
-          .resolves(this.path)
+        ctx.path = '/path/to/test.bib'
+        ctx.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId
+          .withArgs(ctx.project._id, ctx.doc._id)
+          .resolves(ctx.path)
 
-        await this.ProjectEntityUpdateHandler.promises.setMainBibliographyDoc(
-          this.project._id,
-          this.doc._id
+        await ctx.ProjectEntityUpdateHandler.promises.setMainBibliographyDoc(
+          ctx.project._id,
+          ctx.doc._id
         )
       })
 
-      it('should update the project with the new main bibliography doc', function () {
-        expect(this.ProjectModel.updateOne).to.have.been.calledWith(
-          { _id: this.project._id },
-          { mainBibliographyDoc_id: this.doc._id }
+      it('should update the project with the new main bibliography doc', function (ctx) {
+        expect(ctx.ProjectModel.updateOne).to.have.been.calledWith(
+          { _id: ctx.project._id },
+          { mainBibliographyDoc_id: ctx.doc._id }
         )
       })
     })
@@ -3029,18 +3078,18 @@ describe('ProjectEntityUpdateHandler', function () {
     describe('on failure', function () {
       describe("when document can't be found", function () {
         let setMainBibliographyDocPromise
-        beforeEach(function () {
-          this.doc = {
+        beforeEach(function (ctx) {
+          ctx.doc = {
             _id: new ObjectId(),
             name: 'test.bib',
           }
-          this.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId
-            .withArgs(this.project._id, this.doc._id)
+          ctx.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId
+            .withArgs(ctx.project._id, ctx.doc._id)
             .rejects(new Error('error'))
           setMainBibliographyDocPromise =
-            this.ProjectEntityUpdateHandler.promises.setMainBibliographyDoc(
-              this.project._id,
-              this.doc._id
+            ctx.ProjectEntityUpdateHandler.promises.setMainBibliographyDoc(
+              ctx.project._id,
+              ctx.doc._id
             )
         })
 
@@ -3056,7 +3105,7 @@ describe('ProjectEntityUpdateHandler', function () {
           expect(error).to.be.instanceOf(Error)
         })
 
-        it('should not update the project with the new main bibliography doc', async function () {
+        it('should not update the project with the new main bibliography doc', async function (ctx) {
           let error
 
           try {
@@ -3066,26 +3115,26 @@ describe('ProjectEntityUpdateHandler', function () {
           }
 
           expect(error).to.exist
-          expect(this.ProjectModel.updateOne).to.not.have.been.called
+          expect(ctx.ProjectModel.updateOne).to.not.have.been.called
         })
       })
 
       describe("when path is not a bib file can't be found", function () {
         let setMainBibliographyDocPromise
-        beforeEach(function () {
-          this.doc = {
+        beforeEach(function (ctx) {
+          ctx.doc = {
             _id: new ObjectId(),
             name: 'test.bib',
           }
 
-          this.path = '/path/to/test.tex'
-          this.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId
-            .withArgs(this.project._id, this.doc._id)
-            .resolves(this.path)
+          ctx.path = '/path/to/test.tex'
+          ctx.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId
+            .withArgs(ctx.project._id, ctx.doc._id)
+            .resolves(ctx.path)
           setMainBibliographyDocPromise =
-            this.ProjectEntityUpdateHandler.promises.setMainBibliographyDoc(
-              this.project._id,
-              this.doc._id
+            ctx.ProjectEntityUpdateHandler.promises.setMainBibliographyDoc(
+              ctx.project._id,
+              ctx.doc._id
             )
         })
 
@@ -3101,7 +3150,7 @@ describe('ProjectEntityUpdateHandler', function () {
           expect(error).to.be.instanceOf(Error)
         })
 
-        it('should not update the project with the new main bibliography doc', async function () {
+        it('should not update the project with the new main bibliography doc', async function (ctx) {
           let error
 
           try {
@@ -3111,7 +3160,7 @@ describe('ProjectEntityUpdateHandler', function () {
           }
 
           expect(error).to.exist
-          expect(this.ProjectModel.updateOne).to.not.have.been.called
+          expect(ctx.ProjectModel.updateOne).to.not.have.been.called
         })
       })
     })
@@ -3120,24 +3169,24 @@ describe('ProjectEntityUpdateHandler', function () {
   describe('appendToDoc', function () {
     describe('when document cannot be found', function () {
       let appendToDocPromise
-      beforeEach(function () {
-        this.appendedLines = ['5678', 'def']
-        this.DocumentUpdaterHandler.promises.appendToDocument = sinon.stub()
-        this.ProjectLocator.promises.findElement = sinon.stub()
-        this.ProjectLocator.promises.findElement
+      beforeEach(function (ctx) {
+        ctx.appendedLines = ['5678', 'def']
+        ctx.DocumentUpdaterHandler.promises.appendToDocument = sinon.stub()
+        ctx.ProjectLocator.promises.findElement = sinon.stub()
+        ctx.ProjectLocator.promises.findElement
           .withArgs({ project_id: projectId, element_id: docId, type: 'doc' })
           .rejects(new Errors.NotFoundError())
         appendToDocPromise =
-          this.ProjectEntityUpdateHandler.promises.appendToDocWithPath(
+          ctx.ProjectEntityUpdateHandler.promises.appendToDocWithPath(
             projectId,
             docId,
-            this.appendedLines,
-            this.source,
+            ctx.appendedLines,
+            ctx.source,
             userId
           )
       })
 
-      it('should not talk to DocumentUpdaterHandler', async function () {
+      it('should not talk to DocumentUpdaterHandler', async function (ctx) {
         let error
 
         try {
@@ -3147,7 +3196,7 @@ describe('ProjectEntityUpdateHandler', function () {
         }
 
         expect(error).to.exist
-        this.DocumentUpdaterHandler.promises.appendToDocument.should.not.have
+        ctx.DocumentUpdaterHandler.promises.appendToDocument.should.not.have
           .been.called
       })
 
@@ -3166,33 +3215,33 @@ describe('ProjectEntityUpdateHandler', function () {
 
     describe('when document is found', function () {
       let appendToDocResult
-      beforeEach(async function () {
-        this.appendedLines = ['5678', 'def']
-        this.DocumentUpdaterHandler.promises.appendToDocument = sinon.stub()
-        this.DocumentUpdaterHandler.promises.appendToDocument
-          .withArgs(projectId, docId, userId, this.appendedLines, this.source)
+      beforeEach(async function (ctx) {
+        ctx.appendedLines = ['5678', 'def']
+        ctx.DocumentUpdaterHandler.promises.appendToDocument = sinon.stub()
+        ctx.DocumentUpdaterHandler.promises.appendToDocument
+          .withArgs(projectId, docId, userId, ctx.appendedLines, ctx.source)
           .resolves({ rev: 1 })
-        this.ProjectLocator.promises.findElement = sinon.stub()
-        this.ProjectLocator.promises.findElement
+        ctx.ProjectLocator.promises.findElement = sinon.stub()
+        ctx.ProjectLocator.promises.findElement
           .withArgs({ project_id: projectId, element_id: docId, type: 'doc' })
           .resolves({ element: { _id: docId } })
         appendToDocResult =
-          await this.ProjectEntityUpdateHandler.promises.appendToDocWithPath(
+          await ctx.ProjectEntityUpdateHandler.promises.appendToDocWithPath(
             projectId,
             docId,
-            this.appendedLines,
-            this.source,
+            ctx.appendedLines,
+            ctx.source,
             userId
           )
       })
 
-      it('should forward call to DocumentUpdaterHandler.appendToDocument', function () {
-        this.DocumentUpdaterHandler.promises.appendToDocument.should.have.been.calledWith(
+      it('should forward call to DocumentUpdaterHandler.appendToDocument', function (ctx) {
+        ctx.DocumentUpdaterHandler.promises.appendToDocument.should.have.been.calledWith(
           projectId,
           docId,
           userId,
-          this.appendedLines,
-          this.source
+          ctx.appendedLines,
+          ctx.source
         )
       })
 
@@ -3202,27 +3251,27 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('when DocumentUpdater throws an error', function () {
-      beforeEach(function () {
-        this.appendedLines = ['5678', 'def']
-        this.DocumentUpdaterHandler.promises.appendToDocument = sinon.stub()
-        this.DocumentUpdaterHandler.promises.appendToDocument.rejects(
+      beforeEach(function (ctx) {
+        ctx.appendedLines = ['5678', 'def']
+        ctx.DocumentUpdaterHandler.promises.appendToDocument = sinon.stub()
+        ctx.DocumentUpdaterHandler.promises.appendToDocument.rejects(
           new Error()
         )
-        this.ProjectLocator.promises.findElement = sinon.stub()
-        this.ProjectLocator.promises.findElement
+        ctx.ProjectLocator.promises.findElement = sinon.stub()
+        ctx.ProjectLocator.promises.findElement
           .withArgs({ project_id: projectId, element_id: docId, type: 'doc' })
           .resolves({ element: { _id: docId } })
       })
 
-      it('should return the response from DocumentUpdaterHandler', async function () {
+      it('should return the response from DocumentUpdaterHandler', async function (ctx) {
         let error
 
         try {
-          await this.ProjectEntityUpdateHandler.promises.appendToDocWithPath(
+          await ctx.ProjectEntityUpdateHandler.promises.appendToDocWithPath(
             projectId,
             docId,
-            this.appendedLines,
-            this.source,
+            ctx.appendedLines,
+            ctx.source,
             userId
           )
         } catch (err) {

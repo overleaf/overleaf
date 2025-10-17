@@ -1,12 +1,14 @@
-const { expect } = require('chai')
-const sinon = require('sinon')
-const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongodb-legacy')
-const {
+import { expect } from 'chai'
+import sinon from 'sinon'
+import SandboxedModule from 'sandboxed-module'
+import mongodb from 'mongodb-legacy'
+import {
   cleanupTestDatabase,
   db,
   waitForDb,
-} = require('../../../../app/src/infrastructure/mongodb')
+} from '../../../../app/src/infrastructure/mongodb.js'
+
+const { ObjectId } = mongodb
 
 const MODULE_PATH = '../../../../app/src/Features/History/HistoryManager'
 

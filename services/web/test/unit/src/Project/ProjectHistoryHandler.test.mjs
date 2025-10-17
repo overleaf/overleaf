@@ -46,11 +46,14 @@ describe('ProjectHistoryHandler', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/Features/History/HistoryManager.mjs', () => ({
-      default: (ctx.HistoryManager = {
-        promises: {},
-      }),
-    }))
+    vi.doMock(
+      '../../../../app/src/Features/History/HistoryManager.mjs',
+      () => ({
+        default: (ctx.HistoryManager = {
+          promises: {},
+        }),
+      })
+    )
 
     vi.doMock(
       '../../../../app/src/Features/Project/ProjectEntityUpdateHandler',

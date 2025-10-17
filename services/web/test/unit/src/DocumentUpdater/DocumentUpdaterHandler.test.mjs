@@ -1,26 +1,28 @@
-const sinon = require('sinon')
-const SandboxedModule = require('sandboxed-module')
-const path = require('path')
-const { expect } = require('chai')
-const { ObjectId } = require('mongodb-legacy')
-const nock = require('nock')
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+import path from 'path'
+import mongodb from 'mongodb-legacy'
+import nock from 'nock'
+
+const { ObjectId } = mongodb
+
 const modulePath = path.join(
-  __dirname,
+  import.meta.dirname,
   '../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler'
 )
 
 describe('DocumentUpdaterHandler', function () {
-  beforeEach(function () {
-    this.project_id = 'project-id-923'
-    this.projectHistoryId = 'ol-project-id-1'
-    this.doc_id = 'doc-id-394'
-    this.lines = ['one', 'two', 'three']
-    this.version = 42
-    this.user_id = 'mock-user-id-123'
-    this.project = { _id: this.project_id }
+  beforeEach(async function (ctx) {
+    ctx.project_id = 'project-id-923'
+    ctx.projectHistoryId = 'ol-project-id-1'
+    ctx.doc_id = 'doc-id-394'
+    ctx.lines = ['one', 'two', 'three']
+    ctx.version = 42
+    ctx.user_id = 'mock-user-id-123'
+    ctx.project = { _id: ctx.project_id }
 
-    this.projectEntityHandler = {}
-    this.settings = {
+    ctx.projectEntityHandler = {}
+    ctx.settings = {
       apis: {
         documentupdater: {
           url: 'http://document_updater.example.com',
@@ -31,41 +33,60 @@ describe('DocumentUpdaterHandler', function () {
       },
       moduleImportSequence: [],
     }
-    this.source = 'dropbox'
-    this.docUpdaterMock = nock(this.settings.apis.documentupdater.url)
+    ctx.source = 'dropbox'
+    ctx.docUpdaterMock = nock(ctx.settings.apis.documentupdater.url)
 
-    this.ProjectGetter = {
+    ctx.ProjectGetter = {
       promises: {
         getProjectWithoutLock: sinon.stub(),
       },
     }
-    this.ProjectGetter.promises.getProjectWithoutLock
-      .withArgs(this.project_id)
-      .resolves(this.project)
+    ctx.ProjectGetter.promises.getProjectWithoutLock
+      .withArgs(ctx.project_id)
+      .resolves(ctx.project)
 
-    this.handler = SandboxedModule.require(modulePath, {
-      requires: {
-        '@overleaf/settings': this.settings,
-        '../Project/ProjectEntityHandler': this.projectEntityHandler,
-        '../../models/Project': {
-          Project: (this.Project = {}),
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.settings,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectEntityHandler',
+      () => ({
+        default: ctx.projectEntityHandler,
+      })
+    )
+
+    vi.doMock('../../../../app/src/models/Project', () => ({
+      Project: (ctx.Project = {}),
+    }))
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
+      default: ctx.ProjectGetter,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Project/ProjectLocator', () => ({
+      default: {},
+    }))
+
+    vi.doMock('@overleaf/metrics', () => ({
+      default: {
+        Timer: class {
+          done() {}
         },
-        '../Project/ProjectGetter': this.ProjectGetter,
-        '../../Features/Project/ProjectLocator': {},
-        '@overleaf/metrics': {
-          Timer: class {
-            done() {}
-          },
-        },
-        '../../infrastructure/Modules': {
-          promises: {
-            hooks: {
-              fire: sinon.stub().resolves(),
-            },
+      },
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
+      default: {
+        promises: {
+          hooks: {
+            fire: sinon.stub().resolves(),
           },
         },
       },
-    })
+    }))
+
+    ctx.handler = (await import(modulePath)).default
   })
 
   afterEach(function () {
@@ -74,36 +95,36 @@ describe('DocumentUpdaterHandler', function () {
 
   describe('flushProjectToMongo', function () {
     describe('successfully', function () {
-      beforeEach(async function () {
-        this.docUpdaterMock.post(`/project/${this.project_id}/flush`).reply(204)
-        await this.handler.promises.flushProjectToMongo(this.project_id)
+      beforeEach(async function (ctx) {
+        ctx.docUpdaterMock.post(`/project/${ctx.project_id}/flush`).reply(204)
+        await ctx.handler.promises.flushProjectToMongo(ctx.project_id)
       })
 
-      it('should flush the document from the document updater', function () {
-        expect(this.docUpdaterMock.isDone()).to.be.true
+      it('should flush the document from the document updater', function (ctx) {
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
       })
     })
 
     describe('when the document updater API returns an error', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .post(`/project/${this.project_id}/flush`)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/flush`)
           .replyWithError('boom')
       })
 
-      it('should reject with an error', async function () {
-        await expect(this.handler.promises.flushProjectToMongo(this.project_id))
+      it('should reject with an error', async function (ctx) {
+        await expect(ctx.handler.promises.flushProjectToMongo(ctx.project_id))
           .to.be.rejected
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
-      beforeEach(function () {
-        this.docUpdaterMock.post(`/project/${this.project_id}/flush`).reply(500)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock.post(`/project/${ctx.project_id}/flush`).reply(500)
       })
 
-      it('should reject with an error', async function () {
-        await expect(this.handler.promises.flushProjectToMongo(this.project_id))
+      it('should reject with an error', async function (ctx) {
+        await expect(ctx.handler.promises.flushProjectToMongo(ctx.project_id))
           .to.be.rejected
       })
     })
@@ -111,40 +132,38 @@ describe('DocumentUpdaterHandler', function () {
 
   describe('flushProjectToMongoAndDelete', function () {
     describe('successfully', function () {
-      beforeEach(async function () {
-        this.docUpdaterMock.delete(`/project/${this.project_id}`).reply(204)
-        await this.handler.promises.flushProjectToMongoAndDelete(
-          this.project_id
-        )
+      beforeEach(async function (ctx) {
+        ctx.docUpdaterMock.delete(`/project/${ctx.project_id}`).reply(204)
+        await ctx.handler.promises.flushProjectToMongoAndDelete(ctx.project_id)
       })
 
-      it('should delete the project from the document updater', function () {
-        expect(this.docUpdaterMock.isDone()).to.be.true
+      it('should delete the project from the document updater', function (ctx) {
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
       })
     })
 
     describe('when the document updater API returns an error', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .delete(`/project/${this.project_id}`)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .delete(`/project/${ctx.project_id}`)
           .replyWithError('boom')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.flushProjectToMongoAndDelete(this.project_id)
+          ctx.handler.promises.flushProjectToMongoAndDelete(ctx.project_id)
         ).to.be.rejected
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
-      beforeEach(function () {
-        this.docUpdaterMock.delete(`/project/${this.project_id}`).reply(500)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock.delete(`/project/${ctx.project_id}`).reply(500)
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.flushProjectToMongoAndDelete(this.project_id)
+          ctx.handler.promises.flushProjectToMongoAndDelete(ctx.project_id)
         ).to.be.rejected
       })
     })
@@ -152,45 +171,42 @@ describe('DocumentUpdaterHandler', function () {
 
   describe('flushDocToMongo', function () {
     describe('successfully', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .post(`/project/${this.project_id}/doc/${this.doc_id}/flush`)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}/flush`)
           .reply(204)
       })
 
-      it('should flush the document from the document updater', async function () {
-        await this.handler.promises.flushDocToMongo(
-          this.project_id,
-          this.doc_id
-        )
-        expect(this.docUpdaterMock.isDone()).to.be.true
+      it('should flush the document from the document updater', async function (ctx) {
+        await ctx.handler.promises.flushDocToMongo(ctx.project_id, ctx.doc_id)
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
       })
     })
 
     describe('when the document updater API returns an error', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .post(`/project/${this.project_id}/doc/${this.doc_id}/flush`)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}/flush`)
           .replyWithError('boom')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.flushDocToMongo(this.project_id, this.doc_id)
+          ctx.handler.promises.flushDocToMongo(ctx.project_id, ctx.doc_id)
         ).to.be.rejected
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .post(`/project/${this.project_id}/doc/${this.doc_id}/flush`)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}/flush`)
           .reply(500)
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.flushDocToMongo(this.project_id, this.doc_id)
+          ctx.handler.promises.flushDocToMongo(ctx.project_id, ctx.doc_id)
         ).to.be.rejected
       })
     })
@@ -198,142 +214,132 @@ describe('DocumentUpdaterHandler', function () {
 
   describe('deleteDoc', function () {
     describe('successfully', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .delete(`/project/${this.project_id}/doc/${this.doc_id}`)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .delete(`/project/${ctx.project_id}/doc/${ctx.doc_id}`)
           .reply(204)
       })
 
-      it('should delete the document from the document updater', async function () {
-        await this.handler.promises.deleteDoc(this.project_id, this.doc_id)
-        expect(this.docUpdaterMock.isDone()).to.be.true
+      it('should delete the document from the document updater', async function (ctx) {
+        await ctx.handler.promises.deleteDoc(ctx.project_id, ctx.doc_id)
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
       })
     })
 
     describe('when the document updater API returns an error', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .delete(`/project/${this.project_id}/doc/${this.doc_id}`)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .delete(`/project/${ctx.project_id}/doc/${ctx.doc_id}`)
           .replyWithError('boom')
       })
 
-      it('should reject with an error', async function () {
-        await expect(
-          this.handler.promises.deleteDoc(this.project_id, this.doc_id)
-        ).to.be.rejected
+      it('should reject with an error', async function (ctx) {
+        await expect(ctx.handler.promises.deleteDoc(ctx.project_id, ctx.doc_id))
+          .to.be.rejected
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .delete(`/project/${this.project_id}/doc/${this.doc_id}`)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .delete(`/project/${ctx.project_id}/doc/${ctx.doc_id}`)
           .reply(500)
       })
 
-      it('should reject with an error', async function () {
-        await expect(
-          this.handler.promises.deleteDoc(this.project_id, this.doc_id)
-        ).to.be.rejected
+      it('should reject with an error', async function (ctx) {
+        await expect(ctx.handler.promises.deleteDoc(ctx.project_id, ctx.doc_id))
+          .to.be.rejected
       })
     })
 
     describe("with 'ignoreFlushErrors' option", function () {
-      it('when option is true, should send a `ignore_flush_errors=true` URL query to document-updater', async function () {
-        this.docUpdaterMock
+      it('when option is true, should send a `ignore_flush_errors=true` URL query to document-updater', async function (ctx) {
+        ctx.docUpdaterMock
           .delete(
-            `/project/${this.project_id}/doc/${this.doc_id}?ignore_flush_errors=true`
+            `/project/${ctx.project_id}/doc/${ctx.doc_id}?ignore_flush_errors=true`
           )
           .reply(204)
-        await this.handler.promises.deleteDoc(
-          this.project_id,
-          this.doc_id,
-          true
-        )
-        expect(this.docUpdaterMock.isDone()).to.be.true
+        await ctx.handler.promises.deleteDoc(ctx.project_id, ctx.doc_id, true)
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
       })
 
-      it("when option is false, shouldn't send any URL query to document-updater", async function () {
-        this.docUpdaterMock
-          .delete(`/project/${this.project_id}/doc/${this.doc_id}`)
+      it("when option is false, shouldn't send any URL query to document-updater", async function (ctx) {
+        ctx.docUpdaterMock
+          .delete(`/project/${ctx.project_id}/doc/${ctx.doc_id}`)
           .reply(204)
-        await this.handler.promises.deleteDoc(
-          this.project_id,
-          this.doc_id,
-          false
-        )
-        expect(this.docUpdaterMock.isDone()).to.be.true
+        await ctx.handler.promises.deleteDoc(ctx.project_id, ctx.doc_id, false)
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
       })
     })
   })
 
   describe('setDocument', function () {
     describe('successfully', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .post(`/project/${this.project_id}/doc/${this.doc_id}`, {
-            lines: this.lines,
-            source: this.source,
-            user_id: this.user_id,
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}`, {
+            lines: ctx.lines,
+            source: ctx.source,
+            user_id: ctx.user_id,
           })
           .reply(204)
       })
 
-      it('should set the document in the document updater', async function () {
-        await this.handler.promises.setDocument(
-          this.project_id,
-          this.doc_id,
-          this.user_id,
-          this.lines,
-          this.source
+      it('should set the document in the document updater', async function (ctx) {
+        await ctx.handler.promises.setDocument(
+          ctx.project_id,
+          ctx.doc_id,
+          ctx.user_id,
+          ctx.lines,
+          ctx.source
         )
-        expect(this.docUpdaterMock.isDone()).to.be.true
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
       })
     })
 
     describe('when the document updater API returns an error', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .post(`/project/${this.project_id}/doc/${this.doc_id}`, {
-            lines: this.lines,
-            source: this.source,
-            user_id: this.user_id,
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}`, {
+            lines: ctx.lines,
+            source: ctx.source,
+            user_id: ctx.user_id,
           })
           .replyWithError('boom')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.setDocument(
-            this.project_id,
-            this.doc_id,
-            this.user_id,
-            this.lines,
-            this.source
+          ctx.handler.promises.setDocument(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.user_id,
+            ctx.lines,
+            ctx.source
           )
         ).to.be.rejected
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .post(`/project/${this.project_id}/doc/${this.doc_id}`, {
-            lines: this.lines,
-            source: this.source,
-            user_id: this.user_id,
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}`, {
+            lines: ctx.lines,
+            source: ctx.source,
+            user_id: ctx.user_id,
           })
           .reply(500)
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.setDocument(
-            this.project_id,
-            this.doc_id,
-            this.user_id,
-            this.lines,
-            this.source
+          ctx.handler.promises.setDocument(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.user_id,
+            ctx.lines,
+            ctx.source
           )
         ).to.be.rejected
       })
@@ -341,90 +347,90 @@ describe('DocumentUpdaterHandler', function () {
   })
 
   describe('getComment', function () {
-    beforeEach(function () {
-      this.comment = { id: new ObjectId().toString() }
-      this.docUpdaterMock
+    beforeEach(function (ctx) {
+      ctx.comment = { id: new ObjectId().toString() }
+      ctx.docUpdaterMock
         .get(
-          `/project/${this.project_id}/doc/${this.doc_id}/comment/${this.comment.id}`
+          `/project/${ctx.project_id}/doc/${ctx.doc_id}/comment/${ctx.comment.id}`
         )
-        .reply(200, this.comment)
+        .reply(200, ctx.comment)
     })
 
-    it('should get the comment from the document updater', async function () {
-      const body = await this.handler.promises.getComment(
-        this.project_id,
-        this.doc_id,
-        this.comment.id
+    it('should get the comment from the document updater', async function (ctx) {
+      const body = await ctx.handler.promises.getComment(
+        ctx.project_id,
+        ctx.doc_id,
+        ctx.comment.id
       )
-      expect(body).to.deep.equal(this.comment)
+      expect(body).to.deep.equal(ctx.comment)
     })
   })
 
   describe('getDocument', function () {
-    beforeEach(function () {
-      this.doc = {
-        lines: this.lines,
-        version: this.version,
+    beforeEach(function (ctx) {
+      ctx.doc = {
+        lines: ctx.lines,
+        version: ctx.version,
         ops: ['mock-op-1', 'mock-op-2'],
         ranges: { mock: 'ranges' },
       }
-      this.fromVersion = 2
+      ctx.fromVersion = 2
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
           .get(
-            `/project/${this.project_id}/doc/${this.doc_id}?fromVersion=${this.fromVersion}`
+            `/project/${ctx.project_id}/doc/${ctx.doc_id}?fromVersion=${ctx.fromVersion}`
           )
-          .reply(200, this.doc)
+          .reply(200, ctx.doc)
       })
 
-      it('should return the lines and version', async function () {
-        const doc = await this.handler.promises.getDocument(
-          this.project_id,
-          this.doc_id,
-          this.fromVersion
+      it('should return the lines and version', async function (ctx) {
+        const doc = await ctx.handler.promises.getDocument(
+          ctx.project_id,
+          ctx.doc_id,
+          ctx.fromVersion
         )
-        expect(doc).to.deep.equal(this.doc)
+        expect(doc).to.deep.equal(ctx.doc)
       })
     })
 
     describe('when the document updater API returns an error', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
           .get(
-            `/project/${this.project_id}/doc/${this.doc_id}?fromVersion=${this.fromVersion}`
+            `/project/${ctx.project_id}/doc/${ctx.doc_id}?fromVersion=${ctx.fromVersion}`
           )
           .replyWithError('boom')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.getDocument(
-            this.project_id,
-            this.doc_id,
-            this.fromVersion
+          ctx.handler.promises.getDocument(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.fromVersion
           )
         ).to.be.rejected
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
           .get(
-            `/project/${this.project_id}/doc/${this.doc_id}?fromVersion=${this.fromVersion}`
+            `/project/${ctx.project_id}/doc/${ctx.doc_id}?fromVersion=${ctx.fromVersion}`
           )
           .reply(500)
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.getDocument(
-            this.project_id,
-            this.doc_id,
-            this.fromVersion
+          ctx.handler.promises.getDocument(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.fromVersion
           )
         ).to.be.rejected
       })
@@ -432,66 +438,66 @@ describe('DocumentUpdaterHandler', function () {
   })
 
   describe('getProjectDocsIfMatch', function () {
-    beforeEach(function () {
-      this.project_state_hash = '1234567890abcdef'
-      this.doc0 = {
-        _id: this.doc_id,
-        lines: this.lines,
-        v: this.version,
+    beforeEach(function (ctx) {
+      ctx.project_state_hash = '1234567890abcdef'
+      ctx.doc0 = {
+        _id: ctx.doc_id,
+        lines: ctx.lines,
+        v: ctx.version,
       }
-      this.docs = [this.doc0, this.doc0, this.doc0]
+      ctx.docs = [ctx.doc0, ctx.doc0, ctx.doc0]
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
           .post(
-            `/project/${this.project_id}/get_and_flush_if_old?state=${this.project_state_hash}`
+            `/project/${ctx.project_id}/get_and_flush_if_old?state=${ctx.project_state_hash}`
           )
-          .reply(200, this.docs)
+          .reply(200, ctx.docs)
       })
 
-      it('should call the callback with the documents', async function () {
-        const docs = await this.handler.promises.getProjectDocsIfMatch(
-          this.project_id,
-          this.project_state_hash
+      it('should call the callback with the documents', async function (ctx) {
+        const docs = await ctx.handler.promises.getProjectDocsIfMatch(
+          ctx.project_id,
+          ctx.project_state_hash
         )
-        expect(docs).to.deep.equal(this.docs)
+        expect(docs).to.deep.equal(ctx.docs)
       })
     })
 
     describe('when the document updater API returns an error', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
           .post(
-            `/project/${this.project_id}/get_and_flush_if_old?state=${this.project_state_hash}`
+            `/project/${ctx.project_id}/get_and_flush_if_old?state=${ctx.project_state_hash}`
           )
           .replyWithError('boom')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.getProjectDocsIfMatch(
-            this.project_id,
-            this.project_state_hash
+          ctx.handler.promises.getProjectDocsIfMatch(
+            ctx.project_id,
+            ctx.project_state_hash
           )
         ).to.be.rejected
       })
     })
 
     describe('when the document updater returns a conflict error code', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
           .post(
-            `/project/${this.project_id}/get_and_flush_if_old?state=${this.project_state_hash}`
+            `/project/${ctx.project_id}/get_and_flush_if_old?state=${ctx.project_state_hash}`
           )
           .reply(409)
       })
 
-      it('should return no documents', async function () {
-        const response = await this.handler.promises.getProjectDocsIfMatch(
-          this.project_id,
-          this.project_state_hash
+      it('should return no documents', async function (ctx) {
+        const response = await ctx.handler.promises.getProjectDocsIfMatch(
+          ctx.project_id,
+          ctx.project_state_hash
         )
         expect(response).to.be.undefined
       })
@@ -500,99 +506,94 @@ describe('DocumentUpdaterHandler', function () {
 
   describe('clearProjectState', function () {
     describe('successfully', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .post(`/project/${this.project_id}/clearState`)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/clearState`)
           .reply(200)
       })
 
-      it('should clear the project state from the document updater', async function () {
-        await this.handler.promises.clearProjectState(this.project_id)
-        expect(this.docUpdaterMock.isDone()).to.be.true
+      it('should clear the project state from the document updater', async function (ctx) {
+        await ctx.handler.promises.clearProjectState(ctx.project_id)
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
       })
     })
 
     describe('when the document updater API returns an error', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .post(`/project/${this.project_id}/clearState`)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/clearState`)
           .replyWithError('boom')
       })
 
-      it('should reject with an error', async function () {
-        await expect(this.handler.promises.clearProjectState(this.project_id))
-          .to.be.rejected
+      it('should reject with an error', async function (ctx) {
+        await expect(ctx.handler.promises.clearProjectState(ctx.project_id)).to
+          .be.rejected
       })
     })
 
     describe('when the document updater returns an error code', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .post(`/project/${this.project_id}/clearState`)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/clearState`)
           .reply(500)
       })
 
-      it('should reject with an error', async function () {
-        await expect(this.handler.promises.clearProjectState(this.project_id))
-          .to.be.rejected
+      it('should reject with an error', async function (ctx) {
+        await expect(ctx.handler.promises.clearProjectState(ctx.project_id)).to
+          .be.rejected
       })
     })
   })
 
   describe('acceptChanges', function () {
-    beforeEach(function () {
-      this.change_id = 'mock-change-id-1'
+    beforeEach(function (ctx) {
+      ctx.change_id = 'mock-change-id-1'
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .post(
-            `/project/${this.project_id}/doc/${this.doc_id}/change/accept`,
-            {
-              change_ids: [this.change_id],
-            }
-          )
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}/change/accept`, {
+            change_ids: [ctx.change_id],
+          })
           .reply(200)
       })
 
-      it('should accept the change in the document updater', async function () {
-        await this.handler.promises.acceptChanges(
-          this.project_id,
-          this.doc_id,
-          [this.change_id]
-        )
-        expect(this.docUpdaterMock.isDone()).to.be.true
+      it('should accept the change in the document updater', async function (ctx) {
+        await ctx.handler.promises.acceptChanges(ctx.project_id, ctx.doc_id, [
+          ctx.change_id,
+        ])
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
       })
     })
 
     describe('when the document updater API returns an error', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .post(`/project/${this.project_id}/doc/${this.doc_id}/change/accept`)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}/change/accept`)
           .replyWithError('boom')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.acceptChanges(this.project_id, this.doc_id, [
-            this.change_id,
+          ctx.handler.promises.acceptChanges(ctx.project_id, ctx.doc_id, [
+            ctx.change_id,
           ])
         ).to.be.rejected
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .post(`/project/${this.project_id}/doc/${this.doc_id}/change/accept`)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}/change/accept`)
           .reply(500)
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.acceptChanges(this.project_id, this.doc_id, [
-            this.change_id,
+          ctx.handler.promises.acceptChanges(ctx.project_id, ctx.doc_id, [
+            ctx.change_id,
           ])
         ).to.be.rejected
       })
@@ -600,67 +601,67 @@ describe('DocumentUpdaterHandler', function () {
   })
 
   describe('deleteThread', function () {
-    beforeEach(function () {
-      this.thread_id = 'mock-thread-id-1'
+    beforeEach(function (ctx) {
+      ctx.thread_id = 'mock-thread-id-1'
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
           .delete(
-            `/project/${this.project_id}/doc/${this.doc_id}/comment/${this.thread_id}`
+            `/project/${ctx.project_id}/doc/${ctx.doc_id}/comment/${ctx.thread_id}`
           )
           .reply(200)
       })
 
-      it('should delete the thread in the document updater', async function () {
-        await this.handler.promises.deleteThread(
-          this.project_id,
-          this.doc_id,
-          this.thread_id,
-          this.user_id
+      it('should delete the thread in the document updater', async function (ctx) {
+        await ctx.handler.promises.deleteThread(
+          ctx.project_id,
+          ctx.doc_id,
+          ctx.thread_id,
+          ctx.user_id
         )
-        expect(this.docUpdaterMock.isDone()).to.be.true
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
       })
     })
 
     describe('when the document updater API returns an error', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
           .delete(
-            `/project/${this.project_id}/doc/${this.doc_id}/comment/${this.thread_id}`
+            `/project/${ctx.project_id}/doc/${ctx.doc_id}/comment/${ctx.thread_id}`
           )
           .replyWithError('boom')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.deleteThread(
-            this.project_id,
-            this.doc_id,
-            this.thread_id,
-            this.user_id
+          ctx.handler.promises.deleteThread(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.thread_id,
+            ctx.user_id
           )
         ).to.be.rejected
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
           .delete(
-            `/project/${this.project_id}/doc/${this.doc_id}/comment/${this.thread_id}`
+            `/project/${ctx.project_id}/doc/${ctx.doc_id}/comment/${ctx.thread_id}`
           )
           .reply(500)
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.deleteThread(
-            this.project_id,
-            this.doc_id,
-            this.thread_id,
-            this.user_id
+          ctx.handler.promises.deleteThread(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.thread_id,
+            ctx.user_id
           )
         ).to.be.rejected
       })
@@ -668,67 +669,67 @@ describe('DocumentUpdaterHandler', function () {
   })
 
   describe('resolveThread', function () {
-    beforeEach(function () {
-      this.thread_id = 'mock-thread-id-1'
+    beforeEach(function (ctx) {
+      ctx.thread_id = 'mock-thread-id-1'
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
           .post(
-            `/project/${this.project_id}/doc/${this.doc_id}/comment/${this.thread_id}/resolve`
+            `/project/${ctx.project_id}/doc/${ctx.doc_id}/comment/${ctx.thread_id}/resolve`
           )
           .reply(200)
       })
 
-      it('should resolve the thread in the document updater', async function () {
-        await this.handler.promises.resolveThread(
-          this.project_id,
-          this.doc_id,
-          this.thread_id,
-          this.user_id
+      it('should resolve the thread in the document updater', async function (ctx) {
+        await ctx.handler.promises.resolveThread(
+          ctx.project_id,
+          ctx.doc_id,
+          ctx.thread_id,
+          ctx.user_id
         )
-        expect(this.docUpdaterMock.isDone()).to.be.true
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
       })
     })
 
     describe('when the document updater API returns an error', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
           .post(
-            `/project/${this.project_id}/doc/${this.doc_id}/comment/${this.thread_id}/resolve`
+            `/project/${ctx.project_id}/doc/${ctx.doc_id}/comment/${ctx.thread_id}/resolve`
           )
           .replyWithError('boom')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.resolveThread(
-            this.project_id,
-            this.doc_id,
-            this.thread_id,
-            this.user_id
+          ctx.handler.promises.resolveThread(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.thread_id,
+            ctx.user_id
           )
         ).to.be.rejected
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
           .post(
-            `/project/${this.project_id}/doc/${this.doc_id}/comment/${this.thread_id}/resolve`
+            `/project/${ctx.project_id}/doc/${ctx.doc_id}/comment/${ctx.thread_id}/resolve`
           )
           .reply(500)
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.resolveThread(
-            this.project_id,
-            this.doc_id,
-            this.thread_id,
-            this.user_id
+          ctx.handler.promises.resolveThread(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.thread_id,
+            ctx.user_id
           )
         ).to.be.rejected
       })
@@ -736,67 +737,67 @@ describe('DocumentUpdaterHandler', function () {
   })
 
   describe('reopenThread', function () {
-    beforeEach(function () {
-      this.thread_id = 'mock-thread-id-1'
+    beforeEach(function (ctx) {
+      ctx.thread_id = 'mock-thread-id-1'
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
           .post(
-            `/project/${this.project_id}/doc/${this.doc_id}/comment/${this.thread_id}/reopen`
+            `/project/${ctx.project_id}/doc/${ctx.doc_id}/comment/${ctx.thread_id}/reopen`
           )
           .reply(200)
       })
 
-      it('should reopen the thread in the document updater', async function () {
-        await this.handler.promises.reopenThread(
-          this.project_id,
-          this.doc_id,
-          this.thread_id,
-          this.user_id
+      it('should reopen the thread in the document updater', async function (ctx) {
+        await ctx.handler.promises.reopenThread(
+          ctx.project_id,
+          ctx.doc_id,
+          ctx.thread_id,
+          ctx.user_id
         )
-        expect(this.docUpdaterMock.isDone()).to.be.true
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
       })
     })
 
     describe('when the document updater API returns an error', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
           .post(
-            `/project/${this.project_id}/doc/${this.doc_id}/comment/${this.thread_id}/reopen`
+            `/project/${ctx.project_id}/doc/${ctx.doc_id}/comment/${ctx.thread_id}/reopen`
           )
           .replyWithError('boom')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.reopenThread(
-            this.project_id,
-            this.doc_id,
-            this.thread_id,
-            this.user_id
+          ctx.handler.promises.reopenThread(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.thread_id,
+            ctx.user_id
           )
         ).to.be.rejected
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
           .post(
-            `/project/${this.project_id}/doc/${this.doc_id}/comment/${this.thread_id}/reopen`
+            `/project/${ctx.project_id}/doc/${ctx.doc_id}/comment/${ctx.thread_id}/reopen`
           )
           .reply(500)
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.reopenThread(
-            this.project_id,
-            this.doc_id,
-            this.thread_id,
-            this.user_id
+          ctx.handler.promises.reopenThread(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.thread_id,
+            ctx.user_id
           )
         ).to.be.rejected
       })
@@ -804,34 +805,34 @@ describe('DocumentUpdaterHandler', function () {
   })
 
   describe('updateProjectStructure ', function () {
-    beforeEach(function () {
-      this.user_id = 1234
-      this.version = 999
+    beforeEach(function (ctx) {
+      ctx.user_id = 1234
+      ctx.version = 999
     })
 
     describe('with project history disabled', function () {
-      beforeEach(function () {
-        this.settings.apis.project_history.sendProjectStructureOps = false
+      beforeEach(function (ctx) {
+        ctx.settings.apis.project_history.sendProjectStructureOps = false
       })
 
-      it('returns early', async function () {
-        await this.handler.promises.updateProjectStructure(
-          this.project_id,
-          this.projectHistoryId,
-          this.user_id,
+      it('returns early', async function (ctx) {
+        await ctx.handler.promises.updateProjectStructure(
+          ctx.project_id,
+          ctx.projectHistoryId,
+          ctx.user_id,
           {},
-          this.source
+          ctx.source
         )
       })
     })
 
     describe('with project history enabled', function () {
-      beforeEach(function () {
-        this.settings.apis.project_history.sendProjectStructureOps = true
+      beforeEach(function (ctx) {
+        ctx.settings.apis.project_history.sendProjectStructureOps = true
       })
 
       describe('when an entity has changed name', function () {
-        it('should send the structure update to the document updater', async function () {
+        it('should send the structure update to the document updater', async function (ctx) {
           const docIdA = new ObjectId()
           const docIdB = new ObjectId()
           const changes = {
@@ -850,7 +851,7 @@ describe('DocumentUpdaterHandler', function () {
                 doc: { _id: new ObjectId(docIdB.toString()) },
               },
             ],
-            newProject: { version: this.version },
+            newProject: { version: ctx.version },
           }
 
           const updates = [
@@ -862,32 +863,32 @@ describe('DocumentUpdaterHandler', function () {
             },
           ]
 
-          this.docUpdaterMock
-            .post(`/project/${this.project_id}`, {
+          ctx.docUpdaterMock
+            .post(`/project/${ctx.project_id}`, {
               updates,
-              userId: this.user_id,
-              version: this.version,
-              projectHistoryId: this.projectHistoryId,
-              source: this.source,
+              userId: ctx.user_id,
+              version: ctx.version,
+              projectHistoryId: ctx.projectHistoryId,
+              source: ctx.source,
             })
             .reply(204)
-          await this.handler.promises.updateProjectStructure(
-            this.project_id,
-            this.projectHistoryId,
-            this.user_id,
+          await ctx.handler.promises.updateProjectStructure(
+            ctx.project_id,
+            ctx.projectHistoryId,
+            ctx.user_id,
             changes,
-            this.source
+            ctx.source
           )
-          expect(this.docUpdaterMock.isDone()).to.be.true
+          expect(ctx.docUpdaterMock.isDone()).to.be.true
         })
       })
 
       describe('when a doc has been added', function () {
-        it('should send the structure update to the document updater', async function () {
+        it('should send the structure update to the document updater', async function (ctx) {
           const docId = new ObjectId()
           const changes = {
             newDocs: [{ path: '/foo', docLines: 'a\nb', doc: { _id: docId } }],
-            newProject: { version: this.version },
+            newProject: { version: ctx.version },
           }
 
           const updates = [
@@ -904,29 +905,29 @@ describe('DocumentUpdaterHandler', function () {
             },
           ]
 
-          this.docUpdaterMock
-            .post(`/project/${this.project_id}`, {
+          ctx.docUpdaterMock
+            .post(`/project/${ctx.project_id}`, {
               updates,
-              userId: this.user_id,
-              version: this.version,
-              projectHistoryId: this.projectHistoryId,
-              source: this.source,
+              userId: ctx.user_id,
+              version: ctx.version,
+              projectHistoryId: ctx.projectHistoryId,
+              source: ctx.source,
             })
             .reply(204)
-          await this.handler.promises.updateProjectStructure(
-            this.project_id,
-            this.projectHistoryId,
-            this.user_id,
+          await ctx.handler.promises.updateProjectStructure(
+            ctx.project_id,
+            ctx.projectHistoryId,
+            ctx.user_id,
             changes,
-            this.source
+            ctx.source
           )
 
-          expect(this.docUpdaterMock.isDone()).to.be.true
+          expect(ctx.docUpdaterMock.isDone()).to.be.true
         })
       })
 
       describe('when a file has been added', function () {
-        it('should send the structure update to the document updater', async function () {
+        it('should send the structure update to the document updater', async function (ctx) {
           const fileId = new ObjectId()
           const changes = {
             newFiles: [
@@ -935,7 +936,7 @@ describe('DocumentUpdaterHandler', function () {
                 file: { _id: fileId, hash: '12345' },
               },
             ],
-            newProject: { version: this.version },
+            newProject: { version: ctx.version },
           }
 
           const updates = [
@@ -952,34 +953,34 @@ describe('DocumentUpdaterHandler', function () {
             },
           ]
 
-          this.docUpdaterMock
-            .post(`/project/${this.project_id}`, {
+          ctx.docUpdaterMock
+            .post(`/project/${ctx.project_id}`, {
               updates,
-              userId: this.user_id,
-              version: this.version,
-              projectHistoryId: this.projectHistoryId,
-              source: this.source,
+              userId: ctx.user_id,
+              version: ctx.version,
+              projectHistoryId: ctx.projectHistoryId,
+              source: ctx.source,
             })
             .reply(204)
 
-          await this.handler.promises.updateProjectStructure(
-            this.project_id,
-            this.projectHistoryId,
-            this.user_id,
+          await ctx.handler.promises.updateProjectStructure(
+            ctx.project_id,
+            ctx.projectHistoryId,
+            ctx.user_id,
             changes,
-            this.source
+            ctx.source
           )
 
-          expect(this.docUpdaterMock.isDone()).to.be.true
+          expect(ctx.docUpdaterMock.isDone()).to.be.true
         })
       })
 
       describe('when an entity has been deleted', function () {
-        it('should end the structure update to the document updater', async function () {
+        it('should end the structure update to the document updater', async function (ctx) {
           const docId = new ObjectId()
           const changes = {
             oldDocs: [{ path: '/foo', docLines: 'a\nb', doc: { _id: docId } }],
-            newProject: { version: this.version },
+            newProject: { version: ctx.version },
           }
 
           const updates = [
@@ -991,30 +992,30 @@ describe('DocumentUpdaterHandler', function () {
             },
           ]
 
-          this.docUpdaterMock
-            .post(`/project/${this.project_id}`, {
+          ctx.docUpdaterMock
+            .post(`/project/${ctx.project_id}`, {
               updates,
-              userId: this.user_id,
-              version: this.version,
-              projectHistoryId: this.projectHistoryId,
-              source: this.source,
+              userId: ctx.user_id,
+              version: ctx.version,
+              projectHistoryId: ctx.projectHistoryId,
+              source: ctx.source,
             })
             .reply(204)
 
-          await this.handler.promises.updateProjectStructure(
-            this.project_id,
-            this.projectHistoryId,
-            this.user_id,
+          await ctx.handler.promises.updateProjectStructure(
+            ctx.project_id,
+            ctx.projectHistoryId,
+            ctx.user_id,
             changes,
-            this.source
+            ctx.source
           )
 
-          expect(this.docUpdaterMock.isDone()).to.be.true
+          expect(ctx.docUpdaterMock.isDone()).to.be.true
         })
       })
 
       describe('when a file is converted to a doc', function () {
-        it('should send the delete first', async function () {
+        it('should send the delete first', async function (ctx) {
           const docId = new ObjectId()
           const fileId = new ObjectId()
           const changes = {
@@ -1031,7 +1032,7 @@ describe('DocumentUpdaterHandler', function () {
                 doc: { _id: docId },
               },
             ],
-            newProject: { version: this.version },
+            newProject: { version: ctx.version },
           }
 
           const updates = [
@@ -1054,50 +1055,50 @@ describe('DocumentUpdaterHandler', function () {
             },
           ]
 
-          this.docUpdaterMock
-            .post(`/project/${this.project_id}`, {
+          ctx.docUpdaterMock
+            .post(`/project/${ctx.project_id}`, {
               updates,
-              userId: this.user_id,
-              version: this.version,
-              projectHistoryId: this.projectHistoryId,
-              source: this.source,
+              userId: ctx.user_id,
+              version: ctx.version,
+              projectHistoryId: ctx.projectHistoryId,
+              source: ctx.source,
             })
             .reply(204)
 
-          await this.handler.promises.updateProjectStructure(
-            this.project_id,
-            this.projectHistoryId,
-            this.user_id,
+          await ctx.handler.promises.updateProjectStructure(
+            ctx.project_id,
+            ctx.projectHistoryId,
+            ctx.user_id,
             changes,
-            this.source
+            ctx.source
           )
 
-          expect(this.docUpdaterMock.isDone()).to.be.true
+          expect(ctx.docUpdaterMock.isDone()).to.be.true
         })
       })
 
       describe('when the project version is missing', function () {
-        it('should call the callback with an error', async function () {
+        it('should call the callback with an error', async function (ctx) {
           const docId = new ObjectId()
           const changes = {
             oldDocs: [{ path: '/foo', docLines: 'a\nb', doc: { _id: docId } }],
           }
           await expect(
-            this.handler.promises.updateProjectStructure(
-              this.project_id,
-              this.projectHistoryId,
-              this.user_id,
+            ctx.handler.promises.updateProjectStructure(
+              ctx.project_id,
+              ctx.projectHistoryId,
+              ctx.user_id,
               changes,
-              this.source
+              ctx.source
             )
           ).to.be.rejectedWith('did not receive project version in changes')
         })
       })
 
       describe('when ranges are present', function () {
-        beforeEach(function () {
-          this.docId = new ObjectId()
-          this.ranges = {
+        beforeEach(function (ctx) {
+          ctx.docId = new ObjectId()
+          ctx.ranges = {
             changes: [
               {
                 op: { p: 0, i: 'foo' },
@@ -1115,106 +1116,106 @@ describe('DocumentUpdaterHandler', function () {
               },
             ],
           }
-          this.changes = {
+          ctx.changes = {
             newDocs: [
               {
                 path: '/foo',
                 docLines: 'foo\nbar',
-                doc: { _id: this.docId },
-                ranges: this.ranges,
+                doc: { _id: ctx.docId },
+                ranges: ctx.ranges,
               },
             ],
-            newProject: { version: this.version },
+            newProject: { version: ctx.version },
           }
         })
 
-        it('should forward ranges', async function () {
+        it('should forward ranges', async function (ctx) {
           const updates = [
             {
               type: 'add-doc',
-              id: this.docId.toString(),
+              id: ctx.docId.toString(),
               pathname: '/foo',
               docLines: 'foo\nbar',
               historyRangesSupport: false,
               hash: undefined,
-              ranges: this.ranges,
+              ranges: ctx.ranges,
               metadata: undefined,
               createdBlob: true,
             },
           ]
 
-          this.docUpdaterMock
-            .post(`/project/${this.project_id}`, {
+          ctx.docUpdaterMock
+            .post(`/project/${ctx.project_id}`, {
               updates,
-              userId: this.user_id,
-              version: this.version,
-              projectHistoryId: this.projectHistoryId,
-              source: this.source,
+              userId: ctx.user_id,
+              version: ctx.version,
+              projectHistoryId: ctx.projectHistoryId,
+              source: ctx.source,
             })
             .reply(204)
 
-          await this.handler.promises.updateProjectStructure(
-            this.project_id,
-            this.projectHistoryId,
-            this.user_id,
-            this.changes,
-            this.source
+          await ctx.handler.promises.updateProjectStructure(
+            ctx.project_id,
+            ctx.projectHistoryId,
+            ctx.user_id,
+            ctx.changes,
+            ctx.source
           )
 
-          expect(this.docUpdaterMock.isDone()).to.be.true
+          expect(ctx.docUpdaterMock.isDone()).to.be.true
         })
 
-        it('should include flag when history ranges support is enabled', async function () {
-          this.ProjectGetter.promises.getProjectWithoutLock
-            .withArgs(this.project_id)
+        it('should include flag when history ranges support is enabled', async function (ctx) {
+          ctx.ProjectGetter.promises.getProjectWithoutLock
+            .withArgs(ctx.project_id)
             .resolves({
-              _id: this.project_id,
+              _id: ctx.project_id,
               overleaf: { history: { rangesSupportEnabled: true } },
             })
 
           const updates = [
             {
               type: 'add-doc',
-              id: this.docId.toString(),
+              id: ctx.docId.toString(),
               pathname: '/foo',
               docLines: 'foo\nbar',
               historyRangesSupport: true,
               hash: undefined,
-              ranges: this.ranges,
+              ranges: ctx.ranges,
               metadata: undefined,
               createdBlob: true,
             },
           ]
 
-          this.docUpdaterMock
-            .post(`/project/${this.project_id}`, {
+          ctx.docUpdaterMock
+            .post(`/project/${ctx.project_id}`, {
               updates,
-              userId: this.user_id,
-              version: this.version,
-              projectHistoryId: this.projectHistoryId,
-              source: this.source,
+              userId: ctx.user_id,
+              version: ctx.version,
+              projectHistoryId: ctx.projectHistoryId,
+              source: ctx.source,
             })
             .reply(204)
 
-          await this.handler.promises.updateProjectStructure(
-            this.project_id,
-            this.projectHistoryId,
-            this.user_id,
-            this.changes,
-            this.source
+          await ctx.handler.promises.updateProjectStructure(
+            ctx.project_id,
+            ctx.projectHistoryId,
+            ctx.user_id,
+            ctx.changes,
+            ctx.source
           )
 
-          expect(this.docUpdaterMock.isDone()).to.be.true
+          expect(ctx.docUpdaterMock.isDone()).to.be.true
         })
       })
 
       describe('with filestore disabled', function () {
-        beforeEach(function () {
-          this.fileId = new ObjectId()
+        beforeEach(function (ctx) {
+          ctx.fileId = new ObjectId()
           const updates = [
             {
               type: 'add-file',
-              id: this.fileId.toString(),
+              id: ctx.fileId.toString(),
               pathname: '/bar',
               docLines: undefined,
               historyRangesSupport: false,
@@ -1225,58 +1226,58 @@ describe('DocumentUpdaterHandler', function () {
             },
           ]
 
-          this.docUpdaterMock
-            .post(`/project/${this.project_id}`, {
+          ctx.docUpdaterMock
+            .post(`/project/${ctx.project_id}`, {
               updates,
-              userId: this.user_id,
-              version: this.version,
-              projectHistoryId: this.projectHistoryId,
-              source: this.source,
+              userId: ctx.user_id,
+              version: ctx.version,
+              projectHistoryId: ctx.projectHistoryId,
+              source: ctx.source,
             })
             .reply(204)
         })
 
-        it('should add files without URL and with createdBlob', async function () {
-          this.changes = {
+        it('should add files without URL and with createdBlob', async function (ctx) {
+          ctx.changes = {
             newFiles: [
               {
                 path: '/bar',
-                file: { _id: this.fileId, hash: '12345' },
+                file: { _id: ctx.fileId, hash: '12345' },
               },
             ],
-            newProject: { version: this.version },
+            newProject: { version: ctx.version },
           }
 
-          await this.handler.promises.updateProjectStructure(
-            this.project_id,
-            this.projectHistoryId,
-            this.user_id,
-            this.changes,
-            this.source
+          await ctx.handler.promises.updateProjectStructure(
+            ctx.project_id,
+            ctx.projectHistoryId,
+            ctx.user_id,
+            ctx.changes,
+            ctx.source
           )
 
-          expect(this.docUpdaterMock.isDone()).to.be.true
+          expect(ctx.docUpdaterMock.isDone()).to.be.true
         })
 
-        it('should flag files without hash', async function () {
-          this.fileId = new ObjectId()
-          this.changes = {
+        it('should flag files without hash', async function (ctx) {
+          ctx.fileId = new ObjectId()
+          ctx.changes = {
             newFiles: [
               {
                 path: '/bar',
-                file: { _id: this.fileId },
+                file: { _id: ctx.fileId },
               },
             ],
-            newProject: { version: this.version },
+            newProject: { version: ctx.version },
           }
 
           await expect(
-            this.handler.promises.updateProjectStructure(
-              this.project_id,
-              this.projectHistoryId,
-              this.user_id,
-              this.changes,
-              this.source
+            ctx.handler.promises.updateProjectStructure(
+              ctx.project_id,
+              ctx.projectHistoryId,
+              ctx.user_id,
+              ctx.changes,
+              ctx.source
             )
           ).to.be.rejected
         })
@@ -1285,7 +1286,7 @@ describe('DocumentUpdaterHandler', function () {
   })
 
   describe('resyncProjectHistory', function () {
-    it('should add docs', async function () {
+    it('should add docs', async function (ctx) {
       const docId1 = new ObjectId()
       const docId2 = new ObjectId()
       const docs = [
@@ -1296,7 +1297,7 @@ describe('DocumentUpdaterHandler', function () {
       const projectId = new ObjectId()
       const projectHistoryId = 99
 
-      this.docUpdaterMock
+      ctx.docUpdaterMock
         .post(`/project/${projectId}/history/resync`, {
           docs: [
             { doc: docId1.toString(), path: 'main.tex' },
@@ -1307,7 +1308,7 @@ describe('DocumentUpdaterHandler', function () {
         })
         .reply(200)
 
-      await this.handler.promises.resyncProjectHistory(
+      await ctx.handler.promises.resyncProjectHistory(
         projectId,
         projectHistoryId,
         docs,
@@ -1315,10 +1316,10 @@ describe('DocumentUpdaterHandler', function () {
         {}
       )
 
-      expect(this.docUpdaterMock.isDone()).to.be.true
+      expect(ctx.docUpdaterMock.isDone()).to.be.true
     })
 
-    it('should add files', async function () {
+    it('should add files', async function (ctx) {
       const fileId1 = new ObjectId()
       const fileId2 = new ObjectId()
       const fileId3 = new ObjectId()
@@ -1358,7 +1359,7 @@ describe('DocumentUpdaterHandler', function () {
       const projectId = new ObjectId()
       const projectHistoryId = 99
 
-      this.docUpdaterMock
+      ctx.docUpdaterMock
         .post(`/project/${projectId}/history/resync`, {
           docs: [],
           files: [
@@ -1396,7 +1397,7 @@ describe('DocumentUpdaterHandler', function () {
         })
         .reply(200)
 
-      await this.handler.promises.resyncProjectHistory(
+      await ctx.handler.promises.resyncProjectHistory(
         projectId,
         projectHistoryId,
         docs,
@@ -1404,10 +1405,10 @@ describe('DocumentUpdaterHandler', function () {
         {}
       )
 
-      expect(this.docUpdaterMock.isDone()).to.be.true
+      expect(ctx.docUpdaterMock.isDone()).to.be.true
     })
 
-    it('should add files without URL', async function () {
+    it('should add files without URL', async function (ctx) {
       const fileId1 = new ObjectId()
       const fileId2 = new ObjectId()
       const fileId3 = new ObjectId()
@@ -1447,7 +1448,7 @@ describe('DocumentUpdaterHandler', function () {
       const projectId = new ObjectId()
       const projectHistoryId = 99
 
-      this.docUpdaterMock
+      ctx.docUpdaterMock
         .post(`/project/${projectId}/history/resync`, {
           docs: [],
           files: [
@@ -1484,17 +1485,17 @@ describe('DocumentUpdaterHandler', function () {
           projectHistoryId,
         })
         .reply(200)
-      await this.handler.promises.resyncProjectHistory(
+      await ctx.handler.promises.resyncProjectHistory(
         projectId,
         projectHistoryId,
         docs,
         files,
         {}
       )
-      expect(this.docUpdaterMock.isDone()).to.be.true
+      expect(ctx.docUpdaterMock.isDone()).to.be.true
     })
 
-    it('should flag files with missing hashes', async function () {
+    it('should flag files with missing hashes', async function (ctx) {
       const fileId1 = new ObjectId()
       const fileId2 = new ObjectId()
       const fileId3 = new ObjectId()
@@ -1533,7 +1534,7 @@ describe('DocumentUpdaterHandler', function () {
       const projectId = new ObjectId()
       const projectHistoryId = 99
       await expect(
-        this.handler.promises.resyncProjectHistory(
+        ctx.handler.promises.resyncProjectHistory(
           projectId,
           projectHistoryId,
           docs,
@@ -1546,64 +1547,64 @@ describe('DocumentUpdaterHandler', function () {
 
   describe('appendToDocument', function () {
     describe('successfully', function () {
-      beforeEach(function () {
-        this.body = { rev: 1 }
-        this.docUpdaterMock
-          .post(`/project/${this.project_id}/doc/${this.doc_id}/append`, {
-            lines: this.lines,
-            source: this.source,
-            user_id: this.user_id,
+      beforeEach(function (ctx) {
+        ctx.body = { rev: 1 }
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}/append`, {
+            lines: ctx.lines,
+            source: ctx.source,
+            user_id: ctx.user_id,
           })
           .reply(200)
       })
 
-      it('should append to the document in the document updater', async function () {
-        await this.handler.promises.appendToDocument(
-          this.project_id,
-          this.doc_id,
-          this.user_id,
-          this.lines,
-          this.source
+      it('should append to the document in the document updater', async function (ctx) {
+        await ctx.handler.promises.appendToDocument(
+          ctx.project_id,
+          ctx.doc_id,
+          ctx.user_id,
+          ctx.lines,
+          ctx.source
         )
-        expect(this.docUpdaterMock.isDone()).to.be.true
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
       })
     })
 
     describe('when the document updater API returns an error', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .post(`/project/${this.project_id}/doc/${this.doc_id}/append`)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}/append`)
           .replyWithError('boom')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.appendToDocument(
-            this.project_id,
-            this.doc_id,
-            this.user_id,
-            this.lines,
-            this.source
+          ctx.handler.promises.appendToDocument(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.user_id,
+            ctx.lines,
+            ctx.source
           )
         ).to.be.rejected
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
-      beforeEach(function () {
-        this.docUpdaterMock
-          .post(`/project/${this.project_id}/doc/${this.doc_id}/append`)
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}/append`)
           .reply(500)
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         await expect(
-          this.handler.promises.appendToDocument(
-            this.project_id,
-            this.doc_id,
-            this.user_id,
-            this.lines,
-            this.source
+          ctx.handler.promises.appendToDocument(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.user_id,
+            ctx.lines,
+            ctx.source
           )
         ).to.be.rejected
       })

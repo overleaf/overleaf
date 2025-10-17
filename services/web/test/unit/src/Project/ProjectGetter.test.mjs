@@ -1,30 +1,31 @@
-const sinon = require('sinon')
-const { expect } = require('chai')
-const modulePath = '../../../../app/src/Features/Project/ProjectGetter.js'
-const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongodb-legacy')
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+import mongodb from 'mongodb-legacy'
+const modulePath = '../../../../app/src/Features/Project/ProjectGetter.mjs'
+
+const { ObjectId } = mongodb
 
 describe('ProjectGetter', function () {
-  beforeEach(function () {
-    this.project = { _id: new ObjectId() }
-    this.projectIdStr = this.project._id.toString()
-    this.deletedProject = { deleterData: { wombat: 'potato' } }
-    this.userId = new ObjectId()
+  beforeEach(async function (ctx) {
+    ctx.project = { _id: new ObjectId() }
+    ctx.projectIdStr = ctx.project._id.toString()
+    ctx.deletedProject = { deleterData: { wombat: 'potato' } }
+    ctx.userId = new ObjectId()
 
-    this.DeletedProject = {
+    ctx.DeletedProject = {
       find: sinon.stub().returns({
-        exec: sinon.stub().resolves([this.deletedProject]),
+        exec: sinon.stub().resolves([ctx.deletedProject]),
       }),
     }
-    this.Project = {
+    ctx.Project = {
       find: sinon.stub().returns({
         exec: sinon.stub().resolves(),
       }),
       findOne: sinon.stub().returns({
-        exec: sinon.stub().resolves(this.project),
+        exec: sinon.stub().resolves(ctx.project),
       }),
     }
-    this.CollaboratorsGetter = {
+    ctx.CollaboratorsGetter = {
       promises: {
         getProjectsUserIsMemberOf: sinon.stub().resolves({
           readAndWrite: [],
@@ -34,58 +35,76 @@ describe('ProjectGetter', function () {
         }),
       },
     }
-    this.LockManager = {
+    ctx.LockManager = {
       promises: {
         runWithLock: sinon
           .stub()
           .callsFake((namespace, id, runner) => runner()),
       },
     }
-    this.db = {
+    ctx.db = {
       projects: {
-        findOne: sinon.stub().resolves(this.project),
+        findOne: sinon.stub().resolves(ctx.project),
       },
       users: {},
     }
-    this.ProjectEntityMongoUpdateHandler = {
+    ctx.ProjectEntityMongoUpdateHandler = {
       lockKey: sinon.stub().returnsArg(0),
     }
-    this.ProjectGetter = SandboxedModule.require(modulePath, {
-      requires: {
-        '../../infrastructure/mongodb': { db: this.db, ObjectId },
-        '../../models/Project': {
-          Project: this.Project,
-        },
-        '../../models/DeletedProject': {
-          DeletedProject: this.DeletedProject,
-        },
-        '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
-        '../../infrastructure/LockManager': this.LockManager,
-        './ProjectEntityMongoUpdateHandler':
-          this.ProjectEntityMongoUpdateHandler,
-      },
-    })
+
+    vi.doMock('../../../../app/src/infrastructure/mongodb', () => ({
+      db: ctx.db,
+      ObjectId,
+    }))
+
+    vi.doMock('../../../../app/src/models/Project', () => ({
+      Project: ctx.Project,
+    }))
+
+    vi.doMock('../../../../app/src/models/DeletedProject', () => ({
+      DeletedProject: ctx.DeletedProject,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Collaborators/CollaboratorsGetter',
+      () => ({
+        default: ctx.CollaboratorsGetter,
+      })
+    )
+
+    vi.doMock('../../../../app/src/infrastructure/LockManager', () => ({
+      default: ctx.LockManager,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectEntityMongoUpdateHandler',
+      () => ({
+        default: ctx.ProjectEntityMongoUpdateHandler,
+      })
+    )
+
+    ctx.ProjectGetter = (await import(modulePath)).default
   })
 
   describe('getProjectWithoutDocLines', function () {
-    beforeEach(function () {
-      this.ProjectGetter.promises.getProject = sinon.stub().resolves()
+    beforeEach(function (ctx) {
+      ctx.ProjectGetter.promises.getProject = sinon.stub().resolves()
     })
 
     describe('passing an id', function () {
-      beforeEach(async function () {
-        await this.ProjectGetter.promises.getProjectWithoutDocLines(
-          this.project._id
+      beforeEach(async function (ctx) {
+        await ctx.ProjectGetter.promises.getProjectWithoutDocLines(
+          ctx.project._id
         )
       })
 
-      it('should call find with the project id', function () {
-        this.ProjectGetter.promises.getProject
-          .calledWith(this.project._id)
+      it('should call find with the project id', function (ctx) {
+        ctx.ProjectGetter.promises.getProject
+          .calledWith(ctx.project._id)
           .should.equal(true)
       })
 
-      it('should exclude the doc lines', function () {
+      it('should exclude the doc lines', function (ctx) {
         const excludes = {
           'rootFolder.docs.lines': 0,
           'rootFolder.folders.docs.lines': 0,
@@ -97,32 +116,32 @@ describe('ProjectGetter', function () {
           'rootFolder.folders.folders.folders.folders.folders.folders.folders.docs.lines': 0,
         }
 
-        this.ProjectGetter.promises.getProject
-          .calledWith(this.project._id, excludes)
+        ctx.ProjectGetter.promises.getProject
+          .calledWith(ctx.project._id, excludes)
           .should.equal(true)
       })
     })
   })
 
   describe('getProjectWithOnlyFolders', function () {
-    beforeEach(function () {
-      this.ProjectGetter.promises.getProject = sinon.stub().resolves()
+    beforeEach(function (ctx) {
+      ctx.ProjectGetter.promises.getProject = sinon.stub().resolves()
     })
 
     describe('passing an id', function () {
-      beforeEach(async function () {
-        await this.ProjectGetter.promises.getProjectWithOnlyFolders(
-          this.project._id
+      beforeEach(async function (ctx) {
+        await ctx.ProjectGetter.promises.getProjectWithOnlyFolders(
+          ctx.project._id
         )
       })
 
-      it('should call find with the project id', function () {
-        this.ProjectGetter.promises.getProject
-          .calledWith(this.project._id)
+      it('should call find with the project id', function (ctx) {
+        ctx.ProjectGetter.promises.getProject
+          .calledWith(ctx.project._id)
           .should.equal(true)
       })
 
-      it('should exclude the docs and files lines', function () {
+      it('should exclude the docs and files lines', function (ctx) {
         const excludes = {
           'rootFolder.docs': 0,
           'rootFolder.fileRefs': 0,
@@ -141,8 +160,8 @@ describe('ProjectGetter', function () {
           'rootFolder.folders.folders.folders.folders.folders.folders.folders.docs': 0,
           'rootFolder.folders.folders.folders.folders.folders.folders.folders.fileRefs': 0,
         }
-        this.ProjectGetter.promises.getProject
-          .calledWith(this.project._id, excludes)
+        ctx.ProjectGetter.promises.getProject
+          .calledWith(ctx.project._id, excludes)
           .should.equal(true)
       })
     })
@@ -151,58 +170,58 @@ describe('ProjectGetter', function () {
   describe('getProject', function () {
     describe('without projection', function () {
       describe('with project id', function () {
-        beforeEach(async function () {
-          await this.ProjectGetter.promises.getProject(this.projectIdStr)
+        beforeEach(async function (ctx) {
+          await ctx.ProjectGetter.promises.getProject(ctx.projectIdStr)
         })
 
-        it('should call findOne with the project id', function () {
-          expect(this.db.projects.findOne.callCount).to.equal(1)
+        it('should call findOne with the project id', function (ctx) {
+          expect(ctx.db.projects.findOne.callCount).to.equal(1)
           expect(
-            this.db.projects.findOne.lastCall.args[0]._id.toString()
-          ).to.equal(this.projectIdStr)
+            ctx.db.projects.findOne.lastCall.args[0]._id.toString()
+          ).to.equal(ctx.projectIdStr)
         })
       })
 
       describe('without project id', function () {
-        it('should be rejected', function () {
+        it('should be rejected', function (ctx) {
           expect(
-            this.ProjectGetter.promises.getProject(null)
+            ctx.ProjectGetter.promises.getProject(null)
           ).to.be.rejectedWith('no project id provided')
-          expect(this.db.projects.findOne.callCount).to.equal(0)
+          expect(ctx.db.projects.findOne.callCount).to.equal(0)
         })
       })
     })
 
     describe('with projection', function () {
-      beforeEach(function () {
-        this.projection = { _id: 1 }
+      beforeEach(function (ctx) {
+        ctx.projection = { _id: 1 }
       })
 
       describe('with project id', function () {
-        beforeEach(async function () {
-          await this.ProjectGetter.promises.getProject(
-            this.projectIdStr,
-            this.projection
+        beforeEach(async function (ctx) {
+          await ctx.ProjectGetter.promises.getProject(
+            ctx.projectIdStr,
+            ctx.projection
           )
         })
 
-        it('should call findOne with the project id', function () {
-          expect(this.db.projects.findOne.callCount).to.equal(1)
+        it('should call findOne with the project id', function (ctx) {
+          expect(ctx.db.projects.findOne.callCount).to.equal(1)
           expect(
-            this.db.projects.findOne.lastCall.args[0]._id.toString()
-          ).to.equal(this.projectIdStr)
-          expect(this.db.projects.findOne.lastCall.args[1]).to.deep.equal({
-            projection: this.projection,
+            ctx.db.projects.findOne.lastCall.args[0]._id.toString()
+          ).to.equal(ctx.projectIdStr)
+          expect(ctx.db.projects.findOne.lastCall.args[1]).to.deep.equal({
+            projection: ctx.projection,
           })
         })
       })
 
       describe('without project id', function () {
-        it('should be rejected', function () {
+        it('should be rejected', function (ctx) {
           expect(
-            this.ProjectGetter.promises.getProject(null)
+            ctx.ProjectGetter.promises.getProject(null)
           ).to.be.rejectedWith('no project id provided')
-          expect(this.db.projects.findOne.callCount).to.equal(0)
+          expect(ctx.db.projects.findOne.callCount).to.equal(0)
         })
       })
     })
@@ -211,155 +230,151 @@ describe('ProjectGetter', function () {
   describe('getProjectWithoutLock', function () {
     describe('without projection', function () {
       describe('with project id', function () {
-        beforeEach(async function () {
-          await this.ProjectGetter.promises.getProjectWithoutLock(
-            this.projectIdStr
+        beforeEach(async function (ctx) {
+          await ctx.ProjectGetter.promises.getProjectWithoutLock(
+            ctx.projectIdStr
           )
         })
 
-        it('should call findOne with the project id', function () {
-          expect(this.db.projects.findOne.callCount).to.equal(1)
+        it('should call findOne with the project id', function (ctx) {
+          expect(ctx.db.projects.findOne.callCount).to.equal(1)
           expect(
-            this.db.projects.findOne.lastCall.args[0]._id.toString()
-          ).to.equal(this.projectIdStr)
+            ctx.db.projects.findOne.lastCall.args[0]._id.toString()
+          ).to.equal(ctx.projectIdStr)
         })
       })
 
       describe('without project id', function () {
-        it('should be rejected', function () {
+        it('should be rejected', function (ctx) {
           expect(
-            this.ProjectGetter.promises.getProjectWithoutLock(null)
+            ctx.ProjectGetter.promises.getProjectWithoutLock(null)
           ).to.be.rejectedWith('no project id provided')
-          expect(this.db.projects.findOne.callCount).to.equal(0)
+          expect(ctx.db.projects.findOne.callCount).to.equal(0)
         })
       })
     })
 
     describe('with projection', function () {
-      beforeEach(function () {
-        this.projection = { _id: 1 }
+      beforeEach(function (ctx) {
+        ctx.projection = { _id: 1 }
       })
 
       describe('with project id', function () {
-        beforeEach(async function () {
-          await this.ProjectGetter.promises.getProjectWithoutLock(
-            this.project._id,
-            this.projection
+        beforeEach(async function (ctx) {
+          await ctx.ProjectGetter.promises.getProjectWithoutLock(
+            ctx.project._id,
+            ctx.projection
           )
         })
 
-        it('should call findOne with the project id', function () {
-          expect(this.db.projects.findOne.callCount).to.equal(1)
+        it('should call findOne with the project id', function (ctx) {
+          expect(ctx.db.projects.findOne.callCount).to.equal(1)
           expect(
-            this.db.projects.findOne.lastCall.args[0]._id.toString()
-          ).to.equal(this.projectIdStr)
-          expect(this.db.projects.findOne.lastCall.args[1]).to.deep.equal({
-            projection: this.projection,
+            ctx.db.projects.findOne.lastCall.args[0]._id.toString()
+          ).to.equal(ctx.projectIdStr)
+          expect(ctx.db.projects.findOne.lastCall.args[1]).to.deep.equal({
+            projection: ctx.projection,
           })
         })
       })
 
       describe('without project id', function () {
-        it('should be rejected', function () {
+        it('should be rejected', function (ctx) {
           expect(
-            this.ProjectGetter.promises.getProjectWithoutLock(null)
+            ctx.ProjectGetter.promises.getProjectWithoutLock(null)
           ).to.be.rejectedWith('no project id provided')
-          expect(this.db.projects.findOne.callCount).to.equal(0)
+          expect(ctx.db.projects.findOne.callCount).to.equal(0)
         })
       })
     })
   })
 
   describe('findAllUsersProjects', function () {
-    beforeEach(function () {
-      this.fields = { mock: 'fields' }
-      this.projectOwned = { _id: 'mock-owned-projects' }
-      this.projectRW = { _id: 'mock-rw-projects' }
-      this.projectReview = { _id: 'mock-review-projects' }
-      this.projectRO = { _id: 'mock-ro-projects' }
-      this.projectTokenRW = { _id: 'mock-token-rw-projects' }
-      this.projectTokenRO = { _id: 'mock-token-ro-projects' }
-      this.Project.find
-        .withArgs({ owner_ref: this.userId }, this.fields)
-        .returns({ exec: sinon.stub().resolves([this.projectOwned]) })
+    beforeEach(function (ctx) {
+      ctx.fields = { mock: 'fields' }
+      ctx.projectOwned = { _id: 'mock-owned-projects' }
+      ctx.projectRW = { _id: 'mock-rw-projects' }
+      ctx.projectReview = { _id: 'mock-review-projects' }
+      ctx.projectRO = { _id: 'mock-ro-projects' }
+      ctx.projectTokenRW = { _id: 'mock-token-rw-projects' }
+      ctx.projectTokenRO = { _id: 'mock-token-ro-projects' }
+      ctx.Project.find
+        .withArgs({ owner_ref: ctx.userId }, ctx.fields)
+        .returns({ exec: sinon.stub().resolves([ctx.projectOwned]) })
     })
 
-    it('should return a promise with all the projects', async function () {
-      this.CollaboratorsGetter.promises.getProjectsUserIsMemberOf.resolves({
-        readAndWrite: [this.projectRW],
-        readOnly: [this.projectRO],
-        tokenReadAndWrite: [this.projectTokenRW],
-        tokenReadOnly: [this.projectTokenRO],
-        review: [this.projectReview],
+    it('should return a promise with all the projects', async function (ctx) {
+      ctx.CollaboratorsGetter.promises.getProjectsUserIsMemberOf.resolves({
+        readAndWrite: [ctx.projectRW],
+        readOnly: [ctx.projectRO],
+        tokenReadAndWrite: [ctx.projectTokenRW],
+        tokenReadOnly: [ctx.projectTokenRO],
+        review: [ctx.projectReview],
       })
-      const projects = await this.ProjectGetter.promises.findAllUsersProjects(
-        this.userId,
-        this.fields
+      const projects = await ctx.ProjectGetter.promises.findAllUsersProjects(
+        ctx.userId,
+        ctx.fields
       )
 
       expect(projects).to.deep.equal({
-        owned: [this.projectOwned],
-        readAndWrite: [this.projectRW],
-        readOnly: [this.projectRO],
-        tokenReadAndWrite: [this.projectTokenRW],
-        tokenReadOnly: [this.projectTokenRO],
-        review: [this.projectReview],
+        owned: [ctx.projectOwned],
+        readAndWrite: [ctx.projectRW],
+        readOnly: [ctx.projectRO],
+        tokenReadAndWrite: [ctx.projectTokenRW],
+        tokenReadOnly: [ctx.projectTokenRO],
+        review: [ctx.projectReview],
       })
     })
 
-    it('should remove duplicate projects', async function () {
-      this.CollaboratorsGetter.promises.getProjectsUserIsMemberOf.resolves({
-        readAndWrite: [this.projectRW, this.projectOwned],
-        readOnly: [this.projectRO, this.projectRW],
-        tokenReadAndWrite: [this.projectTokenRW, this.projectRO],
-        tokenReadOnly: [
-          this.projectTokenRW,
-          this.projectTokenRO,
-          this.projectRO,
-        ],
-        review: [this.projectReview],
+    it('should remove duplicate projects', async function (ctx) {
+      ctx.CollaboratorsGetter.promises.getProjectsUserIsMemberOf.resolves({
+        readAndWrite: [ctx.projectRW, ctx.projectOwned],
+        readOnly: [ctx.projectRO, ctx.projectRW],
+        tokenReadAndWrite: [ctx.projectTokenRW, ctx.projectRO],
+        tokenReadOnly: [ctx.projectTokenRW, ctx.projectTokenRO, ctx.projectRO],
+        review: [ctx.projectReview],
       })
-      const projects = await this.ProjectGetter.promises.findAllUsersProjects(
-        this.userId,
-        this.fields
+      const projects = await ctx.ProjectGetter.promises.findAllUsersProjects(
+        ctx.userId,
+        ctx.fields
       )
 
       expect(projects).to.deep.equal({
-        owned: [this.projectOwned],
-        readAndWrite: [this.projectRW],
-        readOnly: [this.projectRO],
-        tokenReadAndWrite: [this.projectTokenRW],
-        tokenReadOnly: [this.projectTokenRO],
-        review: [this.projectReview],
+        owned: [ctx.projectOwned],
+        readAndWrite: [ctx.projectRW],
+        readOnly: [ctx.projectRO],
+        tokenReadAndWrite: [ctx.projectTokenRW],
+        tokenReadOnly: [ctx.projectTokenRO],
+        review: [ctx.projectReview],
       })
     })
   })
 
   describe('getProjectIdByReadAndWriteToken', function () {
     describe('when project find returns project', function () {
-      this.beforeEach(async function () {
-        this.projectIdFound =
-          await this.ProjectGetter.promises.getProjectIdByReadAndWriteToken(
+      beforeEach(async function (ctx) {
+        ctx.projectIdFound =
+          await ctx.ProjectGetter.promises.getProjectIdByReadAndWriteToken(
             'token'
           )
       })
 
-      it('should find project with token', function () {
-        this.Project.findOne
+      it('should find project with token', function (ctx) {
+        ctx.Project.findOne
           .calledWithMatch({ 'tokens.readAndWrite': 'token' })
           .should.equal(true)
       })
 
-      it('should return the project id', function () {
-        expect(this.projectIdFound).to.equal(this.project._id)
+      it('should return the project id', function (ctx) {
+        expect(ctx.projectIdFound).to.equal(ctx.project._id)
       })
     })
 
     describe('when project not found', function () {
-      it('should return undefined', async function () {
-        this.Project.findOne.returns({ exec: sinon.stub().resolves(null) })
+      it('should return undefined', async function (ctx) {
+        ctx.Project.findOne.returns({ exec: sinon.stub().resolves(null) })
         const projectId =
-          await this.ProjectGetter.promises.getProjectIdByReadAndWriteToken(
+          await ctx.ProjectGetter.promises.getProjectIdByReadAndWriteToken(
             'token'
           )
 
@@ -368,86 +383,79 @@ describe('ProjectGetter', function () {
     })
 
     describe('when project find returns error', function () {
-      this.beforeEach(async function () {
-        this.Project.findOne.returns({ exec: sinon.stub().rejects() })
+      beforeEach(async function (ctx) {
+        ctx.Project.findOne.returns({ exec: sinon.stub().rejects() })
       })
 
-      it('should be rejected', function () {
+      it('should be rejected', function (ctx) {
         expect(
-          this.ProjectGetter.promises.getProjectIdByReadAndWriteToken('token')
+          ctx.ProjectGetter.promises.getProjectIdByReadAndWriteToken('token')
         ).to.be.rejected
       })
     })
   })
 
   describe('findUsersProjectsByName', function () {
-    it('should perform a case-insensitive search', async function () {
-      this.project1 = { _id: 1, name: 'find me!' }
-      this.project2 = { _id: 2, name: 'not me!' }
-      this.project3 = { _id: 3, name: 'FIND ME!' }
-      this.project4 = { _id: 4, name: 'Find Me!' }
-      this.Project.find.withArgs({ owner_ref: this.userId }).returns({
+    it('should perform a case-insensitive search', async function (ctx) {
+      ctx.project1 = { _id: 1, name: 'find me!' }
+      ctx.project2 = { _id: 2, name: 'not me!' }
+      ctx.project3 = { _id: 3, name: 'FIND ME!' }
+      ctx.project4 = { _id: 4, name: 'Find Me!' }
+      ctx.Project.find.withArgs({ owner_ref: ctx.userId }).returns({
         exec: sinon
           .stub()
-          .resolves([
-            this.project1,
-            this.project2,
-            this.project3,
-            this.project4,
-          ]),
+          .resolves([ctx.project1, ctx.project2, ctx.project3, ctx.project4]),
       })
-      const projects =
-        await this.ProjectGetter.promises.findUsersProjectsByName(
-          this.userId,
-          this.project1.name
-        )
+      const projects = await ctx.ProjectGetter.promises.findUsersProjectsByName(
+        ctx.userId,
+        ctx.project1.name
+      )
       const projectNames = projects.map(project => project.name)
       expect(projectNames).to.have.members([
-        this.project1.name,
-        this.project3.name,
-        this.project4.name,
+        ctx.project1.name,
+        ctx.project3.name,
+        ctx.project4.name,
       ])
     })
 
-    it('should search collaborations as well', async function () {
-      this.project1 = { _id: 1, name: 'find me!' }
-      this.project2 = { _id: 2, name: 'FIND ME!' }
-      this.project3 = { _id: 3, name: 'Find Me!' }
-      this.project4 = { _id: 4, name: 'find ME!' }
-      this.project5 = { _id: 5, name: 'FIND me!' }
-      this.Project.find
-        .withArgs({ owner_ref: this.userId })
-        .returns({ exec: sinon.stub().resolves([this.project1]) })
-      this.CollaboratorsGetter.promises.getProjectsUserIsMemberOf.resolves({
-        readAndWrite: [this.project2],
-        readOnly: [this.project3],
-        tokenReadAndWrite: [this.project4],
-        tokenReadOnly: [this.project5],
+    it('should search collaborations as well', async function (ctx) {
+      ctx.project1 = { _id: 1, name: 'find me!' }
+      ctx.project2 = { _id: 2, name: 'FIND ME!' }
+      ctx.project3 = { _id: 3, name: 'Find Me!' }
+      ctx.project4 = { _id: 4, name: 'find ME!' }
+      ctx.project5 = { _id: 5, name: 'FIND me!' }
+      ctx.Project.find
+        .withArgs({ owner_ref: ctx.userId })
+        .returns({ exec: sinon.stub().resolves([ctx.project1]) })
+      ctx.CollaboratorsGetter.promises.getProjectsUserIsMemberOf.resolves({
+        readAndWrite: [ctx.project2],
+        readOnly: [ctx.project3],
+        tokenReadAndWrite: [ctx.project4],
+        tokenReadOnly: [ctx.project5],
       })
-      const projects =
-        await this.ProjectGetter.promises.findUsersProjectsByName(
-          this.userId,
-          this.project1.name
-        )
+      const projects = await ctx.ProjectGetter.promises.findUsersProjectsByName(
+        ctx.userId,
+        ctx.project1.name
+      )
       expect(projects.map(project => project.name)).to.have.members([
-        this.project1.name,
-        this.project2.name,
+        ctx.project1.name,
+        ctx.project2.name,
       ])
     })
   })
 
   describe('getUsersDeletedProjects', function () {
-    it('should look up the deleted projects by deletedProjectOwnerId', async function () {
-      await this.ProjectGetter.promises.getUsersDeletedProjects('giraffe')
-      sinon.assert.calledWith(this.DeletedProject.find, {
+    it('should look up the deleted projects by deletedProjectOwnerId', async function (ctx) {
+      await ctx.ProjectGetter.promises.getUsersDeletedProjects('giraffe')
+      sinon.assert.calledWith(ctx.DeletedProject.find, {
         'deleterData.deletedProjectOwnerId': 'giraffe',
       })
     })
 
-    it('should pass the found projects to the callback', async function () {
+    it('should pass the found projects to the callback', async function (ctx) {
       const docs =
-        await this.ProjectGetter.promises.getUsersDeletedProjects('giraffe')
-      expect(docs).to.deep.equal([this.deletedProject])
+        await ctx.ProjectGetter.promises.getUsersDeletedProjects('giraffe')
+      expect(docs).to.deep.equal([ctx.deletedProject])
     })
   })
 })

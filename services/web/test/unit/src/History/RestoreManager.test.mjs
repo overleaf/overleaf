@@ -23,61 +23,64 @@ describe('RestoreManager', function () {
       default: Errors,
     }))
 
-    vi.doMock('../../../../app/src/Features/History/HistoryManager.mjs', () => ({
-      default: (ctx.HistoryManager = {
-        promises: {
-          getContentAtVersion: sinon.stub().resolves({
-            // Raw snapshot data that will be passed to Snapshot.fromRaw
-            files: {
-              'main.tex': {
-                hash: 'abcdef1234567890abcdef1234567890abcdef12',
-                stringLength: 100,
-                metadata: {
-                  editorId: 'test-editor',
+    vi.doMock(
+      '../../../../app/src/Features/History/HistoryManager.mjs',
+      () => ({
+        default: (ctx.HistoryManager = {
+          promises: {
+            getContentAtVersion: sinon.stub().resolves({
+              // Raw snapshot data that will be passed to Snapshot.fromRaw
+              files: {
+                'main.tex': {
+                  hash: 'abcdef1234567890abcdef1234567890abcdef12',
+                  stringLength: 100,
+                  metadata: {
+                    editorId: 'test-editor',
+                  },
+                },
+                'foo.tex': {
+                  hash: 'abcdef1234567890abcdef1234567890abcdef12',
+                  stringLength: 100,
+                  metadata: {
+                    editorId: 'test-editor',
+                  },
+                },
+                'folder/file.tex': {
+                  hash: 'abcdef1234567890abcdef1234567890abcdef12',
+                  stringLength: 100,
+                  metadata: {
+                    editorId: 'test-editor',
+                  },
+                },
+                'foo.png': {
+                  hash: 'abcdef1234567890abcdef1234567890abcdef12',
+                  stringLength: 100,
+                  metadata: {
+                    provider: 'bar',
+                  },
+                },
+                'linkedFile.bib': {
+                  hash: 'abcdef1234567890abcdef1234567890abcdef12',
+                  stringLength: 100,
+                  metadata: {
+                    provider: 'mendeley',
+                  },
+                },
+                'withMainTrue.tex': {
+                  hash: 'abcdef1234567890abcdef1234567890abcdef12',
+                  stringLength: 100,
+                  metadata: {
+                    main: true,
+                  },
                 },
               },
-              'foo.tex': {
-                hash: 'abcdef1234567890abcdef1234567890abcdef12',
-                stringLength: 100,
-                metadata: {
-                  editorId: 'test-editor',
-                },
-              },
-              'folder/file.tex': {
-                hash: 'abcdef1234567890abcdef1234567890abcdef12',
-                stringLength: 100,
-                metadata: {
-                  editorId: 'test-editor',
-                },
-              },
-              'foo.png': {
-                hash: 'abcdef1234567890abcdef1234567890abcdef12',
-                stringLength: 100,
-                metadata: {
-                  provider: 'bar',
-                },
-              },
-              'linkedFile.bib': {
-                hash: 'abcdef1234567890abcdef1234567890abcdef12',
-                stringLength: 100,
-                metadata: {
-                  provider: 'mendeley',
-                },
-              },
-              'withMainTrue.tex': {
-                hash: 'abcdef1234567890abcdef1234567890abcdef12',
-                stringLength: 100,
-                metadata: {
-                  main: true,
-                },
-              },
-            },
-            timestamp: new Date().toISOString(),
-          }),
-          requestBlob: sinon.stub().resolves({ stream: ctx.blobStream }),
-        },
-      }),
-    }))
+              timestamp: new Date().toISOString(),
+            }),
+            requestBlob: sinon.stub().resolves({ stream: ctx.blobStream }),
+          },
+        }),
+      })
+    )
 
     vi.doMock('../../../../app/src/infrastructure/Metrics.js', () => ({
       default: {

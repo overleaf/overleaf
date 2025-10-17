@@ -1,37 +1,34 @@
-const SandboxedModule = require('sandboxed-module')
-const sinon = require('sinon')
-const { expect } = require('chai')
-const modulePath = require('path').join(
-  __dirname,
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+const modulePath =
   '../../../../app/src/Features/Subscription/LimitationsManager'
-)
 
 describe('LimitationsManager', function () {
-  beforeEach(function () {
-    this.user = {
-      _id: (this.userId = 'user-id'),
+  beforeEach(async function (ctx) {
+    ctx.user = {
+      _id: (ctx.userId = 'user-id'),
       features: { collaborators: 1 },
     }
-    this.project = {
-      _id: (this.projectId = 'project-id'),
-      owner_ref: this.userId,
+    ctx.project = {
+      _id: (ctx.projectId = 'project-id'),
+      owner_ref: ctx.userId,
     }
-    this.ProjectGetter = {
+    ctx.ProjectGetter = {
       promises: {
         getProject: sinon.stub().callsFake(async (projectId, fields) => {
-          if (projectId === this.projectId) {
-            return this.project
+          if (projectId === ctx.projectId) {
+            return ctx.project
           } else {
             return null
           }
         }),
       },
     }
-    this.UserGetter = {
+    ctx.UserGetter = {
       promises: {
         getUser: sinon.stub().callsFake(async (userId, filter) => {
-          if (userId === this.userId) {
-            return this.user
+          if (userId === ctx.userId) {
+            return ctx.user
           } else {
             return null
           }
@@ -39,7 +36,7 @@ describe('LimitationsManager', function () {
       },
     }
 
-    this.SubscriptionLocator = {
+    ctx.SubscriptionLocator = {
       promises: {
         getUsersSubscription: sinon.stub().resolves(),
         getSubscription: sinon.stub().resolves(),
@@ -47,161 +44,194 @@ describe('LimitationsManager', function () {
       },
     }
 
-    this.CollaboratorsGetter = {
+    ctx.CollaboratorsGetter = {
       promises: {
         getInvitedEditCollaboratorCount: sinon.stub().resolves(0),
         getMemberIdPrivilegeLevel: sinon.stub(),
       },
     }
 
-    this.CollaboratorsInviteGetter = {
+    ctx.CollaboratorsInviteGetter = {
       promises: {
         getEditInviteCount: sinon.stub().resolves(0),
       },
     }
 
-    this.LimitationsManager = SandboxedModule.require(modulePath, {
-      requires: {
-        '../Project/ProjectGetter': this.ProjectGetter,
-        '../User/UserGetter': this.UserGetter,
-        './SubscriptionLocator': this.SubscriptionLocator,
-        '@overleaf/settings': (this.Settings = {}),
-        '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
-        '../Collaborators/CollaboratorsInviteGetter':
-          this.CollaboratorsInviteGetter,
-        './V1SubscriptionManager': this.V1SubscriptionManager,
-      },
-    })
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
+      default: ctx.ProjectGetter,
+    }))
+
+    vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
+      default: ctx.UserGetter,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionLocator',
+      () => ({
+        default: ctx.SubscriptionLocator,
+      })
+    )
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: (ctx.Settings = {}),
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Collaborators/CollaboratorsGetter',
+      () => ({
+        default: ctx.CollaboratorsGetter,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Collaborators/CollaboratorsInviteGetter',
+      () => ({
+        default: ctx.CollaboratorsInviteGetter,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/V1SubscriptionManager',
+      () => ({
+        default: ctx.V1SubscriptionManager,
+      })
+    )
+
+    ctx.LimitationsManager = (await import(modulePath)).default
   })
 
   describe('allowedNumberOfCollaboratorsInProject', function () {
     describe('when the project is owned by a user without a subscription', function () {
-      beforeEach(function () {
-        this.Settings.defaultFeatures = { collaborators: 23 }
-        this.project.owner_ref = this.userId
-        delete this.user.features
+      beforeEach(function (ctx) {
+        ctx.Settings.defaultFeatures = { collaborators: 23 }
+        ctx.project.owner_ref = ctx.userId
+        delete ctx.user.features
       })
 
-      it('should return the default number', async function () {
+      it('should return the default number', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.allowedNumberOfCollaboratorsInProject(
-            this.projectId
+          await ctx.LimitationsManager.promises.allowedNumberOfCollaboratorsInProject(
+            ctx.projectId
           )
-        expect(result).to.equal(this.Settings.defaultFeatures.collaborators)
+        expect(result).to.equal(ctx.Settings.defaultFeatures.collaborators)
       })
     })
 
     describe('when the project is owned by a user with a subscription', function () {
-      beforeEach(function () {
-        this.project.owner_ref = this.userId
-        this.user.features = { collaborators: 21 }
+      beforeEach(function (ctx) {
+        ctx.project.owner_ref = ctx.userId
+        ctx.user.features = { collaborators: 21 }
       })
 
-      it('should return the number of collaborators the user is allowed', async function () {
+      it('should return the number of collaborators the user is allowed', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.allowedNumberOfCollaboratorsInProject(
-            this.projectId
+          await ctx.LimitationsManager.promises.allowedNumberOfCollaboratorsInProject(
+            ctx.projectId
           )
-        expect(result).to.equal(this.user.features.collaborators)
+        expect(result).to.equal(ctx.user.features.collaborators)
       })
     })
   })
 
   describe('allowedNumberOfCollaboratorsForUser', function () {
     describe('when the user has no features', function () {
-      beforeEach(function () {
-        this.Settings.defaultFeatures = { collaborators: 23 }
-        delete this.user.features
+      beforeEach(function (ctx) {
+        ctx.Settings.defaultFeatures = { collaborators: 23 }
+        delete ctx.user.features
       })
 
-      it('should return the default number', async function () {
+      it('should return the default number', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.allowedNumberOfCollaboratorsForUser(
-            this.userId
+          await ctx.LimitationsManager.promises.allowedNumberOfCollaboratorsForUser(
+            ctx.userId
           )
-        expect(result).to.equal(this.Settings.defaultFeatures.collaborators)
+        expect(result).to.equal(ctx.Settings.defaultFeatures.collaborators)
       })
     })
 
     describe('when the user has features', function () {
-      beforeEach(async function () {
-        this.user.features = { collaborators: 21 }
-        this.result =
-          await this.LimitationsManager.promises.allowedNumberOfCollaboratorsForUser(
-            this.userId
+      beforeEach(async function (ctx) {
+        ctx.user.features = { collaborators: 21 }
+        ctx.result =
+          await ctx.LimitationsManager.promises.allowedNumberOfCollaboratorsForUser(
+            ctx.userId
           )
       })
 
-      it('should return the number of collaborators the user is allowed', function () {
-        expect(this.result).to.equal(this.user.features.collaborators)
+      it('should return the number of collaborators the user is allowed', function (ctx) {
+        expect(ctx.result).to.equal(ctx.user.features.collaborators)
       })
     })
   })
 
   describe('canAcceptEditCollaboratorInvite', function () {
     describe('when the project has fewer collaborators than allowed', function () {
-      beforeEach(function () {
-        this.current_number = 1
-        this.user.features.collaborators = 2
-        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
-          sinon.stub().resolves(this.current_number)
+      beforeEach(function (ctx) {
+        ctx.current_number = 1
+        ctx.user.features.collaborators = 2
+        ctx.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount = sinon
+          .stub()
+          .resolves(ctx.current_number)
       })
 
-      it('should return true', async function () {
+      it('should return true', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.canAcceptEditCollaboratorInvite(
-            this.projectId
+          await ctx.LimitationsManager.promises.canAcceptEditCollaboratorInvite(
+            ctx.projectId
           )
         expect(result).to.be.true
       })
     })
 
     describe('when accepting the invite would exceed the collaborator limit', function () {
-      beforeEach(function () {
-        this.current_number = 2
-        this.user.features.collaborators = 2
-        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
-          sinon.stub().resolves(this.current_number)
+      beforeEach(function (ctx) {
+        ctx.current_number = 2
+        ctx.user.features.collaborators = 2
+        ctx.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount = sinon
+          .stub()
+          .resolves(ctx.current_number)
       })
 
-      it('should return false', async function () {
+      it('should return false', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.canAcceptEditCollaboratorInvite(
-            this.projectId
+          await ctx.LimitationsManager.promises.canAcceptEditCollaboratorInvite(
+            ctx.projectId
           )
         expect(result).to.be.false
       })
     })
 
     describe('when the project has more collaborators than allowed', function () {
-      beforeEach(function () {
-        this.current_number = 3
-        this.user.features.collaborators = 2
-        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
-          sinon.stub().resolves(this.current_number)
+      beforeEach(function (ctx) {
+        ctx.current_number = 3
+        ctx.user.features.collaborators = 2
+        ctx.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount = sinon
+          .stub()
+          .resolves(ctx.current_number)
       })
 
-      it('should return false', async function () {
+      it('should return false', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.canAcceptEditCollaboratorInvite(
-            this.projectId
+          await ctx.LimitationsManager.promises.canAcceptEditCollaboratorInvite(
+            ctx.projectId
           )
         expect(result).to.be.false
       })
     })
 
     describe('when the project has infinite collaborators', function () {
-      beforeEach(function () {
-        this.current_number = 100
-        this.user.features.collaborators = -1
-        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
-          sinon.stub().resolves(this.current_number)
+      beforeEach(function (ctx) {
+        ctx.current_number = 100
+        ctx.user.features.collaborators = -1
+        ctx.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount = sinon
+          .stub()
+          .resolves(ctx.current_number)
       })
 
-      it('should return true', async function () {
+      it('should return true', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.canAcceptEditCollaboratorInvite(
-            this.projectId
+          await ctx.LimitationsManager.promises.canAcceptEditCollaboratorInvite(
+            ctx.projectId
           )
         expect(result).to.be.true
       })
@@ -210,21 +240,22 @@ describe('LimitationsManager', function () {
 
   describe('canAddXEditCollaborators', function () {
     describe('when the project has fewer collaborators than allowed', function () {
-      beforeEach(function () {
-        this.current_number = 1
-        this.user.features.collaborators = 2
-        this.invite_count = 0
-        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
-          sinon.stub().resolves(this.current_number)
-        this.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
+      beforeEach(function (ctx) {
+        ctx.current_number = 1
+        ctx.user.features.collaborators = 2
+        ctx.invite_count = 0
+        ctx.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount = sinon
           .stub()
-          .resolves(this.invite_count)
+          .resolves(ctx.current_number)
+        ctx.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
+          .stub()
+          .resolves(ctx.invite_count)
       })
 
-      it('should return true', async function () {
+      it('should return true', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.canAddXEditCollaborators(
-            this.projectId,
+          await ctx.LimitationsManager.promises.canAddXEditCollaborators(
+            ctx.projectId,
             1
           )
         expect(result).to.be.true
@@ -232,21 +263,22 @@ describe('LimitationsManager', function () {
     })
 
     describe('when the project has fewer collaborators and invites than allowed', function () {
-      beforeEach(function () {
-        this.current_number = 1
-        this.user.features.collaborators = 4
-        this.invite_count = 1
-        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
-          sinon.stub().resolves(this.current_number)
-        this.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
+      beforeEach(function (ctx) {
+        ctx.current_number = 1
+        ctx.user.features.collaborators = 4
+        ctx.invite_count = 1
+        ctx.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount = sinon
           .stub()
-          .resolves(this.invite_count)
+          .resolves(ctx.current_number)
+        ctx.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
+          .stub()
+          .resolves(ctx.invite_count)
       })
 
-      it('should return true', async function () {
+      it('should return true', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.canAddXEditCollaborators(
-            this.projectId,
+          await ctx.LimitationsManager.promises.canAddXEditCollaborators(
+            ctx.projectId,
             1
           )
         expect(result).to.be.true
@@ -254,21 +286,22 @@ describe('LimitationsManager', function () {
     })
 
     describe('when the project has fewer collaborators than allowed but I want to add more than allowed', function () {
-      beforeEach(function () {
-        this.current_number = 1
-        this.user.features.collaborators = 2
-        this.invite_count = 0
-        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
-          sinon.stub().resolves(this.current_number)
-        this.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
+      beforeEach(function (ctx) {
+        ctx.current_number = 1
+        ctx.user.features.collaborators = 2
+        ctx.invite_count = 0
+        ctx.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount = sinon
           .stub()
-          .resolves(this.invite_count)
+          .resolves(ctx.current_number)
+        ctx.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
+          .stub()
+          .resolves(ctx.invite_count)
       })
 
-      it('should return false', async function () {
+      it('should return false', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.canAddXEditCollaborators(
-            this.projectId,
+          await ctx.LimitationsManager.promises.canAddXEditCollaborators(
+            ctx.projectId,
             2
           )
         expect(result).to.be.false
@@ -276,21 +309,22 @@ describe('LimitationsManager', function () {
     })
 
     describe('when the project has more collaborators than allowed', function () {
-      beforeEach(function () {
-        this.current_number = 3
-        this.user.features.collaborators = 2
-        this.invite_count = 0
-        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
-          sinon.stub().resolves(this.current_number)
-        this.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
+      beforeEach(function (ctx) {
+        ctx.current_number = 3
+        ctx.user.features.collaborators = 2
+        ctx.invite_count = 0
+        ctx.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount = sinon
           .stub()
-          .resolves(this.invite_count)
+          .resolves(ctx.current_number)
+        ctx.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
+          .stub()
+          .resolves(ctx.invite_count)
       })
 
-      it('should return false', async function () {
+      it('should return false', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.canAddXEditCollaborators(
-            this.projectId,
+          await ctx.LimitationsManager.promises.canAddXEditCollaborators(
+            ctx.projectId,
             1
           )
         expect(result).to.be.false
@@ -298,21 +332,22 @@ describe('LimitationsManager', function () {
     })
 
     describe('when the project has infinite collaborators', function () {
-      beforeEach(function () {
-        this.current_number = 100
-        this.user.features.collaborators = -1
-        this.invite_count = 0
-        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
-          sinon.stub().resolves(this.current_number)
-        this.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
+      beforeEach(function (ctx) {
+        ctx.current_number = 100
+        ctx.user.features.collaborators = -1
+        ctx.invite_count = 0
+        ctx.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount = sinon
           .stub()
-          .resolves(this.invite_count)
+          .resolves(ctx.current_number)
+        ctx.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
+          .stub()
+          .resolves(ctx.invite_count)
       })
 
-      it('should return true', async function () {
+      it('should return true', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.canAddXEditCollaborators(
-            this.projectId,
+          await ctx.LimitationsManager.promises.canAddXEditCollaborators(
+            ctx.projectId,
             1
           )
         expect(result).to.be.true
@@ -320,21 +355,22 @@ describe('LimitationsManager', function () {
     })
 
     describe('when the project has more invites than allowed', function () {
-      beforeEach(function () {
-        this.current_number = 0
-        this.user.features.collaborators = 2
-        this.invite_count = 2
-        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
-          sinon.stub().resolves(this.current_number)
-        this.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
+      beforeEach(function (ctx) {
+        ctx.current_number = 0
+        ctx.user.features.collaborators = 2
+        ctx.invite_count = 2
+        ctx.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount = sinon
           .stub()
-          .resolves(this.invite_count)
+          .resolves(ctx.current_number)
+        ctx.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
+          .stub()
+          .resolves(ctx.invite_count)
       })
 
-      it('should return false', async function () {
+      it('should return false', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.canAddXEditCollaborators(
-            this.projectId,
+          await ctx.LimitationsManager.promises.canAddXEditCollaborators(
+            ctx.projectId,
             1
           )
         expect(result).to.be.false
@@ -342,21 +378,22 @@ describe('LimitationsManager', function () {
     })
 
     describe('when the project has more invites and collaborators than allowed', function () {
-      beforeEach(function () {
-        this.current_number = 1
-        this.user.features.collaborators = 2
-        this.invite_count = 1
-        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
-          sinon.stub().resolves(this.current_number)
-        this.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
+      beforeEach(function (ctx) {
+        ctx.current_number = 1
+        ctx.user.features.collaborators = 2
+        ctx.invite_count = 1
+        ctx.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount = sinon
           .stub()
-          .resolves(this.invite_count)
+          .resolves(ctx.current_number)
+        ctx.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
+          .stub()
+          .resolves(ctx.invite_count)
       })
 
-      it('should return false', async function () {
+      it('should return false', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.canAddXEditCollaborators(
-            this.projectId,
+          await ctx.LimitationsManager.promises.canAddXEditCollaborators(
+            ctx.projectId,
             1
           )
         expect(result).to.be.false
@@ -365,19 +402,19 @@ describe('LimitationsManager', function () {
   })
 
   describe('canChangeCollaboratorPrivilegeLevel', function () {
-    beforeEach(function () {
-      this.collaboratorId = 'collaborator-id'
-      this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel.resolves(
+    beforeEach(function (ctx) {
+      ctx.collaboratorId = 'collaborator-id'
+      ctx.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel.resolves(
         'readOnly'
       )
     })
 
     describe("when the limit hasn't been reached", function () {
-      it('accepts changing a viewer to an editor', async function () {
+      it('accepts changing a viewer to an editor', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.canChangeCollaboratorPrivilegeLevel(
-            this.projectId,
-            this.collaboratorId,
+          await ctx.LimitationsManager.promises.canChangeCollaboratorPrivilegeLevel(
+            ctx.projectId,
+            ctx.collaboratorId,
             'readAndWrite'
           )
         expect(result).to.be.true
@@ -385,30 +422,30 @@ describe('LimitationsManager', function () {
     })
 
     describe('when the limit has been reached', function () {
-      beforeEach(function () {
-        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount.resolves(
+      beforeEach(function (ctx) {
+        ctx.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount.resolves(
           1
         )
       })
 
-      it('accepts changing a reviewer to an editor', async function () {
-        this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel.resolves(
+      it('accepts changing a reviewer to an editor', async function (ctx) {
+        ctx.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel.resolves(
           'review'
         )
         const result =
-          await this.LimitationsManager.promises.canChangeCollaboratorPrivilegeLevel(
-            this.projectId,
-            this.collaboratorId,
+          await ctx.LimitationsManager.promises.canChangeCollaboratorPrivilegeLevel(
+            ctx.projectId,
+            ctx.collaboratorId,
             'readAndWrite'
           )
         expect(result).to.be.true
       })
 
-      it('rejects changing a viewer to a reviewer', async function () {
+      it('rejects changing a viewer to a reviewer', async function (ctx) {
         const result =
-          await this.LimitationsManager.promises.canChangeCollaboratorPrivilegeLevel(
-            this.projectId,
-            this.collaboratorId,
+          await ctx.LimitationsManager.promises.canChangeCollaboratorPrivilegeLevel(
+            ctx.projectId,
+            ctx.collaboratorId,
             'review'
           )
         expect(result).to.be.false
@@ -417,25 +454,25 @@ describe('LimitationsManager', function () {
   })
 
   describe('userHasSubscription', function () {
-    beforeEach(function () {
-      this.SubscriptionLocator.promises.getUsersSubscription = sinon
+    beforeEach(function (ctx) {
+      ctx.SubscriptionLocator.promises.getUsersSubscription = sinon
         .stub()
         .resolves()
     })
 
-    it('should return true if the recurly token is set', async function () {
-      this.SubscriptionLocator.promises.getUsersSubscription = sinon
+    it('should return true if the recurly token is set', async function (ctx) {
+      ctx.SubscriptionLocator.promises.getUsersSubscription = sinon
         .stub()
         .resolves({
           recurlySubscription_id: '1234',
         })
       const { hasSubscription } =
-        await this.LimitationsManager.promises.userHasSubscription(this.user)
+        await ctx.LimitationsManager.promises.userHasSubscription(ctx.user)
       expect(hasSubscription).to.be.true
     })
 
-    it('should return true if the paymentProvider field is set', async function () {
-      this.SubscriptionLocator.promises.getUsersSubscription = sinon
+    it('should return true if the paymentProvider field is set', async function (ctx) {
+      ctx.SubscriptionLocator.promises.getUsersSubscription = sinon
         .stub()
         .resolves({
           paymentProvider: {
@@ -443,80 +480,80 @@ describe('LimitationsManager', function () {
           },
         })
       const { hasSubscription } =
-        await this.LimitationsManager.promises.userHasSubscription(this.user)
+        await ctx.LimitationsManager.promises.userHasSubscription(ctx.user)
       expect(hasSubscription).to.be.true
     })
 
-    it('should return false if the recurly token is not set', async function () {
-      this.SubscriptionLocator.promises.getUsersSubscription.resolves({})
+    it('should return false if the recurly token is not set', async function (ctx) {
+      ctx.SubscriptionLocator.promises.getUsersSubscription.resolves({})
       const { hasSubscription } =
-        await this.LimitationsManager.promises.userHasSubscription(this.user)
+        await ctx.LimitationsManager.promises.userHasSubscription(ctx.user)
       expect(hasSubscription).to.be.false
     })
 
-    it('should return false if the subscription is undefined', async function () {
-      this.SubscriptionLocator.promises.getUsersSubscription.resolves()
+    it('should return false if the subscription is undefined', async function (ctx) {
+      ctx.SubscriptionLocator.promises.getUsersSubscription.resolves()
       const { hasSubscription } =
-        await this.LimitationsManager.promises.userHasSubscription(this.user)
+        await ctx.LimitationsManager.promises.userHasSubscription(ctx.user)
       expect(hasSubscription).to.be.false
     })
 
-    it('should return the subscription', async function () {
+    it('should return the subscription', async function (ctx) {
       const stubbedSubscription = { freeTrial: {}, token: '' }
-      this.SubscriptionLocator.promises.getUsersSubscription.resolves(
+      ctx.SubscriptionLocator.promises.getUsersSubscription.resolves(
         stubbedSubscription
       )
       const { subscription } =
-        await this.LimitationsManager.promises.userHasSubscription(this.user)
+        await ctx.LimitationsManager.promises.userHasSubscription(ctx.user)
       expect(subscription).to.deep.equal(stubbedSubscription)
     })
 
     describe('when user has a custom account', function () {
-      beforeEach(function () {
-        this.fakeSubscription = { customAccount: true }
-        this.SubscriptionLocator.promises.getUsersSubscription.resolves(
-          this.fakeSubscription
+      beforeEach(function (ctx) {
+        ctx.fakeSubscription = { customAccount: true }
+        ctx.SubscriptionLocator.promises.getUsersSubscription.resolves(
+          ctx.fakeSubscription
         )
       })
 
-      it('should return true', async function () {
+      it('should return true', async function (ctx) {
         const { hasSubscription } =
-          await this.LimitationsManager.promises.userHasSubscription(this.user)
+          await ctx.LimitationsManager.promises.userHasSubscription(ctx.user)
         expect(hasSubscription).to.be.true
       })
 
-      it('should return the subscription', async function () {
+      it('should return the subscription', async function (ctx) {
         const { subscription } =
-          await this.LimitationsManager.promises.userHasSubscription(this.user)
-        expect(subscription).to.deep.equal(this.fakeSubscription)
+          await ctx.LimitationsManager.promises.userHasSubscription(ctx.user)
+        expect(subscription).to.deep.equal(ctx.fakeSubscription)
       })
     })
   })
 
   describe('userIsMemberOfGroupSubscription', function () {
-    beforeEach(function () {
-      this.SubscriptionLocator.promises.getMemberSubscriptions = sinon
+    beforeEach(function (ctx) {
+      ctx.SubscriptionLocator.promises.getMemberSubscriptions = sinon
         .stub()
         .resolves()
     })
 
-    it('should return false if there are no groups subcriptions', async function () {
-      this.SubscriptionLocator.promises.getMemberSubscriptions.resolves([])
+    it('should return false if there are no groups subcriptions', async function (ctx) {
+      ctx.SubscriptionLocator.promises.getMemberSubscriptions.resolves([])
       const { isMember } =
-        await this.LimitationsManager.promises.userIsMemberOfGroupSubscription(
-          this.user
+        await ctx.LimitationsManager.promises.userIsMemberOfGroupSubscription(
+          ctx.user
         )
       expect(isMember).to.be.false
     })
 
-    it('should return true if there are no groups subcriptions', async function () {
+    it('should return true if there are no groups subcriptions', async function (ctx) {
       const subscriptions = ['mock-subscription']
-      this.SubscriptionLocator.promises.getMemberSubscriptions.resolves(
+      ctx.SubscriptionLocator.promises.getMemberSubscriptions.resolves(
         subscriptions
       )
       const { isMember, subscriptions: retSubscriptions } =
-        await this.LimitationsManager.promises.userIsMemberOfGroupSubscription(
-          this.user
+        await ctx.LimitationsManager.promises.userIsMemberOfGroupSubscription(
+          ctx.user
         )
       expect(isMember).to.be.true
       expect(retSubscriptions).to.deep.equal(subscriptions)
@@ -524,52 +561,52 @@ describe('LimitationsManager', function () {
   })
 
   describe('hasPaidSubscription', function () {
-    beforeEach(function () {
-      this.SubscriptionLocator.promises.getMemberSubscriptions = sinon
+    beforeEach(function (ctx) {
+      ctx.SubscriptionLocator.promises.getMemberSubscriptions = sinon
         .stub()
         .resolves([])
-      this.SubscriptionLocator.promises.getUsersSubscription = sinon
+      ctx.SubscriptionLocator.promises.getUsersSubscription = sinon
         .stub()
         .resolves(null)
     })
 
-    it('should return true if userIsMemberOfGroupSubscription', async function () {
-      this.SubscriptionLocator.promises.getMemberSubscriptions = sinon
+    it('should return true if userIsMemberOfGroupSubscription', async function (ctx) {
+      ctx.SubscriptionLocator.promises.getMemberSubscriptions = sinon
         .stub()
         .resolves([{ _id: '123' }])
       const { hasPaidSubscription } =
-        await this.LimitationsManager.promises.hasPaidSubscription(this.user)
+        await ctx.LimitationsManager.promises.hasPaidSubscription(ctx.user)
       expect(hasPaidSubscription).to.be.true
     })
 
-    it('should return true if userHasSubscription', async function () {
-      this.SubscriptionLocator.promises.getUsersSubscription = sinon
+    it('should return true if userHasSubscription', async function (ctx) {
+      ctx.SubscriptionLocator.promises.getUsersSubscription = sinon
         .stub()
         .resolves({ recurlySubscription_id: '123' })
       const { hasPaidSubscription } =
-        await this.LimitationsManager.promises.hasPaidSubscription(this.user)
+        await ctx.LimitationsManager.promises.hasPaidSubscription(ctx.user)
       expect(hasPaidSubscription).to.be.true
     })
 
-    it('should return false if none are true', async function () {
+    it('should return false if none are true', async function (ctx) {
       const { hasPaidSubscription } =
-        await this.LimitationsManager.promises.hasPaidSubscription(this.user)
+        await ctx.LimitationsManager.promises.hasPaidSubscription(ctx.user)
       expect(hasPaidSubscription).to.be.false
     })
 
-    it('should have userHasSubscriptionOrIsGroupMember alias', async function () {
+    it('should have userHasSubscriptionOrIsGroupMember alias', async function (ctx) {
       const { hasPaidSubscription } =
-        await this.LimitationsManager.promises.userHasSubscriptionOrIsGroupMember(
-          this.user
+        await ctx.LimitationsManager.promises.userHasSubscriptionOrIsGroupMember(
+          ctx.user
         )
       expect(hasPaidSubscription).to.be.false
     })
   })
 
   describe('hasGroupMembersLimitReached', function () {
-    beforeEach(function () {
-      this.subscriptionId = '12312'
-      this.subscription = {
+    beforeEach(function (ctx) {
+      ctx.subscriptionId = '12312'
+      ctx.subscription = {
         membersLimit: 3,
         member_ids: ['', ''],
         teamInvites: [
@@ -578,37 +615,37 @@ describe('LimitationsManager', function () {
       }
     })
 
-    it('should return true if the limit is hit (including members and invites)', async function () {
-      this.SubscriptionLocator.promises.getSubscription.resolves(
-        this.subscription
+    it('should return true if the limit is hit (including members and invites)', async function (ctx) {
+      ctx.SubscriptionLocator.promises.getSubscription.resolves(
+        ctx.subscription
       )
       const { limitReached } =
-        await this.LimitationsManager.promises.hasGroupMembersLimitReached(
-          this.subscriptionId
+        await ctx.LimitationsManager.promises.hasGroupMembersLimitReached(
+          ctx.subscriptionId
         )
       expect(limitReached).to.be.true
     })
 
-    it('should return false if the limit is not hit (including members and invites)', async function () {
-      this.subscription.membersLimit = 4
-      this.SubscriptionLocator.promises.getSubscription.resolves(
-        this.subscription
+    it('should return false if the limit is not hit (including members and invites)', async function (ctx) {
+      ctx.subscription.membersLimit = 4
+      ctx.SubscriptionLocator.promises.getSubscription.resolves(
+        ctx.subscription
       )
       const { limitReached } =
-        await this.LimitationsManager.promises.hasGroupMembersLimitReached(
-          this.subscriptionId
+        await ctx.LimitationsManager.promises.hasGroupMembersLimitReached(
+          ctx.subscriptionId
         )
       expect(limitReached).to.be.false
     })
 
-    it('should return true if the limit has been exceded (including members and invites)', async function () {
-      this.subscription.membersLimit = 2
-      this.SubscriptionLocator.promises.getSubscription.resolves(
-        this.subscription
+    it('should return true if the limit has been exceded (including members and invites)', async function (ctx) {
+      ctx.subscription.membersLimit = 2
+      ctx.SubscriptionLocator.promises.getSubscription.resolves(
+        ctx.subscription
       )
       const { limitReached } =
-        await this.LimitationsManager.promises.hasGroupMembersLimitReached(
-          this.subscriptionId
+        await ctx.LimitationsManager.promises.hasGroupMembersLimitReached(
+          ctx.subscriptionId
         )
       expect(limitReached).to.be.true
     })

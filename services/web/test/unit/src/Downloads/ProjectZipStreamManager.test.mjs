@@ -43,9 +43,12 @@ describe('ProjectZipStreamManager', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/Features/History/HistoryManager.mjs', () => ({
-      default: (ctx.HistoryManager = {}),
-    }))
+    vi.doMock(
+      '../../../../app/src/Features/History/HistoryManager.mjs',
+      () => ({
+        default: (ctx.HistoryManager = {}),
+      })
+    )
 
     vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
       default: (ctx.ProjectGetter = {}),
