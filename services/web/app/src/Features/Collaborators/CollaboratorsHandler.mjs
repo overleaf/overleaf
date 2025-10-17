@@ -1,17 +1,17 @@
-const { callbackify } = require('util')
-const OError = require('@overleaf/o-error')
-const { Project } = require('../../models/Project')
-const ProjectGetter = require('../Project/ProjectGetter')
-const logger = require('@overleaf/logger')
-const ContactManager = require('../Contacts/ContactManager')
-const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
-const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
-const CollaboratorsGetter = require('./CollaboratorsGetter')
-const Errors = require('../Errors/Errors')
-const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
-const EditorRealTimeController = require('../Editor/EditorRealTimeController')
+import { callbackify } from 'node:util'
+import OError from '@overleaf/o-error'
+import { Project } from '../../models/Project.js'
+import ProjectGetter from '../Project/ProjectGetter.mjs'
+import logger from '@overleaf/logger'
+import ContactManager from '../Contacts/ContactManager.js'
+import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
+import TpdsProjectFlusher from '../ThirdPartyDataStore/TpdsProjectFlusher.mjs'
+import CollaboratorsGetter from './CollaboratorsGetter.mjs'
+import Errors from '../Errors/Errors.js'
+import TpdsUpdateSender from '../ThirdPartyDataStore/TpdsUpdateSender.mjs'
+import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
 
-module.exports = {
+export default {
   userIsTokenMember: callbackify(userIsTokenMember),
   removeUserFromProject: callbackify(removeUserFromProject),
   removeUserFromAllProjects: callbackify(removeUserFromAllProjects),

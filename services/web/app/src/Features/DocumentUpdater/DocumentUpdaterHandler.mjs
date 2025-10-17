@@ -1,16 +1,16 @@
-const OError = require('@overleaf/o-error')
-const settings = require('@overleaf/settings')
-const {
+import OError from '@overleaf/o-error'
+import settings from '@overleaf/settings'
+import {
   fetchJson,
   fetchNothing,
   fetchString,
   RequestFailedError,
-} = require('@overleaf/fetch-utils')
-const _ = require('lodash')
-const logger = require('@overleaf/logger')
-const { callbackifyAll } = require('@overleaf/promise-utils')
-const ProjectGetter = require('../Project/ProjectGetter')
-const Modules = require('../../infrastructure/Modules')
+} from '@overleaf/fetch-utils'
+import _ from 'lodash'
+import logger from '@overleaf/logger'
+import { callbackifyAll } from '@overleaf/promise-utils'
+import ProjectGetter from '../Project/ProjectGetter.mjs'
+import Modules from '../../infrastructure/Modules.js'
 
 const REQUEST_TIMEOUT_MS = 30 * 1000
 const RESYNC_TIMEOUT_MS = 6 * 60 * 1000
@@ -543,7 +543,7 @@ const DocumentUpdaterHandler = {
   getDocumentWithHistoryRanges,
 }
 
-module.exports = {
+export default {
   ...callbackifyAll(DocumentUpdaterHandler, {
     multiResult: {
       getDocument: ['lines', 'version', 'ranges', 'ops'],

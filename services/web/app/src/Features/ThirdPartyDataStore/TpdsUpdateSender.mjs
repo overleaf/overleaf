@@ -1,15 +1,18 @@
-const { ObjectId } = require('mongodb-legacy')
-const _ = require('lodash')
-const { callbackify } = require('util')
-const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
-const Path = require('path')
-const { fetchNothing } = require('@overleaf/fetch-utils')
-const settings = require('@overleaf/settings')
+import mongodb from 'mongodb-legacy'
+import _ from 'lodash'
+import { callbackify } from 'node:util'
+import logger from '@overleaf/logger'
+import metrics from '@overleaf/metrics'
+import Path from 'node:path'
+import { fetchNothing } from '@overleaf/fetch-utils'
+import settings from '@overleaf/settings'
+import CollaboratorsGetterModule from '../Collaborators/CollaboratorsGetter.mjs'
+import UserGetterModule from '../User/UserGetter.js'
 
-const CollaboratorsGetter =
-  require('../Collaborators/CollaboratorsGetter').promises
-const UserGetter = require('../User/UserGetter').promises
+const { promises: UserGetter } = UserGetterModule
+const { promises: CollaboratorsGetter } = CollaboratorsGetterModule
+
+const { ObjectId } = mongodb
 
 const tpdsUrl = _.get(settings, ['apis', 'thirdPartyDataStore', 'url'])
 
@@ -280,4 +283,4 @@ const TpdsUpdateSender = {
   },
 }
 
-module.exports = TpdsUpdateSender
+export default TpdsUpdateSender

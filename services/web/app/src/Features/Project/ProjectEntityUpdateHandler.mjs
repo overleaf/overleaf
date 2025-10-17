@@ -1,31 +1,28 @@
-const _ = require('lodash')
-const OError = require('@overleaf/o-error')
-const logger = require('@overleaf/logger')
-const Settings = require('@overleaf/settings')
-const Path = require('path')
-const fs = require('fs')
-const { Doc } = require('../../models/Doc')
-const DocstoreManager = require('../Docstore/DocstoreManager')
-const DocumentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
-const Errors = require('../Errors/Errors')
-const FileStoreHandler = require('../FileStore/FileStoreHandler')
-const LockManager = require('../../infrastructure/LockManager')
-const { Project } = require('../../models/Project')
-const ProjectEntityHandler = require('./ProjectEntityHandler')
-const ProjectGetter = require('./ProjectGetter')
-const ProjectLocator = require('./ProjectLocator')
-const ProjectOptionsHandler = require('./ProjectOptionsHandler')
-const ProjectUpdateHandler = require('./ProjectUpdateHandler')
-const ProjectEntityMongoUpdateHandler = require('./ProjectEntityMongoUpdateHandler')
-const SafePath = require('./SafePath')
-const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
-const FileWriter = require('../../infrastructure/FileWriter')
-const EditorRealTimeController = require('../Editor/EditorRealTimeController')
-const {
-  callbackifyMultiResult,
-  callbackify,
-} = require('@overleaf/promise-utils')
-const { iterablePaths } = require('./IterablePath')
+import _ from 'lodash'
+import OError from '@overleaf/o-error'
+import logger from '@overleaf/logger'
+import Settings from '@overleaf/settings'
+import Path from 'node:path'
+import fs from 'node:fs'
+import { Doc } from '../../models/Doc.js'
+import DocstoreManager from '../Docstore/DocstoreManager.js'
+import DocumentUpdaterHandler from '../../Features/DocumentUpdater/DocumentUpdaterHandler.mjs'
+import Errors from '../Errors/Errors.js'
+import FileStoreHandler from '../FileStore/FileStoreHandler.mjs'
+import LockManager from '../../infrastructure/LockManager.js'
+import { Project } from '../../models/Project.js'
+import ProjectEntityHandler from './ProjectEntityHandler.mjs'
+import ProjectGetter from './ProjectGetter.mjs'
+import ProjectLocator from './ProjectLocator.mjs'
+import ProjectOptionsHandler from './ProjectOptionsHandler.js'
+import ProjectUpdateHandler from './ProjectUpdateHandler.js'
+import ProjectEntityMongoUpdateHandler from './ProjectEntityMongoUpdateHandler.mjs'
+import SafePath from './SafePath.js'
+import TpdsUpdateSender from '../ThirdPartyDataStore/TpdsUpdateSender.mjs'
+import FileWriter from '../../infrastructure/FileWriter.js'
+import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
+import { callbackifyMultiResult, callbackify } from '@overleaf/promise-utils'
+import { iterablePaths } from './IterablePath.js'
 
 const LOCK_NAMESPACE = 'sequentialProjectStructureUpdateLock'
 const VALID_ROOT_DOC_EXTENSIONS = Settings.validRootDocExtensions
@@ -1697,4 +1694,4 @@ function _listSubtree(entity, entityType, entityPath) {
   }
 }
 
-module.exports = ProjectEntityUpdateHandler
+export default ProjectEntityUpdateHandler

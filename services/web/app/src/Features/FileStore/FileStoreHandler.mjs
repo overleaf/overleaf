@@ -1,13 +1,13 @@
-const logger = require('@overleaf/logger')
-const fs = require('fs')
-const Async = require('async')
-const FileHashManager = require('./FileHashManager')
-const HistoryManager = require('../History/HistoryManager')
-const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
-const { File } = require('../../models/File')
-const OError = require('@overleaf/o-error')
-const { promisifyAll } = require('@overleaf/promise-utils')
-const Modules = require('../../infrastructure/Modules')
+import logger from '@overleaf/logger'
+import fs from 'node:fs'
+import Async from 'async'
+import FileHashManager from './FileHashManager.js'
+import HistoryManager from '../History/HistoryManager.mjs'
+import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
+import { File } from '../../models/File.js'
+import OError from '@overleaf/o-error'
+import { promisifyAll } from '@overleaf/promise-utils'
+import Modules from '../../infrastructure/Modules.js'
 
 const FileStoreHandler = {
   RETRY_ATTEMPTS: 3,
@@ -115,10 +115,11 @@ const FileStoreHandler = {
   },
 }
 
-module.exports = FileStoreHandler
-module.exports.promises = promisifyAll(FileStoreHandler, {
+FileStoreHandler.promises = promisifyAll(FileStoreHandler, {
   multiResult: {
     uploadFileFromDisk: ['fileRef', 'createdBlob', 'size'],
     uploadFileFromDiskWithHistoryId: ['fileRef', 'createdBlob', 'size'],
   },
 })
+
+export default FileStoreHandler

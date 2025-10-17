@@ -1,28 +1,22 @@
-const logger = require('@overleaf/logger')
-const crypto = require('crypto')
+import logger from '@overleaf/logger'
+import crypto from 'node:crypto'
+import settings from '@overleaf/settings'
+import Modules from '../../infrastructure/Modules.js'
+import mongodb from 'mongodb-legacy'
+import { Subscription } from '../../models/Subscription.js'
+import { SSOConfig } from '../../models/SSOConfig.js'
+import UserGetter from '../User/UserGetter.js'
+import SubscriptionLocator from './SubscriptionLocator.js'
+import SubscriptionUpdater from './SubscriptionUpdater.js'
+import LimitationsManager from './LimitationsManager.mjs'
+import EmailHandler from '../Email/EmailHandler.js'
+import EmailHelper from '../Helpers/EmailHelper.js'
+import Errors from '../Errors/Errors.js'
+import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
+import NotificationsBuilder from '../Notifications/NotificationsBuilder.js'
+import RecurlyClient from './RecurlyClient.js'
 
-const settings = require('@overleaf/settings')
-const Modules = require('../../infrastructure/Modules')
-const { ObjectId } = require('mongodb-legacy')
-
-const { Subscription } = require('../../models/Subscription')
-const { SSOConfig } = require('../../models/SSOConfig')
-
-const UserGetter = require('../User/UserGetter')
-const SubscriptionLocator = require('./SubscriptionLocator')
-const SubscriptionUpdater = require('./SubscriptionUpdater')
-const LimitationsManager = require('./LimitationsManager')
-
-const EmailHandler = require('../Email/EmailHandler')
-const EmailHelper = require('../Helpers/EmailHelper')
-
-const Errors = require('../Errors/Errors')
-const {
-  callbackify,
-  callbackifyMultiResult,
-} = require('@overleaf/promise-utils')
-const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
-const RecurlyClient = require('./RecurlyClient')
+const { ObjectId } = mongodb
 
 async function getInvite(token) {
   const subscription = await Subscription.findOne({
@@ -404,7 +398,7 @@ function _getInviterName(inviter) {
   return inviterName
 }
 
-module.exports = {
+export default {
   getInvite: callbackifyMultiResult(getInvite, ['invite', 'subscription']),
   createInvite: callbackify(createInvite),
   importInvite: callbackify(importInvite),

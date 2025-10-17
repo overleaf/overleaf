@@ -1,23 +1,23 @@
-const Path = require('path')
-const fs = require('fs')
-const { callbackify } = require('util')
-const ArchiveManager = require('./ArchiveManager')
-const { Doc } = require('../../models/Doc')
-const DocstoreManager = require('../Docstore/DocstoreManager')
-const DocumentHelper = require('../Documents/DocumentHelper')
-const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const FileStoreHandler = require('../FileStore/FileStoreHandler')
-const FileSystemImportManager = require('./FileSystemImportManager')
-const ProjectCreationHandler = require('../Project/ProjectCreationHandler')
-const ProjectEntityMongoUpdateHandler = require('../Project/ProjectEntityMongoUpdateHandler')
-const ProjectRootDocManager = require('../Project/ProjectRootDocManager')
-const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
-const ProjectDeleter = require('../Project/ProjectDeleter')
-const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
-const logger = require('@overleaf/logger')
-const OError = require('@overleaf/o-error')
+import Path from 'node:path'
+import fs from 'node:fs'
+import { callbackify } from 'node:util'
+import ArchiveManager from './ArchiveManager.js'
+import { Doc } from '../../models/Doc.js'
+import DocstoreManager from '../Docstore/DocstoreManager.js'
+import DocumentHelper from '../Documents/DocumentHelper.js'
+import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mjs'
+import FileStoreHandler from '../FileStore/FileStoreHandler.mjs'
+import FileSystemImportManager from './FileSystemImportManager.mjs'
+import ProjectCreationHandler from '../Project/ProjectCreationHandler.mjs'
+import ProjectEntityMongoUpdateHandler from '../Project/ProjectEntityMongoUpdateHandler.mjs'
+import ProjectRootDocManager from '../Project/ProjectRootDocManager.mjs'
+import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
+import ProjectDeleter from '../Project/ProjectDeleter.mjs'
+import TpdsProjectFlusher from '../ThirdPartyDataStore/TpdsProjectFlusher.mjs'
+import logger from '@overleaf/logger'
+import OError from '@overleaf/o-error'
 
-module.exports = {
+export default {
   createProjectFromZipArchive: callbackify(createProjectFromZipArchive),
   createProjectFromZipArchiveWithName: callbackify(
     createProjectFromZipArchiveWithName

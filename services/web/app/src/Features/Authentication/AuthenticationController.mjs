@@ -1,32 +1,32 @@
-const AuthenticationManager = require('./AuthenticationManager')
-const SessionManager = require('./SessionManager')
-const OError = require('@overleaf/o-error')
-const LoginRateLimiter = require('../Security/LoginRateLimiter')
-const UserUpdater = require('../User/UserUpdater')
-const Metrics = require('@overleaf/metrics')
-const logger = require('@overleaf/logger')
-const querystring = require('querystring')
-const Settings = require('@overleaf/settings')
-const basicAuth = require('basic-auth')
-const tsscmp = require('tsscmp')
-const UserHandler = require('../User/UserHandler')
-const UserSessionsManager = require('../User/UserSessionsManager')
-const Analytics = require('../Analytics/AnalyticsManager')
-const passport = require('passport')
-const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
-const UrlHelper = require('../Helpers/UrlHelper')
-const AsyncFormHelper = require('../Helpers/AsyncFormHelper')
-const _ = require('lodash')
-const UserAuditLogHandler = require('../User/UserAuditLogHandler')
-const AnalyticsRegistrationSourceHelper = require('../Analytics/AnalyticsRegistrationSourceHelper')
-const {
-  acceptsJson,
-} = require('../../infrastructure/RequestContentTypeDetection')
-const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
-const Modules = require('../../infrastructure/Modules')
-const { expressify, promisify } = require('@overleaf/promise-utils')
-const { handleAuthenticateErrors } = require('./AuthenticationErrors')
-const EmailHelper = require('../Helpers/EmailHelper')
+import AuthenticationManager from './AuthenticationManager.js'
+import SessionManager from './SessionManager.js'
+import OError from '@overleaf/o-error'
+import LoginRateLimiter from '../Security/LoginRateLimiter.js'
+import UserUpdater from '../User/UserUpdater.js'
+import Metrics from '@overleaf/metrics'
+import logger from '@overleaf/logger'
+import querystring from 'node:querystring'
+import Settings from '@overleaf/settings'
+import basicAuth from 'basic-auth'
+import tsscmp from 'tsscmp'
+import UserHandler from '../User/UserHandler.mjs'
+import UserSessionsManager from '../User/UserSessionsManager.js'
+import Analytics from '../Analytics/AnalyticsManager.js'
+import passport from 'passport'
+import NotificationsBuilder from '../Notifications/NotificationsBuilder.js'
+import UrlHelper from '../Helpers/UrlHelper.js'
+import AsyncFormHelper from '../Helpers/AsyncFormHelper.js'
+import _ from 'lodash'
+import UserAuditLogHandler from '../User/UserAuditLogHandler.js'
+import AnalyticsRegistrationSourceHelper from '../Analytics/AnalyticsRegistrationSourceHelper.js'
+import { acceptsJson } from '../../infrastructure/RequestContentTypeDetection.js'
+import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
+import Modules from '../../infrastructure/Modules.js'
+import { expressify, promisify } from '@overleaf/promise-utils'
+import { handleAuthenticateErrors } from './AuthenticationErrors.js'
+import EmailHelper from '../Helpers/EmailHelper.js'
+
+const { hasAdminAccess } = AdminAuthorizationHelper
 
 function send401WithChallenge(res) {
   res.setHeader('WWW-Authenticate', 'OverleafLogin')
@@ -391,9 +391,13 @@ const AuthenticationController = {
       )
     }
 
-    // require this here because module may not be included in some versions
-    const Oauth2Server = require('../../../../modules/oauth2-server/app/src/Oauth2Server')
     const middleware = async (req, res, next) => {
+      const Oauth2Server = (
+        await import(
+          '../../../../modules/oauth2-server/app/src/Oauth2Server.js'
+        )
+      ).default
+
       const request = new Oauth2Server.Request(req)
       const response = new Oauth2Server.Response(res)
       try {
@@ -681,4 +685,4 @@ AuthenticationController.promises = {
   finishLogin: AuthenticationController._finishLoginAsync,
 }
 
-module.exports = AuthenticationController
+export default AuthenticationController

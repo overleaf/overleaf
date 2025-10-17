@@ -1,17 +1,15 @@
 // @ts-check
 
-const logger = require('@overleaf/logger')
-const ProjectGetter = require('../Project/ProjectGetter')
-const UserGetter = require('../User/UserGetter')
-const SubscriptionLocator = require('./SubscriptionLocator')
-const Settings = require('@overleaf/settings')
-const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
-const CollaboratorsInvitesGetter = require('../Collaborators/CollaboratorsInviteGetter')
-const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
-const {
-  callbackify,
-  callbackifyMultiResult,
-} = require('@overleaf/promise-utils')
+import logger from '@overleaf/logger'
+
+import ProjectGetter from '../Project/ProjectGetter.mjs'
+import UserGetter from '../User/UserGetter.js'
+import SubscriptionLocator from './SubscriptionLocator.js'
+import Settings from '@overleaf/settings'
+import CollaboratorsGetter from '../Collaborators/CollaboratorsGetter.mjs'
+import CollaboratorsInvitesGetter from '../Collaborators/CollaboratorsInviteGetter.js'
+import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
+import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
 
 async function allowedNumberOfCollaboratorsInProject(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
@@ -216,4 +214,4 @@ const LimitationsManager = {
   },
 }
 
-module.exports = LimitationsManager
+export default LimitationsManager

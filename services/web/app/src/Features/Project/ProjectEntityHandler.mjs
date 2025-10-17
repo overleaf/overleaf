@@ -1,10 +1,10 @@
-const path = require('path')
-const DocstoreManager = require('../Docstore/DocstoreManager')
-const Errors = require('../Errors/Errors')
-const ProjectGetter = require('./ProjectGetter')
-const { callbackifyAll } = require('@overleaf/promise-utils')
-const OError = require('@overleaf/o-error')
-const { iterablePaths } = require('./IterablePath')
+import path from 'node:path'
+import DocstoreManager from '../Docstore/DocstoreManager.js'
+import Errors from '../Errors/Errors.js'
+import ProjectGetter from './ProjectGetter.mjs'
+import { callbackifyAll } from '@overleaf/promise-utils'
+import OError from '@overleaf/o-error'
+import { iterablePaths } from './IterablePath.js'
 
 async function getAllDocs(projectId) {
   // We get the path and name info from the project, and the lines and
@@ -207,7 +207,7 @@ const ProjectEntityHandler = {
   _getAllFolders,
 }
 
-module.exports = {
+export default {
   ...callbackifyAll(ProjectEntityHandler, {
     multiResult: {
       getDoc: ['lines', 'rev', 'version', 'ranges'],

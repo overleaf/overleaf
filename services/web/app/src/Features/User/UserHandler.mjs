@@ -1,9 +1,6 @@
-const { callbackify } = require('util')
-const TeamInvitesHandler = require('../Subscription/TeamInvitesHandler')
-const {
-  db,
-  READ_PREFERENCE_SECONDARY,
-} = require('../../infrastructure/mongodb')
+import { callbackify } from 'node:util'
+import TeamInvitesHandler from '../Subscription/TeamInvitesHandler.mjs'
+import { db, READ_PREFERENCE_SECONDARY } from '../../infrastructure/mongodb.js'
 
 async function populateTeamInvites(user) {
   return await TeamInvitesHandler.promises.createTeamInvitesForLegacyInvitedEmail(
@@ -20,7 +17,7 @@ async function countActiveUsers() {
   )
 }
 
-module.exports = {
+export default {
   populateTeamInvites: callbackify(populateTeamInvites),
   countActiveUsers: callbackify(countActiveUsers),
   promises: {

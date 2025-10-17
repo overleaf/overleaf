@@ -4,15 +4,16 @@ import { expressify } from '@overleaf/promise-utils'
 
 import async from 'async'
 import UserMembershipAuthorization from './UserMembershipAuthorization.mjs'
-import AuthenticationController from '../Authentication/AuthenticationController.js'
+import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import UserMembershipHandler from './UserMembershipHandler.mjs'
 import EntityConfigs from './UserMembershipEntityConfigs.js'
 import Errors from '../Errors/Errors.js'
 import HttpErrorHandler from '../Errors/HttpErrorHandler.js'
-import TemplatesManager from '../Templates/TemplatesManager.js'
+import TemplatesManager from '../Templates/TemplatesManager.mjs'
 import { z, zz, validateReq } from '../../infrastructure/Validation.js'
-import { useAdminCapabilities } from '../Helpers/AdminAuthorizationHelper.js'
+import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
 
+const { useAdminCapabilities } = AdminAuthorizationHelper
 // set of middleware arrays or functions that checks user access to an entity
 // (publisher, institution, group, template, etc.)
 const UserMembershipMiddleware = {

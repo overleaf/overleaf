@@ -1,28 +1,31 @@
-const _ = require('lodash')
-const { db, ObjectId } = require('../../infrastructure/mongodb')
-const Modules = require('../../infrastructure/Modules')
-const { callbackify } = require('util')
-const { Project } = require('../../models/Project')
-const { DeletedProject } = require('../../models/DeletedProject')
-const { ProjectAuditLogEntry } = require('../../models/ProjectAuditLogEntry')
-const Errors = require('../Errors/Errors')
-const logger = require('@overleaf/logger')
-const Settings = require('@overleaf/settings')
-const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const TagsHandler = require('../Tags/TagsHandler')
-const ProjectDetailsHandler = require('./ProjectDetailsHandler')
-const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
-const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
-const DocstoreManager = require('../Docstore/DocstoreManager')
-const EditorRealTimeController = require('../Editor/EditorRealTimeController')
-const HistoryManager = require('../History/HistoryManager')
-const ChatApiHandler = require('../Chat/ChatApiHandler')
-const { promiseMapWithLimit } = require('@overleaf/promise-utils')
-const { READ_PREFERENCE_SECONDARY } = require('../../infrastructure/mongodb')
+import _ from 'lodash'
+import {
+  db,
+  ObjectId,
+  READ_PREFERENCE_SECONDARY,
+} from '../../infrastructure/mongodb.js'
+import Modules from '../../infrastructure/Modules.js'
+import { callbackify } from 'node:util'
+import { Project } from '../../models/Project.js'
+import { DeletedProject } from '../../models/DeletedProject.js'
+import { ProjectAuditLogEntry } from '../../models/ProjectAuditLogEntry.js'
+import Errors from '../Errors/Errors.js'
+import logger from '@overleaf/logger'
+import Settings from '@overleaf/settings'
+import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mjs'
+import TagsHandler from '../Tags/TagsHandler.js'
+import ProjectDetailsHandler from './ProjectDetailsHandler.mjs'
+import CollaboratorsHandler from '../Collaborators/CollaboratorsHandler.mjs'
+import CollaboratorsGetter from '../Collaborators/CollaboratorsGetter.mjs'
+import DocstoreManager from '../Docstore/DocstoreManager.js'
+import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
+import HistoryManager from '../History/HistoryManager.mjs'
+import ChatApiHandler from '../Chat/ChatApiHandler.js'
+import { promiseMapWithLimit } from '@overleaf/promise-utils'
 
 const PROJECT_EXPIRATION_BATCH_SIZE = 10000
 
-module.exports = {
+export default {
   markAsDeletedByExternalSource: callbackify(markAsDeletedByExternalSource),
   unmarkAsDeletedByExternalSource: callbackify(unmarkAsDeletedByExternalSource),
   deleteUsersProjects: callbackify(deleteUsersProjects),

@@ -1,10 +1,12 @@
-const { db } = require('../../infrastructure/mongodb')
-const { normalizeQuery } = require('../Helpers/Mongo')
-const OError = require('@overleaf/o-error')
-const { Project } = require('../../models/Project')
-const LockManager = require('../../infrastructure/LockManager')
-const { DeletedProject } = require('../../models/DeletedProject')
-const { callbackifyAll } = require('@overleaf/promise-utils')
+import { db } from '../../infrastructure/mongodb.js'
+import { normalizeQuery } from '../Helpers/Mongo.js'
+import OError from '@overleaf/o-error'
+import { Project } from '../../models/Project.js'
+import LockManager from '../../infrastructure/LockManager.js'
+import { DeletedProject } from '../../models/DeletedProject.js'
+import { callbackifyAll } from '@overleaf/promise-utils'
+import ProjectEntityMongoUpdateHandler from './ProjectEntityMongoUpdateHandler.mjs'
+import CollaboratorsGetter from '../Collaborators/CollaboratorsGetter.mjs'
 
 const ProjectGetter = {
   EXCLUDE_DEPTH: 8,
@@ -35,7 +37,6 @@ const ProjectGetter = {
     }
 
     if (projection.rootFolder || Object.keys(projection).length === 0) {
-      const ProjectEntityMongoUpdateHandler = require('./ProjectEntityMongoUpdateHandler')
       return await LockManager.promises.runWithLock(
         ProjectEntityMongoUpdateHandler.LOCK_NAMESPACE,
         projectId,
@@ -87,7 +88,6 @@ const ProjectGetter = {
    * @return {Promise<any>}
    */
   async findAllUsersProjects(userId, fields) {
-    const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
     const ownedProjects = await Project.find(
       { owner_ref: userId },
       fields
@@ -157,7 +157,7 @@ const ProjectGetter = {
   },
 }
 
-module.exports = {
+export default {
   ...callbackifyAll(ProjectGetter),
   promises: ProjectGetter,
 }

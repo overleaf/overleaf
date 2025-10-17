@@ -1,21 +1,23 @@
-const OError = require('@overleaf/o-error')
-const metrics = require('@overleaf/metrics')
-const Settings = require('@overleaf/settings')
-const { ObjectId } = require('mongodb-legacy')
-const Features = require('../../infrastructure/Features')
-const { Project } = require('../../models/Project')
-const { Folder } = require('../../models/Folder')
-const ProjectEntityUpdateHandler = require('./ProjectEntityUpdateHandler')
-const ProjectDetailsHandler = require('./ProjectDetailsHandler')
-const HistoryManager = require('../History/HistoryManager')
-const { User } = require('../../models/User')
-const fs = require('fs')
-const path = require('path')
-const { callbackify } = require('util')
-const _ = require('lodash')
-const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+import OError from '@overleaf/o-error'
+import metrics from '@overleaf/metrics'
+import Settings from '@overleaf/settings'
+import mongodb from 'mongodb-legacy'
+import Features from '../../infrastructure/Features.js'
+import { Project } from '../../models/Project.js'
+import { Folder } from '../../models/Folder.js'
+import ProjectEntityUpdateHandler from './ProjectEntityUpdateHandler.mjs'
+import ProjectDetailsHandler from './ProjectDetailsHandler.mjs'
+import HistoryManager from '../History/HistoryManager.mjs'
+import { User } from '../../models/User.js'
+import fs from 'node:fs'
+import path from 'node:path'
+import { callbackify } from 'node:util'
+import _ from 'lodash'
+import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import TpdsUpdateSender from '../ThirdPartyDataStore/TpdsUpdateSender.mjs'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
+
+const { ObjectId } = mongodb
 
 const MONTH_NAMES = [
   'January',
@@ -128,7 +130,7 @@ async function _addExampleProjectFiles(ownerId, projectName, project) {
   )
 
   const frogPath = path.join(
-    __dirname,
+    import.meta.dirname,
     `/../../../templates/project_files/${templateProjectDir}/frog.jpg`
   )
   await ProjectEntityUpdateHandler.promises.addFile(
@@ -227,7 +229,7 @@ async function _buildTemplate(templateName, userId, projectName) {
   const user = await User.findById(userId, 'first_name last_name')
 
   const templatePath = path.join(
-    __dirname,
+    import.meta.dirname,
     `/../../../templates/project_files/${templateName}`
   )
   const template = fs.readFileSync(templatePath)
@@ -241,7 +243,7 @@ async function _buildTemplate(templateName, userId, projectName) {
   return output.split('\n')
 }
 
-module.exports = {
+export default {
   createBlankProject: callbackify(createBlankProject),
   createProjectFromSnippet: callbackify(createProjectFromSnippet),
   createBasicProject: callbackify(createBasicProject),

@@ -1,19 +1,19 @@
-const { callbackify } = require('util')
-const {
+import { callbackify } from 'node:util'
+import {
   fetchJson,
   fetchNothing,
   fetchStreamWithResponse,
   RequestFailedError,
-} = require('@overleaf/fetch-utils')
-const fs = require('fs')
-const settings = require('@overleaf/settings')
-const OError = require('@overleaf/o-error')
-const UserGetter = require('../User/UserGetter')
-const ProjectGetter = require('../Project/ProjectGetter')
-const HistoryBackupDeletionHandler = require('./HistoryBackupDeletionHandler')
-const { db, waitForDb } = require('../../infrastructure/mongodb')
-const Metrics = require('@overleaf/metrics')
-const { NotFoundError } = require('../Errors/Errors')
+} from '@overleaf/fetch-utils'
+import fs from 'node:fs'
+import settings from '@overleaf/settings'
+import OError from '@overleaf/o-error'
+import UserGetter from '../User/UserGetter.js'
+import ProjectGetter from '../Project/ProjectGetter.mjs'
+import HistoryBackupDeletionHandler from './HistoryBackupDeletionHandler.js'
+import { db, waitForDb } from '../../infrastructure/mongodb.js'
+import Metrics from '@overleaf/metrics'
+import { NotFoundError } from '../Errors/Errors.js'
 
 const HISTORY_V1_URL = settings.apis.v1_history.url
 const HISTORY_V1_BASIC_AUTH = {
@@ -404,7 +404,7 @@ function _userView(user) {
 
 const loadGlobalBlobsPromise = loadGlobalBlobs()
 
-module.exports = {
+export default {
   getFilestoreBlobURL,
   loadGlobalBlobsPromise,
   initializeProject: callbackify(initializeProject),

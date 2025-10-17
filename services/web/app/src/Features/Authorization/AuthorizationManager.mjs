@@ -1,20 +1,20 @@
-const { callbackify } = require('util')
-const { ObjectId } = require('mongodb-legacy')
-const Features = require('../../infrastructure/Features')
-const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
-const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
-const ProjectGetter = require('../Project/ProjectGetter')
-const { User } = require('../../models/User')
-const PrivilegeLevels = require('./PrivilegeLevels')
-const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
-const PublicAccessLevels = require('./PublicAccessLevels')
-const Errors = require('../Errors/Errors')
-const {
-  hasAdminAccess,
-  getAdminCapabilities,
-} = require('../Helpers/AdminAuthorizationHelper')
-const Settings = require('@overleaf/settings')
-const ChatApiHandler = require('../Chat/ChatApiHandler')
+import { callbackify } from 'node:util'
+import mongodb from 'mongodb-legacy'
+import Features from '../../infrastructure/Features.js'
+import CollaboratorsGetter from '../Collaborators/CollaboratorsGetter.mjs'
+import CollaboratorsHandler from '../Collaborators/CollaboratorsHandler.mjs'
+import ProjectGetter from '../Project/ProjectGetter.mjs'
+import { User } from '../../models/User.js'
+import PrivilegeLevels from './PrivilegeLevels.js'
+import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.js'
+import PublicAccessLevels from './PublicAccessLevels.js'
+import Errors from '../Errors/Errors.js'
+import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
+import Settings from '@overleaf/settings'
+import ChatApiHandler from '../Chat/ChatApiHandler.js'
+
+const { hasAdminAccess, getAdminCapabilities } = AdminAuthorizationHelper
+const { ObjectId } = mongodb
 
 function isRestrictedUser(
   userId,
@@ -401,7 +401,7 @@ async function canUserDeleteOrResolveThread(
   }
 }
 
-module.exports = {
+export default {
   canUserReadProject: callbackify(canUserReadProject),
   canUserWriteProjectContent: callbackify(canUserWriteProjectContent),
   canUserWriteOrReviewProjectContent: callbackify(

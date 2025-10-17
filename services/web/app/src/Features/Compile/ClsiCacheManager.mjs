@@ -1,13 +1,13 @@
-const _ = require('lodash')
-const { NotFoundError, ResourceGoneError } = require('../Errors/Errors')
-const ClsiCacheHandler = require('./ClsiCacheHandler')
-const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const ProjectGetter = require('../Project/ProjectGetter')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
-const UserGetter = require('../User/UserGetter')
-const Settings = require('@overleaf/settings')
-const { fetchJson, RequestFailedError } = require('@overleaf/fetch-utils')
-const Metrics = require('@overleaf/metrics')
+import _ from 'lodash'
+import { NotFoundError, ResourceGoneError } from '../Errors/Errors.js'
+import ClsiCacheHandler from './ClsiCacheHandler.js'
+import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mjs'
+import ProjectGetter from '../Project/ProjectGetter.mjs'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
+import UserGetter from '../User/UserGetter.js'
+import Settings from '@overleaf/settings'
+import { fetchJson, RequestFailedError } from '@overleaf/fetch-utils'
+import Metrics from '@overleaf/metrics'
 
 /**
  * Get the most recent build and metadata
@@ -228,7 +228,7 @@ async function prepareClsiCache(
   }
 }
 
-module.exports = {
+export default {
   getLatestBuildFromCache,
   getLatestCompileResult,
   prepareClsiCache,

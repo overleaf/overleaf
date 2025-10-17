@@ -1,11 +1,11 @@
-const _ = require('lodash')
-const logger = require('@overleaf/logger')
-const OError = require('@overleaf/o-error')
-const async = require('async')
-const ProjectGetter = require('./ProjectGetter')
-const Errors = require('../Errors/Errors')
-const { promisifyMultiResult } = require('@overleaf/promise-utils')
-const { iterablePaths } = require('./IterablePath')
+import _ from 'lodash'
+import logger from '@overleaf/logger'
+import OError from '@overleaf/o-error'
+import async from 'async'
+import ProjectGetter from './ProjectGetter.mjs'
+import Errors from '../Errors/Errors.js'
+import { promisifyMultiResult } from '@overleaf/promise-utils'
+import { iterablePaths } from './IterablePath.js'
 
 /**
  * @param project
@@ -328,7 +328,7 @@ function findElementByMongoPath(project, mongoPath) {
   return node
 }
 
-module.exports = {
+export default {
   findElement,
   findElementByPath,
   findRootDoc,

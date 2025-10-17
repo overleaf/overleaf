@@ -1,13 +1,13 @@
-const fs = require('fs')
-const Path = require('path')
-const { callbackify } = require('util')
-const EditorController = require('../Editor/EditorController')
-const Errors = require('../Errors/Errors')
-const FileTypeManager = require('./FileTypeManager')
-const SafePath = require('../Project/SafePath')
-const logger = require('@overleaf/logger')
+import fs from 'node:fs'
+import Path from 'node:path'
+import { callbackify } from 'node:util'
+import EditorController from '../Editor/EditorController.mjs'
+import Errors from '../Errors/Errors.js'
+import FileTypeManager from './FileTypeManager.js'
+import SafePath from '../Project/SafePath.js'
+import logger from '@overleaf/logger'
 
-module.exports = {
+export default {
   addEntity: callbackify(addEntity),
   importDir: callbackify(importDir),
   importFile: callbackify(importDir),

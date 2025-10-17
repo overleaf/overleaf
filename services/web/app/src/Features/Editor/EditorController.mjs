@@ -1,14 +1,14 @@
-const logger = require('@overleaf/logger')
-const OError = require('@overleaf/o-error')
-const Metrics = require('@overleaf/metrics')
-const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
-const ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
-const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
-const ProjectDeleter = require('../Project/ProjectDeleter')
-const EditorRealTimeController = require('./EditorRealTimeController')
-const async = require('async')
-const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
-const { promisifyAll } = require('@overleaf/promise-utils')
+import logger from '@overleaf/logger'
+import OError from '@overleaf/o-error'
+import Metrics from '@overleaf/metrics'
+import ProjectEntityUpdateHandler from '../Project/ProjectEntityUpdateHandler.mjs'
+import ProjectOptionsHandler from '../Project/ProjectOptionsHandler.js'
+import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
+import ProjectDeleter from '../Project/ProjectDeleter.mjs'
+import EditorRealTimeController from './EditorRealTimeController.js'
+import async from 'async'
+import PublicAccessLevels from '../Authorization/PublicAccessLevels.js'
+import { promisifyAll } from '@overleaf/promise-utils'
 
 const EditorController = {
   addDoc(projectId, folderId, docName, docLines, source, userId, callback) {
@@ -692,4 +692,4 @@ EditorController.promises = promisifyAll(EditorController, {
     mkdirp: ['newFolders', 'lastFolder'],
   },
 })
-module.exports = EditorController
+export default EditorController

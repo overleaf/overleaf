@@ -1,13 +1,13 @@
-const { callbackify } = require('util')
-const logger = require('@overleaf/logger')
-const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const ProjectGetter = require('../Project/ProjectGetter')
-const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
-const { Project } = require('../../models/Project')
-const TpdsUpdateSender = require('./TpdsUpdateSender')
-const OError = require('@overleaf/o-error')
+import { callbackify } from 'node:util'
+import logger from '@overleaf/logger'
+import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mjs'
+import ProjectGetter from '../Project/ProjectGetter.mjs'
+import ProjectEntityHandler from '../Project/ProjectEntityHandler.mjs'
+import { Project } from '../../models/Project.js'
+import TpdsUpdateSender from './TpdsUpdateSender.mjs'
+import OError from '@overleaf/o-error'
 
-module.exports = {
+export default {
   flushProjectToTpds: callbackify(flushProjectToTpds),
   deferProjectFlushToTpds: callbackify(deferProjectFlushToTpds),
   flushProjectToTpdsIfNeeded: callbackify(flushProjectToTpdsIfNeeded),

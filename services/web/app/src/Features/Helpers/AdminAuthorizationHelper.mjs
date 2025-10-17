@@ -1,10 +1,10 @@
-const Settings = require('@overleaf/settings')
-const Modules = require('../../infrastructure/Modules')
-const { expressify } = require('@overleaf/promise-utils')
-const SessionManager = require('../Authentication/SessionManager')
-const logger = require('@overleaf/logger')
+import Settings from '@overleaf/settings'
+import Modules from '../../infrastructure/Modules.js'
+import { expressify } from '@overleaf/promise-utils'
+import SessionManager from '../Authentication/SessionManager.js'
+import logger from '@overleaf/logger'
 
-module.exports = {
+export default {
   hasAdminAccess,
   hasAdminCapability,
   canRedirectToAdminDomain,

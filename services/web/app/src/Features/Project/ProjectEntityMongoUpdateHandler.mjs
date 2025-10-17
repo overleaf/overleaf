@@ -1,21 +1,23 @@
-const { callbackify } = require('util')
-const { callbackifyMultiResult } = require('@overleaf/promise-utils')
-const logger = require('@overleaf/logger')
-const path = require('path')
-const { ObjectId } = require('mongodb-legacy')
-const Settings = require('@overleaf/settings')
-const OError = require('@overleaf/o-error')
-const CooldownManager = require('../Cooldown/CooldownManager')
-const Errors = require('../Errors/Errors')
-const { Folder } = require('../../models/Folder')
-const LockManager = require('../../infrastructure/LockManager')
-const { Project } = require('../../models/Project')
-const ProjectEntityHandler = require('./ProjectEntityHandler')
-const ProjectGetter = require('./ProjectGetter')
-const ProjectLocator = require('./ProjectLocator')
-const FolderStructureBuilder = require('./FolderStructureBuilder')
-const SafePath = require('./SafePath')
-const { iterablePaths } = require('./IterablePath')
+import { callbackify } from 'node:util'
+import { callbackifyMultiResult } from '@overleaf/promise-utils'
+import logger from '@overleaf/logger'
+import path from 'node:path'
+import mongodb from 'mongodb-legacy'
+import Settings from '@overleaf/settings'
+import OError from '@overleaf/o-error'
+import CooldownManager from '../Cooldown/CooldownManager.js'
+import Errors from '../Errors/Errors.js'
+import { Folder } from '../../models/Folder.js'
+import LockManager from '../../infrastructure/LockManager.js'
+import { Project } from '../../models/Project.js'
+import ProjectEntityHandler from './ProjectEntityHandler.mjs'
+import ProjectGetter from './ProjectGetter.mjs'
+import ProjectLocator from './ProjectLocator.mjs'
+import FolderStructureBuilder from './FolderStructureBuilder.js'
+import SafePath from './SafePath.js'
+import { iterablePaths } from './IterablePath.js'
+
+const { ObjectId } = mongodb
 
 const LOCK_NAMESPACE = 'mongoTransaction'
 const ENTITY_TYPE_TO_MONGO_PATH_SEGMENT = {
@@ -28,7 +30,7 @@ const ENTITY_TYPE_TO_MONGO_PATH_SEGMENT = {
   folders: 'folders',
 }
 
-module.exports = {
+export default {
   LOCK_NAMESPACE,
   addDoc: callbackifyMultiResult(wrapWithLock(addDoc), ['result', 'project']),
   addFile: callbackifyMultiResult(wrapWithLock(addFile), ['result', 'project']),

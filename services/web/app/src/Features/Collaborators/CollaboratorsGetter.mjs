@@ -1,16 +1,21 @@
 // @ts-check
-const { callbackify } = require('util')
-const pLimit = require('p-limit')
-const { ObjectId } = require('mongodb-legacy')
-const OError = require('@overleaf/o-error')
-const { Project } = require('../../models/Project')
-const UserGetter = require('../User/UserGetter')
-const ProjectGetter = require('../Project/ProjectGetter')
-const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
-const Errors = require('../Errors/Errors')
-const ProjectEditorHandler = require('../Project/ProjectEditorHandler')
-const Sources = require('../Authorization/Sources')
-const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
+import { callbackify } from 'node:util'
+
+import pLimit from 'p-limit'
+import mongodb from 'mongodb-legacy'
+import OError from '@overleaf/o-error'
+import { Project } from '../../models/Project.js'
+import UserGetter from '../User/UserGetter.js'
+import ProjectGetter from '../Project/ProjectGetter.mjs'
+import PublicAccessLevels from '../Authorization/PublicAccessLevels.js'
+import Errors from '../Errors/Errors.js'
+import ProjectEditorHandler from '../Project/ProjectEditorHandler.js'
+import Sources from '../Authorization/Sources.js'
+import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
+
+const { ObjectId } = mongodb
+
+/** @import {ObjectId} from "mongodb-legacy" */
 
 /** @import { PrivilegeLevel, Source, PublicAccessLevel } from "../Authorization/types" */
 
@@ -542,7 +547,7 @@ async function _loadMembers(members) {
     .filter(r => r != null)
 }
 
-module.exports = {
+export default {
   getMemberIdsWithPrivilegeLevels: callbackify(getMemberIdsWithPrivilegeLevels),
   getMemberIds: callbackify(getMemberIds),
   getInvitedMemberIds: callbackify(getInvitedMemberIds),

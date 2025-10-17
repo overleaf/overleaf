@@ -1,19 +1,19 @@
-const _ = require('lodash')
-const ProjectGetter = require('./ProjectGetter')
-const UserGetter = require('../User/UserGetter')
-const { Project } = require('../../models/Project')
-const logger = require('@overleaf/logger')
-const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
-const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
-const Errors = require('../Errors/Errors')
-const TokenGenerator = require('../TokenGenerator/TokenGenerator')
-const ProjectHelper = require('./ProjectHelper')
-const settings = require('@overleaf/settings')
-const { callbackify } = require('util')
+import _ from 'lodash'
+import ProjectGetter from './ProjectGetter.mjs'
+import UserGetter from '../User/UserGetter.js'
+import { Project } from '../../models/Project.js'
+import logger from '@overleaf/logger'
+import TpdsUpdateSender from '../ThirdPartyDataStore/TpdsUpdateSender.mjs'
+import PublicAccessLevels from '../Authorization/PublicAccessLevels.js'
+import Errors from '../Errors/Errors.js'
+import TokenGenerator from '../TokenGenerator/TokenGenerator.js'
+import ProjectHelper from './ProjectHelper.js'
+import settings from '@overleaf/settings'
+import { callbackify } from 'node:util'
 
 const MAX_PROJECT_NAME_LENGTH = 150
 
-module.exports = {
+export default {
   MAX_PROJECT_NAME_LENGTH,
   getDetails: callbackify(getDetails),
   getProjectDescription: callbackify(getProjectDescription),

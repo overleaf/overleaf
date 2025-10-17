@@ -1,18 +1,19 @@
 // @ts-check
 
-const RecurlyWrapper = require('./RecurlyWrapper')
-const RecurlyClient = require('./RecurlyClient')
-const { User } = require('../../models/User')
-const logger = require('@overleaf/logger')
-const SubscriptionHelper = require('./SubscriptionHelper')
-const SubscriptionUpdater = require('./SubscriptionUpdater')
-const SubscriptionLocator = require('./SubscriptionLocator')
-const LimitationsManager = require('./LimitationsManager')
-const EmailHandler = require('../Email/EmailHandler')
-const { callbackify } = require('@overleaf/promise-utils')
-const UserUpdater = require('../User/UserUpdater')
-const { IndeterminateInvoiceError } = require('../Errors/Errors')
-const Modules = require('../../infrastructure/Modules')
+import RecurlyWrapper from './RecurlyWrapper.js'
+
+import RecurlyClient from './RecurlyClient.js'
+import { User } from '../../models/User.js'
+import logger from '@overleaf/logger'
+import SubscriptionHelper from './SubscriptionHelper.js'
+import SubscriptionUpdater from './SubscriptionUpdater.js'
+import SubscriptionLocator from './SubscriptionLocator.js'
+import LimitationsManager from './LimitationsManager.mjs'
+import EmailHandler from '../Email/EmailHandler.js'
+import { callbackify } from '@overleaf/promise-utils'
+import UserUpdater from '../User/UserUpdater.js'
+import { IndeterminateInvoiceError } from '../Errors/Errors.js'
+import Modules from '../../infrastructure/Modules.js'
 
 /**
  * @import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities'
@@ -415,7 +416,7 @@ async function setSubscriptionRestorePoint(userId) {
   )
 }
 
-module.exports = {
+export default {
   validateNoSubscriptionInRecurly: callbackify(validateNoSubscriptionInRecurly),
   createSubscription: callbackify(createSubscription),
   previewSubscriptionChange: callbackify(previewSubscriptionChange),

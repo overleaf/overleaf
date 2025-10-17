@@ -1,23 +1,24 @@
-const { Project } = require('../../models/Project')
-const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
-const ProjectOptionsHandler =
-  require('../Project/ProjectOptionsHandler').promises
-const ProjectRootDocManager =
-  require('../Project/ProjectRootDocManager').promises
-const ProjectUploadManager = require('../Uploads/ProjectUploadManager')
-const fs = require('fs')
-const util = require('util')
-const logger = require('@overleaf/logger')
-const {
+import { Project } from '../../models/Project.js'
+import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
+import ProjectOptionsHandlerModule from '../Project/ProjectOptionsHandler.js'
+import ProjectRootDocManagerModule from '../Project/ProjectRootDocManager.mjs'
+import ProjectUploadManager from '../Uploads/ProjectUploadManager.mjs'
+import fs from 'node:fs'
+import util from 'node:util'
+import logger from '@overleaf/logger'
+import {
   fetchJson,
   fetchStreamWithResponse,
   RequestFailedError,
-} = require('@overleaf/fetch-utils')
-const settings = require('@overleaf/settings')
-const crypto = require('crypto')
-const Errors = require('../Errors/Errors')
-const { pipeline } = require('stream/promises')
-const ClsiCacheManager = require('../Compile/ClsiCacheManager')
+} from '@overleaf/fetch-utils'
+import settings from '@overleaf/settings'
+import crypto from 'node:crypto'
+import Errors from '../Errors/Errors.js'
+import { pipeline } from 'node:stream/promises'
+import ClsiCacheManager from '../Compile/ClsiCacheManager.mjs'
+
+const { promises: ProjectRootDocManager } = ProjectRootDocManagerModule
+const { promises: ProjectOptionsHandler } = ProjectOptionsHandlerModule
 
 const TemplatesManager = {
   async createProjectFromV1Template(
@@ -144,7 +145,7 @@ const TemplatesManager = {
   },
 }
 
-module.exports = {
+export default {
   promises: TemplatesManager,
   createProjectFromV1Template: util.callbackify(
     TemplatesManager.createProjectFromV1Template

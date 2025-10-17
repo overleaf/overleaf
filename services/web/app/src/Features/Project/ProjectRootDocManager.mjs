@@ -12,25 +12,21 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let ProjectRootDocManager
-const ProjectEntityHandler = require('./ProjectEntityHandler')
-const ProjectEntityUpdateHandler = require('./ProjectEntityUpdateHandler')
-const ProjectGetter = require('./ProjectGetter')
-const DocumentHelper = require('../Documents/DocumentHelper')
-const Path = require('path')
-const fs = require('fs')
-const async = require('async')
-const globby = require('globby')
-const _ = require('lodash')
-const { promisifyAll } = require('@overleaf/promise-utils')
-const logger = require('@overleaf/logger')
-const {
-  BackgroundTaskTracker,
-} = require('../../infrastructure/GracefulShutdown')
+import ProjectEntityHandler from './ProjectEntityHandler.mjs'
+import ProjectEntityUpdateHandler from './ProjectEntityUpdateHandler.mjs'
+import ProjectGetter from './ProjectGetter.mjs'
+import DocumentHelper from '../Documents/DocumentHelper.js'
+import Path from 'node:path'
+import fs from 'node:fs'
+import async from 'async'
+import globby from 'globby'
+import _ from 'lodash'
+import { promisifyAll } from '@overleaf/promise-utils'
+import logger from '@overleaf/logger'
+import { BackgroundTaskTracker } from '../../infrastructure/GracefulShutdown.js'
 
 const rootDocResets = new BackgroundTaskTracker('root doc resets')
-
-module.exports = ProjectRootDocManager = {
+const ProjectRootDocManager = {
   setRootDocAutomaticallyInBackground(projectId) {
     rootDocResets.add()
     setTimeout(async () => {
@@ -332,10 +328,11 @@ module.exports = ProjectRootDocManager = {
   },
 }
 
-module.exports = ProjectRootDocManager
-module.exports.promises = promisifyAll(module.exports, {
+ProjectRootDocManager.promises = promisifyAll(ProjectRootDocManager, {
   without: ['_rootDocSort', 'setRootDocAutomaticallyInBackground'],
   multiResult: {
     findRootDocFileFromDirectory: ['path', 'content'],
   },
 })
+
+export default ProjectRootDocManager

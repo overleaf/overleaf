@@ -1,25 +1,25 @@
-const { callbackify } = require('util')
-const logger = require('@overleaf/logger')
-const Settings = require('@overleaf/settings')
-const { User } = require('../../models/User')
-const { DeletedUser } = require('../../models/DeletedUser')
-const { UserAuditLogEntry } = require('../../models/UserAuditLogEntry')
-const { Feedback } = require('../../models/Feedback')
-const NewsletterManager = require('../Newsletter/NewsletterManager')
-const ProjectDeleter = require('../Project/ProjectDeleter')
-const SubscriptionHandler = require('../Subscription/SubscriptionHandler')
-const SubscriptionUpdater = require('../Subscription/SubscriptionUpdater')
-const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
-const UserMembershipsHandler = require('../UserMembership/UserMembershipsHandler')
-const UserSessionsManager = require('./UserSessionsManager')
-const UserAuditLogHandler = require('./UserAuditLogHandler')
-const InstitutionsAPI = require('../Institutions/InstitutionsAPI')
-const Modules = require('../../infrastructure/Modules')
-const Errors = require('../Errors/Errors')
-const OnboardingDataCollectionManager = require('../OnboardingDataCollection/OnboardingDataCollectionManager')
-const EmailHandler = require('../Email/EmailHandler')
+import { callbackify } from 'node:util'
+import logger from '@overleaf/logger'
+import Settings from '@overleaf/settings'
+import { User } from '../../models/User.js'
+import { DeletedUser } from '../../models/DeletedUser.js'
+import { UserAuditLogEntry } from '../../models/UserAuditLogEntry.js'
+import { Feedback } from '../../models/Feedback.js'
+import NewsletterManager from '../Newsletter/NewsletterManager.js'
+import ProjectDeleter from '../Project/ProjectDeleter.mjs'
+import SubscriptionHandler from '../Subscription/SubscriptionHandler.mjs'
+import SubscriptionUpdater from '../Subscription/SubscriptionUpdater.js'
+import SubscriptionLocator from '../Subscription/SubscriptionLocator.js'
+import UserMembershipsHandler from '../UserMembership/UserMembershipsHandler.js'
+import UserSessionsManager from './UserSessionsManager.js'
+import UserAuditLogHandler from './UserAuditLogHandler.js'
+import InstitutionsAPI from '../Institutions/InstitutionsAPI.js'
+import Modules from '../../infrastructure/Modules.js'
+import Errors from '../Errors/Errors.js'
+import OnboardingDataCollectionManager from '../OnboardingDataCollection/OnboardingDataCollectionManager.js'
+import EmailHandler from '../Email/EmailHandler.js'
 
-module.exports = {
+export default {
   deleteUser: callbackify(deleteUser),
   deleteMongoUser: callbackify(deleteMongoUser),
   expireDeletedUser: callbackify(expireDeletedUser),
