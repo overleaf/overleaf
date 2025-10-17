@@ -243,6 +243,20 @@ paths:
         name: messageId
         in: path
         required: true
+    get:
+      summary: Get thread message
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '404':
+          description: Message not found
+      operationId: getThreadMessage
+      description: Get a specific message by message ID from the thread with Thread ID and Project ID provided
     delete:
       summary: Delete message
       operationId: deleteMessage

@@ -8,6 +8,12 @@ async function getThread(projectId, threadId) {
   return await fetchJson(chatApiUrl(`/project/${projectId}/thread/${threadId}`))
 }
 
+async function getThreadMessage(projectId, threadId, messageId) {
+  return await fetchJson(
+    chatApiUrl(`/project/${projectId}/thread/${threadId}/messages/${messageId}`)
+  )
+}
+
 async function getThreads(projectId) {
   return await fetchJson(chatApiUrl(`/project/${projectId}/threads`))
 }
@@ -161,6 +167,7 @@ function chatApiUrl(path) {
 
 module.exports = {
   getThread: callbackify(getThread),
+  getThreadMessage: callbackify(getThreadMessage),
   getThreads: callbackify(getThreads),
   destroyProject: callbackify(destroyProject),
   sendGlobalMessage: callbackify(sendGlobalMessage),
@@ -180,6 +187,7 @@ module.exports = {
   generateThreadData: callbackify(generateThreadData),
   promises: {
     getThread,
+    getThreadMessage,
     getThreads,
     destroyProject,
     sendGlobalMessage,

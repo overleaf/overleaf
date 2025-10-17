@@ -62,6 +62,10 @@ export async function getThread(context) {
   return await callMessageHttpController(context, _getThread)
 }
 
+export async function getThreadMessage(context) {
+  return await callMessageHttpController(context, _getThreadMessage)
+}
+
 export async function resolveThread(context) {
   return await callMessageHttpController(context, _resolveThread)
 }
@@ -201,6 +205,30 @@ const _getThread = async (req, res) => {
     res.json(thread)
   } catch (error) {
     if (error instanceof ThreadManager.MissingThreadError) {
+      res.status(404)
+      return
+    }
+    throw error
+  }
+}
+
+const _getThreadMessage = async (req, res) => {
+  const { projectId, threadId, messageId } = req.params
+  logger.debug(
+    { projectId, threadId, messageId },
+    'getting single thread message'
+  )
+  try {
+    const room = await ThreadManager.findThread(projectId, threadId)
+    const message = await MessageManager.getMessage(room._id, messageId)
+    const formattedMsg = MessageFormatter.formatMessageForClientSide(message)
+
+    res.status(200).setBody(formattedMsg)
+  } catch (error) {
+    if (
+      error instanceof ThreadManager.MissingThreadError ||
+      error instanceof MessageManager.MissingMessageError
+    ) {
       res.status(404)
       return
     }
