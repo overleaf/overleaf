@@ -5,9 +5,9 @@ import { promiseMapWithLimit } from '@overleaf/promise-utils'
 import Settings from '@overleaf/settings'
 import { db } from '../app/src/infrastructure/mongodb.js'
 import GracefulShutdown from '../app/src/infrastructure/GracefulShutdown.js'
-import ProjectDeleter from '../app/src/Features/Project/ProjectDeleter.js'
+import ProjectDeleter from '../app/src/Features/Project/ProjectDeleter.mjs'
 import SplitTestManager from '../app/src/Features/SplitTests/SplitTestManager.js'
-import UserDeleter from '../app/src/Features/User/UserDeleter.js'
+import UserDeleter from '../app/src/Features/User/UserDeleter.mjs'
 import UserRegistrationHandler from '../app/src/Features/User/UserRegistrationHandler.mjs'
 
 const MONOREPO = Path.dirname(

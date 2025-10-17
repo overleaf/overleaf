@@ -1,6 +1,6 @@
 import minimist from 'minimist'
 import settings from '@overleaf/settings'
-import ProjectDetailsHandler from '../app/src/Features/Project/ProjectDetailsHandler.js'
+import ProjectDetailsHandler from '../app/src/Features/Project/ProjectDetailsHandler.mjs'
 import mongodb from '../app/src/infrastructure/mongodb.js'
 import mongoose from '../app/src/infrastructure/Mongoose.js'
 import fs from 'node:fs'

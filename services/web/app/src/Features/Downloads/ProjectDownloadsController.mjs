@@ -11,9 +11,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import Metrics from '@overleaf/metrics'
-import ProjectGetter from '../Project/ProjectGetter.js'
+import ProjectGetter from '../Project/ProjectGetter.mjs'
 import ProjectZipStreamManager from './ProjectZipStreamManager.mjs'
-import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.js'
+import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mjs'
 import { prepareZipAttachment } from '../../infrastructure/Response.js'
 
 let ProjectDownloadsController

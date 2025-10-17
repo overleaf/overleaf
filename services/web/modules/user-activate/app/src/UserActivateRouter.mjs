@@ -1,6 +1,6 @@
 import logger from '@overleaf/logger'
 import UserActivateController from './UserActivateController.mjs'
-import AuthenticationController from '../../../../app/src/Features/Authentication/AuthenticationController.js'
+import AuthenticationController from '../../../../app/src/Features/Authentication/AuthenticationController.mjs'
 import AuthorizationMiddleware from '../../../../app/src/Features/Authorization/AuthorizationMiddleware.mjs'
 
 export default {

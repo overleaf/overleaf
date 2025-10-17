@@ -1,4 +1,4 @@
-import AuthenticationController from '../Authentication/AuthenticationController.js'
+import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import PermissionsController from '../Authorization/PermissionsController.mjs'
 import SubscriptionController from './SubscriptionController.mjs'
 import SubscriptionGroupController from './SubscriptionGroupController.mjs'

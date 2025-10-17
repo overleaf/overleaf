@@ -1,7 +1,7 @@
 import { callbackify } from 'node:util'
 import Path from 'node:path'
-import ProjectEntityHandler from './ProjectEntityHandler.js'
-import EditorController from '../Editor/EditorController.js'
+import ProjectEntityHandler from './ProjectEntityHandler.mjs'
+import EditorController from '../Editor/EditorController.mjs'
 
 // generate a new name based on the original, with an optional label.
 // e.g. origname-20210101-122345.tex          (default)

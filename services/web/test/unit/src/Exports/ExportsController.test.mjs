@@ -55,7 +55,7 @@ describe('ExportsController', function () {
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Authentication/AuthenticationController.js',
+      '../../../../app/src/Features/Authentication/AuthenticationController.mjs',
       () => ({
         default: ctx.AuthenticationController,
       })

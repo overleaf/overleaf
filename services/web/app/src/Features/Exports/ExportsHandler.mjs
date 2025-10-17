@@ -12,10 +12,10 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import OError from '@overleaf/o-error'
-import ProjectGetter from '../Project/ProjectGetter.js'
+import ProjectGetter from '../Project/ProjectGetter.mjs'
 import ProjectHistoryHandler from '../Project/ProjectHistoryHandler.mjs'
-import ProjectLocator from '../Project/ProjectLocator.js'
-import ProjectRootDocManager from '../Project/ProjectRootDocManager.js'
+import ProjectLocator from '../Project/ProjectLocator.mjs'
+import ProjectRootDocManager from '../Project/ProjectRootDocManager.mjs'
 import UserGetter from '../User/UserGetter.js'
 import logger from '@overleaf/logger'
 import settings from '@overleaf/settings'

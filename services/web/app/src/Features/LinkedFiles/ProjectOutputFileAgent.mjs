@@ -1,4 +1,4 @@
-import AuthorizationManager from '../Authorization/AuthorizationManager.js'
+import AuthorizationManager from '../Authorization/AuthorizationManager.mjs'
 import CompileManager from '../Compile/CompileManager.mjs'
 import ClsiManager from '../Compile/ClsiManager.mjs'
 import ProjectFileAgent from './ProjectFileAgent.mjs'

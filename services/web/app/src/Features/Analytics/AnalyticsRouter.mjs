@@ -1,4 +1,4 @@
-import AuthenticationController from './../Authentication/AuthenticationController.js'
+import AuthenticationController from './../Authentication/AuthenticationController.mjs'
 import AnalyticsController from './AnalyticsController.mjs'
 import AnalyticsProxy from './AnalyticsProxy.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'

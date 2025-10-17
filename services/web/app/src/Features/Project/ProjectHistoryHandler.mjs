@@ -1,7 +1,7 @@
 import { Project } from '../../models/Project.js'
-import ProjectDetailsHandler from './ProjectDetailsHandler.js'
-import HistoryManager from '../History/HistoryManager.js'
-import ProjectEntityUpdateHandler from './ProjectEntityUpdateHandler.js'
+import ProjectDetailsHandler from './ProjectDetailsHandler.mjs'
+import HistoryManager from '../History/HistoryManager.mjs'
+import ProjectEntityUpdateHandler from './ProjectEntityUpdateHandler.mjs'
 import { callbackify } from 'node:util'
 
 const ProjectHistoryHandler = {

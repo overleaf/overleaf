@@ -2,7 +2,7 @@
 
 import Settings from '@overleaf/settings'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
-import AuthenticationController from '../Authentication/AuthenticationController.js'
+import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.mjs'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'
 import HistoryController from './HistoryController.mjs'

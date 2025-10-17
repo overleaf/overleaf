@@ -28,9 +28,9 @@ import Features from './Features.js'
 import ErrorController from '../Features/Errors/ErrorController.mjs'
 import HttpErrorHandler from '../Features/Errors/HttpErrorHandler.js'
 import UserSessionsManager from '../Features/User/UserSessionsManager.js'
-import AuthenticationController from '../Features/Authentication/AuthenticationController.js'
+import AuthenticationController from '../Features/Authentication/AuthenticationController.mjs'
 import SessionManager from '../Features/Authentication/SessionManager.js'
-import { hasAdminAccess } from '../Features/Helpers/AdminAuthorizationHelper.js'
+import AdminAuthorizationHelper from '../Features/Helpers/AdminAuthorizationHelper.mjs'
 import Modules from './Modules.js'
 import expressLocals from './ExpressLocals.mjs'
 import noCache from 'nocache'
@@ -39,6 +39,7 @@ import http from 'node:http'
 import { fileURLToPath } from 'node:url'
 import serveStaticWrapper from './ServeStaticWrapper.mjs'
 
+const { hasAdminAccess } = AdminAuthorizationHelper
 const sessionsRedisClient = UserSessionsRedis.client()
 
 const oneDayInMilliseconds = 86400000

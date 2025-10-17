@@ -1,5 +1,5 @@
 import PasswordResetController from './PasswordResetController.mjs'
-import AuthenticationController from '../Authentication/AuthenticationController.js'
+import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import CaptchaMiddleware from '../../Features/Captcha/CaptchaMiddleware.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'

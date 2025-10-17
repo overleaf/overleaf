@@ -125,7 +125,7 @@ describe('CollaboratorsInviteController', function () {
       },
     }
 
-    vi.doMock('../../../../app/src/Features/Project/ProjectGetter.js', () => ({
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter.mjs', () => ({
       default: ctx.ProjectGetter,
     }))
 
@@ -137,7 +137,7 @@ describe('CollaboratorsInviteController', function () {
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Subscription/LimitationsManager.js',
+      '../../../../app/src/Features/Subscription/LimitationsManager.mjs',
       () => ({
         default: ctx.LimitationsManager,
       })
@@ -148,7 +148,7 @@ describe('CollaboratorsInviteController', function () {
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/Collaborators/CollaboratorsGetter.js',
+      '../../../../app/src/Features/Collaborators/CollaboratorsGetter.mjs',
       () => ({
         default: ctx.CollaboratorsGetter,
       })

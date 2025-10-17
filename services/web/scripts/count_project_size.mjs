@@ -1,9 +1,9 @@
 import readline from 'node:readline'
 import { ObjectId, db } from '../app/src/infrastructure/mongodb.js'
-import ProjectEntityHandler from '../app/src/Features/Project/ProjectEntityHandler.js'
-import ProjectGetter from '../app/src/Features/Project/ProjectGetter.js'
+import ProjectEntityHandler from '../app/src/Features/Project/ProjectEntityHandler.mjs'
+import ProjectGetter from '../app/src/Features/Project/ProjectGetter.mjs'
 import Errors from '../app/src/Features/Errors/Errors.js'
-import HistoryManager from '../app/src/Features/History/HistoryManager.js'
+import HistoryManager from '../app/src/Features/History/HistoryManager.mjs'
 
 // Handles a list of project IDs from stdin, one per line, and outputs the count of files and docs
 // in the project, along with the aggregated size in bytes for all files and docs.

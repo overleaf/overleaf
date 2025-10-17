@@ -9,7 +9,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import crypto from 'node:crypto'
-import ProjectEntityHandler from '../Project/ProjectEntityHandler.js'
+import ProjectEntityHandler from '../Project/ProjectEntityHandler.mjs'
 
 // The "state" of a project is a hash of the relevant attributes in the
 // project object in this case we only need the rootFolder.

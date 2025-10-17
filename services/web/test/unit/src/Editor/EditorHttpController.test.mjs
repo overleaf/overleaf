@@ -168,14 +168,14 @@ describe('EditorHttpController', function () {
     vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
       vi.importActual('../../../../app/src/Features/Errors/Errors.js')
     )
-    vi.doMock('../../../../app/src/Features/Project/ProjectDeleter.js', () => ({
+    vi.doMock('../../../../app/src/Features/Project/ProjectDeleter.mjs', () => ({
       default: ctx.ProjectDeleter,
     }))
-    vi.doMock('../../../../app/src/Features/Project/ProjectGetter.js', () => ({
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter.mjs', () => ({
       default: ctx.ProjectGetter,
     }))
     vi.doMock(
-      '../../../../app/src/Features/Authorization/AuthorizationManager.js',
+      '../../../../app/src/Features/Authorization/AuthorizationManager.mjs',
       () => ({
         default: ctx.AuthorizationManager,
       })
@@ -187,7 +187,7 @@ describe('EditorHttpController', function () {
       })
     )
     vi.doMock(
-      '../../../../app/src/Features/Editor/EditorController.js',
+      '../../../../app/src/Features/Editor/EditorController.mjs',
       () => ({
         default: ctx.EditorController,
       })
@@ -196,13 +196,13 @@ describe('EditorHttpController', function () {
       default: ctx.Metrics,
     }))
     vi.doMock(
-      '../../../../app/src/Features/Collaborators/CollaboratorsGetter.js',
+      '../../../../app/src/Features/Collaborators/CollaboratorsGetter.mjs',
       () => ({
         default: ctx.CollaboratorsGetter,
       })
     )
     vi.doMock(
-      '../../../../app/src/Features/Collaborators/CollaboratorsHandler.js',
+      '../../../../app/src/Features/Collaborators/CollaboratorsHandler.mjs',
       () => ({
         default: ctx.CollaboratorsHandler,
       })
@@ -229,7 +229,7 @@ describe('EditorHttpController', function () {
       default: ctx.FileWriter,
     }))
     vi.doMock(
-      '../../../../app/src/Features/Project/ProjectEntityUpdateHandler.js',
+      '../../../../app/src/Features/Project/ProjectEntityUpdateHandler.mjs',
       () => ({
         default: ctx.ProjectEntityUpdateHandler,
       })

@@ -1,5 +1,5 @@
-import UserHandler from './UserHandler.js'
-import UserDeleter from './UserDeleter.js'
+import UserHandler from './UserHandler.mjs'
+import UserDeleter from './UserDeleter.mjs'
 import UserGetter from './UserGetter.js'
 import { User } from '../../models/User.js'
 import NewsletterManager from '../Newsletter/NewsletterManager.js'

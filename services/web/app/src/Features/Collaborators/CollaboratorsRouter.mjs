@@ -1,5 +1,5 @@
 import CollaboratorsController from './CollaboratorsController.mjs'
-import AuthenticationController from '../Authentication/AuthenticationController.js'
+import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.mjs'
 import CollaboratorsInviteController from './CollaboratorsInviteController.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'

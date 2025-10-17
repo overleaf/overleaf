@@ -1,6 +1,6 @@
 import path from 'node:path'
 import SessionManager from '../Authentication/SessionManager.js'
-import TemplatesManager from './TemplatesManager.js'
+import TemplatesManager from './TemplatesManager.mjs'
 import ProjectHelper from '../Project/ProjectHelper.js'
 import logger from '@overleaf/logger'
 import { expressify } from '@overleaf/promise-utils'

@@ -7,7 +7,7 @@ import {
   renameSync,
 } from 'fs'
 import { pipeline } from 'stream/promises'
-import DocumentUpdaterHandler from '../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js'
+import DocumentUpdaterHandler from '../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.mjs'
 import ProjectZipStreamManager from '../../../app/src/Features/Downloads/ProjectZipStreamManager.mjs'
 import logger from '@overleaf/logger'
 import { promisify } from '@overleaf/promise-utils'

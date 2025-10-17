@@ -1,4 +1,4 @@
-import AuthenticationController from '../Authentication/AuthenticationController.js'
+import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.mjs'
 import TokenAccessController from './TokenAccessController.mjs'
 

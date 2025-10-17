@@ -38,7 +38,7 @@ describe('ProjectHistoryHandler', function () {
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/Project/ProjectDetailsHandler.js',
+      '../../../../app/src/Features/Project/ProjectDetailsHandler.mjs',
       () => ({
         default: (ctx.ProjectDetailsHandler = {
           promises: {},
@@ -46,7 +46,7 @@ describe('ProjectHistoryHandler', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/Features/History/HistoryManager.js', () => ({
+    vi.doMock('../../../../app/src/Features/History/HistoryManager.mjs', () => ({
       default: (ctx.HistoryManager = {
         promises: {},
       }),

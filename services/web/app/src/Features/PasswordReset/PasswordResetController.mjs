@@ -1,5 +1,5 @@
 import PasswordResetHandler from './PasswordResetHandler.mjs'
-import AuthenticationController from '../Authentication/AuthenticationController.js'
+import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import AuthenticationManager from '../Authentication/AuthenticationManager.js'
 import SessionManager from '../Authentication/SessionManager.js'
 import UserGetter from '../User/UserGetter.js'

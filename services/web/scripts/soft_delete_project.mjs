@@ -1,5 +1,5 @@
 import minimist from 'minimist'
-import ProjectDeleter from '../app/src/Features/Project/ProjectDeleter.js'
+import ProjectDeleter from '../app/src/Features/Project/ProjectDeleter.mjs'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 async function main() {

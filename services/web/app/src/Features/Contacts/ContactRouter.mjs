@@ -1,4 +1,4 @@
-import AuthenticationController from '../Authentication/AuthenticationController.js'
+import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import SessionManager from '../Authentication/SessionManager.js'
 import ContactController from './ContactController.mjs'
 import Settings from '@overleaf/settings'

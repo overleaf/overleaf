@@ -27,7 +27,7 @@ describe('ProjectDownloadsController', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/Features/Project/ProjectGetter.js', () => ({
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter.mjs', () => ({
       default: (ctx.ProjectGetter = {}),
     }))
 
@@ -36,7 +36,7 @@ describe('ProjectDownloadsController', function () {
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js',
+      '../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.mjs',
       () => ({
         default: ctx.DocumentUpdaterHandler,
       })

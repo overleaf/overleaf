@@ -40,14 +40,14 @@ describe('ProjectEntityRestoreHandler', function () {
     }
 
     vi.doMock(
-      '../../../../app/src/Features/Project/ProjectEntityHandler.js',
+      '../../../../app/src/Features/Project/ProjectEntityHandler.mjs',
       () => ({
         default: ctx.ProjectEntityHandler,
       })
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Editor/EditorController.js',
+      '../../../../app/src/Features/Editor/EditorController.mjs',
       () => ({
         default: ctx.EditorController,
       })

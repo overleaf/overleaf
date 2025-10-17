@@ -1,6 +1,6 @@
 import minimist from 'minimist'
 import { ObjectId } from '../app/src/infrastructure/mongodb.js'
-import ProjectEntityUpdateHandler from '../app/src/Features/Project/ProjectEntityUpdateHandler.js'
+import ProjectEntityUpdateHandler from '../app/src/Features/Project/ProjectEntityUpdateHandler.mjs'
 import Errors from '../app/src/Features/Errors/Errors.js'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 

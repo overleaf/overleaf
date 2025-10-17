@@ -82,19 +82,19 @@ describe('HistoryController', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/Features/History/HistoryManager.js', () => ({
+    vi.doMock('../../../../app/src/Features/History/HistoryManager.mjs', () => ({
       default: ctx.HistoryManager,
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/Project/ProjectDetailsHandler.js',
+      '../../../../app/src/Features/Project/ProjectDetailsHandler.mjs',
       () => ({
         default: (ctx.ProjectDetailsHandler = {}),
       })
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Project/ProjectEntityUpdateHandler.js',
+      '../../../../app/src/Features/Project/ProjectEntityUpdateHandler.mjs',
       () => ({
         default: ctx.ProjectEntityUpdateHandler,
       })
@@ -104,7 +104,7 @@ describe('HistoryController', function () {
       default: (ctx.UserGetter = {}),
     }))
 
-    vi.doMock('../../../../app/src/Features/Project/ProjectGetter.js', () => ({
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter.mjs', () => ({
       default: (ctx.ProjectGetter = {}),
     }))
 

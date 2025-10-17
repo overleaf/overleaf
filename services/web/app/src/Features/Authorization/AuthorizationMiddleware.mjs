@@ -1,14 +1,14 @@
-import AuthorizationManager from './AuthorizationManager.js'
+import AuthorizationManager from './AuthorizationManager.mjs'
 import logger from '@overleaf/logger'
 import mongodb from 'mongodb-legacy'
 
 import Errors from '../Errors/Errors.js'
 import HttpErrorHandler from '../Errors/HttpErrorHandler.js'
-import AuthenticationController from '../Authentication/AuthenticationController.js'
+import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import SessionManager from '../Authentication/SessionManager.js'
 import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.js'
 import { expressify } from '@overleaf/promise-utils'
-import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.js'
+import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
 import UrlHelper from '../Helpers/UrlHelper.js'
 
 const { ObjectId } = mongodb

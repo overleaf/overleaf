@@ -1,5 +1,5 @@
-import ProjectEntityHandler from '../Project/ProjectEntityHandler.js'
-import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.js'
+import ProjectEntityHandler from '../Project/ProjectEntityHandler.mjs'
+import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mjs'
 import packageMapping from './packageMapping.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 

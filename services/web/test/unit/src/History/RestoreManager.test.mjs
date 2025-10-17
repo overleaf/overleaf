@@ -23,7 +23,7 @@ describe('RestoreManager', function () {
       default: Errors,
     }))
 
-    vi.doMock('../../../../app/src/Features/History/HistoryManager.js', () => ({
+    vi.doMock('../../../../app/src/Features/History/HistoryManager.mjs', () => ({
       default: (ctx.HistoryManager = {
         promises: {
           getContentAtVersion: sinon.stub().resolves({

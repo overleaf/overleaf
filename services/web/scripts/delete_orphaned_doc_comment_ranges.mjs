@@ -1,7 +1,7 @@
 import minimist from 'minimist'
 import ChatApiHandler from '../app/src/Features/Chat/ChatApiHandler.js'
 import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
-import DocumentUpdaterHandler from '../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js'
+import DocumentUpdaterHandler from '../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.mjs'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 

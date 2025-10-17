@@ -10,15 +10,15 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import AuthorizationManager from '../Authorization/AuthorizationManager.js'
-import ProjectLocator from '../Project/ProjectLocator.js'
+import AuthorizationManager from '../Authorization/AuthorizationManager.mjs'
+import ProjectLocator from '../Project/ProjectLocator.mjs'
 import DocstoreManager from '../Docstore/DocstoreManager.js'
-import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.js'
+import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mjs'
 import _ from 'lodash'
 import LinkedFilesHandler from './LinkedFilesHandler.mjs'
 import LinkedFilesErrors from './LinkedFilesErrors.mjs'
 import { promisify } from '@overleaf/promise-utils'
-import HistoryManager from '../History/HistoryManager.js'
+import HistoryManager from '../History/HistoryManager.mjs'
 
 const {
   BadDataError,

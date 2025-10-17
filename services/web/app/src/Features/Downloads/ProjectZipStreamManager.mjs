@@ -1,9 +1,9 @@
 import archiver from 'archiver'
 import async from 'async'
 import logger from '@overleaf/logger'
-import ProjectEntityHandler from '../Project/ProjectEntityHandler.js'
-import ProjectGetter from '../Project/ProjectGetter.js'
-import HistoryManager from '../History/HistoryManager.js'
+import ProjectEntityHandler from '../Project/ProjectEntityHandler.mjs'
+import ProjectGetter from '../Project/ProjectGetter.mjs'
+import HistoryManager from '../History/HistoryManager.mjs'
 let ProjectZipStreamManager
 
 export default ProjectZipStreamManager = {

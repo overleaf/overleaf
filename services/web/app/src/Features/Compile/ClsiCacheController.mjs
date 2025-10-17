@@ -6,11 +6,11 @@ import {
 import Path from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import logger from '@overleaf/logger'
-import ClsiCacheManager from './ClsiCacheManager.js'
+import ClsiCacheManager from './ClsiCacheManager.mjs'
 import CompileController from './CompileController.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import ClsiCacheHandler from './ClsiCacheHandler.js'
-import ProjectGetter from '../Project/ProjectGetter.js'
+import ProjectGetter from '../Project/ProjectGetter.mjs'
 import { MeteredStream } from '@overleaf/stream-utils'
 import Metrics from '@overleaf/metrics'
 

@@ -14,9 +14,9 @@
 
 import LockManager from '../../../app/src/infrastructure/LockManager.js'
 
-import ProjectCreationHandler from '../../../app/src/Features/Project/ProjectCreationHandler.js'
-import ProjectGetter from '../../../app/src/Features/Project/ProjectGetter.js'
-import ProjectEntityMongoUpdateHandler from '../../../app/src/Features/Project/ProjectEntityMongoUpdateHandler.js'
+import ProjectCreationHandler from '../../../app/src/Features/Project/ProjectCreationHandler.mjs'
+import ProjectGetter from '../../../app/src/Features/Project/ProjectGetter.mjs'
+import ProjectEntityMongoUpdateHandler from '../../../app/src/Features/Project/ProjectEntityMongoUpdateHandler.mjs'
 import UserCreator from '../../../app/src/Features/User/UserCreator.mjs'
 import { expect } from 'chai'
 import _ from 'lodash'

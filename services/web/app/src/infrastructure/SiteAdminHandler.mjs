@@ -8,7 +8,7 @@ import {
 } from './GracefulShutdown.js'
 
 import Features from './Features.js'
-import UserHandler from '../Features/User/UserHandler.js'
+import UserHandler from '../Features/User/UserHandler.mjs'
 import metrics from '@overleaf/metrics'
 
 // Monitor a site maintenance file (e.g. /etc/site_status) periodically and

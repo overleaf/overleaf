@@ -85,7 +85,7 @@ describe('OwnershipTransferHandler', function () {
       vi.importActual('../../../../app/src/Features/Errors/Errors.js')
     )
 
-    vi.doMock('../../../../app/src/Features/Project/ProjectGetter.js', () => ({
+    vi.doMock('../../../../app/src/Features/Project/ProjectGetter.mjs', () => ({
       default: ctx.ProjectGetter,
     }))
 
@@ -102,7 +102,7 @@ describe('OwnershipTransferHandler', function () {
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/ThirdPartyDataStore/TpdsProjectFlusher.js',
+      '../../../../app/src/Features/ThirdPartyDataStore/TpdsProjectFlusher.mjs',
       () => ({
         default: ctx.TpdsProjectFlusher,
       })
@@ -120,7 +120,7 @@ describe('OwnershipTransferHandler', function () {
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/Collaborators/CollaboratorsHandler.js',
+      '../../../../app/src/Features/Collaborators/CollaboratorsHandler.mjs',
       () => ({
         default: ctx.CollaboratorsHandler,
       })

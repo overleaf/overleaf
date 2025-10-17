@@ -4,7 +4,7 @@ import Settings from '@overleaf/settings'
 import Metrics from '@overleaf/metrics'
 import OError from '@overleaf/o-error'
 import DeviceHistory from './DeviceHistory.mjs'
-import AuthenticationController from '../Authentication/AuthenticationController.js'
+import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import EmailsHelper from '../Helpers/EmailHelper.js'
 

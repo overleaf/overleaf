@@ -12,18 +12,17 @@ import SessionManager from '../Features/Authentication/SessionManager.js'
 import PackageVersions from './PackageVersions.js'
 import Modules from './Modules.js'
 import Errors from '../Features/Errors/Errors.js'
-
-import {
-  canRedirectToAdminDomain,
-  hasAdminAccess,
-  useAdminCapabilities,
-  useHasAdminCapability,
-} from '../Features/Helpers/AdminAuthorizationHelper.js'
-
+import AdminAuthorizationHelper from '../Features/Helpers/AdminAuthorizationHelper.mjs'
 import { addOptionalCleanupHandlerAfterDrainingConnections } from './GracefulShutdown.js'
 import { sanitizeSessionUserForFrontEnd } from './FrontEndUser.mjs'
 import { expressify } from '@overleaf/promise-utils'
 
+const {
+  canRedirectToAdminDomain,
+  hasAdminAccess,
+  useAdminCapabilities,
+  useHasAdminCapability,
+} = AdminAuthorizationHelper
 const IEEE_BRAND_ID = Settings.ieeeBrandId
 
 let webpackManifest

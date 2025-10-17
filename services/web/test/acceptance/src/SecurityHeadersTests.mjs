@@ -16,7 +16,7 @@ import { assert } from 'chai'
 import async from 'async'
 import User from './helpers/User.mjs'
 import request from './helpers/request.js'
-import ProjectGetter from '../../../app/src/Features/Project/ProjectGetter.js'
+import ProjectGetter from '../../../app/src/Features/Project/ProjectGetter.mjs'
 
 const assertHasCommonHeaders = function (response) {
   const { headers } = response

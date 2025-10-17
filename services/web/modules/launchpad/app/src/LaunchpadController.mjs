@@ -2,18 +2,17 @@ import OError from '@overleaf/o-error'
 import { expressify } from '@overleaf/promise-utils'
 import Settings from '@overleaf/settings'
 import Path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import logger from '@overleaf/logger'
 import UserRegistrationHandler from '../../../../app/src/Features/User/UserRegistrationHandler.mjs'
 import EmailHandler from '../../../../app/src/Features/Email/EmailHandler.js'
 import UserGetter from '../../../../app/src/Features/User/UserGetter.js'
 import { User } from '../../../../app/src/models/User.js'
 import AuthenticationManager from '../../../../app/src/Features/Authentication/AuthenticationManager.js'
-import AuthenticationController from '../../../../app/src/Features/Authentication/AuthenticationController.js'
+import AuthenticationController from '../../../../app/src/Features/Authentication/AuthenticationController.mjs'
 import SessionManager from '../../../../app/src/Features/Authentication/SessionManager.js'
-import { hasAdminAccess } from '../../../../app/src/Features/Helpers/AdminAuthorizationHelper.js'
+import AdminAuthorizationHelper from '../../../../app/src/Features/Helpers/AdminAuthorizationHelper.mjs'
 
-const __dirname = fileURLToPath(new URL('.', import.meta.url))
+const { hasAdminAccess } = AdminAuthorizationHelper
 
 /**
  * Container for functions that need to be mocked in tests
@@ -53,7 +52,7 @@ async function launchpadPage(req, res) {
 
   if (!sessionUser) {
     if (!adminUserExists) {
-      res.render(Path.resolve(__dirname, '../views/launchpad'), {
+      res.render(Path.resolve(import.meta.dirname, '../views/launchpad'), {
         adminUserExists,
         authMethod,
       })
@@ -66,7 +65,7 @@ async function launchpadPage(req, res) {
       isAdmin: 1,
     })
     if (hasAdminAccess(user)) {
-      res.render(Path.resolve(__dirname, '../views/launchpad'), {
+      res.render(Path.resolve(import.meta.dirname, '../views/launchpad'), {
         wsUrl: Settings.wsUrl,
         adminUserExists,
         authMethod,

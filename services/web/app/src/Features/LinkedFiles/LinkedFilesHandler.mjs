@@ -1,8 +1,8 @@
 import FileWriter from '../../infrastructure/FileWriter.js'
-import EditorController from '../Editor/EditorController.js'
-import ProjectLocator from '../Project/ProjectLocator.js'
+import EditorController from '../Editor/EditorController.mjs'
+import ProjectLocator from '../Project/ProjectLocator.mjs'
 import { Project } from '../../models/Project.js'
-import ProjectGetter from '../Project/ProjectGetter.js'
+import ProjectGetter from '../Project/ProjectGetter.mjs'
 import LinkedFilesErrors from './LinkedFilesErrors.mjs'
 import { callbackifyAll } from '@overleaf/promise-utils'
 
