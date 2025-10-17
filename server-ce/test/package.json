@@ -6,8 +6,8 @@
   "scripts": {
     "cypress:open": "cypress open --e2e --browser chrome",
     "cypress:run": "cypress run --e2e --browser chrome",
-    "format": "prettier --list-different $PWD/'**/*.{js,mjs,ts,tsx,json}'",
-    "format:fix": "prettier --write $PWD/'**/*.{js,mjs,ts,tsx,json}'"
+    "format": "prettier --list-different $PWD/'**/*.{js,mjs,ts,tsx}'",
+    "format:fix": "prettier --write $PWD/'**/*.{js,mjs,ts,tsx}'"
   },
   "devDependencies": {
     "@isomorphic-git/lightning-fs": "^4.6.0",
