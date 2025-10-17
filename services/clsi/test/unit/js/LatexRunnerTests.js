@@ -249,6 +249,7 @@ describe('LatexRunner', function () {
             'makeindex,bibtex,latex,makeindex,bibtex,latex,makeindex,bibtex,latex',
           'latexmk-rules-run': 9,
           'latexmk-time': { total: 2930 },
+          'latexmk-img-times': [],
         })
       })
     })
@@ -280,6 +281,7 @@ describe('LatexRunner', function () {
           },
           'latexmk-clock-time': 4870,
           'latexmk-rules-run': 4,
+          'latexmk-img-times': [],
         })
       })
     })

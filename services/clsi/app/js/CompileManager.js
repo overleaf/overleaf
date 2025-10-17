@@ -766,6 +766,19 @@ function _emitMetrics(request, status, stats, timings) {
     }
   }
 
+  const imgTimings = stats.latexmk?.['latexmk-img-times']
+  if (imgTimings != null) {
+    for (const timing of imgTimings) {
+      ClsiMetrics.imageProcessingDurationSeconds.observe(
+        {
+          group: request.compileGroup,
+          type: timing.type,
+        },
+        timing.time_ms / 1000
+      )
+    }
+  }
+
   ClsiMetrics.compilesTotal.inc({
     status,
     engine: request.compiler,

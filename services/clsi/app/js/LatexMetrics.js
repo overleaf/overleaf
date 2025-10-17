@@ -22,7 +22,7 @@ const NOTEWORTHY_DEPENDENCIES_REGEXP =
  * There are different formats of `latexmk` output depending on the version.
  * The parsers attempt to handle these variations gracefully.
  */
-const LATEX_MK_METRICS = [
+const LATEX_MK_METRICS_STDOUT = [
   // Extract individual latexmk rule times as an array of objects, each with 'rule'
   // and 'time_ms' properties
   [
@@ -100,18 +100,57 @@ const LATEX_MK_METRICS = [
   ],
 ]
 
+const LATEX_MK_METRICS_STDERR = [
+  [
+    'latexmk-img-times',
+    s => {
+      const pngCopyMatches = s.matchAll(/^PNG copy: (.*)$/gm)
+      const pngCopyFiles = new Set()
+      for (const match of pngCopyMatches) {
+        const filename = match[1]
+        pngCopyFiles.add(filename)
+      }
+
+      const timingMatches = s.matchAll(
+        /^Image written \((PNG|JPG|JBIG2|PDF), (\d+) ms\): (.*)$/gm
+      )
+      const timingsByType = new Map()
+      for (const match of timingMatches) {
+        let type = match[1]
+        const timeMs = parseInt(match[2], 10)
+        const filename = match[3]
+        if (type === 'PNG' && pngCopyFiles.has(filename)) {
+          type = 'PNG-fast-copy'
+        }
+        const accumulatedTime = timingsByType.get(type) ?? 0
+        timingsByType.set(type, accumulatedTime + timeMs)
+      }
+      return Array.from(timingsByType.entries()).map(([type, timeMs]) => ({
+        type,
+        time_ms: timeMs,
+      }))
+    },
+  ],
+]
+
 /**
  * Parses latexmk stdout for metrics and adds them to the stats object.
  * It iterates through a predefined list of metric matchers (LATEX_MK_METRICS),
  * applies them to the stdout, and adds any successful matches to the
  * `stats.latexmk` object.
  *
- * @param {{stdout?: string}} output - The output from the latexmk process.
+ * @param {{stdout?: string, stderr?: string}} output - The output from the latexmk process.
  * @param {{latexmk: object}} stats - The statistics object to update. This object is mutated.
  */
 function addLatexMkMetrics(output, stats) {
-  for (const [stat, matcher] of LATEX_MK_METRICS) {
+  for (const [stat, matcher] of LATEX_MK_METRICS_STDOUT) {
     const match = matcher(output?.stdout || '', stats.latexmk)
+    if (match) {
+      stats.latexmk[stat] = match
+    }
+  }
+  for (const [stat, matcher] of LATEX_MK_METRICS_STDERR) {
+    const match = matcher(output?.stderr || '', stats.latexmk)
     if (match) {
       stats.latexmk[stat] = match
     }

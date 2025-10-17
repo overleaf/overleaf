@@ -54,6 +54,13 @@ const latexmkRuleDurationSeconds = new prom.Histogram({
   labelNames: ['group', 'rule'],
 })
 
+const imageProcessingDurationSeconds = new prom.Histogram({
+  name: 'clsi_image_processing_duration_seconds',
+  help: 'Time spent processing images',
+  buckets: COMPILE_TIME_BUCKETS,
+  labelNames: ['group', 'type'],
+})
+
 module.exports = {
   compilesTotal,
   compileDurationSeconds,
@@ -61,4 +68,5 @@ module.exports = {
   syncResourcesDurationSeconds,
   processOutputFilesDurationSeconds,
   latexmkRuleDurationSeconds,
+  imageProcessingDurationSeconds,
 }
