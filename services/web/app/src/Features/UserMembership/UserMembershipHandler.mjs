@@ -1,5 +1,5 @@
 import mongodb from 'mongodb-legacy'
-import { promisifyAll, callbackify } from '@overleaf/promise-utils'
+import { callbackify } from '@overleaf/promise-utils'
 import { Institution } from '../../models/Institution.js'
 import { Subscription } from '../../models/Subscription.js'
 import { Publisher } from '../../models/Publisher.js'
@@ -52,19 +52,6 @@ const UserMembershipHandler = {
   },
 }
 
-UserMembershipHandler.promises = promisifyAll(UserMembershipHandler)
-
-export default {
-  getEntityWithoutAuthorizationCheck: callbackify(
-    UserMembershipHandler.getEntityWithoutAuthorizationCheck
-  ),
-  createEntity: callbackify(UserMembershipHandler.createEntity),
-  getUsers: callbackify(UserMembershipHandler.getUsers),
-  addUser: callbackify(UserMembershipHandler.addUser),
-  removeUser: callbackify(UserMembershipHandler.removeUser),
-  promises: UserMembershipHandler,
-}
-
 async function getPopulatedListOfMembers(entity, attributes) {
   const userObjects = []
 
@@ -112,4 +99,15 @@ function buildEntityQuery(entityId, entityConfig) {
   const query = Object.assign({}, entityConfig.baseQuery)
   query[entityConfig.fields.primaryKey] = entityId
   return query
+}
+
+export default {
+  getEntityWithoutAuthorizationCheck: callbackify(
+    UserMembershipHandler.getEntityWithoutAuthorizationCheck
+  ),
+  createEntity: callbackify(UserMembershipHandler.createEntity),
+  getUsers: callbackify(UserMembershipHandler.getUsers),
+  addUser: callbackify(UserMembershipHandler.addUser),
+  removeUser: callbackify(UserMembershipHandler.removeUser),
+  promises: UserMembershipHandler,
 }

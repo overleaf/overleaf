@@ -171,96 +171,98 @@ async function exportCsv(req, res) {
   csvAttachment(res, csvParser.parse(users), 'Group.csv')
 }
 
+async function add(req, res) {
+  const { entity, entityConfig } = req
+  const email = EmailHelper.parseEmail(req.body.email)
+  if (email == null) {
+    return res.status(400).json({
+      error: {
+        code: 'invalid_email',
+        message: req.i18n.translate('invalid_email'),
+      },
+    })
+  }
+  if (entityConfig.readOnly) {
+    throw new Errors.NotFoundError('Cannot add users to entity')
+  }
+  let user
+  try {
+    user = await UserMembershipHandler.promises.addUser(
+      entity,
+      entityConfig,
+      email
+    )
+  } catch (err) {
+    if (err instanceof UserMembershipErrors.UserAlreadyAddedError) {
+      return res.status(400).json({
+        error: {
+          code: 'user_already_added',
+          message: req.i18n.translate('user_already_added'),
+        },
+      })
+    }
+    if (err instanceof UserMembershipErrors.UserNotFoundError) {
+      return res.status(404).json({
+        error: {
+          code: 'user_not_found',
+          message: req.i18n.translate('add_manager_user_not_found'),
+        },
+      })
+    }
+    throw err
+  }
+  res.json({ user })
+}
+
+async function remove(req, res) {
+  const { entity, entityConfig } = req
+  const { userId } = req.params
+  if (entityConfig.readOnly) {
+    throw new Errors.NotFoundError('Cannot remove users from entity')
+  }
+  const loggedInUserId = SessionManager.getLoggedInUserId(req.session)
+  if (loggedInUserId === userId) {
+    return res.status(400).json({
+      error: {
+        code: 'managers_cannot_remove_self',
+        message: req.i18n.translate('managers_cannot_remove_self'),
+      },
+    })
+  }
+  try {
+    await UserMembershipHandler.promises.removeUser(
+      entity,
+      entityConfig,
+      userId
+    )
+  } catch (err) {
+    if (err instanceof UserMembershipErrors.UserIsManagerError) {
+      return res.status(400).json({
+        error: {
+          code: 'managers_cannot_remove_admin',
+          message: req.i18n.translate('managers_cannot_remove_admin'),
+        },
+      })
+    }
+    throw err
+  }
+  res.sendStatus(200)
+}
+
+async function create(req, res) {
+  const entityId = req.params.id
+  const entityConfig = req.entityConfig
+  await UserMembershipHandler.promises.createEntity(entityId, entityConfig)
+  res.redirect(entityConfig.pathsFor(entityId).index)
+}
+
 export default {
   manageGroupMembers: expressify(manageGroupMembers),
   manageGroupManagers: expressify(manageGroupManagers),
   manageInstitutionManagers: expressify(manageInstitutionManagers),
   managePublisherManagers: expressify(managePublisherManagers),
-  add(req, res, next) {
-    const { entity, entityConfig } = req
-    const email = EmailHelper.parseEmail(req.body.email)
-    if (email == null) {
-      return res.status(400).json({
-        error: {
-          code: 'invalid_email',
-          message: req.i18n.translate('invalid_email'),
-        },
-      })
-    }
-
-    if (entityConfig.readOnly) {
-      return next(new Errors.NotFoundError('Cannot add users to entity'))
-    }
-
-    UserMembershipHandler.addUser(
-      entity,
-      entityConfig,
-      email,
-      function (error, user) {
-        if (
-          error &&
-          error instanceof UserMembershipErrors.UserAlreadyAddedError
-        ) {
-          return res.status(400).json({
-            error: {
-              code: 'user_already_added',
-              message: req.i18n.translate('user_already_added'),
-            },
-          })
-        }
-        if (error && error instanceof UserMembershipErrors.UserNotFoundError) {
-          return res.status(404).json({
-            error: {
-              code: 'user_not_found',
-              message: req.i18n.translate('add_manager_user_not_found'),
-            },
-          })
-        }
-        if (error != null) {
-          return next(error)
-        }
-        res.json({ user })
-      }
-    )
-  },
-  remove(req, res, next) {
-    const { entity, entityConfig } = req
-    const { userId } = req.params
-
-    if (entityConfig.readOnly) {
-      return next(new Errors.NotFoundError('Cannot remove users from entity'))
-    }
-
-    const loggedInUserId = SessionManager.getLoggedInUserId(req.session)
-    if (loggedInUserId === userId) {
-      return res.status(400).json({
-        error: {
-          code: 'managers_cannot_remove_self',
-          message: req.i18n.translate('managers_cannot_remove_self'),
-        },
-      })
-    }
-
-    UserMembershipHandler.removeUser(
-      entity,
-      entityConfig,
-      userId,
-      function (error, user) {
-        if (error && error instanceof UserMembershipErrors.UserIsManagerError) {
-          return res.status(400).json({
-            error: {
-              code: 'managers_cannot_remove_admin',
-              message: req.i18n.translate('managers_cannot_remove_admin'),
-            },
-          })
-        }
-        if (error != null) {
-          return next(error)
-        }
-        res.sendStatus(200)
-      }
-    )
-  },
+  add: expressify(add),
+  remove: expressify(remove),
   exportCsv: expressify(exportCsv),
   new(req, res, next) {
     res.render('user_membership/new', {
@@ -268,19 +270,5 @@ export default {
       entityId: req.params.id,
     })
   },
-  create(req, res, next) {
-    const entityId = req.params.id
-    const entityConfig = req.entityConfig
-
-    UserMembershipHandler.createEntity(
-      entityId,
-      entityConfig,
-      function (error, entity) {
-        if (error != null) {
-          return next(error)
-        }
-        res.redirect(entityConfig.pathsFor(entityId).index)
-      }
-    )
-  },
+  create: expressify(create),
 }

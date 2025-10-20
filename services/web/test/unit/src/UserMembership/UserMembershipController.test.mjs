@@ -132,6 +132,9 @@ describe('UserMembershipController', () => {
       ),
       promises: {
         getUsers: vi.fn().mockResolvedValue(ctx.users),
+        addUser: vi.fn().mockResolvedValue(ctx.newUser),
+        removeUser: vi.fn().mockResolvedValue(),
+        createEntity: vi.fn().mockResolvedValue(ctx.institution),
       },
     }
     ctx.SplitTestHandler = {
@@ -326,29 +329,25 @@ describe('UserMembershipController', () => {
       newUser,
     }) => {
       expect.assertions(1)
-      await new Promise(resolve => {
-        UserMembershipController.add(req, {
-          json: () => {
-            expect(UserMembershipHandler.addUser).toHaveBeenCalledWith(
-              subscription,
-              {
-                modelName: 'Subscription',
-                baseQuery: { groupPlan: true },
-                fields: {
-                  access: 'manager_ids',
-                  membership: 'member_ids',
-                  name: 'teamName',
-                  primaryKey: '_id',
-                  read: ['manager_ids'],
-                  write: 'manager_ids',
-                },
+      await UserMembershipController.add(req, {
+        json: () => {
+          expect(UserMembershipHandler.promises.addUser).toHaveBeenCalledWith(
+            subscription,
+            {
+              modelName: 'Subscription',
+              baseQuery: { groupPlan: true },
+              fields: {
+                access: 'manager_ids',
+                membership: 'member_ids',
+                name: 'teamName',
+                primaryKey: '_id',
+                read: ['manager_ids'],
+                write: 'manager_ids',
               },
-              newUser.email,
-              expect.any(Function)
-            )
-            resolve()
-          },
-        })
+            },
+            newUser.email
+          )
+        },
       })
     })
 
@@ -358,25 +357,19 @@ describe('UserMembershipController', () => {
       newUser,
     }) => {
       expect.assertions(1)
-      await new Promise(resolve => {
-        UserMembershipController.add(req, {
-          json: payload => {
-            expect(payload.user).to.equal(newUser)
-            resolve()
-          },
-        })
+      await UserMembershipController.add(req, {
+        json: payload => {
+          expect(payload.user).to.equal(newUser)
+        },
       })
     })
 
     it('handle readOnly entity', async ({ UserMembershipController, req }) => {
       expect.assertions(2)
       req.entityConfig = EntityConfigs.group
-      await new Promise(resolve => {
-        UserMembershipController.add(req, null, error => {
-          expect(error).to.exist
-          expect(error).to.be.an.instanceof(Errors.NotFoundError)
-          resolve()
-        })
+      await UserMembershipController.add(req, null, error => {
+        expect(error).to.exist
+        expect(error).to.be.an.instanceof(Errors.NotFoundError)
       })
     })
 
@@ -386,26 +379,21 @@ describe('UserMembershipController', () => {
       UserMembershipHandler,
     }) => {
       expect.assertions(1)
-      UserMembershipHandler.addUser.mockImplementation(
-        (_entity, _options, _email, callback) => {
-          callback(new UserMembershipErrors.UserAlreadyAddedError())
-        }
+      UserMembershipHandler.promises.addUser.mockRejectedValue(
+        new UserMembershipErrors.UserAlreadyAddedError()
       )
-      await new Promise(resolve => {
-        UserMembershipController.add(
-          req,
-          {
-            status: () => ({
-              json: payload => {
-                expect(payload.error.code).to.equal('user_already_added')
-                resolve()
-              },
-            }),
-          },
+      await UserMembershipController.add(
+        req,
+        {
+          status: () => ({
+            json: payload => {
+              expect(payload.error.code).to.equal('user_already_added')
+            },
+          }),
+        },
 
-          () => {}
-        )
-      })
+        () => {}
+      )
     })
 
     it('handle user not found', async ({
@@ -414,35 +402,27 @@ describe('UserMembershipController', () => {
       UserMembershipHandler,
     }) => {
       expect.assertions(1)
-      UserMembershipHandler.addUser.mockImplementation(
-        (_entity, _options, _email, callback) => {
-          callback(new UserMembershipErrors.UserNotFoundError())
-        }
+      UserMembershipHandler.promises.addUser.mockRejectedValue(
+        new UserMembershipErrors.UserNotFoundError()
       )
-      await new Promise(resolve => {
-        UserMembershipController.add(req, {
-          status: () => ({
-            json: payload => {
-              expect(payload.error.code).to.equal('user_not_found')
-              resolve()
-            },
-          }),
-        })
+      await UserMembershipController.add(req, {
+        status: () => ({
+          json: payload => {
+            expect(payload.error.code).to.equal('user_not_found')
+          },
+        }),
       })
     })
 
     it('handle invalid email', async ({ UserMembershipController, req }) => {
       expect.assertions(1)
       req.body.email = 'not_valid_email'
-      await new Promise(resolve => {
-        UserMembershipController.add(req, {
-          status: () => ({
-            json: payload => {
-              expect(payload.error.code).to.equal('invalid_email')
-              resolve()
-            },
-          }),
-        })
+      await UserMembershipController.add(req, {
+        status: () => ({
+          json: payload => {
+            expect(payload.error.code).to.equal('invalid_email')
+          },
+        }),
       })
     })
   })
@@ -464,7 +444,9 @@ describe('UserMembershipController', () => {
       expect.assertions(1)
       await UserMembershipController.remove(req, {
         sendStatus: () => {
-          expect(UserMembershipHandler.removeUser).toHaveBeenCalledWith(
+          expect(
+            UserMembershipHandler.promises.removeUser
+          ).toHaveBeenCalledWith(
             subscription,
             {
               modelName: 'Subscription',
@@ -481,8 +463,7 @@ describe('UserMembershipController', () => {
                 write: 'manager_ids',
               },
             },
-            newUser._id,
-            expect.any(Function)
+            newUser._id
           )
         },
       })
@@ -491,12 +472,9 @@ describe('UserMembershipController', () => {
     it('handle readOnly entity', async ({ UserMembershipController, req }) => {
       expect.assertions(2)
       req.entityConfig = EntityConfigs.group
-      await new Promise(resolve => {
-        UserMembershipController.remove(req, null, error => {
-          expect(error).to.exist
-          expect(error).to.be.an.instanceof(Errors.NotFoundError)
-          resolve()
-        })
+      await UserMembershipController.remove(req, null, error => {
+        expect(error).to.exist
+        expect(error).to.be.an.instanceof(Errors.NotFoundError)
       })
     })
 
@@ -522,10 +500,8 @@ describe('UserMembershipController', () => {
       UserMembershipHandler,
     }) => {
       expect.assertions(1)
-      UserMembershipHandler.removeUser.mockImplementation(
-        (_entity, _options, _userId, callback) => {
-          callback(new UserMembershipErrors.UserIsManagerError())
-        }
+      UserMembershipHandler.promises.removeUser.mockRejectedValue(
+        new UserMembershipErrors.UserIsManagerError()
       )
       await UserMembershipController.remove(req, {
         status: () => ({
@@ -671,22 +647,20 @@ describe('UserMembershipController', () => {
       await UserMembershipController.create(req, {
         redirect: path => {
           expect(path).to.eq(EntityConfigs.institution.pathsFor(123).index)
-          expect(UserMembershipHandler.createEntity).toHaveBeenCalledWith(
-            123,
-            {
-              fields: {
-                access: 'managerIds',
-                membership: 'member_ids',
-                name: 'name',
-                primaryKey: 'v1Id',
-                read: ['managerIds'],
-                write: 'managerIds',
-              },
-              modelName: 'Institution',
-              pathsFor: EntityConfigs.institution.pathsFor,
+          expect(
+            UserMembershipHandler.promises.createEntity
+          ).toHaveBeenCalledWith(123, {
+            fields: {
+              access: 'managerIds',
+              membership: 'member_ids',
+              name: 'name',
+              primaryKey: 'v1Id',
+              read: ['managerIds'],
+              write: 'managerIds',
             },
-            expect.any(Function)
-          )
+            modelName: 'Institution',
+            pathsFor: EntityConfigs.institution.pathsFor,
+          })
         },
       })
     })
