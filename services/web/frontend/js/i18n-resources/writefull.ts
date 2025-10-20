@@ -219,7 +219,7 @@ const en = {
       'We’ll use this to assess whether we add text to speech functionality to language suggestions in Overleaf.',
     'language-model.using-this-feature':
       'Using this feature means your text is sent to OpenAI’s servers and may be kept there for up to 30 days. It is not used to train OpenAI’s models. Writefull does not store or train on your texts.',
-    'language-model.learn-more': 'Learn more',
+    'language-model.learn-more': 'Learn more about how your data is used',
     'language-model.writefull-automatically-revises':
       'Writefull automatically revises your text. You can choose what language model is used for this: Writefull’s own model, designed specifically for English research writing, or a GPT-based option, suitable for non-academic texts in any language.',
     'language-model.which-language-model':
@@ -252,7 +252,7 @@ const en = {
     'settings.manage-plan.freemium': 'Get AI Assist',
     'settings.manage-plan.wf-premium': 'Manage Writefull plan',
     'settings.manage-plan': 'Manage plan',
-    'settings.open': 'Open',
+    'settings.open': 'Open settings dialog',
     'settings.writefulls-model': 'Model: Writefull',
     'settings.gpt-model': 'Model: GPT',
     'settings.with-custom-prompt': ' with custom prompt',
@@ -608,7 +608,7 @@ const es = {
     'settings.manage-plan.freemium': 'Obtener AI Assist',
     'settings.manage-plan.wf-premium': 'Gestionar Plan Writefull',
     'settings.manage-plan': 'Gestionar plan',
-    'settings.open': 'Abrir',
+    'settings.open': 'Abrir diálogo de configuración',
     'settings.writefulls-model': 'Modelo de Writefull',
     'settings.gpt-model': 'Modelo GPT',
     'settings.with-custom-prompt': ' con prompt personalizado',
