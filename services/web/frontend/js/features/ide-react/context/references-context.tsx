@@ -188,13 +188,13 @@ export const ReferencesProvider: FC<React.PropsWithChildren> = ({
       doneInitialIndex.current = true
       indexAllReferences(false)
     }
-  }, [projectJoined, indexAllReferences])
 
-  useEffect(() => {
-    const handleProjectJoined = () => {
-      // We only need to grab the references when the editor first loads,
-      // not on every reconnect
-      socket.on('references:keys:updated', (keys, allDocs, refresherId) => {
+    if (projectJoined && socket) {
+      const processUpdatedReferenceKeys = (
+        keys: string[],
+        allDocs: boolean,
+        refresherId: string
+      ) => {
         if (clientSideReferences) {
           if (refresherId === clientId.get()) {
             // We asked for this broadcast, so we must have already done the indexing
@@ -206,15 +206,17 @@ export const ReferencesProvider: FC<React.PropsWithChildren> = ({
             allDocs ? new Set(keys) : new Set([...oldDocs, ...keys])
           )
         }
-      })
-    }
+      }
 
-    eventEmitter.once('project:joined', handleProjectJoined)
-
-    return () => {
-      eventEmitter.off('project:joined', handleProjectJoined)
+      socket.on('references:keys:updated', processUpdatedReferenceKeys)
+      return () => {
+        socket.removeListener(
+          'references:keys:updated',
+          processUpdatedReferenceKeys
+        )
+      }
     }
-  }, [eventEmitter, indexAllReferences, socket, clientSideReferences])
+  }, [projectJoined, indexAllReferences, socket, clientSideReferences])
 
   const searchLocalReferences = useCallback(
     async (query: string): Promise<AdvancedReferenceSearchResult> => {
