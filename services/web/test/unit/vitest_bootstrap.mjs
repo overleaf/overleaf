@@ -4,6 +4,35 @@ import sinon from 'sinon'
 import logger from '@overleaf/logger'
 import sinonChai from 'sinon-chai'
 import chaiAsPromised from 'chai-as-promised'
+import SandboxedModule from 'sandboxed-module'
+import { createRequire } from 'module'
+
+const require = createRequire(import.meta.url)
+
+SandboxedModule.configure({
+  ignoreMissing: true,
+  requires: {
+    // This is already imported the same way in the mocha bootstrap
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    sshpk: require('sshpk'),
+  },
+  globals: {
+    AbortController,
+    AbortSignal,
+    Buffer,
+    Promise,
+    console,
+    process,
+    URL,
+    TextEncoder,
+    TextDecoder,
+  },
+  sourceTransformers: {
+    removeNodePrefix: function (source) {
+      return source.replace(/require\(['"]node:/g, "require('")
+    },
+  },
+})
 
 /*
  * Chai configuration
