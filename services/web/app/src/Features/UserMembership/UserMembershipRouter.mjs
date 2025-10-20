@@ -1,4 +1,4 @@
-import UserMembershipMiddleware from './UserMembershipMiddleware.js'
+import UserMembershipMiddleware from './UserMembershipMiddleware.mjs'
 import UserMembershipController from './UserMembershipController.mjs'
 import SubscriptionGroupController from '../Subscription/SubscriptionGroupController.mjs'
 import TeamInvitesController from '../Subscription/TeamInvitesController.mjs'

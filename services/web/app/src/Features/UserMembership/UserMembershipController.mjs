@@ -1,20 +1,16 @@
 import SessionManager from '../Authentication/SessionManager.js'
-import UserMembershipHandler from './UserMembershipHandler.js'
+import UserMembershipHandler from './UserMembershipHandler.mjs'
 import Errors from '../Errors/Errors.js'
 import EmailHelper from '../Helpers/EmailHelper.js'
 import { csvAttachment } from '../../infrastructure/Response.js'
-import {
-  UserIsManagerError,
-  UserAlreadyAddedError,
-  UserNotFoundError,
-} from './UserMembershipErrors.js'
+import UserMembershipErrors from './UserMembershipErrors.mjs'
 import { SSOConfig } from '../../models/SSOConfig.js'
 import { Parser as CSVParser } from 'json2csv'
 import { expressify } from '@overleaf/promise-utils'
 import PlansLocator from '../Subscription/PlansLocator.js'
 import RecurlyClient from '../Subscription/RecurlyClient.js'
 import Modules from '../../infrastructure/Modules.js'
-import UserMembershipAuthorization from './UserMembershipAuthorization.js'
+import UserMembershipAuthorization from './UserMembershipAuthorization.mjs'
 
 async function manageGroupMembers(req, res, next) {
   const { entity: subscription, entityConfig } = req
@@ -201,7 +197,10 @@ export default {
       entityConfig,
       email,
       function (error, user) {
-        if (error && error instanceof UserAlreadyAddedError) {
+        if (
+          error &&
+          error instanceof UserMembershipErrors.UserAlreadyAddedError
+        ) {
           return res.status(400).json({
             error: {
               code: 'user_already_added',
@@ -209,7 +208,7 @@ export default {
             },
           })
         }
-        if (error && error instanceof UserNotFoundError) {
+        if (error && error instanceof UserMembershipErrors.UserNotFoundError) {
           return res.status(404).json({
             error: {
               code: 'user_not_found',
@@ -247,7 +246,7 @@ export default {
       entityConfig,
       userId,
       function (error, user) {
-        if (error && error instanceof UserIsManagerError) {
+        if (error && error instanceof UserMembershipErrors.UserIsManagerError) {
           return res.status(400).json({
             error: {
               code: 'managers_cannot_remove_admin',

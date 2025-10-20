@@ -7,8 +7,8 @@ import UserDeleter from './UserDeleter.js'
 import UserGetter from './UserGetter.js'
 import UserUpdater from './UserUpdater.js'
 import Analytics from '../Analytics/AnalyticsManager.js'
-import UserOnboardingEmailManager from './UserOnboardingEmailManager.js'
-import UserPostRegistrationAnalyticsManager from './UserPostRegistrationAnalyticsManager.js'
+import UserOnboardingEmailManager from './UserOnboardingEmailManager.mjs'
+import UserPostRegistrationAnalyticsManager from './UserPostRegistrationAnalyticsManager.mjs'
 import OError from '@overleaf/o-error'
 
 async function _addAffiliation(user, affiliationOptions) {

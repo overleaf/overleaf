@@ -1,5 +1,5 @@
-const UserGetter = require('../User/UserGetter')
-const { isObjectIdInstance } = require('../Helpers/Mongo')
+import UserGetter from '../User/UserGetter.js'
+import { isObjectIdInstance } from '../Helpers/Mongo.js'
 
 const UserMembershipViewModel = {
   build(userOrEmail) {
@@ -81,4 +81,4 @@ UserMembershipViewModel.promises = {
   buildAsync: UserMembershipViewModel.buildAsync,
 }
 
-module.exports = UserMembershipViewModel
+export default UserMembershipViewModel

@@ -1,9 +1,9 @@
-const {
+import {
   hasAdminCapability,
   hasAdminAccess,
-} = require('../Helpers/AdminAuthorizationHelper')
-const SessionManager = require('../Authentication/SessionManager')
-const Settings = require('@overleaf/settings')
+} from '../Helpers/AdminAuthorizationHelper.js'
+import SessionManager from '../Authentication/SessionManager.js'
+import Settings from '@overleaf/settings'
 
 const UserMembershipAuthorization = {
   hasStaffAccess(requiredStaffAccess) {
@@ -52,4 +52,4 @@ const UserMembershipAuthorization = {
     }
   },
 }
-module.exports = UserMembershipAuthorization
+export default UserMembershipAuthorization

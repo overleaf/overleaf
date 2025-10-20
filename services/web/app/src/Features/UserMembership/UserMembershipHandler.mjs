@@ -1,17 +1,15 @@
-const { ObjectId } = require('mongodb-legacy')
-const { promisifyAll, callbackify } = require('@overleaf/promise-utils')
-const EntityModels = {
-  Institution: require('../../models/Institution').Institution,
-  Subscription: require('../../models/Subscription').Subscription,
-  Publisher: require('../../models/Publisher').Publisher,
-}
-const UserMembershipViewModel = require('./UserMembershipViewModel')
-const UserGetter = require('../User/UserGetter')
-const {
-  UserIsManagerError,
-  UserNotFoundError,
-  UserAlreadyAddedError,
-} = require('./UserMembershipErrors')
+import mongodb from 'mongodb-legacy'
+import { promisifyAll, callbackify } from '@overleaf/promise-utils'
+import { Institution } from '../../models/Institution.js'
+import { Subscription } from '../../models/Subscription.js'
+import { Publisher } from '../../models/Publisher.js'
+import UserMembershipViewModel from './UserMembershipViewModel.mjs'
+import UserGetter from '../User/UserGetter.js'
+import UserMembershipErrors from './UserMembershipErrors.mjs'
+
+const { ObjectId } = mongodb
+
+const EntityModels = { Institution, Subscription, Publisher }
 
 const UserMembershipHandler = {
   async getEntityWithoutAuthorizationCheck(entityId, entityConfig) {
@@ -34,11 +32,11 @@ const UserMembershipHandler = {
     const user = await UserGetter.promises.getUserByAnyEmail(email)
 
     if (!user) {
-      throw new UserNotFoundError()
+      throw new UserMembershipErrors.UserNotFoundError()
     }
 
     if (entity[attribute].some(managerId => managerId.equals(user._id))) {
-      throw new UserAlreadyAddedError()
+      throw new UserMembershipErrors.UserAlreadyAddedError()
     }
 
     await addUserToEntity(entity, attribute, user)
@@ -48,14 +46,15 @@ const UserMembershipHandler = {
   async removeUser(entity, entityConfig, userId) {
     const attribute = entityConfig.fields.write
     if (entity.admin_id ? entity.admin_id.equals(userId) : undefined) {
-      throw new UserIsManagerError()
+      throw new UserMembershipErrors.UserIsManagerError()
     }
     return await removeUserFromEntity(entity, attribute, userId)
   },
 }
 
 UserMembershipHandler.promises = promisifyAll(UserMembershipHandler)
-module.exports = {
+
+export default {
   getEntityWithoutAuthorizationCheck: callbackify(
     UserMembershipHandler.getEntityWithoutAuthorizationCheck
   ),

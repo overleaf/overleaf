@@ -1,8 +1,8 @@
-const Queues = require('../../infrastructure/Queues')
-const EmailHandler = require('../Email/EmailHandler')
-const UserUpdater = require('./UserUpdater')
-const UserGetter = require('./UserGetter')
-const Settings = require('@overleaf/settings')
+import Queues from '../../infrastructure/Queues.js'
+import EmailHandler from '../Email/EmailHandler.js'
+import UserUpdater from './UserUpdater.js'
+import UserGetter from './UserGetter.js'
+import Settings from '@overleaf/settings'
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
 
@@ -26,4 +26,4 @@ async function sendOnboardingEmail(userId) {
   }
 }
 
-module.exports = { scheduleOnboardingEmail, sendOnboardingEmail }
+export default { scheduleOnboardingEmail, sendOnboardingEmail }

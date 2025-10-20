@@ -1,25 +1,18 @@
-import { expect, vi } from 'vitest'
-import sinon from 'sinon'
-import MockRequest from '../helpers/MockRequest.js'
-import MockResponse from '../helpers/MockResponse.js'
+import { expect, vi, describe, it, beforeEach } from 'vitest'
+import MockRequest from '../helpers/MockRequestVitest.mjs'
+import MockResponse from '../helpers/MockResponseVitest.mjs'
 import EntityConfigs from '../../../../app/src/Features/UserMembership/UserMembershipEntityConfigs.js'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
-import {
-  UserIsManagerError,
-  UserNotFoundError,
-  UserAlreadyAddedError,
-} from '../../../../app/src/Features/UserMembership/UserMembershipErrors.js'
-
-const assertCalledWith = sinon.assert.calledWith
+import UserMembershipErrors from '../../../../app/src/Features/UserMembership/UserMembershipErrors.mjs'
 
 const modulePath =
   '../../../../app/src/Features/UserMembership/UserMembershipController.mjs'
 
 vi.mock(
-  '../../../../app/src/Features/UserMembership/UserMembershipErrors.js',
+  '../../../../app/src/Features/UserMembership/UserMembershipErrors.mjs',
   () =>
     vi.importActual(
-      '../../../../app/src/Features/UserMembership/UserMembershipErrors.js'
+      '../../../../app/src/Features/UserMembership/UserMembershipErrors.mjs'
     )
 )
 
@@ -27,9 +20,9 @@ vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
   vi.importActual('../../../../app/src/Features/Errors/Errors.js')
 )
 
-describe('UserMembershipController', function () {
-  beforeEach(async function (ctx) {
-    ctx.req = new MockRequest()
+describe('UserMembershipController', () => {
+  beforeEach(async ctx => {
+    ctx.req = new MockRequest(vi)
     ctx.req.params.id = 'mock-entity-id'
     ctx.user = { _id: 'mock-user-id' }
     ctx.newUser = { _id: 'mock-new-user-id', email: 'new-user-email@foo.bar' }
@@ -37,16 +30,16 @@ describe('UserMembershipController', function () {
       _id: 'mock-subscription-id',
       admin_id: 'mock-admin-id',
       manager_ids: ['mock-admin-id'],
-      fetchV1Data: callback => callback(null, ctx.subscription),
+      fetchV1Data: vi.fn(callback => callback(null, ctx.subscription)),
     }
     ctx.institution = {
       _id: 'mock-institution-id',
       v1Id: 123,
-      fetchV1Data: callback => {
-        const institution = Object.assign({}, ctx.institution)
+      fetchV1Data: vi.fn(callback => {
+        const institution = { ...ctx.institution }
         institution.name = 'Test Institution Name'
         callback(null, institution)
-      },
+      }),
       managerIds: ['mock-member-id-1'],
     }
     ctx.users = [
@@ -113,44 +106,47 @@ describe('UserMembershipController', function () {
     }
 
     ctx.SessionManager = {
-      getSessionUser: sinon.stub().returns(ctx.user),
-      getLoggedInUserId: sinon.stub().returns(ctx.user._id),
+      getSessionUser: vi.fn().mockReturnValue(ctx.user),
+      getLoggedInUserId: vi.fn().mockReturnValue(ctx.user._id),
     }
     ctx.SSOConfig = {
-      findById: sinon
-        .stub()
-        .returns({ exec: sinon.stub().resolves({ enabled: true }) }),
+      findById: vi.fn().mockReturnValue({
+        exec: vi.fn().mockResolvedValue({ enabled: true }),
+      }),
     }
     ctx.UserMembershipHandler = {
-      getEntity: sinon.stub().yields(null, ctx.subscription),
-      createEntity: sinon.stub().yields(null, ctx.institution),
-      getUsers: sinon.stub().yields(null, ctx.users),
-      addUser: sinon.stub().yields(null, ctx.newUser),
-      removeUser: sinon.stub().yields(null),
+      getEntity: vi.fn((_entity, _options, callback) =>
+        callback(null, ctx.subscription)
+      ),
+      createEntity: vi.fn((_entity, _options, callback) =>
+        callback(null, ctx.institution)
+      ),
+      getUsers: vi.fn((_entity, _options, callback) =>
+        callback(null, ctx.users)
+      ),
+      addUser: vi.fn((_entity, _options, _email, callback) =>
+        callback(null, ctx.newUser)
+      ),
+      removeUser: vi.fn((_entity, _options, _userId, callback) =>
+        callback(null)
+      ),
       promises: {
-        getUsers: sinon.stub().resolves(ctx.users),
+        getUsers: vi.fn().mockResolvedValue(ctx.users),
       },
     }
     ctx.SplitTestHandler = {
       promises: {
-        getAssignment: sinon.stub().resolves({ variant: 'default' }),
+        getAssignment: vi.fn().mockResolvedValue({ variant: 'default' }),
       },
-      getAssignment: sinon.stub().yields(null, { variant: 'default' }),
+      getAssignment: vi.fn((_testName, _userId, callback) =>
+        callback(null, { variant: 'default' })
+      ),
     }
     ctx.RecurlyClient = {
       promises: {
-        getSubscription: sinon.stub().resolves({}),
+        getSubscription: vi.fn().mockResolvedValue({}),
       },
     }
-
-    vi.doMock(
-      '../../../../app/src/Features/UserMembership/UserMembershipErrors',
-      () => ({
-        UserIsManagerError,
-        UserNotFoundError,
-        UserAlreadyAddedError,
-      })
-    )
 
     vi.doMock(
       '../../../../app/src/Features/Authentication/SessionManager',
@@ -191,7 +187,7 @@ describe('UserMembershipController', function () {
     ctx.Modules = {
       promises: {
         hooks: {
-          fire: sinon.stub(),
+          fire: vi.fn(),
         },
       },
     }
@@ -202,55 +198,90 @@ describe('UserMembershipController', function () {
     ctx.UserMembershipController = (await import(modulePath)).default
   })
 
-  describe('index', function () {
-    beforeEach(function (ctx) {
+  describe('index', () => {
+    beforeEach(ctx => {
       ctx.req.user = ctx.user
       ctx.req.entity = ctx.subscription
       ctx.req.entityConfig = EntityConfigs.group
-      ctx.Modules.promises.hooks.fire.resolves([])
+      ctx.Modules.promises.hooks.fire.mockResolvedValue([])
     })
 
-    it('get users', async function (ctx) {
-      await ctx.UserMembershipController.manageGroupMembers(ctx.req, {
+    it('get users', async ({
+      UserMembershipController,
+      req,
+      UserMembershipHandler,
+      subscription,
+    }) => {
+      expect.assertions(1)
+      await UserMembershipController.manageGroupMembers(req, {
         render: () => {
-          sinon.assert.calledWithMatch(
-            ctx.UserMembershipHandler.promises.getUsers,
-            ctx.subscription,
-            { modelName: 'Subscription' }
+          expect(UserMembershipHandler.promises.getUsers).toHaveBeenCalledWith(
+            subscription,
+            {
+              modelName: 'Subscription',
+              baseQuery: { groupPlan: true },
+              fields: {
+                access: 'manager_ids',
+                membership: 'member_ids',
+                name: 'teamName',
+                primaryKey: '_id',
+                read: ['invited_emails', 'teamInvites', 'member_ids'],
+                write: null,
+              },
+              hasMembersLimit: true,
+              readOnly: true,
+            }
           )
         },
       })
     })
 
-    it('render group view', async function (ctx) {
-      ctx.subscription.managedUsersEnabled = false
-      await ctx.UserMembershipController.manageGroupMembers(ctx.req, {
+    it('render group view', async ({
+      UserMembershipController,
+      req,
+      subscription,
+      users,
+    }) => {
+      expect.assertions(4)
+      subscription.managedUsersEnabled = false
+      await UserMembershipController.manageGroupMembers(req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/group-members-react')
-          expect(viewParams.users).to.deep.equal(ctx.users)
-          expect(viewParams.groupSize).to.equal(ctx.subscription.membersLimit)
+          expect(viewParams.users).to.deep.equal(users)
+          expect(viewParams.groupSize).to.equal(subscription.membersLimit)
           expect(viewParams.managedUsersActive).to.equal(false)
         },
       })
     })
 
-    it('render group view with managed users', async function (ctx) {
-      ctx.subscription.managedUsersEnabled = true
-      await ctx.UserMembershipController.manageGroupMembers(ctx.req, {
+    it('render group view with managed users', async ({
+      UserMembershipController,
+      req,
+      subscription,
+      users,
+    }) => {
+      expect.assertions(5)
+      subscription.managedUsersEnabled = true
+      await UserMembershipController.manageGroupMembers(req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/group-members-react')
-          expect(viewParams.users).to.deep.equal(ctx.users)
-          expect(viewParams.groupSize).to.equal(ctx.subscription.membersLimit)
+          expect(viewParams.users).to.deep.equal(users)
+          expect(viewParams.groupSize).to.equal(subscription.membersLimit)
           expect(viewParams.managedUsersActive).to.equal(true)
           expect(viewParams.isUserGroupManager).to.equal(false)
         },
       })
     })
 
-    it('render group managers view', async function (ctx) {
-      ctx.req.user = ctx.user
-      ctx.req.entityConfig = EntityConfigs.groupManagers
-      await ctx.UserMembershipController.manageGroupManagers(ctx.req, {
+    it('render group managers view', async ({
+      UserMembershipController,
+      req,
+      user,
+    }) => {
+      expect.assertions(2)
+      req.user = user
+      req.entityConfig = EntityConfigs.groupManagers
+      await UserMembershipController.manageGroupManagers(req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/group-managers-react')
           expect(viewParams.groupSize).to.equal(undefined)
@@ -258,11 +289,17 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('render institution view', async function (ctx) {
-      ctx.req.user = ctx.user
-      ctx.req.entity = ctx.institution
-      ctx.req.entityConfig = EntityConfigs.institution
-      await ctx.UserMembershipController.manageInstitutionManagers(ctx.req, {
+    it('render institution view', async ({
+      UserMembershipController,
+      req,
+      user,
+      institution,
+    }) => {
+      expect.assertions(3)
+      req.user = user
+      req.entity = institution
+      req.entityConfig = EntityConfigs.institution
+      await UserMembershipController.manageInstitutionManagers(req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal(
             'user_membership/institution-managers-react'
@@ -274,22 +311,40 @@ describe('UserMembershipController', function () {
     })
   })
 
-  describe('add', function () {
-    beforeEach(function (ctx) {
+  describe('add', () => {
+    beforeEach(ctx => {
       ctx.req.body.email = ctx.newUser.email
       ctx.req.entity = ctx.subscription
       ctx.req.entityConfig = EntityConfigs.groupManagers
     })
 
-    it('add user', async function (ctx) {
+    it('add user', async ({
+      UserMembershipController,
+      req,
+      UserMembershipHandler,
+      subscription,
+      newUser,
+    }) => {
+      expect.assertions(1)
       await new Promise(resolve => {
-        ctx.UserMembershipController.add(ctx.req, {
+        UserMembershipController.add(req, {
           json: () => {
-            sinon.assert.calledWithMatch(
-              ctx.UserMembershipHandler.addUser,
-              ctx.subscription,
-              { modelName: 'Subscription' },
-              ctx.newUser.email
+            expect(UserMembershipHandler.addUser).toHaveBeenCalledWith(
+              subscription,
+              {
+                modelName: 'Subscription',
+                baseQuery: { groupPlan: true },
+                fields: {
+                  access: 'manager_ids',
+                  membership: 'member_ids',
+                  name: 'teamName',
+                  primaryKey: '_id',
+                  read: ['manager_ids'],
+                  write: 'manager_ids',
+                },
+              },
+              newUser.email,
+              expect.any(Function)
             )
             resolve()
           },
@@ -297,21 +352,27 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('return user object', async function (ctx) {
+    it('return user object', async ({
+      UserMembershipController,
+      req,
+      newUser,
+    }) => {
+      expect.assertions(1)
       await new Promise(resolve => {
-        ctx.UserMembershipController.add(ctx.req, {
+        UserMembershipController.add(req, {
           json: payload => {
-            payload.user.should.equal(ctx.newUser)
+            expect(payload.user).to.equal(newUser)
             resolve()
           },
         })
       })
     })
 
-    it('handle readOnly entity', async function (ctx) {
+    it('handle readOnly entity', async ({ UserMembershipController, req }) => {
+      expect.assertions(2)
+      req.entityConfig = EntityConfigs.group
       await new Promise(resolve => {
-        ctx.req.entityConfig = EntityConfigs.group
-        ctx.UserMembershipController.add(ctx.req, null, error => {
+        UserMembershipController.add(req, null, error => {
           expect(error).to.exist
           expect(error).to.be.an.instanceof(Errors.NotFoundError)
           resolve()
@@ -319,24 +380,47 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('handle user already added', async function (ctx) {
+    it('handle user already added', async ({
+      UserMembershipController,
+      req,
+      UserMembershipHandler,
+    }) => {
+      expect.assertions(1)
+      UserMembershipHandler.addUser.mockImplementation(
+        (_entity, _options, _email, callback) => {
+          callback(new UserMembershipErrors.UserAlreadyAddedError())
+        }
+      )
       await new Promise(resolve => {
-        ctx.UserMembershipHandler.addUser.yields(new UserAlreadyAddedError())
-        ctx.UserMembershipController.add(ctx.req, {
-          status: () => ({
-            json: payload => {
-              expect(payload.error.code).to.equal('user_already_added')
-              resolve()
-            },
-          }),
-        })
+        UserMembershipController.add(
+          req,
+          {
+            status: () => ({
+              json: payload => {
+                expect(payload.error.code).to.equal('user_already_added')
+                resolve()
+              },
+            }),
+          },
+
+          () => {}
+        )
       })
     })
 
-    it('handle user not found', async function (ctx) {
+    it('handle user not found', async ({
+      UserMembershipController,
+      req,
+      UserMembershipHandler,
+    }) => {
+      expect.assertions(1)
+      UserMembershipHandler.addUser.mockImplementation(
+        (_entity, _options, _email, callback) => {
+          callback(new UserMembershipErrors.UserNotFoundError())
+        }
+      )
       await new Promise(resolve => {
-        ctx.UserMembershipHandler.addUser.yields(new UserNotFoundError())
-        ctx.UserMembershipController.add(ctx.req, {
+        UserMembershipController.add(req, {
           status: () => ({
             json: payload => {
               expect(payload.error.code).to.equal('user_not_found')
@@ -347,10 +431,11 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('handle invalid email', async function (ctx) {
+    it('handle invalid email', async ({ UserMembershipController, req }) => {
+      expect.assertions(1)
+      req.body.email = 'not_valid_email'
       await new Promise(resolve => {
-        ctx.req.body.email = 'not_valid_email'
-        ctx.UserMembershipController.add(ctx.req, {
+        UserMembershipController.add(req, {
           status: () => ({
             json: payload => {
               expect(payload.error.code).to.equal('invalid_email')
@@ -362,33 +447,52 @@ describe('UserMembershipController', function () {
     })
   })
 
-  describe('remove', function () {
-    beforeEach(function (ctx) {
+  describe('remove', () => {
+    beforeEach(ctx => {
       ctx.req.params.userId = ctx.newUser._id
       ctx.req.entity = ctx.subscription
       ctx.req.entityConfig = EntityConfigs.groupManagers
     })
 
-    it('remove user', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.UserMembershipController.remove(ctx.req, {
-          sendStatus: () => {
-            sinon.assert.calledWithMatch(
-              ctx.UserMembershipHandler.removeUser,
-              ctx.subscription,
-              { modelName: 'Subscription' },
-              ctx.newUser._id
-            )
-            resolve()
-          },
-        })
+    it('remove user', async ({
+      UserMembershipController,
+      req,
+      UserMembershipHandler,
+      subscription,
+      newUser,
+    }) => {
+      expect.assertions(1)
+      await UserMembershipController.remove(req, {
+        sendStatus: () => {
+          expect(UserMembershipHandler.removeUser).toHaveBeenCalledWith(
+            subscription,
+            {
+              modelName: 'Subscription',
+
+              baseQuery: {
+                groupPlan: true,
+              },
+              fields: {
+                access: 'manager_ids',
+                membership: 'member_ids',
+                name: 'teamName',
+                primaryKey: '_id',
+                read: ['manager_ids'],
+                write: 'manager_ids',
+              },
+            },
+            newUser._id,
+            expect.any(Function)
+          )
+        },
       })
     })
 
-    it('handle readOnly entity', async function (ctx) {
+    it('handle readOnly entity', async ({ UserMembershipController, req }) => {
+      expect.assertions(2)
+      req.entityConfig = EntityConfigs.group
       await new Promise(resolve => {
-        ctx.req.entityConfig = EntityConfigs.group
-        ctx.UserMembershipController.remove(ctx.req, null, error => {
+        UserMembershipController.remove(req, null, error => {
           expect(error).to.exist
           expect(error).to.be.an.instanceof(Errors.NotFoundError)
           resolve()
@@ -396,172 +500,194 @@ describe('UserMembershipController', function () {
       })
     })
 
-    it('prevent self removal', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.req.params.userId = ctx.user._id
-        ctx.UserMembershipController.remove(ctx.req, {
-          status: () => ({
-            json: payload => {
-              expect(payload.error.code).to.equal('managers_cannot_remove_self')
-              resolve()
-            },
-          }),
-        })
+    it('prevent self removal', async ({
+      UserMembershipController,
+      req,
+      user,
+    }) => {
+      expect.assertions(1)
+      req.params.userId = user._id
+      await UserMembershipController.remove(req, {
+        status: () => ({
+          json: payload => {
+            expect(payload.error.code).to.equal('managers_cannot_remove_self')
+          },
+        }),
       })
     })
 
-    it('prevent admin removal', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.UserMembershipHandler.removeUser.yields(new UserIsManagerError())
-        ctx.UserMembershipController.remove(ctx.req, {
-          status: () => ({
-            json: payload => {
-              expect(payload.error.code).to.equal(
-                'managers_cannot_remove_admin'
-              )
-              resolve()
-            },
-          }),
-        })
+    it('prevent admin removal', async ({
+      UserMembershipController,
+      req,
+      UserMembershipHandler,
+    }) => {
+      expect.assertions(1)
+      UserMembershipHandler.removeUser.mockImplementation(
+        (_entity, _options, _userId, callback) => {
+          callback(new UserMembershipErrors.UserIsManagerError())
+        }
+      )
+      await UserMembershipController.remove(req, {
+        status: () => ({
+          json: payload => {
+            expect(payload.error.code).to.equal('managers_cannot_remove_admin')
+          },
+        }),
       })
     })
   })
 
-  describe('exportCsv', function () {
-    beforeEach(function (ctx) {
+  describe('exportCsv', () => {
+    beforeEach(ctx => {
       ctx.req.entity = ctx.subscription
       ctx.req.entityConfig = EntityConfigs.groupManagers
-      ctx.res = new MockResponse()
+      ctx.res = new MockResponse(vi)
       ctx.UserMembershipController.exportCsv(ctx.req, ctx.res)
     })
 
-    it('get users', function (ctx) {
-      sinon.assert.calledWithMatch(
-        ctx.UserMembershipHandler.promises.getUsers,
-        ctx.subscription,
-        { modelName: 'Subscription' }
+    it('get users', ({ UserMembershipHandler, subscription }) => {
+      expect(UserMembershipHandler.promises.getUsers).toHaveBeenCalledWith(
+        subscription,
+        {
+          modelName: 'Subscription',
+          baseQuery: { groupPlan: true },
+          fields: {
+            access: 'manager_ids',
+            membership: 'member_ids',
+            name: 'teamName',
+            primaryKey: '_id',
+            read: ['manager_ids'],
+            write: 'manager_ids',
+          },
+        }
       )
     })
 
-    it('should set the correct content type on the request', function (ctx) {
-      assertCalledWith(ctx.res.contentType, 'text/csv; charset=utf-8')
+    it('should set the correct content type on the request', ({ res }) => {
+      expect(res.contentType).toHaveBeenCalledWith('text/csv; charset=utf-8')
     })
 
-    it('should name the exported csv file', function (ctx) {
-      assertCalledWith(
-        ctx.res.header,
+    it('should name the exported csv file', ({ res }) => {
+      expect(res.header).toHaveBeenCalledWith(
         'Content-Disposition',
         'attachment; filename="Group.csv"'
       )
     })
 
-    it('should export the correct csv', function (ctx) {
-      assertCalledWith(
-        ctx.res.send,
+    it('should export the correct csv', ({ res }) => {
+      expect(res.send).toHaveBeenCalledWith(
         '"email","last_logged_in_at","last_active_at"\n"mock-email-1@foo.com","2020-08-09T12:43:11.467Z","2021-08-09T12:43:11.467Z"\n"mock-email-2@foo.com","2020-05-20T10:41:11.407Z","2021-05-20T10:41:11.407Z"\n"mock-email-3@foo.com","2021-08-10T10:41:11.407Z","2021-08-20T10:41:11.407Z"\n"mock-email-4@foo.com","2021-01-01T10:41:11.407Z","2021-01-02T10:41:11.407Z"\n"mock-email-5@foo.com","2023-01-01T10:41:11.407Z","2023-01-02T10:41:11.407Z"\n"mock-email-6@foo.com","2024-01-01T10:41:11.407Z","2024-01-02T10:41:11.407Z"'
       )
     })
   })
 
-  describe('exportCsv when group is managed', function () {
-    beforeEach(function (ctx) {
+  describe('exportCsv when group is managed', () => {
+    beforeEach(ctx => {
       ctx.req.entity = Object.assign(
         { managedUsersEnabled: true },
         ctx.subscription
       )
       ctx.req.entityConfig = EntityConfigs.groupManagers
-      ctx.res = new MockResponse()
+      ctx.res = new MockResponse(vi)
       ctx.UserMembershipController.exportCsv(ctx.req, ctx.res)
     })
 
-    it('should export the correct csv', function (ctx) {
-      assertCalledWith(
-        ctx.res.send,
+    it('should export the correct csv', ({ res }) => {
+      expect(res.send).toHaveBeenCalledWith(
         '"email","last_logged_in_at","last_active_at","managed"\n"mock-email-1@foo.com","2020-08-09T12:43:11.467Z","2021-08-09T12:43:11.467Z",false\n"mock-email-2@foo.com","2020-05-20T10:41:11.407Z","2021-05-20T10:41:11.407Z",false\n"mock-email-3@foo.com","2021-08-10T10:41:11.407Z","2021-08-20T10:41:11.407Z",false\n"mock-email-4@foo.com","2021-01-01T10:41:11.407Z","2021-01-02T10:41:11.407Z",true\n"mock-email-5@foo.com","2023-01-01T10:41:11.407Z","2023-01-02T10:41:11.407Z",false\n"mock-email-6@foo.com","2024-01-01T10:41:11.407Z","2024-01-02T10:41:11.407Z",true'
       )
     })
   })
 
-  describe('exportCsv when group has SSO', function () {
-    beforeEach(function (ctx) {
+  describe('exportCsv when group has SSO', () => {
+    beforeEach(ctx => {
       ctx.req.entity = Object.assign(
         { ssoConfig: 'sso-config-id' },
         ctx.subscription
       )
       ctx.req.entityConfig = EntityConfigs.groupManagers
-      ctx.Modules.promises.hooks.fire.resolves([true])
-      ctx.res = new MockResponse()
+      ctx.Modules.promises.hooks.fire.mockResolvedValue([true])
+      ctx.res = new MockResponse(vi)
       ctx.UserMembershipController.exportCsv(ctx.req, ctx.res)
     })
 
-    it('should export the correct csv', function (ctx) {
-      assertCalledWith(
-        ctx.res.send,
+    it('should export the correct csv', ({ res }) => {
+      expect(res.send).toHaveBeenCalledWith(
         '"email","last_logged_in_at","last_active_at","sso"\n"mock-email-1@foo.com","2020-08-09T12:43:11.467Z","2021-08-09T12:43:11.467Z",false\n"mock-email-2@foo.com","2020-05-20T10:41:11.407Z","2021-05-20T10:41:11.407Z",false\n"mock-email-3@foo.com","2021-08-10T10:41:11.407Z","2021-08-20T10:41:11.407Z",false\n"mock-email-4@foo.com","2021-01-01T10:41:11.407Z","2021-01-02T10:41:11.407Z",false\n"mock-email-5@foo.com","2023-01-01T10:41:11.407Z","2023-01-02T10:41:11.407Z",true\n"mock-email-6@foo.com","2024-01-01T10:41:11.407Z","2024-01-02T10:41:11.407Z",true'
       )
     })
   })
 
-  describe('exportCsv when group has SSO and managed users enabled', function () {
-    beforeEach(function (ctx) {
+  describe('exportCsv when group has SSO and managed users enabled', () => {
+    beforeEach(ctx => {
       ctx.req.entity = Object.assign(
         { managedUsersEnabled: true },
         { ssoConfig: 'sso-config-id' },
         ctx.subscription
       )
       ctx.req.entityConfig = EntityConfigs.groupManagers
-      ctx.Modules.promises.hooks.fire.resolves([true])
-      ctx.res = new MockResponse()
+      ctx.Modules.promises.hooks.fire.mockResolvedValue([true])
+      ctx.res = new MockResponse(vi)
       ctx.UserMembershipController.exportCsv(ctx.req, ctx.res)
     })
 
-    it('should export the correct csv', function (ctx) {
-      assertCalledWith(
-        ctx.res.send,
+    it('should export the correct csv', ({ res }) => {
+      expect(res.send).toHaveBeenCalledWith(
         '"email","last_logged_in_at","last_active_at","managed","sso"\n"mock-email-1@foo.com","2020-08-09T12:43:11.467Z","2021-08-09T12:43:11.467Z",false,false\n"mock-email-2@foo.com","2020-05-20T10:41:11.407Z","2021-05-20T10:41:11.407Z",false,false\n"mock-email-3@foo.com","2021-08-10T10:41:11.407Z","2021-08-20T10:41:11.407Z",false,false\n"mock-email-4@foo.com","2021-01-01T10:41:11.407Z","2021-01-02T10:41:11.407Z",true,false\n"mock-email-5@foo.com","2023-01-01T10:41:11.407Z","2023-01-02T10:41:11.407Z",false,true\n"mock-email-6@foo.com","2024-01-01T10:41:11.407Z","2024-01-02T10:41:11.407Z",true,true'
       )
     })
   })
 
-  describe('new', function () {
-    beforeEach(function (ctx) {
+  describe('new', () => {
+    beforeEach(ctx => {
       ctx.req.params.name = 'publisher'
       ctx.req.params.id = 'abc'
     })
 
-    it('renders view', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.UserMembershipController.new(ctx.req, {
-          render: (viewPath, data) => {
-            expect(data.entityName).to.eq('publisher')
-            expect(data.entityId).to.eq('abc')
-            resolve()
-          },
-        })
+    it('renders view', async ({ UserMembershipController, req }) => {
+      expect.assertions(2)
+      await UserMembershipController.new(req, {
+        render: (viewPath, data) => {
+          expect(data.entityName).to.eq('publisher')
+          expect(data.entityId).to.eq('abc')
+        },
       })
     })
   })
 
-  describe('create', function () {
-    beforeEach(function (ctx) {
+  describe('create', () => {
+    beforeEach(ctx => {
       ctx.req.params.name = 'institution'
       ctx.req.entityConfig = EntityConfigs.institution
       ctx.req.params.id = 123
     })
 
-    it('creates institution', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.UserMembershipController.create(ctx.req, {
-          redirect: path => {
-            expect(path).to.eq(EntityConfigs.institution.pathsFor(123).index)
-            sinon.assert.calledWithMatch(
-              ctx.UserMembershipHandler.createEntity,
-              123,
-              { modelName: 'Institution' }
-            )
-            resolve()
-          },
-        })
+    it('creates institution', async ({
+      UserMembershipController,
+      req,
+      UserMembershipHandler,
+    }) => {
+      expect.assertions(2)
+      await UserMembershipController.create(req, {
+        redirect: path => {
+          expect(path).to.eq(EntityConfigs.institution.pathsFor(123).index)
+          expect(UserMembershipHandler.createEntity).toHaveBeenCalledWith(
+            123,
+            {
+              fields: {
+                access: 'managerIds',
+                membership: 'member_ids',
+                name: 'name',
+                primaryKey: 'v1Id',
+                read: ['managerIds'],
+                write: 'managerIds',
+              },
+              modelName: 'Institution',
+              pathsFor: EntityConfigs.institution.pathsFor,
+            },
+            expect.any(Function)
+          )
+        },
       })
     })
   })

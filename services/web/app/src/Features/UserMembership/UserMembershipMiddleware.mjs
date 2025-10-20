@@ -1,16 +1,17 @@
 // @ts-check
 
-const { expressify } = require('@overleaf/promise-utils')
-const async = require('async')
-const UserMembershipAuthorization = require('./UserMembershipAuthorization')
-const AuthenticationController = require('../Authentication/AuthenticationController')
-const UserMembershipHandler = require('./UserMembershipHandler')
-const EntityConfigs = require('./UserMembershipEntityConfigs')
-const Errors = require('../Errors/Errors')
-const HttpErrorHandler = require('../Errors/HttpErrorHandler')
-const TemplatesManager = require('../Templates/TemplatesManager')
-const { z, zz, validateReq } = require('../../infrastructure/Validation')
-const { useAdminCapabilities } = require('../Helpers/AdminAuthorizationHelper')
+import { expressify } from '@overleaf/promise-utils'
+
+import async from 'async'
+import UserMembershipAuthorization from './UserMembershipAuthorization.mjs'
+import AuthenticationController from '../Authentication/AuthenticationController.js'
+import UserMembershipHandler from './UserMembershipHandler.mjs'
+import EntityConfigs from './UserMembershipEntityConfigs.js'
+import Errors from '../Errors/Errors.js'
+import HttpErrorHandler from '../Errors/HttpErrorHandler.js'
+import TemplatesManager from '../Templates/TemplatesManager.js'
+import { z, zz, validateReq } from '../../infrastructure/Validation.js'
+import { useAdminCapabilities } from '../Helpers/AdminAuthorizationHelper.js'
 
 // set of middleware arrays or functions that checks user access to an entity
 // (publisher, institution, group, template, etc.)
@@ -234,7 +235,7 @@ const UserMembershipMiddleware = {
   },
 }
 
-module.exports = UserMembershipMiddleware
+export default UserMembershipMiddleware
 
 // fetch entity config and set it in the request
 function fetchEntityConfig(entityName) {
