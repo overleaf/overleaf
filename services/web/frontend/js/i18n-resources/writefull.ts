@@ -33,7 +33,12 @@ const en = {
     'translate.fr': 'French',
     'translate.hi': 'Hindi',
     'translate.es': 'Spanish',
+    'translate.de': 'German',
+    'translate.ja': 'Japanese',
     'translate.other': 'Other',
+    'translate.more-languages-coming-soon.title': 'More languages coming soon',
+    'translate.more-languages-coming-soon.body':
+      'Sorry, we don’t currently offer any other languages for Translate. We will be adding more throughout October and November so watch this space!',
     'blocked-suggestion-signpost.question':
       'Do you want to permanently stop this suggestion from appearing again?',
     'blocked-suggestion-signpost.tooltip': 'You can block a suggestion here.',
@@ -369,7 +374,12 @@ const es = {
     'translate.fr': 'Francés',
     'translate.hi': 'Hindi',
     'translate.es': 'Español',
+    'translate.de': 'Alemán',
+    'translate.ja': 'Japonés',
     'translate.other': 'Otro',
+    'translate.more-languages-coming-soon.title': 'Más idiomas próximamente',
+    'translate.more-languages-coming-soon.body':
+      'Lo sentimos, actualmente no ofrecemos otros idiomas para la traducción. Agregaremos más a lo largo de octubre y noviembre, ¡así que mantente atento!',
     'blocked-suggestion-signpost.question':
       '¿Quieres dejar de ver esta sugerencia permanentemente? Puedes bloquear esta sugerencia aquí.',
     'blocked-suggestion-signpost.tooltip':
