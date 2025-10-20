@@ -45,7 +45,7 @@ SHARD_PROJECT_NAMES = \
 	test-pro-custom-4
 CLEAN_SHARDS=$(addprefix clean/,$(SHARD_PROJECT_NAMES))
 clean: $(CLEAN_SHARDS)
-	-docker compose run --no-deps --rm --entrypoint rm host-admin -rf docker-compose.override.yml docker-compose.*_*.yml cypress-reports/ data/
+	-docker compose run --no-deps --rm --entrypoint rm host-admin -rf docker-compose.override.yml docker-compose.*_*.yml reports/ data/
 	-docker compose down --remove-orphans --rmi local --timeout 0 --volumes
 
 $(CLEAN_SHARDS): clean/%:

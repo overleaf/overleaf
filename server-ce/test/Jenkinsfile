@@ -41,22 +41,9 @@ pipeline {
     OVERLEAF_PRO_TAG_LATEST = "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pro-internal:main"
   }
   stages {
-    // Retries will use the same pipeline instance. Reset the vars.
-    stage('Reset vars') {
+    stage('Create reports folder') {
       steps {
-        script {
-          job_copybara_done = false
-          job_npm_install_done = false
-          job_prefetch_custom_done = false
-          job_prefetch_default_done = false
-          job_server_ce_build_done = false
-          job_server_pro_build_done = false
-        }
-        // Reset the results folder.
-        // Use a folder that is not managed by cypress, as cypress will clear its results folder at the start of each individual run.
-        // I.e. we would loose the test results from finished/running test suites when the last test suite starts.
-        sh 'rm -rf server-ce/test/cypress-reports/'
-        sh 'mkdir -p server-ce/test/cypress-reports/'
+        sh 'mkdir server-ce/test/reports'
       }
     }
     stage('Parallel') {
@@ -350,7 +337,7 @@ pipeline {
   post {
     // Collect junit test results for both success and failure case.
     always {
-      junit checksName: 'Server Pro E2E test results', testResults: 'server-ce/test/cypress-reports/junit-*.xml'
+      junit checksName: 'Server Pro E2E test results', testResults: 'server-ce/test/reports/junit-*.xml'
     }
     // Ensure tear down of test containers, remove CE docker images, then run general Jenkins VM cleanup.
     cleanup {
