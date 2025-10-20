@@ -73,8 +73,19 @@ async function _getSplitTestOptions(req, res) {
       res,
       'populate-clsi-cache'
     )
-  const populateClsiCache = populateClsiCacheVariant === 'enabled'
+  let populateClsiCache = populateClsiCacheVariant === 'enabled'
   const compileFromClsiCache = populateClsiCache // use same split-test
+
+  if (!populateClsiCache) {
+    // Pre-populate the cache for the users in the split-test for prompts.
+    // Keep the compile from cache disabled for now.
+    const { variant } = await SplitTestHandler.promises.getAssignment(
+      editorReq,
+      res,
+      'populate-clsi-cache-for-prompt'
+    )
+    populateClsiCache = variant === 'enabled'
+  }
 
   const pdfDownloadDomain = Settings.pdfDownloadDomain
 

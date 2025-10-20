@@ -172,7 +172,14 @@ async function prepareClsiCache(
     userId,
     'populate-clsi-cache'
   )
-  if (variant !== 'enabled') return
+  if (variant !== 'enabled') {
+    // Pre-populate the cache for the users in the split-test for prompts.
+    const { variant } = await SplitTestHandler.promises.getAssignmentForUser(
+      userId,
+      'populate-clsi-cache-for-prompt'
+    )
+    if (variant !== 'enabled') return
+  }
 
   const features = await UserGetter.promises.getUserFeatures(userId)
   if (features.compileGroup !== 'priority') return
