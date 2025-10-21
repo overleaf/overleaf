@@ -13,14 +13,22 @@ import { usePermissionsContext } from '@/features/ide-react/context/permissions-
 type ToolbarProps = {
   diff: Nullable<Diff>
   selection: HistoryContextValue['selection']
+  isCurrentVersion: boolean
 }
 
-export default function Toolbar({ diff, selection }: ToolbarProps) {
+export default function Toolbar({
+  diff,
+  selection,
+  isCurrentVersion,
+}: ToolbarProps) {
   const { write } = usePermissionsContext()
   const hasRestoreFileToVersion = useFeatureFlag('revert-file')
 
   const showRestoreFileToVersionButton =
-    hasRestoreFileToVersion && selection.selectedFile && write
+    hasRestoreFileToVersion &&
+    selection.selectedFile &&
+    write &&
+    !isCurrentVersion
 
   const showRestoreFileButton =
     selection.selectedFile &&

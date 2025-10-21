@@ -16,7 +16,7 @@ const TestContainerWithoutErrorBoundary: FC<{
     <EditorProviders layoutContext={layoutContext}>
       <HistoryProvider>
         <div className="history-react">
-          <Toolbar diff={diff} selection={selection} />
+          <Toolbar diff={diff} selection={selection} isCurrentVersion={false} />
         </div>
       </HistoryProvider>
     </EditorProviders>
