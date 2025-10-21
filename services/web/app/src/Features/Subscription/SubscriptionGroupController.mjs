@@ -170,6 +170,7 @@ async function addSeatsToGroupSubscription(req, res) {
       isProfessional: isProfessionalGroupPlan(subscription),
       isCollectionMethodManual:
         paymentProviderSubscription.isCollectionMethodManual,
+      redirectedPaymentErrorCode: req.query.errorCode,
     })
   } catch (error) {
     if (error instanceof MissingBillingInfoError) {
@@ -363,6 +364,7 @@ async function subscriptionUpgradePage(req, res) {
       changePreview,
       totalLicenses: olSubscription.membersLimit,
       groupName: olSubscription.teamName,
+      redirectedPaymentErrorCode: req.query.errorCode,
     })
   } catch (error) {
     if (error instanceof MissingBillingInfoError) {

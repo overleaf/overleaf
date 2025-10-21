@@ -18,6 +18,9 @@ function UpgradeSubscription() {
   const { t } = useTranslation()
   const groupName = getMeta('ol-groupName')
   const preview = getMeta('ol-subscriptionChangePreview') as SubscriptionChange
+  const isRedirectedPaymentError = Boolean(
+    getMeta('ol-subscriptionPaymentErrorCode')
+  )
   const [isError, setIsError] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -56,7 +59,7 @@ function UpgradeSubscription() {
     )
   }
 
-  if (isError) {
+  if (isRedirectedPaymentError || isError) {
     return (
       <RequestStatus
         variant="danger"

@@ -204,6 +204,7 @@ async function userSubscriptionPage(req, res) {
     await Modules.promises.hooks.fire('userCanExtendTrial', user)
   )?.[0]
   const fromPlansPage = req.query.hasSubscription
+  const redirectedPaymentErrorCode = req.query.errorCode
   const isInTrial = SubscriptionHelper.isInTrial(
     personalSubscription?.payment?.trialEndsAt
   )
@@ -306,6 +307,7 @@ async function userSubscriptionPage(req, res) {
     user,
     hasSubscription,
     fromPlansPage,
+    redirectedPaymentErrorCode,
     personalSubscription,
     userCanExtendTrial,
     memberGroupSubscriptions,
@@ -474,6 +476,7 @@ async function previewAddonPurchase(req, res) {
   const userId = user._id
   const addOnCode = req.params.addOnCode
   const purchaseReferrer = req.query.purchaseReferrer
+  const redirectedPaymentErrorCode = req.query.errorCode
 
   if (addOnCode !== AI_ADD_ON_CODE) {
     return HttpErrorHandler.notFound(req, res, `Unknown add-on: ${addOnCode}`)
@@ -571,6 +574,7 @@ async function previewAddonPurchase(req, res) {
   res.render('subscriptions/preview-change', {
     changePreview,
     purchaseReferrer,
+    redirectedPaymentErrorCode,
   })
 }
 
@@ -763,7 +767,10 @@ async function previewSubscription(req, res, next) {
     paymentMethod[0]
   )
 
-  res.render('subscriptions/preview-change', { changePreview })
+  res.render('subscriptions/preview-change', {
+    changePreview,
+    redirectedPaymentErrorCode: req.query.errorCode,
+  })
 }
 
 function cancelPendingSubscriptionChange(req, res, next) {

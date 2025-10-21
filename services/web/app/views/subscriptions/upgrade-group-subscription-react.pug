@@ -12,6 +12,11 @@ block append meta
 	)
 	meta(name='ol-totalLicenses' data-type='number' content=totalLicenses)
 	meta(name='ol-groupName' data-type='string' content=groupName)
+	meta(
+		name='ol-subscriptionPaymentErrorCode'
+		data-type='string'
+		content=redirectedPaymentErrorCode
+	)
 
 block content
 	main#upgrade-group-subscription-root.content.content-alt

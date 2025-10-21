@@ -48,6 +48,9 @@ function AddSeats() {
   const totalLicenses = getMeta('ol-totalLicenses')
   const isProfessional = getMeta('ol-isProfessional')
   const isCollectionMethodManual = getMeta('ol-isCollectionMethodManual')
+  const isRedirectedPaymentError = Boolean(
+    getMeta('ol-subscriptionPaymentErrorCode')
+  )
   const [addSeatsInputError, setAddSeatsInputError] = useState<string>()
   const [poNumberInputError, setPoNumberInputError] = useState<string>()
   const [shouldContactSales, setShouldContactSales] = useState(false)
@@ -272,7 +275,11 @@ function AddSeats() {
     return () => window.removeEventListener('beforeunload', handleUnload)
   }, [])
 
-  if (isErrorAddingSeats || isErrorSendingMailToSales) {
+  if (
+    isRedirectedPaymentError ||
+    isErrorAddingSeats ||
+    isErrorSendingMailToSales
+  ) {
     return (
       <RequestStatus
         variant="danger"
