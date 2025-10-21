@@ -31,6 +31,7 @@ import SubscriptionHelper from '../Subscription/SubscriptionHelper.js'
 import PermissionsManager from '../Authorization/PermissionsManager.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.js'
 import { OnboardingDataCollection } from '../../models/OnboardingDataCollection.js'
+import UserSettingsHelper from './UserSettingsHelper.mjs'
 
 /**
  * @import { GetProjectsRequest, GetProjectsResponse, AllUsersProjects, MongoProject, FormattedProject, MongoTag } from "./types"
@@ -164,7 +165,7 @@ async function projectListPage(req, res, next) {
   })
   const user = await User.findById(
     userId,
-    `email emails features alphaProgram betaProgram lastPrimaryEmailCheck lastActive signUpDate refProviders${
+    `email emails features alphaProgram betaProgram lastPrimaryEmailCheck lastActive signUpDate ace refProviders${
       isSaas ? ' enrollment writefull completedTutorials aiErrorAssistant' : ''
     }`
   )
@@ -537,6 +538,12 @@ async function projectListPage(req, res, next) {
     }
   }
 
+  await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'themed-project-dashboard'
+  )
+
   res.render('project/list-react', {
     title: 'your_projects',
     usersBestSubscription,
@@ -545,6 +552,7 @@ async function projectListPage(req, res, next) {
     user,
     userAffiliations,
     userEmails,
+    userSettings: UserSettingsHelper.buildUserSettings(user),
     reconfirmedViaSAML,
     allInReconfirmNotificationPeriods,
     survey,

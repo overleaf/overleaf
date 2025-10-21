@@ -50,6 +50,7 @@ import UserGetter from '../User/UserGetter.js'
 import { isStandaloneAiAddOnPlanCode } from '../Subscription/AiHelper.js'
 import SubscriptionController from '../Subscription/SubscriptionController.mjs'
 import { formatCurrency } from '../../util/currency.js'
+import UserSettingsHelper from './UserSettingsHelper.mjs'
 
 const { ObjectId } = mongodb
 /**
@@ -811,22 +812,7 @@ const _ProjectController = {
           isMemberOfGroupSubscription: userIsMemberOfGroupSubscription,
           hasInstitutionLicence: userHasInstitutionLicence,
         },
-        userSettings: {
-          mode: user.ace.mode,
-          editorTheme: user.ace.theme,
-          fontSize: user.ace.fontSize,
-          autoComplete: user.ace.autoComplete,
-          autoPairDelimiters: user.ace.autoPairDelimiters,
-          pdfViewer: user.ace.pdfViewer,
-          syntaxValidation: user.ace.syntaxValidation,
-          fontFamily: user.ace.fontFamily || 'lucida',
-          lineHeight: user.ace.lineHeight || 'normal',
-          overallTheme: user.ace.overallTheme,
-          mathPreview: user.ace.mathPreview,
-          breadcrumbs: user.ace.breadcrumbs,
-          referencesSearchMode: user.ace.referencesSearchMode,
-          enableNewEditor: user.ace.enableNewEditor ?? true,
-        },
+        userSettings: UserSettingsHelper.buildUserSettings(user),
         labsExperiments: user.labsExperiments ?? [],
         privilegeLevel,
         anonymous,

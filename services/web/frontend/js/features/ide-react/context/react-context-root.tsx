@@ -76,9 +76,9 @@ export const ReactContextRoot: FC<
       <Providers.ModalsContextProvider>
         <Providers.ConnectionProvider>
           <Providers.ProjectProvider>
-            <Providers.IdeReactProvider>
-              <Providers.UserProvider>
-                <Providers.UserSettingsProvider>
+            <Providers.UserSettingsProvider>
+              <Providers.IdeReactProvider>
+                <Providers.UserProvider>
                   <Providers.SnapshotProvider>
                     <Providers.DetachProvider>
                       <Providers.EditorPropertiesProvider>
@@ -128,9 +128,9 @@ export const ReactContextRoot: FC<
                       </Providers.EditorPropertiesProvider>
                     </Providers.DetachProvider>
                   </Providers.SnapshotProvider>
-                </Providers.UserSettingsProvider>
-              </Providers.UserProvider>
-            </Providers.IdeReactProvider>
+                </Providers.UserProvider>
+              </Providers.IdeReactProvider>
+            </Providers.UserSettingsProvider>
           </Providers.ProjectProvider>
         </Providers.ConnectionProvider>
       </Providers.ModalsContextProvider>

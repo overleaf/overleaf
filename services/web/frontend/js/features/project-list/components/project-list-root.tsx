@@ -19,6 +19,8 @@ import WelcomePageContent from '@/features/project-list/components/welcome-page-
 import { ProjectListDsNav } from '@/features/project-list/components/project-list-ds-nav'
 import { DsNavStyleProvider } from '@/features/project-list/components/use-is-ds-nav'
 import CookieBanner from '@/shared/components/cookie-banner'
+import useThemedPage from '@/shared/hooks/use-themed-page'
+import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 
 function ProjectListRoot() {
   const { isReady } = useWaitForI18n()
@@ -35,7 +37,9 @@ export function ProjectListRootInner() {
     <ProjectListProvider>
       <ColorPickerProvider>
         <SplitTestProvider>
-          <ProjectListPageContent />
+          <UserSettingsProvider>
+            <ProjectListPageContent />
+          </UserSettingsProvider>
         </SplitTestProvider>
       </ColorPickerProvider>
     </ProjectListProvider>
@@ -70,6 +74,7 @@ function DefaultPageContentWrapper({ children }: { children: ReactNode }) {
 }
 
 function ProjectListPageContent() {
+  useThemedPage('themed-project-dashboard')
   const { totalProjectsCount, isLoading, loadProgress } =
     useProjectListContext()
 

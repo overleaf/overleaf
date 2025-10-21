@@ -23,6 +23,16 @@ describe('ProjectListController', function () {
       lastActive: new Date(2),
       signUpDate: new Date(1),
       lastLoginIp: '111.111.111.112',
+      ace: {
+        syntaxValidation: true,
+        pdfViewer: 'pdfjs',
+        spellCheckLanguage: 'en',
+        autoPairDelimiters: true,
+        autoComplete: true,
+        fontSize: 12,
+        theme: 'textmate',
+        mode: 'none',
+      },
     }
     ctx.users = {
       'user-1': {
