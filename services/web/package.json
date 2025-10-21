@@ -326,7 +326,7 @@
     "fast-fuzzy": "^1.12.0",
     "fetch-mock": "^12.5.2",
     "formik": "^2.2.9",
-    "fuse.js": "^3.0.0",
+    "fuse.js": "^7.0.0",
     "glob": "^7.1.6",
     "globals": "^16.2.0",
     "handlebars": "^4.7.8",
