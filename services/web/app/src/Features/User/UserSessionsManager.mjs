@@ -1,8 +1,8 @@
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const _ = require('lodash')
-const { callbackifyAll } = require('@overleaf/promise-utils')
-const UserSessionsRedis = require('./UserSessionsRedis')
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import _ from 'lodash'
+import { callbackifyAll } from 'node:util'
+import UserSessionsRedis from './UserSessionsRedis.mjs'
 const rclient = UserSessionsRedis.client()
 
 const UserSessionsManager = {
@@ -161,7 +161,7 @@ const UserSessionsManager = {
   },
 }
 
-module.exports = {
+export default {
   ...callbackifyAll(UserSessionsManager),
-  promises: UserSessionsManager,
+  promises: UserSessionsManager
 }

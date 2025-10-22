@@ -1,7 +1,7 @@
-const _ = require('lodash')
-const { callbackify } = require('util')
-const { User } = require('../../models/User')
-const Settings = require('@overleaf/settings')
+import _ from 'lodash'
+import { callbackify } from 'node:util'
+import { User } from '../../models/User.js'
+import Settings from '@overleaf/settings'
 
 const ReferalFeatures = {
   async getBonusFeatures(userId) {
@@ -42,7 +42,7 @@ const ReferalFeatures = {
   },
 }
 
-module.exports = {
+export default {
   getBonusFeatures: callbackify(ReferalFeatures.getBonusFeatures),
   promises: ReferalFeatures,
 }

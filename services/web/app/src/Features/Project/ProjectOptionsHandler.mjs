@@ -1,10 +1,12 @@
-const { Project } = require('../../models/Project')
-const settings = require('@overleaf/settings')
-const { callbackify } = require('util')
-const { db, ObjectId } = require('../../infrastructure/mongodb')
-const Errors = require('../Errors/Errors')
-const { ReturnDocument } = require('mongodb-legacy')
+import { Project } from '../../models/Project.js'
+import settings from '@overleaf/settings'
+import { callbackify } from 'node:util'
+import { db, ObjectId } from '../../infrastructure/mongodb.js'
+import Errors from '../Errors/Errors.js'
+import mongodb from 'mongodb-legacy'
 const safeCompilers = ['xelatex', 'pdflatex', 'latex', 'lualatex']
+
+const { ReturnDocument } = mongodb
 
 const ProjectOptionsHandler = {
   async setCompiler(projectId, compiler) {
@@ -92,7 +94,7 @@ const ProjectOptionsHandler = {
   },
 }
 
-module.exports = {
+export default {
   setCompiler: callbackify(ProjectOptionsHandler.setCompiler),
   setImageName: callbackify(ProjectOptionsHandler.setImageName),
   setSpellCheckLanguage: callbackify(

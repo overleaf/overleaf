@@ -1,14 +1,14 @@
-const _ = require('lodash')
-const {
+import _ from 'lodash'
+import {
   fetchNothing,
   fetchRedirectWithResponse,
   RequestFailedError,
-} = require('@overleaf/fetch-utils')
-const logger = require('@overleaf/logger')
-const Settings = require('@overleaf/settings')
-const OError = require('@overleaf/o-error')
-const { NotFoundError, InvalidNameError } = require('../Errors/Errors')
-const Features = require('../../infrastructure/Features')
+} from '@overleaf/fetch-utils'
+import logger from '@overleaf/logger'
+import Settings from '@overleaf/settings'
+import OError from '@overleaf/o-error'
+import { NotFoundError, InvalidNameError } from '../Errors/Errors.js'
+import Features from '../../infrastructure/Features.js'
 
 const TIMEOUT = 4_000
 
@@ -263,7 +263,7 @@ async function prepareCacheSource(
   }
 }
 
-module.exports = {
+export default {
   TIMEOUT,
   getEgressLabel,
   clearCache,

@@ -1,13 +1,13 @@
-const UserAuditLogHandler = require('../../../../app/src/Features/User/UserAuditLogHandler')
-const EmailHandler = require('../../../../app/src/Features/Email/EmailHandler')
-const EmailOptionsHelper = require('../../../../app/src/Features/Email/EmailOptionsHelper')
-const Errors = require('../Errors/Errors')
-const _ = require('lodash')
-const logger = require('@overleaf/logger')
-const settings = require('@overleaf/settings')
-const { User } = require('../../../../app/src/models/User')
-const { callbackify } = require('@overleaf/promise-utils')
-const OError = require('@overleaf/o-error')
+import UserAuditLogHandler from '../../../../app/src/Features/User/UserAuditLogHandler.mjs'
+import EmailHandler from '../../../../app/src/Features/Email/EmailHandler.mjs'
+import EmailOptionsHelper from '../../../../app/src/Features/Email/EmailOptionsHelper.mjs'
+import Errors from '../Errors/Errors.js'
+import _ from 'lodash'
+import logger from '@overleaf/logger'
+import settings from '@overleaf/settings'
+import { User } from '../../../../app/src/models/User.js'
+import { callbackify } from '@overleaf/promise-utils'
+import OError from '@overleaf/o-error'
 
 const oauthProviders = settings.oauthProviders || {}
 
@@ -214,4 +214,4 @@ ThirdPartyIdentityManager.promises = {
   unlink,
 }
 
-module.exports = ThirdPartyIdentityManager
+export default ThirdPartyIdentityManager

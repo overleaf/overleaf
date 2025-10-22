@@ -1,6 +1,6 @@
-const { User } = require('../../models/User')
-const { callbackify } = require('util')
-const Settings = require('@overleaf/settings')
+import { User } from '../../models/User.js'
+import { callbackify } from 'node:util'
+import Settings from '@overleaf/settings'
 
 function _featuresChanged(newFeatures, featuresBefore) {
   for (const feature in newFeatures) {
@@ -49,7 +49,7 @@ async function createFeaturesOverride(userId, featuresOverride) {
   ).exec()
 }
 
-module.exports = {
+export default {
   updateFeatures: callbackify(updateFeatures),
   overrideFeatures: callbackify(overrideFeatures),
   createFeaturesOverride: callbackify(createFeaturesOverride),

@@ -1,8 +1,6 @@
-const {
-  acceptsJson,
-} = require('../../infrastructure/RequestContentTypeDetection')
+import { acceptsJson } from '../../infrastructure/RequestContentTypeDetection.js'
 
-module.exports = {
+export default {
   redirect,
 }
 

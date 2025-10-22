@@ -23,6 +23,6 @@ function emailHasLicence(emailData) {
   return affiliation.licence !== 'free'
 }
 
-module.exports = {
+export default {
   emailHasLicence,
 }

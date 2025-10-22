@@ -12,7 +12,7 @@ function setSplitTestInfo(locals, splitTestName, info) {
   locals.splitTestInfo[splitTestName] = info
 }
 
-module.exports = {
+export default {
   setSplitTestVariant,
   setSplitTestInfo,
 }

@@ -1,7 +1,7 @@
 // @ts-check
 
 /** @type {import('./types').SourcesType} */
-module.exports = {
+export default {
   INVITE: 'invite',
   TOKEN: 'token',
   OWNER: 'owner',

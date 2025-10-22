@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   group: {
     modelName: 'Subscription',
     readOnly: true,

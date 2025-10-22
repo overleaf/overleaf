@@ -132,4 +132,4 @@ prototype\
   })
 }
 
-module.exports = load()
+export default load()

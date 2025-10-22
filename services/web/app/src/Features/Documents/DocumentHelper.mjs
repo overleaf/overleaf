@@ -12,7 +12,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let DocumentHelper
-module.exports = DocumentHelper = {
+
+export default DocumentHelper = {
   getTitleFromTexContent(content, maxContentToScan) {
     if (maxContentToScan == null) {
       maxContentToScan = 30000

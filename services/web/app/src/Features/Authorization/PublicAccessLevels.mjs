@@ -13,7 +13,7 @@
  */
 
 /** @type {import('./types').PublicAccessLevelsType} */
-module.exports = {
+export default {
   READ_ONLY: 'readOnly', // LEGACY
   READ_AND_WRITE: 'readAndWrite', // LEGACY
   PRIVATE: 'private',

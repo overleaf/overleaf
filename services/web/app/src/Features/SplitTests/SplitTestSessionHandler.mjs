@@ -1,12 +1,14 @@
-const { callbackify } = require('util')
-const _ = require('lodash')
-const { ObjectId } = require('mongodb-legacy')
-const logger = require('@overleaf/logger')
-const Metrics = require('@overleaf/metrics')
-const SessionManager = require('../Authentication/SessionManager')
-const SplitTestCache = require('./SplitTestCache')
-const SplitTestUtils = require('./SplitTestUtils')
-const SplitTestUserGetter = require('./SplitTestUserGetter')
+import { callbackify } from 'node:util'
+import _ from 'lodash'
+import mongodb from 'mongodb-legacy'
+import logger from '@overleaf/logger'
+import Metrics from '@overleaf/metrics'
+import SessionManager from '../Authentication/SessionManager.mjs'
+import SplitTestCache from './SplitTestCache.mjs'
+import SplitTestUtils from './SplitTestUtils.mjs'
+import SplitTestUserGetter from './SplitTestUserGetter.mjs'
+
+const { ObjectId } = mongodb
 
 const CACHE_TOMBSTONE_SPLIT_TEST_NOT_ACTIVE_FOR_USER = null
 const TOKEN_SEP = ';'
@@ -242,7 +244,7 @@ function _convertIdToBase64(id) {
   return new ObjectId(id).toString('base64')
 }
 
-module.exports = {
+export default {
   getAssignments: callbackify(getAssignments),
   appendAssignment: callbackify(appendAssignment),
   getCachedVariant,

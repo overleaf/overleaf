@@ -1,24 +1,23 @@
-const Settings = require('@overleaf/settings')
-const { User } = require('../../models/User')
-const { db, ObjectId } = require('../../infrastructure/mongodb')
-const bcrypt = require('bcrypt')
-const EmailHelper = require('../Helpers/EmailHelper')
-const {
+import Settings from '@overleaf/settings'
+import { User } from '../../models/User.js'
+import { db, ObjectId } from '../../infrastructure/mongodb.js'
+import bcrypt from 'bcrypt'
+import EmailHelper from '../Helpers/EmailHelper.js'
+
+import {
   InvalidEmailError,
   InvalidPasswordError,
   ParallelLoginError,
   PasswordMustBeDifferentError,
   PasswordReusedError,
-} = require('./AuthenticationErrors')
-const {
-  callbackify,
-  callbackifyMultiResult,
-} = require('@overleaf/promise-utils')
-const HaveIBeenPwned = require('./HaveIBeenPwned')
-const UserAuditLogHandler = require('../User/UserAuditLogHandler')
-const logger = require('@overleaf/logger')
-const DiffHelper = require('../Helpers/DiffHelper')
-const Metrics = require('@overleaf/metrics')
+} from './AuthenticationErrors.js'
+
+import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
+import HaveIBeenPwned from './HaveIBeenPwned.mjs'
+import UserAuditLogHandler from '../User/UserAuditLogHandler.mjs'
+import logger from '@overleaf/logger'
+import DiffHelper from '../Helpers/DiffHelper.js'
+import Metrics from '@overleaf/metrics'
 
 const BCRYPT_ROUNDS = Settings.security.bcryptRounds || 12
 const BCRYPT_MINOR_VERSION = Settings.security.bcryptMinorVersion || 'a'
@@ -458,7 +457,7 @@ const AuthenticationManager = {
   },
 }
 
-module.exports = {
+export default {
   _validatePasswordNotTooSimilar:
     AuthenticationManager._validatePasswordNotTooSimilar, // Private function exported for tests
   validateEmail: AuthenticationManager.validateEmail,

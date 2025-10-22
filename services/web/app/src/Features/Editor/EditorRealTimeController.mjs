@@ -10,19 +10,19 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import Settings from '@overleaf/settings'
+import Metrics from '@overleaf/metrics'
+import RedisWrapper from '../../infrastructure/RedisWrapper.js'
+import os from 'node:os'
+import crypto from 'node:crypto'
 let EditorRealTimeController
-const Settings = require('@overleaf/settings')
-const Metrics = require('@overleaf/metrics')
-const RedisWrapper = require('../../infrastructure/RedisWrapper')
 const rclient = RedisWrapper.client('pubsub')
-const os = require('os')
-const crypto = require('crypto')
 
 const HOST = os.hostname()
 const RND = crypto.randomBytes(4).toString('hex') // generate a random key for this process
 let COUNT = 0
 
-module.exports = EditorRealTimeController = {
+export default EditorRealTimeController = {
   emitToRoom(roomId, message, ...payload) {
     // create a unique message id using a counter
     const messageId = `web:${HOST}:${RND}-${COUNT++}`

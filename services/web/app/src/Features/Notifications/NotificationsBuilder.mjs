@@ -1,9 +1,11 @@
-const NotificationsHandler = require('./NotificationsHandler')
-const { callbackifyAll } = require('@overleaf/promise-utils')
-const { fetchJson } = require('@overleaf/fetch-utils')
-const settings = require('@overleaf/settings')
-const path = require('path')
-const { ObjectId } = require('mongodb-legacy')
+import NotificationsHandler from './NotificationsHandler.mjs'
+import { callbackifyAll } from '@overleaf/promise-utils'
+import { fetchJson } from '@overleaf/fetch-utils'
+import settings from '@overleaf/settings'
+import path from 'node:path'
+import mongodb from 'mongodb-legacy'
+
+const { ObjectId } = mongodb
 
 function dropboxDuplicateProjectNames(userId) {
   return {
@@ -279,4 +281,4 @@ NotificationsBuilder.promises = {
   tpdsFileLimit,
 }
 
-module.exports = NotificationsBuilder
+export default NotificationsBuilder

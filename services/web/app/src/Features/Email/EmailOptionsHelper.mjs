@@ -24,6 +24,6 @@ function linkOrUnlink(accountLinked, providerName, email) {
   }
 }
 
-module.exports = {
+export default {
   linkOrUnlink,
 }

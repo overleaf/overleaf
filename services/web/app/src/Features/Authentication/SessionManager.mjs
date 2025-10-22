@@ -1,4 +1,4 @@
-const _ = require('lodash')
+import _ from 'lodash'
 
 const SessionManager = {
   getSessionUser(session) {
@@ -43,4 +43,4 @@ const SessionManager = {
   },
 }
 
-module.exports = SessionManager
+export default SessionManager

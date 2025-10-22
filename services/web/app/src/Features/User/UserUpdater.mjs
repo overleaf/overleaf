@@ -1,26 +1,26 @@
-const logger = require('@overleaf/logger')
-const OError = require('@overleaf/o-error')
-const { db } = require('../../infrastructure/mongodb')
-const { normalizeQuery } = require('../Helpers/Mongo')
-const { callbackify } = require('util')
-const UserGetter = require('./UserGetter')
-const InstitutionsAPI = require('../Institutions/InstitutionsAPI')
-const Features = require('../../infrastructure/Features')
-const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
-const EmailHandler = require('../Email/EmailHandler')
-const EmailHelper = require('../Helpers/EmailHelper')
-const Errors = require('../Errors/Errors')
-const NewsletterManager = require('../Newsletter/NewsletterManager')
-const UserAuditLogHandler = require('./UserAuditLogHandler')
-const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const EmailChangeHelper = require('../Analytics/EmailChangeHelper')
-const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
-const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
-const _ = require('lodash')
-const Modules = require('../../infrastructure/Modules')
-const UserSessionsManager = require('./UserSessionsManager')
-const ThirdPartyIdentityManager = require('./ThirdPartyIdentityManager')
-const AsyncLocalStorage = require('../../infrastructure/AsyncLocalStorage')
+import logger from '@overleaf/logger'
+import OError from '@overleaf/o-error'
+import { db } from '../../infrastructure/mongodb.js'
+import { normalizeQuery } from '../Helpers/Mongo.js'
+import { callbackify } from 'node:util'
+import UserGetter from './UserGetter.mjs'
+import InstitutionsAPI from '../Institutions/InstitutionsAPI.mjs'
+import Features from '../../infrastructure/Features.js'
+import FeaturesUpdater from '../Subscription/FeaturesUpdater.mjs'
+import EmailHandler from '../Email/EmailHandler.mjs'
+import EmailHelper from '../Helpers/EmailHelper.js'
+import Errors from '../Errors/Errors.js'
+import NewsletterManager from '../Newsletter/NewsletterManager.mjs'
+import UserAuditLogHandler from './UserAuditLogHandler.mjs'
+import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
+import EmailChangeHelper from '../Analytics/EmailChangeHelper.mjs'
+import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
+import NotificationsBuilder from '../Notifications/NotificationsBuilder.mjs'
+import _ from 'lodash'
+import Modules from '../../infrastructure/Modules.js'
+import UserSessionsManager from './UserSessionsManager.mjs'
+import ThirdPartyIdentityManager from './ThirdPartyIdentityManager.mjs'
+import AsyncLocalStorage from '../../infrastructure/AsyncLocalStorage.js'
 
 async function _sendSecurityAlertPrimaryEmailChanged(
   userId,
@@ -683,7 +683,7 @@ function _securityAlertPrimaryEmailChangedExtraRecipients(
   return Array.from(recipients)
 }
 
-module.exports = {
+export default {
   addAffiliationForNewUser: callbackify(addAffiliationForNewUser),
   addEmailAddress: callbackify(addEmailAddress),
   changeEmailAddress: callbackify(changeEmailAddress),

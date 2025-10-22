@@ -1,6 +1,6 @@
-const { callbackify } = require('util')
-const Metrics = require('@overleaf/metrics')
-const UserGetter = require('../User/UserGetter')
+import { callbackify } from 'node:util'
+import Metrics from '@overleaf/metrics'
+import UserGetter from '../User/UserGetter.mjs'
 
 async function getUser(id, splitTestName) {
   const projection = {
@@ -22,7 +22,7 @@ async function getUser(id, splitTestName) {
   return user
 }
 
-module.exports = {
+export default {
   getUser: callbackify(getUser),
   promises: {
     getUser,

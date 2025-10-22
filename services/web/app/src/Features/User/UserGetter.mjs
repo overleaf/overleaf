@@ -1,18 +1,18 @@
-const { callbackify } = require('util')
-const { db } = require('../../infrastructure/mongodb')
-const moment = require('moment')
-const settings = require('@overleaf/settings')
-const {
-  promises: InstitutionsAPIPromises,
-} = require('../Institutions/InstitutionsAPI')
-const InstitutionsHelper = require('../Institutions/InstitutionsHelper')
-const Errors = require('../Errors/Errors')
-const Features = require('../../infrastructure/Features')
-const { User } = require('../../models/User')
-const { normalizeQuery, normalizeMultiQuery } = require('../Helpers/Mongo')
-const Modules = require('../../infrastructure/Modules')
-const FeaturesHelper = require('../Subscription/FeaturesHelper')
-const AsyncLocalStorage = require('../../infrastructure/AsyncLocalStorage')
+import { callbackify } from 'node:util'
+import { db } from '../../infrastructure/mongodb.js'
+import moment from 'moment'
+import settings from '@overleaf/settings'
+import InstitutionsAPI from '../Institutions/InstitutionsAPI.mjs'
+import InstitutionsHelper from '../Institutions/InstitutionsHelper.mjs'
+import Errors from '../Errors/Errors.js'
+import Features from '../../infrastructure/Features.js'
+import { User } from '../../models/User.js'
+import { normalizeQuery, normalizeMultiQuery } from '../Helpers/Mongo.js'
+import Modules from '../../infrastructure/Modules.js'
+import FeaturesHelper from '../Subscription/FeaturesHelper.mjs'
+import AsyncLocalStorage from '../../infrastructure/AsyncLocalStorage.js'
+
+const InstitutionsAPIPromises = InstitutionsAPI.promises
 
 function _lastDayToReconfirm(emailData, institutionData) {
   const globalReconfirmPeriod = settings.reconfirmNotificationDays
@@ -369,4 +369,4 @@ UserGetter.promises = {
   getWritefullData,
 }
 
-module.exports = UserGetter
+export default UserGetter

@@ -5,12 +5,13 @@
    happy path or via an error (message or attributes).
  */
 
-const { callbackify } = require('util')
-const { fetchString } = require('@overleaf/fetch-utils')
-const crypto = require('crypto')
-const Settings = require('@overleaf/settings')
-const Metrics = require('@overleaf/metrics')
-const logger = require('@overleaf/logger')
+import { callbackify } from 'node:util'
+
+import { fetchString } from '@overleaf/fetch-utils'
+import crypto from 'node:crypto'
+import Settings from '@overleaf/settings'
+import Metrics from '@overleaf/metrics'
+import logger from '@overleaf/logger'
 
 const HEX_CHARS_UPPER = '1234567890ABCDEF'
 const API_ERROR = new Error('cannot contact HaveIBeenPwned api')
@@ -118,7 +119,7 @@ function checkPasswordForReuseInBackground(password) {
   })
 }
 
-module.exports = {
+export default {
   checkPasswordForReuse: callbackify(checkPasswordForReuse),
   checkPasswordForReuseInBackground,
   promises: {

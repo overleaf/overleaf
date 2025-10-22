@@ -1,5 +1,5 @@
-const Settings = require('@overleaf/settings')
-const { URL } = require('url')
+import Settings from '@overleaf/settings'
+import { URL } from 'node:url'
 
 const PROTO = new URL(Settings.siteUrl).protocol
 
@@ -28,7 +28,7 @@ function getSafeAdminDomainRedirect(path) {
   return Settings.adminUrl + (getSafeRedirectPath(path) || '/')
 }
 
-module.exports = {
+export default {
   getCanonicalURL,
   getSafeRedirectPath,
   getSafeAdminDomainRedirect,

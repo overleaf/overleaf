@@ -1,21 +1,21 @@
-const Metrics = require('@overleaf/metrics')
-const UserUpdater = require('../User/UserUpdater')
-const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const LocalsHelper = require('./LocalsHelper')
-const crypto = require('crypto')
-const _ = require('lodash')
-const { callbackify } = require('util')
-const SplitTestCache = require('./SplitTestCache')
-const { SplitTest } = require('../../models/SplitTest')
-const UserAnalyticsIdCache = require('../Analytics/UserAnalyticsIdCache')
-const Features = require('../../infrastructure/Features')
-const SplitTestUtils = require('./SplitTestUtils')
-const Settings = require('@overleaf/settings')
-const SessionManager = require('../Authentication/SessionManager')
-const logger = require('@overleaf/logger')
-const SplitTestSessionHandler = require('./SplitTestSessionHandler')
-const SplitTestUserGetter = require('./SplitTestUserGetter')
-const SplitTestManager = require('./SplitTestManager')
+import Metrics from '@overleaf/metrics'
+import UserUpdater from '../User/UserUpdater.mjs'
+import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
+import LocalsHelper from './LocalsHelper.mjs'
+import crypto from 'node:crypto'
+import _ from 'lodash'
+import { callbackify } from 'node:util'
+import SplitTestCache from './SplitTestCache.mjs'
+import { SplitTest } from '../../models/SplitTest.js'
+import UserAnalyticsIdCache from '../Analytics/UserAnalyticsIdCache.mjs'
+import Features from '../../infrastructure/Features.js'
+import SplitTestUtils from './SplitTestUtils.mjs'
+import Settings from '@overleaf/settings'
+import SessionManager from '../Authentication/SessionManager.mjs'
+import logger from '@overleaf/logger'
+import SplitTestSessionHandler from './SplitTestSessionHandler.mjs'
+import SplitTestUserGetter from './SplitTestUserGetter.mjs'
+import SplitTestManager from './SplitTestManager.mjs'
 
 /**
  * @import { Assignment } from "./types"
@@ -799,7 +799,7 @@ function _isGradualRollout(featureFlag) {
   return !SplitTestUtils.getCurrentVersion(featureFlag).analyticsEnabled
 }
 
-module.exports = {
+export default {
   getPercentile,
   getAssignment: callbackify(getAssignment),
   getAssignmentForUser: callbackify(getAssignmentForUser),

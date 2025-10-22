@@ -1,5 +1,5 @@
-const _ = require('lodash')
-const Settings = require('@overleaf/settings')
+import _ from 'lodash'
+import Settings from '@overleaf/settings'
 
 /**
  * merges an array of feature sets to produce a final feature set
@@ -113,7 +113,7 @@ function getMatchedFeatureSet(features) {
   return 'mixed'
 }
 
-module.exports = {
+export default {
   mergeFeatures,
   computeFeatureSet,
   isFeatureSetBetter,

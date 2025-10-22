@@ -1,9 +1,9 @@
-const Settings = require('@overleaf/settings')
-const MailchimpProvider = require('./MailChimpProvider')
+import Settings from '@overleaf/settings'
+import MailchimpProvider from './MailChimpProvider.mjs'
 
 const provider = MailchimpProvider.make(
   'newsletter',
   Settings.mailchimp ? Settings.mailchimp.list_id : null
 )
 
-module.exports = provider
+export default provider

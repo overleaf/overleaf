@@ -12,20 +12,21 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const logger = require('@overleaf/logger')
-const OError = require('@overleaf/o-error')
-const metrics = require('@overleaf/metrics')
-const fs = require('fs')
-const Path = require('path')
-const yauzl = require('yauzl')
-const Settings = require('@overleaf/settings')
-const {
+import logger from '@overleaf/logger'
+
+import OError from '@overleaf/o-error'
+import metrics from '@overleaf/metrics'
+import fs from 'node:fs'
+import Path from 'node:path'
+import yauzl from 'yauzl'
+import Settings from '@overleaf/settings'
+import {
   InvalidZipFileError,
   EmptyZipFileError,
   ZipContentsTooLargeError,
-} = require('./ArchiveErrors')
-const _ = require('lodash')
-const { promisifyAll } = require('@overleaf/promise-utils')
+} from './ArchiveErrors.js'
+import _ from 'lodash'
+import { promisifyAll } from '@overleaf/promise-utils'
 
 const ONE_MEG = 1024 * 1024
 
@@ -267,4 +268,4 @@ const ArchiveManager = {
 }
 
 ArchiveManager.promises = promisifyAll(ArchiveManager)
-module.exports = ArchiveManager
+export default ArchiveManager

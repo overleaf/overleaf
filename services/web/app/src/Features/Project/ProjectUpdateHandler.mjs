@@ -1,5 +1,5 @@
-const { Project } = require('../../models/Project')
-const { callbackify } = require('util')
+import { Project } from '../../models/Project.js'
+import { callbackify } from 'node:util'
 
 const ProjectUpdateHandler = {
   async markAsUpdated(projectId, lastUpdatedAt, lastUpdatedBy) {
@@ -38,7 +38,7 @@ const ProjectUpdateHandler = {
   },
 }
 
-module.exports = {
+export default {
   markAsUpdated: callbackify(ProjectUpdateHandler.markAsUpdated),
   markAsOpened: callbackify(ProjectUpdateHandler.markAsOpened),
   markAsInactive: callbackify(ProjectUpdateHandler.markAsInactive),

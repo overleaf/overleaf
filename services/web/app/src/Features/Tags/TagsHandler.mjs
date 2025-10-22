@@ -1,5 +1,5 @@
-const { Tag } = require('../../models/Tag')
-const { callbackify } = require('@overleaf/promise-utils')
+import { Tag } from '../../models/Tag.js'
+import { callbackify } from '@overleaf/promise-utils'
 
 const MAX_TAG_LENGTH = 50
 
@@ -133,7 +133,7 @@ async function addProjectToTags(userId, tagIds, projectId) {
   await Tag.updateMany(searchOps, insertOperation)
 }
 
-module.exports = {
+export default {
   getAllTags: callbackify(getAllTags),
   countTagsForProject: callbackify(countTagsForProject),
   getTagsForProject: callbackify(getTagsForProject),

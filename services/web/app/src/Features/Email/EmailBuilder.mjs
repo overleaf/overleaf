@@ -1,12 +1,12 @@
-const _ = require('lodash')
-const settings = require('@overleaf/settings')
-const moment = require('moment')
-const EmailMessageHelper = require('./EmailMessageHelper')
-const StringHelper = require('../Helpers/StringHelper')
-const BaseWithHeaderEmailLayout = require('./Layouts/BaseWithHeaderEmailLayout')
-const SpamSafe = require('./SpamSafe')
-const ctaEmailBody = require('./Bodies/cta-email')
-const NoCTAEmailBody = require('./Bodies/NoCTAEmailBody')
+import _ from 'lodash'
+import settings from '@overleaf/settings'
+import moment from 'moment'
+import EmailMessageHelper from './EmailMessageHelper.js'
+import StringHelper from '../Helpers/StringHelper.mjs'
+import BaseWithHeaderEmailLayout from './Layouts/BaseWithHeaderEmailLayout.js'
+import SpamSafe from './SpamSafe.mjs'
+import ctaEmailBody from './Bodies/cta-email.js'
+import NoCTAEmailBody from './Bodies/NoCTAEmailBody.js'
 
 function _emailBodyPlainText(content, opts, ctaEmail) {
   let emailBody = `${content.greeting(opts, true)}`
@@ -1017,7 +1017,7 @@ function _formatUserNameAndEmail(user, placeholder) {
   return SpamSafe.safeEmail(user.email, placeholder)
 }
 
-module.exports = {
+export default {
   templates,
   ctaTemplate,
   NoCTAEmailTemplate,

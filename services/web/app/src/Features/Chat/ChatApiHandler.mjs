@@ -1,8 +1,9 @@
 // @ts-check
 
-const { fetchJson, fetchNothing } = require('@overleaf/fetch-utils')
-const settings = require('@overleaf/settings')
-const { callbackify } = require('util')
+import { fetchJson, fetchNothing } from '@overleaf/fetch-utils'
+
+import settings from '@overleaf/settings'
+import { callbackify } from 'node:util'
 
 async function getThread(projectId, threadId) {
   return await fetchJson(chatApiUrl(`/project/${projectId}/thread/${threadId}`))
@@ -165,7 +166,7 @@ function chatApiUrl(path) {
   return new URL(path, settings.apis.chat.internal_url)
 }
 
-module.exports = {
+export default {
   getThread: callbackify(getThread),
   getThreadMessage: callbackify(getThreadMessage),
   getThreads: callbackify(getThreads),

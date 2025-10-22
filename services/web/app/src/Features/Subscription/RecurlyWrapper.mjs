@@ -1,15 +1,15 @@
-const OError = require('@overleaf/o-error')
-const {
+import OError from '@overleaf/o-error'
+import {
   fetchStringWithResponse,
   RequestFailedError,
-} = require('@overleaf/fetch-utils')
-const Settings = require('@overleaf/settings')
-const xml2js = require('xml2js')
-const logger = require('@overleaf/logger')
-const Errors = require('../Errors/Errors')
-const SubscriptionErrors = require('./Errors')
-const { callbackify } = require('@overleaf/promise-utils')
-const RecurlyMetrics = require('./RecurlyMetrics')
+} from '@overleaf/fetch-utils'
+import Settings from '@overleaf/settings'
+import xml2js from 'xml2js'
+import logger from '@overleaf/logger'
+import Errors from '../Errors/Errors.js'
+import SubscriptionErrors from './Errors.js'
+import { callbackify } from '@overleaf/promise-utils'
+import RecurlyMetrics from './RecurlyMetrics.mjs'
 
 /**
  * Updates the email address of a Recurly account
@@ -911,7 +911,7 @@ RecurlyWrapper.promises = {
   updateAccountEmailAddress,
 }
 
-module.exports = RecurlyWrapper
+export default RecurlyWrapper
 
 function getCustomFieldsFromSubscriptionDetails(subscriptionDetails) {
   if (!subscriptionDetails.ITMCampaign) {

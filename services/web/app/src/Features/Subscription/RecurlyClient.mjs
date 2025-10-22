@@ -1,11 +1,20 @@
 // @ts-check
 
-const recurly = require('recurly')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const OError = require('@overleaf/o-error')
-const { callbackify } = require('util')
-const UserGetter = require('../User/UserGetter')
+import recurly from 'recurly'
+
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import OError from '@overleaf/o-error'
+import { callbackify } from 'node:util'
+import UserGetter from '../User/UserGetter.mjs'
+import PaymentProviderEntities from './PaymentProviderEntities.mjs'
+import {
+  MissingBillingInfoError,
+  SubtotalLimitExceededError,
+} from './Errors.js'
+import RecurlyMetrics from './RecurlyMetrics.mjs'
+import { isStandaloneAiAddOnPlanCode, AI_ADD_ON_CODE } from './AiHelper.js'
+
 const {
   PaymentProviderSubscription,
   PaymentProviderSubscriptionAddOn,
@@ -17,13 +26,7 @@ const {
   PaymentProviderCoupon,
   PaymentProviderAccount,
   PaymentProviderImmediateCharge,
-} = require('./PaymentProviderEntities')
-const {
-  MissingBillingInfoError,
-  SubtotalLimitExceededError,
-} = require('./Errors')
-const RecurlyMetrics = require('./RecurlyMetrics')
-const { isStandaloneAiAddOnPlanCode, AI_ADD_ON_CODE } = require('./AiHelper')
+} = PaymentProviderEntities
 
 /**
  * @import { PaymentProviderSubscriptionChangeRequest } from './PaymentProviderEntities'
@@ -798,7 +801,7 @@ async function terminateSubscriptionByUuid(subscriptionUuid) {
   return subscription
 }
 
-module.exports = {
+export default {
   errors: recurly.errors,
 
   getAccountForUserId: callbackify(getAccountForUserId),

@@ -1,4 +1,4 @@
-const _ = require('lodash')
+import _ from 'lodash'
 
 function getCurrentVersion(splitTest) {
   if (splitTest?.versions?.length > 0) {
@@ -14,7 +14,7 @@ function getVersion(splitTest, versionNumber) {
   })
 }
 
-module.exports = {
+export default {
   getCurrentVersion,
   getVersion,
 }

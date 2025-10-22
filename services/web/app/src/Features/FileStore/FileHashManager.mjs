@@ -11,13 +11,13 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import crypto from 'node:crypto'
+import logger from '@overleaf/logger'
+import fs from 'node:fs'
+import _ from 'lodash'
 let FileHashManager
-const crypto = require('crypto')
-const logger = require('@overleaf/logger')
-const fs = require('fs')
-const _ = require('lodash')
 
-module.exports = FileHashManager = {
+export default FileHashManager = {
   computeHash(filePath, callback) {
     if (callback == null) {
       callback = function () {}

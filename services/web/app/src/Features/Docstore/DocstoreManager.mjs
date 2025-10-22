@@ -1,11 +1,12 @@
-const { promisify } = require('util')
-const { promisifyMultiResult, callbackify } = require('@overleaf/promise-utils')
-const request = require('request').defaults({ jar: false })
-const OError = require('@overleaf/o-error')
-const logger = require('@overleaf/logger')
-const settings = require('@overleaf/settings')
-const Errors = require('../Errors/Errors')
-const { fetchJson } = require('@overleaf/fetch-utils')
+import { promisify } from 'node:util'
+import { promisifyMultiResult, callbackify } from '@overleaf/promise-utils'
+import OError from '@overleaf/o-error'
+import logger from '@overleaf/logger'
+import settings from '@overleaf/settings'
+import Errors from '../Errors/Errors.js'
+import { fetchJson } from '@overleaf/fetch-utils'
+import Request from 'request'
+const request = Request.defaults({ jar: false })
 
 const TIMEOUT = 30 * 1000 // request timeout
 
@@ -303,7 +304,7 @@ function _operateOnProject(projectId, method, callback) {
   })
 }
 
-module.exports = {
+export default {
   deleteDoc,
   getAllDocs,
   getAllDeletedDocs,

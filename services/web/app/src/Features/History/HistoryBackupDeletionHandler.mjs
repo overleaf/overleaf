@@ -1,5 +1,5 @@
-const { fetchNothing } = require('@overleaf/fetch-utils')
-const Settings = require('@overleaf/settings')
+import { fetchNothing } from '@overleaf/fetch-utils'
+import Settings from '@overleaf/settings'
 
 async function deleteProject(projectId) {
   if (!Settings.apis.historyBackupDeletion.enabled) return
@@ -15,6 +15,6 @@ async function deleteProject(projectId) {
   })
 }
 
-module.exports = {
+export default {
   deleteProject,
 }

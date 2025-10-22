@@ -1,5 +1,5 @@
-const RefererParser = require('referer-parser')
-const { URL } = require('url')
+import RefererParser from 'referer-parser'
+import { URL } from 'node:url'
 
 const UTM_KEYS = [
   'utm_campaign',
@@ -49,7 +49,7 @@ function parseReferrer(referrer, url) {
   return referrerValues
 }
 
-module.exports = {
+export default {
   UTM_KEYS,
   parseUtm,
   parseReferrer,

@@ -1,4 +1,4 @@
-const { fetchJson, fetchNothing } = require('@overleaf/fetch-utils')
+import { fetchJson, fetchNothing } from '@overleaf/fetch-utils'
 
 class MailChimpClient {
   constructor(apiKey) {
@@ -65,4 +65,4 @@ class MailChimpClient {
   }
 }
 
-module.exports = MailChimpClient
+export default MailChimpClient

@@ -1,11 +1,12 @@
 // @ts-check
 
-const fs = require('fs/promises')
-const Path = require('path')
-const { callbackify } = require('util')
-const isUtf8 = require('utf-8-validate')
-const Settings = require('@overleaf/settings')
-const Minimatch = require('minimatch').Minimatch
+import fs from 'node:fs/promises'
+
+import Path from 'node:path'
+import { callbackify } from 'node:util'
+import isUtf8 from 'utf-8-validate'
+import Settings from '@overleaf/settings'
+import { Minimatch } from 'minimatch'
 
 const FILE_IGNORE_MATCHER = new Minimatch(Settings.fileIgnorePattern, {
   // make the whole path matching case-insensitive (previously we were only
@@ -110,7 +111,7 @@ function _detectEncoding(bytes) {
   return 'latin1'
 }
 
-module.exports = {
+export default {
   shouldIgnore,
   isEditable,
   getType: callbackify(getType),

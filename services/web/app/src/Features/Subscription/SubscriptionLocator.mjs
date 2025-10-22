@@ -2,13 +2,14 @@
  * @import { AddOn } from '../../../../types/subscription/plan'
  */
 
-const { callbackifyAll } = require('@overleaf/promise-utils')
-const { Subscription } = require('../../models/Subscription')
-const SubscriptionHelper = require('./SubscriptionHelper')
-const { DeletedSubscription } = require('../../models/DeletedSubscription')
-const logger = require('@overleaf/logger')
-const { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } = require('./AiHelper')
-require('./GroupPlansData') // make sure dynamic group plans are loaded
+import { callbackifyAll } from '@overleaf/promise-utils'
+
+import { Subscription } from '../../models/Subscription.js'
+import SubscriptionHelper from './SubscriptionHelper.js'
+import { DeletedSubscription } from '../../models/DeletedSubscription.js'
+import logger from '@overleaf/logger'
+import { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } from './AiHelper.js'
+import './GroupPlansData.js' // make sure dynamic group plans are loaded
 
 const SubscriptionLocator = {
   async getUsersSubscription(userOrId) {
@@ -215,7 +216,7 @@ const SubscriptionLocator = {
   },
 }
 
-module.exports = {
+export default {
   ...callbackifyAll(SubscriptionLocator),
   promises: SubscriptionLocator,
 }

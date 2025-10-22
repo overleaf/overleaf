@@ -1,9 +1,9 @@
-const logger = require('@overleaf/logger')
-const Settings = require('@overleaf/settings')
-const crypto = require('crypto')
-const OError = require('@overleaf/o-error')
-const { callbackify } = require('util')
-const MailChimpClient = require('./MailChimpClient')
+import logger from '@overleaf/logger'
+import Settings from '@overleaf/settings'
+import crypto from 'node:crypto'
+import OError from '@overleaf/o-error'
+import { callbackify } from 'node:util'
+import MailChimpClient from './MailChimpClient.mjs'
 
 function mailchimpIsConfigured() {
   return Settings.mailchimp != null && Settings.mailchimp.api_key != null
@@ -29,7 +29,7 @@ function make(listName, listId) {
   }
 }
 
-module.exports = {
+export default {
   make,
 }
 

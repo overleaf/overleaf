@@ -1,8 +1,8 @@
-const {
-  OnboardingDataCollection,
-  OnboardingDataCollectionSchema,
-} = require('../../models/OnboardingDataCollection')
-const OError = require('@overleaf/o-error')
+import OnboardingDataCollectionModel from '../../models/OnboardingDataCollection.js'
+import OError from '@overleaf/o-error'
+
+const { OnboardingDataCollection, OnboardingDataCollectionSchema } =
+  OnboardingDataCollectionModel
 
 async function getOnboardingDataCollection(userId, projection = {}) {
   try {
@@ -69,7 +69,7 @@ function deleteOnboardingDataCollection(id) {
   return OnboardingDataCollection.deleteOne({ _id: id })
 }
 
-module.exports = {
+export default {
   getOnboardingDataCollection,
   upsertOnboardingDataCollection,
   deleteOnboardingDataCollection,

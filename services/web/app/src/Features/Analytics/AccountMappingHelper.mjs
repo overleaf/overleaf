@@ -116,7 +116,7 @@ function generateSubscriptionToStripeMapping(
   }
 }
 
-module.exports = {
+export default {
   extractAccountMappingsFromSubscription,
   generateV1Mapping,
   generateSubscriptionToRecurlyMapping,

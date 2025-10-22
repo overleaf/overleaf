@@ -1,6 +1,9 @@
 // @ts-check
-const UserGetter = require('../User/UserGetter')
-const { registerEmailChange } = require('./AnalyticsManager')
+import UserGetter from '../User/UserGetter.mjs'
+
+import AnalyticsManager from './AnalyticsManager.mjs'
+
+const { registerEmailChange } = AnalyticsManager
 
 /**
  * @typedef {object} EmailData
@@ -115,7 +118,7 @@ function fillMissingEventData(eventData, emailData) {
   return eventData
 }
 
-module.exports = {
+export default {
   registerEmailUpdate,
   registerEmailCreation,
   registerEmailDeletion,

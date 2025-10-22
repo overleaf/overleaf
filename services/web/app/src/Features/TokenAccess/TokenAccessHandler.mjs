@@ -1,15 +1,18 @@
-const { Project } = require('../../models/Project')
-const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
-const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
-const { ObjectId } = require('mongodb-legacy')
-const Metrics = require('@overleaf/metrics')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const V1Api = require('../V1/V1Api')
-const crypto = require('crypto')
-const { callbackifyAll } = require('@overleaf/promise-utils')
-const Analytics = require('../Analytics/AnalyticsManager')
-const Features = require('../../infrastructure/Features')
+import { Project } from '../../models/Project.js'
+import PublicAccessLevels from '../Authorization/PublicAccessLevels.mjs'
+import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
+import mongodb from 'mongodb-legacy'
+import Metrics from '@overleaf/metrics'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import V1Api from '../V1/V1Api.js'
+import crypto from 'node:crypto'
+import { callbackifyAll } from '@overleaf/promise-utils'
+import Analytics from '../Analytics/AnalyticsManager.mjs'
+import Features from '../../infrastructure/Features.js'
+
+const { ObjectId } = mongodb
+
 const READ_AND_WRITE_TOKEN_PATTERN = '([0-9]+[a-z]{6,12})'
 const READ_ONLY_TOKEN_PATTERN = '([a-z]{12})'
 
@@ -337,7 +340,7 @@ const TokenAccessHandler = {
   },
 }
 
-module.exports = {
+export default {
   ...TokenAccessHandler,
   ...callbackifyAll(TokenAccessHandler, {
     multiResult: {

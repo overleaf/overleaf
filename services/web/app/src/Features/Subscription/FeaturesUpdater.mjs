@@ -1,21 +1,21 @@
-const _ = require('lodash')
-const { callbackify } = require('util')
-const { callbackifyMultiResult } = require('@overleaf/promise-utils')
-const PlansLocator = require('./PlansLocator')
-const SubscriptionLocator = require('./SubscriptionLocator')
-const SubscriptionHelper = require('./SubscriptionHelper')
-const UserFeaturesUpdater = require('./UserFeaturesUpdater')
-const FeaturesHelper = require('./FeaturesHelper')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const ReferalFeatures = require('../Referal/ReferalFeatures')
-const V1SubscriptionManager = require('./V1SubscriptionManager')
-const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
-const UserGetter = require('../User/UserGetter')
-const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const Queues = require('../../infrastructure/Queues')
-const Modules = require('../../infrastructure/Modules')
-const { AI_ADD_ON_CODE } = require('./AiHelper')
+import _ from 'lodash'
+import { callbackify } from 'node:util'
+import { callbackifyMultiResult } from '@overleaf/promise-utils'
+import PlansLocator from './PlansLocator.mjs'
+import SubscriptionLocator from './SubscriptionLocator.mjs'
+import SubscriptionHelper from './SubscriptionHelper.js'
+import UserFeaturesUpdater from './UserFeaturesUpdater.mjs'
+import FeaturesHelper from './FeaturesHelper.mjs'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import ReferalFeatures from '../Referal/ReferalFeatures.mjs'
+import V1SubscriptionManager from './V1SubscriptionManager.mjs'
+import InstitutionsFeatures from '../Institutions/InstitutionsFeatures.mjs'
+import UserGetter from '../User/UserGetter.mjs'
+import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
+import Queues from '../../infrastructure/Queues.js'
+import Modules from '../../infrastructure/Modules.js'
+import { AI_ADD_ON_CODE } from './AiHelper.js'
 
 /**
  * Enqueue a job for refreshing features for the given user
@@ -204,7 +204,7 @@ async function doSyncFromV1(v1UserId) {
   return refreshFeatures(user._id, 'sync-v1')
 }
 
-module.exports = {
+export default {
   featuresEpochIsCurrent,
   computeFeatures: callbackify(computeFeatures),
   refreshFeatures: callbackifyMultiResult(refreshFeatures, [

@@ -16,14 +16,15 @@
  * @property {boolean} [isAiAssist]
  */
 
-const OError = require('@overleaf/o-error')
-const { DuplicateAddOnError, AddOnNotPresentError } = require('./Errors')
-const PlansLocator = require('./PlansLocator')
-const SubscriptionHelper = require('./SubscriptionHelper')
-const { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } = require('./AiHelper')
+import OError from '@overleaf/o-error'
+
+import { DuplicateAddOnError, AddOnNotPresentError } from './Errors.js'
+import PlansLocator from './PlansLocator.mjs'
+import SubscriptionHelper from './SubscriptionHelper.js'
+import { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } from './AiHelper.js'
 const MEMBERS_LIMIT_ADD_ON_CODE = 'additional-license'
 
-class PaymentProviderSubscription {
+export class PaymentProviderSubscription {
   /**
    * @param {object} props
    * @param {string} props.id
@@ -644,7 +645,7 @@ class PaymentProviderCoupon {
 /**
  * An account in the payment provider
  */
-class PaymentProviderAccount {
+export class PaymentProviderAccount {
   /**
    * @param {object} props
    * @param {string} props.code
@@ -661,7 +662,7 @@ class PaymentProviderAccount {
   }
 }
 
-module.exports = {
+export default {
   MEMBERS_LIMIT_ADD_ON_CODE,
   PaymentProviderSubscription,
   PaymentProviderSubscriptionAddOn,

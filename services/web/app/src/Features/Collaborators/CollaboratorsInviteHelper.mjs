@@ -1,4 +1,4 @@
-const Crypto = require('crypto')
+import Crypto from 'node:crypto'
 
 function generateToken() {
   const buffer = Crypto.randomBytes(24)
@@ -11,7 +11,7 @@ function hashInviteToken(token) {
     .digest('hex')
 }
 
-module.exports = {
+export default {
   generateToken,
   hashInviteToken,
 }

@@ -1,6 +1,6 @@
-const logger = require('@overleaf/logger')
-const Settings = require('@overleaf/settings')
-const { plainTextResponse } = require('../../infrastructure/Response')
+import logger from '@overleaf/logger'
+import Settings from '@overleaf/settings'
+import { plainTextResponse } from '../../infrastructure/Response.js'
 
 function renderJSONError(res, message, info = {}) {
   if (info.message) {
@@ -44,7 +44,8 @@ function handleGeneric400Error(req, res, statusCode, message, info = {}) {
 }
 
 let HttpErrorHandler
-module.exports = HttpErrorHandler = {
+
+export default HttpErrorHandler = {
   handleErrorByStatusCode(req, res, err, statusCode) {
     const is400Error = statusCode >= 400 && statusCode < 500
     const is500Error = statusCode >= 500 && statusCode < 600

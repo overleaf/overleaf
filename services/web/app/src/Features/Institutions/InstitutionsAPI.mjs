@@ -1,17 +1,16 @@
-const { callbackify } = require('util')
-const OError = require('@overleaf/o-error')
-const logger = require('@overleaf/logger')
-const settings = require('@overleaf/settings')
-const request = require('requestretry')
-const { promisifyAll } = require('@overleaf/promise-utils')
-const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
-const {
+import { callbackify } from 'node:util'
+import OError from '@overleaf/o-error'
+import logger from '@overleaf/logger'
+import settings from '@overleaf/settings'
+import request from 'requestretry'
+import { promisifyAll, promiseMapWithLimit } from '@overleaf/promise-utils'
+import NotificationsBuilder from '../Notifications/NotificationsBuilder.mjs'
+import {
   V1ConnectionError,
   InvalidInstitutionalEmailError,
-} = require('../Errors/Errors')
-const { fetchJson, fetchNothing } = require('@overleaf/fetch-utils')
-const { promiseMapWithLimit } = require('@overleaf/promise-utils')
-const Modules = require('../../infrastructure/Modules')
+} from '../Errors/Errors.js'
+import { fetchJson, fetchNothing } from '@overleaf/fetch-utils'
+import Modules from '../../infrastructure/Modules.js'
 
 function _makeRequestOptions(options) {
   const requestOptions = {
@@ -418,4 +417,4 @@ InstitutionsAPI.promises.removeAffiliation = removeAffiliation
 InstitutionsAPI.promises.getUsersNeedingReconfirmationsLapsedProcessed =
   getUsersNeedingReconfirmationsLapsedProcessed
 
-module.exports = InstitutionsAPI
+export default InstitutionsAPI

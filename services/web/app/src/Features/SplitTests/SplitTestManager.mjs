@@ -1,8 +1,8 @@
-const { SplitTest } = require('../../models/SplitTest')
-const SplitTestUtils = require('./SplitTestUtils')
-const OError = require('@overleaf/o-error')
-const _ = require('lodash')
-const { CacheFlow } = require('cache-flow')
+import { SplitTest } from '../../models/SplitTest.js'
+import SplitTestUtils from './SplitTestUtils.mjs'
+import OError from '@overleaf/o-error'
+import _ from 'lodash'
+import { CacheFlow } from 'cache-flow'
 
 const ALPHA_PHASE = 'alpha'
 const BETA_PHASE = 'beta'
@@ -531,7 +531,7 @@ function _mergeFlags(incomingTests, baseTests) {
   return mergedSet
 }
 
-module.exports = {
+export default {
   getSplitTest,
   getSplitTests,
   getRuntimeTests,

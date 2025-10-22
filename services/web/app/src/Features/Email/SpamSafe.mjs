@@ -1,4 +1,4 @@
-const XRegExp = require('xregexp')
+import XRegExp from 'xregexp'
 
 // A note about SAFE_REGEX:
 // We have to escape the escape characters because XRegExp compiles it first.
@@ -69,4 +69,4 @@ const SpamSafe = {
   },
 }
 
-module.exports = SpamSafe
+export default SpamSafe

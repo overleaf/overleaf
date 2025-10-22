@@ -1,8 +1,8 @@
+import _ from 'lodash'
+import Path from 'node:path'
 let ProjectEditorHandler
-const _ = require('lodash')
-const Path = require('path')
 
-module.exports = ProjectEditorHandler = {
+export default ProjectEditorHandler = {
   trackChangesAvailable: false,
 
   buildProjectModelView(

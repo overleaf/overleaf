@@ -1,4 +1,4 @@
-const Metrics = require('@overleaf/metrics')
+import Metrics from '@overleaf/metrics'
 
 /**
  * @param {number} status
@@ -32,7 +32,7 @@ function recordMetricsFromResponse(response) {
   recordMetrics(response.status, rateLimit, rateLimitRemaining, rateLimitReset)
 }
 
-module.exports = {
+export default {
   recordMetrics,
   recordMetricsFromResponse,
 }

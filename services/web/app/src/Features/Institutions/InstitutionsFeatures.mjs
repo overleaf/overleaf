@@ -1,7 +1,7 @@
-const { callbackifyAll } = require('@overleaf/promise-utils')
-const UserGetter = require('../User/UserGetter')
-const PlansLocator = require('../Subscription/PlansLocator')
-const Settings = require('@overleaf/settings')
+import { callbackifyAll } from '@overleaf/promise-utils'
+import UserGetter from '../User/UserGetter.mjs'
+import PlansLocator from '../Subscription/PlansLocator.mjs'
+import Settings from '@overleaf/settings'
 
 async function getInstitutionsFeatures(userId) {
   const planCode = await getInstitutionsPlan(userId)
@@ -26,7 +26,8 @@ const InstitutionsFeatures = {
   getInstitutionsPlan,
   hasLicence,
 }
-module.exports = {
+
+export default {
   promises: InstitutionsFeatures,
   ...callbackifyAll(InstitutionsFeatures),
 }

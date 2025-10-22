@@ -1,7 +1,8 @@
 // @ts-check
 
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
+import Settings from '@overleaf/settings'
+
+import logger from '@overleaf/logger'
 
 /**
  * @typedef {import('../../../../types/subscription/plan').RecurlyPlanCode} RecurlyPlanCode
@@ -173,7 +174,7 @@ function convertLegacyGroupPlanCodeToConsolidatedGroupPlanCodeIfNeeded(
   return { planCode: newPlanCode, quantity: Number(size) }
 }
 
-module.exports = {
+export default {
   ensurePlansAreSetupCorrectly,
   findLocalPlanInSettings,
   buildStripeLookupKey,

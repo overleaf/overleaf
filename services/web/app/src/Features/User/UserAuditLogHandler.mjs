@@ -1,8 +1,8 @@
-const OError = require('@overleaf/o-error')
-const logger = require('@overleaf/logger')
-const { UserAuditLogEntry } = require('../../models/UserAuditLogEntry')
-const { callbackify } = require('util')
-const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
+import OError from '@overleaf/o-error'
+import logger from '@overleaf/logger'
+import { UserAuditLogEntry } from '../../models/UserAuditLogEntry.js'
+import { callbackify } from 'node:util'
+import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
 
 function _canHaveNoIpAddressId(operation, info) {
   if (operation === 'join-group-subscription') return true
@@ -98,4 +98,4 @@ const UserAuditLogHandler = {
   },
 }
 
-module.exports = UserAuditLogHandler
+export default UserAuditLogHandler

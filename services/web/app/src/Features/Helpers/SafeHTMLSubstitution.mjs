@@ -1,4 +1,4 @@
-const pug = require('pug-runtime')
+import pug from 'pug-runtime'
 
 const SPLIT_REGEX = /<(\d+)>(.*?)<\/\1>/g
 
@@ -40,7 +40,7 @@ function render(locale, components) {
   return output.join('')
 }
 
-module.exports = {
+export default {
   SPLIT_REGEX,
   render,
 }

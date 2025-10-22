@@ -1,9 +1,9 @@
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const { fetchJson } = require('@overleaf/fetch-utils')
-const { callbackify } = require('@overleaf/promise-utils')
-const UserMembershipsHandler = require('../UserMembership/UserMembershipsHandler')
-const UserMembershipEntityConfigs = require('../UserMembership/UserMembershipEntityConfigs')
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import { fetchJson } from '@overleaf/fetch-utils'
+import { callbackify } from '@overleaf/promise-utils'
+import UserMembershipsHandler from '../UserMembership/UserMembershipsHandler.mjs'
+import UserMembershipEntityConfigs from '../UserMembership/UserMembershipEntityConfigs.mjs'
 
 async function getManagedPublishers(userId) {
   return await UserMembershipsHandler.promises.getEntitiesByUser(
@@ -33,7 +33,7 @@ async function fetchV1Data(publisher) {
   }
 }
 
-module.exports = {
+export default {
   getManagedPublishers: callbackify(getManagedPublishers),
   promises: {
     getManagedPublishers,

@@ -1,16 +1,16 @@
-const { callbackify } = require('util')
-const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
-const Settings = require('@overleaf/settings')
-const nodemailer = require('nodemailer')
-const aws = require('@aws-sdk/client-ses')
-const OError = require('@overleaf/o-error')
-const { RateLimiter } = require('../../infrastructure/RateLimiter')
-const _ = require('lodash')
+import { callbackify } from 'node:util'
+import logger from '@overleaf/logger'
+import metrics from '@overleaf/metrics'
+import Settings from '@overleaf/settings'
+import nodemailer from 'nodemailer'
+import aws from '@aws-sdk/client-ses'
+import OError from '@overleaf/o-error'
+import { RateLimiter } from '../../infrastructure/RateLimiter.js'
+import _ from 'lodash'
 
 const EMAIL_SETTINGS = Settings.email || {}
 
-module.exports = {
+export default {
   sendEmail: callbackify(sendEmail),
   promises: {
     sendEmail,

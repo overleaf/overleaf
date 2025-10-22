@@ -1,5 +1,5 @@
-const AnalyticsManager = require('./AnalyticsManager')
-const RequestHelper = require('./RequestHelper')
+import AnalyticsManager from './AnalyticsManager.mjs'
+import RequestHelper from './RequestHelper.mjs'
 
 function clearSource(session) {
   if (session) {
@@ -88,7 +88,7 @@ function addUserProperties(userId, session) {
   }
 }
 
-module.exports = {
+export default {
   clearSource,
   setInbound,
   clearInbound,

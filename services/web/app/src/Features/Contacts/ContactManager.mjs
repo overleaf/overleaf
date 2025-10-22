@@ -1,7 +1,7 @@
-const { callbackify } = require('util')
-const OError = require('@overleaf/o-error')
-const { fetchJson } = require('@overleaf/fetch-utils')
-const settings = require('@overleaf/settings')
+import { callbackify } from 'node:util'
+import OError from '@overleaf/o-error'
+import { fetchJson } from '@overleaf/fetch-utils'
+import settings from '@overleaf/settings'
 
 async function getContactIds(userId, options) {
   options = options ?? { limit: 50 }
@@ -41,7 +41,7 @@ async function addContact(userId, contactId) {
   return body?.contact_ids || []
 }
 
-module.exports = {
+export default {
   getContactIds: callbackify(getContactIds),
   addContact: callbackify(addContact),
   promises: {

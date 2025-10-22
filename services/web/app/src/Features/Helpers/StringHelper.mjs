@@ -15,7 +15,7 @@ const JSON_ESCAPE = {
   '\u2029': '\\u2029',
 }
 
-module.exports = StringHelper = {
+export default StringHelper = {
   // stringifies and escapes a json object for use in a script. This ensures that &, < and > characters are escaped,
   // along with quotes. This ensures that the string can be safely rendered into HTML. See rationale at:
   // https://api.rubyonrails.org/classes/ERB/Util.html#method-c-json_escape

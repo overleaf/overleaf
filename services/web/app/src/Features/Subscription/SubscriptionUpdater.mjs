@@ -1,20 +1,20 @@
-const { db, ObjectId } = require('../../infrastructure/mongodb')
-const { callbackify } = require('@overleaf/promise-utils')
-const { Subscription } = require('../../models/Subscription')
-const SubscriptionLocator = require('./SubscriptionLocator')
-const PlansLocator = require('./PlansLocator')
-const FeaturesUpdater = require('./FeaturesUpdater')
-const FeaturesHelper = require('./FeaturesHelper')
-const AnalyticsManager = require('../Analytics/AnalyticsManager')
-const { DeletedSubscription } = require('../../models/DeletedSubscription')
-const logger = require('@overleaf/logger')
-const Features = require('../../infrastructure/Features')
-const UserAuditLogHandler = require('../User/UserAuditLogHandler')
-const UserUpdater = require('../User/UserUpdater')
-const AccountMappingHelper = require('../Analytics/AccountMappingHelper')
-const { SSOConfig } = require('../../models/SSOConfig')
-const mongoose = require('../../infrastructure/Mongoose')
-const Modules = require('../../infrastructure/Modules')
+import { db, ObjectId } from '../../infrastructure/mongodb.js'
+import { callbackify } from '@overleaf/promise-utils'
+import { Subscription } from '../../models/Subscription.js'
+import SubscriptionLocator from './SubscriptionLocator.mjs'
+import PlansLocator from './PlansLocator.mjs'
+import FeaturesUpdater from './FeaturesUpdater.mjs'
+import FeaturesHelper from './FeaturesHelper.mjs'
+import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
+import { DeletedSubscription } from '../../models/DeletedSubscription.js'
+import logger from '@overleaf/logger'
+import Features from '../../infrastructure/Features.js'
+import UserAuditLogHandler from '../User/UserAuditLogHandler.mjs'
+import UserUpdater from '../User/UserUpdater.mjs'
+import AccountMappingHelper from '../Analytics/AccountMappingHelper.mjs'
+import { SSOConfig } from '../../models/SSOConfig.js'
+import mongoose from '../../infrastructure/Mongoose.js'
+import Modules from '../../infrastructure/Modules.js'
 
 /**
  * @typedef {import('../../../../types/subscription/dashboard/subscription').Subscription} Subscription
@@ -553,7 +553,7 @@ async function voidRestorePoint(subscriptionId) {
   await setRestorePoint(subscriptionId, null, null, false)
 }
 
-module.exports = {
+export default {
   updateAdmin: callbackify(updateAdmin),
   syncSubscription: callbackify(syncSubscription),
   createNewSubscription: callbackify(createNewSubscription),

@@ -1,6 +1,6 @@
-const Metrics = require('@overleaf/metrics')
-const SplitTestManager = require('./SplitTestManager')
-const { CacheLoader } = require('cache-flow')
+import Metrics from '@overleaf/metrics'
+import SplitTestManager from './SplitTestManager.mjs'
+import { CacheLoader } from 'cache-flow'
 
 class SplitTestCache extends CacheLoader {
   constructor() {
@@ -24,4 +24,4 @@ class SplitTestCache extends CacheLoader {
   }
 }
 
-module.exports = new SplitTestCache()
+export default new SplitTestCache()

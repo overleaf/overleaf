@@ -9,14 +9,19 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const async = require('async')
-const { promisifyAll } = require('@overleaf/promise-utils')
+import async from 'async'
+
+import { promisifyAll } from '@overleaf/promise-utils'
+import UserMembershipEntityConfigs from './UserMembershipEntityConfigs.mjs'
+import InstitutionModel from '../../models/Institution.js'
+import SubscriptionModel from '../../models/Subscription.js'
+import PublisherModel from '../../models/Publisher.js'
+
 const EntityModels = {
-  Institution: require('../../models/Institution').Institution,
-  Subscription: require('../../models/Subscription').Subscription,
-  Publisher: require('../../models/Publisher').Publisher,
+  Institution: InstitutionModel.Institution,
+  Subscription: SubscriptionModel.Subscription,
+  Publisher: PublisherModel.Publisher,
 }
-const UserMembershipEntityConfigs = require('./UserMembershipEntityConfigs')
 
 const UserMembershipsHandler = {
   removeUserFromAllEntities(userId, callback) {
@@ -80,4 +85,4 @@ const UserMembershipsHandler = {
 }
 
 UserMembershipsHandler.promises = promisifyAll(UserMembershipsHandler)
-module.exports = UserMembershipsHandler
+export default UserMembershipsHandler

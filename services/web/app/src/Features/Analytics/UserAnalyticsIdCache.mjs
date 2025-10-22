@@ -1,6 +1,6 @@
-const UserGetter = require('../User/UserGetter')
-const { CacheLoader } = require('cache-flow')
-const { callbackify } = require('util')
+import UserGetter from '../User/UserGetter.mjs'
+import { CacheLoader } from 'cache-flow'
+import { callbackify } from 'node:util'
 
 class UserAnalyticsIdCache extends CacheLoader {
   constructor() {
@@ -28,4 +28,4 @@ const userAnalyticsIdCache = new UserAnalyticsIdCache()
 userAnalyticsIdCache.callbacks = {
   get: callbackify(userAnalyticsIdCache.get).bind(userAnalyticsIdCache),
 }
-module.exports = userAnalyticsIdCache
+export default userAnalyticsIdCache

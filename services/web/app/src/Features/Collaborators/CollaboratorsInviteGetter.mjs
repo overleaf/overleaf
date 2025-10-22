@@ -1,7 +1,7 @@
-const logger = require('@overleaf/logger')
-const { ProjectInvite } = require('../../models/ProjectInvite')
-const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
-const CollaboratorsInviteHelper = require('./CollaboratorsInviteHelper')
+import logger from '@overleaf/logger'
+import { ProjectInvite } from '../../models/ProjectInvite.js'
+import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
+import CollaboratorsInviteHelper from './CollaboratorsInviteHelper.mjs'
 
 async function getAllInvites(projectId) {
   logger.debug({ projectId }, 'fetching invites for project')
@@ -39,7 +39,7 @@ async function getInviteByToken(projectId, tokenString) {
   return invite
 }
 
-module.exports = {
+export default {
   promises: {
     getAllInvites,
     getEditInviteCount,

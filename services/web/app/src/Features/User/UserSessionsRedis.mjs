@@ -1,4 +1,4 @@
-const RedisWrapper = require('../../infrastructure/RedisWrapper')
+import RedisWrapper from '../../infrastructure/RedisWrapper.js'
 const rclient = RedisWrapper.client('websessions')
 
 const UserSessionsRedis = {
@@ -10,4 +10,4 @@ const UserSessionsRedis = {
     return `UserSessions:{${user._id}}`
   },
 }
-module.exports = UserSessionsRedis
+export default UserSessionsRedis

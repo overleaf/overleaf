@@ -1,7 +1,9 @@
-// @ts-check
-const { ObjectId } = require('mongodb-legacy')
-const _ = require('lodash')
-const Settings = require('@overleaf/settings')
+import mongodb from 'mongodb-legacy'
+
+import _ from 'lodash'
+import Settings from '@overleaf/settings'
+
+const { ObjectId } = mongodb
 
 /**
  * @import { MongoProject } from "./types"
@@ -14,7 +16,7 @@ const ENGINE_TO_COMPILER_MAP = {
   lualatex: 'lualatex',
 }
 
-module.exports = {
+export default {
   compilerFromV1Engine,
   isArchived,
   isTrashed,

@@ -1,9 +1,9 @@
-const { callbackify } = require('util')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const EmailBuilder = require('./EmailBuilder')
-const EmailSender = require('./EmailSender')
-const Queues = require('../../infrastructure/Queues')
+import { callbackify } from 'node:util'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import EmailBuilder from './EmailBuilder.mjs'
+import EmailSender from './EmailSender.mjs'
+import Queues from '../../infrastructure/Queues.js'
 
 const EMAIL_SETTINGS = Settings.email || {}
 
@@ -32,7 +32,7 @@ function sendDeferredEmail(emailType, opts, delay) {
   })
 }
 
-module.exports = {
+export default {
   sendEmail: callbackify(sendEmail),
   sendDeferredEmail,
   promises: {

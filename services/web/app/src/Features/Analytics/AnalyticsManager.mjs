@@ -1,13 +1,12 @@
-const SessionManager = require('../Authentication/SessionManager')
-const UserAnalyticsIdCache = require('./UserAnalyticsIdCache')
-const Settings = require('@overleaf/settings')
-const Metrics = require('../../infrastructure/Metrics')
-const Queues = require('../../infrastructure/Queues')
-const crypto = require('crypto')
-const _ = require('lodash')
-const { expressify } = require('@overleaf/promise-utils')
-const logger = require('@overleaf/logger')
-const { createHash } = require('crypto')
+import SessionManager from '../Authentication/SessionManager.mjs'
+import UserAnalyticsIdCache from './UserAnalyticsIdCache.mjs'
+import Settings from '@overleaf/settings'
+import Metrics from '../../infrastructure/Metrics.js'
+import Queues from '../../infrastructure/Queues.js'
+import crypto, { createHash } from 'node:crypto'
+import _ from 'lodash'
+import { expressify } from '@overleaf/promise-utils'
+import logger from '@overleaf/logger'
 
 if (
   Settings.analytics?.enabled &&
@@ -450,7 +449,7 @@ async function analyticsIdMiddleware(req, res, next) {
   next()
 }
 
-module.exports = {
+export default {
   identifyUser,
   recordEventForSession,
   recordEventForUser,
