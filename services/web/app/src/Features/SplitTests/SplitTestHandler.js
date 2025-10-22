@@ -15,6 +15,7 @@ const SessionManager = require('../Authentication/SessionManager')
 const logger = require('@overleaf/logger')
 const SplitTestSessionHandler = require('./SplitTestSessionHandler')
 const SplitTestUserGetter = require('./SplitTestUserGetter')
+const SplitTestManager = require('./SplitTestManager')
 
 /**
  * @import { Assignment } from "./types"
@@ -513,9 +514,37 @@ async function _getAssignmentMetadata(analyticsId, user, splitTest) {
 
   const userId = user?._id.toString()
   const percentile = getPercentile(analyticsId || userId, splitTest.name, phase)
-  const selectedVariantName =
+  let selectedVariantName =
     _getVariantFromPercentile(currentVersion.variants, percentile) ||
     DEFAULT_VARIANT
+
+  // Some variants may have a limit on the number of users that can be assigned
+  if (selectedVariantName !== DEFAULT_VARIANT) {
+    const selectedVariant = currentVersion.variants.find(
+      variant => variant.name === selectedVariantName
+    )
+    const userLimit = selectedVariant?.userLimit
+
+    if (userLimit && typeof userLimit === 'number') {
+      const userAssignments = user?.splitTests?.[splitTest.name]
+      const existingAssignment = Array.isArray(userAssignments)
+        ? userAssignments.find(
+            assignment =>
+              assignment.phase === phase &&
+              assignment.variantName === selectedVariantName
+          )
+        : null
+
+      if (!existingAssignment) {
+        const currentCount =
+          selectedVariant.userCount ?? Number.MAX_SAFE_INTEGER
+
+        if (currentCount >= userLimit) {
+          selectedVariantName = DEFAULT_VARIANT
+        }
+      }
+    }
+  }
   return {
     activeForUser: true,
     selectedVariantName,
@@ -587,12 +616,114 @@ async function _recordAssignment({
     const assignmentLog = assignedSplitTests[splitTestName] || []
     const existingAssignment = _.find(assignmentLog, { versionNumber })
     if (!existingAssignment) {
-      await UserUpdater.promises.updateUser(userId, {
-        $addToSet: {
-          [`splitTests.${splitTestName}`]: persistedAssignment,
-        },
-      })
+      const shouldIncrementCounter = await _shouldIncrementVariantCounter(
+        splitTestName,
+        variantName,
+        phase,
+        user
+      )
+
+      const updatePromises = [
+        UserUpdater.promises.updateUser(userId, {
+          $addToSet: {
+            [`splitTests.${splitTestName}`]: persistedAssignment,
+          },
+        }),
+      ]
+
+      if (shouldIncrementCounter) {
+        updatePromises.push(
+          _incrementVariantCounter(splitTestName, variantName, versionNumber)
+        )
+      }
+
+      await Promise.all(updatePromises)
     }
+  }
+}
+
+/**
+ * Check if the variant counter should be incremented for this assignment
+ * Only increment for tests with user limits and when user hasn't been assigned to this variant in this phase before
+ * @param {string} splitTestName - The name of the split test
+ * @param {string} variantName - The name of the variant
+ * @param {string} phase - The phase of the split test
+ * @param {Object} user - The user object
+ * @returns {Promise<boolean>} Whether the counter should be incremented
+ */
+async function _shouldIncrementVariantCounter(
+  splitTestName,
+  variantName,
+  phase,
+  user
+) {
+  if (variantName === DEFAULT_VARIANT) {
+    return false
+  }
+
+  const splitTest = await _getSplitTest(splitTestName)
+  if (!splitTest) {
+    return false
+  }
+
+  const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
+  if (!currentVersion) {
+    return false
+  }
+
+  const variant = currentVersion.variants.find(v => v.name === variantName)
+  const hasUserLimit =
+    variant?.userLimit && typeof variant.userLimit === 'number'
+
+  if (!hasUserLimit) {
+    return false
+  }
+
+  const userAssignments = user?.splitTests?.[splitTest.name]
+  const existingPhaseAssignment = Array.isArray(userAssignments)
+    ? userAssignments.find(
+        assignment =>
+          assignment.phase === phase && assignment.variantName === variantName
+      )
+    : null
+
+  // Only increment if user hasn't been assigned to this variant in this phase before
+  return !existingPhaseAssignment
+}
+
+/**
+ * Increment the user counter for a specific variant
+ * @param {string} splitTestName - The name of the split test
+ * @param {string} variantName - The name of the variant
+ * @param {number} versionNumber - The version to update
+ */
+async function _incrementVariantCounter(
+  splitTestName,
+  variantName,
+  versionNumber
+) {
+  try {
+    await SplitTest.updateOne(
+      {
+        name: splitTestName,
+        'versions.versionNumber': versionNumber,
+        'versions.variants.name': variantName,
+      },
+      {
+        $inc: {
+          'versions.$.variants.$[variant].userCount': 1,
+        },
+      },
+      {
+        arrayFilters: [{ 'variant.name': variantName }],
+      }
+    ).exec()
+    await SplitTestManager.clearCache()
+  } catch (error) {
+    logger.error(
+      { err: error, splitTestName, variantName, versionNumber },
+      'Failed to increment variant counter'
+    )
   }
 }
 

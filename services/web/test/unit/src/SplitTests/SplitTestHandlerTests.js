@@ -372,6 +372,101 @@ describe('SplitTestHandler', function () {
       )
     })
   })
+
+  describe('variant user limits', function () {
+    beforeEach(function () {
+      this.AnalyticsManager.getIdsFromSession.returns({
+        userId: 'abc123abc123',
+      })
+      this.SplitTestUserGetter.promises.getUser.resolves({
+        _id: new ObjectId('abc123abc123abc123abc123'),
+        splitTests: {},
+      })
+    })
+
+    it('should assign to variant when under limit', async function () {
+      this.cachedSplitTests.set(
+        'active-test',
+        makeSplitTest('active-test', { userLimit: 100, userCount: 50 })
+      )
+
+      const assignment = await this.SplitTestHandler.promises.getAssignment(
+        this.req,
+        this.res,
+        'active-test'
+      )
+
+      expect(assignment.variant).to.equal('variant-1')
+    })
+
+    it('should assign to default when limit reached', async function () {
+      this.cachedSplitTests.set(
+        'active-test',
+        makeSplitTest('active-test', { userLimit: 100, userCount: 100 })
+      )
+
+      const assignment = await this.SplitTestHandler.promises.getAssignment(
+        this.req,
+        this.res,
+        'active-test'
+      )
+
+      expect(assignment.variant).to.equal('default')
+    })
+
+    it('should not apply limits when no limit configured', async function () {
+      const assignment = await this.SplitTestHandler.promises.getAssignment(
+        this.req,
+        this.res,
+        'active-test'
+      )
+
+      expect(assignment.variant).to.equal('variant-1')
+    })
+
+    it('should allow already assigned users even when limit reached', async function () {
+      this.cachedSplitTests.set(
+        'active-test',
+        makeSplitTest('active-test', { userLimit: 100, userCount: 100 })
+      )
+      this.SplitTestUserGetter.promises.getUser.resolves({
+        _id: new ObjectId('abc123abc123abc123abc123'),
+        splitTests: {
+          'active-test': [
+            {
+              variantName: 'variant-1',
+              versionNumber: 1,
+              assignedAt: new Date(),
+              phase: 'release',
+            },
+          ],
+        },
+      })
+
+      const assignment = await this.SplitTestHandler.promises.getAssignment(
+        this.req,
+        this.res,
+        'active-test'
+      )
+
+      expect(assignment.variant).to.equal('variant-1')
+    })
+
+    it('should assign to default if userCount is undefined', async function () {
+      this.cachedSplitTests.set(
+        'active-test',
+        makeSplitTest('active-test', { userLimit: 100, userCount: undefined })
+      )
+
+      const assignment = await this.SplitTestHandler.promises.getAssignment(
+        this.req,
+        this.res,
+        'active-test'
+      )
+
+      expect(assignment.variant).to.equal('default')
+    })
+  })
 })
 
 function makeSplitTest(
@@ -381,8 +476,24 @@ function makeSplitTest(
     analyticsEnabled = active,
     phase = 'release',
     versionNumber = 1,
+    userLimit = undefined,
+    userCount = undefined,
   } = {}
 ) {
+  const variant = {
+    name: 'variant-1',
+    rolloutPercent: 100,
+    rolloutStripes: [{ start: 0, end: 100 }],
+  }
+
+  if (userLimit !== undefined) {
+    variant.userLimit = userLimit
+  }
+
+  if (userCount !== undefined) {
+    variant.userCount = userCount
+  }
+
   return {
     name,
     versions: [
@@ -391,13 +502,7 @@ function makeSplitTest(
         analyticsEnabled,
         phase,
         versionNumber,
-        variants: [
-          {
-            name: 'variant-1',
-            rolloutPercent: 100,
-            rolloutStripes: [{ start: 0, end: 100 }],
-          },
-        ],
+        variants: [variant],
       },
     ],
   }

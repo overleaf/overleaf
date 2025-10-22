@@ -90,9 +90,10 @@ async function createSplitTest(
     configuration.analyticsEnabled
   )
   for (const variant of configuration.variants) {
-    stripedVariants.push({
+    const variantData = {
       name: (variant.name || '').trim(),
       rolloutPercent: variant.rolloutPercent,
+      userLimit: variant.userLimit,
       rolloutStripes:
         variant.rolloutPercent > 0
           ? [
@@ -102,7 +103,11 @@ async function createSplitTest(
               },
             ]
           : [],
-    })
+    }
+    if (variant.userLimit && typeof variant.userLimit === 'number') {
+      variantData.userCount = 0
+    }
+    stripedVariants.push(variantData)
     stripeStart += variant.rolloutPercent
   }
   const splitTest = new SplitTest({
@@ -258,6 +263,9 @@ async function switchToNextPhase({ name, comment }, userId) {
   for (const variant of lastVersionCopy.variants) {
     variant.rolloutPercent = 0
     variant.rolloutStripes = []
+    if (variant.userCount) {
+      variant.userCount = 0
+    }
   }
   lastVersionCopy.author = userId
   lastVersionCopy.comment = comment
@@ -307,6 +315,29 @@ async function revertToPreviousVersion(
   previousVersionCopy.createdAt = new Date()
   previousVersionCopy.author = userId
   previousVersionCopy.comment = comment
+
+  // restore user count from most recent version of this phase
+  const mostRecentVersionOfTargetPhase = splitTest.versions.findLast(
+    v => v.phase === previousVersion.phase
+  )
+
+  if (mostRecentVersionOfTargetPhase) {
+    for (const variant of previousVersionCopy.variants) {
+      const correspondingVariant = mostRecentVersionOfTargetPhase.variants.find(
+        v => v.name === variant.name
+      )
+      if (correspondingVariant?.userCount) {
+        variant.userCount = correspondingVariant.userCount
+      }
+    }
+  } else {
+    for (const variant of previousVersionCopy.variants) {
+      if (variant.userCount) {
+        variant.userCount = 0
+      }
+    }
+  }
+
   splitTest.versions.push(previousVersionCopy)
   return _saveSplitTest(splitTest)
 }
@@ -362,6 +393,24 @@ function _checkNewVariantsConfiguration(
         )} cannot be decreased: revert to a previous configuration instead`
       )
     }
+    if (variant.userLimit !== undefined) {
+      // Existing variant has a user limit - can only increase it
+      if (
+        newVariantConfiguration.userLimit !== undefined &&
+        newVariantConfiguration.userLimit < variant.userLimit
+      ) {
+        throw new OError(
+          `User limit for variant '${variant.name}' cannot be decreased: revert to a previous configuration instead`
+        )
+      }
+    } else {
+      // Existing variant has no user limit - cannot add one
+      if (newVariantConfiguration.userLimit !== undefined) {
+        throw new OError(
+          `User limit cannot be added to variant '${variant.name}' after creation: user limits can only be set when the split test is created`
+        )
+      }
+    }
   }
 }
 
@@ -377,7 +426,7 @@ function _updateVariantsWithNewConfiguration(
     }
     const variant = _.find(variantsCopy, { name: newVariantConfig.name })
     if (!variant) {
-      variantsCopy.push({
+      const newVariant = {
         name: newVariantConfig.name,
         rolloutPercent: newVariantConfig.rolloutPercent,
         rolloutStripes: [
@@ -386,7 +435,15 @@ function _updateVariantsWithNewConfiguration(
             end: totalRolloutPercentage + newVariantConfig.rolloutPercent,
           },
         ],
-      })
+      }
+      if (
+        newVariantConfig.userLimit &&
+        typeof newVariantConfig.userLimit === 'number'
+      ) {
+        newVariant.userLimit = newVariantConfig.userLimit
+        newVariant.userCount = 0
+      }
+      variantsCopy.push(newVariant)
       totalRolloutPercentage += newVariantConfig.rolloutPercent
     } else if (variant.rolloutPercent < newVariantConfig.rolloutPercent) {
       const newStripeSize =
@@ -397,6 +454,12 @@ function _updateVariantsWithNewConfiguration(
         end: totalRolloutPercentage + newStripeSize,
       })
       totalRolloutPercentage += newStripeSize
+    }
+    if (newVariantConfig.userLimit >= variant?.userLimit) {
+      variant.userLimit = newVariantConfig.userLimit
+    }
+    if (variant?.userLimit && !variant.userCount) {
+      variant.userCount = 0
     }
   }
   return variantsCopy

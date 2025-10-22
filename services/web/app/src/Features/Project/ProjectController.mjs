@@ -395,6 +395,7 @@ const _ProjectController = {
       'track-pdf-download',
       !anonymous && 'writefull-oauth-promotion',
       'hotjar',
+      'hotjar-editor-onboarding',
       'editor-redesign',
       'overleaf-assist-bundle',
       'word-count-client',
@@ -453,17 +454,10 @@ const _ProjectController = {
             ),
         })
       )
-    const splitTestAssignments = {}
 
     try {
       const responses = await pProps({
         userValues: userId ? getUserValues(userId) : defaultUserValues(),
-        splitTestAssignments: Promise.all(
-          splitTests.map(async splitTest => {
-            splitTestAssignments[splitTest] =
-              await SplitTestHandler.promises.getAssignment(req, res, splitTest)
-          })
-        ),
         project: ProjectGetter.promises.getProject(projectId, {
           name: 1,
           lastUpdated: 1,
@@ -503,7 +497,56 @@ const _ProjectController = {
         subscription,
         isTokenMember,
         isInvitedMember,
+        affiliations,
       } = userValues
+
+      let inEnterpriseCommons = false
+      for (const affiliation of affiliations || []) {
+        inEnterpriseCommons =
+          inEnterpriseCommons || affiliation.institution?.enterpriseCommons
+      }
+
+      const getSplitTestAssignment = async splitTest => {
+        if (splitTest === 'hotjar-editor-onboarding') {
+          const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+          const userRegisteredMoreThan7DaysAgo =
+            user.signUpDate && user.signUpDate < sevenDaysAgo
+
+          const isExcluded =
+            user.betaProgram ||
+            inEnterpriseCommons ||
+            userIsMemberOfGroupSubscription ||
+            userRegisteredMoreThan7DaysAgo
+
+          if (!isExcluded) {
+            return await SplitTestHandler.promises.getAssignment(
+              req,
+              res,
+              splitTest
+            )
+          } else {
+            return {
+              variant: 'default',
+              analytics: {
+                segmentation: {},
+              },
+            }
+          }
+        } else {
+          return await SplitTestHandler.promises.getAssignment(
+            req,
+            res,
+            splitTest
+          )
+        }
+      }
+      const splitTestAssignments = {}
+      await Promise.all(
+        splitTests.map(async splitTest => {
+          splitTestAssignments[splitTest] =
+            await getSplitTestAssignment(splitTest)
+        })
+      )
 
       const brandVariation = project?.brandVariationId
         ? await BrandVariationsHandler.promises.getBrandVariationById(
@@ -853,7 +896,9 @@ const _ProjectController = {
         otMigrationStage: project.overleaf?.history?.otMigrationStage ?? 0,
         projectTags,
         isSaas: Features.hasFeature('saas'),
-        shouldLoadHotjar: splitTestAssignments.hotjar?.variant === 'enabled',
+        shouldLoadHotjar:
+          splitTestAssignments['hotjar-editor-onboarding']?.variant ===
+          'enabled',
         isOverleafAssistBundleEnabled,
         customerIoEnabled,
         addonPrices,
@@ -1195,6 +1240,7 @@ const defaultUserValues = () => ({
   learnedWords: [],
   projectTags: [],
   userHasInstitutionLicence: false,
+  affiliations: [],
   subscription: undefined,
   isTokenMember: false,
   isInvitedMember: false,

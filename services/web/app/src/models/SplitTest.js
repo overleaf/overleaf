@@ -60,6 +60,16 @@ const VariantSchema = new Schema(
         end: RolloutPercentType,
       },
     ],
+    userLimit: {
+      type: Number,
+      min: [0, 'User limit must be 0 or greater, got {VALUE}'],
+      required: false,
+    },
+    userCount: {
+      type: Number,
+      min: [0, 'User count must be 0 or greater, got {VALUE}'],
+      required: false,
+    },
   },
   { _id: false }
 )
