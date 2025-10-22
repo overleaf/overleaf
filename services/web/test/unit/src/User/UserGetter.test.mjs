@@ -1,24 +1,29 @@
-const { ObjectId } = require('mongodb-legacy')
-const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
-const moment = require('moment')
-const path = require('path')
-const sinon = require('sinon')
-const modulePath = path.join(
-  __dirname,
-  '../../../../app/src/Features/User/UserGetter'
-)
-const { expect } = require('chai')
-const Errors = require('../../../../app/src/Features/Errors/Errors')
-const {
+import { vi, expect } from 'vitest'
+import mongodb from 'mongodb-legacy'
+import assert from 'assert'
+import moment from 'moment'
+import path from 'path'
+import sinon from 'sinon'
+import Errors from '../../../../app/src/Features/Errors/Errors.js'
+import {
   normalizeQuery,
   normalizeMultiQuery,
-} = require('../../../../app/src/Features/Helpers/Mongo')
+} from '../../../../app/src/Features/Helpers/Mongo.js'
+const modulePath = path.join(
+  import.meta.dirname,
+  '../../../../app/src/Features/User/UserGetter'
+)
+
+vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
+  vi.importActual('../../../../app/src/Features/Errors/Errors.js')
+)
+
+const { ObjectId } = mongodb
 
 describe('UserGetter', function () {
-  beforeEach(function () {
+  beforeEach(async function (ctx) {
     const confirmedAt = new Date()
-    this.fakeUser = {
+    ctx.fakeUser = {
       _id: new ObjectId(),
       email: 'email2@foo.bar',
       emails: [
@@ -31,128 +36,149 @@ describe('UserGetter', function () {
         { email: 'email2@foo.bar', reversedHostname: 'rab.oof' },
       ],
     }
-    this.findOne = sinon.stub().resolves(this.fakeUser)
-    this.findToArrayStub = sinon.stub().resolves([this.fakeUser])
-    this.find = sinon.stub().returns({ toArray: this.findToArrayStub })
-    this.Mongo = {
+    ctx.findOne = sinon.stub().resolves(ctx.fakeUser)
+    ctx.findToArrayStub = sinon.stub().resolves([ctx.fakeUser])
+    ctx.find = sinon.stub().returns({ toArray: ctx.findToArrayStub })
+    ctx.Mongo = {
       db: {
         users: {
-          findOne: this.findOne,
-          find: this.find,
+          findOne: ctx.findOne,
+          find: ctx.find,
         },
       },
       ObjectId,
     }
-    this.getUserAffiliations = sinon.stub().resolves([])
+    ctx.getUserAffiliations = sinon.stub().resolves([])
 
-    this.Modules = {
+    ctx.Modules = {
       promises: { hooks: { fire: sinon.stub().resolves() } },
     }
-    this.AsyncLocalStorage = {
+    ctx.AsyncLocalStorage = {
       storage: {
         getStore: sinon.stub().returns(undefined),
       },
     }
 
-    this.UserGetter = SandboxedModule.require(modulePath, {
-      requires: {
-        '../Helpers/Mongo': { normalizeQuery, normalizeMultiQuery },
-        '../../infrastructure/mongodb': this.Mongo,
-        '@overleaf/settings': (this.settings = {
-          reconfirmNotificationDays: 14,
-        }),
-        '../Institutions/InstitutionsAPI': {
+    vi.doMock('../../../../app/src/Features/Helpers/Mongo', () => ({
+      normalizeQuery,
+      normalizeMultiQuery,
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/mongodb', () => ctx.Mongo)
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: (ctx.settings = {
+        reconfirmNotificationDays: 14,
+      }),
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Institutions/InstitutionsAPI',
+      () => ({
+        default: {
           promises: {
-            getUserAffiliations: this.getUserAffiliations,
+            getUserAffiliations: ctx.getUserAffiliations,
           },
         },
-        '../../infrastructure/Features': {
-          hasFeature: sinon.stub().returns(true),
-        },
-        '../../models/User': {
-          User: (this.User = {}),
-        },
-        '../../infrastructure/Modules': this.Modules,
-        '../../infrastructure/AsyncLocalStorage': this.AsyncLocalStorage,
+      })
+    )
+
+    vi.doMock('../../../../app/src/infrastructure/Features', () => ({
+      default: {
+        hasFeature: sinon.stub().returns(true),
       },
-    })
+    }))
+
+    vi.doMock('../../../../app/src/models/User', () => ({
+      User: (ctx.User = {}),
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
+      default: ctx.Modules,
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/AsyncLocalStorage', () => ({
+      default: ctx.AsyncLocalStorage,
+    }))
+
+    ctx.UserGetter = (await import(modulePath)).default
   })
 
   describe('getSsoUsersAtInstitution', function () {
-    it('should throw an error when no projection is passed', async function () {
+    it('should throw an error when no projection is passed', async function (ctx) {
       await expect(
-        this.UserGetter.promises.getSsoUsersAtInstitution(1, undefined)
+        ctx.UserGetter.promises.getSsoUsersAtInstitution(1, undefined)
       ).to.be.rejectedWith('missing projection')
     })
   })
 
   describe('getUser', function () {
-    it('should get user', async function () {
+    it('should get user', async function (ctx) {
       const query = { _id: '000000000000000000000000' }
       const projection = { email: 1 }
-      const user = await this.UserGetter.promises.getUser(query, projection)
-      this.findOne.called.should.equal(true)
-      this.findOne.calledWith(query, { projection }).should.equal(true)
-      expect(user).to.deep.equal(this.fakeUser)
+      const user = await ctx.UserGetter.promises.getUser(query, projection)
+      ctx.findOne.called.should.equal(true)
+      ctx.findOne.calledWith(query, { projection }).should.equal(true)
+      expect(user).to.deep.equal(ctx.fakeUser)
     })
 
-    it('should not allow null query', async function () {
+    it('should not allow null query', async function (ctx) {
       await expect(
-        this.UserGetter.promises.getUser(null, {})
+        ctx.UserGetter.promises.getUser(null, {})
       ).to.be.rejectedWith('no query provided')
     })
   })
 
   describe('getUsers', function () {
-    it('should get users with array of userIds', async function () {
+    it('should get users with array of userIds', async function (ctx) {
       const query = [new ObjectId()]
       const projection = { email: 1 }
-      const users = await this.UserGetter.promises.getUsers(query, projection)
-      this.find.should.have.been.calledWithMatch(
+      const users = await ctx.UserGetter.promises.getUsers(query, projection)
+      ctx.find.should.have.been.calledWithMatch(
         { _id: { $in: query } },
         { projection }
       )
-      users.should.deep.equal([this.fakeUser])
+      users.should.deep.equal([ctx.fakeUser])
     })
 
-    it('should not call mongo with empty list', async function () {
+    it('should not call mongo with empty list', async function (ctx) {
       const query = []
       const projection = { email: 1 }
-      const users = await this.UserGetter.promises.getUsers(query, projection)
+      const users = await ctx.UserGetter.promises.getUsers(query, projection)
       expect(users).to.deep.equal([])
-      expect(this.find).to.not.have.been.called
+      expect(ctx.find).to.not.have.been.called
     })
 
-    it('should not allow null query', async function () {
+    it('should not allow null query', async function (ctx) {
       await expect(
-        this.UserGetter.promises.getUsers(null, {})
+        ctx.UserGetter.promises.getUsers(null, {})
       ).to.be.rejectedWith('no query provided')
     })
   })
 
   describe('getUserFullEmails', function () {
-    it('should get user', async function () {
-      this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
+    it('should get user', async function (ctx) {
+      ctx.UserGetter.promises.getUser = sinon.stub().resolves(ctx.fakeUser)
       const projection = { email: 1, emails: 1, samlIdentifiers: 1 }
-      await this.UserGetter.promises.getUserFullEmails(this.fakeUser._id)
-      this.UserGetter.promises.getUser.called.should.equal(true)
-      this.UserGetter.promises.getUser
-        .calledWith(this.fakeUser._id, projection)
+      await ctx.UserGetter.promises.getUserFullEmails(ctx.fakeUser._id)
+      ctx.UserGetter.promises.getUser.called.should.equal(true)
+      ctx.UserGetter.promises.getUser
+        .calledWith(ctx.fakeUser._id, projection)
         .should.equal(true)
     })
 
-    it('should fetch emails data', async function () {
-      this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
-      const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-        this.fakeUser._id
+    it('should fetch emails data', async function (ctx) {
+      ctx.UserGetter.promises.getUser = sinon.stub().resolves(ctx.fakeUser)
+      const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+        ctx.fakeUser._id
       )
 
       assert.deepEqual(fullEmails, [
         {
           email: 'email1@foo.bar',
           reversedHostname: 'rab.oof',
-          confirmedAt: this.fakeUser.emails[0].confirmedAt,
-          lastConfirmedAt: this.fakeUser.emails[0].lastConfirmedAt,
+          confirmedAt: ctx.fakeUser.emails[0].confirmedAt,
+          lastConfirmedAt: ctx.fakeUser.emails[0].lastConfirmedAt,
           emailHasInstitutionLicence: false,
           default: false,
         },
@@ -166,8 +192,8 @@ describe('UserGetter', function () {
       ])
     })
 
-    it('should merge affiliation data', async function () {
-      this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
+    it('should merge affiliation data', async function (ctx) {
+      ctx.UserGetter.promises.getUser = sinon.stub().resolves(ctx.fakeUser)
       const affiliationsData = [
         {
           email: 'email1@foo.bar',
@@ -188,17 +214,17 @@ describe('UserGetter', function () {
           portal: undefined,
         },
       ]
-      this.getUserAffiliations.resolves(affiliationsData)
-      const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-        this.fakeUser._id
+      ctx.getUserAffiliations.resolves(affiliationsData)
+      const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+        ctx.fakeUser._id
       )
 
       assert.deepEqual(fullEmails, [
         {
           email: 'email1@foo.bar',
           reversedHostname: 'rab.oof',
-          confirmedAt: this.fakeUser.emails[0].confirmedAt,
-          lastConfirmedAt: this.fakeUser.emails[0].lastConfirmedAt,
+          confirmedAt: ctx.fakeUser.emails[0].confirmedAt,
+          lastConfirmedAt: ctx.fakeUser.emails[0].lastConfirmedAt,
           default: false,
           emailHasInstitutionLicence: true,
           affiliation: {
@@ -228,25 +254,25 @@ describe('UserGetter', function () {
       ])
     })
 
-    it('should merge SAML identifier', async function () {
+    it('should merge SAML identifier', async function (ctx) {
       const fakeSamlIdentifiers = [
         { providerId: 'saml_id', externalUserId: 'whatever' },
       ]
-      const fakeUserWithSaml = this.fakeUser
+      const fakeUserWithSaml = ctx.fakeUser
       fakeUserWithSaml.emails[0].samlProviderId = 'saml_id'
       fakeUserWithSaml.samlIdentifiers = fakeSamlIdentifiers
-      this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
-      this.getUserAffiliations.resolves([])
-      const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-        this.fakeUser._id
+      ctx.UserGetter.promises.getUser = sinon.stub().resolves(ctx.fakeUser)
+      ctx.getUserAffiliations.resolves([])
+      const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+        ctx.fakeUser._id
       )
 
       assert.deepEqual(fullEmails, [
         {
           email: 'email1@foo.bar',
           reversedHostname: 'rab.oof',
-          confirmedAt: this.fakeUser.emails[0].confirmedAt,
-          lastConfirmedAt: this.fakeUser.emails[0].lastConfirmedAt,
+          confirmedAt: ctx.fakeUser.emails[0].confirmedAt,
+          lastConfirmedAt: ctx.fakeUser.emails[0].lastConfirmedAt,
           default: false,
           emailHasInstitutionLicence: false,
           samlProviderId: 'saml_id',
@@ -262,21 +288,21 @@ describe('UserGetter', function () {
       ])
     })
 
-    it('should get user when it has no emails field', async function () {
-      this.fakeUserNoEmails = {
+    it('should get user when it has no emails field', async function (ctx) {
+      ctx.fakeUserNoEmails = {
         _id: '12390i',
         email: 'email2@foo.bar',
       }
-      this.UserGetter.promises.getUser = sinon
+      ctx.UserGetter.promises.getUser = sinon
         .stub()
-        .resolves(this.fakeUserNoEmails)
+        .resolves(ctx.fakeUserNoEmails)
       const projection = { email: 1, emails: 1, samlIdentifiers: 1 }
-      const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-        this.fakeUserNoEmails._id
+      const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+        ctx.fakeUserNoEmails._id
       )
-      this.UserGetter.promises.getUser.called.should.equal(true)
-      this.UserGetter.promises.getUser
-        .calledWith(this.fakeUserNoEmails._id, projection)
+      ctx.UserGetter.promises.getUser.called.should.equal(true)
+      ctx.UserGetter.promises.getUser
+        .calledWith(ctx.fakeUserNoEmails._id, projection)
         .should.equal(true)
       assert.deepEqual(fullEmails, [])
     })
@@ -322,7 +348,7 @@ describe('UserGetter', function () {
             institution: institutionNonSSO,
           },
         ]
-        it('should flag inReconfirmNotificationPeriod for all affiliations in period', async function () {
+        it('should flag inReconfirmNotificationPeriod for all affiliations in period', async function (ctx) {
           const { maxConfirmationMonths } = institutionNonSSO
           const confirmed1 = moment()
             .subtract(maxConfirmationMonths + 2, 'months')
@@ -356,10 +382,10 @@ describe('UserGetter', function () {
           const affiliations = [...affiliationsData]
           affiliations[0].last_day_to_reconfirm = lastDayToReconfirm1
           affiliations[1].last_day_to_reconfirm = lastDayToReconfirm2
-          this.getUserAffiliations.resolves(affiliations)
-          this.UserGetter.promises.getUser = sinon.stub().resolves(user)
-          const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-            this.fakeUser._id
+          ctx.getUserAffiliations.resolves(affiliations)
+          ctx.UserGetter.promises.getUser = sinon.stub().resolves(user)
+          const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+            ctx.fakeUser._id
           )
           expect(
             fullEmails[0].affiliation.inReconfirmNotificationPeriod
@@ -369,7 +395,7 @@ describe('UserGetter', function () {
           ).to.equal(true)
         })
 
-        it('should not flag affiliations outside of notification period', async function () {
+        it('should not flag affiliations outside of notification period', async function (ctx) {
           const { maxConfirmationMonths } = institutionNonSSO
           const confirmed1 = new Date()
           const lastDayToReconfirm1 = moment(confirmed1)
@@ -402,10 +428,10 @@ describe('UserGetter', function () {
           const affiliations = [...affiliationsData]
           affiliations[0].last_day_to_reconfirm = lastDayToReconfirm1
           affiliations[1].last_day_to_reconfirm = lastDayToReconfirm2
-          this.getUserAffiliations.resolves(affiliations)
-          this.UserGetter.promises.getUser = sinon.stub().resolves(user)
-          const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-            this.fakeUser._id
+          ctx.getUserAffiliations.resolves(affiliations)
+          ctx.UserGetter.promises.getUser = sinon.stub().resolves(user)
+          const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+            ctx.fakeUser._id
           )
           expect(
             fullEmails[0].affiliation.inReconfirmNotificationPeriod
@@ -417,7 +443,7 @@ describe('UserGetter', function () {
       })
 
       describe('SSO institutions', function () {
-        it('should flag only linked email, if in notification period', async function () {
+        it('should flag only linked email, if in notification period', async function (ctx) {
           const { maxConfirmationMonths } = institutionSSO
           const email1 = 'email1@sso.bar'
           const email2 = 'email2@sso.bar'
@@ -487,10 +513,10 @@ describe('UserGetter', function () {
               last_day_to_reconfirm: lastDayToReconfirm,
             },
           ]
-          this.getUserAffiliations.resolves(affiliations)
-          this.UserGetter.promises.getUser = sinon.stub().resolves(user)
-          const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-            this.fakeUser._id
+          ctx.getUserAffiliations.resolves(affiliations)
+          ctx.UserGetter.promises.getUser = sinon.stub().resolves(user)
+          const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+            ctx.fakeUser._id
           )
           expect(
             fullEmails[0].affiliation.inReconfirmNotificationPeriod
@@ -505,7 +531,7 @@ describe('UserGetter', function () {
       })
 
       describe('multiple institution affiliations', function () {
-        it('should flag each institution', async function () {
+        it('should flag each institution', async function (ctx) {
           const { maxConfirmationMonths } = institutionSSO
           const email1 = 'email1@sso.bar'
           const email2 = 'email2@sso.bar'
@@ -593,10 +619,10 @@ describe('UserGetter', function () {
             ],
           }
 
-          this.getUserAffiliations.resolves(affiliationsData)
-          this.UserGetter.promises.getUser = sinon.stub().resolves(user)
-          const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-            this.fakeUser._id
+          ctx.getUserAffiliations.resolves(affiliationsData)
+          ctx.UserGetter.promises.getUser = sinon.stub().resolves(user)
+          const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+            ctx.fakeUser._id
           )
           expect(
             fullEmails[0].affiliation.inReconfirmNotificationPeriod
@@ -614,7 +640,7 @@ describe('UserGetter', function () {
       })
 
       describe('reconfirmedAt', function () {
-        it('only use confirmedAt when no reconfirmedAt', async function () {
+        it('only use confirmedAt when no reconfirmedAt', async function (ctx) {
           const { maxConfirmationMonths } = institutionSSO
           const email1 = 'email1@foo.bar'
           const reconfirmed1 = moment().subtract(
@@ -704,10 +730,10 @@ describe('UserGetter', function () {
               },
             ],
           }
-          this.getUserAffiliations.resolves(affiliationsData)
-          this.UserGetter.promises.getUser = sinon.stub().resolves(user)
-          const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-            this.fakeUser._id
+          ctx.getUserAffiliations.resolves(affiliationsData)
+          ctx.UserGetter.promises.getUser = sinon.stub().resolves(user)
+          const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+            ctx.fakeUser._id
           )
           expect(
             fullEmails[0].affiliation.inReconfirmNotificationPeriod
@@ -723,7 +749,7 @@ describe('UserGetter', function () {
 
       describe('before reconfirmation period expires and within reconfirmation notification period', function () {
         const email = 'leonard@example-affiliation.com'
-        it('should flag the email', async function () {
+        it('should flag the email', async function (ctx) {
           const { maxConfirmationMonths } = institutionNonSSO
           const confirmedAt = moment()
             .subtract(maxConfirmationMonths, 'months')
@@ -753,10 +779,10 @@ describe('UserGetter', function () {
               },
             ],
           }
-          this.getUserAffiliations.resolves(affiliationsData)
-          this.UserGetter.promises.getUser = sinon.stub().resolves(user)
-          const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-            this.fakeUser._id
+          ctx.getUserAffiliations.resolves(affiliationsData)
+          ctx.UserGetter.promises.getUser = sinon.stub().resolves(user)
+          const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+            ctx.fakeUser._id
           )
           expect(
             fullEmails[0].affiliation.inReconfirmNotificationPeriod
@@ -765,7 +791,7 @@ describe('UserGetter', function () {
       })
 
       describe('when no Settings.reconfirmNotificationDays', function () {
-        it('should always return inReconfirmNotificationPeriod:false', async function () {
+        it('should always return inReconfirmNotificationPeriod:false', async function (ctx) {
           const email1 = 'email1@sso.bar'
           const email2 = 'email2@foo.bar'
           const email3 = 'email3@foo.bar'
@@ -814,11 +840,11 @@ describe('UserGetter', function () {
               },
             ],
           }
-          this.settings.reconfirmNotificationDays = undefined
-          this.getUserAffiliations.resolves(affiliationsData)
-          this.UserGetter.promises.getUser = sinon.stub().resolves(user)
-          const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-            this.fakeUser._id
+          ctx.settings.reconfirmNotificationDays = undefined
+          ctx.getUserAffiliations.resolves(affiliationsData)
+          ctx.UserGetter.promises.getUser = sinon.stub().resolves(user)
+          const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+            ctx.fakeUser._id
           )
           expect(
             fullEmails[0].affiliation.inReconfirmNotificationPeriod
@@ -832,7 +858,7 @@ describe('UserGetter', function () {
         })
       })
 
-      it('should flag to show notification if v1 shows as past reconfirmation but v2 does not', async function () {
+      it('should flag to show notification if v1 shows as past reconfirmation but v2 does not', async function (ctx) {
         const email = 'abc123@test.com'
         const confirmedAt = new Date()
         const affiliationsData = [
@@ -855,17 +881,17 @@ describe('UserGetter', function () {
             },
           ],
         }
-        this.getUserAffiliations.resolves(affiliationsData)
-        this.UserGetter.promises.getUser = sinon.stub().resolves(user)
-        const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-          this.fakeUser._id
+        ctx.getUserAffiliations.resolves(affiliationsData)
+        ctx.UserGetter.promises.getUser = sinon.stub().resolves(user)
+        const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+          ctx.fakeUser._id
         )
         expect(
           fullEmails[0].affiliation.inReconfirmNotificationPeriod
         ).to.equal(true)
       })
 
-      it('should flag to show notification if v1 shows as reconfirmation upcoming but v2 does not', async function () {
+      it('should flag to show notification if v1 shows as reconfirmation upcoming but v2 does not', async function (ctx) {
         const email = 'abc123@test.com'
         const { maxConfirmationMonths } = institutionNonSSO
         const affiliationsData = [
@@ -890,17 +916,17 @@ describe('UserGetter', function () {
             },
           ],
         }
-        this.getUserAffiliations.resolves(affiliationsData)
-        this.UserGetter.promises.getUser = sinon.stub().resolves(user)
-        const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-          this.fakeUser._id
+        ctx.getUserAffiliations.resolves(affiliationsData)
+        ctx.UserGetter.promises.getUser = sinon.stub().resolves(user)
+        const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+          ctx.fakeUser._id
         )
         expect(
           fullEmails[0].affiliation.inReconfirmNotificationPeriod
         ).to.equal(true)
       })
 
-      it('should flag to show notification if v2 shows as reconfirmation upcoming but v1 does not', async function () {
+      it('should flag to show notification if v2 shows as reconfirmation upcoming but v1 does not', async function (ctx) {
         const email = 'abc123@test.com'
         const { maxConfirmationMonths } = institutionNonSSO
 
@@ -930,10 +956,10 @@ describe('UserGetter', function () {
             },
           ],
         }
-        this.getUserAffiliations.resolves(affiliationsData)
-        this.UserGetter.promises.getUser = sinon.stub().resolves(user)
-        const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-          this.fakeUser._id
+        ctx.getUserAffiliations.resolves(affiliationsData)
+        ctx.UserGetter.promises.getUser = sinon.stub().resolves(user)
+        const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+          ctx.fakeUser._id
         )
         expect(
           fullEmails[0].affiliation.inReconfirmNotificationPeriod
@@ -965,35 +991,35 @@ describe('UserGetter', function () {
           ],
         }
 
-        it('should set cachedLastDayToReconfirm for SSO institutions if email is linked to SSO', async function () {
+        it('should set cachedLastDayToReconfirm for SSO institutions if email is linked to SSO', async function (ctx) {
           const userLinked = Object.assign({}, user)
           userLinked.emails[0].samlProviderId = institutionSSO.id.toString()
-          this.getUserAffiliations.resolves(affiliationsData)
-          this.UserGetter.promises.getUser = sinon.stub().resolves(userLinked)
-          const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-            this.fakeUser._id
+          ctx.getUserAffiliations.resolves(affiliationsData)
+          ctx.UserGetter.promises.getUser = sinon.stub().resolves(userLinked)
+          const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+            ctx.fakeUser._id
           )
           expect(fullEmails[0].affiliation.cachedLastDayToReconfirm).to.equal(
             lastDay
           )
         })
 
-        it('should NOT set cachedLastDayToReconfirm for SSO institutions if email is NOT linked to SSO', async function () {
-          this.getUserAffiliations.resolves(affiliationsData)
-          this.UserGetter.promises.getUser = sinon.stub().resolves(user)
-          const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-            this.fakeUser._id
+        it('should NOT set cachedLastDayToReconfirm for SSO institutions if email is NOT linked to SSO', async function (ctx) {
+          ctx.getUserAffiliations.resolves(affiliationsData)
+          ctx.UserGetter.promises.getUser = sinon.stub().resolves(user)
+          const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+            ctx.fakeUser._id
           )
           expect(fullEmails[0].affiliation.cachedLastDayToReconfirm).to.equal(
             lastDay
           )
         })
 
-        it('should set cachedLastDayToReconfirm for non-SSO institutions', async function () {
-          this.getUserAffiliations.resolves(affiliationsData)
-          this.UserGetter.promises.getUser = sinon.stub().resolves(user)
-          const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-            this.fakeUser._id
+        it('should set cachedLastDayToReconfirm for non-SSO institutions', async function (ctx) {
+          ctx.getUserAffiliations.resolves(affiliationsData)
+          ctx.UserGetter.promises.getUser = sinon.stub().resolves(user)
+          const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+            ctx.fakeUser._id
           )
           expect(fullEmails[0].affiliation.cachedLastDayToReconfirm).to.equal(
             lastDay
@@ -1003,63 +1029,63 @@ describe('UserGetter', function () {
     })
 
     describe('caching full emails data if run inside AsyncLocalStorage context', function () {
-      it('should store the data in the AsyncLocalStorage store', async function () {
-        this.store = {}
-        this.AsyncLocalStorage.storage.getStore.returns(this.store)
-        this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
-        this.getUserAffiliations.resolves([
+      it('should store the data in the AsyncLocalStorage store', async function (ctx) {
+        ctx.store = {}
+        ctx.AsyncLocalStorage.storage.getStore.returns(ctx.store)
+        ctx.UserGetter.promises.getUser = sinon.stub().resolves(ctx.fakeUser)
+        ctx.getUserAffiliations.resolves([
           {
             email: 'email1@foo.bar',
             licence: 'professional',
             institution: {},
           },
         ])
-        const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-          this.fakeUser._id
+        const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+          ctx.fakeUser._id
         )
-        expect(this.UserGetter.promises.getUser).to.have.been.calledOnce
-        expect(this.getUserAffiliations).to.have.been.calledOnce
+        expect(ctx.UserGetter.promises.getUser).to.have.been.calledOnce
+        expect(ctx.getUserAffiliations).to.have.been.calledOnce
         expect(fullEmails).to.be.an('array')
         expect(fullEmails.length).to.equal(2)
-        expect(this.store.userFullEmails[this.fakeUser._id]).to.deep.equal(
+        expect(ctx.store.userFullEmails[ctx.fakeUser._id]).to.deep.equal(
           fullEmails
         )
       })
 
-      it('should fetch data from the store if available', async function () {
-        this.store = {
+      it('should fetch data from the store if available', async function (ctx) {
+        ctx.store = {
           userFullEmails: {
-            [this.fakeUser._id]: [{ email: '1' }, { email: '2' }],
+            [ctx.fakeUser._id]: [{ email: '1' }, { email: '2' }],
           },
         }
-        this.AsyncLocalStorage.storage.getStore.returns(this.store)
-        this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
-        const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-          this.fakeUser._id,
-          this.req
+        ctx.AsyncLocalStorage.storage.getStore.returns(ctx.store)
+        ctx.UserGetter.promises.getUser = sinon.stub().resolves(ctx.fakeUser)
+        const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+          ctx.fakeUser._id,
+          ctx.req
         )
-        expect(this.UserGetter.promises.getUser).to.not.have.been.called
-        expect(this.getUserAffiliations).to.not.have.been.called
+        expect(ctx.UserGetter.promises.getUser).to.not.have.been.called
+        expect(ctx.getUserAffiliations).to.not.have.been.called
         expect(fullEmails).to.be.an('array')
         expect(fullEmails.length).to.equal(2)
-        expect(this.store.userFullEmails[this.fakeUser._id]).to.deep.equal(
+        expect(ctx.store.userFullEmails[ctx.fakeUser._id]).to.deep.equal(
           fullEmails
         )
       })
 
-      it('should not return cached data for different user ids', async function () {
-        this.store = {}
-        this.AsyncLocalStorage.storage.getStore.returns(this.store)
-        this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
-        const fullEmails = await this.UserGetter.promises.getUserFullEmails(
-          this.fakeUser._id,
-          this.req
+      it('should not return cached data for different user ids', async function (ctx) {
+        ctx.store = {}
+        ctx.AsyncLocalStorage.storage.getStore.returns(ctx.store)
+        ctx.UserGetter.promises.getUser = sinon.stub().resolves(ctx.fakeUser)
+        const fullEmails = await ctx.UserGetter.promises.getUserFullEmails(
+          ctx.fakeUser._id,
+          ctx.req
         )
-        expect(this.UserGetter.promises.getUser).to.have.been.calledOnce
-        expect(this.getUserAffiliations).to.have.been.calledOnce
+        expect(ctx.UserGetter.promises.getUser).to.have.been.calledOnce
+        expect(ctx.getUserAffiliations).to.have.been.calledOnce
         expect(fullEmails).to.be.an('array')
         expect(fullEmails.length).to.equal(2)
-        this.otherUser = {
+        ctx.otherUser = {
           _id: new ObjectId(),
           email: 'other@foo.bar',
           emails: [
@@ -1071,28 +1097,27 @@ describe('UserGetter', function () {
             },
           ],
         }
-        this.UserGetter.promises.getUser.resolves(this.otherUser)
-        this.getUserAffiliations.resolves([
+        ctx.UserGetter.promises.getUser.resolves(ctx.otherUser)
+        ctx.getUserAffiliations.resolves([
           {
             email: 'other@foo.bar',
             licence: 'professional',
             institution: {},
           },
         ])
-        const fullEmailsOther =
-          await this.UserGetter.promises.getUserFullEmails(
-            this.otherUser._id,
-            this.req
-          )
-        expect(this.UserGetter.promises.getUser).to.have.been.calledTwice
-        expect(this.getUserAffiliations).to.have.been.calledTwice
+        const fullEmailsOther = await ctx.UserGetter.promises.getUserFullEmails(
+          ctx.otherUser._id,
+          ctx.req
+        )
+        expect(ctx.UserGetter.promises.getUser).to.have.been.calledTwice
+        expect(ctx.getUserAffiliations).to.have.been.calledTwice
         expect(fullEmailsOther).to.not.deep.equal(fullEmails)
         expect(fullEmailsOther).to.be.an('array')
         expect(fullEmailsOther.length).to.equal(1)
-        expect(this.store.userFullEmails[this.fakeUser._id]).to.deep.equal(
+        expect(ctx.store.userFullEmails[ctx.fakeUser._id]).to.deep.equal(
           fullEmails
         )
-        expect(this.store.userFullEmails[this.otherUser._id]).to.deep.equal(
+        expect(ctx.store.userFullEmails[ctx.otherUser._id]).to.deep.equal(
           fullEmailsOther
         )
       })
@@ -1100,8 +1125,8 @@ describe('UserGetter', function () {
   })
 
   describe('getUserConfirmedEmails', function () {
-    beforeEach(function () {
-      this.fakeUser = {
+    beforeEach(function (ctx) {
+      ctx.fakeUser = {
         emails: [
           {
             email: 'email1@foo.bar',
@@ -1116,21 +1141,21 @@ describe('UserGetter', function () {
           },
         ],
       }
-      this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
+      ctx.UserGetter.promises.getUser = sinon.stub().resolves(ctx.fakeUser)
     })
 
-    it('should get user', async function () {
+    it('should get user', async function (ctx) {
       const projection = { emails: 1 }
-      await this.UserGetter.promises.getUserConfirmedEmails(this.fakeUser._id)
+      await ctx.UserGetter.promises.getUserConfirmedEmails(ctx.fakeUser._id)
 
-      this.UserGetter.promises.getUser
-        .calledWith(this.fakeUser._id, projection)
+      ctx.UserGetter.promises.getUser
+        .calledWith(ctx.fakeUser._id, projection)
         .should.equal(true)
     })
 
-    it('should return only confirmed emails', async function () {
+    it('should return only confirmed emails', async function (ctx) {
       const confirmedEmails =
-        await this.UserGetter.promises.getUserConfirmedEmails(this.fakeUser._id)
+        await ctx.UserGetter.promises.getUserConfirmedEmails(ctx.fakeUser._id)
 
       expect(confirmedEmails.length).to.equal(2)
       expect(confirmedEmails[0].email).to.equal('email1@foo.bar')
@@ -1139,85 +1164,85 @@ describe('UserGetter', function () {
   })
 
   describe('getUserbyMainEmail', function () {
-    it('query user by main email', async function () {
+    it('query user by main email', async function (ctx) {
       const email = 'hello@world.com'
       const projection = { emails: 1 }
-      await this.UserGetter.promises.getUserByMainEmail(email, projection)
-      this.findOne.called.should.equal(true)
-      this.findOne.calledWith({ email }, { projection }).should.equal(true)
+      await ctx.UserGetter.promises.getUserByMainEmail(email, projection)
+      ctx.findOne.called.should.equal(true)
+      ctx.findOne.calledWith({ email }, { projection }).should.equal(true)
     })
 
-    it('return user if found', async function () {
+    it('return user if found', async function (ctx) {
       const email = 'hello@world.com'
-      const user = await this.UserGetter.promises.getUserByMainEmail(email)
-      user.should.deep.equal(this.fakeUser)
+      const user = await ctx.UserGetter.promises.getUserByMainEmail(email)
+      user.should.deep.equal(ctx.fakeUser)
     })
 
-    it('trim email', async function () {
+    it('trim email', async function (ctx) {
       const email = 'hello@world.com'
-      await this.UserGetter.promises.getUserByMainEmail(` ${email} `)
-      this.findOne.called.should.equal(true)
-      this.findOne.calledWith({ email }).should.equal(true)
+      await ctx.UserGetter.promises.getUserByMainEmail(` ${email} `)
+      ctx.findOne.called.should.equal(true)
+      ctx.findOne.calledWith({ email }).should.equal(true)
     })
   })
 
   describe('getUserByAnyEmail', function () {
-    it('query user for any email', async function () {
+    it('query user for any email', async function (ctx) {
       const email = 'hello@world.com'
       const expectedQuery = {
         emails: { $exists: true },
         'emails.email': email,
       }
       const projection = { emails: 1 }
-      const user = await this.UserGetter.promises.getUserByAnyEmail(
+      const user = await ctx.UserGetter.promises.getUserByAnyEmail(
         ` ${email} `,
         projection
       )
-      this.findOne.calledWith(expectedQuery, { projection }).should.equal(true)
-      user.should.deep.equal(this.fakeUser)
+      ctx.findOne.calledWith(expectedQuery, { projection }).should.equal(true)
+      user.should.deep.equal(ctx.fakeUser)
     })
 
-    it('query contains $exists:true so partial index is used', async function () {
+    it('query contains $exists:true so partial index is used', async function (ctx) {
       const expectedQuery = {
         emails: { $exists: true },
         'emails.email': '',
       }
-      await this.UserGetter.promises.getUserByAnyEmail('', {})
-      this.findOne
+      await ctx.UserGetter.promises.getUserByAnyEmail('', {})
+      ctx.findOne
         .calledWith(expectedQuery, { projection: {} })
         .should.equal(true)
     })
 
-    it('checks main email as well', async function () {
-      this.findOne.resolves(null)
+    it('checks main email as well', async function (ctx) {
+      ctx.findOne.resolves(null)
       const email = 'hello@world.com'
       const projection = { emails: 1 }
-      await this.UserGetter.promises.getUserByAnyEmail(` ${email} `, projection)
-      this.findOne.calledTwice.should.equal(true)
-      this.findOne.calledWith({ email }, { projection }).should.equal(true)
+      await ctx.UserGetter.promises.getUserByAnyEmail(` ${email} `, projection)
+      ctx.findOne.calledTwice.should.equal(true)
+      ctx.findOne.calledWith({ email }, { projection }).should.equal(true)
     })
   })
 
   describe('getUsersByHostname', function () {
-    it('should find user by hostname', async function () {
+    it('should find user by hostname', async function (ctx) {
       const hostname = 'bar.foo'
       const expectedQuery = {
         emails: { $exists: true },
         'emails.reversedHostname': hostname.split('').reverse().join(''),
       }
       const projection = { emails: 1 }
-      await this.UserGetter.promises.getUsersByHostname(hostname, projection)
-      this.find.calledOnce.should.equal(true)
-      this.find.calledWith(expectedQuery, { projection }).should.equal(true)
+      await ctx.UserGetter.promises.getUsersByHostname(hostname, projection)
+      ctx.find.calledOnce.should.equal(true)
+      ctx.find.calledWith(expectedQuery, { projection }).should.equal(true)
     })
   })
 
   describe('getUsersByAnyConfirmedEmail', function () {
-    it('should find users by confirmed email', async function () {
+    it('should find users by confirmed email', async function (ctx) {
       const emails = ['confirmed@example.com']
 
-      await this.UserGetter.promises.getUsersByAnyConfirmedEmail(emails)
-      expect(this.find).to.be.calledOnceWith(
+      await ctx.UserGetter.promises.getUsersByAnyConfirmedEmail(emails)
+      expect(ctx.find).to.be.calledOnceWith(
         {
           'emails.email': { $in: emails }, // use the index on emails.email
           emails: {
@@ -1234,85 +1259,85 @@ describe('UserGetter', function () {
   })
 
   describe('getUsersByV1Id', function () {
-    it('should find users by list of v1 ids', async function () {
+    it('should find users by list of v1 ids', async function (ctx) {
       const v1Ids = [501]
       const expectedQuery = {
         'overleaf.id': { $in: v1Ids },
       }
       const projection = { emails: 1 }
-      await this.UserGetter.promises.getUsersByV1Ids(v1Ids, projection)
-      this.find.calledOnce.should.equal(true)
-      this.find.calledWith(expectedQuery, { projection }).should.equal(true)
+      await ctx.UserGetter.promises.getUsersByV1Ids(v1Ids, projection)
+      ctx.find.calledOnce.should.equal(true)
+      ctx.find.calledWith(expectedQuery, { projection }).should.equal(true)
     })
   })
 
   describe('ensureUniqueEmailAddress', function () {
-    beforeEach(function () {
-      this.UserGetter.promises.getUserByAnyEmail = sinon.stub()
+    beforeEach(function (ctx) {
+      ctx.UserGetter.promises.getUserByAnyEmail = sinon.stub()
     })
 
-    it('should return error if existing user is found', async function () {
-      this.UserGetter.promises.getUserByAnyEmail.resolves(this.fakeUser)
+    it('should return error if existing user is found', async function (ctx) {
+      ctx.UserGetter.promises.getUserByAnyEmail.resolves(ctx.fakeUser)
       await expect(
-        this.UserGetter.promises.ensureUniqueEmailAddress(this.newEmail)
+        ctx.UserGetter.promises.ensureUniqueEmailAddress(ctx.newEmail)
       ).to.be.rejectedWith(Errors.EmailExistsError)
     })
 
-    it('should return null if no user is found', async function () {
-      this.UserGetter.promises.getUserByAnyEmail.resolves(null)
+    it('should return null if no user is found', async function (ctx) {
+      ctx.UserGetter.promises.getUserByAnyEmail.resolves(null)
       await expect(
-        this.UserGetter.promises.ensureUniqueEmailAddress(this.newEmail)
+        ctx.UserGetter.promises.ensureUniqueEmailAddress(ctx.newEmail)
       ).to.be.fulfilled
     })
   })
 
   describe('getUserFeatures', function () {
-    beforeEach(function () {
-      this.Modules.promises.hooks.fire = sinon.stub().resolves()
-      this.fakeUser.features = {}
+    beforeEach(function (ctx) {
+      ctx.Modules.promises.hooks.fire = sinon.stub().resolves()
+      ctx.fakeUser.features = {}
     })
 
-    it('should return user features', async function () {
-      this.fakeUser.features = { feature1: true, feature2: false }
-      const features = await this.UserGetter.promises.getUserFeatures(
+    it('should return user features', async function (ctx) {
+      ctx.fakeUser.features = { feature1: true, feature2: false }
+      const features = await ctx.UserGetter.promises.getUserFeatures(
         new ObjectId()
       )
-      expect(features).to.deep.equal(this.fakeUser.features)
+      expect(features).to.deep.equal(ctx.fakeUser.features)
     })
 
-    it('should return user features when using promises', async function () {
-      this.fakeUser.features = { feature1: true, feature2: false }
-      const features = await this.UserGetter.promises.getUserFeatures(
-        this.fakeUser._id
+    it('should return user features when using promises', async function (ctx) {
+      ctx.fakeUser.features = { feature1: true, feature2: false }
+      const features = await ctx.UserGetter.promises.getUserFeatures(
+        ctx.fakeUser._id
       )
-      expect(features).to.deep.equal(this.fakeUser.features)
+      expect(features).to.deep.equal(ctx.fakeUser.features)
     })
 
-    it('should take into account features overrides from modules', async function () {
+    it('should take into account features overrides from modules', async function (ctx) {
       // this case occurs when the user has bought the ai bundle on WF, which should include our error assistant
       const bundleFeatures = { aiErrorAssistant: true }
-      this.fakeUser.features = { aiErrorAssistant: false }
-      this.Modules.promises.hooks.fire = sinon.stub().resolves([bundleFeatures])
-      const features = await this.UserGetter.promises.getUserFeatures(
-        this.fakeUser._id
+      ctx.fakeUser.features = { aiErrorAssistant: false }
+      ctx.Modules.promises.hooks.fire = sinon.stub().resolves([bundleFeatures])
+      const features = await ctx.UserGetter.promises.getUserFeatures(
+        ctx.fakeUser._id
       )
       expect(features).to.deep.equal(bundleFeatures)
-      this.Modules.promises.hooks.fire.should.have.been.calledWith(
+      ctx.Modules.promises.hooks.fire.should.have.been.calledWith(
         'getModuleProvidedFeatures',
-        this.fakeUser._id
+        ctx.fakeUser._id
       )
     })
 
-    it('should handle modules not returning any features', async function () {
-      this.Modules.promises.hooks.fire = sinon.stub().resolves([])
-      this.fakeUser.features = { test: true }
-      const features = await this.UserGetter.promises.getUserFeatures(
-        this.fakeUser._id
+    it('should handle modules not returning any features', async function (ctx) {
+      ctx.Modules.promises.hooks.fire = sinon.stub().resolves([])
+      ctx.fakeUser.features = { test: true }
+      const features = await ctx.UserGetter.promises.getUserFeatures(
+        ctx.fakeUser._id
       )
       expect(features).to.deep.equal({ test: true })
-      this.Modules.promises.hooks.fire.should.have.been.calledWith(
+      ctx.Modules.promises.hooks.fire.should.have.been.calledWith(
         'getModuleProvidedFeatures',
-        this.fakeUser._id
+        ctx.fakeUser._id
       )
     })
   })

@@ -1,19 +1,21 @@
-const Path = require('path')
-const SandboxedModule = require('sandboxed-module')
-const sinon = require('sinon')
-const { ObjectId } = require('mongodb-legacy')
-const { assert, expect } = require('chai')
-const MockRequest = require('../helpers/MockRequest')
-const MockResponse = require('../helpers/MockResponse')
+import { vi, assert, expect } from 'vitest'
+import Path from 'path'
+import sinon from 'sinon'
+import mongodb from 'mongodb-legacy'
+import MockRequest from '../helpers/MockRequest.js'
+import MockResponse from '../helpers/MockResponse.js'
+
+const { ObjectId } = mongodb
 
 const MODULE_PATH = Path.join(
-  __dirname,
+  import.meta.dirname,
   '../../../../app/src/Features/SplitTests/SplitTestHandler'
 )
 
 describe('SplitTestHandler', function () {
-  beforeEach(function () {
-    this.splitTests = [
+  let Features
+  beforeEach(async function (ctx) {
+    ctx.splitTests = [
       makeSplitTest('active-test', { versionNumber: 2 }),
       makeSplitTest('not-active-test', { active: false }),
       makeSplitTest('legacy-test'),
@@ -23,72 +25,119 @@ describe('SplitTestHandler', function () {
         versionNumber: 2,
       }),
     ]
-    this.cachedSplitTests = new Map()
-    for (const splitTest of this.splitTests) {
-      this.cachedSplitTests.set(splitTest.name, splitTest)
+    ctx.cachedSplitTests = new Map()
+    for (const splitTest of ctx.splitTests) {
+      ctx.cachedSplitTests.set(splitTest.name, splitTest)
     }
 
-    this.SplitTest = {
+    ctx.SplitTest = {
       find: sinon.stub().returns({
-        exec: sinon.stub().resolves(this.splitTests),
+        exec: sinon.stub().resolves(ctx.splitTests),
       }),
     }
 
-    this.SplitTestCache = {
+    ctx.SplitTestCache = {
       get: sinon.stub().resolves({}),
     }
-    this.SplitTestCache.get.resolves(this.cachedSplitTests)
-    this.Settings = {
+    ctx.SplitTestCache.get.resolves(ctx.cachedSplitTests)
+    ctx.Settings = {
       moduleImportSequence: [],
       overleaf: {},
       devToolbar: {
         enabled: false,
       },
     }
-    this.AnalyticsManager = {
+    ctx.AnalyticsManager = {
       getIdsFromSession: sinon.stub(),
       setUserPropertyForAnalyticsId: sinon.stub().resolves(),
     }
-    this.LocalsHelper = {
+    ctx.LocalsHelper = {
       setSplitTestVariant: sinon.stub(),
       setSplitTestInfo: sinon.stub(),
     }
-    this.SplitTestSessionHandler = {
+    ctx.SplitTestSessionHandler = {
       collectSessionStats: sinon.stub(),
       getCachedVariant: sinon.stub(),
       setVariantInCache: sinon.stub(),
     }
-    this.SplitTestUserGetter = {
+    ctx.SplitTestUserGetter = {
       promises: {
         getUser: sinon.stub().resolves(null),
       },
     }
-    this.SessionManager = {
+    ctx.SessionManager = {
       isUserLoggedIn: sinon.stub().returns(false),
     }
 
-    this.SplitTestHandler = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        '../User/UserGetter': this.UserGetter,
-        './SplitTestCache': this.SplitTestCache,
-        '../../models/SplitTest': { SplitTest: this.SplitTest },
-        '../User/UserUpdater': {},
-        '../Analytics/AnalyticsManager': this.AnalyticsManager,
-        './LocalsHelper': this.LocalsHelper,
-        './SplitTestSessionHandler': this.SplitTestSessionHandler,
-        './SplitTestUserGetter': this.SplitTestUserGetter,
-        '../Authentication/SessionManager': this.SessionManager,
-        '@overleaf/settings': this.Settings,
-      },
-    })
+    Features = {
+      hasFeature: vi.fn().mockReturnValue(true),
+    }
 
-    this.req = new MockRequest()
-    this.res = new MockResponse()
+    vi.doMock('../../../../app/src/infrastructure/Features', () => ({
+      default: Features,
+    }))
+
+    vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
+      default: ctx.UserGetter,
+    }))
+
+    vi.doMock('../../../../app/src/Features/SplitTests/SplitTestCache', () => ({
+      default: ctx.SplitTestCache,
+    }))
+
+    vi.doMock('../../../../app/src/models/SplitTest', () => ({
+      SplitTest: ctx.SplitTest,
+    }))
+
+    vi.doMock('../../../../app/src/Features/User/UserUpdater', () => ({
+      default: {},
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Analytics/AnalyticsManager',
+      () => ({
+        default: ctx.AnalyticsManager,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/SplitTests/LocalsHelper', () => ({
+      default: ctx.LocalsHelper,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/SplitTests/SplitTestSessionHandler',
+      () => ({
+        default: ctx.SplitTestSessionHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/SplitTests/SplitTestUserGetter',
+      () => ({
+        default: ctx.SplitTestUserGetter,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Authentication/SessionManager',
+      () => ({
+        default: ctx.SessionManager,
+      })
+    )
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.Settings,
+    }))
+
+    ctx.SplitTestHandler = (await import(MODULE_PATH)).default
+
+    ctx.req = new MockRequest()
+    ctx.res = new MockResponse()
   })
 
   describe('with an existing user', function () {
-    beforeEach(async function () {
-      this.user = {
+    beforeEach(async function (ctx) {
+      ctx.user = {
         _id: new ObjectId(),
         splitTests: {
           'active-test': [
@@ -110,53 +159,53 @@ describe('SplitTestHandler', function () {
           ],
         },
       }
-      this.SplitTestUserGetter.promises.getUser.resolves(this.user)
-      this.SessionManager.isUserLoggedIn.returns(true)
-      this.assignments =
-        await this.SplitTestHandler.promises.getActiveAssignmentsForUser(
-          this.user._id
+      ctx.SplitTestUserGetter.promises.getUser.resolves(ctx.user)
+      ctx.SessionManager.isUserLoggedIn.returns(true)
+      ctx.assignments =
+        await ctx.SplitTestHandler.promises.getActiveAssignmentsForUser(
+          ctx.user._id
         )
-      this.explicitAssignments =
-        await this.SplitTestHandler.promises.getActiveAssignmentsForUser(
-          this.user._id,
+      ctx.explicitAssignments =
+        await ctx.SplitTestHandler.promises.getActiveAssignmentsForUser(
+          ctx.user._id,
           false,
           true
         )
-      this.assignedToActiveTest =
-        await this.SplitTestHandler.promises.hasUserBeenAssignedToVariant(
-          this.req,
-          this.user._id,
+      ctx.assignedToActiveTest =
+        await ctx.SplitTestHandler.promises.hasUserBeenAssignedToVariant(
+          ctx.req,
+          ctx.user._id,
           'active-test',
           'variant-1'
         )
-      this.assignedToActiveTestAnyVersion =
-        await this.SplitTestHandler.promises.hasUserBeenAssignedToVariant(
-          this.req,
-          this.user._id,
+      ctx.assignedToActiveTestAnyVersion =
+        await ctx.SplitTestHandler.promises.hasUserBeenAssignedToVariant(
+          ctx.req,
+          ctx.user._id,
           'active-test',
           'variant-1',
           true
         )
     })
 
-    it('handles the legacy assignment format', function () {
-      expect(this.assignments['legacy-test']).to.deep.equal({
+    it('handles the legacy assignment format', function (ctx) {
+      expect(ctx.assignments['legacy-test']).to.deep.equal({
         variantName: 'variant-1',
         phase: 'release',
         versionNumber: 1,
       })
     })
 
-    it('returns the current assignment for each active test', function () {
-      expect(this.assignments['active-test']).to.deep.equal({
+    it('returns the current assignment for each active test', function (ctx) {
+      expect(ctx.assignments['active-test']).to.deep.equal({
         variantName: 'variant-1',
         phase: 'release',
         versionNumber: 2,
       })
     })
 
-    it('returns the explicit assignment for each active test', function () {
-      expect(this.explicitAssignments['active-test']).to.deep.equal({
+    it('returns the explicit assignment for each active test', function (ctx) {
+      expect(ctx.explicitAssignments['active-test']).to.deep.equal({
         variantName: 'variant-1',
         phase: 'release',
         versionNumber: 2,
@@ -164,74 +213,74 @@ describe('SplitTestHandler', function () {
       })
     })
 
-    it('returns the current assignment for tests with analytics disabled', function () {
-      expect(this.assignments['no-analytics-test-1']).to.deep.equal({
+    it('returns the current assignment for tests with analytics disabled', function (ctx) {
+      expect(ctx.assignments['no-analytics-test-1']).to.deep.equal({
         variantName: 'variant-1',
         phase: 'release',
         versionNumber: 1,
       })
     })
 
-    it('returns the current assignment for tests with analytics disabled that had previous assignments', function () {
-      expect(this.assignments['no-analytics-test-2']).to.deep.equal({
+    it('returns the current assignment for tests with analytics disabled that had previous assignments', function (ctx) {
+      expect(ctx.assignments['no-analytics-test-2']).to.deep.equal({
         variantName: 'variant-1',
         phase: 'release',
         versionNumber: 2,
       })
     })
 
-    it('shows user has been assigned to previous version of variant', function () {
-      expect(this.assignedToActiveTestAnyVersion).to.be.true
+    it('shows user has been assigned to previous version of variant', function (ctx) {
+      expect(ctx.assignedToActiveTestAnyVersion).to.be.true
     })
 
-    it('shows user has not been explicitly assigned to current version of variant', function () {
-      expect(this.assignedToActiveTest).to.be.false
+    it('shows user has not been explicitly assigned to current version of variant', function (ctx) {
+      expect(ctx.assignedToActiveTest).to.be.false
     })
 
-    it('does not return assignments for unknown tests', function () {
-      expect(this.assignments).not.to.have.property('unknown-test')
+    it('does not return assignments for unknown tests', function (ctx) {
+      expect(ctx.assignments).not.to.have.property('unknown-test')
     })
   })
 
   describe('with an non-existent user', function () {
-    beforeEach(async function () {
+    beforeEach(async function (ctx) {
       const unknownUserId = new ObjectId()
-      this.assignments =
-        await this.SplitTestHandler.promises.getActiveAssignmentsForUser(
+      ctx.assignments =
+        await ctx.SplitTestHandler.promises.getActiveAssignmentsForUser(
           unknownUserId
         )
     })
 
-    it('returns empty assignments', function () {
-      expect(this.assignments).to.deep.equal({})
+    it('returns empty assignments', function (ctx) {
+      expect(ctx.assignments).to.deep.equal({})
     })
   })
 
   describe('with a user without assignments', function () {
-    beforeEach(async function () {
-      this.user = { _id: new ObjectId() }
-      this.SplitTestUserGetter.promises.getUser.resolves(this.user)
-      this.assignments =
-        await this.SplitTestHandler.promises.getActiveAssignmentsForUser(
-          this.user._id
+    beforeEach(async function (ctx) {
+      ctx.user = { _id: new ObjectId() }
+      ctx.SplitTestUserGetter.promises.getUser.resolves(ctx.user)
+      ctx.assignments =
+        await ctx.SplitTestHandler.promises.getActiveAssignmentsForUser(
+          ctx.user._id
         )
-      this.explicitAssignments =
-        await this.SplitTestHandler.promises.getActiveAssignmentsForUser(
-          this.user._id,
+      ctx.explicitAssignments =
+        await ctx.SplitTestHandler.promises.getActiveAssignmentsForUser(
+          ctx.user._id,
           false,
           true
         )
-      this.assignedToActiveTest =
-        await this.SplitTestHandler.promises.hasUserBeenAssignedToVariant(
-          this.req,
-          this.user._id,
+      ctx.assignedToActiveTest =
+        await ctx.SplitTestHandler.promises.hasUserBeenAssignedToVariant(
+          ctx.req,
+          ctx.user._id,
           'active-test',
           'variant-1'
         )
     })
 
-    it('returns current assignments', function () {
-      expect(this.assignments).to.deep.equal({
+    it('returns current assignments', function (ctx) {
+      expect(ctx.assignments).to.deep.equal({
         'active-test': {
           phase: 'release',
           variantName: 'variant-1',
@@ -260,23 +309,23 @@ describe('SplitTestHandler', function () {
       })
     })
 
-    it('shows user not assigned to variant', function () {
-      expect(this.assignedToActiveTest).to.be.false
+    it('shows user not assigned to variant', function (ctx) {
+      expect(ctx.assignedToActiveTest).to.be.false
     })
   })
 
   describe('with settings overrides', function () {
-    beforeEach(function () {
-      this.Settings.splitTestOverrides = {
+    beforeEach(function (ctx) {
+      ctx.Settings.splitTestOverrides = {
         'my-test-name': 'foo-1',
       }
     })
 
-    it('should not use the override when in SaaS mode', async function () {
-      this.AnalyticsManager.getIdsFromSession.returns({
+    it('should not use the override when in SaaS mode', async function (ctx) {
+      ctx.AnalyticsManager.getIdsFromSession.returns({
         userId: 'abc123abc123',
       })
-      this.SplitTestCache.get.resolves(
+      ctx.SplitTestCache.get.resolves(
         new Map([
           [
             'my-test-name',
@@ -300,37 +349,39 @@ describe('SplitTestHandler', function () {
         ])
       )
 
-      const assignment = await this.SplitTestHandler.promises.getAssignment(
-        this.req,
-        this.res,
+      const assignment = await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
         'my-test-name'
       )
 
       assert.equal('100-percent-variant', assignment.variant)
     })
 
-    it('should use the override when not in SaaS mode', async function () {
-      this.Settings.splitTestOverrides = {
+    it('should use the override when not in SaaS mode', async function (ctx) {
+      ctx.Settings.splitTestOverrides = {
         'my-test-name': 'foo-1',
       }
-      this.Settings.overleaf = undefined
-
-      const assignment = await this.SplitTestHandler.promises.getAssignment(
-        this.req,
-        this.res,
+      ctx.Settings.overleaf = undefined
+      Features.hasFeature.mockImplementation(function (feature) {
+        return feature !== 'saas'
+      })
+      const assignment = await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
         'my-test-name'
       )
 
       assert.equal('foo-1', assignment.variant)
     })
 
-    it('should use default when not in SaaS mode and no override is provided', async function () {
-      this.Settings.splitTestOverrides = {}
-      this.Settings.overleaf = undefined
+    it('should use default when not in SaaS mode and no override is provided', async function (ctx) {
+      ctx.Settings.splitTestOverrides = {}
+      ctx.Settings.overleaf = undefined
 
-      const assignment = await this.SplitTestHandler.promises.getAssignment(
-        this.req,
-        this.res,
+      const assignment = await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
         'my-test-name'
       )
 
@@ -339,34 +390,36 @@ describe('SplitTestHandler', function () {
   })
 
   describe('save assignments to res.locals', function () {
-    beforeEach(function () {
-      this.AnalyticsManager.getIdsFromSession.returns({
+    beforeEach(function (ctx) {
+      ctx.AnalyticsManager.getIdsFromSession.returns({
         userId: 'abc123abc123',
       })
     })
 
-    it('when in SaaS mode it should set the variant', async function () {
-      await this.SplitTestHandler.promises.getAssignment(
-        this.req,
-        this.res,
+    it('when in SaaS mode it should set the variant', async function (ctx) {
+      await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
         'active-test'
       )
-      expect(this.LocalsHelper.setSplitTestVariant).to.have.been.calledWith(
-        this.res.locals,
+      expect(ctx.LocalsHelper.setSplitTestVariant).to.have.been.calledWith(
+        ctx.res.locals,
         'active-test',
         'variant-1'
       )
     })
 
-    it('when not in SaaS mode it should set the default variant', async function () {
-      this.Settings.overleaf = undefined
-      await this.SplitTestHandler.promises.getAssignment(
-        this.req,
-        this.res,
+    it('when not in SaaS mode it should set the default variant', async function (ctx) {
+      Features.hasFeature.mockImplementation(function (feature) {
+        return feature !== 'saas'
+      })
+      await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
         'active-test'
       )
-      expect(this.LocalsHelper.setSplitTestVariant).to.have.been.calledWith(
-        this.res.locals,
+      expect(ctx.LocalsHelper.setSplitTestVariant).to.have.been.calledWith(
+        ctx.res.locals,
         'active-test',
         'default'
       )
@@ -374,62 +427,62 @@ describe('SplitTestHandler', function () {
   })
 
   describe('variant user limits', function () {
-    beforeEach(function () {
-      this.AnalyticsManager.getIdsFromSession.returns({
+    beforeEach(function (ctx) {
+      ctx.AnalyticsManager.getIdsFromSession.returns({
         userId: 'abc123abc123',
       })
-      this.SplitTestUserGetter.promises.getUser.resolves({
+      ctx.SplitTestUserGetter.promises.getUser.resolves({
         _id: new ObjectId('abc123abc123abc123abc123'),
         splitTests: {},
       })
     })
 
-    it('should assign to variant when under limit', async function () {
-      this.cachedSplitTests.set(
+    it('should assign to variant when under limit', async function (ctx) {
+      ctx.cachedSplitTests.set(
         'active-test',
         makeSplitTest('active-test', { userLimit: 100, userCount: 50 })
       )
 
-      const assignment = await this.SplitTestHandler.promises.getAssignment(
-        this.req,
-        this.res,
+      const assignment = await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
         'active-test'
       )
 
       expect(assignment.variant).to.equal('variant-1')
     })
 
-    it('should assign to default when limit reached', async function () {
-      this.cachedSplitTests.set(
+    it('should assign to default when limit reached', async function (ctx) {
+      ctx.cachedSplitTests.set(
         'active-test',
         makeSplitTest('active-test', { userLimit: 100, userCount: 100 })
       )
 
-      const assignment = await this.SplitTestHandler.promises.getAssignment(
-        this.req,
-        this.res,
+      const assignment = await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
         'active-test'
       )
 
       expect(assignment.variant).to.equal('default')
     })
 
-    it('should not apply limits when no limit configured', async function () {
-      const assignment = await this.SplitTestHandler.promises.getAssignment(
-        this.req,
-        this.res,
+    it('should not apply limits when no limit configured', async function (ctx) {
+      const assignment = await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
         'active-test'
       )
 
       expect(assignment.variant).to.equal('variant-1')
     })
 
-    it('should allow already assigned users even when limit reached', async function () {
-      this.cachedSplitTests.set(
+    it('should allow already assigned users even when limit reached', async function (ctx) {
+      ctx.cachedSplitTests.set(
         'active-test',
         makeSplitTest('active-test', { userLimit: 100, userCount: 100 })
       )
-      this.SplitTestUserGetter.promises.getUser.resolves({
+      ctx.SplitTestUserGetter.promises.getUser.resolves({
         _id: new ObjectId('abc123abc123abc123abc123'),
         splitTests: {
           'active-test': [
@@ -443,24 +496,24 @@ describe('SplitTestHandler', function () {
         },
       })
 
-      const assignment = await this.SplitTestHandler.promises.getAssignment(
-        this.req,
-        this.res,
+      const assignment = await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
         'active-test'
       )
 
       expect(assignment.variant).to.equal('variant-1')
     })
 
-    it('should assign to default if userCount is undefined', async function () {
-      this.cachedSplitTests.set(
+    it('should assign to default if userCount is undefined', async function (ctx) {
+      ctx.cachedSplitTests.set(
         'active-test',
         makeSplitTest('active-test', { userLimit: 100, userCount: undefined })
       )
 
-      const assignment = await this.SplitTestHandler.promises.getAssignment(
-        this.req,
-        this.res,
+      const assignment = await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
         'active-test'
       )
 

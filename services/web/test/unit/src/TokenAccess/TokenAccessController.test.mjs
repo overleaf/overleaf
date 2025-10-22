@@ -245,17 +245,15 @@ describe('TokenAccessController', function () {
       () => ({ default: ctx.AdminAuthorizationHelper })
     )
 
-    vi.doMock(
-      '../../../../app/src/Features/Helpers/UrlHelper',
-      () =>
-        (ctx.UrlHelper = {
-          getSafeAdminDomainRedirect: sinon
-            .stub()
-            .callsFake(
-              path => `${ctx.Settings.adminUrl}${getSafeRedirectPath(path)}`
-            ),
-        })
-    )
+    vi.doMock('../../../../app/src/Features/Helpers/UrlHelper', () => ({
+      default: (ctx.UrlHelper = {
+        getSafeAdminDomainRedirect: sinon
+          .stub()
+          .callsFake(
+            path => `${ctx.Settings.adminUrl}${getSafeRedirectPath(path)}`
+          ),
+      }),
+    }))
 
     vi.doMock(
       '../../../../app/src/Features/Analytics/AnalyticsManager',

@@ -1,11 +1,5 @@
-const { expect } = require('chai')
-const path = require('path')
-const InstitutionsHelper = require(
-  path.join(
-    __dirname,
-    '/../../../../app/src/Features/Institutions/InstitutionsHelper'
-  )
-)
+import { expect } from 'chai'
+import InstitutionsHelper from '../../../../app/src/Features/Institutions/InstitutionsHelper.mjs'
 
 describe('InstitutionsHelper', function () {
   describe('emailHasLicence', function () {

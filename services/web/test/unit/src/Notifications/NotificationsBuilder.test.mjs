@@ -1,37 +1,45 @@
-const SandboxedModule = require('sandboxed-module')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const modulePath = require('path').join(
-  __dirname,
-  '../../../../app/src/Features/Notifications/NotificationsBuilder.js'
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+import path from 'node:path'
+const modulePath = path.join(
+  import.meta.dirname,
+  '../../../../app/src/Features/Notifications/NotificationsBuilder.mjs'
 )
 
 describe('NotificationsBuilder', function () {
   const userId = '507f1f77bcf86cd799439011'
 
-  beforeEach(function () {
-    this.handler = { promises: { createNotification: sinon.stub().resolves() } }
-    this.settings = {
+  beforeEach(async function (ctx) {
+    ctx.handler = { promises: { createNotification: sinon.stub().resolves() } }
+    ctx.settings = {
       apis: { v1: { url: 'http://v1.url', user: '', pass: '' } },
     }
-    this.FetchUtils = {
+    ctx.FetchUtils = {
       fetchJson: sinon.stub(),
     }
-    this.controller = SandboxedModule.require(modulePath, {
-      requires: {
-        './NotificationsHandler': this.handler,
-        '@overleaf/settings': this.settings,
-        '@overleaf/fetch-utils': this.FetchUtils,
-      },
-    })
+
+    vi.doMock(
+      '../../../../app/src/Features/Notifications/NotificationsHandler',
+      () => ({
+        default: ctx.handler,
+      })
+    )
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.settings,
+    }))
+
+    vi.doMock('@overleaf/fetch-utils', () => ctx.FetchUtils)
+
+    ctx.controller = (await import(modulePath)).default
   })
 
   describe('dropboxUnlinkedDueToLapsedReconfirmation', function () {
-    it('should create the notification', async function () {
-      await this.controller.promises
+    it('should create the notification', async function (ctx) {
+      await ctx.controller.promises
         .dropboxUnlinkedDueToLapsedReconfirmation(userId)
         .create()
-      expect(this.handler.promises.createNotification).to.have.been.calledWith(
+      expect(ctx.handler.promises.createNotification).to.have.been.calledWith(
         userId,
         'drobox-unlinked-due-to-lapsed-reconfirmation',
         'notification_dropbox_unlinked_due_to_lapsed_reconfirmation',
@@ -42,15 +50,15 @@ describe('NotificationsBuilder', function () {
     })
     describe('NotificationsHandler error', function () {
       let anError
-      beforeEach(function () {
+      beforeEach(function (ctx) {
         anError = new Error('oops')
-        this.handler.promises.createNotification.rejects(anError)
+        ctx.handler.promises.createNotification.rejects(anError)
       })
-      it('should return errors from NotificationsHandler', async function () {
+      it('should return errors from NotificationsHandler', async function (ctx) {
         let error
 
         try {
-          await this.controller.promises
+          await ctx.controller.promises
             .dropboxUnlinkedDueToLapsedReconfirmation(userId)
             .create()
         } catch (err) {
@@ -64,30 +72,26 @@ describe('NotificationsBuilder', function () {
 
   describe('groupInvitation', function () {
     const subscriptionId = '123123bcabca'
-    beforeEach(function () {
-      this.invite = {
+    beforeEach(function (ctx) {
+      ctx.invite = {
         token: '123123abcabc',
         inviterName: 'Mr Overleaf',
         managedUsersEnabled: false,
       }
     })
 
-    it('should create the notification', async function () {
-      await this.controller.promises
-        .groupInvitation(
-          userId,
-          subscriptionId,
-          this.invite.managedUsersEnabled
-        )
-        .create(this.invite)
-      expect(this.handler.promises.createNotification).to.have.been.calledWith(
+    it('should create the notification', async function (ctx) {
+      await ctx.controller.promises
+        .groupInvitation(userId, subscriptionId, ctx.invite.managedUsersEnabled)
+        .create(ctx.invite)
+      expect(ctx.handler.promises.createNotification).to.have.been.calledWith(
         userId,
         `groupInvitation-${subscriptionId}-${userId}`,
         'notification_group_invitation',
         {
-          token: this.invite.token,
-          inviterName: this.invite.inviterName,
-          managedUsersEnabled: this.invite.managedUsersEnabled,
+          token: ctx.invite.token,
+          inviterName: ctx.invite.inviterName,
+          managedUsersEnabled: ctx.invite.managedUsersEnabled,
         },
         null,
         true
@@ -97,31 +101,31 @@ describe('NotificationsBuilder', function () {
 
   describe('ipMatcherAffiliation', function () {
     describe('with portal and with SSO', function () {
-      beforeEach(function () {
-        this.body = {
+      beforeEach(function (ctx) {
+        ctx.body = {
           id: 1,
           name: 'stanford',
           is_university: true,
           portal_slug: null,
           sso_enabled: false,
         }
-        this.FetchUtils.fetchJson.resolves(this.body)
+        ctx.FetchUtils.fetchJson.resolves(ctx.body)
       })
 
-      it('should call v1 and create affiliation notifications', async function () {
+      it('should call v1 and create affiliation notifications', async function (ctx) {
         const ip = '192.168.0.1'
-        await this.controller.promises.ipMatcherAffiliation(userId).create(ip)
-        this.FetchUtils.fetchJson.calledOnce.should.equal(true)
+        await ctx.controller.promises.ipMatcherAffiliation(userId).create(ip)
+        ctx.FetchUtils.fetchJson.calledOnce.should.equal(true)
         const expectedOpts = {
-          institutionId: this.body.id,
-          university_name: this.body.name,
+          institutionId: ctx.body.id,
+          university_name: ctx.body.name,
           ssoEnabled: false,
           portalPath: undefined,
         }
-        this.handler.promises.createNotification
+        ctx.handler.promises.createNotification
           .calledWith(
             userId,
-            `ip-matched-affiliation-${this.body.id}`,
+            `ip-matched-affiliation-${ctx.body.id}`,
             'notification_ip_matched_affiliation',
             expectedOpts
           )
@@ -129,31 +133,31 @@ describe('NotificationsBuilder', function () {
       })
     })
     describe('without portal and without SSO', function () {
-      beforeEach(function () {
-        this.body = {
+      beforeEach(function (ctx) {
+        ctx.body = {
           id: 1,
           name: 'stanford',
           is_university: true,
           portal_slug: 'stanford',
           sso_enabled: true,
         }
-        this.FetchUtils.fetchJson.resolves(this.body)
+        ctx.FetchUtils.fetchJson.resolves(ctx.body)
       })
 
-      it('should call v1 and create affiliation notifications', async function () {
+      it('should call v1 and create affiliation notifications', async function (ctx) {
         const ip = '192.168.0.1'
-        await this.controller.promises.ipMatcherAffiliation(userId).create(ip)
-        this.FetchUtils.fetchJson.calledOnce.should.equal(true)
+        await ctx.controller.promises.ipMatcherAffiliation(userId).create(ip)
+        ctx.FetchUtils.fetchJson.calledOnce.should.equal(true)
         const expectedOpts = {
-          institutionId: this.body.id,
-          university_name: this.body.name,
+          institutionId: ctx.body.id,
+          university_name: ctx.body.name,
           ssoEnabled: true,
           portalPath: '/edu/stanford',
         }
-        this.handler.promises.createNotification
+        ctx.handler.promises.createNotification
           .calledWith(
             userId,
-            `ip-matched-affiliation-${this.body.id}`,
+            `ip-matched-affiliation-${ctx.body.id}`,
             'notification_ip_matched_affiliation',
             expectedOpts
           )

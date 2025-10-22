@@ -1,179 +1,182 @@
-const SandboxedModule = require('sandboxed-module')
-const path = require('path')
-const sinon = require('sinon')
-const { expect } = require('chai')
-const { RequestFailedError } = require('@overleaf/fetch-utils')
+import { vi, expect } from 'vitest'
+import path from 'path'
+import sinon from 'sinon'
+import { RequestFailedError } from '@overleaf/fetch-utils'
 
 const MODULE_PATH = path.join(
-  __dirname,
+  import.meta.dirname,
   '../../../../app/src/Features/Chat/ChatApiHandler'
 )
 
 describe('ChatApiHandler', function () {
-  beforeEach(function () {
-    this.settings = {
+  beforeEach(async function (ctx) {
+    ctx.settings = {
       apis: {
         chat: {
           internal_url: 'http://chat.overleaf.env',
         },
       },
     }
-    this.FetchUtils = {
+    ctx.FetchUtils = {
       fetchJson: sinon.stub(),
       fetchNothing: sinon.stub().resolves(),
     }
-    this.ChatApiHandler = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        '@overleaf/settings': this.settings,
-        '@overleaf/fetch-utils': this.FetchUtils,
-      },
-    })
-    this.project_id = '3213213kl12j'
-    this.user_id = '2k3jlkjs9'
-    this.content = 'my message here'
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.settings,
+    }))
+
+    vi.doMock('@overleaf/fetch-utils', () => ctx.FetchUtils)
+
+    ctx.ChatApiHandler = (await import(MODULE_PATH)).default
+    ctx.project_id = '3213213kl12j'
+    ctx.user_id = '2k3jlkjs9'
+    ctx.content = 'my message here'
   })
 
   describe('sendGlobalMessage', function () {
     describe('successfully', function () {
-      beforeEach(async function () {
-        this.message = { mock: 'message' }
-        this.FetchUtils.fetchJson.resolves(this.message)
-        this.result = await this.ChatApiHandler.promises.sendGlobalMessage(
-          this.project_id,
-          this.user_id,
-          this.content
+      beforeEach(async function (ctx) {
+        ctx.message = { mock: 'message' }
+        ctx.FetchUtils.fetchJson.resolves(ctx.message)
+        ctx.result = await ctx.ChatApiHandler.promises.sendGlobalMessage(
+          ctx.project_id,
+          ctx.user_id,
+          ctx.content
         )
       })
 
-      it('should post the data to the chat api', function () {
-        this.FetchUtils.fetchJson.should.have.been.calledWith(
+      it('should post the data to the chat api', function (ctx) {
+        ctx.FetchUtils.fetchJson.should.have.been.calledWith(
           sinon.match(
             url =>
               url.toString() ===
-              `${this.settings.apis.chat.internal_url}/project/${this.project_id}/messages`
+              `${ctx.settings.apis.chat.internal_url}/project/${ctx.project_id}/messages`
           ),
           {
             method: 'POST',
             json: {
-              content: this.content,
-              user_id: this.user_id,
+              content: ctx.content,
+              user_id: ctx.user_id,
             },
           }
         )
       })
 
-      it('should return the message from the post', function () {
-        expect(this.result).to.deep.equal(this.message)
+      it('should return the message from the post', function (ctx) {
+        expect(ctx.result).to.deep.equal(ctx.message)
       })
     })
 
     describe('with a non-success status code', function () {
-      beforeEach(async function () {
-        this.error = new RequestFailedError('some-url', {}, { status: 500 })
-        this.FetchUtils.fetchJson.rejects(this.error)
+      beforeEach(async function (ctx) {
+        ctx.error = new RequestFailedError('some-url', {}, { status: 500 })
+        ctx.FetchUtils.fetchJson.rejects(ctx.error)
+      })
+
+      it('should throw the error', async function (ctx) {
         await expect(
-          this.ChatApiHandler.promises.sendGlobalMessage(
-            this.project_id,
-            this.user_id,
-            this.content
+          ctx.ChatApiHandler.promises.sendGlobalMessage(
+            ctx.project_id,
+            ctx.user_id,
+            ctx.content
           )
-        ).to.be.rejectedWith(this.error)
+        ).to.be.rejectedWith(ctx.error)
       })
     })
   })
 
   describe('getGlobalMessages', function () {
-    beforeEach(function () {
-      this.messages = [{ mock: 'message' }]
-      this.limit = 30
-      this.before = '1234'
+    beforeEach(function (ctx) {
+      ctx.messages = [{ mock: 'message' }]
+      ctx.limit = 30
+      ctx.before = '1234'
     })
 
     describe('successfully', function () {
-      beforeEach(async function () {
-        this.FetchUtils.fetchJson.resolves(this.messages)
-        this.result = await this.ChatApiHandler.promises.getGlobalMessages(
-          this.project_id,
-          this.limit,
-          this.before
+      beforeEach(async function (ctx) {
+        ctx.FetchUtils.fetchJson.resolves(ctx.messages)
+        ctx.result = await ctx.ChatApiHandler.promises.getGlobalMessages(
+          ctx.project_id,
+          ctx.limit,
+          ctx.before
         )
       })
 
-      it('should make get request for room to chat api', function () {
-        this.FetchUtils.fetchJson.should.have.been.calledWith(
+      it('should make get request for room to chat api', function (ctx) {
+        ctx.FetchUtils.fetchJson.should.have.been.calledWith(
           sinon.match(
             url =>
               url.toString() ===
-              `${this.settings.apis.chat.internal_url}/project/${this.project_id}/messages?limit=${this.limit}&before=${this.before}`
+              `${ctx.settings.apis.chat.internal_url}/project/${ctx.project_id}/messages?limit=${ctx.limit}&before=${ctx.before}`
           )
         )
       })
 
-      it('should return the messages from the request', function () {
-        expect(this.result).to.deep.equal(this.messages)
+      it('should return the messages from the request', function (ctx) {
+        expect(ctx.result).to.deep.equal(ctx.messages)
       })
     })
 
     describe('with failure error code', function () {
-      beforeEach(async function () {
-        this.error = new RequestFailedError('some-url', {}, { status: 500 })
-        this.FetchUtils.fetchJson.rejects(this.error)
+      beforeEach(function (ctx) {
+        ctx.error = new RequestFailedError('some-url', {}, { status: 500 })
+        ctx.FetchUtils.fetchJson.rejects(ctx.error)
+      })
+
+      it('should throw the error', async function (ctx) {
         await expect(
-          this.ChatApiHandler.getGlobalMessages(
-            this.project_id,
-            this.limit,
-            this.before
+          ctx.ChatApiHandler.promises.getGlobalMessages(
+            ctx.project_id,
+            ctx.limit,
+            ctx.before
           )
-        ).to.be.rejectedWith(this.error)
+        ).to.be.rejectedWith(ctx.error)
       })
     })
   })
 
   describe('duplicateCommentThreads', function () {
-    beforeEach(async function () {
-      this.FetchUtils.fetchJson.resolves(
-        (this.mapping = {
+    beforeEach(async function (ctx) {
+      ctx.FetchUtils.fetchJson.resolves(
+        (ctx.mapping = {
           'comment-thread-1': 'comment-thread-1-dup',
           'comment-thread-2': 'comment-thread-2-dup',
           'comment-thread-3': 'comment-thread-3-dup',
         })
       )
-      this.threads = [
-        'comment-thread-1',
-        'comment-thread-2',
-        'comment-thread-3',
-      ]
-      this.result = await this.ChatApiHandler.promises.duplicateCommentThreads(
-        this.project_id,
-        this.threads
+      ctx.threads = ['comment-thread-1', 'comment-thread-2', 'comment-thread-3']
+      ctx.result = await ctx.ChatApiHandler.promises.duplicateCommentThreads(
+        ctx.project_id,
+        ctx.threads
       )
     })
 
-    it('should make a post request to the chat api', function () {
-      expect(this.FetchUtils.fetchJson).to.have.been.calledWith(
+    it('should make a post request to the chat api', function (ctx) {
+      expect(ctx.FetchUtils.fetchJson).to.have.been.calledWith(
         sinon.match(
           url =>
             url.toString() ===
-            `${this.settings.apis.chat.internal_url}/project/${this.project_id}/duplicate-comment-threads`
+            `${ctx.settings.apis.chat.internal_url}/project/${ctx.project_id}/duplicate-comment-threads`
         ),
         {
           method: 'POST',
           json: {
-            threads: this.threads,
+            threads: ctx.threads,
           },
         }
       )
     })
 
-    it('should return the thread mapping', function () {
-      expect(this.result).to.deep.equal(this.mapping)
+    it('should return the thread mapping', function (ctx) {
+      expect(ctx.result).to.deep.equal(ctx.mapping)
     })
   })
 
   describe('generateThreadData', async function () {
-    beforeEach(async function () {
-      this.FetchUtils.fetchJson.resolves(
-        (this.chatResponse = {
+    beforeEach(async function (ctx) {
+      ctx.FetchUtils.fetchJson.resolves(
+        (ctx.chatResponse = {
           'comment-thread-1': {
             messages: [
               {
@@ -196,35 +199,31 @@ describe('ChatApiHandler', function () {
       )
       // Chat won't return threads that couldn't be found, so response can have
       // fewer threads
-      this.threads = [
-        'comment-thread-1',
-        'comment-thread-2',
-        'comment-thread-3',
-      ]
-      this.result = await this.ChatApiHandler.promises.generateThreadData(
-        this.project_id,
-        this.threads
+      ctx.threads = ['comment-thread-1', 'comment-thread-2', 'comment-thread-3']
+      ctx.result = await ctx.ChatApiHandler.promises.generateThreadData(
+        ctx.project_id,
+        ctx.threads
       )
     })
 
-    it('should make a post request to the chat api', function () {
-      expect(this.FetchUtils.fetchJson).to.have.been.calledWith(
+    it('should make a post request to the chat api', function (ctx) {
+      expect(ctx.FetchUtils.fetchJson).to.have.been.calledWith(
         sinon.match(
           url =>
             url.toString() ===
-            `${this.settings.apis.chat.internal_url}/project/${this.project_id}/generate-thread-data`
+            `${ctx.settings.apis.chat.internal_url}/project/${ctx.project_id}/generate-thread-data`
         ),
         {
           method: 'POST',
           json: {
-            threads: this.threads,
+            threads: ctx.threads,
           },
         }
       )
     })
 
-    it('should return the thread data', function () {
-      expect(this.result).to.deep.equal(this.chatResponse)
+    it('should return the thread data', function (ctx) {
+      expect(ctx.result).to.deep.equal(ctx.chatResponse)
     })
   })
 })

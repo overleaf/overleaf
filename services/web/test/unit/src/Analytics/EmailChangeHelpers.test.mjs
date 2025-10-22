@@ -1,6 +1,5 @@
-const SandboxedModule = require('sandboxed-module')
-const sinon = require('sinon')
-const { expect } = require('chai')
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
 
 describe('EmailChangeHelper', function () {
   let AnalyticsManager
@@ -8,7 +7,7 @@ describe('EmailChangeHelper', function () {
   let EmailChangeHelpers
   const email = 'test@example.com'
   const userId = '507f1f77bcf86cd799439011'
-  beforeEach(function () {
+  beforeEach(async function () {
     UserGetter = {
       promises: {
         getUserFullEmails: sinon.stub().resolves([]),
@@ -17,15 +16,21 @@ describe('EmailChangeHelper', function () {
     AnalyticsManager = {
       registerEmailChange: sinon.stub(),
     }
-    EmailChangeHelpers = SandboxedModule.require(
-      '../../../../app/src/Features/Analytics/EmailChangeHelper',
-      {
-        requires: {
-          '../User/UserGetter': UserGetter,
-          './AnalyticsManager': AnalyticsManager,
-        },
-      }
+
+    vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
+      default: UserGetter,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Analytics/AnalyticsManager',
+      () => ({
+        default: AnalyticsManager,
+      })
     )
+
+    EmailChangeHelpers = (
+      await import('../../../../app/src/Features/Analytics/EmailChangeHelper')
+    ).default
   })
 
   describe('registerEmailUpdate', function () {

@@ -1,39 +1,38 @@
-const SandboxedModule = require('sandboxed-module')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const { ObjectId } = require('mongodb-legacy')
-const {
-  AI_ADD_ON_CODE,
-} = require('../../../../app/src/Features/Subscription/AiHelper')
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+import mongodb from 'mongodb-legacy'
+import { AI_ADD_ON_CODE } from '../../../../app/src/Features/Subscription/AiHelper.js'
+
+const { ObjectId } = mongodb
 
 const MODULE_PATH = '../../../../app/src/Features/Subscription/FeaturesUpdater'
 
 describe('FeaturesUpdater', function () {
-  beforeEach(function () {
-    this.v1UserId = 12345
-    this.user = {
+  beforeEach(async function (ctx) {
+    ctx.v1UserId = 12345
+    ctx.user = {
       _id: new ObjectId(),
       features: {},
-      overleaf: { id: this.v1UserId },
+      overleaf: { id: ctx.v1UserId },
     }
-    this.aiAddOn = { addOnCode: AI_ADD_ON_CODE, quantity: 1 }
-    this.subscriptions = {
+    ctx.aiAddOn = { addOnCode: AI_ADD_ON_CODE, quantity: 1 }
+    ctx.subscriptions = {
       individual: { planCode: 'individual-plan' },
       group1: { planCode: 'group-plan-1', groupPlan: true },
       group2: { planCode: 'group-plan-2', groupPlan: true },
       noDropbox: { planCode: 'no-dropbox' },
       individualPlusAiAddOn: {
         planCode: 'individual-plan',
-        addOns: [this.aiAddOn],
+        addOns: [ctx.aiAddOn],
       },
       groupPlusAiAddOn: {
         planCode: 'group-plan-1',
         groupPlan: true,
-        addOns: [this.aiAddOn],
+        addOns: [ctx.aiAddOn],
       },
     }
 
-    this.UserFeaturesUpdater = {
+    ctx.UserFeaturesUpdater = {
       promises: {
         updateFeatures: sinon
           .stub()
@@ -41,20 +40,20 @@ describe('FeaturesUpdater', function () {
       },
     }
 
-    this.SubscriptionLocator = {
+    ctx.SubscriptionLocator = {
       promises: {
         getUsersSubscription: sinon.stub(),
         getGroupSubscriptionsMemberOf: sinon.stub(),
       },
     }
-    this.SubscriptionLocator.promises.getUsersSubscription
-      .withArgs(this.user._id)
-      .resolves(this.subscriptions.individual)
-    this.SubscriptionLocator.promises.getGroupSubscriptionsMemberOf
-      .withArgs(this.user._id)
-      .resolves([this.subscriptions.group1, this.subscriptions.group2])
+    ctx.SubscriptionLocator.promises.getUsersSubscription
+      .withArgs(ctx.user._id)
+      .resolves(ctx.subscriptions.individual)
+    ctx.SubscriptionLocator.promises.getGroupSubscriptionsMemberOf
+      .withArgs(ctx.user._id)
+      .resolves([ctx.subscriptions.group1, ctx.subscriptions.group2])
 
-    this.Settings = {
+    ctx.Settings = {
       defaultFeatures: { default: 'features' },
       plans: [
         { planCode: 'individual-plan', features: { individual: 'features' } },
@@ -75,19 +74,19 @@ describe('FeaturesUpdater', function () {
       },
     }
 
-    this.ReferalFeatures = {
+    ctx.ReferalFeatures = {
       promises: {
         getBonusFeatures: sinon.stub().resolves({ bonus: 'features' }),
       },
     }
-    this.V1SubscriptionManager = {
+    ctx.V1SubscriptionManager = {
       getGrandfatheredFeaturesForV1User: sinon.stub(),
     }
-    this.V1SubscriptionManager.getGrandfatheredFeaturesForV1User
-      .withArgs(this.v1UserId)
+    ctx.V1SubscriptionManager.getGrandfatheredFeaturesForV1User
+      .withArgs(ctx.v1UserId)
       .returns({ grandfathered: 'features' })
 
-    this.InstitutionsFeatures = {
+    ctx.InstitutionsFeatures = {
       promises: {
         getInstitutionsFeatures: sinon
           .stub()
@@ -95,113 +94,156 @@ describe('FeaturesUpdater', function () {
       },
     }
 
-    this.UserGetter = {
+    ctx.UserGetter = {
       promises: {
         getUser: sinon.stub().resolves(null),
       },
     }
-    this.UserGetter.promises.getUser.withArgs(this.user._id).resolves(this.user)
-    this.UserGetter.promises.getUser
-      .withArgs({ 'overleaf.id': this.v1UserId })
-      .resolves(this.user)
+    ctx.UserGetter.promises.getUser.withArgs(ctx.user._id).resolves(ctx.user)
+    ctx.UserGetter.promises.getUser
+      .withArgs({ 'overleaf.id': ctx.v1UserId })
+      .resolves(ctx.user)
 
-    this.AnalyticsManager = {
+    ctx.AnalyticsManager = {
       setUserPropertyForUserInBackground: sinon.stub(),
     }
-    this.Modules = {
+    ctx.Modules = {
       promises: { hooks: { fire: sinon.stub().resolves() } },
     }
-    this.Queues = {
+    ctx.Queues = {
       getQueue: sinon.stub().returns({
         add: sinon.stub().resolves(),
       }),
     }
 
-    this.FeaturesUpdater = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        './UserFeaturesUpdater': this.UserFeaturesUpdater,
-        './SubscriptionLocator': this.SubscriptionLocator,
-        '@overleaf/settings': this.Settings,
-        '../Referal/ReferalFeatures': this.ReferalFeatures,
-        './V1SubscriptionManager': this.V1SubscriptionManager,
-        '../Institutions/InstitutionsFeatures': this.InstitutionsFeatures,
-        '../User/UserGetter': this.UserGetter,
-        '../Analytics/AnalyticsManager': this.AnalyticsManager,
-        '../../infrastructure/Modules': this.Modules,
-        '../../infrastructure/Queues': this.Queues,
-        '../../models/Subscription': {},
-      },
-    })
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/UserFeaturesUpdater',
+      () => ({
+        default: ctx.UserFeaturesUpdater,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionLocator',
+      () => ({
+        default: ctx.SubscriptionLocator,
+      })
+    )
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.Settings,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Referal/ReferalFeatures', () => ({
+      default: ctx.ReferalFeatures,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/V1SubscriptionManager',
+      () => ({
+        default: ctx.V1SubscriptionManager,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Institutions/InstitutionsFeatures',
+      () => ({
+        default: ctx.InstitutionsFeatures,
+      })
+    )
+
+    vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
+      default: ctx.UserGetter,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Analytics/AnalyticsManager',
+      () => ({
+        default: ctx.AnalyticsManager,
+      })
+    )
+
+    vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
+      default: ctx.Modules,
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Queues', () => ({
+      default: ctx.Queues,
+    }))
+
+    vi.doMock('../../../../app/src/models/Subscription', () => ({}))
+
+    ctx.FeaturesUpdater = (await import(MODULE_PATH)).default
   })
 
   describe('computeFeatures', function () {
     describe('when userFeaturesDisabled is true for individual plan', function () {
-      beforeEach(function () {
-        this.SubscriptionLocator.promises.getUsersSubscription
-          .withArgs(this.user._id)
+      beforeEach(function (ctx) {
+        ctx.SubscriptionLocator.promises.getUsersSubscription
+          .withArgs(ctx.user._id)
           .resolves({
             planCode: 'individual-plan',
             userFeaturesDisabled: true,
             groupPlan: false,
-            addOns: [this.aiAddOn],
+            addOns: [ctx.aiAddOn],
           })
       })
 
-      it('removes all individual plan features', async function () {
-        const features = await this.FeaturesUpdater.promises.computeFeatures(
-          this.user._id
+      it('removes all individual plan features', async function (ctx) {
+        const features = await ctx.FeaturesUpdater.promises.computeFeatures(
+          ctx.user._id
         )
         expect(features).to.deep.equal({ default: 'features' })
       })
     })
 
     describe('when userFeaturesDisabled is true for group plan', function () {
-      beforeEach(function () {
+      beforeEach(function (ctx) {
         const groupSubscription = {
           planCode: 'group-plan-1',
           userFeaturesDisabled: true,
           groupPlan: true,
-          addOns: [this.aiAddOn],
+          addOns: [ctx.aiAddOn],
         }
-        this.SubscriptionLocator.promises.getUsersSubscription
-          .withArgs(this.user._id)
+        ctx.SubscriptionLocator.promises.getUsersSubscription
+          .withArgs(ctx.user._id)
           .resolves(groupSubscription)
-        this.SubscriptionLocator.promises.getGroupSubscriptionsMemberOf
-          .withArgs(this.user._id)
+        ctx.SubscriptionLocator.promises.getGroupSubscriptionsMemberOf
+          .withArgs(ctx.user._id)
           .resolves([groupSubscription])
       })
 
-      it('removes all group plan features', async function () {
-        const features = await this.FeaturesUpdater.promises.computeFeatures(
-          this.user._id
+      it('removes all group plan features', async function (ctx) {
+        const features = await ctx.FeaturesUpdater.promises.computeFeatures(
+          ctx.user._id
         )
         expect(features).to.deep.equal({ default: 'features' })
       })
     })
-    beforeEach(function () {
-      this.SubscriptionLocator.promises.getUsersSubscription
-        .withArgs(this.user._id)
+    beforeEach(function (ctx) {
+      ctx.SubscriptionLocator.promises.getUsersSubscription
+        .withArgs(ctx.user._id)
         .resolves(null)
-      this.SubscriptionLocator.promises.getGroupSubscriptionsMemberOf
-        .withArgs(this.user._id)
+      ctx.SubscriptionLocator.promises.getGroupSubscriptionsMemberOf
+        .withArgs(ctx.user._id)
         .resolves([])
-      this.ReferalFeatures.promises.getBonusFeatures.resolves({})
-      this.V1SubscriptionManager.getGrandfatheredFeaturesForV1User
-        .withArgs(this.v1UserId)
+      ctx.ReferalFeatures.promises.getBonusFeatures.resolves({})
+      ctx.V1SubscriptionManager.getGrandfatheredFeaturesForV1User
+        .withArgs(ctx.v1UserId)
         .returns({})
-      this.InstitutionsFeatures.promises.getInstitutionsFeatures.resolves({})
+      ctx.InstitutionsFeatures.promises.getInstitutionsFeatures.resolves({})
     })
 
     describe('individual subscriber', function () {
-      beforeEach(function () {
-        this.SubscriptionLocator.promises.getUsersSubscription
-          .withArgs(this.user._id)
-          .resolves(this.subscriptions.individual)
+      beforeEach(function (ctx) {
+        ctx.SubscriptionLocator.promises.getUsersSubscription
+          .withArgs(ctx.user._id)
+          .resolves(ctx.subscriptions.individual)
       })
 
-      it('returns the individual features', async function () {
-        const features = await this.FeaturesUpdater.promises.computeFeatures(
-          this.user._id
+      it('returns the individual features', async function (ctx) {
+        const features = await ctx.FeaturesUpdater.promises.computeFeatures(
+          ctx.user._id
         )
         expect(features).to.deep.equal({
           default: 'features',
@@ -211,15 +253,15 @@ describe('FeaturesUpdater', function () {
     })
 
     describe('group admin', function () {
-      beforeEach(function () {
-        this.SubscriptionLocator.promises.getUsersSubscription
-          .withArgs(this.user._id)
-          .resolves(this.subscriptions.group1)
+      beforeEach(function (ctx) {
+        ctx.SubscriptionLocator.promises.getUsersSubscription
+          .withArgs(ctx.user._id)
+          .resolves(ctx.subscriptions.group1)
       })
 
-      it("doesn't return the group features", async function () {
-        const features = await this.FeaturesUpdater.promises.computeFeatures(
-          this.user._id
+      it("doesn't return the group features", async function (ctx) {
+        const features = await ctx.FeaturesUpdater.promises.computeFeatures(
+          ctx.user._id
         )
         expect(features).to.deep.equal({
           default: 'features',
@@ -228,15 +270,15 @@ describe('FeaturesUpdater', function () {
     })
 
     describe('group member', function () {
-      beforeEach(function () {
-        this.SubscriptionLocator.promises.getGroupSubscriptionsMemberOf
-          .withArgs(this.user._id)
-          .resolves([this.subscriptions.group1])
+      beforeEach(function (ctx) {
+        ctx.SubscriptionLocator.promises.getGroupSubscriptionsMemberOf
+          .withArgs(ctx.user._id)
+          .resolves([ctx.subscriptions.group1])
       })
 
-      it('returns the group features', async function () {
-        const features = await this.FeaturesUpdater.promises.computeFeatures(
-          this.user._id
+      it('returns the group features', async function (ctx) {
+        const features = await ctx.FeaturesUpdater.promises.computeFeatures(
+          ctx.user._id
         )
         expect(features).to.deep.equal({
           default: 'features',
@@ -246,15 +288,15 @@ describe('FeaturesUpdater', function () {
     })
 
     describe('individual subscription + AI add-on', function () {
-      beforeEach(function () {
-        this.SubscriptionLocator.promises.getUsersSubscription
-          .withArgs(this.user._id)
-          .resolves(this.subscriptions.individualPlusAiAddOn)
+      beforeEach(function (ctx) {
+        ctx.SubscriptionLocator.promises.getUsersSubscription
+          .withArgs(ctx.user._id)
+          .resolves(ctx.subscriptions.individualPlusAiAddOn)
       })
 
-      it('returns the individual features and the AI error assistant', async function () {
-        const features = await this.FeaturesUpdater.promises.computeFeatures(
-          this.user._id
+      it('returns the individual features and the AI error assistant', async function (ctx) {
+        const features = await ctx.FeaturesUpdater.promises.computeFeatures(
+          ctx.user._id
         )
         expect(features).to.deep.equal({
           default: 'features',
@@ -265,15 +307,15 @@ describe('FeaturesUpdater', function () {
     })
 
     describe('group admin + AI add-on', function () {
-      beforeEach(function () {
-        this.SubscriptionLocator.promises.getUsersSubscription
-          .withArgs(this.user._id)
-          .resolves(this.subscriptions.groupPlusAiAddOn)
+      beforeEach(function (ctx) {
+        ctx.SubscriptionLocator.promises.getUsersSubscription
+          .withArgs(ctx.user._id)
+          .resolves(ctx.subscriptions.groupPlusAiAddOn)
       })
 
-      it('returns the AI error assistant only', async function () {
-        const features = await this.FeaturesUpdater.promises.computeFeatures(
-          this.user._id
+      it('returns the AI error assistant only', async function (ctx) {
+        const features = await ctx.FeaturesUpdater.promises.computeFeatures(
+          ctx.user._id
         )
         expect(features).to.deep.equal({
           default: 'features',
@@ -283,15 +325,15 @@ describe('FeaturesUpdater', function () {
     })
 
     describe('group member + AI add-on', function () {
-      beforeEach(function () {
-        this.SubscriptionLocator.promises.getGroupSubscriptionsMemberOf
-          .withArgs(this.user._id)
-          .resolves([this.subscriptions.groupPlusAiAddOn])
+      beforeEach(function (ctx) {
+        ctx.SubscriptionLocator.promises.getGroupSubscriptionsMemberOf
+          .withArgs(ctx.user._id)
+          .resolves([ctx.subscriptions.groupPlusAiAddOn])
       })
 
-      it('returns the group features without the AI features', async function () {
-        const features = await this.FeaturesUpdater.promises.computeFeatures(
-          this.user._id
+      it('returns the group features without the AI features', async function (ctx) {
+        const features = await ctx.FeaturesUpdater.promises.computeFeatures(
+          ctx.user._id
         )
         expect(features).to.deep.equal({
           default: 'features',
@@ -302,52 +344,43 @@ describe('FeaturesUpdater', function () {
   })
 
   describe('refreshFeatures', function () {
-    it('should return features and featuresChanged', async function () {
+    it('should return features and featuresChanged', async function (ctx) {
       const { features, featuresChanged } =
-        await this.FeaturesUpdater.promises.refreshFeatures(
-          this.user._id,
-          'test'
-        )
+        await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
       expect(features).to.exist
       expect(featuresChanged).to.exist
     })
 
     describe('normally', function () {
-      beforeEach(async function () {
-        await this.FeaturesUpdater.promises.refreshFeatures(
-          this.user._id,
-          'test'
-        )
+      beforeEach(async function (ctx) {
+        await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
       })
 
-      it('should update the user with the merged features', function () {
+      it('should update the user with the merged features', function (ctx) {
         expect(
-          this.UserFeaturesUpdater.promises.updateFeatures
-        ).to.have.been.calledWith(this.user._id, this.Settings.features.all)
+          ctx.UserFeaturesUpdater.promises.updateFeatures
+        ).to.have.been.calledWith(ctx.user._id, ctx.Settings.features.all)
       })
 
-      it('should send the corresponding feature set user property', function () {
+      it('should send the corresponding feature set user property', function (ctx) {
         expect(
-          this.AnalyticsManager.setUserPropertyForUserInBackground
-        ).to.have.been.calledWith(this.user._id, 'feature-set', 'all')
+          ctx.AnalyticsManager.setUserPropertyForUserInBackground
+        ).to.have.been.calledWith(ctx.user._id, 'feature-set', 'all')
       })
     })
 
     describe('with a non-standard feature set', async function () {
-      beforeEach(async function () {
-        this.SubscriptionLocator.promises.getGroupSubscriptionsMemberOf
-          .withArgs(this.user._id)
+      beforeEach(async function (ctx) {
+        ctx.SubscriptionLocator.promises.getGroupSubscriptionsMemberOf
+          .withArgs(ctx.user._id)
           .resolves(null)
-        await this.FeaturesUpdater.promises.refreshFeatures(
-          this.user._id,
-          'test'
-        )
+        await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
       })
 
-      it('should send mixed feature set user property', function () {
+      it('should send mixed feature set user property', function (ctx) {
         sinon.assert.calledWith(
-          this.AnalyticsManager.setUserPropertyForUserInBackground,
-          this.user._id,
+          ctx.AnalyticsManager.setUserPropertyForUserInBackground,
+          ctx.user._id,
           'feature-set',
           'mixed'
         )
@@ -355,21 +388,18 @@ describe('FeaturesUpdater', function () {
     })
 
     describe('when losing dropbox feature', async function () {
-      beforeEach(async function () {
-        this.user.features = { dropbox: true }
-        this.SubscriptionLocator.promises.getUsersSubscription
-          .withArgs(this.user._id)
-          .resolves(this.subscriptions.noDropbox)
-        await this.FeaturesUpdater.promises.refreshFeatures(
-          this.user._id,
-          'test'
-        )
+      beforeEach(async function (ctx) {
+        ctx.user.features = { dropbox: true }
+        ctx.SubscriptionLocator.promises.getUsersSubscription
+          .withArgs(ctx.user._id)
+          .resolves(ctx.subscriptions.noDropbox)
+        await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
       })
 
-      it('should fire module hook to unlink dropbox', function () {
-        expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+      it('should fire module hook to unlink dropbox', function (ctx) {
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
           'removeDropbox',
-          this.user._id,
+          ctx.user._id,
           'test'
         )
       })
@@ -378,40 +408,40 @@ describe('FeaturesUpdater', function () {
 
   describe('doSyncFromV1', function () {
     describe('when all goes well', function () {
-      beforeEach(async function () {
-        await this.FeaturesUpdater.promises.doSyncFromV1(this.v1UserId)
+      beforeEach(async function (ctx) {
+        await ctx.FeaturesUpdater.promises.doSyncFromV1(ctx.v1UserId)
       })
 
-      it('should update the user with the merged features', function () {
+      it('should update the user with the merged features', function (ctx) {
         expect(
-          this.UserFeaturesUpdater.promises.updateFeatures
-        ).to.have.been.calledWith(this.user._id, this.Settings.features.all)
+          ctx.UserFeaturesUpdater.promises.updateFeatures
+        ).to.have.been.calledWith(ctx.user._id, ctx.Settings.features.all)
       })
     })
 
     describe('when getUser produces an error', function () {
-      beforeEach(function () {
-        this.UserGetter.promises.getUser.rejects(new Error('woops'))
+      beforeEach(function (ctx) {
+        ctx.UserGetter.promises.getUser.rejects(new Error('woops'))
       })
 
-      it('should propagate the error', async function () {
+      it('should propagate the error', async function (ctx) {
         const someId = 9090
-        await expect(this.FeaturesUpdater.promises.doSyncFromV1(someId)).to.be
+        await expect(ctx.FeaturesUpdater.promises.doSyncFromV1(someId)).to.be
           .rejected
-        expect(this.UserFeaturesUpdater.promises.updateFeatures).not.to.have
-          .been.called
+        expect(ctx.UserFeaturesUpdater.promises.updateFeatures).not.to.have.been
+          .called
       })
     })
 
     describe('when getUser does not find a user', function () {
-      beforeEach(async function () {
+      beforeEach(async function (ctx) {
         const someOtherId = 987
-        await this.FeaturesUpdater.promises.doSyncFromV1(someOtherId)
+        await ctx.FeaturesUpdater.promises.doSyncFromV1(someOtherId)
       })
 
-      it('should not update the user', function () {
-        expect(this.UserFeaturesUpdater.promises.updateFeatures).not.to.have
-          .been.called
+      it('should not update the user', function (ctx) {
+        expect(ctx.UserFeaturesUpdater.promises.updateFeatures).not.to.have.been
+          .called
       })
     })
   })

@@ -1,74 +1,58 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const sinon = require('sinon')
-const { expect } = require('chai')
-const modulePath = '../../../../app/src/Features/Documents/DocumentHelper.js'
-const SandboxedModule = require('sandboxed-module')
+import { expect } from 'vitest'
+const modulePath = '../../../../app/src/Features/Documents/DocumentHelper.mjs'
 
 describe('DocumentHelper', function () {
-  beforeEach(function () {
-    return (this.DocumentHelper = SandboxedModule.require(modulePath))
+  beforeEach(async function (ctx) {
+    ctx.DocumentHelper = (await import(modulePath)).default
   })
 
   describe('getTitleFromTexContent', function () {
-    it('should return the title', function () {
+    it('should return the title', function (ctx) {
       const document = '\\begin{document}\n\\title{foo}\n\\end{document}'
-      return expect(
-        this.DocumentHelper.getTitleFromTexContent(document)
-      ).to.equal('foo')
+      expect(ctx.DocumentHelper.getTitleFromTexContent(document)).to.equal(
+        'foo'
+      )
     })
 
-    it('should return the title if surrounded by space', function () {
+    it('should return the title if surrounded by space', function (ctx) {
       const document = '\\begin{document}\n   \\title{foo}   \n\\end{document}'
-      return expect(
-        this.DocumentHelper.getTitleFromTexContent(document)
-      ).to.equal('foo')
+      expect(ctx.DocumentHelper.getTitleFromTexContent(document)).to.equal(
+        'foo'
+      )
     })
 
-    it('should return null if there is no title', function () {
+    it('should return null if there is no title', function (ctx) {
       const document = '\\begin{document}\n\\end{document}'
-      return expect(
-        this.DocumentHelper.getTitleFromTexContent(document)
-      ).to.eql(null)
+      expect(ctx.DocumentHelper.getTitleFromTexContent(document)).to.eql(null)
     })
 
-    it('should accept an array', function () {
+    it('should accept an array', function (ctx) {
       const document = ['\\begin{document}', '\\title{foo}', '\\end{document}']
-      return expect(
-        this.DocumentHelper.getTitleFromTexContent(document)
-      ).to.equal('foo')
+      expect(ctx.DocumentHelper.getTitleFromTexContent(document)).to.equal(
+        'foo'
+      )
     })
 
-    it('should parse out formatting elements from the title', function () {
+    it('should parse out formatting elements from the title', function (ctx) {
       const document = '\\title{\\textbf{\\large{Second Year LaTeX Exercise}}}'
-      return expect(
-        this.DocumentHelper.getTitleFromTexContent(document)
-      ).to.equal('Second Year LaTeX Exercise')
+      expect(ctx.DocumentHelper.getTitleFromTexContent(document)).to.equal(
+        'Second Year LaTeX Exercise'
+      )
     })
 
-    it('should ignore junk after the title', function () {
+    it('should ignore junk after the title', function (ctx) {
       const document = '\\title{wombat} potato'
-      return expect(
-        this.DocumentHelper.getTitleFromTexContent(document)
-      ).to.equal('wombat')
+      expect(ctx.DocumentHelper.getTitleFromTexContent(document)).to.equal(
+        'wombat'
+      )
     })
 
-    it('should ignore junk before the title', function () {
+    it('should ignore junk before the title', function (ctx) {
       const document =
         '% this is something that v1 relied on, even though it seems odd \\title{wombat}'
-      return expect(
-        this.DocumentHelper.getTitleFromTexContent(document)
-      ).to.equal('wombat')
+      expect(ctx.DocumentHelper.getTitleFromTexContent(document)).to.equal(
+        'wombat'
+      )
     })
 
     // NICETOHAVE: Current implementation doesn't do this
@@ -76,87 +60,83 @@ describe('DocumentHelper', function () {
     //	document = "\\title{Second Year \\large{LaTeX} Exercise}"
     //	expect(@DocumentHelper.getTitleFromTexContent(document)).to.equal "Second Year LaTeX Exercise"
 
-    it('should collapse whitespace', function () {
+    it('should collapse whitespace', function (ctx) {
       const document = '\\title{Second    Year  LaTeX     Exercise}'
-      return expect(
-        this.DocumentHelper.getTitleFromTexContent(document)
-      ).to.equal('Second Year LaTeX Exercise')
+      expect(ctx.DocumentHelper.getTitleFromTexContent(document)).to.equal(
+        'Second Year LaTeX Exercise'
+      )
     })
   })
 
   describe('detex', function () {
     // note, there are a number of tests for getTitleFromTexContent that also test cases here
-    it('leaves a non-TeX string unchanged', function () {
-      expect(this.DocumentHelper.detex('')).to.equal('')
-      expect(this.DocumentHelper.detex('a')).to.equal('a')
-      return expect(this.DocumentHelper.detex('a a')).to.equal('a a')
+    it('leaves a non-TeX string unchanged', function (ctx) {
+      expect(ctx.DocumentHelper.detex('')).to.equal('')
+      expect(ctx.DocumentHelper.detex('a')).to.equal('a')
+      expect(ctx.DocumentHelper.detex('a a')).to.equal('a a')
     })
 
-    it('collapses spaces', function () {
-      expect(this.DocumentHelper.detex('a  a')).to.equal('a a')
-      return expect(this.DocumentHelper.detex('a \n a')).to.equal('a \n a')
+    it('collapses spaces', function (ctx) {
+      expect(ctx.DocumentHelper.detex('a  a')).to.equal('a a')
+      expect(ctx.DocumentHelper.detex('a \n a')).to.equal('a \n a')
     })
 
-    it('replaces named commands', function () {
-      expect(this.DocumentHelper.detex('\\LaTeX')).to.equal('LaTeX')
-      expect(this.DocumentHelper.detex('\\TikZ')).to.equal('TikZ')
-      expect(this.DocumentHelper.detex('\\TeX')).to.equal('TeX')
-      return expect(this.DocumentHelper.detex('\\BibTeX')).to.equal('BibTeX')
+    it('replaces named commands', function (ctx) {
+      expect(ctx.DocumentHelper.detex('\\LaTeX')).to.equal('LaTeX')
+      expect(ctx.DocumentHelper.detex('\\TikZ')).to.equal('TikZ')
+      expect(ctx.DocumentHelper.detex('\\TeX')).to.equal('TeX')
+      expect(ctx.DocumentHelper.detex('\\BibTeX')).to.equal('BibTeX')
     })
 
-    it('removes general commands', function () {
-      expect(this.DocumentHelper.detex('\\foo')).to.equal('')
-      expect(this.DocumentHelper.detex('\\foo{}')).to.equal('')
-      expect(this.DocumentHelper.detex('\\foo~Test')).to.equal('Test')
-      expect(this.DocumentHelper.detex('\\"e')).to.equal('e')
-      return expect(this.DocumentHelper.detex('\\textit{e}')).to.equal('e')
+    it('removes general commands', function (ctx) {
+      expect(ctx.DocumentHelper.detex('\\foo')).to.equal('')
+      expect(ctx.DocumentHelper.detex('\\foo{}')).to.equal('')
+      expect(ctx.DocumentHelper.detex('\\foo~Test')).to.equal('Test')
+      expect(ctx.DocumentHelper.detex('\\"e')).to.equal('e')
+      expect(ctx.DocumentHelper.detex('\\textit{e}')).to.equal('e')
     })
 
-    it('leaves basic math', function () {
-      return expect(this.DocumentHelper.detex('$\\cal{O}(n^2)$')).to.equal(
-        'O(n^2)'
-      )
+    it('leaves basic math', function (ctx) {
+      expect(ctx.DocumentHelper.detex('$\\cal{O}(n^2)$')).to.equal('O(n^2)')
     })
 
-    it('removes line spacing commands', function () {
-      return expect(this.DocumentHelper.detex('a \\\\[1.50cm] b')).to.equal(
-        'a b'
-      )
+    it('removes line spacing commands', function (ctx) {
+      expect(ctx.DocumentHelper.detex('a \\\\[1.50cm] b')).to.equal('a b')
     })
   })
 
   describe('contentHasDocumentclass', function () {
-    it('should return true if the content has a documentclass', function () {
+    it('should return true if the content has a documentclass', function (ctx) {
       const document = ['% line', '% line', '% line', '\\documentclass']
-      return expect(
-        this.DocumentHelper.contentHasDocumentclass(document)
-      ).to.equal(true)
+      expect(ctx.DocumentHelper.contentHasDocumentclass(document)).to.equal(
+        true
+      )
     })
 
-    it('should allow whitespace before the documentclass', function () {
+    it('should allow whitespace before the documentclass', function (ctx) {
       const document = ['% line', '% line', '% line', '        \\documentclass']
-      return expect(
-        this.DocumentHelper.contentHasDocumentclass(document)
-      ).to.equal(true)
+      expect(ctx.DocumentHelper.contentHasDocumentclass(document)).to.equal(
+        true
+      )
     })
 
-    it('should not allow non-whitespace before the documentclass', function () {
+    it('should not allow non-whitespace before the documentclass', function (ctx) {
       const document = [
         '% line',
         '% line',
         '% line',
         '    asdf \\documentclass',
       ]
-      return expect(
-        this.DocumentHelper.contentHasDocumentclass(document)
-      ).to.equal(false)
+      expect(ctx.DocumentHelper.contentHasDocumentclass(document)).to.equal(
+        false
+      )
     })
 
-    it('should return false when there is no documentclass', function () {
+    it('should return false when there is no documentclass', function (ctx) {
       const document = ['% line', '% line', '% line']
-      return expect(
-        this.DocumentHelper.contentHasDocumentclass(document)
-      ).to.equal(false)
+      expect(ctx.DocumentHelper.contentHasDocumentclass(document)).to.equal(
+        false
+      )
     })
   })
 })

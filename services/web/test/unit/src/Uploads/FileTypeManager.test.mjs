@@ -1,114 +1,119 @@
-const sinon = require('sinon')
-const { expect } = require('chai')
-const SandboxedModule = require('sandboxed-module')
-const isUtf8 = require('utf-8-validate')
-const Settings = require('@overleaf/settings')
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+import isUtf8 from 'utf-8-validate'
+import Settings from '@overleaf/settings'
 
-const MODULE_PATH = '../../../../app/src/Features/Uploads/FileTypeManager.js'
+const MODULE_PATH = '../../../../app/src/Features/Uploads/FileTypeManager.mjs'
 
 describe('FileTypeManager', function () {
   const fileContents = 'Ich bin eine kleine Teekanne, kurz und kräftig.'
 
-  beforeEach(function () {
-    this.isUtf8 = sinon.spy(isUtf8)
-    this.stats = {
+  beforeEach(async function (ctx) {
+    ctx.isUtf8 = sinon.spy(isUtf8)
+    ctx.stats = {
       isDirectory: sinon.stub().returns(false),
       size: 100,
     }
-    this.fs = {
-      stat: sinon.stub().resolves(this.stats),
+    ctx.fs = {
+      stat: sinon.stub().resolves(ctx.stats),
       readFile: sinon.stub(),
     }
-    this.fs.readFile
+    ctx.fs.readFile
       .withArgs('utf8.tex')
       .resolves(Buffer.from(fileContents, 'utf-8'))
-    this.fs.readFile
+    ctx.fs.readFile
       .withArgs('utf16.tex')
       .resolves(Buffer.from(`\uFEFF${fileContents}`, 'utf-16le'))
-    this.fs.readFile
+    ctx.fs.readFile
       .withArgs('latin1.tex')
       .resolves(Buffer.from(fileContents, 'latin1'))
-    this.fs.readFile
+    ctx.fs.readFile
       .withArgs('latin1-null.tex')
       .resolves(Buffer.from(`${fileContents}\x00${fileContents}`, 'utf-8'))
-    this.fs.readFile
+    ctx.fs.readFile
       .withArgs('utf8-null.tex')
       .resolves(Buffer.from(`${fileContents}\x00${fileContents}`, 'utf-8'))
-    this.fs.readFile
+    ctx.fs.readFile
       .withArgs('utf8-non-bmp.tex')
       .resolves(Buffer.from(`${fileContents}😈`))
-    this.fs.readFile
+    ctx.fs.readFile
       .withArgs('utf8-control-chars.tex')
       .resolves(Buffer.from(`${fileContents}\x0c${fileContents}`))
-    this.fs.readFile
+    ctx.fs.readFile
       .withArgs('text-short.tex')
       .resolves(Buffer.from('a'.repeat(0.5 * 1024 * 1024), 'utf-8'))
-    this.fs.readFile
+    ctx.fs.readFile
       .withArgs('text-smaller.tex')
       .resolves(Buffer.from('a'.repeat(2 * 1024 * 1024 - 1), 'utf-8'))
-    this.fs.readFile
+    ctx.fs.readFile
       .withArgs('text-exact.tex')
       .resolves(Buffer.from('a'.repeat(2 * 1024 * 1024), 'utf-8'))
-    this.fs.readFile
+    ctx.fs.readFile
       .withArgs('text-long.tex')
       .resolves(Buffer.from('a'.repeat(3 * 1024 * 1024), 'utf-8'))
 
-    this.FileTypeManager = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        'fs/promises': this.fs,
-        'utf-8-validate': this.isUtf8,
-        '@overleaf/settings': Settings,
-      },
-    })
+    vi.doMock('fs/promises', () => ({
+      default: ctx.fs,
+    }))
+
+    vi.doMock('utf-8-validate', () => ({
+      default: ctx.isUtf8,
+    }))
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: Settings,
+    }))
+
+    ctx.FileTypeManager = (await import(MODULE_PATH)).default
   })
 
   describe('isDirectory', function () {
     describe('when it is a directory', function () {
-      beforeEach(function () {
-        this.stats.isDirectory.returns(true)
+      beforeEach(function (ctx) {
+        ctx.stats.isDirectory.returns(true)
       })
 
-      it('should return true', async function () {
+      it('should return true', async function (ctx) {
         const result =
-          await this.FileTypeManager.promises.isDirectory('/some/path')
+          await ctx.FileTypeManager.promises.isDirectory('/some/path')
 
         expect(result).to.equal(true)
       })
     })
 
     describe('when it is not a directory', function () {
-      beforeEach(function () {
-        this.stats.isDirectory.returns(false)
+      beforeEach(function (ctx) {
+        ctx.stats.isDirectory.returns(false)
       })
 
-      it('should return false', async function () {
+      it('should return false', async function (ctx) {
         const result =
-          await this.FileTypeManager.promises.isDirectory('/some/path')
+          await ctx.FileTypeManager.promises.isDirectory('/some/path')
         expect(result).to.equal(false)
       })
     })
   })
 
   describe('isEditable', function () {
-    it('classifies simple UTF-8 as editable', function () {
-      expect(this.FileTypeManager.isEditable(fileContents)).to.be.true
+    it('classifies simple UTF-8 as editable', function (ctx) {
+      expect(ctx.FileTypeManager.isEditable(fileContents)).to.be.true
     })
 
-    it('classifies text with non-BMP characters as binary', function () {
-      expect(this.FileTypeManager.isEditable(`${fileContents}😈`)).to.be.false
+    it('classifies text with non-BMP characters as binary', function (ctx) {
+      expect(ctx.FileTypeManager.isEditable(`${fileContents}😈`)).to.be.false
     })
 
-    it('classifies a .tex file as editable', function () {
+    it('classifies a .tex file as editable', function (ctx) {
       expect(
-        this.FileTypeManager.isEditable(fileContents, {
+        ctx.FileTypeManager.isEditable(fileContents, {
           filename: 'some/file.tex',
         })
       ).to.be.true
     })
 
-    it('classifies a .exe file as binary', function () {
+    it('classifies a .exe file as binary', function (ctx) {
       expect(
-        this.FileTypeManager.isEditable(fileContents, {
+        ctx.FileTypeManager.isEditable(fileContents, {
           filename: 'command.exe',
         })
       ).to.be.false
@@ -143,8 +148,8 @@ describe('FileTypeManager', function () {
         '/GNUMakefile',
       ]
       TEXT_FILENAMES.forEach(filename => {
-        it(`should classify ${filename} as text`, async function () {
-          const { binary } = await this.FileTypeManager.promises.getType(
+        it(`should classify ${filename} as text`, async function (ctx) {
+          const { binary } = await ctx.FileTypeManager.promises.getType(
             filename,
             'utf8.tex',
             null
@@ -154,9 +159,9 @@ describe('FileTypeManager', function () {
         })
       })
 
-      it('should not classify short text files as binary', async function () {
-        this.stats.size = 2 * 1024 * 1024 // 2MB
-        const { binary } = await this.FileTypeManager.promises.getType(
+      it('should not classify short text files as binary', async function (ctx) {
+        ctx.stats.size = 2 * 1024 * 1024 // 2MB
+        const { binary } = await ctx.FileTypeManager.promises.getType(
           '/file.tex',
           'text-short.tex',
           null
@@ -165,9 +170,9 @@ describe('FileTypeManager', function () {
         binary.should.equal(false)
       })
 
-      it('should not classify text files just under the size limit as binary', async function () {
-        this.stats.size = 2 * 1024 * 1024 // 2MB
-        const { binary } = await this.FileTypeManager.promises.getType(
+      it('should not classify text files just under the size limit as binary', async function (ctx) {
+        ctx.stats.size = 2 * 1024 * 1024 // 2MB
+        const { binary } = await ctx.FileTypeManager.promises.getType(
           '/file.tex',
           'text-smaller.tex',
           null
@@ -176,9 +181,9 @@ describe('FileTypeManager', function () {
         binary.should.equal(false)
       })
 
-      it('should classify text files at the size limit as binary', async function () {
-        this.stats.size = 2 * 1024 * 1024 // 2MB
-        const { binary } = await this.FileTypeManager.promises.getType(
+      it('should classify text files at the size limit as binary', async function (ctx) {
+        ctx.stats.size = 2 * 1024 * 1024 // 2MB
+        const { binary } = await ctx.FileTypeManager.promises.getType(
           '/file.tex',
           'text-exact.tex',
           null
@@ -187,9 +192,9 @@ describe('FileTypeManager', function () {
         binary.should.equal(true)
       })
 
-      it('should classify long text files as binary', async function () {
-        this.stats.size = 2 * 1024 * 1024 // 2MB
-        const { binary } = await this.FileTypeManager.promises.getType(
+      it('should classify long text files as binary', async function (ctx) {
+        ctx.stats.size = 2 * 1024 * 1024 // 2MB
+        const { binary } = await ctx.FileTypeManager.promises.getType(
           '/file.tex',
           'text-long.tex',
           null
@@ -198,9 +203,9 @@ describe('FileTypeManager', function () {
         binary.should.equal(true)
       })
 
-      it('should classify large text files as binary', async function () {
-        this.stats.size = 8 * 1024 * 1024 // 8MB
-        const { binary } = await this.FileTypeManager.promises.getType(
+      it('should classify large text files as binary', async function (ctx) {
+        ctx.stats.size = 8 * 1024 * 1024 // 8MB
+        const { binary } = await ctx.FileTypeManager.promises.getType(
           '/file.tex',
           'utf8.tex',
           null
@@ -209,55 +214,55 @@ describe('FileTypeManager', function () {
         binary.should.equal(true)
       })
 
-      it('should not try to determine the encoding of large files', async function () {
-        this.stats.size = 8 * 1024 * 1024 // 8MB
-        await this.FileTypeManager.promises.getType(
+      it('should not try to determine the encoding of large files', async function (ctx) {
+        ctx.stats.size = 8 * 1024 * 1024 // 8MB
+        await ctx.FileTypeManager.promises.getType(
           '/file.tex',
           'utf8.tex',
           null
         )
 
-        sinon.assert.notCalled(this.isUtf8)
+        sinon.assert.notCalled(ctx.isUtf8)
       })
 
-      it('should detect the encoding of a utf8 file', async function () {
-        const { encoding } = await this.FileTypeManager.promises.getType(
+      it('should detect the encoding of a utf8 file', async function (ctx) {
+        const { encoding } = await ctx.FileTypeManager.promises.getType(
           '/file.tex',
           'utf8.tex',
           null
         )
 
-        sinon.assert.calledOnce(this.isUtf8)
-        this.isUtf8.returned(true).should.equal(true)
+        sinon.assert.calledOnce(ctx.isUtf8)
+        ctx.isUtf8.returned(true).should.equal(true)
         encoding.should.equal('utf-8')
       })
 
-      it("should return 'latin1' for non-unicode encodings", async function () {
-        const { encoding } = await this.FileTypeManager.promises.getType(
+      it("should return 'latin1' for non-unicode encodings", async function (ctx) {
+        const { encoding } = await ctx.FileTypeManager.promises.getType(
           '/file.tex',
           'latin1.tex',
           null
         )
 
-        sinon.assert.calledOnce(this.isUtf8)
-        this.isUtf8.returned(false).should.equal(true)
+        sinon.assert.calledOnce(ctx.isUtf8)
+        ctx.isUtf8.returned(false).should.equal(true)
         encoding.should.equal('latin1')
       })
 
-      it('should classify utf16 with BOM as utf-16', async function () {
-        const { encoding } = await this.FileTypeManager.promises.getType(
+      it('should classify utf16 with BOM as utf-16', async function (ctx) {
+        const { encoding } = await ctx.FileTypeManager.promises.getType(
           '/file.tex',
           'utf16.tex',
           null
         )
 
-        sinon.assert.calledOnce(this.isUtf8)
-        this.isUtf8.returned(false).should.equal(true)
+        sinon.assert.calledOnce(ctx.isUtf8)
+        ctx.isUtf8.returned(false).should.equal(true)
         encoding.should.equal('utf-16le')
       })
 
-      it('should classify latin1 files with a null char as binary', async function () {
-        const { binary } = await this.FileTypeManager.promises.getType(
+      it('should classify latin1 files with a null char as binary', async function (ctx) {
+        const { binary } = await ctx.FileTypeManager.promises.getType(
           '/file.tex',
           'latin1-null.tex',
           null
@@ -265,8 +270,8 @@ describe('FileTypeManager', function () {
         expect(binary).to.equal(true)
       })
 
-      it('should classify utf8 files with a null char as binary', async function () {
-        const { binary } = await this.FileTypeManager.promises.getType(
+      it('should classify utf8 files with a null char as binary', async function (ctx) {
+        const { binary } = await ctx.FileTypeManager.promises.getType(
           '/file.tex',
           'utf8-null.tex',
           null
@@ -275,8 +280,8 @@ describe('FileTypeManager', function () {
         expect(binary).to.equal(true)
       })
 
-      it('should classify utf8 files with non-BMP chars as binary', async function () {
-        const { binary } = await this.FileTypeManager.promises.getType(
+      it('should classify utf8 files with non-BMP chars as binary', async function (ctx) {
+        const { binary } = await ctx.FileTypeManager.promises.getType(
           '/file.tex',
           'utf8-non-bmp.tex',
           null
@@ -285,13 +290,12 @@ describe('FileTypeManager', function () {
         expect(binary).to.equal(true)
       })
 
-      it('should classify utf8 files with ascii control chars as utf-8', async function () {
-        const { binary, encoding } =
-          await this.FileTypeManager.promises.getType(
-            '/file.tex',
-            'utf8-control-chars.tex',
-            null
-          )
+      it('should classify utf8 files with ascii control chars as utf-8', async function (ctx) {
+        const { binary, encoding } = await ctx.FileTypeManager.promises.getType(
+          '/file.tex',
+          'utf8-control-chars.tex',
+          null
+        )
 
         expect(binary).to.equal(false)
         expect(encoding).to.equal('utf-8')
@@ -307,8 +311,8 @@ describe('FileTypeManager', function () {
         '/tex',
       ]
       BINARY_FILENAMES.forEach(filename => {
-        it(`should classify ${filename} as binary`, async function () {
-          const { binary } = await this.FileTypeManager.promises.getType(
+        it(`should classify ${filename} as binary`, async function (ctx) {
+          const { binary } = await ctx.FileTypeManager.promises.getType(
             filename,
             'latin1.tex', // even if the content is not binary
             null
@@ -318,18 +322,18 @@ describe('FileTypeManager', function () {
         })
       })
 
-      it('should not try to get the character encoding', async function () {
-        await this.FileTypeManager.promises.getType(
+      it('should not try to get the character encoding', async function (ctx) {
+        await ctx.FileTypeManager.promises.getType(
           '/file.png',
           'utf8.tex',
           null
         )
 
-        sinon.assert.notCalled(this.isUtf8)
+        sinon.assert.notCalled(ctx.isUtf8)
       })
 
-      it('should recognise new binary files as binary', async function () {
-        const { binary } = await this.FileTypeManager.promises.getType(
+      it('should recognise new binary files as binary', async function (ctx) {
+        const { binary } = await ctx.FileTypeManager.promises.getType(
           '/file.py',
           'latin1.tex',
           null
@@ -338,8 +342,8 @@ describe('FileTypeManager', function () {
         binary.should.equal(true)
       })
 
-      it('should recognise existing binary files as binary', async function () {
-        const { binary } = await this.FileTypeManager.promises.getType(
+      it('should recognise existing binary files as binary', async function (ctx) {
+        const { binary } = await ctx.FileTypeManager.promises.getType(
           '/file.py',
           'latin1.tex',
           'file'
@@ -348,8 +352,8 @@ describe('FileTypeManager', function () {
         binary.should.equal(true)
       })
 
-      it('should preserve existing non-binary files as non-binary', async function () {
-        const { binary } = await this.FileTypeManager.promises.getType(
+      it('should preserve existing non-binary files as non-binary', async function (ctx) {
+        const { binary } = await ctx.FileTypeManager.promises.getType(
           '/file.py',
           'latin1.tex',
           'doc'
@@ -361,59 +365,59 @@ describe('FileTypeManager', function () {
   })
 
   describe('shouldIgnore', function () {
-    it('should ignore tex auxiliary files', async function () {
-      const ignore = this.FileTypeManager.shouldIgnore('file.aux')
+    it('should ignore tex auxiliary files', async function (ctx) {
+      const ignore = ctx.FileTypeManager.shouldIgnore('file.aux')
       ignore.should.equal(true)
     })
 
-    it('should ignore dotfiles', async function () {
-      const ignore = this.FileTypeManager.shouldIgnore('path/.git')
+    it('should ignore dotfiles', async function (ctx) {
+      const ignore = ctx.FileTypeManager.shouldIgnore('path/.git')
       ignore.should.equal(true)
     })
 
-    it('should ignore .git directories and contained files', async function () {
-      const ignore = await this.FileTypeManager.shouldIgnore('path/.git/info')
+    it('should ignore .git directories and contained files', async function (ctx) {
+      const ignore = await ctx.FileTypeManager.shouldIgnore('path/.git/info')
       ignore.should.equal(true)
     })
 
-    it('should not ignore .latexmkrc dotfile', async function () {
-      const ignore = this.FileTypeManager.shouldIgnore('path/.latexmkrc')
+    it('should not ignore .latexmkrc dotfile', async function (ctx) {
+      const ignore = ctx.FileTypeManager.shouldIgnore('path/.latexmkrc')
       ignore.should.equal(false)
     })
 
-    it('should ignore __MACOSX', async function () {
-      const ignore = this.FileTypeManager.shouldIgnore('path/__MACOSX')
+    it('should ignore __MACOSX', async function (ctx) {
+      const ignore = ctx.FileTypeManager.shouldIgnore('path/__MACOSX')
       ignore.should.equal(true)
     })
 
-    it('should ignore synctex files', async function () {
-      const ignore = this.FileTypeManager.shouldIgnore('file.synctex')
+    it('should ignore synctex files', async function (ctx) {
+      const ignore = ctx.FileTypeManager.shouldIgnore('file.synctex')
       ignore.should.equal(true)
     })
 
-    it('should ignore synctex(busy) files', async function () {
-      const ignore = this.FileTypeManager.shouldIgnore('file.synctex(busy)')
+    it('should ignore synctex(busy) files', async function (ctx) {
+      const ignore = ctx.FileTypeManager.shouldIgnore('file.synctex(busy)')
       ignore.should.equal(true)
     })
 
-    it('should not ignore .tex files', async function () {
-      const ignore = this.FileTypeManager.shouldIgnore('file.tex')
+    it('should not ignore .tex files', async function (ctx) {
+      const ignore = ctx.FileTypeManager.shouldIgnore('file.tex')
       ignore.should.equal(false)
     })
 
-    it('should ignore the case of the extension', async function () {
-      const ignore = this.FileTypeManager.shouldIgnore('file.AUX')
+    it('should ignore the case of the extension', async function (ctx) {
+      const ignore = ctx.FileTypeManager.shouldIgnore('file.AUX')
       ignore.should.equal(true)
     })
 
-    it('should not ignore files with an ignored extension as full name', async function () {
-      const ignore = this.FileTypeManager.shouldIgnore('dvi')
+    it('should not ignore files with an ignored extension as full name', async function (ctx) {
+      const ignore = ctx.FileTypeManager.shouldIgnore('dvi')
       ignore.should.equal(false)
     })
 
-    it('should not ignore directories with an ignored extension as full name', async function () {
-      this.stats.isDirectory.returns(true)
-      const ignore = this.FileTypeManager.shouldIgnore('dvi')
+    it('should not ignore directories with an ignored extension as full name', async function (ctx) {
+      ctx.stats.isDirectory.returns(true)
+      const ignore = ctx.FileTypeManager.shouldIgnore('dvi')
       ignore.should.equal(false)
     })
   })

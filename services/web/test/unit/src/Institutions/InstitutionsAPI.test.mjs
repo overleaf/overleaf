@@ -1,70 +1,88 @@
-const { expect } = require('chai')
-const SandboxedModule = require('sandboxed-module')
-const path = require('path')
-const sinon = require('sinon')
-const { ObjectId } = require('mongodb-legacy')
+import { vi, expect } from 'vitest'
+import path from 'path'
+import sinon from 'sinon'
+import mongodb from 'mongodb-legacy'
+import Errors from '../../../../app/src/Features/Errors/Errors.js'
+
 const modulePath = path.join(
-  __dirname,
+  import.meta.dirname,
   '../../../../app/src/Features/Institutions/InstitutionsAPI'
 )
-const Errors = require('../../../../app/src/Features/Errors/Errors')
+const { ObjectId } = mongodb
+vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
+  vi.importActual('../../../../app/src/Features/Errors/Errors.js')
+)
 
 describe('InstitutionsAPI', function () {
-  beforeEach(function () {
-    this.settings = {
+  beforeEach(async function (ctx) {
+    ctx.settings = {
       apis: { v1: { url: 'v1.url', user: '', pass: '', timeout: 5000 } },
     }
-    this.request = sinon.stub()
-    this.fetchNothing = sinon.stub()
-    this.ipMatcherNotification = {
-      read: (this.markAsReadIpMatcher = sinon.stub().resolves()),
+    ctx.request = sinon.stub()
+    ctx.fetchNothing = sinon.stub()
+    ctx.ipMatcherNotification = {
+      read: (ctx.markAsReadIpMatcher = sinon.stub().resolves()),
     }
-    this.InstitutionsAPI = SandboxedModule.require(modulePath, {
-      requires: {
-        '@overleaf/settings': this.settings,
-        requestretry: this.request,
-        '@overleaf/fetch-utils': {
-          fetchNothing: this.fetchNothing,
-          fetchJson: (this.fetchJson = sinon.stub()),
-        },
-        '../Notifications/NotificationsBuilder': {
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.settings,
+    }))
+
+    vi.doMock('requestretry', () => ({
+      default: ctx.request,
+    }))
+
+    vi.doMock('@overleaf/fetch-utils', () => ({
+      fetchNothing: ctx.fetchNothing,
+      fetchJson: (ctx.fetchJson = sinon.stub()),
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Notifications/NotificationsBuilder',
+      () => ({
+        default: {
           promises: {
             ipMatcherAffiliation: sinon
               .stub()
-              .returns(this.ipMatcherNotification),
+              .returns(ctx.ipMatcherNotification),
           },
         },
-        '../../infrastructure/Modules': (this.Modules = {
-          promises: {
-            hooks: {
-              fire: sinon.stub(),
-            },
-          },
-        }),
-      },
-    })
+      })
+    )
 
-    this.stubbedUser = {
+    vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
+      default: (ctx.Modules = {
+        promises: {
+          hooks: {
+            fire: sinon.stub(),
+          },
+        },
+      }),
+    }))
+
+    ctx.InstitutionsAPI = (await import(modulePath)).default
+
+    ctx.stubbedUser = {
       _id: '3131231',
       name: 'bob',
       email: 'hello@world.com',
     }
-    this.newEmail = 'bob@bob.com'
+    ctx.newEmail = 'bob@bob.com'
   })
 
   describe('getInstitutionAffiliations', function () {
-    it('get affiliations', async function () {
-      this.institutionId = 123
+    it('get affiliations', async function (ctx) {
+      ctx.institutionId = 123
       const responseBody = ['123abc', '456def']
-      this.request.yields(null, { statusCode: 200 }, responseBody)
+      ctx.request.yields(null, { statusCode: 200 }, responseBody)
       const body =
-        await this.InstitutionsAPI.promises.getInstitutionAffiliations(
-          this.institutionId
+        await ctx.InstitutionsAPI.promises.getInstitutionAffiliations(
+          ctx.institutionId
         )
 
-      this.request.calledOnce.should.equal(true)
-      const requestOptions = this.request.lastCall.args[0]
-      const expectedUrl = `v1.url/api/v2/institutions/${this.institutionId}/affiliations`
+      ctx.request.calledOnce.should.equal(true)
+      const requestOptions = ctx.request.lastCall.args[0]
+      const expectedUrl = `v1.url/api/v2/institutions/${ctx.institutionId}/affiliations`
       requestOptions.url.should.equal(expectedUrl)
       requestOptions.method.should.equal('GET')
       requestOptions.maxAttempts.should.exist
@@ -74,12 +92,13 @@ describe('InstitutionsAPI', function () {
       body.should.equal(responseBody)
     })
 
-    it('handle empty response', async function () {
-      this.settings.apis.v1.url = ''
+    it('handle empty response', async function (ctx) {
+      ctx.institutionId = 123
+      ctx.settings.apis.v1.url = ''
 
       const body =
-        await this.InstitutionsAPI.promises.getInstitutionAffiliations(
-          this.institutionId
+        await ctx.InstitutionsAPI.promises.getInstitutionAffiliations(
+          ctx.institutionId
         )
       expect(body).to.be.a('Array')
       body.length.should.equal(0)
@@ -89,7 +108,7 @@ describe('InstitutionsAPI', function () {
   describe('getLicencesForAnalytics', function () {
     const lag = 'daily'
     const queryDate = '2017-01-07:00:00.000Z'
-    it('should send the request to v1', async function () {
+    it('should send the request to v1', async function (ctx) {
       const v1Result = {
         lag: 'daily',
         date: queryDate,
@@ -98,22 +117,19 @@ describe('InstitutionsAPI', function () {
           max_confirmation_months: [],
         },
       }
-      this.request.callsArgWith(1, null, { statusCode: 201 }, v1Result)
-      await this.InstitutionsAPI.promises.getLicencesForAnalytics(
-        lag,
-        queryDate
-      )
-      const requestOptions = this.request.lastCall.args[0]
+      ctx.request.callsArgWith(1, null, { statusCode: 201 }, v1Result)
+      await ctx.InstitutionsAPI.promises.getLicencesForAnalytics(lag, queryDate)
+      const requestOptions = ctx.request.lastCall.args[0]
       expect(requestOptions.body.query_date).to.equal(queryDate)
       expect(requestOptions.body.lag).to.equal(lag)
       requestOptions.method.should.equal('GET')
     })
-    it('should handle errors', async function () {
-      this.request.callsArgWith(1, null, { statusCode: 500 })
+    it('should handle errors', async function (ctx) {
+      ctx.request.callsArgWith(1, null, { statusCode: 500 })
       let error
 
       try {
-        await this.InstitutionsAPI.promises.getLicencesForAnalytics(
+        await ctx.InstitutionsAPI.promises.getLicencesForAnalytics(
           lag,
           queryDate
         )
@@ -126,7 +142,7 @@ describe('InstitutionsAPI', function () {
   })
 
   describe('getUserAffiliations', function () {
-    it('get affiliations with commons', async function () {
+    it('get affiliations with commons', async function (ctx) {
       const responseBody = [
         {
           foo: 'bar',
@@ -135,22 +151,22 @@ describe('InstitutionsAPI', function () {
           },
         },
       ]
-      this.request.callsArgWith(1, null, { statusCode: 201 }, responseBody)
-      const body = await this.InstitutionsAPI.promises.getUserAffiliations(
-        this.stubbedUser._id
+      ctx.request.callsArgWith(1, null, { statusCode: 201 }, responseBody)
+      const body = await ctx.InstitutionsAPI.promises.getUserAffiliations(
+        ctx.stubbedUser._id
       )
-      this.request.calledOnce.should.equal(true)
-      const requestOptions = this.request.lastCall.args[0]
-      const expectedUrl = `v1.url/api/v2/users/${this.stubbedUser._id}/affiliations`
+      ctx.request.calledOnce.should.equal(true)
+      const requestOptions = ctx.request.lastCall.args[0]
+      const expectedUrl = `v1.url/api/v2/users/${ctx.stubbedUser._id}/affiliations`
       requestOptions.url.should.equal(expectedUrl)
       requestOptions.method.should.equal('GET')
       requestOptions.maxAttempts.should.equal(3)
-      this.Modules.promises.hooks.fire.should.have.been.called
+      ctx.Modules.promises.hooks.fire.should.have.been.called
       expect(requestOptions.body).not.to.exist
       expect(body).to.deep.equal(responseBody)
     })
 
-    it('get affiliations with domain capture for groups', async function () {
+    it('get affiliations with domain capture for groups', async function (ctx) {
       const responseBody = [
         {
           id: '123abc',
@@ -160,28 +176,28 @@ describe('InstitutionsAPI', function () {
           },
         },
       ]
-      this.request.callsArgWith(1, null, { statusCode: 201 }, responseBody)
+      ctx.request.callsArgWith(1, null, { statusCode: 201 }, responseBody)
       const groupResponse = {
         _id: new ObjectId(),
         managedUsersEnabled: false,
         domainCaptureEnabled: true,
       }
-      this.Modules.promises.hooks.fire
+      ctx.Modules.promises.hooks.fire
         .withArgs(
           'getGroupWithDomainCaptureByV1Id',
           responseBody[0].institution.id
         )
         .resolves([groupResponse])
-      const body = await this.InstitutionsAPI.promises.getUserAffiliations(
-        this.stubbedUser._id
+      const body = await ctx.InstitutionsAPI.promises.getUserAffiliations(
+        ctx.stubbedUser._id
       )
-      this.request.calledOnce.should.equal(true)
-      const requestOptions = this.request.lastCall.args[0]
-      const expectedUrl = `v1.url/api/v2/users/${this.stubbedUser._id}/affiliations`
+      ctx.request.calledOnce.should.equal(true)
+      const requestOptions = ctx.request.lastCall.args[0]
+      const expectedUrl = `v1.url/api/v2/users/${ctx.stubbedUser._id}/affiliations`
       requestOptions.url.should.equal(expectedUrl)
       requestOptions.method.should.equal('GET')
       requestOptions.maxAttempts.should.equal(3)
-      this.Modules.promises.hooks.fire.should.have.been.calledWith(
+      ctx.Modules.promises.hooks.fire.should.have.been.calledWith(
         'getGroupWithDomainCaptureByV1Id',
         responseBody[0].institution.id
       )
@@ -196,14 +212,14 @@ describe('InstitutionsAPI', function () {
       ])
     })
 
-    it('handle error', async function () {
+    it('handle error', async function (ctx) {
       const body = { errors: 'affiliation error message' }
-      this.request.callsArgWith(1, null, { statusCode: 503 }, body)
+      ctx.request.callsArgWith(1, null, { statusCode: 503 }, body)
       let error
 
       try {
-        await this.InstitutionsAPI.promises.getUserAffiliations(
-          this.stubbedUser._id
+        await ctx.InstitutionsAPI.promises.getUserAffiliations(
+          ctx.stubbedUser._id
         )
       } catch (err) {
         error = err
@@ -212,10 +228,10 @@ describe('InstitutionsAPI', function () {
       expect(error).to.be.instanceOf(Errors.V1ConnectionError)
     })
 
-    it('handle empty response', async function () {
-      this.settings.apis.v1.url = ''
-      const body = await this.InstitutionsAPI.promises.getUserAffiliations(
-        this.stubbedUser._id
+    it('handle empty response', async function (ctx) {
+      ctx.settings.apis.v1.url = ''
+      const body = await ctx.InstitutionsAPI.promises.getUserAffiliations(
+        ctx.stubbedUser._id
       )
       expect(body).to.be.a('Array')
       body.length.should.equal(0)
@@ -223,30 +239,30 @@ describe('InstitutionsAPI', function () {
   })
 
   describe('getUsersNeedingReconfirmationsLapsedProcessed', function () {
-    it('get the list of users', async function () {
-      this.fetchJson.resolves({ statusCode: 200 })
-      await this.InstitutionsAPI.promises.getUsersNeedingReconfirmationsLapsedProcessed()
-      this.fetchJson.calledOnce.should.equal(true)
-      const requestOptions = this.fetchJson.lastCall.args[1]
+    it('get the list of users', async function (ctx) {
+      ctx.fetchJson.resolves({ statusCode: 200 })
+      await ctx.InstitutionsAPI.promises.getUsersNeedingReconfirmationsLapsedProcessed()
+      ctx.fetchJson.calledOnce.should.equal(true)
+      const requestOptions = ctx.fetchJson.lastCall.args[1]
       const expectedUrl = `v1.url/api/v2/institutions/need_reconfirmation_lapsed_processed`
-      this.fetchJson.lastCall.args[0].should.equal(expectedUrl)
+      ctx.fetchJson.lastCall.args[0].should.equal(expectedUrl)
       requestOptions.method.should.equal('GET')
     })
 
-    it('handle error', async function () {
-      this.fetchJson.throws({ info: { statusCode: 500 } })
+    it('handle error', async function (ctx) {
+      ctx.fetchJson.throws({ info: { statusCode: 500 } })
       await expect(
-        this.InstitutionsAPI.promises.getUsersNeedingReconfirmationsLapsedProcessed()
+        ctx.InstitutionsAPI.promises.getUsersNeedingReconfirmationsLapsedProcessed()
       ).to.be.rejected
     })
   })
 
   describe('addAffiliation', function () {
-    beforeEach(function () {
-      this.fetchNothing.resolves({ status: 201 })
+    beforeEach(function (ctx) {
+      ctx.fetchNothing.resolves({ status: 201 })
     })
 
-    it('add affiliation', async function () {
+    it('add affiliation', async function (ctx) {
       const affiliationOptions = {
         university: { id: 1 },
         department: 'Math',
@@ -254,38 +270,38 @@ describe('InstitutionsAPI', function () {
         confirmedAt: new Date(),
         entitlement: true,
       }
-      await this.InstitutionsAPI.promises.addAffiliation(
-        this.stubbedUser._id,
-        this.newEmail,
+      await ctx.InstitutionsAPI.promises.addAffiliation(
+        ctx.stubbedUser._id,
+        ctx.newEmail,
         affiliationOptions
       )
-      this.fetchNothing.calledOnce.should.equal(true)
-      const requestOptions = this.fetchNothing.lastCall.args[1]
-      const expectedUrl = `v1.url/api/v2/users/${this.stubbedUser._id}/affiliations`
-      expect(this.fetchNothing.lastCall.args[0]).to.equal(expectedUrl)
+      ctx.fetchNothing.calledOnce.should.equal(true)
+      const requestOptions = ctx.fetchNothing.lastCall.args[1]
+      const expectedUrl = `v1.url/api/v2/users/${ctx.stubbedUser._id}/affiliations`
+      expect(ctx.fetchNothing.lastCall.args[0]).to.equal(expectedUrl)
       requestOptions.method.should.equal('POST')
 
       const { json } = requestOptions
       Object.keys(json).length.should.equal(7)
       expect(json).to.deep.equal(
         Object.assign(
-          { email: this.newEmail, rejectIfBlocklisted: undefined },
+          { email: ctx.newEmail, rejectIfBlocklisted: undefined },
           affiliationOptions
         )
       )
-      this.markAsReadIpMatcher.calledOnce.should.equal(true)
+      ctx.markAsReadIpMatcher.calledOnce.should.equal(true)
     })
 
-    it('handles 422 error', async function () {
+    it('handles 422 error', async function (ctx) {
       const messageFromApi = 'affiliation error message'
       const body = JSON.stringify({ errors: messageFromApi })
-      this.fetchNothing.throws({ response: { status: 422 }, body })
+      ctx.fetchNothing.throws({ response: { status: 422 }, body })
       let error
 
       try {
-        await this.InstitutionsAPI.promises.addAffiliation(
-          this.stubbedUser._id,
-          this.newEmail,
+        await ctx.InstitutionsAPI.promises.addAffiliation(
+          ctx.stubbedUser._id,
+          ctx.newEmail,
           {}
         )
       } catch (err) {
@@ -296,15 +312,15 @@ describe('InstitutionsAPI', function () {
       expect(error).to.have.property('message', `422: ${messageFromApi}`)
     })
 
-    it('handles 500 error', async function () {
+    it('handles 500 error', async function (ctx) {
       const body = { errors: 'affiliation error message' }
-      this.fetchNothing.throws({ response: { status: 500 }, body })
+      ctx.fetchNothing.throws({ response: { status: 500 }, body })
       let error
 
       try {
-        await this.InstitutionsAPI.promises.addAffiliation(
-          this.stubbedUser._id,
-          this.newEmail,
+        await ctx.InstitutionsAPI.promises.addAffiliation(
+          ctx.stubbedUser._id,
+          ctx.newEmail,
           {}
         )
       } catch (err) {
@@ -319,14 +335,14 @@ describe('InstitutionsAPI', function () {
       })
     })
 
-    it('uses default error message when no error body in response', async function () {
-      this.fetchNothing.throws({ response: { status: 429 } })
+    it('uses default error message when no error body in response', async function (ctx) {
+      ctx.fetchNothing.throws({ response: { status: 429 } })
       let error
 
       try {
-        await this.InstitutionsAPI.promises.addAffiliation(
-          this.stubbedUser._id,
-          this.newEmail,
+        await ctx.InstitutionsAPI.promises.addAffiliation(
+          ctx.stubbedUser._id,
+          ctx.newEmail,
           {}
         )
       } catch (err) {
@@ -340,47 +356,47 @@ describe('InstitutionsAPI', function () {
       )
     })
 
-    it('does not try to mark IP matcher notifications as read if no university passed', async function () {
+    it('does not try to mark IP matcher notifications as read if no university passed', async function (ctx) {
       const affiliationOptions = {
         confirmedAt: new Date(),
       }
 
-      await this.InstitutionsAPI.promises.addAffiliation(
-        this.stubbedUser._id,
-        this.newEmail,
+      await ctx.InstitutionsAPI.promises.addAffiliation(
+        ctx.stubbedUser._id,
+        ctx.newEmail,
         affiliationOptions
       )
 
-      expect(this.markAsReadIpMatcher.callCount).to.equal(0)
+      expect(ctx.markAsReadIpMatcher.callCount).to.equal(0)
     })
   })
 
   describe('removeAffiliation', function () {
-    beforeEach(function () {
-      this.fetchNothing.throws({ response: { status: 404 } })
+    beforeEach(function (ctx) {
+      ctx.fetchNothing.throws({ response: { status: 404 } })
     })
 
-    it('remove affiliation', async function () {
-      await this.InstitutionsAPI.promises.removeAffiliation(
-        this.stubbedUser._id,
-        this.newEmail
+    it('remove affiliation', async function (ctx) {
+      await ctx.InstitutionsAPI.promises.removeAffiliation(
+        ctx.stubbedUser._id,
+        ctx.newEmail
       )
-      this.fetchNothing.calledOnce.should.equal(true)
-      const requestOptions = this.fetchNothing.lastCall.args[1]
-      const expectedUrl = `v1.url/api/v2/users/${this.stubbedUser._id}/affiliations/remove`
-      this.fetchNothing.lastCall.args[0].should.equal(expectedUrl)
+      ctx.fetchNothing.calledOnce.should.equal(true)
+      const requestOptions = ctx.fetchNothing.lastCall.args[1]
+      const expectedUrl = `v1.url/api/v2/users/${ctx.stubbedUser._id}/affiliations/remove`
+      ctx.fetchNothing.lastCall.args[0].should.equal(expectedUrl)
       requestOptions.method.should.equal('POST')
-      expect(requestOptions.json).to.deep.equal({ email: this.newEmail })
+      expect(requestOptions.json).to.deep.equal({ email: ctx.newEmail })
     })
 
-    it('handle error', async function () {
-      this.fetchNothing.throws({ response: { status: 500 } })
+    it('handle error', async function (ctx) {
+      ctx.fetchNothing.throws({ response: { status: 500 } })
       let error
 
       try {
-        await this.InstitutionsAPI.promises.removeAffiliation(
-          this.stubbedUser._id,
-          this.newEmail
+        await ctx.InstitutionsAPI.promises.removeAffiliation(
+          ctx.stubbedUser._id,
+          ctx.newEmail
         )
       } catch (err) {
         error = err
@@ -392,26 +408,24 @@ describe('InstitutionsAPI', function () {
   })
 
   describe('deleteAffiliations', function () {
-    it('delete affiliations', async function () {
-      this.request.callsArgWith(1, null, { statusCode: 200 })
-      await this.InstitutionsAPI.promises.deleteAffiliations(
-        this.stubbedUser._id
-      )
-      this.request.calledOnce.should.equal(true)
-      const requestOptions = this.request.lastCall.args[0]
-      const expectedUrl = `v1.url/api/v2/users/${this.stubbedUser._id}/affiliations`
+    it('delete affiliations', async function (ctx) {
+      ctx.request.callsArgWith(1, null, { statusCode: 200 })
+      await ctx.InstitutionsAPI.promises.deleteAffiliations(ctx.stubbedUser._id)
+      ctx.request.calledOnce.should.equal(true)
+      const requestOptions = ctx.request.lastCall.args[0]
+      const expectedUrl = `v1.url/api/v2/users/${ctx.stubbedUser._id}/affiliations`
       requestOptions.url.should.equal(expectedUrl)
       requestOptions.method.should.equal('DELETE')
     })
 
-    it('handle error', async function () {
+    it('handle error', async function (ctx) {
       const body = { errors: 'affiliation error message' }
-      this.request.callsArgWith(1, null, { statusCode: 518 }, body)
+      ctx.request.callsArgWith(1, null, { statusCode: 518 }, body)
       let error
 
       try {
-        await this.InstitutionsAPI.promises.deleteAffiliations(
-          this.stubbedUser._id
+        await ctx.InstitutionsAPI.promises.deleteAffiliations(
+          ctx.stubbedUser._id
         )
       } catch (err) {
         error = err
@@ -422,26 +436,26 @@ describe('InstitutionsAPI', function () {
   })
 
   describe('endorseAffiliation', function () {
-    beforeEach(function () {
-      this.request.callsArgWith(1, null, { statusCode: 204 })
+    beforeEach(function (ctx) {
+      ctx.request.callsArgWith(1, null, { statusCode: 204 })
     })
 
-    it('endorse affiliation', async function () {
-      await this.InstitutionsAPI.promises.endorseAffiliation(
-        this.stubbedUser._id,
-        this.newEmail,
+    it('endorse affiliation', async function (ctx) {
+      await ctx.InstitutionsAPI.promises.endorseAffiliation(
+        ctx.stubbedUser._id,
+        ctx.newEmail,
         'Student',
         'Physics'
       )
-      this.request.calledOnce.should.equal(true)
-      const requestOptions = this.request.lastCall.args[0]
-      const expectedUrl = `v1.url/api/v2/users/${this.stubbedUser._id}/affiliations/endorse`
+      ctx.request.calledOnce.should.equal(true)
+      const requestOptions = ctx.request.lastCall.args[0]
+      const expectedUrl = `v1.url/api/v2/users/${ctx.stubbedUser._id}/affiliations/endorse`
       requestOptions.url.should.equal(expectedUrl)
       requestOptions.method.should.equal('POST')
 
       const { body } = requestOptions
       Object.keys(body).length.should.equal(3)
-      body.email.should.equal(this.newEmail)
+      body.email.should.equal(ctx.newEmail)
       body.role.should.equal('Student')
       body.department.should.equal('Physics')
     })
@@ -450,13 +464,13 @@ describe('InstitutionsAPI', function () {
   describe('sendUsersWithReconfirmationsLapsedProcessed', function () {
     const users = ['abc123', 'def456']
 
-    it('sends the list of users', async function () {
-      this.request.callsArgWith(1, null, { statusCode: 200 })
-      await this.InstitutionsAPI.promises.sendUsersWithReconfirmationsLapsedProcessed(
+    it('sends the list of users', async function (ctx) {
+      ctx.request.callsArgWith(1, null, { statusCode: 200 })
+      await ctx.InstitutionsAPI.promises.sendUsersWithReconfirmationsLapsedProcessed(
         users
       )
-      this.request.calledOnce.should.equal(true)
-      const requestOptions = this.request.lastCall.args[0]
+      ctx.request.calledOnce.should.equal(true)
+      const requestOptions = ctx.request.lastCall.args[0]
       const expectedUrl =
         'v1.url/api/v2/institutions/reconfirmation_lapsed_processed'
       requestOptions.url.should.equal(expectedUrl)
@@ -464,12 +478,12 @@ describe('InstitutionsAPI', function () {
       expect(requestOptions.body).to.deep.equal({ users })
     })
 
-    it('handle error', async function () {
-      this.request.callsArgWith(1, null, { statusCode: 500 })
+    it('handle error', async function (ctx) {
+      ctx.request.callsArgWith(1, null, { statusCode: 500 })
       let error
 
       try {
-        await this.InstitutionsAPI.promises.sendUsersWithReconfirmationsLapsedProcessed(
+        await ctx.InstitutionsAPI.promises.sendUsersWithReconfirmationsLapsedProcessed(
           users
         )
       } catch (err) {

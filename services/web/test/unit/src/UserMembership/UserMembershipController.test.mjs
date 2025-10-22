@@ -103,6 +103,24 @@ describe('UserMembershipController', () => {
       managedUsers: {
         enabled: false,
       },
+      plans: [
+        {
+          planCode: 'personal',
+          name: 'Personal',
+          price_in_cents: 0,
+          features: {
+            collaborators: -1,
+            dropbox: true,
+            github: true,
+            gitBridge: true,
+            versioning: true,
+            compileTimeout: 180,
+            compileGroup: 'standard',
+            references: true,
+            trackChanges: true,
+          },
+        },
+      ],
     }
 
     ctx.SessionManager = {

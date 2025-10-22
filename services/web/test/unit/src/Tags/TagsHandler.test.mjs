@@ -1,92 +1,91 @@
-const SandboxedModule = require('sandboxed-module')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const { Tag } = require('../helpers/models/Tag')
-const { ObjectId } = require('mongodb-legacy')
-const modulePath = require('path').join(
-  __dirname,
-  '../../../../app/src/Features/Tags/TagsHandler.js'
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+import { Tag } from '../helpers/models/Tag.js'
+import mongodb from 'mongodb-legacy'
+import path from 'node:path'
+const { ObjectId } = mongodb
+
+const modulePath = path.join(
+  import.meta.dirname,
+  '../../../../app/src/Features/Tags/TagsHandler.mjs'
 )
 
 describe('TagsHandler', function () {
-  beforeEach(function () {
-    this.userId = new ObjectId().toString()
-    this.callback = sinon.stub()
+  beforeEach(async function (ctx) {
+    ctx.userId = new ObjectId().toString()
+    ctx.callback = sinon.stub()
 
-    this.tag = { user_id: this.userId, name: 'some name', color: '#3399CC' }
-    this.tagId = new ObjectId().toString()
-    this.projectId = new ObjectId().toString()
-    this.projectIds = [new ObjectId().toString(), new ObjectId().toString()]
+    ctx.tag = { user_id: ctx.userId, name: 'some name', color: '#3399CC' }
+    ctx.tagId = new ObjectId().toString()
+    ctx.projectId = new ObjectId().toString()
+    ctx.projectIds = [new ObjectId().toString(), new ObjectId().toString()]
 
-    this.mongodb = { ObjectId }
-    this.TagMock = sinon.mock(Tag)
+    ctx.mongodb = { ObjectId }
+    ctx.TagMock = sinon.mock(Tag)
 
-    this.TagsHandler = SandboxedModule.require(modulePath, {
-      requires: {
-        '../../infrastructure/mongodb': this.mongodb,
-        '../../models/Tag': { Tag },
-      },
-    })
+    vi.doMock('../../../../app/src/infrastructure/mongodb', () => ({
+      default: ctx.mongodb,
+    }))
+
+    vi.doMock('../../../../app/src/models/Tag', () => ({
+      Tag,
+    }))
+
+    ctx.TagsHandler = (await import(modulePath)).default
   })
 
   describe('finding users tags', function () {
-    it('should find all the documents with that user id', async function () {
+    it('should find all the documents with that user id', async function (ctx) {
       const stubbedTags = [{ name: 'tag1' }, { name: 'tag2' }, { name: 'tag3' }]
-      this.TagMock.expects('find')
+      ctx.TagMock.expects('find')
         .once()
-        .withArgs({ user_id: this.userId })
+        .withArgs({ user_id: ctx.userId })
         .resolves(stubbedTags)
-      const result = await this.TagsHandler.promises.getAllTags(this.userId)
-      this.TagMock.verify()
+      const result = await ctx.TagsHandler.promises.getAllTags(ctx.userId)
+      ctx.TagMock.verify()
       expect(result).to.deep.equal(stubbedTags)
     })
   })
 
   describe('createTag', function () {
     describe('when insert succeeds', function () {
-      it('should call insert in mongo', async function () {
-        this.TagMock.expects('create')
-          .withArgs(this.tag)
-          .once()
-          .resolves(this.tag)
-        const resultTag = await this.TagsHandler.promises.createTag(
-          this.tag.user_id,
-          this.tag.name,
-          this.tag.color
+      it('should call insert in mongo', async function (ctx) {
+        ctx.TagMock.expects('create').withArgs(ctx.tag).once().resolves(ctx.tag)
+        const resultTag = await ctx.TagsHandler.promises.createTag(
+          ctx.tag.user_id,
+          ctx.tag.name,
+          ctx.tag.color
         )
-        this.TagMock.verify()
-        expect(resultTag.user_id).to.equal(this.tag.user_id)
-        expect(resultTag.name).to.equal(this.tag.name)
-        expect(resultTag.color).to.equal(this.tag.color)
+        ctx.TagMock.verify()
+        expect(resultTag.user_id).to.equal(ctx.tag.user_id)
+        expect(resultTag.name).to.equal(ctx.tag.name)
+        expect(resultTag.color).to.equal(ctx.tag.color)
       })
     })
 
     describe('when truncate=true, and tag is too long', function () {
-      it('should truncate the tag name', async function () {
+      it('should truncate the tag name', async function (ctx) {
         // Expect the tag to end up with this truncated name
-        this.tag.name = 'a comically long tag that will be truncated intern'
-        this.TagMock.expects('create')
-          .withArgs(this.tag)
-          .once()
-          .resolves(this.tag)
-        const resultTag = await this.TagsHandler.promises.createTag(
-          this.tag.user_id,
+        ctx.tag.name = 'a comically long tag that will be truncated intern'
+        ctx.TagMock.expects('create').withArgs(ctx.tag).once().resolves(ctx.tag)
+        const resultTag = await ctx.TagsHandler.promises.createTag(
+          ctx.tag.user_id,
           // Pass this too-long name
           'a comically long tag that will be truncated internally and not throw an error',
-          this.tag.color,
+          ctx.tag.color,
           { truncate: true }
         )
-        expect(resultTag.name).to.equal(this.tag.name)
+        expect(resultTag.name).to.equal(ctx.tag.name)
       })
     })
 
     describe('when tag is too long', function () {
-      it('should throw an error', async function () {
+      it('should throw an error', async function (ctx) {
         let error
 
         try {
-          await this.TagsHandler.promises.createTag(
-            this.tag.user_id,
+          await ctx.TagsHandler.promises.createTag(
+            ctx.tag.user_id,
             'this is a tag that is very very very very very very long',
             undefined
           )
@@ -100,230 +99,230 @@ describe('TagsHandler', function () {
     })
 
     describe('when insert has duplicate key error error', function () {
-      beforeEach(function () {
-        this.duplicateKeyError = new Error('Duplicate')
-        this.duplicateKeyError.code = 11000
+      beforeEach(function (ctx) {
+        ctx.duplicateKeyError = new Error('Duplicate')
+        ctx.duplicateKeyError.code = 11000
       })
 
-      it('should get tag with findOne and return that tag', async function () {
-        this.TagMock.expects('create')
-          .withArgs(this.tag)
+      it('should get tag with findOne and return that tag', async function (ctx) {
+        ctx.TagMock.expects('create')
+          .withArgs(ctx.tag)
           .once()
-          .throws(this.duplicateKeyError)
-        this.TagMock.expects('findOne')
-          .withArgs({ user_id: this.tag.user_id, name: this.tag.name })
+          .throws(ctx.duplicateKeyError)
+        ctx.TagMock.expects('findOne')
+          .withArgs({ user_id: ctx.tag.user_id, name: ctx.tag.name })
           .once()
-          .resolves(this.tag)
-        const resultTag = await this.TagsHandler.promises.createTag(
-          this.tag.user_id,
-          this.tag.name,
-          this.tag.color
+          .resolves(ctx.tag)
+        const resultTag = await ctx.TagsHandler.promises.createTag(
+          ctx.tag.user_id,
+          ctx.tag.name,
+          ctx.tag.color
         )
-        this.TagMock.verify()
-        expect(resultTag.user_id).to.equal(this.tag.user_id)
-        expect(resultTag.name).to.equal(this.tag.name)
-        expect(resultTag.color).to.equal(this.tag.color)
+        ctx.TagMock.verify()
+        expect(resultTag.user_id).to.equal(ctx.tag.user_id)
+        expect(resultTag.name).to.equal(ctx.tag.name)
+        expect(resultTag.color).to.equal(ctx.tag.color)
       })
     })
   })
 
   describe('addProjectToTag', function () {
     describe('with a valid tag_id', function () {
-      it('should call update in mongo', async function () {
-        this.TagMock.expects('findOneAndUpdate')
+      it('should call update in mongo', async function (ctx) {
+        ctx.TagMock.expects('findOneAndUpdate')
           .once()
           .withArgs(
-            { _id: this.tagId, user_id: this.userId },
-            { $addToSet: { project_ids: this.projectId } }
+            { _id: ctx.tagId, user_id: ctx.userId },
+            { $addToSet: { project_ids: ctx.projectId } }
           )
           .resolves()
-        await this.TagsHandler.promises.addProjectToTag(
-          this.userId,
-          this.tagId,
-          this.projectId
+        await ctx.TagsHandler.promises.addProjectToTag(
+          ctx.userId,
+          ctx.tagId,
+          ctx.projectId
         )
-        this.TagMock.verify()
+        ctx.TagMock.verify()
       })
     })
   })
 
   describe('addProjectsToTag', function () {
     describe('with a valid tag_id', function () {
-      it('should call update in mongo', async function () {
-        this.TagMock.expects('findOneAndUpdate')
+      it('should call update in mongo', async function (ctx) {
+        ctx.TagMock.expects('findOneAndUpdate')
           .once()
           .withArgs(
-            { _id: this.tagId, user_id: this.userId },
-            { $addToSet: { project_ids: { $each: this.projectIds } } }
+            { _id: ctx.tagId, user_id: ctx.userId },
+            { $addToSet: { project_ids: { $each: ctx.projectIds } } }
           )
           .resolves()
-        await this.TagsHandler.promises.addProjectsToTag(
-          this.userId,
-          this.tagId,
-          this.projectIds
+        await ctx.TagsHandler.promises.addProjectsToTag(
+          ctx.userId,
+          ctx.tagId,
+          ctx.projectIds
         )
-        this.TagMock.verify()
+        ctx.TagMock.verify()
       })
     })
   })
 
   describe('addProjectToTagName', function () {
-    it('should call update in mongo', async function () {
-      this.TagMock.expects('updateOne')
+    it('should call update in mongo', async function (ctx) {
+      ctx.TagMock.expects('updateOne')
         .once()
         .withArgs(
-          { name: this.tag.name, user_id: this.tag.userId },
-          { $addToSet: { project_ids: this.projectId } },
+          { name: ctx.tag.name, user_id: ctx.tag.userId },
+          { $addToSet: { project_ids: ctx.projectId } },
           { upsert: true }
         )
         .resolves()
-      await this.TagsHandler.promises.addProjectToTagName(
-        this.tag.userId,
-        this.tag.name,
-        this.projectId
+      await ctx.TagsHandler.promises.addProjectToTagName(
+        ctx.tag.userId,
+        ctx.tag.name,
+        ctx.projectId
       )
-      this.TagMock.verify()
+      ctx.TagMock.verify()
     })
   })
 
   describe('removeProjectFromTag', function () {
     describe('with a valid tag_id', function () {
-      it('should call update in mongo', async function () {
-        this.TagMock.expects('updateOne')
+      it('should call update in mongo', async function (ctx) {
+        ctx.TagMock.expects('updateOne')
           .once()
           .withArgs(
             {
-              _id: this.tagId,
-              user_id: this.userId,
+              _id: ctx.tagId,
+              user_id: ctx.userId,
             },
             {
-              $pull: { project_ids: this.projectId },
+              $pull: { project_ids: ctx.projectId },
             }
           )
           .resolves()
-        await this.TagsHandler.promises.removeProjectFromTag(
-          this.userId,
-          this.tagId,
-          this.projectId
+        await ctx.TagsHandler.promises.removeProjectFromTag(
+          ctx.userId,
+          ctx.tagId,
+          ctx.projectId
         )
 
-        this.TagMock.verify()
+        ctx.TagMock.verify()
       })
     })
   })
 
   describe('removeProjectsFromTag', function () {
     describe('with a valid tag_id', function () {
-      it('should call update in mongo', async function () {
-        this.TagMock.expects('updateOne')
+      it('should call update in mongo', async function (ctx) {
+        ctx.TagMock.expects('updateOne')
           .once()
           .withArgs(
             {
-              _id: this.tagId,
-              user_id: this.userId,
+              _id: ctx.tagId,
+              user_id: ctx.userId,
             },
             {
-              $pullAll: { project_ids: this.projectIds },
+              $pullAll: { project_ids: ctx.projectIds },
             }
           )
           .resolves()
-        await this.TagsHandler.promises.removeProjectsFromTag(
-          this.userId,
-          this.tagId,
-          this.projectIds
+        await ctx.TagsHandler.promises.removeProjectsFromTag(
+          ctx.userId,
+          ctx.tagId,
+          ctx.projectIds
         )
-        this.TagMock.verify()
+        ctx.TagMock.verify()
       })
     })
   })
 
   describe('removeProjectFromAllTags', function () {
-    it('should pull the project id from the tag', async function () {
-      this.TagMock.expects('updateMany')
+    it('should pull the project id from the tag', async function (ctx) {
+      ctx.TagMock.expects('updateMany')
         .once()
         .withArgs(
           {
-            user_id: this.userId,
+            user_id: ctx.userId,
           },
           {
-            $pull: { project_ids: this.projectId },
+            $pull: { project_ids: ctx.projectId },
           }
         )
         .resolves()
-      await this.TagsHandler.promises.removeProjectFromAllTags(
-        this.userId,
-        this.projectId
+      await ctx.TagsHandler.promises.removeProjectFromAllTags(
+        ctx.userId,
+        ctx.projectId
       )
-      this.TagMock.verify()
+      ctx.TagMock.verify()
     })
   })
 
   describe('addProjectToTags', function () {
-    it('should add the project id to each tag', async function () {
+    it('should add the project id to each tag', async function (ctx) {
       const tagIds = []
 
-      this.TagMock.expects('updateMany')
+      ctx.TagMock.expects('updateMany')
         .once()
         .withArgs(
           {
-            user_id: this.userId,
+            user_id: ctx.userId,
             _id: { $in: tagIds },
           },
           {
-            $addToSet: { project_ids: this.projectId },
+            $addToSet: { project_ids: ctx.projectId },
           }
         )
         .resolves()
-      await this.TagsHandler.promises.addProjectToTags(
-        this.userId,
+      await ctx.TagsHandler.promises.addProjectToTags(
+        ctx.userId,
         tagIds,
-        this.projectId
+        ctx.projectId
       )
-      this.TagMock.verify()
+      ctx.TagMock.verify()
     })
   })
 
   describe('deleteTag', function () {
     describe('with a valid tag_id', function () {
-      it('should call remove in mongo', async function () {
-        this.TagMock.expects('deleteOne')
+      it('should call remove in mongo', async function (ctx) {
+        ctx.TagMock.expects('deleteOne')
           .once()
-          .withArgs({ _id: this.tagId, user_id: this.userId })
+          .withArgs({ _id: ctx.tagId, user_id: ctx.userId })
           .resolves()
-        await this.TagsHandler.promises.deleteTag(this.userId, this.tagId)
-        this.TagMock.verify()
+        await ctx.TagsHandler.promises.deleteTag(ctx.userId, ctx.tagId)
+        ctx.TagMock.verify()
       })
     })
   })
 
   describe('renameTag', function () {
     describe('with a valid tag_id', function () {
-      it('should call remove in mongo', async function () {
-        this.newName = 'new name'
-        this.TagMock.expects('updateOne')
+      it('should call remove in mongo', async function (ctx) {
+        ctx.newName = 'new name'
+        ctx.TagMock.expects('updateOne')
           .once()
           .withArgs(
-            { _id: this.tagId, user_id: this.userId },
-            { $set: { name: this.newName } }
+            { _id: ctx.tagId, user_id: ctx.userId },
+            { $set: { name: ctx.newName } }
           )
           .resolves()
-        await this.TagsHandler.promises.renameTag(
-          this.userId,
-          this.tagId,
-          this.newName
+        await ctx.TagsHandler.promises.renameTag(
+          ctx.userId,
+          ctx.tagId,
+          ctx.newName
         )
-        this.TagMock.verify()
+        ctx.TagMock.verify()
       })
     })
 
     describe('when tag is too long', function () {
-      it('should throw an error', async function () {
+      it('should throw an error', async function (ctx) {
         let error
 
         try {
-          await this.TagsHandler.promises.renameTag(
-            this.userId,
-            this.tagId,
+          await ctx.TagsHandler.promises.renameTag(
+            ctx.userId,
+            ctx.tagId,
             'this is a tag that is very very very very very very long'
           )
         } catch (err) {

@@ -1,10 +1,5 @@
-const path = require('path')
-const modulePath = path.join(
-  __dirname,
-  '../../../../app/src/Features/Email/SpamSafe'
-)
-const SpamSafe = require(modulePath)
-const { expect } = require('chai')
+import SpamSafe from '../../../../app/src/Features/Email/SpamSafe.mjs'
+import { expect } from 'vitest'
 
 describe('SpamSafe', function () {
   it('should reject spammy names', function () {

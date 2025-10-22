@@ -1,14 +1,14 @@
-const { expect } = require('chai')
-const SandboxedModule = require('sandboxed-module')
-const MODULE_PATH = require('path').join(
-  __dirname,
-  '../../../../app/src/Features/Helpers/SafeHTMLSubstitution.js'
+import { beforeAll, describe, expect } from 'vitest'
+import path from 'node:path'
+const MODULE_PATH = path.join(
+  import.meta.dirname,
+  '../../../../app/src/Features/Helpers/SafeHTMLSubstitution.mjs'
 )
 
 describe('SafeHTMLSubstitution', function () {
   let SafeHTMLSubstitution
-  before(function () {
-    SafeHTMLSubstitution = SandboxedModule.require(MODULE_PATH)
+  beforeAll(async function () {
+    SafeHTMLSubstitution = (await import(MODULE_PATH)).default
   })
 
   describe('SPLIT_REGEX', function () {

@@ -1,19 +1,22 @@
-const sinon = require('sinon')
-const { expect } = require('chai')
-const { ObjectId } = require('mongodb-legacy')
-const SandboxedModule = require('sandboxed-module')
-const { UserAuditLogEntry } = require('../helpers/models/UserAuditLogEntry')
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+import mongodb from 'mongodb-legacy'
+import indirectlyImportModels from '../helpers/indirectlyImportModels.js'
+
+const { UserAuditLogEntry } = indirectlyImportModels(['UserAuditLogEntry'])
+
+const { ObjectId } = mongodb
 
 const MODULE_PATH = '../../../../app/src/Features/User/UserAuditLogHandler'
 
 describe('UserAuditLogHandler', function () {
-  beforeEach(function () {
-    this.userId = new ObjectId()
-    this.initiatorId = new ObjectId()
-    this.subscriptionId = new ObjectId()
-    this.action = {
+  beforeEach(async function (ctx) {
+    ctx.userId = new ObjectId()
+    ctx.initiatorId = new ObjectId()
+    ctx.subscriptionId = new ObjectId()
+    ctx.action = {
       operation: 'clear-sessions',
-      initiatorId: this.initiatorId,
+      initiatorId: ctx.initiatorId,
       info: {
         sessions: [
           {
@@ -24,71 +27,77 @@ describe('UserAuditLogHandler', function () {
       },
       ip: '0:0:0:0',
     }
-    this.UserAuditLogEntryMock = sinon.mock(UserAuditLogEntry)
-    this.getUniqueManagedSubscriptionMemberOfMock = sinon.stub().resolves()
-    this.UserAuditLogHandler = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        '../../models/UserAuditLogEntry': { UserAuditLogEntry },
-        '../Subscription/SubscriptionLocator': {
+    ctx.UserAuditLogEntryMock = sinon.mock(UserAuditLogEntry)
+    ctx.getUniqueManagedSubscriptionMemberOfMock = sinon.stub().resolves()
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionLocator',
+      () => ({
+        default: {
           promises: {
             getUniqueManagedSubscriptionMemberOf:
-              this.getUniqueManagedSubscriptionMemberOfMock,
+              ctx.getUniqueManagedSubscriptionMemberOfMock,
           },
         },
-      },
-    })
+      })
+    )
+
+    vi.doMock('../../../../app/src/models/UserAuditLogEntry', () => ({
+      UserAuditLogEntry,
+    }))
+
+    ctx.UserAuditLogHandler = (await import(MODULE_PATH)).default
   })
 
-  afterEach(function () {
-    this.UserAuditLogEntryMock.restore()
+  afterEach(function (ctx) {
+    ctx.UserAuditLogEntryMock.restore()
   })
 
   describe('addEntry', function () {
     describe('success', function () {
-      beforeEach(function () {
-        this.dbUpdate = this.UserAuditLogEntryMock.expects('create')
+      beforeEach(function (ctx) {
+        ctx.dbUpdate = ctx.UserAuditLogEntryMock.expects('create')
           .chain('exec')
           .resolves({ modifiedCount: 1 })
       })
-      it('writes a log', async function () {
-        await this.UserAuditLogHandler.promises.addEntry(
-          this.userId,
-          this.action.operation,
-          this.action.initiatorId,
-          this.action.ip,
-          this.action.info
+      it('writes a log', async function (ctx) {
+        await ctx.UserAuditLogHandler.promises.addEntry(
+          ctx.userId,
+          ctx.action.operation,
+          ctx.action.initiatorId,
+          ctx.action.ip,
+          ctx.action.info
         )
-        this.UserAuditLogEntryMock.verify()
+        ctx.UserAuditLogEntryMock.verify()
       })
 
-      it('updates the log for password reset operation without a initiatorId', async function () {
-        await this.UserAuditLogHandler.promises.addEntry(
-          this.userId,
+      it('updates the log for password reset operation without a initiatorId', async function (ctx) {
+        await ctx.UserAuditLogHandler.promises.addEntry(
+          ctx.userId,
           'reset-password',
           undefined,
-          this.action.ip,
-          this.action.info
+          ctx.action.ip,
+          ctx.action.info
         )
-        this.UserAuditLogEntryMock.verify()
+        ctx.UserAuditLogEntryMock.verify()
       })
 
-      it('updates the log for a email removal via script', async function () {
-        await this.UserAuditLogHandler.promises.addEntry(
-          this.userId,
+      it('updates the log for a email removal via script', async function (ctx) {
+        await ctx.UserAuditLogHandler.promises.addEntry(
+          ctx.userId,
           'remove-email',
           undefined,
-          this.action.ip,
+          ctx.action.ip,
           {
             removedEmail: 'foo',
             script: true,
           }
         )
-        this.UserAuditLogEntryMock.verify()
+        ctx.UserAuditLogEntryMock.verify()
       })
 
-      it('updates the log when no ip address or initiatorId is specified for a group join event', async function () {
-        await this.UserAuditLogHandler.promises.addEntry(
-          this.userId,
+      it('updates the log when no ip address or initiatorId is specified for a group join event', async function (ctx) {
+        await ctx.UserAuditLogHandler.promises.addEntry(
+          ctx.userId,
           'join-group-subscription',
           undefined,
           undefined,
@@ -96,79 +105,78 @@ describe('UserAuditLogHandler', function () {
             subscriptionId: 'foo',
           }
         )
-        this.UserAuditLogEntryMock.verify()
+        ctx.UserAuditLogEntryMock.verify()
       })
 
-      it('includes managedSubscriptionId for managed group user events ', async function () {
-        await this.UserAuditLogHandler.promises.addEntry(
-          this.userId,
+      it('includes managedSubscriptionId for managed group user events ', async function (ctx) {
+        await ctx.UserAuditLogHandler.promises.addEntry(
+          ctx.userId,
           'reset-password',
           undefined,
-          this.action.ip
+          ctx.action.ip
         )
-        this.UserAuditLogEntryMock.verify()
-        expect(this.getUniqueManagedSubscriptionMemberOfMock).to.have.been
-          .called
+        ctx.UserAuditLogEntryMock.verify()
+        expect(ctx.getUniqueManagedSubscriptionMemberOfMock).to.have.been.called
       })
 
-      it('does not includes managedSubscriptionId for events not in the managed group event list', async function () {
-        await this.UserAuditLogHandler.promises.addEntry(
-          this.userId,
+      it('does not includes managedSubscriptionId for events not in the managed group event list', async function (ctx) {
+        await ctx.UserAuditLogHandler.promises.addEntry(
+          ctx.userId,
           'foo',
-          this.action.initiatorId,
-          this.action.ip
+          ctx.action.initiatorId,
+          ctx.action.ip
         )
-        this.UserAuditLogEntryMock.verify()
-        expect(this.getUniqueManagedSubscriptionMemberOfMock).not.to.have.been
+        ctx.UserAuditLogEntryMock.verify()
+        expect(ctx.getUniqueManagedSubscriptionMemberOfMock).not.to.have.been
           .called
       })
     })
 
     describe('errors', function () {
       describe('missing parameters', function () {
-        it('throws an error when no operation', async function () {
+        it('throws an error when no operation', async function (ctx) {
           await expect(
-            this.UserAuditLogHandler.promises.addEntry(
-              this.userId,
+            ctx.UserAuditLogHandler.promises.addEntry(
+              ctx.userId,
               undefined,
-              this.action.initiatorId,
-              this.action.ip,
-              this.action.info
+              ctx.action.initiatorId,
+              ctx.action.ip,
+              ctx.action.info
             )
           ).to.be.rejected
         })
 
-        it('throws an error when no IP and not excempt', async function () {
+        it('throws an error when no IP and not excempt', async function (ctx) {
           await expect(
-            this.UserAuditLogHandler.promises.addEntry(
-              this.userId,
-              this.action.operation,
-              this.action.initiatorId,
+            ctx.UserAuditLogHandler.promises.addEntry(
+              ctx.userId,
+              ctx.action.operation,
+              ctx.action.initiatorId,
               undefined,
-              this.action.info
+              ctx.action.info
             )
           ).to.be.rejected
         })
 
-        it('throws an error when no initiatorId and not a password reset operation', async function () {
+        it('throws an error when no initiatorId and not a password reset operation', async function (ctx) {
           await expect(
-            this.UserAuditLogHandler.promises.addEntry(
-              this.userId,
-              this.action.operation,
+            ctx.UserAuditLogHandler.promises.addEntry(
+              ctx.userId,
+              ctx.action.operation,
               undefined,
-              this.action.ip,
-              this.action.info
+              ctx.action.ip,
+              ctx.action.info
             )
           ).to.be.rejected
         })
 
-        it('throws an error when remove-email is not from a script, but has no initiatorId', async function () {
+        it('throws an error when remove-email is not from a script, but has no initiatorId', async function (ctx) {
           await expect(
-            this.UserAuditLogHandler.promises.addEntry(
-              this.userId,
+            ctx.UserAuditLogHandler.promises.addEntry(
+              ctx.userId,
               'remove-email',
               undefined,
-              this.action.ip,
+              ctx.action.ip,
               {
                 removedEmail: 'foo',
               }

@@ -1,12 +1,11 @@
-const _ = require('lodash')
-const { expect } = require('chai')
+import _ from 'lodash'
+import { expect } from 'vitest'
 
 const modulePath = '../../../../app/src/Features/Project/ProjectEditorHandler'
-const SandboxedModule = require('sandboxed-module')
 
 describe('ProjectEditorHandler', function () {
-  beforeEach(function () {
-    this.project = {
+  beforeEach(async function (ctx) {
+    ctx.project = {
       _id: 'project-id',
       owner_ref: 'owner-id',
       name: 'Project Name',
@@ -27,14 +26,14 @@ describe('ProjectEditorHandler', function () {
                 {
                   _id: 'doc-id',
                   name: 'main.tex',
-                  lines: (this.lines = ['line 1', 'line 2', 'line 3']),
+                  lines: (ctx.lines = ['line 1', 'line 2', 'line 3']),
                 },
               ],
               fileRefs: [
                 {
                   _id: 'file-id',
                   name: 'image.png',
-                  created: (this.created = new Date()),
+                  created: (ctx.created = new Date()),
                   size: 1234,
                 },
               ],
@@ -44,8 +43,8 @@ describe('ProjectEditorHandler', function () {
         },
       ],
     }
-    this.ownerMember = {
-      user: (this.owner = {
+    ctx.ownerMember = {
+      user: (ctx.owner = {
         _id: 'owner-id',
         first_name: 'Owner',
         last_name: 'Overleaf',
@@ -56,7 +55,7 @@ describe('ProjectEditorHandler', function () {
       }),
       privilegeLevel: 'owner',
     }
-    this.members = [
+    ctx.members = [
       {
         user: {
           _id: 'read-only-id',
@@ -76,69 +75,69 @@ describe('ProjectEditorHandler', function () {
         privilegeLevel: 'readAndWrite',
       },
     ]
-    this.invites = [
+    ctx.invites = [
       {
         _id: 'invite_one',
         email: 'user-one@example.com',
         privileges: 'readOnly',
-        projectId: this.project._id,
+        projectId: ctx.project._id,
         token: 'my-secret-token1',
       },
       {
         _id: 'invite_two',
         email: 'user-two@example.com',
         privileges: 'readOnly',
-        projectId: this.project._id,
+        projectId: ctx.project._id,
         token: 'my-secret-token2',
       },
     ]
-    this.handler = SandboxedModule.require(modulePath)
+    ctx.handler = (await import(modulePath)).default
   })
 
   describe('buildProjectModelView', function () {
     describe('with owner, members and invites included', function () {
-      beforeEach(function () {
-        this.result = this.handler.buildProjectModelView(
-          this.project,
-          this.ownerMember,
-          this.members,
-          this.invites,
+      beforeEach(function (ctx) {
+        ctx.result = ctx.handler.buildProjectModelView(
+          ctx.project,
+          ctx.ownerMember,
+          ctx.members,
+          ctx.invites,
           false
         )
       })
 
-      it('should include the id', function () {
-        expect(this.result._id).to.exist
-        this.result._id.should.equal('project-id')
+      it('should include the id', function (ctx) {
+        expect(ctx.result._id).to.exist
+        ctx.result._id.should.equal('project-id')
       })
 
-      it('should include the name', function () {
-        expect(this.result.name).to.exist
-        this.result.name.should.equal('Project Name')
+      it('should include the name', function (ctx) {
+        expect(ctx.result.name).to.exist
+        ctx.result.name.should.equal('Project Name')
       })
 
-      it('should include the root doc id', function () {
-        expect(this.result.rootDoc_id).to.exist
-        this.result.rootDoc_id.should.equal('file-id')
+      it('should include the root doc id', function (ctx) {
+        expect(ctx.result.rootDoc_id).to.exist
+        ctx.result.rootDoc_id.should.equal('file-id')
       })
 
-      it('should include the public access level', function () {
-        expect(this.result.publicAccesLevel).to.exist
-        this.result.publicAccesLevel.should.equal('private')
+      it('should include the public access level', function (ctx) {
+        expect(ctx.result.publicAccesLevel).to.exist
+        ctx.result.publicAccesLevel.should.equal('private')
       })
 
-      it('should include the owner', function () {
-        expect(this.result.owner).to.exist
-        this.result.owner._id.should.equal('owner-id')
-        this.result.owner.email.should.equal('owner@overleaf.com')
-        this.result.owner.first_name.should.equal('Owner')
-        this.result.owner.last_name.should.equal('Overleaf')
-        this.result.owner.privileges.should.equal('owner')
+      it('should include the owner', function (ctx) {
+        expect(ctx.result.owner).to.exist
+        ctx.result.owner._id.should.equal('owner-id')
+        ctx.result.owner.email.should.equal('owner@overleaf.com')
+        ctx.result.owner.first_name.should.equal('Owner')
+        ctx.result.owner.last_name.should.equal('Overleaf')
+        ctx.result.owner.privileges.should.equal('owner')
       })
 
-      it('should gather readOnly_refs and collaberators_refs into a list of members', function () {
+      it('should gather readOnly_refs and collaberators_refs into a list of members', function (ctx) {
         const findMember = id => {
-          for (const member of this.result.members) {
+          for (const member of ctx.result.members) {
             if (member._id === id) {
               return member
             }
@@ -146,7 +145,7 @@ describe('ProjectEditorHandler', function () {
           return null
         }
 
-        this.result.members.length.should.equal(2)
+        ctx.result.members.length.should.equal(2)
 
         expect(findMember('read-only-id')).to.exist
         findMember('read-only-id').privileges.should.equal('readOnly')
@@ -163,174 +162,174 @@ describe('ProjectEditorHandler', function () {
         )
       })
 
-      it('should include folders in the project', function () {
-        this.result.rootFolder[0]._id.should.equal('root-folder-id')
-        this.result.rootFolder[0].name.should.equal('')
+      it('should include folders in the project', function (ctx) {
+        ctx.result.rootFolder[0]._id.should.equal('root-folder-id')
+        ctx.result.rootFolder[0].name.should.equal('')
 
-        this.result.rootFolder[0].folders[0]._id.should.equal('sub-folder-id')
-        this.result.rootFolder[0].folders[0].name.should.equal('folder')
+        ctx.result.rootFolder[0].folders[0]._id.should.equal('sub-folder-id')
+        ctx.result.rootFolder[0].folders[0].name.should.equal('folder')
       })
 
-      it('should not duplicate folder contents', function () {
-        this.result.rootFolder[0].docs.length.should.equal(0)
-        this.result.rootFolder[0].fileRefs.length.should.equal(0)
+      it('should not duplicate folder contents', function (ctx) {
+        ctx.result.rootFolder[0].docs.length.should.equal(0)
+        ctx.result.rootFolder[0].fileRefs.length.should.equal(0)
       })
 
-      it('should include files in the project', function () {
-        this.result.rootFolder[0].folders[0].fileRefs[0]._id.should.equal(
+      it('should include files in the project', function (ctx) {
+        ctx.result.rootFolder[0].folders[0].fileRefs[0]._id.should.equal(
           'file-id'
         )
-        this.result.rootFolder[0].folders[0].fileRefs[0].name.should.equal(
+        ctx.result.rootFolder[0].folders[0].fileRefs[0].name.should.equal(
           'image.png'
         )
-        this.result.rootFolder[0].folders[0].fileRefs[0].created.should.equal(
-          this.created
+        ctx.result.rootFolder[0].folders[0].fileRefs[0].created.should.equal(
+          ctx.created
         )
-        expect(this.result.rootFolder[0].folders[0].fileRefs[0].size).not.to
+        expect(ctx.result.rootFolder[0].folders[0].fileRefs[0].size).not.to
           .exist
       })
 
-      it('should include docs in the project but not the lines', function () {
-        this.result.rootFolder[0].folders[0].docs[0]._id.should.equal('doc-id')
-        this.result.rootFolder[0].folders[0].docs[0].name.should.equal(
+      it('should include docs in the project but not the lines', function (ctx) {
+        ctx.result.rootFolder[0].folders[0].docs[0]._id.should.equal('doc-id')
+        ctx.result.rootFolder[0].folders[0].docs[0].name.should.equal(
           'main.tex'
         )
-        expect(this.result.rootFolder[0].folders[0].docs[0].lines).not.to.exist
+        expect(ctx.result.rootFolder[0].folders[0].docs[0].lines).not.to.exist
       })
 
-      it('should include invites', function () {
-        expect(this.result.invites).to.exist
-        this.result.invites.should.deep.equal(
-          this.invites.map(invite =>
+      it('should include invites', function (ctx) {
+        expect(ctx.result.invites).to.exist
+        ctx.result.invites.should.deep.equal(
+          ctx.invites.map(invite =>
             _.pick(invite, ['_id', 'email', 'privileges'])
           )
         )
       })
 
-      it('invites should not include the token', function () {
-        for (const invite of this.result.invites) {
+      it('invites should not include the token', function (ctx) {
+        for (const invite of ctx.result.invites) {
           expect(invite.token).not.to.exist
         }
       })
 
-      it('should have the correct features', function () {
-        expect(this.result.features.compileTimeout).to.equal(240)
+      it('should have the correct features', function (ctx) {
+        expect(ctx.result.features.compileTimeout).to.equal(240)
       })
     })
 
     describe('with a restricted user', function () {
-      beforeEach(function () {
-        this.result = this.handler.buildProjectModelView(
-          this.project,
-          this.ownerMember,
+      beforeEach(function (ctx) {
+        ctx.result = ctx.handler.buildProjectModelView(
+          ctx.project,
+          ctx.ownerMember,
           [],
           [],
           true
         )
       })
 
-      it('should include the id', function () {
-        expect(this.result._id).to.exist
-        this.result._id.should.equal('project-id')
+      it('should include the id', function (ctx) {
+        expect(ctx.result._id).to.exist
+        ctx.result._id.should.equal('project-id')
       })
 
-      it('should include the name', function () {
-        expect(this.result.name).to.exist
-        this.result.name.should.equal('Project Name')
+      it('should include the name', function (ctx) {
+        expect(ctx.result.name).to.exist
+        ctx.result.name.should.equal('Project Name')
       })
 
-      it('should include the root doc id', function () {
-        expect(this.result.rootDoc_id).to.exist
-        this.result.rootDoc_id.should.equal('file-id')
+      it('should include the root doc id', function (ctx) {
+        expect(ctx.result.rootDoc_id).to.exist
+        ctx.result.rootDoc_id.should.equal('file-id')
       })
 
-      it('should include the public access level', function () {
-        expect(this.result.publicAccesLevel).to.exist
-        this.result.publicAccesLevel.should.equal('private')
+      it('should include the public access level', function (ctx) {
+        expect(ctx.result.publicAccesLevel).to.exist
+        ctx.result.publicAccesLevel.should.equal('private')
       })
 
-      it('should hide the owner', function () {
-        expect(this.result.owner).to.deep.equal({ _id: 'owner-id' })
+      it('should hide the owner', function (ctx) {
+        expect(ctx.result.owner).to.deep.equal({ _id: 'owner-id' })
       })
 
-      it('should hide members', function () {
-        this.result.members.length.should.equal(0)
+      it('should hide members', function (ctx) {
+        ctx.result.members.length.should.equal(0)
       })
 
-      it('should include folders in the project', function () {
-        this.result.rootFolder[0]._id.should.equal('root-folder-id')
-        this.result.rootFolder[0].name.should.equal('')
+      it('should include folders in the project', function (ctx) {
+        ctx.result.rootFolder[0]._id.should.equal('root-folder-id')
+        ctx.result.rootFolder[0].name.should.equal('')
 
-        this.result.rootFolder[0].folders[0]._id.should.equal('sub-folder-id')
-        this.result.rootFolder[0].folders[0].name.should.equal('folder')
+        ctx.result.rootFolder[0].folders[0]._id.should.equal('sub-folder-id')
+        ctx.result.rootFolder[0].folders[0].name.should.equal('folder')
       })
 
-      it('should not duplicate folder contents', function () {
-        this.result.rootFolder[0].docs.length.should.equal(0)
-        this.result.rootFolder[0].fileRefs.length.should.equal(0)
+      it('should not duplicate folder contents', function (ctx) {
+        ctx.result.rootFolder[0].docs.length.should.equal(0)
+        ctx.result.rootFolder[0].fileRefs.length.should.equal(0)
       })
 
-      it('should include files in the project', function () {
-        this.result.rootFolder[0].folders[0].fileRefs[0]._id.should.equal(
+      it('should include files in the project', function (ctx) {
+        ctx.result.rootFolder[0].folders[0].fileRefs[0]._id.should.equal(
           'file-id'
         )
-        this.result.rootFolder[0].folders[0].fileRefs[0].name.should.equal(
+        ctx.result.rootFolder[0].folders[0].fileRefs[0].name.should.equal(
           'image.png'
         )
-        this.result.rootFolder[0].folders[0].fileRefs[0].created.should.equal(
-          this.created
+        ctx.result.rootFolder[0].folders[0].fileRefs[0].created.should.equal(
+          ctx.created
         )
-        expect(this.result.rootFolder[0].folders[0].fileRefs[0].size).not.to
+        expect(ctx.result.rootFolder[0].folders[0].fileRefs[0].size).not.to
           .exist
       })
 
-      it('should include docs in the project but not the lines', function () {
-        this.result.rootFolder[0].folders[0].docs[0]._id.should.equal('doc-id')
-        this.result.rootFolder[0].folders[0].docs[0].name.should.equal(
+      it('should include docs in the project but not the lines', function (ctx) {
+        ctx.result.rootFolder[0].folders[0].docs[0]._id.should.equal('doc-id')
+        ctx.result.rootFolder[0].folders[0].docs[0].name.should.equal(
           'main.tex'
         )
-        expect(this.result.rootFolder[0].folders[0].docs[0].lines).not.to.exist
+        expect(ctx.result.rootFolder[0].folders[0].docs[0].lines).not.to.exist
       })
 
-      it('should hide invites', function () {
-        expect(this.result.invites).to.have.length(0)
+      it('should hide invites', function (ctx) {
+        expect(ctx.result.invites).to.have.length(0)
       })
 
-      it('should have the correct features', function () {
-        expect(this.result.features.compileTimeout).to.equal(240)
+      it('should have the correct features', function (ctx) {
+        expect(ctx.result.features.compileTimeout).to.equal(240)
       })
     })
 
     describe('deletedByExternalDataSource', function () {
-      it('should set the deletedByExternalDataSource flag to false when it is not there', function () {
-        delete this.project.deletedByExternalDataSource
-        const result = this.handler.buildProjectModelView(
-          this.project,
-          this.ownerMember,
-          this.members,
+      it('should set the deletedByExternalDataSource flag to false when it is not there', function (ctx) {
+        delete ctx.project.deletedByExternalDataSource
+        const result = ctx.handler.buildProjectModelView(
+          ctx.project,
+          ctx.ownerMember,
+          ctx.members,
           [],
           false
         )
         result.deletedByExternalDataSource.should.equal(false)
       })
 
-      it('should set the deletedByExternalDataSource flag to false when it is false', function () {
-        const result = this.handler.buildProjectModelView(
-          this.project,
-          this.ownerMember,
-          this.members,
+      it('should set the deletedByExternalDataSource flag to false when it is false', function (ctx) {
+        const result = ctx.handler.buildProjectModelView(
+          ctx.project,
+          ctx.ownerMember,
+          ctx.members,
           [],
           false
         )
         result.deletedByExternalDataSource.should.equal(false)
       })
 
-      it('should set the deletedByExternalDataSource flag to true when it is true', function () {
-        this.project.deletedByExternalDataSource = true
-        const result = this.handler.buildProjectModelView(
-          this.project,
-          this.ownerMember,
-          this.members,
+      it('should set the deletedByExternalDataSource flag to true when it is true', function (ctx) {
+        ctx.project.deletedByExternalDataSource = true
+        const result = ctx.handler.buildProjectModelView(
+          ctx.project,
+          ctx.ownerMember,
+          ctx.members,
           [],
           false
         )
@@ -339,60 +338,60 @@ describe('ProjectEditorHandler', function () {
     })
 
     describe('features', function () {
-      beforeEach(function () {
-        this.owner.features = {
+      beforeEach(function (ctx) {
+        ctx.owner.features = {
           versioning: true,
           collaborators: 3,
           compileGroup: 'priority',
           compileTimeout: 96,
         }
-        this.result = this.handler.buildProjectModelView(
-          this.project,
-          this.ownerMember,
-          this.members,
+        ctx.result = ctx.handler.buildProjectModelView(
+          ctx.project,
+          ctx.ownerMember,
+          ctx.members,
           [],
           false
         )
       })
 
-      it('should copy the owner features to the project', function () {
-        this.result.features.versioning.should.equal(
-          this.owner.features.versioning
+      it('should copy the owner features to the project', function (ctx) {
+        ctx.result.features.versioning.should.equal(
+          ctx.owner.features.versioning
         )
-        this.result.features.collaborators.should.equal(
-          this.owner.features.collaborators
+        ctx.result.features.collaborators.should.equal(
+          ctx.owner.features.collaborators
         )
-        this.result.features.compileGroup.should.equal(
-          this.owner.features.compileGroup
+        ctx.result.features.compileGroup.should.equal(
+          ctx.owner.features.compileGroup
         )
-        this.result.features.compileTimeout.should.equal(
-          this.owner.features.compileTimeout
+        ctx.result.features.compileTimeout.should.equal(
+          ctx.owner.features.compileTimeout
         )
       })
     })
 
     describe('trackChangesState', function () {
       describe('when the owner does not have the trackChanges feature', function () {
-        beforeEach(function () {
-          this.owner.features = {
+        beforeEach(function (ctx) {
+          ctx.owner.features = {
             trackChanges: false,
           }
-          this.result = this.handler.buildProjectModelView(
-            this.project,
-            this.ownerMember,
-            this.members,
+          ctx.result = ctx.handler.buildProjectModelView(
+            ctx.project,
+            ctx.ownerMember,
+            ctx.members,
             [],
             false
           )
         })
-        it('should not emit trackChangesState', function () {
-          expect(this.result.trackChangesState).to.not.exist
+        it('should not emit trackChangesState', function (ctx) {
+          expect(ctx.result.trackChangesState).to.not.exist
         })
       })
 
       describe('when the owner has got the trackChanges feature', function () {
-        beforeEach(function () {
-          this.owner.features = {
+        beforeEach(function (ctx) {
+          ctx.owner.features = {
             trackChanges: true,
           }
         })
@@ -401,18 +400,18 @@ describe('ProjectEditorHandler', function () {
           describe(`when track_changes is ${JSON.stringify(
             dbEntry
           )}`, function () {
-            beforeEach(function () {
-              this.project.track_changes = dbEntry
-              this.result = this.handler.buildProjectModelView(
-                this.project,
-                this.ownerMember,
-                this.members,
+            beforeEach(function (ctx) {
+              ctx.project.track_changes = dbEntry
+              ctx.result = ctx.handler.buildProjectModelView(
+                ctx.project,
+                ctx.ownerMember,
+                ctx.members,
                 [],
                 false
               )
             })
-            it(`should set trackChangesState=${expected}`, function () {
-              expect(this.result.trackChangesState).to.deep.equal(expected)
+            it(`should set trackChangesState=${expected}`, function (ctx) {
+              expect(ctx.result.trackChangesState).to.deep.equal(expected)
             })
           })
         }

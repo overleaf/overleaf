@@ -94,7 +94,49 @@ describe('RestoreManager', function () {
     }))
 
     vi.doMock('@overleaf/settings', () => ({
-      default: {},
+      default: {
+        fileIgnorePattern:
+          '**/{{__MACOSX,.git,.texpadtmp,.R}{,/**},.!(latexmkrc),*.{dvi,aux,log,toc,out,pdfsync,synctex,synctex(busy),fdb_latexmk,fls,nlo,ind,glo,gls,glg,bbl,blg,doc,docx,gz,swp}}',
+        textExtensions: [
+          'tex',
+          'latex',
+          'sty',
+          'cls',
+          'bst',
+          'bib',
+          'bibtex',
+          'txt',
+          'tikz',
+          'mtx',
+          'rtex',
+          'md',
+          'asy',
+          'lbx',
+          'bbx',
+          'cbx',
+          'm',
+          'lco',
+          'dtx',
+          'ins',
+          'ist',
+          'def',
+          'clo',
+          'ldf',
+          'rmd',
+          'lua',
+          'gv',
+          'mf',
+          'yml',
+          'yaml',
+          'lhs',
+          'mk',
+          'xmpdata',
+          'cfg',
+          'rnw',
+          'ltx',
+          'inc',
+        ],
+      },
     }))
 
     vi.doMock('../../../../app/src/infrastructure/FileWriter', () => ({

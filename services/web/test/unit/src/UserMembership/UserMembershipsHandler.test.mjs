@@ -1,66 +1,56 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const sinon = require('sinon')
+import { vi } from 'vitest'
+import sinon from 'sinon'
+import mongodb from 'mongodb-legacy'
+
 const assertCalledWith = sinon.assert.calledWith
-const { ObjectId } = require('mongodb-legacy')
 const modulePath =
   '../../../../app/src/Features/UserMembership/UserMembershipsHandler'
-const SandboxedModule = require('sandboxed-module')
+
+const { ObjectId } = mongodb
 
 describe('UserMembershipsHandler', function () {
-  beforeEach(function () {
-    this.user = { _id: new ObjectId() }
+  beforeEach(async function (ctx) {
+    ctx.user = { _id: new ObjectId() }
 
-    this.Institution = { updateMany: sinon.stub().resolves(null) }
-    this.Subscription = { updateMany: sinon.stub().resolves(null) }
-    this.Publisher = { updateMany: sinon.stub().resolves(null) }
-    return (this.UserMembershipsHandler = SandboxedModule.require(modulePath, {
-      requires: {
-        '../../models/Institution': {
-          Institution: this.Institution,
-        },
-        '../../models/Subscription': {
-          Subscription: this.Subscription,
-        },
-        '../../models/Publisher': {
-          Publisher: this.Publisher,
-        },
-      },
+    ctx.Institution = { updateMany: sinon.stub().resolves(null) }
+    ctx.Subscription = { updateMany: sinon.stub().resolves(null) }
+    ctx.Publisher = { updateMany: sinon.stub().resolves(null) }
+
+    vi.doMock('../../../../app/src/models/Institution', () => ({
+      default: { Institution: ctx.Institution },
     }))
+
+    vi.doMock('../../../../app/src/models/Subscription', () => ({
+      default: { Subscription: ctx.Subscription },
+    }))
+
+    vi.doMock('../../../../app/src/models/Publisher', () => ({
+      default: { Publisher: ctx.Publisher },
+    }))
+
+    ctx.UserMembershipsHandler = (await import(modulePath)).default
   })
 
   describe('remove user', function () {
-    it('remove user from all entities', function (done) {
-      return this.UserMembershipsHandler.removeUserFromAllEntities(
-        this.user._id,
-        error => {
-          assertCalledWith(
-            this.Institution.updateMany,
-            {},
-            { $pull: { managerIds: this.user._id } }
-          )
-          assertCalledWith(
-            this.Subscription.updateMany,
-            {},
-            { $pull: { manager_ids: this.user._id } }
-          )
-          assertCalledWith(
-            this.Publisher.updateMany,
-            {},
-            { $pull: { managerIds: this.user._id } }
-          )
-          return done()
-        }
+    it('remove user from all entities', async function (ctx) {
+      await ctx.UserMembershipsHandler.promises.removeUserFromAllEntities(
+        ctx.user._id
+      )
+
+      assertCalledWith(
+        ctx.Institution.updateMany,
+        {},
+        { $pull: { managerIds: ctx.user._id } }
+      )
+      assertCalledWith(
+        ctx.Subscription.updateMany,
+        {},
+        { $pull: { manager_ids: ctx.user._id } }
+      )
+      assertCalledWith(
+        ctx.Publisher.updateMany,
+        {},
+        { $pull: { managerIds: ctx.user._id } }
       )
     })
   })

@@ -1,8 +1,9 @@
-const { expect } = require('chai')
-const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongodb-legacy')
+import { vi, expect } from 'vitest'
+import mongodb from 'mongodb-legacy'
 
-const MODULE_PATH = '../../../../app/src/Features/Project/ProjectHelper.js'
+const { ObjectId } = mongodb
+
+const MODULE_PATH = '../../../../app/src/Features/Project/ProjectHelper.mjs'
 
 function _mapToAllowed(images) {
   return images.map(image => {
@@ -11,12 +12,12 @@ function _mapToAllowed(images) {
 }
 
 describe('ProjectHelper', function () {
-  beforeEach(function () {
-    this.project = {
+  beforeEach(async function (ctx) {
+    ctx.project = {
       _id: '123213jlkj9kdlsaj',
     }
 
-    this.user = {
+    ctx.user = {
       _id: '588f3ddae8ebc1bac07c9fa4',
       first_name: 'bjkdsjfk',
       features: {},
@@ -24,13 +25,13 @@ describe('ProjectHelper', function () {
       labsExperiments: ['monthly-texlive'],
     }
 
-    this.adminUser = {
+    ctx.adminUser = {
       _id: 'admin-user-id',
       isAdmin: true,
       alphaProgram: true,
     }
 
-    this.Settings = {
+    ctx.Settings = {
       adminPrivilegeAvailable: true,
       allowedImageNames: [
         { imageName: 'texlive-full:2018.1', imageDesc: 'TeX Live 2018' },
@@ -48,101 +49,104 @@ describe('ProjectHelper', function () {
       ],
     }
 
-    this.ProjectHelper = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        'mongodb-legacy': { ObjectId },
-        '@overleaf/settings': this.Settings,
-      },
-    })
+    vi.doMock('mongodb-legacy', () => ({
+      default: { ObjectId },
+    }))
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.Settings,
+    }))
+
+    ctx.ProjectHelper = (await import(MODULE_PATH)).default
   })
 
   describe('isArchived', function () {
     describe('project.archived being an array', function () {
-      it('returns true if user id is found', function () {
-        this.project.archived = [
+      it('returns true if user id is found', function (ctx) {
+        ctx.project.archived = [
           new ObjectId('588f3ddae8ebc1bac07c9fa4'),
           new ObjectId('5c41deb2b4ca500153340809'),
         ]
         expect(
-          this.ProjectHelper.isArchived(this.project, this.user._id)
+          ctx.ProjectHelper.isArchived(ctx.project, ctx.user._id)
         ).to.equal(true)
       })
 
-      it('returns false if user id is not found', function () {
-        this.project.archived = []
+      it('returns false if user id is not found', function (ctx) {
+        ctx.project.archived = []
         expect(
-          this.ProjectHelper.isArchived(this.project, this.user._id)
+          ctx.ProjectHelper.isArchived(ctx.project, ctx.user._id)
         ).to.equal(false)
       })
     })
 
     describe('project.archived being undefined', function () {
-      it('returns false if archived is undefined', function () {
-        this.project.archived = undefined
+      it('returns false if archived is undefined', function (ctx) {
+        ctx.project.archived = undefined
         expect(
-          this.ProjectHelper.isArchived(this.project, this.user._id)
+          ctx.ProjectHelper.isArchived(ctx.project, ctx.user._id)
         ).to.equal(false)
       })
     })
   })
 
   describe('isTrashed', function () {
-    it('returns true if user id is found', function () {
-      this.project.trashed = [
+    it('returns true if user id is found', function (ctx) {
+      ctx.project.trashed = [
         new ObjectId('588f3ddae8ebc1bac07c9fa4'),
         new ObjectId('5c41deb2b4ca500153340809'),
       ]
-      expect(
-        this.ProjectHelper.isTrashed(this.project, this.user._id)
-      ).to.equal(true)
+      expect(ctx.ProjectHelper.isTrashed(ctx.project, ctx.user._id)).to.equal(
+        true
+      )
     })
 
-    it('returns false if user id is not found', function () {
-      this.project.trashed = []
-      expect(
-        this.ProjectHelper.isTrashed(this.project, this.user._id)
-      ).to.equal(false)
+    it('returns false if user id is not found', function (ctx) {
+      ctx.project.trashed = []
+      expect(ctx.ProjectHelper.isTrashed(ctx.project, ctx.user._id)).to.equal(
+        false
+      )
     })
 
     describe('project.trashed being undefined', function () {
-      it('returns false if trashed is undefined', function () {
-        this.project.trashed = undefined
-        expect(
-          this.ProjectHelper.isTrashed(this.project, this.user._id)
-        ).to.equal(false)
+      it('returns false if trashed is undefined', function (ctx) {
+        ctx.project.trashed = undefined
+        expect(ctx.ProjectHelper.isTrashed(ctx.project, ctx.user._id)).to.equal(
+          false
+        )
       })
     })
   })
 
   describe('compilerFromV1Engine', function () {
-    it('returns the correct engine for latex_dvipdf', function () {
-      expect(this.ProjectHelper.compilerFromV1Engine('latex_dvipdf')).to.equal(
+    it('returns the correct engine for latex_dvipdf', function (ctx) {
+      expect(ctx.ProjectHelper.compilerFromV1Engine('latex_dvipdf')).to.equal(
         'latex'
       )
     })
 
-    it('returns the correct engine for pdflatex', function () {
-      expect(this.ProjectHelper.compilerFromV1Engine('pdflatex')).to.equal(
+    it('returns the correct engine for pdflatex', function (ctx) {
+      expect(ctx.ProjectHelper.compilerFromV1Engine('pdflatex')).to.equal(
         'pdflatex'
       )
     })
 
-    it('returns the correct engine for xelatex', function () {
-      expect(this.ProjectHelper.compilerFromV1Engine('xelatex')).to.equal(
+    it('returns the correct engine for xelatex', function (ctx) {
+      expect(ctx.ProjectHelper.compilerFromV1Engine('xelatex')).to.equal(
         'xelatex'
       )
     })
 
-    it('returns the correct engine for lualatex', function () {
-      expect(this.ProjectHelper.compilerFromV1Engine('lualatex')).to.equal(
+    it('returns the correct engine for lualatex', function (ctx) {
+      expect(ctx.ProjectHelper.compilerFromV1Engine('lualatex')).to.equal(
         'lualatex'
       )
     })
   })
 
   describe('getAllowedImagesForUser', function () {
-    it('marks alpha only images as not allowed when the user is anonymous', function () {
-      const images = this.ProjectHelper.getAllowedImagesForUser(null)
+    it('marks alpha only images as not allowed when the user is anonymous', function (ctx) {
+      const images = ctx.ProjectHelper.getAllowedImagesForUser(null)
       const imageNames = _mapToAllowed(images)
       expect(imageNames).to.deep.equal([
         { imageName: 'texlive-full:2018.1', allowed: true },
@@ -152,8 +156,8 @@ describe('ProjectHelper', function () {
       ])
     })
 
-    it('marks monthly labs images as not allowed when the user is anonymous', function () {
-      const images = this.ProjectHelper.getAllowedImagesForUser(null)
+    it('marks monthly labs images as not allowed when the user is anonymous', function (ctx) {
+      const images = ctx.ProjectHelper.getAllowedImagesForUser(null)
       const imageNames = _mapToAllowed(images)
       expect(imageNames).to.deep.equal([
         { imageName: 'texlive-full:2018.1', allowed: true },
@@ -163,8 +167,8 @@ describe('ProjectHelper', function () {
       ])
     })
 
-    it('marks monthly labs images as allowed when the user is enrolled', function () {
-      const images = this.ProjectHelper.getAllowedImagesForUser(this.user)
+    it('marks monthly labs images as allowed when the user is enrolled', function (ctx) {
+      const images = ctx.ProjectHelper.getAllowedImagesForUser(ctx.user)
       const imageNames = _mapToAllowed(images)
       expect(imageNames).to.deep.equal([
         { imageName: 'texlive-full:2018.1', allowed: true },
@@ -174,8 +178,8 @@ describe('ProjectHelper', function () {
       ])
     })
 
-    it('marks alpha only images as not allowed when when the user is not admin', function () {
-      const images = this.ProjectHelper.getAllowedImagesForUser(this.user)
+    it('marks alpha only images as not allowed when when the user is not admin', function (ctx) {
+      const images = ctx.ProjectHelper.getAllowedImagesForUser(ctx.user)
       const imageNames = _mapToAllowed(images)
       expect(imageNames).to.deep.equal([
         { imageName: 'texlive-full:2018.1', allowed: true },
@@ -185,8 +189,8 @@ describe('ProjectHelper', function () {
       ])
     })
 
-    it('returns all images when the user is admin', function () {
-      const images = this.ProjectHelper.getAllowedImagesForUser(this.adminUser)
+    it('returns all images when the user is admin', function (ctx) {
+      const images = ctx.ProjectHelper.getAllowedImagesForUser(ctx.adminUser)
       const imageNames = _mapToAllowed(images)
       expect(imageNames).to.deep.equal([
         { imageName: 'texlive-full:2018.1', allowed: true },

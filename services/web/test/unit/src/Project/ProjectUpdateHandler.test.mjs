@@ -1,67 +1,68 @@
-const sinon = require('sinon')
+import { vi } from 'vitest'
+import sinon from 'sinon'
 const modulePath =
-  '../../../../app/src/Features/Project/ProjectUpdateHandler.js'
-const SandboxedModule = require('sandboxed-module')
+  '../../../../app/src/Features/Project/ProjectUpdateHandler.mjs'
 
 describe('ProjectUpdateHandler', function () {
-  beforeEach(function () {
-    this.fakeTime = new Date()
-    this.clock = sinon.useFakeTimers(this.fakeTime.getTime())
+  beforeEach(function (ctx) {
+    ctx.fakeTime = new Date()
+    ctx.clock = sinon.useFakeTimers(ctx.fakeTime.getTime())
   })
 
-  afterEach(function () {
-    this.clock.restore()
+  afterEach(function (ctx) {
+    ctx.clock.restore()
   })
 
-  beforeEach(function () {
-    this.ProjectModel = class Project {}
-    this.ProjectModel.updateOne = sinon.stub().returns({
+  beforeEach(async function (ctx) {
+    ctx.ProjectModel = class Project {}
+    ctx.ProjectModel.updateOne = sinon.stub().returns({
       exec: sinon.stub(),
     })
-    this.handler = SandboxedModule.require(modulePath, {
-      requires: {
-        '../../models/Project': { Project: this.ProjectModel },
-      },
-    })
+
+    vi.doMock('../../../../app/src/models/Project', () => ({
+      Project: ctx.ProjectModel,
+    }))
+
+    ctx.handler = (await import(modulePath)).default
   })
 
   describe('marking a project as recently updated', function () {
-    beforeEach(function () {
-      this.project_id = 'project_id'
-      this.lastUpdatedAt = 987654321
-      this.lastUpdatedBy = 'fake-last-updater-id'
+    beforeEach(function (ctx) {
+      ctx.project_id = 'project_id'
+      ctx.lastUpdatedAt = 987654321
+      ctx.lastUpdatedBy = 'fake-last-updater-id'
     })
 
-    it('should send an update to mongo', async function () {
-      await this.handler.promises.markAsUpdated(
-        this.project_id,
-        this.lastUpdatedAt,
-        this.lastUpdatedBy
+    it('should send an update to mongo', async function (ctx) {
+      await ctx.handler.promises.markAsUpdated(
+        ctx.project_id,
+        ctx.lastUpdatedAt,
+        ctx.lastUpdatedBy
       )
 
       sinon.assert.calledWith(
-        this.ProjectModel.updateOne,
+        ctx.ProjectModel.updateOne,
         {
-          _id: this.project_id,
-          lastUpdated: { $lt: this.lastUpdatedAt },
+          _id: ctx.project_id,
+          lastUpdated: { $lt: ctx.lastUpdatedAt },
         },
         {
-          lastUpdated: this.lastUpdatedAt,
-          lastUpdatedBy: this.lastUpdatedBy,
+          lastUpdated: ctx.lastUpdatedAt,
+          lastUpdatedBy: ctx.lastUpdatedBy,
         }
       )
     })
 
-    it('should set smart fallbacks', async function () {
-      await this.handler.promises.markAsUpdated(this.project_id, null, null)
+    it('should set smart fallbacks', async function (ctx) {
+      await ctx.handler.promises.markAsUpdated(ctx.project_id, null, null)
       sinon.assert.calledWithMatch(
-        this.ProjectModel.updateOne,
+        ctx.ProjectModel.updateOne,
         {
-          _id: this.project_id,
-          lastUpdated: { $lt: this.fakeTime },
+          _id: ctx.project_id,
+          lastUpdated: { $lt: ctx.fakeTime },
         },
         {
-          lastUpdated: this.fakeTime,
+          lastUpdated: ctx.fakeTime,
           lastUpdatedBy: null,
         }
       )
@@ -69,10 +70,10 @@ describe('ProjectUpdateHandler', function () {
   })
 
   describe('markAsOpened', function () {
-    it('should send an update to mongo', async function () {
+    it('should send an update to mongo', async function (ctx) {
       const projectId = 'project_id'
-      await this.handler.promises.markAsOpened(projectId)
-      const args = this.ProjectModel.updateOne.args[0]
+      await ctx.handler.promises.markAsOpened(projectId)
+      const args = ctx.ProjectModel.updateOne.args[0]
       args[0]._id.should.equal(projectId)
       const date = args[1].lastOpened + ''
       const now = Date.now() + ''
@@ -81,20 +82,20 @@ describe('ProjectUpdateHandler', function () {
   })
 
   describe('markAsInactive', function () {
-    it('should send an update to mongo', async function () {
+    it('should send an update to mongo', async function (ctx) {
       const projectId = 'project_id'
-      await this.handler.promises.markAsInactive(projectId)
-      const args = this.ProjectModel.updateOne.args[0]
+      await ctx.handler.promises.markAsInactive(projectId)
+      const args = ctx.ProjectModel.updateOne.args[0]
       args[0]._id.should.equal(projectId)
       args[1].active.should.equal(false)
     })
   })
 
   describe('markAsActive', function () {
-    it('should send an update to mongo', async function () {
+    it('should send an update to mongo', async function (ctx) {
       const projectId = 'project_id'
-      await this.handler.promises.markAsActive(projectId)
-      const args = this.ProjectModel.updateOne.args[0]
+      await ctx.handler.promises.markAsActive(projectId)
+      const args = ctx.ProjectModel.updateOne.args[0]
       args[0]._id.should.equal(projectId)
       args[1].active.should.equal(true)
     })

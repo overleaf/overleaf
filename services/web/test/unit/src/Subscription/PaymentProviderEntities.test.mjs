@@ -1,27 +1,26 @@
-// @ts-check
+import { vi, expect } from 'vitest'
 
-const SandboxedModule = require('sandboxed-module')
-const { expect } = require('chai')
-const Errors = require('../../../../app/src/Features/Subscription/Errors')
+import Errors from '../../../../app/src/Features/Subscription/Errors.js'
+
+import PaymentProviderEntities from '../../../../app/src/Features/Subscription/PaymentProviderEntities.mjs'
+import { AI_ADD_ON_CODE } from '../../../../app/src/Features/Subscription/AiHelper.js'
+import SubscriptionHelper from '../../../../app/src/Features/Subscription/SubscriptionHelper.js'
+
 const {
   PaymentProviderSubscriptionChangeRequest,
   PaymentProviderSubscriptionUpdateRequest,
   PaymentProviderSubscriptionChange,
   PaymentProviderSubscription,
   PaymentProviderSubscriptionAddOnUpdate,
-} = require('../../../../app/src/Features/Subscription/PaymentProviderEntities')
-const {
-  AI_ADD_ON_CODE,
-} = require('../../../../app/src/Features/Subscription/AiHelper')
-const SubscriptionHelper = require('../../../../app/src/Features/Subscription/SubscriptionHelper')
+} = PaymentProviderEntities
 
 const MODULE_PATH =
   '../../../../app/src/Features/Subscription/PaymentProviderEntities'
 
 describe('PaymentProviderEntities', function () {
   describe('PaymentProviderSubscription', function () {
-    beforeEach(function () {
-      this.Settings = {
+    beforeEach(async function (ctx) {
+      ctx.Settings = {
         plans: [
           { planCode: 'assistant-annual', price_in_cents: 5900 },
           { planCode: 'cheap-plan', price_in_cents: 500 },
@@ -35,34 +34,44 @@ describe('PaymentProviderEntities', function () {
         features: [],
       }
 
-      this.PaymentProviderEntities = SandboxedModule.require(MODULE_PATH, {
-        requires: {
-          '@overleaf/settings': this.Settings,
-          './Errors': Errors,
-          './SubscriptionHelper': SubscriptionHelper,
-        },
-      })
+      vi.doMock('@overleaf/settings', () => ({
+        default: ctx.Settings,
+      }))
+
+      vi.doMock(
+        '../../../../app/src/Features/Subscription/Errors',
+        () => Errors
+      )
+
+      vi.doMock(
+        '../../../../app/src/Features/Subscription/SubscriptionHelper',
+        () => ({
+          default: SubscriptionHelper,
+        })
+      )
+
+      ctx.PaymentProviderEntities = (await import(MODULE_PATH)).default
     })
 
     describe('with add-ons', function () {
-      beforeEach(function () {
+      beforeEach(function (ctx) {
         const {
           PaymentProviderSubscription,
           PaymentProviderSubscriptionAddOn,
-        } = this.PaymentProviderEntities
-        this.addOn = new PaymentProviderSubscriptionAddOn({
+        } = ctx.PaymentProviderEntities
+        ctx.addOn = new PaymentProviderSubscriptionAddOn({
           code: 'add-on-code',
           name: 'My Add-On',
           quantity: 1,
           unitPrice: 2,
         })
-        this.subscription = new PaymentProviderSubscription({
+        ctx.subscription = new PaymentProviderSubscription({
           id: 'subscription-id',
           userId: 'user-id',
           planCode: 'regular-plan',
           planName: 'My Plan',
           planPrice: 10,
-          addOns: [this.addOn],
+          addOns: [ctx.addOn],
           subtotal: 10.99,
           taxRate: 0.2,
           taxAmount: 2.4,
@@ -72,82 +81,82 @@ describe('PaymentProviderEntities', function () {
       })
 
       describe('hasAddOn()', function () {
-        it('returns true if the subscription has the given add-on', function () {
-          expect(this.subscription.hasAddOn(this.addOn.code)).to.be.true
+        it('returns true if the subscription has the given add-on', function (ctx) {
+          expect(ctx.subscription.hasAddOn(ctx.addOn.code)).to.be.true
         })
 
-        it("returns false if the subscription doesn't have the given add-on", function () {
-          expect(this.subscription.hasAddOn('another-add-on')).to.be.false
+        it("returns false if the subscription doesn't have the given add-on", function (ctx) {
+          expect(ctx.subscription.hasAddOn('another-add-on')).to.be.false
         })
       })
 
       describe('getRequestForPlanChange()', function () {
-        it('returns a change request for upgrades', function () {
+        it('returns a change request for upgrades', function (ctx) {
           const { PaymentProviderSubscriptionChangeRequest } =
-            this.PaymentProviderEntities
-          const changeRequest = this.subscription.getRequestForPlanChange(
+            ctx.PaymentProviderEntities
+          const changeRequest = ctx.subscription.getRequestForPlanChange(
             'premium-plan',
             1,
-            this.subscription.shouldPlanChangeAtTermEnd('premium-plan')
+            ctx.subscription.shouldPlanChangeAtTermEnd('premium-plan')
           )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               timeframe: 'now',
               planCode: 'premium-plan',
             })
           )
         })
 
-        it('returns a change request for downgrades', function () {
+        it('returns a change request for downgrades', function (ctx) {
           const { PaymentProviderSubscriptionChangeRequest } =
-            this.PaymentProviderEntities
-          const changeRequest = this.subscription.getRequestForPlanChange(
+            ctx.PaymentProviderEntities
+          const changeRequest = ctx.subscription.getRequestForPlanChange(
             'cheap-plan',
             1,
-            this.subscription.shouldPlanChangeAtTermEnd('cheap-plan')
+            ctx.subscription.shouldPlanChangeAtTermEnd('cheap-plan')
           )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               timeframe: 'term_end',
               planCode: 'cheap-plan',
             })
           )
         })
 
-        it('returns a change request for downgrades while on trial', function () {
+        it('returns a change request for downgrades while on trial', function (ctx) {
           const fiveDaysFromNow = new Date()
           fiveDaysFromNow.setDate(fiveDaysFromNow.getDate() + 5)
-          this.subscription.trialPeriodEnd = fiveDaysFromNow
+          ctx.subscription.trialPeriodEnd = fiveDaysFromNow
           const { PaymentProviderSubscriptionChangeRequest } =
-            this.PaymentProviderEntities
-          const changeRequest = this.subscription.getRequestForPlanChange(
+            ctx.PaymentProviderEntities
+          const changeRequest = ctx.subscription.getRequestForPlanChange(
             'cheap-plan',
             1,
-            this.subscription.shouldPlanChangeAtTermEnd('cheap-plan')
+            ctx.subscription.shouldPlanChangeAtTermEnd('cheap-plan')
           )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               timeframe: 'now',
               planCode: 'cheap-plan',
             })
           )
         })
 
-        it('preserves the AI add-on on upgrades', function () {
+        it('preserves the AI add-on on upgrades', function (ctx) {
           const { PaymentProviderSubscriptionChangeRequest } =
-            this.PaymentProviderEntities
-          this.addOn.code = AI_ADD_ON_CODE
-          const changeRequest = this.subscription.getRequestForPlanChange(
+            ctx.PaymentProviderEntities
+          ctx.addOn.code = AI_ADD_ON_CODE
+          const changeRequest = ctx.subscription.getRequestForPlanChange(
             'premium-plan',
             1,
-            this.subscription.shouldPlanChangeAtTermEnd('premium-plan')
+            ctx.subscription.shouldPlanChangeAtTermEnd('premium-plan')
           )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               timeframe: 'now',
               planCode: 'premium-plan',
               addOnUpdates: [
@@ -160,18 +169,18 @@ describe('PaymentProviderEntities', function () {
           )
         })
 
-        it('preserves the AI add-on on downgrades', function () {
+        it('preserves the AI add-on on downgrades', function (ctx) {
           const { PaymentProviderSubscriptionChangeRequest } =
-            this.PaymentProviderEntities
-          this.addOn.code = AI_ADD_ON_CODE
-          const changeRequest = this.subscription.getRequestForPlanChange(
+            ctx.PaymentProviderEntities
+          ctx.addOn.code = AI_ADD_ON_CODE
+          const changeRequest = ctx.subscription.getRequestForPlanChange(
             'cheap-plan',
             1,
-            this.subscription.shouldPlanChangeAtTermEnd('cheap-plan')
+            ctx.subscription.shouldPlanChangeAtTermEnd('cheap-plan')
           )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               timeframe: 'term_end',
               planCode: 'cheap-plan',
               addOnUpdates: [
@@ -184,19 +193,19 @@ describe('PaymentProviderEntities', function () {
           )
         })
 
-        it('preserves the AI add-on on upgrades from the standalone AI plan', function () {
+        it('preserves the AI add-on on upgrades from the standalone AI plan', function (ctx) {
           const { PaymentProviderSubscriptionChangeRequest } =
-            this.PaymentProviderEntities
-          this.subscription.planCode = 'assistant-annual'
-          this.subscription.addOns = []
-          const changeRequest = this.subscription.getRequestForPlanChange(
+            ctx.PaymentProviderEntities
+          ctx.subscription.planCode = 'assistant-annual'
+          ctx.subscription.addOns = []
+          const changeRequest = ctx.subscription.getRequestForPlanChange(
             'cheap-plan',
             1,
-            this.subscription.shouldPlanChangeAtTermEnd('cheap-plan')
+            ctx.subscription.shouldPlanChangeAtTermEnd('cheap-plan')
           )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               timeframe: 'now',
               planCode: 'cheap-plan',
               addOnUpdates: [
@@ -209,20 +218,20 @@ describe('PaymentProviderEntities', function () {
           )
         })
 
-        it('upgrade from individual to group plan for Stripe subscription', function () {
-          this.subscription.service = 'stripe-uk'
+        it('upgrade from individual to group plan for Stripe subscription', function (ctx) {
+          ctx.subscription.service = 'stripe-uk'
           const { PaymentProviderSubscriptionChangeRequest } =
-            this.PaymentProviderEntities
-          const changeRequest = this.subscription.getRequestForPlanChange(
+            ctx.PaymentProviderEntities
+          const changeRequest = ctx.subscription.getRequestForPlanChange(
             'group_collaborator',
             10,
-            this.subscription.shouldPlanChangeAtTermEnd(
+            ctx.subscription.shouldPlanChangeAtTermEnd(
               'group_collaborator_10_enterprise'
             )
           )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               timeframe: 'now',
               planCode: 'group_collaborator',
               addOnUpdates: [
@@ -235,21 +244,21 @@ describe('PaymentProviderEntities', function () {
           )
         })
 
-        it('upgrade from individual to group plan and preserves the AI add-on for Stripe subscription', function () {
-          this.subscription.service = 'stripe-uk'
+        it('upgrade from individual to group plan and preserves the AI add-on for Stripe subscription', function (ctx) {
+          ctx.subscription.service = 'stripe-uk'
           const { PaymentProviderSubscriptionChangeRequest } =
-            this.PaymentProviderEntities
-          this.addOn.code = AI_ADD_ON_CODE
-          const changeRequest = this.subscription.getRequestForPlanChange(
+            ctx.PaymentProviderEntities
+          ctx.addOn.code = AI_ADD_ON_CODE
+          const changeRequest = ctx.subscription.getRequestForPlanChange(
             'group_collaborator',
             10,
-            this.subscription.shouldPlanChangeAtTermEnd(
+            ctx.subscription.shouldPlanChangeAtTermEnd(
               'group_collaborator_10_enterprise'
             )
           )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               timeframe: 'now',
               planCode: 'group_collaborator',
               addOnUpdates: [
@@ -268,22 +277,22 @@ describe('PaymentProviderEntities', function () {
       })
 
       describe('getRequestForAddOnPurchase()', function () {
-        it('returns a change request', function () {
+        it('returns a change request', function (ctx) {
           const {
             PaymentProviderSubscriptionChangeRequest,
             PaymentProviderSubscriptionAddOnUpdate,
-          } = this.PaymentProviderEntities
+          } = ctx.PaymentProviderEntities
           const changeRequest =
-            this.subscription.getRequestForAddOnPurchase('another-add-on')
+            ctx.subscription.getRequestForAddOnPurchase('another-add-on')
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               timeframe: 'now',
               addOnUpdates: [
                 new PaymentProviderSubscriptionAddOnUpdate({
-                  code: this.addOn.code,
-                  quantity: this.addOn.quantity,
-                  unitPrice: this.addOn.unitPrice,
+                  code: ctx.addOn.code,
+                  quantity: ctx.addOn.quantity,
+                  unitPrice: ctx.addOn.unitPrice,
                 }),
                 new PaymentProviderSubscriptionAddOnUpdate({
                   code: 'another-add-on',
@@ -294,27 +303,27 @@ describe('PaymentProviderEntities', function () {
           )
         })
 
-        it('returns a change request with quantity and unit price specified', function () {
+        it('returns a change request with quantity and unit price specified', function (ctx) {
           const {
             PaymentProviderSubscriptionChangeRequest,
             PaymentProviderSubscriptionAddOnUpdate,
-          } = this.PaymentProviderEntities
+          } = ctx.PaymentProviderEntities
           const quantity = 5
           const unitPrice = 10
-          const changeRequest = this.subscription.getRequestForAddOnPurchase(
+          const changeRequest = ctx.subscription.getRequestForAddOnPurchase(
             'another-add-on',
             quantity,
             unitPrice
           )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               timeframe: 'now',
               addOnUpdates: [
                 new PaymentProviderSubscriptionAddOnUpdate({
-                  code: this.addOn.code,
-                  quantity: this.addOn.quantity,
-                  unitPrice: this.addOn.unitPrice,
+                  code: ctx.addOn.code,
+                  quantity: ctx.addOn.quantity,
+                  unitPrice: ctx.addOn.unitPrice,
                 }),
                 new PaymentProviderSubscriptionAddOnUpdate({
                   code: 'another-add-on',
@@ -326,95 +335,95 @@ describe('PaymentProviderEntities', function () {
           )
         })
 
-        it('throws a DuplicateAddOnError if the subscription already has the add-on', function () {
+        it('throws a DuplicateAddOnError if the subscription already has the add-on', function (ctx) {
           expect(() =>
-            this.subscription.getRequestForAddOnPurchase(this.addOn.code)
+            ctx.subscription.getRequestForAddOnPurchase(ctx.addOn.code)
           ).to.throw(Errors.DuplicateAddOnError)
         })
       })
 
       describe('getRequestForAddOnUpdate()', function () {
-        it('returns a change request', function () {
+        it('returns a change request', function (ctx) {
           const {
             PaymentProviderSubscriptionChangeRequest,
             PaymentProviderSubscriptionAddOnUpdate,
-          } = this.PaymentProviderEntities
+          } = ctx.PaymentProviderEntities
           const newQuantity = 2
-          const changeRequest = this.subscription.getRequestForAddOnUpdate(
+          const changeRequest = ctx.subscription.getRequestForAddOnUpdate(
             'add-on-code',
             newQuantity
           )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               timeframe: 'now',
               addOnUpdates: [
                 new PaymentProviderSubscriptionAddOnUpdate({
-                  code: this.addOn.code,
+                  code: ctx.addOn.code,
                   quantity: newQuantity,
-                  unitPrice: this.addOn.unitPrice,
+                  unitPrice: ctx.addOn.unitPrice,
                 }),
               ],
             })
           )
         })
 
-        it("throws a AddOnNotPresentError if the subscription doesn't have the add-on", function () {
+        it("throws a AddOnNotPresentError if the subscription doesn't have the add-on", function (ctx) {
           expect(() =>
-            this.subscription.getRequestForAddOnUpdate('another-add-on', 2)
+            ctx.subscription.getRequestForAddOnUpdate('another-add-on', 2)
           ).to.throw(Errors.AddOnNotPresentError)
         })
       })
 
       describe('getRequestForAddOnRemoval()', function () {
-        it('returns a change request', function () {
-          const changeRequest = this.subscription.getRequestForAddOnRemoval(
-            this.addOn.code
+        it('returns a change request', function (ctx) {
+          const changeRequest = ctx.subscription.getRequestForAddOnRemoval(
+            ctx.addOn.code
           )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               timeframe: 'term_end',
               addOnUpdates: [],
             })
           )
         })
 
-        it('returns a change request when in trial', function () {
+        it('returns a change request when in trial', function (ctx) {
           const fiveDaysFromNow = new Date()
           fiveDaysFromNow.setDate(fiveDaysFromNow.getDate() + 5)
-          this.subscription.trialPeriodEnd = fiveDaysFromNow
-          const changeRequest = this.subscription.getRequestForAddOnRemoval(
-            this.addOn.code
+          ctx.subscription.trialPeriodEnd = fiveDaysFromNow
+          const changeRequest = ctx.subscription.getRequestForAddOnRemoval(
+            ctx.addOn.code
           )
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               timeframe: 'now',
               addOnUpdates: [],
             })
           )
         })
 
-        it("throws an AddOnNotPresentError if the subscription doesn't have the add-on", function () {
+        it("throws an AddOnNotPresentError if the subscription doesn't have the add-on", function (ctx) {
           expect(() =>
-            this.subscription.getRequestForAddOnRemoval('another-add-on')
+            ctx.subscription.getRequestForAddOnRemoval('another-add-on')
           ).to.throw(Errors.AddOnNotPresentError)
         })
       })
 
       describe('getRequestForAddOnReactivation()', function () {
-        it('throws an AddOnNotPresentError', function () {
+        it('throws an AddOnNotPresentError', function (ctx) {
           expect(() =>
-            this.subscription.getRequestForAddOnReactivation(this.addOn.code)
+            ctx.subscription.getRequestForAddOnReactivation(ctx.addOn.code)
           ).to.throw(Errors.AddOnNotPresentError)
         })
       })
 
       describe('getRequestForGroupPlanUpgrade()', function () {
-        it('returns a correct change request', function () {
+        it('returns a correct change request', function (ctx) {
           const changeRequest =
-            this.subscription.getRequestForGroupPlanUpgrade('test_plan_code')
+            ctx.subscription.getRequestForGroupPlanUpgrade('test_plan_code')
           const addOns = [
             new PaymentProviderSubscriptionAddOnUpdate({
               code: 'add-on-code',
@@ -423,7 +432,7 @@ describe('PaymentProviderEntities', function () {
           ]
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               timeframe: 'now',
               addOnUpdates: addOns,
               planCode: 'test_plan_code',
@@ -433,15 +442,15 @@ describe('PaymentProviderEntities', function () {
       })
 
       describe('getRequestForPoNumberAndTermsAndConditionsUpdate()', function () {
-        it('returns a correct update request', function () {
+        it('returns a correct update request', function (ctx) {
           const updateRequest =
-            this.subscription.getRequestForPoNumberAndTermsAndConditionsUpdate(
+            ctx.subscription.getRequestForPoNumberAndTermsAndConditionsUpdate(
               'O12345',
               'T&C copy'
             )
           expect(updateRequest).to.deep.equal(
             new PaymentProviderSubscriptionUpdateRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               poNumber: 'O12345',
               termsAndConditions: 'T&C copy',
             })
@@ -450,12 +459,12 @@ describe('PaymentProviderEntities', function () {
       })
 
       describe('getRequestForTermsAndConditionsUpdate()', function () {
-        it('returns a correct update request', function () {
+        it('returns a correct update request', function (ctx) {
           const updateRequest =
-            this.subscription.getRequestForTermsAndConditionsUpdate('T&C copy')
+            ctx.subscription.getRequestForTermsAndConditionsUpdate('T&C copy')
           expect(updateRequest).to.deep.equal(
             new PaymentProviderSubscriptionUpdateRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               termsAndConditions: 'T&C copy',
             })
           )
@@ -463,41 +472,41 @@ describe('PaymentProviderEntities', function () {
       })
 
       describe('with an add-on pending cancellation', function () {
-        beforeEach(function () {
-          this.subscription.pendingChange =
+        beforeEach(function (ctx) {
+          ctx.subscription.pendingChange =
             new PaymentProviderSubscriptionChange({
-              subscription: this.subscription,
-              nextPlanCode: this.subscription.planCode,
-              nextPlanName: this.subscription.planName,
-              nextPlanPrice: this.subscription.planPrice,
+              subscription: ctx.subscription,
+              nextPlanCode: ctx.subscription.planCode,
+              nextPlanName: ctx.subscription.planName,
+              nextPlanPrice: ctx.subscription.planPrice,
               nextAddOns: [],
             })
         })
 
         describe('getRequestForAddOnReactivation()', function () {
-          it('returns a change request', function () {
+          it('returns a change request', function (ctx) {
             const changeRequest =
-              this.subscription.getRequestForAddOnReactivation(this.addOn.code)
+              ctx.subscription.getRequestForAddOnReactivation(ctx.addOn.code)
             expect(changeRequest).to.deep.equal(
               new PaymentProviderSubscriptionChangeRequest({
-                subscription: this.subscription,
+                subscription: ctx.subscription,
                 timeframe: 'term_end',
-                addOnUpdates: [this.addOn.toAddOnUpdate()],
+                addOnUpdates: [ctx.addOn.toAddOnUpdate()],
               })
             )
           })
 
-          it('throws an AddOnNotPresentError if given the wrong add-on', function () {
+          it('throws an AddOnNotPresentError if given the wrong add-on', function (ctx) {
             expect(() =>
-              this.subscription.getRequestForAddOnReactivation('some-add-on')
+              ctx.subscription.getRequestForAddOnReactivation('some-add-on')
             ).to.throw(Errors.AddOnNotPresentError)
           })
         })
 
         describe('getRequestForPlanRevert()', function () {
-          beforeEach(function () {
-            const { PaymentProviderSubscription } = this.PaymentProviderEntities
-            this.subscription = new PaymentProviderSubscription({
+          beforeEach(function (ctx) {
+            const { PaymentProviderSubscription } = ctx.PaymentProviderEntities
+            ctx.subscription = new PaymentProviderSubscription({
               id: 'subscription-id',
               userId: 'user-id',
               planCode: 'regular-plan',
@@ -523,24 +532,24 @@ describe('PaymentProviderEntities', function () {
             })
           })
 
-          it('throws if the plan to revert to doesnt exist', function () {
+          it('throws if the plan to revert to doesnt exist', function (ctx) {
             const invalidPlanCode = 'non-existent-plan'
             expect(() =>
-              this.subscription.getRequestForPlanRevert(invalidPlanCode, null)
+              ctx.subscription.getRequestForPlanRevert(invalidPlanCode, null)
             ).to.throw('Unable to find plan in settings')
           })
 
-          it('creates a change request with the restore point', function () {
+          it('creates a change request with the restore point', function (ctx) {
             const previousPlanCode = 'cheap-plan'
             const previousAddOns = [
               { addOnCode: 'addon-1', quantity: 1, unitAmountInCents: 500 },
             ]
-            const changeRequest = this.subscription.getRequestForPlanRevert(
+            const changeRequest = ctx.subscription.getRequestForPlanRevert(
               previousPlanCode,
               previousAddOns
             )
             expect(changeRequest).to.be.an.instanceOf(
-              this.PaymentProviderEntities
+              ctx.PaymentProviderEntities
                 .PaymentProviderSubscriptionChangeRequest
             )
             expect(changeRequest.planCode).to.equal(previousPlanCode)
@@ -553,9 +562,9 @@ describe('PaymentProviderEntities', function () {
             ])
           })
 
-          it('defaults to addons to an empty array to clear the addon state', function () {
+          it('defaults to addons to an empty array to clear the addon state', function (ctx) {
             const previousPlanCode = 'cheap-plan'
-            const changeRequest = this.subscription.getRequestForPlanRevert(
+            const changeRequest = ctx.subscription.getRequestForPlanRevert(
               previousPlanCode,
               null
             )
@@ -566,9 +575,9 @@ describe('PaymentProviderEntities', function () {
     })
 
     describe('without add-ons', function () {
-      beforeEach(function () {
-        const { PaymentProviderSubscription } = this.PaymentProviderEntities
-        this.subscription = new PaymentProviderSubscription({
+      beforeEach(function (ctx) {
+        const { PaymentProviderSubscription } = ctx.PaymentProviderEntities
+        ctx.subscription = new PaymentProviderSubscription({
           id: 'subscription-id',
           userId: 'user-id',
           planCode: 'regular-plan',
@@ -583,22 +592,22 @@ describe('PaymentProviderEntities', function () {
       })
 
       describe('hasAddOn()', function () {
-        it('returns false for any add-on', function () {
-          expect(this.subscription.hasAddOn('some-add-on')).to.be.false
+        it('returns false for any add-on', function (ctx) {
+          expect(ctx.subscription.hasAddOn('some-add-on')).to.be.false
         })
       })
 
       describe('getRequestForAddOnPurchase()', function () {
-        it('returns a change request', function () {
+        it('returns a change request', function (ctx) {
           const {
             PaymentProviderSubscriptionChangeRequest,
             PaymentProviderSubscriptionAddOnUpdate,
-          } = this.PaymentProviderEntities
+          } = ctx.PaymentProviderEntities
           const changeRequest =
-            this.subscription.getRequestForAddOnPurchase('some-add-on')
+            ctx.subscription.getRequestForAddOnPurchase('some-add-on')
           expect(changeRequest).to.deep.equal(
             new PaymentProviderSubscriptionChangeRequest({
-              subscription: this.subscription,
+              subscription: ctx.subscription,
               timeframe: 'now',
               addOnUpdates: [
                 new PaymentProviderSubscriptionAddOnUpdate({
@@ -612,17 +621,17 @@ describe('PaymentProviderEntities', function () {
       })
 
       describe('getRequestForAddOnRemoval()', function () {
-        it('throws an AddOnNotPresentError', function () {
+        it('throws an AddOnNotPresentError', function (ctx) {
           expect(() =>
-            this.subscription.getRequestForAddOnRemoval('some-add-on')
+            ctx.subscription.getRequestForAddOnRemoval('some-add-on')
           ).to.throw(Errors.AddOnNotPresentError)
         })
       })
 
       describe('getRequestForAddOnReactivation()', function () {
-        it('throws an AddOnNotPresentError', function () {
+        it('throws an AddOnNotPresentError', function (ctx) {
           expect(() =>
-            this.subscription.getRequestForAddOnReactivation('some-add-on')
+            ctx.subscription.getRequestForAddOnReactivation('some-add-on')
           ).to.throw(Errors.AddOnNotPresentError)
         })
       })

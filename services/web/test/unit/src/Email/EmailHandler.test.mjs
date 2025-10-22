@@ -1,121 +1,130 @@
-const SandboxedModule = require('sandboxed-module')
-const path = require('path')
-const sinon = require('sinon')
-const { expect } = require('chai')
+import { vi, expect } from 'vitest'
+import path from 'path'
+import sinon from 'sinon'
 
 const MODULE_PATH = path.join(
-  __dirname,
+  import.meta.dirname,
   '../../../../app/src/Features/Email/EmailHandler'
 )
 
 describe('EmailHandler', function () {
-  beforeEach(function () {
-    this.html = '<html>hello</html>'
-    this.Settings = { email: {} }
-    this.EmailBuilder = {
-      buildEmail: sinon.stub().returns({ html: this.html }),
+  beforeEach(async function (ctx) {
+    ctx.html = '<html>hello</html>'
+    ctx.Settings = { email: {} }
+    ctx.EmailBuilder = {
+      buildEmail: sinon.stub().returns({ html: ctx.html }),
     }
-    this.EmailSender = {
+    ctx.EmailSender = {
       promises: {
         sendEmail: sinon.stub().resolves(),
       },
     }
-    this.Queues = {
+    ctx.Queues = {
       createScheduledJob: sinon.stub().resolves(),
     }
-    this.EmailHandler = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        './EmailBuilder': this.EmailBuilder,
-        './EmailSender': this.EmailSender,
-        '@overleaf/settings': this.Settings,
-        '../../infrastructure/Queues': this.Queues,
-      },
-    })
+
+    vi.doMock('../../../../app/src/Features/Email/EmailBuilder', () => ({
+      default: ctx.EmailBuilder,
+    }))
+
+    vi.doMock('../../../../app/src/Features/Email/EmailSender', () => ({
+      default: ctx.EmailSender,
+    }))
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.Settings,
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Queues', () => ({
+      default: ctx.Queues,
+    }))
+
+    ctx.EmailHandler = (await import(MODULE_PATH)).default
   })
 
   describe('send email', function () {
-    it('should use the correct options', async function () {
+    it('should use the correct options', async function (ctx) {
       const opts = { to: 'bob@bob.com' }
-      await this.EmailHandler.promises.sendEmail('welcome', opts)
-      expect(this.EmailSender.promises.sendEmail).to.have.been.calledWithMatch({
-        html: this.html,
+      await ctx.EmailHandler.promises.sendEmail('welcome', opts)
+      expect(ctx.EmailSender.promises.sendEmail).to.have.been.calledWithMatch({
+        html: ctx.html,
       })
     })
 
-    it('should return the error', async function () {
-      this.EmailSender.promises.sendEmail.rejects(new Error('boom'))
+    it('should return the error', async function (ctx) {
+      ctx.EmailSender.promises.sendEmail.rejects(new Error('boom'))
       const opts = {
         to: 'bob@bob.com',
         subject: 'hello bob',
       }
-      await expect(this.EmailHandler.promises.sendEmail('welcome', opts)).to.be
+      await expect(ctx.EmailHandler.promises.sendEmail('welcome', opts)).to.be
         .rejected
     })
 
-    it('should not send an email if lifecycle is not enabled', async function () {
-      this.Settings.email.lifecycle = false
-      this.EmailBuilder.buildEmail.returns({ type: 'lifecycle' })
-      await this.EmailHandler.promises.sendEmail('welcome', {})
-      expect(this.EmailSender.promises.sendEmail).not.to.have.been.called
+    it('should not send an email if lifecycle is not enabled', async function (ctx) {
+      ctx.Settings.email.lifecycle = false
+      ctx.EmailBuilder.buildEmail.returns({ type: 'lifecycle' })
+      await ctx.EmailHandler.promises.sendEmail('welcome', {})
+      expect(ctx.EmailSender.promises.sendEmail).not.to.have.been.called
     })
 
-    it('should send an email if lifecycle is not enabled but the type is notification', async function () {
-      this.Settings.email.lifecycle = false
-      this.EmailBuilder.buildEmail.returns({ type: 'notification' })
+    it('should send an email if lifecycle is not enabled but the type is notification', async function (ctx) {
+      ctx.Settings.email.lifecycle = false
+      ctx.EmailBuilder.buildEmail.returns({ type: 'notification' })
       const opts = { to: 'bob@bob.com' }
-      await this.EmailHandler.promises.sendEmail('welcome', opts)
-      expect(this.EmailSender.promises.sendEmail).to.have.been.called
+      await ctx.EmailHandler.promises.sendEmail('welcome', opts)
+      expect(ctx.EmailSender.promises.sendEmail).to.have.been.called
     })
 
-    it('should send lifecycle email if it is enabled', async function () {
-      this.Settings.email.lifecycle = true
-      this.EmailBuilder.buildEmail.returns({ type: 'lifecycle' })
+    it('should send lifecycle email if it is enabled', async function (ctx) {
+      ctx.Settings.email.lifecycle = true
+      ctx.EmailBuilder.buildEmail.returns({ type: 'lifecycle' })
       const opts = { to: 'bob@bob.com' }
-      await this.EmailHandler.promises.sendEmail('welcome', opts)
-      expect(this.EmailSender.promises.sendEmail).to.have.been.called
+      await ctx.EmailHandler.promises.sendEmail('welcome', opts)
+      expect(ctx.EmailSender.promises.sendEmail).to.have.been.called
     })
 
     describe('with plain-text email content', function () {
-      beforeEach(function () {
-        this.text = 'hello there'
+      beforeEach(function (ctx) {
+        ctx.text = 'hello there'
       })
 
-      it('should pass along the text field', async function () {
-        this.EmailBuilder.buildEmail.returns({
-          html: this.html,
-          text: this.text,
+      it('should pass along the text field', async function (ctx) {
+        ctx.EmailBuilder.buildEmail.returns({
+          html: ctx.html,
+          text: ctx.text,
         })
         const opts = { to: 'bob@bob.com' }
-        await this.EmailHandler.promises.sendEmail('welcome', opts)
-        expect(
-          this.EmailSender.promises.sendEmail
-        ).to.have.been.calledWithMatch({
-          html: this.html,
-          text: this.text,
-        })
+        await ctx.EmailHandler.promises.sendEmail('welcome', opts)
+        expect(ctx.EmailSender.promises.sendEmail).to.have.been.calledWithMatch(
+          {
+            html: ctx.html,
+            text: ctx.text,
+          }
+        )
       })
     })
   })
 
   describe('send deferred email', function () {
-    beforeEach(function () {
-      this.opts = {
+    beforeEach(function (ctx) {
+      ctx.opts = {
         to: 'bob@bob.com',
         first_name: 'hello bob',
       }
-      this.emailType = 'canceledSubscription'
-      this.ONE_HOUR_IN_MS = 1000 * 60 * 60
-      this.EmailHandler.sendDeferredEmail(
-        this.emailType,
-        this.opts,
-        this.ONE_HOUR_IN_MS
+      ctx.emailType = 'canceledSubscription'
+      ctx.ONE_HOUR_IN_MS = 1000 * 60 * 60
+      ctx.EmailHandler.sendDeferredEmail(
+        ctx.emailType,
+        ctx.opts,
+        ctx.ONE_HOUR_IN_MS
       )
     })
-    it('should add a email job to the queue', function () {
-      expect(this.Queues.createScheduledJob).to.have.been.calledWith(
+    it('should add a email job to the queue', function (ctx) {
+      expect(ctx.Queues.createScheduledJob).to.have.been.calledWith(
         'deferred-emails',
-        { data: { emailType: this.emailType, opts: this.opts } },
-        this.ONE_HOUR_IN_MS
+        { data: { emailType: ctx.emailType, opts: ctx.opts } },
+        ctx.ONE_HOUR_IN_MS
       )
     })
   })

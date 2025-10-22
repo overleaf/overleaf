@@ -1,25 +1,25 @@
-const SandboxedModule = require('sandboxed-module')
-const sinon = require('sinon')
-const { expect } = require('chai')
-const modulePath = require('path').join(
-  __dirname,
-  '../../../../app/src/Features/Publishers/PublishersGetter.js'
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+import path from 'node:path'
+const modulePath = path.join(
+  import.meta.dirname,
+  '../../../../app/src/Features/Publishers/PublishersGetter.mjs'
 )
 
 describe('PublishersGetter', function () {
-  beforeEach(function () {
-    this.publisher = {
+  beforeEach(async function (ctx) {
+    ctx.publisher = {
       _id: 'mock-publsiher-id',
       slug: 'ieee',
       fetchV1Data: sinon.stub(),
     }
 
-    this.UserMembershipsHandler = {
+    ctx.UserMembershipsHandler = {
       promises: {
-        getEntitiesByUser: sinon.stub().resolves([this.publisher]),
+        getEntitiesByUser: sinon.stub().resolves([ctx.publisher]),
       },
     }
-    this.UserMembershipEntityConfigs = {
+    ctx.UserMembershipEntityConfigs = {
       publisher: {
         modelName: 'Publisher',
         canCreate: true,
@@ -29,22 +29,33 @@ describe('PublishersGetter', function () {
       },
     }
 
-    this.PublishersGetter = SandboxedModule.require(modulePath, {
-      requires: {
-        '../User/UserGetter': this.UserGetter,
-        '../UserMembership/UserMembershipsHandler': this.UserMembershipsHandler,
-        '../UserMembership/UserMembershipEntityConfigs':
-          this.UserMembershipEntityConfigs,
-      },
-    })
+    vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
+      default: ctx.UserGetter,
+    }))
 
-    this.userId = '12345abcde'
+    vi.doMock(
+      '../../../../app/src/Features/UserMembership/UserMembershipsHandler',
+      () => ({
+        default: ctx.UserMembershipsHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/UserMembership/UserMembershipEntityConfigs',
+      () => ({
+        default: ctx.UserMembershipEntityConfigs,
+      })
+    )
+
+    ctx.PublishersGetter = (await import(modulePath)).default
+
+    ctx.userId = '12345abcde'
   })
 
   describe('getManagedPublishers', function () {
-    it('fetches v1 data before returning publisher list', async function () {
+    it('fetches v1 data before returning publisher list', async function (ctx) {
       const publishers =
-        await this.PublishersGetter.promises.getManagedPublishers(this.userId)
+        await ctx.PublishersGetter.promises.getManagedPublishers(ctx.userId)
       expect(publishers.length).to.equal(1)
     })
   })

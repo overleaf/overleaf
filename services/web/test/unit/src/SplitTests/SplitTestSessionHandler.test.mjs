@@ -1,23 +1,24 @@
-const Path = require('path')
-const SandboxedModule = require('sandboxed-module')
-const sinon = require('sinon')
-const { expect } = require('chai')
-const { ObjectId } = require('mongodb-legacy')
+import { vi, expect } from 'vitest'
+import Path from 'path'
+import sinon from 'sinon'
+import mongodb from 'mongodb-legacy'
+
+const { ObjectId } = mongodb
 
 const MODULE_PATH = Path.join(
-  __dirname,
+  import.meta.dirname,
   '../../../../app/src/Features/SplitTests/SplitTestSessionHandler'
 )
 
 describe('SplitTestSessionHandler', function () {
-  beforeEach(function () {
-    this.SplitTestCache = {
+  beforeEach(async function (ctx) {
+    ctx.SplitTestCache = {
       get: sinon.stub().resolves(),
     }
-    this.SplitTestUserGetter = {}
-    this.Metrics = {}
+    ctx.SplitTestUserGetter = {}
+    ctx.Metrics = {}
 
-    this.SplitTestCache.get = sinon.stub().resolves(
+    ctx.SplitTestCache.get = sinon.stub().resolves(
       new Map(
         Object.entries({
           'anon-test-1': {
@@ -55,17 +56,29 @@ describe('SplitTestSessionHandler', function () {
       )
     )
 
-    this.SplitTestSessionHandler = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        './SplitTestCache': this.SplitTestCache,
-        './SplitTestUserGetter': this.SplitTestUserGetter,
-        '@overleaf/metrics': this.Metrics,
-        'mongodb-legacy': { ObjectId },
-      },
-    })
+    vi.doMock('../../../../app/src/Features/SplitTests/SplitTestCache', () => ({
+      default: ctx.SplitTestCache,
+    }))
+
+    vi.doMock(
+      '../../../../app/src/Features/SplitTests/SplitTestUserGetter',
+      () => ({
+        default: ctx.SplitTestUserGetter,
+      })
+    )
+
+    vi.doMock('@overleaf/metrics', () => ({
+      default: ctx.Metrics,
+    }))
+
+    vi.doMock('mongodb-legacy', () => ({
+      default: { ObjectId },
+    }))
+
+    ctx.SplitTestSessionHandler = (await import(MODULE_PATH)).default
   })
 
-  it('should read from the splitTests field', async function () {
+  it('should read from the splitTests field', async function (ctx) {
     const session = {
       splitTests: {
         'anon-test-1': [
@@ -95,7 +108,7 @@ describe('SplitTestSessionHandler', function () {
     }
 
     const assignments =
-      await this.SplitTestSessionHandler.promises.getAssignments(session)
+      await ctx.SplitTestSessionHandler.promises.getAssignments(session)
     expect(assignments).to.deep.equal({
       'anon-test-1': [
         {
@@ -122,8 +135,8 @@ describe('SplitTestSessionHandler', function () {
     })
   })
 
-  it('should read from the sta field', async function () {
-    this.SplitTestCache.get = sinon.stub().resolves(
+  it('should read from the sta field', async function (ctx) {
+    ctx.SplitTestCache.get = sinon.stub().resolves(
       new Map(
         Object.entries({
           'anon-test-1': {
@@ -165,7 +178,7 @@ describe('SplitTestSessionHandler', function () {
     }
 
     const assignments =
-      await this.SplitTestSessionHandler.promises.getAssignments(session)
+      await ctx.SplitTestSessionHandler.promises.getAssignments(session)
     expect(assignments).to.deep.equal({
       'anon-test-1': [
         {
@@ -192,8 +205,8 @@ describe('SplitTestSessionHandler', function () {
     })
   })
 
-  it('should deduplicate entries from the sta field', async function () {
-    this.SplitTestCache.get = sinon.stub().resolves(
+  it('should deduplicate entries from the sta field', async function (ctx) {
+    ctx.SplitTestCache.get = sinon.stub().resolves(
       new Map(
         Object.entries({
           'anon-test-1': {
@@ -235,7 +248,7 @@ describe('SplitTestSessionHandler', function () {
     }
 
     const assignments =
-      await this.SplitTestSessionHandler.promises.getAssignments(session)
+      await ctx.SplitTestSessionHandler.promises.getAssignments(session)
     expect(assignments).to.deep.equal({
       'anon-test-1': [
         {
@@ -262,7 +275,7 @@ describe('SplitTestSessionHandler', function () {
     })
   })
 
-  it('should merge assignments from both splitTests and sta fields', async function () {
+  it('should merge assignments from both splitTests and sta fields', async function (ctx) {
     const session = {
       splitTests: {
         'anon-test-1': [
@@ -286,7 +299,7 @@ describe('SplitTestSessionHandler', function () {
     }
 
     const assignments =
-      await this.SplitTestSessionHandler.promises.getAssignments(session)
+      await ctx.SplitTestSessionHandler.promises.getAssignments(session)
     expect(assignments).to.deep.equal({
       'anon-test-1': [
         {

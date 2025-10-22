@@ -1,17 +1,17 @@
-const sinon = require('sinon')
-const { expect } = require('chai')
-const modulePath = '../../../../app/src/Features/User/UserSessionsManager.js'
-const SandboxedModule = require('sandboxed-module')
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
+
+const modulePath = '../../../../app/src/Features/User/UserSessionsManager.mjs'
 
 describe('UserSessionsManager', function () {
-  beforeEach(function () {
-    this.user = {
+  beforeEach(async function (ctx) {
+    ctx.user = {
       _id: 'abcd',
       email: 'user@example.com',
     }
-    this.sessionId = 'some_session_id'
+    ctx.sessionId = 'some_session_id'
 
-    this.rclient = {
+    ctx.rclient = {
       multi: sinon.stub(),
       exec: sinon.stub(),
       get: sinon.stub(),
@@ -22,348 +22,338 @@ describe('UserSessionsManager', function () {
       mget: sinon.stub(),
       pexpire: sinon.stub(),
     }
-    this.rclient.multi.returns({
+    ctx.rclient.multi.returns({
       sadd: sinon.stub().returnsThis(),
       srem: sinon.stub().returnsThis(),
       pexpire: sinon.stub().returnsThis(),
       exec: sinon.stub().resolves(),
     })
-    this.rclient.get.resolves()
-    this.rclient.del.resolves()
-    this.rclient.sadd.resolves()
-    this.rclient.srem.resolves()
-    this.rclient.smembers.resolves([])
-    this.rclient.pexpire.resolves()
+    ctx.rclient.get.resolves()
+    ctx.rclient.del.resolves()
+    ctx.rclient.sadd.resolves()
+    ctx.rclient.srem.resolves()
+    ctx.rclient.smembers.resolves([])
+    ctx.rclient.pexpire.resolves()
 
-    this.UserSessionsRedis = {
-      client: () => this.rclient,
+    ctx.UserSessionsRedis = {
+      client: () => ctx.rclient,
       sessionSetKey: user => `UserSessions:{${user._id}}`,
     }
-    this.settings = {
+    ctx.settings = {
       redis: {
         web: {},
       },
     }
-    return (this.UserSessionsManager = SandboxedModule.require(modulePath, {
-      requires: {
-        '@overleaf/settings': this.settings,
-        './UserSessionsRedis': this.UserSessionsRedis,
-      },
+
+    vi.doMock('@overleaf/settings', () => ({
+      default: ctx.settings,
     }))
+
+    vi.doMock('../../../../app/src/Features/User/UserSessionsRedis', () => ({
+      default: ctx.UserSessionsRedis,
+    }))
+
+    return (ctx.UserSessionsManager = (await import(modulePath)).default)
   })
 
   describe('_sessionKey', function () {
-    it('should build the correct key', function () {
-      const result = this.UserSessionsManager._sessionKey(this.sessionId)
+    it('should build the correct key', function (ctx) {
+      const result = ctx.UserSessionsManager._sessionKey(ctx.sessionId)
       return result.should.equal('sess:some_session_id')
     })
   })
 
   describe('trackSession', function () {
-    beforeEach(function () {
-      this._checkSessions = sinon
-        .stub(this.UserSessionsManager.promises, '_checkSessions')
+    beforeEach(function (ctx) {
+      ctx._checkSessions = sinon
+        .stub(ctx.UserSessionsManager.promises, '_checkSessions')
         .resolves()
     })
 
-    afterEach(function () {
-      return this._checkSessions.restore()
+    afterEach(function (ctx) {
+      return ctx._checkSessions.restore()
     })
 
-    it('should not produce an error', async function () {
-      await this.UserSessionsManager.promises.trackSession(
-        this.user,
-        this.sessionId
+    it('should not produce an error', async function (ctx) {
+      await ctx.UserSessionsManager.promises.trackSession(
+        ctx.user,
+        ctx.sessionId
       )
     })
 
-    it('should call the appropriate redis methods', async function () {
-      await this.UserSessionsManager.promises.trackSession(
-        this.user,
-        this.sessionId
+    it('should call the appropriate redis methods', async function (ctx) {
+      await ctx.UserSessionsManager.promises.trackSession(
+        ctx.user,
+        ctx.sessionId
       )
-      this.rclient.multi.callCount.should.equal(1)
-      const multiInstance = this.rclient.multi.returnValues[0]
+      ctx.rclient.multi.callCount.should.equal(1)
+      const multiInstance = ctx.rclient.multi.returnValues[0]
       multiInstance.sadd.callCount.should.equal(1)
       multiInstance.pexpire.callCount.should.equal(1)
       multiInstance.exec.callCount.should.equal(1)
     })
 
-    it('should call _checkSessions', async function () {
-      await this.UserSessionsManager.promises.trackSession(
-        this.user,
-        this.sessionId
+    it('should call _checkSessions', async function (ctx) {
+      await ctx.UserSessionsManager.promises.trackSession(
+        ctx.user,
+        ctx.sessionId
       )
-      this._checkSessions.callCount.should.equal(1)
+      ctx._checkSessions.callCount.should.equal(1)
     })
 
     describe('when rclient produces an error', function () {
-      beforeEach(function () {
-        this.rclient.multi.returns({
+      beforeEach(function (ctx) {
+        ctx.rclient.multi.returns({
           sadd: sinon.stub().returnsThis(),
           pexpire: sinon.stub().returnsThis(),
           exec: sinon.stub().rejects(new Error('woops')),
         })
       })
 
-      it('should produce an error', async function () {
+      it('should produce an error', async function (ctx) {
         await expect(
-          this.UserSessionsManager.promises.trackSession(
-            this.user,
-            this.sessionId
-          )
+          ctx.UserSessionsManager.promises.trackSession(ctx.user, ctx.sessionId)
         ).to.be.rejectedWith(Error)
       })
 
-      it('should not call _checkSessions', async function () {
+      it('should not call _checkSessions', async function (ctx) {
         try {
-          await this.UserSessionsManager.promises.trackSession(
-            this.user,
-            this.sessionId
+          await ctx.UserSessionsManager.promises.trackSession(
+            ctx.user,
+            ctx.sessionId
           )
         } catch (err) {
           // Expected error
         }
-        this._checkSessions.callCount.should.equal(0)
+        ctx._checkSessions.callCount.should.equal(0)
       })
     })
 
     describe('when no user is supplied', function () {
-      it('should not produce an error', async function () {
-        await this.UserSessionsManager.promises.trackSession(
-          null,
-          this.sessionId
-        )
+      it('should not produce an error', async function (ctx) {
+        await ctx.UserSessionsManager.promises.trackSession(null, ctx.sessionId)
       })
 
-      it('should not call the appropriate redis methods', async function () {
-        await this.UserSessionsManager.promises.trackSession(
-          null,
-          this.sessionId
-        )
-        this.rclient.multi.callCount.should.equal(0)
+      it('should not call the appropriate redis methods', async function (ctx) {
+        await ctx.UserSessionsManager.promises.trackSession(null, ctx.sessionId)
+        ctx.rclient.multi.callCount.should.equal(0)
       })
 
-      it('should not call _checkSessions', async function () {
-        await this.UserSessionsManager.promises.trackSession(
-          null,
-          this.sessionId
-        )
-        this._checkSessions.callCount.should.equal(0)
+      it('should not call _checkSessions', async function (ctx) {
+        await ctx.UserSessionsManager.promises.trackSession(null, ctx.sessionId)
+        ctx._checkSessions.callCount.should.equal(0)
       })
     })
 
     describe('when no sessionId is supplied', function () {
-      it('should not produce an error', async function () {
-        await this.UserSessionsManager.promises.trackSession(this.user, null)
+      it('should not produce an error', async function (ctx) {
+        await ctx.UserSessionsManager.promises.trackSession(ctx.user, null)
       })
 
-      it('should not call the appropriate redis methods', async function () {
-        await this.UserSessionsManager.promises.trackSession(this.user, null)
-        this.rclient.multi.callCount.should.equal(0)
+      it('should not call the appropriate redis methods', async function (ctx) {
+        await ctx.UserSessionsManager.promises.trackSession(ctx.user, null)
+        ctx.rclient.multi.callCount.should.equal(0)
       })
 
-      it('should not call _checkSessions', async function () {
-        await this.UserSessionsManager.promises.trackSession(this.user, null)
-        this._checkSessions.callCount.should.equal(0)
+      it('should not call _checkSessions', async function (ctx) {
+        await ctx.UserSessionsManager.promises.trackSession(ctx.user, null)
+        ctx._checkSessions.callCount.should.equal(0)
       })
     })
   })
 
   describe('untrackSession', function () {
-    beforeEach(function () {
-      this._checkSessions = sinon
-        .stub(this.UserSessionsManager.promises, '_checkSessions')
+    beforeEach(function (ctx) {
+      ctx._checkSessions = sinon
+        .stub(ctx.UserSessionsManager.promises, '_checkSessions')
         .resolves()
     })
 
-    afterEach(function () {
-      return this._checkSessions.restore()
+    afterEach(function (ctx) {
+      return ctx._checkSessions.restore()
     })
 
-    it('should not produce an error', async function () {
-      await this.UserSessionsManager.promises.untrackSession(
-        this.user,
-        this.sessionId
+    it('should not produce an error', async function (ctx) {
+      await ctx.UserSessionsManager.promises.untrackSession(
+        ctx.user,
+        ctx.sessionId
       )
     })
 
-    it('should call the appropriate redis methods', async function () {
-      await this.UserSessionsManager.promises.untrackSession(
-        this.user,
-        this.sessionId
+    it('should call the appropriate redis methods', async function (ctx) {
+      await ctx.UserSessionsManager.promises.untrackSession(
+        ctx.user,
+        ctx.sessionId
       )
-      this.rclient.multi.callCount.should.equal(1)
-      const multiInstance = this.rclient.multi.returnValues[0]
+      ctx.rclient.multi.callCount.should.equal(1)
+      const multiInstance = ctx.rclient.multi.returnValues[0]
       multiInstance.srem.callCount.should.equal(1)
       multiInstance.pexpire.callCount.should.equal(1)
       multiInstance.exec.callCount.should.equal(1)
     })
 
-    it('should call _checkSessions', async function () {
-      await this.UserSessionsManager.promises.untrackSession(
-        this.user,
-        this.sessionId
+    it('should call _checkSessions', async function (ctx) {
+      await ctx.UserSessionsManager.promises.untrackSession(
+        ctx.user,
+        ctx.sessionId
       )
-      this._checkSessions.callCount.should.equal(1)
+      ctx._checkSessions.callCount.should.equal(1)
     })
 
     describe('when rclient produces an error', function () {
-      beforeEach(function () {
-        this.rclient.multi.returns({
+      beforeEach(function (ctx) {
+        ctx.rclient.multi.returns({
           srem: sinon.stub().returnsThis(),
           pexpire: sinon.stub().returnsThis(),
           exec: sinon.stub().rejects(new Error('woops')),
         })
       })
 
-      it('should produce an error', async function () {
+      it('should produce an error', async function (ctx) {
         await expect(
-          this.UserSessionsManager.promises.untrackSession(
-            this.user,
-            this.sessionId
+          ctx.UserSessionsManager.promises.untrackSession(
+            ctx.user,
+            ctx.sessionId
           )
         ).to.be.rejectedWith(Error)
       })
 
-      it('should not call _checkSessions', async function () {
+      it('should not call _checkSessions', async function (ctx) {
         try {
-          await this.UserSessionsManager.promises.untrackSession(
-            this.user,
-            this.sessionId
+          await ctx.UserSessionsManager.promises.untrackSession(
+            ctx.user,
+            ctx.sessionId
           )
         } catch (err) {
           // Expected error
         }
-        this._checkSessions.callCount.should.equal(0)
+        ctx._checkSessions.callCount.should.equal(0)
       })
     })
 
     describe('when no user is supplied', function () {
-      it('should not produce an error', async function () {
-        await this.UserSessionsManager.promises.untrackSession(
+      it('should not produce an error', async function (ctx) {
+        await ctx.UserSessionsManager.promises.untrackSession(
           null,
-          this.sessionId
+          ctx.sessionId
         )
       })
 
-      it('should not call the appropriate redis methods', async function () {
-        await this.UserSessionsManager.promises.untrackSession(
+      it('should not call the appropriate redis methods', async function (ctx) {
+        await ctx.UserSessionsManager.promises.untrackSession(
           null,
-          this.sessionId
+          ctx.sessionId
         )
-        this.rclient.multi.callCount.should.equal(0)
+        ctx.rclient.multi.callCount.should.equal(0)
       })
 
-      it('should not call _checkSessions', async function () {
-        await this.UserSessionsManager.promises.untrackSession(
+      it('should not call _checkSessions', async function (ctx) {
+        await ctx.UserSessionsManager.promises.untrackSession(
           null,
-          this.sessionId
+          ctx.sessionId
         )
-        this._checkSessions.callCount.should.equal(0)
+        ctx._checkSessions.callCount.should.equal(0)
       })
     })
 
     describe('when no sessionId is supplied', function () {
-      it('should not produce an error', async function () {
-        await this.UserSessionsManager.promises.untrackSession(this.user, null)
+      it('should not produce an error', async function (ctx) {
+        await ctx.UserSessionsManager.promises.untrackSession(ctx.user, null)
       })
 
-      it('should not call the appropriate redis methods', async function () {
-        await this.UserSessionsManager.promises.untrackSession(this.user, null)
-        this.rclient.multi.callCount.should.equal(0)
+      it('should not call the appropriate redis methods', async function (ctx) {
+        await ctx.UserSessionsManager.promises.untrackSession(ctx.user, null)
+        ctx.rclient.multi.callCount.should.equal(0)
       })
 
-      it('should not call _checkSessions', async function () {
-        await this.UserSessionsManager.promises.untrackSession(this.user, null)
-        this._checkSessions.callCount.should.equal(0)
+      it('should not call _checkSessions', async function (ctx) {
+        await ctx.UserSessionsManager.promises.untrackSession(ctx.user, null)
+        ctx._checkSessions.callCount.should.equal(0)
       })
     })
   })
 
   describe('removeSessionsFromRedis', function () {
-    beforeEach(function () {
-      this.sessionKeys = ['sess:one', 'sess:two']
-      this.currentSessionID = undefined
-      this.rclient.smembers.resolves(this.sessionKeys)
-      this.rclient.del.resolves()
-      this.rclient.srem.resolves()
+    beforeEach(function (ctx) {
+      ctx.sessionKeys = ['sess:one', 'sess:two']
+      ctx.currentSessionID = undefined
+      ctx.rclient.smembers.resolves(ctx.sessionKeys)
+      ctx.rclient.del.resolves()
+      ctx.rclient.srem.resolves()
     })
 
-    it('should not produce an error', async function () {
-      await this.UserSessionsManager.promises.removeSessionsFromRedis(
-        this.user,
-        this.currentSessionID
+    it('should not produce an error', async function (ctx) {
+      await ctx.UserSessionsManager.promises.removeSessionsFromRedis(
+        ctx.user,
+        ctx.currentSessionID
       )
     })
 
-    it('should yield the number of purged sessions', async function () {
+    it('should yield the number of purged sessions', async function (ctx) {
       const result =
-        await this.UserSessionsManager.promises.removeSessionsFromRedis(
-          this.user,
-          this.currentSessionID
+        await ctx.UserSessionsManager.promises.removeSessionsFromRedis(
+          ctx.user,
+          ctx.currentSessionID
         )
-      expect(result).to.equal(this.sessionKeys.length)
+      expect(result).to.equal(ctx.sessionKeys.length)
     })
 
-    it('should call the appropriate redis methods', async function () {
-      await this.UserSessionsManager.promises.removeSessionsFromRedis(
-        this.user,
-        this.currentSessionID
+    it('should call the appropriate redis methods', async function (ctx) {
+      await ctx.UserSessionsManager.promises.removeSessionsFromRedis(
+        ctx.user,
+        ctx.currentSessionID
       )
-      this.rclient.smembers.callCount.should.equal(1)
+      ctx.rclient.smembers.callCount.should.equal(1)
 
-      this.rclient.del.callCount.should.equal(2)
-      expect(this.rclient.del.firstCall.args[0]).to.deep.equal(
-        this.sessionKeys[0]
+      ctx.rclient.del.callCount.should.equal(2)
+      expect(ctx.rclient.del.firstCall.args[0]).to.deep.equal(
+        ctx.sessionKeys[0]
       )
-      expect(this.rclient.del.secondCall.args[0]).to.deep.equal(
-        this.sessionKeys[1]
+      expect(ctx.rclient.del.secondCall.args[0]).to.deep.equal(
+        ctx.sessionKeys[1]
       )
 
-      this.rclient.srem.callCount.should.equal(1)
-      expect(this.rclient.srem.firstCall.args[0]).to.deep.equal(
+      ctx.rclient.srem.callCount.should.equal(1)
+      expect(ctx.rclient.srem.firstCall.args[0]).to.deep.equal(
         'UserSessions:{abcd}'
       )
-      expect(this.rclient.srem.firstCall.args[1]).to.deep.equal(
-        this.sessionKeys
-      )
+      expect(ctx.rclient.srem.firstCall.args[1]).to.deep.equal(ctx.sessionKeys)
     })
 
     describe('when a session is retained', function () {
-      beforeEach(function () {
-        this.sessionKeys = ['sess:one', 'sess:two', 'sess:three', 'sess:four']
-        this.currentSessionID = 'two'
-        this.rclient.smembers.resolves(this.sessionKeys)
-        this.rclient.del.resolves()
+      beforeEach(function (ctx) {
+        ctx.sessionKeys = ['sess:one', 'sess:two', 'sess:three', 'sess:four']
+        ctx.currentSessionID = 'two'
+        ctx.rclient.smembers.resolves(ctx.sessionKeys)
+        ctx.rclient.del.resolves()
       })
 
-      it('should not produce an error', async function () {
-        await this.UserSessionsManager.promises.removeSessionsFromRedis(
-          this.user,
-          this.currentSessionID
+      it('should not produce an error', async function (ctx) {
+        await ctx.UserSessionsManager.promises.removeSessionsFromRedis(
+          ctx.user,
+          ctx.currentSessionID
         )
       })
 
-      it('should call the appropriate redis methods', async function () {
-        await this.UserSessionsManager.promises.removeSessionsFromRedis(
-          this.user,
-          this.currentSessionID
+      it('should call the appropriate redis methods', async function (ctx) {
+        await ctx.UserSessionsManager.promises.removeSessionsFromRedis(
+          ctx.user,
+          ctx.currentSessionID
         )
-        this.rclient.smembers.callCount.should.equal(1)
-        this.rclient.del.callCount.should.equal(this.sessionKeys.length - 1)
-        this.rclient.srem.callCount.should.equal(1)
+        ctx.rclient.smembers.callCount.should.equal(1)
+        ctx.rclient.del.callCount.should.equal(ctx.sessionKeys.length - 1)
+        ctx.rclient.srem.callCount.should.equal(1)
       })
 
-      it('should remove all sessions except for the retained one', async function () {
-        await this.UserSessionsManager.promises.removeSessionsFromRedis(
-          this.user,
-          this.currentSessionID
+      it('should remove all sessions except for the retained one', async function (ctx) {
+        await ctx.UserSessionsManager.promises.removeSessionsFromRedis(
+          ctx.user,
+          ctx.currentSessionID
         )
-        expect(this.rclient.del.firstCall.args[0]).to.deep.equal('sess:one')
-        expect(this.rclient.del.secondCall.args[0]).to.deep.equal('sess:three')
-        expect(this.rclient.del.thirdCall.args[0]).to.deep.equal('sess:four')
-        expect(this.rclient.srem.firstCall.args[1]).to.deep.equal([
+        expect(ctx.rclient.del.firstCall.args[0]).to.deep.equal('sess:one')
+        expect(ctx.rclient.del.secondCall.args[0]).to.deep.equal('sess:three')
+        expect(ctx.rclient.del.thirdCall.args[0]).to.deep.equal('sess:four')
+        expect(ctx.rclient.srem.firstCall.args[1]).to.deep.equal([
           'sess:one',
           'sess:three',
           'sess:four',
@@ -372,141 +362,141 @@ describe('UserSessionsManager', function () {
     })
 
     describe('when rclient produces an error', function () {
-      beforeEach(function () {
-        this.rclient.del.rejects(new Error('woops'))
+      beforeEach(function (ctx) {
+        ctx.rclient.del.rejects(new Error('woops'))
       })
 
-      it('should produce an error', async function () {
+      it('should produce an error', async function (ctx) {
         await expect(
-          this.UserSessionsManager.promises.removeSessionsFromRedis(
-            this.user,
-            this.currentSessionID
+          ctx.UserSessionsManager.promises.removeSessionsFromRedis(
+            ctx.user,
+            ctx.currentSessionID
           )
         ).to.be.rejectedWith(Error)
       })
 
-      it('should not call rclient.srem', async function () {
+      it('should not call rclient.srem', async function (ctx) {
         try {
-          await this.UserSessionsManager.promises.removeSessionsFromRedis(
-            this.user,
-            this.currentSessionID
+          await ctx.UserSessionsManager.promises.removeSessionsFromRedis(
+            ctx.user,
+            ctx.currentSessionID
           )
         } catch (err) {
           // Expected error
         }
-        this.rclient.srem.callCount.should.equal(0)
+        ctx.rclient.srem.callCount.should.equal(0)
       })
     })
 
     describe('when no user is supplied', function () {
-      it('should produce an error', async function () {
+      it('should produce an error', async function (ctx) {
         await expect(
-          this.UserSessionsManager.promises.removeSessionsFromRedis(
+          ctx.UserSessionsManager.promises.removeSessionsFromRedis(
             null,
-            this.currentSessionID
+            ctx.currentSessionID
           )
         ).to.be.rejectedWith(/bug: user not passed to removeSessionsFromRedis/)
       })
 
-      it('should not call the appropriate redis methods', async function () {
+      it('should not call the appropriate redis methods', async function (ctx) {
         try {
-          await this.UserSessionsManager.promises.removeSessionsFromRedis(
+          await ctx.UserSessionsManager.promises.removeSessionsFromRedis(
             null,
-            this.currentSessionID
+            ctx.currentSessionID
           )
         } catch (err) {
           // Expected error
         }
-        this.rclient.smembers.callCount.should.equal(0)
-        this.rclient.del.callCount.should.equal(0)
-        this.rclient.srem.callCount.should.equal(0)
+        ctx.rclient.smembers.callCount.should.equal(0)
+        ctx.rclient.del.callCount.should.equal(0)
+        ctx.rclient.srem.callCount.should.equal(0)
       })
     })
 
     describe('when there are no keys to delete', function () {
-      beforeEach(function () {
-        this.rclient.smembers.resolves([])
+      beforeEach(function (ctx) {
+        ctx.rclient.smembers.resolves([])
       })
 
-      it('should not produce an error', async function () {
-        await this.UserSessionsManager.promises.removeSessionsFromRedis(
-          this.user,
-          this.currentSessionID
+      it('should not produce an error', async function (ctx) {
+        await ctx.UserSessionsManager.promises.removeSessionsFromRedis(
+          ctx.user,
+          ctx.currentSessionID
         )
       })
 
-      it('should not do the delete operation', async function () {
-        await this.UserSessionsManager.promises.removeSessionsFromRedis(
-          this.user,
-          this.currentSessionID
+      it('should not do the delete operation', async function (ctx) {
+        await ctx.UserSessionsManager.promises.removeSessionsFromRedis(
+          ctx.user,
+          ctx.currentSessionID
         )
-        this.rclient.smembers.callCount.should.equal(1)
-        this.rclient.del.callCount.should.equal(0)
-        this.rclient.srem.callCount.should.equal(0)
+        ctx.rclient.smembers.callCount.should.equal(1)
+        ctx.rclient.del.callCount.should.equal(0)
+        ctx.rclient.srem.callCount.should.equal(0)
       })
     })
   })
 
   describe('touch', function () {
-    it('should not produce an error', async function () {
-      await this.UserSessionsManager.promises.touch(this.user)
+    it('should not produce an error', async function (ctx) {
+      await ctx.UserSessionsManager.promises.touch(ctx.user)
     })
 
-    it('should call rclient.pexpire', async function () {
-      await this.UserSessionsManager.promises.touch(this.user)
-      this.rclient.pexpire.callCount.should.equal(1)
+    it('should call rclient.pexpire', async function (ctx) {
+      await ctx.UserSessionsManager.promises.touch(ctx.user)
+      ctx.rclient.pexpire.callCount.should.equal(1)
     })
 
     describe('when rclient produces an error', function () {
-      beforeEach(function () {
-        this.rclient.pexpire.rejects(new Error('woops'))
+      beforeEach(function (ctx) {
+        ctx.rclient.pexpire.rejects(new Error('woops'))
       })
 
-      it('should produce an error', async function () {
+      it('should produce an error', async function (ctx) {
         await expect(
-          this.UserSessionsManager.promises.touch(this.user)
+          ctx.UserSessionsManager.promises.touch(ctx.user)
         ).to.be.rejectedWith(Error)
       })
     })
 
     describe('when no user is supplied', function () {
-      it('should not produce an error', async function () {
-        await this.UserSessionsManager.promises.touch(null)
+      it('should not produce an error', async function (ctx) {
+        await ctx.UserSessionsManager.promises.touch(null)
       })
 
-      it('should not call pexpire', async function () {
-        await this.UserSessionsManager.promises.touch(null)
-        this.rclient.pexpire.callCount.should.equal(0)
+      it('should not call pexpire', async function (ctx) {
+        await ctx.UserSessionsManager.promises.touch(null)
+        ctx.rclient.pexpire.callCount.should.equal(0)
       })
     })
   })
 
   describe('getAllUserSessions', function () {
-    beforeEach(function () {
-      this.sessionKeys = ['sess:one', 'sess:two', 'sess:three']
-      this.sessions = [
+    beforeEach(function (ctx) {
+      ctx.sessionKeys = ['sess:one', 'sess:two', 'sess:three']
+      ctx.sessions = [
         '{"user": {"ip_address": "a", "session_created": "b"}}',
         '{"passport": {"user": {"ip_address": "c", "session_created": "d"}}}',
       ]
-      this.exclude = ['two']
-      this.rclient.smembers.resolves(this.sessionKeys)
-      this.rclient.get = sinon.stub()
-      this.rclient.get.onCall(0).resolves(this.sessions[0])
-      this.rclient.get.onCall(1).resolves(this.sessions[1])
+      ctx.exclude = ['two']
+      ctx.rclient.smembers.resolves(ctx.sessionKeys)
+      ctx.rclient.get = sinon.stub()
+      ctx.rclient.get.onCall(0).resolves(ctx.sessions[0])
+      ctx.rclient.get.onCall(1).resolves(ctx.sessions[1])
     })
 
-    it('should not produce an error', async function () {
-      await this.UserSessionsManager.promises.getAllUserSessions(
-        this.user,
-        this.exclude
+    it('should not produce an error', async function (ctx) {
+      await ctx.UserSessionsManager.promises.getAllUserSessions(
+        ctx.user,
+        ctx.exclude
       )
     })
 
-    it('should get sessions', async function () {
+    it('should get sessions', async function (ctx) {
       const sessions =
-        await this.UserSessionsManager.promises.getAllUserSessions(
-          this.user,
-          this.exclude
+        await ctx.UserSessionsManager.promises.getAllUserSessions(
+          ctx.user,
+          ctx.exclude
         )
       expect(sessions).to.deep.equal([
         { ip_address: 'a', session_created: 'b' },
@@ -514,98 +504,98 @@ describe('UserSessionsManager', function () {
       ])
     })
 
-    it('should have called rclient.smembers', async function () {
-      await this.UserSessionsManager.promises.getAllUserSessions(
-        this.user,
-        this.exclude
+    it('should have called rclient.smembers', async function (ctx) {
+      await ctx.UserSessionsManager.promises.getAllUserSessions(
+        ctx.user,
+        ctx.exclude
       )
-      this.rclient.smembers.callCount.should.equal(1)
+      ctx.rclient.smembers.callCount.should.equal(1)
     })
 
-    it('should have called rclient.get', async function () {
-      await this.UserSessionsManager.promises.getAllUserSessions(
-        this.user,
-        this.exclude
+    it('should have called rclient.get', async function (ctx) {
+      await ctx.UserSessionsManager.promises.getAllUserSessions(
+        ctx.user,
+        ctx.exclude
       )
-      this.rclient.get.callCount.should.equal(this.sessionKeys.length - 1)
+      ctx.rclient.get.callCount.should.equal(ctx.sessionKeys.length - 1)
     })
 
     describe('when there are no other sessions', function () {
-      beforeEach(function () {
-        this.sessionKeys = ['sess:two']
-        this.rclient.smembers.resolves(this.sessionKeys)
+      beforeEach(function (ctx) {
+        ctx.sessionKeys = ['sess:two']
+        ctx.rclient.smembers.resolves(ctx.sessionKeys)
       })
 
-      it('should not produce an error', async function () {
-        await this.UserSessionsManager.promises.getAllUserSessions(
-          this.user,
-          this.exclude
+      it('should not produce an error', async function (ctx) {
+        await ctx.UserSessionsManager.promises.getAllUserSessions(
+          ctx.user,
+          ctx.exclude
         )
       })
 
-      it('should produce an empty list of sessions', async function () {
+      it('should produce an empty list of sessions', async function (ctx) {
         const sessions =
-          await this.UserSessionsManager.promises.getAllUserSessions(
-            this.user,
-            this.exclude
+          await ctx.UserSessionsManager.promises.getAllUserSessions(
+            ctx.user,
+            ctx.exclude
           )
         expect(sessions).to.deep.equal([])
       })
 
-      it('should have called rclient.smembers', async function () {
-        await this.UserSessionsManager.promises.getAllUserSessions(
-          this.user,
-          this.exclude
+      it('should have called rclient.smembers', async function (ctx) {
+        await ctx.UserSessionsManager.promises.getAllUserSessions(
+          ctx.user,
+          ctx.exclude
         )
-        this.rclient.smembers.callCount.should.equal(1)
+        ctx.rclient.smembers.callCount.should.equal(1)
       })
 
-      it('should not have called rclient.get for individual keys', async function () {
-        await this.UserSessionsManager.promises.getAllUserSessions(
-          this.user,
-          this.exclude
+      it('should not have called rclient.get for individual keys', async function (ctx) {
+        await ctx.UserSessionsManager.promises.getAllUserSessions(
+          ctx.user,
+          ctx.exclude
         )
-        this.rclient.get.callCount.should.equal(0)
+        ctx.rclient.get.callCount.should.equal(0)
       })
     })
 
     describe('when smembers produces an error', function () {
-      beforeEach(function () {
-        this.rclient.smembers.rejects(new Error('woops'))
+      beforeEach(function (ctx) {
+        ctx.rclient.smembers.rejects(new Error('woops'))
       })
 
-      it('should produce an error', async function () {
+      it('should produce an error', async function (ctx) {
         await expect(
-          this.UserSessionsManager.promises.getAllUserSessions(
-            this.user,
-            this.exclude
+          ctx.UserSessionsManager.promises.getAllUserSessions(
+            ctx.user,
+            ctx.exclude
           )
         ).to.be.rejectedWith(Error)
       })
 
-      it('should not have called rclient.get', async function () {
+      it('should not have called rclient.get', async function (ctx) {
         try {
-          await this.UserSessionsManager.promises.getAllUserSessions(
-            this.user,
-            this.exclude
+          await ctx.UserSessionsManager.promises.getAllUserSessions(
+            ctx.user,
+            ctx.exclude
           )
         } catch (err) {
           // Expected error
         }
-        this.rclient.get.callCount.should.equal(0)
+        ctx.rclient.get.callCount.should.equal(0)
       })
     })
 
     describe('when get produces an error', function () {
-      beforeEach(function () {
-        this.rclient.get = sinon.stub().rejects(new Error('woops'))
+      beforeEach(function (ctx) {
+        ctx.rclient.get = sinon.stub().rejects(new Error('woops'))
       })
 
-      it('should produce an error', async function () {
+      it('should produce an error', async function (ctx) {
         await expect(
-          this.UserSessionsManager.promises.getAllUserSessions(
-            this.user,
-            this.exclude
+          ctx.UserSessionsManager.promises.getAllUserSessions(
+            ctx.user,
+            ctx.exclude
           )
         ).to.be.rejectedWith(Error)
       })
@@ -613,76 +603,76 @@ describe('UserSessionsManager', function () {
   })
 
   describe('_checkSessions', function () {
-    beforeEach(function () {
-      this.sessionKeys = ['one', 'two']
-      this.rclient.smembers.resolves(this.sessionKeys)
-      this.rclient.get.resolves('some-value')
-      this.rclient.srem.resolves({})
+    beforeEach(function (ctx) {
+      ctx.sessionKeys = ['one', 'two']
+      ctx.rclient.smembers.resolves(ctx.sessionKeys)
+      ctx.rclient.get.resolves('some-value')
+      ctx.rclient.srem.resolves({})
     })
 
-    it('should not produce an error', async function () {
-      await this.UserSessionsManager.promises._checkSessions(this.user)
+    it('should not produce an error', async function (ctx) {
+      await ctx.UserSessionsManager.promises._checkSessions(ctx.user)
     })
 
-    it('should call the appropriate redis methods', async function () {
-      await this.UserSessionsManager.promises._checkSessions(this.user)
-      this.rclient.smembers.callCount.should.equal(1)
-      this.rclient.get.callCount.should.equal(2)
-      this.rclient.srem.callCount.should.equal(0)
+    it('should call the appropriate redis methods', async function (ctx) {
+      await ctx.UserSessionsManager.promises._checkSessions(ctx.user)
+      ctx.rclient.smembers.callCount.should.equal(1)
+      ctx.rclient.get.callCount.should.equal(2)
+      ctx.rclient.srem.callCount.should.equal(0)
     })
 
     describe('when one of the keys is not present in redis', function () {
-      beforeEach(function () {
-        this.rclient.get.onCall(0).resolves('some-val')
-        this.rclient.get.onCall(1).resolves(null)
+      beforeEach(function (ctx) {
+        ctx.rclient.get.onCall(0).resolves('some-val')
+        ctx.rclient.get.onCall(1).resolves(null)
       })
 
-      it('should not produce an error', async function () {
-        await this.UserSessionsManager.promises._checkSessions(this.user)
+      it('should not produce an error', async function (ctx) {
+        await ctx.UserSessionsManager.promises._checkSessions(ctx.user)
       })
 
-      it('should remove that key from the set', async function () {
-        await this.UserSessionsManager.promises._checkSessions(this.user)
-        this.rclient.smembers.callCount.should.equal(1)
-        this.rclient.get.callCount.should.equal(2)
-        this.rclient.srem.callCount.should.equal(1)
-        this.rclient.srem.firstCall.args[1].should.equal('two')
+      it('should remove that key from the set', async function (ctx) {
+        await ctx.UserSessionsManager.promises._checkSessions(ctx.user)
+        ctx.rclient.smembers.callCount.should.equal(1)
+        ctx.rclient.get.callCount.should.equal(2)
+        ctx.rclient.srem.callCount.should.equal(1)
+        ctx.rclient.srem.firstCall.args[1].should.equal('two')
       })
     })
 
     describe('when no user is supplied', function () {
-      it('should not produce an error', async function () {
-        await this.UserSessionsManager.promises._checkSessions(null)
+      it('should not produce an error', async function (ctx) {
+        await ctx.UserSessionsManager.promises._checkSessions(null)
       })
 
-      it('should not call redis methods', async function () {
-        await this.UserSessionsManager.promises._checkSessions(null)
-        this.rclient.smembers.callCount.should.equal(0)
-        this.rclient.get.callCount.should.equal(0)
+      it('should not call redis methods', async function (ctx) {
+        await ctx.UserSessionsManager.promises._checkSessions(null)
+        ctx.rclient.smembers.callCount.should.equal(0)
+        ctx.rclient.get.callCount.should.equal(0)
       })
     })
 
     describe('when one of the get operations produces an error', function () {
-      beforeEach(function () {
-        this.rclient.get.onCall(0).rejects(new Error('woops'))
-        this.rclient.get.onCall(1).resolves(null)
+      beforeEach(function (ctx) {
+        ctx.rclient.get.onCall(0).rejects(new Error('woops'))
+        ctx.rclient.get.onCall(1).resolves(null)
       })
 
-      it('should produce an error', async function () {
+      it('should produce an error', async function (ctx) {
         await expect(
-          this.UserSessionsManager.promises._checkSessions(this.user)
+          ctx.UserSessionsManager.promises._checkSessions(ctx.user)
         ).to.be.rejectedWith(Error)
       })
 
-      it('should call the right redis methods, bailing out early', async function () {
+      it('should call the right redis methods, bailing out early', async function (ctx) {
         try {
-          await this.UserSessionsManager.promises._checkSessions(this.user)
+          await ctx.UserSessionsManager.promises._checkSessions(ctx.user)
         } catch (err) {
           // Expected error
         }
-        this.rclient.smembers.callCount.should.equal(1)
-        this.rclient.get.callCount.should.equal(1)
-        this.rclient.srem.callCount.should.equal(0)
+        ctx.rclient.smembers.callCount.should.equal(1)
+        ctx.rclient.get.callCount.should.equal(1)
+        ctx.rclient.srem.callCount.should.equal(0)
       })
     })
   })

@@ -1,60 +1,67 @@
-const sinon = require('sinon')
+import { beforeAll, beforeEach, describe, it, vi, expect } from 'vitest'
+import sinon from 'sinon'
+import Errors from '../../../../app/src/Features/Errors/Errors.js'
+import tk from 'timekeeper'
 const modulePath = '../../../../app/src/Features/Docstore/DocstoreManager'
-const SandboxedModule = require('sandboxed-module')
-const { expect } = require('chai')
-const Errors = require('../../../../app/src/Features/Errors/Errors')
-const tk = require('timekeeper')
+
+vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
+  vi.importActual('../../../../app/src/Features/Errors/Errors.js')
+)
 
 describe('DocstoreManager', function () {
-  beforeEach(function () {
-    this.requestDefaults = sinon.stub().returns((this.request = sinon.stub()))
-    this.DocstoreManager = SandboxedModule.require(modulePath, {
-      requires: {
-        request: {
-          defaults: this.requestDefaults,
-        },
-        '@overleaf/settings': (this.settings = {
-          apis: {
-            docstore: {
-              url: 'docstore.overleaf.com',
-            },
-          },
-        }),
+  beforeEach(async function (ctx) {
+    ctx.requestDefaults = sinon.stub().returns((ctx.request = sinon.stub()))
+
+    vi.doMock('request', () => ({
+      default: {
+        defaults: ctx.requestDefaults,
       },
-    })
+    }))
 
-    this.requestDefaults.calledWith({ jar: false }).should.equal(true)
+    vi.doMock('@overleaf/settings', () => ({
+      default: (ctx.settings = {
+        apis: {
+          docstore: {
+            url: 'docstore.overleaf.com',
+          },
+        },
+      }),
+    }))
 
-    this.project_id = 'project-id-123'
-    this.doc_id = 'doc-id-123'
+    ctx.DocstoreManager = (await import(modulePath)).default
+
+    ctx.requestDefaults.calledWith({ jar: false }).should.equal(true)
+
+    ctx.project_id = 'project-id-123'
+    ctx.doc_id = 'doc-id-123'
   })
 
   describe('deleteDoc', function () {
     describe('with a successful response code', function () {
       // for assertions on the deletedAt timestamp, we need to freeze the clock.
-      before(function () {
+      beforeAll(function () {
         tk.freeze(Date.now())
       })
-      after(function () {
+      afterAll(function () {
         tk.reset()
       })
 
-      beforeEach(async function () {
-        this.request.patch = sinon
+      beforeEach(async function (ctx) {
+        ctx.request.patch = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 }, '')
-        await this.DocstoreManager.promises.deleteDoc(
-          this.project_id,
-          this.doc_id,
+        await ctx.DocstoreManager.promises.deleteDoc(
+          ctx.project_id,
+          ctx.doc_id,
           'wombat.tex',
           new Date()
         )
       })
 
-      it('should delete the doc in the docstore api', function () {
-        this.request.patch
+      it('should delete the doc in the docstore api', function (ctx) {
+        ctx.request.patch
           .calledWith({
-            url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
+            url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/doc/${ctx.doc_id}`,
             json: { deleted: true, deletedAt: new Date(), name: 'wombat.tex' },
             timeout: 30 * 1000,
           })
@@ -63,19 +70,19 @@ describe('DocstoreManager', function () {
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function () {
-        this.request.patch = sinon
+      beforeEach(function (ctx) {
+        ctx.request.patch = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         let error
 
         try {
-          await this.DocstoreManager.promises.deleteDoc(
-            this.project_id,
-            this.doc_id,
+          await ctx.DocstoreManager.promises.deleteDoc(
+            ctx.project_id,
+            ctx.doc_id,
             'main.tex',
             new Date()
           )
@@ -92,18 +99,18 @@ describe('DocstoreManager', function () {
     })
 
     describe('with a missing (404) response code', function () {
-      beforeEach(function () {
-        this.request.patch = sinon
+      beforeEach(function (ctx) {
+        ctx.request.patch = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 404 }, '')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         let error
         try {
-          await this.DocstoreManager.promises.deleteDoc(
-            this.project_id,
-            this.doc_id,
+          await ctx.DocstoreManager.promises.deleteDoc(
+            ctx.project_id,
+            ctx.doc_id,
             'main.tex',
             new Date()
           )
@@ -121,73 +128,73 @@ describe('DocstoreManager', function () {
   })
 
   describe('updateDoc', function () {
-    beforeEach(function () {
-      this.lines = ['mock', 'doc', 'lines']
-      this.rev = 5
-      this.version = 42
-      this.ranges = { mock: 'ranges' }
-      this.modified = true
+    beforeEach(function (ctx) {
+      ctx.lines = ['mock', 'doc', 'lines']
+      ctx.rev = 5
+      ctx.version = 42
+      ctx.ranges = { mock: 'ranges' }
+      ctx.modified = true
     })
 
     describe('with a successful response code', async function () {
-      beforeEach(async function () {
-        this.request.post = sinon
+      beforeEach(async function (ctx) {
+        ctx.request.post = sinon
           .stub()
           .callsArgWith(
             1,
             null,
             { statusCode: 204 },
-            { modified: this.modified, rev: this.rev }
+            { modified: ctx.modified, rev: ctx.rev }
           )
-        this.updateDocResponse = await this.DocstoreManager.promises.updateDoc(
-          this.project_id,
-          this.doc_id,
-          this.lines,
-          this.version,
-          this.ranges
+        ctx.updateDocResponse = await ctx.DocstoreManager.promises.updateDoc(
+          ctx.project_id,
+          ctx.doc_id,
+          ctx.lines,
+          ctx.version,
+          ctx.ranges
         )
       })
 
-      it('should update the doc in the docstore api', function () {
-        this.request.post
+      it('should update the doc in the docstore api', function (ctx) {
+        ctx.request.post
           .calledWith({
-            url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
+            url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/doc/${ctx.doc_id}`,
             timeout: 30 * 1000,
             json: {
-              lines: this.lines,
-              version: this.version,
-              ranges: this.ranges,
+              lines: ctx.lines,
+              version: ctx.version,
+              ranges: ctx.ranges,
             },
           })
           .should.equal(true)
       })
 
-      it('should return the modified status and revision', function () {
-        expect(this.updateDocResponse).to.haveOwnProperty(
+      it('should return the modified status and revision', function (ctx) {
+        expect(ctx.updateDocResponse).to.haveOwnProperty(
           'modified',
-          this.modified
+          ctx.modified
         )
-        expect(this.updateDocResponse).to.haveOwnProperty('rev', this.rev)
+        expect(ctx.updateDocResponse).to.haveOwnProperty('rev', ctx.rev)
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function () {
-        this.request.post = sinon
+      beforeEach(function (ctx) {
+        ctx.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         let error
 
         try {
-          await this.DocstoreManager.promises.updateDoc(
-            this.project_id,
-            this.doc_id,
-            this.lines,
-            this.version,
-            this.ranges
+          await ctx.DocstoreManager.promises.updateDoc(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.lines,
+            ctx.version,
+            ctx.ranges
           )
         } catch (err) {
           error = err
@@ -203,59 +210,56 @@ describe('DocstoreManager', function () {
   })
 
   describe('getDoc', function () {
-    beforeEach(function () {
-      this.doc = {
-        lines: (this.lines = ['mock', 'doc', 'lines']),
-        rev: (this.rev = 5),
-        version: (this.version = 42),
-        ranges: (this.ranges = { mock: 'ranges' }),
+    beforeEach(function (ctx) {
+      ctx.doc = {
+        lines: (ctx.lines = ['mock', 'doc', 'lines']),
+        rev: (ctx.rev = 5),
+        version: (ctx.version = 42),
+        ranges: (ctx.ranges = { mock: 'ranges' }),
       }
     })
 
     describe('with a successful response code', function () {
-      beforeEach(async function () {
-        this.request.get = sinon
+      beforeEach(async function (ctx) {
+        ctx.request.get = sinon
           .stub()
-          .callsArgWith(1, null, { statusCode: 204 }, this.doc)
-        this.getDocResponse = await this.DocstoreManager.promises.getDoc(
-          this.project_id,
-          this.doc_id
+          .callsArgWith(1, null, { statusCode: 204 }, ctx.doc)
+        ctx.getDocResponse = await ctx.DocstoreManager.promises.getDoc(
+          ctx.project_id,
+          ctx.doc_id
         )
       })
 
-      it('should get the doc from the docstore api', function () {
-        this.request.get.should.have.been.calledWith({
-          url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
+      it('should get the doc from the docstore api', function (ctx) {
+        ctx.request.get.should.have.been.calledWith({
+          url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/doc/${ctx.doc_id}`,
           timeout: 30 * 1000,
           json: true,
         })
       })
 
-      it('should resolve with the lines, version and rev', function () {
-        expect(this.getDocResponse).to.eql({
-          lines: this.lines,
-          rev: this.rev,
-          version: this.version,
-          ranges: this.ranges,
+      it('should resolve with the lines, version and rev', function (ctx) {
+        expect(ctx.getDocResponse).to.eql({
+          lines: ctx.lines,
+          rev: ctx.rev,
+          version: ctx.version,
+          ranges: ctx.ranges,
         })
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function () {
-        this.request.get = sinon
+      beforeEach(function (ctx) {
+        ctx.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         let error
 
         try {
-          await this.DocstoreManager.promises.getDoc(
-            this.project_id,
-            this.doc_id
-          )
+          await ctx.DocstoreManager.promises.getDoc(ctx.project_id, ctx.doc_id)
         } catch (err) {
           error = err
         }
@@ -269,53 +273,49 @@ describe('DocstoreManager', function () {
     })
 
     describe('with include_deleted=true', function () {
-      beforeEach(async function () {
-        this.request.get = sinon
+      beforeEach(async function (ctx) {
+        ctx.request.get = sinon
           .stub()
-          .callsArgWith(1, null, { statusCode: 204 }, this.doc)
-        this.getDocResponse = await this.DocstoreManager.promises.getDoc(
-          this.project_id,
-          this.doc_id,
+          .callsArgWith(1, null, { statusCode: 204 }, ctx.doc)
+        ctx.getDocResponse = await ctx.DocstoreManager.promises.getDoc(
+          ctx.project_id,
+          ctx.doc_id,
           { include_deleted: true }
         )
       })
 
-      it('should get the doc from the docstore api (including deleted)', function () {
-        this.request.get.should.have.been.calledWith({
-          url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}`,
+      it('should get the doc from the docstore api (including deleted)', function (ctx) {
+        ctx.request.get.should.have.been.calledWith({
+          url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/doc/${ctx.doc_id}`,
           qs: { include_deleted: 'true' },
           timeout: 30 * 1000,
           json: true,
         })
       })
 
-      it('should resolve with the lines, version and rev', function () {
-        expect(this.getDocResponse).to.eql({
-          lines: this.lines,
-          rev: this.rev,
-          version: this.version,
-          ranges: this.ranges,
+      it('should resolve with the lines, version and rev', function (ctx) {
+        expect(ctx.getDocResponse).to.eql({
+          lines: ctx.lines,
+          rev: ctx.rev,
+          version: ctx.version,
+          ranges: ctx.ranges,
         })
       })
     })
 
     describe('with peek=true', function () {
-      beforeEach(async function () {
-        this.request.get = sinon
+      beforeEach(async function (ctx) {
+        ctx.request.get = sinon
           .stub()
-          .callsArgWith(1, null, { statusCode: 204 }, this.doc)
-        await this.DocstoreManager.promises.getDoc(
-          this.project_id,
-          this.doc_id,
-          {
-            peek: true,
-          }
-        )
+          .callsArgWith(1, null, { statusCode: 204 }, ctx.doc)
+        await ctx.DocstoreManager.promises.getDoc(ctx.project_id, ctx.doc_id, {
+          peek: true,
+        })
       })
 
-      it('should call the docstore peek url', function () {
-        this.request.get.should.have.been.calledWith({
-          url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc/${this.doc_id}/peek`,
+      it('should call the docstore peek url', function (ctx) {
+        ctx.request.get.should.have.been.calledWith({
+          url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/doc/${ctx.doc_id}/peek`,
           timeout: 30 * 1000,
           json: true,
         })
@@ -323,20 +323,17 @@ describe('DocstoreManager', function () {
     })
 
     describe('with a missing (404) response code', function () {
-      beforeEach(function () {
-        this.request.get = sinon
+      beforeEach(function (ctx) {
+        ctx.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 404 }, '')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         let error
 
         try {
-          await this.DocstoreManager.promises.getDoc(
-            this.project_id,
-            this.doc_id
-          )
+          await ctx.DocstoreManager.promises.getDoc(ctx.project_id, ctx.doc_id)
         } catch (err) {
           error = err
         }
@@ -350,47 +347,47 @@ describe('DocstoreManager', function () {
   describe('getAllDocs', function () {
     describe('with a successful response code', function () {
       let getAllDocsResult
-      beforeEach(async function () {
-        this.request.get = sinon
+      beforeEach(async function (ctx) {
+        ctx.request.get = sinon
           .stub()
           .callsArgWith(
             1,
             null,
             { statusCode: 204 },
-            (this.docs = [{ _id: 'mock-doc-id' }])
+            (ctx.docs = [{ _id: 'mock-doc-id' }])
           )
-        getAllDocsResult = await this.DocstoreManager.promises.getAllDocs(
-          this.project_id
+        getAllDocsResult = await ctx.DocstoreManager.promises.getAllDocs(
+          ctx.project_id
         )
       })
 
-      it('should get all the project docs in the docstore api', function () {
-        this.request.get
+      it('should get all the project docs in the docstore api', function (ctx) {
+        ctx.request.get
           .calledWith({
-            url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc`,
+            url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/doc`,
             timeout: 30 * 1000,
             json: true,
           })
           .should.equal(true)
       })
 
-      it('should return the docs', function () {
-        expect(getAllDocsResult).to.eql(this.docs)
+      it('should return the docs', function (ctx) {
+        expect(getAllDocsResult).to.eql(ctx.docs)
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function () {
-        this.request.get = sinon
+      beforeEach(function (ctx) {
+        ctx.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         let error
 
         try {
-          await this.DocstoreManager.promises.getAllDocs(this.project_id)
+          await ctx.DocstoreManager.promises.getAllDocs(ctx.project_id)
         } catch (err) {
           error = err
         }
@@ -407,40 +404,40 @@ describe('DocstoreManager', function () {
   describe('getAllDeletedDocs', function () {
     describe('with a successful response code', function () {
       let getAllDeletedDocsResponse
-      beforeEach(async function () {
-        this.docs = [{ _id: 'mock-doc-id', name: 'foo.tex' }]
-        this.request.get = sinon
+      beforeEach(async function (ctx) {
+        ctx.docs = [{ _id: 'mock-doc-id', name: 'foo.tex' }]
+        ctx.request.get = sinon
           .stub()
-          .callsArgWith(1, null, { statusCode: 200 }, this.docs)
+          .callsArgWith(1, null, { statusCode: 200 }, ctx.docs)
         getAllDeletedDocsResponse =
-          await this.DocstoreManager.promises.getAllDeletedDocs(this.project_id)
+          await ctx.DocstoreManager.promises.getAllDeletedDocs(ctx.project_id)
       })
 
-      it('should get all the project docs in the docstore api', function () {
-        this.request.get.should.have.been.calledWith({
-          url: `${this.settings.apis.docstore.url}/project/${this.project_id}/doc-deleted`,
+      it('should get all the project docs in the docstore api', function (ctx) {
+        ctx.request.get.should.have.been.calledWith({
+          url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/doc-deleted`,
           timeout: 30 * 1000,
           json: true,
         })
       })
 
-      it('should resolve with the docs', function () {
-        expect(getAllDeletedDocsResponse).to.eql(this.docs)
+      it('should resolve with the docs', function (ctx) {
+        expect(getAllDeletedDocsResponse).to.eql(ctx.docs)
       })
     })
 
     describe('with an error', function () {
-      beforeEach(async function () {
-        this.request.get = sinon
+      beforeEach(async function (ctx) {
+        ctx.request.get = sinon
           .stub()
           .callsArgWith(1, new Error('connect failed'))
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         let error
 
         try {
-          await this.DocstoreManager.promises.getAllDocs(this.project_id)
+          await ctx.DocstoreManager.promises.getAllDocs(ctx.project_id)
         } catch (err) {
           error = err
         }
@@ -451,17 +448,17 @@ describe('DocstoreManager', function () {
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function () {
-        this.request.get = sinon
+      beforeEach(function (ctx) {
+        ctx.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 })
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         let error
 
         try {
-          await this.DocstoreManager.promises.getAllDocs(this.project_id)
+          await ctx.DocstoreManager.promises.getAllDocs(ctx.project_id)
         } catch (err) {
           error = err
         }
@@ -478,47 +475,47 @@ describe('DocstoreManager', function () {
   describe('getAllRanges', function () {
     describe('with a successful response code', function () {
       let getAllRangesResult
-      beforeEach(async function () {
-        this.request.get = sinon
+      beforeEach(async function (ctx) {
+        ctx.request.get = sinon
           .stub()
           .callsArgWith(
             1,
             null,
             { statusCode: 204 },
-            (this.docs = [{ _id: 'mock-doc-id', ranges: 'mock-ranges' }])
+            (ctx.docs = [{ _id: 'mock-doc-id', ranges: 'mock-ranges' }])
           )
-        getAllRangesResult = await this.DocstoreManager.promises.getAllRanges(
-          this.project_id
+        getAllRangesResult = await ctx.DocstoreManager.promises.getAllRanges(
+          ctx.project_id
         )
       })
 
-      it('should get all the project doc ranges in the docstore api', function () {
-        this.request.get
+      it('should get all the project doc ranges in the docstore api', function (ctx) {
+        ctx.request.get
           .calledWith({
-            url: `${this.settings.apis.docstore.url}/project/${this.project_id}/ranges`,
+            url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/ranges`,
             timeout: 30 * 1000,
             json: true,
           })
           .should.equal(true)
       })
 
-      it('should return the docs', async function () {
-        expect(getAllRangesResult).to.eql(this.docs)
+      it('should return the docs', async function (ctx) {
+        expect(getAllRangesResult).to.eql(ctx.docs)
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function () {
-        this.request.get = sinon
+      beforeEach(function (ctx) {
+        ctx.request.get = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 }, '')
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         let error
 
         try {
-          await this.DocstoreManager.promises.getAllRanges(this.project_id)
+          await ctx.DocstoreManager.promises.getAllRanges(ctx.project_id)
         } catch (err) {
           error = err
         }
@@ -534,31 +531,31 @@ describe('DocstoreManager', function () {
 
   describe('archiveProject', function () {
     describe('with a successful response code', function () {
-      beforeEach(function () {
-        this.request.post = sinon
+      beforeEach(function (ctx) {
+        ctx.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 })
       })
 
-      it('should resolve', async function () {
+      it('should resolve', async function (ctx) {
         await expect(
-          this.DocstoreManager.promises.archiveProject(this.project_id)
+          ctx.DocstoreManager.promises.archiveProject(ctx.project_id)
         ).to.eventually.be.fulfilled
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function () {
-        this.request.post = sinon
+      beforeEach(function (ctx) {
+        ctx.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 })
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         let error
 
         try {
-          await this.DocstoreManager.promises.archiveProject(this.project_id)
+          await ctx.DocstoreManager.promises.archiveProject(ctx.project_id)
         } catch (err) {
           error = err
         }
@@ -574,31 +571,31 @@ describe('DocstoreManager', function () {
 
   describe('unarchiveProject', function () {
     describe('with a successful response code', function () {
-      beforeEach(function () {
-        this.request.post = sinon
+      beforeEach(function (ctx) {
+        ctx.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 })
       })
 
-      it('should resolve', async function () {
+      it('should resolve', async function (ctx) {
         await expect(
-          this.DocstoreManager.promises.unarchiveProject(this.project_id)
+          ctx.DocstoreManager.promises.unarchiveProject(ctx.project_id)
         ).to.eventually.be.fulfilled
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function () {
-        this.request.post = sinon
+      beforeEach(function (ctx) {
+        ctx.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 })
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         let error
 
         try {
-          await this.DocstoreManager.promises.unarchiveProject(this.project_id)
+          await ctx.DocstoreManager.promises.unarchiveProject(ctx.project_id)
         } catch (err) {
           error = err
         }
@@ -614,31 +611,31 @@ describe('DocstoreManager', function () {
 
   describe('destroyProject', function () {
     describe('with a successful response code', function () {
-      beforeEach(function () {
-        this.request.post = sinon
+      beforeEach(function (ctx) {
+        ctx.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 204 })
       })
 
-      it('should resolve', async function () {
+      it('should resolve', async function (ctx) {
         await expect(
-          this.DocstoreManager.promises.destroyProject(this.project_id)
+          ctx.DocstoreManager.promises.destroyProject(ctx.project_id)
         ).to.eventually.be.fulfilled
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function () {
-        this.request.post = sinon
+      beforeEach(function (ctx) {
+        ctx.request.post = sinon
           .stub()
           .callsArgWith(1, null, { statusCode: 500 })
       })
 
-      it('should reject with an error', async function () {
+      it('should reject with an error', async function (ctx) {
         let error
 
         try {
-          await this.DocstoreManager.promises.destroyProject(this.project_id)
+          await ctx.DocstoreManager.promises.destroyProject(ctx.project_id)
         } catch (err) {
           error = err
         }

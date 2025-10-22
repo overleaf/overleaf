@@ -1,13 +1,7 @@
-const sinon = require('sinon')
-const { expect } = require('chai')
-const path = require('path')
-const CollaboratorsInviteHelper = require(
-  path.join(
-    __dirname,
-    '/../../../../app/src/Features/Collaborators/CollaboratorsInviteHelper'
-  )
-)
-const Crypto = require('crypto')
+import sinon from 'sinon'
+import { expect } from 'vitest'
+import CollaboratorsInviteHelper from '../../../../app/src/Features/Collaborators/CollaboratorsInviteHelper.mjs'
+import Crypto from 'node:crypto'
 
 describe('CollaboratorsInviteHelper', function () {
   it('should generate a HMAC token', function () {

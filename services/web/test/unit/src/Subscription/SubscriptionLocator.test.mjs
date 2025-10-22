@@ -1,14 +1,13 @@
-const SandboxedModule = require('sandboxed-module')
-const sinon = require('sinon')
+import { vi, expect } from 'vitest'
+import sinon from 'sinon'
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionLocator'
-const { expect } = require('chai')
 
 describe('Subscription Locator Tests', function () {
-  beforeEach(function () {
-    this.user = { _id: '5208dd34438842e2db333333' }
-    this.subscription = { hello: 'world' }
-    this.Subscription = {
+  beforeEach(async function (ctx) {
+    ctx.user = { _id: '5208dd34438842e2db333333' }
+    ctx.subscription = { hello: 'world' }
+    ctx.Subscription = {
       findOne: sinon.stub().returns({
         exec: sinon.stub().resolves(),
       }),
@@ -21,7 +20,7 @@ describe('Subscription Locator Tests', function () {
         exec: sinon.stub().resolves(),
       }),
     }
-    this.DeletedSubscription = {
+    ctx.DeletedSubscription = {
       findOne: sinon.stub().returns({
         exec: sinon.stub().resolves(),
       }),
@@ -30,63 +29,69 @@ describe('Subscription Locator Tests', function () {
       }),
     }
 
-    this.SubscriptionLocator = SandboxedModule.require(modulePath, {
-      requires: {
-        './GroupPlansData': {},
-        '../../models/Subscription': {
-          Subscription: this.Subscription,
-        },
-        '../../models/DeletedSubscription': {
-          DeletedSubscription: this.DeletedSubscription,
-        },
-        '../../models/SSOConfig': {
-          SSOConfig: this.SSOConfig,
-        },
-      },
-    })
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/GroupPlansData',
+      () => ({
+        default: {},
+      })
+    )
+
+    vi.doMock('../../../../app/src/models/Subscription', () => ({
+      Subscription: ctx.Subscription,
+    }))
+
+    vi.doMock('../../../../app/src/models/DeletedSubscription', () => ({
+      DeletedSubscription: ctx.DeletedSubscription,
+    }))
+
+    vi.doMock('../../../../app/src/models/SSOConfig', () => ({
+      SSOConfig: ctx.SSOConfig,
+    }))
+
+    ctx.SubscriptionLocator = (await import(modulePath)).default
   })
 
   describe('finding users subscription', function () {
-    it('should send the users features', async function () {
-      this.Subscription.findOne.returns({
-        exec: sinon.stub().resolves(this.subscription),
+    it('should send the users features', async function (ctx) {
+      ctx.Subscription.findOne.returns({
+        exec: sinon.stub().resolves(ctx.subscription),
       })
       const subscription =
-        await this.SubscriptionLocator.promises.getUsersSubscription(this.user)
-      this.Subscription.findOne
-        .calledWith({ admin_id: this.user._id })
+        await ctx.SubscriptionLocator.promises.getUsersSubscription(ctx.user)
+      ctx.Subscription.findOne
+        .calledWith({ admin_id: ctx.user._id })
         .should.equal(true)
-      subscription.should.equal(this.subscription)
+      subscription.should.equal(ctx.subscription)
     })
 
-    it('should error if not found', async function () {
-      this.Subscription.findOne.returns({
+    it('should error if not found', async function (ctx) {
+      ctx.Subscription.findOne.returns({
         exec: sinon.stub().rejects('not found'),
       })
       await expect(
-        this.SubscriptionLocator.promises.getUsersSubscription(this.user)
+        ctx.SubscriptionLocator.promises.getUsersSubscription(ctx.user)
       ).to.be.rejected
     })
 
-    it('should take a user id rather than the user object', async function () {
-      this.Subscription.findOne.returns({
-        exec: sinon.stub().resolves(this.subscription),
+    it('should take a user id rather than the user object', async function (ctx) {
+      ctx.Subscription.findOne.returns({
+        exec: sinon.stub().resolves(ctx.subscription),
       })
       const subscription =
-        await this.SubscriptionLocator.promises.getUsersSubscription(
-          this.user._id
+        await ctx.SubscriptionLocator.promises.getUsersSubscription(
+          ctx.user._id
         )
-      this.Subscription.findOne
-        .calledWith({ admin_id: this.user._id })
+      ctx.Subscription.findOne
+        .calledWith({ admin_id: ctx.user._id })
         .should.equal(true)
-      subscription.should.equal(this.subscription)
+      subscription.should.equal(ctx.subscription)
     })
   })
 
   describe('getUserSubscriptionStatus', function () {
-    it('should return no active personal or group subscription when no user is passed', async function () {
+    it('should return no active personal or group subscription when no user is passed', async function (ctx) {
       const subscriptionStatus =
-        await this.SubscriptionLocator.promises.getUserSubscriptionStatus(
+        await ctx.SubscriptionLocator.promises.getUserSubscriptionStatus(
           undefined
         )
       expect(subscriptionStatus).to.deep.equal({
@@ -95,10 +100,10 @@ describe('Subscription Locator Tests', function () {
       })
     })
 
-    it('should return no active personal or group subscription when the user has no subscription', async function () {
+    it('should return no active personal or group subscription when the user has no subscription', async function (ctx) {
       const subscriptionStatus =
-        await this.SubscriptionLocator.promises.getUserSubscriptionStatus(
-          this.user._id
+        await ctx.SubscriptionLocator.promises.getUserSubscriptionStatus(
+          ctx.user._id
         )
       expect(subscriptionStatus).to.deep.equal({
         personal: false,
@@ -106,8 +111,8 @@ describe('Subscription Locator Tests', function () {
       })
     })
 
-    it('should return active personal subscription', async function () {
-      this.Subscription.findOne.returns({
+    it('should return active personal subscription', async function (ctx) {
+      ctx.Subscription.findOne.returns({
         exec: sinon.stub().resolves({
           recurlyStatus: {
             state: 'active',
@@ -115,14 +120,14 @@ describe('Subscription Locator Tests', function () {
         }),
       })
       const subscriptionStatus =
-        await this.SubscriptionLocator.promises.getUserSubscriptionStatus(
-          this.user._id
+        await ctx.SubscriptionLocator.promises.getUserSubscriptionStatus(
+          ctx.user._id
         )
       expect(subscriptionStatus).to.deep.equal({ personal: true, group: false })
     })
 
-    it('should return active group subscription when member of a group plan', async function () {
-      this.Subscription.find.returns({
+    it('should return active group subscription when member of a group plan', async function (ctx) {
+      ctx.Subscription.find.returns({
         populate: sinon.stub().returns({
           populate: sinon.stub().returns({
             exec: sinon.stub().resolves([
@@ -137,14 +142,14 @@ describe('Subscription Locator Tests', function () {
         }),
       })
       const subscriptionStatus =
-        await this.SubscriptionLocator.promises.getUserSubscriptionStatus(
-          this.user._id
+        await ctx.SubscriptionLocator.promises.getUserSubscriptionStatus(
+          ctx.user._id
         )
       expect(subscriptionStatus).to.deep.equal({ personal: false, group: true })
     })
 
-    it('should return active group subscription when owner of a group plan', async function () {
-      this.Subscription.findOne.returns({
+    it('should return active group subscription when owner of a group plan', async function (ctx) {
+      ctx.Subscription.findOne.returns({
         exec: sinon.stub().resolves({
           recurlyStatus: {
             state: 'active',
@@ -153,14 +158,14 @@ describe('Subscription Locator Tests', function () {
         }),
       })
       const subscriptionStatus =
-        await this.SubscriptionLocator.promises.getUserSubscriptionStatus(
-          this.user._id
+        await ctx.SubscriptionLocator.promises.getUserSubscriptionStatus(
+          ctx.user._id
         )
       expect(subscriptionStatus).to.deep.equal({ personal: false, group: true })
     })
 
-    it('should return active personal and group subscription when has personal subscription and member of a group', async function () {
-      this.Subscription.find.returns({
+    it('should return active personal and group subscription when has personal subscription and member of a group', async function (ctx) {
+      ctx.Subscription.find.returns({
         populate: sinon.stub().returns({
           populate: sinon.stub().returns({
             exec: sinon.stub().resolves([
@@ -174,7 +179,7 @@ describe('Subscription Locator Tests', function () {
           }),
         }),
       })
-      this.Subscription.findOne.returns({
+      ctx.Subscription.findOne.returns({
         exec: sinon.stub().resolves({
           recurlyStatus: {
             state: 'active',
@@ -182,8 +187,8 @@ describe('Subscription Locator Tests', function () {
         }),
       })
       const subscriptionStatus =
-        await this.SubscriptionLocator.promises.getUserSubscriptionStatus(
-          this.user._id
+        await ctx.SubscriptionLocator.promises.getUserSubscriptionStatus(
+          ctx.user._id
         )
       expect(subscriptionStatus).to.deep.equal({ personal: true, group: true })
     })
