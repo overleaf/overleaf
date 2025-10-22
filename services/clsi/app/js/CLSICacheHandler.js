@@ -42,6 +42,8 @@ function getShard(projectId) {
  * @param {string} editorId
  * @param {[{path: string}]} outputFiles
  * @param {string} compileGroup
+ * @param {Record<string, number>} stats
+ * @param {Record<string, number>} timings
  * @param {Record<string, any>} options
  * @return {string | undefined}
  */
@@ -52,6 +54,8 @@ function notifyCLSICacheAboutBuild({
   editorId,
   outputFiles,
   compileGroup,
+  stats,
+  timings,
   options,
 }) {
   if (!Settings.apis.clsiCache.enabled) return undefined
@@ -72,6 +76,8 @@ function notifyCLSICacheAboutBuild({
         downloadHost: Settings.apis.clsi.downloadHost,
         clsiServerId: Settings.apis.clsi.clsiServerId,
         compileGroup,
+        stats,
+        timings,
         options,
       })
     )

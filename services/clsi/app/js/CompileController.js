@@ -125,6 +125,8 @@ function compile(req, res, next) {
                 editorId: request.editorId,
                 outputFiles,
                 compileGroup: request.compileGroup,
+                stats,
+                timings,
                 options: {
                   compiler: request.compiler,
                   draft: request.draft,

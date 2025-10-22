@@ -107,7 +107,16 @@ async function tryGetLatestCompileResult(projectId, userId, signal) {
   const [, editorId, buildId] = metaLocation.match(
     /\/build\/([a-f0-9-]+?)-([a-f0-9]+-[a-f0-9]+)\//
   )
-  const { ranges, contentId, clsiServerId, compileGroup, size, options } = meta
+  const {
+    ranges,
+    contentId,
+    clsiServerId,
+    compileGroup,
+    size,
+    options,
+    stats,
+    timings,
+  } = meta
 
   let baseURL = `/project/${projectId}`
   if (userId) {
@@ -150,6 +159,8 @@ async function tryGetLatestCompileResult(projectId, userId, signal) {
     clsiServerId,
     clsiCacheShard,
     options,
+    stats,
+    timings,
   }
 }
 

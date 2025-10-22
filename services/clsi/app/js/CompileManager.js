@@ -561,6 +561,13 @@ async function _runSynctex(projectId, userId, command, opts) {
       let downloadedFromCache = false
       try {
         await _checkFileExists(directory, 'output.synctex.gz')
+        if (compileFromClsiCache) {
+          try {
+            await _checkFileExists(directory, 'output.log')
+          } catch (err) {
+            if (err instanceof Errors.NotFoundError) downloadedFromCache = true
+          }
+        }
       } catch (err) {
         if (
           err instanceof Errors.NotFoundError &&

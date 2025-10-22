@@ -123,6 +123,8 @@ async function getLatestBuildFromCache(req, res) {
       clsiServerId,
       clsiCacheShard,
       options,
+      stats,
+      timings,
     } = await ClsiCacheManager.getLatestCompileResult(projectId, userId)
 
     let { pdfCachingMinChunkSize, pdfDownloadDomain } =
@@ -138,6 +140,8 @@ async function getLatestBuildFromCache(req, res) {
       pdfDownloadDomain,
       pdfCachingMinChunkSize,
       options,
+      stats,
+      timings,
     })
   } catch (err) {
     if (err instanceof NotFoundError) {
