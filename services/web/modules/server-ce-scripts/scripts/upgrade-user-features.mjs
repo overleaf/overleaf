@@ -1,13 +1,10 @@
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import { db } from '../../../app/src/infrastructure/mongodb.js'
-import {
-  mergeFeatures,
-  compareFeatures,
-} from '../../../app/src/Features/Subscription/FeaturesHelper.js'
+import FeaturesHelper from '../../../app/src/Features/Subscription/FeaturesHelper.mjs'
 import { fileURLToPath } from 'url'
 const DRY_RUN = !process.argv.includes('--dry-run=false')
-
+const { mergeFeatures, compareFeatures } = FeaturesHelper
 async function main(DRY_RUN, defaultFeatures) {
   logger.info({ defaultFeatures }, 'default features')
 

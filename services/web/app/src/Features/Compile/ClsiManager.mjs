@@ -19,10 +19,10 @@ import ClsiFormatChecker from './ClsiFormatChecker.mjs'
 import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mjs'
 import Metrics from '@overleaf/metrics'
 import Errors from '../Errors/Errors.js'
-import ClsiCacheHandler from './ClsiCacheHandler.js'
+import ClsiCacheHandler from './ClsiCacheHandler.mjs'
 import HistoryManager from '../History/HistoryManager.mjs'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
-import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 
 const ClsiCookieManager = ClsiCookieManagerFactory(
   Settings.apis.clsi?.backendGroupName

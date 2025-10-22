@@ -3,13 +3,13 @@ import OError from '@overleaf/o-error'
 import { Project } from '../../models/Project.js'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import logger from '@overleaf/logger'
-import ContactManager from '../Contacts/ContactManager.js'
+import ContactManager from '../Contacts/ContactManager.mjs'
 import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
 import TpdsProjectFlusher from '../ThirdPartyDataStore/TpdsProjectFlusher.mjs'
 import CollaboratorsGetter from './CollaboratorsGetter.mjs'
 import Errors from '../Errors/Errors.js'
 import TpdsUpdateSender from '../ThirdPartyDataStore/TpdsUpdateSender.mjs'
-import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
+import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
 
 export default {
   userIsTokenMember: callbackify(userIsTokenMember),

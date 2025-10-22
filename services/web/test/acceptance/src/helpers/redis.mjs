@@ -1,8 +1,3 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -11,11 +6,8 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import Settings from '@overleaf/settings'
-
-import logger from '@overleaf/logger'
 import Async from 'async'
-import UserSessionsRedis from '../../../../app/src/Features/User/UserSessionsRedis.js'
+import UserSessionsRedis from '../../../../app/src/Features/User/UserSessionsRedis.mjs'
 
 // rclient = redis.createClient(Settings.redis.web)
 const rclient = UserSessionsRedis.client()
@@ -44,7 +36,7 @@ export default {
         return callback(null)
       }
       const actions = sessionKeys.map(k => cb => rclient.del(k, err => cb(err)))
-      return Async.series(actions, (err, results) =>
+      return Async.series(actions, () =>
         rclient.srem(sessionSetKey, sessionKeys, err => {
           if (err) {
             return callback(err)

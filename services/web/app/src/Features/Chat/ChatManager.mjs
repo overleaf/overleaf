@@ -1,5 +1,5 @@
 import UserInfoController from '../User/UserInfoController.mjs'
-import UserGetter from '../User/UserGetter.js'
+import UserGetter from '../User/UserGetter.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 
 async function injectUserInfoIntoThreads(threads) {

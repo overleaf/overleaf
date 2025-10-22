@@ -1,6 +1,6 @@
 import minimist from 'minimist'
-import ThirdPartyIdentityManager from '../app/src/Features/User/ThirdPartyIdentityManager.js'
-import UserGetter from '../app/src/Features/User/UserGetter.js'
+import ThirdPartyIdentityManager from '../app/src/Features/User/ThirdPartyIdentityManager.mjs'
+import UserGetter from '../app/src/Features/User/UserGetter.mjs'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 /**

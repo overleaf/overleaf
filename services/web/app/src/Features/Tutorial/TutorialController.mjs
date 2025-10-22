@@ -1,4 +1,4 @@
-import SessionManager from '../Authentication/SessionManager.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
 import TutorialHandler from './TutorialHandler.mjs'
 import { expressify } from '@overleaf/promise-utils'
 

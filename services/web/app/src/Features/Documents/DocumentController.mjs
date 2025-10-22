@@ -1,4 +1,4 @@
-import ChatApiHandler from '../Chat/ChatApiHandler.js'
+import ChatApiHandler from '../Chat/ChatApiHandler.mjs'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import ProjectLocator from '../Project/ProjectLocator.mjs'
 import ProjectEntityHandler from '../Project/ProjectEntityHandler.mjs'

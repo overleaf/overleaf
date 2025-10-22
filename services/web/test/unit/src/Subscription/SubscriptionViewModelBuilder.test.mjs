@@ -1,13 +1,14 @@
 import { vi, assert } from 'vitest'
 import sinon from 'sinon'
-import {
+import PaymentProviderEntities from '../../../../app/src/Features/Subscription/PaymentProviderEntities.mjs'
+import SubscriptionHelper from '../../../../app/src/Features/Subscription/SubscriptionHelper.js'
+
+const {
   PaymentProviderAccount,
   PaymentProviderSubscription,
   PaymentProviderSubscriptionAddOn,
   PaymentProviderSubscriptionChange,
-} from '../../../../app/src/Features/Subscription/PaymentProviderEntities.js'
-import SubscriptionHelper from '../../../../app/src/Features/Subscription/SubscriptionHelper.js'
-
+} = PaymentProviderEntities
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionViewModelBuilder.mjs'
 

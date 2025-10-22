@@ -1,7 +1,7 @@
-import EmailHandler from '../Email/EmailHandler.js'
-import UserGetter from '../User/UserGetter.js'
+import EmailHandler from '../Email/EmailHandler.mjs'
+import UserGetter from '../User/UserGetter.mjs'
 import './SubscriptionEmailBuilder.mjs'
-import PlansLocator from './PlansLocator.js'
+import PlansLocator from './PlansLocator.mjs'
 import Settings from '@overleaf/settings'
 
 const SubscriptionEmailHandler = {

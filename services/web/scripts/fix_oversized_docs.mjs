@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import minimist from 'minimist'
 import { ObjectId } from '../app/src/infrastructure/mongodb.js'
-import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
+import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.mjs'
 import FileStoreHandler from '../app/src/Features/FileStore/FileStoreHandler.mjs'
 import FileWriter from '../app/src/infrastructure/FileWriter.js'
 import ProjectEntityMongoUpdateHandler from '../app/src/Features/Project/ProjectEntityMongoUpdateHandler.mjs'

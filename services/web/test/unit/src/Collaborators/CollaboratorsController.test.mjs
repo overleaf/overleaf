@@ -116,25 +116,25 @@ describe('CollaboratorsController', function () {
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Errors/HttpErrorHandler.js',
+      '../../../../app/src/Features/Errors/HttpErrorHandler.mjs',
       () => ({
         default: ctx.HttpErrorHandler,
       })
     )
 
-    vi.doMock('../../../../app/src/Features/Tags/TagsHandler.js', () => ({
+    vi.doMock('../../../../app/src/Features/Tags/TagsHandler.mjs', () => ({
       default: ctx.TagsHandler,
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/Authentication/SessionManager.js',
+      '../../../../app/src/Features/Authentication/SessionManager.mjs',
       () => ({
         default: ctx.SessionManager,
       })
     )
 
     vi.doMock(
-      '../../../../app/src/Features/TokenAccess/TokenAccessHandler.js',
+      '../../../../app/src/Features/TokenAccess/TokenAccessHandler.mjs',
       () => ({
         default: ctx.TokenAccessHandler,
       })
@@ -152,7 +152,7 @@ describe('CollaboratorsController', function () {
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/SplitTests/SplitTestHandler.js',
+      '../../../../app/src/Features/SplitTests/SplitTestHandler.mjs',
       () => ({
         default: ctx.SplitTestHandler,
       })

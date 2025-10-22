@@ -1,5 +1,5 @@
 import { Subscription } from '../app/src/models/Subscription.js'
-import SubscriptionUpdater from '../app/src/Features/Subscription/SubscriptionUpdater.js'
+import SubscriptionUpdater from '../app/src/Features/Subscription/SubscriptionUpdater.mjs'
 import minimist from 'minimist'
 import mongodb from 'mongodb-legacy'
 

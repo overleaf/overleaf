@@ -1,7 +1,7 @@
 import Queues from '../../infrastructure/Queues.js'
-import EmailHandler from '../Email/EmailHandler.js'
-import UserUpdater from './UserUpdater.js'
-import UserGetter from './UserGetter.js'
+import EmailHandler from '../Email/EmailHandler.mjs'
+import UserUpdater from './UserUpdater.mjs'
+import UserGetter from './UserGetter.mjs'
 import Settings from '@overleaf/settings'
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000

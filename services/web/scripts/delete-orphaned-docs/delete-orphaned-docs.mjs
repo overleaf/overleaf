@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import minimist from 'minimist'
 import readline from 'node:readline'
 import { db, ObjectId } from '../../app/src/infrastructure/mongodb.js'
-import DocstoreManagerModule from '../../app/src/Features/Docstore/DocstoreManager.js'
+import DocstoreManagerModule from '../../app/src/Features/Docstore/DocstoreManager.mjs'
 
 const { promises: DocstoreManager } = DocstoreManagerModule
 

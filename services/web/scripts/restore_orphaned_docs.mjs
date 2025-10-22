@@ -1,6 +1,6 @@
 import ProjectEntityRestoreHandler from '../app/src/Features/Project/ProjectEntityRestoreHandler.mjs'
 import ProjectEntityHandler from '../app/src/Features/Project/ProjectEntityHandler.mjs'
-import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
+import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.mjs'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const ARGV = process.argv.slice(2)

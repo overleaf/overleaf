@@ -2,9 +2,9 @@
 
 import minimist from 'minimist'
 import process from 'node:process'
-import ChatApiHandler from '../app/src/Features/Chat/ChatApiHandler.js'
+import ChatApiHandler from '../app/src/Features/Chat/ChatApiHandler.mjs'
 import DocumentUpdaterHandler from '../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.mjs'
-import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
+import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.mjs'
 import HistoryManager from '../app/src/Features/History/HistoryManager.mjs'
 import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
 

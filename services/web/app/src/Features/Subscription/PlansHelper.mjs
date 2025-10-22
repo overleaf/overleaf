@@ -1,5 +1,5 @@
-import FeaturesHelper from './FeaturesHelper.js'
-import PlanLocator from './PlansLocator.js'
+import FeaturesHelper from './FeaturesHelper.mjs'
+import PlanLocator from './PlansLocator.mjs'
 
 export function isProfessionalPlan(planCode) {
   const plan = PlanLocator.findLocalPlanInSettings(planCode)

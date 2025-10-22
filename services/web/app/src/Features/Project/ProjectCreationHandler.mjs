@@ -13,9 +13,9 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { callbackify } from 'node:util'
 import _ from 'lodash'
-import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import TpdsUpdateSender from '../ThirdPartyDataStore/TpdsUpdateSender.mjs'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 
 const { ObjectId } = mongodb
 

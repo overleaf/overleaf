@@ -2,7 +2,7 @@ import { vi, expect } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
-import ProjectHelper from '../../../../app/src/Features/Project/ProjectHelper.js'
+import ProjectHelper from '../../../../app/src/Features/Project/ProjectHelper.mjs'
 
 const { ObjectId } = mongodb
 

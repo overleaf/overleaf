@@ -3,13 +3,13 @@ import logger from '@overleaf/logger'
 import mongodb from 'mongodb-legacy'
 
 import Errors from '../Errors/Errors.js'
-import HttpErrorHandler from '../Errors/HttpErrorHandler.js'
+import HttpErrorHandler from '../Errors/HttpErrorHandler.mjs'
 import AuthenticationController from '../Authentication/AuthenticationController.mjs'
-import SessionManager from '../Authentication/SessionManager.js'
-import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
+import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
-import UrlHelper from '../Helpers/UrlHelper.js'
+import UrlHelper from '../Helpers/UrlHelper.mjs'
 
 const { ObjectId } = mongodb
 

@@ -4,8 +4,9 @@ import mongodb from 'mongodb-legacy'
 import MockRequest from '../helpers/MockRequest.js'
 import MockResponse from '../helpers/MockResponse.js'
 import PrivilegeLevels from '../../../../app/src/Features/Authorization/PrivilegeLevels.js'
-import { getSafeRedirectPath } from '../../../../app/src/Features/Helpers/UrlHelper.js'
+import UrlHelper from '../../../../app/src/Features/Helpers/UrlHelper.mjs'
 
+const { getSafeRedirectPath } = UrlHelper
 const ObjectId = mongodb.ObjectId
 
 const MODULE_PATH =

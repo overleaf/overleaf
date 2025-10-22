@@ -1,6 +1,6 @@
 import { Subscription } from '../../app/src/models/Subscription.js'
-import RecurlyWrapper from '../../app/src/Features/Subscription/RecurlyWrapper.js'
-import SubscriptionUpdater from '../../app/src/Features/Subscription/SubscriptionUpdater.js'
+import RecurlyWrapper from '../../app/src/Features/Subscription/RecurlyWrapper.mjs'
+import SubscriptionUpdater from '../../app/src/Features/Subscription/SubscriptionUpdater.mjs'
 import minimist from 'minimist'
 import { setTimeout } from 'node:timers/promises'
 import util from 'node:util'

@@ -1,9 +1,9 @@
 import settings from '@overleaf/settings'
-import UserAuditLogHandler from '../User/UserAuditLogHandler.js'
-import UserGetter from '../User/UserGetter.js'
+import UserAuditLogHandler from '../User/UserAuditLogHandler.mjs'
+import UserGetter from '../User/UserGetter.mjs'
 import OneTimeTokenHandler from '../Security/OneTimeTokenHandler.js'
-import EmailHandler from '../Email/EmailHandler.js'
-import AuthenticationManager from '../Authentication/AuthenticationManager.js'
+import EmailHandler from '../Email/EmailHandler.mjs'
+import AuthenticationManager from '../Authentication/AuthenticationManager.mjs'
 import { callbackify, promisify } from 'node:util'
 import PermissionsManager from '../Authorization/PermissionsManager.mjs'
 

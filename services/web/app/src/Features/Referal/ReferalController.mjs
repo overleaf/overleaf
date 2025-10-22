@@ -1,5 +1,5 @@
 import ReferalHandler from './ReferalHandler.mjs'
-import SessionManager from '../Authentication/SessionManager.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
 
 export default {
   bonus(req, res, next) {

@@ -29,7 +29,7 @@ describe('ChatController', function () {
       default: ctx.settings,
     }))
 
-    vi.doMock('../../../../app/src/Features/Chat/ChatApiHandler.js', () => ({
+    vi.doMock('../../../../app/src/Features/Chat/ChatApiHandler.mjs', () => ({
       default: ctx.ChatApiHandler,
     }))
 
@@ -38,14 +38,14 @@ describe('ChatController', function () {
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/Editor/EditorRealTimeController.js',
+      '../../../../app/src/Features/Editor/EditorRealTimeController.mjs',
       () => ({
         default: ctx.EditorRealTimeController,
       })
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Authentication/SessionManager.js',
+      '../../../../app/src/Features/Authentication/SessionManager.mjs',
       () => ({
         default: ctx.SessionManager,
       })

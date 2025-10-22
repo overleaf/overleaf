@@ -1,22 +1,22 @@
 // @ts-check
 
-import RecurlyWrapper from './RecurlyWrapper.js'
+import RecurlyWrapper from './RecurlyWrapper.mjs'
 
-import RecurlyClient from './RecurlyClient.js'
+import RecurlyClient from './RecurlyClient.mjs'
 import { User } from '../../models/User.js'
 import logger from '@overleaf/logger'
 import SubscriptionHelper from './SubscriptionHelper.js'
-import SubscriptionUpdater from './SubscriptionUpdater.js'
-import SubscriptionLocator from './SubscriptionLocator.js'
+import SubscriptionUpdater from './SubscriptionUpdater.mjs'
+import SubscriptionLocator from './SubscriptionLocator.mjs'
 import LimitationsManager from './LimitationsManager.mjs'
-import EmailHandler from '../Email/EmailHandler.js'
+import EmailHandler from '../Email/EmailHandler.mjs'
 import { callbackify } from '@overleaf/promise-utils'
-import UserUpdater from '../User/UserUpdater.js'
+import UserUpdater from '../User/UserUpdater.mjs'
 import { IndeterminateInvoiceError } from '../Errors/Errors.js'
 import Modules from '../../infrastructure/Modules.js'
 
 /**
- * @import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities'
+ * @import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities.mjs'
  */
 
 async function validateNoSubscriptionInRecurly(userId) {

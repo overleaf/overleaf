@@ -1,9 +1,9 @@
 import BetaProgramHandler from './BetaProgramHandler.mjs'
 import OError from '@overleaf/o-error'
-import UserGetter from '../User/UserGetter.js'
+import UserGetter from '../User/UserGetter.mjs'
 import logger from '@overleaf/logger'
-import SessionManager from '../Authentication/SessionManager.js'
-import SplitTestSessionHandler from '../SplitTests/SplitTestSessionHandler.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
+import SplitTestSessionHandler from '../SplitTests/SplitTestSessionHandler.mjs'
 import { expressify } from '@overleaf/promise-utils'
 
 async function optIn(req, res) {

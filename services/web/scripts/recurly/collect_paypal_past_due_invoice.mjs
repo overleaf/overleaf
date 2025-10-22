@@ -1,4 +1,4 @@
-import RecurlyWrapper from '../../app/src/Features/Subscription/RecurlyWrapper.js'
+import RecurlyWrapper from '../../app/src/Features/Subscription/RecurlyWrapper.mjs'
 import minimist from 'minimist'
 import logger from '@overleaf/logger'
 import { fileURLToPath } from 'node:url'

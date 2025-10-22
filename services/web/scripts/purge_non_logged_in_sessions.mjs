@@ -1,6 +1,6 @@
 import RedisWrapper from '@overleaf/redis-wrapper'
 import Settings from '@overleaf/settings'
-import SessionManager from '../app/src/Features/Authentication/SessionManager.js'
+import SessionManager from '../app/src/Features/Authentication/SessionManager.mjs'
 import minimist from 'minimist'
 
 const redis = RedisWrapper.createClient(Settings.redis.websessions)

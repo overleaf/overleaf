@@ -1,4 +1,4 @@
-import SplitTestHandler from './SplitTestHandler.js'
+import SplitTestHandler from './SplitTestHandler.mjs'
 import logger from '@overleaf/logger'
 import { expressify } from '@overleaf/promise-utils'
 import Errors from '../Errors/Errors.js'

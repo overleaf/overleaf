@@ -1,4 +1,4 @@
-import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
+import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
 
 export default {
   indexAll(req, res, next) {

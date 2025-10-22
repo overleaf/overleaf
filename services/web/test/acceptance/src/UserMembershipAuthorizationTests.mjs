@@ -5,7 +5,7 @@ import Institution from './helpers/Institution.mjs'
 import Subscription from './helpers/Subscription.mjs'
 import Publisher from './helpers/Publisher.mjs'
 import sinon from 'sinon'
-import RecurlyClient from '../../../app/src/Features/Subscription/RecurlyClient.js'
+import RecurlyClient from '../../../app/src/Features/Subscription/RecurlyClient.mjs'
 
 describe('UserMembershipAuthorization', function () {
   beforeEach(function (done) {

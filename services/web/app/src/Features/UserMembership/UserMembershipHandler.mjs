@@ -4,7 +4,7 @@ import { Institution } from '../../models/Institution.js'
 import { Subscription } from '../../models/Subscription.js'
 import { Publisher } from '../../models/Publisher.js'
 import UserMembershipViewModel from './UserMembershipViewModel.mjs'
-import UserGetter from '../User/UserGetter.js'
+import UserGetter from '../User/UserGetter.mjs'
 import UserMembershipErrors from './UserMembershipErrors.mjs'
 
 const { ObjectId } = mongodb

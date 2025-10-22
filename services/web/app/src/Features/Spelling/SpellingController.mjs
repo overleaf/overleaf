@@ -1,6 +1,6 @@
 // @ts-check
 
-import SessionManager from '../Authentication/SessionManager.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
 import LearnedWordsManager from './LearnedWordsManager.mjs'
 import { z, validateReq } from '../../infrastructure/Validation.js'
 

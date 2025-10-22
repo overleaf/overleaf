@@ -42,11 +42,11 @@ describe('LaunchpadController', function () {
       })
     )
 
-    vi.doMock('../../../../../app/src/Features/Email/EmailHandler.js', () => ({
+    vi.doMock('../../../../../app/src/Features/Email/EmailHandler.mjs', () => ({
       default: (ctx.EmailHandler = { promises: {} }),
     }))
 
-    vi.doMock('../../../../../app/src/Features/User/UserGetter.js', () => ({
+    vi.doMock('../../../../../app/src/Features/User/UserGetter.mjs', () => ({
       default: (ctx.UserGetter = {
         promises: {},
       }),
@@ -64,14 +64,14 @@ describe('LaunchpadController', function () {
     )
 
     vi.doMock(
-      '../../../../../app/src/Features/Authentication/AuthenticationManager.js',
+      '../../../../../app/src/Features/Authentication/AuthenticationManager.mjs',
       () => ({
         default: (ctx.AuthenticationManager = {}),
       })
     )
 
     vi.doMock(
-      '../../../../../app/src/Features/Authentication/SessionManager.js',
+      '../../../../../app/src/Features/Authentication/SessionManager.mjs',
       () => ({
         default: (ctx.SessionManager = {
           getSessionUser: sinon.stub(),

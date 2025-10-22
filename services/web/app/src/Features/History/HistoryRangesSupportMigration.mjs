@@ -5,8 +5,8 @@ import OError from '@overleaf/o-error'
 import logger from '@overleaf/logger'
 import HistoryManager from '../History/HistoryManager.mjs'
 import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mjs'
-import DocstoreManager from '../Docstore/DocstoreManager.js'
-import ProjectOptionsHandler from '../Project/ProjectOptionsHandler.js'
+import DocstoreManager from '../Docstore/DocstoreManager.mjs'
+import ProjectOptionsHandler from '../Project/ProjectOptionsHandler.mjs'
 import mongodb from '../../infrastructure/mongodb.js'
 
 const { db, ObjectId, READ_PREFERENCE_SECONDARY } = mongodb

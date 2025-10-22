@@ -12,7 +12,7 @@
  */
 import AuthorizationManager from '../Authorization/AuthorizationManager.mjs'
 import ProjectLocator from '../Project/ProjectLocator.mjs'
-import DocstoreManager from '../Docstore/DocstoreManager.js'
+import DocstoreManager from '../Docstore/DocstoreManager.mjs'
 import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mjs'
 import _ from 'lodash'
 import LinkedFilesHandler from './LinkedFilesHandler.mjs'

@@ -1,7 +1,7 @@
 import { vi, expect } from 'vitest'
 import MockResponse from '../helpers/MockResponse.js'
 import MockRequest from '../helpers/MockRequest.js'
-const modulePath = '../../../../app/src/Features/Errors/HttpErrorHandler.js'
+const modulePath = '../../../../app/src/Features/Errors/HttpErrorHandler.mjs'
 
 describe('HttpErrorHandler', function () {
   beforeEach(async function (ctx) {

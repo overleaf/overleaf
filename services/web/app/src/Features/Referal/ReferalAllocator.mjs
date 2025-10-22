@@ -1,6 +1,6 @@
 import OError from '@overleaf/o-error'
 import { User } from '../../models/User.js'
-import FeaturesUpdater from '../Subscription/FeaturesUpdater.js'
+import FeaturesUpdater from '../Subscription/FeaturesUpdater.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 
 async function allocate(referalId, newUserId, referalSource, referalMedium) {

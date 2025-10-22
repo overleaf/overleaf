@@ -28,10 +28,10 @@ import minimist from 'minimist'
 import fs from 'node:fs'
 import { ObjectId } from '../app/src/infrastructure/mongodb.js'
 import pLimit from 'p-limit'
-import FeaturesUpdater from '../app/src/Features/Subscription/FeaturesUpdater.js'
-import FeaturesHelper from '../app/src/Features/Subscription/FeaturesHelper.js'
-import UserFeaturesUpdater from '../app/src/Features/Subscription/UserFeaturesUpdater.js'
-import UserGetter from '../app/src/Features/User/UserGetter.js'
+import FeaturesUpdater from '../app/src/Features/Subscription/FeaturesUpdater.mjs'
+import FeaturesHelper from '../app/src/Features/Subscription/FeaturesHelper.mjs'
+import UserFeaturesUpdater from '../app/src/Features/Subscription/UserFeaturesUpdater.mjs'
+import UserGetter from '../app/src/Features/User/UserGetter.mjs'
 
 const processLogger = {
   failed: [],

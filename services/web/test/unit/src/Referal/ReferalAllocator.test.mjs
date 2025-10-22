@@ -10,7 +10,7 @@ describe('ReferalAllocator', function () {
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/Subscription/FeaturesUpdater.js',
+      '../../../../app/src/Features/Subscription/FeaturesUpdater.mjs',
       () => ({
         default: (ctx.FeaturesUpdater = {}),
       })

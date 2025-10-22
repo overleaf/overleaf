@@ -93,11 +93,11 @@ describe('OwnershipTransferHandler', function () {
       Project: ctx.ProjectModel,
     }))
 
-    vi.doMock('../../../../app/src/Features/Tags/TagsHandler.js', () => ({
+    vi.doMock('../../../../app/src/Features/Tags/TagsHandler.mjs', () => ({
       default: ctx.TagsHandler,
     }))
 
-    vi.doMock('../../../../app/src/Features/User/UserGetter.js', () => ({
+    vi.doMock('../../../../app/src/Features/User/UserGetter.mjs', () => ({
       default: ctx.UserGetter,
     }))
 
@@ -115,7 +115,7 @@ describe('OwnershipTransferHandler', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/Features/Email/EmailHandler.js', () => ({
+    vi.doMock('../../../../app/src/Features/Email/EmailHandler.mjs', () => ({
       default: ctx.EmailHandler,
     }))
 

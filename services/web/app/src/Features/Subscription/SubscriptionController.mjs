@@ -1,40 +1,40 @@
 // @ts-check
 
-import SessionManager from '../Authentication/SessionManager.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
 import SubscriptionHandler from './SubscriptionHandler.mjs'
 import SubscriptionHelper from './SubscriptionHelper.js'
 import SubscriptionViewModelBuilder from './SubscriptionViewModelBuilder.mjs'
 import LimitationsManager from './LimitationsManager.mjs'
-import RecurlyWrapper from './RecurlyWrapper.js'
+import RecurlyWrapper from './RecurlyWrapper.mjs'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import GeoIpLookup from '../../infrastructure/GeoIpLookup.mjs'
-import FeaturesUpdater from './FeaturesUpdater.js'
+import FeaturesUpdater from './FeaturesUpdater.mjs'
 import GroupPlansData from './GroupPlansData.js'
-import V1SubscriptionManager from './V1SubscriptionManager.js'
-import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import V1SubscriptionManager from './V1SubscriptionManager.mjs'
+import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import RecurlyEventHandler from './RecurlyEventHandler.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import OError from '@overleaf/o-error'
 import Errors from './Errors.js'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 import AuthorizationManager from '../Authorization/AuthorizationManager.mjs'
 import Modules from '../../infrastructure/Modules.js'
 import async from 'async'
-import HttpErrorHandler from '../Errors/HttpErrorHandler.js'
-import RecurlyClient from './RecurlyClient.js'
+import HttpErrorHandler from '../Errors/HttpErrorHandler.mjs'
+import RecurlyClient from './RecurlyClient.mjs'
 import {
   AI_ADD_ON_CODE,
   subscriptionChangeIsAiAssistUpgrade,
 } from './AiHelper.js'
-import PlansLocator from './PlansLocator.js'
+import PlansLocator from './PlansLocator.mjs'
 import { User } from '../../models/User.js'
-import UserGetter from '../User/UserGetter.js'
+import UserGetter from '../User/UserGetter.mjs'
 import PermissionsManager from '../Authorization/PermissionsManager.mjs'
 import { sanitizeSessionUserForFrontEnd } from '../../infrastructure/FrontEndUser.mjs'
 import { z, validateReq } from '../../infrastructure/Validation.js'
 import { IndeterminateInvoiceError } from '../Errors/Errors.js'
-import SubscriptionLocator from './SubscriptionLocator.js'
+import SubscriptionLocator from './SubscriptionLocator.mjs'
 
 const {
   DuplicateAddOnError,
@@ -157,7 +157,7 @@ async function checkSubscriptionPauseStatus(user) {
 /**
  * @import { SubscriptionChangeDescription } from '../../../../types/subscription/subscription-change-preview'
  * @import { SubscriptionChangePreview } from '../../../../types/subscription/subscription-change-preview'
- * @import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities'
+ * @import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities.mjs'
  * @import { PaymentMethod } from './types'
  */
 

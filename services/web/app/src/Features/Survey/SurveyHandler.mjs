@@ -2,9 +2,9 @@
 import crypto from 'node:crypto'
 
 import SurveyCache from './SurveyCache.mjs'
-import SubscriptionLocator from '../Subscription/SubscriptionLocator.js'
+import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
 import { callbackify } from '@overleaf/promise-utils'
-import UserGetter from '../User/UserGetter.js'
+import UserGetter from '../User/UserGetter.mjs'
 
 /**
  * @import { Survey } from '../../../../types/project/dashboard/survey'

@@ -1,6 +1,6 @@
 import AuthenticationController from '../Authentication/AuthenticationController.mjs'
-import SessionManager from '../Authentication/SessionManager.js'
-import TokenAccessHandler from './TokenAccessHandler.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
+import TokenAccessHandler from './TokenAccessHandler.mjs'
 import Errors from '../Errors/Errors.js'
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
@@ -10,17 +10,18 @@ import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 import CollaboratorsInviteHandler from '../Collaborators/CollaboratorsInviteHandler.mjs'
 import CollaboratorsHandler from '../Collaborators/CollaboratorsHandler.mjs'
-import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
+import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
 import CollaboratorsGetter from '../Collaborators/CollaboratorsGetter.mjs'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
-import AsyncFormHelper from '../Helpers/AsyncFormHelper.js'
-import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import AsyncFormHelper from '../Helpers/AsyncFormHelper.mjs'
+import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
-import { getSafeAdminDomainRedirect } from '../Helpers/UrlHelper.js'
-import UserGetter from '../User/UserGetter.js'
+import UrlHelper from '../Helpers/UrlHelper.mjs'
+import UserGetter from '../User/UserGetter.mjs'
 import Settings from '@overleaf/settings'
 import LimitationsManager from '../Subscription/LimitationsManager.mjs'
 
+const { getSafeAdminDomainRedirect } = UrlHelper
 const { canRedirectToAdminDomain } = AdminAuthorizationHelper
 const orderedPrivilegeLevels = [
   PrivilegeLevels.NONE,

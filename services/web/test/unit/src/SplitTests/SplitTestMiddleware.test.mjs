@@ -8,7 +8,7 @@ const modulePath = '../../../../app/src/Features/SplitTests/SplitTestMiddleware'
 describe('SplitTestMiddleware', function () {
   beforeEach(async function (ctx) {
     vi.doMock(
-      '../../../../app/src/Features/SplitTests/SplitTestHandler.js',
+      '../../../../app/src/Features/SplitTests/SplitTestHandler.mjs',
       () => ({
         default: (ctx.SplitTestHandler = {
           promises: {

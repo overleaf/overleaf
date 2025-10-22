@@ -6,7 +6,7 @@ import fs from 'node:fs'
 // eslint-disable-next-line import/no-unresolved
 import * as csv from 'csv/sync'
 import minimist from 'minimist'
-import UserGetter from '../app/src/Features/User/UserGetter.js'
+import UserGetter from '../app/src/Features/User/UserGetter.mjs'
 import { db } from '../app/src/infrastructure/mongodb.js'
 import _ from 'lodash'
 import { scriptRunner } from './lib/ScriptRunner.mjs'

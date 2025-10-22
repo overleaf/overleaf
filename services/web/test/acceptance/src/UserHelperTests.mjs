@@ -1,4 +1,4 @@
-import AuthenticationManager from '../../../app/src/Features/Authentication/AuthenticationManager.js'
+import AuthenticationManager from '../../../app/src/Features/Authentication/AuthenticationManager.mjs'
 import UserHelper from './helpers/UserHelper.mjs'
 import Features from '../../../app/src/infrastructure/Features.js'
 import { expect } from 'chai'

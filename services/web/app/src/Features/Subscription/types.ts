@@ -1,6 +1,6 @@
 import {
   PaypalPaymentMethod,
   CreditCardPaymentMethod,
-} from './PaymentProviderEntities'
+} from './PaymentProviderEntities.mjs'
 
 export type PaymentMethod = PaypalPaymentMethod | CreditCardPaymentMethod

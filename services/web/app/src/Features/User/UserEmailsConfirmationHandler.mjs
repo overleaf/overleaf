@@ -1,13 +1,13 @@
 import EmailHelper from '../Helpers/EmailHelper.js'
-import EmailHandler from '../Email/EmailHandler.js'
+import EmailHandler from '../Email/EmailHandler.mjs'
 import OneTimeTokenHandler from '../Security/OneTimeTokenHandler.js'
 import settings from '@overleaf/settings'
 import Errors from '../Errors/Errors.js'
-import UserUpdater from './UserUpdater.js'
-import UserGetter from './UserGetter.js'
+import UserUpdater from './UserUpdater.mjs'
+import UserGetter from './UserGetter.mjs'
 import { callbackify } from 'node:util'
 import crypto from 'node:crypto'
-import SessionManager from '../Authentication/SessionManager.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
 
 // Reject email confirmation tokens after 90 days
 const TOKEN_EXPIRY_IN_S = 90 * 24 * 60 * 60

@@ -1,4 +1,4 @@
-import UserGetter from '../User/UserGetter.js'
+import UserGetter from '../User/UserGetter.mjs'
 import { isObjectIdInstance } from '../Helpers/Mongo.js'
 
 const UserMembershipViewModel = {

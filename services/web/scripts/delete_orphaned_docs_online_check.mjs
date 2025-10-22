@@ -1,4 +1,4 @@
-import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
+import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.mjs'
 import { promisify } from 'node:util'
 import mongodb from 'mongodb-legacy'
 import {

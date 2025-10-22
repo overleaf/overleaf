@@ -15,8 +15,8 @@ import {
 } from '@overleaf/fetch-utils'
 
 import settings from '@overleaf/settings'
-import SessionManager from '../Authentication/SessionManager.js'
-import UserGetter from '../User/UserGetter.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
+import UserGetter from '../User/UserGetter.mjs'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import Errors from '../Errors/Errors.js'
 import HistoryManager from './HistoryManager.mjs'

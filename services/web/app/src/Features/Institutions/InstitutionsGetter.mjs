@@ -1,7 +1,7 @@
 import { promisify, callbackify } from 'node:util'
-import UserGetter from '../User/UserGetter.js'
-import UserMembershipsHandler from '../UserMembership/UserMembershipsHandler.js'
-import UserMembershipEntityConfigs from '../UserMembership/UserMembershipEntityConfigs.js'
+import UserGetter from '../User/UserGetter.mjs'
+import UserMembershipsHandler from '../UserMembership/UserMembershipsHandler.mjs'
+import UserMembershipEntityConfigs from '../UserMembership/UserMembershipEntityConfigs.mjs'
 
 async function getCurrentAffiliations(userId) {
   const fullEmails = await UserGetter.promises.getUserFullEmails(userId)

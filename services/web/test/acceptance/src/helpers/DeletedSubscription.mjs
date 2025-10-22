@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import MockSubscription from './Subscription.mjs'
-import SubscriptionUpdater from '../../../../app/src/Features/Subscription/SubscriptionUpdater.js'
+import SubscriptionUpdater from '../../../../app/src/Features/Subscription/SubscriptionUpdater.mjs'
 import { Subscription as SubscriptionModel } from '../../../../app/src/models/Subscription.js'
 import { DeletedSubscription as DeletedSubscriptionModel } from '../../../../app/src/models/DeletedSubscription.js'
 import { promisifyClass } from '@overleaf/promise-utils'

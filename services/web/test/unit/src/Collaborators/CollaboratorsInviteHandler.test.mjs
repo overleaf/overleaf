@@ -104,7 +104,7 @@ describe('CollaboratorsInviteHandler', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/Features/User/UserGetter.js', () => ({
+    vi.doMock('../../../../app/src/Features/User/UserGetter.mjs', () => ({
       default: ctx.UserGetter,
     }))
 
@@ -113,14 +113,14 @@ describe('CollaboratorsInviteHandler', function () {
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/Notifications/NotificationsBuilder.js',
+      '../../../../app/src/Features/Notifications/NotificationsBuilder.mjs',
       () => ({
         default: ctx.NotificationsBuilder,
       })
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Collaborators/CollaboratorsInviteHelper.js',
+      '../../../../app/src/Features/Collaborators/CollaboratorsInviteHelper.mjs',
       () => ({
         default: ctx.CollaboratorsInviteHelper,
       })
@@ -134,7 +134,7 @@ describe('CollaboratorsInviteHandler', function () {
     )
 
     vi.doMock(
-      '../../../../app/src/Features/SplitTests/SplitTestHandler.js',
+      '../../../../app/src/Features/SplitTests/SplitTestHandler.mjs',
       () => ({
         default: ctx.SplitTestHandler,
       })

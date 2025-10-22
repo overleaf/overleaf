@@ -1,8 +1,8 @@
 import fs from 'node:fs'
 import { ObjectId } from '../app/src/infrastructure/mongodb.js'
-import UserUpdater from '../app/src/Features/User/UserUpdater.js'
-import UserSessionsManager from '../app/src/Features/User/UserSessionsManager.js'
-import UserAuditLogHandler from '../app/src/Features/User/UserAuditLogHandler.js'
+import UserUpdater from '../app/src/Features/User/UserUpdater.mjs'
+import UserSessionsManager from '../app/src/Features/User/UserSessionsManager.mjs'
+import UserAuditLogHandler from '../app/src/Features/User/UserAuditLogHandler.mjs'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
 
 const ASYNC_LIMIT = 10

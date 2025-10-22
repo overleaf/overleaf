@@ -3,7 +3,7 @@ import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import sinonChai from 'sinon-chai'
 import { collectPastDueInvoices } from '../../../scripts/recurly/collect_paypal_past_due_invoice.mjs'
-import RecurlyWrapper from '../../../app/src/Features/Subscription/RecurlyWrapper.js'
+import RecurlyWrapper from '../../../app/src/Features/Subscription/RecurlyWrapper.mjs'
 import OError from '@overleaf/o-error'
 
 chai.use(chaiAsPromised)

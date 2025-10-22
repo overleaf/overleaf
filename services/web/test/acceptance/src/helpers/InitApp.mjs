@@ -7,8 +7,8 @@ import MockReCAPTCHAApi from '../mocks/MockReCaptchaApi.mjs'
 import { gracefulShutdown } from '../../../../app/src/infrastructure/GracefulShutdown.js'
 import Server from '../../../../app/src/infrastructure/Server.mjs'
 import { injectRouteAfter } from './injectRoute.mjs'
-import SplitTestHandler from '../../../../app/src/Features/SplitTests/SplitTestHandler.js'
-import SplitTestSessionHandler from '../../../../app/src/Features/SplitTests/SplitTestSessionHandler.js'
+import SplitTestHandler from '../../../../app/src/Features/SplitTests/SplitTestHandler.mjs'
+import SplitTestSessionHandler from '../../../../app/src/Features/SplitTests/SplitTestSessionHandler.mjs'
 import Modules from '../../../../app/src/infrastructure/Modules.js'
 
 const app = Server.app

@@ -1,6 +1,6 @@
 import { vi, expect } from 'vitest'
 import mongodb from 'mongodb-legacy'
-import EntityConfigs from '../../../../app/src/Features/UserMembership/UserMembershipEntityConfigs.js'
+import EntityConfigs from '../../../../app/src/Features/UserMembership/UserMembershipEntityConfigs.mjs'
 import UserMembershipErrors from '../../../../app/src/Features/UserMembership/UserMembershipErrors.mjs'
 
 const { ObjectId } = mongodb

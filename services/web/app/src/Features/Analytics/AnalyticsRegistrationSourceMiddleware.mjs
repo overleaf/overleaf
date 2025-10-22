@@ -1,7 +1,7 @@
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
-import AnalyticsRegistrationSourceHelper from './AnalyticsRegistrationSourceHelper.js'
-import SessionManager from '../../Features/Authentication/SessionManager.js'
+import AnalyticsRegistrationSourceHelper from './AnalyticsRegistrationSourceHelper.mjs'
+import SessionManager from '../../Features/Authentication/SessionManager.mjs'
 
 function setSource(medium, source) {
   return function (req, res, next) {

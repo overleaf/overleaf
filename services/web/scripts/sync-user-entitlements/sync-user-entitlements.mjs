@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import minimist from 'minimist'
-import InstitutionsAPIModule from '../../app/src/Features/Institutions/InstitutionsAPI.js'
+import InstitutionsAPIModule from '../../app/src/Features/Institutions/InstitutionsAPI.mjs'
 
 const { promises: InstitutionsAPI } = InstitutionsAPIModule
 const argv = minimist(process.argv.slice(2))

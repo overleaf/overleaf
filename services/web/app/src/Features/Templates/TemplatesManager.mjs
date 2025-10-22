@@ -1,6 +1,6 @@
 import { Project } from '../../models/Project.js'
 import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
-import ProjectOptionsHandlerModule from '../Project/ProjectOptionsHandler.js'
+import ProjectOptionsHandlerModule from '../Project/ProjectOptionsHandler.mjs'
 import ProjectRootDocManagerModule from '../Project/ProjectRootDocManager.mjs'
 import ProjectUploadManager from '../Uploads/ProjectUploadManager.mjs'
 import fs from 'node:fs'

@@ -5,7 +5,7 @@
  */
 import fs from 'node:fs'
 import { ObjectId } from '../app/src/infrastructure/mongodb.js'
-import UserUpdater from '../app/src/Features/User/UserUpdater.js'
+import UserUpdater from '../app/src/Features/User/UserUpdater.mjs'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
 
 const ASYNC_LIMIT = 10

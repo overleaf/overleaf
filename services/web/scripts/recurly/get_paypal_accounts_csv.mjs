@@ -1,4 +1,4 @@
-import RecurlyWrapper from '../../app/src/Features/Subscription/RecurlyWrapper.js'
+import RecurlyWrapper from '../../app/src/Features/Subscription/RecurlyWrapper.mjs'
 import async from 'async'
 import { Parser as CSVParser } from 'json2csv'
 

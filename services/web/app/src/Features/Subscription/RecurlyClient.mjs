@@ -7,15 +7,7 @@ import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
 import { callbackify } from 'node:util'
 import UserGetter from '../User/UserGetter.mjs'
-import PaymentProviderEntities from './PaymentProviderEntities.mjs'
 import {
-  MissingBillingInfoError,
-  SubtotalLimitExceededError,
-} from './Errors.js'
-import RecurlyMetrics from './RecurlyMetrics.mjs'
-import { isStandaloneAiAddOnPlanCode, AI_ADD_ON_CODE } from './AiHelper.js'
-
-const {
   PaymentProviderSubscription,
   PaymentProviderSubscriptionAddOn,
   PaymentProviderSubscriptionChange,
@@ -26,11 +18,17 @@ const {
   PaymentProviderCoupon,
   PaymentProviderAccount,
   PaymentProviderImmediateCharge,
-} = PaymentProviderEntities
+} from './PaymentProviderEntities.mjs'
+import {
+  MissingBillingInfoError,
+  SubtotalLimitExceededError,
+} from './Errors.js'
+import RecurlyMetrics from './RecurlyMetrics.mjs'
+import { isStandaloneAiAddOnPlanCode, AI_ADD_ON_CODE } from './AiHelper.js'
 
 /**
- * @import { PaymentProviderSubscriptionChangeRequest } from './PaymentProviderEntities'
- * @import { PaymentProviderSubscriptionUpdateRequest } from './PaymentProviderEntities'
+ * @import { PaymentProviderSubscriptionChangeRequest } from './PaymentProviderEntities.mjs'
+ * @import { PaymentProviderSubscriptionUpdateRequest } from './PaymentProviderEntities.mjs'
  * @import { PaymentMethod } from './types'
  * @import { CurrencyCode } from '../../../../types/subscription/currency'
  */

@@ -1,7 +1,7 @@
 import { callbackify } from 'node:util'
 import metrics from '@overleaf/metrics'
-import UserUpdater from '../User/UserUpdater.js'
-import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import UserUpdater from '../User/UserUpdater.mjs'
+import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 
 async function optIn(userId) {
   await UserUpdater.promises.updateUser(userId, { $set: { betaProgram: true } })

@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import minimist from 'minimist'
 import { OnboardingDataCollection } from '../app/src/models/OnboardingDataCollection.js'
 import { User } from '../app/src/models/User.js'
-import SubscriptionLocator from '../app/src/Features/Subscription/SubscriptionLocator.js'
+import SubscriptionLocator from '../app/src/Features/Subscription/SubscriptionLocator.mjs'
 import Settings from '@overleaf/settings'
 import { fetchJson } from '@overleaf/fetch-utils'
 

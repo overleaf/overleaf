@@ -1,7 +1,9 @@
 import Bowser from 'bowser'
 import Settings from '@overleaf/settings'
 import Url from 'node:url'
-import { getSafeRedirectPath } from '../Features/Helpers/UrlHelper.js'
+import UrlHelper from '../Features/Helpers/UrlHelper.mjs'
+
+const { getSafeRedirectPath } = UrlHelper
 
 function unsupportedBrowserMiddleware(req, res, next) {
   if (!Settings.unsupportedBrowsers) return next()

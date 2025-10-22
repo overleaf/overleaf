@@ -1,7 +1,7 @@
 import logger from '@overleaf/logger'
 import fs from 'node:fs'
 import Async from 'async'
-import FileHashManager from './FileHashManager.js'
+import FileHashManager from './FileHashManager.mjs'
 import HistoryManager from '../History/HistoryManager.mjs'
 import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
 import { File } from '../../models/File.js'

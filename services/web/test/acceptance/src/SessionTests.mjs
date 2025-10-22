@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import async from 'async'
 import UserHelper from './helpers/User.mjs'
 import redis from './helpers/redis.mjs'
-import UserSessionsRedis from '../../../app/src/Features/User/UserSessionsRedis.js'
+import UserSessionsRedis from '../../../app/src/Features/User/UserSessionsRedis.mjs'
 const rclient = UserSessionsRedis.client()
 
 describe('Sessions', function () {

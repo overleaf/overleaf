@@ -1,8 +1,8 @@
 import { isZodErrorLike, fromZodError } from 'zod-validation-error'
 import Errors from './Errors.js'
-import SessionManager from '../Authentication/SessionManager.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
 import SamlLogHandler from '../SamlLog/SamlLogHandler.mjs'
-import HttpErrorHandler from './HttpErrorHandler.js'
+import HttpErrorHandler from './HttpErrorHandler.mjs'
 import { plainTextResponse } from '../../infrastructure/Response.js'
 import { expressifyErrorHandler } from '@overleaf/promise-utils'
 

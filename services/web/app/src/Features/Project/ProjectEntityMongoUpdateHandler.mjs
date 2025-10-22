@@ -13,8 +13,8 @@ import { Project } from '../../models/Project.js'
 import ProjectEntityHandler from './ProjectEntityHandler.mjs'
 import ProjectGetter from './ProjectGetter.mjs'
 import ProjectLocator from './ProjectLocator.mjs'
-import FolderStructureBuilder from './FolderStructureBuilder.js'
-import SafePath from './SafePath.js'
+import FolderStructureBuilder from './FolderStructureBuilder.mjs'
+import SafePath from './SafePath.mjs'
 import { iterablePaths } from './IterablePath.js'
 
 const { ObjectId } = mongodb

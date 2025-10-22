@@ -1,5 +1,5 @@
 import logger from '@overleaf/logger'
-import SessionManager from '../Authentication/SessionManager.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
 import LoginRateLimiter from './LoginRateLimiter.js'
 import settings from '@overleaf/settings'
 

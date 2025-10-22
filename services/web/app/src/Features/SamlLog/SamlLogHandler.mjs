@@ -1,5 +1,5 @@
 import { SamlLog } from '../../models/SamlLog.js'
-import SessionManager from '../Authentication/SessionManager.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
 import logger from '@overleaf/logger'
 import loggerSerializers from '@overleaf/logger/serializers.js'
 import { callbackify } from 'node:util'

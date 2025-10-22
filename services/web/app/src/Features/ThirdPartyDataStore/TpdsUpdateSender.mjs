@@ -7,7 +7,7 @@ import Path from 'node:path'
 import { fetchNothing } from '@overleaf/fetch-utils'
 import settings from '@overleaf/settings'
 import CollaboratorsGetterModule from '../Collaborators/CollaboratorsGetter.mjs'
-import UserGetterModule from '../User/UserGetter.js'
+import UserGetterModule from '../User/UserGetter.mjs'
 
 const { promises: UserGetter } = UserGetterModule
 const { promises: CollaboratorsGetter } = CollaboratorsGetterModule

@@ -6,7 +6,7 @@ import Settings from '@overleaf/settings'
 import { URL } from 'node:url'
 import pug from 'pug-runtime'
 import logger from '@overleaf/logger'
-import SafeHTMLSubstitution from '../Features/Helpers/SafeHTMLSubstitution.js'
+import SafeHTMLSubstitution from '../Features/Helpers/SafeHTMLSubstitution.mjs'
 
 const fallbackLanguageCode = Settings.i18n.defaultLng || 'en'
 const availableLanguageCodes = []

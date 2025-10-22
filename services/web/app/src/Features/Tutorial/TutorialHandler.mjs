@@ -1,4 +1,4 @@
-import UserUpdater from '../User/UserUpdater.js'
+import UserUpdater from '../User/UserUpdater.mjs'
 
 const POSTPONE_DURATION_MS = 24 * 60 * 60 * 1000 // 1 day
 

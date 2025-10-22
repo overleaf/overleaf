@@ -1,6 +1,6 @@
 import _ from 'lodash'
-import RequestHelper from './RequestHelper.js'
-import AnalyticsManager from './AnalyticsManager.js'
+import RequestHelper from './RequestHelper.mjs'
+import AnalyticsManager from './AnalyticsManager.mjs'
 import querystring from 'node:querystring'
 import { URL } from 'node:url'
 import Settings from '@overleaf/settings'

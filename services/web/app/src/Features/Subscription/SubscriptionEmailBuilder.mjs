@@ -1,4 +1,4 @@
-import EmailBuilder from '../Email/EmailBuilder.js'
+import EmailBuilder from '../Email/EmailBuilder.mjs'
 import EmailMessageHelper from '../Email/EmailMessageHelper.js'
 import settings from '@overleaf/settings'
 

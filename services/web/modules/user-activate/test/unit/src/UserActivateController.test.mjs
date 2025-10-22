@@ -30,7 +30,7 @@ describe('UserActivateController', function () {
       },
     }
 
-    vi.doMock('../../../../../app/src/Features/User/UserGetter.js', () => ({
+    vi.doMock('../../../../../app/src/Features/User/UserGetter.mjs', () => ({
       default: ctx.UserGetter,
     }))
 

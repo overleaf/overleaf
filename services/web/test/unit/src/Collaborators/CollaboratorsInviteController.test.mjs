@@ -143,7 +143,7 @@ describe('CollaboratorsInviteController', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/Features/User/UserGetter.js', () => ({
+    vi.doMock('../../../../app/src/Features/User/UserGetter.mjs', () => ({
       default: ctx.UserGetter,
     }))
 
@@ -162,28 +162,28 @@ describe('CollaboratorsInviteController', function () {
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Collaborators/CollaboratorsInviteGetter.js',
+      '../../../../app/src/Features/Collaborators/CollaboratorsInviteGetter.mjs',
       () => ({
         default: ctx.CollaboratorsInviteGetter,
       })
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Editor/EditorRealTimeController.js',
+      '../../../../app/src/Features/Editor/EditorRealTimeController.mjs',
       () => ({
         default: ctx.EditorRealTimeController,
       })
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Analytics/AnalyticsManager.js',
+      '../../../../app/src/Features/Analytics/AnalyticsManager.mjs',
       () => ({
         default: ctx.AnalyticsManger,
       })
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Authentication/SessionManager.js',
+      '../../../../app/src/Features/Authentication/SessionManager.mjs',
       () => ({
         default: ctx.SessionManager,
       })

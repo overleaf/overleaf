@@ -1,6 +1,6 @@
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 import Path from 'node:path'
-import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
+import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.mjs'
 import DocumentUpdaterHandler from '../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.mjs'
 import ProjectGetter from '../app/src/Features/Project/ProjectGetter.mjs'
 import ProjectEntityMongoUpdateHandler from '../app/src/Features/Project/ProjectEntityMongoUpdateHandler.mjs'

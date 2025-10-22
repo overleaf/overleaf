@@ -9,7 +9,7 @@ import minimist from 'minimist'
 import { ObjectId } from '../app/src/infrastructure/mongodb.js'
 import { User } from '../app/src/models/User.js'
 import { Subscription } from '../app/src/models/Subscription.js'
-import UserAuditLogHandler from '../app/src/Features/User/UserAuditLogHandler.js'
+import UserAuditLogHandler from '../app/src/Features/User/UserAuditLogHandler.mjs'
 
 const argv = minimist(process.argv.slice(2))
 const COMMIT = argv.commit !== undefined

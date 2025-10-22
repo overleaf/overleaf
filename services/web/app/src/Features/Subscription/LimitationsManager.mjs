@@ -3,11 +3,11 @@
 import logger from '@overleaf/logger'
 
 import ProjectGetter from '../Project/ProjectGetter.mjs'
-import UserGetter from '../User/UserGetter.js'
-import SubscriptionLocator from './SubscriptionLocator.js'
+import UserGetter from '../User/UserGetter.mjs'
+import SubscriptionLocator from './SubscriptionLocator.mjs'
 import Settings from '@overleaf/settings'
 import CollaboratorsGetter from '../Collaborators/CollaboratorsGetter.mjs'
-import CollaboratorsInvitesGetter from '../Collaborators/CollaboratorsInviteGetter.js'
+import CollaboratorsInvitesGetter from '../Collaborators/CollaboratorsInviteGetter.mjs'
 import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
 import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
 

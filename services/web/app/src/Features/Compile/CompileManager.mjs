@@ -3,11 +3,11 @@ import Settings from '@overleaf/settings'
 import RedisWrapper from '../../infrastructure/RedisWrapper.js'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import ProjectRootDocManager from '../Project/ProjectRootDocManager.mjs'
-import UserGetter from '../User/UserGetter.js'
+import UserGetter from '../User/UserGetter.mjs'
 import ClsiManager from './ClsiManager.mjs'
 import Metrics from '@overleaf/metrics'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
-import UserAnalyticsIdCache from '../Analytics/UserAnalyticsIdCache.js'
+import UserAnalyticsIdCache from '../Analytics/UserAnalyticsIdCache.mjs'
 import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
 let CompileManager
 const rclient = RedisWrapper.client('clsi_recently_compiled')

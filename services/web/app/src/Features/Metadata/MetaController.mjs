@@ -1,5 +1,5 @@
 import OError from '@overleaf/o-error'
-import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
+import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
 import MetaHandler from './MetaHandler.mjs'
 import logger from '@overleaf/logger'
 import { expressify } from '@overleaf/promise-utils'

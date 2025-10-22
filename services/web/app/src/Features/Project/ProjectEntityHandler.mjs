@@ -1,5 +1,5 @@
 import path from 'node:path'
-import DocstoreManager from '../Docstore/DocstoreManager.js'
+import DocstoreManager from '../Docstore/DocstoreManager.mjs'
 import Errors from '../Errors/Errors.js'
 import ProjectGetter from './ProjectGetter.mjs'
 import { callbackifyAll } from '@overleaf/promise-utils'

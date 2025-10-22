@@ -20,14 +20,14 @@ describe('AnalyticsController', function () {
     }
 
     vi.doMock(
-      '../../../../app/src/Features/Analytics/AnalyticsManager.js',
+      '../../../../app/src/Features/Analytics/AnalyticsManager.mjs',
       () => ({
         default: ctx.AnalyticsManager,
       })
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Authentication/SessionManager.js',
+      '../../../../app/src/Features/Authentication/SessionManager.mjs',
       () => ({
         default: ctx.SessionManager,
       })

@@ -2,7 +2,7 @@ import logger from '@overleaf/logger'
 import Settings from '@overleaf/settings'
 import { IncomingWebhook } from '@slack/webhook'
 import moment from 'moment'
-import SplitTestUtils from './SplitTestUtils.js'
+import SplitTestUtils from './SplitTestUtils.mjs'
 
 async function sendNotification(splitTest, action, user) {
   const lastVersion = SplitTestUtils.getCurrentVersion(splitTest)

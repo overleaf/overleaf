@@ -1,7 +1,7 @@
 import Settings from '@overleaf/settings'
 import Modules from '../../infrastructure/Modules.js'
 import { expressify } from '@overleaf/promise-utils'
-import SessionManager from '../Authentication/SessionManager.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
 import logger from '@overleaf/logger'
 
 export default {

@@ -11,7 +11,7 @@
  */
 import ExportsHandler from './ExportsHandler.mjs'
 
-import SessionManager from '../Authentication/SessionManager.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
 import logger from '@overleaf/logger'
 
 export default {

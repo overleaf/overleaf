@@ -217,7 +217,7 @@ describe('SubscriptionGroupHandler', function () {
       vi.importActual('../../../../app/src/Features/Errors/Errors.js')
     )
     vi.doMock(
-      '../../../../app/src/Features/Subscription/SubscriptionUpdater.js',
+      '../../../../app/src/Features/Subscription/SubscriptionUpdater.mjs',
       () => ({
         default: ctx.SubscriptionUpdater,
       })

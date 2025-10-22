@@ -1,5 +1,5 @@
 import Settings from '@overleaf/settings'
-import SessionManager from '../Authentication/SessionManager.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
 import SystemMessageManager from './SystemMessageManager.mjs'
 
 const ProjectController = {

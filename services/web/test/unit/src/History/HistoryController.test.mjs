@@ -76,7 +76,7 @@ describe('HistoryController', function () {
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/Authentication/SessionManager.js',
+      '../../../../app/src/Features/Authentication/SessionManager.mjs',
       () => ({
         default: ctx.SessionManager,
       })
@@ -103,7 +103,7 @@ describe('HistoryController', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/Features/User/UserGetter.js', () => ({
+    vi.doMock('../../../../app/src/Features/User/UserGetter.mjs', () => ({
       default: (ctx.UserGetter = {}),
     }))
 

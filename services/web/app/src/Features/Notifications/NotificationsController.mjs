@@ -1,5 +1,5 @@
-import NotificationsHandler from './NotificationsHandler.js'
-import SessionManager from '../Authentication/SessionManager.js'
+import NotificationsHandler from './NotificationsHandler.mjs'
+import SessionManager from '../Authentication/SessionManager.mjs'
 import _ from 'lodash'
 
 export default {

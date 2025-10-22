@@ -3,7 +3,7 @@
 import minimist from 'minimist'
 import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
-import UserAuditLogHandler from '../app/src/Features/User/UserAuditLogHandler.js'
+import UserAuditLogHandler from '../app/src/Features/User/UserAuditLogHandler.mjs'
 import fs from 'node:fs/promises'
 import * as csv from 'csv'
 import { promisify } from 'node:util'

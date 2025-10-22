@@ -3,8 +3,8 @@ import Path from 'node:path'
 import { callbackify } from 'node:util'
 import EditorController from '../Editor/EditorController.mjs'
 import Errors from '../Errors/Errors.js'
-import FileTypeManager from './FileTypeManager.js'
-import SafePath from '../Project/SafePath.js'
+import FileTypeManager from './FileTypeManager.mjs'
+import SafePath from '../Project/SafePath.mjs'
 import logger from '@overleaf/logger'
 
 export default {

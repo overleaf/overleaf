@@ -1,5 +1,5 @@
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
-import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import SubscriptionEmailHandler from './SubscriptionEmailHandler.mjs'
 import { AI_ADD_ON_CODE } from './AiHelper.js'
 import mongodb from 'mongodb-legacy'

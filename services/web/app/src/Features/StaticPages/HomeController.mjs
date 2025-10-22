@@ -1,12 +1,12 @@
 import Features from '../../infrastructure/Features.js'
-import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import Path from 'node:path'
 import fs from 'node:fs'
 import ErrorController from '../Errors/ErrorController.mjs'
-import SessionManager from '../Authentication/SessionManager.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import logger from '@overleaf/logger'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 
 const __dirname = new URL('.', import.meta.url).pathname
 

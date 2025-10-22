@@ -7,7 +7,7 @@ import UserHelper from './UserHelper.mjs'
 import SAMLHelper from './SAMLHelper.mjs'
 import Settings from '@overleaf/settings'
 import GroupUtils from '../../../../app/src/Features/Subscription/GroupUtils.mjs'
-import UserGetter from '../../../../app/src/Features/User/UserGetter.js'
+import UserGetter from '../../../../app/src/Features/User/UserGetter.mjs'
 import { fileURLToPath } from 'node:url'
 import { Subscription as SubscriptionModel } from '../../../../app/src/models/Subscription.js'
 

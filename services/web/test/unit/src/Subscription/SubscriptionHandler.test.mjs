@@ -1,8 +1,9 @@
 import { expect, vi } from 'vitest'
 import sinon from 'sinon'
-import { PaymentProviderSubscription } from '../../../../app/src/Features/Subscription/PaymentProviderEntities.js'
+import PaymentProviderEntities from '../../../../app/src/Features/Subscription/PaymentProviderEntities.mjs'
 import SubscriptionHelper from '../../../../app/src/Features/Subscription/SubscriptionHelper.js'
 
+const { PaymentProviderSubscription } = PaymentProviderEntities
 const MODULE_PATH =
   '../../../../app/src/Features/Subscription/SubscriptionHandler'
 

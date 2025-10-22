@@ -10,10 +10,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import SessionManager from '../Authentication/SessionManager.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
 import Settings from '@overleaf/settings'
 import _ from 'lodash'
-import AnalyticsManager from '../../../../app/src/Features/Analytics/AnalyticsManager.js'
+import AnalyticsManager from '../../../../app/src/Features/Analytics/AnalyticsManager.mjs'
 import LinkedFilesHandler from './LinkedFilesHandler.mjs'
 import LinkedFilesErrors from './LinkedFilesErrors.mjs'
 import {
@@ -23,7 +23,7 @@ import {
 import Modules from '../../infrastructure/Modules.js'
 import { plainTextResponse } from '../../infrastructure/Response.js'
 import { z, zz, validateReq } from '../../infrastructure/Validation.js'
-import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
+import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import ProjectOutputFileAgent from './ProjectOutputFileAgent.mjs'
 import ProjectFileAgent from './ProjectFileAgent.mjs'

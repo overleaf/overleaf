@@ -1,4 +1,4 @@
-import UserGetter from './UserGetter.js'
+import UserGetter from './UserGetter.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 
 async function getPersonalInfo(userId) {

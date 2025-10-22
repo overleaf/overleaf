@@ -1,16 +1,16 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
 import recurly from 'recurly'
+import PaymentProviderEntities from '../../../../app/src/Features/Subscription/PaymentProviderEntities.mjs'
 
-import {
+const {
   PaymentProviderSubscription,
   PaymentProviderSubscriptionChangeRequest,
   PaymentProviderSubscriptionUpdateRequest,
   PaymentProviderSubscriptionAddOnUpdate,
   PaymentProviderAccount,
   PaymentProviderCoupon,
-} from '../../../../app/src/Features/Subscription/PaymentProviderEntities.js'
-
+} = PaymentProviderEntities
 const MODULE_PATH = '../../../../app/src/Features/Subscription/RecurlyClient'
 
 describe('RecurlyClient', function () {

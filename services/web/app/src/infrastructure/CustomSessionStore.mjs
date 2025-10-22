@@ -2,7 +2,7 @@ import session from 'express-session'
 import RedisStoreFactory from 'connect-redis'
 import logger from '@overleaf/logger'
 import Settings from '@overleaf/settings'
-import SessionManager from '../Features/Authentication/SessionManager.js'
+import SessionManager from '../Features/Authentication/SessionManager.mjs'
 import Metrics from '@overleaf/metrics'
 
 const RedisStore = RedisStoreFactory(session)

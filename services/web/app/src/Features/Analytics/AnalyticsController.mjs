@@ -1,10 +1,10 @@
 import metrics from '@overleaf/metrics'
-import AnalyticsManager from './AnalyticsManager.js'
-import SessionManager from '../Authentication/SessionManager.js'
+import AnalyticsManager from './AnalyticsManager.mjs'
+import SessionManager from '../Authentication/SessionManager.mjs'
 import GeoIpLookup from '../../infrastructure/GeoIpLookup.mjs'
 import Features from '../../infrastructure/Features.js'
 import { expressify } from '@overleaf/promise-utils'
-import AccountMappingHelper from './AccountMappingHelper.js'
+import AccountMappingHelper from './AccountMappingHelper.mjs'
 
 async function registerSalesforceMapping(req, res, next) {
   if (!Features.hasFeature('analytics')) {

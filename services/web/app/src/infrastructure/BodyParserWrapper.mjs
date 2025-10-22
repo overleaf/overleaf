@@ -1,5 +1,5 @@
 import bodyParser from 'body-parser'
-import HttpErrorHandler from '../Features/Errors/HttpErrorHandler.js'
+import HttpErrorHandler from '../Features/Errors/HttpErrorHandler.mjs'
 
 function isBodyParserError(nextArg) {
   if (nextArg instanceof Error) {

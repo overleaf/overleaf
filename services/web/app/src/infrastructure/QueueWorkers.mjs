@@ -2,14 +2,14 @@ import Features from './Features.js'
 import Queues from './Queues.js'
 import UserOnboardingEmailManager from '../Features/User/UserOnboardingEmailManager.mjs'
 import UserPostRegistrationAnalyticsManager from '../Features/User/UserPostRegistrationAnalyticsManager.mjs'
-import FeaturesUpdater from '../Features/Subscription/FeaturesUpdater.js'
+import FeaturesUpdater from '../Features/Subscription/FeaturesUpdater.mjs'
 
 import {
   addOptionalCleanupHandlerBeforeStoppingTraffic,
   addRequiredCleanupHandlerBeforeDrainingConnections,
 } from './GracefulShutdown.js'
 
-import EmailHandler from '../Features/Email/EmailHandler.js'
+import EmailHandler from '../Features/Email/EmailHandler.mjs'
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
 import Modules from './Modules.js'

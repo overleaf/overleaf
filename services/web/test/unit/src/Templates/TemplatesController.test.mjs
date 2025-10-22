@@ -1,6 +1,6 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
-import ProjectHelper from '../../../../app/src/Features/Project/ProjectHelper.js'
+import ProjectHelper from '../../../../app/src/Features/Project/ProjectHelper.mjs'
 
 const modulePath =
   '../../../../app/src/Features/Templates/TemplatesController.mjs'

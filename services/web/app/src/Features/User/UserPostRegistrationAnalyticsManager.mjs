@@ -1,7 +1,7 @@
 import Queues from '../../infrastructure/Queues.js'
-import UserGetter from './UserGetter.js'
-import InstitutionsAPI from '../Institutions/InstitutionsAPI.js'
-import AnalyticsManager from '../Analytics/AnalyticsManager.js'
+import UserGetter from './UserGetter.mjs'
+import InstitutionsAPI from '../Institutions/InstitutionsAPI.mjs'
+import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
 

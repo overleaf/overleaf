@@ -8,7 +8,7 @@ import moment from 'moment'
 import { fetchJson } from '@overleaf/fetch-utils'
 import contentDisposition from 'content-disposition'
 import Features from './Features.js'
-import SessionManager from '../Features/Authentication/SessionManager.js'
+import SessionManager from '../Features/Authentication/SessionManager.mjs'
 import PackageVersions from './PackageVersions.js'
 import Modules from './Modules.js'
 import Errors from '../Features/Errors/Errors.js'
@@ -262,7 +262,7 @@ export default async function (webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(
     expressify(async function (req, res, next) {
       res.locals.StringHelper = (
-        await import('../Features/Helpers/StringHelper.js')
+        await import('../Features/Helpers/StringHelper.mjs')
       ).default
       next()
     })

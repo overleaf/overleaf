@@ -1,6 +1,6 @@
-import SessionManager from '../Authentication/SessionManager.js'
-import ContactManager from './ContactManager.js'
-import UserGetter from '../User/UserGetter.js'
+import SessionManager from '../Authentication/SessionManager.mjs'
+import ContactManager from './ContactManager.mjs'
+import UserGetter from '../User/UserGetter.mjs'
 import Modules from '../../infrastructure/Modules.js'
 import { expressify } from '@overleaf/promise-utils'
 

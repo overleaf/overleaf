@@ -15,9 +15,9 @@ import os from 'os'
 import fs from 'fs'
 import * as csv from 'csv/sync'
 import { parseEmail } from '../../../app/src/Features/Helpers/EmailHelper.js'
-import UserGetter from '../../../app/src/Features/User/UserGetter.js'
-import UserUpdater from '../../../app/src/Features/User/UserUpdater.js'
-import UserSessionsManager from '../../../app/src/Features/User/UserSessionsManager.js'
+import UserGetter from '../../../app/src/Features/User/UserGetter.mjs'
+import UserUpdater from '../../../app/src/Features/User/UserUpdater.mjs'
+import UserSessionsManager from '../../../app/src/Features/User/UserSessionsManager.mjs'
 
 const hostname = os.hostname()
 const scriptTimestamp = new Date().toISOString()

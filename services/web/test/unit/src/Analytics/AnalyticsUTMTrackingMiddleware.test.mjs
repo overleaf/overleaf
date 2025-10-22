@@ -24,7 +24,7 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
     }
 
     vi.doMock(
-      '../../../../app/src/Features/Analytics/AnalyticsManager.js',
+      '../../../../app/src/Features/Analytics/AnalyticsManager.mjs',
       () => ({
         default: (ctx.AnalyticsManager = {
           recordEventForSession: sinon.stub().resolves(),

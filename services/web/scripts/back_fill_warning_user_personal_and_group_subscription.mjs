@@ -1,4 +1,4 @@
-import NotificationsBuilder from '../app/src/Features/Notifications/NotificationsBuilder.js'
+import NotificationsBuilder from '../app/src/Features/Notifications/NotificationsBuilder.mjs'
 import { db } from '../app/src/infrastructure/mongodb.js'
 import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { scriptRunner } from './lib/ScriptRunner.mjs'

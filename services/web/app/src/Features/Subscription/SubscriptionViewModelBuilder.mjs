@@ -1,24 +1,26 @@
 // ts-check
 import Settings from '@overleaf/settings'
 
-import PlansLocator from './PlansLocator.js'
+import PlansLocator from './PlansLocator.mjs'
 import { isStandaloneAiAddOnPlanCode } from './AiHelper.js'
-import { MEMBERS_LIMIT_ADD_ON_CODE } from './PaymentProviderEntities.js'
+import PaymentProviderEntities from './PaymentProviderEntities.mjs'
 import SubscriptionFormatters from './SubscriptionFormatters.mjs'
-import SubscriptionLocator from './SubscriptionLocator.js'
+import SubscriptionLocator from './SubscriptionLocator.mjs'
 import InstitutionsGetter from '../Institutions/InstitutionsGetter.mjs'
 import InstitutionsManager from '../Institutions/InstitutionsManager.mjs'
-import PublishersGetter from '../Publishers/PublishersGetter.js'
+import PublishersGetter from '../Publishers/PublishersGetter.mjs'
 import sanitizeHtml from 'sanitize-html'
 import _ from 'lodash'
 import async from 'async'
 import SubscriptionHelper from './SubscriptionHelper.js'
 import { callbackify } from '@overleaf/promise-utils'
 import { V1ConnectionError } from '../Errors/Errors.js'
-import FeaturesHelper from './FeaturesHelper.js'
+import FeaturesHelper from './FeaturesHelper.mjs'
 import { formatCurrency } from '../../util/currency.js'
 import Modules from '../../infrastructure/Modules.js'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+
+const { MEMBERS_LIMIT_ADD_ON_CODE } = PaymentProviderEntities
 
 /**
  * @import { Subscription } from "../../../../types/project/dashboard/subscription"

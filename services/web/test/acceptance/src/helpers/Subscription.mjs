@@ -1,7 +1,7 @@
 import { db, ObjectId } from '../../../../app/src/infrastructure/mongodb.js'
 import { expect } from 'chai'
 import { callbackifyClass } from '@overleaf/promise-utils'
-import SubscriptionUpdater from '../../../../app/src/Features/Subscription/SubscriptionUpdater.js'
+import SubscriptionUpdater from '../../../../app/src/Features/Subscription/SubscriptionUpdater.mjs'
 import PermissionsManager from '../../../../app/src/Features/Authorization/PermissionsManager.mjs'
 import SSOConfigManager from '../../../../modules/group-settings/app/src/sso/SSOConfigManager.mjs'
 import { Subscription as SubscriptionModel } from '../../../../app/src/models/Subscription.js'

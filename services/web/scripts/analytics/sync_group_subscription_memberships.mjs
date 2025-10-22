@@ -1,6 +1,6 @@
 import GoogleBigQueryHelper from './helpers/GoogleBigQueryHelper.mjs'
 import { Subscription } from '../../app/src/models/Subscription.js'
-import AnalyticsManager from '../../app/src/Features/Analytics/AnalyticsManager.js'
+import AnalyticsManager from '../../app/src/Features/Analytics/AnalyticsManager.mjs'
 import { DeletedSubscription } from '../../app/src/models/DeletedSubscription.js'
 import minimist from 'minimist'
 import _ from 'lodash'

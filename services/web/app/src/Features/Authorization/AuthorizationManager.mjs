@@ -6,12 +6,12 @@ import CollaboratorsHandler from '../Collaborators/CollaboratorsHandler.mjs'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import { User } from '../../models/User.js'
 import PrivilegeLevels from './PrivilegeLevels.js'
-import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.js'
-import PublicAccessLevels from './PublicAccessLevels.js'
+import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.mjs'
+import PublicAccessLevels from './PublicAccessLevels.mjs'
 import Errors from '../Errors/Errors.js'
 import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
 import Settings from '@overleaf/settings'
-import ChatApiHandler from '../Chat/ChatApiHandler.js'
+import ChatApiHandler from '../Chat/ChatApiHandler.mjs'
 
 const { hasAdminAccess, getAdminCapabilities } = AdminAuthorizationHelper
 const { ObjectId } = mongodb

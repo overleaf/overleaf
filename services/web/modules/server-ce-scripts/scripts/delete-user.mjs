@@ -1,4 +1,4 @@
-import UserGetter from '../../../app/src/Features/User/UserGetter.js'
+import UserGetter from '../../../app/src/Features/User/UserGetter.mjs'
 import UserDeleter from '../../../app/src/Features/User/UserDeleter.mjs'
 import { fileURLToPath } from 'url'
 import minimist from 'minimist'

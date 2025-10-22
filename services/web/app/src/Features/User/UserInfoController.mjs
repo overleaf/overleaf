@@ -1,5 +1,5 @@
-import UserGetter from './UserGetter.js'
-import SessionManager from '../Authentication/SessionManager.js'
+import UserGetter from './UserGetter.mjs'
+import SessionManager from '../Authentication/SessionManager.mjs'
 import mongodb from 'mongodb-legacy'
 import { expressify } from '@overleaf/promise-utils'
 

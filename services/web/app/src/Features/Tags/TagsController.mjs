@@ -1,5 +1,5 @@
-import TagsHandler from './TagsHandler.js'
-import SessionManager from '../Authentication/SessionManager.js'
+import TagsHandler from './TagsHandler.mjs'
+import SessionManager from '../Authentication/SessionManager.mjs'
 import Errors from '../Errors/Errors.js'
 import { z, validateReq } from '../../infrastructure/Validation.js'
 import { expressify } from '@overleaf/promise-utils'
