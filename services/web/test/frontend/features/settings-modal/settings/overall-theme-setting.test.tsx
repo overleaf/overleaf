@@ -7,6 +7,7 @@ import getMeta from '@/utils/meta'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import { SettingsModalProvider } from '@/features/ide-redesign/contexts/settings-modal-context'
 import OverallThemeSetting from '@/features/ide-redesign/components/settings/appearance-settings/overall-theme-setting'
+import userEvent from '@testing-library/user-event'
 
 const IEEE_BRAND_ID = 1234
 const OTHER_BRAND_ID = 2234
@@ -36,7 +37,7 @@ describe('<OverallThemeSetting />', function () {
     fetchMock.removeRoutes().clearHistory()
   })
 
-  it('shows correct menu', async function () {
+  it('each option is shown and can be selected', async function () {
     render(
       <EditorProviders>
         <SettingsModalProvider>
@@ -45,11 +46,26 @@ describe('<OverallThemeSetting />', function () {
       </EditorProviders>
     )
 
+    const saveSettingsMock = fetchMock.post(
+      'express:/user/settings',
+      {
+        status: 200,
+      },
+      { delay: 0 }
+    )
+
     const select = screen.getByLabelText('Overall theme')
 
-    for (const theme of overallThemes) {
+    // Reverse order so we test changing to each option
+    for (const theme of overallThemes.reverse()) {
       const option = within(select).getByText(theme.name)
       expect(option.getAttribute('value')).to.equal(theme.val)
+      await userEvent.selectOptions(select, [option])
+      expect(
+        saveSettingsMock.callHistory.called('/user/settings', {
+          body: { overallTheme: theme.val },
+        })
+      ).to.be.true
     }
   })
   describe('Branded Project', function () {

@@ -4,13 +4,29 @@ import fetchMock from 'fetch-mock'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import { SettingsModalProvider } from '@/features/ide-redesign/contexts/settings-modal-context'
 import LineHeightSetting from '@/features/ide-redesign/components/settings/appearance-settings/line-height-setting'
+import userEvent from '@testing-library/user-event'
+
+const OPTIONS = [
+  {
+    label: 'Compact',
+    value: 'compact',
+  },
+  {
+    label: 'Normal',
+    value: 'normal',
+  },
+  {
+    label: 'Wide',
+    value: 'wide',
+  },
+]
 
 describe('<LineHeightSetting />', function () {
   afterEach(function () {
     fetchMock.removeRoutes().clearHistory()
   })
 
-  it('shows correct menu', async function () {
+  it('each option is shown and can be selected', async function () {
     render(
       <EditorProviders>
         <SettingsModalProvider>
@@ -21,13 +37,23 @@ describe('<LineHeightSetting />', function () {
 
     const select = screen.getByLabelText('Editor line height')
 
-    const optionCompact = within(select).getByText('Compact')
-    expect(optionCompact.getAttribute('value')).to.equal('compact')
+    const saveSettingsMock = fetchMock.post(
+      'express:/user/settings',
+      {
+        status: 200,
+      },
+      { delay: 0 }
+    )
 
-    const optionNormal = within(select).getByText('Normal')
-    expect(optionNormal.getAttribute('value')).to.equal('normal')
-
-    const optionWide = within(select).getByText('Wide')
-    expect(optionWide.getAttribute('value')).to.equal('wide')
+    for (const option of OPTIONS) {
+      const optionElement = within(select).getByText(option.label)
+      expect(optionElement.getAttribute('value')).to.equal(option.value)
+      await userEvent.selectOptions(select, [optionElement])
+      expect(
+        saveSettingsMock.callHistory.called('/user/settings', {
+          body: { lineHeight: option.value },
+        })
+      ).to.be.true
+    }
   })
 })

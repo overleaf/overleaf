@@ -2,15 +2,38 @@ import { screen, within, render } from '@testing-library/react'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import { SettingsModalProvider } from '@/features/ide-redesign/contexts/settings-modal-context'
-import { EditorProviders } from '../../../helpers/editor-providers'
+import {
+  EditorProviders,
+  projectDefaults,
+} from '../../../helpers/editor-providers'
 import CompilerSetting from '@/features/ide-redesign/components/settings/compiler-settings/compiler-setting'
+import userEvent from '@testing-library/user-event'
+
+const OPTIONS = [
+  {
+    label: 'pdfLaTeX',
+    value: 'pdflatex',
+  },
+  {
+    label: 'LaTeX',
+    value: 'latex',
+  },
+  {
+    label: 'XeLaTeX',
+    value: 'xelatex',
+  },
+  {
+    label: 'LuaLaTeX',
+    value: 'lualatex',
+  },
+]
 
 describe('<CompilerSetting />', function () {
   afterEach(function () {
     fetchMock.removeRoutes().clearHistory()
   })
 
-  it('shows correct menu', async function () {
+  it('each option is shown and can be selected', async function () {
     render(
       <EditorProviders>
         <SettingsModalProvider>
@@ -19,18 +42,30 @@ describe('<CompilerSetting />', function () {
       </EditorProviders>
     )
 
+    const saveSettingsMock = fetchMock.post(
+      `express:/project/:projectId/settings`,
+      {
+        status: 200,
+      },
+      { delay: 0 }
+    )
+
     const select = screen.getByLabelText('Compiler')
 
-    const optionPdfLaTeX = within(select).getByText('pdfLaTeX')
-    expect(optionPdfLaTeX.getAttribute('value')).to.equal('pdflatex')
+    // Reverse order so we test changing to each option
+    for (const option of OPTIONS.reverse()) {
+      const optionElement = within(select).getByText(option.label)
+      expect(optionElement.getAttribute('value')).to.equal(option.value)
+      await userEvent.selectOptions(select, [optionElement])
 
-    const optionLaTeX = within(select).getByText('LaTeX')
-    expect(optionLaTeX.getAttribute('value')).to.equal('latex')
-
-    const optionXeLaTeX = within(select).getByText('XeLaTeX')
-    expect(optionXeLaTeX.getAttribute('value')).to.equal('xelatex')
-
-    const optionLuaLaTeX = within(select).getByText('LuaLaTeX')
-    expect(optionLuaLaTeX.getAttribute('value')).to.equal('lualatex')
+      expect(
+        saveSettingsMock.callHistory.called(
+          `/project/${projectDefaults._id}/settings`,
+          {
+            body: { compiler: option.value },
+          }
+        )
+      ).to.be.true
+    }
   })
 })
