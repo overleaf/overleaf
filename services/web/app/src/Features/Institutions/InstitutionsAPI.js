@@ -235,7 +235,7 @@ async function addAffiliation(userId, email, affiliationOptions) {
   // have notifications delete any ip matcher notifications for this university
   try {
     await NotificationsBuilder.promises
-      .ipMatcherAffiliation(userId)
+      .ipMatcherAffiliation(userId.toString())
       .read(university.id)
   } catch (err) {
     // log and ignore error

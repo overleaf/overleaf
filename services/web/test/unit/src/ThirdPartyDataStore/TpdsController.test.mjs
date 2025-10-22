@@ -33,7 +33,9 @@ describe('TpdsController', function () {
       },
     }
     ctx.NotificationsBuilder = {
-      tpdsFileLimit: sinon.stub().returns({ create: sinon.stub() }),
+      promises: {
+        tpdsFileLimit: sinon.stub().returns({ create: sinon.stub() }),
+      },
     }
     ctx.SessionManager = {
       getLoggedInUserId: sinon.stub().returns('user-id'),
@@ -255,7 +257,7 @@ describe('TpdsController', function () {
         const res = {
           sendStatus: status => {
             expect(status).to.equal(400)
-            ctx.NotificationsBuilder.tpdsFileLimit.should.have.been.calledWith(
+            ctx.NotificationsBuilder.promises.tpdsFileLimit.should.have.been.calledWith(
               ctx.user_id
             )
             resolve()

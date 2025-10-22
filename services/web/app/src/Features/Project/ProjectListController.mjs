@@ -399,7 +399,7 @@ async function projectListPage(req, res, next) {
   if (Settings.overleaf != null && req.ip !== user.lastLoginIp) {
     try {
       await NotificationsBuilder.promises
-        .ipMatcherAffiliation(user._id)
+        .ipMatcherAffiliation(user._id.toString())
         .create(req.ip)
     } catch (err) {
       logger.error(

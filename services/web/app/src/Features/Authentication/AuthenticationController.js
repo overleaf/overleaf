@@ -348,7 +348,7 @@ const AuthenticationController = {
 
   ipMatchCheck(req, user) {
     if (req.ip !== user.lastLoginIp) {
-      NotificationsBuilder.ipMatcherAffiliation(user._id).create(
+      NotificationsBuilder.ipMatcherAffiliation(user._id.toString()).create(
         req.ip,
         () => {}
       )
