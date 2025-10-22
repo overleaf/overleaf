@@ -255,7 +255,6 @@ export interface Meta {
   'ol-showAiErrorAssistant': boolean
   'ol-showBrlGeoBanner': boolean
   'ol-showCouponField': boolean
-  'ol-showFilters': boolean
   'ol-showGroupDiscount': boolean
   'ol-showGroupsAndEnterpriseBanner': boolean
   'ol-showInrGeoBanner': boolean
