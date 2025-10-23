@@ -386,6 +386,7 @@ const _ProjectController = {
       'external-socket-heartbeat',
       'null-test-share-modal',
       'populate-clsi-cache',
+      'populate-clsi-cache-for-prompt',
       'pdf-caching-cached-url-lookup',
       'pdf-caching-mode',
       'pdf-caching-prefetch-large',
@@ -818,14 +819,26 @@ const _ProjectController = {
 
       const planDetails = Settings.plans.find(p => p.planCode === planCode)
 
+      const projectOwnerHasPremiumOnPageLoad =
+        ownerFeatures?.compileGroup === 'priority'
+      if (
+        projectOwnerHasPremiumOnPageLoad &&
+        splitTestAssignments['populate-clsi-cache']?.variant !== 'enabled'
+      ) {
+        await SplitTestHandler.promises.getAssignment(
+          req,
+          res,
+          'clsi-cache-prompt'
+        )
+      }
+
       res.render(template, {
         title: project.name,
         priority_title: true,
         bodyClasses: ['editor'],
         project_id: project._id,
         projectName: project.name,
-        projectOwnerHasPremiumOnPageLoad:
-          ownerFeatures?.compileGroup === 'priority',
+        projectOwnerHasPremiumOnPageLoad,
         user: {
           id: userId,
           email: user.email,

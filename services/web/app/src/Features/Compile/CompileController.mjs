@@ -74,8 +74,9 @@ async function _getSplitTestOptions(req, res) {
       'populate-clsi-cache'
     )
   let populateClsiCache = populateClsiCacheVariant === 'enabled'
-  const compileFromClsiCache = populateClsiCache // use same split-test
+  let compileFromClsiCache = populateClsiCache // use same split-test
 
+  let clsiCachePromptVariant = 'default'
   if (!populateClsiCache) {
     // Pre-populate the cache for the users in the split-test for prompts.
     // Keep the compile from cache disabled for now.
@@ -84,7 +85,17 @@ async function _getSplitTestOptions(req, res) {
       res,
       'populate-clsi-cache-for-prompt'
     )
+    ;({ variant: clsiCachePromptVariant } =
+      await SplitTestHandler.promises.getAssignment(
+        editorReq,
+        res,
+        'clsi-cache-prompt'
+      ))
     populateClsiCache = variant === 'enabled'
+    if (res.locals.splitTestInfo?.['clsi-cache-prompt']?.active) {
+      // Start using the cache when the split-test for the prompts is activated.
+      compileFromClsiCache = populateClsiCache
+    }
   }
 
   const pdfDownloadDomain = Settings.pdfDownloadDomain
@@ -94,6 +105,7 @@ async function _getSplitTestOptions(req, res) {
     return {
       compileFromClsiCache,
       populateClsiCache,
+      clsiCachePromptVariant,
       pdfDownloadDomain,
       enablePdfCaching: false,
     }
@@ -113,6 +125,7 @@ async function _getSplitTestOptions(req, res) {
     return {
       compileFromClsiCache,
       populateClsiCache,
+      clsiCachePromptVariant,
       pdfDownloadDomain,
       enablePdfCaching: false,
     }
@@ -121,6 +134,7 @@ async function _getSplitTestOptions(req, res) {
   return {
     compileFromClsiCache,
     populateClsiCache,
+    clsiCachePromptVariant,
     pdfDownloadDomain,
     enablePdfCaching,
     pdfCachingMinChunkSize,
@@ -212,6 +226,7 @@ const _CompileController = {
     let {
       compileFromClsiCache,
       populateClsiCache,
+      clsiCachePromptVariant,
       enablePdfCaching,
       pdfCachingMinChunkSize,
       pdfDownloadDomain,
@@ -294,6 +309,7 @@ const _CompileController = {
       compileGroup: limits?.compileGroup,
       clsiServerId,
       clsiCacheShard,
+      clsiCachePromptVariant,
       validationProblems,
       stats,
       timings,

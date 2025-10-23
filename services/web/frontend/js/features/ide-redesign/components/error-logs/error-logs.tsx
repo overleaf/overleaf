@@ -18,6 +18,7 @@ import PdfClearCacheButton from '@/features/pdf-preview/components/pdf-clear-cac
 import PdfDownloadFilesButton from '@/features/pdf-preview/components/pdf-download-files-button'
 import { useIsNewErrorLogsPositionEnabled } from '../../utils/new-editor-utils'
 import RollingBuildSelectedReminder from './rolling-build-selected-reminder'
+import ClsiCachePrompt from '@/features/pdf-preview/components/clsi-cache-prompt'
 
 const logsComponents: Array<{
   import: { default: ElementType }
@@ -86,6 +87,7 @@ function ErrorLogs({
       ))}
       <TabContent className="error-logs new-error-logs">
         <div className="logs-pane-content">
+          <ClsiCachePrompt />
           <RollingBuildSelectedReminder />
           {stoppedOnFirstError && includeErrors && <StopOnFirstErrorPrompt />}
 

@@ -2,6 +2,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import ErrorState from './error-state'
 import OLButton from '@/shared/components/ol/ol-button'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
+import ClsiCachePrompt from '@/features/pdf-preview/components/clsi-cache-prompt'
 
 export default function RenderingErrorExpectedState() {
   const { t } = useTranslation()
@@ -30,6 +31,7 @@ export default function RenderingErrorExpectedState() {
           {t('recompile')}
         </OLButton>,
       ]}
+      extraContent={<ClsiCachePrompt />}
     />
   )
 }

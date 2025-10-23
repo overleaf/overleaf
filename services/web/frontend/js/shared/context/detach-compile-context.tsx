@@ -56,6 +56,9 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
     setStopOnValidationError: _setStopOnValidationError,
     showLogs: _showLogs,
     showCompileTimeWarning: _showCompileTimeWarning,
+    clsiCachePromptVariant: _clsiCachePromptVariant,
+    clsiCachePromptSegmentation: _clsiCachePromptSegmentation,
+    setClsiCachePromptSegmentation: _setClsiCachePromptSegmentation,
     stopOnFirstError: _stopOnFirstError,
     stopOnValidationError: _stopOnValidationError,
     stoppedOnFirstError: _stoppedOnFirstError,
@@ -198,6 +201,24 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
   const [showLogs] = useDetachStateWatcher(
     'showLogs',
     _showLogs,
+    'detacher',
+    'detached'
+  )
+  const [clsiCachePromptVariant] = useDetachStateWatcher(
+    'clsiCachePromptVariant',
+    _clsiCachePromptVariant,
+    'detacher',
+    'detached'
+  )
+  const [clsiCachePromptSegmentation] = useDetachStateWatcher(
+    'clsiCachePromptSegmentation',
+    _clsiCachePromptSegmentation,
+    'detacher',
+    'detached'
+  )
+  const setClsiCachePromptSegmentation = useDetachAction(
+    'setClsiCachePromptSegmentation',
+    _setClsiCachePromptSegmentation,
     'detacher',
     'detached'
   )
@@ -419,6 +440,9 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
       setStopOnValidationError,
       showLogs,
       showCompileTimeWarning,
+      clsiCachePromptVariant,
+      clsiCachePromptSegmentation,
+      setClsiCachePromptSegmentation,
       startCompile,
       stopCompile,
       stopOnFirstError,
@@ -472,6 +496,9 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
       setStopOnValidationError,
       showCompileTimeWarning,
       showLogs,
+      clsiCachePromptVariant,
+      clsiCachePromptSegmentation,
+      setClsiCachePromptSegmentation,
       startCompile,
       stopCompile,
       stopOnFirstError,

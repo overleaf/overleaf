@@ -19,6 +19,7 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import PdfCodeCheckFailedBanner from '@/features/ide-redesign/components/pdf-preview/pdf-code-check-failed-banner'
 import getMeta from '@/utils/meta'
 import NewPdfLogsViewer from '@/features/ide-redesign/components/pdf-preview/pdf-logs-viewer'
+import ClsiCachePrompt from './clsi-cache-prompt'
 
 function PdfPreviewPane() {
   const { pdfUrl } = useCompileContext()
@@ -50,6 +51,7 @@ function PdfPreviewPane() {
         <Suspense fallback={<FullSizeLoadingSpinner delay={500} />}>
           <div className="pdf-viewer" data-testid="pdf-viewer">
             <PdfViewer />
+            <ClsiCachePrompt />
           </div>
         </Suspense>
         {newErrorLogsPosition ? (

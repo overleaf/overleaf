@@ -223,6 +223,7 @@ describe('CompileController', function () {
                 url: `/project/${ctx.projectId}/user/wat/build/${ctx.build_id}/output/output.zip`,
                 type: 'zip',
               },
+              clsiCachePromptVariant: 'default',
               pdfDownloadDomain: 'https://compiles.overleaf.test',
             })
           )
@@ -247,6 +248,7 @@ describe('CompileController', function () {
             timings: undefined,
             outputUrlPrefix: '/zone/b',
             buildId: ctx.build_id,
+            clsiCachePromptVariant: 'default',
           })
           await ctx.CompileController.compile(ctx.req, ctx.res, ctx.next)
         })
@@ -268,6 +270,7 @@ describe('CompileController', function () {
                 url: `/project/${ctx.projectId}/user/wat/build/${ctx.build_id}/output/output.zip`,
                 type: 'zip',
               },
+              clsiCachePromptVariant: 'default',
               outputUrlPrefix: '/zone/b',
               pdfDownloadDomain: 'https://compiles.overleaf.test/zone/b',
             })
@@ -318,6 +321,7 @@ describe('CompileController', function () {
               url: `/project/${ctx.projectId}/user/wat/build/${ctx.build_id}/output/output.zip`,
               type: 'zip',
             },
+            clsiCachePromptVariant: 'default',
           })
         )
       })

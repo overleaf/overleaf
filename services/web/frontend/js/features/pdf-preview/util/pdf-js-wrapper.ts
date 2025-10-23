@@ -48,6 +48,10 @@ export default class PDFJSWrapper {
     this.pdfCachingTransportFactory = generatePdfCachingTransportFactory()
   }
 
+  usedClsiCache() {
+    return !!this.pdfCachingTransportFactory?.sentEventFallbackToClsiCache
+  }
+
   // load a document from a URL
   async loadDocument({
     url,

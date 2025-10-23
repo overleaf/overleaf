@@ -25,8 +25,14 @@ type PdfJsViewerProps = {
 function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
   const { projectId } = useProjectContext()
 
-  const { setError, firstRenderDone, highlights, position, setPosition } =
-    useCompileContext()
+  const {
+    setError,
+    firstRenderDone,
+    highlights,
+    position,
+    setPosition,
+    setClsiCachePromptSegmentation,
+  } = useCompileContext()
 
   const { setLoadingError } = usePdfPreviewContext()
 
@@ -82,6 +88,10 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
   }, [])
 
   const [startFetch, setStartFetch] = useState(0)
+  const startFetchRef = useRef(startFetch)
+  useEffect(() => {
+    startFetchRef.current = startFetch
+  }, [startFetch])
 
   // listen for events and trigger rendering.
   // Do everything in one effect to mitigate de-sync between events.
@@ -148,6 +158,27 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
       setPage(event.pageNumber)
     }
 
+    const handleRenderedClsiCachePrompt = () => {
+      const delay = Math.ceil(
+        (performance.now() - startFetchRef.current) / 1_000
+      )
+      if (delay > 30) {
+        setClsiCachePromptSegmentation(prev => {
+          // Always overwrite segmentation; emit the greatest delay.
+          return {
+            ...prev,
+            preview: {
+              previewFailed: false,
+              delay,
+              usedClsiCache: pdfJsWrapper.usedClsiCache(),
+            },
+          }
+        })
+        pdfJsWrapper.eventBus.off('pagerendered', handleRenderedClsiCachePrompt)
+      }
+    }
+    pdfJsWrapper.eventBus.on('pagerendered', handleRenderedClsiCachePrompt)
+
     // `pagesinit` fires when the data for rendering the first page is ready.
     pdfJsWrapper.eventBus.on('pagesinit', handlePagesinit)
     // `pagerendered` fires when a page was actually rendered.
@@ -164,15 +195,22 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
       pdfJsWrapper.eventBus.off('pagerendered', handleRenderedInitialPageNumber)
       pdfJsWrapper.eventBus.off('scalechanging', handleScaleChanged)
       pdfJsWrapper.eventBus.off('pagechanging', handlePageChanging)
+      pdfJsWrapper.eventBus.off('pagerendered', handleRenderedClsiCachePrompt)
     }
-  }, [pdfJsWrapper, firstRenderDone, startFetch])
+  }, [
+    pdfJsWrapper,
+    firstRenderDone,
+    startFetch,
+    setClsiCachePromptSegmentation,
+  ])
 
   // load the PDF document from the URL
   useEffect(() => {
     if (pdfJsWrapper && url) {
       setInitialised(false)
       setError(undefined)
-      setStartFetch(performance.now())
+      const t0 = performance.now()
+      setStartFetch(t0)
 
       const abortController = new AbortController()
       const handleFetchError = (err: any) => {
@@ -180,6 +218,21 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
         // The error is already logged at the call-site with additional context.
         if (err instanceof PDFJS.ResponseException && err.missing) {
           setError('rendering-error-expected')
+          setClsiCachePromptSegmentation(prev => {
+            if (prev['preview-error'] !== null) {
+              return prev // keep delay segmentation from first error.
+            }
+            const delay = Math.ceil((performance.now() - t0) / 1_000)
+            return {
+              ...prev,
+              preview: null,
+              'preview-error': {
+                previewFailed: true,
+                delay,
+                usedClsiCache: pdfJsWrapper.usedClsiCache(),
+              },
+            }
+          })
         } else {
           setError('rendering-error')
         }
@@ -190,6 +243,9 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
           if (doc) {
             setTotalPages(doc.numPages)
           }
+          setClsiCachePromptSegmentation(prev => {
+            return { ...prev, preview: null, 'preview-error': null }
+          })
         })
         .catch(error => {
           if (abortController.signal.aborted) return
@@ -200,7 +256,14 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
         abortController.abort()
       }
     }
-  }, [pdfJsWrapper, url, pdfFile, setError, setStartFetch])
+  }, [
+    pdfJsWrapper,
+    url,
+    pdfFile,
+    setError,
+    setStartFetch,
+    setClsiCachePromptSegmentation,
+  ])
 
   // listen for scroll events
   useEffect(() => {

@@ -39,18 +39,20 @@ import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { getJSON } from '@/infrastructure/fetch-json'
-import { CompileResponseData } from '../../../../types/compile'
+import { CompileResponseData, PDFFile } from '../../../../types/compile'
 import {
   PdfScrollPosition,
   usePdfScrollPosition,
 } from '@/shared/hooks/use-pdf-scroll-position'
 import {
+  ClsiCachePromptSegmentation,
+  ClsiCachePromptVariant,
   DeliveryLatencies,
   HighlightData,
   LogEntry,
   PdfFileDataList,
 } from '@/features/pdf-preview/util/types'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import { getSplitTestVariant, isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { captureException } from '@/infrastructure/error-reporter'
 import OError from '@overleaf/o-error'
 import getMeta from '@/utils/meta'
@@ -99,6 +101,11 @@ export type CompileContext = {
   setStopOnValidationError: (value: boolean) => void
   showCompileTimeWarning: boolean
   showLogs: boolean
+  clsiCachePromptVariant: ClsiCachePromptVariant
+  clsiCachePromptSegmentation: ClsiCachePromptSegmentation
+  setClsiCachePromptSegmentation: Dispatch<
+    SetStateAction<ClsiCachePromptSegmentation>
+  >
   stopOnFirstError: boolean
   stopOnValidationError: boolean
   stoppedOnFirstError: boolean
@@ -200,7 +207,8 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   // fetch initial compile response from cache
   const [initialCompileFromCache, setInitialCompileFromCache] = useState(
     getMeta('ol-projectOwnerHasPremiumOnPageLoad') &&
-      isSplitTestEnabled('populate-clsi-cache') &&
+      (isSplitTestEnabled('populate-clsi-cache') ||
+        isSplitTestEnabled('populate-clsi-cache-for-prompt')) &&
       // Avoid fetching the initial compile from cache in PDF detach tab
       role !== 'detached'
   )
@@ -209,12 +217,25 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
     useState(false)
   // Raw data from clsi-cache, will need post-processing and check settings
   const [dataFromCache, setDataFromCache] = useState<CompileResponseData>()
+  const [compileFromCacheStartedAt, setCompileFromCacheStartedAt] = useState(0)
 
   // whether the cache is being cleared
   const [clearingCache, setClearingCache] = useState(false)
 
   // whether the logs should be visible
   const [showLogs, setShowLogs] = useState(false)
+
+  // flags for clsi-cache prompt
+  const [clsiCachePromptVariant, setClsiCachePromptVariant] =
+    useState<ClsiCachePromptVariant>('default')
+  const [clsiCachePromptSegmentation, setClsiCachePromptSegmentation] =
+    useState<ClsiCachePromptSegmentation>({
+      default: null,
+      compile: null,
+      preview: null,
+      'preview-error': null,
+      synctex: null,
+    })
 
   // whether the compile dropdown arrow should be animated
   const [animateCompileDropdownArrow, setAnimateCompileDropdownArrow] =
@@ -356,6 +377,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   useEffect(() => {
     if (initialCompileFromCache && !pendingInitialCompileFromCache) {
       setPendingInitialCompileFromCache(true)
+      setCompileFromCacheStartedAt(performance.now())
       getJSON(`/project/${projectId}/output/cached/output.overleaf.json`)
         .then((data: any) => {
           // Hand data over to next effect, it will wait for project/doc loading.
@@ -401,6 +423,14 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
 
     if (settingsUpToDate) {
       sendMB('compile-from-cache', { projectId })
+      dataFromCache.clsiCachePromptVariant = getSplitTestVariant(
+        'clsi-cache-prompt',
+        'default'
+      ) as ClsiCachePromptVariant
+      if (!dataFromCache.timings) dataFromCache.timings = {}
+      dataFromCache.timings.compileTimeClientE2E = Math.ceil(
+        performance.now() - compileFromCacheStartedAt
+      )
       setData(dataFromCache)
       setCompiledOnce(true)
     }
@@ -409,6 +439,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
     setPendingInitialCompileFromCache(false)
   }, [
     projectId,
+    compileFromCacheStartedAt,
     dataFromCache,
     joinedOnce,
     currentDocument,
@@ -486,6 +517,32 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       if (data.clsiServerId) {
         setClsiServerId(data.clsiServerId) // set in scope, for PdfSynctexController
       }
+      setClsiCachePromptVariant(data.clsiCachePromptVariant ?? 'default')
+      setClsiCachePromptSegmentation(prev => {
+        if (
+          !(
+            data.status === 'success' &&
+            (data.fromCache || data.stats?.isInitialCompile === 1)
+          )
+        ) {
+          return { ...prev, compile: null }
+        }
+        const pdfSize = (
+          data.outputFiles.find(f => f.path === 'output.pdf') as PDFFile
+        )?.size
+        return {
+          ...prev,
+          compile: {
+            pdfSize,
+            isCompileFromCache: Boolean(data.fromCache),
+            isInitialCompile: data.stats?.isInitialCompile === 1,
+            restoredClsiCache: data.stats?.restoredClsiCache === 1,
+            compileTimeServerE2E: data.timings?.compileE2E,
+            compileTimeClientE2E: data.timings?.compileTimeClientE2E,
+            clsiCacheEnabled: Boolean(data.clsiCacheShard),
+          },
+        }
+      })
 
       if (data.outputFiles) {
         const outputFiles = new Map()
@@ -781,6 +838,9 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       setStopOnFirstError,
       setStopOnValidationError,
       showLogs,
+      clsiCachePromptVariant,
+      clsiCachePromptSegmentation,
+      setClsiCachePromptSegmentation,
       startCompile,
       stopCompile,
       stopOnFirstError,
@@ -831,6 +891,9 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       setStopOnValidationError,
       showCompileTimeWarning,
       showLogs,
+      clsiCachePromptVariant,
+      clsiCachePromptSegmentation,
+      setClsiCachePromptSegmentation,
       startCompile,
       stopCompile,
       stopOnFirstError,

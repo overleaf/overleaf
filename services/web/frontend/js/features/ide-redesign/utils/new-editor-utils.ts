@@ -86,3 +86,13 @@ export const useAreNewErrorLogsEnabled = () => {
   const newEditorEnabled = useIsNewEditorEnabled()
   return newEditorEnabled && canUseNewLogs()
 }
+
+export function useNewEditorVariant() {
+  const newEditor = useIsNewEditorEnabled()
+  const newErrorLogs = useAreNewErrorLogsEnabled()
+  const newErrorLogsPosition = useIsNewErrorLogsPositionEnabled()
+  if (!newEditor) return 'default'
+  if (!newErrorLogs) return 'new-editor-old-logs'
+  if (!newErrorLogsPosition) return 'new-editor-new-logs-old-position'
+  return 'new-editor'
+}

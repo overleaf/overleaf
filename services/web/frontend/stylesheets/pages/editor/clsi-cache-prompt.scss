@@ -1,0 +1,27 @@
+@import '../../foundations/spacing';
+
+.clsi-cache-prompt {
+  width: auto; // Do not expand to full width.
+
+  .pdf-viewer &,
+  .pdf-error-state & {
+    position: fixed;
+    bottom: 0;
+    right: 0.5rem; // Add space for scrollbar.
+    margin: 1rem;
+  }
+
+  .notification-icon {
+    display: none; // Hide the (i) icon.
+  }
+
+  .notification-close-btn {
+    // Put even spacing between question, X and notification border.
+    padding: 0 0 0 (16px - 5.5px); // The X button already has 5.5px padding.
+  }
+
+  .btn {
+    white-space: nowrap;
+    margin: 10px 0 0 10px;
+  }
+}

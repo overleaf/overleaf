@@ -72,7 +72,7 @@ const defaultUserSettings = {
 }
 
 export type EditorProvidersProps = {
-  user?: { id: string; email: string }
+  user?: { id: string; email: string; signUpDate?: string }
   projectId?: string
   projectName?: string
   projectOwner?: ProjectMetadata['owner']
@@ -147,7 +147,11 @@ const layoutContextDefault = {
 } satisfies Partial<LayoutContextValue>
 
 export function EditorProviders({
-  user = { id: USER_ID, email: USER_EMAIL },
+  user = {
+    id: USER_ID,
+    email: USER_EMAIL,
+    signUpDate: '2025-10-10T10:10:10Z',
+  },
   projectId = projectDefaults._id,
   projectName = projectDefaults.name,
   projectOwner = projectDefaults.owner,

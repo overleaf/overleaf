@@ -153,6 +153,7 @@ export default class DocumentCompiler {
       )
 
       const compileTimeClientE2E = Math.ceil(performance.now() - t0)
+      if (data.timings) data.timings.compileTimeClientE2E = compileTimeClientE2E
       const { deliveryLatencies, firstRenderDone } = trackPdfDownload(
         data,
         compileTimeClientE2E,
