@@ -39,7 +39,6 @@ const db = {
   deletedUsers: internalDb.collection('deletedUsers'),
   dropboxEntities: internalDb.collection('dropboxEntities'),
   dropboxProjects: internalDb.collection('dropboxProjects'),
-  docHistory: internalDb.collection('docHistory'),
   docHistoryIndex: internalDb.collection('docHistoryIndex'),
   docSnapshots: internalDb.collection('docSnapshots'),
   docs: internalDb.collection('docs'),
