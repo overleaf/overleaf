@@ -720,7 +720,7 @@ module.exports = {
     parseInt(process.env.COMMENT_MENTION_DELAY_MINUTES) || 30 * 60 * 1000, // 30 minutes
 
   // Comment mention notifications will wait at least this long before being sent
-  commentMentionMinDelay:
+  commentMentionMinAge:
     parseInt(process.env.COMMENT_MENTION_DELAY_MINUTES) || 10 * 60 * 1000, // 10 minutes
 
   // Maximum JSON size in HTTP requests

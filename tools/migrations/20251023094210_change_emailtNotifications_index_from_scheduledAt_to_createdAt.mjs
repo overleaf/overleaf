@@ -23,6 +23,13 @@ const newIndexes = [
     name: 'createdAt_1',
     expireAfterSeconds: 60 * 60 * 24, // expire after 24 hours
   },
+  {
+    key: {
+      project_id: 1,
+    },
+    name: 'project_id_1',
+    expireAfterSeconds: 60 * 60 * 24, // expire after 24 hours
+  },
 ]
 
 const migrate = async client => {
