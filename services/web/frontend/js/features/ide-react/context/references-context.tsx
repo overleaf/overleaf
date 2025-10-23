@@ -21,7 +21,6 @@ import { useEditorManagerContext } from './editor-manager-context'
 import { signalWithTimeout } from '@/utils/abort-signal'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import type { ReferenceIndexer } from '../references/reference-indexer'
 import { AdvancedReferenceSearchResult } from '@/features/ide-react/references/types'
 import clientId from '@/utils/client-id'
@@ -50,38 +49,19 @@ export const ReferencesProvider: FC<React.PropsWithChildren> = ({
   const abortControllerRef = useRef<AbortController | null>(null)
 
   const [referenceKeys, setReferenceKeys] = useState(new Set<string>())
-  const clientSideReferences = useFeatureFlag('client-side-references')
 
   const [existingIndexHash, setExistingIndexHash] = useState<
     Record<string, { hash: string; timestamp: number }>
   >({})
 
-  const indexAllReferencesServerside = useCallback(
-    async (shouldBroadcast: boolean) => {
-      return postJSON(`/project/${projectId}/references/indexAll`, {
-        body: {
-          shouldBroadcast,
-        },
-      })
-        .then((response: { keys: string[] }) => {
-          setReferenceKeys(new Set(response.keys))
-        })
-        .catch(error => {
-          // allow the request to fail
-          debugConsole.error(error)
-        })
-    },
-    [projectId]
-  )
-
   const indexerRef = useRef<Promise<ReferenceIndexer> | null>(null)
-  if (clientSideReferences && indexerRef.current === null) {
+  if (indexerRef.current === null) {
     indexerRef.current = import('../references/reference-indexer').then(
       m => new m.ReferenceIndexer()
     )
   }
 
-  const indexAllReferencesLocally = useCallback(
+  const indexAllReferences = useCallback(
     async (shouldBroadcast: boolean) => {
       if (permissionsLevel === 'readOnly') {
         // Not going to search the references, so let's not index them.
@@ -122,10 +102,6 @@ export const ReferencesProvider: FC<React.PropsWithChildren> = ({
     },
     [projectSnapshot, openDocs, projectId, permissionsLevel]
   )
-
-  const indexAllReferences = clientSideReferences
-    ? indexAllReferencesLocally
-    : indexAllReferencesServerside
 
   const indexReferencesIfDocModified = useCallback(
     (doc: ShareJsDoc, shouldBroadcast: boolean) => {
@@ -195,17 +171,11 @@ export const ReferencesProvider: FC<React.PropsWithChildren> = ({
         allDocs: boolean,
         refresherId: string
       ) => {
-        if (clientSideReferences) {
-          if (refresherId === clientId.get()) {
-            // We asked for this broadcast, so we must have already done the indexing
-            return
-          }
-          indexAllReferences(false)
-        } else {
-          setReferenceKeys(oldDocs =>
-            allDocs ? new Set(keys) : new Set([...oldDocs, ...keys])
-          )
+        if (refresherId === clientId.get()) {
+          // We asked for this broadcast, so we must have already done the indexing
+          return
         }
+        indexAllReferences(false)
       }
 
       socket.on('references:keys:updated', processUpdatedReferenceKeys)
@@ -216,7 +186,7 @@ export const ReferencesProvider: FC<React.PropsWithChildren> = ({
         )
       }
     }
-  }, [projectJoined, indexAllReferences, socket, clientSideReferences])
+  }, [projectJoined, indexAllReferences, socket])
 
   const searchLocalReferences = useCallback(
     async (query: string): Promise<AdvancedReferenceSearchResult> => {

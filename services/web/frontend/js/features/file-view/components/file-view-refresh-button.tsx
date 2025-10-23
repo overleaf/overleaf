@@ -16,7 +16,6 @@ import { sendMB } from '@/infrastructure/event-tracking'
 import useIsMounted from '@/shared/hooks/use-is-mounted'
 import clientId from '@/utils/client-id'
 import { useReferencesContext } from '@/features/ide-react/context/references-context'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type FileViewRefreshButtonProps = {
   setRefreshError: Dispatch<SetStateAction<Nullable<string>>>
@@ -38,7 +37,6 @@ export default function FileViewRefreshButton({
   const [refreshing, setRefreshing] = useState(false)
   const isMountedRef = useIsMounted()
   const { indexAllReferences } = useReferencesContext()
-  const clientSideReferences = useFeatureFlag('client-side-references')
 
   const refreshFile = useCallback(
     (isTPR: Nullable<boolean>) => {
@@ -57,7 +55,7 @@ export default function FileViewRefreshButton({
           if (isMountedRef.current) {
             setRefreshing(false)
           }
-          if (clientSideReferences && shouldReindexReferences) {
+          if (shouldReindexReferences) {
             indexAllReferences(false)
           }
           sendMB('refresh-linked-file', {
@@ -71,14 +69,7 @@ export default function FileViewRefreshButton({
           }
         })
     },
-    [
-      file,
-      projectId,
-      setRefreshError,
-      isMountedRef,
-      indexAllReferences,
-      clientSideReferences,
-    ]
+    [file, projectId, setRefreshError, isMountedRef, indexAllReferences]
   )
 
   if (tprFileViewRefreshButton.length > 0) {

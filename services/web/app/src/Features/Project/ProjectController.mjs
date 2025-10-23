@@ -401,7 +401,6 @@ const _ProjectController = {
       'overleaf-assist-bundle',
       'word-count-client',
       'editor-popup-ux-survey',
-      'client-side-references',
       'editor-redesign-new-users',
       'writefull-frontend-migration',
       'chat-edit-delete',
