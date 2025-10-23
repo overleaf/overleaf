@@ -48,7 +48,8 @@ async function setAllowDowngradeToFalse() {
 }
 
 async function deleteHistoryCollections() {
-  await gracefullyDropCollection(db.docHistory)
+  const docHistory = await getCollectionInternal('docHistory')
+  await gracefullyDropCollection(docHistory)
   await gracefullyDropCollection(db.docHistoryIndex)
   const projectHistoryMetaData = await getCollectionInternal(
     'projectHistoryMetaData'
