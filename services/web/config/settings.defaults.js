@@ -715,9 +715,13 @@ module.exports = {
     parseInt(process.env.OVERLEAF_PROJECT_HARD_DELETION_DELAY, 10) ||
     1000 * 60 * 60 * 24 * 90, // 90 days
 
-  // Delay before sending comment mention notifications
-  commentMentionDelay:
+  // Maximum Delay before sending comment mention notifications
+  commentMentionMaxDelay:
     parseInt(process.env.COMMENT_MENTION_DELAY_MINUTES) || 30 * 60 * 1000, // 30 minutes
+
+  // Comment mention notifications will wait at least this long before being sent
+  commentMentionMinDelay:
+    parseInt(process.env.COMMENT_MENTION_DELAY_MINUTES) || 10 * 60 * 1000, // 10 minutes
 
   // Maximum JSON size in HTTP requests
   // We should be able to process twice the max doc length, to allow for
