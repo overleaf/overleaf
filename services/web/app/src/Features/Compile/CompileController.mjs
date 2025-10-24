@@ -309,7 +309,11 @@ const _CompileController = {
       compileGroup: limits?.compileGroup,
       clsiServerId,
       clsiCacheShard,
-      clsiCachePromptVariant,
+      clsiCachePromptVariant: ['alpha', 'priority'].includes(
+        limits?.compileGroup
+      )
+        ? clsiCachePromptVariant
+        : 'default',
       validationProblems,
       stats,
       timings,
