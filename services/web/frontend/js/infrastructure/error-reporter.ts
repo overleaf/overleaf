@@ -67,6 +67,8 @@ function sentryReporter() {
             // Ignore a frequent unhandled promise rejection
             /Non-Error promise rejection captured with keys: currentTarget, detail, isTrusted, target/,
             /Non-Error promise rejection captured with keys: message, status/,
+            // Ignore a frequent blocked image
+            "Blocked 'image' from 'www.googletagmanager.com'",
           ],
 
           denyUrls: [
