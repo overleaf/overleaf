@@ -104,11 +104,20 @@ const LATEX_MK_METRICS_STDERR = [
   [
     'latexmk-img-times',
     s => {
+      const pngCategoriesByFile = new Map()
       const pngCopyMatches = s.matchAll(/^PNG copy: (.*)$/gm)
-      const pngCopyFiles = new Set()
       for (const match of pngCopyMatches) {
         const filename = match[1]
-        pngCopyFiles.add(filename)
+        pngCategoriesByFile.set(filename, 'fast-copy')
+      }
+
+      const pngCopySkipMatches = s.matchAll(
+        /^PNG copy skipped \((alpha|gamma|palette|interlaced)\): (.*)$/gm
+      )
+      for (const match of pngCopySkipMatches) {
+        const category = match[1]
+        const filename = match[2]
+        pngCategoriesByFile.set(filename, category)
       }
 
       const timingMatches = s.matchAll(
@@ -119,9 +128,14 @@ const LATEX_MK_METRICS_STDERR = [
         let type = match[1]
         const timeMs = parseInt(match[2], 10)
         const filename = match[3]
-        if (type === 'PNG' && pngCopyFiles.has(filename)) {
-          type = 'PNG-fast-copy'
+
+        if (type === 'PNG') {
+          const pngCategory = pngCategoriesByFile.get(filename)
+          if (pngCategory != null) {
+            type = `PNG-${pngCategory}`
+          }
         }
+
         const accumulatedTime = timingsByType.get(type) ?? 0
         timingsByType.set(type, accumulatedTime + timeMs)
       }
