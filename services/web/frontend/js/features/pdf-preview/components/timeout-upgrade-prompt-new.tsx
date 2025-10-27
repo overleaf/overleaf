@@ -7,10 +7,7 @@ import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-err
 import OLButton from '@/shared/components/ol/ol-button'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import getMeta from '@/utils/meta'
-import {
-  populateEditorRedesignSegmentation,
-  useEditorAnalytics,
-} from '@/shared/hooks/use-editor-analytics'
+import { populateEditorRedesignSegmentation } from '@/shared/hooks/use-editor-analytics'
 import {
   isNewUser,
   useIsNewEditorEnabled,
@@ -62,7 +59,6 @@ function TimeoutUpgradePromptNew() {
         <PreventTimeoutHelpMessage
           handleEnableStopOnFirstErrorClick={handleEnableStopOnFirstErrorClick}
           lastCompileOptions={lastCompileOptions}
-          segmentation={sharedSegmentation}
         />
       )}
     </>
@@ -151,36 +147,14 @@ const CompileTimeout = memo(function CompileTimeout({
 type PreventTimeoutHelpMessageProps = {
   lastCompileOptions: any
   handleEnableStopOnFirstErrorClick: () => void
-  segmentation: eventTracking.Segmentation
 }
 
 const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
   lastCompileOptions,
   handleEnableStopOnFirstErrorClick,
-  segmentation,
 }: PreventTimeoutHelpMessageProps) {
   const { t } = useTranslation()
-  const { sendEvent } = useEditorAnalytics()
   const newLogsPosition = useIsNewErrorLogsPositionEnabled()
-
-  function sendInfoClickEvent() {
-    sendEvent('paywall-info-click', {
-      ...segmentation,
-      'paywall-type': 'compile-timeout',
-      content: 'blog',
-    })
-  }
-
-  const compileTimeoutChangesBlogLink = (
-    /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
-    <a
-      aria-label={t('read_more_about_free_compile_timeouts_servers')}
-      href="/blog/changes-to-free-compile-timeout"
-      rel="noopener noreferrer"
-      target="_blank"
-      onClick={sendInfoClickEvent}
-    />
-  )
 
   return (
     <PdfLogEntry
@@ -188,14 +162,6 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
       headerTitle={t('reasons_for_compile_timeouts')}
       formattedContent={
         <>
-          <p>
-            <em>
-              <Trans
-                i18nKey="weve_reduced_compile_timeout"
-                components={[compileTimeoutChangesBlogLink]}
-              />
-            </em>
-          </p>
           <p>{t('common_causes_of_compile_timeouts_include')}:</p>
           <ul>
             <li>

@@ -7,10 +7,7 @@ import { useCallback, useMemo } from 'react'
 import ErrorState from './error-state'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 import getMeta from '@/utils/meta'
-import {
-  populateEditorRedesignSegmentation,
-  useEditorAnalytics,
-} from '@/shared/hooks/use-editor-analytics'
+import { populateEditorRedesignSegmentation } from '@/shared/hooks/use-editor-analytics'
 import {
   isNewUser,
   useIsNewEditorEnabled,
@@ -20,7 +17,6 @@ import { getSplitTestVariant } from '@/utils/splitTestUtils'
 export const ShortCompileTimeoutErrorState = () => {
   const { t } = useTranslation()
   const { isProjectOwner } = useCompileContext()
-  const { sendEvent } = useEditorAnalytics()
   const newEditor = useIsNewEditorEnabled()
 
   const { compileTimeout } = getMeta('ol-compileSettings')
@@ -36,14 +32,6 @@ export const ShortCompileTimeoutErrorState = () => {
       ),
     [isProjectOwner, compileTimeout, newEditor]
   )
-
-  const sendInfoClickEvent = useCallback(() => {
-    sendEvent('paywall-info-click', {
-      ...segmentation,
-      'paywall-type': 'compile-timeout',
-      content: 'blog',
-    })
-  }, [segmentation, sendEvent])
 
   const extraSearchParams = useMemo(() => {
     if (!isNewUser()) {
@@ -92,25 +80,6 @@ export const ShortCompileTimeoutErrorState = () => {
       iconType="running_with_errors"
       extraContent={
         <div className="pdf-error-state-info-box">
-          <p>
-            <em>
-              <Trans
-                i18nKey="weve_reduced_compile_timeout"
-                components={[
-                  /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
-                  <a
-                    aria-label={t(
-                      'read_more_about_free_compile_timeouts_servers'
-                    )}
-                    href="/blog/changes-to-free-compile-timeout"
-                    rel="noopener noreferrer"
-                    target="_blank"
-                    onClick={sendInfoClickEvent}
-                  />,
-                ]}
-              />
-            </em>
-          </p>
           <ReasonsForTimeoutInfo />
         </div>
       }

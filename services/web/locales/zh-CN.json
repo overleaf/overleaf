@@ -1687,7 +1687,6 @@
   "reactivate_subscription": "重新激活您的订阅",
   "read_lines_from_path": "从 __path__ 读取行",
   "read_more": "阅读更多",
-  "read_more_about_free_compile_timeouts_servers": "阅读有关免费计划编译超时和服务器更改的更多信息",
   "read_only_dropbox_sync_message": "作为只读查看者，您可以将当前项目版本同步到 Dropbox，但在 Dropbox 中所做的更改<0>不会</0>同步回 Overleaf。",
   "read_only_token": "只读令牌",
   "read_write_token": "可读写令牌",
