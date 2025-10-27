@@ -19,12 +19,10 @@ import LinkedFilesErrors from './LinkedFilesErrors.mjs'
 import {
   OutputFileFetchFailedError,
   FileTooLargeError,
-  OError,
 } from '../Errors/Errors.js'
 import Modules from '../../infrastructure/Modules.js'
 import { plainTextResponse } from '../../infrastructure/Response.js'
 import { z, zz, validateReq } from '../../infrastructure/Validation.js'
-import ReferencesHandler from '../References/ReferencesHandler.mjs'
 import EditorRealTimeController from '../Editor/EditorRealTimeController.js'
 import { expressify } from '@overleaf/promise-utils'
 import ProjectOutputFileAgent from './ProjectOutputFileAgent.mjs'
@@ -142,26 +140,16 @@ async function refreshLinkedFile(req, res, next) {
   }
 
   if (req.body.shouldReindexReferences) {
-    let data
-    try {
-      data = await ReferencesHandler.promises.indexAll(projectId)
-    } catch (error) {
-      OError.tag(error, 'failed to index references', {
-        projectId,
-      })
-      return next(error)
-    }
+    // Signal to clients that they should re-index references
     EditorRealTimeController.emitToRoom(
       projectId,
       'references:keys:updated',
-      data.keys,
+      [],
       true,
       clientId
     )
-    res.json({ new_file_id: newFileId })
-  } else {
-    res.json({ new_file_id: newFileId })
   }
+  res.json({ new_file_id: newFileId })
 }
 
 export default LinkedFilesController = {

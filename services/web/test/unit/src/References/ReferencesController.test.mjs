@@ -16,16 +16,6 @@ describe('ReferencesController', function () {
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/References/ReferencesHandler',
-      () => ({
-        default: (ctx.ReferencesHandler = {
-          index: sinon.stub(),
-          indexAll: sinon.stub(),
-        }),
-      })
-    )
-
-    vi.doMock(
       '../../../../app/src/Features/Editor/EditorRealTimeController',
       () => ({
         default: (ctx.EditorRealTimeController = {
@@ -45,16 +35,15 @@ describe('ReferencesController', function () {
     ctx.res.json = sinon.stub()
     ctx.res.sendStatus = sinon.stub()
     ctx.next = sinon.stub()
-    ctx.fakeResponseData = {
+    ctx.expectedResponseData = {
       projectId: ctx.projectId,
-      keys: ['one', 'two', 'three'],
+      keys: [],
     }
   })
 
   describe('indexAll', function () {
     beforeEach(function (ctx) {
       ctx.req.body = { shouldBroadcast: false }
-      ctx.ReferencesHandler.indexAll.callsArgWith(1, null, ctx.fakeResponseData)
       ctx.call = callback => {
         ctx.controller.indexAll(ctx.req, ctx.res, ctx.next)
         return callback()
@@ -72,23 +61,11 @@ describe('ReferencesController', function () {
       })
     })
 
-    it('should return data', async function (ctx) {
+    it('should return expected empty data', async function (ctx) {
       await new Promise(resolve => {
         ctx.call(() => {
           ctx.res.json.callCount.should.equal(1)
-          ctx.res.json.calledWith(ctx.fakeResponseData).should.equal(true)
-          resolve()
-        })
-      })
-    })
-
-    it('should call ReferencesHandler.indexAll', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.call(() => {
-          ctx.ReferencesHandler.indexAll.callCount.should.equal(1)
-          ctx.ReferencesHandler.indexAll
-            .calledWith(ctx.projectId)
-            .should.equal(true)
+          ctx.res.json.calledWith(ctx.expectedResponseData).should.equal(true)
           resolve()
         })
       })
@@ -96,7 +73,6 @@ describe('ReferencesController', function () {
 
     describe('when shouldBroadcast is true', function () {
       beforeEach(function (ctx) {
-        ctx.ReferencesHandler.index.callsArgWith(2, null, ctx.fakeResponseData)
         ctx.req.body.shouldBroadcast = true
       })
 
@@ -120,11 +96,11 @@ describe('ReferencesController', function () {
         })
       })
 
-      it('should still return data', async function (ctx) {
+      it('should still return empty data', async function (ctx) {
         await new Promise(resolve => {
           ctx.call(() => {
             ctx.res.json.callCount.should.equal(1)
-            ctx.res.json.calledWith(ctx.fakeResponseData).should.equal(true)
+            ctx.res.json.calledWith(ctx.expectedResponseData).should.equal(true)
             resolve()
           })
         })
@@ -133,7 +109,6 @@ describe('ReferencesController', function () {
 
     describe('when shouldBroadcast is false', function () {
       beforeEach(function (ctx) {
-        ctx.ReferencesHandler.index.callsArgWith(2, null, ctx.fakeResponseData)
         ctx.req.body.shouldBroadcast = false
       })
 
@@ -157,55 +132,13 @@ describe('ReferencesController', function () {
         })
       })
 
-      it('should still return data', async function (ctx) {
+      it('should still return empty data', async function (ctx) {
         await new Promise(resolve => {
           ctx.call(() => {
             ctx.res.json.callCount.should.equal(1)
-            ctx.res.json.calledWith(ctx.fakeResponseData).should.equal(true)
+            ctx.res.json.calledWith(ctx.expectedResponseData).should.equal(true)
             resolve()
           })
-        })
-      })
-    })
-  })
-
-  describe('there is no data', function () {
-    beforeEach(function (ctx) {
-      ctx.ReferencesHandler.indexAll.callsArgWith(1)
-      ctx.call = callback => {
-        ctx.controller.indexAll(ctx.req, ctx.res, ctx.next)
-        callback()
-      }
-    })
-
-    it('should not call EditorRealTimeController.emitToRoom', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.call(() => {
-          ctx.EditorRealTimeController.emitToRoom.callCount.should.equal(0)
-          resolve()
-        })
-      })
-    })
-
-    it('should not produce an error', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.call(() => {
-          ctx.res.sendStatus.callCount.should.equal(0)
-          ctx.res.sendStatus.calledWith(500).should.equal(false)
-          ctx.res.sendStatus.calledWith(400).should.equal(false)
-          resolve()
-        })
-      })
-    })
-
-    it('should send a response with an empty keys list', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.call(() => {
-          ctx.res.json.called.should.equal(true)
-          ctx.res.json
-            .calledWith({ projectId: ctx.projectId, keys: [] })
-            .should.equal(true)
-          resolve()
         })
       })
     })

@@ -34,8 +34,7 @@ describe('LinkedFilesController', function () {
     ctx.SessionManager = {
       getLoggedInUserId: sinon.stub().returns(ctx.userId),
     }
-    ctx.EditorRealTimeController = {}
-    ctx.ReferencesHandler = {}
+    ctx.EditorRealTimeController = { emitToRoom: sinon.stub() }
     ctx.UrlAgent = {}
     ctx.ProjectFileAgent = {}
     ctx.ProjectOutputFileAgent = {}
@@ -71,13 +70,6 @@ describe('LinkedFilesController', function () {
       '../../../../app/src/Features/Editor/EditorRealTimeController',
       () => ({
         default: ctx.EditorRealTimeController,
-      })
-    )
-
-    vi.doMock(
-      '../../../../app/src/Features/References/ReferencesHandler',
-      () => ({
-        default: ctx.ReferencesHandler,
       })
     )
 
@@ -198,6 +190,39 @@ describe('LinkedFilesController', function () {
           },
         }
         ctx.LinkedFilesController.refreshLinkedFile(ctx.req, ctx.res, ctx.next)
+      })
+    })
+
+    describe('when bib file re-indexing is required', function () {
+      const clientId = 'client-id'
+      beforeEach(function (ctx) {
+        ctx.req.body.shouldReindexReferences = true
+        ctx.req.body.clientId = clientId
+      })
+
+      it('informs clients to re-index bib references', async function (ctx) {
+        await new Promise(resolve => {
+          ctx.next = sinon.stub().callsFake(() => resolve('unexpected error'))
+          ctx.res = {
+            json: () => {
+              expect(
+                ctx.EditorRealTimeController.emitToRoom
+              ).to.have.been.calledWith(
+                ctx.projectId,
+                'references:keys:updated',
+                [],
+                true,
+                clientId
+              )
+              resolve()
+            },
+          }
+          ctx.LinkedFilesController.refreshLinkedFile(
+            ctx.req,
+            ctx.res,
+            ctx.next
+          )
+        })
       })
     })
   })
