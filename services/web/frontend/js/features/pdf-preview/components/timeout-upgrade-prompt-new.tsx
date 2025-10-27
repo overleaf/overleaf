@@ -13,7 +13,7 @@ import {
   useIsNewEditorEnabled,
   useIsNewErrorLogsPositionEnabled,
 } from '@/features/ide-redesign/utils/new-editor-utils'
-import { getSplitTestVariant } from '@/utils/splitTestUtils'
+import { getSplitTestVariant, isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 function TimeoutUpgradePromptNew() {
   const {
@@ -23,6 +23,9 @@ function TimeoutUpgradePromptNew() {
     isProjectOwner,
   } = useDetachCompileContext()
   const newEditor = useIsNewEditorEnabled()
+  const shouldHideCompileTimeoutInfo = isSplitTestEnabled(
+    'compile-timeout-remove-info'
+  )
 
   const { enableStopOnFirstError } = useStopOnFirstError({
     eventSource: 'timeout-new',
@@ -55,12 +58,15 @@ function TimeoutUpgradePromptNew() {
         isProjectOwner={isProjectOwner}
         segmentation={sharedSegmentation}
       />
-      {getMeta('ol-ExposedSettings').enableSubscriptions && (
-        <PreventTimeoutHelpMessage
-          handleEnableStopOnFirstErrorClick={handleEnableStopOnFirstErrorClick}
-          lastCompileOptions={lastCompileOptions}
-        />
-      )}
+      {getMeta('ol-ExposedSettings').enableSubscriptions &&
+        !shouldHideCompileTimeoutInfo && (
+          <PreventTimeoutHelpMessage
+            handleEnableStopOnFirstErrorClick={
+              handleEnableStopOnFirstErrorClick
+            }
+            lastCompileOptions={lastCompileOptions}
+          />
+        )}
     </>
   )
 }

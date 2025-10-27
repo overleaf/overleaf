@@ -405,6 +405,7 @@ const _ProjectController = {
       'editor-redesign-new-users',
       'writefull-frontend-migration',
       'chat-edit-delete',
+      'compile-timeout-remove-info',
     ].filter(Boolean)
 
     const getUserValues = async userId =>

@@ -12,12 +12,15 @@ import {
   isNewUser,
   useIsNewEditorEnabled,
 } from '@/features/ide-redesign/utils/new-editor-utils'
-import { getSplitTestVariant } from '@/utils/splitTestUtils'
+import { getSplitTestVariant, isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 export const ShortCompileTimeoutErrorState = () => {
   const { t } = useTranslation()
   const { isProjectOwner } = useCompileContext()
   const newEditor = useIsNewEditorEnabled()
+  const shouldHideCompileTimeoutInfo = isSplitTestEnabled(
+    'compile-timeout-remove-info'
+  )
 
   const { compileTimeout } = getMeta('ol-compileSettings')
   const segmentation = useMemo(
@@ -79,9 +82,11 @@ export const ShortCompileTimeoutErrorState = () => {
       }
       iconType="running_with_errors"
       extraContent={
-        <div className="pdf-error-state-info-box">
-          <ReasonsForTimeoutInfo />
-        </div>
+        !shouldHideCompileTimeoutInfo && (
+          <div className="pdf-error-state-info-box">
+            <ReasonsForTimeoutInfo />
+          </div>
+        )
       }
       actions={
         isProjectOwner && (
