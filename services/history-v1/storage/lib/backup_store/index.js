@@ -1,5 +1,5 @@
 const { Binary, ObjectId } = require('mongodb')
-const { projects, backedUpBlobs } = require('../mongodb')
+const { projects, deletedProjects, backedUpBlobs } = require('../mongodb')
 const OError = require('@overleaf/o-error')
 
 // List projects with pending backups older than the specified interval
@@ -79,6 +79,13 @@ async function getBackupStatus(projectId) {
     }
   )
   if (!project) {
+    // Check whether the project was deleted
+    const deletedProject = await deletedProjects.findOne({
+      'deleterData.deletedProjectId': new ObjectId(projectId),
+    })
+    if (deletedProject) {
+      throw new Error('Project deleted')
+    }
     throw new Error('Project not found')
   }
   return {

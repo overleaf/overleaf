@@ -114,9 +114,14 @@ async function runBackup(projectId, data, job) {
     }
     return `backup completed ${projectId}`
   } catch (err) {
-    metrics.inc('backup_worker_project', 1, { status: 'failed' })
-    logger.error({ projectId, err }, 'backup failed')
-    throw err // Re-throw to mark job as failed
+    if (err.message === 'Project deleted') {
+      metrics.inc('backup_worker_project', 1, { status: 'deleted' })
+      logger.warn({ projectId, err }, 'skipping backup of deleted project')
+    } else {
+      metrics.inc('backup_worker_project', 1, { status: 'failed' })
+      logger.error({ projectId, err }, 'backup failed')
+      throw err // Re-throw to mark job as failed
+    }
   }
 }
 
