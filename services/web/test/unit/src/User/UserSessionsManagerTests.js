@@ -1,16 +1,3 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/User/UserSessionsManager.js'
@@ -35,14 +22,18 @@ describe('UserSessionsManager', function () {
       mget: sinon.stub(),
       pexpire: sinon.stub(),
     }
-    this.rclient.multi.returns(this.rclient)
-    this.rclient.get.returns(this.rclient)
-    this.rclient.del.returns(this.rclient)
-    this.rclient.sadd.returns(this.rclient)
-    this.rclient.srem.returns(this.rclient)
-    this.rclient.smembers.returns(this.rclient)
-    this.rclient.pexpire.returns(this.rclient)
-    this.rclient.exec.callsArgWith(0, null)
+    this.rclient.multi.returns({
+      sadd: sinon.stub().returnsThis(),
+      srem: sinon.stub().returnsThis(),
+      pexpire: sinon.stub().returnsThis(),
+      exec: sinon.stub().resolves(),
+    })
+    this.rclient.get.resolves()
+    this.rclient.del.resolves()
+    this.rclient.sadd.resolves()
+    this.rclient.srem.resolves()
+    this.rclient.smembers.resolves([])
+    this.rclient.pexpire.resolves()
 
     this.UserSessionsRedis = {
       client: () => this.rclient,
@@ -70,272 +61,222 @@ describe('UserSessionsManager', function () {
 
   describe('trackSession', function () {
     beforeEach(function () {
-      this.call = callback => {
-        return this.UserSessionsManager.trackSession(
-          this.user,
-          this.sessionId,
-          callback
-        )
-      }
-      this.rclient.exec.callsArgWith(0, null)
-      return (this._checkSessions = sinon
-        .stub(this.UserSessionsManager, '_checkSessions')
-        .returns(null))
+      this._checkSessions = sinon
+        .stub(this.UserSessionsManager.promises, '_checkSessions')
+        .resolves()
     })
 
     afterEach(function () {
       return this._checkSessions.restore()
     })
 
-    it('should not produce an error', function (done) {
-      return this.call(err => {
-        expect(err).to.not.exist
-        return done()
-      })
+    it('should not produce an error', async function () {
+      await this.UserSessionsManager.promises.trackSession(
+        this.user,
+        this.sessionId
+      )
     })
 
-    it('should call the appropriate redis methods', function (done) {
-      return this.call(err => {
-        this.rclient.multi.callCount.should.equal(1)
-        this.rclient.sadd.callCount.should.equal(1)
-        this.rclient.pexpire.callCount.should.equal(1)
-        this.rclient.exec.callCount.should.equal(1)
-        return done()
-      })
+    it('should call the appropriate redis methods', async function () {
+      await this.UserSessionsManager.promises.trackSession(
+        this.user,
+        this.sessionId
+      )
+      this.rclient.multi.callCount.should.equal(1)
+      const multiInstance = this.rclient.multi.returnValues[0]
+      multiInstance.sadd.callCount.should.equal(1)
+      multiInstance.pexpire.callCount.should.equal(1)
+      multiInstance.exec.callCount.should.equal(1)
     })
 
-    it('should call _checkSessions', function (done) {
-      return this.call(err => {
-        this._checkSessions.callCount.should.equal(1)
-        return done()
-      })
+    it('should call _checkSessions', async function () {
+      await this.UserSessionsManager.promises.trackSession(
+        this.user,
+        this.sessionId
+      )
+      this._checkSessions.callCount.should.equal(1)
     })
 
     describe('when rclient produces an error', function () {
       beforeEach(function () {
-        return this.rclient.exec.callsArgWith(0, new Error('woops'))
-      })
-
-      it('should produce an error', function (done) {
-        return this.call(err => {
-          expect(err).to.be.instanceof(Error)
-          return done()
+        this.rclient.multi.returns({
+          sadd: sinon.stub().returnsThis(),
+          pexpire: sinon.stub().returnsThis(),
+          exec: sinon.stub().rejects(new Error('woops')),
         })
       })
 
-      it('should not call _checkSessions', function (done) {
-        return this.call(err => {
-          this._checkSessions.callCount.should.equal(0)
-          return done()
-        })
+      it('should produce an error', async function () {
+        await expect(
+          this.UserSessionsManager.promises.trackSession(
+            this.user,
+            this.sessionId
+          )
+        ).to.be.rejectedWith(Error)
+      })
+
+      it('should not call _checkSessions', async function () {
+        try {
+          await this.UserSessionsManager.promises.trackSession(
+            this.user,
+            this.sessionId
+          )
+        } catch (err) {
+          // Expected error
+        }
+        this._checkSessions.callCount.should.equal(0)
       })
     })
 
     describe('when no user is supplied', function () {
-      beforeEach(function () {
-        return (this.call = callback => {
-          return this.UserSessionsManager.trackSession(
-            null,
-            this.sessionId,
-            callback
-          )
-        })
+      it('should not produce an error', async function () {
+        await this.UserSessionsManager.promises.trackSession(
+          null,
+          this.sessionId
+        )
       })
 
-      it('should not produce an error', function (done) {
-        return this.call(err => {
-          expect(err).to.not.exist
-          return done()
-        })
+      it('should not call the appropriate redis methods', async function () {
+        await this.UserSessionsManager.promises.trackSession(
+          null,
+          this.sessionId
+        )
+        this.rclient.multi.callCount.should.equal(0)
       })
 
-      it('should not call the appropriate redis methods', function (done) {
-        return this.call(err => {
-          this.rclient.multi.callCount.should.equal(0)
-          this.rclient.sadd.callCount.should.equal(0)
-          this.rclient.pexpire.callCount.should.equal(0)
-          this.rclient.exec.callCount.should.equal(0)
-          return done()
-        })
-      })
-
-      it('should not call _checkSessions', function (done) {
-        return this.call(err => {
-          this._checkSessions.callCount.should.equal(0)
-          return done()
-        })
+      it('should not call _checkSessions', async function () {
+        await this.UserSessionsManager.promises.trackSession(
+          null,
+          this.sessionId
+        )
+        this._checkSessions.callCount.should.equal(0)
       })
     })
 
     describe('when no sessionId is supplied', function () {
-      beforeEach(function () {
-        return (this.call = callback => {
-          return this.UserSessionsManager.trackSession(
-            this.user,
-            null,
-            callback
-          )
-        })
+      it('should not produce an error', async function () {
+        await this.UserSessionsManager.promises.trackSession(this.user, null)
       })
 
-      it('should not produce an error', function (done) {
-        return this.call(err => {
-          expect(err).to.not.exist
-          return done()
-        })
+      it('should not call the appropriate redis methods', async function () {
+        await this.UserSessionsManager.promises.trackSession(this.user, null)
+        this.rclient.multi.callCount.should.equal(0)
       })
 
-      it('should not call the appropriate redis methods', function (done) {
-        return this.call(err => {
-          this.rclient.multi.callCount.should.equal(0)
-          this.rclient.sadd.callCount.should.equal(0)
-          this.rclient.pexpire.callCount.should.equal(0)
-          this.rclient.exec.callCount.should.equal(0)
-          return done()
-        })
-      })
-
-      it('should not call _checkSessions', function (done) {
-        return this.call(err => {
-          this._checkSessions.callCount.should.equal(0)
-          return done()
-        })
+      it('should not call _checkSessions', async function () {
+        await this.UserSessionsManager.promises.trackSession(this.user, null)
+        this._checkSessions.callCount.should.equal(0)
       })
     })
   })
 
   describe('untrackSession', function () {
     beforeEach(function () {
-      this.call = callback => {
-        return this.UserSessionsManager.untrackSession(
-          this.user,
-          this.sessionId,
-          callback
-        )
-      }
-      this.rclient.exec.callsArgWith(0, null)
-      return (this._checkSessions = sinon
-        .stub(this.UserSessionsManager, '_checkSessions')
-        .returns(null))
+      this._checkSessions = sinon
+        .stub(this.UserSessionsManager.promises, '_checkSessions')
+        .resolves()
     })
 
     afterEach(function () {
       return this._checkSessions.restore()
     })
 
-    it('should not produce an error', function (done) {
-      return this.call(err => {
-        expect(err).to.not.exist
-        return done()
-      })
+    it('should not produce an error', async function () {
+      await this.UserSessionsManager.promises.untrackSession(
+        this.user,
+        this.sessionId
+      )
     })
 
-    it('should call the appropriate redis methods', function (done) {
-      return this.call(err => {
-        this.rclient.multi.callCount.should.equal(1)
-        this.rclient.srem.callCount.should.equal(1)
-        this.rclient.pexpire.callCount.should.equal(1)
-        this.rclient.exec.callCount.should.equal(1)
-        return done()
-      })
+    it('should call the appropriate redis methods', async function () {
+      await this.UserSessionsManager.promises.untrackSession(
+        this.user,
+        this.sessionId
+      )
+      this.rclient.multi.callCount.should.equal(1)
+      const multiInstance = this.rclient.multi.returnValues[0]
+      multiInstance.srem.callCount.should.equal(1)
+      multiInstance.pexpire.callCount.should.equal(1)
+      multiInstance.exec.callCount.should.equal(1)
     })
 
-    it('should call _checkSessions', function (done) {
-      return this.call(err => {
-        this._checkSessions.callCount.should.equal(1)
-        return done()
-      })
+    it('should call _checkSessions', async function () {
+      await this.UserSessionsManager.promises.untrackSession(
+        this.user,
+        this.sessionId
+      )
+      this._checkSessions.callCount.should.equal(1)
     })
 
     describe('when rclient produces an error', function () {
       beforeEach(function () {
-        return this.rclient.exec.callsArgWith(0, new Error('woops'))
-      })
-
-      it('should produce an error', function (done) {
-        return this.call(err => {
-          expect(err).to.be.instanceof(Error)
-          return done()
+        this.rclient.multi.returns({
+          srem: sinon.stub().returnsThis(),
+          pexpire: sinon.stub().returnsThis(),
+          exec: sinon.stub().rejects(new Error('woops')),
         })
       })
 
-      it('should not call _checkSessions', function (done) {
-        return this.call(err => {
-          this._checkSessions.callCount.should.equal(0)
-          return done()
-        })
+      it('should produce an error', async function () {
+        await expect(
+          this.UserSessionsManager.promises.untrackSession(
+            this.user,
+            this.sessionId
+          )
+        ).to.be.rejectedWith(Error)
+      })
+
+      it('should not call _checkSessions', async function () {
+        try {
+          await this.UserSessionsManager.promises.untrackSession(
+            this.user,
+            this.sessionId
+          )
+        } catch (err) {
+          // Expected error
+        }
+        this._checkSessions.callCount.should.equal(0)
       })
     })
 
     describe('when no user is supplied', function () {
-      beforeEach(function () {
-        return (this.call = callback => {
-          return this.UserSessionsManager.untrackSession(
-            null,
-            this.sessionId,
-            callback
-          )
-        })
+      it('should not produce an error', async function () {
+        await this.UserSessionsManager.promises.untrackSession(
+          null,
+          this.sessionId
+        )
       })
 
-      it('should not produce an error', function (done) {
-        return this.call(err => {
-          expect(err).to.not.exist
-          return done()
-        })
+      it('should not call the appropriate redis methods', async function () {
+        await this.UserSessionsManager.promises.untrackSession(
+          null,
+          this.sessionId
+        )
+        this.rclient.multi.callCount.should.equal(0)
       })
 
-      it('should not call the appropriate redis methods', function (done) {
-        return this.call(err => {
-          this.rclient.multi.callCount.should.equal(0)
-          this.rclient.srem.callCount.should.equal(0)
-          this.rclient.pexpire.callCount.should.equal(0)
-          this.rclient.exec.callCount.should.equal(0)
-          return done()
-        })
-      })
-
-      it('should not call _checkSessions', function (done) {
-        return this.call(err => {
-          this._checkSessions.callCount.should.equal(0)
-          return done()
-        })
+      it('should not call _checkSessions', async function () {
+        await this.UserSessionsManager.promises.untrackSession(
+          null,
+          this.sessionId
+        )
+        this._checkSessions.callCount.should.equal(0)
       })
     })
 
     describe('when no sessionId is supplied', function () {
-      beforeEach(function () {
-        return (this.call = callback => {
-          return this.UserSessionsManager.untrackSession(
-            this.user,
-            null,
-            callback
-          )
-        })
+      it('should not produce an error', async function () {
+        await this.UserSessionsManager.promises.untrackSession(this.user, null)
       })
 
-      it('should not produce an error', function (done) {
-        return this.call(err => {
-          expect(err).to.not.exist
-          return done()
-        })
+      it('should not call the appropriate redis methods', async function () {
+        await this.UserSessionsManager.promises.untrackSession(this.user, null)
+        this.rclient.multi.callCount.should.equal(0)
       })
 
-      it('should not call the appropriate redis methods', function (done) {
-        return this.call(err => {
-          this.rclient.multi.callCount.should.equal(0)
-          this.rclient.srem.callCount.should.equal(0)
-          this.rclient.pexpire.callCount.should.equal(0)
-          this.rclient.exec.callCount.should.equal(0)
-          return done()
-        })
-      })
-
-      it('should not call _checkSessions', function (done) {
-        return this.call(err => {
-          this._checkSessions.callCount.should.equal(0)
-          return done()
-        })
+      it('should not call _checkSessions', async function () {
+        await this.UserSessionsManager.promises.untrackSession(this.user, null)
+        this._checkSessions.callCount.should.equal(0)
       })
     })
   })
@@ -344,231 +285,198 @@ describe('UserSessionsManager', function () {
     beforeEach(function () {
       this.sessionKeys = ['sess:one', 'sess:two']
       this.currentSessionID = undefined
-      this.rclient.smembers.callsArgWith(1, null, this.sessionKeys)
-      this.rclient.del = sinon.stub().callsArgWith(1, null)
-      this.rclient.srem = sinon.stub().callsArgWith(2, null)
-      return (this.call = callback => {
-        return this.UserSessionsManager.removeSessionsFromRedis(
+      this.rclient.smembers.resolves(this.sessionKeys)
+      this.rclient.del.resolves()
+      this.rclient.srem.resolves()
+    })
+
+    it('should not produce an error', async function () {
+      await this.UserSessionsManager.promises.removeSessionsFromRedis(
+        this.user,
+        this.currentSessionID
+      )
+    })
+
+    it('should yield the number of purged sessions', async function () {
+      const result =
+        await this.UserSessionsManager.promises.removeSessionsFromRedis(
           this.user,
-          this.currentSessionID,
-          callback
+          this.currentSessionID
         )
-      })
+      expect(result).to.equal(this.sessionKeys.length)
     })
 
-    it('should not produce an error', function (done) {
-      return this.call(err => {
-        expect(err).to.not.exist
-        return done()
-      })
-    })
+    it('should call the appropriate redis methods', async function () {
+      await this.UserSessionsManager.promises.removeSessionsFromRedis(
+        this.user,
+        this.currentSessionID
+      )
+      this.rclient.smembers.callCount.should.equal(1)
 
-    it('should yield the number of purged sessions', function (done) {
-      return this.call((err, n) => {
-        expect(err).to.not.exist
-        expect(n).to.equal(this.sessionKeys.length)
-        return done()
-      })
-    })
+      this.rclient.del.callCount.should.equal(2)
+      expect(this.rclient.del.firstCall.args[0]).to.deep.equal(
+        this.sessionKeys[0]
+      )
+      expect(this.rclient.del.secondCall.args[0]).to.deep.equal(
+        this.sessionKeys[1]
+      )
 
-    it('should call the appropriate redis methods', function (done) {
-      return this.call(err => {
-        this.rclient.smembers.callCount.should.equal(1)
-
-        this.rclient.del.callCount.should.equal(2)
-        expect(this.rclient.del.firstCall.args[0]).to.deep.equal(
-          this.sessionKeys[0]
-        )
-        expect(this.rclient.del.secondCall.args[0]).to.deep.equal(
-          this.sessionKeys[1]
-        )
-
-        this.rclient.srem.callCount.should.equal(1)
-        expect(this.rclient.srem.firstCall.args[1]).to.deep.equal(
-          this.sessionKeys
-        )
-
-        return done()
-      })
+      this.rclient.srem.callCount.should.equal(1)
+      expect(this.rclient.srem.firstCall.args[0]).to.deep.equal(
+        'UserSessions:{abcd}'
+      )
+      expect(this.rclient.srem.firstCall.args[1]).to.deep.equal(
+        this.sessionKeys
+      )
     })
 
     describe('when a session is retained', function () {
       beforeEach(function () {
         this.sessionKeys = ['sess:one', 'sess:two', 'sess:three', 'sess:four']
         this.currentSessionID = 'two'
-        this.rclient.smembers.callsArgWith(1, null, this.sessionKeys)
-        this.rclient.del = sinon.stub().callsArgWith(1, null)
-        return (this.call = callback => {
-          return this.UserSessionsManager.removeSessionsFromRedis(
-            this.user,
-            this.currentSessionID,
-            callback
-          )
-        })
+        this.rclient.smembers.resolves(this.sessionKeys)
+        this.rclient.del.resolves()
       })
 
-      it('should not produce an error', function (done) {
-        return this.call(err => {
-          expect(err).to.not.exist
-          return done()
-        })
+      it('should not produce an error', async function () {
+        await this.UserSessionsManager.promises.removeSessionsFromRedis(
+          this.user,
+          this.currentSessionID
+        )
       })
 
-      it('should call the appropriate redis methods', function (done) {
-        return this.call(err => {
-          this.rclient.smembers.callCount.should.equal(1)
-          this.rclient.del.callCount.should.equal(this.sessionKeys.length - 1)
-          this.rclient.srem.callCount.should.equal(1)
-          return done()
-        })
+      it('should call the appropriate redis methods', async function () {
+        await this.UserSessionsManager.promises.removeSessionsFromRedis(
+          this.user,
+          this.currentSessionID
+        )
+        this.rclient.smembers.callCount.should.equal(1)
+        this.rclient.del.callCount.should.equal(this.sessionKeys.length - 1)
+        this.rclient.srem.callCount.should.equal(1)
       })
 
-      it('should remove all sessions except for the retained one', function (done) {
-        return this.call(err => {
-          expect(this.rclient.del.firstCall.args[0]).to.deep.equal('sess:one')
-          expect(this.rclient.del.secondCall.args[0]).to.deep.equal(
-            'sess:three'
-          )
-          expect(this.rclient.del.thirdCall.args[0]).to.deep.equal('sess:four')
-          expect(this.rclient.srem.firstCall.args[1]).to.deep.equal([
-            'sess:one',
-            'sess:three',
-            'sess:four',
-          ])
-          return done()
-        })
+      it('should remove all sessions except for the retained one', async function () {
+        await this.UserSessionsManager.promises.removeSessionsFromRedis(
+          this.user,
+          this.currentSessionID
+        )
+        expect(this.rclient.del.firstCall.args[0]).to.deep.equal('sess:one')
+        expect(this.rclient.del.secondCall.args[0]).to.deep.equal('sess:three')
+        expect(this.rclient.del.thirdCall.args[0]).to.deep.equal('sess:four')
+        expect(this.rclient.srem.firstCall.args[1]).to.deep.equal([
+          'sess:one',
+          'sess:three',
+          'sess:four',
+        ])
       })
     })
 
     describe('when rclient produces an error', function () {
       beforeEach(function () {
-        return (this.rclient.del = sinon
-          .stub()
-          .callsArgWith(1, new Error('woops')))
+        this.rclient.del.rejects(new Error('woops'))
       })
 
-      it('should produce an error', function (done) {
-        return this.call(err => {
-          expect(err).to.be.instanceof(Error)
-          return done()
-        })
+      it('should produce an error', async function () {
+        await expect(
+          this.UserSessionsManager.promises.removeSessionsFromRedis(
+            this.user,
+            this.currentSessionID
+          )
+        ).to.be.rejectedWith(Error)
       })
 
-      it('should not call rclient.srem', function (done) {
-        return this.call(err => {
-          this.rclient.srem.callCount.should.equal(0)
-          return done()
-        })
+      it('should not call rclient.srem', async function () {
+        try {
+          await this.UserSessionsManager.promises.removeSessionsFromRedis(
+            this.user,
+            this.currentSessionID
+          )
+        } catch (err) {
+          // Expected error
+        }
+        this.rclient.srem.callCount.should.equal(0)
       })
     })
 
     describe('when no user is supplied', function () {
-      beforeEach(function () {
-        return (this.call = callback => {
-          return this.UserSessionsManager.removeSessionsFromRedis(
+      it('should produce an error', async function () {
+        await expect(
+          this.UserSessionsManager.promises.removeSessionsFromRedis(
             null,
-            this.currentSessionID,
-            callback
+            this.currentSessionID
           )
-        })
+        ).to.be.rejectedWith(/bug: user not passed to removeSessionsFromRedis/)
       })
 
-      it('should produce an error', function (done) {
-        return this.call(err => {
-          expect(err).to.match(
-            /bug: user not passed to removeSessionsFromRedis/
+      it('should not call the appropriate redis methods', async function () {
+        try {
+          await this.UserSessionsManager.promises.removeSessionsFromRedis(
+            null,
+            this.currentSessionID
           )
-          return done()
-        })
-      })
-
-      it('should not call the appropriate redis methods', function (done) {
-        return this.call(err => {
-          this.rclient.smembers.callCount.should.equal(0)
-          this.rclient.del.callCount.should.equal(0)
-          this.rclient.srem.callCount.should.equal(0)
-          return done()
-        })
+        } catch (err) {
+          // Expected error
+        }
+        this.rclient.smembers.callCount.should.equal(0)
+        this.rclient.del.callCount.should.equal(0)
+        this.rclient.srem.callCount.should.equal(0)
       })
     })
 
     describe('when there are no keys to delete', function () {
       beforeEach(function () {
-        return this.rclient.smembers.callsArgWith(1, null, [])
+        this.rclient.smembers.resolves([])
       })
 
-      it('should not produce an error', function (done) {
-        return this.call(err => {
-          expect(err).to.not.exist
-          return done()
-        })
+      it('should not produce an error', async function () {
+        await this.UserSessionsManager.promises.removeSessionsFromRedis(
+          this.user,
+          this.currentSessionID
+        )
       })
 
-      it('should not do the delete operation', function (done) {
-        return this.call(err => {
-          this.rclient.smembers.callCount.should.equal(1)
-          this.rclient.del.callCount.should.equal(0)
-          this.rclient.srem.callCount.should.equal(0)
-          return done()
-        })
+      it('should not do the delete operation', async function () {
+        await this.UserSessionsManager.promises.removeSessionsFromRedis(
+          this.user,
+          this.currentSessionID
+        )
+        this.rclient.smembers.callCount.should.equal(1)
+        this.rclient.del.callCount.should.equal(0)
+        this.rclient.srem.callCount.should.equal(0)
       })
     })
   })
 
   describe('touch', function () {
-    beforeEach(function () {
-      this.rclient.pexpire.callsArgWith(2, null)
-      return (this.call = callback => {
-        return this.UserSessionsManager.touch(this.user, callback)
-      })
+    it('should not produce an error', async function () {
+      await this.UserSessionsManager.promises.touch(this.user)
     })
 
-    it('should not produce an error', function (done) {
-      return this.call(err => {
-        expect(err).to.not.exist
-        return done()
-      })
-    })
-
-    it('should call rclient.pexpire', function (done) {
-      return this.call(err => {
-        this.rclient.pexpire.callCount.should.equal(1)
-        return done()
-      })
+    it('should call rclient.pexpire', async function () {
+      await this.UserSessionsManager.promises.touch(this.user)
+      this.rclient.pexpire.callCount.should.equal(1)
     })
 
     describe('when rclient produces an error', function () {
       beforeEach(function () {
-        return this.rclient.pexpire.callsArgWith(2, new Error('woops'))
+        this.rclient.pexpire.rejects(new Error('woops'))
       })
 
-      it('should produce an error', function (done) {
-        return this.call(err => {
-          expect(err).to.be.instanceof(Error)
-          return done()
-        })
+      it('should produce an error', async function () {
+        await expect(
+          this.UserSessionsManager.promises.touch(this.user)
+        ).to.be.rejectedWith(Error)
       })
     })
 
     describe('when no user is supplied', function () {
-      beforeEach(function () {
-        return (this.call = callback => {
-          return this.UserSessionsManager.touch(null, callback)
-        })
+      it('should not produce an error', async function () {
+        await this.UserSessionsManager.promises.touch(null)
       })
 
-      it('should not produce an error', function (done) {
-        return this.call(err => {
-          expect(err).to.not.exist
-          return done()
-        })
-      })
-
-      it('should not call pexpire', function (done) {
-        return this.call(err => {
-          this.rclient.pexpire.callCount.should.equal(0)
-          return done()
-        })
+      it('should not call pexpire', async function () {
+        await this.UserSessionsManager.promises.touch(null)
+        this.rclient.pexpire.callCount.should.equal(0)
       })
     })
   })
@@ -581,218 +489,200 @@ describe('UserSessionsManager', function () {
         '{"passport": {"user": {"ip_address": "c", "session_created": "d"}}}',
       ]
       this.exclude = ['two']
-      this.rclient.smembers.callsArgWith(1, null, this.sessionKeys)
+      this.rclient.smembers.resolves(this.sessionKeys)
       this.rclient.get = sinon.stub()
-      this.rclient.get.onCall(0).callsArgWith(1, null, this.sessions[0])
-      this.rclient.get.onCall(1).callsArgWith(1, null, this.sessions[1])
+      this.rclient.get.onCall(0).resolves(this.sessions[0])
+      this.rclient.get.onCall(1).resolves(this.sessions[1])
+    })
 
-      return (this.call = callback => {
-        return this.UserSessionsManager.getAllUserSessions(
+    it('should not produce an error', async function () {
+      await this.UserSessionsManager.promises.getAllUserSessions(
+        this.user,
+        this.exclude
+      )
+    })
+
+    it('should get sessions', async function () {
+      const sessions =
+        await this.UserSessionsManager.promises.getAllUserSessions(
           this.user,
-          this.exclude,
-          callback
+          this.exclude
         )
-      })
+      expect(sessions).to.deep.equal([
+        { ip_address: 'a', session_created: 'b' },
+        { ip_address: 'c', session_created: 'd' },
+      ])
     })
 
-    it('should not produce an error', function (done) {
-      return this.call((err, sessions) => {
-        expect(err).to.not.exist
-        return done()
-      })
+    it('should have called rclient.smembers', async function () {
+      await this.UserSessionsManager.promises.getAllUserSessions(
+        this.user,
+        this.exclude
+      )
+      this.rclient.smembers.callCount.should.equal(1)
     })
 
-    it('should get sessions', function (done) {
-      return this.call((err, sessions) => {
-        expect(sessions).to.deep.equal([
-          { ip_address: 'a', session_created: 'b' },
-          { ip_address: 'c', session_created: 'd' },
-        ])
-        return done()
-      })
-    })
-
-    it('should have called rclient.smembers', function (done) {
-      return this.call((err, sessions) => {
-        this.rclient.smembers.callCount.should.equal(1)
-        return done()
-      })
-    })
-
-    it('should have called rclient.get', function (done) {
-      return this.call((err, sessions) => {
-        this.rclient.get.callCount.should.equal(this.sessionKeys.length - 1)
-        return done()
-      })
+    it('should have called rclient.get', async function () {
+      await this.UserSessionsManager.promises.getAllUserSessions(
+        this.user,
+        this.exclude
+      )
+      this.rclient.get.callCount.should.equal(this.sessionKeys.length - 1)
     })
 
     describe('when there are no other sessions', function () {
       beforeEach(function () {
         this.sessionKeys = ['sess:two']
-        return this.rclient.smembers.callsArgWith(1, null, this.sessionKeys)
+        this.rclient.smembers.resolves(this.sessionKeys)
       })
 
-      it('should not produce an error', function (done) {
-        return this.call((err, sessions) => {
-          expect(err).to.not.exist
-          return done()
-        })
+      it('should not produce an error', async function () {
+        await this.UserSessionsManager.promises.getAllUserSessions(
+          this.user,
+          this.exclude
+        )
       })
 
-      it('should produce an empty list of sessions', function (done) {
-        return this.call((err, sessions) => {
-          expect(sessions).to.deep.equal([])
-          return done()
-        })
+      it('should produce an empty list of sessions', async function () {
+        const sessions =
+          await this.UserSessionsManager.promises.getAllUserSessions(
+            this.user,
+            this.exclude
+          )
+        expect(sessions).to.deep.equal([])
       })
 
-      it('should have called rclient.smembers', function (done) {
-        return this.call((err, sessions) => {
-          this.rclient.smembers.callCount.should.equal(1)
-          return done()
-        })
+      it('should have called rclient.smembers', async function () {
+        await this.UserSessionsManager.promises.getAllUserSessions(
+          this.user,
+          this.exclude
+        )
+        this.rclient.smembers.callCount.should.equal(1)
       })
 
-      it('should not have called rclient.mget', function (done) {
-        return this.call((err, sessions) => {
-          this.rclient.mget.callCount.should.equal(0)
-          return done()
-        })
+      it('should not have called rclient.get for individual keys', async function () {
+        await this.UserSessionsManager.promises.getAllUserSessions(
+          this.user,
+          this.exclude
+        )
+        this.rclient.get.callCount.should.equal(0)
       })
     })
 
     describe('when smembers produces an error', function () {
       beforeEach(function () {
-        return this.rclient.smembers.callsArgWith(1, new Error('woops'))
+        this.rclient.smembers.rejects(new Error('woops'))
       })
 
-      it('should produce an error', function (done) {
-        return this.call((err, sessions) => {
-          expect(err).to.not.equal(null)
-          expect(err).to.be.instanceof(Error)
-          return done()
-        })
+      it('should produce an error', async function () {
+        await expect(
+          this.UserSessionsManager.promises.getAllUserSessions(
+            this.user,
+            this.exclude
+          )
+        ).to.be.rejectedWith(Error)
       })
 
-      it('should not have called rclient.mget', function (done) {
-        return this.call((err, sessions) => {
-          this.rclient.mget.callCount.should.equal(0)
-          return done()
-        })
+      it('should not have called rclient.get', async function () {
+        try {
+          await this.UserSessionsManager.promises.getAllUserSessions(
+            this.user,
+            this.exclude
+          )
+        } catch (err) {
+          // Expected error
+        }
+        this.rclient.get.callCount.should.equal(0)
       })
     })
 
     describe('when get produces an error', function () {
       beforeEach(function () {
-        return (this.rclient.get = sinon
-          .stub()
-          .callsArgWith(1, new Error('woops')))
+        this.rclient.get = sinon.stub().rejects(new Error('woops'))
       })
 
-      it('should produce an error', function (done) {
-        return this.call((err, sessions) => {
-          expect(err).to.not.equal(null)
-          expect(err).to.be.instanceof(Error)
-          return done()
-        })
+      it('should produce an error', async function () {
+        await expect(
+          this.UserSessionsManager.promises.getAllUserSessions(
+            this.user,
+            this.exclude
+          )
+        ).to.be.rejectedWith(Error)
       })
     })
   })
 
   describe('_checkSessions', function () {
     beforeEach(function () {
-      this.call = callback => {
-        return this.UserSessionsManager._checkSessions(this.user, callback)
-      }
       this.sessionKeys = ['one', 'two']
-      this.rclient.smembers.callsArgWith(1, null, this.sessionKeys)
-      this.rclient.get.callsArgWith(1, null, 'some-value')
-      return this.rclient.srem.callsArgWith(2, null, {})
+      this.rclient.smembers.resolves(this.sessionKeys)
+      this.rclient.get.resolves('some-value')
+      this.rclient.srem.resolves({})
     })
 
-    it('should not produce an error', function (done) {
-      return this.call(err => {
-        expect(err).to.not.exist
-        return done()
-      })
+    it('should not produce an error', async function () {
+      await this.UserSessionsManager.promises._checkSessions(this.user)
     })
 
-    it('should call the appropriate redis methods', function (done) {
-      return this.call(err => {
-        this.rclient.smembers.callCount.should.equal(1)
-        this.rclient.get.callCount.should.equal(2)
-        this.rclient.srem.callCount.should.equal(0)
-        return done()
-      })
+    it('should call the appropriate redis methods', async function () {
+      await this.UserSessionsManager.promises._checkSessions(this.user)
+      this.rclient.smembers.callCount.should.equal(1)
+      this.rclient.get.callCount.should.equal(2)
+      this.rclient.srem.callCount.should.equal(0)
     })
 
     describe('when one of the keys is not present in redis', function () {
       beforeEach(function () {
-        this.rclient.get.onCall(0).callsArgWith(1, null, 'some-val')
-        return this.rclient.get.onCall(1).callsArgWith(1, null, null)
+        this.rclient.get.onCall(0).resolves('some-val')
+        this.rclient.get.onCall(1).resolves(null)
       })
 
-      it('should not produce an error', function (done) {
-        return this.call(err => {
-          expect(err).to.not.exist
-          return done()
-        })
+      it('should not produce an error', async function () {
+        await this.UserSessionsManager.promises._checkSessions(this.user)
       })
 
-      it('should remove that key from the set', function (done) {
-        return this.call(err => {
-          this.rclient.smembers.callCount.should.equal(1)
-          this.rclient.get.callCount.should.equal(2)
-          this.rclient.srem.callCount.should.equal(1)
-          this.rclient.srem.firstCall.args[1].should.equal('two')
-          return done()
-        })
+      it('should remove that key from the set', async function () {
+        await this.UserSessionsManager.promises._checkSessions(this.user)
+        this.rclient.smembers.callCount.should.equal(1)
+        this.rclient.get.callCount.should.equal(2)
+        this.rclient.srem.callCount.should.equal(1)
+        this.rclient.srem.firstCall.args[1].should.equal('two')
       })
     })
 
     describe('when no user is supplied', function () {
-      beforeEach(function () {
-        return (this.call = callback => {
-          return this.UserSessionsManager._checkSessions(null, callback)
-        })
+      it('should not produce an error', async function () {
+        await this.UserSessionsManager.promises._checkSessions(null)
       })
 
-      it('should not produce an error', function (done) {
-        return this.call(err => {
-          expect(err).to.not.exist
-          return done()
-        })
-      })
-
-      it('should not call redis methods', function (done) {
-        return this.call(err => {
-          this.rclient.smembers.callCount.should.equal(0)
-          this.rclient.get.callCount.should.equal(0)
-          return done()
-        })
+      it('should not call redis methods', async function () {
+        await this.UserSessionsManager.promises._checkSessions(null)
+        this.rclient.smembers.callCount.should.equal(0)
+        this.rclient.get.callCount.should.equal(0)
       })
     })
 
     describe('when one of the get operations produces an error', function () {
       beforeEach(function () {
-        this.rclient.get.onCall(0).callsArgWith(1, new Error('woops'), null)
-        return this.rclient.get.onCall(1).callsArgWith(1, null, null)
+        this.rclient.get.onCall(0).rejects(new Error('woops'))
+        this.rclient.get.onCall(1).resolves(null)
       })
 
-      it('should produce an error', function (done) {
-        return this.call(err => {
-          expect(err).to.be.instanceof(Error)
-          return done()
-        })
+      it('should produce an error', async function () {
+        await expect(
+          this.UserSessionsManager.promises._checkSessions(this.user)
+        ).to.be.rejectedWith(Error)
       })
 
-      it('should call the right redis methods, bailing out early', function (done) {
-        return this.call(err => {
-          this.rclient.smembers.callCount.should.equal(1)
-          this.rclient.get.callCount.should.equal(1)
-          this.rclient.srem.callCount.should.equal(0)
-          return done()
-        })
+      it('should call the right redis methods, bailing out early', async function () {
+        try {
+          await this.UserSessionsManager.promises._checkSessions(this.user)
+        } catch (err) {
+          // Expected error
+        }
+        this.rclient.smembers.callCount.should.equal(1)
+        this.rclient.get.callCount.should.equal(1)
+        this.rclient.srem.callCount.should.equal(0)
       })
     })
   })
