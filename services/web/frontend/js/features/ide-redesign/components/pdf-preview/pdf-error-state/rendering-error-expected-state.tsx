@@ -25,12 +25,11 @@ export default function RenderingErrorExpectedState() {
           ]}
         />
       }
-      actions={[
-        // eslint-disable-next-line react/jsx-key
+      actions={
         <OLButton variant="primary" size="sm" onClick={() => startCompile()}>
           {t('recompile')}
-        </OLButton>,
-      ]}
+        </OLButton>
+      }
       extraContent={<ClsiCachePrompt />}
     />
   )
