@@ -885,7 +885,10 @@ describe('<UserNotifications />', function () {
       )
 
       await waitForElementToBeRemoved(() => screen.getByText(/sending/i))
-      screen.getByText(/Enter the 6-digit code sent to foo@overleaf.com/i)
+      // Sometimes we need to wait for useWaitForI18n to be ready
+      await screen.findByText(
+        /Enter the 6-digit code sent to foo@overleaf.com/i
+      )
       expect(sendReconfirmationMock.callHistory.called()).to.be.true
       fireEvent.click(
         screen.getByRole('button', { name: /resend confirmation code/i })
