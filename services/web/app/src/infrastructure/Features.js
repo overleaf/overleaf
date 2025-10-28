@@ -14,8 +14,6 @@ const trackChangesModuleAvailable =
  * @property {Object | undefined}  apis
  * @property {Object | undefined}  apis.linkedUrlProxy
  * @property {string | undefined}  apis.linkedUrlProxy.url
- * @property {Object | undefined}  apis.references
- * @property {string | undefined}  apis.references.url
  * @property {boolean | undefined} enableGithubSync
  * @property {boolean | undefined} enableGitBridge
  * @property {boolean | undefined} enableHomepage
