@@ -92,10 +92,7 @@ async function _getSplitTestOptions(req, res) {
         'clsi-cache-prompt'
       ))
     populateClsiCache = variant === 'enabled'
-    if (res.locals.splitTestInfo?.['clsi-cache-prompt']?.active) {
-      // Start using the cache when the split-test for the prompts is activated.
-      compileFromClsiCache = populateClsiCache
-    }
+    compileFromClsiCache = populateClsiCache
   }
 
   const pdfDownloadDomain = Settings.pdfDownloadDomain
