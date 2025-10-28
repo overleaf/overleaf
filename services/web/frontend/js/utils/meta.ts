@@ -300,6 +300,7 @@ export interface Meta {
   'ol-translationLoadErrorMessage': string
   'ol-translationMaintenance': string
   'ol-translationUnableToJoin': string
+  'ol-trialDisabledReason': string | undefined
   'ol-usGovBannerVariant': USGovBannerVariant
   'ol-useShareJsHash': boolean
   'ol-user': User

@@ -747,7 +747,19 @@ async function previewSubscription(req, res, next) {
   }
   // TODO: use PaymentService to fetch plan information
   const plan = await RecurlyClient.promises.getPlan(planCode)
-  const userId = SessionManager.getLoggedInUserId(req.session)
+  const user = SessionManager.getSessionUser(req.session)
+  const userId = user?._id
+
+  let trialDisabledReason
+  if (planCode.includes('_free_trial')) {
+    const trialEligibility = (
+      await Modules.promises.hooks.fire('userCanStartTrial', user)
+    )?.[0]
+    if (!trialEligibility.canStartTrial) {
+      trialDisabledReason = trialEligibility.disabledReason
+    }
+  }
+
   const subscriptionChange =
     await SubscriptionHandler.promises.previewSubscriptionChange(
       userId,
@@ -770,6 +782,7 @@ async function previewSubscription(req, res, next) {
   res.render('subscriptions/preview-change', {
     changePreview,
     redirectedPaymentErrorCode: req.query.errorCode,
+    trialDisabledReason,
   })
 }
 
