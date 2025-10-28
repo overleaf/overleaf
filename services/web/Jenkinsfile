@@ -21,13 +21,28 @@ pipeline {
     DOCKER_COMPOSE_FLAGS = '-f docker-compose.ci.yml'
     BRANCH_NAME = "${env.CHANGE_BRANCH ? env.CHANGE_BRANCH : env.BRANCH_NAME}"
     JENKINS_BUILD_NUMBER = "${BUILD_NUMBER}"       // preserve original BUILD_NUMBER
-    BUILD_NUMBER = "${SHORT_SHA}_${BUILD_NUMBER}"  // mimic the format used for Cloud Build
-    COMMIT_SHA = "${GIT_COMMIT}"
-    SHORT_SHA = "${GIT_COMMIT.take(7)}"
     CDN_STAG = "gs://ol-stag-web-assets-1"
     CDN_PROD = "gs://mgcp-1117973-ol-prod-web-assets-1"
   }
   stages {
+    stage('Set Build Variables') {
+      steps {
+        script {
+          def relevantCommitHash
+          if (env.CHANGE_BRANCH) {
+            echo "PR build detected. Jenkins checked out a merge commit: ${GIT_COMMIT}"
+            relevantCommitHash = sh(script: 'git rev-parse HEAD^1', returnStdout: true).trim()
+            echo "Found actual branch commit: ${relevantCommitHash}"
+          } else {
+            echo "Branch build detected. Using commit: ${GIT_COMMIT}"
+            relevantCommitHash = "${GIT_COMMIT}"
+          }
+          env.COMMIT_SHA = relevantCommitHash
+          env.SHORT_SHA = relevantCommitHash.take(7)
+          env.BUILD_NUMBER = "${env.SHORT_SHA}_${env.JENKINS_BUILD_NUMBER}"
+        }
+      }
+    }
     stage('Stage 1') {
       parallel {
         stage('Prefetch Tests Images') {
