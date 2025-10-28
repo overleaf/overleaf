@@ -18,16 +18,9 @@ const oldIndexes = [
 const newIndexes = [
   {
     key: {
-      createdAt: 1,
+      recipient_id: 1,
     },
-    name: 'createdAt_1',
-    expireAfterSeconds: 60 * 60 * 24, // expire after 24 hours
-  },
-  {
-    key: {
-      project_id: 1,
-    },
-    name: 'project_id_1',
+    name: 'recipientId_1',
     expireAfterSeconds: 60 * 60 * 24, // expire after 24 hours
   },
 ]
