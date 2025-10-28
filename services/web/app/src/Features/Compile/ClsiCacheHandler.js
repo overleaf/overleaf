@@ -9,6 +9,13 @@ const Settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 const { NotFoundError, InvalidNameError } = require('../Errors/Errors')
 
+const TIMEOUT = 4_000
+
+/**
+ * @type {Map<string, number>}
+ */
+const lastFailures = new Map()
+
 /**
  * Keep in sync with validateFilename in services/clsi-cache/app/js/utils.js
  *
@@ -70,7 +77,7 @@ async function clearCache(projectId, userId) {
       try {
         await fetchNothing(u, {
           method: 'DELETE',
-          signal: AbortSignal.timeout(15_000),
+          signal: AbortSignal.timeout(TIMEOUT),
         })
       } catch (err) {
         throw OError.tag(err, 'clear clsi-cache', { url, shard })
@@ -94,7 +101,7 @@ async function getOutputFile(
   userId,
   buildId,
   filename,
-  signal = AbortSignal.timeout(15_000)
+  signal = AbortSignal.timeout(TIMEOUT)
 ) {
   validateFilename(filename)
   if (!/^[a-f0-9-]+$/.test(buildId)) {
@@ -122,7 +129,7 @@ async function getLatestOutputFile(
   projectId,
   userId,
   filename,
-  signal = AbortSignal.timeout(15_000)
+  signal = AbortSignal.timeout(TIMEOUT)
 ) {
   validateFilename(filename)
 
@@ -154,11 +161,23 @@ async function getRedirectWithFallback(
   projectId,
   userId,
   path,
-  signal = AbortSignal.timeout(15_000)
+  signal = AbortSignal.timeout(TIMEOUT)
 ) {
   // Avoid hitting the same instance first all the time.
   const instances = _.shuffle(Settings.apis.clsiCache.instances)
   for (const { url, shard } of instances) {
+    if (signal.aborted) {
+      break // Stop trying the next backend when the signal has expired.
+    }
+    const lastFailure = lastFailures.get(url) ?? 0
+    if (lastFailure) {
+      // Circuit breaker that avoids retries for 4-16s.
+      const retryDelay = TIMEOUT * (1 + 3 * Math.random())
+      if (performance.now() - lastFailure < retryDelay) {
+        continue
+      }
+    }
+
     const u = new URL(url)
     u.pathname = path
     try {
@@ -168,6 +187,7 @@ async function getRedirectWithFallback(
       } = await fetchRedirectWithResponse(u, {
         signal,
       })
+      lastFailures.delete(url) // The shard is back up.
       let allFilesRaw = headers.get('X-All-Files')
       if (!allFilesRaw.startsWith('[')) {
         allFilesRaw = Buffer.from(allFilesRaw, 'base64url').toString()
@@ -183,8 +203,10 @@ async function getRedirectWithFallback(
       }
     } catch (err) {
       if (err instanceof RequestFailedError && err.response.status === 404) {
+        lastFailures.delete(url) // The shard is back up.
         break // No clsi-cache instance has cached something for this project/user.
       }
+      lastFailures.set(url, performance.now()) // The shard is unhealthy. Refresh timestamp of last failure.
       logger.warn(
         { err, projectId, userId, url, shard },
         'getLatestOutputFile from clsi-cache failed'
@@ -239,6 +261,7 @@ async function prepareCacheSource(
 }
 
 module.exports = {
+  TIMEOUT,
   getEgressLabel,
   clearCache,
   getOutputFile,

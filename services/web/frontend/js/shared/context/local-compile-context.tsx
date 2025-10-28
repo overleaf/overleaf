@@ -378,7 +378,9 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
     if (initialCompileFromCache && !pendingInitialCompileFromCache) {
       setPendingInitialCompileFromCache(true)
       setCompileFromCacheStartedAt(performance.now())
-      getJSON(`/project/${projectId}/output/cached/output.overleaf.json`)
+      getJSON(`/project/${projectId}/output/cached/output.overleaf.json`, {
+        signal: AbortSignal.timeout(5_000),
+      })
         .then((data: any) => {
           // Hand data over to next effect, it will wait for project/doc loading.
           setDataFromCache(data)

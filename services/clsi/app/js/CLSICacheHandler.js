@@ -17,6 +17,11 @@ const { MeteredStream } = require('@overleaf/stream-utils')
 const { CACHE_SUBDIR } = require('./OutputCacheManager')
 const { isExtraneousFile } = require('./ResourceWriter')
 
+const TIMEOUT = 5_000
+/**
+ * @type {Map<string, number>}
+ */
+const lastFailures = new Map()
 const TIMING_BUCKETS = [
   0, 10, 100, 1000, 2000, 5000, 10000, 15000, 20000, 30000,
 ]
@@ -33,6 +38,25 @@ function getShard(projectId) {
   const last4Bytes = Buffer.from(projectId, 'hex').subarray(8, 12)
   const idx = last4Bytes.readUInt32BE() % Settings.apis.clsiCache.shards.length
   return Settings.apis.clsiCache.shards[idx]
+}
+
+function checkCircuitBreaker(url) {
+  const lastFailure = lastFailures.get(url) ?? 0
+  if (lastFailure) {
+    // Circuit breaker that avoids retries for 5-20s.
+    const retryDelay = TIMEOUT * (1 + 3 * Math.random())
+    if (performance.now() - lastFailure < retryDelay) {
+      return true
+    }
+  }
+  return false
+}
+
+function tripCircuitBreaker(url) {
+  lastFailures.set(url, performance.now()) // The shard is unhealthy. Refresh timestamp of last failure.
+}
+function closeCircuitBreaker(url) {
+  lastFailures.delete(url) // The shard is back up.
 }
 
 /**
@@ -61,6 +85,7 @@ function notifyCLSICacheAboutBuild({
   if (!Settings.apis.clsiCache.enabled) return undefined
   if (!OBJECT_ID_REGEX.test(projectId)) return undefined
   const { url, shard } = getShard(projectId)
+  if (checkCircuitBreaker(url)) return undefined
 
   /**
    * @param {[{path: string}]} files
@@ -102,13 +127,18 @@ function notifyCLSICacheAboutBuild({
       method: 'POST',
       body,
       headers: { 'Content-Type': 'application/json' },
-      signal: AbortSignal.timeout(15_000),
-    }).catch(err => {
-      logger.warn(
-        { err, projectId, userId, buildId },
-        'enqueue for clsi cache failed'
-      )
+      signal: AbortSignal.timeout(TIMEOUT),
     })
+      .then(() => {
+        closeCircuitBreaker()
+      })
+      .catch(err => {
+        tripCircuitBreaker()
+        logger.warn(
+          { err, projectId, userId, buildId },
+          'enqueue for clsi cache failed'
+        )
+      })
   }
 
   // PDF preview
@@ -201,6 +231,8 @@ async function downloadOutputDotSynctexFromCompileCache(
 ) {
   if (!Settings.apis.clsiCache.enabled) return false
   if (!OBJECT_ID_REGEX.test(projectId)) return false
+  const { url } = getShard(projectId)
+  if (checkCircuitBreaker(url)) return false
 
   const timer = new Metrics.Timer(
     'clsi_cache_download',
@@ -211,19 +243,21 @@ async function downloadOutputDotSynctexFromCompileCache(
   let stream
   try {
     stream = await fetchStream(
-      `${getShard(projectId).url}/project/${projectId}/${
+      `${url}/project/${projectId}/${
         userId ? `user/${userId}/` : ''
       }build/${editorId}-${buildId}/search/output/output.synctex.gz`,
       {
         method: 'GET',
-        signal: AbortSignal.timeout(10_000),
+        signal: AbortSignal.timeout(TIMEOUT),
       }
     )
   } catch (err) {
     if (err instanceof RequestFailedError && err.response.status === 404) {
+      closeCircuitBreaker()
       timer.done({ status: 'not-found' })
       return false
     }
+    tripCircuitBreaker()
     timer.done({ status: 'error' })
     throw err
   }
@@ -240,11 +274,13 @@ async function downloadOutputDotSynctexFromCompileCache(
     )
     await fs.promises.rename(tmp, dst)
   } catch (err) {
+    tripCircuitBreaker()
     try {
       await fs.promises.unlink(tmp)
     } catch {}
     throw err
   }
+  closeCircuitBreaker()
   timer.done({ status: 'success' })
   return true
 }
@@ -258,10 +294,9 @@ async function downloadOutputDotSynctexFromCompileCache(
 async function downloadLatestCompileCache(projectId, userId, compileDir) {
   if (!Settings.apis.clsiCache.enabled) return false
   if (!OBJECT_ID_REGEX.test(projectId)) return false
+  const { url } = getShard(projectId)
+  if (checkCircuitBreaker(url)) return false
 
-  const url = `${getShard(projectId).url}/project/${projectId}/${
-    userId ? `user/${userId}/` : ''
-  }latest/output/output.tar.gz`
   const timer = new Metrics.Timer(
     'clsi_cache_download',
     1,
@@ -270,54 +305,71 @@ async function downloadLatestCompileCache(projectId, userId, compileDir) {
   )
   let stream
   try {
-    stream = await fetchStream(url, {
-      method: 'GET',
-      signal: AbortSignal.timeout(10_000),
-    })
+    stream = await fetchStream(
+      `${url}/project/${projectId}/${
+        userId ? `user/${userId}/` : ''
+      }latest/output/output.tar.gz`,
+      {
+        method: 'GET',
+        signal: AbortSignal.timeout(TIMEOUT),
+      }
+    )
   } catch (err) {
     if (err instanceof RequestFailedError && err.response.status === 404) {
+      closeCircuitBreaker()
       timer.done({ status: 'not-found' })
       return false
     }
+    tripCircuitBreaker()
     timer.done({ status: 'error' })
     throw err
   }
   let n = 0
   let abort = false
-  await pipeline(
-    stream,
-    new MeteredStream(Metrics, 'clsi_cache_egress', { path: 'output.tar.gz' }),
-    createGunzip(),
-    tarFs.extract(compileDir, {
-      // use ignore hook for counting entries (files+folders) and validation.
-      // Include folders as they incur mkdir calls.
-      ignore(_, header) {
-        if (abort) return true // log once
-        n++
-        if (n > MAX_ENTRIES_IN_OUTPUT_TAR) {
-          abort = true
-          logger.warn(
-            {
-              url,
-              compileDir,
-            },
-            'too many entries in tar-ball from clsi-cache'
-          )
-        } else if (header.type !== 'file' && header.type !== 'directory') {
-          abort = true
-          logger.warn(
-            {
-              url,
-              compileDir,
-              entryType: header.type,
-            },
-            'unexpected entry in tar-ball from clsi-cache'
-          )
-        }
-        return abort
-      },
-    })
-  )
+  try {
+    await pipeline(
+      stream,
+      new MeteredStream(Metrics, 'clsi_cache_egress', {
+        path: 'output.tar.gz',
+      }),
+      createGunzip(),
+      tarFs.extract(compileDir, {
+        // use ignore hook for counting entries (files+folders) and validation.
+        // Include folders as they incur mkdir calls.
+        ignore(_, header) {
+          if (abort) return true // log once
+          n++
+          if (n > MAX_ENTRIES_IN_OUTPUT_TAR) {
+            abort = true
+            logger.warn(
+              {
+                projectId,
+                userId,
+                compileDir,
+              },
+              'too many entries in tar-ball from clsi-cache'
+            )
+          } else if (header.type !== 'file' && header.type !== 'directory') {
+            abort = true
+            logger.warn(
+              {
+                projectId,
+                userId,
+                compileDir,
+                entryType: header.type,
+              },
+              'unexpected entry in tar-ball from clsi-cache'
+            )
+          }
+          return abort
+        },
+      })
+    )
+  } catch (err) {
+    tripCircuitBreaker()
+    throw err
+  }
+  closeCircuitBreaker()
   Metrics.count('clsi_cache_download_entries', n)
   timer.done({ status: 'success' })
   return !abort

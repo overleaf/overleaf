@@ -195,7 +195,7 @@ async function prepareClsiCache(
   const features = await UserGetter.promises.getUserFeatures(userId)
   if (features.compileGroup !== 'priority') return
 
-  const signal = AbortSignal.timeout(5_000)
+  const signal = AbortSignal.timeout(ClsiCacheHandler.TIMEOUT)
   let lastUpdated
   let shard = _.shuffle(Settings.apis.clsiCache.instances)[0].shard
   if (sourceProjectId) {
