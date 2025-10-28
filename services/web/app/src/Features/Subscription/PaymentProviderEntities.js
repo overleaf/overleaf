@@ -13,7 +13,7 @@
  * @property {number} subtotal
  * @property {number} discount
  * @property {number} tax
- * @property {boolean} isAiAssist
+ * @property {boolean} [isAiAssist]
  */
 
 const OError = require('@overleaf/o-error')

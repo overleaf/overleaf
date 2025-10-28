@@ -9,7 +9,7 @@ export type ImmediateCharge = {
     subtotal: number
     discount: number
     tax: number
-    isAiAssist: boolean
+    isAiAssist?: boolean
   }[]
 }
 

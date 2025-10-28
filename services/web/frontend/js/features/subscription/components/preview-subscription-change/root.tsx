@@ -39,6 +39,7 @@ function PreviewSubscriptionChange() {
     (item, index, arr) => {
       if (!item.isAiAssist) return true
 
+      // TODO: this can be removed when all subscriptions are using Stripe
       const isCanceledByAnotherItem = arr.some(
         (otherItem, otherIndex) =>
           otherIndex !== index &&
