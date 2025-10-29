@@ -264,17 +264,6 @@ describe('SubscriptionController', function () {
       })
     )
 
-    vi.doMock('celebrate', () => ({
-      default: (ctx.celebrate = {
-        celebrate: sinon.stub(),
-        errors: sinon.stub(),
-        Joi: {
-          any: sinon.stub(),
-          extend: sinon.stub(),
-        },
-      }),
-    }))
-
     vi.doMock(
       '../../../../app/src/Features/Subscription/GroupPlansData',
       () => ({
