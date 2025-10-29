@@ -1,4 +1,5 @@
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
+import { useProjectContext } from '@/shared/context/project-context'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import usePersistedState from '@/shared/hooks/use-persisted-state'
 import { isMac } from '@/shared/utils/os'
@@ -45,7 +46,11 @@ const RailContext = createContext<
 >(undefined)
 
 export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
-  const [isOpen, setIsOpen] = usePersistedState('rail-is-open', true)
+  const { projectId } = useProjectContext()
+  const [isOpen, setIsOpen] = usePersistedState(
+    `rail-is-open-${projectId}`,
+    true
+  )
   const [resizing, setResizing] = useState(false)
   const [activeModal, setActiveModalInternal] = useState<RailModalKey | null>(
     null
@@ -70,7 +75,7 @@ export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
   }, [setIsOpen])
 
   const [selectedTab, setSelectedTab] = usePersistedState<RailTabKey>(
-    'selected-rail-tab',
+    `selected-rail-tab-${projectId}`,
     'file-tree'
   )
 
