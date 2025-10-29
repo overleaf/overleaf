@@ -17,13 +17,34 @@ if (process.env.CI && process.env.MOCHA_ROOT_SUITE_NAME) {
 }
 module.exports = defineConfig({
   test: {
-    include: [
-      'modules/*/test/unit/**/*.test.mjs',
-      'test/unit/src/**/*.test.mjs',
-    ],
     setupFiles: ['./test/unit/vitest_bootstrap.mjs'],
     globals: true,
     isolate: false,
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'Parallel',
+          include: [
+            'modules/*/test/unit/**/*.test.mjs',
+            'test/unit/src/**/*.test.mjs',
+          ],
+          exclude: ['**/*.sequential.test.mjs'],
+          fileParallelism: true,
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'Sequential',
+          include: [
+            'modules/*/test/unit/**/*.sequential.test.mjs',
+            'test/unit/src/**/*.sequential.test.mjs',
+          ],
+          fileParallelism: false,
+        },
+      },
+    ],
     ...reporterOptions,
   },
 })
