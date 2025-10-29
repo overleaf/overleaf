@@ -17,15 +17,18 @@ import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { db } from '../../app/src/infrastructure/mongodb.js'
 import AccountMappingHelper from '../../app/src/Features/Analytics/AccountMappingHelper.js'
 import { registerAccountMapping } from '../../app/src/Features/Analytics/AnalyticsManager.js'
-import { triggerGracefulShutdown } from '../../app/src/infrastructure/GracefulShutdown.js'
+import { gracefulShutdown } from '../../app/src/infrastructure/GracefulShutdown.js'
 import Validation from '../../app/src/infrastructure/Validation.js'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
-const paramsSchema = Validation.Joi.object({
-  endDate: Validation.Joi.string().isoDate(),
-  commit: Validation.Joi.boolean().default(false),
-  verbose: Validation.Joi.boolean().default(false),
-}).unknown(true)
+const paramsSchema = Validation.z.object({
+  endDate: Validation.z.iso
+    .date()
+    .transform(v => new Date(v).toISOString())
+    .optional(),
+  commit: Validation.z.boolean().default(false).optional(),
+  verbose: Validation.z.boolean().default(false).optional(),
+})
 
 let mapped = 0
 let subscriptionCount = 0
@@ -96,33 +99,31 @@ async function main(trackProgress) {
   }
 }
 
-const {
-  error,
-  value: { commit, endDate, verbose },
-} = paramsSchema.validate(
+const { error, data } = paramsSchema.safeParse(
   minimist(process.argv.slice(2), {
     boolean: ['commit', 'verbose'],
     string: ['endDate'],
   })
 )
 
-logger.logger.level(verbose ? 'debug' : 'info')
-
 if (error) {
   logger.error({ error }, 'error with parameters')
-  triggerGracefulShutdown({
-    close(done) {
-      logger.info({}, 'shutting down')
-      done(1)
-    },
-  })
-} else {
-  logger.info({ verbose, commit, endDate }, commit ? 'COMMITTING' : 'DRY RUN')
-  await scriptRunner(main)
-  triggerGracefulShutdown({
+  await gracefulShutdown({
     close(done) {
       logger.info({}, 'shutting down')
       done()
     },
   })
+  process.exit(1)
 }
+const { commit, endDate, verbose } = data
+logger.logger.level(verbose ? 'debug' : 'info')
+logger.info({ verbose, commit, endDate }, commit ? 'COMMITTING' : 'DRY RUN')
+await scriptRunner(main)
+await gracefulShutdown({
+  close(done) {
+    logger.info({}, 'shutting down')
+    done()
+  },
+})
+process.exit()
