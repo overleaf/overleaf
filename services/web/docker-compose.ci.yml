@@ -89,6 +89,7 @@ services:
     user: "${DOCKER_USER:-1000:1000}"
     environment:
       CI:
+      CYPRESS_DOWNLOADS:
       CYPRESS_RESULTS:
       CYPRESS_SPEC_PATTERN:
       CYPRESS_EXCLUDE_SPEC_PATTERN:

@@ -279,7 +279,7 @@ pipeline {
           stages {
             stage('Wait a bit to give tests all the CPU capacity') {
               steps {
-                sh 'sleep 90'
+                sh 'sleep 60'
               }
             }
             stage('Build Webpack') {
@@ -327,6 +327,13 @@ pipeline {
                   dir('services/web') {
                     sh 'rm -f .sentryclirc'
                   }
+                }
+              }
+            }
+            stage('Push Production image early') {
+              steps {
+                dir('services/web') {
+                  sh 'make push_scratch'
                 }
               }
             }

@@ -14,6 +14,7 @@ if (process.env.CI) {
 export default defineConfig({
   fixturesFolder: 'cypress/fixtures',
   video: process.env.CYPRESS_VIDEO === 'true',
+  downloadsFolder: process.env.CYPRESS_DOWNLOADS || 'cypress/downloads',
   screenshotsFolder: process.env.CYPRESS_RESULTS || 'cypress/results',
   videosFolder: process.env.CYPRESS_RESULTS || 'cypress/results',
   viewportHeight: 800,
