@@ -1,0 +1,70 @@
+@import 'ciam-variables';
+@import 'ciam-mixins';
+
+.ciam-layout {
+  padding: var(--ciam-spacing-350);
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  font-family: var(--ciam-font-family-sans), sans-serif;
+  color: var(--ciam-color-text-primary);
+  font-size: var(--ciam-font-size-400);
+  line-height: 1.5;
+
+  @include ciam-body-md-regular;
+
+  .ciam-container {
+    flex: 1 1 auto;
+  }
+
+  .brand {
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+    height: 64px;
+    width: 130px;
+    margin: var(--ciam-spacing-350) auto;
+    display: block;
+
+    @include media-breakpoint-up(sm) {
+      margin: var(--ciam-spacing-350) var(--ciam-spacing-800);
+    }
+  }
+
+  h1 {
+    @include ciam-heading-sm-semibold;
+  }
+
+  .ciam-card {
+    box-shadow:
+      0 4px 6px -4px rgb(0 0 0 / 10%),
+      0 1px 29px -3px rgb(0 0 0 / 16%);
+    padding: var(--ciam-spacing-800) var(--ciam-spacing-400);
+    border-radius: var(--ciam-border-radius-400);
+    max-width: 460px;
+    margin: var(--ciam-spacing-400) auto;
+
+    @include media-breakpoint-up(sm) {
+      padding: var(--ciam-spacing-1300);
+    }
+  }
+
+  footer {
+    display: flex;
+    gap: var(--ciam-spacing-600);
+    text-transform: uppercase;
+    justify-content: center;
+    margin: var(--ciam-spacing-350) auto;
+
+    @include media-breakpoint-up(sm) {
+      margin: var(--ciam-spacing-350) var(--ciam-spacing-800);
+      justify-content: start;
+    }
+
+    a {
+      text-decoration: none;
+
+      @include ciam-body-sm-regular;
+    }
+  }
+}

@@ -1,0 +1,35 @@
+@import 'ciam-mixins';
+@import 'ciam-colors';
+
+// TODO: Replace `fuchsia` by the correct colors.
+
+.ciam-layout {
+  // Spacings
+  --ciam-spacing-200: 8px;
+  --ciam-spacing-250: 10px;
+  --ciam-spacing-350: 12px;
+  --ciam-spacing-400: 16px;
+  --ciam-spacing-600: 24px; // TODO: confirm this variable name (couldn't find in design system)
+  --ciam-spacing-800: 32px; // TODO: confirm this variable name (couldn't find in design system)
+  --ciam-spacing-1300: 52px;
+
+  // Base variables
+  --ciam-color-text-secondary: var(--ciam-color-neutral-800);
+  --ciam-color-text-primary: var(--ciam-color-neutral-900);
+  --ciam-border-radius-200: var(--ciam-spacing-300);
+  --ciam-border-radius-400: var(--ciam-spacing-400);
+  --ciam-font-family-sans: 'Inter', sans-serif;
+
+  // Links
+  // used in services/web/frontend/stylesheets/base/links.scss
+  --link-color: var(--ciam-color-text-secondary);
+  --link-hover-color: fuchsia;
+
+  // TODO: validate that this is correct
+  --link-visited-color: var(--ciam-color-text-secondary);
+  --link-color-dark: fuchsia;
+  --link-hover-color-dark: fuchsia;
+  --link-visited-color-dark: fuchsia;
+  --link-text-decoration: underline;
+  --link-hover-text-decoration: none;
+}
