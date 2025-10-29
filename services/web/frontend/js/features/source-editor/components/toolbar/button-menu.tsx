@@ -16,25 +16,31 @@ export const ToolbarButtonMenu: FC<
     disabled?: boolean
     disablePopover?: boolean
     altCommand?: (view: EditorView) => void
+    onToggle?: (isOpen: boolean) => void
   }>
 > = memo(function ButtonMenu({
   icon,
   id,
   label,
   altCommand,
+  onToggle,
   disabled,
   disablePopover,
   children,
 }) {
   const target = useRef<any>(null)
-  const { open, onToggle, ref } = useDropdown()
+  const { open, onToggle: handleToggle, ref } = useDropdown()
   const view = useCodeMirrorViewContext()
 
   useEffect(() => {
     if (disablePopover && open) {
-      onToggle(false)
+      handleToggle(false)
     }
-  }, [open, disablePopover, onToggle])
+  }, [open, disablePopover, handleToggle])
+
+  useEffect(() => {
+    onToggle?.(open)
+  }, [open, onToggle])
 
   const button = (
     <button
@@ -57,7 +63,7 @@ export const ToolbarButtonMenu: FC<
           altCommand(view)
           view.focus()
         } else {
-          onToggle(!open)
+          handleToggle(!open)
         }
       }}
       ref={target}
@@ -75,7 +81,7 @@ export const ToolbarButtonMenu: FC<
       containerPadding={0}
       transition
       rootClose
-      onHide={() => onToggle(false)}
+      onHide={() => handleToggle(false)}
     >
       <OLPopover
         id={`${id}-menu`}
@@ -85,7 +91,7 @@ export const ToolbarButtonMenu: FC<
         <OLListGroup
           role="menu"
           onClick={() => {
-            onToggle(false)
+            handleToggle(false)
           }}
         >
           {children}
