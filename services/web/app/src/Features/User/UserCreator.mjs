@@ -71,7 +71,7 @@ async function createNewUser(attributes, options = {}) {
     createdAt: new Date(),
     reversedHostname,
   }
-  if (Features.hasFeature('affiliations')) {
+  if (Features.hasFeature('affiliations') && !options.requireAffiliation) {
     emailData.affiliationUnchecked = true
   }
   if (
