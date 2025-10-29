@@ -523,6 +523,12 @@ async function previewAddonPurchase(req, res) {
         '/user/subscription?redirect-reason=ai-assist-unavailable'
       )
     }
+    if (
+      err instanceof Error &&
+      err.constructor.name === 'PaymentServiceResourceNotFoundError'
+    ) {
+      return res.redirect('/user/subscription/plans#ai-assist')
+    }
     throw err
   }
 
@@ -542,6 +548,12 @@ async function previewAddonPurchase(req, res) {
   } catch (err) {
     if (err instanceof DuplicateAddOnError) {
       return res.redirect('/user/subscription?redirect-reason=double-buy')
+    }
+    if (
+      err instanceof Error &&
+      err.constructor.name === 'PaymentServiceResourceNotFoundError'
+    ) {
+      return res.redirect('/user/subscription/plans#ai-assist')
     }
     throw err
   }
