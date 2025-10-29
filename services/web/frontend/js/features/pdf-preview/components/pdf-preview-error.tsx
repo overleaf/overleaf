@@ -5,6 +5,7 @@ import PdfLogEntry from './pdf-log-entry'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
 import getMeta from '../../../utils/meta'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 function PdfPreviewError({
   error,
@@ -300,7 +301,16 @@ function TimedOutLogEntry() {
             i18nKey="project_timed_out_optimize_images"
             components={[
               // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
-              <a href="https://www.overleaf.com/learn/how-to/Optimising_very_large_image_files" />,
+              <a
+                href="https://www.overleaf.com/learn/how-to/Optimising_very_large_image_files"
+                onClick={() => {
+                  sendMB('paywall-info-click', {
+                    'paywall-type': 'compile-timeout',
+                    content: 'docs',
+                    type: 'optimize',
+                  })
+                }}
+              />,
             ]}
           />
         </li>
@@ -309,7 +319,16 @@ function TimedOutLogEntry() {
             i18nKey="project_timed_out_fatal_error"
             components={[
               // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
-              <a href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F#Fatal_compile_errors_blocking_the_compilation" />,
+              <a
+                href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F#Fatal_compile_errors_blocking_the_compilation"
+                onClick={() => {
+                  sendMB('paywall-info-click', {
+                    'paywall-type': 'compile-timeout',
+                    content: 'docs',
+                    type: 'fatal-error',
+                  })
+                }}
+              />,
             ]}
           />
           {!lastCompileOptions.stopOnFirstError && (
@@ -335,7 +354,16 @@ function TimedOutLogEntry() {
           i18nKey="project_timed_out_learn_more"
           components={[
             // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
-            <a href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F" />,
+            <a
+              href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F"
+              onClick={() => {
+                sendMB('paywall-info-click', {
+                  'paywall-type': 'compile-timeout',
+                  content: 'docs',
+                  type: 'learn-more',
+                })
+              }}
+            />,
           ]}
         />
       </p>

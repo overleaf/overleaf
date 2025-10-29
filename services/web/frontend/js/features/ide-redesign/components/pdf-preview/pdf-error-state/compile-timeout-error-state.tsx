@@ -3,6 +3,7 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { Trans, useTranslation } from 'react-i18next'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
 import { useStopOnFirstError } from '@/shared/hooks/use-stop-on-first-error'
+import { sendMB } from '@/infrastructure/event-tracking'
 import { useCallback, useMemo } from 'react'
 import ErrorState from './error-state'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
@@ -149,7 +150,16 @@ const ReasonsForTimeoutInfo = () => {
               i18nKey="project_timed_out_optimize_images"
               components={[
                 // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
-                <a href="https://www.overleaf.com/learn/how-to/Optimising_very_large_image_files" />,
+                <a
+                  href="https://www.overleaf.com/learn/how-to/Optimising_very_large_image_files"
+                  onClick={() => {
+                    sendMB('paywall-info-click', {
+                      'paywall-type': 'compile-timeout',
+                      content: 'docs',
+                      type: 'optimize',
+                    })
+                  }}
+                />,
               ]}
             />
           </li>
@@ -158,7 +168,16 @@ const ReasonsForTimeoutInfo = () => {
               i18nKey="a_fatal_compile_error_that_completely_blocks_compilation"
               components={[
                 // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
-                <a href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F#Fatal_compile_errors_blocking_the_compilation" />,
+                <a
+                  href="https://www.overleaf.com/learn/how-to/Why_do_I_keep_getting_the_compile_timeout_error_message%3F#Fatal_compile_errors_blocking_the_compilation"
+                  onClick={() => {
+                    sendMB('paywall-info-click', {
+                      'paywall-type': 'compile-timeout',
+                      content: 'docs',
+                      type: 'fatal-error',
+                    })
+                  }}
+                />,
               ]}
             />
             {!lastCompileOptions.stopOnFirstError && (
@@ -191,6 +210,13 @@ const ReasonsForTimeoutInfo = () => {
                 href="/learn/how-to/Fixing_and_preventing_compile_timeouts"
                 rel="noopener noreferrer"
                 target="_blank"
+                onClick={() => {
+                  sendMB('paywall-info-click', {
+                    'paywall-type': 'compile-timeout',
+                    content: 'docs',
+                    type: 'learn-more',
+                  })
+                }}
               />,
             ]}
           />

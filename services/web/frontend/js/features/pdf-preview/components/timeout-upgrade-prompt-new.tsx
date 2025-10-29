@@ -179,6 +179,13 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
                     href="/learn/how-to/Optimising_very_large_image_files"
                     rel="noopener noreferrer"
                     target="_blank"
+                    onClick={() => {
+                      eventTracking.sendMB('paywall-info-click', {
+                        'paywall-type': 'compile-timeout',
+                        content: 'docs',
+                        type: 'optimize',
+                      })
+                    }}
                   />,
                 ]}
               />
@@ -192,6 +199,13 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
                     href="/learn/how-to/Fixing_and_preventing_compile_timeouts#Step_3:_Assess_your_project_for_time-consuming_tasks_and_fatal_errors"
                     rel="noopener noreferrer"
                     target="_blank"
+                    onClick={() => {
+                      eventTracking.sendMB('paywall-info-click', {
+                        'paywall-type': 'compile-timeout',
+                        content: 'docs',
+                        type: 'fatal-error',
+                      })
+                    }}
                   />,
                 ]}
               />
@@ -225,6 +239,13 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
                   href="/learn/how-to/Fixing_and_preventing_compile_timeouts"
                   rel="noopener noreferrer"
                   target="_blank"
+                  onClick={() => {
+                    eventTracking.sendMB('paywall-info-click', {
+                      'paywall-type': 'compile-timeout',
+                      content: 'docs',
+                      type: 'learn-more',
+                    })
+                  }}
                 />,
               ]}
             />
