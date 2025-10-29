@@ -337,3 +337,62 @@
     }
   }
 }
+
+.theme-toggle {
+  display: flex;
+  justify-content: space-between;
+  cursor: default !important;
+  align-items: center;
+
+  &:hover {
+    background-color: transparent !important;
+    color: var(--content-primary-themed);
+  }
+
+  legend {
+    font-size: var(--font-size-02);
+    line-height: var(--line-height-02);
+    margin-bottom: 0;
+  }
+}
+
+.theme-toggle-radios {
+  display: flex;
+  border-radius: var(--border-radius-full);
+  background-color: var(--bg-secondary-themed);
+  padding: var(--spacing-01);
+  gap: var(--spacing-01);
+}
+
+:root {
+  --theme-toggle-selected-background: var(--green-70);
+}
+
+@include theme('light') {
+  --theme-toggle-selected-background: var(--green-20);
+}
+
+.theme-toggle-radio {
+  display: flex;
+
+  input {
+    all: unset;
+  }
+
+  label {
+    display: flex;
+    padding: var(--spacing-03);
+    margin-bottom: 0;
+    border-radius: var(--border-radius-full);
+    cursor: pointer;
+    color: var(--content-primary-themed);
+  }
+
+  .material-symbols {
+    font-size: var(--font-size-03);
+  }
+
+  input:checked + label {
+    background-color: var(--theme-toggle-selected-background);
+  }
+}

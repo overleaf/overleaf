@@ -17,6 +17,7 @@ import { AccountMenuItems } from '@/shared/components/navbar/account-menu-items'
 import { useScrolled } from '@/features/project-list/components/sidebar/use-scroll'
 import { useSendProjectListMB } from '@/features/project-list/components/project-list-events'
 import { SurveyWidgetDsNav } from '@/features/project-list/components/survey-widget-ds-nav'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function SidebarDsNav() {
   const { t } = useTranslation()
@@ -36,6 +37,8 @@ function SidebarDsNav() {
     item => item.text === 'help_and_resources'
   ) as NavbarDropdownItemData
   const { containerRef, scrolledUp, scrolledDown } = useScrolled()
+  const themedDsNav = useFeatureFlag('themed-project-dashboard')
+
   return (
     <div
       className="project-list-sidebar-wrapper-react d-none d-md-flex"
@@ -159,6 +162,7 @@ function SidebarDsNav() {
                   <AccountMenuItems
                     sessionUser={sessionUser}
                     showSubscriptionLink={showSubscriptionLink}
+                    showThemeToggle={themedDsNav}
                   />
                 </Dropdown.Menu>
               </Dropdown>

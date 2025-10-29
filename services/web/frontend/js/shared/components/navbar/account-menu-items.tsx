@@ -7,17 +7,21 @@ import NavDropdownDivider from './nav-dropdown-divider'
 import NavDropdownLinkItem from './nav-dropdown-link-item'
 import { useDsNavStyle } from '@/features/project-list/components/use-is-ds-nav'
 import { SignOut } from '@phosphor-icons/react'
+import ThemeToggle from '@/features/project-list/components/sidebar/theme-toggle'
 
 export function AccountMenuItems({
   sessionUser,
   showSubscriptionLink,
+  showThemeToggle = false,
 }: {
   sessionUser: NavbarSessionUser
   showSubscriptionLink: boolean
+  showThemeToggle?: boolean
 }) {
   const { t } = useTranslation()
   const logOutFormId = 'logOutForm'
   const dsNavStyle = useDsNavStyle()
+
   return (
     <>
       <Dropdown.Item as="li" disabled role="menuitem">
@@ -32,6 +36,12 @@ export function AccountMenuItems({
           {t('subscription')}
         </NavDropdownLinkItem>
       ) : null}
+      {showThemeToggle && (
+        <DropdownListItem>
+          <ThemeToggle />
+        </DropdownListItem>
+      )}
+
       <NavDropdownDivider />
       <DropdownListItem>
         {
