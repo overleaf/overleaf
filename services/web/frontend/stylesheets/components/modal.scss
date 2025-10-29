@@ -2,6 +2,11 @@
   --bs-heading-color: var(--content-primary);
 }
 
+.modal {
+  // Until we add a dark modal version, all dropdowns in modals should use light theme
+  @include light-dropdown-menu;
+}
+
 @include media-breakpoint-up(sm) {
   .modal-dialog {
     @include modal-md;

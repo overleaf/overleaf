@@ -1,3 +1,48 @@
+@mixin light-dropdown-menu {
+  --dropdown-text-color: var(--neutral-90);
+  --dropdown-text-secondary: var(--content-secondary);
+  --dropdown-text-active: var(--green-70);
+  --dropdown-text-danger: var(--content-danger);
+  --dropdown-text-danger-hover: var(--content-danger);
+  --dropdown-header-text-color: var(--content-secondary);
+  --dropdown-background: var(--white);
+  --dropdown-background-active: var(--bg-accent-03);
+  --dropdown-background-hover: var(--bg-light-secondary);
+  --dropdown-background-danger-hover: var(--bg-danger-03);
+  --dropdown-border-divider: var(--border-divider);
+  --dropdown-text-hover: var(--content-primary);
+  --dropdown-border-width: 0;
+  --dropdown-border-color: transparent;
+}
+
+@mixin dark-dropdown-menu {
+  --dropdown-background: var(--bg-dark-primary);
+  --dropdown-background-hover: var(--bg-dark-secondary);
+  --dropdown-background-danger-hover: var(--bg-danger-02);
+  --dropdown-text-color: var(--content-primary-dark);
+  --dropdown-text-danger: var(--red-40);
+  --dropdown-text-danger-hover: var(--red-20);
+  --dropdown-text-secondary: var(--content-secondary-dark);
+  --dropdown-header-text-color: var(--content-secondary-dark);
+  --dropdown-text-hover: var(--content-primary-dark);
+  --dropdown-background-active: var(--green-70);
+  --dropdown-text-active: var(--green-10);
+  --dropdown-border-divider: var(--border-divider-dark);
+  --dropdown-border-width: 1px;
+  --dropdown-border-color: var(--border-primary);
+}
+
+:root {
+  @include light-dropdown-menu;
+}
+
+@include theme('default') {
+  .ide-redesign-main,
+  .project-ds-nav-page {
+    @include dark-dropdown-menu;
+  }
+}
+
 $dropdown-item-min-height: 36px;
 
 .dropdown {
@@ -25,6 +70,7 @@ $dropdown-item-min-height: 36px;
   min-height: $dropdown-item-min-height; // a minimum height of 36px to be accessible for touch screens
   padding: var(--spacing-05) var(--spacing-06) var(--spacing-02)
     var(--spacing-04);
+  color: var(--dropdown-header-text-color);
 }
 
 .dropdown-menu.dropdown-menu-unpositioned {
@@ -39,7 +85,9 @@ $dropdown-item-min-height: 36px;
 .dropdown-menu {
   @include shadow-md;
 
+  border: var(--dropdown-border-width) solid var(--dropdown-border-color);
   min-width: 240px;
+  background-color: var(--dropdown-background);
 
   &.dropdown-menu-sm-width {
     min-width: 160px;
@@ -60,37 +108,40 @@ $dropdown-item-min-height: 36px;
   place-content: center start;
   min-height: $dropdown-item-min-height; // a minimum height of 36px to be accessible for touch screens
   position: relative;
+  background-color: var(--dropdown-background);
 
   &:active {
-    background-color: var(--bg-accent-03);
+    background-color: var(--dropdown-background-active);
   }
 
   &,
   &:active,
   &:visited {
-    color: var(--neutral-90);
+    color: var(--dropdown-text-color);
   }
 
   &:hover:not(.active),
   &:focus:not(.active),
   &.nested-dropdown-toggle-shown {
-    background-color: var(--bg-light-secondary);
+    color: var(--dropdown-text-hover);
+    background-color: var(--dropdown-background-hover);
     cursor: pointer;
     text-decoration: none;
   }
 
   &[variant='danger'] {
-    color: var(--content-danger);
+    color: var(--dropdown-text-danger);
 
     &:hover:not(.active),
     &:focus:not(.active) {
-      background-color: var(--bg-danger-03);
+      color: var(--dropdown-text-danger-hover);
+      background-color: var(--dropdown-background-danger-hover);
     }
   }
 
   &.active {
-    background-color: var(--bg-accent-03);
-    color: var(--green-70);
+    background-color: var(--dropdown-background-active);
+    color: var(--dropdown-text-active);
   }
 
   &.btn-link {
@@ -104,14 +155,14 @@ $dropdown-item-min-height: 36px;
 }
 
 .dropdown-divider {
-  border-top-color: var(--border-divider);
+  border-top-color: var(--dropdown-border-divider);
   margin: var(--spacing-01) var(--spacing-03);
 }
 
 .dropdown-item-description {
   @include body-xs;
 
-  color: var(--content-secondary);
+  color: var(--dropdown-text-secondary);
   margin-top: var(--spacing-01);
   text-wrap: wrap;
 }
@@ -163,7 +214,7 @@ $dropdown-item-min-height: 36px;
 // override disabled styles when the state is active
 .dropdown-item.active .dropdown-item-description {
   background-color: initial;
-  color: var(--green-70);
+  color: var(--dropdown-text-active);
 }
 
 .dropdown-button-toggle {
@@ -198,7 +249,7 @@ $dropdown-item-min-height: 36px;
 }
 
 .dropdown-item-highlighted {
-  background-color: var(--bg-light-secondary);
+  background-color: var(--dropdown-background-hover);
 }
 
 .dropdown-item-material-icon-small {

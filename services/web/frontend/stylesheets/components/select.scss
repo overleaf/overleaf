@@ -1,3 +1,7 @@
+:root {
+  --select-background-highlighted: var(--bg-light-secondary);
+}
+
 .select-wrapper {
   position: relative;
 }
@@ -11,5 +15,5 @@
 }
 
 .select-highlighted {
-  background-color: var(--bg-light-secondary);
+  background-color: var(--select-background-highlighted);
 }
