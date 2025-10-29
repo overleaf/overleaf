@@ -289,6 +289,32 @@ describe('<EmailsSection />', function () {
     await screen.findByRole('button', { name: 'Link accounts and add email' })
   })
 
+  it('prevents user from linking to same SSO institution twice', async function () {
+    fetchMock.get('/user/emails?ensureAffiliation=true', [
+      { email: 'bar@autocomplete.edu', samlProviderId: '1234' },
+    ])
+    render(<EmailsSection />)
+
+    const button = await screen.findByRole<HTMLButtonElement>('button', {
+      name: 'Add another email',
+    })
+
+    await fetchMock.callHistory.flush(true)
+    fetchMock.removeRoutes().clearHistory()
+    fetchMock.get('express:/institutions/domains', institutionDomainData)
+
+    await userEvent.click(button)
+
+    const input = screen.getByRole('textbox', { name: 'Email' })
+    fireEvent.change(input, {
+      target: { value: 'baz@autocomplete.edu' },
+    })
+
+    await screen.findByText(
+      'This institution is already linked with your account via another email address.'
+    )
+  })
+
   it('adds new email address with existing institution and custom departments', async function () {
     const country = 'Germany'
     const customDepartment = 'Custom department'
