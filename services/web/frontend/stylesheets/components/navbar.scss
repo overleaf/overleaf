@@ -203,6 +203,7 @@
           .dropdown-item {
             padding: var(--spacing-02) var(--spacing-06) var(--spacing-02)
               var(--spacing-08);
+            background-color: transparent;
 
             &:not(.disabled) {
               color: var(--navbar-hamburger-submenu-item-color);
