@@ -22,7 +22,7 @@ import { DuplicateAddOnError, AddOnNotPresentError } from './Errors.js'
 import PlansLocator from './PlansLocator.mjs'
 import SubscriptionHelper from './SubscriptionHelper.js'
 import { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } from './AiHelper.js'
-const MEMBERS_LIMIT_ADD_ON_CODE = 'additional-license'
+export const MEMBERS_LIMIT_ADD_ON_CODE = 'additional-license'
 
 export class PaymentProviderSubscription {
   /**
@@ -434,7 +434,7 @@ export class PaymentProviderSubscription {
 /**
  * An add-on attached to a subscription
  */
-class PaymentProviderSubscriptionAddOn {
+export class PaymentProviderSubscriptionAddOn {
   /**
    * @param {object} props
    * @param {string} props.code
@@ -462,7 +462,7 @@ class PaymentProviderSubscriptionAddOn {
   }
 }
 
-class PaymentProviderSubscriptionUpdateRequest {
+export class PaymentProviderSubscriptionUpdateRequest {
   /**
    * @param {object} props
    * @param {PaymentProviderSubscription} props.subscription
@@ -476,7 +476,7 @@ class PaymentProviderSubscriptionUpdateRequest {
   }
 }
 
-class PaymentProviderSubscriptionChangeRequest {
+export class PaymentProviderSubscriptionChangeRequest {
   /**
    * @param {object} props
    * @param {PaymentProviderSubscription} props.subscription
@@ -497,7 +497,7 @@ class PaymentProviderSubscriptionChangeRequest {
   }
 }
 
-class PaymentProviderSubscriptionAddOnUpdate {
+export class PaymentProviderSubscriptionAddOnUpdate {
   /**
    * @param {object} props
    * @param {string} props.code
@@ -511,7 +511,7 @@ class PaymentProviderSubscriptionAddOnUpdate {
   }
 }
 
-class PaymentProviderSubscriptionChange {
+export class PaymentProviderSubscriptionChange {
   /**
    * @param {object} props
    * @param {PaymentProviderSubscription} props.subscription
@@ -551,13 +551,13 @@ class PaymentProviderSubscriptionChange {
   }
 }
 
-class PaypalPaymentMethod {
+export class PaypalPaymentMethod {
   toString() {
     return 'Paypal'
   }
 }
 
-class CreditCardPaymentMethod {
+export class CreditCardPaymentMethod {
   /**
    * @param {object} props
    * @param {string} props.cardType
@@ -573,7 +573,7 @@ class CreditCardPaymentMethod {
   }
 }
 
-class PaymentProviderImmediateCharge {
+export class PaymentProviderImmediateCharge {
   /**
    * @param {object} props
    * @param {number} props.subtotal
@@ -594,7 +594,7 @@ class PaymentProviderImmediateCharge {
 /**
  * An add-on configuration, independent of any subscription
  */
-class PaymentProviderAddOn {
+export class PaymentProviderAddOn {
   /**
    * @param {object} props
    * @param {string} props.code
@@ -609,7 +609,7 @@ class PaymentProviderAddOn {
 /**
  * A plan configuration
  */
-class PaymentProviderPlan {
+export class PaymentProviderPlan {
   /**
    * @param {object} props
    * @param {string} props.code
@@ -624,7 +624,7 @@ class PaymentProviderPlan {
 /**
  * A coupon in the payment provider
  */
-class PaymentProviderCoupon {
+export class PaymentProviderCoupon {
   /**
    * @param {object} props
    * @param {string} props.code
