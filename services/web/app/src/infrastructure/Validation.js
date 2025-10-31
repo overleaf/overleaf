@@ -7,6 +7,22 @@ const {
   zz,
   ParamsError,
 } = require('@overleaf/validation-tools')
+const { isZodErrorLike, fromError } = require('zod-validation-error')
+
+/**
+ * @typedef {import('express').ErrorRequestHandler} ErrorRequestHandler
+ */
+
+const errorMiddleware = [
+  /** @type {ErrorRequestHandler} */
+  (err, req, res, next) => {
+    if (!isZodErrorLike(err)) {
+      return next(err)
+    }
+
+    res.status(400).json({ ...fromError(err), statusCode: 400 })
+  },
+]
 
 const validateReqWeb = (req, schema) => {
   try {
@@ -21,6 +37,7 @@ const validateReqWeb = (req, schema) => {
 }
 
 module.exports = {
+  errorMiddleware,
   validateReq: validateReqWeb,
   z,
   zz,

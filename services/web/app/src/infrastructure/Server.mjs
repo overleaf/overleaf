@@ -2,6 +2,7 @@ import express from 'express'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import metrics from '@overleaf/metrics'
+import Validation from './Validation.js'
 import csp, { removeCSPHeaders } from './CSP.mjs'
 import Router from '../router.mjs'
 import helmet from 'helmet'
@@ -37,7 +38,6 @@ import os from 'node:os'
 import http from 'node:http'
 import { fileURLToPath } from 'node:url'
 import serveStaticWrapper from './ServeStaticWrapper.mjs'
-import { handleValidationError } from '@overleaf/validation-tools'
 
 const { hasAdminAccess } = AdminAuthorizationHelper
 const sessionsRedisClient = UserSessionsRedis.client()
@@ -356,17 +356,17 @@ const server = http.createServer(app)
 if (Settings.enabledServices.includes('api')) {
   logger.debug({}, 'providing api router')
   app.use(privateApiRouter)
-  app.use(handleValidationError)
+  app.use(Validation.errorMiddleware)
   app.use(ErrorController.handleApiError)
 }
 
 if (Settings.enabledServices.includes('web')) {
   logger.debug({}, 'providing web router')
   app.use(publicApiRouter) // public API goes with web router for public access
-  app.use(handleValidationError)
+  app.use(Validation.errorMiddleware)
   app.use(ErrorController.handleApiError)
   app.use(webRouter)
-  app.use(handleValidationError)
+  app.use(Validation.errorMiddleware)
   app.use(ErrorController.handleError)
 }
 
