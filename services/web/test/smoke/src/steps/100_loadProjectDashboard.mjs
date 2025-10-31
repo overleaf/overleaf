@@ -11,4 +11,4 @@ async function run({ request, assertHasStatusCode }) {
   }
 }
 
-module.exports = { run }
+export default { run }

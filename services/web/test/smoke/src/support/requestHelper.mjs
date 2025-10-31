@@ -1,10 +1,9 @@
-const { Agent } = require('http')
-const { createConnection } = require('net')
-const { promisify } = require('util')
-
-const OError = require('@overleaf/o-error')
-const request = require('request')
-const Settings = require('@overleaf/settings')
+import { Agent } from 'node:http'
+import { createConnection } from 'node:net'
+import { promisify } from 'node:util'
+import OError from '@overleaf/o-error'
+import request from 'request'
+import Settings from '@overleaf/settings'
 
 // send requests to web router if this is the api process
 const OWN_PORT = Settings.port || Settings.internal.web.port || 3000
@@ -27,7 +26,7 @@ class InsecureCookieJar extends request.jar().constructor {
   }
 }
 
-function requestFactory({ timeout }) {
+export function requestFactory({ timeout }) {
   return promisify(
     request.defaults({
       agent: new LocalhostAgent(),
@@ -43,7 +42,7 @@ function requestFactory({ timeout }) {
   )
 }
 
-function assertHasStatusCode(response, expected) {
+export function assertHasStatusCode(response, expected) {
   const { statusCode: actual } = response
   if (actual !== expected) {
     throw new OError('unexpected response code', {
@@ -52,9 +51,4 @@ function assertHasStatusCode(response, expected) {
       expected,
     })
   }
-}
-
-module.exports = {
-  assertHasStatusCode,
-  requestFactory,
 }

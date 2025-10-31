@@ -1,4 +1,4 @@
-async function processWithTimeout({ work, timeout, message }) {
+export async function processWithTimeout({ work, timeout, message }) {
   let workDeadLine
   function checkInResults() {
     clearTimeout(workDeadLine)
@@ -11,8 +11,4 @@ async function processWithTimeout({ work, timeout, message }) {
     }),
     work.finally(checkInResults),
   ])
-}
-
-module.exports = {
-  processWithTimeout,
 }

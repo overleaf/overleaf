@@ -1,4 +1,4 @@
-const Settings = require('@overleaf/settings')
+import Settings from '@overleaf/settings'
 
 async function run({ assertHasStatusCode, loginCsrfToken, request }) {
   const response = await request('/login', {
@@ -32,4 +32,4 @@ async function cleanup({ assertHasStatusCode, getCsrfTokenFor, request }) {
   assertHasStatusCode(response, 302)
 }
 
-module.exports = { cleanup, run }
+export default { cleanup, run }

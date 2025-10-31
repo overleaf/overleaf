@@ -4,4 +4,4 @@ async function run({ getCsrfTokenFor }) {
   return { loginCsrfToken }
 }
 
-module.exports = { run }
+export default { run }

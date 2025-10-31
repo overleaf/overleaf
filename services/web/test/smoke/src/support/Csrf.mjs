@@ -1,8 +1,8 @@
-const OError = require('@overleaf/o-error')
-const { assertHasStatusCode } = require('./requestHelper')
+import OError from '@overleaf/o-error'
+import { assertHasStatusCode } from './requestHelper.mjs'
 const CSRF_REGEX = /<meta name="ol-csrfToken" content="(.+?)">/
 
-function _parseCsrf(body) {
+export function _parseCsrf(body) {
   const match = CSRF_REGEX.exec(body)
   if (!match) {
     throw new Error('Cannot find csrfToken in HTML')
@@ -10,7 +10,7 @@ function _parseCsrf(body) {
   return match[1]
 }
 
-function getCsrfTokenForFactory({ request }) {
+export function getCsrfTokenForFactory({ request }) {
   return async function getCsrfTokenFor(endpoint) {
     try {
       const response = await request(endpoint)
@@ -20,8 +20,4 @@ function getCsrfTokenForFactory({ request }) {
       throw new OError(`error fetching csrf token on ${endpoint}`, {}, err)
     }
   }
-}
-
-module.exports = {
-  getCsrfTokenForFactory,
 }

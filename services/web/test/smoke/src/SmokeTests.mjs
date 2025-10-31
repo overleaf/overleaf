@@ -1,26 +1,26 @@
-const fs = require('fs')
-const Path = require('path')
-
-const Settings = require('@overleaf/settings')
-const { getCsrfTokenForFactory } = require('./support/Csrf')
-const { SmokeTestFailure } = require('./support/Errors')
-const {
+import fs from 'fs'
+import Path from 'path'
+import Settings from '@overleaf/settings'
+import { getCsrfTokenForFactory } from './support/Csrf.mjs'
+import { SmokeTestFailure } from './support/Errors.mjs'
+import {
   requestFactory,
   assertHasStatusCode,
-} = require('./support/requestHelper')
-const { processWithTimeout } = require('./support/timeoutHelper')
+} from './support/requestHelper.mjs'
+import { processWithTimeout } from './support/timeoutHelper.mjs'
 
 const STEP_TIMEOUT = Settings.smokeTest.stepTimeout
 
-const PATH_STEPS = Path.join(__dirname, './steps')
-const STEPS = fs
-  .readdirSync(PATH_STEPS)
-  .sort()
-  .map(name => {
-    const step = require(Path.join(PATH_STEPS, name))
-    step.name = Path.basename(name, '.js')
-    return step
-  })
+const PATH_STEPS = Path.join(import.meta.dirname, './steps')
+const sortedSteps = fs.readdirSync(PATH_STEPS).sort()
+
+const STEPS = []
+
+for (const name of sortedSteps) {
+  const step = (await import(Path.join(PATH_STEPS, name))).default
+  step.name = Path.basename(name, '.mjs')
+  STEPS.push(step)
+}
 
 async function runSmokeTests({ isAborted, stats }) {
   let lastStep = stats.start
@@ -92,4 +92,4 @@ async function runSmokeTests({ isAborted, stats }) {
   }
 }
 
-module.exports = { runSmokeTests, SmokeTestFailure }
+export default { runSmokeTests, SmokeTestFailure }

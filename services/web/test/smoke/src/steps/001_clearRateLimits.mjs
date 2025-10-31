@@ -1,9 +1,9 @@
-const Settings = require('@overleaf/settings')
-const {
+import Settings from '@overleaf/settings'
+import {
   overleafLoginRateLimiter,
   openProjectRateLimiter,
-} = require('../../../../app/src/infrastructure/RateLimiter')
-const LoginRateLimiter = require('../../../../app/src/Features/Security/LoginRateLimiter')
+} from '../../../../app/src/infrastructure/RateLimiter.js'
+import LoginRateLimiter from '../../../../app/src/Features/Security/LoginRateLimiter.js'
 
 async function clearLoginRateLimit() {
   await LoginRateLimiter.promises.recordSuccessfulLogin(Settings.smokeTest.user)
@@ -32,4 +32,4 @@ async function run({ processWithTimeout, timeout }) {
   })
 }
 
-module.exports = { run }
+export default { run }

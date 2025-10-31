@@ -1,4 +1,4 @@
-const Settings = require('@overleaf/settings')
+import Settings from '@overleaf/settings'
 
 async function run({ assertHasStatusCode, request }) {
   const response = await request(`/project/${Settings.smokeTest.projectId}`)
@@ -13,4 +13,4 @@ async function run({ assertHasStatusCode, request }) {
   }
 }
 
-module.exports = { run }
+export default { run }

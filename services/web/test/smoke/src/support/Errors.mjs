@@ -1,7 +1,3 @@
-const OError = require('@overleaf/o-error')
+import OError from '@overleaf/o-error'
 
-class SmokeTestFailure extends OError {}
-
-module.exports = {
-  SmokeTestFailure,
-}
+export class SmokeTestFailure extends OError {}
