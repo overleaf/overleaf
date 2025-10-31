@@ -1,6 +1,6 @@
 import minimist from 'minimist'
 import { db } from '../../app/src/infrastructure/mongodb.js'
-import { hashSecret } from '../../modules/oauth2-server/app/src/SecretsHelper.js'
+import { hashSecret } from '../../modules/oauth2-server/app/src/SecretsHelper.mjs'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 async function main() {
