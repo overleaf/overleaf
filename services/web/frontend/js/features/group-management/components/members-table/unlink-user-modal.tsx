@@ -85,7 +85,7 @@ export default function UnlinkUserModal({
   return (
     <OLModal show onHide={onClose}>
       <OLModalHeader>
-        <OLModalTitle>{t('unlink_user')}</OLModalTitle>
+        <OLModalTitle>{t('unlink_from_sso')}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>
         {hasError && (
@@ -121,7 +121,7 @@ export default function UnlinkUserModal({
           onClick={e => handleUnlink(e)}
           disabled={unlinkInFlight}
         >
-          {t('unlink_user')}
+          {t('unlink_from_sso')}
         </OLButton>
       </OLModalFooter>
     </OLModal>

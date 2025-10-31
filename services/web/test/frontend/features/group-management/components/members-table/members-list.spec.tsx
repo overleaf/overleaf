@@ -274,7 +274,7 @@ describe('MembersList', function () {
 
       it('should show successs notification and update the user row after unlinking', function () {
         cy.findByRole('dialog').within(() => {
-          cy.findByRole('button', { name: /unlink user/i }).click()
+          cy.findByRole('button', { name: /unlink from sso/i }).click()
         })
         cy.findByRole('alert').should(
           'contain.text',
@@ -314,7 +314,7 @@ describe('MembersList', function () {
 
         it('should show successs notification and update the user row after unlinking', function () {
           cy.findByRole('dialog').within(() => {
-            cy.findByRole('button', { name: /unlink user/i }).click()
+            cy.findByRole('button', { name: /unlink from sso/i }).click()
           })
           cy.findByRole('alert').should(
             'contain.text',
@@ -347,7 +347,7 @@ describe('MembersList', function () {
 
         it('should show successs notification and update the user row after unlinking', function () {
           cy.findByRole('dialog').within(() => {
-            cy.findByRole('button', { name: /unlink user/i }).click()
+            cy.findByRole('button', { name: /unlink from sso/i }).click()
           })
           cy.findByRole('alert').should(
             'contain.text',

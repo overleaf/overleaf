@@ -35,7 +35,7 @@ describe('<UnlinkUserModal />', function () {
   it('displays the modal', async function () {
     renderWithContext(<UnlinkUserModal {...defaultProps} />)
     await screen.findByRole('heading', {
-      name: 'Unlink user',
+      name: 'Unlink from SSO',
     })
     screen.getByText('You’re about to remove the SSO login option for', {
       exact: false,
@@ -47,10 +47,12 @@ describe('<UnlinkUserModal />', function () {
 
     renderWithContext(<UnlinkUserModal {...defaultProps} />)
     await screen.findByRole('heading', {
-      name: 'Unlink user',
+      name: 'Unlink from SSO',
     })
 
-    const confirmButton = screen.getByRole('button', { name: 'Unlink user' })
+    const confirmButton = screen.getByRole('button', {
+      name: 'Unlink from SSO',
+    })
     fireEvent.click(confirmButton)
 
     await waitFor(() => expect(defaultProps.onClose).to.have.been.called)
@@ -70,10 +72,12 @@ describe('<UnlinkUserModal />', function () {
 
     renderWithContext(<UnlinkUserModal {...defaultProps} />)
     await screen.findByRole('heading', {
-      name: 'Unlink user',
+      name: 'Unlink from SSO',
     })
 
-    const confirmButton = screen.getByRole('button', { name: 'Unlink user' })
+    const confirmButton = screen.getByRole('button', {
+      name: 'Unlink from SSO',
+    })
     fireEvent.click(confirmButton)
 
     await waitFor(() => screen.findByText('Sorry, something went wrong'))

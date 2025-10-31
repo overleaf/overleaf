@@ -223,7 +223,7 @@ export default function DropdownButton({
         key="unlink-user-action"
         data-testid="unlink-user-action"
       >
-        {t('unlink_user')}
+        {t('unlink_from_sso')}
       </MenuItemButton>
     )
   }
@@ -250,7 +250,7 @@ export default function DropdownButton({
         data-testid="delete-user-action"
         onClick={onDeleteUserClick}
       >
-        {t('delete_user')}
+        {t('delete_permanently')}
       </MenuItemButton>
     )
     buttons.push(
@@ -259,7 +259,7 @@ export default function DropdownButton({
         data-testid="release-user-action"
         onClick={onReleaseUserClick}
       >
-        {t('remove_user')}
+        {t('remove_from_group')}
       </MenuItemButton>
     )
   } else if (!isUserManaged) {

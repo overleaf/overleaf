@@ -2396,7 +2396,6 @@
   "unlink_provider_account_warning": "警告：当您取消帐户与 __provider__ 的链接后，您将无法再使用 __provider__ 登录。",
   "unlink_reference": "取消关联参考文献提供者",
   "unlink_the_project_from_the_current_github_repo": "取消项目与当前 GitHub 存储库的链接，并创建与您拥有的存储库的连接。 （您需要有效的 __appName__ 订阅才能设置 GitHub 同步）。",
-  "unlink_user": "取消链接用户",
   "unlink_user_explanation": "您即将删除 <0>__email__</0> 的 SSO 登录选项。 这将迫使他们向您的 IdP 重新验证其 Overleaf 帐户。 他们会收到一封电子邮件，要求他们这样做。",
   "unlink_users": "取消用户链接",
   "unlink_warning_reference": "警告：如果将账户与此提供者取消关联，您将无法把参考文献导入到项目中。",

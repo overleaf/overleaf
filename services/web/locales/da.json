@@ -2003,7 +2003,6 @@
   "unlink_provider_account_warning": "Advarsel: Når du afkobler din konto fra __provider__ kan du ikke længere logge ind igennem __provider__.",
   "unlink_reference": "Fjern link til reference udbyder",
   "unlink_the_project_from_the_current_github_repo": "Afkobl projektet fra det nuværende GitHub repository og opret en forbindelse til et repository du ejer. (Der kræves et aktivt __appName__ abonnement for at sætte GitHub synkronisering op).",
-  "unlink_user": "Afkobl bruger",
   "unlink_users": "Afkobl brugere",
   "unlink_warning_reference": "Advarsel: Når du fjerner linket til denne udbyder fra din konto, vil du ikke længere have mulighed for at importere referencer ind i dine projekter.",
   "unlinking": "Fjerner forbindelse",
