@@ -254,7 +254,7 @@ describe('CompileManager', function () {
         .calledWith(null, {
           timeout: ctx.timeout,
           compileGroup: ctx.group,
-          compileBackendClass: 'c2d',
+          compileBackendClass: 'c4d',
           ownerAnalyticsId: 'abc',
         })
         .should.equal(true)
@@ -284,7 +284,7 @@ describe('CompileManager', function () {
           await ctx.CompileManager.promises.getProjectCompileLimits(
             ctx.project_id
           )
-        expect(compileBackendClass).to.equal('c2d')
+        expect(compileBackendClass).to.equal('c4d')
       })
     })
   })

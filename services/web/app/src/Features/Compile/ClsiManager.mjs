@@ -52,6 +52,8 @@ function getNewCompileBackendClass(projectId, compileBackendClass) {
       return 'n4'
     case 'c2d':
       return 'n4'
+    case 'c4d':
+      return 'n4'
     default:
       throw new Error('unknown ?compileBackendClass')
   }

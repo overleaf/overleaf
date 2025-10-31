@@ -135,7 +135,7 @@ async function _getProjectCompileLimits(project) {
     timeout:
       ownerFeatures.compileTimeout || Settings.defaultFeatures.compileTimeout,
     compileGroup,
-    compileBackendClass: compileGroup === 'standard' ? 'n2d' : 'c2d',
+    compileBackendClass: compileGroup === 'standard' ? 'n2d' : 'c4d',
     ownerAnalyticsId: analyticsId,
   }
   return limits

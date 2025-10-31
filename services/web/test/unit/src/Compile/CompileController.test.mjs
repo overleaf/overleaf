@@ -783,7 +783,7 @@ describe('CompileController', function () {
             .stub()
             .resolves({
               compileGroup: 'priority',
-              compileBackendClass: 'c2d',
+              compileBackendClass: 'c4d',
             })
           await ctx.CompileController._proxyToClsi(
             ctx.projectId,
@@ -798,7 +798,7 @@ describe('CompileController', function () {
 
         it('should open a request to the CLSI', function (ctx) {
           ctx.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
-            `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=priority&compileBackendClass=c2d`
+            `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`
           )
         })
       })
