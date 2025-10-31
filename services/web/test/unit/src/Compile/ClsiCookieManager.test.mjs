@@ -55,17 +55,17 @@ describe('ClsiCookieManager', function () {
         ctx.project_id,
         ctx.user_id,
         '',
-        'n2d'
+        'c3d'
       )
       ctx.redis.get
-        .calledWith(`clsiserver:n2d:${ctx.project_id}:${ctx.user_id}`)
+        .calledWith(`clsiserver:c3d:${ctx.project_id}:${ctx.user_id}`)
         .should.equal(true)
       serverId.should.equal('clsi-7')
     })
 
     it('should fallback to old key', async function (ctx) {
       ctx.redis.get
-        .withArgs(`clsiserver:n2d:${ctx.project_id}:${ctx.user_id}`)
+        .withArgs(`clsiserver:c3d:${ctx.project_id}:${ctx.user_id}`)
         .resolves(null)
       ctx.redis.get
         .withArgs(`clsiserver:${ctx.project_id}:${ctx.user_id}`)
@@ -74,10 +74,10 @@ describe('ClsiCookieManager', function () {
         ctx.project_id,
         ctx.user_id,
         '',
-        'n2d'
+        'c3d'
       )
       ctx.redis.get
-        .calledWith(`clsiserver:n2d:${ctx.project_id}:${ctx.user_id}`)
+        .calledWith(`clsiserver:c3d:${ctx.project_id}:${ctx.user_id}`)
         .should.equal(true)
       ctx.redis.get
         .calledWith(`clsiserver:${ctx.project_id}:${ctx.user_id}`)
@@ -109,7 +109,7 @@ describe('ClsiCookieManager', function () {
         ctx.project_id,
         ctx.user_id,
         '',
-        'n2d'
+        'c3d'
       )
       ctx.ClsiCookieManager.promises._populateServerIdViaRequest
         .calledWith(ctx.project_id, ctx.user_id)
@@ -140,13 +140,13 @@ describe('ClsiCookieManager', function () {
           ctx.project_id,
           ctx.user_id,
           'standard',
-          'n2d'
+          'c3d'
         )
         const args = ctx.ClsiCookieManager.promises.setServerId.args[0]
         args[0].should.equal(ctx.project_id)
         args[1].should.equal(ctx.user_id)
         args[2].should.equal('standard')
-        args[3].should.equal('n2d')
+        args[3].should.equal('c3d')
         args[4].should.deep.equal(ctx.clsiServerId)
       })
 
@@ -156,7 +156,7 @@ describe('ClsiCookieManager', function () {
             ctx.project_id,
             ctx.user_id,
             '',
-            'n2d'
+            'c3d'
           )
         serverId.should.equal(ctx.clsiServerId)
       })
@@ -175,7 +175,7 @@ describe('ClsiCookieManager', function () {
           ctx.project_id,
           ctx.user_id,
           'standard',
-          'n2d',
+          'c3d',
           ctx.clsiServerId,
           null
         )
@@ -189,10 +189,10 @@ describe('ClsiCookieManager', function () {
       await ctx.ClsiCookieManager.promises.clearServerId(
         ctx.project_id,
         ctx.user_id,
-        'n2d'
+        'c3d'
       )
       ctx.redis.del.should.have.been.calledWith(
-        `clsiserver:n2d:${ctx.project_id}:${ctx.user_id}`,
+        `clsiserver:c3d:${ctx.project_id}:${ctx.user_id}`,
         `clsiserver:${ctx.project_id}:${ctx.user_id}`
       )
     })
@@ -211,12 +211,12 @@ describe('ClsiCookieManager', function () {
         ctx.project_id,
         ctx.user_id,
         'standard',
-        'n2d',
+        'c3d',
         ctx.clsiServerId,
         null
       )
       ctx.redis.setex.should.have.been.calledWith(
-        `clsiserver:n2d:${ctx.project_id}:${ctx.user_id}`,
+        `clsiserver:c3d:${ctx.project_id}:${ctx.user_id}`,
         ctx.settings.clsiCookie.ttlInSeconds,
         ctx.clsiServerId
       )
@@ -228,12 +228,12 @@ describe('ClsiCookieManager', function () {
         ctx.project_id,
         ctx.user_id,
         'standard',
-        'n2d',
+        'c3d',
         ctx.clsiServerId,
         null
       )
       expect(ctx.redis.setex).to.have.been.calledWith(
-        `clsiserver:n2d:${ctx.project_id}:${ctx.user_id}`,
+        `clsiserver:c3d:${ctx.project_id}:${ctx.user_id}`,
         ctx.settings.clsiCookie.ttlInSecondsRegular,
         ctx.clsiServerId
       )
@@ -256,7 +256,7 @@ describe('ClsiCookieManager', function () {
           ctx.project_id,
           ctx.user_id,
           'standard',
-          'n2d',
+          'c3d',
           ctx.clsiServerId,
           null
         )
@@ -281,12 +281,12 @@ describe('ClsiCookieManager', function () {
         ctx.project_id,
         ctx.user_id,
         'standard',
-        'n2d',
+        'c3d',
         ctx.clsiServerId,
         null
       )
       ctx.redis_secondary.setex.should.have.been.calledWith(
-        `clsiserver:n2d:${ctx.project_id}:${ctx.user_id}`,
+        `clsiserver:c3d:${ctx.project_id}:${ctx.user_id}`,
         ctx.settings.clsiCookie.ttlInSeconds,
         ctx.clsiServerId
       )
@@ -300,14 +300,14 @@ describe('ClsiCookieManager', function () {
             ctx.project_id,
             ctx.user_id,
             'standard',
-            'n2d',
+            'c3d',
             ctx.clsiServerId,
             'previous-clsi-server-id'
           )
           expect(
             ctx.fetchUtils.fetchStringWithResponse
           ).to.have.been.calledWith(
-            `${ctx.settings.apis.clsi.url}/instance-state?clsiserverid=previous-clsi-server-id&compileGroup=standard&compileBackendClass=n2d`,
+            `${ctx.settings.apis.clsi.url}/instance-state?clsiserverid=previous-clsi-server-id&compileGroup=standard&compileBackendClass=c3d`,
             { method: 'GET', signal: sinon.match.instanceOf(AbortSignal) }
           )
         }

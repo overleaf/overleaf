@@ -19,7 +19,7 @@ describe('CompileManager', function () {
     vi.doMock('@overleaf/settings', () => ({
       default: (ctx.settings = {
         apis: {
-          clsi: { submissionBackendClass: 'n2d' },
+          clsi: { submissionBackendClass: 'c3d' },
         },
         redis: { web: { host: '127.0.0.1', port: 42 } },
         rateLimit: { autoCompile: {} },
