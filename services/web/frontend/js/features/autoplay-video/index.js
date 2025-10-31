@@ -1,5 +1,12 @@
 import { debugConsole } from '@/utils/debugging'
 
+let hasHandledAutoplayFailure = false
+
+function enableControls(videoEl, reason) {
+  debugConsole.log(`Enabling video controls: ${reason}`)
+  videoEl.setAttribute('controls', '')
+}
+
 function setup(videoEl) {
   const reducedMotionReduce = window.matchMedia(
     '(prefers-reduced-motion: reduce)'
@@ -10,7 +17,7 @@ function setup(videoEl) {
     // in console, if user seeks the control seek bar relatively fast
     // AbortError: The fetching process for the media resource was aborted by the user agent at the user's request.
     // this is only a problem in firefox (tested in macOS), chrome and safari is fine
-    videoEl.setAttribute('controls', '')
+    enableControls(videoEl, 'reduced motion preference')
 
     return
   }
@@ -21,11 +28,29 @@ function setup(videoEl) {
 
   let videoIsVisible
 
+  function handleAutoplayFailure(error) {
+    // Possible HTMLMediaElement.play() errors
+    // Only show controls for errors where manual play would work
+    // NotAllowedError: autoplay blocked by browser/device settings
+    // AbortError: play attempt interrupted by browser
+    if (error.name === 'NotAllowedError' || error.name === 'AbortError') {
+      if (!hasHandledAutoplayFailure) {
+        hasHandledAutoplayFailure = true
+
+        document.querySelectorAll('[data-ol-autoplay-video]').forEach(video => {
+          enableControls(video, `autoplay blocked (${error.name})`)
+        })
+      }
+    } else {
+      debugConsole.error('Video playback error:', error)
+    }
+  }
+
   videoEl.addEventListener('ended', () => {
     setTimeout(() => {
       videoEl.currentTime = 0
-      if (videoIsVisible) {
-        videoEl.play()
+      if (videoIsVisible && !hasHandledAutoplayFailure) {
+        videoEl.play().catch(handleAutoplayFailure)
       }
     }, DELAY_BEFORE_REPLAY)
   })
@@ -35,23 +60,18 @@ function setup(videoEl) {
       for (const change of changes) {
         if (change.isIntersecting) {
           videoIsVisible = true
-          if (videoEl.readyState >= videoEl.HAVE_FUTURE_DATA) {
-            if (!videoEl.ended) {
-              videoEl
-                .play()
-                .catch(error =>
-                  debugConsole.error('Video autoplay failed:', error)
-                )
-            } else {
-              videoEl
-                .play()
-                .catch(error =>
-                  debugConsole.error('Video autoplay failed:', error)
-                )
-            }
+          if (
+            !hasHandledAutoplayFailure &&
+            videoEl.readyState >= videoEl.HAVE_FUTURE_DATA
+          ) {
+            videoEl.play().catch(handleAutoplayFailure)
           }
         } else {
           videoIsVisible = false
+          // Pause video when it leaves viewport to save resources
+          if (!videoEl.paused) {
+            videoEl.pause()
+          }
         }
       }
     },
