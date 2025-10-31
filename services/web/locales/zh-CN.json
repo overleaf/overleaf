@@ -1214,7 +1214,7 @@
   "log_in_with": "用 __provider__ 账户登陆",
   "log_in_with_a_different_account": "以另外一个账户登录",
   "log_in_with_email": "使用 __email__ 登录",
-  "log_in_with_existing_institution_email": "请使用您现有的 <b>__appName__</b> 帐户登录，以便将您的<b>__appName__</b>和<b>__institutionName__</b> 机构帐户关联起来。",
+  "log_in_with_existing_institution_email": "请使用您现有的 <0>__appName__</0> 帐户登录，以便将您的<0>__appName__</0>和<0>__institutionName__</0> 机构帐户关联起来。",
   "log_in_with_primary_email_address": "如果您使用电子邮件地址和密码登录，这将是要使用的电子邮件地址。 重要的 __appName__ 通知将发送到此电子邮件地址。",
   "log_in_with_sso": "通过 SSO 登录",
   "log_in_with_sso_email": "工作或大学电子邮件账户",

@@ -1305,7 +1305,7 @@
   "log_in_with": "Log in with __provider__",
   "log_in_with_a_different_account": "Log in with a different account",
   "log_in_with_email": "Log in with __email__",
-  "log_in_with_existing_institution_email": "Please log in with your existing <b>__appName__</b> account in order to get your <b>__appName__</b>  and <b>__institutionName__</b> institutional accounts linked.",
+  "log_in_with_existing_institution_email": "Please log in with your existing <0>__appName__</0> account in order to get your <0>__appName__</0>  and <0>__institutionName__</0> institutional accounts linked.",
   "log_in_with_primary_email_address": "This will be the email address to use if you log in with an email address and password. Important __appName__ notifications will be sent to this email address.",
   "log_in_with_sso": "Log in with SSO",
   "log_in_with_sso_email": "Work or university email address",

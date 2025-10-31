@@ -451,7 +451,7 @@
   "log_in_first_to_proceed": "Du måste först <b>logga in</b> för att fortsätta.",
   "log_in_with": "Logga in med __provider__",
   "log_in_with_email": "Logga in med __email__",
-  "log_in_with_existing_institution_email": "Vänligen logga in med ditt befintliga <b>__appName__</b>-konto för att länka kontot <b>__appName__</b> och det institutionella kontot <b>__institutionName__ </b>.",
+  "log_in_with_existing_institution_email": "Vänligen logga in med ditt befintliga <0>__appName__</0>-konto för att länka kontot <0>__appName__</0> och det institutionella kontot <0>__institutionName__ </0>.",
   "log_out": "Logga ut",
   "log_out_from": "Logga ut från __email__",
   "logged_in_with_email": "Du är för närvarande inloggad i <b>__appName__</b> med e-postadressen <b>__email__</b>.",

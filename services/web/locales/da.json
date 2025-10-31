@@ -1016,7 +1016,7 @@
   "log_in_with": "Log ind med __provider__",
   "log_in_with_a_different_account": "Log ind med en anden konto",
   "log_in_with_email": "Log ind med __email__",
-  "log_in_with_existing_institution_email": "For at forbinde din <b>__appName__</b>- og din <b>__institutionName__</b>-konto, er du nødt til først at logge ind med din eksisterende <b>__appName__</b>-konto.",
+  "log_in_with_existing_institution_email": "For at forbinde din <0>__appName__</0>- og din <0>__institutionName__</0>-konto, er du nødt til først at logge ind med din eksisterende <0>__appName__</0>-konto.",
   "log_in_with_primary_email_address": "Dette bliver e-mailaddressen du skal bruge hvis du logger ind med e-mailaddresse og kode. Vigtige __appName__ beskeder vil blive sendt til denne adresse.",
   "log_in_with_sso": "Log ind med SSO",
   "log_in_with_sso_email": "Arbejde- eller universitets-e-mailaddresse",

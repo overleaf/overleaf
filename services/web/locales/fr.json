@@ -688,7 +688,7 @@
   "log_in_first_to_proceed": "Vous aurez besoin de <b>vous connecter</b> avant de poursuivre.",
   "log_in_with": "Se connecter avec __provider__",
   "log_in_with_email": "Se connecter avec __email__",
-  "log_in_with_existing_institution_email": "Veuillez vous connecter sur votre compte <b>__appName__</b> existant afin de lier vos comptes institutionnels <b>__appName__</b>  et <b>__institutionName__</b>.",
+  "log_in_with_existing_institution_email": "Veuillez vous connecter sur votre compte <0>__appName__</0> existant afin de lier vos comptes institutionnels <0>__appName__</0>  et <0>__institutionName__</0>.",
   "log_out": "Déconnexion",
   "log_out_from": "Se déconnecter de __email__",
   "logged_in_with_email": "Vous êtes actuellement connecté à <b>__appName__</b> avec l’adresse <b>__email__</b>.",

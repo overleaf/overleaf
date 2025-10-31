@@ -744,7 +744,7 @@
   "log_in_first_to_proceed": "Du musst dich zuerst <b>anmelden</b>, um fortzufahren.",
   "log_in_with": "Einloggen mit __provider__",
   "log_in_with_email": "Melde dich mit __email__ an",
-  "log_in_with_existing_institution_email": "Bitte melde dich mit deinem bestehenden <b>__appName__</b>-Konto an, um deine institutionellen Konten <b>__appName__</b> und <b>__institutionName__</b> zu verknüpfen.",
+  "log_in_with_existing_institution_email": "Bitte melde dich mit deinem bestehenden <0>__appName__</0>-Konto an, um deine institutionellen Konten <0>__appName__</0> und <0>__institutionName__</0> zu verknüpfen.",
   "log_out": "Abmelden",
   "log_out_from": "Von __email__ abmelden",
   "log_viewer_error": "Beim Anzeigen der Kompilierfehler und -protokolle dieses Projekts ist ein Problem aufgetreten.",
