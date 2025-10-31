@@ -2,6 +2,7 @@ This directory contains fonts used by the Overleaf web application.
 
 * [DM Mono](https://github.com/googlefonts/dm-mono)
 * [Font Awesome](https://fontawesome.com/v4/)
+* [Inter](https://rsms.me/inter/)
 * [Lato](https://www.latofonts.com/)
 * [Material Symbols](https://github.com/google/material-design-icons)
 * [Merriweather](https://github.com/SorkinType/Merriweather)
