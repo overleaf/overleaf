@@ -22,7 +22,8 @@
   "dependencies": {
     "@overleaf/o-error": "*",
     "mongodb": "^6.12.0",
-    "zod": "^4.1.8"
+    "zod": "^4.1.8",
+    "zod-validation-error": "^4.0.1"
   },
   "devDependencies": {
     "typescript": "^5.0.4",
