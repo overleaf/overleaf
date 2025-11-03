@@ -445,7 +445,6 @@ async function projectListPage(req, res, next) {
     _.sample(['on-premise', 'FOMO', 'FOMO', 'FOMO'])
 
   let showInrGeoBanner = false
-  let showBrlGeoBanner = false
   let showLATAMBanner = false
   let recommendedCurrency
 
@@ -459,7 +458,6 @@ async function projectListPage(req, res, next) {
     if (countryCode === 'IN') {
       showInrGeoBanner = true
     }
-    showBrlGeoBanner = countryCode === 'BR'
 
     showLATAMBanner = ['MX', 'CO', 'CL', 'PE'].includes(countryCode)
     // LATAM Banner needs to know which currency to display
@@ -566,7 +564,6 @@ async function projectListPage(req, res, next) {
     showLATAMBanner,
     recommendedCurrency,
     showInrGeoBanner,
-    showBrlGeoBanner,
     projectDashboardReact: true, // used in navbar
     groupSsoSetupSuccess,
     joinedGroupName,
