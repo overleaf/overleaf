@@ -28,7 +28,8 @@ const en = {
     'ask-texgpt': 'Ask TeXGPT',
     'synonyms-in-context': 'Synonyms in Context',
     translate: 'Translate',
-    'translate.zh': 'Chinese',
+    'translate.zh-CN': 'Chinese (Simplified)',
+    'translate.zh-HANT': 'Chinese (Traditional)',
     'translate.en': 'English',
     'translate.fr': 'French',
     'translate.hi': 'Hindi',
@@ -55,11 +56,22 @@ const en = {
     'translate.tr': 'Turkish',
     'translate.uk': 'Ukrainian',
     'translate.vi': 'Vietnamese',
+    'translate.pt': 'Portuguese',
+    'translate.ko': 'Korean',
+    'translate.id': 'Indonesian',
     'translate.other': 'Other',
     'translate.not-listed': 'Language not listed?',
     'translate.more-languages-coming-soon.title': 'More languages coming soon',
     'translate.more-languages-coming-soon.body':
       'Sorry, we don’t currently offer any other languages for Translate. We will be adding more throughout November so watch this space!',
+    'translate.request-new-language.title': 'Request a Language',
+    'translate.request-new-language.body':
+      "Sorry, we don't currently offer any other languages. Tell us what language you wanted to use and we will review whether we can add it in the future.",
+    'translate.request-new-language.submit': 'Request',
+    'translate.request-new-language.thanks.title':
+      'Thank you for your language request',
+    'translate.request-new-language.thanks.body':
+      'We’ll review your request and consider adding it in the future',
     'blocked-suggestion-signpost.question':
       'Do you want to permanently stop this suggestion from appearing again?',
     'blocked-suggestion-signpost.tooltip': 'You can block a suggestion here.',
@@ -390,7 +402,8 @@ const es = {
     'ask-texgpt': 'Preguntar a TeXGPT',
     'synonyms-in-context': 'Sinónimos en Contexto',
     translate: 'Traducir',
-    'translate.zh': 'Chino',
+    'translate.zh-CN': 'Chino (Simplificado)',
+    'translate.zh-HANT': 'Chino (Tradicional)',
     'translate.en': 'Inglés',
     'translate.fr': 'Francés',
     'translate.hi': 'Hindi',
@@ -417,11 +430,22 @@ const es = {
     'translate.tr': 'Turco',
     'translate.uk': 'Ucraniano',
     'translate.vi': 'Vietnamita',
+    'translate.pt': 'Portugués',
+    'translate.ko': 'Coreano',
+    'translate.id': 'Indonesio',
     'translate.other': 'Otro',
     'translate.not-listed': '¿Idioma no listado?',
     'translate.more-languages-coming-soon.title': 'Más idiomas próximamente',
     'translate.more-languages-coming-soon.body':
       'Lo sentimos, actualmente no ofrecemos otros idiomas para la traducción. Agregaremos más a lo largo de noviembre, ¡así que mantente atento!',
+    'translate.request-new-language.title': 'Solicitar un nuevo idioma',
+    'translate.request-new-language.body':
+      'Lo sentimos, actualmente no ofrecemos otros idiomas. Dinos qué idioma querías usar y revisaremos si podemos agregarlo en el futuro.',
+    'translate.request-new-language.submit': 'Solicitar',
+    'translate.request-new-language.thanks.title':
+      'Gracias por tu solicitud de idioma',
+    'translate.request-new-language.thanks.body':
+      'Revisaremos tu solicitud y consideraremos agregarlo en el futuro',
     'blocked-suggestion-signpost.question':
       '¿Quieres dejar de ver esta sugerencia permanentemente? Puedes bloquear esta sugerencia aquí.',
     'blocked-suggestion-signpost.tooltip':
