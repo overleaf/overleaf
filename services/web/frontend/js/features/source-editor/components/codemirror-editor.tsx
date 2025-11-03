@@ -19,6 +19,7 @@ import {
 import MathPreviewTooltip from './math-preview-tooltip'
 import { useToolbarMenuBarEditorCommands } from '@/features/ide-redesign/hooks/use-toolbar-menu-editor-commands'
 import { useProjectContext } from '@/shared/context/project-context'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 // TODO: remove this when definitely no longer used
 export * from './codemirror-context'
@@ -34,12 +35,15 @@ function CodeMirrorEditor() {
   })
 
   const isMounted = useIsMounted()
+  const editContextEnabled = useFeatureFlag('edit-context')
 
   // create the view using the initial state and intercept transactions
   const viewRef = useRef<EditorView | null>(null)
   if (viewRef.current === null) {
-    // @ts-ignore (disable EditContext-based editing until stable)
-    EditorView.EDIT_CONTEXT = false
+    if (!editContextEnabled) {
+      // @ts-expect-error (disable EditContext-based editing until stable)
+      EditorView.EDIT_CONTEXT = false
+    }
 
     const view = new EditorView({
       state,
