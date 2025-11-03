@@ -1,8 +1,6 @@
 const OError = require('@overleaf/o-error')
-const logger = require('@overleaf/logger')
 const { UserAuditLogEntry } = require('../../models/UserAuditLogEntry')
 const { callbackify } = require('util')
-const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 
 function _canHaveNoIpAddressId(operation, info) {
   if (operation === 'join-group-subscription') return true
@@ -28,9 +26,6 @@ function _canHaveNoInitiatorId(operation, info) {
   if (operation === 'account-suspension' && info.script) return true
   if (operation === 'release-managed-user' && info.script) return true
 }
-
-// events that are visible to managed user admins in Group Audit Logs view
-const MANAGED_GROUP_USER_EVENTS = ['login', 'reset-password', 'update-password']
 
 /**
  * Add an audit log entry
@@ -73,25 +68,10 @@ async function addEntry(userId, operation, initiatorId, ipAddress, info = {}) {
     ipAddress,
   }
 
-  if (MANAGED_GROUP_USER_EVENTS.includes(operation)) {
-    try {
-      const managedSubscription =
-        await SubscriptionLocator.promises.getUniqueManagedSubscriptionMemberOf(
-          userId
-        )
-      if (managedSubscription) {
-        entry.managedSubscriptionId = managedSubscription._id
-      }
-    } catch (err) {
-      logger.error({ err, userId }, 'failed to lookup managed subscription')
-    }
-  }
-
   await UserAuditLogEntry.create(entry)
 }
 
 const UserAuditLogHandler = {
-  MANAGED_GROUP_USER_EVENTS,
   addEntry: callbackify(addEntry),
   promises: {
     addEntry,

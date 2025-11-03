@@ -10,7 +10,6 @@ describe('UserAuditLogHandler', function () {
   beforeEach(function () {
     this.userId = new ObjectId()
     this.initiatorId = new ObjectId()
-    this.subscriptionId = new ObjectId()
     this.action = {
       operation: 'clear-sessions',
       initiatorId: this.initiatorId,
@@ -25,16 +24,9 @@ describe('UserAuditLogHandler', function () {
       ip: '0:0:0:0',
     }
     this.UserAuditLogEntryMock = sinon.mock(UserAuditLogEntry)
-    this.getUniqueManagedSubscriptionMemberOfMock = sinon.stub().resolves()
     this.UserAuditLogHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '../../models/UserAuditLogEntry': { UserAuditLogEntry },
-        '../Subscription/SubscriptionLocator': {
-          promises: {
-            getUniqueManagedSubscriptionMemberOf:
-              this.getUniqueManagedSubscriptionMemberOfMock,
-          },
-        },
       },
     })
   })
@@ -61,33 +53,37 @@ describe('UserAuditLogHandler', function () {
         this.UserAuditLogEntryMock.verify()
       })
 
-      it('updates the log for password reset operation without a initiatorId', async function () {
-        await this.UserAuditLogHandler.promises.addEntry(
-          this.userId,
-          'reset-password',
-          undefined,
-          this.action.ip,
-          this.action.info
+      it('updates the log for password reset operation witout a initiatorId', async function () {
+        await expect(
+          this.UserAuditLogHandler.promises.addEntry(
+            this.userId,
+            'reset-password',
+            undefined,
+            this.action.ip,
+            this.action.info
+          )
         )
         this.UserAuditLogEntryMock.verify()
       })
 
       it('updates the log for a email removal via script', async function () {
-        await this.UserAuditLogHandler.promises.addEntry(
-          this.userId,
-          'remove-email',
-          undefined,
-          this.action.ip,
-          {
-            removedEmail: 'foo',
-            script: true,
-          }
+        await expect(
+          this.UserAuditLogHandler.promises.addEntry(
+            this.userId,
+            'remove-email',
+            undefined,
+            this.action.ip,
+            {
+              removedEmail: 'foo',
+              script: true,
+            }
+          )
         )
         this.UserAuditLogEntryMock.verify()
       })
 
       it('updates the log when no ip address or initiatorId is specified for a group join event', async function () {
-        await this.UserAuditLogHandler.promises.addEntry(
+        this.UserAuditLogHandler.promises.addEntry(
           this.userId,
           'join-group-subscription',
           undefined,
@@ -96,31 +92,6 @@ describe('UserAuditLogHandler', function () {
             subscriptionId: 'foo',
           }
         )
-        this.UserAuditLogEntryMock.verify()
-      })
-
-      it('includes managedSubscriptionId for managed group user events ', async function () {
-        await this.UserAuditLogHandler.promises.addEntry(
-          this.userId,
-          'reset-password',
-          undefined,
-          this.action.ip
-        )
-        this.UserAuditLogEntryMock.verify()
-        expect(this.getUniqueManagedSubscriptionMemberOfMock).to.have.been
-          .called
-      })
-
-      it('does not includes managedSubscriptionId for events not in the managed group event list', async function () {
-        await this.UserAuditLogHandler.promises.addEntry(
-          this.userId,
-          'foo',
-          this.action.initiatorId,
-          this.action.ip
-        )
-        this.UserAuditLogEntryMock.verify()
-        expect(this.getUniqueManagedSubscriptionMemberOfMock).not.to.have.been
-          .called
       })
     })
 

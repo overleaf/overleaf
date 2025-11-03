@@ -98,13 +98,6 @@ const SubscriptionLocator = {
     )
   },
 
-  async getUniqueManagedSubscriptionMemberOf(userId) {
-    return await Subscription.findOne(
-      { member_ids: userId, managedUsersEnabled: true },
-      { _id: 1 }
-    )
-  },
-
   async getGroupsWithEmailInvite(email) {
     return await Subscription.find({ invited_emails: email }).exec()
   },
