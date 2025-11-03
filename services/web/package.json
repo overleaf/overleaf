@@ -132,6 +132,7 @@
     "express-bearer-token": "^2.4.0",
     "express-http-proxy": "^1.6.0",
     "express-session": "^1.17.1",
+    "file-type": "^21.0.0",
     "globby": "^5.0.0",
     "helmet": "^6.0.1",
     "https-proxy-agent": "^7.0.6",
