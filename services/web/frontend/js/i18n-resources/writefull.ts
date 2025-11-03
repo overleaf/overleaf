@@ -47,7 +47,7 @@ const en = {
     'translate.hu': 'Hungarian',
     'translate.it': 'Italian',
     'translate.ms': 'Malay',
-    'translate.fa': 'Persian(Farsi)',
+    'translate.fa': 'Persian (Farsi)',
     'translate.pl': 'Polish',
     'translate.ro': 'Romanian',
     'translate.ru': 'Russian',
