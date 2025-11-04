@@ -6,6 +6,10 @@ const tags = ['server-ce', 'server-pro']
 
 const migrate = async client => {
   const { db } = client
+  const totalProjects = await db.projects.estimatedDocumentCount()
+  if (totalProjects === 0) return
+
+  // Does not use an index.
   const count = await db.projects.countDocuments({
     'overleaf.history.display': { $ne: true },
   })

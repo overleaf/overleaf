@@ -10,6 +10,7 @@ services:
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
+      - ../../tools/migrations:/overleaf/tools/migrations
     working_dir: /overleaf/services/contacts
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
@@ -50,7 +51,7 @@ services:
 
   mongo:
     image: mongo:8.0.11
-    command: --replSet overleaf
+    command: --replSet overleaf --notablescan
     volumes:
       - ../../bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
       - ../../bin/shared/mongodb-docker-entrypoint-wait.sh:/mongodb-docker-entrypoint-wait.sh

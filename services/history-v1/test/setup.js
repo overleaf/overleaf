@@ -20,7 +20,8 @@ async function setupPostgresDatabase() {
 async function setupMongoDatabase() {
   this.timeout(60_000)
   await promisify(exec)(
-    `cd ../../tools/migrations && npm run migrations -- migrate -t server-ce`
+    // Run saas migrations for backup indexes
+    `cd ../../tools/migrations && npm run migrations -- migrate -t saas`
   )
 }
 

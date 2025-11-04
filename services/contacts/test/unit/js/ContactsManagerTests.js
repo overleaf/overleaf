@@ -5,6 +5,7 @@ import { expect } from 'chai'
 import { ObjectId } from 'mongodb'
 import { cleanupTestDatabase } from '../../../app/js/mongodb.js'
 import * as ContactManager from '../../../app/js/ContactManager.js'
+import '../../acceptance/js/MongoHelper.js'
 
 describe('ContactManager', function () {
   beforeEach(cleanupTestDatabase)
