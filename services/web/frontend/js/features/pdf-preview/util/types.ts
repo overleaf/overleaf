@@ -42,17 +42,6 @@ export type PdfFileDataList = {
   archive?: PdfFileArchiveData
 }
 
-export type ClsiCachePromptVariant =
-  | 'default'
-  | 'compile'
-  | 'preview'
-  | 'preview-error'
-  | 'synctex'
-export type ClsiCachePromptSegmentation = Record<
-  ClsiCachePromptVariant,
-  Record<string, any> | null
->
-
 export type HighlightData = {
   page: number
   h: number

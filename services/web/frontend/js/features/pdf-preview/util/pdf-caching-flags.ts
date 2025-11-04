@@ -29,10 +29,4 @@ export const prefetchingEnabled = isFlagEnabled('pdf-caching-prefetching')
 export const prefetchLargeEnabled = isFlagEnabled('pdf-caching-prefetch-large')
 export const enablePdfCaching = isFlagEnabled('pdf-caching-mode')
 export const trackPdfDownloadEnabled = isFlagEnabled('track-pdf-download')
-export const projectOwnerHasPremiumOnPageLoad = getMeta(
-  'ol-projectOwnerHasPremiumOnPageLoad'
-)
-export const fallBackToClsiCache =
-  projectOwnerHasPremiumOnPageLoad &&
-  (isFlagEnabled('populate-clsi-cache') ||
-    isFlagEnabled('populate-clsi-cache-for-prompt'))
+export const canUseClsiCache = getMeta('ol-canUseClsiCache')

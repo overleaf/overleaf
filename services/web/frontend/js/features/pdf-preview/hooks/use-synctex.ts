@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
 import { useProjectContext } from '../../../shared/context/project-context'
-import { FetchError, getJSON } from '../../../infrastructure/fetch-json'
+import { getJSON } from '../../../infrastructure/fetch-json'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import useIsMounted from '../../../shared/hooks/use-is-mounted'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
@@ -21,7 +21,6 @@ import {
   showFileErrorToast,
   showSynctexRequestErrorToast,
 } from '@/features/pdf-preview/components/synctex-toasts'
-import { sendMB } from '@/infrastructure/event-tracking'
 
 export default function useSynctex(): {
   syncToPdf: () => void
@@ -33,14 +32,8 @@ export default function useSynctex(): {
   const { projectId, project } = useProjectContext()
   const rootDocId = project?.rootDocId
 
-  const {
-    clsiServerId,
-    pdfFile,
-    position,
-    setShowLogs,
-    setHighlights,
-    setClsiCachePromptSegmentation,
-  } = useCompileContext()
+  const { clsiServerId, pdfFile, position, setShowLogs, setHighlights } =
+    useCompileContext()
 
   const { selectedEntities } = useFileTreeData()
   const { findEntityByPath, dirname, pathInFolder } = useFileTreePathContext()
@@ -127,35 +120,8 @@ export default function useSynctex(): {
         .then(data => {
           setShowLogs(false)
           setHighlights(data.pdf)
-          setClsiCachePromptSegmentation(prev => {
-            return {
-              ...prev,
-              synctex: {
-                direction: 'pdf',
-                navigationFailed: false,
-                restoredFromCache: data.downloadedFromCache,
-              },
-            }
-          })
-          if (data.downloadedFromCache) {
-            sendMB('synctex-downloaded-from-cache', {
-              projectId,
-              method: 'code',
-            })
-          }
         })
         .catch(error => {
-          if (error instanceof FetchError && error.response?.status === 404) {
-            setClsiCachePromptSegmentation(prev => {
-              return {
-                ...prev,
-                synctex: {
-                  direction: 'pdf',
-                  navigationFailed: true,
-                },
-              }
-            })
-          }
           showSynctexRequestErrorToast()
           debugConsole.error(error)
         })
@@ -173,7 +139,6 @@ export default function useSynctex(): {
       setShowLogs,
       setHighlights,
       setSyncToPdfInFlight,
-      setClsiCachePromptSegmentation,
       signal,
     ]
   )
@@ -263,35 +228,8 @@ export default function useSynctex(): {
         .then(data => {
           const [{ file, line }] = data.code
           goToCodeLine(file, line, selectText)
-          setClsiCachePromptSegmentation(prev => {
-            return {
-              ...prev,
-              synctex: {
-                direction: 'code',
-                navigationFailed: false,
-                restoredFromCache: data.downloadedFromCache,
-              },
-            }
-          })
-          if (data.downloadedFromCache) {
-            sendMB('synctex-downloaded-from-cache', {
-              projectId,
-              method: 'pdf',
-            })
-          }
         })
         .catch(error => {
-          if (error instanceof FetchError && error.response?.status === 404) {
-            setClsiCachePromptSegmentation(prev => {
-              return {
-                ...prev,
-                synctex: {
-                  direction: 'code',
-                  navigationFailed: true,
-                },
-              }
-            })
-          }
           debugConsole.error(error)
           showSynctexRequestErrorToast()
         })
@@ -308,7 +246,6 @@ export default function useSynctex(): {
       signal,
       isMounted,
       setSyncToCodeInFlight,
-      setClsiCachePromptSegmentation,
       goToCodeLine,
     ]
   )

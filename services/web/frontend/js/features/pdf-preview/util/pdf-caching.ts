@@ -598,7 +598,6 @@ async function fetchChunk({
   canTryFromCache,
   fallbackToCacheURL,
   file,
-  recordFallbackToClsiCache,
 }: {
   chunk: Chunk | PDFRange<Uint8Array> | Chunk[]
   url: string
@@ -609,7 +608,6 @@ async function fetchChunk({
   canTryFromCache: (error: any) => boolean
   fallbackToCacheURL: string
   file: ProcessedPDFFile
-  recordFallbackToClsiCache: () => void
 }) {
   const estimatedSize = Array.isArray(chunk)
     ? estimateSizeOfMultipartResponse(chunk)
@@ -676,7 +674,6 @@ async function fetchChunk({
       try {
         response = await fetchWithBrowserCacheFallback(url, init)
         checkChunkResponse(response, estimatedSize, init)
-        recordFallbackToClsiCache()
       } catch (err2) {
         throw err1
       }
@@ -836,7 +833,6 @@ export async function fetchRange({
   abortSignal,
   canTryFromCache,
   fallbackToCacheURL,
-  recordFallbackToClsiCache,
 }: {
   url: string
   start: number
@@ -853,7 +849,6 @@ export async function fetchRange({
   abortSignal: AbortSignal
   canTryFromCache: (error: any) => boolean
   fallbackToCacheURL: string
-  recordFallbackToClsiCache: () => void
 }) {
   const timer = new Timer()
   timer.startBlockingCompute()
@@ -1011,7 +1006,6 @@ export async function fetchRange({
           canTryFromCache,
           fallbackToCacheURL,
           file,
-          recordFallbackToClsiCache,
         })
         timer.startBlockingCompute()
         const boundary = getMultipartBoundary(response, chunk)

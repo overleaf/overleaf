@@ -8,13 +8,11 @@ import {
   prefetchingEnabled,
   prefetchLargeEnabled,
   trackPdfDownloadEnabled,
-  fallBackToClsiCache,
+  canUseClsiCache,
 } from './pdf-caching-flags'
 import { isNetworkError } from '@/utils/is-network-error'
 import { debugConsole } from '@/utils/debugging'
 import { PDFJS } from './pdf-js'
-import { sendMB } from '@/infrastructure/event-tracking'
-import getMeta from '@/utils/meta'
 import { PDFFile, PDFRange, ProcessedPDFFile } from '@ol-types/compile'
 import { PdfCachingMetricsFull } from './types'
 
@@ -26,7 +24,6 @@ export function generatePdfCachingTransportFactory() {
   if (!enablePdfCaching && !trackPdfDownloadEnabled) {
     return () => undefined
   }
-  const projectId = getMeta('ol-project_id')
   const usageScore = new Map()
   const cachedUrls = new Map()
   const metrics: PdfCachingMetricsFull = Object.assign(getPdfCachingMetrics(), {
@@ -59,7 +56,6 @@ export function generatePdfCachingTransportFactory() {
     leanPdfRanges: PDFRange[]
     handleFetchError: (error: any) => void
     startTime: number
-    sentEventFallbackToClsiCache: boolean
     queryForChunks: string
 
     constructor({
@@ -89,7 +85,6 @@ export function generatePdfCachingTransportFactory() {
       this.handleFetchError = handleFetchError
       this.abortController = abortController
       this.startTime = performance.now()
-      this.sentEventFallbackToClsiCache = false
 
       const params = new URL(url).searchParams
       // drop no needed params
@@ -103,7 +98,6 @@ export function generatePdfCachingTransportFactory() {
     }
 
     requestDataRange(start: number, end: number) {
-      let recordFallbackToClsiCache = false
       const abortSignal = this.abortController.signal
       const getDebugInfo = () => ({
         // Sentry does not serialize objects in twice nested objects.
@@ -152,7 +146,7 @@ export function generatePdfCachingTransportFactory() {
         )
       }
       const canTryFromCache = (err: any) => {
-        if (!fallBackToClsiCache) return false
+        if (!canUseClsiCache) return false
         if (!is404(err)) return false
         return !usesCache((OError.getFullInfo(err) as { url: string }).url)
       }
@@ -183,7 +177,6 @@ export function generatePdfCachingTransportFactory() {
             this.pdfFile.ranges = this.pdfFile.ranges.filter(r =>
               cachedUrls.has(r.hash)
             )
-            recordFallbackToClsiCache = true
             return blob
           })
           .catch(err => {
@@ -215,9 +208,6 @@ export function generatePdfCachingTransportFactory() {
         abortSignal,
         canTryFromCache,
         fallbackToCacheURL: getOutputPDFURLFromCache(),
-        recordFallbackToClsiCache: () => {
-          recordFallbackToClsiCache = true
-        },
       })
         .catch(err => {
           if (abortSignal.aborted) return
@@ -278,14 +268,6 @@ export function generatePdfCachingTransportFactory() {
         })
         .then(blob => {
           if (abortSignal.aborted) return
-          if (recordFallbackToClsiCache && !this.sentEventFallbackToClsiCache) {
-            // Record once per PDF preview. Technically we should record once per 90min (output cache age), but keep it simple for now.
-            this.sentEventFallbackToClsiCache = true
-            sendMB('fallback-to-clsi-cache', {
-              projectId,
-              ageMS: Math.ceil(performance.now() - this.startTime),
-            })
-          }
           this.onDataRange(start, blob ? new Uint8Array(blob) : null)
         })
         .catch(err => {

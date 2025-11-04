@@ -3,11 +3,11 @@ import { NotFoundError, ResourceGoneError } from '../Errors/Errors.js'
 import ClsiCacheHandler from './ClsiCacheHandler.js'
 import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mjs'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import UserGetter from '../User/UserGetter.js'
 import Settings from '@overleaf/settings'
 import { fetchJson, RequestFailedError } from '@overleaf/fetch-utils'
 import Metrics from '@overleaf/metrics'
+import Features from '../../infrastructure/Features.js'
 
 /**
  * Get the most recent build and metadata
@@ -179,19 +179,7 @@ async function prepareClsiCache(
   userId,
   { sourceProjectId, templateId, templateVersionId }
 ) {
-  const { variant } = await SplitTestHandler.promises.getAssignmentForUser(
-    userId,
-    'populate-clsi-cache'
-  )
-  if (variant !== 'enabled') {
-    // Pre-populate the cache for the users in the split-test for prompts.
-    const { variant } = await SplitTestHandler.promises.getAssignmentForUser(
-      userId,
-      'populate-clsi-cache-for-prompt'
-    )
-    if (variant !== 'enabled') return
-  }
-
+  if (!Features.hasFeature('saas')) return
   const features = await UserGetter.promises.getUserFeatures(userId)
   if (features.compileGroup !== 'priority') return
 

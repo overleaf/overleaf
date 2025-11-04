@@ -8,6 +8,7 @@ const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 const { NotFoundError, InvalidNameError } = require('../Errors/Errors')
+const Features = require('../../infrastructure/Features')
 
 const TIMEOUT = 4_000
 
@@ -64,6 +65,8 @@ function getEgressLabel(fsPath) {
  * @return {Promise<void>}
  */
 async function clearCache(projectId, userId) {
+  if (!Features.hasFeature('saas')) return
+
   let path = `/project/${projectId}`
   if (userId) {
     path += `/user/${userId}`

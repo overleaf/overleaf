@@ -21,6 +21,7 @@ import {
   fetchStreamWithResponse,
   RequestFailedError,
 } from '@overleaf/fetch-utils'
+import Features from '../../infrastructure/Features.js'
 
 const { z, zz, validateReq } = Validation
 const ClsiCookieManager = ClsiCookieManagerFactory(
@@ -64,45 +65,11 @@ async function _getSplitTestOptions(req, res) {
   } catch (e) {}
   const editorReq = { ...req, query }
 
-  // Lookup the clsi-cache flag in the backend.
-  // We may need to turn off the feature on a short notice, without requiring
-  //  all users to reload their editor page to disable the feature.
-  const { variant: populateClsiCacheVariant } =
-    await SplitTestHandler.promises.getAssignment(
-      editorReq,
-      res,
-      'populate-clsi-cache'
-    )
-  let populateClsiCache = populateClsiCacheVariant === 'enabled'
-  let compileFromClsiCache = populateClsiCache // use same split-test
-
-  let clsiCachePromptVariant = 'default'
-  if (!populateClsiCache) {
-    // Pre-populate the cache for the users in the split-test for prompts.
-    // Keep the compile from cache disabled for now.
-    const { variant } = await SplitTestHandler.promises.getAssignment(
-      editorReq,
-      res,
-      'populate-clsi-cache-for-prompt'
-    )
-    ;({ variant: clsiCachePromptVariant } =
-      await SplitTestHandler.promises.getAssignment(
-        editorReq,
-        res,
-        'clsi-cache-prompt'
-      ))
-    populateClsiCache = variant === 'enabled'
-    compileFromClsiCache = populateClsiCache
-  }
-
   const pdfDownloadDomain = Settings.pdfDownloadDomain
 
   if (!req.query.enable_pdf_caching) {
     // The frontend does not want to do pdf caching.
     return {
-      compileFromClsiCache,
-      populateClsiCache,
-      clsiCachePromptVariant,
       pdfDownloadDomain,
       enablePdfCaching: false,
     }
@@ -120,18 +87,12 @@ async function _getSplitTestOptions(req, res) {
   if (!enablePdfCaching) {
     // Skip the lookup of the chunk size when caching is not enabled.
     return {
-      compileFromClsiCache,
-      populateClsiCache,
-      clsiCachePromptVariant,
       pdfDownloadDomain,
       enablePdfCaching: false,
     }
   }
   const pdfCachingMinChunkSize = await getPdfCachingMinChunkSize(editorReq, res)
   return {
-    compileFromClsiCache,
-    populateClsiCache,
-    clsiCachePromptVariant,
     pdfDownloadDomain,
     enablePdfCaching,
     pdfCachingMinChunkSize,
@@ -145,11 +106,10 @@ async function _syncTeX(req, res, direction, validatedOptions) {
   if (!buildId?.match(/^[a-f0-9-]+$/)) throw new Error('invalid ?buildId')
 
   const userId = CompileController._getUserIdForCompile(req)
-  const { compileFromClsiCache } = await _getSplitTestOptions(req, res)
   try {
     const body = await CompileManager.promises.syncTeX(projectId, userId, {
       direction,
-      compileFromClsiCache,
+      compileFromClsiCache: Features.hasFeature('saas'),
       validatedOptions: {
         ...validatedOptions,
         editorId,
@@ -220,16 +180,12 @@ const _CompileController = {
       options.incrementalCompilesEnabled = true
     }
 
-    let {
-      compileFromClsiCache,
-      populateClsiCache,
-      clsiCachePromptVariant,
-      enablePdfCaching,
-      pdfCachingMinChunkSize,
-      pdfDownloadDomain,
-    } = await _getSplitTestOptions(req, res)
-    options.compileFromClsiCache = compileFromClsiCache
-    options.populateClsiCache = populateClsiCache
+    let { enablePdfCaching, pdfCachingMinChunkSize, pdfDownloadDomain } =
+      await _getSplitTestOptions(req, res)
+    if (Features.hasFeature('saas')) {
+      options.compileFromClsiCache = true
+      options.populateClsiCache = true
+    }
     options.enablePdfCaching = enablePdfCaching
     if (enablePdfCaching) {
       options.pdfCachingMinChunkSize = pdfCachingMinChunkSize
@@ -301,11 +257,6 @@ const _CompileController = {
       compileGroup: limits?.compileGroup,
       clsiServerId,
       clsiCacheShard,
-      clsiCachePromptVariant: ['alpha', 'priority'].includes(
-        limits?.compileGroup
-      )
-        ? clsiCachePromptVariant
-        : 'default',
       validationProblems,
       stats,
       timings,

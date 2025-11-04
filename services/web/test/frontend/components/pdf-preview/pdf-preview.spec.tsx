@@ -48,10 +48,7 @@ describe('<PdfPreview/>', function () {
       'ol-compilesUserContentDomain',
       'https://compiles-user.dev-overleaf.com'
     )
-    window.metaAttributesCache.set('ol-splitTestVariants', {
-      'populate-clsi-cache': 'enabled',
-    })
-    window.metaAttributesCache.set('ol-projectOwnerHasPremiumOnPageLoad', true)
+    window.metaAttributesCache.set('ol-canUseClsiCache', true)
     window.metaAttributesCache.set('ol-compileSettings', {
       compileTimeout: 240,
     })

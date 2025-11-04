@@ -16,7 +16,6 @@ import { useDetachCompileContext as useCompileContext } from '../../../shared/co
 import PdfLogEntry from './pdf-log-entry'
 import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-preview-provider'
 import getMeta from '@/utils/meta'
-import ClsiCachePrompt from '@/features/pdf-preview/components/clsi-cache-prompt'
 
 function PdfLogsViewer({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
   const {
@@ -27,7 +26,6 @@ function PdfLogsViewer({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
     validationIssues,
     showLogs,
     stoppedOnFirstError,
-    clsiCachePromptVariant,
   } = useCompileContext()
 
   const { loadingError } = usePdfPreviewContext()
@@ -44,8 +42,6 @@ function PdfLogsViewer({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
       data-testid="logs-pane"
     >
       <div className="logs-pane-content">
-        {clsiCachePromptVariant === 'preview-error' && <ClsiCachePrompt />}
-
         <RollingBuildSelectedReminder />
 
         {codeCheckFailed && <PdfCodeCheckFailedNotice />}

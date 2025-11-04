@@ -17,7 +17,6 @@ import getMeta from '@/utils/meta'
 import PdfClearCacheButton from '@/features/pdf-preview/components/pdf-clear-cache-button'
 import PdfDownloadFilesButton from '@/features/pdf-preview/components/pdf-download-files-button'
 import RollingBuildSelectedReminder from './rolling-build-selected-reminder'
-import ClsiCachePrompt from '@/features/pdf-preview/components/clsi-cache-prompt'
 
 const logsComponents: Array<{
   import: { default: ElementType }
@@ -85,7 +84,6 @@ function ErrorLogs({
       ))}
       <TabContent className="error-logs new-error-logs">
         <div className="logs-pane-content">
-          <ClsiCachePrompt />
           <RollingBuildSelectedReminder />
           {stoppedOnFirstError && includeErrors && <StopOnFirstErrorPrompt />}
 

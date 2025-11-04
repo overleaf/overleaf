@@ -82,10 +82,11 @@ export interface Meta {
   'ol-anonymous': boolean
   'ol-baseAssetPath': string
   'ol-brandVariation': Record<string, any>
+  'ol-canUseAddSeatsFeature': boolean
+  'ol-canUseClsiCache': boolean
+  'ol-canUseFlexibleLicensing': boolean
 
   // dynamic keys based on permissions
-  'ol-canUseAddSeatsFeature': boolean
-  'ol-canUseFlexibleLicensing': boolean
   'ol-cannot-add-secondary-email': boolean
   'ol-cannot-change-password': boolean
   'ol-cannot-delete-own-account': boolean
@@ -96,6 +97,7 @@ export interface Meta {
   'ol-cannot-reactivate-subscription': boolean
   'ol-cannot-use-ai': boolean
   'ol-capabilities': Array<'dropbox' | 'chat' | 'use-ai' | 'link-sharing'>
+
   'ol-compileSettings': {
     compileTimeout: number
   }
@@ -224,7 +226,6 @@ export interface Meta {
   'ol-project': any // TODO
   'ol-projectEntityCounts': { files: number; docs: number }
   'ol-projectName': string
-  'ol-projectOwnerHasPremiumOnPageLoad': boolean
   'ol-projectSyncSuccessMessage': string
   'ol-projectTags': Tag[]
   'ol-project_id': string

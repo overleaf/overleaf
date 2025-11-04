@@ -1,5 +1,3 @@
-import { ClsiCachePromptVariant } from '@/features/pdf-preview/util/types'
-
 export type Chunk = {
   start: number
   end: number
@@ -74,7 +72,6 @@ export type CompileResponseData = {
   stats?: Record<string, number>
   timings?: Record<string, number>
   outputFilesArchive?: CompileOutputFile
-  clsiCachePromptVariant?: ClsiCachePromptVariant
 
   // assigned on response body by DocumentCompiler in frontend
   rootDocId?: string | null
