@@ -4,9 +4,9 @@ import PdfLogEntryContent from './pdf-log-entry-content'
 import HumanReadableLogsHints from '../../../ide/human-readable-logs/HumanReadableLogsHints'
 import getMeta from '@/utils/meta'
 import { ErrorLevel, LogEntry, SourceLocation } from '../util/types'
-import { useAreNewErrorLogsEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import NewLogEntry from '@/features/ide-redesign/components/error-logs/log-entry'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 function PdfLogEntry({
   autoExpand,
@@ -71,9 +71,9 @@ function PdfLogEntry({
       [level, onSourceLocationClick, ruleId, sourceLocation, sendEvent]
     )
 
-  const newErrorlogs = useAreNewErrorLogsEnabled()
+  const newEditor = useIsNewEditorEnabled()
 
-  if (newErrorlogs) {
+  if (newEditor) {
     return (
       <NewLogEntry
         autoExpand={autoExpand}

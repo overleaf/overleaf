@@ -41,18 +41,6 @@ export const canUseNewEditor = () => {
   )
 }
 
-const canUseNewLogs = () => {
-  const newUserTestVariant = getSplitTestVariant('editor-redesign-new-users')
-  const canUseNewLogsViaNewUserFeatureFlag =
-    isNewUser() &&
-    (newUserTestVariant === 'new-editor' ||
-      newUserTestVariant === 'new-editor-new-logs-old-position')
-
-  return (
-    canUseNewEditorViaPrimaryFeatureFlag() || canUseNewLogsViaNewUserFeatureFlag
-  )
-}
-
 export const useIsNewEditorEnabledViaPrimaryFeatureFlag = () => {
   const { userSettings } = useUserSettingsContext()
   const hasAccess = canUseNewEditorViaPrimaryFeatureFlag()
@@ -67,15 +55,8 @@ export const useIsNewEditorEnabled = () => {
   return hasAccess && enabled
 }
 
-export const useAreNewErrorLogsEnabled = () => {
-  const newEditorEnabled = useIsNewEditorEnabled()
-  return newEditorEnabled && canUseNewLogs()
-}
-
 export function useNewEditorVariant() {
   const newEditor = useIsNewEditorEnabled()
-  const newErrorLogs = useAreNewErrorLogsEnabled()
   if (!newEditor) return 'default'
-  if (!newErrorLogs) return 'new-editor-old-logs'
   return 'new-editor-new-logs-old-position'
 }

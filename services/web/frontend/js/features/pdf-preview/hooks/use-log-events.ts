@@ -1,8 +1,8 @@
 import { useCallback } from 'react'
 import { useLayoutContext } from '@/shared/context/layout-context'
-import { useAreNewErrorLogsEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import { useEditorContext } from '@/shared/context/editor-context'
 import useEventListener from '@/shared/hooks/use-event-listener'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 function scrollIntoView(element: Element) {
   setTimeout(() => {
@@ -18,7 +18,7 @@ function scrollIntoView(element: Element) {
  */
 export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
   const { pdfLayout, setView } = useLayoutContext()
-  const newLogs = useAreNewErrorLogsEnabled()
+  const newEditor = useIsNewEditorEnabled()
   const { hasPremiumSuggestion } = useEditorContext()
 
   const selectLogOldLogs = useCallback((id: string, suggestFix: boolean) => {
@@ -117,7 +117,7 @@ export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
 
       openLogs()
 
-      if (newLogs) {
+      if (newEditor) {
         selectLogNewLogs(
           id,
           Boolean(suggestFix),
@@ -127,7 +127,7 @@ export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
         selectLogOldLogs(id, Boolean(suggestFix))
       }
     },
-    [openLogs, selectLogNewLogs, selectLogOldLogs, newLogs]
+    [openLogs, selectLogNewLogs, selectLogOldLogs, newEditor]
   )
 
   useEventListener(

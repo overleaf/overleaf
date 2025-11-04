@@ -14,7 +14,7 @@ describe('new-editor-utils', function () {
       },
       {
         splitTestVariant: 'new-editor-old-logs',
-        uiVariant: 'new-editor-old-logs',
+        uiVariant: 'new-editor-new-logs-old-position',
       },
       {
         splitTestVariant: 'new-editor-new-logs-old-position',
