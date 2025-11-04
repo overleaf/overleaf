@@ -240,7 +240,7 @@ module.exports = {
       // url: "http://#{process.env['CLSI_LB_HOST']}:3014"
       backendGroupName: undefined,
       submissionBackendClass:
-        process.env.CLSI_SUBMISSION_BACKEND_CLASS || 'n2d',
+        process.env.CLSI_SUBMISSION_BACKEND_CLASS || 'c3d',
     },
     clsiCache: {
       instances: JSON.parse(process.env.CLSI_CACHE_INSTANCES || '[]'),
