@@ -1,8 +1,7 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Nav, TabContainer } from 'react-bootstrap'
 import { useLayoutContext } from '@/shared/context/layout-context'
-import ErrorIndicator from '../error-logs/error-indicator'
 import { RailTabKey, useRailContext } from '../../contexts/rail-context'
 import FileTreeOutlinePanel from '../file-tree/file-tree-outline-panel'
 import { ChatIndicator, ChatPane } from '../chat/chat'
@@ -16,8 +15,6 @@ import {
   hasFullProjectSearch,
 } from '../full-project-search-panel'
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
-import ErrorLogsPanel from '../error-logs/error-logs-panel'
-import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 import RailHelpDropdown from './rail-help-dropdown'
@@ -29,23 +26,18 @@ import RailResizeHandle from './rail-resize-handle'
 import RailModals from './rail-modals'
 import RailOverflowDropdown from './rail-overflow-dropdown'
 import useRailOverflow from '../../hooks/use-rail-overflow'
-import { useIsNewErrorLogsPositionEnabled } from '../../utils/new-editor-utils'
 
 export const RailLayout = () => {
   const { sendEvent } = useEditorAnalytics()
   const { t } = useTranslation()
   const { selectedTab, openTab, isOpen, togglePane } = useRailContext()
-  const { logEntries } = useCompileContext()
   const { features } = useProjectContext()
-  const errorLogsDisabled = !logEntries
 
   const { view, setLeftMenuShown } = useLayoutContext()
 
   const { markMessagesAsRead } = useChatContext()
 
   const isHistoryView = view === 'history'
-
-  const newErrorlogsPosition = useIsNewErrorLogsPositionEnabled()
 
   const railTabs: RailElement[] = useMemo(
     () => [
@@ -87,23 +79,8 @@ export const RailLayout = () => {
         title: t('chat'),
         hide: !getMeta('ol-capabilities')?.includes('chat'),
       },
-      {
-        key: 'errors',
-        icon: 'report',
-        title: t('error_log'),
-        component: <ErrorLogsPanel />,
-        indicator: <ErrorIndicator />,
-        disabled: errorLogsDisabled,
-        hide: !newErrorlogsPosition,
-      },
     ],
-    [
-      t,
-      features.trackChangesVisible,
-      newErrorlogsPosition,
-      errorLogsDisabled,
-      view,
-    ]
+    [t, features.trackChangesVisible, view]
   )
 
   const railActions: RailAction[] = useMemo(
@@ -172,6 +149,15 @@ export const RailLayout = () => {
     [openTab, togglePane, selectedTab, railTabs, sendEvent, markMessagesAsRead]
   )
 
+  useEffect(() => {
+    const validTabKeys = railTabs.filter(tab => !tab.hide).map(tab => tab.key)
+    if (!validTabKeys.includes(selectedTab) && isOpen) {
+      // If the selected tab is no longer valid (e.g. due to permissions changes),
+      // switch back to the file tree
+      openTab('file-tree')
+    }
+  }, [railTabs, selectedTab, openTab, isOpen])
+
   const isReviewPanelOpen =
     selectedTab === 'review-panel' && isOpen && !isHistoryView
 
@@ -208,7 +194,7 @@ export const RailLayout = () => {
           Therefore, we nest them: the parent <nav> is the landmark, and its child gets the "role="tablist"". */}
       <nav
         className={classNames('ide-rail', { hidden: isHistoryView })}
-        aria-label={t('files_collaboration_integrations_logs')}
+        aria-label={t('files_collaboration_integrations')}
       >
         <Nav activeKey={selectedTab} className="ide-rail-tabs-nav">
           <div className="ide-rail-tabs-wrapper" ref={tabWrapperRef}>

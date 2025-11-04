@@ -22,7 +22,6 @@ export type RailTabKey =
   | 'integrations'
   | 'review-panel'
   | 'chat'
-  | 'errors'
   | 'full-project-search'
 
 export type RailModalKey = 'keyboard-shortcuts' | 'contact-us' | 'dictionary'

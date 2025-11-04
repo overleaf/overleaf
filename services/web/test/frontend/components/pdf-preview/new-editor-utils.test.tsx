@@ -7,15 +7,24 @@ import { useNewEditorVariant } from '@/features/ide-redesign/utils/new-editor-ut
 describe('new-editor-utils', function () {
   describe('useNewEditorVariant', function () {
     const newEditorVariants = [
-      'default',
-      'new-editor',
-      'new-editor-old-logs',
-      'new-editor-new-logs-old-position',
+      { splitTestVariant: 'default', uiVariant: 'default' },
+      {
+        splitTestVariant: 'new-editor',
+        uiVariant: 'new-editor-new-logs-old-position',
+      },
+      {
+        splitTestVariant: 'new-editor-old-logs',
+        uiVariant: 'new-editor-old-logs',
+      },
+      {
+        splitTestVariant: 'new-editor-new-logs-old-position',
+        uiVariant: 'new-editor-new-logs-old-position',
+      },
     ]
     for (const variant of newEditorVariants) {
       it(`forwards ?editor-redesign-new-users=${variant}`, function () {
         window.metaAttributesCache.set('ol-splitTestVariants', {
-          'editor-redesign-new-users': variant,
+          'editor-redesign-new-users': variant.splitTestVariant,
         })
 
         const scope = mockScope()
@@ -30,13 +39,13 @@ describe('new-editor-utils', function () {
             </EditorProviders>
           ),
         })
-        expect(result.current).to.equal(variant)
+        expect(result.current).to.equal(variant.uiVariant)
       })
     }
     for (const variant of newEditorVariants) {
       it(`ignores ?editor-redesign-new-users=${variant} when disabled by user`, function () {
         window.metaAttributesCache.set('ol-splitTestVariants', {
-          'editor-redesign-new-users': variant,
+          'editor-redesign-new-users': variant.splitTestVariant,
         })
 
         const scope = mockScope()
@@ -71,7 +80,7 @@ describe('new-editor-utils', function () {
           </EditorProviders>
         ),
       })
-      expect(result.current).to.equal('new-editor')
+      expect(result.current).to.equal('new-editor-new-logs-old-position')
     })
   })
 })

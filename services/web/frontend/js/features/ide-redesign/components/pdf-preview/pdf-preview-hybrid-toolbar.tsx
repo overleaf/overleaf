@@ -6,11 +6,9 @@ import PdfHybridDownloadButton from '@/features/pdf-preview/components/pdf-hybri
 import { DetachedSynctexControl } from '@/features/pdf-preview/components/detach-synctex-control'
 import SwitchToEditorButton from '@/features/pdf-preview/components/switch-to-editor-button'
 import PdfHybridLogsButton from '@/features/pdf-preview/components/pdf-hybrid-logs-button'
-import { useIsNewErrorLogsPositionEnabled } from '../../utils/new-editor-utils'
 
 function PdfPreviewHybridToolbar() {
   const { t } = useTranslation()
-  const newErrorLogsPosition = useIsNewErrorLogsPositionEnabled()
 
   // TODO: add detached pdf logic
   return (
@@ -20,7 +18,7 @@ function PdfPreviewHybridToolbar() {
     >
       <div className="toolbar-pdf-left">
         <PdfCompileButton />
-        {!newErrorLogsPosition && <PdfHybridLogsButton />}
+        <PdfHybridLogsButton />
         <PdfHybridDownloadButton />
       </div>
       <div className="toolbar-pdf-right">

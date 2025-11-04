@@ -9,12 +9,6 @@
 .ide-redesign-main {
   --logs-pane-bg: var(--bg-primary-themed);
 
-  .error-logs-panel {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-
   // TODO $ide-redesign-cleanup: Unnest everything from inside .error-logs
   //  when we remove the styles for the old pane
   .error-logs {

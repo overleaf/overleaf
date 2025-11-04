@@ -11,7 +11,6 @@ import { populateEditorRedesignSegmentation } from '@/shared/hooks/use-editor-an
 import {
   isNewUser,
   useIsNewEditorEnabled,
-  useIsNewErrorLogsPositionEnabled,
 } from '@/features/ide-redesign/utils/new-editor-utils'
 import { getSplitTestVariant, isSplitTestEnabled } from '@/utils/splitTestUtils'
 
@@ -81,8 +80,6 @@ const CompileTimeout = memo(function CompileTimeout({
   segmentation,
 }: CompileTimeoutProps) {
   const { t } = useTranslation()
-  const newLogsPosition = useIsNewErrorLogsPositionEnabled()
-
   const extraSearchParams = useMemo(() => {
     if (!isNewUser()) {
       return undefined
@@ -101,7 +98,7 @@ const CompileTimeout = memo(function CompileTimeout({
 
   return (
     <PdfLogEntry
-      autoExpand={!newLogsPosition}
+      autoExpand
       headerTitle={t('your_compile_timed_out')}
       formattedContent={
         getMeta('ol-ExposedSettings').enableSubscriptions && (
@@ -160,11 +157,10 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
   handleEnableStopOnFirstErrorClick,
 }: PreventTimeoutHelpMessageProps) {
   const { t } = useTranslation()
-  const newLogsPosition = useIsNewErrorLogsPositionEnabled()
 
   return (
     <PdfLogEntry
-      autoExpand={!newLogsPosition}
+      autoExpand
       headerTitle={t('reasons_for_compile_timeouts')}
       formattedContent={
         <>

@@ -16,7 +16,6 @@ import TimeoutUpgradePromptNew from '@/features/pdf-preview/components/timeout-u
 import getMeta from '@/utils/meta'
 import PdfClearCacheButton from '@/features/pdf-preview/components/pdf-clear-cache-button'
 import PdfDownloadFilesButton from '@/features/pdf-preview/components/pdf-download-files-button'
-import { useIsNewErrorLogsPositionEnabled } from '../../utils/new-editor-utils'
 import RollingBuildSelectedReminder from './rolling-build-selected-reminder'
 import ClsiCachePrompt from '@/features/pdf-preview/components/clsi-cache-prompt'
 
@@ -39,21 +38,20 @@ function ErrorLogs({
   const { error, logEntries, rawLog, validationIssues, stoppedOnFirstError } =
     useCompileContext()
   const { compileTimeout } = getMeta('ol-compileSettings')
-  const newLogsPosition = useIsNewErrorLogsPositionEnabled()
   const { t } = useTranslation()
 
   const tabs = useMemo(() => {
     return [
       {
         key: 'all',
-        label: newLogsPosition ? t('all') : t('all_logs'),
+        label: t('all_logs'),
         entries: logEntries?.all,
       },
       { key: 'errors', label: t('errors'), entries: logEntries?.errors },
       { key: 'warnings', label: t('warnings'), entries: logEntries?.warnings },
       { key: 'info', label: t('info'), entries: logEntries?.typesetting },
     ]
-  }, [logEntries, newLogsPosition, t])
+  }, [logEntries, t])
 
   const { loadingError } = usePdfPreviewContext()
 

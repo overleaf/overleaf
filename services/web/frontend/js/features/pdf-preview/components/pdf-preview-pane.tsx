@@ -9,11 +9,9 @@ import { PdfPreviewMessages } from './pdf-preview-messages'
 import CompileTimeWarningUpgradePrompt from './compile-time-warning-upgrade-prompt'
 import { PdfPreviewProvider } from './pdf-preview-provider'
 import PdfPreviewHybridToolbarNew from '@/features/ide-redesign/components/pdf-preview/pdf-preview-hybrid-toolbar'
-import PdfErrorState from '@/features/ide-redesign/components/pdf-preview/pdf-error-state/pdf-error-state'
 import {
   useAreNewErrorLogsEnabled,
   useIsNewEditorEnabled,
-  useIsNewErrorLogsPositionEnabled,
 } from '@/features/ide-redesign/utils/new-editor-utils'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import PdfCodeCheckFailedBanner from '@/features/ide-redesign/components/pdf-preview/pdf-code-check-failed-banner'
@@ -29,7 +27,6 @@ function PdfPreviewPane() {
   })
   const newEditor = useIsNewEditorEnabled()
   const newErrorLogs = useAreNewErrorLogsEnabled()
-  const newErrorLogsPosition = useIsNewErrorLogsPositionEnabled()
 
   const pdfPromotions = importOverleafModules('pdfPreviewPromotions') as {
     import: { default: ElementType }
@@ -54,13 +51,7 @@ function PdfPreviewPane() {
             <ClsiCachePrompt />
           </div>
         </Suspense>
-        {newErrorLogsPosition ? (
-          <PdfErrorState />
-        ) : newErrorLogs ? (
-          <NewPdfLogsViewer />
-        ) : (
-          <PdfLogsViewer />
-        )}
+        {newErrorLogs ? <NewPdfLogsViewer /> : <PdfLogsViewer />}
         {pdfPromotions.map(({ import: { default: Component }, path }) => (
           <Component key={path} />
         ))}
