@@ -5,7 +5,7 @@ import OLPageContentCard from '@/shared/components/ol/ol-page-content-card'
 import OLRow from '@/shared/components/ol/ol-row'
 import OLCol from '@/shared/components/ol/ol-col'
 import OLButton from '@/shared/components/ol/ol-button'
-import overleafLogo from '@/shared/svgs/overleaf-a-ds-solution-mallard.svg'
+import CiamLayout from '@/shared/components/layouts/ciam-layout'
 
 const lorem = (n: number) => {
   const quacks = ['quack', 'quack', 'quack', 'quak']
@@ -249,27 +249,13 @@ export const CompleteRegistration = () => (
 )
 
 export const Ciam = () => (
-  <div className="ciam-layout">
-    <a
-      href="/"
-      aria-label="Overleaf"
-      className="brand"
-      style={{ backgroundImage: `url("${overleafLogo}")` }}
-    />
-    <div className="ciam-container">
-      <main className="ciam-card" id="main-content">
-        <h1>Create your Overleaf account</h1>
-        <p>{lorem(20)}</p>
-        <hr />
-        <p>{lorem(20)}</p>
-        <OLButton>Button</OLButton>
-      </main>
-    </div>
-    <footer>
-      <a href="https://www.overleaf.com/legal#Privacy">Privacy</a>
-      <a href="https://www.overleaf.com/legal#Terms">Terms</a>
-    </footer>
-  </div>
+  <CiamLayout>
+    <h1>Create your Overleaf account</h1>
+    <p>{lorem(20)}</p>
+    <hr />
+    <p>{lorem(20)}</p>
+    <OLButton>Button</OLButton>
+  </CiamLayout>
 )
 
 export default {

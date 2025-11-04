@@ -12,6 +12,11 @@ export const defaultSplitTestsArgTypes = {
     },
     options: ['enabled'],
   },
+  uniaccessphase1: {
+    description: 'Enable CIAM designs',
+    control: { type: 'select' as const },
+    options: ['default', 'enabled'],
+  },
 }
 
 export const withSplitTests = <ArgTypes = typeof defaultSplitTestsArgTypes,>(

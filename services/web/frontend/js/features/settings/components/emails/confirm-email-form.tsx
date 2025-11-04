@@ -2,7 +2,7 @@ import { postJSON } from '@/infrastructure/fetch-json'
 import useWaitForI18n from '@/shared/hooks/use-wait-for-i18n'
 import Notification from '@/shared/components/notification'
 import getMeta from '@/utils/meta'
-import { FormEvent, MouseEventHandler, ReactNode, useState } from 'react'
+import { FormEvent, MouseEventHandler, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import LoadingSpinner from '@/shared/components/loading-spinner'
 import MaterialIcon from '@/shared/components/material-icon'
@@ -27,8 +27,9 @@ type ConfirmEmailFormProps = {
   onSuccessfulConfirmation?: () => void
   interstitial: boolean
   isModal?: boolean
-  onCancel?: () => void
+  onCancel?: MouseEventHandler<HTMLButtonElement>
   outerError?: string
+  isCiam?: boolean
 }
 
 export function ConfirmEmailForm({
@@ -43,6 +44,7 @@ export function ConfirmEmailForm({
   isModal,
   onCancel,
   outerError,
+  isCiam,
 }: ConfirmEmailFormProps) {
   const { t } = useTranslation()
   const [confirmationCode, setConfirmationCode] = useState('')
@@ -163,20 +165,6 @@ export function ConfirmEmailForm({
     )
   }
 
-  let intro: ReactNode | null = (
-    <h5 className="h5">{t('confirm_your_email')}</h5>
-  )
-  if (isModal)
-    intro = outerErrorDisplay ? (
-      <div className="mt-4" />
-    ) : (
-      <h3 className="h5">{outerErrorDisplay ? null : t('we_sent_code')}</h3>
-    )
-  if (interstitial)
-    intro = (
-      <h1 className="h3 interstitial-header">{t('confirm_your_email')}</h1>
-    )
-
   return (
     <form
       onSubmit={submitHandler}
@@ -196,7 +184,12 @@ export function ConfirmEmailForm({
           />
         )}
 
-        {intro}
+        <Title
+          isModal={isModal}
+          interstitial={interstitial}
+          isCiam={isCiam}
+          outerErrorDisplay={outerErrorDisplay}
+        />
 
         <OLFormLabel htmlFor="one-time-code">
           {isModal
@@ -258,6 +251,30 @@ export function ConfirmEmailForm({
       </div>
     </form>
   )
+}
+
+function Title({
+  isModal,
+  interstitial,
+  outerErrorDisplay,
+  isCiam,
+}: {
+  isModal?: boolean
+  interstitial: boolean
+  isCiam?: boolean
+  outerErrorDisplay: string | null
+}) {
+  const { t } = useTranslation()
+  if (isCiam) return <h1>{t('verify_your_email_address')}</h1>
+  if (isModal)
+    return outerErrorDisplay ? (
+      <div className="mt-4" />
+    ) : (
+      <h3 className="h5">{outerErrorDisplay ? null : t('we_sent_code')}</h3>
+    )
+  if (interstitial)
+    return <h1 className="h3 interstitial-header">{t('confirm_your_email')}</h1>
+  return <h5 className="h5">{t('confirm_your_email')}</h5>
 }
 
 function ConfirmEmailSuccessfullForm({
