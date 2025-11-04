@@ -176,29 +176,35 @@ const DockerRunner = {
           return callback(error)
         }
 
-        DockerRunner.waitForContainer(name, timeout, (error, exitCode) => {
-          if (error != null) {
-            return callback(error)
+        DockerRunner.waitForContainer(
+          name,
+          timeout,
+          options,
+          (error, exitCode) => {
+            if (error != null) {
+              return callback(error)
+            }
+            if (exitCode === 137) {
+              // exit status from kill -9
+              const err = new Error('terminated')
+              err.terminated = true
+              return callback(err)
+            }
+            if (exitCode === 1) {
+              // exit status from chktex
+              const err = new Error('exited')
+              err.code = exitCode
+              return callback(err)
+            }
+            containerReturned = true
+            logger.debug(
+              // The seccomp policy is very large. Avoid logging it. _.omit deep clones.
+              { exitCode, options: _.omit(options, 'HostConfig.SecurityOpt') },
+              'docker container has exited'
+            )
+            callbackIfFinished()
           }
-          if (exitCode === 137) {
-            // exit status from kill -9
-            const err = new Error('terminated')
-            err.terminated = true
-            return callback(err)
-          }
-          if (exitCode === 1) {
-            // exit status from chktex
-            const err = new Error('exited')
-            err.code = exitCode
-            return callback(err)
-          }
-          containerReturned = true
-          if (options != null && options.HostConfig != null) {
-            options.HostConfig.SecurityOpt = null
-          }
-          logger.debug({ exitCode, options }, 'docker container has exited')
-          callbackIfFinished()
-        })
+        )
       }
     )
   },
@@ -429,7 +435,7 @@ const DockerRunner = {
     })
   },
 
-  waitForContainer(containerId, timeout, _callback) {
+  waitForContainer(containerId, timeout, options, _callback) {
     const callback = _.once(_callback)
 
     const container = dockerode.getContainer(containerId)
@@ -445,6 +451,14 @@ const DockerRunner = {
 
     logger.debug({ containerId }, 'waiting for docker container')
     container.wait((error, res) => {
+      if (error?.statusCode === 404 && options.HostConfig.AutoRemove) {
+        logger.debug(
+          { containerId },
+          'auto-destroy container destroyed before starting to wait'
+        )
+        clearTimeout(timeoutId)
+        return callback(null, 0)
+      }
       if (error != null) {
         clearTimeout(timeoutId)
         logger.warn({ err: error, containerId }, 'error waiting for container')
