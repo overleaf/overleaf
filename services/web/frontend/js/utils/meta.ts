@@ -270,6 +270,11 @@ export interface Meta {
   'ol-ssoDisabled': boolean
   'ol-ssoErrorMessage': string
   'ol-ssoInitPath': string
+  'ol-standardPlanPricing': {
+    monthly?: string
+    annual?: string
+    monthlyTimesTwelve?: string
+  }
   'ol-stripeAccountId': string
   'ol-stripePublicKeyUK': string
   'ol-stripePublicKeyUS': string

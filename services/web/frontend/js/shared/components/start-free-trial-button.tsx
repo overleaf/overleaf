@@ -44,6 +44,9 @@ export default function StartFreeTrialButton({
 
       if (handleClick) {
         handleClick(event)
+        if (event.isPropagationStopped()) {
+          return
+        }
       }
 
       startFreeTrial(source, variant, segmentation, extraSearchParams)

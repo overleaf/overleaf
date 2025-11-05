@@ -31,6 +31,16 @@ describe('ProjectController', function () {
       algolia: {},
       plans: [],
       features: {},
+      localizedPlanPricing: {
+        USD: {
+          collaborator: {
+            monthly: 15,
+            annual: 180,
+            annualDividedByTwelve: 15,
+            monthlyTimesTwelve: 180,
+          },
+        },
+      },
     }
     ctx.brandVariationDetails = {
       id: '12',
@@ -64,6 +74,7 @@ describe('ProjectController', function () {
       },
     }
     ctx.SubscriptionController = {
+      getRecommendedCurrency: sinon.stub().resolves({ currency: 'USD' }),
       promises: {
         getRecommendedCurrency: sinon.stub().resolves({ currency: 'USD' }),
       },

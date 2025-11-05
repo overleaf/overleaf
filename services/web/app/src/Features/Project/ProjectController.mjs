@@ -395,7 +395,6 @@ const _ProjectController = {
       'track-pdf-download',
       !anonymous && 'writefull-oauth-promotion',
       'hotjar',
-      'hotjar-editor-onboarding',
       'editor-redesign',
       'overleaf-assist-bundle',
       'word-count-client',
@@ -404,6 +403,7 @@ const _ProjectController = {
       'writefull-frontend-migration',
       'chat-edit-delete',
       'compile-timeout-remove-info',
+      'compile-timeout-target-plans',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
@@ -507,38 +507,11 @@ const _ProjectController = {
       }
 
       const getSplitTestAssignment = async splitTest => {
-        if (splitTest === 'hotjar-editor-onboarding') {
-          const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-          const userRegisteredMoreThan7DaysAgo =
-            user.signUpDate && user.signUpDate < sevenDaysAgo
-
-          const isExcluded =
-            user.betaProgram ||
-            inEnterpriseCommons ||
-            userIsMemberOfGroupSubscription ||
-            userRegisteredMoreThan7DaysAgo
-
-          if (!isExcluded) {
-            return await SplitTestHandler.promises.getAssignment(
-              req,
-              res,
-              splitTest
-            )
-          } else {
-            return {
-              variant: 'default',
-              analytics: {
-                segmentation: {},
-              },
-            }
-          }
-        } else {
-          return await SplitTestHandler.promises.getAssignment(
-            req,
-            res,
-            splitTest
-          )
-        }
+        return await SplitTestHandler.promises.getAssignment(
+          req,
+          res,
+          splitTest
+        )
       }
       const splitTestAssignments = {}
       await Promise.all(
@@ -811,12 +784,31 @@ const _ProjectController = {
         isOverleafAssistBundleEnabled &&
         (await ProjectController._getAddonPrices(req, res))
 
+      let standardPlanPricing
+      let recommendedCurrency
+      if (Features.hasFeature('saas')) {
+        standardPlanPricing = await ProjectController._getPlanPricing(
+          req,
+          res,
+          'collaborator'
+        )
+        const { currency } =
+          await SubscriptionController.getRecommendedCurrency(req, res)
+        recommendedCurrency = currency
+      }
+
       let planCode = subscription?.planCode
       if (!planCode && !userInNonIndividualSub) {
         planCode = 'personal'
       }
 
       const planDetails = Settings.plans.find(p => p.planCode === planCode)
+
+      const shouldLoadHotjar =
+        splitTestAssignments['compile-timeout-target-plans']?.variant ===
+          'enabled' &&
+        !userHasPremiumSub &&
+        !userInNonIndividualSub
 
       res.render(template, {
         title: project.name,
@@ -897,15 +889,15 @@ const _ProjectController = {
         otMigrationStage: project.overleaf?.history?.otMigrationStage ?? 0,
         projectTags,
         isSaas: Features.hasFeature('saas'),
-        shouldLoadHotjar:
-          splitTestAssignments['hotjar-editor-onboarding']?.variant ===
-          'enabled',
+        shouldLoadHotjar,
         isOverleafAssistBundleEnabled,
         customerIoEnabled,
         addonPrices,
         compileSettings: {
           compileTimeout: ownerFeatures?.compileTimeout,
         },
+        standardPlanPricing,
+        recommendedCurrency,
       })
       timer.done()
     } catch (err) {
@@ -914,30 +906,33 @@ const _ProjectController = {
     }
   },
 
-  async _getPaywallPlansPrices(
-    req,
-    res,
-    paywallPlans = ['collaborator', 'student']
-  ) {
-    const plansData = {}
-
+  async _getPlanPricing(req, res, plan = 'collaborator') {
     const locale = req.i18n.language
     const { currency } = await SubscriptionController.getRecommendedCurrency(
       req,
       res
     )
 
-    paywallPlans.forEach(plan => {
-      const planPrice = Settings.localizedPlanPricing[currency][plan].monthly
-      const formattedPlanPrice = formatCurrency(
-        planPrice,
+    const pricingForCurrency = Settings.localizedPlanPricing[currency]
+    if (!pricingForCurrency) {
+      return null
+    }
+
+    const planPricing = pricingForCurrency[plan]
+    if (!planPricing) {
+      return null
+    }
+
+    return {
+      monthly: formatCurrency(planPricing.monthly, currency, locale, true),
+      annual: formatCurrency(planPricing.annual, currency, locale, true),
+      monthlyTimesTwelve: formatCurrency(
+        planPricing.monthlyTimesTwelve,
         currency,
         locale,
         true
-      )
-      plansData[plan] = formattedPlanPrice
-    })
-    return plansData
+      ),
+    }
   },
 
   async _getAddonPrices(req, res, addonPlans = ['assistant']) {
@@ -1319,7 +1314,7 @@ const ProjectController = {
   _injectProjectUsers: _ProjectController._injectProjectUsers,
   _isInPercentageRollout: _ProjectController._isInPercentageRollout,
   _refreshFeatures: _ProjectController._refreshFeatures,
-  _getPaywallPlansPrices: _ProjectController._getPaywallPlansPrices,
+  _getPlanPricing: _ProjectController._getPlanPricing,
   _getAddonPrices: _ProjectController._getAddonPrices,
   _setWritefullTrialState: _ProjectController._setWritefullTrialState,
 }

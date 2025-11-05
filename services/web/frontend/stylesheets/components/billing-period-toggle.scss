@@ -1,0 +1,84 @@
+@import '../foundations/all';
+@import '../abstracts/mixins';
+
+.billing-period-toggle {
+  position: relative;
+  display: inline-flex;
+  background-color: var(--bg-light-secondary);
+  border-radius: var(--border-radius-full);
+  padding: var(--spacing-03);
+  gap: var(--spacing-04);
+  border: none;
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+    font-size: var(--font-size-05);
+    font-weight: 600;
+    line-height: var(--line-height-04);
+    text-align: center;
+    padding: var(--spacing-01) var(--spacing-04);
+    border-radius: var(--border-radius-full);
+
+    &:hover {
+      background-color: var(--neutral-20);
+      cursor: pointer;
+    }
+  }
+
+  input[type='radio'] {
+    position: absolute;
+    left: -9999px;
+
+    &:focus,
+    &:focus-visible {
+      outline: 0;
+    }
+  }
+
+  input[type='radio']:focus-visible + label,
+  input[type='radio']:checked:focus-visible + label {
+    box-shadow: 0 0 0 2px var(--blue-30);
+    outline: 2px solid transparent;
+  }
+
+  input[type='radio']:checked + label {
+    background-color: var(--green-50);
+    color: white;
+    /* stylelint-disable-next-line length-zero-no-unit, color-function-notation, alpha-value-notation */
+    box-shadow: 0px 2px 4px 0px rgba(30, 37, 48, 0.16);
+
+    .billing-period-toggle-discount-badge {
+      background-color: var(--green-10);
+      color: var(--green-60);
+    }
+  }
+
+  &.billing-period-toggle-premium {
+    input[type='radio']:checked + label {
+      background: var(--premium-gradient);
+      color: white;
+
+      .billing-period-toggle-discount-badge {
+        background-color: var(--green-10);
+        color: var(--blue-70);
+      }
+    }
+  }
+}
+
+.billing-period-toggle-discount-badge {
+  font-size: var(--font-size-01);
+  font-family: 'DM Mono', monospace;
+  padding: 2px 8px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: var(--neutral-70);
+  color: white;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  line-height: var(--line-height-01);
+  margin-left: var(--spacing-03);
+}
