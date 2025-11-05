@@ -198,6 +198,7 @@
 
           box-shadow: none;
           background-color: var(--navbar-hamburger-submenu-bg);
+          border: none;
           width: auto;
 
           .dropdown-item {
@@ -245,8 +246,7 @@
   }
 }
 
-.website-redesign-navbar,
-.website-redesign .navbar-default {
+@mixin navbar-light() {
   --navbar-title-color: var(--content-primary);
   --navbar-title-color-hover: var(--content-secondary);
   --navbar-brand-image-url: var(
@@ -266,12 +266,56 @@
   --navbar-link-hover-border-color: var(--navbar-link-border-color);
 
   // Toggler
-  --navbar-toggler-expanded-color: var(--white);
-  --navbar-toggler-expanded-bg: var(--bg-dark-primary);
+  --navbar-toggler-expanded-bg: none;
+  --navbar-toggler-expanded-color: var(--content-secondary);
 
   // Mobile view
   --navbar-hamburger-submenu-bg: var(--bg-light-secondary);
   --navbar-hamburger-submenu-item-color: var(--navbar-link-color);
-  --navbar-hamburger-submenu-item-hover-color: var(--white);
+  --navbar-hamburger-submenu-item-hover-color: var(--content-primary-dark);
   --navbar-hamburger-submenu-item-hover-bg: var(--bg-dark-primary);
+}
+
+@mixin navbar-dark() {
+  --navbar-title-color: var(--content-primary-dark);
+  --navbar-title-color-hover: var(--content-secondary-dark);
+  --navbar-brand-image-url: var(
+    --navbar-brand-image-redesign-url,
+    url('../../../frontend/js/shared/svgs/overleaf-green.svg')
+  );
+  --navbar-subdued-color: var(--content-primary-dark);
+  --navbar-subdued-hover-bg: var(--bg-dark-secondary);
+  --navbar-subdued-hover-color: var(--content-primary-dark);
+  --navbar-bg: var(--bg-dark-primary);
+
+  // Navbar links
+  --navbar-link-color: var(--content-primary-dark);
+  --navbar-link-border-color: var(--border-primary-dark);
+  --navbar-link-hover-color: var(--navbar-link-color);
+  --navbar-link-hover-bg: var(--bg-dark-tertiary);
+  --navbar-link-hover-border-color: var(--navbar-link-border-color);
+
+  // Toggler
+  --navbar-toggler-expanded-bg: none;
+  --navbar-toggler-expanded-color: var(--content-secondary-dark);
+
+  // Mobile view
+  --navbar-hamburger-submenu-bg: var(--bg-dark-primary);
+  --navbar-hamburger-submenu-item-color: var(--navbar-link-color);
+  --navbar-hamburger-submenu-item-hover-color: var(--content-primary-dark);
+  --navbar-hamburger-submenu-item-hover-bg: var(--bg-dark-secondary);
+}
+
+.website-redesign-navbar,
+.website-redesign .navbar-default {
+  @include navbar-light;
+}
+
+@include theme('default') {
+  #project-list-root {
+    .website-redesign-navbar,
+    .website-redesign .navbar-default {
+      @include navbar-dark;
+    }
+  }
 }

@@ -1,3 +1,21 @@
+:root {
+  --ds-nav-active-bg: var(--bg-accent-03);
+  --ds-nav-active-color: var(--green-60);
+  --theme-toggle-selected-background: var(--green-20);
+
+  @include theme('default') {
+    --ds-nav-active-bg: var(--green-70);
+    --ds-nav-active-color: var(--green-10);
+    --theme-toggle-selected-background: var(--green-70);
+  }
+}
+
+body {
+  --ds-nav-bg-color: var(--bg-primary-themed);
+  --ds-nav-hover-bg: var(--bg-secondary-themed);
+  --ds-nav-color: var(--content-secondary-themed);
+}
+
 .project-ds-nav-page {
   display: flex;
   flex-direction: column;
@@ -14,9 +32,6 @@
 
   .navbar-default {
     position: relative;
-
-    --navbar-toggler-expanded-bg: none;
-    --navbar-toggler-expanded-color: var(--content-secondary);
 
     .navbar-header .navbar-logo {
       @include media-breakpoint-up(md) {
@@ -63,8 +78,8 @@
               border-radius: var(--border-radius-medium);
 
               &.show {
-                background-color: var(--bg-accent-03);
-                color: var(--green-60);
+                background-color: var(--ds-nav-active-bg);
+                color: var(--ds-nav-active-color);
               }
             }
           }
@@ -78,6 +93,7 @@
   }
 
   .project-list-wrapper {
+    background-color: var(--ds-nav-bg-color);
     flex-grow: 1;
     display: flex;
     overflow-y: hidden;
@@ -176,7 +192,7 @@
         > button {
           width: 100%;
           text-align: left;
-          color: var(--content-secondary);
+          color: var(--ds-nav-color);
           background: none;
           border-radius: var(--border-radius-medium);
           border: none;
@@ -184,18 +200,19 @@
         }
 
         &:hover button {
-          background-color: var(--bg-light-secondary);
+          background-color: var(--ds-nav-hover-bg);
         }
 
         &.active button {
-          background-color: var(--bg-accent-03);
-          color: var(--green-60);
+          background-color: var(--ds-nav-active-bg);
+          color: var(--ds-nav-active-color);
           font-weight: bold;
         }
       }
 
       .dropdown-header {
         font-weight: bold;
+        color: var(--ds-nav-color);
       }
 
       > li.tag {
@@ -208,7 +225,7 @@
         button.dropdown-toggle {
           border-radius: var(--border-radius-full);
           border: none;
-          color: var(--content-secondary);
+          color: var(--ds-nav-color);
           height: 20px;
           width: 20px;
           padding: 0;
@@ -293,7 +310,7 @@
 
   .ds-nav-icon-dropdown {
     .dropdown-toggle {
-      color: var(--content-secondary);
+      color: var(--ds-nav-color);
       background: none;
       height: 44px;
       width: 44px;
@@ -301,12 +318,12 @@
       overflow: hidden;
 
       &:hover {
-        background-color: var(--bg-light-secondary);
+        background-color: var(--ds-nav-hover-bg);
       }
 
       &.show {
-        background-color: var(--bg-accent-03);
-        color: var(--green-60);
+        background-color: var(--ds-nav-active-bg);
+        color: var(--ds-nav-active-color);
       }
 
       &::after {
@@ -327,6 +344,7 @@
   }
 
   .ds-nav-ds-name {
+    color: var(--ds-nav-color);
     margin-bottom: var(--spacing-05);
 
     span {
@@ -335,6 +353,10 @@
 
       @include body-xs;
     }
+  }
+
+  .add-affiliation {
+    color: var(--ds-nav-color);
   }
 }
 
@@ -362,14 +384,6 @@
   background-color: var(--bg-secondary-themed);
   padding: var(--spacing-01);
   gap: var(--spacing-01);
-}
-
-:root {
-  --theme-toggle-selected-background: var(--green-70);
-}
-
-@include theme('light') {
-  --theme-toggle-selected-background: var(--green-20);
 }
 
 .theme-toggle-radio {
