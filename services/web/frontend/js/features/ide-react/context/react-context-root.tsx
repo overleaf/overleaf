@@ -1,4 +1,4 @@
-import React, { FC, PropsWithChildren } from 'react'
+import React, { ElementType, FC, PropsWithChildren } from 'react'
 import { ChatProvider } from '@/features/chat/context/chat-context'
 import { ConnectionProvider } from './connection-context'
 import { DetachCompileProvider } from '@/shared/context/detach-compile-context'
@@ -30,6 +30,12 @@ import { UserFeaturesProvider } from '@/shared/context/user-features-context'
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 import { IdeRedesignSwitcherProvider } from './ide-redesign-switcher-context'
 import { CommandRegistryProvider } from './command-registry-context'
+import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+
+const rootContextProviders = importOverleafModules('rootContextProviders') as {
+  import: { default: ElementType }
+  path: string
+}[]
 
 export const ReactContextRoot: FC<
   React.PropsWithChildren<{
@@ -71,6 +77,18 @@ export const ReactContextRoot: FC<
     ...providers,
   }
 
+  // Extract dynamic providers from modules
+  const dynamicProviders = rootContextProviders.map(
+    module => module.import.default
+  )
+
+  // Wrap children with all dynamic providers from outside to inside
+  const childrenWrappedWithDynamicProviders =
+    dynamicProviders.reduceRight<React.ReactElement>(
+      (acc, Provider) => <Provider>{acc}</Provider>,
+      <>{children}</>
+    )
+
   return (
     <Providers.SplitTestProvider>
       <Providers.ModalsContextProvider>
@@ -103,7 +121,9 @@ export const ReactContextRoot: FC<
                                                             <Providers.OutlineProvider>
                                                               <Providers.IdeRedesignSwitcherProvider>
                                                                 <Providers.CommandRegistryProvider>
-                                                                  {children}
+                                                                  {
+                                                                    childrenWrappedWithDynamicProviders
+                                                                  }
                                                                 </Providers.CommandRegistryProvider>
                                                               </Providers.IdeRedesignSwitcherProvider>
                                                             </Providers.OutlineProvider>
