@@ -20,7 +20,6 @@ IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/libraries/o-error/package.json \
 	$(MONOREPO)/libraries/redis-wrapper/package.json \
 	$(MONOREPO)/libraries/settings/package.json \
-	$(MONOREPO)/libraries/validation-tools/package.json \
 	$(MONOREPO)/services/real-time/package.json \
 	$(MONOREPO)/patches/* \
 | sha256sum | cut -d '-' -f1)
