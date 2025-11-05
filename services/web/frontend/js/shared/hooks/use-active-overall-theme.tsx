@@ -2,6 +2,7 @@ import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { OverallTheme } from '@/shared/utils/styles'
 import { isIEEEBranded } from '@/utils/is-ieee-branded'
 import { useEffect, useMemo, useState } from 'react'
+import { useSplitTestContext } from '../context/split-test-context'
 
 export type ActiveOverallTheme = 'dark' | 'light'
 
@@ -28,7 +29,10 @@ function getTheme(
   return 'dark'
 }
 
-export const useActiveOverallTheme = (): ActiveOverallTheme => {
+export const useActiveOverallTheme = (
+  featureFlag?: string
+): ActiveOverallTheme => {
+  const { splitTestVariants } = useSplitTestContext()
   const [browserPrefersDarkMode, setBrowserPrefersDarkMode] = useState(
     mediaWatcher.matches
   )
@@ -37,8 +41,13 @@ export const useActiveOverallTheme = (): ActiveOverallTheme => {
   } = useUserSettingsContext()
 
   const activeOverallTheme = useMemo<ActiveOverallTheme>(() => {
+    // Override theme if feature flag is provided and not enabled
+    if (featureFlag && splitTestVariants[featureFlag] !== 'enabled') {
+      return 'light'
+    }
+
     return getTheme(overallTheme, browserPrefersDarkMode)
-  }, [overallTheme, browserPrefersDarkMode])
+  }, [overallTheme, browserPrefersDarkMode, featureFlag, splitTestVariants])
 
   useEffect(() => {
     const listener = (e: MediaQueryListEvent) => {

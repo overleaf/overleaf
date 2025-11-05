@@ -37,7 +37,7 @@ export function ProjectListDsNav() {
     tags,
     selectedTagId,
   } = useProjectListContext()
-  const activeOverallTheme = useActiveOverallTheme()
+  const activeOverallTheme = useActiveOverallTheme('themed-project-dashboard')
 
   const selectedTag = tags.find(tag => tag._id === selectedTagId)
 
