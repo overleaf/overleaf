@@ -106,10 +106,20 @@ test_unit_mocha: export COMPOSE_PROJECT_NAME=unit_test_mocha_$(BUILD_DIR_NAME)
 test_unit_mocha: mongo_migrations_for_tests
 	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:mocha
 
-test_unit_esm: export MOCHA_ROOT_SUITE_NAME = ESM unit tests
-test_unit_esm: export COMPOSE_PROJECT_NAME=unit_test_esm_$(BUILD_DIR_NAME)
+test_unit_esm: export VITEST_ROOT_SUITE_NAME = ESM unit tests - parallel
+test_unit_esm: export COMPOSE_PROJECT_NAME=unit_test_esm_parallel_$(BUILD_DIR_NAME)
 test_unit_esm: mongo_migrations_for_tests
 	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:esm
+
+test_unit_esm_parallel: export VITEST_ROOT_SUITE_NAME = ESM unit tests - parallel
+test_unit_esm_parallel: export COMPOSE_PROJECT_NAME=unit_test_esm_parallel_$(BUILD_DIR_NAME)
+test_unit_esm_parallel: mongo_migrations_for_tests
+	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:esm:parallel
+
+test_unit_esm_sequential: export VITEST_ROOT_SUITE_NAME = ESM unit tests - sequential
+test_unit_esm_sequential: export COMPOSE_PROJECT_NAME=unit_test_esm_sequential_$(BUILD_DIR_NAME)
+test_unit_esm_sequential: mongo_migrations_for_tests
+	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:esm:sequential
 
 test_unit_esm_watch: export COMPOSE_PROJECT_NAME=unit_test_esm_watch_$(BUILD_DIR_NAME)
 test_unit_esm_watch: mongo_migrations_for_tests

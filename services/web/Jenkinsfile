@@ -269,11 +269,20 @@ pipeline {
             }
           }
         }
-        stage('Test Unit ESM') {
+        stage('Test Unit ESM - Parallel') {
           steps {
             dir('services/web') {
               retry(count: 3) {
-                sh "make test_unit_esm"
+                sh "make test_unit_esm_parallel"
+              }
+            }
+          }
+        }
+        stage('Test Unit ESM - Sequential') {
+          steps {
+            dir('services/web') {
+              retry(count: 3) {
+                sh "make test_unit_esm_sequential"
               }
             }
           }
