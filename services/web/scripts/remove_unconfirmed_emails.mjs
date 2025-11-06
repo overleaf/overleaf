@@ -146,15 +146,15 @@ async function consumeCsvFile() {
   console.log('Total users in the CSV:', userIds.length)
 
   for (const userId of userIds) {
-    const emailsToRemove = emailsByUserId[userId]
+    const emailsToRemoveCandidates = emailsByUserId[userId]
 
     const user = await db.users.findOne({ _id: new ObjectId(userId) })
     if (!user) {
-      skippedEmail.userNotFound += emailsToRemove.length
+      skippedEmail.userNotFound += emailsToRemoveCandidates.length
       continue
     }
 
-    const emailsToRemoveNow = emailsToRemove.filter(email => {
+    const emailsToRemove = emailsToRemoveCandidates.filter(email => {
       const currentEmail = user.emails.find(e => e.email === email)
       if (!currentEmail) {
         skippedEmail.nowRemoved++
@@ -171,9 +171,9 @@ async function consumeCsvFile() {
       return true
     })
 
-    removedEmailsCount += emailsToRemoveNow.length
+    removedEmailsCount += emailsToRemove.length
 
-    if (commit && emailsToRemoveNow.length > 0) {
+    if (commit && emailsToRemove.length > 0) {
       for (const email of emailsToRemove) {
         await UserAuditLogHandler.promises.addEntry(
           userId,

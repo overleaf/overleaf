@@ -5,6 +5,7 @@ import { callbackify } from 'node:util'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
 
 function _canHaveNoIpAddressId(operation, info) {
+  if (operation === 'add-email' && info.script) return true
   if (operation === 'join-group-subscription') return true
   if (operation === 'leave-group-subscription') return true
   if (operation === 'must-reset-password-set') return true
@@ -15,6 +16,7 @@ function _canHaveNoIpAddressId(operation, info) {
 }
 
 function _canHaveNoInitiatorId(operation, info) {
+  if (operation === 'add-email' && info.script) return true
   if (operation === 'reset-password') return true
   if (operation === 'unlink-sso' && info.providerId === 'collabratec')
     return true

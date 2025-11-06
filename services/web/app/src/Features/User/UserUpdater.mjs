@@ -101,6 +101,7 @@ async function addEmailAddress(userId, newEmail, affiliationOptions, auditLog) {
     auditLog.initiatorId,
     auditLog.ipAddress,
     {
+      ...auditLog.info,
       newSecondaryEmail: newEmail,
     }
   )
