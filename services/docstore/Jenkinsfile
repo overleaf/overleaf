@@ -14,12 +14,39 @@ pipeline {
   environment {
     BRANCH_NAME = "${env.CHANGE_BRANCH ? env.CHANGE_BRANCH : env.BRANCH_NAME}"
     JENKINS_BUILD_NUMBER = "${BUILD_NUMBER}"
-    BUILD_NUMBER = "${SHORT_SHA}_${BUILD_NUMBER}"
     DOCKER_COMPOSE_FLAGS = '-f docker-compose.ci.yml'
-    COMMIT_SHA = "${GIT_COMMIT}"
-    SHORT_SHA = "${GIT_COMMIT.take(7)}"
   }
   stages {
+    stage('Set Build Variables') {
+      steps {
+        script {
+          def relevantCommitHash
+          if (env.CHANGE_BRANCH) {
+            def commitExistsOnRemote = sh(script: "git branch --remotes --contains ${GIT_COMMIT}", returnStdout: true).trim()
+            if (commitExistsOnRemote) {
+              echo "PR build detected, but commit exists on remote. Using ${GIT_COMMIT}"
+              relevantCommitHash = "${GIT_COMMIT}"
+            } else {
+              def parentCommits = sh(script: 'git rev-parse HEAD^@', returnStdout: true).trim().split('\n')
+              if (parentCommits.size() >= 2) {
+                echo "PR build detected. Jenkins checked out a merge commit: ${GIT_COMMIT} (parents: ${parentCommits.join(', ')})"
+                relevantCommitHash = parentCommits[0]
+                echo "Using first parent (branch commit): ${relevantCommitHash}"
+              } else {
+                echo "WARN: PR build detected, but ${GIT_COMMIT} is neither a merge commit, nor does it exist on the remote."
+                relevantCommitHash = "${GIT_COMMIT}"
+              }
+            }
+          } else {
+            echo "Branch build detected. Using commit: ${GIT_COMMIT}"
+            relevantCommitHash = "${GIT_COMMIT}"
+          }
+          env.COMMIT_SHA = relevantCommitHash
+          env.SHORT_SHA = relevantCommitHash.take(7)
+          env.BUILD_NUMBER = "${env.SHORT_SHA}_${env.JENKINS_BUILD_NUMBER}"
+        }
+      }
+    }
     stage('Stage 1') {
       parallel {
         stage('Build') {
