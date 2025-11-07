@@ -37,6 +37,7 @@ export type AdminRole =
   | 'finance'
   | 'product'
   | 'sales'
+  | 'sales_support'
   | 'super_admin'
   | 'support'
   | 'support_tier_1'
