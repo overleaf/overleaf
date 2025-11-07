@@ -328,7 +328,7 @@ describe('joinDoc', function () {
     })
 
     it('should return an invalid id error', function () {
-      this.error.message.should.equal('invalid id')
+      this.error.message.should.equal('invalid Mongo ObjectId')
     })
 
     return it('should not have joined the doc room', function (done) {
