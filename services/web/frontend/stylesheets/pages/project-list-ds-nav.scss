@@ -181,6 +181,10 @@ body {
       }
     }
 
+    hr {
+      border-top: 1px solid var(--border-divider-themed);
+    }
+
     ul.project-list-filters {
       margin-bottom: 0;
 
