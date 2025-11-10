@@ -26,6 +26,14 @@ import RailResizeHandle from './rail-resize-handle'
 import RailModals from './rail-modals'
 import RailOverflowDropdown from './rail-overflow-dropdown'
 import useRailOverflow from '../../hooks/use-rail-overflow'
+import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+
+const moduleRailEntries = (
+  importOverleafModules('railEntries') as {
+    import: { default: RailElement }
+    path: string
+  }[]
+).map(({ import: { default: element } }) => element)
 
 export const RailLayout = () => {
   const { sendEvent } = useEditorAnalytics()
@@ -79,6 +87,7 @@ export const RailLayout = () => {
         title: t('chat'),
         hide: !getMeta('ol-capabilities')?.includes('chat'),
       },
+      ...moduleRailEntries,
     ],
     [t, features.trackChangesVisible, view]
   )
@@ -125,7 +134,13 @@ export const RailLayout = () => {
       } else {
         // HACK: Apparently the onSelect event is triggered with href attributes
         // from DropdownItems
-        if (!railTabs.some(tab => !tab.hide && tab.key === key)) {
+        if (
+          !railTabs.some(tab =>
+            typeof tab.hide === 'function'
+              ? !tab.hide()
+              : !tab.hide && tab.key === key
+          )
+        ) {
           // Attempting to open a non-existent tab
           return
         }
@@ -150,7 +165,9 @@ export const RailLayout = () => {
   )
 
   useEffect(() => {
-    const validTabKeys = railTabs.filter(tab => !tab.hide).map(tab => tab.key)
+    const validTabKeys = railTabs
+      .filter(tab => (typeof tab.hide === 'function' ? !tab.hide() : !tab.hide))
+      .map(tab => tab.key)
     if (!validTabKeys.includes(selectedTab) && isOpen) {
       // If the selected tab is no longer valid (e.g. due to permissions changes),
       // switch back to the file tree
@@ -199,7 +216,9 @@ export const RailLayout = () => {
         <Nav activeKey={selectedTab} className="ide-rail-tabs-nav">
           <div className="ide-rail-tabs-wrapper" ref={tabWrapperRef}>
             {tabsInRail
-              .filter(({ hide }) => !hide)
+              .filter(({ hide }) =>
+                typeof hide === 'function' ? !hide() : !hide
+              )
               .map(({ icon, key, indicator, title, disabled }) => (
                 <RailTab
                   open={isOpen && selectedTab === key}

@@ -1040,6 +1040,7 @@ module.exports = {
     referenceSearchSetting: [],
     errorLogsComponents: [],
     referenceIndices: [],
+    railEntries: [],
   },
 
   moduleImportSequence: [

@@ -16,6 +16,7 @@
     "emitDecoratorMetadata": true /* Allow decorators in writefull - inversify */,
     "paths": {
       "@/*": ["./frontend/js/*"],
+      "@modules/*": ["./modules/*"],
       "@overleaf/o-error": ["../../libraries/o-error"],
       "@overleaf/ranges-tracker": ["../../libraries/ranges-tracker"],
       /* can't make this entry @types because that conflicts with the "types" entry below */

@@ -9,6 +9,7 @@ const Usage = new Schema({
 const UserFeatureUsageSchema = new Schema({
   features: {
     aiErrorAssistant: Usage,
+    aiWorkbench: Usage,
   },
 })
 

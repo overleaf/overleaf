@@ -24,6 +24,7 @@ FROM base AS deps-prod
 
 COPY package.json package-lock.json /overleaf/
 COPY libraries/access-token-encryptor/package.json /overleaf/libraries/access-token-encryptor/package.json
+COPY libraries/ai/package.json /overleaf/libraries/ai/package.json
 COPY libraries/eslint-plugin/package.json /overleaf/libraries/eslint-plugin/package.json
 COPY libraries/fetch-utils/package.json /overleaf/libraries/fetch-utils/package.json
 COPY libraries/logger/package.json /overleaf/libraries/logger/package.json
@@ -58,6 +59,7 @@ FROM deps AS dev
 ARG SENTRY_RELEASE
 ENV SENTRY_RELEASE=$SENTRY_RELEASE
 COPY libraries/access-token-encryptor/ /overleaf/libraries/access-token-encryptor/
+COPY libraries/ai/ /overleaf/libraries/ai/
 COPY libraries/eslint-plugin/ /overleaf/libraries/eslint-plugin/
 COPY libraries/fetch-utils/ /overleaf/libraries/fetch-utils/
 COPY libraries/logger/ /overleaf/libraries/logger/
@@ -95,6 +97,7 @@ RUN nice find /overleaf/services/web/public -name '*.js.map' -delete
 # copy source code and precompile pug images
 FROM deps-prod AS pug
 COPY libraries/access-token-encryptor/ /overleaf/libraries/access-token-encryptor/
+COPY libraries/ai/ /overleaf/libraries/ai/
 COPY libraries/eslint-plugin/ /overleaf/libraries/eslint-plugin/
 COPY libraries/fetch-utils/ /overleaf/libraries/fetch-utils/
 COPY libraries/logger/ /overleaf/libraries/logger/

@@ -403,6 +403,7 @@ const _ProjectController = {
       'writefull-frontend-migration',
       'chat-edit-delete',
       'compile-timeout-remove-info',
+      'ai-workbench',
       'compile-timeout-target-plans',
     ].filter(Boolean)
 

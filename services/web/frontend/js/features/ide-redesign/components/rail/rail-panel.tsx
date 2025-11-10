@@ -52,7 +52,9 @@ export default function RailPanel({
       >
         <Tab.Content className="ide-rail-tab-content">
           {railTabs
-            .filter(({ hide }) => !hide)
+            .filter(({ hide }) => {
+              return typeof hide === 'function' ? !hide() : !hide
+            })
             .map(({ key, component, mountOnFirstLoad }) => (
               <Tab.Pane
                 eventKey={key}

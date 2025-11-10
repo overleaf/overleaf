@@ -10,6 +10,7 @@ const {
 
 const PackageVersions = require('./app/src/infrastructure/PackageVersions.js')
 const invalidateBabelCacheIfNeeded = require('./frontend/macros/invalidate-babel-cache-if-needed')
+const { dirname } = require('node:path')
 
 // Make sure that babel-macros are re-evaluated after changing the modules config
 invalidateBabelCacheIfNeeded()
@@ -261,6 +262,26 @@ module.exports = {
             ],
           },
           {
+            // CSS from AI module
+            include: dirname(require.resolve('@overleaf/ai')),
+            use: [
+              {
+                loader: 'css-loader',
+                options: {
+                  exportType: 'css-style-sheet',
+                },
+              },
+              {
+                loader: 'postcss-loader',
+                options: {
+                  postcssOptions: {
+                    config: require.resolve('@overleaf/ai/postcss.config.js'),
+                  },
+                },
+              },
+            ],
+          },
+          {
             // Standard CSS processing (extracted into separate file)
             use: [MiniCssExtractPlugin.loader, 'css-loader'],
           },
@@ -309,6 +330,7 @@ module.exports = {
     alias: {
       // custom prefixes for import paths
       '@': path.resolve(__dirname, './frontend/js/'),
+      '@modules': path.resolve(__dirname, './modules/'),
       '@ol-types': path.resolve(__dirname, './types/'),
       '@wf': path.resolve(
         __dirname,

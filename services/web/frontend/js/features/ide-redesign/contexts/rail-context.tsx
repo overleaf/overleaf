@@ -23,6 +23,7 @@ export type RailTabKey =
   | 'review-panel'
   | 'chat'
   | 'full-project-search'
+  | 'workbench'
 
 export type RailModalKey = 'keyboard-shortcuts' | 'contact-us' | 'dictionary'
 

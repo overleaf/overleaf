@@ -49,6 +49,7 @@ export default /** @type {const} */ ([
   'shuffle',
   'smart_toy',
   'space_dashboard',
+  'star',
   'strikethrough_s',
   'table_chart',
   'table_chart',

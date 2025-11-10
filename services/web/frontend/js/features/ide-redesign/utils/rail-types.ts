@@ -8,7 +8,7 @@ export type RailElement = {
   component: ReactElement | null
   indicator?: ReactElement
   title: string
-  hide?: boolean
+  hide?: boolean | (() => boolean)
   disabled?: boolean
   mountOnFirstLoad?: boolean
 }
