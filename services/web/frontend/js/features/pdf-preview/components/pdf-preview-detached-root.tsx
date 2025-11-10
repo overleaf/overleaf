@@ -3,6 +3,7 @@ import PdfPreview from './pdf-preview'
 import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
 import { ReactContextRoot } from '@/features/ide-react/context/react-context-root'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
+import useThemedPage from '@/shared/hooks/use-themed-page'
 
 function PdfPreviewDetachedRoot() {
   const { isReady } = useWaitForI18n()
@@ -13,13 +14,20 @@ function PdfPreviewDetachedRoot() {
 
   return (
     <ReactContextRoot>
-      <EditorRedesignWrapper>
-        <PdfPreview />
-      </EditorRedesignWrapper>
+      <PdfPreviewDetachedRootContent />
     </ReactContextRoot>
   )
 }
 
+function PdfPreviewDetachedRootContent() {
+  useThemedPage() // set the page theme based on user settings
+
+  return (
+    <EditorRedesignWrapper>
+      <PdfPreview />
+    </EditorRedesignWrapper>
+  )
+}
 function EditorRedesignWrapper({ children }: { children: React.ReactNode }) {
   const newEditorEnabled = useIsNewEditorEnabled()
   if (!newEditorEnabled) {
