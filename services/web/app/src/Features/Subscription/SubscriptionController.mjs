@@ -301,7 +301,7 @@ async function userSubscriptionPage(req, res) {
   } = await UserGetter.promises.getWritefullData(user._id)
 
   const data = {
-    title: 'your_subscription',
+    title: 'your_subscriptions',
     plans: plansData?.plans,
     planCodesChangingAtTermEnd: plansData?.planCodesChangingAtTermEnd,
     user,

@@ -63,7 +63,7 @@ function SubscriptionDashboard() {
           <RedirectAlerts />
           <OLPageContentCard>
             <div className="page-header">
-              <h1>{t('your_subscription')}</h1>
+              <h1>{t('your_subscriptions')}</h1>
             </div>
 
             <div>

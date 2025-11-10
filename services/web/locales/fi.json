@@ -341,7 +341,7 @@
   "you_have_added_x_of_group_size_y": "Olet lisännyt <0>__addedUsersSize__</0> saatavilla olevasta <1>__groupSize__</1> jäsenestä",
   "your_plan": "Sopimuksesi",
   "your_projects": "Sinun projektisi",
-  "your_subscription": "Tilauksesi",
   "your_subscription_has_expired": "Tilauksesi on umpeutunut.",
+  "your_subscriptions": "Tilauksesi tilaukset",
   "zh-CN": "Kiina"
 }

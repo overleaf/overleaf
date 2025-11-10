@@ -335,6 +335,6 @@
   "you_have_added_x_of_group_size_y": "Přidal jste <0>__addedUsersSize__</0> z <1>__groupSize__</1> možných členů",
   "your_plan": "Váš tarif",
   "your_projects": "Vaše projekty",
-  "your_subscription": "Vaše předplatné",
-  "your_subscription_has_expired": "Vaše předplatné vypršelo."
+  "your_subscription_has_expired": "Vaše předplatné vypršelo.",
+  "your_subscriptions": "Vaše předplatná"
 }

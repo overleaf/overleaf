@@ -389,7 +389,7 @@
   "you_have_added_x_of_group_size_y": "Du har lagt til <0>__addedUsersSize__</0> av <1>__groupSize__</1> tilgjengelige deltagere",
   "your_plan": "Din plan",
   "your_projects": "Dine prosjekter",
-  "your_subscription": "Ditt abonnement",
   "your_subscription_has_expired": "Dit abonnement har utgått.",
+  "your_subscriptions": "Dine abonnementer",
   "zh-CN": "Kinesisk"
 }

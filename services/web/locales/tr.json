@@ -374,7 +374,7 @@
   "you_have_added_x_of_group_size_y": "<1>__groupSize__</1> kişilik grup kontenjanınıza, <0>__addedUsersSize__</0> kişi eklediniz",
   "your_plan": "Planınız",
   "your_projects": "Sizin Projeleriniz",
-  "your_subscription": "Aboneliğiniz",
   "your_subscription_has_expired": "Aboneliğinizin süresi doldu.",
+  "your_subscriptions": "Abonelikleriniz",
   "zh-CN": "Çince"
 }

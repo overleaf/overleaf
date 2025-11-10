@@ -379,7 +379,7 @@
   "you_have_added_x_of_group_size_y": "Hai aggiunto <0>__addedUsersSize__</0> membri su <1>__groupSize__</1> disponibili.",
   "your_plan": "Il tuo piano",
   "your_projects": "Tuoi Progetti",
-  "your_subscription": "Il tuo abbonamento",
   "your_subscription_has_expired": "Il tuo abbonamento è scaduto.",
+  "your_subscriptions": "I tuoi abbonamenti",
   "zh-CN": "Cinese"
 }
