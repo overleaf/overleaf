@@ -53,6 +53,10 @@ const QUEUES_JOB_OPTIONS = {
     removeOnFail: MAX_FAILED_JOBS_RETAINED,
     attempts: 3,
   },
+  'project-notification': {
+    removeOnFail: MAX_FAILED_JOBS_RETAINED,
+    attempts: 3,
+  },
 }
 
 const QUEUE_OPTIONS = {

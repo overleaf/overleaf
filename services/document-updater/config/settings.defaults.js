@@ -155,6 +155,9 @@ module.exports = {
         historyRangesSupport() {
           return 'HistoryRangesSupport'
         },
+        projectNotificationTimestamp({ project_id: projectId }) {
+          return `ProjectNotificationTimestamp:{${projectId}}`
+        },
       },
     },
   },

@@ -107,6 +107,20 @@ function start() {
       throw error
     }
   })
+
+  registerQueue('project-notification', async job => {
+    const { projectId, timestamp } = job.data
+    try {
+      await Modules.promises.hooks.fire('projectModified', {
+        projectId,
+        timestamp,
+      })
+    } catch (e) {
+      const error = OError.tag(e, 'failed to process project notification')
+      logger.warn({ error, projectId }, error.message)
+      throw error
+    }
+  })
 }
 
 function registerCleanup(queue) {

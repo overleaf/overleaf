@@ -3,7 +3,11 @@
 const Metrics = require('@overleaf/metrics')
 const MongoUtils = require('@overleaf/mongo-utils')
 const Settings = require('@overleaf/settings')
-const { MongoClient, ObjectId } = require('mongodb-legacy')
+const { MongoClient, ObjectId, ReadPreference } = require('mongodb-legacy')
+
+const READ_PREFERENCE_SECONDARY = Settings.mongo.hasSecondaries
+  ? ReadPreference.secondary.mode
+  : ReadPreference.secondaryPreferred.mode
 
 const mongoClient = new MongoClient(Settings.mongo.url, Settings.mongo.options)
 const mongoDb = mongoClient.db()
@@ -33,4 +37,5 @@ module.exports = {
   mongoClient,
   healthCheck: require('node:util').callbackify(healthCheck),
   cleanupTestDatabase,
+  READ_PREFERENCE_SECONDARY,
 }
