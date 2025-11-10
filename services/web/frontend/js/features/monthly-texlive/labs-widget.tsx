@@ -58,9 +58,31 @@ const MonthlyTexliveLabsWidget = ({
     />
   )
 
+  const description = (
+    <Trans
+      i18nKey="this_experiment_gives_you_access_to_new_versions_of_latex"
+      components={[
+        // eslint-disable-next-line jsx-a11y/anchor-has-content
+        <a
+          href="https://docs.overleaf.com/troubleshooting-and-support/tex-live#How_do_I_change_a_project%E2%80%99s_TeX_Live_version"
+          target="_blank"
+          key="getting-started-link"
+          rel="noopener"
+        />,
+        // eslint-disable-next-line jsx-a11y/anchor-has-content
+        <a
+          href="https://docs.overleaf.com/troubleshooting-and-support/tex-live"
+          target="_blank"
+          key="getting-started-link"
+          rel="noopener"
+        />,
+      ]}
+    />
+  )
+
   return (
     <LabsExperimentWidget
-      description={t('get_regular_access_to_new_versions_of_tex_live')}
+      description={description}
       optedInDescription={optedInDescription}
       experimentName="monthly-texlive"
       logo={logo}
