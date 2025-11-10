@@ -11,4 +11,5 @@ export type SubscriptionCreationPreview = {
   lookupKey: string
   trialLength: number | null
   plan: Plan
+  warnings?: Record<string, string>
 }
