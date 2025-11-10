@@ -1,6 +1,5 @@
-/* eslint-disable no-unused-vars */
-
 import Helpers from './lib/helpers.mjs'
+import { getCollectionInternal } from './lib/mongodb.mjs'
 
 const tags = ['server-ce', 'server-pro', 'saas']
 
@@ -13,17 +12,17 @@ const indexes = [
   },
 ]
 
-const migrate = async client => {
-  const { db } = client
+const migrate = async () => {
+  const docHistoryIndex = await getCollectionInternal('docHistoryIndex')
 
-  await Helpers.addIndexesToCollection(db.docHistoryIndex, indexes)
+  await Helpers.addIndexesToCollection(docHistoryIndex, indexes)
 }
 
-const rollback = async client => {
-  const { db } = client
+const rollback = async () => {
+  const docHistoryIndex = await getCollectionInternal('docHistoryIndex')
 
   try {
-    await Helpers.dropIndexesFromCollection(db.docHistoryIndex, indexes)
+    await Helpers.dropIndexesFromCollection(docHistoryIndex, indexes)
   } catch (err) {
     console.error('Something went wrong rolling back the migrations', err)
   }
