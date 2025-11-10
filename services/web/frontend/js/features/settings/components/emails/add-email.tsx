@@ -155,9 +155,7 @@ function AddEmail() {
 
   const InputComponent = (
     <>
-      <label htmlFor="affiliations-email" className="visually-hidden">
-        {t('email')}
-      </label>
+      <label htmlFor="affiliations-email">{t('email')}</label>
       <Input
         onChange={handleEmailChange}
         handleAddNewEmail={handleAddNewEmail}

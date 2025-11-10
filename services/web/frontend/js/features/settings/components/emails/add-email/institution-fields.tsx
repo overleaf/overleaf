@@ -168,8 +168,8 @@ function InstitutionFields({
             <DownshiftInput
               items={getUniversityItems()}
               inputValue={universityName}
-              placeholder={t('university')}
               label={t('university')}
+              showLabel
               setValue={setUniversityName}
               disabled={!countryCode}
             />
@@ -182,18 +182,18 @@ function InstitutionFields({
             <DownshiftInput
               items={[...defaultRoles]}
               inputValue={role}
-              placeholder={t('role')}
               label={t('role')}
               setValue={setRole}
+              showLabel
             />
           </OLFormGroup>
           <OLFormGroup className="mb-0">
             <DownshiftInput
               items={departments}
               inputValue={department}
-              placeholder={t('department')}
               label={t('department')}
               setValue={setDepartment}
+              showLabel
             />
           </OLFormGroup>
         </>

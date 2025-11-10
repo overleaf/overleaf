@@ -50,9 +50,7 @@ function Downshift({ setValue, inputRef }: CountryInputProps) {
     <div className={classnames('dropdown', 'd-block')}>
       <div>
         {/* eslint-disable-next-line jsx-a11y/label-has-for */}
-        <label {...getLabelProps()} className="visually-hidden">
-          {t('country')}
-        </label>
+        <label {...getLabelProps()}>{t('country')}</label>
         <OLFormControl
           {...getInputProps({
             onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,7 +59,6 @@ function Downshift({ setValue, inputRef }: CountryInputProps) {
             ref: inputRef,
           })}
           append={<i className="caret" aria-hidden />}
-          placeholder={t('country')}
         />
       </div>
       <ul

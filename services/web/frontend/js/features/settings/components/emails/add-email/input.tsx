@@ -186,7 +186,6 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
         onChange={handleEmailChange}
         onKeyDown={handleKeyDownEvent}
         value={inputValue || ''}
-        placeholder="e.g. johndoe@mit.edu"
         ref={inputRef}
       />
     </div>

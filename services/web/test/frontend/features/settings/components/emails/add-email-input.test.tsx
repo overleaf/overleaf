@@ -23,9 +23,9 @@ describe('<AddEmailInput/>', function () {
   })
 
   describe('on initial render', function () {
-    it('should render an input with a placeholder', function () {
+    it('should render an initial input', function () {
       render(<Input {...defaultProps} />)
-      screen.getByPlaceholderText('e.g. johndoe@mit.edu')
+      screen.getByTestId('affiliations-email')
     })
 
     it('should not dispatch any `change` event', function () {

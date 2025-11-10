@@ -173,14 +173,14 @@ describe('user role and institution', function () {
     const roleValue = 'Dummy role'
     const departmentValue = 'Dummy department'
 
-    const roleInput = screen.getByPlaceholderText(/role/i)
+    const roleInput = screen.getByRole('combobox', { name: 'Role' })
     fireEvent.change(roleInput, {
       target: { value: roleValue },
     })
 
     expect(submitBtn.disabled).to.be.true
 
-    const departmentInput = screen.getByPlaceholderText(/department/i)
+    const departmentInput = screen.getByRole('combobox', { name: 'Department' })
     fireEvent.change(departmentInput, {
       target: { value: departmentValue },
     })
