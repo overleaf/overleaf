@@ -1,5 +1,5 @@
 import { assert } from 'chai'
-import LintWorker from '../../../../../../frontend/js/features/source-editor/languages/latex/linter/latex-linter.worker.js'
+import LintWorker from '../../../../../../frontend/js/features/source-editor/languages/latex/linter/latex-linter.worker'
 import { errorsToDiagnostics } from '../../../../../../frontend/js/features/source-editor/languages/latex/linter/errors-to-diagnostics'
 import { Diagnostic } from '@codemirror/lint'
 import { mergeCompatibleOverlappingDiagnostics } from '../../../../../../frontend/js/features/source-editor/languages/latex/linter/merge-overlapping-diagnostics'
@@ -587,8 +587,8 @@ describe('LatexLinter', function () {
     assert.equal(contexts[0].type, 'math')
     assert.equal(contexts[0].range.start.row, 1)
     assert.equal(contexts[0].range.start.column, 0)
-    assert.equal(contexts[0].range.end.row, 5)
-    assert.equal(contexts[0].range.end.column, 2)
+    assert.equal(contexts[0].range.end?.row, 5)
+    assert.equal(contexts[0].range.end?.column, 2)
   })
 
   it('should remove error when cursor is inside incomplete command', function () {

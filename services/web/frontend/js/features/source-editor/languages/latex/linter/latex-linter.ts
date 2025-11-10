@@ -5,7 +5,7 @@ import { mergeCompatibleOverlappingDiagnostics } from './merge-overlapping-diagn
 
 const lintWorker = new Worker(
   /* webpackChunkName: "latex-linter-worker" */
-  new URL('./latex-linter.worker.js', import.meta.url),
+  new URL('./latex-linter.worker.ts', import.meta.url),
   { type: 'module' }
 )
 

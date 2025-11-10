@@ -1,6 +1,45 @@
-const Tokenise = function (text) {
-  const Tokens = []
-  const Comments = []
+import { LintError } from './errors-to-diagnostics'
+
+type ControlSymbolToken = [
+  number,
+  string,
+  number,
+  number,
+  string,
+  'control-symbol',
+]
+type ControlSequenceToken = [number, string, number, number, string]
+type SpecialCharacterToken = [number, string, number, number]
+type TextToken = [number, 'Text', number, number]
+type Token =
+  | ControlSymbolToken
+  | ControlSequenceToken
+  | SpecialCharacterToken
+  | TextToken
+
+type Comment = [number, number, number]
+type InvalidTokeniseResult = never[]
+type TokeniseResult = {
+  tokens: Token[]
+  comments: Comment[]
+  linePosition: number[]
+  lineNumber: number
+  text: string
+}
+
+class TokeniserError extends Error {
+  public pos: number
+  constructor(message: string, pos: number) {
+    super(message)
+    this.pos = pos
+  }
+}
+
+const Tokenise = function (
+  text: string
+): TokeniseResult | InvalidTokeniseResult {
+  const Tokens: Token[] = []
+  const Comments: Comment[] = []
   let pos = -1
   const SPECIAL = /[\\{}$&#^_~%]/g // match TeX special characters
   const NEXTCS = /[^a-zA-Z]/g // match characters which aren't part of a TeX control sequence
@@ -168,9 +207,21 @@ const Tokenise = function (text) {
   }
 }
 
+type LintOptions = {
+  allowStar?: boolean
+  allowCustomDelimiter?: boolean
+  suppressIfEditing?: boolean
+  mathMode?: boolean
+  errorAtStart?: boolean
+}
+
 // Functions for consuming TeX arguments
 
-const read1arg = function (TokeniseResult, k, options) {
+const read1arg = function (
+  TokeniseResult: TokeniseResult,
+  k: number,
+  options?: LintOptions
+) {
   // read an argument FOO to a either form of command
   // \newcommand\FOO...
   // \newcommand{\FOO}...
@@ -215,7 +266,7 @@ const read1arg = function (TokeniseResult, k, options) {
   }
 }
 
-const readLetDefinition = function (TokeniseResult, k) {
+const readLetDefinition = function (TokeniseResult: TokeniseResult, k: number) {
   // read a let command  (the equals sign is optional)
   // \let\foo=\bar
   // \let\foo=TOKEN
@@ -247,7 +298,7 @@ const readLetDefinition = function (TokeniseResult, k) {
   }
 }
 
-const read1name = function (TokeniseResult, k) {
+const read1name = function (TokeniseResult: TokeniseResult, k: number) {
   // read an environemt name FOO in
   // \newenvironment{FOO}...
   const Tokens = TokeniseResult.tokens
@@ -295,7 +346,7 @@ const read1name = function (TokeniseResult, k) {
   }
 }
 
-const read1filename = function (TokeniseResult, k) {
+const read1filename = function (TokeniseResult: TokeniseResult, k: number) {
   // read an filename foo_bar.tex
   const Tokens = TokeniseResult.tokens
   const text = TokeniseResult.text
@@ -322,7 +373,10 @@ const read1filename = function (TokeniseResult, k) {
   }
 }
 
-const readOptionalArgumentWithUnderscores = function (TokeniseResult, k) {
+const readOptionalArgumentWithUnderscores = function (
+  TokeniseResult: TokeniseResult,
+  k: number
+) {
   // read a label my_label:text..
   const Tokens = TokeniseResult.tokens
   const text = TokeniseResult.text
@@ -369,8 +423,7 @@ const readOptionalArgumentWithUnderscores = function (TokeniseResult, k) {
   if (groupDepth !== 0) {
     const missing = groupDepth > 0 ? '{' : '}'
     // mismatched braces
-    const e = new Error(`Unmatched ${missing} in label`)
-    e.pos = j + 1
+    const e = new TokeniserError(`Unmatched ${missing} in label`, j + 1)
     return e
   }
 
@@ -381,13 +434,15 @@ const readOptionalArgumentWithUnderscores = function (TokeniseResult, k) {
     return j - 1 // advance past these tokens
   } else {
     // invalid label
-    const e = new Error('Invalid label')
-    e.pos = j + 1
+    const e = new TokeniserError('Invalid label', j + 1)
     return e
   }
 }
 
-const readOptionalParams = function (TokeniseResult, k) {
+const readOptionalParams = function (
+  TokeniseResult: TokeniseResult,
+  k: number
+) {
   // read an optional parameter [N] where N is a number, used
   // for \newcommand{\foo}[2]... meaning 2 parameters
   const Tokens = TokeniseResult.tokens
@@ -435,7 +490,10 @@ const readOptionalParams = function (TokeniseResult, k) {
   return null
 }
 
-const readOptionalGeneric = function (TokeniseResult, k) {
+const readOptionalGeneric = function (
+  TokeniseResult: TokeniseResult,
+  k: number
+) {
   // read an optional parameter [foo]
   const Tokens = TokeniseResult.tokens
   const text = TokeniseResult.text
@@ -453,7 +511,7 @@ const readOptionalGeneric = function (TokeniseResult, k) {
   return null
 }
 
-const readOptionalDef = function (TokeniseResult, k) {
+const readOptionalDef = function (TokeniseResult: TokeniseResult, k: number) {
   // skip over the optional arguments of a definition
   // \def\foo#1.#2(#3){this is the macro #1 #2 #3}
   // start looking at text immediately after \def command
@@ -482,7 +540,7 @@ const readOptionalDef = function (TokeniseResult, k) {
   return null
 }
 
-const readDefinition = function (TokeniseResult, k) {
+const readDefinition = function (TokeniseResult: TokeniseResult, k: number) {
   // read a definition as in
   // \newcommand{\FOO}{DEFN}
   // \newcommand{\FOO}   {DEF}  (optional whitespace)
@@ -532,7 +590,7 @@ const readDefinition = function (TokeniseResult, k) {
   return null
 }
 
-const readVerb = function (TokeniseResult, k) {
+const readVerb = function (TokeniseResult: TokeniseResult, k: number) {
   // read a verbatim argument
   // \verb@foo@
   // \verb*@foo@
@@ -577,7 +635,11 @@ const readVerb = function (TokeniseResult, k) {
   return null
 }
 
-const readUrl = function (TokeniseResult, k, options) {
+const readUrl = function (
+  TokeniseResult: TokeniseResult,
+  k: number,
+  options?: LintOptions
+) {
   // read a url argument
   // \url|https://example.com|
   // \url{https://example.com}
@@ -642,7 +704,10 @@ const readUrl = function (TokeniseResult, k, options) {
   return null
 }
 
-const InterpretTokens = function (TokeniseResult, ErrorReporter) {
+const InterpretTokens = function (
+  TokeniseResult: TokeniseResult,
+  ErrorReporter: ErrorReporterInstance
+) {
   const Tokens = TokeniseResult.tokens
   // var linePosition = TokeniseResult.linePosition
   // var lineNumber = TokeniseResult.lineNumber
@@ -652,7 +717,7 @@ const InterpretTokens = function (TokeniseResult, ErrorReporter) {
   const TokenError = ErrorReporter.TokenError
   const Environments = new EnvHandler(TokeniseResult, ErrorReporter)
 
-  let nextGroupMathMode = null // if the next group should have
+  let nextGroupMathMode: null | false | undefined = null // if the next group should have
   // math mode on(=true) or
   // off(=false) (for \hbox), or
   // unknown(=undefined) or inherit
@@ -774,14 +839,14 @@ const InterpretTokens = function (TokeniseResult, ErrorReporter) {
           // We're looking at an invalid environment command, read as far as we can in the sequence
           // "{" "CHAR" "CHAR" "CHAR" ... to report an error for as much of the command as we can,
           // bail out when we hit a space/newline.
-          let endToken = null
+          let endToken: SpecialCharacterToken | TextToken | null = null
           if (open && open[1] === '{') {
-            endToken = open // we've got a {
+            endToken = open as SpecialCharacterToken // we've got a {
             if (delimiter && delimiter[1] === 'Text') {
-              endToken = delimiter.slice() // we've got some text following the {
+              endToken = (delimiter as TextToken).slice() as TextToken // we've got some text following the {
               const start = endToken[2]
               const end = endToken[3]
-              let j
+              let j: number
               for (j = start; j < end; j++) {
                 const char = text[j]
                 if (
@@ -821,7 +886,7 @@ const InterpretTokens = function (TokeniseResult, ErrorReporter) {
         // try to read any optional params [LABEL].... allowing for
         // underscores, advance if found
         let newPos = readOptionalArgumentWithUnderscores(TokeniseResult, i)
-        if (newPos instanceof Error) {
+        if (newPos instanceof TokeniserError) {
           TokenErrorFromTo(
             Tokens[i + 1],
             Tokens[Math.min(newPos.pos, len - 1)],
@@ -1010,7 +1075,7 @@ const InterpretTokens = function (TokeniseResult, ErrorReporter) {
           nextToken[5] === 'control-symbol'
         ) {
           // control symbol
-          char = nextToken[4]
+          char = (nextToken as ControlSymbolToken)[4]
         } else if (nextToken && nextToken[1] === '\\') {
           char = 'unknown'
         }
@@ -1244,11 +1309,46 @@ const InterpretTokens = function (TokeniseResult, ErrorReporter) {
   return Environments
 }
 
-const DocumentTree = function (TokeniseResult) {
+type Delimiter = {
+  mathMode?: Delimiter | null | false
+  token: Token
+  closeToken?: Token
+  name?: string
+  command?: string
+  verbatim?: boolean
+}
+
+type DocumentTreeNode = {
+  startDelimiter?: Delimiter
+  endDelimiter?: Delimiter
+  children: DocumentTreeNode[]
+}
+
+type DocumentTreeInstance = {
+  openEnv: (this: DocumentTreeInstance, startDelimiter: Delimiter) => void
+  closeEnv: (endDelimiter?: Delimiter) => Delimiter | null | undefined
+  getNthPreviousNode: (n: number) => DocumentTreeNode | null
+  getCurrentNode: (this: DocumentTreeInstance) => DocumentTreeNode
+  getCurrentDelimiter: (this: DocumentTreeInstance) => Delimiter | undefined
+  getPreviousDelimiter: (
+    this: DocumentTreeInstance
+  ) => Delimiter | undefined | null
+  getDepth: () => number
+  getContexts: () => any[]
+}
+
+type DocumentTreeConstructor = {
+  new (TokeniseResult: TokeniseResult): DocumentTreeInstance
+}
+
+const DocumentTree: DocumentTreeConstructor = function (
+  this: DocumentTreeInstance,
+  TokeniseResult: TokeniseResult
+) {
   // Each environment and scope becomes and an entry in the tree, and can have
   // child entries, e.g. an 'array' inside an 'equation' inside a 'document' environment.
   // Entries can have multiple adjacent children.
-  const tree = {
+  const tree: DocumentTreeNode = {
     children: [],
   }
   // The stack is just for easily moving up and down the tree. Popping off the stack
@@ -1263,46 +1363,46 @@ const DocumentTree = function (TokeniseResult) {
     }
     currentNode.children.push(newNode)
     stack.push(newNode)
-  }
+  } satisfies DocumentTreeInstance['openEnv']
 
   this.closeEnv = function (endDelimiter) {
     if (stack.length === 1) {
       // Can't close root element
       return null
     }
-    const currentNode = stack.pop()
+    const currentNode = stack.pop()!
     currentNode.endDelimiter = endDelimiter
     return currentNode.startDelimiter
-  }
+  } satisfies DocumentTreeInstance['closeEnv']
 
   this.getNthPreviousNode = function (n) {
     const offset = stack.length - n - 1
     if (offset < 0) return null
     return stack[offset]
-  }
+  } satisfies DocumentTreeInstance['getNthPreviousNode']
 
   this.getCurrentNode = function () {
-    return this.getNthPreviousNode(0)
-  }
+    return this.getNthPreviousNode(0)!
+  } satisfies DocumentTreeInstance['getCurrentNode']
 
   this.getCurrentDelimiter = function () {
     return this.getCurrentNode().startDelimiter
-  }
+  } satisfies DocumentTreeInstance['getCurrentDelimiter']
 
   this.getPreviousDelimiter = function () {
     const node = this.getNthPreviousNode(1)
     if (!node) return null
     return node.startDelimiter
-  }
+  } satisfies DocumentTreeInstance['getPreviousDelimiter']
 
   this.getDepth = function () {
     return stack.length - 1 // Root node doesn't count
-  }
+  } satisfies DocumentTreeInstance['getDepth']
 
   this.getContexts = function () {
     const linePosition = TokeniseResult.linePosition
 
-    function tokenToRange(token) {
+    function tokenToRange(token: Token) {
       const line = token[0]
       const start = token[2]
       let end = token[3]
@@ -1323,9 +1423,9 @@ const DocumentTree = function (TokeniseResult) {
       }
     }
 
-    function getContextsFromNode(node) {
+    function getContextsFromNode(node: DocumentTreeNode) {
       if (node.startDelimiter && node.startDelimiter.mathMode) {
-        const context = {
+        const context: Context = {
           type: 'math',
           range: {
             start: tokenToRange(node.startDelimiter.token).start,
@@ -1338,7 +1438,7 @@ const DocumentTree = function (TokeniseResult) {
         }
         return [context]
       } else {
-        let contexts = []
+        let contexts: Context[] = []
         for (let i = 0; i < node.children.length; i++) {
           const child = node.children[i]
           contexts = contexts.concat(getContextsFromNode(child))
@@ -1348,10 +1448,51 @@ const DocumentTree = function (TokeniseResult) {
     }
 
     return getContextsFromNode(tree)
-  }
+  } satisfies DocumentTreeInstance['getContexts']
+} as unknown as DocumentTreeConstructor
+
+type Position = {
+  row: number
+  column: number
 }
 
-const EnvHandler = function (TokeniseResult, ErrorReporter) {
+type Range = {
+  start: Position
+  end?: Position
+}
+
+type Context = {
+  type: 'math' | 'text'
+  range: Range
+}
+
+type EnvHandlerInstance = {
+  getDocument: () => DocumentTreeInstance
+  push: (this: EnvHandlerInstance, newDelimiter: Delimiter) => void
+  _endVerbatim: (this: EnvHandlerInstance, thisDelimiter: Delimiter) => void
+  _end: (this: EnvHandlerInstance, thisDelimiter: Delimiter) => void
+  _beginMathMode: (this: EnvHandlerInstance, thisDelimiter: Delimiter) => void
+  _toggleMathMode: (this: EnvHandlerInstance, thisDelimiter: Delimiter) => void
+  getMathMode: () => Delimiter | false | null | undefined
+  insideGroup: () => boolean | null
+  resetMathMode: () => void
+  setDelimiterProps: (this: EnvHandlerInstance, delimiter: Delimiter) => void
+  checkAndUpdateState: (this: EnvHandlerInstance, delimiter: Delimiter) => void
+  close: () => void
+}
+
+type EnvHandlerConstructor = {
+  new (
+    TokeniseResult: TokeniseResult,
+    ErrorReporter: ErrorReporterInstance
+  ): EnvHandlerInstance
+}
+
+const EnvHandler: EnvHandlerConstructor = function (
+  this: EnvHandlerInstance,
+  TokeniseResult: TokeniseResult,
+  ErrorReporter: ErrorReporterInstance
+) {
   // Loop through the Environments array keeping track of the state,
   // pushing and popping environments onto the state[] array for each
   // \begin and \end command
@@ -1362,19 +1503,19 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
   const delimiters = []
 
   const document = new DocumentTree(TokeniseResult)
-  let documentClosed = null
+  let documentClosed: Delimiter | null = null
   let inVerbatim = false
-  const verbatimRanges = []
+  const verbatimRanges: { start: number; end: number }[] = []
 
   this.getDocument = function () {
     return document
-  }
+  } satisfies EnvHandlerInstance['getDocument']
 
   this.push = function (newDelimiter) {
     this.setDelimiterProps(newDelimiter)
     this.checkAndUpdateState(newDelimiter)
     delimiters.push(newDelimiter)
-  }
+  } satisfies EnvHandlerInstance['push']
 
   this._endVerbatim = function (thisDelimiter) {
     const lastDelimiter = document.getCurrentDelimiter()
@@ -1388,9 +1529,9 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
         end: thisDelimiter.token[2],
       })
     }
-  }
+  } satisfies EnvHandlerInstance['_endVerbatim']
 
-  const invalidEnvs = []
+  const invalidEnvs: Delimiter[] = []
 
   this._end = function (thisDelimiter) {
     // check if environment or group is closed correctly
@@ -1427,7 +1568,7 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
         }
       } else if (
         invalidEnvs.length > 0 &&
-        (i = indexOfClosingEnvInArray(invalidEnvs, thisDelimiter) > -1)
+        (i = indexOfClosingEnvInArray(invalidEnvs, thisDelimiter)) > -1
       ) {
         // got a match on an invalid env, so try to continue
         invalidEnvs.splice(i, 1)
@@ -1468,9 +1609,9 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
         }
       }
     } while (retry === true)
-  }
+  } satisfies EnvHandlerInstance['_end']
 
-  const CLOSING_DELIMITER = {
+  const CLOSING_DELIMITER: Record<string, string> = {
     '{': '}',
     left: 'right',
     '[': ']',
@@ -1479,7 +1620,10 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
     $$: '$$',
   }
 
-  const closedBy = function (lastDelimiter, thisDelimiter) {
+  const closedBy = function (
+    lastDelimiter: Delimiter | undefined,
+    thisDelimiter: Delimiter
+  ) {
     if (!lastDelimiter) {
       return false
     } else if (thisDelimiter.command === 'end') {
@@ -1488,6 +1632,7 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
         lastDelimiter.name === thisDelimiter.name
       )
     } else if (
+      lastDelimiter.command &&
       thisDelimiter.command === CLOSING_DELIMITER[lastDelimiter.command]
     ) {
       return true
@@ -1496,7 +1641,10 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
     }
   }
 
-  const indexOfClosingEnvInArray = function (delimiters, thisDelimiter) {
+  const indexOfClosingEnvInArray = function (
+    delimiters: Delimiter[],
+    thisDelimiter: Delimiter
+  ): number {
     for (let i = 0, n = delimiters.length; i < n; i++) {
       if (closedBy(delimiters[i], thisDelimiter)) {
         return i
@@ -1505,15 +1653,15 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
     return -1
   }
 
-  const delimiterPrecedence = function (delimiter) {
-    const openScore = {
+  const delimiterPrecedence = function (delimiter: Delimiter) {
+    const openScore: Record<string, number> = {
       '{': 1,
       left: 2,
       $: 3,
       $$: 4,
       begin: 4,
     }
-    const closeScore = {
+    const closeScore: Record<string, number> = {
       '}': 1,
       right: 2,
       $: 3,
@@ -1527,8 +1675,8 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
     }
   }
 
-  const getName = function (delimiter) {
-    const description = {
+  const getName = function (delimiter?: Delimiter | null) {
+    const description: Record<string, string> = {
       '{': 'open group {',
       '}': 'close group }',
       '[': 'open display math \\[',
@@ -1540,12 +1688,12 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
       left: '\\left',
       right: '\\right',
     }
-    if (delimiter.command === 'begin' || delimiter.command === 'end') {
+    if (delimiter?.command === 'begin' || delimiter?.command === 'end') {
       return '\\' + delimiter.command + '{' + delimiter.name + '}'
-    } else if (delimiter.command in description) {
+    } else if (delimiter?.command && delimiter.command in description) {
       return description[delimiter.command]
     } else {
-      return delimiter.command
+      return delimiter?.command
     }
   }
 
@@ -1553,7 +1701,10 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
   const UNCLOSED_GROUP = 2
   const UNCLOSED_ENV = 3
 
-  const reportError = function (lastDelimiter, thisDelimiter) {
+  const reportError = function (
+    lastDelimiter: Delimiter,
+    thisDelimiter: Delimiter
+  ) {
     if (!lastDelimiter) {
       // unexpected close, nothing was open!
       if (documentClosed) {
@@ -1620,7 +1771,7 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
     }
     thisDelimiter.mathMode = thisDelimiter
     document.openEnv(thisDelimiter)
-  }
+  } satisfies EnvHandlerInstance['_beginMathMode']
 
   this._toggleMathMode = function (thisDelimiter) {
     // math environments use the same for begin and end.
@@ -1638,7 +1789,7 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
         document.openEnv(thisDelimiter)
       }
     }
-  }
+  } satisfies EnvHandlerInstance['_toggleMathMode']
 
   this.getMathMode = function () {
     // return the current mathmode.
@@ -1649,7 +1800,7 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
     } else {
       return null
     }
-  }
+  } satisfies EnvHandlerInstance['getMathMode']
 
   this.insideGroup = function () {
     const currentDelimiter = document.getCurrentDelimiter()
@@ -1658,7 +1809,7 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
     } else {
       return null
     }
-  }
+  } satisfies EnvHandlerInstance['insideGroup']
 
   const resetMathMode = function () {
     // Wind back the current environment stack removing everything
@@ -1673,11 +1824,13 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
     } else {
       // return
     }
-  }
-
+  } satisfies EnvHandlerInstance['resetMathMode']
   this.resetMathMode = resetMathMode
 
-  const getNewMathMode = function (currentMathMode, thisDelimiter) {
+  const getNewMathMode = function (
+    currentMathMode: Delimiter | null | false | undefined,
+    thisDelimiter: Delimiter
+  ) {
     // look at math mode and transitions
     //
     // We have several cases
@@ -1794,18 +1947,18 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
     ) {
       this._toggleMathMode(thisDelimiter)
     }
-  }
+  } satisfies EnvHandlerInstance['checkAndUpdateState']
 
   this.close = function () {
     // If there is anything left in the state at this point, there
     // were unclosed environments or groups.
     while (document.getDepth() > 0) {
       const thisDelimiter = document.closeEnv()
-      if (thisDelimiter.command === '{') {
+      if (thisDelimiter?.command === '{') {
         // Note that having an unclosed group does not stop
         // compilation in TeX but we will highlight it as an error
         ErrorFrom(thisDelimiter, 'unclosed group {', { type: 'warning' })
-      } else {
+      } else if (thisDelimiter) {
         ErrorFrom(thisDelimiter, 'unclosed ' + getName(thisDelimiter))
       }
     }
@@ -1829,7 +1982,7 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
         }
       }
     }
-  }
+  } satisfies EnvHandlerInstance['close']
 
   this.setDelimiterProps = function (delimiter) {
     const name = delimiter.name
@@ -1842,22 +1995,74 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
     ) {
       delimiter.verbatim = true
     }
-  }
+  } satisfies EnvHandlerInstance['setDelimiterProps']
+} as unknown as EnvHandlerConstructor
+
+type TokenError = LintError & {
+  row: number
+  column: number
+  start_row: number
+  start_col: number
+  end_row: number
+  end_col: number
+  mathMode?: boolean
+  ignore?: boolean
+}
+
+type ErrorType = 'error' | 'warning' | 'info'
+type ErrorOptions = {
+  errorAtStart?: boolean
+  type?: ErrorType
+  suppressIfEditing?: boolean
+  mathMode?: boolean
+}
+
+type ErrorReporterInstance = {
+  errors: TokenError[]
+  tokenErrors: TokenError[]
+  filterMath: boolean
+  getErrors(this: ErrorReporterInstance): TokenError[]
+  TokenError(token: Token, message: string, options?: ErrorOptions): void
+  TokenErrorFromTo(
+    fromToken: Token,
+    toToken: Token,
+    message: string,
+    options?: ErrorOptions
+  ): void
+  EnvErrorFromTo(
+    fromEnv: Delimiter,
+    toEnv: Delimiter,
+    message: string,
+    options?: ErrorOptions
+  ): void
+  EnvErrorTo(toEnv: Delimiter, message: string, options?: ErrorOptions): void
+  EnvErrorFrom(
+    delimiter: Delimiter,
+    message: string,
+    options?: ErrorOptions
+  ): void
+}
+
+interface ErrorReporterConstructor {
+  new (TokeniseResult: TokeniseResult): ErrorReporterInstance
 }
 
 // Error reporting functions for tokens and environments
-const ErrorReporter = function (TokeniseResult) {
+const ErrorReporter: ErrorReporterConstructor = function (
+  this: ErrorReporterInstance,
+  TokeniseResult: TokeniseResult
+) {
   // const text = TokeniseResult.text
   const linePosition = TokeniseResult.linePosition
   const lineNumber = TokeniseResult.lineNumber
 
-  const errors = []
-  const tokenErrors = []
+  const errors: TokenError[] = []
+  const tokenErrors: TokenError[] = []
   this.errors = errors
   this.tokenErrors = tokenErrors
   this.filterMath = false
 
-  function pos(row, column) {
+  function pos(row: number, column: number) {
     return linePosition[row] + column
   }
 
@@ -1896,7 +2101,7 @@ const ErrorReporter = function (TokeniseResult) {
     } else {
       return allErrors
     }
-  }
+  } satisfies ErrorReporterInstance['getErrors']
 
   // Report an error in a single token
 
@@ -1928,8 +2133,7 @@ const ErrorReporter = function (TokeniseResult) {
       suppressIfEditing: options.suppressIfEditing,
       mathMode: options.mathMode,
     })
-  }
-
+  } satisfies ErrorReporterInstance['TokenError']
   // Report an error over a range (from, to)
 
   this.TokenErrorFromTo = function (fromToken, toToken, message, options) {
@@ -1963,7 +2167,7 @@ const ErrorReporter = function (TokeniseResult) {
       suppressIfEditing: options.suppressIfEditing,
       mathMode: options.mathMode,
     })
-  }
+  } satisfies ErrorReporterInstance['TokenErrorFromTo']
 
   this.EnvErrorFromTo = function (fromEnv, toEnv, message, options) {
     if (!options) {
@@ -2002,7 +2206,7 @@ const ErrorReporter = function (TokeniseResult) {
       suppressIfEditing: options.suppressIfEditing,
       mathMode: options.mathMode,
     })
-  }
+  } satisfies ErrorReporterInstance['EnvErrorFromTo']
 
   // Report an error up to a given environment (from the beginning of the document)
 
@@ -2034,7 +2238,7 @@ const ErrorReporter = function (TokeniseResult) {
       mathMode: options.mathMode,
     }
     errors.push(err)
-  }
+  } satisfies ErrorReporterInstance['EnvErrorTo']
 
   // Report an error from a given environment (up to the end of the document)
 
@@ -2064,11 +2268,18 @@ const ErrorReporter = function (TokeniseResult) {
       text: message,
       mathMode: options.mathMode,
     })
-  }
-}
+  } satisfies ErrorReporterInstance['EnvErrorFrom']
+} as unknown as ErrorReporterConstructor
 
-const Parse = function (text) {
+type ParseResult = {
+  errors: TokenError[]
+  contexts: Context[]
+}
+const Parse = function (text: string): ParseResult {
   const TokeniseResult = Tokenise(text)
+  if (!isValidTokeniseResult(TokeniseResult)) {
+    return { errors: [], contexts: [] }
+  }
   const Reporter = new ErrorReporter(TokeniseResult)
   const Environments = InterpretTokens(TokeniseResult, Reporter)
   Environments.close()
@@ -2078,20 +2289,26 @@ const Parse = function (text) {
   }
 }
 
-let latestLintResult = null
+function isValidTokeniseResult(
+  result: InvalidTokeniseResult | TokeniseResult
+): result is TokeniseResult {
+  return (result as TokeniseResult).tokens !== undefined
+}
+
+let latestLintResult: { text: string; workerResult: ParseResult } | null = null
 
 // Define an onmessage handler if this file is loaded in a Worker context
 if (typeof onmessage !== 'undefined') {
   onmessage = function (event) {
     if (event.data && event.type === 'message') {
-      let workerResult = {}
+      let workerResult: Record<never, never> | ParseResult = {}
       const text = event.data.text
       if (latestLintResult && latestLintResult.text === text) {
         workerResult = latestLintResult.workerResult
       } else {
         try {
           workerResult = Parse(event.data.text)
-          latestLintResult = { text, workerResult }
+          latestLintResult = { text, workerResult: workerResult as ParseResult }
         } catch (err) {
           console.error('error in linting', err)
           workerResult = { errors: [], contexts: [] }
@@ -2105,10 +2322,10 @@ if (typeof onmessage !== 'undefined') {
 export default class LintWorker {
   // unused vars kept to document the interface
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  postMessage(message) {}
+  postMessage(message: string) {}
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  addEventListener(eventName, listener) {}
-  Parse(text) {
+  addEventListener(eventName: string, listener: () => void) {}
+  Parse(text: string) {
     return Parse(text)
   }
 }

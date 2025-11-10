@@ -6,7 +6,7 @@ export type LintError = {
   startPos: number
   endPos: number
   pos: number
-  suppressIfEditing: boolean
+  suppressIfEditing?: boolean
   type: 'info' | 'warning' | 'error'
   text: string
 }
