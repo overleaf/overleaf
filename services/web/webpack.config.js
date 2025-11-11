@@ -102,8 +102,6 @@ module.exports = {
     // Output as UMD bundle (allows main JS to import with CJS, AMD or global
     // style code bundles
     libraryTarget: 'umd',
-    // Name the exported variable from output bundle
-    library: ['Frontend', '[name]'],
   },
 
   optimization: {
