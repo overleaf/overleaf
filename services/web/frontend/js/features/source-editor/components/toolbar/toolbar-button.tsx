@@ -73,8 +73,10 @@ export const ToolbarButton = memo<{
 
   const description = (
     <>
-      <div>{label}</div>
-      {shortcut && <div>{shortcut}</div>}
+      <div>
+        {label}
+        {shortcut && <span> ({shortcut})</span>}
+      </div>
     </>
   )
 

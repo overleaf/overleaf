@@ -75,7 +75,7 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     cy.get('.cm-line').eq(1).as('second-line')
     cy.get('.cm-line').eq(2).as('third-line')
     cy.get('.cm-line').eq(3).as('fourth-line')
-    cy.get('.ol-cm-toolbar [aria-label="Format Bold"]').as('toolbar-bold')
+    cy.get('.ol-cm-toolbar [aria-label="Bold"]').as('toolbar-bold')
 
     cy.get('@first-line').click()
   })

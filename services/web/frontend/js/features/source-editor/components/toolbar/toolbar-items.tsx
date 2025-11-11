@@ -82,7 +82,7 @@ export const ToolbarItems: FC<{
             >
               <ToolbarButton
                 id="toolbar-format-bold"
-                label={t('toolbar_format_bold')}
+                label={t('toolbar_bold')}
                 command={commands.toggleBold}
                 active={isActive('\\textbf')}
                 icon="format_bold"
@@ -90,7 +90,7 @@ export const ToolbarItems: FC<{
               />
               <ToolbarButton
                 id="toolbar-format-italic"
-                label={t('toolbar_format_italic')}
+                label={t('toolbar_italic')}
                 command={commands.toggleItalic}
                 active={isActive('\\textit')}
                 icon="format_italic"
@@ -108,7 +108,7 @@ export const ToolbarItems: FC<{
               {symbolPaletteAvailable && (
                 <ToolbarButton
                   id="toolbar-toggle-symbol-palette"
-                  label={t('toolbar_toggle_symbol_palette')}
+                  label={t('toolbar_insert_symbol')}
                   active={showSymbolPalette}
                   command={toggleSymbolPalette}
                   icon="Ω"
@@ -163,7 +163,7 @@ export const ToolbarItems: FC<{
             >
               <ToolbarButton
                 id="toolbar-bullet-list"
-                label={t('toolbar_bullet_list')}
+                label={t('toolbar_bulleted_list')}
                 command={commands.toggleBulletList}
                 icon="format_list_bulleted"
               />

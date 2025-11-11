@@ -13,9 +13,27 @@ import getMeta from '@/utils/meta'
 import { mockProject } from '../helpers/mock-project'
 import { base64image } from '../fixtures/image'
 
-const clickToolbarButton = (text: string) => {
-  cy.findByLabelText(text).click()
-  cy.findByLabelText(text).trigger('mouseout')
+const findInsertFigureToolbarButton = () => {
+  return cy.findByRole('toolbar').within(() => {
+    return cy
+      .findByRole('button', { name: /Insert figure/i })
+      .as('insertFigureToolbarButton')
+  })
+}
+
+const findInsertFigureDialogButton = () => {
+  return cy.findByRole('dialog').within(() => {
+    // There are two buttons with this name, one in the footer and one in the toolbar
+    return cy
+      .findByRole('button', { name: /Insert figure/i })
+      .as('insertFigureDialogButton')
+  })
+}
+
+const clickFigureToolbarButton = () => {
+  findInsertFigureToolbarButton()
+  cy.get('@insertFigureToolbarButton').click()
+  cy.get('@insertFigureToolbarButton').trigger('mouseout')
 }
 
 const chooseFileFromComputer = () => {
@@ -103,13 +121,14 @@ describe('<FigureModal />', function () {
   describe('Upload from computer source', function () {
     beforeEach(function () {
       cy.interceptFileUpload()
-      clickToolbarButton('Insert Figure')
+      clickFigureToolbarButton()
       cy.findByRole('menu').within(() => {
         cy.findByText('Upload from computer').click()
       })
       cy.findByLabelText('Uppy Dashboard')
         .get('.uppy-Dashboard-input:first')
         .as('file-input')
+      findInsertFigureDialogButton()
     })
 
     it('Shows file name and size when selecting file', function () {
@@ -136,18 +155,19 @@ describe('<FigureModal />', function () {
     })
 
     it('Enables insert button when choosing file', function () {
-      cy.findByRole('button', { name: 'Insert figure' }).should('be.disabled')
+      cy.get('@insertFigureDialogButton').should('be.disabled')
       chooseFileFromComputer()
-      cy.findByRole('button', { name: 'Insert figure' }).should('be.enabled')
+      cy.get('@insertFigureDialogButton').should('be.enabled')
     })
   })
 
   describe('Upload from project files source', function () {
     beforeEach(function () {
-      clickToolbarButton('Insert Figure')
+      clickFigureToolbarButton()
       cy.findByRole('menu').within(() => {
         cy.findByText('From project files').click()
       })
+      findInsertFigureDialogButton()
     })
 
     it('Lists files from project', function () {
@@ -161,12 +181,12 @@ describe('<FigureModal />', function () {
     })
 
     it('Enables insert button when choosing file', function () {
-      cy.findByRole('button', { name: 'Insert figure' }).should('be.disabled')
+      cy.get('@insertFigureDialogButton').should('be.disabled')
       cy.findByRole('combobox', { name: 'Image file' }).click()
       cy.findByRole('listbox').within(() => {
         cy.findByText('frog.jpg').click()
       })
-      cy.findByRole('button', { name: 'Insert figure' }).should('be.enabled')
+      cy.get('@insertFigureDialogButton').should('be.enabled')
     })
 
     it('Inserts file when pressing insert button', function () {
@@ -174,7 +194,7 @@ describe('<FigureModal />', function () {
       cy.findByRole('listbox').within(() => {
         cy.findByText('frog.jpg').click()
       })
-      cy.findByRole('button', { name: 'Insert figure' }).click()
+      cy.get('@insertFigureDialogButton').click()
 
       // Note that we have to include the 'edit' text from the edit button's
       // icon, which is literal text in the document
@@ -190,16 +210,17 @@ describe('<FigureModal />', function () {
       cy.interceptProjectListing()
       cy.interceptCompile()
       cy.interceptLinkedFile()
-      clickToolbarButton('Insert Figure')
+      clickFigureToolbarButton()
       cy.findByRole('menu').within(() => {
         cy.findByRole('button', { name: 'From another project' }).click()
       })
       cy.findByRole('combobox', { name: 'Project' }).as('project-dropdown')
       cy.findByRole('combobox', { name: 'Image file' }).as('file-dropdown')
+      findInsertFigureDialogButton()
     })
 
     it('List projects and files in projects', function () {
-      cy.findByRole('button', { name: 'Insert figure' }).should('be.disabled')
+      cy.get('@insertFigureDialogButton').should('be.disabled')
       cy.get('@file-dropdown').should('be.disabled')
       cy.get('@project-dropdown').click()
       cy.findByRole('listbox').within(() => {
@@ -215,11 +236,11 @@ describe('<FigureModal />', function () {
       cy.get('@file-select').within(() => {
         cy.findByText('frog.jpg').click()
       })
-      cy.findByRole('button', { name: 'Insert figure' }).should('be.enabled')
+      cy.get('@insertFigureDialogButton').should('be.enabled')
     })
 
     it('Enables insert button when choosing file', function () {
-      cy.findByRole('button', { name: 'Insert figure' }).should('be.disabled')
+      cy.get('@insertFigureDialogButton').should('be.disabled')
       cy.get('@project-dropdown').click()
       cy.findByRole('listbox').within(() => {
         cy.findByRole('option', { name: 'My first project' }).click()
@@ -228,11 +249,11 @@ describe('<FigureModal />', function () {
       cy.findByRole('listbox').within(() => {
         cy.findByRole('option', { name: 'frog.jpg' }).click()
       })
-      cy.findByRole('button', { name: 'Insert figure' }).should('be.enabled')
+      cy.get('@insertFigureDialogButton').should('be.enabled')
     })
 
     it('Closes project dropdown on pressing Esc key but leaves modal open', function () {
-      cy.findByRole('button', { name: 'Insert figure' }).should('be.disabled')
+      cy.get('@insertFigureDialogButton').should('be.disabled')
       cy.get('@project-dropdown').click()
       cy.findByRole('listbox').should('exist')
       cy.get('@project-dropdown').type('{esc}', { force: true })
@@ -311,7 +332,7 @@ describe('<FigureModal />', function () {
           hasLinkUrlFeature: false,
         })
         mount()
-        clickToolbarButton('Insert Figure')
+        clickFigureToolbarButton()
       })
       it('should not have import from url option', function () {
         cy.findByRole('menu').within(() => {
@@ -327,7 +348,7 @@ describe('<FigureModal />', function () {
           hasLinkUrlFeature: true,
         })
         mount()
-        clickToolbarButton('Insert Figure')
+        clickFigureToolbarButton()
       })
       it('should not have import from project file option', function () {
         cy.findByRole('menu').within(() => {
@@ -339,7 +360,7 @@ describe('<FigureModal />', function () {
     function setupFromAnotherProject() {
       mount()
       cy.interceptProjectListing()
-      clickToolbarButton('Insert Figure')
+      clickFigureToolbarButton()
       cy.findByRole('menu').within(() => {
         cy.findByText('From another project').click()
       })
@@ -397,7 +418,7 @@ describe('<FigureModal />', function () {
   describe('From URL source', function () {
     beforeEach(function () {
       cy.interceptLinkedFile()
-      clickToolbarButton('Insert Figure')
+      clickFigureToolbarButton()
       cy.findByRole('menu').within(() => {
         cy.findByText('From URL').click()
       })
@@ -411,6 +432,7 @@ describe('<FigureModal />', function () {
       cy.findByRole('checkbox', { name: 'Include caption' }).as(
         'include-caption-checkbox'
       )
+      findInsertFigureDialogButton()
     })
 
     it('Auto fills name based on url', function () {
@@ -421,14 +443,14 @@ describe('<FigureModal />', function () {
     })
 
     it('Enables insert button when name and url is available', function () {
-      cy.findByRole('button', { name: 'Insert figure' }).should('be.disabled')
+      cy.get('@insertFigureDialogButton').should('be.disabled')
       cy.get('@image-url-input').type('https://my-fake-website.com/frog.jpg')
-      cy.findByRole('button', { name: 'Insert figure' }).should('be.enabled')
+      cy.get('@insertFigureDialogButton').should('be.enabled')
     })
 
     it('Adds linked file when pressing insert', function () {
       cy.get('@image-url-input').type('https://my-fake-website.com/frog.jpg')
-      cy.findByRole('button', { name: 'Insert figure' }).click()
+      cy.get('@insertFigureDialogButton').click()
 
       cy.get('@linked-file-request').should('have.been.calledWithMatch', {
         body: {
@@ -449,7 +471,7 @@ describe('<FigureModal />', function () {
 
     it('Selects the caption when the figure is inserted with a caption', function () {
       cy.get('@image-url-input').type('https://my-fake-website.com/frog.jpg')
-      cy.findByRole('button', { name: 'Insert figure' }).click()
+      cy.get('@insertFigureDialogButton').click()
 
       cy.get('@linked-file-request').should('have.been.calledWithMatch', {
         body: {
@@ -479,7 +501,7 @@ describe('<FigureModal />', function () {
     it('Selects the label when the figure is inserted without a caption', function () {
       cy.get('@image-url-input').type('https://my-fake-website.com/frog.jpg')
       cy.get('@include-caption-checkbox').uncheck()
-      cy.findByRole('button', { name: 'Insert figure' }).click()
+      cy.get('@insertFigureDialogButton').click()
 
       cy.get('@linked-file-request').should('have.been.calledWithMatch', {
         body: {
@@ -511,7 +533,7 @@ describe('<FigureModal />', function () {
       cy.get('@include-caption-checkbox').uncheck()
       cy.get('@include-label-checkbox').uncheck()
 
-      cy.findByRole('button', { name: 'Insert figure' }).click()
+      cy.get('@insertFigureDialogButton').click()
 
       cy.get('@linked-file-request').should('have.been.calledWithMatch', {
         body: {

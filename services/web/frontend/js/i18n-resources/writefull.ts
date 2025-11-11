@@ -189,8 +189,8 @@ const en = {
     'errors.error-hit-limit-freemium.heading': 'You’re on fire!',
     'errors.error-hit-limit-freemium.body':
       'You’ve hit your Writefull quota. Upgrade now for unlimited language suggestions and LaTeX support, and early access to upcoming features like TikZ generation.',
-    'toolbar.abstract-generator.name': 'Abstract Generator',
-    'toolbar.title-generator.name': 'Title Generator',
+    'toolbar.abstract-generator.name': 'Abstract generator',
+    'toolbar.title-generator.name': 'Title generator',
     'toolbar.create-table.name': 'Create tables',
     'toolbar.create-table.tooltip': 'Generate tables instantly',
     'toolbar.create-equation.name': 'Create equation',

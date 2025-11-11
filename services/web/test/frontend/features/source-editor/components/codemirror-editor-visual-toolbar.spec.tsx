@@ -84,18 +84,18 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     selectAll()
 
     // bold
-    clickToolbarButton('Format Bold')
+    clickToolbarButton('Bold')
     cy.get('.cm-content').should('have.text', '{hi}')
     cy.get('.ol-cm-command-textbf').should('have.length', 1)
-    clickToolbarButton('Format Bold')
+    clickToolbarButton('Bold')
     cy.get('.cm-content').should('have.text', 'hi')
     cy.get('.ol-cm-command-textbf').should('have.length', 0)
 
     // italic
-    clickToolbarButton('Format Italic')
+    clickToolbarButton('Italic')
     cy.get('.cm-content').should('have.text', '{hi}')
     cy.get('.ol-cm-command-textit').should('have.length', 1)
-    clickToolbarButton('Format Italic')
+    clickToolbarButton('Italic')
     cy.get('.cm-content').should('have.text', 'hi')
     cy.get('.ol-cm-command-textit').should('have.length', 0)
   })
@@ -104,8 +104,8 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('2+3=5')
     selectAll()
 
-    clickToolbarButton('Insert Math')
-    cy.findByRole('button', { name: 'Insert Inline Math' }).click()
+    clickToolbarButton('Insert math')
+    cy.findByRole('button', { name: 'Insert inline math' }).click()
     cy.get('.cm-content').should('have.text', '\\(2+3=5\\)')
   })
 
@@ -113,8 +113,8 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('2+3=5')
     selectAll()
 
-    clickToolbarButton('Insert Math')
-    cy.findByRole('button', { name: 'Insert Display Math' }).click()
+    clickToolbarButton('Insert math')
+    cy.findByRole('button', { name: 'Insert display math' }).click()
     cy.get('.cm-content').should('have.text', '\\[2+3=5\\]')
   })
 
@@ -122,7 +122,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('test')
     selectAll()
 
-    clickToolbarButton('Insert Link')
+    clickToolbarButton('Insert link')
     cy.get('.cm-content').should('have.text', '{test}')
     cy.findByLabelText('URL') // tooltip form
   })
@@ -132,7 +132,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     selectAll()
 
     clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Bullet List')
+    clickToolbarButton('Bulleted list')
 
     cy.get('.cm-content').should('have.text', ' test')
 
@@ -145,7 +145,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     selectAll()
 
     clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Numbered List')
+    clickToolbarButton('Numbered list')
 
     cy.get('.cm-content').should('have.text', ' test')
 
@@ -158,7 +158,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     selectAll()
 
     clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Numbered List')
+    clickToolbarButton('Numbered list')
 
     // expose the markup
     cy.get('.cm-line').eq(0).type('{rightArrow}')
@@ -173,7 +173,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
       ].join('')
     )
 
-    clickToolbarButton('Bullet List')
+    clickToolbarButton('Bulleted list')
 
     cy.get('.cm-content').should(
       'have.text',
@@ -191,7 +191,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     selectAll()
 
     clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Numbered List')
+    clickToolbarButton('Numbered list')
 
     // expose the markup
     cy.get('.cm-line').eq(0).type('{rightArrow}')
@@ -206,7 +206,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
       ].join('')
     )
 
-    clickToolbarButton('Numbered List')
+    clickToolbarButton('Numbered list')
 
     cy.get('.cm-content').should('have.text', 'test')
   })
@@ -216,7 +216,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     selectAll()
 
     clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Numbered List')
+    clickToolbarButton('Numbered list')
 
     // expose the markup
     cy.get('.cm-line').eq(1).type('{rightArrow}')
@@ -234,7 +234,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
 
     cy.get('.cm-line').eq(2).click()
 
-    cy.findByRole('button', { name: 'Increase Indent' }).click()
+    cy.findByRole('button', { name: 'Increase indent' }).click()
 
     // expose the markup
     cy.get('.cm-line').eq(1).type('{rightArrow}')
@@ -253,7 +253,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     cy.get('.cm-line').eq(1).click()
 
     clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Numbered List')
+    clickToolbarButton('Numbered list')
 
     cy.get('.cm-line').eq(0).type('{upArrow}')
 
@@ -274,7 +274,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     selectAll()
 
     clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Numbered List')
+    clickToolbarButton('Numbered list')
 
     // expose the markup
     cy.get('.cm-line').eq(1).type('{rightArrow}')
@@ -292,7 +292,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
 
     cy.get('.cm-line').eq(2).click()
 
-    cy.findByRole('button', { name: 'Increase Indent' }).click()
+    cy.findByRole('button', { name: 'Increase indent' }).click()
 
     // expose the markup
     cy.get('.cm-line').eq(1).type('{rightArrow}')
@@ -311,7 +311,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     cy.get('.cm-line').eq(0).click()
 
     clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Numbered List')
+    clickToolbarButton('Numbered list')
 
     // expose the markup
     cy.get('.cm-line').eq(1).type('{rightArrow}')
@@ -328,15 +328,15 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     )
   })
 
-  it('should display the Toggle Symbol Palette button when available', function () {
+  it('should display the Insert symbol button when available', function () {
     window.metaAttributesCache.set('ol-symbolPaletteAvailable', true)
     mountEditor('')
-    clickToolbarButton('Toggle Symbol Palette')
+    clickToolbarButton('Insert symbol')
   })
 
-  it('should not display the Toggle Symbol Palette button when not available', function () {
+  it('should not display the Insert Symbol button when not available', function () {
     window.metaAttributesCache.set('ol-symbolPaletteAvailable', false)
     mountEditor('')
-    cy.findByLabelText('Toggle Symbol Palette').should('not.exist')
+    cy.findByLabelText('Insert symbol').should('not.exist')
   })
 })

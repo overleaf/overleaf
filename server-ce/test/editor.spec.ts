@@ -125,7 +125,7 @@ describe('editor', () => {
     it('symbol palette', () => {
       createNewFile()
 
-      cy.get('button[aria-label="Toggle Symbol Palette"]').click({
+      cy.get('button[aria-label="Insert symbol"]').click({
         force: true,
       })
       cy.get('button').contains('𝜉').click()

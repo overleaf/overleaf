@@ -102,7 +102,16 @@ const RichTextToggle: FC<{
     )
   }
 
-  return toggle
+  return (
+    <OLTooltip
+      id="rich-text-toggle-tooltip"
+      description={t('toolbar_change_editor_mode')}
+      overlayProps={{ placement: 'bottom' }}
+      tooltipProps={{ className: 'tooltip-wide' }}
+    >
+      {toggle}
+    </OLTooltip>
+  )
 }
 
 export default memo(EditorSwitch)
