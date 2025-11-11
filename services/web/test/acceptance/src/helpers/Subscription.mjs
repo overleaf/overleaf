@@ -26,6 +26,7 @@ class PromisifiedSubscription {
     this.groupPolicy = options.groupPolicy
     this.addOns = options.addOns
     this.paymentProvider = options.paymentProvider
+    this.managedUsersEnabled = options.managedUsersEnabled
   }
 
   async ensureExists() {

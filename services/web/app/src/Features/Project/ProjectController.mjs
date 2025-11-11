@@ -275,6 +275,13 @@ const _ProjectController = {
         )
       : ProjectCreationHandler.promises.createBasicProject(userId, projectName))
 
+    ProjectAuditLogHandler.addEntryIfManagedInBackground(
+      project._id,
+      'project-created',
+      project.owner_ref,
+      req.ip
+    )
+
     res.json({
       project_id: project._id,
       owner_ref: project.owner_ref,
