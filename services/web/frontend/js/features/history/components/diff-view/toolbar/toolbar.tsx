@@ -7,7 +7,6 @@ import ToolbarRestoreFileButton from './toolbar-restore-file-button'
 import { isFileRemoved } from '../../../utils/file-diff'
 import ToolbarRestoreFileToVersionButton from './toolbar-restore-file-to-version-button'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
-import SplitTestBadge from '@/shared/components/split-test-badge'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 
 type ToolbarProps = {
@@ -46,13 +45,7 @@ export default function Toolbar({
         <ToolbarRestoreFileButton selection={selection} />
       ) : null}
       {showRestoreFileToVersionButton ? (
-        <>
-          <ToolbarRestoreFileToVersionButton selection={selection} />
-          <SplitTestBadge
-            splitTestName="revert-file"
-            displayOnVariants={['enabled']}
-          />
-        </>
+        <ToolbarRestoreFileToVersionButton selection={selection} />
       ) : null}
     </div>
   )
