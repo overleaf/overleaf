@@ -444,6 +444,11 @@
             "args": []
         },
         {
+            "name": "openat2",
+            "action": "SCMP_ACT_ALLOW",
+            "args": []
+        },
+        {
             "name": "pause",
             "action": "SCMP_ACT_ALLOW",
             "args": []
@@ -645,6 +650,11 @@
         },
         {
             "name": "stat",
+            "action": "SCMP_ACT_ALLOW",
+            "args": []
+        },
+        {
+            "name": "statx",
             "action": "SCMP_ACT_ALLOW",
             "args": []
         },
