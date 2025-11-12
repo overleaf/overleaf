@@ -8,7 +8,7 @@ import UserAuditLogHandler from '../User/UserAuditLogHandler.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import Modules from '../../infrastructure/Modules.js'
 import UserGetter from '../User/UserGetter.mjs'
-import { Subscription } from '../../models/Subscription.mjs'
+import { Subscription } from '../../models/Subscription.js'
 import { z, validateReq } from '../../infrastructure/Validation.js'
 import { isProfessionalGroupPlan } from './PlansHelper.mjs'
 import {

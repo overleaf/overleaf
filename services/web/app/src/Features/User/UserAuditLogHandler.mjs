@@ -1,6 +1,6 @@
 import OError from '@overleaf/o-error'
 import logger from '@overleaf/logger'
-import { UserAuditLogEntry } from '../../models/UserAuditLogEntry.mjs'
+import { UserAuditLogEntry } from '../../models/UserAuditLogEntry.js'
 import { callbackify } from 'node:util'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
 

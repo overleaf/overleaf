@@ -24,7 +24,7 @@ import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
 import Modules from '../../infrastructure/Modules.js'
 import { expressify, promisify } from '@overleaf/promise-utils'
 import { handleAuthenticateErrors } from './AuthenticationErrors.js'
-import EmailHelper from '../Helpers/EmailHelper.mjs'
+import EmailHelper from '../Helpers/EmailHelper.js'
 
 const { hasAdminAccess } = AdminAuthorizationHelper
 

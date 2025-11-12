@@ -1,4 +1,4 @@
-import { User } from '../../models/User.mjs'
+import { User } from '../../models/User.js'
 import { callbackify } from 'node:util'
 import Settings from '@overleaf/settings'
 

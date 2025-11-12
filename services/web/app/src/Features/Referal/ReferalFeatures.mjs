@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { callbackify } from 'node:util'
-import { User } from '../../models/User.mjs'
+import { User } from '../../models/User.js'
 import Settings from '@overleaf/settings'
 
 const ReferalFeatures = {

@@ -8,7 +8,7 @@ import mongodb from 'mongodb-legacy'
 import { db } from '../app/src/infrastructure/mongodb.js'
 import Errors from '../app/src/Features/Errors/Errors.js'
 import ProjectEntityMongoUpdateHandler from '../app/src/Features/Project/ProjectEntityMongoUpdateHandler.mjs'
-import { iterablePaths } from '../app/src/Features/Project/IterablePath.mjs'
+import { iterablePaths } from '../app/src/Features/Project/IterablePath.js'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 import HistoryManager from '../app/src/Features/History/HistoryManager.mjs'
 

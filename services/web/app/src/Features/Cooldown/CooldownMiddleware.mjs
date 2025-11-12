@@ -10,7 +10,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import CooldownManager from './CooldownManager.mjs'
+import CooldownManager from './CooldownManager.js'
 import logger from '@overleaf/logger'
 
 let CooldownMiddleware

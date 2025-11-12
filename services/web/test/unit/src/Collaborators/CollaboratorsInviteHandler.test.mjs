@@ -82,7 +82,7 @@ describe('CollaboratorsInviteHandler', function () {
       default: ctx.settings,
     }))
 
-    vi.doMock('../../../../app/src/models/ProjectInvite.mjs', () => ({
+    vi.doMock('../../../../app/src/models/ProjectInvite.js', () => ({
       ProjectInvite: ctx.ProjectInvite,
     }))
 

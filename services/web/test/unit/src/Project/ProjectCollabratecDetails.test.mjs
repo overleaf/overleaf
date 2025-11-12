@@ -18,7 +18,7 @@ describe('ProjectCollabratecDetailsHandler', function () {
       default: { ObjectId },
     }))
 
-    vi.doMock('../../../../app/src/models/Project.mjs', () => ({
+    vi.doMock('../../../../app/src/models/Project.js', () => ({
       Project: ctx.ProjectModel,
     }))
 

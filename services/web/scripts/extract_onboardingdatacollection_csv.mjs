@@ -1,7 +1,7 @@
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 import * as csv from 'csv'
 import fs from 'node:fs'
-import { OnboardingDataCollection } from '../app/src/models/OnboardingDataCollection.mjs'
+import { OnboardingDataCollection } from '../app/src/models/OnboardingDataCollection.js'
 
 /**
  * This script extracts the OnboardingDataCollection collection from the database

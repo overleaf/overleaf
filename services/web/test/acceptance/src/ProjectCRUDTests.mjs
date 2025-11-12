@@ -1,9 +1,9 @@
 import { expect } from 'chai'
 import UserHelper from './helpers/User.mjs'
-import { Project } from '../../../app/src/models/Project.mjs'
+import { Project } from '../../../app/src/models/Project.js'
 import mongodb from 'mongodb-legacy'
 import cheerio from 'cheerio'
-import { Subscription } from '../../../app/src/models/Subscription.mjs'
+import { Subscription } from '../../../app/src/models/Subscription.js'
 import Features from '../../../app/src/infrastructure/Features.js'
 
 const ObjectId = mongodb.ObjectId

@@ -89,7 +89,7 @@ describe('OwnershipTransferHandler', function () {
       default: ctx.ProjectGetter,
     }))
 
-    vi.doMock('../../../../app/src/models/Project.mjs', () => ({
+    vi.doMock('../../../../app/src/models/Project.js', () => ({
       Project: ctx.ProjectModel,
     }))
 

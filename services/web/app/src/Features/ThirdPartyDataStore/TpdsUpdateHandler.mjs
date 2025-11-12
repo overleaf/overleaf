@@ -8,7 +8,7 @@ import ProjectGetter from '../Project/ProjectGetter.mjs'
 import ProjectHelper from '../Project/ProjectHelper.mjs'
 import ProjectRootDocManager from '../Project/ProjectRootDocManager.mjs'
 import FileTypeManager from '../Uploads/FileTypeManager.mjs'
-import CooldownManager from '../Cooldown/CooldownManager.mjs'
+import CooldownManager from '../Cooldown/CooldownManager.js'
 import Errors from '../Errors/Errors.js'
 import Modules from '../../infrastructure/Modules.js'
 

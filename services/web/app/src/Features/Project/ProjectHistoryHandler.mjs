@@ -1,4 +1,4 @@
-import { Project } from '../../models/Project.mjs'
+import { Project } from '../../models/Project.js'
 import ProjectDetailsHandler from './ProjectDetailsHandler.mjs'
 import HistoryManager from '../History/HistoryManager.mjs'
 import ProjectEntityUpdateHandler from './ProjectEntityUpdateHandler.mjs'

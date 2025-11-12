@@ -1,4 +1,4 @@
-import { UserSchema } from '../../models/User.mjs'
+import { UserSchema } from '../../models/User.js'
 
 export default {
   hasAnyStaffAccess,

@@ -3,7 +3,7 @@ import sinon from 'sinon'
 import MockRequest from '../helpers/MockRequest.js'
 import MockResponse from '../helpers/MockResponse.js'
 import SubscriptionErrors from '../../../../app/src/Features/Subscription/Errors.js'
-import SubscriptionHelper from '../../../../app/src/Features/Subscription/SubscriptionHelper.mjs'
+import SubscriptionHelper from '../../../../app/src/Features/Subscription/SubscriptionHelper.js'
 import { AI_ADD_ON_CODE } from '../../../../app/src/Features/Subscription/AiHelper.js'
 
 const modulePath =

@@ -1,4 +1,4 @@
-import { Project } from '../../models/Project.mjs'
+import { Project } from '../../models/Project.js'
 import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
 import ProjectOptionsHandlerModule from '../Project/ProjectOptionsHandler.mjs'
 import ProjectRootDocManagerModule from '../Project/ProjectRootDocManager.mjs'

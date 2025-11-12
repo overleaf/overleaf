@@ -1,7 +1,7 @@
 import { vi, expect } from 'vitest'
 import assert from 'assert'
 import sinon from 'sinon'
-import EmailHelper from '../../../../app/src/Features/Helpers/EmailHelper.mjs'
+import EmailHelper from '../../../../app/src/Features/Helpers/EmailHelper.js'
 
 const modulePath = '../../../../app/src/Features/User/UserRegistrationHandler'
 

@@ -1,6 +1,6 @@
 import { callbackify } from 'node:util'
 import OError from '@overleaf/o-error'
-import { Project } from '../../models/Project.mjs'
+import { Project } from '../../models/Project.js'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import logger from '@overleaf/logger'
 import ContactManager from '../Contacts/ContactManager.mjs'

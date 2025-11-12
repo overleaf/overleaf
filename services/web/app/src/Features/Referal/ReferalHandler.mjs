@@ -1,5 +1,5 @@
 import { callbackify } from '@overleaf/promise-utils'
-import { User } from '../../models/User.mjs'
+import { User } from '../../models/User.js'
 
 async function getReferedUsers(userId) {
   const projection = { refered_users: 1, refered_user_count: 1 }

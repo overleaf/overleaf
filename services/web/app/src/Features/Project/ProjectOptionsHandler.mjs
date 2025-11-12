@@ -1,4 +1,4 @@
-import { Project } from '../../models/Project.mjs'
+import { Project } from '../../models/Project.js'
 import settings from '@overleaf/settings'
 import { callbackify } from 'node:util'
 import { db, ObjectId } from '../../infrastructure/mongodb.js'

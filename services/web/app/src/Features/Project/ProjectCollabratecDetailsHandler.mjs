@@ -1,6 +1,6 @@
 import mongodb from 'mongodb-legacy'
 
-import { Project } from '../../models/Project.mjs'
+import { Project } from '../../models/Project.js'
 import { callbackifyAll } from '@overleaf/promise-utils'
 
 const { ObjectId } = mongodb

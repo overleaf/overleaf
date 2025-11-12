@@ -6,7 +6,7 @@ import UserGetter from '../User/UserGetter.mjs'
 import UserUpdater from '../User/UserUpdater.mjs'
 import UserSessionsManager from '../User/UserSessionsManager.mjs'
 import OError from '@overleaf/o-error'
-import EmailsHelper from '../Helpers/EmailHelper.mjs'
+import EmailsHelper from '../Helpers/EmailHelper.js'
 import { expressify } from '@overleaf/promise-utils'
 import { z, validateReq } from '../../infrastructure/Validation.js'
 

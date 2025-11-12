@@ -3,9 +3,9 @@
 import RecurlyWrapper from './RecurlyWrapper.mjs'
 
 import RecurlyClient from './RecurlyClient.mjs'
-import { User } from '../../models/User.mjs'
+import { User } from '../../models/User.js'
 import logger from '@overleaf/logger'
-import SubscriptionHelper from './SubscriptionHelper.mjs'
+import SubscriptionHelper from './SubscriptionHelper.js'
 import SubscriptionUpdater from './SubscriptionUpdater.mjs'
 import SubscriptionLocator from './SubscriptionLocator.mjs'
 import LimitationsManager from './LimitationsManager.mjs'

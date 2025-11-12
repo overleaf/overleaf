@@ -3,7 +3,7 @@ import minimist from 'minimist'
 import { parse } from 'csv'
 import Stream from 'node:stream/promises'
 import { ObjectId } from '../app/src/infrastructure/mongodb.js'
-import { Subscription } from '../app/src/models/Subscription.mjs'
+import { Subscription } from '../app/src/models/Subscription.js'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 function usage() {

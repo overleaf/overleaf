@@ -13,9 +13,9 @@ import async from 'async'
 
 import { promisifyAll } from '@overleaf/promise-utils'
 import UserMembershipEntityConfigs from './UserMembershipEntityConfigs.mjs'
-import * as InstitutionModel from '../../models/Institution.mjs'
-import * as SubscriptionModel from '../../models/Subscription.mjs'
-import * as PublisherModel from '../../models/Publisher.mjs'
+import InstitutionModel from '../../models/Institution.js'
+import SubscriptionModel from '../../models/Subscription.js'
+import PublisherModel from '../../models/Publisher.js'
 
 const EntityModels = {
   Institution: InstitutionModel.Institution,

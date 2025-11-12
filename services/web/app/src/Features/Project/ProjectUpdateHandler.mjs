@@ -1,4 +1,4 @@
-import { Project } from '../../models/Project.mjs'
+import { Project } from '../../models/Project.js'
 import { callbackify } from 'node:util'
 
 const ProjectUpdateHandler = {

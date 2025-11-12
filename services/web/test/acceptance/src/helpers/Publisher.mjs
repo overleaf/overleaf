@@ -1,5 +1,5 @@
 import mongodb from 'mongodb-legacy'
-import { Publisher as PublisherModel } from '../../../../app/src/models/Publisher.mjs'
+import { Publisher as PublisherModel } from '../../../../app/src/models/Publisher.js'
 import { callbackifyClass } from '@overleaf/promise-utils'
 
 const { ObjectId } = mongodb

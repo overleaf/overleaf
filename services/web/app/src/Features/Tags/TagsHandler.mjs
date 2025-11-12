@@ -1,4 +1,4 @@
-import { Tag } from '../../models/Tag.mjs'
+import { Tag } from '../../models/Tag.js'
 import { callbackify } from '@overleaf/promise-utils'
 
 const MAX_TAG_LENGTH = 50

@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import ProjectGetter from './ProjectGetter.mjs'
 import UserGetter from '../User/UserGetter.mjs'
-import { Project } from '../../models/Project.mjs'
+import { Project } from '../../models/Project.js'
 import logger from '@overleaf/logger'
 import TpdsUpdateSender from '../ThirdPartyDataStore/TpdsUpdateSender.mjs'
 import PublicAccessLevels from '../Authorization/PublicAccessLevels.mjs'

@@ -3,8 +3,9 @@ import sinon from 'sinon'
 import tk from 'timekeeper'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import mongodb from 'mongodb-legacy'
-import { Project } from '../../../../app/src/models/Project.mjs'
+import indirectlyImportModels from '../helpers/indirectlyImportModels.js'
 
+const { Project } = indirectlyImportModels(['Project'])
 const { ObjectId } = mongodb
 
 vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>

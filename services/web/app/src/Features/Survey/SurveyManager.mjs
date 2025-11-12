@@ -1,4 +1,4 @@
-import { Survey } from '../../models/Survey.mjs'
+import { Survey } from '../../models/Survey.js'
 import OError from '@overleaf/o-error'
 
 async function getSurvey() {

@@ -1,6 +1,6 @@
 import { expect } from 'chai'
-import { User } from '../../../app/src/models/User.mjs'
-import { Subscription } from '../../../app/src/models/Subscription.mjs'
+import { User } from '../../../app/src/models/User.js'
+import { Subscription } from '../../../app/src/models/Subscription.js'
 
 describe('mongoose', function () {
   describe('User', function () {
