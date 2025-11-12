@@ -1,5 +1,5 @@
 import SurveyManager from './SurveyManager.mjs'
-import { Survey } from '../../models/Survey.js'
+import { Survey } from '../../models/Survey.mjs'
 import { CacheLoader } from 'cache-flow'
 
 class SurveyCache extends CacheLoader {

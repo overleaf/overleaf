@@ -1,5 +1,5 @@
 import OError from '@overleaf/o-error'
-import { User } from '../../models/User.js'
+import { User } from '../../models/User.mjs'
 import FeaturesUpdater from '../Subscription/FeaturesUpdater.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 

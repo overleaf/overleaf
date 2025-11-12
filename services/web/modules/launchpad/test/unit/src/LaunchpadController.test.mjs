@@ -52,7 +52,7 @@ describe('LaunchpadController', function () {
       }),
     }))
 
-    vi.doMock('../../../../../app/src/models/User.js', () => ({
+    vi.doMock('../../../../../app/src/models/User.mjs', () => ({
       User: ctx.User,
     }))
 

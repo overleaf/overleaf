@@ -1,4 +1,4 @@
-import { SystemMessage } from '../../models/SystemMessage.js'
+import { SystemMessage } from '../../models/SystemMessage.mjs'
 import { addRequiredCleanupHandlerBeforeDrainingConnections } from '../../infrastructure/GracefulShutdown.js'
 import { callbackifyAll } from '@overleaf/promise-utils'
 import logger from '@overleaf/logger'

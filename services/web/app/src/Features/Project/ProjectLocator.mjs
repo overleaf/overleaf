@@ -5,7 +5,7 @@ import async from 'async'
 import ProjectGetter from './ProjectGetter.mjs'
 import Errors from '../Errors/Errors.js'
 import { promisifyMultiResult } from '@overleaf/promise-utils'
-import { iterablePaths } from './IterablePath.js'
+import { iterablePaths } from './IterablePath.mjs'
 
 /**
  * @param project

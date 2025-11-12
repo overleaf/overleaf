@@ -2,14 +2,14 @@ import fs from 'node:fs'
 import Path from 'node:path'
 import UserModule from './User.mjs'
 import SubscriptionHelper from './Subscription.mjs'
-import { SSOConfig } from '../../../../app/src/models/SSOConfig.js'
+import { SSOConfig } from '../../../../app/src/models/SSOConfig.mjs'
 import UserHelper from './UserHelper.mjs'
 import SAMLHelper from './SAMLHelper.mjs'
 import Settings from '@overleaf/settings'
 import GroupUtils from '../../../../app/src/Features/Subscription/GroupUtils.mjs'
 import UserGetter from '../../../../app/src/Features/User/UserGetter.mjs'
 import { fileURLToPath } from 'node:url'
-import { Subscription as SubscriptionModel } from '../../../../app/src/models/Subscription.js'
+import { Subscription as SubscriptionModel } from '../../../../app/src/models/Subscription.mjs'
 
 const { promises: User } = UserModule
 const { promises: Subscription } = SubscriptionHelper

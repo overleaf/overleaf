@@ -2,7 +2,7 @@
 
 import SessionManager from '../Authentication/SessionManager.mjs'
 import SubscriptionHandler from './SubscriptionHandler.mjs'
-import SubscriptionHelper from './SubscriptionHelper.js'
+import SubscriptionHelper from './SubscriptionHelper.mjs'
 import SubscriptionViewModelBuilder from './SubscriptionViewModelBuilder.mjs'
 import LimitationsManager from './LimitationsManager.mjs'
 import RecurlyWrapper from './RecurlyWrapper.mjs'
@@ -28,7 +28,7 @@ import {
   subscriptionChangeIsAiAssistUpgrade,
 } from './AiHelper.js'
 import PlansLocator from './PlansLocator.mjs'
-import { User } from '../../models/User.js'
+import { User } from '../../models/User.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import PermissionsManager from '../Authorization/PermissionsManager.mjs'
 import { sanitizeSessionUserForFrontEnd } from '../../infrastructure/FrontEndUser.mjs'

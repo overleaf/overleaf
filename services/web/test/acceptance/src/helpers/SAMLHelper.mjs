@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { SignedXml } from 'xml-crypto'
-import { SamlLog } from '../../../../app/src/models/SamlLog.js'
+import { SamlLog } from '../../../../app/src/models/SamlLog.mjs'
 import { expect } from 'chai'
 import zlib from 'node:zlib'
 import { fileURLToPath } from 'node:url'

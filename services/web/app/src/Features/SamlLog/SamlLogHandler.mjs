@@ -1,4 +1,4 @@
-import { SamlLog } from '../../models/SamlLog.js'
+import { SamlLog } from '../../models/SamlLog.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
 import logger from '@overleaf/logger'
 import loggerSerializers from '@overleaf/logger/serializers.js'

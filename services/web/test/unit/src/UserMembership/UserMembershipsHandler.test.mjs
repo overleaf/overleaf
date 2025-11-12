@@ -17,15 +17,15 @@ describe('UserMembershipsHandler', function () {
     ctx.Publisher = { updateMany: sinon.stub().resolves(null) }
 
     vi.doMock('../../../../app/src/models/Institution', () => ({
-      default: { Institution: ctx.Institution },
+      Institution: ctx.Institution,
     }))
 
     vi.doMock('../../../../app/src/models/Subscription', () => ({
-      default: { Subscription: ctx.Subscription },
+      Subscription: ctx.Subscription,
     }))
 
     vi.doMock('../../../../app/src/models/Publisher', () => ({
-      default: { Publisher: ctx.Publisher },
+      Publisher: ctx.Publisher,
     }))
 
     ctx.UserMembershipsHandler = (await import(modulePath)).default

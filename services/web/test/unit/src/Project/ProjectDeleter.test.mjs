@@ -2,15 +2,12 @@ import { vi, expect } from 'vitest'
 import sinon from 'sinon'
 import tk from 'timekeeper'
 import moment from 'moment'
-import indirectlyImportModels from '../helpers/indirectlyImportModels.js'
+import { Project } from '../../../../app/src/models/Project.mjs'
+import { DeletedProject } from '../../../../app/src/models/DeletedProject.mjs'
 import mongodb from 'mongodb-legacy'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 const modulePath = '../../../../app/src/Features/Project/ProjectDeleter'
 
-const { Project, DeletedProject } = indirectlyImportModels([
-  'Project',
-  'DeletedProject',
-])
 const { ObjectId, ReadPreference } = mongodb
 vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
   vi.importActual('../../../../app/src/Features/Errors/Errors.js')

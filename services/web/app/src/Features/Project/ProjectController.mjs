@@ -12,9 +12,9 @@ import ProjectCreationHandler from './ProjectCreationHandler.mjs'
 import EditorController from '../Editor/EditorController.mjs'
 import ProjectHelper from './ProjectHelper.mjs'
 import metrics from '@overleaf/metrics'
-import { User } from '../../models/User.js'
+import { User } from '../../models/User.mjs'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
-import { isPaidSubscription } from '../Subscription/SubscriptionHelper.js'
+import SubscriptionHelper from '../Subscription/SubscriptionHelper.mjs'
 import LimitationsManager from '../Subscription/LimitationsManager.mjs'
 import Settings from '@overleaf/settings'
 import AuthorizationManager from '../Authorization/AuthorizationManager.mjs'
@@ -52,6 +52,7 @@ import SubscriptionController from '../Subscription/SubscriptionController.mjs'
 import { formatCurrency } from '../../util/currency.js'
 import UserSettingsHelper from './UserSettingsHelper.mjs'
 
+const { isPaidSubscription } = SubscriptionHelper
 const { hasAdminAccess } = AdminAuthorizationHelper
 const { ObjectId } = mongodb
 /**

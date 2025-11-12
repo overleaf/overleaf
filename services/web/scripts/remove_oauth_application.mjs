@@ -1,4 +1,4 @@
-import { OauthApplication } from '../app/src/models/OauthApplication.js'
+import { OauthApplication } from '../app/src/models/OauthApplication.mjs'
 import parseArgs from 'minimist'
 import OError from '@overleaf/o-error'
 import { scriptRunner } from './lib/ScriptRunner.mjs'

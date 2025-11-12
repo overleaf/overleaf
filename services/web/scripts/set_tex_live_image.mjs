@@ -1,6 +1,6 @@
 import Settings from '@overleaf/settings'
 import mongodb from 'mongodb-legacy'
-import { Project } from '../app/src/models/Project.js'
+import { Project } from '../app/src/models/Project.mjs'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 const { ObjectId } = mongodb

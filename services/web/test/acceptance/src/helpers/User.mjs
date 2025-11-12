@@ -2,16 +2,14 @@ import OError from '@overleaf/o-error'
 import request from './request.js'
 import settings from '@overleaf/settings'
 import { db, ObjectId } from '../../../../app/src/infrastructure/mongodb.js'
-import { User as UserModel } from '../../../../app/src/models/User.js'
+import { User as UserModel } from '../../../../app/src/models/User.mjs'
 import UserUpdater from '../../../../app/src/Features/User/UserUpdater.mjs'
 import AuthenticationManager from '../../../../app/src/Features/Authentication/AuthenticationManager.mjs'
 import { promisifyClass } from '@overleaf/promise-utils'
 import fs from 'node:fs'
 import Path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { Cookie } from 'tough-cookie'
 
-const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const COOKIE_DOMAIN = settings.cookieDomain
 // The cookie domain has a leading '.' but the cookie jar stores it without.
 const DEFAULT_COOKIE_URL = `https://${COOKIE_DOMAIN.replace(/^\./, '')}/`
@@ -853,7 +851,7 @@ class User {
     callback
   ) {
     const fileStream = fs.createReadStream(
-      Path.resolve(Path.join(__dirname, '..', '..', 'files', file))
+      Path.resolve(Path.join(import.meta.dirname, '..', '..', 'files', file))
     )
 
     this.request.post(

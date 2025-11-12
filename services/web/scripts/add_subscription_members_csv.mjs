@@ -3,7 +3,7 @@ import minimist from 'minimist'
 import { parse } from 'csv'
 import Stream from 'node:stream/promises'
 import SubscriptionGroupHandler from '../app/src/Features/Subscription/SubscriptionGroupHandler.mjs'
-import { Subscription } from '../app/src/models/Subscription.js'
+import { Subscription } from '../app/src/models/Subscription.mjs'
 import { InvalidEmailError } from '../app/src/Features/Errors/Errors.js'
 
 function usage() {

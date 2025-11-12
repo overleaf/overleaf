@@ -1,5 +1,5 @@
 import mongodb from 'mongodb-legacy'
-import { Institution as InstitutionModel } from '../../../../app/src/models/Institution.js'
+import { Institution as InstitutionModel } from '../../../../app/src/models/Institution.mjs'
 
 const { ObjectId } = mongodb
 

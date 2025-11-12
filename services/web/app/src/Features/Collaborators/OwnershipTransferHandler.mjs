@@ -1,5 +1,5 @@
 import logger from '@overleaf/logger'
-import { Project } from '../../models/Project.js'
+import { Project } from '../../models/Project.mjs'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import CollaboratorsHandler from './CollaboratorsHandler.mjs'

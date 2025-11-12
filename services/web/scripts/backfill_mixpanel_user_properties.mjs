@@ -1,5 +1,5 @@
 // @ts-check
-import '../app/src/models/User.js'
+import '../app/src/models/User.mjs'
 import { batchedUpdateWithResultHandling } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
 import { getQueue } from '../app/src/infrastructure/Queues.js'

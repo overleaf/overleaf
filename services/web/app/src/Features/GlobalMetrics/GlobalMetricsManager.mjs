@@ -1,4 +1,4 @@
-import { GlobalMetric } from '../../models/GlobalMetric.js'
+import { GlobalMetric } from '../../models/GlobalMetric.mjs'
 /**
  * A Generic collection used to track metrics shared across the entirety of the application
  * examples:

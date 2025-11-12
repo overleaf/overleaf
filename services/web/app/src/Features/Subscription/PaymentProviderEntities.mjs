@@ -20,7 +20,7 @@ import OError from '@overleaf/o-error'
 
 import { DuplicateAddOnError, AddOnNotPresentError } from './Errors.js'
 import PlansLocator from './PlansLocator.mjs'
-import SubscriptionHelper from './SubscriptionHelper.js'
+import SubscriptionHelper from './SubscriptionHelper.mjs'
 import { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } from './AiHelper.js'
 export const MEMBERS_LIMIT_ADD_ON_CODE = 'additional-license'
 

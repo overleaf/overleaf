@@ -2,7 +2,7 @@ import { scriptRunner } from './lib/ScriptRunner.mjs'
 import * as csv from 'csv'
 import fs from 'node:fs'
 import minimist from 'minimist'
-import { User } from '../app/src/models/User.js'
+import { User } from '../app/src/models/User.mjs'
 
 /**
  * This script extracts users who churned after day 1 - ie. their last session was within 24 hours of registering

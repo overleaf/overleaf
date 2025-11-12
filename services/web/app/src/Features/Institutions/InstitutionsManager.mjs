@@ -10,8 +10,8 @@ import UserGetter from '../User/UserGetter.mjs'
 import NotificationsBuilder from '../Notifications/NotificationsBuilder.mjs'
 import NotificationsHandler from '../Notifications/NotificationsHandler.mjs'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
-import { Institution } from '../../models/Institution.js'
-import { Subscription } from '../../models/Subscription.js'
+import { Institution } from '../../models/Institution.mjs'
+import { Subscription } from '../../models/Subscription.mjs'
 import OError from '@overleaf/o-error'
 
 const { ObjectId } = mongodb

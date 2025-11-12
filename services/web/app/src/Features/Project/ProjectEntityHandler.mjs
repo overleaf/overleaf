@@ -4,7 +4,7 @@ import Errors from '../Errors/Errors.js'
 import ProjectGetter from './ProjectGetter.mjs'
 import { callbackifyAll } from '@overleaf/promise-utils'
 import OError from '@overleaf/o-error'
-import { iterablePaths } from './IterablePath.js'
+import { iterablePaths } from './IterablePath.mjs'
 
 async function getAllDocs(projectId) {
   // We get the path and name info from the project, and the lines and
