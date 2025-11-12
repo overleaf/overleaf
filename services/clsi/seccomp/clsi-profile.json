@@ -64,6 +64,11 @@
             ]
         },
         {
+            "name": "clone3",
+            "action": "SCMP_ACT_ERRNO",
+            "errnoRet": 38
+        },
+        {
             "name": "close",
             "action": "SCMP_ACT_ALLOW",
             "args": []
