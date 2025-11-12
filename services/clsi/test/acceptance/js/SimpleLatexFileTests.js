@@ -1,6 +1,7 @@
 const Client = require('./helpers/Client')
 const { fetchNothing } = require('@overleaf/fetch-utils')
 const ClsiApp = require('./helpers/ClsiApp')
+const { expect } = require('chai')
 
 describe('Simple LaTeX file', function () {
   const content = `\
@@ -92,4 +93,40 @@ Hello world
       })
     })
   }
+
+  describe('document with shell commands', function () {
+    before(async function () {
+      this.project_id = Client.randomId()
+      this.request = {
+        resources: [
+          {
+            path: 'main.tex',
+            content: `\
+\\documentclass{article}
+\\begin{document}
+Testing system calls:
+\\immediate\\write18{/bin/date > date.txt}
+The current date from system is: \\input{date.txt}
+The current date from popen is: \\input{"|date"}
+\\end{document}\
+`,
+          },
+        ],
+      }
+      await ClsiApp.ensureRunning()
+    })
+
+    it('should compile successfully', async function () {
+      const body = await Client.compile(this.project_id, this.request)
+      expect(body).to.exist
+      expect(body.compile?.status, 'compile status').to.equal('success')
+    })
+
+    it('should return the PDF', async function () {
+      const body = await Client.compile(this.project_id, this.request)
+      const pdf = Client.getOutputFile(body, 'pdf')
+      expect(pdf, 'pdf file not produced').to.exist
+      expect(pdf.type, 'invalid pdf file').to.equal('pdf')
+    })
+  })
 })

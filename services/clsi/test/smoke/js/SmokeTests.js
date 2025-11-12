@@ -54,6 +54,9 @@ module.exports = {
 \\documentclass{article}
 \\usepackage{tikz}
 \\usetikzlibrary{calc,fadings,decorations.pathreplacing}
+\\usepackage{ifplatform} % test shell escape, conditionals to test which platform is being used
+\\usepackage{minted}  % to test shell commands
+\\usepackage{bashful} % to test shell commands
 \\begin{document}
 \\begin{tikzpicture}
   \\def\\nuPi{3.1459265}
@@ -79,6 +82,24 @@ module.exports = {
     }
   }
 \\end{tikzpicture}
+
+% Test minted (shell commands)
+\\begin{minted}{python}
+x = 1 + 2
+\\end{minted}
+
+% Test bashful (shell commands)
+\\bash[stdout,stderr]
+date
+\\END
+
+% Test system
+\\immediate\\write18{/bin/date > date.txt}
+\\input date.txt
+
+% Test popen
+\\input{"|date"}
+
 \\end{document}\
 `,
               },

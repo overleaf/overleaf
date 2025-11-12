@@ -1,5 +1,9 @@
 const express = require('express')
-const { fetchJson, fetchNothing } = require('@overleaf/fetch-utils')
+const {
+  fetchJson,
+  fetchNothing,
+  fetchString,
+} = require('@overleaf/fetch-utils')
 const fs = require('node:fs')
 const fsPromises = require('node:fs/promises')
 const Settings = require('@overleaf/settings')
@@ -177,12 +181,19 @@ async function compileDirectory(projectId, baseDirectory, directory) {
   return await compile(projectId, req)
 }
 
+function smokeTest() {
+  return fetchString(`${host}/smoke_test_force`, {
+    method: 'GET',
+  })
+}
+
 module.exports = {
   randomId,
   compile,
   stopCompile,
   clearCache,
   getOutputFile,
+  smokeTest,
   runFakeFilestoreService,
   startFakeFilestoreApp,
   syncFromCode,
