@@ -8,12 +8,9 @@ import OLButton from '@/shared/components/ol/ol-button'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import getMeta from '@/utils/meta'
 import { populateEditorRedesignSegmentation } from '@/shared/hooks/use-editor-analytics'
-import {
-  isNewUser,
-  useIsNewEditorEnabled,
-} from '@/features/ide-redesign/utils/new-editor-utils'
-import { getSplitTestVariant, isSplitTestEnabled } from '@/utils/splitTestUtils'
 import CompileTimeoutPaywallModal from '@/features/pdf-preview/components/compile-timeout-paywall-modal'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 function TimeoutUpgradePromptNew() {
   const {
@@ -98,21 +95,12 @@ const CompileTimeout = memo(function CompileTimeout({
   isCompileTimeoutTargetPlansEnabled,
 }: CompileTimeoutProps) {
   const { t } = useTranslation()
+  const newEditor = useIsNewEditorEnabled()
   const extraSearchParams = useMemo(() => {
-    if (!isNewUser()) {
-      return undefined
-    }
-
-    const variant = getSplitTestVariant('editor-redesign-new-users')
-
-    if (!variant) {
-      return undefined
-    }
-
     return {
-      itm_content: variant,
+      itm_content: newEditor ? 'new-editor' : 'old-editor',
     }
-  }, [])
+  }, [newEditor])
 
   const handleFreeTrialClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {

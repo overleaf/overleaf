@@ -4,7 +4,7 @@ import { useSwitchEnableNewEditorState } from '@/features/ide-redesign/hooks/use
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useCallback } from 'react'
 import {
-  canUseNewEditorViaNewUserFeatureFlag,
+  canUseNewEditorAsNewUser,
   useIsNewEditorEnabled,
 } from '@/features/ide-redesign/utils/new-editor-utils'
 
@@ -13,7 +13,7 @@ export default function SettingsNewEditor() {
   const { setEditorRedesignStatus } = useSwitchEnableNewEditorState()
   const { setLeftMenuShown } = useLayoutContext()
   const enabled = useIsNewEditorEnabled()
-  const show = canUseNewEditorViaNewUserFeatureFlag()
+  const show = canUseNewEditorAsNewUser()
 
   const onChange = useCallback(
     (newValue: boolean) => {
