@@ -41,10 +41,10 @@ function ProjectListTableRow({ project, selected }: ProjectListTableRowProps) {
         <InlineTags projectId={project.id} />
       </td>
       <td className="dash-cell-actions">
-        <div className="d-none d-md-block">
+        <div className="d-none d-lg-block">
           <ActionsCell project={project} />
         </div>
-        <div className="d-md-none">
+        <div className="d-lg-none">
           <ActionsDropdown project={project} />
         </div>
       </td>
