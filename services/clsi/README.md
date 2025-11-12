@@ -1,13 +1,12 @@
-overleaf/clsi
-===============
+# overleaf/clsi
 
 A web api for compiling LaTeX documents in the cloud
 
 The Common LaTeX Service Interface (CLSI) provides a RESTful interface to traditional LaTeX tools (or, more generally, any command line tool for composing marked-up documents into a display format such as PDF or HTML). The CLSI listens on the following ports by default:
 
-* TCP/3013 - the RESTful interface
-* TCP/3048 - reports load information
-* TCP/3049 - HTTP interface to control the CLSI service
+- TCP/3013 - the RESTful interface
+- TCP/3048 - reports load information
+- TCP/3049 - HTTP interface to control the CLSI service
 
 These defaults can be modified in `config/settings.defaults.js`.
 
@@ -15,29 +14,28 @@ The provided `Dockerfile` builds a Docker image which has the Docker command lin
 
 The CLSI can be configured through the following environment variables:
 
-* `ALLOWED_COMPILE_GROUPS` - Space separated list of allowed compile groups
-* `ALLOWED_IMAGES` - Space separated list of allowed Docker TeX Live images
-* `CATCH_ERRORS` - Set to `true` to log uncaught exceptions
-* `COMPILE_GROUP_DOCKER_CONFIGS` - JSON string of Docker configs for compile groups
-* `SANDBOXED_COMPILES` - Set to true to use sibling containers
-* `SANDBOXED_COMPILES_HOST_DIR_COMPILES` - Working directory for LaTeX compiles
-* `SANDBOXED_COMPILES_HOST_DIR_OUTPUT` - Output directory for LaTeX compiles
-* `COMPILE_SIZE_LIMIT` - Sets the body-parser [limit](https://github.com/expressjs/body-parser#limit)
-* `DOCKER_RUNTIME` -
-* `FILESTORE_DOMAIN_OVERRIDE` - The url for the filestore service e.g.`http://$FILESTORE_HOST:3009`
-* `FILESTORE_PARALLEL_FILE_DOWNLOADS` - Number of parallel file downloads
-* `LISTEN_ADDRESS` - The address for the RESTful service to listen on. Set to `0.0.0.0` to listen on all network interfaces
-* `PROCESS_LIFE_SPAN_LIMIT_MS` - Process life span limit in milliseconds
-* `SMOKE_TEST` - Whether to run smoke tests
-* `TEXLIVE_IMAGE` - The TeX Live Docker image to use for sibling containers, e.g. `us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2017.1`
-* `TEX_LIVE_IMAGE_NAME_OVERRIDE` - The name of the registry for the Docker image e.g. `us-east1-docker.pkg.dev/overleaf-ops/ol-docker`
-* `TEXLIVE_IMAGE_USER` - When using sibling containers, the user to run as in the TeX Live image. Defaults to `tex`
-* `TEXLIVE_OPENOUT_ANY` - Sets the `openout_any` environment variable for TeX Live (see the `\openout` primitive [documentation](http://tug.org/texinfohtml/web2c.html#tex-invocation))
+- `ALLOWED_COMPILE_GROUPS` - Space separated list of allowed compile groups
+- `ALLOWED_IMAGES` - Space separated list of allowed Docker TeX Live images
+- `CATCH_ERRORS` - Set to `true` to log uncaught exceptions
+- `COMPILE_GROUP_DOCKER_CONFIGS` - JSON string of Docker configs for compile groups
+- `SANDBOXED_COMPILES` - Set to true to use sibling containers
+- `SANDBOXED_COMPILES_HOST_DIR_COMPILES` - Working directory for LaTeX compiles
+- `SANDBOXED_COMPILES_HOST_DIR_OUTPUT` - Output directory for LaTeX compiles
+- `COMPILE_SIZE_LIMIT` - Sets the body-parser [limit](https://github.com/expressjs/body-parser#limit)
+- `DOCKER_RUNTIME` -
+- `FILESTORE_DOMAIN_OVERRIDE` - The url for the filestore service e.g.`http://$FILESTORE_HOST:3009`
+- `FILESTORE_PARALLEL_FILE_DOWNLOADS` - Number of parallel file downloads
+- `LISTEN_ADDRESS` - The address for the RESTful service to listen on. Set to `0.0.0.0` to listen on all network interfaces
+- `PROCESS_LIFE_SPAN_LIMIT_MS` - Process life span limit in milliseconds
+- `SMOKE_TEST` - Whether to run smoke tests
+- `TEXLIVE_IMAGE` - The TeX Live Docker image to use for sibling containers, e.g. `us-east1-docker.pkg.dev/overleaf-ops/ol-docker/texlive-full:2025.1`
+- `TEX_LIVE_IMAGE_NAME_OVERRIDE` - The name of the registry for the Docker image e.g. `us-east1-docker.pkg.dev/overleaf-ops/ol-docker`
+- `TEXLIVE_IMAGE_USER` - When using sibling containers, the user to run as in the TeX Live image. Defaults to `tex`
+- `TEXLIVE_OPENOUT_ANY` - Sets the `openout_any` environment variable for TeX Live (see the `\openout` primitive [documentation](http://tug.org/texinfohtml/web2c.html#tex-invocation))
 
 Further environment variables configure the [metrics module](https://github.com/overleaf/metrics-module)
 
-Installation
-------------
+## Installation
 
 The CLSI can be installed and set up as part of the entire [Overleaf stack](https://github.com/overleaf/overleaf) (complete with front end editor and document storage), or it can be run as a standalone service. To run is as a standalone service, first checkout this repository:
 
@@ -78,14 +76,14 @@ Note: if you're running the CLSI in macOS you may need to use `-v /var/run/docke
 
 The CLSI should then be running at <http://localhost:3013>
 
-Important note for Linux users
-==============================
+# Important note for Linux users
 
 The Node application runs as user `node` in the CLSI, which has uid `1000`. As a consequence of this, the `compiles` folder gets created on your host with `uid` and `gid` set to `1000`.
 
 ```shell
 ls -lnd compiles
 ```
+
 > `drwxr-xr-x 2 1000 1000 4096 Mar 19 12:41 compiles`
 
 If there is a user/group on your host which also happens to have `uid` / `gid` `1000` then that user/group will have ownership of the compiles folder on your host.
@@ -114,9 +112,7 @@ sudo chmod g+s compiles
 
 This is a facet of the way docker works on Linux. See this [upstream issue](https://github.com/moby/moby/issues/7198)
 
-
-API
----
+## API
 
 The CLSI is based on a JSON API.
 
@@ -128,29 +124,29 @@ The CLSI is based on a JSON API.
 
 ```json5
 {
-    "compile": {
-        "options": {
-            // Which compiler to use. Can be latex, pdflatex, xelatex or lualatex
-            "compiler": "lualatex",
-            // How many seconds to wait before killing the process. Default is 60.
-            "timeout": 40
-        },
-        // The main file to run LaTeX on
-        "rootResourcePath": "main.tex",
-        // An array of files to include in the compilation. May have either the content
-        // passed directly, or a URL where it can be downloaded.
-        "resources": [
-          {
-            "path": "main.tex",
-            "content": "\\documentclass{article}\n\\begin{document}\nHello World\n\\end{document}"
-          }
-          // ,{
-          //     "path": "image.png",
-          //     "url": "www.example.com/image.png",
-          //     "modified": 123456789 // Unix time since epoch
-          // }
-        ]
-    }
+  compile: {
+    options: {
+      // Which compiler to use. Can be latex, pdflatex, xelatex or lualatex
+      compiler: 'lualatex',
+      // How many seconds to wait before killing the process. Default is 60.
+      timeout: 40,
+    },
+    // The main file to run LaTeX on
+    rootResourcePath: 'main.tex',
+    // An array of files to include in the compilation. May have either the content
+    // passed directly, or a URL where it can be downloaded.
+    resources: [
+      {
+        path: 'main.tex',
+        content: '\\documentclass{article}\n\\begin{document}\nHello World\n\\end{document}',
+      },
+      // ,{
+      //     "path": "image.png",
+      //     "url": "www.example.com/image.png",
+      //     "modified": 123456789 // Unix time since epoch
+      // }
+    ],
+  },
 }
 ```
 
@@ -167,21 +163,23 @@ URLs will be downloaded and cached until provided with a more recent modified da
 
 ```json
 {
-    "compile": {
-        "status": "success",
-        "outputFiles": [{
-            "type": "pdf",
-            "url": "http://localhost:3013/project/<project-id>/output/output.pdf"
-        }, {
-            "type": "log",
-            "url": "http://localhost:3013/project/<project-id>/output/output.log"
-        }]
-    }
+  "compile": {
+    "status": "success",
+    "outputFiles": [
+      {
+        "type": "pdf",
+        "url": "http://localhost:3013/project/<project-id>/output/output.pdf"
+      },
+      {
+        "type": "log",
+        "url": "http://localhost:3013/project/<project-id>/output/output.log"
+      }
+    ]
+  }
 }
 ```
 
-License
--------
+## License
 
 The code in this repository is released under the GNU AFFERO GENERAL PUBLIC LICENSE, version 3. A copy can be found in the `LICENSE` file.
 

@@ -85,7 +85,7 @@ function runLatex(projectId, options, callback) {
       }
       // number of latex runs and whether there were errors
       const runs =
-        output?.stderr?.match(/^Run number \d+ of .*latex/gm)?.length || 0
+        output?.stdout?.match(/^Run number \d+ of .*latex/gm)?.length || 0
       const failed = output?.stdout?.match(/^Latexmk: Errors/m) != null ? 1 : 0
       // counters from latexmk output
       stats['latexmk-errors'] = failed
