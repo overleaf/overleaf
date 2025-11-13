@@ -168,7 +168,12 @@ const _ProjectController = {
       deleterUser: user,
       ipAddress: req.ip,
     })
-
+    ProjectAuditLogHandler.addEntryIfManagedInBackground(
+      projectId,
+      'project-deleted',
+      user._id,
+      req.ip
+    )
     res.sendStatus(200)
   },
 
@@ -176,6 +181,12 @@ const _ProjectController = {
     const projectId = req.params.Project_id
     const userId = SessionManager.getLoggedInUserId(req.session)
     await ProjectDeleter.promises.archiveProject(projectId, userId)
+    ProjectAuditLogHandler.addEntryIfManagedInBackground(
+      projectId,
+      'project-archived',
+      userId,
+      req.ip
+    )
     res.sendStatus(200)
   },
 
@@ -183,6 +194,12 @@ const _ProjectController = {
     const projectId = req.params.Project_id
     const userId = SessionManager.getLoggedInUserId(req.session)
     await ProjectDeleter.promises.unarchiveProject(projectId, userId)
+    ProjectAuditLogHandler.addEntryIfManagedInBackground(
+      projectId,
+      'project-unarchived',
+      userId,
+      req.ip
+    )
     res.sendStatus(200)
   },
 
@@ -190,6 +207,12 @@ const _ProjectController = {
     const projectId = req.params.project_id
     const userId = SessionManager.getLoggedInUserId(req.session)
     await ProjectDeleter.promises.trashProject(projectId, userId)
+    ProjectAuditLogHandler.addEntryIfManagedInBackground(
+      projectId,
+      'project-trashed',
+      userId,
+      req.ip
+    )
     res.sendStatus(200)
   },
 
@@ -197,6 +220,12 @@ const _ProjectController = {
     const projectId = req.params.project_id
     const userId = SessionManager.getLoggedInUserId(req.session)
     await ProjectDeleter.promises.untrashProject(projectId, userId)
+    ProjectAuditLogHandler.addEntryIfManagedInBackground(
+      projectId,
+      'project-untrashed',
+      userId,
+      req.ip
+    )
     res.sendStatus(200)
   },
 
@@ -212,8 +241,15 @@ const _ProjectController = {
   },
 
   async restoreProject(req, res) {
+    const user = SessionManager.getLoggedInUserId(req.session)
     const projectId = req.params.Project_id
     await ProjectDeleter.promises.restoreProject(projectId)
+    ProjectAuditLogHandler.addEntryIfManagedInBackground(
+      projectId,
+      'project-restored',
+      user._id,
+      req.ip
+    )
     res.sendStatus(200)
   },
 
@@ -234,6 +270,12 @@ const _ProjectController = {
         projectId,
         projectName,
         tags
+      )
+      ProjectAuditLogHandler.addEntryIfManagedInBackground(
+        projectId,
+        'project-cloned',
+        currentUser._id,
+        req.ip
       )
       res.json({
         name: project.name,

@@ -3,7 +3,17 @@ import { ProjectAuditLogEntry } from '../../models/ProjectAuditLogEntry.js'
 import { callbackify } from '@overleaf/promise-utils'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
 
-const MANAGED_GROUP_PROJECT_EVENTS = ['accept-invite', 'project-created']
+const MANAGED_GROUP_PROJECT_EVENTS = [
+  'accept-invite',
+  'project-created',
+  'project-deleted',
+  'project-archived',
+  'project-unarchived',
+  'project-trashed',
+  'project-untrashed',
+  'project-restored',
+  'project-cloned',
+]
 
 export default {
   promises: {
