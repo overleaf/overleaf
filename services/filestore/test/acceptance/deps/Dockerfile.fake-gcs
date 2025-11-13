@@ -1,5 +1,0 @@
-FROM fsouza/fake-gcs-server:1.20
-RUN apk add --update --no-cache curl
-COPY healthcheck.sh /healthcheck.sh
-HEALTHCHECK --interval=1s --timeout=1s --retries=30 CMD /healthcheck.sh http://127.0.0.1:9090
-CMD ["--port=9090", "--scheme=http"]

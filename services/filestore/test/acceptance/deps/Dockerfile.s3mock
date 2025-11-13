@@ -1,4 +1,0 @@
-FROM adobe/s3mock:2.4.14
-RUN apk add --update --no-cache curl
-COPY healthcheck.sh /healthcheck.sh
-HEALTHCHECK --interval=1s --timeout=1s --retries=30 CMD /healthcheck.sh http://127.0.0.1:9090
