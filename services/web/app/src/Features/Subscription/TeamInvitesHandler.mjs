@@ -14,7 +14,6 @@ import EmailHelper from '../Helpers/EmailHelper.js'
 import Errors from '../Errors/Errors.js'
 import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
 import NotificationsBuilder from '../Notifications/NotificationsBuilder.mjs'
-import RecurlyClient from './RecurlyClient.mjs'
 
 const { ObjectId } = mongodb
 
@@ -78,18 +77,13 @@ async function _deleteUserSubscription(subscription, userId, ipAddress) {
     deleterData
   )
 
-  // Terminate the subscription in Recurly
-  if (subscription.recurlySubscription_id) {
-    try {
-      await RecurlyClient.promises.terminateSubscriptionByUuid(
-        subscription.recurlySubscription_id
-      )
-    } catch (err) {
-      logger.error(
-        { err, subscriptionId: subscription._id },
-        'terminating subscription failed'
-      )
-    }
+  try {
+    await Modules.promises.hooks.fire('terminateSubscription', subscription)
+  } catch (err) {
+    logger.error(
+      { err, subscriptionId: subscription._id },
+      'terminating subscription failed'
+    )
   }
 }
 

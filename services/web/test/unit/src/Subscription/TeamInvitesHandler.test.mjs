@@ -499,8 +499,9 @@ describe('TeamInvitesHandler', function () {
           { id: ctx.user.id, ip: ctx.ipAddress }
         )
         sinon.assert.calledWith(
-          ctx.RecurlyClient.promises.terminateSubscriptionByUuid,
-          ctx.user_subscription.recurlySubscription_id
+          ctx.Modules.promises.hooks.fire,
+          'terminateSubscription',
+          ctx.user_subscription
         )
         sinon.assert.calledWith(
           ctx.Modules.promises.hooks.fire,
