@@ -488,7 +488,10 @@ const _ProjectController = {
           affiliations: InstitutionsGetter.promises
             .getCurrentAffiliations(userId)
             .catch(err => {
-              logger.error({ err, userId }, 'failed to get institution licence')
+              logger.error(
+                { err, userId },
+                'failed to get current affiliations'
+              )
               return false
             }),
           subscription:
@@ -1216,12 +1219,15 @@ const _ProjectController = {
     aiFeaturesAllowed,
     userIsMemberOfGroupSubscription
   ) {
-    let inEnterpriseCommons = false
-    const affiliations = userValues.affiliations || []
-    for (const affiliation of affiliations) {
-      inEnterpriseCommons =
-        inEnterpriseCommons || affiliation.institution?.enterpriseCommons
-    }
+    const affiliations = userValues.affiliations
+    const affiliateLookupFailed = affiliations === false
+
+    // if affiliations is specifically false instead of empty, we know the affiliate lookup failed, and should defer to blocking auto-loading
+    const inEnterpriseCommons =
+      affiliateLookupFailed ||
+      affiliations.some(
+        affiliation => affiliation.institution?.enterpriseCommons
+      )
 
     // check if a user has never tried writefull before (writefull.enabled will be null)
     //  if they previously accepted writefull, or are have been already assigned to a trial, user.writefull will be true,
