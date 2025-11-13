@@ -1,0 +1,30 @@
+:root {
+  // Default to the light theme
+  --ds-color-bg-default: var(--ds-color-white);
+  --ds-color-text-primary: var(--ds-color-neutral-900);
+  --ds-color-text-secondary: var(--ds-color-neutral-800);
+  --ds-color-text-disabled: var(--ds-color-neutral-500);
+  --ds-color-text-danger-default: var(--ds-color-red-700);
+  --ds-color-text-danger-hover: var(--ds-color-red-800);
+  --ds-color-text-warning-default: var(--ds-color-yellow-900);
+  --ds-color-text-warning-hover: var(--ds-color-yellow-950);
+  --ds-color-text-info-default: var(--ds-color-blue-700);
+  --ds-color-text-info-hover: var(--ds-color-blue-800);
+  --ds-color-text-success-default: var(--ds-color-green-700);
+  --ds-color-text-success-hover: var(--ds-color-green-800);
+
+  .ds-theme-dark {
+    --ds-color-bg-default: var(--ds-color-neutral-950);
+    --ds-color-text-primary: var(--ds-color-white);
+    --ds-color-text-secondary: var(--ds-color-neutral-50);
+    --ds-color-text-disabled: var(--ds-color-neutral-500);
+    --ds-color-text-danger-default: var(--ds-color-red-700);
+    --ds-color-text-danger-hover: var(--ds-color-red-800);
+    --ds-color-text-warning-default: var(--ds-color-yellow-900);
+    --ds-color-text-warning-hover: var(--ds-color-yellow-950);
+    --ds-color-text-info-default: var(--ds-color-blue-700);
+    --ds-color-text-info-hover: var(--ds-color-blue-800);
+    --ds-color-text-success-default: var(--ds-color-green-700);
+    --ds-color-text-success-hover: var(--ds-color-green-800);
+  }
+}

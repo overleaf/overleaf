@@ -1,0 +1,81 @@
+.btn.btn-ds {
+  --bs-btn-font-family: var(--ds-font-family-sans);
+  --bs-btn-border-radius: var(--ds-border-radius-200);
+
+  &:focus-visible {
+    outline: 2px solid var(--ds-color-yellow-500);
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+
+  // Default size
+  @include ol-button-size(
+    $font-size: var(--ds-font-size-400),
+    $line-height: var(--ds-font-line-height-600),
+    $padding-x: var(--ds-spacing-400),
+    $padding-y: var(--ds-spacing-100)
+  );
+
+  &.btn-lg {
+    @include ol-button-size(
+      $font-size: var(--ds-font-size-400),
+      $line-height: var(--ds-font-line-height-600),
+      $padding-x: var(--ds-spacing-400),
+      $padding-y: var(--ds-spacing-250)
+    );
+  }
+
+  &.btn-sm {
+    @include ol-button-size(
+      $font-size: var(--ds-font-size-350),
+      $line-height: var(--ds-font-line-height-500),
+      $padding-x: var(--ds-spacing-200),
+      $padding-y: var(--ds-spacing-100)
+    );
+  }
+
+  // Variants
+  &.btn-primary {
+    @include ol-button-variant(
+      $color: var(--ds-color-white),
+      $background: var(--ds-color-neutral-950),
+      $hover-background: var(--ds-color-neutral-900),
+      $active-background: var(--ds-color-neutral-800),
+      $disabled-color: var(--ds-color-neutral-700),
+      $disabled-background: var(--ds-color-neutral-100)
+    );
+  }
+
+  &.btn-secondary {
+    @include ol-button-variant(
+      $color: var(--ds-color-neutral-950),
+      $background: var(--ds-color-neutral-200),
+      $hover-background: var(--ds-color-neutral-300),
+      $active-background: var(--ds-color-neutral-400),
+      $disabled-color: var(--ds-color-neutral-700),
+      $disabled-background: var(--ds-color-neutral-100)
+    );
+  }
+
+  &.btn-tertiary {
+    @include ol-button-variant(
+      $color: var(--ds-color-neutral-950),
+      $background: var(--ds-color-white),
+      $hover-background: var(--ds-color-neutral-100),
+      $active-background: var(--ds-color-neutral-200),
+      $disabled-color: var(--ds-color-neutral-700),
+      $disabled-background: var(--ds-color-neutral-100)
+    );
+  }
+
+  &.btn-danger {
+    @include ol-button-variant(
+      $color: var(--ds-color-white),
+      $background: var(--ds-color-red-700),
+      $hover-background: var(--ds-color-red-800),
+      $active-background: var(--ds-color-red-900),
+      $disabled-color: var(--ds-color-neutral-700),
+      $disabled-background: var(--ds-color-neutral-100)
+    );
+  }
+}

@@ -1,0 +1,34 @@
+:root {
+  --ds-font-family-sans: 'Inter';
+
+  // Font weight
+  --ds-font-weight-regular: 400;
+  --ds-font-weight-medium: 500;
+  --ds-font-weight-semibold: 600;
+  --ds-font-weight-bold: 700;
+
+  // Font size
+  --ds-font-size-300: 0.75rem; // 12px
+  --ds-font-size-350: 0.875rem; // 14px
+  --ds-font-size-400: 1rem; // 16px
+  --ds-font-size-450: 1.125rem; // 18px
+  --ds-font-size-500: 1.25rem; // 20px
+  --ds-font-size-600: 1.5rem; // 24px
+  --ds-font-size-700: 1.75rem; // 28px
+  --ds-font-size-800: 2rem; // 32px
+  --ds-font-size-1000: 2.5rem; // 40px
+  --ds-font-size-1400: 3.5rem; // 56px
+  --ds-font-size-1800: 4.5rem; // 72px
+
+  // Line height
+  --ds-font-line-height-400: 1rem; // 16px
+  --ds-font-line-height-500: 1.25rem; // 20px
+  --ds-font-line-height-600: 1.5rem; // 24px
+  --ds-font-line-height-700: 1.75rem; // 28px
+  --ds-font-line-height-800: 2rem; // 32px
+  --ds-font-line-height-1000: 2.5rem; // 40px
+  --ds-font-line-height-1200: 3rem; // 48px
+  --ds-font-line-height-1600: 4rem; // 64px
+  --ds-font-line-height-1800: 4.5rem; // 72px
+  --ds-font-line-height-900: 2.25rem; // 36px
+}

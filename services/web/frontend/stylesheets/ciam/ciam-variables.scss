@@ -1,17 +1,13 @@
 // TODO: Replace `fuchsia` by the correct colors.
 
 .ciam-enabled {
-  // Base variables
-  --ciam-color-text-secondary: var(--ciam-color-neutral-800);
-  --ciam-color-text-primary: var(--ciam-color-neutral-900);
-
   // Links
   // used in services/web/frontend/stylesheets/base/links.scss
-  --link-color: var(--ciam-color-text-secondary);
+  --link-color: var(--ds-color-text-secondary);
   --link-hover-color: fuchsia;
 
   // TODO: validate that this is correct
-  --link-visited-color: var(--ciam-color-text-secondary);
+  --link-visited-color: var(--ds-color-text-secondary);
   --link-color-dark: fuchsia;
   --link-hover-color-dark: fuchsia;
   --link-visited-color-dark: fuchsia;
