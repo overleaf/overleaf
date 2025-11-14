@@ -2572,7 +2572,7 @@
   "you_are_on_x_plan_as_a_confirmed_member_of_institution_y": "您作为 <1>__institutionName__</1> 的<1>确认成员</1>加入了我们的<0>__planName__</0>计划",
   "you_are_on_x_plan_as_member_of_group_subscription_y_administered_by_z": "您作为<1>__groupName__</1>群组订阅的<1>成员</1>加入了我们的<0>__planName__</0>计划，该群组订阅由<1>__adminEmail__</1>管理",
   "you_can_also_choose_to_view_anonymously_or_leave_the_project": "您还可以选择<0>匿名查看</0>（您将失去编辑权限）或<1>离开项目</1>。",
-  "you_can_buy_this_plan_but_not_as_a_trial": "您可以购买此计划，但不能试用，因为您最近已经完成试用。",
+  "you_can_buy_this_plan_but_not_as_a_trial": "您可以购买此计划，但不能试用，因为您之前已经完成试用。",
   "you_can_leave_the_experiment_from_your_account_settings_at_any_time": "您可以随时从您的<0>帐户设置</0>退出实验。",
   "you_can_manage_your_reference_manager_integrations_from_your_account_settings_page": "您可以从<0>帐户设置页面</0>管理参考文献管理集成。",
   "you_can_now_enable_sso": "现在，您可以在“组设置”页面上启用SSO。",

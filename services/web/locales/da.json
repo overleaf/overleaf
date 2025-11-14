@@ -2142,7 +2142,7 @@
   "you_are_on_x_plan_as_a_confirmed_member_of_institution_y": "Du er på vores <0>__planName__</0> abonnement som et <1>bekræftet medlem</1> af <1>__institutionName__</1>",
   "you_are_on_x_plan_as_member_of_group_subscription_y_administered_by_z": "Du er på vores <0>__planName__</0> abonnement som et <1>medlem</1> af gruppeabonnementet <1>__groupName__</1> administreret af <1>__adminEmail__</1>",
   "you_can_also_choose_to_view_anonymously_or_leave_the_project": "Du kan også vælge at <0>læse anonymt</0> (du mister skriveadgang) eller <1>forlade projektet</1>.",
-  "you_can_buy_this_plan_but_not_as_a_trial": "Du kan købe dette abonnement, men ikke som en prøveperiode, da du for nyligt har afsluttet en prøveperiode.",
+  "you_can_buy_this_plan_but_not_as_a_trial": "Du kan købe dette abonnement, men ikke som en prøveperiode, da du tidligere har afsluttet en prøveperiode.",
   "you_can_manage_your_reference_manager_integrations_from_your_account_settings_page": "Du kan administrere dine henvisningsmanagers i dine <0>kontoindstillinger</0>.",
   "you_can_now_enable_sso": "Du kan nu aktivere SSO i dine gruppeindstillinger",
   "you_can_now_log_in_sso": "Du kan nu logge ind gennem din institution of hvis du er kvalificeret får du <0>__appName__ Professionel-funktioner</0>.",
