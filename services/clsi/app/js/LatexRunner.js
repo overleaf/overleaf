@@ -167,7 +167,7 @@ function _buildLatexCommand(mainFile, opts = {}) {
     'latexmk',
     '-cd',
     '-jobname=output',
-    '-auxdir=$COMPILE_DIR',
+    '-auxdir=./',
     '-outdir=$COMPILE_DIR',
     '-synctex=1',
     '-interaction=batchmode',
