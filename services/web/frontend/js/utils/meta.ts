@@ -275,15 +275,17 @@ export interface Meta {
     annual?: string
     monthlyTimesTwelve?: string
   }
-  'ol-stripeAccountId': string
-  'ol-stripePublicKeyUK': string
-  'ol-stripePublicKeyUS': string
-  'ol-stripeSubscriptionData': {
+  'ol-stripeCustomerData': Array<{
     customerId: string
+    subscriptionId: string
     subscriptionState: string | null
     paymentProviderService: StripePaymentProviderService | null
-    segment: string | null
-  }
+    managementUrl: string
+    segment?: string | null
+    error?: string
+  }>
+  'ol-stripePublicKeyUK': string
+  'ol-stripePublicKeyUS': string
   'ol-subscription': any // TODO: mixed types, split into two fields
   'ol-subscriptionChangePreview': SubscriptionChangePreview
   'ol-subscriptionCreationPreview': SubscriptionCreationPreview

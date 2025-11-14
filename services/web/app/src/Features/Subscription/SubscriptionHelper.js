@@ -1,3 +1,6 @@
+// @ts-check
+
+const Settings = require('@overleaf/settings')
 const { formatCurrency } = require('../../util/currency')
 const GroupPlansData = require('./GroupPlansData')
 const { isStandaloneAiAddOnPlanCode } = require('./AiHelper')
@@ -196,11 +199,67 @@ function isInTrial(trialEndsAt) {
   return trialEndsAt.getTime() > Date.now()
 }
 
+/**
+ * Get the Recurly customer admin URL
+ * @param {string | null} customerId - The customer ID in Recurly
+ * @returns {string | null}
+ */
+function getRecurlyCustomerAdminUrl(customerId) {
+  if (customerId == null) {
+    return null
+  }
+
+  const isStagOrDev =
+    Settings.siteUrl.includes('dev-overleaf') ||
+    Settings.siteUrl.includes('stag-overleaf')
+
+  const baseUrl = isStagOrDev
+    ? 'https://sharelatex-sandbox.recurly.com'
+    : 'https://sharelatex.recurly.com'
+
+  return `${baseUrl}/accounts/${customerId}`
+}
+
+/**
+ * Get the Stripe customer admin URL
+ * @param {string | null} customerId - The customer ID in Stripe
+ * @param {string} service - The Stripe service ('stripe-us' or 'stripe-uk')
+ * @returns {string | null}
+ */
+function getStripeCustomerAdminUrl(customerId, service) {
+  if (customerId == null || service == null) {
+    return null
+  }
+
+  let accountId = null
+  if (service === 'stripe-us') {
+    accountId = Settings.apis.stripeUS?.accountId
+  } else if (service === 'stripe-uk') {
+    accountId = Settings.apis.stripeUK?.accountId
+  }
+
+  if (accountId == null) {
+    return null
+  }
+
+  const isStagOrDev =
+    Settings.siteUrl.includes('dev-overleaf') ||
+    Settings.siteUrl.includes('stag-overleaf')
+
+  const baseUrl = isStagOrDev
+    ? `https://dashboard.stripe.com/${accountId}/test`
+    : `https://dashboard.stripe.com/${accountId}`
+
+  return `${baseUrl}/customers/${customerId}`
+}
+
 module.exports = {
   shouldPlanChangeAtTermEnd,
   generateInitialLocalizedGroupPrice,
   isPaidSubscription,
   isIndividualActivePaidSubscription,
+  getRecurlyCustomerAdminUrl,
+  getStripeCustomerAdminUrl,
   getPaymentProviderSubscriptionId,
   getPaidSubscriptionState,
   getSubscriptionTrialStartedAt,

@@ -799,24 +799,6 @@ async function terminateSubscriptionByUuid(subscriptionUuid) {
   return subscription
 }
 
-/**
- * Get the Recurly admin dashboard url for a user
- *
- * @param {string} userId
- * @returns {string}
- */
-function getCustomerAdminUrlFromUserId(userId) {
-  const isStagOrDev =
-    Settings.siteUrl.includes('dev-overleaf') ||
-    Settings.siteUrl.includes('stag-overleaf')
-
-  if (isStagOrDev) {
-    return `https://sharelatex-sandbox.recurly.com/accounts/${userId}`
-  }
-
-  return `https://sharelatex.recurly.com/accounts/${userId}`
-}
-
 export default {
   errors: recurly.errors,
 
@@ -841,7 +823,6 @@ export default {
   getPastDueInvoices: callbackify(getPastDueInvoices),
   failInvoice: callbackify(failInvoice),
   terminateSubscriptionByUuid: callbackify(terminateSubscriptionByUuid),
-  getCustomerAdminUrlFromUserId,
 
   promises: {
     getSubscription,

@@ -692,4 +692,204 @@ describe('SubscriptionHelper', function () {
       })
     })
   })
+
+  describe('getRecurlyCustomerAdminUrl', function () {
+    beforeEach(function () {
+      this.settings.siteUrl = 'https://www.overleaf.com'
+    })
+
+    it('should return production Recurly account URL', function () {
+      const result =
+        this.SubscriptionHelper.getRecurlyCustomerAdminUrl('user_789')
+      expect(result).to.equal(
+        'https://sharelatex.recurly.com/accounts/user_789'
+      )
+    })
+
+    it('should return sandbox Recurly account URL for dev environment', function () {
+      this.settings.siteUrl = 'https://dev-overleaf.com'
+      const result =
+        this.SubscriptionHelper.getRecurlyCustomerAdminUrl('user_789')
+      expect(result).to.equal(
+        'https://sharelatex-sandbox.recurly.com/accounts/user_789'
+      )
+    })
+
+    it('should return sandbox Recurly account URL for staging environment', function () {
+      this.settings.siteUrl = 'https://stag-overleaf.com'
+      const result =
+        this.SubscriptionHelper.getRecurlyCustomerAdminUrl('user_789')
+      expect(result).to.equal(
+        'https://sharelatex-sandbox.recurly.com/accounts/user_789'
+      )
+    })
+
+    it('should return null if customerId is null', function () {
+      const result = this.SubscriptionHelper.getRecurlyCustomerAdminUrl(null)
+      expect(result).to.be.null
+    })
+
+    it('should return null if customerId is undefined', function () {
+      const result =
+        this.SubscriptionHelper.getRecurlyCustomerAdminUrl(undefined)
+      expect(result).to.be.null
+    })
+
+    it('should handle empty string customerId', function () {
+      const result = this.SubscriptionHelper.getRecurlyCustomerAdminUrl('')
+      expect(result).to.equal('https://sharelatex.recurly.com/accounts/')
+    })
+  })
+
+  describe('getStripeCustomerAdminUrl', function () {
+    beforeEach(function () {
+      this.settings.siteUrl = 'https://www.overleaf.com'
+      this.settings.apis = {
+        stripeUS: { accountId: 'acct_us_123' },
+        stripeUK: { accountId: 'acct_uk_456' },
+      }
+    })
+
+    describe('stripe-us', function () {
+      it('should return production Stripe US customer URL', function () {
+        const result = this.SubscriptionHelper.getStripeCustomerAdminUrl(
+          'cus_us_789',
+          'stripe-us'
+        )
+        expect(result).to.equal(
+          'https://dashboard.stripe.com/acct_us_123/customers/cus_us_789'
+        )
+      })
+
+      it('should return test Stripe US customer URL for dev environment', function () {
+        this.settings.siteUrl = 'https://dev-overleaf.com'
+        const result = this.SubscriptionHelper.getStripeCustomerAdminUrl(
+          'cus_us_789',
+          'stripe-us'
+        )
+        expect(result).to.equal(
+          'https://dashboard.stripe.com/acct_us_123/test/customers/cus_us_789'
+        )
+      })
+
+      it('should return test Stripe US customer URL for staging environment', function () {
+        this.settings.siteUrl = 'https://stag-overleaf.com'
+        const result = this.SubscriptionHelper.getStripeCustomerAdminUrl(
+          'cus_us_789',
+          'stripe-us'
+        )
+        expect(result).to.equal(
+          'https://dashboard.stripe.com/acct_us_123/test/customers/cus_us_789'
+        )
+      })
+    })
+
+    describe('stripe-uk', function () {
+      it('should return production Stripe UK customer URL', function () {
+        const result = this.SubscriptionHelper.getStripeCustomerAdminUrl(
+          'cus_uk_123',
+          'stripe-uk'
+        )
+        expect(result).to.equal(
+          'https://dashboard.stripe.com/acct_uk_456/customers/cus_uk_123'
+        )
+      })
+
+      it('should return test Stripe UK customer URL for dev environment', function () {
+        this.settings.siteUrl = 'https://dev-overleaf.com'
+        const result = this.SubscriptionHelper.getStripeCustomerAdminUrl(
+          'cus_uk_123',
+          'stripe-uk'
+        )
+        expect(result).to.equal(
+          'https://dashboard.stripe.com/acct_uk_456/test/customers/cus_uk_123'
+        )
+      })
+    })
+
+    it('should return null if accountId is missing', function () {
+      this.settings.apis.stripeUS = {}
+      const result = this.SubscriptionHelper.getStripeCustomerAdminUrl(
+        'cus_us_789',
+        'stripe-us'
+      )
+      expect(result).to.be.null
+    })
+
+    it('should return null if customerId is null', function () {
+      const result = this.SubscriptionHelper.getStripeCustomerAdminUrl(
+        null,
+        'stripe-us'
+      )
+      expect(result).to.be.null
+    })
+
+    it('should return null if service is null', function () {
+      const result = this.SubscriptionHelper.getStripeCustomerAdminUrl(
+        'cus_us_789',
+        null
+      )
+      expect(result).to.be.null
+    })
+
+    it('should return null if customerId is undefined', function () {
+      const result = this.SubscriptionHelper.getStripeCustomerAdminUrl(
+        undefined,
+        'stripe-us'
+      )
+      expect(result).to.be.null
+    })
+
+    it('should return null if service is undefined', function () {
+      const result = this.SubscriptionHelper.getStripeCustomerAdminUrl(
+        'cus_us_789',
+        undefined
+      )
+      expect(result).to.be.null
+    })
+
+    it('should return null if both customerId and service are null', function () {
+      const result = this.SubscriptionHelper.getStripeCustomerAdminUrl(
+        null,
+        null
+      )
+      expect(result).to.be.null
+    })
+
+    it('should return null if accountId is missing for UK', function () {
+      this.settings.apis.stripeUK = {}
+      const result = this.SubscriptionHelper.getStripeCustomerAdminUrl(
+        'cus_uk_789',
+        'stripe-uk'
+      )
+      expect(result).to.be.null
+    })
+
+    it('should return null if apis object is missing', function () {
+      this.settings.apis = {}
+      const result = this.SubscriptionHelper.getStripeCustomerAdminUrl(
+        'cus_us_789',
+        'stripe-us'
+      )
+      expect(result).to.be.null
+    })
+
+    it('should handle empty string customerId', function () {
+      const result = this.SubscriptionHelper.getStripeCustomerAdminUrl(
+        '',
+        'stripe-us'
+      )
+      expect(result).to.equal(
+        'https://dashboard.stripe.com/acct_us_123/customers/'
+      )
+    })
+
+    it('should return null if service is not stripe-us or stripe-uk', function () {
+      const result = this.SubscriptionHelper.getStripeCustomerAdminUrl(
+        'cus_us_789',
+        'some-other-service'
+      )
+      expect(result).to.be.null
+    })
+  })
 })

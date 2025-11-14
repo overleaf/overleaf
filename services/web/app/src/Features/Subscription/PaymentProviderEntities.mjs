@@ -653,6 +653,7 @@ export class PaymentProviderAccount {
    * @param {boolean} [props.hasPastDueInvoice]
    * @param {object} [props.metadata]
    * @param {string} [props.metadata.userId]
+   * @param {string} [props.metadata.segment]
    */
   constructor(props) {
     this.code = props.code
