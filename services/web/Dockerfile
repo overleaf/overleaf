@@ -86,7 +86,9 @@ USER node
 # the webpack image has deps+src+webpack artifacts
 FROM dev AS webpack
 USER root
-RUN OVERLEAF_CONFIG=/overleaf/services/web/config/settings.webpack.js nice npm run webpack:production
+RUN OVERLEAF_CONFIG=/overleaf/services/web/config/settings.webpack.js \
+    NODE_OPTIONS="--max-old-space-size=12288" \
+    npm run webpack:production
 
 
 # intermediate image for removing source maps ahead of copying into final production image
