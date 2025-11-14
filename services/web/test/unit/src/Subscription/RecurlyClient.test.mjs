@@ -789,4 +789,31 @@ describe('RecurlyClient', function () {
       expect(invoices).to.deep.equal(pastDueInvoices)
     })
   })
+
+  describe('getCustomerAdminUrlFromUserId', function () {
+    it('should return staging URL for dev-overleaf sites', async function (ctx) {
+      ctx.settings.siteUrl = 'https://dev-overleaf.example.com'
+      const userId = 'user-123'
+      const url = await ctx.RecurlyClient.getCustomerAdminUrlFromUserId(userId)
+      expect(url).to.equal(
+        'https://sharelatex-sandbox.recurly.com/accounts/user-123'
+      )
+    })
+
+    it('should return staging URL for stag-overleaf sites', async function (ctx) {
+      ctx.settings.siteUrl = 'https://stag-overleaf.example.com'
+      const userId = 'user-456'
+      const url = await ctx.RecurlyClient.getCustomerAdminUrlFromUserId(userId)
+      expect(url).to.equal(
+        'https://sharelatex-sandbox.recurly.com/accounts/user-456'
+      )
+    })
+
+    it('should return production URL for production sites', async function (ctx) {
+      ctx.settings.siteUrl = 'https://www.overleaf.com'
+      const userId = 'user-789'
+      const url = await ctx.RecurlyClient.getCustomerAdminUrlFromUserId(userId)
+      expect(url).to.equal('https://sharelatex.recurly.com/accounts/user-789')
+    })
+  })
 })
