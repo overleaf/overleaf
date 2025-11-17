@@ -273,7 +273,12 @@ const FigureModalContent = () => {
     return null
   }
   return (
-    <OLModal onHide={hide} className="figure-modal" show>
+    <OLModal
+      onHide={hide}
+      className="figure-modal"
+      show
+      returnFocusOnDeactivate={false}
+    >
       <OLModalHeader>
         <OLModalTitle>
           {helpShown
