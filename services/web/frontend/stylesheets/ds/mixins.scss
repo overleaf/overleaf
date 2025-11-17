@@ -107,3 +107,10 @@
   font-weight: var(--ds-font-weight-semibold);
   line-height: var(--ds-font-line-height-1200);
 }
+
+// Focus outline
+@mixin ds-focus-outline() {
+  box-shadow: none;
+  outline: 2px solid var(--ds-color-yellow-500);
+  outline-offset: 2px;
+}

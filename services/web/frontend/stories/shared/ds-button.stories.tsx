@@ -9,7 +9,7 @@ export const Button = (args: Args) => {
 }
 
 const meta: Meta<typeof DSButton> = {
-  title: 'Shared / Components / DS Button',
+  title: 'Shared / DS Components',
   component: DSButton,
   args: {
     children: 'Button',

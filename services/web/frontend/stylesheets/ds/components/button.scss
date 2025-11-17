@@ -1,11 +1,11 @@
+@import '../mixins';
+
 .btn.btn-ds {
   --bs-btn-font-family: var(--ds-font-family-sans);
   --bs-btn-border-radius: var(--ds-border-radius-200);
 
   &:focus-visible {
-    outline: 2px solid var(--ds-color-yellow-500);
-    outline-offset: 2px;
-    box-shadow: none;
+    @include ds-focus-outline;
   }
 
   // Default size

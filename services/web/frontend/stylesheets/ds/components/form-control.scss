@@ -1,0 +1,85 @@
+@use 'sass:math';
+@import '../mixins';
+
+.form-control-ds,
+.form-group-ds,
+.form-text-ds,
+.form-label-ds {
+  --bs-body-font-family: var(--ds-font-family-sans), sans-serif;
+  --bs-success-rgb: 25, 117, 76; // #19754c
+  --bs-danger-rgb: 195, 9, 43; // #c3092b
+  --content-placeholder: var(--ds-color-text-disabled);
+
+  // Without this, it inherits the body's --bs-body-font-family which isn't the DS font
+  font-family: var(--ds-font-family-sans), sans-serif;
+}
+
+input.form-control.form-control-ds {
+  border-radius: var(--ds-border-radius-200);
+  border-color: var(--ds-color-neutral-300);
+  color: var(--ds-color-neutral-950);
+  padding: calc(var(--ds-spacing-250) - 1px) calc(var(--ds-spacing-300) - 1px);
+
+  &.form-control-lg {
+    padding: calc(var(--ds-spacing-350) - 1px) calc(var(--ds-spacing-300) - 1px);
+  }
+
+  &:read-only {
+    background: var(--ds-color-neutral-200);
+    color: var(--ds-color-text-secondary);
+  }
+
+  &:disabled {
+    color: var(--ds-color-text-disabled);
+    background: var(--ds-color-neutral-100);
+  }
+
+  &:not(:disabled, :focus-visible) {
+    &:hover,
+    &.hover {
+      border-color: var(--ds-color-neutral-400);
+    }
+  }
+
+  &:focus-visible,
+  &:focus {
+    @include ds-focus-outline;
+
+    border-color: var(--ds-color-neutral-950);
+  }
+
+  &.is-invalid,
+  .was-validated &:invalid {
+    border-color: var(--ds-color-red-500);
+  }
+}
+
+.form-label.form-label-ds {
+  @include ds-body-md-semibold;
+
+  color: var(--ds-color-text-primary);
+
+  &:has(+ .form-control:read-only) {
+    color: var(--ds-color-text-secondary);
+  }
+
+  &:has(+ .form-control:disabled) {
+    color: var(--ds-color-text-disabled);
+  }
+}
+
+.form-text.form-text-ds {
+  color: var(--ds-color-text-secondary);
+
+  .form-text-inner-ds {
+    display: flex;
+    gap: var(--ds-spacing-200);
+    margin-top: var(--ds-spacing-150);
+
+    @include ds-body-sm-regular;
+  }
+
+  .ciam-form-text-icon {
+    font-size: math.div(20em, 14);
+  }
+}
