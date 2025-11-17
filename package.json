@@ -76,6 +76,7 @@
     "services/third-party-references",
     "services/tpdsworker",
     "services/web",
+    "tools/dependency-management",
     "tools/saas-e2e",
     "tools/migrations"
   ]
