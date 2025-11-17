@@ -1,4 +1,4 @@
-import { Project } from '../../models/Project.js'
+import { Project } from '../../models/Project.mjs'
 import PublicAccessLevels from '../Authorization/PublicAccessLevels.mjs'
 import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
 import mongodb from 'mongodb-legacy'

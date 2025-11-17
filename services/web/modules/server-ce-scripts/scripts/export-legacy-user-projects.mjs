@@ -11,8 +11,8 @@ import mongodb from '../../../app/src/infrastructure/mongodb.js'
 import DocumentUpdaterHandler from '../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js'
 import ProjectZipStreamManager from '../../../app/src/Features/Downloads/ProjectZipStreamManager.js'
 import logger from 'logger-sharelatex'
-import { Project } from '../../../app/src/models/Project.js'
-import { User } from '../../../app/src/models/User.js'
+import { Project } from '../../../app/src/models/Project.mjs'
+import { User } from '../../../app/src/models/User.mjs'
 import readline from 'readline'
 
 function parseArgs() {

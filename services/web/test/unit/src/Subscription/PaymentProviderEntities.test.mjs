@@ -4,7 +4,7 @@ import Errors from '../../../../app/src/Features/Subscription/Errors.js'
 
 import PaymentProviderEntities from '../../../../app/src/Features/Subscription/PaymentProviderEntities.mjs'
 import { AI_ADD_ON_CODE } from '../../../../app/src/Features/Subscription/AiHelper.js'
-import SubscriptionHelper from '../../../../app/src/Features/Subscription/SubscriptionHelper.js'
+import SubscriptionHelper from '../../../../app/src/Features/Subscription/SubscriptionHelper.mjs'
 
 const {
   PaymentProviderSubscriptionChangeRequest,

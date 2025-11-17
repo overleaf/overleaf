@@ -1,4 +1,4 @@
-import { SplitTest } from '../../models/SplitTest.js'
+import { SplitTest } from '../../models/SplitTest.mjs'
 import SplitTestUtils from './SplitTestUtils.mjs'
 import OError from '@overleaf/o-error'
 import _ from 'lodash'

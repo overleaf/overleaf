@@ -33,7 +33,7 @@ describe('ProjectHistoryHandler', function () {
       default: (ctx.Settings = {}),
     }))
 
-    vi.doMock('../../../../app/src/models/Project.js', () => ({
+    vi.doMock('../../../../app/src/models/Project.mjs', () => ({
       Project: ctx.ProjectModel,
     }))
 

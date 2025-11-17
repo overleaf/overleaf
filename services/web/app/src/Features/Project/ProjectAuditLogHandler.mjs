@@ -1,5 +1,5 @@
 import logger from '@overleaf/logger'
-import { ProjectAuditLogEntry } from '../../models/ProjectAuditLogEntry.js'
+import { ProjectAuditLogEntry } from '../../models/ProjectAuditLogEntry.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
 

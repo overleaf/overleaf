@@ -2,10 +2,8 @@ import { vi, expect } from 'vitest'
 import Path from 'path'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
-import indirectlyImportModels from '../helpers/indirectlyImportModels.js'
+import { Project } from '../../../../app/src/models/Project.mjs'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
-
-const { Project } = indirectlyImportModels(['Project'])
 
 const { ObjectId } = mongodb
 

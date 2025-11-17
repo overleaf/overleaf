@@ -9,7 +9,7 @@ import UserAuditLogHandler from '../User/UserAuditLogHandler.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import UserUpdater from '../User/UserUpdater.mjs'
 import logger from '@overleaf/logger'
-import { User } from '../../models/User.js'
+import { User } from '../../models/User.mjs'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
 
 const { ObjectId } = mongodb

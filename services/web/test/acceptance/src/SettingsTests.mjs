@@ -58,4 +58,33 @@ describe('SettingsPage', function () {
       return done()
     })
   })
+
+  it('can save when splitTests contains a string variant rather than an object', function (done) {
+    const newFirstName = 'newfirstname'
+    const assignedAtVariant = {
+      variantName: 'enabled',
+      versionNumber: 12,
+      phase: 'release',
+      assignedAt: new Date('2024-08-17T09:17:28.349Z'),
+    }
+    this.user.mongoUpdate(
+      {
+        $set: {
+          'splitTests.string-variant': 'default',
+          'splitTests.assigned-at-date': [assignedAtVariant],
+        },
+      },
+      () => {
+        this.user.updateSettings({ first_name: newFirstName }, error => {
+          expect(error).not.to.exist
+          this.user.get((error, user) => {
+            user.splitTests.should.haveOwnProperty('string-variant')
+            user.splitTests.should.haveOwnProperty('assigned-at-date')
+            user.splitTests['assigned-at-date'].should.eql([assignedAtVariant])
+            done()
+          })
+        })
+      }
+    )
+  })
 })

@@ -5,7 +5,7 @@ import Errors from '../Errors/Errors.js'
 import _ from 'lodash'
 import logger from '@overleaf/logger'
 import settings from '@overleaf/settings'
-import { User } from '../../../../app/src/models/User.js'
+import { User } from '../../../../app/src/models/User.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 import OError from '@overleaf/o-error'
 

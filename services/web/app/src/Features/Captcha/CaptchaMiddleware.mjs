@@ -6,7 +6,7 @@ import OError from '@overleaf/o-error'
 import DeviceHistory from './DeviceHistory.mjs'
 import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import { expressify } from '@overleaf/promise-utils'
-import EmailsHelper from '../Helpers/EmailHelper.js'
+import EmailsHelper from '../Helpers/EmailHelper.mjs'
 
 function respondInvalidCaptcha(req, res) {
   res.status(400).json({

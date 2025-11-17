@@ -1,4 +1,4 @@
-import { Subscription } from '../../app/src/models/Subscription.js'
+import { Subscription } from '../../app/src/models/Subscription.mjs'
 import RecurlyWrapper from '../../app/src/Features/Subscription/RecurlyWrapper.mjs'
 import SubscriptionUpdater from '../../app/src/Features/Subscription/SubscriptionUpdater.mjs'
 import minimist from 'minimist'

@@ -6,7 +6,7 @@
  * in the migrations directory.
  */
 
-import { User } from '../../app/src/models/User.js'
+import { User } from '../../app/src/models/User.mjs'
 import { fileURLToPath } from 'node:url'
 
 // const somePackage = require('some-package')

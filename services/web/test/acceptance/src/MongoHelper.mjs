@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import mongodb from 'mongodb-legacy'
 import mongoose from 'mongoose'
-import { User as UserModel } from '../../../app/src/models/User.js'
+import { User as UserModel } from '../../../app/src/models/User.mjs'
 import { db } from '../../../app/src/infrastructure/mongodb.js'
 import {
   normalizeQuery,

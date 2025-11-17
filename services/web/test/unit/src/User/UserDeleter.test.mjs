@@ -4,9 +4,8 @@ import tk from 'timekeeper'
 import moment from 'moment'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import mongoose from 'mongoose'
-import indirectlyImportModels from '../helpers/indirectlyImportModels.js'
-
-const { User, DeletedUser } = indirectlyImportModels(['User', 'DeletedUser'])
+import { DeletedUser } from '../../../../app/src/models/DeletedUser.mjs'
+import { User } from '../../../../app/src/models/User.mjs'
 
 const ObjectId = mongoose.Types.ObjectId
 

@@ -3,7 +3,7 @@ import logger from '@overleaf/logger'
 import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mjs'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import ProjectEntityHandler from '../Project/ProjectEntityHandler.mjs'
-import { Project } from '../../models/Project.js'
+import { Project } from '../../models/Project.mjs'
 import TpdsUpdateSender from './TpdsUpdateSender.mjs'
 import OError from '@overleaf/o-error'
 

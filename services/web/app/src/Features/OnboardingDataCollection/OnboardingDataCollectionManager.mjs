@@ -1,4 +1,4 @@
-import OnboardingDataCollectionModel from '../../models/OnboardingDataCollection.js'
+import OnboardingDataCollectionModel from '../../models/OnboardingDataCollection.mjs'
 import OError from '@overleaf/o-error'
 
 const { OnboardingDataCollection, OnboardingDataCollectionSchema } =

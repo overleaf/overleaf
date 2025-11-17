@@ -1,7 +1,7 @@
 import UserHandler from './UserHandler.mjs'
 import UserDeleter from './UserDeleter.mjs'
 import UserGetter from './UserGetter.mjs'
-import { User } from '../../models/User.js'
+import { User } from '../../models/User.mjs'
 import NewsletterManager from '../Newsletter/NewsletterManager.mjs'
 import logger from '@overleaf/logger'
 import metrics from '@overleaf/metrics'
@@ -21,7 +21,7 @@ import { promisify } from 'node:util'
 import { expressify } from '@overleaf/promise-utils'
 import { acceptsJson } from '../../infrastructure/RequestContentTypeDetection.js'
 import Modules from '../../infrastructure/Modules.js'
-import OneTimeTokenHandler from '../Security/OneTimeTokenHandler.js'
+import OneTimeTokenHandler from '../Security/OneTimeTokenHandler.mjs'
 
 async function _sendSecurityAlertClearedSessions(user) {
   const emailOptions = {

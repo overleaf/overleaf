@@ -14,11 +14,12 @@ import minimist from 'minimist'
 import os from 'os'
 import fs from 'fs'
 import * as csv from 'csv/sync'
-import { parseEmail } from '../../../app/src/Features/Helpers/EmailHelper.js'
+import EmailHelper from '../../../app/src/Features/Helpers/EmailHelper.mjs'
 import UserGetter from '../../../app/src/Features/User/UserGetter.mjs'
 import UserUpdater from '../../../app/src/Features/User/UserUpdater.mjs'
 import UserSessionsManager from '../../../app/src/Features/User/UserSessionsManager.mjs'
 
+const { parseEmail } = EmailHelper
 const hostname = os.hostname()
 const scriptTimestamp = new Date().toISOString()
 

@@ -10,7 +10,7 @@ describe('CooldownMiddleware', function () {
     ctx.CooldownManager = { isProjectOnCooldown: sinon.stub() }
 
     vi.doMock(
-      '../../../../app/src/Features/Cooldown/CooldownManager.js',
+      '../../../../app/src/Features/Cooldown/CooldownManager.mjs',
       () => ({
         default: ctx.CooldownManager,
       })

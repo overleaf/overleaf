@@ -1,8 +1,8 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
-import { Tag } from '../helpers/models/Tag.js'
 import mongodb from 'mongodb-legacy'
 import path from 'node:path'
+import { Tag } from '../../../../app/src/models/Tag.mjs'
 const { ObjectId } = mongodb
 
 const modulePath = path.join(

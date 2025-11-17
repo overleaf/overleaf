@@ -1,8 +1,8 @@
 import Settings from '@overleaf/settings'
-import { User } from '../../models/User.js'
+import { User } from '../../models/User.mjs'
 import { db, ObjectId } from '../../infrastructure/mongodb.js'
 import bcrypt from 'bcrypt'
-import EmailHelper from '../Helpers/EmailHelper.js'
+import EmailHelper from '../Helpers/EmailHelper.mjs'
 
 import {
   InvalidEmailError,
@@ -16,7 +16,7 @@ import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
 import HaveIBeenPwned from './HaveIBeenPwned.mjs'
 import UserAuditLogHandler from '../User/UserAuditLogHandler.mjs'
 import logger from '@overleaf/logger'
-import DiffHelper from '../Helpers/DiffHelper.js'
+import DiffHelper from '../Helpers/DiffHelper.mjs'
 import Metrics from '@overleaf/metrics'
 
 const BCRYPT_ROUNDS = Settings.security.bcryptRounds || 12

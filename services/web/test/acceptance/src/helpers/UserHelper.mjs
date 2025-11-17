@@ -9,7 +9,7 @@ import moment from 'moment'
 import fetch from 'node-fetch'
 import mongodb from 'mongodb-legacy'
 
-import { UserAuditLogEntry } from '../../../../app/src/models/UserAuditLogEntry.js'
+import { UserAuditLogEntry } from '../../../../app/src/models/UserAuditLogEntry.mjs'
 
 // Import the rate limiter so we can clear it between tests
 
