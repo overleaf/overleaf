@@ -11,7 +11,41 @@ const {
   sentryRelease,
 } = getMeta('ol-ExposedSettings')
 
+const buildIdRegex = /(\/build\/|buildId=)[a-z0-9-]+/
+
 const reporterPromise = sentryDsn ? sentryReporter() : nullReporter()
+
+const sanitizeUrl = (url: string) => {
+  return url.replace(buildIdRegex, '$1[redacted]')
+}
+
+const sanitizeUrls = (event: ErrorEvent) => {
+  if (event.request?.url) {
+    event.request.url = sanitizeUrl(event.request.url)
+  }
+  // Clean any breadcrumb URLs too
+  if (event.breadcrumbs) {
+    event.breadcrumbs = event.breadcrumbs.map(breadcrumb => {
+      if (breadcrumb.data?.url) {
+        return {
+          ...breadcrumb,
+          data: {
+            ...breadcrumb.data,
+            url: sanitizeUrl(breadcrumb.data.url),
+          },
+        }
+      }
+      return breadcrumb
+    })
+  }
+  if (event.extra?.pdfUrl) {
+    event.extra.pdfUrl = sanitizeUrl(event.extra.pdfUrl as string)
+  }
+  if (event.extra?.url) {
+    event.extra.url = sanitizeUrl(event.extra.url as string)
+  }
+  return event
+}
 
 const isPropensityNetworkError = (err: ErrorEvent) => {
   const errorBreadcrumbs = err.breadcrumbs?.filter(b => b.level === 'error')
@@ -76,7 +110,6 @@ function sentryReporter() {
             /extensions\//i,
             /^chrome:\/\//i,
           ],
-
           beforeSend(event) {
             // Limit number of events sent to Sentry to 100 events "per page load",
             // (i.e. the cap will be reset if the page is reloaded). This prevent
@@ -111,7 +144,7 @@ function sentryReporter() {
               return null
             }
 
-            return event
+            return sanitizeUrls(event)
           },
         })
 
