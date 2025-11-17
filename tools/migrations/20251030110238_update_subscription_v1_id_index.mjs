@@ -17,6 +17,13 @@ const newIndexes = [
     sparse: true,
   },
 ]
+const tempIndex = [
+  {
+    key: { v1_id: 1 },
+    name: 'v1_id_temp_migration',
+    sparse: false, // Non-sparse so it includes null/missing values
+  },
+]
 
 async function removeNullV1Ids(collection) {
   // Remove the v1_id field from documents where it's null
@@ -64,14 +71,21 @@ async function assertNoDuplicateV1Ids(collection) {
 const migrate = async client => {
   const { db } = client
 
+  // Create temporary non-sparse index to allow queries with notablescan enabled
+  await Helpers.addIndexesToCollection(db.subscriptions, tempIndex)
+
   // pre‑check (keep old index intact if failing)
-  await assertNoDuplicateV1Ids(db.subscriptions)
-  await removeNullV1Ids(db.subscriptions)
+  try {
+    await assertNoDuplicateV1Ids(db.subscriptions)
+    await removeNullV1Ids(db.subscriptions)
+  } catch (error) {
+    await Helpers.dropIndexesFromCollection(tempIndex)
+    throw error
+  }
   await Helpers.addIndexesToCollection(db.subscriptions, newIndexes)
   await Helpers.dropIndexesFromCollection(
     db.subscriptions,
-    // drop the 20251010082205 index too which wasn't working properly
-    originalIndexes.concat({ name: 'v1_id_2' })
+    originalIndexes.concat({ name: 'v1_id_2' }).concat(tempIndex)
   )
 }
 
