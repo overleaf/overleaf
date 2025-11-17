@@ -221,16 +221,26 @@ async function backupChunk(
   }
   const key = makeChunkKey(historyId, chunkToBackup.startVersion)
   logger.debug({ chunkRecord, historyId, projectId, key }, 'backing up chunk')
-  await chunkBackupPersistorForProject.sendStream(
-    chunksBucket,
-    makeChunkKey(historyId, chunkToBackup.startVersion),
-    Stream.Readable.from([chunkBuffer]),
-    {
-      contentType: 'application/json',
-      contentEncoding: 'gzip',
-      contentLength: chunkBuffer.byteLength,
-    }
-  )
+  const timer = setTimeout(function () {
+    logger.warn(
+      { historyId, chunkRecord, size: chunkBuffer.byteLength },
+      'chunk upload still active after 1 minute'
+    )
+  }, 60 * 1000)
+  try {
+    await chunkBackupPersistorForProject.sendStream(
+      chunksBucket,
+      makeChunkKey(historyId, chunkToBackup.startVersion),
+      Stream.Readable.from([chunkBuffer]),
+      {
+        contentType: 'application/json',
+        contentEncoding: 'gzip',
+        contentLength: chunkBuffer.byteLength,
+      }
+    )
+  } finally {
+    clearTimeout(timer)
+  }
 }
 
 async function updateBackupStatus(

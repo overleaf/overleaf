@@ -74,6 +74,12 @@ export async function uploadBlobToBackup(historyId, blob, path, persistor) {
   let backupSource
   let contentEncoding
   let size
+  const timer = setTimeout(function () {
+    logger.warn(
+      { historyId, blob, path, size },
+      'blob upload still active after 1 minute'
+    )
+  }, 60 * 1000)
   try {
     if (blob.getStringLength()) {
       backupSource = filePathCompressed
@@ -109,6 +115,7 @@ export async function uploadBlobToBackup(historyId, blob, path, persistor) {
       }
     )
   } finally {
+    clearTimeout(timer)
     if (backupSource === filePathCompressed) {
       try {
         await fs.promises.rm(filePathCompressed, { force: true })
