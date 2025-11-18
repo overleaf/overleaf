@@ -40,6 +40,10 @@ const sourceEditorToolbarComponents = importOverleafModules(
   'sourceEditorToolbarComponents'
 ) as { import: { default: ElementType }; path: string }[]
 
+const sourceEditorToolbarEndButtons = importOverleafModules(
+  'sourceEditorToolbarEndButtons'
+) as { import: { default: ElementType }; path: string }[]
+
 export const CodeMirrorToolbar = () => {
   const view = useCodeMirrorViewContext()
   const panel = getPanel(view, createToolbarPanel)
@@ -204,6 +208,11 @@ const Toolbar = memo(function Toolbar() {
             className="ol-cm-toolbar-button-group ol-cm-toolbar-end"
             ref={handleButtons}
           >
+            {sourceEditorToolbarEndButtons.map(
+              ({ import: { default: Component }, path }) => (
+                <Component key={path} />
+              )
+            )}
             <ToggleSearchButton state={state} />
             <SwitchToPDFButton />
             <DetacherSynctexControl />
