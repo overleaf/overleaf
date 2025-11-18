@@ -206,6 +206,38 @@ describe('editor', function () {
     })
   })
 
+  describe('cite key search', function () {
+    it('can insert citation from cite key', function () {
+      createNewFile()
+      cy.get('.cm-line').type('\\cite{{}gre')
+      cy.findByRole('listbox').within(() => {
+        cy.findByRole('option').should('contain.text', 'greenwade93').click()
+      })
+      cy.get('.cm-line').should('have.text', '\\cite{greenwade93}')
+    })
+
+    it('updates citation search when bib file is changed', function () {
+      createNewFile()
+      cy.get('.cm-line').type('\\cite{{}new')
+      // Wait a reasonable time to ensure the autocomplete would've appeared if there were any matches
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.wait(200)
+      cy.findByRole('listbox').should('not.exist')
+      cy.findByRole('treeitem', { name: 'sample.bib' }).click()
+      cy.get('.cm-line')
+        .last()
+        .type(
+          '\n@article{{}newkey2024,\n author = {{}Doe, John},\n title = {{}A New Article},\n journal = {{}Journal of Testing},\n year = 2024\n}\n'
+        )
+      createNewFile()
+      cy.get('.cm-line').type('\\cite{{}new')
+      cy.findByRole('listbox').within(() => {
+        cy.findByRole('option').should('contain.text', 'newkey2024').click()
+      })
+      cy.get('.cm-line').should('have.text', '\\cite{newkey2024}')
+    })
+  })
+
   describe('layout selector', function () {
     it('show editor only and switch between editor and pdf', function () {
       cy.findByRole('region', { name: 'PDF preview and logs' }).should(
