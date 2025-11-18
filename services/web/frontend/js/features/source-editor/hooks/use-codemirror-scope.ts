@@ -60,6 +60,7 @@ import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-
 import { SearchQuery } from '@codemirror/search'
 import { beforeChangeDocEffect } from '@/features/source-editor/extensions/before-change-doc'
 import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
+import { useEditorSelectionContext } from '@/shared/context/editor-selection-context'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -105,6 +106,8 @@ function useCodeMirrorScope(view: EditorView) {
   const { showVisual: visual, trackChanges } = useEditorPropertiesContext()
 
   const { referenceKeys, searchLocalReferences } = useReferencesContext()
+
+  const { setEditorSelection } = useEditorSelectionContext()
 
   const ranges = useRangesContext()
   const threads = useThreadsContext()
@@ -335,6 +338,7 @@ function useCodeMirrorScope(view: EditorView) {
           initialSearchQuery: searchQueryRef.current,
           showBoundary,
           handleException,
+          setEditorSelection,
         }),
       })
       view.setState(state)
@@ -364,7 +368,7 @@ function useCodeMirrorScope(view: EditorView) {
     }
     // IMPORTANT: This effect must not depend on anything variable apart from currentDocument,
     // as the editor state is recreated when the effect runs.
-  }, [view, currentDocument, showBoundary, handleException])
+  }, [view, currentDocument, showBoundary, handleException, setEditorSelection])
 
   useEffect(() => {
     if (openDocName) {

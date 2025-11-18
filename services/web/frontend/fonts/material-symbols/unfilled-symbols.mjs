@@ -37,6 +37,7 @@ export default /** @type {const} */ ([
   'integration_instructions',
   'lightbulb',
   'more_vert',
+  'neurology',
   'note_add',
   'open_in_new',
   'password',

@@ -29,7 +29,8 @@
       "@testing-library/cypress",
       "reflect-metadata",
       "vitest/globals",
-      "@testing-library/jest-dom"
+      "@testing-library/jest-dom",
+      "@types/dom-speech-recognition"
     ]
   },
   "include": [

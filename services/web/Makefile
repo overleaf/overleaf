@@ -570,7 +570,6 @@ IMAGE_SCRATCH ?= $(IMAGE_REPO):do-not-use-this-tag-for-deploys--it-is-used-for-e
 IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/package.json \
 	$(MONOREPO)/package-lock.json \
-	$(MONOREPO)/libraries/ai/package.json \
 	$(MONOREPO)/libraries/access-token-encryptor/package.json \
   $(MONOREPO)/libraries/eslint-plugin/package.json \
   $(MONOREPO)/libraries/fetch-utils/package.json \

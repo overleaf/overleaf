@@ -2,7 +2,6 @@
 .eslint*
 .prettier*
 libraries/access-token-encryptor/**
-libraries/ai/**
 libraries/eslint-plugin/**
 libraries/fetch-utils/**
 libraries/logger/**

@@ -30,6 +30,7 @@ import { UserFeaturesProvider } from '@/shared/context/user-features-context'
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 import { IdeRedesignSwitcherProvider } from './ide-redesign-switcher-context'
 import { CommandRegistryProvider } from './command-registry-context'
+import { EditorSelectionProvider } from '@/shared/context/editor-selection-context'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 
 const rootContextProviders = importOverleafModules('rootContextProviders') as {
@@ -74,6 +75,7 @@ export const ReactContextRoot: FC<
     IdeRedesignSwitcherProvider,
     CommandRegistryProvider,
     UserFeaturesProvider,
+    EditorSelectionProvider,
     ...providers,
   }
 
@@ -121,9 +123,11 @@ export const ReactContextRoot: FC<
                                                             <Providers.OutlineProvider>
                                                               <Providers.IdeRedesignSwitcherProvider>
                                                                 <Providers.CommandRegistryProvider>
-                                                                  {
-                                                                    childrenWrappedWithDynamicProviders
-                                                                  }
+                                                                  <Providers.EditorSelectionProvider>
+                                                                    {
+                                                                      childrenWrappedWithDynamicProviders
+                                                                    }
+                                                                  </Providers.EditorSelectionProvider>
                                                                 </Providers.CommandRegistryProvider>
                                                               </Providers.IdeRedesignSwitcherProvider>
                                                             </Providers.OutlineProvider>

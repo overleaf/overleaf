@@ -55,7 +55,7 @@ export type EditorManager = {
   getCurrentDocumentId: () => DocId | null
   setIgnoringExternalUpdates: (value: boolean) => void
   openDocWithId: (docId: string, options?: OpenDocOptions) => void
-  openDoc: (document: Doc, options?: OpenDocOptions) => void
+  openDoc: (document: Doc, options?: OpenDocOptions) => Promise<Doc | undefined>
   openDocs: OpenDocuments
   openFileWithId: (fileId: string) => void
   openInitialDoc: (docId?: string) => void

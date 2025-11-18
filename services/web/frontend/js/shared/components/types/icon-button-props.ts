@@ -3,7 +3,7 @@ import { ButtonProps } from './button-props'
 
 type BaseIconButtonProps = ButtonProps & {
   accessibilityLabel?: string
-  type?: 'button' | 'submit'
+  type?: 'button' | 'submit' | 'reset'
 }
 
 type FilledIconButtonProps = BaseIconButtonProps & {
