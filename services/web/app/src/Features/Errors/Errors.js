@@ -194,6 +194,8 @@ class SAMLRequestDeniedError extends SAMLAuthenticationError {
   }
 }
 
+class SAMLDomainCaptureManagedUserMissingEmailError extends OError {}
+
 class SAMLSessionDataMissing extends BackwardCompatibleError {
   constructor(arg) {
     super(arg)
@@ -377,6 +379,7 @@ module.exports = {
   SAMLResponseAlreadyProcessedError,
   SAMLRequestDeniedError,
   SAMLDomainCaptureRegisterError,
+  SAMLDomainCaptureManagedUserMissingEmailError,
   SLInV2Error,
   ThirdPartyIdentityExistsError,
   ThirdPartyUserNotFoundError,

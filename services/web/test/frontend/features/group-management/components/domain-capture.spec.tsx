@@ -83,24 +83,59 @@ describe('<DomainCapture />', function () {
     })
   })
 
-  it('renders institution error message', function () {
-    const errorMsg = 'Error message'
-    const notificationsInstitution = [
-      {
-        templateKey: 'notification_institution_sso_error',
-        error: {
-          message: errorMsg,
+  describe('notifications', function () {
+    it('renders missing email on account error message', function () {
+      const institutionEmail = 'email@example.com'
+      const notificationsInstitution = [
+        {
+          templateKey: 'notification_email_not_in_account',
+          institutionEmail,
         },
-      },
-    ]
-    cy.window().then(win => {
-      win.metaAttributesCache.set(
-        'ol-notificationsInstitution',
-        notificationsInstitution
+      ]
+      cy.window().then(win => {
+        win.metaAttributesCache.set(
+          'ol-notificationsInstitution',
+          notificationsInstitution
+        )
+      })
+      cy.mount(<DomainCapture />)
+
+      cy.findByRole('alert').should(
+        'contain.text',
+        `Your identity provider returned ${institutionEmail}, which ` +
+          `is not already on your current Overleaf account. You will need to ` +
+          `log out and create a new Overleaf account with ${institutionEmail} ` +
+          `via the SSO log in page. Once this is done, you can ` +
+          `transfer your existing projects to the new account.`
+      )
+      cy.findByRole('link', {
+        name: /transfer your existing projects/i,
+      }).should(
+        'have.attr',
+        'href',
+        '/learn/how-to/How_to_Transfer_Project_Ownership'
       )
     })
-    cy.mount(<DomainCapture />)
 
-    cy.findByRole('alert').should('contain.text', errorMsg)
+    it('renders institution error message', function () {
+      const errorMsg = 'Error message'
+      const notificationsInstitution = [
+        {
+          templateKey: 'notification_institution_sso_error',
+          error: {
+            message: errorMsg,
+          },
+        },
+      ]
+      cy.window().then(win => {
+        win.metaAttributesCache.set(
+          'ol-notificationsInstitution',
+          notificationsInstitution
+        )
+      })
+      cy.mount(<DomainCapture />)
+
+      cy.findByRole('alert').should('contain.text', errorMsg)
+    })
   })
 })
