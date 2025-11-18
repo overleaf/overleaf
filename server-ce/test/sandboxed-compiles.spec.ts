@@ -156,6 +156,7 @@ describe('SandboxedCompiles', function () {
         // The sync button is swapped as the position in the PDF changes.
         // Cypress appears to click on a button that references a stale position.
         // Adding a cy.wait() statement is the most reliable "fix" so far :/
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
         cy.wait(1000)
         cy.findByRole('button', {
           name: 'Go to PDF location in code (Tip: double click on the PDF for best results)',
@@ -309,6 +310,7 @@ describe('SandboxedCompiles', function () {
   })
 
   // https://github.com/overleaf/internal/issues/20216
+  // eslint-disable-next-line mocha/no-skipped-tests
   describe.skip('unavailable in CE', function () {
     if (isExcludedBySharding('CE_CUSTOM_1')) return
     startWith({ pro: false, vars: enabledVars, resetData: true })

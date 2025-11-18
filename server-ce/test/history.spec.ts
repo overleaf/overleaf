@@ -61,7 +61,7 @@ describe('History', function () {
   const CLASS_ADDITION = 'ol-cm-addition-marker'
   const CLASS_DELETION = 'ol-cm-deletion-marker'
 
-  it('should support labels, comparison and download', () => {
+  it('should support labels, comparison and download', function () {
     const { recompile, waitForCompile } = prepareWaitForNextCompileSlot()
     waitForCompile(() => {
       createProject('labels')

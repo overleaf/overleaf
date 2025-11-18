@@ -1,9 +1,8 @@
-import fs from 'fs'
-import path from 'path'
-// @ts-ignore broken package entrypoint
-import pdf from 'pdf-parse/lib/pdf-parse.js'
+import fs from 'node:fs'
+import path from 'node:path'
+import { PDFParse } from 'pdf-parse'
 import AdmZip from 'adm-zip'
-import { setTimeout } from 'timers/promises'
+import { setTimeout } from 'node:timers/promises'
 
 const MAX_ATTEMPTS = 15
 const POLL_INTERVAL = 500
@@ -23,7 +22,7 @@ export async function readFileInZip({
       const zip = new AdmZip(path.resolve(pathToZip))
       const entry = zip
         .getEntries()
-        .find(entry => entry.entryName == fileToRead)
+        .find(entry => entry.entryName === fileToRead)
       if (entry) {
         return entry.getData().toString('utf8')
       } else {
@@ -41,8 +40,15 @@ export async function readPdf(file: string) {
   while (attempt < MAX_ATTEMPTS) {
     if (fs.existsSync(file)) {
       const dataBuffer = fs.readFileSync(path.resolve(file))
-      const { text } = await pdf(dataBuffer)
-      return text
+      const parser = new PDFParse({ data: dataBuffer })
+      try {
+        const result = await parser.getText()
+        return result.text
+      } catch (error) {
+        console.error('PDF parsing failed:', error)
+      } finally {
+        await parser.destroy()
+      }
     }
     await setTimeout(POLL_INTERVAL)
     attempt++

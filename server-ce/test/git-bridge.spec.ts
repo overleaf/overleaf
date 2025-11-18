@@ -65,7 +65,7 @@ describe('git-bridge', function () {
       login(USER)
     })
 
-    it('should render the git-bridge UI in the settings', () => {
+    it('should render the git-bridge UI in the settings', function () {
       maybeClearAllTokens()
       cy.visit('/user/settings')
       cy.findByRole('heading', { name: 'Git integration' })
@@ -147,7 +147,7 @@ describe('git-bridge', function () {
       })
     })
 
-    describe('git access', () => {
+    describe('git access', function () {
       ensureUserExists({ email: 'collaborator-rw@example.com' })
       ensureUserExists({ email: 'collaborator-ro@example.com' })
       ensureUserExists({ email: 'collaborator-link-rw@example.com' })
@@ -156,13 +156,13 @@ describe('git-bridge', function () {
       let projectName: string
       let recompile: () => void
       let waitForCompile: (triggerCompile: () => void) => void
-      beforeEach(() => {
+      beforeEach(function () {
         projectName = uuid()
         createProject(projectName, { open: false }).as('projectId')
         ;({ recompile, waitForCompile } = prepareWaitForNextCompileSlot())
       })
 
-      it('should expose r/w interface to owner', () => {
+      it('should expose r/w interface to owner', function () {
         maybeClearAllTokens()
         waitForCompile(() => {
           openProjectByName(projectName)
@@ -170,7 +170,7 @@ describe('git-bridge', function () {
         checkGitAccess('readAndWrite')
       })
 
-      it('should expose r/w interface to invited r/w collaborator', () => {
+      it('should expose r/w interface to invited r/w collaborator', function () {
         shareProjectByEmailAndAcceptInviteViaDash(
           projectName,
           'collaborator-rw@example.com',
@@ -183,7 +183,7 @@ describe('git-bridge', function () {
         checkGitAccess('readAndWrite')
       })
 
-      it('should expose r/o interface to invited r/o collaborator', () => {
+      it('should expose r/o interface to invited r/o collaborator', function () {
         shareProjectByEmailAndAcceptInviteViaDash(
           projectName,
           'collaborator-ro@example.com',
@@ -196,7 +196,7 @@ describe('git-bridge', function () {
         checkGitAccess('readOnly')
       })
 
-      it('should expose r/w interface to link-sharing r/w collaborator', () => {
+      it('should expose r/w interface to link-sharing r/w collaborator', function () {
         openProjectByName(projectName)
         enableLinkSharing().then(({ linkSharingReadAndWrite }) => {
           const email = 'collaborator-link-rw@example.com'
@@ -213,7 +213,7 @@ describe('git-bridge', function () {
         })
       })
 
-      it('should expose r/o interface to link-sharing r/o collaborator', () => {
+      it('should expose r/o interface to link-sharing r/o collaborator', function () {
         waitForCompile(() => {
           openProjectByName(projectName)
         })
@@ -267,7 +267,7 @@ describe('git-bridge', function () {
               const dir = `/${projectId}`
 
               async function readFile(path: string): Promise<string> {
-                return new Promise((resolve, reject) => {
+                return await new Promise((resolve, reject) => {
                   fs.readFile(path, { encoding: 'utf8' }, (err, blob) => {
                     if (err) return reject(err)
                     resolve(blob as string)
@@ -276,7 +276,7 @@ describe('git-bridge', function () {
               }
 
               async function writeFile(path: string, data: string) {
-                return new Promise<void>((resolve, reject) => {
+                return await new Promise<void>((resolve, reject) => {
                   fs.writeFile(path, data, undefined, err => {
                     if (err) return reject(err)
                     resolve()
@@ -398,8 +398,9 @@ Hello world
               cy.findByText(/\\documentclass/)
                 .parent()
                 .parent()
+                .as('documentclass')
                 .click()
-                .type('% via editor{enter}')
+              cy.get('@documentclass').type('% via editor{enter}')
 
               // Trigger flush via compile
               recompile()
@@ -433,7 +434,7 @@ Hello world
   function checkDisabled() {
     ensureUserExists({ email: USER })
 
-    it('should not render the git-bridge UI in the settings', () => {
+    it('should not render the git-bridge UI in the settings', function () {
       login(USER)
       cy.visit('/user/settings')
       cy.findByRole('heading', { name: 'Git integration' }).should('not.exist')
@@ -454,7 +455,7 @@ Hello world
     })
   }
 
-  describe('disabled in Server Pro', () => {
+  describe('disabled in Server Pro', function () {
     if (isExcludedBySharding('PRO_DEFAULT_1')) return
     startWith({
       pro: true,
@@ -462,7 +463,7 @@ Hello world
     checkDisabled()
   })
 
-  describe('unavailable in CE', () => {
+  describe('unavailable in CE', function () {
     if (isExcludedBySharding('CE_CUSTOM_1')) return
     startWith({
       pro: false,

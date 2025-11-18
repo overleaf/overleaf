@@ -114,11 +114,10 @@ function shareProjectByEmail(
     cy.findByLabelText('Add email address', { selector: 'input' })
       .parents('form')
       .within(() => {
-        cy.findByTestId('add-collaborator-select')
-          .click()
-          .then(() => {
-            cy.findByRole('option', { name: level }).click()
-          })
+        cy.findByTestId('add-collaborator-select').as('select').click()
+        cy.get('@select').then(() => {
+          cy.findByRole('option', { name: level }).click()
+        })
       })
     cy.findByRole('button', { name: 'Invite' }).click()
     cy.findByText('Invite not yet accepted.')
@@ -275,12 +274,12 @@ export function prepareFileUploadTest(binary = false) {
 }
 
 export function testNewFileUpload() {
-  it('can upload text file', () => {
+  it('can upload text file', function () {
     const check = prepareFileUploadTest(false)
     check()
   })
 
-  it('can upload binary file', () => {
+  it('can upload binary file', function () {
     const check = prepareFileUploadTest(true)
     check()
   })

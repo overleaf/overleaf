@@ -13,7 +13,7 @@ import { prepareWaitForNextCompileSlot } from './helpers/compile'
 const USER = 'user@example.com'
 const COLLABORATOR = 'collaborator@example.com'
 
-describe('editor', () => {
+describe('editor', function () {
   if (isExcludedBySharding('PRO_DEFAULT_1')) return
   startWith({ pro: true })
   ensureUserExists({ email: USER })
@@ -23,7 +23,7 @@ describe('editor', () => {
   let projectId: string
   let recompile: () => void
   let waitForCompile: (fn: () => void) => void
-  beforeWithReRunOnTestRetry(function () {
+  beforeWithReRunOnTestRetry(() => {
     projectName = `project-${uuid()}`
     login(USER)
     createProject(projectName, { type: 'Example project', open: false }).then(
@@ -32,7 +32,7 @@ describe('editor', () => {
     ;({ recompile, waitForCompile } = prepareWaitForNextCompileSlot())
   })
 
-  beforeEach(() => {
+  beforeEach(function () {
     login(USER)
     waitForCompile(() => {
       openProjectById(projectId)
@@ -58,7 +58,7 @@ describe('editor', () => {
       changeSpellCheckLanguageTo('Off')
     })
 
-    it('word dictionary and spelling', () => {
+    it('word dictionary and spelling', function () {
       changeSpellCheckLanguageTo('English (American)')
       createNewFile()
       const word = createRandomLetterString()
@@ -109,8 +109,8 @@ describe('editor', () => {
     })
   })
 
-  describe('editor', () => {
-    it('renders jpg', () => {
+  describe('editor', function () {
+    it('renders jpg', function () {
       cy.findByRole('navigation', {
         name: 'Project files and outline',
       })
@@ -122,7 +122,7 @@ describe('editor', () => {
         .should('be.greaterThan', 0)
     })
 
-    it('symbol palette', () => {
+    it('symbol palette', function () {
       createNewFile()
 
       cy.get('button[aria-label="Insert symbol"]').click({
@@ -139,20 +139,20 @@ describe('editor', () => {
     })
   })
 
-  describe('add new file to project', () => {
-    beforeEach(() => {
+  describe('add new file to project', function () {
+    beforeEach(function () {
       cy.findByRole('button', { name: 'New file' }).click()
     })
 
     testNewFileUpload()
 
-    it('should not display import from URL', () => {
+    it('should not display import from URL', function () {
       cy.findByRole('button', { name: 'From external URL' }).should('not.exist')
     })
   })
 
-  describe('left menu', () => {
-    beforeEach(() => {
+  describe('left menu', function () {
+    beforeEach(function () {
       cy.findByRole('navigation', {
         name: 'Project actions',
       })
@@ -160,7 +160,7 @@ describe('editor', () => {
         .click()
     })
 
-    it('can download project sources', () => {
+    it('can download project sources', function () {
       cy.findByRole('link', { name: 'Source' }).click()
       const zipName = projectName.replaceAll('-', '_')
       cy.task('readFileInZip', {
@@ -169,7 +169,7 @@ describe('editor', () => {
       }).should('contain', 'Your introduction goes here')
     })
 
-    it('can download project PDF', () => {
+    it('can download project PDF', function () {
       cy.log('ensure project is compiled')
       cy.findByRole('region', { name: 'PDF preview and logs' }).should(
         'contain.text',
@@ -185,7 +185,7 @@ describe('editor', () => {
       })
     })
 
-    it('word count', () => {
+    it('word count', function () {
       cy.log('ensure project is compiled')
       cy.findByRole('region', { name: 'PDF preview and logs' }).should(
         'contain.text',
@@ -206,8 +206,8 @@ describe('editor', () => {
     })
   })
 
-  describe('layout selector', () => {
-    it('show editor only and switch between editor and pdf', () => {
+  describe('layout selector', function () {
+    it('show editor only and switch between editor and pdf', function () {
       cy.findByRole('region', { name: 'PDF preview and logs' }).should(
         'be.visible'
       )
@@ -238,7 +238,7 @@ describe('editor', () => {
       cy.get('.cm-editor').should('be.visible')
     })
 
-    it('show PDF only and go back to Editor & PDF', () => {
+    it('show PDF only and go back to Editor & PDF', function () {
       cy.findByRole('region', { name: 'PDF preview and logs' }).should(
         'be.visible'
       )
@@ -265,7 +265,7 @@ describe('editor', () => {
       cy.get('.cm-editor').should('be.visible')
     })
 
-    it('PDF in a separate tab (tests editor only)', () => {
+    it('PDF in a separate tab (tests editor only)', function () {
       cy.findByTestId('pdf-viewer').should('be.visible')
       cy.get('.cm-editor').should('be.visible')
 

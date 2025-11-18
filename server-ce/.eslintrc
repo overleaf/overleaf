@@ -21,5 +21,9 @@
   "overrides": [
     // Extra rules for Cypress tests
     { "files": ["**/*.spec.ts"], "extends": ["plugin:cypress/recommended"] }
+  ],
+  "ignorePatterns": [
+    "hotfix/",
+    "develop/"
   ]
 }

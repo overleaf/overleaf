@@ -42,7 +42,8 @@ describe('Project creation and compilation', function () {
       .findByRole('button', { name: 'New file' })
       .click()
     cy.findByRole('dialog').within(() => {
-      cy.findByLabelText('File Name').clear().type(fileName)
+      cy.findByLabelText('File Name').as('filename').clear()
+      cy.get('@filename').type(fileName)
       cy.findByRole('button', { name: 'Create' }).click()
     })
     cy.findByRole('button', { name: fileName }).click()

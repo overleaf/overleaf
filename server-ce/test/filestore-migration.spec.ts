@@ -295,7 +295,7 @@ describe('filestore migration', function () {
 
   // -------------------
   // filestore-migration
-  beforeEach(() => {
+  beforeEach(function () {
     login(email)
     waitForCompile(() => {
       openProjectById(projectId)
@@ -311,7 +311,7 @@ describe('filestore migration', function () {
       }
     })
 
-    it('renders image of example project', () => {
+    it('renders image of example project', function () {
       cy.findByTestId('file-tree').findByText(defaultImage).click()
       cy.get(`[alt="${defaultImage}"]`)
         .should('be.visible')

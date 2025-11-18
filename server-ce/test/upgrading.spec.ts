@@ -24,7 +24,7 @@ describe('Upgrading', function () {
   ) {
     const startOptions = steps.shift()!
 
-    before(async () => {
+    before(async function () {
       cy.log('Create old instance')
     })
     startWith({
@@ -38,7 +38,7 @@ describe('Upgrading', function () {
       cy.log('Create initial user after deleting it')
     })
     ensureUserExists({ email: USER })
-    before(() => {
+    before(function () {
       cy.log('Populate old instance')
       login(USER)
       ;({ recompile, waitForCompile } = prepareWaitForNextCompileSlot())
@@ -76,12 +76,12 @@ describe('Upgrading', function () {
       }
       cy.findByText('History').click()
       for (let i = 0; i < 3; i++) {
-        cy.findByText(new RegExp(`\\\\section\{Old Section ${i}}`))
+        cy.findByText(new RegExp(`\\\\section{Old Section ${i}}`))
       }
     })
 
     for (const step of steps) {
-      before(() => {
+      before(function () {
         cy.log(`Upgrade to version ${step.version}`)
 
         // Navigate way from editor to avoid redirect to /login when the next instance comes up (which slows down tests)
@@ -113,16 +113,16 @@ describe('Upgrading', function () {
 
       step.hook?.()
     }
-    beforeEach(() => {
+    beforeEach(function () {
       login(USER)
     })
 
-    it('should list the old project', () => {
+    it('should list the old project', function () {
       cy.visit('/project')
       cy.findByText(PROJECT_NAME)
     })
 
-    it('should open the old project', () => {
+    it('should open the old project', function () {
       waitForCompile(() => {
         openProjectByName(PROJECT_NAME)
       })
@@ -174,21 +174,21 @@ describe('Upgrading', function () {
       })
     },
   }
-  describe('from 4.2 to latest', () => {
+  describe('from 4.2 to latest', function () {
     testUpgrade([
       optionsFourDotTwo,
       optionsBinaryFilesMigration,
       { version: 'latest' },
     ])
   })
-  describe('from 5.0 to latest', () => {
+  describe('from 5.0 to latest', function () {
     testUpgrade([
       { version: '5.0' },
       optionsBinaryFilesMigration,
       { version: 'latest' },
     ])
   })
-  describe('doc version recovery', () => {
+  describe('doc version recovery', function () {
     testUpgrade([
       optionsFourDotTwo,
       {

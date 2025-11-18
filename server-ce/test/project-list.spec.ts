@@ -6,7 +6,7 @@ import { v4 as uuid } from 'uuid'
 const WITHOUT_PROJECTS_USER = 'user-without-projects@example.com'
 const REGULAR_USER = 'user@example.com'
 
-describe('Project List', () => {
+describe('Project List', function () {
   if (isExcludedBySharding('PRO_DEFAULT_2')) return
   startWith({ pro: true })
 
@@ -15,10 +15,10 @@ describe('Project List', () => {
     return cy.findByText(projectName).parent().parent()
   }
 
-  describe('user with no projects', () => {
+  describe('user with no projects', function () {
     ensureUserExists({ email: WITHOUT_PROJECTS_USER })
 
-    it("'Import from GitHub' is not displayed in the welcome page", () => {
+    it("'Import from GitHub' is not displayed in the welcome page", function () {
       login(WITHOUT_PROJECTS_USER)
       cy.visit('/project')
       cy.findByRole('button', { name: 'Create a new project' }).click()
@@ -28,11 +28,11 @@ describe('Project List', () => {
     })
   })
 
-  describe('user with projects', () => {
+  describe('user with projects', function () {
     const projectName = `test-project-${uuid()}`
     ensureUserExists({ email: REGULAR_USER })
 
-    before(() => {
+    before(function () {
       login(REGULAR_USER)
       createProject(projectName, { type: 'Example project', open: false })
     })
@@ -41,7 +41,7 @@ describe('Project List', () => {
       cy.visit('/project')
     })
 
-    it('Can download project sources', () => {
+    it('Can download project sources', function () {
       findProjectRow(projectName).within(() =>
         cy.findByRole('button', { name: 'Download .zip file' }).click()
       )
@@ -53,7 +53,7 @@ describe('Project List', () => {
       }).should('contain', 'Your introduction goes here')
     })
 
-    it('Can download project PDF', () => {
+    it('Can download project PDF', function () {
       findProjectRow(projectName).within(() =>
         cy.findByRole('button', { name: 'Download PDF' }).click()
       )
@@ -65,7 +65,7 @@ describe('Project List', () => {
       )
     })
 
-    it('can assign and remove tags to projects', () => {
+    it('can assign and remove tags to projects', function () {
       const tagName = uuid().slice(0, 7) // long tag names are truncated in the UI, which affects selectors
       cy.log('select project')
       cy.findByRole('checkbox', { name: `Select ${projectName}` }).check()
@@ -88,7 +88,7 @@ describe('Project List', () => {
       )
     })
 
-    it('can filter by tag', () => {
+    it('can filter by tag', function () {
       cy.log('create a separate project to filter')
       const nonTaggedProjectName = `project-${uuid()}`
       createProject(nonTaggedProjectName, { open: false })

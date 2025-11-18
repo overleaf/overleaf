@@ -75,6 +75,24 @@ pipeline {
             sh 'bin/run -w /overleaf/server-ce/test monorepo npm run format'
           }
         }
+        stage('Lint') {
+          steps {
+            script {
+              waitUntil {
+                return job_npm_install_done
+              }
+            }
+            sh 'bin/run -w /overleaf/server-ce/test monorepo npm run lint -- --format json --output-file reports/eslint.json'
+          }
+          post {
+            always {
+              sh """
+                sed -i 's_"filePath":"/overleaf_"filePath":"/workspace_g' server-ce/test/reports/eslint.json
+              """
+              recordIssues checksAnnotationScope: 'ALL', enabledForFailure: true, failOnError: true, id: 'server-pro-e2e-tests-eslint', name: 'Server-Pro-E2E-Tests eslint', qualityGates: [[integerThreshold: 1, threshold: 1.0, type: 'TOTAL']], sourceCodeRetention: 'LAST_BUILD', tools: [esLint(pattern: 'server-ce/test/reports/eslint.json')]
+            }
+          }
+        }
         stage('Copybara') {
           steps {
             sh 'copybara/bin/sync'
@@ -337,7 +355,7 @@ pipeline {
   post {
     // Collect junit test results for both success and failure case.
     always {
-      junit checksName: 'Server Pro E2E test results', testResults: 'server-ce/test/reports/junit-*.xml'
+      junit checksName: 'Server-Pro-E2E-Tests results', testResults: 'server-ce/test/reports/junit-*.xml'
     }
     // Ensure tear down of test containers, remove CE docker images, then run general Jenkins VM cleanup.
     cleanup {

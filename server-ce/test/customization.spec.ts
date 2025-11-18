@@ -1,18 +1,18 @@
 import { isExcludedBySharding, startWith } from './helpers/config'
 
-describe('Customization', () => {
+describe('Customization', function () {
   if (isExcludedBySharding('CE_CUSTOM_1')) return
 
-  describe('default settings', () => {
+  describe('default settings', function () {
     startWith({})
 
-    it('should display the default right footer', () => {
+    it('should display the default right footer', function () {
       cy.visit('/')
       cy.get('footer').findByRole('link', { name: 'Fork on GitHub!' })
     })
   })
 
-  describe('custom settings', () => {
+  describe('custom settings', function () {
     startWith({
       vars: {
         OVERLEAF_APP_NAME: 'CUSTOM APP NAME',
@@ -23,16 +23,16 @@ describe('Customization', () => {
       },
     })
 
-    it('should display custom name', () => {
+    it('should display custom name', function () {
       cy.visit('/')
       cy.get('nav').findByText('CUSTOM APP NAME')
     })
 
-    it('should display custom left footer', () => {
+    it('should display custom left footer', function () {
       cy.visit('/')
       cy.get('footer').findByText('CUSTOM LEFT FOOTER')
     })
-    it('should display custom right footer', () => {
+    it('should display custom right footer', function () {
       cy.visit('/')
       cy.get('footer').findByText('CUSTOM RIGHT FOOTER')
     })

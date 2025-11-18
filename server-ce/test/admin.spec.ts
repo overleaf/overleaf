@@ -12,7 +12,7 @@ import { openEmail } from './helpers/email'
 
 describe('admin panel', function () {
   function registrationTests() {
-    it('via GUI and opening URL manually', () => {
+    it('via GUI and opening URL manually', function () {
       const user = `${uuid()}@example.com`
       cy.findByLabelText('Emails to register new users').type(user + '{enter}')
 
@@ -24,7 +24,7 @@ describe('admin panel', function () {
         })
     })
 
-    it('via GUI and email', () => {
+    it('via GUI and email', function () {
       const user = `${uuid()}@example.com`
       cy.findByLabelText('Emails to register new users').type(user + '{enter}')
 
@@ -49,7 +49,7 @@ describe('admin panel', function () {
         activateUser(url)
       })
     })
-    it('via script and opening URL manually', () => {
+    it('via script and opening URL manually', function () {
       const user = `${uuid()}@example.com`
       let url: string
       cy.then(async () => {
@@ -59,7 +59,7 @@ describe('admin panel', function () {
         activateUser(url)
       })
     })
-    it('via script and email', () => {
+    it('via script and email', function () {
       const user = `${uuid()}@example.com`
       let url: string
       cy.then(async () => {
@@ -81,7 +81,7 @@ describe('admin panel', function () {
     })
   }
 
-  describe('in CE', () => {
+  describe('in CE', function () {
     if (isExcludedBySharding('CE_DEFAULT')) return
     startWith({ pro: false, version: 'latest' })
     const admin = 'admin@example.com'
@@ -89,8 +89,8 @@ describe('admin panel', function () {
     ensureUserExists({ email: admin, isAdmin: true })
     ensureUserExists({ email: user })
 
-    describe('create users', () => {
-      beforeEach(() => {
+    describe('create users', function () {
+      beforeEach(function () {
         login(admin)
         cy.visit('/project')
         cy.findByRole('menuitem', { name: 'Admin' }).click()
@@ -100,7 +100,7 @@ describe('admin panel', function () {
     })
   })
 
-  describe('in server pro', () => {
+  describe('in server pro', function () {
     const admin = 'admin@example.com'
     const user1 = 'user@example.com'
     const user2 = 'user2@example.com'
@@ -135,13 +135,13 @@ describe('admin panel', function () {
       )
     })
 
-    describe('admin menu items', () => {
-      beforeEach(() => {
+    describe('admin menu items', function () {
+      beforeEach(function () {
         login(admin)
         cy.visit('/project')
       })
 
-      it('displays expected admin menu items', () => {
+      it('displays expected admin menu items', function () {
         const menuitems = ['Manage Site', 'Manage Users', 'Project URL Lookup']
         menuitems.forEach(name => {
           cy.findByRole('menuitem', { name: 'Admin' }).click()
@@ -153,15 +153,15 @@ describe('admin panel', function () {
       })
     })
 
-    describe('manage site', () => {
-      beforeEach(() => {
+    describe('manage site', function () {
+      beforeEach(function () {
         login(admin)
         cy.visit('/project')
         cy.findByRole('menuitem', { name: 'Admin' }).click()
         cy.findByRole('menuitem', { name: 'Manage Site' }).click()
       })
 
-      it('publish and clear admin messages', () => {
+      it('publish and clear admin messages', function () {
         const message = 'Admin Message ' + uuid()
 
         cy.log('create system message')
@@ -189,15 +189,15 @@ describe('admin panel', function () {
       })
     })
 
-    describe('manage users', () => {
-      beforeEach(() => {
+    describe('manage users', function () {
+      beforeEach(function () {
         login(admin)
         cy.visit('/project')
         cy.findByRole('menuitem', { name: 'Admin' }).click()
         cy.findByRole('menuitem', { name: 'Manage Users' }).click()
       })
 
-      it('displays expected tabs', () => {
+      it('displays expected tabs', function () {
         const tabs = ['Users', 'License Usage']
         cy.findAllByRole('tab').should('have.length', tabs.length)
         tabs.forEach(tabName => {
@@ -205,21 +205,21 @@ describe('admin panel', function () {
         })
       })
 
-      it('license usage tab', () => {
+      it('license usage tab', function () {
         cy.get('a').contains('License Usage').click()
         cy.findByText(
           'An active user is one who has opened a project in this Server Pro instance in the last 12 months.'
         )
       })
 
-      describe('create users', () => {
-        beforeEach(() => {
+      describe('create users', function () {
+        beforeEach(function () {
           cy.get('a').contains('New User').click()
         })
         registrationTests()
       })
 
-      it('user list RegExp search', () => {
+      it('user list RegExp search', function () {
         cy.findByLabelText('RegExp').click()
         cy.findByPlaceholderText('Search users by email or id…').type(
           'user[0-9]{enter}'
@@ -229,8 +229,8 @@ describe('admin panel', function () {
       })
     })
 
-    describe('user page', () => {
-      beforeEach(() => {
+    describe('user page', function () {
+      beforeEach(function () {
         login(admin)
         cy.visit('/project')
         cy.findByRole('menuitem', { name: 'Admin' }).click()
@@ -242,7 +242,7 @@ describe('admin panel', function () {
         cy.url().should('match', /\/admin\/user\/[a-fA-F0-9]{24}/)
       })
 
-      it('displays expected tabs', () => {
+      it('displays expected tabs', function () {
         const tabs = [
           'User Info',
           'Projects',
@@ -256,18 +256,18 @@ describe('admin panel', function () {
         })
       })
 
-      describe('user info tab', () => {
-        beforeEach(() => {
+      describe('user info tab', function () {
+        beforeEach(function () {
           cy.findByRole('tab', { name: 'User Info' }).click()
         })
 
-        it('displays required sections', () => {
+        it('displays required sections', function () {
           // not exhaustive list, checks the tab content is rendered
           cy.findByText('Profile')
           cy.findByText('Editor Settings')
         })
 
-        it('should not display SaaS-only sections', () => {
+        it('should not display SaaS-only sections', function () {
           cy.findByLabelText('Referred User Count').should('not.exist')
           cy.findByRole('heading', { name: /Split Test Assignments/ }).should(
             'not.exist'
@@ -285,7 +285,7 @@ describe('admin panel', function () {
         })
       })
 
-      it('transfer project ownership', () => {
+      it('transfer project ownership', function () {
         cy.log("access project admin through owners' project list")
         cy.findByRole('tablist').within(() => {
           cy.findByRole('tab', { name: 'Projects' }).click()
@@ -326,13 +326,13 @@ describe('admin panel', function () {
       })
     })
 
-    describe('project page', () => {
-      beforeEach(() => {
+    describe('project page', function () {
+      beforeEach(function () {
         login(admin)
         cy.visit(`/admin/project/${testProjectId}`)
       })
 
-      it('displays expected tabs', () => {
+      it('displays expected tabs', function () {
         const tabs = ['Project Info', 'Deleted Docs', 'Audit Log']
         cy.findAllByRole('tab').should('have.length', tabs.length)
         tabs.forEach(tabName => {
@@ -341,7 +341,7 @@ describe('admin panel', function () {
       })
     })
 
-    it('restore deleted projects', () => {
+    it('restore deleted projects', function () {
       login(user1)
       cy.visit('/project')
 

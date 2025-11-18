@@ -53,7 +53,7 @@ export default defineConfig({
   viewportWidth: 1024,
   e2e: {
     baseUrl: 'http://localhost',
-    setupNodeEvents(on, config) {
+    setupNodeEvents(on) {
       on('task', {
         readPdf,
         readFileInZip,

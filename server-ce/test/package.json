@@ -7,14 +7,15 @@
     "cypress:open": "cypress open --e2e --browser chrome",
     "cypress:run": "cypress run --e2e --browser chrome",
     "format": "prettier --list-different $PWD/'**/*.{js,mjs,ts,tsx}'",
-    "format:fix": "prettier --write $PWD/'**/*.{js,mjs,ts,tsx}'"
+    "format:fix": "prettier --write $PWD/'**/*.{js,mjs,ts,tsx}'",
+    "lint": "eslint --max-warnings 0 --format unix --ext .js,.jsx,.mjs,.ts,.tsx .",
+    "lint:fix": "eslint --fix --ext .js,.jsx,.mjs,.ts,.tsx ."
   },
   "devDependencies": {
     "@isomorphic-git/lightning-fs": "^4.6.0",
     "@overleaf/validation-tools": "*",
     "@testing-library/cypress": "^10.0.3",
     "@types/adm-zip": "^0.5.7",
-    "@types/pdf-parse": "^1.1.5",
     "@types/uuid": "^9.0.8",
     "adm-zip": "^0.5.12",
     "body-parser": "^1.20.3",
@@ -24,7 +25,7 @@
     "isomorphic-git": "^1.33.1",
     "js-yaml": "^4.1.1",
     "mocha-junit-reporter": "^2.2.1",
-    "pdf-parse": "^1.1.1",
+    "pdf-parse": "^2.3.0",
     "uuid": "^9.0.1",
     "zod-validation-error": "^4.0.1"
   }

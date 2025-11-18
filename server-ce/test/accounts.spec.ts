@@ -16,7 +16,7 @@ describe('Accounts', function () {
     cy.url().should('include', '/login')
   })
 
-  it('should render the email on the user activate screen', () => {
+  it('should render the email on the user activate screen', function () {
     const email = 'not-activated-user@example.com'
     cy.then(async () => {
       const { url } = await createMongoUser({ email })

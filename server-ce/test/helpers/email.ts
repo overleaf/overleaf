@@ -7,7 +7,10 @@
  */
 export function openEmail<T>(
   subject: string | RegExp,
-  runner: (frame: Cypress.Chainable<JQuery<any>>, args: T) => void,
+  runner: (
+    frame: Cypress.Chainable<Cypress.JQueryWithSelector<any>>,
+    args: T
+  ) => void,
   args?: T
 ) {
   const runnerS = runner.toString()
@@ -28,9 +31,11 @@ export function openEmail<T>(
       // Use force as the subject is partially hidden
       cy.contains(subject).click({ force: true })
       cy.log('wait for iframe loading')
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
       cy.wait(1000)
       cy.get('iframe[id="messagecontframe"]').then(frame => {
         // runnerS='(frame, args) => { runner body }'. Extract the runnable function.
+        // eslint-disable-next-line no-new-func
         const runner = new Function('return ' + runnerS)()
         runner(cy.wrap(frame.prop('contentWindow').document.body), args)
       })

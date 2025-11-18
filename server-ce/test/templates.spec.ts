@@ -10,7 +10,7 @@ const TEMPLATES_USER = 'templates@example.com'
 // Re-use value for "exists" and "does not exist" tests
 const LABEL_BROWSE_TEMPLATES = 'Browse templates'
 
-describe('Templates', () => {
+describe('Templates', function () {
   ensureUserExists({ email: TEMPLATES_USER })
   ensureUserExists({ email: WITHOUT_PROJECTS_USER })
 
@@ -31,7 +31,7 @@ describe('Templates', () => {
     }
   }
 
-  describe('enabled in Server Pro', () => {
+  describe('enabled in Server Pro', function () {
     if (isExcludedBySharding('PRO_CUSTOM_2')) return
     startWith({
       pro: true,
@@ -40,7 +40,7 @@ describe('Templates', () => {
     ensureUserExists({ email: REGULAR_USER })
     ensureUserExists({ email: ADMIN_USER, isAdmin: true })
 
-    it('should show templates link on welcome page', () => {
+    it('should show templates link on welcome page', function () {
       login(WITHOUT_PROJECTS_USER)
       cy.visit('/')
       cy.findByRole('link', { name: LABEL_BROWSE_TEMPLATES })
@@ -49,7 +49,7 @@ describe('Templates', () => {
       cy.url().should('match', /\/templates$/)
     })
 
-    it('should have templates feature', () => {
+    it('should have templates feature', function () {
       login(TEMPLATES_USER)
       const name = `Template ${Date.now()}`
       const description = `Template Description ${Date.now()}`
@@ -64,11 +64,8 @@ describe('Templates', () => {
         .click()
       cy.findByText('Manage Template').click()
 
-      cy.findByText('Template Description')
-        .click()
-        .parent()
-        .get('textarea')
-        .type(description)
+      cy.findByText('Template Description').as('description').click()
+      cy.get('@description').parent().get('textarea').type(description)
       cy.findByText('Publish').click()
       cy.findByText('Publishing…').parent().should('be.disabled')
       cy.findByText('Publish').should('not.exist')
@@ -229,7 +226,7 @@ describe('Templates', () => {
   })
 
   function checkDisabled() {
-    it('should not have templates feature', () => {
+    it('should not have templates feature', function () {
       login(TEMPLATES_USER)
 
       cy.visit('/')
@@ -254,7 +251,7 @@ describe('Templates', () => {
       cy.findAllByText('All Templates').should('not.exist')
     })
 
-    it('should not show templates link on welcome page', () => {
+    it('should not show templates link on welcome page', function () {
       login(WITHOUT_PROJECTS_USER)
       cy.visit('/')
       cy.findByText(NEW_PROJECT_BUTTON_MATCHER) // wait for lazy loading
@@ -262,13 +259,13 @@ describe('Templates', () => {
     })
   }
 
-  describe('disabled Server Pro', () => {
+  describe('disabled Server Pro', function () {
     if (isExcludedBySharding('PRO_DEFAULT_2')) return
     startWith({ pro: true })
     checkDisabled()
   })
 
-  describe('unavailable in CE', () => {
+  describe('unavailable in CE', function () {
     if (isExcludedBySharding('CE_CUSTOM_1')) return
     startWith({
       pro: false,

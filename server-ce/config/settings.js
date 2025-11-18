@@ -14,7 +14,7 @@
  */
 let redisConfig, siteUrl
 let e
-const Path = require('path')
+const Path = require('node:path')
 
 // These credentials are used for authenticating api requests
 // between services that may need to go over public channels
@@ -491,9 +491,9 @@ if (
 // With lots of incoming and outgoing HTTP connections to different services,
 // sometimes long running, it is a good idea to increase the default number
 // of sockets that Node will hold open.
-const http = require('http')
+const http = require('node:http')
 http.globalAgent.maxSockets = 300
-const https = require('https')
+const https = require('node:https')
 https.globalAgent.maxSockets = 300
 
 module.exports = settings

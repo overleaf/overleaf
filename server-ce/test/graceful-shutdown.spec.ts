@@ -28,7 +28,7 @@ describe('GracefulShutdown', function () {
   ensureUserExists({ email: USER })
 
   let projectId: string
-  it('should display banner and flush changes out of redis', () => {
+  it('should display banner and flush changes out of redis', function () {
     bringServerProBackUp()
     login(USER)
     const { recompile, waitForCompile } = prepareWaitForNextCompileSlot()
