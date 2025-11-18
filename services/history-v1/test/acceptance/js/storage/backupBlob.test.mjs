@@ -152,6 +152,40 @@ describe('backupBlob', function () {
     })
   })
 
+  describe('when uploadBlobToBackup fails', function () {
+    let blob
+    let historyId
+    let mockPersistor
+    let uploadError
+
+    beforeEach(async function () {
+      blob = await makeBlobForFile(filePath)
+      historyId = 'abc123def456abc789def123'
+      uploadError = new Error('Upload failed')
+
+      // Create a mock persistor that rejects on sendStream
+      mockPersistor = {
+        sendStream: async () => {
+          throw uploadError
+        },
+      }
+    })
+
+    it('rethrows the error and does not record the blob as backed up', async function () {
+      await expect(
+        backupBlob(historyId, blob, filePath, mockPersistor)
+      ).to.be.rejectedWith('Upload failed')
+
+      const record = await backedUpBlobs.findOne({
+        _id: new ObjectId(historyId),
+        blobs: {
+          $elemMatch: { $eq: new Binary(Buffer.from(blob.getHash(), 'hex')) },
+        },
+      })
+      expect(record).to.not.exist
+    })
+  })
+
   const cases = [
     {
       name: 'text file',

@@ -240,11 +240,13 @@ export async function backupBlob(historyId, blob, tmpPath, persistor) {
       // record that we backed it up already
       await storeBlobBackup(projectId, hash)
       recordBackupConclusion('failure', 'already_backed_up')
+      // Blob already backed up so report success
       return
     }
-    // eventually queue this for retry - for now this will be fixed by running the script
     recordBackupConclusion('failure')
     logger.warn({ error, projectId, hash }, 'Failed to upload blob to backup')
+    // Always throw an exception if the blob is not backed up
+    throw error
   } finally {
     logger.debug({ projectId, hash }, 'Ended blob backup')
   }
