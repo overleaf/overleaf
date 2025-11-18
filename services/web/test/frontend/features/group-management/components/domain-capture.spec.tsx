@@ -5,6 +5,7 @@ describe('<DomainCapture />', function () {
     this.email = 'user@example.com'
     this.groupName = 'test-group'
     this.ssoInitPath = '/sso/init/path'
+    this.notificationsInstitution = []
 
     cy.window().then(win => {
       win.metaAttributesCache.set('ol-user', {
@@ -15,6 +16,10 @@ describe('<DomainCapture />', function () {
       win.metaAttributesCache.set('ol-email', this.email)
       win.metaAttributesCache.set('ol-groupName', this.groupName)
       win.metaAttributesCache.set('ol-ssoInitPath', this.ssoInitPath)
+      win.metaAttributesCache.set(
+        'ol-notificationsInstitution',
+        this.notificationsInstitution
+      )
     })
 
     cy.mount(<DomainCapture />)
@@ -76,5 +81,26 @@ describe('<DomainCapture />', function () {
         '/user/settings'
       )
     })
+  })
+
+  it('renders institution error message', function () {
+    const errorMsg = 'Error message'
+    const notificationsInstitution = [
+      {
+        templateKey: 'notification_institution_sso_error',
+        error: {
+          message: errorMsg,
+        },
+      },
+    ]
+    cy.window().then(win => {
+      win.metaAttributesCache.set(
+        'ol-notificationsInstitution',
+        notificationsInstitution
+      )
+    })
+    cy.mount(<DomainCapture />)
+
+    cy.findByRole('alert').should('contain.text', errorMsg)
   })
 })
