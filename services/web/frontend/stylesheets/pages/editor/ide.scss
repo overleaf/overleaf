@@ -20,10 +20,7 @@ $editor-toggler-bg-dark-color: color.adjust(
 }
 
 #ide-root {
-  display: flex;
-  flex-direction: column;
-  height: 100vh; /* for backwards compatibility */
-  height: 100dvh; /* needed for mobile devices */
+  @include full-height-stacked-page;
 
   .global-alerts {
     position: absolute;

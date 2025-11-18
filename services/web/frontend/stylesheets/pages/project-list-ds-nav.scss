@@ -17,10 +17,8 @@ body {
 }
 
 .project-ds-nav-page {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  height: 100dvh;
+  @include full-height-stacked-page;
+
   color: var(--content-secondary);
 
   // NOTE-AC: This code can be eliminated when we remove sidebar-navigation-ui-update

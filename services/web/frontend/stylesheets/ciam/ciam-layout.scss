@@ -1,23 +1,23 @@
-.ciam-layout {
-  padding: var(--ds-spacing-350);
-  display: flex;
-  min-height: 100vh;
-  flex-direction: column;
+.overleaf-ds-logo {
+  background-image: url('../../../frontend/js/shared/svgs/overleaf-a-ds-solution-mallard.svg');
+}
 
-  @include ds-body-md-regular;
+.ciam-layout {
+  @include full-height-stacked-page;
 }
 
 .ciam-enabled {
+  @include ds-body-md-regular;
+
   font-family: var(--ds-font-family-sans), sans-serif;
-  color: var(--ds-color-text-primary);
-  font-size: var(--ds-font-size-400);
-  line-height: 1.5;
 
   .ciam-container {
     flex: 1 1 auto;
+    padding: var(--ds-spacing-350);
   }
 
   .brand {
+    flex-shrink: 0;
     background-repeat: no-repeat;
     background-position: center center;
     background-size: contain;
@@ -33,15 +33,22 @@
 
   h1 {
     @include ds-heading-sm-semibold;
+
+    padding-bottom: var(--ds-spacing-200);
+    margin: 0;
   }
 
   .ciam-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-spacing-400);
+    background-color: var(--bg-light-primary);
     box-shadow:
       0 4px 6px -4px rgb(0 0 0 / 10%),
       0 1px 29px -3px rgb(0 0 0 / 16%);
     padding: var(--ds-spacing-800) var(--ds-spacing-400);
     border-radius: var(--ds-border-radius-400);
-    max-width: 460px;
+    max-width: 464px;
     margin: var(--ds-spacing-400) auto;
 
     @include media-breakpoint-up(sm) {
@@ -49,22 +56,55 @@
     }
   }
 
-  footer {
+  .ciam-disclaimers p {
+    @include ds-body-sm-regular;
+
+    padding-bottom: var(--ds-spacing-250);
+    margin: 0;
+  }
+
+  .ciam-card-separator {
+    margin: var(--ds-spacing-500) 0;
+    height: 0;
+    border-top: solid 1px var(--ds-grey-20);
+  }
+
+  .ciam-card-footer {
     display: flex;
-    gap: var(--ds-spacing-600);
-    text-transform: uppercase;
-    justify-content: center;
-    margin: var(--ds-spacing-350) auto;
+    flex-direction: column;
+    gap: var(--ds-spacing-250);
 
-    @include media-breakpoint-up(sm) {
-      margin: var(--ds-spacing-350) var(--ds-spacing-800);
-      justify-content: start;
-    }
-
-    a {
-      text-decoration: none;
-
+    p {
       @include ds-body-sm-regular;
+
+      margin-bottom: 0;
+    }
+  }
+
+  .ciam-footer-ds-logo {
+    text-align: center;
+    padding: var(--ds-spacing-200) 0;
+  }
+
+  footer {
+    .footer-links {
+      display: flex;
+      gap: var(--ds-spacing-600);
+      justify-content: center;
+      padding: var(--ds-spacing-350) 0;
+      margin: 0 auto var(--spacing-15) auto;
+
+      @include media-breakpoint-up(sm) {
+        margin-left: var(--ds-spacing-800);
+        margin-right: var(--ds-spacing-800);
+        justify-content: start;
+      }
+
+      a {
+        text-decoration: none;
+
+        @include ds-body-sm-regular;
+      }
     }
   }
 }

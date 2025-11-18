@@ -1,0 +1,27 @@
+include terms_of_service
+include recaptcha
+
+mixin ciamLogo
+	a.brand.overleaf-ds-logo(href='/' aria-label='Overleaf')
+
+mixin ciamCardSeparator
+	hr.ciam-card-separator
+
+mixin ciamCardFooter
+	.ciam-card-footer
+		+ciamCardSeparator
+		.ciam-footer-ds-logo
+			img(
+				src=buildImgPath('digital-science/digital-science.svg')
+				alt='Digital Science'
+			)
+		p
+			| !{translate('advancing_research_with', { linkOverleaf: 'https://www.overleaf.com', linkPapers: 'https://www.papersapp.com/', linkDS: 'https://www.digital-science.com/products/' })}
+
+mixin ciamTermsOfServiceAgreement
+	p
+		+termsOfServiceAgreementContent
+
+mixin ciamRecaptchaConditions
+	p
+		+recaptchaConditionsContent

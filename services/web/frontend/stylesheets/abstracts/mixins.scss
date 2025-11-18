@@ -230,3 +230,15 @@
   background-color: $input-disabled-bg;
   border-color: $input-disabled-border-color;
 }
+
+@mixin full-viewport-height {
+  height: 100vh; /* for backwards compatibility */
+  height: 100dvh; /* needed for mobile devices */
+}
+
+@mixin full-height-stacked-page {
+  @include full-viewport-height;
+
+  display: flex;
+  flex-direction: column;
+}

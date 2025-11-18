@@ -1,0 +1,24 @@
+@import 'ds-design-system';
+
+.ciam-register-container {
+  @include full-viewport-height;
+
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+}
+
+.ciam-register-columns {
+  display: flex;
+  flex-grow: 1;
+}
+
+.ciam-register-login-link {
+  text-align: center;
+  margin: var(--ds-spacing-200) 0;
+}
+
+.ciam-work-uni-sso {
+  padding-top: var(--ds-spacing-200);
+  margin-bottom: var(--ds-spacing-400);
+}
