@@ -53,6 +53,7 @@ const db = {
   migrations: internalDb.collection('migrations'),
   notifications: internalDb.collection('notifications'),
   emailNotifications: internalDb.collection('emailNotifications'),
+  notificationsPreferences: internalDb.collection('notificationsPreferences'),
   oauthAccessTokens: internalDb.collection('oauthAccessTokens'),
   oauthApplications: internalDb.collection('oauthApplications'),
   oauthAuthorizationCodes: internalDb.collection('oauthAuthorizationCodes'),
