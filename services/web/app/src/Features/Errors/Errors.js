@@ -188,6 +188,12 @@ class SAMLEmailNotRecognizedError extends SAMLAuthenticationError {
 
 class SAMLDomainCaptureRegisterError extends SAMLAuthenticationError {}
 
+class SAMLRequestDeniedError extends SAMLAuthenticationError {
+  get i18nKey() {
+    return 'saml_request_denied_error'
+  }
+}
+
 class SAMLSessionDataMissing extends BackwardCompatibleError {
   constructor(arg) {
     super(arg)
@@ -369,6 +375,7 @@ module.exports = {
   SAMLLoginFailureError,
   SAMLEmailNotRecognizedError,
   SAMLResponseAlreadyProcessedError,
+  SAMLRequestDeniedError,
   SAMLDomainCaptureRegisterError,
   SLInV2Error,
   ThirdPartyIdentityExistsError,

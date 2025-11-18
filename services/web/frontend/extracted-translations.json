@@ -1522,6 +1522,7 @@
   "saml_login_identity_not_found_error": "",
   "saml_metadata": "",
   "saml_missing_signature_error": "",
+  "saml_request_denied_error": "",
   "saml_response": "",
   "save": "",
   "save_20_percent": "",

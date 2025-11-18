@@ -1977,6 +1977,7 @@
   "saml_metadata": "Overleaf SAML Metadata",
   "saml_missing_signature_error": "Sorry, the information received from your identity provider is not signed (both response and assertion signatures are required).  Please contact your administrator for more information.",
   "saml_missing_user_attribute": "There was a problem with your Single Sign-on authentication. Your organization did not provide the required information to complete authentication. Please contact your administrator for more information.",
+  "saml_request_denied_error": "Sorry, your identity provider denied the request to authenticate you. Please contact your administrator for more information.",
   "saml_response": "SAML Response",
   "save": "Save",
   "save_20_percent": "save 20%",
