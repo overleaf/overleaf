@@ -7,6 +7,10 @@
   --editor-tour-tooltip-link-hover-color: var(--link-ui-hover);
   --editor-tour-tooltip-link-visited-color: var(--link-ui-visited);
 
+  .material-symbols {
+    color: var(--bs-popover-header-color);
+  }
+
   a {
     color: var(--editor-tour-tooltip-link-color);
 
