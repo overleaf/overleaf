@@ -542,6 +542,12 @@ async function projectListPage(req, res, next) {
     'themed-project-dashboard'
   )
 
+  const userSettings = await UserSettingsHelper.buildUserSettings(
+    req,
+    res,
+    user
+  )
+
   res.render('project/list-react', {
     title: 'your_projects',
     usersBestSubscription,
@@ -550,7 +556,7 @@ async function projectListPage(req, res, next) {
     user,
     userAffiliations,
     userEmails,
-    userSettings: UserSettingsHelper.buildUserSettings(user),
+    userSettings,
     reconfirmedViaSAML,
     allInReconfirmNotificationPeriods,
     survey,

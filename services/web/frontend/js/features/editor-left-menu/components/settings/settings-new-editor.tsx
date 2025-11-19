@@ -4,22 +4,27 @@ import { useSwitchEnableNewEditorState } from '@/features/ide-redesign/hooks/use
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useCallback } from 'react'
 import {
-  canUseNewEditorAsNewUser,
+  canUseNewEditor,
   useIsNewEditorEnabled,
 } from '@/features/ide-redesign/utils/new-editor-utils'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 
 export default function SettingsNewEditor() {
   const { t } = useTranslation()
   const { setEditorRedesignStatus } = useSwitchEnableNewEditorState()
   const { setLeftMenuShown } = useLayoutContext()
   const enabled = useIsNewEditorEnabled()
-  const show = canUseNewEditorAsNewUser()
+  const show = canUseNewEditor()
+  const { sendEvent } = useEditorAnalytics()
 
   const onChange = useCallback(
     (newValue: boolean) => {
+      sendEvent('switch-to-new-editor', {
+        location: 'left-menu',
+      })
       setEditorRedesignStatus(newValue).then(() => setLeftMenuShown(false))
     },
-    [setEditorRedesignStatus, setLeftMenuShown]
+    [setEditorRedesignStatus, setLeftMenuShown, sendEvent]
   )
 
   if (!show) {
@@ -40,7 +45,7 @@ export default function SettingsNewEditor() {
           label: t('off'),
         },
       ]}
-      label={t('new_editor')}
+      label={t('new_editor_look')}
       name="new-editor-setting"
     />
   )

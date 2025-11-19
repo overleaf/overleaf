@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react'
+import { forwardRef, memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
@@ -7,7 +7,7 @@ import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import OLButton from '@/shared/components/ol/ol-button'
 import OLBadge from '@/shared/components/ol/ol-badge'
 
-function PdfHybridLogsButton() {
+const PdfHybridLogsButton = forwardRef<HTMLButtonElement>((_, ref) => {
   const { error, logEntries, toggleLogs, showLogs, stoppedOnFirstError } =
     useCompileContext()
 
@@ -32,6 +32,7 @@ function PdfHybridLogsButton() {
       overlayProps={{ placement: 'bottom' }}
     >
       <OLButton
+        ref={ref}
         variant="link"
         disabled={Boolean(error || stoppedOnFirstError)}
         active={showLogs}
@@ -50,6 +51,8 @@ function PdfHybridLogsButton() {
       </OLButton>
     </OLTooltip>
   )
-}
+})
+
+PdfHybridLogsButton.displayName = 'PdfHybridLogsButton'
 
 export default memo(PdfHybridLogsButton)

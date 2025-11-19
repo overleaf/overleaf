@@ -864,6 +864,12 @@ const _ProjectController = {
         !userHasPremiumSub &&
         !userInNonIndividualSub
 
+      const userSettings = await UserSettingsHelper.buildUserSettings(
+        req,
+        res,
+        user
+      )
+
       res.render(template, {
         title: project.name,
         priority_title: true,
@@ -902,7 +908,7 @@ const _ProjectController = {
           isMemberOfGroupSubscription: userIsMemberOfGroupSubscription,
           hasInstitutionLicence: userHasInstitutionLicence,
         },
-        userSettings: UserSettingsHelper.buildUserSettings(user),
+        userSettings,
         labsExperiments: user.labsExperiments ?? [],
         privilegeLevel,
         anonymous,

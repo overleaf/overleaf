@@ -24,6 +24,8 @@ const VALID_KEYS = [
   'rolling-compile-image-changed',
   'groups-enterprise-banner',
   'groups-enterprise-banner-repeat',
+  'new-editor-opt-in',
+  'new-editor-intro',
 ]
 
 async function completeTutorial(req, res, next) {

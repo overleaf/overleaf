@@ -98,18 +98,3 @@
   justify-content: flex-end;
   margin-left: var(--spacing-06);
 }
-
-.ide-setting-new-editor {
-  display: flex;
-  gap: var(--spacing-04);
-}
-
-.ide-setting-beta-tag {
-  font-size: var(--font-size-01);
-  line-height: var(--line-height-01);
-  color: var(--green-60);
-  background: var(--bg-accent-03);
-  border: 1px solid var(--green-50);
-  border-radius: var(--border-radius-full);
-  padding: var(--spacing-01) var(--spacing-03);
-}

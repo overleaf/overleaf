@@ -7,7 +7,7 @@ export default function Setting({
   description = undefined,
 }: {
   label: React.ReactNode
-  description: string | undefined
+  description: React.ReactNode | undefined
   controlId: string
   children: React.ReactNode
 }) {

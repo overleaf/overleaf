@@ -12,7 +12,7 @@ export default function ToggleSetting({
 }: {
   id: string
   label: React.ReactNode
-  description: string
+  description: React.ReactNode
   checked: boolean | undefined
   onChange: (newValue: boolean) => void
   disabled?: boolean

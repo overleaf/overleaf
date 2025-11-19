@@ -1,4 +1,38 @@
-function buildUserSettings(user) {
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+
+// Copied from services/web/frontend/js/features/ide-redesign/utils/new-editor-utils.ts
+const SPLIT_TEST_USER_CUTOFF_DATE = new Date(Date.UTC(2025, 8, 23, 13, 0, 0)) // 2pm British Summer Time on September 23, 2025
+const NEW_USER_CUTOFF_DATE = new Date(Date.UTC(2025, 10, 12, 12, 0, 0)) // 12pm GMT on November 12, 2025
+
+async function getEnableNewEditorDefault(req, res, user) {
+  if (req.query['existing-user-override'] === 'true') {
+    return false
+  }
+
+  if (req.query['skip-new-user-check'] === 'true') {
+    return true
+  }
+
+  if (user.signUpDate >= NEW_USER_CUTOFF_DATE) {
+    return true
+  }
+
+  if (user.signUpDate >= SPLIT_TEST_USER_CUTOFF_DATE) {
+    const assignment = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'editor-redesign-new-users'
+    )
+
+    return assignment.variant !== 'default'
+  }
+
+  return false
+}
+
+async function buildUserSettings(req, res, user) {
+  const defaultEnableNewEditor = await getEnableNewEditorDefault(req, res, user)
+
   return {
     mode: user.ace.mode,
     editorTheme: user.ace.theme,
@@ -13,7 +47,7 @@ function buildUserSettings(user) {
     mathPreview: user.ace.mathPreview,
     breadcrumbs: user.ace.breadcrumbs,
     referencesSearchMode: user.ace.referencesSearchMode,
-    enableNewEditor: user.ace.enableNewEditor ?? true,
+    enableNewEditor: user.ace.enableNewEditor ?? defaultEnableNewEditor,
   }
 }
 

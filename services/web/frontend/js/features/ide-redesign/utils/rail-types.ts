@@ -11,4 +11,5 @@ export type RailElement = {
   hide?: boolean | (() => boolean)
   disabled?: boolean
   mountOnFirstLoad?: boolean
+  ref?: React.RefObject<HTMLAnchorElement>
 }

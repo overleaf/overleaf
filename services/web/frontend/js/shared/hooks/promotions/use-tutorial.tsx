@@ -19,7 +19,7 @@ const useTutorial = (
       action = 'complete',
       ...rest
     }: {
-      event: 'promo-click' | 'promo-dismiss'
+      event: string
       action: 'complete' | 'postpone'
     } & Record<string, any>) => {
       eventTracking.sendMB(event, { ...eventData, ...rest })
@@ -34,12 +34,15 @@ const useTutorial = (
     [deactivateTutorial, eventData, tutorialKey]
   )
 
-  const dismissTutorial = useCallback(async () => {
-    await completeTutorial({
-      event: 'promo-dismiss',
-      action: 'complete',
-    })
-  }, [completeTutorial])
+  const dismissTutorial = useCallback(
+    async (eventName: string = 'promo-dismiss') => {
+      await completeTutorial({
+        event: eventName,
+        action: 'complete',
+      })
+    },
+    [completeTutorial]
+  )
 
   const maybeLater = useCallback(async () => {
     await completeTutorial({

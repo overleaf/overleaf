@@ -25,7 +25,6 @@ import FontFamilySetting from '../components/settings/appearance-settings/font-f
 import { AvailableUnfilledIcon } from '@/shared/components/material-icon'
 import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/editor-left-menu-context'
 import NewEditorSetting from '../components/settings/editor-settings/new-editor-setting'
-import { canUseNewEditorAsNewUser } from '../utils/new-editor-utils'
 
 const [referenceSearchSettingModule] = importOverleafModules(
   'referenceSearchSetting'
@@ -77,7 +76,6 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const { t } = useTranslation()
-  const showEditorSwitch = canUseNewEditorAsNewUser()
 
   // TODO ide-redesign-cleanup: Rename this field and move it directly into this context
   const { leftMenuShown, setLeftMenuShown } = useLayoutContext()
@@ -215,7 +213,6 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
               {
                 key: 'newEditor',
                 component: <NewEditorSetting />,
-                hidden: !showEditorSwitch,
               },
             ],
           },
@@ -234,7 +231,7 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
         href: '/user/subscription',
       },
     ],
-    [t, showEditorSwitch]
+    [t]
   )
 
   const settingToTabMap = useMemo(() => {

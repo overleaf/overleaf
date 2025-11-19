@@ -4,26 +4,36 @@ import { useSwitchEnableNewEditorState } from '@/features/ide-redesign/hooks/use
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import { useCallback } from 'react'
 import { useLayoutContext } from '@/shared/context/layout-context'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 
 export default function NewEditorSetting() {
   const { t } = useTranslation()
   const { setEditorRedesignStatus } = useSwitchEnableNewEditorState()
   const { setLeftMenuShown } = useLayoutContext()
   const enabled = useIsNewEditorEnabled()
+  const { sendEvent } = useEditorAnalytics()
+
   const handleToggle = useCallback(() => {
+    sendEvent('switch-to-old-editor', { location: 'settings-modal' })
     setEditorRedesignStatus(!enabled).then(() => setLeftMenuShown(false))
-  }, [enabled, setEditorRedesignStatus, setLeftMenuShown])
+  }, [enabled, setEditorRedesignStatus, setLeftMenuShown, sendEvent])
 
   return (
     <ToggleSetting
       id="new-editor-setting"
-      label={
-        <div className="ide-setting-new-editor">
-          {t('new_editor_experience')}
-          <div className="ide-setting-beta-tag">{t('beta')}</div>
-        </div>
+      label={t('new_editor_look')}
+      description={
+        <>
+          <div>{t('the_new_overleaf_editor_info')}</div>
+          <a
+            href="https://forms.gle/3tPYhXcBVGmUB2HXA"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t('share_feedback_on_the_new_editor')}
+          </a>
+        </>
       }
-      description={t('new_editor_info')}
       checked={enabled}
       onChange={handleToggle}
     />

@@ -2,7 +2,6 @@ import getMeta from '@/utils/meta'
 import { useTranslation } from 'react-i18next'
 import { useRailContext } from '../../contexts/rail-context'
 import { useCallback } from 'react'
-import { useSurveyUrl } from '../../hooks/use-survey-url'
 import {
   DropdownDivider,
   DropdownItem,
@@ -19,7 +18,6 @@ export default function RailHelpDropdown() {
   const openContactUsModal = useCallback(() => {
     setActiveModal('contact-us')
   }, [setActiveModal])
-  const surveyURL = useSurveyUrl()
 
   return (
     <DropdownMenu>
@@ -40,14 +38,6 @@ export default function RailHelpDropdown() {
           {t('contact_us')}
         </DropdownItem>
       )}
-      <DropdownItem
-        href={surveyURL}
-        role="menuitem"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {t('give_feedback')}
-      </DropdownItem>
     </DropdownMenu>
   )
 }

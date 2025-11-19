@@ -31,7 +31,6 @@ export default function MainLayout() {
     pdfIsOpen: isPdfOpen,
     pdfPanelRef,
   } = usePdfPane()
-
   const { view, pdfLayout } = useLayoutContext()
 
   const editorIsOpen =

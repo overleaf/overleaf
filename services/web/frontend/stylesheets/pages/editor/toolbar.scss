@@ -540,3 +540,9 @@
   font-size: var(--font-size-01);
   margin-right: var(--spacing-04);
 }
+
+.try-new-editor-button {
+  .button-content {
+    gap: var(--spacing-02);
+  }
+}

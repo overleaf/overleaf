@@ -8,11 +8,7 @@ import { MenuBarDropdown } from '@/shared/components/menu-bar/menu-bar-dropdown'
 import { MenuBarOption } from '@/shared/components/menu-bar/menu-bar-option'
 import { useTranslation } from 'react-i18next'
 import ChangeLayoutOptions from './change-layout-options'
-import { MouseEventHandler, useCallback, useMemo, useState } from 'react'
-import { useIdeRedesignSwitcherContext } from '@/features/ide-react/context/ide-redesign-switcher-context'
-import { useSwitchEnableNewEditorState } from '../../hooks/use-switch-enable-new-editor-state'
-import MaterialIcon from '@/shared/components/material-icon'
-import OLSpinner from '@/shared/components/ol/ol-spinner'
+import { useCallback, useMemo, useState } from 'react'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 import CommandDropdown, {
@@ -24,27 +20,20 @@ import { useRailContext } from '../../contexts/rail-context'
 import WordCountModal from '@/features/word-count-modal/components/word-count-modal'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
-import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
-import { useSurveyUrl } from '../../hooks/use-survey-url'
 import getMeta from '@/utils/meta'
 import EditorCloneProjectModalWrapper from '@/features/clone-project-modal/components/editor-clone-project-modal-wrapper'
 import useOpenProject from '@/shared/hooks/use-open-project'
-import { canUseNewEditorAsExistingUser } from '../../utils/new-editor-utils'
 
 export const ToolbarMenuBar = () => {
   const { t } = useTranslation()
-  const { setShowSwitcherModal } = useIdeRedesignSwitcherContext()
-  const openEditorRedesignSwitcherModal = useCallback(() => {
-    setShowSwitcherModal(true)
-  }, [setShowSwitcherModal])
+
   const { setView, view } = useLayoutContext()
   const { pdfUrl } = useCompileContext()
   const wordCountEnabled = pdfUrl || isSplitTestEnabled('word-count-client')
   const [showWordCountModal, setShowWordCountModal] = useState(false)
   const [showCloneProjectModal, setShowCloneProjectModal] = useState(false)
   const openProject = useOpenProject()
-  const showEditorSwitchMenuOption = canUseNewEditorAsExistingUser()
 
   const anonymous = getMeta('ol-anonymous')
 
@@ -213,8 +202,6 @@ export const ToolbarMenuBar = () => {
     setActiveModal('contact-us')
   }, [setActiveModal])
 
-  const surveyURL = useSurveyUrl()
-
   return (
     <>
       <MenuBar
@@ -285,24 +272,6 @@ export const ToolbarMenuBar = () => {
             title={t('contact_us')}
             onClick={openContactUsModal}
           />
-          {showEditorSwitchMenuOption && (
-            <>
-              <MenuBarOption
-                eventKey="give_feedback"
-                title={t('give_feedback')}
-                href={surveyURL}
-                target="_blank"
-                rel="noopener noreferrer"
-              />
-              <DropdownDivider />
-              <SwitchToOldEditorMenuBarOption />
-              <MenuBarOption
-                eventKey="whats_new"
-                title="What's new?"
-                onClick={openEditorRedesignSwitcherModal}
-              />
-            </>
-          )}
         </MenuBarDropdown>
       </MenuBar>
       <WordCountModal
@@ -315,39 +284,5 @@ export const ToolbarMenuBar = () => {
         openProject={openProject}
       />
     </>
-  )
-}
-
-const SwitchToOldEditorMenuBarOption = () => {
-  const { loading, error, setEditorRedesignStatus } =
-    useSwitchEnableNewEditorState()
-  const { sendEvent } = useEditorAnalytics()
-
-  const disable: MouseEventHandler = useCallback(
-    event => {
-      // Don't close the dropdown
-      event.stopPropagation()
-      sendEvent('editor-redesign-toggle', {
-        action: 'disable',
-        location: 'menu-bar',
-      })
-      setEditorRedesignStatus(false)
-    },
-    [setEditorRedesignStatus, sendEvent]
-  )
-  let icon = null
-  if (loading) {
-    icon = <OLSpinner size="sm" />
-  } else if (error) {
-    icon = <MaterialIcon type="error" title={error} className="text-danger" />
-  }
-  return (
-    <MenuBarOption
-      eventKey="switch_to_old_editor"
-      title="Switch to old editor"
-      onClick={disable}
-      disabled={loading}
-      trailingIcon={icon}
-    />
   )
 }

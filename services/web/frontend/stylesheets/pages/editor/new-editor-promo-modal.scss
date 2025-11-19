@@ -1,0 +1,11 @@
+.new-editor-promo-modal-body,
+.new-editor-intro-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-04);
+
+  video {
+    border-radius: var(--border-radius-base);
+    width: 100%;
+  }
+}

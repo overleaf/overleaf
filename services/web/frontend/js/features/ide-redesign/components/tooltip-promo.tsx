@@ -44,6 +44,10 @@ export default function TooltipPromotion({
     hideUntilReload()
   }, [hideUntilReload])
 
+  const onDismiss = useCallback(() => {
+    dismissTutorial()
+  }, [dismissTutorial])
+
   if (!target || !isInSplitTestIfNeeded) {
     return null
   }
@@ -60,13 +64,13 @@ export default function TooltipPromotion({
         {header && (
           <Popover.Header>
             {header}
-            <Close variant="dark" onDismiss={dismissTutorial} />
+            <Close variant="dark" onDismiss={onDismiss} />
           </Popover.Header>
         )}
 
         <Popover.Body className={classNames(className)}>
           {content}
-          {!header && <Close variant="dark" onDismiss={dismissTutorial} />}
+          {!header && <Close variant="dark" onDismiss={onDismiss} />}
         </Popover.Body>
       </Popover>
     </Overlay>

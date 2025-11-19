@@ -28,8 +28,8 @@ import { SplitTestProvider } from '@/shared/context/split-test-context'
 import { UserProvider } from '@/shared/context/user-context'
 import { UserFeaturesProvider } from '@/shared/context/user-features-context'
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
-import { IdeRedesignSwitcherProvider } from './ide-redesign-switcher-context'
 import { CommandRegistryProvider } from './command-registry-context'
+import { NewEditorTourProvider } from '@/features/ide-redesign/contexts/new-editor-tour-context'
 import { EditorSelectionProvider } from '@/shared/context/editor-selection-context'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 
@@ -72,9 +72,9 @@ export const ReactContextRoot: FC<
     SplitTestProvider,
     UserProvider,
     UserSettingsProvider,
-    IdeRedesignSwitcherProvider,
     CommandRegistryProvider,
     UserFeaturesProvider,
+    NewEditorTourProvider,
     EditorSelectionProvider,
     ...providers,
   }
@@ -111,17 +111,17 @@ export const ReactContextRoot: FC<
                                     <Providers.PermissionsProvider>
                                       <Providers.RailProvider>
                                         <Providers.LayoutProvider>
-                                          <Providers.ProjectSettingsProvider>
-                                            <Providers.EditorManagerProvider>
-                                              <Providers.ReferencesProvider>
-                                                <Providers.LocalCompileProvider>
-                                                  <Providers.DetachCompileProvider>
-                                                    <Providers.ChatProvider>
-                                                      <Providers.FileTreeOpenProvider>
-                                                        <Providers.OnlineUsersProvider>
-                                                          <Providers.MetadataProvider>
-                                                            <Providers.OutlineProvider>
-                                                              <Providers.IdeRedesignSwitcherProvider>
+                                          <Providers.NewEditorTourProvider>
+                                            <Providers.ProjectSettingsProvider>
+                                              <Providers.EditorManagerProvider>
+                                                <Providers.ReferencesProvider>
+                                                  <Providers.LocalCompileProvider>
+                                                    <Providers.DetachCompileProvider>
+                                                      <Providers.ChatProvider>
+                                                        <Providers.FileTreeOpenProvider>
+                                                          <Providers.OnlineUsersProvider>
+                                                            <Providers.MetadataProvider>
+                                                              <Providers.OutlineProvider>
                                                                 <Providers.CommandRegistryProvider>
                                                                   <Providers.EditorSelectionProvider>
                                                                     {
@@ -129,17 +129,17 @@ export const ReactContextRoot: FC<
                                                                     }
                                                                   </Providers.EditorSelectionProvider>
                                                                 </Providers.CommandRegistryProvider>
-                                                              </Providers.IdeRedesignSwitcherProvider>
-                                                            </Providers.OutlineProvider>
-                                                          </Providers.MetadataProvider>
-                                                        </Providers.OnlineUsersProvider>
-                                                      </Providers.FileTreeOpenProvider>
-                                                    </Providers.ChatProvider>
-                                                  </Providers.DetachCompileProvider>
-                                                </Providers.LocalCompileProvider>
-                                              </Providers.ReferencesProvider>
-                                            </Providers.EditorManagerProvider>
-                                          </Providers.ProjectSettingsProvider>
+                                                              </Providers.OutlineProvider>
+                                                            </Providers.MetadataProvider>
+                                                          </Providers.OnlineUsersProvider>
+                                                        </Providers.FileTreeOpenProvider>
+                                                      </Providers.ChatProvider>
+                                                    </Providers.DetachCompileProvider>
+                                                  </Providers.LocalCompileProvider>
+                                                </Providers.ReferencesProvider>
+                                              </Providers.EditorManagerProvider>
+                                            </Providers.ProjectSettingsProvider>
+                                          </Providers.NewEditorTourProvider>
                                         </Providers.LayoutProvider>
                                       </Providers.RailProvider>
                                     </Providers.PermissionsProvider>
