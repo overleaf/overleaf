@@ -107,17 +107,6 @@ export interface InvoiceOverdueWebhookEvent extends Stripe.EventBase {
   }
 }
 
-export interface CheckoutSessionCompletedWebhookEvent extends Stripe.EventBase {
-  type: 'checkout.session.completed'
-  data: {
-    object: Stripe.Checkout.Session & {
-      metadata: {
-        userId?: string
-      }
-    }
-  }
-}
-
 export interface CustomerCreatedWebhookEvent extends Stripe.EventBase {
   type: 'customer.created'
   data: {
@@ -137,5 +126,4 @@ export type WebhookEvent =
   | PaymentIntentPaymentFailedWebhookEvent
   | SetupIntentSetupFailedWebhookEvent
   | InvoiceOverdueWebhookEvent
-  | CheckoutSessionCompletedWebhookEvent
   | CustomerCreatedWebhookEvent
