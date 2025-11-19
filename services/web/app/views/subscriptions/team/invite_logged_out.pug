@@ -11,7 +11,7 @@ block content
 					.card.text-center
 						.card-body
 							.page-header
-								h1.text-center !{translate("invited_to_group", {inviterName: inviterName, appName: appName })}
+								h1.text-center !{translate("invited_to_group", {inviterName: inviterName, appName: appName }, [{name: 'span', attrs: {class: 'team-invite-name'}}])}
 
 							if accountExists
 								div
