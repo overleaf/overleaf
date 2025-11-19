@@ -194,6 +194,11 @@ module.exports = class FSPersistor extends AbstractPersistor {
     }
   }
 
+  async listDirectoryKeys(location, name) {
+    const fsPath = this._getFsPath(location, name)
+    return await this._listDirectory(fsPath)
+  }
+
   async checkIfObjectExists(location, name) {
     const fsPath = this._getFsPath(location, name)
     try {
