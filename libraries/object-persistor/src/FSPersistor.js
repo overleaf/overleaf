@@ -1,17 +1,14 @@
 const crypto = require('node:crypto')
 const fs = require('node:fs')
 const fsPromises = require('node:fs/promises')
-const globCallbacks = require('glob')
+const { glob } = require('glob')
 const Path = require('node:path')
 const { PassThrough } = require('node:stream')
 const { pipeline } = require('node:stream/promises')
-const { promisify } = require('node:util')
 
 const AbstractPersistor = require('./AbstractPersistor')
 const { ReadError, WriteError, NotImplementedError } = require('./Errors')
 const PersistorHelper = require('./PersistorHelper')
-
-const glob = promisify(globCallbacks)
 
 module.exports = class FSPersistor extends AbstractPersistor {
   constructor(settings = {}) {
@@ -305,10 +302,8 @@ module.exports = class FSPersistor extends AbstractPersistor {
 
   async _listDirectory(path) {
     if (this.useSubdirectories) {
-      // eslint-disable-next-line @typescript-eslint/return-await
       return await glob(Path.join(path, '**'))
     } else {
-      // eslint-disable-next-line @typescript-eslint/return-await
       return await glob(`${path}_*`)
     }
   }

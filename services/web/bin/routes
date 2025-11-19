@@ -4,7 +4,7 @@ const acorn = require('acorn')
 const acornWalk = require('acorn-walk')
 const fs = require('fs')
 const _ = require('lodash')
-const glob = require('glob')
+const { glob } = require('glob')
 const escodegen = require('escodegen')
 const print = console.log
 
@@ -89,7 +89,7 @@ const formatRouterName = name => {
   return routerNameMapping[name] || name
 }
 
-const main = () => {
+const main = async () => {
   // Take an optional filter to apply to file names
   const filter = process.argv[2] || null
 
@@ -104,31 +104,27 @@ const main = () => {
   }
 
   // Find all routers
-  glob('*[rR]outer.*js', { matchBase: true }, (err, files) => {
-    if (err) {
-      console.error(err)
-      process.exit(1)
+  const files = await glob('*[rR]outer.*js', { matchBase: true })
+  for (const file of files) {
+    if (file.match('^node_modules.*$') || file.match('.*/public/.*')) {
+      continue
     }
-    for (const file of files) {
-      if (file.match('^node_modules.*$') || file.match('.*/public/.*')) {
-        continue
-      }
-      // Restrict to the filter (if filter is present)
-      if (filter && !file.match(`.*${filter}.*`)) {
-        continue
-      }
-      print(`[${file}]`)
-      try {
-        parseAndPrintRoutesSync(file)
-      } catch (_e) {
-        print('>> Error parsing file')
-        continue
-      }
+    // Restrict to the filter (if filter is present)
+    if (filter && !file.match(`.*${filter}.*`)) {
+      continue
     }
-    process.exit(0)
-  })
+    print(`[${file}]`)
+    try {
+      parseAndPrintRoutesSync(file)
+    } catch (_e) {
+      print('>> Error parsing file')
+    }
+  }
 }
 
 if (require.main === module) {
-  main()
+  main().then(() => process.exit(0)).catch(() => {
+    console.error(err)
+    process.exit(1)
+  })
 }

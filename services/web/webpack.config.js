@@ -1,5 +1,5 @@
 const path = require('path')
-const glob = require('glob')
+const { globSync } = require('glob')
 const webpack = require('webpack')
 const CopyPlugin = require('copy-webpack-plugin')
 const WebpackAssetsManifest = require('webpack-assets-manifest')
@@ -25,30 +25,28 @@ const entryPoints = {
 }
 
 // Add entrypoints for each "page"
-glob
-  .sync(
-    path.join(__dirname, 'modules/*/frontend/js/pages/**/*.{js,jsx,ts,tsx}')
-  )
-  .forEach(page => {
-    // in: /workspace/services/web/modules/foo/frontend/js/pages/bar.js
-    // out: modules/foo/pages/bar
-    const name = path
-      .relative(__dirname, page)
-      .replace(/frontend[/]js[/]/, '')
-      .replace(/.(js|jsx|ts|tsx)$/, '')
-    entryPoints[name] = './' + path.relative(__dirname, page)
-  })
+globSync(
+  path.join(__dirname, 'modules/*/frontend/js/pages/**/*.{js,jsx,ts,tsx}')
+).forEach(page => {
+  // in: /workspace/services/web/modules/foo/frontend/js/pages/bar.js
+  // out: modules/foo/pages/bar
+  const name = path
+    .relative(__dirname, page)
+    .replace(/frontend[/]js[/]/, '')
+    .replace(/.(js|jsx|ts|tsx)$/, '')
+  entryPoints[name] = './' + path.relative(__dirname, page)
+})
 
-glob
-  .sync(path.join(__dirname, 'frontend/js/pages/**/*.{js,jsx,ts,tsx}'))
-  .forEach(page => {
-    // in: /workspace/services/web/frontend/js/pages/marketing/homepage.ts
-    // out: pages/marketing/homepage
-    const name = path
-      .relative(path.join(__dirname, 'frontend/js/'), page)
-      .replace(/.(js|jsx|ts|tsx)$/, '')
-    entryPoints[name] = './' + path.relative(__dirname, page)
-  })
+globSync(
+  path.join(__dirname, 'frontend/js/pages/**/*.{js,jsx,ts,tsx}')
+).forEach(page => {
+  // in: /workspace/services/web/frontend/js/pages/marketing/homepage.ts
+  // out: pages/marketing/homepage
+  const name = path
+    .relative(path.join(__dirname, 'frontend/js/'), page)
+    .replace(/.(js|jsx|ts|tsx)$/, '')
+  entryPoints[name] = './' + path.relative(__dirname, page)
+})
 
 function getModuleDirectory(moduleName) {
   const entrypointPath = require.resolve(moduleName)

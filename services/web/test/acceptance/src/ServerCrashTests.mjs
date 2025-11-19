@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import Path from 'node:path'
 import fetch from 'node-fetch'
 import UserHelper from './helpers/UserHelper.mjs'
-import glob from 'glob'
+import { globSync } from 'glob'
 import { fileURLToPath } from 'node:url'
 
 const BASE_URL = UserHelper.baseUrl()
@@ -11,7 +11,7 @@ const BASE_URL = UserHelper.baseUrl()
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 // Test all files in the crash_test_urls directory
-const CRASH_TEST_FILES = glob.sync(
+const CRASH_TEST_FILES = globSync(
   Path.join(__dirname, '../files/crash_test_urls/*.txt')
 )
 
