@@ -93,19 +93,6 @@ export interface SetupIntentSetupFailedWebhookEvent extends Stripe.EventBase {
   }
 }
 
-export interface SetupIntentSucceededWebhookEvent extends Stripe.EventBase {
-  type: 'setup_intent.succeeded'
-  data: {
-    object: Stripe.SetupIntent & {
-      metadata: {
-        userId?: string
-        isTrial?: string
-        checkoutSource?: 'hosted-checkout' | 'elements-checkout' | undefined
-      }
-    }
-  }
-}
-
 export interface InvoiceVoidedWebhookEvent extends Stripe.EventBase {
   type: 'invoice.voided'
   data: {
@@ -149,7 +136,6 @@ export type WebhookEvent =
   | InvoiceVoidedWebhookEvent
   | PaymentIntentPaymentFailedWebhookEvent
   | SetupIntentSetupFailedWebhookEvent
-  | SetupIntentSucceededWebhookEvent
   | InvoiceOverdueWebhookEvent
   | CheckoutSessionCompletedWebhookEvent
   | CustomerCreatedWebhookEvent
