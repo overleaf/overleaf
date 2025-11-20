@@ -1,5 +1,5 @@
 import { expect, vi } from 'vitest'
-import assert from 'assert'
+import assert from 'node:assert'
 import sinon from 'sinon'
 import MockResponse from '../helpers/MockResponse.js'
 import MockRequest from '../helpers/MockRequest.js'

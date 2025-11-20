@@ -5,13 +5,14 @@ import settings from '@overleaf/settings'
 import InstitutionsAPI from '../Institutions/InstitutionsAPI.mjs'
 import InstitutionsHelper from '../Institutions/InstitutionsHelper.mjs'
 import Errors from '../Errors/Errors.js'
-import Features from '../../infrastructure/Features.js'
+import Features from '../../infrastructure/Features.mjs'
 import { User } from '../../models/User.mjs'
-import { normalizeQuery, normalizeMultiQuery } from '../Helpers/Mongo.js'
+import Mongo from '../Helpers/Mongo.mjs'
 import Modules from '../../infrastructure/Modules.js'
 import FeaturesHelper from '../Subscription/FeaturesHelper.mjs'
 import AsyncLocalStorage from '../../infrastructure/AsyncLocalStorage.js'
 
+const { normalizeQuery, normalizeMultiQuery } = Mongo
 const InstitutionsAPIPromises = InstitutionsAPI.promises
 
 function _lastDayToReconfirm(emailData, institutionData) {

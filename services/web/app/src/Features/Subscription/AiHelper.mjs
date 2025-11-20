@@ -2,9 +2,9 @@
 // Initially, this functions lived in PaymentProviderEntities.js,
 // but it was moved to this file to prevent circular dependency issue
 
-const AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE = 'assistant'
-const AI_ASSIST_STANDALONE_ANNUAL_PLAN_CODE = 'assistant-annual'
-const AI_ADD_ON_CODE = 'assistant'
+export const AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE = 'assistant'
+export const AI_ASSIST_STANDALONE_ANNUAL_PLAN_CODE = 'assistant-annual'
+export const AI_ADD_ON_CODE = 'assistant'
 
 /**
  * Returns whether the given plan code is a standalone AI plan
@@ -12,7 +12,7 @@ const AI_ADD_ON_CODE = 'assistant'
  * @param {string | null | undefined} planCode
  * @return {boolean}
  */
-function isStandaloneAiAddOnPlanCode(planCode) {
+export function isStandaloneAiAddOnPlanCode(planCode) {
   return (
     planCode === AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE ||
     planCode === AI_ASSIST_STANDALONE_ANNUAL_PLAN_CODE
@@ -28,7 +28,7 @@ function isStandaloneAiAddOnPlanCode(planCode) {
  *
  * @return {boolean}
  */
-function subscriptionChangeIsAiAssistUpgrade(subscriptionChange) {
+export function subscriptionChangeIsAiAssistUpgrade(subscriptionChange) {
   return Boolean(
     isStandaloneAiAddOnPlanCode(subscriptionChange.nextPlanCode) ||
       subscriptionChange.nextAddOns?.some(
@@ -37,7 +37,7 @@ function subscriptionChangeIsAiAssistUpgrade(subscriptionChange) {
   )
 }
 
-module.exports = {
+export default {
   AI_ADD_ON_CODE,
   AI_ASSIST_STANDALONE_MONTHLY_PLAN_CODE,
   AI_ASSIST_STANDALONE_ANNUAL_PLAN_CODE,

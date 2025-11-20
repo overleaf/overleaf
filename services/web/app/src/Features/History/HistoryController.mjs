@@ -24,7 +24,7 @@ import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
 import ProjectEntityUpdateHandler from '../Project/ProjectEntityUpdateHandler.mjs'
 import RestoreManager from './RestoreManager.mjs'
 import { prepareZipAttachment } from '../../infrastructure/Response.js'
-import Features from '../../infrastructure/Features.js'
+import Features from '../../infrastructure/Features.mjs'
 import { z, zz, validateReq } from '../../infrastructure/Validation.js'
 
 // Number of seconds after which the browser should send a request to revalidate

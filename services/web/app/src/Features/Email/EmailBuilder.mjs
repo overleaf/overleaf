@@ -1,12 +1,12 @@
 import _ from 'lodash'
 import settings from '@overleaf/settings'
 import moment from 'moment'
-import EmailMessageHelper from './EmailMessageHelper.js'
+import EmailMessageHelper from './EmailMessageHelper.mjs'
 import StringHelper from '../Helpers/StringHelper.mjs'
-import BaseWithHeaderEmailLayout from './Layouts/BaseWithHeaderEmailLayout.js'
+import BaseWithHeaderEmailLayout from './Layouts/BaseWithHeaderEmailLayout.mjs'
 import SpamSafe from './SpamSafe.mjs'
-import ctaEmailBody from './Bodies/cta-email.js'
-import NoCTAEmailBody from './Bodies/NoCTAEmailBody.js'
+import ctaEmailBody from './Bodies/cta-email.mjs'
+import NoCTAEmailBody from './Bodies/NoCTAEmailBody.mjs'
 
 function _emailBodyPlainText(content, opts, ctaEmail) {
   let emailBody = `${content.greeting(opts, true)}`

@@ -8,8 +8,8 @@ import { Subscription } from '../../models/Subscription.mjs'
 import SubscriptionHelper from './SubscriptionHelper.mjs'
 import { DeletedSubscription } from '../../models/DeletedSubscription.mjs'
 import logger from '@overleaf/logger'
-import { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } from './AiHelper.js'
-import './GroupPlansData.js' // make sure dynamic group plans are loaded
+import { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } from './AiHelper.mjs'
+import './GroupPlansData.mjs' // make sure dynamic group plans are loaded
 
 const SubscriptionLocator = {
   async getUsersSubscription(userOrId) {

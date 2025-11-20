@@ -16,7 +16,7 @@ import { expressify } from '@overleaf/promise-utils'
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 import Errors from '../Errors/Errors.js'
 import AuthenticationController from '../Authentication/AuthenticationController.mjs'
-import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
+import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
 
 // This rate limiter allows a different number of requests depending on the
 // number of callaborators a user is allowed. This is implemented by providing

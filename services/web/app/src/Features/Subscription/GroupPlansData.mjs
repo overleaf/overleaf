@@ -1,6 +1,6 @@
-const Settings = require('@overleaf/settings')
-const fs = require('fs')
-const Path = require('path')
+import Settings from '@overleaf/settings'
+import fs from 'node:fs'
+import Path from 'node:path'
 
 // The groups.json file encodes the various group plan options we provide, and
 // is used in the app the render the appropriate dialog in the plans page, and
@@ -12,7 +12,7 @@ const Path = require('path')
 // fetch pricing data and generate a groups.json using the current Recurly
 // prices
 const data = fs.readFileSync(
-  Path.join(__dirname, '/../../../templates/plans/groups.json')
+  Path.join(import.meta.dirname, '/../../../templates/plans/groups.json')
 )
 const groups = JSON.parse(data.toString())
 
@@ -63,4 +63,4 @@ for (const [usage, planData] of Object.entries(groups)) {
   }
 }
 
-module.exports = groups
+export default groups

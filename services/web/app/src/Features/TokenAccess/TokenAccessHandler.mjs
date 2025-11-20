@@ -1,15 +1,15 @@
 import { Project } from '../../models/Project.mjs'
 import PublicAccessLevels from '../Authorization/PublicAccessLevels.mjs'
-import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
+import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
 import mongodb from 'mongodb-legacy'
 import Metrics from '@overleaf/metrics'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
-import V1Api from '../V1/V1Api.js'
+import V1Api from '../V1/V1Api.mjs'
 import crypto from 'node:crypto'
 import { callbackifyAll } from '@overleaf/promise-utils'
 import Analytics from '../Analytics/AnalyticsManager.mjs'
-import Features from '../../infrastructure/Features.js'
+import Features from '../../infrastructure/Features.mjs'
 
 const { ObjectId } = mongodb
 

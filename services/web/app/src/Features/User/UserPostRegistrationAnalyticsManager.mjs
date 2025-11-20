@@ -1,4 +1,4 @@
-import Queues from '../../infrastructure/Queues.js'
+import Queues from '../../infrastructure/Queues.mjs'
 import UserGetter from './UserGetter.mjs'
 import InstitutionsAPI from '../Institutions/InstitutionsAPI.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'

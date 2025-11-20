@@ -10,7 +10,7 @@ import {
   ParallelLoginError,
   PasswordMustBeDifferentError,
   PasswordReusedError,
-} from './AuthenticationErrors.js'
+} from './AuthenticationErrors.mjs'
 
 import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
 import HaveIBeenPwned from './HaveIBeenPwned.mjs'

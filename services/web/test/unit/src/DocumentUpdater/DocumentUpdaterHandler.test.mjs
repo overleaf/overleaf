@@ -1,6 +1,6 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
-import path from 'path'
+import path from 'node:path'
 import mongodb from 'mongodb-legacy'
 import nock from 'nock'
 

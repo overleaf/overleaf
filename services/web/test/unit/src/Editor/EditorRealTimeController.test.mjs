@@ -1,5 +1,5 @@
 import { vi } from 'vitest'
-import path from 'path'
+import path from 'node:path'
 import sinon from 'sinon'
 const modulePath = path.join(
   import.meta.dirname,

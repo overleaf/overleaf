@@ -7,7 +7,7 @@ import {
   addRequiredCleanupHandlerBeforeDrainingConnections,
 } from './GracefulShutdown.js'
 
-import Features from './Features.js'
+import Features from './Features.mjs'
 import UserHandler from '../Features/User/UserHandler.mjs'
 import metrics from '@overleaf/metrics'
 

@@ -1,5 +1,5 @@
 import { vi, expect } from 'vitest'
-import path from 'path'
+import path from 'node:path'
 import sinon from 'sinon'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import { Project } from '../../../../app/src/models/Project.mjs'

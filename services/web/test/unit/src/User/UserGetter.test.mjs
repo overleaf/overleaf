@@ -1,18 +1,16 @@
 import { vi, expect } from 'vitest'
 import mongodb from 'mongodb-legacy'
-import assert from 'assert'
+import assert from 'node:assert'
 import moment from 'moment'
-import path from 'path'
+import path from 'node:path'
 import sinon from 'sinon'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
-import {
-  normalizeQuery,
-  normalizeMultiQuery,
-} from '../../../../app/src/Features/Helpers/Mongo.js'
+import MongoHelpers from '../../../../app/src/Features/Helpers/Mongo.mjs'
 const modulePath = path.join(
   import.meta.dirname,
   '../../../../app/src/Features/User/UserGetter'
 )
+const { normalizeQuery, normalizeMultiQuery } = MongoHelpers
 
 vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
   vi.importActual('../../../../app/src/Features/Errors/Errors.js')
@@ -60,8 +58,7 @@ describe('UserGetter', function () {
     }
 
     vi.doMock('../../../../app/src/Features/Helpers/Mongo', () => ({
-      normalizeQuery,
-      normalizeMultiQuery,
+      default: { normalizeQuery, normalizeMultiQuery },
     }))
 
     vi.doMock('../../../../app/src/infrastructure/mongodb', () => ctx.Mongo)

@@ -1,7 +1,7 @@
 import AuthenticationManager from './AuthenticationManager.mjs'
 import SessionManager from './SessionManager.mjs'
 import OError from '@overleaf/o-error'
-import LoginRateLimiter from '../Security/LoginRateLimiter.js'
+import LoginRateLimiter from '../Security/LoginRateLimiter.mjs'
 import UserUpdater from '../User/UserUpdater.mjs'
 import Metrics from '@overleaf/metrics'
 import logger from '@overleaf/logger'
@@ -23,7 +23,7 @@ import { acceptsJson } from '../../infrastructure/RequestContentTypeDetection.js
 import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
 import Modules from '../../infrastructure/Modules.js'
 import { expressify, promisify } from '@overleaf/promise-utils'
-import { handleAuthenticateErrors } from './AuthenticationErrors.js'
+import { handleAuthenticateErrors } from './AuthenticationErrors.mjs'
 import EmailHelper from '../Helpers/EmailHelper.mjs'
 
 const { hasAdminAccess } = AdminAuthorizationHelper

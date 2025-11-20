@@ -8,8 +8,8 @@ import { vi, expect } from 'vitest'
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import sinon from 'sinon'
-import ArchiveErrors from '../../../../app/src/Features/Uploads/ArchiveErrors.js'
-import events from 'events'
+import ArchiveErrors from '../../../../app/src/Features/Uploads/ArchiveErrors.mjs'
+import events from 'node:events'
 
 vi.mock('../../../../app/src/Features/Uploads/ArchiveErrors.js', () =>
   vi.importActual('../../../../app/src/Features/Uploads/ArchiveErrors.js')

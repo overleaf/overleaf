@@ -1,7 +1,7 @@
 import { expect, vi } from 'vitest'
 import sinon from 'sinon'
-import MockRequest from '../helpers/MockRequest.js'
-import MockResponse from '../helpers/MockResponse.js'
+import MockRequest from '../helpers/MockRequestVitest.mjs'
+import MockResponse from '../helpers/MockResponseVitest.mjs'
 import mongodb from 'mongodb-legacy'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import _ from 'lodash'
@@ -214,8 +214,8 @@ describe('CollaboratorsInviteController', function () {
 
     ctx.CollaboratorsInviteController = (await import(MODULE_PATH)).default
 
-    ctx.res = new MockResponse()
-    ctx.req = new MockRequest()
+    ctx.res = new MockResponse(vi)
+    ctx.req = new MockRequest(vi)
     ctx.next = sinon.stub()
   })
 
@@ -248,8 +248,8 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should produce a list of invite objects', function (ctx) {
-        ctx.res.json.callCount.should.equal(1)
-        ctx.res.json.calledWith({ invites: ctx.fakeInvites }).should.equal(true)
+        expect(ctx.res.json).toHaveBeenCalledTimes(1)
+        expect(ctx.res.json).toHaveBeenCalledWith({ invites: ctx.fakeInvites })
       })
 
       it('should have called CollaboratorsInviteHandler.getAllInvites', function (ctx) {
@@ -312,8 +312,8 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should produce json response', function (ctx) {
-        ctx.res.json.callCount.should.equal(1)
-        expect(ctx.res.json.firstCall.args[0]).to.deep.equal({
+        expect(ctx.res.json).toHaveBeenCalledTimes(1)
+        expect(ctx.res.json.mock.calls[0][0]).to.deep.equal({
           invite: ctx.inviteReducedData,
         })
       })
@@ -397,8 +397,8 @@ describe('CollaboratorsInviteController', function () {
         })
 
         it('should produce json response without an invite', function (ctx) {
-          ctx.res.json.callCount.should.equal(1)
-          expect(ctx.res.json.firstCall.args[0]).to.deep.equal({
+          expect(ctx.res.json).toHaveBeenCalledTimes(1)
+          expect(ctx.res.json.mock.calls[0][0]).to.deep.equal({
             invite: null,
           })
         })
@@ -442,8 +442,8 @@ describe('CollaboratorsInviteController', function () {
         })
 
         it('should produce json response', function (ctx) {
-          ctx.res.json.callCount.should.equal(1)
-          expect(ctx.res.json.firstCall.args[0]).to.deep.equal({
+          expect(ctx.res.json).toHaveBeenCalledTimes(1)
+          expect(ctx.res.json.mock.calls[0][0]).to.deep.equal({
             invite: ctx.inviteReducedData,
           })
         })
@@ -577,8 +577,8 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should produce json response with no invite, and an error property', function (ctx) {
-        ctx.res.json.callCount.should.equal(1)
-        expect(ctx.res.json.firstCall.args[0]).to.deep.equal({
+        expect(ctx.res.json).toHaveBeenCalledTimes(1)
+        expect(ctx.res.json.mock.calls[0][0]).to.deep.equal({
           invite: null,
           error: 'cannot_invite_non_user',
         })
@@ -656,8 +656,8 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should reject action, return json response with error code', function (ctx) {
-        ctx.res.json.callCount.should.equal(1)
-        expect(ctx.res.json.firstCall.args[0]).to.deep.equal({
+        expect(ctx.res.json).toHaveBeenCalledTimes(1)
+        expect(ctx.res.json.mock.calls[0][0]).to.deep.equal({
           invite: null,
           error: 'cannot_invite_self',
         })
@@ -702,7 +702,7 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should send a 429 response', function (ctx) {
-        ctx.res.sendStatus.calledWith(429).should.equal(true)
+        expect(ctx.res.sendStatus).toHaveBeenCalledWith(429)
       })
 
       it('should not call inviteToProject', function (ctx) {
@@ -760,8 +760,11 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should render the view template', function (ctx) {
-        ctx.res.render.callCount.should.equal(1)
-        ctx.res.render.calledWith('project/invite/show').should.equal(true)
+        expect(ctx.res.render).toHaveBeenCalledTimes(1)
+        expect(ctx.res.render).toHaveBeenCalledWith(
+          'project/invite/show',
+          expect.anything()
+        )
       })
 
       it('should not call next', function (ctx) {
@@ -826,32 +829,29 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should redirect to the register page', function (ctx) {
-        expect(ctx.res.render).to.not.have.been.called
-        expect(ctx.res.redirect).to.have.been.calledOnce
-        expect(ctx.res.redirect).to.have.been.calledWith('/register')
+        expect(ctx.res.render).not.toHaveBeenCalled()
+        expect(ctx.res.redirect).toHaveBeenCalledTimes(1)
+        expect(ctx.res.redirect).toHaveBeenCalledWith('/register')
       })
     })
 
     describe('when user is already a member of the project', function () {
       beforeEach(async function (ctx) {
-        await new Promise(resolve => {
-          ctx.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
-            true
-          )
-          ctx.res.callback = () => resolve()
-          ctx.CollaboratorsInviteController.viewInvite(
-            ctx.req,
-            ctx.res,
-            ctx.next
-          )
-        })
+        ctx.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
+          true
+        )
+        await ctx.CollaboratorsInviteController.viewInvite(
+          ctx.req,
+          ctx.res,
+          ctx.next
+        )
       })
 
       it('should redirect to the project page', function (ctx) {
-        ctx.res.redirect.callCount.should.equal(1)
-        ctx.res.redirect
-          .calledWith(`/project/${ctx.projectId}`)
-          .should.equal(true)
+        expect(ctx.res.redirect).toHaveBeenCalledTimes(1)
+        expect(ctx.res.redirect).toHaveBeenCalledWith(
+          `/project/${ctx.projectId}`
+        )
       })
 
       it('should not call next with an error', function (ctx) {
@@ -987,8 +987,11 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should render the not-valid view template', function (ctx) {
-        ctx.res.render.callCount.should.equal(1)
-        ctx.res.render.calledWith('project/invite/not-valid').should.equal(true)
+        expect(ctx.res.render).toHaveBeenCalledTimes(1)
+        expect(ctx.res.render).toHaveBeenCalledWith(
+          'project/invite/not-valid',
+          expect.anything()
+        )
       })
 
       it('should not call next', function (ctx) {
@@ -1081,8 +1084,11 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should render the not-valid view template', function (ctx) {
-        ctx.res.render.callCount.should.equal(1)
-        ctx.res.render.calledWith('project/invite/not-valid').should.equal(true)
+        expect(ctx.res.render).toHaveBeenCalledTimes(1)
+        expect(ctx.res.render).toHaveBeenCalledWith(
+          'project/invite/not-valid',
+          expect.anything()
+        )
       })
 
       it('should not call next', function (ctx) {
@@ -1175,8 +1181,11 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should render the not-valid view template', function (ctx) {
-        ctx.res.render.callCount.should.equal(1)
-        ctx.res.render.calledWith('project/invite/not-valid').should.equal(true)
+        expect(ctx.res.render).toHaveBeenCalledTimes(1)
+        expect(ctx.res.render).toHaveBeenCalledWith(
+          'project/invite/not-valid',
+          expect.anything()
+        )
       })
 
       it('should not call next', function (ctx) {
@@ -1236,8 +1245,8 @@ describe('CollaboratorsInviteController', function () {
         })
 
         it('should produce a 201 response', function (ctx) {
-          ctx.res.sendStatus.callCount.should.equal(1)
-          ctx.res.sendStatus.calledWith(201).should.equal(true)
+          expect(ctx.res.sendStatus).toHaveBeenCalledTimes(1)
+          expect(ctx.res.sendStatus).toHaveBeenCalledWith(201)
         })
 
         it('should have called generateNewInvite', function (ctx) {
@@ -1296,8 +1305,8 @@ describe('CollaboratorsInviteController', function () {
         })
 
         it('should produce a 404 response when invite is null', function (ctx) {
-          ctx.res.sendStatus.callCount.should.equal(1)
-          ctx.res.sendStatus.should.have.been.calledWith(404)
+          expect(ctx.res.sendStatus).toHaveBeenCalledTimes(1)
+          expect(ctx.res.sendStatus).toHaveBeenCalledWith(404)
         })
       })
     })
@@ -1318,7 +1327,7 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should not produce a 201 response', function (ctx) {
-        ctx.res.sendStatus.callCount.should.equal(0)
+        expect(ctx.res.sendStatus).not.toHaveBeenCalled()
       })
 
       it('should call next with the error', function (ctx) {
@@ -1355,8 +1364,8 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should produce a 204 response', function (ctx) {
-        ctx.res.sendStatus.callCount.should.equal(1)
-        ctx.res.sendStatus.should.have.been.calledWith(204)
+        expect(ctx.res.sendStatus).toHaveBeenCalledTimes(1)
+        expect(ctx.res.sendStatus).toHaveBeenCalledWith(204)
       })
 
       it('should have called revokeInvite', function (ctx) {
@@ -1402,7 +1411,7 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should not produce a 201 response', function (ctx) {
-        ctx.res.sendStatus.callCount.should.equal(0)
+        expect(ctx.res.sendStatus).not.toHaveBeenCalled()
       })
 
       it('should call next with the error', function (ctx) {
@@ -1439,8 +1448,8 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should redirect to project page', function (ctx) {
-        ctx.res.redirect.should.have.been.calledOnce
-        ctx.res.redirect.should.have.been.calledWith(
+        expect(ctx.res.redirect).toHaveBeenCalledTimes(1)
+        expect(ctx.res.redirect).toHaveBeenCalledWith(
           `/project/${ctx.projectId}`
         )
       })
@@ -1511,7 +1520,7 @@ describe('CollaboratorsInviteController', function () {
       })
 
       it('should not redirect to project page', function (ctx) {
-        ctx.res.redirect.callCount.should.equal(0)
+        expect(ctx.res.redirect).not.toHaveBeenCalled()
       })
 
       it('should call next with the error', function (ctx) {

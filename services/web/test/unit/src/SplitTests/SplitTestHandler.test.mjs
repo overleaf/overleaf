@@ -1,5 +1,5 @@
 import { vi, assert, expect } from 'vitest'
-import Path from 'path'
+import Path from 'node:path'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 import MockRequest from '../helpers/MockRequest.js'

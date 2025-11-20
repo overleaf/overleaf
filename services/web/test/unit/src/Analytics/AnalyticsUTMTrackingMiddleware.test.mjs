@@ -1,7 +1,7 @@
 import { assert, vi } from 'vitest'
 import sinon from 'sinon'
-import MockRequest from '../helpers/MockRequest.js'
-import MockResponse from '../helpers/MockResponse.js'
+import MockRequest from '../helpers/MockRequestVitest.mjs'
+import MockResponse from '../helpers/MockResponseVitest.mjs'
 
 const MODULE_PATH = new URL(
   '../../../../app/src/Features/Analytics/AnalyticsUTMTrackingMiddleware',
@@ -13,8 +13,8 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
     ctx.analyticsId = 'ecdb935a-52f3-4f91-aebc-7a70d2ffbb55'
     ctx.userId = '61795fcb013504bb7b663092'
 
-    ctx.req = new MockRequest()
-    ctx.res = new MockResponse()
+    ctx.req = new MockRequest(vi)
+    ctx.res = new MockResponse(vi)
     ctx.next = sinon.stub().returns()
     ctx.req.session = {
       user: {

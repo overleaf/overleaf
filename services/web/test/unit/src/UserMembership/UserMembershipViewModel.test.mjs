@@ -1,14 +1,12 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
-import {
-  isObjectIdInstance,
-  normalizeQuery,
-} from '../../../../app/src/Features/Helpers/Mongo.js'
+import MongoHelpers from '../../../../app/src/Features/Helpers/Mongo.mjs'
 
 const assertCalledWith = sinon.assert.calledWith
 const assertNotCalled = sinon.assert.notCalled
 
+const { isObjectIdInstance, normalizeQuery } = MongoHelpers
 const { ObjectId } = mongodb
 
 const modulePath =
@@ -23,8 +21,7 @@ describe('UserMembershipViewModel', function () {
     }))
 
     vi.doMock('../../../../app/src/Features/Helpers/Mongo', () => ({
-      isObjectIdInstance,
-      normalizeQuery,
+      default: { isObjectIdInstance, normalizeQuery },
     }))
 
     vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({

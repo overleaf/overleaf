@@ -2,7 +2,7 @@ import { vi, assert, expect } from 'vitest'
 import sinon from 'sinon'
 import tk from 'timekeeper'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
-import SubscriptionErrors from '../../../../app/src/Features/Subscription/Errors.js'
+import SubscriptionErrors from '../../../../app/src/Features/Subscription/Errors.mjs'
 import { RequestFailedError } from '@overleaf/fetch-utils'
 const modulePath = '../../../../app/src/Features/Subscription/RecurlyWrapper'
 

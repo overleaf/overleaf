@@ -1,6 +1,6 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
-import { Writable } from 'stream'
+import { Writable } from 'node:stream'
 import mongodb from 'mongodb-legacy'
 
 const { ObjectId } = mongodb

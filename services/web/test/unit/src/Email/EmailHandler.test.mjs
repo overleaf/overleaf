@@ -1,5 +1,5 @@
 import { vi, expect } from 'vitest'
-import path from 'path'
+import path from 'node:path'
 import sinon from 'sinon'
 
 const MODULE_PATH = path.join(

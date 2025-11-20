@@ -9,7 +9,7 @@ import { Subscription } from '../../models/Subscription.mjs'
 import { User } from '../../models/User.mjs'
 import PlansLocator from './PlansLocator.mjs'
 import TeamInvitesHandler from './TeamInvitesHandler.mjs'
-import GroupPlansData from './GroupPlansData.js'
+import GroupPlansData from './GroupPlansData.mjs'
 import Modules from '../../infrastructure/Modules.js'
 import PaymentProviderEntities from './PaymentProviderEntities.mjs'
 import {
@@ -18,7 +18,7 @@ import {
   InactiveError,
   HasPastDueInvoiceError,
   HasNoAdditionalLicenseWhenManuallyCollectedError,
-} from './Errors.js'
+} from './Errors.mjs'
 import EmailHelper from '../Helpers/EmailHelper.mjs'
 import { InvalidEmailError } from '../Errors/Errors.js'
 

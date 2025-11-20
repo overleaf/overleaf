@@ -1,6 +1,6 @@
 import { beforeEach, describe, it, vi, expect } from 'vitest'
 
-import path from 'path'
+import path from 'node:path'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 const { ObjectId } = mongodb

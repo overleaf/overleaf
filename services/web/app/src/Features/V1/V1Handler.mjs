@@ -11,7 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import OError from '@overleaf/o-error'
-import V1Api from './V1Api.js'
+import V1Api from './V1Api.mjs'
 import logger from '@overleaf/logger'
 
 let V1Handler

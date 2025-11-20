@@ -1,11 +1,11 @@
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
 import { db } from '../../infrastructure/mongodb.js'
-import { normalizeQuery } from '../Helpers/Mongo.js'
+import Mongo from '../Helpers/Mongo.mjs'
 import { callbackify } from 'node:util'
 import UserGetter from './UserGetter.mjs'
 import InstitutionsAPI from '../Institutions/InstitutionsAPI.mjs'
-import Features from '../../infrastructure/Features.js'
+import Features from '../../infrastructure/Features.mjs'
 import FeaturesUpdater from '../Subscription/FeaturesUpdater.mjs'
 import EmailHandler from '../Email/EmailHandler.mjs'
 import EmailHelper from '../Helpers/EmailHelper.mjs'
@@ -21,6 +21,8 @@ import Modules from '../../infrastructure/Modules.js'
 import UserSessionsManager from './UserSessionsManager.mjs'
 import ThirdPartyIdentityManager from './ThirdPartyIdentityManager.mjs'
 import AsyncLocalStorage from '../../infrastructure/AsyncLocalStorage.js'
+
+const { normalizeQuery } = Mongo
 
 async function _sendSecurityAlertPrimaryEmailChanged(
   userId,

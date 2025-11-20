@@ -1,6 +1,6 @@
-const Errors = require('../Errors/Errors')
+import Errors from '../Errors/Errors.js'
 
-class InvalidZipFileError extends Errors.BackwardCompatibleError {
+export class InvalidZipFileError extends Errors.BackwardCompatibleError {
   constructor(options) {
     super({
       message: 'invalid_zip_file',
@@ -9,7 +9,7 @@ class InvalidZipFileError extends Errors.BackwardCompatibleError {
   }
 }
 
-class EmptyZipFileError extends InvalidZipFileError {
+export class EmptyZipFileError extends InvalidZipFileError {
   constructor(options) {
     super({
       message: 'empty_zip_file',
@@ -18,7 +18,7 @@ class EmptyZipFileError extends InvalidZipFileError {
   }
 }
 
-class ZipContentsTooLargeError extends InvalidZipFileError {
+export class ZipContentsTooLargeError extends InvalidZipFileError {
   constructor(options) {
     super({
       message: 'zip_contents_too_large',
@@ -27,7 +27,7 @@ class ZipContentsTooLargeError extends InvalidZipFileError {
   }
 }
 
-module.exports = {
+export default {
   InvalidZipFileError,
   EmptyZipFileError,
   ZipContentsTooLargeError,

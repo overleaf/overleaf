@@ -17,7 +17,7 @@ import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import UserPrimaryEmailCheckHandler from '../User/UserPrimaryEmailCheckHandler.mjs'
 import UserAuditLogHandler from './UserAuditLogHandler.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.js'
-import Features from '../../infrastructure/Features.js'
+import Features from '../../infrastructure/Features.mjs'
 import tsscmp from 'tsscmp'
 import Modules from '../../infrastructure/Modules.js'
 

@@ -3,7 +3,7 @@ import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 import MockRequest from '../helpers/MockRequest.js'
 import MockResponse from '../helpers/MockResponse.js'
-import PrivilegeLevels from '../../../../app/src/Features/Authorization/PrivilegeLevels.js'
+import PrivilegeLevels from '../../../../app/src/Features/Authorization/PrivilegeLevels.mjs'
 import UrlHelper from '../../../../app/src/Features/Helpers/UrlHelper.mjs'
 
 const { getSafeRedirectPath } = UrlHelper

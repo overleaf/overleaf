@@ -1,5 +1,5 @@
 import { vi, expect } from 'vitest'
-import assert from 'assert'
+import assert from 'node:assert'
 import sinon from 'sinon'
 import EmailHelper from '../../../../app/src/Features/Helpers/EmailHelper.mjs'
 

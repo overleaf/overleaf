@@ -22,9 +22,9 @@ import {
 import {
   MissingBillingInfoError,
   SubtotalLimitExceededError,
-} from './Errors.js'
+} from './Errors.mjs'
 import RecurlyMetrics from './RecurlyMetrics.mjs'
-import { isStandaloneAiAddOnPlanCode, AI_ADD_ON_CODE } from './AiHelper.js'
+import { isStandaloneAiAddOnPlanCode, AI_ADD_ON_CODE } from './AiHelper.mjs'
 
 /**
  * @import { PaymentProviderSubscriptionChangeRequest } from './PaymentProviderEntities.mjs'

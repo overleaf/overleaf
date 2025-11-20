@@ -7,7 +7,7 @@ import Settings from '@overleaf/settings'
 import xml2js from 'xml2js'
 import logger from '@overleaf/logger'
 import Errors from '../Errors/Errors.js'
-import SubscriptionErrors from './Errors.js'
+import SubscriptionErrors from './Errors.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 import RecurlyMetrics from './RecurlyMetrics.mjs'
 

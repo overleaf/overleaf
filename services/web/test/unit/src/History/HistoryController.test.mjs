@@ -118,7 +118,7 @@ describe('HistoryController', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/infrastructure/Features.js', () => ({
+    vi.doMock('../../../../app/src/infrastructure/Features.mjs', () => ({
       default: (ctx.Features = sinon.stub().withArgs('saas').returns(true)),
     }))
 

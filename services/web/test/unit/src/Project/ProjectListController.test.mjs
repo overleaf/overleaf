@@ -2,6 +2,7 @@ import { beforeEach, describe, it, expect, vi } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
+import Settings from '@overleaf/settings'
 
 const ObjectId = mongodb.ObjectId
 
@@ -64,6 +65,7 @@ describe('ProjectListController', function () {
       },
     ]
     ctx.settings = {
+      ...Settings,
       siteUrl: 'https://overleaf.com',
     }
     ctx.onboardingDataCollection = {

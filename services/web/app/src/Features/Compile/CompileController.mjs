@@ -21,7 +21,7 @@ import {
   fetchStreamWithResponse,
   RequestFailedError,
 } from '@overleaf/fetch-utils'
-import Features from '../../infrastructure/Features.js'
+import Features from '../../infrastructure/Features.mjs'
 
 const { z, zz, validateReq } = Validation
 const ClsiCookieManager = ClsiCookieManagerFactory(

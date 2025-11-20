@@ -12,7 +12,7 @@ import { expect } from 'chai'
 
 import async from 'async'
 import User from './helpers/User.mjs'
-import Features from '../../../app/src/infrastructure/Features.js'
+import Features from '../../../app/src/infrastructure/Features.mjs'
 
 describe('SettingsPage', function () {
   beforeEach(function (done) {

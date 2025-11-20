@@ -24,7 +24,7 @@ import {
   InvalidZipFileError,
   EmptyZipFileError,
   ZipContentsTooLargeError,
-} from './ArchiveErrors.js'
+} from './ArchiveErrors.mjs'
 import _ from 'lodash'
 import { promisifyAll } from '@overleaf/promise-utils'
 

@@ -1,9 +1,10 @@
 // @ts-check
 
-const Errors = require('../Errors/Errors')
-const OError = require('@overleaf/o-error')
+import Errors from '../Errors/Errors.js'
 
-class RecurlyTransactionError extends Errors.BackwardCompatibleError {
+import OError from '@overleaf/o-error'
+
+export class RecurlyTransactionError extends Errors.BackwardCompatibleError {
   constructor(options) {
     super({
       message: 'Unknown transaction error',
@@ -12,27 +13,27 @@ class RecurlyTransactionError extends Errors.BackwardCompatibleError {
   }
 }
 
-class DuplicateAddOnError extends OError {}
+export class DuplicateAddOnError extends OError {}
 
-class AddOnNotPresentError extends OError {}
+export class AddOnNotPresentError extends OError {}
 
-class MissingBillingInfoError extends OError {}
+export class MissingBillingInfoError extends OError {}
 
-class ManuallyCollectedError extends OError {}
+export class ManuallyCollectedError extends OError {}
 
-class PendingChangeError extends OError {}
+export class PendingChangeError extends OError {}
 
-class InactiveError extends OError {}
+export class InactiveError extends OError {}
 
-class SubtotalLimitExceededError extends OError {}
+export class SubtotalLimitExceededError extends OError {}
 
-class HasPastDueInvoiceError extends OError {}
+export class HasPastDueInvoiceError extends OError {}
 
-class HasNoAdditionalLicenseWhenManuallyCollectedError extends OError {}
+export class HasNoAdditionalLicenseWhenManuallyCollectedError extends OError {}
 
-class InvalidTaxIdError extends OError {}
+export class InvalidTaxIdError extends OError {}
 
-class StripeClientIdempotencyKeyInUseError extends OError {
+export class StripeClientIdempotencyKeyInUseError extends OError {
   constructor() {
     super('Stripe idempotency key was already in use')
   }
@@ -43,7 +44,7 @@ class StripeClientIdempotencyKeyInUseError extends OError {
  * @property {string} PaymentActionRequiredInfo.clientSecret
  * @property {string} PaymentActionRequiredInfo.publicKey
  */
-class PaymentActionRequiredError extends OError {
+export class PaymentActionRequiredError extends OError {
   /**
    * @param {PaymentActionRequiredInfo} info
    */
@@ -58,7 +59,7 @@ class PaymentActionRequiredError extends OError {
  * @property {string} PaymentFailedInfo.reason
  * @property {string} PaymentFailedInfo.adviceCode
  */
-class PaymentFailedError extends OError {
+export class PaymentFailedError extends OError {
   /**
    * @param {PaymentFailedInfo} info
    */
@@ -67,7 +68,7 @@ class PaymentFailedError extends OError {
   }
 }
 
-module.exports = {
+export default {
   RecurlyTransactionError,
   DuplicateAddOnError,
   AddOnNotPresentError,

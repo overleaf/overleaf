@@ -8,7 +8,7 @@ import SubscriptionLocator from './SubscriptionLocator.mjs'
 import Settings from '@overleaf/settings'
 import CollaboratorsGetter from '../Collaborators/CollaboratorsGetter.mjs'
 import CollaboratorsInvitesGetter from '../Collaborators/CollaboratorsInviteGetter.mjs'
-import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
+import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
 import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
 
 async function allowedNumberOfCollaboratorsInProject(projectId) {

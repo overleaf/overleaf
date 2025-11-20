@@ -1,6 +1,6 @@
 import AdminController from './Features/ServerAdmin/AdminController.mjs'
 import ErrorController from './Features/Errors/ErrorController.mjs'
-import Features from './infrastructure/Features.js'
+import Features from './infrastructure/Features.mjs'
 import ProjectController from './Features/Project/ProjectController.mjs'
 import ProjectApiController from './Features/Project/ProjectApiController.mjs'
 import ProjectListController from './Features/Project/ProjectListController.mjs'

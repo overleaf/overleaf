@@ -1,6 +1,6 @@
-const { RateLimiter } = require('../../infrastructure/RateLimiter')
-const { callbackify } = require('@overleaf/promise-utils')
-const Settings = require('@overleaf/settings')
+import { RateLimiter } from '../../infrastructure/RateLimiter.js'
+import { callbackify } from '@overleaf/promise-utils'
+import Settings from '@overleaf/settings'
 
 const rateLimiterLoginEmail = new RateLimiter(
   'login',
@@ -38,4 +38,4 @@ LoginRateLimiter.promises = {
   recordSuccessfulLogin,
 }
 
-module.exports = LoginRateLimiter
+export default LoginRateLimiter

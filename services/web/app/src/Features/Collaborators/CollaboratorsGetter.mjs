@@ -11,7 +11,7 @@ import PublicAccessLevels from '../Authorization/PublicAccessLevels.mjs'
 import Errors from '../Errors/Errors.js'
 import ProjectEditorHandler from '../Project/ProjectEditorHandler.mjs'
 import Sources from '../Authorization/Sources.mjs'
-import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
+import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
 
 const { ObjectId } = mongodb
 

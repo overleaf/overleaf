@@ -1,6 +1,6 @@
 import Settings from '@overleaf/settings'
 import mongoose from '../infrastructure/Mongoose.js'
-import TokenGenerator from '../Features/TokenGenerator/TokenGenerator.js'
+import TokenGenerator from '../Features/TokenGenerator/TokenGenerator.mjs'
 const { Schema } = mongoose
 const { ObjectId } = Schema
 

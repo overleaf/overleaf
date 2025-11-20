@@ -2,8 +2,8 @@
 
 import Settings from '@overleaf/settings'
 import { formatCurrency } from '../../util/currency.js'
-import GroupPlansData from './GroupPlansData.js'
-import { isStandaloneAiAddOnPlanCode } from './AiHelper.js'
+import GroupPlansData from './GroupPlansData.mjs'
+import { isStandaloneAiAddOnPlanCode } from './AiHelper.mjs'
 import { Subscription } from '../../models/Subscription.mjs'
 
 const MILLISECONDS = 1_000

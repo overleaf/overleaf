@@ -29,7 +29,9 @@ describe('EmailChangeHelper', function () {
     )
 
     EmailChangeHelpers = (
-      await import('../../../../app/src/Features/Analytics/EmailChangeHelper')
+      await import(
+        '../../../../app/src/Features/Analytics/EmailChangeHelper.mjs'
+      )
     ).default
   })
 

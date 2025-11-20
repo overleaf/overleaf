@@ -7,7 +7,7 @@ import UserGetter from '../User/UserGetter.mjs'
 import Settings from '@overleaf/settings'
 import { fetchJson, RequestFailedError } from '@overleaf/fetch-utils'
 import Metrics from '@overleaf/metrics'
-import Features from '../../infrastructure/Features.js'
+import Features from '../../infrastructure/Features.mjs'
 
 /**
  * Get the most recent build and metadata

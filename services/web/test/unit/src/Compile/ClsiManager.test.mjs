@@ -1,5 +1,5 @@
 import { vi, expect } from 'vitest'
-import { setTimeout } from 'timers/promises'
+import { setTimeout } from 'node:timers/promises'
 import sinon from 'sinon'
 import tk from 'timekeeper'
 import { RequestFailedError } from '@overleaf/fetch-utils'

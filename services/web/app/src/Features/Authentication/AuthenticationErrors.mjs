@@ -1,15 +1,15 @@
-const Metrics = require('@overleaf/metrics')
-const OError = require('@overleaf/o-error')
-const Settings = require('@overleaf/settings')
-const Errors = require('../Errors/Errors')
+import Metrics from '@overleaf/metrics'
+import OError from '@overleaf/o-error'
+import Settings from '@overleaf/settings'
+import Errors from '../Errors/Errors.js'
 
-class InvalidEmailError extends Errors.BackwardCompatibleError {}
-class InvalidPasswordError extends Errors.BackwardCompatibleError {}
-class ParallelLoginError extends Errors.BackwardCompatibleError {}
-class PasswordMustBeDifferentError extends Errors.BackwardCompatibleError {}
-class PasswordReusedError extends Errors.BackwardCompatibleError {}
+export class InvalidEmailError extends Errors.BackwardCompatibleError {}
+export class InvalidPasswordError extends Errors.BackwardCompatibleError {}
+export class ParallelLoginError extends Errors.BackwardCompatibleError {}
+export class PasswordMustBeDifferentError extends Errors.BackwardCompatibleError {}
+export class PasswordReusedError extends Errors.BackwardCompatibleError {}
 
-function handleAuthenticateErrors(error, req) {
+export function handleAuthenticateErrors(error, req) {
   if (error.message === 'password is too long') {
     Metrics.inc('login_failure_reason', 1, {
       status: 'password_is_too_long',
@@ -48,7 +48,7 @@ function handleAuthenticateErrors(error, req) {
   throw error
 }
 
-module.exports = {
+export default {
   InvalidEmailError,
   InvalidPasswordError,
   ParallelLoginError,

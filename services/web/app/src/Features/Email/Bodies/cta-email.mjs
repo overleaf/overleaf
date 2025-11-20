@@ -1,6 +1,6 @@
-const _ = require('lodash')
+import _ from 'lodash'
 
-module.exports = _.template(`\
+export default _.template(`\
 	<table class="row" style="border-collapse: collapse; border-spacing: 0; display: table; padding: 0; position: relative; text-align: left; vertical-align: top; width: 100%;">
 		<tbody>
 			<tr style="padding: 0; vertical-align: top;">

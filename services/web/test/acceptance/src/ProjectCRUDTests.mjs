@@ -4,7 +4,7 @@ import { Project } from '../../../app/src/models/Project.mjs'
 import mongodb from 'mongodb-legacy'
 import cheerio from 'cheerio'
 import { Subscription } from '../../../app/src/models/Subscription.mjs'
-import Features from '../../../app/src/infrastructure/Features.js'
+import Features from '../../../app/src/infrastructure/Features.mjs'
 
 const ObjectId = mongodb.ObjectId
 

@@ -10,7 +10,7 @@ import { vi } from 'vitest'
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import sinon from 'sinon'
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'node:events'
 const modulePath =
   '../../../../app/src/Features/Downloads/ProjectZipStreamManager.mjs'
 

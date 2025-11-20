@@ -3,7 +3,7 @@ import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import EmailBuilder from './EmailBuilder.mjs'
 import EmailSender from './EmailSender.mjs'
-import Queues from '../../infrastructure/Queues.js'
+import Queues from '../../infrastructure/Queues.mjs'
 
 const EMAIL_SETTINGS = Settings.email || {}
 

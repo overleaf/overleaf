@@ -1,6 +1,6 @@
 import logger from '@overleaf/logger'
 import { ProjectInvite } from '../../models/ProjectInvite.mjs'
-import PrivilegeLevels from '../Authorization/PrivilegeLevels.js'
+import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
 import CollaboratorsInviteHelper from './CollaboratorsInviteHelper.mjs'
 
 async function getAllInvites(projectId) {

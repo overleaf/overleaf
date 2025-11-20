@@ -18,10 +18,10 @@
 
 import OError from '@overleaf/o-error'
 
-import { DuplicateAddOnError, AddOnNotPresentError } from './Errors.js'
+import { DuplicateAddOnError, AddOnNotPresentError } from './Errors.mjs'
 import PlansLocator from './PlansLocator.mjs'
 import SubscriptionHelper from './SubscriptionHelper.mjs'
-import { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } from './AiHelper.js'
+import { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } from './AiHelper.mjs'
 export const MEMBERS_LIMIT_ADD_ON_CODE = 'additional-license'
 
 export class PaymentProviderSubscription {

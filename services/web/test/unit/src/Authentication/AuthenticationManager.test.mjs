@@ -1,7 +1,7 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
-import AuthenticationErrors from '../../../../app/src/Features/Authentication/AuthenticationErrors.js'
+import AuthenticationErrors from '../../../../app/src/Features/Authentication/AuthenticationErrors.mjs'
 import tk from 'timekeeper'
 import bcrypt from 'bcrypt'
 

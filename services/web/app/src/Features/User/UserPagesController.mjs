@@ -9,7 +9,7 @@ import NewsletterManager from '../Newsletter/NewsletterManager.mjs'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
 import _ from 'lodash'
 import { expressify } from '@overleaf/promise-utils'
-import Features from '../../infrastructure/Features.js'
+import Features from '../../infrastructure/Features.mjs'
 import Modules from '../../infrastructure/Modules.js'
 
 async function settingsPage(req, res) {

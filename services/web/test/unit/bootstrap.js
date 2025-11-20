@@ -66,10 +66,7 @@ function getSandboxedModuleRequires() {
     '@overleaf/logger': globalStubs.logger,
   }
 
-  const internalModules = [
-    '../../app/src/Features/Errors/Errors',
-    '../../app/src/Features/Helpers/Mongo',
-  ]
+  const internalModules = ['../../app/src/Features/Errors/Errors']
   const externalLibs = [
     'async',
     'bull',

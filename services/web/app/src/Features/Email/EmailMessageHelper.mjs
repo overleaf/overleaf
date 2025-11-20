@@ -1,4 +1,4 @@
-const sanitizeHtml = require('sanitize-html')
+import sanitizeHtml from 'sanitize-html'
 const sanitizeOptions = {
   html: {
     allowedTags: ['a', 'span', 'b', 'br', 'i'],
@@ -22,7 +22,7 @@ function displayLink(text, url, isPlainText) {
   return isPlainText ? `${text} (${url})` : `<a href="${url}">${text}</a>`
 }
 
-module.exports = {
+export default {
   cleanHTML,
   displayLink,
 }

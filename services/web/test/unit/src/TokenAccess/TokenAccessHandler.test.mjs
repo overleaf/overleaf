@@ -1,8 +1,8 @@
 import { vi, expect } from 'vitest'
-import path from 'path'
+import path from 'node:path'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
-import PrivilegeLevels from '../../../../app/src/Features/Authorization/PrivilegeLevels.js'
+import PrivilegeLevels from '../../../../app/src/Features/Authorization/PrivilegeLevels.mjs'
 
 const modulePath = path.join(
   import.meta.dirname,

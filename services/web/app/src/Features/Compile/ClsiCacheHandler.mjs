@@ -8,7 +8,7 @@ import logger from '@overleaf/logger'
 import Settings from '@overleaf/settings'
 import OError from '@overleaf/o-error'
 import { NotFoundError, InvalidNameError } from '../Errors/Errors.js'
-import Features from '../../infrastructure/Features.js'
+import Features from '../../infrastructure/Features.mjs'
 
 const TIMEOUT = 4_000
 

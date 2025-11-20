@@ -13,9 +13,9 @@ import V1SubscriptionManager from './V1SubscriptionManager.mjs'
 import InstitutionsFeatures from '../Institutions/InstitutionsFeatures.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
-import Queues from '../../infrastructure/Queues.js'
+import Queues from '../../infrastructure/Queues.mjs'
 import Modules from '../../infrastructure/Modules.js'
-import { AI_ADD_ON_CODE } from './AiHelper.js'
+import { AI_ADD_ON_CODE } from './AiHelper.mjs'
 
 /**
  * Enqueue a job for refreshing features for the given user

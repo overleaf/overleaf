@@ -2,7 +2,7 @@
 import Settings from '@overleaf/settings'
 
 import PlansLocator from './PlansLocator.mjs'
-import { isStandaloneAiAddOnPlanCode } from './AiHelper.js'
+import { isStandaloneAiAddOnPlanCode } from './AiHelper.mjs'
 import PaymentProviderEntities from './PaymentProviderEntities.mjs'
 import SubscriptionFormatters from './SubscriptionFormatters.mjs'
 import SubscriptionLocator from './SubscriptionLocator.mjs'

@@ -1,7 +1,7 @@
 import { beforeEach, describe, it, vi, expect } from 'vitest'
 import sinon from 'sinon'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
-import PrivilegeLevels from '../../../../app/src/Features/Authorization/PrivilegeLevels.js'
+import PrivilegeLevels from '../../../../app/src/Features/Authorization/PrivilegeLevels.mjs'
 import PublicAccessLevels from '../../../../app/src/Features/Authorization/PublicAccessLevels.mjs'
 import mongodb from 'mongodb-legacy'
 const modulePath =

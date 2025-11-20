@@ -1,7 +1,7 @@
-const Queue = require('bull')
-const Settings = require('@overleaf/settings')
-const Features = require('../infrastructure/Features')
-const { addConnectionDrainer } = require('./GracefulShutdown')
+import Queue from 'bull'
+import Settings from '@overleaf/settings'
+import Features from '../infrastructure/Features.mjs'
+import { addConnectionDrainer } from './GracefulShutdown.js'
 
 // Bull will keep a fixed number of the most recently completed jobs. This is
 // useful to inspect recently completed jobs. The bull prometheus exporter also
@@ -127,7 +127,7 @@ async function createScheduledJob(queueName, { name, data, options }, delay) {
   )
 }
 
-module.exports = {
+export default {
   getQueue,
   createScheduledJob,
 }

@@ -4,7 +4,7 @@ import User from './helpers/User.mjs'
 import settings from '@overleaf/settings'
 import CollaboratorsEmailHandler from '../../../app/src/Features/Collaborators/CollaboratorsEmailHandler.mjs'
 import CollaboratorsInviteHelper from '../../../app/src/Features/Collaborators/CollaboratorsInviteHelper.mjs'
-import Features from '../../../app/src/infrastructure/Features.js'
+import Features from '../../../app/src/infrastructure/Features.mjs'
 import sinon from 'sinon'
 
 let generateTokenSpy

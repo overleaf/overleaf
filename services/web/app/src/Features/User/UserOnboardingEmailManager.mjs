@@ -1,4 +1,4 @@
-import Queues from '../../infrastructure/Queues.js'
+import Queues from '../../infrastructure/Queues.mjs'
 import EmailHandler from '../Email/EmailHandler.mjs'
 import UserUpdater from './UserUpdater.mjs'
 import UserGetter from './UserGetter.mjs'

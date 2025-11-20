@@ -2,7 +2,7 @@ import OError from '@overleaf/o-error'
 import { URL } from 'node:url'
 import settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
-import V1Api from '../V1/V1Api.js'
+import V1Api from '../V1/V1Api.mjs'
 import sanitizeHtml from 'sanitize-html'
 import { promisify } from '@overleaf/promise-utils'
 

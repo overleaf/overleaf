@@ -1,7 +1,7 @@
 import { expect, vi } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
-import Crypto from 'crypto'
+import Crypto from 'node:crypto'
 
 const ObjectId = mongodb.ObjectId
 

@@ -1,7 +1,7 @@
 import UserHelper from './helpers/UserHelper.mjs'
 import Settings from '@overleaf/settings'
 import { expect } from 'chai'
-import Features from '../../../app/src/infrastructure/Features.js'
+import Features from '../../../app/src/infrastructure/Features.mjs'
 import MockV1ApiClass from './mocks/MockV1Api.mjs'
 import SubscriptionHelper from './helpers/Subscription.mjs'
 

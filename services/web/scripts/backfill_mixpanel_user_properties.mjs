@@ -2,12 +2,13 @@
 import '../app/src/models/User.mjs'
 import { batchedUpdateWithResultHandling } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
-import { getQueue } from '../app/src/infrastructure/Queues.js'
+import Queues from '../app/src/infrastructure/Queues.mjs'
 import SubscriptionLocator from '../app/src/Features/Subscription/SubscriptionLocator.mjs'
 import PlansLocator from '../app/src/Features/Subscription/PlansLocator.mjs'
 import FeaturesHelper from '../app/src/Features/Subscription/FeaturesHelper.mjs'
 import { db } from '../app/src/infrastructure/mongodb.js'
 
+const { getQueue } = Queues
 const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY || '10', 10)
 
 const mixpanelSinkQueue = getQueue('analytics-mixpanel-sink')

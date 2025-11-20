@@ -1,6 +1,6 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
-import PrivilegeLevels from '../../../../app/src/Features/Authorization/PrivilegeLevels.js'
+import PrivilegeLevels from '../../../../app/src/Features/Authorization/PrivilegeLevels.mjs'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import mongodb from 'mongodb-legacy'
 

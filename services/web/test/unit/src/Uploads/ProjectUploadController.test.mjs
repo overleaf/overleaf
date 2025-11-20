@@ -9,7 +9,7 @@ import { expect, vi } from 'vitest'
 import sinon from 'sinon'
 import MockRequest from '../helpers/MockRequest.js'
 import MockResponse from '../helpers/MockResponse.js'
-import ArchiveErrors from '../../../../app/src/Features/Uploads/ArchiveErrors.js'
+import ArchiveErrors from '../../../../app/src/Features/Uploads/ArchiveErrors.mjs'
 
 const modulePath =
   '../../../../app/src/Features/Uploads/ProjectUploadController.mjs'

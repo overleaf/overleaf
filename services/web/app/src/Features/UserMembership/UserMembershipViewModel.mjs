@@ -1,5 +1,7 @@
 import UserGetter from '../User/UserGetter.mjs'
-import { isObjectIdInstance } from '../Helpers/Mongo.js'
+import Mongo from '../Helpers/Mongo.mjs'
+
+const { isObjectIdInstance } = Mongo
 
 const UserMembershipViewModel = {
   build(userOrEmail) {

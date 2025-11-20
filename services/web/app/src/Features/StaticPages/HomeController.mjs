@@ -1,4 +1,4 @@
-import Features from '../../infrastructure/Features.js'
+import Features from '../../infrastructure/Features.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import Path from 'node:path'
 import fs from 'node:fs'

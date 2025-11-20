@@ -1,5 +1,5 @@
-const _ = require('lodash')
-const Settings = require('@overleaf/settings')
+import _ from 'lodash'
+import Settings from '@overleaf/settings'
 
 const supportModuleAvailable = Settings.moduleImportSequence.includes('support')
 
@@ -98,4 +98,4 @@ const Features = {
   },
 }
 
-module.exports = Features
+export default Features

@@ -2,9 +2,9 @@ import { vi, assert, expect } from 'vitest'
 import sinon from 'sinon'
 import MockRequest from '../helpers/MockRequest.js'
 import MockResponse from '../helpers/MockResponse.js'
-import SubscriptionErrors from '../../../../app/src/Features/Subscription/Errors.js'
+import SubscriptionErrors from '../../../../app/src/Features/Subscription/Errors.mjs'
 import SubscriptionHelper from '../../../../app/src/Features/Subscription/SubscriptionHelper.mjs'
-import { AI_ADD_ON_CODE } from '../../../../app/src/Features/Subscription/AiHelper.js'
+import { AI_ADD_ON_CODE } from '../../../../app/src/Features/Subscription/AiHelper.mjs'
 
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionController.mjs'

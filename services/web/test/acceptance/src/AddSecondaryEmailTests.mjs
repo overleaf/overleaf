@@ -3,7 +3,7 @@ import UserHelper from './helpers/User.mjs'
 import logger from '@overleaf/logger'
 import sinon from 'sinon'
 import { db } from '../../../app/src/infrastructure/mongodb.js'
-import Features from '../../../app/src/infrastructure/Features.js'
+import Features from '../../../app/src/infrastructure/Features.mjs'
 
 const User = UserHelper.promises
 

@@ -1,8 +1,8 @@
 import { vi, assert } from 'vitest'
-import path from 'path'
+import path from 'node:path'
 import sinon from 'sinon'
-import MockRequest from '../helpers/MockRequest.js'
-import MockResponse from '../helpers/MockResponse.js'
+import MockRequest from '../helpers/MockRequestVitest.mjs'
+import MockResponse from '../helpers/MockResponseVitest.mjs'
 import mongodb from 'mongodb-legacy'
 
 const { ObjectId } = mongodb
@@ -395,9 +395,9 @@ describe('AnalyticsManager', function () {
       }))
 
       ctx.AnalyticsManager = (await import(MODULE_PATH)).default
-      ctx.req = new MockRequest()
+      ctx.req = new MockRequest(vi)
       ctx.req.session = {}
-      ctx.res = new MockResponse()
+      ctx.res = new MockResponse(vi)
       ctx.next = () => {}
     })
 

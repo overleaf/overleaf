@@ -1,5 +1,5 @@
 import { vi, expect } from 'vitest'
-import Path from 'path'
+import Path from 'node:path'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 import { Project } from '../../../../app/src/models/Project.mjs'

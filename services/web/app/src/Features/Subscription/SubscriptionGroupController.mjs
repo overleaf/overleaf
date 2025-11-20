@@ -20,7 +20,7 @@ import {
   HasPastDueInvoiceError,
   HasNoAdditionalLicenseWhenManuallyCollectedError,
   PaymentActionRequiredError,
-} from './Errors.js'
+} from './Errors.mjs'
 
 const MAX_NUMBER_OF_USERS = 20
 const MAX_NUMBER_OF_PO_NUMBER_CHARACTERS = 50

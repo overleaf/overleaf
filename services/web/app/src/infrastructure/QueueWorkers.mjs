@@ -1,5 +1,5 @@
-import Features from './Features.js'
-import Queues from './Queues.js'
+import Features from './Features.mjs'
+import Queues from './Queues.mjs'
 import UserOnboardingEmailManager from '../Features/User/UserOnboardingEmailManager.mjs'
 import UserPostRegistrationAnalyticsManager from '../Features/User/UserPostRegistrationAnalyticsManager.mjs'
 import FeaturesUpdater from '../Features/Subscription/FeaturesUpdater.mjs'

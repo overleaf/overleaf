@@ -3,7 +3,7 @@ import {
   overleafLoginRateLimiter,
   openProjectRateLimiter,
 } from '../../../../app/src/infrastructure/RateLimiter.js'
-import LoginRateLimiter from '../../../../app/src/Features/Security/LoginRateLimiter.js'
+import LoginRateLimiter from '../../../../app/src/Features/Security/LoginRateLimiter.mjs'
 
 async function clearLoginRateLimit() {
   await LoginRateLimiter.promises.recordSuccessfulLogin(Settings.smokeTest.user)

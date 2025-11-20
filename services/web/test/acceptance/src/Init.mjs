@@ -1,5 +1,5 @@
 import './helpers/InitApp.mjs'
-import Features from '../../../app/src/infrastructure/Features.js'
+import Features from '../../../app/src/infrastructure/Features.mjs'
 
 import MockAnalyticsApi from './mocks/MockAnalyticsApi.mjs'
 import MockChatApi from './mocks/MockChatApi.mjs'

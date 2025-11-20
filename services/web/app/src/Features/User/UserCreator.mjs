@@ -1,7 +1,7 @@
 import logger from '@overleaf/logger'
 import util from 'node:util'
 import { AffiliationError } from '../Errors/Errors.js'
-import Features from '../../infrastructure/Features.js'
+import Features from '../../infrastructure/Features.mjs'
 import { User } from '../../models/User.mjs'
 import UserDeleter from './UserDeleter.mjs'
 import UserGetter from './UserGetter.mjs'

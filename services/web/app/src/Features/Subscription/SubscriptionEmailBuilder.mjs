@@ -1,5 +1,5 @@
 import EmailBuilder from '../Email/EmailBuilder.mjs'
-import EmailMessageHelper from '../Email/EmailMessageHelper.js'
+import EmailMessageHelper from '../Email/EmailMessageHelper.mjs'
 import settings from '@overleaf/settings'
 
 EmailBuilder.templates.trialOnboarding = EmailBuilder.NoCTAEmailTemplate({

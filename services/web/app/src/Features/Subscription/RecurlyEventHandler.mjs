@@ -1,7 +1,7 @@
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import SubscriptionEmailHandler from './SubscriptionEmailHandler.mjs'
-import { AI_ADD_ON_CODE } from './AiHelper.js'
+import { AI_ADD_ON_CODE } from './AiHelper.mjs'
 import mongodb from 'mongodb-legacy'
 
 const { ObjectId } = mongodb

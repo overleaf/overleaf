@@ -1,12 +1,13 @@
 import { vi, expect } from 'vitest'
-import { setTimeout } from 'timers/promises'
-import path from 'path'
+import { setTimeout } from 'node:timers/promises'
+import path from 'node:path'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 import tk from 'timekeeper'
-import { normalizeQuery } from '../../../../app/src/Features/Helpers/Mongo.js'
+import MongoHelpers from '../../../../app/src/Features/Helpers/Mongo.mjs'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 
+const { normalizeQuery } = MongoHelpers
 const { ObjectId } = mongodb
 
 const MODULE_PATH = path.join(
@@ -126,7 +127,7 @@ describe('UserUpdater', function () {
     }
 
     vi.doMock('../../../../app/src/Features/Helpers/Mongo', () => ({
-      normalizeQuery,
+      default: { normalizeQuery },
     }))
 
     vi.doMock('../../../../app/src/infrastructure/mongodb', () => ctx.mongodb)

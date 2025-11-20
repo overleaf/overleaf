@@ -1,7 +1,7 @@
 import { expect, vi } from 'vitest'
 import path from 'node:path'
 import sinon from 'sinon'
-import MockResponse from '../helpers/MockResponse.js'
+import MockResponse from '../helpers/MockResponseVitest.mjs'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
@@ -74,7 +74,7 @@ describe('BetaProgramController', function () {
     )
 
     ctx.BetaProgramController = (await import(modulePath)).default
-    ctx.res = new MockResponse()
+    ctx.res = new MockResponse(vi)
     ctx.next = sinon.stub()
   })
 
@@ -122,7 +122,7 @@ describe('BetaProgramController', function () {
 
       it("should not redirect to '/beta/participate'", function (ctx) {
         ctx.BetaProgramController.optIn(ctx.req, ctx.res, ctx.next)
-        ctx.res.redirect.callCount.should.equal(0)
+        expect(ctx.res.redirect).not.toHaveBeenCalled()
       })
 
       it('should produce an error', async function (ctx) {
@@ -248,7 +248,7 @@ describe('BetaProgramController', function () {
 
       it('should not render the opt-in page', function (ctx) {
         ctx.BetaProgramController.optInPage(ctx.req, ctx.res, ctx.next)
-        ctx.res.render.callCount.should.equal(0)
+        expect(ctx.res.render).not.toHaveBeenCalled()
       })
 
       it('should produce an error', async function (ctx) {

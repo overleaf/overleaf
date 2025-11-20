@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import sinon from 'sinon'
-import MockResponse from '../helpers/MockResponse.js'
+import MockResponse from '../helpers/MockResponseVitest.mjs'
 const modulePath = new URL(
   '../../../../app/src/Features/Analytics/AnalyticsController.mjs',
   import.meta.url
@@ -33,7 +33,7 @@ describe('AnalyticsController', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/infrastructure/Features.js', () => ({
+    vi.doMock('../../../../app/src/infrastructure/Features.mjs', () => ({
       default: ctx.Features,
     }))
 
@@ -47,7 +47,7 @@ describe('AnalyticsController', function () {
 
     ctx.controller = (await import(modulePath)).default
 
-    ctx.res = new MockResponse()
+    ctx.res = new MockResponse(vi)
   })
 
   describe('updateEditingSession', function () {

@@ -1,10 +1,10 @@
 import { beforeEach, describe, it, vi, expect } from 'vitest'
 import sinon from 'sinon'
 import tk from 'timekeeper'
-import MockRequest from '../helpers/MockRequest.js'
-import MockResponse from '../helpers/MockResponse.js'
+import MockRequest from '../helpers/MockRequestVitest.mjs'
+import MockResponse from '../helpers/MockResponseVitest.mjs'
 import mongodb from 'mongodb-legacy'
-import AuthenticationErrors from '../../../../app/src/Features/Authentication/AuthenticationErrors.js'
+import AuthenticationErrors from '../../../../app/src/Features/Authentication/AuthenticationErrors.mjs'
 const modulePath =
   '../../../../app/src/Features/Authentication/AuthenticationController.mjs'
 
@@ -64,8 +64,8 @@ describe('AuthenticationController', function () {
       },
     }
     ctx.password = 'banana'
-    ctx.req = new MockRequest()
-    ctx.res = new MockResponse()
+    ctx.req = new MockRequest(vi)
+    ctx.res = new MockResponse(vi)
     ctx.callback = sinon.stub()
     ctx.next = sinon.stub()
     ctx.req.session.analyticsId = 'abc-123'

@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
-import MockRequest from '../helpers/MockRequest.js'
-import MockResponse from '../helpers/MockResponse.js'
+import MockRequest from '../helpers/MockRequestVitest.mjs'
+import MockResponse from '../helpers/MockResponseVitest.mjs'
 
 const ObjectId = mongodb.ObjectId
 
@@ -16,8 +16,8 @@ vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
 
 describe('CollaboratorsController', function () {
   beforeEach(async function (ctx) {
-    ctx.res = new MockResponse()
-    ctx.req = new MockRequest()
+    ctx.res = new MockResponse(vi)
+    ctx.req = new MockRequest(vi)
 
     ctx.user = { _id: new ObjectId() }
     ctx.projectId = new ObjectId()

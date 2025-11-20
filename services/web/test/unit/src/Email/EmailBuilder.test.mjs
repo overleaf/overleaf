@@ -1,11 +1,11 @@
 import { vi, expect } from 'vitest'
 import cheerio from 'cheerio'
-import path from 'path'
+import path from 'node:path'
 
-import EmailMessageHelper from '../../../../app/src/Features/Email/EmailMessageHelper.js'
-import ctaEmailBody from '../../../../app/src/Features/Email/Bodies/cta-email.js'
-import NoCTAEmailBody from '../../../../app/src/Features/Email/Bodies/NoCTAEmailBody.js'
-import BaseWithHeaderEmailLayout from '../../../../app/src/Features/Email/Layouts/BaseWithHeaderEmailLayout.js'
+import EmailMessageHelper from '../../../../app/src/Features/Email/EmailMessageHelper.mjs'
+import ctaEmailBody from '../../../../app/src/Features/Email/Bodies/cta-email.mjs'
+import NoCTAEmailBody from '../../../../app/src/Features/Email/Bodies/NoCTAEmailBody.mjs'
+import BaseWithHeaderEmailLayout from '../../../../app/src/Features/Email/Layouts/BaseWithHeaderEmailLayout.mjs'
 
 const MODULE_PATH = path.join(
   import.meta.dirname,

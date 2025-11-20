@@ -1,6 +1,8 @@
-const OError = require('@overleaf/o-error')
-const { ObjectId } = require('mongodb-legacy')
-const { ObjectId: MongooseObjectId } = require('mongoose').mongo
+import OError from '@overleaf/o-error'
+import mongodb from 'mongodb-legacy'
+import { ObjectId as MongooseObjectId } from 'mongoose'
+
+const { ObjectId } = mongodb
 
 function _getObjectIdInstance(id) {
   if (typeof id === 'string') {
@@ -47,7 +49,7 @@ function isObjectIdInstance(id) {
   return id instanceof ObjectId || id instanceof MongooseObjectId
 }
 
-module.exports = {
+export default {
   isObjectIdInstance,
   normalizeQuery,
   normalizeMultiQuery,

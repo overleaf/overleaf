@@ -2,8 +2,8 @@ import { beforeEach, describe, it, vi, expect } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
-import MockRequest from '../helpers/MockRequest.js'
-import MockResponse from '../helpers/MockResponse.js'
+import MockRequest from '../helpers/MockRequestVitest.mjs'
+import MockResponse from '../helpers/MockResponseVitest.mjs'
 
 const { ObjectId } = mongodb
 
@@ -52,8 +52,8 @@ describe('EditorHttpController', function () {
     ctx.source = 'editor'
 
     ctx.parentFolderId = 'mock-folder-id'
-    ctx.req = new MockRequest()
-    ctx.res = new MockResponse()
+    ctx.req = new MockRequest(vi)
+    ctx.res = new MockResponse(vi)
     ctx.next = sinon.stub()
     ctx.token = null
     ctx.docLines = ['hello', 'overleaf']
@@ -302,7 +302,7 @@ describe('EditorHttpController', function () {
       })
 
       it('should return the project and privilege level', function (ctx) {
-        expect(ctx.res.json).to.have.been.calledWith({
+        expect(ctx.res.json).toHaveBeenCalledWith({
           project: ctx.projectView,
           privilegeLevel: 'owner',
           isRestrictedUser: false,
@@ -359,7 +359,7 @@ describe('EditorHttpController', function () {
       })
 
       it('should mark the user as restricted, and hide details of owner', function (ctx) {
-        expect(ctx.res.json).to.have.been.calledWith({
+        expect(ctx.res.json).toHaveBeenCalledWith({
           project: ctx.reducedProjectView,
           privilegeLevel: 'readOnly',
           isRestrictedUser: true,
@@ -415,7 +415,7 @@ describe('EditorHttpController', function () {
       })
 
       it('should mark the user as restricted', function (ctx) {
-        expect(ctx.res.json).to.have.been.calledWith({
+        expect(ctx.res.json).toHaveBeenCalledWith({
           project: ctx.reducedProjectView,
           privilegeLevel: 'readOnly',
           isRestrictedUser: true,
@@ -449,7 +449,7 @@ describe('EditorHttpController', function () {
       })
 
       it('should mark the user as being a token-access member', function (ctx) {
-        expect(ctx.res.json).to.have.been.calledWith({
+        expect(ctx.res.json).toHaveBeenCalledWith({
           project: ctx.projectView,
           privilegeLevel: 'readAndWrite',
           isRestrictedUser: false,
@@ -505,7 +505,7 @@ describe('EditorHttpController', function () {
       })
 
       it('should send the doc back as JSON', function (ctx) {
-        expect(ctx.res.json).to.have.been.calledWith(ctx.doc)
+        expect(ctx.res.json).toHaveBeenCalledWith(ctx.doc)
       })
     })
 
@@ -528,7 +528,7 @@ describe('EditorHttpController', function () {
         await new Promise(resolve => {
           ctx.res.callback = () => {
             expect(ctx.res.body).to.equal('"project_has_too_many_files_limit"')
-            expect(ctx.res.status).to.have.been.calledWith(400)
+            expect(ctx.res.status).toHaveBeenCalledWith(400)
             resolve()
           }
           ctx.EditorHttpController.addDoc(ctx.req, ctx.res)
@@ -565,7 +565,7 @@ describe('EditorHttpController', function () {
       })
 
       it('should send the folder back as JSON', function (ctx) {
-        expect(ctx.res.json).to.have.been.calledWith(ctx.folder)
+        expect(ctx.res.json).toHaveBeenCalledWith(ctx.folder)
       })
     })
 
@@ -646,7 +646,7 @@ describe('EditorHttpController', function () {
       })
 
       it('should send back a success response', function (ctx) {
-        expect(ctx.res.sendStatus).to.have.been.calledWith(204)
+        expect(ctx.res.sendStatus).toHaveBeenCalledWith(204)
       })
     })
     describe('with long name', function () {

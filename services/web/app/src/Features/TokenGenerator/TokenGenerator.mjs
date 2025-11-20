@@ -1,7 +1,7 @@
-const crypto = require('crypto')
-const V1Api = require('../V1/V1Api')
-const Features = require('../../infrastructure/Features')
-const { callbackify } = require('util')
+import crypto from 'node:crypto'
+import V1Api from '../V1/V1Api.mjs'
+import Features from '../../infrastructure/Features.mjs'
+import { callbackify } from 'node:util'
 
 // (From Overleaf `random_token.rb`)
 //   Letters (not numbers! see generate_token) used in tokens. They're all
@@ -94,4 +94,4 @@ const TokenGenerator = {
 TokenGenerator.promises = {
   generateUniqueReadOnlyToken,
 }
-module.exports = TokenGenerator
+export default TokenGenerator

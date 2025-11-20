@@ -9,4 +9,4 @@ const PrivilegeLevels = {
   OWNER: 'owner',
 }
 
-module.exports = PrivilegeLevels
+export default PrivilegeLevels

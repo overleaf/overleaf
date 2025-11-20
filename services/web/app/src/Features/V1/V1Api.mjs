@@ -7,10 +7,11 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const request = require('request')
-const settings = require('@overleaf/settings')
-const Errors = require('../Errors/Errors')
-const { promisifyAll } = require('@overleaf/promise-utils')
+import request from 'request'
+
+import settings from '@overleaf/settings'
+import Errors from '../Errors/Errors.js'
+import { promisifyAll } from '@overleaf/promise-utils'
 
 // TODO: check what happens when these settings aren't defined
 const DEFAULT_V1_PARAMS = {
@@ -103,4 +104,4 @@ V1Api.promises = promisifyAll(V1Api, {
     oauthRequest: ['response', 'body'],
   },
 })
-module.exports = V1Api
+export default V1Api
