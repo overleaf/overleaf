@@ -104,6 +104,7 @@ export interface Meta {
   'ol-compilesUserContentDomain': string
   'ol-countryCode': PricingFormState['country']
   'ol-couponCode': PricingFormState['coupon']
+  'ol-createNewUserViaDomainCapture': boolean
   'ol-createdAt': Date
   'ol-csrfToken': string
   'ol-currentInstitutionsWithLicence': Institution[]
@@ -166,6 +167,7 @@ export interface Meta {
   'ol-i18n': { currentLangCode: string }
   'ol-imageNames': ImageName[]
   'ol-inactiveTutorials': string[]
+  'ol-institutionEmail': string | undefined
   'ol-institutionEmailNonCanonical': string | undefined
   'ol-institutionLinked': InstitutionLink | undefined
   'ol-inviteToken': string

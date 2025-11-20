@@ -81,6 +81,8 @@ class SAMLCommonsUnavailable extends OError {
   }
 }
 
+class SAMLDomainCaptureError extends OError {}
+
 class SAMLIdentityExistsError extends OError {
   get i18nKey() {
     return 'institution_account_tried_to_add_already_registered'
@@ -357,6 +359,7 @@ module.exports = {
   SAMLAssertionAudienceMismatch,
   SAMLAuthenticationRequiredError,
   SAMLCommonsUnavailable,
+  SAMLDomainCaptureError,
   SAMLIdentityExistsError,
   SAMLAlreadyLinkedError,
   SAMLEmailNotAffiliatedError,
