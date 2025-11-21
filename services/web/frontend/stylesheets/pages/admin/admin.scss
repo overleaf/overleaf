@@ -100,3 +100,76 @@
 .expiration-label {
   vertical-align: super;
 }
+
+.privileges-matrix-container {
+  overflow-x: auto;
+  margin-top: var(--spacing-04);
+}
+
+.privileges-matrix-table {
+  width: 100%;
+  min-width: 800px;
+
+  thead {
+    background-color: var(--bg-accent-01);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+
+    th {
+      text-align: center;
+      font-weight: 600;
+      padding: var(--spacing-03);
+      border: 1px solid var(--border-color);
+    }
+
+    th:first-child {
+      text-align: left;
+    }
+  }
+
+  tbody {
+    .section-header {
+      background-color: var(--bg-accent-02);
+      font-weight: 600;
+
+      td {
+        padding: var(--spacing-03);
+        border: 1px solid var(--border-color);
+      }
+    }
+
+    .privilege-label {
+      padding: var(--spacing-03);
+      border: 1px solid var(--border-color);
+      text-align: left;
+    }
+
+    .access-cell {
+      text-align: center;
+      padding: var(--spacing-03);
+      border: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+
+    .access-badge {
+      display: inline-block;
+      padding: var(--spacing-01) var(--spacing-02);
+      border-radius: var(--border-radius-large);
+      font-weight: 500;
+      font-size: 0.875rem;
+      min-width: 40px;
+      text-align: center;
+    }
+
+    .badge-yes {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .badge-no {
+      background-color: #8b4513;
+      color: white;
+    }
+  }
+}

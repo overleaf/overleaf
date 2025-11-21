@@ -16,6 +16,7 @@ block content
 										+bookmarkable-tabset-header('system-messages', 'System Messages', true)
 										+bookmarkable-tabset-header('open-sockets', 'Open Sockets')
 										+bookmarkable-tabset-header('open-close-editor', 'Open/Close Editor')
+										+bookmarkable-tabset-header('privileges-matrix', 'Privileges Matrix')
 										if hasFeature('saas')
 											+bookmarkable-tabset-header('tpds', 'TPDS/Dropbox Management')
 
@@ -70,6 +71,41 @@ block content
 													input(name='_csrf' type='hidden' value=csrfToken)
 													button.btn.btn-danger(type='submit') Reopen Editor
 												p.small Will reopen the editor after closing.
+
+									.tab-pane(role='tabpanel' id='privileges-matrix')
+										p This matrix shows the access levels for different admin roles across various user management privileges. The matrix is automatically generated from the code-defined roles and capabilities.
+										if hasFeature('saas') && privilegesMatrix
+											.privileges-matrix-container
+												table.table.table-bordered.table-striped.privileges-matrix-table
+													thead
+														tr
+															th Webpage and privilege
+															th(colspan=privilegesMatrix.roles.length) Access Level Needed For Team
+														tr
+															th
+															each role in privilegesMatrix.roles
+																th= role.displayName
+													tbody
+														- let currentSection = null
+														each row in privilegesMatrix.privileges
+															- const privilege = row.privilege
+															- if (currentSection !== privilege.section)
+																- currentSection = privilege.section
+																tr.section-header
+																	td(colspan=privilegesMatrix.roles.length + 1)
+																		strong= privilege.section
+															tr
+																td.privilege-label= privilege.label
+																each role in privilegesMatrix.roles
+																	- const accessLevel = row.access[role.id]
+																	td.access-cell(class=`access-${accessLevel}`)
+																		span.access-badge(class=`badge-${accessLevel}`)
+																			if accessLevel === 'yes'
+																				| Yes
+																			else
+																				| No
+										else
+											p The privileges matrix is not available in this environment.
 
 									if hasFeature('saas')
 										.tab-pane(role='tabpanel' id='tpds')
