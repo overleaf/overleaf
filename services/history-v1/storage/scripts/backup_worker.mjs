@@ -6,6 +6,7 @@ import {
   backupProject,
   initializeProjects,
   configureBackup,
+  closeConnections,
 } from './backup.mjs'
 
 const JOB_CONCURRENCY = parseInt(process.env.JOB_CONCURRENCY, 10) || 15
@@ -19,6 +20,19 @@ const LAG_TIME_BUCKETS_HRS = [
 
 // Configure backup settings to match worker concurrency
 configureBackup({ concurrency: UPLOAD_CONCURRENCY, useSecondary: true })
+
+let gracefulShutdownInitiated = false
+
+process.on('SIGINT', handleSignal)
+process.on('SIGTERM', handleSignal)
+
+async function handleSignal() {
+  if (!gracefulShutdownInitiated) {
+    gracefulShutdownInitiated = true
+    logger.info({}, 'graceful shutdown: stopping backup worker')
+    await drainQueue()
+  }
+}
 
 // Create a Bull queue named 'backup'
 const backupQueue = new Queue('backup', {
@@ -62,11 +76,11 @@ backupQueue.on('lock-extension-failed', (job, err) => {
 })
 
 backupQueue.on('paused', () => {
-  logger.info('queue paused')
+  logger.info({}, 'queue paused')
 })
 
 backupQueue.on('resumed', () => {
-  logger.info('queue resumed')
+  logger.info({}, 'queue resumed')
 })
 
 // Process jobs
@@ -138,10 +152,10 @@ async function runInit(startDate, endDate) {
 }
 
 export async function drainQueue() {
-  logger.info({ queue: backupQueue.name }, 'pausing queue')
-  await backupQueue.pause(true) // pause this worker and wait for jobs to finish
   logger.info({ queue: backupQueue.name }, 'closing queue')
   await backupQueue.close()
+  logger.info({ queue: backupQueue.name }, 'closing database connections')
+  await closeConnections()
 }
 
 export async function healthCheck() {

@@ -93,8 +93,10 @@ process.on('SIGINT', handleSignal)
 process.on('SIGTERM', handleSignal)
 
 function handleSignal() {
-  gracefulShutdownInitiated = true
-  logger.info({}, 'graceful shutdown initiated, draining queue')
+  if (!gracefulShutdownInitiated) {
+    gracefulShutdownInitiated = true
+    logger.info({}, 'graceful shutdown: waiting for backups to complete')
+  }
 }
 
 async function retry(fn, times, delayMs) {
@@ -1071,6 +1073,45 @@ async function main() {
   }
 }
 
+/**
+ * Close all database connections gracefully
+ * @returns {Promise<void>}
+ */
+export async function closeConnections() {
+  /** @type {Error[]} */
+  const errors = []
+
+  try {
+    await knex.destroy()
+    console.log('Postgres connection closed')
+  } catch (err) {
+    console.error('Error closing Postgres connection:', err)
+    errors.push(/** @type {Error} */ (err))
+  }
+
+  try {
+    await client.close()
+    console.log('MongoDB connection closed')
+  } catch (err) {
+    console.error('Error closing MongoDB connection:', err)
+    errors.push(/** @type {Error} */ (err))
+  }
+
+  try {
+    await redis.disconnect()
+    console.log('Redis connection closed')
+  } catch (err) {
+    console.error('Error closing Redis connection:', err)
+    errors.push(/** @type {Error} */ (err))
+  }
+
+  if (errors.length > 0) {
+    throw new Error(
+      `Failed to close ${errors.length} connection(s): ${errors.map(e => e.message).join(', ')}`
+    )
+  }
+}
+
 // Only run command-line interface when script is run directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   main()
@@ -1083,30 +1124,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       console.error('Error backing up project:', err)
       process.exit(1)
     })
-    .finally(() => {
-      knex
-        .destroy()
-        .then(() => {
-          console.log('Postgres connection closed')
-        })
-        .catch(err => {
-          console.error('Error closing Postgres connection:', err)
-        })
-      client
-        .close()
-        .then(() => {
-          console.log('MongoDB connection closed')
-        })
-        .catch(err => {
-          console.error('Error closing MongoDB connection:', err)
-        })
-      redis
-        .disconnect()
-        .then(() => {
-          console.log('Redis connection closed')
-        })
-        .catch(err => {
-          console.error('Error closing Redis connection:', err)
-        })
+    .finally(async () => {
+      await closeConnections()
     })
 }
