@@ -1,33 +1,59 @@
+@use 'sass:math';
+
 .overleaf-ds-logo {
   background-image: url('../../../frontend/js/shared/svgs/overleaf-a-ds-solution-mallard.svg');
 }
 
 .ciam-layout {
-  @include full-height-stacked-page;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-spacing-400);
+
+  @include media-breakpoint-up(sm) {
+    gap: var(--ds-spacing-800);
+  }
 }
 
 .ciam-enabled {
   @include ds-body-md-regular;
 
-  font-family: var(--ds-font-family-sans), sans-serif;
+  --password-visibility-toggle-width: calc(24px + 2 * var(--ds-spacing-250));
+
+  &,
+  h1 {
+    font-family: var(--ds-font-family-sans), sans-serif;
+    color: var(--ds-color-text-primary);
+  }
 
   .ciam-container {
     flex: 1 1 auto;
-    padding: var(--ds-spacing-350);
+    padding: 0 var(--ds-spacing-300);
   }
 
-  .brand {
+  .ciam-logo {
+    padding: var(--ds-spacing-800) 0 0 0;
+    text-align: center;
+
+    @include media-breakpoint-up(sm) {
+      padding-left: var(--ds-spacing-800);
+      padding-right: var(--ds-spacing-800);
+    }
+  }
+
+  .ciam-logo .brand {
     flex-shrink: 0;
     background-repeat: no-repeat;
     background-position: center center;
     background-size: contain;
-    height: 64px;
-    width: 130px;
-    margin: var(--ds-spacing-350) auto;
+    height: 49px;
+    width: 107px;
+    margin: 0 auto;
     display: block;
 
     @include media-breakpoint-up(sm) {
-      margin: var(--ds-spacing-350) var(--ds-spacing-800);
+      height: 64px;
+      width: 130px;
+      margin: 9px 0; // Vertical margin isn't an exacting spacing value in the design
     }
   }
 
@@ -49,10 +75,31 @@
     padding: var(--ds-spacing-800) var(--ds-spacing-400);
     border-radius: var(--ds-border-radius-400);
     max-width: 464px;
-    margin: var(--ds-spacing-400) auto;
+    margin: 0 auto;
 
     @include media-breakpoint-up(sm) {
       padding: var(--ds-spacing-1300);
+    }
+
+    .notification {
+      @include ds-body-sm-regular;
+
+      color: var(--ds-color-text-primary);
+      padding: 0 var(--ds-spacing-400);
+      border-width: 0;
+      border-radius: var(--ds-border-radius-200);
+
+      .notification-icon {
+        font-size: math.div(20em, 14);
+      }
+
+      .notification-content {
+        padding: var(--ds-spacing-400) 0;
+      }
+
+      &.notification-type-error {
+        background-color: var(--ds-color-red-50);
+      }
     }
   }
 
@@ -77,6 +124,7 @@
     p {
       @include ds-body-sm-regular;
 
+      color: var(--ds-color-text-secondary);
       margin-bottom: 0;
     }
   }
@@ -86,25 +134,31 @@
     padding: var(--ds-spacing-200) 0;
   }
 
+  .ciam-stepper {
+    margin: 0;
+    height: 4px;
+    border-radius: var(--ds-border-radius-full);
+
+    .step {
+      background: var(--ds-color-neutral-200);
+    }
+  }
+
   footer {
-    .footer-links {
-      display: flex;
-      gap: var(--ds-spacing-600);
-      justify-content: center;
-      padding: var(--ds-spacing-350) 0;
-      margin: 0 auto var(--spacing-15) auto;
+    display: flex;
+    gap: var(--ds-spacing-600);
+    justify-content: center;
+    padding: var(--ds-spacing-300) 0;
+    margin: 0 auto;
 
-      @include media-breakpoint-up(sm) {
-        margin-left: var(--ds-spacing-800);
-        margin-right: var(--ds-spacing-800);
-        justify-content: start;
-      }
+    @include media-breakpoint-up(sm) {
+      margin-left: var(--ds-spacing-800);
+      margin-right: var(--ds-spacing-800);
+      justify-content: start;
+    }
 
-      a {
-        text-decoration: none;
-
-        @include ds-body-sm-regular;
-      }
+    a {
+      @include ds-body-sm-regular;
     }
   }
 }

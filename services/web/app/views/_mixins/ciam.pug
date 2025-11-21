@@ -2,13 +2,15 @@ include terms_of_service
 include recaptcha
 
 mixin ciamLogo
-	a.brand.overleaf-ds-logo(href='/' aria-label='Overleaf')
+	header.ciam-logo
+		a.brand.overleaf-ds-logo(href='/')
+			span.visually-hidden Overleaf
 
 mixin ciamCardSeparator
 	hr.ciam-card-separator
 
 mixin ciamCardFooter
-	.ciam-card-footer
+	section.ciam-card-footer
 		+ciamCardSeparator
 		.ciam-footer-ds-logo
 			img(
@@ -25,3 +27,16 @@ mixin ciamTermsOfServiceAgreement
 mixin ciamRecaptchaConditions
 	p
 		+recaptchaConditionsContent
+
+mixin ciamCustomFormDangerMessage(key)
+	div(
+		class='notification ciam-notification notification-type-error'
+		hidden
+		data-ol-custom-form-message=key
+		role='alert'
+		aria-live='polite'
+	)
+		.notification-icon
+			ph-warning-circle(aria-hidden='true')
+		.notification-content.text-left
+			block

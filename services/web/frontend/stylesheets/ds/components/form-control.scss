@@ -4,14 +4,26 @@
 .form-control-ds,
 .form-group-ds,
 .form-text-ds,
-.form-label-ds {
+.form-label-ds,
+.form-group-ds label,
+.website-redesign .form-group-ds label,
+.website-redesign .form-label-ds {
+  @include ds-body-sm-semibold;
+
   --bs-body-font-family: var(--ds-font-family-sans), sans-serif;
   --bs-success-rgb: 25, 117, 76; // #19754c
   --bs-danger-rgb: 195, 9, 43; // #c3092b
   --content-placeholder: var(--ds-color-text-disabled);
 
-  // Without this, it inherits the body's --bs-body-font-family which isn't the DS font
-  font-family: var(--ds-font-family-sans), sans-serif;
+  font-family:
+    var(--ds-font-family-sans), sans-serif; // Without this, it inherits the body's --bs-body-font-family which isn't the DS font
+
+  color: var(--ds-color-text-primary);
+  margin-bottom: var(--ds-spacing-100);
+}
+
+.form-group-ds {
+  margin-bottom: var(--ds-spacing-400);
 }
 
 input.form-control.form-control-ds {
@@ -82,4 +94,12 @@ input.form-control.form-control-ds {
   .ciam-form-text-icon {
     font-size: math.div(20em, 14);
   }
+}
+
+.form-complex-input-container {
+  position: relative;
+}
+
+.ciam-form-input-icon {
+  font-size: var(--ds-font-size-600);
 }

@@ -104,6 +104,7 @@
     "@overleaf/stream-utils": "*",
     "@overleaf/validation-tools": "*",
     "@phosphor-icons/react": "^2.1.7",
+    "@phosphor-icons/webcomponents": "^2.1.5",
     "@slack/webhook": "^7.0.2",
     "@stripe/react-stripe-js": "^3.9.0",
     "@stripe/stripe-js": "^7.7.0",
