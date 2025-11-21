@@ -10,8 +10,6 @@ services:
                 condition: service_healthy
             redis:
                 condition: service_started
-        ports:
-            - 80:80
         stop_grace_period: 60s
         volumes:
             - ~/sharelatex_data:/var/lib/overleaf
@@ -40,7 +38,7 @@ services:
             EMAIL_CONFIRMATION_DISABLED: 'true'
 
             ## Set for SSL via nginx-proxy
-            #VIRTUAL_HOST: 103.112.212.22
+            VIRTUAL_HOST: ec2-3-229-134-93.compute-1.amazonaws.com,3.229.134.93,localhost
 
             # OVERLEAF_SITE_URL: http://overleaf.example.com
             # OVERLEAF_NAV_TITLE: Overleaf Community Edition
@@ -79,9 +77,9 @@ services:
             ## Sandboxed Compiles: https://docs.overleaf.com/on-premises/configuration/overleaf-toolkit/server-pro-only-configuration/sandboxed-compiles
             SANDBOXED_COMPILES: 'true'
             ### Bind-mount source for /var/lib/overleaf/data/compiles inside the container.
-            SANDBOXED_COMPILES_HOST_DIR_COMPILES: '/home/user/sharelatex_data/data/compiles'
+            SANDBOXED_COMPILES_HOST_DIR_COMPILES: '/home/ec2-user/sharelatex_data/data/compiles'
             ### Bind-mount source for /var/lib/overleaf/data/output inside the container.
-            SANDBOXED_COMPILES_HOST_DIR_OUTPUT: '/home/user/sharelatex_data/data/output'
+            SANDBOXED_COMPILES_HOST_DIR_OUTPUT: '/home/ec2-user/sharelatex_data/data/output'
             ### Backwards compatibility (before Server Pro 5.5)
             DOCKER_RUNNER: 'true'
             SANDBOXED_COMPILES_SIBLING_CONTAINERS: 'true'
@@ -105,7 +103,7 @@ services:
 
     mongo:
         restart: always
-        image: mongo:6.0
+        image: mongo:8.0
         container_name: mongo
         command: '--replSet overleaf'
         volumes:
@@ -140,12 +138,12 @@ services:
     # settings. We recommend using a properly managed nginx instance outside of the Overleaf Server Pro setup,
     # but the example here can be used if you'd prefer to run everything with docker-compose
 
-    # nginx-proxy:
-    #     image: jwilder/nginx-proxy
-    #     container_name: nginx-proxy
-    #     ports:
-    #       - "80:80"
-    #       - "443:443"
-    #     volumes:
-    #       - /var/run/docker.sock:/tmp/docker.sock:ro
-    #       - /home/overleaf/tmp:/etc/nginx/certs
+    nginx-proxy:
+        image: jwilder/nginx-proxy
+        container_name: nginx-proxy
+        ports:
+          - "80:80"
+          - "443:443"
+        volumes:
+          - /var/run/docker.sock:/tmp/docker.sock:ro
+          - /home/ec2-user/overleaf_certs:/etc/nginx/certs
