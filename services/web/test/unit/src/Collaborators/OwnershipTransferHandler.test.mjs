@@ -80,6 +80,11 @@ describe('OwnershipTransferHandler', function () {
         addProjectsToTag: sinon.stub().resolves(),
       },
     }
+    ctx.LimitationsManager = {
+      promises: {
+        canAddXEditCollaborators: sinon.stub().resolves(true),
+      },
+    }
 
     vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
       vi.importActual('../../../../app/src/Features/Errors/Errors.js')
@@ -133,6 +138,13 @@ describe('OwnershipTransferHandler', function () {
           recordEventForUserInBackground: (ctx.recordEventForUserInBackground =
             sinon.stub()),
         },
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/LimitationsManager.mjs',
+      () => ({
+        default: ctx.LimitationsManager,
       })
     )
 
@@ -195,30 +207,197 @@ describe('OwnershipTransferHandler', function () {
       )
     })
 
-    it('should transfer ownership of the project to a read-only collaborator', async function (ctx) {
+    it('should check collaborator limits after ownership transfer', async function (ctx) {
       await ctx.handler.promises.transferOwnership(
         ctx.project._id,
-        ctx.readOnlyCollaborator._id
+        ctx.collaborator._id
       )
-      expect(ctx.ProjectModel.updateOne).to.have.been.calledWith(
-        { _id: ctx.project._id },
-        sinon.match({ $set: { owner_ref: ctx.readOnlyCollaborator._id } })
+
+      expect(ctx.ProjectModel.updateOne).to.have.been.calledBefore(
+        ctx.LimitationsManager.promises.canAddXEditCollaborators
+      )
+
+      expect(
+        ctx.LimitationsManager.promises.canAddXEditCollaborators
+      ).to.have.been.calledBefore(
+        ctx.CollaboratorsHandler.promises.addUserIdToProject
       )
     })
 
-    it('gives old owner read-only permissions if new owner was previously a viewer', async function (ctx) {
-      await ctx.handler.promises.transferOwnership(
-        ctx.project._id,
-        ctx.readOnlyCollaborator._id
-      )
-      expect(
-        ctx.CollaboratorsHandler.promises.addUserIdToProject
-      ).to.have.been.calledWith(
-        ctx.project._id,
-        ctx.readOnlyCollaborator._id,
-        ctx.user._id,
-        PrivilegeLevels.READ_ONLY
-      )
+    describe('when there are edit collaborator slots available', function () {
+      beforeEach(function (ctx) {
+        ctx.LimitationsManager.promises.canAddXEditCollaborators.resolves(true)
+      })
+
+      it('should give old owner read/write permissions when transferring to a read-only collaborator', async function (ctx) {
+        await ctx.handler.promises.transferOwnership(
+          ctx.project._id,
+          ctx.readOnlyCollaborator._id
+        )
+        expect(
+          ctx.CollaboratorsHandler.promises.addUserIdToProject
+        ).to.have.been.calledWith(
+          ctx.project._id,
+          ctx.readOnlyCollaborator._id,
+          ctx.user._id,
+          PrivilegeLevels.READ_AND_WRITE,
+          undefined
+        )
+        expect(
+          ctx.LimitationsManager.promises.canAddXEditCollaborators
+        ).to.have.been.calledWith(ctx.project._id, 1)
+      })
+
+      it('should give old owner read/write permissions when transferring to an editor', async function (ctx) {
+        await ctx.handler.promises.transferOwnership(
+          ctx.project._id,
+          ctx.collaborator._id
+        )
+        expect(
+          ctx.CollaboratorsHandler.promises.addUserIdToProject
+        ).to.have.been.calledWith(
+          ctx.project._id,
+          ctx.collaborator._id,
+          ctx.user._id,
+          PrivilegeLevels.READ_AND_WRITE,
+          undefined
+        )
+        expect(
+          ctx.LimitationsManager.promises.canAddXEditCollaborators
+        ).to.have.been.calledWith(ctx.project._id, 1)
+      })
+
+      it('should give old owner read/write permissions when transferring to a reviewer', async function (ctx) {
+        await ctx.handler.promises.transferOwnership(
+          ctx.project._id,
+          ctx.reviewer._id
+        )
+        expect(
+          ctx.CollaboratorsHandler.promises.addUserIdToProject
+        ).to.have.been.calledWith(
+          ctx.project._id,
+          ctx.reviewer._id,
+          ctx.user._id,
+          PrivilegeLevels.READ_AND_WRITE,
+          undefined
+        )
+        expect(
+          ctx.LimitationsManager.promises.canAddXEditCollaborators
+        ).to.have.been.calledWith(ctx.project._id, 1)
+      })
+
+      it('should give old owner read/write permissions when transferring to a non-collaborator', async function (ctx) {
+        ctx.project.collaberator_refs = []
+        ctx.project.readOnly_refs = []
+        ctx.project.reviewer_refs = []
+        const newOwner = {
+          _id: new ObjectId(),
+          email: 'admin@example.com',
+        }
+        ctx.UserGetter.promises.getUser
+          .withArgs(newOwner._id)
+          .resolves(newOwner)
+
+        await ctx.handler.promises.transferOwnership(
+          ctx.project._id,
+          newOwner._id,
+          { allowTransferToNonCollaborators: true }
+        )
+        expect(
+          ctx.CollaboratorsHandler.promises.addUserIdToProject
+        ).to.have.been.calledWith(
+          ctx.project._id,
+          newOwner._id,
+          ctx.user._id,
+          PrivilegeLevels.READ_AND_WRITE,
+          undefined
+        )
+        expect(
+          ctx.LimitationsManager.promises.canAddXEditCollaborators
+        ).to.have.been.calledWith(ctx.project._id, 1)
+      })
+    })
+
+    describe('when there are no edit collaborator slots available', function () {
+      beforeEach(function (ctx) {
+        ctx.LimitationsManager.promises.canAddXEditCollaborators.resolves(false)
+      })
+
+      it('should give old owner read-only with pending editor flag when transferring to an editor', async function (ctx) {
+        await ctx.handler.promises.transferOwnership(
+          ctx.project._id,
+          ctx.collaborator._id
+        )
+        expect(
+          ctx.CollaboratorsHandler.promises.addUserIdToProject
+        ).to.have.been.calledWith(
+          ctx.project._id,
+          ctx.collaborator._id,
+          ctx.user._id,
+          PrivilegeLevels.READ_ONLY,
+          { pendingEditor: true }
+        )
+      })
+
+      it('should give old owner read-only with pending editor flag when transferring to a reviewer', async function (ctx) {
+        await ctx.handler.promises.transferOwnership(
+          ctx.project._id,
+          ctx.reviewer._id
+        )
+        expect(
+          ctx.CollaboratorsHandler.promises.addUserIdToProject
+        ).to.have.been.calledWith(
+          ctx.project._id,
+          ctx.reviewer._id,
+          ctx.user._id,
+          PrivilegeLevels.READ_ONLY,
+          { pendingEditor: true }
+        )
+      })
+
+      it('should give old owner read-only with pending editor flag when transferring to a read-only collaborator', async function (ctx) {
+        await ctx.handler.promises.transferOwnership(
+          ctx.project._id,
+          ctx.readOnlyCollaborator._id
+        )
+        expect(
+          ctx.CollaboratorsHandler.promises.addUserIdToProject
+        ).to.have.been.calledWith(
+          ctx.project._id,
+          ctx.readOnlyCollaborator._id,
+          ctx.user._id,
+          PrivilegeLevels.READ_ONLY,
+          { pendingEditor: true }
+        )
+      })
+
+      it('should give old owner read-only with pending editor flag when transferring to a non-collaborator', async function (ctx) {
+        ctx.project.collaberator_refs = []
+        ctx.project.readOnly_refs = []
+        ctx.project.reviewer_refs = []
+        const newOwner = {
+          _id: new ObjectId(),
+          email: 'newowner@example.com',
+        }
+        ctx.UserGetter.promises.getUser
+          .withArgs(newOwner._id)
+          .resolves(newOwner)
+
+        await ctx.handler.promises.transferOwnership(
+          ctx.project._id,
+          newOwner._id,
+          { allowTransferToNonCollaborators: true }
+        )
+        expect(
+          ctx.CollaboratorsHandler.promises.addUserIdToProject
+        ).to.have.been.calledWith(
+          ctx.project._id,
+          newOwner._id,
+          ctx.user._id,
+          PrivilegeLevels.READ_ONLY,
+          { pendingEditor: true }
+        )
+      })
     })
 
     it('should do nothing if transferring back to the owner', async function (ctx) {
@@ -239,21 +418,6 @@ describe('OwnershipTransferHandler', function () {
       ).to.have.been.calledWith(ctx.project._id, ctx.collaborator._id)
     })
 
-    it('should add the former project owner as a read/write collaborator', async function (ctx) {
-      await ctx.handler.promises.transferOwnership(
-        ctx.project._id,
-        ctx.collaborator._id
-      )
-      expect(
-        ctx.CollaboratorsHandler.promises.addUserIdToProject
-      ).to.have.been.calledWith(
-        ctx.project._id,
-        ctx.collaborator._id,
-        ctx.user._id,
-        PrivilegeLevels.READ_AND_WRITE
-      )
-    })
-
     it('should transfer ownership of the project to a reviewer', async function (ctx) {
       await ctx.handler.promises.transferOwnership(
         ctx.project._id,
@@ -262,21 +426,6 @@ describe('OwnershipTransferHandler', function () {
       expect(ctx.ProjectModel.updateOne).to.have.been.calledWith(
         { _id: ctx.project._id },
         sinon.match({ $set: { owner_ref: ctx.reviewer._id } })
-      )
-    })
-
-    it('gives old owner reviewer permissions if new owner was previously a reviewer', async function (ctx) {
-      await ctx.handler.promises.transferOwnership(
-        ctx.project._id,
-        ctx.reviewer._id
-      )
-      expect(
-        ctx.CollaboratorsHandler.promises.addUserIdToProject
-      ).to.have.been.calledWith(
-        ctx.project._id,
-        ctx.reviewer._id,
-        ctx.user._id,
-        PrivilegeLevels.REVIEW
       )
     })
 
