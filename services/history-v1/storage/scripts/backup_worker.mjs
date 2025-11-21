@@ -8,7 +8,8 @@ import {
   configureBackup,
 } from './backup.mjs'
 
-const CONCURRENCY = 15
+const JOB_CONCURRENCY = parseInt(process.env.JOB_CONCURRENCY, 10) || 15
+const UPLOAD_CONCURRENCY = parseInt(process.env.UPLOAD_CONCURRENCY, 10) || 50
 const WARN_THRESHOLD = 2 * 60 * 60 * 1000 // warn if projects are older than this
 const redisOptions = config.get('redis.queue')
 const JOB_TIME_BUCKETS = [10, 100, 500, 1000, 5000, 10000, 30000, 60000] // milliseconds
@@ -17,7 +18,7 @@ const LAG_TIME_BUCKETS_HRS = [
 ] // hours
 
 // Configure backup settings to match worker concurrency
-configureBackup({ concurrency: 50, useSecondary: true })
+configureBackup({ concurrency: UPLOAD_CONCURRENCY, useSecondary: true })
 
 // Create a Bull queue named 'backup'
 const backupQueue = new Queue('backup', {
@@ -69,7 +70,7 @@ backupQueue.on('resumed', () => {
 })
 
 // Process jobs
-backupQueue.process(CONCURRENCY, async job => {
+backupQueue.process(JOB_CONCURRENCY, async job => {
   const { projectId, startDate, endDate } = job.data
 
   if (projectId) {
