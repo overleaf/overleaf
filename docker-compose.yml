@@ -38,7 +38,9 @@ services:
             EMAIL_CONFIRMATION_DISABLED: 'true'
 
             ## Set for SSL via nginx-proxy
-            VIRTUAL_HOST: ec2-3-229-134-93.compute-1.amazonaws.com,3.229.134.93,localhost
+            VIRTUAL_HOST: projectcobrix.com,ec2-3-229-134-93.compute-1.amazonaws.com,3.229.134.93,localhost
+            LETSENCRYPT_HOST: projectcobrix.com
+            LETSENCRYPT_EMAIL: shrishah95@gmail.com
 
             # OVERLEAF_SITE_URL: http://overleaf.example.com
             # OVERLEAF_NAV_TITLE: Overleaf Community Edition
@@ -147,3 +149,19 @@ services:
         volumes:
           - /var/run/docker.sock:/tmp/docker.sock:ro
           - /home/ec2-user/overleaf_certs:/etc/nginx/certs
+          - /home/ec2-user/overleaf_vhost.d:/etc/nginx/vhost.d
+          - /home/ec2-user/overleaf_html:/usr/share/nginx/html
+
+    letsencrypt-companion:
+        image: nginxproxy/acme-companion
+        container_name: letsencrypt-nginx-proxy-companion
+        depends_on:
+          - nginx-proxy
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+          - /home/ec2-user/overleaf_certs:/etc/nginx/certs
+          - /home/ec2-user/overleaf_vhost.d:/etc/nginx/vhost.d
+          - /home/ec2-user/overleaf_html:/usr/share/nginx/html
+        environment:
+          NGINX_PROXY_CONTAINER: nginx-proxy
+          DEFAULT_EMAIL: founders@lemmaforlatex.com
