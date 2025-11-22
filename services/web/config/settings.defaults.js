@@ -799,7 +799,7 @@ module.exports = {
 
     right_footer: [
       {
-        text: '<a href="https://github.com/overleaf/overleaf">Fork on GitHub!</a>',
+        text: '<a href="https://github.com/TryBayes/LemmaForLatex">Fork on GitHub!</a>',
       },
     ],
 
