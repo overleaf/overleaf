@@ -5,6 +5,17 @@ const https = require('node:https')
 http.globalAgent.keepAlive = false
 https.globalAgent.keepAlive = false
 
+const redisTls =
+  process.env.REDIS_TLS === 'true'
+    ? {
+        rejectUnauthorized:
+          process.env.REDIS_TLS_REJECT_UNAUTHORIZED !== 'false',
+        ...(process.env.REDIS_TLS_SERVERNAME
+          ? { servername: process.env.REDIS_TLS_SERVERNAME }
+          : {}),
+      }
+    : undefined
+
 const settings = {
   redis: {
     pubsub: {
@@ -18,6 +29,7 @@ const settings = {
           process.env.REDIS_MAX_RETRIES_PER_REQUEST ||
           '20'
       ),
+      tls: redisTls,
     },
 
     realtime: {
@@ -47,6 +59,7 @@ const settings = {
           process.env.REDIS_MAX_RETRIES_PER_REQUEST ||
           '20'
       ),
+      tls: redisTls,
     },
 
     documentupdater: {
@@ -70,6 +83,7 @@ const settings = {
           process.env.REDIS_MAX_RETRIES_PER_REQUEST ||
           '20'
       ),
+      tls: redisTls,
     },
 
     websessions: {
@@ -85,6 +99,7 @@ const settings = {
           process.env.REDIS_MAX_RETRIES_PER_REQUEST ||
           '20'
       ),
+      tls: redisTls,
     },
   },
 

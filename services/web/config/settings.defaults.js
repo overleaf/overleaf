@@ -110,6 +110,17 @@ const httpPermissionsPolicy = {
   },
 }
 
+const redisTls =
+  process.env.REDIS_TLS === 'true'
+    ? {
+        rejectUnauthorized:
+          process.env.REDIS_TLS_REJECT_UNAUTHORIZED !== 'false',
+        ...(process.env.REDIS_TLS_SERVERNAME
+          ? { servername: process.env.REDIS_TLS_SERVERNAME }
+          : {}),
+      }
+    : undefined
+
 module.exports = {
   env: 'server-ce',
 
@@ -152,6 +163,7 @@ module.exports = {
       maxRetriesPerRequest: parseInt(
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
+      tls: redisTls,
     },
 
     // websessions:
@@ -191,6 +203,7 @@ module.exports = {
       maxRetriesPerRequest: parseInt(
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
+      tls: redisTls,
     },
   },
 

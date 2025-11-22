@@ -4,6 +4,17 @@ const https = require('node:https')
 http.globalAgent.keepAlive = false
 https.globalAgent.keepAlive = false
 
+const redisTls =
+  process.env.REDIS_TLS === 'true'
+    ? {
+        rejectUnauthorized:
+          process.env.REDIS_TLS_REJECT_UNAUTHORIZED !== 'false',
+        ...(process.env.REDIS_TLS_SERVERNAME
+          ? { servername: process.env.REDIS_TLS_SERVERNAME }
+          : {}),
+      }
+    : undefined
+
 module.exports = {
   internal: {
     documentupdater: {
@@ -35,6 +46,7 @@ module.exports = {
       maxRetriesPerRequest: parseInt(
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
+      tls: redisTls,
     },
 
     history: {
@@ -46,6 +58,7 @@ module.exports = {
       maxRetriesPerRequest: parseInt(
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
+      tls: redisTls,
     },
 
     project_history: {
@@ -57,6 +70,7 @@ module.exports = {
       maxRetriesPerRequest: parseInt(
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
+      tls: redisTls,
       key_schema: {
         projectHistoryOps({ project_id: projectId }) {
           return `ProjectHistory:Ops:{${projectId}}`
@@ -76,6 +90,7 @@ module.exports = {
       maxRetriesPerRequest: parseInt(
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
+      tls: redisTls,
       key_schema: {
         blockingKey({ doc_id: docId }) {
           return `Blocking:{${docId}}`
@@ -97,6 +112,7 @@ module.exports = {
       maxRetriesPerRequest: parseInt(
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
+      tls: redisTls,
       key_schema: {
         blockingKey({ doc_id: docId }) {
           return `Blocking:{${docId}}`

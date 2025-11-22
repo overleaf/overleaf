@@ -8,8 +8,6 @@ services:
         depends_on:
             mongo:
                 condition: service_healthy
-            redis:
-                condition: service_started
         stop_grace_period: 60s
         volumes:
             - ~/sharelatex_data:/var/lib/overleaf
@@ -26,8 +24,16 @@ services:
 
             # Same property, unfortunately with different names in
             # different locations
-            OVERLEAF_REDIS_HOST: redis
-            REDIS_HOST: redis
+            OVERLEAF_REDIS_HOST: ${REDIS_HOST}
+            OVERLEAF_REDIS_PORT: ${REDIS_PORT:-6379}
+            OVERLEAF_REDIS_PASS: ${REDIS_PASSWORD:-}
+            OVERLEAF_REDIS_TLS: ${REDIS_TLS:-false}
+            REDIS_HOST: ${REDIS_HOST}
+            REDIS_PORT: ${REDIS_PORT:-6379}
+            REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+            REDIS_TLS: ${REDIS_TLS:-false}
+            REDIS_TLS_SERVERNAME: ${REDIS_TLS_SERVERNAME:-}
+            REDIS_TLS_REJECT_UNAUTHORIZED: ${REDIS_TLS_REJECT_UNAUTHORIZED:-true}
 
             ENABLED_LINKED_FILE_TYPES: 'project_file,project_output_file'
 
@@ -123,13 +129,6 @@ services:
             interval: 10s
             timeout: 10s
             retries: 5
-
-    redis:
-        restart: always
-        image: redis:6.2
-        container_name: redis
-        volumes:
-            - ~/redis_data:/data
 
     # ldap:
     #    restart: always
