@@ -20,7 +20,7 @@ services:
             # - /var/run/docker.sock:/var/run/docker.sock
         environment:
 
-            OVERLEAF_APP_NAME: Overleaf Community Edition
+            OVERLEAF_APP_NAME: Lemma
 
             OVERLEAF_MONGO_URL: mongodb://mongo/sharelatex
 
