@@ -49,7 +49,7 @@ services:
             LETSENCRYPT_HOST: projectcobrix.com
             LETSENCRYPT_EMAIL: founders@lemmaforlatex.com
 
-            OVERLEAF_SITE_URL: http://projectcobrix.com
+            OVERLEAF_SITE_URL: https://projectcobrix.com
             OVERLEAF_NAV_TITLE: Lemma
             # OVERLEAF_HEADER_IMAGE_URL: http://example.com/mylogo.png
             OVERLEAF_ADMIN_EMAIL: founders@lemmaforlatex.com
