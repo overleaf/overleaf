@@ -83,50 +83,50 @@ const settings = {
       key_schema: {
         // document-updater
         blockingKey({ doc_id }) {
-          return `Blocking:${doc_id}`
+          return `Blocking:{${doc_id}}`
         },
         docLines({ doc_id }) {
-          return `doclines:${doc_id}`
+          return `doclines:{${doc_id}}`
         },
         docOps({ doc_id }) {
-          return `DocOps:${doc_id}`
+          return `DocOps:{${doc_id}}`
         },
         docVersion({ doc_id }) {
-          return `DocVersion:${doc_id}`
+          return `DocVersion:{${doc_id}}`
         },
         docHash({ doc_id }) {
-          return `DocHash:${doc_id}`
+          return `DocHash:{${doc_id}}`
         },
         projectKey({ doc_id }) {
-          return `ProjectId:${doc_id}`
+          return `ProjectId:{${doc_id}}`
         },
         docsInProject({ project_id }) {
-          return `DocsIn:${project_id}`
+          return `DocsIn:{${project_id}}`
         },
         ranges({ doc_id }) {
-          return `Ranges:${doc_id}`
+          return `Ranges:{${doc_id}}`
         },
         // document-updater:realtime
         pendingUpdates({ doc_id }) {
-          return `PendingUpdates:${doc_id}`
+          return `PendingUpdates:{${doc_id}}`
         },
         // document-updater:history
         uncompressedHistoryOps({ doc_id }) {
-          return `UncompressedHistoryOps:${doc_id}`
+          return `UncompressedHistoryOps:{${doc_id}}`
         },
         docsWithHistoryOps({ project_id }) {
-          return `DocsWithHistoryOps:${project_id}`
+          return `DocsWithHistoryOps:{${project_id}}`
         },
         // document-updater:lock
         blockingKey({ doc_id }) {
-          return `Blocking:${doc_id}`
+          return `Blocking:{${doc_id}}`
         },
         // realtime
         clientsInProject({ project_id }) {
-          return `clients_in_project:${project_id}`
+          return `clients_in_project:{${project_id}}`
         },
         connectedUser({ project_id, client_id }) {
-          return `connected_user:${project_id}:${client_id}`
+          return `connected_user:{${project_id}}:${client_id}`
         },
       },
     }),
