@@ -40,7 +40,7 @@ services:
             ## Set for SSL via nginx-proxy
             VIRTUAL_HOST: projectcobrix.com,ec2-3-229-134-93.compute-1.amazonaws.com,3.229.134.93,localhost
             LETSENCRYPT_HOST: projectcobrix.com
-            LETSENCRYPT_EMAIL: shrishah95@gmail.com
+            LETSENCRYPT_EMAIL: founders@lemmaforlatex.com
 
             # OVERLEAF_SITE_URL: http://overleaf.example.com
             # OVERLEAF_NAV_TITLE: Overleaf Community Edition
