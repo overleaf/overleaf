@@ -2,7 +2,7 @@
 import { db } from '../app/src/infrastructure/mongodb.js'
 import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
-import CollaboratorsHandler from '../app/src/Features/Collaborators/CollaboratorsHandler.js'
+import CollaboratorsHandler from '../app/src/Features/Collaborators/CollaboratorsHandler.mjs'
 
 const DRY_RUN = !process.argv.includes('--dry-run=false')
 const DEBUG = process.argv.includes('--debug=true')
