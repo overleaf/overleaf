@@ -57,6 +57,15 @@ async function processProject(project) {
     )
   }
 
+  if (typeof project.track_changes === 'object') {
+    if (DEBUG) {
+      console.log(
+        `Skipping project ${project._id} as it is already in the new format`
+      )
+    }
+    return
+  }
+
   const newTrackChangesState =
     await CollaboratorsHandler.promises.convertTrackChangesToExplicitFormat(
       project._id,
@@ -75,6 +84,13 @@ async function processProject(project) {
     await db.projects.updateOne(
       { _id: project._id },
       { $set: { track_changes: newTrackChangesState } }
+    )
+    console.log(
+      `Updated project ${project._id} track_changes from ${JSON.stringify(project.track_changes)} to ${JSON.stringify(newTrackChangesState)}`
+    )
+  } else {
+    console.log(
+      `Dry run - would have updated project ${project._id} track_changes from ${JSON.stringify(project.track_changes)} to ${JSON.stringify(newTrackChangesState)}`
     )
   }
 }
