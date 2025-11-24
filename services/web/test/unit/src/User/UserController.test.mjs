@@ -120,6 +120,7 @@ describe('UserController', function () {
       promises: {
         addEntry: sinon.stub().resolves(),
       },
+      addEntryInBackground: sinon.stub(),
     }
 
     ctx.RequestContentTypeDetection = {

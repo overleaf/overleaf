@@ -68,6 +68,70 @@ describe('Sessions', function () {
         }
       )
     })
+
+    it('should update audit log on logout', function (done) {
+      async.series(
+        [
+          next => {
+            redis.clearUserSessions(this.user1, next)
+          },
+
+          // login
+          next => {
+            this.user1.login(err => next(err))
+          },
+
+          // logout, should add logout audit log entry (happens in background)
+          next => {
+            this.user1.logout(err => next(err))
+          },
+
+          // poll for audit log entry since it's written in the background
+          next => {
+            let attempts = 0
+            const checkAuditLog = () => {
+              this.user1.getAuditLogWithoutNoise((error, auditLog) => {
+                if (error) return next(error)
+
+                const logoutEntries = auditLog.filter(
+                  entry => entry.operation === 'logout'
+                )
+
+                // If we found the logout entry, we're done
+                if (logoutEntries.length > 0) {
+                  expect(logoutEntries.length).to.be.greaterThan(0)
+                  const lastLogout = logoutEntries[logoutEntries.length - 1]
+                  expect(lastLogout.operation).to.equal('logout')
+                  expect(lastLogout.ipAddress).to.exist
+                  expect(lastLogout.initiatorId).to.exist
+                  expect(lastLogout.timestamp).to.exist
+                  return next()
+                }
+
+                // Otherwise retry up to 10 times
+                attempts++
+                if (attempts >= 10) {
+                  return next(
+                    new Error(
+                      'Logout audit log entry not found after 10 attempts'
+                    )
+                  )
+                }
+
+                setTimeout(checkAuditLog, 25)
+              })
+            }
+            checkAuditLog()
+          },
+        ],
+        (err, result) => {
+          if (err) {
+            throw err
+          }
+          done()
+        }
+      )
+    })
   })
 
   describe('two sessions', function () {
@@ -465,11 +529,19 @@ describe('Sessions', function () {
             this.user1.getAuditLogWithoutNoise((error, auditLog) => {
               expect(error).not.to.exist
               expect(auditLog).to.exist
-              expect(auditLog[0].operation).to.equal('clear-sessions')
-              expect(auditLog[0].ipAddress).to.exist
-              expect(auditLog[0].initiatorId).to.exist
-              expect(auditLog[0].timestamp).to.exist
-              expect(auditLog[0].info.sessions.length).to.equal(2)
+
+              // find the clear-sessions entry
+              const clearSessionsEntries = auditLog.filter(
+                entry => entry.operation === 'clear-sessions'
+              )
+              expect(clearSessionsEntries.length).to.equal(1)
+              expect(clearSessionsEntries[0].operation).to.equal(
+                'clear-sessions'
+              )
+              expect(clearSessionsEntries[0].ipAddress).to.exist
+              expect(clearSessionsEntries[0].initiatorId).to.exist
+              expect(clearSessionsEntries[0].timestamp).to.exist
+              expect(clearSessionsEntries[0].info.sessions.length).to.equal(2)
               next()
             })
           },
