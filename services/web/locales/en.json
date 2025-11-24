@@ -203,7 +203,6 @@
   "ascending": "Ascending",
   "ask_proj_owner_to_unlink_from_current_github": "Ask the owner of the project (<0>__projectOwnerEmail__</0>) to unlink the project from the current GitHub repository and create a connection to a different repository.",
   "ask_proj_owner_to_upgrade_for_full_history": "Please ask the project owner to upgrade to access this project’s full history.",
-  "ask_proj_owner_to_upgrade_for_references_search": "Please ask the project owner to upgrade to use the References Search feature.",
   "ask_repo_owner_to_reconnect": "Ask the GitHub repository owner (<0>__repoOwnerEmail__</0>) to reconnect the project.",
   "ask_repo_owner_to_renew_overleaf_subscription": "Ask the GitHub repository owner (<0>__repoOwnerEmail__</0>) to renew their __appName__ subscription and reconnect the project.",
   "at_most_x_libraries_can_be_selected": "At most __maxCount__ libraries can be selected",
