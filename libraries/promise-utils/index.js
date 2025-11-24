@@ -146,9 +146,9 @@ function promisifyMultiResult(fn, resultNames) {
  *
  * @param {Object} module - The module to callbackify
  * @param {Object} opts - Options
- * @param {Array<string>} [opts.without] - Array of method names to exclude from
+ * @param {Array<string>} opts.without - Array of method names to exclude from
  *                                       being callbackified
- * @param {Object} [opts.multiResult] - Spec of methods to be callbackified with
+ * @param {Object} opts.multiResult - Spec of methods to be callbackified with
  *                                    callbackifyMultiResult()
  */
 function callbackifyAll(module, opts = {}) {
