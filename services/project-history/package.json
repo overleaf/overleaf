@@ -48,7 +48,7 @@
     "mocha": "^11.1.0",
     "mocha-junit-reporter": "^2.2.1",
     "mocha-multi-reporters": "^1.5.1",
-    "nock": "^13.5.3",
+    "nock": "^14.0.10",
     "sinon": "~9.0.1",
     "sinon-chai": "^3.7.0",
     "timekeeper": "2.2.0",
