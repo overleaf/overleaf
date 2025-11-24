@@ -455,6 +455,7 @@ const _ProjectController = {
       'compile-timeout-remove-info',
       'ai-workbench',
       'compile-timeout-target-plans',
+      'writefull-figure-generator',
     ].filter(Boolean)
 
     const getUserValues = async userId =>

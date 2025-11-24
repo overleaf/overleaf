@@ -17,4 +17,5 @@ export interface WritefullAPI {
   ): void
   openTableGenerator(): void
   openEquationGenerator(): void
+  openFigureGenerator(): void
 }

@@ -861,6 +861,7 @@
   "gallery_page_title": "Gallery - Templates, Examples and Articles written in LaTeX",
   "gallery_show_more_tags": "Show more",
   "general": "General",
+  "generate_from_text": "From text",
   "generate_from_text_or_image": "From text or image",
   "generate_tables_and_equations": "Generate tables and equations from text and images. Try it for free in the Overleaf toolbar!",
   "generate_token": "Generate token",

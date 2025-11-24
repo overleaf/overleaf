@@ -16,6 +16,7 @@ const en = {
     'do-not-know': 'Don’t know',
     equation: 'equation',
     table: 'table',
+    figure: 'figure',
     or: 'or',
     close: 'Close',
     submit: 'Submit',
@@ -228,7 +229,7 @@ const en = {
     'create-modal.accept-tos_equation': 'Before you generate an equation',
     'create-modal.image-picker-placeholder':
       'Drop an image of the __name__ here',
-    'create-modal.enter-prompt': 'Enter your own prompt/Paste an image here:',
+    'create-modal.enter-prompt': 'Enter your prompt to generate the __name__:',
     'create-modal.enter-prompt-or-paste-image':
       'Enter your prompt or paste an image with the __name__:',
     'create-modal.drop-image': 'Or, drop an image of the __name__ here:',
@@ -390,6 +391,7 @@ const es = {
     'do-not-know': 'No lo sé',
     equation: 'equación',
     table: 'tabla',
+    figure: 'figura',
     or: 'o',
     close: 'Cerrar',
     submit: 'Enviar',
@@ -616,7 +618,7 @@ const es = {
     'create-modal.accept-tos_equation': 'Antes de generar una ecuación',
     'create-modal.image-picker-placeholder': 'Arrastra una imagen aquí',
     'create-modal.enter-prompt':
-      'Introduce tu propio prompt/pega una imagen aquí:',
+      'Introduce tu propio prompt para generar la __name__:',
     'create-modal.enter-prompt-or-paste-image':
       'Introduce tu propio prompt o pega una imagen de la __name__:',
     'create-modal.drop-image': 'O, arrastre una imagen de __name__ aquí:',
