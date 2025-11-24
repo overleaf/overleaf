@@ -42,12 +42,7 @@ export const isSplitTestUser = () => {
 }
 
 export const canUseNewEditorAsExistingUser = () => {
-  const isBetaUser = getMeta('ol-user').betaProgram
-
-  return (
-    !canUseNewEditorAsNewUser() &&
-    (isSplitTestEnabled('editor-redesign') || isBetaUser)
-  )
+  return !canUseNewEditorAsNewUser() && isSplitTestEnabled('editor-redesign')
 }
 
 export const canUseNewEditorAsNewUser = () => {
