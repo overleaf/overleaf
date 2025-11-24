@@ -40,6 +40,8 @@ const MANAGED_GROUP_USER_EVENTS = [
   'unlink-dropbox',
   'link-github',
   'unlink-github',
+  'delete-account',
+  'leave-group-subscription',
 ]
 
 /**
