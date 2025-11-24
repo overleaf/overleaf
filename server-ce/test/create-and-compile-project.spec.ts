@@ -123,7 +123,9 @@ describe('Project creation and compilation', function () {
       cy.findByRole('button', { name: 'Share' }).click()
     })
     cy.findByRole('dialog').within(() => {
-      cy.findByTestId('collaborator-email-input').type(COLLABORATOR + ',')
+      cy.findByRole('combobox', { name: 'Add email address' }).type(
+        COLLABORATOR + ','
+      )
       cy.findByRole('button', { name: 'Invite' }).click()
       cy.findByText('Invite not yet accepted.')
     })

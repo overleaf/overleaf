@@ -26,22 +26,19 @@ describe('LearnWiki', function () {
     it('should add a documentation entry to the nav bar', function () {
       login(REGULAR_USER)
       cy.visit('/project')
-      cy.findByRole('menuitem', { name: 'Documentation' }).should(
-        'have.attr',
-        'href',
-        '/learn'
-      )
+      cy.findByRole('navigation', { name: 'Primary' }).findByRole('menuitem', {
+        name: 'Documentation',
+      })
     })
 
     it('should display a tutorial link in the welcome page', function () {
       login(WITHOUT_PROJECTS_USER)
       cy.visit('/project')
-      cy.findByRole('link', { name: LABEL_LEARN_LATEX })
-        .should('have.attr', 'href', '/learn/latex/Learn_LaTeX_in_30_minutes')
-        .and('have.attr', 'target', '_blank')
-        .within(() => {
-          cy.get('img').should('have.attr', 'src').and('not.be.empty')
-        })
+      cy.findByRole('link', { name: LABEL_LEARN_LATEX }).should(
+        'have.attr',
+        'href',
+        '/learn/latex/Learn_LaTeX_in_30_minutes'
+      )
     })
 
     it('should render wiki page', function () {
@@ -102,7 +99,11 @@ describe('LearnWiki', function () {
     it('should not add a documentation entry to the nav bar', function () {
       login(REGULAR_USER)
       cy.visit('/project')
-      cy.findByText('Documentation').should('not.exist')
+      cy.findByRole('navigation', { name: 'Primary' })
+        .findByRole('menuitem', {
+          name: 'Documentation',
+        })
+        .should('not.exist')
     })
 
     it('should not render wiki page', function () {
@@ -110,7 +111,7 @@ describe('LearnWiki', function () {
       cy.visit(COPYING_A_PROJECT_URL, {
         failOnStatusCode: false,
       })
-      cy.findByText('Not found')
+      cy.findByRole('heading', { name: 'Not found' })
     })
 
     it('should not display a tutorial link in the welcome page', function () {

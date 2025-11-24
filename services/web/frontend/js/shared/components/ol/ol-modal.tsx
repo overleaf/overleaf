@@ -8,6 +8,7 @@ import {
 } from 'react-bootstrap'
 import { ModalBodyProps } from 'react-bootstrap/ModalBody'
 import type { Options as FocusTrapOptions } from 'focus-trap'
+import { useTranslation } from 'react-i18next'
 
 type OLModalProps = ModalProps & {
   size?: 'sm' | 'lg'
@@ -52,8 +53,13 @@ export function OLModalHeader({
   closeButton = true,
   ...props
 }: OLModalHeaderProps) {
+  const { t } = useTranslation()
   return (
-    <Modal.Header closeButton={closeButton} {...props}>
+    <Modal.Header
+      closeButton={closeButton}
+      closeLabel={t('close_dialog')}
+      {...props}
+    >
       {children}
     </Modal.Header>
   )

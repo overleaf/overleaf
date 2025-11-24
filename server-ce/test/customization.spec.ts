@@ -8,7 +8,9 @@ describe('Customization', function () {
 
     it('should display the default right footer', function () {
       cy.visit('/')
-      cy.get('footer').findByRole('link', { name: 'Fork on GitHub!' })
+      cy.findByRole('contentinfo').findByRole('link', {
+        name: 'Fork on GitHub!',
+      })
     })
   })
 
@@ -25,16 +27,18 @@ describe('Customization', function () {
 
     it('should display custom name', function () {
       cy.visit('/')
-      cy.get('nav').findByText('CUSTOM APP NAME')
+      cy.findByRole('navigation', { name: 'Primary' }).findByText(
+        'CUSTOM APP NAME'
+      )
     })
 
     it('should display custom left footer', function () {
       cy.visit('/')
-      cy.get('footer').findByText('CUSTOM LEFT FOOTER')
+      cy.findByRole('contentinfo').findByText('CUSTOM LEFT FOOTER')
     })
     it('should display custom right footer', function () {
       cy.visit('/')
-      cy.get('footer').findByText('CUSTOM RIGHT FOOTER')
+      cy.findByRole('contentinfo').findByText('CUSTOM RIGHT FOOTER')
     })
   })
 })

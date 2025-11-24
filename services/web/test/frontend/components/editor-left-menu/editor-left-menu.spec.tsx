@@ -163,7 +163,7 @@ describe('<EditorLeftMenu />', function () {
         cy.findByRole('heading', { name: 'Copy project' })
 
         // try closing & re-opening the modal with different methods
-        cy.findByRole('button', { name: 'Close' }).click()
+        cy.findByRole('button', { name: 'Close dialog' }).click()
         cy.findByRole('button', { name: 'Copy project' }).click()
         cy.findByRole('button', { name: 'Cancel' }).click()
         cy.findByRole('button', { name: 'Copy project' }).click()

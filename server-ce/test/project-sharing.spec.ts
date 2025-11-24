@@ -50,10 +50,12 @@ describe('Project Sharing', function () {
     // Add chat message
     cy.findByRole('button', { name: 'Chat' }).click()
     // wait for lazy loading of the chat pane
-    cy.findByText('Send your first message to your collaborators')
-    cy.get(
-      'textarea[placeholder="Send a message to your collaborators…"]'
-    ).type('New Chat Message{enter}')
+    cy.findByRole('complementary', { name: 'Chat' }).findByText(
+      'Send your first message to your collaborators'
+    )
+    cy.findByLabelText('Send a message to your collaborators…').type(
+      'New Chat Message{enter}'
+    )
 
     // Get link sharing links
     enableLinkSharing().then(
@@ -130,7 +132,9 @@ describe('Project Sharing', function () {
 
   function expectChatAccess() {
     cy.findByRole('button', { name: 'Chat' }).click()
-    cy.findByText('New Chat Message')
+    cy.findByRole('complementary', { name: 'Chat' }).findByText(
+      'New Chat Message'
+    )
   }
 
   function expectHistoryAccess() {
@@ -451,8 +455,14 @@ describe('Project Sharing', function () {
       it('should not display link sharing in the sharing modal', function () {
         login('user@example.com')
         openProjectByName(projectName)
-        cy.findByText('Share').click()
-        cy.findByText('Turn on link sharing').should('not.exist')
+        cy.findByRole('navigation', {
+          name: 'Project actions',
+        })
+          .findByRole('button', { name: 'Share' })
+          .click()
+        cy.findByRole('button', { name: 'Turn on link sharing' }).should(
+          'not.exist'
+        )
       })
 
       it('should block new access to read-only link shared projects', function () {

@@ -75,6 +75,7 @@ function PdfZoomDropdown({
         id="pdf-zoom-dropdown"
         variant="link"
         className="pdf-toolbar-btn pdfjs-zoom-dropdown-button small"
+        aria-label={t('pdf_zoom_level')}
       >
         {rawScaleToPercentage(rawScale)}
       </DropdownToggle>
