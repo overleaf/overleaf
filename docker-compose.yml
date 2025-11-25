@@ -3,7 +3,8 @@ services:
         restart: always
         # Server Pro users:
         # image: quay.io/sharelatex/sharelatex-pro
-        image: sharelatex/sharelatex
+        # Official image: sharelatex/sharelatex
+        image: sharelatex/sharelatex:main
         container_name: sharelatex
         depends_on:
             mongo:
@@ -11,7 +12,6 @@ services:
         stop_grace_period: 60s
         volumes:
             - ~/sharelatex_data:/var/lib/overleaf
-            - ./server-ce/config/settings.js:/etc/overleaf/settings.js:ro
             ########################################################################
             ####  Server Pro: Uncomment the following line to mount the docker  ####
             ####             socket, required for Sibling Containers to work    ####
