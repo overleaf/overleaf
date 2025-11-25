@@ -14,6 +14,9 @@ describe('InstitutionsFeatures', function () {
     }
     ctx.PlansLocator = { findLocalPlanInSettings: sinon.stub() }
     ctx.institutionPlanCode = 'institution_plan_code'
+    ctx.InstitutionsGetter = {
+      promises: { getCurrentAffiliations: sinon.stub().resolves([]) },
+    }
 
     vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
       default: ctx.UserGetter,
@@ -29,10 +32,30 @@ describe('InstitutionsFeatures', function () {
       },
     }))
 
+    vi.doMock(
+      '../../../../app/src/Features/Institutions/InstitutionsGetter',
+      () => ({
+        default: ctx.InstitutionsGetter,
+      })
+    )
+
     ctx.InstitutionsFeatures = (await import(modulePath)).default
     ctx.emailDataWithLicense = [{ emailHasInstitutionLicence: true }]
     ctx.emailDataWithoutLicense = [{ emailHasInstitutionLicence: false }]
     ctx.userId = '12345abcde'
+    ctx.affiliateWithAiBundle = {
+      institution: { writefullCommonsAccount: true },
+    }
+    ctx.affiliateWithoutAiBundle = {
+      institution: { writefullCommonsAccount: false },
+    }
+    ctx.testFeatures = { features: { institution: 'all' } }
+    ctx.testFeaturesWithAiAddon = {
+      features: { institution: 'all', aiErrorAssistant: true },
+    }
+    ctx.testFeaturesWithNoAddon = {
+      features: { institution: 'all', aiErrorAssistant: false },
+    }
   })
 
   describe('hasLicence', function () {
@@ -87,7 +110,7 @@ describe('InstitutionsFeatures', function () {
       ).to.be.rejected
     })
 
-    it('should return no feaures if user has no plan code', async function (ctx) {
+    it('should return no features if user has no plan code', async function (ctx) {
       ctx.UserGetter.promises.getUserFullEmails.resolves(
         ctx.emailDataWithoutLicense
       )
@@ -96,6 +119,21 @@ describe('InstitutionsFeatures', function () {
           ctx.userId
         )
       expect(features).to.deep.equal({})
+    })
+
+    it('should return ai features if user has any affiliation with add-on bundle', async function (ctx) {
+      ctx.InstitutionsGetter.promises.getCurrentAffiliations = sinon
+        .stub()
+        .resolves([ctx.affiliateWithoutAiBundle, ctx.affiliateWithAiBundle])
+      ctx.UserGetter.promises.getUserFullEmails.resolves(
+        ctx.emailDataWithLicense
+      )
+
+      const features =
+        await ctx.InstitutionsFeatures.promises.getInstitutionsFeatures(
+          ctx.userId
+        )
+      expect(features).to.deep.equal(ctx.testFeaturesWithAiAddon.features)
     })
 
     it('should return feaures if user has affiliations plan code', async function (ctx) {

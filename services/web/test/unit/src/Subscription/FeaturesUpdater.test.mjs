@@ -72,6 +72,9 @@ describe('FeaturesUpdater', function () {
           bonus: 'features',
         },
       },
+      writefull: {
+        overleafApiUrl: 'https://www.writefull.com',
+      },
     }
 
     ctx.ReferalFeatures = {
@@ -172,6 +175,10 @@ describe('FeaturesUpdater', function () {
     }))
 
     vi.doMock('../../../../app/src/models/Subscription', () => ({}))
+
+    vi.doMock('@overleaf/fetch-utils', () => ({
+      fetchNothing: sinon.stub().resolves(),
+    }))
 
     ctx.FeaturesUpdater = (await import(MODULE_PATH)).default
   })

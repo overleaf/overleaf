@@ -16,6 +16,8 @@ import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import Queues from '../../infrastructure/Queues.mjs'
 import Modules from '../../infrastructure/Modules.js'
 import { AI_ADD_ON_CODE } from './AiHelper.mjs'
+// import { fetchNothing } from '@overleaf/fetch-utils'
+import metrics from '@overleaf/metrics'
 
 /**
  * Enqueue a job for refreshing features for the given user
@@ -42,7 +44,7 @@ async function refreshFeatures(userId, reason) {
   })
   const oldFeatures = _.clone(user.features)
   const features = await computeFeatures(userId)
-  logger.debug({ userId, features }, 'updating user features')
+  logger.debug({ userId, features, reason }, 'updating user features')
 
   const matchedFeatureSet = FeaturesHelper.getMatchedFeatureSet(features)
   AnalyticsManager.setUserPropertyForUserInBackground(
@@ -71,6 +73,33 @@ async function refreshFeatures(userId, reason) {
     }
   }
 
+  // only update Writefull if the user's features have changed,
+  //  skip if they are the reason we are refreshing features (they'd already be up to date)
+  if (featuresChanged && reason !== 'writefullEntitlementSynced') {
+    try {
+      // update WF with the current feature set for the user
+      // await fetchNothing(
+      //   `${Settings.writefull.overleafApiUrl}/api/user/status/update-overleaf-status`,
+      //   {
+      //     headers: {
+      //       'x-api-key': Settings.writefull.overleafApiKey,
+      //     },
+      //     json: {
+      //       userOverleafId: userId,
+      //       hasAiAssist: newFeatures.aiErrorAssistant,
+      //     },
+      //     method: 'POST',
+      //   }
+      // )
+      // increment a metric instead of calling WF so we cna give them an idea of the # of requests they will recieve
+      metrics.inc('feature_sync_called_to_wf')
+    } catch (err) {
+      logger.warn(
+        { userId, reason },
+        'failed to sync entitlement to Writefull after a feature refresh'
+      )
+    }
+  }
   return { features: newFeatures, featuresChanged }
 }
 
