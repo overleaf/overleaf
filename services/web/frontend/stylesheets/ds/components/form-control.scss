@@ -91,6 +91,13 @@ input.form-control.form-control-ds {
     @include ds-body-sm-regular;
   }
 
+  &.marginless {
+    &,
+    .form-text-inner-ds {
+      margin: 0;
+    }
+  }
+
   .ciam-form-text-icon {
     font-size: math.div(20em, 14);
   }

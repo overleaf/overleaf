@@ -120,6 +120,13 @@
     line-height: var(--line-height-02);
     margin-top: var(--spacing-04);
   }
+
+  &.marginless {
+    &,
+    .form-text-inner {
+      margin: 0;
+    }
+  }
 }
 
 .form-label {

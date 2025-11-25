@@ -76,6 +76,7 @@
     border-radius: var(--ds-border-radius-400);
     max-width: 464px;
     margin: 0 auto;
+    min-height: 500px;
 
     @include media-breakpoint-up(sm) {
       padding: var(--ds-spacing-1300);

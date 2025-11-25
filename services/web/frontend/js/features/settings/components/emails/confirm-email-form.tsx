@@ -2,14 +2,25 @@ import { postJSON } from '@/infrastructure/fetch-json'
 import useWaitForI18n from '@/shared/hooks/use-wait-for-i18n'
 import Notification from '@/shared/components/notification'
 import getMeta from '@/utils/meta'
-import { FormEvent, MouseEventHandler, useState } from 'react'
+import {
+  ChangeEventHandler,
+  ComponentProps,
+  FormEvent,
+  MouseEventHandler,
+  useEffect,
+  useState,
+} from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import LoadingSpinner from '@/shared/components/loading-spinner'
-import MaterialIcon from '@/shared/components/material-icon'
 import { sendMB } from '@/infrastructure/event-tracking'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLButton from '@/shared/components/ol/ol-button'
 import { useLocation } from '@/shared/hooks/use-location'
+import DSFormLabel from '@/shared/components/ds/ds-form-label'
+import DSButton from '@/shared/components/ds/ds-button'
+import CIAMSixDigitsInput from '@/features/settings/components/emails/ciam-six-digits-input'
+import OLFormText from '@/shared/components/ol/ol-form-text'
+import DSFormText from '@/shared/components/ds/ds-form-text'
 
 type Feedback = {
   type: 'input' | 'alert'
@@ -19,7 +30,7 @@ type Feedback = {
 
 type ConfirmEmailFormProps = {
   confirmationEndpoint: string
-  flow: string
+  flow: 'registration' | 'resend' | 'secondary'
   resendEndpoint: string
   successMessage?: React.ReactNode
   successButtonText?: string
@@ -31,6 +42,15 @@ type ConfirmEmailFormProps = {
   outerError?: string
   isCiam?: boolean
 }
+
+const OLSixDigitsInput = (props: ComponentProps<'input'>) => (
+  <input
+    inputMode="numeric"
+    maxLength={6}
+    className="form-control"
+    {...props}
+  />
+)
 
 export function ConfirmEmailForm({
   confirmationEndpoint,
@@ -146,7 +166,7 @@ export function ConfirmEmailForm({
     })
   }
 
-  const changeHandler = (e: FormEvent<HTMLInputElement>) => {
+  const changeHandler: ChangeEventHandler<HTMLInputElement> = e => {
     setConfirmationCode(e.currentTarget.value)
     setFeedback(null)
   }
@@ -161,9 +181,20 @@ export function ConfirmEmailForm({
         successMessage={successMessage}
         successButtonText={successButtonText}
         redirectTo={successRedirectPath}
+        autoRedirect={isCiam ? 8000 : false}
       />
     )
   }
+
+  const longLabel = isModal
+    ? t('enter_the_code', { email })
+    : t('enter_the_confirmation_code', { email })
+
+  const Button = isCiam ? DSButton : OLButton
+  const buttonSize = isCiam ? 'lg' : undefined
+
+  const SixDigits = isCiam ? CIAMSixDigitsInput : OLSixDigitsInput
+  const FormText = isCiam ? DSFormText : OLFormText
 
   return (
     <form
@@ -191,53 +222,54 @@ export function ConfirmEmailForm({
           outerErrorDisplay={outerErrorDisplay}
         />
 
-        <OLFormLabel htmlFor="one-time-code">
-          {isModal
-            ? t('enter_the_code', { email })
-            : t('enter_the_confirmation_code', { email })}
-        </OLFormLabel>
-        <input
+        {isCiam && <p>{longLabel}</p>}
+
+        {isCiam ? (
+          <DSFormLabel htmlFor="one-time-code">
+            {t('verification_code')}
+          </DSFormLabel>
+        ) : (
+          <OLFormLabel htmlFor="one-time-code">{longLabel}</OLFormLabel>
+        )}
+
+        <SixDigits
           id="one-time-code"
-          className="form-control"
-          inputMode="numeric"
           required
           value={confirmationCode}
           onChange={changeHandler}
           data-ol-dirty={feedback ? 'true' : undefined}
-          maxLength={6}
           autoComplete="one-time-code"
           autoFocus // eslint-disable-line jsx-a11y/no-autofocus
           disabled={!!outerErrorDisplay}
         />
         <div aria-live="polite">
           {feedback?.type === 'input' && (
-            <div className="small text-danger">
-              <MaterialIcon className="icon" type="error" />
-              <div>
-                <ErrorMessage error={feedback.message} />
-              </div>
-            </div>
+            <FormText type="error" marginless>
+              <ErrorMessage error={feedback.message} />
+            </FormText>
           )}
         </div>
 
         <div className="form-actions">
-          <OLButton
+          <Button
+            size={buttonSize}
             disabled={isResending || !!outerErrorDisplay}
             type="submit"
             isLoading={isConfirming}
             loadingLabel={t('confirming')}
           >
             {t('confirm')}
-          </OLButton>
-          <OLButton
+          </Button>
+          <Button
             variant="secondary"
+            size={buttonSize}
             disabled={isConfirming}
             onClick={resendHandler}
             isLoading={isResending}
             loadingLabel={t('resending_confirmation_code')}
           >
             {t('resend_confirmation_code')}
-          </OLButton>
+          </Button>
           {onCancel && (
             <OLButton
               variant="danger-ghost"
@@ -248,6 +280,25 @@ export function ConfirmEmailForm({
             </OLButton>
           )}
         </div>
+        {isCiam && flow === 'registration' && (
+          <div className="mt-4 mb-2 text-center ">
+            <Trans
+              i18nKey="use_a_different_email"
+              components={[
+                // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
+                <a
+                  href="/register"
+                  onClick={() =>
+                    sendMB('email-verification-click', {
+                      button: 'change-email',
+                      flow,
+                    })
+                  }
+                />,
+              ]}
+            />
+          </div>
+        )}
       </div>
     </form>
   )
@@ -281,10 +332,12 @@ function ConfirmEmailSuccessfullForm({
   successMessage,
   successButtonText,
   redirectTo,
+  autoRedirect = false,
 }: {
   successMessage: React.ReactNode
   successButtonText: string
   redirectTo: string
+  autoRedirect?: number | false
 }) {
   const location = useLocation()
   const submitHandler = (e: FormEvent<HTMLFormElement>) => {
@@ -292,15 +345,24 @@ function ConfirmEmailSuccessfullForm({
     location.assign(redirectTo)
   }
 
+  useEffect(() => {
+    if (autoRedirect) {
+      const timer = setTimeout(() => location.assign(redirectTo), autoRedirect)
+      return () => clearTimeout(timer)
+    }
+  }, [autoRedirect, location, redirectTo])
+
   return (
-    <form onSubmit={submitHandler}>
+    <form onSubmit={submitHandler} className="confirm-email-success-form">
       <div aria-live="polite">{successMessage}</div>
 
-      <div className="form-actions">
-        <OLButton type="submit" variant="primary">
-          {successButtonText}
-        </OLButton>
-      </div>
+      {!autoRedirect && (
+        <div className="form-actions">
+          <OLButton type="submit" variant="primary">
+            {successButtonText}
+          </OLButton>
+        </div>
+      )}
     </form>
   )
 }

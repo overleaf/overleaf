@@ -9,6 +9,7 @@ export type FormTextProps = MergeAndOverride<
   BS5FormTextProps,
   {
     type?: TextType
+    marginless?: boolean
   }
 >
 
@@ -38,13 +39,14 @@ function FormTextIcon({ type }: { type?: TextType }) {
 
 function FormText({
   type = 'default',
+  marginless,
   children,
   className,
   ...rest
 }: FormTextProps) {
   return (
     <Form.Text
-      className={classnames(className, getFormTextClass(type))}
+      className={classnames(className, getFormTextClass(type), { marginless })}
       {...rest}
     >
       <span className="form-text-inner">

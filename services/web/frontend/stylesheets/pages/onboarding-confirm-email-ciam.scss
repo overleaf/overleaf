@@ -1,0 +1,46 @@
+#onboarding-confirm-email .ciam-enabled {
+  .animated-tick {
+    height: var(--ds-spacing-1200);
+    width: var(--ds-spacing-1200);
+  }
+
+  .ciam-email-confirmed-title {
+    margin-top: var(--ds-spacing-800);
+    margin-bottom: var(--ds-spacing-600);
+  }
+
+  .confirm-email-success-form {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .confirm-email-form .confirm-email-form-inner {
+    margin: auto;
+    max-width: 480px;
+
+    .notification {
+      margin-bottom: var(--spacing-05);
+    }
+
+    .text-danger {
+      display: flex;
+      gap: var(--spacing-03);
+      padding: var(--spacing-02);
+    }
+
+    .form-label {
+      font-weight: bold;
+    }
+
+    .form-actions {
+      margin-top: var(--ds-spacing-800);
+      display: flex;
+      flex-direction: column;
+      gap: var(--ds-spacing-400);
+    }
+  }
+}

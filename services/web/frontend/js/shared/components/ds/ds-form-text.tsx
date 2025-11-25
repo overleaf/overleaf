@@ -7,7 +7,10 @@ type TextType = 'success' | 'error'
 
 export type FormTextProps = MergeAndOverride<
   BS5FormTextProps,
-  { type?: TextType }
+  {
+    type?: TextType
+    marginless?: boolean
+  }
 >
 
 const typeClasses = {
@@ -31,10 +34,18 @@ function FormTextIcon({ type }: { type?: TextType }) {
   }
 }
 
-function DSFormText({ type, children, className, ...rest }: FormTextProps) {
+function DSFormText({
+  type,
+  marginless,
+  children,
+  className,
+  ...rest
+}: FormTextProps) {
   return (
     <Form.Text
-      className={classnames('form-text-ds', className, getFormTextClass(type))}
+      className={classnames('form-text-ds', className, getFormTextClass(type), {
+        marginless,
+      })}
       {...rest}
     >
       <span className="form-text-inner-ds">

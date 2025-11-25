@@ -26,7 +26,7 @@ const meta: Meta<typeof DSButton> = {
   },
   parameters: {
     controls: {
-      include: ['children', 'disabled', 'size', 'variant'],
+      include: ['children', 'disabled', 'isLoading', 'size', 'variant'],
     },
     ...figmaDesignUrl(
       'https://www.figma.com/design/aJQlecvqCS9Ry8b6JA1lQN/DS---Components?node-id=4565-2932&m=dev'

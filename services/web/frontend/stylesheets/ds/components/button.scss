@@ -78,4 +78,37 @@
       $disabled-background: var(--ds-color-neutral-100)
     );
   }
+
+  &.button-loading {
+    .spinner-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .loading-spinner-small {
+        border-width: 0.25em;
+        height: 1.25rem;
+        width: 1.25rem;
+      }
+
+      .loading-spinner-large {
+        border-width: 0.25em;
+        height: 1.5rem;
+        width: 1.5rem;
+      }
+
+      .spinner-border {
+        border-right-color: color-mix(
+          in srgb,
+          var(--bs-btn-color) 32%,
+          var(--bs-btn-bg)
+        );
+      }
+    }
+
+    // Hide the text when the spinner is visible
+    & > [aria-hidden='true'] {
+      visibility: hidden;
+    }
+  }
 }
