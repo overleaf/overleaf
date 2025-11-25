@@ -265,6 +265,46 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   if (Features.hasFeature('registration-page')) {
     webRouter.get('/register', UserPagesController.registerPage)
     AuthenticationController.addEndpointToLoginWhitelist('/register')
+
+    // Self-registration POST handler
+    webRouter.post(
+      '/register',
+      RateLimiterMiddleware.rateLimit(rateLimiters.registerEmail),
+      async (req, res, next) => {
+        try {
+          const { email, password } = req.body
+          if (!email || !password) {
+            return res.status(400).json({
+              message: { type: 'error', text: 'Email and password are required' },
+            })
+          }
+
+          const UserRegistrationHandler = (
+            await import('./Features/User/UserRegistrationHandler.mjs')
+          ).default
+
+          const user = await UserRegistrationHandler.promises.registerNewUser({
+            email,
+            password,
+          })
+
+          // Log the user in after registration
+          AuthenticationController.setAuditInfo(req, { method: 'Password' })
+          await AuthenticationController.promises.finishLogin(user, req, res)
+        } catch (err) {
+          if (err.message === 'EmailAlreadyRegistered') {
+            return res.status(400).json({
+              message: {
+                type: 'error',
+                key: 'email-already-registered',
+                text: 'This email is already registered',
+              },
+            })
+          }
+          next(err)
+        }
+      }
+    )
   }
 
   EditorRouter.apply(webRouter, privateApiRouter)

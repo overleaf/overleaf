@@ -27,9 +27,43 @@ block content
 						.card-body
 							.page-header
 								h1 #{translate("register")}
-							p
-								| Please contact
+							form(
+								data-ol-async-form
+								action='/register'
+								method='POST'
+							)
+								input(name='_csrf' type='hidden' value=csrfToken)
+								.form-group
+									.notification.notification-type-error.mb-3(hidden data-ol-custom-form-message="email-already-registered")
+										.notification-content #{translate("email_already_registered")}
+											|
+											a(href='/login') #{translate("login_here")}
+									.notification.notification-type-error.mb-3(hidden data-ol-custom-form-message="something-went-wrong")
+										.notification-content Something went wrong. Please try again.
+								.form-group
+									label.form-label(for='email') #{translate("email")}
+									input.form-control(
+										name='email'
+										type='email'
+										id='email'
+										autocomplete='username'
+										required
+										autofocus='true'
+									)
+								.form-group
+									label.form-label(for='passwordField') #{translate("password")}
+									input#passwordField.form-control(
+										name='password'
+										type='password'
+										autocomplete='new-password'
+										required
+									)
+								.actions
+									button.btn.btn-primary(type='submit' data-ol-disabled-inflight)
+										span(data-ol-inflight='idle') #{translate("register")}
+										span(hidden data-ol-inflight='pending') #{translate("registering")}…
+							hr
+							p.text-center
+								| #{translate("already_have_sl_account")}
 								|
-								strong #{settings.adminEmail}
-								|
-								| to create an account.
+								a(href='/login') #{translate("login_here")}

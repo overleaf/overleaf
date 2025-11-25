@@ -75,6 +75,22 @@ services:
 
             # ENABLE_CRON_RESOURCE_DELETION: true
 
+            ####################################
+            ## Subscription & Registration    ##
+            ####################################
+
+            # Enable user self-registration
+            OVERLEAF_ALLOW_PUBLIC_ACCESS: ${OVERLEAF_ALLOW_PUBLIC_ACCESS:-true}
+
+            # Enable subscriptions
+            ENABLE_SUBSCRIPTIONS: ${ENABLE_SUBSCRIPTIONS:-true}
+
+            # Recurly Configuration
+            RECURLY_API_KEY: ${RECURLY_API_KEY:-}
+            RECURLY_SUBDOMAIN: ${RECURLY_SUBDOMAIN:-}
+            RECURLY_WEBHOOK_USER: ${RECURLY_WEBHOOK_USER:-}
+            RECURLY_WEBHOOK_PASS: ${RECURLY_WEBHOOK_PASS:-}
+
             ################
             ## Server Pro ##
             ################
