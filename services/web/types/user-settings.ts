@@ -18,4 +18,5 @@ export type UserSettings = {
   referencesSearchMode: 'advanced' | 'simple'
   enableNewEditor: boolean
   breadcrumbs: boolean
+  darkModePdf: boolean
 }

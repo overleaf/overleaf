@@ -28,6 +28,7 @@ type ProjectSettingsSetterContextValue = {
   setPdfViewer: (pdfViewer: UserSettings['pdfViewer']) => void
   setMathPreview: (mathPreview: UserSettings['mathPreview']) => void
   setBreadcrumbs: (breadcrumbs: UserSettings['breadcrumbs']) => void
+  setDarkModePdf: (darkModePdf: UserSettings['darkModePdf']) => void
 }
 
 type ProjectSettingsContextValue = Partial<ProjectSettings> &
@@ -77,6 +78,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
     setMathPreview,
     breadcrumbs,
     setBreadcrumbs,
+    darkModePdf,
+    setDarkModePdf,
   } = useUserWideSettings()
 
   useProjectWideSettingsSocketListener()
@@ -115,6 +118,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setMathPreview,
       breadcrumbs,
       setBreadcrumbs,
+      darkModePdf,
+      setDarkModePdf,
     }),
     [
       compiler,
@@ -149,6 +154,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setMathPreview,
       breadcrumbs,
       setBreadcrumbs,
+      darkModePdf,
+      setDarkModePdf,
     ]
   )
 

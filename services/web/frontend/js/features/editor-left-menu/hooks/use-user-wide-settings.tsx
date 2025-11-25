@@ -21,6 +21,7 @@ export default function useUserWideSettings() {
     pdfViewer,
     mathPreview,
     breadcrumbs,
+    darkModePdf,
   } = userSettings
 
   const setOverallTheme = useSetOverallTheme()
@@ -101,6 +102,13 @@ export default function useUserWideSettings() {
     [saveUserSettings]
   )
 
+  const setDarkModePdf = useCallback(
+    (darkModePdf: UserSettings['darkModePdf']) => {
+      saveUserSettings('darkModePdf', darkModePdf)
+    },
+    [saveUserSettings]
+  )
+
   return {
     autoComplete,
     setAutoComplete,
@@ -126,5 +134,7 @@ export default function useUserWideSettings() {
     setMathPreview,
     breadcrumbs,
     setBreadcrumbs,
+    darkModePdf,
+    setDarkModePdf,
   }
 }

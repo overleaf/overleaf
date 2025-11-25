@@ -208,10 +208,40 @@
       outline: none;
     }
   }
+
+  &.theme-toggle-btn {
+    border: none;
+    border-radius: var(--border-radius-full);
+
+    &.active {
+      color: var(--white);
+      background-color: var(--green-70);
+
+      &:hover {
+        background-color: var(--green-60);
+      }
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
 }
 
 .pdf {
   background-color: var(--pdf-bg);
+
+  &.pdf-dark-mode {
+    --pdf-bg: var(--bg-dark-secondary);
+
+    .pdfjs-viewer {
+      --canvas-box-shadow: none;
+
+      .page {
+        filter: invert(95%) hue-rotate(180deg) brightness(90%) contrast(90%);
+      }
+    }
+  }
 }
 
 .pdf-viewer,
@@ -234,6 +264,8 @@
   .pdfjs-viewer {
     @extend .full-size;
 
+    --canvas-box-shadow: 0 0 10px rgb(0 0 0 / 50%);
+
     background-color: transparent;
     overflow: scroll;
 
@@ -241,7 +273,7 @@
     .canvasWrapper > canvas,
     div.pdf-canvas {
       background: white;
-      box-shadow: 0 0 10px rgb(0 0 0 / 50%);
+      box-shadow: var(--canvas-box-shadow);
     }
 
     div.pdf-canvas.pdfng-empty {

@@ -598,6 +598,39 @@ describe('UserController', function () {
       })
     })
 
+    it('should set darkModePdf to true', function (ctx) {
+      return new Promise(resolve => {
+        ctx.req.body = { darkModePdf: true }
+        ctx.res.sendStatus = code => {
+          ctx.user.ace.darkModePdf.should.equal(true)
+          resolve()
+        }
+        ctx.UserController.updateUserSettings(ctx.req, ctx.res)
+      })
+    })
+
+    it('should set darkModePdf to false', function (ctx) {
+      return new Promise(resolve => {
+        ctx.req.body = { darkModePdf: false }
+        ctx.res.sendStatus = code => {
+          ctx.user.ace.darkModePdf.should.equal(false)
+          resolve()
+        }
+        ctx.UserController.updateUserSettings(ctx.req, ctx.res)
+      })
+    })
+
+    it('should keep darkModePdf a boolean', function (ctx) {
+      return new Promise(resolve => {
+        ctx.req.body = { darkModePdf: 'foobar' }
+        ctx.res.sendStatus = code => {
+          ctx.user.ace.darkModePdf.should.equal(true)
+          resolve()
+        }
+        ctx.UserController.updateUserSettings(ctx.req, ctx.res)
+      })
+    })
+
     it('should send an error if the email is 0 len', function (ctx) {
       return new Promise(resolve => {
         ctx.req.body.email = ''

@@ -25,6 +25,9 @@ import FontFamilySetting from '../components/settings/appearance-settings/font-f
 import { AvailableUnfilledIcon } from '@/shared/components/material-icon'
 import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/editor-left-menu-context'
 import NewEditorSetting from '../components/settings/editor-settings/new-editor-setting'
+import DarkModePdfSetting from '../components/settings/appearance-settings/dark-mode-pdf-setting'
+import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const [referenceSearchSettingModule] = importOverleafModules(
   'referenceSearchSetting'
@@ -76,9 +79,12 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const { t } = useTranslation()
+  const { overallTheme } = useProjectSettingsContext()
 
   // TODO ide-redesign-cleanup: Rename this field and move it directly into this context
   const { leftMenuShown, setLeftMenuShown } = useLayoutContext()
+
+  const hasDarkModePdf = useFeatureFlag('pdf-dark-mode')
   const settingsTabs: SettingsEntry[] = useMemo(
     () => [
       {
@@ -199,6 +205,11 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
                 component: <EditorThemeSetting />,
               },
               {
+                key: 'pdfDarkMode',
+                component: <DarkModePdfSetting />,
+                hidden: overallTheme === 'light-' || !hasDarkModePdf,
+              },
+              {
                 key: 'fontSize',
                 component: <FontSizeSetting />,
               },
@@ -231,7 +242,7 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
         href: '/user/subscription',
       },
     ],
-    [t]
+    [t, overallTheme, hasDarkModePdf]
   )
 
   const settingToTabMap = useMemo(() => {

@@ -456,6 +456,7 @@ const _ProjectController = {
       'compile-timeout-target-plans',
       'writefull-keywords-generator',
       'writefull-figure-generator',
+      'pdf-dark-mode',
     ].filter(Boolean)
 
     const getUserValues = async userId =>

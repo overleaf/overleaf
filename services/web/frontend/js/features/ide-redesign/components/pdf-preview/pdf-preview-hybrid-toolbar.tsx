@@ -7,6 +7,7 @@ import { DetachedSynctexControl } from '@/features/pdf-preview/components/detach
 import SwitchToEditorButton from '@/features/pdf-preview/components/switch-to-editor-button'
 import PdfHybridLogsButton from '@/features/pdf-preview/components/pdf-hybrid-logs-button'
 import EditorTourLogsTooltip from '../editor-tour/editor-tour-logs-tooltip'
+import { PdfHybridThemeButton } from '@/features/pdf-preview/components/pdf-hybrid-theme-button'
 
 function PdfPreviewHybridToolbar() {
   const { t } = useTranslation()
@@ -29,6 +30,7 @@ function PdfPreviewHybridToolbar() {
         <PdfHybridLogsButton ref={logsButtonRef} />
         <PdfHybridDownloadButton />
         <EditorTourLogsTooltip target={logsButtonElt} />
+        <PdfHybridThemeButton />
       </div>
       <div className="toolbar-pdf-right">
         <div className="toolbar-pdf-controls" id="toolbar-pdf-controls" />

@@ -101,6 +101,7 @@ export const UserSchema = new Schema(
       breadcrumbs: { type: Boolean, default: true },
       referencesSearchMode: { type: String, default: 'advanced' }, // 'advanced' or 'simple'
       enableNewEditor: { type: Boolean },
+      darkModePdf: { type: Boolean, default: false },
     },
     features: {
       collaborators: {

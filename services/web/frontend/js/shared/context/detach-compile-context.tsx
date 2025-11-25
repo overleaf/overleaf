@@ -71,6 +71,9 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
     clearCache: _clearCache,
     syncToEntry: _syncToEntry,
     recordAction: _recordAction,
+    darkModePdf: _darkModePdf,
+    setDarkModePdf: _setDarkModePdf,
+    activeOverallTheme: _activeOverallTheme,
   } = localCompileContext
 
   const [animateCompileDropdownArrow] = useDetachStateWatcher(
@@ -373,6 +376,26 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
     'detacher'
   )
 
+  const [darkModePdf] = useDetachStateWatcher(
+    'darkModePdf',
+    _darkModePdf,
+    'detacher',
+    'detached'
+  )
+  const setDarkModePdf = useDetachAction(
+    'setDarkModePdf',
+    _setDarkModePdf,
+    'detached',
+    'detacher'
+  )
+
+  const [activeOverallTheme] = useDetachStateWatcher(
+    'activeOverallTheme',
+    _activeOverallTheme,
+    'detacher',
+    'detached'
+  )
+
   useCompileTriggers(startCompile, setChangedAt)
   useLogEvents(setShowLogs)
 
@@ -431,6 +454,9 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
       cleanupCompileResult,
       syncToEntry,
       recordAction,
+      darkModePdf,
+      setDarkModePdf,
+      activeOverallTheme,
     }),
     [
       animateCompileDropdownArrow,
@@ -484,6 +510,9 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
       cleanupCompileResult,
       syncToEntry,
       recordAction,
+      darkModePdf,
+      setDarkModePdf,
+      activeOverallTheme,
     ]
   )
 

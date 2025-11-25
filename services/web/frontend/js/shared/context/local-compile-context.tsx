@@ -54,6 +54,11 @@ import { captureException } from '@/infrastructure/error-reporter'
 import OError from '@overleaf/o-error'
 import getMeta from '@/utils/meta'
 import type { Annotation } from '../../../../types/annotation'
+import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
+import {
+  ActiveOverallTheme,
+  useActiveOverallTheme,
+} from '../hooks/use-active-overall-theme'
 
 type PdfFile = Record<string, any>
 
@@ -121,6 +126,9 @@ export type CompileContext = {
   clearCache: () => void
   syncToEntry: (value: any, keepCurrentView?: boolean) => void
   recordAction: (action: string) => void
+  darkModePdf: boolean | undefined
+  setDarkModePdf: (value: boolean) => void
+  activeOverallTheme: ActiveOverallTheme
 }
 
 export const LocalCompileContext = createContext<CompileContext | undefined>(
@@ -164,6 +172,11 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   // the PDF viewer and whether syntax validation is enabled globally
   const { userSettings } = useUserSettingsContext()
   const { pdfViewer, syntaxValidation } = userSettings
+
+  // The active setting for dark mode PDF
+  const { darkModePdf, setDarkModePdf } = useProjectSettingsContext()
+
+  const activeOverallTheme = useActiveOverallTheme()
 
   // low level details for metrics
   const [pdfFile, setPdfFile] = useState<PdfFile | null | undefined>()
@@ -793,6 +806,9 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       cleanupCompileResult,
       syncToEntry,
       recordAction,
+      darkModePdf,
+      setDarkModePdf,
+      activeOverallTheme,
     }),
     [
       animateCompileDropdownArrow,
@@ -845,6 +861,9 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       toggleLogs,
       syncToEntry,
       recordAction,
+      darkModePdf,
+      setDarkModePdf,
+      activeOverallTheme,
     ]
   )
 

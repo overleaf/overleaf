@@ -25,6 +25,7 @@ const defaultSettings: UserSettings = {
   referencesSearchMode: 'advanced',
   enableNewEditor: true,
   breadcrumbs: true,
+  darkModePdf: false,
 }
 
 type UserSettingsContextValue = {

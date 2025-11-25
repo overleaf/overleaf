@@ -3,7 +3,8 @@ import PdfPreview from './pdf-preview'
 import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
 import { ReactContextRoot } from '@/features/ide-react/context/react-context-root'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
-import useThemedPage from '@/shared/hooks/use-themed-page'
+import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
+import { useEffect } from 'react'
 
 function PdfPreviewDetachedRoot() {
   const { isReady } = useWaitForI18n()
@@ -20,7 +21,13 @@ function PdfPreviewDetachedRoot() {
 }
 
 function PdfPreviewDetachedRootContent() {
-  useThemedPage() // set the page theme based on user settings
+  const { activeOverallTheme } = useCompileContext()
+  useEffect(() => {
+    // NOTE: We cannot use useThemedPage here because we need to read the
+    // activeOverallTheme value from the compile context
+    document.body.dataset.theme =
+      activeOverallTheme === 'dark' ? 'default' : 'light'
+  }, [activeOverallTheme])
 
   return (
     <EditorRedesignWrapper>

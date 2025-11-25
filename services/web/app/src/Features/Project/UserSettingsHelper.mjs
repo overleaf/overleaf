@@ -48,6 +48,7 @@ async function buildUserSettings(req, res, user) {
     breadcrumbs: user.ace.breadcrumbs,
     referencesSearchMode: user.ace.referencesSearchMode,
     enableNewEditor: user.ace.enableNewEditor ?? defaultEnableNewEditor,
+    darkModePdf: user.ace.darkModePdf ?? false,
   }
 }
 
