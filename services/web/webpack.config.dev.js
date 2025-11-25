@@ -93,4 +93,9 @@ module.exports = merge(base, {
     preset: 'minimal',
     colors: true,
   },
+
+  ignoreWarnings: [
+    // ignore some "Can't resolve '*'" warnings for dynamically-imported optional peer dependencies
+    /@ai-sdk\/provider-utils\/dist/,
+  ],
 })
