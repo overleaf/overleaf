@@ -72,11 +72,13 @@ describe('git-bridge', function () {
       cy.findByRole('button', {
         name: 'Git integration Generate token',
       }).click()
-      cy.findByLabelText('Git authentication token')
-        .contains(/olp_[a-zA-Z0-9]{16}/)
-        .then(el => el.text())
-        .as('newToken')
-      cy.findAllByText('Close').last().click()
+      cy.findByRole('dialog').within(() => {
+        cy.findByLabelText('Git authentication token')
+          .contains(/olp_[a-zA-Z0-9]{16}/)
+          .then(el => el.text())
+          .as('newToken')
+        cy.findByRole('button', { name: 'Close dialog' }).click()
+      })
       cy.get('@newToken').then(token => {
         // There can be more than one token with the same prefix when retrying
         cy.findAllByText(
@@ -258,7 +260,7 @@ describe('git-bridge', function () {
               const token = tokenEl.text()
 
               // close Git modal
-              cy.get('body').type('{esc}')
+              cy.findByRole('button', { name: 'Close dialog' }).click()
               cy.findByTestId('git-bridge-modal').should('not.exist')
               // close the modal
               cy.get('body').type('{esc}')
@@ -345,8 +347,16 @@ Hello world
                 })
                   .findByRole('button', { name: 'History' })
                   .click()
-                cy.findByText('(via Git)').should('not.exist')
-                cy.findAllByText('Back to editor').last().click()
+                cy.findByRole('complementary', {
+                  name: 'Project history and labels',
+                }).within(() => {
+                  cy.findByText('(via Git)').should('not.exist')
+                })
+                cy.findByRole('navigation', {
+                  name: 'Project actions',
+                })
+                  .findByRole('button', { name: 'Back to editor' })
+                  .click()
                 cy.then(async () => {
                   await git.push({
                     ...commonOptions,
@@ -379,10 +389,10 @@ Hello world
               // Wait for history sync - trigger flush by toggling the UI
               cy.findByRole('navigation', {
                 name: 'Project actions',
+              }).within(() => {
+                cy.findByRole('button', { name: 'History' }).click()
+                cy.findByRole('button', { name: 'Back to editor' }).click()
               })
-                .findByRole('button', { name: 'History' })
-                .click()
-              cy.findAllByText('Back to editor').last().click()
 
               // check push in history
               cy.findByRole('navigation', {
@@ -391,10 +401,18 @@ Hello world
                 .findByRole('button', { name: 'History' })
                 .click()
               cy.findByText(/Hello world/)
-              cy.findByText('(via Git)').should('exist')
+              cy.findByRole('complementary', {
+                name: 'Project history and labels',
+              }).within(() => {
+                cy.findByText('(via Git)').should('exist')
+              })
 
               // Back to the editor
-              cy.findAllByText('Back to editor').last().click()
+              cy.findByRole('navigation', {
+                name: 'Project actions',
+              })
+                .findByRole('button', { name: 'Back to editor' })
+                .click()
               cy.findByText(/\\documentclass/)
                 .parent()
                 .parent()

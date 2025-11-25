@@ -374,6 +374,15 @@ pipeline {
     always {
       junit checksName: 'Web test results', testResults: 'services/web/data/reports/junit-*.xml,services/web/data/reports/junit-*/**/*.xml'
     }
+    failure {
+      script {
+        if (env.BRANCH_NAME == 'main') {
+          node('built-in') {
+            sh '/usr/local/bin/open-gh-failure-issue --project="🚉 Platform"'
+          }
+        }
+      }
+    }
     // Ensure tear down of test containers, then run general Jenkins VM cleanup.
     cleanup {
       dir('services/web') {

@@ -1,25 +1,23 @@
-.login-register-or-text-container {
-  padding: var(--spacing-08) 0 var(--spacing-05) 0;
-  margin: 0;
-  line-height: 1;
-  position: relative;
-  font-size: var(--font-size-02);
-  text-align: center;
+:root {
+  --password-visibility-toggle-width: 35px;
+}
 
-  &::before {
+.login-register-or-text-container {
+  display: flex;
+  gap: var(--spacing-05);
+  padding: var(--spacing-08) 0 var(--spacing-05) 0;
+  align-items: center;
+  font-size: var(--font-size-02);
+  line-height: 1;
+  margin: 0;
+
+  &::before,
+  &::after {
     content: '';
-    position: absolute;
+    display: block;
+    flex-grow: 1;
     height: 1px;
     background-color: var(--neutral-20);
-    left: 0;
-    right: 0;
-    top: calc(var(--spacing-08) + var(--spacing-08) / 4);
-  }
-
-  .login-register-or-text {
-    position: relative;
-    background-color: #fff;
-    padding: 0 var(--spacing-05);
   }
 }
 
@@ -39,7 +37,7 @@
 
   .form-group-password-input {
     input.form-control {
-      padding-right: 35px;
+      padding-right: var(--password-visibility-toggle-width);
     }
   }
 
@@ -47,8 +45,8 @@
     position: absolute;
     right: 0;
     top: 0;
-    width: 35px; // TODO: Should this be calculated ?
-    height: 35px; // TODO: Should this be calculated ?
+    width: var(--password-visibility-toggle-width);
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;

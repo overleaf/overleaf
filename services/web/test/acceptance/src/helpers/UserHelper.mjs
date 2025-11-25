@@ -59,6 +59,16 @@ class UserHelper {
   }
 
   /**
+   * Get auditLog by operation
+   * @return {object[]}
+   */
+  getAuditLogByOperation(operation) {
+    return (this.user.auditLog || []).filter(entry => {
+      return entry.operation === operation
+    })
+  }
+
+  /**
    * Generate default email from unique (per instantiation) user number
    * @returns {string} email
    */

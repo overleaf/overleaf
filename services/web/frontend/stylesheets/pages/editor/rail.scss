@@ -93,6 +93,12 @@ body {
     font-size: 20px;
   }
 
+  .ide-rail-tab-img-icon {
+    width: 20px;
+    max-height: 32px;
+    object-fit: contain;
+  }
+
   &.open-rail {
     color: var(--ide-rail-link-active-color);
     background-color: var(--ide-rail-link-active-background);

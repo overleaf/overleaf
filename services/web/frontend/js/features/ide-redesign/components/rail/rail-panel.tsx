@@ -6,6 +6,7 @@ import usePreviousValue from '@/shared/hooks/use-previous-value'
 import { HistorySidebar } from '@/features/ide-react/components/history-sidebar'
 import { Tab } from 'react-bootstrap'
 import { RailElement } from '../../utils/rail-types'
+import { shouldIncludeRailTab } from '../../utils/rail-utils'
 
 export default function RailPanel({
   isReviewPanelOpen,
@@ -52,9 +53,7 @@ export default function RailPanel({
       >
         <Tab.Content className="ide-rail-tab-content">
           {railTabs
-            .filter(({ hide }) => {
-              return typeof hide === 'function' ? !hide() : !hide
-            })
+            .filter(shouldIncludeRailTab)
             .map(({ key, component, mountOnFirstLoad }) => (
               <Tab.Pane
                 eventKey={key}

@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import UserHelper from './helpers/User.mjs'
+import Features from '../../../app/src/infrastructure/Features.mjs'
 
 const User = UserHelper.promises
 
@@ -53,10 +54,37 @@ describe('Project ownership transfer', function () {
     })
 
     it('adds the previous owner as a read/write collaborator', async function () {
+      // Skip this test in SaaS environments as limited collaborators are enforced
+      if (Features.hasFeature('saas')) {
+        this.skip()
+      }
+
       const project = await this.collaboratorSession.getProject(this.projectId)
       expect(project.collaberator_refs.map(x => x.toString())).to.have.members([
         this.owner._id.toString(),
         this.invitedAdmin._id.toString(),
+      ])
+      expect(project.owner_ref.toString()).to.equal(
+        this.collaborator._id.toString()
+      )
+      expect(project.readOnly_refs.map(x => x.toString())).to.be.empty
+    })
+
+    it('adds the previous owner as a read only', async function () {
+      // Skip this test in non-SaaS environments as unlimited collaborators are allowed
+      if (!Features.hasFeature('saas')) {
+        this.skip()
+      }
+
+      const project = await this.collaboratorSession.getProject(this.projectId)
+      expect(project.collaberator_refs.map(x => x.toString())).to.have.members([
+        this.invitedAdmin._id.toString(),
+      ])
+      expect(project.owner_ref.toString()).to.equal(
+        this.collaborator._id.toString()
+      )
+      expect(project.readOnly_refs.map(x => x.toString())).to.have.members([
+        this.owner._id.toString(),
       ])
     })
 

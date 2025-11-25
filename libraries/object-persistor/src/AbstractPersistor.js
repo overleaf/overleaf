@@ -160,4 +160,21 @@ module.exports = class AbstractPersistor {
       name,
     })
   }
+
+  /**
+   * List objects in a directory, returning the full keys.
+   *
+   * Suitable only for directories where the number of keys is known to be small.
+   *
+   * @param {string} location
+   * @param {string} prefix
+   * @returns {Promise<Array<string>>}
+   */
+  async listDirectoryKeys(location, prefix) {
+    throw new NotImplementedError('method not implemented in persistor', {
+      method: 'listDirectoryKeys',
+      location,
+      prefix,
+    })
+  }
 }

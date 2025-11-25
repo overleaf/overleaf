@@ -36,6 +36,8 @@ export default /** @type {const} */ ([
   'info',
   'integration_instructions',
   'lightbulb',
+  'lock',
+  'lock_open',
   'more_vert',
   'neurology',
   'note_add',

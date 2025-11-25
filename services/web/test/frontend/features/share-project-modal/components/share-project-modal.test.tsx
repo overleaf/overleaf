@@ -141,15 +141,10 @@ describe('<ShareProjectModal/>', function () {
       createContextProps()
     )
 
-    const [headerCloseButton, footerCloseButton] = await screen.findAllByRole(
-      'button',
-      { name: 'Close' }
-    )
+    const closeButton = screen.getByRole('button', { name: 'Close dialog' })
+    await userEvent.click(closeButton)
 
-    await userEvent.click(headerCloseButton)
-    await userEvent.click(footerCloseButton)
-
-    expect(handleHide.callCount).to.equal(2)
+    expect(handleHide.callCount).to.equal(1)
   })
 
   it('handles access level "private"', async function () {
@@ -410,7 +405,7 @@ describe('<ShareProjectModal/>', function () {
       createContextProps({ publicAccessLevel: 'tokenBased', invites })
     )
 
-    const [, closeButton] = screen.getAllByRole('button', {
+    const closeButton = screen.getByRole('button', {
       name: 'Close',
     })
 
@@ -446,7 +441,7 @@ describe('<ShareProjectModal/>', function () {
       createContextProps({ publicAccessLevel: 'tokenBased', invites })
     )
 
-    const [, closeButton] = screen.getAllByRole('button', {
+    const closeButton = screen.getByRole('button', {
       name: 'Close',
     })
 
@@ -481,7 +476,7 @@ describe('<ShareProjectModal/>', function () {
       createContextProps({ publicAccessLevel: 'tokenBased', members })
     )
 
-    const [, closeButton] = screen.getAllByRole('button', {
+    const closeButton = screen.getByRole('button', {
       name: 'Close',
     })
 

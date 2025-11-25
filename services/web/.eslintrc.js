@@ -353,6 +353,7 @@ module.exports = {
         'scripts/suspend_users.mjs',
         'scripts/sync-user-entitlements/sync-user-entitlements.mjs',
         'scripts/update_project_image_name.mjs',
+        'scripts/user-export/analytics.mjs',
         'scripts/user-export/fs.mjs',
         'scripts/user-export/http.mjs',
         'scripts/user-export/observer.mjs',

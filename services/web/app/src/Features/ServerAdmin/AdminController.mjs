@@ -6,6 +6,7 @@ import TpdsUpdateSender from '../ThirdPartyDataStore/TpdsUpdateSender.mjs'
 import TpdsProjectFlusher from '../ThirdPartyDataStore/TpdsProjectFlusher.mjs'
 import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
 import SystemMessageManager from '../SystemMessages/SystemMessageManager.mjs'
+import Modules from '../../infrastructure/Modules.js'
 
 const AdminController = {
   _sendDisconnectAllUsersMessage: delay => {
@@ -30,16 +31,23 @@ const AdminController = {
       )
     }
 
-    SystemMessageManager.getMessagesFromDB(function (error, systemMessages) {
-      if (error) {
-        return next(error)
+    SystemMessageManager.getMessagesFromDB(
+      async function (error, systemMessages) {
+        if (error) {
+          return next(error)
+        }
+        const privilegesMatrixResults = await Modules.promises.hooks.fire(
+          'getPrivilegesMatrix'
+        )
+        const privilegesMatrix = privilegesMatrixResults[0] || null
+        res.render('admin/index', {
+          title: 'System Admin',
+          openSockets,
+          systemMessages,
+          privilegesMatrix,
+        })
       }
-      res.render('admin/index', {
-        title: 'System Admin',
-        openSockets,
-        systemMessages,
-      })
-    })
+    )
   },
 
   disconnectAllUsers: (req, res) => {

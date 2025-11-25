@@ -62,7 +62,7 @@ describe('<NewProjectButton />', function () {
 
     it('close the new project modal when clicking at the top right "x" button', function () {
       fireEvent.click(screen.getByRole('menuitem', { name: 'Blank project' }))
-      fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Close dialog' }))
 
       expect(screen.queryByRole('dialog')).to.be.null
     })

@@ -473,6 +473,16 @@ async function doLogout(req) {
   logger.debug({ user }, 'logging out')
   const sessionId = req.sessionID
 
+  if (user != null) {
+    UserAuditLogHandler.addEntryInBackground(
+      user._id,
+      'logout',
+      user._id,
+      req.ip,
+      {}
+    )
+  }
+
   if (typeof req.logout === 'function') {
     // passport logout
     const logout = promisify(req.logout.bind(req))

@@ -8,7 +8,7 @@ import express from 'express'
 import logger from '@overleaf/logger'
 import Metrics from '@overleaf/metrics'
 import { expressify } from '@overleaf/promise-utils'
-import { drainQueue, healthCheck } from './storage/scripts/backup_worker.mjs'
+import { healthCheck } from './storage/scripts/backup_worker.mjs'
 const app = express()
 
 logger.initialize('history-v1-backup-worker')
@@ -39,7 +39,6 @@ app.use((err, req, res, next) => {
 
 async function triggerGracefulShutdown(server, signal) {
   logger.info({ signal }, 'graceful shutdown: started shutdown sequence')
-  await drainQueue()
   server.close(function () {
     logger.info({ signal }, 'graceful shutdown: closed server')
     setTimeout(() => {

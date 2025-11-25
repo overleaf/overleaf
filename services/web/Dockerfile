@@ -18,6 +18,9 @@ RUN mkdir -p /overleaf/services/web/data/dumpFolder \
     &&  chmod -R 0755 /overleaf/services/web/data \
     &&  chown -R node:node /overleaf/services/web/data
 
+# Add intermediate certificate for prism.optica.org
+COPY services/web/certs/DigiCertGlobalG2TLSRSASHA2562020CA1-1.crt.pem /usr/local/share/ca-certificates/DigiCertGlobalG2TLSRSASHA2562020CA1-1.crt
+RUN update-ca-certificates
 
 # the deps image is used for caching npm ci
 FROM base AS deps-prod
@@ -127,6 +130,7 @@ CMD ["node", "--expose-gc", "app.mjs"]
 FROM pug AS app
 ARG SENTRY_RELEASE
 ENV SENTRY_RELEASE=$SENTRY_RELEASE
+ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/DigiCertGlobalG2TLSRSASHA2562020CA1-1.crt
 COPY --from=webpack-no-sourcemaps /overleaf/services/web/public /overleaf/services/web/public
 USER node
 CMD ["node", "--expose-gc", "app.mjs"]

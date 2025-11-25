@@ -74,6 +74,7 @@ const ANALYTICS_QUEUES = [
   'analytics-events',
   'analytics-editing-sessions',
   'analytics-user-properties',
+  'analytics-user-exports',
   'post-registration-analytics',
 ]
 

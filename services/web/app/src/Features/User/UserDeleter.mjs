@@ -45,17 +45,22 @@ async function deleteUser(userId, options) {
     const user = await User.findById(userId).exec()
     logger.info({ userId }, 'deleting user')
     await ensureCanDeleteUser(user)
-    logger.info({ userId }, 'cleaning up user')
-    await _cleanupUser(user)
-    logger.info({ userId }, 'firing deleteUser hook')
-    await Modules.promises.hooks.fire('deleteUser', userId)
+
+    // add audit log entry before _cleanUpUser removes any group subscriptions
     logger.info({ userId }, 'adding delete-account audit log entry')
     await UserAuditLogHandler.promises.addEntry(
       userId,
       'delete-account',
       options.deleterUser ? options.deleterUser._id : userId,
-      options.ipAddress
+      options.ipAddress,
+      {}
     )
+
+    logger.info({ userId }, 'cleaning up user')
+    await _cleanupUser(user)
+    logger.info({ userId }, 'firing deleteUser hook')
+    await Modules.promises.hooks.fire('deleteUser', userId)
+
     logger.info({ userId }, 'creating deleted user record')
     await _createDeletedUser(user, options)
     logger.info({ userId }, 'deleting user projects')

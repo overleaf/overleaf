@@ -91,8 +91,8 @@ const rateLimiters = {
     duration: 60,
   }),
   compileProjectHttp: new RateLimiter('compile-project-http', {
-    points: 800,
-    duration: 60 * 60,
+    points: 200,
+    duration: 10 * 60,
   }),
   confirmEmail: new RateLimiter('confirm-email', {
     points: 10,

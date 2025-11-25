@@ -2,6 +2,7 @@ import { DropdownMenu } from '@/shared/components/dropdown/dropdown-menu'
 import { RailTabKey } from '../../contexts/rail-context'
 import { RailElement } from '../../utils/rail-types'
 import RailTab from './rail-tab'
+import { shouldIncludeRailTab } from '../../utils/rail-utils'
 
 export default function RailOverflowDropdown({
   tabs,
@@ -15,7 +16,7 @@ export default function RailOverflowDropdown({
   return (
     <DropdownMenu className="ide-rail-overflow-dropdown">
       {tabs
-        .filter(({ hide }) => !hide)
+        .filter(shouldIncludeRailTab)
         .map(({ icon, key, indicator, title, disabled }) => (
           <RailTab
             open={isOpen && selectedTab === key}

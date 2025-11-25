@@ -26,8 +26,8 @@ describe('<DictionarySetting />', function () {
     within(modal).getByRole('heading', { name: 'Edit Dictionary' })
     within(modal).getByText('Your custom dictionary is empty.')
 
-    const [, closeButton] = within(modal).getAllByRole('button', {
-      name: 'Close',
+    const closeButton = within(modal).getByRole('button', {
+      name: 'Close dialog',
     })
     fireEvent.click(closeButton)
     expect(screen.getByTestId('dictionary-modal')).to.not.be.null

@@ -43,9 +43,7 @@ describe('Templates', function () {
     it('should show templates link on welcome page', function () {
       login(WITHOUT_PROJECTS_USER)
       cy.visit('/')
-      cy.findByRole('link', { name: LABEL_BROWSE_TEMPLATES })
-        .should('have.attr', 'href', '/templates')
-        .click()
+      cy.findByRole('link', { name: LABEL_BROWSE_TEMPLATES }).click()
       cy.url().should('match', /\/templates$/)
     })
 
@@ -62,32 +60,31 @@ describe('Templates', function () {
       })
         .findByRole('button', { name: 'Menu' })
         .click()
-      cy.findByText('Manage Template').click()
+      cy.findByRole('button', { name: 'Manage Template' }).click()
 
-      cy.findByText('Template Description').as('description').click()
-      cy.get('@description').parent().get('textarea').type(description)
-      cy.findByText('Publish').click()
-      cy.findByText('Publishing…').parent().should('be.disabled')
-      cy.findByText('Publish').should('not.exist')
-      cy.findByText('Unpublish', { timeout: 60_000 })
-      cy.findByText('Republish')
+      cy.findByLabelText('Template Description').type(description)
+      cy.findByRole('button', { name: 'Publish' }).click()
+      cy.findByRole('button', { name: 'Publishing…' }).should('be.disabled')
+      cy.findByRole('button', { name: 'Publish' }).should('not.exist')
+      cy.findByRole('button', { name: 'Unpublish', timeout: 60_000 })
+      cy.findByRole('button', { name: 'Republish' })
 
-      cy.findByText('View it in the template gallery').click()
+      cy.findByRole('link', { name: 'View it in the template gallery' }).click()
       cy.url()
         .should('match', /\/templates\/[a-f0-9]{24}$/)
         .as('templateURL')
 
-      cy.findAllByText(name).first().should('exist')
+      cy.findByRole('heading', { level: 2 }).findByText(name)
       cy.findByText(description)
-      cy.findByText('Open as Template')
-      cy.findByText('Unpublish')
-      cy.findByText('Republish')
+      cy.findByRole('link', { name: 'Open as Template' })
+      cy.findByRole('button', { name: 'Unpublish' })
+      cy.findByRole('button', { name: 'Republish' })
       cy.get('img')
         .should('have.attr', 'src')
         .and('match', /\/v\/0\//)
-      cy.findByText('Republish').click()
-      cy.findByText('Publishing…').parent().should('be.disabled')
-      cy.findByText('Republish', { timeout: 60_000 })
+      cy.findByRole('button', { name: 'Republish' }).click()
+      cy.findByRole('button', { name: 'Publishing…' }).should('be.disabled')
+      cy.findByRole('button', { name: 'Republish', timeout: 60_000 })
       cy.get('img', { timeout: 60_000 })
         .should('have.attr', 'src')
         .and('match', /\/v\/1\//)
@@ -95,43 +92,38 @@ describe('Templates', function () {
       // custom tag
       const tagName = `${Date.now()}`
       cy.visit('/')
-      cy.findByText(name)
-        .parent()
-        .parent()
-        .within(() => cy.get('input[type="checkbox"]').first().check())
-      cy.get('.project-list-sidebar-scroll').within(() => {
-        cy.findAllByText('New tag').first().click()
-      })
+      cy.findByRole('checkbox', { name: `Select ${name}` }).check()
+      cy.findByRole('navigation', { name: 'Project categories and tags' })
+        .findByRole('button', { name: 'New tag' })
+        .click()
       cy.focused().type(tagName)
-      cy.findByText('Create').click()
-      cy.get('.project-list-sidebar-scroll').within(() => {
-        cy.findByText(tagName)
-          .parent()
-          .within(() => cy.get('.name').should('have.text', `${tagName} (1)`))
-      })
+      cy.findByRole('button', { name: 'Create' }).click()
+      cy.findByRole('navigation', {
+        name: 'Project categories and tags',
+      }).should('contain', `${tagName} (1)`)
 
       // Check listing
       cy.visit('/templates')
-      cy.findByText(tagName)
+      cy.findByRole('link', { name: tagName })
       cy.visit('/templates/all')
-      cy.findByText(name)
+      cy.findByRole('heading', { name })
       cy.visit(`/templates/${tagName}`)
-      cy.findByText(name)
+      cy.findByRole('heading', { name })
 
       // Unpublish via template page
       cy.get('@templateURL').then(url => cy.visit(`${url}`))
-      cy.findByText('Unpublish').click()
+      cy.findByRole('button', { name: 'Unpublish' }).click()
       cy.url().should('match', /\/templates$/)
       cy.get('@templateURL').then(url =>
         cy.visit(`${url}`, {
           failOnStatusCode: false,
         })
       )
-      cy.findByText('Not found')
+      cy.findByRole('heading', { name: 'Not found' })
       cy.visit('/templates/all')
-      cy.findByText(name).should('not.exist')
+      cy.findByRole('heading', { name }).should('not.exist')
       cy.visit(`/templates/${tagName}`)
-      cy.findByText(name).should('not.exist')
+      cy.findByRole('heading', { name }).should('not.exist')
 
       // Publish again
       cy.get('@templateProjectId').then(projectId =>
@@ -142,12 +134,12 @@ describe('Templates', function () {
       })
         .findByRole('button', { name: 'Menu' })
         .click()
-      cy.findByText('Manage Template').click()
-      cy.findByText('Publish').click()
-      cy.findByText('Unpublish', { timeout: 60_000 })
+      cy.findByRole('button', { name: 'Manage Template' }).click()
+      cy.findByRole('button', { name: 'Publish' }).click()
+      cy.findByRole('button', { name: 'Unpublish', timeout: 60_000 })
 
       // Should assign a new template id
-      cy.findByText('View it in the template gallery').click()
+      cy.findByRole('link', { name: 'View it in the template gallery' }).click()
       cy.url()
         .should('match', /\/templates\/[a-f0-9]{24}$/)
         .as('newTemplateURL')
@@ -161,31 +153,32 @@ describe('Templates', function () {
       // Open project from template
       login(REGULAR_USER)
       cy.visit('/templates')
-      cy.findByText(tagName).click()
-      cy.findByText(name).click()
-      cy.findByText('Open as Template').click()
-      cy.url().should('match', /\/project\/[a-f0-9]{24}$/)
-      cy.get('.project-name').should('contain.text', 'Your Paper') // might have (1) suffix
+      cy.findByRole('link', { name: tagName }).click()
+      cy.findByRole('link', { name }).click()
+      cy.findByRole('link', { name: 'Open as Template' }).click()
+      cy.findByRole('navigation', { name: 'Project actions' }).findByText(
+        /Your Paper/i
+      ) // might have (1) suffix
       cy.findByRole('navigation', {
         name: 'Project actions',
       })
         .findByRole('button', { name: 'Menu' })
         .click()
-      cy.findByText('Word Count') // wait for lazy loading
-      cy.findByText('Manage Template').should('not.exist')
+      cy.findByRole('button', { name: 'Word Count' }).click() // wait for lazy loading
+      cy.findByRole('button', { name: 'Manage Template' }).should('not.exist')
 
       // Check management as regular user
       cy.get('@newTemplateURL').then(url => cy.visit(`${url}`))
-      cy.findByText('Open as Template')
-      cy.findByText('Unpublish').should('not.exist')
-      cy.findByText('Republish').should('not.exist')
+      cy.findByRole('link', { name: 'Open as Template' })
+      cy.findByRole('button', { name: 'Unpublish' }).should('not.exist')
+      cy.findByRole('button', { name: 'Republish' }).should('not.exist')
 
       // Check management as admin user
       login(ADMIN_USER)
       cy.get('@newTemplateURL').then(url => cy.visit(`${url}`))
-      cy.findByText('Open as Template')
-      cy.findByText('Unpublish')
-      cy.findByText('Republish')
+      cy.findByRole('link', { name: 'Open as Template' })
+      cy.findByRole('button', { name: 'Unpublish' })
+      cy.findByRole('button', { name: 'Republish' })
       cy.get('@templateProjectId').then(projectId =>
         cy.visit(`/project/${projectId}`)
       )
@@ -194,8 +187,8 @@ describe('Templates', function () {
       })
         .findByRole('button', { name: 'Menu' })
         .click()
-      cy.findByText('Manage Template').click()
-      cy.findByText('Unpublish')
+      cy.findByRole('button', { name: 'Manage Template' }).click()
+      cy.findByRole('button', { name: 'Unpublish' })
 
       // Back to templates user
       login(TEMPLATES_USER)
@@ -209,19 +202,20 @@ describe('Templates', function () {
       })
         .findByRole('button', { name: 'Menu' })
         .click()
-      cy.findByText('Manage Template').click()
-      cy.findByText('Unpublish').click()
-      cy.findByText('Publish')
+      cy.findByRole('button', { name: 'Manage Template' }).click()
+      cy.findByRole('button', { name: 'Unpublish' }).click()
+      cy.findByRole('button', { name: 'Publish' })
       cy.visit('/templates/all')
-      cy.findByText(name).should('not.exist')
+      cy.findByRole('link', { name }).should('not.exist')
 
       // check for template links, after creating the first project
       cy.visit('/')
       cy.findAllByRole('button', { name: NEW_PROJECT_BUTTON_MATCHER }).click()
-      cy.findAllByText('All Templates')
-        .first()
-        .parent()
-        .should('have.attr', 'href', '/templates/all')
+      cy.findByRole('menuitem', { name: /All Templates/ }).should(
+        'have.attr',
+        'href',
+        '/templates/all'
+      )
     })
   })
 
@@ -237,25 +231,27 @@ describe('Templates', function () {
       })
         .findByRole('button', { name: 'Menu' })
         .click()
-      cy.findByText('Word Count') // wait for lazy loading
-      cy.findByText('Manage Template').should('not.exist')
+      cy.findByRole('button', { name: 'Word Count' }) // wait for lazy loading
+      cy.findByRole('button', { name: 'Manage Template' }).should('not.exist')
 
       cy.visit('/templates', { failOnStatusCode: false })
-      cy.findByText('Not found')
+      cy.findByRole('heading', { name: 'Not found' })
       cy.visit('/templates/all', { failOnStatusCode: false })
-      cy.findByText('Not found')
+      cy.findByRole('heading', { name: 'Not found' })
 
       // check for template links, after creating the first project
       cy.visit('/')
       cy.findAllByRole('button', { name: NEW_PROJECT_BUTTON_MATCHER }).click()
-      cy.findAllByText('All Templates').should('not.exist')
+      cy.findByRole('menuitem', { name: /All Templates/ }).should('not.exist')
     })
 
     it('should not show templates link on welcome page', function () {
       login(WITHOUT_PROJECTS_USER)
       cy.visit('/')
-      cy.findByText(NEW_PROJECT_BUTTON_MATCHER) // wait for lazy loading
-      cy.findByText(LABEL_BROWSE_TEMPLATES).should('not.exist')
+      cy.findByRole('button', { name: NEW_PROJECT_BUTTON_MATCHER }) // wait for lazy loading
+      cy.findByRole('link', { name: LABEL_BROWSE_TEMPLATES }).should(
+        'not.exist'
+      )
     })
   }
 

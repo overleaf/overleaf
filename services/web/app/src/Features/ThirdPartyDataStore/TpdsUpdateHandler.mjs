@@ -107,7 +107,11 @@ async function findProjectByIdWithRWAccess(userId, projectId) {
   for (const projects of [allProjects.owned, allProjects.readAndWrite]) {
     for (const project of projects) {
       if (project._id.toString() === projectId) {
-        return project
+        if (ProjectHelper.isArchivedOrTrashed(project, userId)) {
+          return null
+        } else {
+          return project
+        }
       }
     }
   }

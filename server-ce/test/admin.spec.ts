@@ -16,12 +16,10 @@ describe('admin panel', function () {
       const user = `${uuid()}@example.com`
       cy.findByLabelText('Emails to register new users').type(user + '{enter}')
 
-      cy.get('td')
-        .contains(/\/user\/activate/)
-        .then($td => {
-          const url = $td.text().trim()
-          activateUser(url)
-        })
+      cy.findByRole('cell', { name: /\/user\/activate/ }).then($td => {
+        const url = $td.text().trim()
+        activateUser(url)
+      })
     })
 
     it('via GUI and email', function () {
@@ -29,17 +27,15 @@ describe('admin panel', function () {
       cy.findByLabelText('Emails to register new users').type(user + '{enter}')
 
       let url: string
-      cy.get('td')
-        .contains(/\/user\/activate/)
-        .then($td => {
-          url = $td.text().trim()
-        })
+      cy.findByRole('cell', { name: /\/user\/activate/ }).then($td => {
+        url = $td.text().trim()
+      })
 
       cy.then(() => {
         openEmail(
           'Activate your E2E test Account',
           (frame, { url }) => {
-            frame.contains('Set password').then(el => {
+            frame.contains('a', 'Set password').then(el => {
               expect(el.attr('href')!).to.equal(url)
             })
           },
@@ -69,7 +65,7 @@ describe('admin panel', function () {
         openEmail(
           'Activate your E2E test Account',
           (frame, { url }) => {
-            frame.contains('Set password').then(el => {
+            frame.contains('a', 'Set password').then(el => {
               expect(el.attr('href')!).to.equal(url)
             })
           },
@@ -145,10 +141,10 @@ describe('admin panel', function () {
         const menuitems = ['Manage Site', 'Manage Users', 'Project URL Lookup']
         menuitems.forEach(name => {
           cy.findByRole('menuitem', { name: 'Admin' }).click()
-          cy.get('ul[role="menu"]')
+          cy.findByRole('menu')
             .findAllByRole('menuitem')
             .should('have.length', menuitems.length)
-          cy.get('ul[role="menu"]').findByRole('menuitem', { name }).click()
+          cy.findByRole('menu').findByRole('menuitem', { name }).click()
         })
       })
     })
@@ -206,7 +202,7 @@ describe('admin panel', function () {
       })
 
       it('license usage tab', function () {
-        cy.get('a').contains('License Usage').click()
+        cy.findByRole('tab', { name: 'License Usage' }).click()
         cy.findByText(
           'An active user is one who has opened a project in this Server Pro instance in the last 12 months.'
         )
@@ -214,7 +210,7 @@ describe('admin panel', function () {
 
       describe('create users', function () {
         beforeEach(function () {
-          cy.get('a').contains('New User').click()
+          cy.findByRole('link', { name: 'New User' }).click()
         })
         registrationTests()
       })
@@ -263,8 +259,8 @@ describe('admin panel', function () {
 
         it('displays required sections', function () {
           // not exhaustive list, checks the tab content is rendered
-          cy.findByText('Profile')
-          cy.findByText('Editor Settings')
+          cy.findByRole('heading', { name: 'Profile' })
+          cy.findByRole('heading', { name: 'Editor Settings' })
         })
 
         it('should not display SaaS-only sections', function () {
@@ -290,9 +286,12 @@ describe('admin panel', function () {
         cy.findByRole('tablist').within(() => {
           cy.findByRole('tab', { name: 'Projects' }).click()
         })
-        cy.get(`a[href="/admin/project/${testProjectId}"]`)
-          .should('contain.text', 'Project information')
-          .click()
+        cy.findByRole('link', { name: testProjectName })
+          .parent()
+          .parent()
+          .within(() => {
+            cy.findByRole('link', { name: 'Project information' }).click()
+          })
 
         cy.findByRole('button', { name: 'Transfer Ownership' }).click()
         cy.findByRole('dialog').within(() => {
@@ -319,10 +318,12 @@ describe('admin panel', function () {
         cy.findByRole('tablist').within(() => {
           cy.findByRole('tab', { name: 'Projects' }).click()
         })
-        cy.get(`a[href="/admin/project/${testProjectId}"]`).should(
-          'contain.text',
-          'Project information'
-        )
+        cy.findByRole('link', { name: testProjectName })
+          .parent()
+          .parent()
+          .within(() => {
+            cy.findByRole('link', { name: 'Project information' }).click()
+          })
       })
     })
 

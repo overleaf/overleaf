@@ -30,6 +30,7 @@ import EditorTourRailTooltip from '../editor-tour/editor-tour-rail-tooltip'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import EditorTourThemeTooltip from '../editor-tour/editor-tour-theme-tooltip'
 import EditorTourSwitchBackTooltip from '../editor-tour/editor-tour-switch-back-tooltip'
+import { shouldIncludeRailTab } from '../../utils/rail-utils'
 
 const moduleRailEntries = (
   importOverleafModules('railEntries') as {
@@ -174,7 +175,7 @@ export const RailLayout = () => {
 
   useEffect(() => {
     const validTabKeys = railTabs
-      .filter(tab => (typeof tab.hide === 'function' ? !tab.hide() : !tab.hide))
+      .filter(shouldIncludeRailTab)
       .map(tab => tab.key)
     if (!validTabKeys.includes(selectedTab) && isOpen) {
       // If the selected tab is no longer valid (e.g. due to permissions changes),
@@ -224,9 +225,7 @@ export const RailLayout = () => {
         <Nav activeKey={selectedTab} className="ide-rail-tabs-nav">
           <div className="ide-rail-tabs-wrapper" ref={tabWrapperRef}>
             {tabsInRail
-              .filter(({ hide }) =>
-                typeof hide === 'function' ? !hide() : !hide
-              )
+              .filter(shouldIncludeRailTab)
               .map(({ icon, key, indicator, title, disabled, ref }) => (
                 <RailTab
                   open={isOpen && selectedTab === key}
