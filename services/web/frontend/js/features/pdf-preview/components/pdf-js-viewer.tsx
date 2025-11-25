@@ -238,6 +238,7 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
           window.clearTimeout(storePositionTimer)
         }
         storePosition.cancel()
+        setPosition(pdfJsWrapper.currentPosition)
       }
     }
   }, [setPosition, pdfJsWrapper, initialised])
