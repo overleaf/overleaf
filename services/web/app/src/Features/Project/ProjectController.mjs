@@ -454,6 +454,7 @@ const _ProjectController = {
       'chat-edit-delete',
       'ai-workbench',
       'compile-timeout-target-plans',
+      'writefull-keywords-generator',
       'writefull-figure-generator',
     ].filter(Boolean)
 
