@@ -17,12 +17,14 @@ module.exports = merge(
       // Minify JS (with Terser) and CSS (with cssnano)
       minimizer: [
         new TerserPlugin({
+          parallel: 2, // Limit parallel workers to reduce memory usage
           terserOptions: {
             keep_classnames: /(Error|Exception)$/,
             keep_fnames: /(Error|Exception)$/,
           },
         }),
         new CssMinimizerPlugin({
+          parallel: 2, // Limit parallel workers to reduce memory usage
           minimizerOptions: {
             // disable mergeLonghand to avoid a cssnano bug https://github.com/cssnano/cssnano/issues/864
             preset: ['default', { mergeLonghand: false }],
