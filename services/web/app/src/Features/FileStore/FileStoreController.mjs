@@ -7,7 +7,7 @@ import Metrics from '@overleaf/metrics'
 import ProjectLocator from '../Project/ProjectLocator.mjs'
 import HistoryManager from '../History/HistoryManager.mjs'
 import Errors from '../Errors/Errors.js'
-import { preparePlainTextResponse } from '../../infrastructure/Response.js'
+import { preparePlainTextResponse } from '../../infrastructure/Response.mjs'
 
 async function getFile(req, res) {
   const projectId = req.params.Project_id

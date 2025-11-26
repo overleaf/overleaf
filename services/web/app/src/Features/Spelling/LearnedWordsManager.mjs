@@ -1,4 +1,4 @@
-import mongodb from '../../infrastructure/mongodb.js'
+import mongodb from '../../infrastructure/mongodb.mjs'
 import { callbackify } from 'node:util'
 import Settings from '@overleaf/settings'
 import Errors from '../Errors/Errors.js'

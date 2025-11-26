@@ -5,7 +5,7 @@ import minimist from 'minimist'
 import {
   db,
   READ_PREFERENCE_SECONDARY,
-} from '../../app/src/infrastructure/mongodb.js'
+} from '../../app/src/infrastructure/mongodb.mjs'
 
 /**
  * @import { ObjectId } from 'mongodb-legacy'

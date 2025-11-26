@@ -7,7 +7,7 @@ import fs from 'node:fs'
 import * as csv from 'csv/sync'
 import minimist from 'minimist'
 import UserGetter from '../app/src/Features/User/UserGetter.mjs'
-import { db } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.mjs'
 import _ from 'lodash'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 

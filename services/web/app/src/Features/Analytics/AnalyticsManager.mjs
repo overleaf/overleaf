@@ -1,7 +1,7 @@
 import SessionManager from '../Authentication/SessionManager.mjs'
 import UserAnalyticsIdCache from './UserAnalyticsIdCache.mjs'
 import Settings from '@overleaf/settings'
-import Metrics from '../../infrastructure/Metrics.js'
+import Metrics from '../../infrastructure/Metrics.mjs'
 import Queues from '../../infrastructure/Queues.mjs'
 import crypto, { createHash } from 'node:crypto'
 import _ from 'lodash'

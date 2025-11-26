@@ -1,21 +1,19 @@
-/* eslint-disable no-template-curly-in-string */
+import { vi, expect } from 'vitest'
 
-const { expect } = require('chai')
-const pug = require('pug')
-const modulePath = '../../../../app/src/infrastructure/Views.js'
-const SandboxedModule = require('sandboxed-module')
+import pug from 'pug'
+const modulePath = '../../../../app/src/infrastructure/Views.mjs'
 
 describe('Views', function () {
-  beforeEach(function () {
-    this.Views = SandboxedModule.require(modulePath, {
-      requires: {
-        '@overleaf/settings': (this.settings = {
-          viewIncludes: {
-            someInclude: 'path/to/_include.pug',
-          },
-        }),
-      },
-    })
+  beforeEach(async function (ctx) {
+    vi.doMock('@overleaf/settings', () => ({
+      default: (ctx.settings = {
+        viewIncludes: {
+          someInclude: 'path/to/_include.pug',
+        },
+      }),
+    }))
+
+    ctx.Views = (await import(modulePath)).default
   })
 
   describe('_expectMetaFor', function () {
@@ -52,8 +50,8 @@ describe('Views', function () {
       },
     ]
     for (const { name, filename, firstLine, expectMeta } of cases) {
-      it(name, function () {
-        expect(this.Views._expectMetaFor(filename, firstLine)).to.equal(
+      it(name, function (ctx) {
+        expect(ctx.Views._expectMetaFor(filename, firstLine)).to.equal(
           expectMeta
         )
       })
@@ -100,7 +98,9 @@ describe('Views', function () {
       },
       {
         name: 'computed code',
+        // eslint-disable-next-line no-template-curly-in-string
         src: 'meta(name=`ol-prefix-${foo}` content=1)',
+        // eslint-disable-next-line no-template-curly-in-string
         found: ['ol-prefix-${foo}'],
         duplicates: [],
       },
@@ -118,9 +118,9 @@ describe('Views', function () {
       },
     ]
     for (const { name, compiled, src, found, duplicates } of cases) {
-      it(name, function () {
-        const res = this.Views._findAllMetaTags(
-          compiled || pug.compileClient(src, this.Views.PUG_COMPILE_ARGUMENTS)
+      it(name, function (ctx) {
+        const res = ctx.Views._findAllMetaTags(
+          compiled || pug.compileClient(src, ctx.Views.PUG_COMPILE_ARGUMENTS)
         )
         expect(res).to.deep.equal({ found, duplicates })
       })

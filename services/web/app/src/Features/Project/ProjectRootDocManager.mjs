@@ -23,7 +23,7 @@ import globby from 'globby'
 import _ from 'lodash'
 import { promisifyAll } from '@overleaf/promise-utils'
 import logger from '@overleaf/logger'
-import { BackgroundTaskTracker } from '../../infrastructure/GracefulShutdown.js'
+import { BackgroundTaskTracker } from '../../infrastructure/GracefulShutdown.mjs'
 
 const rootDocResets = new BackgroundTaskTracker('root doc resets')
 const ProjectRootDocManager = {

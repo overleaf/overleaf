@@ -6,7 +6,7 @@ import TpdsUpdateSender from '../ThirdPartyDataStore/TpdsUpdateSender.mjs'
 import TpdsProjectFlusher from '../ThirdPartyDataStore/TpdsProjectFlusher.mjs'
 import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
 import SystemMessageManager from '../SystemMessages/SystemMessageManager.mjs'
-import Modules from '../../infrastructure/Modules.js'
+import Modules from '../../infrastructure/Modules.mjs'
 
 const AdminController = {
   _sendDisconnectAllUsersMessage: delay => {

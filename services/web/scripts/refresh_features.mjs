@@ -1,4 +1,4 @@
-import { db } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.mjs'
 import minimist from 'minimist'
 import _ from 'lodash'
 import async from 'async'

@@ -1,4 +1,4 @@
-import mongoose from '../infrastructure/Mongoose.js'
+import mongoose from '../infrastructure/Mongoose.mjs'
 import { SubscriptionSchema } from './Subscription.mjs'
 
 const { Schema } = mongoose

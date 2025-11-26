@@ -1,7 +1,7 @@
 import SessionManager from '../Authentication/SessionManager.mjs'
 import ContactManager from './ContactManager.mjs'
 import UserGetter from '../User/UserGetter.mjs'
-import Modules from '../../infrastructure/Modules.js'
+import Modules from '../../infrastructure/Modules.mjs'
 import { expressify } from '@overleaf/promise-utils'
 
 function _formatContact(contact) {

@@ -1,7 +1,7 @@
 import {
   db,
   READ_PREFERENCE_SECONDARY,
-} from '../app/src/infrastructure/mongodb.js'
+} from '../app/src/infrastructure/mongodb.mjs'
 import UserSessionsManager from '../app/src/Features/User/UserSessionsManager.mjs'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 

@@ -1,6 +1,6 @@
 import { callbackify } from 'node:util'
 import TeamInvitesHandler from '../Subscription/TeamInvitesHandler.mjs'
-import { db, READ_PREFERENCE_SECONDARY } from '../../infrastructure/mongodb.js'
+import { db, READ_PREFERENCE_SECONDARY } from '../../infrastructure/mongodb.mjs'
 
 async function populateTeamInvites(user) {
   return await TeamInvitesHandler.promises.createTeamInvitesForLegacyInvitedEmail(

@@ -1,6 +1,6 @@
 import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.mjs'
 import AuthenticationController from '../Authentication/AuthenticationController.mjs'
-import { RateLimiter } from '../../infrastructure/RateLimiter.js'
+import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'
 import LinkedFilesController from './LinkedFilesController.mjs'
 

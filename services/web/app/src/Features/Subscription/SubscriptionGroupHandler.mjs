@@ -10,7 +10,7 @@ import { User } from '../../models/User.mjs'
 import PlansLocator from './PlansLocator.mjs'
 import TeamInvitesHandler from './TeamInvitesHandler.mjs'
 import GroupPlansData from './GroupPlansData.mjs'
-import Modules from '../../infrastructure/Modules.js'
+import Modules from '../../infrastructure/Modules.mjs'
 import PaymentProviderEntities from './PaymentProviderEntities.mjs'
 import {
   ManuallyCollectedError,

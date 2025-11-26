@@ -1,5 +1,5 @@
 import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
-import { db } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.mjs'
 
 const oldImage = process.argv[2]
 const newImage = process.argv[3]

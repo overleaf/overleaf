@@ -1,7 +1,7 @@
 // Metrics must be initialized before importing anything else
 import { metricsModuleImportStartTime } from '@overleaf/metrics/initialize.js'
 
-import Modules from './app/src/infrastructure/Modules.js'
+import Modules from './app/src/infrastructure/Modules.mjs'
 import metrics from '@overleaf/metrics'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
@@ -13,10 +13,10 @@ import https from 'node:https'
 import Serializers from './app/src/infrastructure/LoggerSerializers.mjs'
 import Server from './app/src/infrastructure/Server.mjs'
 import QueueWorkers from './app/src/infrastructure/QueueWorkers.mjs'
-import mongodb from './app/src/infrastructure/mongodb.js'
-import mongoose from './app/src/infrastructure/Mongoose.js'
-import { triggerGracefulShutdown } from './app/src/infrastructure/GracefulShutdown.js'
-import FileWriter from './app/src/infrastructure/FileWriter.js'
+import mongodb from './app/src/infrastructure/mongodb.mjs'
+import mongoose from './app/src/infrastructure/Mongoose.mjs'
+import { triggerGracefulShutdown } from './app/src/infrastructure/GracefulShutdown.mjs'
+import FileWriter from './app/src/infrastructure/FileWriter.mjs'
 import { fileURLToPath } from 'node:url'
 
 metrics.gauge(

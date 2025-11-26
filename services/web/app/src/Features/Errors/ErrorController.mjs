@@ -3,7 +3,7 @@ import Errors from './Errors.js'
 import SessionManager from '../Authentication/SessionManager.mjs'
 import SamlLogHandler from '../SamlLog/SamlLogHandler.mjs'
 import HttpErrorHandler from './HttpErrorHandler.mjs'
-import { plainTextResponse } from '../../infrastructure/Response.js'
+import { plainTextResponse } from '../../infrastructure/Response.mjs'
 import { expressifyErrorHandler } from '@overleaf/promise-utils'
 
 function notFound(req, res) {

@@ -1,4 +1,4 @@
-import mongoose from '../infrastructure/Mongoose.js'
+import mongoose from '../infrastructure/Mongoose.mjs'
 const { Schema } = mongoose
 
 export const GlobalMetricSchema = new Schema(

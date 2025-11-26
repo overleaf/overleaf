@@ -1,6 +1,6 @@
 import minimist from 'minimist'
-import { db } from '../../../app/src/infrastructure/mongodb.js'
 import { fileURLToPath } from 'url'
+import { db } from '../../../app/src/infrastructure/mongodb.mjs'
 
 const filename = fileURLToPath(import.meta.url)
 

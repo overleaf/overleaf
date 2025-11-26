@@ -1,5 +1,5 @@
 // @ts-check
-const { AsyncLocalStorage } = require('node:async_hooks')
+import { AsyncLocalStorage } from 'node:async_hooks'
 
 /**
  * @typedef {Object} RequestContext
@@ -31,7 +31,7 @@ function removeItem(key) {
   }
 }
 
-module.exports = {
+export default {
   middleware,
   storage: asyncLocalStorage,
   removeItem,

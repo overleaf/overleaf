@@ -6,7 +6,7 @@ import {
   db,
   ObjectId,
   READ_PREFERENCE_SECONDARY,
-} from '../app/src/infrastructure/mongodb.js'
+} from '../app/src/infrastructure/mongodb.mjs'
 
 /**
  * This script extracts user emails given a list of newline separated IDs

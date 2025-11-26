@@ -5,8 +5,8 @@ import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mj
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import ProjectUpdateHandler from '../Project/ProjectUpdateHandler.mjs'
 import { Project } from '../../models/Project.mjs'
-import Modules from '../../infrastructure/Modules.js'
-import { READ_PREFERENCE_SECONDARY } from '../../infrastructure/mongodb.js'
+import Modules from '../../infrastructure/Modules.mjs'
+import { READ_PREFERENCE_SECONDARY } from '../../infrastructure/mongodb.mjs'
 import { callbackifyAll } from '@overleaf/promise-utils'
 import Metrics from '@overleaf/metrics'
 

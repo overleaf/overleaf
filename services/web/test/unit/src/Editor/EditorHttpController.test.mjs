@@ -228,7 +228,7 @@ describe('EditorHttpController', function () {
         default: ctx.SessionManager,
       })
     )
-    vi.doMock('../../../../app/src/infrastructure/FileWriter.js', () => ({
+    vi.doMock('../../../../app/src/infrastructure/FileWriter.mjs', () => ({
       default: ctx.FileWriter,
     }))
     vi.doMock(

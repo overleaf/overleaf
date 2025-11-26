@@ -1,7 +1,7 @@
 import AbstractMockApi from './AbstractMockApi.mjs'
 import _ from 'lodash'
 import mongodb from 'mongodb-legacy'
-import { plainTextResponse } from '../../../../app/src/infrastructure/Response.js'
+import { plainTextResponse } from '../../../../app/src/infrastructure/Response.mjs'
 
 const { ObjectId } = mongodb
 

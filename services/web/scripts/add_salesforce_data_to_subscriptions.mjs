@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import minimist from 'minimist'
 import { parse } from 'csv'
 import Stream from 'node:stream/promises'
-import { ObjectId } from '../app/src/infrastructure/mongodb.js'
+import { ObjectId } from '../app/src/infrastructure/mongodb.mjs'
 import { Subscription } from '../app/src/models/Subscription.mjs'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 

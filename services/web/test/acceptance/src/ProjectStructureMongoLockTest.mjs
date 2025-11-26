@@ -12,7 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-import LockManager from '../../../app/src/infrastructure/LockManager.js'
+import LockManager from '../../../app/src/infrastructure/LockManager.mjs'
 
 import ProjectCreationHandler from '../../../app/src/Features/Project/ProjectCreationHandler.mjs'
 import ProjectGetter from '../../../app/src/Features/Project/ProjectGetter.mjs'

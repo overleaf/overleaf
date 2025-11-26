@@ -16,10 +16,10 @@ import AsyncFormHelper from '../Helpers/AsyncFormHelper.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import UserPrimaryEmailCheckHandler from '../User/UserPrimaryEmailCheckHandler.mjs'
 import UserAuditLogHandler from './UserAuditLogHandler.mjs'
-import { RateLimiter } from '../../infrastructure/RateLimiter.js'
+import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
 import Features from '../../infrastructure/Features.mjs'
 import tsscmp from 'tsscmp'
-import Modules from '../../infrastructure/Modules.js'
+import Modules from '../../infrastructure/Modules.mjs'
 
 const AUDIT_LOG_TOKEN_PREFIX_LENGTH = 10
 

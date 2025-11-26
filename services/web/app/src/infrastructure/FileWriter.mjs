@@ -5,18 +5,19 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const fs = require('fs')
-const OError = require('@overleaf/o-error')
-const logger = require('@overleaf/logger')
-const crypto = require('crypto')
-const _ = require('lodash')
-const Settings = require('@overleaf/settings')
-const request = require('request')
-const { Transform, pipeline } = require('stream')
-const { FileTooLargeError } = require('../Features/Errors/Errors')
-const { promisifyAll } = require('@overleaf/promise-utils')
+import fs from 'node:fs'
 
-class SizeLimitedStream extends Transform {
+import OError from '@overleaf/o-error'
+import logger from '@overleaf/logger'
+import crypto from 'node:crypto'
+import _ from 'lodash'
+import Settings from '@overleaf/settings'
+import request from 'request'
+import { Transform, pipeline } from 'node:stream'
+import { FileTooLargeError } from '../Features/Errors/Errors.js'
+import { promisifyAll } from '@overleaf/promise-utils'
+
+export class SizeLimitedStream extends Transform {
   constructor(options) {
     options.autoDestroy = true
     super(options)
@@ -179,8 +180,8 @@ const FileWriter = {
   },
 }
 
-module.exports = FileWriter
-module.exports.promises = promisifyAll(FileWriter, {
+FileWriter.promises = promisifyAll(FileWriter, {
   without: ['ensureDumpFolderExists'],
 })
-module.exports.SizeLimitedStream = SizeLimitedStream
+
+export default FileWriter

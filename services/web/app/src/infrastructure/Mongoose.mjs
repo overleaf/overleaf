@@ -1,8 +1,8 @@
-const mongoose = require('mongoose')
-const Settings = require('@overleaf/settings')
-const Metrics = require('@overleaf/metrics')
-const logger = require('@overleaf/logger')
-const { addConnectionDrainer } = require('./GracefulShutdown')
+import mongoose from 'mongoose'
+import Settings from '@overleaf/settings'
+import Metrics from '@overleaf/metrics'
+import logger from '@overleaf/logger'
+import { addConnectionDrainer } from './GracefulShutdown.mjs'
 
 mongoose.set('autoIndex', false)
 mongoose.set('strictQuery', false)
@@ -54,4 +54,4 @@ mongoose.Promise = global.Promise
 
 mongoose.connectionPromise = connectionPromise
 
-module.exports = mongoose
+export default mongoose

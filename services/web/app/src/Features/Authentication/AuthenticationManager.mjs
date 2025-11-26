@@ -1,6 +1,6 @@
 import Settings from '@overleaf/settings'
 import { User } from '../../models/User.mjs'
-import { db, ObjectId } from '../../infrastructure/mongodb.js'
+import { db, ObjectId } from '../../infrastructure/mongodb.mjs'
 import bcrypt from 'bcrypt'
 import EmailHelper from '../Helpers/EmailHelper.mjs'
 

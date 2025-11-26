@@ -1,9 +1,9 @@
-const mongodb = require('mongodb-legacy')
-const OError = require('@overleaf/o-error')
-const Settings = require('@overleaf/settings')
-const MongoUtils = require('@overleaf/mongo-utils')
-const Mongoose = require('./Mongoose')
-const { addConnectionDrainer } = require('./GracefulShutdown')
+import mongodb from 'mongodb-legacy'
+import OError from '@overleaf/o-error'
+import Settings from '@overleaf/settings'
+import MongoUtils from '@overleaf/mongo-utils'
+import Mongoose from './Mongoose.mjs'
+import { addConnectionDrainer } from './GracefulShutdown.mjs'
 
 // Ensure Mongoose is using the same mongodb instance as the mongodb module,
 // otherwise we will get multiple versions of the ObjectId class. Mongoose
@@ -15,10 +15,11 @@ if (Mongoose.mongo.ObjectId !== mongodb.ObjectId) {
   )
 }
 
-const { ObjectId, ReadPreference } = mongodb
+export const { ObjectId } = mongodb
+const { ReadPreference } = mongodb
 
-const READ_PREFERENCE_PRIMARY = ReadPreference.primary.mode
-const READ_PREFERENCE_SECONDARY = Settings.mongo.hasSecondaries
+export const READ_PREFERENCE_PRIMARY = ReadPreference.primary.mode
+export const READ_PREFERENCE_SECONDARY = Settings.mongo.hasSecondaries
   ? ReadPreference.secondary.mode
   : ReadPreference.secondaryPreferred.mode
 
@@ -32,7 +33,7 @@ addConnectionDrainer('mongodb', async () => {
 })
 
 const internalDb = mongoClient.db()
-const db = {
+export const db = {
   contacts: internalDb.collection('contacts'),
   deletedProjects: internalDb.collection('deletedProjects'),
   deletedSubscriptions: internalDb.collection('deletedSubscriptions'),
@@ -85,36 +86,36 @@ const db = {
   scriptLogs: internalDb.collection('scriptLogs'),
 }
 
-const connectionPromise = mongoClient.connect()
+export const connectionPromise = mongoClient.connect()
 
-async function getCollectionNames() {
+export async function getCollectionNames() {
   const internalDb = mongoClient.db()
 
   const collections = await internalDb.collections()
   return collections.map(collection => collection.collectionName)
 }
 
-async function cleanupTestDatabase() {
+export async function cleanupTestDatabase() {
   await MongoUtils.cleanupTestDatabase(mongoClient)
 }
 
-async function dropTestDatabase() {
+export async function dropTestDatabase() {
   await MongoUtils.dropTestDatabase(mongoClient)
 }
 
 /**
  * WARNING: Consider using a pre-populated collection from `db` to avoid typos!
  */
-async function getCollectionInternal(name) {
+export async function getCollectionInternal(name) {
   const internalDb = mongoClient.db()
   return internalDb.collection(name)
 }
 
-async function waitForDb() {
+export async function waitForDb() {
   await connectionPromise
 }
 
-module.exports = {
+export default {
   db,
   ObjectId,
   connectionPromise,

@@ -1,12 +1,12 @@
 import { expect } from 'vitest'
 import mongodb from 'mongodb-legacy'
 import CooldownManager from '../../../../app/src/Features/Cooldown/CooldownManager.mjs'
-import { cleanupTestRedis } from '../../../../app/src/infrastructure/RedisWrapper.js'
+import RedisWrapper from '../../../../app/src/infrastructure/RedisWrapper.mjs'
 
 const { ObjectId } = mongodb
 
 describe('CooldownManager', function () {
-  beforeEach(cleanupTestRedis)
+  beforeEach(RedisWrapper.cleanupTestRedis)
 
   beforeEach(function (ctx) {
     ctx.project1Id = new ObjectId().toString()

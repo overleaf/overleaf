@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { db } from '../../../app/src/infrastructure/mongodb.js'
+import { db } from '../../../app/src/infrastructure/mongodb.mjs'
 import { exec } from 'node:child_process'
 
 describe('ConvertEmailConfirmedAtToDates', function () {

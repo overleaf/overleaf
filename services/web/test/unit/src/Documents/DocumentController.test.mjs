@@ -121,7 +121,7 @@ describe('DocumentController', function () {
       default: ctx.ChatApiHandler,
     }))
 
-    vi.doMock('../../../../app/src/infrastructure/Modules.js', () => ({
+    vi.doMock('../../../../app/src/infrastructure/Modules.mjs', () => ({
       default: ctx.Modules,
     }))
 

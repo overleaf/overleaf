@@ -5,7 +5,7 @@ import Settings from '@overleaf/settings'
 import nodemailer from 'nodemailer'
 import aws from '@aws-sdk/client-ses'
 import OError from '@overleaf/o-error'
-import { RateLimiter } from '../../infrastructure/RateLimiter.js'
+import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
 import _ from 'lodash'
 
 const EMAIL_SETTINGS = Settings.email || {}

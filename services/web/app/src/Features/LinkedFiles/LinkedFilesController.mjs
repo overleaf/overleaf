@@ -20,9 +20,9 @@ import {
   OutputFileFetchFailedError,
   FileTooLargeError,
 } from '../Errors/Errors.js'
-import Modules from '../../infrastructure/Modules.js'
-import { plainTextResponse } from '../../infrastructure/Response.js'
-import { z, zz, validateReq } from '../../infrastructure/Validation.js'
+import Modules from '../../infrastructure/Modules.mjs'
+import { plainTextResponse } from '../../infrastructure/Response.mjs'
+import { z, zz, validateReq } from '../../infrastructure/Validation.mjs'
 import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import ProjectOutputFileAgent from './ProjectOutputFileAgent.mjs'

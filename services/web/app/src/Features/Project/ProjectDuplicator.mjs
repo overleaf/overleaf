@@ -20,7 +20,7 @@ import TpdsProjectFlusher from '../ThirdPartyDataStore/TpdsProjectFlusher.mjs'
 import _ from 'lodash'
 import TagsHandler from '../Tags/TagsHandler.mjs'
 import ClsiCacheManager from '../Compile/ClsiCacheManager.mjs'
-import Modules from '../../infrastructure/Modules.js'
+import Modules from '../../infrastructure/Modules.mjs'
 
 export default {
   duplicate: callbackify(duplicate),

@@ -1,6 +1,6 @@
 //  @ts-check
 
-const Settings = require('@overleaf/settings')
+import Settings from '@overleaf/settings'
 
 /**
  * @import { HttpPermissionsPolicy } from './types'
@@ -85,4 +85,4 @@ class HttpPermissionsPolicyMiddleware {
   }
 }
 
-module.exports = HttpPermissionsPolicyMiddleware
+export default HttpPermissionsPolicyMiddleware

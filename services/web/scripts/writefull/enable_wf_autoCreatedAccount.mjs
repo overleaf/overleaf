@@ -1,4 +1,4 @@
-import { db } from '../../app/src/infrastructure/mongodb.js'
+import { db } from '../../app/src/infrastructure/mongodb.mjs'
 import mongodb from 'mongodb-legacy'
 import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'

@@ -1,4 +1,4 @@
-import { db, ObjectId } from '../../../../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../../../../app/src/infrastructure/mongodb.mjs'
 import AbstractMockApi from './AbstractMockApi.mjs'
 
 class MockDocstoreApi extends AbstractMockApi {

@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process'
 import { expect } from 'chai'
-import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.mjs'
 
 describe('BatchedUpdateTests', function () {
   it('can handle non linear insert order', async function () {
@@ -24,7 +24,7 @@ describe('BatchedUpdateTests', function () {
     spawnSync(process.argv0, [
       '--input-type=module',
       '-e',
-      'import { batchedUpdateWithResultHandling } from "@overleaf/mongo-utils/batchedUpdate.js"; import { db } from "./app/src/infrastructure/mongodb.js"; batchedUpdateWithResultHandling(db.systemmessages, { content: { $ne: "42" }}, { $set: { content: "42" } })',
+      'import { batchedUpdateWithResultHandling } from "@overleaf/mongo-utils/batchedUpdate.js"; import { db } from "./app/src/infrastructure/mongodb.mjs"; batchedUpdateWithResultHandling(db.systemmessages, { content: { $ne: "42" }}, { $set: { content: "42" } })',
     ])
 
     await expect(
@@ -56,7 +56,7 @@ describe('BatchedUpdateTests', function () {
       [
         '--input-type=module',
         '-e',
-        'import { batchedUpdateWithResultHandling } from "@overleaf/mongo-utils/batchedUpdate.js"; import { db } from "./app/src/infrastructure/mongodb.js"; batchedUpdateWithResultHandling(db.systemmessages, { content: { $ne: "42" }}, { $set: { content: "42" } })',
+        'import { batchedUpdateWithResultHandling } from "@overleaf/mongo-utils/batchedUpdate.js"; import { db } from "./app/src/infrastructure/mongodb.mjs"; batchedUpdateWithResultHandling(db.systemmessages, { content: { $ne: "42" }}, { $set: { content: "42" } })',
       ],
       { encoding: 'utf-8' }
     )
@@ -93,7 +93,7 @@ describe('BatchedUpdateTests', function () {
       [
         '--input-type=module',
         '-e',
-        'import { batchedUpdateWithResultHandling } from "@overleaf/mongo-utils/batchedUpdate.js"; import { db } from "./app/src/infrastructure/mongodb.js"; batchedUpdateWithResultHandling(db.systemmessages, { content: { $ne: "42" }}, { $set: { content: "42" } })',
+        'import { batchedUpdateWithResultHandling } from "@overleaf/mongo-utils/batchedUpdate.js"; import { db } from "./app/src/infrastructure/mongodb.mjs"; batchedUpdateWithResultHandling(db.systemmessages, { content: { $ne: "42" }}, { $set: { content: "42" } })',
       ],
       {
         encoding: 'utf-8',
@@ -141,7 +141,7 @@ describe('BatchedUpdateTests', function () {
       [
         '--input-type=module',
         '-e',
-        'import { batchedUpdateWithResultHandling } from "@overleaf/mongo-utils/batchedUpdate.js"; import { db } from "./app/src/infrastructure/mongodb.js"; batchedUpdateWithResultHandling(db.systemmessages, { content: { $ne: "42" }}, { $set: { content: "42" } })',
+        'import { batchedUpdateWithResultHandling } from "@overleaf/mongo-utils/batchedUpdate.js"; import { db } from "./app/src/infrastructure/mongodb.mjs"; batchedUpdateWithResultHandling(db.systemmessages, { content: { $ne: "42" }}, { $set: { content: "42" } })',
       ],
       {
         env: {

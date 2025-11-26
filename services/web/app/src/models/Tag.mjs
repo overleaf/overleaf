@@ -1,4 +1,4 @@
-import mongoose from '../infrastructure/Mongoose.js'
+import mongoose from '../infrastructure/Mongoose.mjs'
 const { Schema } = mongoose
 
 const COLOR_REGEX = /^#[a-fA-F0-9]{6}$/

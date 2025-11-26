@@ -1,7 +1,7 @@
 // @ts-check
 import { ForbiddenError, UserNotFoundError } from '../Errors/Errors.js'
 import PermissionsManager from './PermissionsManager.mjs'
-import Modules from '../../infrastructure/Modules.js'
+import Modules from '../../infrastructure/Modules.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import Features from '../../infrastructure/Features.mjs'
 

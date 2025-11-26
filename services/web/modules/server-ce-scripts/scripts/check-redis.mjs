@@ -1,4 +1,4 @@
-import RedisWrapper from '../../../app/src/infrastructure/RedisWrapper.js'
+import RedisWrapper from '../../../app/src/infrastructure/RedisWrapper.mjs'
 const rclient = RedisWrapper.client('health_check')
 rclient.on('error', err => {
   console.error('Cannot connect to redis.')

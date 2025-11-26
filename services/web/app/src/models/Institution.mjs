@@ -1,4 +1,4 @@
-import mongoose from '../infrastructure/Mongoose.js'
+import mongoose from '../infrastructure/Mongoose.mjs'
 import settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import { promisify } from '@overleaf/promise-utils'

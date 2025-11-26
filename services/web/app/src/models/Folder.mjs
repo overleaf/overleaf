@@ -1,4 +1,4 @@
-import mongoose from '../infrastructure/Mongoose.js'
+import mongoose from '../infrastructure/Mongoose.mjs'
 import { DocSchema } from './Doc.mjs'
 import { FileSchema } from './File.mjs'
 

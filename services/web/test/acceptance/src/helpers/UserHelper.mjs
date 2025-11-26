@@ -13,7 +13,7 @@ import { UserAuditLogEntry } from '../../../../app/src/models/UserAuditLogEntry.
 
 // Import the rate limiter so we can clear it between tests
 
-import { RateLimiter } from '../../../../app/src/infrastructure/RateLimiter.js'
+import { RateLimiter } from '../../../../app/src/infrastructure/RateLimiter.mjs'
 
 const { ObjectId } = mongodb
 

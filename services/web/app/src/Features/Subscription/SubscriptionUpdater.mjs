@@ -1,4 +1,4 @@
-import { db, ObjectId } from '../../infrastructure/mongodb.js'
+import { db, ObjectId } from '../../infrastructure/mongodb.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 import { Subscription } from '../../models/Subscription.mjs'
 import SubscriptionLocator from './SubscriptionLocator.mjs'
@@ -13,8 +13,8 @@ import UserAuditLogHandler from '../User/UserAuditLogHandler.mjs'
 import UserUpdater from '../User/UserUpdater.mjs'
 import AccountMappingHelper from '../Analytics/AccountMappingHelper.mjs'
 import { SSOConfig } from '../../models/SSOConfig.mjs'
-import mongoose from '../../infrastructure/Mongoose.js'
-import Modules from '../../infrastructure/Modules.js'
+import mongoose from '../../infrastructure/Mongoose.mjs'
+import Modules from '../../infrastructure/Modules.mjs'
 
 /**
  * @typedef {import('../../../../types/subscription/dashboard/subscription').Subscription} Subscription

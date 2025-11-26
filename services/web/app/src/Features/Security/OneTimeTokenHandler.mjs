@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { db } from '../../infrastructure/mongodb.js'
+import { db } from '../../infrastructure/mongodb.mjs'
 import Errors from '../Errors/Errors.js'
 import { callbackify } from 'node:util'
 

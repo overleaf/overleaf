@@ -2,7 +2,7 @@
 import minimist from 'minimist'
 import PQueue from 'p-queue'
 import InactiveProjectManager from '../app/src/Features/InactiveData/InactiveProjectManager.mjs'
-import { gracefulShutdown } from '../app/src/infrastructure/GracefulShutdown.js'
+import { gracefulShutdown } from '../app/src/infrastructure/GracefulShutdown.mjs'
 import logger from '@overleaf/logger'
 
 // Global variables for tracking job and error counts

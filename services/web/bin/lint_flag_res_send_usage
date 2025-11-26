@@ -14,7 +14,7 @@ POTENTIAL_SEND_USAGE=$(\
     --regex "\.send\b" \
     --regex "\bsend(" \
 )
-HELPER_MODULE="app/src/infrastructure/Response.js"
+HELPER_MODULE="app/src/infrastructure/Response.mjs"
 if [[ "$POTENTIAL_SEND_USAGE" == "$HELPER_MODULE" ]]; then
   exit 0
 fi

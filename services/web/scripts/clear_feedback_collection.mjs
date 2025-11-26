@@ -5,7 +5,7 @@
  *   DRY_RUN=false node scripts/clear_feedback_collection.mjs 2022-11-01 # deletion mode
  */
 
-import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../app/src/infrastructure/mongodb.mjs'
 import { fileURLToPath } from 'node:url'
 
 const runScript = async (timestamp, dryRun) => {
