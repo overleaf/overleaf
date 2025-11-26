@@ -161,6 +161,10 @@ const rateLimiters = {
     points: 15,
     duration: 60,
   }),
+  registerEmail: new RateLimiter('register-email', {
+    points: 10,
+    duration: 60,
+  }),
   removeProjectFromTag: new RateLimiter('remove-project-from-tag', {
     points: 30,
     duration: 60,
