@@ -56,7 +56,7 @@ describe('CompileManager', function () {
       default: (ctx.ClsiManager = { promises: {} }),
     }))
 
-    vi.doMock('../../../../app/src/infrastructure/RateLimiter.mjs', () => ({
+    vi.doMock('../../../../app/src/infrastructure/RateLimiter.js', () => ({
       RateLimiter: sinon.stub().returns(ctx.rateLimiter),
     }))
 

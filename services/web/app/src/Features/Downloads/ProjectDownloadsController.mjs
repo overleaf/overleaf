@@ -14,7 +14,7 @@ import Metrics from '@overleaf/metrics'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import ProjectZipStreamManager from './ProjectZipStreamManager.mjs'
 import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mjs'
-import { prepareZipAttachment } from '../../infrastructure/Response.mjs'
+import { prepareZipAttachment } from '../../infrastructure/Response.js'
 
 let ProjectDownloadsController
 

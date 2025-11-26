@@ -1,6 +1,6 @@
 import logger from '@overleaf/logger'
 import Settings from '@overleaf/settings'
-import { plainTextResponse } from '../../infrastructure/Response.mjs'
+import { plainTextResponse } from '../../infrastructure/Response.js'
 
 function renderJSONError(res, message, info = {}) {
   if (info.message) {

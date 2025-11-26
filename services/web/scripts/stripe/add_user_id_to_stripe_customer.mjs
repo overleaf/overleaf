@@ -26,7 +26,7 @@
  */
 
 import minimist from 'minimist'
-import { z } from '../../app/src/infrastructure/Validation.mjs'
+import { z } from '../../app/src/infrastructure/Validation.js'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
 import {
   getRegionClient,

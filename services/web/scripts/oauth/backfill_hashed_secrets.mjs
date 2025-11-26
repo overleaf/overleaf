@@ -1,7 +1,7 @@
 import {
   db,
   READ_PREFERENCE_SECONDARY,
-} from '../../app/src/infrastructure/mongodb.mjs'
+} from '../../app/src/infrastructure/mongodb.js'
 import { hashSecret } from '../../modules/oauth2-server/app/src/SecretsHelper.mjs'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
 

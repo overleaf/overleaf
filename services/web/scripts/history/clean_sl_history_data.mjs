@@ -1,7 +1,7 @@
 import {
   db,
   getCollectionInternal,
-} from '../../app/src/infrastructure/mongodb.mjs'
+} from '../../app/src/infrastructure/mongodb.js'
 import { ensureMongoTimeout } from '../helpers/env_variable_helper.mjs'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
 // Ensure default mongo query timeout has been increased 1h

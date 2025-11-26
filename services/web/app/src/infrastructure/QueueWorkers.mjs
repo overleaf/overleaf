@@ -7,12 +7,12 @@ import FeaturesUpdater from '../Features/Subscription/FeaturesUpdater.mjs'
 import {
   addOptionalCleanupHandlerBeforeStoppingTraffic,
   addRequiredCleanupHandlerBeforeDrainingConnections,
-} from './GracefulShutdown.mjs'
+} from './GracefulShutdown.js'
 
 import EmailHandler from '../Features/Email/EmailHandler.mjs'
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
-import Modules from './Modules.mjs'
+import Modules from './Modules.js'
 
 /**
  * @typedef {{

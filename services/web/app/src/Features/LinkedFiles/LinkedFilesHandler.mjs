@@ -1,4 +1,4 @@
-import FileWriter from '../../infrastructure/FileWriter.mjs'
+import FileWriter from '../../infrastructure/FileWriter.js'
 import EditorController from '../Editor/EditorController.mjs'
 import ProjectLocator from '../Project/ProjectLocator.mjs'
 import { Project } from '../../models/Project.mjs'

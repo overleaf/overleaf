@@ -71,7 +71,7 @@ describe('HistoryController', function () {
       default: {},
     }))
 
-    vi.doMock('../../../../app/src/infrastructure/mongodb.mjs', () => ({
+    vi.doMock('../../../../app/src/infrastructure/mongodb.js', () => ({
       default: { ObjectId },
     }))
 

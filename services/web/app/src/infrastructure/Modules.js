@@ -1,18 +1,17 @@
 // @ts-check
 
-import fs from 'node:fs'
-
-import Path from 'node:path'
-import { promisify, callbackify } from 'node:util'
-import Settings from '@overleaf/settings'
-import Views from './Views.mjs'
-import _ from 'lodash'
-import Metrics from '@overleaf/metrics'
+const fs = require('fs')
+const Path = require('path')
+const { promisify, callbackify } = require('util')
+const Settings = require('@overleaf/settings')
+const Views = require('./Views')
+const _ = require('lodash')
+const Metrics = require('@overleaf/metrics')
 
 /** @import { WebModule } from "../../../types/web-module" */
 /** @import { RequestHandler } from "express" */
 
-const MODULE_BASE_PATH = Path.join(import.meta.dirname, '/../../../modules')
+const MODULE_BASE_PATH = Path.join(__dirname, '/../../../modules')
 
 /** @type {WebModule[]} */
 const _modules = []
@@ -208,7 +207,7 @@ async function getMiddleware(name) {
   return _middleware[name] || []
 }
 
-export default {
+module.exports = {
   applyNonCsrfRouter,
   applyRouter,
   linkedFileAgentsIncludes,

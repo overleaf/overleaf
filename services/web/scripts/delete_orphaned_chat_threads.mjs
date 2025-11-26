@@ -4,7 +4,7 @@ import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 import ChatApiHandler from '../app/src/Features/Chat/ChatApiHandler.mjs'
 import DeleteOrphanedDataHelper from './delete_orphaned_data_helper.mjs'
 import { ensureMongoTimeout } from './helpers/env_variable_helper.mjs'
-import { db } from '../app/src/infrastructure/mongodb.mjs'
+import { db } from '../app/src/infrastructure/mongodb.js'
 
 const { ObjectId } = mongodb
 const { getHardDeletedProjectIds } = DeleteOrphanedDataHelper

@@ -1,4 +1,4 @@
-import mongoose from '../infrastructure/Mongoose.mjs'
+import mongoose from '../infrastructure/Mongoose.js'
 import { ProjectSchema } from './Project.mjs'
 
 const { Schema } = mongoose

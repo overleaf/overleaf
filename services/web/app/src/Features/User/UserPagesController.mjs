@@ -10,7 +10,7 @@ import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
 import _ from 'lodash'
 import { expressify } from '@overleaf/promise-utils'
 import Features from '../../infrastructure/Features.mjs'
-import Modules from '../../infrastructure/Modules.mjs'
+import Modules from '../../infrastructure/Modules.js'
 
 async function settingsPage(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)

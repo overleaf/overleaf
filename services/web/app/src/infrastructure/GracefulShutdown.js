@@ -9,37 +9,29 @@
   - By now the node app should exit on its own.
  */
 
-import logger from '@overleaf/logger'
-
-import OError from '@overleaf/o-error'
-import Settings from '@overleaf/settings'
-import Metrics from '@overleaf/metrics'
-import { setTimeout as sleep } from 'node:timers/promises'
-
+const logger = require('@overleaf/logger')
+const OError = require('@overleaf/o-error')
+const Settings = require('@overleaf/settings')
+const Metrics = require('@overleaf/metrics')
+const sleep = require('util').promisify(setTimeout)
 const optionalCleanupHandlersBeforeStoppingTraffic = []
 const requiredCleanupHandlersBeforeDrainingConnections = []
 const optionalCleanupHandlersAfterDrainingConnections = []
 const connectionDrainer = []
 
-export function addConnectionDrainer(label, handler) {
+function addConnectionDrainer(label, handler) {
   connectionDrainer.push({ label, handler })
 }
 
-export function addOptionalCleanupHandlerBeforeStoppingTraffic(label, handler) {
+function addOptionalCleanupHandlerBeforeStoppingTraffic(label, handler) {
   optionalCleanupHandlersBeforeStoppingTraffic.push({ label, handler })
 }
 
-export function addRequiredCleanupHandlerBeforeDrainingConnections(
-  label,
-  handler
-) {
+function addRequiredCleanupHandlerBeforeDrainingConnections(label, handler) {
   requiredCleanupHandlersBeforeDrainingConnections.push({ label, handler })
 }
 
-export function addOptionalCleanupHandlerAfterDrainingConnections(
-  label,
-  handler
-) {
+function addOptionalCleanupHandlerAfterDrainingConnections(label, handler) {
   optionalCleanupHandlersAfterDrainingConnections.push({ label, handler })
 }
 
@@ -63,7 +55,7 @@ async function runHandlers(stage, handlers, logOnly) {
  * @param {import('net').Server} [server]
  * @param {number|string} [signal]
  */
-export async function gracefulShutdown(server, signal) {
+async function gracefulShutdown(server, signal) {
   logger.warn({ signal }, 'graceful shutdown: started shutdown sequence')
   Settings.shuttingDown = true
 
@@ -118,7 +110,7 @@ export async function gracefulShutdown(server, signal) {
   logger.info({}, 'graceful shutdown: ready to exit')
 }
 
-export function triggerGracefulShutdown(server, signal) {
+function triggerGracefulShutdown(server, signal) {
   gracefulShutdown(server, signal).catch(err => {
     logger.err(
       { err },
@@ -127,7 +119,7 @@ export function triggerGracefulShutdown(server, signal) {
   })
 }
 
-export class BackgroundTaskTracker {
+class BackgroundTaskTracker {
   constructor(label) {
     // Do not leak any handles, just record the number of pending jobs.
     // In case we miss the cleanup of one job, the worst thing that can happen
@@ -149,7 +141,7 @@ export class BackgroundTaskTracker {
   }
 }
 
-export default {
+module.exports = {
   BackgroundTaskTracker,
   addConnectionDrainer,
   addOptionalCleanupHandlerBeforeStoppingTraffic,

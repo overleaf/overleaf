@@ -1,4 +1,4 @@
-import Mongoose from '../infrastructure/Mongoose.mjs'
+import Mongoose from '../infrastructure/Mongoose.js'
 
 export const ScriptLogSchema = new Mongoose.Schema(
   {

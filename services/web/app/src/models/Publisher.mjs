@@ -1,4 +1,4 @@
-import mongoose from '../infrastructure/Mongoose.mjs'
+import mongoose from '../infrastructure/Mongoose.js'
 import settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import request from 'request'

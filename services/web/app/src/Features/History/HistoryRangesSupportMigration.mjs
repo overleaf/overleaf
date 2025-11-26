@@ -7,7 +7,7 @@ import HistoryManager from '../History/HistoryManager.mjs'
 import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mjs'
 import DocstoreManager from '../Docstore/DocstoreManager.mjs'
 import ProjectOptionsHandler from '../Project/ProjectOptionsHandler.mjs'
-import mongodb from '../../infrastructure/mongodb.mjs'
+import mongodb from '../../infrastructure/mongodb.js'
 
 const { db, ObjectId, READ_PREFERENCE_SECONDARY } = mongodb
 

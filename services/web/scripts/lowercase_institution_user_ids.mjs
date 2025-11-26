@@ -1,4 +1,4 @@
-import { db } from '../app/src/infrastructure/mongodb.mjs'
+import { db } from '../app/src/infrastructure/mongodb.js'
 import minimist from 'minimist'
 import UserGetter from '../app/src/Features/User/UserGetter.mjs'
 import fs from 'node:fs'

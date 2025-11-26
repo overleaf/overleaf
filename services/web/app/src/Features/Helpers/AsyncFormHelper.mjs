@@ -1,4 +1,4 @@
-import { acceptsJson } from '../../infrastructure/RequestContentTypeDetection.mjs'
+import { acceptsJson } from '../../infrastructure/RequestContentTypeDetection.js'
 
 export default {
   redirect,

@@ -133,7 +133,7 @@ describe('CompileController', function () {
     )
 
     vi.doMock(
-      '../../../../app/src/infrastructure/RateLimiter.mjs',
+      '../../../../app/src/infrastructure/RateLimiter.js',
       () => ctx.RateLimiter
     )
 

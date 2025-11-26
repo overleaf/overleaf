@@ -3,7 +3,7 @@ import {
   connectionPromise,
   cleanupTestDatabase,
   dropTestDatabase,
-} from '../../../../app/src/infrastructure/mongodb.mjs'
+} from '../../../../app/src/infrastructure/mongodb.js'
 import Settings from '@overleaf/settings'
 import { promisify } from 'node:util'
 

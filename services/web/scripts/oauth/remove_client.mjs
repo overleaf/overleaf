@@ -2,7 +2,7 @@ import minimist from 'minimist'
 import {
   db,
   READ_PREFERENCE_SECONDARY,
-} from '../../app/src/infrastructure/mongodb.mjs'
+} from '../../app/src/infrastructure/mongodb.js'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 async function main() {

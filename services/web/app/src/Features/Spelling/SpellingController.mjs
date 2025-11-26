@@ -2,7 +2,7 @@
 
 import SessionManager from '../Authentication/SessionManager.mjs'
 import LearnedWordsManager from './LearnedWordsManager.mjs'
-import { z, validateReq } from '../../infrastructure/Validation.mjs'
+import { z, validateReq } from '../../infrastructure/Validation.js'
 
 const learnSchema = z.object({
   body: z.object({

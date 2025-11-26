@@ -10,7 +10,7 @@ import {
   InvalidInstitutionalEmailError,
 } from '../Errors/Errors.js'
 import { fetchJson, fetchNothing } from '@overleaf/fetch-utils'
-import Modules from '../../infrastructure/Modules.mjs'
+import Modules from '../../infrastructure/Modules.js'
 
 function _makeRequestOptions(options) {
   const requestOptions = {

@@ -1,9 +1,9 @@
-import logger from '@overleaf/logger'
-import pug from 'pug'
-import globby from 'globby'
-import Settings from '@overleaf/settings'
-import fs from 'node:fs'
-import Path from 'node:path'
+const logger = require('@overleaf/logger')
+const pug = require('pug')
+const globby = require('globby')
+const Settings = require('@overleaf/settings')
+const fs = require('fs')
+const Path = require('path')
 
 // Generate list of view names from app/views
 function buildViewList() {
@@ -147,7 +147,7 @@ function precompileViewsAndCacheToDisk() {
   )
 }
 
-export default {
+module.exports = {
   // for tests
   PUG_COMPILE_ARGUMENTS,
   _expectMetaFor,
@@ -169,7 +169,7 @@ export default {
     return viewIncludes
   },
 
-  async precompileViews(app) {
+  precompileViews(app) {
     const startTime = Date.now()
     let success = 0
     let precompiled = 0
@@ -179,7 +179,7 @@ export default {
       if (fs.existsSync(precompiledFilename)) {
         logger.debug({ filePath }, 'loading precompiled pug template')
         try {
-          pug.cache[filePath] = await import(precompiledFilename)
+          pug.cache[filePath] = require(precompiledFilename)
           precompiled++
           continue
         } catch (err) {
@@ -206,7 +206,7 @@ export default {
   },
 }
 
-if (import.meta.main) {
+if (require.main === module) {
   precompileViewsAndCacheToDisk()
   process.exit(0)
 }

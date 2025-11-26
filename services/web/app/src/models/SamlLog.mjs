@@ -1,4 +1,4 @@
-import mongoose from '../infrastructure/Mongoose.mjs'
+import mongoose from '../infrastructure/Mongoose.js'
 const { Schema } = mongoose
 
 export const SamlLogSchema = new Schema(

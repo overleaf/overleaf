@@ -35,12 +35,12 @@ import ExportsController from './Features/Exports/ExportsController.mjs'
 import PasswordResetRouter from './Features/PasswordReset/PasswordResetRouter.mjs'
 import StaticPagesRouter from './Features/StaticPages/StaticPagesRouter.mjs'
 import ChatController from './Features/Chat/ChatController.mjs'
-import Modules from './infrastructure/Modules.mjs'
+import Modules from './infrastructure/Modules.js'
 import {
   RateLimiter,
   openProjectRateLimiter,
   overleafLoginRateLimiter,
-} from './infrastructure/RateLimiter.mjs'
+} from './infrastructure/RateLimiter.js'
 import RateLimiterMiddleware from './Features/Security/RateLimiterMiddleware.mjs'
 import InactiveProjectController from './Features/InactiveData/InactiveProjectController.mjs'
 import ContactRouter from './Features/Contacts/ContactRouter.mjs'
@@ -61,10 +61,10 @@ import CaptchaMiddleware from './Features/Captcha/CaptchaMiddleware.mjs'
 import UnsupportedBrowserMiddleware from './infrastructure/UnsupportedBrowserMiddleware.mjs'
 import logger from '@overleaf/logger'
 import _ from 'lodash'
-import { plainTextResponse } from './infrastructure/Response.mjs'
+import { plainTextResponse } from './infrastructure/Response.js'
 import SocketDiagnostics from './Features/SocketDiagnostics/SocketDiagnostics.mjs'
 import ClsiCacheController from './Features/Compile/ClsiCacheController.mjs'
-import AsyncLocalStorage from './infrastructure/AsyncLocalStorage.mjs'
+import AsyncLocalStorage from './infrastructure/AsyncLocalStorage.js'
 
 const { renderUnsupportedBrowserPage, unsupportedBrowserMiddleware } =
   UnsupportedBrowserMiddleware

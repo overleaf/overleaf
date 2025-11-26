@@ -6,14 +6,14 @@ import {
   existsSync,
   unlinkSync,
   renameSync,
-} from 'node:fs'
-import mongodb from '../../../app/src/infrastructure/mongodb.mjs'
-import DocumentUpdaterHandler from '../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.mjs'
-import ProjectZipStreamManager from '../../../app/src/Features/Downloads/ProjectZipStreamManager.mjs'
+} from 'fs'
+import mongodb from '../../../app/src/infrastructure/mongodb.js'
+import DocumentUpdaterHandler from '../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js'
+import ProjectZipStreamManager from '../../../app/src/Features/Downloads/ProjectZipStreamManager.js'
 import logger from 'logger-sharelatex'
 import { Project } from '../../../app/src/models/Project.mjs'
 import { User } from '../../../app/src/models/User.mjs'
-import readline from 'node:readline'
+import readline from 'readline'
 
 function parseArgs() {
   return minimist(process.argv.slice(2), {

@@ -1,16 +1,16 @@
-import Settings from '@overleaf/settings'
-import Metrics from '@overleaf/metrics'
-import logger from '@overleaf/logger'
-import RedisWrapper from './RedisWrapper.mjs'
-import RateLimiterFlexible from 'rate-limiter-flexible'
-import OError from '@overleaf/o-error'
+const Settings = require('@overleaf/settings')
+const Metrics = require('@overleaf/metrics')
+const logger = require('@overleaf/logger')
+const RedisWrapper = require('./RedisWrapper')
+const RateLimiterFlexible = require('rate-limiter-flexible')
+const OError = require('@overleaf/o-error')
 
 const rclient = RedisWrapper.client('ratelimiter')
 
 /**
  * Wrapper over the RateLimiterRedis class
  */
-export class RateLimiter {
+class RateLimiter {
   #opts
 
   /**
@@ -122,13 +122,13 @@ export class RateLimiter {
  * Shared rate limiters
  */
 
-export const openProjectRateLimiter = new RateLimiter('open-project', {
+const openProjectRateLimiter = new RateLimiter('open-project', {
   points: 15,
   duration: 60,
 })
 
 // Keep in sync with the can-skip-captcha options.
-export const overleafLoginRateLimiter = new RateLimiter(
+const overleafLoginRateLimiter = new RateLimiter(
   'overleaf-login',
   Settings.rateLimit?.login?.ip || {
     points: 20,
@@ -137,7 +137,7 @@ export const overleafLoginRateLimiter = new RateLimiter(
   }
 )
 
-export default {
+module.exports = {
   RateLimiter,
   openProjectRateLimiter,
   overleafLoginRateLimiter,

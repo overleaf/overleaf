@@ -1,4 +1,4 @@
-import RedisWrapper from '../../infrastructure/RedisWrapper.mjs'
+import RedisWrapper from '../../infrastructure/RedisWrapper.js'
 import settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import UserGetter from '../User/UserGetter.mjs'

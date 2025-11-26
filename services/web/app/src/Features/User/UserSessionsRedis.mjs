@@ -1,4 +1,4 @@
-import RedisWrapper from '../../infrastructure/RedisWrapper.mjs'
+import RedisWrapper from '../../infrastructure/RedisWrapper.js'
 const rclient = RedisWrapper.client('websessions')
 
 const UserSessionsRedis = {

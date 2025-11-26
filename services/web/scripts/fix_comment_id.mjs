@@ -2,7 +2,7 @@
 
 import minimist from 'minimist'
 import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.mjs'
-import { db, ObjectId } from '../app/src/infrastructure/mongodb.mjs'
+import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
 
 const OPTS = parseArgs()
 

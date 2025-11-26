@@ -1,7 +1,8 @@
-import settings from '@overleaf/settings'
-import RedisWrapper from './RedisWrapper.mjs'
-import RedisWebLocker from '@overleaf/redis-wrapper/RedisWebLocker.js'
+const settings = require('@overleaf/settings')
+const RedisWrapper = require('./RedisWrapper')
 const rclient = RedisWrapper.client('lock')
+
+const RedisWebLocker = require('@overleaf/redis-wrapper/RedisWebLocker')
 
 // this method creates a lock manager with the provided timeout options
 function createLockManager(options) {
@@ -32,4 +33,4 @@ LockManager.withTimeout = function (timeout) {
   return createLockManager(lockManagerSettingsWithTimeout)
 }
 
-export default LockManager
+module.exports = LockManager

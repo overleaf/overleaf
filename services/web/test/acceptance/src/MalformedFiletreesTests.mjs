@@ -3,7 +3,7 @@ import { promisify } from 'node:util'
 import { expect } from 'chai'
 import logger from '@overleaf/logger'
 import { filterOutput } from './helpers/settings.mjs'
-import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.mjs'
+import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.js'
 
 const lastUpdated = new Date(42)
 const lastUpdatedBy = new ObjectId()

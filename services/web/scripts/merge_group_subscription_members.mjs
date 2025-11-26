@@ -6,7 +6,7 @@
 // node scripts/merge_group_subscription_members \
 //  --target [targetSubscriptionId] --source [sourceSubscriptionId] --commit
 
-import { db, ObjectId } from '../app/src/infrastructure/mongodb.mjs'
+import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
 
 import SubscriptionUpdater from '../app/src/Features/Subscription/SubscriptionUpdater.mjs'
 import minimist from 'minimist'

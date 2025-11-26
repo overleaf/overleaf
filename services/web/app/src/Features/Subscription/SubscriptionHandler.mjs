@@ -13,7 +13,7 @@ import EmailHandler from '../Email/EmailHandler.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 import UserUpdater from '../User/UserUpdater.mjs'
 import { IndeterminateInvoiceError } from '../Errors/Errors.js'
-import Modules from '../../infrastructure/Modules.mjs'
+import Modules from '../../infrastructure/Modules.js'
 
 /**
  * @import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities.mjs'

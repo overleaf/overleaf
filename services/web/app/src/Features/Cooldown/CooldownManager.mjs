@@ -1,4 +1,4 @@
-import RedisWrapper from '../../infrastructure/RedisWrapper.mjs'
+import RedisWrapper from '../../infrastructure/RedisWrapper.js'
 import logger from '@overleaf/logger'
 import { promisify } from '@overleaf/promise-utils'
 const rclient = RedisWrapper.client('cooldown')

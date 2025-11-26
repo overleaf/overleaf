@@ -1,5 +1,5 @@
 import { batchedUpdateWithResultHandling } from '@overleaf/mongo-utils/batchedUpdate.js'
-import { db } from '../app/src/infrastructure/mongodb.mjs'
+import { db } from '../app/src/infrastructure/mongodb.js'
 
 const MODEL_NAME = process.argv.pop()
 

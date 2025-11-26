@@ -4,7 +4,7 @@ import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import {
   connectionPromise,
   cleanupTestDatabase,
-} from '../../../../app/src/infrastructure/mongodb.mjs'
+} from '../../../../app/src/infrastructure/mongodb.js'
 import OneTimeTokenHandler from '../../../../app/src/Features/Security/OneTimeTokenHandler.mjs'
 
 vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>

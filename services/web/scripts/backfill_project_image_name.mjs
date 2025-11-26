@@ -1,7 +1,7 @@
 // @ts-check
 import minimist from 'minimist'
 import { batchedUpdateWithResultHandling } from '@overleaf/mongo-utils/batchedUpdate.js'
-import { db } from '../app/src/infrastructure/mongodb.mjs'
+import { db } from '../app/src/infrastructure/mongodb.js'
 
 const argv = minimist(process.argv.slice(2))
 const commit = argv.commit !== undefined

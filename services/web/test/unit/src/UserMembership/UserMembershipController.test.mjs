@@ -212,7 +212,7 @@ describe('UserMembershipController', () => {
         },
       },
     }
-    vi.doMock('../../../../app/src/infrastructure/Modules.mjs', () => ({
+    vi.doMock('../../../../app/src/infrastructure/Modules.js', () => ({
       default: ctx.Modules,
     }))
 

@@ -1,4 +1,4 @@
-import { ObjectId } from '../app/src/infrastructure/mongodb.mjs'
+import { ObjectId } from '../app/src/infrastructure/mongodb.js'
 import UserUpdater from '../app/src/Features/User/UserUpdater.mjs'
 import UserGetter from '../app/src/Features/User/UserGetter.mjs'
 

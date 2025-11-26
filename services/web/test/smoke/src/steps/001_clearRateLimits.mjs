@@ -2,7 +2,7 @@ import Settings from '@overleaf/settings'
 import {
   overleafLoginRateLimiter,
   openProjectRateLimiter,
-} from '../../../../app/src/infrastructure/RateLimiter.mjs'
+} from '../../../../app/src/infrastructure/RateLimiter.js'
 import LoginRateLimiter from '../../../../app/src/Features/Security/LoginRateLimiter.mjs'
 
 async function clearLoginRateLimit() {

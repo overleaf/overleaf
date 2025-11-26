@@ -1,7 +1,7 @@
 import logger from '@overleaf/logger'
 import crypto from 'node:crypto'
 import settings from '@overleaf/settings'
-import Modules from '../../infrastructure/Modules.mjs'
+import Modules from '../../infrastructure/Modules.js'
 import mongodb from 'mongodb-legacy'
 import { Subscription } from '../../models/Subscription.mjs'
 import { SSOConfig } from '../../models/SSOConfig.mjs'

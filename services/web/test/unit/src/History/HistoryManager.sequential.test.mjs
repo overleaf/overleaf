@@ -5,7 +5,7 @@ import {
   cleanupTestDatabase,
   db,
   waitForDb,
-} from '../../../../app/src/infrastructure/mongodb.mjs'
+} from '../../../../app/src/infrastructure/mongodb.js'
 
 const { ObjectId } = mongodb
 

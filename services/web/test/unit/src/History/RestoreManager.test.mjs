@@ -82,7 +82,7 @@ describe('RestoreManager', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/infrastructure/Metrics.mjs', () => ({
+    vi.doMock('../../../../app/src/infrastructure/Metrics.js', () => ({
       default: {
         revertFileDurationSeconds: {
           startTimer: sinon.stub().returns(sinon.stub()),

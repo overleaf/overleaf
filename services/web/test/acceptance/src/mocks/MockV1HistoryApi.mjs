@@ -3,7 +3,7 @@ import { EventEmitter } from 'node:events'
 import {
   zipAttachment,
   prepareZipAttachment,
-} from '../../../../app/src/infrastructure/Response.mjs'
+} from '../../../../app/src/infrastructure/Response.js'
 import { z } from 'zod'
 
 class MockV1HistoryApi extends AbstractMockApi {

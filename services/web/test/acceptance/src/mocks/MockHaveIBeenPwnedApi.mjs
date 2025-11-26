@@ -1,5 +1,5 @@
 import AbstractMockApi from './AbstractMockApi.mjs'
-import { plainTextResponse } from '../../../../app/src/infrastructure/Response.mjs'
+import { plainTextResponse } from '../../../../app/src/infrastructure/Response.js'
 
 class MockHaveIBeenPwnedApi extends AbstractMockApi {
   reset() {

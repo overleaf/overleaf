@@ -1,5 +1,5 @@
 // @ts-check
-import { db, ObjectId } from '../app/src/infrastructure/mongodb.mjs'
+import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
 import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 

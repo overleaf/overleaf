@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import UserHelper from './helpers/UserHelper.mjs'
-import { db } from '../../../app/src/infrastructure/mongodb.mjs'
+import { db } from '../../../app/src/infrastructure/mongodb.js'
 
 describe('PasswordReset', function () {
   let email, response, user, userHelper, token, emailQuery

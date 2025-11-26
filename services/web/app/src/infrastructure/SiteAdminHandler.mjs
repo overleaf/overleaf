@@ -5,7 +5,7 @@ import fs from 'node:fs'
 import {
   addOptionalCleanupHandlerAfterDrainingConnections,
   addRequiredCleanupHandlerBeforeDrainingConnections,
-} from './GracefulShutdown.mjs'
+} from './GracefulShutdown.js'
 
 import Features from './Features.mjs'
 import UserHandler from '../Features/User/UserHandler.mjs'
