@@ -310,6 +310,26 @@ const settings = {
   // Subscriptions
   enableSubscriptions: process.env.ENABLE_SUBSCRIPTIONS === 'true',
 
+  // Google OAuth Configuration
+  oauthProviders: process.env.GOOGLE_CLIENT_ID
+    ? {
+        google: {
+          name: 'Google',
+          descriptionKey: 'login_with_service',
+          descriptionOptions: { service: 'Google' },
+          linkPath: '/auth/google',
+        },
+      }
+    : {},
+
+  googleOAuth: process.env.GOOGLE_CLIENT_ID
+    ? {
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: (siteUrl || 'http://localhost') + '/auth/google/callback',
+      }
+    : undefined,
+
   defaultFeatures: {
     collaborators: -1,
     dropbox: true,

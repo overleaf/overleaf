@@ -91,6 +91,11 @@ services:
             RECURLY_WEBHOOK_USER: ${RECURLY_WEBHOOK_USER:-}
             RECURLY_WEBHOOK_PASS: ${RECURLY_WEBHOOK_PASS:-}
 
+            # Google OAuth Configuration
+            # Get credentials from: https://console.cloud.google.com/apis/credentials
+            GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+            GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+
             ################
             ## Server Pro ##
             ################

@@ -13,6 +13,7 @@ import UploadsRouter from './Features/Uploads/UploadsRouter.mjs'
 import metrics from '@overleaf/metrics'
 import ReferalController from './Features/Referal/ReferalController.mjs'
 import AuthenticationController from './Features/Authentication/AuthenticationController.mjs'
+import GoogleAuthController from './Features/Authentication/GoogleAuthController.mjs'
 import PermissionsController from './Features/Authorization/PermissionsController.mjs'
 import SessionManager from './Features/Authentication/SessionManager.mjs'
 import TagsController from './Features/Tags/TagsController.mjs'
@@ -263,6 +264,18 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
 
   webRouter.post('/logout', UserController.logout)
+
+  // Google OAuth routes
+  if (GoogleAuthController.isGoogleOAuthEnabled()) {
+    webRouter.get('/auth/google', GoogleAuthController.initiateGoogleAuth)
+    AuthenticationController.addEndpointToLoginWhitelist('/auth/google')
+
+    webRouter.get(
+      '/auth/google/callback',
+      GoogleAuthController.handleGoogleCallback
+    )
+    AuthenticationController.addEndpointToLoginWhitelist('/auth/google/callback')
+  }
 
   webRouter.get('/restricted', AuthorizationMiddleware.restricted)
 

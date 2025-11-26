@@ -4,6 +4,7 @@ import UserSessionsManager from './UserSessionsManager.mjs'
 import logger from '@overleaf/logger'
 import Settings from '@overleaf/settings'
 import AuthenticationController from '../Authentication/AuthenticationController.mjs'
+import GoogleAuthController from '../Authentication/GoogleAuthController.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
 import NewsletterManager from '../Newsletter/NewsletterManager.mjs'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
@@ -212,6 +213,7 @@ const UserPagesController = {
       sharedProjectData,
       newTemplateData,
       samlBeta: req.session.samlBeta,
+      googleOAuthEnabled: GoogleAuthController.isGoogleOAuthEnabled(),
     })
   },
 
@@ -233,6 +235,7 @@ const UserPagesController = {
       login_support_title: Settings.nav?.login_support_title,
       login_support_text: Settings.nav?.login_support_text,
       metadata,
+      googleOAuthEnabled: GoogleAuthController.isGoogleOAuthEnabled(),
     })
   },
 
