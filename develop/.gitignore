@@ -2,3 +2,4 @@
 !.gitkeep
 .env
 output/*
+dev.env
