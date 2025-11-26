@@ -287,6 +287,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     webRouter.post(
       '/register',
       RateLimiterMiddleware.rateLimit(rateLimiters.registerEmail),
+      CaptchaMiddleware.validateCaptcha('register'),
       async (req, res, next) => {
         try {
           const { email, password } = req.body
@@ -315,6 +316,13 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
                 type: 'error',
                 key: 'email-already-registered',
                 text: 'This email is already registered',
+              },
+            })
+          } else if (err.message === 'request is not valid') {
+            return res.status(400).json({
+              message: {
+                type: 'error',
+                text: 'Invalid email or password',
               },
             })
           }
