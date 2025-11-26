@@ -28,6 +28,7 @@ import ErrorController from '../Features/Errors/ErrorController.mjs'
 import HttpErrorHandler from '../Features/Errors/HttpErrorHandler.mjs'
 import UserSessionsManager from '../Features/User/UserSessionsManager.mjs'
 import AuthenticationController from '../Features/Authentication/AuthenticationController.mjs'
+import GoogleAuthController from '../Features/Authentication/GoogleAuthController.mjs'
 import SessionManager from '../Features/Authentication/SessionManager.mjs'
 import AdminAuthorizationHelper from '../Features/Helpers/AdminAuthorizationHelper.mjs'
 import Modules from './Modules.js'
@@ -223,6 +224,9 @@ passport.use(
 )
 passport.serializeUser(AuthenticationController.serializeUser)
 passport.deserializeUser(AuthenticationController.deserializeUser)
+
+// Set up Google OAuth strategy
+GoogleAuthController.setupStrategy()
 
 Modules.hooks.fire('passportSetup', passport, err => {
   if (err != null) {

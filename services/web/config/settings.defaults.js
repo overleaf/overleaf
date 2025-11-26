@@ -450,6 +450,26 @@ module.exports = {
   restrictedCountries: [],
   enableOnboardingEmails: process.env.ENABLE_ONBOARDING_EMAILS === 'true',
 
+  // Google OAuth Configuration
+  oauthProviders: process.env.GOOGLE_CLIENT_ID
+    ? {
+        google: {
+          name: 'Google',
+          descriptionKey: 'login_with_service',
+          descriptionOptions: { service: 'Google' },
+          linkPath: '/auth/google',
+        },
+      }
+    : {},
+
+  googleOAuth: process.env.GOOGLE_CLIENT_ID
+    ? {
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: (process.env.PUBLIC_URL || 'http://localhost') + '/auth/google/callback',
+      }
+    : undefined,
+
   enabledLinkedFileTypes: (process.env.ENABLED_LINKED_FILE_TYPES || '').split(
     ','
   ),

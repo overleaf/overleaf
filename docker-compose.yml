@@ -75,6 +75,27 @@ services:
 
             # ENABLE_CRON_RESOURCE_DELETION: true
 
+            ####################################
+            ## Subscription & Registration    ##
+            ####################################
+
+            # Enable user self-registration
+            OVERLEAF_ALLOW_PUBLIC_ACCESS: ${OVERLEAF_ALLOW_PUBLIC_ACCESS:-true}
+
+            # Enable subscriptions
+            ENABLE_SUBSCRIPTIONS: ${ENABLE_SUBSCRIPTIONS:-true}
+
+            # Recurly Configuration
+            RECURLY_API_KEY: ${RECURLY_API_KEY:-}
+            RECURLY_SUBDOMAIN: ${RECURLY_SUBDOMAIN:-}
+            RECURLY_WEBHOOK_USER: ${RECURLY_WEBHOOK_USER:-}
+            RECURLY_WEBHOOK_PASS: ${RECURLY_WEBHOOK_PASS:-}
+
+            # Google OAuth Configuration
+            # Get credentials from: https://console.cloud.google.com/apis/credentials
+            GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+            GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+
             ################
             ## Server Pro ##
             ################
@@ -163,6 +184,7 @@ services:
           - /home/ec2-user/overleaf_certs:/etc/nginx/certs
           - /home/ec2-user/overleaf_vhost.d:/etc/nginx/vhost.d
           - /home/ec2-user/overleaf_html:/usr/share/nginx/html
+          - /home/ec2-user/overleaf_acme:/etc/acme.sh
         environment:
           NGINX_PROXY_CONTAINER: nginx-proxy
           DEFAULT_EMAIL: founders@lemmaforlatex.com

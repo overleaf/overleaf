@@ -13,6 +13,7 @@ import UploadsRouter from './Features/Uploads/UploadsRouter.mjs'
 import metrics from '@overleaf/metrics'
 import ReferalController from './Features/Referal/ReferalController.mjs'
 import AuthenticationController from './Features/Authentication/AuthenticationController.mjs'
+import GoogleAuthController from './Features/Authentication/GoogleAuthController.mjs'
 import PermissionsController from './Features/Authorization/PermissionsController.mjs'
 import SessionManager from './Features/Authentication/SessionManager.mjs'
 import TagsController from './Features/Tags/TagsController.mjs'
@@ -161,6 +162,10 @@ const rateLimiters = {
     points: 15,
     duration: 60,
   }),
+  registerEmail: new RateLimiter('register-email', {
+    points: 10,
+    duration: 60,
+  }),
   removeProjectFromTag: new RateLimiter('remove-project-from-tag', {
     points: 30,
     duration: 60,
@@ -260,11 +265,71 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.post('/logout', UserController.logout)
 
+  // Google OAuth routes
+  if (GoogleAuthController.isGoogleOAuthEnabled()) {
+    webRouter.get('/auth/google', GoogleAuthController.initiateGoogleAuth)
+    AuthenticationController.addEndpointToLoginWhitelist('/auth/google')
+
+    webRouter.get(
+      '/auth/google/callback',
+      GoogleAuthController.handleGoogleCallback
+    )
+    AuthenticationController.addEndpointToLoginWhitelist('/auth/google/callback')
+  }
+
   webRouter.get('/restricted', AuthorizationMiddleware.restricted)
 
   if (Features.hasFeature('registration-page')) {
     webRouter.get('/register', UserPagesController.registerPage)
     AuthenticationController.addEndpointToLoginWhitelist('/register')
+
+    // Self-registration POST handler
+    webRouter.post(
+      '/register',
+      RateLimiterMiddleware.rateLimit(rateLimiters.registerEmail),
+      CaptchaMiddleware.validateCaptcha('register'),
+      async (req, res, next) => {
+        try {
+          const { email, password } = req.body
+          if (!email || !password) {
+            return res.status(400).json({
+              message: { type: 'error', text: 'Email and password are required' },
+            })
+          }
+
+          const UserRegistrationHandler = (
+            await import('./Features/User/UserRegistrationHandler.mjs')
+          ).default
+
+          const user = await UserRegistrationHandler.promises.registerNewUser({
+            email,
+            password,
+          })
+
+          // Log the user in after registration
+          AuthenticationController.setAuditInfo(req, { method: 'Password' })
+          await AuthenticationController.promises.finishLogin(user, req, res)
+        } catch (err) {
+          if (err.message === 'EmailAlreadyRegistered') {
+            return res.status(400).json({
+              message: {
+                type: 'error',
+                key: 'email-already-registered',
+                text: 'This email is already registered',
+              },
+            })
+          } else if (err.message === 'request is not valid') {
+            return res.status(400).json({
+              message: {
+                type: 'error',
+                text: 'Invalid email or password',
+              },
+            })
+          }
+          next(err)
+        }
+      }
+    )
   }
 
   EditorRouter.apply(webRouter, privateApiRouter)

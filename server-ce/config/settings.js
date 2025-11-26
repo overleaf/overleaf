@@ -292,9 +292,40 @@ const settings = {
         10
       ),
     },
+    recurly: process.env.RECURLY_API_KEY
+      ? {
+          apiKey: process.env.RECURLY_API_KEY,
+          subdomain: process.env.RECURLY_SUBDOMAIN,
+          webhookUser: process.env.RECURLY_WEBHOOK_USER,
+          webhookPass: process.env.RECURLY_WEBHOOK_PASS,
+        }
+      : undefined,
   },
   references: {},
   notifications: undefined,
+
+  // Subscriptions
+  enableSubscriptions: process.env.ENABLE_SUBSCRIPTIONS === 'true',
+
+  // Google OAuth Configuration
+  oauthProviders: process.env.GOOGLE_CLIENT_ID
+    ? {
+        google: {
+          name: 'Google',
+          descriptionKey: 'login_with_service',
+          descriptionOptions: { service: 'Google' },
+          linkPath: '/auth/google',
+        },
+      }
+    : {},
+
+  googleOAuth: process.env.GOOGLE_CLIENT_ID
+    ? {
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: (siteUrl || 'http://localhost') + '/auth/google/callback',
+      }
+    : undefined,
 
   defaultFeatures: {
     collaborators: -1,
@@ -305,6 +336,82 @@ const settings = {
     trackChanges: true,
     references: true,
   },
+
+  // Plan definitions for subscriptions
+  plans: [
+    {
+      planCode: 'personal',
+      name: 'Personal',
+      price_in_cents: 0,
+      features: {
+        collaborators: 1,
+        dropbox: false,
+        versioning: false,
+        compileTimeout: 60,
+        compileGroup: 'standard',
+        trackChanges: false,
+        references: false,
+      },
+    },
+    {
+      planCode: 'collaborator',
+      name: 'Standard',
+      price_in_cents: 1500,
+      features: {
+        collaborators: 10,
+        dropbox: true,
+        versioning: true,
+        compileTimeout: 180,
+        compileGroup: 'priority',
+        trackChanges: true,
+        references: true,
+      },
+    },
+    {
+      planCode: 'collaborator-annual',
+      name: 'Standard Annual',
+      price_in_cents: 12900,
+      annual: true,
+      features: {
+        collaborators: 10,
+        dropbox: true,
+        versioning: true,
+        compileTimeout: 180,
+        compileGroup: 'priority',
+        trackChanges: true,
+        references: true,
+      },
+    },
+    {
+      planCode: 'professional',
+      name: 'Professional',
+      price_in_cents: 3000,
+      features: {
+        collaborators: -1,
+        dropbox: true,
+        versioning: true,
+        compileTimeout: 180,
+        compileGroup: 'priority',
+        trackChanges: true,
+        references: true,
+      },
+    },
+    {
+      planCode: 'professional-annual',
+      name: 'Professional Annual',
+      price_in_cents: 25900,
+      annual: true,
+      features: {
+        collaborators: -1,
+        dropbox: true,
+        versioning: true,
+        compileTimeout: 180,
+        compileGroup: 'priority',
+        trackChanges: true,
+        references: true,
+      },
+    },
+  ],
 }
 
 // # OPTIONAL CONFIGURABLE SETTINGS
