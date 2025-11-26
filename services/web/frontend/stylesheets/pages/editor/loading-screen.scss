@@ -14,6 +14,26 @@
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes subtlePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.012);
+  }
+}
+
 .loading-screen {
   display: flex;
   flex-direction: column;
@@ -22,28 +42,46 @@
   width: 100%;
   height: 100%;
   background-color: #fff;
+  opacity: 1;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.fade-out {
+    opacity: 0;
+    transform: scale(1.02);
+  }
 
   .loading-screen-brand-container {
-    min-width: 200px;
+    min-width: 160px;
+    max-width: 160px;
+    animation: fadeIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
 
   .loading-screen-brand {
+    --progress: 0%;
+    
     position: relative;
-    padding-top: math.percentage(math.div(150, 130)); // dimensions of the SVG
+    width: 100%;
+    padding-top: 100%; // Square aspect ratio
     height: 0;
     background: url(../../../../public/img/ol-brand/overleaf-o-grey.svg)
-      no-repeat bottom / 100%;
+      no-repeat center / 100%;
+    animation: subtlePulse 2.5s ease-in-out infinite;
+    border-radius: 10px;
 
+    // The green fill overlay - clips from bottom
     &::after {
       content: '';
       position: absolute;
-      height: inherit;
       right: 0;
       bottom: 0;
       left: 0;
+      height: var(--progress);
       background: url(../../../../public/img/ol-brand/overleaf-o.svg) no-repeat
         bottom / 100%;
-      transition: height 0.5s;
+      // Smooth spring-like easing for satisfying fill effect
+      transition: height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-radius: 0 0 10px 10px;
     }
   }
 
@@ -53,6 +91,8 @@
     font-family: $font-family-serif;
     font-size: var(--font-size-07);
     color: var(--content-secondary);
+    opacity: 0;
+    animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
   }
 
   .loading-screen-ellip {
