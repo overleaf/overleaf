@@ -22,7 +22,7 @@
 
 import minimist from 'minimist'
 import fs from 'node:fs'
-import { z } from '../../app/src/infrastructure/Validation.mjs'
+import { z } from '../../app/src/infrastructure/Validation.js'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
 import { getRegionClient } from '../../modules/subscriptions/app/src/StripeClient.mjs'
 
