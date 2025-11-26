@@ -2358,6 +2358,7 @@
   "the_following_folder_already_exists_in_this_project_plural": "The following folders already exist in this project:",
   "the_latex_engine_used_for_compiling": "The LaTeX engine used for compiling",
   "the_new_overleaf_editor_info": "__appName__’s new look is here. Disabling this option will switch you back to the old editor design.",
+  "the_next_payment_will_be_collected_on": "The next payment will be collected on <strong>__date__</strong>.",
   "the_original_text_has_changed": "The original text has changed, so this suggestion can’t be applied",
   "the_overleaf_color_scheme": "The __appName__ color scheme",
   "the_primary_file_for_compiling_your_project": "The primary file for compiling your project",
