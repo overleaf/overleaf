@@ -184,6 +184,7 @@ services:
           - /home/ec2-user/overleaf_certs:/etc/nginx/certs
           - /home/ec2-user/overleaf_vhost.d:/etc/nginx/vhost.d
           - /home/ec2-user/overleaf_html:/usr/share/nginx/html
+          - /home/ec2-user/overleaf_acme:/etc/acme.sh
         environment:
           NGINX_PROXY_CONTAINER: nginx-proxy
           DEFAULT_EMAIL: founders@lemmaforlatex.com
