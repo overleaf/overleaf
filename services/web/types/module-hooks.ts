@@ -8,3 +8,8 @@ export type CommentAddedEvent = {
   threadId: string
   messageId: string
 }
+
+export type ProjectModifiedEvent = {
+  projectId: string
+  timestamp: number
+}

@@ -94,7 +94,13 @@ async function setDocument(req, res) {
     'finished receiving set document request from api (docupdater)'
   )
 
-  await Modules.promises.hooks.fire('docModified', projectId, docId, ranges)
+  await Modules.promises.hooks.fire(
+    'docModified',
+    projectId,
+    docId,
+    ranges,
+    lastUpdatedAt
+  )
 
   res.json(result)
 }
