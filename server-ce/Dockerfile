@@ -1,5 +1,6 @@
 # ---------------------------------------------
-# Overleaf Community Edition (overleaf/overleaf)
+# Lemma (fork of Overleaf Community Edition)
+# https://github.com/TryBayes/LemmaForLatex
 # ---------------------------------------------
 
 ARG OVERLEAF_BASE_TAG=sharelatex/sharelatex-base:latest
@@ -99,7 +100,7 @@ ENV OVERLEAF_CONFIG=/etc/overleaf/settings.js
 ENV WEB_API_USER="overleaf"
 ENV ADMIN_PRIVILEGE_AVAILABLE="true"
 
-ENV OVERLEAF_APP_NAME="Overleaf Community Edition"
+ENV OVERLEAF_APP_NAME="Lemma"
 
 ENV OPTIMISE_PDF="true"
 

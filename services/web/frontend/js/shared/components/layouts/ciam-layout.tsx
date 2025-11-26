@@ -6,7 +6,7 @@ const CiamLayout: FC<Props> = ({ children }: Props) => (
   <div className="ciam-layout ciam-enabled">
     <header className="ciam-logo">
       <a href="/" className="brand overleaf-ds-logo">
-        <span className="visually-hidden">Overleaf</span>
+        <span className="visually-hidden">Lemma</span>
       </a>
     </header>
     <div className="ciam-container">
@@ -15,8 +15,8 @@ const CiamLayout: FC<Props> = ({ children }: Props) => (
       </main>
     </div>
     <footer>
-      <a href="https://www.overleaf.com/legal#Privacy">Privacy</a>
-      <a href="https://www.overleaf.com/legal#Terms">Terms</a>
+      <a href="/legal#Privacy">Privacy</a>
+      <a href="/legal#Terms">Terms</a>
     </footer>
   </div>
 )

@@ -29,7 +29,7 @@ export function setDefaultMeta() {
   window.metaAttributesCache.set('ol-oauthProviders', {
     collabratec: {
       descriptionKey: 'linked_collabratec_description',
-      descriptionOptions: { appName: 'Overleaf' },
+      descriptionOptions: { appName: 'Lemma' },
       name: 'IEEE Collabratec®',
       hideWhenNotLinked: true,
       linkPath: '/collabratec/auth/link',
@@ -44,7 +44,7 @@ export function setDefaultMeta() {
       descriptionKey: 'oauth_orcid_description',
       descriptionOptions: {
         link: '/blog/434',
-        appName: 'Overleaf',
+        appName: 'Lemma',
       },
       name: 'ORCID',
       linkPath: '/auth/orcid',

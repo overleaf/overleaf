@@ -1,4 +1,4 @@
-# Overleaf Community Edition, development environment
+# Lemma Development Environment
 
 ## Building and running
 
@@ -33,8 +33,8 @@ docker build texlive -t texlive-full
 
 ## Development
 
-To avoid running `bin/build && bin/up` after every code change, you can run Overleaf
-Community Edition in _development mode_, where services will automatically update on code changes.
+To avoid running `bin/build && bin/up` after every code change, you can run Lemma
+in _development mode_, where services will automatically update on code changes.
 
 To do this, use the included `bin/dev` script:
 

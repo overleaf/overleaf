@@ -18,7 +18,7 @@ export function Interstitial({
 }: InterstitialProps) {
   return (
     <div className={classNames('interstitial', className)}>
-      {showLogo && <img className="logo" src={overleafLogo} alt="Overleaf" />}
+      {showLogo && <img className="logo" src={overleafLogo} alt="Lemma" />}
       {title && <h1 className="h3 interstitial-header">{title}</h1>}
       <div className={classNames(contentClassName)}>{children}</div>
     </div>

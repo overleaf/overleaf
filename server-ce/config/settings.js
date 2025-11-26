@@ -60,7 +60,7 @@ const settings = {
   // Databases
   // ---------
 
-  // Overleaf Community Edition's main persistent data store is MongoDB (http://www.mongodb.org/)
+  // Lemma's main persistent data store is MongoDB (http://www.mongodb.org/)
   // Documentation about the URL connection string format can be found at:
   //
   //    http://docs.mongodb.org/manual/reference/connection-string/
@@ -70,7 +70,7 @@ const settings = {
     url: process.env.OVERLEAF_MONGO_URL || 'mongodb://dockerhost/sharelatex',
   },
 
-  // Redis is used in Overleaf Community Edition for high volume queries, like real-time
+  // Redis is used in Lemma for high volume queries, like real-time
   // editing, and session management.
   //
   // The following config will work with Redis's default settings:
@@ -179,7 +179,7 @@ const settings = {
   // Server Config
   // -------------
 
-  // Where your instance of Overleaf Community Edition can be found publicly. This is used
+  // Where your instance of Lemma can be found publicly. This is used
   // when emails are sent out and in generated links:
   siteUrl: (siteUrl = process.env.OVERLEAF_SITE_URL || 'http://localhost'),
 
@@ -194,8 +194,8 @@ const settings = {
   maintenanceMessage: process.env.OVERLEAF_MAINTENANCE_MESSAGE,
   maintenanceMessageHTML: process.env.OVERLEAF_MAINTENANCE_MESSAGE_HTML,
 
-  // The name this is used to describe your Overleaf Community Edition Installation
-  appName: process.env.OVERLEAF_APP_NAME || 'Overleaf Community Edition',
+  // The name this is used to describe your Lemma Installation
+  appName: process.env.OVERLEAF_APP_NAME || 'Lemma',
 
   restrictInvitesToExistingAccounts:
     process.env.OVERLEAF_RESTRICT_INVITES_TO_EXISTING_ACCOUNTS === 'true',
@@ -204,12 +204,12 @@ const settings = {
     title:
       process.env.OVERLEAF_NAV_TITLE ||
       process.env.OVERLEAF_APP_NAME ||
-      'Overleaf Community Edition',
+      'Lemma',
   },
 
   // The email address which users will be directed to as the main point of
-  // contact for this installation of Overleaf Community Edition.
-  adminEmail: process.env.OVERLEAF_ADMIN_EMAIL || 'placeholder@example.com',
+  // contact for this installation of Lemma.
+  adminEmail: process.env.OVERLEAF_ADMIN_EMAIL || 'founders@lemmaforlatex.com',
 
   // If provided, a sessionSecret is used to sign cookies so that they cannot be
   // spoofed. This is recommended.
@@ -239,11 +239,11 @@ const settings = {
   // but should be set to true in production.
   cacheStaticAssets: true,
 
-  // If you are running Overleaf Community Edition over https, set this to true to send the
+  // If you are running Lemma over https, set this to true to send the
   // cookie with a secure flag (recommended).
   secureCookie: process.env.OVERLEAF_SECURE_COOKIE != null,
 
-  // If you are running Overleaf Community Edition behind a proxy (like Apache, Nginx, etc)
+  // If you are running Lemma behind a proxy (like Apache, Nginx, etc)
   // then set this to true to allow it to correctly detect the forwarded IP
   // address and http/https protocol information.
 
@@ -460,7 +460,7 @@ if (process.env.OVERLEAF_LOGIN_SUPPORT_TITLE != null) {
 // -------------
 //
 // You must configure a mail server to be able to send invite emails from
-// Overleaf Community Edition. The config settings are passed to nodemailer. See the nodemailer
+// Lemma. The config settings are passed to nodemailer. See the nodemailer
 // documentation for available options:
 //
 //     http://www.nodemailer.com/docs/transports

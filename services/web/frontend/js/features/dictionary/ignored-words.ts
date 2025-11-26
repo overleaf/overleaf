@@ -1,5 +1,5 @@
 export const globalIgnoredWords = new Set([
-  'Overleaf',
+  'Lemma',
   'overleaf',
   'ShareLaTeX',
   'sharelatex',

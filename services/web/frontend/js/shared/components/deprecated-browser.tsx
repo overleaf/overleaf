@@ -22,7 +22,7 @@ export const DeprecatedBrowser: FC = () => {
           i18nKey="to_continue_using_upgrade_or_change_your_browser"
           components={[
             // eslint-disable-next-line jsx-a11y/anchor-has-content,react/jsx-key
-            <a href="/learn/how-to/Which_browsers_does_Overleaf_support%3F" />,
+            <a href="/learn/how-to/Which_browsers_does_Lemma_support%3F" />,
           ]}
         />
       }

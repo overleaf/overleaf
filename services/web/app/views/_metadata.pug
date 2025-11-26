@@ -38,11 +38,11 @@ else if metadata && metadata.image_src
 	meta(itemprop='image' content=metadata.image_src)
 	meta(name='image' content=metadata.image_src)
 else if settings.overleaf
-	//- the default image for Overleaf
+	//- the default image for Lemma
 	meta(itemprop='image' content=buildImgPath('ol-brand/overleaf_og_logo.png'))
 	meta(name='image' content=buildImgPath('ol-brand/overleaf_og_logo.png'))
 else
-	//- the default image for Overleaf Community Edition/Server Pro
+	//- the default image for Lemma Community Edition/Server Pro
 	meta(itemprop='image' content=buildBaseAssetPath() + 'apple-touch-icon.png')
 	meta(name='image' content=buildBaseAssetPath() + 'apple-touch-icon.png')
 
@@ -72,13 +72,13 @@ if metadata && metadata.twitterImage && metadata.twitterImage.fields
 	meta(name='twitter:image' content=metadata.twitterImage.fields.file.url)
 	meta(name='twitter:image:alt' content=metadata.twitterImage.fields.title)
 else if settings.overleaf
-	//- the default image for Overleaf
+	//- the default image for Lemma
 	meta(
 		name='twitter:image'
 		content=buildImgPath('ol-brand/overleaf_og_logo.png')
 	)
 else
-	//- the default image for Overleaf Community Edition/Server Pro
+	//- the default image for Lemma Community Edition/Server Pro
 	meta(
 		name='twitter:image'
 		content=buildBaseAssetPath() + 'apple-touch-icon.png'
@@ -98,13 +98,13 @@ if metadata && metadata.openGraphImage && metadata.openGraphImage.fields
 	//- from the CMS
 	meta(property='og:image' content=metadata.openGraphImage.fields.file.url)
 else if settings.overleaf
-	//- the default image for Overleaf
+	//- the default image for Lemma
 	meta(
 		property='og:image'
 		content=buildImgPath('ol-brand/overleaf_og_logo.png')
 	)
 else
-	//- the default image for Overleaf Community Edition/Server Pro
+	//- the default image for Lemma Community Edition/Server Pro
 	meta(
 		property='og:image'
 		content=buildBaseAssetPath() + 'apple-touch-icon.png'

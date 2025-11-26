@@ -48,7 +48,7 @@ export function setDefaultMeta() {
   Object.assign(getMeta('ol-ExposedSettings'), {
     emailConfirmationDisabled: false,
     samlInitPath: '/fakeSaml',
-    appName: 'Overleaf',
+    appName: 'Lemma',
   })
   window.metaAttributesCache.set('ol-notificationsInstitution', [])
   window.metaAttributesCache.set('ol-userEmails', [])

@@ -61,8 +61,8 @@ function ThinFooter({
               <>
                 <li>
                   {/* year of Server Pro release, static */}© 2025{' '}
-                  <a href="https://www.overleaf.com/for/enterprises">
-                    Powered by Overleaf
+                  <a href="https://lemmaforlatex.com">
+                    Powered by Lemma
                   </a>
                 </li>
                 {showLanguagePicker || hasCustomLeftNav ? <Separator /> : null}
