@@ -1,0 +1,8 @@
+{
+  "name": "@overleaf/eslint-plugin",
+  "version": "0.0.1",
+  "description": "Overleaf ESLint plugin (stub)",
+  "main": "index.js",
+  "license": "AGPL-3.0-only"
+}
+
