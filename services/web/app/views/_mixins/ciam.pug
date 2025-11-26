@@ -12,13 +12,8 @@ mixin ciamCardSeparator
 mixin ciamCardFooter
 	section.ciam-card-footer
 		+ciamCardSeparator
-		.ciam-footer-ds-logo
-			img(
-				src=buildImgPath('digital-science/digital-science.svg')
-				alt='Digital Science'
-			)
-		p
-			| !{translate('advancing_research_with', { linkLemma: 'https://lemmaforlatex.com', linkPapers: 'https://www.papersapp.com/', linkDS: 'https://www.digital-science.com/products/' })}
+		p.ciam-footer-copyright
+			| © #{new Date().getFullYear()} Bayes AI Inc.
 
 mixin ciamTermsOfServiceAgreement
 	p

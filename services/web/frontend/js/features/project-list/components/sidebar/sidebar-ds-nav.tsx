@@ -171,7 +171,7 @@ function SidebarDsNav() {
           )}
         </nav>
         <div className="ds-nav-ds-name" translate="no">
-          <span>Digital Science</span>
+          <span>Bayes AI</span>
         </div>
       </div>
       <div
