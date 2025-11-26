@@ -357,6 +357,15 @@ pipeline {
     always {
       junit checksName: 'Server-Pro-E2E-Tests results', testResults: 'server-ce/test/reports/junit-*.xml'
     }
+    failure {
+      script {
+        if (env.BRANCH_NAME == 'main') {
+          node('built-in') {
+            sh '/usr/local/bin/open-gh-failure-issue --project="B2B"'
+          }
+        }
+      }
+    }
     // Ensure tear down of test containers, remove CE docker images, then run general Jenkins VM cleanup.
     cleanup {
       dir('server-ce/test') {
