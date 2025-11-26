@@ -142,6 +142,15 @@ pipeline {
     always {
       junit checksName: 'contacts test results', testResults: 'services/contacts/reports/junit-*.xml'
     }
+    failure {
+      script {
+        if (env.BRANCH_NAME == 'main') {
+          node('built-in') {
+            sh '/usr/local/bin/open-gh-failure-issue --project="B2C"'
+          }
+        }
+      }
+    }
     cleanup {
       dir('services/contacts') {
         sh 'make clean'

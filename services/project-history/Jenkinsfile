@@ -142,6 +142,15 @@ pipeline {
     always {
       junit checksName: 'project-history test results', testResults: 'services/project-history/reports/junit-*.xml'
     }
+    failure {
+      script {
+        if (env.BRANCH_NAME == 'main') {
+          node('built-in') {
+            sh '/usr/local/bin/open-gh-failure-issue --project="🥑 Core"'
+          }
+        }
+      }
+    }
     cleanup {
       dir('services/project-history') {
         sh 'make clean'

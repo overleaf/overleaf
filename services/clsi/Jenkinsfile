@@ -148,6 +148,15 @@ pipeline {
     always {
       junit checksName: 'clsi test results', testResults: 'services/clsi/reports/junit-*.xml'
     }
+    failure {
+      script {
+        if (env.BRANCH_NAME == 'main') {
+          node('built-in') {
+            sh '/usr/local/bin/open-gh-failure-issue --project="🚉 Platform"'
+          }
+        }
+      }
+    }
     cleanup {
       dir('services/clsi') {
         sh 'make clean'

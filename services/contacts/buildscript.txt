@@ -4,4 +4,5 @@ contacts
 --env-pass-through=
 --esmock-loader=True
 --node-version=22.18.0
+--pipeline-owner=B2C
 --public-repo=False

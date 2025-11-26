@@ -142,6 +142,15 @@ pipeline {
     always {
       junit checksName: 'docstore test results', testResults: 'services/docstore/reports/junit-*.xml'
     }
+    failure {
+      script {
+        if (env.BRANCH_NAME == 'main') {
+          node('built-in') {
+            sh '/usr/local/bin/open-gh-failure-issue --project="🚉 Platform"'
+          }
+        }
+      }
+    }
     cleanup {
       dir('services/docstore') {
         sh 'make clean'

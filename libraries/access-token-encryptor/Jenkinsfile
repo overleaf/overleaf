@@ -101,6 +101,15 @@ pipeline {
     always {
       junit checksName: 'access-token-encryptor test results', testResults: 'libraries/access-token-encryptor/reports/junit-*.xml'
     }
+    failure {
+      script {
+        if (env.BRANCH_NAME == 'main') {
+          node('built-in') {
+            sh '/usr/local/bin/open-gh-failure-issue --project="🚉 Platform"'
+          }
+        }
+      }
+    }
     cleanup {
       sh 'rm -rf libraries/access-token-encryptor/reports'
       sh 'make clean_jenkins -j10'

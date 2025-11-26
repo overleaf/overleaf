@@ -5,6 +5,7 @@ filestore
 --env-pass-through=
 --esmock-loader=False
 --node-version=22.18.0
+--pipeline-owner=🚉 Platform
 --public-repo=True
 --test-acceptance-shards=SHARD_01_,SHARD_02_,SHARD_03_
 --use-large-ci-runner=True

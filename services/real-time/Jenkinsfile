@@ -142,6 +142,15 @@ pipeline {
     always {
       junit checksName: 'real-time test results', testResults: 'services/real-time/reports/junit-*.xml'
     }
+    failure {
+      script {
+        if (env.BRANCH_NAME == 'main') {
+          node('built-in') {
+            sh '/usr/local/bin/open-gh-failure-issue --project="🚉 Platform"'
+          }
+        }
+      }
+    }
     cleanup {
       dir('services/real-time') {
         sh 'make clean'
