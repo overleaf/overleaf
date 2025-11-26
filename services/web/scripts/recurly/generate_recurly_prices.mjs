@@ -78,6 +78,16 @@ function computeAddOnPrices(prices, size) {
   })
 }
 
+function shouldSkipPlan(record) {
+  const planCode = record.plan_code
+  // Skip non-legacy group plan codes (e.g. group_professional_20_enterprise)
+  if (planCode.startsWith('group_') && !GROUP_SIZE_REGEX.test(planCode)) {
+    return true
+  }
+
+  return false
+}
+
 // Convert the raw records into the output format
 
 function transformRecordToPlan(record) {
@@ -104,8 +114,12 @@ function transformRecordToPlan(record) {
 function generate(inputFile, outputFile) {
   const input = fs.readFileSync(inputFile, 'utf8')
   const rawRecords = csv.parse(input, { columns: true })
+  // filter out plans that should be skipped
+  const filteredRecords = rawRecords.filter(record => !shouldSkipPlan(record))
   // transform the raw records into the output format
-  const plans = _.sortBy(rawRecords, 'plan_code').map(transformRecordToPlan)
+  const plans = _.sortBy(filteredRecords, 'plan_code').map(
+    transformRecordToPlan
+  )
   const output = JSON.stringify(plans, null, 2)
   fs.writeFileSync(outputFile, output)
 }

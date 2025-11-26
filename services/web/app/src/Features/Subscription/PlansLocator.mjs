@@ -46,7 +46,6 @@ const recurlyCodeToStripeBaseLookupKey = {
   'student-annual': 'student_annual',
   student_free_trial_7_days: 'student_monthly',
 
-  // TODO: change all group plans' lookup_keys to match the UK account after they have been added
   group_collaborator: 'group_standard_enterprise',
   group_collaborator_educational: 'group_standard_educational',
   group_professional: 'group_professional_enterprise',
@@ -181,4 +180,5 @@ export default {
   getPlanTypeAndPeriodFromRecurlyPlanCode,
   isGroupPlanCode,
   convertLegacyGroupPlanCodeToConsolidatedGroupPlanCodeIfNeeded,
+  LATEST_STRIPE_LOOKUP_KEY_VERSION,
 }
