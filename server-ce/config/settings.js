@@ -200,9 +200,6 @@ const settings = {
   restrictInvitesToExistingAccounts:
     process.env.OVERLEAF_RESTRICT_INVITES_TO_EXISTING_ACCOUNTS === 'true',
 
-  // Allow public access to registration page and other public pages
-  allowPublicAccess: process.env.OVERLEAF_ALLOW_PUBLIC_ACCESS === 'true',
-
   nav: {
     title:
       process.env.OVERLEAF_NAV_TITLE ||
