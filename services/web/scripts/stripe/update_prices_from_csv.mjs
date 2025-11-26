@@ -26,7 +26,7 @@ import fs from 'node:fs'
 // https://github.com/import-js/eslint-plugin-import/issues/1810
 // eslint-disable-next-line import/no-unresolved
 import * as csv from 'csv/sync'
-import { z } from '../../app/src/infrastructure/Validation.js'
+import { z } from '../../app/src/infrastructure/Validation.mjs'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
 import { getRegionClient } from '../../modules/subscriptions/app/src/StripeClient.mjs'
 import PlansLocator from '../../app/src/Features/Subscription/PlansLocator.mjs'
