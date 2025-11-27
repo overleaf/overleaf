@@ -57,7 +57,7 @@ describe('PlansLocator', function () {
         planCode,
         currency
       )
-      expect(lookupKey).to.equal('standard_monthly_jun2025_eur')
+      expect(lookupKey).to.equal('standard_monthly_nov2025_eur')
     })
 
     it('should map "collaborator_free_trial_7_days" plan code to stripe lookup keys', function (ctx) {
@@ -67,7 +67,7 @@ describe('PlansLocator', function () {
         planCode,
         currency
       )
-      expect(lookupKey).to.equal('standard_monthly_jun2025_eur')
+      expect(lookupKey).to.equal('standard_monthly_nov2025_eur')
     })
 
     it('should map "collaborator-annual" plan code to stripe lookup keys', function (ctx) {
@@ -77,7 +77,7 @@ describe('PlansLocator', function () {
         planCode,
         currency
       )
-      expect(lookupKey).to.equal('standard_annual_jun2025_eur')
+      expect(lookupKey).to.equal('standard_annual_nov2025_eur')
     })
 
     it('should map "professional" plan code to stripe lookup keys', function (ctx) {
@@ -87,7 +87,7 @@ describe('PlansLocator', function () {
         planCode,
         currency
       )
-      expect(lookupKey).to.equal('professional_monthly_jun2025_eur')
+      expect(lookupKey).to.equal('professional_monthly_nov2025_eur')
     })
 
     it('should map "professional_free_trial_7_days" plan code to stripe lookup keys', function (ctx) {
@@ -97,7 +97,7 @@ describe('PlansLocator', function () {
         planCode,
         currency
       )
-      expect(lookupKey).to.equal('professional_monthly_jun2025_eur')
+      expect(lookupKey).to.equal('professional_monthly_nov2025_eur')
     })
 
     it('should map "professional-annual" plan code to stripe lookup keys', function (ctx) {
@@ -107,7 +107,7 @@ describe('PlansLocator', function () {
         planCode,
         currency
       )
-      expect(lookupKey).to.equal('professional_annual_jun2025_eur')
+      expect(lookupKey).to.equal('professional_annual_nov2025_eur')
     })
 
     it('should map "student" plan code to stripe lookup keys', function (ctx) {
@@ -117,7 +117,7 @@ describe('PlansLocator', function () {
         planCode,
         currency
       )
-      expect(lookupKey).to.equal('student_monthly_jun2025_eur')
+      expect(lookupKey).to.equal('student_monthly_nov2025_eur')
     })
 
     it('shoult map "student_free_trial_7_days" plan code to stripe lookup keys', function (ctx) {
@@ -127,7 +127,7 @@ describe('PlansLocator', function () {
         planCode,
         currency
       )
-      expect(lookupKey).to.equal('student_monthly_jun2025_eur')
+      expect(lookupKey).to.equal('student_monthly_nov2025_eur')
     })
 
     it('should map "student-annual" plan code to stripe lookup keys', function (ctx) {
@@ -137,7 +137,7 @@ describe('PlansLocator', function () {
         planCode,
         currency
       )
-      expect(lookupKey).to.equal('student_annual_jun2025_eur')
+      expect(lookupKey).to.equal('student_annual_nov2025_eur')
     })
 
     it('should return null for unknown add-on codes', function (ctx) {
@@ -169,7 +169,7 @@ describe('PlansLocator', function () {
         currency,
         billingCycleInterval
       )
-      expect(lookupKey).to.equal('assistant_monthly_jun2025_gbp')
+      expect(lookupKey).to.equal('assistant_monthly_nov2025_gbp')
     })
 
     it('returns the key for an annual AI assist add-on', function (ctx) {
@@ -181,7 +181,7 @@ describe('PlansLocator', function () {
         currency,
         billingCycleInterval
       )
-      expect(lookupKey).to.equal('assistant_annual_jun2025_gbp')
+      expect(lookupKey).to.equal('assistant_annual_nov2025_gbp')
     })
   })
 

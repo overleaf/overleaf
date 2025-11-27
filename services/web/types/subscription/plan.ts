@@ -108,7 +108,8 @@ export type StripeBaseLookupKey =
   | 'group_standard_educational'
   | 'group_professional_educational'
 
-export type StripeLookupKeyVersion = 'jun2025'
+// Keep in sync with LATEST_STRIPE_LOOKUP_KEY_VERSION in PlansLocator.mjs
+export type StripeLookupKeyVersion = 'nov2025'
 
 export type StripeLookupKey =
   `${StripeBaseLookupKey}_${StripeLookupKeyVersion}_${StripeCurrencyCode}`

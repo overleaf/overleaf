@@ -55,7 +55,8 @@ const recurlyCodeToStripeBaseLookupKey = {
   'assistant-annual': 'assistant_annual',
 }
 
-const LATEST_STRIPE_LOOKUP_KEY_VERSION = 'jun2025'
+// Keep in sync with StripeLookupKeyVersion in types/subscription/plan.ts
+const LATEST_STRIPE_LOOKUP_KEY_VERSION = 'nov2025'
 
 /**
  * Build the Stripe lookup key, will be in this format:
