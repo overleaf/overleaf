@@ -181,6 +181,26 @@ templates.canceledSubscription = ctaTemplate({
   },
 })
 
+templates.canceledSubscriptionOrAddOn = ctaTemplate({
+  subject() {
+    return `${settings.appName} thoughts`
+  },
+  message() {
+    return [
+      `We are sorry to see you cancelled your ${settings.appName} subscription. Would you mind giving us some feedback on what the site is lacking at the moment via this quick survey?`,
+    ]
+  },
+  secondaryMessage() {
+    return ['Thank you in advance!']
+  },
+  ctaText() {
+    return 'Leave feedback'
+  },
+  ctaURL(opts) {
+    return 'https://digitalscience.qualtrics.com/jfe/form/SV_2n2aSlWgvoxXdGK'
+  },
+})
+
 templates.reactivatedSubscription = ctaTemplate({
   subject() {
     return `Subscription Reactivated - ${settings.appName}`

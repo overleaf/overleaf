@@ -726,7 +726,7 @@ async function removeAddon(req, res, next) {
   logger.debug({ userId: user._id, addOnCode }, 'removing add-ons')
 
   try {
-    await SubscriptionHandler.promises.removeAddon(user._id, addOnCode)
+    await SubscriptionHandler.promises.removeAddon(user, addOnCode)
     res.sendStatus(200)
   } catch (err) {
     if (err instanceof AddOnNotPresentError) {

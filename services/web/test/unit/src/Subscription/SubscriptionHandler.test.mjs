@@ -2,6 +2,7 @@ import { expect, vi } from 'vitest'
 import sinon from 'sinon'
 import PaymentProviderEntities from '../../../../app/src/Features/Subscription/PaymentProviderEntities.mjs'
 import SubscriptionHelper from '../../../../app/src/Features/Subscription/SubscriptionHelper.mjs'
+import { AI_ADD_ON_CODE } from '../../../../app/src/Features/Subscription/AiHelper.mjs'
 
 const { PaymentProviderSubscription } = PaymentProviderEntities
 const MODULE_PATH =
@@ -141,6 +142,12 @@ describe('SubscriptionHandler', function () {
       },
     }
 
+    ctx.SplitTestHandler = {
+      promises: {
+        getAssignmentForUser: sinon.stub().resolves({ variant: 'default' }),
+      },
+    }
+
     vi.doMock(
       '../../../../app/src/Features/Subscription/RecurlyWrapper',
       () => ({
@@ -205,6 +212,13 @@ describe('SubscriptionHandler', function () {
     vi.doMock('../../../../app/src/Features/User/UserUpdater', () => ({
       default: ctx.UserUpdater,
     }))
+
+    vi.doMock(
+      '../../../../app/src/Features/SplitTests/SplitTestHandler',
+      () => ({
+        default: ctx.SplitTestHandler,
+      })
+    )
 
     vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
       default: (ctx.Modules = {
@@ -412,6 +426,92 @@ describe('SubscriptionHandler', function () {
     })
   })
 
+  describe('removeAddon', function () {
+    beforeEach(function (ctx) {
+      ctx.addOnCode = AI_ADD_ON_CODE
+    })
+
+    describe('when split test is disabled', function () {
+      beforeEach(async function (ctx) {
+        ctx.SplitTestHandler.promises.getAssignmentForUser.resolves({
+          variant: 'control',
+        })
+        await ctx.SubscriptionHandler.promises.removeAddon(
+          ctx.user,
+          ctx.addOnCode
+        )
+      })
+
+      it('should remove the addon', function (ctx) {
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'removeAddOn',
+          ctx.user._id,
+          ctx.addOnCode
+        )
+      })
+
+      it('should send the email after 1 hour', function (ctx) {
+        const ONE_HOUR_IN_MS = 1000 * 60 * 60
+        expect(ctx.EmailHandler.sendDeferredEmail).to.have.been.calledWith(
+          'canceledSubscription',
+          { to: ctx.user.email, first_name: ctx.user.first_name },
+          ONE_HOUR_IN_MS
+        )
+      })
+    })
+
+    describe('when split test is enabled', function () {
+      beforeEach(async function (ctx) {
+        ctx.SplitTestHandler.promises.getAssignmentForUser.resolves({
+          variant: 'enabled',
+        })
+        await ctx.SubscriptionHandler.promises.removeAddon(
+          ctx.user,
+          ctx.addOnCode
+        )
+      })
+
+      it('should remove the addon', function (ctx) {
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'removeAddOn',
+          ctx.user._id,
+          ctx.addOnCode
+        )
+      })
+
+      it('should send the email after 1 hour', function (ctx) {
+        const ONE_HOUR_IN_MS = 1000 * 60 * 60
+        expect(ctx.EmailHandler.sendDeferredEmail).to.have.been.calledWith(
+          'canceledSubscriptionOrAddOn',
+          { to: ctx.user.email, first_name: ctx.user.first_name },
+          ONE_HOUR_IN_MS
+        )
+      })
+    })
+
+    describe('when addon is not AI assistant', function () {
+      beforeEach(async function (ctx) {
+        ctx.addOnCode = 'other-addon'
+        await ctx.SubscriptionHandler.promises.removeAddon(
+          ctx.user,
+          ctx.addOnCode
+        )
+      })
+
+      it('should remove the addon', function (ctx) {
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'removeAddOn',
+          ctx.user._id,
+          ctx.addOnCode
+        )
+      })
+
+      it('should not send an email', function (ctx) {
+        expect(ctx.EmailHandler.sendDeferredEmail).to.not.have.been.called
+      })
+    })
+  })
+
   describe('cancelSubscription', function () {
     describe('with a user without a subscription', function () {
       beforeEach(async function (ctx) {
@@ -435,23 +535,56 @@ describe('SubscriptionHandler', function () {
           hasSubscription: true,
           subscription: ctx.subscription,
         })
-        await ctx.SubscriptionHandler.promises.cancelSubscription(ctx.user)
       })
 
-      it('should cancel the subscription', function (ctx) {
-        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
-          'cancelPaidSubscription',
-          ctx.subscription
-        )
+      describe('when split test is disabled', function () {
+        beforeEach(async function (ctx) {
+          ctx.SplitTestHandler.promises.getAssignmentForUser.resolves({
+            variant: 'control',
+          })
+          await ctx.SubscriptionHandler.promises.cancelSubscription(ctx.user)
+        })
+
+        it('should cancel the subscription', function (ctx) {
+          expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+            'cancelPaidSubscription',
+            ctx.subscription
+          )
+        })
+
+        it('should send the email after 1 hour', function (ctx) {
+          const ONE_HOUR_IN_MS = 1000 * 60 * 60
+          expect(ctx.EmailHandler.sendDeferredEmail).to.have.been.calledWith(
+            'canceledSubscription',
+            { to: ctx.user.email, first_name: ctx.user.first_name },
+            ONE_HOUR_IN_MS
+          )
+        })
       })
 
-      it('should send the email after 1 hour', function (ctx) {
-        const ONE_HOUR_IN_MS = 1000 * 60 * 60
-        expect(ctx.EmailHandler.sendDeferredEmail).to.have.been.calledWith(
-          'canceledSubscription',
-          { to: ctx.user.email, first_name: ctx.user.first_name },
-          ONE_HOUR_IN_MS
-        )
+      describe('when split test is enabled', function () {
+        beforeEach(async function (ctx) {
+          ctx.SplitTestHandler.promises.getAssignmentForUser.resolves({
+            variant: 'enabled',
+          })
+          await ctx.SubscriptionHandler.promises.cancelSubscription(ctx.user)
+        })
+
+        it('should cancel the subscription', function (ctx) {
+          expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+            'cancelPaidSubscription',
+            ctx.subscription
+          )
+        })
+
+        it('should send the email after 1 hour', function (ctx) {
+          const ONE_HOUR_IN_MS = 1000 * 60 * 60
+          expect(ctx.EmailHandler.sendDeferredEmail).to.have.been.calledWith(
+            'canceledSubscriptionOrAddOn',
+            { to: ctx.user.email, first_name: ctx.user.first_name },
+            ONE_HOUR_IN_MS
+          )
+        })
       })
     })
   })

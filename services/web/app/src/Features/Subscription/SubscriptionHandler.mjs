@@ -14,6 +14,8 @@ import { callbackify } from '@overleaf/promise-utils'
 import UserUpdater from '../User/UserUpdater.mjs'
 import { IndeterminateInvoiceError } from '../Errors/Errors.js'
 import Modules from '../../infrastructure/Modules.js'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import { AI_ADD_ON_CODE } from './AiHelper.mjs'
 
 /**
  * @import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities.mjs'
@@ -132,6 +134,45 @@ async function cancelPendingSubscriptionChange(user) {
 }
 
 /**
+ * Send cancellation email to user with split test for AI Assist addon
+ * @param user
+ */
+async function _sendCancellationEmail(user) {
+  const { variant } = await SplitTestHandler.promises.getAssignmentForUser(
+    user._id,
+    'cancellation-survey-ai-assist'
+  )
+
+  const emailOpts = {
+    to: user.email,
+    first_name: user.first_name,
+  }
+
+  const ONE_HOUR_IN_MS = 1000 * 60 * 60
+
+  if (variant === 'enabled') {
+    logger.debug(
+      { userId: user._id },
+      'deferred email: canceledSubscriptionOrAddOn'
+    )
+
+    EmailHandler.sendDeferredEmail(
+      'canceledSubscriptionOrAddOn',
+      emailOpts,
+      ONE_HOUR_IN_MS
+    )
+  } else {
+    logger.debug({ userId: user._id }, 'deferred email: canceledSubscription')
+
+    EmailHandler.sendDeferredEmail(
+      'canceledSubscription',
+      emailOpts,
+      ONE_HOUR_IN_MS
+    )
+  }
+}
+
+/**
  * @param user
  */
 async function cancelSubscription(user) {
@@ -139,16 +180,8 @@ async function cancelSubscription(user) {
     await LimitationsManager.promises.userHasSubscription(user)
   if (hasSubscription && subscription != null) {
     await Modules.promises.hooks.fire('cancelPaidSubscription', subscription)
-    const emailOpts = {
-      to: user.email,
-      first_name: user.first_name,
-    }
-    const ONE_HOUR_IN_MS = 1000 * 60 * 60
-    EmailHandler.sendDeferredEmail(
-      'canceledSubscription',
-      emailOpts,
-      ONE_HOUR_IN_MS
-    )
+
+    await _sendCancellationEmail(user)
   }
 }
 
@@ -277,13 +310,17 @@ async function purchaseAddon(userId, addOnCode, quantity) {
 }
 
 /**
- * Cancels and add-on for a user
+ * Cancels an add-on for a user
  *
- * @param {string} userId
+ * @param user
  * @param {string} addOnCode
  */
-async function removeAddon(userId, addOnCode) {
-  await Modules.promises.hooks.fire('removeAddOn', userId, addOnCode)
+async function removeAddon(user, addOnCode) {
+  await Modules.promises.hooks.fire('removeAddOn', user._id, addOnCode)
+
+  if (addOnCode === AI_ADD_ON_CODE) {
+    await _sendCancellationEmail(user)
+  }
 }
 
 /**

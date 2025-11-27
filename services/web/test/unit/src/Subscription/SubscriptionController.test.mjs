@@ -1126,6 +1126,57 @@ describe('SubscriptionController', function () {
     })
   })
 
+  describe('removeAddon', function () {
+    beforeEach(function (ctx) {
+      ctx.SessionManager.getSessionUser.returns(ctx.user)
+      ctx.next = sinon.stub()
+      ctx.req.params = { addOnCode: AI_ADD_ON_CODE }
+      ctx.SubscriptionHandler.promises.removeAddon = sinon.stub().resolves()
+    })
+
+    it('should return 200 on successful removal of AI add-on', async function (ctx) {
+      ctx.res.sendStatus = sinon.spy()
+
+      await ctx.SubscriptionController.removeAddon(ctx.req, ctx.res, ctx.next)
+
+      expect(ctx.SubscriptionHandler.promises.removeAddon).to.have.been.called
+      expect(
+        ctx.SubscriptionHandler.promises.removeAddon
+      ).to.have.been.calledWith(ctx.user, AI_ADD_ON_CODE)
+      expect(ctx.res.sendStatus).to.have.been.calledWith(200)
+      expect(ctx.logger.debug).to.have.been.calledWith(
+        { userId: ctx.user._id, addOnCode: AI_ADD_ON_CODE },
+        'removing add-ons'
+      )
+    })
+
+    it('should return 404 if the add-on code is not AI_ADD_ON_CODE', async function (ctx) {
+      ctx.req.params = { addOnCode: 'some-other-addon' }
+      ctx.res.sendStatus = sinon.spy()
+
+      await ctx.SubscriptionController.removeAddon(ctx.req, ctx.res, ctx.next)
+
+      expect(ctx.SubscriptionHandler.promises.removeAddon).to.not.have.been
+        .called
+      expect(ctx.res.sendStatus).to.have.been.calledWith(404)
+    })
+
+    it('should handle AddOnNotPresentError and send badRequest', async function (ctx) {
+      ctx.SubscriptionHandler.promises.removeAddon.rejects(
+        new SubscriptionErrors.AddOnNotPresentError()
+      )
+
+      await ctx.SubscriptionController.removeAddon(ctx.req, ctx.res, ctx.next)
+
+      expect(ctx.HttpErrorHandler.badRequest).to.have.been.calledWith(
+        ctx.req,
+        ctx.res,
+        'Your subscription does not contain the requested add-on',
+        { addon: AI_ADD_ON_CODE }
+      )
+    })
+  })
+
   describe('checkSubscriptionPauseStatus', function () {
     beforeEach(function (ctx) {
       ctx.user = {
