@@ -39,7 +39,7 @@
     --image-padding: var(--spacing-01);
 
     display: grid;
-    grid-template-columns: var(--image-size) 1fr auto;
+    grid-template-columns: var(--image-size) 1fr auto auto;
     gap: var(--spacing-07);
     align-items: center;
     padding: var(--spacing-05);
@@ -115,5 +115,17 @@
 .labs-opt-in {
   .form-group {
     margin-top: var(--spacing-06);
+  }
+}
+
+.labs-workbench-logo {
+  width: 32px;
+  height: 32px;
+  padding: var(--spacing-01);
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
   }
 }

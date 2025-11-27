@@ -6,7 +6,7 @@ import { postJSON } from '@/infrastructure/fetch-json'
 import OLButton from '@/shared/components/ol/ol-button'
 import getMeta from '@/utils/meta'
 
-type IntegrationLinkingWidgetProps = {
+export type LabsExperimentWidgetProps = {
   logo: ReactNode
   title: string
   description: string | ReactNode
@@ -17,6 +17,7 @@ type IntegrationLinkingWidgetProps = {
   setErrorMessage: (message: string) => void
   optedIn: boolean
   setOptedIn: (optedIn: boolean) => void
+  feedbackLink?: string
 }
 
 /** @knipignore */
@@ -31,7 +32,8 @@ export function LabsExperimentWidget({
   setErrorMessage,
   optedIn,
   setOptedIn,
-}: IntegrationLinkingWidgetProps) {
+  feedbackLink,
+}: LabsExperimentWidgetProps) {
   const { t } = useTranslation()
 
   const experimentsErrorMessage = t(
@@ -83,6 +85,18 @@ export function LabsExperimentWidget({
       {disabled && (
         <div className="disabled-explanation">{t('experiment_full')}</div>
       )}
+      <div>
+        {optedIn && feedbackLink && (
+          <OLButton
+            variant="ghost"
+            href={feedbackLink}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {t('give_feedback')}
+          </OLButton>
+        )}
+      </div>
       <div>
         {labsEnabled && (
           <ActionButton

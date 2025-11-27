@@ -95,4 +95,6 @@ const MonthlyTexliveLabsWidget = ({
   )
 }
 
+export const hidden = () => !isSplitTestEnabled('monthly-texlive')
+
 export default MonthlyTexliveLabsWidget
