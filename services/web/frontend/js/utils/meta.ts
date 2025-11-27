@@ -117,7 +117,7 @@ export interface Meta {
   'ol-domainCaptureEnabled': boolean | undefined
   'ol-domainCaptureTestURL': string | undefined
   'ol-dropbox': { error: boolean; registered: boolean }
-  'ol-editorThemes': string[]
+  'ol-editorThemes': { name: string; dark: boolean }[]
   'ol-email': string
   'ol-emailAddressLimit': number
   'ol-error': { name: string } | undefined
@@ -188,7 +188,7 @@ export interface Meta {
   'ol-labsExperiments': ActiveExperiment[] | undefined
   'ol-languages': SpellCheckLanguage[]
   'ol-learnedWords': string[]
-  'ol-legacyEditorThemes': string[]
+  'ol-legacyEditorThemes': { name: string; dark: boolean }[]
   'ol-licenseQuantity'?: number
   'ol-loadingText': string
   'ol-managedGroupSubscriptions': ManagedGroupSubscription[]

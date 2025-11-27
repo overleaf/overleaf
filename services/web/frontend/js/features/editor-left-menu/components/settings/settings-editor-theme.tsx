@@ -14,8 +14,8 @@ export default function SettingsEditorTheme() {
   const options = useMemo(() => {
     const editorThemeOptions: Array<Option> =
       editorThemes?.map(theme => ({
-        value: theme,
-        label: theme.replace(/_/g, ' '),
+        value: theme.name,
+        label: theme.name.replace(/_/g, ' '),
       })) ?? []
 
     const dividerOption: Option = {
@@ -26,8 +26,8 @@ export default function SettingsEditorTheme() {
 
     const legacyEditorThemeOptions: Array<Option> =
       legacyEditorThemes?.map(theme => ({
-        value: theme,
-        label: theme.replace(/_/g, ' ') + ' (Legacy)',
+        value: theme.name,
+        label: theme.name.replace(/_/g, ' ') + ' (Legacy)',
       })) ?? []
 
     return [...editorThemeOptions, dividerOption, ...legacyEditorThemeOptions]

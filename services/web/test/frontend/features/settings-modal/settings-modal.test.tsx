@@ -60,8 +60,16 @@ describe('<SettingsModal />', function () {
     },
   ]
 
-  const editorThemes = ['editortheme-1', 'editortheme-2', 'editortheme-3']
-  const legacyEditorThemes = ['legacytheme-1', 'legacytheme-2', 'legacytheme-3']
+  const editorThemes = [
+    { name: 'editortheme-1', dark: false },
+    { name: 'editortheme-2', dark: false },
+    { name: 'editortheme-3', dark: false },
+  ]
+  const legacyEditorThemes = [
+    { name: 'legacytheme-1', dark: false },
+    { name: 'legacytheme-2', dark: false },
+    { name: 'legacytheme-3', dark: false },
+  ]
 
   const imageNames: ImageName[] = [
     {

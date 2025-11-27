@@ -7,8 +7,16 @@ import EditorThemeSetting from '@/features/ide-redesign/components/settings/appe
 import userEvent from '@testing-library/user-event'
 
 describe('<EditorThemeSetting />', function () {
-  const editorThemes = ['editortheme-1', 'editortheme-2', 'editortheme-3']
-  const legacyEditorThemes = ['legacytheme-1', 'legacytheme-2', 'legacytheme-3']
+  const editorThemes = [
+    { name: 'editortheme-1', dark: false },
+    { name: 'editortheme-2', dark: false },
+    { name: 'editortheme-3', dark: false },
+  ]
+  const legacyEditorThemes = [
+    { name: 'legacytheme-1', dark: false },
+    { name: 'legacytheme-2', dark: false },
+    { name: 'legacytheme-3', dark: false },
+  ]
 
   beforeEach(function () {
     window.metaAttributesCache.set('ol-editorThemes', editorThemes)
@@ -39,25 +47,25 @@ describe('<EditorThemeSetting />', function () {
     const select = screen.getByLabelText('Editor theme')
 
     for (const theme of editorThemes) {
-      const option = within(select).getByText(theme.replace(/_/g, ' '))
-      expect(option.getAttribute('value')).to.equal(theme)
+      const option = within(select).getByText(theme.name.replace(/_/g, ' '))
+      expect(option.getAttribute('value')).to.equal(theme.name)
       await userEvent.selectOptions(select, [option])
       expect(
         saveSettingsMock.callHistory.called(`/user/settings`, {
-          body: { editorTheme: theme },
+          body: { editorTheme: theme.name },
         })
       ).to.be.true
     }
 
     for (const theme of legacyEditorThemes) {
       const option = within(select).getByText(
-        theme.replace(/_/g, ' ') + ' (Legacy)'
+        theme.name.replace(/_/g, ' ') + ' (Legacy)'
       )
-      expect(option.getAttribute('value')).to.equal(theme)
+      expect(option.getAttribute('value')).to.equal(theme.name)
       await userEvent.selectOptions(select, [option])
       expect(
         saveSettingsMock.callHistory.called(`/user/settings`, {
-          body: { editorTheme: theme },
+          body: { editorTheme: theme.name },
         })
       ).to.be.true
     }

@@ -1,4 +1,4 @@
-import { LoadingPane } from '@/features/ide-react/components/editor/loading-pane'
+import { EditorLoadingPane } from '@/features/ide-react/components/editor/editor-loading-pane'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'
 import classNames from 'classnames'
@@ -40,7 +40,7 @@ export const Editor = () => {
           className="ide-redesign-editor-panel"
         >
           <SourceEditor />
-          {isLoading && <LoadingPane />}
+          {isLoading && <EditorLoadingPane />}
         </Panel>
         {showSymbolPalette && (
           <>

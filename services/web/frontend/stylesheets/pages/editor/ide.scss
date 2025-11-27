@@ -77,6 +77,17 @@ $editor-toggler-bg-dark-color: color.adjust(
       background-color: var(--bg-tertiary-themed);
     }
   }
+
+  .loading-panel {
+    background-color: var(--bg-light-primary);
+    color: var(--content-primary);
+
+    // Based on editor theme rather than overall theme
+    &.loading-panel-dark {
+      background-color: var(--bg-dark-primary);
+      color: var(--content-primary-dark);
+    }
+  }
 }
 
 .global-alerts {

@@ -4,7 +4,7 @@ import SourceEditor from '@/features/source-editor/components/source-editor'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import classNames from 'classnames'
-import { LoadingPane } from '@/features/ide-react/components/editor/loading-pane'
+import { EditorLoadingPane } from '@/features/ide-react/components/editor/editor-loading-pane'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import { VerticalResizeHandle } from '@/features/ide-react/components/resize/vertical-resize-handle'
 import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'
@@ -37,7 +37,7 @@ export const EditorPane: FC = () => {
           className="ide-react-editor-panel"
         >
           <SourceEditor />
-          {isLoading && <LoadingPane />}
+          {isLoading && <EditorLoadingPane />}
         </Panel>
 
         {showSymbolPalette && (

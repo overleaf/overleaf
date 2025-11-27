@@ -287,7 +287,8 @@ const loadSelectedTheme = async (editorTheme: string) => {
     const themes = getMeta('ol-editorThemes') || []
     const legacyThemes = getMeta('ol-legacyEditorThemes') || []
     const themeExists =
-      themes.includes(editorTheme) || legacyThemes.includes(editorTheme)
+      themes.some(theme => theme.name === editorTheme) ||
+      legacyThemes.some(theme => theme.name === editorTheme)
     if (!themeExists) {
       editorTheme = 'textmate' // fallback to default if the theme is not found
     }
