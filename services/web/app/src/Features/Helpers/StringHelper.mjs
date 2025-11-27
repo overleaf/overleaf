@@ -15,6 +15,20 @@ const JSON_ESCAPE = {
   '\u2029': '\\u2029',
 }
 
+/**
+ * Converts a snake_case string into a user friendly string with each word capitalized.
+ * @param {string} snakecaseStr
+ * @returns {string}
+ */
+export function wordifySnakecase(snakecaseStr) {
+  return snakecaseStr
+    .split('_')
+    .map(word => {
+      return word.charAt(0).toUpperCase() + word.slice(1)
+    })
+    .join(' ')
+}
+
 export default StringHelper = {
   // stringifies and escapes a json object for use in a script. This ensures that &, < and > characters are escaped,
   // along with quotes. This ensures that the string can be safely rendered into HTML. See rationale at:

@@ -114,6 +114,21 @@ export interface CustomerCreatedWebhookEvent extends Stripe.EventBase {
   }
 }
 
+export interface CustomerUpdatedWebhookEvent extends Stripe.EventBase {
+  type: 'customer.updated'
+  data: {
+    object: Stripe.Customer
+    previous_attributes?: {
+      invoice_settings?: {
+        default_payment_method?: string
+      }
+      address?: Stripe.Address
+      name?: string
+      email?: string
+    }
+  }
+}
+
 export type CustomerSubscriptionWebhookEvent =
   | CustomerSubscriptionUpdatedWebhookEvent
   | CustomerSubscriptionCreatedWebhookEvent
@@ -127,3 +142,4 @@ export type WebhookEvent =
   | SetupIntentSetupFailedWebhookEvent
   | InvoiceOverdueWebhookEvent
   | CustomerCreatedWebhookEvent
+  | CustomerUpdatedWebhookEvent
