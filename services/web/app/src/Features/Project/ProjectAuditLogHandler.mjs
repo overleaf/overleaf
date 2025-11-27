@@ -4,6 +4,7 @@ import { callbackify } from '@overleaf/promise-utils'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
 
 const MANAGED_GROUP_PROJECT_EVENTS = [
+  'send-invite',
   'accept-invite',
   'project-created',
   'project-deleted',
