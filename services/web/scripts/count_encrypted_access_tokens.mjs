@@ -1,7 +1,7 @@
 import {
   db,
   READ_PREFERENCE_SECONDARY,
-} from '../app/src/infrastructure/mongodb.js'
+} from '../app/src/infrastructure/mongodb.mjs'
 import _ from 'lodash'
 import { formatTokenUsageStats } from '@overleaf/access-token-encryptor/scripts/helpers/format-usage-stats.js'
 import { ensureMongoTimeout } from './helpers/env_variable_helper.mjs'

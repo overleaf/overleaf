@@ -3,7 +3,7 @@ import { promisify } from 'node:util'
 import { expect } from 'chai'
 import logger from '@overleaf/logger'
 import { filterOutput } from './helpers/settings.mjs'
-import { db } from '../../../app/src/infrastructure/mongodb.js'
+import { db } from '../../../app/src/infrastructure/mongodb.mjs'
 import { renderObjectId } from '@overleaf/mongo-utils/batchedUpdate.js'
 
 const BATCH_SIZE = 100

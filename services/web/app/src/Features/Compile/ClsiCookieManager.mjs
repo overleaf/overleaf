@@ -6,7 +6,7 @@ import {
   fetchStringWithResponse,
   RequestFailedError,
 } from '@overleaf/fetch-utils'
-import RedisWrapper from '../../infrastructure/RedisWrapper.js'
+import RedisWrapper from '../../infrastructure/RedisWrapper.mjs'
 import Cookie from 'cookie'
 import logger from '@overleaf/logger'
 import Metrics from '@overleaf/metrics'

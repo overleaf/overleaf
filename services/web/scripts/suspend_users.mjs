@@ -4,7 +4,7 @@
  * Usage: node scripts/suspend_users.mjs <filename>
  */
 import fs from 'node:fs'
-import { ObjectId } from '../app/src/infrastructure/mongodb.js'
+import { ObjectId } from '../app/src/infrastructure/mongodb.mjs'
 import UserUpdater from '../app/src/Features/User/UserUpdater.mjs'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
 

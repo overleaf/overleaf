@@ -1,4 +1,4 @@
-import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.mjs'
 import { promisify } from 'node:util'
 import { exec } from 'node:child_process'
 import logger from '@overleaf/logger'

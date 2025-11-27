@@ -1,5 +1,5 @@
 import mongodb from 'mongodb-legacy'
-import { db } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.mjs'
 import DocumentUpdaterHandler from '../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.mjs'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 

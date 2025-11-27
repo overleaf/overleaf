@@ -1,4 +1,4 @@
-import RedisWrapper from '../../../../app/src/infrastructure/RedisWrapper.js'
+import RedisWrapper from '../../../../app/src/infrastructure/RedisWrapper.mjs'
 const client = RedisWrapper.client('ratelimiter')
 
 export default {

@@ -1,9 +1,9 @@
-const logger = require('@overleaf/logger')
-const pug = require('pug')
-const globby = require('globby')
-const Settings = require('@overleaf/settings')
-const fs = require('fs')
-const Path = require('path')
+import logger from '@overleaf/logger'
+import pug from 'pug'
+import globby from 'globby'
+import Settings from '@overleaf/settings'
+import fs from 'node:fs'
+import Path from 'node:path'
 
 // Generate list of view names from app/views
 function buildViewList() {
@@ -147,7 +147,7 @@ function precompileViewsAndCacheToDisk() {
   )
 }
 
-module.exports = {
+export default {
   // for tests
   PUG_COMPILE_ARGUMENTS,
   _expectMetaFor,
@@ -169,7 +169,7 @@ module.exports = {
     return viewIncludes
   },
 
-  precompileViews(app) {
+  async precompileViews(app) {
     const startTime = Date.now()
     let success = 0
     let precompiled = 0
@@ -179,7 +179,9 @@ module.exports = {
       if (fs.existsSync(precompiledFilename)) {
         logger.debug({ filePath }, 'loading precompiled pug template')
         try {
-          pug.cache[filePath] = require(precompiledFilename)
+          // We need to retrieve the `default` property as a result of using dynamic imports
+          // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import#module_namespace_object
+          pug.cache[filePath] = (await import(precompiledFilename)).default
           precompiled++
           continue
         } catch (err) {
@@ -206,7 +208,7 @@ module.exports = {
   },
 }
 
-if (require.main === module) {
+if (import.meta.main) {
   precompileViewsAndCacheToDisk()
   process.exit(0)
 }

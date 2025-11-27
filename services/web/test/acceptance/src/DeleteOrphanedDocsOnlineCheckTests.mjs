@@ -3,7 +3,7 @@ import { promisify } from 'node:util'
 import { expect } from 'chai'
 import logger from '@overleaf/logger'
 import { filterOutput } from './helpers/settings.mjs'
-import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.mjs'
 
 const ONE_DAY_IN_S = 60 * 60 * 24
 const BATCH_SIZE = 3

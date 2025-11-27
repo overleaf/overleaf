@@ -10,7 +10,7 @@ import _ from 'lodash'
 import logger from '@overleaf/logger'
 import { callbackifyAll } from '@overleaf/promise-utils'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
-import Modules from '../../infrastructure/Modules.js'
+import Modules from '../../infrastructure/Modules.mjs'
 
 const REQUEST_TIMEOUT_MS = 30 * 1000
 const RESYNC_TIMEOUT_MS = 6 * 60 * 1000

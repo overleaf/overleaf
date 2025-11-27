@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 
 import _ from 'lodash'
-import { db, ObjectId } from '../../../../../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../../../../../app/src/infrastructure/mongodb.mjs'
 import User from '../../../../../test/acceptance/src/helpers/User.mjs'
 import MockV1HistoryApiClass from '../../../../../test/acceptance/src/mocks/MockV1HistoryApi.mjs'
 

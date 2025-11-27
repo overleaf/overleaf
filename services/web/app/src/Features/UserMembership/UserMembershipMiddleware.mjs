@@ -10,7 +10,7 @@ import EntityConfigs from './UserMembershipEntityConfigs.mjs'
 import Errors from '../Errors/Errors.js'
 import HttpErrorHandler from '../Errors/HttpErrorHandler.mjs'
 import TemplatesManager from '../Templates/TemplatesManager.mjs'
-import { z, zz, validateReq } from '../../infrastructure/Validation.js'
+import { z, zz, validateReq } from '../../infrastructure/Validation.mjs'
 import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
 
 const { useAdminCapabilities } = AdminAuthorizationHelper

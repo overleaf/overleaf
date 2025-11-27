@@ -1,4 +1,4 @@
-import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../app/src/infrastructure/mongodb.mjs'
 import minimist from 'minimist'
 const argv = minimist(process.argv.slice(2))
 const commit = argv.commit !== undefined

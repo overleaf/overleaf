@@ -18,7 +18,7 @@ describe('LearnedWordsManager', function () {
       },
     }
 
-    vi.doMock('../../../../app/src/infrastructure/mongodb.js', () => ({
+    vi.doMock('../../../../app/src/infrastructure/mongodb.mjs', () => ({
       default: { db: ctx.db },
     }))
 

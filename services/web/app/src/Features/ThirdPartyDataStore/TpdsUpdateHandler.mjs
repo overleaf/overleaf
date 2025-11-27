@@ -10,7 +10,7 @@ import ProjectRootDocManager from '../Project/ProjectRootDocManager.mjs'
 import FileTypeManager from '../Uploads/FileTypeManager.mjs'
 import CooldownManager from '../Cooldown/CooldownManager.mjs'
 import Errors from '../Errors/Errors.js'
-import Modules from '../../infrastructure/Modules.js'
+import Modules from '../../infrastructure/Modules.mjs'
 
 async function newUpdate(
   userId,

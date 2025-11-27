@@ -1,6 +1,6 @@
 import minimist from 'minimist'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
-import { db } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.mjs'
 
 const argv = minimist(process.argv.slice(2))
 

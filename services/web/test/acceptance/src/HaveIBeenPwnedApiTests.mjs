@@ -2,7 +2,7 @@ import Settings from '@overleaf/settings'
 import { expect } from 'chai'
 import UserHelper from './helpers/User.mjs'
 import MockHaveIBeenPwnedApiClass from './mocks/MockHaveIBeenPwnedApi.mjs'
-import { db } from '../../../app/src/infrastructure/mongodb.js'
+import { db } from '../../../app/src/infrastructure/mongodb.mjs'
 import MetricsHelper from './helpers/metrics.mjs'
 
 const User = UserHelper.promises

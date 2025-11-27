@@ -11,7 +11,7 @@ const MODULE_PATH = path.join(
   import.meta.dirname,
   '../../../../app/src/Features/Analytics/AnalyticsManager'
 )
-vi.mock('../../../../app/src/infrastructure/Metrics.js', () => ({
+vi.mock('../../../../app/src/infrastructure/Metrics.mjs', () => ({
   default: {
     analyticsQueue: {
       inc: vi.fn(),

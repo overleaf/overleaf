@@ -7,7 +7,7 @@ import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
 import { File } from '../../models/File.mjs'
 import OError from '@overleaf/o-error'
 import { promisifyAll } from '@overleaf/promise-utils'
-import Modules from '../../infrastructure/Modules.js'
+import Modules from '../../infrastructure/Modules.mjs'
 
 const FileStoreHandler = {
   RETRY_ATTEMPTS: 3,

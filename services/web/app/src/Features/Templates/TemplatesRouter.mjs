@@ -1,7 +1,7 @@
 import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import TemplatesController from './TemplatesController.mjs'
 import TemplatesMiddleware from './TemplatesMiddleware.mjs'
-import { RateLimiter } from '../../infrastructure/RateLimiter.js'
+import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'
 import AnalyticsRegistrationSourceMiddleware from '../Analytics/AnalyticsRegistrationSourceMiddleware.mjs'
 

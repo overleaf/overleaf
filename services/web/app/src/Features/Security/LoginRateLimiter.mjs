@@ -1,4 +1,4 @@
-import { RateLimiter } from '../../infrastructure/RateLimiter.js'
+import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 import Settings from '@overleaf/settings'
 

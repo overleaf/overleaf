@@ -11,7 +11,7 @@ import Errors from '../Errors/Errors.js'
 import { expressify } from '@overleaf/promise-utils'
 import Settings from '@overleaf/settings'
 import CollaboratorsGetter from '../Collaborators/CollaboratorsGetter.mjs'
-import { z, zz, validateReq } from '../../infrastructure/Validation.js'
+import { z, zz, validateReq } from '../../infrastructure/Validation.mjs'
 
 const ProjectAccess = CollaboratorsGetter.ProjectAccess
 

@@ -5,9 +5,9 @@ import ProjectEntityHandler from '../Project/ProjectEntityHandler.mjs'
 import ProjectEntityUpdateHandler from '../Project/ProjectEntityUpdateHandler.mjs'
 import logger from '@overleaf/logger'
 import _ from 'lodash'
-import { plainTextResponse } from '../../infrastructure/Response.js'
+import { plainTextResponse } from '../../infrastructure/Response.mjs'
 import { expressify } from '@overleaf/promise-utils'
-import Modules from '../../infrastructure/Modules.js'
+import Modules from '../../infrastructure/Modules.mjs'
 
 async function getDocument(req, res) {
   const { Project_id: projectId, doc_id: docId } = req.params

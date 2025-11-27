@@ -1,6 +1,6 @@
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
-import { db } from '../../infrastructure/mongodb.js'
+import { db } from '../../infrastructure/mongodb.mjs'
 import Mongo from '../Helpers/Mongo.mjs'
 import { callbackify } from 'node:util'
 import UserGetter from './UserGetter.mjs'
@@ -17,10 +17,10 @@ import EmailChangeHelper from '../Analytics/EmailChangeHelper.mjs'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
 import NotificationsBuilder from '../Notifications/NotificationsBuilder.mjs'
 import _ from 'lodash'
-import Modules from '../../infrastructure/Modules.js'
+import Modules from '../../infrastructure/Modules.mjs'
 import UserSessionsManager from './UserSessionsManager.mjs'
 import ThirdPartyIdentityManager from './ThirdPartyIdentityManager.mjs'
-import AsyncLocalStorage from '../../infrastructure/AsyncLocalStorage.js'
+import AsyncLocalStorage from '../../infrastructure/AsyncLocalStorage.mjs'
 
 const { normalizeQuery } = Mongo
 

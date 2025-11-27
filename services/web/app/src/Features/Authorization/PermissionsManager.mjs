@@ -44,7 +44,7 @@
 import { callbackify } from 'node:util'
 
 import Errors from '../Errors/Errors.js'
-import Modules from '../../infrastructure/Modules.js'
+import Modules from '../../infrastructure/Modules.mjs'
 
 const { ForbiddenError } = Errors
 

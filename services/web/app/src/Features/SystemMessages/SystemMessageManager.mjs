@@ -1,5 +1,5 @@
 import { SystemMessage } from '../../models/SystemMessage.mjs'
-import { addRequiredCleanupHandlerBeforeDrainingConnections } from '../../infrastructure/GracefulShutdown.js'
+import { addRequiredCleanupHandlerBeforeDrainingConnections } from '../../infrastructure/GracefulShutdown.mjs'
 import { callbackifyAll } from '@overleaf/promise-utils'
 import logger from '@overleaf/logger'
 

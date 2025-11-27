@@ -1,7 +1,7 @@
 import { Project } from '../../models/Project.mjs'
 import settings from '@overleaf/settings'
 import { callbackify } from 'node:util'
-import { db, ObjectId } from '../../infrastructure/mongodb.js'
+import { db, ObjectId } from '../../infrastructure/mongodb.mjs'
 import Errors from '../Errors/Errors.js'
 import mongodb from 'mongodb-legacy'
 const safeCompilers = ['xelatex', 'pdflatex', 'latex', 'lualatex']

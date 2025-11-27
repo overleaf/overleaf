@@ -1,7 +1,7 @@
 import OError from '@overleaf/o-error'
 import request from './request.js'
 import settings from '@overleaf/settings'
-import { db, ObjectId } from '../../../../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../../../../app/src/infrastructure/mongodb.mjs'
 import { User as UserModel } from '../../../../app/src/models/User.mjs'
 import UserUpdater from '../../../../app/src/Features/User/UserUpdater.mjs'
 import AuthenticationManager from '../../../../app/src/Features/Authentication/AuthenticationManager.mjs'

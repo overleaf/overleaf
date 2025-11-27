@@ -2,7 +2,7 @@ import mongodb from 'mongodb-legacy'
 import {
   connectionPromise,
   db,
-} from '../../../app/src/infrastructure/mongodb.js'
+} from '../../../app/src/infrastructure/mongodb.mjs'
 
 const { ObjectId } = mongodb
 

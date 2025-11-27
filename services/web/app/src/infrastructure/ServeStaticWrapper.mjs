@@ -1,5 +1,5 @@
 import express from 'express'
-import { plainTextResponse } from './Response.js'
+import { plainTextResponse } from './Response.mjs'
 
 /*
     This wrapper is implemented specifically to handle "Premature Close" errors.

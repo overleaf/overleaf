@@ -1,4 +1,4 @@
-import { db } from '../../../app/src/infrastructure/mongodb.js'
+import { db } from '../../../app/src/infrastructure/mongodb.mjs'
 import { expect } from 'chai'
 import Settings from '@overleaf/settings'
 import UserHelper from './helpers/User.mjs'

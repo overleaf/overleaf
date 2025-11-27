@@ -1,6 +1,6 @@
-const Settings = require('@overleaf/settings')
-const redis = require('@overleaf/redis-wrapper')
-const { addConnectionDrainer } = require('./GracefulShutdown')
+import Settings from '@overleaf/settings'
+import redis from '@overleaf/redis-wrapper'
+import { addConnectionDrainer } from './GracefulShutdown.mjs'
 
 /**
  * A per-feature interface to Redis, looks up the feature in `settings.redis`
@@ -23,4 +23,4 @@ async function cleanupTestRedis() {
   await redis.cleanupTestRedis(rclient)
 }
 
-module.exports = { client, cleanupTestRedis }
+export default { client, cleanupTestRedis }

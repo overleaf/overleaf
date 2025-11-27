@@ -14,7 +14,7 @@ import UserMembershipsHandler from '../UserMembership/UserMembershipsHandler.mjs
 import UserSessionsManager from './UserSessionsManager.mjs'
 import UserAuditLogHandler from './UserAuditLogHandler.mjs'
 import InstitutionsAPI from '../Institutions/InstitutionsAPI.mjs'
-import Modules from '../../infrastructure/Modules.js'
+import Modules from '../../infrastructure/Modules.mjs'
 import Errors from '../Errors/Errors.js'
 import OnboardingDataCollectionManager from '../OnboardingDataCollection/OnboardingDataCollectionManager.mjs'
 import EmailHandler from '../Email/EmailHandler.mjs'

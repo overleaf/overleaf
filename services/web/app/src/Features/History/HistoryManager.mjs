@@ -11,7 +11,7 @@ import OError from '@overleaf/o-error'
 import UserGetter from '../User/UserGetter.mjs'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import HistoryBackupDeletionHandler from './HistoryBackupDeletionHandler.mjs'
-import { db, waitForDb } from '../../infrastructure/mongodb.js'
+import { db, waitForDb } from '../../infrastructure/mongodb.mjs'
 import Metrics from '@overleaf/metrics'
 import { NotFoundError } from '../Errors/Errors.js'
 

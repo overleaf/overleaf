@@ -2,7 +2,7 @@ import { exec } from 'node:child_process'
 import fs from 'node:fs'
 import Settings from '@overleaf/settings'
 import { expect } from 'chai'
-import { db } from '../../../../../app/src/infrastructure/mongodb.js'
+import { db } from '../../../../../app/src/infrastructure/mongodb.mjs'
 import UserHelper from '../../../../../test/acceptance/src/helpers/User.mjs'
 
 const { promises: User } = UserHelper

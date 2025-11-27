@@ -1,18 +1,18 @@
-const { expect } = require('chai')
-const sinon = require('sinon')
-const modulePath = '../../../../app/src/infrastructure/HttpPermissionsPolicy.js'
-const SandboxedModule = require('sandboxed-module')
-const HttpPermissionsPolicyMiddleware = require('../../../../app/src/infrastructure/HttpPermissionsPolicy')
-const MockRequest = require('../helpers/MockRequest')
-const MockResponse = require('../helpers/MockResponse')
+import { expect, vi } from 'vitest'
+import sinon from 'sinon'
+import HttpPermissionsPolicyMiddleware from '../../../../app/src/infrastructure/HttpPermissionsPolicy.mjs'
+import MockRequest from '../helpers/MockRequestVitest.mjs'
+import MockResponse from '../helpers/MockResponseVitest.mjs'
+const modulePath =
+  '../../../../app/src/infrastructure/HttpPermissionsPolicy.mjs'
 
 describe('HttpPermissionsPolicy', function () {
-  this.beforeEach(function () {
-    this.next = sinon.stub()
-    this.HttpPermissionsPolicy = SandboxedModule.require(modulePath, {})
-    this.path = '/foo/bar'
-    this.req = new MockRequest()
-    return (this.res = new MockResponse())
+  beforeEach(async function (ctx) {
+    ctx.next = sinon.stub()
+    ctx.HttpPermissionsPolicy = (await import(modulePath)).default
+    ctx.path = '/foo/bar'
+    ctx.req = new MockRequest(vi)
+    ctx.res = new MockResponse(vi)
   })
 
   describe('when a single blocked policy element is provided', function () {
@@ -23,9 +23,7 @@ describe('HttpPermissionsPolicy', function () {
       const httpPermissionsMiddleware = new HttpPermissionsPolicyMiddleware(
         policy
       )
-      return expect(httpPermissionsMiddleware.policy).to.equal(
-        'accelerometer=()'
-      )
+      expect(httpPermissionsMiddleware.policy).to.equal('accelerometer=()')
     })
   })
 
@@ -37,7 +35,7 @@ describe('HttpPermissionsPolicy', function () {
       const httpPermissionsMiddleware = new HttpPermissionsPolicyMiddleware(
         policy
       )
-      return expect(httpPermissionsMiddleware.policy).to.equal('camera=(self)')
+      expect(httpPermissionsMiddleware.policy).to.equal('camera=(self)')
     })
   })
 
@@ -50,7 +48,7 @@ describe('HttpPermissionsPolicy', function () {
       const httpPermissionsMiddleware = new HttpPermissionsPolicyMiddleware(
         policy
       )
-      return expect(httpPermissionsMiddleware.policy).to.equal(
+      expect(httpPermissionsMiddleware.policy).to.equal(
         'usb=(), hid=(), camera=(self https://example.com), fullscreen=(self)'
       )
     })
@@ -62,7 +60,7 @@ describe('HttpPermissionsPolicy', function () {
         blocked: ['usb'],
         allowed: { usb: 'self' },
       }
-      return expect(() => new HttpPermissionsPolicyMiddleware(policy)).to.throw(
+      expect(() => new HttpPermissionsPolicyMiddleware(policy)).to.throw(
         'Invalid Permissions-Policy header configuration'
       )
     })
@@ -74,7 +72,7 @@ describe('HttpPermissionsPolicy', function () {
         blocked: ['usb'],
         allowed: { camera: '' },
       }
-      return expect(() => new HttpPermissionsPolicyMiddleware(policy)).to.throw(
+      expect(() => new HttpPermissionsPolicyMiddleware(policy)).to.throw(
         'Invalid Permissions-Policy header configuration'
       )
     })
@@ -89,7 +87,7 @@ describe('HttpPermissionsPolicy', function () {
       const httpPermissionsMiddleware = new HttpPermissionsPolicyMiddleware(
         policy
       )
-      return expect(httpPermissionsMiddleware.policy).to.equal('camera=(self)')
+      expect(httpPermissionsMiddleware.policy).to.equal('camera=(self)')
     })
   })
 
@@ -102,7 +100,7 @@ describe('HttpPermissionsPolicy', function () {
       const httpPermissionsMiddleware = new HttpPermissionsPolicyMiddleware(
         policy
       )
-      return expect(httpPermissionsMiddleware.policy).to.equal('usb=()')
+      expect(httpPermissionsMiddleware.policy).to.equal('usb=()')
     })
   })
 })

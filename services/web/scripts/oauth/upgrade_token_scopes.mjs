@@ -1,5 +1,5 @@
 import minimist from 'minimist'
-import { db } from '../../app/src/infrastructure/mongodb.js'
+import { db } from '../../app/src/infrastructure/mongodb.mjs'
 
 const OPTS = parseArgs()
 

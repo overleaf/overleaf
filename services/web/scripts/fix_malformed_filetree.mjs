@@ -7,7 +7,7 @@
  * Alternatively, use an adhoc file: --logs=<(echo '{"projectId":"...","path":"..."}')
  */
 import mongodb from 'mongodb-legacy'
-import { db } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.mjs'
 import ProjectLocator from '../app/src/Features/Project/ProjectLocator.mjs'
 import minimist from 'minimist'
 import readline from 'node:readline'

@@ -3,7 +3,7 @@ import {
   db,
   ObjectId,
   READ_PREFERENCE_SECONDARY,
-} from '../app/src/infrastructure/mongodb.js'
+} from '../app/src/infrastructure/mongodb.mjs'
 import lodash from 'lodash'
 
 const args = minimist(process.argv.slice(2), {

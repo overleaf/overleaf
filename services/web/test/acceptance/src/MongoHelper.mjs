@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import mongodb from 'mongodb-legacy'
 import mongoose from 'mongoose'
 import { User as UserModel } from '../../../app/src/models/User.mjs'
-import { db } from '../../../app/src/infrastructure/mongodb.js'
+import { db } from '../../../app/src/infrastructure/mongodb.mjs'
 import MongoHelpers from '../../../app/src/Features/Helpers/Mongo.mjs'
 import UserHelper from './helpers/User.mjs'
 

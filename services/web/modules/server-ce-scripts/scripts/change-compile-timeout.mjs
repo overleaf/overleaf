@@ -1,5 +1,5 @@
 import minimist from 'minimist'
-import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.mjs'
 
 async function main() {
   const argv = minimist(process.argv.slice(2), {

@@ -12,7 +12,7 @@
  */
 import Settings from '@overleaf/settings'
 import Metrics from '@overleaf/metrics'
-import RedisWrapper from '../../infrastructure/RedisWrapper.js'
+import RedisWrapper from '../../infrastructure/RedisWrapper.mjs'
 import os from 'node:os'
 import crypto from 'node:crypto'
 let EditorRealTimeController

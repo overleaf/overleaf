@@ -62,7 +62,7 @@ describe('ChatController', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/infrastructure/Modules.js', () => ({
+    vi.doMock('../../../../app/src/infrastructure/Modules.mjs', () => ({
       default: ctx.Modules,
     }))
 

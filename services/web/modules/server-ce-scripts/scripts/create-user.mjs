@@ -1,5 +1,5 @@
 import minimist from 'minimist'
-import { db } from '../../../app/src/infrastructure/mongodb.js'
+import { db } from '../../../app/src/infrastructure/mongodb.mjs'
 import UserRegistrationHandler from '../../../app/src/Features/User/UserRegistrationHandler.mjs'
 import { fileURLToPath } from 'url'
 

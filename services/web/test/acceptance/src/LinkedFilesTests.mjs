@@ -4,7 +4,7 @@ import timekeeper from 'timekeeper'
 import Settings from '@overleaf/settings'
 import UserHelper from './helpers/User.mjs'
 import express from 'express'
-import { plainTextResponse } from '../../../app/src/infrastructure/Response.js'
+import { plainTextResponse } from '../../../app/src/infrastructure/Response.mjs'
 
 const User = UserHelper.promises
 

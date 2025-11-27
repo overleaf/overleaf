@@ -3,8 +3,8 @@ import {
   db,
   ObjectId,
   READ_PREFERENCE_SECONDARY,
-} from '../../infrastructure/mongodb.js'
-import Modules from '../../infrastructure/Modules.js'
+} from '../../infrastructure/mongodb.mjs'
+import Modules from '../../infrastructure/Modules.mjs'
 import { callbackify } from 'node:util'
 import { Project } from '../../models/Project.mjs'
 import { DeletedProject } from '../../models/DeletedProject.mjs'

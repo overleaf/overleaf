@@ -16,7 +16,7 @@ import {
   batchedUpdate,
   READ_PREFERENCE_SECONDARY,
 } from '@overleaf/mongo-utils/batchedUpdate.js'
-import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../app/src/infrastructure/mongodb.mjs'
 import minimist from 'minimist'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 

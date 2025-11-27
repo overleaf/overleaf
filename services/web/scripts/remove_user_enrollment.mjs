@@ -6,7 +6,7 @@
 // $ node scripts/remove_user_enrollment.mjs --id USER_ID --commit
 
 import minimist from 'minimist'
-import { ObjectId } from '../app/src/infrastructure/mongodb.js'
+import { ObjectId } from '../app/src/infrastructure/mongodb.mjs'
 import { User } from '../app/src/models/User.mjs'
 import { Subscription } from '../app/src/models/Subscription.mjs'
 import UserAuditLogHandler from '../app/src/Features/User/UserAuditLogHandler.mjs'

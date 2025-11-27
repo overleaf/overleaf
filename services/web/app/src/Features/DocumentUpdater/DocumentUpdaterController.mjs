@@ -1,7 +1,7 @@
 import logger from '@overleaf/logger'
 import DocumentUpdaterHandler from './DocumentUpdaterHandler.mjs'
 import ProjectLocator from '../Project/ProjectLocator.mjs'
-import { plainTextResponse } from '../../infrastructure/Response.js'
+import { plainTextResponse } from '../../infrastructure/Response.mjs'
 import { expressify } from '@overleaf/promise-utils'
 
 async function getDoc(req, res) {

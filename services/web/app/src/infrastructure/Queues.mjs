@@ -1,7 +1,7 @@
 import Queue from 'bull'
 import Settings from '@overleaf/settings'
 import Features from '../infrastructure/Features.mjs'
-import { addConnectionDrainer } from './GracefulShutdown.js'
+import { addConnectionDrainer } from './GracefulShutdown.mjs'
 
 // Bull will keep a fixed number of the most recently completed jobs. This is
 // useful to inspect recently completed jobs. The bull prometheus exporter also

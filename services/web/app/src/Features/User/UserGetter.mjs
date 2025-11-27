@@ -1,5 +1,5 @@
 import { callbackify } from 'node:util'
-import { db } from '../../infrastructure/mongodb.js'
+import { db } from '../../infrastructure/mongodb.mjs'
 import moment from 'moment'
 import settings from '@overleaf/settings'
 import InstitutionsAPI from '../Institutions/InstitutionsAPI.mjs'
@@ -8,9 +8,9 @@ import Errors from '../Errors/Errors.js'
 import Features from '../../infrastructure/Features.mjs'
 import { User } from '../../models/User.mjs'
 import Mongo from '../Helpers/Mongo.mjs'
-import Modules from '../../infrastructure/Modules.js'
+import Modules from '../../infrastructure/Modules.mjs'
 import FeaturesHelper from '../Subscription/FeaturesHelper.mjs'
-import AsyncLocalStorage from '../../infrastructure/AsyncLocalStorage.js'
+import AsyncLocalStorage from '../../infrastructure/AsyncLocalStorage.mjs'
 
 const { normalizeQuery, normalizeMultiQuery } = Mongo
 const InstitutionsAPIPromises = InstitutionsAPI.promises

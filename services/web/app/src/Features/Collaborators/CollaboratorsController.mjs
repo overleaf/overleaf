@@ -15,7 +15,7 @@ import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.mjs'
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 import LimitationsManager from '../Subscription/LimitationsManager.mjs'
 import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
-import { z, zz, validateReq } from '../../infrastructure/Validation.js'
+import { z, zz, validateReq } from '../../infrastructure/Validation.mjs'
 import Features from '../../infrastructure/Features.mjs'
 
 const { hasAdminAccess } = AdminAuthorizationHelper

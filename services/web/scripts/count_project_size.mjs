@@ -1,5 +1,5 @@
 import readline from 'node:readline'
-import { ObjectId, db } from '../app/src/infrastructure/mongodb.js'
+import { ObjectId, db } from '../app/src/infrastructure/mongodb.mjs'
 import ProjectEntityHandler from '../app/src/Features/Project/ProjectEntityHandler.mjs'
 import ProjectGetter from '../app/src/Features/Project/ProjectGetter.mjs'
 import Errors from '../app/src/Features/Errors/Errors.js'

@@ -4,7 +4,7 @@ import SubscriptionLocator from '../app/src/Features/Subscription/SubscriptionLo
 import PlansLocator from '../app/src/Features/Subscription/PlansLocator.mjs'
 import FeaturesHelper from '../app/src/Features/Subscription/FeaturesHelper.mjs'
 import AnalyticsManager from '../app/src/Features/Analytics/AnalyticsManager.mjs'
-import { db } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.mjs'
 
 const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 

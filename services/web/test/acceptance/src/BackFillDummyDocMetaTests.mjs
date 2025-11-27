@@ -3,7 +3,7 @@ import { promisify } from 'node:util'
 import { expect } from 'chai'
 import logger from '@overleaf/logger'
 import { filterOutput } from './helpers/settings.mjs'
-import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.mjs'
 
 const DUMMY_NAME = 'unknown.tex'
 const DUMMY_TIME = new Date('2021-04-12T00:00:00.000Z')

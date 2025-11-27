@@ -6,10 +6,10 @@ import SubscriptionLocator from './SubscriptionLocator.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
 import UserAuditLogHandler from '../User/UserAuditLogHandler.mjs'
 import { expressify } from '@overleaf/promise-utils'
-import Modules from '../../infrastructure/Modules.js'
+import Modules from '../../infrastructure/Modules.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import { Subscription } from '../../models/Subscription.mjs'
-import { z, validateReq } from '../../infrastructure/Validation.js'
+import { z, validateReq } from '../../infrastructure/Validation.mjs'
 import { isProfessionalGroupPlan } from './PlansHelper.mjs'
 import {
   MissingBillingInfoError,

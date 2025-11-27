@@ -1,4 +1,4 @@
-import mongoose from '../infrastructure/Mongoose.js'
+import mongoose from '../infrastructure/Mongoose.mjs'
 import _ from 'lodash'
 import { FolderSchema } from './Folder.mjs'
 import Errors from '../Features/Errors/Errors.js'
