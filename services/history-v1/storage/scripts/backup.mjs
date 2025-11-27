@@ -376,6 +376,19 @@ const optionDefinitions = [
     description:
       'Performs a fast comparison of blobs by only checking for presence and size. Only works with --compare.',
   },
+  {
+    name: 'input',
+    type: String,
+    description:
+      'Input file containing project IDs (one per line) for batch comparison. Only works with --compare.',
+  },
+  {
+    name: 'verbose',
+    alias: 'v',
+    type: Boolean,
+    description:
+      'Enable verbose output during batch comparison. Only works with --compare and --input.',
+  },
 ]
 
 function handleOptions() {
@@ -394,7 +407,8 @@ function handleOptions() {
     !options.pending &&
     !options.init &&
     !(options.fix >= 0) &&
-    !(options.compare && options['start-date'] && options['end-date'])
+    !(options.compare && options['start-date'] && options['end-date']) &&
+    !(options.compare && options.input)
 
   if (projectIdRequired && !options.projectId) {
     console.error('Error: projectId is required')
@@ -434,16 +448,39 @@ function handleOptions() {
   if (
     options.compare &&
     !options.projectId &&
-    !(options['start-date'] && options['end-date'])
+    !(options['start-date'] && options['end-date']) &&
+    !options.input
   ) {
     console.error(
-      'Error: --compare requires either projectId or both --start-date and --end-date'
+      'Error: --compare requires either projectId, --input file, or both --start-date and --end-date'
     )
     process.exit(1)
   }
 
   if (options.fast && !options.compare) {
     console.error('Error: --fast can only be used with --compare')
+    process.exit(1)
+  }
+
+  if (options.input && !options.compare) {
+    console.error('Error: --input can only be used with --compare')
+    process.exit(1)
+  }
+
+  if (options.input && options.projectId) {
+    console.error('Error: --input cannot be specified with projectId')
+    process.exit(1)
+  }
+
+  if (options.input && (options['start-date'] || options['end-date'])) {
+    console.error(
+      'Error: --input cannot be specified with --start-date or --end-date'
+    )
+    process.exit(1)
+  }
+
+  if (options.verbose && !options.input) {
+    console.error('Error: --verbose can only be used with --input')
     process.exit(1)
   }
 
@@ -898,8 +935,21 @@ async function getBlobListing(historyId) {
   return remoteBlobs
 }
 
-async function compareBackups(projectId, options) {
-  console.log(`Comparing backups for project ${projectId}`)
+/**
+ * @typedef {Object} ComparisonError
+ * @property {string} type - Error type code (e.g., 'chunk-not-found', 'blob-hash-mismatch')
+ * @property {string} [chunkId]
+ * @property {string} historyId
+ * @property {string} [blobHash]
+ * @property {string|Error} error
+ */
+
+/**
+ * @typedef {Error & {historyId: string, errors: ComparisonError[], counters: Object}} ComparisonFailureError
+ */
+
+async function compareBackups(projectId, options, log = console.log) {
+  log(`Comparing backups for project ${projectId}`)
   const { historyId } = await getBackupStatus(projectId)
   const chunks = await getProjectChunks(historyId)
   const blobStore = new BlobStore(historyId)
@@ -914,6 +964,7 @@ async function compareBackups(projectId, options) {
   let totalBlobMatches = 0
   let totalBlobMismatches = 0
   let totalBlobsNotFound = 0
+  /** @type {ComparisonError[]} */
   const errors = []
   const blobComparator = new BlobComparator(backupPersistorForProject)
 
@@ -938,33 +989,48 @@ async function compareBackups(projectId, options) {
         const backupEndVersion = chunk.startVersion + backupChunk.changes.length
 
         if (originalStr === backupStr) {
-          console.log(
+          log(
             `✓ Chunk ${chunk.id} (v${chunk.startVersion}-v${chunk.endVersion}) matches`
           )
           totalChunkMatches++
         } else if (originalStr === JSON.stringify(JSON.parse(backupStr))) {
-          console.log(
+          log(
             `✓ Chunk ${chunk.id} (v${chunk.startVersion}-v${chunk.endVersion}) matches (after normalisation)`
           )
           totalChunkMatches++
         } else if (backupEndVersion < chunk.endVersion) {
-          console.log(
+          log(
             `✗ Chunk ${chunk.id} is ahead of backup (v${chunk.startVersion}-v${chunk.endVersion} vs v${backupStartVersion}-v${backupEndVersion})`
           )
           totalChunkMismatches++
-          errors.push({ chunkId: chunk.id, error: 'Chunk ahead of backup' })
+          errors.push({
+            type: 'chunk-ahead',
+            chunkId: chunk.id,
+            historyId,
+            error: 'Chunk ahead of backup',
+          })
         } else {
-          console.log(
+          log(
             `✗ Chunk ${chunk.id} (v${chunk.startVersion}-v${chunk.endVersion}) MISMATCH`
           )
           totalChunkMismatches++
-          errors.push({ chunkId: chunk.id, error: 'Chunk mismatch' })
+          errors.push({
+            type: 'chunk-mismatch',
+            chunkId: chunk.id,
+            historyId,
+            error: 'Chunk mismatch',
+          })
         }
       } catch (err) {
         if (err instanceof NotFoundError) {
-          console.log(`✗ Chunk ${chunk.id} not found in backup`, err.cause)
+          log(`✗ Chunk ${chunk.id} not found in backup`, err.cause)
           totalChunksNotFound++
-          errors.push({ chunkId: chunk.id, error: `Chunk not found` })
+          errors.push({
+            type: 'chunk-not-found',
+            chunkId: chunk.id,
+            historyId,
+            error: `Chunk not found`,
+          })
         } else {
           throw err
         }
@@ -983,7 +1049,7 @@ async function compareBackups(projectId, options) {
 
         if (GLOBAL_BLOBS.has(blob.hash)) {
           const globalBlob = GLOBAL_BLOBS.get(blob.hash)
-          console.log(
+          log(
             `  ✓ Blob ${blob.hash} is a global blob`,
             globalBlob?.demoted ? '(demoted)' : ''
           )
@@ -995,7 +1061,7 @@ async function compareBackups(projectId, options) {
             if (blobListEntry) {
               if (blob.byteLength === blobListEntry.Size) {
                 // Size matches exactly
-                console.log(
+                log(
                   `  ✓ Blob ${blob.hash} exists on remote with expected size (${blob.byteLength} bytes)`
                 )
                 totalBlobMatches++
@@ -1005,29 +1071,35 @@ async function compareBackups(projectId, options) {
                 const compressionRatio = (
                   blobListEntry.Size / blob.byteLength
                 ).toFixed(2)
-                console.log(
+                log(
                   `  ✓ Blob ${blob.hash} consistent with compressed data on remote (${blob.byteLength} bytes => ${blobListEntry.Size} bytes, ratio=${compressionRatio})`
                 )
                 totalBlobMatches++
                 continue
               } else {
-                console.log(
+                log(
                   `  ✗ Blob ${blob.hash} size mismatch (original: ${blob.byteLength} bytes, stringLength: ${blob.stringLength}, backup: ${blobListEntry.Size} bytes)`
                 )
                 totalBlobMismatches++
                 errors.push({
+                  type: 'blob-size-mismatch',
                   chunkId: chunk.id,
+                  historyId,
+                  blobHash: blob.hash,
                   error: `Blob ${blob.hash} size mismatch`,
                 })
                 continue
               }
             } else {
-              console.log(
+              log(
                 `  ✗ Blob ${blob.hash} not found on remote listing (${blob.byteLength} bytes, ${blob.stringLength} string length)`
               )
               totalBlobMismatches++
               errors.push({
+                type: 'blob-not-found',
                 chunkId: chunk.id,
+                historyId,
+                blobHash: blob.hash,
                 error: `Blob ${blob.hash} not found`,
               })
               continue
@@ -1037,20 +1109,23 @@ async function compareBackups(projectId, options) {
               await blobComparator.compareBlob(historyId, blob)
 
             if (matches) {
-              console.log(
+              log(
                 `  ✓ Blob ${blob.hash} hash matches (${blob.byteLength} bytes)` +
                   (fromCache ? ' (from cache)' : '')
               )
               totalBlobMatches++
               continue
             } else {
-              console.log(
+              log(
                 `  ✗ Blob ${blob.hash} hash mismatch (original: ${blob.hash}, backup: ${computedHash}) (${blob.byteLength} bytes, ${blob.stringLength} string length)` +
                   (fromCache ? ' (from cache)' : '')
               )
               totalBlobMismatches++
               errors.push({
+                type: 'blob-hash-mismatch',
                 chunkId: chunk.id,
+                historyId,
+                blobHash: blob.hash,
                 error: `Blob ${blob.hash} hash mismatch`,
               })
               continue
@@ -1058,10 +1133,13 @@ async function compareBackups(projectId, options) {
           }
         } catch (err) {
           if (err instanceof NotFoundError) {
-            console.log(`  ✗ Blob ${blob.hash} not found in backup`, err.cause)
+            log(`  ✗ Blob ${blob.hash} not found in backup`, err.cause)
             totalBlobsNotFound++
             errors.push({
+              type: 'blob-not-found',
               chunkId: chunk.id,
+              historyId,
+              blobHash: blob.hash,
               error: `Blob ${blob.hash} not found`,
             })
           } else {
@@ -1070,31 +1148,197 @@ async function compareBackups(projectId, options) {
         }
       }
     } catch (err) {
-      console.error(`Error comparing chunk ${chunk.id}:`, err)
-      errors.push({ chunkId: chunk.id, error: err })
+      log(`Error comparing chunk ${chunk.id}:`, err)
+      errors.push({
+        type: 'error',
+        chunkId: chunk.id,
+        historyId,
+        error: err instanceof Error ? err : String(err),
+      })
     }
   }
 
   // Print summary
-  console.log('\nComparison Summary:')
-  console.log('==================')
-  console.log(`Total chunks: ${chunks.length}`)
-  console.log(`Chunk matches: ${totalChunkMatches}`)
-  console.log(`Chunk mismatches: ${totalChunkMismatches}`)
-  console.log(`Chunk not found: ${totalChunksNotFound}`)
-  console.log(`Blob matches: ${totalBlobMatches}`)
-  console.log(`Blob mismatches: ${totalBlobMismatches}`)
-  console.log(`Blob not found: ${totalBlobsNotFound}`)
-  console.log(`Errors: ${errors.length}`)
+  log('\nComparison Summary:')
+  log('==================')
+  log(`Total chunks: ${chunks.length}`)
+  log(`Chunk matches: ${totalChunkMatches}`)
+  log(`Chunk mismatches: ${totalChunkMismatches}`)
+  log(`Chunk not found: ${totalChunksNotFound}`)
+  log(`Blob matches: ${totalBlobMatches}`)
+  log(`Blob mismatches: ${totalBlobMismatches}`)
+  log(`Blob not found: ${totalBlobsNotFound}`)
+  log(`Errors: ${errors.length}`)
 
   if (errors.length > 0) {
-    console.log('\nErrors:')
+    log('\nErrors:')
     errors.forEach(({ chunkId, error }) => {
-      console.log(`  Chunk ${chunkId}: ${error}`)
+      log(`  Chunk ${chunkId}: ${error}`)
     })
-    throw new Error('Backup comparison FAILED')
+    const err = /** @type {ComparisonFailureError} */ (
+      new Error('Backup comparison FAILED')
+    )
+    err.historyId = historyId
+    err.errors = errors
+    err.counters = {
+      totalChunks: chunks.length,
+      chunkMatches: totalChunkMatches,
+      chunkMismatches: totalChunkMismatches,
+      chunksNotFound: totalChunksNotFound,
+      blobMatches: totalBlobMatches,
+      blobMismatches: totalBlobMismatches,
+      blobsNotFound: totalBlobsNotFound,
+    }
+    throw err
   } else {
-    console.log('Backup comparison successful')
+    log('Backup comparison successful')
+  }
+}
+
+/**
+ * Compare a single project and emit structured output
+ * @param {string} projectId - The project ID to compare
+ * @param {Object} options - Comparison options
+ * @param {number} projectNumber - Current project number for progress reporting
+ * @param {number} totalCount - Total number of projects
+ * @returns {Promise<boolean>} - Returns true if comparison had errors
+ */
+async function compareProjectAndEmitResult(
+  projectId,
+  options,
+  projectNumber,
+  totalCount
+) {
+  if (gracefulShutdownInitiated) {
+    return false
+  }
+
+  console.error(
+    `Processing project ${projectNumber}/${totalCount}: ${projectId}`
+  )
+
+  // Custom logger: silent by default, buffered if verbose
+  const logBuffer = []
+  const customLog = options.verbose
+    ? (...args) => logBuffer.push(args.join(' '))
+    : () => {}
+
+  try {
+    await compareBackups(projectId, options, customLog)
+    console.log(`OK: ${projectId}`)
+
+    // Output buffered logs after success
+    if (options.verbose && logBuffer.length > 0) {
+      console.error(`\n--- Verbose output for ${projectId} ---`)
+      logBuffer.forEach(line => console.error(line))
+      console.error(`--- End of output for ${projectId} ---\n`)
+    }
+
+    return false
+  } catch (err) {
+    console.log(`FAIL: ${projectId}`)
+
+    // Output buffered logs on error when verbose
+    if (options.verbose && logBuffer.length > 0) {
+      console.error(`\n--- Verbose output for ${projectId} (FAILED) ---`)
+      logBuffer.forEach(line => console.error(line))
+      console.error(`--- End of output for ${projectId} ---\n`)
+    }
+
+    // Check if this is a comparison error with attached details
+    const error = /** @type {ComparisonFailureError} */ (err)
+    if (error.errors && error.historyId) {
+      // Emit structured error lines
+      for (const errorRecord of error.errors) {
+        const {
+          type,
+          historyId,
+          blobHash,
+          chunkId,
+          error: errorDetail,
+        } = errorRecord
+        const errorMsg =
+          typeof errorDetail === 'string'
+            ? errorDetail
+            : errorDetail?.message || String(errorDetail)
+
+        // Use error type for structured output
+        switch (type) {
+          case 'blob-not-found':
+            console.log(`missing: ${projectId},${historyId},${blobHash}`)
+            break
+          case 'chunk-not-found':
+            console.log(`chunk-missing: ${projectId},${historyId},${chunkId}`)
+            break
+          case 'blob-hash-mismatch':
+            console.log(`hash-mismatch: ${projectId},${historyId},${blobHash}`)
+            break
+          case 'blob-size-mismatch':
+            console.log(`size-mismatch: ${projectId},${historyId},${blobHash}`)
+            break
+          case 'chunk-mismatch':
+            console.log(`chunk-mismatch: ${projectId},${historyId},${chunkId}`)
+            break
+          case 'chunk-ahead':
+            console.log(`chunk-ahead: ${projectId},${historyId},${chunkId}`)
+            break
+          default:
+            console.log(
+              `error: ${projectId},${historyId},${errorMsg.replace(/[,\n]/g, ' ')}`
+            )
+            break
+        }
+      }
+    } else {
+      // Generic error without details
+      const errorMsg = error?.message || String(error)
+      console.log(
+        `error: ${projectId},unknown,${errorMsg.replace(/[,\n]/g, ' ')}`
+      )
+    }
+    return true
+  }
+}
+
+async function compareProjectsFromFile(options) {
+  await ensureGlobalBlobsLoaded()
+  const limiter = pLimit(CONCURRENCY)
+  let totalErrors = 0
+  let totalProjects = 0
+
+  // Read project IDs from file
+  const fileContent = await fs.readFile(options.input, 'utf-8')
+  const projectIds = fileContent
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+
+  console.error(`Loaded ${projectIds.length} project IDs from ${options.input}`)
+
+  const operations = projectIds.map(projectId =>
+    limiter(async () => {
+      totalProjects++
+      const hadError = await compareProjectAndEmitResult(
+        projectId,
+        options,
+        totalProjects,
+        projectIds.length
+      )
+      if (hadError) {
+        totalErrors++
+      }
+    })
+  )
+
+  await Promise.allSettled(operations)
+
+  console.error('\nComparison Summary:')
+  console.error('==================')
+  console.error(`Total projects processed: ${totalProjects}`)
+  console.error(`Projects with errors: ${totalErrors}`)
+
+  if (totalErrors > 0) {
+    throw new Error('Some project comparisons failed')
   }
 }
 
@@ -1169,7 +1413,9 @@ async function main() {
   } else if (options.init) {
     await initializeProjects(options)
   } else if (options.compare) {
-    if (options['start-date'] && options['end-date']) {
+    if (options.input) {
+      await compareProjectsFromFile(options)
+    } else if (options['start-date'] && options['end-date']) {
       await compareAllProjects(options)
     } else {
       await compareBackups(projectId, options)
