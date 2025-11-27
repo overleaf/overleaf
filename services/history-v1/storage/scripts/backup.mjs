@@ -370,6 +370,12 @@ const optionDefinitions = [
     description:
       'Compare backup with original chunks. With --start-date and --end-date compares all projects in range.',
   },
+  {
+    name: 'fast',
+    type: Boolean,
+    description:
+      'Performs a fast comparison of blobs by only checking for presence and size. Only works with --compare.',
+  },
 ]
 
 function handleOptions() {
@@ -433,6 +439,11 @@ function handleOptions() {
     console.error(
       'Error: --compare requires either projectId or both --start-date and --end-date'
     )
+    process.exit(1)
+  }
+
+  if (options.fast && !options.compare) {
+    console.error('Error: --fast can only be used with --compare')
     process.exit(1)
   }
 
@@ -848,6 +859,45 @@ class BlobComparator {
   }
 }
 
+const SHA1_HEX_REGEX = /^[a-f0-9]{40}$/
+
+async function getBlobListing(historyId) {
+  const backupPersistorForProject = await backupPersistor.forProject(
+    projectBlobsBucket,
+    makeProjectKey(historyId, '')
+  )
+
+  // get the blob listing
+  const projectBlobsPath = projectKey.format(historyId)
+
+  const { contents: blobList } = await backupPersistorForProject.listDirectory(
+    projectBlobsBucket,
+    projectBlobsPath
+  )
+
+  if (blobList.length === 0) {
+    return new Map()
+  }
+
+  const remoteBlobs = new Map()
+
+  for (const blobRecord of blobList) {
+    if (!blobRecord.Key) {
+      logger.debug({ blobRecord }, 'no key')
+      continue
+    }
+    const parts = blobRecord.Key.split('/')
+    const hash = parts[3] + parts[4]
+
+    if (!SHA1_HEX_REGEX.test(hash)) {
+      console.warn(`Invalid SHA1 hash for project ${historyId}: ${hash}`)
+      continue
+    }
+    remoteBlobs.set(hash, blobRecord)
+  }
+  return remoteBlobs
+}
+
 async function compareBackups(projectId, options) {
   console.log(`Comparing backups for project ${projectId}`)
   const { historyId } = await getBackupStatus(projectId)
@@ -867,7 +917,13 @@ async function compareBackups(projectId, options) {
   const errors = []
   const blobComparator = new BlobComparator(backupPersistorForProject)
 
+  const blobsFromListing = await getBlobListing(historyId)
+
   for (const chunk of chunks) {
+    if (gracefulShutdownInitiated) {
+      throw new Error('interrupted')
+    }
+
     try {
       // Compare chunk content
       const originalChunk = await historyStore.loadRaw(historyId, chunk.id)
@@ -921,6 +977,10 @@ async function compareBackups(projectId, options) {
       history.findBlobHashes(blobHashes)
       const blobs = await blobStore.getBlobs(Array.from(blobHashes))
       for (const blob of blobs) {
+        if (gracefulShutdownInitiated) {
+          throw new Error('interrupted')
+        }
+
         if (GLOBAL_BLOBS.has(blob.hash)) {
           const globalBlob = GLOBAL_BLOBS.get(blob.hash)
           console.log(
@@ -930,25 +990,71 @@ async function compareBackups(projectId, options) {
           continue
         }
         try {
-          const { matches, computedHash, fromCache } =
-            await blobComparator.compareBlob(historyId, blob)
-
-          if (matches) {
-            console.log(
-              `  ✓ Blob ${blob.hash} hash matches (${blob.byteLength} bytes)` +
-                (fromCache ? ' (from cache)' : '')
-            )
-            totalBlobMatches++
+          const blobListEntry = blobsFromListing.get(blob.hash)
+          if (options.fast) {
+            if (blobListEntry) {
+              if (blob.byteLength === blobListEntry.Size) {
+                // Size matches exactly
+                console.log(
+                  `  ✓ Blob ${blob.hash} exists on remote with expected size (${blob.byteLength} bytes)`
+                )
+                totalBlobMatches++
+                continue
+              } else if (blob.stringLength > 0 && blobListEntry.Size > 0) {
+                // Text file present with compressed size, assume valid as we are in --fast comparison mode
+                const compressionRatio = (
+                  blobListEntry.Size / blob.byteLength
+                ).toFixed(2)
+                console.log(
+                  `  ✓ Blob ${blob.hash} consistent with compressed data on remote (${blob.byteLength} bytes => ${blobListEntry.Size} bytes, ratio=${compressionRatio})`
+                )
+                totalBlobMatches++
+                continue
+              } else {
+                console.log(
+                  `  ✗ Blob ${blob.hash} size mismatch (original: ${blob.byteLength} bytes, stringLength: ${blob.stringLength}, backup: ${blobListEntry.Size} bytes)`
+                )
+                totalBlobMismatches++
+                errors.push({
+                  chunkId: chunk.id,
+                  error: `Blob ${blob.hash} size mismatch`,
+                })
+                continue
+              }
+            } else {
+              console.log(
+                `  ✗ Blob ${blob.hash} not found on remote listing (${blob.byteLength} bytes, ${blob.stringLength} string length)`
+              )
+              totalBlobMismatches++
+              errors.push({
+                chunkId: chunk.id,
+                error: `Blob ${blob.hash} not found`,
+              })
+              continue
+            }
           } else {
-            console.log(
-              `  ✗ Blob ${blob.hash} hash mismatch (original: ${blob.hash}, backup: ${computedHash}) (${blob.byteLength} bytes, ${blob.stringLength} string length)` +
-                (fromCache ? ' (from cache)' : '')
-            )
-            totalBlobMismatches++
-            errors.push({
-              chunkId: chunk.id,
-              error: `Blob ${blob.hash} hash mismatch`,
-            })
+            const { matches, computedHash, fromCache } =
+              await blobComparator.compareBlob(historyId, blob)
+
+            if (matches) {
+              console.log(
+                `  ✓ Blob ${blob.hash} hash matches (${blob.byteLength} bytes)` +
+                  (fromCache ? ' (from cache)' : '')
+              )
+              totalBlobMatches++
+              continue
+            } else {
+              console.log(
+                `  ✗ Blob ${blob.hash} hash mismatch (original: ${blob.hash}, backup: ${computedHash}) (${blob.byteLength} bytes, ${blob.stringLength} string length)` +
+                  (fromCache ? ' (from cache)' : '')
+              )
+              totalBlobMismatches++
+              errors.push({
+                chunkId: chunk.id,
+                error: `Blob ${blob.hash} hash mismatch`,
+              })
+              continue
+            }
           }
         } catch (err) {
           if (err instanceof NotFoundError) {
