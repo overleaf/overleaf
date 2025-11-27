@@ -365,6 +365,55 @@ describe('TeamInvitesHandler', function () {
         .create.calledWith(invite)
         .should.eq(true)
     })
+
+    it('creates an audit log entry for group-invite-sent for managed subscription', async function (ctx) {
+      ctx.subscription.managedUsersEnabled = true
+
+      const auditLog = {
+        initiatorId: ctx.manager._id,
+        ipAddress: '192.0.2.1',
+      }
+
+      await ctx.TeamInvitesHandler.promises.createInvite(
+        ctx.manager._id,
+        ctx.subscription,
+        'John.Snow@example.com',
+        auditLog
+      )
+
+      sinon.assert.calledWith(
+        ctx.Modules.promises.hooks.fire,
+        'addGroupAuditLogEntry',
+        sinon.match({
+          initiatorId: auditLog.initiatorId,
+          ipAddress: auditLog.ipAddress,
+          groupId: ctx.subscription._id,
+          operation: 'group-invite-sent',
+          info: { invitedEmail: 'john.snow@example.com' },
+        })
+      )
+    })
+
+    it('does not create an audit log entry for non-managed subscription', async function (ctx) {
+      ctx.subscription.managedUsersEnabled = false
+
+      const auditLog = {
+        initiatorId: ctx.manager._id,
+        ipAddress: '192.0.2.1',
+      }
+
+      await ctx.TeamInvitesHandler.promises.createInvite(
+        ctx.manager._id,
+        ctx.subscription,
+        'John.Snow@example.com',
+        auditLog
+      )
+
+      sinon.assert.neverCalledWith(
+        ctx.Modules.promises.hooks.fire,
+        'addGroupAuditLogEntry'
+      )
+    })
   })
 
   describe('importInvite', function () {
