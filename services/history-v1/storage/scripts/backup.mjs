@@ -7,6 +7,7 @@ import {
   getProjectChunks,
   getLatestChunkMetadata,
   create,
+  getBackend,
 } from '../lib/chunk_store/index.js'
 import { client } from '../lib/mongodb.js'
 import redis from '../lib/redis.js'
@@ -27,6 +28,7 @@ import {
   updatePendingChangeTimestamp,
   getBackedUpBlobHashes,
   unsetBackedUpBlobHashes,
+  getHashesFromFileTree,
 } from '../lib/backup_store/index.js'
 import { backupBlob, downloadBlobToDir } from '../lib/backupBlob.mjs'
 import {
@@ -949,8 +951,19 @@ async function getBlobListing(historyId) {
  */
 
 async function compareBackups(projectId, options, log = console.log) {
-  log(`Comparing backups for project ${projectId}`)
-  const { historyId } = await getBackupStatus(projectId)
+  // Convert any postgres history ids to mongo project ids
+  const backend = getBackend(projectId)
+  projectId = await backend.resolveHistoryIdToMongoProjectId(projectId)
+  const { historyId, rootFolder } = await getBackupStatus(projectId, {
+    includeRootFolder: true,
+  })
+
+  log(`Comparing backups for project ${projectId} historyId ${historyId}`)
+  const hashesFromFileTree = rootFolder
+    ? getHashesFromFileTree(rootFolder)
+    : new Set()
+  const hashesFromHistory = new Set()
+
   const chunks = await getProjectChunks(historyId)
   const blobStore = new BlobStore(historyId)
   const backupPersistorForProject = await backupPersistor.forProject(
@@ -1046,6 +1059,9 @@ async function compareBackups(projectId, options, log = console.log) {
         if (gracefulShutdownInitiated) {
           throw new Error('interrupted')
         }
+
+        // Track all the hashes in the history
+        hashesFromHistory.add(blob.hash)
 
         if (GLOBAL_BLOBS.has(blob.hash)) {
           const globalBlob = GLOBAL_BLOBS.get(blob.hash)
@@ -1158,6 +1174,31 @@ async function compareBackups(projectId, options, log = console.log) {
     }
   }
 
+  if (gracefulShutdownInitiated) {
+    throw new Error('interrupted')
+  }
+  // Reconcile hashes in file tree with history
+  log(`Comparing file hashes from file tree with history`)
+  if (hashesFromFileTree.size > 0) {
+    for (const hash of hashesFromFileTree) {
+      const presentInHistory = hashesFromHistory.has(hash)
+      if (presentInHistory) {
+        log(`  ✓ File tree hash ${hash} present in history`)
+      } else {
+        log(`  ✗ File tree hash ${hash} not found in history`)
+        totalBlobsNotFound++
+        errors.push({
+          type: 'file-not-found',
+          historyId,
+          blobHash: hash,
+          error: `File tree hash ${hash} not found in history`,
+        })
+      }
+    }
+  } else {
+    log(`  ✓ File tree does not contain any binary files`)
+  }
+
   // Print summary
   log('\nComparison Summary:')
   log('==================')
@@ -1236,6 +1277,9 @@ async function compareProjectAndEmitResult(
 
     return false
   } catch (err) {
+    if (gracefulShutdownInitiated) {
+      throw err
+    }
     console.log(`FAIL: ${projectId}`)
 
     // Output buffered logs on error when verbose
@@ -1275,6 +1319,9 @@ async function compareProjectAndEmitResult(
             break
           case 'blob-size-mismatch':
             console.log(`size-mismatch: ${projectId},${historyId},${blobHash}`)
+            break
+          case 'file-not-found':
+            console.log(`file-not-found: ${projectId},${historyId},${blobHash}`)
             break
           case 'chunk-mismatch':
             console.log(`chunk-mismatch: ${projectId},${historyId},${chunkId}`)
