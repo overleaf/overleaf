@@ -456,6 +456,7 @@ const _ProjectController = {
       'compile-timeout-target-plans',
       'writefull-keywords-generator',
       'writefull-figure-generator',
+      'writefull-asymetric-queue-size-per-model',
       'pdf-dark-mode',
     ].filter(Boolean)
 
