@@ -999,6 +999,7 @@ module.exports = {
     sourceEditorToolbarEndButtons: [],
     rootContextProviders: [],
     mainEditorLayoutModals: [],
+    mainEditorLayoutPanels: [],
     langFeedbackLinkingWidgets: [],
     labsExperiments: [],
     integrationLinkingWidgets: [],
