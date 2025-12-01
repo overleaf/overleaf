@@ -8,6 +8,7 @@ import { FC } from 'react'
 import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { TestContainer } from '../helpers/test-container'
 import { PermissionsContext } from '@/features/ide-react/context/permissions-context'
+import { metaKey } from '../helpers/meta-key'
 
 const FileTreePathProvider: FC<React.PropsWithChildren> = ({ children }) => (
   <FileTreePathContext.Provider
@@ -153,5 +154,57 @@ describe('<CodeMirrorEditor/> in Visual mode with read-only permission', functio
     cy.findByRole('button', { name: 'Go to page' })
     cy.findByLabelText('URL').should('be.disabled')
     cy.findByRole('button', { name: 'Remove link' }).should('not.exist')
+  })
+
+  it('opens the CodeMirror search panel with Cmd/Ctrl+F', function () {
+    mountEditor('Hello world\n\nThis is a test document.')
+
+    // Click to focus the editor
+    cy.get('.cm-content').click()
+
+    // Search panel should not be open initially
+    cy.findByRole('search').should('not.exist')
+
+    // Press Cmd/Ctrl+F to open search
+    cy.get('.cm-content').type(`{${metaKey}+f}`)
+
+    // Search panel should now be open
+    cy.findByRole('search').should('exist')
+    cy.findByRole('textbox', { name: 'Find' }).should('be.visible')
+  })
+
+  it('allows searching for text in read-only mode', function () {
+    mountEditor('Hello world\n\nThis is a test document with hello again.')
+
+    // Click to focus the editor
+    cy.get('.cm-content').click()
+
+    // Open search panel
+    cy.get('.cm-content').type(`{${metaKey}+f}`)
+
+    // Type a search query
+    cy.findByRole('textbox', { name: 'Find' }).type('hello')
+
+    // Should find matches (case insensitive)
+    cy.get('.cm-searchMatch').should('have.length.at.least', 1)
+  })
+
+  it('closes the search panel with Escape', function () {
+    mountEditor('Hello world')
+
+    // Click to focus the editor
+    cy.get('.cm-content').click()
+
+    // Open search panel
+    cy.get('.cm-content').type(`{${metaKey}+f}`)
+
+    // Search panel should be open
+    cy.findByRole('search').should('exist')
+
+    // Press Escape to close
+    cy.findByRole('textbox', { name: 'Find' }).type('{esc}')
+
+    // Search panel should be closed
+    cy.findByRole('search').should('not.exist')
   })
 })
