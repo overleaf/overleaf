@@ -1,5 +1,6 @@
 import {
   ChangeEvent,
+  ClipboardEvent,
   FormEventHandler,
   useCallback,
   useEffect,
@@ -55,6 +56,13 @@ export default function FileTreeImportFromUrl() {
     })
   }
 
+  const handlePaste = useCallback((event: ClipboardEvent<HTMLInputElement>) => {
+    event.preventDefault()
+    const text = event.clipboardData?.getData('text/plain') ?? ''
+    const pastedText = text.replace(/\.*\s*$/, '')
+    setUrl(pastedText)
+  }, [])
+
   return (
     <form
       className="form-controls"
@@ -70,6 +78,7 @@ export default function FileTreeImportFromUrl() {
           required
           value={url}
           onChange={handleChange}
+          onPaste={handlePaste}
         />
       </OLFormGroup>
 
