@@ -17,6 +17,7 @@
     "@overleaf/redis-wrapper": "*",
     "@overleaf/settings": "*",
     "@overleaf/stream-utils": "^0.1.0",
+    "@overleaf/validation-tools": "*",
     "archiver": "^5.3.0",
     "basic-auth": "^2.0.1",
     "bluebird": "^3.7.2",
