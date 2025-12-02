@@ -30,6 +30,7 @@ const commandSuggestions: Suggestion[] = [
   ['\\texorpdfstring', { name: 'hyperref', command: '\\usepackage{hyperref}' }],
   ['\\phantomsection', { name: 'hyperref', command: '\\usepackage{hyperref}' }],
   ['\\arraybackslash', { name: 'array', command: '\\usepackage{array}' }],
+  ['\\includesvg', { name: 'svg', command: '\\usepackage{svg}' }],
 ]
 
 const environmentSuggestions: Suggestion[] = [
