@@ -1,6 +1,6 @@
 import { expect, vi } from 'vitest'
 import sinon from 'sinon'
-import MockResponse from '../helpers/MockResponse.js'
+import MockResponse from '../helpers/MockResponse.mjs'
 
 const MODULE_PATH =
   '../../../../app/src/Features/DocumentUpdater/DocumentUpdaterController.mjs'
@@ -49,7 +49,7 @@ describe('DocumentUpdaterController', function () {
       },
     }
     ctx.lines = ['test', '', 'testing']
-    ctx.res = new MockResponse()
+    ctx.res = new MockResponse(vi)
     ctx.next = sinon.stub()
     ctx.doc = { name: 'myfile.tex' }
   })
@@ -62,7 +62,7 @@ describe('DocumentUpdaterController', function () {
       ctx.ProjectLocator.promises.findElement.resolves({
         element: ctx.doc,
       })
-      ctx.res = new MockResponse()
+      ctx.res = new MockResponse(vi)
     })
 
     it('should call the document updater handler with the project_id and doc_id', async function (ctx) {
@@ -96,10 +96,9 @@ describe('DocumentUpdaterController', function () {
 
     it('should set the Content-Disposition header', async function (ctx) {
       await ctx.controller.getDoc(ctx.req, ctx.res)
-      expect(ctx.res.setContentDisposition).to.have.been.calledWith(
-        'attachment',
-        { filename: ctx.doc.name }
-      )
+      expect(ctx.res.setContentDisposition).toHaveBeenCalledWith('attachment', {
+        filename: ctx.doc.name,
+      })
     })
   })
 })

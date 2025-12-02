@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
-import MockResponse from '../helpers/MockResponse.js'
+import MockResponse from '../helpers/MockResponse.mjs'
 
 const MODULE_PATH =
   '../../../../app/src/Features/PasswordReset/PasswordResetController.mjs'
@@ -25,7 +25,7 @@ describe('PasswordResetController', function () {
       session: {},
       query: {},
     }
-    ctx.res = new MockResponse()
+    ctx.res = new MockResponse(vi)
 
     ctx.settings = {}
     ctx.PasswordResetHandler = {
@@ -110,21 +110,18 @@ describe('PasswordResetController', function () {
 
   describe('requestReset', function () {
     it('should tell the handler to process that email', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.PasswordResetHandler.promises.generateAndEmailResetToken.resolves(
-          'primary'
-        )
-        ctx.res.callback = () => {
-          ctx.res.statusCode.should.equal(200)
-          ctx.res.json.calledWith(sinon.match.has('message')).should.equal(true)
-          expect(
-            ctx.PasswordResetHandler.promises.generateAndEmailResetToken
-              .lastCall.args[0]
-          ).equal(ctx.email)
-          resolve()
-        }
-        ctx.PasswordResetController.requestReset(ctx.req, ctx.res)
-      })
+      ctx.PasswordResetHandler.promises.generateAndEmailResetToken.resolves(
+        'primary'
+      )
+      await ctx.PasswordResetController.requestReset(ctx.req, ctx.res)
+      expect(ctx.res.statusCode).to.equal(200)
+      expect(ctx.res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ message: expect.anything() })
+      )
+      expect(
+        ctx.PasswordResetHandler.promises.generateAndEmailResetToken.lastCall
+          .args[0]
+      ).equal(ctx.email)
     })
 
     it('should send a 500 if there is an error', async function (ctx) {
@@ -140,47 +137,41 @@ describe('PasswordResetController', function () {
     })
 
     it("should send a 404 if the email doesn't exist", async function (ctx) {
-      await new Promise(resolve => {
-        ctx.PasswordResetHandler.promises.generateAndEmailResetToken.resolves(
-          null
-        )
-        ctx.res.callback = () => {
-          ctx.res.statusCode.should.equal(404)
-          ctx.res.json.calledWith(sinon.match.has('message')).should.equal(true)
-          resolve()
-        }
-        ctx.PasswordResetController.requestReset(ctx.req, ctx.res)
-      })
+      ctx.PasswordResetHandler.promises.generateAndEmailResetToken.resolves(
+        null
+      )
+
+      await ctx.PasswordResetController.requestReset(ctx.req, ctx.res)
+      expect(ctx.res.statusCode).to.equal(404)
+      expect(ctx.res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ message: expect.anything() })
+      )
     })
 
     it('should send a 404 if the email is registered as a secondard email', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.PasswordResetHandler.promises.generateAndEmailResetToken.resolves(
-          'secondary'
-        )
-        ctx.res.callback = () => {
-          ctx.res.statusCode.should.equal(404)
-          ctx.res.json.calledWith(sinon.match.has('message')).should.equal(true)
-          resolve()
-        }
-        ctx.PasswordResetController.requestReset(ctx.req, ctx.res)
-      })
+      ctx.PasswordResetHandler.promises.generateAndEmailResetToken.resolves(
+        'secondary'
+      )
+
+      await ctx.PasswordResetController.requestReset(ctx.req, ctx.res)
+      expect(ctx.res.statusCode).to.equal(404)
+      expect(ctx.res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ message: expect.anything() })
+      )
     })
 
     it('should normalize the email address', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.email = '  UPperCaseEMAILWithSpacesAround@example.Com '
-        ctx.req.body.email = ctx.email
-        ctx.PasswordResetHandler.promises.generateAndEmailResetToken.resolves(
-          'primary'
-        )
-        ctx.res.callback = () => {
-          ctx.res.statusCode.should.equal(200)
-          ctx.res.json.calledWith(sinon.match.has('message')).should.equal(true)
-          resolve()
-        }
-        ctx.PasswordResetController.requestReset(ctx.req, ctx.res)
-      })
+      ctx.email = '  UPperCaseEMAILWithSpacesAround@example.Com '
+      ctx.req.body.email = ctx.email
+      ctx.PasswordResetHandler.promises.generateAndEmailResetToken.resolves(
+        'primary'
+      )
+
+      await ctx.PasswordResetController.requestReset(ctx.req, ctx.res)
+      expect(ctx.res.statusCode).to.equal(200)
+      expect(ctx.res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ message: expect.anything() })
+      )
     })
   })
 

@@ -1,7 +1,7 @@
 import { vi } from 'vitest'
 import sinon from 'sinon'
-import MockRequest from '../helpers/MockRequest.js'
-import MockResponse from '../helpers/MockResponse.js'
+import MockRequest from '../helpers/MockRequest.mjs'
+import MockResponse from '../helpers/MockResponse.mjs'
 const modulePath =
   '../../../../app/src/Features/References/ReferencesController'
 
@@ -25,13 +25,13 @@ describe('ReferencesController', function () {
     )
 
     ctx.controller = (await import(modulePath)).default
-    ctx.req = new MockRequest()
+    ctx.req = new MockRequest(vi)
     ctx.req.params.Project_id = ctx.projectId
     ctx.req.body = {
       docIds: (ctx.docIds = ['aaa', 'bbb']),
       shouldBroadcast: false,
     }
-    ctx.res = new MockResponse()
+    ctx.res = new MockResponse(vi)
     ctx.res.json = sinon.stub()
     ctx.res.sendStatus = sinon.stub()
     ctx.next = sinon.stub()

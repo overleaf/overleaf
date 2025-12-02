@@ -1,8 +1,8 @@
 import { vi, assert } from 'vitest'
 import path from 'node:path'
 import sinon from 'sinon'
-import MockRequest from '../helpers/MockRequestVitest.mjs'
-import MockResponse from '../helpers/MockResponseVitest.mjs'
+import MockRequest from '../helpers/MockRequest.mjs'
+import MockResponse from '../helpers/MockResponse.mjs'
 import mongodb from 'mongodb-legacy'
 
 const { ObjectId } = mongodb

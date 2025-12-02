@@ -1,6 +1,6 @@
 import accepts from 'accepts'
 import { expect, vi } from 'vitest'
-import MockRequest from '../helpers/MockRequestVitest.mjs'
+import MockRequest from '../helpers/MockRequest.mjs'
 const MODULE_PATH =
   '../../../../app/src/infrastructure/RequestContentTypeDetection.mjs'
 

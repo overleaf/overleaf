@@ -1,8 +1,8 @@
 import { expect, vi } from 'vitest'
 import sinon from 'sinon'
 import HttpPermissionsPolicyMiddleware from '../../../../app/src/infrastructure/HttpPermissionsPolicy.mjs'
-import MockRequest from '../helpers/MockRequestVitest.mjs'
-import MockResponse from '../helpers/MockResponseVitest.mjs'
+import MockRequest from '../helpers/MockRequest.mjs'
+import MockResponse from '../helpers/MockResponse.mjs'
 const modulePath =
   '../../../../app/src/infrastructure/HttpPermissionsPolicy.mjs'
 

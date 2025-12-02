@@ -1,5 +1,7 @@
-const chai = require('chai')
-const { expect } = chai
+import { expect } from 'vitest'
+import { createRequire } from 'node:module'
+
+const require = createRequire(import.meta.url)
 
 function clearSettingsCache() {
   const monorepoPath = require

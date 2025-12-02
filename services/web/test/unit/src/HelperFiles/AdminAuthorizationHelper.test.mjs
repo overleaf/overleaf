@@ -1,7 +1,7 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
-import MockRequest from '../helpers/MockRequest.js'
-import MockResponse from '../helpers/MockResponse.js'
+import MockRequest from '../helpers/MockRequest.mjs'
+import MockResponse from '../helpers/MockResponse.mjs'
 
 const modulePath =
   '../../../../app/src/Features/Helpers/AdminAuthorizationHelper'
@@ -68,8 +68,8 @@ describe('AdminAuthorizationHelper', function () {
     describe('when admin capabilities are not available', function () {
       describe('user is null', function () {
         beforeEach(async function (ctx) {
-          ctx.req = new MockRequest()
-          ctx.res = new MockResponse()
+          ctx.req = new MockRequest(vi)
+          ctx.res = new MockResponse(vi)
           ctx.next = sinon.stub()
 
           ctx.req.session = {
@@ -93,8 +93,8 @@ describe('AdminAuthorizationHelper', function () {
       })
       describe('user is not an admin', function () {
         beforeEach(async function (ctx) {
-          ctx.req = new MockRequest()
-          ctx.res = new MockResponse()
+          ctx.req = new MockRequest(vi)
+          ctx.res = new MockResponse(vi)
           ctx.next = sinon.stub()
 
           ctx.user = {
@@ -122,8 +122,8 @@ describe('AdminAuthorizationHelper', function () {
       })
       describe('user is an admin', function () {
         beforeEach(async function (ctx) {
-          ctx.req = new MockRequest()
-          ctx.res = new MockResponse()
+          ctx.req = new MockRequest(vi)
+          ctx.res = new MockResponse(vi)
           ctx.next = sinon.stub()
 
           ctx.user = {
@@ -158,8 +158,8 @@ describe('AdminAuthorizationHelper', function () {
       })
       describe('user is not an admin', function () {
         beforeEach(async function (ctx) {
-          ctx.req = new MockRequest()
-          ctx.res = new MockResponse()
+          ctx.req = new MockRequest(vi)
+          ctx.res = new MockResponse(vi)
           ctx.next = sinon.stub()
 
           ctx.user = {
@@ -187,8 +187,8 @@ describe('AdminAuthorizationHelper', function () {
       })
       describe('user is an admin', function () {
         beforeEach(async function (ctx) {
-          ctx.req = new MockRequest()
-          ctx.res = new MockResponse()
+          ctx.req = new MockRequest(vi)
+          ctx.res = new MockResponse(vi)
           ctx.next = sinon.stub()
 
           ctx.user = {
@@ -221,8 +221,8 @@ describe('AdminAuthorizationHelper', function () {
       beforeEach(async function (ctx) {
         ctx.fireHook.rejects(new Error('Module error'))
 
-        ctx.req = new MockRequest()
-        ctx.res = new MockResponse()
+        ctx.req = new MockRequest(vi)
+        ctx.res = new MockResponse(vi)
         ctx.next = sinon.stub()
 
         ctx.user = {
@@ -259,8 +259,8 @@ describe('AdminAuthorizationHelper', function () {
   })
   describe('useHasAdminCapability', function () {
     it('adds hasAdminCapability to res.locals', function (ctx) {
-      const req = new MockRequest()
-      const res = new MockResponse()
+      const req = new MockRequest(vi)
+      const res = new MockResponse(vi)
       const next = sinon.stub()
 
       ctx.AdminAuthorizationHelper.useHasAdminCapability(req, res, next)
@@ -272,8 +272,8 @@ describe('AdminAuthorizationHelper', function () {
     describe('when the user is not an admin', function () {
       describe('when req.adminCapabilitiesAvailable is true', function () {
         it('returns false for any capability', function (ctx) {
-          const req = new MockRequest()
-          const res = new MockResponse()
+          const req = new MockRequest(vi)
+          const res = new MockResponse(vi)
           const next = sinon.stub()
 
           req.adminCapabilitiesAvailable = true
@@ -289,8 +289,8 @@ describe('AdminAuthorizationHelper', function () {
 
       describe('when req.adminCapabilitiesAvailable is false', function () {
         it('returns false for any capability', function (ctx) {
-          const req = new MockRequest()
-          const res = new MockResponse()
+          const req = new MockRequest(vi)
+          const res = new MockResponse(vi)
           const next = sinon.stub()
 
           req.adminCapabilitiesAvailable = false
@@ -306,8 +306,8 @@ describe('AdminAuthorizationHelper', function () {
 
       describe('when req.adminCapabilitiesAvailable is undefined', function () {
         it('returns false for any capability', function (ctx) {
-          const req = new MockRequest()
-          const res = new MockResponse()
+          const req = new MockRequest(vi)
+          const res = new MockResponse(vi)
           const next = sinon.stub()
 
           req.session.user = { isAdmin: false }
@@ -322,8 +322,8 @@ describe('AdminAuthorizationHelper', function () {
     describe('user is an admin', function () {
       describe('when req.adminCapabilitiesAvailable is false', function () {
         it('returns true for any capability', function (ctx) {
-          const req = new MockRequest()
-          const res = new MockResponse()
+          const req = new MockRequest(vi)
+          const res = new MockResponse(vi)
           const next = sinon.stub()
 
           req.session.user = { isAdmin: true }
@@ -337,8 +337,8 @@ describe('AdminAuthorizationHelper', function () {
 
       describe('when req.adminCapabilitiesAvailable is undefined', function () {
         it('returns true for any capability', function (ctx) {
-          const req = new MockRequest()
-          const res = new MockResponse()
+          const req = new MockRequest(vi)
+          const res = new MockResponse(vi)
           const next = sinon.stub()
 
           req.session.user = { isAdmin: true }
@@ -352,8 +352,8 @@ describe('AdminAuthorizationHelper', function () {
       describe('when req.adminCapabilitiesAvailable is true', function () {
         let req, res, next
         beforeEach(function (ctx) {
-          req = new MockRequest()
-          res = new MockResponse()
+          req = new MockRequest(vi)
+          res = new MockResponse(vi)
           next = sinon.stub()
 
           req.session.user = { isAdmin: true }

@@ -1,10 +1,13 @@
-import { chai, vi } from 'vitest'
-import './common_bootstrap.js'
+import { afterEach, beforeEach, chai, vi } from 'vitest'
+import 'sinon-mongoose'
 import sinon from 'sinon'
 import logger from '@overleaf/logger'
 import sinonChai from 'sinon-chai'
 import chaiAsPromised from 'chai-as-promised'
 import mongoose from 'mongoose'
+import mongodb from 'mongodb-legacy'
+
+mongodb.ObjectId.cacheHexString = true
 
 /*
  * Chai configuration

@@ -7,8 +7,8 @@
  */
 import { expect, vi } from 'vitest'
 import sinon from 'sinon'
-import MockRequest from '../helpers/MockRequest.js'
-import MockResponse from '../helpers/MockResponse.js'
+import MockRequest from '../helpers/MockRequest.mjs'
+import MockResponse from '../helpers/MockResponse.mjs'
 import ArchiveErrors from '../../../../app/src/Features/Uploads/ArchiveErrors.mjs'
 
 const modulePath =
@@ -17,8 +17,8 @@ const modulePath =
 describe('ProjectUploadController', function () {
   beforeEach(async function (ctx) {
     let Timer
-    ctx.req = new MockRequest()
-    ctx.res = new MockResponse()
+    ctx.req = new MockRequest(vi)
+    ctx.res = new MockResponse(vi)
     ctx.user_id = 'user-id-123'
     ctx.metrics = {
       Timer: (Timer = (function () {

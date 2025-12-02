@@ -1,7 +1,7 @@
 import { vi } from 'vitest'
 import sinon from 'sinon'
-import MockRequest from '../helpers/MockRequest.js'
-import MockResponse from '../helpers/MockResponse.js'
+import MockRequest from '../helpers/MockRequest.mjs'
+import MockResponse from '../helpers/MockResponse.mjs'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 
 const MODULE_PATH =
@@ -9,8 +9,8 @@ const MODULE_PATH =
 
 describe('DocumentController', function () {
   beforeEach(async function (ctx) {
-    ctx.res = new MockResponse()
-    ctx.req = new MockRequest()
+    ctx.res = new MockResponse(vi)
+    ctx.req = new MockRequest(vi)
     ctx.next = sinon.stub()
     ctx.doc = { _id: 'doc-id-123' }
     ctx.doc_lines = ['one', 'two', 'three']

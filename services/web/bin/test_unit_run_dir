@@ -2,19 +2,6 @@
 
 declare -a vitest_args=("$@")
 
-has_mocha_test=0
-has_sequential_test=0
-
-for dir_path in "$@"; do
-  if [ -n "$(find "$dir_path" -name "*.js" -type f -print -quit 2>/dev/null)" ]; then
-    has_mocha_test=1
-  fi
-
-  if [ -n "$(find "$dir_path" -name "*.sequential.test.mjs" -type f -print -quit 2>/dev/null)" ]; then
-    has_sequential_test=1
-  fi
-done
-
 if [[ -n "$MOCHA_GREP" ]]; then
   vitest_args+=("--testNamePattern" "$MOCHA_GREP")
 fi
@@ -26,41 +13,24 @@ fi
 
 echo "Running unit tests in directory: $*"
 
-
-npm run test:unit:esm:parallel -- "${vitest_args[@]}"
+npm run test:unit:parallel -- "${vitest_args[@]}"
 vitest_parallel_status=$?
-if (( has_sequential_test == 0 )); then
-  echo "No sequential vitest tests found, skipping sequential vitest step."
-  vitest_sequential_status=0
-else
-  npm run test:unit:esm:sequential -- "${vitest_args[@]}"
-  vitest_sequential_status=$?
-fi
 
-if (( has_mocha_test == 1 )); then
-  mocha --recursive --timeout 25000 --exit --grep="$MOCHA_GREP" --require test/unit/bootstrap.js --extension=js "$@"
-  mocha_status=$?
-else
-  echo "No mocha tests found, skipping mocha step."
-  mocha_status=0
-fi
+npm run test:unit:sequential -- "${vitest_args[@]}"
+vitest_sequential_status=$?
 
-if [ "$mocha_status" -eq 0 ] && [ "$vitest_sequential_status" -eq 0 ] && [ "$vitest_parallel_status" -eq 0 ]; then
+if [ "$vitest_sequential_status" -eq 0 ] && [ "$vitest_parallel_status" -eq 0 ]; then
   exit 0
 fi
 
 # Report status briefly at the end for failures
 
-if [ "$mocha_status" -ne 0 ]; then
-  echo "Mocha tests failed with status: $mocha_status"
-fi
-
 if [ "$vitest_parallel_status" -ne 0 ]; then
-  echo "Vitest parallel tests failed with status: $vitest_parallel_status"
+  echo "Parallel tests failed with status: $vitest_parallel_status"
 fi
 
 if [ "$vitest_sequential_status" -ne 0 ]; then
-  echo "Vitest sequential tests failed with status: $vitest_sequential_status"
+  echo "Sequential tests failed with status: $vitest_sequential_status"
 fi
 
 exit 1

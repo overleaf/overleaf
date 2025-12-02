@@ -1,6 +1,6 @@
 import { expect, vi, describe, it, beforeEach } from 'vitest'
-import MockRequest from '../helpers/MockRequestVitest.mjs'
-import MockResponse from '../helpers/MockResponseVitest.mjs'
+import MockRequest from '../helpers/MockRequest.mjs'
+import MockResponse from '../helpers/MockResponse.mjs'
 import EntityConfigs from '../../../../app/src/Features/UserMembership/UserMembershipEntityConfigs.mjs'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import UserMembershipErrors from '../../../../app/src/Features/UserMembership/UserMembershipErrors.mjs'

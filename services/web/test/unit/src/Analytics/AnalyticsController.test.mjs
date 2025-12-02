@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import sinon from 'sinon'
-import MockResponse from '../helpers/MockResponseVitest.mjs'
+import MockResponse from '../helpers/MockResponse.mjs'
 const modulePath = new URL(
   '../../../../app/src/Features/Analytics/AnalyticsController.mjs',
   import.meta.url

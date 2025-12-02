@@ -1,7 +1,7 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
-import MockResponse from '../helpers/MockResponse.js'
-import MockRequest from '../helpers/MockRequest.js'
+import MockResponse from '../helpers/MockResponse.mjs'
+import MockRequest from '../helpers/MockRequest.mjs'
 import mongodb from 'mongodb-legacy'
 
 const modulePath = '../../../../app/src/Features/User/UserInfoController.mjs'
@@ -45,8 +45,8 @@ describe('UserInfoController', function () {
 
     ctx.UserInfoController = (await import(modulePath)).default
 
-    ctx.req = new MockRequest()
-    ctx.res = new MockResponse()
+    ctx.req = new MockRequest(vi)
+    ctx.res = new MockResponse(vi)
     ctx.next = sinon.stub()
   })
 
@@ -192,8 +192,8 @@ describe('UserInfoController', function () {
       })
 
       it('should return the features as JSON', function (ctx) {
-        expect(ctx.res.json.callCount).to.equal(1)
-        expect(ctx.res.json.calledWith(ctx.features)).to.equal(true)
+        expect(ctx.res.json).toHaveBeenCalledTimes(1)
+        expect(ctx.res.json).toHaveBeenCalledWith(ctx.features)
       })
     })
 

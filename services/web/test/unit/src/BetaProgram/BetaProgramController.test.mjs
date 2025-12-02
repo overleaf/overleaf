@@ -1,7 +1,7 @@
 import { expect, vi } from 'vitest'
 import path from 'node:path'
 import sinon from 'sinon'
-import MockResponse from '../helpers/MockResponseVitest.mjs'
+import MockResponse from '../helpers/MockResponse.mjs'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))

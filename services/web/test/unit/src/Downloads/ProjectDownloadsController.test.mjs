@@ -7,16 +7,16 @@ import { vi } from 'vitest'
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import sinon from 'sinon'
-import MockRequest from '../helpers/MockRequest.js'
-import MockResponse from '../helpers/MockResponse.js'
+import MockRequest from '../helpers/MockRequest.mjs'
+import MockResponse from '../helpers/MockResponse.mjs'
 const modulePath =
   '../../../../app/src/Features/Downloads/ProjectDownloadsController.mjs'
 
 describe('ProjectDownloadsController', function () {
   beforeEach(async function (ctx) {
     ctx.project_id = 'project-id-123'
-    ctx.req = new MockRequest()
-    ctx.res = new MockResponse()
+    ctx.req = new MockRequest(vi)
+    ctx.res = new MockResponse(vi)
     ctx.next = sinon.stub()
     ctx.DocumentUpdaterHandler = sinon.stub()
 
@@ -78,9 +78,7 @@ describe('ProjectDownloadsController', function () {
     })
 
     it('should set the correct content type on the request', function (ctx) {
-      return ctx.res.contentType
-        .calledWith('application/zip')
-        .should.equal(true)
+      expect(ctx.res.contentType).toHaveBeenCalledWith('application/zip')
     })
 
     it('should flush the project to mongo', function (ctx) {
@@ -138,9 +136,7 @@ describe('ProjectDownloadsController', function () {
     })
 
     it('should set the correct content type on the request', function (ctx) {
-      return ctx.res.contentType
-        .calledWith('application/zip')
-        .should.equal(true)
+      expect(ctx.res.contentType).toHaveBeenCalledWith('application/zip')
     })
 
     it('should flush the projects to mongo', function (ctx) {

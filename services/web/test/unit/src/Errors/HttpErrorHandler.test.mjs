@@ -1,12 +1,12 @@
 import { vi, expect } from 'vitest'
-import MockResponse from '../helpers/MockResponse.js'
-import MockRequest from '../helpers/MockRequest.js'
+import MockResponse from '../helpers/MockResponse.mjs'
+import MockRequest from '../helpers/MockRequest.mjs'
 const modulePath = '../../../../app/src/Features/Errors/HttpErrorHandler.mjs'
 
 describe('HttpErrorHandler', function () {
   beforeEach(async function (ctx) {
-    ctx.req = new MockRequest()
-    ctx.res = new MockResponse()
+    ctx.req = new MockRequest(vi)
+    ctx.res = new MockResponse(vi)
 
     vi.doMock('@overleaf/settings', () => ({
       default: {
@@ -274,8 +274,8 @@ describe('HttpErrorHandler', function () {
       it('should send the error to the logger', function (ctx) {
         const error = new Error('message')
         ctx.HttpErrorHandler.legacyInternal(ctx.req, ctx.res, 'message', error)
-        expect(ctx.req.logger.setLevel).to.have.been.calledWith('error')
-        expect(ctx.req.logger.addFields).to.have.been.calledWith({
+        expect(ctx.req.logger.setLevel).toHaveBeenCalledWith('error')
+        expect(ctx.req.logger.addFields).toHaveBeenCalledWith({
           err: error,
         })
       })

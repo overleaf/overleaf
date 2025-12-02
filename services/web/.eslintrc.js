@@ -71,7 +71,7 @@ module.exports = {
       files: ['**/test/**/*.*'],
       excludedFiles: [
         '**/test/unit/src/**/*.test.mjs',
-        'test/unit/vitest_bootstrap.mjs',
+        'test/unit/bootstrap.mjs',
       ], // exclude vitest files
       plugins: ['mocha', 'chai-expect', 'chai-friendly'],
       env: {
@@ -105,10 +105,7 @@ module.exports = {
       },
     },
     {
-      files: [
-        '**/test/unit/src/**/*.test.mjs',
-        'test/unit/vitest_bootstrap.mjs',
-      ],
+      files: ['**/test/unit/src/**/*.test.mjs', 'test/unit/bootstrap.mjs'],
       env: {
         jest: true, // best match for vitest API etc.
       },

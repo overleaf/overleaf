@@ -1,8 +1,8 @@
 import { beforeEach, describe, it, vi, expect } from 'vitest'
 import sinon from 'sinon'
 import tk from 'timekeeper'
-import MockRequest from '../helpers/MockRequestVitest.mjs'
-import MockResponse from '../helpers/MockResponseVitest.mjs'
+import MockRequest from '../helpers/MockRequest.mjs'
+import MockResponse from '../helpers/MockResponse.mjs'
 import mongodb from 'mongodb-legacy'
 import AuthenticationErrors from '../../../../app/src/Features/Authentication/AuthenticationErrors.mjs'
 const modulePath =

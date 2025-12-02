@@ -1,8 +1,8 @@
 import { expect, vi } from 'vitest'
 import assert from 'node:assert'
 import sinon from 'sinon'
-import MockResponse from '../helpers/MockResponse.js'
-import MockRequest from '../helpers/MockRequest.js'
+import MockResponse from '../helpers/MockResponse.mjs'
+import MockRequest from '../helpers/MockRequest.mjs'
 
 const modulePath = '../../../../app/src/Features/User/UserPagesController'
 
@@ -154,10 +154,10 @@ describe('UserPagesController', function () {
     }))
 
     ctx.UserPagesController = (await import(modulePath)).default
-    ctx.req = new MockRequest()
+    ctx.req = new MockRequest(vi)
     ctx.req.capabilitySet = new Set()
     ctx.req.session.user = ctx.user
-    ctx.res = new MockResponse()
+    ctx.res = new MockResponse(vi)
   })
 
   describe('registerPage', function () {

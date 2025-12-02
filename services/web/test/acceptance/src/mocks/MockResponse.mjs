@@ -1,19 +1,6 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS206: Consider reworking classes to avoid initClass
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const sinon = require('sinon')
-const Path = require('path')
-const contentDisposition = require('content-disposition')
+import sinon from 'sinon'
+import Path from 'node:path'
+import contentDisposition from 'content-disposition'
 
 class MockResponse {
   static initClass() {
@@ -160,7 +147,7 @@ class MockResponse {
   attachment(filename) {
     switch (Path.extname(filename)) {
       case '.csv':
-        this.contentType('text/csv; charset=utf-8')
+        this.contentType('text/csv; charset=utf8')
         break
       case '.zip':
         this.contentType('application/zip')
@@ -168,12 +155,12 @@ class MockResponse {
       default:
         throw new Error('unexpected extension')
     }
-    this.header('Content-Disposition', contentDisposition(filename))
+    this.header('ContentDisposition', contentDisposition(filename))
     return this
   }
 
   contentType(type) {
-    this.header('Content-Type', type)
+    this.header('ContentType', type)
     this.type = type
     return this
   }
@@ -184,4 +171,4 @@ class MockResponse {
 }
 MockResponse.initClass()
 
-module.exports = MockResponse
+export default MockResponse

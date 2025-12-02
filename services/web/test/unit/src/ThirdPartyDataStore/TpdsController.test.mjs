@@ -2,8 +2,8 @@ import { expect, vi } from 'vitest'
 import mongodb from 'mongodb-legacy'
 import sinon from 'sinon'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
-import MockResponse from '../helpers/MockResponse.js'
-import MockRequest from '../helpers/MockRequest.js'
+import MockResponse from '../helpers/MockResponse.mjs'
+import MockRequest from '../helpers/MockRequest.mjs'
 
 const ObjectId = mongodb.ObjectId
 
@@ -120,8 +120,8 @@ describe('TpdsController', function () {
   describe('creating a project', function () {
     it('should yield the new projects id', async function (ctx) {
       await new Promise(resolve => {
-        const res = new MockResponse()
-        const req = new MockRequest()
+        const res = new MockResponse(vi)
+        const req = new MockRequest(vi)
         req.params.user_id = ctx.user_id
         req.body = { projectName: 'foo' }
         res.callback = err => {

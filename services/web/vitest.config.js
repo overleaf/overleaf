@@ -17,9 +17,10 @@ if (process.env.CI && process.env.MOCHA_ROOT_SUITE_NAME) {
 }
 module.exports = defineConfig({
   test: {
-    setupFiles: ['./test/unit/vitest_bootstrap.mjs'],
+    setupFiles: ['./test/unit/bootstrap.mjs'],
     globals: true,
     isolate: false,
+    passWithNoTests: true, // in case there are no tests from one project or other in a module
     projects: [
       {
         extends: true,

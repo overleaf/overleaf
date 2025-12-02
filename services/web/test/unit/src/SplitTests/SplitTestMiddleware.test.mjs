@@ -1,7 +1,7 @@
 import { vi } from 'vitest'
 import sinon from 'sinon'
-import MockResponse from '../helpers/MockResponse.js'
-import MockRequest from '../helpers/MockRequest.js'
+import MockResponse from '../helpers/MockResponse.mjs'
+import MockRequest from '../helpers/MockRequest.mjs'
 
 const modulePath = '../../../../app/src/Features/SplitTests/SplitTestMiddleware'
 
@@ -20,8 +20,8 @@ describe('SplitTestMiddleware', function () {
 
     ctx.SplitTestMiddleware = (await import(modulePath)).default
 
-    ctx.req = new MockRequest()
-    ctx.res = new MockResponse()
+    ctx.req = new MockRequest(vi)
+    ctx.res = new MockResponse(vi)
     ctx.next = sinon.stub()
   })
 

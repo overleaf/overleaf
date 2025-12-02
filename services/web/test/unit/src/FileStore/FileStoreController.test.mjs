@@ -1,7 +1,7 @@
 import { expect, vi } from 'vitest'
 import sinon from 'sinon'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
-import MockResponse from '../helpers/MockResponse.js'
+import MockResponse from '../helpers/MockResponse.mjs'
 
 const MODULE_PATH =
   '../../../../app/src/Features/FileStore/FileStoreController.mjs'
@@ -53,7 +53,7 @@ describe('FileStoreController', function () {
         addFields: sinon.stub(),
       },
     }
-    ctx.res = new MockResponse()
+    ctx.res = new MockResponse(vi)
     ctx.next = sinon.stub()
     ctx.hash = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
     ctx.file = { name: 'myfile.png', hash: ctx.hash }
@@ -92,7 +92,7 @@ describe('FileStoreController', function () {
 
     it('should set the Content-Disposition header', async function (ctx) {
       await ctx.controller.getFile(ctx.req, ctx.res)
-      ctx.res.setContentDisposition.should.be.calledWith('attachment', {
+      expect(ctx.res.setContentDisposition).toBeCalledWith('attachment', {
         filename: ctx.file.name,
       })
     })
@@ -216,8 +216,8 @@ describe('FileStoreController', function () {
           .resolves({ contentLength: expectedFileSize })
 
         ctx.res.end = () => {
-          expect(ctx.res.status.lastCall.args).to.deep.equal([200])
-          expect(ctx.res.header.lastCall.args).to.deep.equal([
+          expect(ctx.res.status.mock.lastCall).to.deep.equal([200])
+          expect(ctx.res.header.mock.lastCall).to.deep.equal([
             'Content-Length',
             expectedFileSize,
           ])
@@ -235,7 +235,7 @@ describe('FileStoreController', function () {
         )
 
         ctx.res.end = () => {
-          expect(ctx.res.status.lastCall.args).to.deep.equal([404])
+          expect(ctx.res.status.mock.lastCall).to.deep.equal([404])
           resolve()
         }
 

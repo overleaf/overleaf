@@ -1,8 +1,8 @@
 import { expect, vi } from 'vitest'
 import Path from 'node:path'
 import sinon from 'sinon'
-import MockResponse from '../helpers/MockResponse.js'
-import MockRequest from '../helpers/MockRequest.js'
+import MockResponse from '../helpers/MockResponse.mjs'
+import MockRequest from '../helpers/MockRequest.mjs'
 
 const modulePath = Path.join(
   import.meta.dirname,
@@ -13,8 +13,8 @@ describe('ServeStaticWrapperTests', function () {
   let error = null
 
   beforeEach(async function (ctx) {
-    ctx.req = new MockRequest()
-    ctx.res = new MockResponse()
+    ctx.req = new MockRequest(vi)
+    ctx.res = new MockResponse(vi)
     ctx.express = {
       static: () => (req, res, next) => {
         if (error) {

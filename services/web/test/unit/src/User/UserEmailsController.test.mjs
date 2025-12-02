@@ -1,7 +1,7 @@
 import { vi, assert, expect } from 'vitest'
 import { setTimeout } from 'node:timers/promises'
-import MockRequest from '../helpers/MockRequestVitest.mjs'
-import MockResponse from '../helpers/MockResponseVitest.mjs'
+import MockRequest from '../helpers/MockRequest.mjs'
+import MockResponse from '../helpers/MockResponse.mjs'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 
 const modulePath = '../../../../app/src/Features/User/UserEmailsController.mjs'

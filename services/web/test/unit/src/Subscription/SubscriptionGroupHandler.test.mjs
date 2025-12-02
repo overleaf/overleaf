@@ -1,7 +1,7 @@
 import { vi, expect } from 'vitest'
 import mongodb from 'mongodb-legacy'
 import sinon from 'sinon'
-import MockRequest from '../helpers/MockRequest.js'
+import MockRequest from '../helpers/MockRequest.mjs'
 import { InvalidEmailError } from '../../../../app/src/Features/Errors/Errors.js'
 
 const { ObjectId } = mongodb
@@ -416,7 +416,7 @@ describe('SubscriptionGroupHandler', function () {
 
   describe('getUsersGroupSubscriptionDetails', function () {
     beforeEach(function (ctx) {
-      ctx.req = new MockRequest()
+      ctx.req = new MockRequest(vi)
       ctx.PlansLocator.findLocalPlanInSettings = sinon.stub().returns({
         ...ctx.localPlanInSettings,
         canUseFlexibleLicensing: true,
@@ -459,7 +459,7 @@ describe('SubscriptionGroupHandler', function () {
 
   describe('add seats subscription change', function () {
     beforeEach(function (ctx) {
-      ctx.req = new MockRequest()
+      ctx.req = new MockRequest(vi)
       Object.assign(ctx.req.body, { adding: ctx.adding })
       ctx.PlansLocator.findLocalPlanInSettings = sinon.stub().returns({
         ...ctx.localPlanInSettings,
