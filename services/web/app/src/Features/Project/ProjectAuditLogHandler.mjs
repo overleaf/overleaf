@@ -2,6 +2,7 @@ import logger from '@overleaf/logger'
 import { ProjectAuditLogEntry } from '../../models/ProjectAuditLogEntry.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
+import _ from 'lodash'
 
 const MANAGED_GROUP_PROJECT_EVENTS = [
   'send-invite',
@@ -14,7 +15,34 @@ const MANAGED_GROUP_PROJECT_EVENTS = [
   'project-untrashed',
   'project-restored',
   'project-cloned',
+  'transfer-ownership',
 ]
+
+async function findManagedSubscriptions(entry) {
+  if (!MANAGED_GROUP_PROJECT_EVENTS.includes(entry.operation)) {
+    return
+  }
+
+  // remove duplications and empty values
+  const userIds = _.uniq(
+    _.compact([
+      entry.info?.previousOwnerId,
+      entry.info?.newOwnerId,
+      entry.initiatorId,
+    ])
+  )
+
+  const managedSubscriptions = await Promise.all(
+    userIds.map(id =>
+      SubscriptionLocator.promises.getUniqueManagedSubscriptionMemberOf(id)
+    )
+  )
+  const ids = managedSubscriptions.map(subscription =>
+    subscription?._id.toString()
+  )
+
+  return _.uniq(_.compact(ids))
+}
 
 export default {
   promises: {
@@ -29,13 +57,16 @@ export default {
 }
 
 /**
- * Add an audit log entry
+ * Add an audit log entry. If the entry involves multiple managed subscriptions,
+ * adds multiple entries each with a different managedSubscriptionId.
  *
  * The entry should include at least the following fields:
  *
- * - operation: a string identifying the type of operation
- * - userId: the user on behalf of whom the operation was performed
- * - message: a string detailing what happened
+ * @param {ObjectId} projectId - the project for which the operation was performed
+ * @param {string} operation - a string identifying the type of operation
+ * @param {ObjectId} initiatorId - the user on behalf of whom the operation was performed
+ * @param {string} ipAddress - the IP address of the initiator
+ * @param {object} info - any additional payload
  */
 async function addEntry(
   projectId,
@@ -51,20 +82,32 @@ async function addEntry(
     ipAddress,
     info,
   }
-
-  if (MANAGED_GROUP_PROJECT_EVENTS.includes(operation)) {
-    const managedSubscription =
-      await SubscriptionLocator.promises.getUniqueManagedSubscriptionMemberOf(
-        info.userId || initiatorId
-      )
-
-    if (managedSubscription) {
-      entry.managedSubscriptionId = managedSubscription._id
+  const managedSubscriptions = await findManagedSubscriptions(entry)
+  if (managedSubscriptions?.length) {
+    for (const managedSubscriptionId of managedSubscriptions) {
+      await ProjectAuditLogEntry.create({
+        ...entry,
+        managedSubscriptionId,
+      })
     }
+  } else {
+    await ProjectAuditLogEntry.create(entry)
   }
-  await ProjectAuditLogEntry.create(entry)
 }
 
+/**
+ * Add an audit log entry only if the entry is related to a managed subscription.
+ * If the entry involves multiple managed subscriptions, adds multiple entries each
+ * with a different managedSubscriptionId.
+ *
+ * The entry should include at least the following fields:
+ *
+ * @param {ObjectId} projectId - the project for which the operation was performed
+ * @param {string} operation - a string identifying the type of operation
+ * @param {ObjectId} initiatorId - the user on behalf of whom the operation was performed
+ * @param {string} ipAddress - the IP address of the initiator
+ * @param {object} info - any additional payload
+ */
 async function addEntryIfManaged(
   projectId,
   operation,
@@ -76,24 +119,25 @@ async function addEntryIfManaged(
     return
   }
 
-  const managedSubscription =
-    await SubscriptionLocator.promises.getUniqueManagedSubscriptionMemberOf(
-      info.userId || initiatorId
-    )
-  if (!managedSubscription) {
-    return
-  }
-
   const entry = {
     projectId,
     operation,
     initiatorId,
     ipAddress,
     info,
-    managedSubscriptionId: managedSubscription._id,
   }
 
-  await ProjectAuditLogEntry.create(entry)
+  const managedSubscriptions = await findManagedSubscriptions(entry)
+  if (!managedSubscriptions?.length) {
+    return
+  }
+
+  for (const managedSubscriptionId of managedSubscriptions) {
+    await ProjectAuditLogEntry.create({
+      ...entry,
+      managedSubscriptionId,
+    })
+  }
 }
 
 /**
@@ -116,6 +160,9 @@ function addEntryInBackground(
   })
 }
 
+/**
+ * Add an audit log entry in the background only if related to a managed subscription.
+ */
 function addEntryIfManagedInBackground(
   projectId,
   operation,

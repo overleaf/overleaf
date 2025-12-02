@@ -9,6 +9,9 @@ const { ObjectId } = mongodb
 const projectId = new ObjectId()
 const userId = new ObjectId()
 const subscriptionId = new ObjectId()
+const previousOwnerId = new ObjectId()
+const newOwnerId = new ObjectId()
+const subscriptionId2 = new ObjectId()
 
 describe('ProjectAuditLogHandler', function (ctx) {
   beforeEach(async function (ctx) {
@@ -75,7 +78,7 @@ describe('ProjectAuditLogHandler', function (ctx) {
         '0:0:0:0'
       )
       expect(ctx.createEntryMock).to.have.been.calledWithMatch({
-        managedSubscriptionId: subscriptionId,
+        managedSubscriptionId: subscriptionId.toString(),
       })
     })
 
@@ -91,6 +94,29 @@ describe('ProjectAuditLogHandler', function (ctx) {
       )
       expect(ctx.createEntryMock).not.to.have.been.calledWithMatch({
         managedSubscriptionId: subscriptionId,
+      })
+    })
+
+    it('adds multiple entries when the log involves multiple group subscriptions', async function (ctx) {
+      ctx.getUniqueManagedSubscriptionMemberOfMock.onFirstCall().resolves({
+        _id: subscriptionId,
+      })
+      ctx.getUniqueManagedSubscriptionMemberOfMock.onSecondCall().resolves({
+        _id: subscriptionId2,
+      })
+      await ctx.ProjectAuditLogHandler.promises.addEntry(
+        projectId,
+        'transfer-ownership',
+        userId,
+        '0:0:0:0',
+        { previousOwnerId, newOwnerId }
+      )
+      expect(ctx.createEntryMock).to.have.been.calledTwice
+      expect(ctx.createEntryMock).to.have.been.calledWithMatch({
+        managedSubscriptionId: subscriptionId.toString(),
+      })
+      expect(ctx.createEntryMock).to.have.been.calledWithMatch({
+        managedSubscriptionId: subscriptionId2.toString(),
       })
     })
   })
@@ -116,7 +142,7 @@ describe('ProjectAuditLogHandler', function (ctx) {
           initiatorId: userId,
           ipAddress: '0:0:0:0',
           info: {},
-          managedSubscriptionId: subscriptionId,
+          managedSubscriptionId: subscriptionId.toString(),
         })
       })
 
@@ -140,6 +166,29 @@ describe('ProjectAuditLogHandler', function (ctx) {
           '0:0:0:0'
         )
         expect(ctx.createEntryMock).not.to.have.been.called
+      })
+    })
+
+    it('adds multiple entries when the log involves multiple group subscriptions', async function (ctx) {
+      ctx.getUniqueManagedSubscriptionMemberOfMock.onFirstCall().resolves({
+        _id: subscriptionId,
+      })
+      ctx.getUniqueManagedSubscriptionMemberOfMock.onSecondCall().resolves({
+        _id: subscriptionId2,
+      })
+      await ctx.ProjectAuditLogHandler.promises.addEntryIfManaged(
+        projectId,
+        'transfer-ownership',
+        userId,
+        '0:0:0:0',
+        { previousOwnerId, newOwnerId }
+      )
+      expect(ctx.createEntryMock).to.have.been.calledTwice
+      expect(ctx.createEntryMock).to.have.been.calledWithMatch({
+        managedSubscriptionId: subscriptionId.toString(),
+      })
+      expect(ctx.createEntryMock).to.have.been.calledWithMatch({
+        managedSubscriptionId: subscriptionId2.toString(),
       })
     })
   })
