@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * This script exports all products and their prices from a Stripe environment to a JSON file
+ * This script exports active products and their active prices from a Stripe environment to a JSON file
  *
  * Usage:
  *   node scripts/stripe/export_products_from_environment.mjs --region us -o fileName [options]
@@ -21,6 +21,7 @@
 
 import minimist from 'minimist'
 import fs from 'node:fs'
+import path from 'node:path'
 import { z } from '../../app/src/infrastructure/Validation.mjs'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
 import { getRegionClient } from '../../modules/subscriptions/app/src/StripeClient.mjs'
@@ -93,15 +94,22 @@ function buildExportData(prices) {
     const product = price.product
     const productId = typeof product === 'string' ? product : product.id
 
-    // Store the product object if it's expanded
-    if (typeof product !== 'string' && !productMap.has(productId)) {
+    // Store the product object if it's expanded and active
+    if (
+      typeof product !== 'string' &&
+      product.active &&
+      !productMap.has(productId)
+    ) {
       productMap.set(productId, product)
     }
 
-    if (!pricesByProduct.has(productId)) {
-      pricesByProduct.set(productId, [])
+    // Only include prices for active products
+    if (typeof product !== 'string' && product.active) {
+      if (!pricesByProduct.has(productId)) {
+        pricesByProduct.set(productId, [])
+      }
+      pricesByProduct.get(productId).push(price)
     }
-    pricesByProduct.get(productId).push(price)
   }
 
   const products = Array.from(productMap.values())
@@ -141,6 +149,8 @@ async function main(trackProgress) {
   const exportData = buildExportData(prices)
 
   await trackProgress(`Writing to file: ${outputFile}`)
+  const outputDir = path.dirname(outputFile)
+  fs.mkdirSync(outputDir, { recursive: true })
   fs.writeFileSync(outputFile, JSON.stringify(exportData, null, 2))
 
   await trackProgress('EXPORT COMPLETE')

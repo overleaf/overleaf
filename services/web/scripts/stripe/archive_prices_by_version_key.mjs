@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * This script archives or unarchives all prices with a matching version key in their lookup key
+ * This script marks as archived all prices with a matching version key in their lookup key
  *
  * Usage:
  *   node scripts/stripe/archive_prices_by_version_key.mjs --region us --version versionKey [options]
@@ -45,6 +45,56 @@ const paramsSchema = z.object({
  */
 async function rateLimitSleep() {
   return new Promise(resolve => setTimeout(resolve, 50))
+}
+
+/**
+ * Check if a price has active subscriptions (if an active subscription has
+ * archived prices, those customers will run into issues modifying their
+ * subscriptions)
+ *
+ * @param {Stripe} stripe
+ * @param {string} priceId
+ * @returns {Promise<boolean>}
+ */
+async function getHasActiveSubscriptions(stripe, priceId) {
+  const potentiallyActiveStatuses = [
+    'active',
+    'trialing',
+    'past_due',
+    'unpaid',
+    'paused',
+    'incomplete',
+  ]
+  let hasMore = true
+  let startingAfter
+
+  while (hasMore) {
+    const params = {
+      price: priceId,
+      limit: 100,
+    }
+    if (startingAfter) {
+      params.starting_after = startingAfter
+    }
+    const subscriptions = await stripe.subscriptions.list(params)
+    await rateLimitSleep()
+
+    const hasActiveInBatch = subscriptions.data.some(subscription =>
+      potentiallyActiveStatuses.includes(subscription.status)
+    )
+
+    if (hasActiveInBatch) {
+      return true
+    }
+
+    hasMore = subscriptions.has_more
+
+    if (hasMore && subscriptions.data.length > 0) {
+      startingAfter = subscriptions.data[subscriptions.data.length - 1].id
+    }
+  }
+
+  return false
 }
 
 /**
@@ -102,29 +152,77 @@ async function processPrices(prices, stripe, action, commit, trackProgress) {
   const results = {
     processed: 0,
     skipped: 0,
+    hasSubscriptions: 0,
     errored: 0,
   }
 
+  // pre-filter prices already in the desired state to avoid unnecessary API calls
+  const pricesToProcess = []
   for (const price of prices) {
+    const hasArchivedNickname = price.nickname?.includes('[ARCHIVED]')
+    const alreadyInDesiredState =
+      action === 'archive'
+        ? hasArchivedNickname
+        : price.active && !hasArchivedNickname
+
+    if (alreadyInDesiredState) {
+      await trackProgress(
+        `Skipping price ${price.id} (${price.lookup_key}) - already ${price.active ? 'active' : 'archived'}`
+      )
+      results.skipped++
+    } else {
+      pricesToProcess.push(price)
+    }
+  }
+
+  if (pricesToProcess.length === 0) {
+    return results
+  }
+
+  await trackProgress(`Processing ${pricesToProcess.length} prices...`)
+
+  for (const price of pricesToProcess) {
     try {
-      // Skip if already in the desired state
-      if (price.active === targetActiveStatus) {
-        await trackProgress(
-          `Skipping price ${price.id} (${price.lookup_key}) - already ${price.active ? 'active' : 'archived'}`
-        )
-        results.skipped++
-        continue
+      const hasActiveSubscriptions =
+        action === 'archive'
+          ? await getHasActiveSubscriptions(stripe, price.id)
+          : false
+      if (hasActiveSubscriptions) {
+        results.hasSubscriptions++
       }
 
       if (commit) {
-        await stripe.prices.update(price.id, { active: targetActiveStatus })
-        await trackProgress(
-          `${action === 'archive' ? 'Archived' : 'Unarchived'} price: ${price.id} (${price.lookup_key})`
-        )
-        await rateLimitSleep()
+        const updateParams = {}
+
+        if (!hasActiveSubscriptions) {
+          updateParams.active = targetActiveStatus
+        }
+
+        if (action === 'archive' && !price.nickname?.includes('[ARCHIVED]')) {
+          updateParams.nickname = price.nickname
+            ? `[ARCHIVED] ${price.nickname}`
+            : '[ARCHIVED]'
+        }
+        if (action === 'unarchive' && price.nickname?.includes('[ARCHIVED]')) {
+          updateParams.nickname = price.nickname.replace(/^\[ARCHIVED\]\s*/, '')
+        }
+
+        if (Object.keys(updateParams).length > 0) {
+          await stripe.prices.update(price.id, updateParams)
+          const statusNote = hasActiveSubscriptions
+            ? '(nickname only - has active subscriptions)'
+            : ''
+          await trackProgress(
+            `${action === 'archive' ? 'Archived' : 'Unarchived'} price: ${price.id} (${price.lookup_key}) ${statusNote}`
+          )
+          await rateLimitSleep()
+        }
       } else {
+        const statusNote = hasActiveSubscriptions
+          ? '(nickname only - has active subscriptions)'
+          : ''
         await trackProgress(
-          `[DRY RUN] Would ${action} price: ${price.id} (${price.lookup_key})`
+          `[DRY RUN] Would ${action} price: ${price.id} (${price.lookup_key}) ${statusNote}`
         )
       }
 
@@ -182,6 +280,9 @@ async function main(trackProgress) {
   )
   await trackProgress(
     `Prices skipped (already in desired state): ${results.skipped}`
+  )
+  await trackProgress(
+    `Prices skipped (has active subscriptions): ${results.hasSubscriptions}`
   )
   await trackProgress(`Prices errored: ${results.errored}`)
 
