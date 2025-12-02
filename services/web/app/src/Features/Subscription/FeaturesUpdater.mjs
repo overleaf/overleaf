@@ -16,8 +16,7 @@ import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import Queues from '../../infrastructure/Queues.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
 import { AI_ADD_ON_CODE } from './AiHelper.mjs'
-// import { fetchNothing } from '@overleaf/fetch-utils'
-import metrics from '@overleaf/metrics'
+import { fetchNothing } from '@overleaf/fetch-utils'
 
 /**
  * Enqueue a job for refreshing features for the given user
@@ -78,22 +77,21 @@ async function refreshFeatures(userId, reason) {
   if (featuresChanged && reason !== 'writefullEntitlementSynced') {
     try {
       // update WF with the current feature set for the user
-      // await fetchNothing(
-      //   `${Settings.writefull.overleafApiUrl}/api/user/status/update-overleaf-status`,
-      //   {
-      //     headers: {
-      //       'x-api-key': Settings.writefull.overleafApiKey,
-      //     },
-      //     json: {
-      //       userOverleafId: userId,
-      //       hasAiAssist: newFeatures.aiErrorAssistant,
-      //     },
-      //     method: 'POST',
-      //   }
-      // )
-      // increment a metric instead of calling WF so we cna give them an idea of the # of requests they will recieve
-      metrics.inc('feature_sync_called_to_wf')
+      await fetchNothing(
+        `${Settings.writefull.overleafApiUrl}/api/user/status/update-overleaf-status`,
+        {
+          headers: {
+            'x-api-key': Settings.writefull.overleafApiKey,
+          },
+          json: {
+            userOverleafId: userId,
+            hasAiAssist: newFeatures.aiErrorAssistant,
+          },
+          method: 'POST',
+        }
+      )
     } catch (err) {
+      // continue with sync even if we cant communicate with wf
       logger.warn(
         { userId, reason },
         'failed to sync entitlement to Writefull after a feature refresh'
