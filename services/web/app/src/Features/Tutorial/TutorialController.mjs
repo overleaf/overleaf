@@ -26,6 +26,8 @@ const VALID_KEYS = [
   'groups-enterprise-banner-repeat',
   'new-editor-opt-in',
   'new-editor-intro',
+  'new-editor-intro-2',
+  'old-editor-warning-tooltip',
 ]
 
 async function completeTutorial(req, res, next) {

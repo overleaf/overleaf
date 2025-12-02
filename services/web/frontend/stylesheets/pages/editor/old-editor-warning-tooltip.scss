@@ -1,0 +1,15 @@
+.old-editor-warning-tooltip {
+  .popover-header {
+    display: flex;
+  }
+
+  .popover-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-06);
+  }
+}
+
+.old-editor-warning-tooltip-switch-button {
+  align-self: flex-end;
+}

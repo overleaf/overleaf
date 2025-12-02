@@ -17,6 +17,7 @@ export type UserSettings = {
   mathPreview: boolean
   referencesSearchMode: 'advanced' | 'simple'
   enableNewEditor: boolean
+  enableNewEditorLegacy: boolean
   breadcrumbs: boolean
   darkModePdf: boolean
 }

@@ -24,6 +24,7 @@ const defaultSettings: UserSettings = {
   mathPreview: true,
   referencesSearchMode: 'advanced',
   enableNewEditor: true,
+  enableNewEditorLegacy: true,
   breadcrumbs: true,
   darkModePdf: false,
 }

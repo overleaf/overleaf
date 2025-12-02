@@ -4,7 +4,7 @@ import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 const SPLIT_TEST_USER_CUTOFF_DATE = new Date(Date.UTC(2025, 8, 23, 13, 0, 0)) // 2pm British Summer Time on September 23, 2025
 const NEW_USER_CUTOFF_DATE = new Date(Date.UTC(2025, 10, 12, 12, 0, 0)) // 12pm GMT on November 12, 2025
 
-async function getEnableNewEditorDefault(req, res, user) {
+async function getEnableNewEditorLegacyDefault(req, res, user) {
   if (req.query['existing-user-override'] === 'true') {
     return false
   }
@@ -31,7 +31,22 @@ async function getEnableNewEditorDefault(req, res, user) {
 }
 
 async function buildUserSettings(req, res, user) {
-  const defaultEnableNewEditor = await getEnableNewEditorDefault(req, res, user)
+  const defaultLegacyEnableNewEditor = await getEnableNewEditorLegacyDefault(
+    req,
+    res,
+    user
+  )
+
+  const enableNewEditorStageFour = user.ace.enableNewEditorStageFour ?? true
+  const enableNewEditorLegacy =
+    user.ace.enableNewEditor ?? defaultLegacyEnableNewEditor
+
+  const assignment = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'editor-redesign-opt-out'
+  )
+  const isOptOutEnabled = assignment.variant === 'enabled'
 
   return {
     mode: user.ace.mode,
@@ -47,7 +62,10 @@ async function buildUserSettings(req, res, user) {
     mathPreview: user.ace.mathPreview,
     breadcrumbs: user.ace.breadcrumbs,
     referencesSearchMode: user.ace.referencesSearchMode,
-    enableNewEditor: user.ace.enableNewEditor ?? defaultEnableNewEditor,
+    enableNewEditor: isOptOutEnabled
+      ? enableNewEditorStageFour
+      : enableNewEditorLegacy,
+    enableNewEditorLegacy,
     darkModePdf: user.ace.darkModePdf ?? false,
   }
 }
