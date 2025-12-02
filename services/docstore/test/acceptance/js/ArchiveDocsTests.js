@@ -1,13 +1,16 @@
-const Settings = require('@overleaf/settings')
-const { expect } = require('chai')
-const { db, ObjectId } = require('../../../app/js/mongodb')
-const async = require('async')
-const DocstoreApp = require('./helpers/DocstoreApp')
-const DocstoreClient = require('./helpers/DocstoreClient')
-const { Storage } = require('@google-cloud/storage')
-const Persistor = require('../../../app/js/PersistorManager')
-const { ReadableString } = require('@overleaf/stream-utils')
-const { callbackify } = require('node:util')
+import Settings from '@overleaf/settings'
+import { expect } from 'chai'
+import mongodb from '../../../app/js/mongodb.js'
+import async from 'async'
+import DocstoreApp from './helpers/DocstoreApp.js'
+import DocstoreClient from './helpers/DocstoreClient.js'
+import { Storage } from '@google-cloud/storage'
+import Persistor from '../../../app/js/PersistorManager.js'
+import { ReadableString } from '@overleaf/stream-utils'
+import { callbackify } from 'node:util'
+import Crypto from 'node:crypto'
+
+const { db, ObjectId } = mongodb
 
 async function uploadContent(path, json) {
   const stream = new ReadableString(JSON.stringify(json))
@@ -275,9 +278,7 @@ describe('Archiving', function () {
       this.project_id = new ObjectId()
       this.timeout(1000 * 30)
       const quarterMegInBytes = 250000
-      const bigLine = require('node:crypto')
-        .randomBytes(quarterMegInBytes)
-        .toString('hex')
+      const bigLine = Crypto.randomBytes(quarterMegInBytes).toString('hex')
       this.doc = {
         _id: new ObjectId(),
         lines: [bigLine, bigLine, bigLine, bigLine],

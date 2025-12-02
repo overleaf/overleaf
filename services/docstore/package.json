@@ -2,13 +2,14 @@
   "name": "@overleaf/docstore",
   "description": "A CRUD API for handling text documents in projects",
   "private": true,
+  "type": "module",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "test:acceptance:_run": "mocha --recursive --timeout 15000 --exit $@ test/acceptance/js",
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
-    "test:unit:_run": "mocha --recursive --exit $@ test/unit/js",
-    "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
+    "test:unit:_run": "vitest --config ./vitest.config.unit.cjs",
+    "test:unit": "npm run test:unit:_run",
     "nodemon": "node --watch app.js",
     "lint": "eslint --max-warnings 0 --format unix .",
     "format": "prettier --list-different $PWD/'**/{*.*js,*.ts}'",
@@ -46,6 +47,7 @@
     "sandboxed-module": "~2.0.4",
     "sinon": "~9.0.2",
     "sinon-chai": "^3.7.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "vitest": "^3.2.4"
   }
 }

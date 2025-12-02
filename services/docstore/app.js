@@ -1,20 +1,22 @@
 // Metrics must be initialized before importing anything else
-require('@overleaf/metrics/initialize')
+import '@overleaf/metrics/initialize.js'
 
-const Events = require('node:events')
-const Metrics = require('@overleaf/metrics')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const express = require('express')
-const bodyParser = require('body-parser')
-const {
-  celebrate: validate,
+import Events from 'node:events'
+import Metrics from '@overleaf/metrics'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import express from 'express'
+import bodyParser from 'body-parser'
+import {
+  celebrate as validate,
   Joi,
-  errors: handleValidationErrors,
-} = require('celebrate')
-const { mongoClient } = require('./app/js/mongodb')
-const Errors = require('./app/js/Errors')
-const HttpController = require('./app/js/HttpController')
+  errors as handleValidationErrors,
+} from 'celebrate'
+import mongodb from './app/js/mongodb.js'
+import Errors from './app/js/Errors.js'
+import HttpController from './app/js/HttpController.js'
+
+const { mongoClient } = mongodb
 
 Events.setMaxListeners(20)
 
@@ -114,7 +116,7 @@ app.use(function (error, req, res, next) {
 const { port } = Settings.internal.docstore
 const { host } = Settings.internal.docstore
 
-if (!module.parent) {
+if (import.meta.main) {
   // Called directly
   mongoClient
     .connect()
@@ -137,4 +139,4 @@ if (!module.parent) {
     })
 }
 
-module.exports = app
+export default app

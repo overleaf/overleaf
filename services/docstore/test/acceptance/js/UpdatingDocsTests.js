@@ -1,7 +1,8 @@
-const { ObjectId } = require('mongodb-legacy')
-const DocstoreApp = require('./helpers/DocstoreApp')
+import mongodb from 'mongodb-legacy'
+import DocstoreApp from './helpers/DocstoreApp.js'
+import DocstoreClient from './helpers/DocstoreClient.js'
 
-const DocstoreClient = require('./helpers/DocstoreClient')
+const { ObjectId } = mongodb
 
 describe('Applying updates to a doc', function () {
   beforeEach(async function () {

@@ -1,11 +1,12 @@
-let DocstoreClient
-const {
+import {
   fetchNothing,
   fetchJson,
   fetchJsonWithResponse,
-} = require('@overleaf/fetch-utils')
-const settings = require('@overleaf/settings')
-const Persistor = require('../../../../app/js/PersistorManager')
+} from '@overleaf/fetch-utils'
+import settings from '@overleaf/settings'
+import Persistor from '../../../../app/js/PersistorManager.js'
+
+let DocstoreClient
 
 async function streamToString(stream) {
   const chunks = []
@@ -22,7 +23,7 @@ async function getStringFromPersistor(persistor, bucket, key) {
   return await streamToString(stream)
 }
 
-module.exports = DocstoreClient = {
+export default DocstoreClient = {
   async createDoc(projectId, docId, lines, version, ranges) {
     return await DocstoreClient.updateDoc(
       projectId,

@@ -1,11 +1,11 @@
-const MongoManager = require('./MongoManager')
-const Errors = require('./Errors')
-const logger = require('@overleaf/logger')
-const _ = require('lodash')
-const DocArchive = require('./DocArchiveManager')
-const RangeManager = require('./RangeManager')
-const Settings = require('@overleaf/settings')
-const { setTimeout } = require('node:timers/promises')
+import MongoManager from './MongoManager.js'
+import Errors from './Errors.js'
+import logger from '@overleaf/logger'
+import _ from 'lodash'
+import DocArchive from './DocArchiveManager.js'
+import RangeManager from './RangeManager.js'
+import Settings from '@overleaf/settings'
+import { setTimeout } from 'node:timers/promises'
 
 /**
  * @import { Document } from 'mongodb'
@@ -319,4 +319,4 @@ const DocManager = {
   },
 }
 
-module.exports = DocManager
+export default DocManager

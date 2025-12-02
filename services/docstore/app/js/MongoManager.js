@@ -1,6 +1,8 @@
-const { db, ObjectId } = require('./mongodb')
-const Settings = require('@overleaf/settings')
-const Errors = require('./Errors')
+import mongodb from './mongodb.js'
+import Settings from '@overleaf/settings'
+import Errors from './Errors.js'
+
+const { db, ObjectId } = mongodb
 
 const ARCHIVING_LOCK_DURATION_MS = Settings.archivingLockDurationMs
 
@@ -239,7 +241,7 @@ async function destroyProject(projectId) {
   await db.docs.deleteMany({ project_id: new ObjectId(projectId) })
 }
 
-module.exports = {
+export default {
   findDoc,
   getProjectsDeletedDocs,
   getProjectsDocs,

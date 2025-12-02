@@ -1,9 +1,10 @@
-const { ObjectId } = require('mongodb-legacy')
-const async = require('async')
-const DocstoreApp = require('./helpers/DocstoreApp')
-const { callbackify } = require('node:util')
+import mongodb from 'mongodb-legacy'
+import async from 'async'
+import DocstoreApp from './helpers/DocstoreApp.js'
+import { callbackify } from 'node:util'
+import DocstoreClient from './helpers/DocstoreClient.js'
 
-const DocstoreClient = require('./helpers/DocstoreClient')
+const { ObjectId } = mongodb
 
 describe('Getting all docs', function () {
   beforeEach(function (done) {

@@ -1,6 +1,6 @@
-const app = require('../../../../app')
-const Settings = require('@overleaf/settings')
-require('./MongoHelper')
+import app from '../../../../app.js'
+import Settings from '@overleaf/settings'
+import './MongoHelper.js'
 
 function startApp() {
   return new Promise((resolve, reject) => {
@@ -27,6 +27,6 @@ async function ensureRunning() {
   await appStartedPromise
 }
 
-module.exports = {
+export default {
   ensureRunning,
 }

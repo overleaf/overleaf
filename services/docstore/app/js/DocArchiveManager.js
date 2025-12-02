@@ -1,14 +1,16 @@
-const MongoManager = require('./MongoManager')
-const Errors = require('./Errors')
-const logger = require('@overleaf/logger')
-const Settings = require('@overleaf/settings')
-const crypto = require('node:crypto')
-const { ReadableString } = require('@overleaf/stream-utils')
-const RangeManager = require('./RangeManager')
-const PersistorManager = require('./PersistorManager')
-const pMap = require('p-map')
-const { streamToBuffer } = require('./StreamToBuffer')
-const { BSON } = require('mongodb-legacy')
+import MongoManager from './MongoManager.js'
+import Errors from './Errors.js'
+import logger from '@overleaf/logger'
+import Settings from '@overleaf/settings'
+import crypto from 'node:crypto'
+import { ReadableString } from '@overleaf/stream-utils'
+import RangeManager from './RangeManager.js'
+import PersistorManager from './PersistorManager.js'
+import pMap from 'p-map'
+import { streamToBuffer } from './StreamToBuffer.js'
+import mongodb from 'mongodb-legacy'
+
+const { BSON } = mongodb
 
 const PARALLEL_JOBS = Settings.parallelArchiveJobs
 const UN_ARCHIVE_BATCH_SIZE = Settings.unArchiveBatchSize
@@ -220,7 +222,7 @@ function _isArchivingEnabled() {
   return true
 }
 
-module.exports = {
+export default {
   archiveAllDocs,
   archiveDoc,
   unArchiveAllDocs,

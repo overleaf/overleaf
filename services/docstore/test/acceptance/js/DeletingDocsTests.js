@@ -1,14 +1,14 @@
-const { db, ObjectId } = require('../../../app/js/mongodb')
-const { expect } = require('chai')
-const DocstoreApp = require('./helpers/DocstoreApp')
-const Errors = require('../../../app/js/Errors')
-const Settings = require('@overleaf/settings')
-const { Storage } = require('@google-cloud/storage')
-const { promisify } = require('node:util')
+import mongodb from '../../../app/js/mongodb.js'
+import { expect } from 'chai'
+import DocstoreApp from './helpers/DocstoreApp.js'
+import Errors from '../../../app/js/Errors.js'
+import Settings from '@overleaf/settings'
+import { Storage } from '@google-cloud/storage'
+import { setTimeout as sleep } from 'node:timers/promises'
 
-const sleep = promisify(setTimeout)
+import DocstoreClient from './helpers/DocstoreClient.js'
 
-const DocstoreClient = require('./helpers/DocstoreClient')
+const { db, ObjectId } = mongodb
 
 function deleteTestSuite(deleteDoc) {
   before(async function () {

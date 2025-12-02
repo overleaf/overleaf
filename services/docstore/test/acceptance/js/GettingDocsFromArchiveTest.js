@@ -1,8 +1,10 @@
-const Settings = require('@overleaf/settings')
-const { ObjectId } = require('../../../app/js/mongodb')
-const DocstoreApp = require('./helpers/DocstoreApp')
-const DocstoreClient = require('./helpers/DocstoreClient')
-const { Storage } = require('@google-cloud/storage')
+import Settings from '@overleaf/settings'
+import mongodb from '../../../app/js/mongodb.js'
+import DocstoreApp from './helpers/DocstoreApp.js'
+import DocstoreClient from './helpers/DocstoreClient.js'
+import { Storage } from '@google-cloud/storage'
+
+const { ObjectId } = mongodb
 
 describe('Getting A Doc from Archive', function () {
   before(async function () {

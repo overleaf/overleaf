@@ -10,11 +10,14 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let RangeManager
-const _ = require('lodash')
-const { ObjectId } = require('./mongodb')
+import _ from 'lodash'
+import mongodb from './mongodb.js'
 
-module.exports = RangeManager = {
+const { ObjectId } = mongodb
+
+let RangeManager
+
+export default RangeManager = {
   shouldUpdateRanges(docRanges, incomingRanges) {
     if (incomingRanges == null) {
       throw new Error('expected incoming_ranges')

@@ -1,10 +1,10 @@
-const DocManager = require('./DocManager')
-const logger = require('@overleaf/logger')
-const DocArchive = require('./DocArchiveManager')
-const HealthChecker = require('./HealthChecker')
-const Errors = require('./Errors')
-const Settings = require('@overleaf/settings')
-const { expressify } = require('@overleaf/promise-utils')
+import DocManager from './DocManager.js'
+import logger from '@overleaf/logger'
+import DocArchive from './DocArchiveManager.js'
+import HealthChecker from './HealthChecker.js'
+import Errors from './Errors.js'
+import Settings from '@overleaf/settings'
+import { expressify } from '@overleaf/promise-utils'
 
 async function getDoc(req, res) {
   const { doc_id: docId, project_id: projectId } = req.params
@@ -236,7 +236,7 @@ async function healthCheck(req, res) {
   res.sendStatus(200)
 }
 
-module.exports = {
+export default {
   getDoc: expressify(getDoc),
   peekDoc: expressify(peekDoc),
   isDocDeleted: expressify(isDocDeleted),

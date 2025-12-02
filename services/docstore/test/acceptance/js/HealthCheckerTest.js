@@ -1,7 +1,9 @@
-const { db } = require('../../../app/js/mongodb')
-const DocstoreApp = require('./helpers/DocstoreApp')
-const DocstoreClient = require('./helpers/DocstoreClient')
-const { expect } = require('chai')
+import mongodb from '../../../app/js/mongodb.js'
+import DocstoreApp from './helpers/DocstoreApp.js'
+import DocstoreClient from './helpers/DocstoreClient.js'
+import { expect } from 'chai'
+
+const { db } = mongodb
 
 describe('HealthChecker', function () {
   beforeEach('start', async function () {

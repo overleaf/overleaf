@@ -1,12 +1,13 @@
-const settings = require('@overleaf/settings')
+import settings from '@overleaf/settings'
+import ObjectPersistor from '@overleaf/object-persistor'
+import AbstractPersistor from '@overleaf/object-persistor/src/AbstractPersistor.js'
+import Metrics from '@overleaf/metrics'
 
 const persistorSettings = settings.docstore
-persistorSettings.Metrics = require('@overleaf/metrics')
+persistorSettings.Metrics = Metrics
 
-const ObjectPersistor = require('@overleaf/object-persistor')
-const AbstractPersistor = require('@overleaf/object-persistor/src/AbstractPersistor')
 const persistor = settings.docstore.backend
   ? ObjectPersistor(persistorSettings)
   : new AbstractPersistor()
 
-module.exports = persistor
+export default persistor

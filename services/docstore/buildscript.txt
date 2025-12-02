@@ -6,3 +6,5 @@ docstore
 --node-version=22.18.0
 --pipeline-owner=🚉 Platform
 --public-repo=True
+--test-unit-vitest=True
+--tsconfig-extra-includes=vitest.config.unit.cjs
