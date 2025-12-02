@@ -134,8 +134,8 @@ module.exports = {
         'app.mjs',
         'scripts/**/*.mjs',
         'migrations/**/*.mjs',
-        'test/acceptance/src/**/*.mjs',
-        'test/unit/src/**/*.mjs',
+        '**/test/acceptance/src/**/*.mjs',
+        '**/test/unit/src/**/*.mjs',
       ],
       excludedFiles: [
         // migration template file
