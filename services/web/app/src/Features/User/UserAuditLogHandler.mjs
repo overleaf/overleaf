@@ -42,6 +42,8 @@ const MANAGED_GROUP_USER_EVENTS = [
   'unlink-github',
   'delete-account',
   'leave-group-subscription',
+  'integration-account-linked',
+  'integration-account-unlinked',
 ]
 
 /**
