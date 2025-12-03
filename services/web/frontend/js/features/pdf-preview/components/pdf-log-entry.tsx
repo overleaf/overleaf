@@ -1,12 +1,12 @@
-import { memo, MouseEventHandler, useCallback } from 'react'
+import { memo } from 'react'
 import PreviewLogEntryHeader from '../../preview/components/preview-log-entry-header'
 import PdfLogEntryContent from './pdf-log-entry-content'
 import HumanReadableLogsHints from '../../../ide/human-readable-logs/HumanReadableLogsHints'
 import getMeta from '@/utils/meta'
 import { ErrorLevel, LogEntry, SourceLocation } from '../util/types'
 import NewLogEntry from '@/features/ide-redesign/components/error-logs/log-entry'
-import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
+import useHandleLogEntryClick from '../hooks/use-handle-log-entry-click'
 
 function PdfLogEntry({
   autoExpand,
@@ -46,7 +46,6 @@ function PdfLogEntry({
   id?: string
 }) {
   const showAiErrorAssistant = getMeta('ol-showAiErrorAssistant')
-  const { sendEvent } = useEditorAnalytics()
 
   if (ruleId && HumanReadableLogsHints[ruleId]) {
     const hint = HumanReadableLogsHints[ruleId]
@@ -54,22 +53,12 @@ function PdfLogEntry({
     extraInfoURL = hint.extraInfoURL
   }
 
-  const handleLogEntryLinkClick: MouseEventHandler<HTMLButtonElement> =
-    useCallback(
-      event => {
-        event.preventDefault()
-
-        if (onSourceLocationClick && sourceLocation) {
-          onSourceLocationClick(sourceLocation)
-
-          const parts = sourceLocation?.file?.split('.')
-          const extension =
-            parts?.length && parts?.length > 1 ? parts.pop() : ''
-          sendEvent('log-entry-link-click', { level, ruleId, extension })
-        }
-      },
-      [level, onSourceLocationClick, ruleId, sourceLocation, sendEvent]
-    )
+  const handleLogEntryLinkClick = useHandleLogEntryClick({
+    level,
+    ruleId,
+    sourceLocation,
+    onSourceLocationClick,
+  })
 
   const newEditor = useIsNewEditorEnabled()
 
