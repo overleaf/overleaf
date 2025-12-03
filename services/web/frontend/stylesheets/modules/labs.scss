@@ -44,16 +44,6 @@
     align-items: center;
     padding: var(--spacing-05);
 
-    > div {
-      display: flex;
-      flex-direction: column;
-      padding-right: var(--spacing-07);
-
-      &:last-child {
-        padding-right: 0;
-      }
-    }
-
     .experiment-logo-container {
       padding: var(--image-padding);
     }
@@ -86,16 +76,7 @@
     }
 
     &.disabled-experiment {
-      grid-template-columns: var(--image-size) 3fr 1fr auto;
-
-      .disabled-explanation {
-        color: var(--content-secondary);
-      }
-
-      h3,
-      p {
-        color: var(--content-disabled);
-      }
+      grid-template-columns: var(--image-size) 3fr auto auto;
     }
   }
 
@@ -103,12 +84,6 @@
     .labs-experiment-widget-container {
       grid-template-columns: 1fr;
     }
-  }
-}
-
-.disabled-experiment {
-  .ai-error-assistant-avatar {
-    filter: grayscale(0.6);
   }
 }
 

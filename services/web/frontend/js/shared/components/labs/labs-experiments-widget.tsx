@@ -1,10 +1,10 @@
 import { ReactNode, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import OLBadge from '@/shared/components/ol/ol-badge'
-import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { postJSON } from '@/infrastructure/fetch-json'
 import OLButton from '@/shared/components/ol/ol-button'
 import getMeta from '@/utils/meta'
+import Notification from '../notification'
 
 export type LabsExperimentWidgetProps = {
   logo: ReactNode
@@ -82,9 +82,6 @@ export function LabsExperimentWidget({
           )}
         </p>
       </div>
-      {disabled && (
-        <div className="disabled-explanation">{t('experiment_full')}</div>
-      )}
       <div>
         {optedIn && feedbackLink && (
           <OLButton
@@ -107,6 +104,17 @@ export function LabsExperimentWidget({
           />
         )}
       </div>
+      {disabled && (
+        <>
+          <div />
+          <Notification
+            type="info"
+            content={t('experiment_full_check_back_soon')}
+          />
+          <div />
+          <div />
+        </>
+      )}
     </div>
   )
 }
@@ -129,31 +137,19 @@ function ActionButton({
   if (optedIn) {
     return (
       <OLButton variant="secondary" onClick={handleDisable}>
-        {t('turn_off')}
+        {t('disable')}
       </OLButton>
     )
   } else if (disabled) {
-    const tooltipableButton = (
-      <div className="d-inline-block">
-        <OLButton variant="primary" disabled>
-          {t('turn_on')}
-        </OLButton>
-      </div>
-    )
-
     return (
-      <OLTooltip
-        id="experiment-disabled"
-        description={t('this_experiment_isnt_accepting_new_participants')}
-        overlayProps={{ delay: 0 }}
-      >
-        {tooltipableButton}
-      </OLTooltip>
+      <OLButton variant="primary" disabled>
+        {t('enable')}
+      </OLButton>
     )
   } else {
     return (
       <OLButton variant="primary" onClick={handleEnable}>
-        {t('turn_on')}
+        {t('enable')}
       </OLButton>
     )
   }
