@@ -8,6 +8,7 @@ import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { useFileTreeMainContext } from '../contexts/file-tree-main'
 
 import FileTreeItemMenuItems from './file-tree-item/file-tree-item-menu-items'
+import classNames from 'classnames'
 
 function FileTreeContextMenu() {
   const { fileTreeReadOnly } = useFileTreeData()
@@ -76,21 +77,27 @@ function FileTreeContextMenu() {
 
   if (!contextMenuCoords || fileTreeReadOnly) return null
 
+  const dropDirection =
+    document.body.offsetHeight / contextMenuCoords.top < 2 &&
+    document.body.offsetHeight - contextMenuCoords.top < 250
+      ? 'up'
+      : 'down'
+
   return ReactDOM.createPortal(
     <div style={contextMenuCoords} className="context-menu">
       <Dropdown
         show
-        drop={
-          document.body.offsetHeight / contextMenuCoords.top < 2 &&
-          document.body.offsetHeight - contextMenuCoords.top < 250
-            ? 'up'
-            : 'down'
-        }
+        drop={dropDirection}
         onKeyDown={handleClose}
         onToggle={handleToggle}
       >
         <DropdownMenu
-          className="dropdown-menu-sm-width"
+          className={classNames('dropdown-menu-sm-width', {
+            // We have to manually add a class to handle upwards context menu styling
+            // due to the way that this dropdown is positioned with absolute coordinates and
+            // not relative to a toggle
+            'context-menu-upwards': dropDirection === 'up',
+          })}
           id="dropdown-file-tree-context-menu"
         >
           <FileTreeItemMenuItems />

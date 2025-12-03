@@ -210,6 +210,11 @@
   z-index: 100;
 }
 
+.context-menu-upwards {
+  top: auto;
+  bottom: 100%;
+}
+
 .editor-sidebar {
   background-color: var(--file-tree-bg);
   display: flex;
