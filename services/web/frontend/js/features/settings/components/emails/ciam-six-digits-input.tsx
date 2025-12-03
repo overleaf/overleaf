@@ -37,6 +37,8 @@ const CIAMSixDigitsInput = forwardRef<
         )}
         maxLength={7}
         inputMode="numeric"
+        autocomplete="off"
+        data-1p-ignore
       />
       <span className="ciam-six-digits-dash" aria-hidden>
         -

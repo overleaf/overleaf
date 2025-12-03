@@ -111,4 +111,18 @@
       visibility: hidden;
     }
   }
+
+  .button-content {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-spacing-200); // Add gap between text and icons
+    justify-content: center;
+  }
+
+  .btn-social-icon {
+    height: 24px;
+    width: 24px;
+    padding: var(--ds-spacing-50);
+    margin: 0;
+  }
 }

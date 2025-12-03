@@ -1,0 +1,15 @@
+@import 'ds-design-system';
+
+.ciam-login-text {
+  text-align: center;
+  padding: var(--ds-spacing-200) 0;
+  margin: 0;
+
+  &.ciam-login-bottom-space {
+    @include ciam-bottom-margin;
+  }
+}
+
+.ciam-login-sso-form-controls {
+  @include ciam-vertically-spaced;
+}

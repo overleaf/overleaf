@@ -1,13 +1,7 @@
 import { materialIcon } from '@/features/utils/material-icon'
 import classNames from 'classnames'
 import '@phosphor-icons/webcomponents/PhWarningCircle'
-
-function dsErrorIcon() {
-  const icon = document.createElement('ph-warning-circle')
-  icon.className = 'ciam-form-text-icon'
-  icon.ariaHidden = 'true'
-  return icon
-}
+import { ciamIcon } from '@/features/utils/ciam-icon'
 
 export default function inputValidator(
   inputEl: HTMLInputElement | HTMLTextAreaElement
@@ -30,7 +24,9 @@ export default function inputValidator(
 
   const messageTextNode = document.createTextNode('')
 
-  const iconEl = isDsBranded ? dsErrorIcon() : materialIcon('error')
+  const iconEl = isDsBranded
+    ? ciamIcon('error', 'ciam-form-text-icon')
+    : materialIcon('error')
   messageInnerEl.append(iconEl)
   messageInnerEl.append(messageTextNode)
 

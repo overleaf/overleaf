@@ -1,13 +1,21 @@
 @use 'sass:math';
 
+@mixin ciam-bottom-margin {
+  margin: 0 0 var(--ds-spacing-400);
+}
+
+@mixin ciam-vertically-spaced {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-spacing-400);
+}
+
 .overleaf-ds-logo {
   background-image: url('../../../frontend/js/shared/svgs/overleaf-a-ds-solution-mallard.svg');
 }
 
 .ciam-layout {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-spacing-400);
+  @include ciam-vertically-spaced;
 
   @include media-breakpoint-up(sm) {
     gap: var(--ds-spacing-800);
@@ -25,141 +33,195 @@
     color: var(--ds-color-text-primary);
   }
 
-  .ciam-container {
-    flex: 1 1 auto;
-    padding: 0 var(--ds-spacing-300);
-  }
-
-  .ciam-logo {
-    padding: var(--ds-spacing-800) 0 0 0;
-    text-align: center;
-
-    @include media-breakpoint-up(sm) {
-      padding-left: var(--ds-spacing-800);
-      padding-right: var(--ds-spacing-800);
-    }
-  }
-
-  .ciam-logo .brand {
-    flex-shrink: 0;
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: contain;
-    height: 49px;
-    width: 107px;
-    margin: 0 auto;
-    display: block;
-
-    @include media-breakpoint-up(sm) {
-      height: 64px;
-      width: 130px;
-      margin: 9px 0; // Vertical margin isn't an exacting spacing value in the design
-    }
-  }
-
   h1 {
-    @include ds-heading-sm-semibold;
+    @include ds-heading-md-semibold;
 
     padding-bottom: var(--ds-spacing-200);
     margin: 0;
   }
 
-  .ciam-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--ds-spacing-400);
-    background-color: var(--bg-light-primary);
-    box-shadow:
-      0 4px 6px -4px rgb(0 0 0 / 10%),
-      0 1px 29px -3px rgb(0 0 0 / 16%);
-    padding: var(--ds-spacing-800) var(--ds-spacing-400);
-    border-radius: var(--ds-border-radius-400);
-    max-width: 464px;
-    margin: 0 auto;
-    min-height: 500px;
+  footer {
+    // Allow room for the cookie banner
+    padding-bottom: 100px;
 
-    @include media-breakpoint-up(sm) {
-      padding: var(--ds-spacing-1300);
-    }
+    .footer-links {
+      display: flex;
+      gap: var(--ds-spacing-600);
+      justify-content: center;
+      color: var(--ds-color-text-secondary);
+      padding: var(--ds-spacing-300) 0;
+      margin: 0 auto;
 
-    .notification {
-      @include ds-body-sm-regular;
-
-      color: var(--ds-color-text-primary);
-      padding: 0 var(--ds-spacing-400);
-      border-width: 0;
-      border-radius: var(--ds-border-radius-200);
-
-      .notification-icon {
-        font-size: math.div(20em, 14);
+      @include media-breakpoint-up(sm) {
+        margin-left: var(--ds-spacing-800);
+        margin-right: var(--ds-spacing-800);
       }
 
-      .notification-content {
-        padding: var(--ds-spacing-400) 0;
-      }
-
-      &.notification-type-error {
-        background-color: var(--ds-color-red-50);
+      a {
+        @include ds-body-sm-regular;
       }
     }
   }
+}
 
-  .ciam-disclaimers p {
+.ciam-container {
+  flex: 1 1 auto;
+  padding: 0 var(--ds-spacing-300);
+}
+
+.ciam-logo {
+  padding: var(--ds-spacing-800) 0 0 0;
+  text-align: center;
+
+  @include media-breakpoint-up(sm) {
+    padding-left: var(--ds-spacing-800);
+    padding-right: var(--ds-spacing-800);
+  }
+}
+
+.ciam-logo .brand {
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: contain;
+  height: 60px;
+  width: 133px;
+  margin: 0 auto;
+  display: block;
+
+  @include media-breakpoint-up(sm) {
+    height: 64px;
+    width: 142px;
+    margin: 9px 0; // Vertical margin isn't an exacting spacing value in the design
+  }
+}
+
+.ciam-card {
+  @include ciam-vertically-spaced;
+
+  background-color: var(--bg-light-primary);
+  box-shadow:
+    0 4px 6px -4px rgb(0 0 0 / 10%),
+    0 1px 29px -3px rgb(0 0 0 / 16%);
+  padding: var(--ds-spacing-800) var(--ds-spacing-400);
+  border-radius: var(--ds-border-radius-400);
+  max-width: 464px;
+  margin: 0 auto;
+  min-height: 500px;
+
+  @include media-breakpoint-up(sm) {
+    padding: var(--ds-spacing-1300);
+  }
+
+  .notification {
     @include ds-body-sm-regular;
 
-    padding-bottom: var(--ds-spacing-250);
-    margin: 0;
-  }
+    color: var(--ds-color-text-primary);
+    padding: 0 var(--ds-spacing-400);
+    border-width: 0;
+    border-radius: var(--ds-border-radius-200);
+    gap: var(--ds-spacing-300);
 
-  .ciam-card-separator {
-    margin: var(--ds-spacing-500) 0;
-    height: 0;
-    border-top: solid 1px var(--ds-grey-20);
-  }
+    .notification-icon {
+      font-size: math.div(20em, 14);
+      display: flex;
+      align-items: center;
+      padding: var(--ds-spacing-50);
+    }
 
-  .ciam-card-footer {
-    display: flex;
-    flex-direction: column;
-    gap: var(--ds-spacing-250);
+    .notification-content {
+      padding: var(--ds-spacing-400) 0;
+    }
 
-    p {
-      @include ds-body-sm-regular;
+    &.notification-type-error {
+      background-color: var(--ds-color-red-50);
+    }
 
-      color: var(--ds-color-text-secondary);
-      margin-bottom: 0;
+    &.notification-type-info {
+      background-color: var(--ds-color-blue-50);
     }
   }
+}
 
-  .ciam-footer-ds-logo {
+.ciam-login-register-error-container .notification {
+  @include ciam-bottom-margin;
+}
+
+.ciam-disclaimers p {
+  @include ds-body-sm-regular;
+
+  padding-bottom: var(--ds-spacing-250);
+  margin: 0;
+}
+
+.ciam-card-separator {
+  margin: var(--ds-spacing-500) 0;
+  height: 0;
+  border-top: solid 1px var(--ds-grey-20);
+}
+
+.ciam-card-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-spacing-250);
+
+  p {
+    @include ds-body-sm-regular;
+
+    color: var(--ds-color-text-secondary);
+    margin-bottom: 0;
     text-align: center;
-    padding: var(--ds-spacing-200) 0;
-  }
-
-  .ciam-stepper {
-    margin: 0;
-    height: 4px;
-    border-radius: var(--ds-border-radius-full);
-
-    .step {
-      background: var(--ds-color-neutral-200);
-    }
-  }
-
-  footer {
-    display: flex;
-    gap: var(--ds-spacing-600);
-    justify-content: center;
-    padding: var(--ds-spacing-300) 0;
-    margin: 0 auto;
 
     @include media-breakpoint-up(sm) {
-      margin-left: var(--ds-spacing-800);
-      margin-right: var(--ds-spacing-800);
-      justify-content: start;
+      text-align: start;
     }
+  }
+}
 
-    a {
-      @include ds-body-sm-regular;
-    }
+.ciam-login-register-text {
+  @include ciam-bottom-margin;
+}
+
+.ciam-login-register-text-final {
+  margin: 0;
+}
+
+.ciam-footer-ds-logo {
+  text-align: center;
+  padding: var(--ds-spacing-200) 0;
+}
+
+.ciam-stepper {
+  margin: 0;
+  height: 4px;
+  border-radius: var(--ds-border-radius-full);
+
+  .step {
+    background: var(--ds-color-neutral-200);
+  }
+}
+
+.ciam-work-uni-sso {
+  padding-top: var(--ds-spacing-200);
+  font-weight: var(--ds-font-weight-semibold);
+}
+
+.ciam-login-register-or-text-container {
+  @include ds-body-xs-semibold;
+  @include ciam-bottom-margin;
+
+  display: flex;
+  align-items: center;
+  gap: var(--ds-spacing-250);
+  color: var(--ds-color-text-secondary);
+  padding: var(--ds-spacing-200) 0 0 0;
+
+  &::before,
+  &::after {
+    content: '';
+    display: block;
+    flex-grow: 1;
+    height: 1px;
+    background-color: var(--ds-color-neutral-200);
   }
 }

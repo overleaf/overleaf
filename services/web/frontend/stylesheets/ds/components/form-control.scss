@@ -8,8 +8,6 @@
 .form-group-ds label,
 .website-redesign .form-group-ds label,
 .website-redesign .form-label-ds {
-  @include ds-body-sm-semibold;
-
   --bs-body-font-family: var(--ds-font-family-sans), sans-serif;
   --bs-success-rgb: 25, 117, 76; // #19754c
   --bs-danger-rgb: 195, 9, 43; // #c3092b
@@ -20,6 +18,12 @@
 
   color: var(--ds-color-text-primary);
   margin-bottom: var(--ds-spacing-100);
+}
+
+.form-label-ds,
+.form-group-ds label,
+.website-redesign .form-group-ds label {
+  @include ds-body-md-semibold;
 }
 
 .form-group-ds {

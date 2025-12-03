@@ -11,41 +11,19 @@
   padding: var(--ds-spacing-200) 0;
 }
 
-.ciam-work-uni-sso {
-  color: var(--ds-color-text-secondary);
-  padding-top: var(--ds-spacing-200);
-  margin-bottom: var(--ds-spacing-400);
-  font-weight: var(--ds-font-weight-semibold);
-}
-
 .ciam-register-container {
   display: flex;
   flex-direction: column;
 
-  .login-register-or-text-container {
-    @include ds-body-xs-semibold;
-
-    gap: var(--ds-spacing-250);
-    padding: var(--ds-spacing-200) 0 0 0;
-    margin-bottom: var(--ds-spacing-400);
-
-    &::before,
-    &::after {
-      background-color: var(--ds-color-neutral-200);
-    }
-  }
-
-  .login-register-error-container {
-    padding-bottom: 0;
-
-    .notification {
-      margin-bottom: var(--ds-spacing-400);
+  footer .footer-links {
+    @include media-breakpoint-up(sm) {
+      justify-content: start;
     }
   }
 }
 
 .ciam-password-group {
-  margin-bottom: var(--ds-spacing-400);
+  @include ciam-bottom-margin;
 }
 
 .ciam-password-requirements-message {
