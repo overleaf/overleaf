@@ -247,7 +247,7 @@ const settings = {
   // then set this to true to allow it to correctly detect the forwarded IP
   // address and http/https protocol information.
 
-  behindProxy: true,
+  behindProxy: process.env.OVERLEAF_BEHIND_PROXY === 'true',
   trustedProxyIps: process.env.OVERLEAF_TRUSTED_PROXY_IPS || 'loopback',
 
   // The amount of time, in milliseconds, until the (rolling) cookie session expires
