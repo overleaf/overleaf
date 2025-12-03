@@ -44,19 +44,11 @@ function getOutputFilesArchiveSpecification(projectId, userId, buildId) {
   }
 }
 
-async function getPdfCachingMinChunkSize(req, res) {
-  const { variant } = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'pdf-caching-min-chunk-size'
-  )
-  if (variant === 'default') {
-    return 1_000_000
-  }
-  return parseInt(variant, 10)
+function getPdfCachingMinChunkSize(req, res) {
+  return Settings.pdfCachingMinChunkSize
 }
 
-async function _getSplitTestOptions(req, res) {
+function _getSplitTestOptions(req, res) {
   // Use the query flags from the editor request for overriding the split test.
   let query = {}
   try {
@@ -66,8 +58,9 @@ async function _getSplitTestOptions(req, res) {
   const editorReq = { ...req, query }
 
   const pdfDownloadDomain = Settings.pdfDownloadDomain
+  const enablePdfCaching = Settings.enablePdfCaching
 
-  if (!req.query.enable_pdf_caching) {
+  if (!enablePdfCaching || !req.query.enable_pdf_caching) {
     // The frontend does not want to do pdf caching.
     return {
       pdfDownloadDomain,
@@ -75,23 +68,7 @@ async function _getSplitTestOptions(req, res) {
     }
   }
 
-  // Double check with the latest split test assignment.
-  // We may need to turn off the feature on a short notice, without requiring
-  //  all users to reload their editor page to disable the feature.
-  const { variant } = await SplitTestHandler.promises.getAssignment(
-    editorReq,
-    res,
-    'pdf-caching-mode'
-  )
-  const enablePdfCaching = variant === 'enabled'
-  if (!enablePdfCaching) {
-    // Skip the lookup of the chunk size when caching is not enabled.
-    return {
-      pdfDownloadDomain,
-      enablePdfCaching: false,
-    }
-  }
-  const pdfCachingMinChunkSize = await getPdfCachingMinChunkSize(editorReq, res)
+  const pdfCachingMinChunkSize = getPdfCachingMinChunkSize(editorReq, res)
   return {
     pdfDownloadDomain,
     enablePdfCaching,
@@ -181,7 +158,7 @@ const _CompileController = {
     }
 
     let { enablePdfCaching, pdfCachingMinChunkSize, pdfDownloadDomain } =
-      await _getSplitTestOptions(req, res)
+      _getSplitTestOptions(req, res)
     if (Features.hasFeature('saas')) {
       options.compileFromClsiCache = true
       options.populateClsiCache = true

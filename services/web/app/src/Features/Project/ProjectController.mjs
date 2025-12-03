@@ -435,8 +435,6 @@ const _ProjectController = {
       'visual-preview',
       'external-socket-heartbeat',
       'null-test-share-modal',
-      'pdf-caching-cached-url-lookup',
-      'pdf-caching-mode',
       'pdf-caching-prefetch-large',
       'pdf-caching-prefetching',
       'revert-file',
