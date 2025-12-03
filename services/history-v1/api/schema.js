@@ -42,6 +42,13 @@ const changeSchema = z.object({
 })
 
 const schemas = {
+  projectId: z.object({
+    params: z
+      .object({
+        project_id: z.string().optional(),
+      })
+      .optional(),
+  }),
   initializeProject: z.object({
     body: z
       .object({
