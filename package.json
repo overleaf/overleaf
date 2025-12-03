@@ -40,6 +40,9 @@
     "request@2.88.2": {
       "tough-cookie": "5.1.2",
       "form-data": "2.5.5"
+    },
+    "streamdown": {
+      "mermaid": "file:./services/web/stubs/mermaid-stub"
     }
   },
   "scripts": {
