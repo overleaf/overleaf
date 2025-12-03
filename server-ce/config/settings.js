@@ -241,7 +241,7 @@ const settings = {
 
   // If you are running Overleaf Community Edition over https, set this to true to send the
   // cookie with a secure flag (recommended).
-  secureCookie: process.env.OVERLEAF_SECURE_COOKIE != null,
+  secureCookie: process.env.OVERLEAF_SECURE_COOKIE === 'true',
 
   // If you are running Overleaf Community Edition behind a proxy (like Apache, Nginx, etc)
   // then set this to true to allow it to correctly detect the forwarded IP
