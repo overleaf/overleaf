@@ -8,6 +8,7 @@ const VALID_KEYS = [
   'writefull-oauth-promotion',
   'bib-file-tpr-prompt',
   'ai-error-assistant-consent',
+  'workbench-consent',
   'history-restore-promo',
   'us-gov-banner',
   'us-gov-banner-fedramp',

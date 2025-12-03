@@ -4,6 +4,17 @@ import { postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
 import { useEditorContext } from '@/shared/context/editor-context'
 
+type CompleteTutorialParams = {
+  event: string
+  action: 'complete' | 'postpone'
+} & Record<string, any>
+
+type CompleteTutorialOptions = {
+  // Whether to ignore errors if the request fails. Defaults to true. If
+  // successfull completion is required, set this to false.
+  failSilently?: boolean
+}
+
 const useTutorial = (
   tutorialKey: string,
   eventData: Record<string, any> = {}
@@ -14,18 +25,22 @@ const useTutorial = (
     useEditorContext()
 
   const completeTutorial = useCallback(
-    async ({
-      event = 'promo-click',
-      action = 'complete',
-      ...rest
-    }: {
-      event: string
-      action: 'complete' | 'postpone'
-    } & Record<string, any>) => {
+    async (
+      {
+        event = 'promo-click',
+        action = 'complete',
+        ...rest
+      }: CompleteTutorialParams,
+      options: CompleteTutorialOptions = {}
+    ) => {
       eventTracking.sendMB(event, { ...eventData, ...rest })
       try {
         await postJSON(`/tutorial/${tutorialKey}/${action}`)
       } catch (err) {
+        const failSilently = options.failSilently ?? true
+        if (!failSilently) {
+          throw err
+        }
         debugConsole.error(err)
       }
       setShowPopup(false)
