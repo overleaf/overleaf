@@ -24,6 +24,7 @@ export default /** @type {const} */ ([
   'delete_forever',
   'delete',
   'description',
+  'edit_square',
   'error',
   'experiment',
   'find_replace',
