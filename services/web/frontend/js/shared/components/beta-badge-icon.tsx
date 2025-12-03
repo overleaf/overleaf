@@ -14,6 +14,8 @@ const BetaBadgeIcon: FC<{
         α
       </OLBadge>
     )
+  } else if (badgeClass === 'labs-badge') {
+    return <MaterialIcon type="science" className="align-middle labs-badge" />
   } else {
     return (
       <OLBadge className="beta-badge" bg="beta">
@@ -25,6 +27,8 @@ const BetaBadgeIcon: FC<{
 
 function chooseBadgeClass(phase?: string) {
   switch (phase) {
+    case 'labs':
+      return 'labs-badge'
     case 'release':
       return 'info-badge'
     case 'alpha':

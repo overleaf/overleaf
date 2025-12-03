@@ -8,7 +8,7 @@ export default function RailPanelHeader({
   title,
   actions,
 }: {
-  title: string
+  title: React.ReactNode
   actions?: React.ReactNode[]
 }) {
   const { t } = useTranslation()

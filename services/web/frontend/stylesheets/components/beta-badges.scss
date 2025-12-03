@@ -6,6 +6,13 @@
   font-family: $font-family-monospace;
 }
 
+.labs-badge {
+  background-color: var(--green-50);
+  color: var(--white);
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-01);
+}
+
 .beta-badge {
   font-family: $font-family-monospace;
   background-color: var(--bg-accent-03);
