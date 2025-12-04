@@ -1,9 +1,8 @@
-const settings = require('@overleaf/settings')
+import settings from '@overleaf/settings'
+import ObjectPersistor from '@overleaf/object-persistor'
 
 const persistorSettings = settings.filestore
 persistorSettings.paths = settings.path
-
-const ObjectPersistor = require('@overleaf/object-persistor')
 const persistor = ObjectPersistor(persistorSettings)
 
-module.exports = persistor
+export default persistor

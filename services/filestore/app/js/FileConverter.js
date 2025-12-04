@@ -1,15 +1,16 @@
-const metrics = require('@overleaf/metrics')
-const Settings = require('@overleaf/settings')
-const { callbackify } = require('node:util')
+import metrics from '@overleaf/metrics'
+import Settings from '@overleaf/settings'
+import { callbackify } from 'node:util'
+import SafeExec from './SafeExec.js'
+import Errors from './Errors.js'
 
-const safeExec = require('./SafeExec').promises
-const { ConversionError } = require('./Errors')
+const { ConversionError } = Errors
 
 const APPROVED_FORMATS = ['png']
 const FOURTY_SECONDS = 40 * 1000
 const KILL_SIGNAL = 'SIGTERM'
 
-module.exports = {
+export default {
   convert: callbackify(convert),
   thumbnail: callbackify(thumbnail),
   preview: callbackify(preview),
@@ -81,7 +82,7 @@ async function _convert(sourcePath, requestedFormat, command) {
   command = Settings.commands.convertCommandPrefix.concat(command)
 
   try {
-    await safeExec(command, {
+    await SafeExec.promises(command, {
       killSignal: KILL_SIGNAL,
       timeout: FOURTY_SECONDS,
     })

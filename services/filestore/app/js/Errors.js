@@ -1,5 +1,6 @@
-const OError = require('@overleaf/o-error')
-const { Errors } = require('@overleaf/object-persistor')
+import OError from '@overleaf/o-error'
+
+import { Errors } from '@overleaf/object-persistor'
 
 class HealthCheckError extends OError {}
 class ConversionsDisabledError extends OError {}
@@ -19,12 +20,12 @@ class FailedCommandError extends OError {
   }
 }
 
-module.exports = {
-  FailedCommandError,
+export default {
+  ...Errors,
+  HealthCheckError,
   ConversionsDisabledError,
   ConversionError,
-  HealthCheckError,
   TimeoutError,
   InvalidParametersError,
-  ...Errors,
+  FailedCommandError,
 }

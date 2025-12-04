@@ -1,15 +1,17 @@
-const Settings = require('@overleaf/settings')
-const { callbackify } = require('node:util')
-const fs = require('node:fs')
-let PersistorManager = require('./PersistorManager')
-const LocalFileWriter = require('./LocalFileWriter')
-const FileConverter = require('./FileConverter')
-const KeyBuilder = require('./KeyBuilder')
-const ImageOptimiser = require('./ImageOptimiser')
-const { ConversionError, InvalidParametersError } = require('./Errors')
-const metrics = require('@overleaf/metrics')
+import Settings from '@overleaf/settings'
+import { callbackify } from 'node:util'
+import fs from 'node:fs'
+import _PersistorManager from './PersistorManager.js'
+import LocalFileWriter from './LocalFileWriter.js'
+import FileConverter from './FileConverter.js'
+import KeyBuilder from './KeyBuilder.js'
+import ImageOptimiser from './ImageOptimiser.js'
+import Errors from './Errors.js'
+import metrics from '@overleaf/metrics'
 
-module.exports = {
+const { ConversionError, InvalidParametersError } = Errors
+
+const FileHandler = {
   insertFile: callbackify(insertFile),
   getFile: callbackify(getFile),
   getRedirectUrl: callbackify(getRedirectUrl),
@@ -22,8 +24,10 @@ module.exports = {
   },
 }
 
+let PersistorManager = _PersistorManager
+
 if (process.env.NODE_ENV === 'test') {
-  module.exports._TESTONLYSwapPersistorManager = _PersistorManager => {
+  FileHandler._TESTONLYSwapPersistorManager = _PersistorManager => {
     PersistorManager = _PersistorManager
   }
 }
@@ -183,3 +187,5 @@ async function _writeFileToDisk(bucket, key, opts) {
   const fileStream = await PersistorManager.getObjectStream(bucket, key, opts)
   return await LocalFileWriter.promises.writeStream(fileStream, key)
 }
+
+export default FileHandler

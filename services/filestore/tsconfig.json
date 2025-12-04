@@ -8,6 +8,8 @@
     "config/**/*",
     "scripts/**/*",
     "test/**/*",
-    "types"
+    "types",
+    "vitest.config.acceptance.cjs",
+    "vitest.config.unit.cjs"
   ]
 }

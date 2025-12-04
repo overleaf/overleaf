@@ -1,19 +1,48 @@
-const chai = require('chai')
+import chai from 'chai'
+import fs from 'node:fs'
+import Stream from 'node:stream'
+import Settings from '@overleaf/settings'
+import Path from 'node:path'
+import FilestoreApp from './FilestoreApp.js'
+import TestHelper from './TestHelper.js'
+import fetch from 'node-fetch'
+import { promisify } from 'node:util'
+import { Storage } from '@google-cloud/storage'
+import streamifier from 'streamifier'
+import { ObjectId } from 'mongodb'
+import { ListObjectsV2Command } from '@aws-sdk/client-s3'
+import ChildProcess from 'node:child_process'
+import chaiAsPromised from 'chai-as-promised'
+
+// store settings for multiple backends, so that we can test each one.
+// fs will always be available - add others if they are configured
+import TestConfig from './TestConfig.js'
+
+import {
+  AlreadyWrittenError,
+  NotFoundError,
+  NotImplementedError,
+  NoKEKMatchedError,
+} from '@overleaf/object-persistor/src/Errors.js'
+import {
+  PerProjectEncryptedS3Persistor,
+  RootKeyEncryptionKey,
+} from '@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor.js'
+import { S3Persistor } from '@overleaf/object-persistor/src/S3Persistor.js'
+import crypto from 'node:crypto'
+import { WritableBuffer } from '@overleaf/stream-utils'
+import { gzipSync } from 'node:zlib'
+
 const { expect } = chai
-const fs = require('node:fs')
-const Stream = require('node:stream')
-const Settings = require('@overleaf/settings')
-const Path = require('node:path')
-const FilestoreApp = require('./FilestoreApp')
-const TestHelper = require('./TestHelper')
-const fetch = require('node-fetch')
-const { promisify } = require('node:util')
-const { Storage } = require('@google-cloud/storage')
-const streamifier = require('streamifier')
-chai.use(require('chai-as-promised'))
-const { ObjectId } = require('mongodb')
-const ChildProcess = require('node:child_process')
-const { ListObjectsV2Command } = require('@aws-sdk/client-s3')
+
+chai.use(chaiAsPromised)
+
+const {
+  BackendSettings,
+  s3Config,
+  s3SSECConfig,
+  AWS_S3_USER_FILES_STORAGE_CLASS,
+} = TestConfig
 
 const fsWriteFile = promisify(fs.writeFile)
 const fsStat = promisify(fs.stat)
@@ -29,29 +58,6 @@ process.on('unhandledRejection', e => {
   console.log('** Unhandled Promise Rejection **\n', e)
   throw e
 })
-
-// store settings for multiple backends, so that we can test each one.
-// fs will always be available - add others if they are configured
-const {
-  BackendSettings,
-  s3Config,
-  s3SSECConfig,
-  AWS_S3_USER_FILES_STORAGE_CLASS,
-} = require('./TestConfig')
-const {
-  AlreadyWrittenError,
-  NotFoundError,
-  NotImplementedError,
-  NoKEKMatchedError,
-} = require('@overleaf/object-persistor/src/Errors')
-const {
-  PerProjectEncryptedS3Persistor,
-  RootKeyEncryptionKey,
-} = require('@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor')
-const { S3Persistor } = require('@overleaf/object-persistor/src/S3Persistor')
-const crypto = require('node:crypto')
-const { WritableBuffer } = require('@overleaf/stream-utils')
-const { gzipSync } = require('node:zlib')
 
 describe('Filestore', function () {
   this.timeout(1000 * 10)
@@ -899,7 +905,7 @@ describe('Filestore', function () {
       describe('with a pdf file', function () {
         let localFileSize
         const localFileReadPath = Path.resolve(
-          __dirname,
+          import.meta.dirname,
           '../../fixtures/test.pdf'
         )
 

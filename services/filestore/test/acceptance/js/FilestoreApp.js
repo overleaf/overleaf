@@ -1,8 +1,8 @@
-const ObjectPersistor = require('@overleaf/object-persistor')
-const Settings = require('@overleaf/settings')
-const { promisify } = require('node:util')
-const App = require('../../../app')
-const FileHandler = require('../../../app/js/FileHandler')
+import ObjectPersistor from '@overleaf/object-persistor'
+import Settings from '@overleaf/settings'
+import { promisify } from 'node:util'
+import App from '../../../app.js'
+import FileHandler from '../../../app/js/FileHandler.js'
 
 class FilestoreApp {
   async runServer() {
@@ -39,4 +39,4 @@ class FilestoreApp {
   }
 }
 
-module.exports = FilestoreApp
+export default FilestoreApp

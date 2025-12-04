@@ -1,7 +1,9 @@
-const lodashOnce = require('lodash.once')
-const childProcess = require('node:child_process')
-const Settings = require('@overleaf/settings')
-const { ConversionsDisabledError, FailedCommandError } = require('./Errors')
+import lodashOnce from 'lodash.once'
+import childProcess from 'node:child_process'
+import Settings from '@overleaf/settings'
+import Errors from './Errors.js'
+
+const { ConversionsDisabledError, FailedCommandError } = Errors
 
 // execute a command in the same way as 'exec' but with a timeout that
 // kills all child processes
@@ -9,8 +11,9 @@ const { ConversionsDisabledError, FailedCommandError } = require('./Errors')
 // we spawn the command with 'detached:true' to make a new process
 // group, then we can kill everything in that process group.
 
-module.exports = safeExec
-module.exports.promises = safeExecPromise
+export default safeExec
+
+safeExec.promises = safeExecPromise
 
 // options are {timeout:  number-of-milliseconds, killSignal: signal-name}
 function safeExec(command, options, callback) {

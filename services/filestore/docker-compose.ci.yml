@@ -11,12 +11,14 @@ services:
     user: node
     volumes:
       - ./reports:/overleaf/services/filestore/reports
+      - ../../tsconfig.backend.json:/overleaf/tsconfig.backend.json
     command: npm run test:unit:_run
     environment:
       CI:
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      VITEST_NO_CACHE: true
 
 
   test_acceptance:

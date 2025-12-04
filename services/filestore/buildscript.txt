@@ -8,4 +8,6 @@ filestore
 --pipeline-owner=🚉 Platform
 --public-repo=True
 --test-acceptance-shards=SHARD_01_,SHARD_02_,SHARD_03_
+--test-unit-vitest=True
+--tsconfig-extra-includes=vitest.config.unit.cjs,vitest.config.acceptance.cjs
 --use-large-ci-runner=True

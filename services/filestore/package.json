@@ -3,18 +3,19 @@
   "description": "An API for CRUD operations on binary files stored in S3",
   "private": true,
   "main": "app.js",
+  "type": "module",
   "scripts": {
     "test:acceptance:run": "mocha --recursive --timeout 15000  $@ test/acceptance/js",
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
     "test:unit:run": "mocha --recursive $@ test/unit/js",
-    "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
+    "test:unit": "npm run test:unit:_run",
     "start": "node app.js",
     "nodemon": "node --watch app.js",
     "lint": "eslint --max-warnings 0 --format unix .",
     "format": "prettier --list-different $PWD/'**/{*.*js,*.ts}'",
     "format:fix": "prettier --write $PWD/'**/{*.*js,*.ts}'",
     "test:acceptance:_run": "mocha --recursive --timeout 15000 --exit $@ test/acceptance/js",
-    "test:unit:_run": "mocha --recursive --exit $@ test/unit/js",
+    "test:unit:_run": "vitest --config ./vitest.config.unit.cjs",
     "lint:fix": "eslint --fix .",
     "types:check": "tsc --noEmit"
   },
@@ -47,6 +48,7 @@
     "sinon": "9.0.2",
     "sinon-chai": "^3.7.0",
     "streamifier": "^0.1.1",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "vitest": "^3.2.4"
   }
 }

@@ -1,9 +1,9 @@
-const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
-const { callbackify } = require('node:util')
-const safeExec = require('./SafeExec').promises
+import logger from '@overleaf/logger'
+import metrics from '@overleaf/metrics'
+import { callbackify } from 'node:util'
+import SafeExec from './SafeExec.js'
 
-module.exports = {
+export default {
   compressPng: callbackify(compressPng),
   promises: {
     compressPng,
@@ -19,7 +19,7 @@ async function compressPng(localPath, callback) {
   }
 
   try {
-    await safeExec(args, opts)
+    await SafeExec.promises(args, opts)
     timer.done()
   } catch (err) {
     if (err.code === 'SIGKILL') {

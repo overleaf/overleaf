@@ -1,12 +1,12 @@
-const FileHandler = require('./FileHandler')
-const metrics = require('@overleaf/metrics')
-const parseRange = require('range-parser')
-const Errors = require('./Errors')
-const { pipeline } = require('node:stream')
+import FileHandler from './FileHandler.js'
+import metrics from '@overleaf/metrics'
+import parseRange from 'range-parser'
+import Errors from './Errors.js'
+import { pipeline } from 'node:stream'
 
 const maxSizeInBytes = 1024 * 1024 * 1024 // 1GB
 
-module.exports = {
+export default {
   getFile,
   getFileHead,
   insertFile,
