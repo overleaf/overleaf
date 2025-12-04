@@ -8,7 +8,8 @@ export const CopyToClipboard = memo<{
   content: string
   tooltipId: string
   kind?: 'text' | 'icon'
-}>(({ content, tooltipId, kind = 'icon' }) => {
+  unfilled?: boolean
+}>(({ content, tooltipId, kind = 'icon', unfilled = false }) => {
   const { t } = useTranslation()
 
   const [copied, setCopied] = useState(false)
@@ -49,6 +50,7 @@ export const CopyToClipboard = memo<{
           accessibilityLabel={t('copy')}
           className="copy-button"
           icon={copied ? 'check' : 'content_copy'}
+          unfilled={unfilled}
         />
       )}
     </OLTooltip>
