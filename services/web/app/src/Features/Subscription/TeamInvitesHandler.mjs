@@ -87,6 +87,14 @@ async function _deleteUserSubscription(subscription, userId, ipAddress) {
   }
 }
 
+async function removeTeamInviteAndNotification(subscriptionId, userId, email) {
+  await _removeInviteFromTeam(subscriptionId, email)
+
+  await NotificationsBuilder.promises
+    .groupInvitation(userId, subscriptionId, false)
+    .read()
+}
+
 async function acceptInvite(token, userId, ipAddress) {
   const { invite, subscription } = await getInvite(token)
   if (!invite) {
@@ -132,11 +140,7 @@ async function acceptInvite(token, userId, ipAddress) {
     }
   }
 
-  await _removeInviteFromTeam(subscription.id, invite.email)
-
-  await NotificationsBuilder.promises
-    .groupInvitation(userId, subscription._id, false)
-    .read()
+  await removeTeamInviteAndNotification(subscription._id, userId, invite.email)
 
   return subscription
 }
@@ -453,6 +457,7 @@ export default {
     createInvite,
     importInvite,
     acceptInvite,
+    removeTeamInviteAndNotification,
     revokeInvite,
     createTeamInvitesForLegacyInvitedEmail,
   },
