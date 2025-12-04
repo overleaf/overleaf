@@ -1,6 +1,6 @@
 import { expect, vi } from 'vitest'
 import sinon from 'sinon'
-import MockResponse from '../helpers/MockResponse.js'
+import MockResponse from '../helpers/MockResponse.mjs'
 
 const modulePath =
   '../../../../app/src/Features/Subscription/TeamInvitesController'
@@ -289,13 +289,13 @@ describe('TeamInvitesController', function () {
           email,
         },
       }
-      ctx.res = new MockResponse()
+      ctx.res = new MockResponse(vi)
       ctx.next = sinon.stub()
     })
 
     it('sends the invite email again', async function (ctx) {
       await new Promise(resolve => {
-        const res = new MockResponse()
+        const res = new MockResponse(vi)
         res.callback = () => {
           res.statusCode.should.equal(200)
           resolve()
@@ -314,7 +314,7 @@ describe('TeamInvitesController', function () {
 
       it('sends the invite again', async function (ctx) {
         await new Promise(resolve => {
-          const res = new MockResponse()
+          const res = new MockResponse(vi)
           res.callback = () => {
             sinon.assert.calledWith(
               ctx.Modules.promises.hooks.fire,
