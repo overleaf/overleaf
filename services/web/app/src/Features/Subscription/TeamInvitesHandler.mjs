@@ -172,6 +172,7 @@ async function createTeamInvitesForLegacyInvitedEmail(email) {
 }
 
 async function _createInvite(subscription, email, inviter, auditLog) {
+  const { domainCaptureEnabled, managedUsersEnabled } = subscription
   const { possible, reason } = await _checkIfInviteIsPossible(
     subscription,
     email
@@ -231,27 +232,42 @@ async function _createInvite(subscription, email, inviter, auditLog) {
     invite = invite.toObject()
     invite.sentAt = new Date()
   } else {
-    invite = {
-      email,
-      inviterName,
-      token: crypto.randomBytes(32).toString('hex'),
-      sentAt: new Date(),
+    if (domainCaptureEnabled) {
+      invite = {
+        email,
+        inviterName,
+        sentAt: new Date(),
+        domainCapture: true,
+      }
+    } else {
+      invite = {
+        email,
+        inviterName,
+        token: crypto.randomBytes(32).toString('hex'),
+        sentAt: new Date(),
+      }
     }
+
     subscription.teamInvites.push(invite)
   }
 
-  try {
-    await _sendNotificationToExistingUser(
-      subscription,
-      email,
-      invite,
-      subscription.managedUsersEnabled
-    )
-  } catch (err) {
-    logger.error(
-      { err },
-      'Failed to send notification to existing user when creating group invitation'
-    )
+  if (!domainCaptureEnabled) {
+    // no need to create notification when domain capture is enabled since
+    // dash will show one on page load for non-managed groups, and for managed groups
+    // dash is not loadable until user joins the group
+    try {
+      await _sendNotificationToExistingUser(
+        subscription,
+        email,
+        invite,
+        subscription.managedUsersEnabled
+      )
+    } catch (err) {
+      logger.error(
+        { err },
+        'Failed to send notification to existing user when creating group invitation'
+      )
+    }
   }
 
   await subscription.save()
@@ -273,7 +289,22 @@ async function _createInvite(subscription, email, inviter, auditLog) {
         'Error adding group audit log entry for group-invite-sent'
       )
     }
+  }
 
+  let acceptInviteUrl
+  if (domainCaptureEnabled) {
+    const samlInitPath = (
+      await Modules.promises.hooks.fire(
+        'getGroupSSOInitPath',
+        subscription,
+        email
+      )
+    )?.[0]
+    acceptInviteUrl = `${settings.siteUrl}${samlInitPath}`
+  } else {
+    acceptInviteUrl = `${settings.siteUrl}/subscription/invites/${invite.token}/`
+  }
+  if (managedUsersEnabled) {
     let admin = {}
     try {
       admin = await SubscriptionLocator.promises.getAdminEmailAndName(
@@ -289,7 +320,7 @@ async function _createInvite(subscription, email, inviter, auditLog) {
       to: email,
       admin,
       inviter,
-      acceptInviteUrl: `${settings.siteUrl}/subscription/invites/${invite.token}/`,
+      acceptInviteUrl,
       appName: settings.appName,
     }
 
@@ -308,10 +339,9 @@ async function _createInvite(subscription, email, inviter, auditLog) {
     const opts = {
       to: email,
       inviter,
-      acceptInviteUrl: `${settings.siteUrl}/subscription/invites/${invite.token}/`,
+      acceptInviteUrl,
       appName: settings.appName,
     }
-
     await EmailHandler.promises.sendEmail('verifyEmailToJoinTeam', opts)
   }
 

@@ -1,5 +1,6 @@
 import { expect, vi } from 'vitest'
 import sinon from 'sinon'
+import MockResponse from '../helpers/MockResponse.js'
 
 const modulePath =
   '../../../../app/src/Features/Subscription/TeamInvitesController'
@@ -74,7 +75,9 @@ describe('TeamInvitesController', function () {
     }
 
     ctx.RateLimiter = {
-      RateLimiter: class {},
+      RateLimiter: class {
+        consume = sinon.stub().resolves()
+      },
     }
 
     vi.doMock(
@@ -271,6 +274,60 @@ describe('TeamInvitesController', function () {
           },
         }
         ctx.Controller.viewInvite(req, res)
+      })
+    })
+  })
+
+  describe('resendInvite', function () {
+    const email = 'user@example.com'
+    const initPath = '/saml/ukamf/init?group_id=12345'
+    beforeEach(function (ctx) {
+      ctx.subscription = { teamInvites: [{ email }], populate: sinon.stub() }
+      ctx.req = {
+        entity: ctx.subscription,
+        body: {
+          email,
+        },
+      }
+      ctx.res = new MockResponse()
+      ctx.next = sinon.stub()
+    })
+
+    it('sends the invite email again', async function (ctx) {
+      await new Promise(resolve => {
+        const res = new MockResponse()
+        res.callback = () => {
+          res.statusCode.should.equal(200)
+          resolve()
+        }
+
+        ctx.Controller.resendInvite(ctx.req, res, ctx.next)
+      })
+    })
+
+    describe('when domain capture is enabled', function () {
+      beforeEach(function (ctx) {
+        ctx.req.entity.domainCaptureEnabled = true
+
+        ctx.Modules.promises.hooks.fire.resolves([initPath])
+      })
+
+      it('sends the invite again', async function (ctx) {
+        await new Promise(resolve => {
+          const res = new MockResponse()
+          res.callback = () => {
+            sinon.assert.calledWith(
+              ctx.Modules.promises.hooks.fire,
+              'getGroupSSOInitPath',
+              ctx.subscription,
+              email
+            )
+            res.statusCode.should.equal(200)
+            resolve()
+          }
+
+          ctx.Controller.resendInvite(ctx.req, res, ctx.next)
+        })
       })
     })
   })

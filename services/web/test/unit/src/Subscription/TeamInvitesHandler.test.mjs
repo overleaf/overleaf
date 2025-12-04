@@ -131,7 +131,7 @@ describe('TeamInvitesHandler', function () {
     }))
 
     vi.doMock('@overleaf/settings', () => ({
-      default: { siteUrl: 'http://example.com' },
+      default: { siteUrl: 'http://example.com', appName: 'Overleaf' },
     }))
 
     vi.doMock('../../../../app/src/models/TeamInvite', () => ({
@@ -413,6 +413,90 @@ describe('TeamInvitesHandler', function () {
         ctx.Modules.promises.hooks.fire,
         'addGroupAuditLogEntry'
       )
+    })
+
+    describe('when domain capture is enabled', function () {
+      it('creates a domain capture invite', async function (ctx) {
+        const initPath = '/saml/ukamf/init?group_id=12345'
+        ctx.Modules.promises.hooks.fire.resolves([initPath])
+        ctx.UserGetter.promises.getUser.resolves(ctx.manager)
+
+        ctx.subscription.domainCaptureEnabled = true
+        const invite = await ctx.TeamInvitesHandler.promises.createInvite(
+          ctx.manager._id,
+          ctx.subscription,
+          'user@example.com',
+          { domainCapture: true }
+        )
+        expect(invite.token).to.be.undefined
+        expect(invite.domainCapture).to.be.true
+        expect(invite.email).to.eq('user@example.com')
+
+        sinon.assert.calledWith(
+          ctx.Modules.promises.hooks.fire,
+          'getGroupSSOInitPath',
+          ctx.subscription,
+          invite.email
+        )
+
+        ctx.EmailHandler.promises.sendEmail
+          .calledWith(
+            'verifyEmailToJoinTeam',
+            sinon.match({
+              to: 'user@example.com',
+              inviter: ctx.manager,
+              acceptInviteUrl: `http://example.com${initPath}`,
+              appName: 'Overleaf',
+            })
+          )
+          .should.equal(true)
+      })
+
+      describe('when managed users is also enabled', function () {
+        it('creates a domain capture invite', async function (ctx) {
+          ctx.SubscriptionLocator.promises.getAdminEmailAndName = sinon
+            .stub()
+            .resolves(ctx.manager)
+
+          ctx.UserGetter.promises.getUserByAnyEmail
+            .withArgs('user@example.com')
+            .resolves(ctx.user)
+          const initPath = '/saml/ukamf/init?group_id=12345'
+          ctx.Modules.promises.hooks.fire.resolves([initPath])
+          ctx.UserGetter.promises.getUser.resolves(ctx.manager)
+          ctx.subscription.managedUsersEnabled = true
+          ctx.subscription.domainCaptureEnabled = true
+          const invite = await ctx.TeamInvitesHandler.promises.createInvite(
+            ctx.manager._id,
+            ctx.subscription,
+            'user@example.com',
+            { domainCapture: true }
+          )
+          expect(invite.token).to.be.undefined
+          expect(invite.domainCapture).to.be.true
+          expect(invite.email).to.eq('user@example.com')
+
+          sinon.assert.calledWith(
+            ctx.Modules.promises.hooks.fire,
+            'getGroupSSOInitPath',
+            ctx.subscription,
+            invite.email
+          )
+
+          ctx.EmailHandler.promises.sendEmail
+            .calledWith(
+              'inviteNewUserToJoinManagedUsers',
+              sinon.match({
+                to: 'user@example.com',
+                inviter: ctx.manager,
+                acceptInviteUrl: `http://example.com${initPath}`,
+                appName: 'Overleaf',
+                admin: ctx.manager,
+              })
+            )
+            .should.equal(true)
+        })
+      })
     })
   })
 
