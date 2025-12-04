@@ -399,28 +399,33 @@ const en = {
     'citations-checker.publications.copied': 'Copied to clipboard',
     'citations-reviewer.chat.title': 'Citations reviewer',
     'citations-reviewer.chat.description':
-      'Here are statements in your article that may benefit from a citation. <b>View suggestions</b> to see relevant papers.',
+      '<b>Identified __count__ passages</b><br/>Here are statements in your article that may benefit from a citation.',
     'citations-reviewer.chat.document-updated':
       'Your document has been updated. Refresh citations to get new suggestions.',
     'citations-reviewer.chat.fetching-citations':
       'Reviewing your document to see if any passage of text might need a citation',
     'citations-reviewer.chat.fetching-publications': 'Fetching publications...',
-    'citations-reviewer.chat.no-citations': 'No citations found',
+    'citations-reviewer.chat.no-citations.title': 'Well done!',
+    'citations-reviewer.chat.no-citations.description':
+      "We didn't identify any passages that need additional citation.",
+    'citations-reviewer.chat.no-citations.run-again': 'Run again',
+    'citations-reviewer.chat.no-citations.done': 'Done',
     'citations-reviewer.chat.publications.title': 'Suggested papers',
     'citations-reviewer.chat.publications.description':
-      'The following papers may support the claim you’ve made. <b>AI can make mistakes. Always check papers yourself to ensure relevance.</b>',
+      'The following papers may support the claim you’ve made. Always check papers yourself to ensure relevance.',
     'citations-reviewer.chat.publications.alternatively': 'Alternatively,',
     'citations-reviewer.chat.publications.custom-search':
       'search for papers yourself.',
-    'citations-reviewer.chat.publications.from-document': 'From your document:',
     'citations-reviewer.chat.publications.passage': 'Passage to review',
     'citations-reviewer.chat.actions.refresh': 'Refresh citations',
     'citations-reviewer.chat.actions.back': 'Back',
     'citations-reviewer.chat.actions.read-abstract': '> Read abstract',
-    'citations-reviewer.chat.actions.view-suggestions': 'View suggestions',
+    'citations-reviewer.chat.actions.view-suggestions': 'View suggestions →',
     'citations-reviewer.chat.actions.ignore': 'Ignore',
     'citations-reviewer.chat.actions.view-paper': 'View paper',
     'citations-reviewer.chat.actions.insert-citation': 'Insert citation',
+    'citations-reviewer.chat.actions.insert-citations':
+      'Insert __count__ citations',
     'citations-reviewer.chat.confirmation.title': 'Insert citation?',
     'citations-reviewer.chat.confirmation.body':
       'Always ensure you’ve read the paper and confirmed any suggestions made by AI before inserting a citation.',
@@ -857,29 +862,34 @@ const es = {
     'citations-checker.publications.copied': 'Copiado al portapapeles',
     'citations-reviewer.chat.title': 'Revisor de citas',
     'citations-reviewer.chat.description':
-      'Aquí tienes afirmaciones en tu artículo que pueden beneficiarse de una cita. <b>Ver sugerencias</b> para consultar los artículos relevantes.',
+      '<b>__count__ afirmaciones identificadas</b><br/>Aquí tienes pasajes en tu artículo que pueden beneficiarse de una cita.',
     'citations-reviewer.chat.document-updated':
       'Documento actualizado. Haz clic en "Actualizar citas" para revisar las citas nuevamente.',
     'citations-reviewer.chat.fetching-citations':
       'Revisando tu documento para ver si algún pasaje podría necesitar una cita',
     'citations-reviewer.chat.fetching-publications':
       'Obteniendo publicaciones...',
-    'citations-reviewer.chat.no-citations': 'No se encontraron citas',
+    'citations-reviewer.chat.no-citations.title': 'Bien hecho!',
+    'citations-reviewer.chat.no-citations.description':
+      'No se identificaron pasajes que necesiten citas adicionales.',
+    'citations-reviewer.chat.no-citations.run-again': 'Volver a ejecutar',
+    'citations-reviewer.chat.no-citations.done': 'Hecho',
     'citations-reviewer.chat.publications.title': 'Artículos sugeridos',
     'citations-reviewer.chat.publications.description':
-      'Los siguientes artículos pueden respaldar la afirmación que has hecho. <b>La IA puede cometer errores. Revisa siempre los artículos por tu cuenta para asegurar su relevancia.</b>',
+      'Los siguientes artículos pueden respaldar la afirmación que has hecho. Revisa siempre los artículos por tu cuenta para asegurar su relevancia.',
     'citations-reviewer.chat.publications.alternatively': 'Alternativamente,',
     'citations-reviewer.chat.publications.custom-search':
       'busca artículos por tu cuenta.',
-    'citations-reviewer.chat.publications.from-document': 'De tu documento:',
     'citations-reviewer.chat.publications.passage': 'Pasaje a revisar',
     'citations-reviewer.chat.actions.refresh': 'Actualizar citas',
     'citations-reviewer.chat.actions.back': 'Volver',
     'citations-reviewer.chat.actions.read-abstract': '> Leer resumen',
-    'citations-reviewer.chat.actions.view-suggestions': 'Ver sugerencias',
+    'citations-reviewer.chat.actions.view-suggestions': 'Ver sugerencias →',
     'citations-reviewer.chat.actions.ignore': 'Ignorar',
     'citations-reviewer.chat.actions.view-paper': 'Ver artículo',
     'citations-reviewer.chat.actions.insert-citation': 'Insertar cita',
+    'citations-reviewer.chat.actions.insert-citations':
+      'Insertar __count__ citas',
     'citations-reviewer.chat.confirmation.title': '¿Insertar cita?',
     'citations-reviewer.chat.confirmation.body':
       'Asegúrate siempre de haber leído el artículo y confirmado cualquier sugerencia realizada por la IA antes de insertar una cita.',
