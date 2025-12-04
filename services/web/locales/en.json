@@ -1986,7 +1986,7 @@
   "saml_authentication_required_error": "Other login methods have been disabled by your group administrator. Please use your group SSO login.",
   "saml_commons_unavailable": "Institution SSO is currently unavailable. For more details, please see <0>__linkText__</0>.",
   "saml_create_admin_instructions": "Choose an email address for the first __appName__ admin account. This should correspond to an account in the SAML system. You will then be asked to log in with this account.",
-  "saml_email_not_in_account_error": "Your identity provider returned __email__, which is not already on your current __appName__ account. You will need to log out and create a new __appName__ account with __email__ via the SSO log in page. Once this is done, you can <0>transfer your existing projects</0> to the new account.",
+  "saml_email_not_in_account_error_managed_users": "Your identity provider returned __email__, which is not already on your current __appName__ account. You will need to log out and create a new __appName__ account with __email__ via the SSO log in page. Once this is done, you can <0>transfer your existing projects</0> to the new account.",
   "saml_email_not_recognized_error": "This email address isn’t set up for SSO. Please check it and try again or contact your administrator.",
   "saml_identity_exists_error": "Sorry, the identity returned by your identity provider is already linked with a different Overleaf account.  Please contact your administrator for more information.",
   "saml_invalid_signature_error": "Sorry, the information received from your identity provider has an invalid signature.  Please contact your administrator for more information.",
