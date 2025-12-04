@@ -3,6 +3,9 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { Nav, NavLink, TabContainer, TabContent } from 'react-bootstrap'
 import { SettingsEntry } from '../../contexts/settings-modal-context'
 import SettingsTabPane from './settings-tab-pane'
+import BetaBadgeIcon from '@/shared/components/beta-badge-icon'
+import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import { useTranslation } from 'react-i18next'
 
 export const SettingsModalBody = ({
   activeTab,
@@ -42,6 +45,8 @@ export const SettingsModalBody = ({
 }
 
 const SettingsNavLink = ({ entry }: { entry: SettingsEntry }) => {
+  const { t } = useTranslation()
+
   if ('href' in entry) {
     return (
       <a
@@ -77,6 +82,18 @@ const SettingsNavLink = ({ entry }: { entry: SettingsEntry }) => {
             unfilled
           />
           <span>{entry.title}</span>
+          <div className="flex-grow-1" />
+          {entry.key === 'project_notifications' && (
+            <OLTooltip
+              id="project-notifications-beta-badge"
+              description={t('email_notifications_are_currently_in_beta')}
+              overlayProps={{ placement: 'right', delay: 100 }}
+            >
+              <span>
+                <BetaBadgeIcon />
+              </span>
+            </OLTooltip>
+          )}
         </NavLink>
       </>
     )

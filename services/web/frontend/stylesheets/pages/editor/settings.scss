@@ -1,5 +1,5 @@
 .ide-settings-tab-nav.nav {
-  width: 240px;
+  width: 300px;
   border-right: var(--bs-modal-header-border-width) solid
     var(--bs-modal-header-border-color);
   padding: var(--spacing-02);
@@ -97,4 +97,36 @@
   display: flex;
   justify-content: flex-end;
   margin-left: var(--spacing-06);
+}
+
+.ide-radio-setting-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-06);
+}
+
+.ide-radio-option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-04);
+  cursor: pointer;
+}
+
+.ide-radio-input {
+  margin-top: var(--spacing-02);
+}
+
+.ide-radio-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.project-notifications-beta-note {
+  margin-top: var(--spacing-06);
+  padding: var(--spacing-04);
+  font-size: var(--font-size-02);
+}
+
+.beta-note-text {
+  color: var(--content-secondary);
 }

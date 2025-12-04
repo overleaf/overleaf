@@ -42,6 +42,7 @@ export default /** @type {const} */ ([
   'more_vert',
   'neurology',
   'note_add',
+  'notifications',
   'open_in_new',
   'password',
   'picture_as_pdf',

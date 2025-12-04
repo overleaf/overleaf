@@ -28,6 +28,7 @@ import NewEditorSetting from '../components/settings/editor-settings/new-editor-
 import DarkModePdfSetting from '../components/settings/appearance-settings/dark-mode-pdf-setting'
 import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import ProjectNotificationsSetting from '../components/settings/editor-settings/project-notifications-setting'
 
 const [referenceSearchSettingModule] = importOverleafModules(
   'referenceSearchSetting'
@@ -51,6 +52,7 @@ export type SettingsTab = {
   icon: AvailableUnfilledIcon
   sections: SettingsSection[]
   title: string
+  hidden?: boolean
 }
 
 type SettingsLink = {
@@ -58,6 +60,7 @@ type SettingsLink = {
   icon: AvailableUnfilledIcon
   href: string
   title: string
+  hidden?: boolean
 }
 
 export type SettingsEntry = SettingsLink | SettingsTab
@@ -85,7 +88,8 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
   const { leftMenuShown, setLeftMenuShown } = useLayoutContext()
 
   const hasDarkModePdf = useFeatureFlag('pdf-dark-mode')
-  const settingsTabs: SettingsEntry[] = useMemo(
+  const hasEmailNotifications = useFeatureFlag('email-notifications')
+  const allSettingsTabs: SettingsEntry[] = useMemo(
     () => [
       {
         key: 'editor',
@@ -229,6 +233,25 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
           },
         ],
       },
+
+      {
+        key: 'project_notifications',
+        title: t('project_notifications'),
+        icon: 'notifications' as const,
+        sections: [
+          {
+            key: 'general',
+            settings: [
+              {
+                key: 'projectNotifications',
+                component: <ProjectNotificationsSetting />,
+              },
+            ],
+          },
+        ],
+        hidden: !hasEmailNotifications,
+      },
+
       {
         key: 'account_settings',
         title: t('account_settings'),
@@ -242,7 +265,12 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
         href: '/user/subscription',
       },
     ],
-    [t, overallTheme, hasDarkModePdf]
+    [t, overallTheme, hasDarkModePdf, hasEmailNotifications]
+  )
+
+  const settingsTabs = useMemo(
+    () => allSettingsTabs.filter(tab => !tab.hidden),
+    [allSettingsTabs]
   )
 
   const settingToTabMap = useMemo(() => {
