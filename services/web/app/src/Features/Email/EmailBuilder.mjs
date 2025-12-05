@@ -1023,6 +1023,36 @@ templates.taxExemptCertificateRequired = NoCTAEmailTemplate({
   },
 })
 
+templates.groupMemberLimitWarning = ctaTemplate({
+  subject(opts) {
+    return `${opts.groupName || 'Your group'} is approaching its member limit`
+  },
+  title(opts) {
+    return `${opts.groupName || 'Your group'} is approaching its member limit`
+  },
+  greeting(opts) {
+    return opts.firstName ? `Hi ${opts.firstName},` : 'Hi,'
+  },
+  message(opts) {
+    return [
+      `Your group "${opts.groupName}" is approaching its member limit.`,
+      `<b>Current usage:</b> ${opts.currentMembers} of ${opts.membersLimit} licenses used (${opts.remainingSeats} remaining)`,
+      'With domain capture enabled, users with verified email addresses from your domain can automatically join the group via SSO. Once the member limit is reached, new users will be blocked from joining.',
+    ]
+  },
+  secondaryMessage() {
+    return [
+      'To ensure uninterrupted access for your users, consider adding more licenses or removing inactive members.',
+    ]
+  },
+  ctaText() {
+    return 'Add licenses'
+  },
+  ctaURL() {
+    return `${settings.siteUrl}/user/subscription/group/add-users`
+  },
+})
+
 function _formatUserNameAndEmail(user, placeholder) {
   if (user.first_name && user.last_name) {
     const fullName = `${user.first_name} ${user.last_name}`

@@ -976,6 +976,72 @@ describe('EmailBuilder', function () {
           })
         })
       })
+
+      describe('groupMemberLimitWarning', function () {
+        beforeEach(function (ctx) {
+          ctx.emailAddress = 'example@overleaf.com'
+          ctx.opts = {
+            to: ctx.emailAddress,
+            groupName: 'Example Group',
+            firstName: 'Joe',
+            currentMembers: 9,
+            membersLimit: 10,
+            remainingSeats: 1,
+          }
+          ctx.email = ctx.EmailBuilder.buildEmail(
+            'groupMemberLimitWarning',
+            ctx.opts
+          )
+          ctx.expectedUrl = `${ctx.settings.siteUrl}/user/subscription/group/add-users`
+        })
+
+        it('should build the email', function (ctx) {
+          expect(ctx.email.html).to.exist
+          expect(ctx.email.text).to.exist
+        })
+
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function (ctx) {
+            const dom = cheerio.load(ctx.email.html)
+            const plainText = dom.text()
+            expect(ctx.email.subject).to.equal(
+              `${ctx.opts.groupName} is approaching its member limit`
+            )
+            expect(ctx.email.html).to.exist
+            expect(ctx.email.html).to.contain(
+              `Your group "${ctx.opts.groupName}" is approaching its member limit.`
+            )
+            expect(plainText).to.contain(
+              `Current usage: ${ctx.opts.currentMembers} of ` +
+                `${ctx.opts.membersLimit} licenses used ` +
+                `(${ctx.opts.remainingSeats} remaining)`
+            )
+            expect(ctx.email.html).to.contain(
+              'With domain capture enabled, users with verified email ' +
+                'addresses from your domain can automatically join the group ' +
+                'via SSO. Once the member limit is reached, new users will ' +
+                'be blocked from joining.'
+            )
+            expect(ctx.email.html).to.contain(
+              'To ensure uninterrupted access for your users, consider ' +
+                'adding more licenses or removing inactive members.'
+            )
+            const buttonLink = dom('td a')
+            expect(buttonLink).to.exist
+            expect(buttonLink.attr('href')).to.equal(ctx.expectedUrl)
+            const fallback = dom('.force-overleaf-style').last()
+            expect(fallback).to.exist
+            const fallbackLink = fallback.html().replace(/&amp;/g, '&')
+            expect(fallbackLink).to.contain(ctx.expectedUrl)
+          })
+        })
+
+        describe('plain text email', function () {
+          it('should contain the CTA link', function (ctx) {
+            expect(ctx.email.text).to.contain(ctx.expectedUrl)
+          })
+        })
+      })
     })
   })
 })
