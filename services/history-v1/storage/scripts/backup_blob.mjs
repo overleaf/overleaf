@@ -1,18 +1,34 @@
 // @ts-check
 import commandLineArgs from 'command-line-args'
-import { backupBlob, downloadBlobToDir } from '../lib/backupBlob.mjs'
+import {
+  backupBlob,
+  downloadBlobToDir,
+  blobIsBackedUp,
+} from '../lib/backupBlob.mjs'
+import { backupPersistor, projectBlobsBucket } from '../lib/backupPersistor.mjs'
 import withTmpDir from '../../api/controllers/with_tmp_dir.js'
 import {
   BlobStore,
   GLOBAL_BLOBS,
   loadGlobalBlobs,
+  makeProjectKey,
 } from '../lib/blob_store/index.js'
+import {
+  getBackupStatus,
+  unsetBackedUpBlobHashes,
+} from '../lib/backup_store/index.js'
+import chunkStore from '../lib/chunk_store/index.js'
 import assert from '../lib/assert.js'
 import knex from '../lib/knex.js'
 import { client } from '../lib/mongodb.js'
 import redis from '../lib/redis.js'
 import { setTimeout } from 'node:timers/promises'
 import fs from 'node:fs'
+import pLimit from 'p-limit'
+import Events from 'node:events'
+
+// Silence warning.
+Events.setMaxListeners(20)
 
 await loadGlobalBlobs()
 
@@ -121,22 +137,80 @@ async function initialiseJobs({ historyId, hash, input }) {
 }
 
 /**
+ * @typedef {import("@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor").CachedPerProjectEncryptedS3Persistor} CachedPerProjectEncryptedS3Persistor
+ */
+
+/** @type {Map<string, Promise<CachedPerProjectEncryptedS3Persistor>>} */
+const persistorCache = new Map()
+
+/**
+ * @param {string} historyId
+ * @returns {Promise<CachedPerProjectEncryptedS3Persistor>}
+ */
+function getPersistor(historyId) {
+  let persistorPromise = persistorCache.get(historyId)
+  if (!persistorPromise) {
+    persistorPromise = backupPersistor.forProject(
+      projectBlobsBucket,
+      makeProjectKey(historyId, '')
+    )
+    persistorCache.set(historyId, persistorPromise)
+  }
+  return persistorPromise
+}
+
+// Track processed objects to handle input csv files with duplicate entries
+const processedObjects = new Set()
+
+/**
  *
  * @param {string} historyId
  * @param {string} hash
  * @return {Promise<void>}
  */
 export async function downloadAndBackupBlob(historyId, hash) {
+  const key = `${historyId}:${hash}`
+  if (processedObjects.has(key)) {
+    console.log(`${historyId} ${hash} skipping previously processed blob`)
+    return
+  } else {
+    processedObjects.add(key)
+  }
+  const backend = chunkStore.getBackend(historyId)
+  const projectId = await backend.resolveHistoryIdToMongoProjectId(historyId)
+  // Check whether the project still exists
+  try {
+    await getBackupStatus(projectId)
+  } catch (err) {
+    if (err instanceof Error && err.message === 'Project not found') {
+      console.log(`${historyId} ${hash} project not found (expired)`)
+      return
+    } else if (err instanceof Error && err.message === 'Project deleted') {
+      console.log(`${historyId} ${hash} project deleted but not expired`)
+      // continue and allow backing up blob for a deleted project in case it is undeleted in future
+    } else {
+      throw err
+    }
+  }
+  // Force clearning of any backed up blob record
+  if (options.clear) {
+    await unsetBackedUpBlobHashes(projectId, [hash])
+  } else if (await blobIsBackedUp(projectId, hash)) {
+    // Check if the blob is already backed up
+    console.log(`${historyId} ${hash} already backed up`)
+    return
+  }
+  const persistor = await getPersistor(historyId)
   const blobStore = new BlobStore(historyId)
   const blob = await blobStore.getBlob(hash)
   if (!blob) {
-    throw new Error(`Blob ${hash} could not be loaded`)
+    throw new Error(`Blob ${hash} could not be loaded for history ${historyId}`)
   }
-  await withTmpDir(`blob-${hash}`, async tmpDir => {
+  await withTmpDir(`blob-${historyId}-${hash}`, async tmpDir => {
     const filePath = await downloadBlobToDir(historyId, blob, tmpDir)
-    console.log(`Downloaded blob ${hash} to ${filePath}`)
-    await backupBlob(historyId, blob, filePath)
-    console.log('Backed up blob')
+    console.log(`${historyId} ${hash} Downloaded blob ${filePath}`)
+    const status = await backupBlob(historyId, blob, filePath, persistor)
+    console.log(`${historyId} ${hash} Blob`, status ?? 'backed up')
   })
 }
 
@@ -146,6 +220,8 @@ const options = commandLineArgs([
   { name: 'historyId', type: String },
   { name: 'hash', type: String },
   { name: 'input', type: String },
+  { name: 'concurrency', alias: 'c', type: Number, defaultValue: 1 },
+  { name: 'clear', type: Boolean },
 ])
 
 try {
@@ -162,12 +238,31 @@ if (!Array.isArray(jobs)) {
   process.exit(1)
 }
 
-for (const { historyId, hash } of jobs) {
+const limit = pLimit(options.concurrency)
+let successCount = 0
+let failedCount = 0
+const totalJobs = jobs.length
+
+/**
+ * @param {string} historyId
+ * @param {string} hash
+ */
+async function runJob(historyId, hash) {
   try {
     await downloadAndBackupBlob(historyId, hash)
+    successCount++
   } catch (error) {
-    console.error(error)
+    console.error(`${historyId} ${hash} Error:`, error)
     process.exitCode = 1
+    failedCount++
   }
 }
+
+const promises = jobs.map(({ historyId, hash }) =>
+  limit(runJob, historyId, hash)
+)
+await Promise.all(promises)
+console.log(
+  `Backup complete: ${successCount} succeeded, ${failedCount} failed, ${totalJobs} total`
+)
 await gracefulShutdown()

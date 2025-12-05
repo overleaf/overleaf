@@ -167,7 +167,7 @@ export async function storeBlobBackup(projectId, hash) {
  * @return {Promise<*>}
  * @private
  */
-export async function _blobIsBackedUp(projectId, hash) {
+export async function blobIsBackedUp(projectId, hash) {
   const blobs = await backedUpBlobs.findOne(
     {
       _id: new ObjectId(projectId),
@@ -185,7 +185,7 @@ export async function _blobIsBackedUp(projectId, hash) {
  * @param {Blob} blob - The blob that is being backed up
  * @param {string} tmpPath - The path to a temporary file storing the contents of the blob.
  * @param {CachedPerProjectEncryptedS3Persistor} [persistor] - The persistor to use (optional)
- * @return {Promise<void>}
+ * @return {Promise<string|void>}
  */
 export async function backupBlob(historyId, blob, tmpPath, persistor) {
   const hash = blob.getHash()
@@ -200,17 +200,17 @@ export async function backupBlob(historyId, blob, tmpPath, persistor) {
   if (globalBlob && !globalBlob.demoted) {
     recordBackupConclusion('skipped', 'global')
     logger.debug({ projectId, hash }, 'Blob is global - skipping backup')
-    return
+    return 'global'
   }
 
   try {
-    if (await _blobIsBackedUp(projectId, hash)) {
+    if (await blobIsBackedUp(projectId, hash)) {
       recordBackupConclusion('skipped', 'already_backed_up')
       logger.debug(
         { projectId, hash },
         'Blob already backed up - skipping backup'
       )
-      return
+      return 'already-recorded'
     }
   } catch (error) {
     logger.warn({ error }, 'Failed to check if blob is backed up')
@@ -241,7 +241,7 @@ export async function backupBlob(historyId, blob, tmpPath, persistor) {
       await storeBlobBackup(projectId, hash)
       recordBackupConclusion('failure', 'already_backed_up')
       // Blob already backed up so report success
-      return
+      return 'already-written'
     }
     recordBackupConclusion('failure')
     logger.warn({ error, projectId, hash }, 'Failed to upload blob to backup')
