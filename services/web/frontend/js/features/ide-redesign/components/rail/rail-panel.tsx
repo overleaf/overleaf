@@ -37,7 +37,7 @@ export default function RailPanel({
       id={`ide-redesign-sidebar-panel-${isHistoryView ? 'file-tree' : selectedTab}`}
       className={classNames({ hidden: isReviewPanelOpen })}
       order={1}
-      defaultSize={15}
+      defaultSize={selectedTab === 'workbench' ? 20 : 15}
       minSize={5}
       maxSize={80}
       ref={panelRef}
