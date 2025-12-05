@@ -58,6 +58,7 @@ describe('DocumentManager', function () {
     }
     this.Settings = {
       max_doc_length: 2 * 1024 * 1024, // 2mb
+      maxUnflushedAgeMs: 300 * 1000, // 5 minutes
     }
 
     this.DocumentManager = SandboxedModule.require(modulePath, {
@@ -1030,7 +1031,7 @@ describe('DocumentManager', function () {
             ranges: this.ranges,
             projectHistoryId: this.projectHistoryId,
             pathname: this.pathname,
-            unflushedTime: Date.now() - 1e9,
+            unflushedTime: Date.now() - 2 * this.Settings.maxUnflushedAgeMs, // document is older than max unflushed age
             alreadyLoaded: true,
           })
           this.result = await this.DocumentManager.promises.getDocAndFlushIfOld(
@@ -1066,7 +1067,7 @@ describe('DocumentManager', function () {
             version: this.version,
             ranges: this.ranges,
             pathname: this.pathname,
-            unflushedTime: Date.now() - 100,
+            unflushedTime: Date.now() - 0.5 * this.Settings.maxUnflushedAgeMs, // document is not old enough to trigger flush
             alreadyLoaded: true,
           })
           this.result = await this.DocumentManager.promises.getDocAndFlushIfOld(

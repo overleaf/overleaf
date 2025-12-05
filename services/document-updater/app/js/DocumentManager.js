@@ -13,7 +13,7 @@ const { getTotalSizeOfLines } = require('./Limits')
 const Settings = require('@overleaf/settings')
 const { StringFileData } = require('overleaf-editor-core')
 
-const MAX_UNFLUSHED_AGE = 300 * 1000 // 5 mins, document should be flushed to mongo this time after a change
+const MAX_UNFLUSHED_AGE = Settings.maxUnflushedAgeMs // document should be flushed to mongo this time after a change
 
 const DocumentManager = {
   /**

@@ -188,6 +188,9 @@ module.exports = {
   gracefulShutdownDelayInMs:
     parseInt(process.env.GRACEFUL_SHUTDOWN_DELAY_SECONDS ?? '10', 10) * 1000,
 
+  maxUnflushedAgeMs:
+    parseInt(process.env.MAX_UNFLUSHED_AGE_SECONDS ?? '300', 10) * 1000, // 5 mins by default
+
   shortHistoryQueues: (process.env.SHORT_HISTORY_QUEUES || '')
     .split(',')
     .filter(s => !!s),
