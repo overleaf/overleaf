@@ -963,6 +963,7 @@
   "group_admin": "Group admin",
   "group_audit_logs": "Group audit logs",
   "group_full": "This group is already full",
+  "group_has_no_licenses_available_error": "Sorry, your group has no licenses available. Please contact your administrator to request a license.",
   "group_invitations": "Group invitations",
   "group_invite_has_been_sent_to_email": "Group invite has been sent to <0>__email__</0>",
   "group_libraries": "Group Libraries",

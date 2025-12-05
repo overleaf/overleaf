@@ -198,6 +198,8 @@ class SAMLRequestDeniedError extends SAMLAuthenticationError {
 
 class SAMLDomainCaptureManagedUserMissingEmailError extends OError {}
 
+class SAMLGroupMemberLimitReachedError extends OError {}
+
 class SAMLDomainCaptureManagedOptInUserMissingEmailError extends SAMLDomainCaptureError {}
 
 class SAMLSessionDataMissing extends BackwardCompatibleError {
@@ -385,6 +387,7 @@ module.exports = {
   SAMLRequestDeniedError,
   SAMLDomainCaptureRegisterError,
   SAMLDomainCaptureManagedUserMissingEmailError,
+  SAMLGroupMemberLimitReachedError,
   SAMLDomainCaptureManagedOptInUserMissingEmailError,
   SLInV2Error,
   ThirdPartyIdentityExistsError,

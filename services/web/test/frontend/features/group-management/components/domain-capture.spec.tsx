@@ -117,6 +117,25 @@ describe('<DomainCapture />', function () {
       )
     })
 
+    it('renders group limit reached error message', function () {
+      const notificationsInstitution = [
+        { templateKey: 'notification_group_member_limit_reached' },
+      ]
+      cy.window().then(win => {
+        win.metaAttributesCache.set(
+          'ol-notificationsInstitution',
+          notificationsInstitution
+        )
+      })
+      cy.mount(<DomainCapture />)
+
+      cy.findByRole('alert').should(
+        'contain.text',
+        'Sorry, your group has no licenses available. ' +
+          'Please contact your administrator to request a license.'
+      )
+    })
+
     it('renders institution error message', function () {
       const errorMsg = 'Error message'
       const notificationsInstitution = [
