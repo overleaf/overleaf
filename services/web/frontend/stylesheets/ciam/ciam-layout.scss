@@ -22,6 +22,9 @@
 }
 
 .ciam-layout {
+  // Allow room for the cookie banner
+  padding-bottom: var(--ds-spacing-2400);
+
   @include ciam-vertically-spaced;
 
   @include media-breakpoint-up(sm) {
@@ -42,9 +45,6 @@
   }
 
   footer {
-    // Allow room for the cookie banner
-    padding-bottom: 100px;
-
     .footer-links {
       display: flex;
       gap: var(--ds-spacing-600);
@@ -143,10 +143,6 @@
     color: var(--ds-color-text-secondary);
     margin-bottom: 0;
     text-align: center;
-
-    @include media-breakpoint-up(sm) {
-      text-align: start;
-    }
   }
 }
 
