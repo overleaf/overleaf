@@ -196,7 +196,46 @@ module.exports = class FSPersistor extends AbstractPersistor {
 
   async listDirectoryKeys(location, name) {
     const fsPath = this._getFsPath(location, name)
-    return await this._listDirectory(fsPath)
+    const paths = await this._listDirectory(fsPath)
+
+    // Filter to only return files, not directories
+    const files = []
+    for (const path of paths) {
+      try {
+        const stat = await fsPromises.stat(path)
+        if (stat.isFile()) {
+          files.push(path)
+        }
+      } catch (err) {
+        // ignore files that may have just been deleted
+        if (err.code !== 'ENOENT') {
+          throw err
+        }
+      }
+    }
+    return files
+  }
+
+  async listDirectoryStats(location, name) {
+    const fsPath = this._getFsPath(location, name)
+    const paths = await this._listDirectory(fsPath)
+
+    // Filter to only return files, not directories, with their sizes
+    const stats = []
+    for (const path of paths) {
+      try {
+        const stat = await fsPromises.stat(path)
+        if (stat.isFile()) {
+          stats.push({ key: path, size: stat.size })
+        }
+      } catch (err) {
+        // ignore files that may have just been deleted
+        if (err.code !== 'ENOENT') {
+          throw err
+        }
+      }
+    }
+    return stats
   }
 
   async checkIfObjectExists(location, name) {

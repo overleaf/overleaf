@@ -417,10 +417,20 @@ class CachedPerProjectEncryptedS3Persistor {
    *
    * @param {string} bucketName
    * @param {string} path
-   * @return {Promise<ListDirectoryResult>}
+   * @return {Promise<string[]>}
    */
-  async listDirectory(bucketName, path) {
-    return await this.#parent.listDirectory(bucketName, path)
+  async listDirectoryKeys(bucketName, path) {
+    return await this.#parent.listDirectoryKeys(bucketName, path)
+  }
+
+  /**
+   *
+   * @param {string} bucketName
+   * @param {string} path
+   * @return {Promise<Array<{key: string, size: number}>>}
+   */
+  async listDirectoryStats(bucketName, path) {
+    return await this.#parent.listDirectoryStats(bucketName, path)
   }
 
   /**

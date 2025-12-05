@@ -400,6 +400,56 @@ describe('FSPersistorTests', function () {
           ).to.equal(0)
         })
       })
+
+      describe('listDirectoryKeys', function () {
+        beforeEach(async function () {
+          for (const file of Object.values(files)) {
+            await persistor.sendFile(location, file, '/uploads/info.txt')
+          }
+        })
+
+        it('should list directory keys', async function () {
+          const keys = await persistor.listDirectoryKeys(location, 'animals')
+          expect(keys).to.have.lengthOf(2)
+          expect(keys).to.include(scenario.fsPath(files.wombat))
+          expect(keys).to.include(scenario.fsPath(files.giraffe))
+        })
+
+        it('should return empty array for non-existing directories', async function () {
+          const keys = await persistor.listDirectoryKeys(
+            location,
+            'does-not-exist'
+          )
+          expect(keys).to.deep.equal([])
+        })
+      })
+
+      describe('listDirectoryStats', function () {
+        beforeEach(async function () {
+          for (const file of Object.values(files)) {
+            await persistor.sendFile(location, file, '/uploads/info.txt')
+          }
+        })
+
+        it('should list directory stats', async function () {
+          const stats = await persistor.listDirectoryStats(location, 'animals')
+          expect(stats).to.have.lengthOf(2)
+          const keys = stats.map(s => s.key)
+          expect(keys).to.include(scenario.fsPath(files.wombat))
+          expect(keys).to.include(scenario.fsPath(files.giraffe))
+          for (const stat of stats) {
+            expect(stat.size).to.equal(localFiles['/uploads/info.txt'].length)
+          }
+        })
+
+        it('should return empty array for non-existing directories', async function () {
+          const stats = await persistor.listDirectoryStats(
+            location,
+            'does-not-exist'
+          )
+          expect(stats).to.deep.equal([])
+        })
+      })
     })
   }
 })

@@ -322,6 +322,17 @@ module.exports = class GcsPersistor extends AbstractPersistor {
     return files.map(file => file.name)
   }
 
+  async listDirectoryStats(bucketName, prefix) {
+    const files = await this.#listDirectory(
+      bucketName,
+      ensurePrefixIsDirectory(prefix)
+    )
+    return files.map(file => ({
+      key: file.name,
+      size: parseInt(file.metadata.size, 10),
+    }))
+  }
+
   async checkIfObjectExists(bucketName, key) {
     try {
       const [response] = await this.storage

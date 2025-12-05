@@ -400,28 +400,22 @@ export async function archiveLatestChunk(
  * @return {Promise<void>}
  */
 async function addRawBlobsToArchive(historyId, archive, projectCache) {
-  const key = projectKey.format(historyId)
-  const { contents } = await projectCache.listDirectory(projectBlobsBucket, key)
-  for (const blobRecord of contents) {
-    if (!blobRecord.Key) {
-      logger.debug({ blobRecord }, 'no key')
-      continue
-    }
-    const blobKey = blobRecord.Key
+  const blobKeys = await projectCache.listDirectoryKeys(
+    projectBlobsBucket,
+    projectKey.format(historyId)
+  )
+  for (const key of blobKeys) {
     try {
       const stream = await projectCache.getObjectStream(
         projectBlobsBucket,
-        blobKey,
+        key,
         { autoGunzip: true }
       )
       archive.append(stream, {
-        name: path.join(historyId, 'blobs', blobKey),
+        name: path.join(historyId, 'blobs', key),
       })
     } catch (err) {
-      logger.warn(
-        { err, path: blobRecord.Key },
-        'Failed to append blob to archive'
-      )
+      logger.warn({ err, path: key }, 'Failed to append blob to archive')
     }
   }
 }
@@ -445,24 +439,20 @@ export async function archiveRawProject(
 ) {
   const projectCache = await getProjectPersistor(historyId)
 
-  const { contents: chunks } = await projectCache.listDirectory(
+  const chunkKeys = await projectCache.listDirectoryKeys(
     chunksBucket,
     projectKey.format(historyId)
   )
 
-  if (chunks.length === 0) {
+  if (chunkKeys.length === 0) {
     throw new Error('No chunks found')
   }
 
-  for (const chunkRecord of chunks) {
-    if (!chunkRecord.Key) {
-      logger.debug({ chunkRecord }, 'no key')
-      continue
-    }
-    const chunkId = chunkRecord.Key.split('/').pop()
-    logger.debug({ chunkId, key: chunkRecord.Key }, 'Processing chunk')
+  for (const key of chunkKeys) {
+    const chunkId = key.split('/').pop()
+    logger.debug({ chunkId, key }, 'Processing chunk')
 
-    const { buffer } = await loadChunkByKey(projectCache, chunkRecord.Key)
+    const { buffer } = await loadChunkByKey(projectCache, key)
 
     archive.append(buffer, {
       name: `${historyId}/chunks/${chunkId}/chunk.json`,

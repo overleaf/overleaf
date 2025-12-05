@@ -177,4 +177,21 @@ module.exports = class AbstractPersistor {
       prefix,
     })
   }
+
+  /**
+   * List objects in a directory, returning key and size information.
+   *
+   * Suitable only for directories where the number of keys is known to be small.
+   *
+   * @param {string} location
+   * @param {string} prefix
+   * @returns {Promise<Array<{key: string, size: number}>>}
+   */
+  async listDirectoryStats(location, prefix) {
+    throw new NotImplementedError('method not implemented in persistor', {
+      method: 'listDirectoryStats',
+      location,
+      prefix,
+    })
+  }
 }

@@ -723,4 +723,127 @@ describe('GcsPersistorTests', function () {
       })
     })
   })
+
+  describe('listDirectoryKeys', function () {
+    describe('with valid parameters', function () {
+      let keys
+
+      beforeEach(async function () {
+        const filesWithNames = files.map((file, i) => ({
+          ...file,
+          name: i === 0 ? 'llama' : 'hippo',
+        }))
+        GcsBucket.getFiles.resolves([filesWithNames])
+        keys = await GcsPersistor.listDirectoryKeys(bucket, key)
+      })
+
+      it('should list the objects in the directory', function () {
+        expect(Storage.prototype.bucket).to.have.been.calledWith(bucket)
+        expect(GcsBucket.getFiles).to.have.been.calledWith({
+          prefix: `${key}/`,
+        })
+      })
+
+      it('should return the keys', function () {
+        expect(keys).to.deep.equal(['llama', 'hippo'])
+      })
+    })
+
+    describe('when there are no files', function () {
+      let keys
+
+      beforeEach(async function () {
+        GcsBucket.getFiles.resolves([[]])
+        keys = await GcsPersistor.listDirectoryKeys(bucket, key)
+      })
+
+      it('should return an empty array', function () {
+        expect(keys).to.deep.equal([])
+      })
+    })
+
+    describe('when there is an error listing the objects', function () {
+      let error
+
+      beforeEach(async function () {
+        GcsBucket.getFiles.rejects(genericError)
+        try {
+          await GcsPersistor.listDirectoryKeys(bucket, key)
+        } catch (err) {
+          error = err
+        }
+      })
+
+      it('should generate a ReadError', function () {
+        expect(error).to.be.an.instanceOf(Errors.ReadError)
+      })
+
+      it('should wrap the error', function () {
+        expect(error.cause).to.equal(genericError)
+      })
+    })
+  })
+
+  describe('listDirectoryStats', function () {
+    describe('with valid parameters', function () {
+      let stats
+
+      beforeEach(async function () {
+        const filesWithNames = files.map((file, i) => ({
+          ...file,
+          name: i === 0 ? 'llama' : 'hippo',
+        }))
+        GcsBucket.getFiles.resolves([filesWithNames])
+        stats = await GcsPersistor.listDirectoryStats(bucket, key)
+      })
+
+      it('should list the objects in the directory', function () {
+        expect(Storage.prototype.bucket).to.have.been.calledWith(bucket)
+        expect(GcsBucket.getFiles).to.have.been.calledWith({
+          prefix: `${key}/`,
+        })
+      })
+
+      it('should return the stats', function () {
+        expect(stats).to.deep.equal([
+          { key: 'llama', size: 11 },
+          { key: 'hippo', size: 22 },
+        ])
+      })
+    })
+
+    describe('when there are no files', function () {
+      let stats
+
+      beforeEach(async function () {
+        GcsBucket.getFiles.resolves([[]])
+        stats = await GcsPersistor.listDirectoryStats(bucket, key)
+      })
+
+      it('should return an empty array', function () {
+        expect(stats).to.deep.equal([])
+      })
+    })
+
+    describe('when there is an error listing the objects', function () {
+      let error
+
+      beforeEach(async function () {
+        GcsBucket.getFiles.rejects(genericError)
+        try {
+          await GcsPersistor.listDirectoryStats(bucket, key)
+        } catch (err) {
+          error = err
+        }
+      })
+
+      it('should generate a ReadError', function () {
+        expect(error).to.be.an.instanceOf(Errors.ReadError)
+      })
+
+      it('should wrap the error', function () {
+        expect(error.cause).to.equal(genericError)
+      })
+    })
+  })
 })

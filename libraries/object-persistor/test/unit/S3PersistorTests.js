@@ -1046,4 +1046,215 @@ describe('S3PersistorTests', function () {
       })
     })
   })
+
+  describe('listDirectoryKeys', function () {
+    describe('with valid parameters', function () {
+      let keys
+
+      beforeEach(async function () {
+        S3.mockSend(S3.ListObjectsV2Command, {
+          Contents: files.map(file => ({ Key: file.Key })),
+          IsTruncated: false,
+        })
+        keys = await S3Persistor.listDirectoryKeys(bucket, key)
+      })
+
+      it('should list the objects in the directory', function () {
+        S3.assertSendCalledWith(S3.ListObjectsV2Command, {
+          Bucket: bucket,
+          Prefix: key,
+        })
+      })
+
+      it('should return the keys', function () {
+        expect(keys).to.deep.equal(['llama', 'hippo'])
+      })
+    })
+
+    describe('when there are no files', function () {
+      let keys
+
+      beforeEach(async function () {
+        S3.mockSend(S3.ListObjectsV2Command, {
+          Contents: [],
+          IsTruncated: false,
+        })
+        keys = await S3Persistor.listDirectoryKeys(bucket, key)
+      })
+
+      it('should return an empty array', function () {
+        expect(keys).to.deep.equal([])
+      })
+    })
+
+    describe('when there are more files available', function () {
+      const continuationToken = 'wombat'
+      let keys
+
+      beforeEach(async function () {
+        S3.mockSend(
+          S3.ListObjectsV2Command,
+          {
+            Contents: [files[0]].map(file => ({ Key: file.Key })),
+            IsTruncated: true,
+            NextContinuationToken: continuationToken,
+          },
+          {
+            nextResponses: [
+              {
+                Contents: [files[1]].map(file => ({ Key: file.Key })),
+                IsTruncated: false,
+              },
+            ],
+          }
+        )
+        keys = await S3Persistor.listDirectoryKeys(bucket, key)
+      })
+
+      it('should list the objects in multiple calls', function () {
+        S3.assertSendCallCount(S3.ListObjectsV2Command, 2)
+        expect(S3.s3ClientStub.send.firstCall.args[0].payload).to.deep.equal({
+          Bucket: bucket,
+          Prefix: key,
+        })
+        expect(S3.s3ClientStub.send.secondCall.args[0].payload).to.deep.equal({
+          Bucket: bucket,
+          Prefix: key,
+          ContinuationToken: continuationToken,
+        })
+      })
+
+      it('should return all keys', function () {
+        expect(keys).to.deep.equal(['llama', 'hippo'])
+      })
+    })
+
+    describe('when there is an error listing the objects', function () {
+      let error
+
+      beforeEach(async function () {
+        S3.mockSend(S3.ListObjectsV2Command, genericError, { rejects: true })
+        try {
+          await S3Persistor.listDirectoryKeys(bucket, key)
+        } catch (err) {
+          error = err
+        }
+      })
+
+      it('should generate a ReadError', function () {
+        expect(error).to.be.an.instanceOf(Errors.ReadError)
+      })
+
+      it('should wrap the error', function () {
+        expect(error.cause).to.exist
+      })
+    })
+  })
+
+  describe('listDirectoryStats', function () {
+    describe('with valid parameters', function () {
+      let stats
+
+      beforeEach(async function () {
+        S3.mockSend(S3.ListObjectsV2Command, {
+          Contents: files.map(file => ({ Key: file.Key, Size: file.Size })),
+          IsTruncated: false,
+        })
+        stats = await S3Persistor.listDirectoryStats(bucket, key)
+      })
+
+      it('should list the objects in the directory', function () {
+        S3.assertSendCalledWith(S3.ListObjectsV2Command, {
+          Bucket: bucket,
+          Prefix: key,
+        })
+      })
+
+      it('should return the stats', function () {
+        expect(stats).to.deep.equal([
+          { key: 'llama', size: 11 },
+          { key: 'hippo', size: 22 },
+        ])
+      })
+    })
+
+    describe('when there are no files', function () {
+      let stats
+
+      beforeEach(async function () {
+        S3.mockSend(S3.ListObjectsV2Command, {
+          Contents: [],
+          IsTruncated: false,
+        })
+        stats = await S3Persistor.listDirectoryStats(bucket, key)
+      })
+
+      it('should return an empty array', function () {
+        expect(stats).to.deep.equal([])
+      })
+    })
+
+    describe('when there are more files available', function () {
+      const continuationToken = 'wombat'
+      let stats
+
+      beforeEach(async function () {
+        S3.mockSend(
+          S3.ListObjectsV2Command,
+          {
+            Contents: [files[0]].map(file => ({
+              Key: file.Key,
+              Size: file.Size,
+            })),
+            IsTruncated: true,
+            NextContinuationToken: continuationToken,
+          },
+          {
+            nextResponses: [
+              {
+                Contents: [files[1]].map(file => ({
+                  Key: file.Key,
+                  Size: file.Size,
+                })),
+                IsTruncated: false,
+              },
+            ],
+          }
+        )
+        stats = await S3Persistor.listDirectoryStats(bucket, key)
+      })
+
+      it('should list the objects in multiple calls', function () {
+        S3.assertSendCallCount(S3.ListObjectsV2Command, 2)
+      })
+
+      it('should return all stats', function () {
+        expect(stats).to.deep.equal([
+          { key: 'llama', size: 11 },
+          { key: 'hippo', size: 22 },
+        ])
+      })
+    })
+
+    describe('when there is an error listing the objects', function () {
+      let error
+
+      beforeEach(async function () {
+        S3.mockSend(S3.ListObjectsV2Command, genericError, { rejects: true })
+        try {
+          await S3Persistor.listDirectoryStats(bucket, key)
+        } catch (err) {
+          error = err
+        }
+      })
+
+      it('should generate a ReadError', function () {
+        expect(error).to.be.an.instanceOf(Errors.ReadError)
+      })
+
+      it('should wrap the error', function () {
+        expect(error.cause).to.exist
+      })
+    })
+  })
 })

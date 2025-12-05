@@ -266,7 +266,7 @@ class S3Persistor extends AbstractPersistor {
    * @return {Promise<void>}
    */
   async deleteDirectory(bucketName, key, continuationToken) {
-    const { contents, response } = await this.listDirectory(
+    const { contents, response } = await this.#listDirectory(
       bucketName,
       key,
       continuationToken
@@ -309,7 +309,7 @@ class S3Persistor extends AbstractPersistor {
    * @param {string} [continuationToken]
    * @return {Promise<ListDirectoryResult>}
    */
-  async listDirectory(bucketName, key, continuationToken) {
+  async #listDirectory(bucketName, key, continuationToken) {
     let response
     const options = { Bucket: bucketName, Prefix: key }
     if (continuationToken) {
@@ -533,6 +533,59 @@ class S3Persistor extends AbstractPersistor {
         ReadError
       )
     }
+  }
+
+  /**
+   * @param {string} bucketName
+   * @param {string} prefix
+   * @return {Promise<Array<string>>}
+   */
+  async listDirectoryKeys(bucketName, prefix) {
+    const keys = []
+    let continuationToken
+
+    do {
+      const { contents, response } = await this.#listDirectory(
+        bucketName,
+        prefix,
+        continuationToken
+      )
+      keys.push(...contents.map(item => item.Key || ''))
+      continuationToken = response.IsTruncated
+        ? response.NextContinuationToken
+        : undefined
+    } while (continuationToken)
+
+    return keys
+  }
+
+  /**
+   * @param {string} bucketName
+   * @param {string} prefix
+   * @return {Promise<Array<{key: string, size: number}>>}
+   */
+  async listDirectoryStats(bucketName, prefix) {
+    const stats = []
+    let continuationToken
+
+    do {
+      const { contents, response } = await this.#listDirectory(
+        bucketName,
+        prefix,
+        continuationToken
+      )
+      stats.push(
+        ...contents.map(item => ({
+          key: item.Key || '',
+          size: item.Size ?? -1,
+        }))
+      )
+      continuationToken = response.IsTruncated
+        ? response.NextContinuationToken
+        : undefined
+    } while (continuationToken)
+
+    return stats
   }
 
   /**
