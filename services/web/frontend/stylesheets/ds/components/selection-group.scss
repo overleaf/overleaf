@@ -1,0 +1,40 @@
+.selection-group-ds {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-spacing-400);
+}
+
+.selection-group-ds-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-spacing-200);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.selection-group-ds-item label {
+  display: flex;
+  gap: var(--ds-spacing-200);
+  padding: var(--ds-spacing-250);
+  border: 1px solid var(--ds-color-neutral-300);
+  border-radius: var(--ds-border-radius-200);
+  cursor: pointer;
+
+  &:has(input:checked) {
+    border-color: var(--ds-color-neutral-950);
+    background-color: var(--ds-color-neutral-50);
+  }
+
+  &:has(input:focus-visible, textarea:focus-visible) {
+    @include ds-focus-outline;
+
+    border-radius: var(--ds-border-radius-100);
+
+    .form-check-ds,
+    input:focus-visible,
+    textarea:focus-visible {
+      outline: none;
+    }
+  }
+}

@@ -17,16 +17,31 @@ const CiamLayout: FC<Props> = ({ children }: Props) => (
         <section className="ciam-card-footer">
           <hr className="ciam-card-separator" />
           <div className="ciam-footer-ds-logo">
-            <img src={dsLogo} alt="Digital Science — home" />
+            <a
+              href="https://www.digital-science.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ciam-image-link"
+            >
+              <img src={dsLogo} alt="Digital Science — home" />
+            </a>
           </div>
           <p>
             <Trans
               i18nKey="advancing_research_with"
               components={[
                 // eslint-disable-next-line jsx-a11y/anchor-has-content,react/jsx-key
-                <a href="https://www.overleaf.com" />,
+                <a
+                  href="https://www.overleaf.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />,
                 // eslint-disable-next-line jsx-a11y/anchor-has-content,react/jsx-key
-                <a href="https://www.papersapp.com/" />,
+                <a
+                  href="https://www.papersapp.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />,
               ]}
             />
           </p>

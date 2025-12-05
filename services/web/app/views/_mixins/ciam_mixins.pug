@@ -1,0 +1,91 @@
+include terms_of_service
+include recaptcha
+include ../../../modules/saas-authentication/app/views/_mixins
+
+mixin ciamLogo
+	header.ciam-logo
+		a.brand.overleaf-ds-logo.ciam-image-link(href='/')
+			span.visually-hidden Overleaf
+
+mixin ciamCardSeparator
+	hr.ciam-card-separator
+
+mixin ciamCardFooter
+	section.ciam-card-footer
+		+ciamCardSeparator
+		.ciam-footer-ds-logo
+			a.ciam-image-link(
+				href='https://www.digital-science.com/'
+				target='_blank'
+				rel='noopener noreferrer'
+			)
+				img(
+					src=buildImgPath('digital-science/digital-science.svg')
+					alt='Digital Science — home'
+				)
+		p
+			| !{translate('advancing_research_with', null, [{ name: 'a', attrs: { href: 'https://www.overleaf.com/', target: '_blank', rel: 'noopener noreferrer' }}, { name: 'a', attrs: { href: 'https://www.papersapp.com/', target: '_blank', rel: 'noopener noreferrer' }}])}
+
+mixin ciamTermsOfServiceAgreement
+	p
+		+termsOfServiceAgreementContent
+
+mixin ciamRecaptchaConditions
+	p
+		+recaptchaConditionsContent
+
+mixin ciamCustomFormDangerMessage(key)
+	div(
+		class='notification ciam-notification notification-type-error'
+		hidden
+		data-ol-custom-form-message=key
+		role='alert'
+		aria-live='polite'
+	)
+		.notification-icon
+			ph-warning-circle(aria-hidden='true')
+		.notification-content.text-left
+			block
+
+mixin ciamSamlErrorNotLoggedIn(error)
+	+samlErrorNotLoggedIn(error)
+		ph-warning-circle(aria-hidden='true')
+
+mixin ciamFooter
+	footer
+		.footer-links
+			a(href='https://www.overleaf.com/legal#Privacy') Privacy
+			a(href='https://www.overleaf.com/legal#Terms') Terms
+
+mixin ciamErrorNotification
+	.notification.notification-ds.notification-type-error(
+		role='alert'
+		aria-live='polite'
+	)
+		.notification-icon
+			ph-warning-circle(aria-hidden='true')
+		.notification-content-and-cta
+			.notification-content
+				block
+
+mixin ciamInfoNotification
+	.notification.notification-ds.notification-type-info(
+		role='alert'
+		aria-live='polite'
+	)
+		.notification-icon
+			ph-info(aria-hidden='true')
+		.notification-content-and-cta
+			.notification-content
+				block
+
+mixin ciamOrDivider
+	p.ciam-login-register-or-text-container= translate('login_register_or').toUpperCase()
+
+mixin ciamButtonContentLoading(loadingLabel)
+	span.button-content
+		span(data-ol-inflight='idle')
+			block
+		span.spinner-container(hidden data-ol-inflight='pending')
+			.loading-spinner-large.spinner-border.spinner-border-sm(aria-hidden='true')
+				span.visually-hidden= loadingLabel

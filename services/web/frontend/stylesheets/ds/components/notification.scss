@@ -1,0 +1,30 @@
+@use 'sass:math';
+
+.notification.notification-ds {
+  @include ds-body-sm-regular;
+
+  color: var(--ds-color-text-primary);
+  padding: 0 var(--ds-spacing-400);
+  border-width: 0;
+  border-radius: var(--ds-border-radius-200);
+  gap: var(--ds-spacing-300);
+
+  .notification-icon {
+    font-size: math.div(20em, 14);
+    display: flex;
+    align-items: center;
+    padding: var(--ds-spacing-50);
+  }
+
+  .notification-content {
+    padding: var(--ds-spacing-400) 0;
+  }
+
+  &.notification-type-error {
+    background-color: var(--ds-color-red-50);
+  }
+
+  &.notification-type-info {
+    background-color: var(--ds-color-blue-50);
+  }
+}

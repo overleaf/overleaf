@@ -1,0 +1,31 @@
+@import 'ds-design-system';
+
+.btn.btn-ds.ciam-onboarding-back-button {
+  --bs-btn-padding-x: 0;
+  --bs-btn-hover-bg: transparent;
+}
+
+.ciam-onboarding-email-updates p {
+  margin: 0;
+}
+
+.ciam-onboarding-privacy-note {
+  @include ds-body-sm-regular;
+
+  color: var(--ds-color-text-secondary);
+  padding-top: var(--ds-spacing-250);
+}
+
+.ciam-onboarding-step {
+  @include ciam-vertically-spaced;
+
+  padding-bottom: var(--ds-spacing-400);
+
+  legend {
+    @include ciam-h1;
+  }
+}
+
+.ciam-used-latex-options {
+  padding-bottom: var(--ds-spacing-200);
+}

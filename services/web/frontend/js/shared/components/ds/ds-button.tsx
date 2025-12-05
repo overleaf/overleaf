@@ -6,6 +6,7 @@ import classNames from 'classnames'
 type DSButtonProps = Pick<
   ButtonProps,
   | 'children'
+  | 'className'
   | 'disabled'
   | 'href'
   | 'id'
@@ -32,6 +33,7 @@ const DSButton = forwardRef<HTMLButtonElement, DSButtonProps>(
   (
     {
       children,
+      className,
       leadingIcon,
       isLoading = false,
       loadingLabel,
@@ -44,7 +46,7 @@ const DSButton = forwardRef<HTMLButtonElement, DSButtonProps>(
   ) => {
     const { t } = useTranslation()
 
-    const buttonClassName = classNames('d-inline-grid btn-ds', {
+    const buttonClassName = classNames('d-inline-grid btn-ds', className, {
       'button-loading': isLoading,
     })
 

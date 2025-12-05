@@ -1,0 +1,13 @@
+@import 'ds-design-system';
+
+.ciam-try-premium-logo-container {
+  display: flex;
+  justify-content: center;
+  gap: var(--ds-spacing-600);
+  padding: var(--ds-spacing-200) 0 var(--ds-spacing-500) 0;
+}
+
+.ciam-try-premium-third-party-logo {
+  width: 36px;
+  height: 36px;
+}

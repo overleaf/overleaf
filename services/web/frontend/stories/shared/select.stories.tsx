@@ -1,4 +1,10 @@
-import { Select } from '../../js/shared/components/select'
+import { Select } from '@/shared/components/select'
+import { Meta } from '@storybook/react'
+
+type Args = Pick<
+  React.ComponentProps<typeof Select>,
+  'disabled' | 'defaultText' | 'isCiam'
+>
 
 const items = [1, 2, 3, 4].map(index => ({
   key: index,
@@ -6,9 +12,10 @@ const items = [1, 2, 3, 4].map(index => ({
   group: index >= 3 ? 'Large numbers' : undefined,
 }))
 
-export const Base = () => {
+export const Base = (args: Args) => {
   return (
     <Select
+      {...args}
       items={items}
       itemToString={x => String(x?.value)}
       itemToKey={x => String(x.key)}
@@ -16,9 +23,10 @@ export const Base = () => {
   )
 }
 
-export const WithSubtitles = () => {
+export const WithSubtitles = (args: Args) => {
   return (
     <Select
+      {...args}
       items={items}
       itemToString={x => String(x?.value)}
       itemToKey={x => String(x.key)}
@@ -27,9 +35,10 @@ export const WithSubtitles = () => {
   )
 }
 
-export const WithSelectedIcon = () => {
+export const WithSelectedIcon = (args: Args) => {
   return (
     <Select
+      {...args}
       items={items}
       itemToString={x => String(x?.value)}
       itemToKey={x => String(x.key)}
@@ -39,9 +48,10 @@ export const WithSelectedIcon = () => {
   )
 }
 
-export const WithDisabledItem = () => {
+export const WithDisabledItem = (args: Args) => {
   return (
     <Select
+      {...args}
       items={items}
       itemToString={x => String(x?.value)}
       itemToKey={x => String(x.key)}
@@ -51,16 +61,19 @@ export const WithDisabledItem = () => {
   )
 }
 
-export default {
+const meta: Meta<typeof Select> = {
   title: 'Shared / Components / Select',
   component: Select,
   parameters: {
     controls: {
-      include: ['disabled', 'defaultText'],
+      include: ['disabled', 'defaultText', 'isCiam'],
     },
   },
   args: {
     disabled: false,
+    isCiam: false,
     defaultText: 'Choose an item',
   },
 }
+
+export default meta

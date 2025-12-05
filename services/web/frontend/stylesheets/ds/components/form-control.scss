@@ -1,6 +1,10 @@
 @use 'sass:math';
 @import '../mixins';
 
+:root {
+  --ds-form-check-input-size: 1em;
+}
+
 .form-control-ds,
 .form-group-ds,
 .form-text-ds,
@@ -43,9 +47,15 @@ input.form-control.form-control-ds {
   &:read-only {
     background: var(--ds-color-neutral-200);
     color: var(--ds-color-text-secondary);
+
+    &.select-trigger {
+      background: transparent;
+      color: var(--ds-color-neutral-950);
+    }
   }
 
-  &:disabled {
+  &:disabled,
+  &:disabled.select-trigger {
     color: var(--ds-color-text-disabled);
     background: var(--ds-color-neutral-100);
   }
@@ -111,6 +121,188 @@ input.form-control.form-control-ds {
   position: relative;
 }
 
-.ciam-form-input-icon {
+.form-input-icon-ds {
   font-size: var(--ds-font-size-600);
+}
+
+.form-control-wrapper-ds {
+  position: relative;
+
+  &.form-control-wrapper-disabled-ds {
+    .form-control-start-icon,
+    .form-control-end-icon {
+      & > * {
+        color: var(--ds-color-text-disabled);
+      }
+    }
+  }
+
+  .form-control-start-icon-ds,
+  .form-control-end-icon-ds {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+
+    &:has(*) {
+      pointer-events: none;
+    }
+  }
+
+  .form-control-start-icon-ds {
+    left: 0;
+    padding-left: calc(var(--form-control-padding-x) + var(--bs-border-width));
+  }
+
+  .form-control-end-icon-ds {
+    right: 0;
+    padding-right: calc(var(--form-control-padding-x) + var(--bs-border-width));
+
+    .form-control-search-clear-btn {
+      @include reset-button;
+
+      display: flex;
+      justify-content: center;
+    }
+  }
+
+  --icon-width: 20px;
+  --form-control-padding-x: var(--ds-spacing-250);
+  --form-control-icon-offset-y: var(--ds-spacing-200);
+  --form-control-icon-padding: calc(
+    var(--form-control-padding-x) + var(--form-control-icon-offset-y) +
+      var(--icon-width)
+  );
+
+  .form-control-ds.form-control-offset-start-ds {
+    padding-left: var(--form-control-icon-padding);
+  }
+
+  .form-control-ds.form-control-offset-end-ds {
+    padding-right: var(--form-control-icon-padding);
+  }
+
+  &:has(:disabled) {
+    color: var(--ds-color-text-disabled);
+  }
+}
+
+.form-check-ds input.form-check-input,
+input.check-input-ds {
+  @function form-check-svg($type, $color) {
+    @if $type == 'checkbox' {
+      @return url("data:image/svg+xml,<svg width='8' height='8' viewBox='0 0 8 8' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M1 4.60011L3 7.00011L7 1.00011' fill='none' stroke='#{$color}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    }
+
+    @if $type == 'radio' {
+      @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'><circle r='4' cx='4' cy='4' fill='#{$color}'/></svg>");
+    }
+  }
+
+  border-style: solid;
+  border-width: 1px;
+
+  &,
+  &:hover {
+    border-color: var(--ds-color-neutral-900);
+  }
+
+  &:checked {
+    &,
+    &:hover {
+      background-color: var(--ds-color-neutral-950);
+      border-color: var(--ds-color-neutral-950);
+    }
+  }
+
+  &:disabled {
+    background-color: var(--ds-color-neutral-200);
+    border-color: var(--ds-color-neutral-200);
+  }
+
+  &:focus-visible {
+    @include ds-focus-outline;
+  }
+
+  @mixin input-type-override($type) {
+    width: var(--ds-form-check-input-size);
+    height: var(--ds-form-check-input-size);
+
+    &:checked {
+      background-size: 8px;
+      background-image: escape-svg(form-check-svg($type, '#fff'));
+    }
+
+    &[disabled],
+    &:disabled {
+      &:checked {
+        background-image: escape-svg(
+          form-check-svg($type, $ds-color-neutral-400)
+        );
+      }
+    }
+  }
+
+  &[type='checkbox'] {
+    @include input-type-override('checkbox');
+
+    border-radius: var(--ds-border-radius-100);
+  }
+
+  &[type='radio'] {
+    @include input-type-override('radio');
+
+    border-radius: 50%;
+  }
+}
+
+input.check-input-ds {
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  margin: var(--ds-spacing-100);
+
+  &[type='radio'] {
+    border-radius: 50%;
+  }
+}
+
+.form-check-ds {
+  --ds-form-check-input-margin: var(--ds-spacing-100);
+  --ds-form-check-label-gap: var(--ds-spacing-200);
+  --ds-form-check-box-size: 1em;
+
+  padding-left: calc(
+    var(--ds-form-check-box-size) + 2 * var(--ds-form-check-input-margin) +
+      var(--ds-form-check-label-gap)
+  );
+
+  &:has(.form-check-input:focus-visible) {
+    @include ds-focus-outline;
+
+    border-radius: var(--ds-border-radius-100);
+  }
+
+  .form-check-label {
+    @include ds-body-md-regular;
+  }
+
+  .form-check-input {
+    margin-left: calc(
+      -1 *
+        (
+          var(--ds-form-check-box-size) + var(--ds-form-check-input-margin) +
+            var(--ds-form-check-label-gap)
+        )
+    );
+    margin-top: var(--ds-form-check-input-margin);
+    margin-bottom: var(--ds-form-check-input-margin);
+
+    &:focus,
+    &:focus-visible {
+      box-shadow: none;
+    }
+  }
 }

@@ -12,10 +12,19 @@
   .confirm-email-success-form {
     display: flex;
     flex: 1 1 auto;
-    align-items: center;
     flex-direction: column;
     justify-content: center;
     text-align: center;
+    min-height: 400px;
+
+    p {
+      margin: 0;
+    }
+
+    .form-actions {
+      margin-top: var(--ds-spacing-600);
+      margin-bottom: var(--ds-spacing-400);
+    }
   }
 
   .confirm-email-form .confirm-email-form-inner {

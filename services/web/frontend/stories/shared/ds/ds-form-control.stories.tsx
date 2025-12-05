@@ -1,5 +1,5 @@
 import { Meta } from '@storybook/react'
-import { figmaDesignUrl } from '../../../.storybook/utils/figma-design-url'
+import { figmaDesignUrl } from '../../../../.storybook/utils/figma-design-url'
 import DSFormControl from '@/shared/components/ds/ds-form-control'
 import DSFormText from '@/shared/components/ds/ds-form-text'
 import DSFormGroup from '@/shared/components/ds/ds-form-group'
@@ -26,7 +26,7 @@ export const FormControl = ({ textType, value, ...args }: Args) => {
 }
 
 const meta: Meta<typeof FormControl> = {
-  title: 'Shared / DS Components',
+  title: 'Shared / DS Components / Form',
   component: FormControl,
   argTypes: {
     disabled: { control: 'boolean' },
