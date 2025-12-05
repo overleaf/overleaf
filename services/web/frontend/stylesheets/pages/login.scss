@@ -11,6 +11,10 @@
     @include heading-sm;
   }
 
+  .explanatory-ciam-notification .notification-content {
+    text-align: left;
+  }
+
   form {
     padding-top: var(--spacing-08);
 
