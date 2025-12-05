@@ -8,27 +8,20 @@ import {
   READ_PREFERENCE_SECONDARY,
 } from '../app/src/infrastructure/mongodb.mjs'
 
-/**
- * This script extracts user emails given a list of newline separated IDs
- *
- * Usage:
- *   - Locally:
- *     - docker compose exec web bash
- *     - node scripts/get_emails_by_ids.mjs
- *   - On the server:
- *     - rake run:pod[staging,web]
- *     - node scripts/get_emails_by_ids.mjs
- *     - exit
- *     - kubectl cp web-standalone-prod-XXXXX:/tmp/emails.txt ~/emails.txt
- */
-
 function usage() {
   console.log(
     `
-    User email extraction, outputs to /tmp/emails.txt
+    This script extracts user emails given a list of newline separated IDs, outputs to /tmp/emails.txt
 
     Usage:
-      node scripts/get_emails_by_ids.js [--inputPath=<path>] [--outputPath=<path>] [--batchSize=<number>]
+    - Locally:
+        docker compose exec web bash
+        node scripts/get_emails_by_ids.js [--inputPath=<path>] [--outputPath=<path>] [--batchSize=<number>]
+    - On the server:
+        rake run:pod[staging,web]
+        node scripts/get_emails_by_ids.js [--inputPath=<path>] [--outputPath=<path>] [--batchSize=<number>]
+        exit
+        kubectl cp web-standalone-prod-XXXXX:/tmp/emails.txt ~/emails.txt
 
     Options:
     --help                     Show this screen
@@ -38,9 +31,6 @@ function usage() {
     --outputPath=<path>        Output file path (default: /tmp/emails.txt)
 
     --batchSize=<number>       Number of emails to be fetched in one query
-
-    Description:
-    This script extracts user emails given a list of newline separated IDs
     `
   )
 }
