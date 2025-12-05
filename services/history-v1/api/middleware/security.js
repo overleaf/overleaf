@@ -11,8 +11,6 @@ const schemas = require('../schema')
 function hasValidBasicAuthCredentials(req) {
   const credentials = basicAuth(req)
   if (!credentials) return false
-
-  // No security in the name, so just use straight comparison.
   if (credentials.name !== 'staging') return false
 
   const password = config.get('basicHttpAuth.password')
@@ -50,53 +48,58 @@ function setupSSL(app) {
 
 exports.setupSSL = setupSSL
 
-function handleJWTAuth(req, res, next) {
-  if (hasValidBasicAuthCredentials(req)) {
-    return next()
-  }
+function configureJWTAuth(mode = 'jwt') {
+  return function handleJWTAuth(req, res, next) {
+    if (hasValidBasicAuthCredentials(req)) {
+      return next()
+    }
 
-  let token
-  if (req.query.token) {
-    token = req.query.token
-  } else if (
-    req.headers.authorization &&
-    req.headers.authorization.split(' ')[0] === 'Bearer'
-  ) {
-    token = req.headers.authorization.split(' ')[1]
-  }
-
-  if (!token) {
-    const err = new Error('jwt missing')
-    err.statusCode = HTTPStatus.UNAUTHORIZED
-    err.headers = { 'WWW-Authenticate': 'Bearer' }
-    return next(err)
-  }
-
-  let decoded
-  try {
-    decoded = decodeJWT(token)
-  } catch (error) {
-    if (
-      error instanceof jwt.JsonWebTokenError ||
-      error instanceof jwt.TokenExpiredError
+    let token
+    if ((mode === 'either' || mode === 'token') && req.query.token) {
+      token = req.query.token
+    } else if (
+      (mode === 'either' || mode === 'jwt') &&
+      req.headers.authorization &&
+      req.headers.authorization.split(' ')[0] === 'Bearer'
     ) {
-      const err = new Error(error.message)
+      token = req.headers.authorization.split(' ')[1]
+    }
+
+    if (!token) {
+      const err = new Error('jwt missing')
       err.statusCode = HTTPStatus.UNAUTHORIZED
-      err.headers = { 'WWW-Authenticate': 'Bearer error="invalid_token"' }
+      err.headers = { 'WWW-Authenticate': 'Bearer' }
       return next(err)
     }
-    throw error
-  }
 
-  const { params } = validateReq(req, schemas.projectId)
-  if (decoded.project_id.toString() !== params.project_id.toString()) {
-    const err = new Error('Wrong project_id')
-    err.statusCode = HTTPStatus.FORBIDDEN
-    return next(err)
-  }
+    let decoded
+    try {
+      decoded = decodeJWT(token)
+    } catch (error) {
+      if (
+        error instanceof jwt.JsonWebTokenError ||
+        error instanceof jwt.TokenExpiredError
+      ) {
+        const err = new Error(error.message)
+        err.statusCode = HTTPStatus.UNAUTHORIZED
+        err.headers = {
+          'WWW-Authenticate': 'Bearer error="invalid_token"',
+        }
+        return next(err)
+      }
+      throw error
+    }
 
-  req.jwt = decoded
-  next()
+    const { params } = validateReq(req, schemas.projectId)
+    if (decoded.project_id.toString() !== params.project_id.toString()) {
+      const err = new Error('Wrong project_id')
+      err.statusCode = HTTPStatus.FORBIDDEN
+      return next(err)
+    }
+
+    req.jwt = decoded
+    next()
+  }
 }
 
 /**
@@ -134,11 +137,14 @@ function getAuthHandlers() {
   }
 
   const handlers = {}
-  handlers.jwt = handleJWTAuth
+  handlers.jwt = configureJWTAuth('jwt')
+  handlers.token = configureJWTAuth('token')
+  handlers.either = configureJWTAuth('either')
   handlers.basic = handleBasicAuth
-  handlers.token = handleJWTAuth
   return handlers
 }
 
 exports.hasValidBasicAuthCredentials = hasValidBasicAuthCredentials
+exports.configureJWTAuth = configureJWTAuth
+exports.handleBasicAuth = handleBasicAuth
 exports.getAuthHandlers = getAuthHandlers
