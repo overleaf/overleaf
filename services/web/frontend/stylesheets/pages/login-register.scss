@@ -36,7 +36,9 @@
   flex-direction: column;
 
   .form-group-password-input {
-    input.form-control {
+    input.form-control,
+    // needlessly specific selectors to override competing styles
+    input.form-control.form-control-ds.form-control-lg {
       padding-right: var(--password-visibility-toggle-width);
     }
   }

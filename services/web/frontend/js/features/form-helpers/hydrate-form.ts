@@ -304,6 +304,8 @@ function showMessagesNewStyle(
       el.hidden = true
     })
 
+  const isDsBranded = formEl.dataset.ciamForm !== undefined
+
   // Render messages
   messageBag.forEach(message => {
     const customErrorElements = message.key
@@ -322,6 +324,7 @@ function showMessagesNewStyle(
       messageElContainer.className = classNames('notification', {
         'notification-type-error': message.type === 'error',
         'notification-type-success': message.type !== 'error',
+        'notification-ds': isDsBranded,
       })
       const messageEl = document.createElement('div')
 
@@ -344,7 +347,6 @@ function showMessagesNewStyle(
       }
 
       // create the left icon
-      const isDsBranded = formEl.dataset.ciamForm !== undefined
       const messageIcon = document.createElement('div')
       messageIcon.className = 'notification-icon'
       if (

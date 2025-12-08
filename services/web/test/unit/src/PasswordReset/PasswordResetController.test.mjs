@@ -57,6 +57,11 @@ describe('PasswordResetController', function () {
         removeReconfirmFlag: sinon.stub().resolves(),
       },
     }
+    ctx.SplitTestHandler = {
+      promises: {
+        getAssignment: sinon.stub().resolves({ variant: 'default' }),
+      },
+    }
 
     vi.doMock('@overleaf/settings', () => ({
       default: ctx.settings,
@@ -104,6 +109,13 @@ describe('PasswordResetController', function () {
     vi.doMock('../../../../app/src/Features/User/UserUpdater', () => ({
       default: ctx.UserUpdater,
     }))
+
+    vi.doMock(
+      '../../../../app/src/Features/SplitTests/SplitTestHandler',
+      () => ({
+        default: ctx.SplitTestHandler,
+      })
+    )
 
     ctx.PasswordResetController = (await import(MODULE_PATH)).default
   })

@@ -9,6 +9,7 @@ import OError from '@overleaf/o-error'
 import EmailsHelper from '../Helpers/EmailHelper.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import { z, validateReq } from '../../infrastructure/Validation.mjs'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 
 const setNewUserPasswordSchema = z.object({
   body: z.object({
@@ -186,16 +187,20 @@ async function renderSetPasswordForm(req, res, next) {
         return res.redirect('/user/password/reset?error=token_expired')
       }
       req.session.resetToken = query.passwordResetToken
-      let emailQuery = ''
 
+      const params = new URLSearchParams()
       if (typeof query.email === 'string') {
         const email = EmailsHelper.parseEmail(query.email)
         if (email) {
-          emailQuery = `?email=${encodeURIComponent(email)}`
+          params.append('email', email)
         }
       }
-
-      return res.redirect('/user/password/set' + emailQuery)
+      if (req.query.uniaccessphase1) {
+        // Preserve uniaccessphase1 flag in the redirect so it can be tested
+        params.append('uniaccessphase1', req.query.uniaccessphase1)
+      }
+      const queryString = params.toString() ? `?${params.toString()}` : ''
+      return res.redirect('/user/password/set' + queryString)
     } catch (err) {
       if (err.name === 'ForbiddenError') {
         return next(err)
@@ -214,11 +219,22 @@ async function renderSetPasswordForm(req, res, next) {
   const passwordResetToken = req.session.resetToken
   delete req.session.resetToken
 
-  res.render('user/setPassword', {
-    title: 'set_password',
-    email,
-    passwordResetToken,
-  })
+  const ciamAssignment = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'uniaccessphase1'
+  )
+
+  res.render(
+    ciamAssignment.variant === 'enabled'
+      ? 'user/setPasswordCiam'
+      : 'user/setPassword',
+    {
+      title: 'set_password',
+      email,
+      passwordResetToken,
+    }
+  )
 }
 
 const renderRequestResetFormSchema = z.object({
@@ -235,10 +251,21 @@ async function renderRequestResetForm(req, res) {
     error = 'password_reset_token_expired'
   }
 
-  res.render('user/passwordReset', {
-    title: 'reset_password',
-    error,
-  })
+  const ciamAssignment = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'uniaccessphase1'
+  )
+
+  res.render(
+    ciamAssignment.variant === 'enabled'
+      ? 'user/passwordResetCiam'
+      : 'user/passwordReset',
+    {
+      title: 'reset_password',
+      error,
+    }
+  )
 }
 
 export default {

@@ -1,6 +1,5 @@
 include terms_of_service
 include recaptcha
-include ../../../modules/saas-authentication/app/views/_mixins
 
 mixin ciamLogo
 	header.ciam-logo
@@ -10,7 +9,7 @@ mixin ciamLogo
 mixin ciamCardSeparator
 	hr.ciam-card-separator
 
-mixin ciamCardFooter
+mixin ciamCardFooter(short)
 	section.ciam-card-footer
 		+ciamCardSeparator
 		.ciam-footer-ds-logo
@@ -24,7 +23,10 @@ mixin ciamCardFooter
 					alt='Digital Science — home'
 				)
 		p
-			| !{translate('advancing_research_with', null, [{ name: 'a', attrs: { href: 'https://www.overleaf.com/', target: '_blank', rel: 'noopener noreferrer' }}, { name: 'a', attrs: { href: 'https://www.papersapp.com/', target: '_blank', rel: 'noopener noreferrer' }}])}
+			if short
+				| !{translate('overleaf_is_a_ds_product')}
+			else
+				| !{translate('advancing_research_with', null, [{ name: 'a', attrs: { href: 'https://www.overleaf.com/', target: '_blank', rel: 'noopener noreferrer' }}, { name: 'a', attrs: { href: 'https://www.papersapp.com/', target: '_blank', rel: 'noopener noreferrer' }}])}
 
 mixin ciamTermsOfServiceAgreement
 	p
@@ -36,7 +38,7 @@ mixin ciamRecaptchaConditions
 
 mixin ciamCustomFormDangerMessage(key)
 	div(
-		class='notification ciam-notification notification-type-error'
+		class='notification notification-ds notification-type-error'
 		hidden
 		data-ol-custom-form-message=key
 		role='alert'
@@ -46,10 +48,6 @@ mixin ciamCustomFormDangerMessage(key)
 			ph-warning-circle(aria-hidden='true')
 		.notification-content.text-left
 			block
-
-mixin ciamSamlErrorNotLoggedIn(error)
-	+samlErrorNotLoggedIn(error)
-		ph-warning-circle(aria-hidden='true')
 
 mixin ciamFooter
 	footer
