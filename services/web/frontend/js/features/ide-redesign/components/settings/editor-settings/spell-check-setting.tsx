@@ -31,7 +31,7 @@ export default function SpellCheckSetting() {
       id="spellCheckLanguage"
       label={t('spellcheck_language')}
       options={[{ value: '', label: t('off') }]}
-      optgroup={optgroup}
+      optgroups={[optgroup]}
       onChange={setSpellCheckLanguage}
       value={supportsWebAssembly() ? spellCheckLanguage : ''}
       width="wide"

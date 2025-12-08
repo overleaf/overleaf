@@ -22,8 +22,8 @@ export type Optgroup<T extends PossibleValue = string> = {
 type SettingsMenuSelectProps<T extends PossibleValue = string> = {
   label: string
   name: string
-  options: Array<Option<T>>
-  optgroup?: Optgroup<T>
+  options?: Array<Option<T>>
+  optgroups?: Array<Optgroup<T>>
   loading?: boolean
   onChange: (val: T) => void
   value?: T
@@ -35,7 +35,7 @@ export default function SettingsMenuSelect<T extends PossibleValue = string>({
   label,
   name,
   options,
-  optgroup,
+  optgroups,
   loading,
   onChange,
   value,
@@ -92,7 +92,7 @@ export default function SettingsMenuSelect<T extends PossibleValue = string>({
           ref={selectRef}
           translate={translateOptions}
         >
-          {options.map(option => (
+          {options?.map(option => (
             <option
               key={`${name}-${option.value}`}
               value={option.value.toString()}
@@ -102,8 +102,8 @@ export default function SettingsMenuSelect<T extends PossibleValue = string>({
               {option.label}
             </option>
           ))}
-          {optgroup ? (
-            <optgroup label={optgroup.label}>
+          {optgroups?.map(optgroup => (
+            <optgroup label={optgroup.label} key={optgroup.label}>
               {optgroup.options.map(option => (
                 <option
                   value={option.value.toString()}
@@ -113,7 +113,7 @@ export default function SettingsMenuSelect<T extends PossibleValue = string>({
                 </option>
               ))}
             </optgroup>
-          ) : null}
+          ))}
         </OLFormSelect>
       )}
     </OLFormGroup>

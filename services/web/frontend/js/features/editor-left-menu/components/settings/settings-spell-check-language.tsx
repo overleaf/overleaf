@@ -33,7 +33,7 @@ export default function SettingsSpellCheckLanguage() {
       onChange={setSpellCheckLanguage}
       value={supportsWebAssembly() ? spellCheckLanguage : ''}
       options={[{ value: '', label: t('off') }]}
-      optgroup={optgroup}
+      optgroups={[optgroup]}
       label={t('spell_check')}
       name="spellCheckLanguage"
       disabled={permissionsLevel === 'readOnly' || !supportsWebAssembly()}

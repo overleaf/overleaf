@@ -21,12 +21,10 @@ export type Optgroup<T extends PossibleValue = string> = {
 type SettingsMenuSelectProps<T extends PossibleValue = string> = {
   id: string
   label: string
-  options: Array<Option<T>>
+  options?: Array<Option<T>>
   onChange: (val: T) => void
   description?: string
-  // TODO: We can remove optgroup when the spellcheck setting is
-  // split into 2 and no longer uses it.
-  optgroup?: Optgroup<T>
+  optgroups?: Array<Optgroup<T>>
   value?: T
   disabled?: boolean
   width?: 'default' | 'wide'
@@ -40,7 +38,7 @@ export default function DropdownSetting<T extends PossibleValue = string>({
   options,
   onChange,
   value,
-  optgroup,
+  optgroups,
   description = undefined,
   disabled = false,
   width = 'default',
@@ -77,7 +75,7 @@ export default function DropdownSetting<T extends PossibleValue = string>({
           disabled={disabled}
           translate={translateOptions}
         >
-          {options.map(option => (
+          {options?.map(option => (
             <option
               key={`${id}-${option.value}`}
               value={option.value.toString()}
@@ -87,8 +85,8 @@ export default function DropdownSetting<T extends PossibleValue = string>({
               {option.label}
             </option>
           ))}
-          {optgroup ? (
-            <optgroup label={optgroup.label}>
+          {optgroups?.map(optgroup => (
+            <optgroup label={optgroup.label} key={optgroup.label}>
               {optgroup.options.map(option => (
                 <option
                   value={option.value.toString()}
@@ -98,7 +96,7 @@ export default function DropdownSetting<T extends PossibleValue = string>({
                 </option>
               ))}
             </optgroup>
-          ) : null}
+          ))}
         </OLFormSelect>
       )}
     </Setting>
