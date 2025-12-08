@@ -543,7 +543,7 @@
   "end_of_document": "Slutningen af dokumentet",
   "enter_any_size_including_units_or_valid_latex_command": "Indtast en størrelse (inklusiv enhed) eller en gyldig LaTeX kommando",
   "enter_image_url": "Indtast billedets URL",
-  "enter_the_confirmation_code": "Indtast den 6-cifrede bekræftelseskode sendt til __email__.",
+  "enter_the_confirmation_code": "Indtast den 6-cifrede bekræftelseskode sendt til <0>__email__</0>.",
   "enter_your_email_address": "Indtast din e-mailaddresse",
   "enter_your_email_address_below_and_we_will_send_you_a_link_to_reset_your_password": "Indtast din e-mailaddresse nedenfor, så sender vi et link til at nulstille dit kodeord",
   "enter_your_new_password": "Indtast dit nye kodeord",

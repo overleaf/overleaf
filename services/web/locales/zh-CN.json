@@ -652,7 +652,7 @@
   "enter_any_size_including_units_or_valid_latex_command": "输入任意大小（包括单位）或有效的 LaTeX 命令",
   "enter_image_url": "输入图片 URL",
   "enter_the_code": "输入发送至__email__的6位数代码。",
-  "enter_the_confirmation_code": "输入发送到 __email__ 的六位验证码。",
+  "enter_the_confirmation_code": "输入发送到 <0>__email__</0> 的六位验证码。",
   "enter_the_number_of_licenses_youd_like_to_add_to_see_the_cost_breakdown": "输入您想要添加的许可证数量以查看成本明细。",
   "enter_your_email_address": "输入你的电子邮件",
   "enter_your_email_address_below_and_we_will_send_you_a_link_to_reset_your_password": "在下面输入您的电子邮件地址，我们将向您发送重置密码的链接",

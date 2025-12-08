@@ -64,8 +64,9 @@ function resetFetchMock() {
 
 async function confirmCodeForEmail(email: string) {
   const inputCode = await screen.findByRole('textbox', {
-    name: `Enter the 6-digit confirmation code sent to ${email}.`,
+    name: /Enter the 6-digit confirmation code sent to /,
   })
+  screen.getByText(email, { exact: false })
   fireEvent.change(inputCode, { target: { value: '123456' } })
   const submitCodeBtn = screen.getByRole<HTMLButtonElement>('button', {
     name: 'Confirm',
@@ -225,7 +226,8 @@ describe('<EmailsSection />', function () {
     )
 
     await confirmCodeForEmail(userEmailData.email)
-    await screen.findByText(userEmailData.email)
+    const elements = await screen.findAllByText(userEmailData.email)
+    expect(elements.length).to.equal(2)
   })
 
   it('fails to add add new email address', async function () {
@@ -412,9 +414,7 @@ describe('<EmailsSection />', function () {
       department: customDepartment,
     })
 
-    await screen.findByText(
-      `Enter the 6-digit confirmation code sent to ${userEmailData.email}.`
-    )
+    await screen.findByText(/Enter the 6-digit confirmation code sent to /)
 
     await confirmCodeForEmail(userEmailData.email)
 
@@ -575,7 +575,8 @@ describe('<EmailsSection />', function () {
       department: userEmailData.affiliation?.department,
     })
 
-    await screen.findByText(userEmailData.email)
+    const elements = await screen.findAllByText(userEmailData.email)
+    expect(elements.length).to.equal(2)
     await screen.findByText(newUniversity)
     await screen.findByText(userEmailData.affiliation.role!, { exact: false })
     await screen.findByText(userEmailData.affiliation.department!, {

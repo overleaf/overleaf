@@ -718,7 +718,7 @@
   "enter_any_size_including_units_or_valid_latex_command": "Enter any size (including units) or valid LaTeX command",
   "enter_tax_id_number": "Enter tax ID number",
   "enter_the_code": "Enter the 6-digit code sent to __email__.",
-  "enter_the_confirmation_code": "Enter the 6-digit confirmation code sent to __email__.",
+  "enter_the_confirmation_code": "Enter the 6-digit confirmation code sent to <0>__email__</0>.",
   "enter_the_number_of_licenses_youd_like_to_add_to_see_the_cost_breakdown": "Enter the number of licenses you’d like to add to see the cost breakdown.",
   "enter_your_email": "Enter your email",
   "enter_your_email_address_below_and_we_will_send_you_a_link_to_reset_your_password": "Enter your email address below, and we will send you a link to reset your password",

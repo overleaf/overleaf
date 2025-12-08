@@ -40,9 +40,11 @@ const CIAMSixDigitsInput = forwardRef<
         autocomplete="off"
         data-1p-ignore
       />
-      <span className="ciam-six-digits-dash" aria-hidden>
-        -
-      </span>
+      {group1.length > 0 && (
+        <span className="ciam-six-digits-dash" aria-hidden>
+          -
+        </span>
+      )}
     </div>
   )
 })

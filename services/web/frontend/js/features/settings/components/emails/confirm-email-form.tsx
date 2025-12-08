@@ -187,9 +187,17 @@ export function ConfirmEmailForm({
     )
   }
 
-  const longLabel = isModal
-    ? t('enter_the_code', { email })
-    : t('enter_the_confirmation_code', { email })
+  const longLabel = isModal ? (
+    t('enter_the_code', { email })
+  ) : (
+    <Trans
+      i18nKey="enter_the_confirmation_code"
+      components={[isCiam ? <strong /> : <span />]}
+      values={{ email }}
+      shouldUnescape
+      tOptions={{ interpolation: { escapeValue: true } }}
+    />
+  )
 
   const Button = isCiam ? DSButton : OLButton
   const buttonSize = isCiam ? 'lg' : undefined
