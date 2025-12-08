@@ -21,7 +21,8 @@
   border-radius: var(--ds-border-radius-200);
   cursor: pointer;
 
-  &:has(input:checked) {
+  &:has(input:checked),
+  &:hover {
     border-color: var(--ds-color-neutral-950);
     background-color: var(--ds-color-neutral-50);
   }

@@ -3,6 +3,7 @@
     "target": "esnext" /* Specify ECMAScript target version */,
     "module": "esnext" /* Specify module code generation */,
     "allowJs": true /* Allow JavaScript files to be compiled. */,
+    "resolveJsonModule": true,
     //    "checkJs": true /* Report errors in .js files. */,
     "jsx": "preserve" /* Specify JSX code generation */,
     "noEmit": true /* Do not emit outputs. */,

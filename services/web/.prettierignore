@@ -37,3 +37,4 @@ modules/two-factor-authentication/app/views/_mixins.pug
 # minified files
 app/views/_google_analytics.pug
 app/views/_customer_io.pug
+frontend/js/shared/lottie/**

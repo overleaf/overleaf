@@ -52,3 +52,53 @@ details.ciam-onboarding-privacy {
     @include ds-body-sm-regular;
   }
 }
+
+.ciam-welcome-interstitial {
+  @include full-height-stacked-page;
+
+  background-color: var(--ds-color-white);
+  align-items: center;
+  justify-content: space-around;
+  overflow-y: auto;
+  padding: var(--ds-spacing-800) 0;
+
+  main {
+    @include ciam-vertically-spaced;
+
+    text-align: center;
+  }
+
+  .ciam-welcome-logo {
+    height: 70px;
+    background: url(../../../public/img/ol-brand/overleaf-o.svg) center
+      no-repeat;
+    background-size: contain;
+  }
+
+  h1 {
+    padding-top: var(--ds-spacing-400);
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .ciam-welcome-animation {
+    margin: 0 auto;
+  }
+
+  .ciam-welcome-message {
+    @include ds-heading-sm-regular;
+
+    margin: 0;
+    padding: var(--ds-spacing-400) 0;
+  }
+
+  .ciam-welcome-ds-logo {
+    height: 28px;
+  }
+
+  .ciam-welcome-skip {
+    margin-top: var(--ds-spacing-1000);
+  }
+}
