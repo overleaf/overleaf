@@ -29,3 +29,26 @@
 .ciam-used-latex-options {
   padding-bottom: var(--ds-spacing-200);
 }
+
+details.ciam-onboarding-privacy {
+  summary {
+    padding: var(--ds-spacing-100) var(--ds-spacing-200);
+
+    @extend .btn, .btn-ds, .btn-tertiary;
+
+    svg {
+      margin-left: var(--ds-spacing-200);
+      color: var(--ds-color-text-secondary);
+
+      &.flip {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  .ciam-onboarding-collapse-content {
+    margin: var(--ds-spacing-200) var(--ds-spacing-200) var(--ds-spacing-500);
+
+    @include ds-body-sm-regular;
+  }
+}
