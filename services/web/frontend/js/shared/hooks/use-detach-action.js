@@ -21,7 +21,7 @@ export default function useDetachAction(
       if (role === senderRole) {
         broadcastEvent(eventName, { args })
       } else {
-        actionFunction(...args)
+        return actionFunction(...args)
       }
     },
     [role, senderRole, eventName, actionFunction, broadcastEvent]

@@ -11,13 +11,14 @@ import { getBackgroundColorForUserId } from '@/shared/utils/colors'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 import { OnlineUser } from '@/features/ide-react/context/online-users-context'
+import { Doc } from '@ol-types/doc'
 
 function OnlineUsersWidget({
   onlineUsers,
   goToUser,
 }: {
   onlineUsers: OnlineUser[]
-  goToUser: (user: OnlineUser) => void
+  goToUser: (user: OnlineUser) => Promise<Doc | undefined>
 }) {
   const { t } = useTranslation()
 

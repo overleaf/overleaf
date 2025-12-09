@@ -14,7 +14,7 @@ describe('<ToolbarHeader />', function () {
     toggleHistoryOpen: () => {},
     unreadMessageCount: 0,
     onlineUsers: [],
-    goToUser: () => {},
+    goToUser: (async () => {}) as any,
     projectName: 'test project',
     renameProject: () => {},
     openShareModal: () => {},

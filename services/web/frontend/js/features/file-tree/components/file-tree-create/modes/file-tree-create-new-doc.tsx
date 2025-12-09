@@ -31,7 +31,7 @@ export default function FileTreeCreateNewDoc() {
       })
 
       if (doc) {
-        openDoc(doc)
+        return await openDoc(doc)
       }
     },
     [finishCreatingDoc, name, openDoc]

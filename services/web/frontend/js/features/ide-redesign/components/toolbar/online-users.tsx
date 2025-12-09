@@ -11,9 +11,9 @@ export const OnlineUsers = () => {
   const { onlineUsersArray } = useOnlineUsersContext()
 
   const goToUser = useCallback(
-    (user: OnlineUser) => {
+    async (user: OnlineUser) => {
       if (user.doc && typeof user.row === 'number') {
-        openDoc(user.doc, { gotoLine: user.row + 1 })
+        return await openDoc(user.doc, { gotoLine: user.row + 1 })
       }
     },
     [openDoc]

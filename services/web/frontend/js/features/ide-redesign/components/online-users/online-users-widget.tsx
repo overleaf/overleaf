@@ -14,6 +14,7 @@ import {
 import classNames from 'classnames'
 import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Doc } from '@ol-types/doc'
 
 // Should be kept in sync with $max-user-circles-displayed CSS constant
 const MAX_USER_CIRCLES_DISPLAYED = 5
@@ -26,7 +27,7 @@ export const OnlineUsersWidget = ({
   goToUser,
 }: {
   onlineUsers: OnlineUser[]
-  goToUser: (user: OnlineUser) => void
+  goToUser: (user: OnlineUser) => Promise<Doc | undefined>
 }) => {
   const hasOverflow = onlineUsers.length > MAX_USER_CIRCLES_DISPLAYED
   const usersBeforeOverflow = useMemo(

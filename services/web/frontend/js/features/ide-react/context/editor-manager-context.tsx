@@ -54,11 +54,14 @@ export type EditorManager = {
   getCurrentDocValue: () => string | null
   getCurrentDocumentId: () => DocId | null
   setIgnoringExternalUpdates: (value: boolean) => void
-  openDocWithId: (docId: string, options?: OpenDocOptions) => void
+  openDocWithId: (
+    docId: string,
+    options?: OpenDocOptions
+  ) => Promise<Doc | undefined>
   openDoc: (document: Doc, options?: OpenDocOptions) => Promise<Doc | undefined>
   openDocs: OpenDocuments
   openFileWithId: (fileId: string) => void
-  openInitialDoc: (docId?: string) => void
+  openInitialDoc: (docId?: string) => Promise<Doc | undefined>
   isLoading: boolean
   jumpToLine: (options: GotoLineOptions) => void
   debugTimers: React.MutableRefObject<Record<string, number>>
@@ -486,12 +489,12 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
   )
 
   const openDocWithId = useCallback(
-    (docId: string, options: OpenDocOptions = {}) => {
+    async (docId: string, options: OpenDocOptions = {}) => {
       const doc = findDocEntityById(fileTreeData, docId)
       if (!doc) {
         return
       }
-      openDoc(doc, options)
+      return await openDoc(doc, options)
     },
     [fileTreeData, openDoc]
   )
@@ -513,11 +516,11 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
   )
 
   const openInitialDoc = useCallback(
-    (fallbackDocId?: string) => {
+    async (fallbackDocId?: string) => {
       const docId =
         customLocalStorage.getItem(currentDocumentIdStorageKey) || fallbackDocId
       if (docId) {
-        openDocWithId(docId)
+        return await openDocWithId(docId)
       }
     },
     [currentDocumentIdStorageKey, openDocWithId]
@@ -580,7 +583,7 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
       }
 
       const handleProjectJoined = () => {
-        openDoc(doc, { forceReopen: true })
+        return openDoc(doc, { forceReopen: true })
       }
 
       eventEmitter.once('project:joined', handleProjectJoined)

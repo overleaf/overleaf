@@ -20,7 +20,10 @@ const EditorNavigationToolbarRoot = React.memo(
     openShareProjectModal,
   }: {
     onlineUsersArray: OnlineUser[]
-    openDoc: (doc: Doc, { gotoLine }: { gotoLine: number }) => void
+    openDoc: (
+      doc: Doc,
+      { gotoLine }: { gotoLine: number }
+    ) => Promise<Doc | undefined>
     openShareProjectModal: () => void
   }) {
     const {
@@ -93,9 +96,9 @@ const EditorNavigationToolbarRoot = React.memo(
     }, [setLeftMenuShown])
 
     const goToUser = useCallback(
-      (user: OnlineUser) => {
+      async (user: OnlineUser) => {
         if (user.doc && typeof user.row === 'number') {
-          openDoc(user.doc, { gotoLine: user.row + 1 })
+          return await openDoc(user.doc, { gotoLine: user.row + 1 })
         }
       },
       [openDoc]

@@ -40,7 +40,10 @@ export const OnlineUsersRedesign = ({ users }: { users: number }) => {
         padding: '20px',
       }}
     >
-      <OnlineUsersWidget onlineUsers={generatedUsers} goToUser={() => {}} />
+      <OnlineUsersWidget
+        onlineUsers={generatedUsers}
+        goToUser={(async () => {}) as any}
+      />
     </div>
   )
 }
@@ -54,7 +57,10 @@ export const OnlineUsersOld = ({ users }: { users: number }) => {
         padding: '20px',
       }}
     >
-      <OnlineUsersWidgetOld onlineUsers={generatedUsers} goToUser={() => {}} />
+      <OnlineUsersWidgetOld
+        onlineUsers={generatedUsers}
+        goToUser={(async () => {}) as any}
+      />
     </div>
   )
 }

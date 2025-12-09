@@ -33,7 +33,7 @@ export const startCompileKeypress = (
 }
 
 export default function useCompileTriggers(
-  startCompile: (...args: any[]) => void,
+  startCompile: (...args: any[]) => Promise<void>,
   setChangedAt: (...args: any[]) => void
 ) {
   const handleKeyDown = useCallback(

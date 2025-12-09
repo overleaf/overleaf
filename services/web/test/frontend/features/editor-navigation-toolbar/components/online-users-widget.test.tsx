@@ -20,7 +20,7 @@ describe('<OnlineUsersWidget />', function () {
         email: 'another_test_email',
       },
     ],
-    goToUser: () => {},
+    goToUser: (async () => {}) as any,
   }
 
   describe('with less than 4 users', function () {

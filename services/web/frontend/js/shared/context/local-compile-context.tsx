@@ -120,7 +120,7 @@ export type CompileContext = {
   setAnimateCompileDropdownArrow: (value: boolean) => void
   recompileFromScratch: () => void
   setCompiling: (value: boolean) => void
-  startCompile: (options?: any) => void
+  startCompile: (options?: any) => Promise<void>
   stopCompile: () => void
   setChangedAt: (value: any) => void
   clearCache: () => void
@@ -700,14 +700,14 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   const startCompile = useCallback(
     (options: any) => {
       setCompiledOnce(true)
-      compiler.compile(options)
+      return compiler.compile(options)
     },
     [compiler, setCompiledOnce]
   )
 
   // stop a compile manually
   const stopCompile = useCallback(() => {
-    compiler.stopCompile()
+    return compiler.stopCompile()
   }, [compiler])
 
   // clear the compile cache

@@ -19,6 +19,7 @@ import TryNewEditorButton from '../try-new-editor-button'
 import { OnlineUser } from '@/features/ide-react/context/online-users-context'
 import { Cobranding } from '../../../../../types/cobranding'
 import { canUseNewEditor } from '@/features/ide-redesign/utils/new-editor-utils'
+import { Doc } from '@ol-types/doc'
 
 const [publishModalModules] = importOverleafModules('publishModal') as {
   import: { default: ElementType }
@@ -50,7 +51,7 @@ export type ToolbarHeaderProps = {
   toggleHistoryOpen: () => void
   unreadMessageCount: number
   onlineUsers: OnlineUser[]
-  goToUser: (user: OnlineUser) => void
+  goToUser: (user: OnlineUser) => Promise<Doc | undefined>
   isRestrictedTokenMember: boolean | undefined
   hasPublishPermissions: boolean
   chatVisible: boolean
