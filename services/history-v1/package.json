@@ -32,7 +32,7 @@
     "generic-pool": "^2.1.1",
     "helmet": "^3.22.0",
     "http-status": "^1.4.2",
-    "jsonwebtoken": "^9.0.0",
+    "jsonwebtoken": "^9.0.3",
     "knex": "^2.4.0",
     "lodash": "^4.17.19",
     "mongodb": "6.12.0",

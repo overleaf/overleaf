@@ -1,37 +1,35 @@
 diff --git a/node_modules/@google-cloud/storage/node_modules/teeny-request/build/src/index.js b/node_modules/@google-cloud/storage/node_modules/teeny-request/build/src/index.js
-index a2251ca..e29e796 100644
+index af5d15e..8a9bf77 100644
 --- a/node_modules/@google-cloud/storage/node_modules/teeny-request/build/src/index.js
 +++ b/node_modules/@google-cloud/storage/node_modules/teeny-request/build/src/index.js
-@@ -166,27 +166,27 @@ function teenyRequest(reqOpts, callback) {
-     }
-     if (callback === undefined) {
+@@ -168,31 +168,34 @@ function teenyRequest(reqOpts, callback) {
          // Stream mode
--        const requestStream = streamEvents(new stream_1.PassThrough());
--        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         const requestStream = streamEvents(new stream_1.PassThrough());
+         // eslint-disable-next-line @typescript-eslint/no-explicit-any
 -        let responseStream;
 -        requestStream.once('reading', () => {
 -            if (responseStream) {
--                responseStream.pipe(requestStream);
+-                (0, stream_1.pipeline)(responseStream, requestStream, () => { });
 -            }
 -            else {
 -                requestStream.once('response', () => {
--                    responseStream.pipe(requestStream);
+-                    (0, stream_1.pipeline)(responseStream, requestStream, () => { });
 -                });
 -            }
 -        });
-+        const requestStream = new stream_1.PassThrough();
-+        // // eslint-disable-next-line @typescript-eslint/no-explicit-any
 +        // let responseStream;
 +        // requestStream.once('reading', () => {
-+        //     if (responseStream) {
-+        //         responseStream.pipe(requestStream);
-+        //     }
-+        //     else {
-+        //         requestStream.once('response', () => {
-+        //             responseStream.pipe(requestStream);
-+        //         });
-+        //     }
++        //    if (responseStream) {
++        //        (0, stream_1.pipeline)(responseStream, requestStream, () => { });
++        //    }
++        //    else {
++        //        requestStream.once('response', () => {
++        //            (0, stream_1.pipeline)(responseStream, requestStream, () => { });
++        //        });
++        //    }
 +        // });
++
++
          options.compress = false;
          teenyRequest.stats.requestStarting();
          (0, node_fetch_1.default)(uri, options).then(res => {
@@ -41,10 +39,17 @@ index a2251ca..e29e796 100644
 -                requestStream.emit('error', err);
 -            });
 +            teenyRequest.stats.requestFinished(); stream_1.pipeline(res.body, requestStream, () => {});
-+            // responseStream = res.body;
-+            // responseStream.on('error', (err) => {
-+            //     requestStream.emit('error', err);
-+            // });
++        //    responseStream = res.body;
++        //    responseStream.on('error', (err) => {
++        //        requestStream.emit('error', err);
++        //    });
              const response = fetchToRequestResponse(options, res);
              requestStream.emit('response', response);
          }, err => {
+             teenyRequest.stats.requestFinished();
+             requestStream.emit('error', err);
+         });
++
+         // fetch doesn't supply the raw HTTP stream, instead it
+         // returns a PassThrough piped from the HTTP response
+         // stream.

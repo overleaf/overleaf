@@ -145,7 +145,7 @@
     "i18next-http-middleware": "^3.5.0",
     "jose": "^4.3.8",
     "json2csv": "^4.3.3",
-    "jsonwebtoken": "^9.0.0",
+    "jsonwebtoken": "^9.0.3",
     "lodash": "^4.17.19",
     "lru-cache": "^7.10.1",
     "marked": "^4.1.0",
