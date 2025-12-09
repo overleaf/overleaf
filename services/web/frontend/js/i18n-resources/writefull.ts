@@ -397,7 +397,7 @@ const en = {
     'citations-checker.publications.insert': 'Insert',
     'citations-checker.publications.copy': 'Copy citation',
     'citations-checker.publications.copied': 'Copied to clipboard',
-    'citations-reviewer.chat.title': 'Citations reviewer',
+    'citations-reviewer.chat.title': 'Citation reviewer',
     'citations-reviewer.chat.description':
       '<b>Identified __count__ passages</b><br/>Here are statements in your article that may benefit from a citation.',
     'citations-reviewer.chat.document-updated':
