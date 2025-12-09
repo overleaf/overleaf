@@ -413,12 +413,14 @@ const en = {
     'citations-reviewer.chat.publications.title': 'Suggested papers',
     'citations-reviewer.chat.publications.description':
       'The following papers may support the claim you’ve made. Always check papers yourself to ensure relevance.',
+    'citations-reviewer.chat.publications.subtitle': 'Select papers to cite:',
     'citations-reviewer.chat.publications.alternatively': 'Alternatively,',
     'citations-reviewer.chat.publications.custom-search':
       'search for papers yourself.',
     'citations-reviewer.chat.publications.passage': 'Passage to review',
     'citations-reviewer.chat.actions.refresh': 'Refresh citations',
     'citations-reviewer.chat.actions.back': 'Back',
+    'citations-reviewer.chat.actions.more-authors': '> More authors',
     'citations-reviewer.chat.actions.read-abstract': '> Read abstract',
     'citations-reviewer.chat.actions.view-suggestions': 'View suggestions →',
     'citations-reviewer.chat.actions.ignore': 'Ignore',
@@ -877,12 +879,15 @@ const es = {
     'citations-reviewer.chat.publications.title': 'Artículos sugeridos',
     'citations-reviewer.chat.publications.description':
       'Los siguientes artículos pueden respaldar la afirmación que has hecho. Revisa siempre los artículos por tu cuenta para asegurar su relevancia.',
+    'citations-reviewer.chat.publications.subtitle':
+      'Selecciona artículos para citar:',
     'citations-reviewer.chat.publications.alternatively': 'Alternativamente,',
     'citations-reviewer.chat.publications.custom-search':
       'busca artículos por tu cuenta.',
     'citations-reviewer.chat.publications.passage': 'Pasaje a revisar',
     'citations-reviewer.chat.actions.refresh': 'Actualizar citas',
     'citations-reviewer.chat.actions.back': 'Volver',
+    'citations-reviewer.chat.actions.more-authors': '> Más autores',
     'citations-reviewer.chat.actions.read-abstract': '> Leer resumen',
     'citations-reviewer.chat.actions.view-suggestions': 'Ver sugerencias →',
     'citations-reviewer.chat.actions.ignore': 'Ignorar',
