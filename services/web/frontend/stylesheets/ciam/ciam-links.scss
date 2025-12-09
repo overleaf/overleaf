@@ -18,20 +18,19 @@
   }
 
   a:focus-visible {
-    box-shadow: 0 0 0 2px var(--ds-color-yellow-500);
-    outline: none;
-    color: var(--ds-color-text-primary);
-    background-color: var(--ds-color-yellow-500);
-    border-radius: 1px;
+    &:not(.btn) {
+      // don't override button focus styles
+      box-shadow: 0 0 0 2px var(--ds-color-yellow-500);
+      outline: none;
+      color: var(--ds-color-text-primary);
+      background-color: var(--ds-color-yellow-500);
+      border-radius: 1px;
+    }
 
     &.ciam-image-link {
       @include ds-focus-outline;
 
       background-color: transparent;
-    }
-
-    &.btn {
-      background-color: var(--bs-btn-bg);
     }
   }
 }
