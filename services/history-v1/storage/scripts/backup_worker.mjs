@@ -40,7 +40,7 @@ const backupQueue = new Queue('backup', {
   settings: {
     lockDuration: 15 * 60 * 1000, // 15 minutes
     lockRenewTime: 60 * 1000, // 1 minute
-    maxStalledCount: 0, // mark stalled jobs as failed
+    maxStalledCount: 1, // allow stalled jobs to retried
   },
 })
 
