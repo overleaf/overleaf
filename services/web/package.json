@@ -418,8 +418,5 @@
     "webpack-merge": "^5.10.0",
     "yup": "^0.32.11",
     "zustand": "^5.0.1"
-  },
-  "overrides": {
-    "ejs": "$ejs"
   }
 }
