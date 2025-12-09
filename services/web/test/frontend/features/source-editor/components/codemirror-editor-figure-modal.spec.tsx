@@ -13,6 +13,9 @@ import getMeta from '@/utils/meta'
 import { mockProject } from '../helpers/mock-project'
 import { base64image } from '../fixtures/image'
 
+const svgContent =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><circle cx="50" cy="50" r="40" fill="red"/></svg>'
+
 const findInsertFigureToolbarButton = () => {
   return cy.findByRole('toolbar').within(() => {
     return cy
@@ -83,7 +86,16 @@ describe('<FigureModal />', function () {
           previewByPath: cy
             .stub()
             .as('previewByPath')
-            .returns({ url: base64image, extension: 'png' }),
+            .callsFake(path => {
+              if (path === 'diagram.svg' || path === 'diagram') {
+                return {
+                  url: '/project/test-project/blob/abc123',
+                  extension: 'svg',
+                }
+              }
+              // Default to PNG for any other path (for non-SVG tests)
+              return { url: base64image, extension: 'png' }
+            }),
         }}
       >
         {children}
@@ -674,5 +686,162 @@ text below`,
 
     // TODO: Add tests for replacing image when we can match on image path
     // TODO: Add tests for changing image size when we can match on figure width
+
+    it('Switches from includegraphics to includesvg when replacing with SVG file', function () {
+      cy.interceptLinkedFile()
+
+      cy.get('.cm-content').type(
+        `\\begin{{}figure}
+\\centering
+\\includegraphics[width=0.75\\linewidth]{{}frog.jpg}
+\\caption{{}My caption}
+\\label{{}fig:my-label}
+\\end{{}figure}`,
+        { delay: 0 }
+      )
+      cy.get('[aria-label="Edit figure"]').click({ force: true })
+      cy.findByRole('button', { name: 'Remove or replace figure' }).click()
+      cy.findByText('Replace from URL').click()
+      cy.findByLabelText('Image URL').type('https://example.com/diagram.svg')
+      cy.findByText('Insert figure').click()
+
+      cy.get('@linked-file-request').should('have.been.calledWithMatch', {
+        body: {
+          provider: 'url',
+          data: {
+            url: 'https://example.com/diagram.svg',
+          },
+        },
+      })
+
+      // Note: \caption and \label render as widgets in visual editor
+      cy.get('.cm-content').should(
+        'have.text',
+        '\\begin{figure}\\centering\\includesvg[width=0.75\\linewidth]{diagram}My caption🏷fig:my-label\\end{figure}'
+      )
+    })
+  })
+
+  describe('SVG file handling', function () {
+    beforeEach(function () {
+      // Intercept the fetch request for the SVG blob
+      cy.intercept('GET', '/project/test-project/blob/abc123', {
+        statusCode: 200,
+        body: svgContent,
+        headers: {
+          'Content-Type': 'application/octet-stream',
+        },
+      }).as('svgFetch')
+    })
+
+    describe('inserting SVG from URL', function () {
+      beforeEach(function () {
+        cy.interceptLinkedFile()
+        clickFigureToolbarButton()
+        cy.findByRole('menu').within(() => {
+          cy.findByText('From URL').click()
+        })
+        cy.findByLabelText('Image URL').as('image-url-input')
+        findInsertFigureDialogButton()
+      })
+
+      it('uses includesvg command for SVG files and displays the file', function () {
+        cy.get('@image-url-input').type('https://example.com/diagram.svg')
+        cy.get('@insertFigureDialogButton').click()
+
+        cy.get('@linked-file-request').should('have.been.calledWithMatch', {
+          body: {
+            provider: 'url',
+            data: {
+              url: 'https://example.com/diagram.svg',
+            },
+          },
+        })
+
+        cy.get('[aria-label="Edit figure"]').should('exist')
+        cy.get('.ol-cm-environment-figure[data-filepath="diagram"]').should(
+          'exist'
+        )
+        cy.get('.cm-content').should(
+          'have.text',
+          '\\begin{figure}    \\centeringedit    \\caption{Enter Caption}    🏷fig:placeholder\\end{figure}'
+        )
+      })
+    })
+
+    describe('editing existing SVG figure', function () {
+      it('parses existing includesvg with width, label, and caption', function () {
+        cy.get('.cm-content').type(
+          `\\begin{{}figure}
+\\centering
+\\includesvg[width=0.75\\linewidth]{{}diagram}
+\\caption{{}My SVG caption}
+\\label{{}fig:svg-label}
+\\end{{}figure}`,
+          { delay: 0 }
+        )
+        cy.get('[aria-label="Edit figure"]').click({ force: true })
+        cy.get('[value="0.75"]').should('be.checked')
+        cy.findByRole('checkbox', { name: 'Include caption' }).should(
+          'be.checked'
+        )
+        cy.findByRole('checkbox', { name: 'Include label' }).should(
+          'be.checked'
+        )
+      })
+
+      it('removes existing label from includesvg figure when unchecked', function () {
+        cy.get('.cm-content').type(
+          `\\begin{{}figure}
+\\centering
+\\includesvg[width=0.75\\linewidth]{{}diagram}
+\\label{{}fig:my-label}
+\\end{{}figure}`,
+          { delay: 0 }
+        )
+        cy.get('[aria-label="Edit figure"]').click({ force: true })
+        cy.findByRole('checkbox', { name: 'Include label' }).click()
+        cy.findByRole('checkbox', { name: 'Include label' }).should(
+          'not.be.checked'
+        )
+        cy.findByText('Done').click()
+        cy.get('.cm-content').should(
+          'have.text',
+          '\\begin{figure}\\centering\\includesvg[width=0.75\\linewidth]{diagram}\\end{figure}'
+        )
+      })
+
+      it('switches from includesvg to includegraphics when replacing with non-SVG file', function () {
+        cy.interceptLinkedFile()
+
+        cy.get('.cm-content').type(
+          `\\begin{{}figure}
+\\centering
+\\includesvg[width=0.75\\linewidth]{{}diagram}
+\\caption{{}My caption}
+\\label{{}fig:my-label}
+\\end{{}figure}`,
+          { delay: 0 }
+        )
+        cy.get('[aria-label="Edit figure"]').click({ force: true })
+        cy.findByRole('button', { name: 'Remove or replace figure' }).click()
+        cy.findByText('Replace from URL').click()
+        cy.findByLabelText('Image URL').type('https://example.com/photo.jpg')
+        cy.findByText('Insert figure').click()
+
+        cy.get('@linked-file-request').should('have.been.calledWithMatch', {
+          body: {
+            provider: 'url',
+            data: {
+              url: 'https://example.com/photo.jpg',
+            },
+          },
+        })
+
+        // Should switch to includegraphics for non-SVG files
+        cy.get('.cm-content').should('contain.text', '\\includegraphics')
+        cy.get('.cm-content').should('not.contain.text', '\\includesvg')
+      })
+    })
   })
 })

@@ -114,19 +114,20 @@ export function previewByPath(
     '.jpg',
     '.jpeg',
     '.pdf',
+    '.svg',
     '.PNG',
     '.JPG',
     '.JPEG',
     '.PDF',
+    '.SVG',
   ]) {
     const result = findEntityByPath(folder, path + suffix)
 
     if (result?.type === 'fileRef') {
       const { name, hash } = result.entity
-      return {
-        url: `/project/${projectId}/blob/${hash}`,
-        extension: name.slice(name.lastIndexOf('.') + 1),
-      }
+      const extension = name.slice(name.lastIndexOf('.') + 1)
+      const url = `/project/${projectId}/blob/${hash}`
+      return { url, extension }
     }
   }
   return null

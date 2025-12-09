@@ -58,6 +58,7 @@
     VerbCtrlSeq,
     LstInlineCtrlSeq,
     IncludeGraphicsCtrlSeq,
+    IncludeSvgCtrlSeq,
     CaptionCtrlSeq,
     DefCtrlSeq,
     LetCtrlSeq,
@@ -296,6 +297,10 @@ KnownCommand<ArgumentType> {
     IncludeGraphics {
         IncludeGraphicsCtrlSeq optionalWhitespace? OptionalArgument?
         IncludeGraphicsArgument { FilePathArgument }
+    } |
+    IncludeSvg {
+        IncludeSvgCtrlSeq optionalWhitespace? OptionalArgument?
+        IncludeSvgArgument { FilePathArgument }
     } |
     Caption {
         CaptionCtrlSeq "*"? optionalWhitespace? OptionalArgument? TextArgument

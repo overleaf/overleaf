@@ -49,7 +49,7 @@ export const FigureModalUploadFileSource: FC = () => {
       restrictions: {
         maxNumberOfFiles: 1,
         maxFileSize: getMeta('ol-ExposedSettings').maxUploadSize,
-        allowedFileTypes: ['image/*', '.pdf', '.eps'],
+        allowedFileTypes: ['image/*', '.pdf', '.eps', '.svg'],
       },
       autoProceed: false,
     })

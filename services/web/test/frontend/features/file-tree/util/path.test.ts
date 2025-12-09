@@ -70,6 +70,11 @@ describe('Path utils', function () {
           name: 'frog.JPG',
           hash: '22',
         },
+        {
+          _id: 'test-svg-file',
+          name: 'diagram.svg',
+          hash: '44',
+        },
       ],
     }
   })
@@ -156,6 +161,18 @@ describe('Path utils', function () {
       expect(preview).to.deep.equal({
         url: '/project/test-project-id/blob/42',
         extension: 'png',
+      })
+    })
+
+    it('returns SVG files with correct extension', function () {
+      const preview = previewByPath(
+        rootFolder,
+        'test-project-id',
+        'diagram.svg'
+      )
+      expect(preview).to.deep.equal({
+        url: '/project/test-project-id/blob/44',
+        extension: 'svg',
       })
     })
   })

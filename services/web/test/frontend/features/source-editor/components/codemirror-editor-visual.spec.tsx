@@ -12,6 +12,9 @@ import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-pat
 import { TestContainer } from '../helpers/test-container'
 import { base64image } from '../fixtures/image'
 
+const svgContent =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><circle cx="50" cy="50" r="40" fill="red"/></svg>'
+
 describe('<CodeMirrorEditor/> in Visual mode', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
@@ -35,16 +38,24 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
           previewByPath: cy
             .stub()
             .as('previewByPath')
-            .callsFake(path =>
-              path === 'valid.png'
-                ? { url: base64image, extension: 'png' }
-                : path === 'graphic.eps'
-                  ? {
-                      url: 'data:application/postscript,0 0 moveto (hello) show',
-                      extension: 'eps',
-                    }
-                  : null
-            ),
+            .callsFake(path => {
+              if (path === 'valid.png') {
+                return { url: base64image, extension: 'png' }
+              }
+              if (path === 'graphic.eps') {
+                return {
+                  url: 'data:application/postscript,0 0 moveto (hello) show',
+                  extension: 'eps',
+                }
+              }
+              if (path === 'diagram.svg' || path === 'diagram') {
+                return {
+                  url: '/project/test-project/blob/abc123',
+                  extension: 'svg',
+                }
+              }
+              return null
+            }),
         }}
       >
         {children}
@@ -257,6 +268,51 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
   it('displays unknown commands unchanged', function () {
     cy.get('@first-line').type('\\foo[bar]{{}baz} ')
     cy.get('@first-line').should('have.text', '\\foo[bar]{baz} ')
+  })
+
+  it('renders \\includesvg command and fetches SVG with blob URL', function () {
+    // Intercept the fetch request for the SVG blob
+    cy.intercept('GET', '/project/test-project/blob/abc123', {
+      statusCode: 200,
+      body: svgContent,
+      headers: {
+        'Content-Type': 'application/octet-stream',
+      },
+    }).as('svgFetch')
+
+    // Type the includesvg command directly (no figure environment needed)
+    cy.get('@first-line').type('\\includesvg[width=0.5\\linewidth]{{}diagram}')
+
+    // Move cursor out to trigger widget rendering
+    cy.get('@second-line').click()
+
+    // Wait for the fetch to complete
+    cy.wait('@svgFetch')
+
+    // Should show the image with a blob URL (widget renders the SVG)
+    cy.get('img.ol-cm-graphics')
+      .should('exist')
+      .and('have.attr', 'src')
+      .and('match', /^blob:/)
+  })
+
+  it('does not render \\includegraphics with SVG file (invalid LaTeX)', function () {
+    // \includegraphics{file.svg} is not valid LaTeX - SVG files require \includesvg
+    cy.get('@first-line').type(
+      '\\includegraphics[width=0.5\\linewidth]{{}invalid.svg}'
+    )
+
+    // Move cursor out to trigger any potential widget rendering
+    cy.get('@second-line').click()
+
+    // Should NOT create a preview widget - raw LaTeX should be visible
+    cy.get('.cm-content').should(
+      'contain.text',
+      '\\includegraphics[width=0.5\\linewidth]{invalid.svg}'
+    )
+
+    // No graphics widget should be created
+    cy.get('img.ol-cm-graphics').should('not.exist')
   })
 
   describe('Figure environments', function () {
