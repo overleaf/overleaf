@@ -1,5 +1,6 @@
 import React, { FC, ReactNode } from 'react'
 import { Trans } from 'react-i18next'
+import * as eventTracking from '@/infrastructure/event-tracking'
 import dsLogo from '@/shared/svgs/digital-science.svg'
 
 type Props = { children: ReactNode }
@@ -22,6 +23,13 @@ const CiamLayout: FC<Props> = ({ children }: Props) => (
               target="_blank"
               rel="noopener noreferrer"
               className="ciam-image-link"
+              onClick={() =>
+                eventTracking.sendMB('unified-access-footer-click', {
+                  product: 'overleaf',
+                  item: 'logo',
+                  destinationUrl: 'https://www.digital-science.com/',
+                })
+              }
             >
               <img src={dsLogo} alt="Digital Science — home" />
             </a>
@@ -35,12 +43,26 @@ const CiamLayout: FC<Props> = ({ children }: Props) => (
                   href="https://www.overleaf.com/"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() =>
+                    eventTracking.sendMB('unified-access-footer-click', {
+                      product: 'overleaf',
+                      item: 'overleaf',
+                      destinationUrl: 'https://www.overleaf.com/',
+                    })
+                  }
                 />,
                 // eslint-disable-next-line jsx-a11y/anchor-has-content,react/jsx-key
                 <a
                   href="https://www.papersapp.com/"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() =>
+                    eventTracking.sendMB('unified-access-footer-click', {
+                      product: 'overleaf',
+                      item: 'papers',
+                      destinationUrl: 'https://www.papersapp.com/',
+                    })
+                  }
                 />,
               ]}
             />
