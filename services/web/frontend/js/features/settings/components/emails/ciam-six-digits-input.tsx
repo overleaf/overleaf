@@ -37,7 +37,7 @@ const CIAMSixDigitsInput = forwardRef<
         )}
         maxLength={7}
         inputMode="numeric"
-        autocomplete="off"
+        autoComplete="off"
         data-1p-ignore
       />
       {group1.length > 0 && (

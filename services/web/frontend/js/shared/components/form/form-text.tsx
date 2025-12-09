@@ -51,7 +51,7 @@ function FormText({
     >
       <span className="form-text-inner">
         <FormTextIcon type={type} />
-        {children}
+        <span>{children}</span>
       </span>
     </Form.Text>
   )

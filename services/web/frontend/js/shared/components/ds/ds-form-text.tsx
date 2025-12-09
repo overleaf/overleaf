@@ -50,7 +50,7 @@ function DSFormText({
     >
       <span className="form-text-inner-ds">
         <FormTextIcon type={type} />
-        {children}
+        <span>{children}</span>
       </span>
     </Form.Text>
   )

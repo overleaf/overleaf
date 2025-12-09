@@ -17,7 +17,6 @@ export function CiamStepper({
         aria-label={t('progress_bar_percentage')}
         aria-valuenow={active + 1}
         aria-valuemax={steps}
-        tabIndex={0}
       >
         {Array.from({ length: steps }).map((_, i) => (
           <div

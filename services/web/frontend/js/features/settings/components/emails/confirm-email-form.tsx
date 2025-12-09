@@ -207,6 +207,15 @@ export function ConfirmEmailForm({
 
   const NotificationComponent = isCiam ? DSNotification : Notification
 
+  const outerErrorEl = (feedback?.type === 'alert' || outerErrorDisplay) && (
+    <NotificationComponent
+      ariaLive="polite"
+      className="confirm-email-alert"
+      type={outerErrorDisplay ? 'error' : feedback!.style}
+      content={outerErrorDisplay || <ErrorMessage error={feedback!.message!} />}
+    />
+  )
+
   return (
     <form
       onSubmit={submitHandler}
@@ -215,16 +224,7 @@ export function ConfirmEmailForm({
       data-testid="confirm-email-form"
     >
       <div className="confirm-email-form-inner">
-        {(feedback?.type === 'alert' || outerErrorDisplay) && (
-          <NotificationComponent
-            ariaLive="polite"
-            className="confirm-email-alert"
-            type={outerErrorDisplay ? 'error' : feedback!.style}
-            content={
-              outerErrorDisplay || <ErrorMessage error={feedback!.message!} />
-            }
-          />
-        )}
+        {!isCiam && outerErrorEl}
 
         <Title
           isModal={isModal}
@@ -232,6 +232,8 @@ export function ConfirmEmailForm({
           isCiam={isCiam}
           outerErrorDisplay={outerErrorDisplay}
         />
+
+        {isCiam && outerErrorEl}
 
         {isCiam && <p>{longLabel}</p>}
 
