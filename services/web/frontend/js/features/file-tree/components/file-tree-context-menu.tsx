@@ -9,12 +9,14 @@ import { useFileTreeMainContext } from '../contexts/file-tree-main'
 
 import FileTreeItemMenuItems from './file-tree-item/file-tree-item-menu-items'
 import classNames from 'classnames'
+import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 function FileTreeContextMenu() {
   const { fileTreeReadOnly } = useFileTreeData()
   const { contextMenuCoords, setContextMenuCoords } = useFileTreeMainContext()
   const toggleButtonRef = useRef<HTMLButtonElement | null>(null)
   const keyboardInputRef = useRef(false)
+  const newEditor = useIsNewEditorEnabled()
 
   useEffect(() => {
     if (contextMenuCoords) {
@@ -84,7 +86,12 @@ function FileTreeContextMenu() {
       : 'down'
 
   return ReactDOM.createPortal(
-    <div style={contextMenuCoords} className="context-menu">
+    <div
+      style={contextMenuCoords}
+      // TODO ide-redesign-cleanup: remove 'ide-redesign-main' class when old editor is removed
+      // It is only used to apply dark theme styles to the context menu in the new editor
+      className={classNames('context-menu', { 'ide-redesign-main': newEditor })}
+    >
       <Dropdown
         show
         drop={dropDirection}
