@@ -76,7 +76,10 @@ input.form-control.form-control-ds {
 
   &.is-invalid,
   .was-validated &:invalid {
-    border-color: var(--ds-color-red-500);
+    &,
+    &:hover {
+      border-color: var(--ds-color-red-500);
+    }
   }
 }
 
@@ -201,10 +204,8 @@ input.check-input-ds {
     }
   }
 
-  border-style: solid;
-  border-width: 1px;
+  border: solid 1px var(--ds-color-neutral-800);
 
-  &,
   &:hover {
     border-color: var(--ds-color-neutral-900);
   }

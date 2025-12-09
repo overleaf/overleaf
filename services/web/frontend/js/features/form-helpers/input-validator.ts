@@ -76,6 +76,8 @@ export default function inputValidator(
     if (!canDisplayErrorMessages) return
     if (!inputEl.hasAttribute('data-ol-dirty')) return
 
+    inputEl.classList.toggle('is-invalid', !inputEl.validity.valid)
+
     if (inputEl.validity.valid) {
       messageEl.hidden = true
 

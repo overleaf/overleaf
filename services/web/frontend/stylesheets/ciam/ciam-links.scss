@@ -1,5 +1,3 @@
-// TODO: Replace `fuchsia` by the correct colors.
-
 .ciam-enabled,
 .website-redesign:not(.application-page) .ciam-enabled .notification {
   // Links, used in services/web/frontend/stylesheets/base/links.scss
@@ -10,19 +8,21 @@
   --link-hover-text-decoration: underline;
 
   a {
-    text-decoration-thickness: 5%;
+    text-decoration-thickness: var(--ds-link-text-decoration-thickness);
     text-underline-offset: 19.5%;
   }
 
   a:hover,
-  a:focus {
-    text-decoration-thickness: 10%;
+  a:focus-visible {
+    text-decoration-thickness: 0.17em;
   }
 
   a:focus-visible {
-    box-shadow: none;
+    box-shadow: 0 0 0 2px var(--ds-color-yellow-500);
     outline: none;
+    color: var(--ds-color-text-primary);
     background-color: var(--ds-color-yellow-500);
+    border-radius: 1px;
 
     &.ciam-image-link {
       @include ds-focus-outline;

@@ -1,5 +1,3 @@
-@import 'ds-design-system';
-
 .ciam-register-columns {
   display: flex;
   flex-grow: 1;
@@ -12,13 +10,10 @@
 }
 
 .ciam-register-container {
-  display: flex;
-  flex-direction: column;
+  @include ciam-vertically-spaced;
 
-  footer .footer-links {
-    @include media-breakpoint-up(sm) {
-      justify-content: start;
-    }
+  @include media-breakpoint-up(sm) {
+    gap: var(--ds-spacing-800);
   }
 }
 

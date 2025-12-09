@@ -1,5 +1,13 @@
 // Typography mixins for consistent text styles
 
+:root {
+  --ds-link-text-decoration-thickness: auto;
+}
+
+@mixin ds-body-sm-links() {
+  --ds-link-text-decoration-thickness: 0.06em;
+}
+
 @mixin ds-body-xs-regular() {
   font-size: var(--ds-font-size-300);
   font-weight: var(--ds-font-weight-regular);
@@ -13,12 +21,16 @@
 }
 
 @mixin ds-body-sm-regular() {
+  @include ds-body-sm-links;
+
   font-size: var(--ds-font-size-350);
   font-weight: var(--ds-font-weight-regular);
   line-height: var(--ds-font-line-height-500);
 }
 
 @mixin ds-body-sm-semibold() {
+  @include ds-body-sm-links;
+
   font-size: var(--ds-font-size-350);
   font-weight: var(--ds-font-weight-semibold);
   line-height: var(--ds-font-line-height-500);
