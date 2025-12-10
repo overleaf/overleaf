@@ -152,7 +152,7 @@ export const Select = <T,>({
     value = defaultText
   }
 
-  const TickIcon = function () {
+  const tickIcon = function () {
     return isCiam ? <Check /> : 'check'
   }
 
@@ -183,9 +183,7 @@ export const Select = <T,>({
                 })}
                 active={selectedItem === item}
                 trailingIcon={
-                  selectedIcon && selectedItem === item ? (
-                    <TickIcon />
-                  ) : undefined
+                  selectedIcon && selectedItem === item ? tickIcon() : undefined
                 }
                 description={itemToSubtitle ? itemToSubtitle(item) : undefined}
                 {...itemProps}

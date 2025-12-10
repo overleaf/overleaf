@@ -81,7 +81,7 @@ function Downshift({
     )
   }
 
-  const TickIcon = function () {
+  const tickIcon = function () {
     return isCiam ? <Check /> : 'check'
   }
 
@@ -116,7 +116,7 @@ function Downshift({
               active: selectedItem === item,
               'dropdown-item-highlighted': highlightedIndex === index,
             })}
-            trailingIcon={selectedItem === item ? <TickIcon /> : undefined}
+            trailingIcon={selectedItem === item ? tickIcon() : undefined}
           >
             {highlightMatchedCharacters(item, inputValue)}
           </DropdownItem>

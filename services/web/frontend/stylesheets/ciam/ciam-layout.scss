@@ -225,6 +225,10 @@
 
   .dropdown-item {
     border-radius: var(--ds-border-radius-200);
+
+    :has(.dropdown-item-trailing-icon) {
+      padding-right: calc(var(--ds-font-size-350) + var(--ds-spacing-200));
+    }
   }
 
   // Allow dropdowns to be wider than the form container where necessary
