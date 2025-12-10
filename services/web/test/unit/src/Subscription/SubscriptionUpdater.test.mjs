@@ -303,6 +303,81 @@ describe('SubscriptionUpdater', function () {
     })
   })
 
+  describe('transferSubscriptionOwnership', function () {
+    it('should transfer the subscription ownership for group subscriptions', async function (ctx) {
+      ctx.subscription.groupPlan = true
+      ctx.subscription.paymentProvider = {
+        id: 'stripe-123',
+        name: 'stripe-us',
+      }
+      await ctx.SubscriptionUpdater.promises.transferSubscriptionOwnership(
+        ctx.subscription,
+        ctx.otherUserId,
+        false
+      )
+      const query = {
+        _id: new ObjectId(ctx.subscription._id),
+      }
+      const update = {
+        $set: {
+          admin_id: new ObjectId(ctx.otherUserId),
+          previousPaymentProvider: ctx.subscription.paymentProvider,
+        },
+        $addToSet: { manager_ids: new ObjectId(ctx.otherUserId) },
+      }
+      ctx.SubscriptionModel.updateOne.should.have.been.calledOnce
+      ctx.SubscriptionModel.updateOne.should.have.been.calledWith(query, update)
+    })
+
+    it('should transfer the subscription ownership for non-group subscriptions', async function (ctx) {
+      ctx.subscription.paymentProvider = {
+        id: 'stripe-123',
+        name: 'stripe-us',
+      }
+      await ctx.SubscriptionUpdater.promises.transferSubscriptionOwnership(
+        ctx.subscription,
+        ctx.otherUserId,
+        false
+      )
+      const query = {
+        _id: new ObjectId(ctx.subscription._id),
+      }
+      const update = {
+        $set: {
+          admin_id: new ObjectId(ctx.otherUserId),
+          manager_ids: [new ObjectId(ctx.otherUserId)],
+          previousPaymentProvider: ctx.subscription.paymentProvider,
+        },
+      }
+      ctx.SubscriptionModel.updateOne.should.have.been.calledOnce
+      ctx.SubscriptionModel.updateOne.should.have.been.calledWith(query, update)
+    })
+
+    it('should clear previousPaymentProvider when clearPreviousPaymentProvider is true', async function (ctx) {
+      ctx.subscription.paymentProvider = {
+        id: 'stripe-123',
+        name: 'stripe-us',
+      }
+      await ctx.SubscriptionUpdater.promises.transferSubscriptionOwnership(
+        ctx.subscription,
+        ctx.otherUserId,
+        true
+      )
+      const query = {
+        _id: new ObjectId(ctx.subscription._id),
+      }
+      const update = {
+        $set: {
+          admin_id: new ObjectId(ctx.otherUserId),
+          manager_ids: [new ObjectId(ctx.otherUserId)],
+        },
+        $unset: { previousPaymentProvider: 1 },
+      }
+      ctx.SubscriptionModel.updateOne.should.have.been.calledOnce
+      ctx.SubscriptionModel.updateOne.should.have.been.calledWith(query, update)
+    })
+  })
+
   describe('syncSubscription', function () {
     beforeEach(function (ctx) {
       ctx.SubscriptionLocator.promises.getUsersSubscription.resolves(

@@ -4,6 +4,30 @@ import { TeamInviteSchema } from './TeamInvite.mjs'
 const { Schema } = mongoose
 const { ObjectId } = Schema
 
+const PaymentProvider = {
+  service: {
+    type: String,
+  },
+  subscriptionId: {
+    type: String,
+  },
+  state: {
+    type: String,
+  },
+  pausePeriodStart: {
+    type: Date,
+  },
+  pausePeriodEnd: {
+    type: Date,
+  },
+  trialStartedAt: {
+    type: Date,
+  },
+  trialEndsAt: {
+    type: Date,
+  },
+}
+
 export const SubscriptionSchema = new Schema(
   {
     admin_id: {
@@ -68,29 +92,8 @@ export const SubscriptionSchema = new Schema(
         type: Date,
       },
     },
-    paymentProvider: {
-      service: {
-        type: String,
-      },
-      subscriptionId: {
-        type: String,
-      },
-      state: {
-        type: String,
-      },
-      pausePeriodStart: {
-        type: Date,
-      },
-      pausePeriodEnd: {
-        type: Date,
-      },
-      trialStartedAt: {
-        type: Date,
-      },
-      trialEndsAt: {
-        type: Date,
-      },
-    },
+    paymentProvider: PaymentProvider,
+    previousPaymentProvider: PaymentProvider,
     collectionMethod: {
       type: String,
       enum: ['automatic', 'manual'],
