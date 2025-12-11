@@ -9,7 +9,8 @@ export const CopyToClipboard = memo<{
   tooltipId: string
   kind?: 'text' | 'icon'
   unfilled?: boolean
-}>(({ content, tooltipId, kind = 'icon', unfilled = false }) => {
+  onClick?: () => void
+}>(({ content, tooltipId, kind = 'icon', unfilled = false, onClick }) => {
   const { t } = useTranslation()
 
   const [copied, setCopied] = useState(false)
@@ -21,7 +22,10 @@ export const CopyToClipboard = memo<{
         setCopied(false)
       }, 1500)
     })
-  }, [content])
+    if (onClick) {
+      onClick()
+    }
+  }, [content, onClick])
 
   if (!navigator.clipboard?.writeText) {
     return null
