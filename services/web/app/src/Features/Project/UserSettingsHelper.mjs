@@ -51,6 +51,8 @@ async function buildUserSettings(req, res, user) {
   return {
     mode: user.ace.mode,
     editorTheme: user.ace.theme,
+    editorLightTheme: user.ace.lightTheme,
+    editorDarkTheme: user.ace.darkTheme,
     fontSize: user.ace.fontSize,
     autoComplete: user.ace.autoComplete,
     autoPairDelimiters: user.ace.autoPairDelimiters,

@@ -6,13 +6,6 @@ import { useSplitTestContext } from '../context/split-test-context'
 
 export type ActiveOverallTheme = 'dark' | 'light'
 
-const mediaWatcher = window.matchMedia?.('(prefers-color-scheme: dark)') ?? {
-  // If matchMedia is not supported, use the default (dark) theme
-  matches: true,
-  addEventListener: () => {},
-  removeEventListener: () => {},
-}
-
 function getTheme(
   overallTheme: OverallTheme,
   prefersDark: boolean
@@ -33,8 +26,13 @@ export const useActiveOverallTheme = (
   featureFlag?: string
 ): ActiveOverallTheme => {
   const { splitTestVariants } = useSplitTestContext()
-  const [browserPrefersDarkMode, setBrowserPrefersDarkMode] = useState(
-    mediaWatcher.matches
+  const [browserPrefersDarkMode, setBrowserPrefersDarkMode] = useState(() =>
+    // If matchMedia is not supported, use the default (dark) theme
+    {
+      return (
+        window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ?? true
+      )
+    }
   )
   const {
     userSettings: { overallTheme },
@@ -50,6 +48,9 @@ export const useActiveOverallTheme = (
   }, [overallTheme, browserPrefersDarkMode, featureFlag, splitTestVariants])
 
   useEffect(() => {
+    const mediaWatcher = window.matchMedia?.('(prefers-color-scheme: dark)')
+    if (!mediaWatcher) return
+
     const listener = (e: MediaQueryListEvent) => {
       setBrowserPrefersDarkMode(e.matches)
     }
