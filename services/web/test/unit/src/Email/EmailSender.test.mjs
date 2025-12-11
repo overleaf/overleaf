@@ -39,7 +39,7 @@ describe('EmailSender', function () {
     }))
 
     vi.doMock('@aws-sdk/client-ses', () => ({
-      default: { SESClient: ctx.SESClient },
+      SESClient: ctx.SESClient,
     }))
 
     vi.doMock('@overleaf/settings', () => ({

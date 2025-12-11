@@ -17,9 +17,11 @@ import { z } from 'zod'
 import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { db } from '../../app/src/infrastructure/mongodb.mjs'
 import AccountMappingHelper from '../../app/src/Features/Analytics/AccountMappingHelper.mjs'
-import { registerAccountMapping } from '../../app/src/Features/Analytics/AnalyticsManager.mjs'
+import AnalyticsManager from '../../app/src/Features/Analytics/AnalyticsManager.mjs'
 import { triggerGracefulShutdown } from '../../app/src/infrastructure/GracefulShutdown.mjs'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
+
+const { registerAccountMapping } = AnalyticsManager
 
 const paramsSchema = z.object({
   endDate: z.string().datetime(),

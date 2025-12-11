@@ -154,6 +154,8 @@ module.exports = {
             ignore: ['^p-queue$'],
           },
         ],
+        'import/named': 'error',
+        'import/default': 'error',
         'import/extensions': [
           'error',
           'ignorePackages',
