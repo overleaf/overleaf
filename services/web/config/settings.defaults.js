@@ -703,10 +703,6 @@ module.exports = {
   // By default turn on feature flag, can be overridden per request.
   enablePdfCaching: process.env.ENABLE_PDF_CACHING === 'true',
 
-  pdfCachingMinChunkSize: 7500,
-  pdfCaching: true,
-  cachedUrlLookupEnabled: true,
-
   // Maximum size of text documents in the real-time editing system.
   max_doc_length: 2 * 1024 * 1024, // 2mb
 
