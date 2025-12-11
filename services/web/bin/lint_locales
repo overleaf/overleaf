@@ -17,6 +17,7 @@ LOCALES_WITH_SINGLE_QUOTE=$(\
     --files-with-matches \
     --recursive locales/ \
     --regex "'" \
+    --exclude="README.md" \
   || true
 )
 
