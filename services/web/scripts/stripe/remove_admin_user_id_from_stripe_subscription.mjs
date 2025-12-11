@@ -143,7 +143,6 @@ async function main(trackProgress) {
 
   const listParams = {
     limit: 100, // Stripe's maximum limit per request
-    status: 'all', // Include subscriptions in all statuses (active, past_due, unpaid, canceled, etc.)
   }
 
   let hasMore = true
