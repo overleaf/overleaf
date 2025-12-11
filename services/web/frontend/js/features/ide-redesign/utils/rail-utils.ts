@@ -1,6 +1,8 @@
-import { RailElement } from './rail-types'
-
-export function shouldIncludeRailTab({ hide }: RailElement): boolean {
+export function shouldIncludeElement({
+  hide,
+}: {
+  hide?: boolean | (() => boolean)
+}): boolean {
   if (typeof hide === 'function') {
     return !hide()
   }

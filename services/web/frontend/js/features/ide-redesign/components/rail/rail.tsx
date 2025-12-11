@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { FC, RefObject, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Nav, TabContainer } from 'react-bootstrap'
 import { useLayoutContext } from '@/shared/context/layout-context'
@@ -30,11 +30,24 @@ import EditorTourRailTooltip from '../editor-tour/editor-tour-rail-tooltip'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import EditorTourThemeTooltip from '../editor-tour/editor-tour-theme-tooltip'
 import EditorTourSwitchBackTooltip from '../editor-tour/editor-tour-switch-back-tooltip'
-import { shouldIncludeRailTab } from '../../utils/rail-utils'
+import { shouldIncludeElement } from '../../utils/rail-utils'
 
 const moduleRailEntries = (
   importOverleafModules('railEntries') as {
     import: { default: RailElement }
+    path: string
+  }[]
+).map(({ import: { default: element } }) => element)
+const moduleRailPopovers = (
+  importOverleafModules('railPopovers') as {
+    import: {
+      default: {
+        key: string
+        Component: FC<{ ref: RefObject<HTMLAnchorElement> }>
+        ref: RefObject<HTMLAnchorElement>
+        hide: boolean | (() => boolean)
+      }
+    }
     path: string
   }[]
 ).map(({ import: { default: element } }) => element)
@@ -175,7 +188,7 @@ export const RailLayout = () => {
 
   useEffect(() => {
     const validTabKeys = railTabs
-      .filter(shouldIncludeRailTab)
+      .filter(shouldIncludeElement)
       .map(tab => tab.key)
     if (!validTabKeys.includes(selectedTab) && isOpen) {
       // If the selected tab is no longer valid (e.g. due to permissions changes),
@@ -225,7 +238,7 @@ export const RailLayout = () => {
         <Nav activeKey={selectedTab} className="ide-rail-tabs-nav">
           <div className="ide-rail-tabs-wrapper" ref={tabWrapperRef}>
             {tabsInRail
-              .filter(shouldIncludeRailTab)
+              .filter(shouldIncludeElement)
               .map(({ icon, key, indicator, title, disabled, ref }) => (
                 <RailTab
                   open={isOpen && selectedTab === key}
@@ -254,6 +267,11 @@ export const RailLayout = () => {
       <EditorTourRailTooltip target={fileTreeRef.current} />
       <EditorTourThemeTooltip target={settingsRef.current} />
       <EditorTourSwitchBackTooltip target={settingsRef.current} />
+      {moduleRailPopovers
+        .filter(shouldIncludeElement)
+        .map(({ key, Component, ref }) => (
+          <Component key={key} ref={ref} />
+        ))}
       <RailPanel
         isReviewPanelOpen={isReviewPanelOpen}
         isHistoryView={isHistoryView}
