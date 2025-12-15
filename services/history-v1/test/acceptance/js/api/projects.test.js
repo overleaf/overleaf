@@ -520,7 +520,7 @@ describe('project controller', function () {
             project_id: projectId,
             since: -1,
           })
-        ).to.be.rejectedWith('Bad Request')
+        ).to.be.rejectedWith('request failed with status 400')
       })
 
       it('rejects out of bounds versions', async function () {
@@ -529,7 +529,7 @@ describe('project controller', function () {
             project_id: projectId,
             since: 20,
           })
-        ).to.be.rejectedWith('Bad Request')
+        ).to.be.rejectedWith('request failed with status 400')
       })
     })
 

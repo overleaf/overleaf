@@ -1,17 +1,17 @@
 const { isZodErrorLike, fromError } = require('zod-validation-error')
-/**
- * @typedef {import('express').ErrorRequestHandler} ErrorRequestHandler
- */
 
-const handleValidationError = [
-  /** @type {ErrorRequestHandler} */
-  (err, req, res, next) => {
-    if (!isZodErrorLike(err)) {
-      return next(err)
-    }
+function createHandleValidationError(statusCode = 400) {
+  return [
+    (err, req, res, next) => {
+      if (!isZodErrorLike(err)) {
+        return next(err)
+      }
 
-    res.status(400).json({ ...fromError(err), statusCode: 400 })
-  },
-]
+      res.status(statusCode).json({ ...fromError(err), statusCode })
+    },
+  ]
+}
 
-module.exports = { handleValidationError }
+const handleValidationError = createHandleValidationError(400)
+
+module.exports = { handleValidationError, createHandleValidationError }

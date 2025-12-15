@@ -48,6 +48,19 @@ function setupSSL(app) {
 
 exports.setupSSL = setupSSL
 
+function setupBasicHttpAuthForSwaggerDocs(app) {
+  app.use('/docs', function (req, res, next) {
+    if (hasValidBasicAuthCredentials(req)) {
+      return next()
+    }
+
+    res.header('WWW-Authenticate', 'Basic realm="Application"')
+    res.status(HTTPStatus.UNAUTHORIZED).end()
+  })
+}
+
+exports.setupBasicHttpAuthForSwaggerDocs = setupBasicHttpAuthForSwaggerDocs
+
 function configureJWTAuth(mode = 'jwt') {
   return function handleJWTAuth(req, res, next) {
     if (hasValidBasicAuthCredentials(req)) {

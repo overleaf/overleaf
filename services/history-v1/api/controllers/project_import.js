@@ -27,16 +27,36 @@ const persistBuffer = storage.persistBuffer
 const InvalidChangeError = storage.InvalidChangeError
 
 const render = require('./render')
+const { validateReq } = require('@overleaf/validation-tools')
+const schemas = require('../schema')
 const Rollout = require('../app/rollout')
 const redisBackend = require('../../storage/lib/chunk_store/redis')
 
 const rollout = new Rollout(config)
 rollout.report(logger) // display the rollout configuration in the logs
 
+function getParam(req, name, location = 'path') {
+  switch (location) {
+    case 'path':
+      return req.params?.[name]
+    case 'query':
+      return req.query?.[name]
+    case 'body':
+      if (name === 'body') {
+        return req.body
+      }
+      if (req.body?.[name] !== undefined) {
+        return req.body[name]
+      }
+      return undefined
+    default:
+      return undefined
+  }
+}
 async function importSnapshot(req, res) {
-  const projectId = req.swagger.params.project_id.value
-  const rawSnapshot = req.swagger.params.snapshot.value
-
+  const { params, body } = validateReq(req, schemas.importSnapshot)
+  const projectId = params.project_id
+  const rawSnapshot = getParam({ body }, 'snapshot', 'body') ?? body
   let snapshot
 
   try {
@@ -62,10 +82,11 @@ async function importSnapshot(req, res) {
 }
 
 async function importChanges(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
-  const rawChanges = req.swagger.params.changes.value
-  const endVersion = req.swagger.params.end_version.value
-  const returnSnapshot = req.swagger.params.return_snapshot.value || 'none'
+  const { params, query, body } = validateReq(req, schemas.importChanges)
+  const projectId = params.project_id
+  const rawChanges = getParam({ body }, 'changes', 'body') ?? body
+  const endVersion = query.end_version
+  const returnSnapshot = query.return_snapshot ?? 'none'
 
   let changes
 
@@ -156,7 +177,8 @@ async function importChanges(req, res, next) {
 }
 
 async function flushChanges(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
+  const { params } = validateReq(req, schemas.flushChanges)
+  const projectId = params.project_id
   // Use the same limits importChanges, since these are passed to persistChanges
   const farFuture = new Date()
   farFuture.setTime(farFuture.getTime() + 7 * 24 * 3600 * 1000)
@@ -179,7 +201,8 @@ async function flushChanges(req, res, next) {
 }
 
 async function expireProject(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
+  const { params } = validateReq(req, schemas.expireProject)
+  const projectId = params.project_id
   await redisBackend.expireProject(projectId)
   res.status(HTTPStatus.OK).end()
 }
