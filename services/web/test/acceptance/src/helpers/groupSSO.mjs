@@ -71,6 +71,7 @@ export async function createGroupSSO(
     },
     ssoConfig: ssoConfig._id,
     membersLimit: 10,
+    teamName: 'Test Team',
   })
   await subscription.ensureExists()
   const subscriptionId = subscription._id.toString()
