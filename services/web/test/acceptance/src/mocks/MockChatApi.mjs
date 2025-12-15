@@ -1,4 +1,5 @@
 import AbstractMockApi from './AbstractMockApi.mjs'
+import { ObjectId } from '../../../../app/src/infrastructure/mongodb.mjs'
 
 class MockChatApi extends AbstractMockApi {
   reset() {
@@ -21,7 +22,7 @@ class MockChatApi extends AbstractMockApi {
 
   sendMessage(projectId, threadId, props) {
     const message = {
-      id: Math.random().toString(),
+      id: new ObjectId().toString(),
       content: props.content,
       timestamp: Date.now(),
       user_id: props.user_id,
