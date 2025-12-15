@@ -7,6 +7,7 @@ import UserMembershipErrors from './UserMembershipErrors.mjs'
 import { SSOConfig } from '../../models/SSOConfig.mjs'
 import { Parser as CSVParser } from 'json2csv'
 import { expressify } from '@overleaf/promise-utils'
+import logger from '@overleaf/logger'
 import PlansLocator from '../Subscription/PlansLocator.mjs'
 import RecurlyClient from '../Subscription/RecurlyClient.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
@@ -34,17 +35,34 @@ async function manageGroupMembers(req, res, next) {
   const isUserGroupManager =
     Boolean(subscription.manager_ids?.some(id => id.toString() === userId)) &&
     !isAdmin
-  const recurlySubscription = subscription.recurlySubscription_id
-    ? await RecurlyClient.promises.getSubscription(
+
+  let recurlySubscription
+  try {
+    if (subscription.recurlySubscription_id) {
+      recurlySubscription = await RecurlyClient.promises.getSubscription(
         subscription.recurlySubscription_id
       )
-    : undefined
+    }
+  } catch (err) {
+    // do not block page rendering
+    logger.error(
+      {
+        err,
+        subscription: {
+          _id: subscription._id,
+          recurlySubscription_id: subscription.recurlySubscription_id,
+        },
+      },
+      'Error fetching Recurly subscription'
+    )
+  }
 
-  const canUseAddSeatsFeature =
+  const canUseAddSeatsFeature = Boolean(
     plan?.canUseFlexibleLicensing &&
-    isAdmin &&
-    recurlySubscription &&
-    !recurlySubscription.pendingChange
+      isAdmin &&
+      recurlySubscription &&
+      !recurlySubscription.pendingChange
+  )
 
   res.render('user_membership/group-members-react', {
     name: entityName,
