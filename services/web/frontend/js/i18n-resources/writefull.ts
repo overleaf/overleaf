@@ -322,6 +322,19 @@ const en = {
     'sign-in.extension-user-blocked.p5':
       'If you need help or guidance then more information is available ',
     'sign-in.extension-user-blocked.l2': 'here.',
+    'translation-notification.title_1': 'New, nieuw, nuevo!',
+    'translation-notification.title_2': 'Translate your text instantly',
+    'translation-notification.body_1':
+      'Translate your project without leaving Overleaf!',
+    'translation-notification.body_2_floating-button-enabled':
+      'Simply highlight your text, click',
+    'translation-notification.body_3_floating-button-enabled':
+      'and select "Translate" to pick from 30 languages.',
+    'translation-notification.body_2_toolbar-visible':
+      'Simply highlight your text and select the "Translate"',
+    'translation-notification.body_3_toolbar-visible':
+      'icon in your toolbar to pick from 30 languages.',
+    'translation-notification.ok': 'OK',
     'welcome.continue': 'Continue',
     'welcome.not-for-you': 'Not for you? Click',
     'welcome.here': 'here',
@@ -791,6 +804,19 @@ const es = {
     'sign-in.extension-user-blocked.p5':
       'Si necesitas ayuda o orientación, más información está disponible ',
     'sign-in.extension-user-blocked.l2': 'aquí.',
+    'translation-notification.title_1': 'New, nieuw, nuevo!',
+    'translation-notification.title_2': 'Traduce tu texto instantáneamente',
+    'translation-notification.body_1':
+      'Traduce tu proyecto sin salir de Overleaf!',
+    'translation-notification.body_2_floating-button-enabled':
+      'Simplemente resalta tu texto, haz clic',
+    'translation-notification.body_3_floating-button-enabled':
+      'y selecciona "Traducir" para elegir entre 30 idiomas.',
+    'translation-notification.body_2_toolbar-visible':
+      'Simplemente resalta tu texto y selecciona el icono "Traducir"',
+    'translation-notification.body_3_toolbar-visible':
+      'en tu barra de herramientas para elegir entre 30 idiomas.',
+    'translation-notification.ok': 'OK',
     'welcome.continue': 'Continuar',
     'welcome.not-for-you': '¿No es para ti? Haz clic',
     'welcome.here': 'aquí',

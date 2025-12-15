@@ -61,6 +61,7 @@ import { SearchQuery } from '@codemirror/search'
 import { beforeChangeDocEffect } from '@/features/source-editor/extensions/before-change-doc'
 import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 import { useEditorSelectionContext } from '@/shared/context/editor-selection-context'
+import { useActiveEditorTheme } from '@/shared/hooks/use-active-editor-theme'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -82,7 +83,6 @@ function useCodeMirrorScope(view: EditorView) {
     fontSize,
     lineHeight,
     autoComplete,
-    editorTheme,
     autoPairDelimiters,
     mode,
     syntaxValidation,
@@ -91,6 +91,7 @@ function useCodeMirrorScope(view: EditorView) {
     enableNewEditor,
   } = userSettings
   const activeOverallTheme = useActiveOverallTheme()
+  const editorTheme = useActiveEditorTheme()
 
   const { onlineUserCursorHighlights } = useOnlineUsersContext()
 

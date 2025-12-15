@@ -4,7 +4,7 @@ import Path from 'node:path'
 import cheerio from 'cheerio'
 // checkSanitizeOptions is only used in dev env
 // eslint-disable-next-line import/no-extraneous-dependencies
-import prettier from 'prettier'
+import * as prettier from 'prettier'
 import sanitizeHtml from 'sanitize-html'
 import { sanitizeOptions } from '../../../modules/learn/app/src/sanitizeOptions.mjs'
 import { fileURLToPath } from 'node:url'

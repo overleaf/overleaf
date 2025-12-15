@@ -368,6 +368,12 @@ async function updateUserSettings(req, res, next) {
   if (body.editorTheme != null) {
     user.ace.theme = body.editorTheme
   }
+  if (body.editorLightTheme != null) {
+    user.ace.lightTheme = body.editorLightTheme
+  }
+  if (body.editorDarkTheme != null) {
+    user.ace.darkTheme = body.editorDarkTheme
+  }
   if (body.overallTheme != null) {
     user.ace.overallTheme = body.overallTheme
   }

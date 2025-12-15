@@ -21,6 +21,10 @@ type ProjectSettingsSetterContextValue = {
   ) => void
   setMode: (mode: UserSettings['mode']) => void
   setEditorTheme: (editorTheme: UserSettings['editorTheme']) => void
+  setEditorLightTheme: (
+    editorLightTheme: UserSettings['editorLightTheme']
+  ) => void
+  setEditorDarkTheme: (editorDarkTheme: UserSettings['editorDarkTheme']) => void
   setOverallTheme: (overallTheme: UserSettings['overallTheme']) => void
   setFontSize: (fontSize: UserSettings['fontSize']) => void
   setFontFamily: (fontFamily: UserSettings['fontFamily']) => void
@@ -62,6 +66,10 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
     setSyntaxValidation,
     editorTheme,
     setEditorTheme,
+    editorLightTheme,
+    setEditorLightTheme,
+    editorDarkTheme,
+    setEditorDarkTheme,
     overallTheme,
     setOverallTheme,
     mode,
@@ -102,6 +110,10 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setSyntaxValidation,
       editorTheme,
       setEditorTheme,
+      editorLightTheme,
+      setEditorLightTheme,
+      editorDarkTheme,
+      setEditorDarkTheme,
       overallTheme,
       setOverallTheme,
       mode,
@@ -138,6 +150,10 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setSyntaxValidation,
       editorTheme,
       setEditorTheme,
+      editorLightTheme,
+      setEditorLightTheme,
+      editorDarkTheme,
+      setEditorDarkTheme,
       overallTheme,
       setOverallTheme,
       mode,

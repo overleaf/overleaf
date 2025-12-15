@@ -50,8 +50,8 @@ export default function SettingsMenu() {
         <SettingsAutoCloseBrackets />
         <SettingsSyntaxValidation />
         <SettingsMathPreview />
-        <SettingsEditorTheme />
         <SettingsOverallTheme />
+        <SettingsEditorTheme />
         <SettingsKeybindings />
         <SettingsFontSize />
         <SettingsFontFamily />

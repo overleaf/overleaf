@@ -6,6 +6,7 @@
   --file-tree-item-selected-color: var(--content-primary-dark);
   --file-tree-item-dragging-bg: #{rgb($bg-dark-secondary, 0.9)};
   --file-tree-item-dragging-color: var(--content-primary-dark);
+  --file-tree-item-icon-dragging-color: var(--content-disabled);
   --file-tree-item-dragging-preview-bg: #{rgb($bg-accent-01, 0.6)};
   --file-tree-item-dragging-preview-colour: var(--content-primary-dark);
   --file-tree-line-height: 2.05;
@@ -28,8 +29,9 @@
     --file-tree-item-color: var(--content-primary);
     --file-tree-bg: var(--white);
     --file-tree-icon-colour: var(--content-primary);
-    --file-tree-item-dragging-bg: #{rgb($bg-dark-primary, 0.9)};
+    --file-tree-item-dragging-bg: var(--green-60);
     --file-tree-item-dragging-color: var(--white);
+    --file-tree-item-icon-dragging-color: var(--file-tree-item-dragging-color);
     --file-tree-item-dragging-preview-bg: #{rgb($bg-light-secondary, 0.6)};
     --file-tree-item-dragging-preview-colour: #{rgb($content-primary, 0.6)};
     --file-tree-expand-button-color: var(--content-primary);
@@ -44,10 +46,11 @@
   --file-tree-item-color: var(--content-primary-dark);
   --file-tree-bg: var(--bg-dark-primary);
   --file-tree-icon-colour: var(--content-primary-dark);
-  --file-tree-item-dragging-bg: #{rgb($bg-light-primary, 0.9)};
-  --file-tree-item-dragging-color: var(--content-secondary);
-  --file-tree-item-dragging-preview-bg: var(--bg-light-primary);
-  --file-tree-item-dragging-preview-colour: var(--bg-light-primary);
+  --file-tree-item-dragging-bg: var(--green-40);
+  --file-tree-item-dragging-color: var(--content-primary-dark);
+  --file-tree-item-icon-dragging-color: var(--file-tree-item-dragging-color);
+  --file-tree-item-dragging-preview-bg: #{rgb($bg-dark-secondary, 0.6)};
+  --file-tree-item-dragging-preview-colour: #{rgb($content-primary-dark, 0.6)};
   --file-tree-expand-button-color: var(--content-primary-dark);
 
   .file-tree-outline-panel-group {
@@ -595,7 +598,7 @@
     color: var(--file-tree-item-dragging-color);
 
     .material-symbols {
-      color: var(--content-disabled) !important;
+      color: var(--file-tree-item-icon-dragging-color) !important;
     }
   }
 

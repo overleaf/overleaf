@@ -16,7 +16,10 @@ type OLModalProps = ModalProps & {
   show?: boolean
 } & Pick<
     FocusTrapOptions,
-    'escapeDeactivates' | 'clickOutsideDeactivates' | 'returnFocusOnDeactivate'
+    | 'escapeDeactivates'
+    | 'clickOutsideDeactivates'
+    | 'returnFocusOnDeactivate'
+    | 'initialFocus'
   >
 
 type OLModalHeaderProps = ModalHeaderProps & {
@@ -30,6 +33,7 @@ export function OLModal({
   returnFocusOnDeactivate = true, // Return focus to trigger element when modal closes
   escapeDeactivates = false, // Let React-Bootstrap Modal handle Escape key to avoid double Escape key handling
   clickOutsideDeactivates = true, // Allow focus trap to deactivate on outside click and let React-Bootstrap Modal handle it
+  initialFocus,
   ...props
 }: OLModalProps) {
   return (
@@ -40,6 +44,7 @@ export function OLModal({
           escapeDeactivates,
           clickOutsideDeactivates,
           returnFocusOnDeactivate,
+          initialFocus,
         }}
       >
         {children}

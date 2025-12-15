@@ -16,10 +16,12 @@ import minimist from 'minimist'
 import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { db } from '../../app/src/infrastructure/mongodb.mjs'
 import AccountMappingHelper from '../../app/src/Features/Analytics/AccountMappingHelper.mjs'
-import { registerAccountMapping } from '../../app/src/Features/Analytics/AnalyticsManager.mjs'
+import AnalyticsManager from '../../app/src/Features/Analytics/AnalyticsManager.mjs'
 import { gracefulShutdown } from '../../app/src/infrastructure/GracefulShutdown.mjs'
 import Validation from '../../app/src/infrastructure/Validation.mjs'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
+
+const { registerAccountMapping } = AnalyticsManager
 
 const paramsSchema = Validation.z.object({
   endDate: Validation.z.iso

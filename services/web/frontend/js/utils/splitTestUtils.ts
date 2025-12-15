@@ -4,7 +4,10 @@ export function isSplitTestEnabled(name: string) {
   return getMeta('ol-splitTestVariants')?.[name] === 'enabled'
 }
 
-export function getSplitTestVariant(name: string, fallback?: string) {
+export function getSplitTestVariant(
+  name: string,
+  fallback: string = 'default'
+) {
   return getMeta('ol-splitTestVariants')?.[name] || fallback
 }
 

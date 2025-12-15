@@ -15,6 +15,7 @@ const NewEditorTourContext = createContext<
       stage: NewEditorTourStage
       stageNumber: number
       totalStages: number
+      isShowing: boolean
       shouldShowTourStage: (tourStage: NewEditorTourStage) => boolean
       startTour: () => void
       goToNextStage: () => void
@@ -83,6 +84,7 @@ export const NewEditorTourProvider: FC<React.PropsWithChildren> = ({
       goToNextStage,
       finishTour,
       dismissTour,
+      isShowing: showTour,
     }),
     [
       stage,
@@ -93,6 +95,7 @@ export const NewEditorTourProvider: FC<React.PropsWithChildren> = ({
       goToNextStage,
       finishTour,
       dismissTour,
+      showTour,
     ]
   )
 

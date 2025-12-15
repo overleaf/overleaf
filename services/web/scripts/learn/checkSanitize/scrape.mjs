@@ -67,7 +67,7 @@ async function scrapeAndCachePage(baseUrl, page) {
 }
 
 async function getAllPagesFrom(baseUrl, continueFrom) {
-  // https://learn.overleaf.com/learn/Special:ApiSandbox#action=query&format=json&generator=allpages&gapfilterredir=nonredirects
+  // https://learnwiki.overleaf.com/learn/Special:ApiSandbox#action=query&format=json&generator=allpages&gapfilterredir=nonredirects
   const uri = new URL(baseUrl + '/learn-scripts/api.php')
   uri.search = new URLSearchParams({
     action: 'query',

@@ -14,6 +14,8 @@ export default function useUserWideSettings() {
     autoPairDelimiters,
     syntaxValidation,
     editorTheme,
+    editorLightTheme,
+    editorDarkTheme,
     mode,
     fontSize,
     fontFamily,
@@ -49,6 +51,20 @@ export default function useUserWideSettings() {
   const setEditorTheme = useCallback(
     (editorTheme: UserSettings['editorTheme']) => {
       saveUserSettings('editorTheme', editorTheme)
+    },
+    [saveUserSettings]
+  )
+
+  const setEditorLightTheme = useCallback(
+    (editorLightTheme: UserSettings['editorLightTheme']) => {
+      saveUserSettings('editorLightTheme', editorLightTheme)
+    },
+    [saveUserSettings]
+  )
+
+  const setEditorDarkTheme = useCallback(
+    (editorDarkTheme: UserSettings['editorDarkTheme']) => {
+      saveUserSettings('editorDarkTheme', editorDarkTheme)
     },
     [saveUserSettings]
   )
@@ -118,6 +134,10 @@ export default function useUserWideSettings() {
     setSyntaxValidation,
     editorTheme,
     setEditorTheme,
+    editorLightTheme,
+    setEditorLightTheme,
+    editorDarkTheme,
+    setEditorDarkTheme,
     overallTheme,
     setOverallTheme,
     mode,

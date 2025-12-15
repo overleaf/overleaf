@@ -32,6 +32,7 @@ import Features from '../../infrastructure/Features.mjs'
 import BrandVariationsHandler from '../BrandVariations/BrandVariationsHandler.mjs'
 import UserController from '../User/UserController.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
+import LocalsHelper from '../SplitTests/LocalsHelper.mjs'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 import SplitTestSessionHandler from '../SplitTests/SplitTestSessionHandler.mjs'
 import FeaturesUpdater from '../Subscription/FeaturesUpdater.mjs'
@@ -579,6 +580,18 @@ const _ProjectController = {
           splitTestAssignments[splitTest] =
             await getSplitTestAssignment(splitTest)
         })
+      )
+
+      // PDF caching, these tests are archived but we are keeping the frontend code unchanged for now
+      LocalsHelper.setSplitTestVariant(
+        res.locals,
+        'pdf-caching-cached-url-lookup',
+        Settings.cachedUrlLookupEnabled ? 'enabled' : 'disabled'
+      )
+      LocalsHelper.setSplitTestVariant(
+        res.locals,
+        'pdf-caching-mode',
+        Settings.pdfCachingMode ? 'enabled' : 'disabled'
       )
 
       const brandVariation = project?.brandVariationId

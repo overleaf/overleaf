@@ -16,6 +16,8 @@ const defaultSettings: UserSettings = {
   autoPairDelimiters: true,
   syntaxValidation: false,
   editorTheme: 'textmate',
+  editorDarkTheme: 'overleaf_dark',
+  editorLightTheme: 'textmate',
   overallTheme: '',
   mode: 'default',
   fontSize: 12,
