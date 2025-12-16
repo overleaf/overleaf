@@ -69,6 +69,8 @@ const en = {
     'translate.request-new-language.title': 'Request a Language',
     'translate.request-new-language.body':
       "Sorry, we don't currently offer any other languages. Tell us what language you wanted to use and we will review whether we can add it in the future.",
+    'translate.request-new-language.body.already-provided':
+      'Thank you for your request. We already provide __language__. Please try using Translate again.',
     'translate.request-new-language.submit': 'Request',
     'translate.request-new-language.thanks.title':
       'Thank you for your language request',
@@ -539,6 +541,8 @@ const es = {
     'translate.request-new-language.title': 'Solicitar un nuevo idioma',
     'translate.request-new-language.body':
       'Lo sentimos, actualmente no ofrecemos otros idiomas. Dinos qué idioma querías usar y revisaremos si podemos agregarlo en el futuro.',
+    'translate.request-new-language.body.already-provided':
+      'Gracias por tu solicitud. Ya ofrecemos __language__. Por favor, intenta usar Traducir nuevamente.',
     'translate.request-new-language.submit': 'Solicitar',
     'translate.request-new-language.thanks.title':
       'Gracias por tu solicitud de idioma',
