@@ -434,6 +434,8 @@ const en = {
       'change the search criteria.',
     'citations-reviewer.chat.publications.search-criteria':
       'Search by "__type__": "__value__"',
+    'citations-reviewer.chat.publications.clear-search':
+      'Clear search criteria',
     'citations-reviewer.chat.publications.passage': 'Passage to review',
     'citations-reviewer.chat.actions.refresh': 'Refresh citations',
     'citations-reviewer.chat.actions.back': 'Back',
@@ -918,6 +920,8 @@ const es = {
       'cambia los criterios de búsqueda.',
     'citations-reviewer.chat.publications.search-criteria':
       'Búsqueda por "__type__": "__value__"',
+    'citations-reviewer.chat.publications.clear-search':
+      'Borrar criterios de búsqueda',
     'citations-reviewer.chat.publications.passage': 'Pasaje a revisar',
     'citations-reviewer.chat.actions.refresh': 'Actualizar citas',
     'citations-reviewer.chat.actions.back': 'Volver',
