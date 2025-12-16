@@ -22,7 +22,6 @@ import { expressify } from '@overleaf/promise-utils'
 import { acceptsJson } from '../../infrastructure/RequestContentTypeDetection.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
 import OneTimeTokenHandler from '../Security/OneTimeTokenHandler.mjs'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 
 async function _sendSecurityAlertClearedSessions(user) {
   const emailOptions = {
@@ -412,18 +411,7 @@ async function updateUserSettings(req, res, next) {
     user.ace.referencesSearchMode = mode
   }
   if (body.enableNewEditor != null) {
-    const assignment = await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'editor-redesign-opt-out'
-    )
-    const isOptOutStageEnabled = assignment.variant === 'enabled'
-
-    if (isOptOutStageEnabled) {
-      user.ace.enableNewEditorStageFour = Boolean(body.enableNewEditor)
-    } else {
-      user.ace.enableNewEditor = Boolean(body.enableNewEditor)
-    }
+    user.ace.enableNewEditorStageFour = Boolean(body.enableNewEditor)
   }
   if (body.darkModePdf != null) {
     user.ace.darkModePdf = Boolean(body.darkModePdf)
