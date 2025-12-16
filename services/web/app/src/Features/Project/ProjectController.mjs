@@ -456,7 +456,6 @@ const _ProjectController = {
       'writefull-keywords-generator',
       'writefull-figure-generator',
       'wf-citations-checker',
-      'wf-citations-checker-dimensions',
       'wf-citations-checker-on-selection',
       'writefull-asymetric-queue-size-per-model',
       'pdf-dark-mode',
