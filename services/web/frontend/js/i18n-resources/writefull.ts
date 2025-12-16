@@ -427,6 +427,7 @@ const en = {
     'citations-reviewer.chat.publications.description':
       'The following papers may support the claim you’ve made. Always check papers yourself to ensure relevance.',
     'citations-reviewer.chat.publications.subtitle': 'Select papers to cite:',
+    'citations-reviewer.chat.publications.no-results': 'No sources found',
     'citations-reviewer.chat.publications.alternatively': 'Alternatively,',
     'citations-reviewer.chat.publications.custom-search':
       'search for papers yourself.',
@@ -463,6 +464,7 @@ const en = {
     'citations-reviewer.chat.custom-search.form.keywords-placeholder':
       'Enter keywords',
     'citations-reviewer.chat.custom-search.form.search': 'Search',
+    'citations-reviewer.chat.custom-search.form.searching': 'Searching...',
   },
 } as const
 
@@ -913,6 +915,8 @@ const es = {
       'Los siguientes artículos pueden respaldar la afirmación que has hecho. Revisa siempre los artículos por tu cuenta para asegurar su relevancia.',
     'citations-reviewer.chat.publications.subtitle':
       'Selecciona artículos para citar:',
+    'citations-reviewer.chat.publications.no-results':
+      'No se encontraron fuentes',
     'citations-reviewer.chat.publications.alternatively': 'Alternativamente,',
     'citations-reviewer.chat.publications.custom-search':
       'busca artículos por tu cuenta.',
@@ -949,6 +953,7 @@ const es = {
     'citations-reviewer.chat.custom-search.form.keywords-placeholder':
       'Introduce palabras clave',
     'citations-reviewer.chat.custom-search.form.search': 'Buscar',
+    'citations-reviewer.chat.custom-search.form.searching': 'Buscando...',
   },
 }
 
