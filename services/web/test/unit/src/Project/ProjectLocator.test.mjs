@@ -1,6 +1,7 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
+
 const modulePath = '../../../../app/src/Features/Project/ProjectLocator'
 
 vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
@@ -43,7 +44,9 @@ project.rootDoc_id = rootDoc._id
 describe('ProjectLocator', function () {
   beforeEach(async function (ctx) {
     ctx.ProjectGetter = {
-      getProject: sinon.stub().callsArgWith(2, null, project),
+      promises: {
+        getProject: sinon.stub().resolves(project),
+      },
     }
     ctx.ProjectHelper = {
       isArchived: sinon.stub(),
@@ -481,7 +484,11 @@ describe('ProjectLocator', function () {
 
     describe('with a null project', function () {
       beforeEach(function (ctx) {
-        ctx.ProjectGetter = { getProject: sinon.stub().callsArg(2) }
+        ctx.ProjectGetter = {
+          promises: {
+            getProject: sinon.stub().resolves(null),
+          },
+        }
       })
 
       it('should not crash with a null', async function (ctx) {
@@ -502,7 +509,7 @@ describe('ProjectLocator', function () {
           project_id: project._id,
           path,
         })
-        ctx.ProjectGetter.getProject
+        ctx.ProjectGetter.promises.getProject
           .calledWith(project._id, { rootFolder: true, rootDoc_id: true })
           .should.equal(true)
         element.should.deep.equal(doc1)
