@@ -41,6 +41,13 @@ async function buildUserSettings(req, res, user) {
   const enableNewEditorLegacy =
     user.ace.enableNewEditor ?? defaultLegacyEnableNewEditor
 
+  const assignment = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'editor-redesign-opt-out'
+  )
+  const isOptOutEnabled = assignment.variant === 'enabled'
+
   return {
     mode: user.ace.mode,
     editorTheme: user.ace.theme,
@@ -57,7 +64,9 @@ async function buildUserSettings(req, res, user) {
     mathPreview: user.ace.mathPreview,
     breadcrumbs: user.ace.breadcrumbs,
     referencesSearchMode: user.ace.referencesSearchMode,
-    enableNewEditor: enableNewEditorStageFour,
+    enableNewEditor: isOptOutEnabled
+      ? enableNewEditorStageFour
+      : enableNewEditorLegacy,
     enableNewEditorLegacy,
     darkModePdf: user.ace.darkModePdf ?? false,
   }

@@ -459,6 +459,7 @@ const _ProjectController = {
       'wf-citations-checker-on-selection',
       'writefull-asymetric-queue-size-per-model',
       'pdf-dark-mode',
+      'editor-redesign-opt-out',
       'email-notifications',
     ].filter(Boolean)
 

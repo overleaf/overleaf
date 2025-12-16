@@ -4,12 +4,14 @@ import { useTranslation } from 'react-i18next'
 import { useSwitchEnableNewEditorState } from '../ide-redesign/hooks/use-switch-enable-new-editor-state'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 import OldEditorWarningTooltip from '../ide-redesign/components/old-editor-warning-tooltip'
 
 const TryNewEditorButton = () => {
   const { t } = useTranslation()
   const { loading, setEditorRedesignStatus } = useSwitchEnableNewEditorState()
   const { sendEvent } = useEditorAnalytics()
+  const isNewEditorOptOutStage = useFeatureFlag('editor-redesign-opt-out')
   const [buttonElt, setButtonElt] = useState<HTMLButtonElement | null>(null)
   const buttonRef = useCallback((node: HTMLButtonElement) => {
     if (node !== null) {
@@ -35,9 +37,11 @@ const TryNewEditorButton = () => {
         ref={buttonRef}
       >
         <MaterialIcon type="fiber_new" />
-        {t('switch_to_new_look')}
+        {isNewEditorOptOutStage
+          ? t('switch_to_new_look')
+          : t('try_the_new_editor_design')}
       </OLButton>
-      <OldEditorWarningTooltip target={buttonElt} />
+      {isNewEditorOptOutStage && <OldEditorWarningTooltip target={buttonElt} />}
     </div>
   )
 }
