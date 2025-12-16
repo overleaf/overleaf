@@ -1,142 +1,168 @@
+import path from 'node:path'
 import settings from '@overleaf/settings'
-import request from 'request'
+import {
+  fetchJson,
+  fetchNothing,
+  RequestFailedError,
+} from '@overleaf/fetch-utils'
 import logger from '@overleaf/logger'
 import _ from 'lodash'
-import { promisifyAll } from '@overleaf/promise-utils'
+import { callbackifyAll } from '@overleaf/promise-utils'
+import OError from '@overleaf/o-error'
 
 const notificationsApi = _.get(settings, ['apis', 'notifications', 'url'])
 const oneSecond = 1000
 
-const makeRequest = function (opts, callback) {
-  if (notificationsApi) {
-    request(opts, callback)
-  } else {
-    callback(null, { statusCode: 200 })
+async function getUserNotifications(userId) {
+  if (!notificationsApi) return []
+
+  const url = new URL(notificationsApi)
+  url.pathname = path.posix.join('user', userId.toString())
+
+  try {
+    const body = await fetchJson(url, {
+      signal: AbortSignal.timeout(oneSecond),
+    })
+    return body || []
+  } catch (err) {
+    logger.err({ err, userId }, 'something went wrong getting notifications')
+    return []
   }
 }
 
-const NotificationsHandler = {
-  getUserNotifications(userId, callback) {
-    const opts = {
-      uri: `${notificationsApi}/user/${userId}`,
-      json: true,
-      timeout: oneSecond,
-      method: 'GET',
-    }
-    makeRequest(opts, function (err, res, unreadNotifications) {
-      const statusCode = res ? res.statusCode : 500
-      if (err || statusCode !== 200) {
-        logger.err(
-          { err, statusCode },
-          'something went wrong getting notifications'
-        )
-        callback(null, [])
-      } else {
-        if (unreadNotifications == null) {
-          unreadNotifications = []
-        }
-        callback(null, unreadNotifications)
-      }
-    })
-  },
+async function createNotification(
+  userId,
+  key,
+  templateKey,
+  messageOpts,
+  expiryDateTime,
+  forceCreate = true
+) {
+  if (!notificationsApi) return
 
-  createNotification(
-    userId,
+  const payload = {
     key,
-    templateKey,
     messageOpts,
-    expiryDateTime,
+    templateKey,
     forceCreate,
-    callback
-  ) {
-    if (!callback) {
-      callback = forceCreate
-      forceCreate = true
-    }
-    const payload = {
-      key,
-      messageOpts,
-      templateKey,
-      forceCreate,
-    }
-    if (expiryDateTime) {
-      payload.expires = expiryDateTime
-    }
-    const opts = {
-      uri: `${notificationsApi}/user/${userId}`,
-      timeout: oneSecond,
+  }
+  if (expiryDateTime) {
+    payload.expires = expiryDateTime
+  }
+  const url = new URL(notificationsApi)
+  url.pathname = path.posix.join('user', userId.toString())
+  try {
+    return await fetchNothing(url, {
       method: 'POST',
       json: payload,
-    }
-    makeRequest(opts, callback)
-  },
-
-  markAsReadWithKey(userId, key, callback) {
-    const opts = {
-      uri: `${notificationsApi}/user/${userId}`,
-      method: 'DELETE',
-      timeout: oneSecond,
-      json: {
-        key,
-      },
-    }
-    makeRequest(opts, callback)
-  },
-
-  markAsRead(userId, notificationId, callback) {
-    const opts = {
-      method: 'DELETE',
-      uri: `${notificationsApi}/user/${userId}/notification/${notificationId}`,
-      timeout: oneSecond,
-    }
-    makeRequest(opts, callback)
-  },
-
-  // removes notification by key, without regard for user_id,
-  // should not be exposed to user via ui/router
-  markAsReadByKeyOnly(key, callback) {
-    const opts = {
-      uri: `${notificationsApi}/key/${key}`,
-      method: 'DELETE',
-      timeout: oneSecond,
-    }
-    makeRequest(opts, callback)
-  },
-
-  previewMarkAsReadByKeyOnlyBulk(key, callback) {
-    const opts = {
-      uri: `${notificationsApi}/key/${key}/count`,
-      method: 'GET',
-      timeout: 10 * oneSecond,
-      json: true,
-    }
-    makeRequest(opts, (err, res, body) => {
-      if (err) return callback(err)
-      if (res.statusCode !== 200) {
-        return callback(
-          new Error('cannot preview bulk delete notification: ' + key)
-        )
-      }
-      callback(null, (body && body.count) || 0)
+      signal: AbortSignal.timeout(oneSecond),
     })
-  },
-
-  markAsReadByKeyOnlyBulk(key, callback) {
-    const opts = {
-      uri: `${notificationsApi}/key/${key}/bulk`,
-      method: 'DELETE',
-      timeout: 10 * oneSecond,
-      json: true,
+  } catch (err) {
+    // keep the behavior from `request`
+    if (!(err instanceof RequestFailedError)) {
+      throw OError.tag(err, 'Failed create notification')
     }
-    makeRequest(opts, (err, res, body) => {
-      if (err) return callback(err)
-      if (res.statusCode !== 200) {
-        return callback(new Error('cannot bulk delete notification: ' + key))
-      }
-      callback(null, (body && body.count) || 0)
-    })
-  },
+  }
 }
 
-NotificationsHandler.promises = promisifyAll(NotificationsHandler)
+async function markAsReadWithKey(userId, key) {
+  if (!notificationsApi) return
+
+  const url = new URL(notificationsApi)
+  url.pathname = path.posix.join('user', userId.toString())
+  try {
+    await fetchNothing(url, {
+      method: 'DELETE',
+      json: { key },
+      signal: AbortSignal.timeout(oneSecond),
+    })
+  } catch (err) {
+    // keep the behavior from `request`
+    if (!(err instanceof RequestFailedError)) {
+      throw OError.tag(err, 'markAsReadWithKey failed')
+    }
+  }
+}
+
+async function markAsRead(userId, notificationId) {
+  if (!notificationsApi) return
+
+  const url = new URL(notificationsApi)
+  url.pathname = path.posix.join(
+    'user',
+    userId.toString(),
+    'notification',
+    notificationId
+  )
+  try {
+    await fetchNothing(url, {
+      method: 'DELETE',
+      signal: AbortSignal.timeout(oneSecond),
+    })
+  } catch (err) {
+    // keep the behavior from `request`
+    if (!(err instanceof RequestFailedError)) {
+      throw OError.tag(err, 'markAsRead failed')
+    }
+  }
+}
+
+// removes notification by key, without regard for user_id,
+// should not be exposed to user via ui/router
+async function markAsReadByKeyOnly(key) {
+  if (!notificationsApi) return
+
+  const url = new URL(notificationsApi)
+  url.pathname = path.posix.join('key', key)
+  try {
+    await fetchNothing(url, {
+      method: 'DELETE',
+      signal: AbortSignal.timeout(oneSecond),
+    })
+  } catch (err) {
+    // keep the behavior from `request`
+    if (!(err instanceof RequestFailedError)) {
+      throw OError.tag(err, 'markAsReadByKeyOnly failed')
+    }
+  }
+}
+
+async function previewMarkAsReadByKeyOnlyBulk(key) {
+  if (!notificationsApi) return 0
+
+  const url = new URL(notificationsApi)
+  url.pathname = path.posix.join('key', key, 'count')
+  const body = await fetchJson(url, {
+    signal: AbortSignal.timeout(10 * oneSecond),
+  })
+  return body?.count || 0
+}
+
+async function markAsReadByKeyOnlyBulk(key) {
+  if (!notificationsApi) return 0
+
+  const url = new URL(notificationsApi)
+  url.pathname = path.posix.join('key', key, 'bulk')
+  const body = await fetchJson(url, {
+    method: 'DELETE',
+    signal: AbortSignal.timeout(10 * oneSecond),
+  })
+  return body?.count || 0
+}
+
+const promises = {
+  getUserNotifications,
+  createNotification,
+  markAsReadWithKey,
+  markAsRead,
+  markAsReadByKeyOnly,
+  previewMarkAsReadByKeyOnlyBulk,
+  markAsReadByKeyOnlyBulk,
+}
+
+const NotificationsHandler = {
+  ...callbackifyAll(promises),
+  promises,
+}
+
 export default NotificationsHandler

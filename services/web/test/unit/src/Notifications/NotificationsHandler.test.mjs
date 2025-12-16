@@ -9,10 +9,13 @@ const modulePath = path.join(
 describe('NotificationsHandler', function () {
   const userId = '123nd3ijdks'
   const notificationId = '123njdskj9jlk'
-  const notificationUrl = 'notification.overleaf.testing'
+  const notificationUrl = 'http://notification.overleaf.testing'
 
   beforeEach(async function (ctx) {
-    ctx.request = sinon.stub().callsArgWith(1)
+    ctx.FetchUtils = {
+      fetchJson: sinon.stub().resolves(),
+      fetchNothing: sinon.stub().resolves(),
+    }
 
     vi.doMock('@overleaf/settings', () => ({
       default: {
@@ -20,9 +23,7 @@ describe('NotificationsHandler', function () {
       },
     }))
 
-    vi.doMock('request', () => ({
-      default: ctx.request,
-    }))
+    vi.doMock('@overleaf/fetch-utils', () => ctx.FetchUtils)
 
     ctx.handler = (await import(modulePath)).default
   })
@@ -30,26 +31,19 @@ describe('NotificationsHandler', function () {
   describe('getUserNotifications', function () {
     it('should get unread notifications', async function (ctx) {
       const stubbedNotifications = [{ _id: notificationId, user_id: userId }]
-      ctx.request.callsArgWith(
-        1,
-        null,
-        { statusCode: 200 },
-        stubbedNotifications
-      )
+      ctx.FetchUtils.fetchJson.resolves(stubbedNotifications)
       const unreadNotifications =
         await ctx.handler.promises.getUserNotifications(userId)
       stubbedNotifications.should.deep.equal(unreadNotifications)
-      const getOpts = {
-        uri: `${notificationUrl}/user/${userId}`,
-        json: true,
-        timeout: 1000,
-        method: 'GET',
-      }
-      ctx.request.calledWith(getOpts).should.equal(true)
+      ctx.FetchUtils.fetchJson
+        .calledWith(
+          sinon.match(u => u.href === `${notificationUrl}/user/${userId}`)
+        )
+        .should.equal(true)
     })
 
     it('should return empty arrays if there are no notifications', async function (ctx) {
-      ctx.request.callsArgWith(1, null, { statusCode: 200 }, null)
+      ctx.FetchUtils.fetchJson.resolves(null)
       const unreadNotifications =
         await ctx.handler.promises.getUserNotifications(userId)
       unreadNotifications.length.should.equal(0)
@@ -63,15 +57,15 @@ describe('NotificationsHandler', function () {
 
     it('should send a delete request when a delete has been received to mark a notification', async function (ctx) {
       await ctx.handler.promises.markAsReadWithKey(userId, ctx.key)
-      const opts = {
-        uri: `${notificationUrl}/user/${userId}`,
-        json: {
-          key: ctx.key,
-        },
-        timeout: 1000,
-        method: 'DELETE',
-      }
-      ctx.request.calledWith(opts).should.equal(true)
+      ctx.FetchUtils.fetchNothing
+        .calledWith(
+          sinon.match(u => u.href === `${notificationUrl}/user/${userId}`),
+          sinon.match({
+            method: 'DELETE',
+            json: { key: ctx.key },
+          })
+        )
+        .should.equal(true)
     })
   })
 
@@ -91,16 +85,17 @@ describe('NotificationsHandler', function () {
         ctx.messageOpts,
         ctx.expiry
       )
-      const args = ctx.request.args[0][0]
-      args.uri.should.equal(`${notificationUrl}/user/${userId}`)
-      args.timeout.should.equal(1000)
+      const [url, opts] = ctx.FetchUtils.fetchNothing.getCall(0).args
+      url.href.should.equal(`${notificationUrl}/user/${userId}`)
+      opts.method.should.equal('POST')
+
       const expectedJson = {
         key: ctx.key,
         templateKey: ctx.templateKey,
         messageOpts: ctx.messageOpts,
         forceCreate: true,
       }
-      assert.deepEqual(args.json, expectedJson)
+      assert.deepEqual(opts.json, expectedJson)
     })
 
     describe('when expiry date is supplied', function () {
@@ -120,9 +115,10 @@ describe('NotificationsHandler', function () {
           ctx.expiry
         )
 
-        const args = ctx.request.args[0][0]
-        args.uri.should.equal(`${notificationUrl}/user/${userId}`)
-        args.timeout.should.equal(1000)
+        const [url, args] = ctx.FetchUtils.fetchNothing.getCall(0).args
+        url.href.should.equal(`${notificationUrl}/user/${userId}`)
+        args.method.should.equal('POST')
+
         const expectedJson = {
           key: ctx.key,
           templateKey: ctx.templateKey,
@@ -142,12 +138,16 @@ describe('NotificationsHandler', function () {
 
     it('should send a delete request when a delete has been received to mark a notification', async function (ctx) {
       await ctx.handler.promises.markAsReadByKeyOnly(ctx.key)
-      const opts = {
-        uri: `${notificationUrl}/key/${ctx.key}`,
-        timeout: 1000,
-        method: 'DELETE',
-      }
-      ctx.request.calledWith(opts).should.equal(true)
+      ctx.FetchUtils.fetchNothing
+        .calledWith(
+          sinon.match(
+            u => u.href === `${notificationUrl}/key/some%20key%20here`
+          ),
+          sinon.match({
+            method: 'DELETE',
+          })
+        )
+        .should.equal(true)
     })
   })
 })
