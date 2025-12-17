@@ -79,7 +79,9 @@ describe('UserEmailsController', function () {
       consume: vi.fn().mockResolvedValue(undefined),
     }
     ctx.RateLimiter = {
-      RateLimiter: vi.fn().mockReturnValue(ctx.rateLimiter),
+      RateLimiter: vi.fn().mockImplementation(function RateLimiter() {
+        this.consume = ctx.rateLimiter.consume
+      }),
     }
     ctx.AuthenticationController = {
       getRedirectFromSession: vi.fn().mockReturnValue(null),

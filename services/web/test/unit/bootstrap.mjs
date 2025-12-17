@@ -52,7 +52,7 @@ beforeEach(ctx => {
 })
 
 afterEach(() => {
-  vi.restoreAllMocks()
+  vi.resetAllMocks()
   vi.resetModules()
   sinon.restore()
   const modelNames = mongoose.modelNames()
