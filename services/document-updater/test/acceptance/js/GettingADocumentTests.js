@@ -147,14 +147,7 @@ describe('Getting a document', function () {
 
   describe('when the web api returns an error', function () {
     before(function () {
-      sinon
-        .stub(MockWebApi, 'getDocument')
-        .callsFake((projectId, docId, callback) => {
-          if (callback == null) {
-            callback = function () {}
-          }
-          callback(new Error('oops'))
-        })
+      sinon.stub(MockWebApi, 'getDocument').rejects(new Error('oops'))
     })
 
     after(function () {
@@ -173,14 +166,11 @@ describe('Getting a document', function () {
   describe('when the web api http request takes a long time', function () {
     before(function (done) {
       this.timeout = 10000
-      sinon
-        .stub(MockWebApi, 'getDocument')
-        .callsFake((projectId, docId, callback) => {
-          if (callback == null) {
-            callback = function () {}
-          }
-          setTimeout(callback, 30000)
+      sinon.stub(MockWebApi, 'getDocument').returns(
+        new Promise(resolve => {
+          setTimeout(() => resolve(null), 30000)
         })
+      )
       done()
     })
 

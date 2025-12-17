@@ -205,15 +205,7 @@ describe('Ranges', function () {
 
     it('should flush the ranges to the persistence layer again', async function () {
       await DocUpdaterClient.flushDoc(this.project_id, this.doc.id)
-      const doc = await new Promise((resolve, reject) => {
-        MockWebApi.getDocument(this.project_id, this.doc.id, (error, doc) => {
-          if (error) {
-            reject(error)
-          } else {
-            resolve(doc)
-          }
-        })
-      })
+      const doc = await MockWebApi.getDocument(this.project_id, this.doc.id)
       const { changes } = doc.ranges
       changes[0].op.should.deep.equal({ i: '123', p: 1 })
       changes[1].op.should.deep.equal({ i: '456', p: 5 })
