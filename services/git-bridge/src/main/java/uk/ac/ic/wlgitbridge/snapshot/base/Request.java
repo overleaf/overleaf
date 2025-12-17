@@ -8,8 +8,8 @@ import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.*;
-import javax.servlet.http.HttpServletResponse;
 import org.asynchttpclient.AsyncHttpClient;
+import org.eclipse.jetty.http.HttpStatus;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.util.Instance;
 import uk.ac.ic.wlgitbridge.util.Log;
@@ -72,17 +72,16 @@ public abstract class Request<T extends Result> {
       if (cause instanceof HttpResponseException) {
         HttpResponseException httpCause = (HttpResponseException) cause;
         int sc = httpCause.getStatusCode();
-        if (sc == HttpServletResponse.SC_UNAUTHORIZED
-            || sc == HttpServletResponse.SC_FORBIDDEN) { // 401, 403
+        if (sc == HttpStatus.UNAUTHORIZED_401 || sc == HttpStatus.FORBIDDEN_403) {
           throw new ForbiddenException();
-        } else if (sc == 429) { // Too many requests
+        } else if (sc == HttpStatus.TOO_MANY_REQUESTS_429) {
           throw new MissingRepositoryException(
               Arrays.asList(
                   "Rate-limit exceeded. Please wait a while and try again.",
                   "",
                   "If this is unexpected, please contact us at support@overleaf.com, or",
                   "see https://www.overleaf.com/learn/how-to/Git_integration for more information."));
-        } else if (sc == HttpServletResponse.SC_CONFLICT) { // 409
+        } else if (sc == HttpStatus.CONFLICT_409) {
           try {
             JsonObject json = Instance.gson.fromJson(httpCause.getContent(), JsonObject.class);
             String code = json.get("code").getAsString();
@@ -105,7 +104,7 @@ public abstract class Request<T extends Result> {
               | NullPointerException _e) { // json parse errors
             throw new MissingRepositoryException(Arrays.asList("Conflict: 409"));
           }
-        } else if (sc == HttpServletResponse.SC_NOT_FOUND) { // 404
+        } else if (sc == HttpStatus.NOT_FOUND_404) {
           try {
             JsonObject json = Instance.gson.fromJson(httpCause.getContent(), JsonObject.class);
             String message = json.get("message").getAsString();

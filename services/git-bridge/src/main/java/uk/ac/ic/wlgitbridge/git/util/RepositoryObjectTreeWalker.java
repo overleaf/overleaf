@@ -64,7 +64,7 @@ public class RepositoryObjectTreeWalker {
       String path = treeWalk.getPathString();
 
       ObjectId objectId = treeWalk.getObjectId(0);
-      if (!repository.hasObject(objectId)) {
+      if (!repository.getObjectDatabase().has(objectId)) {
         throw new InvalidGitRepository();
       }
       ObjectLoader obj = repository.open(objectId);

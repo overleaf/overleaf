@@ -1,7 +1,7 @@
 package uk.ac.ic.wlgitbridge.application;
 
+import jakarta.servlet.ServletException;
 import java.io.IOException;
-import javax.servlet.ServletException;
 import uk.ac.ic.wlgitbridge.application.config.Config;
 import uk.ac.ic.wlgitbridge.application.exception.ArgsException;
 import uk.ac.ic.wlgitbridge.application.exception.ConfigFileException;

@@ -4,44 +4,48 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 import io.prometheus.client.hotspot.DefaultExports;
 import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.*;
+import org.eclipse.jetty.http.HttpField;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.io.Content;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.Fields;
 import uk.ac.ic.wlgitbridge.util.Log;
 
-public class PrometheusHandler extends AbstractHandler {
+public class PrometheusHandler extends Handler.Abstract {
 
   public PrometheusHandler() {
     DefaultExports.initialize();
   }
 
   @Override
-  public void handle(
-      String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-      throws IOException, ServletException {
-    String method = baseRequest.getMethod();
-    if (("GET".equals(method)) && target != null && target.matches("^/metrics/?$")) {
+  public boolean handle(Request request, Response response, Callback callback) throws Exception {
+    String method = request.getMethod();
+    String path = Request.getPathInContext(request);
+    if (("GET".equals(method)) && path != null && path.matches("^/metrics/?$")) {
       Log.debug(method + " <- /metrics");
-      this.printMetrics(request, response);
-      baseRequest.setHandled(true);
+      this.printMetrics(request, response, callback);
+      return true;
     }
+    return false;
   }
 
-  private void printMetrics(HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
-    response.setStatus(200);
-    String contentType = TextFormat.chooseContentType(request.getHeader("Accept"));
-    response.setContentType(contentType);
+  private void printMetrics(Request request, Response response, Callback callback)
+      throws Exception {
+    response.setStatus(HttpStatus.OK_200);
+    HttpField acceptField = request.getHeaders().getField(HttpHeader.ACCEPT);
+    String accept = acceptField != null ? acceptField.getValue() : null;
+    String contentType = TextFormat.chooseContentType(accept);
+    response.getHeaders().put("Content-Type", contentType);
 
-    Writer writer = new BufferedWriter(response.getWriter());
+    Writer writer =
+        new BufferedWriter(new OutputStreamWriter(Content.Sink.asOutputStream(response)));
 
     try {
       TextFormat.writeFormat(
@@ -51,15 +55,24 @@ public class PrometheusHandler extends AbstractHandler {
       writer.flush();
     } finally {
       writer.close();
+      callback.succeeded();
     }
   }
 
-  private Set<String> parse(HttpServletRequest req) {
-    String[] includedParam = req.getParameterValues("name[]");
-    if (includedParam == null) {
-      return Collections.emptySet();
-    } else {
+  private Set<String> parse(Request req) {
+    try {
+      Fields parameters = Request.getParameters(req);
+      if (parameters == null) {
+        return Collections.emptySet();
+      }
+      List<String> values = parameters.getValues("name[]");
+      if (values == null || values.isEmpty()) {
+        return Collections.emptySet();
+      }
+      String[] includedParam = values.toArray(new String[0]);
       return new HashSet<String>(Arrays.asList(includedParam));
+    } catch (Exception e) {
+      return Collections.emptySet();
     }
   }
 }
