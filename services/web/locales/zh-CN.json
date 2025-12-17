@@ -2192,7 +2192,7 @@
   "the_next_payment_will_be_collected_on": "下一笔付款将于<strong>__date__</strong>收取。",
   "the_original_text_has_changed": "原文本已发生改变，因此此建议无法应用",
   "the_overleaf_color_scheme": "__appName__ 配色方案",
-  "the_primary_file_for_compiling_your_project": "编译项目的主要文件",
+  "the_primary_file_for_compiling_your_project": "编译项目的主要文件。",
   "the_project_that_contains_this_file_is_not_shared_with_you": "包含此文件的项目未与您共享",
   "the_requested_conversion_job_was_not_found": "在Overleaf打开此内容的链接指定了找不到的转换作业。作业可能已过期，需要重新运行。如果某个网站的链接经常出现这种情况，请向他们报告。",
   "the_requested_publisher_was_not_found": "在Overleaf打开此内容的链接指定了找不到的发布者。如果某个网站的链接经常出现这种情况，请向他们报告。",

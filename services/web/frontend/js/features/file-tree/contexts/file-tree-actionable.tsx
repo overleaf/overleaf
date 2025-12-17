@@ -19,6 +19,7 @@ import {
   NewDocEntity,
   NewLinkedFileEntity,
   NewEntity,
+  syncRootDocId,
 } from '../util/sync-mutation'
 import { findInTree, findInTreeOrThrow } from '../util/find-in-tree'
 import { isNameUniqueInFolder } from '../util/is-name-unique-in-folder'
@@ -39,6 +40,7 @@ import { useReferencesContext } from '@/features/ide-react/context/references-co
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { FileTreeEntity } from '@ol-types/file-tree-entity'
 import { Doc } from '@ol-types/doc'
+import { isValidTeXFile } from '@/main/is-valid-tex-file'
 
 type DroppedFile = File & {
   relativePath?: string
@@ -87,6 +89,8 @@ const FileTreeActionableContext = createContext<
       droppedFiles: { files: File[]; targetFolderId: string } | null
       setDroppedFiles: (value: DroppedFiles | null) => void
       downloadPath?: string
+      canSetRootDocId: boolean
+      setRootDocId: () => Promise<void>
     }
   | undefined
 >(undefined)
@@ -230,10 +234,12 @@ function fileTreeActionableReducer(state: State, action: Action) {
 export const FileTreeActionableProvider: FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  const { projectId } = useProjectContext()
+  const { projectId, project, updateProject } = useProjectContext()
   const { fileTreeReadOnly } = useFileTreeData()
   const { indexAllReferences } = useReferencesContext()
   const { write } = usePermissionsContext()
+
+  const rootDocId = project?.rootDocId
 
   const [state, dispatch] = useReducer(
     fileTreeReadOnly
@@ -522,6 +528,34 @@ export const FileTreeActionableProvider: FC<React.PropsWithChildren> = ({
     }
   }, [fileTreeData, projectId, selectedEntityIds])
 
+  const canSetRootDocId = useMemo(() => {
+    // must have write permission on the project
+    if (!write) {
+      return false
+    }
+
+    // must be only one file selected
+    if (!selectedFileName) {
+      return false
+    }
+
+    // must not already be the root doc
+    if (rootDocId && selectedEntityIds.has(rootDocId)) {
+      return false
+    }
+
+    // must have a valid root doc extension
+    return isValidTeXFile(selectedFileName)
+  }, [rootDocId, selectedEntityIds, selectedFileName, write])
+
+  const setRootDocId = useCallback(async () => {
+    const [selectedEntityId] = selectedEntityIds
+
+    await syncRootDocId(projectId, selectedEntityId)
+
+    updateProject({ rootDocId: selectedEntityId })
+  }, [projectId, selectedEntityIds, updateProject])
+
   const value = useMemo(
     () => ({
       canDelete: write && selectedEntityIds.size > 0 && !isRootFolderSelected,
@@ -549,6 +583,8 @@ export const FileTreeActionableProvider: FC<React.PropsWithChildren> = ({
       droppedFiles,
       setDroppedFiles,
       downloadPath,
+      canSetRootDocId,
+      setRootDocId,
     }),
     [
       cancel,
@@ -573,6 +609,8 @@ export const FileTreeActionableProvider: FC<React.PropsWithChildren> = ({
       startUploadingDocOrFile,
       state,
       write,
+      canSetRootDocId,
+      setRootDocId,
     ]
   )
 
