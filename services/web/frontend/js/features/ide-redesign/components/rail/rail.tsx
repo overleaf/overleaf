@@ -233,7 +233,7 @@ export const RailLayout = () => {
           Therefore, we nest them: the parent <nav> is the landmark, and its child gets the "role="tablist"". */}
       <nav
         className={classNames('ide-rail', { hidden: isHistoryView })}
-        aria-label={t('files_collaboration_integrations')}
+        aria-label={t('sidebar')}
       >
         <Nav activeKey={selectedTab} className="ide-rail-tabs-nav">
           <div className="ide-rail-tabs-wrapper" ref={tabWrapperRef}>
