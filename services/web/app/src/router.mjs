@@ -697,6 +697,27 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
 
   webRouter.post(
+    '/project/:Project_id/webdav/link',
+    AuthenticationController.requireLogin(),
+    AuthorizationMiddleware.ensureUserCanAdminProject,
+    ProjectController.linkWebDAV
+  )
+
+  webRouter.post(
+    '/project/:Project_id/webdav/unlink',
+    AuthenticationController.requireLogin(),
+    AuthorizationMiddleware.ensureUserCanAdminProject,
+    ProjectController.unlinkWebDAV
+  )
+
+  webRouter.post(
+    '/project/:Project_id/webdav/sync',
+    AuthenticationController.requireLogin(),
+    AuthorizationMiddleware.ensureUserCanAdminProject,
+    ProjectController.syncWebDAV
+  )
+
+  webRouter.post(
     '/Project/:Project_id/restore',
     AuthenticationController.requireLogin(),
     AuthorizationMiddleware.ensureUserCanAdminProject,

@@ -3,10 +3,13 @@ const { SettingsError } = require('./Errors')
 const GcsPersistor = require('./GcsPersistor')
 const { S3Persistor } = require('./S3Persistor')
 const FSPersistor = require('./FSPersistor')
+const WebDAVPersistor = require('./WebDAVPersistor')
 const MigrationPersistor = require('./MigrationPersistor')
 const {
   PerProjectEncryptedS3Persistor,
 } = require('./PerProjectEncryptedS3Persistor')
+
+const SyncPersistor = require('./SyncPersistor')
 
 function getPersistor(backend, settings) {
   switch (backend) {
@@ -40,6 +43,11 @@ module.exports = function create(settings) {
   }
 
   let persistor = getPersistor(settings.backend, settings)
+
+  if (settings.webdav && settings.webdav.url) {
+    const syncPersistor = new WebDAVPersistor(settings.webdav)
+    persistor = new SyncPersistor(persistor, syncPersistor)
+  }
 
   if (settings.fallback && settings.fallback.backend) {
     const primary = persistor

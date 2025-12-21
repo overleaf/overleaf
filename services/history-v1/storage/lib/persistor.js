@@ -2,6 +2,8 @@ const _ = require('lodash')
 const config = require('config')
 const metrics = require('@overleaf/metrics')
 const objectPersistor = require('@overleaf/object-persistor')
+const { SyncPersistor } = objectPersistor
+const ProjectConfigProvider = require('./ProjectConfigProvider')
 
 const persistorConfig = _.cloneDeep(config.get('persistor'))
 
@@ -24,4 +26,9 @@ convertKey('fallback.buckets', s => JSON.parse(s || '{}'))
 
 persistorConfig.Metrics = metrics
 
-module.exports = objectPersistor(persistorConfig)
+let persistor = objectPersistor(persistorConfig)
+
+// Wrap with SyncPersistor for WebDAV synchronization
+persistor = new SyncPersistor(persistor, ProjectConfigProvider)
+
+module.exports = persistor

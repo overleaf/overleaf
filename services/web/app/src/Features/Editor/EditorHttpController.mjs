@@ -12,11 +12,13 @@ import { expressify } from '@overleaf/promise-utils'
 import Settings from '@overleaf/settings'
 import CollaboratorsGetter from '../Collaborators/CollaboratorsGetter.mjs'
 import { z, zz, validateReq } from '../../infrastructure/Validation.mjs'
+import ProjectWebDAVAutoSync from '../Project/ProjectWebDAVAutoSync.mjs'
 
 const ProjectAccess = CollaboratorsGetter.ProjectAccess
 
 export default {
   joinProject: expressify(joinProject),
+  leaveProject: expressify(leaveProject),
   addDoc: expressify(addDoc),
   addFolder: expressify(addFolder),
   renameEntity: expressify(renameEntity),
@@ -74,6 +76,37 @@ async function joinProject(req, res, next) {
     isTokenMember,
     isInvitedMember,
   })
+}
+
+const leaveProjectSchema = z.object({
+  params: z.object({
+    Project_id: zz.objectId(),
+  }),
+  body: z.object({
+    isLastClient: z.boolean().optional(),
+  }),
+})
+
+/**
+ * Called by real-time service when a client leaves a project.
+ * When this is the last client in the project, triggers WebDAV sync if enabled.
+ */
+async function leaveProject(req, res, next) {
+  const { params, body } = validateReq(req, leaveProjectSchema)
+  const projectId = params.Project_id
+  const isLastClient = body.isLastClient || false
+
+  Metrics.inc('editor.leave-project')
+
+  // Only sync if this is the last client leaving the project
+  if (isLastClient) {
+    // Trigger WebDAV sync in background - don't wait for it to complete
+    ProjectWebDAVAutoSync.syncOnProjectClose(projectId).catch(() => {
+      // Errors are logged in syncOnProjectClose, ignore here
+    })
+  }
+
+  res.sendStatus(200)
 }
 
 async function _buildJoinProjectView(req, projectId, userId) {

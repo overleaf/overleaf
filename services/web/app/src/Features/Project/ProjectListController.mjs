@@ -630,7 +630,7 @@ async function _getProjects(
   const results = await Promise.all([
     ProjectGetter.promises.findAllUsersProjects(
       userId,
-      'name lastUpdated lastUpdatedBy publicAccesLevel archived trashed owner_ref tokens'
+      'name lastUpdated lastUpdatedBy publicAccesLevel archived trashed owner_ref tokens webdavConfig'
     ),
     TagsHandler.promises.getAllTags(userId),
   ])
@@ -764,7 +764,7 @@ function _formatProjectInfo(project, accessLevel, source, userId) {
   const readOnlyTokenAccess =
     accessLevel === PrivilegeLevels.READ_ONLY && source === Sources.TOKEN
 
-  return {
+  const formatted = {
     id: project._id.toString(),
     name: project.name,
     owner_ref: readOnlyTokenAccess ? null : project.owner_ref,
@@ -775,6 +775,20 @@ function _formatProjectInfo(project, accessLevel, source, userId) {
     archived,
     trashed,
   }
+  
+  // Include WebDAV config if available (without credentials)
+  if (project.webdavConfig && project.webdavConfig.enabled) {
+    formatted.webdavConfig = {
+      url: project.webdavConfig.url,
+      basePath: project.webdavConfig.basePath,
+      enabled: project.webdavConfig.enabled,
+      lastSyncDate: project.webdavConfig.lastSyncDate,
+      hasUsername: !!project.webdavConfig.username,
+      hasPassword: !!project.webdavConfig.password,
+    }
+  }
+  
+  return formatted
 }
 
 /**
@@ -827,6 +841,7 @@ async function _injectProjectUsers(projects) {
         ? undefined
         : users[project.owner_ref.toString()],
     owner_ref: undefined,
+    webdavConfig: project.webdavConfig,
   }))
 }
 
