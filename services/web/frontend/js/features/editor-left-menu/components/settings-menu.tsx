@@ -16,6 +16,7 @@ import SettingsPdfViewer from './settings/settings-pdf-viewer'
 import SettingsSpellCheckLanguage from './settings/settings-spell-check-language'
 import SettingsSyntaxValidation from './settings/settings-syntax-validation'
 import SettingsMathPreview from './settings/settings-math-preview'
+import SettingsWebDAV from './settings/settings-webdav'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { ElementType } from 'react'
 import OLForm from '@/shared/components/ol/ol-form'
@@ -41,6 +42,7 @@ export default function SettingsMenu() {
         <SettingsCompiler />
         <SettingsImageName />
         <SettingsDocument />
+        <SettingsWebDAV />
         <SettingsSpellCheckLanguage />
         <SettingsDictionary />
         {moduleSettings.map(({ import: { default: Component }, path }) => (

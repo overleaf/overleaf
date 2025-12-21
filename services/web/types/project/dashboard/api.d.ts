@@ -51,6 +51,14 @@ export type ProjectApi = {
   trashed: boolean
   accessLevel: ProjectAccessLevel
   source: Source
+  webdavConfig?: {
+    url: string
+    basePath: string
+    enabled: boolean
+    lastSyncDate?: Date
+    hasUsername: boolean
+    hasPassword: boolean
+  }
 }
 
 export type Project = MergeAndOverride<

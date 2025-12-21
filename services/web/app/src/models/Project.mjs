@@ -103,6 +103,18 @@ export const ProjectSchema = new Schema(
       },
     ],
     deferredTpdsFlushCounter: { type: Number },
+    webdavConfig: {
+      url: { type: String },
+      username: { type: String },
+      password: { type: String },
+      basePath: { type: String, default: '/overleaf' },
+      enabled: { type: Boolean, default: false },
+      lastSyncDate: { type: Date },
+      // Object storing filePath -> fileHash for tracking synced files
+      // Uses Mixed type because Mongoose Map doesn't support keys with dots
+      // File paths are encoded using URL-style percent encoding (. -> %2E)
+      syncedFileHashes: { type: Schema.Types.Mixed, default: {} },
+    },
   },
   { minimize: false }
 )

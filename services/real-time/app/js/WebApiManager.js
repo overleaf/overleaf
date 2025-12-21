@@ -60,4 +60,40 @@ module.exports = {
       }
     )
   },
+
+  /**
+   * Notify web service that a project is being closed (last client leaving)
+   * This triggers WebDAV sync if enabled
+   */
+  leaveProject(projectId, isLastClient, callback) {
+    logger.debug({ projectId, isLastClient }, 'sending leave project request to web')
+    const url = `${settings.apis.web.url}/project/${projectId}/leave`
+    request.post(
+      {
+        url,
+        auth: {
+          user: settings.apis.web.user,
+          pass: settings.apis.web.pass,
+          sendImmediately: true,
+        },
+        json: {
+          isLastClient,
+        },
+        jar: false,
+        timeout: 5000, // 5 second timeout - don't block disconnect
+      },
+      function (error, response) {
+        if (error) {
+          OError.tag(error, 'leave project request failed')
+          return callback(error)
+        }
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          callback(null)
+        } else {
+          callback(new WebApiRequestFailedError(response.statusCode))
+        }
+      }
+    )
+  },
 }
+

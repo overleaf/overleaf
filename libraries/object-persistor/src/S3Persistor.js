@@ -374,6 +374,21 @@ class S3Persistor extends AbstractPersistor {
    * @param {string} key
    * @param {Object} opts
    * @param {SSECOptions} [opts.ssecOptions]
+   * @return {Promise<{lastModified: Date, size: number}>}
+   */
+  async getObjectMetadata(bucketName, key, opts = {}) {
+    const response = await this.#headObject(bucketName, key, opts)
+    return {
+      lastModified: response.LastModified,
+      size: response.ContentLength || 0,
+    }
+  }
+
+  /**
+   * @param {string} bucketName
+   * @param {string} key
+   * @param {Object} opts
+   * @param {SSECOptions} [opts.ssecOptions]
    * @return {Promise<string | undefined>}
    */
   async getObjectStorageClass(bucketName, key, opts = {}) {

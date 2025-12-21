@@ -190,6 +190,17 @@ module.exports = WebsocketController = {
             }
           }
         )
+
+        // Notify web service to trigger WebDAV sync if enabled
+        // This runs in the background and doesn't block the disconnect flow
+        WebApiManager.leaveProject(projectId, true, function (err) {
+          if (err) {
+            logger.warn(
+              { err, projectId },
+              'error notifying web service of project close for WebDAV sync'
+            )
+          }
+        })
       }
       callback()
     }, WebsocketController.FLUSH_IF_EMPTY_DELAY)

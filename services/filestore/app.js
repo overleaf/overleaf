@@ -10,7 +10,15 @@ import fileController from './app/js/FileController.js'
 import keyBuilder from './app/js/KeyBuilder.js'
 import RequestLogger from './app/js/RequestLogger.js'
 
+import ProjectConfigProvider from './app/js/ProjectConfigProvider.js'
+
 logger.initialize(process.env.METRICS_APP_NAME || 'filestore')
+
+// Connect to MongoDB
+ProjectConfigProvider.connect().catch(err => {
+  logger.error({ err }, 'Failed to connect ProjectConfigProvider to MongoDB')
+  process.exit(1)
+})
 
 Events.setMaxListeners(20)
 

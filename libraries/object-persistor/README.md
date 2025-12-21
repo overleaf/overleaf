@@ -9,6 +9,7 @@ Contains a workaround within the GCS backend to allow lifecycle rules to keep ob
 - S3
 - GCS
 - Filesystem (FS)
+- WebDAV (including Nextcloud)
 
 ## Getting started
 
@@ -298,6 +299,47 @@ GCS authentication is configured automatically via the local service account, or
 In order to support deletion after a period, the GCS persistor allows usage of a two-bucket system. The main bucket contains the live objects, and on delete the objects are first copied to a 'deleted' bucket, and then deleted from the main one. The 'deleted' bucket is then expected to have a lifecycle policy applied to delete objects after a set period.
 
 In order to prevent accidental deletion from outside this mechanism, an event-based-hold can be applied by default on the main bucket. This will be unlocked _after_ the object has been copied to the 'deleted' bucket so that the object can then be deleted from the main bucket.
+
+### WebDAV-specific parameters
+
+WebDAV in Overleaf is used as a cloud storage synchronization backend, not as a primary storage backend. It is configured at the **project level** through the Overleaf user interface, not through environment variables or global configuration.
+
+#### Configuring WebDAV in Overleaf
+
+1. Open your project in Overleaf
+2. Click on the **Menu** button in the top-left corner of the editor
+3. Find the **Cloud Storage** section
+4. Click **Link WebDAV** and provide the following information:
+   - **WebDAV URL**: The WebDAV server URL including the path to the WebDAV endpoint
+     - For Nextcloud: `https://nextcloud.example.com/remote.php/dav/files/username/`
+     - For other WebDAV servers, consult their documentation
+   - **Username**: Your WebDAV account username
+   - **Password**: Your WebDAV account password (app-specific passwords are recommended)
+   - **Base Path**: Path for storing project files (default: `/overleaf`)
+
+#### Configuration parameters
+
+When WebDAV is configured at the project level, the following parameters are stored:
+
+- `url` (required): The WebDAV server URL
+- `username` (required): Username for WebDAV authentication
+- `password` (required): Password for WebDAV authentication
+- `basePath`: Base path for storing files on the WebDAV server (default: `/overleaf`)
+
+#### Synchronization behavior
+
+- Project files are automatically synced to WebDAV when the project is modified
+- An initial full sync is triggered when WebDAV is first linked to a project
+- Manual sync can be triggered through the project menu
+- Only modified files are synced (based on content hash comparison)
+- File deletions and renames in the project are reflected on the WebDAV server
+
+#### Notes
+
+- WebDAV does not support signed URLs, so `getRedirectUrl()` always returns `null`.
+- It's recommended to use app-specific passwords when using Nextcloud or other services that support them.
+- The WebDAV persistor has been tested with Nextcloud but should work with any WebDAV-compliant server.
+- Each project has its own independent WebDAV configuration.
 
 ## Contributing
 
