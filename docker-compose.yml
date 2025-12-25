@@ -128,7 +128,7 @@ services:
         image: redis:6.2
         container_name: redis
         volumes:
-            redis_data:/data
+            - redis_data:/data
 volumes:
   mongo_data:
   redis_data:
