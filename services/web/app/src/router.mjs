@@ -983,6 +983,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
       '/project/:project_id/messages/:message_id',
       AuthorizationMiddleware.blockRestrictedUserFromProject,
       AuthorizationMiddleware.ensureUserCanReadProject,
+      AuthorizationMiddleware.ensureUserIsMessageAuthor,
       PermissionsController.requirePermission('chat'),
       ChatController.deleteMessage
     )
@@ -990,6 +991,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
       '/project/:project_id/messages/:message_id/edit',
       AuthorizationMiddleware.blockRestrictedUserFromProject,
       AuthorizationMiddleware.ensureUserCanReadProject,
+      AuthorizationMiddleware.ensureUserIsMessageAuthor,
       PermissionsController.requirePermission('chat'),
       ChatController.editMessage
     )

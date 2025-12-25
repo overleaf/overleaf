@@ -69,6 +69,8 @@ const en = {
     'translate.request-new-language.title': 'Request a Language',
     'translate.request-new-language.body':
       "Sorry, we don't currently offer any other languages. Tell us what language you wanted to use and we will review whether we can add it in the future.",
+    'translate.request-new-language.body.already-provided':
+      'Thank you for your request. We already provide __language__. Please try using Translate again.',
     'translate.request-new-language.submit': 'Request',
     'translate.request-new-language.thanks.title':
       'Thank you for your language request',
@@ -223,9 +225,6 @@ const en = {
     'toolbar.next-suggestion': 'Next suggestion',
     'toolbar.quota-exceeded': 'Quota is exceeded',
     'toolbar.translate': 'Translate',
-    'toolbar.citations-checker': 'Citations Checker',
-    'toolbar.citations-checker.selection':
-      'Select at least 10 words to use this widget',
     'create-modal.title': 'Generate __name__',
     'create-modal.unavailable.title': 'Writefull is unavailable',
     'create-modal.unavailable.content':
@@ -389,27 +388,6 @@ const en = {
     'welcome.reset-password': 'Reset password',
     'welcome.enable-writefull':
       'Enable Writefull for language and LaTeX support',
-    'citations-checker.title': 'Citations Checker',
-    'citations-checker.searching-cites':
-      'Checking your document for potential passages to include citations',
-    'citations-checker.no-results': 'No potential citations found',
-    'citations-checker.search-publications': 'View sources',
-    'citations-checker.publications.search-placeholder':
-      'Search in publications list',
-    'citations-checker.dismiss': 'Dismiss',
-    'citations-checker.searching-publications':
-      'Identifying potential sources to use',
-    'citations-checker.back': 'Back',
-    'citations-checker.publications.title':
-      "We've identified the following sources for you to review.",
-    'citations-checker.publications.no-results': 'No sources found',
-    'citations-checker.publications.no-title': 'No title',
-    'citations-checker.publications.no-authors': 'No authors',
-    'citations-checker.publications.external-search': 'Search for a DOI',
-    'citations-checker.publications.view': 'View',
-    'citations-checker.publications.insert': 'Insert',
-    'citations-checker.publications.copy': 'Copy citation',
-    'citations-checker.publications.copied': 'Copied to clipboard',
     'citations-reviewer.chat.title': 'Citation reviewer',
     'citations-reviewer.chat.description':
       '<b>Identified __count__ passages</b><br/>Here are statements in your article that may benefit from a citation.',
@@ -427,6 +405,7 @@ const en = {
     'citations-reviewer.chat.publications.description':
       'The following papers may support the claim you’ve made. Always check papers yourself to ensure relevance.',
     'citations-reviewer.chat.publications.subtitle': 'Select papers to cite:',
+    'citations-reviewer.chat.publications.no-results': 'No sources found',
     'citations-reviewer.chat.publications.alternatively': 'Alternatively,',
     'citations-reviewer.chat.publications.custom-search':
       'search for papers yourself.',
@@ -434,7 +413,10 @@ const en = {
       'change the search criteria.',
     'citations-reviewer.chat.publications.search-criteria':
       'Search by "__type__": "__value__"',
+    'citations-reviewer.chat.publications.clear-search':
+      'Clear search criteria',
     'citations-reviewer.chat.publications.passage': 'Passage to review',
+    'citations-reviewer.chat.publications.no-authors': 'No authors',
     'citations-reviewer.chat.actions.refresh': 'Refresh citations',
     'citations-reviewer.chat.actions.back': 'Back',
     'citations-reviewer.chat.actions.more-authors': '> More authors',
@@ -461,6 +443,7 @@ const en = {
     'citations-reviewer.chat.custom-search.form.keywords-placeholder':
       'Enter keywords',
     'citations-reviewer.chat.custom-search.form.search': 'Search',
+    'citations-reviewer.chat.custom-search.form.searching': 'Searching...',
   },
 } as const
 
@@ -535,6 +518,8 @@ const es = {
     'translate.request-new-language.title': 'Solicitar un nuevo idioma',
     'translate.request-new-language.body':
       'Lo sentimos, actualmente no ofrecemos otros idiomas. Dinos qué idioma querías usar y revisaremos si podemos agregarlo en el futuro.',
+    'translate.request-new-language.body.already-provided':
+      'Gracias por tu solicitud. Ya ofrecemos __language__. Por favor, intenta usar Traducir nuevamente.',
     'translate.request-new-language.submit': 'Solicitar',
     'translate.request-new-language.thanks.title':
       'Gracias por tu solicitud de idioma',
@@ -703,9 +688,6 @@ const es = {
     'toolbar.next-suggestion': 'Siguiente sugerencia',
     'toolbar.quota-exceeded': 'Cuota agotada',
     'toolbar.translate': 'Traducir',
-    'toolbar.citations-checker': 'Citations Checker',
-    'toolbar.citations-checker.selection':
-      'Selecciona al menos 10 palabras para usar este widget',
     'create-modal.title': 'Generador de __name__',
     'create-modal.unavailable.title': 'Writefull no está disponible',
     'create-modal.unavailable.content':
@@ -871,27 +853,6 @@ const es = {
     'welcome.reset-password': 'Restablecer contraseña',
     'welcome.enable-writefull':
       'Habilitar Writefull para soporte de lenguaje y LaTeX',
-    'citations-checker.title': 'Verificador de citas',
-    'citations-checker.searching-cites':
-      'Comprobando tu documento para encontrar pasajes que puedan requerir citas',
-    'citations-checker.no-results': 'No se encontraron citas potenciales',
-    'citations-checker.search-publications': 'Ver fuentes',
-    'citations-checker.publications.search-placeholder':
-      'Buscar en la lista de fuentes',
-    'citations-checker.dismiss': 'Descartar',
-    'citations-checker.searching-publications':
-      'Identificando posibles fuentes para usar',
-    'citations-checker.back': 'Volver',
-    'citations-checker.publications.title':
-      'Hemos identificado las siguientes fuentes para que las revises.',
-    'citations-checker.publications.no-results': 'No se encontraron fuentes',
-    'citations-checker.publications.no-title': 'Sin título',
-    'citations-checker.publications.no-authors': 'Sin autores',
-    'citations-checker.publications.external-search': 'Buscar por DOI',
-    'citations-checker.publications.view': 'Ver',
-    'citations-checker.publications.insert': 'Insertar',
-    'citations-checker.publications.copy': 'Copiar cita',
-    'citations-checker.publications.copied': 'Copiado al portapapeles',
     'citations-reviewer.chat.title': 'Revisor de citas',
     'citations-reviewer.chat.description':
       '<b>__count__ afirmaciones identificadas</b><br/>Aquí tienes pasajes en tu artículo que pueden beneficiarse de una cita.',
@@ -911,6 +872,8 @@ const es = {
       'Los siguientes artículos pueden respaldar la afirmación que has hecho. Revisa siempre los artículos por tu cuenta para asegurar su relevancia.',
     'citations-reviewer.chat.publications.subtitle':
       'Selecciona artículos para citar:',
+    'citations-reviewer.chat.publications.no-results':
+      'No se encontraron fuentes',
     'citations-reviewer.chat.publications.alternatively': 'Alternativamente,',
     'citations-reviewer.chat.publications.custom-search':
       'busca artículos por tu cuenta.',
@@ -918,7 +881,10 @@ const es = {
       'cambia los criterios de búsqueda.',
     'citations-reviewer.chat.publications.search-criteria':
       'Búsqueda por "__type__": "__value__"',
+    'citations-reviewer.chat.publications.clear-search':
+      'Borrar criterios de búsqueda',
     'citations-reviewer.chat.publications.passage': 'Pasaje a revisar',
+    'citations-reviewer.chat.publications.no-authors': 'Sin autores',
     'citations-reviewer.chat.actions.refresh': 'Actualizar citas',
     'citations-reviewer.chat.actions.back': 'Volver',
     'citations-reviewer.chat.actions.more-authors': '> Más autores',
@@ -945,6 +911,7 @@ const es = {
     'citations-reviewer.chat.custom-search.form.keywords-placeholder':
       'Introduce palabras clave',
     'citations-reviewer.chat.custom-search.form.search': 'Buscar',
+    'citations-reviewer.chat.custom-search.form.searching': 'Buscando...',
   },
 }
 

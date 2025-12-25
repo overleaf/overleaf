@@ -1,21 +1,23 @@
 package uk.ac.ic.wlgitbridge.server;
 
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.ServletException;
 import java.io.File;
 import java.net.BindException;
 import java.nio.file.Paths;
 import java.util.EnumSet;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.ServletException;
+import org.eclipse.jetty.ee10.servlet.FilterHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.SessionHandler;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.*;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.util.resource.ResourceFactory;
 import uk.ac.ic.wlgitbridge.application.config.Config;
-import uk.ac.ic.wlgitbridge.application.jetty.NullLogger;
 import uk.ac.ic.wlgitbridge.bridge.Bridge;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SqliteDBStore;
@@ -48,7 +50,6 @@ public class GitBridgeServer {
   private String apiBaseURL;
 
   public GitBridgeServer(Config config) throws ServletException {
-    org.eclipse.jetty.util.log.Log.setLog(new NullLogger());
     this.port = config.getPort();
     this.rootGitDirectoryPath = config.getRootGitDirectory();
     RepoStore repoStore =
@@ -109,7 +110,7 @@ public class GitBridgeServer {
     connector.setIdleTimeout(config.getIdleTimeout());
     this.jettyServer.addConnector(connector);
 
-    HandlerCollection handlers = new HandlerList();
+    Handler.Sequence handlers = new Handler.Sequence();
     handlers.addHandler(new CORSHandler(config.getAllowedCorsOrigins()));
     handlers.addHandler(initApiHandler());
     handlers.addHandler(initBaseHandler());
@@ -120,7 +121,7 @@ public class GitBridgeServer {
   private Handler initBaseHandler() {
     ContextHandler base = new ContextHandler();
     base.setContextPath("/");
-    HandlerCollection handlers = new HandlerList();
+    Handler.Sequence handlers = new Handler.Sequence();
     handlers.addHandler(new StatusHandler(bridge));
     handlers.addHandler(new HealthCheckHandler(bridge));
     handlers.addHandler(new GitLfsHandler(bridge));
@@ -134,7 +135,7 @@ public class GitBridgeServer {
     ContextHandler api = new ContextHandler();
     api.setContextPath("/api");
 
-    HandlerCollection handlers = new HandlerList();
+    Handler.Sequence handlers = new Handler.Sequence();
     handlers.addHandler(initResourceHandler());
     handlers.addHandler(new PostbackHandler(bridge));
     handlers.addHandler(new ProjectDeletionHandler(bridge));
@@ -149,8 +150,8 @@ public class GitBridgeServer {
 
   private Handler initGitHandler(Config config, RepoStore repoStore, SnapshotApi snapshotApi)
       throws ServletException {
-    final ServletContextHandler servletContextHandler =
-        new ServletContextHandler(ServletContextHandler.SESSIONS);
+    final ServletContextHandler servletContextHandler = new ServletContextHandler();
+    servletContextHandler.setSessionHandler(new SessionHandler());
     if (config.getOauth2Server() != null) {
       Filter filter =
           new Oauth2Filter(snapshotApi, config.getOauth2Server(), config.isUserPasswordEnabled());
@@ -166,8 +167,10 @@ public class GitBridgeServer {
   }
 
   private Handler initResourceHandler() {
-    ResourceHandler resourceHandler = new FileHandler(bridge);
-    resourceHandler.setResourceBase(new File(rootGitDirectoryPath, ".wlgb/atts").getAbsolutePath());
+    FileHandler resourceHandler = new FileHandler(bridge);
+    File attDir = new File(rootGitDirectoryPath, ".wlgb/atts");
+    resourceHandler.setBaseResource(
+        ResourceFactory.of(resourceHandler).newResource(attDir.toPath()));
     return resourceHandler;
   }
 }

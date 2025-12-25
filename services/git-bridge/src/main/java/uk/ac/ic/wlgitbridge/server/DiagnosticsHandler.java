@@ -1,28 +1,28 @@
 package uk.ac.ic.wlgitbridge.server;
 
-import java.io.IOException;
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import javax.management.JMException;
 import javax.management.ObjectName;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.io.Content;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.util.Callback;
 import uk.ac.ic.wlgitbridge.util.Log;
 
-public class DiagnosticsHandler extends AbstractHandler {
+public class DiagnosticsHandler extends Handler.Abstract {
 
   public DiagnosticsHandler() {}
 
   @Override
-  public void handle(
-      String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-      throws IOException, ServletException {
-    String method = baseRequest.getMethod();
-    if (("GET".equals(method)) && target != null && target.matches("^/diags/?$")) {
-      baseRequest.setHandled(true);
-
+  public boolean handle(Request request, Response response, Callback callback) throws Exception {
+    String method = request.getMethod();
+    String path = Request.getPathInContext(request);
+    if (("GET".equals(method)) && path != null && path.matches("^/diags/?$")) {
       Log.debug(method + " <- /diags");
 
       String detail;
@@ -33,18 +33,28 @@ public class DiagnosticsHandler extends AbstractHandler {
         summary = execute("vmNativeMemory", "summary");
       } catch (JMException e) {
         Log.error("Failed to get native memory detail: " + e.getMessage());
-        response.setStatus(500);
-        return;
+        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
+        callback.succeeded();
+        return true;
       }
 
-      response.setContentType("text/plain");
-      response.setStatus(200);
+      response.getHeaders().put("Content-Type", "text/plain");
+      response.setStatus(HttpStatus.OK_200);
 
-      response.getWriter().write(summary);
-      response.getWriter().write("\n----------\n\n");
-      response.getWriter().write(detail);
-      response.getWriter().flush();
+      Writer writer =
+          new BufferedWriter(new OutputStreamWriter(Content.Sink.asOutputStream(response)));
+      try {
+        writer.write(summary);
+        writer.write("\n----------\n\n");
+        writer.write(detail);
+        writer.flush();
+      } finally {
+        writer.close();
+        callback.succeeded();
+      }
+      return true;
     }
+    return false;
   }
 
   public static String execute(String command, String... args) throws JMException {

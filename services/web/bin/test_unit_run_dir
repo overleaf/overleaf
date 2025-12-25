@@ -13,24 +13,5 @@ fi
 
 echo "Running unit tests in directory: $*"
 
-npm run test:unit:parallel -- "${vitest_args[@]}"
-vitest_parallel_status=$?
+npm run test:unit -- "${vitest_args[@]}"
 
-npm run test:unit:sequential -- "${vitest_args[@]}"
-vitest_sequential_status=$?
-
-if [ "$vitest_sequential_status" -eq 0 ] && [ "$vitest_parallel_status" -eq 0 ]; then
-  exit 0
-fi
-
-# Report status briefly at the end for failures
-
-if [ "$vitest_parallel_status" -ne 0 ]; then
-  echo "Parallel tests failed with status: $vitest_parallel_status"
-fi
-
-if [ "$vitest_sequential_status" -ne 0 ]; then
-  echo "Sequential tests failed with status: $vitest_sequential_status"
-fi
-
-exit 1

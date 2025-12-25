@@ -449,6 +449,70 @@ describe('history import', function () {
       .catch(expectResponse.unprocessableEntity)
   })
 
+  it('imports changes with git-bridge origin', function () {
+    const testProjectId = '1'
+    const testFilePathname = 'git.tex'
+    const testFile = File.fromHash(File.EMPTY_FILE_HASH)
+    const testGitOrigin = Origin.fromRaw({
+      kind: 'git-bridge',
+    })
+
+    let testSnapshot
+
+    return fetch(
+      testServer.url(
+        `/api/projects/${testProjectId}/blobs/${File.EMPTY_FILE_HASH}`
+      ),
+      {
+        method: 'PUT',
+        body: fs.createReadStream(testFiles.path('empty.tex')),
+        headers: {
+          Authorization: testServer.basicAuthHeader,
+        },
+      }
+    )
+      .then(response => {
+        expect(response.ok).to.be.true
+      })
+      .then(() => {
+        testSnapshot = new Snapshot()
+        testSnapshot.addFile(testFilePathname, testFile)
+        return basicAuthClient.apis.ProjectImport.importSnapshot1({
+          project_id: testProjectId,
+          snapshot: testSnapshot.toRaw(),
+        })
+      })
+      .then(response => {
+        expect(response.obj.projectId).to.equal(testProjectId)
+      })
+      .then(() => {
+        const changes = [
+          makeChange(Operation.addFile(testFilePathname, testFile)),
+        ]
+        changes[0].setOrigin(testGitOrigin)
+        return basicAuthClient.apis.ProjectImport.importChanges1({
+          project_id: testProjectId,
+          end_version: 0,
+          changes: changes.map(changeToRaw),
+        })
+      })
+      .then(response => {
+        expect(response.status).to.equal(HTTPStatus.CREATED)
+      })
+      .then(() => {
+        return clientForProject.apis.Project.getLatestHistory({
+          project_id: testProjectId,
+        })
+      })
+      .then(response => {
+        const chunkResponse = ChunkResponse.fromRaw(response.obj)
+        const changes = chunkResponse.getChunk().getChanges()
+        expect(changes.length).to.be.at.least(1)
+        const lastChange = changes[changes.length - 1]
+        expect(lastChange.getOrigin()).to.deep.equal(testGitOrigin)
+      })
+  })
+
   it('rejects text operations on binary files', function () {
     const testProjectId = '1'
     const testFilePathname = 'main.tex'
@@ -821,9 +885,7 @@ describe('history import', function () {
         expect.fail()
       })
       .catch(error => {
-        expect(error.message).to.equal(
-          'Required parameter end_version is not provided'
-        )
+        expect(error.message).to.equal('request failed with status 422')
       })
   })
 
@@ -845,9 +907,6 @@ describe('history import', function () {
       })
       .catch(error => {
         expect(error.status).to.equal(HTTPStatus.UNPROCESSABLE_ENTITY)
-        expect(error.response.body.message).to.equal(
-          'invalid enum value: return_snapshot'
-        )
       })
   })
 })

@@ -4,7 +4,6 @@ import static org.asynchttpclient.Dsl.*;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import java.io.Reader;
 import java.util.concurrent.ExecutionException;
 import uk.ac.ic.wlgitbridge.util.Log;
 
@@ -16,9 +15,9 @@ public class PostbackThread extends Thread {
   private String url;
   private String postback;
 
-  public PostbackThread(Reader reader, String postback) {
-    if (postback != null) {
-      url = new Gson().fromJson(reader, JsonObject.class).get("postbackUrl").getAsString();
+  public PostbackThread(String requestBody, String postback) {
+    if (postback != null && requestBody != null && !requestBody.isEmpty()) {
+      url = new Gson().fromJson(requestBody, JsonObject.class).get("postbackUrl").getAsString();
       this.postback = postback;
     }
   }

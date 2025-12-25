@@ -7,7 +7,7 @@ import { promisify } from 'node:util'
 import express from 'express'
 import logger from '@overleaf/logger'
 import Metrics from '@overleaf/metrics'
-import { hasValidBasicAuthCredentials } from './api/app/security.js'
+import { hasValidBasicAuthCredentials } from './api/middleware/security.js'
 import {
   deleteProjectBackupCb,
   healthCheck,

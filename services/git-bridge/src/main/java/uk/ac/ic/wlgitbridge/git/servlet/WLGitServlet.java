@@ -1,7 +1,7 @@
 package uk.ac.ic.wlgitbridge.git.servlet;
 
-import javax.servlet.ServletException;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import jakarta.servlet.ServletException;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jgit.http.server.GitServlet;
 import uk.ac.ic.wlgitbridge.bridge.Bridge;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;

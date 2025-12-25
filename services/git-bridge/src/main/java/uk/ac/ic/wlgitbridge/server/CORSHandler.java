@@ -1,14 +1,16 @@
 package uk.ac.ic.wlgitbridge.server;
 
-import java.io.IOException;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import org.eclipse.jetty.http.HttpField;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.util.Callback;
 import uk.ac.ic.wlgitbridge.util.Log;
 
-public class CORSHandler extends AbstractHandler {
+public class CORSHandler extends Handler.Abstract {
   private final Set<String> allowedCorsOrigins;
 
   public CORSHandler(String[] allowedCorsOrigins) {
@@ -16,32 +18,34 @@ public class CORSHandler extends AbstractHandler {
   }
 
   @Override
-  public void handle(
-      String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-      throws IOException {
+  public boolean handle(Request request, Response response, Callback callback) throws Exception {
+    HttpField originField = request.getHeaders().getField(HttpHeader.ORIGIN);
+    String origin = originField != null ? originField.getValue() : null;
 
-    String origin = request.getHeader("Origin");
     if (origin == null) {
-      return; // Not a CORS request
+      return false; // Not a CORS request
     }
 
     final boolean ok = allowedCorsOrigins.contains(origin);
     if (ok) {
-      response.setHeader("Access-Control-Allow-Origin", origin);
-      response.setHeader("Access-Control-Allow-Credentials", "true");
-      response.setHeader("Access-Control-Allow-Methods", "GET, HEAD, PUT, POST, DELETE");
-      response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
-      response.setHeader("Access-Control-Max-Age", "86400"); // cache for 24h
+      response.getHeaders().put("Access-Control-Allow-Origin", origin);
+      response.getHeaders().put("Access-Control-Allow-Credentials", "true");
+      response.getHeaders().put("Access-Control-Allow-Methods", "GET, HEAD, PUT, POST, DELETE");
+      response.getHeaders().put("Access-Control-Allow-Headers", "Authorization, Content-Type");
+      response.getHeaders().put("Access-Control-Max-Age", "86400"); // cache for 24h
     }
-    String method = baseRequest.getMethod();
+    String method = request.getMethod();
     if ("OPTIONS".equals(method)) {
-      Log.debug("OPTIONS <- {}", target);
-      baseRequest.setHandled(true);
+      String path = Request.getPathInContext(request);
+      Log.debug("OPTIONS <- {}", path);
       if (ok) {
-        response.setStatus(200);
+        response.setStatus(HttpStatus.OK_200);
       } else {
-        response.setStatus(403);
+        response.setStatus(HttpStatus.FORBIDDEN_403);
       }
+      callback.succeeded();
+      return true;
     }
+    return false;
   }
 }

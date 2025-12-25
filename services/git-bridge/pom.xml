@@ -16,10 +16,11 @@
         <fmt.plugin.version>2.23</fmt.plugin.version>
         <junit.version>4.13.2</junit.version>
         <jmock.junit4.version>2.13.1</jmock.junit4.version>
-        <jetty.servlet.version>9.4.57.v20241219</jetty.servlet.version>
+        <jetty.version>12.1.5</jetty.version>
+        <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
         <gson.version>2.13.2</gson.version>
         <async.http.client.version>3.0.3</async.http.client.version>
-        <jgit.version>6.10.1.202505221210-r</jgit.version>
+        <jgit.version>7.5.0.202512021534-r</jgit.version>
         <sqlite.jdbc.version>3.41.2.2</sqlite.jdbc.version>
         <joda.time.version>2.9.9</joda.time.version>
         <google.oauth.client.version>1.39.0</google.oauth.client.version>
@@ -104,17 +105,23 @@
             <version>${jmock.junit4.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlet -->
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>${jetty.servlet.version}</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>${jetty.servlet.version}</version>
+            <version>${jetty.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.eclipse.jetty.ee10/jetty-ee10-servlet -->
+        <dependency>
+            <groupId>org.eclipse.jetty.ee10</groupId>
+            <artifactId>jetty-ee10-servlet</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <!-- Jakarta Servlet API -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>${jakarta.servlet.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>

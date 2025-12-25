@@ -339,17 +339,12 @@ describe('CheckRedisMongoSyncState', function () {
       })
     })
     describe('with docstore metadata updated', function () {
-      beforeEach(function (done) {
-        MockDocstoreApi.patchDocument(
-          projectId,
-          docId,
-          {
-            deleted: true,
-            deletedAt: new Date(),
-            name: 'c.tex',
-          },
-          done
-        )
+      beforeEach(async function () {
+        await MockDocstoreApi.patchDocument(projectId, docId, {
+          deleted: true,
+          deletedAt: new Date(),
+          name: 'c.tex',
+        })
       })
 
       it('should work when in sync', async function () {

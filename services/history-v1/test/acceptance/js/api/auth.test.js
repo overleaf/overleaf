@@ -1,12 +1,11 @@
 const config = require('config')
-const fetch = require('node-fetch')
 const sinon = require('sinon')
 const { expect } = require('chai')
+const nodeFetch = require('node-fetch')
 
 const cleanup = require('../storage/support/cleanup')
 const expectResponse = require('./support/expect_response')
 const fixtures = require('../storage/support/fixtures')
-const HTTPStatus = require('http-status')
 const testServer = require('./support/test_server')
 
 describe('auth', function () {
@@ -18,47 +17,26 @@ describe('auth', function () {
   })
   afterEach(sinon.restore)
 
-  it('renders 401 on swagger docs endpoint without auth', async function () {
-    const response = await fetch(testServer.url('/docs'))
-    expect(response.status).to.equal(HTTPStatus.UNAUTHORIZED)
-    expect(response.headers.get('www-authenticate')).to.match(/^Basic/)
-  })
+  it('protects /docs with basic auth', async function () {
+    const url = testServer.url('/docs')
 
-  it('renders swagger docs endpoint with auth', async function () {
-    const response = await fetch(testServer.url('/docs'), {
-      headers: {
-        Authorization: testServer.basicAuthHeader,
-      },
+    const unauthenticatedResponse = await nodeFetch(url)
+    expect(unauthenticatedResponse.status).to.equal(401)
+    expect(unauthenticatedResponse.headers.get('www-authenticate')).to.match(
+      /^Basic/
+    )
+
+    const badHeader =
+      'Basic ' + Buffer.from('staging:wrong-password').toString('base64')
+    const badPasswordResponse = await nodeFetch(url, {
+      headers: { Authorization: badHeader },
     })
-    expect(response.ok).to.be.true
-  })
+    expect(badPasswordResponse.status).to.equal(401)
 
-  it('takes an old basic auth password during a password change', async function () {
-    setMockConfig('basicHttpAuth.oldPassword', 'foo')
-
-    // Primary should still work.
-    const response1 = await fetch(testServer.url('/docs'), {
-      headers: {
-        Authorization: testServer.basicAuthHeader,
-      },
+    const validResponse = await nodeFetch(url, {
+      headers: { Authorization: testServer.basicAuthHeader },
     })
-    expect(response1.ok).to.be.true
-
-    // Old password should also work.
-    const response2 = await fetch(testServer.url('/docs'), {
-      headers: {
-        Authorization: 'Basic ' + Buffer.from('staging:foo').toString('base64'),
-      },
-    })
-    expect(response2.ok).to.be.true
-
-    // Incorrect password should not work.
-    const response3 = await fetch(testServer.url('/docs'), {
-      header: {
-        Authorization: 'Basic ' + Buffer.from('staging:bar').toString('base64'),
-      },
-    })
-    expect(response3.status).to.equal(HTTPStatus.UNAUTHORIZED)
+    expect(validResponse.status).to.equal(200)
   })
 
   it('renders 401 on ProjectImport endpoints', async function () {

@@ -8,6 +8,8 @@ const fs = require('node:fs')
 const { promisify } = require('node:util')
 const config = require('config')
 const OError = require('@overleaf/o-error')
+const { expressify } = require('@overleaf/promise-utils')
+const { validateReq } = require('@overleaf/validation-tools')
 
 const logger = require('@overleaf/logger')
 const { Chunk, ChunkResponse, Blob } = require('overleaf-editor-core')
@@ -23,7 +25,7 @@ const {
 } = require('../../storage')
 
 const render = require('./render')
-const expressify = require('./expressify')
+const schemas = require('../schema')
 const withTmpDir = require('./with_tmp_dir')
 const StreamSizeLimit = require('./stream_size_limit')
 const { getProjectBlobsBatch } = require('../../storage/lib/blob_store')
@@ -33,7 +35,8 @@ const { getChunkMetadataForVersion } = require('../../storage/lib/chunk_store')
 const pipeline = promisify(Stream.pipeline)
 
 async function initializeProject(req, res, next) {
-  let projectId = req.swagger.params.body.value.projectId
+  const { body } = validateReq(req, schemas.initializeProject)
+  let projectId = body?.projectId
   try {
     projectId = await chunkStore.initializeProject(projectId)
     res.status(HTTPStatus.OK).json({ projectId })
@@ -48,7 +51,8 @@ async function initializeProject(req, res, next) {
 }
 
 async function getLatestContent(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
+  const { params } = validateReq(req, schemas.getLatestContent)
+  const projectId = params.project_id
   const blobStore = new BlobStore(projectId)
   const chunk = await chunkStore.loadLatest(projectId)
   const snapshot = chunk.getSnapshot()
@@ -58,8 +62,9 @@ async function getLatestContent(req, res, next) {
 }
 
 async function getContentAtVersion(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
-  const version = req.swagger.params.version.value
+  const { params } = validateReq(req, schemas.getContentAtVersion)
+  const projectId = params.project_id
+  const version = params.version
   const blobStore = new BlobStore(projectId)
   const snapshot = await getSnapshotAtVersion(projectId, version)
   await snapshot.loadFiles('eager', blobStore)
@@ -67,7 +72,8 @@ async function getContentAtVersion(req, res, next) {
 }
 
 async function getLatestHashedContent(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
+  const { params } = validateReq(req, schemas.getLatestHashedContent)
+  const projectId = params.project_id
   const blobStore = new HashCheckBlobStore(new BlobStore(projectId))
   const chunk = await chunkStore.loadLatest(projectId)
   const snapshot = chunk.getSnapshot()
@@ -78,7 +84,8 @@ async function getLatestHashedContent(req, res, next) {
 }
 
 async function getLatestHistory(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
+  const { params } = validateReq(req, schemas.getLatestHistory)
+  const projectId = params.project_id
   try {
     const chunk = await chunkStore.loadLatest(projectId)
     const chunkResponse = new ChunkResponse(chunk)
@@ -93,8 +100,9 @@ async function getLatestHistory(req, res, next) {
 }
 
 async function getLatestHistoryRaw(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
-  const readOnly = req.swagger.params.readOnly.value
+  const { params, query } = validateReq(req, schemas.getLatestHistoryRaw)
+  const projectId = params.project_id
+  const readOnly = query.readOnly
   try {
     const { startVersion, endVersion, endTimestamp } =
       await chunkStore.getLatestChunkMetadata(projectId, { readOnly })
@@ -113,8 +121,9 @@ async function getLatestHistoryRaw(req, res, next) {
 }
 
 async function getHistory(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
-  const version = req.swagger.params.version.value
+  const { params } = validateReq(req, schemas.getHistory)
+  const projectId = params.project_id
+  const version = params.version
   try {
     const chunk = await chunkStore.loadAtVersion(projectId, version)
     const chunkResponse = new ChunkResponse(chunk)
@@ -129,8 +138,9 @@ async function getHistory(req, res, next) {
 }
 
 async function getHistoryBefore(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
-  const timestamp = req.swagger.params.timestamp.value
+  const { params } = validateReq(req, schemas.getHistoryBefore)
+  const projectId = params.project_id
+  const timestamp = params.timestamp
   try {
     const chunk = await chunkStore.loadAtTimestamp(projectId, timestamp)
     const chunkResponse = new ChunkResponse(chunk)
@@ -148,8 +158,10 @@ async function getHistoryBefore(req, res, next) {
  * Get all changes since the beginning of history or since a given version
  */
 async function getChanges(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
-  const since = req.swagger.params.since.value ?? 0
+  const { params, query } = validateReq(req, schemas.getChanges)
+  const projectId = params.project_id
+  const sinceParam = query.since
+  const since = sinceParam == null ? 0 : sinceParam
 
   if (since < 0) {
     // Negative values would cause an infinite loop
@@ -175,8 +187,9 @@ async function getChanges(req, res, next) {
 }
 
 async function getZip(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
-  const version = req.swagger.params.version.value
+  const { params } = validateReq(req, schemas.getZip)
+  const projectId = params.project_id
+  const version = params.version
   const blobStore = new BlobStore(projectId)
 
   let snapshot
@@ -202,8 +215,9 @@ async function getZip(req, res, next) {
 }
 
 async function createZip(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
-  const version = req.swagger.params.version.value
+  const { params } = validateReq(req, schemas.createZip)
+  const projectId = params.project_id
+  const version = params.version
   try {
     const snapshot = await getSnapshotAtVersion(projectId, version)
     const zipUrl = await zipStore.getSignedUrl(projectId, version)
@@ -222,7 +236,8 @@ async function createZip(req, res, next) {
 }
 
 async function deleteProject(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
+  const { params } = validateReq(req, schemas.deleteProject)
+  const projectId = params.project_id
   const blobStore = new BlobStore(projectId)
 
   await Promise.all([
@@ -234,8 +249,9 @@ async function deleteProject(req, res, next) {
 }
 
 async function createProjectBlob(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
-  const expectedHash = req.swagger.params.hash.value
+  const { params } = validateReq(req, schemas.createProjectBlob)
+  const projectId = params.project_id
+  const expectedHash = params.hash
   const maxUploadSize = parseInt(config.get('maxFileUploadSize'), 10)
 
   await withTmpDir('blob-', async tmpDir => {
@@ -271,8 +287,9 @@ async function createProjectBlob(req, res, next) {
 }
 
 async function headProjectBlob(req, res) {
-  const projectId = req.swagger.params.project_id.value
-  const hash = req.swagger.params.hash.value
+  const { params } = validateReq(req, schemas.headProjectBlob)
+  const projectId = params.project_id
+  const hash = params.hash
 
   const blobStore = new BlobStore(projectId)
   const blob = await blobStore.getBlob(hash)
@@ -283,7 +300,6 @@ async function headProjectBlob(req, res) {
     res.status(404).end()
   }
 }
-
 // Support simple, singular ranges starting from zero only, up-to 2MB = 2_000_000, 7 digits
 const RANGE_HEADER = /^bytes=(\d{1,7})-(\d{1,7})$/
 
@@ -304,13 +320,19 @@ function _getRangeOpts(header) {
 }
 
 async function getProjectBlob(req, res, next) {
-  const projectId = req.swagger.params.project_id.value
-  const hash = req.swagger.params.hash.value
-  const opts = _getRangeOpts(req.swagger.params.range.value || '')
+  const { params, headers } = validateReq(req, schemas.getProjectBlob)
+  const projectId = params.project_id
+  const hash = params.hash
+  const rangeHeader = headers.range || ''
+  const opts = _getRangeOpts(rangeHeader)
 
   const blobStore = new BlobStore(projectId)
   logger.debug({ projectId, hash }, 'getProjectBlob started')
   try {
+    if (req.method === 'HEAD') {
+      return await headProjectBlob(req, res)
+    }
+
     let stream
     try {
       if (opts) {
@@ -363,9 +385,10 @@ async function getProjectBlob(req, res, next) {
 }
 
 async function copyProjectBlob(req, res, next) {
-  const sourceProjectId = req.swagger.params.copyFrom.value
-  const targetProjectId = req.swagger.params.project_id.value
-  const blobHash = req.swagger.params.hash.value
+  const { params, query } = validateReq(req, schemas.copyProjectBlob)
+  const sourceProjectId = query.copyFrom
+  const targetProjectId = params.project_id
+  const blobHash = params.hash
   // Check that blob exists in source project
   const sourceBlobStore = new BlobStore(sourceProjectId)
   const targetBlobStore = new BlobStore(targetProjectId)
@@ -427,8 +450,9 @@ function sumUpByteLength(blobs) {
 }
 
 async function getBlobStats(req, res) {
-  const projectId = req.swagger.params.project_id.value
-  const blobHashes = req.swagger.params.body.value.blobHashes || []
+  const { params, body } = validateReq(req, schemas.getBlobStats)
+  const projectId = params.project_id
+  const blobHashes = body.blobHashes || []
   for (const hash of blobHashes) {
     assert.blobHash(hash, 'bad hash')
   }
@@ -451,7 +475,8 @@ async function getBlobStats(req, res) {
 }
 
 async function getProjectBlobsStats(req, res) {
-  const projectIds = req.swagger.params.body.value.projectIds
+  const { body } = validateReq(req, schemas.getProjectBlobsStats)
+  const projectIds = body.projectIds
   const { blobs } = await getProjectBlobsBatch(
     projectIds.map(id => {
       if (assert.POSTGRES_ID_REGEXP.test(id)) {

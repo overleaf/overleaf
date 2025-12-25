@@ -1,14 +1,14 @@
 import { useTranslation } from 'react-i18next'
 import RadioButtonSetting, { RadioOption } from '../radio-button-setting'
-import { useState } from 'react'
-
-type NotificationLevel = 'all' | 'replies' | 'off'
+import {
+  NotificationLevel,
+  useProjectNotificationPreferences,
+} from '../../../hooks/use-project-notification-preferences'
 
 export default function ProjectNotificationsSetting() {
   const { t } = useTranslation()
-  // TODO: Connect to project settings context when backend support is added
-  const [notificationLevel, setNotificationLevel] =
-    useState<NotificationLevel>('all')
+  const { notificationLevel, setNotificationLevel, isLoading } =
+    useProjectNotificationPreferences()
 
   const options: Array<RadioOption<NotificationLevel>> = [
     {
@@ -33,7 +33,7 @@ export default function ProjectNotificationsSetting() {
       <RadioButtonSetting
         id="projectNotifications"
         options={options}
-        value={notificationLevel}
+        value={isLoading ? undefined : notificationLevel}
         onChange={setNotificationLevel}
       />
       <div className="project-notifications-beta-note">

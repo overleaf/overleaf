@@ -88,3 +88,9 @@ export function syncCreateEntity<T extends NewEntity>(
 function getEntityPathName(entityType: string) {
   return entityType === 'fileRef' ? 'file' : entityType
 }
+
+export function syncRootDocId(projectId: string, rootDocId: string) {
+  return postJSON(`/project/${projectId}/settings`, {
+    body: { rootDocId },
+  })
+}

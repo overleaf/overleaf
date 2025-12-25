@@ -37,6 +37,7 @@ export default /** @type {const} */ ([
   'info',
   'integration_instructions',
   'lightbulb',
+  'lightbulb_2',
   'lock',
   'lock_open',
   'more_vert',

@@ -3,7 +3,10 @@ const { z } = require('zod')
 const { zz } = require('./zodHelpers')
 const { validateReq } = require('./validateReq')
 const { validateSchema } = require('./validateSchema')
-const { handleValidationError } = require('./handleValidationError')
+const {
+  handleValidationError,
+  createHandleValidationError,
+} = require('./handleValidationError')
 
 module.exports = {
   z,
@@ -11,5 +14,6 @@ module.exports = {
   validateSchema,
   validateReq,
   handleValidationError,
+  createHandleValidationError,
   ParamsError,
 }

@@ -45,7 +45,7 @@ export default function RootDocumentSetting() {
     <DropdownSetting
       id="rootDocId"
       label={t('main_document')}
-      description={t('the_primary_file_for_compiling_your_project')}
+      description={`${t('the_primary_file_for_compiling_your_project')} ${t('you_can_also_right_click_a_file_to_set_it_as_main')}`}
       disabled={!write}
       options={validDocsOptions}
       onChange={changeRootDocId}

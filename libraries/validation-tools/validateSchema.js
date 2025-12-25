@@ -12,6 +12,8 @@ const { isZodErrorLike } = require('zod-validation-error')
 /**
  * A helper function to safely get a nested value from an object
  * using a path array (e.g., ["query", "resource_type"])
+ * @param {any} data
+ * @param {Array<PropertyKey>} path
  */
 function getPathValue(data, path) {
   let current = data
@@ -24,6 +26,10 @@ function getPathValue(data, path) {
   return current
 }
 
+/**
+ * @param {any} issue
+ * @param {any} value
+ */
 const isRequiredError = (issue, value) =>
   value === undefined &&
   (issue.code === 'invalid_type' || issue.code === 'invalid_union')

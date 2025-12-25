@@ -23,6 +23,8 @@ function FileTreeItemMenuItems() {
     startUploadingDocOrFile,
     downloadPath,
     selectedFileName,
+    canSetRootDocId,
+    setRootDocId,
   } = useFileTreeActionable()
 
   const { project } = useProjectContext()
@@ -63,10 +65,23 @@ function FileTreeItemMenuItems() {
           </DropdownItem>
         </li>
       ) : null}
+      {canSetRootDocId ? (
+        <>
+          <DropdownDivider />
+          <li role="none">
+            <DropdownItem onClick={setRootDocId}>
+              {t('set_as_main_document')}
+            </DropdownItem>
+          </li>
+        </>
+      ) : null}
       {canDelete ? (
-        <li role="none">
-          <DropdownItem onClick={startDeleting}>{t('delete')}</DropdownItem>
-        </li>
+        <>
+          <DropdownDivider />
+          <li role="none">
+            <DropdownItem onClick={startDeleting}>{t('delete')}</DropdownItem>
+          </li>
+        </>
       ) : null}
       {canCreate ? (
         <>

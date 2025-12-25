@@ -1,6 +1,6 @@
 'use strict'
 
-const { z } = require('@overleaf/validation-tools')
+const { z, zz } = require('@overleaf/validation-tools')
 const Blob = require('overleaf-editor-core').Blob
 
 const hexHashPattern = new RegExp(Blob.HEX_HASH_RX_STRING)
@@ -20,26 +20,38 @@ const v2DocVersionsSchema = z.object({
   v: z.number().int().optional(),
 })
 
-const operationSchema = z.object({
-  pathname: z.string().optional(),
-  newPathname: z.string().optional(),
-  blob: z
-    .object({
-      hash: z.string(),
-    })
-    .optional(),
-  textOperation: z.array(z.any()).optional(),
-  file: fileSchema.optional(),
-})
+const operationSchema = z
+  .object({
+    pathname: z.string().optional(),
+    newPathname: z.string().optional(),
+    blob: z
+      .object({
+        hash: z.string(),
+      })
+      .optional(),
+    textOperation: z.array(z.any()).optional(),
+    file: fileSchema.optional(),
+    contentHash: z.string().optional(),
+  })
+  .passthrough()
 
-const changeSchema = z.object({
-  timestamp: z.string(),
-  operations: z.array(operationSchema),
-  authors: z.array(z.number().int().nullable()).optional(),
-  v2Authors: z.array(z.string().nullable()).optional(),
-  projectVersion: z.string().optional(),
-  v2DocVersions: z.record(v2DocVersionsSchema).optional(),
-})
+const originSchema = z
+  .object({
+    kind: z.string().optional(),
+  })
+  .passthrough()
+
+const changeSchema = z
+  .object({
+    timestamp: z.string(),
+    operations: z.array(operationSchema),
+    authors: z.array(z.number().int().nullable()).optional(),
+    v2Authors: z.array(z.string().nullable()).optional(),
+    origin: originSchema.optional(),
+    projectVersion: z.string().optional(),
+    v2DocVersions: z.record(z.string(), v2DocVersionsSchema).optional(),
+  })
+  .passthrough()
 
 const schemas = {
   projectId: z.object({
@@ -138,7 +150,7 @@ const schemas = {
       project_id: z.string(),
     }),
     query: z.object({
-      readOnly: z.boolean().optional(),
+      readOnly: z.coerce.boolean().optional(),
     }),
   }),
 
@@ -165,7 +177,7 @@ const schemas = {
   getHistoryBefore: z.object({
     params: z.object({
       project_id: z.string(),
-      timestamp: z.iso.datetime(),
+      timestamp: zz.datetime(),
     }),
   }),
 

@@ -1,22 +1,17 @@
 package uk.ac.ic.wlgitbridge.server;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.handler.ErrorHandler;
+import org.eclipse.jetty.util.Callback;
 
 public class ProductionErrorHandler extends ErrorHandler {
   @Override
-  public void handle(
-      String target,
-      org.eclipse.jetty.server.Request baseRequest,
-      HttpServletRequest request,
-      HttpServletResponse response)
-      throws IOException {
-    response
-        .getWriter()
-        .append("{\"message\":\"HTTP error ")
-        .append(String.valueOf(response.getStatus()))
-        .append("\"}");
+  public boolean handle(Request request, Response response, Callback callback) throws Exception {
+    String message = "{\"message\":\"HTTP error " + response.getStatus() + "\"}";
+    response.write(true, ByteBuffer.wrap(message.getBytes(StandardCharsets.UTF_8)), callback);
+    return true;
   }
 }

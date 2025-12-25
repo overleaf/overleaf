@@ -69,9 +69,9 @@ function PreviewSubscriptionChange() {
         upgradeType: 'add-on',
         referrer: purchaseReferrer,
       })
+      eventTracking.sendMB('assistant-add-on-purchase')
     }
 
-    eventTracking.sendMB('assistant-add-on-purchase')
     payNowTask
       .runAsync(payNow(preview))
       .then(() => {

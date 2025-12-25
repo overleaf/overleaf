@@ -21,7 +21,10 @@ vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
 )
 
 describe('UserMembershipController', () => {
+  let recurlySubscriptionId
+
   beforeEach(async ctx => {
+    recurlySubscriptionId = 'mock-recurly-subscription-id'
     ctx.req = new MockRequest(vi)
     ctx.req.params.id = 'mock-entity-id'
     ctx.user = { _id: 'mock-user-id' }
@@ -30,6 +33,8 @@ describe('UserMembershipController', () => {
       _id: 'mock-subscription-id',
       admin_id: 'mock-admin-id',
       manager_ids: ['mock-admin-id'],
+      planCode: 'group_professional',
+      recurlySubscription_id: recurlySubscriptionId,
       fetchV1Data: vi.fn(callback => callback(null, ctx.subscription)),
     }
     ctx.institution = {
@@ -165,8 +170,17 @@ describe('UserMembershipController', () => {
     }
     ctx.RecurlyClient = {
       promises: {
-        getSubscription: vi.fn().mockResolvedValue({}),
+        getSubscription: vi.fn().mockResolvedValue({
+          id: recurlySubscriptionId,
+        }),
       },
+    }
+
+    ctx.PlansLocator = {
+      findLocalPlanInSettings: vi.fn().mockReturnValue({
+        planCode: 'group_professional',
+        canUseFlexibleLicensing: true,
+      }),
     }
 
     vi.doMock(
@@ -194,6 +208,13 @@ describe('UserMembershipController', () => {
       '../../../../app/src/Features/Subscription/RecurlyClient',
       () => ({
         default: ctx.RecurlyClient,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/PlansLocator.mjs',
+      () => ({
+        default: ctx.PlansLocator,
       })
     )
 
@@ -291,6 +312,117 @@ describe('UserMembershipController', () => {
           expect(viewParams.managedUsersActive).to.equal(true)
           expect(viewParams.isUserGroupManager).to.equal(false)
         },
+      })
+    })
+
+    describe('canUseAddSeatsFeature', () => {
+      beforeEach(ctx => {
+        ctx.subscription.admin_id = 'mock-admin-id'
+        ctx.SessionManager.getLoggedInUserId.mockReturnValue('mock-admin-id')
+      })
+
+      it('should be true when all conditions are met', async ({
+        UserMembershipController,
+        req,
+      }) => {
+        expect.assertions(1)
+        await UserMembershipController.manageGroupMembers(req, {
+          render: (viewPath, viewParams) => {
+            expect(viewParams.canUseAddSeatsFeature).to.equal(true)
+          },
+        })
+      })
+
+      it('should be false when plan does not support flexible licensing', async ({
+        UserMembershipController,
+        req,
+        PlansLocator,
+      }) => {
+        expect.assertions(1)
+        PlansLocator.findLocalPlanInSettings.mockReturnValue({
+          planCode: 'group_professional',
+          canUseFlexibleLicensing: false,
+        })
+        await UserMembershipController.manageGroupMembers(req, {
+          render: (viewPath, viewParams) => {
+            expect(viewParams.canUseAddSeatsFeature).to.equal(false)
+          },
+        })
+      })
+
+      it('should be false when user is not admin', async ({
+        UserMembershipController,
+        req,
+        SessionManager,
+      }) => {
+        expect.assertions(1)
+        SessionManager.getLoggedInUserId.mockReturnValue('mock-user-id')
+        await UserMembershipController.manageGroupMembers(req, {
+          render: (viewPath, viewParams) => {
+            expect(viewParams.canUseAddSeatsFeature).to.equal(false)
+          },
+        })
+      })
+
+      it('should be false when recurly subscription does not exist', async ({
+        UserMembershipController,
+        req,
+        subscription,
+      }) => {
+        expect.assertions(1)
+        subscription.recurlySubscription_id = null
+        await UserMembershipController.manageGroupMembers(req, {
+          render: (viewPath, viewParams) => {
+            expect(viewParams.canUseAddSeatsFeature).to.equal(false)
+          },
+        })
+      })
+
+      it('should be false when recurly subscription has pending changes', async ({
+        UserMembershipController,
+        req,
+        RecurlyClient,
+      }) => {
+        expect.assertions(1)
+        RecurlyClient.promises.getSubscription.mockResolvedValue({
+          id: recurlySubscriptionId,
+          pendingChange: {},
+        })
+        await UserMembershipController.manageGroupMembers(req, {
+          render: (viewPath, viewParams) => {
+            expect(viewParams.canUseAddSeatsFeature).to.equal(false)
+          },
+        })
+      })
+
+      it('should be false when fetching recurly subscription fails', async ({
+        UserMembershipController,
+        req,
+        RecurlyClient,
+      }) => {
+        expect.assertions(1)
+        RecurlyClient.promises.getSubscription.mockRejectedValue(
+          new Error('Recurly error')
+        )
+        await UserMembershipController.manageGroupMembers(req, {
+          render: (viewPath, viewParams) => {
+            expect(viewParams.canUseAddSeatsFeature).to.equal(false)
+          },
+        })
+      })
+
+      it('should be false when plan is not found', async ({
+        UserMembershipController,
+        req,
+        PlansLocator,
+      }) => {
+        expect.assertions(1)
+        PlansLocator.findLocalPlanInSettings.mockReturnValue(null)
+        await UserMembershipController.manageGroupMembers(req, {
+          render: (viewPath, viewParams) => {
+            expect(viewParams.canUseAddSeatsFeature).to.equal(false)
+          },
+        })
       })
     })
 

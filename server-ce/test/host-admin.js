@@ -1,11 +1,15 @@
 import fs from 'node:fs'
 import Path from 'node:path'
-import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
+import { execFile as execFileCb } from 'node:child_process'
 import bodyParser from 'body-parser'
 import express from 'express'
 import YAML from 'js-yaml'
 import { isZodErrorLike } from 'zod-validation-error'
 import { ParamsError, validateReq, z } from '@overleaf/validation-tools'
+import { expressify } from '@overleaf/promise-utils'
+
+const execFile = promisify(execFileCb)
 
 const DATA_DIR = Path.join(
   import.meta.dirname,
@@ -59,7 +63,7 @@ function writeDockerComposeOverride(cfg) {
   fs.writeFileSync(PATHS.DOCKER_COMPOSE_OVERRIDE, YAML.dump(cfg))
 }
 
-function runDockerCompose(command, args, callback) {
+async function runDockerCompose(command, args) {
   const files = ['-f', PATHS.DOCKER_COMPOSE_FILE]
   if (process.env.NATIVE_CYPRESS) {
     files.push('-f', PATHS.DOCKER_COMPOSE_NATIVE)
@@ -67,7 +71,7 @@ function runDockerCompose(command, args, callback) {
   if (fs.existsSync(PATHS.DOCKER_COMPOSE_OVERRIDE)) {
     files.push('-f', PATHS.DOCKER_COMPOSE_OVERRIDE)
   }
-  execFile('docker', ['compose', ...files, command, ...args], callback)
+  return await execFile('docker', ['compose', ...files, command, ...args])
 }
 
 function purgeDataDir() {
@@ -105,78 +109,76 @@ app.use((req, res, next) => {
   next()
 })
 
-app.post('/run/script', (req, res) => {
-  const {
-    body: { cwd, script, args, user, hasOverleafEnv },
-  } = validateReq(
-    req,
-    z.object({
-      body: z.object({
-        cwd: z.string(),
-        script: z.string(),
-        args: z.array(z.string()),
-        user: z.string(),
-        hasOverleafEnv: z.boolean(),
-      }),
-    })
-  )
+app.post(
+  '/run/script',
+  expressify(async (req, res) => {
+    const {
+      body: { cwd, script, args, user, hasOverleafEnv },
+    } = validateReq(
+      req,
+      z.object({
+        body: z.object({
+          cwd: z.string(),
+          script: z.string(),
+          args: z.array(z.string()),
+          user: z.string(),
+          hasOverleafEnv: z.boolean(),
+        }),
+      })
+    )
 
-  const env = hasOverleafEnv
-    ? 'source /etc/overleaf/env.sh || source /etc/sharelatex/env.sh'
-    : 'true'
-
-  runDockerCompose(
-    'exec',
-    [
-      '--workdir',
-      `/overleaf/${cwd}`,
-      'sharelatex',
-      'bash',
-      '-c',
-      `source /etc/container_environment.sh && ${env} && /sbin/setuser ${user} node ${script} ${args.map(a => JSON.stringify(a)).join(' ')}`,
-    ],
-    (error, stdout, stderr) => {
+    const env = hasOverleafEnv
+      ? 'source /etc/overleaf/env.sh || source /etc/sharelatex/env.sh'
+      : 'true'
+    try {
+      const { stdout, stderr } = await runDockerCompose('exec', [
+        '--workdir',
+        `/overleaf/${cwd}`,
+        'sharelatex',
+        'bash',
+        '-c',
+        `source /etc/container_environment.sh && ${env} && /sbin/setuser ${user} node ${script} ${args.map(a => JSON.stringify(a)).join(' ')}`,
+      ])
       res.json({
-        error,
         stdout,
         stderr,
       })
+    } catch (error) {
+      return res.json({ error })
     }
-  )
-})
+  })
+)
 
-app.post('/run/gruntTask', (req, res) => {
-  const {
-    body: { task, args },
-  } = validateReq(
-    req,
-    z.object({
-      body: z.object({
-        task: z.string(),
-        args: z.array(z.string()),
-      }),
-    })
-  )
-
-  runDockerCompose(
-    'exec',
-    [
-      '--workdir',
-      '/var/www/sharelatex',
-      'sharelatex',
-      'bash',
-      '-c',
-      `source /etc/container_environment.sh && /sbin/setuser www-data grunt ${JSON.stringify(task)} ${args.map(a => JSON.stringify(a)).join(' ')}`,
-    ],
-    (error, stdout, stderr) => {
-      res.json({
-        error,
-        stdout,
-        stderr,
+app.post(
+  '/run/gruntTask',
+  expressify(async (req, res) => {
+    const {
+      body: { task, args },
+    } = validateReq(
+      req,
+      z.object({
+        body: z.object({
+          task: z.string(),
+          args: z.array(z.string()),
+        }),
       })
+    )
+
+    try {
+      const { stdout, stderr } = await runDockerCompose('exec', [
+        '--workdir',
+        '/var/www/sharelatex',
+        'sharelatex',
+        'bash',
+        '-c',
+        `source /etc/container_environment.sh && /sbin/setuser www-data grunt ${JSON.stringify(task)} ${args.map(a => JSON.stringify(a)).join(' ')}`,
+      ])
+      res.json({ stdout, stderr })
+    } catch (error) {
+      return res.json({ error })
     }
-  )
-})
+  })
+)
 
 const allowedVars = z.object(
   Object.fromEntries(
@@ -289,76 +291,81 @@ function setVarsDockerCompose({
   writeDockerComposeOverride(cfg)
 }
 
-app.post('/docker/compose/:cmd', (req, res) => {
-  const {
-    params: { cmd },
-    body: { args },
-  } = validateReq(
-    req,
-    z.object({
-      params: z.object({
-        cmd: z.literal(['up', 'stop', 'down', 'ps', 'logs']),
-      }),
-      body: z.object({
-        args: z.array(
-          z.literal([
-            '--detach',
-            '--wait',
-            '--volumes',
-            '--timeout=60',
-            'sharelatex',
-            'git-bridge',
-            'mongo',
-            'redis',
-          ])
-        ),
-      }),
-    })
-  )
+app.post(
+  '/docker/compose/:cmd',
+  expressify(async (req, res) => {
+    const {
+      params: { cmd },
+      body: { args },
+    } = validateReq(
+      req,
+      z.object({
+        params: z.object({
+          cmd: z.literal(['up', 'stop', 'down', 'ps', 'logs']),
+        }),
+        body: z.object({
+          args: z.array(
+            z.literal([
+              '--detach',
+              '--wait',
+              '--volumes',
+              '--timeout=60',
+              'sharelatex',
+              'git-bridge',
+              'mongo',
+              'redis',
+            ])
+          ),
+        }),
+      })
+    )
 
-  runDockerCompose(cmd, args, (error, stdout, stderr) => {
-    res.json({ error, stdout, stderr })
+    try {
+      const { stdout, stderr } = await runDockerCompose(cmd, args)
+      res.json({ stdout, stderr })
+    } catch (error) {
+      return res.json({ error })
+    }
   })
-})
+)
 
-function maybeResetData(resetData, callback) {
-  if (!resetData) return callback()
+async function maybeResetData(resetData) {
+  if (!resetData) return
 
   previousConfig = ''
-  runDockerCompose(
-    'down',
-    ['--timeout=0', '--volumes', 'mongo', 'redis', 'sharelatex'],
-    (error, stdout, stderr) => {
-      if (error) return callback(error, stdout, stderr)
-
-      try {
-        purgeDataDir()
-      } catch (error) {
-        return callback(error)
-      }
-      callback()
-    }
-  )
+  await runDockerCompose('down', [
+    '--timeout=0',
+    '--volumes',
+    'mongo',
+    'redis',
+    'sharelatex',
+  ])
+  purgeDataDir()
 }
 
-app.post('/reconfigure', (req, res) => {
-  const {
-    body: { pro, version, vars, withDataDir, resetData, mongoVersion },
-  } = validateReq(
-    req,
-    z.object({
-      body: z.object({
-        pro: z.boolean(),
-        version: z.string(),
-        vars: allowedVars,
-        withDataDir: z.boolean(),
-        resetData: z.boolean(),
-        mongoVersion: z.string(),
-      }),
-    })
-  )
-  maybeResetData(resetData, (error, stdout, stderr) => {
-    if (error) return res.json({ error, stdout, stderr })
+app.post(
+  '/reconfigure',
+  expressify(async (req, res) => {
+    const {
+      body: { pro, version, vars, withDataDir, resetData, mongoVersion },
+    } = validateReq(
+      req,
+      z.object({
+        body: z.object({
+          pro: z.boolean(),
+          version: z.string(),
+          vars: allowedVars,
+          withDataDir: z.boolean(),
+          resetData: z.boolean(),
+          mongoVersion: z.string(),
+        }),
+      })
+    )
+    try {
+      await maybeResetData(resetData)
+    } catch (error) {
+      return res.json({ error })
+    }
 
     const previousConfigServer = previousConfig
     const newConfig = JSON.stringify(req.body)
@@ -372,67 +379,94 @@ app.post('/reconfigure', (req, res) => {
       return res.json({ error })
     }
 
-    if (error) return res.json({ error, stdout, stderr })
-    runDockerCompose(
-      'up',
-      ['--detach', '--wait', 'sharelatex'],
-      (error, stdout, stderr) => {
-        previousConfig = newConfig
-        res.json({ error, stdout, stderr, previousConfigServer })
-      }
-    )
+    try {
+      const { stdout, stderr } = await runDockerCompose('up', [
+        '--detach',
+        '--wait',
+        'sharelatex',
+      ])
+      res.json({ stdout, stderr, previousConfigServer })
+    } catch (error) {
+      return res.json({
+        error,
+        previousConfigServer,
+      })
+    } finally {
+      previousConfig = newConfig
+    }
   })
-})
+)
 
-app.post('/mongo/setFeatureCompatibilityVersion', (req, res) => {
-  const {
-    body: { mongoVersion },
-  } = validateReq(
-    req,
-    z.object({
-      body: z.object({
-        mongoVersion: z.string(),
-      }),
-    })
-  )
-  const mongosh = mongoVersion > '5' ? 'mongosh' : 'mongo'
-  const params = {
-    setFeatureCompatibilityVersion: mongoVersion,
-  }
-  if (mongoVersion >= '7.0') {
-    // MongoServerError: Once you have upgraded to 7.0, you will not be able to downgrade FCV and binary version without support assistance. Please re-run this command with 'confirm: true' to acknowledge this and continue with the FCV upgrade.
-    // NOTE: 6.0 does not know about this flag. So conditionally add it.
-    // MongoServerError: BSON field 'setFeatureCompatibilityVersion.confirm' is an unknown field.
-    params.confirm = true
-  }
-  runDockerCompose(
-    'exec',
-    ['mongo', mongosh, '--eval', `db.adminCommand(${JSON.stringify(params)})`],
-    (error, stdout, stderr) => {
-      res.json({ error, stdout, stderr })
+app.post(
+  '/mongo/setFeatureCompatibilityVersion',
+  expressify(async (req, res) => {
+    const {
+      body: { mongoVersion },
+    } = validateReq(
+      req,
+      z.object({
+        body: z.object({
+          mongoVersion: z.string(),
+        }),
+      })
+    )
+    const mongosh = mongoVersion > '5' ? 'mongosh' : 'mongo'
+    const params = {
+      setFeatureCompatibilityVersion: mongoVersion,
     }
-  )
-})
+    if (mongoVersion >= '7.0') {
+      // MongoServerError: Once you have upgraded to 7.0, you will not be able to downgrade FCV and binary version without support assistance. Please re-run this command with 'confirm: true' to acknowledge this and continue with the FCV upgrade.
+      // NOTE: 6.0 does not know about this flag. So conditionally add it.
+      // MongoServerError: BSON field 'setFeatureCompatibilityVersion.confirm' is an unknown field.
+      params.confirm = true
+    }
+    try {
+      const { stdout, stderr } = await runDockerCompose('exec', [
+        'mongo',
+        mongosh,
+        '--eval',
+        `db.adminCommand(${JSON.stringify(params)})`,
+      ])
+      res.json({ stdout, stderr })
+    } catch (error) {
+      return res.json({ error })
+    }
+  })
+)
 
-app.get('/redis/keys', (req, res) => {
-  runDockerCompose(
-    'exec',
-    ['redis', 'redis-cli', 'KEYS', '*'],
-    (error, stdout, stderr) => {
-      res.json({ error, stdout, stderr })
+app.get(
+  '/redis/keys',
+  expressify(async (req, res) => {
+    try {
+      const { stdout, stderr } = await runDockerCompose('exec', [
+        'redis',
+        'redis-cli',
+        'KEYS',
+        '*',
+      ])
+      res.json({ stdout, stderr })
+    } catch (error) {
+      return res.json({ error })
     }
-  )
-})
+  })
+)
 
-app.delete('/data/user_files', (req, res) => {
-  runDockerCompose(
-    'exec',
-    ['sharelatex', 'rm', '-vrf', '/var/lib/overleaf/data/user_files'],
-    (error, stdout, stderr) => {
-      res.json({ error, stdout, stderr })
+app.delete(
+  '/data/user_files',
+  expressify(async (req, res) => {
+    try {
+      const { stdout, stderr } = await runDockerCompose('exec', [
+        'sharelatex',
+        'rm',
+        '-vrf',
+        '/var/lib/overleaf/data/user_files',
+      ])
+      res.json({ stdout, stderr })
+    } catch (error) {
+      return res.json({ error })
     }
-  )
-})
+  })
+)
 
 app.use((error, req, res, next) => {
   if (error instanceof ParamsError) {

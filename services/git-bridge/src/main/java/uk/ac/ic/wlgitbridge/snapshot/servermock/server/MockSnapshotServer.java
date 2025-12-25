@@ -1,11 +1,11 @@
 package uk.ac.ic.wlgitbridge.snapshot.servermock.server;
 
 import java.io.File;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.util.resource.ResourceFactory;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.response.SnapshotResponseBuilder;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.state.SnapshotAPIState;
 import uk.ac.ic.wlgitbridge.util.Log;
@@ -23,14 +23,14 @@ public class MockSnapshotServer {
     server = new Server(port);
     responseBuilder = new SnapshotResponseBuilder();
 
-    HandlerList handlers = new HandlerList();
+    Handler.Sequence handlers = new Handler.Sequence();
     handlers.addHandler(new MockOAuthRequestHandler());
     handlers.addHandler(getHandlerForResourceBase(resourceBase));
     server.setHandler(handlers);
   }
 
-  private HandlerCollection getHandlerForResourceBase(File resourceBase) {
-    HandlerCollection handlers = new HandlerCollection();
+  private Handler.Sequence getHandlerForResourceBase(File resourceBase) {
+    Handler.Sequence handlers = new Handler.Sequence();
     handlers.addHandler(new MockSnapshotRequestHandler(responseBuilder));
     handlers.addHandler(resourceHandlerWithBase(resourceBase));
     return handlers;
@@ -38,7 +38,8 @@ public class MockSnapshotServer {
 
   private ResourceHandler resourceHandlerWithBase(File resourceBase) {
     ResourceHandler resourceHandler = new ResourceHandler();
-    resourceHandler.setResourceBase(resourceBase.getAbsolutePath());
+    resourceHandler.setBaseResource(
+        ResourceFactory.of(resourceHandler).newResource(resourceBase.toPath()));
     return resourceHandler;
   }
 

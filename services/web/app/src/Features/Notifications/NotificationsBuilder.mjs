@@ -57,7 +57,7 @@ function featuresUpgradedByAffiliation(affiliation, user) {
     async create() {
       const messageOpts = { institutionName: affiliation.institutionName }
       return await NotificationsHandler.promises.createNotification(
-        user._id,
+        user._id.toString(),
         this.key,
         'notification_features_upgraded_by_affiliation',
         messageOpts,
@@ -80,7 +80,7 @@ function redundantPersonalSubscription(affiliation, user) {
     async create() {
       const messageOpts = { institutionName: affiliation.institutionName }
       return await NotificationsHandler.promises.createNotification(
-        user._id,
+        user._id.toString(),
         this.key,
         'notification_personal_subscription_not_required_due_to_affiliation',
         messageOpts,
@@ -108,7 +108,7 @@ function projectInvite(invite, project, sendingUser, user) {
         token: invite.token,
       }
       return await NotificationsHandler.promises.createNotification(
-        user._id,
+        user._id.toString(),
         this.key,
         'notification_project_invite',
         messageOpts,
