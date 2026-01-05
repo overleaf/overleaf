@@ -1,13 +1,19 @@
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
 
 BUILD_NUMBER ?= local
-export BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
-BRANCH_NAME_TAG_SAFE = $(shell echo $(BRANCH_NAME) | sed 's/\//\-\-/')
-export COMMIT_SHA ?= $(shell git rev-parse HEAD)
+ifeq ($(BRANCH_NAME),)
+  export BRANCH_NAME := $(shell git rev-parse --abbrev-ref HEAD)
+endif
+BRANCH_NAME_TAG_SAFE := $(subst /,--,$(BRANCH_NAME))
+ifeq ($(COMMIT_SHA),)
+  export COMMIT_SHA := $(shell git rev-parse HEAD)
+endif
 PROJECT_NAME = web
-BUILD_DIR_NAME = $(shell pwd | xargs basename | tr -cd '[a-zA-Z0-9_.\-]')
-PWD = $(shell pwd)
-export MONOREPO ?= $(shell cd ../../ && pwd)
+BUILD_DIR_NAME := web
+PWD := $(shell pwd)
+ifeq ($(MONOREPO),)
+	export MONOREPO := $(shell cd ../../ && pwd)
+endif
 
 export OVERLEAF_CONFIG ?= /overleaf/services/web/test/acceptance/config/settings.test.saas.js
 export BASE_CONFIG ?= ${OVERLEAF_CONFIG}
