@@ -144,7 +144,9 @@ public class SwapJobImpl implements SwapJob {
         exceptionProjectNames.add(projectName);
       }
     }
-    if (totalSize > lowWatermarkBytes) {
+    if (lowWatermarkBytes > 0 && totalSize > lowWatermarkBytes) {
+      // NOTE: If lowWatermarkBytes is 0, we never expect to reach it (since
+      // we keep the repo database on disk), so don't log a warning.
       Log.warn("Finished swapping, but total size is still too high.");
     }
     Log.debug(
