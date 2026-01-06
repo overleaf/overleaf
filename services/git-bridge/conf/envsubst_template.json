@@ -18,7 +18,8 @@
     "awsAccessKey": "${GIT_BRIDGE_SWAPSTORE_AWS_ACCESS_KEY}",
     "awsSecret": "${GIT_BRIDGE_SWAPSTORE_AWS_SECRET}",
     "s3BucketName": "${GIT_BRIDGE_SWAPSTORE_S3_BUCKET_NAME}",
-    "awsRegion": "${GIT_BRIDGE_SWAPSTORE_AWS_REGION:-us-east-1}"
+    "awsRegion": "${GIT_BRIDGE_SWAPSTORE_AWS_REGION:-us-east-1}",
+    "awsEndpoint": "${GIT_BRIDGE_SWAPSTORE_AWS_ENDPOINT}"
   },
   "swapJob": {
     "minProjects": ${GIT_BRIDGE_SWAPJOB_MIN_PROJECTS:-50},

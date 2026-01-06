@@ -5,28 +5,40 @@ package uk.ac.ic.wlgitbridge.bridge.swap.store;
  */
 public class SwapStoreConfig {
 
-  public static final SwapStoreConfig NOOP = new SwapStoreConfig("noop", null, null, null, null);
+  public static final SwapStoreConfig NOOP =
+      new SwapStoreConfig("noop", null, null, null, null, null);
 
   private String type;
   private String awsAccessKey;
   private String awsSecret;
   private String s3BucketName;
   private String awsRegion;
+  private String awsEndpoint;
 
   public SwapStoreConfig() {}
 
   public SwapStoreConfig(
-      String awsAccessKey, String awsSecret, String s3BucketName, String awsRegion) {
-    this("s3", awsAccessKey, awsSecret, s3BucketName, awsRegion);
+      String awsAccessKey,
+      String awsSecret,
+      String s3BucketName,
+      String awsRegion,
+      String awsEndpoint) {
+    this("s3", awsAccessKey, awsSecret, s3BucketName, awsRegion, awsEndpoint);
   }
 
   SwapStoreConfig(
-      String type, String awsAccessKey, String awsSecret, String s3BucketName, String awsRegion) {
+      String type,
+      String awsAccessKey,
+      String awsSecret,
+      String s3BucketName,
+      String awsRegion,
+      String awsEndpoint) {
     this.type = type;
     this.awsAccessKey = awsAccessKey;
     this.awsSecret = awsSecret;
     this.s3BucketName = s3BucketName;
     this.awsRegion = awsRegion;
+    this.awsEndpoint = awsEndpoint;
   }
 
   public String getType() {
@@ -49,13 +61,18 @@ public class SwapStoreConfig {
     return awsRegion;
   }
 
+  public String getAwsEndpoint() {
+    return awsEndpoint;
+  }
+
   public SwapStoreConfig sanitisedCopy() {
     return new SwapStoreConfig(
         type,
         awsAccessKey == null ? null : "<awsAccessKey>",
         awsSecret == null ? null : "<awsSecret>",
         s3BucketName,
-        awsRegion);
+        awsRegion,
+        awsEndpoint);
   }
 
   public static SwapStoreConfig sanitisedCopy(SwapStoreConfig swapStore) {

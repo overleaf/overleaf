@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.bridge.swap.store;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
@@ -17,22 +18,35 @@ public class S3SwapStore implements SwapStore {
   private final String bucketName;
 
   public S3SwapStore(SwapStoreConfig cfg) {
-    this(cfg.getAwsAccessKey(), cfg.getAwsSecret(), cfg.getS3BucketName(), cfg.getAwsRegion());
+    this(
+        cfg.getAwsAccessKey(),
+        cfg.getAwsSecret(),
+        cfg.getS3BucketName(),
+        cfg.getAwsRegion(),
+        cfg.getAwsEndpoint());
   }
 
-  S3SwapStore(String accessKey, String secret, String bucketName, String region) {
+  S3SwapStore(String accessKey, String secret, String bucketName, String region, String endpoint) {
     String regionToUse = null;
     if (region == null) {
       regionToUse = "us-east-1";
     } else {
       regionToUse = region;
     }
-    s3 =
+
+    AmazonS3ClientBuilder builder =
         AmazonS3ClientBuilder.standard()
-            .withRegion(regionToUse)
             .withCredentials(
-                new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secret)))
-            .build();
+                new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secret)));
+
+    if (endpoint != null && !endpoint.isEmpty()) {
+      builder
+          .enablePathStyleAccess()
+          .withEndpointConfiguration(new EndpointConfiguration(endpoint, regionToUse));
+    } else {
+      builder.withRegion(regionToUse);
+    }
+    s3 = builder.build();
     this.bucketName = bucketName;
   }
 

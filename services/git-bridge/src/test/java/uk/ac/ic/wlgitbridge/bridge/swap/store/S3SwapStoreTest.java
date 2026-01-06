@@ -11,6 +11,7 @@ public class S3SwapStoreTest {
   private static final String secret = null;
   private static final String bucketName = "com.overleaf.testbucket";
   private static final String region = "us-east-1";
+  private static final String endpoint = null;
 
   private S3SwapStore s3;
 
@@ -20,7 +21,7 @@ public class S3SwapStoreTest {
       s3 = null;
       return;
     }
-    s3 = new S3SwapStore(accessKey, secret, bucketName, region);
+    s3 = new S3SwapStore(accessKey, secret, bucketName, region, endpoint);
   }
 
   //    @Ignore
