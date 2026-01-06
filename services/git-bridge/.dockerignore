@@ -1,6 +1,7 @@
 *
 !start.sh
 !server-pro-start.sh
+!dev-env-start.sh
 !/conf
 !/lib
 !/src/main

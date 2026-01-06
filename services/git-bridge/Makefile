@@ -20,7 +20,7 @@ runtime-conf:
 
 
 run: $(MVN_TARGET) runtime-conf
-	java $(GIT_BRIDGE_JVM_ARGS) -jar $(MVN_TARGET) conf/runtime.json
+	@exec java $(GIT_BRIDGE_JVM_ARGS) -jar $(MVN_TARGET) conf/runtime.json
 
 
 $(MVN_TARGET): $(shell find src -type f) pom.xml
