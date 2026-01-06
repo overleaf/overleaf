@@ -1,19 +1,20 @@
 package uk.ac.ic.wlgitbridge.bridge.swap.store;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.*;
 import java.io.InputStream;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3ClientBuilder;
+import software.amazon.awssdk.services.s3.model.*;
 
 /*
  * Created by winston on 21/08/2016.
  */
 public class S3SwapStore implements SwapStore {
 
-  private final AmazonS3 s3;
+  private final S3Client s3;
 
   private final String bucketName;
 
@@ -27,24 +28,20 @@ public class S3SwapStore implements SwapStore {
   }
 
   S3SwapStore(String accessKey, String secret, String bucketName, String region, String endpoint) {
-    String regionToUse = null;
+    Region regionToUse = null;
     if (region == null) {
-      regionToUse = "us-east-1";
+      regionToUse = Region.US_EAST_1;
     } else {
-      regionToUse = region;
+      regionToUse = Region.of(region);
     }
-
-    AmazonS3ClientBuilder builder =
-        AmazonS3ClientBuilder.standard()
-            .withCredentials(
-                new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secret)));
+    S3ClientBuilder builder =
+        S3Client.builder()
+            .region(regionToUse)
+            .credentialsProvider(
+                StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secret)));
 
     if (endpoint != null && !endpoint.isEmpty()) {
-      builder
-          .enablePathStyleAccess()
-          .withEndpointConfiguration(new EndpointConfiguration(endpoint, regionToUse));
-    } else {
-      builder.withRegion(regionToUse);
+      builder.forcePathStyle(true).endpointOverride(java.net.URI.create(endpoint));
     }
     s3 = builder.build();
     this.bucketName = bucketName;
@@ -52,22 +49,25 @@ public class S3SwapStore implements SwapStore {
 
   @Override
   public void upload(String projectName, InputStream uploadStream, long contentLength) {
-    ObjectMetadata metadata = new ObjectMetadata();
-    metadata.setContentLength(contentLength);
-    PutObjectRequest put = new PutObjectRequest(bucketName, projectName, uploadStream, metadata);
-    PutObjectResult res = s3.putObject(put);
+    PutObjectRequest put =
+        PutObjectRequest.builder()
+            .bucket(bucketName)
+            .key(projectName)
+            .contentLength(contentLength)
+            .build();
+    s3.putObject(put, RequestBody.fromInputStream(uploadStream, contentLength));
   }
 
   @Override
   public InputStream openDownloadStream(String projectName) {
-    GetObjectRequest get = new GetObjectRequest(bucketName, projectName);
-    S3Object res = s3.getObject(get);
-    return res.getObjectContent();
+    GetObjectRequest get = GetObjectRequest.builder().bucket(bucketName).key(projectName).build();
+    return s3.getObject(get);
   }
 
   @Override
   public void remove(String projectName) {
-    DeleteObjectRequest del = new DeleteObjectRequest(bucketName, projectName);
+    DeleteObjectRequest del =
+        DeleteObjectRequest.builder().bucket(bucketName).key(projectName).build();
     s3.deleteObject(del);
   }
 

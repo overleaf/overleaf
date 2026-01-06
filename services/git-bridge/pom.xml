@@ -29,7 +29,7 @@
         <logback.classic.version>1.5.20</logback.classic.version>
         <mockserver.version>5.15.0</mockserver.version>
         <mockito.version>5.20.0</mockito.version>
-        <aws.java.sdk.version>1.12.793</aws.java.sdk.version>
+        <aws.java.sdk.version>2.36.2</aws.java.sdk.version>
         <jakarta.xml.bind.api.version>${jaxb.runtime.version}</jakarta.xml.bind.api.version>
         <jaxb.runtime.version>2.3.2</jaxb.runtime.version>
         <httpclient.version>4.5.14</httpclient.version>
@@ -210,10 +210,10 @@
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk -->
+        <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/s3/2.36.2 -->
         <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-s3</artifactId>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
             <version>${aws.java.sdk.version}</version>
         </dependency>
         <!-- API, java.xml.bind module -->
