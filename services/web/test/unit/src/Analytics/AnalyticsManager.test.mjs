@@ -50,6 +50,10 @@ describe('AnalyticsManager', function () {
       add: sinon.stub().resolves(),
       process: sinon.stub().resolves(),
     }
+    ctx.analyticsPackageUsageQueue = {
+      add: sinon.stub().resolves(),
+      process: sinon.stub().resolves(),
+    }
     ctx.Queues = {
       getQueue: queueName => {
         switch (queueName) {
@@ -65,6 +69,8 @@ describe('AnalyticsManager', function () {
             return ctx.analyticsAccountMappingQueue
           case 'analytics-email-change':
             return ctx.analyticsEmailChangeQueue
+          case 'analytics-package-usage':
+            return ctx.analyticsPackageUsageQueue
           default:
             throw new Error('Unexpected queue name')
         }
@@ -372,6 +378,8 @@ describe('AnalyticsManager', function () {
                 return ctx.analyticsAccountMappingQueue
               case 'analytics-email-change':
                 return ctx.analyticsEmailChangeQueue
+              case 'analytics-package-usage':
+                return ctx.analyticsPackageUsageQueue
               default:
                 throw new Error('Unexpected queue name')
             }

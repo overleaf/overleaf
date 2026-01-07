@@ -7,8 +7,15 @@ import { callbackify } from '@overleaf/promise-utils'
  *   labels: string[]
  *   packages: Record<string, Record<string, any>>,
  *   packageNames: string[],
+ *   documentClass: string | null
  * }} DocMeta
  */
+
+const LABEL_RE = /\\label{(.{0,80}?)}/g
+const LABEL_OPTION_RE = /\blabel={?(.{0,80}?)[\s},\]]/g
+const PACKAGE_RE = /^\\usepackage(?:\[.{0,80}?])?{(.{0,80}?)}/g
+const REQ_PACKAGE_RE = /^\\RequirePackage(?:\[.{0,80}?])?{(.{0,80}?)}/g
+const DOCUMENT_CLASS_RE = /^\\documentclass(?:\[.{0,80}?])?{(.{0,80}?)}/
 
 /**
  * @param {string[]} lines
@@ -20,30 +27,33 @@ async function extractMetaFromDoc(lines) {
     labels: [],
     packages: {},
     packageNames: [],
+    documentClass: null,
   }
-
-  const labelRe = /\\label{(.{0,80}?)}/g
-  const labelOptionRe = /\blabel={?(.{0,80}?)[\s},\]]/g
-  const packageRe = /^\\usepackage(?:\[.{0,80}?])?{(.{0,80}?)}/g
-  const reqPackageRe = /^\\RequirePackage(?:\[.{0,80}?])?{(.{0,80}?)}/g
 
   for (const rawLine of lines) {
     const line = getNonCommentedContent(rawLine)
 
-    for (const label of lineMatches(labelRe, line)) {
+    for (const label of lineMatches(LABEL_RE, line)) {
       docMeta.labels.push(label)
     }
 
-    for (const label of lineMatches(labelOptionRe, line)) {
+    for (const label of lineMatches(LABEL_OPTION_RE, line)) {
       docMeta.labels.push(label)
     }
 
-    for (const pkg of lineMatches(packageRe, line, ',')) {
+    for (const pkg of lineMatches(PACKAGE_RE, line, ',')) {
       docMeta.packageNames.push(pkg)
     }
 
-    for (const pkg of lineMatches(reqPackageRe, line, ',')) {
+    for (const pkg of lineMatches(REQ_PACKAGE_RE, line, ',')) {
       docMeta.packageNames.push(pkg)
+    }
+
+    if (docMeta.documentClass == null) {
+      const match = line.match(DOCUMENT_CLASS_RE)
+      if (match != null) {
+        docMeta.documentClass = match[1]
+      }
     }
   }
 
