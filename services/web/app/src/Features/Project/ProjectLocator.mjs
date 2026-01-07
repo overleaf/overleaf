@@ -1,11 +1,17 @@
 import _ from 'lodash'
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
+import async from 'async'
 import ProjectGetter from './ProjectGetter.mjs'
 import Errors from '../Errors/Errors.js'
-import { callbackifyMultiResult } from '@overleaf/promise-utils'
+import { promisifyMultiResult } from '@overleaf/promise-utils'
 import { iterablePaths } from './IterablePath.mjs'
 
+/**
+ * @param project
+ * @param predicate
+ * @returns {{path: string, value: *}}
+ */
 function findDeep(project, predicate) {
   function find(value, path) {
     if (predicate(value)) {
@@ -23,8 +29,17 @@ function findDeep(project, predicate) {
   return find(project.rootFolder, ['rootFolder'])
 }
 
-async function findElement(options) {
-  const { project_id: projectId, element_id: elementId, type } = options
+function findElement(options, _callback) {
+  // The search algorithm below potentially invokes the callback multiple
+  // times.
+  const callback = _.once(_callback)
+
+  const {
+    project,
+    project_id: projectId,
+    element_id: elementId,
+    type,
+  } = options
   const elementType = sanitizeTypeOfElement(type)
 
   let count = 0
@@ -35,9 +50,10 @@ async function findElement(options) {
           projectId || project._id
         }`
       )
-      throw new Errors.NotFoundError('entity not found')
+      callback(new Errors.NotFoundError('entity not found'))
     }
   }
+
   function search(searchFolder, path) {
     count++
     const element = _.find(
@@ -49,9 +65,9 @@ async function findElement(options) {
       searchFolder.folders != null &&
       searchFolder.folders.length !== 0
     ) {
-      for (const [index, folder] of searchFolder.folders.entries()) {
+      _.forEach(searchFolder.folders, (folder, index) => {
         if (folder == null) {
-          continue
+          return
         }
         const newPath = {}
         for (const key of Object.keys(path)) {
@@ -60,11 +76,8 @@ async function findElement(options) {
         } // make a value copy of the string
         newPath.fileSystem += `/${folder.name}`
         newPath.mongo += `.folders.${index}`
-        const result = search(folder, newPath)
-        if (result) {
-          return result
-        }
-      }
+        search(folder, newPath)
+      })
       endOfBranch()
     } else if (element != null) {
       const elementPlaceInArray = getIndexOf(
@@ -73,9 +86,8 @@ async function findElement(options) {
       )
       path.fileSystem += `/${element.name}`
       path.mongo += `.${elementType}.${elementPlaceInArray}`
-      return { element, path, folder: searchFolder }
-    }
-    if (element == null) {
+      callback(null, element, path, searchFolder)
+    } else if (element == null) {
       endOfBranch()
     }
   }
@@ -87,70 +99,97 @@ async function findElement(options) {
       elementId + '' === project.rootFolder[0]._id + '' &&
       elementType === 'folders'
     ) {
-      return { element: project.rootFolder[0], path, folder: null }
+      callback(null, project.rootFolder[0], path, null)
+    } else {
+      search(project.rootFolder[0], path)
     }
-    return search(project.rootFolder[0], path)
   }
 
-  const project =
-    options.project ||
-    (await ProjectGetter.promises.getProject(projectId, {
-      rootFolder: true,
-      rootDoc_id: true,
-    }))
-
-  if (project == null) {
-    throw new Errors.NotFoundError('project not found')
-  }
-  return startSearch(project)
-}
-
-async function findRootDoc(opts) {
-  const getRootDoc = async project => {
-    if (project.rootDoc_id == null) {
-      return { element: null, path: null, folder: null }
-    }
-    try {
-      return await findElement({
-        project,
-        element_id: project.rootDoc_id,
-        type: 'docs',
-      })
-    } catch (err) {
-      if (err instanceof Errors.NotFoundError) {
-        return { element: null, path: null, folder: null }
+  if (project != null) {
+    startSearch(project)
+  } else {
+    ProjectGetter.getProject(
+      projectId,
+      { rootFolder: true, rootDoc_id: true },
+      (err, project) => {
+        if (err != null) {
+          return callback(err)
+        }
+        if (project == null) {
+          return callback(new Errors.NotFoundError('project not found'))
+        }
+        startSearch(project)
       }
-      throw err
+    )
+  }
+}
+
+function findRootDoc(opts, callback) {
+  const getRootDoc = project => {
+    if (project.rootDoc_id != null) {
+      findElement(
+        { project, element_id: project.rootDoc_id, type: 'docs' },
+        (error, ...args) => {
+          if (error != null) {
+            if (error instanceof Errors.NotFoundError) {
+              return callback(null, null)
+            } else {
+              return callback(error)
+            }
+          }
+          callback(null, ...args)
+        }
+      )
+    } else {
+      callback(null, null)
     }
   }
-  const { project_id: projectId } = opts
-  const project =
-    opts.project ||
-    (await ProjectGetter.promises.getProject(projectId, {
-      rootFolder: true,
-      rootDoc_id: true,
-    }))
-  return await getRootDoc(project)
-}
-
-async function findElementByPath(options) {
-  const { project_id: projectId, path, exactCaseMatch } = options
-  if (path == null) {
-    throw new Error('no path provided for findElementByPath')
+  const { project, project_id: projectId } = opts
+  if (project != null) {
+    getRootDoc(project)
+  } else {
+    ProjectGetter.getProject(
+      projectId,
+      { rootFolder: true, rootDoc_id: true },
+      (err, project) => {
+        if (err != null) {
+          logger.warn({ err }, 'error getting project')
+          callback(err)
+        } else {
+          getRootDoc(project)
+        }
+      }
+    )
   }
-  const project =
-    options.project ||
-    (await ProjectGetter.promises.getProject(projectId, {
-      rootFolder: true,
-      rootDoc_id: true,
-    }))
-  return await _findElementByPathWithProject(project, path, exactCaseMatch)
 }
 
-async function _findElementByPathWithProject(
+function findElementByPath(options, callback) {
+  const { project, project_id: projectId, path, exactCaseMatch } = options
+  if (path == null) {
+    return new Error('no path provided for findElementByPath')
+  }
+
+  if (project != null) {
+    _findElementByPathWithProject(project, path, exactCaseMatch, callback)
+  } else {
+    ProjectGetter.getProject(
+      projectId,
+      { rootFolder: true, rootDoc_id: true },
+      (err, project) => {
+        if (err != null) {
+          return callback(err)
+        }
+        _findElementByPathWithProject(project, path, exactCaseMatch, callback)
+      }
+    )
+  }
+}
+
+function _findElementByPathWithProject(
   project,
   needlePath,
-  exactCaseMatch
+  exactCaseMatch,
+  callback
 ) {
   let matchFn
   if (exactCaseMatch) {
@@ -161,9 +200,9 @@ async function _findElementByPathWithProject(
       (b != null ? b.toLowerCase() : undefined)
   }
 
-  function getParentFolder(haystackFolder, foldersList, level) {
+  function getParentFolder(haystackFolder, foldersList, level, cb) {
     if (foldersList.length === 0) {
-      return haystackFolder
+      return cb(null, haystackFolder)
     }
     const needleFolderName = foldersList[level]
     let found = false
@@ -171,22 +210,25 @@ async function _findElementByPathWithProject(
       if (matchFn(folder.name, needleFolderName)) {
         found = true
         if (level === foldersList.length - 1) {
-          return folder
+          return cb(null, folder)
+        } else {
+          return getParentFolder(folder, foldersList, level + 1, cb)
         }
-        return getParentFolder(folder, foldersList, level + 1)
       }
     }
     if (!found) {
-      throw new Error(
-        `not found project: ${project._id} search path: ${needlePath}, folder ${foldersList[level]} could not be found`
+      cb(
+        new Error(
+          `not found project: ${project._id} search path: ${needlePath}, folder ${foldersList[level]} could not be found`
+        )
       )
     }
   }
 
-  function getEntity(folder, entityName) {
+  function getEntity(folder, entityName, cb) {
     let result, type
     if (entityName == null) {
-      return { element: folder, type: 'folder', folder: null }
+      return cb(null, folder, 'folder', null)
     }
     for (const file of iterablePaths(folder, 'fileRefs')) {
       if (matchFn(file != null ? file.name : undefined, entityName)) {
@@ -210,18 +252,21 @@ async function _findElementByPathWithProject(
     }
 
     if (result != null) {
-      return { element: result, type, folder }
+      cb(null, result, type, folder)
+    } else {
+      cb(
+        new Error(
+          `not found project: ${project._id} search path: ${needlePath}, entity ${entityName} could not be found`
+        )
+      )
     }
-    throw new Error(
-      `not found project: ${project._id} search path: ${needlePath}, entity ${entityName} could not be found`
-    )
   }
 
   if (project == null) {
-    throw new Error('Tried to find an element for a null project')
+    return callback(new Error('Tried to find an element for a null project'))
   }
   if (needlePath === '' || needlePath === '/') {
-    return { element: project.rootFolder[0], type: 'folder', folder: null }
+    return callback(null, project.rootFolder[0], 'folder', null)
   }
 
   if (needlePath.indexOf('/') === 0) {
@@ -230,8 +275,11 @@ async function _findElementByPathWithProject(
   const foldersList = needlePath.split('/')
   const needleName = foldersList.pop()
   const rootFolder = project.rootFolder[0]
-  const parentFolder = getParentFolder(rootFolder, foldersList, 0)
-  return getEntity(parentFolder, needleName)
+
+  const jobs = []
+  jobs.push(cb => getParentFolder(rootFolder, foldersList, 0, cb))
+  jobs.push((folder, cb) => getEntity(folder, needleName, cb))
+  async.waterfall(jobs, callback)
 }
 
 function sanitizeTypeOfElement(elementType) {
@@ -281,26 +329,26 @@ function findElementByMongoPath(project, mongoPath) {
 }
 
 export default {
-  findElement: callbackifyMultiResult(findElement, [
-    'element',
-    'path',
-    'folder',
-  ]),
-  findElementByPath: callbackifyMultiResult(findElementByPath, [
-    'element',
-    'type',
-    'folder',
-  ]),
-  findRootDoc: callbackifyMultiResult(findRootDoc, [
-    'element',
-    'path',
-    'folder',
-  ]),
+  findElement,
+  findElementByPath,
+  findRootDoc,
   findElementByMongoPath,
   findDeep,
   promises: {
-    findElement,
-    findElementByPath,
-    findRootDoc,
+    findElement: promisifyMultiResult(findElement, [
+      'element',
+      'path',
+      'folder',
+    ]),
+    findElementByPath: promisifyMultiResult(findElementByPath, [
+      'element',
+      'type',
+      'folder',
+    ]),
+    findRootDoc: promisifyMultiResult(findRootDoc, [
+      'element',
+      'path',
+      'folder',
+    ]),
   },
 }
