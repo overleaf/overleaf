@@ -89,7 +89,7 @@ block content
 														- let currentSection = null
 														each row in privilegesMatrix.privileges
 															- const privilege = row.privilege
-															- if (currentSection !== privilege.section)
+															if currentSection !== privilege.section
 																- currentSection = privilege.section
 																tr.section-header
 																	td(colspan=privilegesMatrix.roles.length + 1)
