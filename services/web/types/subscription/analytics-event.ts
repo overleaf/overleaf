@@ -8,7 +8,6 @@ import { RecurlyPlanCode } from './plan'
 type PaymentPageFormSubmitEventBaseSegmentation = {
   currencyCode: CurrencyCode
   plan_code?: string
-  coupon_code: string
   isPaypal: boolean
   upgradeType: 'standalone'
   referrer?: string
@@ -16,6 +15,8 @@ type PaymentPageFormSubmitEventBaseSegmentation = {
 
 type PaymentPageFormSubmitEventStripeSegmentation =
   PaymentPageFormSubmitEventBaseSegmentation & {
+    couponName?: string
+    promotionCode?: string
     payment_provider: StripePaymentProviderService
     stripe_price_id: string
     stripe_price_lookup_key: string
@@ -23,6 +24,7 @@ type PaymentPageFormSubmitEventStripeSegmentation =
 
 type PaymentPageFormSubmitEventRecurlySegmentation =
   PaymentPageFormSubmitEventBaseSegmentation & {
+    coupon_code?: string
     payment_provider: Exclude<
       PaymentProvider['service'],
       'stripe-us' | 'stripe-uk'
