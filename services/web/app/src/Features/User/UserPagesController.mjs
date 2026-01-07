@@ -11,6 +11,7 @@ import _ from 'lodash'
 import { expressify } from '@overleaf/promise-utils'
 import Features from '../../infrastructure/Features.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 
 async function settingsPage(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -115,6 +116,8 @@ async function settingsPage(req, res) {
       'error fetching groups with Group SSO enabled the user may be member of'
     )
   }
+
+  await SplitTestHandler.promises.getAssignment(req, res, 'email-notifications')
 
   res.render('user/settings', {
     title: 'account_settings',

@@ -1,0 +1,20 @@
+.notification-settings-container {
+  input {
+    margin-top: var(--spacing-01);
+    margin-bottom: auto;
+    accent-color: var(--green-50);
+  }
+
+  .setting-container {
+    display: flex;
+    gap: 10px;
+  }
+
+  h2 {
+    margin-bottom: 0;
+  }
+
+  h4 {
+    margin-bottom: 0;
+  }
+}
