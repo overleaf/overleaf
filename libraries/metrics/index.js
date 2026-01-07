@@ -97,6 +97,12 @@ function histogram(key, value, buckets, labels = {}) {
 }
 
 class Timer {
+  /**
+   * @param {string} key
+   * @param {number} sampleRate
+   * @param {Record<string, any>} labels
+   * @param {Array<number>} buckets
+   */
   constructor(key, sampleRate = 1, labels = {}, buckets = undefined) {
     if (typeof sampleRate === 'object') {
       // called with (key, labels, buckets)

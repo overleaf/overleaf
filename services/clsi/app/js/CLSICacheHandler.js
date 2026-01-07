@@ -1,3 +1,4 @@
+// @ts-check
 const crypto = require('node:crypto')
 const fs = require('node:fs')
 const Path = require('node:path')
@@ -26,6 +27,7 @@ const TIMING_BUCKETS = [
   0, 10, 100, 1000, 2000, 5000, 10000, 15000, 20000, 30000,
 ]
 const MAX_ENTRIES_IN_OUTPUT_TAR = 100
+const MAX_BLG_FILES = 50
 const OBJECT_ID_REGEX = /^[0-9a-f]{24}$/
 
 /**
@@ -40,6 +42,10 @@ function getShard(projectId) {
   return Settings.apis.clsiCache.shards[idx]
 }
 
+/**
+ * @param {string} url
+ * @return {boolean}
+ */
 function checkCircuitBreaker(url) {
   const lastFailure = lastFailures.get(url) ?? 0
   if (lastFailure) {
@@ -52,23 +58,31 @@ function checkCircuitBreaker(url) {
   return false
 }
 
+/**
+ * @param {string} url
+ */
 function tripCircuitBreaker(url) {
   lastFailures.set(url, performance.now()) // The shard is unhealthy. Refresh timestamp of last failure.
 }
+
+/**
+ * @param {string} url
+ */
 function closeCircuitBreaker(url) {
   lastFailures.delete(url) // The shard is back up.
 }
 
 /**
- * @param {string} projectId
- * @param {string} userId
- * @param {string} buildId
- * @param {string} editorId
- * @param {[{path: string}]} outputFiles
- * @param {string} compileGroup
- * @param {Record<string, number>} stats
- * @param {Record<string, number>} timings
- * @param {Record<string, any>} options
+ * @param {Object} opts
+ * @param {string} opts.projectId
+ * @param {string} opts.userId
+ * @param {string} opts.buildId
+ * @param {string} opts.editorId
+ * @param {[{path: string}]} opts.outputFiles
+ * @param {string} opts.compileGroup
+ * @param {Record<string, number>} opts.stats
+ * @param {Record<string, number>} opts.timings
+ * @param {Record<string, any>} opts.options
  * @return {string | undefined}
  */
 function notifyCLSICacheAboutBuild({
@@ -88,7 +102,7 @@ function notifyCLSICacheAboutBuild({
   if (checkCircuitBreaker(url)) return undefined
 
   /**
-   * @param {[{path: string}]} files
+   * @param {{path: string}[]} files
    */
   const enqueue = files => {
     const body = Buffer.from(
@@ -117,7 +131,11 @@ function notifyCLSICacheAboutBuild({
           nFiles: files.length,
           outputPDFSize:
             outputPDF && Buffer.from(JSON.stringify(outputPDF)).byteLength,
-          nPDFCachingRanges: outputPDF?.ranges?.length,
+          nPDFCachingRanges:
+            outputPDF &&
+            'ranges' in outputPDF &&
+            Array.isArray(outputPDF.ranges) &&
+            outputPDF.ranges.length,
         },
         'large clsi-cache request'
       )
@@ -130,10 +148,10 @@ function notifyCLSICacheAboutBuild({
       signal: AbortSignal.timeout(TIMEOUT),
     })
       .then(() => {
-        closeCircuitBreaker()
+        closeCircuitBreaker(url)
       })
       .catch(err => {
-        tripCircuitBreaker()
+        tripCircuitBreaker(url)
         logger.warn(
           { err, projectId, userId, buildId },
           'enqueue for clsi cache failed'
@@ -148,14 +166,17 @@ function notifyCLSICacheAboutBuild({
         f =>
           f.path === 'output.pdf' ||
           f.path === 'output.log' ||
-          f.path === 'output.synctex.gz' ||
-          f.path.endsWith('.blg')
+          f.path === 'output.synctex.gz'
+      )
+      .concat(
+        outputFiles.filter(f => f.path.endsWith('.blg')).slice(0, MAX_BLG_FILES)
       )
       .map(f => {
+        const lean = { path: f.path }
         if (f.path === 'output.pdf') {
-          return _.pick(f, 'path', 'size', 'contentId', 'ranges')
+          Object.assign(lean, _.pick(f, 'path', 'size', 'contentId', 'ranges'))
         }
-        return _.pick(f, 'path')
+        return lean
       })
   )
 
@@ -175,10 +196,11 @@ function notifyCLSICacheAboutBuild({
 }
 
 /**
- * @param {string} projectId
- * @param {string} userId
- * @param {string} buildId
- * @param {[{path: string}]} outputFiles
+ * @param {Object} opts
+ * @param {string} opts.projectId
+ * @param {string} opts.userId
+ * @param {string} opts.buildId
+ * @param {[{path: string}]} opts.outputFiles
  * @return {Promise<void>}
  */
 async function buildTarball({ projectId, userId, buildId, outputFiles }) {
@@ -253,11 +275,11 @@ async function downloadOutputDotSynctexFromCompileCache(
     )
   } catch (err) {
     if (err instanceof RequestFailedError && err.response.status === 404) {
-      closeCircuitBreaker()
+      closeCircuitBreaker(url)
       timer.done({ status: 'not-found' })
       return false
     }
-    tripCircuitBreaker()
+    tripCircuitBreaker(url)
     timer.done({ status: 'error' })
     throw err
   }
@@ -274,13 +296,13 @@ async function downloadOutputDotSynctexFromCompileCache(
     )
     await fs.promises.rename(tmp, dst)
   } catch (err) {
-    tripCircuitBreaker()
+    tripCircuitBreaker(url)
     try {
       await fs.promises.unlink(tmp)
     } catch {}
     throw err
   }
-  closeCircuitBreaker()
+  closeCircuitBreaker(url)
   timer.done({ status: 'success' })
   return true
 }
@@ -316,11 +338,11 @@ async function downloadLatestCompileCache(projectId, userId, compileDir) {
     )
   } catch (err) {
     if (err instanceof RequestFailedError && err.response.status === 404) {
-      closeCircuitBreaker()
+      closeCircuitBreaker(url)
       timer.done({ status: 'not-found' })
       return false
     }
-    tripCircuitBreaker()
+    tripCircuitBreaker(url)
     timer.done({ status: 'error' })
     throw err
   }
@@ -366,10 +388,10 @@ async function downloadLatestCompileCache(projectId, userId, compileDir) {
       })
     )
   } catch (err) {
-    tripCircuitBreaker()
+    tripCircuitBreaker(url)
     throw err
   }
-  closeCircuitBreaker()
+  closeCircuitBreaker(url)
   Metrics.count('clsi_cache_download_entries', n)
   timer.done({ status: 'success' })
   return !abort
