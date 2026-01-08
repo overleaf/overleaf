@@ -15,6 +15,8 @@ function levelToPreferences(
   switch (level) {
     case 'all':
       return {
+        trackedChangesOnOwnProject: true,
+        trackedChangesOnInvitedProject: true,
         commentOnOwnProject: true,
         commentOnInvitedProject: true,
         repliesOnOwnProject: true,
@@ -24,6 +26,8 @@ function levelToPreferences(
       }
     case 'replies':
       return {
+        trackedChangesOnOwnProject: false,
+        trackedChangesOnInvitedProject: false,
         commentOnOwnProject: false,
         commentOnInvitedProject: false,
         repliesOnOwnProject: false,
@@ -33,6 +37,8 @@ function levelToPreferences(
       }
     case 'off':
       return {
+        trackedChangesOnOwnProject: false,
+        trackedChangesOnInvitedProject: false,
         commentOnOwnProject: false,
         commentOnInvitedProject: false,
         repliesOnOwnProject: false,
