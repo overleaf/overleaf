@@ -6,6 +6,7 @@ import {
 } from '@/shared/components/dropdown/dropdown-menu'
 import type { Meta } from '@storybook/react'
 import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import { IdeRedesign } from '../decorators/ide-redesign'
 
 type Args = React.ComponentProps<typeof DropdownMenu>
 
@@ -229,6 +230,7 @@ const meta: Meta<typeof DropdownMenu> = {
       include: ['disabled'],
     },
   },
+  decorators: [IdeRedesign],
 }
 
 export default meta
