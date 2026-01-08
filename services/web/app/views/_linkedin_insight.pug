@@ -1,0 +1,3 @@
+if typeof suppressAnalytics == 'undefined'
+	each file in entrypointScripts('linkedin-insight')
+		script(type='text/javascript' nonce=scriptNonce src=file defer=deferScripts)

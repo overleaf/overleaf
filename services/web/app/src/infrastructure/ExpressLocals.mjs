@@ -390,6 +390,7 @@ export default async function (webRouter, privateApiRouter, publicApiRouter) {
         Settings.overleaf != null || Settings.templates?.user_id != null,
       cioWriteKey: Settings.analytics?.cio?.writeKey,
       cioSiteId: Settings.analytics?.cio?.siteId,
+      linkedInInsightsPartnerId: Settings.analytics?.linkedIn?.partnerId,
     }
     next()
   })

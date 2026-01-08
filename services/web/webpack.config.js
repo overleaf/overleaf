@@ -22,6 +22,7 @@ const entryPoints = {
   marketing: './frontend/js/marketing.ts',
   'main-style': './frontend/stylesheets/main-style.scss',
   tracking: './frontend/js/infrastructure/tracking.ts',
+  'linkedin-insight': './frontend/js/infrastructure/linkedin-insight.ts',
 }
 
 // Add entrypoints for each "page"
