@@ -1,13 +1,53 @@
 import csurf from 'csurf'
-import { promisify } from 'node:util'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
+import { callbackify } from '@overleaf/promise-utils'
 
 const csrf = csurf()
 
+function blockCrossOriginRequests() {
+  return function (req, res, next) {
+    const { origin } = req.headers
+    // NOTE: Only cross-origin requests must have an origin header set.
+    if (origin && !Settings.allowedOrigins.includes(origin)) {
+      logger.warn({ req }, 'blocking cross-origin request')
+      return res.sendStatus(403)
+    }
+    next()
+  }
+}
+
+function validateRequest(req) {
+  // run a dummy csrf check to see if it returns an error
+  return new Promise((resolve, reject) => {
+    csrf(req, null, err => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve()
+      }
+    })
+  })
+}
+
+async function validateToken(token, session) {
+  if (token == null) {
+    throw new Error('missing token')
+  }
+  // run a dummy csrf check to see if it returns an error
+  // use this to simulate a csrf check regardless of req method, headers &c.
+  const req = {
+    body: {
+      _csrf: token,
+    },
+    headers: {},
+    method: 'POST',
+    session,
+  }
+  await validateRequest(req)
+}
+
 // Wrapper for `csurf` middleware that provides a list of routes that can be excluded from csrf checks.
-//
-// Include with `Csrf = require('./Csrf')`
 //
 // Add the middleware to the router with:
 //   myRouter.csrf = new Csrf()
@@ -16,24 +56,12 @@ const csrf = csurf()
 //   myRouter.csrf.disableDefaultCsrfProtection "/path" "METHOD"
 //
 // To validate the csrf token in a request to ensure that it's valid, you can use `validateRequest`, which takes a
-// request object and calls a callback with an error if invalid.
+// request object rejects with an error if invalid.
 
-class Csrf {
+export class Csrf {
   constructor() {
     this.middleware = this.middleware.bind(this)
     this.excluded_routes = {}
-  }
-
-  static blockCrossOriginRequests() {
-    return function (req, res, next) {
-      const { origin } = req.headers
-      // NOTE: Only cross-origin requests must have an origin header set.
-      if (origin && !Settings.allowedOrigins.includes(origin)) {
-        logger.warn({ req }, 'blocking cross-origin request')
-        return res.sendStatus(403)
-      }
-      next()
-    }
   }
 
   disableDefaultCsrfProtection(route, method) {
@@ -62,36 +90,14 @@ class Csrf {
       csrf(req, res, next)
     }
   }
-
-  static validateRequest(req, cb) {
-    // run a dummy csrf check to see if it returns an error
-    if (cb == null) {
-      cb = function (valid) {}
-    }
-    csrf(req, null, err => cb(err))
-  }
-
-  static validateToken(token, session, cb) {
-    if (token == null) {
-      return cb(new Error('missing token'))
-    }
-    // run a dummy csrf check to see if it returns an error
-    // use this to simulate a csrf check regardless of req method, headers &c.
-    const req = {
-      body: {
-        _csrf: token,
-      },
-      headers: {},
-      method: 'POST',
-      session,
-    }
-    Csrf.validateRequest(req, cb)
-  }
 }
 
-Csrf.promises = {
-  validateRequest: promisify(Csrf.validateRequest),
-  validateToken: promisify(Csrf.validateToken),
+export default {
+  blockCrossOriginRequests,
+  validateRequest: callbackify(validateRequest),
+  validateToken: callbackify(validateToken),
+  promises: {
+    validateRequest,
+    validateToken,
+  },
 }
-
-export default Csrf
