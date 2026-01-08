@@ -1873,6 +1873,7 @@
   "redirecting": "Redirecting",
   "redo": "Redo",
   "reduce_costs_group_licenses": "You can cut down on paperwork and reduce costs with our discounted group licenses.",
+  "refer_to_doc_link": "If needed, you can refer to the <a href=\"__link__\">Overleaf API documentation</a>.",
   "reference_error_relink_hint": "If this error persists, try re-linking your account here:",
   "reference_manager_linked": "Reference manager linked",
   "reference_manager_lowercase": "reference manager",
