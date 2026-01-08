@@ -442,13 +442,15 @@ const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
 
           <FullProjectSearchButton query={query} />
 
-          {position !== null && (
-            <div className="ol-cm-search-form-position">
-              {position.current === null ? '?' : position.current} {t('of')}{' '}
-              {position.total}
-              {position.interrupted && '+'}
-            </div>
-          )}
+          <div className="ol-cm-search-form-position">
+            {position !== null && (
+              <>
+                {position.current === null ? '?' : position.current} {t('of')}{' '}
+                {position.total}
+                {position.interrupted && '+'}
+              </>
+            )}
+          </div>
         </div>
 
         {showReplace && (
