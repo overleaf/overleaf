@@ -120,8 +120,12 @@ $dropdown-item-min-height: 36px;
     color: var(--dropdown-text-color);
   }
 
+  &:focus {
+    background: none;
+  }
+
   &:hover:not(.active),
-  &:focus:not(.active),
+  &:focus-visible:not(.active),
   &.nested-dropdown-toggle-shown {
     color: var(--dropdown-text-hover);
     background-color: var(--dropdown-background-hover);
@@ -133,7 +137,7 @@ $dropdown-item-min-height: 36px;
     color: var(--dropdown-text-danger);
 
     &:hover:not(.active),
-    &:focus:not(.active) {
+    &:focus-visible:not(.active) {
       color: var(--dropdown-text-danger-hover);
       background-color: var(--dropdown-background-danger-hover);
     }
@@ -148,7 +152,7 @@ $dropdown-item-min-height: 36px;
     text-decoration: none;
 
     &:hover,
-    &:focus {
+    &:focus-visible {
       color: inherit;
     }
   }
