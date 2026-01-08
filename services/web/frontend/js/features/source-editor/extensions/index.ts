@@ -55,7 +55,6 @@ import { trackDetachedComments } from './track-detached-comments'
 import { reviewTooltip } from './review-tooltip'
 import { tooltipsReposition } from './tooltips-reposition'
 import { selectionListener } from '@/features/source-editor/extensions/selection-listener'
-import { autocompleteOnPaste } from '@/features/source-editor/extensions/autocomplete-on-paste'
 
 const moduleExtensions: Array<(options: Record<string, any>) => Extension> =
   importOverleafModules('sourceEditorExtensions').map(
@@ -175,5 +174,4 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   fileTreeItemDrop(),
   tooltipsReposition(),
   selectionListener(options.setEditorSelection),
-  autocompleteOnPaste,
 ]
