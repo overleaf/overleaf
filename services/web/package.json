@@ -407,6 +407,8 @@
     "ts-loader": "^9.5.2",
     "tty-browserify": "^0.0.1",
     "typescript": "^5.9.3",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.0.0",
     "use-stick-to-bottom": "^1.1.1",
     "uuid": "^9.0.1",
     "vitest": "^4.0.0",
