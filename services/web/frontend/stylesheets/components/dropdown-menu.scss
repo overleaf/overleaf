@@ -272,3 +272,13 @@ $dropdown-item-min-height: 36px;
   display: flex;
   justify-content: space-between;
 }
+
+.dropdown-shortcut-char {
+  display: inline-block;
+  width: 1em;
+  text-align: center;
+}
+
+.dropdown-item-wide {
+  min-width: 264px;
+}

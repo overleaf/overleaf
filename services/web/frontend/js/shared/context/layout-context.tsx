@@ -23,6 +23,7 @@ import { sendSearchEvent } from '@/features/event-tracking/search-events'
 import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
 import usePersistedState from '@/shared/hooks/use-persisted-state'
 import { repositionAllTooltips } from '@/features/source-editor/extensions/tooltips-reposition'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 
 export type IdeLayout = 'sideBySide' | 'flat'
 export type IdeView = 'editor' | 'file' | 'pdf' | 'history'
@@ -63,6 +64,8 @@ export type LayoutContextValue = LayoutContextOwnStates & {
   setProjectSearchIsOpen: Dispatch<SetStateAction<boolean>>
   setOpenFile: Dispatch<SetStateAction<BinaryFile | null>>
   restoreView: () => void
+  handleChangeLayout: (newLayout: IdeLayout, newView?: IdeView) => void
+  handleDetach: () => void
 }
 
 const debugPdfDetach = getMeta('ol-debugPdfDetach')
@@ -89,6 +92,7 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const [prevRailIsOpen, setPrevRailIsOpen] = useState(railIsOpen)
   // Whether we came from a file or a document when we left the ide
   const lastIdeView = useRef<IdeView>('editor')
+  const { sendEvent } = useEditorAnalytics()
 
   const setView = useCallback(
     (value: IdeView | null) => {
@@ -258,6 +262,68 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
     changeLayout,
   ])
 
+  const handleDetach = useCallback(() => {
+    detach()
+    sendEvent('project-layout-detach')
+  }, [detach, sendEvent])
+
+  const handleReattach = useCallback(() => {
+    if (detachRole !== 'detacher') {
+      return
+    }
+    reattach()
+    sendEvent('project-layout-reattach')
+  }, [detachRole, reattach, sendEvent])
+
+  const handleChangeLayout = useCallback(
+    (newLayout: IdeLayout, newView?: IdeView) => {
+      handleReattach()
+      changeLayout(newLayout, newView)
+      sendEvent('project-layout-change', {
+        layout: newLayout,
+        view: newView,
+      })
+    },
+    [changeLayout, handleReattach, sendEvent]
+  )
+
+  useEventListener(
+    'keydown',
+    useCallback(
+      (event: KeyboardEvent) => {
+        if (
+          isMac &&
+          event.metaKey &&
+          event.ctrlKey &&
+          !event.shiftKey &&
+          !event.altKey
+        ) {
+          switch (event.code) {
+            case 'ArrowLeft': // Editor only
+              event.preventDefault()
+              handleChangeLayout('flat', 'editor')
+              break
+            case 'ArrowRight': // PDF only
+              event.preventDefault()
+              handleChangeLayout('flat', 'pdf')
+              break
+            case 'ArrowDown': // Split view
+              event.preventDefault()
+              handleChangeLayout('sideBySide')
+              break
+            case 'ArrowUp': // Open PDF in separate tab (detach)
+              event.preventDefault()
+              if ('BroadcastChannel' in window && detachRole !== 'detacher') {
+                handleDetach()
+              }
+              break
+          }
+        }
+      },
+      [detachRole, handleChangeLayout, handleDetach]
+    )
+  )
+
   const value = useMemo<LayoutContextValue>(
     () => ({
       reattach,
@@ -285,6 +351,8 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
       setView,
       view,
       restoreView,
+      handleChangeLayout,
+      handleDetach,
     }),
     [
       reattach,
@@ -312,6 +380,8 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
       setView,
       view,
       restoreView,
+      handleChangeLayout,
+      handleDetach,
     ]
   )
 

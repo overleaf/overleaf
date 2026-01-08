@@ -96,6 +96,8 @@ const createInitialValue = () =>
     openFile: null,
     setOpenFile: cy.stub(),
     restoreView: cy.stub(),
+    handleChangeLayout: cy.stub(),
+    handleDetach: cy.stub(),
   }) satisfies LayoutContextValue
 
 const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {

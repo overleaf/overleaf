@@ -7,12 +7,13 @@ import {
   IdeView,
   useLayoutContext,
 } from '@/shared/context/layout-context'
-import React, { useCallback } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
-import useEventListener from '@/shared/hooks/use-event-listener'
 import { DetachRole } from '@/shared/context/detach-context'
-import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import OLSpinner from '@/shared/components/ol/ol-spinner'
+import { isMac } from '@/shared/utils/os'
+import { Shortcut } from '@/shared/components/shortcut'
+import classNames from 'classnames'
 
 type LayoutOption = 'sideBySide' | 'editorOnly' | 'pdfOnly' | 'detachedPdf'
 
@@ -53,76 +54,62 @@ const LayoutDropdownItem = ({
   disabled = false,
   processing = false,
   leadingIcon,
+  trailingIcon,
   onClick,
   children,
 }: {
   active: boolean
-  leadingIcon: string
+  leadingIcon: React.ReactNode
+  trailingIcon?: React.ReactNode
   onClick: () => void
   children: React.ReactNode
   processing?: boolean
   disabled?: boolean
 }) => {
-  let trailingIcon: string | React.ReactNode | null = null
   if (processing) {
-    trailingIcon = <OLSpinner size="sm" />
+    leadingIcon = <OLSpinner size="sm" />
   } else if (active) {
-    trailingIcon = 'check'
+    leadingIcon = 'check'
   }
 
   return (
     <DropdownItem
       active={active}
       aria-current={active}
-      trailingIcon={trailingIcon}
       disabled={disabled}
       onClick={onClick}
       leadingIcon={leadingIcon}
+      trailingIcon={trailingIcon}
+      className={classNames({ 'dropdown-item-wide': isMac })}
     >
       {children}
     </DropdownItem>
   )
 }
 
+const shortcuts: Record<LayoutOption, string[] | null> = isMac
+  ? {
+      editorOnly: ['⌃', '⌘', '←'],
+      pdfOnly: ['⌃', '⌘', '→'],
+      sideBySide: ['⌃', '⌘', '↓'],
+      detachedPdf: ['⌃', '⌘', '↑'],
+    }
+  : {
+      editorOnly: null,
+      pdfOnly: null,
+      sideBySide: null,
+      detachedPdf: null,
+    }
+
 export default function ChangeLayoutOptions() {
-  const { sendEvent } = useEditorAnalytics()
   const {
-    reattach,
-    detach,
     detachIsLinked,
     detachRole,
-    changeLayout,
     view,
     pdfLayout,
+    handleChangeLayout,
+    handleDetach,
   } = useLayoutContext()
-
-  const handleDetach = useCallback(() => {
-    detach()
-    sendEvent('project-layout-detach')
-  }, [detach, sendEvent])
-
-  const handleReattach = useCallback(() => {
-    if (detachRole !== 'detacher') {
-      return
-    }
-    reattach()
-    sendEvent('project-layout-reattach')
-  }, [detachRole, reattach, sendEvent])
-
-  // reattach when the PDF pane opens
-  useEventListener('ui:pdf-open', handleReattach)
-
-  const handleChangeLayout = useCallback(
-    (newLayout: IdeLayout, newView?: IdeView) => {
-      handleReattach()
-      changeLayout(newLayout, newView)
-      sendEvent('project-layout-change', {
-        layout: newLayout,
-        view: newView,
-      })
-    },
-    [changeLayout, handleReattach, sendEvent]
-  )
 
   const { t } = useTranslation()
 
@@ -143,6 +130,9 @@ export default function ChangeLayoutOptions() {
         onClick={() => handleChangeLayout('sideBySide')}
         active={activeLayoutOption === 'sideBySide'}
         leadingIcon="splitscreen_right"
+        trailingIcon={
+          shortcuts.sideBySide && <Shortcut keys={shortcuts.sideBySide} />
+        }
       >
         {t('split_view')}
       </LayoutDropdownItem>
@@ -150,6 +140,9 @@ export default function ChangeLayoutOptions() {
         onClick={() => handleChangeLayout('flat', 'editor')}
         active={activeLayoutOption === 'editorOnly'}
         leadingIcon="edit"
+        trailingIcon={
+          shortcuts.editorOnly && <Shortcut keys={shortcuts.editorOnly} />
+        }
       >
         {t('editor_only')}
       </LayoutDropdownItem>
@@ -157,6 +150,9 @@ export default function ChangeLayoutOptions() {
         onClick={() => handleChangeLayout('flat', 'pdf')}
         active={activeLayoutOption === 'pdfOnly'}
         leadingIcon="picture_as_pdf"
+        trailingIcon={
+          shortcuts.pdfOnly && <Shortcut keys={shortcuts.pdfOnly} />
+        }
       >
         {t('pdf_only')}
       </LayoutDropdownItem>
@@ -165,6 +161,9 @@ export default function ChangeLayoutOptions() {
         active={activeLayoutOption === 'detachedPdf' && detachIsLinked}
         disabled={!detachable}
         leadingIcon="open_in_new"
+        trailingIcon={
+          shortcuts.detachedPdf && <Shortcut keys={shortcuts.detachedPdf} />
+        }
         processing={waitingForDetachedLink}
       >
         {t('open_pdf_in_separate_tab')}

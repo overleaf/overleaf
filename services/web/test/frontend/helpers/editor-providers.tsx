@@ -48,6 +48,7 @@ import {
 import { UserId } from '../../../types/user'
 import { ProjectCompiler } from '../../../types/project-settings'
 import { ReferencesContext } from '@/features/ide-react/context/references-context'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -429,6 +430,8 @@ const makeLayoutProvider = (
       layout.loadingStyleSheet
     )
 
+    const { sendEvent } = useEditorAnalytics()
+
     useEventListener(
       'ui.toggle-review-panel',
       useCallback(() => {
@@ -453,8 +456,34 @@ const makeLayoutProvider = (
       isLinked: detachIsLinked,
       role: detachRole,
     } = useDetachLayout()
+
+    const handleDetach = useCallback(() => {
+      detach()
+      sendEvent('project-layout-detach')
+    }, [detach, sendEvent])
+
+    const handleReattach = useCallback(() => {
+      if (detachRole !== 'detacher') {
+        return
+      }
+      reattach()
+      sendEvent('project-layout-reattach')
+    }, [detachRole, reattach, sendEvent])
+
+    const handleChangeLayout = useCallback(
+      (newLayout: IdeLayout, newView?: IdeView) => {
+        handleReattach()
+        changeLayout(newLayout, newView)
+        sendEvent('project-layout-change', {
+          layout: newLayout,
+          view: newView,
+        })
+      },
+      [changeLayout, handleReattach, sendEvent]
+    )
     const pdfPreviewOpen =
       pdfLayout === 'sideBySide' || view === 'pdf' || detachRole === 'detacher'
+
     const value = useMemo(
       () => ({
         reattach,
@@ -482,6 +511,8 @@ const makeLayoutProvider = (
         setView,
         view,
         restoreView,
+        handleChangeLayout,
+        handleDetach,
       }),
       [
         reattach,
@@ -509,6 +540,8 @@ const makeLayoutProvider = (
         setView,
         view,
         restoreView,
+        handleChangeLayout,
+        handleDetach,
       ]
     )
 
