@@ -100,12 +100,15 @@ async function createProduct(stripe, productData) {
     name: productData.name,
     active: productData.active,
     metadata: productData.metadata,
-    tax_code: productData.tax_code,
     images: productData.images,
   }
 
   if (productData.description) {
     params.description = productData.description
+  }
+
+  if (productData.tax_code) {
+    params.tax_code = productData.tax_code
   }
 
   return await stripe.products.create(params)
