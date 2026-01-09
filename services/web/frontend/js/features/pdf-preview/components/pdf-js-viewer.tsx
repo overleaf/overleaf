@@ -322,7 +322,6 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
     }
   }, [scale, pdfJsWrapper])
 
-  // transmit rotation value to the viewer when it changes
   useEffect(() => {
     if (pdfJsWrapper && initialised) {
       pdfJsWrapper.rotatePages(rotation)
