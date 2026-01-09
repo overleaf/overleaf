@@ -195,8 +195,16 @@ const en = {
     'errors.error-hit-limit-freemium.body':
       'You’ve hit your Writefull quota. Upgrade now for unlimited language suggestions and LaTeX support, and early access to upcoming features like TikZ generation.',
     'toolbar.abstract-generator.name': 'Abstract generator',
+    'toolbar.abstract-generator.disabled_non_english':
+      'You need to be writing in English to generate an abstract',
     'toolbar.keywords-generator.name': 'Keywords generator',
+    'toolbar.keywords-generator.disabled':
+      'You need to have an abstract to generate keywords',
     'toolbar.title-generator.name': 'Title generator',
+    'toolbar.title-generator.disabled_abstract_required':
+      'You need to have an abstract to generate a title',
+    'toolbar.title-generator.disabled_non_english':
+      'You need to be writing in English to generate a title',
     'toolbar.create-table.name': 'Create tables',
     'toolbar.create-table.tooltip': 'Generate tables instantly',
     'toolbar.create-equation.name': 'Create equation',
@@ -657,8 +665,16 @@ const es = {
     'errors.error-hit-limit-freemium.body':
       'Has agotado tu cuota de Writefull. Actualiza ahora para obtener sugerencias de lenguaje ilimitadas y soporte en LaTeX, y acceso anticipado a las próximas funciones de generación como TikZ.',
     'toolbar.abstract-generator.name': 'Generar Abstract',
+    'toolbar.abstract-generator.disabled_non_english':
+      'Necesitas estar en un documento en inglés para generar un abstract',
     'toolbar.keywords-generator.name': 'Generar Palabras Clave',
+    'toolbar.keywords-generator.disabled':
+      'Necesitas tener un abstract para generar palabras clave',
     'toolbar.title-generator.name': 'Generar Título',
+    'toolbar.title-generator.disabled_abstract_required':
+      'Necesitas tener un abstract para generar un título',
+    'toolbar.title-generator.disabled_non_english':
+      'Necesitas estar en un documento en inglés para generar un título',
     'toolbar.create-table.name': 'Crear tablas',
     'toolbar.create-table.tooltip': 'Generar tablas al instante',
     'toolbar.create-equation.name': 'Crear ecuaciones',
