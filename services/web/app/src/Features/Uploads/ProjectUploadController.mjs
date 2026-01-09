@@ -71,6 +71,7 @@ async function uploadFile(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   let { folder_id: folderId } = req.query
   if (name == null || name.length === 0 || name.length > 150) {
+    fs.unlink(path, function () {})
     return res.status(422).json({
       success: false,
       error: 'invalid_filename',

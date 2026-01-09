@@ -354,13 +354,37 @@ describe('ProjectUploadController', function () {
         ctx.ProjectUploadController.uploadFile(ctx.req, ctx.res)
       })
 
-      it('should return a a non success response', function (ctx) {
+      it('should return a non success response', function (ctx) {
         expect(ctx.res.body).to.deep.equal(
           JSON.stringify({
             success: false,
             error: 'invalid_filename',
           })
         )
+      })
+
+      it('should remove the uploaded file', function (ctx) {
+        ctx.fs.unlink.calledWith(ctx.path).should.equal(true)
+      })
+    })
+
+    describe('with a filename that is too long', function () {
+      beforeEach(function (ctx) {
+        ctx.req.body.name = 'a'.repeat(151)
+        ctx.ProjectUploadController.uploadFile(ctx.req, ctx.res)
+      })
+
+      it('should return a non success response', function (ctx) {
+        expect(ctx.res.body).to.deep.equal(
+          JSON.stringify({
+            success: false,
+            error: 'invalid_filename',
+          })
+        )
+      })
+
+      it('should remove the uploaded file', function (ctx) {
+        ctx.fs.unlink.calledWith(ctx.path).should.equal(true)
       })
     })
   })
