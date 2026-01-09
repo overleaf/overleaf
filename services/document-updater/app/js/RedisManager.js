@@ -567,18 +567,6 @@ const RedisManager = {
     }
   },
 
-  /*
-   * Record the timestamp of the update operation (if it doesn't already exist).
-   * This is used for email notifications
-   */
-  async recordProjectNotificationTimestamp(projectId, timestamp) {
-    await rclient.set(
-      keys.projectNotificationTimestamp({ project_id: projectId }),
-      timestamp,
-      'NX'
-    )
-  },
-
   async blockProject(projectId) {
     // Make sure that this MULTI operation only operates on project
     // specific keys, i.e. keys that have the project id in curly braces.

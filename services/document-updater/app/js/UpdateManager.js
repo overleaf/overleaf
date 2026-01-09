@@ -195,12 +195,6 @@ const UpdateManager = {
           // Just record the error here and acknowledge the write-op.
           Metrics.inc('history-queue-error')
         }
-        const timestamp = update.meta?.ts || Date.now()
-        await RedisManager.promises.recordProjectNotificationTimestamp(
-          projectId,
-          timestamp
-        )
-        profile.log('recordProjectNotificationTimestamp')
       }
 
       if (rangesWereCollapsed) {

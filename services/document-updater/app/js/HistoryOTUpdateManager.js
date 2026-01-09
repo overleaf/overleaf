@@ -118,11 +118,6 @@ async function tryApplyUpdate(projectId, docId, update, profiler) {
       // Just record the error here and acknowledge the write-op.
       Metrics.inc('history-queue-error')
     }
-    await RedisManager.promises.recordProjectNotificationTimestamp(
-      projectId,
-      update.meta.ts
-    )
-    profiler.log('recordProjectNotificationTimestamp')
   }
   RealTimeRedisManager.sendData({
     project_id: projectId,

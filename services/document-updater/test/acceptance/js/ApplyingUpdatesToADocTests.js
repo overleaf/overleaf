@@ -113,15 +113,6 @@ describe('Applying updates to a doc', function () {
       body.should.deep.equal({})
     })
 
-    it('should set the project notification timestamp in Redis', async function () {
-      const timestamp = await rclientDU.get(
-        Keys.projectNotificationTimestamp({ project_id: this.project_id })
-      )
-      expect(timestamp).to.exist
-      const timestampValue = parseInt(timestamp, 10)
-      timestampValue.should.be.within(this.startTime, Date.now())
-    })
-
     describe('when sending another update', function () {
       beforeEach(async function () {
         this.timeout(10000)
@@ -166,16 +157,6 @@ describe('Applying updates to a doc', function () {
         const { lastUpdatedAt } =
           await DocUpdaterClient.getProjectLastUpdatedAt(this.project_id)
         lastUpdatedAt.should.be.within(this.secondStartTime, Date.now())
-      })
-
-      it('should not change the project notification timestamp', async function () {
-        const timestamp = await rclientDU.get(
-          Keys.projectNotificationTimestamp({ project_id: this.project_id })
-        )
-        expect(timestamp).to.exist
-        const timestampValue = parseInt(timestamp, 10)
-        // Should still be within the first update time range, not the second
-        timestampValue.should.be.within(this.startTime, this.secondStartTime)
       })
     })
 
@@ -294,15 +275,6 @@ describe('Applying updates to a doc', function () {
       body.should.deep.equal({})
     })
 
-    it('should set the project notification timestamp in Redis', async function () {
-      const timestamp = await rclientDU.get(
-        Keys.projectNotificationTimestamp({ project_id: this.project_id })
-      )
-      expect(timestamp).to.exist
-      const timestampValue = parseInt(timestamp, 10)
-      timestampValue.should.be.within(this.startTime, Date.now())
-    })
-
     describe('when sending another update', function () {
       beforeEach(async function () {
         this.timeout(10000)
@@ -352,16 +324,6 @@ describe('Applying updates to a doc', function () {
         const { lastUpdatedAt } =
           await DocUpdaterClient.getProjectLastUpdatedAt(this.project_id)
         lastUpdatedAt.should.be.within(this.secondStartTime, Date.now())
-      })
-
-      it('should not change the project notification timestamp', async function () {
-        const timestamp = await rclientDU.get(
-          Keys.projectNotificationTimestamp({ project_id: this.project_id })
-        )
-        expect(timestamp).to.exist
-        const timestampValue = parseInt(timestamp, 10)
-        // Should still be within the first update time range, not the second
-        timestampValue.should.be.within(this.startTime, this.secondStartTime)
       })
     })
 

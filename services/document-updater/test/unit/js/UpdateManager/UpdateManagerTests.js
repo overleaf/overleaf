@@ -35,7 +35,6 @@ describe('UpdateManager', function () {
       promises: {
         setDocument: sinon.stub().resolves(),
         updateDocument: sinon.stub(),
-        recordProjectNotificationTimestamp: sinon.stub().resolves(),
       },
     }
 
@@ -416,55 +415,6 @@ describe('UpdateManager', function () {
           this.historyUpdates,
           this.historyUpdates.length
         )
-      })
-
-      it('should record the project notification timestamp', function () {
-        this.RedisManager.promises.recordProjectNotificationTimestamp.should.have.been.calledWith(
-          this.project_id,
-          sinon.match.number
-        )
-      })
-    })
-
-    describe('when update has a timestamp in meta', function () {
-      beforeEach(async function () {
-        this.timestamp = 1234567890
-        this.update = {
-          op: [{ p: 42, i: 'foo' }],
-          meta: { ...this.updateMeta, ts: this.timestamp },
-        }
-        await this.UpdateManager.promises.applyUpdate(
-          this.project_id,
-          this.doc_id,
-          this.update
-        )
-      })
-
-      it('should record the project notification timestamp with the provided timestamp', function () {
-        this.RedisManager.promises.recordProjectNotificationTimestamp.should.have.been.calledWith(
-          this.project_id,
-          this.timestamp
-        )
-      })
-    })
-
-    describe('when there are no history updates', function () {
-      beforeEach(async function () {
-        this.RangesManager.applyUpdate.returns({
-          newRanges: this.updated_ranges,
-          rangesWereCollapsed: false,
-          historyUpdates: [],
-        })
-        await this.UpdateManager.promises.applyUpdate(
-          this.project_id,
-          this.doc_id,
-          this.update
-        )
-      })
-
-      it('should not record the project notification timestamp', function () {
-        this.RedisManager.promises.recordProjectNotificationTimestamp.should.not
-          .have.been.called
       })
     })
 
