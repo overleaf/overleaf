@@ -1008,6 +1008,7 @@ module.exports = {
     importProjectFromGithubMenu: [],
     editorLeftMenuSync: [],
     editorLeftMenuManageTemplate: [],
+    menubarExtraComponents: [],
     oauth2Server: [],
     managedGroupSubscriptionEnrollmentNotification: [],
     managedGroupEnrollmentInvite: [],

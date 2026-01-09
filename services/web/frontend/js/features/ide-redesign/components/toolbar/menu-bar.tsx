@@ -8,7 +8,7 @@ import { MenuBarDropdown } from '@/shared/components/menu-bar/menu-bar-dropdown'
 import { MenuBarOption } from '@/shared/components/menu-bar/menu-bar-option'
 import { useTranslation } from 'react-i18next'
 import ChangeLayoutOptions from './change-layout-options'
-import { useCallback, useMemo, useState } from 'react'
+import { ElementType, useCallback, useMemo, useState } from 'react'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 import CommandDropdown, {
@@ -24,6 +24,13 @@ import { useProjectSettingsContext } from '@/features/editor-left-menu/context/p
 import getMeta from '@/utils/meta'
 import EditorCloneProjectModalWrapper from '@/features/clone-project-modal/components/editor-clone-project-modal-wrapper'
 import useOpenProject from '@/shared/hooks/use-open-project'
+import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+
+const menubarExtraComponents = importOverleafModules(
+  'menubarExtraComponents'
+) as {
+  import: { default: ElementType }
+}[]
 
 export const ToolbarMenuBar = () => {
   const { t } = useTranslation()
@@ -75,7 +82,7 @@ export const ToolbarMenuBar = () => {
         children: ['new_file', 'new_folder', 'upload_file', 'copy_project'],
       },
       { id: 'file-tools', children: ['show_version_history', 'word_count'] },
-      { id: 'submit', children: ['submit-project'] },
+      { id: 'submit', children: ['submit-project', 'manage-template'] },
       {
         id: 'file-download',
         children: ['download-as-source-zip', 'download-pdf'],
@@ -283,6 +290,11 @@ export const ToolbarMenuBar = () => {
         handleHide={() => setShowCloneProjectModal(false)}
         openProject={openProject}
       />
+      {menubarExtraComponents.map(
+        ({ import: { default: Component } }, index) => (
+          <Component key={index} />
+        )
+      )}
     </>
   )
 }
