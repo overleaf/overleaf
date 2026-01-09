@@ -78,21 +78,26 @@ async function uploadFile(req, res, next) {
     })
   }
 
-  // preserve the directory structure from an uploaded folder
-  const { relativePath } = req.body
-  // NOTE: Uppy sends a "null" string for `relativePath` when the file is not nested in a folder
-  if (relativePath && relativePath !== 'null') {
-    const { path } = await ProjectLocator.promises.findElement({
-      project_id: projectId,
-      element_id: folderId,
-      type: 'folder',
-    })
-    const { lastFolder } = await EditorController.promises.mkdirp(
-      projectId,
-      Path.dirname(Path.join('/', path.fileSystem, relativePath)),
-      userId
-    )
-    folderId = lastFolder._id
+  try {
+    // preserve the directory structure from an uploaded folder
+    const { relativePath } = req.body
+    // NOTE: Uppy sends a "null" string for `relativePath` when the file is not nested in a folder
+    if (relativePath && relativePath !== 'null') {
+      const { path } = await ProjectLocator.promises.findElement({
+        project_id: projectId,
+        element_id: folderId,
+        type: 'folder',
+      })
+      const { lastFolder } = await EditorController.promises.mkdirp(
+        projectId,
+        Path.dirname(Path.join('/', path.fileSystem, relativePath)),
+        userId
+      )
+      folderId = lastFolder._id
+    }
+  } catch (error) {
+    fs.unlink(path, function () {})
+    throw error
   }
 
   return FileSystemImportManager.addEntity(

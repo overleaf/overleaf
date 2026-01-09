@@ -313,6 +313,33 @@ describe('ProjectUploadController', function () {
       })
     })
 
+    describe('when looking up the folder structure fails', function () {
+      beforeEach(async function (ctx) {
+        await new Promise(resolve => {
+          ctx.error = new Error('woops')
+          ctx.ProjectLocator.promises.findElement = sinon
+            .stub()
+            .rejects(ctx.error)
+          ctx.req.body.relativePath = 'foo/bar/' + ctx.fileName
+
+          ctx.next = error => {
+            ctx.nextError = error
+            resolve()
+          }
+
+          ctx.ProjectUploadController.uploadFile(ctx.req, ctx.res, ctx.next)
+        })
+      })
+
+      it('should unlink the file', function (ctx) {
+        ctx.fs.unlink.should.have.been.calledWith(ctx.path)
+      })
+
+      it('should call next with the error', function (ctx) {
+        expect(ctx.nextError).to.equal(ctx.error)
+      })
+    })
+
     describe('when FileSystemImportManager.addEntity returns a generic error', function () {
       beforeEach(function (ctx) {
         ctx.FileSystemImportManager.addEntity = sinon
