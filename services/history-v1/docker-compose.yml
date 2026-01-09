@@ -142,6 +142,9 @@ services:
         if [ ! -f private.key ] || [ ! -f public.crt ]; then
           /certgen -host minio
         fi
+        if ! openssl x509 -checkend 864000 -noout -in public.crt > /dev/null; then
+          /certgen -host minio
+        fi
 
   minio:
     image: minio/minio:RELEASE.2024-10-13T13-34-11Z
