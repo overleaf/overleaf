@@ -30,38 +30,44 @@ export default {
 
 async function createProjectFromZipArchive(ownerId, defaultName, zipPath) {
   const contentsPath = await _extractZip(zipPath)
-  const { path, content } =
-    await ProjectRootDocManager.promises.findRootDocFileFromDirectory(
-      contentsPath
-    )
-
-  const projectName =
-    DocumentHelper.getTitleFromTexContent(content || '') || defaultName
-  const uniqueName = await _generateUniqueName(ownerId, projectName)
-  const project = await ProjectCreationHandler.promises.createBlankProject(
-    ownerId,
-    uniqueName
-  )
   try {
-    await _initializeProjectWithZipContents(ownerId, project, contentsPath)
-
-    if (path) {
-      await ProjectRootDocManager.promises.setRootDocFromName(project._id, path)
-    }
-  } catch (err) {
-    // no need to wait for the cleanup here
-    ProjectDeleter.promises
-      .deleteProject(project._id)
-      .catch(err =>
-        logger.error(
-          { err, projectId: project._id },
-          'there was an error cleaning up project after importing a zip failed'
-        )
+    const { path, content } =
+      await ProjectRootDocManager.promises.findRootDocFileFromDirectory(
+        contentsPath
       )
-    throw err
+
+    const projectName =
+      DocumentHelper.getTitleFromTexContent(content || '') || defaultName
+    const uniqueName = await _generateUniqueName(ownerId, projectName)
+    const project = await ProjectCreationHandler.promises.createBlankProject(
+      ownerId,
+      uniqueName
+    )
+    try {
+      await _initializeProjectWithZipContents(ownerId, project, contentsPath)
+
+      if (path) {
+        await ProjectRootDocManager.promises.setRootDocFromName(
+          project._id,
+          path
+        )
+      }
+    } catch (err) {
+      // no need to wait for the cleanup here
+      ProjectDeleter.promises
+        .deleteProject(project._id)
+        .catch(err =>
+          logger.error(
+            { err, projectId: project._id },
+            'there was an error cleaning up project after importing a zip failed'
+          )
+        )
+      throw err
+    }
+    return project
+  } finally {
+    await fs.promises.rm(contentsPath, { recursive: true, force: true })
   }
-  await fs.promises.rm(contentsPath, { recursive: true, force: true })
-  return project
 }
 
 async function createProjectFromZipArchiveWithName(
@@ -71,30 +77,33 @@ async function createProjectFromZipArchiveWithName(
   attributes = {}
 ) {
   const contentsPath = await _extractZip(zipPath)
-  const uniqueName = await _generateUniqueName(ownerId, proposedName)
-  const project = await ProjectCreationHandler.promises.createBlankProject(
-    ownerId,
-    uniqueName,
-    attributes
-  )
-
   try {
-    await _initializeProjectWithZipContents(ownerId, project, contentsPath)
-    await ProjectRootDocManager.promises.setRootDocAutomatically(project._id)
-  } catch (err) {
-    // no need to wait for the cleanup here
-    ProjectDeleter.promises
-      .deleteProject(project._id)
-      .catch(err =>
-        logger.error(
-          { err, projectId: project._id },
-          'there was an error cleaning up project after importing a zip failed'
+    const uniqueName = await _generateUniqueName(ownerId, proposedName)
+    const project = await ProjectCreationHandler.promises.createBlankProject(
+      ownerId,
+      uniqueName,
+      attributes
+    )
+
+    try {
+      await _initializeProjectWithZipContents(ownerId, project, contentsPath)
+      await ProjectRootDocManager.promises.setRootDocAutomatically(project._id)
+    } catch (err) {
+      // no need to wait for the cleanup here
+      ProjectDeleter.promises
+        .deleteProject(project._id)
+        .catch(err =>
+          logger.error(
+            { err, projectId: project._id },
+            'there was an error cleaning up project after importing a zip failed'
+          )
         )
-      )
-    throw err
+      throw err
+    }
+    return project
+  } finally {
+    await fs.promises.rm(contentsPath, { recursive: true, force: true })
   }
-  await fs.promises.rm(contentsPath, { recursive: true, force: true })
-  return project
 }
 
 async function _extractZip(zipPath) {
@@ -102,7 +111,13 @@ async function _extractZip(zipPath) {
     Path.dirname(zipPath),
     `${Path.basename(zipPath, '.zip')}-${Date.now()}`
   )
-  await ArchiveManager.promises.extractZipArchive(zipPath, destination)
+  try {
+    await ArchiveManager.promises.extractZipArchive(zipPath, destination)
+  } catch (error) {
+    logger.debug({ zipPath, error }, 'error extracting from zip archive')
+    await fs.promises.rm(destination, { recursive: true, force: true })
+    throw error
+  }
   return destination
 }
 
