@@ -204,6 +204,51 @@ export default class PDFJSWrapper {
     })
   }
 
+  // rotate all pages by the given rotation (in degrees: 0, 90, 180, 270)
+  rotatePages(rotation: number) {
+    if (!this.viewer.pdfDocument) {
+      return
+    }
+
+    const numPages = this.viewer.pdfDocument.numPages
+
+    for (let pageIndex = 0; pageIndex < numPages; pageIndex++) {
+      const pageView = this.viewer.getPageView(pageIndex)
+      if (!pageView || !pageView.pdfPage) {
+        continue
+      }
+
+      const currentScale = pageView.viewport.scale
+      
+      // Get the page object
+      const page = pageView.pdfPage
+      
+      // Create a new viewport with the rotation
+      const viewport = page.getViewport({ scale: currentScale, rotation })
+
+      // Update the page view's viewport
+      pageView.viewport = viewport
+      
+      // Find the canvas element in the page view's div
+      const canvas = pageView.div?.querySelector('canvas') as HTMLCanvasElement
+      if (canvas) {
+        // Update canvas dimensions to match the new viewport
+        const devicePixelRatio = window.devicePixelRatio || 1
+        canvas.width = viewport.width * devicePixelRatio
+        canvas.height = viewport.height * devicePixelRatio
+        canvas.style.width = `${viewport.width}px`
+        canvas.style.height = `${viewport.height}px`
+      }
+
+      // Re-render the page with the new viewport
+      // The pageView.update() method will use the updated viewport
+      pageView.update()
+    }
+
+    // Update the viewer to re-render all pages and adjust layout
+    this.viewer.update()
+  }
+
   isVisible() {
     return this.viewer.container.offsetParent !== null
   }
