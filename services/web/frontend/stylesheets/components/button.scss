@@ -35,7 +35,7 @@
   // Variants
   &.btn-primary {
     @include ol-button-variant(
-      $color: var(--content-primary-dark),
+      $color: var(--white),
       $background: var(--bg-accent-01),
       $hover-background: var(--bg-accent-02),
       $hover-border: var(--bg-accent-02)
@@ -63,7 +63,7 @@
 
   &.btn-danger {
     @include ol-button-variant(
-      $color: var(--content-primary-dark),
+      $color: var(--white),
       $background: var(--bg-danger-01),
       $border: var(--bg-danger-01),
       $hover-background: var(--bg-danger-02)
@@ -80,7 +80,7 @@
 
   &.btn-premium {
     @include ol-button-variant(
-      $color: var(--content-primary-dark),
+      $color: var(--white),
       $background: var(--blue-70)
     );
 
@@ -105,7 +105,7 @@
 
   &.btn-blue {
     @include ol-button-variant(
-      $color: var(--content-primary-dark),
+      $color: var(--white),
       $background: var(--sapphire-blue),
       $border: var(--sapphire-blue),
       $hover-background: (
