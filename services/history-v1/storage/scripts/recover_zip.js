@@ -29,7 +29,7 @@ const { Storage } = require('@google-cloud/storage')
 const isValidUtf8 = require('utf-8-validate')
 
 const core = require('overleaf-editor-core')
-const projectKey = require('../lib/project_key')
+const projectKey = require('@overleaf/object-persistor/src/ProjectKey.js')
 const streams = require('../lib/streams')
 const ProjectArchive = require('../lib/project_archive')
 

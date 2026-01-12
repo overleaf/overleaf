@@ -15,7 +15,7 @@ const logger = require('@overleaf/logger')
 
 const assert = require('./assert')
 const persistor = require('./persistor')
-const projectKey = require('./project_key')
+const projectKey = require('@overleaf/object-persistor/src/ProjectKey.js')
 const streams = require('./streams')
 
 const Chunk = core.Chunk

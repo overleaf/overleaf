@@ -1,8 +1,6 @@
-'use strict'
-
 const { expect } = require('chai')
 
-const { format, pad } = require('../../../../storage/lib/project_key')
+const { format, pad } = require('../../src/ProjectKey.js')
 
 describe('projectKey', function () {
   it('reverses padded keys', function () {

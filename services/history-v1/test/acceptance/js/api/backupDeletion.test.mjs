@@ -13,8 +13,8 @@ import {
 } from '../../../../storage/lib/backupPersistor.mjs'
 import { makeProjectKey } from '../../../../storage/lib/blob_store/index.js'
 import config from 'config'
-import Stream from 'stream'
-import projectKey from '../../../../storage/lib/project_key.js'
+import Stream from 'node:stream'
+import projectKey from '@overleaf/object-persistor/src/ProjectKey.js'
 import { ListObjectsV2Command } from '@aws-sdk/client-s3'
 
 /**

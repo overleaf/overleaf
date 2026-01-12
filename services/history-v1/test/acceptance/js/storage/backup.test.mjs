@@ -13,7 +13,7 @@ import {
   makeProjectKey,
 } from '../../../../storage/lib/blob_store/index.js'
 import { NotFoundError } from '@overleaf/object-persistor/src/Errors.js'
-import projectKey from '../../../../storage/lib/project_key.js'
+import projectKey from '@overleaf/object-persistor/src/ProjectKey.js'
 import { getBackupStatus } from '../../../../storage/lib/backup_store/index.js'
 import { text, buffer } from 'node:stream/consumers'
 import { createGunzip } from 'node:zlib'

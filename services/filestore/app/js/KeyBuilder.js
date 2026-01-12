@@ -1,5 +1,5 @@
 import settings from '@overleaf/settings'
-import * as projectKey from './project_key.js'
+import projectKey from '@overleaf/object-persistor/src/ProjectKey.js'
 
 export default {
   getConvertedFolderKey,
