@@ -34,14 +34,6 @@ const ClsiCookieManagerFactory = function (backendGroup) {
     }
   }
 
-  function buildOldKey(projectId, userId) {
-    if (backendGroup != null) {
-      return `clsiserver:${backendGroup}:${projectId}:${userId}`
-    } else {
-      return `clsiserver:${projectId}:${userId}`
-    }
-  }
-
   async function getServerId(
     projectId,
     userId,
@@ -51,14 +43,9 @@ const ClsiCookieManagerFactory = function (backendGroup) {
     if (!clsiCookiesEnabled) {
       return
     }
-    let serverId = await rclient.get(
+    const serverId = await rclient.get(
       buildKey(projectId, userId, compileBackendClass)
     )
-    if (!serverId) {
-      // Fallback to the old key.
-      // TODO(das7pad): remove this in 24h.
-      serverId = await rclient.get(buildOldKey(projectId, userId))
-    }
 
     if (!serverId) {
       return await cookieManager.promises._populateServerIdViaRequest(
@@ -229,10 +216,7 @@ const ClsiCookieManagerFactory = function (backendGroup) {
       return
     }
     try {
-      await rclient.del(
-        buildKey(projectId, userId, compileBackendClass),
-        buildOldKey(projectId, userId)
-      )
+      await rclient.del(buildKey(projectId, userId, compileBackendClass))
     } catch (err) {
       // redis errors need wrapping as the instance may be shared
       throw new OError(
