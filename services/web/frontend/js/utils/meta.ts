@@ -212,6 +212,7 @@ export interface Meta {
   'ol-odcData': OnboardingFormData
   'ol-otMigrationStage': number
   'ol-overallThemes': OverallThemeMeta[]
+  'ol-ownerIsManaged': boolean
   'ol-pages': number
   'ol-passwordStrengthOptions': PasswordStrengthOptions
   'ol-paywallPlans': { [key: string]: string }
