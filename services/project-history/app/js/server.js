@@ -4,7 +4,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import * as Errors from './Errors.js'
 import * as Router from './Router.js'
-import * as Validation from './Validation.js'
+import { handleValidationError } from '@overleaf/validation-tools'
 
 const HistoryLogger = logger.initialize('project-history').logger
 
@@ -44,7 +44,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(Metrics.http.monitor(logger))
 Router.initialize(app)
 Metrics.injectMetricsRoute(app)
-app.use(Validation.errorMiddleware)
+app.use(handleValidationError)
 app.use(function (error, req, res, next) {
   if (error instanceof Errors.NotFoundError) {
     res.sendStatus(404)

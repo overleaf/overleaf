@@ -92,7 +92,7 @@ describe('HttpController', function () {
     beforeEach(function () {
       this.blobHash = 'abcd'
       this.stream = {}
-      this.historyId = 1337
+      this.historyId = new ObjectId().toString()
       this.HistoryStoreManager.getProjectBlobStream.yields(null, this.stream)
       this.HttpController.getProjectBlob(
         { params: { history_id: this.historyId, hash: this.blobHash } },
@@ -414,7 +414,7 @@ describe('HttpController', function () {
           project_id: this.projectId,
         },
         body: {
-          version: (this.version = 'label-1'),
+          version: (this.version = 1),
           comment: (this.comment = 'a comment'),
           created_at: (this.created_at = Date.now().toString()),
           validate_exists: true,
@@ -486,11 +486,12 @@ describe('HttpController', function () {
 
   describe('deleteLabelForUser', function () {
     beforeEach(function () {
+      this.label_id = new ObjectId()
       this.req = {
         params: {
           project_id: this.projectId,
           user_id: this.userId,
-          label_id: (this.label_id = new ObjectId()),
+          label_id: this.label_id.toString(),
         },
       }
       this.HttpController.deleteLabelForUser(this.req, this.res, this.next)
@@ -498,7 +499,7 @@ describe('HttpController', function () {
 
     it('should delete a label for a project', function () {
       this.LabelsManager.deleteLabelForUser
-        .calledWith(this.projectId, this.userId, this.label_id)
+        .calledWith(this.projectId, this.userId, this.label_id.toString())
         .should.equal(true)
     })
 
@@ -509,10 +510,11 @@ describe('HttpController', function () {
 
   describe('deleteLabel', function () {
     beforeEach(function () {
+      this.label_id = new ObjectId()
       this.req = {
         params: {
           project_id: this.projectId,
-          label_id: (this.label_id = new ObjectId()),
+          label_id: this.label_id.toString(),
         },
       }
       this.HttpController.deleteLabel(this.req, this.res, this.next)
@@ -520,7 +522,7 @@ describe('HttpController', function () {
 
     it('should delete a label for a project', function () {
       this.LabelsManager.deleteLabel
-        .calledWith(this.projectId, this.label_id)
+        .calledWith(this.projectId, this.label_id.toString())
         .should.equal(true)
     })
 
