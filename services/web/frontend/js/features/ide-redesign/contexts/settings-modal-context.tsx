@@ -89,6 +89,8 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
 
   const hasDarkModePdf = useFeatureFlag('pdf-dark-mode')
   const hasEmailNotifications = useFeatureFlag('email-notifications')
+  const noNewEditorOptOut = useFeatureFlag('editor-redesign-no-opt-out')
+
   const allSettingsTabs: SettingsEntry[] = useMemo(
     () => [
       {
@@ -228,6 +230,7 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
               {
                 key: 'newEditor',
                 component: <NewEditorSetting />,
+                hidden: noNewEditorOptOut,
               },
             ],
           },
@@ -265,7 +268,7 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
         href: '/user/subscription',
       },
     ],
-    [t, overallTheme, hasDarkModePdf, hasEmailNotifications]
+    [t, overallTheme, hasDarkModePdf, hasEmailNotifications, noNewEditorOptOut]
   )
 
   const settingsTabs = useMemo(

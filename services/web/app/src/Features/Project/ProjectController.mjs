@@ -459,6 +459,7 @@ const _ProjectController = {
       'writefull-asymetric-queue-size-per-model',
       'pdf-dark-mode',
       'email-notifications',
+      'editor-redesign-no-opt-out',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
