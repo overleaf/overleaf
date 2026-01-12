@@ -1,6 +1,6 @@
-const proxyaddr = require('proxy-addr')
+import proxyaddr from 'proxy-addr'
 
-module.exports = class WebsocketAddressManager {
+export default class WebsocketAddressManager {
   constructor(behindProxy, trustedProxyIps) {
     if (behindProxy) {
       // parse trustedProxyIps comma-separated list the same way as express

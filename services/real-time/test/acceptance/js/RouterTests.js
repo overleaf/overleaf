@@ -5,11 +5,11 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const async = require('async')
-const { expect } = require('chai')
+import async from 'async'
 
-const RealTimeClient = require('./helpers/RealTimeClient')
-const FixturesManager = require('./helpers/FixturesManager')
+import { expect } from 'chai'
+import RealTimeClient from './helpers/RealTimeClient.js'
+import FixturesManager from './helpers/FixturesManager.js'
 
 describe('Router', function () {
   return describe('joinProject', function () {

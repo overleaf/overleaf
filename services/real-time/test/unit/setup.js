@@ -1,8 +1,7 @@
-import * as chai from 'chai'
+import { afterEach, beforeEach, chai, vi } from 'vitest'
 import sinon from 'sinon'
 import chaiAsPromised from 'chai-as-promised'
 import sinonChai from 'sinon-chai'
-import '../app.js'
 
 // Chai configuration
 chai.should()
@@ -23,12 +22,13 @@ const stubs = {
 }
 
 // Mocha hooks
-export const mochaHooks = {
-  beforeEach() {
-    this.logger = stubs.logger
-  },
+beforeEach(ctx => {
+  ctx.logger = stubs.logger
+  vi.doMock('@overleaf/logger', () => ({ default: ctx.logger }))
+})
 
-  afterEach() {
-    sandbox.reset()
-  },
-}
+afterEach(() => {
+  sandbox.reset()
+  vi.restoreAllMocks()
+  vi.resetModules()
+})

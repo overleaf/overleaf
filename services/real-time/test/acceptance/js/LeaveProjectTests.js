@@ -9,14 +9,13 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const RealTimeClient = require('./helpers/RealTimeClient')
-const MockDocUpdaterServer = require('./helpers/MockDocUpdaterServer')
-const FixturesManager = require('./helpers/FixturesManager')
+import RealTimeClient from './helpers/RealTimeClient.js'
 
-const async = require('async')
-
-const settings = require('@overleaf/settings')
-const redis = require('@overleaf/redis-wrapper')
+import MockDocUpdaterServer from './helpers/MockDocUpdaterServer.js'
+import FixturesManager from './helpers/FixturesManager.js'
+import async from 'async'
+import settings from '@overleaf/settings'
+import redis from '@overleaf/redis-wrapper'
 const rclient = redis.createClient(settings.redis.pubsub)
 
 describe('leaveProject', function () {

@@ -1,6 +1,6 @@
-const logger = require('@overleaf/logger')
-const settings = require('@overleaf/settings')
-const fs = require('node:fs')
+import logger from '@overleaf/logger'
+import settings from '@overleaf/settings'
+import fs from 'node:fs'
 
 // Monitor a status file (e.g. /etc/real_time_status) periodically and close the
 // service if the file contents don't contain the matching deployment colour.
@@ -45,7 +45,7 @@ function checkStatusFileSync() {
   }
 }
 
-module.exports = {
+export default {
   initialise() {
     if (statusFile && deploymentColour) {
       logger.info(

@@ -1,9 +1,9 @@
-const async = require('async')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const redis = require('@overleaf/redis-wrapper')
-const OError = require('@overleaf/o-error')
-const Metrics = require('@overleaf/metrics')
+import async from 'async'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import redis from '@overleaf/redis-wrapper'
+import OError from '@overleaf/o-error'
+import Metrics from '@overleaf/metrics'
 const rclient = redis.createClient(Settings.redis.realtime)
 const Keys = Settings.redis.realtime.key_schema
 
@@ -28,7 +28,7 @@ function recordProjectNotEmptySinceMetric(res, status) {
   Metrics.histogram('project_not_empty_since', diff, BUCKETS, { status })
 }
 
-module.exports = {
+export default {
   countConnectedClients(projectId, callback) {
     rclient.scard(Keys.clientsInProject({ project_id: projectId }), callback)
   },

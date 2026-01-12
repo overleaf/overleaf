@@ -1,5 +1,6 @@
 let HttpController
-module.exports = HttpController = {
+
+export default HttpController = {
   // The code in this controller is hard to unit test because of a lot of
   // dependencies on internal socket.io methods. It is not critical to the running
   // of Overleaf, and is only used for getting stats about connected clients,

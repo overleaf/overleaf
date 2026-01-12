@@ -9,6 +9,7 @@ services:
       - .:/overleaf/services/real-time
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
+      - ../../tsconfig.backend.json:/overleaf/tsconfig.backend.json
     working_dir: /overleaf/services/real-time
     environment:
       MOCHA_GREP: ${MOCHA_GREP}

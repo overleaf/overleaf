@@ -1,19 +1,19 @@
-const request = require('request')
-const _ = require('lodash')
-const OError = require('@overleaf/o-error')
-const logger = require('@overleaf/logger')
-const settings = require('@overleaf/settings')
-const metrics = require('@overleaf/metrics')
+import request from 'request'
+import _ from 'lodash'
+import OError from '@overleaf/o-error'
+import logger from '@overleaf/logger'
+import settings from '@overleaf/settings'
+import metrics from '@overleaf/metrics'
+import RedisWrapper from '@overleaf/redis-wrapper'
+import Errors from './Errors.js'
+
 const {
   ClientRequestedMissingOpsError,
   DocumentUpdaterRequestFailedError,
   NullBytesInOpError,
   UpdateTooLargeError,
-} = require('./Errors')
-
-const rclient = require('@overleaf/redis-wrapper').createClient(
-  settings.redis.documentupdater
-)
+} = Errors
+const rclient = RedisWrapper.createClient(settings.redis.documentupdater)
 const Keys = settings.redis.documentupdater.key_schema
 
 const DocumentUpdaterManager = {
@@ -154,4 +154,4 @@ const DocumentUpdaterManager = {
   },
 }
 
-module.exports = DocumentUpdaterManager
+export default DocumentUpdaterManager

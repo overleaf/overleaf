@@ -1,15 +1,16 @@
-const logger = require('@overleaf/logger')
-const settings = require('@overleaf/settings')
-const RedisClientManager = require('./RedisClientManager')
-const SafeJsonParse = require('./SafeJsonParse')
-const EventLogger = require('./EventLogger')
-const HealthCheckManager = require('./HealthCheckManager')
-const RoomManager = require('./RoomManager')
-const ChannelManager = require('./ChannelManager')
-const metrics = require('@overleaf/metrics')
+import logger from '@overleaf/logger'
+import settings from '@overleaf/settings'
+import RedisClientManager from './RedisClientManager.js'
+import SafeJsonParse from './SafeJsonParse.js'
+import EventLogger from './EventLogger.js'
+import HealthCheckManager from './HealthCheckManager.js'
+import RoomManager from './RoomManager.js'
+import ChannelManager from './ChannelManager.js'
+import metrics from '@overleaf/metrics'
 
 let DocumentUpdaterController
-module.exports = DocumentUpdaterController = {
+
+export default DocumentUpdaterController = {
   // DocumentUpdaterController is responsible for updates that come via Redis
   // Pub/Sub from the document updater.
   rclientList: RedisClientManager.createClientList(settings.redis.pubsub),

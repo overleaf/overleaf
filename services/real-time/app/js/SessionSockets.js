@@ -1,9 +1,11 @@
-const metrics = require('@overleaf/metrics')
-const OError = require('@overleaf/o-error')
-const { EventEmitter } = require('node:events')
-const { MissingSessionError } = require('./Errors')
+import metrics from '@overleaf/metrics'
+import OError from '@overleaf/o-error'
+import { EventEmitter } from 'node:events'
+import Errors from './Errors.js'
 
-module.exports = function (io, sessionStore, cookieParser, cookieName) {
+const { MissingSessionError } = Errors
+
+export default function (io, sessionStore, cookieParser, cookieName) {
   const missingSessionError = new MissingSessionError()
 
   const sessionSockets = new EventEmitter()

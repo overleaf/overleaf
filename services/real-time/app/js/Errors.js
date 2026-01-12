@@ -1,4 +1,4 @@
-const OError = require('@overleaf/o-error')
+import OError from '@overleaf/o-error'
 
 class ClientRequestedMissingOpsError extends OError {
   constructor(statusCode, info = {}) {
@@ -87,7 +87,7 @@ class WebApiRequestFailedError extends OError {
   }
 }
 
-module.exports = {
+export default {
   CodedError,
   CorruptedJoinProjectResponseError,
   ClientRequestedMissingOpsError,

@@ -1,14 +1,16 @@
-const { XMLHttpRequest } = require('../../libs/XMLHttpRequest')
-const io = require('socket.io-client')
+import io from 'socket.io-client'
 
-const Settings = require('@overleaf/settings')
-const redis = require('@overleaf/redis-wrapper')
+import Settings from '@overleaf/settings'
+import redis from '@overleaf/redis-wrapper'
+
+import uidSafe from 'uid-safe'
+import signature from 'cookie-signature'
+import { callbackify } from 'node:util'
+import { fetchJson, fetchNothing } from '@overleaf/fetch-utils'
+import { XMLHttpRequest } from '../../libs/XMLHttpRequest.js'
+
 const rclient = redis.createClient(Settings.redis.websessions)
-
-const uid = require('uid-safe').sync
-const signature = require('cookie-signature')
-const { callbackify } = require('node:util')
-const { fetchJson, fetchNothing } = require('@overleaf/fetch-utils')
+const uid = uidSafe.sync
 
 io.util.request = function () {
   const xhr = new XMLHttpRequest()
@@ -150,4 +152,4 @@ const Client = {
   },
 }
 
-module.exports = Client
+export default Client
