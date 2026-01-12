@@ -1,4 +1,3 @@
-import { Project } from '../../models/Project.mjs'
 import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
 import ProjectOptionsHandlerModule from '../Project/ProjectOptionsHandler.mjs'
 import ProjectRootDocManagerModule from '../Project/ProjectRootDocManager.mjs'
@@ -31,6 +30,11 @@ const TemplatesManager = {
     userId,
     imageName
   ) {
+    compiler = ProjectOptionsHandler.normalizeCompiler(compiler || 'pdflatex')
+    imageName = ProjectOptionsHandler.normalizeImageName(
+      imageName || 'wl_texlive:2018.1'
+    )
+
     const zipUrl = `${settings.apis.v1.url}/api/v1/overleaf/templates/${templateVersionId}`
     const zipReq = await fetchStreamWithResponse(zipUrl, {
       basicAuth: {
@@ -47,7 +51,11 @@ const TemplatesManager = {
       const attributes = {
         fromV1TemplateId: templateId,
         fromV1TemplateVersionId: templateVersionId,
+        compiler,
+        imageName,
       }
+      if (brandVariationId) attributes.brandVariationId = brandVariationId
+
       await pipeline(zipReq.stream, writeStream)
 
       if (zipReq.response.status !== 200) {
@@ -76,16 +84,7 @@ const TemplatesManager = {
         )
       })
 
-      await TemplatesManager._setCompiler(project._id, compiler)
-      await TemplatesManager._setImage(project._id, imageName)
-      await TemplatesManager._setMainFile(project._id, mainFile)
-      await TemplatesManager._setBrandVariationId(project._id, brandVariationId)
-
-      const update = {
-        fromV1TemplateId: templateId,
-        fromV1TemplateVersionId: templateVersionId,
-      }
-      await Project.updateOne({ _id: project._id }, update, {})
+      await TemplatesManager._setMainFile(project, mainFile)
 
       await prepareClsiCacheInBackground
 
@@ -95,33 +94,15 @@ const TemplatesManager = {
     }
   },
 
-  async _setCompiler(projectId, compiler) {
-    if (compiler == null) {
-      return
-    }
-    await ProjectOptionsHandler.setCompiler(projectId, compiler)
-  },
-
-  async _setImage(projectId, imageName) {
-    if (!imageName) {
-      imageName = 'wl_texlive:2018.1'
-    }
-
-    await ProjectOptionsHandler.setImageName(projectId, imageName)
-  },
-
-  async _setMainFile(projectId, mainFile) {
+  async _setMainFile(project, mainFile) {
     if (mainFile == null) {
       return
     }
-    await ProjectRootDocManager.setRootDocFromName(projectId, mainFile)
-  },
-
-  async _setBrandVariationId(projectId, brandVariationId) {
-    if (brandVariationId == null) {
-      return
-    }
-    await ProjectOptionsHandler.setBrandVariationId(projectId, brandVariationId)
+    const rootDocId = await ProjectRootDocManager.setRootDocFromName(
+      project._id,
+      mainFile
+    )
+    if (rootDocId) project.rootDoc_id = rootDocId
   },
 
   async fetchFromV1(templateId) {

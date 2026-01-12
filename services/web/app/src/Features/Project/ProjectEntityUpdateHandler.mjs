@@ -221,6 +221,7 @@ async function setRootDoc(projectId, newRootDocID) {
       'invalid file extension for root doc'
     )
   }
+  return newRootDocID
 }
 
 async function unsetRootDoc(projectId) {
