@@ -63,7 +63,7 @@ export function initializeProject(req, res, next) {
 
 const flushProjectSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
   }),
   query: z.object({
     debug: z.stringbool().default(false),
@@ -110,7 +110,7 @@ export function flushProject(req, res, next) {
 
 const dumpProjectSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
   }),
   query: z.object({
     count: z.coerce.number().int().optional(),
@@ -165,7 +165,7 @@ export function flushOld(req, res, next) {
 
 const getDiffSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
   }),
   query: z.object({
     pathname: z.string(),
@@ -190,7 +190,7 @@ export function getDiff(req, res, next) {
 
 const getFileTreeDiffSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
   }),
   query: z.object({
     from: z.coerce.number().int(),
@@ -213,7 +213,7 @@ export function getFileTreeDiff(req, res, next) {
 
 const getUpdatesSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
   }),
   query: z.object({
     before: z.coerce.number().int().optional(),
@@ -246,7 +246,7 @@ export function getUpdates(req, res, next) {
 
 const latestVersionSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
   }),
 })
 
@@ -282,7 +282,7 @@ export function latestVersion(req, res, next) {
 
 const getFileSnapshotSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
     version: z.coerce.number().int(),
     pathname: z.string(),
   }),
@@ -309,7 +309,7 @@ export function getFileSnapshot(req, res, next) {
 
 const getRangesSnapshotSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
     version: z.coerce.number().int(),
     pathname: z.string(),
   }),
@@ -333,7 +333,7 @@ export function getRangesSnapshot(req, res, next) {
 
 const getFileMetadataSnapshotSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
     version: z.coerce.number().int(),
     pathname: z.string(),
   }),
@@ -357,7 +357,7 @@ export function getFileMetadataSnapshot(req, res, next) {
 
 const getLatestSnapshotSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
   }),
 })
 
@@ -382,7 +382,7 @@ export function getLatestSnapshot(req, res, next) {
 
 const getChangesInChunkSinceSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
   }),
   query: z.object({
     since: z.coerce.number().int().min(0),
@@ -415,7 +415,7 @@ export function getChangesInChunkSince(req, res, next) {
 
 const getProjectSnapshotSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
     version: z.coerce.number().int(),
   }),
 })
@@ -437,7 +437,7 @@ export function getProjectSnapshot(req, res, next) {
 
 const getPathsAtVersionSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
     version: z.coerce.number().int(),
   }),
 })
@@ -477,7 +477,7 @@ export function checkLock(req, res) {
 
 const resyncProjectSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
   }),
   query: z.object({
     force: z.stringbool().default(false),
@@ -536,7 +536,7 @@ export function resyncProject(req, res, next) {
 
 const forceDebugProjectSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
   }),
   query: z.object({
     clear: z.stringbool().default(false),
@@ -582,7 +582,7 @@ export function getQueueCounts(req, res, next) {
 
 const getLabelsSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
   }),
 })
 
@@ -611,7 +611,7 @@ export function getLabels(req, res, next) {
 
 const createLabelSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
     user_id: zz.objectId().optional(),
   }),
   body: z.object({
@@ -683,7 +683,7 @@ export function createLabel(req, res, next) {
  */
 const deleteLabelForUserSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
     user_id: zz.objectId(),
     label_id: zz.objectId(),
   }),
@@ -703,7 +703,7 @@ export function deleteLabelForUser(req, res, next) {
 
 const deleteLabelSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
     label_id: zz.objectId(),
   }),
 })
@@ -785,7 +785,7 @@ export function transferLabels(req, res, next) {
 
 const deleteProjectSchema = z.object({
   params: z.object({
-    project_id: zz.objectId(),
+    project_id: zz.objectId().or(z.coerce.number()),
   }),
 })
 
