@@ -31,6 +31,7 @@ import importOverleafModules from '../../../../../macros/import-overleaf-module.
 import EditorTourThemeTooltip from '../editor-tour/editor-tour-theme-tooltip'
 import EditorTourSwitchBackTooltip from '../editor-tour/editor-tour-switch-back-tooltip'
 import { shouldIncludeElement } from '../../utils/rail-utils'
+import { useEditorContext } from '@/shared/context/editor-context'
 
 const moduleRailEntries = (
   importOverleafModules('railEntries') as {
@@ -57,6 +58,7 @@ export const RailLayout = () => {
   const { t } = useTranslation()
   const { selectedTab, openTab, isOpen, togglePane } = useRailContext()
   const { features } = useProjectContext()
+  const { isRestrictedTokenMember } = useEditorContext()
 
   const { view, setLeftMenuShown } = useLayoutContext()
 
@@ -106,11 +108,13 @@ export const RailLayout = () => {
         component: <ChatPane />,
         indicator: <ChatIndicator />,
         title: t('chat'),
-        hide: !getMeta('ol-capabilities')?.includes('chat'),
+        hide:
+          !getMeta('ol-capabilities')?.includes('chat') ||
+          isRestrictedTokenMember,
       },
       ...moduleRailEntries,
     ],
-    [t, features.trackChangesVisible, view]
+    [t, features.trackChangesVisible, view, isRestrictedTokenMember]
   )
 
   const railActions: RailAction[] = useMemo(
