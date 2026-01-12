@@ -45,9 +45,7 @@ describe('TpdsUpdateHandler', function () {
     }
 
     ctx.CooldownManager = {
-      promises: {
-        isProjectOnCooldown: sinon.stub().resolves(false),
-      },
+      isProjectOnCooldown: sinon.stub().resolves(false),
     }
     ctx.FileTypeManager = {
       shouldIgnore: sinon.stub().returns(false),
@@ -487,7 +485,7 @@ function setupMatchingProjects(projectKeys) {
 
 function setupProjectOnCooldown() {
   beforeEach(function (ctx) {
-    ctx.CooldownManager.promises.isProjectOnCooldown
+    ctx.CooldownManager.isProjectOnCooldown
       .withArgs(ctx.projects.active1._id)
       .resolves(true)
   })

@@ -25,8 +25,9 @@ async function newUpdate(
     return null
   }
 
-  const projectIsOnCooldown =
-    await CooldownManager.promises.isProjectOnCooldown(project._id)
+  const projectIsOnCooldown = await CooldownManager.isProjectOnCooldown(
+    project._id
+  )
   if (projectIsOnCooldown) {
     throw new Errors.TooManyRequestsError('project on cooldown')
   }
@@ -173,8 +174,9 @@ async function createFolder(userId, projectId, projectName, path) {
     return null
   }
 
-  const projectIsOnCooldown =
-    await CooldownManager.promises.isProjectOnCooldown(project._id)
+  const projectIsOnCooldown = await CooldownManager.isProjectOnCooldown(
+    project._id
+  )
   if (projectIsOnCooldown) {
     throw new Errors.TooManyRequestsError('project on cooldown')
   }
