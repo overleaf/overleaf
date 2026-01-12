@@ -904,7 +904,8 @@ function _finaliseRequest(projectId, options, project, docs, files) {
           ['alpha', 'priority'].includes(options.compileGroup) &&
           options.compileFromClsiCache,
         populateClsiCache:
-          ['alpha', 'priority'].includes(options.compileGroup) &&
+          (['alpha', 'priority'].includes(options.compileGroup) ||
+            options.metricsPath === 'clsi-cache-template') &&
           options.populateClsiCache,
         enablePdfCaching:
           (Settings.enablePdfCaching && options.enablePdfCaching) || false,
@@ -1010,6 +1011,7 @@ function _getClsiServerIdFromResponse(response) {
 }
 
 export default {
+  _finaliseRequest,
   sendRequest: callbackifyMultiResult(sendRequest, [
     'status',
     'outputFiles',

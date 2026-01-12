@@ -5,9 +5,18 @@ import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mj
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
 import { fetchJson, RequestFailedError } from '@overleaf/fetch-utils'
 import Metrics from '@overleaf/metrics'
 import Features from '../../infrastructure/Features.mjs'
+import ClsiManager from './ClsiManager.mjs'
+import Crypto from 'node:crypto'
+import ClsiCookieManagerFactory from './ClsiCookieManager.mjs'
+import { ObjectId } from '../../infrastructure/mongodb.mjs'
+
+const ClsiCookieManager = ClsiCookieManagerFactory(
+  Settings.apis.clsi?.backendGroupName
+)
 
 /**
  * Get the most recent build and metadata
@@ -167,21 +176,24 @@ async function tryGetLatestCompileResult(projectId, userId, signal) {
 /**
  * Collect metadata and prepare the clsi-cache for the given project.
  *
+ * Returns true when downloaded; false when download failed; undefined when
+ * disabled for env/user;
+ *
  * @param projectId
  * @param userId
  * @param sourceProjectId
- * @param templateId
  * @param templateVersionId
- * @return {Promise<void>}
+ * @param imageName
+ * @return {Promise<boolean|undefined>}
  */
 async function prepareClsiCache(
   projectId,
   userId,
-  { sourceProjectId, templateId, templateVersionId }
+  { sourceProjectId, templateVersionId, imageName }
 ) {
-  if (!Features.hasFeature('saas')) return
+  if (!Features.hasFeature('saas')) return undefined
   const features = await UserGetter.promises.getUserFeatures(userId)
-  if (features.compileGroup !== 'priority') return
+  if (features.compileGroup !== 'priority') return undefined
 
   const signal = AbortSignal.timeout(ClsiCacheHandler.TIMEOUT)
   let lastUpdated
@@ -197,22 +209,100 @@ async function prepareClsiCache(
         signal
       ))
     } catch (err) {
-      if (err instanceof NotFoundError) return // nothing cached yet
+      if (err instanceof NotFoundError) return false // nothing cached yet
       throw err
     }
   }
   try {
     await ClsiCacheHandler.prepareCacheSource(projectId, userId, {
       sourceProjectId,
-      templateId,
       templateVersionId,
+      imageName,
       shard,
       lastUpdated,
       signal,
     })
   } catch (err) {
-    if (err instanceof NotFoundError) return // nothing cached yet/expired.
+    if (err instanceof NotFoundError) return false // nothing cached yet/expired.
     throw err
+  }
+  return true
+}
+
+async function createTemplateClsiCache({
+  templateVersionId,
+  project,
+  fileEntries,
+  docEntries,
+}) {
+  const compileGroup = Settings.defaultFeatures.compileGroup
+  const compileBackendClass = Settings.apis.clsi.submissionBackendClass
+  const submissionId = new ObjectId().toString()
+  const editorId = Crypto.randomUUID()
+  const options = {
+    editorId,
+    compileGroup,
+    compileBackendClass,
+    timeout: 60,
+    syncType: 'full',
+    compileFromClsiCache: false,
+    populateClsiCache: true,
+    enablePdfCaching: false,
+    pdfCachingMinChunkSize: 0,
+    metricsPath: 'clsi-cache-template',
+  }
+  const req = ClsiManager._finaliseRequest(
+    submissionId,
+    options,
+    project,
+    Object.fromEntries(
+      docEntries.map(doc => [
+        doc.path,
+        { _id: doc.doc._id, lines: doc.docLines.split('\n') },
+      ])
+    ),
+    Object.fromEntries(fileEntries.map(file => [file.path, file.file]))
+  )
+  let clsiServerId = await ClsiCookieManager.promises.getServerId(
+    submissionId,
+    undefined,
+    compileGroup,
+    compileBackendClass
+  )
+  const { imageName } = project
+  try {
+    let status, buildId, clsiCacheShard
+    ;({ status, buildId, clsiCacheShard, clsiServerId } =
+      await ClsiManager.promises.sendExternalRequest(
+        submissionId,
+        req,
+        options
+      ))
+    if (status !== 'success') {
+      logger.warn(
+        { status, templateVersionId, imageName },
+        'compiling template failed'
+      )
+      return
+    }
+    if (!clsiCacheShard) {
+      // The circuit breaker tripped for all clsi -> clsi-cache shards. Try again later.
+      return
+    }
+    await ClsiCacheHandler.exportSubmissionAsTemplate(
+      clsiCacheShard,
+      submissionId,
+      editorId + '-' + buildId,
+      templateVersionId,
+      imageName
+    )
+  } finally {
+    await ClsiManager.promises.deleteAuxFiles(
+      submissionId,
+      null,
+      options,
+      clsiServerId
+    )
   }
 }
 
@@ -220,4 +310,5 @@ export default {
   getLatestBuildFromCache,
   getLatestCompileResult,
   prepareClsiCache,
+  createTemplateClsiCache,
 }

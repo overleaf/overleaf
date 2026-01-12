@@ -37,9 +37,11 @@ describe('TemplatesManager', function () {
     }
     ctx.ProjectUploadManager = {
       promises: {
-        createProjectFromZipArchiveWithName: sinon
-          .stub()
-          .resolves({ _id: ctx.project_id }),
+        createProjectFromZipArchiveWithName: sinon.stub().resolves({
+          project: { _id: ctx.project_id },
+          fileEntries: [],
+          docEntries: [],
+        }),
       },
     }
     ctx.ProjectOptionsHandler = {

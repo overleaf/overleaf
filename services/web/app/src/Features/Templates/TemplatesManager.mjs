@@ -65,7 +65,7 @@ const TemplatesManager = {
         )
         throw new Error(`get zip failed: ${zipReq.response.status}`)
       }
-      const project =
+      const { fileEntries, docEntries, project } =
         await ProjectUploadManager.promises.createProjectFromZipArchiveWithName(
           userId,
           projectName,
@@ -76,17 +76,31 @@ const TemplatesManager = {
       const prepareClsiCacheInBackground = ClsiCacheManager.prepareClsiCache(
         project._id,
         userId,
-        { templateId, templateVersionId }
+        { templateVersionId, imageName }
       ).catch(err => {
         logger.warn(
-          { err, templateId, templateVersionId, projectId: project._id },
+          { err, templateVersionId, projectId: project._id },
           'failed to prepare clsi-cache from template'
         )
+        return undefined
       })
 
       await TemplatesManager._setMainFile(project, mainFile)
 
-      await prepareClsiCacheInBackground
+      const found = await prepareClsiCacheInBackground
+      if (found === false && project.rootDoc_id) {
+        ClsiCacheManager.createTemplateClsiCache({
+          templateVersionId,
+          project,
+          fileEntries,
+          docEntries,
+        }).catch(err => {
+          logger.error(
+            { err, templateVersionId },
+            'failed to create template clsi-cache'
+          )
+        })
+      }
 
       return project
     } finally {

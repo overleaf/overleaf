@@ -86,12 +86,14 @@ async function createProjectFromZipArchiveWithName(
     )
 
     try {
-      await _initializeProjectWithZipContents(ownerId, project, contentsPath)
+      const { fileEntries, docEntries } =
+        await _initializeProjectWithZipContents(ownerId, project, contentsPath)
       const rootDocId =
         await ProjectRootDocManager.promises.setRootDocAutomatically(
           project._id
         )
       if (rootDocId) project.rootDoc_id = rootDocId
+      return { fileEntries, docEntries, project }
     } catch (err) {
       // no need to wait for the cleanup here
       ProjectDeleter.promises
@@ -104,7 +106,6 @@ async function createProjectFromZipArchiveWithName(
         )
       throw err
     }
-    return project
   } finally {
     await fs.promises.rm(contentsPath, { recursive: true, force: true })
   }
@@ -159,6 +160,7 @@ async function _initializeProjectWithZipContents(
     newProject: { version: projectVersion },
   })
   await TpdsProjectFlusher.promises.flushProjectToTpds(project._id)
+  return { fileEntries, docEntries }
 }
 
 async function _createEntriesFromImports(project, importEntries) {

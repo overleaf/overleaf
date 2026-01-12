@@ -9,6 +9,7 @@ import Settings from '@overleaf/settings'
 import OError from '@overleaf/o-error'
 import { NotFoundError, InvalidNameError } from '../Errors/Errors.js'
 import Features from '../../infrastructure/Features.mjs'
+import Path from 'node:path'
 
 const TIMEOUT = 4_000
 
@@ -228,8 +229,8 @@ async function getRedirectWithFallback(
  * @param projectId
  * @param userId
  * @param sourceProjectId
- * @param templateId
  * @param templateVersionId
+ * @param imageName
  * @param lastUpdated
  * @param shard
  * @param signal
@@ -238,8 +239,9 @@ async function getRedirectWithFallback(
 async function prepareCacheSource(
   projectId,
   userId,
-  { sourceProjectId, templateId, templateVersionId, lastUpdated, shard, signal }
+  { sourceProjectId, templateVersionId, imageName, lastUpdated, shard, signal }
 ) {
+  imageName = Path.basename(imageName)
   const url = new URL(
     `/project/${projectId}/user/${userId}/import-from`,
     Settings.apis.clsiCache.instances.find(i => i.shard === shard).url
@@ -250,10 +252,50 @@ async function prepareCacheSource(
       json: {
         sourceProjectId,
         lastUpdated,
-        templateId,
         templateVersionId,
+        imageName,
       },
       signal,
+    })
+  } catch (err) {
+    if (err instanceof RequestFailedError && err.response.status === 404) {
+      throw new NotFoundError()
+    }
+    throw err
+  }
+}
+
+/**
+ * Populate the clsi-cache for a template using a submission build
+ *
+ * @param clsiCacheShard
+ * @param submissionId
+ * @param buildId
+ * @param templateVersionId
+ * @param imageName
+ * @return {Promise<void>}
+ */
+async function exportSubmissionAsTemplate(
+  clsiCacheShard,
+  submissionId,
+  buildId,
+  templateVersionId,
+  imageName
+) {
+  imageName = Path.basename(imageName)
+  const url = new URL(
+    `/submission/${submissionId}/build/${buildId}/export-as-template`,
+    Settings.apis.clsiCache.instances.find(i => i.shard === clsiCacheShard).url
+  )
+  try {
+    await fetchNothing(url, {
+      method: 'POST',
+      json: {
+        templateVersionId,
+        imageName,
+      },
+      // clsi-cache will poll up-to 15s for the output to be copied from clsi.
+      signal: AbortSignal.timeout(30_000),
     })
   } catch (err) {
     if (err instanceof RequestFailedError && err.response.status === 404) {
@@ -270,4 +312,5 @@ export default {
   getOutputFile,
   getLatestOutputFile,
   prepareCacheSource,
+  exportSubmissionAsTemplate,
 }
