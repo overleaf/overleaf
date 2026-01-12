@@ -4,7 +4,6 @@ import Settings from '@overleaf/settings'
 import { User } from '../../models/User.mjs'
 import { DeletedUser } from '../../models/DeletedUser.mjs'
 import { UserAuditLogEntry } from '../../models/UserAuditLogEntry.mjs'
-import { Feedback } from '../../models/Feedback.mjs'
 import NewsletterManager from '../Newsletter/NewsletterManager.mjs'
 import ProjectDeleter from '../Project/ProjectDeleter.mjs'
 import SubscriptionHandler from '../Subscription/SubscriptionHandler.mjs'
@@ -18,6 +17,7 @@ import Modules from '../../infrastructure/Modules.mjs'
 import Errors from '../Errors/Errors.js'
 import OnboardingDataCollectionManager from '../OnboardingDataCollection/OnboardingDataCollectionManager.mjs'
 import EmailHandler from '../Email/EmailHandler.mjs'
+import Features from '../../infrastructure/Features.mjs'
 
 export default {
   deleteUser: callbackify(deleteUser),
@@ -96,8 +96,6 @@ async function expireDeletedUser(userId) {
   try {
     logger.info({ userId }, 'firing expireDeletedUser hook')
     await Modules.promises.hooks.fire('expireDeletedUser', userId)
-    logger.info({ userId }, 'removing deleted user feedback records')
-    await Feedback.deleteMany({ userId }).exec()
     logger.info({ userId }, 'removing deleted user onboarding data')
     await OnboardingDataCollectionManager.deleteOnboardingDataCollection(userId)
     logger.info({ userId }, 'redacting PII from the deleted user record')
@@ -157,6 +155,7 @@ async function expireDeletedUsersAfterDuration() {
 }
 
 async function ensureCanDeleteUser(user) {
+  if (!Features.hasFeature('saas')) return
   const subscription =
     await SubscriptionLocator.promises.getUsersSubscription(user)
   if (subscription) {
@@ -212,16 +211,18 @@ async function _cleanupUser(user) {
 
   logger.info({ userId }, '[cleanupUser] removing user sessions from Redis')
   await UserSessionsManager.promises.removeSessionsFromRedis(user)
-  logger.info({ userId }, '[cleanupUser] unsubscribing from newsletters')
-  await NewsletterManager.promises.unsubscribe(user, { delete: true })
-  logger.info({ userId }, '[cleanupUser] cancelling subscription')
-  await SubscriptionHandler.promises.cancelSubscription(user)
-  logger.info({ userId }, '[cleanupUser] deleting affiliations')
-  await InstitutionsAPI.promises.deleteAffiliations(userId)
-  logger.info({ userId }, '[cleanupUser] removing user from groups')
-  await SubscriptionUpdater.promises.removeUserFromAllGroups(userId)
-  logger.info({ userId }, '[cleanupUser] removing user from memberships')
-  await UserMembershipsHandler.promises.removeUserFromAllEntities(userId)
+  if (Features.hasFeature('saas')) {
+    logger.info({ userId }, '[cleanupUser] unsubscribing from newsletters')
+    await NewsletterManager.promises.unsubscribe(user, { delete: true })
+    logger.info({ userId }, '[cleanupUser] cancelling subscription')
+    await SubscriptionHandler.promises.cancelSubscription(user)
+    logger.info({ userId }, '[cleanupUser] deleting affiliations')
+    await InstitutionsAPI.promises.deleteAffiliations(userId)
+    logger.info({ userId }, '[cleanupUser] removing user from groups')
+    await SubscriptionUpdater.promises.removeUserFromAllGroups(userId)
+    logger.info({ userId }, '[cleanupUser] removing user from memberships')
+    await UserMembershipsHandler.promises.removeUserFromAllEntities(userId)
+  }
   logger.info({ userId }, '[cleanupUser] removing personal access tokens')
   await Modules.promises.hooks.fire('cleanupPersonalAccessTokens', userId, [
     'collabratec',

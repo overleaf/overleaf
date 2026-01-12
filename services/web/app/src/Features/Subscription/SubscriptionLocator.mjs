@@ -10,9 +10,11 @@ import { DeletedSubscription } from '../../models/DeletedSubscription.mjs'
 import logger from '@overleaf/logger'
 import { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } from './AiHelper.mjs'
 import './GroupPlansData.mjs' // make sure dynamic group plans are loaded
+import Features from '../../infrastructure/Features.mjs'
 
 const SubscriptionLocator = {
   async getUsersSubscription(userOrId) {
+    if (!Features.hasFeature('saas')) return undefined
     const userId = SubscriptionLocator._getUserId(userOrId)
     const subscription = await Subscription.findOne({ admin_id: userId }).exec()
     logger.debug({ userId }, 'got users subscription')
@@ -25,6 +27,7 @@ const SubscriptionLocator = {
   },
 
   async getUserIndividualSubscription(userOrId) {
+    if (!Features.hasFeature('saas')) return undefined
     const userId = SubscriptionLocator._getUserId(userOrId)
     const subscription = await Subscription.findOne({
       admin_id: userId,
@@ -35,6 +38,7 @@ const SubscriptionLocator = {
   },
 
   async getManagedGroupSubscriptions(userOrId) {
+    if (!Features.hasFeature('saas')) return []
     return await Subscription.find({
       manager_ids: userOrId,
       groupPlan: true,
@@ -44,6 +48,7 @@ const SubscriptionLocator = {
   },
 
   async getMemberSubscriptions(userOrId, populate = []) {
+    if (!Features.hasFeature('saas')) return []
     const userId = SubscriptionLocator._getUserId(userOrId)
     // eslint-disable-next-line no-restricted-syntax
     return await Subscription.find({ member_ids: userId })
@@ -53,6 +58,7 @@ const SubscriptionLocator = {
   },
 
   async getAdminEmail(subscriptionId) {
+    if (!Features.hasFeature('saas')) return undefined
     const subscription = await Subscription.findById(subscriptionId)
       .populate('admin_id', 'email')
       .exec()
@@ -61,6 +67,7 @@ const SubscriptionLocator = {
   },
 
   async getAdminEmailAndName(subscriptionId) {
+    if (!Features.hasFeature('saas')) return undefined
     const subscription = await Subscription.findById(subscriptionId)
       .populate('admin_id', ['email', 'first_name', 'last_name'])
       .exec()
@@ -69,6 +76,7 @@ const SubscriptionLocator = {
   },
 
   async hasRecurlyGroupSubscription(userOrId) {
+    if (!Features.hasFeature('saas')) return false
     const userId = SubscriptionLocator._getUserId(userOrId)
     return await Subscription.exists({
       groupPlan: true,
@@ -93,6 +101,7 @@ const SubscriptionLocator = {
   },
 
   async getGroupSubscriptionsMemberOf(userId) {
+    if (!Features.hasFeature('saas')) return []
     return await Subscription.find(
       { member_ids: userId },
       { _id: 1, planCode: 1, userFeaturesDisabled: 1 }
@@ -100,6 +109,7 @@ const SubscriptionLocator = {
   },
 
   async getUniqueManagedSubscriptionMemberOf(userId) {
+    if (!Features.hasFeature('saas')) return null
     return await Subscription.findOne(
       { member_ids: userId, managedUsersEnabled: true },
       { _id: 1 }
@@ -125,8 +135,13 @@ const SubscriptionLocator = {
   },
 
   async getGroupsWithTeamInvitesEmail(email) {
+    if (!Features.hasFeature('saas')) return []
     return await Subscription.find(
-      { teamInvites: { $elemMatch: { email } } },
+      {
+        teamInvites: { $elemMatch: { email } },
+        // Add partialFilterExpression from index.
+        'teamInvites.email': { $exists: true },
+      },
       { teamInvites: 1 }
     ).exec()
   },
@@ -136,6 +151,7 @@ const SubscriptionLocator = {
   },
 
   async getUserDeletedSubscriptions(userId) {
+    if (!Features.hasFeature('saas')) return []
     return await DeletedSubscription.find({
       'subscription.admin_id': userId,
     }).exec()

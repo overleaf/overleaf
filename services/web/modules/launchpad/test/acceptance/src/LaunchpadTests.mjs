@@ -67,6 +67,9 @@ describe('Launchpad', function () {
       }),
     })
     expect(badPostResponse.status).to.equal(403)
+    expect(await badPostResponse.json()).to.deep.equal({
+      message: { type: 'error', text: 'admin user already exists' },
+    })
 
     // Log in as this new admin user
     const adminUser = await UserHelper.loginUser({

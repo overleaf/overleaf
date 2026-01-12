@@ -3,6 +3,7 @@ import logger from '@overleaf/logger'
 import { UserAuditLogEntry } from '../../models/UserAuditLogEntry.mjs'
 import { callbackify } from 'node:util'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
+import Features from '../../infrastructure/Features.mjs'
 
 function _canHaveNoIpAddressId(operation, info) {
   if (operation === 'add-email' && info.script) return true
@@ -87,7 +88,10 @@ async function addEntry(userId, operation, initiatorId, ipAddress, info = {}) {
     ipAddress,
   }
 
-  if (MANAGED_GROUP_USER_EVENTS.includes(operation)) {
+  if (
+    MANAGED_GROUP_USER_EVENTS.includes(operation) &&
+    Features.hasFeature('saas')
+  ) {
     try {
       const managedSubscription =
         await SubscriptionLocator.promises.getUniqueManagedSubscriptionMemberOf(

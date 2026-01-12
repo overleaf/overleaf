@@ -6,15 +6,24 @@ import Subscription from './helpers/Subscription.mjs'
 import Publisher from './helpers/Publisher.mjs'
 import sinon from 'sinon'
 import RecurlyClient from '../../../app/src/Features/Subscription/RecurlyClient.mjs'
+import Features from '../../../app/src/infrastructure/Features.mjs'
 
 describe('UserMembershipAuthorization', function () {
   beforeEach(function (done) {
+    if (!Features.hasFeature('saas')) {
+      this.skip()
+    }
+
     this.user = new User()
     sinon.stub(RecurlyClient.promises, 'getSubscription').resolves({})
     async.series([this.user.ensureUserExists.bind(this.user)], done)
   })
 
   afterEach(function () {
+    if (!Features.hasFeature('saas')) {
+      return
+    }
+
     RecurlyClient.promises.getSubscription.restore()
   })
 

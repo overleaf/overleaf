@@ -265,6 +265,10 @@ describe('PrimaryEmailCheck', function () {
 
     describe('when the user is a managed user', function () {
       beforeEach(async function () {
+        if (!Features.hasFeature('saas')) {
+          this.skip()
+        }
+
         const adminUser = await UserHelper.createUser()
         this.subscription = new Subscription({
           adminId: adminUser._id,

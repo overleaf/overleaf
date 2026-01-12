@@ -16,6 +16,7 @@ import UserMembershipEntityConfigs from './UserMembershipEntityConfigs.mjs'
 import * as InstitutionModel from '../../models/Institution.mjs'
 import * as SubscriptionModel from '../../models/Subscription.mjs'
 import * as PublisherModel from '../../models/Publisher.mjs'
+import Features from '../../infrastructure/Features.mjs'
 
 const EntityModels = {
   Institution: InstitutionModel.Institution,
@@ -66,6 +67,7 @@ const UserMembershipsHandler = {
     if (callback == null) {
       callback = function () {}
     }
+    if (!Features.hasFeature('saas')) return callback(null, [])
     const query = Object.assign({}, entityConfig.baseQuery)
     query[entityConfig.fields.access] = userId
     EntityModels[entityConfig.modelName]

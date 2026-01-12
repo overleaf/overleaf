@@ -6,5 +6,6 @@ module.exports = {
     jenkinsMode: true,
     jenkinsClassnamePrefix: process.env.MOCHA_ROOT_SUITE_NAME,
     rootSuiteTitle: process.env.MOCHA_ROOT_SUITE_NAME,
+    outputs: true,
   },
 }

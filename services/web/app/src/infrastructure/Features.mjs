@@ -1,13 +1,14 @@
 import _ from 'lodash'
 import Settings from '@overleaf/settings'
 
-const supportModuleAvailable = Settings.moduleImportSequence.includes('support')
+const supportModuleAvailable =
+  Settings.moduleImportSequence?.includes('support')
 
 const symbolPaletteModuleAvailable =
-  Settings.moduleImportSequence.includes('symbol-palette')
+  Settings.moduleImportSequence?.includes('symbol-palette')
 
 const trackChangesModuleAvailable =
-  Settings.moduleImportSequence.includes('track-changes')
+  Settings.moduleImportSequence?.includes('track-changes')
 
 /**
  * @typedef {Object} Settings

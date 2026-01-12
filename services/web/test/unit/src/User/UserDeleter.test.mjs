@@ -99,10 +99,6 @@ describe('UserDeleter', function () {
       promises: { hooks: { fire: sinon.stub().resolves() } },
     }
 
-    ctx.Feedback = {
-      deleteMany: sinon.stub().returns({ exec: sinon.stub().resolves() }),
-    }
-
     ctx.OnboardingDataCollectionManager = {
       deleteOnboardingDataCollection: sinon.stub().resolves(),
     }
@@ -125,10 +121,6 @@ describe('UserDeleter', function () {
 
     vi.doMock('../../../../app/src/models/DeletedUser', () => ({
       DeletedUser,
-    }))
-
-    vi.doMock('../../../../app/src/models/Feedback', () => ({
-      Feedback: ctx.Feedback,
     }))
 
     vi.doMock(
@@ -786,13 +778,6 @@ describe('UserDeleter', function () {
         'expireDeletedUser',
         ctx.userId
       )
-    })
-
-    it('should delete Feeback', async function (ctx) {
-      await ctx.UserDeleter.promises.expireDeletedUser(ctx.userId)
-      expect(ctx.Feedback.deleteMany).to.have.been.calledWith({
-        userId: ctx.userId,
-      })
     })
 
     describe('when called as a callback', function () {

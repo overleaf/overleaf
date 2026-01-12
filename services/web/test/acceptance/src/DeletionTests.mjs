@@ -45,12 +45,16 @@ describe('Deleting a user', function () {
           'user',
           'login',
           (results, cb) => {
-            const subscription = new Subscription({
-              admin_id: results.user._id,
-            })
-            subscription.ensureExists(err => {
-              cb(err, subscription)
-            })
+            if (Features.hasFeature('saas')) {
+              const subscription = new Subscription({
+                admin_id: results.user._id,
+              })
+              subscription.ensureExists(err => {
+                cb(err, subscription)
+              })
+            } else {
+              cb()
+            }
           },
         ],
       },
@@ -88,7 +92,7 @@ describe('Deleting a user', function () {
       this.user.deleteUser(error => {
         expect(error).not.to.exist
         db.deletedUsers.findOne(
-          { 'user._id': user._id },
+          { 'user.email': user.email },
           (error, deletedUser) => {
             expect(error).not.to.exist
             expect(deletedUser).to.exist
