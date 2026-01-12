@@ -444,7 +444,6 @@ const _ProjectController = {
       'track-pdf-download',
       !anonymous && 'writefull-oauth-promotion',
       'hotjar',
-      'editor-redesign',
       'overleaf-assist-bundle',
       'word-count-client',
       'editor-popup-ux-survey',
