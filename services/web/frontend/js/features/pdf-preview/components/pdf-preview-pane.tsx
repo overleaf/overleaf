@@ -14,7 +14,6 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import PdfCodeCheckFailedBanner from '@/features/ide-redesign/components/pdf-preview/pdf-code-check-failed-banner'
 import getMeta from '@/utils/meta'
 import NewPdfLogsViewer from '@/features/ide-redesign/components/pdf-preview/pdf-logs-viewer'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function PdfPreviewPane() {
   const {
@@ -25,9 +24,7 @@ function PdfPreviewPane() {
   } = useCompileContext()
   const { compileTimeout } = getMeta('ol-compileSettings')
   const usesNewEditor = useIsNewEditorEnabled()
-  const inDarkModePdfSplitTest = useFeatureFlag('pdf-dark-mode')
   const darkModePdf =
-    inDarkModePdfSplitTest &&
     usesNewEditor &&
     pdfViewer === 'pdfjs' &&
     activeOverallTheme === 'dark' &&

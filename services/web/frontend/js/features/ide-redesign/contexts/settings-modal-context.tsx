@@ -87,7 +87,6 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
   // TODO ide-redesign-cleanup: Rename this field and move it directly into this context
   const { leftMenuShown, setLeftMenuShown } = useLayoutContext()
 
-  const hasDarkModePdf = useFeatureFlag('pdf-dark-mode')
   const hasEmailNotifications = useFeatureFlag('email-notifications')
   const noNewEditorOptOut = useFeatureFlag('editor-redesign-no-opt-out')
 
@@ -213,7 +212,7 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
               {
                 key: 'pdfDarkMode',
                 component: <DarkModePdfSetting />,
-                hidden: overallTheme === 'light-' || !hasDarkModePdf,
+                hidden: overallTheme === 'light-',
               },
               {
                 key: 'fontSize',
@@ -268,7 +267,7 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
         href: '/user/subscription',
       },
     ],
-    [t, overallTheme, hasDarkModePdf, hasEmailNotifications, noNewEditorOptOut]
+    [t, overallTheme, hasEmailNotifications, noNewEditorOptOut]
   )
 
   const settingsTabs = useMemo(
