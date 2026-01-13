@@ -266,6 +266,8 @@ class User {
 
       db.userAuditLogEntries
         .find({ userId: new ObjectId(this._id) })
+        // Explicitly sort in ascending chronological order
+        .sort({ timestamp: 1 })
         .toArray((error, auditLog) => {
           if (error) {
             return callback(error)
