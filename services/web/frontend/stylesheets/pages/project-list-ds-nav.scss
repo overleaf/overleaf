@@ -153,8 +153,8 @@ body {
       }
 
       .survey-notification {
-        background-color: var(--bg-light-secondary);
-        color: var(--content-secondary);
+        background-color: var(--bg-secondary-themed);
+        color: var(--content-secondary-themed);
         box-shadow: none;
         border-radius: var(--border-radius-large);
         position: relative;
@@ -167,6 +167,12 @@ body {
           top: var(--spacing-07);
           right: var(--spacing-07);
           color: inherit;
+        }
+
+        .notification-body {
+          .btn {
+            @include ol-button-themed('secondary');
+          }
         }
 
         p {
