@@ -176,6 +176,7 @@ async function settingsPage(req, res) {
     userRestrictions: Array.from(req.userRestrictions || []),
     currentManagedUserAdminEmail,
     gitBridgeEnabled: Settings.enableGitBridge,
+    githubSyncEnabled: Features.hasFeature('github-sync'),
     isSaas: Features.hasFeature('saas'),
     memberOfSSOEnabledGroups,
     capabilities: [...req.capabilitySet],

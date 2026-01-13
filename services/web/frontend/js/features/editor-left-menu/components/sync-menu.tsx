@@ -12,6 +12,7 @@ export default function SyncMenu() {
   const { t } = useTranslation()
   const anonymous = getMeta('ol-anonymous')
   const gitBridgeEnabled = getMeta('ol-gitBridgeEnabled')
+  const githubSyncEnabled = getMeta('ol-githubSyncEnabled')
 
   if (anonymous) {
     return null
@@ -21,9 +22,8 @@ export default function SyncMenu() {
     return null
   }
 
-  // This flag can only be false in CE and Server Pro. In this case we skip rendering the
-  // entire sync section, since Dropbox and GitHub are never available in SP
-  if (!gitBridgeEnabled) {
+  // Show sync section if git-bridge or github-sync is enabled
+  if (!gitBridgeEnabled && !githubSyncEnabled) {
     return null
   }
 

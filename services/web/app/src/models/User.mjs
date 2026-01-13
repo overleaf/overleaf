@@ -209,6 +209,12 @@ export const UserSchema = new Schema(
       isPremium: { type: Boolean, default: false },
       premiumSource: { type: String, default: null },
     },
+    githubSync: {
+      enabled: { type: Boolean, default: false },
+      tokenEncrypted: { type: String },
+      username: { type: String },
+      connectedAt: { type: Date },
+    },
     aiErrorAssistant: {
       enabled: { type: Boolean, default: true },
     },

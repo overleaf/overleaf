@@ -433,6 +433,10 @@ module.exports = {
 
   disableChat: process.env.OVERLEAF_DISABLE_CHAT === 'true',
   disableLinkSharing: process.env.OVERLEAF_DISABLE_LINK_SHARING === 'true',
+
+  // GitHub Sync
+  enableGithubSync: process.env.ENABLE_GITHUB_SYNC === 'true',
+  githubSyncEncryptionSecret: process.env.GITHUB_SYNC_ENCRYPTION_SECRET,
   enableSubscriptions: false,
   restrictedCountries: [],
   enableOnboardingEmails: process.env.ENABLE_ONBOARDING_EMAILS === 'true',
@@ -1002,11 +1006,21 @@ module.exports = {
     mainEditorLayoutPanels: [],
     langFeedbackLinkingWidgets: [],
     labsExperiments: [],
-    integrationLinkingWidgets: [],
+    integrationLinkingWidgets: [
+      Path.resolve(
+        __dirname,
+        '../modules/github-sync/frontend/js/components/github-sync-widget.tsx'
+      ),
+    ],
     referenceLinkingWidgets: [],
     importProjectFromGithubModalWrapper: [],
     importProjectFromGithubMenu: [],
-    editorLeftMenuSync: [],
+    editorLeftMenuSync: [
+      Path.resolve(
+        __dirname,
+        '../modules/github-sync/frontend/js/components/github-sync-button.tsx'
+      ),
+    ],
     editorLeftMenuManageTemplate: [],
     menubarExtraComponents: [],
     oauth2Server: [],
@@ -1049,6 +1063,7 @@ module.exports = {
   },
 
   moduleImportSequence: [
+    'github-sync',
     'history-v1',
     'launchpad',
     'server-ce-scripts',

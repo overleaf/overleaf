@@ -949,6 +949,7 @@ const _ProjectController = {
         imageNames,
         gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl,
         gitBridgeEnabled: Features.hasFeature('git-bridge'),
+        githubSyncEnabled: Features.hasFeature('github-sync'),
         wsUrl,
         showSupport: Features.hasFeature('support'),
         showTemplatesServerPro,

@@ -42,7 +42,9 @@ function LinkingSection() {
   }[]
 
   const renderSyncSection =
-    getMeta('ol-isSaas') || getMeta('ol-gitBridgeEnabled')
+    getMeta('ol-isSaas') ||
+    getMeta('ol-gitBridgeEnabled') ||
+    getMeta('ol-githubSyncEnabled')
 
   const allIntegrationLinkingWidgets = integrationLinkingWidgets.concat(
     oauth2ServerComponents

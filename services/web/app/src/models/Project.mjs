@@ -89,6 +89,14 @@ export const ProjectSchema = new Schema(
         otMigrationStage: { type: Number },
       },
     },
+    githubSync: {
+      enabled: { type: Boolean, default: false },
+      repoOwner: { type: String },
+      repoName: { type: String },
+      branch: { type: String, default: 'main' },
+      lastSyncedAt: { type: Date },
+      lastSyncedBy: { type: ObjectId, ref: 'User' },
+    },
     collabratecUsers: [
       {
         user_id: { type: ObjectId, ref: 'User' },
