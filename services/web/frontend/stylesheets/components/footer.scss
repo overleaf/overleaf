@@ -3,6 +3,33 @@
 // Max width of the sidebar
 $footer-width-delta: 320px;
 
+@mixin cookie-banner-light {
+  --cookie-banner-background: var(--bg-light-primary);
+  --cookie-banner-content: var(--content-primary);
+  --cookie-banner-link: var(--link-ui);
+}
+
+@mixin cookie-banner-dark {
+  --cookie-banner-background: var(--bg-dark-secondary);
+  --cookie-banner-content: var(--content-primary-dark);
+  --cookie-banner-link: var(--link-ui-dark);
+}
+
+:root {
+  .cookie-banner {
+    @include cookie-banner-light;
+  }
+
+  @include theme('default') {
+    .ide-redesign-main,
+    .project-ds-nav-page {
+      .cookie-banner {
+        @include cookie-banner-dark;
+      }
+    }
+  }
+}
+
 @mixin footer-container-up($bp) {
   $size: map.get($grid-breakpoints, $bp);
 
@@ -373,9 +400,10 @@ footer.site-footer {
   left: 0;
   right: 0;
   z-index: 100;
-  color: var(--content-secondary);
   background: var(--bg-light-secondary);
   box-shadow: 0 -5px 8px 0 #0000001a;
+  background-color: var(--cookie-banner-background);
+  color: var(--cookie-banner-content);
 
   .cookie-banner-actions {
     padding-top: var(--spacing-04);
@@ -398,7 +426,7 @@ footer.site-footer {
 
     .cookie-banner-content a,
     .cookie-banner-actions .btn-link {
-      color: var(--link-ui);
+      color: var(--cookie-banner-link);
     }
   }
 }
