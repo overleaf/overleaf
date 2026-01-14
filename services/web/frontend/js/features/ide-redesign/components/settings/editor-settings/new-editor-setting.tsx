@@ -5,8 +5,10 @@ import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-
 import { useCallback } from 'react'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
+import getMeta from '@/utils/meta'
 
 export default function NewEditorSetting() {
+  const { isOverleaf } = getMeta('ol-ExposedSettings')
   const { t } = useTranslation()
   const { setEditorRedesignStatus } = useSwitchEnableNewEditorState()
   const { setLeftMenuShown } = useLayoutContext()
@@ -25,13 +27,15 @@ export default function NewEditorSetting() {
       description={
         <>
           <div>{t('the_new_overleaf_editor_info')}</div>
-          <a
-            href="https://forms.gle/3tPYhXcBVGmUB2HXA"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {t('share_feedback_on_the_new_editor')}
-          </a>
+          {isOverleaf && (
+            <a
+              href="https://forms.gle/3tPYhXcBVGmUB2HXA"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t('share_feedback_on_the_new_editor')}
+            </a>
+          )}
         </>
       }
       checked={enabled}

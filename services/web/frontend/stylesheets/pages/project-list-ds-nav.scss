@@ -153,8 +153,8 @@ body {
       }
 
       .survey-notification {
-        background-color: var(--bg-light-secondary);
-        color: var(--content-secondary);
+        background-color: var(--bg-secondary-themed);
+        color: var(--content-secondary-themed);
         box-shadow: none;
         border-radius: var(--border-radius-large);
         position: relative;
@@ -167,6 +167,12 @@ body {
           top: var(--spacing-07);
           right: var(--spacing-07);
           color: inherit;
+        }
+
+        .notification-body {
+          .btn {
+            @include ol-button-themed('secondary');
+          }
         }
 
         p {
@@ -281,7 +287,7 @@ body {
 
       > * {
         @include media-breakpoint-up(md) {
-          border-left: 1px solid var(--border-divider);
+          border-left: 1px solid var(--border-divider-themed);
         }
       }
 
@@ -299,7 +305,6 @@ body {
 
       .cookie-banner {
         position: static;
-        background-color: var(--bg-light-primary);
 
         // Remove the parts of the shadow that stick out of the sides
         clip-path: inset(-13px 0 0 0);

@@ -35,6 +35,7 @@ function _canHaveNoInitiatorId(operation, info) {
 // events that are visible to managed user admins in Group Audit Logs view
 const MANAGED_GROUP_USER_EVENTS = [
   'login',
+  'logout',
   'reset-password',
   'update-password',
   'link-dropbox',

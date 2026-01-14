@@ -26,6 +26,7 @@ import RestoreManager from './RestoreManager.mjs'
 import { prepareZipAttachment } from '../../infrastructure/Response.mjs'
 import Features from '../../infrastructure/Features.mjs'
 import { z, zz, validateReq } from '../../infrastructure/Validation.mjs'
+import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 
 // Number of seconds after which the browser should send a request to revalidate
 // blobs
@@ -192,6 +193,19 @@ async function restoreFileFromV2(req, res, next) {
     pathname
   )
 
+  ProjectAuditLogHandler.addEntryIfManagedInBackground(
+    projectId,
+    'project-history-version-restored',
+    userId,
+    req.ip,
+    {
+      version,
+      scope: 'file',
+      pathname,
+      restoredEntityId: entity._id,
+    }
+  )
+
   res.json({
     type: entity.type,
     id: entity._id,
@@ -211,6 +225,19 @@ async function revertFile(req, res, next) {
     {}
   )
 
+  ProjectAuditLogHandler.addEntryIfManagedInBackground(
+    projectId,
+    'project-history-version-restored',
+    userId,
+    req.ip,
+    {
+      version,
+      scope: 'file',
+      pathname,
+      restoredEntityId: entity._id,
+    }
+  )
+
   res.json({
     type: entity.type,
     id: entity._id,
@@ -226,6 +253,18 @@ async function revertProject(req, res, next) {
     userId,
     projectId,
     version
+  )
+
+  ProjectAuditLogHandler.addEntryIfManagedInBackground(
+    projectId,
+    'project-history-version-restored',
+    userId,
+    req.ip,
+    {
+      version,
+      scope: 'project',
+      restoredEntities: reverted,
+    }
   )
 
   res.json(reverted)
@@ -346,6 +385,7 @@ async function deleteLabel(req, res, next) {
 
 async function downloadZipOfVersion(req, res, next) {
   const { project_id: projectId, version } = req.params
+  const userId = SessionManager.getLoggedInUserId(req.session)
 
   const project = await ProjectDetailsHandler.promises.getDetails(projectId)
   const v1Id =
@@ -365,6 +405,17 @@ async function downloadZipOfVersion(req, res, next) {
     `${project.name} (Version ${version})`,
     req,
     res
+  )
+
+  ProjectAuditLogHandler.addEntryIfManagedInBackground(
+    projectId,
+    'project-history-version-downloaded',
+    userId,
+    req.ip,
+    {
+      version,
+      projectName: project.name,
+    }
   )
 }
 
