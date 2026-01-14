@@ -8,7 +8,7 @@ import UserSessionsManager from '../User/UserSessionsManager.mjs'
 import OError from '@overleaf/o-error'
 import EmailsHelper from '../Helpers/EmailHelper.mjs'
 import { expressify } from '@overleaf/promise-utils'
-import { z, validateReq } from '../../infrastructure/Validation.mjs'
+import { z, parseReq } from '../../infrastructure/Validation.mjs'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 
 const setNewUserPasswordSchema = z.object({
@@ -21,7 +21,7 @@ const setNewUserPasswordSchema = z.object({
 
 async function setNewUserPassword(req, res, next) {
   let user
-  const { body } = validateReq(req, setNewUserPasswordSchema)
+  const { body } = parseReq(req, setNewUserPasswordSchema)
   let { passwordResetToken, password, email } = body
   if (!passwordResetToken || !password) {
     return res.status(400).json({
@@ -120,7 +120,7 @@ const requestResetSchema = z.object({
 })
 
 async function requestReset(req, res, next) {
-  const { body } = validateReq(req, requestResetSchema)
+  const { body } = parseReq(req, requestResetSchema)
   const email = EmailsHelper.parseEmail(body.email)
   if (!email) {
     return res.status(400).json({
@@ -173,7 +173,7 @@ const renderSetPasswordFormSchema = z.object({
 })
 
 async function renderSetPasswordForm(req, res, next) {
-  const { query } = validateReq(req, renderSetPasswordFormSchema)
+  const { query } = parseReq(req, renderSetPasswordFormSchema)
 
   if (query.passwordResetToken != null) {
     try {
@@ -244,7 +244,7 @@ const renderRequestResetFormSchema = z.object({
 })
 
 async function renderRequestResetForm(req, res) {
-  const { query } = validateReq(req, renderRequestResetFormSchema)
+  const { query } = parseReq(req, renderRequestResetFormSchema)
   const errorQuery = query.error
   let error = null
   if (errorQuery === 'token_expired') {

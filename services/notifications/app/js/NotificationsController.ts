@@ -2,7 +2,7 @@ import logger from '@overleaf/logger'
 import metrics from '@overleaf/metrics'
 import Notifications from './Notifications.js'
 import { expressify } from '@overleaf/promise-utils'
-import { validateReq, z, zz } from '@overleaf/validation-tools'
+import { parseReq, z, zz } from '@overleaf/validation-tools'
 import type { Request, Response } from 'express'
 
 const getUserNotificationsSchema = z.object({
@@ -12,7 +12,7 @@ const getUserNotificationsSchema = z.object({
 })
 
 async function getUserNotifications(req: Request, res: Response) {
-  const { params } = validateReq(req, getUserNotificationsSchema)
+  const { params } = parseReq(req, getUserNotificationsSchema)
   logger.debug({ userId: params.user_id }, 'getting user unread notifications')
   metrics.inc('getUserNotifications')
   const notifications = await Notifications.getUserNotifications(params.user_id)
@@ -27,7 +27,7 @@ const addNotificationSchema = z.object({
 })
 
 async function addNotification(req: Request, res: Response) {
-  const { params, body } = validateReq(req, addNotificationSchema)
+  const { params, body } = parseReq(req, addNotificationSchema)
   logger.debug(
     { userId: params.user_id, notification: body },
     'adding notification'
@@ -49,7 +49,7 @@ const removeNotificationIdSchema = z.object({
 })
 
 async function removeNotificationId(req: Request, res: Response) {
-  const { params } = validateReq(req, removeNotificationIdSchema)
+  const { params } = parseReq(req, removeNotificationIdSchema)
   logger.debug(
     {
       userId: req.params.user_id,
@@ -75,7 +75,7 @@ const removeNotificationKeySchema = z.object({
 })
 
 async function removeNotificationKey(req: Request, res: Response) {
-  const { params, body } = validateReq(req, removeNotificationKeySchema)
+  const { params, body } = parseReq(req, removeNotificationKeySchema)
   logger.debug(
     { userId: req.params.user_id, notificationKey: body.key },
     'mark key notification as read'
@@ -93,7 +93,7 @@ const removeNotificationByKeyOnlySchema = z.object({
 })
 
 async function removeNotificationByKeyOnly(req: Request, res: Response) {
-  const { params } = validateReq(req, removeNotificationByKeyOnlySchema)
+  const { params } = parseReq(req, removeNotificationByKeyOnlySchema)
   const notificationKey = params.key
   logger.debug({ notificationKey }, 'mark notification as read by key only')
   metrics.inc('removeNotificationKey')
@@ -108,7 +108,7 @@ const countNotificationsByKeyOnlySchema = z.object({
 })
 
 async function countNotificationsByKeyOnly(req: Request, res: Response) {
-  const { params } = validateReq(req, countNotificationsByKeyOnlySchema)
+  const { params } = parseReq(req, countNotificationsByKeyOnlySchema)
   const notificationKey = params.key
   try {
     const count =
@@ -130,10 +130,7 @@ async function deleteUnreadNotificationsByKeyOnlyBulk(
   req: Request,
   res: Response
 ) {
-  const { params } = validateReq(
-    req,
-    deleteUnreadNotificationsByKeyOnlyBulkSchema
-  )
+  const { params } = parseReq(req, deleteUnreadNotificationsByKeyOnlyBulkSchema)
   const notificationKey = params.key
   try {
     const count =

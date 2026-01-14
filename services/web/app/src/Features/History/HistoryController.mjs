@@ -25,7 +25,7 @@ import ProjectEntityUpdateHandler from '../Project/ProjectEntityUpdateHandler.mj
 import RestoreManager from './RestoreManager.mjs'
 import { prepareZipAttachment } from '../../infrastructure/Response.mjs'
 import Features from '../../infrastructure/Features.mjs'
-import { z, zz, validateReq } from '../../infrastructure/Validation.mjs'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 
 // Number of seconds after which the browser should send a request to revalidate
@@ -57,7 +57,7 @@ const requestBlobSchema = z.object({
 })
 
 async function requestBlob(method, req, res) {
-  const { params } = validateReq(req, requestBlobSchema)
+  const { params } = parseReq(req, requestBlobSchema)
   const { project_id: projectId, hash } = params
 
   // Handle conditional GET request
@@ -535,7 +535,7 @@ const getLatestHistorySchema = z.object({
 })
 
 async function getLatestHistory(req, res, next) {
-  const { params } = validateReq(req, getLatestHistorySchema)
+  const { params } = parseReq(req, getLatestHistorySchema)
   const projectId = params.project_id
   const history = await HistoryManager.promises.getLatestHistory(projectId)
   res.json(history)
@@ -552,7 +552,7 @@ const getChangesSchema = z.object({
 })
 
 async function getChanges(req, res, next) {
-  const { params, query } = validateReq(req, getChangesSchema)
+  const { params, query } = parseReq(req, getChangesSchema)
   const projectId = params.project_id
   let since = query.since
   // TODO: Transition flag; remove after a while

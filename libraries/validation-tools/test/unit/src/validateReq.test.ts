@@ -1,10 +1,10 @@
-import { validateReq } from '../../../validateReq'
+import { parseReq } from '../../../parseReq'
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 import type { Request } from 'express'
 import { zz } from '../../../zodHelpers'
 
-describe('validateReq', () => {
+describe('parseReq', () => {
   describe('with a request that is valid for the schema', () => {
     it('should return the parsed request', () => {
       const req = {
@@ -25,7 +25,7 @@ describe('validateReq', () => {
         }),
       })
 
-      const result = validateReq(req, schema)
+      const result = parseReq(req, schema)
 
       expect(result).toEqual({
         params: {
@@ -46,7 +46,7 @@ describe('validateReq', () => {
       } as Request<{ id: string }>
 
       expect(() =>
-        validateReq(
+        parseReq(
           req,
           z.object({
             params: z.object({
@@ -65,7 +65,7 @@ describe('validateReq', () => {
       } as Request
 
       expect(() =>
-        validateReq(
+        parseReq(
           req,
           z.object({
             body: z.object({

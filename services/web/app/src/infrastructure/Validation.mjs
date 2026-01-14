@@ -3,7 +3,7 @@
 import { NotFoundError } from '../Features/Errors/Errors.js'
 
 import {
-  validateReq as validateReqBase,
+  parseReq as parseReqBase,
   z,
   zz,
   ParamsError,
@@ -11,9 +11,9 @@ import {
 
 export { z, zz } from '@overleaf/validation-tools'
 
-export const validateReq = (req, schema) => {
+export const parseReq = (req, schema) => {
   try {
-    return validateReqBase(req, schema)
+    return parseReqBase(req, schema)
   } catch (err) {
     if (err instanceof ParamsError) {
       // convert into a NotFoundError that web understands
@@ -24,7 +24,7 @@ export const validateReq = (req, schema) => {
 }
 
 export default {
-  validateReq,
+  parseReq,
   z,
   zz,
 }

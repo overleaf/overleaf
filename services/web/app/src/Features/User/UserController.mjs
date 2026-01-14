@@ -8,7 +8,7 @@ import metrics from '@overleaf/metrics'
 import AuthenticationManager from '../Authentication/AuthenticationManager.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
 import Features from '../../infrastructure/Features.mjs'
-import { z, validateReq } from '../../infrastructure/Validation.mjs'
+import { z, parseReq } from '../../infrastructure/Validation.mjs'
 import UserAuditLogHandler from './UserAuditLogHandler.mjs'
 import UserSessionsManager from './UserSessionsManager.mjs'
 import UserUpdater from './UserUpdater.mjs'
@@ -340,7 +340,7 @@ const updateUserSettingsSchema = z.object({
 })
 
 async function updateUserSettings(req, res, next) {
-  const { body } = validateReq(req, updateUserSettingsSchema)
+  const { body } = parseReq(req, updateUserSettingsSchema)
   const userId = SessionManager.getLoggedInUserId(req.session)
   req.logger.addFields({ userId })
 

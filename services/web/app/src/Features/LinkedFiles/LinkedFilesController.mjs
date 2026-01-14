@@ -22,7 +22,7 @@ import {
 } from '../Errors/Errors.js'
 import Modules from '../../infrastructure/Modules.mjs'
 import { plainTextResponse } from '../../infrastructure/Response.mjs'
-import { z, zz, validateReq } from '../../infrastructure/Validation.mjs'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import ProjectOutputFileAgent from './ProjectOutputFileAgent.mjs'
@@ -60,7 +60,7 @@ const createLinkedFileSchema = z.object({
 })
 
 async function createLinkedFile(req, res, next) {
-  const { params, body } = validateReq(req, createLinkedFileSchema)
+  const { params, body } = parseReq(req, createLinkedFileSchema)
   const { project_id: projectId } = params
   const { name, provider, data, parent_folder_id: parentFolderId } = body
   const userId = SessionManager.getLoggedInUserId(req.session)

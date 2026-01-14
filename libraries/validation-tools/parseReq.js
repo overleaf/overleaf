@@ -12,14 +12,14 @@ const { ParamsError } = require('./Errors')
  */
 
 /**
- * Validate a request against a zod schema
+ * Parse and validate a request against a Zod schema
  *
  * @template {ZodType} T
  * @param {Request} req - The Express request object
  * @param {T} schema - The Zod schema to validate against
  * @returns {output<T>} The validated request object
  */
-function validateReq(req, schema) {
+function parseReq(req, schema) {
   const parsed = schema.safeParse(req)
   if (parsed.success) {
     return parsed.data
@@ -31,4 +31,4 @@ function validateReq(req, schema) {
   }
 }
 
-module.exports = { validateReq }
+module.exports = { parseReq }

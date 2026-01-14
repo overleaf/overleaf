@@ -9,7 +9,7 @@ const { promisify } = require('node:util')
 const config = require('config')
 const OError = require('@overleaf/o-error')
 const { expressify } = require('@overleaf/promise-utils')
-const { validateReq } = require('@overleaf/validation-tools')
+const { parseReq } = require('@overleaf/validation-tools')
 
 const logger = require('@overleaf/logger')
 const { Chunk, ChunkResponse, Blob } = require('overleaf-editor-core')
@@ -35,7 +35,7 @@ const { getChunkMetadataForVersion } = require('../../storage/lib/chunk_store')
 const pipeline = promisify(Stream.pipeline)
 
 async function initializeProject(req, res, next) {
-  const { body } = validateReq(req, schemas.initializeProject)
+  const { body } = parseReq(req, schemas.initializeProject)
   let projectId = body?.projectId
   try {
     projectId = await chunkStore.initializeProject(projectId)
@@ -51,7 +51,7 @@ async function initializeProject(req, res, next) {
 }
 
 async function getLatestContent(req, res, next) {
-  const { params } = validateReq(req, schemas.getLatestContent)
+  const { params } = parseReq(req, schemas.getLatestContent)
   const projectId = params.project_id
   const blobStore = new BlobStore(projectId)
   const chunk = await chunkStore.loadLatest(projectId)
@@ -62,7 +62,7 @@ async function getLatestContent(req, res, next) {
 }
 
 async function getContentAtVersion(req, res, next) {
-  const { params } = validateReq(req, schemas.getContentAtVersion)
+  const { params } = parseReq(req, schemas.getContentAtVersion)
   const projectId = params.project_id
   const version = params.version
   const blobStore = new BlobStore(projectId)
@@ -72,7 +72,7 @@ async function getContentAtVersion(req, res, next) {
 }
 
 async function getLatestHashedContent(req, res, next) {
-  const { params } = validateReq(req, schemas.getLatestHashedContent)
+  const { params } = parseReq(req, schemas.getLatestHashedContent)
   const projectId = params.project_id
   const blobStore = new HashCheckBlobStore(new BlobStore(projectId))
   const chunk = await chunkStore.loadLatest(projectId)
@@ -84,7 +84,7 @@ async function getLatestHashedContent(req, res, next) {
 }
 
 async function getLatestHistory(req, res, next) {
-  const { params } = validateReq(req, schemas.getLatestHistory)
+  const { params } = parseReq(req, schemas.getLatestHistory)
   const projectId = params.project_id
   try {
     const chunk = await chunkStore.loadLatest(projectId)
@@ -100,7 +100,7 @@ async function getLatestHistory(req, res, next) {
 }
 
 async function getLatestHistoryRaw(req, res, next) {
-  const { params, query } = validateReq(req, schemas.getLatestHistoryRaw)
+  const { params, query } = parseReq(req, schemas.getLatestHistoryRaw)
   const projectId = params.project_id
   const readOnly = query.readOnly
   try {
@@ -121,7 +121,7 @@ async function getLatestHistoryRaw(req, res, next) {
 }
 
 async function getHistory(req, res, next) {
-  const { params } = validateReq(req, schemas.getHistory)
+  const { params } = parseReq(req, schemas.getHistory)
   const projectId = params.project_id
   const version = params.version
   try {
@@ -138,7 +138,7 @@ async function getHistory(req, res, next) {
 }
 
 async function getHistoryBefore(req, res, next) {
-  const { params } = validateReq(req, schemas.getHistoryBefore)
+  const { params } = parseReq(req, schemas.getHistoryBefore)
   const projectId = params.project_id
   const timestamp = params.timestamp
   try {
@@ -158,7 +158,7 @@ async function getHistoryBefore(req, res, next) {
  * Get all changes since the beginning of history or since a given version
  */
 async function getChanges(req, res, next) {
-  const { params, query } = validateReq(req, schemas.getChanges)
+  const { params, query } = parseReq(req, schemas.getChanges)
   const projectId = params.project_id
   const sinceParam = query.since
   const since = sinceParam == null ? 0 : sinceParam
@@ -187,7 +187,7 @@ async function getChanges(req, res, next) {
 }
 
 async function getZip(req, res, next) {
-  const { params } = validateReq(req, schemas.getZip)
+  const { params } = parseReq(req, schemas.getZip)
   const projectId = params.project_id
   const version = params.version
   const blobStore = new BlobStore(projectId)
@@ -215,7 +215,7 @@ async function getZip(req, res, next) {
 }
 
 async function createZip(req, res, next) {
-  const { params } = validateReq(req, schemas.createZip)
+  const { params } = parseReq(req, schemas.createZip)
   const projectId = params.project_id
   const version = params.version
   try {
@@ -236,7 +236,7 @@ async function createZip(req, res, next) {
 }
 
 async function deleteProject(req, res, next) {
-  const { params } = validateReq(req, schemas.deleteProject)
+  const { params } = parseReq(req, schemas.deleteProject)
   const projectId = params.project_id
   const blobStore = new BlobStore(projectId)
 
@@ -249,7 +249,7 @@ async function deleteProject(req, res, next) {
 }
 
 async function createProjectBlob(req, res, next) {
-  const { params } = validateReq(req, schemas.createProjectBlob)
+  const { params } = parseReq(req, schemas.createProjectBlob)
   const projectId = params.project_id
   const expectedHash = params.hash
   const maxUploadSize = parseInt(config.get('maxFileUploadSize'), 10)
@@ -287,7 +287,7 @@ async function createProjectBlob(req, res, next) {
 }
 
 async function headProjectBlob(req, res) {
-  const { params } = validateReq(req, schemas.headProjectBlob)
+  const { params } = parseReq(req, schemas.headProjectBlob)
   const projectId = params.project_id
   const hash = params.hash
 
@@ -320,7 +320,7 @@ function _getRangeOpts(header) {
 }
 
 async function getProjectBlob(req, res, next) {
-  const { params, headers } = validateReq(req, schemas.getProjectBlob)
+  const { params, headers } = parseReq(req, schemas.getProjectBlob)
   const projectId = params.project_id
   const hash = params.hash
   const rangeHeader = headers.range || ''
@@ -385,7 +385,7 @@ async function getProjectBlob(req, res, next) {
 }
 
 async function copyProjectBlob(req, res, next) {
-  const { params, query } = validateReq(req, schemas.copyProjectBlob)
+  const { params, query } = parseReq(req, schemas.copyProjectBlob)
   const sourceProjectId = query.copyFrom
   const targetProjectId = params.project_id
   const blobHash = params.hash
@@ -450,7 +450,7 @@ function sumUpByteLength(blobs) {
 }
 
 async function getBlobStats(req, res) {
-  const { params, body } = validateReq(req, schemas.getBlobStats)
+  const { params, body } = parseReq(req, schemas.getBlobStats)
   const projectId = params.project_id
   const blobHashes = body.blobHashes || []
   for (const hash of blobHashes) {
@@ -475,7 +475,7 @@ async function getBlobStats(req, res) {
 }
 
 async function getProjectBlobsStats(req, res) {
-  const { body } = validateReq(req, schemas.getProjectBlobsStats)
+  const { body } = parseReq(req, schemas.getProjectBlobsStats)
   const projectIds = body.projectIds
   const { blobs } = await getProjectBlobsBatch(
     projectIds.map(id => {

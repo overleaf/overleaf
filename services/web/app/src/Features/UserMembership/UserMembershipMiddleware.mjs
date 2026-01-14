@@ -10,7 +10,7 @@ import EntityConfigs from './UserMembershipEntityConfigs.mjs'
 import Errors from '../Errors/Errors.js'
 import HttpErrorHandler from '../Errors/HttpErrorHandler.mjs'
 import TemplatesManager from '../Templates/TemplatesManager.mjs'
-import { z, zz, validateReq } from '../../infrastructure/Validation.mjs'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
 
 const { useAdminCapabilities } = AdminAuthorizationHelper
@@ -283,7 +283,7 @@ const fetchEntitySchema = z.discriminatedUnion('entityName', [
 // fetch the entity with id and config, and set it in the request
 function fetchEntity() {
   return expressify(async (req, res, next) => {
-    const { params } = validateReq(req, fetchEntitySchema)
+    const { params } = parseReq(req, fetchEntitySchema)
     req.entity =
       await UserMembershipHandler.promises.getEntityWithoutAuthorizationCheck(
         params.id,
