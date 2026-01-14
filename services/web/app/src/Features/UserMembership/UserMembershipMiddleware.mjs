@@ -2,7 +2,6 @@
 
 import { expressify } from '@overleaf/promise-utils'
 
-import async from 'async'
 import UserMembershipAuthorization from './UserMembershipAuthorization.mjs'
 import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import UserMembershipHandler from './UserMembershipHandler.mjs'
@@ -208,32 +207,7 @@ const UserMembershipMiddleware = {
     ]),
   ],
 
-  // graphs access is an edge-case:
-  // - the entity id is in `req.query.resource_id`. It must be set as
-  // `req.params.id`
-  // - the entity name is in `req.query.resource_type` and is used to find the
-  // require middleware depending on the entity name
-  requireGraphAccess(req, res, next) {
-    req.params.id = req.query.resource_id
-    let entityName = req.query.resource_type
-    if (!entityName) {
-      return HttpErrorHandler.notFound(req, res, 'resource_type param missing')
-    }
-    entityName = entityName.charAt(0).toUpperCase() + entityName.slice(1)
-
-    const middleware =
-      UserMembershipMiddleware[`require${entityName}MetricsAccess`]
-    if (!middleware) {
-      return HttpErrorHandler.notFound(
-        req,
-        res,
-        `incorrect entity name: ${entityName}`
-      )
-    }
-    // run the list of middleware functions in series. This is essencially
-    // a poor man's middleware runner
-    async.eachSeries(middleware, (fn, callback) => fn(req, res, callback), next)
-  },
+  requireGraphAccess,
 }
 
 export default UserMembershipMiddleware
@@ -279,6 +253,36 @@ const fetchEntitySchema = z.discriminatedUnion('entityName', [
   ObjectIdEntitySchema,
   PostgresIdEntitySchema,
 ])
+
+// graphs access is an edge-case:
+// - the entity id is in `req.query.resource_id`. It must be set as
+// `req.params.id`
+// - the entity name is in `req.query.resource_type` and is used to find the
+// require middleware depending on the entity name
+function requireGraphAccess(req, res, next) {
+  const entityName = req.query.resource_type
+  if (!entityName) {
+    return HttpErrorHandler.notFound(req, res, 'resource_type param missing')
+  }
+  const middleWareName =
+    entityName.charAt(0).toUpperCase() + entityName.slice(1)
+
+  const middlewares =
+    UserMembershipMiddleware[`require${middleWareName}MetricsAccess`]
+  if (!middlewares) {
+    return HttpErrorHandler.notFound(
+      req,
+      res,
+      `incorrect entity name: ${middleWareName}`
+    )
+  }
+
+  // call next router with fixed params to pass it to the correct middleware chain
+  const { graph } = req.params
+  const entityRoute = entityName === 'splitTest' ? 'split-test' : entityName
+  req.url = `/graphs/${entityRoute}/${graph}/${req.query.resource_id}`
+  next('route')
+}
 
 // fetch the entity with id and config, and set it in the request
 function fetchEntity() {
