@@ -7,7 +7,23 @@ function enableControls(videoEl, reason) {
   videoEl.setAttribute('controls', '')
 }
 
+function isIOS() {
+  if (typeof navigator === 'undefined') {
+    return false
+  }
+  // Detects iPhone/iPod and iPad in mobile mode
+  // Note: Modern iPad in desktop mode reports as Mac in UA and is intentionally not detected
+  // to allow autoplay if the browser permits it
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)
+}
+
 function setup(videoEl) {
+  // iOS has strict autoplay policies - always show controls first
+  if (isIOS()) {
+    enableControls(videoEl, 'iOS devices')
+    return
+  }
+
   const reducedMotionReduce = window.matchMedia(
     '(prefers-reduced-motion: reduce)'
   )
@@ -46,12 +62,23 @@ function setup(videoEl) {
     }
   }
 
+  function attemptPlay() {
+    if (!videoIsVisible || hasHandledAutoplayFailure) {
+      return
+    }
+    if (videoEl.readyState >= videoEl.HAVE_FUTURE_DATA) {
+      videoEl.play().catch(handleAutoplayFailure)
+    }
+  }
+
+  // Retry play when video has enough data
+  videoEl.addEventListener('canplay', attemptPlay, { once: true })
+  videoEl.addEventListener('loadeddata', attemptPlay, { once: true })
+
   videoEl.addEventListener('ended', () => {
     setTimeout(() => {
       videoEl.currentTime = 0
-      if (videoIsVisible && !hasHandledAutoplayFailure) {
-        videoEl.play().catch(handleAutoplayFailure)
-      }
+      attemptPlay()
     }, DELAY_BEFORE_REPLAY)
   })
 
@@ -60,12 +87,7 @@ function setup(videoEl) {
       for (const change of changes) {
         if (change.isIntersecting) {
           videoIsVisible = true
-          if (
-            !hasHandledAutoplayFailure &&
-            videoEl.readyState >= videoEl.HAVE_FUTURE_DATA
-          ) {
-            videoEl.play().catch(handleAutoplayFailure)
-          }
+          attemptPlay()
         } else {
           videoIsVisible = false
           // Pause video when it leaves viewport to save resources
