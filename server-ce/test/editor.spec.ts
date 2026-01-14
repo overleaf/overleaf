@@ -310,6 +310,22 @@ describe('editor', function () {
       cy.get('.cm-editor').should('be.visible')
     })
   })
+
+  describe('full project search', function () {
+    it('can search for text in project files', function () {
+      cy.get('button').contains('Search').click({ force: true })
+      cy.findByRole('searchbox', { name: 'Search' })
+        .should('be.visible')
+        .type('Some examples to get started')
+      cy.get('button').contains('Search').click()
+
+      cy.findByRole('listbox').within(() => {
+        cy.findByRole('option', {
+          name: /Some examples to get started/,
+        }).should('be.visible')
+      })
+    })
+  })
 })
 
 function createRandomLetterString() {

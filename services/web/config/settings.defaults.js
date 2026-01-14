@@ -1039,7 +1039,12 @@ module.exports = {
         '../modules/full-project-search/frontend/js/components/full-project-search-button.tsx'
       ),
     ],
-    fullProjectSearchPanel: [],
+    fullProjectSearchPanel: [
+      Path.resolve(
+        __dirname,
+        '../modules/full-project-search/frontend/js/components/full-project-search.tsx'
+      ),
+    ],
     integrationPanelComponents: [],
     referenceSearchSetting: [],
     errorLogsComponents: [],
