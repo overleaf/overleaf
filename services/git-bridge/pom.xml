@@ -19,25 +19,36 @@
         <jetty.version>12.1.5</jetty.version>
         <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
         <gson.version>2.13.2</gson.version>
-        <async.http.client.version>3.0.3</async.http.client.version>
+        <async.http.client.version>3.0.6</async.http.client.version>
         <jgit.version>7.5.0.202512021534-r</jgit.version>
         <sqlite.jdbc.version>3.41.2.2</sqlite.jdbc.version>
         <joda.time.version>2.9.9</joda.time.version>
         <google.oauth.client.version>1.39.0</google.oauth.client.version>
         <google.http.client.version>1.23.0</google.http.client.version>
-        <commons.lang3.version>3.19.0</commons.lang3.version>
-        <logback.classic.version>1.5.20</logback.classic.version>
+        <commons.lang3.version>3.20.0</commons.lang3.version>
+        <logback.classic.version>1.5.24</logback.classic.version>
         <mockserver.version>5.15.0</mockserver.version>
         <mockito.version>5.20.0</mockito.version>
-        <aws.java.sdk.version>2.36.2</aws.java.sdk.version>
+        <aws.java.sdk.version>2.41.7</aws.java.sdk.version>
         <jakarta.xml.bind.api.version>${jaxb.runtime.version}</jakarta.xml.bind.api.version>
         <jaxb.runtime.version>2.3.2</jaxb.runtime.version>
         <httpclient.version>4.5.14</httpclient.version>
-        <commons.io.version>2.20.0</commons.io.version>
+        <commons.io.version>2.21.0</commons.io.version>
         <commons.compress.version>1.28.0</commons.compress.version>
         <simpleclient.version>0.10.0</simpleclient.version>
-        <bouncycastle.crypto.version>1.82</bouncycastle.crypto.version>
+        <bouncycastle.crypto.version>1.83</bouncycastle.crypto.version>
+        <netty.version>4.1.130.Final</netty.version>
     </properties>
+    <dependencyManagement>
+        <dependencies>
+            <!-- Override vulnerable netty version from mockserver-netty -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-http2</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <build>
         <plugins>
             <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
