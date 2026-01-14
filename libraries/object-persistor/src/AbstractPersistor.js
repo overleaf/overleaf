@@ -194,4 +194,17 @@ module.exports = class AbstractPersistor {
       prefix,
     })
   }
+
+  /**
+   * @param {string} location
+   * @param {string} name
+   * @return {Promise<{lastModified: Date, size: number}>}
+   */
+  async getObjectMetadata(location, name) {
+    throw new NotImplementedError('method not implemented in persistor', {
+      method: 'getObjectMetadata',
+      location,
+      name,
+    })
+  }
 }

@@ -75,5 +75,12 @@ export default {
       }),
       EditorHttpController.joinProject
     )
+
+    // Called by the real-time API when a client leaves a project
+    privateApiRouter.post(
+      '/project/:Project_id/leave',
+      AuthenticationController.requirePrivateApiAuth(),
+      EditorHttpController.leaveProject
+    )
   },
 }

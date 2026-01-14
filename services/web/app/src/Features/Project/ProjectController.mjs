@@ -48,6 +48,7 @@ import UserUpdater from '../User/UserUpdater.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
 import { z, zz, validateReq } from '../../infrastructure/Validation.mjs'
 import UserGetter from '../User/UserGetter.mjs'
+import ProjectWebDAVSync from './ProjectWebDAVSync.mjs'
 import { isStandaloneAiAddOnPlanCode } from '../Subscription/AiHelper.mjs'
 import SubscriptionController from '../Subscription/SubscriptionController.mjs'
 import { formatCurrency } from '../../util/currency.js'
@@ -85,6 +86,25 @@ const updateProjectSettingsSchema = z.object({
     name: z.string().optional(),
     rootDocId: zz.objectId().optional(),
     spellCheckLanguage: z.string().optional(),
+  }),
+})
+
+const webdavConfigSchema = z.object({
+  url: z.string().url().max(500),
+  basePath: z.string().max(200).default('/overleaf'),
+  // Credential flags - indicate if username/password should be used
+  useUsername: z.boolean().optional().default(false),
+  usePassword: z.boolean().optional().default(false),
+  username: z.string().max(200).optional().default(''),
+  password: z.string().max(200).optional().default(''),
+})
+
+const linkWebDAVSchema = z.object({
+  params: z.object({
+    Project_id: zz.coercedObjectId(),
+  }),
+  body: z.object({
+    webdavConfig: webdavConfigSchema,
   }),
 })
 
@@ -310,7 +330,7 @@ const _ProjectController = {
     } = currentUser
     const projectName =
       req.body.projectName != null ? req.body.projectName.trim() : undefined
-    const { template } = req.body
+    const { template, webdavConfig } = req.body
 
     const project = await (template === 'example'
       ? ProjectCreationHandler.promises.createExampleProject(
@@ -318,6 +338,15 @@ const _ProjectController = {
           projectName
         )
       : ProjectCreationHandler.promises.createBasicProject(userId, projectName))
+
+    // If webdavConfig is provided, validate and update the project
+    if (webdavConfig && webdavConfig.url) {
+      const validatedConfig = webdavConfigSchema.parse(webdavConfig)
+      await ProjectUpdateHandler.promises.setWebDAVConfig(
+        project._id,
+        validatedConfig
+      )
+    }
 
     ProjectAuditLogHandler.addEntryIfManagedInBackground(
       project._id,
@@ -343,6 +372,87 @@ const _ProjectController = {
     const newName = req.body.newProjectName
     await EditorController.promises.renameProject(projectId, newName)
     res.sendStatus(200)
+  },
+
+  async linkWebDAV(req, res, next) {
+    const { params, body } = validateReq(req, linkWebDAVSchema)
+    const projectId = params.Project_id
+    const { webdavConfig } = body
+    const userId = SessionManager.getLoggedInUserId(req.session)
+
+    try {
+      await ProjectUpdateHandler.promises.setWebDAVConfig(
+        projectId,
+        webdavConfig
+      )
+    } catch (err) {
+      if (err.info?.public?.message) {
+        return res.status(400).json({ message: err.info.public.message })
+      }
+      return next(err)
+    }
+
+    ProjectAuditLogHandler.addEntryIfManagedInBackground(
+      projectId,
+      'webdav-linked',
+      userId,
+      req.ip
+    )
+
+    // Trigger initial full sync in the background
+    ProjectWebDAVSync.syncAllProjectFiles(projectId).catch(err => {
+      logger.warn({ err, projectId }, 'Background WebDAV sync failed')
+    })
+
+    res.sendStatus(200)
+  },
+
+  async unlinkWebDAV(req, res) {
+    const projectId = req.params.Project_id
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    const deleteRemoteContent = req.body?.deleteRemoteContent || false
+
+    // If user wants to delete remote content, do it before unlinking
+    if (deleteRemoteContent) {
+      try {
+        await ProjectWebDAVSync.deleteAllFromWebDAV(projectId)
+      } catch (err) {
+        logger.warn({ err, projectId }, 'Failed to delete remote content during unlink')
+        // Continue with unlink even if delete fails
+      }
+    }
+
+    await ProjectUpdateHandler.promises.unsetWebDAVConfig(projectId)
+
+    ProjectAuditLogHandler.addEntryIfManagedInBackground(
+      projectId,
+      'webdav-unlinked',
+      userId,
+      req.ip
+    )
+
+    res.sendStatus(200)
+  },
+
+  async syncWebDAV(req, res, next) {
+    const projectId = req.params.Project_id
+    const userId = SessionManager.getLoggedInUserId(req.session)
+
+    try {
+      await ProjectWebDAVSync.syncAllProjectFiles(projectId)
+
+      ProjectAuditLogHandler.addEntryIfManagedInBackground(
+        projectId,
+        'webdav-synced',
+        userId,
+        req.ip
+      )
+
+      res.sendStatus(200)
+    } catch (err) {
+      logger.error({ err, projectId }, 'WebDAV sync failed')
+      return res.status(500).json({ message: 'Sync failed' })
+    }
   },
 
   async userProjectsJson(req, res) {
@@ -528,6 +638,7 @@ const _ProjectController = {
           collaberator_refs: 1, // used for link sharing analytics
           pendingEditor_refs: 1, // used for link sharing analytics
           reviewer_refs: 1,
+          webdavConfig: 1, // for WebDAV cloud storage settings
         }),
         userIsMemberOfGroupSubscription: sessionUser
           ? (async () =>
@@ -964,6 +1075,14 @@ const _ProjectController = {
         hasTrackChangesFeature: Features.hasFeature('track-changes'),
         otMigrationStage: project.overleaf?.history?.otMigrationStage ?? 0,
         projectTags,
+        webdavConfig: project.webdavConfig ? {
+          url: project.webdavConfig.url,
+          basePath: project.webdavConfig.basePath,
+          enabled: project.webdavConfig.enabled,
+          // Don't send actual credentials, just indicate if they're configured
+          hasUsername: !!project.webdavConfig.username,
+          hasPassword: !!project.webdavConfig.password,
+        } : null,
         isSaas: Features.hasFeature('saas'),
         shouldLoadHotjar,
         isOverleafAssistBundleEnabled,
@@ -1207,6 +1326,18 @@ const _ProjectController = {
       owner_ref: project.owner_ref,
       isV1Project: false,
     }
+    
+    // Include WebDAV config if available (without password)
+    if (project.webdavConfig && project.webdavConfig.enabled) {
+      model.webdavConfig = {
+        url: project.webdavConfig.url,
+        username: project.webdavConfig.username,
+        basePath: project.webdavConfig.basePath,
+        enabled: project.webdavConfig.enabled,
+        lastSyncDate: project.webdavConfig.lastSyncDate,
+      }
+    }
+    
     if (accessLevel === PrivilegeLevels.READ_ONLY && source === Sources.TOKEN) {
       model.owner_ref = null
       model.lastUpdatedBy = null
@@ -1375,6 +1506,7 @@ const ProjectController = {
   expireDeletedProjectsAfterDuration: expressify(
     _ProjectController.expireDeletedProjectsAfterDuration
   ),
+  linkWebDAV: expressify(_ProjectController.linkWebDAV),
   loadEditor: expressify(_ProjectController.loadEditor),
   newProject: expressify(_ProjectController.newProject),
   projectEntitiesJson: expressify(_ProjectController.projectEntitiesJson),
@@ -1382,6 +1514,8 @@ const ProjectController = {
   restoreProject: expressify(_ProjectController.restoreProject),
   trashProject: expressify(_ProjectController.trashProject),
   unarchiveProject: expressify(_ProjectController.unarchiveProject),
+  unlinkWebDAV: expressify(_ProjectController.unlinkWebDAV),
+  syncWebDAV: expressify(_ProjectController.syncWebDAV),
   untrashProject: expressify(_ProjectController.untrashProject),
   updateProjectAdminSettings: expressify(
     _ProjectController.updateProjectAdminSettings

@@ -23,6 +23,8 @@ import FileWriter from '../../infrastructure/FileWriter.mjs'
 import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
 import { callbackifyMultiResult, callbackify } from '@overleaf/promise-utils'
 import { iterablePaths } from './IterablePath.mjs'
+import ProjectWebDAVAutoSync from './ProjectWebDAVAutoSync.mjs'
+import ProjectWebDAVSync from './ProjectWebDAVSync.mjs'
 
 const LOCK_NAMESPACE = 'sequentialProjectStructureUpdateLock'
 const VALID_ROOT_DOC_EXTENSIONS = Settings.validRootDocExtensions
@@ -379,6 +381,12 @@ const addFile = wrapWithLock({
       { newFiles, newProject: project },
       source
     )
+
+    // Trigger immediate WebDAV sync for binary file changes (runs in background)
+    ProjectWebDAVAutoSync.markPendingSync(projectId, true).catch(() => {
+      // Ignore errors - this is a best-effort background operation
+    })
+
     return { fileRef, folderId, createdBlob }
   },
 })
@@ -827,6 +835,26 @@ const deleteEntity = wrapWithLock(
       subtreeEntityIds,
     })
 
+    // Sync deletion to WebDAV
+    try {
+      if (entityType === 'folder') {
+        // For folders, delete all files in the subtree
+        for (const entry of subtreeListing) {
+          if (entry.type === 'doc' || entry.type === 'file') {
+            await ProjectWebDAVSync.deleteFromWebDAV(projectId, entry.path)
+          }
+        }
+        // Also try to delete the folder itself (some WebDAV servers support this)
+        await ProjectWebDAVSync.deleteFromWebDAV(projectId, path.fileSystem)
+      } else {
+        // For single file/doc, just delete it
+        await ProjectWebDAVSync.deleteFromWebDAV(projectId, path.fileSystem)
+      }
+    } catch (err) {
+      logger.warn({ err, projectId, entityId, entityType, path: path.fileSystem },
+        'Failed to sync entity deletion to WebDAV')
+    }
+
     return entityId
   }
 )
@@ -939,6 +967,17 @@ const moveEntity = wrapWithLock(
       logger.error({ err }, 'error sending tpds update')
     }
 
+    // Sync move to WebDAV
+    try {
+      if (entityType !== 'folder') {
+        await ProjectWebDAVSync.moveOnWebDAV(projectId, startPath, endPath)
+      }
+      // For folders, the files inside will be handled by their individual paths
+    } catch (err) {
+      logger.warn({ err, projectId, startPath, endPath },
+        'Failed to sync entity move to WebDAV')
+    }
+
     return await DocumentUpdaterHandler.promises.updateProjectStructure(
       projectId,
       projectHistoryId,
@@ -998,6 +1037,18 @@ const renameEntity = wrapWithLock(
     } catch (err) {
       logger.error({ err }, 'error sending tpds update')
     }
+
+    // Sync rename to WebDAV (rename is essentially a move)
+    try {
+      if (entityType !== 'folder') {
+        await ProjectWebDAVSync.moveOnWebDAV(projectId, startPath, endPath)
+      }
+      // For folders, the files inside will be handled by their individual paths
+    } catch (err) {
+      logger.warn({ err, projectId, startPath, endPath },
+        'Failed to sync entity rename to WebDAV')
+    }
+
     return await DocumentUpdaterHandler.promises.updateProjectStructure(
       projectId,
       projectHistoryId,
@@ -1408,6 +1459,11 @@ const ProjectEntityUpdateHandler = {
       { oldFiles, newFiles, newProject },
       source
     )
+
+    // Trigger immediate WebDAV sync for binary file replacement (runs in background)
+    ProjectWebDAVAutoSync.markPendingSync(projectId, true).catch(() => {
+      // Ignore errors - this is a best-effort background operation
+    })
 
     return updatedFileRef
   },

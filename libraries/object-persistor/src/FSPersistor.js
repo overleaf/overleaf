@@ -288,6 +288,29 @@ module.exports = class FSPersistor extends AbstractPersistor {
     return size
   }
 
+  /**
+   * @param {string} location
+   * @param {string} name
+   * @return {Promise<{lastModified: Date, size: number}>}
+   */
+  async getObjectMetadata(location, name) {
+    const fsPath = this._getFsPath(location, name)
+    try {
+      const stat = await fsPromises.stat(fsPath)
+      return {
+        lastModified: stat.mtime,
+        size: stat.size,
+      }
+    } catch (err) {
+      throw PersistorHelper.wrapError(
+        err,
+        'failed to get object metadata',
+        { location, name, fsPath },
+        ReadError
+      )
+    }
+  }
+
   async _writeStreamToTempFile(location, stream, opts = {}) {
     const observerOptions = {
       metric: 'fs.egress', // egress from us to disk
