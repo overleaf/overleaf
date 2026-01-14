@@ -5,7 +5,7 @@ import {
   startWith,
 } from './helpers/config'
 import { dockerCompose, getRedisKeys } from './helpers/hostAdminClient'
-import { createProject } from './helpers/project'
+import { createProjectAndOpenInNewEditor } from './helpers/project'
 import { prepareWaitForNextCompileSlot } from './helpers/compile'
 
 const USER = 'user@example.com'
@@ -18,7 +18,7 @@ function bringServerProBackUp() {
   })
 }
 
-describe('GracefulShutdown', function () {
+describe('new editor.GracefulShutdown', function () {
   if (isExcludedBySharding('PRO_CUSTOM_1')) return
   startWith({
     pro: true,
@@ -33,7 +33,7 @@ describe('GracefulShutdown', function () {
     login(USER)
     const { recompile, waitForCompile } = prepareWaitForNextCompileSlot()
     waitForCompile(() => {
-      createProject(PROJECT_NAME).then(id => {
+      createProjectAndOpenInNewEditor(PROJECT_NAME).then(id => {
         projectId = id
       })
     })
@@ -48,7 +48,7 @@ describe('GracefulShutdown', function () {
     cy.log(
       'check flush from frontend to backend: should include new section in PDF'
     )
-    cy.findByRole('region', { name: 'PDF preview and logs' }).should(
+    cy.findByRole('region', { name: 'PDF preview' }).should(
       'contain.text',
       'New Section'
     )
@@ -87,16 +87,14 @@ describe('GracefulShutdown', function () {
     bringServerProBackUp()
 
     cy.then(() => {
-      cy.visit(
-        `/project/${projectId}?trick-cypress-into-page-reload=true&old-editor-override=true`
-      )
+      cy.visit(`/project/${projectId}?trick-cypress-into-page-reload=true`)
     })
 
     cy.log('check loading doc from mongo')
     cy.findByRole('region', { name: 'Editor' }).findByText('New Section')
 
     cy.log('check PDF')
-    cy.findByRole('region', { name: 'PDF preview and logs' }).should(
+    cy.findByRole('region', { name: 'PDF preview' }).should(
       'contain.text',
       'New Section'
     )
