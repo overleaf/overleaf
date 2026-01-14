@@ -17,7 +17,7 @@ import {
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
 import OLNotification from '@/shared/components/ol/ol-notification'
-import Icon from '@/shared/components/icon'
+import GithubLogo from '@/shared/svgs/github-logo'
 
 type GitHubStatus = {
   connected: boolean
@@ -94,7 +94,7 @@ export default function GitHubSyncWidget() {
     return (
       <div className="settings-widget-container">
         <div>
-          <Icon type="github" fw />
+          <GithubLogo />
         </div>
         <div className="description-container">
           <div className="title-row">
@@ -110,7 +110,7 @@ export default function GitHubSyncWidget() {
     <>
       <div className="settings-widget-container">
         <div>
-          <Icon type="github" fw style={{ fontSize: '2rem' }} />
+          <GithubLogo size={32} />
         </div>
         <div className="description-container">
           <div className="title-row">
