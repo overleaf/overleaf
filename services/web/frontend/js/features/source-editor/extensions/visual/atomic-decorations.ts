@@ -1017,7 +1017,7 @@ export const atomicDecorations = (options: Options) => {
                   ...decorateArgumentBraces(
                     new BraceWidget(decorateBrackets ? '' : '['),
                     argumentNode,
-                    from,
+                    argumentNode.from,
                     false,
                     new BraceWidget(decorateBrackets ? '' : ']'),
                     { open: OpenBracket, close: CloseBracket }

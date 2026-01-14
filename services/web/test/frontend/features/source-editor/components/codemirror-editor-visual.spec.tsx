@@ -730,7 +730,7 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
       cy.get('.ol-cm-textcolor')
         .should('have.length', 1)
         .should('have.text', 'foo')
-        .should('have.attr', 'style', 'color: rgb(255,0,0)')
+        .should('have.attr', 'style', 'color: rgb(255, 0, 0);')
     })
 
     it('decorates colorbox', function () {
@@ -738,7 +738,7 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
       cy.get('.ol-cm-colorbox')
         .should('have.length', 1)
         .should('have.text', 'foo')
-        .should('have.attr', 'style', 'background-color: rgb(255,255,0)')
+        .should('have.attr', 'style', 'background-color: rgb(255, 255, 0);')
     })
   })
 
