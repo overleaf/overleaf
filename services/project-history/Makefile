@@ -25,6 +25,7 @@ IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/libraries/redis-wrapper/package.json \
 	$(MONOREPO)/libraries/settings/package.json \
 	$(MONOREPO)/libraries/stream-utils/package.json \
+	$(MONOREPO)/libraries/validation-tools/package.json \
 	$(MONOREPO)/services/project-history/package.json \
 	$(MONOREPO)/tools/migrations/package.json \
 	$(MONOREPO)/patches/* \
