@@ -76,6 +76,7 @@ export interface Meta {
   >
   'ol-adminCapabilities': AdminCapability[]
   'ol-adminSubscription': AdminSubscription
+  'ol-adminUserExists': boolean
   'ol-aiAssistViaWritefullSource': string
   'ol-algolia': AlgoliaConfig | undefined
   'ol-allInReconfirmNotificationPeriods': UserEmailData[]
