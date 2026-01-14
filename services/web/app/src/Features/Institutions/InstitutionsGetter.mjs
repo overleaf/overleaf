@@ -1,4 +1,4 @@
-import { promisify, callbackify } from 'node:util'
+import { callbackify } from 'node:util'
 import UserGetter from '../User/UserGetter.mjs'
 import UserMembershipsHandler from '../UserMembership/UserMembershipsHandler.mjs'
 import UserMembershipEntityConfigs from '../UserMembership/UserMembershipEntityConfigs.mjs'
@@ -55,39 +55,36 @@ async function getCurrentInstitutionsWithLicence(userId) {
   return Object.values(institutions)
 }
 
+async function getConfirmedAffiliations(userId) {
+  const emailsData = await UserGetter.promises.getUserFullEmails(userId)
+
+  const confirmedAffiliations = emailsData
+    .filter(
+      emailData =>
+        emailData.confirmedAt &&
+        emailData.affiliation &&
+        emailData.affiliation.institution &&
+        emailData.affiliation.institution.confirmed
+    )
+    .map(emailData => emailData.affiliation)
+
+  return confirmedAffiliations
+}
+
+async function getManagedInstitutions(userId) {
+  return await UserMembershipsHandler.promises.getEntitiesByUser(
+    UserMembershipEntityConfigs.institution,
+    userId
+  )
+}
+
 const InstitutionsGetter = {
-  getConfirmedAffiliations(userId, callback) {
-    UserGetter.getUserFullEmails(userId, function (error, emailsData) {
-      if (error) {
-        return callback(error)
-      }
-
-      const confirmedAffiliations = emailsData
-        .filter(
-          emailData =>
-            emailData.confirmedAt &&
-            emailData.affiliation &&
-            emailData.affiliation.institution &&
-            emailData.affiliation.institution.confirmed
-        )
-        .map(emailData => emailData.affiliation)
-
-      callback(null, confirmedAffiliations)
-    })
-  },
-
+  getConfirmedAffiliations: callbackify(getConfirmedAffiliations),
   getCurrentInstitutionIds: callbackify(getCurrentInstitutionIds),
   getCurrentInstitutionsWithLicence: callbackify(
     getCurrentInstitutionsWithLicence
   ),
-
-  getManagedInstitutions(userId, callback) {
-    UserMembershipsHandler.getEntitiesByUser(
-      UserMembershipEntityConfigs.institution,
-      userId,
-      callback
-    )
-  },
+  getManagedInstitutions: callbackify(getManagedInstitutions),
 }
 
 InstitutionsGetter.promises = {
@@ -95,7 +92,7 @@ InstitutionsGetter.promises = {
   getCurrentInstitutionIds,
   getCurrentInstitutionsWithLicence,
   getCurrentAndPastAffiliationIds,
-  getManagedInstitutions: promisify(InstitutionsGetter.getManagedInstitutions),
+  getManagedInstitutions,
 }
 
 export default InstitutionsGetter

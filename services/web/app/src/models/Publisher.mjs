@@ -1,7 +1,8 @@
 import mongoose from '../infrastructure/Mongoose.mjs'
 import settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
-import request from 'request'
+import { fetchJson } from '@overleaf/fetch-utils'
+import { callbackify } from '@overleaf/promise-utils'
 const { Schema } = mongoose
 const { ObjectId } = Schema
 
@@ -13,37 +14,32 @@ export const PublisherSchema = new Schema(
   { minimize: false }
 )
 
-// fetch publisher's (brand on v1) data from v1 API. Errors are ignored
-PublisherSchema.method('fetchV1Data', function (callback) {
-  request(
-    {
-      baseUrl: settings.apis.v1.url,
-      url: `/api/v2/brands/${this.slug}`,
-      method: 'GET',
-      auth: {
+async function fetchV1DataPromise() {
+  const url = `${settings.apis.v1.url}/api/v2/brands/${this.slug}`
+  try {
+    const parsedBody = await fetchJson(url, {
+      basicAuth: {
         user: settings.apis.v1.user,
         pass: settings.apis.v1.pass,
-        sendImmediately: true,
       },
-      timeout: settings.apis.v1.timeout,
-    },
-    (error, response, body) => {
-      let parsedBody
-      try {
-        parsedBody = JSON.parse(body)
-      } catch (error1) {
-        // log error and carry on without v1 data
-        error = error1
-        logger.err(
-          { model: 'Publisher', slug: this.slug, error },
-          '[fetchV1DataError]'
-        )
-      }
-      this.name = parsedBody != null ? parsedBody.name : undefined
-      this.partner = parsedBody != null ? parsedBody.partner : undefined
-      callback(null, this)
-    }
-  )
-})
+      signal: AbortSignal.timeout(settings.apis.v1.timeout),
+    })
+
+    this.name = parsedBody?.name
+    this.partner = parsedBody?.partner
+    return this
+  } catch (error) {
+    // log error and carry on without v1 data
+    logger.err(
+      { model: 'Publisher', slug: this.slug, error },
+      '[fetchV1DataError]'
+    )
+  }
+  return this
+}
+
+PublisherSchema.method('fetchV1DataPromise', fetchV1DataPromise)
+
+PublisherSchema.method('fetchV1Data', callbackify(fetchV1DataPromise))
 
 export const Publisher = mongoose.model('Publisher', PublisherSchema)

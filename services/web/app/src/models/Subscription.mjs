@@ -1,5 +1,6 @@
 import mongoose from '../infrastructure/Mongoose.mjs'
 import { TeamInviteSchema } from './TeamInvite.mjs'
+import { callbackify } from '@overleaf/promise-utils'
 
 const { Schema } = mongoose
 const { ObjectId } = Schema
@@ -123,8 +124,11 @@ export const SubscriptionSchema = new Schema(
 )
 
 // Subscriptions have no v1 data to fetch
-SubscriptionSchema.method('fetchV1Data', function (callback) {
-  callback(null, this)
-})
+async function fetchV1DataPromise() {
+  return this
+}
+SubscriptionSchema.method('fetchV1Data', callbackify(fetchV1DataPromise))
+
+SubscriptionSchema.method('fetchV1DataPromise', fetchV1DataPromise)
 
 export const Subscription = mongoose.model('Subscription', SubscriptionSchema)

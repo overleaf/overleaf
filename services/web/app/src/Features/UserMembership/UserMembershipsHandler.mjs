@@ -1,17 +1,4 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-import async from 'async'
-
-import { promisifyAll } from '@overleaf/promise-utils'
+import { callbackifyAll } from '@overleaf/promise-utils'
 import UserMembershipEntityConfigs from './UserMembershipEntityConfigs.mjs'
 import * as InstitutionModel from '../../models/Institution.mjs'
 import * as SubscriptionModel from '../../models/Subscription.mjs'
@@ -25,11 +12,25 @@ const EntityModels = {
 }
 
 const UserMembershipsHandler = {
-  removeUserFromAllEntities(userId, callback) {
-    // get all writable entity types
-    if (callback == null) {
-      callback = function () {}
+  async getEntitiesByUser(entityConfig, userId) {
+    if (!Features.hasFeature('saas')) {
+      return []
     }
+    const query = entityConfig.baseQuery || {}
+    query[entityConfig.fields.access] = userId
+
+    const entities =
+      (await EntityModels[entityConfig.modelName].find(query)) || []
+
+    const filledEntities = []
+    for (const entity of entities) {
+      const filled = await entity.fetchV1DataPromise()
+      filledEntities.push(filled)
+    }
+    return filledEntities
+  },
+
+  async removeUserFromAllEntities(userId) {
     const entityConfigs = []
     for (const key in UserMembershipEntityConfigs) {
       const entityConfig = UserMembershipEntityConfigs[key]
@@ -39,52 +40,19 @@ const UserMembershipsHandler = {
     }
 
     // remove the user from all entities types
-    async.map(
-      entityConfigs,
-      (entityConfig, innerCallback) =>
-        UserMembershipsHandler.removeUserFromEntities(
-          entityConfig,
-          userId,
-          innerCallback
-        ),
-      callback
-    )
+    for (const entityConfig of entityConfigs) {
+      await UserMembershipsHandler.removeUserFromEntities(entityConfig, userId)
+    }
   },
 
-  removeUserFromEntities(entityConfig, userId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  async removeUserFromEntities(entityConfig, userId) {
     const removeOperation = { $pull: {} }
     removeOperation.$pull[entityConfig.fields.write] = userId
-    EntityModels[entityConfig.modelName]
-      .updateMany({}, removeOperation)
-      .then(result => callback(null, result))
-      .catch(callback)
-  },
-
-  getEntitiesByUser(entityConfig, userId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    if (!Features.hasFeature('saas')) return callback(null, [])
-    const query = Object.assign({}, entityConfig.baseQuery)
-    query[entityConfig.fields.access] = userId
-    EntityModels[entityConfig.modelName]
-      .find(query)
-      .then(entities => {
-        if (entities == null) {
-          entities = []
-        }
-        async.mapSeries(
-          entities,
-          (entity, cb) => entity.fetchV1Data(cb),
-          callback
-        )
-      })
-      .catch(callback)
+    await EntityModels[entityConfig.modelName].updateMany({}, removeOperation)
   },
 }
 
-UserMembershipsHandler.promises = promisifyAll(UserMembershipsHandler)
-export default UserMembershipsHandler
+export default {
+  ...callbackifyAll(UserMembershipsHandler),
+  promises: UserMembershipsHandler,
+}
