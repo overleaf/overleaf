@@ -432,6 +432,7 @@ const _ProjectController = {
     }
 
     const splitTests = [
+      'bibtex-visual-editor',
       'compile-log-events',
       'visual-preview',
       'external-socket-heartbeat',

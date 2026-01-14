@@ -37,7 +37,6 @@ import { setVisual } from '../extensions/visual/visual'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { setDocName } from '@/features/source-editor/extensions/doc-name'
-import { isValidTeXFile } from '@/main/is-valid-tex-file'
 import { captureException } from '@/infrastructure/error-reporter'
 import grammarlyExtensionPresent from '@/shared/utils/grammarly'
 import { debugConsole } from '@/utils/debugging'
@@ -62,6 +61,7 @@ import { beforeChangeDocEffect } from '@/features/source-editor/extensions/befor
 import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 import { useEditorSelectionContext } from '@/shared/context/editor-selection-context'
 import { useActiveEditorTheme } from '@/shared/hooks/use-active-editor-theme'
+import { isVisualEditorAvailable } from '../utils/visual-editor'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -273,7 +273,8 @@ function useCodeMirrorScope(view: EditorView) {
 
   const { previewByPath } = useFileTreePathContext()
 
-  const showVisual = visual && !!openDocName && isValidTeXFile(openDocName)
+  const showVisual =
+    visual && !!openDocName && isVisualEditorAvailable(openDocName)
 
   const visualRef = useRef({
     previewByPath,

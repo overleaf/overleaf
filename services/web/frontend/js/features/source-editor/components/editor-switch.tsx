@@ -1,10 +1,10 @@
 import { ChangeEvent, FC, memo, useCallback } from 'react'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { sendMB } from '../../../infrastructure/event-tracking'
-import { isValidTeXFile } from '../../../main/is-valid-tex-file'
 import { useTranslation } from 'react-i18next'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
+import { isVisualEditorAvailable } from '../utils/visual-editor'
 
 function EditorSwitch() {
   const { t } = useTranslation()
@@ -12,7 +12,9 @@ function EditorSwitch() {
     useEditorPropertiesContext()
   const { openDocName } = useEditorOpenDocContext()
 
-  const richTextAvailable = openDocName ? isValidTeXFile(openDocName) : false
+  const richTextAvailable = openDocName
+    ? isVisualEditorAvailable(openDocName)
+    : false
 
   const handleChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {

@@ -1015,6 +1015,7 @@ module.exports = {
     ssoCertificateInfo: [],
     v1ImportDataScreen: [],
     snapshotUtils: [],
+    visualEditorProviders: [],
     usGovBanner: [],
     rollingBuildsUpdatedAlert: [],
     offlineModeToolbarButtons: [],
