@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import minimist from 'minimist'
+import { setTimeout } from 'node:timers/promises'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
 import { getRegionClient } from '../../modules/subscriptions/app/src/StripeClient.mjs'
 // eslint-disable-next-line import/no-unresolved
@@ -17,7 +18,7 @@ import { readFile } from 'node:fs/promises'
  *   --region=us|uk     Required. Stripe region to process (us or uk)
  *
  * CSV Format:
- * id,name,percent_off,duration,code,max_redemptions
+ * name,percent_off,duration,code,max_redemptions
  */
 
 async function main(trackProgress) {
@@ -33,50 +34,43 @@ async function main(trackProgress) {
   )
 
   const file = await readFile(inputCSV, { encoding: 'utf8' })
-  const couponsPlannedToCreate = csv.parse(file, { columns: true })
+  const couponsToCreate = csv.parse(file, { columns: true })
   await trackProgress(
-    `Successfully parsed "${inputCSV}" CSV file with ${couponsPlannedToCreate.length} coupons to create`
+    `Successfully parsed "${inputCSV}" CSV file with ${couponsToCreate.length} coupons and promotion codes to create`
   )
 
   const client = getRegionClient(region)
 
-  const existingCoupons = await client.stripe.coupons.list({ limit: 100 })
-  const existingIdsAndNames = existingCoupons.data.map(ec => ({
-    id: ec.id,
-    name: ec.name,
-  }))
+  const stripeCoupons = await client.stripe.coupons.list({ limit: 100 })
+  const existingCoupons = stripeCoupons.data.reduce((acc, curr) => {
+    acc[curr.name] = curr.id
+    return acc
+  }, {})
   await trackProgress(
-    `Successfully parsed ${existingIdsAndNames.length} existing coupons for verification`
+    `Successfully parsed ${Object.keys(existingCoupons).length} existing coupons for verification`
   )
 
-  const couponsToCreate = couponsPlannedToCreate.filter(
-    c => !existingIdsAndNames.some(e => e.id === c.id || e.name === c.name)
-  )
-  if (couponsToCreate.length === 0) {
-    await trackProgress(`There are no coupons to create`)
-  } else if (couponsToCreate.length < couponsPlannedToCreate.length) {
-    const filteredOut = couponsPlannedToCreate
-      .filter(c =>
-        existingIdsAndNames.some(e => e.id === c.id || e.name === c.name)
-      )
-      .map(c => c.name)
-    await trackProgress(
-      `Successfully filtered out: ${filteredOut.join(', ')} existing coupons from the ones to create`
-    )
-  }
+  let couponsCreated = 0
+  let promotionCodesCreated = 0
+  let promotionCodesExisted = 0
 
   const errors = []
   for (const toCreate of couponsToCreate) {
     try {
-      const createdCoupon = await client.stripe.coupons.create({
-        id: toCreate.id,
-        name: toCreate.name,
-        percent_off: parseFloat(toCreate.percent_off),
-        duration: toCreate.duration,
-      })
+      let targetCouponId = existingCoupons[toCreate.name]
+      if (!targetCouponId) {
+        const createdCoupon = await client.stripe.coupons.create({
+          name: toCreate.name,
+          percent_off: parseFloat(toCreate.percent_off),
+          duration: toCreate.duration,
+        })
+        targetCouponId = createdCoupon.id
+        existingCoupons[toCreate.name] = targetCouponId
+        couponsCreated++
+      }
 
       const promotionPayload = {
-        coupon: createdCoupon.id,
+        coupon: targetCouponId,
         code: toCreate.code,
       }
       const maxRedemptions = parseInt(toCreate.max_redemptions, 10)
@@ -85,14 +79,30 @@ async function main(trackProgress) {
       }
 
       await client.stripe.promotionCodes.create(promotionPayload)
+      promotionCodesCreated++
     } catch (error) {
+      if (
+        error.message.includes('promotion code') &&
+        error.message.includes('already exists')
+      ) {
+        promotionCodesExisted++
+      } else {
+        await trackProgress(`Failed to create coupon "${toCreate}"`)
+        await trackProgress(error.message)
+        errors.push(toCreate.name)
+      }
+    }
+    if (promotionCodesCreated > 10 && promotionCodesCreated % 10 === 0) {
       await trackProgress(
-        `Failed to create coupon "${toCreate.name}" (${toCreate.id})`,
-        error.message
+        `Promotion codes created: ${promotionCodesCreated}, existed: ${promotionCodesExisted}`
       )
-      errors.push(toCreate.name)
+      await setTimeout(10)
     }
   }
+
+  await trackProgress(`\n\nCoupons created: ${couponsCreated}`)
+  await trackProgress(`Promotion codes created: ${promotionCodesCreated}`)
+  await trackProgress(`Promotion codes existed: ${promotionCodesExisted}`)
 
   if (errors.length > 0) {
     await trackProgress(
