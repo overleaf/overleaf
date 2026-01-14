@@ -4,6 +4,7 @@ const fs = require('node:fs')
 const Path = require('node:path')
 const { pipeline } = require('node:stream/promises')
 const { createGzip, createGunzip } = require('node:zlib')
+const { crc32 } = require('node:zlib')
 const tarFs = require('tar-fs')
 const _ = require('lodash')
 const {
@@ -30,23 +31,51 @@ const MAX_ENTRIES_IN_OUTPUT_TAR = 100
 const MAX_BLG_FILES = 50
 const OBJECT_ID_REGEX = /^[0-9a-f]{24}$/
 
+const MIGRATE_FROM = new Date('2026-01-14').getTime()
+const MIGRATE_UNTIL = new Date('2026-01-21').getTime()
+
 /**
  * @param {string} projectId
  * @return {{shard: string, url: string}}
  */
 function getShard(projectId) {
+  // Layout of mongodb object id bytes:
   // [timestamp 4bytes][random per machine 5bytes][counter 3bytes]
   //                                          [32bit       4bytes]
   const last4Bytes = Buffer.from(projectId, 'hex').subarray(8, 12)
-  const idx = last4Bytes.readUInt32BE() % Settings.apis.clsiCache.shards.length
-  return Settings.apis.clsiCache.shards[idx]
+  const counter = last4Bytes.readUInt32BE()
+  const nShards = Settings.apis.clsiCache.shards.length
+
+  // Use the "counter" part of the id for a stable assignment with an even
+  // distribution. This is where the current data resides.
+  const preferredShard = counter % nShards
+
+  // Gradually migrate over to the crc base shard assignment.
+  const remaining = MIGRATE_UNTIL - Date.now()
+  if ((counter % 100) / 100 < remaining / (MIGRATE_UNTIL - MIGRATE_FROM)) {
+    const shard = Settings.apis.clsiCache.shards[preferredShard]
+    if (!isCircuitBreakerTripped(shard.url)) return shard
+  }
+
+  // Then use a crc for generating a stable sequence of shards with even
+  // distribution to try next.
+  const shards = Settings.apis.clsiCache.shards.slice(0)
+  let i = 0
+  while (shards.length > 0) {
+    const idx = crc32(`${projectId}-${i++}`) % shards.length
+    const candidate = shards[idx]
+    if (!isCircuitBreakerTripped(candidate.url)) return candidate
+    shards.splice(idx, 1)
+  }
+  // All shards are down. Return the original preference.
+  return Settings.apis.clsiCache.shards[preferredShard]
 }
 
 /**
  * @param {string} url
  * @return {boolean}
  */
-function checkCircuitBreaker(url) {
+function isCircuitBreakerTripped(url) {
   const lastFailure = lastFailures.get(url) ?? 0
   if (lastFailure) {
     // Circuit breaker that avoids retries for 5-20s.
@@ -99,7 +128,7 @@ function notifyCLSICacheAboutBuild({
   if (!Settings.apis.clsiCache.enabled) return undefined
   if (!OBJECT_ID_REGEX.test(projectId)) return undefined
   const { url, shard } = getShard(projectId)
-  if (checkCircuitBreaker(url)) return undefined
+  if (isCircuitBreakerTripped(url)) return undefined
 
   /**
    * @param {{path: string}[]} files
@@ -254,7 +283,7 @@ async function downloadOutputDotSynctexFromCompileCache(
   if (!Settings.apis.clsiCache.enabled) return false
   if (!OBJECT_ID_REGEX.test(projectId)) return false
   const { url } = getShard(projectId)
-  if (checkCircuitBreaker(url)) return false
+  if (isCircuitBreakerTripped(url)) return false
 
   const timer = new Metrics.Timer(
     'clsi_cache_download',
@@ -317,7 +346,7 @@ async function downloadLatestCompileCache(projectId, userId, compileDir) {
   if (!Settings.apis.clsiCache.enabled) return false
   if (!OBJECT_ID_REGEX.test(projectId)) return false
   const { url } = getShard(projectId)
-  if (checkCircuitBreaker(url)) return false
+  if (isCircuitBreakerTripped(url)) return false
 
   const timer = new Metrics.Timer(
     'clsi_cache_download',
