@@ -5,6 +5,7 @@ import {
   copySelection,
   cutSelection,
   pasteWithoutFormatting,
+  pasteWithFormatting,
 } from '../../../../../frontend/js/features/source-editor/commands/clipboard'
 
 const createClipboardStub = () => {
@@ -190,6 +191,81 @@ describe('clipboard behavior', function () {
       ])
       await pasteWithoutFormatting(view)
       expect(view.state.doc.toString()).to.equal('new\nline1\nnew\nline2')
+    })
+
+    it('preserves multiple cursors after pasting into multiple selections', async function () {
+      clipboard.reads.push('XX')
+      const view = createViewWithMultipleRanges('abcdefgh', [
+        { anchor: 1, head: 2 }, // "b"
+        { anchor: 5, head: 6 }, // "f"
+      ])
+      await pasteWithoutFormatting(view)
+      const ranges = view.state.selection.ranges
+      expect(ranges).to.have.length(2)
+      expect(ranges.every(r => r.empty)).to.equal(true)
+    })
+
+    it('preserves multiple cursors when pasting line-wise content', async function () {
+      clipboard.reads.push('new\n')
+      const view = createViewWithMultipleRanges('line1\nline2', [
+        { anchor: 2 }, // in "line1"
+        { anchor: 8 }, // in "line2"
+      ])
+      await pasteWithoutFormatting(view)
+      // After line-wise paste at line starts: cursor should be after each "new\n"
+      const ranges = view.state.selection.ranges
+      expect(ranges).to.have.length(2)
+      expect(ranges[0].anchor).to.equal(4) // after first "new\n"
+      expect(ranges[1].anchor).to.equal(14) // after second "new\n" (original pos 8 + 4 from first insert + 4 from second)
+    })
+  })
+
+  describe('pasteWithFormatting', function () {
+    // Helper to set clipboard.read with HTML + plain text
+    const setClipboardHtml = (html: string, text: string) => {
+      ;(navigator as any).clipboard.read = async () => [
+        {
+          types: ['text/html', 'text/plain'],
+          // Avoid relying on DOM Blob in the Mocha/jsdom environment.
+          getType: async (type: string) =>
+            ({
+              text: async () => (type === 'text/html' ? html : text),
+            }) as any,
+        },
+      ]
+      ;(navigator as any).clipboard.readText = async () => text
+    }
+
+    it('pastes converted HTML into a single selection', async function () {
+      setClipboardHtml('<b>x</b>', 'x')
+      const view = createView('abcde', 2, 3) // replace 'c'
+      await pasteWithFormatting(view)
+      expect(view.state.doc.toString()).to.equal('ab\\textbf{x}de')
+      expect(view.state.selection.ranges).to.have.length(1)
+      expect(view.state.selection.main.empty).to.equal(true)
+    })
+
+    it('pastes converted HTML into all selected ranges (multi-range)', async function () {
+      setClipboardHtml('<strong>x</strong>', 'x')
+      const view = createViewWithMultipleRanges('abcdefgh', [
+        { anchor: 1, head: 2 }, // b
+        { anchor: 5, head: 6 }, // f
+      ])
+      await pasteWithFormatting(view)
+      expect(view.state.doc.toString()).to.equal('a\\textbf{x}cde\\textbf{x}gh')
+      expect(view.state.selection.ranges).to.have.length(2)
+      expect(view.state.selection.ranges.every(r => r.empty)).to.equal(true)
+    })
+
+    it('falls back to plain text when there is no formatting', async function () {
+      setClipboardHtml('x', 'x')
+      const view = createViewWithMultipleRanges('abcdefgh', [
+        { anchor: 1, head: 2 },
+        { anchor: 5, head: 6 },
+      ])
+      await pasteWithFormatting(view)
+      expect(view.state.doc.toString()).to.equal('axcdexgh')
+      expect(view.state.selection.ranges).to.have.length(2)
     })
   })
 })

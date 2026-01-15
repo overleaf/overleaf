@@ -20,7 +20,9 @@ import {
   cutSelection,
   copySelection,
   pasteWithoutFormatting,
+  pasteWithFormatting,
 } from '../commands/clipboard'
+import { isVisual } from '../extensions/visual/visual'
 
 export const useContextMenuItems = () => {
   const view = useCodeMirrorViewContext()
@@ -68,9 +70,16 @@ export const useContextMenuItems = () => {
     [view, closeMenu]
   )
 
+  const inVisualMode = isVisual(view)
+
   const handleCut = wrapForContextMenu(() => cutSelection(view))
   const handleCopy = wrapForContextMenu(() => copySelection(view))
-  const handlePaste = wrapForContextMenu(() => pasteWithoutFormatting(view))
+  const handlePaste = wrapForContextMenu(() =>
+    inVisualMode ? pasteWithFormatting(view) : pasteWithoutFormatting(view)
+  )
+  const handlePasteSpecial = wrapForContextMenu(() =>
+    inVisualMode ? pasteWithoutFormatting(view) : pasteWithFormatting(view)
+  )
   const handleDelete = wrapForContextMenu(() => commands.deleteSelection(view))
 
   const handleToggleTrackChanges = wrapForContextMenu(() => {
@@ -119,6 +128,15 @@ export const useContextMenuItems = () => {
       disabled: false,
       show: canEdit,
       shortcut: getShortcut('paste'),
+    },
+    {
+      label: inVisualMode
+        ? t('paste_without_formatting')
+        : t('paste_with_formatting'),
+      handler: handlePasteSpecial,
+      disabled: false,
+      show: canEdit,
+      shortcut: inVisualMode ? getShortcut('paste-special') : undefined,
     },
     {
       label: t('delete'),

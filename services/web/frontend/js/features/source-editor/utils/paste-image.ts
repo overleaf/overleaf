@@ -45,3 +45,16 @@ export async function findImageInClipboard(): Promise<File | null> {
 
   return null
 }
+
+export const handleImagePaste = async (): Promise<boolean> => {
+  const imageFile = await findImageInClipboard()
+  if (imageFile) {
+    dispatchFigureModalPasteEvent({
+      name: imageFile.name,
+      type: imageFile.type,
+      data: imageFile,
+    })
+    return true
+  }
+  return false
+}

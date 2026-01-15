@@ -81,6 +81,27 @@ function isPositionInsideSelection(pos: number, from: number, to: number) {
   return from !== to && pos >= from && pos <= to
 }
 
+function isPositionInsideAnyRangeOrCursor(view: EditorView, pos: number) {
+  for (const range of view.state.selection.ranges) {
+    // If it's a cursor, treat a right-click anywhere on the same line as "inside".
+    // This avoids collapsing multi-cursor selections when right-clicking on blank lines
+    // or to the right of the caret.
+    if (range.from === range.to) {
+      const clickedLine = view.state.doc.lineAt(pos)
+      const cursorLine = view.state.doc.lineAt(range.from)
+      if (clickedLine.number === cursorLine.number) {
+        return true
+      }
+      continue
+    }
+
+    if (isPositionInsideSelection(pos, range.from, range.to)) {
+      return true
+    }
+  }
+  return false
+}
+
 function selectEntireLine(
   view: EditorView,
   pos: number
@@ -171,8 +192,7 @@ const editorContextMenuHandlers = (): Extension =>
         return false
       }
 
-      const { from, to } = view.state.selection.main
-      const clickedInsideSelection = isPositionInsideSelection(pos, from, to)
+      const clickedInsideSelection = isPositionInsideAnyRangeOrCursor(view, pos)
 
       // Set cursor to clicked position if outside selection
       let selection: TransactionSpec['selection'] = { anchor: pos }

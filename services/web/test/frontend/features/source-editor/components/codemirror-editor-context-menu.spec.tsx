@@ -66,6 +66,21 @@ const MockFileTreeDataProvider: FC<React.PropsWithChildren> = ({
   </FileTreeDataContext.Provider>
 )
 
+// Regex to match plain "Paste" but exclude "Paste with formatting" and "Paste without formatting"
+const pasteLabelMatcher = /^paste(?! with| without)/i
+
+const grantClipboardPermissions = () => {
+  cy.wrap(
+    Cypress.automation('remote:debugger:protocol', {
+      command: 'Browser.grantPermissions',
+      params: {
+        permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
+        origin: window.location.origin,
+      },
+    })
+  )
+}
+
 describe('editor context menu', { scrollBehavior: false }, function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
@@ -133,7 +148,12 @@ describe('editor context menu', { scrollBehavior: false }, function () {
         cy.findByRole('menuitem', { name: /copy/i }).should('be.enabled')
         cy.findByRole('menuitem', { name: /delete/i }).should('be.disabled')
         cy.findByRole('menuitem', { name: /comment/i }).should('be.disabled')
-        cy.findByRole('menuitem', { name: /paste/i }).should('be.enabled')
+        cy.findByRole('menuitem', { name: pasteLabelMatcher }).should(
+          'be.enabled'
+        )
+        cy.findByRole('menuitem', {
+          name: /paste with formatting/i,
+        }).should('be.enabled')
         cy.findByRole('menuitem', { name: /suggest edits/i }).should(
           'be.enabled'
         )
@@ -170,7 +190,12 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       cy.get('.editor-context-menu').within(() => {
         cy.findByRole('menuitem', { name: /cut/i }).should('be.enabled')
         cy.findByRole('menuitem', { name: /copy/i }).should('be.enabled')
-        cy.findByRole('menuitem', { name: /paste/i }).should('be.enabled')
+        cy.findByRole('menuitem', { name: pasteLabelMatcher }).should(
+          'be.enabled'
+        )
+        cy.findByRole('menuitem', {
+          name: /paste with formatting/i,
+        }).should('be.enabled')
         cy.findByRole('menuitem', { name: /delete/i }).should('be.enabled')
         cy.findByRole('menuitem', { name: /suggest edits/i }).should(
           'be.enabled'
@@ -180,16 +205,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
     })
 
     it('should copy selected text and close menu', function () {
-      // Grant clipboard permissions for this test
-      cy.wrap(
-        Cypress.automation('remote:debugger:protocol', {
-          command: 'Browser.grantPermissions',
-          params: {
-            permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
-            origin: window.location.origin,
-          },
-        })
-      )
+      grantClipboardPermissions()
 
       const scope = mockScope()
 
@@ -219,17 +235,8 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       cy.get('.editor-context-menu').should('not.exist')
     })
 
-    it('should cut and paste text via the context menu', function () {
-      // Grant clipboard permissions for this test
-      cy.wrap(
-        Cypress.automation('remote:debugger:protocol', {
-          command: 'Browser.grantPermissions',
-          params: {
-            permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
-            origin: window.location.origin,
-          },
-        })
-      )
+    it('should cut and paste text', function () {
+      grantClipboardPermissions()
 
       const scope = mockScope()
 
@@ -266,7 +273,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       // Paste "world" at the beginning
       cy.get('.editor-context-menu').within(() => {
-        cy.findByRole('menuitem', { name: /paste/i }).click()
+        cy.findByRole('menuitem', { name: pasteLabelMatcher }).click()
       })
 
       cy.get('.editor-context-menu').should('not.exist')
@@ -458,7 +465,12 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       cy.get('.editor-context-menu').within(() => {
         cy.findByRole('menuitem', { name: /cut/i }).should('not.exist')
         cy.findByRole('menuitem', { name: /copy/i }).should('be.enabled')
-        cy.findByRole('menuitem', { name: /paste/i }).should('not.exist')
+        cy.findByRole('menuitem', { name: pasteLabelMatcher }).should(
+          'not.exist'
+        )
+        cy.findByRole('menuitem', { name: /paste with formatting/ }).should(
+          'not.exist'
+        )
         cy.findByRole('menuitem', { name: /delete/i }).should('not.exist')
         cy.findByRole('menuitem', { name: /suggest edits/i }).should(
           'not.exist'
@@ -512,8 +524,8 @@ describe('editor context menu', { scrollBehavior: false }, function () {
     })
   })
 
-  describe('pasting images via context menu', function () {
-    it('should open figure modal on pasting image via context menu', function () {
+  describe('when pasting an image', function () {
+    it('should open figure modal on pasting image', function () {
       const scope = mockScope()
 
       cy.mount(
@@ -546,7 +558,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
           // Click paste button
           cy.get('.editor-context-menu').within(() => {
-            cy.findByRole('menuitem', { name: /paste/i }).click()
+            cy.findByRole('menuitem', { name: pasteLabelMatcher }).click()
           })
 
           // Figure modal should open with the image
@@ -556,6 +568,95 @@ describe('editor context menu', { scrollBehavior: false }, function () {
           cy.get('.editor-context-menu').should('not.exist')
         }
       )
+    })
+  })
+
+  describe('when a user has HTML content in the clipboard', function () {
+    const formattedHtml =
+      '<b>foo</b><sup>th</sup> <i>bar</i><sub>2</sub> baz <em>woo</em> <strong>woo</strong> woo'
+    const plainText = 'footh bar2 baz woo woo woo'
+
+    beforeEach(function () {
+      grantClipboardPermissions()
+
+      // Stub the clipboard API with formatted HTML
+      cy.window().then(win => {
+        const getTypeStub = cy.stub()
+        getTypeStub
+          .withArgs('text/html')
+          .resolves(new Blob([formattedHtml], { type: 'text/html' }))
+        getTypeStub
+          .withArgs('text/plain')
+          .resolves(new Blob([plainText], { type: 'text/plain' }))
+
+        cy.stub(win.navigator.clipboard, 'read').resolves([
+          {
+            types: ['text/html', 'text/plain'],
+            getType: getTypeStub,
+          },
+        ])
+        cy.stub(win.navigator.clipboard, 'readText').resolves(plainText)
+      })
+    })
+
+    describe('when pasting with formatting', function () {
+      it('should paste formatted HTML with LaTeX commands', function () {
+        const scope = mockScope()
+
+        cy.mount(
+          <TestContainer>
+            <EditorProviders scope={scope}>
+              <CodeMirrorEditor />
+            </EditorProviders>
+          </TestContainer>
+        )
+
+        cy.get('.cm-line').eq(10).rightclick()
+        cy.get('.editor-context-menu').within(() => {
+          cy.findByRole('menuitem', {
+            name: /paste with formatting/i,
+          }).click()
+        })
+
+        cy.get('.editor-context-menu').should('not.exist')
+
+        cy.get('.cm-line').should($lines => {
+          const text = $lines.text()
+          expect(text).to.include(
+            '\\textbf{foo}\\textsuperscript{th} \\textit{bar}\\textsubscript{2} baz \\textit{woo} \\textbf{woo} woo'
+          )
+        })
+      })
+    })
+
+    describe('when pasting without formatting', function () {
+      it('should paste plain text without LaTeX commands', function () {
+        const scope = mockScope()
+
+        cy.mount(
+          <TestContainer>
+            <EditorProviders scope={scope}>
+              <CodeMirrorEditor />
+            </EditorProviders>
+          </TestContainer>
+        )
+
+        cy.get('.cm-line').eq(10).rightclick()
+        cy.get('.editor-context-menu').within(() => {
+          cy.findByRole('menuitem', { name: pasteLabelMatcher }).click()
+        })
+
+        cy.get('.editor-context-menu').should('not.exist')
+
+        cy.get('.cm-line').should($lines => {
+          const text = $lines.text()
+          expect(text).to.include('footh bar2 baz woo woo woo')
+          expect(text).to.not.include('\\textbf{foo}')
+          expect(text).to.not.include('\\textsuperscript{th}')
+          expect(text).to.not.include('\\textit{bar}')
+          expect(text).to.not.include('\\textsubscript{2}')
+        })
+      })
     })
   })
 
@@ -588,7 +689,9 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       cy.get('.cm-line').eq(10).rightclick()
 
       cy.get('.editor-context-menu').within(() => {
-        cy.findByRole('menuitem', { name: /jump to location in pdf/i }).click()
+        cy.findByRole('menuitem', {
+          name: /jump to location in pdf/i,
+        }).click()
       })
 
       cy.get('.editor-context-menu').should('not.exist')
@@ -619,18 +722,18 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       cy.get('.cm-line').eq(10).rightclick()
 
       cy.get('.editor-context-menu').within(() => {
-        cy.findByRole('menuitem', { name: /jump to location in pdf/i }).should(
-          'not.exist'
-        )
+        cy.findByRole('menuitem', {
+          name: /jump to location in pdf/i,
+        }).should('not.exist')
       })
     })
   })
 
-  describe('gutter context menu', function () {
+  describe('when right-clicking on the gutter', function () {
     const editorLine = 2
     const gutterLineIndex = editorLine + 1 // extra hidden gutter line
 
-    it('should select entire line when right-clicking on gutter', function () {
+    it('should select entire line', function () {
       const scope = mockScope()
 
       cy.mount(
@@ -657,15 +760,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
     })
 
     it('should work with cut/copy/delete operations on gutter-selected line', function () {
-      cy.wrap(
-        Cypress.automation('remote:debugger:protocol', {
-          command: 'Browser.grantPermissions',
-          params: {
-            permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
-            origin: window.location.origin,
-          },
-        })
-      )
+      grantClipboardPermissions()
 
       const scope = mockScope()
 
@@ -693,7 +788,9 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       cy.get('.editor-context-menu').within(() => {
         cy.findByRole('menuitem', { name: /cut/i }).should('be.enabled')
         cy.findByRole('menuitem', { name: /copy/i }).should('be.enabled')
-        cy.findByRole('menuitem', { name: /paste/i }).should('be.enabled')
+        cy.findByRole('menuitem', { name: pasteLabelMatcher }).should(
+          'be.enabled'
+        )
         cy.findByRole('menuitem', { name: /delete/i }).should('be.enabled')
         cy.findByRole('menuitem', { name: /suggest edits/i }).should(
           'be.enabled'
@@ -714,7 +811,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       )
     })
 
-    it('should close menu when clicking elsewhere after gutter right-click', function () {
+    it('should close menu when clicking elsewhere', function () {
       const scope = mockScope()
 
       cy.mount(

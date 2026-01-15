@@ -45,34 +45,16 @@ export const pasteHtml = [
           return false
         }
 
-        // convert the HTML to LaTeX
         try {
-          const parser = new DOMParser()
-          const { documentElement } = parser.parseFromString(html, 'text/html')
+          const latex = convertHtmlStringToLatex(
+            html,
+            clipboardData.files.length
+          )
 
-          // fall back to creating a figure when there's an image on the clipoard,
-          // unless the HTML indicates that it came from an Office application
-          // (which also puts an image on the clipboard)
-          if (
-            clipboardData.files.length > 0 &&
-            !hasProgId(documentElement) &&
-            !isOnlyTable(documentElement)
-          ) {
+          // if there's no latex conversion, use plain text version
+          if (latex === null) {
             return false
           }
-
-          const bodyElement = documentElement.querySelector('body')
-          // DOMParser should always create a body element, so this is mostly for TypeScript
-          if (!bodyElement) {
-            return false
-          }
-
-          // if the only content is in a code block, use the plain text version
-          if (onlyCode(bodyElement)) {
-            return false
-          }
-
-          const latex = htmlToLaTeX(bodyElement)
 
           // if there's no formatting, use the plain text version
           if (latex === text && clipboardData.files.length === 0) {
@@ -94,6 +76,37 @@ export const pasteHtml = [
   ),
   pastedContent,
 ]
+
+export function convertHtmlStringToLatex(
+  html: string,
+  filesLength: number
+): string | null {
+  const parser = new DOMParser()
+  const { documentElement } = parser.parseFromString(html, 'text/html')
+
+  // Do not process HTML as LaTeX when the clipboard contains files (e.g. images),
+  // unless the HTML is from an Office application or is a table-only selection.
+  if (
+    filesLength > 0 &&
+    !hasProgId(documentElement) &&
+    !isOnlyTable(documentElement)
+  ) {
+    return null
+  }
+
+  const bodyElement = documentElement.querySelector('body')
+  // DOMParser should always create a body element, so this is mostly for TypeScript
+  if (!bodyElement) {
+    return null
+  }
+
+  // If the only content is a code block, skip latex conversion
+  if (onlyCode(bodyElement)) {
+    return null
+  }
+
+  return htmlToLaTeX(bodyElement)
+}
 
 const removeUnwantedElements = (
   documentElement: HTMLElement,
