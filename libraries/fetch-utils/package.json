@@ -17,10 +17,10 @@
   "license": "AGPL-3.0-only",
   "devDependencies": {
     "@types/node-fetch": "^2.6.13",
-    "body-parser": "^1.20.3",
+    "body-parser": "1.20.4",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
-    "express": "^4.21.2",
+    "express": "4.22.1",
     "mocha": "^11.1.0",
     "mocha-junit-reporter": "^2.2.1",
     "mocha-multi-reporters": "^1.5.1",

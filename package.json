@@ -33,7 +33,8 @@
   "overrides": {
     "request@2.88.2": {
       "tough-cookie": "5.1.2",
-      "form-data": "2.5.5"
+      "form-data": "2.5.5",
+      "qs": "6.14.1"
     },
     "streamdown": {
       "mermaid": "file:./services/web/stubs/mermaid-stub"
