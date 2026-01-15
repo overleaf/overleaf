@@ -107,12 +107,12 @@ test_unit_app: export COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME)
 test_unit_app: mongo_migrations_for_tests
 	$(DOCKER_COMPOSE) run --name unit_test_$(BUILD_DIR_NAME) --rm test_unit
 
-test_unit_parallel: export VITEST_ROOT_SUITE_NAME = ESM unit tests - parallel
+test_unit_parallel: export JUNIT_ROOT_SUITE_NAME = ESM unit tests - parallel
 test_unit_parallel: export COMPOSE_PROJECT_NAME=unit_test_parallel_$(BUILD_DIR_NAME)
 test_unit_parallel: mongo_migrations_for_tests
 	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:parallel
 
-test_unit_sequential: export VITEST_ROOT_SUITE_NAME = ESM unit tests - sequential
+test_unit_sequential: export JUNIT_ROOT_SUITE_NAME = ESM unit tests - sequential
 test_unit_sequential: export COMPOSE_PROJECT_NAME=unit_test_sequential_$(BUILD_DIR_NAME)
 test_unit_sequential: mongo_migrations_for_tests
 	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:sequential
@@ -159,7 +159,7 @@ mongo_migrations_for_tests:
 # Frontend tests
 #
 
-test_frontend: export MOCHA_ROOT_SUITE_NAME = JSDOM frontend tests
+test_frontend: export JUNIT_ROOT_SUITE_NAME = JSDOM frontend tests
 test_frontend:
 	COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend
 	COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
@@ -181,7 +181,7 @@ TEST_FRONTEND_CT_VARIANTS = \
 # Writefull tests
 #
 
-test_writefull: export MOCHA_ROOT_SUITE_NAME = Writefull tests
+test_writefull: export JUNIT_ROOT_SUITE_NAME = Writefull tests
 test_writefull:
 	COMPOSE_PROJECT_NAME=writefull_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_writefull
 	COMPOSE_PROJECT_NAME=writefull_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
@@ -232,13 +232,13 @@ TEST_ACCEPTANCE_APP :=  \
 	test_acceptance_app_server_pro \
 
 test_acceptance_app: $(TEST_ACCEPTANCE_APP)
-test_acceptance_app_saas: export MOCHA_ROOT_SUITE_NAME = SaaS app acceptance tests
+test_acceptance_app_saas: export JUNIT_ROOT_SUITE_NAME = SaaS app acceptance tests
 test_acceptance_app_saas: export COMPOSE_PROJECT_NAME=acceptance_test_saas_$(BUILD_DIR_NAME)
 test_acceptance_app_saas: export OVERLEAF_CONFIG=$(CFG_SAAS)
-test_acceptance_app_server_ce: export MOCHA_ROOT_SUITE_NAME = Server CE app acceptance tests
+test_acceptance_app_server_ce: export JUNIT_ROOT_SUITE_NAME = Server CE app acceptance tests
 test_acceptance_app_server_ce: export COMPOSE_PROJECT_NAME=acceptance_test_server_ce_$(BUILD_DIR_NAME)
 test_acceptance_app_server_ce: export OVERLEAF_CONFIG=$(CFG_SERVER_CE)
-test_acceptance_app_server_pro: export MOCHA_ROOT_SUITE_NAME = Server Pro app acceptance tests
+test_acceptance_app_server_pro: export JUNIT_ROOT_SUITE_NAME = Server Pro app acceptance tests
 test_acceptance_app_server_pro: export COMPOSE_PROJECT_NAME=acceptance_test_server_pro_$(BUILD_DIR_NAME)
 test_acceptance_app_server_pro: export OVERLEAF_CONFIG=$(CFG_SERVER_PRO)
 
@@ -370,17 +370,17 @@ $(TEST_ACCEPTANCE_MODULES_MERGED_INNER_SPLIT):
 	)
 
 # See docs for test_acceptance_server_ce how this works.
-test_acceptance_modules_merged_saas: export MOCHA_ROOT_SUITE_NAME = SaaS modules acceptance tests
+test_acceptance_modules_merged_saas: export JUNIT_ROOT_SUITE_NAME = SaaS modules acceptance tests
 test_acceptance_modules_merged_saas: export COMPOSE_PROJECT_NAME = \
 	acceptance_test_modules_merged_saas_$(BUILD_DIR_NAME)
 test_acceptance_modules_merged_saas: export BASE_CONFIG = $(CFG_SAAS)
 
-test_acceptance_modules_merged_server_ce: export MOCHA_ROOT_SUITE_NAME = Server CE modules acceptance tests
+test_acceptance_modules_merged_server_ce: export JUNIT_ROOT_SUITE_NAME = Server CE modules acceptance tests
 test_acceptance_modules_merged_server_ce: export COMPOSE_PROJECT_NAME = \
 	acceptance_test_modules_merged_server_ce_$(BUILD_DIR_NAME)
 test_acceptance_modules_merged_server_ce: export BASE_CONFIG = $(CFG_SERVER_CE)
 
-test_acceptance_modules_merged_server_pro: export MOCHA_ROOT_SUITE_NAME = Server Pro modules acceptance tests
+test_acceptance_modules_merged_server_pro: export JUNIT_ROOT_SUITE_NAME = Server Pro modules acceptance tests
 test_acceptance_modules_merged_server_pro: export COMPOSE_PROJECT_NAME = \
 	acceptance_test_modules_merged_server_pro_$(BUILD_DIR_NAME)
 test_acceptance_modules_merged_server_pro: export BASE_CONFIG = $(CFG_SERVER_PRO)
@@ -412,7 +412,7 @@ test_acceptance_modules_merged_saas_3: export COMPOSE_PROJECT_NAME = \
 test_acceptance_modules_merged_saas_4: export COMPOSE_PROJECT_NAME = \
 	acceptance_test_modules_merged_saas_4_$(BUILD_DIR_NAME)
 $(TEST_ACCEPTANCE_MODULES_MERGED_SPLIT_SAAS): export BASE_CONFIG = $(CFG_SAAS)
-$(TEST_ACCEPTANCE_MODULES_MERGED_SPLIT_SAAS): export MOCHA_ROOT_SUITE_NAME = SaaS modules acceptance tests
+$(TEST_ACCEPTANCE_MODULES_MERGED_SPLIT_SAAS): export JUNIT_ROOT_SUITE_NAME = SaaS modules acceptance tests
 
 $(TEST_ACCEPTANCE_MODULES_MERGED_SPLIT_SAAS): test_acceptance_modules_merged_saas_%:
 	$(DOCKER_COMPOSE) run --rm test_acceptance make test_acceptance_modules_merged_inner_$*

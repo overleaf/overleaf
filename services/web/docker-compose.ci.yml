@@ -21,7 +21,7 @@ services:
     environment:
       CI:
       MODULE_NAME:
-      MOCHA_ROOT_SUITE_NAME:
+      JUNIT_ROOT_SUITE_NAME:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
       NODE_ENV: test
@@ -44,7 +44,7 @@ services:
     environment:
       CI:
       MODULE_NAME:
-      MOCHA_ROOT_SUITE_NAME:
+      JUNIT_ROOT_SUITE_NAME:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
       REDIS_HOST: redis_test
@@ -79,7 +79,7 @@ services:
     environment:
       NODE_OPTIONS: "--unhandled-rejections=strict"
       CI:
-      MOCHA_ROOT_SUITE_NAME:
+      JUNIT_ROOT_SUITE_NAME:
 
   test_frontend_ct:
     image: cypress/included:13.13.2
@@ -115,7 +115,7 @@ services:
       - ./data/reports:/overleaf/services/web/data/reports
     environment:
       CI:
-      MOCHA_ROOT_SUITE_NAME:
+      JUNIT_ROOT_SUITE_NAME:
       NODE_OPTIONS: "--unhandled-rejections=strict"
 
   tar:

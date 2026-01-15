@@ -105,6 +105,7 @@ const instrumentedCompile = instrumentWithTimer(compile, 'editor.compile')
 async function getProjectCompileLimits(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     owner_ref: 1,
+    fromV1TemplateId: 1,
   })
   return _getProjectCompileLimits(project)
 }
@@ -138,6 +139,9 @@ async function _getProjectCompileLimits(project) {
     compileBackendClass: compileGroup === 'standard' ? 'c3d' : 'c4d',
     ownerAnalyticsId: analyticsId,
   }
+  if (project.fromV1TemplateId === Settings.overrideCompileTimeForTemplate) {
+    limits.timeout = Math.max(limits.timeout, 20)
+  }
   return limits
 }
 
@@ -161,6 +165,7 @@ async function syncTeX(
   const project = await ProjectGetter.promises.getProject(projectId, {
     owner_ref: 1,
     imageName: 1,
+    fromV1TemplateId: 1,
   })
   const limits = await _getProjectCompileLimits(project)
   const { imageName } = project
