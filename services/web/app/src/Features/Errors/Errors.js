@@ -204,6 +204,11 @@ class SAMLRequestDeniedError extends SAMLAuthenticationError {
   }
 }
 
+class SAMLDomainCaptureManagedUserOptInRequiredError extends OError {
+  // use OError instead of SAMLDomainCaptureError since SAMLMiddleware will check for
+  // SAMLDomainCaptureError and update SAML audit log but these errors do not need to be logged
+}
+
 class SAMLDomainCaptureManagedUserMissingEmailError extends OError {}
 
 class SAMLGroupMemberLimitReachedError extends OError {}
@@ -398,6 +403,7 @@ module.exports = {
   SAMLDomainCaptureRegisterError,
   SAMLDomainCaptureManagedUserMissingEmailError,
   SAMLGroupMemberLimitReachedError,
+  SAMLDomainCaptureManagedUserOptInRequiredError,
   SAMLDomainCaptureManagedOptInUserMissingEmailError,
   SLInV2Error,
   ThirdPartyIdentityExistsError,
