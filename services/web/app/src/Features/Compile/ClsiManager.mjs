@@ -48,10 +48,6 @@ function getNewCompileBackendClass(projectId, compileBackendClass) {
   }
 
   switch (compileBackendClass) {
-    case 'n2d':
-      return 'n4'
-    case 'c2d':
-      return 'n4'
     case 'c3d':
       return 'n4'
     case 'c4d':
