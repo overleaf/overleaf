@@ -20,3 +20,4 @@ function naiveReverse(string) {
 
 exports.format = format
 exports.pad = pad
+exports.naiveReverse = naiveReverse
