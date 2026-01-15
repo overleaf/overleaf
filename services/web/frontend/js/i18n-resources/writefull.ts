@@ -165,6 +165,8 @@ const en = {
     'ai-context-menu.advanced-options.paraphrase.level': 'Level',
     'ai-context-menu.advanced-options.paraphrase.style': 'Style',
     'ai-context-menu.advanced-options.paraphrase.length': 'Length',
+    'ai-context-menu.advanced-options.prompt': 'Prompt',
+    'ai-context-menu.advanced-options.advanced': 'Advanced',
     'ai-context-menu.translate': 'Translate',
     'blocked-language-suggestions-modal.title': 'Blocked Language Suggestions',
     'blocked-language-suggestions-modal.description':
@@ -634,6 +636,8 @@ const es = {
     'ai-context-menu.advanced-options.paraphrase.level': 'Nivel',
     'ai-context-menu.advanced-options.paraphrase.style': 'Estilo',
     'ai-context-menu.advanced-options.paraphrase.length': 'Longitud',
+    'ai-context-menu.advanced-options.prompt': 'Prompt',
+    'ai-context-menu.advanced-options.advanced': 'Avanzado',
     'ai-context-menu.translate': 'Traducir',
     'blocked-language-suggestions-modal.title':
       'Sugerencias de Lenguaje Bloqueadas',
