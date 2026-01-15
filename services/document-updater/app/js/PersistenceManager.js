@@ -102,6 +102,13 @@ function getDoc(projectId, docId, options = {}, _callback) {
         body.ranges = {}
       }
 
+      if (!body.projectHistoryId) {
+        logger.warn(
+          { projectId, docId },
+          'projectHistoryId not found for doc from web'
+        )
+      }
+
       callback(
         null,
         body.lines,
