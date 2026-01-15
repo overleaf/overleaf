@@ -282,6 +282,13 @@ const RedisManager = {
       })
     }
 
+    if (!projectHistoryId) {
+      logger.warn(
+        { docId, projectId },
+        'projectHistoryId not found for doc in Redis'
+      )
+    }
+
     return {
       lines: docLines,
       version,
