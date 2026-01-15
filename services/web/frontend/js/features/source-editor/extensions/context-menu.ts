@@ -1,0 +1,249 @@
+import {
+  EditorView,
+  showTooltip,
+  Tooltip,
+  TooltipView,
+  keymap,
+} from '@codemirror/view'
+import {
+  Extension,
+  StateField,
+  StateEffect,
+  TransactionSpec,
+  EditorSelection,
+  Prec,
+} from '@codemirror/state'
+
+export const openContextMenuEffect = StateEffect.define<{
+  pos: number
+  x: number
+  y: number
+}>()
+
+export const closeContextMenuEffect = StateEffect.define()
+
+type ContextMenuState = {
+  tooltip: Tooltip | null
+  mousePosition: { x: number; y: number } | null
+}
+
+export const contextMenuStateField = StateField.define<ContextMenuState>({
+  create() {
+    return { tooltip: null, mousePosition: null }
+  },
+
+  update(field, tr) {
+    // Process state effects to open/close menu
+    for (const effect of tr.effects) {
+      if (effect.is(openContextMenuEffect)) {
+        const { pos, x, y } = effect.value
+        return {
+          tooltip: buildContextMenuTooltip(pos),
+          mousePosition: { x, y },
+        }
+      }
+      if (effect.is(closeContextMenuEffect)) {
+        return { tooltip: null, mousePosition: null }
+      }
+    }
+
+    // Close menu on document changes
+    if (tr.docChanged && field.tooltip) {
+      return { tooltip: null, mousePosition: null }
+    }
+
+    return field
+  },
+
+  // Connect state field to tooltip system
+  provide: field => [
+    showTooltip.compute([field], state => state.field(field).tooltip),
+  ],
+})
+
+function buildContextMenuTooltip(pos: number): Tooltip {
+  return {
+    pos,
+    above: false,
+    strictSide: false,
+    arrow: false,
+    create: createTooltipView,
+  }
+}
+
+const createTooltipView = (): TooltipView => {
+  const dom = document.createElement('div')
+  dom.className = 'editor-context-menu-container'
+  return { dom, overlap: true, offset: { x: 0, y: 0 } }
+}
+
+function isPositionInsideSelection(pos: number, from: number, to: number) {
+  return from !== to && pos >= from && pos <= to
+}
+
+function selectEntireLine(
+  view: EditorView,
+  pos: number
+): EditorSelection | null {
+  if (pos === null) {
+    return null
+  }
+
+  const line = view.state.doc.lineAt(pos)
+  return EditorSelection.single(line.from, line.to)
+}
+
+function closeContextMenu(view: EditorView): void {
+  const menuState = view.state.field(contextMenuStateField, false)
+  if (menuState?.tooltip) {
+    view.dispatch({ effects: closeContextMenuEffect.of(null) })
+  }
+}
+
+function openContextMenuAtPosition(
+  view: EditorView,
+  pos: number,
+  selection: EditorSelection | TransactionSpec['selection'],
+  clientX: number,
+  clientY: number
+): void {
+  view.dispatch({
+    selection,
+    effects: openContextMenuEffect.of({
+      pos,
+      x: clientX,
+      y: clientY,
+    }),
+  })
+}
+
+function isClickOnGutter(target: HTMLElement): boolean {
+  return !!target.closest('.cm-gutters')
+}
+
+// Gutter context menu plugin
+const gutterContextMenuPlugin = (): Extension =>
+  EditorView.updateListener.of(update => {
+    if (!update.view.dom.parentElement) {
+      return
+    }
+
+    const gutters = update.view.dom.parentElement.querySelector('.cm-gutters')
+    // Attach listener only once per editor instance
+    if (!gutters || gutters.hasAttribute('data-context-menu-attached')) {
+      return
+    }
+
+    gutters.setAttribute('data-context-menu-attached', 'true')
+    gutters.addEventListener('contextmenu', (event: Event) => {
+      const mouseEvent = event as MouseEvent
+      event.preventDefault()
+
+      const pos = update.view.posAtCoords({
+        x: mouseEvent.clientX,
+        y: mouseEvent.clientY,
+      })
+      if (pos === null) {
+        return
+      }
+
+      const selection = selectEntireLine(update.view, pos)
+      if (selection) {
+        openContextMenuAtPosition(
+          update.view,
+          pos,
+          selection,
+          mouseEvent.clientX,
+          mouseEvent.clientY
+        )
+      }
+    })
+  })
+
+// Editor view context menu handlers
+const editorContextMenuHandlers = (): Extension =>
+  EditorView.domEventHandlers({
+    contextmenu(event: MouseEvent, view: EditorView) {
+      event.preventDefault()
+
+      const pos = view.posAtCoords({ x: event.clientX, y: event.clientY })
+      if (pos === null) {
+        return false
+      }
+
+      const { from, to } = view.state.selection.main
+      const clickedInsideSelection = isPositionInsideSelection(pos, from, to)
+
+      // Set cursor to clicked position if outside selection
+      let selection: TransactionSpec['selection'] = { anchor: pos }
+      if (clickedInsideSelection) {
+        // Keep current selection if inside selection
+        // so actions apply to the existing selection
+        selection = view.state.selection
+      }
+
+      openContextMenuAtPosition(
+        view,
+        pos,
+        selection,
+        event.clientX,
+        event.clientY
+      )
+      return true
+    },
+
+    mousedown(event: MouseEvent, view: EditorView) {
+      const target = event.target as HTMLElement
+      const isGutter = isClickOnGutter(target)
+      const isRightClick = event.button === 2 || event.ctrlKey
+
+      // Close menu on any click except right-click on non-gutter
+      if (!isRightClick || isGutter) {
+        closeContextMenu(view)
+      }
+
+      // Prevent default on right-click to preserve selection
+      if (isRightClick) {
+        event.preventDefault()
+        return true
+      }
+      return false
+    },
+  })
+
+// High-priority keymap to handle Escape before default handlers
+const contextMenuKeymap = (): Extension =>
+  Prec.high(
+    keymap.of([
+      {
+        key: 'Escape',
+        run: view => {
+          const menuState = view.state.field(contextMenuStateField, false)
+          if (menuState?.tooltip) {
+            closeContextMenu(view)
+            return true
+          }
+          return false
+        },
+      },
+    ])
+  )
+
+export const contextMenu = (enabled: boolean): Extension =>
+  enabled
+    ? [
+        contextMenuContainerTheme,
+        contextMenuStateField,
+        gutterContextMenuPlugin(),
+        editorContextMenuHandlers(),
+        contextMenuKeymap(),
+      ]
+    : []
+
+const contextMenuContainerTheme = EditorView.baseTheme({
+  '.editor-context-menu-container.cm-tooltip': {
+    backgroundColor: 'transparent',
+    border: 'none',
+    zIndex: 100,
+  },
+})

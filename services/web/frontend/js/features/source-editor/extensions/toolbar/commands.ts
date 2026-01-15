@@ -166,3 +166,14 @@ export const toggleSearch: Command = view => {
 export const addComment = () => {
   window.dispatchEvent(new Event('add-new-review-comment'))
 }
+
+export const deleteSelection: Command = view => {
+  const { from, to } = view.state.selection.main
+  if (from === to) return false
+
+  view.dispatch({
+    changes: { from, to, insert: '' },
+    selection: { anchor: from },
+  })
+  return true
+}

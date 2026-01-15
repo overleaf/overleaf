@@ -57,6 +57,10 @@ export const CommandRegistryProvider: React.FC<React.PropsWithChildren> = ({
   // NOTE: This is where we'd add functionality for customising shortcuts.
   const shortcuts: Record<string, Shortcut[]> = useMemo(
     () => ({
+      cut: [{ key: 'Mod-x' }],
+      copy: [{ key: 'Mod-c' }],
+      paste: [{ key: 'Mod-v' }],
+      'toggle-track-changes': [{ key: 'Mod-Shift-A' }],
       undo: [
         {
           key: 'Mod-z',

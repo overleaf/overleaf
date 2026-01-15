@@ -1,0 +1,154 @@
+import {
+  useCodeMirrorStateContext,
+  useCodeMirrorViewContext,
+} from '@/features/source-editor/components/codemirror-context'
+import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
+import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
+import useSynctex from '@/features/pdf-preview/hooks/use-synctex'
+import { useDetachCompileContext } from '@/shared/context/detach-compile-context'
+import { useLayoutContext } from '@/shared/context/layout-context'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { useTranslation } from 'react-i18next'
+import { useCallback, useEffect, useState } from 'react'
+import {
+  formatShortcut,
+  useCommandRegistry,
+} from '@/features/ide-react/context/command-registry-context'
+import { closeContextMenuEffect } from '../extensions/context-menu'
+import * as commands from '../extensions/toolbar/commands'
+import {
+  cutSelection,
+  copySelection,
+  pasteWithoutFormatting,
+} from '../commands/clipboard'
+
+export const useContextMenuItems = () => {
+  const view = useCodeMirrorViewContext()
+  const state = useCodeMirrorStateContext()
+  const permissions = usePermissionsContext()
+  const { wantTrackChanges } = useEditorPropertiesContext()
+  const { syncToPdf, syncToPdfInFlight, canSyncToPdf } = useSynctex()
+  const { pdfUrl, pdfViewer } = useDetachCompileContext()
+  const { detachRole } = useLayoutContext()
+  const visualPreviewEnabled = useFeatureFlag('visual-preview')
+  const { t } = useTranslation()
+  const { shortcuts } = useCommandRegistry()
+
+  const closeMenu = useCallback(() => {
+    view.dispatch({ effects: closeContextMenuEffect.of(null) })
+  }, [view])
+
+  const [pendingClose, setPendingClose] = useState(false)
+
+  // Wait for syncToPdf to finish before closing the menu
+  useEffect(() => {
+    if (pendingClose && !syncToPdfInFlight) {
+      closeMenu()
+      setPendingClose(false)
+    }
+  }, [pendingClose, syncToPdfInFlight, closeMenu])
+
+  const hasSelection = !state.selection.main.empty
+  const canEdit = permissions.write || permissions.trackedWrite
+  const jumpToLocationInPdfEnabled =
+    pdfUrl &&
+    pdfViewer !== 'native' &&
+    !detachRole &&
+    !visualPreviewEnabled &&
+    canSyncToPdf
+
+  const wrapForContextMenu = useCallback(
+    (command: () => Promise<boolean> | boolean) => async () => {
+      const result = await command()
+      if (result !== false) {
+        view.focus()
+        closeMenu()
+      }
+    },
+    [view, closeMenu]
+  )
+
+  const handleCut = wrapForContextMenu(() => cutSelection(view))
+  const handleCopy = wrapForContextMenu(() => copySelection(view))
+  const handlePaste = wrapForContextMenu(() => pasteWithoutFormatting(view))
+  const handleDelete = wrapForContextMenu(() => commands.deleteSelection(view))
+
+  const handleToggleTrackChanges = wrapForContextMenu(() => {
+    window.dispatchEvent(new Event('toggle-track-changes'))
+    return true
+  })
+
+  const handleComment = wrapForContextMenu(() => {
+    commands.addComment()
+    return true
+  })
+
+  // Sync-to-PDF is special: it needs to wait for async completion before closing
+  const handleSyncToPdf = useCallback(() => {
+    syncToPdf()
+    setPendingClose(true)
+    view.focus()
+  }, [syncToPdf, view])
+
+  const getShortcut = useCallback(
+    (id: string) => {
+      const shortcut = shortcuts[id]?.[0]
+      return shortcut ? formatShortcut(shortcut) : undefined
+    },
+    [shortcuts]
+  )
+
+  return [
+    {
+      label: t('cut'),
+      handler: handleCut,
+      disabled: false,
+      show: canEdit,
+      shortcut: getShortcut('cut'),
+    },
+    {
+      label: t('copy'),
+      handler: handleCopy,
+      disabled: false,
+      show: true,
+      shortcut: getShortcut('copy'),
+    },
+    {
+      label: t('paste'),
+      handler: handlePaste,
+      disabled: false,
+      show: canEdit,
+      shortcut: getShortcut('paste'),
+    },
+    {
+      label: t('delete'),
+      handler: handleDelete,
+      disabled: !hasSelection,
+      show: canEdit,
+      shortcut: undefined,
+    },
+    {
+      label: t('jump_to_location_in_pdf'),
+      handler: handleSyncToPdf,
+      disabled: syncToPdfInFlight,
+      separatorAbove: true,
+      show: jumpToLocationInPdfEnabled,
+      shortcut: undefined,
+    },
+    {
+      label: wantTrackChanges ? t('back_to_editing') : t('suggest_edits'),
+      handler: handleToggleTrackChanges,
+      disabled: false,
+      separatorAbove: true,
+      show: canEdit,
+      shortcut: getShortcut('toggle-track-changes'),
+    },
+    {
+      label: t('comment'),
+      handler: handleComment,
+      disabled: !hasSelection,
+      show: permissions.comment,
+      shortcut: getShortcut('insert-comment'),
+    },
+  ].filter(item => item.show)
+}

@@ -33,7 +33,7 @@ const { buildFileTree, createFolder } =
   (importOverleafModules('snapshotUtils')[0]
     ?.import as typeof StubSnapshotUtils) || StubSnapshotUtils
 
-const FileTreeDataContext = createContext<
+export const FileTreeDataContext = createContext<
   | {
       // fileTreeData is the up-to-date representation of the files list, updated
       // by the file tree

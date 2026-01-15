@@ -8,6 +8,10 @@ import { EditorView } from '@codemirror/view'
 import { addEffectListener, removeEffectListener } from './effect-listeners'
 import { setMetadataEffect } from './language'
 import { debugConsole } from '@/utils/debugging'
+import {
+  dispatchFigureModalPasteEvent,
+  isAllowedImageType,
+} from '../utils/paste-image'
 
 type NestedReadonly<T> = {
   readonly [P in keyof T]: NestedReadonly<T[P]>
@@ -160,18 +164,6 @@ export function waitForFileTreeUpdate(view: EditorView) {
   }
 }
 
-const ALLOWED_MIME_TYPES = new Set([
-  'image/jpeg',
-  'image/png',
-  'application/pdf',
-])
-
-export type PastedImageData = {
-  name: string
-  type: string
-  data: Blob
-}
-
 export const figureModalPasteHandler = (): Extension => {
   return EditorView.domEventHandlers({
     drop: evt => {
@@ -179,18 +171,14 @@ export const figureModalPasteHandler = (): Extension => {
         return
       }
       const file = evt.dataTransfer.files[0]
-      if (!ALLOWED_MIME_TYPES.has(file.type)) {
+      if (!isAllowedImageType(file.type)) {
         return
       }
-      window.dispatchEvent(
-        new CustomEvent<PastedImageData>('figure-modal:paste-image', {
-          detail: {
-            name: file.name,
-            type: file.type,
-            data: file,
-          },
-        })
-      )
+      dispatchFigureModalPasteEvent({
+        name: file.name,
+        type: file.type,
+        data: file,
+      })
     },
     paste: evt => {
       if (!evt.clipboardData || evt.clipboardData.files.length === 0) {
@@ -200,18 +188,14 @@ export const figureModalPasteHandler = (): Extension => {
         return // allow pasted text to be handled even if there's also a file on the clipboard
       }
       const file = evt.clipboardData.files[0]
-      if (!ALLOWED_MIME_TYPES.has(file.type)) {
+      if (!isAllowedImageType(file.type)) {
         return
       }
-      window.dispatchEvent(
-        new CustomEvent<PastedImageData>('figure-modal:paste-image', {
-          detail: {
-            name: file.name,
-            type: file.type,
-            data: file,
-          },
-        })
-      )
+      dispatchFigureModalPasteEvent({
+        name: file.name,
+        type: file.type,
+        data: file,
+      })
     },
   })
 }

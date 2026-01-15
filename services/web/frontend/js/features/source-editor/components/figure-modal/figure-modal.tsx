@@ -18,7 +18,6 @@ import { ChangeSpec } from '@codemirror/state'
 import { snippet } from '@codemirror/autocomplete'
 import {
   FigureData,
-  PastedImageData,
   editFigureData,
   editFigureDataEffect,
 } from '../../extensions/figure-modal'
@@ -28,6 +27,7 @@ import useEventListener from '../../../../shared/hooks/use-event-listener'
 import { prepareLines } from '../../utils/prepare-lines'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import { isSvgFile } from '../../utils/file'
+import { PastedImageData } from '../../utils/paste-image'
 
 const FigureModalBody = lazy(() => import('./figure-modal-body'))
 
