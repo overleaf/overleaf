@@ -157,12 +157,6 @@
 }
 
 .symbol-palette-close-button {
-  --bs-btn-close-color: var(--symbol-palette-color);
-
-  [data-theme='default'] & {
-    filter: var(--bs-btn-close-white-filter);
-  }
-
   margin-top: var(--spacing-04);
   margin-left: var(--spacing-05);
   margin-right: var(--spacing-03);
