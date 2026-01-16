@@ -31,6 +31,13 @@ const e2eCompileDurationSeconds = new prom.Histogram({
   name: 'clsi_e2e_compile_duration_seconds',
   help: 'Duration of the entire compile request in clsi (sync, latexmk, output)',
   buckets: COMPILE_TIME_BUCKETS,
+  labelNames: ['compile', 'group'],
+})
+
+const e2eCompileDurationClsiPerfSeconds = new prom.Gauge({
+  name: 'clsi_e2e_compile_duration_clsi_perf_seconds',
+  help: 'Duration of the entire compile request in clsi (sync, latexmk, output) for clsi-perf',
+  labelNames: ['compile', 'variant'],
 })
 
 const syncResourcesDurationSeconds = new prom.Histogram({
@@ -61,12 +68,20 @@ const imageProcessingDurationSeconds = new prom.Histogram({
   labelNames: ['group', 'type'],
 })
 
+function shouldSkipMetrics(request) {
+  return ['clsi-perf', 'health-check', 'clsi-cache-template'].includes(
+    request.metricsOpts.path
+  )
+}
+
 module.exports = {
   compilesTotal,
   compileDurationSeconds,
   e2eCompileDurationSeconds,
+  e2eCompileDurationClsiPerfSeconds,
   syncResourcesDurationSeconds,
   processOutputFilesDurationSeconds,
   latexmkRuleDurationSeconds,
   imageProcessingDurationSeconds,
+  shouldSkipMetrics,
 }

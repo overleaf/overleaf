@@ -23,6 +23,7 @@ const ResourceStateManager = require('./ResourceStateManager')
 const Metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 const settings = require('@overleaf/settings')
+const { shouldSkipMetrics } = require('./Metrics')
 
 const parallelFileDownloads = settings.parallelFileDownloads || 1
 
@@ -193,7 +194,7 @@ module.exports = ResourceWriter = {
       request.metricsOpts
     )
     const callback = function (error, ...result) {
-      timer.done()
+      if (!shouldSkipMetrics(request)) timer.done()
       return _callback(error, ...Array.from(result))
     }
 

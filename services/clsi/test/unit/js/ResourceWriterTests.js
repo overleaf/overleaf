@@ -246,6 +246,7 @@ describe('ResourceWriter', function () {
         syncType: 'incremental',
         syncState: (this.syncState = '1234567890abcdef'),
         resources: this.resources,
+        metricsOpts: { path: 'foo' },
       }
       this.OutputFileFinder.findOutputFiles = sinon
         .stub()

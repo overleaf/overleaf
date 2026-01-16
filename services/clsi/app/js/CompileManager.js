@@ -27,6 +27,7 @@ const StatsManager = require('./StatsManager')
 const SafeReader = require('./SafeReader')
 const { enableLatexMkMetrics, addLatexFdbMetrics } = require('./LatexMetrics')
 const { callbackifyMultiResult } = require('@overleaf/promise-utils')
+const { shouldSkipMetrics } = require('./Metrics')
 
 const KNOWN_LATEXMK_RULES = new Set([
   'biber',
@@ -247,7 +248,7 @@ async function doCompile(request, stats, timings) {
       )
     }
 
-    if (!_shouldSkipMetrics(request)) {
+    if (!shouldSkipMetrics(request)) {
       const status = error.timedout
         ? 'timeout'
         : error.terminated
@@ -284,7 +285,7 @@ async function doCompile(request, stats, timings) {
   const status = stats['latexmk-errors'] ? 'error' : 'success'
   _emitMetrics(request, status, stats, timings)
 
-  if (stats['pdf-size']) {
+  if (stats['pdf-size'] && !shouldSkipMetrics(request)) {
     emitPdfStats(stats, timings, request)
   }
 
@@ -726,12 +727,17 @@ function _isImageNameAllowed(imageName) {
   return !ALLOWED_IMAGES || ALLOWED_IMAGES.includes(imageName)
 }
 
-function _shouldSkipMetrics(request) {
-  return ['clsi-perf', 'health-check'].includes(request.metricsOpts.path)
-}
-
 function _emitMetrics(request, status, stats, timings) {
-  if (_shouldSkipMetrics(request)) {
+  if (request.metricsOpts.path === 'clsi-perf') {
+    ClsiMetrics.e2eCompileDurationClsiPerfSeconds.set(
+      {
+        compile: request.metricsOpts.compile,
+        variant: request.metricsOpts.method,
+      },
+      timings.compileE2E / 1000
+    )
+  }
+  if (shouldSkipMetrics(request)) {
     return
   }
 
@@ -832,7 +838,13 @@ function _emitMetrics(request, status, stats, timings) {
   }
 
   if (timings.compileE2E != null) {
-    ClsiMetrics.e2eCompileDurationSeconds.observe(timings.compileE2E / 1000)
+    ClsiMetrics.e2eCompileDurationSeconds.observe(
+      {
+        compile: request.metricsOpts.compile,
+        group: request.compileGroup,
+      },
+      timings.compileE2E / 1000
+    )
   }
 }
 

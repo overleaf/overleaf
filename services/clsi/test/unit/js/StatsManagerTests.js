@@ -85,7 +85,7 @@ describe('StatsManager', function () {
 
   describe('sampleRequest', function () {
     it('should return undefined if there is no user_id', function () {
-      const request = {}
+      const request = { metricsOpts: {} }
       const percentage = 50
       expect(sampleRequest(request, percentage)).to.be.undefined
     })
@@ -127,21 +127,15 @@ describe('StatsManager', function () {
     })
 
     it('should return undefined if the sampling percentage is 0', function () {
-      const request = { user_id: 'some-user' }
+      const request = { user_id: 'some-user', metricsOpts: {} }
       const percentage = 0
       expect(sampleRequest(request, percentage)).to.be.undefined
     })
 
     it('should return undefined if the sampling percentage is negative', function () {
-      const request = { user_id: 'some-user' }
+      const request = { user_id: 'some-user', metricsOpts: {} }
       const percentage = -10
       expect(sampleRequest(request, percentage)).to.be.undefined
-    })
-
-    it('should sample if there are no metricsOpts', function () {
-      const request = { user_id: 'test-key-in' } // percentile 13
-      const percentage = 40
-      expect(sampleRequest(request, percentage)).to.be.true
     })
 
     it('should sample if metricsOpts has no path', function () {
@@ -151,13 +145,13 @@ describe('StatsManager', function () {
     })
 
     it('should return true for a request that should be sampled', function () {
-      const request = { user_id: 'test-key-in' } // percentile 13
+      const request = { user_id: 'test-key-in', metricsOpts: {} } // percentile 13
       const percentage = 40
       expect(sampleRequest(request, percentage)).to.be.true
     })
 
     it('should return false for a request that should not be sampled', function () {
-      const request = { user_id: 'test-key-outer' } // percentile 47
+      const request = { user_id: 'test-key-outer', metricsOpts: {} } // percentile 47
       const percentage = 40
       expect(sampleRequest(request, percentage)).to.be.false
     })

@@ -85,16 +85,20 @@ async function pipeUrlToFile(url, fallbackURL, filePath) {
   }
 
   const source = inferSource(url)
-  Metrics.inc('url_source', 1, { path: source })
+  if (source !== 'clsi-perf') {
+    Metrics.inc('url_source', 1, { path: source })
+  }
 
   const atomicWrite = filePath + '~'
   try {
     const output = fs.createWriteStream(atomicWrite)
     await pipeline(stream, output)
     await fs.promises.rename(atomicWrite, filePath)
-    Metrics.count('UrlFetcher.downloaded_bytes', output.bytesWritten, {
-      path: source,
-    })
+    if (source !== 'clsi-perf') {
+      Metrics.count('UrlFetcher.downloaded_bytes', output.bytesWritten, {
+        path: source,
+      })
+    }
   } catch (err) {
     try {
       await fs.promises.unlink(atomicWrite)
