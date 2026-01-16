@@ -393,16 +393,18 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
 
 /**
  * @param {{_id: string}} user
- * @returns {Promise<{bestSubscription:Subscription,individualSubscription:DBSubscription|null,memberGroupSubscriptions:DBSubscription[]}>}
+ * @returns {Promise<{bestSubscription:Subscription,individualSubscription:DBSubscription|null,memberGroupSubscriptions:DBSubscription[],managedGroupSubscriptions:DBSubscription[]}>}
  */
 async function getUsersSubscriptionDetails(user) {
   let [
     individualSubscription,
     memberGroupSubscriptions,
+    managedGroupSubscriptions,
     currentInstitutionsWithLicence,
   ] = await Promise.all([
     SubscriptionLocator.promises.getUsersSubscription(user),
     SubscriptionLocator.promises.getMemberSubscriptions(user),
+    SubscriptionLocator.promises.getManagedGroupSubscriptions(user),
     InstitutionsGetter.promises.getCurrentInstitutionsWithLicence(user._id),
   ])
   if (
@@ -483,7 +485,12 @@ async function getUsersSubscriptionDetails(user) {
       }
     }
   }
-  return { bestSubscription, individualSubscription, memberGroupSubscriptions }
+  return {
+    bestSubscription,
+    individualSubscription,
+    memberGroupSubscriptions,
+    managedGroupSubscriptions,
+  }
 }
 
 function buildPlansList(currentPlan, isInTrial) {

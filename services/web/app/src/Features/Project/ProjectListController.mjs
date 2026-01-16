@@ -125,6 +125,7 @@ async function projectListPage(req, res, next) {
   let usersBestSubscription
   let usersIndividualSubscription
   let usersGroupSubscriptions = []
+  let usersManagedGroupSubscriptions = []
   let survey
   let userIsMemberOfGroupSubscription = false
   let groupSubscriptionsPendingEnrollment = []
@@ -186,6 +187,7 @@ async function projectListPage(req, res, next) {
         bestSubscription: usersBestSubscription,
         individualSubscription: usersIndividualSubscription,
         memberGroupSubscriptions: usersGroupSubscriptions,
+        managedGroupSubscriptions: usersManagedGroupSubscriptions,
       } = await SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
         { _id: userId }
       ))
@@ -195,20 +197,16 @@ async function projectListPage(req, res, next) {
         "Failed to get user's best subscription"
       )
     }
-    try {
-      userIsMemberOfGroupSubscription = usersGroupSubscriptions?.length > 0
 
-      // TODO use helper function
-      if (!user.enrollment?.managedBy) {
-        groupSubscriptionsPendingEnrollment = usersGroupSubscriptions.filter(
-          subscription =>
-            subscription.groupPlan && subscription.managedUsersEnabled
-        )
-      }
-    } catch (error) {
-      logger.error(
-        { err: error },
-        'Failed to check whether user is a member of group subscription'
+    userIsMemberOfGroupSubscription =
+      usersGroupSubscriptions.length > 0 ||
+      usersManagedGroupSubscriptions.length > 0
+
+    // TODO use helper function
+    if (!user.enrollment?.managedBy) {
+      groupSubscriptionsPendingEnrollment = usersGroupSubscriptions.filter(
+        subscription =>
+          subscription.groupPlan && subscription.managedUsersEnabled
       )
     }
 
@@ -447,14 +445,13 @@ async function projectListPage(req, res, next) {
   let showInrGeoBanner = false
   let showLATAMBanner = false
   let recommendedCurrency
+  const { countryCode, currencyCode } =
+    await GeoIpLookup.promises.getCurrencyCode(req.ip)
 
   if (
     usersBestSubscription?.type === 'free' ||
     usersBestSubscription?.type === 'standalone-ai-add-on'
   ) {
-    const { countryCode, currencyCode } =
-      await GeoIpLookup.promises.getCurrencyCode(req.ip)
-
     if (countryCode === 'IN') {
       showInrGeoBanner = true
     }
@@ -478,9 +475,9 @@ async function projectListPage(req, res, next) {
   }
 
   const affiliations = userAffiliations || []
-  const inEnterpriseCommons = affiliations.some(
-    affiliation => affiliation.institution?.enterpriseCommons
-  )
+  const commonsInstitution = affiliations.find(
+    affiliation => affiliation.institution?.commonsAccount
+  )?.institution?.name
 
   let onboardingDataCollection
   let subjectArea
@@ -493,10 +490,9 @@ async function projectListPage(req, res, next) {
   let customerIoEnabled = false
   const aiBlocked = !(await _canUseAIAssist(user))
   const hasAiAssist = await _userHasAIAssist(user)
-  if (!userIsMemberOfGroupSubscription && !inEnterpriseCommons && isSaas) {
+
+  if (!userIsMemberOfGroupSubscription && !commonsInstitution && isSaas) {
     try {
-      const ip = req.ip
-      const { countryCode } = await GeoIpLookup.promises.getCurrencyCode(ip)
       const excludedCountries = ['IN', 'CN']
 
       if (!excludedCountries.includes(countryCode)) {
@@ -548,6 +544,13 @@ async function projectListPage(req, res, next) {
     user
   )
 
+  const groupRole = userIsMemberOfGroupSubscription
+    ? usersManagedGroupSubscriptions?.length > 0 ||
+      usersGroupSubscriptions.some(sub => sub.userIsGroupManager)
+      ? 'admin'
+      : 'member'
+    : undefined
+
   res.render('project/list-react', {
     title: 'your_projects',
     usersBestSubscription,
@@ -595,6 +598,10 @@ async function projectListPage(req, res, next) {
     role,
     usedLatex,
     inactiveTutorials,
+    countryCode,
+    commonsInstitution,
+    groupRole,
+    isManagedUser: Boolean(user.enrollment?.managedBy),
   })
 }
 

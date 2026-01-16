@@ -113,6 +113,7 @@ describe('SubscriptionViewModelBuilder', function () {
       promises: {
         getUsersSubscription: sinon.stub().resolves(),
         getMemberSubscriptions: sinon.stub().resolves(),
+        getManagedGroupSubscriptions: sinon.stub().resolves([]),
       },
       getUsersSubscription: sinon.stub().yields(),
       getMemberSubscriptions: sinon.stub().yields(null, []),

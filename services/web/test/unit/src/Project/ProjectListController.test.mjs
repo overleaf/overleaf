@@ -148,6 +148,7 @@ describe('ProjectListController', function () {
           bestSubscription: { type: 'free' },
           individualSubscription: null,
           memberGroupSubscriptions: [],
+          managedGroupSubscriptions: [],
         }),
       },
     }
@@ -472,6 +473,8 @@ describe('ProjectListController', function () {
       ctx.Features.hasFeature.withArgs('saas').returns(true)
       ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
         {
+          memberGroupSubscriptions: [],
+          managedGroupSubscriptions: [],
           bestSubscription: {
             type: 'free',
           },
@@ -491,6 +494,8 @@ describe('ProjectListController', function () {
       ctx.Features.hasFeature.withArgs('saas').returns(true)
       ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
         {
+          memberGroupSubscriptions: [],
+          managedGroupSubscriptions: [],
           bestSubscription: {
             type: 'individual',
           },
@@ -897,7 +902,7 @@ describe('ProjectListController', function () {
       beforeEach(function (ctx) {
         ctx.Features.hasFeature.withArgs('saas').returns(true)
         ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
-          { memberGroupSubscriptions: [] }
+          { memberGroupSubscriptions: [], managedGroupSubscriptions: [] }
         )
         ctx.UserGetter.promises.getUserFullEmails.resolves([
           {
