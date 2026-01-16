@@ -1,34 +1,17 @@
 import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
-import Settings from '@overleaf/settings'
-
-const { hasAdminCapability, hasAdminAccess } = AdminAuthorizationHelper
 
 const UserMembershipAuthorization = {
-  hasStaffAccess(requiredStaffAccess) {
-    return req => {
-      if (!req.user) {
-        return false
-      }
-      return (
-        requiredStaffAccess &&
-        req.user.staffAccess &&
-        req.user.staffAccess[requiredStaffAccess]
-      )
-    }
-  },
+  hasAdminCapability: AdminAuthorizationHelper.hasAdminCapability,
 
-  hasAdminCapability,
-
-  hasAnyAdminRole(req) {
-    return (
-      Settings.adminRolesEnabled &&
-      hasAdminAccess(SessionManager.getSessionUser(req.session))
+  hasAdminAccess(req) {
+    return AdminAuthorizationHelper.hasAdminAccess(
+      SessionManager.getSessionUser(req.session)
     )
   },
 
   hasModifyGroupMemberCapability(req, res) {
-    return hasAdminCapability(
+    return AdminAuthorizationHelper.hasAdminCapability(
       req.entity.managedUsersEnabled
         ? 'modify-managed-group-member'
         : 'modify-group-member',

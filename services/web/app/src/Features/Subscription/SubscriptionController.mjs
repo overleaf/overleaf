@@ -172,39 +172,6 @@ function formatGroupPlansDataForDash() {
   }
 }
 
-/**
- * Trim the staffAccess object to only include allowed fields
- * @param {Object} user - The user object with mongoose object fields
- * @returns {Object} - User object with trimmed staffAccess
- */
-function _trimStaffAccess(user) {
-  if (!user || !user.staffAccess) return user
-
-  const allowedFields = [
-    'publisherMetrics',
-    'publisherManagement',
-    'institutionMetrics',
-    'institutionManagement',
-    'groupMetrics',
-    'groupManagement',
-    'adminMetrics',
-    'splitTestMetrics',
-    'splitTestManagement',
-  ]
-
-  const trimmedStaffAccess = allowedFields.reduce((acc, key) => {
-    if (key in user.staffAccess) {
-      acc[key] = user.staffAccess[key]
-    }
-    return acc
-  }, {})
-
-  return {
-    ...user,
-    staffAccess: trimmedStaffAccess,
-  }
-}
-
 async function userSubscriptionPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
   await SplitTestHandler.promises.getAssignment(req, res, 'pause-subscription')
@@ -337,7 +304,7 @@ async function userSubscriptionPage(req, res) {
     title: 'your_subscriptions',
     plans: plansData?.plans,
     planCodesChangingAtTermEnd: plansData?.planCodesChangingAtTermEnd,
-    user: _trimStaffAccess(user),
+    user,
     hasSubscription,
     fromPlansPage,
     redirectedPaymentErrorCode,

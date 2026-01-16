@@ -6,6 +6,7 @@ import Subscription from './helpers/Subscription.mjs'
 import Publisher from './helpers/Publisher.mjs'
 import sinon from 'sinon'
 import RecurlyClient from '../../../app/src/Features/Subscription/RecurlyClient.mjs'
+import Settings from '@overleaf/settings'
 import Features from '../../../app/src/infrastructure/Features.mjs'
 
 describe('UserMembershipAuthorization', function () {
@@ -16,6 +17,16 @@ describe('UserMembershipAuthorization', function () {
 
     this.user = new User()
     sinon.stub(RecurlyClient.promises, 'getSubscription').resolves({})
+
+    this.adminRolesEnabledStub = sinon.stub(Settings, 'adminRolesEnabled')
+    this.adminRolesEnabledStub.value(true)
+
+    this.adminPrivilegeAvailableStub = sinon.stub(
+      Settings,
+      'adminPrivilegeAvailable'
+    )
+    this.adminPrivilegeAvailableStub.value(true)
+
     async.series([this.user.ensureUserExists.bind(this.user)], done)
   })
 
@@ -25,6 +36,8 @@ describe('UserMembershipAuthorization', function () {
     }
 
     RecurlyClient.promises.getSubscription.restore()
+    this.adminRolesEnabledStub.restore()
+    this.adminPrivilegeAvailableStub.restore()
   })
 
   describe('group', function () {
@@ -92,13 +105,14 @@ describe('UserMembershipAuthorization', function () {
     })
 
     describe('creation', function () {
-      it('should allow staff only', function (done) {
+      it('should allow admin only', function (done) {
         const url = `/entities/institution/create/foo`
         async.series(
           [
             this.user.login.bind(this.user),
             expectAccess(this.user, url, 403),
-            cb => this.user.ensureStaffAccess('institutionManagement', cb),
+            cb => this.user.ensureAdmin(cb),
+            cb => this.user.ensureAdminRole('engineering', cb),
             this.user.login.bind(this.user),
             expectAccess(this.user, url, 200),
           ],
@@ -135,13 +149,14 @@ describe('UserMembershipAuthorization', function () {
     })
 
     describe('creation', function () {
-      it('should redirect staff only', function (done) {
+      it('should redirect admin only', function (done) {
         const url = `/manage/publishers/foo/managers`
         async.series(
           [
             this.user.login.bind(this.user),
             expectAccess(this.user, url, 404),
-            cb => this.user.ensureStaffAccess('publisherManagement', cb),
+            cb => this.user.ensureAdmin(cb),
+            cb => this.user.ensureAdminRole('engineering', cb),
             this.user.login.bind(this.user),
             expectAccess(this.user, url, 302, /\/create/),
           ],
@@ -149,12 +164,13 @@ describe('UserMembershipAuthorization', function () {
         )
       })
 
-      it('should allow staff only', function (done) {
+      it('should allow admin only', function (done) {
         const url = `/entities/publisher/create/foo`
         async.series(
           [
             expectAccess(this.user, url, 403),
-            cb => this.user.ensureStaffAccess('publisherManagement', cb),
+            cb => this.user.ensureAdmin(cb),
+            cb => this.user.ensureAdminRole('engineering', cb),
             this.user.login.bind(this.user),
             expectAccess(this.user, url, 200),
           ],
