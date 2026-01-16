@@ -9,7 +9,7 @@ import OError from '@overleaf/o-error'
 import EmailsHelper from '../Helpers/EmailHelper.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import { z, parseReq } from '../../infrastructure/Validation.mjs'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import Features from '../../infrastructure/Features.mjs'
 
 const setNewUserPasswordSchema = z.object({
   body: z.object({
@@ -195,10 +195,6 @@ async function renderSetPasswordForm(req, res, next) {
           params.append('email', email)
         }
       }
-      if (req.query.uniaccessphase1) {
-        // Preserve uniaccessphase1 flag in the redirect so it can be tested
-        params.append('uniaccessphase1', req.query.uniaccessphase1)
-      }
       const queryString = params.toString() ? `?${params.toString()}` : ''
       return res.redirect('/user/password/set' + queryString)
     } catch (err) {
@@ -219,16 +215,8 @@ async function renderSetPasswordForm(req, res, next) {
   const passwordResetToken = req.session.resetToken
   delete req.session.resetToken
 
-  const ciamAssignment = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'uniaccessphase1'
-  )
-
   res.render(
-    ciamAssignment.variant === 'enabled'
-      ? 'user/setPasswordCiam'
-      : 'user/setPassword',
+    Features.hasFeature('saas') ? 'user/setPasswordCiam' : 'user/setPassword',
     {
       title: 'set_password',
       email,
@@ -251,14 +239,8 @@ async function renderRequestResetForm(req, res) {
     error = 'password_reset_token_expired'
   }
 
-  const ciamAssignment = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'uniaccessphase1'
-  )
-
   res.render(
-    ciamAssignment.variant === 'enabled'
+    Features.hasFeature('saas')
       ? 'user/passwordResetCiam'
       : 'user/passwordReset',
     {

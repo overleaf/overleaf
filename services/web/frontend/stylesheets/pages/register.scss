@@ -11,52 +11,6 @@
     margin-bottom: 0;
   }
 
-  .register-content-container {
-    padding: 0; // override bootstrap padding
-    display: flex;
-    background-color: #f2f4f7;
-    min-height: 100vh;
-  }
-
-  .register-form-container {
-    display: flex;
-    justify-content: center;
-    padding-top: var(--spacing-11);
-    background-color: var(--white);
-
-    @include media-breakpoint-down(lg) {
-      height: 100%;
-    }
-
-    .register-form {
-      text-align: center;
-      max-width: 320px;
-      padding-bottom: 120px;
-
-      .notification-content p {
-        text-align: left;
-      }
-
-      .registration-message {
-        .registration-message-heading {
-          color: var(--neutral-70);
-          font-size: var(--font-size-05);
-          line-height: var(--line-height-04);
-          margin-top: var(--spacing-08);
-          margin-bottom: var(--spacing-05);
-        }
-
-        .registration-message-details {
-          font-size: var(--font-size-02);
-        }
-      }
-
-      .tos-agreement-notice {
-        text-align: left;
-      }
-    }
-  }
-
   .register-illustration-container {
     height: 100%;
     display: flex;
