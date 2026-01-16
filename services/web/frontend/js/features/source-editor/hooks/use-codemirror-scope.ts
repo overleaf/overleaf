@@ -61,8 +61,8 @@ import { beforeChangeDocEffect } from '@/features/source-editor/extensions/befor
 import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 import { useEditorSelectionContext } from '@/shared/context/editor-selection-context'
 import { useActiveEditorTheme } from '@/shared/hooks/use-active-editor-theme'
-import { isVisualEditorAvailable } from '../utils/visual-editor'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { isValidTeXFile } from '@/main/is-valid-tex-file'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -276,8 +276,7 @@ function useCodeMirrorScope(view: EditorView) {
 
   const { previewByPath } = useFileTreePathContext()
 
-  const showVisual =
-    visual && !!openDocName && isVisualEditorAvailable(openDocName)
+  const showVisual = visual && !!openDocName && isValidTeXFile(openDocName)
 
   const visualRef = useRef({
     previewByPath,
