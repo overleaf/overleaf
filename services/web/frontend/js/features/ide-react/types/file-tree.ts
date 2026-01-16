@@ -13,18 +13,15 @@ interface BaseFileTreeFindResult<T> {
   index: number
 }
 
-export interface FileTreeFolderFindResult
-  extends BaseFileTreeFindResult<Folder> {
+export interface FileTreeFolderFindResult extends BaseFileTreeFindResult<Folder> {
   type: 'folder'
 }
 
-export interface FileTreeDocumentFindResult
-  extends BaseFileTreeFindResult<Doc> {
+export interface FileTreeDocumentFindResult extends BaseFileTreeFindResult<Doc> {
   type: 'doc'
 }
 
-export interface FileTreeFileRefFindResult
-  extends BaseFileTreeFindResult<FileRef> {
+export interface FileTreeFileRefFindResult extends BaseFileTreeFindResult<FileRef> {
   type: 'fileRef'
 }
 

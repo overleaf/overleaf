@@ -31,9 +31,7 @@ export function isStandaloneAiAddOnPlanCode(planCode) {
 export function subscriptionChangeIsAiAssistUpgrade(subscriptionChange) {
   return Boolean(
     isStandaloneAiAddOnPlanCode(subscriptionChange.nextPlanCode) ||
-      subscriptionChange.nextAddOns?.some(
-        addOn => addOn.code === AI_ADD_ON_CODE
-      )
+    subscriptionChange.nextAddOns?.some(addOn => addOn.code === AI_ADD_ON_CODE)
   )
 }
 

@@ -85,7 +85,7 @@ const Features = {
       case 'link-url':
         return Boolean(
           _.get(Settings, ['apis', 'linkedUrlProxy', 'url']) &&
-            Settings.enabledLinkedFileTypes.includes('url')
+          Settings.enabledLinkedFileTypes.includes('url')
         )
       case 'support':
         return supportModuleAvailable

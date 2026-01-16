@@ -922,7 +922,7 @@ export const atomicDecorations = (options: Options) => {
                 )
                 const centered = Boolean(
                   environmentNode &&
-                    centeringNodeForEnvironment(environmentNode)
+                  centeringNodeForEnvironment(environmentNode)
                 )
                 const figureData = environmentNode
                   ? parseFigureData(environmentNode, state)

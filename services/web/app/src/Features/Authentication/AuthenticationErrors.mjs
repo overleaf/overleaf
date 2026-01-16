@@ -6,7 +6,8 @@ import Errors from '../Errors/Errors.js'
 export class InvalidEmailError extends Errors.BackwardCompatibleError {}
 export class InvalidPasswordError extends Errors.BackwardCompatibleError {}
 export class ParallelLoginError extends Errors.BackwardCompatibleError {}
-export class PasswordMustBeDifferentError extends Errors.BackwardCompatibleError {}
+export class PasswordMustBeDifferentError
+  extends Errors.BackwardCompatibleError {}
 export class PasswordReusedError extends Errors.BackwardCompatibleError {}
 
 export function handleAuthenticateErrors(error, req) {

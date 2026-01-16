@@ -3,7 +3,8 @@ module.exports = {
     type: 'problem',
     fixable: null,
     docs: {
-      description: 'Require loadingLabel prop when isLoading is specified on OLButton',
+      description:
+        'Require loadingLabel prop when isLoading is specified on OLButton',
     },
     schema: [],
   },
@@ -11,10 +12,7 @@ module.exports = {
     return {
       'JSXOpeningElement[name.name="OLButton"]'(node) {
         const attributes = new Map(
-          node.attributes.map(attr => [
-            attr.name?.name,
-            attr
-          ])
+          node.attributes.map(attr => [attr.name?.name, attr])
         )
 
         const isLoadingAttr = attributes.get('isLoading')
@@ -26,12 +24,13 @@ module.exports = {
           if (
             !isLoadingValue ||
             (isLoadingValue.type === 'JSXExpressionContainer' &&
-             isLoadingValue.expression.type === 'Literal' &&
-             isLoadingValue.expression.value === true)
+              isLoadingValue.expression.type === 'Literal' &&
+              isLoadingValue.expression.value === true)
           ) {
             context.report({
               node: isLoadingAttr,
-              message: 'Button with isLoading prop must also specify loadingLabel',
+              message:
+                'Button with isLoading prop must also specify loadingLabel',
             })
           } else if (
             isLoadingValue.type === 'JSXExpressionContainer' &&
@@ -39,7 +38,8 @@ module.exports = {
           ) {
             context.report({
               node: isLoadingAttr,
-              message: 'Button with isLoading prop must also specify loadingLabel',
+              message:
+                'Button with isLoading prop must also specify loadingLabel',
             })
           }
         }

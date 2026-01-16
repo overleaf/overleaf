@@ -86,8 +86,8 @@ function MakePrimary({
 
   const isConfirmDisabled = Boolean(
     !userEmailData.confirmedAt ||
-      state.isLoading ||
-      inReconfirmNotificationPeriod(userEmailData)
+    state.isLoading ||
+    inReconfirmNotificationPeriod(userEmailData)
   )
 
   return (

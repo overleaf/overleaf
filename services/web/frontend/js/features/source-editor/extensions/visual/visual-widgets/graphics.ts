@@ -241,9 +241,8 @@ export class GraphicsWidget extends WidgetType {
   }
 
   async renderPDF(view: EditorView, canvas: HTMLCanvasElement, url: string) {
-    const { loadPdfDocumentFromUrl } = await import(
-      '@/features/pdf-preview/util/pdf-js'
-    )
+    const { loadPdfDocumentFromUrl } =
+      await import('@/features/pdf-preview/util/pdf-js')
 
     // bail out if loading PDF.js took too long
     if (this.destroyed) {

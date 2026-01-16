@@ -84,7 +84,7 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
     () => {
       return Boolean(
         featureUsage?.aiErrorAssistant &&
-          featureUsage?.aiErrorAssistant.remainingUsage > 0
+        featureUsage?.aiErrorAssistant.remainingUsage > 0
       )
     }
   )

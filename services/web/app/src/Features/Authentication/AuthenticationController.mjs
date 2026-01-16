@@ -393,9 +393,7 @@ const AuthenticationController = {
 
     const middleware = async (req, res, next) => {
       const Oauth2Server = (
-        await import(
-          '../../../../modules/oauth2-server/app/src/Oauth2Server.mjs'
-        )
+        await import('../../../../modules/oauth2-server/app/src/Oauth2Server.mjs')
       ).default
 
       const request = new Oauth2Server.Request(req)

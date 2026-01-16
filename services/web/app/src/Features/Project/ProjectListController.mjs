@@ -876,12 +876,12 @@ function _matchesFilters(project, tags, filters) {
 function _hasActiveFilter(filters) {
   return Boolean(
     filters.ownedByUser ||
-      filters.sharedWithUser ||
-      filters.archived ||
-      filters.trashed ||
-      filters.tag === null ||
-      filters.tag?.length ||
-      filters.search?.length
+    filters.sharedWithUser ||
+    filters.archived ||
+    filters.trashed ||
+    filters.tag === null ||
+    filters.tag?.length ||
+    filters.search?.length
   )
 }
 

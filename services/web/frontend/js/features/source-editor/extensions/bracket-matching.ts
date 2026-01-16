@@ -61,8 +61,8 @@ interface AdjacentMatchResult extends MatchResult {
 const matchedAdjacent = (match: MatchResult): match is AdjacentMatchResult =>
   Boolean(
     match.matched &&
-      match.end &&
-      (match.start.to === match.end.from || match.end.to === match.start.from)
+    match.end &&
+    (match.start.to === match.end.from || match.end.to === match.start.from)
   )
 
 /**

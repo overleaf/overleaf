@@ -14,9 +14,8 @@ const FileViewPdf: FC<{
   const handleContainer = useCallback(
     async (element: HTMLDivElement | null) => {
       if (element) {
-        const { loadPdfDocumentFromUrl } = await import(
-          '@/features/pdf-preview/util/pdf-js'
-        )
+        const { loadPdfDocumentFromUrl } =
+          await import('@/features/pdf-preview/util/pdf-js')
 
         // bail out if loading PDF.js took too long
         if (!mountedRef.current) {

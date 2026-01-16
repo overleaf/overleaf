@@ -85,8 +85,8 @@ export function ActiveSubscription({
 
   const hasPendingPause = Boolean(
     subscription.payment.state === 'active' &&
-      subscription.payment.remainingPauseCycles &&
-      subscription.payment.remainingPauseCycles > 0
+    subscription.payment.remainingPauseCycles &&
+    subscription.payment.remainingPauseCycles > 0
   )
 
   const isLegacyPlan =

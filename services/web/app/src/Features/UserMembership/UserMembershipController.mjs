@@ -59,9 +59,9 @@ async function manageGroupMembers(req, res, next) {
 
   const canUseAddSeatsFeature = Boolean(
     plan?.canUseFlexibleLicensing &&
-      isAdmin &&
-      recurlySubscription &&
-      !recurlySubscription.pendingChange
+    isAdmin &&
+    recurlySubscription &&
+    !recurlySubscription.pendingChange
   )
 
   res.render('user_membership/group-members-react', {

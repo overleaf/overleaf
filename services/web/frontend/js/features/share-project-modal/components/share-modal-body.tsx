@@ -45,7 +45,7 @@ export default function ShareModalBody() {
       members?.some(member =>
         ['readAndWrite', 'review'].includes(member.privileges)
       ) &&
-        members?.some(member => member.pendingEditor || member.pendingReviewer)
+      members?.some(member => member.pendingEditor || member.pendingReviewer)
     )
   }, [members])
 

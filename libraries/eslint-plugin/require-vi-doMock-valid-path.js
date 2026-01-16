@@ -1,5 +1,5 @@
-const path = require('node:path');
-const fs = require('node:fs');
+const path = require('node:path')
+const fs = require('node:fs')
 
 module.exports = {
   meta: {
@@ -14,26 +14,39 @@ module.exports = {
     hasSuggestions: true,
     schema: [],
     messages: {
-      unresolvablePath: 'The path "{{pathValue}}" in vi.doMock() cannot be resolved relative to the current file.',
-      notAStringLiteral: 'The first argument of vi.doMock() must be (or resolve to) a string literal representing a path.',
+      unresolvablePath:
+        'The path "{{pathValue}}" in vi.doMock() cannot be resolved relative to the current file.',
+      notAStringLiteral:
+        'The first argument of vi.doMock() must be (or resolve to) a string literal representing a path.',
       noArguments: 'vi.doMock() called with no arguments.',
     },
   },
   create(context) {
-    const currentFilePath = context.getFilename();
+    const currentFilePath = context.getFilename()
     // ESLint can sometimes pass <text> or <input> for snippets not in a file
     if (currentFilePath === '<text>' || currentFilePath === '<input>') {
       return {}
     }
-    const currentDirectory = path.dirname(currentFilePath);
+    const currentDirectory = path.dirname(currentFilePath)
 
     function canResolve(modulePath) {
       try {
-        require.resolve(path.resolve(currentDirectory, modulePath));
-        return true;
+        require.resolve(path.resolve(currentDirectory, modulePath))
+        return true
       } catch (e) {
-        const absolutePath = path.resolve(currentDirectory, modulePath);
-        const extensions = ['', '.js', '.mjs', '.ts', '.jsx', '.tsx', '.json', '.node', '/index.js', '/index.ts']; // Add common extensions
+        const absolutePath = path.resolve(currentDirectory, modulePath)
+        const extensions = [
+          '',
+          '.js',
+          '.mjs',
+          '.ts',
+          '.jsx',
+          '.tsx',
+          '.json',
+          '.node',
+          '/index.js',
+          '/index.ts',
+        ] // Add common extensions
         for (const ext of extensions) {
           if (fs.existsSync(absolutePath + ext)) {
             return true
@@ -63,9 +76,14 @@ module.exports = {
           const firstArg = node.arguments[0]
           let pathValue = firstArg.value
 
-          if (firstArg.type !== 'Literal' || typeof firstArg.value !== 'string') {
+          if (
+            firstArg.type !== 'Literal' ||
+            typeof firstArg.value !== 'string'
+          ) {
             if (firstArg.type === 'Identifier') {
-              const variable = context.getScope().variables.find(v => v.name === firstArg.name);
+              const variable = context
+                .getScope()
+                .variables.find(v => v.name === firstArg.name)
               if (
                 variable &&
                 variable.defs.length > 0 &&
@@ -80,14 +98,12 @@ module.exports = {
                 // If the first argument was a variable that didn't resolve then we can't auto-fix it
               }
             }
-              context.report({
-                node: firstArg,
-                messageId: 'notAStringLiteral',
-              })
-              return
-
+            context.report({
+              node: firstArg,
+              messageId: 'notAStringLiteral',
+            })
+            return
           }
-
 
           if (!pathValue.startsWith('.')) {
             return
@@ -97,12 +113,13 @@ module.exports = {
             const mjsPath = pathValue.replace('.js', '.mjs')
             const additionalReportOptions = {}
             if (canResolve(mjsPath)) {
-              additionalReportOptions.fix = (fixer) => fixer.replaceText(firstArg, `'${mjsPath}'`)
+              additionalReportOptions.fix = fixer =>
+                fixer.replaceText(firstArg, `'${mjsPath}'`)
               additionalReportOptions.suggest = [
                 {
                   desc: `Replace with "${pathValue.replace('.js', '.mjs')}"`,
-                  fix: (fixer) => fixer.replaceText(firstArg, `'${mjsPath}'`),
-                }
+                  fix: fixer => fixer.replaceText(firstArg, `'${mjsPath}'`),
+                },
               ]
             }
             context.report({
@@ -111,11 +128,11 @@ module.exports = {
               data: {
                 pathValue,
               },
-              ...additionalReportOptions
+              ...additionalReportOptions,
             })
           }
         }
       },
     }
   },
-};
+}

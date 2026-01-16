@@ -171,7 +171,7 @@ const SubscriptionLocator = {
     return Boolean(
       (subscription?.planCode &&
         isStandaloneAiAddOnPlanCode(subscription?.planCode)) ||
-        subscription?.addOns?.some(addOn => addOn.addOnCode === AI_ADD_ON_CODE)
+      subscription?.addOns?.some(addOn => addOn.addOnCode === AI_ADD_ON_CODE)
     )
   },
 

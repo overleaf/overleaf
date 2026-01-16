@@ -70,9 +70,8 @@ async function cleanupBackup() {
 
   // The backupPersistor refuses to delete short prefixes. Use a low-level S3 persistor.
   if (!s3PersistorForBackupCleanup) {
-    const { backupPersistor } = await import(
-      '../../../../../storage/lib/backupPersistor.mjs'
-    )
+    const { backupPersistor } =
+      await import('../../../../../storage/lib/backupPersistor.mjs')
     s3PersistorForBackupCleanup = new S3Persistor(backupPersistor.settings)
   }
   await Promise.all(

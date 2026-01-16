@@ -32,9 +32,9 @@ export function cookieBannerRequired() {
   const exposedSettings = getMeta('ol-ExposedSettings')
   return Boolean(
     exposedSettings.gaToken ||
-      exposedSettings.gaTokenV4 ||
-      exposedSettings.propensityId ||
-      exposedSettings.hotjarId
+    exposedSettings.gaTokenV4 ||
+    exposedSettings.propensityId ||
+    exposedSettings.hotjarId
   )
 }
 
