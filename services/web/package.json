@@ -180,7 +180,7 @@
     "rate-limiter-flexible": "^2.4.1",
     "recurly": "^4.0.0",
     "referer-parser": "github:overleaf/nodejs-referer-parser#8b8b103762d05b7be4cfa2f810e1d408be67d7bb",
-    "request": "^2.88.2",
+    "request": "2.88.2",
     "requestretry": "^7.1.0",
     "sanitize-html": "^2.8.1",
     "stripe": "^18.4.0",

@@ -27,7 +27,7 @@
     "bunyan": "^1.8.15",
     "express": "4.22.1",
     "mongodb": "6.12.0",
-    "request": "^2.88.2",
+    "request": "2.88.2",
     "underscore": "~1.13.1"
   },
   "devDependencies": {
