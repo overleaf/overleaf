@@ -47,7 +47,7 @@ export default {
       const object = options || {}
       for (const key in object) {
         const value = object[key]
-        if (!['isAutoCompile'].includes(key)) {
+        if (!['isAutoCompile', 'buildId'].includes(key)) {
           result.push(`option ${key}:${value}`)
         }
       }

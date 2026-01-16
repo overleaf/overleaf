@@ -18,7 +18,11 @@ describe('ClsiStateManager', function () {
 
     ctx.ClsiStateManager = (await import(modulePath)).default
     ctx.project = 'project'
-    ctx.options = { draft: true, isAutoCompile: false }
+    ctx.options = {
+      draft: true,
+      isAutoCompile: false,
+      buildId: 'original-build-id',
+    }
     ctx.callback = sinon.stub()
   })
 
@@ -181,6 +185,18 @@ describe('ClsiStateManager', function () {
     describe('when the isAutoCompile option is changed', function () {
       beforeEach(function (ctx) {
         ctx.options.isAutoCompile = !ctx.options.isAutoCompile
+      })
+
+      it('should return the same hash value', function (ctx) {
+        expect(
+          ctx.ClsiStateManager.computeHash(ctx.project, ctx.options)
+        ).to.equal(ctx.hash0)
+      })
+    })
+
+    describe('when the buildId option is changed', function () {
+      beforeEach(function (ctx) {
+        ctx.options.buildId = 'new-build-id'
       })
 
       it('should return the same hash value', function (ctx) {
