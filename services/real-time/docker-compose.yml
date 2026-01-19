@@ -21,6 +21,7 @@ services:
       HISTORY_REDIS_HOST: redis_test
       QUEUES_REDIS_HOST: redis_test
       ANALYTICS_QUEUES_REDIS_HOST: redis_test
+      ANALYTICS_QUEUES_BQ_SINK_REDIS_HOST: redis_test
     command: npm run --silent test:unit
     user: node
     depends_on:
@@ -40,6 +41,7 @@ services:
       HISTORY_REDIS_HOST: redis_test
       QUEUES_REDIS_HOST: redis_test
       ANALYTICS_QUEUES_REDIS_HOST: redis_test
+      ANALYTICS_QUEUES_BQ_SINK_REDIS_HOST: redis_test
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}

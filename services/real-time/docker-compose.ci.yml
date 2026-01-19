@@ -20,6 +20,7 @@ services:
       QUEUES_REDIS_HOST: redis_test
       HISTORY_REDIS_HOST: redis_test
       ANALYTICS_QUEUES_REDIS_HOST: redis_test
+      ANALYTICS_QUEUES_BQ_SINK_REDIS_HOST: redis_test
     depends_on:
       redis_test:
         condition: service_healthy
@@ -35,6 +36,7 @@ services:
       QUEUES_REDIS_HOST: redis_test
       HISTORY_REDIS_HOST: redis_test
       ANALYTICS_QUEUES_REDIS_HOST: redis_test
+      ANALYTICS_QUEUES_BQ_SINK_REDIS_HOST: redis_test
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}

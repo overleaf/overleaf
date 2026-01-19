@@ -28,6 +28,7 @@ services:
       HISTORY_REDIS_HOST: redis_test
       QUEUES_REDIS_HOST: redis_test
       ANALYTICS_QUEUES_REDIS_HOST: redis_test
+      ANALYTICS_QUEUES_BQ_SINK_REDIS_HOST: redis_test
     entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: npm run --silent test:unit
     user: node
@@ -56,6 +57,7 @@ services:
       HISTORY_REDIS_HOST: redis_test
       QUEUES_REDIS_HOST: redis_test
       ANALYTICS_QUEUES_REDIS_HOST: redis_test
+      ANALYTICS_QUEUES_BQ_SINK_REDIS_HOST: redis_test
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       POSTGRES_HOST: postgres
       AWS_S3_ENDPOINT: https://minio:9000
