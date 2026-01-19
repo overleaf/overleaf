@@ -836,7 +836,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       cy.get('.review-tooltip-menu').should('exist')
 
       cy.get('.cm-line').eq(5).rightclick()
-      cy.get('.editor-context-menu').should('be.visible')
+      cy.findByRole('menu').should('be.visible')
       cy.get('.review-tooltip-menu').should('not.exist')
     })
 
@@ -895,7 +895,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       cy.get('.ol-cm-spelling-context-menu-tooltip').should('be.visible')
 
       cy.get('.cm-line').eq(5).rightclick()
-      cy.get('.editor-context-menu').should('be.visible')
+      cy.findByRole('menu').should('be.visible')
       cy.get('.ol-cm-spelling-context-menu-tooltip').should('not.exist')
     })
 
@@ -923,7 +923,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       cy.get('.cm-line').eq(5).rightclick()
 
       cy.get('.ol-cm-math-tooltip').should('not.exist')
-      cy.get('.editor-context-menu').should('be.visible')
+      cy.findByRole('menu').should('be.visible')
     })
   })
 
