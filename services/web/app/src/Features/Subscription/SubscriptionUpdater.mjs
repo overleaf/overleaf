@@ -333,6 +333,17 @@ async function updateSubscriptionFromRecurly(
   subscription,
   requesterData
 ) {
+  if (
+    subscription?.paymentProvider?.service &&
+    subscription.paymentProvider.service.includes('stripe')
+  ) {
+    logger.warn(
+      { subscriptionId: subscription._id },
+      'attempted to update non-recurly subscription from Recurly data'
+    )
+    return
+  }
+
   if (recurlySubscription.state === 'expired') {
     await handleExpiredSubscription(subscription, requesterData)
     return

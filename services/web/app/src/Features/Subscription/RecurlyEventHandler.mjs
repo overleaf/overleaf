@@ -3,6 +3,7 @@ import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import SubscriptionEmailHandler from './SubscriptionEmailHandler.mjs'
 import { AI_ADD_ON_CODE } from './AiHelper.mjs'
 import mongodb from 'mongodb-legacy'
+import SubscriptionLocator from './SubscriptionLocator.mjs'
 
 const { ObjectId } = mongodb
 
@@ -11,6 +12,17 @@ const INVOICE_SUBSCRIPTION_LIMIT = 10
 async function sendRecurlyAnalyticsEvent(event, eventData) {
   const userId = _getUserId(eventData)
   if (!ObjectId.isValid(userId)) {
+    return
+  }
+
+  const subscription =
+    await SubscriptionLocator.promises.getUsersSubscription(userId)
+
+  if (
+    subscription?.paymentProvider?.service &&
+    subscription.paymentProvider.service.includes('stripe')
+  ) {
+    // do not send recurly events for subscriptions managed by stripe
     return
   }
 
