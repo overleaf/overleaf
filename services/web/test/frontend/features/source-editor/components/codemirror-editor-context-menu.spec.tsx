@@ -102,16 +102,42 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       </TestContainer>
     )
 
-    cy.get('.editor-context-menu').should('not.exist')
+    cy.findByRole('menu').should('not.exist')
 
     cy.get('.cm-line').eq(10).rightclick()
-    cy.get('.editor-context-menu').should('be.visible')
+    cy.findByRole('menu').should('be.visible')
 
     cy.get('body').type('{esc}')
-    cy.get('.editor-context-menu').should('not.exist')
+    cy.findByRole('menu').should('not.exist')
   })
 
-  it('should close when clicking elsewhere', function () {
+  it('should open on Shift+F10', { retries: 1 }, function () {
+    const scope = mockScope()
+
+    cy.mount(
+      <TestContainer>
+        <EditorProviders scope={scope}>
+          <CodeMirrorEditor />
+        </EditorProviders>
+      </TestContainer>
+    )
+
+    cy.get('.cm-line').eq(8).click()
+    cy.findByRole('menu').should('not.exist')
+
+    cy.get('.cm-line').eq(8).trigger('keydown', {
+      key: 'F10',
+      code: 'F10',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+      force: true,
+    })
+
+    cy.findByRole('menu').should('be.visible')
+  })
+
+  it('should close when clicking elsewhere in the editor', function () {
     const scope = mockScope()
 
     cy.mount(
@@ -123,10 +149,30 @@ describe('editor context menu', { scrollBehavior: false }, function () {
     )
 
     cy.get('.cm-line').eq(10).rightclick()
-    cy.get('.editor-context-menu').should('be.visible')
+    cy.findByRole('menu').should('be.visible')
 
     cy.get('.cm-line').eq(5).click()
-    cy.get('.editor-context-menu').should('not.exist')
+    cy.findByRole('menu').should('not.exist')
+  })
+
+  it('should should close when clicking outside the editor', function () {
+    const scope = mockScope()
+    const outsideEditorButtonName = 'Recompile'
+    cy.mount(
+      <TestContainer>
+        <EditorProviders scope={scope}>
+          <button>{outsideEditorButtonName}</button>
+          <CodeMirrorEditor />
+        </EditorProviders>
+      </TestContainer>
+    )
+
+    // Open context menu
+    cy.get('.cm-line').eq(10).rightclick()
+    cy.findByRole('menu').should('be.visible')
+
+    cy.findByRole('button', { name: outsideEditorButtonName }).click()
+    cy.findByRole('menu').should('not.exist')
   })
 
   describe('when nothing is selected', function () {
@@ -143,17 +189,25 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       cy.get('.cm-line').eq(10).rightclick()
 
-      cy.get('.editor-context-menu').within(() => {
+      cy.findByRole('menu').within(() => {
         cy.findByRole('menuitem', { name: /cut/i }).should('be.enabled')
         cy.findByRole('menuitem', { name: /copy/i }).should('be.enabled')
-        cy.findByRole('menuitem', { name: /delete/i }).should('be.disabled')
-        cy.findByRole('menuitem', { name: /comment/i }).should('be.disabled')
         cy.findByRole('menuitem', { name: pasteLabelMatcher }).should(
           'be.enabled'
         )
         cy.findByRole('menuitem', {
           name: /paste with formatting/i,
         }).should('be.enabled')
+        cy.findByRole('menuitem', { name: /delete/i }).should(
+          'have.attr',
+          'aria-disabled',
+          'true'
+        )
+        cy.findByRole('menuitem', { name: /comment/i }).should(
+          'have.attr',
+          'aria-disabled',
+          'true'
+        )
         cy.findByRole('menuitem', { name: /suggest edits/i }).should(
           'be.enabled'
         )
@@ -185,9 +239,9 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       cy.get('@line').rightclick()
 
       cy.get('.cm-selectionBackground').should('exist')
-      cy.get('.editor-context-menu').should('be.visible')
+      cy.findByRole('menu').should('be.visible')
 
-      cy.get('.editor-context-menu').within(() => {
+      cy.findByRole('menu').within(() => {
         cy.findByRole('menuitem', { name: /cut/i }).should('be.enabled')
         cy.findByRole('menuitem', { name: /copy/i }).should('be.enabled')
         cy.findByRole('menuitem', { name: pasteLabelMatcher }).should(
@@ -228,11 +282,11 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       cy.get('@line').rightclick()
 
-      cy.get('.editor-context-menu').within(() => {
+      cy.findByRole('menu').within(() => {
         cy.findByRole('menuitem', { name: /copy/i }).click()
       })
 
-      cy.get('.editor-context-menu').should('not.exist')
+      cy.findByRole('menu').should('not.exist')
     })
 
     it('should cut and paste text', function () {
@@ -259,11 +313,11 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       // Cut "world"
       cy.get('@line').rightclick()
-      cy.get('.editor-context-menu').within(() => {
+      cy.findByRole('menu').within(() => {
         cy.findByRole('menuitem', { name: /cut/i }).click()
       })
 
-      cy.get('.editor-context-menu').should('not.exist')
+      cy.findByRole('menu').should('not.exist')
       cy.get('@line').should('contain', 'hello ')
       cy.get('@line').should('not.contain', 'world')
 
@@ -272,11 +326,11 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       cy.get('@line').rightclick(0, 0)
 
       // Paste "world" at the beginning
-      cy.get('.editor-context-menu').within(() => {
+      cy.findByRole('menu').within(() => {
         cy.findByRole('menuitem', { name: pasteLabelMatcher }).click()
       })
 
-      cy.get('.editor-context-menu').should('not.exist')
+      cy.findByRole('menu').should('not.exist')
       cy.get('@line').should('contain', 'worldhello')
     })
 
@@ -302,11 +356,11 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       cy.get('@line').rightclick()
 
-      cy.get('.editor-context-menu').within(() => {
+      cy.findByRole('menu').within(() => {
         cy.findByRole('menuitem', { name: /delete/i }).click()
       })
 
-      cy.get('.editor-context-menu').should('not.exist')
+      cy.findByRole('menu').should('not.exist')
       cy.get('@line').should('contain', 'hello ')
       cy.get('@line').should('not.contain', 'world')
     })
@@ -337,6 +391,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
         <TestContainer>
           <EditorProviders
             scope={scope}
+            projectFeatures={{ trackChanges: true }}
             providers={{
               EditorPropertiesProvider: makeEditorPropertiesProvider({
                 wantTrackChanges: false,
@@ -350,7 +405,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       cy.get('.cm-line').eq(10).rightclick()
 
-      cy.get('.editor-context-menu').within(() => {
+      cy.findByRole('menu').within(() => {
         // Verify we're showing the edit mode label
         cy.findByRole('menuitem', { name: /suggest edits/i }).should(
           'be.visible'
@@ -361,7 +416,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
         cy.findByRole('menuitem', { name: /suggest edits/i }).click()
       })
 
-      cy.get('.editor-context-menu').should('not.exist')
+      cy.findByRole('menu').should('not.exist')
 
       // Verify the toggle event was dispatched
       cy.get('@toggleTrackChanges').should('have.been.calledOnce')
@@ -374,6 +429,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
         <TestContainer>
           <EditorProviders
             scope={scope}
+            projectFeatures={{ trackChanges: true }}
             providers={{
               EditorPropertiesProvider: makeEditorPropertiesProvider({
                 wantTrackChanges: true,
@@ -387,7 +443,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       cy.get('.cm-line').eq(10).rightclick()
 
-      cy.get('.editor-context-menu').within(() => {
+      cy.findByRole('menu').within(() => {
         // Verify we're showing the review mode label
         cy.findByRole('menuitem', { name: /back to editing/i }).should(
           'be.visible'
@@ -398,10 +454,35 @@ describe('editor context menu', { scrollBehavior: false }, function () {
         cy.findByRole('menuitem', { name: /back to editing/i }).click()
       })
 
-      cy.get('.editor-context-menu').should('not.exist')
+      cy.findByRole('menu').should('not.exist')
 
       // Verify the toggle event was dispatched
       cy.get('@toggleTrackChanges').should('have.been.calledOnce')
+    })
+
+    it('should disable suggest edits when project does not support track changes', function () {
+      const scope = mockScope()
+
+      cy.mount(
+        <TestContainer>
+          <EditorProviders
+            scope={scope}
+            projectFeatures={{ trackChanges: false }}
+          >
+            <CodeMirrorEditor />
+          </EditorProviders>
+        </TestContainer>
+      )
+
+      cy.get('.cm-line').eq(10).rightclick()
+
+      cy.findByRole('menu').within(() => {
+        cy.findByRole('menuitem', { name: /suggest edits/i }).should(
+          'have.attr',
+          'aria-disabled',
+          'true'
+        )
+      })
     })
   })
 
@@ -422,7 +503,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       )
 
       cy.get('.cm-line').eq(10).rightclick()
-      cy.get('.editor-context-menu').should('not.exist')
+      cy.findByRole('menu').should('not.exist')
     })
   })
 
@@ -460,9 +541,9 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       cy.get('@line').rightclick()
 
-      cy.get('.editor-context-menu').should('be.visible')
+      cy.findByRole('menu').should('be.visible')
 
-      cy.get('.editor-context-menu').within(() => {
+      cy.findByRole('menu').within(() => {
         cy.findByRole('menuitem', { name: /cut/i }).should('not.exist')
         cy.findByRole('menuitem', { name: /copy/i }).should('be.enabled')
         cy.findByRole('menuitem', { name: pasteLabelMatcher }).should(
@@ -515,9 +596,9 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       cy.get('@line').rightclick()
 
-      cy.get('.editor-context-menu').should('be.visible')
+      cy.findByRole('menu').should('be.visible')
 
-      cy.get('.editor-context-menu').within(() => {
+      cy.findByRole('menu').within(() => {
         cy.findByRole('menuitem', { name: /copy/i }).should('be.enabled')
         cy.findByRole('menuitem', { name: /comment/i }).should('not.exist')
       })
@@ -554,10 +635,10 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
           // Right-click to open context menu
           cy.get('.cm-line').eq(10).rightclick()
-          cy.get('.editor-context-menu').should('be.visible')
+          cy.findByRole('menu').should('be.visible')
 
           // Click paste button
-          cy.get('.editor-context-menu').within(() => {
+          cy.findByRole('menu').within(() => {
             cy.findByRole('menuitem', { name: pasteLabelMatcher }).click()
           })
 
@@ -565,7 +646,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
           cy.findByText('Upload from computer').should('be.visible')
 
           // Context menu should close
-          cy.get('.editor-context-menu').should('not.exist')
+          cy.findByRole('menu').should('not.exist')
         }
       )
     })
@@ -612,13 +693,13 @@ describe('editor context menu', { scrollBehavior: false }, function () {
         )
 
         cy.get('.cm-line').eq(10).rightclick()
-        cy.get('.editor-context-menu').within(() => {
+        cy.findByRole('menu').within(() => {
           cy.findByRole('menuitem', {
             name: /paste with formatting/i,
           }).click()
         })
 
-        cy.get('.editor-context-menu').should('not.exist')
+        cy.findByRole('menu').should('not.exist')
 
         cy.get('.cm-line').should($lines => {
           const text = $lines.text()
@@ -642,11 +723,11 @@ describe('editor context menu', { scrollBehavior: false }, function () {
         )
 
         cy.get('.cm-line').eq(10).rightclick()
-        cy.get('.editor-context-menu').within(() => {
+        cy.findByRole('menu').within(() => {
           cy.findByRole('menuitem', { name: pasteLabelMatcher }).click()
         })
 
-        cy.get('.editor-context-menu').should('not.exist')
+        cy.findByRole('menu').should('not.exist')
 
         cy.get('.cm-line').should($lines => {
           const text = $lines.text()
@@ -688,13 +769,11 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       cy.get('.cm-line').eq(10).rightclick()
 
-      cy.get('.editor-context-menu').within(() => {
-        cy.findByRole('menuitem', {
-          name: /jump to location in pdf/i,
-        }).click()
+      cy.findByRole('menu').within(() => {
+        cy.findByRole('menuitem', { name: /jump to location in pdf/i }).click()
       })
 
-      cy.get('.editor-context-menu').should('not.exist')
+      cy.findByRole('menu').should('not.exist')
 
       // Verify the sync API was called and returned expected response
       cy.wait('@syncToPdfRequest').then(interception => {
@@ -721,10 +800,10 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       cy.get('.cm-line').eq(10).rightclick()
 
-      cy.get('.editor-context-menu').within(() => {
-        cy.findByRole('menuitem', {
-          name: /jump to location in pdf/i,
-        }).should('not.exist')
+      cy.findByRole('menu').within(() => {
+        cy.findByRole('menuitem', { name: /jump to location in pdf/i }).should(
+          'not.exist'
+        )
       })
     })
   })
@@ -744,7 +823,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
         </TestContainer>
       )
 
-      cy.get('.editor-context-menu').should('not.exist')
+      cy.findByRole('menu').should('not.exist')
 
       cy.get('.cm-line').eq(editorLine).as('targetLine')
       cy.get('@targetLine').click()
@@ -756,7 +835,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       cy.get('.cm-gutterElement').eq(gutterLineIndex).rightclick()
 
       cy.get('.cm-selectionBackground').should('exist')
-      cy.get('.editor-context-menu').should('be.visible')
+      cy.findByRole('menu').should('be.visible')
     })
 
     it('should work with cut/copy/delete operations on gutter-selected line', function () {
@@ -783,9 +862,9 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       cy.get('.cm-gutterElement').eq(gutterLineIndex).rightclick()
 
       cy.get('.cm-selectionBackground').should('exist')
-      cy.get('.editor-context-menu').should('be.visible')
+      cy.findByRole('menu').should('be.visible')
 
-      cy.get('.editor-context-menu').within(() => {
+      cy.findByRole('menu').within(() => {
         cy.findByRole('menuitem', { name: /cut/i }).should('be.enabled')
         cy.findByRole('menuitem', { name: /copy/i }).should('be.enabled')
         cy.findByRole('menuitem', { name: pasteLabelMatcher }).should(
@@ -800,7 +879,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
         cy.findByRole('menuitem', { name: /copy/i }).click()
       })
 
-      cy.get('.editor-context-menu').should('not.exist')
+      cy.findByRole('menu').should('not.exist')
 
       cy.get('@writeText').should('have.been.calledOnce')
       cy.get('@writeText').should(
@@ -823,10 +902,10 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       )
 
       cy.get('.cm-gutterElement').eq(5).rightclick()
-      cy.get('.editor-context-menu').should('be.visible')
+      cy.findByRole('menu').should('be.visible')
 
       cy.get('.cm-line').eq(10).click()
-      cy.get('.editor-context-menu').should('not.exist')
+      cy.findByRole('menu').should('not.exist')
     })
 
     it('should close menu on Escape after gutter right-click', function () {
@@ -841,11 +920,11 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       )
 
       cy.get('.cm-gutterElement').eq(5).rightclick()
-      cy.get('.editor-context-menu').should('be.visible')
+      cy.findByRole('menu').should('be.visible')
 
       cy.get('.cm-content').focus()
       cy.get('body').type('{esc}')
-      cy.get('.editor-context-menu').should('not.exist')
+      cy.findByRole('menu').should('not.exist')
     })
 
     it('should not show context menu on gutter when feature flag is disabled', function () {
@@ -864,7 +943,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       )
 
       cy.get('.cm-gutterElement').eq(5).rightclick()
-      cy.get('.editor-context-menu').should('not.exist')
+      cy.findByRole('menu').should('not.exist')
     })
   })
 })

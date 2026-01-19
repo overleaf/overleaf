@@ -73,6 +73,8 @@ export type DropdownMenuProps = PropsWithChildren<{
   id?: string
   renderOnMount?: boolean
   popperConfig?: BS5DropdownMenuProps['popperConfig']
+  tabIndex?: number
+  onKeyDown?: (event: React.KeyboardEvent) => void
 }>
 
 export type DropdownDividerProps = PropsWithChildren<{

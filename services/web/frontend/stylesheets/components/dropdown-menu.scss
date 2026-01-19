@@ -38,7 +38,9 @@
 
 @include theme('default') {
   .ide-redesign-main,
-  .project-ds-nav-page {
+  .project-ds-nav-page,
+  // Codemirror tooltips are rendered outside of the main app container
+  .cm-tooltip .dropdown-menu {
     @include dark-dropdown-menu;
   }
 }
@@ -80,6 +82,10 @@ $dropdown-item-min-height: 36px;
   z-index: unset;
   display: block;
   float: unset;
+
+  &:focus {
+    outline: none;
+  }
 }
 
 .dropdown-menu {

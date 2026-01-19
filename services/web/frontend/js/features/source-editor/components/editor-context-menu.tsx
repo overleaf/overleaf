@@ -1,7 +1,12 @@
-import { FC, Fragment, memo } from 'react'
+import { FC, Fragment, memo, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
-import { useTranslation } from 'react-i18next'
 import { getTooltip } from '@codemirror/view'
+import {
+  Dropdown,
+  DropdownMenu,
+  DropdownItem,
+  DropdownDivider,
+} from '@/shared/components/dropdown/dropdown-menu'
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
@@ -9,6 +14,7 @@ import {
 import { contextMenuStateField } from '../extensions/context-menu'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useContextMenuItems } from '../hooks/use-context-menu-items'
+import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
 
 const EditorContextMenu: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -29,52 +35,52 @@ const EditorContextMenu: FC = () => {
 }
 
 const EditorContextMenuContent: FC = memo(function EditorContextMenuContent() {
-  const { t } = useTranslation()
+  const { menuItems, closeMenu, onToggle } = useContextMenuItems()
+  const menuRef = useRef<any>(null)
 
-  const menuItems = useContextMenuItems()
+  useEffect(() => {
+    menuRef.current?.focus()
+  }, [])
 
   return (
-    <div className="editor-context-menu" role="menu" aria-label={t('menu')}>
-      {menuItems.map((menuItem, index) => (
-        <Fragment key={index}>
-          {menuItem.separatorAbove && (
-            <div className="editor-context-menu-separator" />
-          )}
-          <ContextMenuItem
-            label={menuItem.label}
-            onClick={() => menuItem.handler()}
-            disabled={menuItem.disabled}
-            shortcut={menuItem.shortcut}
-          />
-        </Fragment>
-      ))}
-    </div>
+    <Dropdown show onToggle={onToggle}>
+      <DropdownMenu
+        ref={menuRef}
+        show
+        tabIndex={0}
+        className="dropdown-menu-unpositioned"
+        onKeyDown={event => {
+          switch (event.code) {
+            case 'Escape':
+            case 'Tab':
+              event.preventDefault()
+              closeMenu()
+              break
+          }
+        }}
+      >
+        {menuItems.map((menuItem, index) => (
+          <Fragment key={index}>
+            {menuItem.separatorAbove && <DropdownDivider />}
+            <DropdownListItem>
+              <DropdownItem
+                as="button"
+                onClick={() => menuItem.handler()}
+                disabled={menuItem.disabled}
+                trailingIcon={
+                  menuItem.shortcut ? (
+                    <span>{menuItem.shortcut}</span>
+                  ) : undefined
+                }
+              >
+                {menuItem.label}
+              </DropdownItem>
+            </DropdownListItem>
+          </Fragment>
+        ))}
+      </DropdownMenu>
+    </Dropdown>
   )
 })
-
-type ContextMenuItemProps = {
-  label: string
-  onClick: () => void
-  disabled?: boolean
-  shortcut?: string
-}
-
-const ContextMenuItem: FC<ContextMenuItemProps> = ({
-  label,
-  shortcut,
-  onClick,
-  disabled,
-}) => (
-  <button
-    type="button"
-    role="menuitem"
-    className="editor-context-menu-item"
-    onClick={onClick}
-    disabled={disabled}
-  >
-    <span className="editor-context-menu-item-label">{label}</span>
-    <span className="editor-context-menu-item-shortcut">{shortcut ?? ''}</span>
-  </button>
-)
 
 export default EditorContextMenu
