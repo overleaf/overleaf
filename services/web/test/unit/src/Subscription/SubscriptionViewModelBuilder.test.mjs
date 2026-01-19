@@ -999,13 +999,10 @@ describe('SubscriptionViewModelBuilder', function () {
           await ctx.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
             ctx.user
           )
-        assert.equal(
-          result.personalSubscription.payment.displayPrice,
-          '€1,756.92'
-        )
+        assert.equal(result.personalSubscription.payment.displayPrice, '€16.50')
         assert.equal(
           result.personalSubscription.payment.planOnlyDisplayPrice,
-          '€1,754.72'
+          '€14.30'
         )
         assert.deepEqual(
           result.personalSubscription.payment

@@ -186,10 +186,6 @@ export function ActiveSubscription({
       <hr />
       <h2 className="h3 fw-bold">{t('plan')}</h2>
       <h3 className="h5 mt-0 mb-1 fw-bold">{planName}</h3>
-      {subscription.pendingPlan &&
-        subscription.pendingPlan.name !== subscription.plan.name && (
-          <p className="mb-1">{t('want_change_to_apply_before_plan_end')}</p>
-        )}
       {isInFreeTrial(subscription.payment.trialEndsAt) &&
         subscription.payment.trialEndsAtFormatted && (
           <TrialEnding
@@ -262,6 +258,12 @@ export function ActiveSubscription({
               })}
         </p>
       )}
+
+      {subscription.pendingPlan &&
+        subscription.pendingPlan.name !== subscription.plan.name && (
+          <p className="mb-1">{t('want_change_to_apply_before_plan_end')}</p>
+        )}
+
       {!recurlyLoadError && (
         <PlanActions
           subscription={subscription}

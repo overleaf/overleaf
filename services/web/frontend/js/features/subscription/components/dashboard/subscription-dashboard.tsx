@@ -16,6 +16,7 @@ import OLCol from '@/shared/components/ol/ol-col'
 import OLNotification from '@/shared/components/ol/ol-notification'
 import WritefullManagedBundleAddOn from './states/active/change-plan/modals/writefull-bundle-management-modal'
 import RedirectAlerts from './redirect-alerts'
+import { PaidSubscription } from '@ol-types/subscription/dashboard/subscription'
 
 function SubscriptionDashboard() {
   const { t } = useTranslation()
@@ -26,16 +27,48 @@ function SubscriptionDashboard() {
     personalSubscription,
   } = useSubscriptionDashboardContext()
 
+  const subscription = personalSubscription as PaidSubscription
+
   const hasAiAssistViaWritefull = getMeta('ol-hasAiAssistViaWritefull')
   const fromPlansPage = getMeta('ol-fromPlansPage')
   const hasRedirectedPaymentError = Boolean(
     getMeta('ol-subscriptionPaymentErrorCode')
   )
 
+  const hasPendingPlan =
+    subscription &&
+    subscription.pendingPlan &&
+    subscription.pendingPlan.name !== subscription.plan.name
+  const nextPaymentDueDate = subscription?.payment?.nextPaymentDueDate
+
   return (
     <div className="container">
       <OLRow>
         <OLCol lg={{ span: 8, offset: 2 }}>
+          {hasPendingPlan && (
+            <OLNotification
+              className="mb-4"
+              aria-live="polite"
+              content={
+                <div>
+                  <Trans
+                    i18nKey="pending_subscription_message"
+                    values={{
+                      planName: personalSubscription?.pendingPlan?.name,
+                      activationDate: nextPaymentDueDate,
+                    }}
+                    shouldUnescape
+                    tOptions={{ interpolation: { escapeValue: true } }}
+                    components={[
+                      // eslint-disable-next-line react/jsx-key
+                      <strong />,
+                    ]}
+                  />
+                </div>
+              }
+              type="success"
+            />
+          )}
           {fromPlansPage && (
             <OLNotification
               className="mb-4"

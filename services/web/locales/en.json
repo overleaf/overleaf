@@ -1690,6 +1690,7 @@
   "pending_additional_licenses": "Your subscription is changing to include <0>__pendingAdditionalLicenses__</0> additional license(s) for a total of <1>__pendingTotalLicenses__</1> licenses.",
   "pending_addon_cancellation": "Your subscription will change to remove the <strong>__addOnName__</strong> add-on at the end of the current billing period.",
   "pending_invite": "Pending invite",
+  "pending_subscription_message": "You’ve switched to <0>__planName__</0>. This change will come into effect on <0>__activationDate__</0> at the end of your current billing cycle. When your plan switches, your billing and subscription information will be updated.",
   "per_license": "per license",
   "per_month": "per month",
   "per_month_billed_annually": "per month, billed annually",
