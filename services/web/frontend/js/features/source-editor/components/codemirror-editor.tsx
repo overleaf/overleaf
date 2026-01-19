@@ -40,6 +40,13 @@ function CodeMirrorEditor() {
 
   const isMounted = useIsMounted()
   const editContextEnabled = useFeatureFlag('edit-context')
+  const { openDocName } = useEditorOpenDocContext()
+  const { showVisual } = useEditorPropertiesContext()
+
+  const VisualEditor =
+    showVisual && openDocName != null
+      ? getVisualEditorComponent(openDocName)
+      : null
 
   // create the view using the initial state and intercept transactions
   const viewRef = useRef<EditorView | null>(null)
@@ -64,27 +71,26 @@ function CodeMirrorEditor() {
   return (
     <CodeMirrorStateContext.Provider value={state}>
       <CodeMirrorViewContext.Provider value={viewRef.current}>
-        <CodeMirrorEditorComponents />
+        <CodeMirrorEditorComponents hidden={VisualEditor != null} />
+        {VisualEditor && <VisualEditor />}
       </CodeMirrorViewContext.Provider>
     </CodeMirrorStateContext.Provider>
   )
 }
 
-function CodeMirrorEditorComponents() {
+type CodeMirrorEditorComponentsProps = {
+  hidden: boolean
+}
+
+function CodeMirrorEditorComponents({
+  hidden = false,
+}: CodeMirrorEditorComponentsProps) {
   useToolbarMenuBarEditorCommands()
   const { features } = useProjectContext()
-  const { openDocName } = useEditorOpenDocContext()
-  const { showVisual } = useEditorPropertiesContext()
-
-  const VisualEditor =
-    showVisual && openDocName != null
-      ? getVisualEditorComponent(openDocName)
-      : null
-
   return (
     <ReviewPanelProviders>
       <CodemirrorOutline />
-      <CodeMirrorView />
+      <CodeMirrorView hidden={hidden} />
       <FigureModal />
       <CodeMirrorSearch />
       <CodeMirrorToolbar />
@@ -100,8 +106,6 @@ function CodeMirrorEditorComponents() {
           <Component key={path} />
         )
       )}
-
-      {VisualEditor && <VisualEditor />}
     </ReviewPanelProviders>
   )
 }
