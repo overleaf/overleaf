@@ -42,7 +42,6 @@ function defaultDockerComposeOverride() {
         environment: {},
       },
       'git-bridge': {},
-      mongo: {},
     },
   }
 }
@@ -56,7 +55,7 @@ function readDockerComposeOverride() {
     if (error.code !== 'ENOENT') {
       throw error
     }
-    return defaultDockerComposeOverride()
+    return defaultDockerComposeOverride
   }
 }
 
@@ -282,13 +281,11 @@ function setVarsDockerCompose({
   }
 
   if (mongoVersion) {
-    cfg.services.mongo.image = `mongo:${mongoVersion}`
+    cfg.services.mongo = {
+      image: `mongo:${mongoVersion}`,
+    }
   } else {
-    delete cfg.services.mongo.image
-  }
-
-  if (version === 'latest') {
-    cfg.services.mongo.command = '--replSet overleaf --notablescan'
+    delete cfg.services.mongo
   }
 
   writeDockerComposeOverride(cfg)
