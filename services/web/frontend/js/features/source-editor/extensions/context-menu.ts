@@ -13,6 +13,7 @@ import {
   EditorSelection,
   Prec,
 } from '@codemirror/state'
+import { closeAllContextMenusEffect } from '../utils/close-all-context-menus-effect'
 
 export const openContextMenuEffect = StateEffect.define<{
   pos: number
@@ -33,8 +34,16 @@ export const contextMenuStateField = StateField.define<ContextMenuState>({
   },
 
   update(field, tr) {
-    // Process state effects to open/close menu
+    let next = field
+
+    // Process effects in order but let open win if present in the same transaction
     for (const effect of tr.effects) {
+      if (
+        effect.is(closeContextMenuEffect) ||
+        effect.is(closeAllContextMenusEffect)
+      ) {
+        next = { tooltip: null, mousePosition: null }
+      }
       if (effect.is(openContextMenuEffect)) {
         const { pos, x, y } = effect.value
         return {
@@ -42,9 +51,11 @@ export const contextMenuStateField = StateField.define<ContextMenuState>({
           mousePosition: { x, y },
         }
       }
-      if (effect.is(closeContextMenuEffect)) {
-        return { tooltip: null, mousePosition: null }
-      }
+    }
+
+    // If effects changed the state, return early so doc-change fallback doesn’t override it
+    if (next !== field) {
+      return next
     }
 
     // Close menu on document changes
@@ -181,11 +192,14 @@ function openContextMenuAtPosition(
 ): void {
   view.dispatch({
     selection,
-    effects: openContextMenuEffect.of({
-      pos,
-      x: clientX,
-      y: clientY,
-    }),
+    effects: [
+      closeAllContextMenusEffect.of(null),
+      openContextMenuEffect.of({
+        pos,
+        x: clientX,
+        y: clientY,
+      }),
+    ],
   })
 }
 

@@ -19,6 +19,7 @@ import { debugConsole } from '@/utils/debugging'
 import { nodeHasError } from '../utils/tree-operations/common'
 import { documentEnvironments } from '../languages/latex/document-environments'
 import { repositionAllTooltips } from './tooltips-reposition'
+import { closeAllContextMenusEffect } from '../utils/close-all-context-menus-effect'
 
 const HIDE_TOOLTIP_EVENT = 'editor:hideMathTooltip'
 
@@ -46,6 +47,9 @@ export const mathPreviewStateField = StateField.define<{
     for (const effect of tr.effects) {
       if (effect.is(hideTooltipEffect)) {
         return { tooltip: null, hide: true }
+      }
+      if (effect.is(closeAllContextMenusEffect)) {
+        return { tooltip: null, hide: state.hide }
       }
     }
 

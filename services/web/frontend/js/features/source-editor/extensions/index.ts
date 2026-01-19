@@ -156,7 +156,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   trackDetachedComments(options.currentDoc),
   visual(options.visual),
   mathPreview(options.settings.mathPreview),
-  reviewTooltip(),
+  reviewTooltip(options.editorContextMenuEnabled),
   contextMenu(options.editorContextMenuEnabled),
   toolbarPanel(),
   breadcrumbPanel(),

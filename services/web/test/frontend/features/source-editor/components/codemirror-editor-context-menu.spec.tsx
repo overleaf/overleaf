@@ -2,6 +2,7 @@ import { mockScope } from '../helpers/mock-scope'
 import {
   EditorProviders,
   makeEditorPropertiesProvider,
+  makeProjectProvider,
 } from '../../../helpers/editor-providers'
 import CodeMirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { TestContainer } from '../helpers/test-container'
@@ -10,6 +11,8 @@ import { PermissionsContext } from '@/features/ide-react/context/permissions-con
 import { Permissions } from '@/features/ide-react/types/permissions'
 import { DetachCompileContext } from '@/shared/context/detach-compile-context'
 import { FileTreeDataContext } from '@/shared/context/file-tree-data-context'
+import PackageVersions from '../../../../../app/src/infrastructure/PackageVersions'
+import { mockProject } from '../helpers/mock-project'
 
 const createPermissionsProvider = (
   permissions: Partial<Permissions>
@@ -805,6 +808,122 @@ describe('editor context menu', { scrollBehavior: false }, function () {
           'not.exist'
         )
       })
+    })
+  })
+
+  describe('when interacting with other tooltips/menus', function () {
+    it('should hide the add-comment tooltip when the context menu opens', function () {
+      const scope = mockScope(undefined, {
+        docOptions: { wantTrackChanges: true },
+      })
+
+      cy.mount(
+        <TestContainer>
+          <EditorProviders
+            scope={scope}
+            projectFeatures={{ trackChangesVisible: true }}
+            features={{ trackChangesVisible: true }}
+          >
+            <CodeMirrorEditor />
+          </EditorProviders>
+        </TestContainer>
+      )
+
+      cy.get('.cm-line').eq(12).type('{shift}{leftArrow}', {
+        scrollBehavior: false,
+      })
+
+      cy.get('.review-tooltip-menu').should('exist')
+
+      cy.get('.cm-line').eq(5).rightclick()
+      cy.get('.editor-context-menu').should('be.visible')
+      cy.get('.review-tooltip-menu').should('not.exist')
+    })
+
+    it('should close the spelling suggestions menu when another context menu opens', function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-learnedWords', ['baz'])
+        win.metaAttributesCache.set(
+          'ol-dictionariesRoot',
+          `js/dictionaries/${PackageVersions.version.dictionaries}/`
+        )
+        win.metaAttributesCache.set('ol-baseAssetPath', '/__cypress/src/')
+        win.metaAttributesCache.set('ol-languages', [
+          { code: 'en_GB', dic: 'en_GB', name: 'English (British)' },
+        ])
+      })
+
+      const spellcheckerContent = `
+      \\documentclass{}
+
+      \\title{}
+      \\author{}
+
+      \\begin{document}
+      \\maketitle
+
+      \\begin{abstract}
+      \\end{abstract}
+
+      \\section{}
+
+      \\end{document}`
+
+      const scope = mockScope(spellcheckerContent)
+      const project = mockProject({ spellCheckLanguage: 'en_GB' })
+
+      cy.mount(
+        <TestContainer>
+          <EditorProviders
+            scope={scope}
+            providers={{ ProjectProvider: makeProjectProvider(project) }}
+          >
+            <CodeMirrorEditor />
+          </EditorProviders>
+        </TestContainer>
+      )
+
+      cy.get('.cm-line').eq(13).as('line')
+      cy.get('@line').click()
+      cy.get('@line').type('medecin foo', { delay: 0 })
+
+      cy.get('@line')
+        .find('.ol-cm-spelling-error', { timeout: 15000 })
+        .should('have.length', 1)
+
+      cy.get('@line').find('.ol-cm-spelling-error').rightclick()
+      cy.get('.ol-cm-spelling-context-menu-tooltip').should('be.visible')
+
+      cy.get('.cm-line').eq(5).rightclick()
+      cy.get('.editor-context-menu').should('be.visible')
+      cy.get('.ol-cm-spelling-context-menu-tooltip').should('not.exist')
+    })
+
+    it('should close math preview tooltip when context menu opens', function () {
+      const scope = mockScope()
+
+      cy.mount(
+        <TestContainer>
+          <EditorProviders scope={scope}>
+            <CodeMirrorEditor />
+          </EditorProviders>
+        </TestContainer>
+      )
+
+      // Click on a math expression to show the tooltip
+      cy.get('.cm-line').eq(5).click()
+      cy.get('.cm-line')
+        .eq(5)
+        .type('$x + y$', { parseSpecialCharSequences: false })
+      // Move cursor into the math expression
+      cy.get('.cm-line').eq(5).type('{leftArrow}{leftArrow}')
+
+      cy.get('.ol-cm-math-tooltip').should('be.visible')
+
+      cy.get('.cm-line').eq(5).rightclick()
+
+      cy.get('.ol-cm-math-tooltip').should('not.exist')
+      cy.get('.editor-context-menu').should('be.visible')
     })
   })
 
