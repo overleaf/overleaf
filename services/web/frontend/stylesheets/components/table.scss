@@ -9,6 +9,7 @@
   --bs-table-hover-bg: var(--bg-light-secondary);
   --bs-border-divider: var(--border-divider);
   --table-bg-tertiary: var(--bg-light-tertiary);
+  --table-btn-bg-hover: 27 34 44;
 }
 
 @mixin dark-table {
@@ -22,6 +23,7 @@
   --bs-table-hover-bg: var(--bg-dark-secondary);
   --bs-border-divider: var(--border-divider-dark);
   --table-bg-tertiary: var(--bg-dark-tertiary);
+  --table-btn-bg-hover: 255 255 255;
 }
 
 :root {
@@ -83,6 +85,14 @@
   .dropdown {
     .dropdown-table-button-toggle {
       @include action-button;
+
+      color: var(--bs-table-color);
+
+      &:hover,
+      &:active,
+      &[aria-expanded='true'] {
+        background-color: rgb(var(--table-btn-bg-hover) / 8%);
+      }
 
       padding: var(--spacing-04);
     }

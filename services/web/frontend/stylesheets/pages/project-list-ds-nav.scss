@@ -3,12 +3,14 @@
   --ds-nav-active-color: var(--green-60);
   --theme-toggle-selected-background: var(--green-20);
   --ds-nav-content-bg-secondary: var(--bg-light-secondary);
+  --table-icon-bg-hover: 27 34 44;
 
   @include theme('default') {
     --ds-nav-active-bg: var(--green-70);
     --ds-nav-active-color: var(--green-10);
     --theme-toggle-selected-background: var(--green-70);
     --ds-nav-content-bg-secondary: var(--bg-dark-secondary);
+    --table-icon-bg-hover: 255 255 255;
   }
 }
 
@@ -273,7 +275,7 @@ body {
 
         &:hover,
         &:focus {
-          background-color: #d9d9d9 !important;
+          background-color: rgb(var(--table-icon-bg-hover) / 8%) !important;
         }
       }
 

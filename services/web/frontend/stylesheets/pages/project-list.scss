@@ -335,7 +335,7 @@ ul.project-list-filters {
 
   @include media-breakpoint-down(md) {
     tr:not(:last-child) {
-      border-bottom: 1px solid $table-border-color;
+      border-bottom: 1px solid var(--border-divider-themed);
     }
 
     td {
