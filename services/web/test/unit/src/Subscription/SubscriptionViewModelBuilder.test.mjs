@@ -724,6 +724,39 @@ describe('SubscriptionViewModelBuilder', function () {
         })
       })
 
+      it('filters out single-use coupons for stripe subscriptions', async function (ctx) {
+        ctx.paymentRecord.service = 'stripe-us'
+        const foreverCoupon = {
+          code: 'forever',
+          name: 'Forever',
+          isSingleUse: false,
+        }
+        const singleUseCoupon = {
+          code: 'once',
+          name: 'Once',
+          isSingleUse: true,
+        }
+        ctx.Modules.hooks.fire
+          .withArgs('getPaymentFromRecord', ctx.individualSubscription)
+          .yields(null, [
+            {
+              subscription: ctx.paymentRecord,
+              account: new PaymentProviderAccount({
+                email: 'example@example.com',
+                hasPastDueInvoice: false,
+              }),
+              coupons: [foreverCoupon, singleUseCoupon],
+            },
+          ])
+        const result =
+          await ctx.SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
+            ctx.user
+          )
+        assert.deepEqual(result.personalSubscription.payment.activeCoupons, [
+          foreverCoupon,
+        ])
+      })
+
       describe('isEligibleForGroupPlan', function () {
         it('is false when in trial', async function (ctx) {
           const msIn24Hours = 24 * 60 * 60 * 1000

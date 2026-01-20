@@ -270,6 +270,12 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
       isEligibleForPause = stripePauseAssignment.variant === 'enabled'
     }
 
+    let activeCoupons = paymentRecord.coupons
+    if (paymentRecord.subscription.service.includes('stripe')) {
+      // TODO: consider using discount.coupon.valid after removing Recurly
+      activeCoupons = activeCoupons.filter(ac => !ac.isSingleUse)
+    }
+
     personalSubscription.payment = {
       taxRate,
       billingDetailsLink:
@@ -292,7 +298,7 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
         paymentRecord.subscription.trialPeriodEnd
       ),
       trialEndsAt: paymentRecord.subscription.trialPeriodEnd,
-      activeCoupons: paymentRecord.coupons,
+      activeCoupons,
       accountEmail: paymentRecord.account.email,
       hasPastDueInvoice: paymentRecord.account.hasPastDueInvoice,
       pausedAt: paymentRecord.subscription.pausePeriodStart,
