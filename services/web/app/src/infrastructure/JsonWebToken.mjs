@@ -14,9 +14,11 @@ async function sign(payload, options = {}) {
   return token
 }
 
-function getDecoded(token) {
+function getDecoded(token, options = {}) {
   const key = Settings.jwt.key
-  const decoded = JWT.verify(token, key)
+  const decoded = JWT.verify(token, key, {
+    ignoreExpiration: options.ignoreExpiration,
+  })
   return decoded
 }
 
