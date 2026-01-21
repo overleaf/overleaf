@@ -63,12 +63,12 @@ async function deleteUser(email) {
   const projects = await db.deletedProjects
     .find(
       { 'deleterData.deletedProjectOwnerId': user._id },
-      { projection: { deletedProjectId: 1 } }
+      { projection: { 'deleterData.deletedProjectId': 1 } }
     )
     .toArray()
   await promiseMapWithLimit(
     10,
-    projects.map(p => p.deletedProjectId),
+    projects.map(p => p.deleterData.deletedProjectId),
     ProjectDeleter.promises.expireDeletedProject
   )
   // Hard-delete the user.
