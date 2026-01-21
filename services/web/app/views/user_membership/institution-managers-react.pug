@@ -4,11 +4,12 @@ block entrypointVar
 	- entrypoint = 'pages/user/subscription/group-management/institution-managers'
 
 block append meta
+	- const hasWriteAccess = entityAccess || (hasAdminAccess() && hasAdminCapability('modify-institution-manager'))
 	meta(name='ol-user' data-type='json' content=user)
 	meta(name='ol-users' data-type='json' content=users)
 	meta(name='ol-groupId' data-type='string' content=groupId)
 	meta(name='ol-groupName' data-type='string' content=name)
-	meta(name='ol-hasWriteAccess' data-type='boolean' content)
+	meta(name='ol-hasWriteAccess' data-type='boolean' content=hasWriteAccess)
 
 block content
 	main#subscription-manage-group-root.content.content-alt

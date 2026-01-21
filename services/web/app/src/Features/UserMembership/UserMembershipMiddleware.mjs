@@ -95,7 +95,19 @@ const UserMembershipMiddleware = {
     ]),
   ],
 
-  requireInstitutionManagementAccess: [
+  requireInstitutionManagerAccess: [
+    AuthenticationController.requireLogin(),
+    fetchEntityConfig('institution'),
+    fetchEntity(),
+    requireEntityOrCreate(),
+    useAdminCapabilities,
+    allowAccessIfAny([
+      UserMembershipAuthorization.hasEntityAccess(),
+      UserMembershipAuthorization.hasAdminAccess,
+    ]),
+  ],
+
+  requireInstitutionManagerManagement: [
     AuthenticationController.requireLogin(),
     fetchEntityConfig('institution'),
     fetchEntity(),

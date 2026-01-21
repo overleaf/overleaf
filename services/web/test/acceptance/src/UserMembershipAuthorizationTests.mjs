@@ -90,7 +90,7 @@ describe('UserMembershipAuthorization', function () {
     })
 
     describe('users management', function () {
-      it('should allow managers only', function (done) {
+      it('should allow managers', function (done) {
         const url = `/manage/institutions/${this.institution.v1Id}/managers`
         async.series(
           [
@@ -98,6 +98,54 @@ describe('UserMembershipAuthorization', function () {
             expectAccess(this.user, url, 403),
             cb => this.institution.setManagerIds([this.user._id], cb),
             expectAccess(this.user, url, 200),
+          ],
+          done
+        )
+      })
+
+      it('should allow admin users', function (done) {
+        const url = `/manage/institutions/${this.institution.v1Id}/managers`
+        async.series(
+          [
+            this.user.login.bind(this.user),
+            expectAccess(this.user, url, 403),
+            cb => this.user.ensureAdmin(cb),
+            cb => this.user.ensureAdminRole('sales', cb),
+            this.user.login.bind(this.user),
+            expectAccess(this.user, url, 200),
+          ],
+          done
+        )
+      })
+
+      it('should not allow "sales" admin to add managers', function (done) {
+        const url = `/manage/institutions/${this.institution.v1Id}/managers`
+        async.series(
+          [
+            this.user.login.bind(this.user),
+            expectPost(this.user, url, { email: this.user.email }, 403),
+            cb => this.user.ensureAdmin(cb),
+            cb => this.user.ensureAdminRole('sales', cb),
+            this.user.login.bind(this.user),
+            expectPost(this.user, url, { email: this.user.email }, 403),
+          ],
+          done
+        )
+      })
+
+      it('should allow "engineering" admin to add managers', function (done) {
+        const user = new User()
+        const url = `/manage/institutions/${this.institution.v1Id}/managers`
+        async.series(
+          [
+            user.ensureUserExists.bind(user),
+            this.user.login.bind(this.user),
+            expectPost(this.user, url, { email: user.email }, 403),
+            cb => this.user.ensureAdmin(cb),
+            cb => this.user.ensureAdminRole('engineering', cb),
+            this.user.login.bind(this.user),
+            expectPost(this.user, url, { email: user.email }, 200),
+            cb => this.institution.setManagerIds([], cb),
           ],
           done
         )
@@ -184,6 +232,21 @@ describe('UserMembershipAuthorization', function () {
 function expectAccess(user, url, status, pattern) {
   return callback => {
     user.request.get({ url }, (error, response, body) => {
+      if (error) {
+        return callback(error)
+      }
+      expect(response.statusCode).to.equal(status)
+      if (pattern) {
+        expect(body).to.match(pattern)
+      }
+      callback()
+    })
+  }
+}
+
+function expectPost(user, url, body, status, pattern) {
+  return callback => {
+    user.request.post({ url, json: body }, (error, response, body) => {
       if (error) {
         return callback(error)
       }

@@ -82,17 +82,17 @@ export default {
     // institution members routes
     webRouter.get(
       '/manage/institutions/:id/managers',
-      UserMembershipMiddleware.requireInstitutionManagementAccess,
+      UserMembershipMiddleware.requireInstitutionManagerAccess,
       UserMembershipController.manageInstitutionManagers
     )
     webRouter.post(
       '/manage/institutions/:id/managers',
-      UserMembershipMiddleware.requireInstitutionManagementAccess,
+      UserMembershipMiddleware.requireInstitutionManagerManagement,
       UserMembershipController.add
     )
     webRouter.delete(
       '/manage/institutions/:id/managers/:userId',
-      UserMembershipMiddleware.requireInstitutionManagementAccess,
+      UserMembershipMiddleware.requireInstitutionManagerManagement,
       UserMembershipController.remove
     )
 
