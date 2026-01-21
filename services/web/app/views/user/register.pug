@@ -1,7 +1,10 @@
-extends ../layout-marketing
+extends ../layout-website-redesign
+
+block vars
+	- isWebsiteRedesign = true
 
 block content
-	main#main-content.content.content-alt
+	main#main-content.content
 		.container
 			.row
 				.registration-message
@@ -23,13 +26,11 @@ block content
 
 			.row
 				.col-lg-8.offset-lg-2.col-xl-6.offset-xl-3
-					.card
-						.card-body
-							.page-header
-								h1 #{translate("register")}
-							p
-								| Please contact
-								|
-								strong #{settings.adminEmail}
-								|
-								| to create an account.
+					.page-header
+						h1 #{translate("register")}
+					p
+						| Please contact
+						|
+						strong #{settings.adminEmail}
+						|
+						| to create an account.

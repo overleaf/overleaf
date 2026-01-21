@@ -125,19 +125,6 @@ export const PostGateway = () => (
   </>
 )
 
-export const AccountSuspended = () => (
-  <main className="content content-alt" id="main-content">
-    <div className="container-custom-sm mx-auto">
-      <div className="card">
-        <div className="card-body">
-          <h3>Your account is suspended</h3>
-          <p>{lorem(6)}</p>
-        </div>
-      </div>
-    </div>
-  </main>
-)
-
 export const Restricted = () => (
   <>
     <Nav />
@@ -151,28 +138,6 @@ export const Restricted = () => (
               </h2>
             </div>
             <p>{lorem(23)}</p>
-          </div>
-        </div>
-      </div>
-    </main>
-  </>
-)
-
-export const OneTimeLogin = () => (
-  <>
-    <Nav />
-    <main className="content content-alt" id="main-content">
-      <div className="container">
-        <div className="row">
-          <div className="col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
-            <div className="card">
-              <div className="card-body">
-                <div className="page-header">
-                  <h1>We're back!</h1>
-                </div>
-                <p>Overleaf is now running normally.</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

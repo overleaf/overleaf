@@ -1,66 +1,67 @@
-extends ../layout-marketing
+extends ../layout-website-redesign
+
+block vars
+	- isWebsiteRedesign = true
 
 block content
-	main#main-content.content.content-alt
+	main#main-content.content
 		.container
 			.row
 				.col-lg-10.offset-lg-1.col-xl-8.offset-xl-2
-					.card.clear-user-sessions
-						.card-body
-							.page-header
-								h1 #{translate("your_sessions")}
+					.page-header
+						h1 #{translate("your_sessions")}
 
-							if currentSession.ip_address && currentSession.session_created
-								h3 #{translate("current_session")}
-								div
-									table.table.table-striped
-										thead
-											tr
-												th #{translate("ip_address")}
-												th #{translate("session_created_at")}
-											tr
-												td #{currentSession.ip_address}
-												td #{moment(currentSession.session_created).utc().format('Do MMM YYYY, h:mm a')} UTC
+					if currentSession.ip_address && currentSession.session_created
+						h3 #{translate("current_session")}
+						div
+							table.table.table-striped
+								thead
+									tr
+										th #{translate("ip_address")}
+										th #{translate("session_created_at")}
+									tr
+										td #{currentSession.ip_address}
+										td #{moment(currentSession.session_created).utc().format('Do MMM YYYY, h:mm a')} UTC
 
-							h3 #{translate("other_sessions")}
-							div
-								p.small
-									| !{translate("clear_sessions_description")}
+					h3 #{translate("other_sessions")}
+					div
+						p.small
+							| !{translate("clear_sessions_description")}
 
-							form(data-ol-async-form action='/user/sessions/clear' method='POST')
-								input(name='_csrf' type='hidden' value=csrfToken)
-								div(data-ol-not-sent)
-									if sessions.length == 0
-										p.text-center
-											| #{translate("no_other_sessions")}
+					form(data-ol-async-form action='/user/sessions/clear' method='POST')
+						input(name='_csrf' type='hidden' value=csrfToken)
+						div(data-ol-not-sent)
+							if sessions.length == 0
+								p.text-center
+									| #{translate("no_other_sessions")}
 
-									if sessions.length > 0
-										table.table.table-striped
-											thead
-												tr
-													th #{translate("ip_address")}
-													th #{translate("session_created_at")}
-											each session in sessions
-												tr
-													td #{session.ip_address}
-													td #{moment(session.session_created).utc().format('Do MMM YYYY, h:mm a')} UTC
+							if sessions.length > 0
+								table.table.table-striped
+									thead
+										tr
+											th #{translate("ip_address")}
+											th #{translate("session_created_at")}
+									each session in sessions
+										tr
+											td #{session.ip_address}
+											td #{moment(session.session_created).utc().format('Do MMM YYYY, h:mm a')} UTC
 
-										p.actions
-											.text-center
-												button.btn.btn-lg.btn-primary(
-													type='submit'
-													data-ol-disable-inflight
-												)
-													span(data-ol-inflight='idle') #{translate('clear_sessions')}
-													span(hidden data-ol-inflight='pending') #{translate("processing")}…
+								p.actions
+									.text-center
+										button.btn.btn-lg.btn-primary(
+											type='submit'
+											data-ol-disable-inflight
+										)
+											span(data-ol-inflight='idle') #{translate('clear_sessions')}
+											span(hidden data-ol-inflight='pending') #{translate("processing")}…
 
-								div(hidden data-ol-sent)
-									p.text-center
-										| #{translate("no_other_sessions")}
+						div(hidden data-ol-sent)
+							p.text-center
+								| #{translate("no_other_sessions")}
 
-									p.text-success.text-center
-										| #{translate('clear_sessions_success')}
-							.page-separator
-							.d-flex.gap-3
-								a.btn.btn-secondary(href='/user/settings') #{translate('back_to_account_settings')}
-								a.btn.btn-secondary(href='/project') #{translate('back_to_your_projects')}
+							p.text-success.text-center
+								| #{translate('clear_sessions_success')}
+					.page-separator
+					.d-flex.gap-3
+						a.btn.btn-secondary(href='/user/settings') #{translate('back_to_account_settings')}
+						a.btn.btn-secondary(href='/project') #{translate('back_to_your_projects')}

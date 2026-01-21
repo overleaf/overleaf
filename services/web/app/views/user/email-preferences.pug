@@ -1,47 +1,48 @@
-extends ../layout-marketing
+extends ../layout-website-redesign
 include ../_mixins/back_to_btns
 
+block vars
+	- isWebsiteRedesign = true
+
 block content
-	main#main-content.content.content-alt
+	main#main-content.content
 		.container
 			.row
 				.col-lg-10.offset-lg-1.col-xl-8.offset-xl-2
-					.card
-						.card-body
-							.page-header
-								h1 #{translate("newsletter_info_title")}
+					.page-header
+						h1 #{translate("newsletter_info_title")}
 
-							p #{translate("newsletter_info_summary")}
+					p #{translate("newsletter_info_summary")}
 
-							- var submitAction
+					- var submitAction
+					if subscribed
+						- submitAction = '/user/newsletter/unsubscribe'
+						p !{translate("newsletter_info_subscribed", {}, ['strong'])}
+					else
+						- submitAction = '/user/newsletter/subscribe'
+						p !{translate("newsletter_info_unsubscribed", {}, ['strong'])}
+
+					form(
+						name='newsletterForm'
+						data-ol-async-form
+						data-ol-reload-on-success
+						action=submitAction
+						method='POST'
+					)
+						input(name='_csrf' type='hidden' value=csrfToken)
+						+formMessages
+						p.actions.text-center
 							if subscribed
-								- submitAction = '/user/newsletter/unsubscribe'
-								p !{translate("newsletter_info_subscribed", {}, ['strong'])}
+								button.btn-danger.btn(type='submit' data-ol-disabled-inflight)
+									span(data-ol-inflight='idle') #{translate("unsubscribe")}
+									span(hidden data-ol-inflight='pending') #{translate("saving")}…
 							else
-								- submitAction = '/user/newsletter/subscribe'
-								p !{translate("newsletter_info_unsubscribed", {}, ['strong'])}
+								button.btn-primary.btn(type='submit' data-ol-disabled-inflight)
+									span(data-ol-inflight='idle') #{translate("subscribe")}
+									span(hidden data-ol-inflight='pending') #{translate("saving")}…
 
-							form(
-								name='newsletterForm'
-								data-ol-async-form
-								data-ol-reload-on-success
-								action=submitAction
-								method='POST'
-							)
-								input(name='_csrf' type='hidden' value=csrfToken)
-								+formMessages
-								p.actions.text-center
-									if subscribed
-										button.btn-danger.btn(type='submit' data-ol-disabled-inflight)
-											span(data-ol-inflight='idle') #{translate("unsubscribe")}
-											span(hidden data-ol-inflight='pending') #{translate("saving")}…
-									else
-										button.btn-primary.btn(type='submit' data-ol-disabled-inflight)
-											span(data-ol-inflight='idle') #{translate("subscribe")}
-											span(hidden data-ol-inflight='pending') #{translate("saving")}…
+					if subscribed
+						p #{translate("newsletter_info_note")}
 
-							if subscribed
-								p #{translate("newsletter_info_note")}
-
-							.page-separator
-							+back-to-btns
+					.page-separator
+					+back-to-btns
