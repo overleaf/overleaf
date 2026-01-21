@@ -1,16 +1,18 @@
-const express = require('express')
-const Path = require('node:path')
-const Client = require('./helpers/Client')
-const sinon = require('sinon')
-const ClsiApp = require('./helpers/ClsiApp')
-const { fetchString } = require('@overleaf/fetch-utils')
-const Settings = require('@overleaf/settings')
+import express from 'express'
+import Path from 'node:path'
+import Client from './helpers/Client.js'
+import sinon from 'sinon'
+import ClsiApp from './helpers/ClsiApp.js'
+import { fetchString } from '@overleaf/fetch-utils'
+import Settings from '@overleaf/settings'
 
 const Server = {
   run() {
     const app = express()
 
-    const staticServer = express.static(Path.join(__dirname, '../fixtures/'))
+    const staticServer = express.static(
+      Path.join(import.meta.dirname, '../fixtures/')
+    )
 
     const alreadyFailed = new Map()
     app.get('/fail/:times/:id', (req, res) => {

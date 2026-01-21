@@ -1,6 +1,6 @@
-const Client = require('./helpers/Client')
-const ClsiApp = require('./helpers/ClsiApp')
-const { expect } = require('chai')
+import Client from './helpers/Client.js'
+import ClsiApp from './helpers/ClsiApp.js'
+import { expect } from 'chai'
 
 describe('Timed out compile', function () {
   before(async function () {

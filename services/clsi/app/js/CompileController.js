@@ -1,12 +1,14 @@
-const Path = require('node:path')
-const RequestParser = require('./RequestParser')
-const CompileManager = require('./CompileManager')
-const Settings = require('@overleaf/settings')
-const Metrics = require('@overleaf/metrics')
-const ProjectPersistenceManager = require('./ProjectPersistenceManager')
-const logger = require('@overleaf/logger')
-const Errors = require('./Errors')
-const { notifyCLSICacheAboutBuild } = require('./CLSICacheHandler')
+import Path from 'node:path'
+import RequestParser from './RequestParser.js'
+import CompileManager from './CompileManager.js'
+import Settings from '@overleaf/settings'
+import Metrics from '@overleaf/metrics'
+import ProjectPersistenceManager from './ProjectPersistenceManager.js'
+import logger from '@overleaf/logger'
+import Errors from './Errors.js'
+import CLSICacheHandler from './CLSICacheHandler.js'
+
+const { notifyCLSICacheAboutBuild } = CLSICacheHandler
 
 let lastSuccessfulCompileTimestamp = 0
 
@@ -272,7 +274,7 @@ function status(req, res, next) {
   res.send('OK')
 }
 
-module.exports = {
+export default {
   compile,
   stopCompile,
   clearCache,

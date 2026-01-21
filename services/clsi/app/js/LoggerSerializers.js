@@ -1,4 +1,4 @@
-const Path = require('node:path')
+import Path from 'node:path'
 
 const CLSI_REQUEST_SERIALIZED_PROPERTIES = [
   'compiler',
@@ -16,7 +16,7 @@ const CLSI_REQUEST_SERIALIZED_PROPERTIES = [
   'syncType',
 ]
 
-module.exports = {
+export default {
   /**
    * Serializer for a CLSI request object.
    * Only includes properties useful for logging.

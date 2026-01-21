@@ -1,23 +1,25 @@
 // @ts-check
-const crypto = require('node:crypto')
-const fs = require('node:fs')
-const Path = require('node:path')
-const { pipeline } = require('node:stream/promises')
-const { createGzip, createGunzip } = require('node:zlib')
-const { crc32 } = require('node:zlib')
-const tarFs = require('tar-fs')
-const _ = require('lodash')
-const {
+import crypto from 'node:crypto'
+import fs from 'node:fs'
+import Path from 'node:path'
+import { pipeline } from 'node:stream/promises'
+import { crc32, createGzip, createGunzip } from 'node:zlib'
+import tarFs from 'tar-fs'
+import _ from 'lodash'
+import {
   fetchNothing,
   fetchStream,
   RequestFailedError,
-} = require('@overleaf/fetch-utils')
-const logger = require('@overleaf/logger')
-const Metrics = require('@overleaf/metrics')
-const Settings = require('@overleaf/settings')
-const { MeteredStream } = require('@overleaf/stream-utils')
-const { CACHE_SUBDIR } = require('./OutputCacheManager')
-const { isExtraneousFile } = require('./ResourceWriter')
+} from '@overleaf/fetch-utils'
+import logger from '@overleaf/logger'
+import Metrics from '@overleaf/metrics'
+import Settings from '@overleaf/settings'
+import { MeteredStream } from '@overleaf/stream-utils'
+import OutputCacheManager from './OutputCacheManager.js'
+import ResourceWriter from './ResourceWriter.js'
+
+const { CACHE_SUBDIR } = OutputCacheManager
+const { isExtraneousFile } = ResourceWriter
 
 const TIMEOUT = 5_000
 /**
@@ -426,7 +428,7 @@ async function downloadLatestCompileCache(projectId, userId, compileDir) {
   return !abort
 }
 
-module.exports = {
+export default {
   notifyCLSICacheAboutBuild,
   downloadLatestCompileCache,
   downloadOutputDotSynctexFromCompileCache,

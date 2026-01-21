@@ -1,15 +1,15 @@
-const fs = require('node:fs')
-const Path = require('node:path')
-const { expect } = require('chai')
+import fs from 'node:fs'
+import Path from 'node:path'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 const MODULE_PATH = '../../../app/js/ContentCacheManager'
 
 describe('ContentCacheManager', function () {
   let contentDir, pdfPath, xrefPath
   let ContentCacheManager, files, Settings
-  before(function () {
-    Settings = require('@overleaf/settings')
-    ContentCacheManager = require(MODULE_PATH)
+  beforeAll(async function () {
+    Settings = (await import('@overleaf/settings')).default
+    ContentCacheManager = (await import(MODULE_PATH)).default
   })
   let contentRanges, newContentRanges, reclaimed
   async function run(filePath, pdfSize, pdfCachingMinChunkSize) {
@@ -35,7 +35,7 @@ describe('ContentCacheManager', function () {
       files[path] = await fs.promises.readFile(path)
     }
   }
-  before(function () {
+  beforeAll(function () {
     contentDir =
       '/overleaf/services/clsi/output/602cee6f6460fca0ba7921e6/content/1797a7f48f9-5abc1998509dea1f'
     pdfPath =
@@ -47,7 +47,7 @@ describe('ContentCacheManager', function () {
     Settings.pdfCachingMinChunkSize = 1024
   })
 
-  before(async function () {
+  beforeAll(async function () {
     await fs.promises.rm(contentDir, { recursive: true, force: true })
     await fs.promises.mkdir(contentDir, { recursive: true })
     await fs.promises.mkdir(Path.dirname(pdfPath), { recursive: true })
@@ -66,7 +66,7 @@ describe('ContentCacheManager', function () {
       return Path.join('test/unit/js/snapshots/minimalCompile/chunks', hash)
     }
     let MINIMAL_SIZE, RANGE_1, RANGE_2, h1, h2, START_1, START_2, END_1, END_2
-    before(async function () {
+    beforeAll(async function () {
       await fs.promises.copyFile(PATH_MINIMAL_PDF, pdfPath)
       await fs.promises.copyFile(PATH_MINIMAL_XREF, xrefPath)
       const MINIMAL = await fs.promises.readFile(PATH_MINIMAL_PDF)
@@ -85,7 +85,7 @@ describe('ContentCacheManager', function () {
     }
 
     describe('with two ranges qualifying', function () {
-      before(async function () {
+      beforeAll(async function () {
         await runWithMinimal(500)
       })
       it('should produce two ranges', function () {
@@ -133,7 +133,7 @@ describe('ContentCacheManager', function () {
       })
 
       describe('when re-running with one range too small', function () {
-        before(async function () {
+        beforeAll(async function () {
           await runWithMinimal(1024)
         })
 
@@ -177,7 +177,7 @@ describe('ContentCacheManager', function () {
 
         describe('when re-running 5 more times', function () {
           for (let i = 0; i < 5; i++) {
-            before(async function () {
+            beforeAll(async function () {
               await runWithMinimal(1024)
             })
           }

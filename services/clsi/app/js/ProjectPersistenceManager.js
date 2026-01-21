@@ -7,17 +7,17 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import UrlCache from './UrlCache.js'
+import CompileManager from './CompileManager.js'
+import async from 'async'
+import logger from '@overleaf/logger'
+import Metrics from '@overleaf/metrics'
+import Settings from '@overleaf/settings'
+import { callbackify } from 'node:util'
+import Path from 'node:path'
+import fs from 'node:fs'
 let ProjectPersistenceManager
-const UrlCache = require('./UrlCache')
-const CompileManager = require('./CompileManager')
-const async = require('async')
-const logger = require('@overleaf/logger')
 const oneDay = 24 * 60 * 60 * 1000
-const Metrics = require('@overleaf/metrics')
-const Settings = require('@overleaf/settings')
-const { callbackify } = require('node:util')
-const Path = require('node:path')
-const fs = require('node:fs')
 
 // projectId -> timestamp mapping.
 const LAST_ACCESS = new Map()
@@ -87,7 +87,7 @@ async function refreshExpiryTimeout() {
   )
 }
 
-module.exports = ProjectPersistenceManager = {
+export default ProjectPersistenceManager = {
   EXPIRY_TIMEOUT: Settings.project_cache_length_ms || oneDay * 2.5,
 
   isAnyDiskLow() {

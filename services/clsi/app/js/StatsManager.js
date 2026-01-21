@@ -1,5 +1,7 @@
-const crypto = require('node:crypto')
-const { shouldSkipMetrics } = require('./Metrics')
+import crypto from 'node:crypto'
+import Metrics from './Metrics.js'
+
+const { shouldSkipMetrics } = Metrics
 
 /**
  * Consistently sample a keyspace with a given sample percentage.
@@ -46,4 +48,4 @@ function sampleRequest(request, samplingPercentage) {
   }
 }
 
-module.exports = { sampleByHash, sampleRequest }
+export default { sampleByHash, sampleRequest }

@@ -1,5 +1,5 @@
-const app = require('../../../../app')
-const Settings = require('@overleaf/settings')
+import app from '../../../../app.js'
+import Settings from '@overleaf/settings'
 
 function startApp() {
   return new Promise((resolve, reject) => {
@@ -26,6 +26,6 @@ async function ensureRunning() {
   await appStartedPromise
 }
 
-module.exports = {
+export default {
   ensureRunning,
 }

@@ -1,6 +1,6 @@
-const fsPromises = require('node:fs/promises')
-const { callbackify } = require('node:util')
-const logger = require('@overleaf/logger')
+import fsPromises from 'node:fs/promises'
+import { callbackify } from 'node:util'
+import logger from '@overleaf/logger'
 
 async function injectDraftMode(filename) {
   const content = await fsPromises.readFile(filename, { encoding: 'utf8' })
@@ -18,7 +18,7 @@ async function injectDraftMode(filename) {
   await fsPromises.writeFile(filename, modifiedContent, { encoding: 'utf8' })
 }
 
-module.exports = {
+export default {
   injectDraftMode: callbackify(injectDraftMode),
   promises: { injectDraftMode },
 }

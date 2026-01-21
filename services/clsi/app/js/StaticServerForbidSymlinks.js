@@ -12,13 +12,13 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import Path from 'node:path'
+import fs from 'node:fs'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
 let ForbidSymlinks
-const Path = require('node:path')
-const fs = require('node:fs')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
 
-module.exports = ForbidSymlinks = function (staticFn, root, options) {
+export default ForbidSymlinks = function (staticFn, root, options) {
   const expressStatic = staticFn(root, options)
   const basePath = Path.resolve(root)
   return function (req, res, next) {

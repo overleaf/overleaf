@@ -3,12 +3,13 @@
   "description": "A Node.js implementation of the CLSI LaTeX web-API",
   "private": true,
   "main": "app.js",
+  "type": "module",
   "scripts": {
     "start": "node app.js",
     "test:acceptance:_run": "mocha --recursive --timeout 15000 --exit $@ test/acceptance/js",
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
-    "test:unit:_run": "mocha --recursive --exit $@ test/unit/js",
-    "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
+    "test:unit:_run": "vitest --config ./vitest.config.unit.cjs",
+    "test:unit": "npm run test:unit:_run",
     "nodemon": "node --watch app.js",
     "lint": "eslint --max-warnings 0 --format unix .",
     "format": "prettier --list-different $PWD/'**/{*.*js,*.ts}'",
@@ -45,10 +46,10 @@
     "mocha-multi-reporters": "^1.5.1",
     "mock-fs": "^5.1.2",
     "node-fetch": "^2.7.0",
-    "sandboxed-module": "^2.0.4",
     "sinon": "~9.0.1",
     "sinon-chai": "^3.7.0",
     "timekeeper": "2.2.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "vitest": "^4.0.0"
   }
 }

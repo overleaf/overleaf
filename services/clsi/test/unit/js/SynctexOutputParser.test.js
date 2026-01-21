@@ -1,16 +1,18 @@
-const Path = require('node:path')
-const SandboxedModule = require('sandboxed-module')
-const { expect } = require('chai')
+import Path from 'node:path'
+import { expect, describe, beforeEach, it } from 'vitest'
 
-const MODULE_PATH = Path.join(__dirname, '../../../app/js/SynctexOutputParser')
+const MODULE_PATH = Path.join(
+  import.meta.dirname,
+  '../../../app/js/SynctexOutputParser'
+)
 
 describe('SynctexOutputParser', function () {
-  beforeEach(function () {
-    this.SynctexOutputParser = SandboxedModule.require(MODULE_PATH)
+  beforeEach(async function (ctx) {
+    ctx.SynctexOutputParser = (await import(MODULE_PATH)).default
   })
 
   describe('parseViewOutput', function () {
-    it('parses valid output', function () {
+    it('parses valid output', function (ctx) {
       const output = `This is SyncTeX command line utility, version 1.5
 SyncTeX result begin
 Output:/compile/output.pdf
@@ -39,7 +41,7 @@ middle:
 after:
 SyncTeX result end
 `
-      const records = this.SynctexOutputParser.parseViewOutput(output)
+      const records = ctx.SynctexOutputParser.parseViewOutput(output)
       expect(records).to.deep.equal([
         {
           page: 1,
@@ -58,15 +60,15 @@ SyncTeX result end
       ])
     })
 
-    it('handles garbage', function () {
+    it('handles garbage', function (ctx) {
       const output = 'This computer is on strike!'
-      const records = this.SynctexOutputParser.parseViewOutput(output)
+      const records = ctx.SynctexOutputParser.parseViewOutput(output)
       expect(records).to.deep.equal([])
     })
   })
 
   describe('parseEditOutput', function () {
-    it('parses valid output', function () {
+    it('parses valid output', function (ctx) {
       const output = `This is SyncTeX command line utility, version 1.5
 SyncTeX result begin
 Output:/compile/output.pdf
@@ -77,7 +79,7 @@ Offset:0
 Context:
 SyncTeX result end
 `
-      const records = this.SynctexOutputParser.parseEditOutput(
+      const records = ctx.SynctexOutputParser.parseEditOutput(
         output,
         '/compile'
       )
@@ -86,7 +88,7 @@ SyncTeX result end
       ])
     })
 
-    it('handles values that contain colons', function () {
+    it('handles values that contain colons', function (ctx) {
       const output = `This is SyncTeX command line utility, version 1.5
 SyncTeX result begin
 Output:/compile/output.pdf
@@ -98,7 +100,7 @@ Context:
 SyncTeX result end
 `
 
-      const records = this.SynctexOutputParser.parseEditOutput(
+      const records = ctx.SynctexOutputParser.parseEditOutput(
         output,
         '/compile'
       )
@@ -107,9 +109,9 @@ SyncTeX result end
       ])
     })
 
-    it('handles garbage', function () {
+    it('handles garbage', function (ctx) {
       const output = '2 + 2 = 4'
-      const records = this.SynctexOutputParser.parseEditOutput(output)
+      const records = ctx.SynctexOutputParser.parseEditOutput(output)
       expect(records).to.deep.equal([])
     })
   })

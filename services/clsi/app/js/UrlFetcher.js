@@ -1,15 +1,15 @@
-const fs = require('node:fs')
-const logger = require('@overleaf/logger')
-const Settings = require('@overleaf/settings')
-const {
+import fs from 'node:fs'
+import logger from '@overleaf/logger'
+import Settings from '@overleaf/settings'
+import {
   CustomHttpAgent,
   CustomHttpsAgent,
   fetchStream,
   RequestFailedError,
-} = require('@overleaf/fetch-utils')
-const { URL } = require('node:url')
-const { pipeline } = require('node:stream/promises')
-const Metrics = require('@overleaf/metrics')
+} from '@overleaf/fetch-utils'
+import { URL } from 'node:url'
+import { pipeline } from 'node:stream/promises'
+import Metrics from '@overleaf/metrics'
 
 const MAX_CONNECT_TIME = 1000
 const httpAgent = new CustomHttpAgent({ connectTimeout: MAX_CONNECT_TIME })
@@ -121,6 +121,8 @@ function inferSource(url) {
   return 'unknown'
 }
 
-module.exports.promises = {
-  pipeUrlToFileWithRetry,
+export default {
+  promises: {
+    pipeUrlToFileWithRetry,
+  },
 }

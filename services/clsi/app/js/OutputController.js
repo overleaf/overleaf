@@ -1,6 +1,6 @@
-const OutputFileArchiveManager = require('./OutputFileArchiveManager')
-const { expressify } = require('@overleaf/promise-utils')
-const { pipeline } = require('node:stream/promises')
+import OutputFileArchiveManager from './OutputFileArchiveManager.js'
+import { expressify } from '@overleaf/promise-utils'
+import { pipeline } from 'node:stream/promises'
 
 async function createOutputZip(req, res) {
   const {
@@ -20,4 +20,4 @@ async function createOutputZip(req, res) {
   await pipeline(archive, res)
 }
 
-module.exports = { createOutputZip: expressify(createOutputZip) }
+export default { createOutputZip: expressify(createOutputZip) }

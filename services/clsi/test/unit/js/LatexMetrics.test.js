@@ -1,32 +1,34 @@
-const fs = require('node:fs')
-const path = require('node:path')
-const { expect } = require('chai')
-const { addLatexFdbMetrics } = require('../../../app/js/LatexMetrics')
+import fs from 'node:fs'
+import path from 'node:path'
+import { expect, describe, beforeEach, it } from 'vitest'
+import LatexMetrics from '../../../app/js/LatexMetrics.js'
+
+const { addLatexFdbMetrics } = LatexMetrics
 
 describe('LatexMetrics', function () {
   describe('addLatexFdbMetrics', function () {
-    beforeEach(function () {
-      this.stats = {}
-      Object.defineProperty(this.stats, 'latexmk', {
+    beforeEach(function (ctx) {
+      ctx.stats = {}
+      Object.defineProperty(ctx.stats, 'latexmk', {
         value: {},
         enumerable: false,
       })
     })
 
-    it('should do nothing if fdbContent is null or empty', function () {
-      addLatexFdbMetrics(null, this.stats)
-      expect(this.stats.latexmk).to.deep.equal({})
-      addLatexFdbMetrics('', this.stats)
-      expect(this.stats.latexmk).to.deep.equal({})
+    it('should do nothing if fdbContent is null or empty', function (ctx) {
+      addLatexFdbMetrics(null, ctx.stats)
+      expect(ctx.stats.latexmk).to.deep.equal({})
+      addLatexFdbMetrics('', ctx.stats)
+      expect(ctx.stats.latexmk).to.deep.equal({})
     })
 
-    it('should parse v3 fdb content and add to stats', function () {
+    it('should parse v3 fdb content and add to stats', function (ctx) {
       const fdbContent = fs.readFileSync(
-        path.join(__dirname, 'fixtures', 'v3.fdb_latexmk'),
+        path.join(import.meta.dirname, 'fixtures', 'v3.fdb_latexmk'),
         'utf8'
       )
-      addLatexFdbMetrics(fdbContent, this.stats)
-      expect(this.stats.latexmk['fdb-file-types']).to.deep.equal({
+      addLatexFdbMetrics(fdbContent, ctx.stats)
+      expect(ctx.stats.latexmk['fdb-file-types']).to.deep.equal({
         system: [
           { ext: 'fmt', count: 1, size: 3847283 },
           { ext: 'map', count: 2, size: 1644257 },
@@ -64,13 +66,13 @@ describe('LatexMetrics', function () {
       })
     })
 
-    it('should parse v4 fdb content and add to stats', function () {
+    it('should parse v4 fdb content and add to stats', function (ctx) {
       const fdbContent = fs.readFileSync(
-        path.join(__dirname, 'fixtures', 'v4.fdb_latexmk'),
+        path.join(import.meta.dirname, 'fixtures', 'v4.fdb_latexmk'),
         'utf8'
       )
-      addLatexFdbMetrics(fdbContent, this.stats)
-      expect(this.stats.latexmk['fdb-file-types']).to.deep.equal({
+      addLatexFdbMetrics(fdbContent, ctx.stats)
+      expect(ctx.stats.latexmk['fdb-file-types']).to.deep.equal({
         system: [
           { ext: 'fmt', count: 1, size: 8172536 },
           { ext: 'map', count: 2, size: 4652176 },

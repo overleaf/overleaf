@@ -11,12 +11,12 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import fs from 'node:fs'
+import logger from '@overleaf/logger'
+import { promisifyMultiResult } from '@overleaf/promise-utils'
 let SafeReader
-const fs = require('node:fs')
-const logger = require('@overleaf/logger')
-const { promisifyMultiResult } = require('@overleaf/promise-utils')
 
-module.exports = SafeReader = {
+export default SafeReader = {
   // safely read up to size bytes from a file and return result as a
   // string
 
@@ -62,6 +62,6 @@ module.exports = SafeReader = {
   },
 }
 
-module.exports.promises = {
+SafeReader.promises = {
   readFile: promisifyMultiResult(SafeReader.readFile, ['result', 'bytesRead']),
 }

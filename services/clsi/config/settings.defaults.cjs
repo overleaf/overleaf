@@ -1,5 +1,6 @@
 const Path = require('node:path')
 const os = require('node:os')
+const fs = require('node:fs')
 
 const isPreEmptible = process.env.PREEMPTIBLE === 'TRUE'
 const CLSI_SERVER_ID = os.hostname().replace('-ctr', '')
@@ -96,6 +97,15 @@ if (process.env.ALLOWED_COMPILE_GROUPS) {
 }
 
 if ((process.env.DOCKER_RUNNER || process.env.SANDBOXED_COMPILES) === 'true') {
+  if (
+    !fs.existsSync(Path.join(__dirname, '..', 'app', 'js', 'DockerRunner.js'))
+  ) {
+    console.error(
+      'Sandboxed compiles are only available with Overleaf Server Pro. Compare Server Pro with Community Edition here: https://docs.overleaf.com/on-premises/welcome/server-pro-vs.-community-edition'
+    )
+    process.exit(1)
+  }
+
   module.exports.clsi = {
     dockerRunner: true,
     docker: {

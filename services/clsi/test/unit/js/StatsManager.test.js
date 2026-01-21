@@ -1,5 +1,16 @@
-const { expect } = require('chai')
-const { sampleByHash, sampleRequest } = require('../../../app/js/StatsManager')
+import { expect, describe, it, vi } from 'vitest'
+import StatsManager from '../../../app/js/StatsManager.js'
+
+const { sampleByHash, sampleRequest } = StatsManager
+
+// Mocks allow us to import Metrics.js twice without getting errors.
+vi.mock('@overleaf/metrics', () => ({
+  prom: {
+    Gauge: vi.fn(),
+    Counter: vi.fn(),
+    Histogram: vi.fn(),
+  },
+}))
 
 describe('StatsManager', function () {
   describe('sampleByHash', function () {

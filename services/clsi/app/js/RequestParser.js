@@ -1,5 +1,5 @@
-const settings = require('@overleaf/settings')
-const OutputCacheManager = require('./OutputCacheManager')
+import settings from '@overleaf/settings'
+import OutputCacheManager from './OutputCacheManager.js'
 
 const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
 const MAX_TIMEOUT = 600
@@ -247,4 +247,4 @@ function _checkPath(path) {
   return path
 }
 
-module.exports = { parse, MAX_TIMEOUT }
+export default { parse, MAX_TIMEOUT }

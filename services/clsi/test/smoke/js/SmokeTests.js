@@ -1,12 +1,12 @@
-const request = require('request')
-const Settings = require('@overleaf/settings')
+import request from 'request'
+import Settings from '@overleaf/settings'
 
 const buildUrl = path =>
   `http://${Settings.internal.clsi.host}:${Settings.internal.clsi.port}/${path}`
 
 const url = buildUrl(`project/smoketest-${process.pid}/compile`)
 
-module.exports = {
+export default {
   sendNewResult(res) {
     this._run(error => this._sendResponse(res, error))
   },

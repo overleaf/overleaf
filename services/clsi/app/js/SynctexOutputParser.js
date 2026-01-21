@@ -1,4 +1,4 @@
-const Path = require('node:path')
+import Path from 'node:path'
 
 /**
  * Parse output from the `synctex view` command
@@ -110,4 +110,4 @@ function _setFloatProp(record, prop, value) {
   }
 }
 
-module.exports = { parseViewOutput, parseEditOutput }
+export default { parseViewOutput, parseEditOutput }

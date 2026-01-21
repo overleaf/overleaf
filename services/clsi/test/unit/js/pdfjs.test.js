@@ -1,11 +1,13 @@
-const fs = require('node:fs')
-const Path = require('node:path')
-const { expect } = require('chai')
-const { parseXrefTable } = require('../../../app/js/XrefParser')
-const { NoXrefTableError } = require('../../../app/js/Errors')
+import fs from 'node:fs'
+import Path from 'node:path'
+import { beforeAll, expect, describe, it } from 'vitest'
+import XrefParser from '../../../app/js/XrefParser.js'
+import { NoXrefTableError } from '../../../app/js/Errors.js'
 const PATH_EXAMPLES = 'test/acceptance/fixtures/examples/'
 const PATH_SNAPSHOTS = 'test/unit/js/snapshots/pdfjs/'
 const EXAMPLES = fs.readdirSync(PATH_EXAMPLES)
+
+const { parseXrefTable } = XrefParser
 
 function snapshotPath(example) {
   return Path.join(PATH_SNAPSHOTS, example, 'XrefTable.json')
@@ -62,13 +64,15 @@ describe('pdfjs', function () {
   for (const example of EXAMPLES) {
     describe(example, function () {
       let size, snapshot
-      before('load snapshot', async function () {
+      beforeAll(async function () {
+        // load snapshot
         const ctx = await loadContext(example)
         size = ctx.size
         snapshot = ctx.snapshot
       })
 
-      before('back fill new snapshot', async function () {
+      beforeAll(async function (ctx) {
+        // back fill new snapshot
         if (snapshot === null) {
           console.error('back filling snapshot for', example)
           snapshot = await backFillSnapshot(example, size)

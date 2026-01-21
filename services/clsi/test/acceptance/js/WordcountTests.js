@@ -1,8 +1,8 @@
-const Client = require('./helpers/Client')
-const { expect } = require('chai')
-const path = require('node:path')
-const fs = require('node:fs')
-const ClsiApp = require('./helpers/ClsiApp')
+import Client from './helpers/Client.js'
+import { expect } from 'chai'
+import path from 'node:path'
+import fs from 'node:fs'
+import ClsiApp from './helpers/ClsiApp.js'
 
 describe('Syncing', function () {
   before(async function () {
@@ -11,7 +11,7 @@ describe('Syncing', function () {
         {
           path: 'main.tex',
           content: fs.readFileSync(
-            path.join(__dirname, '../fixtures/naugty_strings.txt'),
+            path.join(import.meta.dirname, '../fixtures/naugty_strings.txt'),
             'utf-8'
           ),
         },

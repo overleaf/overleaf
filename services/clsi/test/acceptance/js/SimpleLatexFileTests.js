@@ -1,8 +1,8 @@
-const Client = require('./helpers/Client')
-const { fetchNothing, fetchString } = require('@overleaf/fetch-utils')
-const ClsiApp = require('./helpers/ClsiApp')
-const { expect } = require('chai')
-const Settings = require('@overleaf/settings')
+import Client from './helpers/Client.js'
+import { fetchNothing, fetchString } from '@overleaf/fetch-utils'
+import ClsiApp from './helpers/ClsiApp.js'
+import { expect } from 'chai'
+import Settings from '@overleaf/settings'
 
 describe('Simple LaTeX file', function () {
   const content = `\
