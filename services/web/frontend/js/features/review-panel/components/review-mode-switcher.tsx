@@ -1,4 +1,4 @@
-import { forwardRef, memo, MouseEventHandler, useState } from 'react'
+import { forwardRef, memo, MouseEventHandler, useEffect, useState } from 'react'
 import {
   Dropdown,
   DropdownMenu,
@@ -53,11 +53,30 @@ function ReviewModeSwitcher() {
   const { write, trackedWrite } = usePermissionsContext()
   const { features } = useProjectContext()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  // Track global drag to avoid the button covering text (opacity changes while dragging)
+  const [isDragging, setIsDragging] = useState(false)
   const showViewOption = permissionsLevel === 'readOnly'
   const view = useCodeMirrorViewContext()
 
+  useEffect(() => {
+    const handleMouseDown = () => setIsDragging(true)
+    const handleMouseUp = () => setIsDragging(false)
+
+    document.addEventListener('mousedown', handleMouseDown)
+    document.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [])
+
   return (
-    <div className="review-mode-switcher-container">
+    <div
+      className={classNames('review-mode-switcher-container', {
+        'review-mode-switcher-dragging': isDragging,
+      })}
+    >
       <Dropdown className="review-mode-switcher" align="end">
         <DropdownToggle
           as={ModeSwitcherToggleButton}
