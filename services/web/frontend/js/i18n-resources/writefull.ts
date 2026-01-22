@@ -411,6 +411,9 @@ const en = {
       "We didn't identify any passages that need additional citation.",
     'citations-reviewer.chat.no-citations.run-again': 'Run again',
     'citations-reviewer.chat.no-citations.done': 'Done',
+    'citations-reviewer.chat.no-citations.rerun':
+      'Do you want us to run the check again with a lower threshold for showing passages that require additional citation?',
+    'citations-reviewer.chat.no-citations.rerun-yes': 'Yes, run again',
     'citations-reviewer.chat.publications.title': 'Suggested papers',
     'citations-reviewer.chat.publications.description':
       'The following papers may support the claim you’ve made. Always check papers yourself to ensure relevance.',
@@ -888,6 +891,9 @@ const es = {
       'No se identificaron pasajes que necesiten citas adicionales.',
     'citations-reviewer.chat.no-citations.run-again': 'Volver a ejecutar',
     'citations-reviewer.chat.no-citations.done': 'Hecho',
+    'citations-reviewer.chat.no-citations.rerun':
+      '¿Quieres que volvamos a ejecutar la revisión con un umbral más bajo para mostrar pasajes que requieran citas adicionales?',
+    'citations-reviewer.chat.no-citations.rerun-yes': 'Sí, volver a ejecutar',
     'citations-reviewer.chat.publications.title': 'Artículos sugeridos',
     'citations-reviewer.chat.publications.description':
       'Los siguientes artículos pueden respaldar la afirmación que has hecho. Revisa siempre los artículos por tu cuenta para asegurar su relevancia.',
