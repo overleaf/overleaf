@@ -8,7 +8,7 @@ function usage() {
     'Usage: node update_institution_user_saml_ids.mjs -i <institution-id> -s <search> [-r <replace>]'
   )
   console.log(
-    'Performs string replacement on external user IDs for all users in an institution'
+    'Performs string replacement on external user IDs for all users in an institution. A search-and-replace or/and an append operation must be specified.'
   )
   console.log('Options:')
   console.log(
@@ -16,7 +16,13 @@ function usage() {
   )
   console.log('  --search, -s                             String to search for')
   console.log(
+    '  --search-regexp                          Regular expression to search for (ignored if --search is provided)'
+  )
+  console.log(
     '  --replace, -r                            String to replace with (optional, defaults to empty string)'
+  )
+  console.log(
+    '  --append, -a                            String to append at the end'
   )
   console.log(
     '  --dry-run, -d                            Shows changes but does not perform updates'
@@ -31,15 +37,18 @@ const {
   'dry-run': dryRun,
   'institution-id': providerId,
   search,
+  'search-regexp': searchRegexp,
   replace,
+  append,
   help,
 } = minimist(process.argv.slice(2), {
-  string: ['institution-id', 'search', 'replace'],
+  string: ['institution-id', 'search', 'search-regexp', 'replace'],
   boolean: ['dry-run', 'help'],
   alias: {
     'institution-id': 'i',
     search: 's',
     replace: 'r',
+    append: 'a',
     'dry-run': 'd',
     help: 'h',
   },
@@ -50,7 +59,9 @@ const {
 })
 
 async function main() {
-  if (help || !providerId || !search) {
+  const hasSearchOrAppend =
+    Boolean(search) || Boolean(searchRegexp) || Boolean(append)
+  if (help || !providerId || !hasSearchOrAppend) {
     usage()
   }
 
@@ -68,17 +79,20 @@ async function main() {
       u => u.providerId === providerId
     )
 
-    if (
-      !matchingIdentifier ||
-      !matchingIdentifier.externalUserId.includes(search)
-    ) {
+    if (!matchingIdentifier) {
       continue
     }
 
-    const updatedId = matchingIdentifier.externalUserId.replaceAll(
-      search,
-      replace
-    )
+    let updatedId
+    if (search) {
+      updatedId = matchingIdentifier.externalUserId.replaceAll(search, replace)
+    } else if (searchRegexp) {
+      const regexp = new RegExp(searchRegexp, 'g')
+      updatedId = matchingIdentifier.externalUserId.replaceAll(regexp, replace)
+    }
+    if (append) {
+      updatedId = matchingIdentifier.externalUserId + append
+    }
 
     usersToUpdate = usersToUpdate + 1
     console.log(`${user._id},${matchingIdentifier.externalUserId},${updatedId}`)
