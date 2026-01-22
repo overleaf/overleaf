@@ -15,9 +15,56 @@ $footer-width-delta: 320px;
   --cookie-banner-link: var(--link-ui-dark);
 }
 
+@mixin footer-pre-redesign {
+  --footer-background: var(--bg-dark-primary);
+  --footer-content: var(--content-secondary-dark);
+  --footer-link: var(--content-secondary-dark);
+  --footer-logo-url: url('../../../frontend/js/shared/svgs/overleaf-green.svg');
+}
+
+@mixin footer-light {
+  --footer-background: var(--bg-light-secondary);
+  --footer-content: var(--content-primary);
+  --footer-link: var(--content-primary);
+  --footer-logo-url: url('../../../frontend/js/shared/svgs/overleaf-green.svg');
+}
+
+@mixin footer-dark {
+  --footer-background: var(--bg-dark-primary);
+  --footer-content: var(--content-primary-dark);
+  --footer-link: var(--content-placeholder-dark);
+  --footer-logo-url: url('../../../frontend/js/shared/svgs/overleaf-white.svg');
+}
+
+@mixin socials-light {
+  --facebook-logo-background: #0866ff;
+  --facebook-logo-path: transparent;
+  --x-logo-path: #000;
+  --linkedin-logo-background: #2867b2;
+  --linkedin-logo-path: #fff;
+}
+
+@mixin socials-dark {
+  --facebook-logo-background: #fff;
+  --facebook-logo-path: transparent;
+  --x-logo-path: #fff;
+  --linkedin-logo-background: #fff;
+  --linkedin-logo-path: #000;
+}
+
 :root {
+  .fat-footer {
+    @include footer-pre-redesign;
+  }
+
   .cookie-banner {
     @include cookie-banner-light;
+  }
+
+  .website-redesign-fat-footer,
+  .website-redesign .fat-footer {
+    @include footer-light;
+    @include socials-light;
   }
 
   @include theme('default') {
@@ -25,6 +72,11 @@ $footer-width-delta: 320px;
     .project-ds-nav-page {
       .cookie-banner {
         @include cookie-banner-dark;
+      }
+
+      .fat-footer {
+        @include footer-dark;
+        @include socials-dark;
       }
     }
   }
@@ -153,11 +205,11 @@ footer.site-footer {
 }
 
 .fat-footer {
-  --footer-text-color: var(--content-secondary-dark);
-  --footer-background-color: var(--bg-dark-primary);
-  --link-color: var(--footer-text-color);
-  --link-hover-color: var(--footer-text-color);
-  --link-visited-color: var(--footer-text-color);
+  --footer-text-color: var(--footer-content);
+  --footer-background-color: var(--footer-background);
+  --link-color: var(--footer-link);
+  --link-hover-color: var(--footer-link);
+  --link-visited-color: var(--footer-link);
   --link-text-decoration: none;
   --link-hover-text-decoration: underline;
 
@@ -433,7 +485,7 @@ footer.site-footer {
 
 .website-redesign-fat-footer,
 .website-redesign .fat-footer {
-  --footer-text-color: var(--content-primary);
+  --footer-text-color: var(--footer-content);
 
   .fat-footer-container {
     @include footer-container-down(sm) {
@@ -442,14 +494,14 @@ footer.site-footer {
   }
 
   &.fat-footer {
-    background: var(--content-primary-dark);
+    background: var(--footer-background);
 
     h2 {
       font-weight: 400;
     }
 
     .fat-footer-base {
-      color: var(--content-primary);
+      color: var(--footer-content);
 
       #language-picker-toggle {
         color: inherit;
@@ -460,32 +512,33 @@ footer.site-footer {
     // supported in older versions of browsers and these logos need to be correct.
     .fat-footer-social {
       &.x-logo svg path {
-        fill: #0f1419;
-      }
-
-      &.facebook-logo svg,
-      &.linkedin-logo svg {
-        path.text {
-          fill: #fff;
-        }
+        fill: var(--x-logo-path);
       }
 
       &.facebook-logo svg {
+        path.text {
+          fill: var(--facebook-logo-path);
+        }
+
         path.background {
-          fill: #0866ff;
+          fill: var(--facebook-logo-background);
         }
       }
 
       &.linkedin-logo svg {
+        path.text {
+          fill: var(--linkedin-logo-path);
+        }
+
         path.background {
-          fill: #0b66c3;
+          fill: var(--linkedin-logo-background);
         }
       }
     }
   }
 
   .footer-brand {
-    background-image: url('../../../frontend/js/shared/svgs/overleaf-green.svg');
+    background-image: var(--footer-logo-url);
   }
 
   @include footer-container-down(sm) {
