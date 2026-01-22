@@ -83,6 +83,8 @@ class SAMLCommonsUnavailable extends OError {
 
 class SAMLDomainCaptureError extends OError {}
 
+class SAMLDomainCaptureMissingSessionDataError extends SAMLDomainCaptureError {}
+
 class SAMLDomainCaptureJoiningError extends SAMLDomainCaptureError {}
 
 class SAMLDomainCaptureEmailExistsError extends SAMLDomainCaptureJoiningError {
@@ -379,6 +381,7 @@ module.exports = {
   SAMLDomainCaptureEmailExistsError,
   SAMLDomainCaptureError,
   SAMLDomainCaptureJoiningError,
+  SAMLDomainCaptureMissingSessionDataError,
   SAMLIdentityExistsError,
   SAMLAlreadyLinkedError,
   SAMLEmailNotAffiliatedError,
