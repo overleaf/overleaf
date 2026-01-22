@@ -233,8 +233,11 @@ async function _createInvite(subscription, email, inviter, auditLog) {
   let invite = subscription.teamInvites.find(invite => invite.email === email)
 
   if (invite) {
-    invite = invite.toObject()
     invite.sentAt = new Date()
+    if (!invite.token && !domainCaptureEnabled) {
+      invite.token = crypto.randomBytes(32).toString('hex')
+      invite.domainCapture = false
+    }
   } else {
     if (domainCaptureEnabled) {
       invite = {

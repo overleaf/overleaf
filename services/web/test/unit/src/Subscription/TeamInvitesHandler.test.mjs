@@ -498,6 +498,42 @@ describe('TeamInvitesHandler', function () {
         })
       })
     })
+
+    describe('when invite exists without token (created with domain capture) and domain capture is now disabled', function () {
+      it('generates a token for the existing invite', async function (ctx) {
+        const existingInvite = {
+          email: 'user@example.com',
+          inviterName: 'Daenerys Targaryen (daenerys@example.com)',
+          domainCapture: true,
+          sentAt: new Date(),
+        }
+        ctx.subscription.teamInvites = [existingInvite]
+        ctx.subscription.domainCaptureEnabled = false
+
+        const invite = await ctx.TeamInvitesHandler.promises.createInvite(
+          ctx.manager._id,
+          ctx.subscription,
+          'user@example.com'
+        )
+
+        expect(invite.token).to.eq(ctx.newToken)
+        expect(invite.domainCapture).to.be.false
+        expect(invite.email).to.eq('user@example.com')
+
+        sinon.assert.calledOnce(ctx.subscription.save)
+
+        ctx.EmailHandler.promises.sendEmail
+          .calledWith(
+            'verifyEmailToJoinTeam',
+            sinon.match({
+              to: 'user@example.com',
+              inviter: ctx.manager,
+              acceptInviteUrl: `http://example.com/subscription/invites/${ctx.newToken}/`,
+            })
+          )
+          .should.equal(true)
+      })
+    })
   })
 
   describe('importInvite', function () {

@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
@@ -280,6 +281,11 @@ async function resendInvite(req, res, next) {
     )?.[0]
     acceptInviteUrl = `${settings.siteUrl}${samlInitPath}`
   } else {
+    if (!currentInvite.token) {
+      currentInvite.token = crypto.randomBytes(32).toString('hex')
+      currentInvite.domainCapture = false
+      await subscription.save()
+    }
     acceptInviteUrl = `${settings.siteUrl}/subscription/invites/${currentInvite.token}/`
   }
 
