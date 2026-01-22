@@ -12,27 +12,35 @@ mixin notificationIcon(type)
 		+material-symbol('warning')
 
 mixin notification(options)
-	- var {ariaLive, id, type, title, content, disclaimer, className} = options
+	- var {ariaLive, id, type, title, content, disclaimer, className, dismissId, dismissCookiePaths} = options ?? {}
 	- var classNames = `notification notification-type-${type} ${className ? className : ''} ${isActionBelowContent ? 'notification-cta-below-content' : ''}`
 
-	div(aria-live=ariaLive role='alert' id=id class=classNames)
-		.notification-icon
-			+notificationIcon(type)
-		.notification-content-and-cta
-			.notification-content
-				if title
-					p
-						b #{title}
-				| !{content}
-				block
-			//- TODO: handle action
-			//- if action
-			//- 	.notification-cta
-			if disclaimer
-				.notification-disclaimer #{disclaimer}
-		//- TODO: handle dismissible notifications
-		//- TODO: handle onDismiss
-		//- if isDismissible
-		//- 	.notification-close-btn
-		//- 		button(aria-label=translate('close'))
-		//- 			+material-symbol("close")
+	if dismissId && dismissedNotifications.includes(dismissId)
+		//- Notification has been dismissed, do not render
+	else
+		div(
+			aria-live=ariaLive
+			role='alert'
+			id=id
+			class=classNames
+			data-ol-dismiss-id=dismissId
+			data-ol-dismiss-cookie-paths=dismissCookiePaths && dismissCookiePaths.join(',')
+		)
+			.notification-icon
+				+notificationIcon(type)
+			.notification-content-and-cta
+				.notification-content
+					if title
+						p
+							b #{title}
+					| !{content}
+					block
+				//- TODO: handle action
+				//- if action
+				//- 	.notification-cta
+				if disclaimer
+					.notification-disclaimer #{disclaimer}
+			if dismissId
+				.notification-close-btn
+					button(aria-label=translate('close') data-ol-dismiss-button)
+						+material-symbol('close')

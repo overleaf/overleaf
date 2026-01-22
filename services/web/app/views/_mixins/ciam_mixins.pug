@@ -109,16 +109,26 @@ mixin ciamErrorNotification
 			.notification-content
 				block
 
-mixin ciamInfoNotification
-	.notification.notification-ds.notification-type-info(
-		role='alert'
-		aria-live='polite'
-	)
-		.notification-icon
-			ph-info(aria-hidden='true')
-		.notification-content-and-cta
-			.notification-content
-				block
+mixin ciamInfoNotification(options)
+	- var {dismissId, dismissCookiePaths} = options ?? {}
+	if dismissId && dismissedNotifications.includes(dismissId)
+		// Notification has been dismissed, do not render
+	else
+		.notification.notification-ds.notification-type-info(
+			role='alert'
+			aria-live='polite'
+			data-ol-dismiss-id=dismissId
+			data-ol-dismiss-cookie-paths=dismissCookiePaths && dismissCookiePaths.join(',')
+		)
+			.notification-icon
+				ph-info(aria-hidden='true')
+			.notification-content-and-cta
+				.notification-content
+					block
+			if dismissId
+				.notification-close-btn
+					button(aria-label=translate('close') data-ol-dismiss-button)
+						ph-x
 
 mixin ciamOrDivider
 	p.ciam-login-register-or-text-container= translate('login_register_or').toUpperCase()
