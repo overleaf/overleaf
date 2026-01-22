@@ -181,7 +181,7 @@ async function addSeatsToGroupSubscription(req, res) {
 
     if (error instanceof HasNoAdditionalLicenseWhenManuallyCollectedError) {
       return res.redirect(
-        '/user/subscription/group/manually-collected-subscription'
+        '/user/subscription/group/manually-collected-subscription?error_type=no-additional-license'
       )
     }
 
@@ -375,7 +375,7 @@ async function subscriptionUpgradePage(req, res) {
 
     if (error instanceof ManuallyCollectedError) {
       return res.redirect(
-        '/user/subscription/group/manually-collected-subscription'
+        '/user/subscription/group/manually-collected-subscription?error_type=plan-upgrade'
       )
     }
 
@@ -437,6 +437,7 @@ async function manuallyCollectedSubscription(req, res) {
 
     res.render('subscriptions/manually-collected-subscription', {
       groupName: subscription.teamName,
+      errorType: req.query.error_type,
     })
   } catch (error) {
     logger.err(

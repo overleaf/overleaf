@@ -532,7 +532,7 @@ describe('SubscriptionGroupController', function () {
         const res = {
           redirect: url => {
             url.should.equal(
-              '/user/subscription/group/manually-collected-subscription'
+              '/user/subscription/group/manually-collected-subscription?error_type=no-additional-license'
             )
             resolve()
           },
@@ -872,7 +872,7 @@ describe('SubscriptionGroupController', function () {
         const res = {
           redirect: url => {
             url.should.equal(
-              '/user/subscription/group/manually-collected-subscription'
+              '/user/subscription/group/manually-collected-subscription?error_type=plan-upgrade'
             )
             resolve()
           },
