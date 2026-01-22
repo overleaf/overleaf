@@ -76,6 +76,14 @@ const en = {
       'Thank you for your language request',
     'translate.request-new-language.thanks.body':
       'We’ll review your request and consider adding it in the future',
+    'translate.non-latin-warning.title':
+      'Using __language__ characters in Overleaf',
+    'translate.non-latin-warning.body':
+      'To avoid compile issues with your translation, your project might need extra LaTeX packages to handle the proper characters.',
+    'translate.non-latin-warning.link': 'Learn how to use non-Latin characters',
+    'translate.non-latin-warning.dont-show-again':
+      "Don't show this warning again for non-Latin languages",
+    'translate.non-latin-warning.understood': 'I understand, continue',
     'blocked-suggestion-signpost.question':
       'Do you want to permanently stop this suggestion from appearing again?',
     'blocked-suggestion-signpost.tooltip': 'You can block a suggestion here.',
@@ -539,6 +547,15 @@ const es = {
       'Gracias por tu solicitud de idioma',
     'translate.request-new-language.thanks.body':
       'Revisaremos tu solicitud y consideraremos agregarlo en el futuro',
+    'translate.non-latin-warning.title':
+      'Uso de caracteres __language__ en Overleaf',
+    'translate.non-latin-warning.body':
+      'Para evitar problemas de compilación con tu traducción, tu proyecto podría necesitar paquetes LaTeX adicionales para manejar los caracteres correspondientes.',
+    'translate.non-latin-warning.link':
+      'Aprende cómo usar caracteres no latinos',
+    'translate.non-latin-warning.dont-show-again':
+      'No mostrar esta advertencia nuevamente',
+    'translate.non-latin-warning.understood': 'Lo entiendo, continua',
     'blocked-suggestion-signpost.question':
       '¿Quieres dejar de ver esta sugerencia permanentemente? Puedes bloquear esta sugerencia aquí.',
     'blocked-suggestion-signpost.tooltip':
