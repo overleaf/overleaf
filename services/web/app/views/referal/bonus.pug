@@ -1,47 +1,48 @@
-extends ../layout-marketing
+extends ../layout-website-redesign
+
+block vars
+	- isWebsiteRedesign = true
 
 block content
-	.content.content-alt#main-content
+	#main-content.content
 		.container#bonus
 			.row
 				.col-lg-8.offset-lg-2
-					.card
-						.card-body
-							.container-fluid
-								.row
-									.col-lg-10.offset-lg-1
-										if (refered_user_count > 0)
-											p.thanks The Overleaf Bonus Program has been discontinued, but you'll continue to have access to the features you already earned.
-										else
-											p.thanks The Overleaf Bonus Program has been discontinued.
-										p.thanks Please <a href="/contact">contact us</a> if you have any questions.
-										
+					.container-fluid
+						.row
+							.col-lg-10.offset-lg-1
 								if (refered_user_count > 0)
-									.row.ab-bonus
-										.col-lg-10.offset-lg-1(style="position: relative; height: 30px; margin-top: 20px;")
-											- for (var i = 0; i <= 10; i++) {
-												if (refered_user_count == i)
-													.number(style="left: "+i+"0%").active #{i}
-												else
-													.number(style="left: "+i+"0%") #{i}
-											- }
-		
-									.row.ab-bonus
-										.col-lg-10.offset-lg-1
-											.progress
-												.progress-bar.progress-bar-info(style="width: "+refered_user_count+"0%")
-		
-									.row.ab-bonus
-										.col-lg-10.offset-lg-1(style="position: relative; height: 110px;")
-											.perk(style="left: 10%;", class = refered_user_count >= 1 ? "active" : "") #{translate("one_free_collab")}
-											.perk(style="left: 30%;", class = refered_user_count >= 3 ? "active" : "") #{translate("three_free_collab")}
-											.perk(style="left: 60%;", class = refered_user_count >= 6 ? "active" : "") #{translate("free_dropbox_and_history")} + #{translate("three_free_collab")}
-											.perk(style="left: 90%;", class = refered_user_count >= 9 ? "active" : "") #{translate("free_dropbox_and_history")} + #{translate("unlimited_collabs")}
-									.row &nbsp;
+									p.thanks The Overleaf Bonus Program has been discontinued, but you'll continue to have access to the features you already earned.
+								else
+									p.thanks The Overleaf Bonus Program has been discontinued.
+								p.thanks Please <a href="/contact">contact us</a> if you have any questions.
+								
+						if (refered_user_count > 0)
+							.row.ab-bonus
+								.col-lg-10.offset-lg-1(style="position: relative; height: 30px; margin-top: 20px;")
+									- for (var i = 0; i <= 10; i++) {
+										if (refered_user_count == i)
+											.number(style="left: "+i+"0%").active #{i}
+										else
+											.number(style="left: "+i+"0%") #{i}
+									- }
+	
+							.row.ab-bonus
+								.col-lg-10.offset-lg-1
+									.progress
+										.progress-bar.progress-bar-info(style="width: "+refered_user_count+"0%")
+	
+							.row.ab-bonus
+								.col-lg-10.offset-lg-1(style="position: relative; height: 110px;")
+									.perk(style="left: 10%;", class = refered_user_count >= 1 ? "active" : "") #{translate("one_free_collab")}
+									.perk(style="left: 30%;", class = refered_user_count >= 3 ? "active" : "") #{translate("three_free_collab")}
+									.perk(style="left: 60%;", class = refered_user_count >= 6 ? "active" : "") #{translate("free_dropbox_and_history")} + #{translate("three_free_collab")}
+									.perk(style="left: 90%;", class = refered_user_count >= 9 ? "active" : "") #{translate("free_dropbox_and_history")} + #{translate("unlimited_collabs")}
+							.row &nbsp;
 
-									.row.ab-bonus
-										.col-lg-10.offset-lg-1.bonus-status
-											if (refered_user_count == 1)
-												p.thanks You’ve introduced <strong>1</strong> person to #{settings.appName}.
-											else
-												p.thanks You’ve introduced <strong>#{refered_user_count}</strong> people to #{settings.appName}.
+							.row.ab-bonus
+								.col-lg-10.offset-lg-1.bonus-status
+									if (refered_user_count == 1)
+										p.thanks You’ve introduced <strong>1</strong> person to #{settings.appName}.
+									else
+										p.thanks You’ve introduced <strong>#{refered_user_count}</strong> people to #{settings.appName}.
