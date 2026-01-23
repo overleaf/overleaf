@@ -21,6 +21,20 @@ export type CommentReopenedEvent = {
   threadId: string
 }
 
+export type CommentEditedEvent = {
+  projectId: string
+  userId: string
+  threadId: string
+  messageId: string
+}
+
+export type CommentDeletedEvent = {
+  projectId: string
+  userId: string
+  threadId: string
+  messageId: string
+}
+
 export type ProjectModifiedEvent = {
   projectId: string
   timestamp: number
