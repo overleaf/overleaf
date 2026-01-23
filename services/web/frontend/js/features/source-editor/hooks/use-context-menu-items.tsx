@@ -24,6 +24,8 @@ import {
   pasteWithFormatting,
 } from '../commands/clipboard'
 import { isVisual } from '../extensions/visual/visual'
+import { useEditorContext } from '@/shared/context/editor-context'
+import { useTrackingChangesMode } from '@/shared/hooks/use-tracking-changes-mode'
 
 export const useContextMenuItems = () => {
   const view = useCodeMirrorViewContext()
@@ -38,6 +40,9 @@ export const useContextMenuItems = () => {
   const { shortcuts } = useCommandRegistry()
   const { features } = useProjectContext()
   const requestedPdfSyncRef = useRef(false)
+  const { setShowUpgradeModal } = useEditorContext()
+  const trackingChangesMode = useTrackingChangesMode()
+  const isReview = trackingChangesMode === 'review'
 
   const closeMenu = useCallback(() => {
     view.dispatch({ effects: closeContextMenuEffect.of(null) })
@@ -97,6 +102,11 @@ export const useContextMenuItems = () => {
   const handleDelete = wrapForContextMenu(() => commands.deleteSelection(view))
 
   const handleToggleTrackChanges = wrapForContextMenu(() => {
+    // Matching the logic in review toggle to ensure consistency for server pro
+    if (!features.trackChanges && !isReview) {
+      setShowUpgradeModal(true)
+      return true
+    }
     window.dispatchEvent(new Event('toggle-track-changes'))
     return true
   })
@@ -173,10 +183,9 @@ export const useContextMenuItems = () => {
       {
         label: wantTrackChanges ? t('back_to_editing') : t('suggest_edits'),
         handler: handleToggleTrackChanges,
-        // disable for now, future work opens upgrade modal
-        disabled: !features.trackChanges,
+        disabled: false,
         separatorAbove: true,
-        show: canEdit,
+        show: canEdit && features.trackChangesVisible,
         shortcut: getShortcut('toggle-track-changes'),
       },
       {

@@ -39,6 +39,8 @@ export const EditorContext = createContext<
       premiumSuggestionResetDate: Date
       writefullInstance: WritefullAPI | null
       setWritefullInstance: (instance: WritefullAPI) => void
+      showUpgradeModal: boolean
+      setShowUpgradeModal: Dispatch<SetStateAction<boolean>>
     }
   | undefined
 >(undefined)
@@ -94,6 +96,8 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
         ? new Date(featureUsage.aiErrorAssistant.resetDate)
         : new Date()
     })
+
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
   const isPendingEditor = useMemo(
     () =>
@@ -186,6 +190,8 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       setPremiumSuggestionResetDate,
       writefullInstance,
       setWritefullInstance,
+      showUpgradeModal,
+      setShowUpgradeModal,
     }),
     [
       cobranding,
@@ -205,6 +211,8 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       setPremiumSuggestionResetDate,
       writefullInstance,
       setWritefullInstance,
+      showUpgradeModal,
+      setShowUpgradeModal,
     ]
   )
 

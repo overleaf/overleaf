@@ -90,6 +90,10 @@ describe('editor context menu', { scrollBehavior: false }, function () {
     window.metaAttributesCache.set('ol-splitTestVariants', {
       'editor-context-menu': 'enabled',
     })
+    cy.intercept('POST', '/project/*/track_changes', {
+      statusCode: 200,
+      body: {},
+    }).as('trackChanges')
     cy.interceptEvents()
     cy.interceptMetadata()
   })
@@ -184,7 +188,10 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       cy.mount(
         <TestContainer>
-          <EditorProviders scope={scope}>
+          <EditorProviders
+            scope={scope}
+            features={{ trackChangesVisible: true }}
+          >
             <CodeMirrorEditor />
           </EditorProviders>
         </TestContainer>
@@ -224,7 +231,10 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       cy.mount(
         <TestContainer>
-          <EditorProviders scope={scope}>
+          <EditorProviders
+            scope={scope}
+            features={{ trackChangesVisible: true }}
+          >
             <CodeMirrorEditor />
           </EditorProviders>
         </TestContainer>
@@ -369,7 +379,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
     })
   })
 
-  describe('track changes toggle', function () {
+  describe('when clicking the track changes buttons', function () {
     let toggleTrackChangesListener: Cypress.Agent<sinon.SinonStub>
 
     beforeEach(function () {
@@ -394,11 +404,19 @@ describe('editor context menu', { scrollBehavior: false }, function () {
         <TestContainer>
           <EditorProviders
             scope={scope}
-            projectFeatures={{ trackChanges: true }}
             providers={{
               EditorPropertiesProvider: makeEditorPropertiesProvider({
                 wantTrackChanges: false,
               }),
+              ProjectProvider: makeProjectProvider(
+                mockProject({
+                  trackChangesState: false,
+                  projectFeatures: {
+                    trackChanges: true,
+                    trackChangesVisible: true,
+                  },
+                })
+              ),
             }}
           >
             <CodeMirrorEditor />
@@ -432,11 +450,17 @@ describe('editor context menu', { scrollBehavior: false }, function () {
         <TestContainer>
           <EditorProviders
             scope={scope}
-            projectFeatures={{ trackChanges: true }}
             providers={{
-              EditorPropertiesProvider: makeEditorPropertiesProvider({
-                wantTrackChanges: true,
-              }),
+              ProjectProvider: makeProjectProvider(
+                mockProject({
+                  // Re-assigns `withTrackChanges` value in the `track-changes-state-context` useEffect hook
+                  trackChangesState: true,
+                  projectFeatures: {
+                    trackChanges: true,
+                    trackChangesVisible: true,
+                  },
+                })
+              ),
             }}
           >
             <CodeMirrorEditor />
@@ -463,14 +487,40 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       cy.get('@toggleTrackChanges').should('have.been.calledOnce')
     })
 
-    it('should disable suggest edits when project does not support track changes', function () {
+    it('should open upgrade modal when user does not support track changes', function () {
       const scope = mockScope()
 
       cy.mount(
         <TestContainer>
           <EditorProviders
             scope={scope}
-            projectFeatures={{ trackChanges: false }}
+            features={{ trackChangesVisible: true, trackChanges: false }}
+          >
+            <CodeMirrorEditor />
+          </EditorProviders>
+        </TestContainer>
+      )
+
+      cy.get('.cm-line').eq(10).rightclick()
+
+      cy.findByRole('menu').within(() => {
+        cy.findByRole('menuitem', { name: /suggest edits/i }).click()
+      })
+
+      cy.findByRole('dialog').should('be.visible')
+      cy.findByRole('dialog').should('contain.text', 'Upgrade to Review')
+    })
+  })
+
+  describe('when trackChangesVisible feature is disabled', function () {
+    it('should hide the track changes button', function () {
+      const scope = mockScope()
+
+      cy.mount(
+        <TestContainer>
+          <EditorProviders
+            scope={scope}
+            features={{ trackChangesVisible: false }}
           >
             <CodeMirrorEditor />
           </EditorProviders>
@@ -481,9 +531,10 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       cy.findByRole('menu').within(() => {
         cy.findByRole('menuitem', { name: /suggest edits/i }).should(
-          'have.attr',
-          'aria-disabled',
-          'true'
+          'not.exist'
+        )
+        cy.findByRole('menuitem', { name: /back to editing/i }).should(
+          'not.exist'
         )
       })
     })
@@ -557,6 +608,9 @@ describe('editor context menu', { scrollBehavior: false }, function () {
         )
         cy.findByRole('menuitem', { name: /delete/i }).should('not.exist')
         cy.findByRole('menuitem', { name: /suggest edits/i }).should(
+          'not.exist'
+        )
+        cy.findByRole('menuitem', { name: /back to editing/i }).should(
           'not.exist'
         )
         cy.findByRole('menuitem', { name: /comment/i }).should('be.enabled')
@@ -821,7 +875,6 @@ describe('editor context menu', { scrollBehavior: false }, function () {
         <TestContainer>
           <EditorProviders
             scope={scope}
-            projectFeatures={{ trackChangesVisible: true }}
             features={{ trackChangesVisible: true }}
           >
             <CodeMirrorEditor />
@@ -964,7 +1017,10 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       cy.mount(
         <TestContainer>
-          <EditorProviders scope={scope}>
+          <EditorProviders
+            scope={scope}
+            features={{ trackChangesVisible: true }}
+          >
             <CodeMirrorEditor />
           </EditorProviders>
         </TestContainer>
