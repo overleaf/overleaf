@@ -37,7 +37,7 @@
     "p-map": "^4.0.0"
   },
   "devDependencies": {
-    "@google-cloud/storage": "^7.18.0",
+    "@google-cloud/storage": "^6.10.1",
     "@overleaf/migrations": "*",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
