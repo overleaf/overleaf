@@ -35,7 +35,7 @@ function OLFormCheckbox(props: OLFormCheckboxProps) {
       }
     />
   ) : (
-    <Form.Check ref={inputRef} {...rest} />
+    <Form.Check className="form-checkbox" ref={inputRef} {...rest} />
   )
 }
 

@@ -1,16 +1,117 @@
+@function form-check-box-svg($color) {
+  @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='none' stroke='#{$color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/></svg>");
+}
+
+@function form-check-radio-svg($color) {
+  @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='2' fill='#{$color}'/></svg>");
+}
+
+@function form-check-indeterminate-svg($color) {
+  @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='none' stroke='#{$color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/></svg>");
+}
+
+@mixin form-check-light {
+  --checkbox-label-color: var(--content-primary);
+  --checkbox-border-color: var(--border-primary);
+  --checkbox-bg: var(--bg-light-primary);
+
+  // Hover
+  --checkbox-hover-border-color: var(--border-hover);
+
+  // Checked
+  --checkbox-checked-bg: var(--bg-accent-01);
+  --checkbox-checked-border-color: var(--bg-accent-01);
+  --checkbox-checked-background-image: #{escape-svg(
+      form-check-box-svg($content-primary-dark)
+    )};
+
+  // Indeterminate
+  --checkbox-indeterminate-background-image: #{escape-svg(
+      form-check-indeterminate-svg($content-primary-dark)
+    )};
+
+  // Checked & hover
+  --checkbox-hover-checked-bg: var(--bg-accent-02);
+  --checkbox-hover-checked-border-color: var(--bg-accent-02);
+
+  // Focus
+  --checkbox-focus-border-color: var(--border-primary);
+
+  // Disabled
+  --checkbox-disabled-bg: var(--bg-light-disabled);
+  --checkbox-disabled-border-color: var(--border-disabled);
+
+  // Disabled & checked
+  --checkbox-disabled-checked-background-image: #{escape-svg(
+      form-check-box-svg($content-disabled-dark)
+    )};
+
+  // Disabled & indeterminate
+  --checkbox-disabled-indeterminate-background-image: #{escape-svg(
+      form-check-indeterminate-svg($content-disabled-dark)
+    )};
+}
+
+@mixin form-check-dark {
+  --checkbox-label-color: var(--content-primary-dark);
+  --checkbox-border-color: var(--border-primary-dark);
+  --checkbox-bg: var(--bg-dark-primary);
+
+  // Hover
+  --checkbox-hover-border-color: var(--border-hover-dark);
+
+  // Checked
+  --checkbox-checked-bg: var(--bg-accent-03);
+  --checkbox-checked-border-color: var(--bg-accent-03);
+  --checkbox-checked-background-image: #{escape-svg(
+      form-check-box-svg($content-primary)
+    )};
+
+  // Indeterminate
+  --checkbox-indeterminate-background-image: #{escape-svg(
+      form-check-indeterminate-svg($content-primary)
+    )};
+
+  // Checked & hover
+  --checkbox-hover-checked-bg: var(--bg-accent-03);
+  --checkbox-hover-checked-border-color: var(--bg-accent-03);
+
+  // Focus
+  --checkbox-focus-border-color: var(--border-primary-dark);
+
+  // Disabled
+  --checkbox-disabled-bg: var(--bg-dark-disabled);
+  --checkbox-disabled-border-color: var(--border-disabled-dark);
+
+  // Disabled & checked
+  --checkbox-disabled-checked-background-image: #{escape-svg(
+      form-check-box-svg($content-disabled-dark)
+    )};
+
+  // Disabled & indeterminate
+  --checkbox-disabled-indeterminate-background-image: #{escape-svg(
+      form-check-indeterminate-svg($content-disabled-dark)
+    )};
+}
+
+:root {
+  @include form-check-light;
+}
+
+@include theme('default') {
+  .ide-redesign-main,
+  .project-ds-nav-page {
+    @include form-check-dark;
+  }
+}
+
+#storybook-root {
+  @include theme('default') {
+    @include form-check-dark;
+  }
+}
+
 .form-check-input {
-  @function form-check-box-svg($color) {
-    @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='none' stroke='#{$color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/></svg>");
-  }
-
-  @function form-check-radio-svg($color) {
-    @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='2' fill='#{$color}'/></svg>");
-  }
-
-  @function form-check-indeterminate-svg($color) {
-    @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='none' stroke='#{$color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/></svg>");
-  }
-
   &:hover {
     &:not(:disabled) {
       border-color: var(--border-hover);
@@ -57,6 +158,76 @@
     border-color: $input-focus-border-color;
     box-shadow: $input-focus-box-shadow;
   }
+}
+
+// TODO: compare to live storybook
+// NOTE: Nesting inside .form-checkbox to avoid affecting other form checks
+// such as input switches and radio buttons.
+.form-checkbox {
+  .form-check-input {
+    background-color: var(--checkbox-bg);
+    border-color: var(--checkbox-border-color);
+
+    &:checked,
+    &:indeterminate {
+      background-color: var(--checkbox-checked-bg);
+      border-color: var(--checkbox-checked-border-color);
+    }
+
+    &:checked {
+      background-image: var(--checkbox-checked-background-image);
+    }
+
+    &:indeterminate {
+      background-image: var(--checkbox-indeterminate-background-image);
+    }
+
+    &:hover {
+      &:not(:disabled) {
+        border-color: var(--checkbox-hover-border-color);
+
+        &:checked,
+        &:indeterminate {
+          background-color: var(--checkbox-hover-checked-bg);
+          border-color: var(--checkbox-hover-checked-border-color);
+        }
+      }
+    }
+
+    &:disabled {
+      background-color: var(--checkbox-disabled-bg);
+      border-color: var(--checkbox-disabled-border-color);
+
+      &:indeterminate {
+        background-color: var(--checkbox-disabled-bg);
+        border-color: var(--checkbox-disabled-border-color);
+        background-image: var(
+          --checkbox-disabled-indeterminate-background-image
+        );
+      }
+    }
+
+    // Use disabled attribute in addition of :disabled pseudo-class
+    // See: https://github.com/twbs/bootstrap/issues/28247
+    &[disabled],
+    &:disabled {
+      ~ .form-check-label {
+        color: $input-disabled-color;
+      }
+
+      &:checked {
+        background-image: var(--checkbox-disabled-checked-background-image);
+      }
+    }
+
+    &:focus-visible {
+      border-color: var(--checkbox-focus-border-color);
+    }
+  }
+}
+
+.form-check-label {
+  color: var(--checkbox-label-color);
 }
 
 .form-control {
@@ -239,6 +410,10 @@
 
   .checkbox-label {
     margin-left: var(--spacing-04);
+  }
+
+  .form-check-label {
+    color: var(--checkbox-label-color);
   }
 }
 
