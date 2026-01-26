@@ -13,7 +13,7 @@ import { prepareWaitForNextCompileSlot } from './helpers/compile'
 const USER = 'user@example.com'
 const COLLABORATOR = 'collaborator@example.com'
 
-describe('new editor.editor', function () {
+describe('editor', function () {
   if (isExcludedBySharding('PRO_DEFAULT_1')) return
   startWith({ pro: true })
   ensureUserExists({ email: USER })

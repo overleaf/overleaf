@@ -19,7 +19,7 @@ import {
 import { prepareWaitForNextCompileSlot } from './helpers/compile'
 import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
 
-describe('new editor.Project Sharing', function () {
+describe('Project Sharing', function () {
   if (isExcludedBySharding('PRO_CUSTOM_4')) return
   ensureUserExists({ email: 'user@example.com' })
   startWith({ withDataDir: true, pro: true })

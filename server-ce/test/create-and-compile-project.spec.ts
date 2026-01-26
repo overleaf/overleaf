@@ -9,7 +9,7 @@ import { prepareWaitForNextCompileSlot } from './helpers/compile'
 
 const USER = 'user@example.com'
 const COLLABORATOR = 'collaborator@example.com'
-describe('new editor.Project creation and compilation', function () {
+describe('Project creation and compilation', function () {
   if (isExcludedBySharding('CE_DEFAULT')) return
   startWith({})
   ensureUserExists({ email: USER })

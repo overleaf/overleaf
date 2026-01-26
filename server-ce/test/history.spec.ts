@@ -3,7 +3,7 @@ import { prepareWaitForNextCompileSlot } from './helpers/compile'
 import { ensureUserExists, login } from './helpers/login'
 import { isExcludedBySharding, startWith } from './helpers/config'
 
-describe('new editor.History', function () {
+describe('History', function () {
   if (isExcludedBySharding('CE_DEFAULT')) return
   startWith({})
   ensureUserExists({ email: 'user@example.com' })

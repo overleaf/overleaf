@@ -17,7 +17,7 @@ import { prepareWaitForNextCompileSlot } from './helpers/compile'
 
 const USER = 'user@example.com'
 
-describe('new editor.git-bridge', function () {
+describe('git-bridge', function () {
   const ENABLED_VARS = {
     GIT_BRIDGE_ENABLED: 'true',
     GIT_BRIDGE_HOST: 'git-bridge',

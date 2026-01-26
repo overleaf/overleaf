@@ -18,7 +18,7 @@ function bringServerProBackUp() {
   })
 }
 
-describe('new editor.GracefulShutdown', function () {
+describe('GracefulShutdown', function () {
   if (isExcludedBySharding('PRO_CUSTOM_1')) return
   startWith({
     pro: true,

@@ -14,7 +14,7 @@ const TEMPLATES_USER = 'templates@example.com'
 // Re-use value for "exists" and "does not exist" tests
 const LABEL_BROWSE_TEMPLATES = 'Browse templates'
 
-describe('new editor.Templates', function () {
+describe('Templates', function () {
   ensureUserExists({ email: TEMPLATES_USER })
   ensureUserExists({ email: WITHOUT_PROJECTS_USER })
 

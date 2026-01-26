@@ -7,7 +7,7 @@ import { waitUntilScrollingFinished } from './helpers/waitUntilScrollingFinished
 
 const LABEL_TEX_LIVE_VERSION = 'TeX Live version'
 
-describe('new editor.SandboxedCompiles', function () {
+describe('SandboxedCompiles', function () {
   const enabledVars = {
     SANDBOXED_COMPILES: 'true',
     ALL_TEX_LIVE_DOCKER_IMAGE_NAMES: '2023,2022',
