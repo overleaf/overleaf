@@ -362,3 +362,52 @@ export function getTaxIdType(country, taxIdValue, postalCode) {
 
   return countryTaxIdTypes[upperCountry] || null
 }
+
+/**
+ *
+ * @param {Stripe.PaymentMethod[]} paymentMethods
+ * @param {string} stripeCustomerId
+ * @returns {Stripe.PaymentMethod} valid payment method
+ * @throws {Error} if no valid payment method found
+ */
+export function coalesceOrThrowPaymentMethod(paymentMethods, stripeCustomerId) {
+  if (paymentMethods.length === 0) {
+    throw new Error(
+      `Stripe customer ${stripeCustomerId} has no usable payment method`
+    )
+  }
+
+  const now = new Date()
+
+  const nonExpiredPaymentMethods = paymentMethods.filter(method => {
+    if (!method.card?.exp_month || !method.card?.exp_year) {
+      return false
+    }
+
+    const expirationDate = new Date(
+      method.card.exp_year,
+      method.card.exp_month,
+      0,
+      23,
+      59,
+      59,
+      999
+    )
+
+    return expirationDate >= now
+  })
+
+  if (nonExpiredPaymentMethods.length === 0) {
+    throw new Error(
+      `Stripe customer ${stripeCustomerId} has no usable payment method`
+    )
+  }
+
+  if (nonExpiredPaymentMethods.length > 1) {
+    throw new Error(
+      `Stripe customer ${stripeCustomerId} has multiple usable payment methods`
+    )
+  }
+
+  return nonExpiredPaymentMethods[0]
+}

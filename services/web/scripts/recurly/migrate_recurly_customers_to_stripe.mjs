@@ -83,6 +83,7 @@ import { scriptRunner } from '../lib/ScriptRunner.mjs'
 import {
   coalesceOrEqualOrThrowAddress,
   coalesceOrEqualOrThrowName,
+  coalesceOrThrowPaymentMethod,
   coalesceOrThrowVATNumber,
   getTaxIdType,
 } from '../helpers/migrate_recurly_customers_to_stripe.helpers.mjs'
@@ -576,6 +577,23 @@ async function fetchTargetStripeCustomer(stripeClient, stripeCustomerId) {
 }
 
 /**
+ * Fetch existing customer's payment method from the target Stripe account by ID.
+ *
+ * @param {Stripe} stripeClient - The Stripe client for the target account
+ * @param {string} stripeCustomerId - The Stripe customer ID
+ * @returns {Promise<Stripe.PaymentMethod[]>}
+ */
+async function fetchTargetStripeCustomerPaymentMethods(
+  stripeClient,
+  stripeCustomerId
+) {
+  await throttleStripe()
+  const paymentMethods =
+    await stripeClient.customers.listPaymentMethods(stripeCustomerId)
+  return paymentMethods.data
+}
+
+/**
  * Replace a customer's tax IDs (delete any existing, then create the desired one).
  *
  * This makes re-runs more predictable for customers where a tax ID was created
@@ -906,6 +924,15 @@ async function processCustomer(row, rowNumber, commit) {
     //   customerParams.metadata.ccEmails = account.ccEmails
     // }
 
+    const paymentMethods = await fetchTargetStripeCustomerPaymentMethods(
+      stripeClient,
+      stripeCustomerId
+    )
+    const paymentMethod = coalesceOrThrowPaymentMethod(
+      paymentMethods,
+      stripeCustomerId
+    )
+
     /** @type {Record<string, string>} */
     const metadata = {}
     if (account.createdAt) {
@@ -919,6 +946,9 @@ async function processCustomer(row, rowNumber, commit) {
       metadata,
       ...(address ? { address } : {}),
       ...(companyName ? { business_name: companyName } : {}),
+      ...(paymentMethod
+        ? { invoice_settings: { default_payment_method: paymentMethod.id } }
+        : {}),
     }
 
     logDebug(

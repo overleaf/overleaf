@@ -16,6 +16,7 @@ import {
   coalesceOrEqualOrThrowName,
   coalesceOrThrowVATNumber,
   getCanadaTaxIdType,
+  coalesceOrThrowPaymentMethod,
 } from './migrate_recurly_customers_to_stripe.helpers.mjs'
 
 test('coalesceOrEqualOrThrow returns primary when set', () => {
@@ -229,4 +230,119 @@ test('getCanadaTaxIdType returns null when format is unknown/ambiguous', () => {
   assert.equal(getCanadaTaxIdType(null, null), null)
   assert.equal(getCanadaTaxIdType('RT0002', null), null)
   assert.equal(getCanadaTaxIdType('PST12345678', null), null)
+})
+
+test('coalesceOrThrowPaymentMethod throws when payment methods array is empty', () => {
+  assert.throws(
+    () => coalesceOrThrowPaymentMethod([], 'cus_123'),
+    /Stripe customer cus_123 has no usable payment method/
+  )
+})
+
+test('coalesceOrThrowPaymentMethod throws when no payment methods have card info', () => {
+  const paymentMethods = [{ id: 'pm_1', card: null }, { id: 'pm_2' }]
+  assert.throws(
+    () => coalesceOrThrowPaymentMethod(paymentMethods, 'cus_123'),
+    /Stripe customer cus_123 has no usable payment method/
+  )
+})
+
+test('coalesceOrThrowPaymentMethod throws when all payment methods are expired', () => {
+  const paymentMethods = [
+    {
+      id: 'pm_expired',
+      card: { exp_month: 1, exp_year: 2020 },
+    },
+  ]
+  assert.throws(
+    () => coalesceOrThrowPaymentMethod(paymentMethods, 'cus_123'),
+    /Stripe customer cus_123 has no usable payment method/
+  )
+})
+
+test('coalesceOrThrowPaymentMethod throws when multiple non-expired payment methods exist', () => {
+  const paymentMethods = [
+    {
+      id: 'pm_1',
+      card: { exp_month: 12, exp_year: 2030 },
+    },
+    {
+      id: 'pm_2',
+      card: { exp_month: 12, exp_year: 2031 },
+    },
+  ]
+  assert.throws(
+    () => coalesceOrThrowPaymentMethod(paymentMethods, 'cus_123'),
+    /Stripe customer cus_123 has multiple usable payment methods/
+  )
+})
+
+test('coalesceOrThrowPaymentMethod returns single non-expired payment method', () => {
+  const paymentMethod = {
+    id: 'pm_valid',
+    card: { exp_month: 12, exp_year: 2030 },
+  }
+  const result = coalesceOrThrowPaymentMethod([paymentMethod], 'cus_123')
+  assert.equal(result, paymentMethod)
+})
+
+test('coalesceOrThrowPaymentMethod filters out expired and returns valid method', () => {
+  const expiredMethod = {
+    id: 'pm_expired',
+    card: { exp_month: 1, exp_year: 2020 },
+  }
+  const validMethod = {
+    id: 'pm_valid',
+    card: { exp_month: 12, exp_year: 2030 },
+  }
+  const result = coalesceOrThrowPaymentMethod(
+    [expiredMethod, validMethod],
+    'cus_123'
+  )
+  assert.equal(result, validMethod)
+})
+
+test('coalesceOrThrowPaymentMethod keeps payment method expiring this month', () => {
+  const now = new Date()
+  const currentMonth = now.getMonth() + 1 // JavaScript months are 0-indexed, Stripe uses 1-indexed
+  const currentYear = now.getFullYear()
+
+  const paymentMethod = {
+    id: 'pm_expiring_this_month',
+    card: { exp_month: currentMonth, exp_year: currentYear },
+  }
+  const result = coalesceOrThrowPaymentMethod([paymentMethod], 'cus_123')
+  assert.equal(result, paymentMethod)
+})
+
+test('coalesceOrThrowPaymentMethod filters out method without exp_month', () => {
+  const invalidMethod = {
+    id: 'pm_invalid',
+    card: { exp_year: 2030 },
+  }
+  const validMethod = {
+    id: 'pm_valid',
+    card: { exp_month: 12, exp_year: 2030 },
+  }
+  const result = coalesceOrThrowPaymentMethod(
+    [invalidMethod, validMethod],
+    'cus_123'
+  )
+  assert.equal(result, validMethod)
+})
+
+test('coalesceOrThrowPaymentMethod filters out method without exp_year', () => {
+  const invalidMethod = {
+    id: 'pm_invalid',
+    card: { exp_month: 12 },
+  }
+  const validMethod = {
+    id: 'pm_valid',
+    card: { exp_month: 12, exp_year: 2030 },
+  }
+  const result = coalesceOrThrowPaymentMethod(
+    [invalidMethod, validMethod],
+    'cus_123'
+  )
+  assert.equal(result, validMethod)
 })
