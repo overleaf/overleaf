@@ -1,0 +1,20 @@
+# Custom Overleaf image with pre-installed LaTeX packages
+FROM sharelatex/sharelatex:latest
+
+# Install commonly needed LaTeX packages via tlmgr
+RUN tlmgr install \
+    koma-script \
+    babel-german \
+    nth \
+    listings \
+    appendix \
+    subfigure \
+    csquotes \
+    collection-latexextra \
+    collection-fontsrecommended \
+    collection-latexrecommended
+
+# Update TeX database
+RUN texhash && fmtutil-sys --all
+
+# Keep the original entrypoint
