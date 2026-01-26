@@ -367,47 +367,33 @@ export function getTaxIdType(country, taxIdValue, postalCode) {
  *
  * @param {Stripe.PaymentMethod[]} paymentMethods
  * @param {string} stripeCustomerId
+ * @param {object|null} billingInfo - Recurly billing info object
  * @returns {Stripe.PaymentMethod} valid payment method
  * @throws {Error} if no valid payment method found
  */
-export function coalesceOrThrowPaymentMethod(paymentMethods, stripeCustomerId) {
+export function coalesceOrThrowPaymentMethod(
+  paymentMethods,
+  stripeCustomerId,
+  billingInfo
+) {
   if (paymentMethods.length === 0) {
     throw new Error(
       `Stripe customer ${stripeCustomerId} has no usable payment method`
     )
   }
 
-  const now = new Date()
+  const matchingPaymentMethods = paymentMethods.filter(
+    method =>
+      method.card?.last4 === billingInfo?.paymentMethod?.lastFour &&
+      method.card?.exp_month === billingInfo?.paymentMethod?.expMonth &&
+      method.card?.exp_year === billingInfo?.paymentMethod?.expYear
+  )
 
-  const nonExpiredPaymentMethods = paymentMethods.filter(method => {
-    if (!method.card?.exp_month || !method.card?.exp_year) {
-      return false
-    }
-
-    const expirationDate = new Date(
-      method.card.exp_year,
-      method.card.exp_month,
-      0,
-      23,
-      59,
-      59,
-      999
-    )
-
-    return expirationDate >= now
-  })
-
-  if (nonExpiredPaymentMethods.length === 0) {
+  if (matchingPaymentMethods.length === 0) {
     throw new Error(
       `Stripe customer ${stripeCustomerId} has no usable payment method`
     )
   }
 
-  if (nonExpiredPaymentMethods.length > 1) {
-    throw new Error(
-      `Stripe customer ${stripeCustomerId} has multiple usable payment methods`
-    )
-  }
-
-  return nonExpiredPaymentMethods[0]
+  return matchingPaymentMethods[0]
 }

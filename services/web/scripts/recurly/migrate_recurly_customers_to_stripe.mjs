@@ -973,7 +973,8 @@ async function processCustomer(
     )
     const paymentMethod = coalesceOrThrowPaymentMethod(
       paymentMethods,
-      stripeCustomerId
+      stripeCustomerId,
+      billingInfo
     )
 
     /** @type {Record<string, string>} */
