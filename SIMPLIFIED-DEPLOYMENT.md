@@ -1,26 +1,30 @@
-# Overleaf Deployment Guide
+# Simplified Overleaf Deployment Guide
 
-This guide explains how to deploy Overleaf in a single Docker container with embedded databases and automatic LaTeX package installation.
+This guide explains how to deploy Overleaf in a single Docker container with embedded databases and on-demand package installation.
 
-## Architecture
+## Architecture Differences
 
-All 11 Overleaf microservices, MongoDB 8.0, and Redis run inside a **single container**:
+### Standard Overleaf (docker-compose.yml)
+- **3 separate containers**: Overleaf, MongoDB (replica set), Redis
+- **Sandboxed compiles**: Uses sibling Docker containers for LaTeX compilation
+- **Complex setup**: Requires replica set initialization, multiple volumes
 
+### Simplified Overleaf (docker-compose.simplified.yml)
+- **1 container**: All services embedded (Overleaf + MongoDB + Redis)
 - **Direct compilation**: LaTeX runs directly in the same container
-- **Simple setup**: Single command deployment
-- **Auto-install packages**: Missing LaTeX packages are installed automatically during compilation
-- **Process management**: Uses Phusion Baseimage with runit
+- **Simple setup**: Single command deployment, no replica set
+- **On-demand packages**: Support for `tlmgr install` to add LaTeX packages
 
 ## Trade-offs
 
-### Advantages
+### Advantages ✅
 - **Easier deployment**: One container, one command
 - **Lower resource usage**: No overhead from multiple containers
 - **Simpler networking**: All services on localhost
-- **Automatic package installation**: Missing `.sty` files detected and installed on first compile
+- **Package installation**: Can install LaTeX packages on-demand
 - **Faster startup**: No need to wait for replica set initialization
 
-### Limitations
+### Limitations ⚠️
 - **No MongoDB transactions**: Some advanced features may not work
 - **Single point of failure**: If container crashes, everything goes down
 - **No sandboxed compiles**: Less isolation (users can access filesystem)
@@ -38,7 +42,7 @@ docker build -f Dockerfile.simplified -t overleaf/overleaf-simplified:latest .
 ### 2. Start the Container
 
 ```bash
-docker compose up -d
+docker-compose -f docker-compose.simplified.yml up -d
 ```
 
 ### 3. Access Overleaf
@@ -47,42 +51,30 @@ docker compose up -d
 2. Navigate to http://localhost/launchpad
 3. Create your admin account
 
-## Automatic Package Installation
+## Installing LaTeX Packages
 
-When `AUTO_INSTALL_PACKAGES=true` (the default in simplified mode), the CLSI compiler will:
+### Method 1: Using tlmgr (Recommended)
 
-1. Attempt to compile your LaTeX document
-2. If compilation fails, parse `output.log` for missing file errors (e.g., `! LaTeX Error: File 'tikz.sty' not found`)
-3. Use `tlmgr search` to find which TeX Live package provides the missing file
-4. Install the package with `tlmgr install`
-5. Run `texhash` to refresh the TeX database
-6. Retry compilation automatically
-
-This means you can use any LaTeX package — just write `\usepackage{tikz}` and the first compilation will install it. Subsequent compilations will be fast since the package persists in the `texlive_extra` volume.
-
-### Disabling Auto-Install
-
-Set `AUTO_INSTALL_PACKAGES=false` in your docker-compose environment if you prefer to manage packages manually.
-
-## Manual Package Installation
-
-### Method 1: Using the install script
-
+Access the container:
 ```bash
-docker exec -it overleaf bash
+docker exec -it overleaf-simplified bash
+```
 
-# Install a package
+Install a package:
+```bash
+install-tex-package <package-name>
+
+# Examples:
 install-tex-package tikz
 install-tex-package biblatex
-
-# List installed packages
-install-tex-package --list-installed
+install-tex-package algorithm2e
 ```
 
 ### Method 2: Bulk Installation
 
+Create a file `packages.txt` with one package per line, then:
 ```bash
-docker exec overleaf bash -c 'for pkg in tikz pgfplots biblatex beamer; do tlmgr install "$pkg"; done && texhash'
+docker exec overleaf-simplified bash -c 'cat packages.txt | xargs -I {} install-tex-package {}'
 ```
 
 ### Method 3: Pre-build Custom Image
@@ -109,58 +101,45 @@ docker build -f Dockerfile.custom -t overleaf-custom .
 
 All data is stored in Docker volumes:
 
-| Volume | Purpose |
-|--------|---------|
-| `overleaf_data` | Projects, user data, uploads |
-| `mongodb_data` | Database files |
-| `redis_data` | Cache and session data |
-| `texlive_extra` | Installed LaTeX packages (persists across restarts) |
-
-### Backup
-
 ```bash
-# Backup all volumes
-for vol in overleaf_data mongodb_data redis_data texlive_extra; do
-  docker run --rm -v ${vol}:/data -v $(pwd):/backup alpine tar czf /backup/${vol}.tar.gz -C /data .
-done
-```
+# List volumes
+docker volume ls | grep overleaf
 
-### Restore
+# Backup volumes
+docker run --rm -v overleaf_data:/data -v $(pwd):/backup alpine tar czf /backup/overleaf-backup.tar.gz /data
+docker run --rm -v mongodb_data:/data -v $(pwd):/backup alpine tar czf /backup/mongodb-backup.tar.gz /data
 
-```bash
-for vol in overleaf_data mongodb_data redis_data texlive_extra; do
-  docker run --rm -v ${vol}:/data -v $(pwd):/backup alpine tar xzf /backup/${vol}.tar.gz -C /data
-done
+# Restore volumes
+docker run --rm -v overleaf_data:/data -v $(pwd):/backup alpine tar xzf /backup/overleaf-backup.tar.gz -C /
 ```
 
 ## Environment Variables
 
-Key variables you can customize in `docker-compose.yml`:
+Key variables you can customize in `docker-compose.simplified.yml`:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `OVERLEAF_APP_NAME` | "Overleaf Community Edition" | Application name |
+| `OVERLEAF_APP_NAME` | "Overleaf Simplified" | Application name |
 | `OVERLEAF_SITE_URL` | "http://localhost" | Public URL |
-| `EMBEDDED_MONGO` | "true" | Run MongoDB inside the container |
-| `EMBEDDED_REDIS` | "true" | Run Redis inside the container |
-| `AUTO_INSTALL_PACKAGES` | "true" | Auto-install missing LaTeX packages |
-| `SANDBOXED_COMPILES` | "false" | Disable sandboxed compiles |
+| `OVERLEAF_ADMIN_EMAIL` | "admin@example.com" | Admin contact |
 | `EMAIL_CONFIRMATION_DISABLED` | "true" | Skip email verification |
+| `SANDBOXED_COMPILES` | "false" | Disable sandboxed compiles |
 
 ## Monitoring
 
 ### Check Container Status
 ```bash
-docker compose ps
+docker-compose -f docker-compose.simplified.yml ps
 ```
 
 ### View Logs
 ```bash
 # All logs
-docker compose logs -f
+docker-compose -f docker-compose.simplified.yml logs -f
 
-# Inside the container — each service has its own runit log
-docker exec overleaf sv status /etc/service/*
+# Specific service logs (inside container)
+docker exec overleaf-simplified tail -f /var/log/mongodb.log
+docker exec overleaf-simplified tail -f /var/log/redis.log
 ```
 
 ### Health Check
@@ -173,48 +152,40 @@ curl http://localhost/status
 ### Container won't start
 ```bash
 # Check logs
-docker logs overleaf
+docker logs overleaf-simplified
 
 # Check if ports are available
-# Windows: netstat -an | findstr :80
-# Linux: ss -tlnp | grep :80
+netstat -an | grep :80
 ```
 
 ### MongoDB connection issues
 ```bash
 # Verify MongoDB is running
-docker exec overleaf sv status mongod
+docker exec overleaf-simplified ps aux | grep mongod
 
-# Check MongoDB connectivity
-docker exec overleaf mongosh --quiet --eval "db.runCommand({ping:1})"
+# Check MongoDB logs
+docker exec overleaf-simplified cat /var/log/mongodb.log
 ```
 
 ### Redis connection issues
 ```bash
 # Verify Redis is running
-docker exec overleaf sv status redis
-
-# Check Redis connectivity
-docker exec overleaf redis-cli ping
+docker exec overleaf-simplified redis-cli ping
 # Should return: PONG
 ```
 
 ### LaTeX compilation fails
 ```bash
 # Check TeX Live installation
-docker exec overleaf pdflatex --version
+docker exec overleaf-simplified pdflatex --version
 
-# Manually install a missing package
-docker exec overleaf tlmgr install <package-name> && docker exec overleaf texhash
+# Install missing package
+docker exec overleaf-simplified install-tex-package <package-name>
 ```
-
-### Auto-install not working
-- Ensure `AUTO_INSTALL_PACKAGES=true` is set
-- Check CLSI logs: `docker exec overleaf cat /var/log/overleaf/clsi.log | grep auto-install`
-- Verify tlmgr works: `docker exec overleaf tlmgr --version`
 
 ## Upgrading
 
+### Option 1: Rebuild Image
 ```bash
 # Pull latest code
 git pull
@@ -222,9 +193,9 @@ git pull
 # Rebuild image
 docker build -f Dockerfile.simplified -t overleaf/overleaf-simplified:latest .
 
-# Restart container (volumes preserve all data)
-docker compose down
-docker compose up -d
+# Restart container (preserves data in volumes)
+docker-compose -f docker-compose.simplified.yml down
+docker-compose -f docker-compose.simplified.yml up -d
 ```
 
 ### Option 2: In-place Update
@@ -233,7 +204,7 @@ docker compose up -d
 docker exec overleaf-simplified bash -c 'cd /overleaf && npm update'
 
 # Restart services
-docker-compose restart
+docker-compose -f docker-compose.simplified.yml restart
 ```
 
 ## Migration from Standard Overleaf
@@ -286,7 +257,7 @@ RUN tlmgr option repository https://your-mirror.example.com/systems/texlive/tlne
 ```
 
 ### Resource Limits
-Add to `docker-compose.yml`:
+Add to docker-compose.simplified.yml:
 ```yaml
 deploy:
   resources:
