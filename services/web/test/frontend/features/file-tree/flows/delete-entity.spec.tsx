@@ -177,7 +177,7 @@ describe('FileTree Delete Entity Flow', function () {
         </div>
       )
 
-      cy.findByRole('button', { name: 'Expand' }).click()
+      cy.findByLabelText('Expand').click()
       cy.findByRole('treeitem', { name: 'main.tex' }).click()
       cy.findByRole('treeitem', { name: 'my.bib' }).click({
         ctrlKey: true,
@@ -248,7 +248,7 @@ describe('FileTree Delete Entity Flow', function () {
       })
 
       // open the context menu
-      cy.findByRole('button', { name: 'my.bib' }).trigger('contextmenu')
+      cy.findByRole('treeitem', { name: 'my.bib' }).trigger('contextmenu')
 
       // make sure the menu has opened, with only a "Delete" item (as multiple files are selected)
       cy.findByRole('menu')

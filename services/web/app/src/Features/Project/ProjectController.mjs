@@ -461,7 +461,6 @@ const _ProjectController = {
       'writefull-encourage-prompt-for-paraphrase',
       'editor-context-menu',
       'email-notifications',
-      'editor-redesign-no-opt-out',
     ].filter(Boolean)
 
     const getUserValues = async userId =>

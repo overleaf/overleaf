@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react'
 
-export type NewEditorTourStage = 'rail' | 'logs' | 'theme' | 'switch-back'
+export type NewEditorTourStage = 'rail' | 'logs' | 'theme' | 'got-questions'
 
 const NewEditorTourContext = createContext<
   | {
@@ -25,11 +25,11 @@ const NewEditorTourContext = createContext<
   | undefined
 >(undefined)
 
-const STAGES: NewEditorTourStage[] = ['rail', 'logs', 'theme', 'switch-back']
+const STAGES: NewEditorTourStage[] = ['rail', 'logs', 'theme', 'got-questions']
 const EDITOR_ONLY_STAGES: NewEditorTourStage[] = [
   'rail',
   'theme',
-  'switch-back',
+  'got-questions',
 ]
 
 export const NewEditorTourProvider: FC<React.PropsWithChildren> = ({

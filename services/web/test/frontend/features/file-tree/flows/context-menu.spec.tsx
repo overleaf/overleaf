@@ -37,7 +37,7 @@ describe('FileTree Context Menu Flow', function () {
     )
 
     cy.findByRole('menu').should('not.exist')
-    cy.findByRole('button', { name: 'main.tex' }).trigger('contextmenu')
+    cy.findByRole('treeitem', { name: 'main.tex' }).trigger('contextmenu')
     cy.findByRole('menu')
   })
 
@@ -73,9 +73,9 @@ describe('FileTree Context Menu Flow', function () {
     )
 
     cy.findByRole('menu').should('not.exist')
-    cy.findByRole('button', { name: 'main.tex' }).trigger('contextmenu')
+    cy.findByRole('treeitem', { name: 'main.tex' }).trigger('contextmenu')
     cy.findByRole('menu')
-    cy.findAllByRole('button', { name: 'foo.tex' }).click()
+    cy.findAllByRole('treeitem', { name: 'foo.tex' }).click()
     cy.findByRole('menu').should('not.exist')
   })
 
@@ -108,7 +108,7 @@ describe('FileTree Context Menu Flow', function () {
       </EditorProviders>
     )
 
-    cy.findAllByRole('button', { name: 'main.tex' }).trigger('contextmenu')
+    cy.findAllByRole('treeitem', { name: 'main.tex' }).trigger('contextmenu')
     cy.findByRole('menu').should('not.exist')
   })
 
@@ -146,14 +146,14 @@ describe('FileTree Context Menu Flow', function () {
     cy.findByRole('menu').should('not.exist')
 
     // main.tex is already the main document
-    cy.findByRole('button', { name: 'main.tex' }).trigger('contextmenu')
+    cy.findByRole('treeitem', { name: 'main.tex' }).trigger('contextmenu')
     cy.findByRole('menu')
       .findByRole('menuitem', { name: 'Set as main document' })
       .should('not.exist')
 
     // set other.tex as the main document
-    cy.findByRole('button', { name: 'other.tex' }).click({ force: true })
-    cy.findByRole('button', { name: 'other.tex' }).trigger('contextmenu')
+    cy.findByRole('treeitem', { name: 'other.tex' }).click({ force: true })
+    cy.findByRole('treeitem', { name: 'other.tex' }).trigger('contextmenu')
 
     cy.intercept('POST', '/project/123abc/settings', { statusCode: 204 }).as(
       'update-settings'
@@ -168,7 +168,7 @@ describe('FileTree Context Menu Flow', function () {
       .should('eq', 'other-doc')
 
     // main.tex is now not the main document
-    cy.findByRole('button', { name: 'main.tex' }).trigger('contextmenu')
+    cy.findByRole('treeitem', { name: 'main.tex' }).trigger('contextmenu')
     cy.findByRole('menu').findByRole('menuitem', {
       name: 'Set as main document',
     })

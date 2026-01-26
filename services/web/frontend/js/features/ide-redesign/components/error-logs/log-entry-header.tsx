@@ -6,6 +6,7 @@ import {
   ElementType,
   useCallback,
   KeyboardEventHandler,
+  useMemo,
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
@@ -106,7 +107,10 @@ function LogEntryHeader({
   ) : null
 
   const headerTitleText = logType ? `${logType} ${headerTitle}` : headerTitle
-  const fileData = file && findEntityByPath(file)
+  const fileData = useMemo(
+    () => file && findEntityByPath(file),
+    [file, findEntityByPath]
+  )
   const showGoToCodeButton =
     showSourceLocationLink &&
     !!fileData &&

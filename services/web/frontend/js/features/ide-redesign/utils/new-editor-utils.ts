@@ -1,4 +1,3 @@
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 
 // For e2e tests purposes, allow overriding to old editor
@@ -11,17 +10,7 @@ export const canUseNewEditor = () => {
 }
 
 export const useIsNewEditorEnabled = () => {
-  const { userSettings } = useUserSettingsContext()
-  const noOptOut = useFeatureFlag('editor-redesign-no-opt-out')
-  const hasAccess = canUseNewEditor()
-  if (!hasAccess) {
-    return false
-  }
-  const enabled = userSettings.enableNewEditor
-  if (noOptOut) {
-    return true
-  }
-  return enabled
+  return canUseNewEditor()
 }
 
 export const useIsNewToNewEditor = () => {

@@ -24,7 +24,6 @@ import LineHeightSetting from '../components/settings/appearance-settings/line-h
 import FontFamilySetting from '../components/settings/appearance-settings/font-family-setting'
 import { AvailableUnfilledIcon } from '@/shared/components/material-icon'
 import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/editor-left-menu-context'
-import NewEditorSetting from '../components/settings/editor-settings/new-editor-setting'
 import DarkModePdfSetting from '../components/settings/appearance-settings/dark-mode-pdf-setting'
 import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
@@ -88,7 +87,6 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
   const { leftMenuShown, setLeftMenuShown } = useLayoutContext()
 
   const hasEmailNotifications = useFeatureFlag('email-notifications')
-  const noNewEditorOptOut = useFeatureFlag('editor-redesign-no-opt-out')
 
   const allSettingsTabs: SettingsEntry[] = useMemo(
     () => [
@@ -226,11 +224,6 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
                 key: 'lineHeight',
                 component: <LineHeightSetting />,
               },
-              {
-                key: 'newEditor',
-                component: <NewEditorSetting />,
-                hidden: noNewEditorOptOut,
-              },
             ],
           },
         ],
@@ -267,7 +260,7 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
         href: '/user/subscription',
       },
     ],
-    [t, overallTheme, hasEmailNotifications, noNewEditorOptOut]
+    [t, overallTheme, hasEmailNotifications]
   )
 
   const settingsTabs = useMemo(

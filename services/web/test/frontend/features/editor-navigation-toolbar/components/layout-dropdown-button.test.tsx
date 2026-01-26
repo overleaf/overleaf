@@ -224,6 +224,7 @@ describe('<LayoutDropdownButton />', function () {
         layout: 'flat',
         view: 'editor',
         page: '/detacher',
+        'editor-redesign': 'enabled',
       })
     })
 

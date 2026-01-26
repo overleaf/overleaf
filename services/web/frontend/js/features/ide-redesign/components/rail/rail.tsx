@@ -29,7 +29,7 @@ import useRailOverflow from '../../hooks/use-rail-overflow'
 import EditorTourRailTooltip from '../editor-tour/editor-tour-rail-tooltip'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import EditorTourThemeTooltip from '../editor-tour/editor-tour-theme-tooltip'
-import EditorTourSwitchBackTooltip from '../editor-tour/editor-tour-switch-back-tooltip'
+import EditorTourGotQuestionsTooltip from '../editor-tour/editor-tour-got-questions'
 import { shouldIncludeElement } from '../../utils/rail-utils'
 import { useEditorContext } from '@/shared/context/editor-context'
 
@@ -280,7 +280,7 @@ export const RailLayout = () => {
       </nav>
       <EditorTourRailTooltip target={fileTreeRef.current} />
       <EditorTourThemeTooltip target={settingsRef.current} />
-      <EditorTourSwitchBackTooltip target={settingsRef.current} />
+      <EditorTourGotQuestionsTooltip target={settingsRef.current} />
       {moduleRailPopovers
         .filter(shouldIncludeElement)
         .map(({ key, Component, ref }) => (
