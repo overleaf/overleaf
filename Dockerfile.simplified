@@ -1,0 +1,192 @@
+# =====================================================
+# Simplified Overleaf - All-in-One Container
+# =====================================================
+# This Dockerfile creates a single container with:
+# - MongoDB (no replica set)
+# - Redis
+# - All Overleaf services
+# - TeX Live with package installation support
+# =====================================================
+
+ARG OVERLEAF_BASE_TAG=sharelatex/sharelatex-base:latest
+FROM $OVERLEAF_BASE_TAG
+
+WORKDIR /overleaf
+
+# Install MongoDB and Redis in the same container
+# ------------------------------------------------
+RUN apt-get update && apt-get install -y \
+    mongodb \
+    redis-server \
+    supervisor \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add required source files
+# -------------------------
+ADD server-ce/genScript.js /overleaf/genScript.js
+ADD server-ce/services.js /overleaf/services.js
+ADD package.json package-lock.json /overleaf/
+ADD libraries/ /overleaf/libraries/
+ADD services/ /overleaf/services/
+ADD tools/migrations/ /overleaf/tools/migrations/
+
+# Add npm patches
+# -----------------------
+ADD patches/ /overleaf/patches
+
+# Install npm dependencies and build webpack assets
+# ------------------------
+RUN --mount=type=cache,target=/root/.cache \
+    --mount=type=cache,target=/root/.npm \
+    --mount=type=cache,target=/overleaf/services/web/node_modules/.cache,id=server-ce-webpack-cache \
+    --mount=type=tmpfs,target=/tmp true \
+&&  node genScript install | bash \
+&&  node genScript compile | bash
+
+# Copy runit service startup scripts to its location
+# --------------------------------------------------
+ADD server-ce/runit /etc/service
+
+# Simplified configuration files
+# ------------------------------
+COPY server-ce/config/env.sh /etc/overleaf/env.sh
+
+# Configure nginx
+# ---------------
+ADD server-ce/nginx/nginx.conf.template /etc/nginx/templates/nginx.conf.template
+ADD server-ce/nginx/overleaf.conf /etc/nginx/sites-enabled/overleaf.conf
+ADD server-ce/nginx/clsi-nginx.conf /etc/nginx/sites-enabled/clsi-nginx.conf
+
+# Configure log rotation
+# ----------------------
+ADD server-ce/logrotate/overleaf /etc/logrotate.d/overleaf
+RUN chmod 644 /etc/logrotate.d/overleaf
+
+# Configure cron tasks
+# ----------------------
+ADD server-ce/cron /overleaf/cron
+ADD server-ce/config/crontab-history /etc/cron.d/crontab-history
+RUN chmod 600 /etc/cron.d/crontab-history
+ADD server-ce/config/crontab-deletion /etc/cron.d/crontab-deletion
+RUN chmod 600 /etc/cron.d/crontab-deletion
+
+# Copy Phusion Image startup and shutdown scripts
+# ------------------------------------------------
+COPY server-ce/init_scripts/ /etc/my_init.d/
+COPY server-ce/init_preshutdown_scripts/ /etc/my_init.pre_shutdown.d/
+
+# Simplified settings file
+# ------------------------
+COPY server-ce/config/settings.js /etc/overleaf/settings.js
+
+# Copy history-v1 files
+# ---------------------
+COPY server-ce/config/production.json /overleaf/services/history-v1/config/production.json
+COPY server-ce/config/custom-environment-variables.json /overleaf/services/history-v1/config/custom-environment-variables.json
+
+# Copy helper scripts
+# -------------------
+ADD server-ce/bin/grunt /usr/local/bin/grunt
+RUN chmod +x /usr/local/bin/grunt
+ADD server-ce/bin/flush-history-queues /overleaf/bin/flush-history-queues
+RUN chmod +x /overleaf/bin/flush-history-queues
+ADD server-ce/bin/force-history-resyncs /overleaf/bin/force-history-resyncs
+RUN chmod +x /overleaf/bin/force-history-resyncs
+
+# Copy Latexmkrc
+# --------------
+COPY server-ce/config/latexmkrc /usr/local/share/latexmk/LatexMk
+
+# Create data directories
+# ------------------------
+RUN mkdir -p /var/lib/overleaf/data \
+    /var/lib/overleaf/tmp \
+    /var/lib/mongodb \
+    /var/lib/redis \
+    /var/lib/texlive/texmf-local
+
+# Install TeX Live with tlmgr support
+# ------------------------------------
+# This section enables on-demand package installation
+RUN tlmgr option autobackup -- -1 \
+    && tlmgr option repository https://mirror.ctan.org/systems/texlive/tlnet
+
+# Create tlmgr installation script
+# ---------------------------------
+COPY <<'EOF' /usr/local/bin/install-tex-package
+#!/bin/bash
+# Script to install LaTeX packages on-demand
+PACKAGE=$1
+if [ -z "$PACKAGE" ]; then
+    echo "Usage: install-tex-package <package-name>"
+    exit 1
+fi
+tlmgr install "$PACKAGE"
+texhash
+EOF
+
+RUN chmod +x /usr/local/bin/install-tex-package
+
+# Create supervisor configuration for MongoDB and Redis
+# ------------------------------------------------------
+COPY <<'EOF' /etc/supervisor/conf.d/databases.conf
+[program:mongodb]
+command=/usr/bin/mongod --dbpath /var/lib/mongodb --nojournal --smallfiles
+autostart=true
+autorestart=true
+stdout_logfile=/var/log/mongodb.log
+stderr_logfile=/var/log/mongodb.err
+
+[program:redis]
+command=/usr/bin/redis-server --dir /var/lib/redis
+autostart=true
+autorestart=true
+stdout_logfile=/var/log/redis.log
+stderr_logfile=/var/log/redis.err
+EOF
+
+# Site status file
+# ----------------
+ENV SITE_MAINTENANCE_FILE="/etc/overleaf/site_status"
+RUN touch $SITE_MAINTENANCE_FILE
+
+# Environment Variables (Simplified)
+# -----------------------------------
+ENV OVERLEAF_CONFIG=/etc/overleaf/settings.js
+ENV WEB_API_USER="overleaf"
+ENV ADMIN_PRIVILEGE_AVAILABLE="true"
+ENV OVERLEAF_APP_NAME="Overleaf Simplified Edition"
+
+# Simplified database connections (localhost)
+ENV OVERLEAF_MONGO_URL="mongodb://127.0.0.1:27017/sharelatex"
+ENV OVERLEAF_REDIS_HOST="127.0.0.1"
+ENV REDIS_HOST="127.0.0.1"
+
+# Disable sandboxed compiles (run in same container)
+ENV SANDBOXED_COMPILES="false"
+ENV DOCKER_RUNNER="false"
+
+# Other settings
+ENV OPTIMISE_PDF="true"
+ENV EMAIL_CONFIRMATION_DISABLED="true"
+ENV ENABLED_LINKED_FILE_TYPES="project_file,project_output_file"
+ENV ENABLE_CONVERSIONS="true"
+
+ENV NODE_ENV="production"
+ENV LOG_LEVEL="info"
+
+# Phusion Image timeouts
+ENV KILL_PROCESS_TIMEOUT=55
+ENV KILL_ALL_PROCESSES_TIMEOUT=55
+ENV GRACEFUL_SHUTDOWN_DELAY_SECONDS=1
+
+# Volumes for persistence
+# -----------------------
+VOLUME ["/var/lib/overleaf", "/var/lib/mongodb", "/var/lib/redis", "/var/lib/texlive/texmf-local"]
+
+EXPOSE 80
+
+# Start supervisor to manage all services
+# ----------------------------------------
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]

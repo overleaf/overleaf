@@ -1,0 +1,71 @@
+# =====================================================
+# Simplified Overleaf Docker Compose
+# =====================================================
+# Single-container deployment with embedded databases
+# and on-demand package installation support
+# =====================================================
+
+version: '3.8'
+
+services:
+  overleaf-simplified:
+    build:
+      context: .
+      dockerfile: Dockerfile.simplified
+    image: overleaf/overleaf-simplified:latest
+    container_name: overleaf-simplified
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      # Persistent data storage
+      - overleaf_data:/var/lib/overleaf
+      - mongodb_data:/var/lib/mongodb
+      - redis_data:/var/lib/redis
+      - texlive_packages:/var/lib/texlive/texmf-local
+    environment:
+      # Application settings
+      OVERLEAF_APP_NAME: "Overleaf Simplified"
+      OVERLEAF_SITE_URL: "http://localhost"
+      
+      # Admin settings
+      OVERLEAF_ADMIN_EMAIL: "admin@example.com"
+      
+      # Email settings (optional - configure if needed)
+      # OVERLEAF_EMAIL_FROM_ADDRESS: "noreply@example.com"
+      # OVERLEAF_EMAIL_SMTP_HOST: "smtp.example.com"
+      # OVERLEAF_EMAIL_SMTP_PORT: "587"
+      # OVERLEAF_EMAIL_SMTP_SECURE: "false"
+      # OVERLEAF_EMAIL_SMTP_USER: ""
+      # OVERLEAF_EMAIL_SMTP_PASS: ""
+      
+      # Feature flags
+      EMAIL_CONFIRMATION_DISABLED: "true"
+      ENABLE_CONVERSIONS: "true"
+      OPTIMISE_PDF: "true"
+      
+      # Database connections (all localhost in same container)
+      OVERLEAF_MONGO_URL: "mongodb://127.0.0.1:27017/sharelatex"
+      OVERLEAF_REDIS_HOST: "127.0.0.1"
+      REDIS_HOST: "127.0.0.1"
+      
+      # Compilation settings
+      SANDBOXED_COMPILES: "false"
+      DOCKER_RUNNER: "false"
+      
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  overleaf_data:
+    driver: local
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+  texlive_packages:
+    driver: local
