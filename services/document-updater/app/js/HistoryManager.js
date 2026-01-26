@@ -96,13 +96,21 @@ async function resyncProjectHistory(
   if (opts.resyncProjectStructureOnly) return
   const DocumentManager = require('./DocumentManager')
 
-  await promiseMapWithLimit(MAX_PARALLEL_REQUESTS, docs, doc => {
-    DocumentManager.promises.resyncDocContentsWithLock(
-      projectId,
-      doc.doc,
-      doc.path,
-      opts
-    )
+  await promiseMapWithLimit(MAX_PARALLEL_REQUESTS, docs, async doc => {
+    const { doc: docId, path } = doc
+    try {
+      await DocumentManager.promises.resyncDocContentsWithLock(
+        projectId,
+        docId,
+        path,
+        opts
+      )
+    } catch (err) {
+      throw OError.tag(err, 'resyncDocContents', {
+        projectId,
+        docId,
+      })
+    }
   })
 }
 
