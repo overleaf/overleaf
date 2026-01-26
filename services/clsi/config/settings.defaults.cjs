@@ -59,7 +59,7 @@ module.exports = {
     clsiCache: {
       enabled: !!process.env.CLSI_CACHE_INSTANCES,
       shards: JSON.parse(process.env.CLSI_CACHE_INSTANCES || '[]').filter(
-        ({ zone }) => zone === process.env.ZONE
+        ({ zone, readOnly }) => zone === process.env.ZONE && !readOnly
       ),
     },
   },

@@ -38,30 +38,32 @@ const MIGRATE_UNTIL = new Date('2026-01-21').getTime()
 
 /**
  * @param {string} projectId
- * @return {{shard: string, url: string}}
+ * @return {{shard: string, url: string}|undefined}
  */
-function getShard(projectId) {
+function getAvailableShard(projectId) {
   // Layout of mongodb object id bytes:
   // [timestamp 4bytes][random per machine 5bytes][counter 3bytes]
   //                                          [32bit       4bytes]
   const last4Bytes = Buffer.from(projectId, 'hex').subarray(8, 12)
   const counter = last4Bytes.readUInt32BE()
-  const nShards = Settings.apis.clsiCache.shards.length
 
-  // Use the "counter" part of the id for a stable assignment with an even
-  // distribution. This is where the current data resides.
-  const preferredShard = counter % nShards
-
-  // Gradually migrate over to the crc base shard assignment.
-  const remaining = MIGRATE_UNTIL - Date.now()
-  if ((counter % 100) / 100 < remaining / (MIGRATE_UNTIL - MIGRATE_FROM)) {
-    const shard = Settings.apis.clsiCache.shards[preferredShard]
-    if (!isCircuitBreakerTripped(shard.url)) return shard
+  let shards = Settings.apis.clsiCache.shards.slice(
+    0,
+    Settings.apis.clsiCache.currentShards
+  )
+  const now = Date.now()
+  if (
+    now > MIGRATE_FROM &&
+    now < MIGRATE_UNTIL &&
+    (counter % 100) / 100 <
+      (MIGRATE_UNTIL - now) / (MIGRATE_UNTIL - MIGRATE_FROM)
+  ) {
+    shards = Settings.apis.clsiCache.shards.slice(
+      0,
+      Settings.apis.clsiCache.desiredShards
+    )
   }
 
-  // Then use a crc for generating a stable sequence of shards with even
-  // distribution to try next.
-  const shards = Settings.apis.clsiCache.shards.slice(0)
   let i = 0
   while (shards.length > 0) {
     const idx = crc32(`${projectId}-${i++}`) % shards.length
@@ -69,8 +71,7 @@ function getShard(projectId) {
     if (!isCircuitBreakerTripped(candidate.url)) return candidate
     shards.splice(idx, 1)
   }
-  // All shards are down. Return the original preference.
-  return Settings.apis.clsiCache.shards[preferredShard]
+  return undefined
 }
 
 /**
@@ -129,8 +130,9 @@ function notifyCLSICacheAboutBuild({
 }) {
   if (!Settings.apis.clsiCache.enabled) return undefined
   if (!OBJECT_ID_REGEX.test(projectId)) return undefined
-  const { url, shard } = getShard(projectId)
-  if (isCircuitBreakerTripped(url)) return undefined
+  const shardCfg = getAvailableShard(projectId)
+  if (!shardCfg) return undefined
+  const { url, shard } = shardCfg
 
   /**
    * @param {{path: string}[]} files
@@ -284,8 +286,9 @@ async function downloadOutputDotSynctexFromCompileCache(
 ) {
   if (!Settings.apis.clsiCache.enabled) return false
   if (!OBJECT_ID_REGEX.test(projectId)) return false
-  const { url } = getShard(projectId)
-  if (isCircuitBreakerTripped(url)) return false
+  const shardCfg = getAvailableShard(projectId)
+  if (!shardCfg) return false
+  const { url } = shardCfg
 
   const timer = new Metrics.Timer(
     'clsi_cache_download',
@@ -347,8 +350,9 @@ async function downloadOutputDotSynctexFromCompileCache(
 async function downloadLatestCompileCache(projectId, userId, compileDir) {
   if (!Settings.apis.clsiCache.enabled) return false
   if (!OBJECT_ID_REGEX.test(projectId)) return false
-  const { url } = getShard(projectId)
-  if (isCircuitBreakerTripped(url)) return false
+  const shardCfg = getAvailableShard(projectId)
+  if (!shardCfg) return false
+  const { url } = shardCfg
 
   const timer = new Metrics.Timer(
     'clsi_cache_download',
