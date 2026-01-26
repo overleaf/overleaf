@@ -299,6 +299,11 @@ for (const signal of [
   process.on(signal, shutdownCleanly(signal))
 }
 
+process.on('uncaughtException', function (err) {
+  logger.error({ err }, 'uncaught exception')
+  shutdownCleanly('uncaughtException')()
+})
+
 function longerTimeout(req, res, next) {
   res.setTimeout(6 * 60 * 1000)
   next()
