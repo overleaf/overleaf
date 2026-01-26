@@ -17,7 +17,7 @@ import * as RetryManager from './RetryManager.js'
 import * as FlushManager from './FlushManager.js'
 import { pipeline } from 'node:stream'
 import { RequestFailedError } from '@overleaf/fetch-utils'
-import { z, zz, validateReq } from '@overleaf/validation-tools'
+import { z, zz, parseReq } from '@overleaf/validation-tools'
 
 const ONE_DAY_IN_SECONDS = 24 * 60 * 60
 
@@ -29,7 +29,7 @@ const getProjectBlobSchema = z.object({
 })
 
 export function getProjectBlob(req, res, next) {
-  const { params } = validateReq(req, getProjectBlobSchema)
+  const { params } = parseReq(req, getProjectBlobSchema)
   const historyId = params.history_id
   const blobHash = params.hash
   HistoryStoreManager.getProjectBlobStream(
@@ -72,7 +72,7 @@ const flushProjectSchema = z.object({
 })
 
 export function flushProject(req, res, next) {
-  const { query, params } = validateReq(req, flushProjectSchema)
+  const { query, params } = parseReq(req, flushProjectSchema)
   const projectId = params.project_id
   if (query.debug) {
     logger.debug(
@@ -118,7 +118,7 @@ const dumpProjectSchema = z.object({
 })
 
 export function dumpProject(req, res, next) {
-  const { query, params } = validateReq(req, dumpProjectSchema)
+  const { query, params } = parseReq(req, dumpProjectSchema)
   const projectId = params.project_id
   const batchSize = query.count || UpdatesProcessor.REDIS_READ_BATCH_SIZE
   logger.debug({ projectId }, 'retrieving raw updates')
@@ -152,7 +152,7 @@ const flushOldSchema = z.object({
 })
 
 export function flushOld(req, res, next) {
-  const { query } = validateReq(req, flushOldSchema)
+  const { query } = parseReq(req, flushOldSchema)
   const { maxAge, queueDelay, limit, timeout, background } = query
   const options = { maxAge, queueDelay, limit, timeout, background }
   FlushManager.flushOldOps(options, (error, results) => {
@@ -175,7 +175,7 @@ const getDiffSchema = z.object({
 })
 
 export function getDiff(req, res, next) {
-  const { query, params } = validateReq(req, getDiffSchema)
+  const { query, params } = parseReq(req, getDiffSchema)
   const { pathname, from, to } = query
   const projectId = params.project_id
 
@@ -199,7 +199,7 @@ const getFileTreeDiffSchema = z.object({
 })
 
 export function getFileTreeDiff(req, res, next) {
-  const { query, params } = validateReq(req, getFileTreeDiffSchema)
+  const { query, params } = parseReq(req, getFileTreeDiffSchema)
   const { from, to } = query
   const projectId = params.project_id
 
@@ -222,7 +222,7 @@ const getUpdatesSchema = z.object({
 })
 
 export function getUpdates(req, res, next) {
-  const { query, params } = validateReq(req, getUpdatesSchema)
+  const { query, params } = parseReq(req, getUpdatesSchema)
   const projectId = params.project_id
   const { before, min_count: minCount } = query
   SummarizedUpdatesManager.getSummarizedProjectUpdates(
@@ -251,7 +251,7 @@ const latestVersionSchema = z.object({
 })
 
 export function latestVersion(req, res, next) {
-  const { params } = validateReq(req, latestVersionSchema)
+  const { params } = parseReq(req, latestVersionSchema)
   const projectId = params.project_id
   logger.debug({ projectId }, 'compressing project history and getting version')
   UpdatesProcessor.processUpdatesForProject(projectId, error => {
@@ -289,7 +289,7 @@ const getFileSnapshotSchema = z.object({
 })
 
 export function getFileSnapshot(req, res, next) {
-  const { params } = validateReq(req, getFileSnapshotSchema)
+  const { params } = parseReq(req, getFileSnapshotSchema)
   const { project_id: projectId, version, pathname } = params
   SnapshotManager.getFileSnapshotStream(
     projectId,
@@ -316,7 +316,7 @@ const getRangesSnapshotSchema = z.object({
 })
 
 export function getRangesSnapshot(req, res, next) {
-  const { params } = validateReq(req, getRangesSnapshotSchema)
+  const { params } = parseReq(req, getRangesSnapshotSchema)
   const { project_id: projectId, version, pathname } = params
   SnapshotManager.getRangesSnapshot(
     projectId,
@@ -340,7 +340,7 @@ const getFileMetadataSnapshotSchema = z.object({
 })
 
 export function getFileMetadataSnapshot(req, res, next) {
-  const { params } = validateReq(req, getFileMetadataSnapshotSchema)
+  const { params } = parseReq(req, getFileMetadataSnapshotSchema)
   const { project_id: projectId, version, pathname } = params
   SnapshotManager.getFileMetadataSnapshot(
     projectId,
@@ -362,7 +362,7 @@ const getLatestSnapshotSchema = z.object({
 })
 
 export function getLatestSnapshot(req, res, next) {
-  const { params } = validateReq(req, getLatestSnapshotSchema)
+  const { params } = parseReq(req, getLatestSnapshotSchema)
   const { project_id: projectId } = params
   WebApiManager.getHistoryId(projectId, (error, historyId) => {
     if (error) return next(OError.tag(error))
@@ -390,7 +390,7 @@ const getChangesInChunkSinceSchema = z.object({
 })
 
 export function getChangesInChunkSince(req, res, next) {
-  const { query, params } = validateReq(req, getChangesInChunkSinceSchema)
+  const { query, params } = parseReq(req, getChangesInChunkSinceSchema)
   const { project_id: projectId } = params
   const { since } = query
   WebApiManager.getHistoryId(projectId, (error, historyId) => {
@@ -421,7 +421,7 @@ const getProjectSnapshotSchema = z.object({
 })
 
 export function getProjectSnapshot(req, res, next) {
-  const { params } = validateReq(req, getProjectSnapshotSchema)
+  const { params } = parseReq(req, getProjectSnapshotSchema)
   const { project_id: projectId, version } = params
   SnapshotManager.getProjectSnapshot(
     projectId,
@@ -443,7 +443,7 @@ const getPathsAtVersionSchema = z.object({
 })
 
 export function getPathsAtVersion(req, res, next) {
-  const { params } = validateReq(req, getPathsAtVersionSchema)
+  const { params } = parseReq(req, getPathsAtVersionSchema)
   const { project_id: projectId, version } = params
   SnapshotManager.getPathsAtVersion(projectId, version, (error, result) => {
     if (error != null) {
@@ -494,7 +494,7 @@ const resyncProjectSchema = z.object({
 })
 
 export function resyncProject(req, res, next) {
-  const { query, params, body } = validateReq(req, resyncProjectSchema)
+  const { query, params, body } = parseReq(req, resyncProjectSchema)
   const projectId = params.project_id
   const options = {}
   if (body.origin) {
@@ -544,7 +544,7 @@ const forceDebugProjectSchema = z.object({
 })
 
 export function forceDebugProject(req, res, next) {
-  const { query, params } = validateReq(req, forceDebugProjectSchema)
+  const { query, params } = parseReq(req, forceDebugProjectSchema)
   const projectId = params.project_id
   // set the debug flag to true unless we see ?clear=true
   const state = !query.clear
@@ -587,7 +587,7 @@ const getLabelsSchema = z.object({
 })
 
 export function getLabels(req, res, next) {
-  const { params } = validateReq(req, getLabelsSchema)
+  const { params } = parseReq(req, getLabelsSchema)
   const projectId = params.project_id
   HistoryApiManager.shouldUseProjectHistory(
     projectId,
@@ -624,7 +624,7 @@ const createLabelSchema = z.object({
 })
 
 export function createLabel(req, res, next) {
-  const { params, body } = validateReq(req, createLabelSchema)
+  const { params, body } = parseReq(req, createLabelSchema)
   const { project_id: projectId, user_id: userIdParam } = params
   const {
     version,
@@ -690,7 +690,7 @@ const deleteLabelForUserSchema = z.object({
 })
 
 export function deleteLabelForUser(req, res, next) {
-  const { params } = validateReq(req, deleteLabelForUserSchema)
+  const { params } = parseReq(req, deleteLabelForUserSchema)
   const { project_id: projectId, user_id: userId, label_id: labelId } = params
 
   LabelsManager.deleteLabelForUser(projectId, userId, labelId, error => {
@@ -709,7 +709,7 @@ const deleteLabelSchema = z.object({
 })
 
 export function deleteLabel(req, res, next) {
-  const { params } = validateReq(req, deleteLabelSchema)
+  const { params } = parseReq(req, deleteLabelSchema)
   const { project_id: projectId, label_id: labelId } = params
 
   LabelsManager.deleteLabel(projectId, labelId, error => {
@@ -732,7 +732,7 @@ const retryFailuresSchema = z.object({
 })
 
 export function retryFailures(req, res, next) {
-  const { query } = validateReq(req, retryFailuresSchema)
+  const { query } = parseReq(req, retryFailuresSchema)
   const { failureType, timeout, limit, callbackUrl } = query
   if (callbackUrl) {
     // send response but run in background when callbackUrl provided
@@ -773,7 +773,7 @@ const transferLabelsSchema = z.object({
 })
 
 export function transferLabels(req, res, next) {
-  const { params } = validateReq(req, transferLabelsSchema)
+  const { params } = parseReq(req, transferLabelsSchema)
   const { from_user: fromUser, to_user: toUser } = params
   LabelsManager.transferLabels(fromUser, toUser, error => {
     if (error != null) {
@@ -790,7 +790,7 @@ const deleteProjectSchema = z.object({
 })
 
 export function deleteProject(req, res, next) {
-  const { params } = validateReq(req, deleteProjectSchema)
+  const { params } = parseReq(req, deleteProjectSchema)
   const { project_id: projectId } = params
   // clear the timestamp before clearing the queue,
   // because the queue location is used in the migration
