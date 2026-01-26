@@ -88,6 +88,7 @@ export const ProjectSchema = new Schema(
         rangesSupportEnabled: { type: Boolean },
         otMigrationStage: { type: Number },
       },
+      isDebugCopyOf: { type: ObjectId },
     },
     collabratecUsers: [
       {
