@@ -202,12 +202,6 @@ export default function EditMember({
         </OLCol>
 
         <OLCol xs={4} className="project-member-actions">
-          {confirmRemoval && (
-            <ChangePrivilegesActions
-              handleReset={() => setPrivileges(member.privileges)}
-            />
-          )}
-
           <div className="project-member-select">
             {hasBeenDowngraded && !confirmRemoval && (
               <MaterialIcon type="warning" className="project-member-warning" />
@@ -224,6 +218,12 @@ export default function EditMember({
               canAddCollaborators={canAddCollaborators}
             />
           </div>
+
+          {confirmRemoval && (
+            <ChangePrivilegesActions
+              handleReset={() => setPrivileges(member.privileges)}
+            />
+          )}
         </OLCol>
       </OLFormGroup>
     </form>
@@ -325,21 +325,19 @@ function ChangePrivilegesActions({
   const { t } = useTranslation()
 
   return (
-    <div className="text-center">
-      <OLButton type="submit" size="sm" variant="primary">
-        {t('change_or_cancel-change')}
+    <div className="text-center d-flex gap-1 me-3">
+      <OLButton
+        type="submit"
+        size="sm"
+        variant="secondary"
+        onClick={handleReset}
+      >
+        {t('cancel')}
       </OLButton>
-      <div className="text-sm">
-        {t('change_or_cancel-or')}
-        &nbsp;
-        <OLButton
-          variant="link"
-          className="btn-inline-link"
-          onClick={handleReset}
-        >
-          {t('change_or_cancel-cancel')}
-        </OLButton>
-      </div>
+
+      <OLButton type="submit" size="sm" variant="primary">
+        {t('confirm')}
+      </OLButton>
     </div>
   )
 }

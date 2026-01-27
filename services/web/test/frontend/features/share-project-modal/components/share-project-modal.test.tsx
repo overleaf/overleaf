@@ -529,7 +529,7 @@ describe('<ShareProjectModal/>', function () {
       next: 'Remove access',
     })
     const removeButton = screen.getByRole('button', {
-      name: 'Change',
+      name: 'Confirm',
     })
     fireEvent.click(removeButton)
 
