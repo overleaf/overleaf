@@ -706,6 +706,47 @@ function extractCompanyName(account, billingInfo) {
   return null
 }
 
+function normalizeComparableString(value) {
+  if (value == null) return ''
+  return String(value).trim()
+}
+
+function hasAnyAddressValue(address) {
+  if (!address || typeof address !== 'object') return false
+  return Object.values(address).some(v => normalizeComparableString(v) !== '')
+}
+
+function normalizeComparableAddress(address) {
+  if (!address || typeof address !== 'object') return null
+
+  const norm = {
+    line1: normalizeComparableString(address.line1),
+    line2: normalizeComparableString(address.line2),
+    city: normalizeComparableString(address.city),
+    state: normalizeComparableString(address.state),
+    postal_code: normalizeComparableString(address.postal_code),
+    country: normalizeComparableString(address.country).toUpperCase(),
+  }
+
+  return hasAnyAddressValue(norm) ? norm : null
+}
+
+function addressesEqual(a, b) {
+  const na = normalizeComparableAddress(a)
+  const nb = normalizeComparableAddress(b)
+  if (!na && !nb) return true
+  if (!na || !nb) return false
+
+  return (
+    na.line1 === nb.line1 &&
+    na.line2 === nb.line2 &&
+    na.city === nb.city &&
+    na.state === nb.state &&
+    na.postal_code === nb.postal_code &&
+    na.country === nb.country
+  )
+}
+
 // =============================================================================
 // MAIN PROCESSING
 // =============================================================================
@@ -995,22 +1036,40 @@ async function processCustomer(
         : {}),
     }
 
-    // If Stripe already has any of the migrated fields set, warn and capture both
-    // the desired (Recurly-derived) and existing (Stripe) values in a JSON file.
-    const presentFields = []
-    if (existingCustomer?.name) presentFields.push('name')
-    if (existingCustomer?.business_name) presentFields.push('business_name')
+    // If Stripe already has any of the fields we're about to set, and the value is
+    // different from what we'd set, warn and capture both desired and existing.
+    const differingFields = []
+
     if (
-      existingCustomer?.address &&
-      Object.values(existingCustomer.address).some(v => v)
+      customerParams?.name != null &&
+      normalizeComparableString(existingCustomer?.name) !== '' &&
+      normalizeComparableString(existingCustomer?.name) !==
+        normalizeComparableString(customerParams.name)
     ) {
-      presentFields.push('address')
+      differingFields.push('name')
     }
 
-    if (presentFields.length > 0) {
-      logWarn('Stripe customer already has name/address/business_name set', {
+    if (
+      customerParams?.business_name != null &&
+      normalizeComparableString(existingCustomer?.business_name) !== '' &&
+      normalizeComparableString(existingCustomer?.business_name) !==
+        normalizeComparableString(customerParams.business_name)
+    ) {
+      differingFields.push('business_name')
+    }
+
+    if (
+      customerParams?.address &&
+      hasAnyAddressValue(existingCustomer?.address) &&
+      !addressesEqual(existingCustomer.address, customerParams.address)
+    ) {
+      differingFields.push('address')
+    }
+
+    if (differingFields.length > 0) {
+      logWarn('Stripe customer already has differing fields set', {
         ...context,
-        fields: presentFields,
+        fields: differingFields,
       })
 
       if (writeStripeExistingFields) {
@@ -1019,14 +1078,26 @@ async function processCustomer(
           stripe_account: targetStripeAccount,
           stripe_customer_id: stripeCustomerId,
           recurly: {
-            name: customerParams.name,
-            address: customerParams.address,
-            business_name: customerParams.business_name,
+            ...(differingFields.includes('name')
+              ? { name: customerParams.name }
+              : {}),
+            ...(differingFields.includes('business_name')
+              ? { business_name: customerParams.business_name }
+              : {}),
+            ...(differingFields.includes('address')
+              ? { address: customerParams.address }
+              : {}),
           },
           stripe: {
-            name: existingCustomer.name,
-            address: existingCustomer.address,
-            business_name: existingCustomer.business_name,
+            ...(differingFields.includes('name')
+              ? { name: existingCustomer.name }
+              : {}),
+            ...(differingFields.includes('business_name')
+              ? { business_name: existingCustomer.business_name }
+              : {}),
+            ...(differingFields.includes('address')
+              ? { address: existingCustomer.address }
+              : {}),
           },
         })
       }
