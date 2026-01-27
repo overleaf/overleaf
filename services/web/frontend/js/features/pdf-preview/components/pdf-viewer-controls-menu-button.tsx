@@ -2,6 +2,7 @@ import { useRef } from 'react'
 
 import PdfPageNumberControl from './pdf-page-number-control'
 import PdfZoomButtons from './pdf-zoom-buttons'
+import PdfRotationButtons from './pdf-rotation-buttons'
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
 import useDropdown from '@/shared/hooks/use-dropdown'
@@ -16,6 +17,8 @@ type PdfViewerControlsMenuButtonProps = {
   page: number
   totalPages: number
   pdfContainer?: HTMLDivElement
+  rotation: number
+  setRotation: (rotation: number) => void
 }
 
 export default function PdfViewerControlsMenuButton({
@@ -24,6 +27,8 @@ export default function PdfViewerControlsMenuButton({
   page,
   totalPages,
   pdfContainer,
+  rotation,
+  setRotation,
 }: PdfViewerControlsMenuButtonProps) {
   const { t } = useTranslation()
 
@@ -74,6 +79,9 @@ export default function PdfViewerControlsMenuButton({
           />
           <div className="pdfjs-zoom-controls">
             <PdfZoomButtons setZoom={setZoom} />
+          </div>
+          <div className="pdfjs-rotation-controls">
+            <PdfRotationButtons rotation={rotation} setRotation={setRotation} />
           </div>
         </OLPopover>
       </OLOverlay>
