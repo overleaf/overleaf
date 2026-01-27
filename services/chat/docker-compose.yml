@@ -35,7 +35,6 @@ services:
       - ../../tools/migrations:/overleaf/tools/migrations
     working_dir: /overleaf/services/chat
     environment:
-      ELASTIC_SEARCH_DSN: es:9200
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}

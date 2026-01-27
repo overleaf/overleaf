@@ -36,7 +36,6 @@ services:
       - ../../tools/migrations:/overleaf/tools/migrations
     working_dir: /overleaf/services/docstore
     environment:
-      ELASTIC_SEARCH_DSN: es:9200
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       POSTGRES_HOST: postgres
       GCS_API_ENDPOINT: http://gcs:9090

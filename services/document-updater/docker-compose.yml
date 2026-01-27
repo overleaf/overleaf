@@ -42,7 +42,6 @@ services:
       - ../../tools/migrations:/overleaf/tools/migrations
     working_dir: /overleaf/services/document-updater
     environment:
-      ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis_test
       HISTORY_REDIS_HOST: redis_test
       QUEUES_REDIS_HOST: redis_test

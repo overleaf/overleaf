@@ -33,7 +33,6 @@ services:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     environment:
       CI:
-      ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis_test
       QUEUES_REDIS_HOST: redis_test
       HISTORY_REDIS_HOST: redis_test
