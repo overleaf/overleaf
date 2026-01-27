@@ -6,6 +6,7 @@
   // Until we add a dark modal version, all core components in modals should use light theme
   @include light-dropdown-menu;
   @include form-check-light;
+  @include light-input;
 }
 
 @include media-breakpoint-up(sm) {

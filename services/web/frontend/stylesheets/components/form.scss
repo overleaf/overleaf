@@ -94,14 +94,40 @@
     )};
 }
 
+@mixin light-input {
+  --input-field-color: var(--content-primary);
+  --input-field-bg: var(--bg-light-primary);
+  --input-field-border-color: var(--border-primary);
+  --input-placeholder-content: var(--content-placeholder);
+  --input-border-hover: var(--border-hover);
+  --input-field-content-disabled: var(--content-disabled);
+}
+
+@mixin dark-input {
+  --input-field-color: var(--content-primary-dark);
+  --input-field-bg: var(--bg-dark-primary);
+  --input-field-border-color: var(--border-primary-dark);
+  --input-placeholder-content: var(--content-placeholder-dark);
+  --input-border-hover: var(--border-hover-dark);
+  --input-field-content-disabled: var(--content-disabled-dark);
+}
+
 :root {
   @include form-check-light;
+  @include light-input;
 }
 
 @include theme('default') {
   .ide-redesign-main,
   .project-ds-nav-page {
     @include form-check-dark;
+  }
+
+  .project-ds-nav-page {
+    .form-control,
+    .form-control-wrapper {
+      @include dark-input;
+    }
   }
 }
 
@@ -230,15 +256,6 @@
   color: var(--checkbox-label-color);
 }
 
-.form-control {
-  &[disabled],
-  &:disabled {
-    &::placeholder {
-      color: var(--content-disabled);
-    }
-  }
-}
-
 // Fake disabled checkbox style
 .readonly-disabled-checkbox input.form-check-input {
   @include input-disabled-styles;
@@ -350,6 +367,7 @@
 
       display: flex;
       justify-content: center;
+      color: var(--input-field-color);
     }
   }
 
@@ -438,4 +456,30 @@ input[type='range'] {
 
 .has-error {
   @include form-control-validation($bg-danger-01);
+}
+
+.form-control {
+  &[disabled],
+  &:disabled {
+    &::placeholder {
+      color: var(--input-field-content-disabled);
+    }
+  }
+}
+
+input.form-control[type='text'] {
+  color: var(--input-field-color);
+  background-color: var(--input-field-bg);
+  border-color: var(--input-field-border-color);
+
+  &::placeholder {
+    color: var(--input-placeholder-content);
+  }
+
+  &:focus,
+  &:focus-visible {
+    color: var(--input-field-color);
+    background-color: var(--input-field-bg);
+    border-color: var(--input-border-hover);
+  }
 }
