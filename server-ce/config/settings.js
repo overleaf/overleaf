@@ -140,7 +140,6 @@ const settings = {
     api: redisConfig,
     pubsub: redisConfig,
     project_history: redisConfig,
-    references: redisConfig,
 
     project_history_migration: {
       host: redisConfig.host,
@@ -293,7 +292,6 @@ const settings = {
       ),
     },
   },
-  references: {},
   notifications: undefined,
 
   defaultFeatures: {
@@ -423,14 +421,6 @@ if (
       min: process.env.OVERLEAF_PASSWORD_VALIDATION_MIN_LENGTH || 8,
       max: process.env.OVERLEAF_PASSWORD_VALIDATION_MAX_LENGTH || 72,
     },
-  }
-}
-
-// /References
-// -----------
-if (process.env.OVERLEAF_ELASTICSEARCH_URL != null) {
-  settings.references.elasticsearch = {
-    host: process.env.OVERLEAF_ELASTICSEARCH_URL,
   }
 }
 

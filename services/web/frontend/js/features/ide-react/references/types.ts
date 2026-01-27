@@ -6,7 +6,7 @@ export type Bib2JsonEntry = {
     journal: string
     title: string
     year: string
-  }
+  } & Record<string, string>
 }
 
 export type AdvancedReferenceSearchResult = {

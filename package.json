@@ -70,7 +70,6 @@
     "services/notifications",
     "services/project-history",
     "services/real-time",
-    "services/references",
     "services/templates",
     "services/third-party-datastore",
     "services/third-party-references",
