@@ -101,6 +101,21 @@ export interface InvoiceOverdueWebhookEvent extends Stripe.EventBase {
   }
 }
 
+export interface InvoiceCreatedWebhookEvent extends Stripe.EventBase {
+  type: 'invoice.created'
+  data: {
+    object: Stripe.Invoice & {
+      parent: Stripe.Invoice.Parent & {
+        subscription_details: Stripe.Invoice.Parent.SubscriptionDetails & {
+          metadata: {
+            billing_migration_id?: string
+          }
+        }
+      }
+    }
+  }
+}
+
 export interface CustomerCreatedWebhookEvent extends Stripe.EventBase {
   type: 'customer.created'
   data: {
@@ -132,6 +147,7 @@ export type WebhookEvent =
   | CustomerSubscriptionWebhookEvent
   | InvoicePaidWebhookEvent
   | InvoiceVoidedWebhookEvent
+  | InvoiceCreatedWebhookEvent
   | PaymentIntentPaymentFailedWebhookEvent
   | SetupIntentSetupFailedWebhookEvent
   | InvoiceOverdueWebhookEvent
