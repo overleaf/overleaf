@@ -92,7 +92,6 @@ const httpPermissionsPolicy = {
     'idle-detection',
     'local-fonts',
     'magnetometer',
-    'microphone',
     'midi',
     'otp-credentials',
     'payment',
@@ -107,6 +106,7 @@ const httpPermissionsPolicy = {
   allowed: {
     autoplay: 'self "https://videos.ctfassets.net"',
     fullscreen: 'self',
+    'on-device-speech-recognition': 'self',
   },
 }
 

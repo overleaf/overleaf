@@ -2194,6 +2194,8 @@
   "sort_by_x": "Sort by __x__",
   "sort_projects": "Sort projects",
   "source": "Source",
+  "speak": "Speak",
+  "speech_input_not_available": "Speech input is not yet available in this browser",
   "spell_check": "Spell check",
   "spellcheck": "Spellcheck",
   "spellcheck_language": "Spellcheck language",

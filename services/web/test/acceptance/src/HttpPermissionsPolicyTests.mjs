@@ -9,7 +9,7 @@ describe('HttpPermissionsPolicy', function () {
     const response = await fetch(BASE_URL)
 
     expect(response.headers.get('permissions-policy')).to.equal(
-      'accelerometer=(), attribution-reporting=(), browsing-topics=(), camera=(), display-capture=(), encrypted-media=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), screen-wake-lock=(), serial=(), storage-access=(), usb=(), window-management=(), xr-spatial-tracking=(), autoplay=(self "https://videos.ctfassets.net"), fullscreen=(self)'
+      'accelerometer=(), attribution-reporting=(), browsing-topics=(), camera=(), display-capture=(), encrypted-media=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), local-fonts=(), magnetometer=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), screen-wake-lock=(), serial=(), storage-access=(), usb=(), window-management=(), xr-spatial-tracking=(), autoplay=(self "https://videos.ctfassets.net"), fullscreen=(self), on-device-speech-recognition=(self)'
     )
   })
 
