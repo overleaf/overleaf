@@ -1,3 +1,64 @@
+@mixin light-notification {
+  --notification-bg-info: var(--bg-info-03);
+  --notification-bg-success: var(--bg-accent-03);
+  --notification-bg-warning: var(--bg-warning-03);
+  --notification-bg-error: var(--bg-danger-03);
+  --notification-bg-offer: var(--bg-light-primary);
+  --notification-border-info: var(--blue-20);
+  --notification-border-success: var(--green-20);
+  --notification-border-warning: var(--yellow-20);
+  --notification-border-error: var(--red-20);
+  --notification-border-offer: var(--neutral-20);
+  --notification-icon-info: var(--blue-50);
+  --notification-icon-success: var(--green-50);
+  --notification-icon-warning: var(--yellow-40);
+  --notification-icon-error: var(--red-50);
+  --notification-icon-offer: var(--neutral-50);
+  --notification-content-primary: var(--content-primary);
+  --notification-content-secondary: var(--content-secondary);
+  --notification-bg-primary: var(--neutral-90);
+  --notification-reconfirmation-bg: var(--bg-light-secondary);
+  --notification-disclaimer-color: var(--neutral-60);
+  --notification-close-btn-bg: rgb(27 34 44 / 8%);
+}
+
+@mixin dark-notification {
+  --notification-bg-info: var(--blue-70);
+  --notification-bg-success: var(--green-70);
+  --notification-bg-warning: var(--yellow-70);
+  --notification-bg-error: var(--red-70);
+  --notification-bg-offer: var(--neutral-70);
+  --notification-border-info: var(--blue-60);
+  --notification-border-success: var(--green-60);
+  --notification-border-warning: var(--yellow-60);
+  --notification-border-error: var(--red-60);
+  --notification-border-offer: var(--neutral-60);
+  --notification-icon-info: var(--blue-30);
+  --notification-icon-success: var(--green-30);
+  --notification-icon-warning: var(--yellow-20);
+  --notification-icon-error: var(--red-20);
+  --notification-icon-offer: var(--neutral-20);
+  --notification-content-primary: var(--content-primary-dark);
+  --notification-content-secondary: var(--content-secondary-dark);
+  --notification-bg-primary: var(--neutral-10);
+  --notification-reconfirmation-bg: var(--bg-dark-secondary);
+  --notification-disclaimer-color: var(--neutral-40);
+  --notification-close-btn-bg: rgb(255 255 255 / 8%);
+}
+
+:root {
+  @include light-notification;
+
+  @include theme('default') {
+    .project-ds-nav-page {
+      .notification {
+        @include dark-notification;
+        @include dark-bg;
+      }
+    }
+  }
+}
+
 .notification-body {
   // will be deprecated once notifications moved to use .notification (see below)
   flex-grow: 1;
@@ -40,8 +101,8 @@
 
     &:hover,
     &:focus {
-      background-color: rgba($neutral-90, 0.08);
-      color: var(--content-secondary);
+      background-color: var(--notification-close-btn-bg);
+      color: var(--notification-content-secondary);
     }
   }
 
@@ -52,7 +113,7 @@
 
 .notification {
   border-radius: $border-radius-base;
-  color: var(--content-primary);
+  color: var(--notification-content-primary);
   display: flex;
   padding: 0 $spacing-06; // vertical padding added by elements within notification
   width: 100%;
@@ -107,7 +168,7 @@
   }
 
   .notification-disclaimer {
-    color: var(--neutral-60);
+    color: var(--notification-disclaimer-color);
     font-size: $font-size-sm;
     padding-bottom: $spacing-06;
   }
@@ -127,58 +188,58 @@
       cursor: pointer;
       background: transparent;
       border: 0;
-      color: var(--content-primary);
+      color: var(--notification-content-primary);
 
       &:hover,
       &:focus {
-        background-color: rgba($neutral-90, 0.08);
-        color: var(--content-secondary);
+        background-color: var(--notification-close-btn-bg);
+        color: var(--notification-content-secondary);
       }
     }
   }
 
   &.notification-type-info {
-    background-color: var(--bg-info-03);
-    border: 1px solid var(--blue-20);
+    background-color: var(--notification-bg-info);
+    border: 1px solid var(--notification-border-info);
 
     .notification-icon {
-      color: var(--blue-50);
+      color: var(--notification-icon-info);
     }
   }
 
   &.notification-type-success {
-    background-color: var(--bg-accent-03);
-    border: 1px solid var(--green-20);
+    background-color: var(--notification-bg-success);
+    border: 1px solid var(--notification-border-success);
 
     .notification-icon {
-      color: var(--green-50);
+      color: var(--notification-icon-success);
     }
   }
 
   &.notification-type-warning {
-    background-color: var(--bg-warning-03);
-    border: 1px solid var(--yellow-20);
+    background-color: var(--notification-bg-warning);
+    border: 1px solid var(--notification-border-warning);
 
     .notification-icon {
-      color: var(--yellow-40);
+      color: var(--notification-icon-warning);
     }
   }
 
   &.notification-type-error {
-    background-color: var(--bg-danger-03);
-    border: 1px solid var(--red-20);
+    background-color: var(--notification-bg-error);
+    border: 1px solid var(--notification-border-error);
 
     .notification-icon {
-      color: var(--red-50);
+      color: var(--notification-icon-error);
     }
   }
 
   &.notification-type-offer {
-    background-color: var(--bg-light-primary);
-    border: 1px solid var(--neutral-20);
+    background-color: var(--notification-bg-offer);
+    border: 1px solid var(--notification-border-offer);
 
     .notification-icon {
-      color: var(--neutral-50);
+      color: var(--notification-icon-offer);
     }
   }
 
@@ -253,11 +314,11 @@
 
       :not(.alert) {
         .reconfirm-notification {
-          background-color: var(--neutral-10);
+          background-color: var(--notification-reconfirmation-bg);
           border-radius: $border-radius-base;
 
           .fa-warning {
-            color: var(--yellow-40);
+            color: var(--notification-icon-warning);
           }
         }
       }
