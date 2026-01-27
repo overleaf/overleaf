@@ -287,13 +287,14 @@ export default WebsocketController = {
             projectId,
             docId,
             fromVersion,
-            function (error, { lines, version, ranges, ops, ttlInS, type }) {
+            function (error, result) {
               if (error) {
                 if (error instanceof ClientRequestedMissingOpsError) {
                   emitJoinDocCatchUpMetrics('missing', error.info)
                 }
                 return callback(error)
               }
+              const { lines, version, ranges, ops, ttlInS, type } = result
               emitJoinDocCatchUpMetrics('success', { version, ttlInS })
               if (client.disconnected) {
                 metrics.inc('editor.join-doc.disconnected', 1, {

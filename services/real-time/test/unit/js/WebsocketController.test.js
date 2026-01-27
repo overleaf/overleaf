@@ -728,6 +728,28 @@ describe('WebsocketController', function () {
       })
     })
 
+    describe('when the DocumentUpdaterManager returns an error', function () {
+      beforeEach(function (ctx) {
+        ctx.err = new Error('document updater error')
+        ctx.DocumentUpdaterManager.getDocument = sinon
+          .stub()
+          .callsArgWith(3, ctx.err)
+        ctx.WebsocketController.joinDoc(
+          ctx.client,
+          ctx.doc_id,
+          -1,
+          ctx.options,
+          ctx.callback
+        )
+      })
+
+      it('should call the callback with the error', function (ctx) {
+        ctx.callback
+          .calledWith(sinon.match({ message: 'document updater error' }))
+          .should.equal(true)
+      })
+    })
+
     describe('with a restricted client', function () {
       beforeEach(function (ctx) {
         ctx.ranges.comments = [{ op: { a: 1 } }, { op: { a: 2 } }]
