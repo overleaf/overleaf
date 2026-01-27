@@ -550,7 +550,12 @@ describe('WebsocketController', function () {
         .callsArgWith(2, null)
       ctx.DocumentUpdaterManager.getDocument = sinon
         .stub()
-        .callsArgWith(3, null, ctx.doc_lines, ctx.version, ctx.ranges, ctx.ops)
+        .callsArgWith(3, null, {
+          lines: ctx.doc_lines,
+          version: ctx.version,
+          ranges: ctx.ranges,
+          ops: ctx.ops,
+        })
       ctx.RoomManager.joinDoc = sinon.stub().callsArg(2)
     })
 
@@ -937,7 +942,12 @@ describe('WebsocketController', function () {
           callback
         ) => {
           ctx.client.disconnected = true
-          callback(null, ctx.doc_lines, ctx.version, ctx.ranges, ctx.ops)
+          return callback(null, {
+            lines: ctx.doc_lines,
+            version: ctx.version,
+            ranges: ctx.ranges,
+            ops: ctx.ops,
+          })
         }
 
         ctx.WebsocketController.joinDoc(

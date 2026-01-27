@@ -18,6 +18,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@overleaf/fetch-utils": "*",
     "@overleaf/logger": "*",
     "@overleaf/metrics": "*",
     "@overleaf/o-error": "*",
@@ -40,7 +41,6 @@
     "zod-validation-error": "^4.0.1"
   },
   "devDependencies": {
-    "@overleaf/fetch-utils": "*",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "cookie-signature": "^1.1.0",

@@ -287,7 +287,7 @@ export default WebsocketController = {
             projectId,
             docId,
             fromVersion,
-            function (error, lines, version, ranges, ops, ttlInS, type) {
+            function (error, { lines, version, ranges, ops, ttlInS, type }) {
               if (error) {
                 if (error instanceof ClientRequestedMissingOpsError) {
                   emitJoinDocCatchUpMetrics('missing', error.info)

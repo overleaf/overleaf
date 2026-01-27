@@ -6,7 +6,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import sinon from 'sinon'
-import { vi, describe, beforeEach, it, afterEach } from 'vitest'
+import { expect, vi, describe, beforeEach, it, afterEach } from 'vitest'
 import _ from 'lodash'
 const modulePath = '../../../app/js/DocumentUpdaterManager'
 
@@ -31,13 +31,26 @@ describe('DocumentUpdaterManager', function () {
       pendingUpdateListShardCount: 10,
     }
     ctx.rclient = { auth() {} }
+    ctx.fetchJson = sinon.stub()
+    ctx.fetchNothing = sinon.stub()
+    ctx.RequestFailedError = class RequestFailedError extends Error {
+      constructor(message, url, options, response, body) {
+        super(message)
+        this.url = url
+        this.options = options
+        this.response = response
+        this.body = body
+      }
+    }
 
     vi.doMock('@overleaf/settings', () => ({
       default: ctx.settings,
     }))
 
-    vi.doMock('request', () => ({
-      default: (ctx.request = {}),
+    vi.doMock('@overleaf/fetch-utils', () => ({
+      fetchJson: ctx.fetchJson,
+      fetchNothing: ctx.fetchNothing,
+      RequestFailedError: ctx.RequestFailedError,
     }))
 
     vi.doMock('@overleaf/redis-wrapper', () => ({
@@ -59,88 +72,75 @@ describe('DocumentUpdaterManager', function () {
   }) // avoid modifying JSON object directly
 
   describe('getDocument', function () {
-    beforeEach(function (ctx) {
-      ctx.callback = sinon.stub()
-    })
-
     describe('successfully', function () {
-      beforeEach(function (ctx) {
-        ctx.body = JSON.stringify({
+      beforeEach(async function (ctx) {
+        ctx.body = {
           lines: ctx.lines,
           version: ctx.version,
           ops: (ctx.ops = ['mock-op-1', 'mock-op-2']),
           ranges: (ctx.ranges = { mock: 'ranges' }),
-        })
+        }
         ctx.fromVersion = 2
-        ctx.request.get = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 200 }, ctx.body)
-        ctx.DocumentUpdaterManager.getDocument(
+        ctx.fetchJson.resolves(ctx.body)
+        ctx.result = await ctx.DocumentUpdaterManager.promises.getDocument(
           ctx.project_id,
           ctx.doc_id,
-          ctx.fromVersion,
-          ctx.callback
+          ctx.fromVersion
         )
       })
 
       it('should get the document from the document updater', function (ctx) {
         const url = `${ctx.settings.apis.documentupdater.url}/project/${ctx.project_id}/doc/${ctx.doc_id}?fromVersion=${ctx.fromVersion}&historyOTSupport=true`
-        ctx.request.get.calledWith(url).should.equal(true)
+        ctx.fetchJson.calledWith(url).should.equal(true)
       })
 
-      it('should call the callback with the lines, version, ranges and ops', function (ctx) {
-        ctx.callback
-          .calledWith(null, ctx.lines, ctx.version, ctx.ranges, ctx.ops)
-          .should.equal(true)
+      it('should return the lines, version, ranges and ops', function (ctx) {
+        ctx.result.lines.should.deep.equal(ctx.lines)
+        ctx.result.version.should.equal(ctx.version)
+        ctx.result.ranges.should.deep.equal(ctx.ranges)
+        ctx.result.ops.should.deep.equal(ctx.ops)
       })
     })
 
     describe('when the document updater API returns an error', function () {
       beforeEach(function (ctx) {
-        ctx.request.get = sinon
-          .stub()
-          .callsArgWith(
-            1,
-            (ctx.error = new Error('something went wrong')),
-            null,
-            null
-          )
-        ctx.DocumentUpdaterManager.getDocument(
-          ctx.project_id,
-          ctx.doc_id,
-          ctx.fromVersion,
-          ctx.callback
-        )
+        ctx.error = new Error('something went wrong')
+        ctx.fetchJson.rejects(ctx.error)
       })
 
-      it('should return an error to the callback', function (ctx) {
-        ctx.callback.calledWith(ctx.error).should.equal(true)
+      it('should throw an error', async function (ctx) {
+        await expect(
+          ctx.DocumentUpdaterManager.promises.getDocument(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.fromVersion
+          )
+        ).to.be.rejectedWith(ctx.error)
       })
     })
     ;[404, 422].forEach(statusCode =>
       describe(`when the document updater returns a ${statusCode} status code`, function () {
         beforeEach(function (ctx) {
-          ctx.request.get = sinon
-            .stub()
-            .callsArgWith(1, null, { statusCode }, '')
-          ctx.DocumentUpdaterManager.getDocument(
-            ctx.project_id,
-            ctx.doc_id,
-            ctx.fromVersion,
-            ctx.callback
+          const error = new ctx.RequestFailedError(
+            'error',
+            'url',
+            {},
+            { status: statusCode },
+            null
           )
+          ctx.fetchJson.rejects(error)
         })
 
-        it('should return the callback with an error', function (ctx) {
-          ctx.callback.called.should.equal(true)
-          ctx.callback
-            .calledWith(
-              sinon.match({
-                message: 'doc updater could not load requested ops',
-                info: { statusCode },
-              })
+        it('should throw an error with the status code', async function (ctx) {
+          const error = await expect(
+            ctx.DocumentUpdaterManager.promises.getDocument(
+              ctx.project_id,
+              ctx.doc_id,
+              ctx.fromVersion
             )
-            .should.equal(true)
+          ).to.be.rejected
+          error.message.should.equal('doc updater could not load requested ops')
+          error.info.statusCode.should.equal(statusCode)
           ctx.logger.error.called.should.equal(false)
           ctx.logger.warn.called.should.equal(false)
         })
@@ -149,106 +149,89 @@ describe('DocumentUpdaterManager', function () {
 
     describe('when the document updater returns a failure error code', function () {
       beforeEach(function (ctx) {
-        ctx.request.get = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 }, '')
-        ctx.DocumentUpdaterManager.getDocument(
-          ctx.project_id,
-          ctx.doc_id,
-          ctx.fromVersion,
-          ctx.callback
+        const error = new ctx.RequestFailedError(
+          'error',
+          'url',
+          {},
+          { status: 500 },
+          null
         )
+        ctx.fetchJson.rejects(error)
       })
 
-      it('should return the callback with an error', function (ctx) {
-        ctx.callback.called.should.equal(true)
-        ctx.callback
-          .calledWith(
-            sinon.match({
-              message: 'doc updater returned a non-success status code',
-              info: {
-                action: 'getDocument',
-                statusCode: 500,
-              },
-            })
+      it('should throw an error', async function (ctx) {
+        const error = await expect(
+          ctx.DocumentUpdaterManager.promises.getDocument(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.fromVersion
           )
-          .should.equal(true)
+        ).to.be.rejected
+        error.message.should.equal(
+          'doc updater returned a non-success status code'
+        )
+        error.info.action.should.equal('getDocument')
+        error.info.statusCode.should.equal(500)
         ctx.logger.error.called.should.equal(false)
       })
     })
   })
 
   describe('flushProjectToMongoAndDelete', function () {
-    beforeEach(function (ctx) {
-      ctx.callback = sinon.stub()
-    })
-
     describe('successfully', function () {
-      beforeEach(function (ctx) {
-        ctx.request.del = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 204 }, '')
-        ctx.DocumentUpdaterManager.flushProjectToMongoAndDelete(
-          ctx.project_id,
-          ctx.callback
+      beforeEach(async function (ctx) {
+        ctx.fetchNothing.resolves()
+        await ctx.DocumentUpdaterManager.promises.flushProjectToMongoAndDelete(
+          ctx.project_id
         )
       })
 
       it('should delete the project from the document updater', function (ctx) {
         const url = `${ctx.settings.apis.documentupdater.url}/project/${ctx.project_id}?background=true`
-        ctx.request.del.calledWith(url).should.equal(true)
-      })
-
-      it('should call the callback with no error', function (ctx) {
-        ctx.callback.calledWith(null).should.equal(true)
+        ctx.fetchNothing
+          .calledWith(url, { method: 'DELETE' })
+          .should.equal(true)
       })
     })
 
     describe('when the document updater API returns an error', function () {
       beforeEach(function (ctx) {
-        ctx.request.del = sinon
-          .stub()
-          .callsArgWith(
-            1,
-            (ctx.error = new Error('something went wrong')),
-            null,
-            null
-          )
-        ctx.DocumentUpdaterManager.flushProjectToMongoAndDelete(
-          ctx.project_id,
-          ctx.callback
-        )
+        ctx.error = new Error('something went wrong')
+        ctx.fetchNothing.rejects(ctx.error)
       })
 
-      it('should return an error to the callback', function (ctx) {
-        ctx.callback.calledWith(ctx.error).should.equal(true)
+      it('should throw an error', async function (ctx) {
+        await expect(
+          ctx.DocumentUpdaterManager.promises.flushProjectToMongoAndDelete(
+            ctx.project_id
+          )
+        ).to.be.rejectedWith(ctx.error)
       })
     })
 
     describe('when the document updater returns a failure error code', function () {
       beforeEach(function (ctx) {
-        ctx.request.del = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 }, '')
-        ctx.DocumentUpdaterManager.flushProjectToMongoAndDelete(
-          ctx.project_id,
-          ctx.callback
+        const error = new ctx.RequestFailedError(
+          'error',
+          'url',
+          {},
+          { status: 500 },
+          null
         )
+        ctx.fetchNothing.rejects(error)
       })
 
-      it('should return the callback with an error', function (ctx) {
-        ctx.callback.called.should.equal(true)
-        ctx.callback
-          .calledWith(
-            sinon.match({
-              message: 'doc updater returned a non-success status code',
-              info: {
-                action: 'flushProjectToMongoAndDelete',
-                statusCode: 500,
-              },
-            })
+      it('should throw an error', async function (ctx) {
+        const error = await expect(
+          ctx.DocumentUpdaterManager.promises.flushProjectToMongoAndDelete(
+            ctx.project_id
           )
-          .should.equal(true)
+        ).to.be.rejected
+        error.message.should.equal(
+          'doc updater returned a non-success status code'
+        )
+        error.info.action.should.equal('flushProjectToMongoAndDelete')
+        error.info.statusCode.should.equal(500)
       })
     })
   })
@@ -260,22 +243,15 @@ describe('DocumentUpdaterManager', function () {
         op: [{ d: 'test', p: 345 }],
         v: 789,
       }
-      ctx.rclient.rpush = sinon.stub().yields()
-      ctx.callback = sinon.stub()
+      ctx.rclient.rpush = sinon.stub().resolves()
     })
 
     describe('successfully', function () {
-      beforeEach(function (ctx) {
-        ctx.pendingUpdateListKey = `pending-updates-list-key-${Math.random()}`
-
-        ctx.DocumentUpdaterManager._getPendingUpdateListKey = sinon
-          .stub()
-          .returns(ctx.pendingUpdateListKey)
-        ctx.DocumentUpdaterManager.queueChange(
+      beforeEach(async function (ctx) {
+        await ctx.DocumentUpdaterManager.promises.queueChange(
           ctx.project_id,
           ctx.doc_id,
-          ctx.change,
-          ctx.callback
+          ctx.change
         )
       })
 
@@ -289,12 +265,12 @@ describe('DocumentUpdaterManager', function () {
       })
 
       it('should notify the doc updater of the change via the pending-updates-list queue', function (ctx) {
-        ctx.rclient.rpush
-          .calledWith(
-            ctx.pendingUpdateListKey,
-            `${ctx.project_id}:${ctx.doc_id}`
-          )
-          .should.equal(true)
+        // The second call should be to a pending-updates-list key (either base or sharded)
+        const secondCall = ctx.rclient.rpush.secondCall
+        secondCall.should.exist
+        const queueKey = secondCall.args[0]
+        queueKey.should.match(/^pending-updates-list(-\d+)?$/)
+        secondCall.args[1].should.equal(`${ctx.project_id}:${ctx.doc_id}`)
       })
     })
 
@@ -302,17 +278,17 @@ describe('DocumentUpdaterManager', function () {
       beforeEach(function (ctx) {
         ctx.rclient.rpush = sinon
           .stub()
-          .yields(new Error('something went wrong'))
-        ctx.DocumentUpdaterManager.queueChange(
-          ctx.project_id,
-          ctx.doc_id,
-          ctx.change,
-          ctx.callback
-        )
+          .rejects(new Error('something went wrong'))
       })
 
-      it('should return an error', function (ctx) {
-        ctx.callback.calledWithExactly(sinon.match(Error)).should.equal(true)
+      it('should throw an error', async function (ctx) {
+        await expect(
+          ctx.DocumentUpdaterManager.promises.queueChange(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.change
+          )
+        ).to.be.rejected
       })
     })
 
@@ -321,23 +297,30 @@ describe('DocumentUpdaterManager', function () {
         ctx.stringifyStub = sinon
           .stub(JSON, 'stringify')
           .callsFake(() => '["bad bytes! \u0000 <- here"]')
-        ctx.DocumentUpdaterManager.queueChange(
-          ctx.project_id,
-          ctx.doc_id,
-          ctx.change,
-          ctx.callback
-        )
       })
 
       afterEach(function (ctx) {
         ctx.stringifyStub.restore()
       })
 
-      it('should return an error', function (ctx) {
-        ctx.callback.calledWithExactly(sinon.match(Error)).should.equal(true)
+      it('should throw an error', async function (ctx) {
+        await expect(
+          ctx.DocumentUpdaterManager.promises.queueChange(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.change
+          )
+        ).to.be.rejected
       })
 
-      it('should not push the change onto the pending-updates-list queue', function (ctx) {
+      it('should not push the change onto the pending-updates-list queue', async function (ctx) {
+        await expect(
+          ctx.DocumentUpdaterManager.promises.queueChange(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.change
+          )
+        ).to.be.rejected
         ctx.rclient.rpush.called.should.equal(false)
       })
     })
@@ -347,38 +330,51 @@ describe('DocumentUpdaterManager', function () {
         ctx.change = {
           op: { p: 12, t: 'update is too large'.repeat(1024 * 400) },
         }
-        ctx.DocumentUpdaterManager.queueChange(
-          ctx.project_id,
-          ctx.doc_id,
-          ctx.change,
-          ctx.callback
-        )
       })
 
-      it('should return an error', function (ctx) {
-        ctx.callback.calledWithExactly(sinon.match(Error)).should.equal(true)
+      it('should throw an error', async function (ctx) {
+        await expect(
+          ctx.DocumentUpdaterManager.promises.queueChange(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.change
+          )
+        ).to.be.rejected
       })
 
-      it('should add the size to the error', function (ctx) {
-        ctx.callback.args[0][0].info.updateSize.should.equal(7782422)
+      it('should add the size to the error', async function (ctx) {
+        const error = await expect(
+          ctx.DocumentUpdaterManager.promises.queueChange(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.change
+          )
+        ).to.be.rejected
+        error.info.updateSize.should.equal(7782422)
       })
 
-      it('should not push the change onto the pending-updates-list queue', function (ctx) {
+      it('should not push the change onto the pending-updates-list queue', async function (ctx) {
+        await expect(
+          ctx.DocumentUpdaterManager.promises.queueChange(
+            ctx.project_id,
+            ctx.doc_id,
+            ctx.change
+          )
+        ).to.be.rejected
         ctx.rclient.rpush.called.should.equal(false)
       })
     })
 
     describe('with invalid keys', function () {
-      beforeEach(function (ctx) {
+      beforeEach(async function (ctx) {
         ctx.change = {
           op: [{ d: 'test', p: 345 }],
           version: 789, // not a valid key
         }
-        ctx.DocumentUpdaterManager.queueChange(
+        await ctx.DocumentUpdaterManager.promises.queueChange(
           ctx.project_id,
           ctx.doc_id,
-          ctx.change,
-          ctx.callback
+          ctx.change
         )
       })
 
