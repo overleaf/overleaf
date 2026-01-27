@@ -730,10 +730,7 @@ function _isImageNameAllowed(imageName) {
 function _emitMetrics(request, status, stats, timings) {
   if (request.metricsOpts.path === 'clsi-perf') {
     ClsiMetrics.e2eCompileDurationClsiPerfSeconds.set(
-      {
-        compile: request.metricsOpts.compile,
-        variant: request.metricsOpts.method,
-      },
+      { variant: request.metricsOpts.method },
       timings.compileE2E / 1000
     )
   }
