@@ -1,5 +1,8 @@
 extends ../layout-react
 
+block vars
+	- isWebsiteRedesign = true
+
 block entrypointVar
 	- entrypoint = 'pages/user/subscription/group-management/subtotal-limit-exceeded'
 
@@ -8,4 +11,4 @@ block append meta
 	meta(name='ol-groupName' data-type='string' content=groupName)
 
 block content
-	main#subtotal-limit-exceeded-root.content.content-alt
+	main#subtotal-limit-exceeded-root.content

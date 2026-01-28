@@ -1,5 +1,8 @@
 extends ../../layout-react
 
+block vars
+	- isWebsiteRedesign = true
+
 block entrypointVar
 	- entrypoint = 'pages/user/subscription/invite'
 
@@ -22,4 +25,4 @@ block append meta
 	meta(name='ol-user' data-type='json' content=user)
 
 block content
-	main#invite-root.content.content-alt
+	main#invite-root.content

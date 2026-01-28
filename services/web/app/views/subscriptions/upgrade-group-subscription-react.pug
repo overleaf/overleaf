@@ -1,5 +1,8 @@
 extends ../layout-react
 
+block vars
+	- isWebsiteRedesign = true
+
 block entrypointVar
 	- entrypoint = 'pages/user/subscription/group-management/upgrade-group-subscription'
 
@@ -19,4 +22,4 @@ block append meta
 	)
 
 block content
-	main#upgrade-group-subscription-root.content.content-alt
+	main#upgrade-group-subscription-root.content

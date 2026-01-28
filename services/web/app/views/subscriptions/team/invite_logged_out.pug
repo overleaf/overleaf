@@ -1,31 +1,32 @@
 extends ../../layout-marketing
 
+block vars
+	- isWebsiteRedesign = true
+
 block append meta
 	meta(name='ol-user' data-type='json' content=user)
 
 block content
-	main#main-content.content.content-alt.team-invite
+	main#main-content.content.team-invite
 		.container
 			.row
-				.col-lg-8.m-auto
-					.card.text-center
-						.card-body
-							.page-header
-								h1.text-center !{translate("invited_to_group", {inviterName: inviterName, appName: appName }, [{name: 'span', attrs: {class: 'team-invite-name'}}])}
+				.col-lg-8.m-auto.text-center
+					.page-header
+						h1 !{translate("invited_to_group", {inviterName: inviterName, appName: appName }, [{name: 'span', attrs: {class: 'team-invite-name'}}])}
 
-							if accountExists
-								div
-									p #{translate("invited_to_group_login_benefits", {appName: appName})}
-									p #{translate("invited_to_group_login", {emailAddress: emailAddress})}
-									p
-										a.btn.btn-primary(
-											href=`/login?redir=/subscription/invites/${inviteToken}${groupSSOActive ? "&hide_sso_login=true" : ""}`
-										) #{translate("login_to_accept_invitation")}
-							else
-								div
-									p #{translate("invited_to_group_register_benefits", {appName: appName})}
-									p #{translate("invited_to_group_register", {inviterName: inviterName})}
-									p
-										a.btn.btn-primary(
-											href=`/register?redir=/subscription/invites/${inviteToken}${groupSSOActive ? "&hide_sso_login=true" : ""}`
-										) #{translate("register_to_accept_invitation")}
+					if accountExists
+						div
+							p #{translate("invited_to_group_login_benefits", {appName: appName})}
+							p #{translate("invited_to_group_login", {emailAddress: emailAddress})}
+							p
+								a.btn.btn-primary(
+									href=`/login?redir=/subscription/invites/${inviteToken}${groupSSOActive ? "&hide_sso_login=true" : ""}`
+								) #{translate("login_to_accept_invitation")}
+					else
+						div
+							p #{translate("invited_to_group_register_benefits", {appName: appName})}
+							p #{translate("invited_to_group_register", {inviterName: inviterName})}
+							p
+								a.btn.btn-primary(
+									href=`/register?redir=/subscription/invites/${inviteToken}${groupSSOActive ? "&hide_sso_login=true" : ""}`
+								) #{translate("register_to_accept_invitation")}
