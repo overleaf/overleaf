@@ -246,6 +246,7 @@
   "beta_program_opt_in_action": "Opt-in to beta program",
   "beta_program_opt_out_action": "Opt-out of beta program",
   "bibliographies": "Bibliographies",
+  "bibtex_duplicates_warning": "This file contains duplicate citation keys: __keys__. Only the first occurrence of each duplicate key is shown.",
   "billed_annually_at": "Billed annually at <0>__price__</0> <1>(includes plan and any add-ons)</1>",
   "billed_monthly_at": "Billed monthly at <0>__price__</0> <1>(includes plan and any add-ons)</1>",
   "billed_yearly": "billed yearly",
