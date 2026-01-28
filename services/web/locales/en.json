@@ -2014,6 +2014,7 @@
   "saml_login_failure": "Sorry, there was a problem logging you in.  Please contact your administrator for more information.",
   "saml_login_identity_mismatch_error": "Sorry, you are trying to log in to Overleaf as __email__ but the identity returned by your identity provider is not the correct one for this Overleaf account.",
   "saml_login_identity_not_found_error": "Sorry, we were not able to find an Overleaf account set up for single sign-on with this identity provider.",
+  "saml_login_requested_email_not_confirmed_error": "Sorry, the email address you requested to use for login has not been confirmed and we cannot complete your SSO log in request. If you have another method to log in please log in and then confirm your email. Please <0>contact us</0> if you need assistance.",
   "saml_metadata": "Overleaf SAML Metadata",
   "saml_missing_signature_error": "Sorry, the information received from your identity provider is not signed (both response and assertion signatures are required).  Please contact your administrator for more information.",
   "saml_missing_user_attribute": "There was a problem with your Single Sign-on authentication. Your organization did not provide the required information to complete authentication. Please contact your administrator for more information.",

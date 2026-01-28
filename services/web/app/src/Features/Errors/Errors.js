@@ -136,6 +136,12 @@ class SAMLGroupSSOLoginIdentityMismatchError extends SAMLAuthenticationError {
   }
 }
 
+class SAMLGroupSSOLoginRequestedEmailNotConfirmed extends SAMLAuthenticationError {
+  get i18nKey() {
+    return 'saml_login_requested_email_not_confirmed_error'
+  }
+}
+
 class SAMLGroupSSOLoginIdentityNotFoundError extends SAMLAuthenticationError {
   get i18nKey() {
     return 'saml_login_identity_not_found_error'
@@ -391,6 +397,7 @@ module.exports = {
   SAMLGroupSSOLoginIdentityMismatchError,
   SAMLGroupSSOLoginIdentityNotFoundError,
   SAMLGroupSSODisabledError,
+  SAMLGroupSSOLoginRequestedEmailNotConfirmed,
   SAMLInvalidUserAttributeError,
   SAMLInvalidUserIdentifierError,
   SAMLInvalidSignatureError,
