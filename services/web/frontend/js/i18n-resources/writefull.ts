@@ -415,6 +415,11 @@ const en = {
     'citations-reviewer.chat.fetching-citations':
       'Reviewing your document to see if any passage of text might need a citation',
     'citations-reviewer.chat.fetching-publications': 'Fetching publications...',
+    'citations-reviewer.chat.initial-state.title': 'Citation reviewer',
+    'citations-reviewer.chat.initial-state.description':
+      'The citation reviewer scans your document for statements that may need citations. Click "Find citations" to start the review.',
+    'citations-reviewer.chat.initial-state.done': 'Done',
+    'citations-reviewer.chat.initial-state.run': 'Find citations',
     'citations-reviewer.chat.no-citations.title': 'Well done!',
     'citations-reviewer.chat.no-citations.description':
       "We didn't identify any passages that need additional citation.",
@@ -905,6 +910,11 @@ const es = {
       'Revisando tu documento para ver si algún pasaje podría necesitar una cita',
     'citations-reviewer.chat.fetching-publications':
       'Obteniendo publicaciones...',
+    'citations-reviewer.chat.initial-state.title': 'Citation reviewer',
+    'citations-reviewer.chat.initial-state.description':
+      'El revisor de citas escanea tu documento en busca de afirmaciones que puedan necesitar citas. Haz clic en "Buscar citas" para iniciar la revisión.',
+    'citations-reviewer.chat.initial-state.done': 'Hecho',
+    'citations-reviewer.chat.initial-state.run': 'Buscar citas',
     'citations-reviewer.chat.no-citations.title': 'Bien hecho!',
     'citations-reviewer.chat.no-citations.description':
       'No se identificaron pasajes que necesiten citas adicionales.',
