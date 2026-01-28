@@ -314,7 +314,8 @@ async function processMigration(input, commit) {
       mongoSubscription,
       stripeSubscription,
       recurlySubscription,
-      stripeClient
+      stripeClient,
+      stripeCustomer
     )
     return {
       status: 'migrated',
@@ -403,7 +404,8 @@ async function performCutover(
   mongoSubscription,
   stripeSubscription,
   recurlySubscription,
-  stripeClient
+  stripeClient,
+  stripeCustomer
 ) {
   const adminUserId = mongoSubscription.admin_id.toString()
 
@@ -472,6 +474,25 @@ async function performCutover(
       'analytics-mapping-failed',
       `Successfully migrated to Stripe but failed to register analytics mapping: ${err.message}`
     )
+  }
+
+  // Step 6. Remap customer metadata (if needed) in Stripe
+  if (
+    stripeCustomer.metadata != null &&
+    stripeCustomer.metadata.recurlyAccountCode != null &&
+    stripeCustomer.metadata.userId == null
+  ) {
+    try {
+      await stripeClient.updateCustomerMetadata(stripeCustomer.id, {
+        recurlyAccountCode: '',
+        userId: adminUserId,
+      })
+    } catch (err) {
+      throw new ReportError(
+        'customer-metadata-removal-failed',
+        `Successfully migrated to Stripe and registered analytics mapping but failed to remove customer metadata: ${err.message}`
+      )
+    }
   }
 }
 

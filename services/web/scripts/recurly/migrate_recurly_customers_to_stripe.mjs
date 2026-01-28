@@ -1023,6 +1023,19 @@ async function processCustomer(
     if (account.createdAt) {
       metadata.recurlyCreatedAt = account.createdAt.toISOString()
     }
+    if (
+      existingCustomer.metadata != null &&
+      existingCustomer.metadata.recurlyAccountCode === recurlyAccountCode &&
+      existingCustomer.metadata.userId == null
+    ) {
+      metadata.recurlyAccountCode = ''
+      metadata.userId = recurlyAccountCode
+    } else {
+      logWarn('Stripe customer metadata cannot be remapped', {
+        ...context,
+        existingCustomerMetadata: existingCustomer.metadata,
+      })
+    }
 
     /** @type {Stripe.CustomerUpdateParams} */
     const customerParams = {
