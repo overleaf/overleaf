@@ -417,6 +417,7 @@ describe('ProjectController', function () {
       () => ({
         default: {
           recordEventForUserInBackground: () => {},
+          setUserPropertyForUserInBackground: () => {},
         },
       })
     )

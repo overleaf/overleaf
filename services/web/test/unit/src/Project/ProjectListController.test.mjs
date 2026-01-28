@@ -10,7 +10,11 @@ const MODULE_PATH = `${import.meta.dirname}/../../../../app/src/Features/Project
 
 // Mock AnalyticsManager as it isn't used in these tests but causes the User model to be imported and redeclares queues
 vi.mock('../../../../app/src/Features/Analytics/AnalyticsManager.mjs', () => {
-  return {}
+  return {
+    default: {
+      setUserPropertyForUserInBackground: () => {},
+    },
+  }
 })
 
 describe('ProjectListController', function () {

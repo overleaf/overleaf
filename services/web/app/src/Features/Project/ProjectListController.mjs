@@ -179,6 +179,13 @@ async function projectListPage(req, res, next) {
 
   user.refProviders = _.mapValues(user.refProviders, Boolean)
 
+  let onboardingDataCollection
+  let customerIoEnabled = false
+  let subjectArea
+  let usedLatex
+  let primaryOccupation
+  let role
+
   if (isSaas) {
     await SplitTestSessionHandler.promises.sessionMaintenance(req, user)
 
@@ -227,6 +234,26 @@ async function projectListPage(req, res, next) {
     ) {
       return res.redirect('/user/emails/primary-email-check')
     }
+
+    onboardingDataCollection = await OnboardingDataCollection.findById(
+      userId,
+      'subjectArea usedLatex primaryOccupation role'
+    )
+
+    if (onboardingDataCollection) {
+      subjectArea = onboardingDataCollection.subjectArea
+      usedLatex = onboardingDataCollection.usedLatex
+      primaryOccupation = onboardingDataCollection.primaryOccupation
+      role = onboardingDataCollection.role
+    }
+
+    customerIoEnabled = true
+
+    AnalyticsManager.setUserPropertyForUserInBackground(
+      userId,
+      'customer-io-integration',
+      true
+    )
   }
 
   const tags = await TagsHandler.promises.getAllTags(userId)
@@ -273,6 +300,10 @@ async function projectListPage(req, res, next) {
       result.email = emailData.email
       return result
     })
+
+  const commonsInstitution = userAffiliations.find(
+    affiliation => affiliation.institution?.commonsAccount
+  )?.institution?.name
 
   const portalTemplates = _buildPortalTemplatesList(userAffiliations)
 
@@ -474,63 +505,8 @@ async function projectListPage(req, res, next) {
     logger.error({ err: error }, 'Failed to get individual subscription')
   }
 
-  const affiliations = userAffiliations || []
-  const commonsInstitution = affiliations.find(
-    affiliation => affiliation.institution?.commonsAccount
-  )?.institution?.name
-
-  let onboardingDataCollection
-  let subjectArea
-  let usedLatex
-  let primaryOccupation
-  let role
-
-  // customer.io: Premium nudge experiment
-  // Only do customer-io-trial-conversion assignment for users not in India/China and not in group/commons
-  let customerIoEnabled = false
   const aiBlocked = !(await _canUseAIAssist(user))
   const hasAiAssist = await _userHasAIAssist(user)
-
-  if (!userIsMemberOfGroupSubscription && !commonsInstitution && isSaas) {
-    try {
-      const excludedCountries = ['IN', 'CN']
-
-      if (!excludedCountries.includes(countryCode)) {
-        const cioAssignment =
-          await SplitTestHandler.promises.getAssignmentForUser(
-            userId,
-            'customer-io-trial-conversion'
-          )
-        if (cioAssignment.variant === 'enabled') {
-          customerIoEnabled = true
-          onboardingDataCollection = await OnboardingDataCollection.findById(
-            userId,
-            'subjectArea usedLatex primaryOccupation role'
-          )
-
-          if (onboardingDataCollection) {
-            subjectArea = onboardingDataCollection.subjectArea
-            usedLatex = onboardingDataCollection.usedLatex
-            primaryOccupation = onboardingDataCollection.primaryOccupation
-            role = onboardingDataCollection.role
-          }
-
-          AnalyticsManager.setUserPropertyForUserInBackground(
-            userId,
-            'customer-io-integration',
-            true
-          )
-        }
-      }
-    } catch (err) {
-      logger.error(
-        { err },
-        'Error checking geo location for customer-io-trial-conversion'
-      )
-      // Fallback to not enabled if geoip fails
-      customerIoEnabled = false
-    }
-  }
 
   await SplitTestHandler.promises.getAssignment(
     req,

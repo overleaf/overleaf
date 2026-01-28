@@ -807,6 +807,12 @@ const _ProjectController = {
         userIsMemberOfGroupSubscription
       )
 
+      AnalyticsManager.setUserPropertyForUserInBackground(
+        userId,
+        'customer-io-integration',
+        true
+      )
+
       const template =
         detachRole === 'detached'
           ? 'project/ide-react-detached'
@@ -844,15 +850,6 @@ const _ProjectController = {
         (!hasManuallyCollectedSubscription ||
           fullFeatureSet?.aiErrorAssistant) &&
         !assistantDisabled
-
-      const customerIoEnabled =
-        await SplitTestHandler.promises.hasUserBeenAssignedToVariant(
-          req,
-          userId,
-          'customer-io-trial-conversion',
-          'enabled',
-          true
-        )
 
       const addonPrices =
         isOverleafAssistBundleEnabled &&
@@ -971,7 +968,7 @@ const _ProjectController = {
         isSaas: Features.hasFeature('saas'),
         shouldLoadHotjar,
         isOverleafAssistBundleEnabled,
-        customerIoEnabled,
+        customerIoEnabled: true,
         addonPrices,
         compileSettings: {
           compileTimeout: ownerFeatures?.compileTimeout,
