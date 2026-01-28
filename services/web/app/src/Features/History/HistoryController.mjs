@@ -383,8 +383,16 @@ async function deleteLabel(req, res, next) {
   res.sendStatus(204)
 }
 
+const downloadZipOfVersionSchema = z.object({
+  params: z.object({
+    project_id: zz.objectId(),
+    version: z.coerce.number().int().min(0),
+  }),
+})
+
 async function downloadZipOfVersion(req, res, next) {
-  const { project_id: projectId, version } = req.params
+  const { params } = parseReq(req, downloadZipOfVersionSchema)
+  const { project_id: projectId, version } = params
   const userId = SessionManager.getLoggedInUserId(req.session)
 
   const project = await ProjectDetailsHandler.promises.getDetails(projectId)
