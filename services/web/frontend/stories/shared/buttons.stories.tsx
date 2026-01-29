@@ -23,22 +23,46 @@ const variants: ButtonProps['variant'][] = [
 export const Variants: Story = {
   render() {
     return (
-      <div className="d-flex flex-column gap-2">
-        {variants.map(variant => (
-          <div key={variant} className="d-flex gap-2">
-            <OLButton variant={variant}>Button</OLButton>
-            <OLButton variant={variant} isLoading>
-              Button
-            </OLButton>
-            <OLButton variant={variant} disabled>
-              Button
-            </OLButton>
-            <OLButton variant={variant} size="sm">
-              Button
-            </OLButton>
-          </div>
-        ))}
-      </div>
+      <>
+        <div className="d-flex flex-column gap-2 p-4">
+          {variants.map(variant => (
+            <div key={variant} className="d-flex gap-2">
+              <OLButton variant={variant}>Button</OLButton>
+              <OLButton variant={variant} isLoading>
+                Button
+              </OLButton>
+              <OLButton variant={variant} disabled>
+                Button
+              </OLButton>
+              <OLButton variant={variant} size="sm">
+                Button
+              </OLButton>
+            </div>
+          ))}
+        </div>
+        <h1> Dark Mode</h1>
+        <br />
+        <div
+          className="d-flex flex-column gap-2 p-4 ide-redesign-main"
+          data-theme="default"
+          style={{ backgroundColor: '#2f3a4c' }}
+        >
+          {variants.map(variant => (
+            <div key={variant} className="d-flex gap-2">
+              <OLButton variant={variant}>Button</OLButton>
+              <OLButton variant={variant} isLoading>
+                Button
+              </OLButton>
+              <OLButton variant={variant} disabled>
+                Button
+              </OLButton>
+              <OLButton variant={variant} size="sm">
+                Button
+              </OLButton>
+            </div>
+          ))}
+        </div>
+      </>
     )
   },
 }

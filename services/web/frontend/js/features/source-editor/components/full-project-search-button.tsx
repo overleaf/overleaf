@@ -47,7 +47,7 @@ export const FullProjectSearchButton = ({ query }: { query: SearchQuery }) => {
         overlayProps={{ placement: 'top' }}
         description={t('search_all_project_files')}
       >
-        <OLButton variant="secondary" size="sm" onClick={onClick}>
+        <OLButton variant="ghost" size="sm" onClick={onClick}>
           <MaterialIcon
             type="manage_search"
             accessibilityLabel={t('search_all_project_files')}

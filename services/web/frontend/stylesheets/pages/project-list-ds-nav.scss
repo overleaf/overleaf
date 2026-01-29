@@ -173,12 +173,6 @@ body {
           color: inherit;
         }
 
-        .notification-body {
-          .btn {
-            @include ol-button-themed('secondary');
-          }
-        }
-
         p {
           margin-bottom: var(--spacing-03);
         }
@@ -316,6 +310,11 @@ body {
         // Prevent the cookie banner being overlaid on top of the navigation
         z-index: auto;
       }
+    }
+
+    .btn-link {
+      --link-color: var(--link-web-themed);
+      --link-hover-color: var(--link-web-hover-themed);
     }
   }
 
