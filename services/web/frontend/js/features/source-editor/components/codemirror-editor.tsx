@@ -1,4 +1,4 @@
-import { ElementType, memo, useRef, useState } from 'react'
+import { ElementType, Suspense, memo, useRef, useState } from 'react'
 import useIsMounted from '../../../shared/hooks/use-is-mounted'
 import { EditorView } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
@@ -73,7 +73,11 @@ function CodeMirrorEditor() {
     <CodeMirrorStateContext.Provider value={state}>
       <CodeMirrorViewContext.Provider value={viewRef.current}>
         <CodeMirrorEditorComponents hidden={VisualEditor != null} />
-        {VisualEditor && <VisualEditor />}
+        {VisualEditor && (
+          <Suspense fallback={null}>
+            <VisualEditor />
+          </Suspense>
+        )}
       </CodeMirrorViewContext.Provider>
     </CodeMirrorStateContext.Provider>
   )
