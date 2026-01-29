@@ -4,7 +4,7 @@
 
 services:
   test_unit:
-    image: node:22.18.0
+    image: node:24.13.0
     volumes:
       - .:/overleaf/services/document-updater
       - ../../node_modules:/overleaf/node_modules
@@ -33,7 +33,7 @@ services:
         condition: service_healthy
 
   test_acceptance:
-    image: node:22.18.0
+    image: node:24.13.0
     volumes:
       - .:/overleaf/services/document-updater
       - ../../node_modules:/overleaf/node_modules

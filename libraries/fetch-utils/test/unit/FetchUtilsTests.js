@@ -22,7 +22,7 @@ const HTTP_PORT = 30001
 const HTTPS_PORT = 30002
 
 const attrs = [{ name: 'commonName', value: 'example.com' }]
-const pems = selfsigned.generate(attrs, { days: 365 })
+const pems = selfsigned.generate(attrs, { days: 365, keySize: 2048 })
 
 const PRIVATE_KEY = pems.private
 const PUBLIC_CERT = pems.cert

@@ -119,11 +119,20 @@ class TestServer {
   }
 
   stop() {
-    const stopHttp = promisify(this.server.close).bind(this.server)
-    const stopHttps = promisify(this.https_server.close).bind(this.https_server)
-    this.server.closeAllConnections()
-    this.https_server.closeAllConnections()
-    return Promise.all([stopHttp(), stopHttps()])
+    const promises = []
+    if (this.server) {
+      const stopHttp = promisify(this.server.close).bind(this.server)
+      this.server.closeAllConnections()
+      promises.push(stopHttp())
+    }
+    if (this.https_server) {
+      const stopHttps = promisify(this.https_server.close).bind(
+        this.https_server
+      )
+      this.https_server.closeAllConnections()
+      promises.push(stopHttps())
+    }
+    return Promise.all(promises)
   }
 }
 

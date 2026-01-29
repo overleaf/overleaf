@@ -3,7 +3,7 @@ notifications
 --env-add=
 --env-pass-through=
 --esmock-loader=False
---node-version=22.18.0
+--node-version=24.13.0
 --pipeline-owner=🚉 Platform
 --public-repo=True
 --test-acceptance-vitest=True

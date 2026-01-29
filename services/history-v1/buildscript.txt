@@ -3,7 +3,7 @@ history-v1
 --env-add=
 --env-pass-through=
 --esmock-loader=False
---node-version=22.18.0
+--node-version=24.13.0
 --pipeline-owner=🥑 Core
 --public-repo=False
 --tsconfig-extra-includes=backup-deletion-app.mjs,backup-verifier-app.mjs,backup-worker-app.mjs,api/**/*,migrations/**/*,storage/**/*

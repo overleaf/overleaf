@@ -4,7 +4,7 @@ volumes:
 services:
 
   test_unit:
-    image: node:22.18.0
+    image: node:24.13.0
     volumes:
       - .:/overleaf/services/web
       - ../../node_modules:/overleaf/node_modules
@@ -32,7 +32,7 @@ services:
       - redis_test
 
   test_acceptance:
-    image: node:22.18.0
+    image: node:24.13.0
     volumes:
       - .:/overleaf/services/web
       - ../../node_modules:/overleaf/node_modules

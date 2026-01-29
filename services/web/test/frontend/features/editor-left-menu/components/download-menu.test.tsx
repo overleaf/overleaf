@@ -27,6 +27,7 @@ describe('<DownloadMenu />', function () {
 
     renderWithEditorContext(<DownloadMenu />, {
       projectId: '123abc',
+      mockCompileOnLoad: true,
       scope: {
         editor: {
           sharejs_doc: {
