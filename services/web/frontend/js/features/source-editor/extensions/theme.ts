@@ -188,6 +188,12 @@ const staticTheme = EditorView.theme({
   '&.cm-editor.cm-focused:not(:focus-visible)': {
     outline: 'none',
   },
+  '.cm-panels': {
+    backgroundColor: 'var(--bg-secondary-themed)',
+  },
+  '.cm-panel-bottom': {
+    borderTop: '1px solid var(--border-primary-themed)',
+  },
   // override default styles for the search panel
   '.cm-panel.cm-search label': {
     display: 'inline-flex',

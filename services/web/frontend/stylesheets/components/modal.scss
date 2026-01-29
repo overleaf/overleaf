@@ -8,6 +8,7 @@
   @include form-check-light;
   @include light-notification;
   @include light-input;
+  @include light-buttons;
 }
 
 @include media-breakpoint-up(sm) {

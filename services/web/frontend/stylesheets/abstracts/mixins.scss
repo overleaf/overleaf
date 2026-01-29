@@ -75,39 +75,6 @@
   );
 }
 
-// util for creating the base themes for each button, only usable when scoped to -themed available classes
-// currently only primary and secondary buttons implemented
-// todo: once all button types have matching light/dark designs, remove mixin and implement in buttons.scss
-@mixin ol-button-themed($variant) {
-  // primary button remains the same in both dark and light
-  @if $variant == 'primary' {
-    @include ol-button-variant(
-      $color: var(--content-primary-dark),
-      $background: var(--bg-accent-01),
-      $hover-background: var(--bg-accent-02),
-      $hover-border: var(--bg-accent-02)
-    );
-  } @else if $variant == 'secondary' {
-    @include ol-button-variant(
-      $color: var(--content-primary-themed),
-      $background: var(--bg-primary-themed),
-      $border: var(--border-primary-themed),
-      $hover-background: var(--bg-secondary-themed),
-      $hover-border: var(--border-hover-themed),
-      $borderless: false
-    );
-  } @else {
-    @include ol-button-variant(
-      $color: var(--content-primary-themed),
-      $background: var(--bg-primary-themed),
-      $border: var(--border-primary-themed),
-      $hover-background: var(--bg-secondary-themed),
-      $hover-border: var(--border-hover-themed),
-      $borderless: false
-    );
-  }
-}
-
 @mixin reset-button() {
   padding: 0;
   cursor: pointer;

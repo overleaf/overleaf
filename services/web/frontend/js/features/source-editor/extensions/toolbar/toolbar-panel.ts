@@ -320,7 +320,7 @@ const toolbarTheme = EditorView.theme({
 })
 
 const toolbarBorderTheme = EditorView.baseTheme({
-  '&light.overall-theme-dark .cm-panels-top': {
+  '&.overall-theme-dark .cm-panels-top': {
     borderBottom: '1px solid var(--border-divider-dark)',
   },
 })

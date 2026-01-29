@@ -1,3 +1,108 @@
+@mixin light-buttons {
+  // primary
+  --btn-primary-color: var(--white);
+  --btn-primary-background: var(--bg-accent-01);
+  --btn-primary-hover-background: var(--bg-accent-02);
+  --btn-primary-hover-border: var(--bg-accent-02);
+
+  // secondary
+  --btn-secondary-color: var(--content-primary);
+  --btn-secondary-background: var(--bg-light-primary);
+  --btn-secondary-border: var(--border-primary);
+  --btn-secondary-hover-background: var(--bg-light-tertiary);
+  --btn-secondary-hover-border: var(--border-primary);
+
+  // ghost
+  --btn-ghost-color: var(--content-primary);
+  --btn-ghost-background: var(--bg-light-primary);
+  --btn-ghost-hover-background: var(--bg-light-tertiary);
+
+  // danger
+  --btn-danger-color: var(--white);
+  --btn-danger-background: var(--bg-danger-01);
+  --btn-danger-border: var(--bg-danger-01);
+  --btn-danger-hover-background: var(--bg-danger-02);
+
+  // danger-ghost
+  --btn-danger-ghost-color: var(--content-danger);
+  --btn-danger-ghost-background: var(--bg-light-primary);
+  --btn-danger-ghost-hover-background: var(--bg-danger-03);
+  --btn-danger-ghost-border: var(--bg-light-primary);
+  --btn-danger-ghost-hover-border: var(--bg-light-primary);
+
+  // premium
+  --btn-premium-color: var(--white);
+  --btn-premium-background: var(--blue-70);
+  --btn-premium-hover-background: var(--blue-70);
+
+  // premium-secondary
+  --btn-premium-secondary-color: var(--blue-60);
+  --btn-premium-secondary-background: var(--bg-light-primary);
+  --btn-premium-secondary-border: var(--blue-60);
+  --btn-premium-secondary-hover-background: var(--bg-info-03);
+  --btn-premium-secondary-hover-border: var(--blue-60);
+}
+
+@mixin dark-buttons {
+  // primary
+  --btn-primary-color: var(--white);
+  --btn-primary-background: var(--bg-accent-01);
+  --btn-primary-hover-background: var(--bg-accent-02);
+  --btn-primary-hover-border: var(--bg-accent-02);
+
+  // secondary
+  --btn-secondary-color: var(--white);
+  --btn-secondary-background: var(--bg-dark-primary);
+  --btn-secondary-border: var(--bg-light-primary);
+  --btn-secondary-hover-background: var(--bg-dark-tertiary);
+  --btn-secondary-hover-border: var(--bg-light-primary);
+
+  // ghost
+  --btn-ghost-color: var(--white);
+  --btn-ghost-background: var(--bg-dark-secondary);
+  --btn-ghost-hover-background: var(--bg-dark-tertiary);
+
+  // danger
+  --btn-danger-color: var(--white);
+  --btn-danger-background: var(--bg-danger-01);
+  --btn-danger-border: var(--bg-danger-01);
+  --btn-danger-hover-background: var(--bg-danger-02);
+
+  // danger-ghost
+  --btn-danger-ghost-color: var(--bg-danger-03);
+  --btn-danger-ghost-background: var(--bg-dark-secondary);
+  --btn-danger-ghost-hover-background: var(--bg-dark-tertiary);
+  --btn-danger-ghost-border: var(--bg-danger-01);
+  --btn-danger-ghost-hover-border: var(--bg-danger-01);
+
+  // premium
+  --btn-premium-color: var(--white);
+  --btn-premium-background: var(--blue-70);
+  --btn-premium-hover-background: var(--blue-70);
+
+  // premium-secondary, todo once WIP designs for dm are finished
+  --btn-premium-secondary-color: var(--content-primary);
+  --btn-premium-secondary-background: var(--blue-30);
+  --btn-premium-secondary-border: var(--blue-60);
+  --btn-premium-secondary-hover-background: var(--blue-30);
+  --btn-premium-secondary-hover-border: var(--blue-60);
+}
+
+:root {
+  .btn {
+    @include light-buttons;
+  }
+
+  @include theme('default') {
+    .ide-redesign-main,
+    .project-ds-nav-page {
+      .btn {
+        @include dark-buttons;
+      }
+    }
+  }
+}
+
 .btn {
   // Focus style for all buttons
   --bs-btn-focus-box-shadow: 0 0 0 2px var(--border-active-dark);
@@ -35,70 +140,73 @@
   // Variants
   &.btn-primary {
     @include ol-button-variant(
-      $color: var(--white),
-      $background: var(--bg-accent-01),
-      $hover-background: var(--bg-accent-02),
-      $hover-border: var(--bg-accent-02)
+      $color: var(--btn-primary-color),
+      $background: var(--btn-primary-background),
+      $hover-background: var(--btn-primary-hover-background),
+      $hover-border: var(--btn-primary-hover-border)
     );
   }
 
   &.btn-secondary {
     @include ol-button-variant(
-      $color: var(--content-primary),
-      $background: var(--bg-light-primary),
-      $border: var(--border-primary),
-      $hover-background: var(--bg-light-tertiary),
-      $hover-border: var(--border-primary),
+      $color: var(--btn-secondary-color),
+      $background: var(--btn-secondary-background),
+      $border: var(--btn-secondary-border),
+      $hover-background: var(--btn-secondary-hover-background),
+      $hover-border: var(--btn-secondary-hover-border),
       $borderless: false
     );
   }
 
   &.btn-ghost {
     @include ol-button-variant(
-      $color: var(--content-primary),
-      $background: var(--bg-light-primary),
-      $hover-background: var(--bg-light-tertiary)
+      $color: var(--btn-ghost-color),
+      $background: var(--btn-ghost-background),
+      $hover-background: var(--btn-ghost-hover-background)
     );
   }
 
   &.btn-danger {
     @include ol-button-variant(
-      $color: var(--white),
-      $background: var(--bg-danger-01),
-      $border: var(--bg-danger-01),
-      $hover-background: var(--bg-danger-02)
+      $color: var(--btn-danger-color),
+      $background: var(--btn-danger-background),
+      $border: var(--btn-danger-border),
+      $hover-background: var(--btn-danger-hover-background)
     );
   }
 
   &.btn-danger-ghost {
     @include ol-button-variant(
-      $color: var(--content-danger),
-      $background: var(--bg-light-primary),
-      $hover-background: var(--bg-danger-03)
+      $color: var(--btn-danger-ghost-color),
+      $background: var(--btn-danger-ghost-background),
+      $border: var(--btn-danger-ghost-border),
+      $hover-background: var(--btn-danger-ghost-hover-background),
+      $hover-border: var(--btn-danger-ghost-hover-border),
+      $borderless: false
     );
   }
 
   &.btn-premium {
     @include ol-button-variant(
-      $color: var(--white),
-      $background: var(--blue-70)
+      $color: var(--btn-premium-color),
+      $background: var(--btn-premium-background)
     );
 
     background: var(--premium-gradient);
     transition: none;
 
     &:hover {
-      background: var(--blue-70);
+      background: var(--btn-premium-hover-background);
     }
   }
 
   &.btn-premium-secondary {
     @include ol-button-variant(
-      $color: var(--blue-60),
-      $background: var(--bg-light-primary),
-      $border: var(--blue-60),
-      $hover-background: var(--bg-info-03),
-      $hover-border: var(--blue-60),
+      $color: var(--btn-premium-secondary-color),
+      $background: var(--btn-premium-secondary-background),
+      $border: var(--btn-premium-secondary-border),
+      $hover-background: var(--btn-premium-secondary-hover-background),
+      $hover-border: var(--btn-premium-secondary-hover-border),
       $borderless: false
     );
   }
