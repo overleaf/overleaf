@@ -1,7 +1,8 @@
-import { beforeAll, beforeEach, describe, it, vi, expect } from 'vitest'
-import sinon from 'sinon'
+import { assert, beforeAll, beforeEach, describe, it, vi, expect } from 'vitest'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import tk from 'timekeeper'
+import { RequestFailedError } from '@overleaf/fetch-utils'
+
 const modulePath = '../../../../app/src/Features/Docstore/DocstoreManager'
 
 vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
@@ -9,31 +10,33 @@ vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
 )
 
 describe('DocstoreManager', function () {
-  beforeEach(async function (ctx) {
-    ctx.requestDefaults = sinon.stub().returns((ctx.request = sinon.stub()))
+  let DocstoreManager, FetchUtils, projectId, docId, settings
 
-    vi.doMock('request', () => ({
-      default: {
-        defaults: ctx.requestDefaults,
+  beforeEach(async function () {
+    settings = {
+      apis: {
+        docstore: {
+          url: 'http://docstore.overleaf.com',
+        },
       },
-    }))
+    }
 
     vi.doMock('@overleaf/settings', () => ({
-      default: (ctx.settings = {
-        apis: {
-          docstore: {
-            url: 'docstore.overleaf.com',
-          },
-        },
-      }),
+      default: settings,
     }))
 
-    ctx.DocstoreManager = (await import(modulePath)).default
+    FetchUtils = {
+      fetchNothing: vi.fn().mockResolvedValue(),
+      fetchJson: vi.fn().mockResolvedValue({}),
+      RequestFailedError,
+    }
 
-    ctx.requestDefaults.calledWith({ jar: false }).should.equal(true)
+    vi.doMock('@overleaf/fetch-utils', () => FetchUtils)
 
-    ctx.project_id = 'project-id-123'
-    ctx.doc_id = 'doc-id-123'
+    DocstoreManager = (await import(modulePath)).default
+
+    projectId = 'project-id-123'
+    docId = 'doc-id-123'
   })
 
   describe('deleteDoc', function () {
@@ -46,43 +49,40 @@ describe('DocstoreManager', function () {
         tk.reset()
       })
 
-      beforeEach(async function (ctx) {
-        ctx.request.patch = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 204 }, '')
-        await ctx.DocstoreManager.promises.deleteDoc(
-          ctx.project_id,
-          ctx.doc_id,
+      beforeEach(async function () {
+        await DocstoreManager.promises.deleteDoc(
+          projectId,
+          docId,
           'wombat.tex',
           new Date()
         )
       })
 
-      it('should delete the doc in the docstore api', function (ctx) {
-        ctx.request.patch
-          .calledWith({
-            url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/doc/${ctx.doc_id}`,
-            json: { deleted: true, deletedAt: new Date(), name: 'wombat.tex' },
-            timeout: 30 * 1000,
-          })
-          .should.equal(true)
+      it('should delete the doc in the docstore api', function () {
+        const url = new URL(settings.apis.docstore.url)
+        url.pathname = `/project/${projectId}/doc/${docId}`
+        expect(FetchUtils.fetchNothing).toHaveBeenCalledWith(url, {
+          json: { deleted: true, deletedAt: new Date(), name: 'wombat.tex' },
+          signal: expect.anything(),
+          method: 'PATCH',
+        })
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function (ctx) {
-        ctx.request.patch = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 }, '')
+      beforeEach(function () {
+        FetchUtils.fetchNothing.mockImplementation((url, opts) => {
+          throw new RequestFailedError(url, opts, { status: 500 })
+        })
       })
 
-      it('should reject with an error', async function (ctx) {
+      it('should reject with an error', async function () {
         let error
 
         try {
-          await ctx.DocstoreManager.promises.deleteDoc(
-            ctx.project_id,
-            ctx.doc_id,
+          await DocstoreManager.promises.deleteDoc(
+            projectId,
+            docId,
             'main.tex',
             new Date()
           )
@@ -99,18 +99,18 @@ describe('DocstoreManager', function () {
     })
 
     describe('with a missing (404) response code', function () {
-      beforeEach(function (ctx) {
-        ctx.request.patch = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 404 }, '')
+      beforeEach(function () {
+        FetchUtils.fetchNothing.mockImplementation((url, opts) => {
+          throw new RequestFailedError(url, opts, { status: 404 })
+        })
       })
 
-      it('should reject with an error', async function (ctx) {
+      it('should reject with an error', async function () {
         let error
         try {
-          await ctx.DocstoreManager.promises.deleteDoc(
-            ctx.project_id,
-            ctx.doc_id,
+          await DocstoreManager.promises.deleteDoc(
+            projectId,
+            docId,
             'main.tex',
             new Date()
           )
@@ -128,74 +128,72 @@ describe('DocstoreManager', function () {
   })
 
   describe('updateDoc', function () {
-    beforeEach(function (ctx) {
-      ctx.lines = ['mock', 'doc', 'lines']
-      ctx.rev = 5
-      ctx.version = 42
-      ctx.ranges = { mock: 'ranges' }
-      ctx.modified = true
+    let lines, modified, ranges, rev, updateDocResponse, version
+    beforeEach(function () {
+      lines = ['mock', 'doc', 'lines']
+      rev = 5
+      version = 42
+      ranges = { mock: 'ranges' }
+      modified = true
     })
 
     describe('with a successful response code', async function () {
-      beforeEach(async function (ctx) {
-        ctx.request.post = sinon
-          .stub()
-          .callsArgWith(
-            1,
-            null,
-            { statusCode: 204 },
-            { modified: ctx.modified, rev: ctx.rev }
-          )
-        ctx.updateDocResponse = await ctx.DocstoreManager.promises.updateDoc(
-          ctx.project_id,
-          ctx.doc_id,
-          ctx.lines,
-          ctx.version,
-          ctx.ranges
+      beforeEach(async function () {
+        FetchUtils.fetchJson.mockResolvedValue({
+          modified,
+          rev,
+        })
+        updateDocResponse = await DocstoreManager.promises.updateDoc(
+          projectId,
+          docId,
+          lines,
+          version,
+          ranges
         )
       })
 
-      it('should update the doc in the docstore api', function (ctx) {
-        ctx.request.post
-          .calledWith({
-            url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/doc/${ctx.doc_id}`,
-            timeout: 30 * 1000,
+      it('should update the doc in the docstore api', function () {
+        expect(FetchUtils.fetchJson).toHaveBeenCalledWith(
+          new URL(
+            `${settings.apis.docstore.url}/project/${projectId}/doc/${docId}`
+          ),
+          {
+            signal: expect.anything(),
+            method: 'POST',
             json: {
-              lines: ctx.lines,
-              version: ctx.version,
-              ranges: ctx.ranges,
+              lines,
+              version,
+              ranges,
             },
-          })
-          .should.equal(true)
+          }
+        )
       })
 
-      it('should return the modified status and revision', function (ctx) {
-        expect(ctx.updateDocResponse).to.haveOwnProperty(
-          'modified',
-          ctx.modified
-        )
-        expect(ctx.updateDocResponse).to.haveOwnProperty('rev', ctx.rev)
+      it('should return the modified status and revision', function () {
+        expect(updateDocResponse).to.haveOwnProperty('modified', modified)
+        expect(updateDocResponse).to.haveOwnProperty('rev', rev)
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function (ctx) {
-        ctx.request.post = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 }, '')
+      beforeEach(function () {
+        FetchUtils.fetchJson.mockImplementation((url, opts) => {
+          throw new RequestFailedError(url, opts, { status: 500 })
+        })
       })
 
-      it('should reject with an error', async function (ctx) {
+      it('should reject with an error', async function () {
         let error
 
         try {
-          await ctx.DocstoreManager.promises.updateDoc(
-            ctx.project_id,
-            ctx.doc_id,
-            ctx.lines,
-            ctx.version,
-            ctx.ranges
+          await DocstoreManager.promises.updateDoc(
+            projectId,
+            docId,
+            lines,
+            version,
+            ranges
           )
+          assert.fail('updateDoc should have thrown an error')
         } catch (err) {
           error = err
         }
@@ -210,56 +208,60 @@ describe('DocstoreManager', function () {
   })
 
   describe('getDoc', function () {
-    beforeEach(function (ctx) {
-      ctx.doc = {
-        lines: (ctx.lines = ['mock', 'doc', 'lines']),
-        rev: (ctx.rev = 5),
-        version: (ctx.version = 42),
-        ranges: (ctx.ranges = { mock: 'ranges' }),
+    let doc, getDocResponse, lines, ranges, rev, version
+    beforeEach(function () {
+      lines = ['mock', 'doc', 'lines']
+      rev = 5
+      version = 42
+      ranges = { mock: 'ranges' }
+      doc = {
+        lines,
+        rev,
+        version,
+        ranges,
       }
     })
 
     describe('with a successful response code', function () {
-      beforeEach(async function (ctx) {
-        ctx.request.get = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 204 }, ctx.doc)
-        ctx.getDocResponse = await ctx.DocstoreManager.promises.getDoc(
-          ctx.project_id,
-          ctx.doc_id
+      beforeEach(async function () {
+        FetchUtils.fetchJson.mockResolvedValue(doc)
+        getDocResponse = await DocstoreManager.promises.getDoc(projectId, docId)
+      })
+
+      it('should get the doc from the docstore api', function () {
+        expect(FetchUtils.fetchJson).toHaveBeenCalledWith(
+          new URL(
+            `${settings.apis.docstore.url}/project/${projectId}/doc/${docId}`
+          ),
+          {
+            signal: expect.anything(),
+          }
         )
       })
 
-      it('should get the doc from the docstore api', function (ctx) {
-        ctx.request.get.should.have.been.calledWith({
-          url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/doc/${ctx.doc_id}`,
-          timeout: 30 * 1000,
-          json: true,
-        })
-      })
-
-      it('should resolve with the lines, version and rev', function (ctx) {
-        expect(ctx.getDocResponse).to.eql({
-          lines: ctx.lines,
-          rev: ctx.rev,
-          version: ctx.version,
-          ranges: ctx.ranges,
+      it('should resolve with the lines, version and rev', function () {
+        expect(getDocResponse).to.eql({
+          lines,
+          rev,
+          version,
+          ranges,
         })
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function (ctx) {
-        ctx.request.get = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 }, '')
+      beforeEach(function () {
+        FetchUtils.fetchJson.mockImplementation((url, opts) => {
+          throw new RequestFailedError(url, opts, { status: 500 })
+        })
       })
 
-      it('should reject with an error', async function (ctx) {
+      it('should reject with an error', async function () {
         let error
 
         try {
-          await ctx.DocstoreManager.promises.getDoc(ctx.project_id, ctx.doc_id)
+          await DocstoreManager.promises.getDoc(projectId, docId)
+          assert.fail('getDoc should have thrown an error')
         } catch (err) {
           error = err
         }
@@ -273,67 +275,68 @@ describe('DocstoreManager', function () {
     })
 
     describe('with include_deleted=true', function () {
-      beforeEach(async function (ctx) {
-        ctx.request.get = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 204 }, ctx.doc)
-        ctx.getDocResponse = await ctx.DocstoreManager.promises.getDoc(
-          ctx.project_id,
-          ctx.doc_id,
+      beforeEach(async function () {
+        FetchUtils.fetchJson.mockResolvedValue(doc)
+        getDocResponse = await DocstoreManager.promises.getDoc(
+          projectId,
+          docId,
           { include_deleted: true }
         )
       })
 
-      it('should get the doc from the docstore api (including deleted)', function (ctx) {
-        ctx.request.get.should.have.been.calledWith({
-          url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/doc/${ctx.doc_id}`,
-          qs: { include_deleted: 'true' },
-          timeout: 30 * 1000,
-          json: true,
-        })
+      it('should get the doc from the docstore api (including deleted)', function () {
+        expect(FetchUtils.fetchJson).toHaveBeenCalledWith(
+          new URL(
+            `${settings.apis.docstore.url}/project/${projectId}/doc/${docId}?include_deleted=true`
+          ),
+          {
+            signal: expect.anything(),
+          }
+        )
       })
 
-      it('should resolve with the lines, version and rev', function (ctx) {
-        expect(ctx.getDocResponse).to.eql({
-          lines: ctx.lines,
-          rev: ctx.rev,
-          version: ctx.version,
-          ranges: ctx.ranges,
+      it('should resolve with the lines, version and rev', function () {
+        expect(getDocResponse).to.eql({
+          lines,
+          rev,
+          version,
+          ranges,
         })
       })
     })
 
     describe('with peek=true', function () {
-      beforeEach(async function (ctx) {
-        ctx.request.get = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 204 }, ctx.doc)
-        await ctx.DocstoreManager.promises.getDoc(ctx.project_id, ctx.doc_id, {
+      beforeEach(async function () {
+        await DocstoreManager.promises.getDoc(projectId, docId, {
           peek: true,
         })
       })
 
-      it('should call the docstore peek url', function (ctx) {
-        ctx.request.get.should.have.been.calledWith({
-          url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/doc/${ctx.doc_id}/peek`,
-          timeout: 30 * 1000,
-          json: true,
-        })
+      it('should call the docstore peek url', function () {
+        expect(FetchUtils.fetchJson).toHaveBeenCalledWith(
+          new URL(
+            `${settings.apis.docstore.url}/project/${projectId}/doc/${docId}/peek`
+          ),
+          {
+            signal: expect.anything(),
+          }
+        )
       })
     })
 
     describe('with a missing (404) response code', function () {
-      beforeEach(function (ctx) {
-        ctx.request.get = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 404 }, '')
+      beforeEach(function () {
+        FetchUtils.fetchJson.mockImplementation((url, opts) => {
+          throw new RequestFailedError(url, opts, { status: 404 })
+        })
       })
 
-      it('should reject with an error', async function (ctx) {
+      it('should reject with an error', async function () {
         let error
 
         try {
-          await ctx.DocstoreManager.promises.getDoc(ctx.project_id, ctx.doc_id)
+          await DocstoreManager.promises.getDoc(projectId, docId)
+          assert.fail('getDoc should have thrown an error')
         } catch (err) {
           error = err
         }
@@ -347,47 +350,40 @@ describe('DocstoreManager', function () {
   describe('getAllDocs', function () {
     describe('with a successful response code', function () {
       let getAllDocsResult
-      beforeEach(async function (ctx) {
-        ctx.request.get = sinon
-          .stub()
-          .callsArgWith(
-            1,
-            null,
-            { statusCode: 204 },
-            (ctx.docs = [{ _id: 'mock-doc-id' }])
-          )
-        getAllDocsResult = await ctx.DocstoreManager.promises.getAllDocs(
-          ctx.project_id
+      let docs
+      beforeEach(async function () {
+        docs = [{ _id: 'mock-doc-id' }]
+        FetchUtils.fetchJson.mockResolvedValue(docs)
+        getAllDocsResult = await DocstoreManager.promises.getAllDocs(projectId)
+      })
+
+      it('should get all the project docs in the docstore api', function () {
+        expect(FetchUtils.fetchJson).toBeCalledWith(
+          new URL(`${settings.apis.docstore.url}/project/${projectId}/doc`),
+          {
+            signal: expect.anything(),
+          }
         )
       })
 
-      it('should get all the project docs in the docstore api', function (ctx) {
-        ctx.request.get
-          .calledWith({
-            url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/doc`,
-            timeout: 30 * 1000,
-            json: true,
-          })
-          .should.equal(true)
-      })
-
-      it('should return the docs', function (ctx) {
-        expect(getAllDocsResult).to.eql(ctx.docs)
+      it('should return the docs', function () {
+        expect(getAllDocsResult).to.eql(docs)
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function (ctx) {
-        ctx.request.get = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 }, '')
+      beforeEach(function () {
+        FetchUtils.fetchJson.mockImplementation((url, opts) => {
+          throw new RequestFailedError(url, opts, { status: 500 })
+        })
       })
 
-      it('should reject with an error', async function (ctx) {
+      it('should reject with an error', async function () {
         let error
 
         try {
-          await ctx.DocstoreManager.promises.getAllDocs(ctx.project_id)
+          await DocstoreManager.promises.getAllDocs(projectId)
+          assert.fail('getAllDocs should have thrown an error')
         } catch (err) {
           error = err
         }
@@ -404,40 +400,41 @@ describe('DocstoreManager', function () {
   describe('getAllDeletedDocs', function () {
     describe('with a successful response code', function () {
       let getAllDeletedDocsResponse
-      beforeEach(async function (ctx) {
-        ctx.docs = [{ _id: 'mock-doc-id', name: 'foo.tex' }]
-        ctx.request.get = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 200 }, ctx.docs)
+      let docs
+      beforeEach(async function () {
+        docs = [{ _id: 'mock-doc-id', name: 'foo.tex' }]
+        FetchUtils.fetchJson.mockResolvedValue(docs)
         getAllDeletedDocsResponse =
-          await ctx.DocstoreManager.promises.getAllDeletedDocs(ctx.project_id)
+          await DocstoreManager.promises.getAllDeletedDocs(projectId)
       })
 
-      it('should get all the project docs in the docstore api', function (ctx) {
-        ctx.request.get.should.have.been.calledWith({
-          url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/doc-deleted`,
-          timeout: 30 * 1000,
-          json: true,
-        })
+      it('should get all the project docs in the docstore api', function () {
+        expect(FetchUtils.fetchJson).toHaveBeenCalledWith(
+          new URL(
+            `${settings.apis.docstore.url}/project/${projectId}/doc-deleted`
+          ),
+          {
+            signal: expect.anything(),
+          }
+        )
       })
 
-      it('should resolve with the docs', function (ctx) {
-        expect(getAllDeletedDocsResponse).to.eql(ctx.docs)
+      it('should resolve with the docs', function () {
+        expect(getAllDeletedDocsResponse).to.eql(docs)
       })
     })
 
     describe('with an error', function () {
-      beforeEach(async function (ctx) {
-        ctx.request.get = sinon
-          .stub()
-          .callsArgWith(1, new Error('connect failed'))
+      beforeEach(async function () {
+        FetchUtils.fetchJson.mockRejectedValue(new Error('connect failed'))
       })
 
-      it('should reject with an error', async function (ctx) {
+      it('should reject with an error', async function () {
         let error
 
         try {
-          await ctx.DocstoreManager.promises.getAllDocs(ctx.project_id)
+          await DocstoreManager.promises.getAllDeletedDocs(projectId)
+          assert.fail('getAllDeletedDocs should have thrown an error')
         } catch (err) {
           error = err
         }
@@ -448,17 +445,18 @@ describe('DocstoreManager', function () {
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function (ctx) {
-        ctx.request.get = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 })
+      beforeEach(function () {
+        FetchUtils.fetchJson.mockImplementation((url, opts) => {
+          throw new RequestFailedError(url, opts, { status: 500 })
+        })
       })
 
-      it('should reject with an error', async function (ctx) {
+      it('should reject with an error', async function () {
         let error
 
         try {
-          await ctx.DocstoreManager.promises.getAllDocs(ctx.project_id)
+          await DocstoreManager.promises.getAllDeletedDocs(projectId)
+          assert.fail('getAllDeletedDocs should have thrown an error')
         } catch (err) {
           error = err
         }
@@ -475,47 +473,41 @@ describe('DocstoreManager', function () {
   describe('getAllRanges', function () {
     describe('with a successful response code', function () {
       let getAllRangesResult
-      beforeEach(async function (ctx) {
-        ctx.request.get = sinon
-          .stub()
-          .callsArgWith(
-            1,
-            null,
-            { statusCode: 204 },
-            (ctx.docs = [{ _id: 'mock-doc-id', ranges: 'mock-ranges' }])
-          )
-        getAllRangesResult = await ctx.DocstoreManager.promises.getAllRanges(
-          ctx.project_id
+      let docs
+      beforeEach(async function () {
+        docs = [{ _id: 'mock-doc-id', ranges: 'mock-ranges' }]
+        FetchUtils.fetchJson.mockResolvedValue(docs)
+        getAllRangesResult =
+          await DocstoreManager.promises.getAllRanges(projectId)
+      })
+
+      it('should get all the project doc ranges in the docstore api', function () {
+        expect(FetchUtils.fetchJson).toHaveBeenCalledWith(
+          new URL(`${settings.apis.docstore.url}/project/${projectId}/ranges`),
+          {
+            signal: expect.anything(),
+          }
         )
       })
 
-      it('should get all the project doc ranges in the docstore api', function (ctx) {
-        ctx.request.get
-          .calledWith({
-            url: `${ctx.settings.apis.docstore.url}/project/${ctx.project_id}/ranges`,
-            timeout: 30 * 1000,
-            json: true,
-          })
-          .should.equal(true)
-      })
-
-      it('should return the docs', async function (ctx) {
-        expect(getAllRangesResult).to.eql(ctx.docs)
+      it('should return the docs', async function () {
+        expect(getAllRangesResult).to.eql(docs)
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function (ctx) {
-        ctx.request.get = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 }, '')
+      beforeEach(function () {
+        FetchUtils.fetchJson.mockImplementation((url, opts) => {
+          throw new RequestFailedError(url, opts, { status: 500 })
+        })
       })
 
-      it('should reject with an error', async function (ctx) {
+      it('should reject with an error', async function () {
         let error
 
         try {
-          await ctx.DocstoreManager.promises.getAllRanges(ctx.project_id)
+          await DocstoreManager.promises.getAllRanges(projectId)
+          assert.fail('getAllRanges should have thrown an error')
         } catch (err) {
           error = err
         }
@@ -531,31 +523,25 @@ describe('DocstoreManager', function () {
 
   describe('archiveProject', function () {
     describe('with a successful response code', function () {
-      beforeEach(function (ctx) {
-        ctx.request.post = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 204 })
-      })
-
-      it('should resolve', async function (ctx) {
-        await expect(
-          ctx.DocstoreManager.promises.archiveProject(ctx.project_id)
-        ).to.eventually.be.fulfilled
+      it('should resolve', async function () {
+        await expect(DocstoreManager.promises.archiveProject(projectId)).to
+          .eventually.be.fulfilled
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function (ctx) {
-        ctx.request.post = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 })
+      beforeEach(function () {
+        FetchUtils.fetchNothing.mockImplementation((url, opts) => {
+          throw new RequestFailedError(url, opts, { status: 500 })
+        })
       })
 
-      it('should reject with an error', async function (ctx) {
+      it('should reject with an error', async function () {
         let error
 
         try {
-          await ctx.DocstoreManager.promises.archiveProject(ctx.project_id)
+          await DocstoreManager.promises.archiveProject(projectId)
+          assert.fail('archiveProject should have thrown an error')
         } catch (err) {
           error = err
         }
@@ -571,31 +557,25 @@ describe('DocstoreManager', function () {
 
   describe('unarchiveProject', function () {
     describe('with a successful response code', function () {
-      beforeEach(function (ctx) {
-        ctx.request.post = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 204 })
-      })
-
-      it('should resolve', async function (ctx) {
-        await expect(
-          ctx.DocstoreManager.promises.unarchiveProject(ctx.project_id)
-        ).to.eventually.be.fulfilled
+      it('should resolve', async function () {
+        await expect(DocstoreManager.promises.unarchiveProject(projectId)).to
+          .eventually.be.fulfilled
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function (ctx) {
-        ctx.request.post = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 })
+      beforeEach(function () {
+        FetchUtils.fetchNothing.mockImplementation((url, opts) => {
+          throw new RequestFailedError(url, opts, { status: 500 })
+        })
       })
 
-      it('should reject with an error', async function (ctx) {
+      it('should reject with an error', async function () {
         let error
 
         try {
-          await ctx.DocstoreManager.promises.unarchiveProject(ctx.project_id)
+          await DocstoreManager.promises.unarchiveProject(projectId)
+          assert.fail('unarchiveProject should have thrown an error')
         } catch (err) {
           error = err
         }
@@ -611,31 +591,25 @@ describe('DocstoreManager', function () {
 
   describe('destroyProject', function () {
     describe('with a successful response code', function () {
-      beforeEach(function (ctx) {
-        ctx.request.post = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 204 })
-      })
-
-      it('should resolve', async function (ctx) {
-        await expect(
-          ctx.DocstoreManager.promises.destroyProject(ctx.project_id)
-        ).to.eventually.be.fulfilled
+      it('should resolve', async function () {
+        await expect(DocstoreManager.promises.destroyProject(projectId)).to
+          .eventually.be.fulfilled
       })
     })
 
     describe('with a failed response code', function () {
-      beforeEach(function (ctx) {
-        ctx.request.post = sinon
-          .stub()
-          .callsArgWith(1, null, { statusCode: 500 })
+      beforeEach(function () {
+        FetchUtils.fetchNothing.mockImplementation((url, opts) => {
+          throw new RequestFailedError(url, opts, { status: 500 })
+        })
       })
 
-      it('should reject with an error', async function (ctx) {
+      it('should reject with an error', async function () {
         let error
 
         try {
-          await ctx.DocstoreManager.promises.destroyProject(ctx.project_id)
+          await DocstoreManager.promises.destroyProject(projectId)
+          assert.fail('destroyProject should have thrown an error')
         } catch (err) {
           error = err
         }
