@@ -25,7 +25,9 @@ export default function FocusTrap({
         fallbackFocus: () => containerRef.current as HTMLElement,
       }}
     >
-      <div ref={containerRef}>{children}</div>
+      <div ref={containerRef} tabIndex={-1}>
+        {children}
+      </div>
     </FocusTrapReact>
   )
 }
