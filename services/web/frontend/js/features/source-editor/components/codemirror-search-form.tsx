@@ -38,7 +38,6 @@ import { EditorSelection, EditorState } from '@codemirror/state'
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
 import { FullProjectSearchButton } from './full-project-search-button'
 import { isInvalidRegExp } from '../utils/regexp'
-import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 
 const MATCH_COUNT_DEBOUNCE_WAIT = 100 // the amount of ms to wait before counting matches
 const MAX_MATCH_COUNT = 999 // the maximum number of matches to count
@@ -82,8 +81,6 @@ const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
   const formRef = useRef<HTMLFormElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const replaceRef = useRef<HTMLInputElement | null>(null)
-
-  const overallTheme = useActiveOverallTheme()
 
   const handleInputRef = useCallback((node: HTMLInputElement) => {
     inputRef.current = node
@@ -421,7 +418,7 @@ const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
         <div className="ol-cm-search-form-group ol-cm-search-next-previous">
           <OLButtonGroup className="ol-cm-search-form-button-group">
             <OLButton
-              variant="ghost"
+              variant="secondary"
               size="sm"
               onClick={() => findPrevious(view)}
             >
@@ -431,7 +428,11 @@ const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
               />
             </OLButton>
 
-            <OLButton variant="ghost" size="sm" onClick={() => findNext(view)}>
+            <OLButton
+              variant="secondary"
+              size="sm"
+              onClick={() => findNext(view)}
+            >
               <MaterialIcon
                 type="keyboard_arrow_down"
                 accessibilityLabel={t('search_next')}
@@ -455,7 +456,7 @@ const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
         {showReplace && (
           <div className="ol-cm-search-form-group ol-cm-search-replace-buttons">
             <OLButton
-              variant="ghost"
+              variant="secondary"
               size="sm"
               onClick={() => {
                 sendSearchEvent('search-replace-click', {
@@ -470,7 +471,7 @@ const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
             </OLButton>
 
             <OLButton
-              variant="ghost"
+              variant="secondary"
               size="sm"
               onClick={() => {
                 sendSearchEvent('search-replace-click', {
@@ -489,10 +490,7 @@ const CodeMirrorSearchForm: FC<React.PropsWithChildren> = () => {
 
       <div className="ol-cm-search-form-close">
         <OLTooltip id="search-close" description={<>{t('close')} (Esc)</>}>
-          <OLCloseButton
-            variant={overallTheme === 'dark' ? 'white' : undefined}
-            onClick={() => closeSearchPanel(view)}
-          />
+          <OLCloseButton onClick={() => closeSearchPanel(view)} />
         </OLTooltip>
       </div>
     </form>

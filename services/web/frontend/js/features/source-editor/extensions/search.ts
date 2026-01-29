@@ -301,13 +301,12 @@ export const search = (initialSearchQuery: SearchQuery | null) => {
 
 const searchFormTheme = EditorView.theme({
   '.ol-cm-search-form': {
-    '--ol-cm-search-form-gap': 'var(--spacing-05)',
-    '--ol-cm-search-form-button-margin': 'var(--spacing-02)',
-    '--input-border': 'var(--border-primary)',
-    '--input-border-focus': 'var(--border-active)',
+    '--ol-cm-search-form-gap': '10px',
+    '--ol-cm-search-form-button-margin': '3px',
     padding: 'var(--ol-cm-search-form-gap)',
     display: 'flex',
     gap: 'var(--ol-cm-search-form-gap)',
+    background: 'var(--neutral-20)',
     '--ol-cm-search-form-focus-shadow':
       'inset 0 1px 1px rgb(0 0 0 / 8%), 0 0 8px rgb(102 175 233 / 60%)',
     '--ol-cm-search-form-error-shadow':
@@ -316,6 +315,12 @@ const searchFormTheme = EditorView.theme({
     '& .form-control-sm, & .btn-sm': {
       padding: 'var(--spacing-03) var(--spacing-05)',
     },
+  },
+  '&.ol-cm-search-form': {
+    '--ol-cm-search-form-gap': 'var(--spacing-05)',
+    '--ol-cm-search-form-button-margin': 'var(--spacing-02)',
+    '--input-border': 'var(--border-primary)',
+    '--input-border-focus': 'var(--border-active)',
   },
   '.ol-cm-search-controls': {
     display: 'grid',
@@ -340,30 +345,24 @@ const searchFormTheme = EditorView.theme({
     alignItems: 'center',
   },
   '.ol-cm-search-input-group': {
-    backgroundColor: 'var(--bg-primary-themed)',
-    border: '1px solid var(--border-primary-themed)',
+    border: '1px solid var(--input-border)',
     borderRadius: '20px',
+    background: 'white',
     width: '100%',
     maxWidth: '50em',
     display: 'inline-flex',
     alignItems: 'center',
-    '--input-field-color': 'var(--content-primary-themed)',
-    '--input-field-bg': 'var(--bg-primary-themed)',
-    '--input-placeholder-content': 'var(--content-placeholder-themed)',
-    '--input-field-content-disabled': 'var(--content-disabled-themed)',
     '& input[type="text"]': {
       background: 'none',
       boxShadow: 'none',
-      borderRadius: '20px',
     },
     '& input[type="text"]:focus': {
       outline: 'none',
-      background: 'none',
       boxShadow: 'none',
     },
     '& .btn.btn': {
-      background: 'var(--bg-secondary-themed)',
-      color: 'var(--content-secondary-themed)',
+      background: 'var(--neutral-10)',
+      color: 'var(--neutral-60)',
       borderRadius: '50%',
       height: '2em',
       display: 'inline-flex',
@@ -380,10 +379,8 @@ const searchFormTheme = EditorView.theme({
       },
     },
     '&:focus-within': {
+      borderColor: 'var(--input-border-focus)',
       boxShadow: 'var(--ol-cm-search-form-focus-shadow)',
-    },
-    '& .form-control': {
-      color: 'var(--content-primary-themed)',
     },
   },
   '.ol-cm-search-input-group.ol-cm-search-input-error': {
@@ -409,7 +406,7 @@ const searchFormTheme = EditorView.theme({
   },
   '.ol-cm-search-form-position': {
     flexShrink: 0,
-    color: 'var(--content-secondary-themed)',
+    color: 'var(--content-secondary)',
     minWidth: '5em',
   },
   '.ol-cm-search-hidden-inputs': {
