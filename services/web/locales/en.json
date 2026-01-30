@@ -1440,6 +1440,8 @@
   "more_project_collaborators": "<0>More</0> project <0>collaborators</0>",
   "more_than_one_kind_of_snippet_was_requested": "The link to open this content on Overleaf included some invalid parameters. If this keeps happening for links on a particular site, please report this to them.",
   "most_popular_uppercase": "Most popular",
+  "move_to_the_left": "Move to the left",
+  "move_to_the_right": "Move to the right",
   "must_be_at_least_n_characters": "Must be at least __n__ characters. Avoid common passwords.",
   "must_be_email_address": "Must be an email address.",
   "must_be_purchased_online": "Must be purchased online",

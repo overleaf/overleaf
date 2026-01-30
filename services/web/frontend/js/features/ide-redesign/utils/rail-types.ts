@@ -1,6 +1,7 @@
 import { AvailableUnfilledIcon } from '@/shared/components/material-icon'
 import { RailTabKey } from '../contexts/rail-context'
 import { FC, ReactElement } from 'react'
+import RailTab from '@/features/ide-redesign/components/rail/rail-tab'
 
 export type CustomRailTabIcon = FC<{ open: boolean; title: string }>
 
@@ -14,4 +15,5 @@ export type RailElement = {
   disabled?: boolean
   mountOnFirstLoad?: boolean
   ref?: React.RefObject<HTMLAnchorElement>
+  tab?: typeof RailTab
 }

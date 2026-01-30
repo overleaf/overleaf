@@ -10,7 +10,7 @@ export default function RailPanelHeader({
   onClose,
 }: {
   title: React.ReactNode
-  actions?: React.ReactNode[]
+  actions?: React.ReactElement
   onClose?: () => void
 }) {
   const { t } = useTranslation()

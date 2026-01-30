@@ -200,3 +200,20 @@ body {
   background-color: black;
   border-radius: var(--border-radius-base);
 }
+
+.separated-rail-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  isolation: isolate;
+}
+
+.separated-rail-tab::before {
+  display: inline-block;
+  content: '';
+  border-top: 1px solid var(--border-divider);
+  width: 100%;
+  transform: translateY(-12px);
+}

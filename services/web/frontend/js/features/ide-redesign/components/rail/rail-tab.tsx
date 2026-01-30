@@ -1,7 +1,7 @@
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 import classNames from 'classnames'
-import { forwardRef, ReactElement } from 'react'
+import { ComponentProps, forwardRef, ReactElement } from 'react'
 import { NavLink } from 'react-bootstrap'
 import { RailElement } from '../../utils/rail-types'
 
@@ -9,13 +9,12 @@ const RailTab = forwardRef<
   HTMLAnchorElement,
   {
     icon: RailElement['icon']
-    eventKey: string
+    eventKey?: string
     open: boolean
     indicator?: ReactElement
     title: string
-    disabled?: boolean
-  }
->(({ icon, eventKey, open, indicator, title, disabled = false }, ref) => {
+  } & ComponentProps<'button'>
+>(({ icon, eventKey, className, open, indicator, title, ...props }, ref) => {
   return (
     <OLTooltip
       id={`rail-tab-tooltip-${eventKey}`}
@@ -23,12 +22,12 @@ const RailTab = forwardRef<
       overlayProps={{ delay: 0, placement: 'right' }}
     >
       <NavLink
+        {...props}
         ref={ref}
         eventKey={eventKey}
-        className={classNames('ide-rail-tab-link', {
+        className={classNames('ide-rail-tab-link', className, {
           'open-rail': open,
         })}
-        disabled={disabled}
       >
         <RailTabIcon icon={icon} title={title} open={open} />
         {indicator}

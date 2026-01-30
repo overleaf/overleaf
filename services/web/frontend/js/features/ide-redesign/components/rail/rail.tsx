@@ -32,6 +32,7 @@ import EditorTourThemeTooltip from '../editor-tour/editor-tour-theme-tooltip'
 import EditorTourGotQuestionsTooltip from '../editor-tour/editor-tour-got-questions'
 import { shouldIncludeElement } from '../../utils/rail-utils'
 import { useEditorContext } from '@/shared/context/editor-context'
+import useEventListener from '@/shared/hooks/use-event-listener'
 
 const moduleRailEntries = (
   importOverleafModules('railEntries') as {
@@ -39,6 +40,7 @@ const moduleRailEntries = (
     path: string
   }[]
 ).map(({ import: { default: element } }) => element)
+
 const moduleRailPopovers = (
   importOverleafModules('railPopovers') as {
     import: {
@@ -56,7 +58,8 @@ const moduleRailPopovers = (
 export const RailLayout = () => {
   const { sendEvent } = useEditorAnalytics()
   const { t } = useTranslation()
-  const { selectedTab, openTab, isOpen, togglePane } = useRailContext()
+  const { selectedTab, openTab, isOpen, setIsOpen, togglePane, selectTab } =
+    useRailContext()
   const { features } = useProjectContext()
   const { isRestrictedTokenMember } = useEditorContext()
   const gitBridgeEnabled = getMeta('ol-gitBridgeEnabled')
@@ -70,6 +73,23 @@ export const RailLayout = () => {
 
   const fileTreeRef = useRef<HTMLAnchorElement>(null)
   const settingsRef = useRef<HTMLButtonElement>(null)
+
+  useEventListener(
+    'ui:select-rail-tab',
+    useCallback(
+      (event: Event) => {
+        const {
+          detail: { tab, open },
+        } = event as CustomEvent<{
+          tab: RailTabKey
+          open: boolean
+        }>
+        selectTab(tab)
+        setIsOpen(open)
+      },
+      [selectTab, setIsOpen]
+    )
+  )
 
   const railTabs: RailElement[] = useMemo(
     () => [
@@ -253,18 +273,21 @@ export const RailLayout = () => {
           <div className="ide-rail-tabs-wrapper" ref={tabWrapperRef}>
             {tabsInRail
               .filter(shouldIncludeElement)
-              .map(({ icon, key, indicator, title, disabled, ref }) => (
-                <RailTab
-                  open={isOpen && selectedTab === key}
-                  key={key}
-                  eventKey={key}
-                  icon={icon}
-                  indicator={indicator}
-                  title={title}
-                  disabled={disabled}
-                  ref={ref}
-                />
-              ))}
+              .map(({ icon, key, indicator, title, disabled, ref, tab }) => {
+                const Component = tab ?? RailTab
+                return (
+                  <Component
+                    open={isOpen && selectedTab === key}
+                    key={key}
+                    eventKey={key}
+                    icon={icon}
+                    indicator={indicator}
+                    title={title}
+                    disabled={disabled}
+                    ref={ref}
+                  />
+                )
+              })}
             <RailActionElement key="more-options" action={moreOptionsAction} />
           </div>
           <nav aria-label={t('help_editor_settings')}>

@@ -41,6 +41,7 @@ const RailContext = createContext<
       activeModal: RailModalKey | null
       setActiveModal: Dispatch<SetStateAction<RailModalKey | null>>
       openTab: (tab: RailTabKey) => void
+      selectTab: (tab: RailTabKey) => void
     }
   | undefined
 >(undefined)
@@ -91,6 +92,13 @@ export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
       }
     }
   }, [isOpen, selectedTab])
+
+  const selectTab = useCallback(
+    (tab: RailTabKey) => {
+      setSelectedTab(tab)
+    },
+    [setSelectedTab]
+  )
 
   const openTab = useCallback(
     (tab: RailTabKey) => {
@@ -146,6 +154,7 @@ export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
       activeModal,
       setActiveModal,
       openTab,
+      selectTab,
     }),
     [
       selectedTab,
@@ -160,6 +169,7 @@ export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
       activeModal,
       setActiveModal,
       openTab,
+      selectTab,
     ]
   )
 

@@ -16,7 +16,7 @@ const ReviewPanelHeader: FC = () => {
       {newEditor ? (
         <RailPanelHeader
           title={t('review')}
-          actions={[<ReviewPanelResolvedThreadsButton key="resolve-threads" />]}
+          actions={<ReviewPanelResolvedThreadsButton key="resolve-threads" />}
         />
       ) : (
         <PanelHeading title={t('review')} handleClose={closeReviewPanel}>
