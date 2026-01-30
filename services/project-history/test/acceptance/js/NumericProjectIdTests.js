@@ -136,4 +136,20 @@ describe('NumericProjectId', function () {
     })
     expect(response.statusCode).to.equal(200)
   })
+
+  it('should accept numeric history_id for getProjectBlob', async function () {
+    const blobHash = 'a'.repeat(40)
+    const blobContent = 'test blob content'
+
+    MockHistoryStore()
+      .get(`/api/projects/${this.historyId}/blobs/${blobHash}`)
+      .reply(200, blobContent)
+
+    const { response, body } = await makeRequest({
+      method: 'GET',
+      url: `http://127.0.0.1:3054/project/${this.historyId}/blob/${blobHash}`,
+    })
+    expect(response.statusCode).to.equal(200)
+    expect(body).to.equal(blobContent)
+  })
 })

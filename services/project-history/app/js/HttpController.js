@@ -23,7 +23,7 @@ const ONE_DAY_IN_SECONDS = 24 * 60 * 60
 
 const getProjectBlobSchema = z.object({
   params: z.object({
-    history_id: zz.objectId(),
+    history_id: zz.objectId().or(z.coerce.number()),
     hash: z.string(),
   }),
 })
