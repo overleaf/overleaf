@@ -588,10 +588,12 @@ async function getChanges(req, res, next) {
 }
 
 function isPrematureClose(err) {
+
   return (
     err instanceof Error &&
     'code' in err &&
-    err.code === 'ERR_STREAM_PREMATURE_CLOSE'
+    (err.code === 'ERR_STREAM_PREMATURE_CLOSE' || 
+      err.code === 'ERR_STREAM_UNABLE_TO_PIPE') 
   )
 }
 
