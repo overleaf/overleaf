@@ -468,7 +468,7 @@ async function performCutover(
       AccountMappingHelper.generateSubscriptionToStripeMapping(
         mongoSubscription._id,
         stripeSubscription.id,
-        stripeSubscription.service
+        stripeClient.serviceName
       )
     )
   } catch (err) {
