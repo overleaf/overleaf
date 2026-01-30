@@ -301,30 +301,35 @@ async function performRollback(
     }
   )
 
-  // Step 3: Un-postpone Recurly billing by 10 years
+  // Step 3: Un-postpone Recurly billing by 10 years if next billing period was postponed
   const currentPeriodEnd = new Date(recurlySubscription.current_period_ends_at)
-  const nextBillingDate = new Date(currentPeriodEnd)
-  nextBillingDate.setFullYear(currentPeriodEnd.getFullYear() - 10)
-  const targetBillingDateIsInFuture = nextBillingDate.getTime() > Date.now()
+  const nineYearsFromNow = new Date()
+  nineYearsFromNow.setFullYear(new Date().getFullYear() + 9)
 
-  if (targetBillingDateIsInFuture) {
-    try {
-      await RecurlyWrapper.promises.apiRequest({
-        url: `subscriptions/${recurlySubscriptionId}/postpone`,
-        qs: { bulk: true, next_bill_date: nextBillingDate },
-        method: 'PUT',
-      })
-    } catch (err) {
+  if (currentPeriodEnd > nineYearsFromNow) {
+    const nextBillingDate = new Date(currentPeriodEnd)
+    nextBillingDate.setFullYear(currentPeriodEnd.getFullYear() - 10)
+    const targetBillingDateIsInFuture = nextBillingDate.getTime() > Date.now()
+
+    if (targetBillingDateIsInFuture) {
+      try {
+        await RecurlyWrapper.promises.apiRequest({
+          url: `subscriptions/${recurlySubscriptionId}/postpone`,
+          qs: { bulk: true, next_bill_date: nextBillingDate },
+          method: 'PUT',
+        })
+      } catch (err) {
+        throw new ReportError(
+          'rolled-back-recurly-restore-failed',
+          `Restored Mongo but failed to restore Recurly billing: ${err.message}`
+        )
+      }
+    } else {
       throw new ReportError(
         'rolled-back-recurly-restore-failed',
-        `Restored Mongo but failed to restore Recurly billing: ${err.message}`
+        `Restored Mongo and Recurly but failed to restore Recurly billing: target next billing date is in the past (${nextBillingDate.toISOString()})`
       )
     }
-  } else {
-    throw new ReportError(
-      'rolled-back-recurly-restore-failed',
-      `Restored Mongo and Recurly but failed to restore Recurly billing: target next billing date is in the past (${nextBillingDate.toISOString()})`
-    )
   }
 
   // Step 4: Restore migration metadata to Stripe

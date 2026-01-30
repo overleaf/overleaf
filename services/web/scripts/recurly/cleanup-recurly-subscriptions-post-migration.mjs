@@ -195,25 +195,60 @@ async function processTermination(input, commit) {
     )
   }
 
-  // 3. If commit mode, terminate the subscription
+  // 3. Fetch Recurly subscription and verify it is in our expected state
+  let recurlySubscription
+  let isInExpectedEndState = true
+  try {
+    recurlySubscription =
+      await RecurlyClient.promises.getSubscription(subscriptionUuid)
+  } catch (err) {
+    isInExpectedEndState = false
+  }
+
+  if (recurlySubscription) {
+    const nineYearsFromNow = new Date()
+    nineYearsFromNow.setFullYear(new Date().getFullYear() + 9)
+
+    if (
+      recurlySubscription.periodEnd > nineYearsFromNow &&
+      recurlySubscription.state === 'canceled'
+    ) {
+      isInExpectedEndState = false
+    }
+  } else {
+    throw new ReportError(
+      'missing-subscription',
+      'Recurly subscription not found'
+    )
+  }
+  const warning = isInExpectedEndState
+    ? ''
+    : `(subscription was NOT in expected state: periodEnd=${recurlySubscription?.periodEnd?.toISOString()}, state=${recurlySubscription?.state})`
+
+  // 4. If commit mode, terminate the subscription
   if (commit) {
     try {
       await RecurlyClient.promises.terminateSubscriptionByUuid(subscriptionUuid)
-
       return {
-        status: 'terminated',
-        note: 'Successfully terminated Recurly subscription',
+        status: isInExpectedEndState
+          ? 'terminated'
+          : 'terminated-with-warnings',
+        note: `Successfully terminated Recurly subscription ${warning}`,
       }
     } catch (err) {
       throw new ReportError(
         'terminate-failed',
-        `Failed to terminate: ${err.message}`
+        `Failed to terminate: ${err.message} ${warning}`
       )
     }
   } else {
+    const note = isInExpectedEndState
+      ? 'DRY RUN: Ready to terminate'
+      : `DRY RUN: Ready to terminate ${warning}`
+
     return {
       status: 'validated',
-      note: 'DRY RUN: Ready to terminate',
+      note,
     }
   }
 }

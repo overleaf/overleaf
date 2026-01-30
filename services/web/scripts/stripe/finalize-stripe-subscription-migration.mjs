@@ -431,21 +431,23 @@ async function performCutover(
     }
   )
 
-  // Step 3: Postpone Recurly billing by +10 years
-  const currentBillingDate = new Date(
-    recurlySubscription.current_period_ends_at
-  )
-  const postponedDate = new Date(currentBillingDate)
-  postponedDate.setFullYear(currentBillingDate.getFullYear() + 10)
+  // Step 3: Postpone Recurly billing by +10 years if Recurly subscription is active
+  if (recurlySubscription.state !== 'canceled') {
+    const currentBillingDate = new Date(
+      recurlySubscription.current_period_ends_at
+    )
+    const postponedDate = new Date(currentBillingDate)
+    postponedDate.setFullYear(currentBillingDate.getFullYear() + 10)
 
-  try {
-    await RecurlyWrapper.promises.apiRequest({
-      url: `subscriptions/${recurlySubscription.uuid}/postpone`,
-      qs: { bulk: true, next_bill_date: postponedDate },
-      method: 'PUT',
-    })
-  } catch (err) {
-    throw new Error(`Failed to postpone Recurly billing: ${err.message}`)
+    try {
+      await RecurlyWrapper.promises.apiRequest({
+        url: `subscriptions/${recurlySubscription.uuid}/postpone`,
+        qs: { bulk: true, next_bill_date: postponedDate },
+        method: 'PUT',
+      })
+    } catch (err) {
+      throw new Error(`Failed to postpone Recurly billing: ${err.message}`)
+    }
   }
 
   // Step 4: Remove migration metadata from Stripe
