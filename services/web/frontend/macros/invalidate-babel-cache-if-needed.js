@@ -3,8 +3,9 @@ const Path = require('path')
 const Settings = require('@overleaf/settings')
 
 module.exports = function invalidateBabelCacheIfNeeded() {
-  const cachePath = Path.join(__dirname, '../../node_modules/.cache')
-  const statePath = Path.join(cachePath, 'last-overleafModuleImports.json')
+  const cacheDir = Path.join(__dirname, '../../node_modules/.cache')
+  const cachePath = Path.join(cacheDir, 'babel-loader')
+  const statePath = Path.join(cacheDir, 'last-overleafModuleImports.json')
   let lastState = ''
   try {
     lastState = fs.readFileSync(statePath, { encoding: 'utf-8' })
@@ -16,15 +17,13 @@ module.exports = function invalidateBabelCacheIfNeeded() {
     console.warn(
       'Detected change in overleafModuleImports, purging babel cache!'
     )
-    // Gracefully handle cache mount in Server Pro build, only purge nested folders and keep .cache/ folder.
-    fs.mkdirSync(cachePath, { recursive: true })
-    for (const name of fs.readdirSync(cachePath)) {
-      fs.rmSync(Path.join(cachePath, name), {
-        recursive: true,
-        force: true,
-        maxRetries: 5,
-      })
-    }
+    // Gracefully handle cache mount in Server Pro build, only purge nested folder and keep .cache/ folder.
+    fs.mkdirSync(cacheDir, { recursive: true })
+    fs.rmSync(cachePath, {
+      recursive: true,
+      force: true,
+      maxRetries: 5,
+    })
     fs.writeFileSync(statePath, newState)
   }
 }
