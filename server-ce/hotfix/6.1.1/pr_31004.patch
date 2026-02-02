@@ -1,0 +1,131 @@
+--- a/services/web/frontend/js/features/ide-redesign/components/rail/rail-help-dropdown.tsx
++++ b/services/web/frontend/js/features/ide-redesign/components/rail/rail-help-dropdown.tsx
+@@ -10,6 +10,7 @@ import {
+ 
+ export default function RailHelpDropdown() {
+   const showSupport = getMeta('ol-showSupport')
++  const showDocumentation = getMeta('ol-wikiEnabled')
+   const { t } = useTranslation()
+   const { setActiveModal } = useRailContext()
+   const openKeyboardShortcutsModal = useCallback(() => {
+@@ -24,20 +25,24 @@ export default function RailHelpDropdown() {
+       <DropdownItem onClick={openKeyboardShortcutsModal}>
+         {t('keyboard_shortcuts')}
+       </DropdownItem>
+-      <DropdownItem
+-        href="/learn"
+-        role="menuitem"
+-        target="_blank"
+-        rel="noopener noreferrer"
+-      >
+-        {t('documentation')}
+-      </DropdownItem>
+-      <DropdownDivider />
+-      {showSupport && (
+-        <DropdownItem onClick={openContactUsModal}>
+-          {t('contact_us')}
++      {showDocumentation && (
++        <DropdownItem
++          href="/learn"
++          role="menuitem"
++          target="_blank"
++          rel="noopener noreferrer"
++        >
++          {t('documentation')}
+         </DropdownItem>
+       )}
++      {showSupport && (
++        <>
++          <DropdownDivider />
++          <DropdownItem onClick={openContactUsModal}>
++            {t('contact_us')}
++          </DropdownItem>
++        </>
++      )}
+     </DropdownMenu>
+   )
+ }
+diff --git a/services/web/frontend/js/features/ide-redesign/components/toolbar/menu-bar.tsx b/services/web/frontend/js/features/ide-redesign/components/toolbar/menu-bar.tsx
+index 1610cdb89675..648d2f47fb53 100644
+--- a/services/web/frontend/js/features/ide-redesign/components/toolbar/menu-bar.tsx
++++ b/services/web/frontend/js/features/ide-redesign/components/toolbar/menu-bar.tsx
+@@ -43,6 +43,8 @@ export const ToolbarMenuBar = () => {
+   const openProject = useOpenProject()
+ 
+   const anonymous = getMeta('ol-anonymous')
++  const showSupport = getMeta('ol-showSupport')
++  const showDocumentation = getMeta('ol-wikiEnabled')
+ 
+   useCommandProvider(
+     () => [
+@@ -266,19 +268,25 @@ export const ToolbarMenuBar = () => {
+             title={t('keyboard_shortcuts')}
+             onClick={openKeyboardShortcutsModal}
+           />
+-          <MenuBarOption
+-            title={t('documentation')}
+-            eventKey="documentation"
+-            href="/learn"
+-            target="_blank"
+-            rel="noopener noreferrer"
+-          />
+-          <DropdownDivider />
+-          <MenuBarOption
+-            eventKey="contact_us"
+-            title={t('contact_us')}
+-            onClick={openContactUsModal}
+-          />
++          {showDocumentation && (
++            <MenuBarOption
++              title={t('documentation')}
++              eventKey="documentation"
++              href="/learn"
++              target="_blank"
++              rel="noopener noreferrer"
++            />
++          )}
++          {showSupport && (
++            <>
++              <DropdownDivider />
++              <MenuBarOption
++                eventKey="contact_us"
++                title={t('contact_us')}
++                onClick={openContactUsModal}
++              />
++            </>
++          )}
+         </MenuBarDropdown>
+       </MenuBar>
+       <WordCountModal
+diff --git a/services/web/frontend/js/features/ide-redesign/contexts/settings-modal-context.tsx b/services/web/frontend/js/features/ide-redesign/contexts/settings-modal-context.tsx
+index 56f0d4e30fe4..ab3bbd9d2b7f 100644
+--- a/services/web/frontend/js/features/ide-redesign/contexts/settings-modal-context.tsx
++++ b/services/web/frontend/js/features/ide-redesign/contexts/settings-modal-context.tsx
+@@ -29,6 +29,7 @@ import DarkModePdfSetting from '../components/settings/appearance-settings/dark-
+ import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
+ import { useFeatureFlag } from '@/shared/context/split-test-context'
+ import ProjectNotificationsSetting from '../components/settings/editor-settings/project-notifications-setting'
++import getMeta from '@/utils/meta'
+ 
+ const [referenceSearchSettingModule] = importOverleafModules(
+   'referenceSearchSetting'
+@@ -82,6 +83,7 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
+   children,
+ }) => {
+   const { t } = useTranslation()
++  const { isOverleaf } = getMeta('ol-ExposedSettings')
+   const { overallTheme } = useProjectSettingsContext()
+ 
+   // TODO ide-redesign-cleanup: Rename this field and move it directly into this context
+@@ -265,9 +267,10 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
+         title: t('subscription'),
+         icon: 'account_balance',
+         href: '/user/subscription',
++        hidden: !isOverleaf,
+       },
+     ],
+-    [t, overallTheme, hasEmailNotifications, noNewEditorOptOut]
++    [t, overallTheme, hasEmailNotifications, noNewEditorOptOut, isOverleaf]
+   )
+ 
+   const settingsTabs = useMemo(
