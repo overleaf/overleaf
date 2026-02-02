@@ -14,7 +14,6 @@ import Modules from '../../infrastructure/Modules.mjs'
 import PaymentProviderEntities from './PaymentProviderEntities.mjs'
 import {
   ManuallyCollectedError,
-  PendingChangeError,
   InactiveError,
   HasPastDueInvoiceError,
   HasNoAdditionalLicenseWhenManuallyCollectedError,
@@ -100,16 +99,6 @@ async function ensureSubscriptionCollectionMethodIsNotManual(
   }
 }
 
-async function ensureSubscriptionHasNoPendingChanges(
-  paymentProviderSubscription
-) {
-  if (paymentProviderSubscription.pendingChange) {
-    throw new PendingChangeError('This subscription has a pending change', {
-      subscription_id: paymentProviderSubscription.id,
-    })
-  }
-}
-
 async function ensureSubscriptionHasNoPastDueInvoice(subscription) {
   const [paymentRecord] = await Modules.promises.hooks.fire(
     'getPaymentFromRecord',
@@ -184,7 +173,6 @@ async function _addSeatsSubscriptionChange(userId, adding) {
     await getUsersGroupSubscriptionDetails(userId)
   await ensureFlexibleLicensingEnabled(plan)
   await ensureSubscriptionIsActive(subscription)
-  await ensureSubscriptionHasNoPendingChanges(paymentProviderSubscription)
   await checkBillingInfoExistence(paymentProviderSubscription, userId)
   await ensureSubscriptionHasNoPastDueInvoice(subscription)
 
@@ -481,9 +469,6 @@ export default {
   ensureSubscriptionCollectionMethodIsNotManual: callbackify(
     ensureSubscriptionCollectionMethodIsNotManual
   ),
-  ensureSubscriptionHasNoPendingChanges: callbackify(
-    ensureSubscriptionHasNoPendingChanges
-  ),
   ensureSubscriptionHasNoPastDueInvoice: callbackify(
     ensureSubscriptionHasNoPastDueInvoice
   ),
@@ -503,7 +488,6 @@ export default {
     ensureFlexibleLicensingEnabled,
     ensureSubscriptionIsActive,
     ensureSubscriptionCollectionMethodIsNotManual,
-    ensureSubscriptionHasNoPendingChanges,
     ensureSubscriptionHasNoPastDueInvoice,
     ensureSubscriptionHasAdditionalLicenseAddOnWhenCollectionMethodIsManual,
     getTotalConfirmedUsersInGroup,

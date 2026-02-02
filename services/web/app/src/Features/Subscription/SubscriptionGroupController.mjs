@@ -14,12 +14,12 @@ import { isProfessionalGroupPlan } from './PlansHelper.mjs'
 import {
   MissingBillingInfoError,
   ManuallyCollectedError,
-  PendingChangeError,
   InactiveError,
   SubtotalLimitExceededError,
   HasPastDueInvoiceError,
   HasNoAdditionalLicenseWhenManuallyCollectedError,
   PaymentActionRequiredError,
+  MultiplePendingChangesError,
 } from './Errors.mjs'
 
 const MAX_NUMBER_OF_USERS = 20
@@ -146,9 +146,6 @@ async function addSeatsToGroupSubscription(req, res) {
         userId
       )
     await SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled(plan)
-    await SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPendingChanges(
-      paymentProviderSubscription
-    )
     await SubscriptionGroupHandler.promises.ensureSubscriptionIsActive(
       subscription
     )
@@ -186,7 +183,6 @@ async function addSeatsToGroupSubscription(req, res) {
     }
 
     if (
-      error instanceof PendingChangeError ||
       error instanceof InactiveError ||
       error instanceof HasPastDueInvoiceError
     ) {
@@ -228,7 +224,6 @@ async function previewAddSeatsSubscriptionChange(req, res) {
   } catch (error) {
     if (
       error instanceof MissingBillingInfoError ||
-      error instanceof PendingChangeError ||
       error instanceof InactiveError ||
       error instanceof HasPastDueInvoiceError ||
       error instanceof HasNoAdditionalLicenseWhenManuallyCollectedError
@@ -271,7 +266,7 @@ async function createAddSeatsSubscriptionChange(req, res) {
   } catch (error) {
     if (
       error instanceof MissingBillingInfoError ||
-      error instanceof PendingChangeError ||
+      error instanceof MultiplePendingChangesError ||
       error instanceof InactiveError ||
       error instanceof HasPastDueInvoiceError ||
       error instanceof HasNoAdditionalLicenseWhenManuallyCollectedError
@@ -383,7 +378,7 @@ async function subscriptionUpgradePage(req, res) {
       return res.redirect('/user/subscription/group/subtotal-limit-exceeded')
     }
 
-    if (error instanceof PendingChangeError || error instanceof InactiveError) {
+    if (error instanceof InactiveError) {
       return res.redirect('/user/subscription')
     }
 
@@ -404,6 +399,13 @@ async function upgradeSubscription(req, res) {
         message: 'Payment action required',
         clientSecret: error.info.clientSecret,
         publicKey: error.info.publicKey,
+      })
+    }
+    if (error instanceof MultiplePendingChangesError) {
+      return res.status(422).json({
+        code: 'multiple_pending_changes',
+        message:
+          'Cannot upgrade subscription while there are multiple pending subscription changes. Please contact support.',
       })
     }
     logger.err({ error }, 'error trying to upgrade subscription')

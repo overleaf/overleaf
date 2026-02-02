@@ -66,7 +66,6 @@ describe('SubscriptionGroupController', function () {
         ensureFlexibleLicensingEnabled: sinon.stub().resolves(),
         ensureSubscriptionIsActive: sinon.stub().resolves(),
         ensureSubscriptionCollectionMethodIsNotManual: sinon.stub().resolves(),
-        ensureSubscriptionHasNoPendingChanges: sinon.stub().resolves(),
         ensureSubscriptionHasNoPastDueInvoice: sinon.stub().resolves(),
         getGroupPlanUpgradePreview: sinon
           .stub()
@@ -132,7 +131,6 @@ describe('SubscriptionGroupController', function () {
     ctx.Errors = {
       MissingBillingInfoError: class extends Error {},
       ManuallyCollectedError: class extends Error {},
-      PendingChangeError: class extends Error {},
       InactiveError: class extends Error {},
       SubtotalLimitExceededError: class extends Error {},
       HasPastDueInvoiceError: class extends Error {},
@@ -143,6 +141,7 @@ describe('SubscriptionGroupController', function () {
           this.info = info
         }
       },
+      MultiplePendingChangesError: class extends Error {},
     }
 
     vi.doMock(
@@ -440,9 +439,6 @@ describe('SubscriptionGroupController', function () {
             ctx.SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled
               .calledWith(ctx.plan)
               .should.equal(true)
-            ctx.SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPendingChanges
-              .calledWith(ctx.recurlySubscription)
-              .should.equal(true)
             ctx.SubscriptionGroupHandler.promises.ensureSubscriptionIsActive
               .calledWith(ctx.subscription)
               .should.equal(true)
@@ -534,22 +530,6 @@ describe('SubscriptionGroupController', function () {
             url.should.equal(
               '/user/subscription/group/manually-collected-subscription?error_type=no-additional-license'
             )
-            resolve()
-          },
-        }
-
-        ctx.Controller.addSeatsToGroupSubscription(ctx.req, res)
-      })
-    })
-
-    it('should redirect to subscription page when there is a pending change', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.SubscriptionGroupHandler.promises.ensureSubscriptionHasNoPendingChanges =
-          sinon.stub().throws(new ctx.Errors.PendingChangeError())
-
-        const res = {
-          redirect: url => {
-            url.should.equal('/user/subscription')
             resolve()
           },
         }
@@ -756,6 +736,28 @@ describe('SubscriptionGroupController', function () {
         ctx.Controller.createAddSeatsSubscriptionChange(ctx.req, res)
       })
     })
+
+    it('should return 422 with MultiplePendingChangesError', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.req.body = { adding: 2 }
+        ctx.SubscriptionGroupHandler.promises.createAddSeatsSubscriptionChange =
+          sinon.stub().throws(new ctx.Errors.MultiplePendingChangesError())
+
+        const res = {
+          status: statusCode => {
+            statusCode.should.equal(422)
+
+            return {
+              end: () => {
+                resolve()
+              },
+            }
+          },
+        }
+
+        ctx.Controller.createAddSeatsSubscriptionChange(ctx.req, res)
+      })
+    })
   })
 
   describe('submitForm', function () {
@@ -953,6 +955,31 @@ describe('SubscriptionGroupController', function () {
                   message: 'Payment action required',
                   clientSecret: error.info.clientSecret,
                   publicKey: error.info.publicKey,
+                })
+                resolve()
+              },
+            }
+          },
+        }
+
+        ctx.Controller.upgradeSubscription(ctx.req, res)
+      })
+    })
+
+    it('should send 422 response with MultiplePendingChangesError', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.SubscriptionGroupHandler.promises.upgradeGroupPlan = sinon
+          .stub()
+          .rejects(new ctx.Errors.MultiplePendingChangesError())
+        const res = {
+          status: code => {
+            code.should.equal(422)
+            return {
+              json: data => {
+                data.should.deep.equal({
+                  code: 'multiple_pending_changes',
+                  message:
+                    'Cannot upgrade subscription while there are multiple pending subscription changes. Please contact support.',
                 })
                 resolve()
               },

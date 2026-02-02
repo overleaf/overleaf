@@ -130,6 +130,26 @@ export class PaymentProviderSubscription {
   }
 
   /**
+   * Returns the add-ons that should be used as the base for a change request.
+   *
+   * For immediate changes (timeframe = 'now'), we use the current add-ons because
+   * the user is still paying for them until term_end. Any pending term_end changes
+   * will need to be re-applied after the immediate change by the payment provider client.
+   *
+   * For term_end changes, if there's already a pending change, we use its nextAddOns
+   * as the base to merge scheduled changes together.
+   *
+   * @param {"now" | "term_end"} timeframe - when the change will be applied
+   * @return {PaymentProviderSubscriptionAddOn[]}
+   */
+  #getBaseAddOnsForChangeRequest(timeframe) {
+    if (timeframe === 'term_end' && this.pendingChange != null) {
+      return this.pendingChange.nextAddOns
+    }
+    return this.addOns
+  }
+
+  /**
    * Change this subscription's plan
    * @param {string} planCode - the new plan code
    * @param {number} [quantity] - the quantity of the plan
@@ -137,40 +157,46 @@ export class PaymentProviderSubscription {
    * @return {PaymentProviderSubscriptionChangeRequest}
    */
   getRequestForPlanChange(planCode, quantity, shouldChangeAtTermEnd) {
-    const changeRequest = new PaymentProviderSubscriptionChangeRequest({
-      subscription: this,
-      timeframe: shouldChangeAtTermEnd ? 'term_end' : 'now',
-      planCode,
-    })
+    const timeframe = shouldChangeAtTermEnd ? 'term_end' : 'now'
+    const baseAddOns = this.#getBaseAddOnsForChangeRequest(timeframe)
+
+    // Start with all existing add-ons, but filter out additional-license
+    // since we'll handle it specially for group plans below
+    const addOnUpdates = baseAddOns
+      .filter(addOn => addOn.code !== MEMBERS_LIMIT_ADD_ON_CODE)
+      .map(addOn => addOn.toAddOnUpdate())
 
     if (quantity !== 1) {
       // Only group plans in Stripe can have larger than 1 quantity
-      // This is because in Stripe, the group plans are configued with per-seat pricing
+      // This is because in Stripe, the group plans are configured with per-seat pricing
       // and the quantity is the number of seats
       // Setting the members limit add-on quantity accordingly
-      // so it is compitible with Recurly's group plan model (1 base plan + add-on for each member)
-      changeRequest.addOnUpdates = [
+      // so it is compatible with Recurly's group plan model (1 base plan + add-on for each member)
+      addOnUpdates.push(
         new PaymentProviderSubscriptionAddOnUpdate({
           code: MEMBERS_LIMIT_ADD_ON_CODE,
           quantity,
-        }),
-      ]
+        })
+      )
     }
 
-    // Carry the AI add-on to the new plan if applicable
-    if (
-      this.isStandaloneAiAddOn() ||
-      (!shouldChangeAtTermEnd && this.hasAddOn(AI_ADD_ON_CODE)) ||
-      (shouldChangeAtTermEnd && this.hasAddOnNextPeriod(AI_ADD_ON_CODE))
-    ) {
-      const addOnUpdate = new PaymentProviderSubscriptionAddOnUpdate({
-        code: AI_ADD_ON_CODE,
-        quantity: 1,
-      })
-      changeRequest.addOnUpdates = changeRequest.addOnUpdates
-        ? [...changeRequest.addOnUpdates, addOnUpdate]
-        : [addOnUpdate]
+    // When upgrading from standalone AI plan, add the AI add-on since
+    // the standalone plan doesn't have it as an add-on
+    if (this.isStandaloneAiAddOn() && !isStandaloneAiAddOnPlanCode(planCode)) {
+      addOnUpdates.push(
+        new PaymentProviderSubscriptionAddOnUpdate({
+          code: AI_ADD_ON_CODE,
+          quantity: 1,
+        })
+      )
     }
+
+    const changeRequest = new PaymentProviderSubscriptionChangeRequest({
+      subscription: this,
+      timeframe,
+      planCode,
+      addOnUpdates,
+    })
 
     return changeRequest
   }
@@ -194,7 +220,8 @@ export class PaymentProviderSubscription {
       })
     }
 
-    const addOnUpdates = this.addOns.map(addOn => addOn.toAddOnUpdate())
+    const baseAddOns = this.#getBaseAddOnsForChangeRequest('now')
+    const addOnUpdates = baseAddOns.map(addOn => addOn.toAddOnUpdate())
     addOnUpdates.push(
       new PaymentProviderSubscriptionAddOnUpdate({ code, quantity, unitPrice })
     )
@@ -226,7 +253,8 @@ export class PaymentProviderSubscription {
       )
     }
 
-    const addOnUpdates = this.addOns.map(addOn => {
+    const baseAddOns = this.#getBaseAddOnsForChangeRequest('now')
+    const addOnUpdates = baseAddOns.map(addOn => {
       const update = addOn.toAddOnUpdate()
 
       if (update.code === code) {
@@ -261,13 +289,22 @@ export class PaymentProviderSubscription {
         }
       )
     }
-    const addOnUpdates = this.addOns
+    const isInTrial = SubscriptionHelper.isInTrial(this.trialPeriodEnd)
+    const timeframe = isInTrial ? 'now' : 'term_end'
+
+    const baseAddOns = this.#getBaseAddOnsForChangeRequest(timeframe)
+    const addOnUpdates = baseAddOns
       .filter(addOn => addOn.code !== code)
       .map(addOn => addOn.toAddOnUpdate())
-    const isInTrial = SubscriptionHelper.isInTrial(this.trialPeriodEnd)
+
+    // preserve pending plan change when scheduling add-on removal at term_end
+    const planCode =
+      timeframe === 'term_end' ? this.pendingChange?.nextPlanCode : undefined
+
     return new PaymentProviderSubscriptionChangeRequest({
       subscription: this,
-      timeframe: isInTrial ? 'now' : 'term_end',
+      timeframe,
+      planCode,
       addOnUpdates,
     })
   }
@@ -295,9 +332,62 @@ export class PaymentProviderSubscription {
       .map(addOn => addOn.toAddOnUpdate())
     addOnUpdates.push(reactivatedAddOn.toAddOnUpdate())
 
+    // preserve pending plan change when reactivating add-on
+    const planCode = pendingChange.nextPlanCode
+
     return new PaymentProviderSubscriptionChangeRequest({
       subscription: this,
       timeframe: 'term_end',
+      planCode,
+      addOnUpdates,
+    })
+  }
+
+  /**
+   * Cancel only the pending plan change while preserving any pending add-on changes
+   *
+   * This is used when a user wants to "keep their current plan" but has also
+   * scheduled add-on changes (additions or removals) that should still happen.
+   *
+   * @return {PaymentProviderSubscriptionChangeRequest | null}
+   */
+  getRequestForPlanChangeCancellation() {
+    const pendingChange = this.pendingChange
+    if (pendingChange == null) {
+      return null
+    }
+
+    const currentAddOnCodes = this.addOns.map(a => a.code)
+    const pendingAddOnCodes = pendingChange.nextAddOns.map(a => a.code)
+
+    const hasAddOnChanges =
+      currentAddOnCodes.length !== pendingAddOnCodes.length ||
+      !currentAddOnCodes.every(code => pendingAddOnCodes.includes(code))
+
+    if (!hasAddOnChanges) {
+      return null
+    }
+
+    const addOnUpdates = pendingChange.nextAddOns
+      .filter(addOn => {
+        if (
+          addOn.code === MEMBERS_LIMIT_ADD_ON_CODE &&
+          !this.isGroupSubscription() &&
+          PlansLocator.isGroupPlanCode(pendingChange.nextPlanCode)
+        ) {
+          // if there was a pending group plan upgrade, removing the plan change
+          // means we also need to remove the members limit add-on
+          return false
+        }
+
+        return true
+      })
+      .map(addOn => addOn.toAddOnUpdate())
+
+    return new PaymentProviderSubscriptionChangeRequest({
+      subscription: this,
+      timeframe: 'term_end',
+      planCode: this.planCode,
       addOnUpdates,
     })
   }
@@ -346,8 +436,8 @@ export class PaymentProviderSubscription {
    * @return {PaymentProviderSubscriptionChangeRequest}
    */
   getRequestForGroupPlanUpgrade(newPlanCode) {
-    // Ensure all the existing add-ons are added to the new plan
-    const addOns = this.addOns.map(
+    const baseAddOns = this.#getBaseAddOnsForChangeRequest('now')
+    const addOns = baseAddOns.map(
       addOn =>
         new PaymentProviderSubscriptionAddOnUpdate({
           code: addOn.code,

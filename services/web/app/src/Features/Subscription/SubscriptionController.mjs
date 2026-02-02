@@ -35,6 +35,7 @@ import { sanitizeSessionUserForFrontEnd } from '../../infrastructure/FrontEndUse
 import { z, parseReq } from '../../infrastructure/Validation.mjs'
 import { IndeterminateInvoiceError } from '../Errors/Errors.js'
 import SubscriptionLocator from './SubscriptionLocator.mjs'
+import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities.mjs'
 
 const {
   DuplicateAddOnError,
@@ -42,6 +43,7 @@ const {
   PaymentActionRequiredError,
   PaymentFailedError,
   MissingBillingInfoError,
+  MultiplePendingChangesError,
 } = Errors
 
 const SUBSCRIPTION_PAUSED_REDIRECT_PATH =
@@ -157,7 +159,6 @@ async function checkSubscriptionPauseStatus(user) {
 /**
  * @import { SubscriptionChangeDescription } from '../../../../types/subscription/subscription-change-preview'
  * @import { SubscriptionChangePreview } from '../../../../types/subscription/subscription-change-preview'
- * @import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities.mjs'
  * @import { PaymentMethod } from './types'
  */
 
@@ -655,6 +656,16 @@ async function purchaseAddon(req, res, next) {
         reason: err.info.reason,
         adviceCode: err.info.adviceCode,
       })
+    } else if (err instanceof MultiplePendingChangesError) {
+      logger.warn(
+        { userId: user._id, err, addOnCode },
+        'Cannot purchase add-on: multiple pending changes'
+      )
+      return res.status(422).json({
+        code: 'multiple_pending_changes',
+        message:
+          'Cannot complete purchase while there are multiple pending subscription changes. Please contact support.',
+      })
     } else {
       if (err instanceof Error) {
         OError.tag(err, 'something went wrong purchasing add-ons', {
@@ -703,6 +714,16 @@ async function removeAddon(req, res, next) {
         'Your subscription does not contain the requested add-on',
         { addon: addOnCode }
       )
+    } else if (err instanceof MultiplePendingChangesError) {
+      logger.warn(
+        { userId: user._id, err, addOnCode },
+        'Cannot remove add-on: multiple pending changes'
+      )
+      return res.status(422).json({
+        code: 'multiple_pending_changes',
+        message:
+          'Cannot remove add-on while there are multiple pending subscription changes. Please contact support.',
+      })
     } else {
       if (err instanceof Error) {
         OError.tag(err, 'something went wrong removing add-ons', {
@@ -1104,9 +1125,38 @@ function makeChangePreview(
   paymentMethod
 ) {
   const subscription = subscriptionChange.subscription
+
+  // For the future invoice display, if there's a pending change scheduled,
+  // we should show what will happen at renewal (the pending change state)
+  // merged with any new changes from this immediate update
+  const pendingChange = subscription.pendingChange
+
+  let futureInvoiceChange
+  if (pendingChange) {
+    const pendingAddOnCodes = new Set(pendingChange.nextAddOns.map(a => a.code))
+    const mergedAddOns = [...pendingChange.nextAddOns]
+
+    for (const addOn of subscriptionChange.nextAddOns) {
+      if (!pendingAddOnCodes.has(addOn.code)) {
+        mergedAddOns.push(addOn)
+      }
+    }
+
+    futureInvoiceChange = new PaymentProviderSubscriptionChange({
+      subscription,
+      nextPlanCode: pendingChange.nextPlanCode,
+      nextPlanName: pendingChange.nextPlanName,
+      nextPlanPrice: pendingChange.nextPlanPrice,
+      nextAddOns: mergedAddOns,
+    })
+  } else {
+    futureInvoiceChange = subscriptionChange
+  }
+
   const nextPlan = PlansLocator.findLocalPlanInSettings(
-    subscriptionChange.nextPlanCode
+    futureInvoiceChange.nextPlanCode
   )
+
   return {
     change: subscriptionChangeDescription,
     currency: subscription.currency,
@@ -1120,24 +1170,24 @@ function makeChangePreview(
       date: subscription.periodEnd.toISOString(),
       plan: {
         name: getPlanNameForDisplay(
-          subscriptionChange.nextPlanName,
-          subscriptionChange.nextPlanCode
+          futureInvoiceChange.nextPlanName,
+          futureInvoiceChange.nextPlanCode
         ),
-        amount: subscriptionChange.nextPlanPrice,
+        amount: futureInvoiceChange.nextPlanPrice,
       },
-      addOns: subscriptionChange.nextAddOns.map(addOn => ({
+      addOns: futureInvoiceChange.nextAddOns.map(addOn => ({
         code: addOn.code,
         name: addOn.name,
         quantity: addOn.quantity,
         unitAmount: addOn.unitPrice,
         amount: addOn.preTaxTotal,
       })),
-      subtotal: subscriptionChange.subtotal,
+      subtotal: futureInvoiceChange.subtotal,
       tax: {
         rate: subscription.taxRate,
-        amount: subscriptionChange.tax,
+        amount: futureInvoiceChange.tax,
       },
-      total: subscriptionChange.total,
+      total: futureInvoiceChange.total,
     },
   }
 }

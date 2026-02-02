@@ -104,6 +104,13 @@ describe('PaymentProviderEntities', function () {
               subscription: ctx.subscription,
               timeframe: 'now',
               planCode: 'premium-plan',
+              addOnUpdates: [
+                new PaymentProviderSubscriptionAddOnUpdate({
+                  code: ctx.addOn.code,
+                  quantity: ctx.addOn.quantity,
+                  unitPrice: ctx.addOn.unitPrice,
+                }),
+              ],
             })
           )
         })
@@ -121,6 +128,13 @@ describe('PaymentProviderEntities', function () {
               subscription: ctx.subscription,
               timeframe: 'term_end',
               planCode: 'cheap-plan',
+              addOnUpdates: [
+                new PaymentProviderSubscriptionAddOnUpdate({
+                  code: ctx.addOn.code,
+                  quantity: ctx.addOn.quantity,
+                  unitPrice: ctx.addOn.unitPrice,
+                }),
+              ],
             })
           )
         })
@@ -141,6 +155,13 @@ describe('PaymentProviderEntities', function () {
               subscription: ctx.subscription,
               timeframe: 'now',
               planCode: 'cheap-plan',
+              addOnUpdates: [
+                new PaymentProviderSubscriptionAddOnUpdate({
+                  code: ctx.addOn.code,
+                  quantity: ctx.addOn.quantity,
+                  unitPrice: ctx.addOn.unitPrice,
+                }),
+              ],
             })
           )
         })
@@ -163,6 +184,7 @@ describe('PaymentProviderEntities', function () {
                 new PaymentProviderSubscriptionAddOnUpdate({
                   code: AI_ADD_ON_CODE,
                   quantity: 1,
+                  unitPrice: ctx.addOn.unitPrice,
                 }),
               ],
             })
@@ -187,6 +209,7 @@ describe('PaymentProviderEntities', function () {
                 new PaymentProviderSubscriptionAddOnUpdate({
                   code: AI_ADD_ON_CODE,
                   quantity: 1,
+                  unitPrice: ctx.addOn.unitPrice,
                 }),
               ],
             })
@@ -236,6 +259,11 @@ describe('PaymentProviderEntities', function () {
               planCode: 'group_collaborator',
               addOnUpdates: [
                 new PaymentProviderSubscriptionAddOnUpdate({
+                  code: ctx.addOn.code,
+                  quantity: ctx.addOn.quantity,
+                  unitPrice: ctx.addOn.unitPrice,
+                }),
+                new PaymentProviderSubscriptionAddOnUpdate({
                   code: 'additional-license',
                   quantity: 10,
                 }),
@@ -263,16 +291,82 @@ describe('PaymentProviderEntities', function () {
               planCode: 'group_collaborator',
               addOnUpdates: [
                 new PaymentProviderSubscriptionAddOnUpdate({
-                  code: 'additional-license',
-                  quantity: 10,
-                }),
-                new PaymentProviderSubscriptionAddOnUpdate({
                   code: AI_ADD_ON_CODE,
                   quantity: 1,
+                  unitPrice: ctx.addOn.unitPrice,
+                }),
+                new PaymentProviderSubscriptionAddOnUpdate({
+                  code: 'additional-license',
+                  quantity: 10,
                 }),
               ],
             })
           )
+        })
+
+        describe('with pending add-on removal', function () {
+          beforeEach(function (ctx) {
+            // Reset to a subscription with an add-on and pending removal
+            const {
+              PaymentProviderSubscription,
+              PaymentProviderSubscriptionAddOn,
+            } = ctx.PaymentProviderEntities
+            ctx.addOn = new PaymentProviderSubscriptionAddOn({
+              code: 'add-on-code',
+              name: 'My Add-On',
+              quantity: 1,
+              unitPrice: 2,
+            })
+            ctx.subscription = new PaymentProviderSubscription({
+              id: 'subscription-id',
+              userId: 'user-id',
+              planCode: 'regular-plan',
+              planName: 'My Plan',
+              planPrice: 10,
+              addOns: [ctx.addOn],
+              subtotal: 10.99,
+              taxRate: 0.2,
+              taxAmount: 2.4,
+              total: 14.4,
+              currency: 'USD',
+            })
+            // Set up a pending change that removes the add-on at term_end
+            ctx.subscription.pendingChange =
+              new PaymentProviderSubscriptionChange({
+                subscription: ctx.subscription,
+                nextPlanCode: ctx.subscription.planCode,
+                nextPlanName: ctx.subscription.planName,
+                nextPlanPrice: ctx.subscription.planPrice,
+                nextAddOns: [], // Add-on is scheduled to be removed
+              })
+          })
+
+          it('preserves current add-ons for immediate upgrade', function (ctx) {
+            const changeRequest = ctx.subscription.getRequestForPlanChange(
+              'premium-plan',
+              1,
+              false // immediate change
+            )
+            expect(changeRequest.timeframe).to.equal('now')
+            expect(changeRequest.addOnUpdates).to.deep.equal([
+              new PaymentProviderSubscriptionAddOnUpdate({
+                code: ctx.addOn.code,
+                quantity: ctx.addOn.quantity,
+                unitPrice: ctx.addOn.unitPrice,
+              }),
+            ])
+          })
+
+          it('stacks with pending add-on removal for term_end downgrade', function (ctx) {
+            const changeRequest = ctx.subscription.getRequestForPlanChange(
+              'cheap-plan',
+              1,
+              true // term_end change
+            )
+            expect(changeRequest.timeframe).to.equal('term_end')
+            // Should have NO add-ons because the pending change already removed them
+            expect(changeRequest.addOnUpdates).to.deep.equal([])
+          })
         })
       })
 
@@ -339,6 +433,51 @@ describe('PaymentProviderEntities', function () {
           expect(() =>
             ctx.subscription.getRequestForAddOnPurchase(ctx.addOn.code)
           ).to.throw(Errors.DuplicateAddOnError)
+        })
+
+        describe('with pending plan downgrade', function () {
+          beforeEach(function (ctx) {
+            // Scenario: downgrade is scheduled, and then they want to buy an add-on immediately
+            const {
+              PaymentProviderSubscription,
+              PaymentProviderSubscriptionChange,
+            } = ctx.PaymentProviderEntities
+            ctx.subscription = new PaymentProviderSubscription({
+              id: 'subscription-id',
+              userId: 'user-id',
+              planCode: 'premium-plan',
+              planName: 'Premium Plan',
+              planPrice: 20,
+              addOns: [],
+              subtotal: 20,
+              taxRate: 0.2,
+              taxAmount: 4,
+              total: 24,
+              currency: 'USD',
+            })
+            // Pending downgrade to cheaper plan at term_end
+            ctx.subscription.pendingChange =
+              new PaymentProviderSubscriptionChange({
+                subscription: ctx.subscription,
+                nextPlanCode: 'cheap-plan',
+                nextPlanName: 'Cheap Plan',
+                nextPlanPrice: 5,
+                nextAddOns: [],
+              })
+          })
+
+          it('uses current add-ons for immediate add-on purchase', function (ctx) {
+            const changeRequest =
+              ctx.subscription.getRequestForAddOnPurchase('assistant')
+            expect(changeRequest.timeframe).to.equal('now')
+            // Should only have the new add-on, based on current state, client will reapply the pending change
+            expect(changeRequest.addOnUpdates).to.deep.equal([
+              new PaymentProviderSubscriptionAddOnUpdate({
+                code: 'assistant',
+                quantity: 1,
+              }),
+            ])
+          })
         })
       })
 
@@ -410,6 +549,57 @@ describe('PaymentProviderEntities', function () {
             ctx.subscription.getRequestForAddOnRemoval('another-add-on')
           ).to.throw(Errors.AddOnNotPresentError)
         })
+
+        describe('with pending changes', function () {
+          beforeEach(function (ctx) {
+            // Scenario: a subscription has two add-ons, one already scheduled for removal
+            const {
+              PaymentProviderSubscription,
+              PaymentProviderSubscriptionAddOn,
+            } = ctx.PaymentProviderEntities
+            ctx.addOn1 = new PaymentProviderSubscriptionAddOn({
+              code: 'addon-1',
+              name: 'Add-On 1',
+              quantity: 1,
+              unitPrice: 2,
+            })
+            ctx.addOn2 = new PaymentProviderSubscriptionAddOn({
+              code: 'addon-2',
+              name: 'Add-On 2',
+              quantity: 1,
+              unitPrice: 3,
+            })
+            ctx.subscription = new PaymentProviderSubscription({
+              id: 'subscription-id',
+              userId: 'user-id',
+              planCode: 'regular-plan',
+              planName: 'My Plan',
+              planPrice: 10,
+              addOns: [ctx.addOn1, ctx.addOn2],
+              subtotal: 10.99,
+              taxRate: 0.2,
+              taxAmount: 2.4,
+              total: 14.4,
+              currency: 'USD',
+            })
+            // Set up a pending change that removes addon-1 at term_end
+            ctx.subscription.pendingChange =
+              new PaymentProviderSubscriptionChange({
+                subscription: ctx.subscription,
+                nextPlanCode: ctx.subscription.planCode,
+                nextPlanName: ctx.subscription.planName,
+                nextPlanPrice: ctx.subscription.planPrice,
+                nextAddOns: [ctx.addOn2], // Only addon-2 remains
+              })
+          })
+
+          it('stacks multiple add-on removals at term_end', function (ctx) {
+            const changeRequest =
+              ctx.subscription.getRequestForAddOnRemoval('addon-2')
+            expect(changeRequest.timeframe).to.equal('term_end')
+            expect(changeRequest.addOnUpdates).to.deep.equal([]) // empty because both are scheduled for removal
+          })
+        })
       })
 
       describe('getRequestForAddOnReactivation()', function () {
@@ -471,6 +661,172 @@ describe('PaymentProviderEntities', function () {
         })
       })
 
+      describe('getRequestForPlanChangeCancellation()', function () {
+        it('returns null when there is no pending change', function (ctx) {
+          ctx.subscription.pendingChange = null
+          const result = ctx.subscription.getRequestForPlanChangeCancellation()
+          expect(result).to.be.null
+        })
+
+        it('returns null when pending change has no add-on changes', function (ctx) {
+          // Same add-ons in pending change as current subscription
+          ctx.subscription.pendingChange =
+            new PaymentProviderSubscriptionChange({
+              subscription: ctx.subscription,
+              nextPlanCode: 'cheap-plan', // only plan change, no add-on change
+              nextPlanName: 'Cheap Plan',
+              nextPlanPrice: 5,
+              nextAddOns: [ctx.addOn], // same add-on as current subscription
+            })
+          const result = ctx.subscription.getRequestForPlanChangeCancellation()
+          expect(result).to.be.null
+        })
+
+        it('returns a change request preserving add-on removal when canceling plan change', function (ctx) {
+          // Pending change has both plan downgrade AND add-on removal
+          ctx.subscription.pendingChange =
+            new PaymentProviderSubscriptionChange({
+              subscription: ctx.subscription,
+              nextPlanCode: 'cheap-plan',
+              nextPlanName: 'Cheap Plan',
+              nextPlanPrice: 5,
+              nextAddOns: [], // add-on is being removed
+            })
+
+          const result = ctx.subscription.getRequestForPlanChangeCancellation()
+          expect(result).to.not.be.null
+          expect(result.timeframe).to.equal('term_end')
+          expect(result.planCode).to.equal(ctx.subscription.planCode) // keep current plan
+          expect(result.addOnUpdates).to.deep.equal([]) // preserve add-on removal
+        })
+
+        it('returns a change request preserving add-on addition when canceling plan change', function (ctx) {
+          const {
+            PaymentProviderSubscriptionAddOn,
+            PaymentProviderSubscriptionAddOnUpdate,
+          } = ctx.PaymentProviderEntities
+
+          // Current subscription has one add-on
+          // Pending change has plan downgrade AND a new add-on
+          const newAddOn = new PaymentProviderSubscriptionAddOn({
+            code: 'new-addon',
+            name: 'New Add-On',
+            quantity: 1,
+            unitPrice: 3,
+          })
+          ctx.subscription.pendingChange =
+            new PaymentProviderSubscriptionChange({
+              subscription: ctx.subscription,
+              nextPlanCode: 'cheap-plan',
+              nextPlanName: 'Cheap Plan',
+              nextPlanPrice: 5,
+              nextAddOns: [ctx.addOn, newAddOn], // current add-on plus new one
+            })
+
+          const result = ctx.subscription.getRequestForPlanChangeCancellation()
+          expect(result).to.not.be.null
+          expect(result.timeframe).to.equal('term_end')
+          expect(result.planCode).to.equal(ctx.subscription.planCode) // keep current plan
+          expect(result.addOnUpdates).to.deep.equal([
+            new PaymentProviderSubscriptionAddOnUpdate({
+              code: ctx.addOn.code,
+              quantity: ctx.addOn.quantity,
+              unitPrice: ctx.addOn.unitPrice,
+            }),
+            new PaymentProviderSubscriptionAddOnUpdate({
+              code: newAddOn.code,
+              quantity: newAddOn.quantity,
+              unitPrice: newAddOn.unitPrice,
+            }),
+          ])
+        })
+
+        it('removes additional-license add-on when canceling pending group plan upgrade', function (ctx) {
+          const { MEMBERS_LIMIT_ADD_ON_CODE } = ctx.PaymentProviderEntities
+
+          // Current: professional-annual (no add-ons, not a group plan)
+          ctx.subscription.planCode = 'professional-annual'
+          ctx.subscription.planName = 'Professional Annual'
+          ctx.subscription.addOns = []
+
+          // Pending: group_professional_10_educational + 5 additional-license
+          const additionalLicenseAddOn =
+            new ctx.PaymentProviderEntities.PaymentProviderSubscriptionAddOn({
+              code: MEMBERS_LIMIT_ADD_ON_CODE,
+              name: 'Additional License',
+              quantity: 5,
+              unitPrice: 10,
+            })
+
+          ctx.subscription.pendingChange =
+            new PaymentProviderSubscriptionChange({
+              subscription: ctx.subscription,
+              nextPlanCode: 'group_professional_10_educational',
+              nextPlanName: 'Group Professional Educational',
+              nextPlanPrice: 100,
+              nextAddOns: [additionalLicenseAddOn],
+            })
+
+          const result = ctx.subscription.getRequestForPlanChangeCancellation()
+
+          // Should return a change request that keeps the current plan
+          // but removes the additional-license add-on
+          expect(result).to.not.be.null
+          expect(result.timeframe).to.equal('term_end')
+          expect(result.planCode).to.equal('professional-annual')
+          expect(result.addOnUpdates).to.deep.equal([])
+        })
+
+        it('preserves non-members-limit add-ons when canceling pending group plan upgrade', function (ctx) {
+          const { MEMBERS_LIMIT_ADD_ON_CODE } = ctx.PaymentProviderEntities
+
+          // Current: professional-annual with AI add-on (not a group plan)
+          ctx.subscription.planCode = 'professional-annual'
+          ctx.subscription.planName = 'Professional Annual'
+          const aiAddOn =
+            new ctx.PaymentProviderEntities.PaymentProviderSubscriptionAddOn({
+              code: AI_ADD_ON_CODE,
+              name: 'AI Add-On',
+              quantity: 1,
+              unitPrice: 20,
+            })
+          ctx.subscription.addOns = [aiAddOn]
+
+          // Pending: group_professional_10_educational + AI add-on + 5 additional-license
+          const additionalLicenseAddOn =
+            new ctx.PaymentProviderEntities.PaymentProviderSubscriptionAddOn({
+              code: MEMBERS_LIMIT_ADD_ON_CODE,
+              name: 'Additional License',
+              quantity: 5,
+              unitPrice: 10,
+            })
+
+          ctx.subscription.pendingChange =
+            new PaymentProviderSubscriptionChange({
+              subscription: ctx.subscription,
+              nextPlanCode: 'group_professional_10_educational',
+              nextPlanName: 'Group Professional Educational',
+              nextPlanPrice: 100,
+              nextAddOns: [aiAddOn, additionalLicenseAddOn],
+            })
+
+          const result = ctx.subscription.getRequestForPlanChangeCancellation()
+
+          // Should return a change request that keeps the current plan and AI add-on
+          // but removes the additional-license add-on
+          expect(result).to.not.be.null
+          expect(result.timeframe).to.equal('term_end')
+          expect(result.planCode).to.equal('professional-annual')
+          expect(result.addOnUpdates).to.deep.equal([
+            new PaymentProviderSubscriptionAddOnUpdate({
+              code: AI_ADD_ON_CODE,
+              quantity: 1,
+              unitPrice: 20,
+            }),
+          ])
+        })
+      })
+
       describe('with an add-on pending cancellation', function () {
         beforeEach(function (ctx) {
           ctx.subscription.pendingChange =
@@ -491,6 +847,7 @@ describe('PaymentProviderEntities', function () {
               new PaymentProviderSubscriptionChangeRequest({
                 subscription: ctx.subscription,
                 timeframe: 'term_end',
+                planCode: ctx.subscription.pendingChange.nextPlanCode,
                 addOnUpdates: [ctx.addOn.toAddOnUpdate()],
               })
             )

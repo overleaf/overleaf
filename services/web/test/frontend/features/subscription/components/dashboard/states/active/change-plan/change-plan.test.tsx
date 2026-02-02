@@ -6,6 +6,7 @@ import {
   annualActiveSubscription,
   annualActiveSubscriptionEuro,
   annualActiveSubscriptionPro,
+  pendingAddOnChange,
   pendingSubscriptionChange,
 } from '../../../../../fixtures/subscriptions'
 import { ActiveSubscription } from '../../../../../../../../../frontend/js/features/subscription/components/dashboard/states/active/active'
@@ -67,6 +68,17 @@ describe('<ChangePlanModal />', function () {
 
     await screen.findByText('Your new plan')
     screen.getByRole('button', { name: 'Keep my current plan' })
+  })
+
+  it('renders "Your plan" when there is a pending add-on change but no plan change', async function () {
+    renderActiveSubscription(pendingAddOnChange)
+
+    const button = screen.getByRole('button', { name: 'Change plan' })
+    fireEvent.click(button)
+
+    await screen.findByText('Your plan')
+    expect(screen.queryByRole('button', { name: 'Keep my current plan' })).to.be
+      .null
   })
 
   it('does not render when Recurly did not load', function () {

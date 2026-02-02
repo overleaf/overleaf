@@ -395,7 +395,7 @@ describe('SubscriptionHandler', function () {
       })
     })
 
-    it('should not fire cancelPendingPaidSubscriptionChange hook if user has no subscription', async function (ctx) {
+    it('should not fire hooks if user has no subscription', async function (ctx) {
       ctx.LimitationsManager.promises.userHasSubscription.resolves({
         hasSubscription: false,
         subscription: null,
@@ -404,24 +404,90 @@ describe('SubscriptionHandler', function () {
         ctx.user,
         ctx.plan_code
       )
-      expect(ctx.Modules.promises.hooks.fire).to.not.have.been.calledWith(
-        'cancelPendingPaidSubscriptionChange',
-        sinon.match.any
-      )
+      expect(ctx.Modules.promises.hooks.fire).to.not.have.been.called
     })
 
-    it('should fire cancelPendingPaidSubscriptionChange to update a valid subscription', async function (ctx) {
+    it('should get payment record and apply change request', async function (ctx) {
+      const changeRequest = { subscription: { id: 'sub_123' } }
+      const paymentProviderSubscription = {
+        id: 'sub_123',
+        service: 'stripe',
+        getRequestForPlanChangeCancellation: sinon
+          .stub()
+          .returns(changeRequest),
+      }
+      const paymentRecord = { subscription: paymentProviderSubscription }
+
       ctx.LimitationsManager.promises.userHasSubscription.resolves({
         hasSubscription: true,
         subscription: ctx.subscription,
       })
+      ctx.Modules.promises.hooks.fire
+        .withArgs('getPaymentFromRecord', ctx.subscription)
+        .resolves([paymentRecord])
+      ctx.Modules.promises.hooks.fire
+        .withArgs(
+          'applySubscriptionChangeRequestAndSync',
+          changeRequest,
+          ctx.user._id.toString()
+        )
+        .resolves([Promise.resolve()])
+
       await ctx.SubscriptionHandler.promises.cancelPendingSubscriptionChange(
         ctx.user,
         ctx.plan_code
       )
+
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'getPaymentFromRecord',
+        ctx.subscription
+      )
+      expect(paymentProviderSubscription.getRequestForPlanChangeCancellation).to
+        .have.been.called
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'applySubscriptionChangeRequestAndSync',
+        changeRequest,
+        ctx.user._id.toString()
+      )
+    })
+
+    it('should remove pending change when there are no add-on changes to preserve', async function (ctx) {
+      const paymentProviderSubscription = {
+        id: 'sub_123',
+        service: 'stripe',
+        pendingChange: { nextPlanCode: 'student' },
+        getRequestForPlanChangeCancellation: sinon.stub().returns(null),
+      }
+      const paymentRecord = { subscription: paymentProviderSubscription }
+
+      ctx.LimitationsManager.promises.userHasSubscription.resolves({
+        hasSubscription: true,
+        subscription: ctx.subscription,
+      })
+      ctx.Modules.promises.hooks.fire
+        .withArgs('getPaymentFromRecord', ctx.subscription)
+        .resolves([paymentRecord])
+      ctx.Modules.promises.hooks.fire
+        .withArgs('cancelPendingPaidSubscriptionChange', ctx.subscription)
+        .resolves([Promise.resolve()])
+
+      await ctx.SubscriptionHandler.promises.cancelPendingSubscriptionChange(
+        ctx.user,
+        ctx.plan_code
+      )
+
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'getPaymentFromRecord',
+        ctx.subscription
+      )
+      expect(paymentProviderSubscription.getRequestForPlanChangeCancellation).to
+        .have.been.called
       expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
         'cancelPendingPaidSubscriptionChange',
         ctx.subscription
+      )
+      expect(ctx.Modules.promises.hooks.fire).to.not.have.been.calledWith(
+        'applySubscriptionChangeRequestAndSync'
       )
     })
   })

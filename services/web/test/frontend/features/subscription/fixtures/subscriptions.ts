@@ -409,6 +409,63 @@ export const canceledSubscription: PaidSubscription = {
   },
 }
 
+export const pendingAddOnChange: PaidSubscription = {
+  manager_ids: ['abc123'],
+  member_ids: [],
+  invited_emails: [],
+  groupPlan: false,
+  membersLimit: 0,
+  _id: 'add-on-change-123',
+  admin_id: 'abc123',
+  teamInvites: [],
+  planCode: 'collaborator-annual',
+  plan: {
+    planCode: 'collaborator-annual',
+    name: 'Standard (Collaborator) Annual',
+    price_in_cents: 21900,
+    annual: true,
+    featureDescription: [],
+    canUseFlexibleLicensing: false,
+  },
+  payment: {
+    taxRate: 0,
+    billingDetailsLink: '/user/subscription/payment/billing-details',
+    accountManagementLink: '/user/subscription/payment/account-management',
+    additionalLicenses: 0,
+    totalLicenses: 0,
+    nextPaymentDueAt,
+    nextPaymentDueDate,
+    currency: 'USD',
+    state: 'active',
+    trialEndsAtFormatted: null,
+    trialEndsAt: null,
+    activeCoupons: [],
+    accountEmail: 'fake@example.com',
+    hasPastDueInvoice: false,
+    displayPrice: '$199.00',
+    planOnlyDisplayPrice: '$199.00',
+    addOns: [
+      {
+        code: 'AI',
+        quantity: 1,
+        unitPrice: 1000,
+        name: 'AI Add-on',
+      },
+    ],
+    addOnDisplayPricesWithoutAdditionalLicense: {},
+    isEligibleForGroupPlan: true,
+    isEligibleForPause: false,
+    isEligibleForDowngradeUpsell: false,
+  },
+  pendingPlan: {
+    planCode: 'collaborator-annual',
+    name: 'Standard (Collaborator) Annual',
+    price_in_cents: 21900,
+    annual: true,
+    featureDescription: [],
+  },
+}
+
 export const pendingSubscriptionChange: PaidSubscription = {
   manager_ids: ['abc123'],
   member_ids: [],
