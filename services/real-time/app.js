@@ -291,6 +291,7 @@ if (Settings.shutdownDrainTimeWindow) {
           'EPIPE',
           'ECONNRESET',
           'ERR_STREAM_WRITE_AFTER_END',
+          'ERR_STREAM_UNABLE_TO_PIPE',
         ].includes(error.code) ||
         // socket.io error handler sending on polling connection again.
         (error.code === 'ERR_HTTP_HEADERS_SENT' &&

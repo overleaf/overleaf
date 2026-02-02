@@ -68,7 +68,11 @@ function getFile(req, res, next) {
       }
 
       pipeline(fileStream, res, err => {
-        if (err && err.code === 'ERR_STREAM_PREMATURE_CLOSE') {
+        if (
+          err &&
+          (err.code === 'ERR_STREAM_PREMATURE_CLOSE' ||
+            err.code === 'ERR_STREAM_UNABLE_TO_PIPE')
+        ) {
           res.end()
         } else if (err) {
           next(

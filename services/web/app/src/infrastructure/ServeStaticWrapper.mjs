@@ -15,7 +15,10 @@ function serveStaticWrapper(root, options) {
         return next()
       }
 
-      if (error.code !== 'ERR_STREAM_PREMATURE_CLOSE') {
+      if (
+        error.code !== 'ERR_STREAM_PREMATURE_CLOSE' &&
+        error.code !== 'ERR_STREAM_UNABLE_TO_PIPE'
+      ) {
         return next(error)
       }
 

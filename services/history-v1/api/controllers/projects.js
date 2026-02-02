@@ -373,7 +373,10 @@ async function getProjectBlob(req, res, next) {
     try {
       await pipeline(stream, res)
     } catch (err) {
-      if (err?.code === 'ERR_STREAM_PREMATURE_CLOSE') {
+      if (
+        err?.code === 'ERR_STREAM_PREMATURE_CLOSE' ||
+        err?.code === 'ERR_STREAM_UNABLE_TO_PIPE'
+      ) {
         res.end()
       } else {
         throw OError.tag(err, 'error transferring stream', { projectId, hash })
