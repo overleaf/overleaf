@@ -196,11 +196,6 @@ async function _createBlankProject(
   if (historyRangesSupportAssignment.variant === 'enabled') {
     project.overleaf.history.rangesSupportEnabled = true
   }
-
-  if (attributes.isDebugCopyOf) {
-    project.overleaf.isDebugCopyOf = new ObjectId(attributes.isDebugCopyOf)
-  }
-
   await project.save()
   if (!skipCreatingInTPDS) {
     await TpdsUpdateSender.promises.createProject({

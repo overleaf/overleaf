@@ -287,12 +287,6 @@ function CommonNotification({ notification }: CommonNotificationProps) {
             />
           }
         />
-      ) : templateKey === 'notification_old_debug_projects' ? (
-        <Notification
-          type="warning"
-          onDismiss={() => id && handleDismiss(id)}
-          content={html}
-        />
       ) : (
         <Notification
           type="info"

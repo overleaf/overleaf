@@ -6,10 +6,7 @@ import TpdsUpdateSender from '../ThirdPartyDataStore/TpdsUpdateSender.mjs'
 import TpdsProjectFlusher from '../ThirdPartyDataStore/TpdsProjectFlusher.mjs'
 import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
 import SystemMessageManager from '../SystemMessages/SystemMessageManager.mjs'
-import ProjectGetter from '../Project/ProjectGetter.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
-import Features from '../../infrastructure/Features.mjs'
-import { expressify } from '@overleaf/promise-utils'
 
 const AdminController = {
   _sendDisconnectAllUsersMessage: delay => {
@@ -19,7 +16,7 @@ const AdminController = {
       delay
     )
   },
-  index: expressify(async (req, res, next) => {
+  index: (req, res, next) => {
     let url
     const openSockets = {}
     for (url in http.globalAgent.sockets) {
@@ -34,30 +31,24 @@ const AdminController = {
       )
     }
 
-    const systemMessages =
-      await SystemMessageManager.promises.getMessagesFromDB()
-
-    const privilegesMatrixResults = await Modules.promises.hooks.fire(
-      'getPrivilegesMatrix'
+    SystemMessageManager.getMessagesFromDB(
+      async function (error, systemMessages) {
+        if (error) {
+          return next(error)
+        }
+        const privilegesMatrixResults = await Modules.promises.hooks.fire(
+          'getPrivilegesMatrix'
+        )
+        const privilegesMatrix = privilegesMatrixResults[0] || null
+        res.render('admin/index', {
+          title: 'System Admin',
+          openSockets,
+          systemMessages,
+          privilegesMatrix,
+        })
+      }
     )
-
-    const privilegesMatrix = privilegesMatrixResults[0] || null
-
-    const toRender = {
-      title: 'System Admin',
-      openSockets,
-      systemMessages,
-      privilegesMatrix,
-    }
-
-    if (Features.hasFeature('saas')) {
-      const debugProjects = await ProjectGetter.promises.findAllDebugProjects(
-        'name lastUpdated owner_ref'
-      )
-      toRender.debugProjects = debugProjects
-    }
-    res.render('admin/index', toRender)
-  }),
+  },
 
   disconnectAllUsers: (req, res) => {
     logger.warn('disconecting everyone')
