@@ -15,6 +15,7 @@ import crypto from 'node:crypto'
 import Errors from '../Errors/Errors.js'
 import { pipeline } from 'node:stream/promises'
 import ClsiCacheManager from '../Compile/ClsiCacheManager.mjs'
+import Path from 'node:path'
 
 const { promises: ProjectRootDocManager } = ProjectRootDocManagerModule
 const { promises: ProjectOptionsHandler } = ProjectOptionsHandlerModule
@@ -76,7 +77,7 @@ const TemplatesManager = {
       const prepareClsiCacheInBackground = ClsiCacheManager.prepareClsiCache(
         project._id,
         userId,
-        { templateVersionId, imageName }
+        { templateVersionId, imageName: imageName && Path.basename(imageName) }
       ).catch(err => {
         logger.warn(
           { err, templateVersionId, projectId: project._id },

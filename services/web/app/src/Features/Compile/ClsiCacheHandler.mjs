@@ -241,7 +241,6 @@ async function prepareCacheSource(
   userId,
   { sourceProjectId, templateVersionId, imageName, lastUpdated, shard, signal }
 ) {
-  imageName = Path.basename(imageName)
   const url = new URL(
     `/project/${projectId}/user/${userId}/import-from`,
     Settings.apis.clsiCache.instances.find(i => i.shard === shard).url
