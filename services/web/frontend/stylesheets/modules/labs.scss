@@ -56,14 +56,11 @@
     .title-row {
       margin: 0;
       margin-bottom: var(--spacing-04);
+      align-items: center;
 
       > h3 {
         margin: 0;
         margin-right: var(--spacing-04);
-      }
-
-      .badge {
-        line-height: var(--line-height-02);
       }
     }
 
