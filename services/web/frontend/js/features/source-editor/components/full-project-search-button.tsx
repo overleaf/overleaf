@@ -8,7 +8,7 @@ import { useCodeMirrorViewContext } from './codemirror-context'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
-import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
+import { useRailContext } from '@/features/ide-react/context/rail-context'
 
 export const FullProjectSearchButton = ({ query }: { query: SearchQuery }) => {
   const view = useCodeMirrorViewContext()

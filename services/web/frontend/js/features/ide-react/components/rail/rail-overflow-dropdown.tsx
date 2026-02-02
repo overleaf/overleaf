@@ -1,8 +1,8 @@
 import { DropdownMenu } from '@/shared/components/dropdown/dropdown-menu'
-import { RailTabKey } from '../../contexts/rail-context'
-import { RailElement } from '../../utils/rail-types'
+import { RailTabKey } from '@/features/ide-react/context/rail-context'
+import { RailElement } from '@/features/ide-react/util/rail-types'
 import RailTab from './rail-tab'
-import { shouldIncludeElement } from '../../utils/rail-utils'
+import { shouldIncludeElement } from '@/features/ide-react/util/rail-utils'
 
 export default function RailOverflowDropdown({
   tabs,

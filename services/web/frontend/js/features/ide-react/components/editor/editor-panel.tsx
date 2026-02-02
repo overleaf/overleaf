@@ -1,5 +1,5 @@
 import NoSelectionPane from '@/features/ide-react/components/editor/no-selection-pane'
-import { Editor } from './editor'
+import { Editor } from '@/features/ide-redesign/components/editor'
 import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'
 import FileView from '@/features/file-view/components/file-view'
 import { fileViewFile } from '@/features/ide-react/util/file-view'

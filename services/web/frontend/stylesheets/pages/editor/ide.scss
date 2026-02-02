@@ -141,12 +141,6 @@ $editor-toggler-bg-dark-color: color.adjust(
   flex-direction: column;
 }
 
-// Ensure an element with class "full-size", such as the binary file view, stays within the bounds of the panel
-.ide-react-panel {
-  position: relative;
-  container-type: size;
-}
-
 .ide-panel-group-resizing {
   background-color: var(--white);
 

@@ -36,7 +36,7 @@ import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-
 import { FullProjectSearchResults } from './full-project-search-results'
 import { signalWithTimeout } from '@/utils/abort-signal'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
-import RailPanelHeader from '@/features/ide-redesign/components/rail/rail-panel-header'
+import RailPanelHeader from '@/features/ide-react/components/rail/rail-panel-header'
 import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 
 const FullProjectSearchUI: FC = () => {

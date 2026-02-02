@@ -2,35 +2,41 @@ import { FC, RefObject, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Nav, TabContainer } from 'react-bootstrap'
 import { useLayoutContext } from '@/shared/context/layout-context'
-import { RailTabKey, useRailContext } from '../../contexts/rail-context'
-import FileTreeOutlinePanel from '../file-tree/file-tree-outline-panel'
-import { ChatIndicator, ChatPane } from '../chat/chat'
+import {
+  RailTabKey,
+  useRailContext,
+} from '@/features/ide-react/context/rail-context'
+import FileTreeOutlinePanel from '@/features/ide-redesign/components/file-tree/file-tree-outline-panel'
+import {
+  ChatIndicator,
+  ChatPane,
+} from '@/features/ide-redesign/components/chat/chat'
 import getMeta from '@/utils/meta'
 import classNames from 'classnames'
-import IntegrationsPanel from '../integrations-panel/integrations-panel'
+import IntegrationsPanel from '@/features/ide-redesign/components/integrations-panel/integrations-panel'
 import { useChatContext } from '@/features/chat/context/chat-context'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import {
   FullProjectSearchPanel,
   hasFullProjectSearch,
-} from '../full-project-search-panel'
+} from '@/features/ide-redesign/components/full-project-search-panel'
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 import RailHelpDropdown from './rail-help-dropdown'
 import RailTab from './rail-tab'
 import RailActionElement, { RailAction } from './rail-action-element'
-import { RailElement } from '../../utils/rail-types'
+import { RailElement } from '@/features/ide-react/util/rail-types'
 import RailPanel from './rail-panel'
 import RailResizeHandle from './rail-resize-handle'
 import RailModals from './rail-modals'
 import RailOverflowDropdown from './rail-overflow-dropdown'
-import useRailOverflow from '../../hooks/use-rail-overflow'
-import EditorTourRailTooltip from '../editor-tour/editor-tour-rail-tooltip'
+import useRailOverflow from '@/features/ide-redesign/hooks/use-rail-overflow'
+import EditorTourRailTooltip from '@/features/ide-redesign/components/editor-tour/editor-tour-rail-tooltip'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
-import EditorTourThemeTooltip from '../editor-tour/editor-tour-theme-tooltip'
-import EditorTourGotQuestionsTooltip from '../editor-tour/editor-tour-got-questions'
-import { shouldIncludeElement } from '../../utils/rail-utils'
+import EditorTourThemeTooltip from '@/features/ide-redesign/components/editor-tour/editor-tour-theme-tooltip'
+import EditorTourGotQuestionsTooltip from '@/features/ide-redesign/components/editor-tour/editor-tour-got-questions'
+import { shouldIncludeElement } from '@/features/ide-react/util/rail-utils'
 import { useEditorContext } from '@/shared/context/editor-context'
 import useEventListener from '@/shared/hooks/use-event-listener'
 

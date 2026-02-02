@@ -1,6 +1,6 @@
 import getMeta from '@/utils/meta'
 import { useTranslation } from 'react-i18next'
-import { useRailContext } from '../../contexts/rail-context'
+import { useRailContext } from '@/features/ide-react/context/rail-context'
 import { useCallback } from 'react'
 import {
   DropdownDivider,

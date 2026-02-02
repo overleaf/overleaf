@@ -1,12 +1,12 @@
 import { Panel } from 'react-resizable-panels'
-import { useRailContext } from '../../contexts/rail-context'
+import { useRailContext } from '@/features/ide-react/context/rail-context'
 import classNames from 'classnames'
 import { useCallback, useMemo } from 'react'
 import usePreviousValue from '@/shared/hooks/use-previous-value'
 import { HistorySidebar } from '@/features/ide-react/components/history-sidebar'
 import { Tab } from 'react-bootstrap'
-import { RailElement } from '../../utils/rail-types'
-import { shouldIncludeElement } from '../../utils/rail-utils'
+import { RailElement } from '@/features/ide-react/util/rail-types'
+import { shouldIncludeElement } from '@/features/ide-react/util/rail-utils'
 
 export default function RailPanel({
   isReviewPanelOpen,

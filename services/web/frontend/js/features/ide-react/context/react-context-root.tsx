@@ -20,7 +20,7 @@ import { OnlineUsersProvider } from '@/features/ide-react/context/online-users-c
 import { OutlineProvider } from '@/features/ide-react/context/outline-context'
 import { PermissionsProvider } from '@/features/ide-react/context/permissions-context'
 import { ProjectProvider } from '@/shared/context/project-context'
-import { RailProvider } from '@/features/ide-redesign/contexts/rail-context'
+import { RailProvider } from '@/features/ide-react/context/rail-context'
 import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/project-settings-context'
 import { ReferencesProvider } from '@/features/ide-react/context/references-context'
 import { SnapshotProvider } from '@/features/ide-react/context/snapshot-context'

@@ -29,7 +29,7 @@ import { useIdeContext } from '@/shared/context/ide-context'
 import getMeta from '@/utils/meta'
 import { debugConsole } from '@/utils/debugging'
 import { User } from '../../../../../types/user'
-import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
+import { useRailContext } from '@/features/ide-react/context/rail-context'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 const PAGE_SIZE = 50

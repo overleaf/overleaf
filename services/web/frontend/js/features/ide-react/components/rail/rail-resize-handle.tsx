@@ -1,7 +1,7 @@
 import { HorizontalResizeHandle } from '@/features/ide-react/components/resize/horizontal-resize-handle'
 import { HorizontalToggler } from '@/features/ide-react/components/resize/horizontal-toggler'
 import classNames from 'classnames'
-import { useRailContext } from '../../contexts/rail-context'
+import { useRailContext } from '@/features/ide-react/context/rail-context'
 import { useTranslation } from 'react-i18next'
 
 export default function RailResizeHandle({

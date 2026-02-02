@@ -1,134 +1,136 @@
 import { Panel, PanelGroup } from 'react-resizable-panels'
-import { ElementType, FC } from 'react'
-import { HorizontalResizeHandle } from '../resize/horizontal-resize-handle'
 import classNames from 'classnames'
-import { useLayoutContext } from '@/shared/context/layout-context'
-import EditorNavigationToolbar from '@/features/ide-react/components/editor-navigation-toolbar'
-import ChatPane from '@/features/chat/components/chat-pane'
+import { HorizontalResizeHandle } from '@/features/ide-react/components/resize/horizontal-resize-handle'
+import PdfPreview from '@/features/pdf-preview/components/pdf-preview'
+import { RailLayout } from '../rail/rail'
+import { Toolbar } from '../toolbar/toolbar'
 import { HorizontalToggler } from '@/features/ide-react/components/resize/horizontal-toggler'
-import { HistorySidebar } from '@/features/ide-react/components/history-sidebar'
-import EditorSidebar from '@/features/ide-react/components/editor-sidebar'
 import { useTranslation } from 'react-i18next'
-import { useSidebarPane } from '@/features/ide-react/hooks/use-sidebar-pane'
-import { useChatPane } from '@/features/ide-react/hooks/use-chat-pane'
-import { EditorAndPdf } from '@/features/ide-react/components/editor-and-pdf'
+import { usePdfPane } from '@/features/ide-react/hooks/use-pdf-pane'
+import { useLayoutContext } from '@/shared/context/layout-context'
+import { ElementType, useState } from 'react'
+import EditorPanel from '../editor/editor-panel'
+import { useRailContext } from '../../context/rail-context'
 import HistoryContainer from '@/features/ide-react/components/history-container'
-import getMeta from '@/utils/meta'
-import { useEditorContext } from '@/shared/context/editor-context'
+import { DefaultSynctexControl } from '@/features/pdf-preview/components/detach-synctex-control'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+
+const mainEditorLayoutPanels: Array<{
+  import: { default: ElementType }
+  path: string
+}> = importOverleafModules('mainEditorLayoutPanels')
 
 const mainEditorLayoutModalsModules: Array<{
   import: { default: ElementType }
   path: string
 }> = importOverleafModules('mainEditorLayoutModals')
 
-export const MainLayout: FC = () => {
-  const { view } = useLayoutContext()
-  const { isRestrictedTokenMember } = useEditorContext()
-
+export default function MainLayout() {
+  const [resizing, setResizing] = useState(false)
+  const { resizing: railResizing } = useRailContext()
   const {
-    isOpen: sidebarIsOpen,
-    setIsOpen: setSidebarIsOpen,
-    panelRef: sidebarPanelRef,
-    togglePane: toggleSidebar,
-    handlePaneExpand: handleSidebarExpand,
-    handlePaneCollapse: handleSidebarCollapse,
-    resizing: sidebarResizing,
-    setResizing: setSidebarResizing,
-  } = useSidebarPane()
+    togglePdfPane,
+    handlePdfPaneExpand,
+    handlePdfPaneCollapse,
+    setPdfIsOpen: setIsPdfOpen,
+    pdfIsOpen: isPdfOpen,
+    pdfPanelRef,
+  } = usePdfPane()
+  const { view, pdfLayout } = useLayoutContext()
 
-  const {
-    isOpen: chatIsOpen,
-    panelRef: chatPanelRef,
-    togglePane: toggleChat,
-    resizing: chatResizing,
-    setResizing: setChatResizing,
-    handlePaneCollapse: handleChatCollapse,
-    handlePaneExpand: handleChatExpand,
-  } = useChatPane()
-
-  const chatEnabled =
-    getMeta('ol-capabilities')?.includes('chat') && !isRestrictedTokenMember
+  const editorIsOpen =
+    view === 'editor' || view === 'file' || pdfLayout === 'sideBySide'
 
   const { t } = useTranslation()
 
   return (
-    <div className="ide-react-main">
-      <EditorNavigationToolbar />
-      <div className="ide-react-body">
+    <div className="ide-redesign-main">
+      <Toolbar />
+      <div className="ide-redesign-body">
         <PanelGroup
-          autoSaveId="ide-outer-layout"
+          autoSaveId="ide-redesign-outer-layout"
           direction="horizontal"
-          className={classNames({
-            'ide-panel-group-resizing': sidebarResizing || chatResizing,
+          className={classNames('ide-redesign-inner', {
+            'ide-panel-group-resizing': resizing || railResizing,
           })}
         >
-          {/* sidebar */}
-          <Panel
-            ref={sidebarPanelRef}
-            id="panel-sidebar"
-            order={1}
-            defaultSize={15}
-            minSize={5}
-            maxSize={80}
-            collapsible
-            onCollapse={handleSidebarCollapse}
-            onExpand={handleSidebarExpand}
-          >
-            <EditorSidebar />
-            {view === 'history' && <HistorySidebar />}
-          </Panel>
-
-          <HorizontalResizeHandle
-            onDoubleClick={toggleSidebar}
-            resizable={sidebarIsOpen}
-            onDragging={setSidebarResizing}
-            hitAreaMargins={{ coarse: 0, fine: 0 }}
-          >
-            <HorizontalToggler
-              id="panel-sidebar"
-              togglerType="west"
-              isOpen={sidebarIsOpen}
-              setIsOpen={setSidebarIsOpen}
-              tooltipWhenOpen={t('tooltip_hide_filetree')}
-              tooltipWhenClosed={t('tooltip_show_filetree')}
-            />
-          </HorizontalResizeHandle>
-
-          <Panel id="panel-outer-main" order={2}>
-            <PanelGroup autoSaveId="ide-inner-layout" direction="horizontal">
-              <Panel className="ide-react-panel" id="panel-main" order={1}>
-                <HistoryContainer />
-                <EditorAndPdf />
+          <RailLayout />
+          <Panel id="ide-redesign-editor-and-pdf-panel" order={2}>
+            <HistoryContainer />
+            <PanelGroup
+              autoSaveId="ide-redesign-editor-and-pdf-panel-group"
+              direction="horizontal"
+              className={classNames({
+                hidden: view === 'history',
+              })}
+            >
+              <Panel
+                id="ide-redesign-editor-panel"
+                order={1}
+                className={classNames({
+                  hidden: !editorIsOpen || view === 'history',
+                })}
+                minSize={5}
+                defaultSize={50}
+                tagName="section"
+                aria-label={t('editor')}
+              >
+                <div className="ide-redesign-editor-container">
+                  <EditorPanel />
+                </div>
               </Panel>
-
-              {chatEnabled && (
-                <>
-                  <HorizontalResizeHandle
-                    onDoubleClick={toggleChat}
-                    resizable={chatIsOpen}
-                    onDragging={setChatResizing}
-                    hitAreaMargins={{ coarse: 0, fine: 0 }}
-                  />
-
-                  {/* chat */}
-                  <Panel
-                    ref={chatPanelRef}
-                    id="panel-chat"
-                    order={2}
-                    defaultSize={20}
-                    minSize={5}
-                    maxSize={30}
-                    collapsible
-                    onCollapse={handleChatCollapse}
-                    onExpand={handleChatExpand}
-                  >
-                    <ChatPane />
-                  </Panel>
-                </>
-              )}
+              <HorizontalResizeHandle
+                resizable={pdfLayout === 'sideBySide'}
+                onDragging={setResizing}
+                onDoubleClick={togglePdfPane}
+                hitAreaMargins={{ coarse: 0, fine: 0 }}
+                className={classNames({
+                  hidden: !editorIsOpen,
+                })}
+              >
+                <HorizontalToggler
+                  id="ide-redesign-pdf-panel"
+                  togglerType="east"
+                  isOpen={isPdfOpen}
+                  setIsOpen={setIsPdfOpen}
+                  tooltipWhenOpen={t('tooltip_hide_pdf')}
+                  tooltipWhenClosed={t('tooltip_show_pdf')}
+                />
+                {pdfLayout === 'sideBySide' && (
+                  <div className="synctex-controls">
+                    <DefaultSynctexControl />
+                  </div>
+                )}
+              </HorizontalResizeHandle>
+              <Panel
+                collapsible
+                className={classNames('ide-redesign-pdf-container', {
+                  hidden: view === 'history',
+                })}
+                id="ide-redesign-pdf-panel"
+                order={2}
+                defaultSize={50}
+                minSize={5}
+                ref={pdfPanelRef}
+                onExpand={handlePdfPaneExpand}
+                onCollapse={handlePdfPaneCollapse}
+                tagName="section"
+                aria-label={t('pdf_preview')}
+              >
+                <PdfPreview />
+                {pdfLayout === 'flat' && view === 'pdf' && (
+                  <div className="synctex-controls" hidden>
+                    <DefaultSynctexControl />
+                  </div>
+                )}
+              </Panel>
             </PanelGroup>
           </Panel>
+          {mainEditorLayoutPanels.map(
+            ({ import: { default: Component }, path }, i) => {
+              return <Component key={path} order={i + 3} />
+            }
+          )}
         </PanelGroup>
       </div>
       {mainEditorLayoutModalsModules.map(

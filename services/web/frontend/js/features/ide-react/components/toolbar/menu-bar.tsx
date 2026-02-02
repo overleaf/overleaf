@@ -16,7 +16,7 @@ import CommandDropdown, {
   MenuSectionStructure,
   MenuStructure,
 } from './command-dropdown'
-import { useRailContext } from '../../contexts/rail-context'
+import { useRailContext } from '../../context/rail-context'
 import WordCountModal from '@/features/word-count-modal/components/word-count-modal'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'

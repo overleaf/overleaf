@@ -15,7 +15,7 @@ import {
 import {
   RailTabKey,
   useRailContext,
-} from '@/features/ide-redesign/contexts/rail-context'
+} from '@/features/ide-react/context/rail-context'
 
 function createEditingSessionHeartbeatData(
   editorType: EditorType,

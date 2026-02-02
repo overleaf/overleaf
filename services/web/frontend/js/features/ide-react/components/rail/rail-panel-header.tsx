@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useRailContext } from '../../contexts/rail-context'
+import { useRailContext } from '@/features/ide-react/context/rail-context'
 import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import React, { useCallback } from 'react'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'

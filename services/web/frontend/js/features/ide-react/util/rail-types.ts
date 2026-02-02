@@ -1,7 +1,7 @@
 import { AvailableUnfilledIcon } from '@/shared/components/material-icon'
-import { RailTabKey } from '../contexts/rail-context'
+import { RailTabKey } from '../context/rail-context'
 import { FC, ReactElement } from 'react'
-import RailTab from '@/features/ide-redesign/components/rail/rail-tab'
+import RailTab from '@/features/ide-react/components/rail/rail-tab'
 
 export type CustomRailTabIcon = FC<{ open: boolean; title: string }>
 

@@ -63,7 +63,7 @@ describe('<FileViewHeader/>', function () {
       },
       created: new Date(2021, 1, 17, 3, 24).toISOString(),
     }
-    // FIXME: This should be tested through the <EditorAndPdf /> component instead
+    // FIXME: This should be tested through the <EditorPanel /> component instead
     const fileShown = fileViewFile(fileFromServer)
     renderWithEditorContext(<FileViewHeader file={fileShown} />)
     screen.getByText('Imported from', { exact: false })

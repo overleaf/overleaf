@@ -3,7 +3,7 @@ import MaterialIcon from '@/shared/components/material-icon'
 import classNames from 'classnames'
 import { ComponentProps, forwardRef, ReactElement } from 'react'
 import { NavLink } from 'react-bootstrap'
-import { RailElement } from '../../utils/rail-types'
+import { RailElement } from '@/features/ide-react/util/rail-types'
 
 const RailTab = forwardRef<
   HTMLAnchorElement,
