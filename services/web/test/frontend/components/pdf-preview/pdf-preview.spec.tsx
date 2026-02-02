@@ -9,7 +9,6 @@ import {
 } from '../../../../frontend/js/shared/context/layout-context'
 import { FC, PropsWithChildren, ReactElement, useEffect } from 'react'
 import { useLocalCompileContext } from '@/shared/context/local-compile-context'
-import { ProjectCompiler } from '../../../../types/project-settings'
 
 const storeAndFireEvent = (win: typeof window, key: string, value: unknown) => {
   localStorage.setItem(key, value)
@@ -210,20 +209,6 @@ describe('<PdfPreview/>', function () {
         cached: true,
         setup: () => {},
         props: {},
-      },
-      'ignores the compile from cache when imageName changed': {
-        cached: false,
-        setup: () => {},
-        props: {
-          imageName: 'texlive-full:2025.1',
-        },
-      },
-      'ignores the compile from cache when compiler changed': {
-        cached: false,
-        setup: () => {},
-        props: {
-          compiler: 'lualatex' as ProjectCompiler,
-        },
       },
       'ignores the compile from cache when draft mode changed': {
         cached: false,

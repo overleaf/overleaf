@@ -330,7 +330,7 @@
     "eventsource-client": "^1.1.4",
     "fake-indexeddb": "^6.0.0",
     "fast-fuzzy": "^1.12.0",
-    "fetch-mock": "^12.5.2",
+    "fetch-mock": "^12.6.0",
     "formik": "^2.2.9",
     "fuse.js": "^7.0.0",
     "glob": "^12.0.0",

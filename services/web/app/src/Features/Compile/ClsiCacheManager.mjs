@@ -1,3 +1,4 @@
+import Path from 'node:path'
 import _ from 'lodash'
 import { NotFoundError, ResourceGoneError } from '../Errors/Errors.js'
 import ClsiCacheHandler from './ClsiCacheHandler.mjs'
@@ -27,17 +28,21 @@ const ClsiCookieManager = ClsiCookieManagerFactory(
  * @param userId
  * @param filename
  * @param signal
- * @return {Promise<{internal: {location: string}, external: {zone: string, shard: string, isUpToDate: boolean, lastUpdated: Date, size: number, allFiles: string[]}}>}
+ * @return {Promise<{internal: {location: string, imageName: string, compiler: string}, external: {zone: string, shard: string, isUpToDate: boolean, lastUpdated: Date, size: number, allFiles: string[]}}>}
  */
 async function getLatestBuildFromCache(projectId, userId, filename, signal) {
   const [
     { location, lastModified: lastCompiled, zone, shard, size, allFiles },
     lastUpdatedInRedis,
-    { lastUpdated: lastUpdatedInMongo },
+    { lastUpdated: lastUpdatedInMongo, imageName: fullImageName, compiler },
   ] = await Promise.all([
     ClsiCacheHandler.getLatestOutputFile(projectId, userId, filename, signal),
     DocumentUpdaterHandler.promises.getProjectLastUpdatedAt(projectId),
-    ProjectGetter.promises.getProject(projectId, { lastUpdated: 1 }),
+    ProjectGetter.promises.getProject(projectId, {
+      lastUpdated: 1,
+      imageName: 1,
+      compiler: 1,
+    }),
   ])
 
   const lastUpdated =
@@ -45,10 +50,13 @@ async function getLatestBuildFromCache(projectId, userId, filename, signal) {
       ? lastUpdatedInRedis
       : lastUpdatedInMongo
   const isUpToDate = lastCompiled >= lastUpdated
+  const imageName = Path.basename(fullImageName)
 
   return {
     internal: {
       location,
+      imageName,
+      compiler,
     },
     external: {
       isUpToDate,
@@ -80,7 +88,7 @@ async function getLatestCompileResult(projectId, userId) {
 
 async function tryGetLatestCompileResult(projectId, userId, signal) {
   const {
-    internal: { location: metaLocation },
+    internal: { location: metaLocation, imageName, compiler },
     external: {
       isUpToDate,
       allFiles,
@@ -126,6 +134,10 @@ async function tryGetLatestCompileResult(projectId, userId, signal) {
     stats,
     timings,
   } = meta
+
+  if (options.imageName !== imageName || options.compiler !== compiler) {
+    throw new ResourceGoneError()
+  }
 
   let baseURL = `/project/${projectId}`
   if (userId) {

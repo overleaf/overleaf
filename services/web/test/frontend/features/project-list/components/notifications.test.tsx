@@ -790,6 +790,7 @@ describe('<UserNotifications />', function () {
       })
       const resendButton = resendButtons[0]
       fireEvent.click(resendButton)
+      await fetchMock.callHistory.flush(true)
 
       await screen.findByRole('dialog')
 
