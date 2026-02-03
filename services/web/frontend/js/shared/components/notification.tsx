@@ -93,8 +93,6 @@ function Notification({
     if (onDismiss) onDismiss()
   }
 
-  // return null
-
   if (!show) {
     return null
   }

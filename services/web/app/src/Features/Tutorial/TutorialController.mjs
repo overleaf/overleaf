@@ -9,6 +9,7 @@ const VALID_KEYS = [
   'bib-file-tpr-prompt',
   'ai-error-assistant-consent',
   'workbench-consent',
+  'workbench-consent-release',
   'history-restore-promo',
   'us-gov-banner',
   'us-gov-banner-fedramp',
