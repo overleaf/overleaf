@@ -452,7 +452,7 @@ const _ProjectController = {
       'editor-redesign-new-users',
       'writefull-frontend-migration',
       'chat-edit-delete',
-      'ai-workbench',
+      'ai-workbench-release',
       'compile-timeout-target-plans',
       'writefull-keywords-generator',
       'writefull-figure-generator',
