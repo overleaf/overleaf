@@ -472,6 +472,14 @@ const en = {
       'Enter keywords',
     'citations-reviewer.chat.custom-search.form.search': 'Search',
     'citations-reviewer.chat.custom-search.form.searching': 'Searching...',
+    'citations-reviewer.chat.backend-quota-error.premium.title':
+      'Usage limit reached',
+    'citations-reviewer.chat.backend-quota-error.premium.body':
+      "You've reached the fair usage limit on your plan. You can check for citations again in __remainingTime__",
+    'citations-reviewer.chat.backend-quota-error.freemium.title':
+      'You’ve hit your Writefull quota',
+    'citations-reviewer.chat.backend-quota-error.freemium.body':
+      'To ensure fair access for all users, free accounts have a usage limit. You can check for citations again in __remainingTime__. Upgrade to Premium to unlock the full power of Writefull.',
   },
 } as const
 
@@ -969,6 +977,14 @@ const es = {
       'Introduce palabras clave',
     'citations-reviewer.chat.custom-search.form.search': 'Buscar',
     'citations-reviewer.chat.custom-search.form.searching': 'Buscando...',
+    'citations-reviewer.chat.backend-quota-error.premium.title':
+      'Límite de uso alcanzado',
+    'citations-reviewer.chat.backend-quota-error.premium.body':
+      'Has alcanzado el límite de uso justo en tu plan. Puedes volver a buscar citas en __remainingTime__',
+    'citations-reviewer.chat.backend-quota-error.freemium.title':
+      'Has agotado tu cuota de Writefull',
+    'citations-reviewer.chat.backend-quota-error.freemium.body':
+      'Para garantizar un acceso justo para todos los usuarios, las cuentas gratuitas tienen un límite de uso. Puedes volver a buscar citas en __remainingTime__. Actualiza a Premium para desbloquear todo el potencial de Writefull.',
   },
 }
 
