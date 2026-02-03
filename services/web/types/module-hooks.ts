@@ -35,6 +35,12 @@ export type CommentDeletedEvent = {
   messageId: string
 }
 
+export type ThreadDeletedEvent = {
+  projectId: string
+  userId: string
+  threadId: string
+}
+
 export type ProjectModifiedEvent = {
   projectId: string
   timestamp: number
