@@ -11,10 +11,10 @@ services:
             redis:
                 condition: service_started
         ports:
-            - 80:80
+            - ${SHARELATEX_PORT}:80
         stop_grace_period: 60s
         volumes:
-            - ~/sharelatex_data:/var/lib/overleaf
+            - sharelatex_data:/var/lib/overleaf
             ########################################################################
             ####  Server Pro: Uncomment the following line to mount the docker  ####
             ####             socket, required for Sibling Containers to work    ####
@@ -22,51 +22,51 @@ services:
             # - /var/run/docker.sock:/var/run/docker.sock
         environment:
 
-            OVERLEAF_APP_NAME: Overleaf Community Edition
+            OVERLEAF_APP_NAME: ${OVERLEAF_APP_NAME}
 
-            OVERLEAF_MONGO_URL: mongodb://mongo/sharelatex
+            OVERLEAF_MONGO_URL: ${OVERLEAF_MONGO_URL}
 
             # Same property, unfortunately with different names in
             # different locations
-            OVERLEAF_REDIS_HOST: redis
-            REDIS_HOST: redis
+            OVERLEAF_REDIS_HOST: ${OVERLEAF_REDIS_HOST}
+            REDIS_HOST: ${REDIS_HOST}
 
-            ENABLED_LINKED_FILE_TYPES: 'project_file,project_output_file'
+            ENABLED_LINKED_FILE_TYPES: ${ENABLED_LINKED_FILE_TYPES}
 
             # Enables Thumbnail generation using ImageMagick
-            ENABLE_CONVERSIONS: 'true'
+            ENABLE_CONVERSIONS: ${ENABLE_CONVERSIONS}
 
             # Disables email confirmation requirement
-            EMAIL_CONFIRMATION_DISABLED: 'true'
+            EMAIL_CONFIRMATION_DISABLED: ${EMAIL_CONFIRMATION_DISABLED}
 
             ## Set for SSL via nginx-proxy
-            #VIRTUAL_HOST: 103.112.212.22
+            #VIRTUAL_HOST: ${VIRTUAL_HOST}
 
-            # OVERLEAF_SITE_URL: http://overleaf.example.com
-            # OVERLEAF_NAV_TITLE: Overleaf Community Edition
-            # OVERLEAF_HEADER_IMAGE_URL: http://example.com/mylogo.png
-            # OVERLEAF_ADMIN_EMAIL: support@it.com
+            # OVERLEAF_SITE_URL: ${OVERLEAF_SITE_URL}
+            # OVERLEAF_NAV_TITLE: ${OVERLEAF_NAV_TITLE}
+            # OVERLEAF_HEADER_IMAGE_URL: ${OVERLEAF_HEADER_IMAGE_URL}
+            # OVERLEAF_ADMIN_EMAIL: ${OVERLEAF_ADMIN_EMAIL}
 
             # OVERLEAF_LEFT_FOOTER: '[{"text": "Another page I want to link to can be found <a href=\"here\">here</a>"} ]'
             # OVERLEAF_RIGHT_FOOTER: '[{"text": "Hello I am on the Right"} ]'
 
-            # OVERLEAF_EMAIL_FROM_ADDRESS: "hello@example.com"
+            # OVERLEAF_EMAIL_FROM_ADDRESS: ${OVERLEAF_EMAIL_FROM_ADDRESS}
 
             # OVERLEAF_EMAIL_AWS_SES_ACCESS_KEY_ID:
             # OVERLEAF_EMAIL_AWS_SES_SECRET_KEY:
 
-            # OVERLEAF_EMAIL_SMTP_HOST: smtp.example.com
-            # OVERLEAF_EMAIL_SMTP_PORT: 587
-            # OVERLEAF_EMAIL_SMTP_SECURE: false
+            # OVERLEAF_EMAIL_SMTP_HOST: ${OVERLEAF_EMAIL_SMTP_HOST}
+            # OVERLEAF_EMAIL_SMTP_PORT: ${OVERLEAF_EMAIL_SMTP_PORT}
+            # OVERLEAF_EMAIL_SMTP_SECURE: ${OVERLEAF_EMAIL_SMTP_SECURE}
             # OVERLEAF_EMAIL_SMTP_USER:
             # OVERLEAF_EMAIL_SMTP_PASS:
-            # OVERLEAF_EMAIL_SMTP_TLS_REJECT_UNAUTH: true
-            # OVERLEAF_EMAIL_SMTP_IGNORE_TLS: false
-            # OVERLEAF_EMAIL_SMTP_NAME: '127.0.0.1'
-            # OVERLEAF_EMAIL_SMTP_LOGGER: true
-            # OVERLEAF_CUSTOM_EMAIL_FOOTER: "This system is run by department x"
+            # OVERLEAF_EMAIL_SMTP_TLS_REJECT_UNAUTH: ${OVERLEAF_EMAIL_SMTP_TLS_REJECT_UNAUTH}
+            # OVERLEAF_EMAIL_SMTP_IGNORE_TLS: ${OVERLEAF_EMAIL_SMTP_IGNORE_TLS}
+            # OVERLEAF_EMAIL_SMTP_NAME: ${OVERLEAF_EMAIL_SMTP_NAME}
+            # OVERLEAF_EMAIL_SMTP_LOGGER: ${OVERLEAF_EMAIL_SMTP_LOGGER}
+            # OVERLEAF_CUSTOM_EMAIL_FOOTER: ${OVERLEAF_CUSTOM_EMAIL_FOOTER}
 
-            # ENABLE_CRON_RESOURCE_DELETION: true
+            # ENABLE_CRON_RESOURCE_DELETION: ${ENABLE_CRON_RESOURCE_DELETION}
 
             ################
             ## Server Pro ##
@@ -77,14 +77,14 @@ services:
             ## so the following environment variables must be commented out to avoid compile issues.
             ##
             ## Sandboxed Compiles: https://docs.overleaf.com/on-premises/configuration/overleaf-toolkit/server-pro-only-configuration/sandboxed-compiles
-            SANDBOXED_COMPILES: 'true'
+            #SANDBOXED_COMPILES: ${SANDBOXED_COMPILES}
             ### Bind-mount source for /var/lib/overleaf/data/compiles inside the container.
-            SANDBOXED_COMPILES_HOST_DIR_COMPILES: '/home/user/sharelatex_data/data/compiles'
+            #SANDBOXED_COMPILES_HOST_DIR_COMPILES: ${SANDBOXED_COMPILES_HOST_DIR_COMPILES}
             ### Bind-mount source for /var/lib/overleaf/data/output inside the container.
-            SANDBOXED_COMPILES_HOST_DIR_OUTPUT: '/home/user/sharelatex_data/data/output'
+            #SANDBOXED_COMPILES_HOST_DIR_OUTPUT: ${SANDBOXED_COMPILES_HOST_DIR_OUTPUT}
             ### Backwards compatibility (before Server Pro 5.5)
-            DOCKER_RUNNER: 'true'
-            SANDBOXED_COMPILES_SIBLING_CONTAINERS: 'true'
+            #DOCKER_RUNNER: ${DOCKER_RUNNER}
+            #SANDBOXED_COMPILES_SIBLING_CONTAINERS: ${SANDBOXED_COMPILES_SIBLING_CONTAINERS}
 
             ## Works with test LDAP server shown at bottom of docker compose
             # OVERLEAF_LDAP_URL: 'ldap://ldap:389'
@@ -105,11 +105,11 @@ services:
 
     mongo:
         restart: always
-        image: mongo:6.0
+        image: mongo:8.0
         container_name: mongo
         command: '--replSet overleaf'
         volumes:
-            - ~/mongo_data:/data/db
+            - mongo_data:/data/db
             - ./bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
         environment:
           MONGO_INITDB_DATABASE: sharelatex
@@ -128,7 +128,11 @@ services:
         image: redis:6.2
         container_name: redis
         volumes:
-            - ~/redis_data:/data
+            - redis_data:/data
+volumes:
+  mongo_data:
+  redis_data:
+  sharelatex_data:
 
     # ldap:
     #    restart: always
