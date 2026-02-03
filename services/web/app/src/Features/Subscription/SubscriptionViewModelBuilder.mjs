@@ -335,6 +335,7 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
             pendingAdditionalLicenses += addOn.quantity
           }
         })
+        pendingPlan.addOns = pendingAddOns
       }
 
       const totalPrice = paymentRecord.subscription.planPrice + addOnPrice + tax
