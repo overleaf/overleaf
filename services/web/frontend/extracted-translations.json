@@ -741,6 +741,7 @@
   "github_workflow_authorize": "",
   "github_workflow_files_delete_github_repo": "",
   "github_workflow_files_error": "",
+  "github_workflow_files_error_non_owner": "",
   "give_feedback": "",
   "give_your_feedback": "",
   "go_next_page": "",

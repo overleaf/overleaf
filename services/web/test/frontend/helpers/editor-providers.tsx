@@ -51,6 +51,7 @@ import { ReferencesContext } from '@/features/ide-react/context/references-conte
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import { DetachCompileContext } from '@/shared/context/detach-compile-context'
 import { type CompileContext } from '@/shared/context/local-compile-context'
+import { EditorContext } from '@/shared/context/editor-context'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -255,6 +256,11 @@ export function EditorProviders({
     ...providers,
   }
 
+  // Only use the mock EditorProvider when explicitly required
+  if (providers.EditorProvider) {
+    customProviders.EditorProvider = providers.EditorProvider
+  }
+
   // Only override DetachCompileProvider when we need the mock
   if (mockCompileOnLoad) {
     customProviders.DetachCompileProvider =
@@ -265,6 +271,33 @@ export function EditorProviders({
   return (
     <ReactContextRoot providers={customProviders}>{children}</ReactContextRoot>
   )
+}
+
+export function makeEditorProvider({ isProjectOwner = true } = {}) {
+  const EditorProvider: FC<PropsWithChildren> = ({ children }) => {
+    const value = {
+      isProjectOwner,
+      renameProject: () => {},
+      isPendingEditor: false,
+      deactivateTutorial: () => {},
+      inactiveTutorials: [],
+      currentPopup: null,
+      setCurrentPopup: () => {},
+      hasPremiumSuggestion: false,
+      setHasPremiumSuggestion: () => {},
+      premiumSuggestionResetDate: new Date(),
+      setPremiumSuggestionResetDate: () => {},
+      writefullInstance: null,
+      setWritefullInstance: () => {},
+      showUpgradeModal: false,
+      setShowUpgradeModal: () => {},
+    }
+
+    return (
+      <EditorContext.Provider value={value}>{children}</EditorContext.Provider>
+    )
+  }
+  return EditorProvider
 }
 
 const makeReferencesProvider = () => {
