@@ -52,8 +52,8 @@ const moduleRailPopovers = (
     import: {
       default: {
         key: string
-        Component: FC<{ ref: RefObject<HTMLAnchorElement> }>
-        ref: RefObject<HTMLAnchorElement>
+        Component: FC<{ ref: RefObject<HTMLButtonElement> }>
+        ref: RefObject<HTMLButtonElement>
         hide: boolean | (() => boolean)
       }
     }
@@ -77,7 +77,7 @@ export const RailLayout = () => {
 
   const isHistoryView = view === 'history'
 
-  const fileTreeRef = useRef<HTMLAnchorElement>(null)
+  const fileTreeRef = useRef<HTMLButtonElement>(null)
   const settingsRef = useRef<HTMLButtonElement>(null)
 
   useEventListener(

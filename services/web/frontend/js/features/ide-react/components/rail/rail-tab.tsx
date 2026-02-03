@@ -6,7 +6,7 @@ import { NavLink } from 'react-bootstrap'
 import { RailElement } from '@/features/ide-react/util/rail-types'
 
 const RailTab = forwardRef<
-  HTMLAnchorElement,
+  HTMLButtonElement,
   {
     icon: RailElement['icon']
     eventKey?: string
@@ -14,7 +14,7 @@ const RailTab = forwardRef<
     indicator?: ReactElement
     title: string
   } & ComponentProps<'button'>
->(({ icon, eventKey, className, open, indicator, title, ...props }, ref) => {
+>(({ icon, className, eventKey, open, indicator, title, ...props }, ref) => {
   return (
     <OLTooltip
       id={`rail-tab-tooltip-${eventKey}`}
@@ -28,6 +28,7 @@ const RailTab = forwardRef<
         className={classNames('ide-rail-tab-link', className, {
           'open-rail': open,
         })}
+        as="button"
       >
         <RailTabIcon icon={icon} title={title} open={open} />
         {indicator}
