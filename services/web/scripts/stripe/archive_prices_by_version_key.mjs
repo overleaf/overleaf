@@ -10,7 +10,10 @@
  * Options:
  *   --region           Required. Stripe region to process (us or uk)
  *   --version          Required. Version key to match in lookup keys (e.g., 'jul2025')
- *   --action           Required. Action to perform: 'archive' or 'unarchive'
+ *   --action           Required. Action to perform: 'archive', 'soft-archive', or 'unarchive'
+ *                      - archive: Set prices as inactive (if not associated with any active subscriptions) and add [ARCHIVED] to nickname
+ *                      - soft-archive: Only add [ARCHIVED] to nickname, keep prices active
+ *                      - unarchive: Reactivate prices and remove [ARCHIVED] from nickname
  *   --commit           Actually perform the updates (default: dry-run mode)
  *
  * Examples:
@@ -19,6 +22,9 @@
  *
  *   # Commit archive prices with version 'jul2025' in UK region
  *   node scripts/stripe/archive_prices_by_version_key.mjs --region uk --version jul2025 --action archive --commit
+ *
+ *   # Soft archive: only mark in nickname, keep prices active
+ *   node scripts/stripe/archive_prices_by_version_key.mjs --region us --version jul2025 --action soft-archive --commit
  *
  *   # Unarchive prices with version 'jul2025'
  *   node scripts/stripe/archive_prices_by_version_key.mjs --region us --version jul2025 --action unarchive --commit
@@ -36,7 +42,7 @@ import { getRegionClient } from '../../modules/subscriptions/app/src/StripeClien
 const paramsSchema = z.object({
   region: z.enum(['us', 'uk']),
   version: z.string(),
-  action: z.enum(['archive', 'unarchive']),
+  action: z.enum(['archive', 'soft-archive', 'unarchive']),
   commit: z.boolean().default(false),
 })
 
@@ -149,6 +155,8 @@ async function fetchPricesByVersion(stripe, version, trackProgress) {
  */
 async function processPrices(prices, stripe, action, commit, trackProgress) {
   const targetActiveStatus = action === 'unarchive'
+  const isSoftArchive = action === 'soft-archive'
+  const isArchiving = action === 'archive' || action === 'soft-archive'
   const results = {
     processed: 0,
     skipped: 0,
@@ -160,10 +168,9 @@ async function processPrices(prices, stripe, action, commit, trackProgress) {
   const pricesToProcess = []
   for (const price of prices) {
     const hasArchivedNickname = price.nickname?.includes('[ARCHIVED]')
-    const alreadyInDesiredState =
-      action === 'archive'
-        ? hasArchivedNickname
-        : price.active && !hasArchivedNickname
+    const alreadyInDesiredState = isArchiving
+      ? hasArchivedNickname
+      : price.active && !hasArchivedNickname
 
     if (alreadyInDesiredState) {
       await trackProgress(
@@ -194,11 +201,12 @@ async function processPrices(prices, stripe, action, commit, trackProgress) {
       if (commit) {
         const updateParams = {}
 
-        if (!hasActiveSubscriptions) {
+        // only update active status if not soft-archiving and price doesn't have active subscriptions
+        if (!isSoftArchive && !hasActiveSubscriptions) {
           updateParams.active = targetActiveStatus
         }
 
-        if (action === 'archive' && !price.nickname?.includes('[ARCHIVED]')) {
+        if (isArchiving && !price.nickname?.includes('[ARCHIVED]')) {
           updateParams.nickname = price.nickname
             ? `[ARCHIVED] ${price.nickname}`
             : '[ARCHIVED]'
@@ -209,18 +217,24 @@ async function processPrices(prices, stripe, action, commit, trackProgress) {
 
         if (Object.keys(updateParams).length > 0) {
           await stripe.prices.update(price.id, updateParams)
-          const statusNote = hasActiveSubscriptions
-            ? '(nickname only - has active subscriptions)'
-            : ''
+          let statusNote = ''
+          if (hasActiveSubscriptions) {
+            statusNote = '(soft archived - has active subscriptions)'
+          } else if (isSoftArchive) {
+            statusNote = '(soft archived)'
+          }
           await trackProgress(
-            `${action === 'archive' ? 'Archived' : 'Unarchived'} price: ${price.id} (${price.lookup_key}) ${statusNote}`
+            `${isArchiving ? 'Archived' : 'Unarchived'} price: ${price.id} (${price.lookup_key}) ${statusNote}`
           )
           await rateLimitSleep()
         }
       } else {
-        const statusNote = hasActiveSubscriptions
-          ? '(nickname only - has active subscriptions)'
-          : ''
+        let statusNote = ''
+        if (hasActiveSubscriptions) {
+          statusNote = '(soft archived - has active subscriptions)'
+        } else if (isSoftArchive) {
+          statusNote = '(soft archived)'
+        }
         await trackProgress(
           `[DRY RUN] Would ${action} price: ${price.id} (${price.lookup_key}) ${statusNote}`
         )
