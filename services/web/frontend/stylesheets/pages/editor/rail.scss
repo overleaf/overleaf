@@ -213,7 +213,7 @@ body {
 .separated-rail-tab::before {
   display: inline-block;
   content: '';
-  border-top: 1px solid var(--border-divider);
+  border-top: 1px solid var(--border-divider-themed);
   width: 100%;
   transform: translateY(-12px);
 }
