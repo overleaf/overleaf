@@ -4,6 +4,7 @@ import PQueue from 'p-queue'
 import InactiveProjectManager from '../app/src/Features/InactiveData/InactiveProjectManager.mjs'
 import { gracefulShutdown } from '../app/src/infrastructure/GracefulShutdown.mjs'
 import logger from '@overleaf/logger'
+import { setTimeout } from 'node:timers/promises'
 
 // Global variables for tracking job and error counts
 let jobCount = 0
@@ -17,6 +18,7 @@ let gracefulShutdownInitiated = false
 const SCRIPT_START_TIME = Date.now()
 const MAX_RUNTIME_DEFAULT = null
 let MAX_RUNTIME = MAX_RUNTIME_DEFAULT // in milliseconds
+const MAX_PROJECT_ESTIMATE = 30_000
 
 // Configure signal handling
 process.on('SIGINT', handleSignal)
@@ -36,6 +38,8 @@ function hasMaxRuntimeExceeded() {
   const elapsedTime = Date.now() - SCRIPT_START_TIME
   const hasExceeded = elapsedTime >= MAX_RUNTIME
   if (hasExceeded && !gracefulShutdownInitiated) {
+    // Exit with code 1 eventually. The cron heartbeat script will alert us.
+    process.exitCode = 1
     gracefulShutdownInitiated = true
     logger.warn(
       { elapsedTimeMs: elapsedTime, maxRuntimeMs: MAX_RUNTIME },
@@ -96,12 +100,33 @@ async function deactivateSingleProject(project) {
 // Centralized project processing function
 async function processProjects(projectCursor, concurrency) {
   const queue = new PQueue({ concurrency })
+  const projects = []
   for await (const project of projectCursor) {
     if (gracefulShutdownInitiated || hasMaxRuntimeExceeded()) {
       skippedCount++
       break
     }
+    projects.push(project)
+  }
+  const start = Date.now()
+  const isSteadyStateProcessing = projects.length < 10_000
+  for (const [idx, project] of projects.entries()) {
+    if (MAX_RUNTIME > 0) {
+      // If the job has to run in a finite time (e.g. when running as the cron job)
+      // then spread the work evenly over the runtime duration.  Otherwise, process
+      // all the outstanding projects without any delay, subject to the concurrency.
+      const remainingTime = MAX_RUNTIME - (Date.now() - start)
+      if (isSteadyStateProcessing && remainingTime > MAX_PROJECT_ESTIMATE) {
+        const remainingProjects = projects.length - idx
+        // Handle small number of projects better (don't wait for all of remainingTime to pass).
+        await setTimeout(remainingTime / (remainingProjects + 1))
+      }
+    }
     await queue.onEmpty()
+    if (gracefulShutdownInitiated || hasMaxRuntimeExceeded()) {
+      skippedCount++
+      break
+    }
     logger.debug(
       { queueSize: queue.size, queuePending: queue.pending },
       'queue size before adding new job'
