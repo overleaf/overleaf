@@ -19,6 +19,7 @@ block content
 										+bookmarkable-tabset-header('privileges-matrix', 'Privileges Matrix')
 										if hasFeature('saas')
 											+bookmarkable-tabset-header('tpds', 'TPDS/Dropbox Management')
+											+bookmarkable-tabset-header('debug-projects', 'Debug Projects')
 
 								.tab-content
 									.tab-pane.active(role='tabpanel' id='system-messages')
@@ -133,3 +134,20 @@ block content
 														input.form-control(name='user_id' id='user-id' type='text' required)
 													.form-group
 														button.btn-primary.btn(type='submit') Poll
+
+										.tab-pane(role='tabpanel' id='debug-projects')
+											if debugProjects.length
+												table.table.table-striped
+													thead
+														tr
+															th Owner
+															th Project Name
+															th Last updated
+													tbody
+														each project in debugProjects
+															tr
+																td= project.owner_ref.email
+																td= project.name
+																td= moment(project.lastUpdated.toUTCString()).format('Do MMM YYYY, h:mm a') + ' UTC'
+											else
+												p.text-muted No debug projects found

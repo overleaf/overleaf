@@ -259,8 +259,8 @@ const _ProjectController = {
     res.setTimeout(5 * 60 * 1000) // allow extra time for the copy to complete
     metrics.inc('cloned-project')
     const projectId = req.params.Project_id
-    const { projectName, tags } = req.body
-    logger.debug({ projectId, projectName }, 'cloning project')
+    const { projectName, isDebugCopy, tags } = req.body
+    logger.debug({ projectId, projectName, isDebugCopy }, 'cloning project')
     if (!SessionManager.isUserLoggedIn(req.session)) {
       return res.json({ redir: '/register' })
     }
@@ -271,7 +271,8 @@ const _ProjectController = {
         currentUser,
         projectId,
         projectName,
-        tags
+        tags,
+        isDebugCopy
       )
       ProjectAuditLogHandler.addEntryIfManagedInBackground(
         projectId,
