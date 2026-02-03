@@ -60,11 +60,6 @@ describe('UserUpdater', function () {
       .withArgs(ctx.user._id)
       .resolves(ctx.user.email)
 
-    ctx.NewsletterManager = {
-      promises: {
-        changeEmail: sinon.stub().resolves(),
-      },
-    }
     ctx.AnalyticsManager = {
       recordEventForUserInBackground: sinon.stub(),
     }
@@ -161,13 +156,6 @@ describe('UserUpdater', function () {
     vi.doMock('@overleaf/settings', () => ({
       default: (ctx.settings = {}),
     }))
-
-    vi.doMock(
-      '../../../../app/src/Features/Newsletter/NewsletterManager',
-      () => ({
-        default: ctx.NewsletterManager,
-      })
-    )
 
     vi.doMock(
       '../../../../app/src/Features/Subscription/RecurlyWrapper',
@@ -349,10 +337,12 @@ describe('UserUpdater', function () {
       )
     })
 
-    it('sets the new email in the newsletter', function (ctx) {
-      expect(
-        ctx.NewsletterManager.promises.changeEmail
-      ).to.have.been.calledWith(ctx.user, ctx.newEmail)
+    it('fires userEmailChanged hook', function (ctx) {
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'userEmailChanged',
+        ctx.user,
+        ctx.newEmail
+      )
       expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
         'updateAccountEmailAddress',
         ctx.user._id,
@@ -715,16 +705,18 @@ describe('UserUpdater', function () {
       )
     })
 
-    it('sets the changed email in the newsletter', async function (ctx) {
+    it('fires userEmailChanged hook', async function (ctx) {
       await ctx.UserUpdater.promises.setDefaultEmailAddress(
         ctx.user._id,
         ctx.newEmail,
         false,
         ctx.auditLog
       )
-      expect(
-        ctx.NewsletterManager.promises.changeEmail
-      ).to.have.been.calledWith(ctx.user, ctx.newEmail)
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'userEmailChanged',
+        ctx.user,
+        ctx.newEmail
+      )
       expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
         'updateAccountEmailAddress',
         ctx.user._id,
@@ -833,8 +825,6 @@ describe('UserUpdater', function () {
           )
         ).to.be.rejectedWith(Errors.UnconfirmedEmailError)
         expect(ctx.db.users.updateOne).to.not.have.been.called
-        expect(ctx.NewsletterManager.promises.changeEmail).to.not.have.been
-          .called
       })
     })
 
@@ -854,7 +844,6 @@ describe('UserUpdater', function () {
             expect(error).to.exist
             expect(error.name).to.equal('Error')
             ctx.UserUpdater.promises.updateUser.callCount.should.equal(0)
-            ctx.NewsletterManager.promises.changeEmail.callCount.should.equal(0)
           }
         )
       })

@@ -3,7 +3,7 @@ if(customerIoEnabled && ExposedSettings.cioWriteKey && ExposedSettings.cioSiteId
 		function boolAttr(value) {
 			return value !== undefined ? String(value) : null;
 		}
-	script(type="text/javascript", id="cio-loader", nonce=scriptNonce, data-best-subscription=(usersBestSubscription && usersBestSubscription.type), data-ai-blocked=boolAttr(aiBlocked), data-has-ai-assist=boolAttr(hasAiAssist), data-cio-write-key=ExposedSettings.cioWriteKey, data-cio-site-id=ExposedSettings.cioSiteId, data-session-analytics-id=getSessionAnalyticsId(), data-user-id=getLoggedInUserId(), data-last-active=lastActive, data-sign-up-date=signUpDate, data-subject-area=subjectArea, data-role=role, data-used-latex=usedLatex, data-primary-occupation=primaryOccupation, data-country=countryCode, data-commons-institution=commonsInstitution, data-group-role=groupRole, data-features=user.features, data-is-managed-user=boolAttr(isManagedUser)).
+	script(type="text/javascript", id="cio-loader", nonce=scriptNonce, data-best-subscription=(usersBestSubscription && usersBestSubscription.type), data-ai-blocked=boolAttr(aiBlocked), data-has-ai-assist=boolAttr(hasAiAssist), data-cio-write-key=ExposedSettings.cioWriteKey, data-cio-site-id=ExposedSettings.cioSiteId, data-session-analytics-id=getSessionAnalyticsId(), data-user-id=getLoggedInUserId(), data-last-active=lastActive, data-sign-up-date=signUpDate, data-subject-area=subjectArea, data-role=role, data-used-latex=usedLatex, data-primary-occupation=primaryOccupation, data-country=countryCode, data-commons-institution=commonsInstitution, data-group-role=groupRole, data-features=user.features, data-email=user.email, data-is-managed-user=boolAttr(isManagedUser)).
 		
 		function parseBool(value) {
 			return value === 'true' ? true : value === 'false' ? false : undefined;
@@ -24,6 +24,7 @@ if(customerIoEnabled && ExposedSettings.cioWriteKey && ExposedSettings.cioSiteId
 		var primaryOccupation = cioSettings.primaryOccupation;
 		var usedLatex = cioSettings.usedLatex;
 		var features = cioSettings.features;
+		var email = cioSettings.email;
 
 		var countryCode = cioSettings.country;
 		var commonsInstitution = cioSettings.commonsInstitution;
@@ -65,6 +66,7 @@ if(customerIoEnabled && ExposedSettings.cioWriteKey && ExposedSettings.cioSiteId
 			addIfDefined(identifyData, 'groupRole', groupRole);
 			addIfDefined(identifyData, 'isManagedUser', isManagedUser);
 			addIfDefined(identifyData, 'features', features);
+			addIfDefined(identifyData, 'email', email);
 			
 			analytics.identify(analyticsId, identifyData);
 		}}();

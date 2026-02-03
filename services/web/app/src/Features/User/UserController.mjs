@@ -2,7 +2,6 @@ import UserHandler from './UserHandler.mjs'
 import UserDeleter from './UserDeleter.mjs'
 import UserGetter from './UserGetter.mjs'
 import { User } from '../../models/User.mjs'
-import NewsletterManager from '../Newsletter/NewsletterManager.mjs'
 import logger from '@overleaf/logger'
 import metrics from '@overleaf/metrics'
 import AuthenticationManager from '../Authentication/AuthenticationManager.mjs'
@@ -300,15 +299,16 @@ async function subscribe(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   req.logger.addFields({ userId })
 
-  const user = await UserGetter.promises.getUser(userId, {
-    _id: 1,
-    email: 1,
-    first_name: 1,
-    last_name: 1,
-  })
-  await NewsletterManager.promises.subscribe(user)
+  await Modules.promises.hooks.fire(
+    'updateTopicSubscription',
+    userId,
+    'newsletter',
+    true
+  )
+
   res.json({
     message: req.i18n.translate('thanks_settings_updated'),
+    subscribed: true,
   })
 }
 
@@ -316,16 +316,16 @@ async function unsubscribe(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   req.logger.addFields({ userId })
 
-  const user = await UserGetter.promises.getUser(userId, {
-    _id: 1,
-    email: 1,
-    first_name: 1,
-    last_name: 1,
-  })
-  await NewsletterManager.promises.unsubscribe(user)
-  await Modules.promises.hooks.fire('newsletterUnsubscribed', user)
+  await Modules.promises.hooks.fire(
+    'updateTopicSubscription',
+    userId,
+    'newsletter',
+    false
+  )
+
   res.json({
     message: req.i18n.translate('thanks_settings_updated'),
+    subscribed: false,
   })
 }
 

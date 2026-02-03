@@ -42,12 +42,6 @@ describe('UserDeleter', function () {
     )
     ctx.user = ctx.mockedUser.object
 
-    ctx.NewsletterManager = {
-      promises: {
-        unsubscribe: sinon.stub().resolves(),
-      },
-    }
-
     ctx.ProjectDeleter = {
       promises: {
         deleteUsersProjects: sinon.stub().resolves(),
@@ -122,13 +116,6 @@ describe('UserDeleter', function () {
     vi.doMock('../../../../app/src/models/DeletedUser', () => ({
       DeletedUser,
     }))
-
-    vi.doMock(
-      '../../../../app/src/Features/Newsletter/NewsletterManager',
-      () => ({
-        default: ctx.NewsletterManager,
-      })
-    )
 
     vi.doMock('../../../../app/src/Features/User/UserSessionsManager', () => ({
       default: ctx.UserSessionsManager,
@@ -259,15 +246,6 @@ describe('UserDeleter', function () {
               ipAddress: ctx.ipAddress,
             })
             ctx.UserMock.verify()
-          })
-
-          it('should delete the user from mailchimp', async function (ctx) {
-            await ctx.UserDeleter.promises.deleteUser(ctx.userId, {
-              ipAddress: ctx.ipAddress,
-            })
-            expect(
-              ctx.NewsletterManager.promises.unsubscribe
-            ).to.have.been.calledWith(ctx.user, { delete: true })
           })
 
           it('should delete all the projects of a user', async function (ctx) {
@@ -423,23 +401,6 @@ describe('UserDeleter', function () {
               ctx.ipAddress,
               {}
             )
-          })
-        })
-
-        describe('when unsubscribing from mailchimp fails', function () {
-          beforeEach(function (ctx) {
-            ctx.NewsletterManager.promises.unsubscribe.rejects(
-              new Error('something went wrong')
-            )
-          })
-
-          it('should return an error and not delete the user', async function (ctx) {
-            await expect(
-              ctx.UserDeleter.promises.deleteUser(ctx.userId, {
-                ipAddress: ctx.ipAddress,
-              })
-            ).to.be.rejected
-            ctx.UserMock.verify()
           })
         })
 

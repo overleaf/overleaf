@@ -2,7 +2,7 @@ import { User } from '../../models/User.mjs'
 import UserCreator from './UserCreator.mjs'
 import UserGetter from './UserGetter.mjs'
 import AuthenticationManager from '../Authentication/AuthenticationManager.mjs'
-import NewsletterManager from '../Newsletter/NewsletterManager.mjs'
+import Modules from '../../infrastructure/Modules.mjs'
 import logger from '@overleaf/logger'
 import crypto from 'node:crypto'
 import EmailHandler from '../Email/EmailHandler.mjs'
@@ -72,7 +72,12 @@ const UserRegistrationHandler = {
 
     if (userDetails.subscribeToNewsletter === 'true') {
       try {
-        NewsletterManager.subscribe(user)
+        await Modules.promises.hooks.fire(
+          'updateTopicSubscription',
+          user._id,
+          'newsletter',
+          true
+        )
       } catch (error) {
         logger.warn(
           { err: error, user },

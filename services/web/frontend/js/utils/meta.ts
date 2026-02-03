@@ -207,6 +207,7 @@ export interface Meta {
   'ol-memberOfSSOEnabledGroups': GroupSSOLinkingStatus[]
   'ol-members': MinimalUser[]
   'ol-navbar': DefaultNavbarMetadata
+  'ol-newsletter-subscribed': boolean
   'ol-no-single-dollar': boolean
   'ol-notifications': NotificationType[]
   'ol-notificationsInstitution': InstitutionType[]
