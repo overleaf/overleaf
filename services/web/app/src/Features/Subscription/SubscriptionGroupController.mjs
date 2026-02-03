@@ -427,7 +427,7 @@ async function missingBillingInformation(req, res) {
       { error },
       'error trying to render missing billing information page'
     )
-    return res.render('/user/subscription')
+    return res.redirect('/user/subscription')
   }
 }
 
@@ -446,7 +446,7 @@ async function manuallyCollectedSubscription(req, res) {
       { error },
       'error trying to render manually collected subscription page'
     )
-    return res.render('/user/subscription')
+    return res.redirect('/user/subscription')
   }
 }
 
@@ -461,7 +461,7 @@ async function subtotalLimitExceeded(req, res) {
     })
   } catch (error) {
     logger.err({ error }, 'error trying to render subtotal limit exceeded page')
-    return res.render('/user/subscription')
+    return res.redirect('/user/subscription')
   }
 }
 
