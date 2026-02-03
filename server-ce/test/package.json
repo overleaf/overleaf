@@ -6,8 +6,6 @@
   "scripts": {
     "cypress:open": "cypress open --e2e --browser chrome",
     "cypress:run": "cypress run --e2e --browser chrome",
-    "format": "prettier --list-different $PWD/'**/*.{js,mjs,ts,tsx}'",
-    "format:fix": "prettier --write $PWD/'**/*.{js,mjs,ts,tsx}'",
     "lint": "eslint --max-warnings 0 --format unix --ext .js,.jsx,.mjs,.ts,.tsx .",
     "lint:fix": "eslint --fix --ext .js,.jsx,.mjs,.ts,.tsx ."
   },

@@ -4,7 +4,6 @@ Lezer-LaTeX is a LaTeX parser implemented with [lezer](https://lezer.codemirror.
 
 The parser is written in a "grammar" file, (and a "tokens" file with custom tokenizer logic) which is then compiled by `@lezer/generator` into a parser module and a "terms" module. The parser module is then loaded by the CodeMirror 6 in the web frontend codebase.
 
-
 ## Important files
 
 - Source files:
@@ -23,7 +22,6 @@ The parser is written in a "grammar" file, (and a "tokens" file with custom toke
 - Webpack plugins:
   - `web/webpack-plugins/lezer-grammar-compiler.js`: A webpack plugin that calls the generator as part of the webpack build. In dev, it will automatically re-build the parser when the grammar file changes.
 
-
 ## NPM tasks
 
 - `lezer-latex:generate`: Generate the parser files from the grammar
@@ -32,7 +30,6 @@ The parser is written in a "grammar" file, (and a "tokens" file with custom toke
 
 - `lezer-latex:run`: Run the parser against a file
   - (Calls `lezer-latex/run.js`)
-
 
 ### Generating the parser
 
@@ -46,7 +43,6 @@ make install
 bin/npm -w services/web run 'lezer-latex:generate'
 ```
 
-
 ## Tests
 
 Unit tests for the parser live in `web/test/unit/src/LezerLatex`. There are three kinds of test, in three subdirectories:
@@ -57,10 +53,9 @@ Unit tests for the parser live in `web/test/unit/src/LezerLatex`. There are thre
 
 These tests run as part of `test_frontend`. You can run these tests alone by invoking:
 
-``` sh
+```sh
 make test_unit MOCHA_GREP='lezer-latex'
 ```
-
 
 ## Trying the parser
 
@@ -69,12 +64,11 @@ some example files in the test suite, at `web/test/unit/src/LezerLatex/examples/
 
 For example:
 
-``` sh
+```sh
 bin/npm -w services/web run 'lezer-latex:run'  web/test/unit/src/LezerLatex/examples/amsmath.tex
 ```
 
 If you omit the file path, the default file (`examples/demo.tex`) will be run.
-
 
 ## Integration into web
 

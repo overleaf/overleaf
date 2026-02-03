@@ -12,8 +12,6 @@
     "start": "node app.js",
     "nodemon": "node --watch app.js",
     "lint": "eslint --max-warnings 0 --format unix .",
-    "format": "prettier --list-different $PWD/'**/{*.*js,*.ts}'",
-    "format:fix": "prettier --write $PWD/'**/{*.*js,*.ts}'",
     "test:acceptance:_run": "mocha --recursive --timeout 15000 --exit $@ test/acceptance/js",
     "test:unit:_run": "vitest --config ./vitest.config.unit.cjs",
     "lint:fix": "eslint --fix .",

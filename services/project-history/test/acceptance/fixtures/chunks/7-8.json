@@ -21,33 +21,21 @@
           "operations": [
             {
               "pathname": "main.tex",
-              "textOperation": [
-                1923,
-                " also updated",
-                18726
-              ]
+              "textOperation": [1923, " also updated", 18726]
             }
           ],
           "timestamp": "2017-12-04T10:32:47.277Z",
-          "authors": [
-            31
-          ]
+          "authors": [31]
         },
         {
           "operations": [
             {
               "pathname": "bar.tex",
-              "textOperation": [
-                28,
-                -15,
-                16
-              ]
+              "textOperation": [28, -15, 16]
             }
           ],
           "timestamp": "2017-12-04T10:32:52.877Z",
-          "v2Authors": [
-            "5a5637efdac84e81b71014c4"
-          ]
+          "v2Authors": ["5a5637efdac84e81b71014c4"]
         }
       ]
     },

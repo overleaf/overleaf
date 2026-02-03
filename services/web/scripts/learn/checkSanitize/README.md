@@ -7,10 +7,10 @@ node scripts/learn/checkSanitize/index.mjs https://LEARN_WIKI
 ## Bulk export
 
 There is a bulk export for media wiki pages, but it produces different
- html escaping compared to the regular parse API we use in web.
+html escaping compared to the regular parse API we use in web.
 
 The bulk export does not escape all the placeholder HTML-like elements,
- like `<project-id` or `<document goes here>`.
+like `<project-id` or `<document goes here>`.
 
 ## Example output
 

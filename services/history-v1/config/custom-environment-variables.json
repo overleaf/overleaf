@@ -59,10 +59,10 @@
     "zipTimeoutMs": "ZIP_STORE_ZIP_TIMEOUT_MS"
   },
   "backupStore": {
-    "chunksBucket":"BACKUP_OVERLEAF_EDITOR_CHUNKS_BUCKET",
-    "deksBucket":"BACKUP_OVERLEAF_EDITOR_DEKS_BUCKET",
-    "globalBlobsBucket":"BACKUP_OVERLEAF_EDITOR_GLOBAL_BLOBS_BUCKET",
-    "projectBlobsBucket":"BACKUP_OVERLEAF_EDITOR_PROJECT_BLOBS_BUCKET"
+    "chunksBucket": "BACKUP_OVERLEAF_EDITOR_CHUNKS_BUCKET",
+    "deksBucket": "BACKUP_OVERLEAF_EDITOR_DEKS_BUCKET",
+    "globalBlobsBucket": "BACKUP_OVERLEAF_EDITOR_GLOBAL_BLOBS_BUCKET",
+    "projectBlobsBucket": "BACKUP_OVERLEAF_EDITOR_PROJECT_BLOBS_BUCKET"
   },
   "healthCheckBlobs": "HEALTH_CHECK_BLOBS",
   "healthCheckProjects": "HEALTH_CHECK_PROJECTS",

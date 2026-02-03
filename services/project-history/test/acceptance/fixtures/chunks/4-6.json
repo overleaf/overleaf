@@ -21,32 +21,21 @@
           "operations": [
             {
               "pathname": "foo.tex",
-              "textOperation": [
-                41,
-                "\n\nSeven eight nince"
-              ]
+              "textOperation": [41, "\n\nSeven eight nince"]
             }
           ],
           "timestamp": "2017-12-04T10:29:17.786Z",
-          "authors": [
-            31
-          ]
+          "authors": [31]
         },
         {
           "operations": [
             {
               "pathname": "foo.tex",
-              "textOperation": [
-                58,
-                -1,
-                1
-              ]
+              "textOperation": [58, -1, 1]
             }
           ],
           "timestamp": "2017-12-04T10:29:22.905Z",
-          "authors": [
-            31
-          ]
+          "authors": [31]
         },
         {
           "operations": [
@@ -56,9 +45,7 @@
             }
           ],
           "timestamp": "2017-12-04T10:29:26.120Z",
-          "authors": [
-            31
-          ]
+          "authors": [31]
         }
       ]
     },

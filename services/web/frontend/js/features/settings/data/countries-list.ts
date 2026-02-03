@@ -253,4 +253,4 @@ const countries = <const>[
 ]
 
 export default countries
-export type CountryCode = typeof countries[number]['code']
+export type CountryCode = (typeof countries)[number]['code']

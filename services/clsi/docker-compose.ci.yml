@@ -16,7 +16,6 @@ services:
       NODE_OPTIONS: "--unhandled-rejections=strict"
       VITEST_NO_CACHE: true
 
-
   test_acceptance:
     build: .
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
@@ -42,7 +41,6 @@ services:
       - ./compiles:/overleaf/services/clsi/compiles
       - /var/run/docker.sock:/var/run/docker.sock
     command: npm run test:acceptance
-
 
   tar:
     build: .

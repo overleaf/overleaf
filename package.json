@@ -5,6 +5,7 @@
     "patch-package": "^8.0.0"
   },
   "devDependencies": {
+    "@prettier/plugin-pug": "^3.4.0",
     "@types/chai": "^4.3.0",
     "@types/chai-as-promised": "^7.1.8",
     "@types/mocha": "^10.0.6",
@@ -41,10 +42,14 @@
     }
   },
   "scripts": {
-    "format": "prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "prettier --write $PWD/'**/*.js'",
-    "format:jenkins": "prettier --list-different $PWD/'**/Jenkinsfile'",
-    "format:jenkins:fix": "prettier --write $PWD/'**/Jenkinsfile'",
+    "format": "prettier --list-different",
+    "format:fix": "prettier --write --list-different",
+    "format:styles": "prettier --list-different '**/*.{css,scss}'",
+    "format:styles:fix": "prettier --write --list-different '**/*.{css,scss}'",
+    "format:pug": "prettier --list-different '**/*.pug'",
+    "format:pug:fix": "prettier --write --list-different '**/*.pug'",
+    "format:jenkins": "prettier --list-different '**/Jenkinsfile'",
+    "format:jenkins:fix": "prettier --write --list-different '**/Jenkinsfile'",
     "lint": "eslint --max-warnings 0 --format unix .",
     "lint:fix": "eslint --fix .",
     "postinstall": "patch-package"

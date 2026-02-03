@@ -3,9 +3,7 @@
   "scripts": {
     "migrations": "MONGO_SOCKET_TIMEOUT=0 east --es-modules",
     "lint": "eslint --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --fix --ext .cjs,.js,.jsx,.mjs,.ts .",
-    "format": "prettier --list-different $PWD/'**/*.{mjs,js,cjs,ts}'",
-    "format:fix": "prettier --write $PWD/'**/*.{mjs,js,cjs,ts}'"
+    "lint:fix": "eslint --fix --ext .cjs,.js,.jsx,.mjs,.ts ."
   },
   "dependencies": {
     "@overleaf/logger": "*",

@@ -431,9 +431,16 @@ ci:
 #
 # Lint & format
 #
+
+# Run the linting commands in the scope of the monorepo.
+# Eslint and prettier (plus some configs) are on the root.
+RUN_LINTING_MONOREPO = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(MONOREPO) {{node_image}}:{{node_version}} npm run --silent
+
+RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/web/data/reports:/overleaf/services/web/data/reports -w /overleaf $(IMAGE_CI) npm run --silent
+
 ORG_PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN_LINT_FORMAT ?= \
-	docker run --rm --env BRANCH_NAME --env CI --env COMMIT_SHA --env MONOREPO --volume ${PWD}/data/reports:/overleaf/services/web/data/reports ${IMAGE_CI}
+	docker run --rm --env BRANCH_NAME --env CI --env COMMIT_SHA --env MONOREPO --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume ${PWD}/data/reports:/overleaf/services/web/data/reports ${IMAGE_CI}
 
 NODE_MODULES_PATH := ${PATH}:${PWD}/node_modules/.bin:/overleaf/services/web/node_modules/.bin
 WITH_NODE_MODULES_PATH = \
@@ -505,34 +512,34 @@ lint_in_docker:
 
 format: format_js
 format_js:
-	npm run --silent format
+	$(RUN_LINTING_MONOREPO) format -- services/web
 
-format: format_styles
-format_styles:
-	npm run --silent format:styles
-
-format: format_pug
-format_pug:
-	npm run --silent format:pug
-
-format: format_jenkins
-format_jenkins:
-	npm run --silent format:jenkins
+format_ci:
+	$(RUN_LINTING_CI_MONOREPO) format -- services/web
 
 format_fix:
-	npm run --silent format:fix
+	$(RUN_LINTING_MONOREPO) format:fix -- services/web
+
+format_styles:
+	$(RUN_LINTING_MONOREPO) format:styles
 
 format_styles_fix:
-	npm run --silent format:styles:fix
+	$(RUN_LINTING_MONOREPO) format:styles:fix
+
+format_pug:
+	$(RUN_LINTING_MONOREPO) format:pug
 
 format_pug_fix:
-	npm run --silent format:pug:fix
+	$(RUN_LINTING_MONOREPO) format:pug:fix
+
+format_jenkins:
+	$(RUN_LINTING_MONOREPO) format:jenkins
 
 format_jenkins_fix:
-	npm run --silent format:jenkins:fix
+	$(RUN_LINTING_MONOREPO) format:jenkins:fix
 
 format_in_docker:
-	$(RUN_LINT_FORMAT) make format -j2 --output-sync
+	$(RUN_LINT_FORMAT) npm run --prefix /overleaf format -- services/web
 
 SHELLCHECK_OPTS = \
 	--shell=bash \

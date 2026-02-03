@@ -10,9 +10,7 @@
   "license": "AGPL-3.0-only",
   "version": "1.0.0",
   "scripts": {
-    "test": "npm run lint && npm run format && npm run types:check && npm run test:unit",
-    "format": "prettier --list-different $PWD/'**/*.{js,cjs,ts}'",
-    "format:fix": "prettier --write $PWD/'**/*.{js,cjs,ts}'",
+    "test": "npm run lint && npm run types:check && npm run test:unit",
     "lint": "eslint --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 --format unix .",
     "lint:fix": "eslint --fix --ext .cjs,.js,.jsx,.mjs,.ts .",
     "test:ci": "npm run test:unit",

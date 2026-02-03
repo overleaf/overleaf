@@ -51,4 +51,3 @@ services:
       SANDBOXED_COMPILES_HOST_DIR_COMPILES: $PWD/compiles
       SANDBOXED_COMPILES_HOST_DIR_OUTPUT: $PWD/output
     command: npm run --silent test:acceptance
-

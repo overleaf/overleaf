@@ -64,8 +64,6 @@
     "start": "node app.js",
     "lint": "eslint --max-warnings 0 --format unix .",
     "lint:fix": "eslint --fix .",
-    "format": "prettier --list-different $PWD/'**/{*.*js,*.ts}'",
-    "format:fix": "prettier --write $PWD/'**/{*.*js,*.ts}'",
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
     "test:unit:_run": "mocha --recursive --exit $@ test/unit/js",

@@ -20,7 +20,6 @@ services:
       NODE_OPTIONS: "--unhandled-rejections=strict"
       VITEST_NO_CACHE: true
 
-
   test_acceptance:
     build: .
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
@@ -29,7 +28,7 @@ services:
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
       AWS_S3_ENDPOINT: https://minio:9000
-      AWS_S3_PATH_STYLE: 'true'
+      AWS_S3_PATH_STYLE: "true"
       DELETE_OBJECTS_MD5_FALLBACK: true
       AWS_ACCESS_KEY_ID: OVERLEAF_FILESTORE_S3_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY: OVERLEAF_FILESTORE_S3_SECRET_ACCESS_KEY
@@ -64,7 +63,6 @@ services:
     user: node
     command: npm run test:acceptance
 
-
   tar:
     build: .
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
@@ -72,6 +70,7 @@ services:
       - ./:/tmp/build/
     command: tar -czf /tmp/build/build.tar.gz --exclude=build.tar.gz --exclude-vcs .
     user: root
+
   certs:
     build:
       dockerfile_inline: |
@@ -83,7 +82,7 @@ services:
     working_dir: /certs
     entrypoint: sh
     command:
-      - '-cex'
+      - "-cex"
       - |
         if [ ! -f private.key ] || [ ! -f public.crt ]; then
           /certgen -host minio
@@ -115,7 +114,7 @@ services:
       - minio-certs:/root/.mc/certs/CAs
     entrypoint: sh
     command:
-      - '-cex'
+      - "-cex"
       - |
         sleep 1
         mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD \
@@ -218,6 +217,7 @@ services:
         mc admin policy create s3 overleaf-filestore policy-filestore.json
         mc admin policy attach s3 overleaf-filestore \
           --user=OVERLEAF_FILESTORE_S3_ACCESS_KEY_ID
+
   gcs:
     image: fsouza/fake-gcs-server:1.52.3
     command: ["--port=9090", "--scheme=http", "--external-url=http://gcs:9090"]

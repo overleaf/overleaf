@@ -35,9 +35,7 @@
     "lint:fix": "eslint --fix --ext .cjs,.js,.jsx,.mjs,.ts .",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
     "test:acceptance": "mocha --recursive --exit --grep=$MOCHA_GREP test/acceptance",
-    "test": "npm run lint && npm run format && npm run types:check && npm run test:unit",
-    "format": "prettier --list-different $PWD/'**/*.{js,cjs,ts}'",
-    "format:fix": "prettier --write $PWD/'**/*.{js,cjs,ts}'",
+    "test": "npm run lint && npm run types:check && npm run test:unit",
     "test:ci": "npm run test:unit",
     "types:check": "tsc --noEmit"
   },

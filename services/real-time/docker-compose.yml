@@ -59,4 +59,3 @@ services:
       test: ping=$$(redis-cli ping) && [ "$$ping" = 'PONG' ]
       interval: 1s
       retries: 20
-
