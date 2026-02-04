@@ -10,16 +10,12 @@ import RealTimeClient from './helpers/RealTimeClient.js'
 import FixturesManager from './helpers/FixturesManager.js'
 import { expect } from 'chai'
 import async from 'async'
-import request from 'request'
+import { fetchNothing } from '@overleaf/fetch-utils'
 
-const drain = function (rate, callback) {
-  request.post(
-    {
-      url: `http://127.0.0.1:3026/drain?rate=${rate}`,
-    },
-    (error, response, data) => callback(error, data)
-  )
-  return null
+const drain = async function (rate) {
+  await fetchNothing(`http://127.0.0.1:3026/drain?rate=${rate}`, {
+    method: 'POST',
+  })
 }
 
 describe('DrainManagerTests', function () {
@@ -34,7 +30,7 @@ describe('DrainManagerTests', function () {
       (e, { project_id: projectId, user_id: userId }) => {
         this.project_id = projectId
         this.user_id = userId
-        return done()
+        done()
       }
     )
     return null
@@ -43,23 +39,23 @@ describe('DrainManagerTests', function () {
   before(function (done) {
     // cleanup to speedup reconnecting
     this.timeout(10000)
-    return RealTimeClient.disconnectAllClients(done)
+    RealTimeClient.disconnectAllClients(done)
   })
 
   // trigger and check cleanup
   it('should have disconnected all previous clients', function (done) {
-    return RealTimeClient.getConnectedClients((error, data) => {
+    RealTimeClient.getConnectedClients((error, data) => {
       if (error) {
         return done(error)
       }
       expect(data.length).to.equal(0)
-      return done()
+      done()
     })
   })
 
-  return describe('with two clients in the project', function () {
+  describe('with two clients in the project', function () {
     beforeEach(function (done) {
-      return async.series(
+      async.series(
         [
           cb => {
             this.clientA = RealTimeClient.connect(this.project_id, cb)
@@ -73,34 +69,37 @@ describe('DrainManagerTests', function () {
       )
     })
 
-    return describe('starting to drain', function () {
+    describe('starting to drain', function () {
       beforeEach(function (done) {
-        return async.parallel(
+        async.parallel(
           [
             cb => {
-              return this.clientA.on('reconnectGracefully', cb)
+              this.clientA.on('reconnectGracefully', cb)
             },
             cb => {
-              return this.clientB.on('reconnectGracefully', cb)
+              this.clientB.on('reconnectGracefully', cb)
             },
 
-            cb => drain(2, cb),
+            cb =>
+              drain(2)
+                .then(() => cb())
+                .catch(cb),
           ],
           done
         )
       })
 
-      afterEach(function (done) {
-        return drain(0, done)
+      afterEach(async function () {
+        await drain(0)
       }) // reset drain
 
       it('should not timeout', function () {
-        return expect(true).to.equal(true)
+        expect(true).to.equal(true)
       })
 
-      return it('should not have disconnected', function () {
+      it('should not have disconnected', function () {
         expect(this.clientA.socket.connected).to.equal(true)
-        return expect(this.clientB.socket.connected).to.equal(true)
+        expect(this.clientB.socket.connected).to.equal(true)
       })
     })
   })
