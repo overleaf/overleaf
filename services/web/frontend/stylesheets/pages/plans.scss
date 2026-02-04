@@ -1541,3 +1541,15 @@ $z-index-group-member-picker-list: 1;
     margin-top: 0;
   }
 }
+
+.plans-watermark {
+  position: fixed;
+  left: 150px;
+  top: 5px;
+  font-size: var(--font-size-07);
+  border: solid magenta 3px;
+  padding: var(--spacing-04);
+  color: magenta;
+  opacity: 0.3;
+  pointer-events: none;
+}
