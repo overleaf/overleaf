@@ -8,7 +8,7 @@ RUN go install github.com/a8m/envsubst/cmd/envsubst@latest
 
 FROM maven:3-amazoncorretto-21-debian AS base
 
-RUN apt-get update && apt-get install -y make git sqlite3 \
+RUN apt-get update && apt-get install -y make git sqlite3 curl \
  && rm -rf /var/lib/apt/lists
 
 COPY --from=envsubst_builder /go/bin/envsubst /opt/envsubst
