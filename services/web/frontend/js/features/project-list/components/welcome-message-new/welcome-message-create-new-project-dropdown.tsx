@@ -95,7 +95,7 @@ function WelcomeMessageCreateNewProjectDropdown({
   )
 
   return (
-    <Dropdown>
+    <Dropdown className="welcome-message-card-item">
       <DropdownToggle
         as={CustomDropdownToggle}
         id="create-new-project-dropdown-toggle-btn"
