@@ -16,23 +16,23 @@ Light-weight helpers for handling JavaScript Errors in node.js and the browser.
 <!-- toc -->
 
 - [Long Stack Traces with `OError.tag`](#long-stack-traces-with-oerrortag)
-  * [The Problem](#the-problem)
-  * [The Solution](#the-solution)
-  * [Adding More Info](#adding-more-info)
-  * [`async`/`await`](#asyncawait)
-  * [Better Async Stack Traces in Node 12+](#better-async-stack-traces-in-node-12)
-  * [Caveat: Shared Error Instances](#caveat-shared-error-instances)
+  - [The Problem](#the-problem)
+  - [The Solution](#the-solution)
+  - [Adding More Info](#adding-more-info)
+  - [`async`/`await`](#asyncawait)
+  - [Better Async Stack Traces in Node 12+](#better-async-stack-traces-in-node-12)
+  - [Caveat: Shared Error Instances](#caveat-shared-error-instances)
 - [Create Custom Error Classes](#create-custom-error-classes)
-  * [Attaching Extra Info](#attaching-extra-info)
-  * [Wrapping an Internal Error](#wrapping-an-internal-error)
+  - [Attaching Extra Info](#attaching-extra-info)
+  - [Wrapping an Internal Error](#wrapping-an-internal-error)
 - [OError API Reference](#oerror-api-reference)
-  * [new OError(message, [info], [cause])](#new-oerrormessage-info-cause)
-  * [oError.withInfo(info) ⇒ this](#oerrorwithinfoinfo--this)
-  * [oError.withCause(cause) ⇒ this](#oerrorwithcausecause--this)
-  * [OError.maxTags : Number](#oerrormaxtags--number)
-  * [OError.tag(error, [message], [info]) ⇒ Error](#oerrortagerror-message-info--error)
-  * [OError.getFullInfo(error) ⇒ Object](#oerrorgetfullinfoerror--object)
-  * [OError.getFullStack(error) ⇒ string](#oerrorgetfullstackerror--string)
+  - [new OError(message, [info], [cause])](#new-oerrormessage-info-cause)
+  - [oError.withInfo(info) ⇒ this](#oerrorwithinfoinfo--this)
+  - [oError.withCause(cause) ⇒ this](#oerrorwithcausecause--this)
+  - [OError.maxTags : Number](#oerrormaxtags--number)
+  - [OError.tag(error, [message], [info]) ⇒ Error](#oerrortagerror-message-info--error)
+  - [OError.getFullInfo(error) ⇒ Object](#oerrorgetfullinfoerror--object)
+  - [OError.getFullStack(error) ⇒ string](#oerrorgetfullstackerror--string)
 - [References](#references)
 
 <!-- tocstop -->
@@ -345,52 +345,56 @@ caused by:
 ## OError API Reference
 
 <a name="OError"></a>
-* [OError](#OError)
-    * [new OError(message, [info], [cause])](#new_OError_new)
-    * _instance_
-        * [.withInfo(info)](#OError+withInfo) ⇒ <code>this</code>
-        * [.withCause(cause)](#OError+withCause) ⇒ <code>this</code>
-    * _static_
-        * [.maxTags](#OError.maxTags) : <code>Number</code>
-        * [.tag(error, [message], [info])](#OError.tag) ⇒ <code>Error</code>
-        * [.getFullInfo(error)](#OError.getFullInfo) ⇒ <code>Object</code>
-        * [.getFullStack(error)](#OError.getFullStack) ⇒ <code>string</code>
+
+- [OError](#OError)
+  - [new OError(message, [info], [cause])](#new_OError_new)
+  - _instance_
+    - [.withInfo(info)](#OError+withInfo) ⇒ <code>this</code>
+    - [.withCause(cause)](#OError+withCause) ⇒ <code>this</code>
+  - _static_
+    - [.maxTags](#OError.maxTags) : <code>Number</code>
+    - [.tag(error, [message], [info])](#OError.tag) ⇒ <code>Error</code>
+    - [.getFullInfo(error)](#OError.getFullInfo) ⇒ <code>Object</code>
+    - [.getFullStack(error)](#OError.getFullStack) ⇒ <code>string</code>
 
 <a name="new_OError_new"></a>
 
 ### new OError(message, [info], [cause])
 
-| Param | Type | Description |
-| --- | --- | --- |
-| message | <code>string</code> | as for built-in Error |
-| [info] | <code>Object</code> | extra data to attach to the error |
-| [cause] | <code>Error</code> | the internal error that caused this error |
+| Param   | Type                | Description                               |
+| ------- | ------------------- | ----------------------------------------- |
+| message | <code>string</code> | as for built-in Error                     |
+| [info]  | <code>Object</code> | extra data to attach to the error         |
+| [cause] | <code>Error</code>  | the internal error that caused this error |
 
 <a name="OError+withInfo"></a>
 
 ### oError.withInfo(info) ⇒ <code>this</code>
+
 Set the extra info object for this error.
 
-**Kind**: instance method of [<code>OError</code>](#OError)  
+**Kind**: instance method of [<code>OError</code>](#OError)
 
-| Param | Type | Description |
-| --- | --- | --- |
-| info | <code>Object</code> | extra data to attach to the error |
+| Param | Type                | Description                       |
+| ----- | ------------------- | --------------------------------- |
+| info  | <code>Object</code> | extra data to attach to the error |
 
 <a name="OError+withCause"></a>
 
 ### oError.withCause(cause) ⇒ <code>this</code>
+
 Wrap the given error, which caused this error.
 
-**Kind**: instance method of [<code>OError</code>](#OError)  
+**Kind**: instance method of [<code>OError</code>](#OError)
 
-| Param | Type | Description |
-| --- | --- | --- |
+| Param | Type               | Description                               |
+| ----- | ------------------ | ----------------------------------------- |
 | cause | <code>Error</code> | the internal error that caused this error |
 
 <a name="OError.maxTags"></a>
 
 ### OError.maxTags : <code>Number</code>
+
 Maximum number of tags to apply to any one error instance. This is to avoid
 a resource leak in the (hopefully unlikely) case that a singleton error
 instance is returned to many callbacks. If tags have been dropped, the full
@@ -402,19 +406,21 @@ Defaults to 100. Must be at least 1.
 <a name="OError.tag"></a>
 
 ### OError.tag(error, [message], [info]) ⇒ <code>Error</code>
+
 Tag debugging information onto any error (whether an OError or not) and
 return it.
 
 **Kind**: static method of [<code>OError</code>](#OError)  
-**Returns**: <code>Error</code> - the modified `error` argument  
+**Returns**: <code>Error</code> - the modified `error` argument
 
-| Param | Type | Description |
-| --- | --- | --- |
-| error | <code>Error</code> | the error to tag |
-| [message] | <code>string</code> | message with which to tag `error` |
-| [info] | <code>Object</code> | extra data with wich to tag `error` |
+| Param     | Type                | Description                         |
+| --------- | ------------------- | ----------------------------------- |
+| error     | <code>Error</code>  | the error to tag                    |
+| [message] | <code>string</code> | message with which to tag `error`   |
+| [info]    | <code>Object</code> | extra data with wich to tag `error` |
 
-**Example** *(An error in a callback)*  
+**Example** _(An error in a callback)_
+
 ```js
 function findUser(name, callback) {
   fs.readFile('/etc/passwd', (err, data) => {
@@ -423,13 +429,17 @@ function findUser(name, callback) {
   })
 }
 ```
-**Example** *(A possible error in a callback)*  
+
+**Example** _(A possible error in a callback)_
+
 ```js
 function cleanup(callback) {
-  fs.unlink('/tmp/scratch', (err) => callback(err && OError.tag(err)))
+  fs.unlink('/tmp/scratch', err => callback(err && OError.tag(err)))
 }
 ```
-**Example** *(An error with async/await)*  
+
+**Example** _(An error with async/await)_
+
 ```js
 async function cleanup() {
   try {
@@ -439,30 +449,34 @@ async function cleanup() {
   }
 }
 ```
+
 <a name="OError.getFullInfo"></a>
 
 ### OError.getFullInfo(error) ⇒ <code>Object</code>
+
 The merged info from any `tag`s and causes on the given error.
 
 If an info property is repeated, the last one wins.
 
-**Kind**: static method of [<code>OError</code>](#OError)  
+**Kind**: static method of [<code>OError</code>](#OError)
 
-| Param | Type | Description |
-| --- | --- | --- |
+| Param | Type                                                              | Description                               |
+| ----- | ----------------------------------------------------------------- | ----------------------------------------- |
 | error | <code>Error</code> \| <code>null</code> \| <code>undefined</code> | any error (may or may not be an `OError`) |
 
 <a name="OError.getFullStack"></a>
 
 ### OError.getFullStack(error) ⇒ <code>string</code>
+
 Return the `stack` property from `error`, including the `stack`s for any
 tagged errors added with `OError.tag` and for any `cause`s.
 
-**Kind**: static method of [<code>OError</code>](#OError)  
+**Kind**: static method of [<code>OError</code>](#OError)
 
-| Param | Type | Description |
-| --- | --- | --- |
+| Param | Type                                                              | Description                               |
+| ----- | ----------------------------------------------------------------- | ----------------------------------------- |
 | error | <code>Error</code> \| <code>null</code> \| <code>undefined</code> | any error (may or may not be an `OError`) |
+
 <!-- END API REFERENCE -->
 
 ## References

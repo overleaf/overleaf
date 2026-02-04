@@ -1,6 +1,6 @@
-const Client = require('./helpers/Client')
-const { expect } = require('chai')
-const ClsiApp = require('./helpers/ClsiApp')
+import Client from './helpers/Client.js'
+import { expect } from 'chai'
+import ClsiApp from './helpers/ClsiApp.js'
 
 describe('Syncing', function () {
   before(async function () {

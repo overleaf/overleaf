@@ -38,6 +38,7 @@ describe('<ActionsWordCount />', function () {
 
     renderWithEditorContext(<ActionsWordCount />, {
       projectId: '123abc',
+      mockCompileOnLoad: true,
       scope: {
         editor: {
           sharejs_doc: {

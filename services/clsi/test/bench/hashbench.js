@@ -1,9 +1,9 @@
-const ContentCacheManager = require('../../app/js/ContentCacheManager')
-const fs = require('node:fs')
-const crypto = require('node:crypto')
-const path = require('node:path')
-const os = require('node:os')
-const async = require('async')
+import ContentCacheManager from '../../app/js/ContentCacheManager.js'
+import fs from 'node:fs'
+import crypto from 'node:crypto'
+import path from 'node:path'
+import os from 'node:os'
+import async from 'async'
 const _createHash = crypto.createHash
 
 const files = process.argv.slice(2)

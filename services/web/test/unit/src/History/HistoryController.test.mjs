@@ -103,6 +103,15 @@ describe('HistoryController', function () {
       })
     )
 
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectAuditLogHandler.mjs',
+      () => ({
+        default: (ctx.ProjectAuditLogHandler = {
+          addEntryIfManagedInBackground: sinon.stub(),
+        }),
+      })
+    )
+
     vi.doMock('../../../../app/src/Features/User/UserGetter.mjs', () => ({
       default: (ctx.UserGetter = {}),
     }))

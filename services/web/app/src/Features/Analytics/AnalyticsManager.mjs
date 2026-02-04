@@ -28,6 +28,7 @@ const analyticsAccountMappingQueue = Queues.getQueue(
   'analytics-account-mapping'
 )
 const analyticsEmailChangeQueue = Queues.getQueue('analytics-email-change')
+const analyticsPackageUsageQueue = Queues.getQueue('analytics-package-usage')
 
 const ONE_MINUTE_MS = 60 * 1000
 
@@ -95,6 +96,14 @@ function recordEventForSession(session, event, segmentation) {
     isLoggedIn: !!userId,
     createdAt: new Date(),
   })
+}
+
+function emitPackageUsage(projectId, { documentClasses, packages }) {
+  analyticsPackageUsageQueue
+    .add('package-usage', { projectId, documentClasses, packages })
+    .catch(err => {
+      logger.warn({ err, projectId }, 'Failed to emit package usage')
+    })
 }
 
 async function setUserPropertyForUser(userId, propertyName, propertyValue) {
@@ -454,6 +463,7 @@ export default {
   recordEventForSession,
   recordEventForUser,
   recordEventForUserInBackground,
+  emitPackageUsage,
   setUserPropertyForUser,
   setUserPropertyForUserInBackground,
   setUserPropertyForSession,

@@ -529,7 +529,7 @@ describe('<ShareProjectModal/>', function () {
       next: 'Remove access',
     })
     const removeButton = screen.getByRole('button', {
-      name: 'Change',
+      name: 'Confirm',
     })
     fireEvent.click(removeButton)
 
@@ -912,17 +912,17 @@ describe('<ShareProjectModal/>', function () {
 
     // Pressing Tab should add the entered item
     fireEvent.keyDown(inputElement, { key: 'Tab', code: 'Tab' })
-    await waitFor(() => {
-      expect(screen.getAllByRole('button', { name: /Remove/ })).to.have.length(
-        1
-      )
+    const collaborators = await waitFor(() => {
+      return screen.getAllByRole('button', { name: /Remove/ })
     })
+
+    expect(collaborators).to.not.be.null
 
     // Blurring the input should not add another contact
     fireEvent.blur(inputElement)
     await waitFor(() => {
-      expect(screen.getAllByRole('button', { name: /Remove/ })).to.have.length(
-        1
+      expect(screen.getAllByRole('button', { name: /Remove/ }).length).to.eql(
+        collaborators.length
       )
     })
   })

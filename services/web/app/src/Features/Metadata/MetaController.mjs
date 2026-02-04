@@ -3,6 +3,8 @@ import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
 import MetaHandler from './MetaHandler.mjs'
 import logger from '@overleaf/logger'
 import { expressify } from '@overleaf/promise-utils'
+import Analytics from '../Analytics/AnalyticsManager.mjs'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 
 async function getMetadata(req, res) {
   const { project_id: projectId } = req.params
@@ -22,7 +24,35 @@ async function getMetadata(req, res) {
     )
   }
 
+  const assignment = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'emit-package-usage-statistics'
+  )
+  if (assignment.variant === 'enabled') {
+    sendAnalyticsEventForPackageUsage(projectId, projectMeta)
+  }
+
   res.json({ projectId, projectMeta })
+}
+
+function sendAnalyticsEventForPackageUsage(projectId, projectMeta) {
+  const packagesSet = new Set()
+  const documentClassesSet = new Set()
+  for (const docMeta of Object.values(projectMeta)) {
+    if (docMeta.documentClass != null) {
+      documentClassesSet.add(docMeta.documentClass)
+    }
+
+    for (const packageName of docMeta.packageNames) {
+      if (packageName.match(/^[a-zA-Z0-9-_]+$/)) {
+        packagesSet.add(packageName)
+      }
+    }
+  }
+  const packages = Array.from(packagesSet)
+  const documentClasses = Array.from(documentClassesSet)
+  Analytics.emitPackageUsage(projectId, { documentClasses, packages })
 }
 
 async function broadcastMetadataForDoc(req, res) {

@@ -1,6 +1,6 @@
 import {
   createNewFile,
-  createProject,
+  createProjectAndOpenInNewEditor,
   openProjectById,
   testNewFileUpload,
 } from './helpers/project'
@@ -26,30 +26,25 @@ describe('editor', function () {
   beforeWithReRunOnTestRetry(() => {
     projectName = `project-${uuid()}`
     login(USER)
-    createProject(projectName, { type: 'Example project', open: false }).then(
-      id => (projectId = id)
-    )
+    createProjectAndOpenInNewEditor(projectName, {
+      type: 'Example project',
+    }).then(id => (projectId = id))
     ;({ recompile, waitForCompile } = prepareWaitForNextCompileSlot())
   })
 
   beforeEach(function () {
     login(USER)
     waitForCompile(() => {
-      openProjectById(projectId)
+      openProjectById(projectId, true)
     })
   })
 
   describe('spelling', function () {
     function changeSpellCheckLanguageTo(lng: string) {
       cy.log(`change project language to '${lng}'`)
-      cy.findByRole('navigation', {
-        name: 'Project actions',
-      })
-        .findByRole('button', { name: 'Menu' })
-        .click()
-
+      cy.findByRole('button', { name: 'Settings' }).click()
       cy.findByRole('dialog').within(() => {
-        cy.findByLabelText('Spell check').select(lng)
+        cy.findByLabelText('Spellcheck language').select(lng)
       })
       cy.get('body').type('{esc}')
     }
@@ -79,11 +74,7 @@ describe('editor', function () {
       cy.findByText(word).should('not.have.class', 'ol-cm-spelling-error')
 
       cy.log('remove word from dictionary')
-      cy.findByRole('navigation', {
-        name: 'Project actions',
-      })
-        .findByRole('button', { name: 'Menu' })
-        .click()
+      cy.findByRole('button', { name: 'Settings' }).click()
       cy.findByRole('dialog').within(() => {
         cy.findByLabelText('Dictionary').click()
       })
@@ -94,13 +85,11 @@ describe('editor', function () {
             cy.findByRole('button', { name: 'Remove from dictionary' }).click()
           )
 
-        // the modal has 2 close buttons, this ensures the one with the visible label is
-        // clicked, otherwise it would need `force: true`
-        cy.contains('button', /close/i).click()
+        cy.findByRole('button', { name: 'Close dialog' }).click()
       })
 
-      cy.log('close left panel')
-      cy.findByTestId('left-menu').type('{esc}')
+      cy.log('close modal')
+      cy.get('body').type('{esc}')
 
       cy.log('rewrite word to force spelling error')
       cy.get('.cm-line').type('{selectAll}{del}' + word + '{enter}')
@@ -111,11 +100,8 @@ describe('editor', function () {
 
   describe('editor', function () {
     it('renders jpg', function () {
-      cy.findByRole('navigation', {
-        name: 'Project files and outline',
-      })
-        .findByRole('treeitem', { name: 'frog.jpg' })
-        .click()
+      cy.findByRole('treeitem', { name: 'frog.jpg' }).click({ force: true })
+
       cy.get('[alt="frog.jpg"]')
         .should('be.visible')
         .and('have.prop', 'naturalWidth')
@@ -151,17 +137,10 @@ describe('editor', function () {
     })
   })
 
-  describe('left menu', function () {
-    beforeEach(function () {
-      cy.findByRole('navigation', {
-        name: 'Project actions',
-      })
-        .findByRole('button', { name: 'Menu' })
-        .click()
-    })
-
+  describe('file menu', function () {
     it('can download project sources', function () {
-      cy.findByRole('link', { name: 'Source' }).click()
+      cy.findByRole('button', { name: 'File' }).click()
+      cy.findByRole('menuitem', { name: 'Download as source (.zip)' }).click()
       const zipName = projectName.replaceAll('-', '_')
       cy.task('readFileInZip', {
         pathToZip: `cypress/downloads/${zipName}.zip`,
@@ -171,27 +150,29 @@ describe('editor', function () {
 
     it('can download project PDF', function () {
       cy.log('ensure project is compiled')
-      cy.findByRole('region', { name: 'PDF preview and logs' }).should(
+      cy.findByRole('region', { name: 'PDF preview' }).should(
         'contain.text',
         'Your Paper'
       )
-      cy.findByRole('dialog').within(() => {
-        cy.findByRole('link', { name: 'PDF' }).click()
-        const pdfName = projectName.replaceAll('-', '_')
-        cy.task('readPdf', `cypress/downloads/${pdfName}.pdf`).should(
-          'contain',
-          'Your introduction goes here'
-        )
-      })
+
+      cy.findByRole('button', { name: 'File' }).click()
+      cy.findByRole('menuitem', { name: 'Download as PDF' }).click()
+      const pdfName = projectName.replaceAll('-', '_')
+      cy.task('readPdf', `cypress/downloads/${pdfName}.pdf`).should(
+        'contain',
+        'Your introduction goes here'
+      )
     })
 
     it('word count', function () {
       cy.log('ensure project is compiled')
-      cy.findByRole('region', { name: 'PDF preview and logs' }).should(
+      cy.findByRole('region', { name: 'PDF preview' }).should(
         'contain.text',
         'Your Paper'
       )
-      cy.findByRole('button', { name: 'Word Count' }).click()
+
+      cy.findByRole('button', { name: 'File' }).click()
+      cy.findByRole('menuitem', { name: 'Word count' }).click()
 
       cy.findByTestId('word-count-modal').within(() => {
         cy.findByText('Total Words:')
@@ -240,60 +221,47 @@ describe('editor', function () {
 
   describe('layout selector', function () {
     it('show editor only and switch between editor and pdf', function () {
-      cy.findByRole('region', { name: 'PDF preview and logs' }).should(
-        'be.visible'
-      )
+      cy.findByRole('region', { name: 'PDF preview' }).should('be.visible')
       cy.get('.cm-editor').should('be.visible')
 
-      cy.findByRole('button', { name: 'Layout' }).click()
+      cy.findByRole('button', { name: 'Layout options' }).click()
       cy.findByRole('menu').within(() => {
         cy.findByRole('menuitem', { name: /Editor only/ }).click()
       })
 
-      cy.findByRole('region', { name: 'PDF preview and logs' }).should(
-        'not.be.visible'
-      )
+      cy.findByRole('region', { name: 'PDF preview' }).should('not.be.visible')
       cy.get('.cm-editor').should('be.visible')
 
-      cy.findByRole('button', { name: 'Switch to PDF' }).click()
+      // force click as tooltip may cover button for some reason
+      cy.findByRole('button', { name: 'Switch to PDF' }).click({ force: true })
 
-      cy.findByRole('region', { name: 'PDF preview and logs' }).should(
-        'be.visible'
-      )
+      cy.findByRole('region', { name: 'PDF preview' }).should('be.visible')
       cy.get('.cm-editor').should('not.be.visible')
 
       cy.findByRole('button', { name: 'Switch to editor' }).click()
 
-      cy.findByRole('region', { name: 'PDF preview and logs' }).should(
-        'not.be.visible'
-      )
+      cy.findByRole('region', { name: 'PDF preview' }).should('not.be.visible')
       cy.get('.cm-editor').should('be.visible')
     })
 
-    it('show PDF only and go back to Editor & PDF', function () {
-      cy.findByRole('region', { name: 'PDF preview and logs' }).should(
-        'be.visible'
-      )
+    it('show PDF only and go back to split view', function () {
+      cy.findByRole('region', { name: 'PDF preview' }).should('be.visible')
       cy.get('.cm-editor').should('be.visible')
 
-      cy.findByRole('button', { name: 'Layout' }).click()
+      cy.findByRole('button', { name: 'Layout options' }).click()
       cy.findByRole('menu').within(() => {
         cy.findByRole('menuitem', { name: /PDF only/ }).click()
       })
 
-      cy.findByRole('region', { name: 'PDF preview and logs' }).should(
-        'be.visible'
-      )
+      cy.findByRole('region', { name: 'PDF preview' }).should('be.visible')
       cy.get('.cm-editor').should('not.be.visible')
 
-      cy.findByRole('button', { name: 'Layout' }).click()
+      cy.findByRole('button', { name: 'Layout options' }).click()
       cy.findByRole('menu').within(() => {
-        cy.findByRole('menuitem', { name: 'Editor & PDF' }).click()
+        cy.findByRole('menuitem', { name: 'Split view' }).click()
       })
 
-      cy.findByRole('region', { name: 'PDF preview and logs' }).should(
-        'be.visible'
-      )
+      cy.findByRole('region', { name: 'PDF preview' }).should('be.visible')
       cy.get('.cm-editor').should('be.visible')
     })
 
@@ -301,13 +269,30 @@ describe('editor', function () {
       cy.findByTestId('pdf-viewer').should('be.visible')
       cy.get('.cm-editor').should('be.visible')
 
-      cy.findByRole('button', { name: 'Layout' }).click()
+      cy.findByRole('button', { name: 'Layout options' }).click()
       cy.findByRole('menu').within(() => {
-        cy.findByRole('menuitem', { name: 'PDF in separate tab' }).click()
+        cy.findByRole('menuitem', { name: 'Open PDF in separate tab' }).click()
       })
 
       cy.findByTestId('pdf-viewer').should('not.exist')
       cy.get('.cm-editor').should('be.visible')
+    })
+  })
+
+  describe('full project search', function () {
+    it('can search for text in project files', function () {
+      cy.findByRole('tab', { name: 'Project search' }).click()
+
+      cy.findByRole('searchbox', { name: 'Search' })
+        .should('be.visible')
+        .type('Some examples to get started')
+      cy.get('button').contains('Search').click()
+
+      cy.findByRole('listbox').within(() => {
+        cy.findByRole('option', {
+          name: /Some examples to get started/,
+        }).should('be.visible')
+      })
     })
   })
 })

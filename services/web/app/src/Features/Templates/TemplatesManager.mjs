@@ -1,4 +1,3 @@
-import { Project } from '../../models/Project.mjs'
 import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
 import ProjectOptionsHandlerModule from '../Project/ProjectOptionsHandler.mjs'
 import ProjectRootDocManagerModule from '../Project/ProjectRootDocManager.mjs'
@@ -16,6 +15,7 @@ import crypto from 'node:crypto'
 import Errors from '../Errors/Errors.js'
 import { pipeline } from 'node:stream/promises'
 import ClsiCacheManager from '../Compile/ClsiCacheManager.mjs'
+import Path from 'node:path'
 
 const { promises: ProjectRootDocManager } = ProjectRootDocManagerModule
 const { promises: ProjectOptionsHandler } = ProjectOptionsHandlerModule
@@ -31,6 +31,11 @@ const TemplatesManager = {
     userId,
     imageName
   ) {
+    compiler = ProjectOptionsHandler.normalizeCompiler(compiler || 'pdflatex')
+    imageName = ProjectOptionsHandler.normalizeImageName(
+      imageName || 'wl_texlive:2018.1'
+    )
+
     const zipUrl = `${settings.apis.v1.url}/api/v1/overleaf/templates/${templateVersionId}`
     const zipReq = await fetchStreamWithResponse(zipUrl, {
       basicAuth: {
@@ -47,7 +52,11 @@ const TemplatesManager = {
       const attributes = {
         fromV1TemplateId: templateId,
         fromV1TemplateVersionId: templateVersionId,
+        compiler,
+        imageName,
       }
+      if (brandVariationId) attributes.brandVariationId = brandVariationId
+
       await pipeline(zipReq.stream, writeStream)
 
       if (zipReq.response.status !== 200) {
@@ -57,7 +66,7 @@ const TemplatesManager = {
         )
         throw new Error(`get zip failed: ${zipReq.response.status}`)
       }
-      const project =
+      const { fileEntries, docEntries, project } =
         await ProjectUploadManager.promises.createProjectFromZipArchiveWithName(
           userId,
           projectName,
@@ -68,26 +77,31 @@ const TemplatesManager = {
       const prepareClsiCacheInBackground = ClsiCacheManager.prepareClsiCache(
         project._id,
         userId,
-        { templateId, templateVersionId }
+        { templateVersionId, imageName: imageName && Path.basename(imageName) }
       ).catch(err => {
         logger.warn(
-          { err, templateId, templateVersionId, projectId: project._id },
+          { err, templateVersionId, projectId: project._id },
           'failed to prepare clsi-cache from template'
         )
+        return undefined
       })
 
-      await TemplatesManager._setCompiler(project._id, compiler)
-      await TemplatesManager._setImage(project._id, imageName)
-      await TemplatesManager._setMainFile(project._id, mainFile)
-      await TemplatesManager._setBrandVariationId(project._id, brandVariationId)
+      await TemplatesManager._setMainFile(project, mainFile)
 
-      const update = {
-        fromV1TemplateId: templateId,
-        fromV1TemplateVersionId: templateVersionId,
+      const found = await prepareClsiCacheInBackground
+      if (found === false && project.rootDoc_id) {
+        ClsiCacheManager.createTemplateClsiCache({
+          templateVersionId,
+          project,
+          fileEntries,
+          docEntries,
+        }).catch(err => {
+          logger.error(
+            { err, templateVersionId },
+            'failed to create template clsi-cache'
+          )
+        })
       }
-      await Project.updateOne({ _id: project._id }, update, {})
-
-      await prepareClsiCacheInBackground
 
       return project
     } finally {
@@ -95,33 +109,15 @@ const TemplatesManager = {
     }
   },
 
-  async _setCompiler(projectId, compiler) {
-    if (compiler == null) {
-      return
-    }
-    await ProjectOptionsHandler.setCompiler(projectId, compiler)
-  },
-
-  async _setImage(projectId, imageName) {
-    if (!imageName) {
-      imageName = 'wl_texlive:2018.1'
-    }
-
-    await ProjectOptionsHandler.setImageName(projectId, imageName)
-  },
-
-  async _setMainFile(projectId, mainFile) {
+  async _setMainFile(project, mainFile) {
     if (mainFile == null) {
       return
     }
-    await ProjectRootDocManager.setRootDocFromName(projectId, mainFile)
-  },
-
-  async _setBrandVariationId(projectId, brandVariationId) {
-    if (brandVariationId == null) {
-      return
-    }
-    await ProjectOptionsHandler.setBrandVariationId(projectId, brandVariationId)
+    const rootDocId = await ProjectRootDocManager.setRootDocFromName(
+      project._id,
+      mainFile
+    )
+    if (rootDocId) project.rootDoc_id = rootDocId
   },
 
   async fetchFromV1(templateId) {

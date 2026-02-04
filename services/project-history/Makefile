@@ -25,6 +25,7 @@ IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/libraries/redis-wrapper/package.json \
 	$(MONOREPO)/libraries/settings/package.json \
 	$(MONOREPO)/libraries/stream-utils/package.json \
+	$(MONOREPO)/libraries/validation-tools/package.json \
 	$(MONOREPO)/services/project-history/package.json \
 	$(MONOREPO)/tools/migrations/package.json \
 	$(MONOREPO)/patches/* \
@@ -54,12 +55,11 @@ clean:
 
 # Run the linting commands in the scope of the monorepo.
 # Eslint and prettier (plus some configs) are on the root.
-RUN_LINTING = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(HERE) node:22.18.0 npm run --silent
+RUN_LINTING = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(HERE) node:24.13.0 npm run --silent
+RUN_LINTING_MONOREPO = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(MONOREPO) node:24.13.0 npm run --silent
 
 RUN_LINTING_CI = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/document-updater/app/js/types.ts:/overleaf/services/document-updater/app/js/types.ts --volume $(MONOREPO)/services/project-history/reports:/overleaf/services/project-history/reports $(IMAGE_CI) npm run --silent
-
-# Same but from the top of the monorepo
-RUN_LINTING_MONOREPO = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(MONOREPO) node:22.18.0 npm run --silent
+RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/document-updater/app/js/types.ts:/overleaf/services/document-updater/app/js/types.ts --volume $(MONOREPO)/services/project-history/reports:/overleaf/services/project-history/reports -w /overleaf $(IMAGE_CI) npm run --silent
 
 SHELLCHECK_OPTS = \
 	--shell=bash \
@@ -80,13 +80,13 @@ shellcheck_fix:
 	done
 
 format:
-	$(RUN_LINTING) format
+	$(RUN_LINTING_MONOREPO) format -- services/project-history
 
 format_ci:
-	$(RUN_LINTING_CI) format
+	$(RUN_LINTING_CI_MONOREPO) format -- services/project-history
 
 format_fix:
-	$(RUN_LINTING) format:fix
+	$(RUN_LINTING_MONOREPO) format:fix -- services/project-history
 
 lint:
 	$(RUN_LINTING) lint

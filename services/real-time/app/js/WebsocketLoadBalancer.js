@@ -1,13 +1,13 @@
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const Metrics = require('@overleaf/metrics')
-const RedisClientManager = require('./RedisClientManager')
-const SafeJsonParse = require('./SafeJsonParse')
-const EventLogger = require('./EventLogger')
-const HealthCheckManager = require('./HealthCheckManager')
-const RoomManager = require('./RoomManager')
-const ChannelManager = require('./ChannelManager')
-const ConnectedUsersManager = require('./ConnectedUsersManager')
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import Metrics from '@overleaf/metrics'
+import RedisClientManager from './RedisClientManager.js'
+import SafeJsonParse from './SafeJsonParse.js'
+import EventLogger from './EventLogger.js'
+import HealthCheckManager from './HealthCheckManager.js'
+import RoomManager from './RoomManager.js'
+import ChannelManager from './ChannelManager.js'
+import ConnectedUsersManager from './ConnectedUsersManager.js'
 
 const RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
   'otUpdateApplied',
@@ -32,7 +32,8 @@ for (let i = 5; i <= 22; i++) {
 }
 
 let WebsocketLoadBalancer
-module.exports = WebsocketLoadBalancer = {
+
+export default WebsocketLoadBalancer = {
   rclientPubList: RedisClientManager.createClientList(Settings.redis.pubsub),
   rclientSubList: RedisClientManager.createClientList(Settings.redis.pubsub),
 

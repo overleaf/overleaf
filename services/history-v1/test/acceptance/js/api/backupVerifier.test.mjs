@@ -29,7 +29,7 @@ import {
 } from 'overleaf-editor-core'
 import Crypto from 'node:crypto'
 import path from 'node:path'
-import projectKey from '../../../../storage/lib/project_key.js'
+import projectKey from '@overleaf/object-persistor/src/ProjectKey.js'
 import { historyStore } from '../../../../storage/lib/history_store.js'
 
 /**

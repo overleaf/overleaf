@@ -1,32 +1,33 @@
-const fsPromises = require('node:fs/promises')
-const os = require('node:os')
-const Path = require('node:path')
-const { callbackify } = require('node:util')
+import fsPromises from 'node:fs/promises'
+import os from 'node:os'
+import Path from 'node:path'
+import { callbackify } from 'node:util'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import OError from '@overleaf/o-error'
+import ResourceWriter from './ResourceWriter.js'
+import LatexRunner from './LatexRunner.js'
+import OutputFileFinder from './OutputFileFinder.js'
+import OutputCacheManager from './OutputCacheManager.js'
+import ClsiMetrics from './Metrics.js'
+import DraftModeManager from './DraftModeManager.js'
+import TikzManager from './TikzManager.js'
+import LockManager from './LockManager.js'
+import Errors from './Errors.js'
+import CommandRunner from './CommandRunner.js'
+import ContentCacheMetrics from './ContentCacheMetrics.js'
+import SynctexOutputParser from './SynctexOutputParser.js'
+import CLSICacheHandler from './CLSICacheHandler.js'
+import StatsManager from './StatsManager.js'
+import SafeReader from './SafeReader.js'
+import LatexMetrics from './LatexMetrics.js'
+import { callbackifyMultiResult } from '@overleaf/promise-utils'
 
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const OError = require('@overleaf/o-error')
-
-const ResourceWriter = require('./ResourceWriter')
-const LatexRunner = require('./LatexRunner')
-const OutputFileFinder = require('./OutputFileFinder')
-const OutputCacheManager = require('./OutputCacheManager')
-const ClsiMetrics = require('./Metrics')
-const DraftModeManager = require('./DraftModeManager')
-const TikzManager = require('./TikzManager')
-const LockManager = require('./LockManager')
-const Errors = require('./Errors')
-const CommandRunner = require('./CommandRunner')
-const { emitPdfStats } = require('./ContentCacheMetrics')
-const SynctexOutputParser = require('./SynctexOutputParser')
-const {
-  downloadLatestCompileCache,
-  downloadOutputDotSynctexFromCompileCache,
-} = require('./CLSICacheHandler')
-const StatsManager = require('./StatsManager')
-const SafeReader = require('./SafeReader')
-const { enableLatexMkMetrics, addLatexFdbMetrics } = require('./LatexMetrics')
-const { callbackifyMultiResult } = require('@overleaf/promise-utils')
+const { downloadLatestCompileCache, downloadOutputDotSynctexFromCompileCache } =
+  CLSICacheHandler
+const { emitPdfStats } = ContentCacheMetrics
+const { enableLatexMkMetrics, addLatexFdbMetrics } = LatexMetrics
+const { shouldSkipMetrics } = ClsiMetrics
 
 const KNOWN_LATEXMK_RULES = new Set([
   'biber',
@@ -247,7 +248,7 @@ async function doCompile(request, stats, timings) {
       )
     }
 
-    if (!_shouldSkipMetrics(request)) {
+    if (!shouldSkipMetrics(request)) {
       const status = error.timedout
         ? 'timeout'
         : error.terminated
@@ -284,7 +285,7 @@ async function doCompile(request, stats, timings) {
   const status = stats['latexmk-errors'] ? 'error' : 'success'
   _emitMetrics(request, status, stats, timings)
 
-  if (stats['pdf-size']) {
+  if (stats['pdf-size'] && !shouldSkipMetrics(request)) {
     emitPdfStats(stats, timings, request)
   }
 
@@ -726,12 +727,14 @@ function _isImageNameAllowed(imageName) {
   return !ALLOWED_IMAGES || ALLOWED_IMAGES.includes(imageName)
 }
 
-function _shouldSkipMetrics(request) {
-  return ['clsi-perf', 'health-check'].includes(request.metricsOpts.path)
-}
-
 function _emitMetrics(request, status, stats, timings) {
-  if (_shouldSkipMetrics(request)) {
+  if (request.metricsOpts.path === 'clsi-perf') {
+    ClsiMetrics.e2eCompileDurationClsiPerfSeconds.set(
+      { variant: request.metricsOpts.method },
+      timings.compileE2E / 1000
+    )
+  }
+  if (shouldSkipMetrics(request)) {
     return
   }
 
@@ -832,11 +835,17 @@ function _emitMetrics(request, status, stats, timings) {
   }
 
   if (timings.compileE2E != null) {
-    ClsiMetrics.e2eCompileDurationSeconds.observe(timings.compileE2E / 1000)
+    ClsiMetrics.e2eCompileDurationSeconds.observe(
+      {
+        compile: request.metricsOpts.compile,
+        group: request.compileGroup,
+      },
+      timings.compileE2E / 1000
+    )
   }
 }
 
-module.exports = {
+export default {
   doCompileWithLock: callbackify(doCompileWithLock),
   stopCompile: callbackify(stopCompile),
   clearProject: callbackify(clearProject),

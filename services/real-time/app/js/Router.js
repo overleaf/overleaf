@@ -1,17 +1,20 @@
-const metrics = require('@overleaf/metrics')
-const logger = require('@overleaf/logger')
-const settings = require('@overleaf/settings')
-const WebsocketController = require('./WebsocketController')
-const HttpController = require('./HttpController')
-const HttpApiController = require('./HttpApiController')
-const WebsocketAddressManager = require('./WebsocketAddressManager')
-const bodyParser = require('body-parser')
-const base64id = require('base64id')
-const { UnexpectedArgumentsError } = require('./Errors')
-const { z, zz } = require('@overleaf/validation-tools')
-const { isZodErrorLike } = require('zod-validation-error')
+import metrics from '@overleaf/metrics'
+import logger from '@overleaf/logger'
+import settings from '@overleaf/settings'
+import WebsocketController from './WebsocketController.js'
+import HttpController from './HttpController.js'
+import HttpApiController from './HttpApiController.js'
+import WebsocketAddressManager from './WebsocketAddressManager.js'
+import bodyParser from 'body-parser'
+import base64id from 'base64id'
+import Errors from './Errors.js'
+import { z, zz } from '@overleaf/validation-tools'
+import { isZodErrorLike } from 'zod-validation-error'
+import os from 'node:os'
 
-const HOSTNAME = require('node:os').hostname()
+const { UnexpectedArgumentsError } = Errors
+
+const HOSTNAME = os.hostname()
 const SERVER_PING_INTERVAL = 15000
 const SERVER_PING_LATENCY_THRESHOLD = 5000
 
@@ -27,7 +30,8 @@ const applyOtUpdateSchema = z.object({
 })
 
 let Router
-module.exports = Router = {
+
+export default Router = {
   _handleError(callback, error, client, method, attrs) {
     attrs = attrs || {}
     for (const key of ['project_id', 'user_id']) {

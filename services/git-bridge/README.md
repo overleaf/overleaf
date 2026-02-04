@@ -3,7 +3,7 @@
 ## Docker
 
 The `Dockerfile` contains all the requirements for building and running the
- writelatex-git-bridge.
+writelatex-git-bridge.
 
 ```bash
 # build the image
@@ -17,8 +17,8 @@ docker run -v `pwd`/conf/local.json:/conf/runtime.json writelatex-git-bridge
 
 ### Required packages
 
-  * `maven` (for building, running tests and packaging)
-  * `jdk-8` (for compiling and running)
+- `maven` (for building, running tests and packaging)
+- `jdk-8` (for compiling and running)
 
 ### Commands
 
@@ -113,7 +113,6 @@ The configuration file is in `.json` format.
     }
 
 You have to restart the server for configuration changes to take effect.
-
 
 ## Creating OAuth app
 

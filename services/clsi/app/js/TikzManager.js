@@ -10,19 +10,19 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import fs from 'node:fs'
+import Path from 'node:path'
+import { promisify } from 'node:util'
+import ResourceWriter from './ResourceWriter.js'
+import SafeReader from './SafeReader.js'
+import logger from '@overleaf/logger'
 let TikzManager
-const fs = require('node:fs')
-const Path = require('node:path')
-const { promisify } = require('node:util')
-const ResourceWriter = require('./ResourceWriter')
-const SafeReader = require('./SafeReader')
-const logger = require('@overleaf/logger')
 
 // for \tikzexternalize or pstool to work the main file needs to match the
 // jobname.  Since we set the -jobname to output, we have to create a
 // copy of the main file as 'output.tex'.
 
-module.exports = TikzManager = {
+export default TikzManager = {
   checkMainFile(compileDir, mainFile, resources, callback) {
     // if there's already an output.tex file, we don't want to touch it
     if (callback == null) {
@@ -103,7 +103,7 @@ module.exports = TikzManager = {
   },
 }
 
-module.exports.promises = {
+TikzManager.promises = {
   checkMainFile: promisify(TikzManager.checkMainFile),
   injectOutputFile: promisify(TikzManager.injectOutputFile),
 }

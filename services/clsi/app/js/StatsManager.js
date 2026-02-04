@@ -1,4 +1,7 @@
-const crypto = require('node:crypto')
+import crypto from 'node:crypto'
+import Metrics from './Metrics.js'
+
+const { shouldSkipMetrics } = Metrics
 
 /**
  * Consistently sample a keyspace with a given sample percentage.
@@ -21,8 +24,6 @@ function sampleByHash(key, samplePercentage) {
   return percentile < samplePercentage
 }
 
-const EXCLUDED_METRICS_OPTS_PATHS = new Set(['health-check', 'clsi-perf'])
-
 /**
  * Determines whether a given request should be sampled based on user ID and sampling percentage.
  * The request will not be sampled if it lacks a user_id, if its metrics path is in the exclusion list,
@@ -39,7 +40,7 @@ function sampleRequest(request, samplingPercentage) {
   if (!request.user_id) {
     return
   }
-  if (EXCLUDED_METRICS_OPTS_PATHS.has(request.metricsOpts?.path)) {
+  if (shouldSkipMetrics(request)) {
     return
   }
   if (samplingPercentage > 0) {
@@ -47,4 +48,4 @@ function sampleRequest(request, samplingPercentage) {
   }
 }
 
-module.exports = { sampleByHash, sampleRequest }
+export default { sampleByHash, sampleRequest }

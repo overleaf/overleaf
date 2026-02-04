@@ -1,6 +1,5 @@
 import RedisWrapper from '../../infrastructure/RedisWrapper.mjs'
 import logger from '@overleaf/logger'
-import { promisify } from '@overleaf/promise-utils'
 const rclient = RedisWrapper.client('cooldown')
 
 const COOLDOWN_IN_SECONDS = 60 * 10
@@ -10,39 +9,23 @@ const CooldownManager = {
     return `Cooldown:{${projectId}}`
   },
 
-  putProjectOnCooldown(projectId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  async putProjectOnCooldown(projectId) {
     logger.debug(
       { projectId },
       `[Cooldown] putting project on cooldown for ${COOLDOWN_IN_SECONDS} seconds`
     )
-    rclient.set(
+    await rclient.set(
       CooldownManager._buildKey(projectId),
       '1',
       'EX',
-      COOLDOWN_IN_SECONDS,
-      callback
+      COOLDOWN_IN_SECONDS
     )
   },
 
-  isProjectOnCooldown(projectId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    rclient.get(CooldownManager._buildKey(projectId), function (err, result) {
-      if (err != null) {
-        return callback(err)
-      }
-      return callback(null, result === '1')
-    })
+  async isProjectOnCooldown(projectId) {
+    const result = await rclient.get(CooldownManager._buildKey(projectId))
+    return result === '1'
   },
-}
-
-CooldownManager.promises = {
-  putProjectOnCooldown: promisify(CooldownManager.putProjectOnCooldown),
-  isProjectOnCooldown: promisify(CooldownManager.isProjectOnCooldown),
 }
 
 export default CooldownManager

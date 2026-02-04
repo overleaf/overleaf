@@ -59,17 +59,6 @@ export const UserSchema = new Schema(
     },
     isAdmin: { type: Boolean, default: false },
     adminRoles: { type: Array },
-    staffAccess: {
-      publisherMetrics: { type: Boolean, default: false },
-      publisherManagement: { type: Boolean, default: false },
-      institutionMetrics: { type: Boolean, default: false },
-      institutionManagement: { type: Boolean, default: false },
-      groupMetrics: { type: Boolean, default: false },
-      groupManagement: { type: Boolean, default: false },
-      adminMetrics: { type: Boolean, default: false },
-      splitTestMetrics: { type: Boolean, default: false },
-      splitTestManagement: { type: Boolean, default: false },
-    },
     signUpDate: {
       type: Date,
       default() {

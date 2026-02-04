@@ -1,13 +1,14 @@
 import _ from 'lodash'
 import Settings from '@overleaf/settings'
 
-const supportModuleAvailable = Settings.moduleImportSequence.includes('support')
+const supportModuleAvailable =
+  Settings.moduleImportSequence?.includes('support')
 
 const symbolPaletteModuleAvailable =
-  Settings.moduleImportSequence.includes('symbol-palette')
+  Settings.moduleImportSequence?.includes('symbol-palette')
 
 const trackChangesModuleAvailable =
-  Settings.moduleImportSequence.includes('track-changes')
+  Settings.moduleImportSequence?.includes('track-changes')
 
 /**
  * @typedef {Object} Settings
@@ -71,8 +72,6 @@ const Features = {
       case 'affiliations':
       case 'analytics':
         return Boolean(_.get(Settings, ['apis', 'v1', 'url']))
-      case 'references':
-        return Boolean(_.get(Settings, ['apis', 'references', 'url']))
       case 'saml':
         return Boolean(Settings.enableSaml)
       case 'linked-project-file':
@@ -84,7 +83,7 @@ const Features = {
       case 'link-url':
         return Boolean(
           _.get(Settings, ['apis', 'linkedUrlProxy', 'url']) &&
-            Settings.enabledLinkedFileTypes.includes('url')
+          Settings.enabledLinkedFileTypes.includes('url')
         )
       case 'support':
         return supportModuleAvailable

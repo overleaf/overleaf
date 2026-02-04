@@ -38,7 +38,10 @@
 
 @include theme('default') {
   .ide-redesign-main,
-  .project-ds-nav-page {
+  .project-ds-nav-page,
+  // Codemirror tooltips are rendered outside of the main app container
+  .cm-tooltip .dropdown-menu,
+  .cm-tooltip .dropdown {
     @include dark-dropdown-menu;
   }
 }
@@ -80,6 +83,10 @@ $dropdown-item-min-height: 36px;
   z-index: unset;
   display: block;
   float: unset;
+
+  &:focus {
+    outline: none;
+  }
 }
 
 .dropdown-menu {
@@ -120,8 +127,12 @@ $dropdown-item-min-height: 36px;
     color: var(--dropdown-text-color);
   }
 
+  &:focus {
+    background: none;
+  }
+
   &:hover:not(.active),
-  &:focus:not(.active),
+  &:focus-visible:not(.active),
   &.nested-dropdown-toggle-shown {
     color: var(--dropdown-text-hover);
     background-color: var(--dropdown-background-hover);
@@ -133,7 +144,7 @@ $dropdown-item-min-height: 36px;
     color: var(--dropdown-text-danger);
 
     &:hover:not(.active),
-    &:focus:not(.active) {
+    &:focus-visible:not(.active) {
       color: var(--dropdown-text-danger-hover);
       background-color: var(--dropdown-background-danger-hover);
     }
@@ -148,7 +159,7 @@ $dropdown-item-min-height: 36px;
     text-decoration: none;
 
     &:hover,
-    &:focus {
+    &:focus-visible {
       color: inherit;
     }
   }
@@ -271,4 +282,14 @@ $dropdown-item-min-height: 36px;
 
   display: flex;
   justify-content: space-between;
+}
+
+.dropdown-shortcut-char {
+  display: inline-block;
+  width: 1em;
+  text-align: center;
+}
+
+.dropdown-item-wide {
+  min-width: 264px;
 }

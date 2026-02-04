@@ -11,6 +11,7 @@ export const mockProject = ({
   projectOwner = undefined,
   spellCheckLanguage = 'en',
   rootFolder = null,
+  trackChangesState = false,
 }: any = {}) => {
   return {
     _id: 'test-project',
@@ -63,7 +64,7 @@ export const mockProject = ({
     },
     compiler: 'pdflatex' as ProjectCompiler,
     imageName: 'texlive-full:2024.1',
-    trackChangesState: false,
+    trackChangesState,
     invites: [],
     members: [],
     owner: projectOwner || {

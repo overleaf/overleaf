@@ -63,8 +63,8 @@ services:
       dockerfile: services/filestore/Dockerfile
     env_file:
       - dev.env
-#    environment:
-#      - ENABLE_CONVERSIONS=true
+    #    environment:
+    #      - ENABLE_CONVERSIONS=true
     volumes:
       - filestore-public-files:/overleaf/services/filestore/public_files
       - filestore-template-files:/overleaf/services/filestore/template_files
@@ -75,7 +75,7 @@ services:
       context: ..
       dockerfile: services/history-v1/Dockerfile
     env_file:
-        - dev.env
+      - dev.env
     environment:
       OVERLEAF_EDITOR_ANALYTICS_BUCKET: "/buckets/analytics"
       OVERLEAF_EDITOR_BLOBS_BUCKET: "/buckets/blobs"
@@ -84,7 +84,7 @@ services:
       OVERLEAF_EDITOR_ZIPS_BUCKET: "/buckets/zips"
       PERSISTOR_BACKEND: fs
     volumes:
-        - history-v1-buckets:/buckets
+      - history-v1-buckets:/buckets
 
   mongo:
     image: mongo:6.0
@@ -114,7 +114,7 @@ services:
       context: ..
       dockerfile: services/project-history/Dockerfile
     env_file:
-        - dev.env
+      - dev.env
 
   real-time:
     build:
@@ -166,7 +166,8 @@ services:
       context: ..
       dockerfile: services/web/Dockerfile
       target: webpack
-    command: ["npx", "webpack", "serve", "--config", "webpack.config.dev-env.js"]
+    command:
+      ["npx", "webpack", "serve", "--config", "webpack.config.dev-env.js"]
     ports:
       - "127.0.0.1:80:3808"
     volumes:

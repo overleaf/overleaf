@@ -1,9 +1,9 @@
-const WebsocketLoadBalancer = require('./WebsocketLoadBalancer')
-const DrainManager = require('./DrainManager')
-const ConnectedUsersManager = require('./ConnectedUsersManager')
-const logger = require('@overleaf/logger')
+import WebsocketLoadBalancer from './WebsocketLoadBalancer.js'
+import DrainManager from './DrainManager.js'
+import ConnectedUsersManager from './ConnectedUsersManager.js'
+import logger from '@overleaf/logger'
 
-module.exports = {
+export default {
   countConnectedClients(req, res) {
     const { projectId } = req.params
     ConnectedUsersManager.countConnectedClients(

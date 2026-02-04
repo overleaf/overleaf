@@ -37,7 +37,6 @@ import { setVisual } from '../extensions/visual/visual'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { setDocName } from '@/features/source-editor/extensions/doc-name'
-import { isValidTeXFile } from '@/main/is-valid-tex-file'
 import { captureException } from '@/infrastructure/error-reporter'
 import grammarlyExtensionPresent from '@/shared/utils/grammarly'
 import { debugConsole } from '@/utils/debugging'
@@ -62,6 +61,8 @@ import { beforeChangeDocEffect } from '@/features/source-editor/extensions/befor
 import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 import { useEditorSelectionContext } from '@/shared/context/editor-selection-context'
 import { useActiveEditorTheme } from '@/shared/hooks/use-active-editor-theme'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { isValidTeXFile } from '@/main/is-valid-tex-file'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -96,6 +97,7 @@ function useCodeMirrorScope(view: EditorView) {
   const { onlineUserCursorHighlights } = useOnlineUsersContext()
 
   const { project, features: projectFeatures } = useProjectContext()
+  const editorContextMenuEnabled = useFeatureFlag('editor-context-menu')
   let spellCheckLanguage = project?.spellCheckLanguage || ''
   // spell check is off when read-only
   if (!permissions.write && !permissions.trackedWrite) {
@@ -210,6 +212,7 @@ function useCodeMirrorScope(view: EditorView) {
   }, [view, spellCheckLanguage, hunspellManager])
 
   const projectFeaturesRef = useRef(projectFeatures)
+  const editorContextMenuEnabledRef = useRef(editorContextMenuEnabled)
 
   // listen to doc:after-opened, and focus the editor if it's not a new doc
   useEffect(() => {
@@ -336,6 +339,7 @@ function useCodeMirrorScope(view: EditorView) {
           spelling: spellingRef.current,
           visual: visualRef.current,
           projectFeatures: projectFeaturesRef.current,
+          editorContextMenuEnabled: editorContextMenuEnabledRef.current,
           initialSearchQuery: searchQueryRef.current,
           showBoundary,
           handleException,

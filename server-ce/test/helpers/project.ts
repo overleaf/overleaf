@@ -1,8 +1,25 @@
 import { login } from './login'
 import { openEmail } from './email'
 import { v4 as uuid } from 'uuid'
+import { prepareWaitForNextCompileSlot } from './compile'
 
 export const NEW_PROJECT_BUTTON_MATCHER = /new project/i
+
+const NEW_EDITOR_QUERY_PARAMS = ''
+const OLD_EDITOR_QUERY_PARAMS = '?old-editor-override=true'
+
+export function redirectEditorUrlWithQueryParams(newEditor: boolean) {
+  const queryString = newEditor
+    ? NEW_EDITOR_QUERY_PARAMS
+    : OLD_EDITOR_QUERY_PARAMS
+  cy.intercept(
+    { method: 'GET', url: /\/project\/[a-fA-F0-9]{24}$/, times: 1 },
+    req => {
+      // Intercept redirect and add the query param to use the new editor
+      req.redirect(`${req.url}${queryString}`)
+    }
+  )
+}
 
 export function createProject(
   name: string,
@@ -10,10 +27,12 @@ export function createProject(
     type = 'Blank project',
     newProjectButtonMatcher = NEW_PROJECT_BUTTON_MATCHER,
     open = true,
+    newEditor = false,
   }: {
     type?: 'Blank project' | 'Example project'
     newProjectButtonMatcher?: RegExp
     open?: boolean
+    newEditor?: boolean
   } = {}
 ): Cypress.Chainable<string> {
   cy.url().then(url => {
@@ -30,12 +49,14 @@ export function createProject(
       cy.intercept(
         { method: 'GET', url: /\/project\/[a-fA-F0-9]{24}$/, times: 1 },
         req => {
-          projectId = req.url.split('/').pop()!
+          projectId = req.url.split('/').pop()!.split('?')[0]
           // Redirect back to the project dashboard, effectively reload the page.
           req.redirect('/project')
         }
       ).as(interceptId)
     })
+  } else {
+    redirectEditorUrlWithQueryParams(newEditor)
   }
   cy.findAllByRole('button').contains(newProjectButtonMatcher).click()
   // FIXME: This should only look in the left menu
@@ -51,7 +72,7 @@ export function createProject(
     return cy
       .url()
       .should('match', /\/project\/[a-fA-F0-9]{24}/)
-      .then(url => url.split('/').pop())
+      .then(url => url.split('/').pop()?.split('?')[0])
   } else {
     const alias = `@${interceptId}` // IDEs do not like computed values in cy.wait().
     cy.wait(alias)
@@ -59,35 +80,93 @@ export function createProject(
   }
 }
 
-export function openProjectByName(projectName: string) {
+// TODO ide-redesign-cleanup: Remove this and just use createProject directly
+export function createProjectAndOpenInNewEditor(
+  projectName: string,
+  options: {
+    type?: 'Blank project' | 'Example project'
+    newProjectButtonMatcher?: RegExp
+  } = {}
+) {
+  return createProject(projectName, { ...options, open: false }).then(
+    projectId => {
+      // Open the new project in the new editor
+      openProjectById(projectId, true)
+      return cy.then(() => projectId)
+    }
+  )
+}
+
+export function openProjectByName(projectName: string, newEditor = false) {
   cy.visit('/project')
+
+  redirectEditorUrlWithQueryParams(newEditor)
+
   cy.findByText(projectName).click()
   waitForMainDocToLoad()
+
+  if (newEditor) {
+    // Close the beta intro modal if it appears
+    // TODO ide-redesign-cleanup: Remove this when the intro modal is removed
+    cy.get('body').type('{esc}')
+  }
 }
 
-export function openProjectById(projectId: string) {
-  cy.visit(`/project/${projectId}`)
-  waitForMainDocToLoad()
-}
-
-export function openProjectViaLinkSharingAsAnon(url: string) {
+export function openProjectById(projectId: string, newEditor = false) {
+  const url = newEditor
+    ? `/project/${projectId}${NEW_EDITOR_QUERY_PARAMS}`
+    : `/project/${projectId}${OLD_EDITOR_QUERY_PARAMS}`
   cy.visit(url)
   waitForMainDocToLoad()
+
+  if (newEditor) {
+    // Close the beta intro modal if it appears
+    // TODO ide-redesign-cleanup: Remove this when the intro modal is removed
+    cy.get('body').type('{esc}')
+  }
+}
+
+export function openProjectViaLinkSharingAsAnon(
+  url: string,
+  newEditor = false
+) {
+  redirectEditorUrlWithQueryParams(newEditor)
+  cy.visit(url)
+  waitForMainDocToLoad()
+
+  if (newEditor) {
+    // Close the beta intro modal if it appears
+    // TODO ide-redesign-cleanup: Remove this when the intro modal is removed
+    cy.get('body').type('{esc}')
+  }
 }
 
 export function openProjectViaLinkSharingAsUser(
   url: string,
   projectName: string,
-  email: string
+  email: string,
+  newEditor: boolean = false
 ) {
   cy.visit(url)
   cy.findByText(projectName) // wait for lazy loading
   cy.contains(`as ${email}`)
+
+  redirectEditorUrlWithQueryParams(newEditor)
+
   cy.findByText('OK, join project').click()
   waitForMainDocToLoad()
+
+  if (newEditor) {
+    // Close the beta intro modal if it appears
+    // TODO ide-redesign-cleanup: Remove this when the intro modal is removed
+    cy.get('body').type('{esc}')
+  }
 }
 
-export function openProjectViaInviteNotification(projectName: string) {
+export function openProjectViaInviteNotification(
+  projectName: string,
+  newEditor: boolean = false
+) {
   cy.visit('/project')
   cy.findByText(projectName)
     .parent()
@@ -95,17 +174,42 @@ export function openProjectViaInviteNotification(projectName: string) {
     .within(() => {
       cy.findByText('Join Project').click()
     })
-  cy.findByText('Open Project').click()
-  cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
-  waitForMainDocToLoad()
+
+  cy.intercept(
+    // NOTE: Struggling to work out why but this only seems to work with times: 2.
+    // This is temporary code so leaving it for now.
+    { method: 'GET', url: /\/project\/[a-fA-F0-9]{24}$/, times: 2 },
+    req => {
+      const queryString = newEditor
+        ? NEW_EDITOR_QUERY_PARAMS
+        : OLD_EDITOR_QUERY_PARAMS
+      // Intercept redirect and add the query param to use the new editor
+      req.redirect(`${req.url}${queryString}`)
+    }
+  )
+
+  const { waitForCompile } = prepareWaitForNextCompileSlot()
+  waitForCompile(() => {
+    cy.findByText('Open Project').click()
+
+    cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
+    waitForMainDocToLoad()
+
+    if (newEditor) {
+      // Close the beta intro modal if it appears
+      // TODO ide-redesign-cleanup: Remove this when the intro modal is removed
+      cy.get('body').type('{esc}')
+    }
+  })
 }
 
 function shareProjectByEmail(
   projectName: string,
   email: string,
-  level: 'Viewer' | 'Editor'
+  level: 'Viewer' | 'Editor',
+  newEditor: boolean = false
 ) {
-  openProjectByName(projectName)
+  openProjectByName(projectName, newEditor)
   cy.findByRole('button', { name: 'Share' }).click()
   cy.findByRole('dialog').within(() => {
     cy.findByLabelText('Add email address', { selector: 'input' }).type(
@@ -127,12 +231,13 @@ function shareProjectByEmail(
 export function shareProjectByEmailAndAcceptInviteViaDash(
   projectName: string,
   email: string,
-  level: 'Viewer' | 'Editor'
+  level: 'Viewer' | 'Editor',
+  newEditor: boolean = false
 ) {
-  shareProjectByEmail(projectName, email, level)
+  shareProjectByEmail(projectName, email, level, newEditor)
 
   login(email)
-  openProjectViaInviteNotification(projectName)
+  openProjectViaInviteNotification(projectName, newEditor)
 }
 
 export function getSpamSafeProjectName() {
@@ -150,9 +255,10 @@ export function getSpamSafeProjectName() {
 export function shareProjectByEmailAndAcceptInviteViaEmail(
   projectName: string,
   email: string,
-  level: 'Viewer' | 'Editor'
+  level: 'Viewer' | 'Editor',
+  newEditor: boolean = false
 ) {
-  shareProjectByEmail(projectName, email, level)
+  shareProjectByEmail(projectName, email, level, newEditor)
 
   login(email)
 
@@ -167,8 +273,17 @@ export function shareProjectByEmailAndAcceptInviteViaEmail(
   cy.url().should('match', /\/project\/[a-f0-9]+\/invite\/token\/[a-f0-9]+/)
   cy.findByText(/user would like you to join/)
   cy.contains(new RegExp(`You are accepting this invite as ${email}`))
+
+  redirectEditorUrlWithQueryParams(newEditor)
+
   cy.findByText('Join Project').click()
   waitForMainDocToLoad()
+
+  if (newEditor) {
+    // Close the beta intro modal if it appears
+    // TODO ide-redesign-cleanup: Remove this when the intro modal is removed
+    cy.get('body').type('{esc}')
+  }
 }
 
 export function enableLinkSharing() {

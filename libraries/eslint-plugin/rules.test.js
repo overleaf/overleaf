@@ -136,26 +136,33 @@ ruleTester.run('domock-require-valid-path', viDoMockValidPath, {
   valid: [
     {
       code: 'vi.doMock("./require-vi-doMock-valid-path.js")',
-      filename: __filename
+      filename: __filename,
     },
     {
       code: 'const filename = "./require-vi-doMock-valid-path.js"; vi.doMock(filename);',
-      filename: __filename
-    }
+      filename: __filename,
+    },
   ],
-  invalid: [{
-    code: "vi.doMock('./require-vi-doMock-valid-path2')",
-    filename: __filename,
-    errors: [
-      {
-        message: 'The path "./require-vi-doMock-valid-path2" in vi.doMock() cannot be resolved relative to the current file.'}
-    ]
-  }, {
-    code: 'const filename = "./require-vi-doMock-valid-path2.js"; vi.doMock(filename);',
-    filename: __filename,
-    errors: [
-      {
-        message: 'The first argument of vi.doMock() must be (or resolve to) a string literal representing a path.'}
-    ]
-  }]
+  invalid: [
+    {
+      code: "vi.doMock('./require-vi-doMock-valid-path2')",
+      filename: __filename,
+      errors: [
+        {
+          message:
+            'The path "./require-vi-doMock-valid-path2" in vi.doMock() cannot be resolved relative to the current file.',
+        },
+      ],
+    },
+    {
+      code: 'const filename = "./require-vi-doMock-valid-path2.js"; vi.doMock(filename);',
+      filename: __filename,
+      errors: [
+        {
+          message:
+            'The first argument of vi.doMock() must be (or resolve to) a string literal representing a path.',
+        },
+      ],
+    },
+  ],
 })

@@ -1,8 +1,8 @@
-import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import SubscriptionEmailHandler from './SubscriptionEmailHandler.mjs'
 import { AI_ADD_ON_CODE } from './AiHelper.mjs'
 import mongodb from 'mongodb-legacy'
+import SubscriptionLocator from './SubscriptionLocator.mjs'
 
 const { ObjectId } = mongodb
 
@@ -14,15 +14,18 @@ async function sendRecurlyAnalyticsEvent(event, eventData) {
     return
   }
 
-  const customerIoEnabled =
-    await SplitTestHandler.promises.hasUserBeenAssignedToVariant(
-      {},
-      userId,
-      'customer-io-trial-conversion',
-      'enabled',
-      true
-    )
-  eventData['customerio-integration'] = customerIoEnabled || false
+  eventData['customerio-integration'] = true
+
+  const subscription =
+    await SubscriptionLocator.promises.getUsersSubscription(userId)
+
+  if (
+    subscription?.paymentProvider?.service &&
+    subscription.paymentProvider.service.includes('stripe')
+  ) {
+    // do not send recurly events for subscriptions managed by stripe
+    return
+  }
 
   switch (event) {
     case 'new_subscription_notification':
@@ -146,17 +149,6 @@ async function _sendSubscriptionStartedEvent(userId, eventData) {
 
   if (isTrial) {
     await SubscriptionEmailHandler.sendTrialOnboardingEmail(userId, planCode)
-    const cioAssignment = await SplitTestHandler.promises.getAssignmentForUser(
-      userId,
-      'customer-io-trial-conversion'
-    )
-    if (cioAssignment.variant === 'enabled') {
-      AnalyticsManager.setUserPropertyForUserInBackground(
-        userId,
-        'customer-io-integration',
-        true
-      )
-    }
   }
 }
 

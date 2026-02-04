@@ -48,10 +48,6 @@ function getNewCompileBackendClass(projectId, compileBackendClass) {
   }
 
   switch (compileBackendClass) {
-    case 'n2d':
-      return 'n4'
-    case 'c2d':
-      return 'n4'
     case 'c3d':
       return 'n4'
     case 'c4d':
@@ -904,7 +900,8 @@ function _finaliseRequest(projectId, options, project, docs, files) {
           ['alpha', 'priority'].includes(options.compileGroup) &&
           options.compileFromClsiCache,
         populateClsiCache:
-          ['alpha', 'priority'].includes(options.compileGroup) &&
+          (['alpha', 'priority'].includes(options.compileGroup) ||
+            options.metricsPath === 'clsi-cache-template') &&
           options.populateClsiCache,
         enablePdfCaching:
           (Settings.enablePdfCaching && options.enablePdfCaching) || false,
@@ -1010,6 +1007,7 @@ function _getClsiServerIdFromResponse(response) {
 }
 
 export default {
+  _finaliseRequest,
   sendRequest: callbackifyMultiResult(sendRequest, [
     'status',
     'outputFiles',

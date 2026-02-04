@@ -7,25 +7,26 @@ services:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     volumes:
       - ./reports:/overleaf/services/clsi/reports
+      - ../../tsconfig.backend.json:/overleaf/tsconfig.backend.json
     command: npm run test:unit:_run
     environment:
       CI:
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
-
+      VITEST_NO_CACHE: true
 
   test_acceptance:
     build: .
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     environment:
       CI:
-      ELASTIC_SEARCH_DSN: es:9200
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      ALLOWED_COMPILE_GROUPS: "clsi-perf simple-latex-file"
       ENABLE_PDF_CACHING: "true"
       PDF_CACHING_ENABLE_WORKER_POOL: "true"
       ALLOWED_IMAGES: quay.io/sharelatex/texlive-full:2025.1
@@ -40,7 +41,6 @@ services:
       - ./compiles:/overleaf/services/clsi/compiles
       - /var/run/docker.sock:/var/run/docker.sock
     command: npm run test:acceptance
-
 
   tar:
     build: .

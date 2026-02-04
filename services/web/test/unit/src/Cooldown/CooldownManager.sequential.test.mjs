@@ -22,35 +22,27 @@ describe('CooldownManager', function () {
   describe('isProjectOnCooldown', function () {
     describe('when no project is on cooldown', function () {
       it('returns false for project 1', async function (ctx) {
-        const result = await CooldownManager.promises.isProjectOnCooldown(
-          ctx.project1Id
-        )
+        const result = await CooldownManager.isProjectOnCooldown(ctx.project1Id)
         expect(result).to.be.false
       })
 
       it('returns false for project 2', async function (ctx) {
-        const result = await CooldownManager.promises.isProjectOnCooldown(
-          ctx.project2Id
-        )
+        const result = await CooldownManager.isProjectOnCooldown(ctx.project2Id)
         expect(result).to.be.false
       })
     })
     describe('when project 1 is on cooldown', function () {
       beforeEach(async function (ctx) {
-        await CooldownManager.promises.putProjectOnCooldown(ctx.project1Id)
+        await CooldownManager.putProjectOnCooldown(ctx.project1Id)
       })
 
       it('returns true for project 1', async function (ctx) {
-        const result = await CooldownManager.promises.isProjectOnCooldown(
-          ctx.project1Id
-        )
+        const result = await CooldownManager.isProjectOnCooldown(ctx.project1Id)
         expect(result).to.be.true
       })
 
       it('returns false for project 2', async function (ctx) {
-        const result = await CooldownManager.promises.isProjectOnCooldown(
-          ctx.project2Id
-        )
+        const result = await CooldownManager.isProjectOnCooldown(ctx.project2Id)
         expect(result).to.be.false
       })
     })

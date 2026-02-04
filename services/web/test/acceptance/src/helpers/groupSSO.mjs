@@ -42,7 +42,7 @@ export async function createGroupSSO(
   const nonSSOMember = nonSSOMemberHelper.user
 
   const groupAdminUser = new User()
-  const memberUser = new User()
+  const memberUser = new User({ confirmedAt: new Date() })
 
   await groupAdminUser.ensureUserExists()
   await memberUser.ensureUserExists()

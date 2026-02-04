@@ -125,7 +125,7 @@ function Institution() {
                       href="/learn/how-to/Understanding_Managed_Overleaf_Accounts"
                       target="_blank"
                     >
-                      {t('read_more_about_managed_users')}
+                      {t('understand_managed_user_accounts')}
                     </a>
                   </>
                 }

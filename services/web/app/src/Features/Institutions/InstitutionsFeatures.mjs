@@ -4,8 +4,10 @@ import PlansLocator from '../Subscription/PlansLocator.mjs'
 import Settings from '@overleaf/settings'
 import InstitutionsGetter from './InstitutionsGetter.mjs'
 import FeaturesHelper from '../Subscription/FeaturesHelper.mjs'
+import Features from '../../infrastructure/Features.mjs'
 
 async function _getInstitutionsAddons(userId) {
+  if (!Features.hasFeature('saas')) return {}
   const affiliates =
     await InstitutionsGetter.promises.getCurrentAffiliations(userId)
   // currently only addOn available to institutions is assist/WF bundle,
@@ -17,6 +19,7 @@ async function _getInstitutionsAddons(userId) {
 }
 
 async function getInstitutionsFeatures(userId) {
+  if (!Features.hasFeature('saas')) return {}
   const planCode = await getInstitutionsPlan(userId)
   const plan = planCode && PlansLocator.findLocalPlanInSettings(planCode)
   let features = plan && plan.features
@@ -28,6 +31,7 @@ async function getInstitutionsFeatures(userId) {
 }
 
 async function getInstitutionsPlan(userId) {
+  if (!Features.hasFeature('saas')) return null
   if (await hasLicence(userId)) {
     return Settings.institutionPlanCode
   }
@@ -35,6 +39,7 @@ async function getInstitutionsPlan(userId) {
 }
 
 async function hasLicence(userId) {
+  if (!Features.hasFeature('saas')) return false
   const emailsData = await UserGetter.promises.getUserFullEmails(userId)
   return emailsData.some(emailData => emailData.emailHasInstitutionLicence)
 }

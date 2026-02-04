@@ -63,28 +63,6 @@ describe('ClsiCookieManager', function () {
       serverId.should.equal('clsi-7')
     })
 
-    it('should fallback to old key', async function (ctx) {
-      ctx.redis.get
-        .withArgs(`clsiserver:c3d:${ctx.project_id}:${ctx.user_id}`)
-        .resolves(null)
-      ctx.redis.get
-        .withArgs(`clsiserver:${ctx.project_id}:${ctx.user_id}`)
-        .resolves('clsi-7')
-      const serverId = await ctx.ClsiCookieManager.promises.getServerId(
-        ctx.project_id,
-        ctx.user_id,
-        '',
-        'c3d'
-      )
-      ctx.redis.get
-        .calledWith(`clsiserver:c3d:${ctx.project_id}:${ctx.user_id}`)
-        .should.equal(true)
-      ctx.redis.get
-        .calledWith(`clsiserver:${ctx.project_id}:${ctx.user_id}`)
-        .should.equal(true)
-      serverId.should.equal('clsi-7')
-    })
-
     it('should _populateServerIdViaRequest if no key is found', async function (ctx) {
       ctx.ClsiCookieManager.promises._populateServerIdViaRequest = sinon
         .stub()
@@ -185,15 +163,14 @@ describe('ClsiCookieManager', function () {
   })
 
   describe('clearServerId', function () {
-    it('should clear both keys', async function (ctx) {
+    it('should clear the key', async function (ctx) {
       await ctx.ClsiCookieManager.promises.clearServerId(
         ctx.project_id,
         ctx.user_id,
         'c3d'
       )
       ctx.redis.del.should.have.been.calledWith(
-        `clsiserver:c3d:${ctx.project_id}:${ctx.user_id}`,
-        `clsiserver:${ctx.project_id}:${ctx.user_id}`
+        `clsiserver:c3d:${ctx.project_id}:${ctx.user_id}`
       )
     })
   })

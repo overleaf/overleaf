@@ -91,7 +91,8 @@ async function getFile(req, res) {
     if (
       err instanceof Error &&
       'code' in err &&
-      err.code === 'ERR_STREAM_PREMATURE_CLOSE'
+      (err.code === 'ERR_STREAM_PREMATURE_CLOSE' ||
+        err.code === 'ERR_STREAM_UNABLE_TO_PIPE')
     ) {
       // Ignore clients closing the connection prematurely
       return

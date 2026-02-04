@@ -3,12 +3,12 @@
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
+import sinon from 'sinon'
 let MockClient
-const sinon = require('sinon')
 
 let idCounter = 0
 
-module.exports = MockClient = class MockClient {
+export default MockClient = class MockClient {
   constructor() {
     this.ol_context = {}
     this.join = sinon.stub()

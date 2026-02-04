@@ -2,10 +2,11 @@ import { useRef, useLayoutEffect } from 'react'
 import { Form } from 'react-bootstrap'
 import type { Meta, StoryObj } from '@storybook/react'
 import { figmaDesignUrl } from '../../../../.storybook/utils/figma-design-url'
+import OLFormCheckbox from '@/shared/components/ol/ol-form-checkbox'
 
 const meta: Meta<(typeof Form)['Check']> = {
   title: 'Shared / Components / Form',
-  component: Form.Check,
+  component: OLFormCheckbox,
   parameters: {
     controls: {
       include: ['disabled'],
@@ -40,7 +41,7 @@ export const CheckboxChecked: Story = {
 }
 
 export const CheckboxIndeterminate = (args: Story['args']) => {
-  const ref = useRef<HTMLInputElement>()
+  const ref = useRef<HTMLInputElement>(null)
 
   useLayoutEffect(() => {
     if (ref.current) {
@@ -48,7 +49,7 @@ export const CheckboxIndeterminate = (args: Story['args']) => {
     }
   }, [])
 
-  return <Form.Check ref={ref} {...args} />
+  return <OLFormCheckbox inputRef={ref} {...args} />
 }
 CheckboxIndeterminate.args = {
   id: 'id-2',

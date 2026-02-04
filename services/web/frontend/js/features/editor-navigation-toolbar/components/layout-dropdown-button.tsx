@@ -1,4 +1,4 @@
-import { memo, useCallback, forwardRef } from 'react'
+import { memo, forwardRef } from 'react'
 import {
   Dropdown,
   DropdownItem,
@@ -13,7 +13,6 @@ import {
   useLayoutContext,
 } from '../../../shared/context/layout-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
-import useEventListener from '../../../shared/hooks/use-event-listener'
 import { DetachRole } from '@/shared/context/detach-context'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
@@ -96,42 +95,13 @@ function BS5DetachDisabled() {
 
 function LayoutDropdownButton() {
   const {
-    reattach,
-    detach,
     detachIsLinked,
     detachRole,
-    changeLayout,
     view,
     pdfLayout,
+    handleChangeLayout,
+    handleDetach,
   } = useLayoutContext()
-
-  const handleDetach = useCallback(() => {
-    detach()
-    eventTracking.sendMB('project-layout-detach')
-  }, [detach])
-
-  const handleReattach = useCallback(() => {
-    if (detachRole !== 'detacher') {
-      return
-    }
-    reattach()
-    eventTracking.sendMB('project-layout-reattach')
-  }, [detachRole, reattach])
-
-  // reattach when the PDF pane opens
-  useEventListener('ui:pdf-open', handleReattach)
-
-  const handleChangeLayout = useCallback(
-    (newLayout: IdeLayout, newView?: IdeView) => {
-      handleReattach()
-      changeLayout(newLayout, newView)
-      eventTracking.sendMB('project-layout-change', {
-        layout: newLayout,
-        view: newView,
-      })
-    },
-    [changeLayout, handleReattach]
-  )
 
   return (
     <LayoutDropdownButtonUi

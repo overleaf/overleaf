@@ -55,6 +55,7 @@ import { trackDetachedComments } from './track-detached-comments'
 import { reviewTooltip } from './review-tooltip'
 import { tooltipsReposition } from './tooltips-reposition'
 import { selectionListener } from '@/features/source-editor/extensions/selection-listener'
+import { contextMenu } from './context-menu'
 
 const moduleExtensions: Array<(options: Record<string, any>) => Extension> =
   importOverleafModules('sourceEditorExtensions').map(
@@ -155,7 +156,8 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   trackDetachedComments(options.currentDoc),
   visual(options.visual),
   mathPreview(options.settings.mathPreview),
-  reviewTooltip(),
+  reviewTooltip(options.editorContextMenuEnabled),
+  contextMenu(options.editorContextMenuEnabled),
   toolbarPanel(),
   breadcrumbPanel(),
   verticalOverflow(),

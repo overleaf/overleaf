@@ -1,8 +1,8 @@
-const RealTimeClient = require('./helpers/RealTimeClient')
-const FixturesManager = require('./helpers/FixturesManager')
-const Settings = require('@overleaf/settings')
-const signature = require('cookie-signature')
-const { expect } = require('chai')
+import RealTimeClient from './helpers/RealTimeClient.js'
+import FixturesManager from './helpers/FixturesManager.js'
+import Settings from '@overleaf/settings'
+import signature from 'cookie-signature'
+import { expect } from 'chai'
 
 describe('SessionSockets', function () {
   beforeEach(function (done) {

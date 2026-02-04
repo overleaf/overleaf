@@ -42,8 +42,7 @@ export interface GotoOffsetOptions {
 }
 
 interface OpenDocOptions
-  extends Partial<GotoLineOptions>,
-    Partial<GotoOffsetOptions> {
+  extends Partial<GotoLineOptions>, Partial<GotoOffsetOptions> {
   gotoOffset?: number
   forceReopen?: boolean
   keepCurrentView?: boolean

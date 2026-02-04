@@ -4,7 +4,7 @@
 
 services:
   test_unit:
-    image: node:22.18.0
+    image: node:24.13.0
     volumes:
       - .:/overleaf/services/chat
       - ../../node_modules:/overleaf/node_modules
@@ -26,7 +26,7 @@ services:
         condition: service_started
 
   test_acceptance:
-    image: node:22.18.0
+    image: node:24.13.0
     volumes:
       - .:/overleaf/services/chat
       - ../../node_modules:/overleaf/node_modules
@@ -35,7 +35,6 @@ services:
       - ../../tools/migrations:/overleaf/tools/migrations
     working_dir: /overleaf/services/chat
     environment:
-      ELASTIC_SEARCH_DSN: es:9200
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
@@ -63,4 +62,3 @@ services:
       # replica set. This override is not needed when running the setup after
       # starting up mongo.
       - mongo:127.0.0.1
-

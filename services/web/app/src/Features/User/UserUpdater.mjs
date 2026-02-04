@@ -10,7 +10,6 @@ import FeaturesUpdater from '../Subscription/FeaturesUpdater.mjs'
 import EmailHandler from '../Email/EmailHandler.mjs'
 import EmailHelper from '../Helpers/EmailHelper.mjs'
 import Errors from '../Errors/Errors.js'
-import NewsletterManager from '../Newsletter/NewsletterManager.mjs'
 import UserAuditLogHandler from './UserAuditLogHandler.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import EmailChangeHelper from '../Analytics/EmailChangeHelper.mjs'
@@ -295,14 +294,6 @@ async function setDefaultEmailAddress(
     })
   }
 
-  try {
-    await NewsletterManager.promises.changeEmail(user, email)
-  } catch (error) {
-    logger.warn(
-      { err: error, oldEmail, newEmail: email },
-      'Failed to change email in newsletter subscription'
-    )
-  }
   try {
     await Modules.promises.hooks.fire('userEmailChanged', user, email)
   } catch (err) {

@@ -29,6 +29,7 @@ describe('<ActionsMenu />', function () {
 
     renderWithEditorContext(<ActionsMenu />, {
       projectId: '123abc',
+      mockCompileOnLoad: true,
       scope: {
         editor: {
           sharejs_doc: {
@@ -56,6 +57,7 @@ describe('<ActionsMenu />', function () {
 
     renderWithEditorContext(<ActionsMenu />, {
       projectId: '123abc',
+      mockCompileOnLoad: true,
       scope: {
         editor: {
           sharejs_doc: {

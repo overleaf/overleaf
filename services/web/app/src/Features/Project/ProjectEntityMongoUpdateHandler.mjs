@@ -554,7 +554,7 @@ async function _putElement(project, folderId, element, type, userId) {
       { projectId: project._id },
       'project too big, stopping insertions'
     )
-    CooldownManager.putProjectOnCooldown(project._id)
+    await CooldownManager.putProjectOnCooldown(project._id)
     throw new Error('project_has_too_many_files')
   }
 

@@ -1,36 +1,39 @@
 // Metrics must be initialized before importing anything else
-require('@overleaf/metrics/initialize')
+import '@overleaf/metrics/initialize.js'
 
-const CompileController = require('./app/js/CompileController')
-const ContentController = require('./app/js/ContentController')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
+import CompileController from './app/js/CompileController.js'
+import ContentController from './app/js/ContentController.js'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import LoggerSerializers from './app/js/LoggerSerializers.js'
+
+import Metrics from '@overleaf/metrics'
+import smokeTest from './test/smoke/js/SmokeTests.js'
+import ContentTypeMapper from './app/js/ContentTypeMapper.js'
+import Errors from './app/js/Errors.js'
+import OutputController from './app/js/OutputController.js'
+import Path from 'node:path'
+
+import ProjectPersistenceManager from './app/js/ProjectPersistenceManager.js'
+import OutputCacheManager from './app/js/OutputCacheManager.js'
+import ContentCacheManager from './app/js/ContentCacheManager.js'
+
+import express from 'express'
+import bodyParser from 'body-parser'
+
+import ForbidSymlinks from './app/js/StaticServerForbidSymlinks.js'
+
+import net from 'node:net'
+import os from 'node:os'
 logger.initialize('clsi')
-const LoggerSerializers = require('./app/js/LoggerSerializers')
 logger.logger.serializers.clsiRequest = LoggerSerializers.clsiRequest
-
-const Metrics = require('@overleaf/metrics')
-
-const smokeTest = require('./test/smoke/js/SmokeTests')
-const ContentTypeMapper = require('./app/js/ContentTypeMapper')
-const Errors = require('./app/js/Errors')
-const { createOutputZip } = require('./app/js/OutputController')
-
-const Path = require('node:path')
 
 Metrics.open_sockets.monitor(true)
 Metrics.memory.monitor(logger)
 Metrics.leaked_sockets.monitor(logger)
 
-const ProjectPersistenceManager = require('./app/js/ProjectPersistenceManager')
-const OutputCacheManager = require('./app/js/OutputCacheManager')
-const ContentCacheManager = require('./app/js/ContentCacheManager')
-
 ProjectPersistenceManager.init()
 OutputCacheManager.init()
-
-const express = require('express')
-const bodyParser = require('body-parser')
 const app = express()
 
 Metrics.injectMetricsRoute(app)
@@ -126,8 +129,6 @@ app.get(
   CompileController.wordcount
 )
 
-const ForbidSymlinks = require('./app/js/StaticServerForbidSymlinks')
-
 // create a static server which does not allow access to any symlinks
 // avoids possible mismatch of root directory between middleware check
 // and serving the files
@@ -155,14 +156,14 @@ const staticOutputServer = ForbidSymlinks(
 app.get(
   '/project/:project_id/build/:build_id/output/output.zip',
   bodyParser.json(),
-  createOutputZip
+  OutputController.createOutputZip
 )
 
 // This needs to be before GET /project/:project_id/user/:user_id/build/:build_id/output/*
 app.get(
   '/project/:project_id/user/:user_id/build/:build_id/output/output.zip',
   bodyParser.json(),
-  createOutputZip
+  OutputController.createOutputZip
 )
 
 app.get(
@@ -275,9 +276,6 @@ app.use(function (error, req, res, next) {
   }
 })
 
-const net = require('node:net')
-const os = require('node:os')
-
 let STATE = 'up'
 
 const loadTcpServer = net.createServer(function (socket) {
@@ -360,7 +358,7 @@ const host = Settings.internal.clsi.host
 const loadTcpPort = Settings.internal.load_balancer_agent.load_port
 const loadHttpPort = Settings.internal.load_balancer_agent.local_port
 
-if (!module.parent) {
+if (import.meta.main) {
   // Called directly
 
   // handle uncaught exceptions when running in production
@@ -394,4 +392,4 @@ if (!module.parent) {
   })
 }
 
-module.exports = app
+export default app

@@ -7,12 +7,12 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import logger from '@overleaf/logger'
 let LockManager
-const logger = require('@overleaf/logger')
 
 const LockState = {} // locks for docker container operations, by container name
 
-module.exports = LockManager = {
+export default LockManager = {
   MAX_LOCK_HOLD_TIME: 15000, // how long we can keep a lock
   MAX_LOCK_WAIT_TIME: 10000, // how long we wait for a lock
   LOCK_TEST_INTERVAL: 1000, // retry time

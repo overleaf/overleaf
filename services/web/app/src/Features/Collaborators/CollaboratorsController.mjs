@@ -15,7 +15,7 @@ import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.mjs'
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 import LimitationsManager from '../Subscription/LimitationsManager.mjs'
 import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
-import { z, zz, validateReq } from '../../infrastructure/Validation.mjs'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import Features from '../../infrastructure/Features.mjs'
 
 const { hasAdminAccess } = AdminAuthorizationHelper
@@ -93,7 +93,7 @@ const setCollaboratorInfoSchema = z.object({
 
 async function setCollaboratorInfo(req, res, next) {
   try {
-    const { params, body } = validateReq(req, setCollaboratorInfoSchema)
+    const { params, body } = parseReq(req, setCollaboratorInfoSchema)
     const projectId = params.Project_id
     const userId = params.user_id
     const { privilegeLevel } = body
@@ -143,7 +143,7 @@ const transferOwnershipSchema = z.object({
 
 async function transferOwnership(req, res, next) {
   const sessionUser = SessionManager.getSessionUser(req.session)
-  const { params, body } = validateReq(req, transferOwnershipSchema)
+  const { params, body } = parseReq(req, transferOwnershipSchema)
   const projectId = params.Project_id
   const toUserId = body.user_id
   try {

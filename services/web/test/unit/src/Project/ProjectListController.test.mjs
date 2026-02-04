@@ -10,7 +10,11 @@ const MODULE_PATH = `${import.meta.dirname}/../../../../app/src/Features/Project
 
 // Mock AnalyticsManager as it isn't used in these tests but causes the User model to be imported and redeclares queues
 vi.mock('../../../../app/src/Features/Analytics/AnalyticsManager.mjs', () => {
-  return {}
+  return {
+    default: {
+      setUserPropertyForUserInBackground: () => {},
+    },
+  }
 })
 
 describe('ProjectListController', function () {
@@ -148,6 +152,7 @@ describe('ProjectListController', function () {
           bestSubscription: { type: 'free' },
           individualSubscription: null,
           memberGroupSubscriptions: [],
+          managedGroupSubscriptions: [],
         }),
       },
     }
@@ -472,6 +477,8 @@ describe('ProjectListController', function () {
       ctx.Features.hasFeature.withArgs('saas').returns(true)
       ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
         {
+          memberGroupSubscriptions: [],
+          managedGroupSubscriptions: [],
           bestSubscription: {
             type: 'free',
           },
@@ -491,6 +498,8 @@ describe('ProjectListController', function () {
       ctx.Features.hasFeature.withArgs('saas').returns(true)
       ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
         {
+          memberGroupSubscriptions: [],
+          managedGroupSubscriptions: [],
           bestSubscription: {
             type: 'individual',
           },
@@ -897,7 +906,7 @@ describe('ProjectListController', function () {
       beforeEach(function (ctx) {
         ctx.Features.hasFeature.withArgs('saas').returns(true)
         ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
-          { memberGroupSubscriptions: [] }
+          { memberGroupSubscriptions: [], managedGroupSubscriptions: [] }
         )
         ctx.UserGetter.promises.getUserFullEmails.resolves([
           {

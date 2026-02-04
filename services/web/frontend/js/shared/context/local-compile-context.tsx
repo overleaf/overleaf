@@ -398,8 +398,6 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       const rootDocOverride = compiler.getRootDocOverrideId() || rootDocId
       settingsUpToDate =
         rootDocOverride === dataFromCache.rootDocId &&
-        dataFromCache.options.imageName === imageName &&
-        dataFromCache.options.compiler === compilerName &&
         dataFromCache.options.draft === draft &&
         // Allow stopOnFirstError to be enabled in the compile from cache and disabled locally.
         // Compiles that passed with stopOnFirstError=true will also pass with stopOnFirstError=false. The inverse does not hold, and we need to recompile.

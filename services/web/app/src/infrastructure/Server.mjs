@@ -6,7 +6,7 @@ import csp, { removeCSPHeaders } from './CSP.mjs'
 import Router from '../router.mjs'
 import helmet from 'helmet'
 import UserSessionsRedis from '../Features/User/UserSessionsRedis.mjs'
-import Csrf from './Csrf.mjs'
+import Csrf, { Csrf as CsrfClass } from './Csrf.mjs'
 import HttpPermissionsPolicyMiddleware from './HttpPermissionsPolicy.mjs'
 import SessionAutostartMiddleware from './SessionAutostartMiddleware.mjs'
 import AnalyticsManager from '../Features/Analytics/AnalyticsManager.mjs'
@@ -232,7 +232,7 @@ Modules.hooks.fire('passportSetup', passport, err => {
 
 await Modules.applyNonCsrfRouter(webRouter, privateApiRouter, publicApiRouter)
 
-webRouter.csrf = new Csrf()
+webRouter.csrf = new CsrfClass()
 webRouter.use(webRouter.csrf.middleware)
 webRouter.use(translations.i18nMiddleware)
 webRouter.use(translations.setLangBasedOnDomainMiddleware)

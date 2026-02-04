@@ -1,8 +1,8 @@
-const logger = require('@overleaf/logger')
-const Errors = require('./Errors')
-const RequestParser = require('./RequestParser')
-const Metrics = require('@overleaf/metrics')
-const Settings = require('@overleaf/settings')
+import logger from '@overleaf/logger'
+import Errors from './Errors.js'
+import RequestParser from './RequestParser.js'
+import Metrics from '@overleaf/metrics'
+import Settings from '@overleaf/settings'
 
 // The lock timeout should be higher than the maximum end-to-end compile time.
 // Here, we use the maximum compile timeout plus 2 minutes.
@@ -63,4 +63,4 @@ class Lock {
   }
 }
 
-module.exports = { acquire }
+export default { acquire }

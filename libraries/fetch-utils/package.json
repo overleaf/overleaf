@@ -4,11 +4,9 @@
   "description": "utilities for node-fetch",
   "main": "index.js",
   "scripts": {
-    "test": "npm run lint && npm run format && npm run types:check && npm run test:unit",
+    "test": "npm run lint && npm run types:check && npm run test:unit",
     "lint": "eslint --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 --format unix .",
     "lint:fix": "eslint --fix --ext .cjs,.js,.jsx,.mjs,.ts .",
-    "format": "prettier --list-different $PWD/'**/*.{js,cjs,ts}'",
-    "format:fix": "prettier --write $PWD/'**/*.{js,cjs,ts}'",
     "test:ci": "npm run test:unit",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
     "types:check": "tsc --noEmit"
@@ -17,10 +15,10 @@
   "license": "AGPL-3.0-only",
   "devDependencies": {
     "@types/node-fetch": "^2.6.13",
-    "body-parser": "^1.20.3",
+    "body-parser": "1.20.4",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
-    "express": "^4.21.2",
+    "express": "4.22.1",
     "mocha": "^11.1.0",
     "mocha-junit-reporter": "^2.2.1",
     "mocha-multi-reporters": "^1.5.1",

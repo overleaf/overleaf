@@ -12,6 +12,7 @@ services:
       - .:/overleaf/services/clsi
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
+      - ../../tsconfig.backend.json:/overleaf/tsconfig.backend.json
     working_dir: /overleaf/services/clsi
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
@@ -33,13 +34,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /overleaf/services/clsi
     environment:
-      ELASTIC_SEARCH_DSN: es:9200
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      ALLOWED_COMPILE_GROUPS: "clsi-perf simple-latex-file"
       ENABLE_PDF_CACHING: "true"
       PDF_CACHING_ENABLE_WORKER_POOL: "true"
       ALLOWED_IMAGES: quay.io/sharelatex/texlive-full:2025.1
@@ -50,4 +51,3 @@ services:
       SANDBOXED_COMPILES_HOST_DIR_COMPILES: $PWD/compiles
       SANDBOXED_COMPILES_HOST_DIR_OUTPUT: $PWD/output
     command: npm run --silent test:acceptance
-

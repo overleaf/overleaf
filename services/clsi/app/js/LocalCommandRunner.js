@@ -11,15 +11,15 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import { spawn } from 'node:child_process'
+import { promisify } from 'node:util'
+import _ from 'lodash'
+import logger from '@overleaf/logger'
 let CommandRunner
-const { spawn } = require('node:child_process')
-const { promisify } = require('node:util')
-const _ = require('lodash')
-const logger = require('@overleaf/logger')
 
 logger.debug('using standard command runner')
 
-module.exports = CommandRunner = {
+export default CommandRunner = {
   run(
     projectId,
     command,
@@ -106,7 +106,7 @@ module.exports = CommandRunner = {
   },
 }
 
-module.exports.promises = {
+CommandRunner.promises = {
   run: promisify(CommandRunner.run),
   kill: promisify(CommandRunner.kill),
 }

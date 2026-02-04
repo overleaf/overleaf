@@ -1,7 +1,7 @@
 import { WidgetType } from '@codemirror/view'
 
 export class IconBraceWidget extends WidgetType {
-  constructor(private content?: string) {
+  constructor(private content = '') {
     super()
   }
 
@@ -9,9 +9,7 @@ export class IconBraceWidget extends WidgetType {
     const element = document.createElement('span')
     element.classList.add('ol-cm-brace')
     element.classList.add('ol-cm-icon-brace')
-    if (this.content !== undefined) {
-      element.textContent = this.content
-    }
+    element.textContent = this.content
     return element
   }
 
@@ -24,7 +22,7 @@ export class IconBraceWidget extends WidgetType {
   }
 
   updateDOM(element: HTMLElement): boolean {
-    element.textContent = this.content ?? ''
+    element.textContent = this.content
     return true
   }
 

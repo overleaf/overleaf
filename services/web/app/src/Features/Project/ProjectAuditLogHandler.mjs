@@ -15,7 +15,10 @@ const MANAGED_GROUP_PROJECT_EVENTS = [
   'project-untrashed',
   'project-restored',
   'project-cloned',
+  'project-history-version-restored',
+  'project-history-version-downloaded',
   'transfer-ownership',
+  'project-downloaded',
 ]
 
 async function findManagedSubscriptions(entry) {

@@ -2,7 +2,7 @@ import { useLayoutContext } from '@/shared/context/layout-context'
 import { useRangesContext } from '../context/ranges-context'
 import { useThreadsContext } from '@/features/review-panel/context/threads-context'
 import { hasActiveRange } from '@/features/review-panel/utils/has-active-range'
-import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
+import { useRailContext } from '@/features/ide-react/context/rail-context'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import { useCallback } from 'react'
 

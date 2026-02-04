@@ -1,5 +1,5 @@
 import DictionaryModal from '@/features/dictionary/components/dictionary-modal'
-import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
+import { useRailContext } from '@/features/ide-react/context/rail-context'
 import { useCallback } from 'react'
 
 export default function DictionarySettingsModal({ show }: { show: boolean }) {

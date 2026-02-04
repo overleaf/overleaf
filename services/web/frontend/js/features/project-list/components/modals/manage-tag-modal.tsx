@@ -144,9 +144,9 @@ export function ManageTagModal({
           onClick={() => runUpdateTag(tag._id)}
           disabled={Boolean(
             isUpdateLoading ||
-              isDeleteLoading ||
-              !newTagName?.length ||
-              (newTagName === tag?.name && selectedColor === getTagColor(tag))
+            isDeleteLoading ||
+            !newTagName?.length ||
+            (newTagName === tag?.name && selectedColor === getTagColor(tag))
           )}
           isLoading={isUpdateLoading}
           loadingLabel={t('saving')}

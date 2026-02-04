@@ -23,7 +23,7 @@ import { pipeline } from 'node:stream/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
-import projectKey from '../lib/project_key.js'
+import projectKey from '@overleaf/object-persistor/src/ProjectKey.js'
 import { createGunzip } from 'node:zlib'
 import { text } from 'node:stream/consumers'
 

@@ -22,10 +22,10 @@
     "bucket": "overleaf-test-zips"
   },
   "backupStore": {
-    "chunksBucket":"overleaf-test-history-chunks",
-    "deksBucket":"overleaf-test-history-deks",
-    "globalBlobsBucket":"overleaf-test-history-global-blobs",
-    "projectBlobsBucket":"overleaf-test-history-project-blobs"
+    "chunksBucket": "overleaf-test-history-chunks",
+    "deksBucket": "overleaf-test-history-deks",
+    "globalBlobsBucket": "overleaf-test-history-global-blobs",
+    "projectBlobsBucket": "overleaf-test-history-project-blobs"
   },
   "backupPersistor": {
     "keyEncryptionKeys": "[{\"key\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\",\"salt\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\"}]",

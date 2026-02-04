@@ -4,7 +4,7 @@ import { Project } from '../../../../../../../../types/project/dashboard/api'
 import * as eventTracking from '../../../../../../infrastructure/event-tracking'
 import { useLocation } from '../../../../../../shared/hooks/use-location'
 import useAbortController from '../../../../../../shared/hooks/use-abort-controller'
-import { postJSON } from '../../../../../../infrastructure/fetch-json'
+import { getJSON, postJSON } from '../../../../../../infrastructure/fetch-json'
 import { isSmallDevice } from '../../../../../../infrastructure/event-tracking'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import OLButton from '@/shared/components/ol/ol-button'
@@ -16,6 +16,10 @@ import {
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
 import OLIconButton from '@/shared/components/ol/ol-icon-button'
+import getMeta from '@/utils/meta'
+import { v4 as uuid } from 'uuid'
+
+const FAKE_EDITOR_ID = uuid()
 
 type CompileAndDownloadProjectPDFButtonProps = {
   project: Project
@@ -49,43 +53,70 @@ function CompileAndDownloadProjectPDFButton({
           isSmallDevice,
         })
 
-        postJSON(`/project/${project.id}/compile`, {
-          body: {
-            check: 'silent',
-            draft: false,
-            incrementalCompilesEnabled: true,
-          },
-          signal,
-        })
-          .catch(() => ({ status: 'error' }))
-          .then(data => {
-            setPendingCompile(false)
-            if (data.status === 'success') {
+        const { isOverleaf } = getMeta('ol-ExposedSettings')
+        ;(async () => {
+          if (isOverleaf) {
+            try {
+              const data = await getJSON(
+                `/project/${project.id}/output/cached/output.overleaf.json`,
+                { signal }
+              )
+              if (data.options.draft) throw new Error('options changed')
+
+              setPendingCompile(false)
               const outputFile = data.outputFiles
                 .filter((file: { path: string }) => file.path === 'output.pdf')
                 .pop()
-
-              const params = new URLSearchParams({
-                compileGroup: data.compileGroup,
-                popupDownload: 'true',
-              })
-              if (data.clsiServerId) {
-                params.set('clsiserverid', data.clsiServerId)
-              }
-              // Note: Triggering concurrent downloads does not work.
-              // Note: This is affecting the download of .zip files as well.
-              // When creating a dynamic `a` element with `download` attribute,
-              //  another "actual" UI click is needed to trigger downloads.
-              // Forwarding the click `event` to the dynamic `a` element does
-              //  not work either.
-              location.assign(
-                `/download/project/${project.id}/build/${outputFile.build}/output/output.pdf?${params}`
-              )
+              location.assign(outputFile.downloadURL)
               onDone?.(e)
-            } else {
-              setShowErrorModal(true)
+              return
+            } catch {
+              // fall back to compile
             }
+          }
+
+          let data
+          try {
+            data = await postJSON(`/project/${project.id}/compile`, {
+              body: {
+                check: 'silent',
+                draft: false,
+                incrementalCompilesEnabled: true,
+                // Add a fake editorId for enabling clsi-cache.
+                editorId: FAKE_EDITOR_ID,
+              },
+              signal,
+            })
+          } catch {
+            data = { status: 'error' }
+          }
+          setPendingCompile(false)
+          if (data.status !== 'success') {
+            setShowErrorModal(true)
+            return
+          }
+          const outputFile = data.outputFiles
+            .filter((file: { path: string }) => file.path === 'output.pdf')
+            .pop()
+
+          const params = new URLSearchParams({
+            compileGroup: data.compileGroup,
+            popupDownload: 'true',
           })
+          if (data.clsiServerId) {
+            params.set('clsiserverid', data.clsiServerId)
+          }
+          // Note: Triggering concurrent downloads does not work.
+          // Note: This is affecting the download of .zip files as well.
+          // When creating a dynamic `a` element with `download` attribute,
+          //  another "actual" UI click is needed to trigger downloads.
+          // Forwarding the click `event` to the dynamic `a` element does
+          //  not work either.
+          location.assign(
+            `/download/project/${project.id}/build/${outputFile.build}/output/output.pdf?${params}`
+          )
+          onDone?.(e)
+        })()
         return true
       })
     },

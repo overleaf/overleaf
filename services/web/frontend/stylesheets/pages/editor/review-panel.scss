@@ -16,6 +16,7 @@ $rp-type-blue: #6b7797;
   --review-panel-empty-state-bg-color: var(--bg-light-primary);
   --review-panel-button-hover-bg-color: var(--bg-light-tertiary);
   --review-panel-border-color: var(--border-divider);
+  --review-panel-header-height: 36px;
   --review-panel-width: 230px;
   --review-panel-width-mini: 24px;
   --review-panel-color-scheme: light;
@@ -95,6 +96,7 @@ $rp-type-blue: #6b7797;
   box-sizing: content-box;
   width: var(--review-panel-width);
   min-height: var(--review-panel-height);
+  backface-visibility: hidden; // force compositing layer
 
   .dropdown-menu {
     z-index: 1;
@@ -253,7 +255,6 @@ del.review-panel-content-highlight {
   justify-content: center;
   border-bottom: 1px solid var(--review-panel-border-color);
   background-color: var(--review-panel-header-bg-color);
-  text-align: center;
   z-index: 4;
 }
 

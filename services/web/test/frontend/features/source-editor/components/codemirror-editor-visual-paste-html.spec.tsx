@@ -813,7 +813,7 @@ test test test</p>
   it('treats a pasted image as a figure even if there is HTML', function () {
     mountEditor()
 
-    cy.fixture<Uint8Array>('images/gradient.png').then(image => {
+    cy.fixture<ArrayBuffer>('images/gradient.png').then(image => {
       const file = new File([image], 'gradient.png', { type: 'image/png' })
       const html = `<meta charset="utf-8"><img src="https://example.com/gradient.png" alt="gradient">`
 
@@ -830,7 +830,7 @@ test test test</p>
   it('does not treat a pasted image as a figure if there is Office HTML', function () {
     mountEditor()
 
-    cy.fixture<Uint8Array>('images/gradient.png').then(image => {
+    cy.fixture<ArrayBuffer>('images/gradient.png').then(image => {
       const file = new File([image], 'gradient.png', { type: 'image/png' })
       const html = `<meta charset="utf-8"><meta name="ProgId" content="MS.Word"><img src="https://example.com/gradient.png" alt="gradient">`
 

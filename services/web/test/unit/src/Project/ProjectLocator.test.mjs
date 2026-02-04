@@ -1,6 +1,7 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
+
 const modulePath = '../../../../app/src/Features/Project/ProjectLocator'
 
 vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
@@ -14,6 +15,13 @@ const doc2 = { name: 'docname.txt', _id: 'dsad2ddddd' }
 const file1 = { name: 'file1', _id: 'dsa9lkdsad' }
 const subSubFile = { name: 'subSubFile', _id: 'd1d2dk' }
 const subSubDoc = { name: 'subdoc.txt', _id: '321dmdwi' }
+const firstSubFolder = {
+  name: 'firstSubFolder',
+  _id: 'rweq43',
+  docs: [],
+  fileRefs: [],
+  folders: [],
+}
 const secondSubFolder = {
   name: 'secondSubFolder',
   _id: 'dsa3e23',
@@ -28,7 +36,11 @@ const subFolder = {
   docs: [],
   fileRefs: [],
 }
-const subFolder1 = { name: 'subFolder1', _id: '123asdjoij' }
+const subFolder1 = {
+  name: 'subFolder1',
+  _id: '123asdjoij',
+  folders: [firstSubFolder],
+}
 
 const rootFolder = {
   _id: '123sdskd',
@@ -43,7 +55,9 @@ project.rootDoc_id = rootDoc._id
 describe('ProjectLocator', function () {
   beforeEach(async function (ctx) {
     ctx.ProjectGetter = {
-      getProject: sinon.stub().callsArgWith(2, null, project),
+      promises: {
+        getProject: sinon.stub().resolves(project),
+      },
     }
     ctx.ProjectHelper = {
       isArchived: sinon.stub(),
@@ -481,7 +495,11 @@ describe('ProjectLocator', function () {
 
     describe('with a null project', function () {
       beforeEach(function (ctx) {
-        ctx.ProjectGetter = { getProject: sinon.stub().callsArg(2) }
+        ctx.ProjectGetter = {
+          promises: {
+            getProject: sinon.stub().resolves(null),
+          },
+        }
       })
 
       it('should not crash with a null', async function (ctx) {
@@ -502,7 +520,7 @@ describe('ProjectLocator', function () {
           project_id: project._id,
           path,
         })
-        ctx.ProjectGetter.getProject
+        ctx.ProjectGetter.promises.getProject
           .calledWith(project._id, { rootFolder: true, rootDoc_id: true })
           .should.equal(true)
         element.should.deep.equal(doc1)

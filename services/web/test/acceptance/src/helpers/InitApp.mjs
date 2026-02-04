@@ -10,6 +10,7 @@ import { injectRouteAfter } from './injectRoute.mjs'
 import SplitTestHandler from '../../../../app/src/Features/SplitTests/SplitTestHandler.mjs'
 import SplitTestSessionHandler from '../../../../app/src/Features/SplitTests/SplitTestSessionHandler.mjs'
 import Modules from '../../../../app/src/infrastructure/Modules.mjs'
+import testLogRecorder from '@overleaf/logger/test-log-recorder.js'
 
 const app = Server.app
 
@@ -114,3 +115,7 @@ after('stop main app', async function () {
   Settings.gracefulShutdownDelayInMs = 1
   await gracefulShutdown(server, 'tests')
 })
+
+if (process.env.CI === 'true') {
+  beforeEach('record error logs in junit', testLogRecorder)
+}

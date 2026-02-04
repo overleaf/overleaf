@@ -4,11 +4,12 @@
 
 services:
   test_unit:
-    image: node:22.18.0
+    image: node:24.13.0
     volumes:
       - .:/overleaf/services/real-time
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
+      - ../../tsconfig.backend.json:/overleaf/tsconfig.backend.json
     working_dir: /overleaf/services/real-time
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
@@ -20,6 +21,7 @@ services:
       HISTORY_REDIS_HOST: redis_test
       QUEUES_REDIS_HOST: redis_test
       ANALYTICS_QUEUES_REDIS_HOST: redis_test
+      ANALYTICS_QUEUES_BQ_SINK_REDIS_HOST: redis_test
     command: npm run --silent test:unit
     user: node
     depends_on:
@@ -27,18 +29,18 @@ services:
         condition: service_healthy
 
   test_acceptance:
-    image: node:22.18.0
+    image: node:24.13.0
     volumes:
       - .:/overleaf/services/real-time
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
     working_dir: /overleaf/services/real-time
     environment:
-      ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis_test
       HISTORY_REDIS_HOST: redis_test
       QUEUES_REDIS_HOST: redis_test
       ANALYTICS_QUEUES_REDIS_HOST: redis_test
+      ANALYTICS_QUEUES_BQ_SINK_REDIS_HOST: redis_test
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
@@ -57,4 +59,3 @@ services:
       test: ping=$$(redis-cli ping) && [ "$$ping" = 'PONG' ]
       interval: 1s
       retries: 20
-

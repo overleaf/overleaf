@@ -790,6 +790,7 @@ describe('<UserNotifications />', function () {
       })
       const resendButton = resendButtons[0]
       fireEvent.click(resendButton)
+      await fetchMock.callHistory.flush(true)
 
       await screen.findByRole('dialog')
 
@@ -1105,7 +1106,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupSsoSetupSuccess)
       const alert = screen.getByRole('alert')
       expect(alert.textContent).to.contain(
-        `Success! You’ve joined the ${groupName} group subscription. Your group has SSO enabled.`
+        `You’ve joined the ${groupName} group. SSO is enabled.`
       )
     })
   })

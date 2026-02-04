@@ -1,11 +1,15 @@
 extends ../layout-react
 
+block vars
+	- isWebsiteRedesign = true
+
 block entrypointVar
 	- entrypoint = 'pages/user/subscription/group-management/manually-collected-subscription'
 
 block append meta
 	meta(name='ol-user' data-type='json' content=user)
 	meta(name='ol-groupName' data-type='string' content=groupName)
+	meta(name='ol-errorType' data-type='string' content=errorType)
 
 block content
-	main#manually-collected-subscription-root.content.content-alt
+	main#manually-collected-subscription-root.content

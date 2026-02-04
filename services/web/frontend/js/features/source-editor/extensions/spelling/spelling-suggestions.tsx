@@ -1,9 +1,9 @@
 import {
   FC,
   MouseEventHandler,
-  useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import { SpellChecker, Word } from './spellchecker'
@@ -15,7 +15,13 @@ import { SpellingSuggestionsLanguage } from './spelling-suggestions-language'
 import { captureException } from '@/infrastructure/error-reporter'
 import { debugConsole } from '@/utils/debugging'
 import { SpellCheckLanguage } from '../../../../../../types/project-settings'
-import { Dropdown } from 'react-bootstrap'
+import {
+  Dropdown,
+  DropdownDivider,
+  DropdownItem,
+  DropdownMenu,
+} from '@/shared/components/dropdown/dropdown-menu'
+import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
 
 const ITEMS_TO_SHOW = 8
 
@@ -102,15 +108,30 @@ const B5SpellingSuggestions: FC<SpellingSuggestionsInnerProps> = ({
   handleLearnWord,
 }) => {
   const { t } = useTranslation()
+  const menuRef = useRef<any>(null)
+
+  // Handle closing the menu when it loses focus, e.g. click outside the editor
+  const onToggle = (show: boolean) => {
+    if (!show) {
+      handleClose()
+    }
+  }
+
+  useEffect(() => {
+    if (!waiting) {
+      menuRef.current?.focus()
+    }
+  }, [waiting])
+
   return (
-    <Dropdown>
-      <Dropdown.Menu
-        className={classnames('dropdown-menu', 'dropdown-menu-unpositioned', {
+    <Dropdown onToggle={onToggle} show={!waiting}>
+      <DropdownMenu
+        className={classnames('dropdown-menu-unpositioned', {
           hidden: waiting,
         })}
+        ref={menuRef}
         show={!waiting}
         tabIndex={0}
-        role="menu"
         onKeyDown={event => {
           switch (event.code) {
             case 'Escape':
@@ -122,58 +143,40 @@ const B5SpellingSuggestions: FC<SpellingSuggestionsInnerProps> = ({
         }}
       >
         {Array.isArray(suggestions) &&
-          suggestions.map((suggestion, index) => (
-            <BS5ListItem
+          suggestions.map(suggestion => (
+            <SpellingListItem
               key={suggestion}
               content={suggestion}
               handleClick={event => {
                 event.preventDefault()
                 handleCorrectWord(suggestion)
               }}
-              // eslint-disable-next-line jsx-a11y/no-autofocus
-              autoFocus={index === 0}
             />
           ))}
-        {suggestions?.length > 0 && <Dropdown.Divider />}
-        <BS5ListItem
+        {suggestions?.length > 0 && <DropdownDivider />}
+        <SpellingListItem
           content={t('add_to_dictionary')}
           handleClick={event => {
             event.preventDefault()
             handleLearnWord()
           }}
-          // eslint-disable-next-line jsx-a11y/no-autofocus
-          autoFocus={suggestions?.length === 0}
         />
 
-        <Dropdown.Divider />
+        <DropdownDivider />
         <SpellingSuggestionsLanguage
           language={language}
           handleClose={handleClose}
         />
-      </Dropdown.Menu>
+      </DropdownMenu>
     </Dropdown>
   )
 }
 
-const BS5ListItem: FC<{
+const SpellingListItem: FC<{
   content: string
   handleClick: MouseEventHandler<HTMLButtonElement>
-  autoFocus?: boolean
-}> = ({ content, handleClick, autoFocus }) => {
-  const handleListItem = useCallback(
-    (node: HTMLElement | null) => {
-      if (node && autoFocus) node.focus()
-    },
-    [autoFocus]
-  )
-  return (
-    <Dropdown.Item
-      role="menuitem"
-      className="btn-link text-left dropdown-menu-button"
-      onClick={handleClick}
-      ref={handleListItem}
-    >
-      {content}
-    </Dropdown.Item>
-  )
-}
+}> = ({ content, handleClick }) => (
+  <DropdownListItem>
+    <DropdownItem onClick={handleClick}>{content}</DropdownItem>
+  </DropdownListItem>
+)

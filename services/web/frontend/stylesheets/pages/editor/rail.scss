@@ -50,6 +50,7 @@ body {
   color: var(--ide-rail-color);
   margin-bottom: 0;
   font-weight: bold;
+  width: 100%;
 }
 
 .ide-rail-tab-button {
@@ -198,4 +199,21 @@ body {
   line-height: var(--line-height-02);
   background-color: black;
   border-radius: var(--border-radius-base);
+}
+
+.separated-rail-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  isolation: isolate;
+}
+
+.separated-rail-tab::before {
+  display: inline-block;
+  content: '';
+  border-top: 1px solid var(--border-divider-themed);
+  width: 100%;
+  transform: translateY(-12px);
 }

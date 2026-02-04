@@ -4,22 +4,19 @@ import { useCodeMirrorViewContext } from '@/features/source-editor/components/co
 export const useReviewPanelStyles = () => {
   const view = useCodeMirrorViewContext()
 
-  const [styles, setStyles] = useState<CSSProperties>({
-    '--review-panel-header-height': '36px',
-  } as CSSProperties)
+  const [styles, setStyles] = useState<CSSProperties>({} as CSSProperties)
 
   const updateScrollDomVariables = useCallback((element: HTMLDivElement) => {
-    const { top, bottom } = element.getBoundingClientRect()
+    const { top } = element.getBoundingClientRect()
 
     setStyles(value => ({
       ...value,
       '--review-panel-top': `${top}px`,
-      '--review-panel-bottom': `${bottom}px`,
     }))
   }, [])
 
   const updateContentDomVariables = useCallback((element: HTMLDivElement) => {
-    const { height } = element.getBoundingClientRect()
+    const height = element.clientHeight
 
     setStyles(value => ({
       ...value,

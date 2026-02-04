@@ -25,7 +25,8 @@ import ProjectEntityUpdateHandler from '../Project/ProjectEntityUpdateHandler.mj
 import RestoreManager from './RestoreManager.mjs'
 import { prepareZipAttachment } from '../../infrastructure/Response.mjs'
 import Features from '../../infrastructure/Features.mjs'
-import { z, zz, validateReq } from '../../infrastructure/Validation.mjs'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
+import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 
 // Number of seconds after which the browser should send a request to revalidate
 // blobs
@@ -56,7 +57,7 @@ const requestBlobSchema = z.object({
 })
 
 async function requestBlob(method, req, res) {
-  const { params } = validateReq(req, requestBlobSchema)
+  const { params } = parseReq(req, requestBlobSchema)
   const { project_id: projectId, hash } = params
 
   // Handle conditional GET request
@@ -192,6 +193,19 @@ async function restoreFileFromV2(req, res, next) {
     pathname
   )
 
+  ProjectAuditLogHandler.addEntryIfManagedInBackground(
+    projectId,
+    'project-history-version-restored',
+    userId,
+    req.ip,
+    {
+      version,
+      scope: 'file',
+      pathname,
+      restoredEntityId: entity._id,
+    }
+  )
+
   res.json({
     type: entity.type,
     id: entity._id,
@@ -211,6 +225,19 @@ async function revertFile(req, res, next) {
     {}
   )
 
+  ProjectAuditLogHandler.addEntryIfManagedInBackground(
+    projectId,
+    'project-history-version-restored',
+    userId,
+    req.ip,
+    {
+      version,
+      scope: 'file',
+      pathname,
+      restoredEntityId: entity._id,
+    }
+  )
+
   res.json({
     type: entity.type,
     id: entity._id,
@@ -226,6 +253,18 @@ async function revertProject(req, res, next) {
     userId,
     projectId,
     version
+  )
+
+  ProjectAuditLogHandler.addEntryIfManagedInBackground(
+    projectId,
+    'project-history-version-restored',
+    userId,
+    req.ip,
+    {
+      version,
+      scope: 'project',
+      restoredEntities: reverted,
+    }
   )
 
   res.json(reverted)
@@ -344,8 +383,17 @@ async function deleteLabel(req, res, next) {
   res.sendStatus(204)
 }
 
+const downloadZipOfVersionSchema = z.object({
+  params: z.object({
+    project_id: zz.objectId(),
+    version: z.coerce.number().int().min(0),
+  }),
+})
+
 async function downloadZipOfVersion(req, res, next) {
-  const { project_id: projectId, version } = req.params
+  const { params } = parseReq(req, downloadZipOfVersionSchema)
+  const { project_id: projectId, version } = params
+  const userId = SessionManager.getLoggedInUserId(req.session)
 
   const project = await ProjectDetailsHandler.promises.getDetails(projectId)
   const v1Id =
@@ -365,6 +413,17 @@ async function downloadZipOfVersion(req, res, next) {
     `${project.name} (Version ${version})`,
     req,
     res
+  )
+
+  ProjectAuditLogHandler.addEntryIfManagedInBackground(
+    projectId,
+    'project-history-version-downloaded',
+    userId,
+    req.ip,
+    {
+      version,
+      projectName: project.name,
+    }
   )
 }
 
@@ -484,7 +543,7 @@ const getLatestHistorySchema = z.object({
 })
 
 async function getLatestHistory(req, res, next) {
-  const { params } = validateReq(req, getLatestHistorySchema)
+  const { params } = parseReq(req, getLatestHistorySchema)
   const projectId = params.project_id
   const history = await HistoryManager.promises.getLatestHistory(projectId)
   res.json(history)
@@ -501,7 +560,7 @@ const getChangesSchema = z.object({
 })
 
 async function getChanges(req, res, next) {
-  const { params, query } = validateReq(req, getChangesSchema)
+  const { params, query } = parseReq(req, getChangesSchema)
   const projectId = params.project_id
   let since = query.since
   // TODO: Transition flag; remove after a while
@@ -540,7 +599,8 @@ function isPrematureClose(err) {
   return (
     err instanceof Error &&
     'code' in err &&
-    err.code === 'ERR_STREAM_PREMATURE_CLOSE'
+    (err.code === 'ERR_STREAM_PREMATURE_CLOSE' ||
+      err.code === 'ERR_STREAM_UNABLE_TO_PIPE')
   )
 }
 

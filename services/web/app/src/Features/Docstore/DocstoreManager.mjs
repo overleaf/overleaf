@@ -1,91 +1,108 @@
-import { promisify } from 'node:util'
-import { promisifyMultiResult, callbackify } from '@overleaf/promise-utils'
+// @ts-check
+import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
 import OError from '@overleaf/o-error'
 import logger from '@overleaf/logger'
 import settings from '@overleaf/settings'
 import Errors from '../Errors/Errors.js'
-import { fetchJson } from '@overleaf/fetch-utils'
-import Request from 'request'
-const request = Request.defaults({ jar: false })
+import {
+  fetchJson,
+  fetchNothing,
+  RequestFailedError,
+} from '@overleaf/fetch-utils'
+import path from 'node:path'
+
+/**
+ * @import { ObjectId } from 'mongodb'
+ */
 
 const TIMEOUT = 30 * 1000 // request timeout
 
-function deleteDoc(projectId, docId, name, deletedAt, callback) {
-  const url = `${settings.apis.docstore.url}/project/${projectId}/doc/${docId}`
+/**
+ *
+ * @param {string | ObjectId} projectId
+ * @param {string | ObjectId} docId
+ * @param {string} name
+ * @param {Date} deletedAt
+ * @return {Promise<void>}
+ */
+async function deleteDoc(projectId, docId, name, deletedAt) {
+  const url = new URL(settings.apis.docstore.url)
+  url.pathname = path.posix.join(
+    'project',
+    projectId.toString(),
+    'doc',
+    docId.toString()
+  )
   const docMetaData = { deleted: true, deletedAt, name }
-  const options = { url, json: docMetaData, timeout: TIMEOUT }
-  request.patch(options, (error, res) => {
-    if (error) {
-      return callback(error)
-    }
-    if (res.statusCode >= 200 && res.statusCode < 300) {
-      callback(null)
-    } else if (res.statusCode === 404) {
-      error = new Errors.NotFoundError({
-        message: 'tried to delete doc not in docstore',
-        info: {
-          projectId,
-          docId,
-        },
-      })
-      callback(error) // maybe suppress the error when delete doc which is not present?
-    } else {
-      error = new OError(
-        `docstore api responded with non-success code: ${res.statusCode}`,
+  const options = {
+    json: docMetaData,
+    signal: AbortSignal.timeout(TIMEOUT),
+    method: 'PATCH',
+  }
+  try {
+    await fetchNothing(url, options)
+  } catch (error) {
+    if (error instanceof RequestFailedError) {
+      if (error.response.status === 404) {
+        // maybe suppress the error when delete doc which is not present?
+        throw new Errors.NotFoundError({
+          message: 'tried to delete doc not in docstore',
+          info: {
+            projectId,
+            docId,
+          },
+        })
+      }
+      throw new OError(
+        `docstore api responded with non-success code: ${error.response.status}`,
         {
           projectId,
           docId,
         }
       )
-      callback(error)
     }
-  })
+    throw error
+  }
 }
 
 /**
  * @param {string} projectId
  */
-function getAllDocs(projectId, callback) {
-  const url = `${settings.apis.docstore.url}/project/${projectId}/doc`
-  request.get(
-    {
-      url,
-      timeout: TIMEOUT,
-      json: true,
-    },
-    (error, res, docs) => {
-      if (error) {
-        return callback(error)
-      }
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        callback(null, docs)
-      } else {
-        error = new OError(
-          `docstore api responded with non-success code: ${res.statusCode}`,
-          { projectId }
-        )
-        callback(error)
-      }
-    }
-  )
-}
-
-function getAllDeletedDocs(projectId, callback) {
-  const url = `${settings.apis.docstore.url}/project/${projectId}/doc-deleted`
-  request.get({ url, timeout: TIMEOUT, json: true }, (error, res, docs) => {
-    if (error) {
-      callback(OError.tag(error, 'could not get deleted docs from docstore'))
-    } else if (res.statusCode === 200) {
-      callback(null, docs)
-    } else {
-      callback(
-        new OError(
-          `docstore api responded with non-success code: ${res.statusCode}`,
-          { projectId }
-        )
+async function getAllDocs(projectId) {
+  const url = new URL(settings.apis.docstore.url)
+  url.pathname = path.posix.join('project', projectId.toString(), 'doc')
+  try {
+    return await fetchJson(url, { signal: AbortSignal.timeout(TIMEOUT) })
+  } catch (error) {
+    if (error instanceof RequestFailedError) {
+      throw new OError(
+        `docstore api responded with non-success code: ${error.response.status}`,
+        { projectId }
       )
     }
-  })
+    throw error
+  }
+}
+
+/**
+ *
+ * @param {string|ObjectId} projectId
+ * @return {Promise<*>}
+ */
+async function getAllDeletedDocs(projectId) {
+  const url = new URL(settings.apis.docstore.url)
+  url.pathname = path.posix.join('project', projectId.toString(), 'doc-deleted')
+  try {
+    return await fetchJson(url, { signal: AbortSignal.timeout(TIMEOUT) })
+  } catch (error) {
+    if (error instanceof RequestFailedError) {
+      throw new OError(
+        `docstore api responded with non-success code: ${error.response.status}`,
+        { projectId }
+      )
+    }
+    throw OError.tag(error, 'could not get deleted docs from docstore')
+  }
 }
 
 /**
@@ -106,231 +123,257 @@ async function getTrackedChangesUserIds(projectId) {
 
 /**
  * @param {string} projectId
- * @param {Callback} callback
  */
-function getAllRanges(projectId, callback) {
-  const url = `${settings.apis.docstore.url}/project/${projectId}/ranges`
-  request.get(
-    {
-      url,
-      timeout: TIMEOUT,
-      json: true,
-    },
-    (error, res, docs) => {
-      if (error) {
-        return callback(error)
-      }
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        callback(null, docs)
-      } else {
-        error = new OError(
-          `docstore api responded with non-success code: ${res.statusCode}`,
-          { projectId }
-        )
-        callback(error)
-      }
+async function getAllRanges(projectId) {
+  const url = new URL(settings.apis.docstore.url)
+  url.pathname = path.posix.join('project', projectId, 'ranges')
+  try {
+    return await fetchJson(url, { signal: AbortSignal.timeout(TIMEOUT) })
+  } catch (error) {
+    if (error instanceof RequestFailedError) {
+      throw new OError(
+        `docstore api responded with non-success code: ${error.response.status}`,
+        { projectId }
+      )
     }
-  )
+    throw error
+  }
 }
 
-function getDoc(projectId, docId, options, callback) {
-  if (options == null) {
-    options = {}
-  }
-  if (typeof options === 'function') {
-    callback = options
-    options = {}
-  }
-  const requestParams = { timeout: TIMEOUT, json: true }
+/**
+ *
+ * @param {string | ObjectId} projectId
+ * @param {string | ObjectId} docId
+ * @param {{ peek?: boolean, include_deleted?: boolean }} options
+ * @return {Promise<{lines: *, rev: *, version: *, ranges: *}>}
+ */
+async function getDoc(projectId, docId, options = {}) {
+  const url = new URL(settings.apis.docstore.url)
   if (options.peek) {
-    requestParams.url = `${settings.apis.docstore.url}/project/${projectId}/doc/${docId}/peek`
+    url.pathname = path.posix.join(
+      'project',
+      projectId.toString(),
+      'doc',
+      docId.toString(),
+      'peek'
+    )
   } else {
-    requestParams.url = `${settings.apis.docstore.url}/project/${projectId}/doc/${docId}`
+    url.pathname = path.posix.join(
+      'project',
+      projectId.toString(),
+      'doc',
+      docId.toString()
+    )
   }
   if (options.include_deleted) {
-    requestParams.qs = { include_deleted: 'true' }
+    url.searchParams.set('include_deleted', 'true')
   }
-  request.get(requestParams, (error, res, doc) => {
-    if (error) {
-      return callback(error)
+  try {
+    const doc = await fetchJson(url, { signal: AbortSignal.timeout(TIMEOUT) })
+    logger.debug(
+      { docId, projectId, version: doc.version, rev: doc.rev },
+      'got doc from docstore api'
+    )
+    return {
+      lines: doc.lines,
+      rev: doc.rev,
+      version: doc.version,
+      ranges: doc.ranges,
     }
-    if (res.statusCode >= 200 && res.statusCode < 300) {
-      logger.debug(
-        { docId, projectId, version: doc.version, rev: doc.rev },
-        'got doc from docstore api'
-      )
-      callback(null, doc.lines, doc.rev, doc.version, doc.ranges)
-    } else if (res.statusCode === 404) {
-      error = new Errors.NotFoundError({
-        message: 'doc not found in docstore',
-        info: {
-          projectId,
-          docId,
-        },
-      })
-      callback(error)
-    } else {
-      error = new OError(
-        `docstore api responded with non-success code: ${res.statusCode}`,
+  } catch (error) {
+    if (error instanceof RequestFailedError) {
+      if (error.response.status === 404) {
+        throw new Errors.NotFoundError({
+          message: 'doc not found in docstore',
+          info: {
+            projectId,
+            docId,
+          },
+        })
+      }
+      throw new OError(
+        `docstore api responded with non-success code: ${error.response.status}`,
         {
           projectId,
           docId,
         }
       )
-      callback(error)
     }
-  })
+    throw error
+  }
 }
 
-function isDocDeleted(projectId, docId, callback) {
-  const url = `${settings.apis.docstore.url}/project/${projectId}/doc/${docId}/deleted`
-  request.get({ url, timeout: TIMEOUT, json: true }, (err, res, body) => {
-    if (err) {
-      callback(err)
-    } else if (res.statusCode === 200) {
-      callback(null, body.deleted)
-    } else if (res.statusCode === 404) {
-      callback(
-        new Errors.NotFoundError({
+/**
+ *
+ * @param {string} projectId
+ * @param {string} docId
+ * @return {Promise<boolean>}
+ */
+async function isDocDeleted(projectId, docId) {
+  const url = new URL(settings.apis.docstore.url)
+  url.pathname = path.posix.join('project', projectId, 'doc', docId, 'deleted')
+  try {
+    const doc = await fetchJson(url, { signal: AbortSignal.timeout(TIMEOUT) })
+    return doc.deleted
+  } catch (error) {
+    if (error instanceof RequestFailedError) {
+      if (error.response.status === 404) {
+        throw new Errors.NotFoundError({
           message: 'doc does not exist in project',
           info: { projectId, docId },
         })
-      )
-    } else {
-      callback(
-        new OError(
-          `docstore api responded with non-success code: ${res.statusCode}`,
-          { projectId, docId }
-        )
+      }
+      throw new OError(
+        `docstore api responded with non-success code: ${error.response.status}`,
+        { projectId, docId }
       )
     }
-  })
+    throw error
+  }
 }
 
-function updateDoc(projectId, docId, lines, version, ranges, callback) {
-  const url = `${settings.apis.docstore.url}/project/${projectId}/doc/${docId}`
-  request.post(
-    {
-      url,
-      timeout: TIMEOUT,
+/**
+ *
+ * @param {string} projectId
+ * @param {string} docId
+ * @param {string[]} lines
+ * @param {number} version
+ * @param ranges
+ * @return {Promise<{modified: *, rev: *}>}
+ */
+async function updateDoc(projectId, docId, lines, version, ranges) {
+  const url = new URL(settings.apis.docstore.url)
+  url.pathname = path.posix.join('project', projectId, 'doc', docId)
+  try {
+    const result = await fetchJson(url, {
+      method: 'POST',
+      signal: AbortSignal.timeout(TIMEOUT),
       json: {
         lines,
         version,
         ranges,
       },
-    },
-    (error, res, result) => {
-      if (error) {
-        return callback(error)
-      }
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        logger.debug(
-          { projectId, docId },
-          'update doc in docstore url finished'
-        )
-        callback(null, result.modified, result.rev)
-      } else {
-        error = new OError(
-          `docstore api responded with non-success code: ${res.statusCode}`,
-          { projectId, docId }
-        )
-        callback(error)
-      }
+    })
+    logger.debug({ projectId, docId }, 'update doc in docstore url finished')
+    return { modified: result.modified, rev: result.rev }
+  } catch (error) {
+    if (error instanceof RequestFailedError) {
+      throw new OError(
+        `docstore api responded with non-success code: ${error.response.status}`,
+        { projectId, docId }
+      )
     }
-  )
+    throw error
+  }
 }
 
 /**
  * Asks docstore whether any doc in the project has ranges
  *
- * @param {string} proejctId
- * @param {Callback} callback
+ * @param {string} projectId
  */
-function projectHasRanges(projectId, callback) {
-  const url = `${settings.apis.docstore.url}/project/${projectId}/has-ranges`
-  request.get({ url, timeout: TIMEOUT, json: true }, (err, res, body) => {
-    if (err) {
-      return callback(err)
-    }
-    if (res.statusCode >= 200 && res.statusCode < 300) {
-      callback(null, body.projectHasRanges)
-    } else {
-      callback(
-        new OError(
-          `docstore api responded with non-success code: ${res.statusCode}`,
-          { projectId }
-        )
+async function projectHasRanges(projectId) {
+  const url = new URL(settings.apis.docstore.url)
+  url.pathname = path.posix.join('project', projectId, 'has-ranges')
+  try {
+    const body = await fetchJson(url, { signal: AbortSignal.timeout(TIMEOUT) })
+    return body.projectHasRanges
+  } catch (error) {
+    if (error instanceof RequestFailedError) {
+      throw new OError(
+        `docstore api responded with non-success code: ${error.response.status}`,
+        { projectId }
       )
     }
-  })
+    throw error
+  }
 }
 
-function archiveProject(projectId, callback) {
-  _operateOnProject(projectId, 'archive', callback)
+/**
+ *
+ * @param {string|ObjectId} projectId
+ * @return {Promise<void>}
+ */
+async function archiveProject(projectId) {
+  await _operateOnProject(projectId, 'archive')
+}
+/**
+ *
+ * @param {string|ObjectId} projectId
+ * @return {Promise<void>}
+ */
+async function unarchiveProject(projectId) {
+  await _operateOnProject(projectId, 'unarchive')
+}
+/**
+ *
+ * @param {string|ObjectId} projectId
+ * @return {Promise<void>}
+ */
+async function destroyProject(projectId) {
+  await _operateOnProject(projectId, 'destroy')
 }
 
-function unarchiveProject(projectId, callback) {
-  _operateOnProject(projectId, 'unarchive', callback)
-}
-
-function destroyProject(projectId, callback) {
-  _operateOnProject(projectId, 'destroy', callback)
-}
-
-function _operateOnProject(projectId, method, callback) {
-  const url = `${settings.apis.docstore.url}/project/${projectId}/${method}`
+/**
+ *
+ * @param {string|ObjectId} projectId
+ * @param {string} method
+ * @return {Promise<void>}
+ * @private
+ */
+async function _operateOnProject(projectId, method) {
+  const url = new URL(settings.apis.docstore.url)
+  url.pathname = path.posix.join('project', projectId.toString(), method)
   logger.debug({ projectId }, `calling ${method} for project in docstore`)
-  // use default timeout for archiving/unarchiving/destroying
-  request.post(url, (err, res, docs) => {
-    if (err) {
-      OError.tag(err, `error calling ${method} project in docstore`, {
-        projectId,
-      })
-      return callback(err)
-    }
-
-    if (res.statusCode >= 200 && res.statusCode < 300) {
-      callback()
-    } else {
+  try {
+    // use default timeout for archiving/unarchiving/destroying
+    await fetchNothing(url, {
+      method: 'POST',
+    })
+  } catch (err) {
+    if (err instanceof RequestFailedError) {
       const error = new Error(
-        `docstore api responded with non-success code: ${res.statusCode}`
+        `docstore api responded with non-success code: ${err.response.status}`
       )
       logger.warn(
         { err: error, projectId },
         `error calling ${method} project in docstore`
       )
-      callback(error)
+      throw error
     }
-  })
+    throw OError.tag(err, `error calling ${method} project in docstore`, {
+      projectId,
+    })
+  }
 }
 
 export default {
-  deleteDoc,
-  getAllDocs,
-  getAllDeletedDocs,
-  getAllRanges,
-  getDoc,
+  deleteDoc: callbackify(deleteDoc),
+  getAllDocs: callbackify(getAllDocs),
+  getAllDeletedDocs: callbackify(getAllDeletedDocs),
+  getAllRanges: callbackify(getAllRanges),
+  getDoc: callbackifyMultiResult(getDoc, ['lines', 'rev', 'version', 'ranges']),
   getCommentThreadIds: callbackify(getCommentThreadIds),
   getTrackedChangesUserIds: callbackify(getTrackedChangesUserIds),
-  isDocDeleted,
-  updateDoc,
-  projectHasRanges,
-  archiveProject,
-  unarchiveProject,
-  destroyProject,
+  isDocDeleted: callbackify(isDocDeleted),
+  updateDoc: callbackifyMultiResult(updateDoc, ['modified', 'rev']),
+  projectHasRanges: callbackify(projectHasRanges),
+  archiveProject: callbackify(archiveProject),
+  unarchiveProject: callbackify(unarchiveProject),
+  destroyProject: callbackify(destroyProject),
   promises: {
-    deleteDoc: promisify(deleteDoc),
-    getAllDocs: promisify(getAllDocs),
-    getAllDeletedDocs: promisify(getAllDeletedDocs),
-    getAllRanges: promisify(getAllRanges),
-    getDoc: promisifyMultiResult(getDoc, ['lines', 'rev', 'version', 'ranges']),
+    deleteDoc,
+    getAllDocs,
+    getAllDeletedDocs,
+    getAllRanges,
+    getDoc,
     getCommentThreadIds,
     getTrackedChangesUserIds,
-    isDocDeleted: promisify(isDocDeleted),
-    updateDoc: promisifyMultiResult(updateDoc, ['modified', 'rev']),
-    projectHasRanges: promisify(projectHasRanges),
-    archiveProject: promisify(archiveProject),
-    unarchiveProject: promisify(unarchiveProject),
-    destroyProject: promisify(destroyProject),
+    isDocDeleted,
+    updateDoc,
+    projectHasRanges,
+    archiveProject,
+    unarchiveProject,
+    destroyProject,
   },
 }

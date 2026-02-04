@@ -1,7 +1,7 @@
+import logger from '@overleaf/logger'
+import metrics from '@overleaf/metrics'
+import settings from '@overleaf/settings'
 let EventLogger
-const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
-const settings = require('@overleaf/settings')
 
 // keep track of message counters to detect duplicate and out of order events
 // messsage ids have the format "UNIQUEHOSTKEY-COUNTER"
@@ -13,7 +13,7 @@ let EVENT_LAST_CLEAN_TIMESTAMP = 0
 // counter for debug logs
 let COUNTER = 0
 
-module.exports = EventLogger = {
+export default EventLogger = {
   MAX_STALE_TIME_IN_MS: 3600 * 1000,
 
   debugEvent(channel, message) {

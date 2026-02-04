@@ -8,7 +8,7 @@ const fs = require('node:fs')
 const readline = require('node:readline')
 const { History } = require('overleaf-editor-core')
 const { knex, historyStore, persistor } = require('..')
-const projectKey = require('../lib/project_key')
+const projectKey = require('@overleaf/object-persistor/src/ProjectKey.js')
 
 const MAX_POSTGRES_INTEGER = 2147483647
 const DEFAULT_BATCH_SIZE = 1000

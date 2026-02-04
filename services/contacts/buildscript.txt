@@ -3,6 +3,6 @@ contacts
 --env-add=
 --env-pass-through=
 --esmock-loader=True
---node-version=22.18.0
+--node-version=24.13.0
 --pipeline-owner=B2C
 --public-repo=False

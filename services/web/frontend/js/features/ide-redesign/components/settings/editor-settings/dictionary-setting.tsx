@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useCallback } from 'react'
 import ButtonSetting from '../button-setting'
 import { useLayoutContext } from '@/shared/context/layout-context'
-import { useRailContext } from '@/features/ide-redesign/contexts/rail-context'
+import { useRailContext } from '@/features/ide-react/context/rail-context'
 
 export default function DictionarySetting() {
   const { t } = useTranslation()

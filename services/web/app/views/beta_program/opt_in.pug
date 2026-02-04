@@ -1,71 +1,72 @@
-extends ../layout-marketing
+extends ../layout-website-redesign
 include ../_mixins/back_to_btns
 
+block vars
+	- isWebsiteRedesign = true
+
 block content
-	main#main-content.content.content-alt
+	main#main-content.content
 		.container.beta-opt-in-wrapper
 			.row
 				.col-lg-10.offset-lg-1.col-xl-8.offset-xl-2
-					.card
-						.card-body
-							.page-header
-								h1
-									| #{translate("sharelatex_beta_program")}
-							.beta-opt-in
-								.container-fluid
-									.row
-										.col-lg-12
-											if user.betaProgram
-												p.text-center
-													strong #{translate("beta_program_already_participating")}.
-												p !{translate("thank_you_for_being_part_of_our_beta_program", {}, ['strong'])}.
-											else
-												p.text-center
-													strong #{translate("beta_program_not_participating")}.
-												p !{translate("beta_program_benefits", {}, ['strong'])}
+					.page-header
+						h1
+							| #{translate("sharelatex_beta_program")}
+					.beta-opt-in
+						.container-fluid
+							.row
+								.col-lg-12
+									if user.betaProgram
+										p.text-center
+											strong #{translate("beta_program_already_participating")}.
+										p !{translate("thank_you_for_being_part_of_our_beta_program", {}, ['strong'])}.
+									else
+										p.text-center
+											strong #{translate("beta_program_not_participating")}.
+										p !{translate("beta_program_benefits", {}, ['strong'])}
 
-											p #[strong How it works:]
-											ul
-												li
-													| #{translate("beta_program_badge_description")}&nbsp;
-													span.beta-badge.badge.bg-beta.bg-beta(
-														aria-label=translate('beta_feature_badge')
-													)
-														span.badge-content β
-												li !{translate("you_will_be_able_to_contact_us_any_time_to_share_your_feedback", {}, ['strong'])}.
-												li !{translate("we_may_also_contact_you_from_time_to_time_by_email_with_a_survey", {}, ['strong'])}.
-												li !{translate("you_can_opt_in_and_out_of_the_program_at_any_time_on_this_page", {}, ['strong'])}.
-											p !{translate("note_features_under_development", {}, ['strong'])}.
+									p #[strong How it works:]
+									ul
+										li
+											| #{translate("beta_program_badge_description")}&nbsp;
+											span.beta-badge.badge.bg-beta.bg-beta(
+												aria-label=translate('beta_feature_badge')
+											)
+												span.badge-content β
+										li !{translate("you_will_be_able_to_contact_us_any_time_to_share_your_feedback", {}, ['strong'])}.
+										li !{translate("we_may_also_contact_you_from_time_to_time_by_email_with_a_survey", {}, ['strong'])}.
+										li !{translate("you_can_opt_in_and_out_of_the_program_at_any_time_on_this_page", {}, ['strong'])}.
+									p !{translate("note_features_under_development", {}, ['strong'])}.
 
-									.row.text-center
-										.col-lg-12
-											if user.betaProgram
-												form(
-													data-ol-regular-form
-													method='post'
-													action='/beta/opt-out'
-													novalidate
+							.row.text-center
+								.col-lg-12
+									if user.betaProgram
+										form(
+											data-ol-regular-form
+											method='post'
+											action='/beta/opt-out'
+											novalidate
+										)
+											input(name='_csrf' type='hidden' value=csrfToken)
+											.form-group
+												a.btn.btn-primary.btn-lg(
+													href='https://forms.gle/CFEsmvZQTAwHCd3X9'
+													target='_blank'
+													rel='noopener noreferrer'
+												) #{translate("give_feedback")}
+											.form-group
+												button.btn.btn-secondary-info.btn-secondary.btn-sm(
+													type='submit'
+													data-ol-disabled-inflight
 												)
-													input(name='_csrf' type='hidden' value=csrfToken)
-													.form-group
-														a.btn.btn-primary.btn-lg(
-															href='https://forms.gle/CFEsmvZQTAwHCd3X9'
-															target='_blank'
-															rel='noopener noreferrer'
-														) #{translate("give_feedback")}
-													.form-group
-														button.btn.btn-secondary-info.btn-secondary.btn-sm(
-															type='submit'
-															data-ol-disabled-inflight
-														)
-															span(data-ol-inflight='idle') #{translate("beta_program_opt_out_action")}
-															span(hidden data-ol-inflight='pending') #{translate("processing")}…
-											else
-												form(data-ol-regular-form method='post' action='/beta/opt-in')
-													input(name='_csrf' type='hidden' value=csrfToken)
-													.form-group
-														button.btn.btn-primary(type='submit' data-ol-disabled-inflight)
-															span(data-ol-inflight='idle') #{translate("beta_program_opt_in_action")}
-															span(hidden data-ol-inflight='pending') #{translate("joining")}…
-								.page-separator
-								+back-to-btns
+													span(data-ol-inflight='idle') #{translate("beta_program_opt_out_action")}
+													span(hidden data-ol-inflight='pending') #{translate("processing")}…
+									else
+										form(data-ol-regular-form method='post' action='/beta/opt-in')
+											input(name='_csrf' type='hidden' value=csrfToken)
+											.form-group
+												button.btn.btn-primary(type='submit' data-ol-disabled-inflight)
+													span(data-ol-inflight='idle') #{translate("beta_program_opt_in_action")}
+													span(hidden data-ol-inflight='pending') #{translate("joining")}…
+					.page-separator
+					+back-to-btns

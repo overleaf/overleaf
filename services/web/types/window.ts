@@ -29,5 +29,9 @@ declare global {
     propensity?: (propensityId?: string) => void
     olLoadGA?: () => void
     grecaptcha?: ReCaptchaInstance
+    _linkedin_data_partner_ids?: string[]
+    lintrk?: ((a: string, b?: unknown) => void) & {
+      q: Array<[string, unknown?]>
+    }
   }
 }

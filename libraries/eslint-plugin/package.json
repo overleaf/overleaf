@@ -9,7 +9,7 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@typescript-eslint/parser": "^8.30.1"
+    "@typescript-eslint/parser": "^8.50.0"
   },
   "scripts": {
     "test": "node rules.test.js"

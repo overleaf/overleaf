@@ -1,19 +1,19 @@
-const Client = require('./helpers/Client')
-const fetch = require('node-fetch')
-const Stream = require('node:stream')
-const fs = require('node:fs')
-const fsPromises = require('node:fs/promises')
-const ChildProcess = require('node:child_process')
-const { promisify } = require('node:util')
-const ClsiApp = require('./helpers/ClsiApp')
-const Path = require('node:path')
+import Client from './helpers/Client.js'
+import fetch from 'node-fetch'
+import Stream from 'node:stream'
+import fs from 'node:fs'
+import fsPromises from 'node:fs/promises'
+import ChildProcess from 'node:child_process'
+import { promisify } from 'node:util'
+import ClsiApp from './helpers/ClsiApp.js'
+import Path from 'node:path'
+import process from 'node:process'
 const fixturePath = path => {
   if (path.slice(0, 3) === 'tmp') {
     return '/tmp/clsi_acceptance_tests' + path.slice(3)
   }
-  return Path.join(__dirname, '../fixtures/', path)
+  return Path.join(import.meta.dirname, '../fixtures/', path)
 }
-const process = require('node:process')
 const pipeline = promisify(Stream.pipeline)
 console.log(
   process.pid,

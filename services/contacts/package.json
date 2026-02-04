@@ -12,8 +12,6 @@
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "nodemon": "node --watch app.js",
     "lint": "eslint --max-warnings 0 --format unix .",
-    "format": "prettier --list-different $PWD/'**/{*.*js,*.ts}'",
-    "format:fix": "prettier --write $PWD/'**/{*.*js,*.ts}'",
     "lint:fix": "eslint --fix .",
     "types:check": "tsc --noEmit"
   },
@@ -23,11 +21,11 @@
     "@overleaf/mongo-utils": "*",
     "@overleaf/settings": "*",
     "async": "^3.2.5",
-    "body-parser": "^1.20.3",
+    "body-parser": "1.20.4",
     "bunyan": "^1.8.15",
-    "express": "^4.21.2",
+    "express": "4.22.1",
     "mongodb": "6.12.0",
-    "request": "^2.88.2",
+    "request": "2.88.2",
     "underscore": "~1.13.1"
   },
   "devDependencies": {

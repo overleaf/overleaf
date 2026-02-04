@@ -3,13 +3,13 @@
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
+import Path from 'node:path'
 let ContentTypeMapper
-const Path = require('node:path')
 
 // here we coerce html, css and js to text/plain,
 // otherwise choose correct mime type based on file extension,
 // falling back to octet-stream
-module.exports = ContentTypeMapper = {
+export default ContentTypeMapper = {
   map(path) {
     switch (Path.extname(path)) {
       case '.txt':

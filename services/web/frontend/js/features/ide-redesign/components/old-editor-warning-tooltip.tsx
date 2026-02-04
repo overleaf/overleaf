@@ -8,7 +8,7 @@ import { useSwitchEnableNewEditorState } from '../hooks/use-switch-enable-new-ed
 import { useEditorContext } from '@/shared/context/editor-context'
 import { canUseNewEditor } from '../utils/new-editor-utils'
 
-const TUTORIAL_KEY = 'old-editor-warning-tooltip'
+const TUTORIAL_KEY = 'old-editor-warning-tooltip-2'
 
 export default function OldEditorWarningTooltip({
   target,

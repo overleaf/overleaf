@@ -1,10 +1,12 @@
 clsi
 --data-dirs=cache,compiles,output
 --dependencies=
---env-add=ENABLE_PDF_CACHING="true",PDF_CACHING_ENABLE_WORKER_POOL="true",ALLOWED_IMAGES=quay.io/sharelatex/texlive-full:2025.1,TEXLIVE_IMAGE=quay.io/sharelatex/texlive-full:2025.1,TEX_LIVE_IMAGE_NAME_OVERRIDE=us-east1-docker.pkg.dev/overleaf-ops/ol-docker,TEXLIVE_IMAGE_USER="tex",SANDBOXED_COMPILES="true",SANDBOXED_COMPILES_HOST_DIR_COMPILES=$PWD/compiles,SANDBOXED_COMPILES_HOST_DIR_OUTPUT=$PWD/output
+--env-add=ALLOWED_COMPILE_GROUPS="clsi-perf simple-latex-file",ENABLE_PDF_CACHING="true",PDF_CACHING_ENABLE_WORKER_POOL="true",ALLOWED_IMAGES=quay.io/sharelatex/texlive-full:2025.1,TEXLIVE_IMAGE=quay.io/sharelatex/texlive-full:2025.1,TEX_LIVE_IMAGE_NAME_OVERRIDE=us-east1-docker.pkg.dev/overleaf-ops/ol-docker,TEXLIVE_IMAGE_USER="tex",SANDBOXED_COMPILES="true",SANDBOXED_COMPILES_HOST_DIR_COMPILES=$PWD/compiles,SANDBOXED_COMPILES_HOST_DIR_OUTPUT=$PWD/output
 --env-pass-through=
 --esmock-loader=False
---node-version=22.18.0
+--node-version=24.13.0
 --pipeline-owner=🚉 Platform
 --public-repo=True
+--test-unit-vitest=True
+--tsconfig-extra-includes=vitest.config.unit.cjs
 --use-large-ci-runner=True

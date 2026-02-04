@@ -144,7 +144,7 @@
   .project-list-title {
     @include heading-sm;
 
-    color: $content-secondary;
+    color: var(--content-secondary-themed);
     font-weight: bold;
     min-width: 0;
   }
@@ -335,7 +335,7 @@ ul.project-list-filters {
 
   @include media-breakpoint-down(md) {
     tr:not(:last-child) {
-      border-bottom: 1px solid $table-border-color;
+      border-bottom: 1px solid var(--border-divider-themed);
     }
 
     td {
@@ -354,7 +354,7 @@ ul.project-list-filters {
   .table-header-sort-btn {
     border: 0;
     text-align: left;
-    color: var(--content-secondary);
+    color: var(--content-secondary-themed);
     background-color: transparent;
     padding: 0;
     font-weight: bold;
@@ -365,7 +365,7 @@ ul.project-list-filters {
 
     &:hover,
     &:focus {
-      color: var(--content-secondary);
+      color: var(--content-secondary-themed);
       text-decoration: none;
     }
 
@@ -576,7 +576,7 @@ ul.project-list-filters {
 .current-plan {
   a.current-plan-label {
     text-decoration: none;
-    color: $content-secondary;
+    color: var(--content-secondary-themed);
   }
 
   .current-plan-label-icon {

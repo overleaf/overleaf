@@ -1,10 +1,12 @@
-const Path = require('node:path')
-const { promisify } = require('node:util')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const CommandRunner = require('./CommandRunner')
-const { addLatexMkMetrics } = require('./LatexMetrics')
-const fs = require('node:fs')
+import Path from 'node:path'
+import { promisify } from 'node:util'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import CommandRunner from './CommandRunner.js'
+import LatexMetrics from './LatexMetrics.js'
+import fs from 'node:fs'
+
+const { addLatexMkMetrics } = LatexMetrics
 
 const ProcessTable = {} // table of currently running jobs (pids or docker container names)
 
@@ -203,7 +205,7 @@ function _buildLatexCommand(mainFile, opts = {}) {
   return command
 }
 
-module.exports = {
+export default {
   runLatex,
   killLatex,
   promises: {

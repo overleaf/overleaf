@@ -10,18 +10,18 @@ services:
       mailtrap:
         condition: service_started
     environment:
-      OVERLEAF_SITE_URL: 'http://sharelatex'
+      OVERLEAF_SITE_URL: "http://sharelatex"
       OVERLEAF_APP_NAME: E2E test
       OVERLEAF_MONGO_URL: mongodb://mongo/sharelatex?directConnection=true
       OVERLEAF_REDIS_HOST: redis
       REDIS_HOST: redis
-      OVERLEAF_EMAIL_FROM_ADDRESS: 'welcome@example.com'
-      OVERLEAF_EMAIL_SMTP_HOST: 'mailtrap'
-      OVERLEAF_EMAIL_SMTP_PORT: '25'
-      OVERLEAF_EMAIL_SMTP_IGNORE_TLS: 'true'
-      ENABLED_LINKED_FILE_TYPES: 'project_file,project_output_file'
-      ENABLE_CONVERSIONS: 'true'
-      EMAIL_CONFIRMATION_DISABLED: 'true'
+      OVERLEAF_EMAIL_FROM_ADDRESS: "welcome@example.com"
+      OVERLEAF_EMAIL_SMTP_HOST: "mailtrap"
+      OVERLEAF_EMAIL_SMTP_PORT: "25"
+      OVERLEAF_EMAIL_SMTP_IGNORE_TLS: "true"
+      ENABLED_LINKED_FILE_TYPES: "project_file,project_output_file"
+      ENABLE_CONVERSIONS: "true"
+      EMAIL_CONFIRMATION_DISABLED: "true"
     healthcheck:
       test: curl --fail http://localhost:3000/status
       interval: 3s
@@ -31,11 +31,11 @@ services:
   mailtrap:
     image: mailtrap
     environment:
-      MAILTRAP_PASSWORD: 'password-for-mailtrap'
+      MAILTRAP_PASSWORD: "password-for-mailtrap"
 
   mongo:
     image: mongo:8.0.11
-    command: '--replSet overleaf'
+    command: "--replSet overleaf"
     volumes:
       - ../bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
       - ../bin/shared/mongodb-docker-entrypoint-wait.sh:/mongodb-docker-entrypoint-wait.sh
@@ -129,9 +129,9 @@ services:
     restart: always
     image: us-east1-docker.pkg.dev/overleaf-ops/ol-docker/saml-test
     environment:
-      SAML_TEST_SP_ENTITY_ID: 'sharelatex-test-saml'
-      SAML_BASE_URL_PATH: 'http://saml/simplesaml/'
-      SAML_TEST_SP_LOCATION: 'http://sharelatex/saml/callback'
+      SAML_TEST_SP_ENTITY_ID: "sharelatex-test-saml"
+      SAML_BASE_URL_PATH: "http://saml/simplesaml/"
+      SAML_TEST_SP_LOCATION: "http://sharelatex/saml/callback"
 
   ldap:
     restart: always
@@ -140,6 +140,6 @@ services:
     # REF: https://github.com/moby/moby/issues/8231#issuecomment-63877553
     # REF: https://github.com/moby/moby/issues/8231#issuecomment-63871343
     command:
-      - 'bash'
-      - '-c'
-      - 'ulimit -n 1024 && exec bash /run.sh'
+      - "bash"
+      - "-c"
+      - "ulimit -n 1024 && exec bash /run.sh"

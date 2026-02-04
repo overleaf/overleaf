@@ -1,48 +1,49 @@
-extends ../layout-marketing
+extends ../layout-website-redesign
+
+block vars
+	- isWebsiteRedesign = true
 
 block content
-	main#main-content.content.content-alt
+	main#main-content.content
 		.container
 			.row
 				.col-lg-6.offset-lg-3.col-xl-4.offset-xl-4
-					.card
-						.card-body
-							.page-header
-								if login_support_title
-									h1 !{login_support_title}
-								else
-									h1 #{translate("log_in")} 
-							form(name='loginForm' data-ol-async-form action='/login' method='POST')
-								input(name='_csrf' type='hidden' value=csrfToken)
-								+formMessagesNewStyle
-								+customFormMessageNewStyle('invalid-password-retry-or-reset', 'danger')
-									| !{translate('email_or_password_wrong_try_again_or_reset', {}, [{ name: 'a', attrs: { href: '/user/password/reset', 'aria-describedby': 'resetPasswordDescription' } }])}
-									span.visually-hidden(id='resetPasswordDescription')
-										| #{translate('reset_password_link')}
-								+customFormMessageNewStyle('password-compromised')
-									| !{translate('password_compromised_try_again_or_use_known_device_or_reset', {}, [{name: 'a', attrs: {href: 'https://haveibeenpwned.com/passwords', rel: 'noopener noreferrer', target: '_blank'}}, {name: 'a', attrs: {href: '/user/password/reset', target: '_blank'}}])}.
-								.form-group
-									label(for='email') #{translate("email")}
-									input#email.form-control(
-										name='email'
-										type='email'
-										required
-										autofocus='true'
-										autocomplete='username'
-									)
-								.form-group
-									label(for='password') #{translate("password")}
-									input#password.form-control(
-										name='password'
-										type='password'
-										autocomplete='current-password'
-										required
-									)
-								.actions
-									button.btn-primary.btn(type='submit' data-ol-disabled-inflight)
-										span(data-ol-inflight='idle') #{translate("login")}
-										span(hidden data-ol-inflight='pending') #{translate("logging_in")}…
-									a.float-end(href='/user/password/reset') #{translate("forgot_your_password")}?
-								if login_support_text
-									hr
-									p.text-center !{login_support_text}
+					.page-header
+						if login_support_title
+							h1 !{login_support_title}
+						else
+							h1 #{translate("log_in")} 
+					form(name='loginForm' data-ol-async-form action='/login' method='POST')
+						input(name='_csrf' type='hidden' value=csrfToken)
+						+formMessagesNewStyle
+						+customFormMessageNewStyle('invalid-password-retry-or-reset', 'danger')
+							| !{translate('email_or_password_wrong_try_again_or_reset', {}, [{ name: 'a', attrs: { href: '/user/password/reset', 'aria-describedby': 'resetPasswordDescription' } }])}
+							span.visually-hidden(id='resetPasswordDescription')
+								| #{translate('reset_password_link')}
+						+customFormMessageNewStyle('password-compromised')
+							| !{translate('password_compromised_try_again_or_use_known_device_or_reset', {}, [{name: 'a', attrs: {href: 'https://haveibeenpwned.com/passwords', rel: 'noopener noreferrer', target: '_blank'}}, {name: 'a', attrs: {href: '/user/password/reset', target: '_blank'}}])}.
+						.form-group
+							label(for='email') #{translate("email")}
+							input#email.form-control(
+								name='email'
+								type='email'
+								required
+								autofocus='true'
+								autocomplete='username'
+							)
+						.form-group
+							label(for='password') #{translate("password")}
+							input#password.form-control(
+								name='password'
+								type='password'
+								autocomplete='current-password'
+								required
+							)
+						.actions
+							button.btn-primary.btn(type='submit' data-ol-disabled-inflight)
+								span(data-ol-inflight='idle') #{translate("login")}
+								span(hidden data-ol-inflight='pending') #{translate("logging_in")}…
+							a.float-end(href='/user/password/reset') #{translate("forgot_your_password")}?
+						if login_support_text
+							hr
+							p.text-center !{login_support_text}

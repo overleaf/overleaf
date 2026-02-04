@@ -5,12 +5,13 @@ import logger from '@overleaf/logger'
 import Settings from '@overleaf/settings'
 import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
-import NewsletterManager from '../Newsletter/NewsletterManager.mjs'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
+import UserAnalyticsIdCache from '../Analytics/UserAnalyticsIdCache.mjs'
 import _ from 'lodash'
 import { expressify } from '@overleaf/promise-utils'
 import Features from '../../infrastructure/Features.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 
 async function settingsPage(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -116,6 +117,8 @@ async function settingsPage(req, res) {
     )
   }
 
+  await SplitTestHandler.promises.getAssignment(req, res, 'email-notifications')
+
   res.render('user/settings', {
     title: 'account_settings',
     user: {
@@ -194,6 +197,39 @@ async function reconfirmAccountPage(req, res) {
   }
 
   res.render('user/reconfirm', pageData)
+}
+
+async function emailPreferencesPage(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const user = await UserGetter.promises.getUser(userId, {
+    _id: 1,
+    email: 1,
+    first_name: 1,
+    last_name: 1,
+  })
+
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  let subscribed = false
+
+  const analyticsId = await UserAnalyticsIdCache.get(userId)
+  if (analyticsId) {
+    const [preferences] = await Modules.promises.hooks.fire(
+      'getSubscriptionPreferences',
+      analyticsId
+    )
+
+    subscribed = Boolean(preferences?.newsletter)
+  }
+
+  res.render('user/email-preferences', {
+    title: 'newsletter_info_title',
+    customerIoEnabled: true,
+    subscribed,
+    user,
+  })
 }
 
 const UserPagesController = {
@@ -276,28 +312,7 @@ const UserPagesController = {
     )
   },
 
-  emailPreferencesPage(req, res, next) {
-    const userId = SessionManager.getLoggedInUserId(req.session)
-    UserGetter.getUser(
-      userId,
-      { _id: 1, email: 1, first_name: 1, last_name: 1 },
-      (err, user) => {
-        if (err != null) {
-          return next(err)
-        }
-        NewsletterManager.subscribed(user, (err, subscribed) => {
-          if (err != null) {
-            OError.tag(err, 'error getting newsletter subscription status')
-            return next(err)
-          }
-          res.render('user/email-preferences', {
-            title: 'newsletter_info_title',
-            subscribed,
-          })
-        })
-      }
-    )
-  },
+  emailPreferencesPage: expressify(emailPreferencesPage),
 
   async compromisedPasswordPage(req, res) {
     res.render('user/compromised_password')

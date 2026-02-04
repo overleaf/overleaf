@@ -27,7 +27,7 @@ const persistBuffer = storage.persistBuffer
 const InvalidChangeError = storage.InvalidChangeError
 
 const render = require('./render')
-const { validateReq } = require('@overleaf/validation-tools')
+const { parseReq } = require('@overleaf/validation-tools')
 const schemas = require('../schema')
 const Rollout = require('../app/rollout')
 const redisBackend = require('../../storage/lib/chunk_store/redis')
@@ -54,7 +54,7 @@ function getParam(req, name, location = 'path') {
   }
 }
 async function importSnapshot(req, res) {
-  const { params, body } = validateReq(req, schemas.importSnapshot)
+  const { params, body } = parseReq(req, schemas.importSnapshot)
   const projectId = params.project_id
   const rawSnapshot = getParam({ body }, 'snapshot', 'body') ?? body
   let snapshot
@@ -82,7 +82,7 @@ async function importSnapshot(req, res) {
 }
 
 async function importChanges(req, res, next) {
-  const { params, query, body } = validateReq(req, schemas.importChanges)
+  const { params, query, body } = parseReq(req, schemas.importChanges)
   const projectId = params.project_id
   const rawChanges = getParam({ body }, 'changes', 'body') ?? body
   const endVersion = query.end_version
@@ -177,7 +177,7 @@ async function importChanges(req, res, next) {
 }
 
 async function flushChanges(req, res, next) {
-  const { params } = validateReq(req, schemas.flushChanges)
+  const { params } = parseReq(req, schemas.flushChanges)
   const projectId = params.project_id
   // Use the same limits importChanges, since these are passed to persistChanges
   const farFuture = new Date()
@@ -201,7 +201,7 @@ async function flushChanges(req, res, next) {
 }
 
 async function expireProject(req, res, next) {
-  const { params } = validateReq(req, schemas.expireProject)
+  const { params } = parseReq(req, schemas.expireProject)
   const projectId = params.project_id
   await redisBackend.expireProject(projectId)
   res.status(HTTPStatus.OK).end()

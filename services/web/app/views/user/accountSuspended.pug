@@ -1,15 +1,14 @@
-extends ../layout-marketing
+extends ../layout-website-redesign
 
 block vars
 	- var suppressNavbar = true
 	- var suppressFooter = true
 	- metadata.robotsNoindexNofollow = true
+	- isWebsiteRedesign = true
 
 block content
-	main#main-content.content.content-alt
+	main#main-content.content
 		.container-custom-sm.mx-auto
-			.card
-				.card-body
-					h3 #{translate('your_account_is_suspended')}
-					p #{translate('sorry_this_account_has_been_suspended')}
-					p !{translate('please_contact_us_if_you_think_this_is_in_error', {}, [{name: 'a', attrs: {href: `mailto:${settings.adminEmail}`}}])}
+			h3 #{translate('your_account_is_suspended')}
+			p #{translate('sorry_this_account_has_been_suspended')}
+			p !{translate('please_contact_us_if_you_think_this_is_in_error', {}, [{name: 'a', attrs: {href: `mailto:${settings.adminEmail}`}}])}

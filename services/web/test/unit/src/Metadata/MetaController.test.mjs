@@ -27,6 +27,11 @@ describe('MetaController', function () {
       default: ctx.MetaHandler,
     }))
 
+    vi.doMock(
+      '../../../../app/src/Features/Analytics/AnalyticsManager',
+      () => ({ default: {} })
+    )
+
     ctx.MetadataController = (await import(modulePath)).default
   })
 

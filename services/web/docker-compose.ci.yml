@@ -2,7 +2,6 @@ volumes:
   data:
 
 services:
-
   test_unit:
     build:
       context: ../..
@@ -21,7 +20,7 @@ services:
     environment:
       CI:
       MODULE_NAME:
-      MOCHA_ROOT_SUITE_NAME:
+      JUNIT_ROOT_SUITE_NAME:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
       NODE_ENV: test
@@ -44,12 +43,12 @@ services:
     environment:
       CI:
       MODULE_NAME:
-      MOCHA_ROOT_SUITE_NAME:
+      JUNIT_ROOT_SUITE_NAME:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
       REDIS_HOST: redis_test
     extra_hosts:
-      - 'www.overleaf.test:127.0.0.1'
+      - "www.overleaf.test:127.0.0.1"
     volumes:
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
       - ./data/reports:/overleaf/services/web/data/reports
@@ -79,7 +78,7 @@ services:
     environment:
       NODE_OPTIONS: "--unhandled-rejections=strict"
       CI:
-      MOCHA_ROOT_SUITE_NAME:
+      JUNIT_ROOT_SUITE_NAME:
 
   test_frontend_ct:
     image: cypress/included:13.13.2
@@ -115,7 +114,7 @@ services:
       - ./data/reports:/overleaf/services/web/data/reports
     environment:
       CI:
-      MOCHA_ROOT_SUITE_NAME:
+      JUNIT_ROOT_SUITE_NAME:
       NODE_OPTIONS: "--unhandled-rejections=strict"
 
   tar:
@@ -130,7 +129,7 @@ services:
 
   mongo:
     image: mongo:8.0.11
-    command: --replSet overleaf
+    command: --replSet overleaf --notablescan
     volumes:
       - ../../bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
       - ../../bin/shared/mongodb-docker-entrypoint-wait.sh:/mongodb-docker-entrypoint-wait.sh
@@ -151,15 +150,15 @@ services:
     # REF: https://github.com/moby/moby/issues/8231#issuecomment-63877553
     # REF: https://github.com/moby/moby/issues/8231#issuecomment-63871343
     command:
-      - 'bash'
-      - '-c'
-      - 'ulimit -n 1024 && exec bash /run.sh'
+      - "bash"
+      - "-c"
+      - "ulimit -n 1024 && exec bash /run.sh"
 
   saml:
-      image: us-east1-docker.pkg.dev/overleaf-ops/ol-docker/saml-test
-      logging:
-        driver: none
-      environment:
-          SAML_BASE_URL_PATH: 'http://saml/simplesaml/'
-          SAML_TEST_SP_ENTITY_ID: 'overleaf-test-saml'
-          SAML_TEST_SP_LOCATION: 'http://www.overleaf.test:23000/saml/callback'
+    image: us-east1-docker.pkg.dev/overleaf-ops/ol-docker/saml-test
+    logging:
+      driver: none
+    environment:
+      SAML_BASE_URL_PATH: "http://saml/simplesaml/"
+      SAML_TEST_SP_ENTITY_ID: "overleaf-test-saml"
+      SAML_TEST_SP_LOCATION: "http://www.overleaf.test:23000/saml/callback"

@@ -72,7 +72,7 @@ divert`'dnl
     <small>
       Last updated on syscmd(date)dnl
       for ifdef(`BRANCH_NAME',<a href="BRANCH_NAME/">BRANCH_NAME</a>,unknown branch)
-      (<a href="https://jenkins.ops-overleaf.com/job/Overleaf_Organization/job/Storybook/view/default/builds">build history</a>).
+      (<a href="https://jenkins.ops-overleaf.com/job/Storybook/view/default/builds">build history</a>).
     </small>
   </body>
 </html>

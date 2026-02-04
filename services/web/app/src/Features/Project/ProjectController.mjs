@@ -46,7 +46,7 @@ import TagsHandler from '../Tags/TagsHandler.mjs'
 import TutorialHandler from '../Tutorial/TutorialHandler.mjs'
 import UserUpdater from '../User/UserUpdater.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
-import { z, zz, validateReq } from '../../infrastructure/Validation.mjs'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import { isStandaloneAiAddOnPlanCode } from '../Subscription/AiHelper.mjs'
 import SubscriptionController from '../Subscription/SubscriptionController.mjs'
@@ -100,7 +100,7 @@ const _ProjectController = {
   },
 
   async updateProjectSettings(req, res) {
-    const { params, body } = validateReq(req, updateProjectSettingsSchema)
+    const { params, body } = parseReq(req, updateProjectSettingsSchema)
     const projectId = params.Project_id
 
     if (body.compiler != null) {
@@ -137,7 +137,7 @@ const _ProjectController = {
   },
 
   async updateProjectAdminSettings(req, res) {
-    const { params, body } = validateReq(req, updateProjectAdminSettingsSchema)
+    const { params, body } = parseReq(req, updateProjectAdminSettingsSchema)
     const projectId = params.Project_id
     const user = SessionManager.getSessionUser(req.session)
     if (!Features.hasFeature('link-sharing')) {
@@ -259,8 +259,8 @@ const _ProjectController = {
     res.setTimeout(5 * 60 * 1000) // allow extra time for the copy to complete
     metrics.inc('cloned-project')
     const projectId = req.params.Project_id
-    const { projectName, tags } = req.body
-    logger.debug({ projectId, projectName }, 'cloning project')
+    const { projectName, isDebugCopy, tags } = req.body
+    logger.debug({ projectId, projectName, isDebugCopy }, 'cloning project')
     if (!SessionManager.isUserLoggedIn(req.session)) {
       return res.json({ redir: '/register' })
     }
@@ -271,7 +271,8 @@ const _ProjectController = {
         currentUser,
         projectId,
         projectName,
-        tags
+        tags,
+        isDebugCopy
       )
       ProjectAuditLogHandler.addEntryIfManagedInBackground(
         projectId,
@@ -432,6 +433,7 @@ const _ProjectController = {
     }
 
     const splitTests = [
+      'bibtex-visual-editor',
       'compile-log-events',
       'visual-preview',
       'external-socket-heartbeat',
@@ -444,23 +446,24 @@ const _ProjectController = {
       'track-pdf-download',
       !anonymous && 'writefull-oauth-promotion',
       'hotjar',
-      'editor-redesign',
       'overleaf-assist-bundle',
       'word-count-client',
       'editor-popup-ux-survey',
       'editor-redesign-new-users',
       'writefull-frontend-migration',
       'chat-edit-delete',
-      'ai-workbench',
+      'ai-workbench-release',
       'compile-timeout-target-plans',
       'writefull-keywords-generator',
       'writefull-figure-generator',
       'wf-citations-checker',
       'wf-citations-checker-on-selection',
       'writefull-asymetric-queue-size-per-model',
-      'pdf-dark-mode',
-      'editor-redesign-opt-out',
+      'writefull-encourage-prompt-for-paraphrase',
+      'editor-context-menu',
       'email-notifications',
+      'wf-enable-freemium-super-complete',
+      'wf-enable-super-complete-promotion',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
@@ -805,6 +808,12 @@ const _ProjectController = {
         userIsMemberOfGroupSubscription
       )
 
+      AnalyticsManager.setUserPropertyForUserInBackground(
+        userId,
+        'customer-io-integration',
+        true
+      )
+
       const template =
         detachRole === 'detached'
           ? 'project/ide-react-detached'
@@ -842,15 +851,6 @@ const _ProjectController = {
         (!hasManuallyCollectedSubscription ||
           fullFeatureSet?.aiErrorAssistant) &&
         !assistantDisabled
-
-      const customerIoEnabled =
-        await SplitTestHandler.promises.hasUserBeenAssignedToVariant(
-          req,
-          userId,
-          'customer-io-trial-conversion',
-          'enabled',
-          true
-        )
 
       const addonPrices =
         isOverleafAssistBundleEnabled &&
@@ -969,7 +969,7 @@ const _ProjectController = {
         isSaas: Features.hasFeature('saas'),
         shouldLoadHotjar,
         isOverleafAssistBundleEnabled,
-        customerIoEnabled,
+        customerIoEnabled: true,
         addonPrices,
         compileSettings: {
           compileTimeout: ownerFeatures?.compileTimeout,

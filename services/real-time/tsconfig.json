@@ -8,6 +8,7 @@
     "config/**/*",
     "scripts/**/*",
     "test/**/*",
-    "types"
+    "types",
+    "vitest.config.unit.cjs"
   ]
 }

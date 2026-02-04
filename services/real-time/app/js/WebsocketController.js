@@ -1,19 +1,21 @@
-const OError = require('@overleaf/o-error')
-const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
-const WebApiManager = require('./WebApiManager')
-const AuthorizationManager = require('./AuthorizationManager')
-const DocumentUpdaterManager = require('./DocumentUpdaterManager')
-const ConnectedUsersManager = require('./ConnectedUsersManager')
-const WebsocketLoadBalancer = require('./WebsocketLoadBalancer')
-const RoomManager = require('./RoomManager')
+import OError from '@overleaf/o-error'
+import logger from '@overleaf/logger'
+import metrics from '@overleaf/metrics'
+import WebApiManager from './WebApiManager.js'
+import AuthorizationManager from './AuthorizationManager.js'
+import DocumentUpdaterManager from './DocumentUpdaterManager.js'
+import ConnectedUsersManager from './ConnectedUsersManager.js'
+import WebsocketLoadBalancer from './WebsocketLoadBalancer.js'
+import RoomManager from './RoomManager.js'
+import Errors from './Errors.js'
+
 const {
   CodedError,
   JoinLeaveEpochMismatchError,
   NotAuthorizedError,
   NotJoinedError,
   ClientRequestedMissingOpsError,
-} = require('./Errors')
+} = Errors
 
 const JOIN_DOC_CATCH_UP_LENGTH_BUCKETS = [
   0, 5, 10, 25, 50, 100, 150, 200, 250, 500, 1000,
@@ -35,7 +37,8 @@ const JOIN_DOC_CATCH_UP_AGE = [
 ].map(x => x * 1000)
 
 let WebsocketController
-module.exports = WebsocketController = {
+
+export default WebsocketController = {
   // If the protocol version changes when the client reconnects,
   // it will force a full refresh of the page. Useful for non-backwards
   // compatible protocol changes. Use only in extreme need.
@@ -284,13 +287,14 @@ module.exports = WebsocketController = {
             projectId,
             docId,
             fromVersion,
-            function (error, lines, version, ranges, ops, ttlInS, type) {
+            function (error, result) {
               if (error) {
                 if (error instanceof ClientRequestedMissingOpsError) {
                   emitJoinDocCatchUpMetrics('missing', error.info)
                 }
                 return callback(error)
               }
+              const { lines, version, ranges, ops, ttlInS, type } = result
               emitJoinDocCatchUpMetrics('success', { version, ttlInS })
               if (client.disconnected) {
                 metrics.inc('editor.join-doc.disconnected', 1, {

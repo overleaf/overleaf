@@ -35,34 +35,6 @@ describe('AuthenticationController', function () {
       referal_id: 1234,
       isAdmin: false,
     }
-    ctx.staffUser = {
-      ...ctx.user,
-      staffAccess: {
-        publisherMetrics: true,
-        publisherManagement: false,
-        institutionMetrics: true,
-        institutionManagement: false,
-        groupMetrics: true,
-        groupManagement: false,
-        adminMetrics: true,
-        splitTestMetrics: false,
-        splitTestManagement: true,
-      },
-    }
-    ctx.noStaffAccessUser = {
-      ...ctx.user,
-      staffAccess: {
-        publisherMetrics: false,
-        publisherManagement: false,
-        institutionMetrics: false,
-        institutionManagement: false,
-        groupMetrics: false,
-        groupManagement: false,
-        adminMetrics: false,
-        splitTestMetrics: false,
-        splitTestManagement: false,
-      },
-    }
     ctx.password = 'banana'
     ctx.req = new MockRequest(vi)
     ctx.res = new MockResponse(vi)
@@ -323,41 +295,6 @@ describe('AuthenticationController', function () {
 
         ctx.AuthenticationController.serializeUser(ctx.user, ctx.callback)
         expect(ctx.callback).to.have.been.calledWith(null, isAdminMatcher)
-      })
-    })
-
-    describe('when staffAccess fields are provided', function () {
-      it('only returns the fields set to true', function (ctx) {
-        const expectedStaffAccess = {
-          publisherMetrics: true,
-          institutionMetrics: true,
-          groupMetrics: true,
-          adminMetrics: true,
-          splitTestManagement: true,
-        }
-        const staffAccessMatcher = sinon.match(value => {
-          return (
-            Object.keys(value.staffAccess).length ===
-            Object.keys(expectedStaffAccess).length
-          )
-        })
-
-        ctx.AuthenticationController.serializeUser(ctx.staffUser, ctx.callback)
-        expect(ctx.callback).to.have.been.calledWith(null, staffAccessMatcher)
-      })
-    })
-
-    describe('when all staffAccess fields are false', function () {
-      it('no staffAccess attribute is set', function (ctx) {
-        const staffAccessMatcher = sinon.match(value => {
-          return !('staffAccess' in value)
-        })
-
-        ctx.AuthenticationController.serializeUser(
-          ctx.noStaffAccessUser,
-          ctx.callback
-        )
-        expect(ctx.callback).to.have.been.calledWith(null, staffAccessMatcher)
       })
     })
   })

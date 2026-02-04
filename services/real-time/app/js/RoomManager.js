@@ -1,7 +1,7 @@
-const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
-const { EventEmitter } = require('node:events')
-const OError = require('@overleaf/o-error')
+import logger from '@overleaf/logger'
+import metrics from '@overleaf/metrics'
+import { EventEmitter } from 'node:events'
+import OError from '@overleaf/o-error'
 
 const IdMap = new Map() // keep track of whether ids are from projects or docs
 const RoomEvents = new EventEmitter() // emits {project,doc}-active and {project,doc}-empty events
@@ -16,7 +16,7 @@ const RoomEvents = new EventEmitter() // emits {project,doc}-active and {project
 //
 // The pubsub side is handled by ChannelManager
 
-module.exports = {
+export default {
   joinProject(client, projectId, callback) {
     this.joinEntity(client, 'project', projectId, callback)
   },

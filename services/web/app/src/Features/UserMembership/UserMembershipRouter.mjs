@@ -58,7 +58,6 @@ export default {
       '/manage/groups/:id/managers',
       UserMembershipMiddleware.requireEntityAccess({
         entityName: 'groupManagers',
-        staffAccess: 'groupManagement',
         adminCapability: 'view-group-manager',
       }),
       UserMembershipController.manageGroupManagers
@@ -67,7 +66,6 @@ export default {
       '/manage/groups/:id/managers',
       UserMembershipMiddleware.requireEntityAccess({
         entityName: 'groupManagers',
-        staffAccess: 'groupManagement',
         adminCapability: 'modify-group-manager',
       }),
       UserMembershipController.add
@@ -76,7 +74,6 @@ export default {
       '/manage/groups/:id/managers/:userId',
       UserMembershipMiddleware.requireEntityAccess({
         entityName: 'groupManagers',
-        staffAccess: 'groupManagement',
         adminCapability: 'modify-group-manager',
       }),
       UserMembershipController.remove
@@ -85,17 +82,17 @@ export default {
     // institution members routes
     webRouter.get(
       '/manage/institutions/:id/managers',
-      UserMembershipMiddleware.requireInstitutionManagementAccess,
+      UserMembershipMiddleware.requireInstitutionManagerAccess,
       UserMembershipController.manageInstitutionManagers
     )
     webRouter.post(
       '/manage/institutions/:id/managers',
-      UserMembershipMiddleware.requireInstitutionManagementAccess,
+      UserMembershipMiddleware.requireInstitutionManagerManagement,
       UserMembershipController.add
     )
     webRouter.delete(
       '/manage/institutions/:id/managers/:userId',
-      UserMembershipMiddleware.requireInstitutionManagementAccess,
+      UserMembershipMiddleware.requireInstitutionManagerManagement,
       UserMembershipController.remove
     )
 

@@ -1122,6 +1122,24 @@ describe('SubscriptionController', function () {
         )
       ).to.be.true
     })
+
+    it('should handle MultiplePendingChangesError and return 422 with JSON response', async function (ctx) {
+      ctx.req.params.addOnCode = AI_ADD_ON_CODE
+      ctx.SubscriptionHandler.promises.purchaseAddon.rejects(
+        new SubscriptionErrors.MultiplePendingChangesError()
+      )
+
+      await ctx.SubscriptionController.purchaseAddon(ctx.req, ctx.res, ctx.next)
+
+      expect(ctx.res.status).toHaveBeenCalledWith(422)
+      expect(ctx.res.json).toHaveBeenCalledWith({
+        code: 'multiple_pending_changes',
+        message:
+          'Cannot complete purchase while there are multiple pending subscription changes. Please contact support.',
+      })
+      expect(ctx.FeaturesUpdater.promises.refreshFeatures).to.not.have.been
+        .called
+    })
   })
 
   describe('removeAddon', function () {
@@ -1172,6 +1190,21 @@ describe('SubscriptionController', function () {
         'Your subscription does not contain the requested add-on',
         { addon: AI_ADD_ON_CODE }
       )
+    })
+
+    it('should handle MultiplePendingChangesError and return 422 with JSON response', async function (ctx) {
+      ctx.SubscriptionHandler.promises.removeAddon.rejects(
+        new SubscriptionErrors.MultiplePendingChangesError()
+      )
+
+      await ctx.SubscriptionController.removeAddon(ctx.req, ctx.res, ctx.next)
+
+      expect(ctx.res.status).toHaveBeenCalledWith(422)
+      expect(ctx.res.json).toHaveBeenCalledWith({
+        code: 'multiple_pending_changes',
+        message:
+          'Cannot remove add-on while there are multiple pending subscription changes. Please contact support.',
+      })
     })
   })
 

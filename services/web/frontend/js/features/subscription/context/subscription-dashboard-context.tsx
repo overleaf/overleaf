@@ -129,17 +129,17 @@ export function SubscriptionDashboardProvider({
 
   const hasDisplayedSubscription = Boolean(
     institutionMemberships?.length > 0 ||
-      personalSubscription ||
-      memberGroupSubscriptions?.length > 0 ||
-      managedGroupSubscriptions?.length > 0 ||
-      managedInstitutions?.length > 0 ||
-      managedPublishers?.length > 0
+    personalSubscription ||
+    memberGroupSubscriptions?.length > 0 ||
+    managedGroupSubscriptions?.length > 0 ||
+    managedInstitutions?.length > 0 ||
+    managedPublishers?.length > 0
   )
 
   const hasValidActiveSubscription = Boolean(
     ['active', 'canceled'].includes(personalSubscription?.payment?.state) ||
-      institutionMemberships?.length > 0 ||
-      memberGroupSubscriptions?.length > 0
+    institutionMemberships?.length > 0 ||
+    memberGroupSubscriptions?.length > 0
   )
 
   const getFormattedRenewalDate = useCallback(() => {

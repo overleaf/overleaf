@@ -1,5 +1,5 @@
-const Client = require('./helpers/Client')
-const ClsiApp = require('./helpers/ClsiApp')
+import Client from './helpers/Client.js'
+import ClsiApp from './helpers/ClsiApp.js'
 
 describe('Deleting Old Files', function () {
   before(async function () {

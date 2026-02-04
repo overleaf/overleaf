@@ -1,7 +1,9 @@
-const Settings = require('@overleaf/settings')
-const { DataTooLargeToParseError } = require('./Errors')
+import Settings from '@overleaf/settings'
+import Errors from './Errors.js'
 
-module.exports = {
+const { DataTooLargeToParseError } = Errors
+
+export default {
   parse(data, callback) {
     if (data.length > Settings.maxUpdateSize) {
       return callback(new DataTooLargeToParseError(data))

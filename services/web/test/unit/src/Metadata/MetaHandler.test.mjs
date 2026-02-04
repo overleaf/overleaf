@@ -103,6 +103,7 @@ describe('MetaHandler', function () {
           baz: ctx.packageMapping.baz,
         },
         packageNames: ['foo', 'bar', 'baz'],
+        documentClass: null,
       })
 
       ctx.DocumentUpdaterHandler.promises.flushDocToMongo.should.be.calledWith(
@@ -161,16 +162,19 @@ describe('MetaHandler', function () {
           labels: ['aaa'],
           packages: {},
           packageNames: [],
+          documentClass: null,
         },
         id_two: {
           labels: [],
           packages: {},
           packageNames: [],
+          documentClass: null,
         },
         id_three: {
           labels: ['bbb', 'ccc'],
           packages: {},
           packageNames: [],
+          documentClass: null,
         },
         id_four: {
           labels: [],
@@ -185,6 +189,7 @@ describe('MetaHandler', function () {
             ],
           },
           packageNames: ['baz', 'amsmath'],
+          documentClass: null,
         },
         id_five: {
           labels: ['sec:intro'],
@@ -213,6 +218,7 @@ describe('MetaHandler', function () {
             ],
           },
           packageNames: ['foo', 'baz', 'hello'],
+          documentClass: null,
         },
       })
 

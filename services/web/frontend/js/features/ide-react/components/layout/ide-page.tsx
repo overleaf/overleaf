@@ -1,7 +1,4 @@
-import { lazy, Suspense } from 'react'
 import { Alerts } from '@/features/ide-react/components/alerts/alerts'
-import { MainLayout } from '@/features/ide-react/components/layout/main-layout'
-import EditorLeftMenu from '@/features/editor-left-menu/components/editor-left-menu'
 import { useLayoutEventTracking } from '@/features/ide-react/hooks/use-layout-event-tracking'
 import useSocketListeners from '@/features/ide-react/hooks/use-socket-listeners'
 import { useEditingSessionHeartbeat } from '@/features/ide-react/hooks/use-editing-session-heartbeat'
@@ -10,21 +7,13 @@ import { useHasLintingError } from '@/features/ide-react/hooks/use-has-linting-e
 import { Modals } from '@/features/ide-react/components/modals/modals'
 import { GlobalAlertsProvider } from '@/features/ide-react/context/global-alerts-context'
 import { GlobalToasts } from '../global-toasts'
-import {
-  canUseNewEditor,
-  useIsNewEditorEnabled,
-} from '@/features/ide-redesign/utils/new-editor-utils'
 import EditorSurvey from '../editor-survey'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useStatusFavicon } from '@/features/ide-react/hooks/use-status-favicon'
 import useThemedPage from '@/shared/hooks/use-themed-page'
 
-const MainLayoutNew = lazy(
-  () => import('@/features/ide-redesign/components/main-layout')
-)
-const SettingsModalNew = lazy(
-  () => import('@/features/ide-redesign/components/settings/settings-modal')
-)
+import MainLayout from '@/features/ide-react/components/layout/main-layout'
+import SettingsModalNew from '@/features/ide-redesign/components/settings/settings-modal'
 
 export default function IdePage() {
   useLayoutEventTracking() // sent event when the layout changes
@@ -35,26 +24,15 @@ export default function IdePage() {
   useStatusFavicon() // update the favicon based on the compile status
   useThemedPage() // set the page theme based on user settings
 
-  const newEditor = useIsNewEditorEnabled()
-  const canAccessNewEditor = canUseNewEditor()
   const editorSurveyFlag = useFeatureFlag('editor-popup-ux-survey')
-  const showEditorSurvey = editorSurveyFlag && !canAccessNewEditor
+  const showEditorSurvey = editorSurveyFlag
 
   return (
     <GlobalAlertsProvider>
       <Alerts />
       <Modals />
-      {newEditor ? (
-        <Suspense fallback={null}>
-          <SettingsModalNew />
-          <MainLayoutNew />
-        </Suspense>
-      ) : (
-        <>
-          <EditorLeftMenu />
-          <MainLayout />
-        </>
-      )}
+      <SettingsModalNew />
+      <MainLayout />
       <GlobalToasts />
       {showEditorSurvey && <EditorSurvey />}
     </GlobalAlertsProvider>

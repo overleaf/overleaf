@@ -266,6 +266,8 @@ class User {
 
       db.userAuditLogEntries
         .find({ userId: new ObjectId(this._id) })
+        // Explicitly sort in ascending chronological order
+        .sort({ timestamp: 1 })
         .toArray((error, auditLog) => {
           if (error) {
             return callback(error)
@@ -578,13 +580,7 @@ class User {
   }
 
   ensureAdminRole(role, callback) {
-    this.mongoUpdate({ $addToSet: { adminRoles: 'engineering' } }, callback)
-  }
-
-  ensureStaffAccess(flag, callback) {
-    const update = { $set: {} }
-    update.$set[`staffAccess.${flag}`] = true
-    this.mongoUpdate(update, callback)
+    this.mongoUpdate({ $addToSet: { adminRoles: role } }, callback)
   }
 
   upgradeSomeFeatures(callback) {

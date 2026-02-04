@@ -1,7 +1,7 @@
-const Path = require('node:path')
-const send = require('send')
-const Settings = require('@overleaf/settings')
-const OutputCacheManager = require('./OutputCacheManager')
+import Path from 'node:path'
+import send from 'send'
+import Settings from '@overleaf/settings'
+import OutputCacheManager from './OutputCacheManager.js'
 
 const ONE_DAY_S = 24 * 60 * 60
 const ONE_DAY_MS = ONE_DAY_S * 1000
@@ -21,4 +21,4 @@ function getPdfRange(req, res, next) {
   send(req, path).pipe(res)
 }
 
-module.exports = { getPdfRange }
+export default { getPdfRange }

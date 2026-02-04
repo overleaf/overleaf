@@ -410,6 +410,7 @@ describe('SubscriptionUpdater', function () {
   describe('updateSubscriptionFromRecurly', function () {
     afterEach(function (ctx) {
       ctx.subscription.member_ids = []
+      delete ctx.subscription.paymentProvider
     })
 
     it('should update the subscription with token etc when not expired', async function (ctx) {
@@ -463,6 +464,20 @@ describe('SubscriptionUpdater', function () {
         targetEntityId: ctx.subscription._id,
         createdAt,
       })
+    })
+
+    it('should not update subscription when paymentProvider service contains stripe', async function (ctx) {
+      ctx.subscription.paymentProvider = {
+        service: 'stripe-uk',
+      }
+      await ctx.SubscriptionUpdater.promises.updateSubscriptionFromRecurly(
+        ctx.recurlySubscription,
+        ctx.subscription,
+        {}
+      )
+      ctx.subscription.save.called.should.equal(false)
+      expect(ctx.FeaturesUpdater.promises.scheduleRefreshFeatures).to.not.have
+        .been.called
     })
 
     it('should remove the subscription when expired', async function (ctx) {

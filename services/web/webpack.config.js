@@ -22,6 +22,7 @@ const entryPoints = {
   marketing: './frontend/js/marketing.ts',
   'main-style': './frontend/stylesheets/main-style.scss',
   tracking: './frontend/js/infrastructure/tracking.ts',
+  'linkedin-insight': './frontend/js/infrastructure/linkedin-insight.ts',
 }
 
 // Add entrypoints for each "page"
@@ -123,6 +124,13 @@ module.exports = {
         ),
         use: [
           {
+            loader: 'babel-loader',
+            options: {
+              cacheDirectory: true,
+              configFile: path.join(__dirname, './babel.config.json'),
+            },
+          },
+          {
             loader: 'ts-loader',
             options: {
               configFile: path.resolve(
@@ -141,7 +149,7 @@ module.exports = {
         // Only compile application files and specific dependencies
         // (other npm and vendored dependencies must be in ES5 already)
         exclude: [
-          /node_modules\/(?!(react-dnd|chart\.js|@uppy|pdfjs-dist|react-resizable-panels)\/)/,
+          /node_modules\/(?!(react-dnd|chart\.js|@uppy|@writefull|pdfjs-dist|react-resizable-panels)\/)/,
           vendorDir,
           path.resolve(__dirname, 'modules/writefull/frontend/js/integration'),
         ],

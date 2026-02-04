@@ -59,6 +59,9 @@ function BibtexParser(arg0, allowedKeys) {
   this.ALLOWEDKEYS_ = allowedKeys || []
   this.reset_(arg0)
   this.initMacros_()
+  // Force parsing of all entries, even if they arent in our list of ENTRY_TYPES since new types are being created,
+  // and users can create their own custom type anyways
+  this.FORCE_PARSING = true
   return this
 }
 
@@ -131,6 +134,9 @@ BibtexParser.prototype.reset_ = function (arg0) {
   mvproceedings: 39,
   mvreference: 40,
   online: 41,
+  webpage: 41,
+  electronic: 41,
+  www: 41,
   patent: 42,
   performance: 43,
   reference: 44,
@@ -335,7 +341,7 @@ BibtexParser.prototype.processCharacter_ = function (c) {
               if (ot == 'preamble') {
                 this.STATE_ = this.STATES_.ENTRY_OR_JUNK
               } else {
-                if (ot in this.ENTRY_TYPES_) {
+                if (ot in this.ENTRY_TYPES_ || this.FORCE_PARSING) {
                   // SUCCESS:     Parsed a valid object type.
                   // NEXT_STATE:  ENTRY_KEY
                   this.DATA_.ObjectType = 'entry'

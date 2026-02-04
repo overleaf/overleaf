@@ -301,11 +301,6 @@ describe('SplitTestHandler', function () {
           variantName: 'variant-1',
           versionNumber: 2,
         },
-        'not-active-test': {
-          phase: 'release',
-          variantName: 'variant-1',
-          versionNumber: 1,
-        },
       })
     })
 

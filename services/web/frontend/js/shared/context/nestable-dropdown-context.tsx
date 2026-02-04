@@ -1,4 +1,11 @@
-import { createContext, Dispatch, FC, SetStateAction, useState } from 'react'
+import {
+  createContext,
+  Dispatch,
+  FC,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react'
 
 export type NestableDropdownContextType = {
   selected: string | null
@@ -14,6 +21,14 @@ export const NestableDropdownContextProvider: FC<
   React.PropsWithChildren<{ id: string }>
 > = ({ id, children }) => {
   const [selected, setSelected] = useState<string | null>(null)
+
+  useEffect(() => {
+    return () => {
+      // unset selection on unmount
+      setSelected(null)
+    }
+  }, [])
+
   return (
     <NestableDropdownContext.Provider
       value={{ selected, setSelected, menuId: id }}

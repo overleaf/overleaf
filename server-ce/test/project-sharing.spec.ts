@@ -7,7 +7,7 @@ import {
 } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
 import {
-  createProject,
+  createProjectAndOpenInNewEditor,
   enableLinkSharing,
   getSpamSafeProjectName,
   openProjectByName,
@@ -44,18 +44,16 @@ describe('Project Sharing', function () {
   function setupTestProject() {
     login('user@example.com')
     waitForCompile(() => {
-      createProject(projectName)
+      createProjectAndOpenInNewEditor(projectName)
     })
 
     // Add chat message
-    cy.findByRole('button', { name: 'Chat' }).click()
+    cy.findByRole('tab', { name: 'Chat' }).click()
     // wait for lazy loading of the chat pane
-    cy.findByRole('complementary', { name: 'Chat' }).findByText(
-      'Send your first message to your collaborators'
-    )
-    cy.findByLabelText('Send a message to your collaborators…').type(
-      'New Chat Message{enter}'
-    )
+    cy.findByText('Start the conversation by saying hello or sharing an update')
+    cy.get(
+      'textarea[placeholder="Send a message to your collaborators…"]'
+    ).type('New Chat Message{enter}')
 
     // Get link sharing links
     enableLinkSharing().then(
@@ -104,11 +102,11 @@ describe('Project Sharing', function () {
     )
     // check PDF
     recompile()
-    cy.findByRole('region', { name: 'PDF preview and logs' }).within(() => {
+    cy.findByRole('region', { name: 'PDF preview' }).within(() => {
       cy.findByLabelText(/Page.*1/i).should('be.visible')
       cy.findByText(projectName).should('be.visible')
     })
-    cy.findByRole('region', { name: 'PDF preview and logs' }).within(() => {
+    cy.findByRole('region', { name: 'PDF preview' }).within(() => {
       cy.findByLabelText(/Page.*1/i).should('be.visible')
       cy.contains(section)
     })
@@ -131,10 +129,8 @@ describe('Project Sharing', function () {
   }
 
   function expectChatAccess() {
-    cy.findByRole('button', { name: 'Chat' }).click()
-    cy.findByRole('complementary', { name: 'Chat' }).findByText(
-      'New Chat Message'
-    )
+    cy.findByRole('tab', { name: 'Chat' }).click()
+    cy.findByText('New Chat Message')
   }
 
   function expectHistoryAccess() {
@@ -163,12 +159,12 @@ describe('Project Sharing', function () {
   }
 
   function expectNoChatAccess() {
-    cy.findByRole('button', { name: 'Layout' }) // wait for lazy loading
-    cy.findByRole('button', { name: 'Chat' }).should('not.exist')
+    cy.findByRole('button', { name: 'Layout options' }) // wait for lazy loading
+    cy.findByRole('tab', { name: 'Chat' }).should('not.exist')
   }
 
   function expectNoHistoryAccess() {
-    cy.findByRole('button', { name: 'Layout' }) // wait for lazy loading
+    cy.findByRole('button', { name: 'Layout options' }) // wait for lazy loading
     cy.findByRole('button', { name: 'History' }).should('not.exist')
   }
 
@@ -246,7 +242,12 @@ describe('Project Sharing', function () {
 
     beforeEach(function () {
       login('user@example.com')
-      shareProjectByEmailAndAcceptInviteViaEmail(projectName, email, 'Viewer')
+      shareProjectByEmailAndAcceptInviteViaEmail(
+        projectName,
+        email,
+        'Viewer',
+        true
+      )
     })
 
     it('should grant the collaborator read access', function () {
@@ -261,12 +262,17 @@ describe('Project Sharing', function () {
 
     beforeWithReRunOnTestRetry(() => {
       login('user@example.com')
-      shareProjectByEmailAndAcceptInviteViaDash(projectName, email, 'Viewer')
+      shareProjectByEmailAndAcceptInviteViaDash(
+        projectName,
+        email,
+        'Viewer',
+        true
+      )
     })
 
     it('should grant the collaborator read access', function () {
       login(email)
-      openProjectByName(projectName)
+      openProjectByName(projectName, true)
       expectFullReadOnlyAccess()
       expectProjectDashboardEntry()
     })
@@ -278,12 +284,17 @@ describe('Project Sharing', function () {
 
     beforeWithReRunOnTestRetry(() => {
       login('user@example.com')
-      shareProjectByEmailAndAcceptInviteViaDash(projectName, email, 'Editor')
+      shareProjectByEmailAndAcceptInviteViaDash(
+        projectName,
+        email,
+        'Editor',
+        true
+      )
     })
 
     it('should grant the collaborator write access', function () {
       login(email)
-      openProjectByName(projectName)
+      openProjectByName(projectName, true)
       expectFullReadAndWriteAccess()
       expectEditAuthoredAs('You')
       expectProjectDashboardEntry()
@@ -301,7 +312,8 @@ describe('Project Sharing', function () {
           openProjectViaLinkSharingAsUser(
             linkSharingReadOnly,
             projectName,
-            email
+            email,
+            true
           )
           expectRestrictedReadOnlyAccess()
           expectProjectDashboardEntry()
@@ -317,7 +329,8 @@ describe('Project Sharing', function () {
           openProjectViaLinkSharingAsUser(
             linkSharingReadAndWrite,
             projectName,
-            email
+            email,
+            true
           )
           expectFullReadAndWriteAccess()
           expectEditAuthoredAs('You')
@@ -365,7 +378,7 @@ describe('Project Sharing', function () {
           withDataDir: true,
         })
         it('should grant read access with read link', function () {
-          openProjectViaLinkSharingAsAnon(linkSharingReadOnly)
+          openProjectViaLinkSharingAsAnon(linkSharingReadOnly, true)
           expectRestrictedReadOnlyAccess()
         })
 
@@ -386,12 +399,12 @@ describe('Project Sharing', function () {
         })
 
         it('should grant read access with read link', function () {
-          openProjectViaLinkSharingAsAnon(linkSharingReadOnly)
+          openProjectViaLinkSharingAsAnon(linkSharingReadOnly, true)
           expectRestrictedReadOnlyAccess()
         })
 
         it('should grant write access with write link', function () {
-          openProjectViaLinkSharingAsAnon(linkSharingReadAndWrite)
+          openProjectViaLinkSharingAsAnon(linkSharingReadAndWrite, true)
           expectAnonymousReadAndWriteAccess()
           expectEditAuthoredAs('Anonymous')
         })
@@ -423,7 +436,8 @@ describe('Project Sharing', function () {
         openProjectViaLinkSharingAsUser(
           linkSharingReadOnly,
           projectName,
-          retainedViewerEmail
+          retainedViewerEmail,
+          true
         )
 
         // Set up retained editor access
@@ -431,7 +445,8 @@ describe('Project Sharing', function () {
         openProjectViaLinkSharingAsUser(
           linkSharingReadAndWrite,
           projectName,
-          retainedEditorEmail
+          retainedEditorEmail,
+          true
         )
       })
 
@@ -454,7 +469,7 @@ describe('Project Sharing', function () {
 
       it('should not display link sharing in the sharing modal', function () {
         login('user@example.com')
-        openProjectByName(projectName)
+        openProjectByName(projectName, true)
         cy.findByRole('navigation', {
           name: 'Project actions',
         })
@@ -494,7 +509,8 @@ describe('Project Sharing', function () {
         shareProjectByEmailAndAcceptInviteViaEmail(
           projectName,
           invitedEmail,
-          'Viewer'
+          'Viewer',
+          true
         )
         expectFullReadOnlyAccess()
         expectProjectDashboardEntry()
@@ -502,14 +518,14 @@ describe('Project Sharing', function () {
 
       it('should retain read-only access when project was joined via link before link sharing was turned off', function () {
         login(retainedViewerEmail)
-        openProjectByName(projectName)
+        openProjectByName(projectName, true)
         expectRestrictedReadOnlyAccess()
         expectProjectDashboardEntry()
       })
 
       it('should retain read-write access when project was joined via link before link sharing was turned off', function () {
         login(retainedEditorEmail)
-        openProjectByName(projectName)
+        openProjectByName(projectName, true)
         expectFullReadAndWriteAccess()
         expectProjectDashboardEntry()
       })

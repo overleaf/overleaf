@@ -212,6 +212,24 @@ describe('History', function () {
         )
       })
     })
+
+    it('should return 404 for invalid version', function (done) {
+      this.owner.createProject('example-project', (error, projectId) => {
+        if (error) {
+          return done(error)
+        }
+        this.owner.request(
+          `/project/${projectId}/version/invalid/zip`,
+          (error, response) => {
+            if (error) {
+              return done(error)
+            }
+            expect(response.statusCode).to.equal(404)
+            done()
+          }
+        )
+      })
+    })
   })
 
   describe('zip download, with upstream 404', function () {

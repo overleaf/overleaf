@@ -109,7 +109,7 @@ describe('FileTree Create Folder Flow', function () {
       </EditorProviders>
     )
 
-    cy.findByRole('button', { name: 'Expand' }).click()
+    cy.findByLabelText('Expand').click()
 
     const name = 'Foo Bar In thefolder'
 
@@ -144,7 +144,7 @@ describe('FileTree Create Folder Flow', function () {
     cy.findByRole('treeitem', { name })
 
     // collapse the parent folder; created folder should not be rendered anymore
-    cy.findByRole('button', { name: 'Collapse' }).click()
+    cy.findByLabelText('Collapse').click()
     cy.findByRole('treeitem', { name }).should('not.exist')
   })
 
@@ -218,7 +218,7 @@ describe('FileTree Create Folder Flow', function () {
     cy.findByRole('treeitem', { name })
 
     // collapse the parent folder; created folder should not be rendered anymore
-    cy.findByRole('button', { name: 'Collapse' }).click()
+    cy.findByLabelText('Collapse').click()
     cy.findByRole('treeitem', { name }).should('not.exist')
   })
 

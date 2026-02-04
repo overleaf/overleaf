@@ -45,16 +45,16 @@ There is additional meta-data that UserItems and SessionItems may use to skip
   SessionItem: { needsOwnProject: true }
  */
 
-const { expect } = require('chai')
-const async = require('async')
+import { expect } from 'chai'
 
-const RealTimeClient = require('./helpers/RealTimeClient')
-const FixturesManager = require('./helpers/FixturesManager')
-const MockWebServer = require('./helpers/MockWebServer')
+import async from 'async'
+import RealTimeClient from './helpers/RealTimeClient.js'
+import FixturesManager from './helpers/FixturesManager.js'
+import MockWebServer from './helpers/MockWebServer.js'
+import settings from '@overleaf/settings'
+import redis from '@overleaf/redis-wrapper'
 
-const settings = require('@overleaf/settings')
 const Keys = settings.redis.documentupdater.key_schema
-const redis = require('@overleaf/redis-wrapper')
 const rclient = redis.createClient(settings.redis.pubsub)
 
 function getPendingUpdates(docId, cb) {

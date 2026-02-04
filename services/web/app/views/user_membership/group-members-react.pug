@@ -4,7 +4,7 @@ block entrypointVar
 	- entrypoint = 'pages/user/subscription/group-management/group-members'
 
 block append meta
-	- var hasWriteAccess = entityAccess || (hasAdminAccess() && hasAdminCapability(managedUsersActive ? 'modify-managed-group-member' : 'modify-group-member')) || (getSessionUser().staffAccess && getSessionUser().staffAccess.groupManagement)
+	- var hasWriteAccess = entityAccess || (hasAdminAccess() && hasAdminCapability(managedUsersActive ? 'modify-managed-group-member' : 'modify-group-member'))
 	meta(name='ol-user' data-type='json' content=user)
 	meta(name='ol-users' data-type='json' content=users)
 	meta(name='ol-groupId' data-type='string' content=groupId)

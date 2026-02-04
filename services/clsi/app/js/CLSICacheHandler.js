@@ -1,22 +1,25 @@
 // @ts-check
-const crypto = require('node:crypto')
-const fs = require('node:fs')
-const Path = require('node:path')
-const { pipeline } = require('node:stream/promises')
-const { createGzip, createGunzip } = require('node:zlib')
-const tarFs = require('tar-fs')
-const _ = require('lodash')
-const {
+import crypto from 'node:crypto'
+import fs from 'node:fs'
+import Path from 'node:path'
+import { pipeline } from 'node:stream/promises'
+import { crc32, createGzip, createGunzip } from 'node:zlib'
+import tarFs from 'tar-fs'
+import _ from 'lodash'
+import {
   fetchNothing,
   fetchStream,
   RequestFailedError,
-} = require('@overleaf/fetch-utils')
-const logger = require('@overleaf/logger')
-const Metrics = require('@overleaf/metrics')
-const Settings = require('@overleaf/settings')
-const { MeteredStream } = require('@overleaf/stream-utils')
-const { CACHE_SUBDIR } = require('./OutputCacheManager')
-const { isExtraneousFile } = require('./ResourceWriter')
+} from '@overleaf/fetch-utils'
+import logger from '@overleaf/logger'
+import Metrics from '@overleaf/metrics'
+import Settings from '@overleaf/settings'
+import { MeteredStream } from '@overleaf/stream-utils'
+import OutputCacheManager from './OutputCacheManager.js'
+import ResourceWriter from './ResourceWriter.js'
+
+const { CACHE_SUBDIR } = OutputCacheManager
+const { isExtraneousFile } = ResourceWriter
 
 const TIMEOUT = 5_000
 /**
@@ -30,23 +33,52 @@ const MAX_ENTRIES_IN_OUTPUT_TAR = 100
 const MAX_BLG_FILES = 50
 const OBJECT_ID_REGEX = /^[0-9a-f]{24}$/
 
+const MIGRATE_FROM = new Date('2026-01-14').getTime()
+const MIGRATE_UNTIL = new Date('2026-01-21').getTime()
+
 /**
  * @param {string} projectId
- * @return {{shard: string, url: string}}
+ * @return {{shard: string, url: string}|undefined}
  */
-function getShard(projectId) {
+function getAvailableShard(projectId) {
+  // Layout of mongodb object id bytes:
   // [timestamp 4bytes][random per machine 5bytes][counter 3bytes]
   //                                          [32bit       4bytes]
   const last4Bytes = Buffer.from(projectId, 'hex').subarray(8, 12)
-  const idx = last4Bytes.readUInt32BE() % Settings.apis.clsiCache.shards.length
-  return Settings.apis.clsiCache.shards[idx]
+  const counter = last4Bytes.readUInt32BE()
+
+  let shards = Settings.apis.clsiCache.shards.slice(
+    0,
+    Settings.apis.clsiCache.currentShards
+  )
+  const now = Date.now()
+  if (
+    now > MIGRATE_FROM &&
+    now < MIGRATE_UNTIL &&
+    (counter % 100) / 100 <
+      (MIGRATE_UNTIL - now) / (MIGRATE_UNTIL - MIGRATE_FROM)
+  ) {
+    shards = Settings.apis.clsiCache.shards.slice(
+      0,
+      Settings.apis.clsiCache.desiredShards
+    )
+  }
+
+  let i = 0
+  while (shards.length > 0) {
+    const idx = crc32(`${projectId}-${i++}`) % shards.length
+    const candidate = shards[idx]
+    if (!isCircuitBreakerTripped(candidate.url)) return candidate
+    shards.splice(idx, 1)
+  }
+  return undefined
 }
 
 /**
  * @param {string} url
  * @return {boolean}
  */
-function checkCircuitBreaker(url) {
+function isCircuitBreakerTripped(url) {
   const lastFailure = lastFailures.get(url) ?? 0
   if (lastFailure) {
     // Circuit breaker that avoids retries for 5-20s.
@@ -98,8 +130,9 @@ function notifyCLSICacheAboutBuild({
 }) {
   if (!Settings.apis.clsiCache.enabled) return undefined
   if (!OBJECT_ID_REGEX.test(projectId)) return undefined
-  const { url, shard } = getShard(projectId)
-  if (checkCircuitBreaker(url)) return undefined
+  const shardCfg = getAvailableShard(projectId)
+  if (!shardCfg) return undefined
+  const { url, shard } = shardCfg
 
   /**
    * @param {{path: string}[]} files
@@ -253,8 +286,9 @@ async function downloadOutputDotSynctexFromCompileCache(
 ) {
   if (!Settings.apis.clsiCache.enabled) return false
   if (!OBJECT_ID_REGEX.test(projectId)) return false
-  const { url } = getShard(projectId)
-  if (checkCircuitBreaker(url)) return false
+  const shardCfg = getAvailableShard(projectId)
+  if (!shardCfg) return false
+  const { url } = shardCfg
 
   const timer = new Metrics.Timer(
     'clsi_cache_download',
@@ -316,8 +350,9 @@ async function downloadOutputDotSynctexFromCompileCache(
 async function downloadLatestCompileCache(projectId, userId, compileDir) {
   if (!Settings.apis.clsiCache.enabled) return false
   if (!OBJECT_ID_REGEX.test(projectId)) return false
-  const { url } = getShard(projectId)
-  if (checkCircuitBreaker(url)) return false
+  const shardCfg = getAvailableShard(projectId)
+  if (!shardCfg) return false
+  const { url } = shardCfg
 
   const timer = new Metrics.Timer(
     'clsi_cache_download',
@@ -397,7 +432,7 @@ async function downloadLatestCompileCache(projectId, userId, compileDir) {
   return !abort
 }
 
-module.exports = {
+export default {
   notifyCLSICacheAboutBuild,
   downloadLatestCompileCache,
   downloadOutputDotSynctexFromCompileCache,

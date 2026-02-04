@@ -3,6 +3,6 @@ document-updater
 --env-add=
 --env-pass-through=
 --esmock-loader=False
---node-version=22.18.0
+--node-version=24.13.0
 --pipeline-owner=🥑 Core
 --public-repo=True

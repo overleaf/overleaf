@@ -12,8 +12,6 @@
     "test:acceptance:_run": "mocha --recursive --timeout 15000 --exit $@ test/acceptance/js",
     "test:unit:_run": "mocha --recursive --exit $@ test/unit/js",
     "lint": "eslint --max-warnings 0 --format unix .",
-    "format": "prettier --list-different $PWD/'**/{*.*js,*.ts}'",
-    "format:fix": "prettier --write $PWD/'**/{*.*js,*.ts}'",
     "lint:fix": "eslint --fix .",
     "types:check": "tsc --noEmit"
   },
@@ -23,9 +21,9 @@
     "@overleaf/mongo-utils": "*",
     "@overleaf/settings": "*",
     "async": "^3.2.5",
-    "body-parser": "^1.20.3",
-    "exegesis-express": "^4.0.0",
-    "express": "^4.21.2",
+    "body-parser": "1.20.4",
+    "exegesis-express": "4.0.0",
+    "express": "4.22.1",
     "mongodb": "6.12.0"
   },
   "devDependencies": {
@@ -37,7 +35,7 @@
     "mocha": "^11.1.0",
     "mocha-junit-reporter": "^2.2.1",
     "mocha-multi-reporters": "^1.5.1",
-    "request": "^2.88.2",
+    "request": "2.88.2",
     "sandboxed-module": "^2.0.4",
     "sinon": "^9.2.4",
     "timekeeper": "^2.2.0",

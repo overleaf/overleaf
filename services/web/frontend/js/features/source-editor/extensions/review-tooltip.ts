@@ -51,7 +51,7 @@ export const buildAddNewCommentRangeEffect = (range: SelectionRange) => {
   )
 }
 
-export const reviewTooltip = (): Extension => {
+export const reviewTooltip = (editorContextMenuEnabled = false): Extension => {
   let mouseUpListener: null | (() => void) = null
   const disableMouseUpListener = () => {
     if (mouseUpListener) {
@@ -65,6 +65,11 @@ export const reviewTooltip = (): Extension => {
     mouseDownStateField,
     EditorView.domEventHandlers({
       mousedown: (event, view) => {
+        // Hide tooltip when opening the context menu
+        if (editorContextMenuEnabled && (event.button === 2 || event.ctrlKey)) {
+          return false
+        }
+
         disableMouseUpListener()
         mouseUpListener = () => {
           disableMouseUpListener()

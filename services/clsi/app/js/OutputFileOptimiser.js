@@ -12,15 +12,15 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import fs from 'node:fs'
+import Path from 'node:path'
+import { spawn } from 'node:child_process'
+import logger from '@overleaf/logger'
+import Metrics from '@overleaf/metrics'
+import _ from 'lodash'
 let OutputFileOptimiser
-const fs = require('node:fs')
-const Path = require('node:path')
-const { spawn } = require('node:child_process')
-const logger = require('@overleaf/logger')
-const Metrics = require('@overleaf/metrics')
-const _ = require('lodash')
 
-module.exports = OutputFileOptimiser = {
+export default OutputFileOptimiser = {
   optimiseFile(src, dst, callback) {
     // check output file (src) and see if we can optimise it, storing
     // the result in the build directory (dst)

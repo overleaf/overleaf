@@ -37,9 +37,11 @@ describe('TemplatesManager', function () {
     }
     ctx.ProjectUploadManager = {
       promises: {
-        createProjectFromZipArchiveWithName: sinon
-          .stub()
-          .resolves({ _id: ctx.project_id }),
+        createProjectFromZipArchiveWithName: sinon.stub().resolves({
+          project: { _id: ctx.project_id },
+          fileEntries: [],
+          docEntries: [],
+        }),
       },
     }
     ctx.ProjectOptionsHandler = {
@@ -47,6 +49,8 @@ describe('TemplatesManager', function () {
         setCompiler: sinon.stub().resolves(),
         setImageName: sinon.stub().resolves(),
         setBrandVariationId: sinon.stub().resolves(),
+        normalizeCompiler: sinon.stub().returnsArg(0),
+        normalizeImageName: sinon.stub().returnsArg(0),
       },
     }
     ctx.ProjectRootDocManager = {
@@ -182,6 +186,9 @@ describe('TemplatesManager', function () {
           {
             fromV1TemplateId: ctx.templateId,
             fromV1TemplateVersionId: ctx.templateVersionId,
+            compiler: ctx.compiler,
+            imageName: ctx.imageName,
+            brandVariationId: ctx.brandVariationId,
           }
         )
       })
@@ -190,32 +197,10 @@ describe('TemplatesManager', function () {
         ctx.fs.promises.unlink.should.have.been.calledWith(ctx.dumpPath)
       })
 
-      it('should set project options when passed', function (ctx) {
-        ctx.ProjectOptionsHandler.promises.setCompiler.should.have.been.calledWithMatch(
-          ctx.project_id,
-          ctx.compiler
-        )
-        ctx.ProjectOptionsHandler.promises.setImageName.should.have.been.calledWithMatch(
-          ctx.project_id,
-          ctx.imageName
-        )
+      it('should set project rootDoc when passed', function (ctx) {
         ctx.ProjectRootDocManager.promises.setRootDocFromName.should.have.been.calledWithMatch(
           ctx.project_id,
           ctx.mainFile
-        )
-        ctx.ProjectOptionsHandler.promises.setBrandVariationId.should.have.been.calledWithMatch(
-          ctx.project_id,
-          ctx.brandVariationId
-        )
-      })
-
-      it('should update project', function (ctx) {
-        ctx.Project.updateOne.should.have.been.calledWithMatch(
-          { _id: ctx.project_id },
-          {
-            fromV1TemplateId: ctx.templateId,
-            fromV1TemplateVersionId: ctx.templateVersionId,
-          }
         )
       })
     })
@@ -234,19 +219,23 @@ describe('TemplatesManager', function () {
         )
       })
 
-      it('should not set missing project options', function (ctx) {
-        ctx.ProjectOptionsHandler.promises.setCompiler.called.should.equal(
-          false
+      it('should create project', function (ctx) {
+        ctx.ProjectUploadManager.promises.createProjectFromZipArchiveWithName.should.have.been.calledWithMatch(
+          ctx.user_id,
+          ctx.templateName,
+          ctx.dumpPath,
+          {
+            fromV1TemplateId: ctx.templateId,
+            fromV1TemplateVersionId: ctx.templateVersionId,
+            compiler: 'pdflatex',
+            imageName: 'wl_texlive:2018.1',
+          }
         )
+      })
+
+      it('should not set missing project options', function (ctx) {
         ctx.ProjectRootDocManager.promises.setRootDocFromName.called.should.equal(
           false
-        )
-        ctx.ProjectOptionsHandler.promises.setBrandVariationId.called.should.equal(
-          false
-        )
-        ctx.ProjectOptionsHandler.promises.setImageName.should.have.been.calledWithMatch(
-          ctx.project_id,
-          'wl_texlive:2018.1'
         )
       })
     })

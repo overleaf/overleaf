@@ -274,9 +274,7 @@ describe('<ReviewPanel />', function () {
 
   describe('toggler', function () {
     it('should close panel when pressing close button', function () {
-      cy.get('@review-panel').within(() => {
-        cy.findByLabelText('Close').click({ scrollBehavior: false })
-      })
+      cy.findByLabelText('Close').click({ scrollBehavior: false })
       // We should collapse to the mini state
       cy.get('.review-panel-mini').should('exist')
     })

@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/overleaf/internal/
 
-FROM node:22.18.0 AS base
+FROM node:24.13.0 AS base
 
 WORKDIR /overleaf/services/project-history
 
@@ -23,6 +23,7 @@ COPY libraries/promise-utils/package.json /overleaf/libraries/promise-utils/pack
 COPY libraries/redis-wrapper/package.json /overleaf/libraries/redis-wrapper/package.json
 COPY libraries/settings/package.json /overleaf/libraries/settings/package.json
 COPY libraries/stream-utils/package.json /overleaf/libraries/stream-utils/package.json
+COPY libraries/validation-tools/package.json /overleaf/libraries/validation-tools/package.json
 COPY services/project-history/package.json /overleaf/services/project-history/package.json
 COPY tools/migrations/package.json /overleaf/tools/migrations/package.json
 COPY patches/ /overleaf/patches/
@@ -39,6 +40,7 @@ COPY libraries/promise-utils/ /overleaf/libraries/promise-utils/
 COPY libraries/redis-wrapper/ /overleaf/libraries/redis-wrapper/
 COPY libraries/settings/ /overleaf/libraries/settings/
 COPY libraries/stream-utils/ /overleaf/libraries/stream-utils/
+COPY libraries/validation-tools/ /overleaf/libraries/validation-tools/
 COPY services/project-history/ /overleaf/services/project-history/
 COPY tools/migrations/ /overleaf/tools/migrations/
 

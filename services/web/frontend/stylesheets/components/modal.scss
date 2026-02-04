@@ -3,8 +3,12 @@
 }
 
 .modal {
-  // Until we add a dark modal version, all dropdowns in modals should use light theme
+  // Until we add a dark modal version, all core components in modals should use light theme
   @include light-dropdown-menu;
+  @include form-check-light;
+  @include light-notification;
+  @include light-input;
+  @include light-buttons;
 }
 
 @include media-breakpoint-up(sm) {

@@ -32,9 +32,10 @@ import { User } from '../../models/User.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import PermissionsManager from '../Authorization/PermissionsManager.mjs'
 import { sanitizeSessionUserForFrontEnd } from '../../infrastructure/FrontEndUser.mjs'
-import { z, validateReq } from '../../infrastructure/Validation.mjs'
+import { z, parseReq } from '../../infrastructure/Validation.mjs'
 import { IndeterminateInvoiceError } from '../Errors/Errors.js'
 import SubscriptionLocator from './SubscriptionLocator.mjs'
+import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities.mjs'
 
 const {
   DuplicateAddOnError,
@@ -42,6 +43,7 @@ const {
   PaymentActionRequiredError,
   PaymentFailedError,
   MissingBillingInfoError,
+  MultiplePendingChangesError,
 } = Errors
 
 const SUBSCRIPTION_PAUSED_REDIRECT_PATH =
@@ -157,7 +159,6 @@ async function checkSubscriptionPauseStatus(user) {
 /**
  * @import { SubscriptionChangeDescription } from '../../../../types/subscription/subscription-change-preview'
  * @import { SubscriptionChangePreview } from '../../../../types/subscription/subscription-change-preview'
- * @import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities.mjs'
  * @import { PaymentMethod } from './types'
  */
 
@@ -169,39 +170,6 @@ function formatGroupPlansDataForDash() {
     sizes: [...groupPlanModalOptions.sizes],
     usages: [...groupPlanModalOptions.usages],
     priceByUsageTypeAndSize: JSON.parse(JSON.stringify(GroupPlansData)),
-  }
-}
-
-/**
- * Trim the staffAccess object to only include allowed fields
- * @param {Object} user - The user object with mongoose object fields
- * @returns {Object} - User object with trimmed staffAccess
- */
-function _trimStaffAccess(user) {
-  if (!user || !user.staffAccess) return user
-
-  const allowedFields = [
-    'publisherMetrics',
-    'publisherManagement',
-    'institutionMetrics',
-    'institutionManagement',
-    'groupMetrics',
-    'groupManagement',
-    'adminMetrics',
-    'splitTestMetrics',
-    'splitTestManagement',
-  ]
-
-  const trimmedStaffAccess = allowedFields.reduce((acc, key) => {
-    if (key in user.staffAccess) {
-      acc[key] = user.staffAccess[key]
-    }
-    return acc
-  }, {})
-
-  return {
-    ...user,
-    staffAccess: trimmedStaffAccess,
   }
 }
 
@@ -337,7 +305,7 @@ async function userSubscriptionPage(req, res) {
     title: 'your_subscriptions',
     plans: plansData?.plans,
     planCodesChangingAtTermEnd: plansData?.planCodesChangingAtTermEnd,
-    user: _trimStaffAccess(user),
+    user,
     hasSubscription,
     fromPlansPage,
     redirectedPaymentErrorCode,
@@ -407,7 +375,7 @@ const pauseSubscriptionSchema = z.object({
 
 async function pauseSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
-  const { params } = validateReq(req, pauseSubscriptionSchema)
+  const { params } = parseReq(req, pauseSubscriptionSchema)
   const pauseCycles = params.pauseCycles
   if (pauseCycles < 0) {
     return HttpErrorHandler.badRequest(
@@ -631,7 +599,7 @@ const purchaseAddonSchema = z.object({
 
 async function purchaseAddon(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
-  const { params } = validateReq(req, purchaseAddonSchema)
+  const { params } = parseReq(req, purchaseAddonSchema)
   const addOnCode = params.addOnCode
   // currently we only support having a quantity of 1
   const quantity = 1
@@ -688,6 +656,16 @@ async function purchaseAddon(req, res, next) {
         reason: err.info.reason,
         adviceCode: err.info.adviceCode,
       })
+    } else if (err instanceof MultiplePendingChangesError) {
+      logger.warn(
+        { userId: user._id, err, addOnCode },
+        'Cannot purchase add-on: multiple pending changes'
+      )
+      return res.status(422).json({
+        code: 'multiple_pending_changes',
+        message:
+          'Cannot complete purchase while there are multiple pending subscription changes. Please contact support.',
+      })
     } else {
       if (err instanceof Error) {
         OError.tag(err, 'something went wrong purchasing add-ons', {
@@ -716,7 +694,7 @@ const removeAddonSchema = z.object({
 
 async function removeAddon(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
-  const { params } = validateReq(req, removeAddonSchema)
+  const { params } = parseReq(req, removeAddonSchema)
   const addOnCode = params.addOnCode
 
   if (addOnCode !== AI_ADD_ON_CODE) {
@@ -736,6 +714,16 @@ async function removeAddon(req, res, next) {
         'Your subscription does not contain the requested add-on',
         { addon: addOnCode }
       )
+    } else if (err instanceof MultiplePendingChangesError) {
+      logger.warn(
+        { userId: user._id, err, addOnCode },
+        'Cannot remove add-on: multiple pending changes'
+      )
+      return res.status(422).json({
+        code: 'multiple_pending_changes',
+        message:
+          'Cannot remove add-on while there are multiple pending subscription changes. Please contact support.',
+      })
     } else {
       if (err instanceof Error) {
         OError.tag(err, 'something went wrong removing add-ons', {
@@ -761,7 +749,7 @@ const reactivateAddonSchema = z.object({
  */
 async function reactivateAddon(req, res) {
   const user = SessionManager.getSessionUser(req.session)
-  const { params } = validateReq(req, reactivateAddonSchema)
+  const { params } = parseReq(req, reactivateAddonSchema)
   const addOnCode = params.addOnCode
 
   if (addOnCode !== AI_ADD_ON_CODE) {
@@ -1137,9 +1125,38 @@ function makeChangePreview(
   paymentMethod
 ) {
   const subscription = subscriptionChange.subscription
+
+  // For the future invoice display, if there's a pending change scheduled,
+  // we should show what will happen at renewal (the pending change state)
+  // merged with any new changes from this immediate update
+  const pendingChange = subscription.pendingChange
+
+  let futureInvoiceChange
+  if (pendingChange) {
+    const pendingAddOnCodes = new Set(pendingChange.nextAddOns.map(a => a.code))
+    const mergedAddOns = [...pendingChange.nextAddOns]
+
+    for (const addOn of subscriptionChange.nextAddOns) {
+      if (!pendingAddOnCodes.has(addOn.code)) {
+        mergedAddOns.push(addOn)
+      }
+    }
+
+    futureInvoiceChange = new PaymentProviderSubscriptionChange({
+      subscription,
+      nextPlanCode: pendingChange.nextPlanCode,
+      nextPlanName: pendingChange.nextPlanName,
+      nextPlanPrice: pendingChange.nextPlanPrice,
+      nextAddOns: mergedAddOns,
+    })
+  } else {
+    futureInvoiceChange = subscriptionChange
+  }
+
   const nextPlan = PlansLocator.findLocalPlanInSettings(
-    subscriptionChange.nextPlanCode
+    futureInvoiceChange.nextPlanCode
   )
+
   return {
     change: subscriptionChangeDescription,
     currency: subscription.currency,
@@ -1153,24 +1170,24 @@ function makeChangePreview(
       date: subscription.periodEnd.toISOString(),
       plan: {
         name: getPlanNameForDisplay(
-          subscriptionChange.nextPlanName,
-          subscriptionChange.nextPlanCode
+          futureInvoiceChange.nextPlanName,
+          futureInvoiceChange.nextPlanCode
         ),
-        amount: subscriptionChange.nextPlanPrice,
+        amount: futureInvoiceChange.nextPlanPrice,
       },
-      addOns: subscriptionChange.nextAddOns.map(addOn => ({
+      addOns: futureInvoiceChange.nextAddOns.map(addOn => ({
         code: addOn.code,
         name: addOn.name,
         quantity: addOn.quantity,
         unitAmount: addOn.unitPrice,
         amount: addOn.preTaxTotal,
       })),
-      subtotal: subscriptionChange.subtotal,
+      subtotal: futureInvoiceChange.subtotal,
       tax: {
         rate: subscription.taxRate,
-        amount: subscriptionChange.tax,
+        amount: futureInvoiceChange.tax,
       },
-      total: subscriptionChange.total,
+      total: futureInvoiceChange.total,
     },
   }
 }

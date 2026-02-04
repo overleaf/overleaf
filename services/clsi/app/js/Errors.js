@@ -1,13 +1,10 @@
-/* eslint-disable
-    no-proto,
-    no-unused-vars,
-*/
+/* eslint-disable no-proto
+ */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
-const OError = require('@overleaf/o-error')
+import OError from '@overleaf/o-error'
 
-let Errors
-function NotFoundError(message) {
+export function NotFoundError(message) {
   const error = new Error(message)
   error.name = 'NotFoundError'
   error.__proto__ = NotFoundError.prototype
@@ -15,7 +12,7 @@ function NotFoundError(message) {
 }
 NotFoundError.prototype.__proto__ = Error.prototype
 
-function FilesOutOfSyncError(message) {
+export function FilesOutOfSyncError(message) {
   const error = new Error(message)
   error.name = 'FilesOutOfSyncError'
   error.__proto__ = FilesOutOfSyncError.prototype
@@ -23,7 +20,7 @@ function FilesOutOfSyncError(message) {
 }
 FilesOutOfSyncError.prototype.__proto__ = Error.prototype
 
-function AlreadyCompilingError(message) {
+export function AlreadyCompilingError(message) {
   const error = new Error(message)
   error.name = 'AlreadyCompilingError'
   error.__proto__ = AlreadyCompilingError.prototype
@@ -31,13 +28,13 @@ function AlreadyCompilingError(message) {
 }
 AlreadyCompilingError.prototype.__proto__ = Error.prototype
 
-class QueueLimitReachedError extends OError {}
-class TimedOutError extends OError {}
-class NoXrefTableError extends OError {}
-class TooManyCompileRequestsError extends OError {}
-class InvalidParameter extends OError {}
+export class QueueLimitReachedError extends OError {}
+export class TimedOutError extends OError {}
+export class NoXrefTableError extends OError {}
+export class TooManyCompileRequestsError extends OError {}
+export class InvalidParameter extends OError {}
 
-module.exports = Errors = {
+export default {
   QueueLimitReachedError,
   TimedOutError,
   NotFoundError,

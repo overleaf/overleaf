@@ -5,11 +5,12 @@
     "patch-package": "^8.0.0"
   },
   "devDependencies": {
+    "@prettier/plugin-pug": "^3.4.0",
     "@types/chai": "^4.3.0",
     "@types/chai-as-promised": "^7.1.8",
     "@types/mocha": "^10.0.6",
-    "@typescript-eslint/eslint-plugin": "^8.30.1",
-    "@typescript-eslint/parser": "^8.30.1",
+    "@typescript-eslint/eslint-plugin": "8.50.0",
+    "@typescript-eslint/parser": "^8.50.0",
     "@vitest/eslint-plugin": "^1.5.0",
     "eslint": "^8.15.0",
     "eslint-config-prettier": "^8.5.0",
@@ -23,9 +24,9 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-unicorn": "^56.0.0",
-    "prettier": "3.6.2",
+    "prettier": "3.7.4",
     "prettier-plugin-groovy": "0.2.1",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   },
   "engines": {
     "npm": "11.4.2"
@@ -33,17 +34,22 @@
   "overrides": {
     "request@2.88.2": {
       "tough-cookie": "5.1.2",
-      "form-data": "2.5.5"
+      "form-data": "2.5.5",
+      "qs": "6.14.1"
     },
     "streamdown": {
       "mermaid": "file:./services/web/stubs/mermaid-stub"
     }
   },
   "scripts": {
-    "format": "prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "prettier --write $PWD/'**/*.js'",
-    "format:jenkins": "prettier --list-different $PWD/'**/Jenkinsfile'",
-    "format:jenkins:fix": "prettier --write $PWD/'**/Jenkinsfile'",
+    "format": "prettier --list-different",
+    "format:fix": "prettier --write --list-different",
+    "format:styles": "prettier --list-different '**/*.{css,scss}'",
+    "format:styles:fix": "prettier --write --list-different '**/*.{css,scss}'",
+    "format:pug": "prettier --list-different '**/*.pug'",
+    "format:pug:fix": "prettier --write --list-different '**/*.pug'",
+    "format:jenkins": "prettier --list-different '**/Jenkinsfile'",
+    "format:jenkins:fix": "prettier --write --list-different '**/Jenkinsfile'",
     "lint": "eslint --max-warnings 0 --format unix .",
     "lint:fix": "eslint --fix .",
     "postinstall": "patch-package"
@@ -69,7 +75,6 @@
     "services/notifications",
     "services/project-history",
     "services/real-time",
-    "services/references",
     "services/templates",
     "services/third-party-datastore",
     "services/third-party-references",

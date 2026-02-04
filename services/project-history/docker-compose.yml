@@ -4,7 +4,7 @@
 
 services:
   test_unit:
-    image: node:22.18.0
+    image: node:24.13.0
     volumes:
       - .:/overleaf/services/project-history
       - ../../node_modules:/overleaf/node_modules
@@ -22,6 +22,7 @@ services:
       HISTORY_REDIS_HOST: redis_test
       QUEUES_REDIS_HOST: redis_test
       ANALYTICS_QUEUES_REDIS_HOST: redis_test
+      ANALYTICS_QUEUES_BQ_SINK_REDIS_HOST: redis_test
     entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: npm run --silent test:unit
     user: node
@@ -32,7 +33,7 @@ services:
         condition: service_healthy
 
   test_acceptance:
-    image: node:22.18.0
+    image: node:24.13.0
     volumes:
       - .:/overleaf/services/project-history
       - ../../node_modules:/overleaf/node_modules
@@ -41,11 +42,11 @@ services:
       - ../../tools/migrations:/overleaf/tools/migrations
     working_dir: /overleaf/services/project-history
     environment:
-      ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis_test
       HISTORY_REDIS_HOST: redis_test
       QUEUES_REDIS_HOST: redis_test
       ANALYTICS_QUEUES_REDIS_HOST: redis_test
+      ANALYTICS_QUEUES_BQ_SINK_REDIS_HOST: redis_test
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}
@@ -82,4 +83,3 @@ services:
       # replica set. This override is not needed when running the setup after
       # starting up mongo.
       - mongo:127.0.0.1
-

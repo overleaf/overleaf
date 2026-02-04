@@ -1,558 +1,286 @@
 import { expect } from 'chai'
-import async from 'async'
+import { setTimeout } from 'node:timers/promises'
 import UserHelper from './helpers/User.mjs'
 import redis from './helpers/redis.mjs'
 import UserSessionsRedis from '../../../app/src/Features/User/UserSessionsRedis.mjs'
+
 const rclient = UserSessionsRedis.client()
 
+const UserPromises = UserHelper.promises
+
 describe('Sessions', function () {
-  beforeEach(function (done) {
+  beforeEach(async function () {
     this.timeout(20000)
-    this.user1 = new UserHelper()
-    this.site_admin = new UserHelper({ email: 'admin@example.com' })
-    async.series(
-      [cb => this.user1.login(cb), cb => this.user1.logout(cb)],
-      done
-    )
+    this.user1 = new UserPromises()
+    this.site_admin = new UserPromises({ email: 'admin@example.com' })
+    await this.user1.login()
+    await this.user1.logout()
   })
 
   describe('one session', function () {
-    it('should have one session in UserSessions set', function (done) {
-      async.series(
-        [
-          next => {
-            redis.clearUserSessions(this.user1, next)
-          },
+    it('should have one session in UserSessions set', async function () {
+      await redis.clearUserSessions(this.user1)
 
-          // login, should add session to set
-          next => {
-            this.user1.login(err => next(err))
-          },
+      // login, should add session to set
+      await this.user1.login()
 
-          next => {
-            redis.getUserSessions(this.user1, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(1)
-              expect(sessions[0].slice(0, 5)).to.equal('sess:')
-              next()
-            })
-          },
+      const sessions = await redis.getUserSessions(this.user1)
+      expect(sessions.length).to.equal(1)
+      expect(sessions[0].slice(0, 5)).to.equal('sess:')
 
-          // should be able to access project list page
-          next => {
-            this.user1.getProjectListPage((err, statusCode) => {
-              expect(err).to.equal(null)
-              expect(statusCode).to.equal(200)
-              next()
-            })
-          },
+      // should be able to access project list page
+      const statusCode = await this.user1.getProjectListPage()
+      expect(statusCode).to.equal(200)
 
-          // logout, should remove session from set
-          next => {
-            this.user1.logout(err => next(err))
-          },
-
-          next => {
-            redis.getUserSessions(this.user1, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(0)
-              next()
-            })
-          },
-        ],
-        (err, result) => {
-          if (err) {
-            throw err
-          }
-          done()
-        }
-      )
+      // logout, should remove session from set
+      await this.user1.logout()
+      const sessionsAfterLogout = await redis.getUserSessions(this.user1)
+      expect(sessionsAfterLogout.length).to.equal(0)
     })
 
-    it('should update audit log on logout', function (done) {
-      async.series(
-        [
-          next => {
-            redis.clearUserSessions(this.user1, next)
-          },
+    it('should update audit log on logout', async function () {
+      await redis.clearUserSessions(this.user1)
 
-          // login
-          next => {
-            this.user1.login(err => next(err))
-          },
+      // login
+      await this.user1.login()
 
-          // logout, should add logout audit log entry (happens in background)
-          next => {
-            this.user1.logout(err => next(err))
-          },
+      // logout, should add logout audit log entry (happens in background)
+      await this.user1.logout()
 
-          // poll for audit log entry since it's written in the background
-          next => {
-            let attempts = 0
-            const checkAuditLog = () => {
-              this.user1.getAuditLogWithoutNoise((error, auditLog) => {
-                if (error) return next(error)
+      // poll for audit log entry since it's written in the background
+      const findAuditLogEntry = async () => {
+        for (let attempts = 0; attempts < 10; attempts++) {
+          const auditLog = await this.user1.getAuditLogWithoutNoise()
 
-                const logoutEntries = auditLog.filter(
-                  entry => entry.operation === 'logout'
-                )
+          const logoutEntries = auditLog.filter(
+            entry => entry.operation === 'logout'
+          )
 
-                // If we found the logout entry, we're done
-                if (logoutEntries.length > 0) {
-                  expect(logoutEntries.length).to.be.greaterThan(0)
-                  const lastLogout = logoutEntries[logoutEntries.length - 1]
-                  expect(lastLogout.operation).to.equal('logout')
-                  expect(lastLogout.ipAddress).to.exist
-                  expect(lastLogout.initiatorId).to.exist
-                  expect(lastLogout.timestamp).to.exist
-                  return next()
-                }
-
-                // Otherwise retry up to 10 times
-                attempts++
-                if (attempts >= 10) {
-                  return next(
-                    new Error(
-                      'Logout audit log entry not found after 10 attempts'
-                    )
-                  )
-                }
-
-                setTimeout(checkAuditLog, 25)
-              })
-            }
-            checkAuditLog()
-          },
-        ],
-        (err, result) => {
-          if (err) {
-            throw err
+          // If we found the logout entry, we're done
+          if (logoutEntries.length > 0) {
+            return logoutEntries
           }
-          done()
+
+          await setTimeout(25)
         }
-      )
+
+        throw new Error('Logout audit log entry not found after 10 attempts')
+      }
+
+      const logoutEntries = await findAuditLogEntry()
+      expect(logoutEntries.length).to.be.greaterThan(0)
+      const lastLogout = logoutEntries[logoutEntries.length - 1]
+      expect(lastLogout.operation).to.equal('logout')
+      expect(lastLogout.ipAddress).to.exist
+      expect(lastLogout.initiatorId).to.exist
+      expect(lastLogout.timestamp).to.exist
     })
   })
 
   describe('two sessions', function () {
     beforeEach(function () {
       // set up second session for this user
-      this.user2 = new UserHelper()
+      this.user2 = new UserPromises()
       this.user2.email = this.user1.email
       this.user2.emails = this.user1.emails
       this.user2.password = this.user1.password
     })
 
-    it('should have two sessions in UserSessions set', function (done) {
-      async.series(
-        [
-          next => {
-            redis.clearUserSessions(this.user1, next)
-          },
+    it('should have two sessions in UserSessions set', async function () {
+      await redis.clearUserSessions(this.user1)
 
-          // login, should add session to set
-          next => {
-            this.user1.login(err => next(err))
-          },
+      // login, should add session to set
+      await this.user1.login()
 
-          next => {
-            redis.getUserSessions(this.user1, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(1)
-              expect(sessions[0].slice(0, 5)).to.equal('sess:')
-              next()
-            })
-          },
+      const sessions1 = await redis.getUserSessions(this.user1)
+      expect(sessions1.length).to.equal(1)
+      expect(sessions1[0].slice(0, 5)).to.equal('sess:')
 
-          // login again, should add the second session to set
-          next => {
-            this.user2.login(err => next(err))
-          },
+      // login again, should add the second session to set
+      await this.user2.login()
 
-          next => {
-            redis.getUserSessions(this.user1, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(2)
-              expect(sessions[0].slice(0, 5)).to.equal('sess:')
-              expect(sessions[1].slice(0, 5)).to.equal('sess:')
-              next()
-            })
-          },
+      const sessions2 = await redis.getUserSessions(this.user1)
+      expect(sessions2.length).to.equal(2)
+      expect(sessions2[0].slice(0, 5)).to.equal('sess:')
+      expect(sessions2[1].slice(0, 5)).to.equal('sess:')
 
-          // both should be able to access project list page
-          next => {
-            this.user1.getProjectListPage((err, statusCode) => {
-              expect(err).to.equal(null)
-              expect(statusCode).to.equal(200)
-              next()
-            })
-          },
+      // both should be able to access project list page
+      const statusCode1 = await this.user1.getProjectListPage()
+      expect(statusCode1).to.equal(200)
+      const statusCode2 = await this.user2.getProjectListPage()
+      expect(statusCode2).to.equal(200)
 
-          next => {
-            this.user2.getProjectListPage((err, statusCode) => {
-              expect(err).to.equal(null)
-              expect(statusCode).to.equal(200)
-              next()
-            })
-          },
+      // logout first session, should remove session from set
+      await this.user1.logout()
 
-          // logout first session, should remove session from set
-          next => {
-            this.user1.logout(err => next(err))
-          },
+      const sessions3 = await redis.getUserSessions(this.user1)
+      expect(sessions3.length).to.equal(1)
 
-          next => {
-            redis.getUserSessions(this.user1, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(1)
-              next()
-            })
-          },
+      // first session should not have access to project list page
+      const statusCode3 = await this.user1.getProjectListPage()
+      expect(statusCode3).to.equal(302)
 
-          // first session should not have access to project list page
-          next => {
-            this.user1.getProjectListPage((err, statusCode) => {
-              expect(err).to.equal(null)
-              expect(statusCode).to.equal(302)
-              next()
-            })
-          },
+      // second session should still have access to settings
+      const statusCode4 = await this.user2.getProjectListPage()
+      expect(statusCode4).to.equal(200)
 
-          // second session should still have access to settings
-          next => {
-            this.user2.getProjectListPage((err, statusCode) => {
-              expect(err).to.equal(null)
-              expect(statusCode).to.equal(200)
-              next()
-            })
-          },
+      // logout second session, should remove last session from set
+      await this.user2.logout()
 
-          // logout second session, should remove last session from set
-          next => {
-            this.user2.logout(err => next(err))
-          },
+      const sessions4 = await redis.getUserSessions(this.user1)
+      expect(sessions4.length).to.equal(0)
 
-          next => {
-            redis.getUserSessions(this.user1, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(0)
-              next()
-            })
-          },
-
-          // second session should not have access to project list page
-          next => {
-            this.user2.getProjectListPage((err, statusCode) => {
-              expect(err).to.equal(null)
-              expect(statusCode).to.equal(302)
-              next()
-            })
-          },
-        ],
-        (err, result) => {
-          if (err) {
-            throw err
-          }
-          done()
-        }
-      )
+      // second session should not have access to project list page
+      const statusCode5 = await this.user2.getProjectListPage()
+      expect(statusCode5).to.equal(302)
     })
   })
 
   describe('three sessions, password reset', function () {
     beforeEach(function () {
       // set up second session for this user
-      this.user2 = new UserHelper()
+      this.user2 = new UserPromises()
       this.user2.email = this.user1.email
       this.user2.emails = this.user1.emails
       this.user2.password = this.user1.password
-      this.user3 = new UserHelper()
+      this.user3 = new UserPromises()
       this.user3.email = this.user1.email
       this.user3.emails = this.user1.emails
       this.user3.password = this.user1.password
     })
 
-    it('should erase both sessions when password is reset', function (done) {
-      async.series(
-        [
-          next => {
-            redis.clearUserSessions(this.user1, next)
-          },
+    it('should erase both sessions when password is reset', async function () {
+      await redis.clearUserSessions(this.user1)
 
-          // login, should add session to set
-          next => {
-            this.user1.login(err => next(err))
-          },
+      // login, should add session to set
+      await this.user1.login()
 
-          next => {
-            redis.getUserSessions(this.user1, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(1)
-              expect(sessions[0].slice(0, 5)).to.equal('sess:')
-              next()
-            })
-          },
+      const sessions1 = await redis.getUserSessions(this.user1)
+      expect(sessions1.length).to.equal(1)
+      expect(sessions1[0].slice(0, 5)).to.equal('sess:')
 
-          // login again, should add the second session to set
-          next => {
-            this.user2.login(err => next(err))
-          },
+      // login again, should add the second session to set
+      await this.user2.login()
 
-          next => {
-            redis.getUserSessions(this.user1, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(2)
-              expect(sessions[0].slice(0, 5)).to.equal('sess:')
-              expect(sessions[1].slice(0, 5)).to.equal('sess:')
-              next()
-            })
-          },
+      const sessions2 = await redis.getUserSessions(this.user1)
+      expect(sessions2.length).to.equal(2)
+      expect(sessions2[0].slice(0, 5)).to.equal('sess:')
+      expect(sessions2[1].slice(0, 5)).to.equal('sess:')
 
-          // login third session, should add the second session to set
-          next => {
-            this.user3.login(err => next(err))
-          },
+      // login third session, should add the second session to set
+      await this.user3.login()
 
-          next => {
-            redis.getUserSessions(this.user1, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(3)
-              expect(sessions[0].slice(0, 5)).to.equal('sess:')
-              expect(sessions[1].slice(0, 5)).to.equal('sess:')
-              next()
-            })
-          },
+      const sessions3 = await redis.getUserSessions(this.user1)
+      expect(sessions3.length).to.equal(3)
+      expect(sessions3[0].slice(0, 5)).to.equal('sess:')
+      expect(sessions3[1].slice(0, 5)).to.equal('sess:')
 
-          // password reset from second session, should erase two of the three sessions
-          next => {
-            this.user2.changePassword(`password${Date.now()}`, err => next(err))
-          },
+      // password reset from second session, should erase two of the three sessions
+      await this.user2.changePassword(`password${Date.now()}`)
 
-          next => {
-            redis.getUserSessions(this.user2, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(1)
-              next()
-            })
-          },
+      const sessions4 = await redis.getUserSessions(this.user2)
+      expect(sessions4.length).to.equal(1)
 
-          // users one and three should not be able to access project list page
-          next => {
-            this.user1.getProjectListPage((err, statusCode) => {
-              expect(err).to.equal(null)
-              expect(statusCode).to.equal(302)
-              next()
-            })
-          },
+      // users one and three should not be able to access project list page
+      const statusCode1 = await this.user1.getProjectListPage()
+      expect(statusCode1).to.equal(302)
+      const statusCode3 = await this.user3.getProjectListPage()
+      expect(statusCode3).to.equal(302)
 
-          next => {
-            this.user3.getProjectListPage((err, statusCode) => {
-              expect(err).to.equal(null)
-              expect(statusCode).to.equal(302)
-              next()
-            })
-          },
+      // user two should still be logged in, and able to access project list page
+      const statusCode2 = await this.user2.getProjectListPage()
+      expect(statusCode2).to.equal(200)
 
-          // user two should still be logged in, and able to access project list page
-          next => {
-            this.user2.getProjectListPage((err, statusCode) => {
-              expect(err).to.equal(null)
-              expect(statusCode).to.equal(200)
-              next()
-            })
-          },
+      // logout second session, should remove last session from set
+      await this.user2.logout()
 
-          // logout second session, should remove last session from set
-          next => {
-            this.user2.logout(err => next(err))
-          },
-
-          next => {
-            redis.getUserSessions(this.user1, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(0)
-              next()
-            })
-          },
-        ],
-        (err, result) => {
-          if (err) {
-            throw err
-          }
-          done()
-        }
-      )
+      const sessions5 = await redis.getUserSessions(this.user1)
+      expect(sessions5.length).to.equal(0)
     })
   })
 
   describe('three sessions, sessions page', function () {
-    beforeEach(function (done) {
+    beforeEach(async function () {
       // set up second session for this user
-      this.user2 = new UserHelper()
+      this.user2 = new UserPromises()
       this.user2.email = this.user1.email
       this.user2.emails = this.user1.emails
       this.user2.password = this.user1.password
-      this.user3 = new UserHelper()
+      this.user3 = new UserPromises()
       this.user3.email = this.user1.email
       this.user3.emails = this.user1.emails
       this.user3.password = this.user1.password
-      async.series([this.user2.login.bind(this.user2)], done)
+      await this.user2.login()
     })
 
-    it('should allow the user to erase the other two sessions', function (done) {
-      async.series(
-        [
-          next => {
-            redis.clearUserSessions(this.user1, next)
-          },
+    it('should allow the user to erase the other two sessions', async function () {
+      await redis.clearUserSessions(this.user1)
 
-          // login, should add session to set
-          next => {
-            this.user1.login(err => next(err))
-          },
+      // login, should add session to set
+      await this.user1.login()
 
-          next => {
-            redis.getUserSessions(this.user1, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(1)
-              expect(sessions[0].slice(0, 5)).to.equal('sess:')
-              next()
-            })
-          },
+      const sessions1 = await redis.getUserSessions(this.user1)
+      expect(sessions1.length).to.equal(1)
+      expect(sessions1[0].slice(0, 5)).to.equal('sess:')
 
-          // login again, should add the second session to set
-          next => {
-            this.user2.login(err => next(err))
-          },
+      // login again, should add the second session to set
+      await this.user2.login()
 
-          next => {
-            redis.getUserSessions(this.user1, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(2)
-              expect(sessions[0].slice(0, 5)).to.equal('sess:')
-              expect(sessions[1].slice(0, 5)).to.equal('sess:')
-              next()
-            })
-          },
+      const sessions2 = await redis.getUserSessions(this.user1)
+      expect(sessions2.length).to.equal(2)
+      expect(sessions2[0].slice(0, 5)).to.equal('sess:')
+      expect(sessions2[1].slice(0, 5)).to.equal('sess:')
 
-          // login third session, should add the second session to set
-          next => {
-            this.user3.login(err => next(err))
-          },
+      // login third session, should add the second session to set
+      await this.user3.login()
 
-          next => {
-            redis.getUserSessions(this.user1, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(3)
-              expect(sessions[0].slice(0, 5)).to.equal('sess:')
-              expect(sessions[1].slice(0, 5)).to.equal('sess:')
-              next()
-            })
-          },
+      const sessions3 = await redis.getUserSessions(this.user1)
+      expect(sessions3.length).to.equal(3)
+      expect(sessions3[0].slice(0, 5)).to.equal('sess:')
+      expect(sessions3[1].slice(0, 5)).to.equal('sess:')
 
-          // check the sessions page
-          next => {
-            this.user2.request.get(
-              {
-                uri: '/user/sessions',
-              },
-              (err, response, body) => {
-                expect(err).to.be.oneOf([null, undefined])
-                expect(response.statusCode).to.equal(200)
-                next()
-              }
-            )
-          },
-
-          // clear sessions from second session, should erase two of the three sessions
-          next => {
-            this.user2.getCsrfToken(err => {
-              expect(err).to.be.oneOf([null, undefined])
-              this.user2.request.post(
-                {
-                  uri: '/user/sessions/clear',
-                },
-                err => next(err)
-              )
-            })
-          },
-
-          next => {
-            redis.getUserSessions(this.user2, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(1)
-              next()
-            })
-          },
-
-          // users one and three should not be able to access project list page
-          next => {
-            this.user1.getProjectListPage((err, statusCode) => {
-              expect(err).to.equal(null)
-              expect(statusCode).to.equal(302)
-              next()
-            })
-          },
-
-          next => {
-            this.user3.getProjectListPage((err, statusCode) => {
-              expect(err).to.equal(null)
-              expect(statusCode).to.equal(302)
-              next()
-            })
-          },
-
-          // user two should still be logged in, and able to access project list page
-          next => {
-            this.user2.getProjectListPage((err, statusCode) => {
-              expect(err).to.equal(null)
-              expect(statusCode).to.equal(200)
-              next()
-            })
-          },
-
-          // logout second session, should remove last session from set
-          next => {
-            this.user2.logout(err => next(err))
-          },
-
-          next => {
-            redis.getUserSessions(this.user1, (err, sessions) => {
-              expect(err).to.not.exist
-              expect(sessions.length).to.equal(0)
-              next()
-            })
-          },
-
-          // the user audit log should have been updated
-          next => {
-            this.user1.getAuditLogWithoutNoise((error, auditLog) => {
-              expect(error).not.to.exist
-              expect(auditLog).to.exist
-
-              // find the clear-sessions entry
-              const clearSessionsEntries = auditLog.filter(
-                entry => entry.operation === 'clear-sessions'
-              )
-              expect(clearSessionsEntries.length).to.equal(1)
-              expect(clearSessionsEntries[0].operation).to.equal(
-                'clear-sessions'
-              )
-              expect(clearSessionsEntries[0].ipAddress).to.exist
-              expect(clearSessionsEntries[0].initiatorId).to.exist
-              expect(clearSessionsEntries[0].timestamp).to.exist
-              expect(clearSessionsEntries[0].info.sessions.length).to.equal(2)
-              next()
-            })
-          },
-        ],
-        (err, result) => {
-          if (err) {
-            throw err
-          }
-          done()
-        }
+      // check the sessions page
+      const { response: sessionsPageResponse } = await this.user2.doRequest(
+        'GET',
+        '/user/sessions'
       )
+      expect(sessionsPageResponse.statusCode).to.equal(200)
+
+      // clear sessions from second session, should erase two of the three sessions
+      await this.user2.getCsrfToken()
+      await this.user2.doRequest('POST', '/user/sessions/clear')
+      const sessions4 = await redis.getUserSessions(this.user2)
+      expect(sessions4.length).to.equal(1)
+
+      // users one and three should not be able to access project list page
+      const statusCode1 = await this.user1.getProjectListPage()
+      expect(statusCode1).to.equal(302)
+      const statusCode3 = await this.user3.getProjectListPage()
+      expect(statusCode3).to.equal(302)
+
+      // user two should still be logged in, and able to access project list page
+      const statusCode2 = await this.user2.getProjectListPage()
+      expect(statusCode2).to.equal(200)
+
+      // logout second session, should remove last session from set
+      await this.user2.logout()
+      const sessions5 = await redis.getUserSessions(this.user1)
+      expect(sessions5.length).to.equal(0)
+
+      // the user audit log should have been updated
+      const auditLog = await this.user1.getAuditLogWithoutNoise()
+      expect(auditLog).to.exist
+
+      // find the clear-sessions entry
+      const clearSessionsEntries = auditLog.filter(
+        entry => entry.operation === 'clear-sessions'
+      )
+      expect(clearSessionsEntries.length).to.equal(1)
+      expect(clearSessionsEntries[0].operation).to.equal('clear-sessions')
+      expect(clearSessionsEntries[0].ipAddress).to.exist
+      expect(clearSessionsEntries[0].initiatorId).to.exist
+      expect(clearSessionsEntries[0].timestamp).to.exist
+      expect(clearSessionsEntries[0].info.sessions.length).to.equal(2)
     })
   })
 

@@ -1,15 +1,17 @@
-const request = require('request')
-const OError = require('@overleaf/o-error')
-const settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
+import request from 'request'
+import OError from '@overleaf/o-error'
+import settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import Errors from './Errors.js'
+
 const {
   CodedError,
   CorruptedJoinProjectResponseError,
   NotAuthorizedError,
   WebApiRequestFailedError,
-} = require('./Errors')
+} = Errors
 
-module.exports = {
+export default {
   joinProject(projectId, user, callback) {
     const userId = user._id
     logger.debug({ projectId, userId }, 'sending join project request to web')

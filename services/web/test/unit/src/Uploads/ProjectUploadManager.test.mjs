@@ -323,6 +323,48 @@ describe('ProjectUploadManager', function () {
           .been.called
       })
     })
+
+    describe('when extraction fails', function () {
+      beforeEach(async function (ctx) {
+        ctx.ArchiveManager.promises.extractZipArchive.rejects(new Error('oops'))
+        await expect(
+          ctx.ProjectUploadManager.promises.createProjectFromZipArchive(
+            ctx.ownerId,
+            ctx.projectName,
+            ctx.zipPath
+          )
+        ).to.be.rejectedWith('oops')
+      })
+
+      it('should remove the destination directory', function (ctx) {
+        ctx.fs.promises.rm.should.have.been.calledWith(ctx.extractedZipPath, {
+          recursive: true,
+          force: true,
+        })
+      })
+    })
+
+    describe('when project creation fails', function () {
+      beforeEach(async function (ctx) {
+        ctx.ProjectCreationHandler.promises.createBlankProject.rejects(
+          new Error('oops')
+        )
+        await expect(
+          ctx.ProjectUploadManager.promises.createProjectFromZipArchive(
+            ctx.ownerId,
+            ctx.projectName,
+            ctx.zipPath
+          )
+        ).to.be.rejectedWith('oops')
+      })
+
+      it('should remove the destination directory', function (ctx) {
+        ctx.fs.promises.rm.should.have.been.calledWith(ctx.extractedZipPath, {
+          recursive: true,
+          force: true,
+        })
+      })
+    })
   })
 
   describe('createProjectFromZipArchiveWithName', function () {
@@ -406,6 +448,13 @@ describe('ProjectUploadManager', function () {
           ctx.project._id
         )
       })
+
+      it('should remove the destination directory', function (ctx) {
+        ctx.fs.promises.rm.should.have.been.calledWith(ctx.extractedZipPath, {
+          recursive: true,
+          force: true,
+        })
+      })
     })
 
     describe('when setting automatically the root doc fails', function () {
@@ -424,6 +473,33 @@ describe('ProjectUploadManager', function () {
         ctx.ProjectDeleter.promises.deleteProject.should.have.been.calledWith(
           ctx.project._id
         )
+      })
+
+      it('should remove the destination directory', function (ctx) {
+        ctx.fs.promises.rm.should.have.been.calledWith(ctx.extractedZipPath, {
+          recursive: true,
+          force: true,
+        })
+      })
+    })
+
+    describe('when extraction fails', function () {
+      beforeEach(async function (ctx) {
+        ctx.ArchiveManager.promises.extractZipArchive.rejects(new Error('oops'))
+        await expect(
+          ctx.ProjectUploadManager.promises.createProjectFromZipArchiveWithName(
+            ctx.ownerId,
+            ctx.projectName,
+            ctx.zipPath
+          )
+        ).to.be.rejectedWith('oops')
+      })
+
+      it('should remove the destination directory', function (ctx) {
+        ctx.fs.promises.rm.should.have.been.calledWith(ctx.extractedZipPath, {
+          recursive: true,
+          force: true,
+        })
       })
     })
   })

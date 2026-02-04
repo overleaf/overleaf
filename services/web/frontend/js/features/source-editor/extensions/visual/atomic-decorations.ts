@@ -922,7 +922,7 @@ export const atomicDecorations = (options: Options) => {
                 )
                 const centered = Boolean(
                   environmentNode &&
-                    centeringNodeForEnvironment(environmentNode)
+                  centeringNodeForEnvironment(environmentNode)
                 )
                 const figureData = environmentNode
                   ? parseFigureData(environmentNode, state)
@@ -1017,7 +1017,7 @@ export const atomicDecorations = (options: Options) => {
                   ...decorateArgumentBraces(
                     new BraceWidget(decorateBrackets ? '' : '['),
                     argumentNode,
-                    from,
+                    argumentNode.from,
                     false,
                     new BraceWidget(decorateBrackets ? '' : ']'),
                     { open: OpenBracket, close: CloseBracket }

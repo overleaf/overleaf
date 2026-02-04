@@ -21,7 +21,7 @@ export class MissingBillingInfoError extends OError {}
 
 export class ManuallyCollectedError extends OError {}
 
-export class PendingChangeError extends OError {}
+export class MultiplePendingChangesError extends OError {}
 
 export class InactiveError extends OError {}
 
@@ -76,7 +76,7 @@ export default {
   PaymentFailedError,
   MissingBillingInfoError,
   ManuallyCollectedError,
-  PendingChangeError,
+  MultiplePendingChangesError,
   InactiveError,
   SubtotalLimitExceededError,
   HasPastDueInvoiceError,

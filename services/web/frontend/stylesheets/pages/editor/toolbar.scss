@@ -397,7 +397,7 @@
   height: var(--toggle-switch-height);
   margin-right: var(--spacing-03);
   border-radius: var(--border-radius-full);
-  background-color: var(--neutral-20);
+  background-color: var(--bg-tertiary-themed);
   padding: var(--toggle-switch-padding);
 }
 
@@ -412,7 +412,7 @@
   margin: 0;
   cursor: pointer;
   user-select: none;
-  color: var(--content-secondary);
+  color: var(--content-secondary-themed);
   border-radius: var(--border-radius-full);
   transition:
     color 0.12s ease-out,

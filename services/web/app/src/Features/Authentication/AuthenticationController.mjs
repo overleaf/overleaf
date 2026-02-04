@@ -62,20 +62,6 @@ function checkCredentials(userDetailsMap, user, password) {
   return isValid
 }
 
-function reduceStaffAccess(staffAccess) {
-  const reducedStaffAccess = {}
-  for (const field in staffAccess) {
-    if (staffAccess[field]) {
-      reducedStaffAccess[field] = true
-    }
-  }
-  return reducedStaffAccess
-}
-
-function userHasStaffAccess(user) {
-  return user.staffAccess && Object.values(user.staffAccess).includes(true)
-}
-
 // TODO: Finish making these methods async
 const AuthenticationController = {
   serializeUser(user, callback) {
@@ -100,9 +86,7 @@ const AuthenticationController = {
     }
     if (user.isAdmin) {
       lightUser.isAdmin = true
-    }
-    if (userHasStaffAccess(user)) {
-      lightUser.staffAccess = reduceStaffAccess(user.staffAccess)
+      lightUser.adminRoles = user.adminRoles
     }
 
     callback(null, lightUser)
@@ -393,9 +377,7 @@ const AuthenticationController = {
 
     const middleware = async (req, res, next) => {
       const Oauth2Server = (
-        await import(
-          '../../../../modules/oauth2-server/app/src/Oauth2Server.mjs'
-        )
+        await import('../../../../modules/oauth2-server/app/src/Oauth2Server.mjs')
       ).default
 
       const request = new Oauth2Server.Request(req)

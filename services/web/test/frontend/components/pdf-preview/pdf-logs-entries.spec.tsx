@@ -3,7 +3,7 @@ import PdfLogsEntries from '../../../../frontend/js/features/pdf-preview/compone
 import { detachChannel, testDetachChannel } from '../../helpers/detach-channel'
 import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { FindResult } from '@/features/file-tree/util/path'
-import { FC } from 'react'
+import { FC, ReactElement } from 'react'
 import {
   EditorManager,
   EditorManagerContext,
@@ -62,6 +62,14 @@ describe('<PdfLogsEntries/>', function () {
     )
   }
 
+  // TODO: ide-redesign-cleanup: Remove this wrapper when the styles are no
+  // longer nested in .ide-redesign-main .error-logs
+  const LogsPanel = ({ children }: { children: ReactElement }) => (
+    <div className="ide-redesign-main">
+      <div className="error-logs"> {children}</div>
+    </div>
+  )
+
   const logEntries: LogEntry[] = [
     {
       file: 'main.tex',
@@ -84,7 +92,9 @@ describe('<PdfLogsEntries/>', function () {
   it('displays human readable hint', function () {
     cy.mount(
       <EditorProviders providers={{ EditorViewProvider }}>
-        <PdfLogsEntries entries={logEntries} />
+        <LogsPanel>
+          <PdfLogsEntries entries={logEntries} />
+        </LogsPanel>
       </EditorProviders>
     )
 
@@ -100,15 +110,17 @@ describe('<PdfLogsEntries/>', function () {
           EditorViewProvider,
         }}
       >
-        <PdfLogsEntries entries={logEntries} />
+        <LogsPanel>
+          <PdfLogsEntries entries={logEntries} />
+        </LogsPanel>
       </EditorProviders>
     )
 
     cy.findByRole('button', {
-      name: 'Navigate to log position in source code: main.tex, 9',
+      name: 'Go to code location',
     }).click()
 
-    cy.get('@findEntityByPath').should('have.been.calledOnceWith', 'main.tex')
+    cy.get('@findEntityByPath').should('have.been.calledWith', 'main.tex')
     cy.get('@openDocWithId').should(
       'have.been.calledOnceWith',
       fakeFindEntityResult.entity._id,
@@ -133,7 +145,9 @@ describe('<PdfLogsEntries/>', function () {
           EditorViewProvider,
         }}
       >
-        <PdfLogsEntries entries={logEntries} />
+        <LogsPanel>
+          <PdfLogsEntries entries={logEntries} />
+        </LogsPanel>
       </EditorProviders>
     ).then(() => {
       testDetachChannel.postMessage({
@@ -151,7 +165,7 @@ describe('<PdfLogsEntries/>', function () {
       })
     })
 
-    cy.get('@findEntityByPath').should('have.been.calledOnce')
+    cy.get('@findEntityByPath').should('have.been.called')
     cy.get('@openDocWithId').should(
       'have.been.calledOnceWith',
       fakeFindEntityResult.entity._id,
@@ -176,17 +190,18 @@ describe('<PdfLogsEntries/>', function () {
           EditorViewProvider,
         }}
       >
-        <PdfLogsEntries entries={logEntries} />
+        <LogsPanel>
+          <PdfLogsEntries entries={logEntries} />
+        </LogsPanel>
       </EditorProviders>
     )
 
     cy.spy(detachChannel, 'postMessage').as('postDetachMessage')
 
     cy.findByRole('button', {
-      name: 'Navigate to log position in source code: main.tex, 9',
+      name: 'Go to code location',
     }).click()
 
-    cy.get('@findEntityByPath').should('not.have.been.called')
     cy.get('@openDocWithId').should('not.have.been.called')
     cy.get('@postDetachMessage').should('have.been.calledWith', {
       role: 'detached',

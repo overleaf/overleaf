@@ -66,7 +66,7 @@ describe('<FileTreeitemInner />', function () {
       cy.findByRole('menu')
 
       // close the context menu
-      cy.get('div.entity').click()
+      cy.get('div.entity').click({ force: true })
       cy.findByRole('menu').should('not.exist')
     })
   })
@@ -86,7 +86,8 @@ describe('<FileTreeitemInner />', function () {
         </EditorProviders>
       )
 
-      cy.findByRole('button', { name: 'bar.tex' })
+      // TODO: ide-redesign-cleanup: Can we add a better selector here?
+      cy.findByText('bar.tex')
       cy.findByRole('textbox').should('not.exist')
     })
 
@@ -117,7 +118,7 @@ describe('<FileTreeitemInner />', function () {
 
       cy.findByRole('button', { name: 'Open bar.tex action menu' }).click()
       cy.findByRole('menuitem', { name: 'Rename' }).click()
-      cy.findByRole('button', { name: 'bar.tex' }).should('not.exist')
+      cy.findByRole('treeitem', { name: 'bar.tex' }).should('not.exist')
       cy.findByRole('textbox')
     })
   })

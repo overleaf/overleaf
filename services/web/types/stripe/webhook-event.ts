@@ -1,15 +1,18 @@
 import Stripe from 'stripe'
 
+type StripeSubscription = Stripe.Subscription & {
+  metadata: {
+    billing_migration_id?: string
+    recurly_to_stripe_migration_status?: 'in_progress' | 'completed'
+  }
+  customer: string
+}
+
 export interface CustomerSubscriptionUpdatedWebhookEvent
   extends Stripe.EventBase {
   type: 'customer.subscription.updated'
   data: {
-    object: Stripe.Subscription & {
-      metadata: {
-        adminUserId?: string
-      }
-      customer: string
-    }
+    object: StripeSubscription
     // https://docs.stripe.com/api/events/object?api-version=2025-04-30.basil#event_object-data-previous_attributes
     previous_attributes: {
       cancel_at_period_end?: boolean // will only be present if the subscription was cancelled or reactivated
@@ -34,12 +37,7 @@ export interface CustomerSubscriptionCreatedWebhookEvent
   extends Stripe.EventBase {
   type: 'customer.subscription.created'
   data: {
-    object: Stripe.Subscription & {
-      metadata: {
-        adminUserId?: string
-      }
-      customer: string
-    }
+    object: StripeSubscription
   }
 }
 
@@ -47,12 +45,7 @@ export interface CustomerSubscriptionsDeletedWebhookEvent
   extends Stripe.EventBase {
   type: 'customer.subscription.deleted'
   data: {
-    object: Stripe.Subscription & {
-      metadata: {
-        adminUserId?: string
-      }
-      customer: string
-    }
+    object: StripeSubscription
   }
 }
 
@@ -63,7 +56,8 @@ export interface InvoicePaidWebhookEvent extends Stripe.EventBase {
       parent: Stripe.Invoice.Parent & {
         subscription_details: Stripe.Invoice.Parent.SubscriptionDetails & {
           metadata: {
-            adminUserId?: string
+            billing_migration_id?: string
+            recurly_to_stripe_migration_status?: 'in_progress' | 'completed'
           }
         }
       }
@@ -107,6 +101,21 @@ export interface InvoiceOverdueWebhookEvent extends Stripe.EventBase {
   }
 }
 
+export interface InvoiceCreatedWebhookEvent extends Stripe.EventBase {
+  type: 'invoice.created'
+  data: {
+    object: Stripe.Invoice & {
+      parent: Stripe.Invoice.Parent & {
+        subscription_details: Stripe.Invoice.Parent.SubscriptionDetails & {
+          metadata: {
+            billing_migration_id?: string
+          }
+        }
+      }
+    }
+  }
+}
+
 export interface CustomerCreatedWebhookEvent extends Stripe.EventBase {
   type: 'customer.created'
   data: {
@@ -138,6 +147,7 @@ export type WebhookEvent =
   | CustomerSubscriptionWebhookEvent
   | InvoicePaidWebhookEvent
   | InvoiceVoidedWebhookEvent
+  | InvoiceCreatedWebhookEvent
   | PaymentIntentPaymentFailedWebhookEvent
   | SetupIntentSetupFailedWebhookEvent
   | InvoiceOverdueWebhookEvent

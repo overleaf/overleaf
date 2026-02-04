@@ -5,20 +5,21 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const async = require('async')
-const { expect } = require('chai')
-const request = require('request').defaults({
+import async from 'async'
+import Request from 'request'
+import { expect } from 'chai'
+import RealTimeClient from './helpers/RealTimeClient.js'
+import FixturesManager from './helpers/FixturesManager.js'
+
+const request = Request.defaults({
   baseUrl: 'http://127.0.0.1:3026',
 })
 
-const RealTimeClient = require('./helpers/RealTimeClient')
-const FixturesManager = require('./helpers/FixturesManager')
-
 describe('HttpControllerTests', function () {
   describe('without a user', function () {
-    return it('should return 404 for the client view', function (done) {
+    it('should return 404 for the client view', function (done) {
       const clientId = 'not-existing'
-      return request.get(
+      request.get(
         {
           url: `/clients/${clientId}`,
           json: true,
@@ -28,36 +29,36 @@ describe('HttpControllerTests', function () {
             return done(error)
           }
           expect(response.statusCode).to.equal(404)
-          return done()
+          done()
         }
       )
     })
   })
 
-  return describe('with a user and after joining a project', function () {
+  describe('with a user and after joining a project', function () {
     before(function (done) {
-      return async.series(
+      async.series(
         [
           cb => {
-            return FixturesManager.setUpProject(
+            FixturesManager.setUpProject(
               {
                 privilegeLevel: 'owner',
               },
               (error, { project_id: projectId, user_id: userId }) => {
                 this.project_id = projectId
                 this.user_id = userId
-                return cb(error)
+                cb(error)
               }
             )
           },
 
           cb => {
-            return FixturesManager.setUpDoc(
+            FixturesManager.setUpDoc(
               this.project_id,
               {},
               (error, { doc_id: docId }) => {
                 this.doc_id = docId
-                return cb(error)
+                cb(error)
               }
             )
           },
@@ -67,15 +68,15 @@ describe('HttpControllerTests', function () {
           },
 
           cb => {
-            return this.client.emit('joinDoc', this.doc_id, cb)
+            this.client.emit('joinDoc', this.doc_id, cb)
           },
         ],
         done
       )
     })
 
-    return it('should send a client view', function (done) {
-      return request.get(
+    it('should send a client view', function (done) {
+      request.get(
         {
           url: `/clients/${this.client.socket.sessionid}`,
           json: true,
@@ -97,7 +98,7 @@ describe('HttpControllerTests', function () {
             user_id: this.user_id,
             rooms: [this.project_id, this.doc_id],
           })
-          return done()
+          done()
         }
       )
     })

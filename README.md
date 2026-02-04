@@ -65,7 +65,6 @@ in which to run the Overleaf services. Baseimage uses the `runit` service
 manager to manage services, and we add our init-scripts from the `server-ce/runit`
 folder.
 
-
 ## Contributing
 
 Please see the [CONTRIBUTING](CONTRIBUTING.md) file for information on contributing to the development of Overleaf.

@@ -46,9 +46,9 @@ Uploads a stream to the backend.
 - `key`: The key for the uploaded object
 - `readStream`: The data stream to upload
 - `opts` (optional):
-    - `sourceMd5`: The md5 hash of the source data, if known. The uploaded data will be compared against this and the operation will fail if it does not match. If omitted, the md5 is calculated as the data is uploaded instead, and verified against the backend. This is not supported in `S3Persistor` as it performs [its own integrity protections](https://aws.amazon.com/blogs/aws/introducing-default-data-integrity-protections-for-new-objects-in-amazon-s3/). Setting `sourceMd5` with `S3Persistor` will result in an error being thrown.
-    - `contentType`: The content type to write in the object metadata
-    - `contentEncoding`: The content encoding to write in the object metadata
+  - `sourceMd5`: The md5 hash of the source data, if known. The uploaded data will be compared against this and the operation will fail if it does not match. If omitted, the md5 is calculated as the data is uploaded instead, and verified against the backend. This is not supported in `S3Persistor` as it performs [its own integrity protections](https://aws.amazon.com/blogs/aws/introducing-default-data-integrity-protections-for-new-objects-in-amazon-s3/). Setting `sourceMd5` with `S3Persistor` will result in an error being thrown.
+  - `contentType`: The content type to write in the object metadata
+  - `contentEncoding`: The content encoding to write in the object metadata
 
 ##### Notes
 

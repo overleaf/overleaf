@@ -2,9 +2,8 @@ volumes:
   data:
 
 services:
-
   test_unit:
-    image: node:22.18.0
+    image: node:24.13.0
     volumes:
       - .:/overleaf/services/web
       - ../../node_modules:/overleaf/node_modules
@@ -18,7 +17,7 @@ services:
       OVERLEAF_CONFIG:
       CI:
       MODULE_NAME:
-      MOCHA_ROOT_SUITE_NAME:
+      JUNIT_ROOT_SUITE_NAME:
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
@@ -32,7 +31,7 @@ services:
       - redis_test
 
   test_acceptance:
-    image: node:22.18.0
+    image: node:24.13.0
     volumes:
       - .:/overleaf/services/web
       - ../../node_modules:/overleaf/node_modules
@@ -47,7 +46,7 @@ services:
       OVERLEAF_CONFIG:
       CI:
       MODULE_NAME:
-      MOCHA_ROOT_SUITE_NAME:
+      JUNIT_ROOT_SUITE_NAME:
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ${LOG_LEVEL:-}
       MONGO_SERVER_SELECTION_TIMEOUT: 600000
@@ -56,7 +55,7 @@ services:
       # OVERLEAF_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true'
 
     extra_hosts:
-      - 'www.overleaf.test:127.0.0.1'
+      - "www.overleaf.test:127.0.0.1"
     depends_on:
       - redis_test
       - mongo
@@ -77,7 +76,7 @@ services:
     working_dir: /overleaf/services/web
     environment:
       CI:
-      MOCHA_ROOT_SUITE_NAME:
+      JUNIT_ROOT_SUITE_NAME:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_OPTIONS: "--unhandled-rejections=strict"
       VERBOSE_LOGGING:
@@ -93,7 +92,7 @@ services:
     environment:
       VERBOSE_LOGGING:
       CI:
-      MOCHA_ROOT_SUITE_NAME:
+      JUNIT_ROOT_SUITE_NAME:
       CYPRESS_SPEC_PATTERN: ${CYPRESS_SPEC_PATTERN:-}
       CYPRESS_EXCLUDE_SPEC_PATTERN: ${CYPRESS_EXCLUDE_SPEC_PATTERN:-}
     entrypoint: npm
@@ -113,7 +112,7 @@ services:
     working_dir: /overleaf/services/web
     environment:
       CI:
-      MOCHA_ROOT_SUITE_NAME:
+      JUNIT_ROOT_SUITE_NAME:
       NODE_OPTIONS: "--unhandled-rejections=strict"
       VERBOSE_LOGGING:
     command: npm run --silent test:writefull
@@ -124,7 +123,7 @@ services:
 
   mongo:
     image: mongo:8.0.11
-    command: --replSet overleaf
+    command: --replSet overleaf --notablescan
     volumes:
       - ../../bin/shared/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
       - ../../bin/shared/mongodb-docker-entrypoint-wait.sh:/mongodb-docker-entrypoint-wait.sh
@@ -143,13 +142,13 @@ services:
     # REF: https://github.com/moby/moby/issues/8231#issuecomment-63877553
     # REF: https://github.com/moby/moby/issues/8231#issuecomment-63871343
     command:
-      - 'bash'
-      - '-c'
-      - 'ulimit -n 1024 && exec bash /run.sh'
+      - "bash"
+      - "-c"
+      - "ulimit -n 1024 && exec bash /run.sh"
 
   saml:
-      image: us-east1-docker.pkg.dev/overleaf-ops/ol-docker/saml-test
-      environment:
-          SAML_BASE_URL_PATH: 'http://saml/simplesaml/'
-          SAML_TEST_SP_ENTITY_ID: 'overleaf-test-saml'
-          SAML_TEST_SP_LOCATION: 'http://www.overleaf.test:23000/saml/callback'
+    image: us-east1-docker.pkg.dev/overleaf-ops/ol-docker/saml-test
+    environment:
+      SAML_BASE_URL_PATH: "http://saml/simplesaml/"
+      SAML_TEST_SP_ENTITY_ID: "overleaf-test-saml"
+      SAML_TEST_SP_LOCATION: "http://www.overleaf.test:23000/saml/callback"

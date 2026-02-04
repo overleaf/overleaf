@@ -2,7 +2,6 @@
 
 import { expressify } from '@overleaf/promise-utils'
 
-import async from 'async'
 import UserMembershipAuthorization from './UserMembershipAuthorization.mjs'
 import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import UserMembershipHandler from './UserMembershipHandler.mjs'
@@ -10,7 +9,7 @@ import EntityConfigs from './UserMembershipEntityConfigs.mjs'
 import Errors from '../Errors/Errors.js'
 import HttpErrorHandler from '../Errors/HttpErrorHandler.mjs'
 import TemplatesManager from '../Templates/TemplatesManager.mjs'
-import { z, zz, validateReq } from '../../infrastructure/Validation.mjs'
+import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
 
 const { useAdminCapabilities } = AdminAuthorizationHelper
@@ -24,7 +23,7 @@ const UserMembershipMiddleware = {
     requireEntity(),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('groupMetrics'),
+      UserMembershipAuthorization.hasAdminAccess,
     ]),
   ],
 
@@ -37,7 +36,7 @@ const UserMembershipMiddleware = {
     requireEntity(),
   ],
 
-  requireEntityAccess: ({ entityName, staffAccess, adminCapability }) => [
+  requireEntityAccess: ({ entityName, adminCapability }) => [
     AuthenticationController.requireLogin(),
     fetchEntityConfig(entityName),
     fetchEntity(),
@@ -45,7 +44,6 @@ const UserMembershipMiddleware = {
     allowAccessIfAny(
       [
         UserMembershipAuthorization.hasEntityAccess(),
-        staffAccess && UserMembershipAuthorization.hasStaffAccess(staffAccess),
         adminCapability &&
           UserMembershipAuthorization.hasAdminCapability(adminCapability),
       ].filter(Boolean)
@@ -59,9 +57,7 @@ const UserMembershipMiddleware = {
     requireEntity(),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('groupManagement'),
-      // allow to all admins when `adminRolesEnabled` is true
-      UserMembershipAuthorization.hasAnyAdminRole,
+      UserMembershipAuthorization.hasAdminCapability('modify-group'),
     ]),
   ],
 
@@ -73,7 +69,6 @@ const UserMembershipMiddleware = {
     useAdminCapabilities,
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('groupManagement'),
       UserMembershipAuthorization.hasModifyGroupMemberCapability,
     ]),
   ],
@@ -85,7 +80,7 @@ const UserMembershipMiddleware = {
     requireEntity(),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('groupMetrics'),
+      UserMembershipAuthorization.hasAdminAccess,
     ]),
   ],
 
@@ -93,42 +88,63 @@ const UserMembershipMiddleware = {
     AuthenticationController.requireLogin(),
     fetchEntityConfig('institution'),
     fetchEntity(),
-    requireEntityOrCreate('institutionManagement'),
+    requireEntityOrCreate(),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('institutionMetrics'),
+      UserMembershipAuthorization.hasAdminAccess,
     ]),
   ],
 
-  requireInstitutionManagementAccess: [
+  requireInstitutionManagerAccess: [
     AuthenticationController.requireLogin(),
     fetchEntityConfig('institution'),
     fetchEntity(),
-    requireEntityOrCreate('institutionManagement'),
+    requireEntityOrCreate(),
+    useAdminCapabilities,
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('institutionManagement'),
+      UserMembershipAuthorization.hasAdminAccess,
     ]),
   ],
 
-  requireInstitutionManagementStaffAccess: [
+  requireInstitutionManagerManagement: [
     AuthenticationController.requireLogin(),
-    allowAccessIfAny([
-      UserMembershipAuthorization.hasStaffAccess('institutionManagement'),
-    ]),
     fetchEntityConfig('institution'),
     fetchEntity(),
-    requireEntityOrCreate('institutionManagement'),
+    requireEntityOrCreate(),
+    useAdminCapabilities,
+    allowAccessIfAny([
+      UserMembershipAuthorization.hasEntityAccess(),
+      UserMembershipAuthorization.hasAdminCapability(
+        'modify-institution-manager'
+      ),
+    ]),
+  ],
+
+  requireInstitutionAIAccess: [
+    AuthenticationController.requireLogin(),
+    fetchEntityConfig('institution'),
+    fetchEntity(),
+    requireEntityOrCreate(),
+    allowAccessIfAny([UserMembershipAuthorization.hasAdminAccess]),
+  ],
+
+  requireInstitutionStaffHubAccess: [
+    AuthenticationController.requireLogin(),
+    fetchEntityConfig('institution'),
+    fetchEntity(),
+    requireEntityOrCreate(),
+    allowAccessIfAny([UserMembershipAuthorization.hasAdminAccess]),
   ],
 
   requirePublisherMetricsAccess: [
     AuthenticationController.requireLogin(),
     fetchEntityConfig('publisher'),
     fetchEntity(),
-    requireEntityOrCreate('publisherManagement'),
+    requireEntityOrCreate(),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('publisherMetrics'),
+      UserMembershipAuthorization.hasAdminAccess,
     ]),
   ],
 
@@ -136,10 +152,13 @@ const UserMembershipMiddleware = {
     AuthenticationController.requireLogin(),
     fetchEntityConfig('publisher'),
     fetchEntity(),
-    requireEntityOrCreate('publisherManagement'),
+    requireEntityOrCreate(),
+    useAdminCapabilities,
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('publisherManagement'),
+      UserMembershipAuthorization.hasAdminCapability(
+        'modify-publisher-manager'
+      ),
     ]),
   ],
 
@@ -147,18 +166,16 @@ const UserMembershipMiddleware = {
     AuthenticationController.requireLogin(),
     fetchEntityConfig('publisher'),
     fetchEntity(),
-    requireEntityOrCreate('publisherManagement'),
+    requireEntityOrCreate(),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('publisherMetrics'),
+      UserMembershipAuthorization.hasAdminAccess,
     ]),
   ],
 
   requireAdminMetricsAccess: [
     AuthenticationController.requireLogin(),
-    allowAccessIfAny([
-      UserMembershipAuthorization.hasStaffAccess('adminMetrics'),
-    ]),
+    allowAccessIfAny([UserMembershipAuthorization.hasAdminAccess]),
   ],
 
   requireTemplateMetricsAccess: [
@@ -169,23 +186,19 @@ const UserMembershipMiddleware = {
     fetchPublisherFromTemplate(),
     allowAccessIfAny([
       UserMembershipAuthorization.hasEntityAccess(),
-      UserMembershipAuthorization.hasStaffAccess('publisherMetrics'),
+      UserMembershipAuthorization.hasAdminAccess,
     ]),
   ],
 
   requirePublisherCreationAccess: [
     AuthenticationController.requireLogin(),
-    allowAccessIfAny([
-      UserMembershipAuthorization.hasStaffAccess('publisherManagement'),
-    ]),
+    allowAccessIfAny([UserMembershipAuthorization.hasAdminAccess]),
     fetchEntityConfig('publisher'),
   ],
 
   requireInstitutionCreationAccess: [
     AuthenticationController.requireLogin(),
-    allowAccessIfAny([
-      UserMembershipAuthorization.hasStaffAccess('institutionManagement'),
-    ]),
+    allowAccessIfAny([UserMembershipAuthorization.hasAdminAccess]),
     fetchEntityConfig('institution'),
   ],
 
@@ -193,8 +206,6 @@ const UserMembershipMiddleware = {
     AuthenticationController.requireLogin(),
     useAdminCapabilities,
     allowAccessIfAny([
-      UserMembershipAuthorization.hasStaffAccess('splitTestMetrics'),
-      UserMembershipAuthorization.hasStaffAccess('splitTestManagement'),
       UserMembershipAuthorization.hasAdminCapability('view-split-test'),
     ]),
   ],
@@ -203,37 +214,11 @@ const UserMembershipMiddleware = {
     AuthenticationController.requireLogin(),
     useAdminCapabilities,
     allowAccessIfAny([
-      UserMembershipAuthorization.hasStaffAccess('splitTestManagement'),
       UserMembershipAuthorization.hasAdminCapability('modify-split-test'),
     ]),
   ],
 
-  // graphs access is an edge-case:
-  // - the entity id is in `req.query.resource_id`. It must be set as
-  // `req.params.id`
-  // - the entity name is in `req.query.resource_type` and is used to find the
-  // require middleware depending on the entity name
-  requireGraphAccess(req, res, next) {
-    req.params.id = req.query.resource_id
-    let entityName = req.query.resource_type
-    if (!entityName) {
-      return HttpErrorHandler.notFound(req, res, 'resource_type param missing')
-    }
-    entityName = entityName.charAt(0).toUpperCase() + entityName.slice(1)
-
-    const middleware =
-      UserMembershipMiddleware[`require${entityName}MetricsAccess`]
-    if (!middleware) {
-      return HttpErrorHandler.notFound(
-        req,
-        res,
-        `incorrect entity name: ${entityName}`
-      )
-    }
-    // run the list of middleware functions in series. This is essencially
-    // a poor man's middleware runner
-    async.eachSeries(middleware, (fn, callback) => fn(req, res, callback), next)
-  },
+  requireGraphAccess,
 }
 
 export default UserMembershipMiddleware
@@ -280,10 +265,40 @@ const fetchEntitySchema = z.discriminatedUnion('entityName', [
   PostgresIdEntitySchema,
 ])
 
+// graphs access is an edge-case:
+// - the entity id is in `req.query.resource_id`. It must be set as
+// `req.params.id`
+// - the entity name is in `req.query.resource_type` and is used to find the
+// require middleware depending on the entity name
+function requireGraphAccess(req, res, next) {
+  const entityName = req.query.resource_type
+  if (!entityName) {
+    return HttpErrorHandler.notFound(req, res, 'resource_type param missing')
+  }
+  const middleWareName =
+    entityName.charAt(0).toUpperCase() + entityName.slice(1)
+
+  const middlewares =
+    UserMembershipMiddleware[`require${middleWareName}MetricsAccess`]
+  if (!middlewares) {
+    return HttpErrorHandler.notFound(
+      req,
+      res,
+      `incorrect entity name: ${middleWareName}`
+    )
+  }
+
+  // call next router with fixed params to pass it to the correct middleware chain
+  const { graph } = req.params
+  const entityRoute = entityName === 'splitTest' ? 'split-test' : entityName
+  req.url = `/graphs/${entityRoute}/${graph}/${req.query.resource_id}`
+  next('route')
+}
+
 // fetch the entity with id and config, and set it in the request
 function fetchEntity() {
   return expressify(async (req, res, next) => {
-    const { params } = validateReq(req, fetchEntitySchema)
+    const { params } = parseReq(req, fetchEntitySchema)
     req.entity =
       await UserMembershipHandler.promises.getEntityWithoutAuthorizationCheck(
         params.id,
@@ -321,13 +336,13 @@ function requireEntity() {
 
 // ensure an entity was found or redirect to entity creation page if the user
 // has permissions to create the entity, or fail with 404
-function requireEntityOrCreate(creationStaffAccess) {
+function requireEntityOrCreate() {
   return (req, res, next) => {
     if (req.entity) {
       return next()
     }
 
-    if (UserMembershipAuthorization.hasStaffAccess(creationStaffAccess)(req)) {
+    if (UserMembershipAuthorization.hasAdminAccess(req)) {
       res.redirect(`/entities/${req.entityName}/create/${req.params.id}`)
       return
     }

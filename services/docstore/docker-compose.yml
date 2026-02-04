@@ -4,7 +4,7 @@
 
 services:
   test_unit:
-    image: node:22.18.0
+    image: node:24.13.0
     volumes:
       - .:/overleaf/services/docstore
       - ../../node_modules:/overleaf/node_modules
@@ -27,7 +27,7 @@ services:
         condition: service_started
 
   test_acceptance:
-    image: node:22.18.0
+    image: node:24.13.0
     volumes:
       - .:/overleaf/services/docstore
       - ../../node_modules:/overleaf/node_modules
@@ -36,7 +36,6 @@ services:
       - ../../tools/migrations:/overleaf/tools/migrations
     working_dir: /overleaf/services/docstore
     environment:
-      ELASTIC_SEARCH_DSN: es:9200
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       POSTGRES_HOST: postgres
       GCS_API_ENDPOINT: http://gcs:9090

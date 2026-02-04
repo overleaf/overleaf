@@ -3,12 +3,12 @@ x-stoplight:
   id: okoe8mh50pjec
 info:
   title: chat
-  version: '1.0'
+  version: "1.0"
 servers:
-  - url: 'http://chat:3010'
+  - url: "http://chat:3010"
 x-exegesis-controller: messagesController
 paths:
-  '/project/{projectId}/messages':
+  "/project/{projectId}/messages":
     parameters:
       - schema:
           type: string
@@ -19,14 +19,14 @@ paths:
       summary: Get Global messages
       tags: []
       responses:
-        '201':
+        "201":
           description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Message'
+                  $ref: "#/components/schemas/Message"
       operationId: getGlobalMessages
       description: Get global messages for the project with Project ID provided
       parameters:
@@ -42,21 +42,21 @@ paths:
       summary: Send Global message
       operationId: sendGlobalMessage
       responses:
-        '201':
+        "201":
           description: OK
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Message'
+              $ref: "#/components/schemas/Message"
             examples:
               example-1:
                 value:
                   user_id: string
                   content: string
-        description: 'UserID and Content of the message to be posted. '
+        description: "UserID and Content of the message to be posted. "
       description: Send global message  for the project with Project ID provided
-  '/project/{projectId}/messages/{messageId}':
+  "/project/{projectId}/messages/{messageId}":
     parameters:
       - schema:
           type: string
@@ -72,13 +72,13 @@ paths:
       summary: Get single global message
       tags: []
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Message'
-        '404':
+                $ref: "#/components/schemas/Message"
+        "404":
           description: Message not found
       operationId: getGlobalMessage
       description: Get a single global message by message ID for the project with Project ID provided
@@ -86,10 +86,10 @@ paths:
       summary: Delete global message
       operationId: deleteGlobalMessage
       responses:
-        '204':
+        "204":
           description: No Content
-      description: 'Delete global message'
-  '/project/{projectId}/thread/{threadId}/messages':
+      description: "Delete global message"
+  "/project/{projectId}/thread/{threadId}/messages":
     parameters:
       - schema:
           type: string
@@ -105,19 +105,19 @@ paths:
       summary: Send message
       operationId: sendMessage
       responses:
-        '201':
+        "201":
           description: Created
       description: Add a message to the thread with thread ID provided from the Project with Project ID provided.
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Message'
+              $ref: "#/components/schemas/Message"
         description: |-
           JSON object with :
           - user_id: Id of the user
           - content: Content of the message
-  '/project/{projectId}/threads':
+  "/project/{projectId}/threads":
     parameters:
       - schema:
           type: string
@@ -128,20 +128,20 @@ paths:
       summary: Get Threads
       tags: []
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Thread'
+                  $ref: "#/components/schemas/Thread"
               examples: {}
-        '404':
+        "404":
           description: Not Found
       operationId: getThreads
       description: Get the list of threads for the project with Project ID provided
-  '/project/{projectId}/thread/{threadId}/messages/{messageId}/edit':
+  "/project/{projectId}/thread/{threadId}/messages/{messageId}/edit":
     parameters:
       - schema:
           type: string
@@ -162,9 +162,9 @@ paths:
       summary: Edit message
       operationId: editMessage
       responses:
-        '204':
+        "204":
           description: No Content
-        '404':
+        "404":
           description: Not Found
       requestBody:
         content:
@@ -186,7 +186,7 @@ paths:
           - user_id: Id of the user (optional)
       description: |
         Update message with Message ID provided from the Thread ID and Project ID provided
-  '/project/{projectId}/messages/{messageId}/edit':
+  "/project/{projectId}/messages/{messageId}/edit":
     parameters:
       - schema:
           type: string
@@ -202,9 +202,9 @@ paths:
       summary: Edit global message
       operationId: editGlobalMessage
       responses:
-        '204':
+        "204":
           description: No Content
-        '404':
+        "404":
           description: Not Found
       requestBody:
         content:
@@ -226,7 +226,7 @@ paths:
           - user_id: Id of the user (optional)
       description: |
         Update global message with Message ID provided from the Project ID provided
-  '/project/{projectId}/thread/{threadId}/messages/{messageId}':
+  "/project/{projectId}/thread/{threadId}/messages/{messageId}":
     parameters:
       - schema:
           type: string
@@ -247,13 +247,13 @@ paths:
       summary: Get thread message
       tags: []
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Message'
-        '404':
+                $ref: "#/components/schemas/Message"
+        "404":
           description: Message not found
       operationId: getThreadMessage
       description: Get a specific message by message ID from the thread with Thread ID and Project ID provided
@@ -261,10 +261,10 @@ paths:
       summary: Delete message
       operationId: deleteMessage
       responses:
-        '204':
+        "204":
           description: No Content
-      description: 'Delete message with Message ID provided, from the Thread with ThreadID and ProjectID provided'
-  '/project/{projectId}/thread/{threadId}/user/{userId}/messages/{messageId}':
+      description: "Delete message with Message ID provided, from the Thread with ThreadID and ProjectID provided"
+  "/project/{projectId}/thread/{threadId}/user/{userId}/messages/{messageId}":
     parameters:
       - schema:
           type: string
@@ -290,9 +290,9 @@ paths:
       summary: Delete message written by a given user
       operationId: deleteUserMessage
       responses:
-        '204':
+        "204":
           description: No Content
-  '/project/{projectId}/thread/{threadId}/resolve':
+  "/project/{projectId}/thread/{threadId}/resolve":
     parameters:
       - schema:
           type: string
@@ -308,7 +308,7 @@ paths:
       summary: Resolve Thread
       operationId: resolveThread
       responses:
-        '204':
+        "204":
           description: No Content
       requestBody:
         content:
@@ -324,7 +324,7 @@ paths:
           JSON object with :
           - user_id: Id of the user.
       description: Mark Thread with ThreadID and ProjectID provided owned by the user with UserID provided as resolved.
-  '/project/{projectId}/thread/{threadId}/reopen':
+  "/project/{projectId}/thread/{threadId}/reopen":
     parameters:
       - schema:
           type: string
@@ -340,12 +340,12 @@ paths:
       summary: Reopen Thread
       operationId: reopenThread
       responses:
-        '204':
+        "204":
           description: No Content
       description: |-
         Reopen Thread with ThreadID and ProjectID provided.
         i.e unmark it as resolved.
-  '/project/{projectId}/thread/{threadId}':
+  "/project/{projectId}/thread/{threadId}":
     parameters:
       - schema:
           type: string
@@ -361,13 +361,13 @@ paths:
       summary: Get Thread
       tags: []
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Thread'
-        '404':
+                $ref: "#/components/schemas/Thread"
+        "404":
           description: Thread not found
       operationId: getThread
       description: Get a thread with ThreadID and ProjectID provided
@@ -375,10 +375,10 @@ paths:
       summary: Delete thread
       operationId: deleteThread
       responses:
-        '204':
+        "204":
           description: No Content
       description: Delete thread with ThreadID and ProjectID provided
-  '/project/{projectId}/resolved-thread-ids':
+  "/project/{projectId}/resolved-thread-ids":
     parameters:
       - schema:
           type: string
@@ -389,9 +389,9 @@ paths:
       summary: Get resolved thread ids
       operationId: getResolvedThreadIds
       responses:
-        '200':
+        "200":
           description: Resolved thread ids
-  '/project/{projectId}':
+  "/project/{projectId}":
     parameters:
       - schema:
           type: string
@@ -402,15 +402,15 @@ paths:
       summary: Destroy project
       operationId: destroyProject
       responses:
-        '204':
+        "204":
           description: No Content
-      description: 'Delete all threads from Project with Project ID provided, and all messages in those threads.'
+      description: "Delete all threads from Project with Project ID provided, and all messages in those threads."
   /status:
     get:
       summary: Check status
       tags: []
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -423,7 +423,7 @@ paths:
       summary: Check status
       tags: []
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -432,7 +432,7 @@ paths:
                 description: chat is alive
       operationId: getStatus
       description: Check that the Chat service is alive
-  '/project/{projectId}/duplicate-comment-threads':
+  "/project/{projectId}/duplicate-comment-threads":
     parameters:
       - schema:
           type: string
@@ -453,7 +453,7 @@ paths:
                   items:
                     type: string
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
@@ -463,7 +463,7 @@ paths:
                     type: object
                 description: Mapping of old thread ids to their duplicated thread ids
       description: Duplicate a list of comment threads
-  '/project/{projectId}/generate-thread-data':
+  "/project/{projectId}/generate-thread-data":
     parameters:
       - schema:
           type: string
@@ -484,7 +484,7 @@ paths:
                   items:
                     type: string
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
@@ -514,4 +514,4 @@ components:
         id: 0ppt3jw4h5bua
       type: array
       items:
-        $ref: '#/components/schemas/Message'
+        $ref: "#/components/schemas/Message"

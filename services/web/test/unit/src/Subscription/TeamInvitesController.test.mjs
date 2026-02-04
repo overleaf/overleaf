@@ -281,8 +281,12 @@ describe('TeamInvitesController', function () {
   describe('resendInvite', function () {
     const email = 'user@example.com'
     const initPath = '/saml/ukamf/init?group_id=12345'
+    const token = 'token123'
     beforeEach(function (ctx) {
-      ctx.subscription = { teamInvites: [{ email }], populate: sinon.stub() }
+      ctx.subscription = {
+        teamInvites: [{ email, token }],
+        populate: sinon.stub(),
+      }
       ctx.req = {
         entity: ctx.subscription,
         body: {
@@ -322,6 +326,35 @@ describe('TeamInvitesController', function () {
               ctx.subscription,
               email
             )
+            res.statusCode.should.equal(200)
+            resolve()
+          }
+
+          ctx.Controller.resendInvite(ctx.req, res, ctx.next)
+        })
+      })
+    })
+
+    describe('when invite was created with domain capture enabled but domain capture is now disabled', function () {
+      beforeEach(function (ctx) {
+        ctx.subscription = {
+          teamInvites: [
+            { email, inviterName: 'Test Inviter', domainCapture: true },
+          ],
+          populate: sinon.stub(),
+          save: sinon.stub().resolves(),
+        }
+        ctx.req.entity = ctx.subscription
+        ctx.req.entity.domainCaptureEnabled = false
+      })
+
+      it('generates a token and saves the subscription', async function (ctx) {
+        await new Promise(resolve => {
+          const res = new MockResponse(vi)
+          res.callback = () => {
+            expect(ctx.subscription.teamInvites[0].token).to.be.a('string')
+            expect(ctx.subscription.teamInvites[0].token).to.have.length(64)
+            sinon.assert.calledOnce(ctx.subscription.save)
             res.statusCode.should.equal(200)
             resolve()
           }

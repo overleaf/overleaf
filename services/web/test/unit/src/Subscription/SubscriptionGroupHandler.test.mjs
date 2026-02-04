@@ -819,22 +819,6 @@ describe('SubscriptionGroupHandler', function () {
     })
   })
 
-  describe('ensureSubscriptionHasNoPendingChanges', function () {
-    it('should throw if the subscription has pending change', async function (ctx) {
-      await expect(
-        ctx.Handler.promises.ensureSubscriptionHasNoPendingChanges({
-          pendingChange: {},
-        })
-      ).to.be.rejectedWith('This subscription has a pending change')
-    })
-
-    it('should not throw if the subscription has no pending change', async function (ctx) {
-      await expect(
-        ctx.Handler.promises.ensureSubscriptionHasNoPendingChanges({})
-      ).to.not.be.rejected
-    })
-  })
-
   describe('ensureSubscriptionHasNoPastDueInvoice', function () {
     it('should throw if the subscription has past due invoice', async function (ctx) {
       ctx.Modules.promises.hooks.fire

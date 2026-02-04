@@ -1,30 +1,30 @@
 {
-    "port": 8080,
-    "bindIp": "127.0.0.1",
-    "idleTimeout": 30000,
-    "rootGitDirectory": "/tmp/wlgb",
-    "allowedCorsOrigins": "https://localhost",
-    "apiBaseUrl": "https://localhost/api/v0",
-    "postbackBaseUrl": "https://localhost",
-    "serviceName": "Overleaf",
-    "oauth2Server": "https://localhost",
-    "repoStore": {
-        "maxFileNum": 2000,
-        "maxFileSize": 52428800
-    },
-    "swapStore": {
-        "type": "s3",
-        "awsAccessKey": "asdf",
-        "awsSecret": "asdf",
-        "s3BucketName": "com.overleaf.testbucket",
-        "awsRegion": "us-east-1"
-    },
-    "swapJob": {
-        "minProjects": 50,
-        "lowGiB": 128,
-        "highGiB": 256,
-        "intervalMillis": 3600000,
-        "compressionMethod": "gzip"
-    },
-    "sqliteHeapLimitBytes": 512000000
+  "port": 8080,
+  "bindIp": "127.0.0.1",
+  "idleTimeout": 30000,
+  "rootGitDirectory": "/tmp/wlgb",
+  "allowedCorsOrigins": "https://localhost",
+  "apiBaseUrl": "https://localhost/api/v0",
+  "postbackBaseUrl": "https://localhost",
+  "serviceName": "Overleaf",
+  "oauth2Server": "https://localhost",
+  "repoStore": {
+    "maxFileNum": 2000,
+    "maxFileSize": 52428800
+  },
+  "swapStore": {
+    "type": "s3",
+    "awsAccessKey": "asdf",
+    "awsSecret": "asdf",
+    "s3BucketName": "com.overleaf.testbucket",
+    "awsRegion": "us-east-1"
+  },
+  "swapJob": {
+    "minProjects": 50,
+    "lowGiB": 128,
+    "highGiB": 256,
+    "intervalMillis": 3600000,
+    "compressionMethod": "gzip"
+  },
+  "sqliteHeapLimitBytes": 512000000
 }

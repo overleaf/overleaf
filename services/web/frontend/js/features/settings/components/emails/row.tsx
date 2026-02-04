@@ -23,7 +23,7 @@ type EmailsRowProps = {
 function EmailsRow({ userEmailData, primary }: EmailsRowProps) {
   const hasSSOAffiliation = Boolean(
     userEmailData.affiliation &&
-      ssoAvailableForInstitution(userEmailData.affiliation.institution)
+    ssoAvailableForInstitution(userEmailData.affiliation.institution)
   )
 
   return (

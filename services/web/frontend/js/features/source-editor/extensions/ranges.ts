@@ -199,6 +199,7 @@ export const ranges = () => [
                 tr.effects.some(effect => effect.is(updateRangesEffect))
             )
           ) {
+            this.decorations = this.decorations.map(update.changes)
             return
           }
 

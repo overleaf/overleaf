@@ -53,12 +53,11 @@ clean:
 
 # Run the linting commands in the scope of the monorepo.
 # Eslint and prettier (plus some configs) are on the root.
-RUN_LINTING = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(HERE) node:22.18.0 npm run --silent
+RUN_LINTING = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(HERE) node:24.13.0 npm run --silent
+RUN_LINTING_MONOREPO = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(MONOREPO) node:24.13.0 npm run --silent
 
 RUN_LINTING_CI = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/docstore/reports:/overleaf/services/docstore/reports $(IMAGE_CI) npm run --silent
-
-# Same but from the top of the monorepo
-RUN_LINTING_MONOREPO = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(MONOREPO) node:22.18.0 npm run --silent
+RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/docstore/reports:/overleaf/services/docstore/reports -w /overleaf $(IMAGE_CI) npm run --silent
 
 SHELLCHECK_OPTS = \
 	--shell=bash \
@@ -79,13 +78,13 @@ shellcheck_fix:
 	done
 
 format:
-	$(RUN_LINTING) format
+	$(RUN_LINTING_MONOREPO) format -- services/docstore
 
 format_ci:
-	$(RUN_LINTING_CI) format
+	$(RUN_LINTING_CI_MONOREPO) format -- services/docstore
 
 format_fix:
-	$(RUN_LINTING) format:fix
+	$(RUN_LINTING_MONOREPO) format:fix -- services/docstore
 
 lint:
 	$(RUN_LINTING) lint

@@ -1,7 +1,10 @@
-const { NotAuthorizedError } = require('./Errors')
+import Errors from './Errors.js'
+
+const { NotAuthorizedError } = Errors
 
 let AuthorizationManager
-module.exports = AuthorizationManager = {
+
+export default AuthorizationManager = {
   assertClientCanViewProject(client, callback) {
     AuthorizationManager._assertClientHasPrivilegeLevel(
       client,

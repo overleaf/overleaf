@@ -4,7 +4,7 @@ function LinkedInLogo() {
       <g fill="none" fillRule="evenodd">
         <path
           className="background"
-          fill="#0B66C3"
+          fill="#2867b2"
           d="M8 72h56a8 8 0 0 0 8-8V8a8 8 0 0 0-8-8H8a8 8 0 0 0-8 8v56a8 8 0 0 0 8 8"
         />
         <path

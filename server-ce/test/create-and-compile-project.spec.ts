@@ -1,6 +1,7 @@
 import { ensureUserExists, login } from './helpers/login'
 import {
   createProject,
+  createProjectAndOpenInNewEditor,
   openProjectViaInviteNotification,
 } from './helpers/project'
 import { isExcludedBySharding, startWith } from './helpers/config'
@@ -8,7 +9,6 @@ import { prepareWaitForNextCompileSlot } from './helpers/compile'
 
 const USER = 'user@example.com'
 const COLLABORATOR = 'collaborator@example.com'
-
 describe('Project creation and compilation', function () {
   if (isExcludedBySharding('CE_DEFAULT')) return
   startWith({})
@@ -17,16 +17,18 @@ describe('Project creation and compilation', function () {
 
   it('users can create project and compile it', function () {
     login(USER)
-    const { recompile, waitForCompile } = prepareWaitForNextCompileSlot()
+    const { recompile, waitForCompile, waitForCompileRateLimitCoolOff } =
+      prepareWaitForNextCompileSlot()
     waitForCompile(() => {
-      createProject('test-project')
+      createProjectAndOpenInNewEditor('test-project')
     })
     cy.findByRole('textbox', { name: 'Source Editor editing' }).within(() => {
       cy.findByText('\\maketitle').parent().click()
       cy.findByText('\\maketitle').parent().type('\n\\section{{}Test Section}')
     })
+    waitForCompileRateLimitCoolOff()
     recompile()
-    cy.findByRole('region', { name: 'PDF preview and logs' }).within(() => {
+    cy.findByRole('region', { name: 'PDF preview' }).within(() => {
       cy.findByLabelText(/Page.*1/i).should('be.visible')
       cy.findByText('Test Section').should('be.visible')
     })
@@ -36,17 +38,15 @@ describe('Project creation and compilation', function () {
     const fileName = `test-${Date.now()}.md`
     const markdownContent = '# Markdown title'
     login(USER)
-    createProject('test-project')
+    createProjectAndOpenInNewEditor('test-project')
 
-    cy.findByRole('navigation', { name: 'Project files and outline' })
-      .findByRole('button', { name: 'New file' })
-      .click()
+    cy.findByRole('button', { name: 'New file' }).click()
     cy.findByRole('dialog').within(() => {
-      cy.findByLabelText('File Name').as('filename').clear()
-      cy.get('@filename').type(fileName)
+      cy.findByLabelText('File Name').as('fileName').clear()
+      cy.get('@fileName').type(fileName)
       cy.findByRole('button', { name: 'Create' }).click()
     })
-    cy.findByRole('button', { name: fileName }).click()
+    cy.findByRole('treeitem', { name: fileName }).click()
     // wait until we've switched to the newly created empty file
     cy.findByRole('textbox', { name: 'Source Editor editing' }).should(
       'have.length',
@@ -55,12 +55,12 @@ describe('Project creation and compilation', function () {
     cy.findByRole('textbox', { name: 'Source Editor editing' }).type(
       markdownContent
     )
-    cy.findByRole('button', { name: 'main.tex' }).click()
+    cy.findByRole('treeitem', { name: 'main.tex' }).click()
     cy.findByRole('textbox', { name: 'Source Editor editing' }).should(
       'contain.text',
       '\\maketitle'
     )
-    cy.findByRole('button', { name: fileName }).click()
+    cy.findByRole('treeitem', { name: fileName }).click()
     cy.findByRole('textbox', { name: 'Source Editor editing' }).should(
       'contain.text',
       markdownContent
@@ -75,8 +75,9 @@ describe('Project creation and compilation', function () {
     createProject(sourceProjectName, {
       type: 'Example project',
       open: false,
+      newEditor: true,
     }).as('sourceProjectId')
-    createProject(targetProjectName)
+    createProjectAndOpenInNewEditor(targetProjectName)
 
     // link the image from `projectName` into this project
     cy.findByRole('button', { name: 'New file' }).click()
@@ -86,9 +87,7 @@ describe('Project creation and compilation', function () {
       cy.findByLabelText('Select a File').select('frog.jpg')
       cy.findByRole('button', { name: 'Create' }).click()
     })
-    cy.findByRole('navigation', { name: 'Project files and outline' })
-      .findByRole('treeitem', { name: 'frog.jpg' })
-      .click()
+    cy.findByRole('treeitem', { name: 'frog.jpg' }).click()
     cy.findByRole('link', { name: 'Another project' })
       .should('have.attr', 'href')
       .then(href => {
@@ -105,13 +104,12 @@ describe('Project creation and compilation', function () {
     createProject(sourceProjectName, {
       type: 'Example project',
       open: false,
+      newEditor: true,
     }).as('sourceProjectId')
-    createProject(targetProjectName).as('targetProjectId')
+    createProjectAndOpenInNewEditor(targetProjectName).as('targetProjectId')
 
     // link the image from `projectName` into this project
-    cy.findByRole('navigation', { name: 'Project files and outline' })
-      .findByRole('button', { name: 'New file' })
-      .click()
+    cy.findByRole('button', { name: 'New file' }).click()
     cy.findByRole('dialog').within(() => {
       cy.findByRole('button', { name: 'From another project' }).click()
       cy.findByLabelText('Select a Project').select(sourceProjectName)
@@ -123,22 +121,18 @@ describe('Project creation and compilation', function () {
       cy.findByRole('button', { name: 'Share' }).click()
     })
     cy.findByRole('dialog').within(() => {
-      cy.findByRole('combobox', { name: 'Add email address' }).type(
-        COLLABORATOR + ','
-      )
+      cy.findByTestId('collaborator-email-input').type(COLLABORATOR + ',')
       cy.findByRole('button', { name: 'Invite' }).click()
       cy.findByText('Invite not yet accepted.')
     })
 
     login(COLLABORATOR)
-    openProjectViaInviteNotification(targetProjectName)
+    openProjectViaInviteNotification(targetProjectName, true)
     cy.get('@targetProjectId').then(targetProjectId => {
       cy.url().should('include', targetProjectId)
     })
 
-    cy.findByRole('navigation', { name: 'Project files and outline' })
-      .findByRole('treeitem', { name: 'frog.jpg' })
-      .click()
+    cy.findByRole('treeitem', { name: 'frog.jpg' }).click()
     cy.findByRole('link', { name: 'Another project' })
       .should('have.attr', 'href')
       .then(href => {

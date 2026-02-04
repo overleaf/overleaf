@@ -1,6 +1,6 @@
 // @ts-check
 import path from 'node:path'
-import projectKey from './project_key.js'
+import projectKey from '@overleaf/object-persistor/src/ProjectKey.js'
 import {
   chunksBucket,
   backupPersistor,

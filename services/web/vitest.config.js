@@ -1,14 +1,14 @@
 const { defineConfig } = require('vitest/config')
 
 let reporterOptions = {}
-if (process.env.CI && process.env.MOCHA_ROOT_SUITE_NAME) {
+if (process.env.CI && process.env.JUNIT_ROOT_SUITE_NAME) {
   reporterOptions = {
     reporters: [
       'default',
       [
         'junit',
         {
-          classnameTemplate: `${process.env.MOCHA_ROOT_SUITE_NAME}.{filename}`,
+          classnameTemplate: `${process.env.JUNIT_ROOT_SUITE_NAME}.{filename}`,
         },
       ],
     ],

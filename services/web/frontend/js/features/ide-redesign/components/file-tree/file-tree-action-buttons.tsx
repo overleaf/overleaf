@@ -6,7 +6,7 @@ import React from 'react'
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import FileTreeActionButton from './file-tree-action-button'
-import { useRailContext } from '../../contexts/rail-context'
+import { useRailContext } from '../../../ide-react/context/rail-context'
 
 export default function FileTreeActionButtons({
   fileTreeExpanded,

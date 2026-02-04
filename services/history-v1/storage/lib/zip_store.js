@@ -12,7 +12,7 @@ const assert = require('./assert')
 const { BlobStore } = require('./blob_store')
 const persistor = require('./persistor')
 const ProjectArchive = require('./project_archive')
-const projectKey = require('./project_key')
+const projectKey = require('@overleaf/object-persistor/src/ProjectKey.js')
 const temp = require('./temp')
 
 const BUCKET = config.get('zipStore.bucket')

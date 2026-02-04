@@ -232,12 +232,11 @@ async function getActiveAssignmentsForUser(
     return {}
   }
 
-  const splitTests = await SplitTest.find({
-    $where: 'this.versions[this.versions.length - 1].active',
-    ...(removeArchived && { archived: { $ne: true } }),
-  }).exec()
+  const splitTests = (await SplitTestCache.get('')).values()
   const assignments = {}
   for (const splitTest of splitTests) {
+    if (!splitTest.versions[splitTest.versions.length - 1].active) continue
+    if (removeArchived && splitTest.archived) continue
     const { activeForUser, selectedVariantName, phase, versionNumber } =
       await _getAssignmentMetadata(user.analyticsId, user, splitTest)
     if (activeForUser) {

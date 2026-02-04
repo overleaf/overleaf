@@ -3,7 +3,7 @@ import { ReviewPanelResolvedThreadsButton } from './review-panel-resolved-thread
 import { useTranslation } from 'react-i18next'
 import { PanelHeading } from '@/shared/components/panel-heading'
 import useReviewPanelLayout from '../hooks/use-review-panel-layout'
-import RailPanelHeader from '@/features/ide-redesign/components/rail/rail-panel-header'
+import RailPanelHeader from '@/features/ide-react/components/rail/rail-panel-header'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 const ReviewPanelHeader: FC = () => {
@@ -16,7 +16,7 @@ const ReviewPanelHeader: FC = () => {
       {newEditor ? (
         <RailPanelHeader
           title={t('review')}
-          actions={[<ReviewPanelResolvedThreadsButton key="resolve-threads" />]}
+          actions={<ReviewPanelResolvedThreadsButton key="resolve-threads" />}
         />
       ) : (
         <PanelHeading title={t('review')} handleClose={closeReviewPanel}>

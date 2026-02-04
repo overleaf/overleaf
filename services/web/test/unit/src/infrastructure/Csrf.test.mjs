@@ -13,8 +13,10 @@ describe('Csrf', function () {
       default: sinon.stub().returns(ctx.csurf_csrf),
     }))
 
-    ctx.Csrf = (await import(modulePath)).default
-    ctx.csrf = new ctx.Csrf()
+    const module = await import(modulePath)
+    ctx.Csrf = module.default
+    ctx.CsrfClass = module.Csrf
+    ctx.csrf = new ctx.CsrfClass()
     ctx.next = sinon.stub()
     ctx.path = '/foo/bar'
     ctx.req = {
@@ -87,7 +89,7 @@ describe('Csrf', function () {
 
         ctx.csurf_csrf.callsArgWith(2, err)
 
-        const csrf = new ctx.Csrf()
+        const csrf = new ctx.CsrfClass()
         csrf.disableDefaultCsrfProtection(ctx.path, 'POST')
         csrf.middleware(ctx.req, ctx.res, ctx.next)
         expect(ctx.next.calledWith(err)).to.equal(true)
@@ -98,55 +100,51 @@ describe('Csrf', function () {
 
   describe('validateRequest', function () {
     describe('when the request is invalid', function () {
-      it('calls the callback with error', function (ctx) {
-        ctx.cb = sinon.stub()
-        ctx.Csrf.validateRequest(ctx.req, ctx.cb)
-        expect(ctx.cb.calledWith(ctx.err)).to.equal(true)
+      it('rejects the promise', async function (ctx) {
+        await expect(
+          ctx.Csrf.promises.validateRequest(ctx.req)
+        ).to.be.rejectedWith(ctx.err)
       })
     })
 
     describe('when the request is valid', function () {
-      it('calls the callback without an error', async function (ctx) {
+      it('resolves the promise', async function (ctx) {
+        vi.resetModules()
         vi.doMock('csurf', () => ({
-          default: (ctx.csurf = sinon
-            .stub()
-            .returns((ctx.csurf_csrf = sinon.stub().callsArg(2)))),
+          default: sinon.stub().returns(sinon.stub().callsArg(2)),
         }))
 
         ctx.Csrf = (await import(modulePath)).default
-        ctx.cb = sinon.stub()
-        ctx.Csrf.validateRequest(ctx.req, ctx.cb)
-        expect(ctx.cb.calledWith()).to.equal(true)
+        await expect(ctx.Csrf.promises.validateRequest(ctx.req)).to.eventually
+          .be.fulfilled
       })
     })
   })
 
   describe('validateToken', function () {
     describe('when the request is invalid', function () {
-      it('calls the callback with `false`', function (ctx) {
-        ctx.cb = sinon.stub()
-        ctx.Csrf.validateToken('token', {}, ctx.cb)
-        expect(ctx.cb.calledWith(ctx.err)).to.equal(true)
+      it('rejects the promise', async function (ctx) {
+        await expect(
+          ctx.Csrf.promises.validateToken('token', {})
+        ).to.be.rejectedWith(ctx.err)
       })
     })
 
     describe('when the request is valid', function () {
-      it('calls the callback with `true`', async function (ctx) {
+      it('resolves the promise', async function (ctx) {
+        vi.resetModules()
         vi.doMock('csurf', () => ({
-          default: (ctx.csurf = sinon
-            .stub()
-            .returns((ctx.csurf_csrf = sinon.stub().callsArg(2)))),
+          default: sinon.stub().returns(sinon.stub().callsArg(2)),
         }))
 
         ctx.Csrf = (await import(modulePath)).default
-        ctx.cb = sinon.stub()
-        ctx.Csrf.validateToken('goodtoken', {}, ctx.cb)
-        expect(ctx.cb.calledWith()).to.equal(true)
+        await expect(ctx.Csrf.promises.validateToken('goodtoken', {})).to
+          .eventually.be.fulfilled
       })
     })
 
     describe('when there is no token', function () {
-      it('calls the callback with an error', async function (ctx) {
+      it('throws an error', async function (ctx) {
         vi.doMock('csurf', () => ({
           default: (ctx.csurf = sinon
             .stub()
@@ -154,10 +152,9 @@ describe('Csrf', function () {
         }))
 
         ctx.Csrf = (await import(modulePath)).default
-        ctx.cb = sinon.stub()
-        ctx.Csrf.validateToken(null, {}, error => {
-          expect(error).to.exist
-        })
+        await expect(
+          ctx.Csrf.promises.validateToken(null, {})
+        ).to.be.rejectedWith('missing token')
       })
     })
   })

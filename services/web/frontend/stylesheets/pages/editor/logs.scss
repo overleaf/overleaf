@@ -89,16 +89,19 @@
       border-radius: var(--border-radius-base);
       padding: var(--spacing-02) 0;
       overflow: hidden;
-      user-select: text;
 
       &:hover {
         cursor: pointer;
       }
 
       &:hover,
-      :focus,
-      :active {
+      &:focus-visible,
+      &:active {
         background-color: var(--bg-secondary-themed);
+      }
+
+      .log-entry-expand-icon {
+        user-select: none;
       }
     }
 

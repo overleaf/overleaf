@@ -1,11 +1,10 @@
 ---
-
 steps:
   - id: build_base
     name: us-east1-docker.pkg.dev/overleaf-ops/ol-docker/cloud-builder
     dir: server-ce
     args:
-      - 'build-base'
+      - "build-base"
   - id: tag_main_latest_base
     name: gcr.io/cloud-builders/docker
     script: |
@@ -26,7 +25,7 @@ steps:
       exit 0
     automapSubstitutions: true
     waitFor:
-      - '-'
+      - "-"
   - id: build_community
     name: us-east1-docker.pkg.dev/overleaf-ops/ol-docker/cloud-builder
     dir: server-ce
@@ -51,27 +50,27 @@ timeout: 3600s
 options:
   machineType: E2_HIGHCPU_32
   env:
-    - 'BRANCH_NAME=${BRANCH_NAME}'
+    - "BRANCH_NAME=${BRANCH_NAME}"
     # docker build
-    - 'OVERLEAF_BASE_BRANCH=${_IMAGE_BASE_BRANCH}'
-    - 'OVERLEAF_BASE_LATEST=${_IMAGE_BASE_LATEST}'
-    - 'OVERLEAF_BASE_TAG=${_IMAGE_BASE}'
-    - 'OVERLEAF_BRANCH=${_IMAGE_TAG_BRANCH}'
-    - 'OVERLEAF_LATEST=${_IMAGE_TAG_LATEST}'
-    - 'OVERLEAF_TAG=${_IMAGE_TAG}'
+    - "OVERLEAF_BASE_BRANCH=${_IMAGE_BASE_BRANCH}"
+    - "OVERLEAF_BASE_LATEST=${_IMAGE_BASE_LATEST}"
+    - "OVERLEAF_BASE_TAG=${_IMAGE_BASE}"
+    - "OVERLEAF_BRANCH=${_IMAGE_TAG_BRANCH}"
+    - "OVERLEAF_LATEST=${_IMAGE_TAG_LATEST}"
+    - "OVERLEAF_TAG=${_IMAGE_TAG}"
 images:
-  - '${_IMAGE_BASE}'
-  - '${_IMAGE_BASE_BRANCH}'
-  - '${_IMAGE_TAG}'
-  - '${_IMAGE_TAG_BRANCH}'
+  - "${_IMAGE_BASE}"
+  - "${_IMAGE_BASE_BRANCH}"
+  - "${_IMAGE_TAG}"
+  - "${_IMAGE_TAG_BRANCH}"
 substitutions:
-  _IMAGE_BASE: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-base:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}'
-  _IMAGE_BASE_BRANCH: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-base:${BRANCH_NAME}'
-  _IMAGE_BASE_LATEST: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-base:latest'
-  _IMAGE_TAG_BRANCH: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf:${BRANCH_NAME}'
-  _IMAGE_TAG_LATEST: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf:latest'
-  _IMAGE_TAG: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}'
+  _IMAGE_BASE: "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-base:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}"
+  _IMAGE_BASE_BRANCH: "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-base:${BRANCH_NAME}"
+  _IMAGE_BASE_LATEST: "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-base:latest"
+  _IMAGE_TAG_BRANCH: "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf:${BRANCH_NAME}"
+  _IMAGE_TAG_LATEST: "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf:latest"
+  _IMAGE_TAG: "us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}"
 tags:
-  - 'overleaf-public'
-  - '${BRANCH_NAME}'
-  - '${SHORT_SHA}'
+  - "overleaf-public"
+  - "${BRANCH_NAME}"
+  - "${SHORT_SHA}"

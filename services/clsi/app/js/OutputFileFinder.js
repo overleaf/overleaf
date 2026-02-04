@@ -1,6 +1,6 @@
-const Path = require('node:path')
-const fs = require('node:fs')
-const { callbackifyMultiResult } = require('@overleaf/promise-utils')
+import Path from 'node:path'
+import fs from 'node:fs'
+import { callbackifyMultiResult } from '@overleaf/promise-utils'
 
 async function walkFolder(compileDir, d, files, allEntries) {
   const dirents = await fs.promises.readdir(Path.join(compileDir, d), {
@@ -42,7 +42,7 @@ async function findOutputFiles(resources, directory) {
   }
 }
 
-module.exports = {
+export default {
   findOutputFiles: callbackifyMultiResult(findOutputFiles, [
     'outputFiles',
     'allEntries',

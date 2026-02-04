@@ -1,6 +1,10 @@
 import { isExcludedBySharding, startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
-import { createProject, NEW_PROJECT_BUTTON_MATCHER } from './helpers/project'
+import {
+  createProjectAndOpenInNewEditor,
+  NEW_PROJECT_BUTTON_MATCHER,
+  redirectEditorUrlWithQueryParams,
+} from './helpers/project'
 
 const WITHOUT_PROJECTS_USER = 'user-without-projects@example.com'
 const ADMIN_USER = 'admin@example.com'
@@ -53,14 +57,16 @@ describe('Templates', function () {
       const description = `Template Description ${Date.now()}`
 
       cy.visit('/')
-      createProject(name, { type: 'Example project' }).as('templateProjectId')
+      createProjectAndOpenInNewEditor(name, { type: 'Example project' }).as(
+        'templateProjectId'
+      )
 
       cy.findByRole('navigation', {
         name: 'Project actions',
       })
-        .findByRole('button', { name: 'Menu' })
+        .findByRole('button', { name: 'File' })
         .click()
-      cy.findByRole('button', { name: 'Manage Template' }).click()
+      cy.findByRole('menuitem', { name: 'Manage template' }).click()
 
       cy.findByLabelText('Template Description').type(description)
       cy.findByRole('button', { name: 'Publish' }).click()
@@ -132,9 +138,9 @@ describe('Templates', function () {
       cy.findByRole('navigation', {
         name: 'Project actions',
       })
-        .findByRole('button', { name: 'Menu' })
+        .findByRole('button', { name: 'File' })
         .click()
-      cy.findByRole('button', { name: 'Manage Template' }).click()
+      cy.findByRole('menuitem', { name: 'Manage template' }).click()
       cy.findByRole('button', { name: 'Publish' }).click()
       cy.findByRole('button', { name: 'Unpublish', timeout: 60_000 })
 
@@ -162,10 +168,10 @@ describe('Templates', function () {
       cy.findByRole('navigation', {
         name: 'Project actions',
       })
-        .findByRole('button', { name: 'Menu' })
+        .findByRole('button', { name: 'File' })
         .click()
-      cy.findByRole('button', { name: 'Word Count' }).click() // wait for lazy loading
-      cy.findByRole('button', { name: 'Manage Template' }).should('not.exist')
+      cy.findByRole('menuitem', { name: 'Word count' }).click() // wait for lazy loading
+      cy.findByRole('menuitem', { name: 'Manage template' }).should('not.exist')
 
       // Check management as regular user
       cy.get('@newTemplateURL').then(url => cy.visit(`${url}`))
@@ -175,6 +181,9 @@ describe('Templates', function () {
 
       // Check management as admin user
       login(ADMIN_USER)
+
+      redirectEditorUrlWithQueryParams(true)
+
       cy.get('@newTemplateURL').then(url => cy.visit(`${url}`))
       cy.findByRole('link', { name: 'Open as Template' })
       cy.findByRole('button', { name: 'Unpublish' })
@@ -185,9 +194,9 @@ describe('Templates', function () {
       cy.findByRole('navigation', {
         name: 'Project actions',
       })
-        .findByRole('button', { name: 'Menu' })
+        .findByRole('button', { name: 'File' })
         .click()
-      cy.findByRole('button', { name: 'Manage Template' }).click()
+      cy.findByRole('menuitem', { name: 'Manage template' }).click()
       cy.findByRole('button', { name: 'Unpublish' })
 
       // Back to templates user
@@ -200,9 +209,9 @@ describe('Templates', function () {
       cy.findByRole('navigation', {
         name: 'Project actions',
       })
-        .findByRole('button', { name: 'Menu' })
+        .findByRole('button', { name: 'File' })
         .click()
-      cy.findByRole('button', { name: 'Manage Template' }).click()
+      cy.findByRole('menuitem', { name: 'Manage template' }).click()
       cy.findByRole('button', { name: 'Unpublish' }).click()
       cy.findByRole('button', { name: 'Publish' })
       cy.visit('/templates/all')
@@ -224,15 +233,15 @@ describe('Templates', function () {
       login(TEMPLATES_USER)
 
       cy.visit('/')
-      createProject('maybe templates')
+      createProjectAndOpenInNewEditor('maybe templates')
 
       cy.findByRole('navigation', {
         name: 'Project actions',
       })
-        .findByRole('button', { name: 'Menu' })
+        .findByRole('button', { name: 'File' })
         .click()
-      cy.findByRole('button', { name: 'Word Count' }) // wait for lazy loading
-      cy.findByRole('button', { name: 'Manage Template' }).should('not.exist')
+      cy.findByRole('menuitem', { name: 'Word count' }) // wait for lazy loading
+      cy.findByRole('menuitem', { name: 'Manage template' }).should('not.exist')
 
       cy.visit('/templates', { failOnStatusCode: false })
       cy.findByRole('heading', { name: 'Not found' })

@@ -59,7 +59,6 @@ describe('Features', function () {
         expect(ctx.Features.hasFeature('link-url')).to.be.false
         expect(ctx.Features.hasFeature('oauth')).to.be.false
         expect(ctx.Features.hasFeature('saas')).to.be.false
-        expect(ctx.Features.hasFeature('references')).to.be.false
         expect(ctx.Features.hasFeature('saml')).to.be.false
         expect(ctx.Features.hasFeature('templates-server-pro')).to.be.false
       })
@@ -82,7 +81,6 @@ describe('Features', function () {
           expect(ctx.Features.hasFeature('homepage')).to.be.false
           expect(ctx.Features.hasFeature('link-url')).to.be.false
           expect(ctx.Features.hasFeature('oauth')).to.be.false
-          expect(ctx.Features.hasFeature('references')).to.be.false
           expect(ctx.Features.hasFeature('saml')).to.be.false
           expect(ctx.Features.hasFeature('templates-server-pro')).to.be.false
         })
@@ -104,7 +102,6 @@ describe('Features', function () {
             expect(ctx.Features.hasFeature('affiliations')).to.be.true
             expect(ctx.Features.hasFeature('analytics')).to.be.true
             expect(ctx.Features.hasFeature('saas')).to.be.true
-            expect(ctx.Features.hasFeature('references')).to.be.true
             expect(ctx.Features.hasFeature('registration')).to.be.true
           })
           it('should return false', function (ctx) {
@@ -135,7 +132,6 @@ describe('Features', function () {
               expect(ctx.Features.hasFeature('link-url')).to.be.true
               expect(ctx.Features.hasFeature('oauth')).to.be.true
               expect(ctx.Features.hasFeature('saas')).to.be.true
-              expect(ctx.Features.hasFeature('references')).to.be.true
               expect(ctx.Features.hasFeature('registration')).to.be.true
               expect(ctx.Features.hasFeature('saml')).to.be.true
             })

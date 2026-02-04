@@ -32,8 +32,12 @@ describe('UserRegistrationHandler', function () {
         setUserPassword: sinon.stub().resolves(ctx.user),
       },
     }
-    ctx.NewsLetterManager = {
-      subscribe: sinon.stub(),
+    ctx.Modules = {
+      promises: {
+        hooks: {
+          fire: sinon.stub().resolves([]),
+        },
+      },
     }
     ctx.EmailHandler = {
       promises: { sendEmail: sinon.stub().resolves() },
@@ -59,12 +63,9 @@ describe('UserRegistrationHandler', function () {
       })
     )
 
-    vi.doMock(
-      '../../../../app/src/Features/Newsletter/NewsletterManager',
-      () => ({
-        default: ctx.NewsLetterManager,
-      })
-    )
+    vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
+      default: ctx.Modules,
+    }))
 
     vi.doMock('crypto', () => ({
       default: (ctx.crypto = {}),
@@ -238,12 +239,22 @@ describe('UserRegistrationHandler', function () {
       it('should add the user to the newsletter if accepted terms', async function (ctx) {
         ctx.passingRequest.subscribeToNewsletter = 'true'
         await ctx.handler.promises.registerNewUser(ctx.passingRequest)
-        ctx.NewsLetterManager.subscribe.calledWith(ctx.user).should.equal(true)
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'updateTopicSubscription',
+          ctx.user._id,
+          'newsletter',
+          true
+        )
       })
 
       it('should not add the user to the newsletter if not accepted terms', async function (ctx) {
         await ctx.handler.promises.registerNewUser(ctx.passingRequest)
-        ctx.NewsLetterManager.subscribe.calledWith(ctx.user).should.equal(false)
+        expect(ctx.Modules.promises.hooks.fire).to.not.have.been.calledWith(
+          'updateTopicSubscription',
+          sinon.match.any,
+          sinon.match.any,
+          true
+        )
       })
     })
   })

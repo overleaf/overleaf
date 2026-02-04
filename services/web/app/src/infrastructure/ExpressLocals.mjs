@@ -338,6 +338,18 @@ export default async function (webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.use(function (req, res, next) {
+    const KEY_PREFIX = 'readnotif-'
+    const dismissedNotifications = []
+    for (const cookieName in req.cookies) {
+      if (cookieName.startsWith(KEY_PREFIX)) {
+        dismissedNotifications.push(cookieName.slice(KEY_PREFIX.length))
+      }
+    }
+    res.locals.dismissedNotifications = dismissedNotifications
+    next()
+  })
+
+  webRouter.use(function (req, res, next) {
     res.locals.ExposedSettings = {
       isOverleaf: Settings.overleaf != null,
       appName: Settings.appName,
@@ -390,6 +402,7 @@ export default async function (webRouter, privateApiRouter, publicApiRouter) {
         Settings.overleaf != null || Settings.templates?.user_id != null,
       cioWriteKey: Settings.analytics?.cio?.writeKey,
       cioSiteId: Settings.analytics?.cio?.siteId,
+      linkedInInsightsPartnerId: Settings.analytics?.linkedIn?.partnerId,
     }
     next()
   })

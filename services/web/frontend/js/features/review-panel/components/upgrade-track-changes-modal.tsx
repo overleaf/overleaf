@@ -16,22 +16,20 @@ import OLButton from '@/shared/components/ol/ol-button'
 import OLRow from '@/shared/components/ol/ol-row'
 import OLCol from '@/shared/components/ol/ol-col'
 import MaterialIcon from '@/shared/components/material-icon'
+import { useEditorContext } from '@/shared/context/editor-context'
 
-type UpgradeTrackChangesModalProps = {
-  show: boolean
-  setShow: React.Dispatch<React.SetStateAction<boolean>>
-}
-
-function UpgradeTrackChangesModal({
-  show,
-  setShow,
-}: UpgradeTrackChangesModalProps) {
+function UpgradeTrackChangesModal() {
   const { t } = useTranslation()
   const { project } = useProjectContext()
   const user = useUserContext()
+  const { showUpgradeModal, setShowUpgradeModal } = useEditorContext()
+
+  if (!showUpgradeModal) {
+    return null
+  }
 
   return (
-    <OLModal show={show} onHide={() => setShow(false)}>
+    <OLModal show={showUpgradeModal} onHide={() => setShowUpgradeModal(false)}>
       <OLModalHeader>
         <OLModalTitle>{t('upgrade_to_review')}</OLModalTitle>
       </OLModalHeader>
@@ -94,7 +92,10 @@ function UpgradeTrackChangesModal({
         )}
       </OLModalBody>
       <OLModalFooter>
-        <OLButton variant="secondary" onClick={() => setShow(false)}>
+        <OLButton
+          variant="secondary"
+          onClick={() => setShowUpgradeModal(false)}
+        >
           {t('close')}
         </OLButton>
       </OLModalFooter>

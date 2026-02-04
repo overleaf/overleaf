@@ -39,13 +39,9 @@ export const MenuBarDropdown: FC<
     })
   }, [id, setSelected])
 
+  const active = selected === id
   return (
-    <Dropdown
-      show={selected === id}
-      align={align}
-      onToggle={onToggle}
-      autoClose
-    >
+    <Dropdown show={active} align={align} onToggle={onToggle} autoClose>
       <DropdownToggle
         id={`${menuId}-${id}`}
         variant="secondary"
@@ -54,9 +50,11 @@ export const MenuBarDropdown: FC<
       >
         {title}
       </DropdownToggle>
-      <NestableDropdownMenu renderOnMount id={`${menuId}-${id}`}>
-        {children}
-      </NestableDropdownMenu>
+      {active && (
+        <NestableDropdownMenu renderOnMount id={`${menuId}-${id}`}>
+          {children}
+        </NestableDropdownMenu>
+      )}
     </Dropdown>
   )
 }
@@ -109,7 +107,10 @@ export const NestedMenuBarDropdown: FC<
   }, [id, setSelected])
   const onToggle = useCallback(
     (show: boolean) => {
-      setSelected(show ? id : null)
+      // Only handle opening
+      if (show) {
+        setSelected(id)
+      }
     },
     [setSelected, id]
   )
@@ -130,9 +131,11 @@ export const NestedMenuBarDropdown: FC<
       >
         {title}
       </DropdownToggle>
-      <NestableDropdownMenu renderOnMount id={`${menuId}-${id}`}>
-        {children}
-      </NestableDropdownMenu>
+      {active && (
+        <NestableDropdownMenu renderOnMount id={`${menuId}-${id}`}>
+          {children}
+        </NestableDropdownMenu>
+      )}
     </Dropdown>
   )
 }

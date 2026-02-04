@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/overleaf/internal/
 
-FROM node:22.18.0 AS base
+FROM node:24.13.0 AS base
 
 WORKDIR /overleaf/services/contacts
 

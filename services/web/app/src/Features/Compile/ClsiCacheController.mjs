@@ -86,7 +86,8 @@ async function downloadFromCache(req, res) {
     if (
       streamingStarted &&
       reqAborted &&
-      err.code === 'ERR_STREAM_PREMATURE_CLOSE'
+      (err.code === 'ERR_STREAM_PREMATURE_CLOSE' ||
+        err.code === 'ERR_STREAM_UNABLE_TO_PIPE')
     ) {
       // Ignore noisy spurious error
       return

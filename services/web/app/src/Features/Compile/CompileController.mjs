@@ -23,7 +23,7 @@ import {
 } from '@overleaf/fetch-utils'
 import Features from '../../infrastructure/Features.mjs'
 
-const { z, zz, validateReq } = Validation
+const { z, zz, parseReq } = Validation
 const ClsiCookieManager = ClsiCookieManagerFactory(
   Settings.apis.clsi?.backendGroupName
 )
@@ -358,7 +358,7 @@ const _CompileController = {
   },
 
   async deleteAuxFiles(req, res) {
-    const { params, query } = validateReq(req, deleteAuxFilesSchema)
+    const { params, query } = parseReq(req, deleteAuxFilesSchema)
     const projectId = params.Project_id
     const { clsiserverid } = query
     const userId = await CompileController._getUserIdForCompile(req)
@@ -596,7 +596,8 @@ const _CompileController = {
       if (
         streamingStarted &&
         reqAborted &&
-        err.code === 'ERR_STREAM_PREMATURE_CLOSE'
+        (err.code === 'ERR_STREAM_PREMATURE_CLOSE' ||
+          err.code === 'ERR_STREAM_UNABLE_TO_PIPE')
       ) {
         // Ignore noisy spurious error
         return
@@ -625,7 +626,7 @@ const _CompileController = {
   },
 
   async wordCount(req, res) {
-    const { params, query } = validateReq(req, wordCountSchema)
+    const { params, query } = parseReq(req, wordCountSchema)
     const projectId = params.Project_id
     const file = query.file || false
     const { clsiserverid } = query

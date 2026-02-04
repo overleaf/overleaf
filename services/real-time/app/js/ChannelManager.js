@@ -1,7 +1,7 @@
-const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
-const settings = require('@overleaf/settings')
-const OError = require('@overleaf/o-error')
+import logger from '@overleaf/logger'
+import metrics from '@overleaf/metrics'
+import settings from '@overleaf/settings'
+import OError from '@overleaf/o-error'
 
 const ClientMap = new Map() // for each redis client, store a Map of subscribed channels (channelname -> subscribe promise)
 
@@ -9,7 +9,7 @@ const ClientMap = new Map() // for each redis client, store a Map of subscribed 
 // that we never subscribe to a channel multiple times. The socket.io side is
 // handled by RoomManager.
 
-module.exports = {
+export default {
   getClientMapEntry(rclient) {
     // return the per-client channel map if it exists, otherwise create and
     // return an empty map for the client.

@@ -1,5 +1,13 @@
 import classNames from 'classnames'
-import { useState, useRef, MouseEventHandler, ElementType } from 'react'
+import {
+  useState,
+  useRef,
+  MouseEventHandler,
+  ElementType,
+  useCallback,
+  KeyboardEventHandler,
+  useMemo,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import {
@@ -99,22 +107,39 @@ function LogEntryHeader({
   ) : null
 
   const headerTitleText = logType ? `${logType} ${headerTitle}` : headerTitle
-  const fileData = file && findEntityByPath(file)
+  const fileData = useMemo(
+    () => file && findEntityByPath(file),
+    [file, findEntityByPath]
+  )
   const showGoToCodeButton =
     showSourceLocationLink &&
     !!fileData &&
     !(fileData.entity._id === openEntity?.entity._id && !line)
 
+  const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = useCallback(
+    event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
+        onToggleCollapsed()
+      }
+    },
+    [onToggleCollapsed]
+  )
+
   return (
     <header className="log-entry-header-card">
-      <button
+      <div
         data-action="expand-collapse"
         data-collapsed={collapsed}
         className="log-entry-header-button"
         onClick={onToggleCollapsed}
+        role="button"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
         aria-label={collapsed ? t('expand') : t('collapse')}
       >
         <MaterialIcon
+          className="log-entry-expand-icon"
           type={
             openCollapseIconOverride ??
             (collapsed ? 'chevron_right' : 'expand_more')
@@ -135,7 +160,7 @@ function LogEntryHeader({
             formattedLocationText
           )}
         </div>
-      </button>
+      </div>
 
       {actionButtonsOverride ?? (
         <div className="log-entry-header-actions">

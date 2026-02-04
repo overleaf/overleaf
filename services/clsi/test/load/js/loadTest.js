@@ -1,8 +1,8 @@
-const { fetchNothing } = require('@overleaf/fetch-utils')
-const Settings = require('@overleaf/settings')
-const async = require('async')
-const fs = require('node:fs')
-const _ = require('lodash')
+import { fetchNothing } from '@overleaf/fetch-utils'
+import Settings from '@overleaf/settings'
+import async from 'async'
+import fs from 'node:fs'
+import _ from 'lodash'
 const concurentCompiles = 5
 const totalCompiles = 50
 

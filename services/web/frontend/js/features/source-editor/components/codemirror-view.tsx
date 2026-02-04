@@ -3,7 +3,11 @@ import { useCodeMirrorViewContext } from './codemirror-context'
 import useCodeMirrorScope from '../hooks/use-codemirror-scope'
 import { useEditorViewContext } from '@/features/ide-react/context/editor-view-context'
 
-function CodeMirrorView() {
+type CodeMirrorViewProps = {
+  hidden: boolean
+}
+
+function CodeMirrorView({ hidden = false }: CodeMirrorViewProps) {
   const view = useCodeMirrorViewContext()
 
   const { setView } = useEditorViewContext()
@@ -33,7 +37,7 @@ function CodeMirrorView() {
 
   useCodeMirrorScope(view)
 
-  return <div ref={containerRef} style={{ height: '100%' }} />
+  return <div ref={containerRef} style={{ height: '100%' }} hidden={hidden} />
 }
 
 export default memo(CodeMirrorView)

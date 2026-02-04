@@ -6,9 +6,21 @@ import {
   OLModalFooter,
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
+import { Select } from '@/shared/components/select'
+
+type TestItem = {
+  key: string
+  label: string
+}
 
 function Modal({ backdrop }: { backdrop?: boolean | 'static' } = {}) {
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const testItems: TestItem[] = [
+    { key: 'item1', label: 'First Item' },
+    { key: 'item2', label: 'Second Item' },
+    { key: 'item3', label: 'Third Item' },
+  ]
 
   return (
     <div>
@@ -26,6 +38,13 @@ function Modal({ backdrop }: { backdrop?: boolean | 'static' } = {}) {
           <p>This is for testing the modal behaviour</p>
           <label htmlFor="modal-input">Enter text:&nbsp;</label>
           <input id="modal-input" />
+          <Select
+            items={testItems}
+            itemToKey={item => item.key}
+            itemToString={item => item?.label || ''}
+            dataTestId="test-select"
+            defaultText="Select an item"
+          />
         </OLModalBody>
         <OLModalFooter>
           <button onClick={() => setIsModalOpen(false)}>Close the modal</button>
@@ -74,11 +93,28 @@ describe('<OLModal />', function () {
     cy.focused().tab()
     cy.findByLabelText(/enter text/i).should('be.focused')
     cy.focused().tab()
+    cy.get('[data-testid="test-select"]').should('be.focused')
+    cy.focused().tab()
     cy.findByRole('button', { name: 'Close the modal' }).should('be.focused')
     cy.focused().tab()
     cy.findByRole('button', { name: 'Close dialog' }).should('be.focused')
     cy.focused().tab({ shift: true })
     cy.findByRole('button', { name: 'Close the modal' }).should('be.focused')
+  })
+
+  it('closes select menus when the modal container is clicked on', function () {
+    cy.mount(<Modal />)
+    cy.findByRole('button', { name: 'Open modal' }).click()
+    cy.get('[data-testid="test-select"]').click()
+
+    cy.contains('First Item').should('be.visible')
+    cy.contains('Second Item').should('be.visible')
+    cy.contains('Third Item').should('be.visible')
+
+    cy.findByText('This is for testing the modal behaviour').click()
+    cy.contains('First Item').should('not.exist')
+    cy.contains('Second Item').should('not.exist')
+    cy.contains('Third Item').should('not.exist')
   })
 
   it('restores focus to trigger button after modal closes', function () {

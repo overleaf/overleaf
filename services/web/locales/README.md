@@ -1,5 +1,4 @@
-Locales
-=======
+# Locales
 
 These files are not to be edited by hand.
 

@@ -3,7 +3,7 @@ import Path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
 import Settings from '@overleaf/settings'
-import { db } from '../app/src/infrastructure/mongodb.mjs'
+import { connectionPromise, db } from '../app/src/infrastructure/mongodb.mjs'
 import GracefulShutdown from '../app/src/infrastructure/GracefulShutdown.mjs'
 import ProjectDeleter from '../app/src/Features/Project/ProjectDeleter.mjs'
 import SplitTestManager from '../app/src/Features/SplitTests/SplitTestManager.mjs'
@@ -62,13 +62,13 @@ async function deleteUser(email) {
   // Hard-delete the users projects.
   const projects = await db.deletedProjects
     .find(
-      { deletedProjectOwnerId: user._id },
-      { projection: { deletedProjectId: 1 } }
+      { 'deleterData.deletedProjectOwnerId': user._id },
+      { projection: { 'deleterData.deletedProjectId': 1 } }
     )
     .toArray()
   await promiseMapWithLimit(
     10,
-    projects.map(p => p.deletedProjectId),
+    projects.map(p => p.deleterData.deletedProjectId),
     ProjectDeleter.promises.expireDeletedProject
   )
   // Hard-delete the user.
@@ -137,10 +137,31 @@ async function provisionSplitTests() {
   await SplitTestManager.replaceSplitTests(SPLIT_TESTS)
 }
 
+async function checkNoTableScan() {
+  const client = await connectionPromise
+  const { notablescan } = await client
+    .db()
+    .admin()
+    .command({ getParameter: 1, notablescan: 1 })
+  if (!notablescan) {
+    console.error()
+    console.error('!!!  mongo is running without --notablescan')
+    console.error()
+    console.error('To fix this, either')
+    console.error('- run "internal$ bin/e2e_test_setup"')
+    console.error(
+      '- or add MONGO_EXTRA_ARGS=--notablescan in config/local.env and apply with "internal$ bin/up mongo"'
+    )
+    console.error()
+    throw new Error('mongo is running without --notablescan')
+  }
+}
+
 async function main() {
   if (process.env.NODE_ENV !== 'development') {
     throw new Error('only available in dev-env')
   }
+  await checkNoTableScan()
 
   await Promise.all([purgeNewUsers(), provisionUsers(), provisionSplitTests()])
 }

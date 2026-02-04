@@ -30,6 +30,9 @@ const QUEUES_JOB_OPTIONS = {
   'analytics-email-change': {
     removeOnFail: MAX_FAILED_JOBS_RETAINED_ANALYTICS,
   },
+  'analytics-package-usage': {
+    removeOnFail: MAX_FAILED_JOBS_RETAINED_ANALYTICS,
+  },
   'emails-onboarding': {
     removeOnFail: MAX_FAILED_JOBS_RETAINED,
   },
@@ -73,6 +76,7 @@ const ANALYTICS_QUEUES = [
   'analytics-email-change',
   'analytics-events',
   'analytics-editing-sessions',
+  'analytics-package-usage',
   'analytics-user-properties',
   'analytics-user-exports',
   'post-registration-analytics',

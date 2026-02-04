@@ -8,8 +8,8 @@ import UserSessionsManager from '../User/UserSessionsManager.mjs'
 import OError from '@overleaf/o-error'
 import EmailsHelper from '../Helpers/EmailHelper.mjs'
 import { expressify } from '@overleaf/promise-utils'
-import { z, validateReq } from '../../infrastructure/Validation.mjs'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import { z, parseReq } from '../../infrastructure/Validation.mjs'
+import Features from '../../infrastructure/Features.mjs'
 
 const setNewUserPasswordSchema = z.object({
   body: z.object({
@@ -21,7 +21,7 @@ const setNewUserPasswordSchema = z.object({
 
 async function setNewUserPassword(req, res, next) {
   let user
-  const { body } = validateReq(req, setNewUserPasswordSchema)
+  const { body } = parseReq(req, setNewUserPasswordSchema)
   let { passwordResetToken, password, email } = body
   if (!passwordResetToken || !password) {
     return res.status(400).json({
@@ -120,7 +120,7 @@ const requestResetSchema = z.object({
 })
 
 async function requestReset(req, res, next) {
-  const { body } = validateReq(req, requestResetSchema)
+  const { body } = parseReq(req, requestResetSchema)
   const email = EmailsHelper.parseEmail(body.email)
   if (!email) {
     return res.status(400).json({
@@ -173,7 +173,7 @@ const renderSetPasswordFormSchema = z.object({
 })
 
 async function renderSetPasswordForm(req, res, next) {
-  const { query } = validateReq(req, renderSetPasswordFormSchema)
+  const { query } = parseReq(req, renderSetPasswordFormSchema)
 
   if (query.passwordResetToken != null) {
     try {
@@ -195,10 +195,6 @@ async function renderSetPasswordForm(req, res, next) {
           params.append('email', email)
         }
       }
-      if (req.query.uniaccessphase1) {
-        // Preserve uniaccessphase1 flag in the redirect so it can be tested
-        params.append('uniaccessphase1', req.query.uniaccessphase1)
-      }
       const queryString = params.toString() ? `?${params.toString()}` : ''
       return res.redirect('/user/password/set' + queryString)
     } catch (err) {
@@ -219,16 +215,8 @@ async function renderSetPasswordForm(req, res, next) {
   const passwordResetToken = req.session.resetToken
   delete req.session.resetToken
 
-  const ciamAssignment = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'uniaccessphase1'
-  )
-
   res.render(
-    ciamAssignment.variant === 'enabled'
-      ? 'user/setPasswordCiam'
-      : 'user/setPassword',
+    Features.hasFeature('saas') ? 'user/setPasswordCiam' : 'user/setPassword',
     {
       title: 'set_password',
       email,
@@ -244,21 +232,15 @@ const renderRequestResetFormSchema = z.object({
 })
 
 async function renderRequestResetForm(req, res) {
-  const { query } = validateReq(req, renderRequestResetFormSchema)
+  const { query } = parseReq(req, renderRequestResetFormSchema)
   const errorQuery = query.error
   let error = null
   if (errorQuery === 'token_expired') {
     error = 'password_reset_token_expired'
   }
 
-  const ciamAssignment = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'uniaccessphase1'
-  )
-
   res.render(
-    ciamAssignment.variant === 'enabled'
+    Features.hasFeature('saas')
       ? 'user/passwordResetCiam'
       : 'user/passwordReset',
     {

@@ -1,4 +1,4 @@
-import { forwardRef, memo, MouseEventHandler, useState } from 'react'
+import { forwardRef, memo, MouseEventHandler } from 'react'
 import {
   Dropdown,
   DropdownMenu,
@@ -7,10 +7,7 @@ import {
 import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
 import MaterialIcon from '@/shared/components/material-icon'
 import classNames from 'classnames'
-import {
-  useTrackChangesStateActionsContext,
-  useTrackChangesStateContext,
-} from '../context/track-changes-state-context'
+import { useTrackChangesStateActionsContext } from '../context/track-changes-state-context'
 import { useUserContext } from '@/shared/context/user-context'
 import { useTranslation } from 'react-i18next'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
@@ -18,41 +15,20 @@ import usePersistedState from '@/shared/hooks/use-persisted-state'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useProjectContext } from '@/shared/context/project-context'
-import UpgradeTrackChangesModal from './upgrade-track-changes-modal'
 import { useCodeMirrorViewContext } from '@/features/source-editor/components/codemirror-context'
-
-type Mode = 'view' | 'review' | 'edit'
-
-const useCurrentMode = (): Mode => {
-  const trackChanges = useTrackChangesStateContext()
-  const user = useUserContext()
-  const trackChangesForCurrentUser =
-    trackChanges?.onForEveryone ||
-    (user?.id && trackChanges?.onForMembers[user.id]) ||
-    (!user?.id && trackChanges?.onForGuests)
-  const { permissionsLevel } = useIdeReactContext()
-
-  if (permissionsLevel === 'readOnly') {
-    return 'view'
-  } else if (permissionsLevel === 'review') {
-    return 'review'
-  } else if (trackChangesForCurrentUser) {
-    return 'review'
-  } else {
-    return 'edit'
-  }
-}
+import { useEditorContext } from '@/shared/context/editor-context'
+import { useTrackingChangesMode } from '@/shared/hooks/use-tracking-changes-mode'
 
 function ReviewModeSwitcher() {
   const { t } = useTranslation()
   const user = useUserContext()
   const { saveTrackChangesForCurrentUser, saveTrackChanges } =
     useTrackChangesStateActionsContext()
-  const mode = useCurrentMode()
+  const mode = useTrackingChangesMode()
   const { permissionsLevel } = useIdeReactContext()
   const { write, trackedWrite } = usePermissionsContext()
   const { features } = useProjectContext()
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const { setShowUpgradeModal } = useEditorContext()
   const showViewOption = permissionsLevel === 'readOnly'
   const view = useCodeMirrorViewContext()
 
@@ -133,10 +109,6 @@ function ReviewModeSwitcher() {
           )}
         </DropdownMenu>
       </Dropdown>
-      <UpgradeTrackChangesModal
-        show={showUpgradeModal}
-        setShow={setShowUpgradeModal}
-      />
     </div>
   )
 }
@@ -146,7 +118,7 @@ const ModeSwitcherToggleButton = forwardRef<
   { onClick: MouseEventHandler<HTMLButtonElement>; 'aria-expanded': boolean }
 >(({ onClick, 'aria-expanded': ariaExpanded }, ref) => {
   const { t } = useTranslation()
-  const mode = useCurrentMode()
+  const mode = useTrackingChangesMode()
 
   if (mode === 'edit') {
     return (

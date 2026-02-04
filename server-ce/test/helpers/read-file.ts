@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { PDFParse } from 'pdf-parse'
+import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs'
 import AdmZip from 'adm-zip'
 import { setTimeout } from 'node:timers/promises'
 
@@ -39,15 +39,19 @@ export async function readPdf(file: string) {
   let attempt = 0
   while (attempt < MAX_ATTEMPTS) {
     if (fs.existsSync(file)) {
-      const dataBuffer = fs.readFileSync(path.resolve(file))
-      const parser = new PDFParse({ data: dataBuffer })
+      const pdf = await getDocument(file).promise
+      const text = []
       try {
-        const result = await parser.getText()
-        return result.text
-      } catch (error) {
-        console.error('PDF parsing failed:', error)
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i)
+          const content = await page.getTextContent()
+          for (const item of content.items) {
+            if ('str' in item) text.push(item.str)
+          }
+        }
+        return text.join('\n')
       } finally {
-        await parser.destroy()
+        await pdf.destroy()
       }
     }
     await setTimeout(POLL_INTERVAL)

@@ -1,12 +1,8 @@
-const express = require('express')
-const {
-  fetchJson,
-  fetchNothing,
-  fetchString,
-} = require('@overleaf/fetch-utils')
-const fs = require('node:fs')
-const fsPromises = require('node:fs/promises')
-const Settings = require('@overleaf/settings')
+import express from 'express'
+import { fetchJson, fetchNothing, fetchString } from '@overleaf/fetch-utils'
+import fs from 'node:fs'
+import fsPromises from 'node:fs/promises'
+import Settings from '@overleaf/settings'
 
 const host = Settings.apis.clsi.url
 
@@ -187,7 +183,7 @@ function smokeTest() {
   })
 }
 
-module.exports = {
+export default {
   randomId,
   compile,
   stopCompile,

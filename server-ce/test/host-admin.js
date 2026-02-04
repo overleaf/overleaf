@@ -6,7 +6,7 @@ import bodyParser from 'body-parser'
 import express from 'express'
 import YAML from 'js-yaml'
 import { isZodErrorLike } from 'zod-validation-error'
-import { ParamsError, validateReq, z } from '@overleaf/validation-tools'
+import { ParamsError, parseReq, z } from '@overleaf/validation-tools'
 import { expressify } from '@overleaf/promise-utils'
 
 const execFile = promisify(execFileCb)
@@ -42,6 +42,7 @@ function defaultDockerComposeOverride() {
         environment: {},
       },
       'git-bridge': {},
+      mongo: {},
     },
   }
 }
@@ -55,7 +56,7 @@ function readDockerComposeOverride() {
     if (error.code !== 'ENOENT') {
       throw error
     }
-    return defaultDockerComposeOverride
+    return defaultDockerComposeOverride()
   }
 }
 
@@ -114,7 +115,7 @@ app.post(
   expressify(async (req, res) => {
     const {
       body: { cwd, script, args, user, hasOverleafEnv },
-    } = validateReq(
+    } = parseReq(
       req,
       z.object({
         body: z.object({
@@ -154,7 +155,7 @@ app.post(
   expressify(async (req, res) => {
     const {
       body: { task, args },
-    } = validateReq(
+    } = parseReq(
       req,
       z.object({
         body: z.object({
@@ -281,11 +282,15 @@ function setVarsDockerCompose({
   }
 
   if (mongoVersion) {
-    cfg.services.mongo = {
-      image: `mongo:${mongoVersion}`,
-    }
+    cfg.services.mongo.image = `mongo:${mongoVersion}`
   } else {
-    delete cfg.services.mongo
+    delete cfg.services.mongo.image
+  }
+
+  if (version === 'latest') {
+    cfg.services.mongo.command = '--replSet overleaf --notablescan'
+  } else {
+    delete cfg.services.mongo.command
   }
 
   writeDockerComposeOverride(cfg)
@@ -297,7 +302,7 @@ app.post(
     const {
       params: { cmd },
       body: { args },
-    } = validateReq(
+    } = parseReq(
       req,
       z.object({
         params: z.object({
@@ -348,7 +353,7 @@ app.post(
   expressify(async (req, res) => {
     const {
       body: { pro, version, vars, withDataDir, resetData, mongoVersion },
-    } = validateReq(
+    } = parseReq(
       req,
       z.object({
         body: z.object({
@@ -402,7 +407,7 @@ app.post(
   expressify(async (req, res) => {
     const {
       body: { mongoVersion },
-    } = validateReq(
+    } = parseReq(
       req,
       z.object({
         body: z.object({

@@ -126,10 +126,30 @@ async function cancelPendingSubscriptionChange(user) {
     await LimitationsManager.promises.userHasSubscription(user)
 
   if (hasSubscription && subscription != null) {
-    await Modules.promises.hooks.fire(
-      'cancelPendingPaidSubscriptionChange',
+    const [paymentRecord] = await Modules.promises.hooks.fire(
+      'getPaymentFromRecord',
       subscription
     )
+
+    if (paymentRecord != null) {
+      const changeRequest =
+        paymentRecord.subscription.getRequestForPlanChangeCancellation()
+
+      if (changeRequest) {
+        // There are pending add-on changes to preserve, apply the change request
+        await Modules.promises.hooks.fire(
+          'applySubscriptionChangeRequestAndSync',
+          changeRequest,
+          user._id.toString()
+        )
+      } else if (paymentRecord.subscription.pendingChange != null) {
+        // No add-on changes to preserve, just remove the pending change
+        await Modules.promises.hooks.fire(
+          'cancelPendingPaidSubscriptionChange',
+          subscription
+        )
+      }
+    }
   }
 }
 

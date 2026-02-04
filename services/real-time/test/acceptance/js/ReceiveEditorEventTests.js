@@ -9,15 +9,13 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { expect } = require('chai')
+import { expect } from 'chai'
 
-const RealTimeClient = require('./helpers/RealTimeClient')
-const FixturesManager = require('./helpers/FixturesManager')
-
-const async = require('async')
-
-const settings = require('@overleaf/settings')
-const redis = require('@overleaf/redis-wrapper')
+import RealTimeClient from './helpers/RealTimeClient.js'
+import FixturesManager from './helpers/FixturesManager.js'
+import async from 'async'
+import settings from '@overleaf/settings'
+import redis from '@overleaf/redis-wrapper'
 const rclient = redis.createClient(settings.redis.pubsub)
 
 describe('receiveEditorEvent', function () {

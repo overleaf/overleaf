@@ -44,9 +44,16 @@ if (Settings.catchErrors) {
   process.removeAllListeners('uncaughtException')
   process.removeAllListeners('unhandledRejection')
   process
-    .on('uncaughtException', error =>
+    .on('uncaughtException', error => {
+      if (error.code === 'ERR_STREAM_UNABLE_TO_PIPE') {
+        metrics.inc('disconnected_write', 1, { status: error.code })
+        return logger.warn(
+          { err: error },
+          'attempted to write to disconnected client'
+        )
+      }
       logger.error({ err: error }, 'uncaughtException')
-    )
+    })
     .on('unhandledRejection', (reason, p) => {
       logger.error({ err: reason }, 'unhandledRejection at Promise', p)
     })

@@ -378,7 +378,7 @@ describe('UserMembershipController', () => {
         })
       })
 
-      it('should be false when recurly subscription has pending changes', async ({
+      it('should be true when recurly subscription has pending changes', async ({
         UserMembershipController,
         req,
         RecurlyClient,
@@ -390,7 +390,7 @@ describe('UserMembershipController', () => {
         })
         await UserMembershipController.manageGroupMembers(req, {
           render: (viewPath, viewParams) => {
-            expect(viewParams.canUseAddSeatsFeature).to.equal(false)
+            expect(viewParams.canUseAddSeatsFeature).to.equal(true)
           },
         })
       })

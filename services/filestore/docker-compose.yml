@@ -38,11 +38,10 @@ services:
       - minio-certs:/certs
     working_dir: /overleaf/services/filestore
     environment:
-      ELASTIC_SEARCH_DSN: es:9200
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       POSTGRES_HOST: postgres
       AWS_S3_ENDPOINT: https://minio:9000
-      AWS_S3_PATH_STYLE: 'true'
+      AWS_S3_PATH_STYLE: "true"
       DELETE_OBJECTS_MD5_FALLBACK: true
       AWS_ACCESS_KEY_ID: OVERLEAF_FILESTORE_S3_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY: OVERLEAF_FILESTORE_S3_SECRET_ACCESS_KEY
@@ -78,7 +77,7 @@ services:
   certs:
     build:
       dockerfile_inline: |
-        FROM node:22.18.0
+        FROM node:24.13.0
         RUN wget -O /certgen "https://github.com/minio/certgen/releases/download/v1.3.0/certgen-linux-"`dpkg --print-architecture`
         RUN chmod +x /certgen
     volumes:
@@ -86,9 +85,12 @@ services:
     working_dir: /certs
     entrypoint: sh
     command:
-      - '-cex'
+      - "-cex"
       - |
         if [ ! -f private.key ] || [ ! -f public.crt ]; then
+          /certgen -host minio
+        fi
+        if ! openssl x509 -checkend 864000 -noout -in public.crt > /dev/null; then
           /certgen -host minio
         fi
 
@@ -115,7 +117,7 @@ services:
       - minio-certs:/root/.mc/certs/CAs
     entrypoint: sh
     command:
-      - '-cex'
+      - "-cex"
       - |
         sleep 1
         mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD \
@@ -218,6 +220,7 @@ services:
         mc admin policy create s3 overleaf-filestore policy-filestore.json
         mc admin policy attach s3 overleaf-filestore \
           --user=OVERLEAF_FILESTORE_S3_ACCESS_KEY_ID
+
   gcs:
     image: fsouza/fake-gcs-server:1.52.3
     command: ["--port=9090", "--scheme=http", "--external-url=http://gcs:9090"]

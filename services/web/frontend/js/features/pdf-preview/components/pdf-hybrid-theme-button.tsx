@@ -2,14 +2,12 @@ import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { useCallback, useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 export const PdfHybridThemeButton = () => {
   const id = useId()
   const { t } = useTranslation()
-  const splitTestEnabled = useFeatureFlag('pdf-dark-mode')
   const usesNewEditor = useIsNewEditorEnabled()
   const {
     pdfViewer,
@@ -25,10 +23,6 @@ export const PdfHybridThemeButton = () => {
 
   if (!usesNewEditor) {
     // The old editor does not support dark mode PDF, so don't show the button
-    return null
-  }
-
-  if (!splitTestEnabled) {
     return null
   }
 

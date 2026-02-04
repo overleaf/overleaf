@@ -3,6 +3,7 @@ import { isExcludedBySharding, startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
 import {
   createProject,
+  createProjectAndOpenInNewEditor,
   enableLinkSharing,
   openProjectByName,
   openProjectViaLinkSharingAsUser,
@@ -98,16 +99,10 @@ describe('git-bridge', function () {
 
     it('should render the git-bridge UI in the editor', function () {
       maybeClearAllTokens()
-      createProject('git').as('projectId')
-      cy.findByRole('navigation', {
-        name: 'Project actions',
-      })
-        .findByRole('button', { name: 'Menu' })
-        .click()
-      cy.findByTestId('left-menu').within(() => {
-        cy.findByRole('heading', { name: 'Sync' })
-        cy.findByRole('button', { name: 'Git' }).click()
-      })
+      createProjectAndOpenInNewEditor('git').as('projectId')
+      cy.findByRole('tab', { name: 'Integrations' }).click()
+      cy.findByText('Git clone this project.').click()
+
       cy.findByTestId('git-bridge-modal').within(() => {
         cy.get('@projectId').then(id => {
           cy.findByLabelText('Git clone project command').contains(
@@ -124,14 +119,7 @@ describe('git-bridge', function () {
 
       // Re-open
       cy.url().then(url => cy.visit(url))
-      cy.findByRole('navigation', {
-        name: 'Project actions',
-      })
-        .findByRole('button', { name: 'Menu' })
-        .click()
-      cy.findByTestId('left-menu').within(() => {
-        cy.findByRole('button', { name: 'Git' }).click()
-      })
+      cy.findByText('Git clone this project.').click()
 
       cy.findByTestId('git-bridge-modal').within(() => {
         cy.get('@projectId').then(id => {
@@ -167,7 +155,7 @@ describe('git-bridge', function () {
       it('should expose r/w interface to owner', function () {
         maybeClearAllTokens()
         waitForCompile(() => {
-          openProjectByName(projectName)
+          openProjectByName(projectName, true)
         })
         checkGitAccess('readAndWrite')
       })
@@ -176,11 +164,12 @@ describe('git-bridge', function () {
         shareProjectByEmailAndAcceptInviteViaDash(
           projectName,
           'collaborator-rw@example.com',
-          'Editor'
+          'Editor',
+          true
         )
         maybeClearAllTokens()
         waitForCompile(() => {
-          openProjectByName(projectName)
+          openProjectByName(projectName, true)
         })
         checkGitAccess('readAndWrite')
       })
@@ -189,17 +178,18 @@ describe('git-bridge', function () {
         shareProjectByEmailAndAcceptInviteViaDash(
           projectName,
           'collaborator-ro@example.com',
-          'Viewer'
+          'Viewer',
+          true
         )
         maybeClearAllTokens()
         waitForCompile(() => {
-          openProjectByName(projectName)
+          openProjectByName(projectName, true)
         })
         checkGitAccess('readOnly')
       })
 
       it('should expose r/w interface to link-sharing r/w collaborator', function () {
-        openProjectByName(projectName)
+        openProjectByName(projectName, true)
         enableLinkSharing().then(({ linkSharingReadAndWrite }) => {
           const email = 'collaborator-link-rw@example.com'
           login(email)
@@ -208,7 +198,8 @@ describe('git-bridge', function () {
             openProjectViaLinkSharingAsUser(
               linkSharingReadAndWrite,
               projectName,
-              email
+              email,
+              true
             )
           })
           checkGitAccess('readAndWrite')
@@ -217,7 +208,7 @@ describe('git-bridge', function () {
 
       it('should expose r/o interface to link-sharing r/o collaborator', function () {
         waitForCompile(() => {
-          openProjectByName(projectName)
+          openProjectByName(projectName, true)
         })
         enableLinkSharing().then(({ linkSharingReadOnly }) => {
           const email = 'collaborator-link-ro@example.com'
@@ -227,7 +218,8 @@ describe('git-bridge', function () {
             openProjectViaLinkSharingAsUser(
               linkSharingReadOnly,
               projectName,
-              email
+              email,
+              true
             )
           })
           checkGitAccess('readOnly')
@@ -235,15 +227,9 @@ describe('git-bridge', function () {
       })
 
       function checkGitAccess(access: 'readOnly' | 'readAndWrite') {
-        cy.findByRole('navigation', {
-          name: 'Project actions',
-        })
-          .findByRole('button', { name: 'Menu' })
-          .click()
-        cy.findByTestId('left-menu').within(() => {
-          cy.findByRole('heading', { name: 'Sync' })
-          cy.findByRole('button', { name: 'Git' }).click()
-        })
+        cy.findByRole('tab', { name: 'Integrations' }).click()
+        cy.findByText('Git clone this project.').click()
+
         cy.get('@projectId').then(projectId => {
           cy.findByTestId('git-bridge-modal').within(() => {
             cy.findByLabelText('Git clone project command').contains(
@@ -347,16 +333,8 @@ Hello world
                 })
                   .findByRole('button', { name: 'History' })
                   .click()
-                cy.findByRole('complementary', {
-                  name: 'Project history and labels',
-                }).within(() => {
-                  cy.findByText('(via Git)').should('not.exist')
-                })
-                cy.findByRole('navigation', {
-                  name: 'Project actions',
-                })
-                  .findByRole('button', { name: 'Back to editor' })
-                  .click()
+                cy.findByText('(via Git)').should('not.exist')
+                cy.findAllByText('Back to editor').last().click()
                 cy.then(async () => {
                   await git.push({
                     ...commonOptions,
@@ -389,10 +367,10 @@ Hello world
               // Wait for history sync - trigger flush by toggling the UI
               cy.findByRole('navigation', {
                 name: 'Project actions',
-              }).within(() => {
-                cy.findByRole('button', { name: 'History' }).click()
-                cy.findByRole('button', { name: 'Back to editor' }).click()
               })
+                .findByRole('button', { name: 'History' })
+                .click()
+              cy.findAllByText('Back to editor').last().click()
 
               // check push in history
               cy.findByRole('navigation', {
@@ -401,24 +379,16 @@ Hello world
                 .findByRole('button', { name: 'History' })
                 .click()
               cy.findByText(/Hello world/)
-              cy.findByRole('complementary', {
-                name: 'Project history and labels',
-              }).within(() => {
-                cy.findByText('(via Git)').should('exist')
-              })
+              cy.findByText('(via Git)').should('exist')
 
               // Back to the editor
-              cy.findByRole('navigation', {
-                name: 'Project actions',
-              })
-                .findByRole('button', { name: 'Back to editor' })
-                .click()
+              cy.findAllByText('Back to editor').last().click()
               cy.findByText(/\\documentclass/)
                 .parent()
                 .parent()
-                .as('documentclass')
+                .as('editor')
                 .click()
-              cy.get('@documentclass').type('% via editor{enter}')
+              cy.get('@editor').type('% via editor{enter}')
 
               // Trigger flush via compile
               recompile()
@@ -459,17 +429,13 @@ Hello world
     })
     it('should not render the git-bridge UI in the editor', function () {
       login(USER)
-      createProject('maybe git')
-      cy.findByRole('navigation', {
-        name: 'Project actions',
-      })
-        .findByRole('button', { name: 'Menu' })
-        .click()
-      cy.findByTestId('left-menu').within(() => {
-        cy.findByRole('button', { name: 'Word Count' }) // wait for lazy loading
-        cy.findByRole('heading', { name: 'Sync' }).should('not.exist')
-        cy.findByRole('button', { name: 'Git' }).should('not.exist')
-      })
+      createProjectAndOpenInNewEditor('maybe git')
+      cy.findByRole('tab', {
+        name: 'File tree',
+      }).should('exist') // Wait for load
+      cy.findByRole('tab', {
+        name: 'Integrations',
+      }).should('not.exist')
     })
   }
 

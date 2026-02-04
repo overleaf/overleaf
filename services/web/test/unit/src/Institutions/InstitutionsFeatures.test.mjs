@@ -29,6 +29,7 @@ describe('InstitutionsFeatures', function () {
     vi.doMock('@overleaf/settings', () => ({
       default: {
         institutionPlanCode: ctx.institutionPlanCode,
+        overleaf: {},
       },
     }))
 

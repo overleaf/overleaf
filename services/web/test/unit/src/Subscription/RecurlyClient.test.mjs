@@ -5,8 +5,10 @@ import PaymentProviderEntities from '../../../../app/src/Features/Subscription/P
 
 const {
   PaymentProviderSubscription,
+  PaymentProviderSubscriptionChange,
   PaymentProviderSubscriptionChangeRequest,
   PaymentProviderSubscriptionUpdateRequest,
+  PaymentProviderSubscriptionAddOn,
   PaymentProviderSubscriptionAddOnUpdate,
   PaymentProviderAccount,
   PaymentProviderCoupon,
@@ -458,6 +460,241 @@ describe('RecurlyClient', function () {
           subscription: ctx.subscription,
         })
       ).to.be.rejectedWith(Error)
+    })
+
+    describe('when subscription has a pending add-on removal', function () {
+      beforeEach(function (ctx) {
+        // Create subscription with an add-on that has a pending removal scheduled
+        ctx.subscriptionWithAddOn = new PaymentProviderSubscription({
+          id: 'subscription-id',
+          userId: 'user-id',
+          currency: 'EUR',
+          planCode: 'collaborator',
+          planName: 'Collaborator Plan',
+          planPrice: 13,
+          addOns: [
+            new PaymentProviderSubscriptionAddOn({
+              code: 'assistant',
+              name: 'AI Assistant',
+              quantity: 1,
+              unitPrice: 5,
+            }),
+          ],
+          subtotal: 18,
+          taxRate: 0.1,
+          taxAmount: 1.8,
+          total: 19.8,
+          periodStart: new Date(),
+          periodEnd: new Date(),
+          collectionMethod: 'automatic',
+          service: 'recurly',
+          state: 'active',
+        })
+        ctx.subscriptionWithAddOn.pendingChange =
+          new PaymentProviderSubscriptionChange({
+            subscription: ctx.subscriptionWithAddOn,
+            nextPlanCode: 'collaborator',
+            nextPlanName: 'Collaborator Plan',
+            nextPlanPrice: 13,
+            nextAddOns: [], // add-on is being removed
+          })
+
+        ctx.client.getSubscription = sinon.stub().resolves({
+          uuid: 'subscription-id',
+          account: { code: 'user-id' },
+          plan: { code: 'professional', name: 'Professional Plan' },
+          addOns: [
+            {
+              addOn: { code: 'assistant', name: 'AI Assistant' },
+              quantity: 1,
+              unitAmount: 5,
+            },
+          ],
+          unitAmount: 20,
+          subtotal: 25,
+          taxInfo: { rate: 0.1 },
+          tax: 2.5,
+          total: 27.5,
+          currency: 'EUR',
+          currentPeriodStartedAt: new Date(),
+          currentPeriodEndsAt: new Date(),
+          collectionMethod: 'automatic',
+          netTerms: 0,
+          poNumber: '',
+          termsAndConditions: '',
+        })
+      })
+
+      it('re-applies pending add-on removal after immediate plan upgrade', async function (ctx) {
+        await ctx.RecurlyClient.promises.applySubscriptionChangeRequest(
+          new PaymentProviderSubscriptionChangeRequest({
+            subscription: ctx.subscriptionWithAddOn,
+            timeframe: 'now',
+            planCode: 'professional',
+          })
+        )
+
+        // immediate change
+        expect(ctx.client.createSubscriptionChange).to.have.been.calledWith(
+          'uuid-subscription-id',
+          { timeframe: 'now', planCode: 'professional' }
+        )
+
+        // re-apply pending change: only add-on removal, NOT the plan downgrade
+        // because the immediate change was a plan change, the user's new plan choice supersedes
+        expect(ctx.client.createSubscriptionChange).to.have.been.calledWith(
+          'uuid-subscription-id',
+          {
+            timeframe: 'term_end',
+            addOns: [],
+          }
+        )
+
+        expect(ctx.client.createSubscriptionChange.callCount).to.equal(2)
+      })
+
+      it('does not re-apply pending change if plan and add-ons are the same', async function (ctx) {
+        ctx.subscriptionWithAddOn.pendingChange =
+          new PaymentProviderSubscriptionChange({
+            subscription: ctx.subscriptionWithAddOn,
+            nextPlanCode: 'professional', // pending change to professional
+            nextPlanName: 'Professional Plan',
+            nextPlanPrice: 20,
+            nextAddOns: [
+              new PaymentProviderSubscriptionAddOn({
+                code: 'assistant',
+                name: 'AI Assistant',
+                quantity: 1,
+                unitPrice: 5,
+              }),
+            ],
+          })
+
+        await ctx.RecurlyClient.promises.applySubscriptionChangeRequest(
+          new PaymentProviderSubscriptionChangeRequest({
+            subscription: ctx.subscriptionWithAddOn,
+            timeframe: 'now',
+            planCode: 'professional',
+          })
+        )
+
+        expect(ctx.client.createSubscriptionChange.callCount).to.equal(1)
+      })
+
+      it('does not re-apply anything if no pending change existed', async function (ctx) {
+        ctx.subscriptionWithAddOn.pendingChange = null
+
+        await ctx.RecurlyClient.promises.applySubscriptionChangeRequest(
+          new PaymentProviderSubscriptionChangeRequest({
+            subscription: ctx.subscriptionWithAddOn,
+            timeframe: 'now',
+            planCode: 'professional',
+          })
+        )
+
+        expect(ctx.client.createSubscriptionChange.callCount).to.equal(1)
+      })
+
+      it('does not re-apply when timeframe is term_end', async function (ctx) {
+        await ctx.RecurlyClient.promises.applySubscriptionChangeRequest(
+          new PaymentProviderSubscriptionChangeRequest({
+            subscription: ctx.subscriptionWithAddOn,
+            timeframe: 'term_end',
+            planCode: 'professional',
+          })
+        )
+
+        expect(ctx.client.createSubscriptionChange.callCount).to.equal(1)
+      })
+
+      it('re-applies pending plan downgrade while preserving newly purchased add-on', async function (ctx) {
+        const subscriptionWithPendingDowngrade =
+          new PaymentProviderSubscription({
+            id: 'subscription-id',
+            userId: 'user-id',
+            currency: 'EUR',
+            planCode: 'professional',
+            planName: 'Professional Plan',
+            planPrice: 20,
+            addOns: [], // NO add-ons originally
+            subtotal: 20,
+            taxRate: 0.1,
+            taxAmount: 2,
+            total: 22,
+            periodStart: new Date(),
+            periodEnd: new Date(),
+            collectionMethod: 'automatic',
+            service: 'recurly',
+            state: 'active',
+          })
+        subscriptionWithPendingDowngrade.pendingChange =
+          new PaymentProviderSubscriptionChange({
+            subscription: subscriptionWithPendingDowngrade,
+            nextPlanCode: 'collaborator',
+            nextPlanName: 'Collaborator Plan',
+            nextPlanPrice: 13,
+            nextAddOns: [], // NO add-ons in pending change
+          })
+
+        // mock the subscription fetch after immediate update - now has add-on
+        ctx.client.getSubscription = sinon.stub().resolves({
+          uuid: 'subscription-id',
+          account: { code: 'user-id' },
+          plan: { code: 'professional', name: 'Professional Plan' },
+          addOns: [
+            {
+              addOn: { code: 'assistant', name: 'AI Assistant' },
+              quantity: 1,
+              unitAmount: 5,
+            },
+          ],
+          unitAmount: 20,
+          subtotal: 25,
+          taxInfo: { rate: 0.1 },
+          tax: 2.5,
+          total: 27.5,
+          currency: 'EUR',
+          currentPeriodStartedAt: new Date(),
+          currentPeriodEndsAt: new Date(),
+          collectionMethod: 'automatic',
+          netTerms: 0,
+          poNumber: '',
+          termsAndConditions: '',
+        })
+
+        await ctx.RecurlyClient.promises.applySubscriptionChangeRequest(
+          new PaymentProviderSubscriptionChangeRequest({
+            subscription: subscriptionWithPendingDowngrade,
+            timeframe: 'now',
+            addOnUpdates: [
+              new PaymentProviderSubscriptionAddOnUpdate({
+                code: 'assistant',
+                quantity: 1,
+                unitPrice: 5,
+              }),
+            ],
+          })
+        )
+
+        expect(ctx.client.createSubscriptionChange).to.have.been.calledWith(
+          'uuid-subscription-id',
+          {
+            timeframe: 'now',
+            addOns: [{ code: 'assistant', quantity: 1, unitAmount: 5 }],
+          }
+        )
+
+        expect(ctx.client.createSubscriptionChange).to.have.been.calledWith(
+          'uuid-subscription-id',
+          {
+            timeframe: 'term_end',
+            planCode: 'collaborator',
+            addOns: [{ code: 'assistant', quantity: 1, unitAmount: 5 }], // add-on preserved!
+          }
+        )
+
+        expect(ctx.client.createSubscriptionChange.callCount).to.equal(2)
+      })
     })
   })
 

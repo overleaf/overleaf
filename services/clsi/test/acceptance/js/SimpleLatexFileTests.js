@@ -1,7 +1,8 @@
-const Client = require('./helpers/Client')
-const { fetchNothing } = require('@overleaf/fetch-utils')
-const ClsiApp = require('./helpers/ClsiApp')
-const { expect } = require('chai')
+import Client from './helpers/Client.js'
+import { fetchNothing, fetchString } from '@overleaf/fetch-utils'
+import ClsiApp from './helpers/ClsiApp.js'
+import { expect } from 'chai'
+import Settings from '@overleaf/settings'
 
 describe('Simple LaTeX file', function () {
   const content = `\
@@ -15,6 +16,9 @@ Hello world
       description: 'simple file',
       request: {
         resources: [{ path: 'main.tex', content }],
+        options: {
+          compileGroup: 'simple-latex-file',
+        },
       },
     },
     {
@@ -22,8 +26,10 @@ Hello world
       request: {
         resources: [{ path: 'main.tex', content }],
         options: {
+          enablePdfCaching: false,
           metricsPath: 'clsi-perf',
-          metricsMethod: 'priority',
+          metricsMethod: 'memoir-manual',
+          compileGroup: 'clsi-perf', // only used by tests, not by the service
         },
       },
     },
@@ -65,8 +71,46 @@ Hello world
         response.status.should.equal(200)
       })
 
+      if (scenario.description === 'clsi-perf request') {
+        it('should only emit e2e compile time metric', async function () {
+          const metrics = await fetchString(`${Settings.apis.clsi.url}/metrics`)
+          const byPath = `path="${scenario.request.options.metricsPath}"`
+          const byMethod = `method="${scenario.request.options.metricsMethod}"`
+          const byVariant = `variant="${scenario.request.options.metricsMethod}"`
+          const byGroup = `group="${scenario.request.options.compileGroup}"`
+          expect(metrics).to.not.include(byPath)
+          expect(metrics).to.not.include(byMethod)
+          expect(metrics).to.not.include(byGroup)
+          expect(metrics).to.include(byVariant)
+          expect(metrics.match(new RegExp(byVariant, 'g'))).to.have.lengthOf(1)
+        })
+      } else {
+        it('should shard metrics by compileGroup', async function () {
+          const metrics = await fetchString(`${Settings.apis.clsi.url}/metrics`)
+          const byGroup = `group="${scenario.request.options.compileGroup}"`
+          expect(metrics).to.include(byGroup)
+          expect(metrics.match(new RegExp(byGroup, 'g'))).to.have.lengthOf(134)
+        })
+      }
+
       it('should return only the expected keys for stats and timings', function () {
         const { stats, timings } = this.body.compile
+        let pdfCachingStats = []
+        let pdfCachingTimings = []
+        if (scenario.request.options.enablePdfCaching !== false) {
+          pdfCachingStats = [
+            'pdf-caching-total-ranges-size',
+            'pdf-caching-reclaimed-space',
+            'pdf-caching-new-ranges-size',
+            'pdf-caching-n-ranges',
+            'pdf-caching-n-new-ranges',
+          ]
+          pdfCachingTimings = [
+            'compute-pdf-caching',
+            'pdf-caching-overhead-delete-stale-hashes',
+          ]
+        }
+
         // Note: chai's all.keys assertion rejects extra keys
         stats.should.have.all.keys(
           'isInitialCompile',
@@ -75,20 +119,15 @@ Hello world
           'latex-runs-with-errors',
           'latex-runs-1',
           'latex-runs-with-errors-1',
-          'pdf-caching-total-ranges-size',
-          'pdf-caching-reclaimed-space',
-          'pdf-caching-new-ranges-size',
-          'pdf-caching-n-ranges',
-          'pdf-caching-n-new-ranges',
-          'pdf-size'
+          'pdf-size',
+          ...pdfCachingStats
         )
         timings.should.have.all.keys(
           'sync',
           'compile',
           'output',
           'compileE2E',
-          'compute-pdf-caching',
-          'pdf-caching-overhead-delete-stale-hashes'
+          ...pdfCachingTimings
         )
       })
     })

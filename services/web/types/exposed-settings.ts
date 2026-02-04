@@ -50,4 +50,5 @@ export type ExposedSettings = {
   labsEnabled: boolean
   wikiEnabled?: boolean
   templatesEnabled?: boolean
+  linkedInInsightsPartnerId?: string
 }

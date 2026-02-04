@@ -132,6 +132,30 @@ const ProjectGetter = {
     return filteredProjects
   },
 
+  async existUsersDebugProjectsOlderThan(userId, days) {
+    const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+
+    const exists = await Project.exists({
+      owner_ref: userId,
+      'overleaf.isDebugCopyOf': { $type: 'objectId' },
+      lastUpdated: { $lt: cutoffDate },
+    })
+
+    return Boolean(exists)
+  },
+
+  async findAllDebugProjects(fields) {
+    return Project.find(
+      {
+        'overleaf.isDebugCopyOf': { $type: 'objectId' },
+      },
+      fields
+    )
+      .limit(500)
+      .populate('owner_ref', ['email', 'name'])
+      .exec()
+  },
+
   /**
    * Return all projects with the given name that belong to the given user.
    *

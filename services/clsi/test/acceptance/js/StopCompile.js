@@ -1,7 +1,7 @@
-const { promisify } = require('node:util')
-const Client = require('./helpers/Client')
-const ClsiApp = require('./helpers/ClsiApp')
-const { expect } = require('chai')
+import { promisify } from 'node:util'
+import Client from './helpers/Client.js'
+import ClsiApp from './helpers/ClsiApp.js'
+import { expect } from 'chai'
 
 const sleep = promisify(setTimeout)
 

@@ -1,8 +1,4 @@
 {
   "extends": "../../tsconfig.backend.json",
-  "include": [
-    "**/*.js",
-    "**/*.cjs",
-    "**/*.ts"
-  ]
+  "include": ["**/*.js", "**/*.cjs", "**/*.ts"]
 }

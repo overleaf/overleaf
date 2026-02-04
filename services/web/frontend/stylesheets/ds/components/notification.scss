@@ -27,4 +27,32 @@
   &.notification-type-info {
     background-color: var(--ds-color-blue-50);
   }
+
+  .notification-close-btn {
+    align-self: flex-start;
+    padding: var(--ds-spacing-400) 0 0;
+    height: auto;
+
+    button {
+      @include ds-heading-sm-regular;
+
+      color: var(--ds-color-neutral-950);
+      padding: var(--ds-spacing-150);
+
+      &:hover,
+      &:focus {
+        background-color: var(--ds-color-blue-100);
+      }
+
+      &:active {
+        background-color: var(--ds-color-blue-200);
+      }
+
+      &:focus-visible {
+        background: transparent;
+
+        @include ds-focus-outline;
+      }
+    }
+  }
 }

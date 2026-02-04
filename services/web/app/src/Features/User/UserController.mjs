@@ -2,13 +2,12 @@ import UserHandler from './UserHandler.mjs'
 import UserDeleter from './UserDeleter.mjs'
 import UserGetter from './UserGetter.mjs'
 import { User } from '../../models/User.mjs'
-import NewsletterManager from '../Newsletter/NewsletterManager.mjs'
 import logger from '@overleaf/logger'
 import metrics from '@overleaf/metrics'
 import AuthenticationManager from '../Authentication/AuthenticationManager.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
 import Features from '../../infrastructure/Features.mjs'
-import { z, validateReq } from '../../infrastructure/Validation.mjs'
+import { z, parseReq } from '../../infrastructure/Validation.mjs'
 import UserAuditLogHandler from './UserAuditLogHandler.mjs'
 import UserSessionsManager from './UserSessionsManager.mjs'
 import UserUpdater from './UserUpdater.mjs'
@@ -22,7 +21,6 @@ import { expressify } from '@overleaf/promise-utils'
 import { acceptsJson } from '../../infrastructure/RequestContentTypeDetection.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
 import OneTimeTokenHandler from '../Security/OneTimeTokenHandler.mjs'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 
 async function _sendSecurityAlertClearedSessions(user) {
   const emailOptions = {
@@ -301,15 +299,16 @@ async function subscribe(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   req.logger.addFields({ userId })
 
-  const user = await UserGetter.promises.getUser(userId, {
-    _id: 1,
-    email: 1,
-    first_name: 1,
-    last_name: 1,
-  })
-  await NewsletterManager.promises.subscribe(user)
+  await Modules.promises.hooks.fire(
+    'updateTopicSubscription',
+    userId,
+    'newsletter',
+    true
+  )
+
   res.json({
     message: req.i18n.translate('thanks_settings_updated'),
+    subscribed: true,
   })
 }
 
@@ -317,16 +316,16 @@ async function unsubscribe(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   req.logger.addFields({ userId })
 
-  const user = await UserGetter.promises.getUser(userId, {
-    _id: 1,
-    email: 1,
-    first_name: 1,
-    last_name: 1,
-  })
-  await NewsletterManager.promises.unsubscribe(user)
-  await Modules.promises.hooks.fire('newsletterUnsubscribed', user)
+  await Modules.promises.hooks.fire(
+    'updateTopicSubscription',
+    userId,
+    'newsletter',
+    false
+  )
+
   res.json({
     message: req.i18n.translate('thanks_settings_updated'),
+    subscribed: false,
   })
 }
 
@@ -341,7 +340,7 @@ const updateUserSettingsSchema = z.object({
 })
 
 async function updateUserSettings(req, res, next) {
-  const { body } = validateReq(req, updateUserSettingsSchema)
+  const { body } = parseReq(req, updateUserSettingsSchema)
   const userId = SessionManager.getLoggedInUserId(req.session)
   req.logger.addFields({ userId })
 
@@ -412,18 +411,7 @@ async function updateUserSettings(req, res, next) {
     user.ace.referencesSearchMode = mode
   }
   if (body.enableNewEditor != null) {
-    const assignment = await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'editor-redesign-opt-out'
-    )
-    const isOptOutStageEnabled = assignment.variant === 'enabled'
-
-    if (isOptOutStageEnabled) {
-      user.ace.enableNewEditorStageFour = Boolean(body.enableNewEditor)
-    } else {
-      user.ace.enableNewEditor = Boolean(body.enableNewEditor)
-    }
+    user.ace.enableNewEditorStageFour = Boolean(body.enableNewEditor)
   }
   if (body.darkModePdf != null) {
     user.ace.darkModePdf = Boolean(body.darkModePdf)

@@ -2,21 +2,24 @@
  * ContentCacheManager - maintains a cache of stream hashes from a PDF file
  */
 
-const { callbackify } = require('node:util')
-const fs = require('node:fs')
-const crypto = require('node:crypto')
-const Path = require('node:path')
-const Settings = require('@overleaf/settings')
-const OError = require('@overleaf/o-error')
-const pLimit = require('p-limit')
-const { parseXrefTable } = require('./XrefParser')
-const {
+import { callbackify } from 'node:util'
+
+import fs from 'node:fs'
+import crypto from 'node:crypto'
+import Path from 'node:path'
+import Settings from '@overleaf/settings'
+import OError from '@overleaf/o-error'
+import pLimit from 'p-limit'
+import XrefParser from './XrefParser.js'
+import {
   QueueLimitReachedError,
   TimedOutError,
   NoXrefTableError,
-} = require('./Errors')
-const workerpool = require('workerpool')
-const Metrics = require('@overleaf/metrics')
+} from './Errors.js'
+import workerpool from 'workerpool'
+import Metrics from '@overleaf/metrics'
+
+const { parseXrefTable } = XrefParser
 
 /**
  * @type {import('workerpool').WorkerPool}
@@ -24,14 +27,17 @@ const Metrics = require('@overleaf/metrics')
 let WORKER_POOL
 // NOTE: Check for main thread to avoid recursive start of pool.
 if (Settings.pdfCachingEnableWorkerPool && workerpool.isMainThread) {
-  WORKER_POOL = workerpool.pool(Path.join(__dirname, 'ContentCacheWorker.js'), {
-    // Cap number of worker threads.
-    maxWorkers: Settings.pdfCachingWorkerPoolSize,
-    // Warmup workers.
-    minWorkers: Settings.pdfCachingWorkerPoolSize,
-    // Limit queue back-log
-    maxQueueSize: Settings.pdfCachingWorkerPoolBackLogLimit,
-  })
+  WORKER_POOL = workerpool.pool(
+    Path.join(import.meta.dirname, 'ContentCacheWorker.js'),
+    {
+      // Cap number of worker threads.
+      maxWorkers: Settings.pdfCachingWorkerPoolSize,
+      // Warmup workers.
+      minWorkers: Settings.pdfCachingWorkerPoolSize,
+      // Limit queue back-log
+      maxQueueSize: Settings.pdfCachingWorkerPoolBackLogLimit,
+    }
+  )
   setInterval(() => {
     const {
       totalWorkers,
@@ -431,7 +437,7 @@ function promiseMapWithLimit(concurrency, array, fn) {
   return Promise.all(array.map(x => limit(() => fn(x))))
 }
 
-module.exports = {
+export default {
   HASH_REGEX: /^[0-9a-f]{64}$/,
   update: callbackify(update),
   promises: {

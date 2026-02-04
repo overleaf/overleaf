@@ -125,6 +125,7 @@ async function projectListPage(req, res, next) {
   let usersBestSubscription
   let usersIndividualSubscription
   let usersGroupSubscriptions = []
+  let usersManagedGroupSubscriptions = []
   let survey
   let userIsMemberOfGroupSubscription = false
   let groupSubscriptionsPendingEnrollment = []
@@ -163,9 +164,10 @@ async function projectListPage(req, res, next) {
     logger.err({ err, userId }, 'projects listing in background failed')
     return undefined
   })
+
   const user = await User.findById(
     userId,
-    `email emails features alphaProgram betaProgram lastPrimaryEmailCheck lastActive signUpDate ace refProviders${
+    `email isAdmin emails features alphaProgram betaProgram lastPrimaryEmailCheck lastActive signUpDate ace refProviders${
       isSaas ? ' enrollment writefull completedTutorials aiErrorAssistant' : ''
     }`
   )
@@ -178,7 +180,16 @@ async function projectListPage(req, res, next) {
 
   user.refProviders = _.mapValues(user.refProviders, Boolean)
 
+  let onboardingDataCollection
+  let customerIoEnabled = false
+  let subjectArea
+  let usedLatex
+  let primaryOccupation
+  let role
+
   if (isSaas) {
+    if (user.isAdmin) await _checkForOldDebugProjects(userId)
+
     await SplitTestSessionHandler.promises.sessionMaintenance(req, user)
 
     try {
@@ -186,6 +197,7 @@ async function projectListPage(req, res, next) {
         bestSubscription: usersBestSubscription,
         individualSubscription: usersIndividualSubscription,
         memberGroupSubscriptions: usersGroupSubscriptions,
+        managedGroupSubscriptions: usersManagedGroupSubscriptions,
       } = await SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails(
         { _id: userId }
       ))
@@ -195,20 +207,16 @@ async function projectListPage(req, res, next) {
         "Failed to get user's best subscription"
       )
     }
-    try {
-      userIsMemberOfGroupSubscription = usersGroupSubscriptions?.length > 0
 
-      // TODO use helper function
-      if (!user.enrollment?.managedBy) {
-        groupSubscriptionsPendingEnrollment = usersGroupSubscriptions.filter(
-          subscription =>
-            subscription.groupPlan && subscription.managedUsersEnabled
-        )
-      }
-    } catch (error) {
-      logger.error(
-        { err: error },
-        'Failed to check whether user is a member of group subscription'
+    userIsMemberOfGroupSubscription =
+      usersGroupSubscriptions.length > 0 ||
+      usersManagedGroupSubscriptions.length > 0
+
+    // TODO use helper function
+    if (!user.enrollment?.managedBy) {
+      groupSubscriptionsPendingEnrollment = usersGroupSubscriptions.filter(
+        subscription =>
+          subscription.groupPlan && subscription.managedUsersEnabled
       )
     }
 
@@ -229,6 +237,26 @@ async function projectListPage(req, res, next) {
     ) {
       return res.redirect('/user/emails/primary-email-check')
     }
+
+    onboardingDataCollection = await OnboardingDataCollection.findById(
+      userId,
+      'subjectArea usedLatex primaryOccupation role'
+    )
+
+    if (onboardingDataCollection) {
+      subjectArea = onboardingDataCollection.subjectArea
+      usedLatex = onboardingDataCollection.usedLatex
+      primaryOccupation = onboardingDataCollection.primaryOccupation
+      role = onboardingDataCollection.role
+    }
+
+    customerIoEnabled = true
+
+    AnalyticsManager.setUserPropertyForUserInBackground(
+      userId,
+      'customer-io-integration',
+      true
+    )
   }
 
   const tags = await TagsHandler.promises.getAllTags(userId)
@@ -275,6 +303,10 @@ async function projectListPage(req, res, next) {
       result.email = emailData.email
       return result
     })
+
+  const commonsInstitution = userAffiliations.find(
+    affiliation => affiliation.institution?.commonsAccount
+  )?.institution?.name
 
   const portalTemplates = _buildPortalTemplatesList(userAffiliations)
 
@@ -447,14 +479,13 @@ async function projectListPage(req, res, next) {
   let showInrGeoBanner = false
   let showLATAMBanner = false
   let recommendedCurrency
+  const { countryCode, currencyCode } =
+    await GeoIpLookup.promises.getCurrencyCode(req.ip)
 
   if (
     usersBestSubscription?.type === 'free' ||
     usersBestSubscription?.type === 'standalone-ai-add-on'
   ) {
-    const { countryCode, currencyCode } =
-      await GeoIpLookup.promises.getCurrencyCode(req.ip)
-
     if (countryCode === 'IN') {
       showInrGeoBanner = true
     }
@@ -477,64 +508,8 @@ async function projectListPage(req, res, next) {
     logger.error({ err: error }, 'Failed to get individual subscription')
   }
 
-  const affiliations = userAffiliations || []
-  const inEnterpriseCommons = affiliations.some(
-    affiliation => affiliation.institution?.enterpriseCommons
-  )
-
-  let onboardingDataCollection
-  let subjectArea
-  let usedLatex
-  let primaryOccupation
-  let role
-
-  // customer.io: Premium nudge experiment
-  // Only do customer-io-trial-conversion assignment for users not in India/China and not in group/commons
-  let customerIoEnabled = false
   const aiBlocked = !(await _canUseAIAssist(user))
   const hasAiAssist = await _userHasAIAssist(user)
-  if (!userIsMemberOfGroupSubscription && !inEnterpriseCommons && isSaas) {
-    try {
-      const ip = req.ip
-      const { countryCode } = await GeoIpLookup.promises.getCurrencyCode(ip)
-      const excludedCountries = ['IN', 'CN']
-
-      if (!excludedCountries.includes(countryCode)) {
-        const cioAssignment =
-          await SplitTestHandler.promises.getAssignmentForUser(
-            userId,
-            'customer-io-trial-conversion'
-          )
-        if (cioAssignment.variant === 'enabled') {
-          customerIoEnabled = true
-          onboardingDataCollection = await OnboardingDataCollection.findById(
-            userId,
-            'subjectArea usedLatex primaryOccupation role'
-          )
-
-          if (onboardingDataCollection) {
-            subjectArea = onboardingDataCollection.subjectArea
-            usedLatex = onboardingDataCollection.usedLatex
-            primaryOccupation = onboardingDataCollection.primaryOccupation
-            role = onboardingDataCollection.role
-          }
-
-          AnalyticsManager.setUserPropertyForUserInBackground(
-            userId,
-            'customer-io-integration',
-            true
-          )
-        }
-      }
-    } catch (err) {
-      logger.error(
-        { err },
-        'Error checking geo location for customer-io-trial-conversion'
-      )
-      // Fallback to not enabled if geoip fails
-      customerIoEnabled = false
-    }
-  }
 
   await SplitTestHandler.promises.getAssignment(
     req,
@@ -547,6 +522,13 @@ async function projectListPage(req, res, next) {
     res,
     user
   )
+
+  const groupRole = userIsMemberOfGroupSubscription
+    ? usersManagedGroupSubscriptions?.length > 0 ||
+      usersGroupSubscriptions.some(sub => sub.userIsGroupManager)
+      ? 'admin'
+      : 'member'
+    : undefined
 
   res.render('project/list-react', {
     title: 'your_projects',
@@ -595,6 +577,10 @@ async function projectListPage(req, res, next) {
     role,
     usedLatex,
     inactiveTutorials,
+    countryCode,
+    commonsInstitution,
+    groupRole,
+    isManagedUser: Boolean(user.enrollment?.managedBy),
   })
 }
 
@@ -610,6 +596,20 @@ async function getProjectsJson(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const projectsPage = await _getProjects(userId, filters, sort, page)
   res.json(projectsPage)
+}
+
+/**
+ * @param {string} userId
+ * @private
+ */
+async function _checkForOldDebugProjects(userId) {
+  const exists = await ProjectGetter.promises.existUsersDebugProjectsOlderThan(
+    userId,
+    7
+  )
+  if (exists) {
+    await NotificationsBuilder.promises.oldDebugProjects(userId).create(userId)
+  }
 }
 
 /**
@@ -876,12 +876,12 @@ function _matchesFilters(project, tags, filters) {
 function _hasActiveFilter(filters) {
   return Boolean(
     filters.ownedByUser ||
-      filters.sharedWithUser ||
-      filters.archived ||
-      filters.trashed ||
-      filters.tag === null ||
-      filters.tag?.length ||
-      filters.search?.length
+    filters.sharedWithUser ||
+    filters.archived ||
+    filters.trashed ||
+    filters.tag === null ||
+    filters.tag?.length ||
+    filters.search?.length
   )
 }
 

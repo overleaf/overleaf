@@ -1,6 +1,6 @@
 # Build the a8m/envsubst binary, as it supports default values,
 # which the gnu envsubst (from gettext-base) does not.
-FROM golang:1.25.3-alpine AS envsubst_builder
+FROM golang:1.25.5-alpine AS envsubst_builder
 
 WORKDIR /build
 

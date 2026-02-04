@@ -22,6 +22,9 @@ import TagsHandler from '../Tags/TagsHandler.mjs'
 import ClsiCacheManager from '../Compile/ClsiCacheManager.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
 
+const TAG_COLOR_RED = '#f04343'
+const DEBUG_TAG_NAME = 'Debug'
+
 export default {
   duplicate: callbackify(duplicate),
   promises: {
@@ -29,7 +32,13 @@ export default {
   },
 }
 
-async function duplicate(owner, originalProjectId, newProjectName, tags = []) {
+async function duplicate(
+  owner,
+  originalProjectId,
+  newProjectName,
+  tags = [],
+  isDebugCopy
+) {
   await DocumentUpdaterHandler.promises.flushProjectToMongo(originalProjectId)
   const originalProject = await ProjectGetter.promises.getProject(
     originalProjectId,
@@ -58,6 +67,18 @@ async function duplicate(owner, originalProjectId, newProjectName, tags = []) {
     originalEntries,
   })
 
+  const attributes = {}
+  if (isDebugCopy) {
+    attributes.isDebugCopyOf = originalProjectId
+    // - Create new tag on owner._id if it doesn't already exist
+    const debugTag = await TagsHandler.promises.createTag(
+      owner._id,
+      DEBUG_TAG_NAME,
+      TAG_COLOR_RED,
+      { truncate: true }
+    )
+    tags.push(debugTag)
+  }
   // Pass template ID as analytics segmentation if duplicating project from a template
   const segmentation = _.pick(originalProject, [
     'fromV1TemplateId',
@@ -72,6 +93,9 @@ async function duplicate(owner, originalProjectId, newProjectName, tags = []) {
       originalProject._id
     )
   segmentation['updated-tags'] = tags.length
+  attributes.segmentation = segmentation
+
+  attributes.segmentation = segmentation
 
   // remove any leading or trailing spaces
   newProjectName = newProjectName.trim()
@@ -80,7 +104,7 @@ async function duplicate(owner, originalProjectId, newProjectName, tags = []) {
   const newProject = await ProjectCreationHandler.promises.createBlankProject(
     owner._id,
     newProjectName,
-    { segmentation }
+    attributes
   )
 
   let prepareClsiCacheInBackground = Promise.resolve()

@@ -1,11 +1,9 @@
-overleaf/web
-==============
+# overleaf/web
 
 overleaf/web is the front-end web service of the open-source web-based collaborative LaTeX editor,
 [Overleaf](https://www.overleaf.com).
 It serves all the HTML pages, CSS and javascript to the client. overleaf/web also contains
 a lot of logic around creating and editing projects, and account management.
-
 
 The rest of the Overleaf stack, along with information about contributing can be found in the
 [overleaf/overleaf](https://github.com/overleaf/overleaf) repository.
@@ -22,11 +20,13 @@ $ npm run start
 ### Running Tests
 
 To run all tests run:
+
 ```
 make test
 ```
 
 To run both unit and acceptance tests for a module run:
+
 ```
 make test_module MODULE=saas-authentication
 ```
@@ -50,11 +50,13 @@ make test_unit MOCHA_GREP='AuthorizationManager'
 ```
 
 To run only the unit tests for a single module do:
+
 ```
 make test_unit_module MODULE=saas-authentication
 ```
 
 Module tests can also use a MOCHA_GREP argument:
+
 ```
 make test_unit_module MODULE=saas-authentication MOCHA_GREP=SSO
 ```
@@ -86,23 +88,22 @@ make test_acceptance_run MOCHA_GREP='AuthorizationManager'
 ```
 
 To run only the acceptance tests for a single module do:
+
 ```
 make test_acceptance_module MODULE=saas-authentication
 ```
 
 Module tests can also use a MOCHA_GREP argument:
+
 ```
 make test_acceptance_module MODULE=saas-authentication MOCHA_GREP=SSO
 ```
 
-Routes
-------
+## Routes
 
 Run `bin/routes` to print out all routes in the project.
 
-
-License and Credits
--------------------
+## License and Credits
 
 This project is licensed under the [AGPLv3 license](http://www.gnu.org/licenses/agpl-3.0.html)
 
@@ -127,4 +128,3 @@ of these icons are used within Overleaf inside the `public/img/silk` and
 We gratefully acknowledge [IconShock](http://www.iconshock.com) for use of the icons
 in the `public/img/iconshock` directory found via
 [findicons.com](http://findicons.com/icon/498089/height?id=526085#)
-

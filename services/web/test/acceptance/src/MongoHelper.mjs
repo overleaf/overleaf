@@ -163,9 +163,10 @@ describe('MongoTests', function () {
     })
 
     describe('with an object as query', function () {
+      const signUpDate = new Date('2025-11-03T16:38:17.320Z')
       beforeEach(async function addHiddenFlag() {
         // add a mongo field that does not exist on the other users
-        await ghost.mongoUpdate({ $set: { hidden: 1 } })
+        await ghost.mongoUpdate({ $set: { signUpDate } })
       })
 
       it('should pass through the query', function () {
@@ -176,7 +177,7 @@ describe('MongoTests', function () {
 
       describe('when searching for hidden users', function () {
         it('should match the ghost only', async function () {
-          const query = normalizeMultiQuery({ hidden: 1 })
+          const query = normalizeMultiQuery({ signUpDate })
 
           const users = await db.users.find(query).toArray()
           expect(users).to.have.length(1)
@@ -186,7 +187,7 @@ describe('MongoTests', function () {
 
       describe('when searching for non hidden users', function () {
         it('should find the three users', async function () {
-          const query = normalizeMultiQuery({ hidden: { $exists: false } })
+          const query = normalizeMultiQuery({ signUpDate: { $ne: signUpDate } })
 
           await expectToFindTheThreeUsers(query)
         })

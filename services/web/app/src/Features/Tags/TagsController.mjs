@@ -1,7 +1,7 @@
 import TagsHandler from './TagsHandler.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
 import Errors from '../Errors/Errors.js'
-import { z, validateReq } from '../../infrastructure/Validation.mjs'
+import { z, parseReq } from '../../infrastructure/Validation.mjs'
 import { expressify } from '@overleaf/promise-utils'
 
 async function _getTags(userId, _req, res) {
@@ -30,7 +30,7 @@ const createTagSchema = z.object({
 })
 
 async function createTag(req, res) {
-  const { body } = validateReq(req, createTagSchema)
+  const { body } = parseReq(req, createTagSchema)
   const { name, color } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
   const tag = await TagsHandler.promises.createTag(userId, name, color)
@@ -54,7 +54,7 @@ const addProjectsToTagSchema = z.object({
 })
 
 async function addProjectsToTag(req, res) {
-  const { params, body } = validateReq(req, addProjectsToTagSchema)
+  const { params, body } = parseReq(req, addProjectsToTagSchema)
   const { tagId } = params
   const { projectIds } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -79,7 +79,7 @@ const removeProjectsFromTagSchema = z.object({
 })
 
 async function removeProjectsFromTag(req, res, next) {
-  const { params, body } = validateReq(req, removeProjectsFromTagSchema)
+  const { params, body } = parseReq(req, removeProjectsFromTagSchema)
   const { tagId } = params
   const { projectIds } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -104,7 +104,7 @@ const renameTagSchema = z.object({
 })
 
 async function renameTag(req, res) {
-  const { params, body } = validateReq(req, renameTagSchema)
+  const { params, body } = parseReq(req, renameTagSchema)
   const userId = SessionManager.getLoggedInUserId(req.session)
   const { tagId } = params
   const name = body.name
@@ -126,7 +126,7 @@ const editTagSchema = z.object({
 })
 
 async function editTag(req, res) {
-  const { params, body } = validateReq(req, editTagSchema)
+  const { params, body } = parseReq(req, editTagSchema)
   const { tagId } = params
   const name = body.name
   const color = body.color

@@ -140,6 +140,7 @@ function getLicencesForAnalytics(lag, queryDate, callback) {
       path: `/api/v2/institutions/institutions_licences`,
       body: { query_date: queryDate, lag },
       defaultErrorMessage: 'Could not get institutions licences',
+      timeout: 60_000,
     },
     callback
   )
@@ -349,13 +350,14 @@ function makeAffiliationRequest(options, callback) {
   if (!options.extraSuccessStatusCodes) {
     options.extraSuccessStatusCodes = []
   }
+  const timeout = options.timeout ? options.timeout : settings.apis.v1.timeout
   const requestOptions = {
     method: options.method,
     url: `${settings.apis.v1.url}${options.path}`,
     body: options.body,
     auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
     json: true,
-    timeout: settings.apis.v1.timeout,
+    timeout,
   }
   if (options.method === 'GET') {
     requestOptions.maxAttempts = 3

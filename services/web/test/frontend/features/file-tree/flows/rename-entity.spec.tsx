@@ -85,7 +85,7 @@ describe('FileTree Rename Entity Flow', function () {
       'renameFile'
     )
 
-    cy.findByRole('button', { name: 'Expand' }).click()
+    cy.findByLabelText('Expand').click()
 
     renameItem('c.tex', 'd.tex')
 
@@ -122,7 +122,7 @@ describe('FileTree Rename Entity Flow', function () {
   })
 
   it('shows error modal on duplicate filename in subfolder', function () {
-    cy.findByRole('button', { name: 'Expand' }).click()
+    cy.findByLabelText('Expand').click()
 
     renameItem('c.tex', 'e.tex')
 
