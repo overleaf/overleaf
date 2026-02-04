@@ -1,11 +1,12 @@
 import { syntaxTree } from '@codemirror/language'
 import { Diagnostic, LintSource } from '@codemirror/lint'
 import {
-  Declaration,
-  EntryName,
-  EntryTypeName,
+  Entry,
+  EntryCommand,
+  EntryBody,
+  EntryType,
   FieldName,
-  Other,
+  Comment,
 } from '../../lezer-bibtex/bibtex.terms.mjs'
 import { SyntaxNodeRef } from '@lezer/common'
 import { EditorState } from '@codemirror/state'
@@ -36,7 +37,7 @@ export const bibtexLintSource: LintSource = view => {
       if (fileLintingDisabled) {
         return false
       }
-      if (node.type.is(Other)) {
+      if (node.type.is(Comment)) {
         // Content between declaration. Can be linter directive
         const content = view.state.sliceDoc(node.from, node.to).trim()
         if (content === '%%novalidate') {
@@ -50,7 +51,7 @@ export const bibtexLintSource: LintSource = view => {
       if (lintingCurrentlyDisabled) {
         return false
       }
-      if (node.type.is(Declaration)) {
+      if (node.type.is(Entry)) {
         diagnostics.push(...checkRequiredFields(node, view.state))
         return false
       }
@@ -190,25 +191,29 @@ const checkRequiredFields = (
   // syntax tree
   const node = nodeRef.node
 
-  const entryNameNode = node.getChild(EntryName)
-  if (!entryNameNode) {
+  const entryCommandNode = node.getChild(EntryCommand)
+  if (!entryCommandNode) {
     return []
   }
 
-  const entryTypeNameNode = entryNameNode.getChild(EntryTypeName)
-  if (!entryTypeNameNode) {
+  const entryTypeNode = entryCommandNode.getChild(EntryType)
+  if (!entryTypeNode) {
     return []
   }
-  const entryTypeName = state
-    .sliceDoc(entryTypeNameNode.from, entryTypeNameNode.to)
+  const entryType = state
+    .sliceDoc(entryTypeNode.from, entryTypeNode.to)
     .toLowerCase()
-  const environment = bibEntryValidationRules.get(entryTypeName)
+  const environment = bibEntryValidationRules.get(entryType)
   if (!environment) {
     return []
   }
   const requiredFields = environment.requiredAttributes
 
-  const actualFieldNodes = node.getChildren('Field')
+  const entryBodyNode = node.getChild(EntryBody)
+  if (!entryBodyNode) {
+    return []
+  }
+  const actualFieldNodes = entryBodyNode.getChildren('Field')
   const actualFieldNames = new Set(
     actualFieldNodes
       .map(fieldNode => fieldNode.getChild(FieldName))
@@ -249,9 +254,9 @@ const checkRequiredFields = (
 
   return [
     {
-      from: entryNameNode.from,
-      to: entryNameNode.to,
-      message: createErrorMessage(missingFields, entryTypeName, state),
+      from: entryCommandNode.from,
+      to: entryCommandNode.to,
+      message: createErrorMessage(missingFields, entryType, state),
       severity: 'warning',
     },
   ]
