@@ -1,4 +1,6 @@
 .homepage-container {
+  --password-visibility-toggle-width: 44px;
+
   padding-top: $header-height;
 
   .home-animation-text-container {
@@ -155,6 +157,34 @@
 
       input {
         flex: 1;
+      }
+
+      .form-complex-input-container {
+        position: relative;
+        flex: 1;
+
+        input {
+          padding-right: var(--password-visibility-toggle-width);
+        }
+      }
+
+      .visibility-toggle {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: var(--password-visibility-toggle-width);
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background-color: transparent;
+        cursor: pointer;
+        color: var(--content-secondary);
+
+        &:hover {
+          color: var(--content-primary);
+        }
       }
     }
 
