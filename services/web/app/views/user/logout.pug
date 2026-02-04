@@ -1,0 +1,24 @@
+extends ../layout-marketing
+
+block vars
+	- var suppressNavbar = true
+	- var suppressFooter = true
+	- var suppressPugCookieBanner = true
+	- metadata = {title: translate('log_out_of_overleaf')}
+
+block content
+	main#main-content.content.content-alt.full-height
+		.container.full-height
+			.row
+			.col-xl-6.offset-xl-3
+				.card
+					.card-body
+						.page-header
+							h1 #{translate("log_out_of_overleaf")} 
+						form(name='logoutForm' data-ol-async-form action='/logout' method='POST')
+							input(name='_csrf' type='hidden' value=csrfToken)
+							p #{translate("log_out_of_overleaf_confirmation")}
+							.d-flex.justify-content-between.flex-row
+								button.btn-primary.btn(type='submit' data-ol-disabled-inflight)
+									span #{translate("log_out")}
+								a.btn-secondary.btn(href='/') #{translate("cancel")}

@@ -191,6 +191,14 @@ async function accountSuspended(req, res) {
   })
 }
 
+async function logout(req, res) {
+  const isLoggedIn = SessionManager.isUserLoggedIn(req.session)
+  if (!isLoggedIn) {
+    return res.redirect('/')
+  }
+  res.render('user/logout')
+}
+
 async function reconfirmAccountPage(req, res) {
   const pageData = {
     reconfirm_email: req.session.reconfirm_email,
@@ -234,6 +242,7 @@ async function emailPreferencesPage(req, res) {
 
 const UserPagesController = {
   accountSuspended: expressify(accountSuspended),
+  logout: expressify(logout),
 
   registerPage(req, res) {
     const sharedProjectData = req.session.sharedProjectData || {}
