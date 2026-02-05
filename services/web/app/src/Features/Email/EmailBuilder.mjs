@@ -1025,24 +1025,26 @@ templates.taxExemptCertificateRequired = NoCTAEmailTemplate({
 
 templates.groupMemberLimitWarning = ctaTemplate({
   subject(opts) {
-    return `${opts.groupName || 'Your group'} is approaching its member limit`
+    return `Action needed: Your Overleaf group is nearly out of licenses`
   },
   title(opts) {
-    return `${opts.groupName || 'Your group'} is approaching its member limit`
+    return `Action needed: Your Overleaf group is nearly out of licenses`
   },
   greeting(opts) {
-    return opts.firstName ? `Hi ${opts.firstName},` : 'Hi,'
+    return opts.firstName ? `Hi ${opts.firstName},` : 'Hi there,'
   },
   message(opts) {
     return [
-      `Your group "${opts.groupName}" is approaching its member limit.`,
-      `<b>Current usage:</b> ${opts.currentMembers} of ${opts.membersLimit} licenses used (${opts.remainingSeats} remaining)`,
-      'With domain capture enabled, users with verified email addresses from your domain can automatically join the group via SSO. Once the member limit is reached, new users will be blocked from joining.',
-    ]
-  },
-  secondaryMessage() {
-    return [
-      'To ensure uninterrupted access for your users, consider adding more licenses or removing inactive members.',
+      `Your Overleaf group <b>${opts.groupName}</b> is close to its license limit.`,
+      `<b>${opts.currentMembers} of ${opts.membersLimit} licenses are in use (${opts.remainingSeats} remaining).</b>`,
+      'Because domain capture is enabled, users from your domain can join automatically via SSO.' +
+        '<br/>' +
+        '<b>Once all licenses are used, new users won’t be able to join.</b>',
+      '<b>What you can do now:</b>',
+      '<ul>' +
+        '<li>Add more licenses, or</li>' +
+        '<li>Remove inactive users to free up licenses</li>' +
+        '</ul>',
     ]
   },
   ctaText() {

@@ -1005,26 +1005,27 @@ describe('EmailBuilder', function () {
             const dom = cheerio.load(ctx.email.html)
             const plainText = dom.text()
             expect(ctx.email.subject).to.equal(
-              `${ctx.opts.groupName} is approaching its member limit`
+              'Action needed: Your Overleaf group is nearly out of licenses'
             )
             expect(ctx.email.html).to.exist
             expect(ctx.email.html).to.contain(
-              `Your group "${ctx.opts.groupName}" is approaching its member limit.`
+              `Your Overleaf group <b>${ctx.opts.groupName}</b> is close to its license limit.`
             )
             expect(plainText).to.contain(
-              `Current usage: ${ctx.opts.currentMembers} of ` +
-                `${ctx.opts.membersLimit} licenses used ` +
-                `(${ctx.opts.remainingSeats} remaining)`
+              `${ctx.opts.currentMembers} of ${ctx.opts.membersLimit} ` +
+                `licenses are in use (${ctx.opts.remainingSeats} remaining).`
             )
             expect(ctx.email.html).to.contain(
-              'With domain capture enabled, users with verified email ' +
-                'addresses from your domain can automatically join the group ' +
-                'via SSO. Once the member limit is reached, new users will ' +
-                'be blocked from joining.'
+              'Because domain capture is enabled, users from your domain ' +
+                'can join automatically via SSO.'
             )
             expect(ctx.email.html).to.contain(
-              'To ensure uninterrupted access for your users, consider ' +
-                'adding more licenses or removing inactive members.'
+              'Once all licenses are used, new users won’t be able to join.'
+            )
+            expect(ctx.email.html).to.contain('What you can do now:')
+            expect(ctx.email.html).to.contain('Add more licenses, or')
+            expect(ctx.email.html).to.contain(
+              'Remove inactive users to free up licenses'
             )
             const buttonLink = dom('td a')
             expect(buttonLink).to.exist
