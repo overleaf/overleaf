@@ -42,6 +42,7 @@
  */
 
 import { callbackify } from 'node:util'
+import _ from 'lodash'
 
 import Errors from '../Errors/Errors.js'
 import Modules from '../../infrastructure/Modules.mjs'
@@ -459,7 +460,11 @@ async function checkUserPermissions(user, requiredCapabilities) {
  * @returns {Promise<boolean>} - A promise that resolves to `true` if all collaborators have the specified capability, otherwise `false`.
  */
 async function checkUserListPermissions(userList, capabilities) {
-  for (const user of userList) {
+  // Deduplicate the user list to avoid checking the same user multiple times
+  // Convert _id to string for comparison since it can be ObjectId or string
+  const uniqueUsers = _.uniqBy(userList, user => String(user._id))
+
+  for (const user of uniqueUsers) {
     // mimic a user object with only id, since we need it to fetch permissions
     const allowed = await checkUserPermissions(user, capabilities)
     if (!allowed) {

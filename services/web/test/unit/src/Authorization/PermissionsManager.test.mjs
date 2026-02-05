@@ -797,7 +797,7 @@ describe('PermissionsManager', function () {
 
   describe('checkUserListPermissions', function () {
     it('should return true when all users have permissions required', async function (ctx) {
-      const userList = ['user1', 'user2', 'user3']
+      const userList = [{ _id: 'user1' }, { _id: 'user2' }, { _id: 'user3' }]
       const capabilities = ['capability1', 'capability2']
       ctx.hooksFire.onCall(0).resolves(ctx.openPolicyResponseSet)
       ctx.hooksFire.onCall(1).resolves(ctx.openPolicyResponseSet)
@@ -812,7 +812,7 @@ describe('PermissionsManager', function () {
     })
 
     it('should return false if any user does not have permission', async function (ctx) {
-      const userList = ['user1', 'user2', 'user3']
+      const userList = [{ _id: 'user1' }, { _id: 'user2' }, { _id: 'user3' }]
       const capabilities = ['capability1', 'capability2']
       ctx.hooksFire.onCall(0).resolves(ctx.openPolicyResponseSet)
       ctx.hooksFire.onCall(1).resolves(ctx.restrictivePolicyResponseSet)
@@ -824,6 +824,40 @@ describe('PermissionsManager', function () {
           capabilities
         )
       expect(usersHavePermission).to.equal(false)
+    })
+
+    it('should deduplicate users with duplicate IDs', async function (ctx) {
+      const userList = [{ _id: 'user1' }, { _id: 'user1' }, { _id: 'user2' }]
+      const capabilities = ['capability1', 'capability2']
+      ctx.hooksFire.onCall(0).resolves(ctx.openPolicyResponseSet)
+      ctx.hooksFire.onCall(1).resolves(ctx.openPolicyResponseSet)
+
+      const usersHavePermission =
+        await ctx.PermissionsManager.promises.checkUserListPermissions(
+          userList,
+          capabilities
+        )
+      expect(usersHavePermission).to.equal(true)
+      // Should only call hooksFire twice (once per unique user), not three times
+      expect(ctx.hooksFire.callCount).to.equal(2)
+    })
+
+    it('should deduplicate users when _id is ObjectId vs string', async function (ctx) {
+      const mongodb = await import('mongodb-legacy')
+      const ObjectId = mongodb.default.ObjectId
+      const userId = new ObjectId()
+      const userList = [{ _id: userId }, { _id: userId.toString() }]
+      const capabilities = ['capability1', 'capability2']
+      ctx.hooksFire.onCall(0).resolves(ctx.openPolicyResponseSet)
+
+      const usersHavePermission =
+        await ctx.PermissionsManager.promises.checkUserListPermissions(
+          userList,
+          capabilities
+        )
+      expect(usersHavePermission).to.equal(true)
+      // Should only call hooksFire once since both users are the same
+      expect(ctx.hooksFire.callCount).to.equal(1)
     })
   })
 })
