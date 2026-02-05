@@ -542,13 +542,17 @@ async function moveReadWriteToCollaborators(req, res, next) {
       userId,
       projectId
     )
+
+    const auditInfo = { ipAddress: req.ip, initiatorId: userId }
+
     await CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
       projectId,
       userId,
       pendingEditor
         ? PrivilegeLevels.READ_ONLY
         : PrivilegeLevels.READ_AND_WRITE,
-      { pendingEditor }
+      { pendingEditor },
+      auditInfo
     )
   } else {
     // Normal case, not invited, joining via link sharing

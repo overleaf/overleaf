@@ -35,6 +35,9 @@ describe('UserMembershipHandler', function () {
       update: vi.fn().mockReturnValue({
         exec: vi.fn().mockResolvedValue(),
       }),
+      updateOne: vi.fn().mockReturnValue({
+        exec: vi.fn().mockResolvedValue(),
+      }),
     }
     ctx.institution = {
       _id: 'mock-institution-id',
@@ -83,6 +86,21 @@ describe('UserMembershipHandler', function () {
       }),
     }
 
+    ctx.Modules = {
+      promises: {
+        hooks: {
+          fire: vi.fn().mockResolvedValue(),
+        },
+      },
+    }
+
+    ctx.mongoose = {
+      startSession: vi.fn().mockResolvedValue({
+        withTransaction: vi.fn(async callback => await callback()),
+        endSession: vi.fn().mockResolvedValue(),
+      }),
+    }
+
     vi.doMock('mongodb-legacy', () => ({
       default: { ObjectId },
     }))
@@ -108,6 +126,14 @@ describe('UserMembershipHandler', function () {
 
     vi.doMock('../../../../app/src/models/Publisher', () => ({
       Publisher: ctx.Publisher,
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
+      default: ctx.Modules,
+    }))
+
+    vi.doMock('../../../../app/src/infrastructure/Mongoose', () => ({
+      default: ctx.mongoose,
     }))
 
     ctx.UserMembershipHandler = (await import(modulePath)).default
@@ -254,6 +280,66 @@ describe('UserMembershipHandler', function () {
         expect(user).to.equal(ctx.newUser)
       })
     })
+
+    describe('group managers', function () {
+      it('add user to group managers', async function (ctx) {
+        await ctx.UserMembershipHandler.promises.addUser(
+          ctx.subscription,
+          EntityConfigs.groupManagers,
+          ctx.email
+        )
+        expect(ctx.subscription.updateOne).toHaveBeenCalledWith({
+          $addToSet: { manager_ids: ctx.newUser._id },
+        })
+      })
+
+      it('should write a group audit log when subscription has managed users enabled', async function (ctx) {
+        ctx.subscription.managedUsersEnabled = true
+        const auditInfo = {
+          initiatorId: new ObjectId(),
+          ipAddress: '192.168.1.1',
+        }
+
+        await ctx.UserMembershipHandler.promises.addUser(
+          ctx.subscription,
+          EntityConfigs.groupManagers,
+          ctx.email,
+          auditInfo
+        )
+
+        expect(ctx.Modules.promises.hooks.fire).toHaveBeenCalledWith(
+          'addGroupAuditLogEntry',
+          {
+            groupId: ctx.subscription._id,
+            operation: 'group-role-changed',
+            initiatorId: auditInfo.initiatorId,
+            ipAddress: auditInfo.ipAddress,
+            info: {
+              userId: ctx.newUser._id,
+              role: 'manager',
+            },
+          },
+          expect.anything() // session object
+        )
+      })
+
+      it('should not write a group audit log when subscription does not have managed users enabled', async function (ctx) {
+        ctx.subscription.managedUsersEnabled = false
+        const auditInfo = {
+          initiatorId: new ObjectId(),
+          ipAddress: '192.168.1.1',
+        }
+
+        await ctx.UserMembershipHandler.promises.addUser(
+          ctx.subscription,
+          EntityConfigs.groupManagers,
+          ctx.email,
+          auditInfo
+        )
+
+        expect(ctx.Modules.promises.hooks.fire).not.toHaveBeenCalled()
+      })
+    })
   })
 
   describe('removeUser', function () {
@@ -281,6 +367,65 @@ describe('UserMembershipHandler', function () {
         } catch (err) {
           expect(err).toBeInstanceOf(UserMembershipErrors.UserIsManagerError)
         }
+      })
+    })
+
+    describe('group managers', function () {
+      it('remove user from group managers', async function (ctx) {
+        await ctx.UserMembershipHandler.promises.removeUser(
+          ctx.subscription,
+          EntityConfigs.groupManagers,
+          ctx.newUser._id
+        )
+        expect(ctx.subscription.updateOne).toHaveBeenCalledWith({
+          $pull: { manager_ids: ctx.newUser._id },
+        })
+      })
+
+      it('should write a group audit log when subscription has managed users enabled', async function (ctx) {
+        ctx.subscription.managedUsersEnabled = true
+        const auditInfo = {
+          initiatorId: new ObjectId(),
+          ipAddress: '192.168.1.1',
+        }
+
+        await ctx.UserMembershipHandler.promises.removeUser(
+          ctx.subscription,
+          EntityConfigs.groupManagers,
+          ctx.newUser._id,
+          auditInfo
+        )
+
+        expect(ctx.Modules.promises.hooks.fire).toHaveBeenCalledWith(
+          'addGroupAuditLogEntry',
+          {
+            groupId: ctx.subscription._id,
+            operation: 'group-role-changed',
+            initiatorId: auditInfo.initiatorId,
+            ipAddress: auditInfo.ipAddress,
+            info: {
+              userId: ctx.newUser._id,
+              role: 'member',
+            },
+          }
+        )
+      })
+
+      it('should not write a group audit log when subscription does not have managed users enabled', async function (ctx) {
+        ctx.subscription.managedUsersEnabled = false
+        const auditInfo = {
+          initiatorId: new ObjectId(),
+          ipAddress: '192.168.1.1',
+        }
+
+        await ctx.UserMembershipHandler.promises.removeUser(
+          ctx.subscription,
+          EntityConfigs.groupManagers,
+          ctx.newUser._id,
+          auditInfo
+        )
+
+        expect(ctx.Modules.promises.hooks.fire).not.toHaveBeenCalled()
       })
     })
   })

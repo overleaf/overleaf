@@ -104,6 +104,17 @@ describe('CollaboratorsHandler', function () {
       })
     )
 
+    ctx.ProjectAuditLogHandler = {
+      addEntryInBackground: sinon.stub(),
+    }
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectAuditLogHandler',
+      () => ({
+        default: ctx.ProjectAuditLogHandler,
+      })
+    )
+
     ctx.CollaboratorsHandler = (await import(MODULE_PATH)).default
   })
 
@@ -811,6 +822,30 @@ describe('CollaboratorsHandler', function () {
           'readAndWrite'
         )
       ).to.be.rejectedWith(Errors.NotFoundError)
+    })
+
+    it('should write a project audit log', async function (ctx) {
+      ctx.ProjectMock.expects('updateOne')
+        .chain('exec')
+        .resolves({ matchedCount: 1 })
+      const auditInfo = {
+        initiatorId: new ObjectId(),
+        ipAddress: '192.168.1.1',
+      }
+      await ctx.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
+        ctx.project._id,
+        ctx.userId,
+        'readOnly',
+        {},
+        auditInfo
+      )
+      ctx.ProjectAuditLogHandler.addEntryInBackground.should.have.been.calledWith(
+        ctx.project._id,
+        'project-role-changed',
+        auditInfo.initiatorId,
+        auditInfo.ipAddress,
+        { userId: ctx.userId, role: 'Viewer' }
+      )
     })
   })
 })

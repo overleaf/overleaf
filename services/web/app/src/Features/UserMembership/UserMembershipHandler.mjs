@@ -6,6 +6,8 @@ import { Publisher } from '../../models/Publisher.mjs'
 import UserMembershipViewModel from './UserMembershipViewModel.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import UserMembershipErrors from './UserMembershipErrors.mjs'
+import Modules from '../../infrastructure/Modules.mjs'
+import mongoose from '../../infrastructure/Mongoose.mjs'
 
 const { ObjectId } = mongodb
 
@@ -27,7 +29,7 @@ const UserMembershipHandler = {
     return await getPopulatedListOfMembers(entity, attributes)
   },
 
-  async addUser(entity, entityConfig, email) {
+  async addUser(entity, entityConfig, email, auditInfo) {
     const attribute = entityConfig.fields.write
     const user = await UserGetter.promises.getUserByAnyEmail(email)
 
@@ -39,15 +41,63 @@ const UserMembershipHandler = {
       throw new UserMembershipErrors.UserAlreadyAddedError()
     }
 
+    // if the entity is a Subscription with managed users enabled, then audit log the event
+    if (
+      entityConfig.modelName === 'Subscription' &&
+      entity.managedUsersEnabled
+    ) {
+      const session = await mongoose.startSession()
+      try {
+        await session.withTransaction(async () => {
+          const auditLog = {
+            groupId: entity._id,
+            operation: 'group-role-changed',
+            initiatorId: auditInfo.initiatorId,
+            ipAddress: auditInfo.ipAddress,
+            info: {
+              userId: user._id,
+              role: 'manager',
+            },
+          }
+          await Modules.promises.hooks.fire(
+            'addGroupAuditLogEntry',
+            auditLog,
+            session
+          )
+        })
+      } finally {
+        await session.endSession()
+      }
+    }
+
     await addUserToEntity(entity, attribute, user)
     return UserMembershipViewModel.build(user)
   },
 
-  async removeUser(entity, entityConfig, userId) {
+  async removeUser(entity, entityConfig, userId, auditInfo) {
     const attribute = entityConfig.fields.write
     if (entity.admin_id ? entity.admin_id.equals(userId) : undefined) {
       throw new UserMembershipErrors.UserIsManagerError()
     }
+
+    // if the entity is a Subscription with managed users enabled, then audit log the event
+    if (
+      entityConfig.modelName === 'Subscription' &&
+      entity.managedUsersEnabled
+    ) {
+      const auditLog = {
+        groupId: entity._id,
+        operation: 'group-role-changed',
+        initiatorId: auditInfo.initiatorId,
+        ipAddress: auditInfo.ipAddress,
+        info: {
+          userId,
+          role: 'member',
+        },
+      }
+      await Modules.promises.hooks.fire('addGroupAuditLogEntry', auditLog)
+    }
+
     return await removeUserFromEntity(entity, attribute, userId)
   },
 }

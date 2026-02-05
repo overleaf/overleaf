@@ -112,10 +112,17 @@ async function setCollaboratorInfo(req, res, next) {
       )
     }
 
+    const auditInfo = {
+      ipAddress: req.ip,
+      initiatorId: SessionManager.getLoggedInUserId(req.session),
+    }
+
     await CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
       projectId,
       userId,
-      privilegeLevel
+      privilegeLevel,
+      {},
+      auditInfo
     )
     EditorRealTimeController.emitToRoom(
       projectId,

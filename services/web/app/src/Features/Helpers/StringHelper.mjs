@@ -15,6 +15,11 @@ const JSON_ESCAPE = {
   '\u2029': '\\u2029',
 }
 
+export function capitalise(str) {
+  if (!str || str.length === 0 || typeof str !== 'string') return str
+  return str.substring(0, 1).toUpperCase() + str.slice(1)
+}
+
 /**
  * Converts a snake_case string into a user friendly string with each word capitalized.
  * @param {string} snakecaseStr

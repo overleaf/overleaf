@@ -15,6 +15,7 @@ const MANAGED_GROUP_PROJECT_EVENTS = [
   'project-untrashed',
   'project-restored',
   'project-cloned',
+  'project-role-changed',
   'project-history-version-restored',
   'project-history-version-downloaded',
   'transfer-ownership',
