@@ -10,7 +10,7 @@ import {
 import { UserSettings } from '../../../../types/user-settings'
 import getMeta from '@/utils/meta'
 
-const defaultSettings: UserSettings = {
+export const defaultSettings: UserSettings = {
   pdfViewer: 'pdfjs',
   autoComplete: true,
   autoPairDelimiters: true,

@@ -49,6 +49,8 @@ import { UserId } from '../../../types/user'
 import { ProjectCompiler } from '../../../types/project-settings'
 import { ReferencesContext } from '@/features/ide-react/context/references-context'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
+import { defaultSettings } from '@/shared/context/user-settings-context'
+import { UserSettings } from '@ol-types/user-settings'
 import { DetachCompileContext } from '@/shared/context/detach-compile-context'
 import { type CompileContext } from '@/shared/context/local-compile-context'
 import { EditorContext } from '@/shared/context/editor-context'
@@ -61,19 +63,11 @@ export const USER_ID = '123abd' as UserId
 export const USER_EMAIL = 'testuser@example.com'
 
 const defaultUserSettings = {
-  pdfViewer: 'pdfjs',
-  fontSize: 12,
-  fontFamily: 'monaco',
-  lineHeight: 'normal',
-  editorTheme: 'textmate',
-  overallTheme: '',
-  mode: 'default',
-  autoComplete: true,
-  autoPairDelimiters: true,
-  trackChanges: true,
-  syntaxValidation: false,
-  mathPreview: true,
-}
+  ...defaultSettings,
+  enableNewEditor: false,
+  enableNewEditorLegacy: false,
+  referencesSearchMode: 'simple',
+} satisfies UserSettings
 
 export type EditorProvidersProps = {
   user?: { id: string; email: string; signUpDate?: string }
