@@ -2,7 +2,6 @@
 import lodash from 'lodash'
 
 /*
- * This helper can be used by migrate_recurly_customers_to_stripe.mjs
  *
  * This file can be deleted once the Recurly to Stripe migration is complete.
  */
@@ -181,6 +180,30 @@ export const EU_VAT_COUNTRIES = [
   'SK', // Slovakia
 ]
 
+const EU_VAT_PREFIX_OVERRIDES = {
+  GR: 'EL', // Greece uses EL prefix for VAT numbers
+}
+
+function normalizeTaxId(value) {
+  if (!value) return ''
+  return String(value).trim().toUpperCase()
+}
+
+function normalizeTaxIdCompact(value) {
+  return normalizeTaxId(value).replace(/\s+/g, '')
+}
+
+function digitsOnly(value) {
+  return normalizeTaxId(value).replace(/\D+/g, '')
+}
+
+function hasEuVatPrefix(country, taxIdValue) {
+  const normalized = normalizeTaxIdCompact(taxIdValue)
+  if (!normalized) return false
+  const prefix = EU_VAT_PREFIX_OVERRIDES[country] || country
+  return normalized.startsWith(prefix)
+}
+
 function caProvinceFromPostalCode(postalCode) {
   if (!postalCode) return null
   const m = String(postalCode)
@@ -268,6 +291,445 @@ export function getCanadaTaxIdType(taxIdValue, postalCode) {
 }
 
 /**
+ * Determine the Stripe tax ID type for Australia based on the tax ID value.
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Australia section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'au_abn'|'au_arn'|null}
+ */
+export function getAustraliaTaxIdType(taxIdValue) {
+  const digits = digitsOnly(taxIdValue)
+  if (!digits) return null
+
+  // ABN: 11 digits (example: 12345678912)
+  if (/^\d{11}$/.test(digits)) return 'au_abn'
+
+  // ARN: 12 digits (example: 123456789123)
+  if (/^\d{12}$/.test(digits)) return 'au_arn'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Brazil based on the tax ID value.
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Brazil section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'br_cnpj'|'br_cpf'|null}
+ */
+export function getBrazilTaxIdType(taxIdValue) {
+  const digits = digitsOnly(taxIdValue)
+  if (!digits) return null
+
+  // CNPJ: 14 digits (example: 01.234.456/5432-10)
+  if (/^\d{14}$/.test(digits)) return 'br_cnpj'
+
+  // CPF: 11 digits (example: 123.456.789-87)
+  if (/^\d{11}$/.test(digits)) return 'br_cpf'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Bulgaria (EU VAT vs UIC).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Bulgaria section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'eu_vat'|'bg_uic'|null}
+ */
+export function getBulgariaTaxIdType(taxIdValue) {
+  if (!taxIdValue) return null
+
+  // EU VAT: BG prefix (example: BG0123456789)
+  if (hasEuVatPrefix('BG', taxIdValue)) return 'eu_vat'
+
+  // UIC: 9 digits (example: 123456789)
+  if (/^\d{9}$/.test(digitsOnly(taxIdValue))) return 'bg_uic'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Croatia (EU VAT vs OIB).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Croatia section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'eu_vat'|'hr_oib'|null}
+ */
+export function getCroatiaTaxIdType(taxIdValue) {
+  if (!taxIdValue) return null
+
+  // EU VAT: HR prefix (example: HR12345678912)
+  if (hasEuVatPrefix('HR', taxIdValue)) return 'eu_vat'
+
+  // OIB: 11 digits (example: 12345678901)
+  if (/^\d{11}$/.test(digitsOnly(taxIdValue))) return 'hr_oib'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Germany (EU VAT vs Steuer Nummer).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Germany section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'eu_vat'|'de_stn'|null}
+ */
+export function getGermanyTaxIdType(taxIdValue) {
+  if (!taxIdValue) return null
+
+  // EU VAT: DE prefix (example: DE123456789)
+  if (hasEuVatPrefix('DE', taxIdValue)) return 'eu_vat'
+
+  // Steuer Nummer: 10 digits (example: 1234567890)
+  if (/^\d{10}$/.test(digitsOnly(taxIdValue))) return 'de_stn'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Hungary (EU VAT vs HU tax number).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Hungary section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'eu_vat'|'hu_tin'|null}
+ */
+export function getHungaryTaxIdType(taxIdValue) {
+  if (!taxIdValue) return null
+
+  // EU VAT: HU prefix (example: HU12345678)
+  if (hasEuVatPrefix('HU', taxIdValue)) return 'eu_vat'
+
+  // HU tax number: 8-1-2 digits (example: 12345678-1-23)
+  const normalized = normalizeTaxIdCompact(taxIdValue)
+  if (/^\d{8}-\d-\d{2}$/.test(normalized)) return 'hu_tin'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Japan.
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Japan section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'jp_cn'|'jp_rn'|'jp_trn'|null}
+ */
+export function getJapanTaxIdType(taxIdValue) {
+  const normalized = normalizeTaxIdCompact(taxIdValue)
+  if (!normalized) return null
+
+  // Tax Registration Number: T + 13 digits (example: T1234567891234)
+  if (/^T\d{13}$/.test(normalized)) return 'jp_trn'
+
+  // Corporate Number: 13 digits (example: 1234567891234)
+  if (/^\d{13}$/.test(normalized)) return 'jp_cn'
+
+  // Registered Foreign Businesses: 5 digits (example: 12345)
+  if (/^\d{5}$/.test(normalized)) return 'jp_rn'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Liechtenstein (UID vs VAT).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Liechtenstein section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'li_uid'|'li_vat'|null}
+ */
+export function getLiechtensteinTaxIdType(taxIdValue) {
+  const normalized = normalizeTaxIdCompact(taxIdValue)
+  if (!normalized) return null
+
+  // UID: CHE + 9 digits (example: CHE123456789)
+  if (/^CHE\d{9}$/.test(normalized)) return 'li_uid'
+
+  // VAT: 5 digits (example: 12345)
+  if (/^\d{5}$/.test(digitsOnly(normalized))) return 'li_vat'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Malaysia (FRP, ITN, SST).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Malaysia section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'my_frp'|'my_itn'|'my_sst'|null}
+ */
+export function getMalaysiaTaxIdType(taxIdValue) {
+  const normalized = normalizeTaxIdCompact(taxIdValue)
+  if (!normalized) return null
+
+  // FRP: 8 digits (example: 12345678)
+  if (/^\d{8}$/.test(digitsOnly(normalized))) return 'my_frp'
+
+  // ITN: letter + 10 digits (example: C 1234567890)
+  if (/^[A-Z]\d{10}$/.test(normalized.replace(/\s+/g, ''))) return 'my_itn'
+
+  // SST: A12-3456-78912345
+  if (/^[A-Z]\d{2}-\d{4}-\d{8}$/.test(normalized)) return 'my_sst'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Norway (VAT vs VOEC).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Norway section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'no_vat'|'no_voec'|null}
+ */
+export function getNorwayTaxIdType(taxIdValue) {
+  const normalized = normalizeTaxIdCompact(taxIdValue)
+  if (!normalized) return null
+
+  // VAT: 9 digits + MVA (example: 123456789MVA)
+  if (/^\d{9}MVA$/.test(normalized)) return 'no_vat'
+
+  // VOEC: 7 digits (example: 1234567)
+  if (/^\d{7}$/.test(digitsOnly(normalized))) return 'no_voec'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Poland (EU VAT vs NIP).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Poland section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'eu_vat'|'pl_nip'|null}
+ */
+export function getPolandTaxIdType(taxIdValue) {
+  if (!taxIdValue) return null
+
+  // EU VAT: PL prefix (example: PL1234567890)
+  if (hasEuVatPrefix('PL', taxIdValue)) return 'eu_vat'
+
+  // NIP: 10 digits (example: 1234567890)
+  if (/^\d{10}$/.test(digitsOnly(taxIdValue))) return 'pl_nip'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Romania (EU VAT vs TIN).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Romania section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'eu_vat'|'ro_tin'|null}
+ */
+export function getRomaniaTaxIdType(taxIdValue) {
+  if (!taxIdValue) return null
+
+  // EU VAT: RO prefix (example: RO1234567891)
+  if (hasEuVatPrefix('RO', taxIdValue)) return 'eu_vat'
+
+  // TIN: 13 digits (example: 1234567890123)
+  if (/^\d{13}$/.test(digitsOnly(taxIdValue))) return 'ro_tin'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Russia (INN vs KPP).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Russia section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'ru_inn'|'ru_kpp'|null}
+ */
+export function getRussiaTaxIdType(taxIdValue) {
+  const digits = digitsOnly(taxIdValue)
+  if (!digits) return null
+
+  // INN: 10 digits (example: 1234567891)
+  if (/^\d{10}$/.test(digits)) return 'ru_inn'
+
+  // KPP: 9 digits (example: 123456789)
+  if (/^\d{9}$/.test(digits)) return 'ru_kpp'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Singapore (GST vs UEN).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Singapore section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'sg_gst'|'sg_uen'|null}
+ */
+export function getSingaporeTaxIdType(taxIdValue) {
+  const normalized = normalizeTaxIdCompact(taxIdValue)
+  if (!normalized) return null
+
+  // GST: M + 8 digits + letter (example: M12345678X)
+  if (/^M\d{8}[A-Z]$/.test(normalized)) return 'sg_gst'
+
+  // UEN: 9 digits + letter (example: 123456789F)
+  if (/^\d{9}[A-Z]$/.test(normalized)) return 'sg_uen'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Slovenia (EU VAT vs TIN).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Slovenia section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'eu_vat'|'si_tin'|null}
+ */
+export function getSloveniaTaxIdType(taxIdValue) {
+  if (!taxIdValue) return null
+
+  // EU VAT: SI prefix (example: SI12345678)
+  if (hasEuVatPrefix('SI', taxIdValue)) return 'eu_vat'
+
+  // TIN: 8 digits (example: 12345678)
+  if (/^\d{8}$/.test(digitsOnly(taxIdValue))) return 'si_tin'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Spain (EU VAT vs CIF/NIF).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Spain section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'eu_vat'|'es_cif'|null}
+ */
+export function getSpainTaxIdType(taxIdValue) {
+  const normalized = normalizeTaxIdCompact(taxIdValue)
+  if (!normalized) return null
+
+  // EU VAT: ES prefix (example: ESA1234567Z)
+  if (hasEuVatPrefix('ES', normalized)) return 'eu_vat'
+
+  // CIF/NIF: A12345678 (letter + 7 digits + alnum)
+  if (/^[A-Z]\d{7}[A-Z0-9]$/.test(normalized)) return 'es_cif'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Switzerland (UID vs VAT).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Switzerland section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'ch_uid'|'ch_vat'|null}
+ */
+export function getSwitzerlandTaxIdType(taxIdValue) {
+  const normalized = normalizeTaxIdCompact(taxIdValue)
+  if (!normalized) return null
+
+  const alnum = normalized.replace(/[^A-Z0-9]/g, '')
+
+  // UID: CHE-123.456.789 HR
+  if (/^CHE\d{9}HR$/.test(alnum)) return 'ch_uid'
+
+  // VAT: CHE-123.456.789 MWST
+  if (/^CHE\d{9}MWST$/.test(alnum)) return 'ch_vat'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for the United Kingdom (GB VAT vs EU VAT for NI).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (UK section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'gb_vat'|'eu_vat'|null}
+ */
+export function getUkTaxIdType(taxIdValue) {
+  const normalized = normalizeTaxIdCompact(taxIdValue)
+  if (!normalized) return null
+
+  // Northern Ireland VAT numbers use XI prefix
+  if (/^XI[A-Z0-9]+$/.test(normalized)) return 'eu_vat'
+
+  // GB VAT numbers use GB prefix
+  if (/^GB[A-Z0-9]+$/.test(normalized)) return 'gb_vat'
+
+  return null
+}
+
+/**
+ * Determine the Stripe tax ID type for Uzbekistan (TIN vs VAT).
+ *
+ * Source reference:
+ * - Stripe docs list supported types + example formats (Uzbekistan section)
+ *   https://docs.stripe.com/billing/customer/tax-ids
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {'uz_tin'|'uz_vat'|null}
+ */
+export function getUzbekistanTaxIdType(taxIdValue) {
+  const digits = digitsOnly(taxIdValue)
+  if (!digits) return null
+
+  // VAT: 12 digits (example: 123456789012)
+  if (/^\d{12}$/.test(digits)) return 'uz_vat'
+
+  // TIN: 9 digits (example: 123456789)
+  if (/^\d{9}$/.test(digits)) return 'uz_tin'
+
+  return null
+}
+
+/**
  * Get the Stripe tax ID type for a given country + tax ID value.
  *
  * Note: for some countries (e.g. Canada) the type depends on the tax ID value format,
@@ -285,79 +747,152 @@ export function getTaxIdType(country, taxIdValue, postalCode) {
 
   const upperCountry = String(country).toUpperCase()
 
+  if (upperCountry === 'EU') {
+    // European One Stop Shop VAT number for non-Union scheme
+    const normalized = normalizeTaxIdCompact(taxIdValue)
+    return /^EU\d+$/.test(normalized) ? 'eu_oss_vat' : null
+  }
+
   // EU VAT
   if (EU_VAT_COUNTRIES.includes(upperCountry)) {
-    return 'eu_vat'
+    // If this country has multiple types, we'll handle it below with a dedicated function.
+    // Otherwise, EU VAT is the only supported type for that country.
+    const euVatOnlyCountries = new Set([
+      'AT',
+      'BE',
+      'CY',
+      'CZ',
+      'DK',
+      'EE',
+      'FI',
+      'FR',
+      'GR',
+      'IE',
+      'IT',
+      'LT',
+      'LU',
+      'LV',
+      'MT',
+      'NL',
+      'PT',
+      'SE',
+      'SK',
+    ])
+    if (euVatOnlyCountries.has(upperCountry)) return 'eu_vat'
   }
 
-  // Canada
-  if (upperCountry === 'CA') {
-    return getCanadaTaxIdType(taxIdValue, postalCode)
-  }
+  // Multi-type countries
+  if (upperCountry === 'CA') return getCanadaTaxIdType(taxIdValue, postalCode)
+  if (upperCountry === 'AU') return getAustraliaTaxIdType(taxIdValue)
+  if (upperCountry === 'BR') return getBrazilTaxIdType(taxIdValue)
+  if (upperCountry === 'BG') return getBulgariaTaxIdType(taxIdValue)
+  if (upperCountry === 'HR') return getCroatiaTaxIdType(taxIdValue)
+  if (upperCountry === 'DE') return getGermanyTaxIdType(taxIdValue)
+  if (upperCountry === 'HU') return getHungaryTaxIdType(taxIdValue)
+  if (upperCountry === 'JP') return getJapanTaxIdType(taxIdValue)
+  if (upperCountry === 'LI') return getLiechtensteinTaxIdType(taxIdValue)
+  if (upperCountry === 'MY') return getMalaysiaTaxIdType(taxIdValue)
+  if (upperCountry === 'NO') return getNorwayTaxIdType(taxIdValue)
+  if (upperCountry === 'PL') return getPolandTaxIdType(taxIdValue)
+  if (upperCountry === 'RO') return getRomaniaTaxIdType(taxIdValue)
+  if (upperCountry === 'RU') return getRussiaTaxIdType(taxIdValue)
+  if (upperCountry === 'SG') return getSingaporeTaxIdType(taxIdValue)
+  if (upperCountry === 'SI') return getSloveniaTaxIdType(taxIdValue)
+  if (upperCountry === 'ES') return getSpainTaxIdType(taxIdValue)
+  if (upperCountry === 'CH') return getSwitzerlandTaxIdType(taxIdValue)
+  if (upperCountry === 'GB') return getUkTaxIdType(taxIdValue)
+  if (upperCountry === 'UZ') return getUzbekistanTaxIdType(taxIdValue)
 
   // Country-specific tax IDs (all Stripe-supported types)
-  // See: https://docs.stripe.com/api/tax_ids/create#create_tax_id-type
+  // See: https://docs.stripe.com/billing/customer/tax-ids
   const countryTaxIdTypes = {
-    // Europe (non-EU)
-    GB: 'gb_vat',
-    // CH: 'ch_vat',
-    // NO: 'no_vat',
-    // IS: 'is_vat',
-    // LI: 'li_uid',
-    // TR: 'tr_tin',
+    // Africa
+    AO: 'ao_tin',
+    BH: 'bh_vat',
+    BF: 'bf_ifu',
+    BJ: 'bj_ifu',
+    CM: 'cm_niu',
+    CV: 'cv_nif',
+    CD: 'cd_nif',
+    EG: 'eg_tin',
+    ET: 'et_tin',
+    GN: 'gn_nif',
+    KE: 'ke_pin',
+    MA: 'ma_vat',
+    MR: 'mr_nif',
+    NG: 'ng_tin',
+    SN: 'sn_ninea',
+    TZ: 'tz_vat',
+    UG: 'ug_tin',
+    ZA: 'za_vat',
+    ZM: 'zm_tin',
+    ZW: 'zw_tin',
 
-    // // Americas
+    // Americas
+    AR: 'ar_cuit',
+    BO: 'bo_tin',
+    BS: 'bs_tin',
+    BB: 'bb_tin',
+    CL: 'cl_tin',
+    CO: 'co_nit',
+    CR: 'cr_tin',
+    DO: 'do_rcn',
+    EC: 'ec_ruc',
+    MX: 'mx_rfc',
+    PE: 'pe_ruc',
+    SR: 'sr_fin',
+    SV: 'sv_nit',
     US: 'us_ein',
-    // CA: 'ca_bn', // this is more complex, see getCanadaTaxIdType()
-    // MX: 'mx_rfc',
-    // BR: 'br_cnpj',
-    // CL: 'cl_tin',
-    // CO: 'co_nit',
-    // AR: 'ar_cuit',
-    // BO: 'bo_tin',
-    // CR: 'cr_tin',
-    // DO: 'do_rcn',
-    // EC: 'ec_ruc',
-    // PE: 'pe_ruc',
-    // UY: 'uy_ruc',
-    // VE: 've_rif',
-    // SV: 'sv_nit',
+    UY: 'uy_ruc',
+    VE: 've_rif',
 
-    // // Asia-Pacific
-    // AU: 'au_abn',
-    // NZ: 'nz_gst',
-    // JP: 'jp_cn',
-    // KR: 'kr_brn',
-    // CN: 'cn_tin',
-    // HK: 'hk_br',
-    // TW: 'tw_vat',
-    // SG: 'sg_gst',
-    // MY: 'my_sst',
-    // TH: 'th_vat',
-    // ID: 'id_npwp',
-    // PH: 'ph_tin',
-    // IN: 'in_gst',
-    // VN: 'vn_tin',
+    // Asia-Pacific
+    BD: 'bd_bin',
+    CN: 'cn_tin',
+    HK: 'hk_br',
+    ID: 'id_npwp',
+    IN: 'in_gst',
+    KH: 'kh_tin',
+    KR: 'kr_brn',
+    KZ: 'kz_bin',
+    KG: 'kg_tin',
+    LA: 'la_tin',
+    NZ: 'nz_gst',
+    NP: 'np_pan',
+    PH: 'ph_tin',
+    TH: 'th_vat',
+    TW: 'tw_vat',
+    VN: 'vn_tin',
 
-    // // Middle East
-    // AE: 'ae_trn',
-    // SA: 'sa_vat',
-    // BH: 'bh_vat',
-    // OM: 'om_vat',
-    // IL: 'il_vat',
+    // Europe (non-EU)
+    AD: 'ad_nrt',
+    AL: 'al_tin',
+    AM: 'am_tin',
+    AW: 'aw_tin',
+    AZ: 'az_tin',
+    BA: 'ba_tin',
+    BY: 'by_tin',
+    CH: 'ch_vat',
+    GE: 'ge_vat',
+    IS: 'is_vat',
+    LI: 'li_uid',
+    MD: 'md_vat',
+    ME: 'me_pib',
+    MK: 'mk_vat',
+    NO: 'no_vat',
+    RS: 'rs_pib',
+    RU: 'ru_inn',
+    TR: 'tr_tin',
+    UA: 'ua_vat',
 
-    // // Africa
-    // ZA: 'za_vat',
-    // EG: 'eg_tin',
-    // KE: 'ke_pin',
-    // NG: 'ng_tin',
+    // Middle East
+    AE: 'ae_trn',
+    IL: 'il_vat',
+    OM: 'om_vat',
+    SA: 'sa_vat',
 
-    // // Other
-    // GE: 'ge_vat',
-    // UA: 'ua_vat',
-    // RS: 'rs_pib',
-    // MD: 'md_vat',
-    // AD: 'ad_nrt',
+    // Other
+    EU: 'eu_oss_vat',
   }
 
   return countryTaxIdTypes[upperCountry] || null

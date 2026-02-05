@@ -16,6 +16,26 @@ import {
   coalesceOrEqualOrThrowName,
   coalesceOrThrowVATNumber,
   getCanadaTaxIdType,
+  getAustraliaTaxIdType,
+  getBrazilTaxIdType,
+  getBulgariaTaxIdType,
+  getCroatiaTaxIdType,
+  getGermanyTaxIdType,
+  getHungaryTaxIdType,
+  getJapanTaxIdType,
+  getLiechtensteinTaxIdType,
+  getMalaysiaTaxIdType,
+  getNorwayTaxIdType,
+  getPolandTaxIdType,
+  getRomaniaTaxIdType,
+  getRussiaTaxIdType,
+  getSingaporeTaxIdType,
+  getSloveniaTaxIdType,
+  getSpainTaxIdType,
+  getSwitzerlandTaxIdType,
+  getUkTaxIdType,
+  getUzbekistanTaxIdType,
+  getTaxIdType,
   coalesceOrThrowPaymentMethod,
 } from './migrate_recurly_customers_to_stripe.helpers.mjs'
 
@@ -230,6 +250,108 @@ test('getCanadaTaxIdType returns null when format is unknown/ambiguous', () => {
   assert.equal(getCanadaTaxIdType(null, null), null)
   assert.equal(getCanadaTaxIdType('RT0002', null), null)
   assert.equal(getCanadaTaxIdType('PST12345678', null), null)
+})
+
+test('getAustraliaTaxIdType distinguishes ABN vs ARN', () => {
+  assert.equal(getAustraliaTaxIdType('12345678912'), 'au_abn')
+  assert.equal(getAustraliaTaxIdType('123456789123'), 'au_arn')
+})
+
+test('getBrazilTaxIdType distinguishes CNPJ vs CPF', () => {
+  assert.equal(getBrazilTaxIdType('01.234.456/5432-10'), 'br_cnpj')
+  assert.equal(getBrazilTaxIdType('123.456.789-87'), 'br_cpf')
+})
+
+test('getBulgariaTaxIdType distinguishes EU VAT vs UIC', () => {
+  assert.equal(getBulgariaTaxIdType('BG0123456789'), 'eu_vat')
+  assert.equal(getBulgariaTaxIdType('123456789'), 'bg_uic')
+})
+
+test('getCroatiaTaxIdType distinguishes EU VAT vs OIB', () => {
+  assert.equal(getCroatiaTaxIdType('HR12345678912'), 'eu_vat')
+  assert.equal(getCroatiaTaxIdType('12345678901'), 'hr_oib')
+})
+
+test('getGermanyTaxIdType distinguishes EU VAT vs Steuer Nummer', () => {
+  assert.equal(getGermanyTaxIdType('DE123456789'), 'eu_vat')
+  assert.equal(getGermanyTaxIdType('1234567890'), 'de_stn')
+})
+
+test('getHungaryTaxIdType distinguishes EU VAT vs HU tax number', () => {
+  assert.equal(getHungaryTaxIdType('HU12345678'), 'eu_vat')
+  assert.equal(getHungaryTaxIdType('12345678-1-23'), 'hu_tin')
+})
+
+test('getJapanTaxIdType distinguishes TRN, CN, RN', () => {
+  assert.equal(getJapanTaxIdType('T1234567891234'), 'jp_trn')
+  assert.equal(getJapanTaxIdType('1234567891234'), 'jp_cn')
+  assert.equal(getJapanTaxIdType('12345'), 'jp_rn')
+})
+
+test('getLiechtensteinTaxIdType distinguishes UID vs VAT', () => {
+  assert.equal(getLiechtensteinTaxIdType('CHE123456789'), 'li_uid')
+  assert.equal(getLiechtensteinTaxIdType('12345'), 'li_vat')
+})
+
+test('getMalaysiaTaxIdType distinguishes FRP, ITN, SST', () => {
+  assert.equal(getMalaysiaTaxIdType('12345678'), 'my_frp')
+  assert.equal(getMalaysiaTaxIdType('C 1234567890'), 'my_itn')
+  assert.equal(getMalaysiaTaxIdType('A12-3456-78912345'), 'my_sst')
+})
+
+test('getNorwayTaxIdType distinguishes VAT vs VOEC', () => {
+  assert.equal(getNorwayTaxIdType('123456789MVA'), 'no_vat')
+  assert.equal(getNorwayTaxIdType('1234567'), 'no_voec')
+})
+
+test('getPolandTaxIdType distinguishes EU VAT vs NIP', () => {
+  assert.equal(getPolandTaxIdType('PL1234567890'), 'eu_vat')
+  assert.equal(getPolandTaxIdType('1234567890'), 'pl_nip')
+})
+
+test('getRomaniaTaxIdType distinguishes EU VAT vs TIN', () => {
+  assert.equal(getRomaniaTaxIdType('RO1234567891'), 'eu_vat')
+  assert.equal(getRomaniaTaxIdType('1234567890123'), 'ro_tin')
+})
+
+test('getRussiaTaxIdType distinguishes INN vs KPP', () => {
+  assert.equal(getRussiaTaxIdType('1234567891'), 'ru_inn')
+  assert.equal(getRussiaTaxIdType('123456789'), 'ru_kpp')
+})
+
+test('getSingaporeTaxIdType distinguishes GST vs UEN', () => {
+  assert.equal(getSingaporeTaxIdType('M12345678X'), 'sg_gst')
+  assert.equal(getSingaporeTaxIdType('123456789F'), 'sg_uen')
+})
+
+test('getSloveniaTaxIdType distinguishes EU VAT vs TIN', () => {
+  assert.equal(getSloveniaTaxIdType('SI12345678'), 'eu_vat')
+  assert.equal(getSloveniaTaxIdType('12345678'), 'si_tin')
+})
+
+test('getSpainTaxIdType distinguishes EU VAT vs CIF', () => {
+  assert.equal(getSpainTaxIdType('ESA1234567Z'), 'eu_vat')
+  assert.equal(getSpainTaxIdType('A12345678'), 'es_cif')
+})
+
+test('getSwitzerlandTaxIdType distinguishes UID vs VAT', () => {
+  assert.equal(getSwitzerlandTaxIdType('CHE-123.456.789 HR'), 'ch_uid')
+  assert.equal(getSwitzerlandTaxIdType('CHE-123.456.789 MWST'), 'ch_vat')
+})
+
+test('getUkTaxIdType distinguishes GB VAT vs EU VAT (NI)', () => {
+  assert.equal(getUkTaxIdType('GB123456789'), 'gb_vat')
+  assert.equal(getUkTaxIdType('XI123456789'), 'eu_vat')
+})
+
+test('getUzbekistanTaxIdType distinguishes TIN vs VAT', () => {
+  assert.equal(getUzbekistanTaxIdType('123456789'), 'uz_tin')
+  assert.equal(getUzbekistanTaxIdType('123456789012'), 'uz_vat')
+})
+
+test('getTaxIdType handles EU OSS VAT and EU VAT defaults', () => {
+  assert.equal(getTaxIdType('EU', 'EU123456789'), 'eu_oss_vat')
+  assert.equal(getTaxIdType('AT', 'ATU12345678'), 'eu_vat')
 })
 
 test('coalesceOrThrowPaymentMethod throws when payment methods array is empty', () => {
