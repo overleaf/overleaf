@@ -6,8 +6,8 @@ import type { ProjectSettings } from '../utils/api'
 import { UserSettings } from '../../../../../types/user-settings'
 
 type ProjectSettingsSetterContextValue = {
-  setCompiler: (compiler: ProjectSettings['compiler']) => void
-  setImageName: (imageName: ProjectSettings['imageName']) => void
+  setCompiler: (compiler: ProjectSettings['compiler']) => Promise<void>
+  setImageName: (imageName: ProjectSettings['imageName']) => Promise<void>
   setRootDocId: (rootDocId: ProjectSettings['rootDocId']) => void
   setSpellCheckLanguage: (
     spellCheckLanguage: ProjectSettings['spellCheckLanguage']

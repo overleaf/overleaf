@@ -12,15 +12,19 @@ export default function useProjectWideSettings() {
   const saveProjectSettings = useSaveProjectSettings()
 
   const setCompiler = useCallback(
-    (newCompiler: ProjectSettings['compiler']) => {
-      saveProjectSettings('compiler', newCompiler).catch(debugConsole.error)
+    async (newCompiler: ProjectSettings['compiler']) => {
+      await saveProjectSettings('compiler', newCompiler).catch(
+        debugConsole.error
+      )
     },
     [saveProjectSettings]
   )
 
   const setImageName = useCallback(
-    (newImageName: ProjectSettings['imageName']) => {
-      saveProjectSettings('imageName', newImageName).catch(debugConsole.error)
+    async (newImageName: ProjectSettings['imageName']) => {
+      await saveProjectSettings('imageName', newImageName).catch(
+        debugConsole.error
+      )
     },
     [saveProjectSettings]
   )
