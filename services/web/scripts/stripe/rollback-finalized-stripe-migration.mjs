@@ -38,6 +38,8 @@ import { getRegionClient } from '../../modules/subscriptions/app/src/StripeClien
 import RecurlyWrapper from '../../app/src/Features/Subscription/RecurlyWrapper.mjs'
 import { Subscription } from '../../app/src/models/Subscription.mjs'
 import AnalyticsManager from '../../app/src/Features/Analytics/AnalyticsManager.mjs'
+import UserAnalyticsIdCache from '../../app/src/Features/Analytics/UserAnalyticsIdCache.mjs'
+import CustomerIoHandler from '../../modules/customer-io/app/src/CustomerIoHandler.mjs'
 import { ReportError } from './helpers.mjs'
 import AccountMappingHelper from '../../app/src/Features/Analytics/AccountMappingHelper.mjs'
 
@@ -149,6 +151,7 @@ async function main(trackProgress) {
   await trackProgress('🎉 Script completed!')
 
   csvWriter.end()
+  await CustomerIoHandler.closeCustomerIo()
 }
 
 function getCsvReader(inputStream) {
@@ -358,6 +361,21 @@ async function performRollback(
       'rolled-back-analytics-mapping-failed',
       `Restored Mongo, Recurly, Stripe but failed to register analytics mapping: ${err.message}`
     )
+  }
+
+  // Step 5: Remove migration date from customer.io
+  const analyticsId = await UserAnalyticsIdCache.get(adminUserId)
+  if (analyticsId) {
+    try {
+      CustomerIoHandler.updateUserAttributes(analyticsId, {
+        stripe_migration: {},
+      })
+    } catch (err) {
+      throw new ReportError(
+        'rolled-back-customerio-update-failed',
+        `Restored Mongo, Recurly, Stripe but failed to update user in customer.io: ${err.message}`
+      )
+    }
   }
 }
 
