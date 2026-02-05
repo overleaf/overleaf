@@ -435,7 +435,7 @@ ci:
 # Run the linting commands in the scope of the monorepo.
 # Eslint and prettier (plus some configs) are on the root.
 RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/web/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/node_modules/.cache/:/overleaf/node_modules/.cache/ -w /overleaf $(IMAGE_CI) npm run --silent
-RUN_LINTING_MONOREPO = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(MONOREPO) node:24.13.0 npm run --silent
+RUN_LINTING_MONOREPO = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(MONOREPO) --user node node:24.13.0 npm run --silent
 
 ORG_PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN_LINT_FORMAT ?= \
