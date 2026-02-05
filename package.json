@@ -29,7 +29,7 @@
     "typescript": "^5.9.3"
   },
   "engines": {
-    "npm": "11.4.2"
+    "npm": "11.6.2"
   },
   "overrides": {
     "request@2.88.2": {
