@@ -6,8 +6,8 @@
   "scripts": {
     "cypress:open": "cypress open --e2e --browser chrome",
     "cypress:run": "cypress run --e2e --browser chrome",
-    "lint": "eslint --max-warnings 0 --format unix --ext .js,.jsx,.mjs,.ts,.tsx .",
-    "lint:fix": "eslint --fix --ext .js,.jsx,.mjs,.ts,.tsx ."
+    "lint": "eslint --cache --cache-location ../../node_modules/.cache/eslint/ --max-warnings 0 --format unix --ext .js,.jsx,.mjs,.ts,.tsx .",
+    "lint:fix": "eslint --cache --cache-location ../../node_modules/.cache/eslint/ --fix --ext .js,.jsx,.mjs,.ts,.tsx ."
   },
   "devDependencies": {
     "@isomorphic-git/lightning-fs": "^4.6.0",

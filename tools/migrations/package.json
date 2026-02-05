@@ -2,8 +2,8 @@
   "name": "@overleaf/migrations",
   "scripts": {
     "migrations": "MONGO_SOCKET_TIMEOUT=0 east --es-modules",
-    "lint": "eslint --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --fix --ext .cjs,.js,.jsx,.mjs,.ts ."
+    "lint": "eslint --cache --cache-location ../../node_modules/.cache/eslint/ --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --cache --cache-location ../../node_modules/.cache/eslint/ --fix --ext .cjs,.js,.jsx,.mjs,.ts ."
   },
   "dependencies": {
     "@overleaf/logger": "*",

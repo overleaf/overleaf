@@ -434,12 +434,12 @@ ci:
 
 # Run the linting commands in the scope of the monorepo.
 # Eslint and prettier (plus some configs) are on the root.
-RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/web/data/reports:/overleaf/services/web/data/reports -w /overleaf $(IMAGE_CI) npm run --silent
+RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/web/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/node_modules/.cache/:/overleaf/node_modules/.cache/ -w /overleaf $(IMAGE_CI) npm run --silent
 RUN_LINTING_MONOREPO = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(MONOREPO) node:24.13.0 npm run --silent
 
 ORG_PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN_LINT_FORMAT ?= \
-	docker run --rm --env BRANCH_NAME --env CI --env COMMIT_SHA --env MONOREPO --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume ${PWD}/data/reports:/overleaf/services/web/data/reports ${IMAGE_CI}
+	docker run --rm --env BRANCH_NAME --env CI --env COMMIT_SHA --env MONOREPO --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume ${PWD}/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/node_modules/.cache/:/overleaf/node_modules/.cache/ ${IMAGE_CI}
 
 NODE_MODULES_PATH := ${PATH}:${PWD}/node_modules/.bin:/overleaf/services/web/node_modules/.bin
 WITH_NODE_MODULES_PATH = \
@@ -453,6 +453,33 @@ WITH_NODE_MODULES_PATH = \
 	$(TEST_SUITES) \
 
 $(WITH_NODE_MODULES_PATH): export PATH=$(NODE_MODULES_PATH)
+
+WITH_CACHE_FOLDER = \
+	lint_eslint \
+	lint_stylelint \
+	lint_in_docker \
+	format_js \
+	format_ci \
+	format_fix \
+	format_styles \
+	format_styles_fix \
+	format_pug \
+	format_pug_fix \
+	format_jenkins \
+	format_jenkins_fix \
+	format_in_docker \
+
+$(WITH_CACHE_FOLDER): ../../node_modules/.cache/prettier/
+../../node_modules/.cache/prettier/:
+	mkdir -p $@
+
+$(WITH_CACHE_FOLDER): ../../node_modules/.cache/eslint/
+../../node_modules/.cache/eslint/:
+	mkdir -p $@
+
+$(WITH_CACHE_FOLDER): ../../node_modules/.cache/stylelint/
+../../node_modules/.cache/stylelint/:
+	mkdir -p $@
 
 lint: lint_eslint
 lint_eslint:

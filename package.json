@@ -42,16 +42,16 @@
     }
   },
   "scripts": {
-    "format": "prettier --list-different",
-    "format:fix": "prettier --write --list-different",
-    "format:styles": "prettier --list-different '**/*.{css,scss}'",
-    "format:styles:fix": "prettier --write --list-different '**/*.{css,scss}'",
-    "format:pug": "prettier --list-different '**/*.pug'",
-    "format:pug:fix": "prettier --write --list-different '**/*.pug'",
-    "format:jenkins": "prettier --list-different '**/Jenkinsfile'",
-    "format:jenkins:fix": "prettier --write --list-different '**/Jenkinsfile'",
-    "lint": "eslint --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --fix .",
+    "format": "prettier --cache --cache-location ./node_modules/.cache/prettier/.prettier-cache --check",
+    "format:fix": "prettier --cache --cache-location ./node_modules/.cache/prettier/.prettier-cache --write --check",
+    "format:styles": "prettier --cache --cache-location ./node_modules/.cache/prettier/.prettier-cache --check '**/*.{css,scss}'",
+    "format:styles:fix": "prettier --cache --cache-location ./node_modules/.cache/prettier/.prettier-cache --write --check '**/*.{css,scss}'",
+    "format:pug": "prettier --cache --cache-location ./node_modules/.cache/prettier/.prettier-cache --check '**/*.pug'",
+    "format:pug:fix": "prettier --cache --cache-location ./node_modules/.cache/prettier/.prettier-cache --write --check '**/*.pug'",
+    "format:jenkins": "prettier --cache --cache-location ./node_modules/.cache/prettier/.prettier-cache --check '**/Jenkinsfile'",
+    "format:jenkins:fix": "prettier --cache --cache-location ./node_modules/.cache/prettier/.prettier-cache --write --check '**/Jenkinsfile'",
+    "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint/ --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --cache --cache-location ./node_modules/.cache/eslint/ --fix .",
     "postinstall": "patch-package"
   },
   "workspaces": [
