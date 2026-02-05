@@ -370,6 +370,9 @@ module.exports = {
     preservePath: process.env.MULTER_PRESERVE_PATH,
   },
 
+  notifyOnSystemMessageChanges:
+    process.env.NOTIFY_ON_SYSTEM_MESSAGE_CHANGES === 'true',
+
   // start failing the health check if active handles exceeds this limit
   maxActiveHandles: process.env.MAX_ACTIVE_HANDLES
     ? parseInt(process.env.MAX_ACTIVE_HANDLES, 10)
