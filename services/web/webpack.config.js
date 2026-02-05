@@ -96,10 +96,6 @@ module.exports = {
 
     // By default write into js directory
     filename: 'js/[name]-[contenthash].js',
-
-    // Output as UMD bundle (allows main JS to import with CJS, AMD or global
-    // style code bundles
-    libraryTarget: 'umd',
   },
 
   optimization: {
