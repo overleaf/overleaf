@@ -1935,6 +1935,7 @@
   "remove_manager": "Remove manager",
   "remove_or_replace_figure": "Remove or replace figure",
   "remove_secondary_email_addresses": "Remove any secondary email addresses associated with your account. <0>Remove them in account settings.</0>",
+  "remove_secondary_email_addresses_except_saml_email": "Remove all email addresses except <0>__institutionEmail__</0> from your Overleaf account. <1>Remove them in account settings.</1>",
   "remove_sso_login_option": "Remove the SSO login option for your users.",
   "remove_tag": "Remove tag __tagName__",
   "remove_user": "Remove user",
