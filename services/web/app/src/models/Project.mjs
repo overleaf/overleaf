@@ -24,6 +24,7 @@ export const ProjectSchema = new Schema(
     lastUpdatedBy: { type: ObjectId, ref: 'User' },
     lastOpened: { type: Date },
     active: { type: Boolean, default: true },
+    readOnly: { type: Boolean, default: false },
     owner_ref: { type: ObjectId, ref: 'User' },
     collaberator_refs: [{ type: ObjectId, ref: 'User' }],
     reviewer_refs: [{ type: ObjectId, ref: 'User' }],

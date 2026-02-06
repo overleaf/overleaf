@@ -23,6 +23,7 @@ export type MongoProject = {
   lastUpdated: Date
   lastUpdatedBy: string
   publicAccesLevel: string
+  readOnly: boolean
   archived: ObjectId[]
   trashed: ObjectId[]
   owner_ref: string
