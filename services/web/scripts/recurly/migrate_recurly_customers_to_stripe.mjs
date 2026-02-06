@@ -553,42 +553,56 @@ class RateLimiter {
     this.windowMs = windowMs
     this.requests = [] // timestamps of recent requests
     this.totalRequests = 0
+    this._pending = Promise.resolve()
   }
 
   /**
    * Wait if necessary to stay within rate limits, then record the request.
    */
   async throttle() {
-    const now = Date.now()
+    this._pending = this._pending
+      .catch(error => {
+        // this should never happen since setTimeout or logDebug are very unlikely to ever fail
+        // but if it does, we log it and continue without blocking the queue (fail-open)
+        logWarn(`Rate limiter chain error for ${this.name}`, {
+          error: error?.message || String(error),
+        })
+      })
+      .then(async () => {
+        while (true) {
+          const now = Date.now()
 
-    // Remove requests outside the window
-    const windowStart = now - this.windowMs
-    this.requests = this.requests.filter(ts => ts > windowStart)
+          // Remove requests outside the window
+          const windowStart = now - this.windowMs
+          this.requests = this.requests.filter(ts => ts > windowStart)
 
-    // If at limit, wait until the oldest request exits the window
-    if (this.requests.length >= this.maxRequests) {
-      const oldestRequest = this.requests[0]
-      const waitTime = oldestRequest - windowStart + 1
-      if (waitTime > 0) {
-        logDebug(
-          `Rate limit throttle for ${this.name}`,
-          {
-            waitMs: waitTime,
-            currentRequests: this.requests.length,
-            maxRequests: this.maxRequests,
-          },
-          { verboseOnly: true }
-        )
-        await setTimeout(waitTime)
-      }
-      // Clean up again after waiting
-      const newNow = Date.now()
-      this.requests = this.requests.filter(ts => ts > newNow - this.windowMs)
-    }
+          // If at limit, wait until the oldest request exits the window
+          if (this.requests.length >= this.maxRequests) {
+            const oldestRequest = this.requests[0]
+            const waitTime = oldestRequest - windowStart + 1
+            if (waitTime > 0) {
+              logDebug(
+                `Rate limit throttle for ${this.name}`,
+                {
+                  waitMs: waitTime,
+                  currentRequests: this.requests.length,
+                  maxRequests: this.maxRequests,
+                },
+                { verboseOnly: true }
+              )
+              await setTimeout(waitTime)
+              continue
+            }
+          }
 
-    // Record this request
-    this.requests.push(Date.now())
-    this.totalRequests++
+          // Record this request
+          this.requests.push(Date.now())
+          this.totalRequests++
+          break
+        }
+      })
+
+    return this._pending
   }
 
   /**
@@ -1851,6 +1865,7 @@ async function main(trackProgress) {
     const parser = csv.parse({
       columns: true,
       trim: true,
+      bom: true,
       skip_empty_lines: true,
       relax_column_count: true,
       relax_column_count_less: true,
