@@ -1,5 +1,6 @@
 import OError from '@overleaf/o-error'
 import metrics from '@overleaf/metrics'
+import logger from '@overleaf/logger'
 import Settings from '@overleaf/settings'
 import mongodb from 'mongodb-legacy'
 import Features from '../../infrastructure/Features.mjs'
@@ -16,6 +17,8 @@ import _ from 'lodash'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import TpdsUpdateSender from '../ThirdPartyDataStore/TpdsUpdateSender.mjs'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import ClsiCacheManager from '../Compile/ClsiCacheManager.mjs'
+import crypto from 'node:crypto'
 
 const { ObjectId } = mongodb
 
@@ -95,10 +98,85 @@ async function createBasicProject(ownerId, projectName) {
   return project
 }
 
+function hashProjectContent({ fileEntries, docEntries }) {
+  const entries = []
+  for (const {
+    path,
+    file: { hash },
+  } of fileEntries) {
+    entries.push(`${path}:${hash}`)
+  }
+  for (const { path, docLines } of docEntries) {
+    entries.push(`${path}:${docLines}`)
+  }
+  entries.sort()
+  const hash = crypto.createHash('sha256')
+  for (const item of entries) {
+    hash.update(item)
+  }
+  return hash.digest('hex')
+}
+
+let exampleProjectContentHash
+
+async function populateClsiCacheForExampleProject(
+  ownerId,
+  project,
+  fileEntries,
+  docEntries
+) {
+  const hash = hashProjectContent({ fileEntries, docEntries })
+  if (exampleProjectContentHash && exampleProjectContentHash !== hash) {
+    // We need a stable identifier for example projects. Otherwise we will
+    // generate a lot of cruft in clsi-cache/GCS.
+    const err = new Error('example project content is not static')
+    logger.error({ err }, err.message)
+    return
+  }
+  exampleProjectContentHash = hash
+
+  const templateVersionId = `example-project-${hash}`
+  const { _id: projectId, imageName } = project
+  const found = await ClsiCacheManager.prepareClsiCache(projectId, ownerId, {
+    templateVersionId,
+    imageName: imageName && path.basename(imageName),
+  }).catch(err => {
+    logger.error(
+      { err, templateVersionId, projectId },
+      'failed to prepare clsi-cache from example project'
+    )
+    return undefined
+  })
+  if (found === false) {
+    ClsiCacheManager.createTemplateClsiCache({
+      templateVersionId,
+      project,
+      fileEntries,
+      docEntries,
+    }).catch(err => {
+      logger.error(
+        { err, templateVersionId },
+        'failed to create example project clsi-cache'
+      )
+    })
+  }
+  return projectId
+}
+
 async function createExampleProject(ownerId, projectName) {
   const project = await _createBlankProject(ownerId, projectName)
 
-  await _addExampleProjectFiles(ownerId, projectName, project)
+  const { fileEntries, docEntries } = await _addExampleProjectFiles(
+    ownerId,
+    projectName,
+    project
+  )
+  await populateClsiCacheForExampleProject(
+    ownerId,
+    project,
+    fileEntries,
+    docEntries
+  )
 
   AnalyticsManager.recordEventForUserInBackground(ownerId, 'project-created', {
     projectId: project._id,
@@ -113,14 +191,14 @@ async function _addExampleProjectFiles(ownerId, projectName, project) {
     ownerId,
     projectName
   )
-  await _createRootDoc(project, ownerId, mainDocLines)
+  const rootDoc = await _createRootDoc(project, ownerId, mainDocLines)
 
   const bibDocLines = await _buildTemplate(
     `${templateProjectDir}/sample.bib`,
     ownerId,
     projectName
   )
-  await ProjectEntityUpdateHandler.promises.addDoc(
+  const bibDoc = await ProjectEntityUpdateHandler.promises.addDoc(
     project._id,
     project.rootFolder[0]._id,
     'sample.bib',
@@ -133,7 +211,7 @@ async function _addExampleProjectFiles(ownerId, projectName, project) {
     import.meta.dirname,
     `/../../../templates/project_files/${templateProjectDir}/frog.jpg`
   )
-  await ProjectEntityUpdateHandler.promises.addFile(
+  const { fileRef } = await ProjectEntityUpdateHandler.promises.addFile(
     project._id,
     project.rootFolder[0]._id,
     'frog.jpg',
@@ -142,6 +220,13 @@ async function _addExampleProjectFiles(ownerId, projectName, project) {
     ownerId,
     null
   )
+  return {
+    fileEntries: [{ path: fileRef.name, file: fileRef }],
+    docEntries: [
+      { path: 'main.tex', doc: rootDoc, docLines: mainDocLines.join('\n') },
+      { path: 'sample.bib', doc: bibDoc, docLines: bibDocLines.join('\n') },
+    ],
+  }
 }
 
 async function _createBlankProject(
@@ -225,6 +310,7 @@ async function _createRootDoc(project, ownerId, docLines) {
       null
     )
     await ProjectEntityUpdateHandler.promises.setRootDoc(project._id, doc._id)
+    return doc
   } catch (error) {
     throw OError.tag(error, 'error adding root doc when creating project')
   }
