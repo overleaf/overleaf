@@ -1,30 +1,39 @@
 // TODO: .website-redesign to be removed once fully rolled out
 
+@mixin apply-font-size($size) {
+  @if $size == 'heading-2xl' {
+    @include heading-2xl;
+  } @else if $size == 'heading-xl' {
+    @include heading-xl;
+  } @else if $size == 'heading-lg' {
+    @include heading-lg;
+  } @else if $size == 'heading-md' {
+    @include heading-md;
+  } @else if $size == 'heading-sm' {
+    @include heading-sm;
+  } @else if $size == 'heading-xs' {
+    @include heading-xs;
+  } @else if $size == 'base' {
+    @include body-base;
+  }
+}
+
 @mixin reset-font-size($size) {
+  p,
+  ul,
+  ol {
+    @include apply-font-size($size);
+  }
+}
+
+@mixin reset-heading-font-size($size) {
   h1,
   h2,
   h3,
   h4,
   h5,
-  h6,
-  p,
-  ul,
-  ol {
-    @if $size == 'heading-2xl' {
-      @include heading-2xl;
-    } @else if $size == 'heading-xl' {
-      @include heading-xl;
-    } @else if $size == 'heading-lg' {
-      @include heading-lg;
-    } @else if $size == 'heading-md' {
-      @include heading-md;
-    } @else if $size == 'heading-sm' {
-      @include heading-sm;
-    } @else if $size == 'heading-xs' {
-      @include heading-xs;
-    } @else if $size == 'base' {
-      @include body-base;
-    }
+  h6 {
+    @include apply-font-size($size);
   }
 }
 
@@ -116,6 +125,10 @@
     @include reset-font-size('heading-2xl');
   }
 
+  .heading-font-size-h1 {
+    @include reset-heading-font-size('heading-2xl');
+  }
+
   h2,
   .h2 {
     @include heading-xl;
@@ -123,6 +136,10 @@
 
   .font-size-h2 {
     @include reset-font-size('heading-xl');
+  }
+
+  .heading-font-size-h2 {
+    @include reset-heading-font-size('heading-xl');
   }
 
   h3,
@@ -134,6 +151,10 @@
     @include reset-font-size('heading-lg');
   }
 
+  .heading-font-size-h3 {
+    @include reset-heading-font-size('heading-lg');
+  }
+
   h4,
   .h4 {
     @include heading-md;
@@ -141,6 +162,10 @@
 
   .font-size-h4 {
     @include reset-font-size('heading-md');
+  }
+
+  .heading-font-size-h4 {
+    @include reset-heading-font-size('heading-md');
   }
 
   h5,
@@ -152,6 +177,10 @@
     @include reset-font-size('heading-sm');
   }
 
+  .heading-font-size-h5 {
+    @include reset-heading-font-size('heading-sm');
+  }
+
   h6,
   .h6 {
     @include heading-xs;
@@ -161,8 +190,16 @@
     @include reset-font-size('heading-xs');
   }
 
+  .heading-font-size-h6 {
+    @include reset-heading-font-size('heading-xs');
+  }
+
   .font-size-base {
     @include reset-font-size('base');
+  }
+
+  .heading-font-size-base {
+    @include reset-heading-font-size('base');
   }
 
   // smaller fonts for mobile
@@ -176,6 +213,10 @@
       @include reset-font-size('heading-xl');
     }
 
+    .heading-font-size-h1 {
+      @include reset-heading-font-size('heading-xl');
+    }
+
     h2,
     .h2 {
       @include heading-lg;
@@ -183,6 +224,10 @@
 
     .font-size-h2 {
       @include reset-font-size('heading-lg');
+    }
+
+    .heading-font-size-h2 {
+      @include reset-heading-font-size('heading-lg');
     }
 
     h3,
@@ -194,6 +239,10 @@
       @include reset-font-size('heading-md');
     }
 
+    .heading-font-size-h3 {
+      @include reset-heading-font-size('heading-md');
+    }
+
     h4,
     .h4 {
       @include heading-sm;
@@ -201,6 +250,10 @@
 
     .font-size-h4 {
       @include reset-font-size('heading-sm');
+    }
+
+    .heading-font-size-h4 {
+      @include reset-heading-font-size('heading-sm');
     }
 
     h5,
@@ -212,6 +265,10 @@
       @include reset-font-size('heading-xs');
     }
 
+    .heading-font-size-h5 {
+      @include reset-heading-font-size('heading-xs');
+    }
+
     h6,
     .h6 {
       @include body-base;
@@ -219,6 +276,10 @@
 
     .font-size-h6 {
       @include reset-font-size('base');
+    }
+
+    .heading-font-size-h6 {
+      @include reset-heading-font-size('base');
     }
   }
 
