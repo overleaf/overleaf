@@ -7,7 +7,7 @@
     "public": "./public"
   },
   "scripts": {
-    "test:acceptance:run_dir": "mocha --recursive --timeout 25000 --grep=$MOCHA_GREP --require test/acceptance/bootstrap.js",
+    "test:acceptance:run_dir": "bin/test_acceptance_run_dir",
     "test:acceptance:app": "npm run test:acceptance:run_dir -- test/acceptance/src",
     "test:unit:run_dir": "bin/test_unit_run_dir",
     "test:unit:all": "npm run test:unit:run_dir -- test/unit/src modules/*/test/unit/src",
@@ -273,7 +273,8 @@
     "@uppy/react": "^3.2.1",
     "@uppy/utils": "^5.7.0",
     "@uppy/xhr-upload": "^3.6.0",
-    "@vitest/eslint-plugin": "1.1.44",
+    "@vitest/coverage-istanbul": "^4.0.17",
+    "@vitest/eslint-plugin": "1.6.6",
     "@writefull/core": "^1.27.27",
     "@writefull/ui": "^1.27.27",
     "@writefull/utils": "^1.27.27",

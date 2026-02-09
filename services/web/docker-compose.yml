@@ -18,11 +18,13 @@ services:
       CI:
       MODULE_NAME:
       JUNIT_ROOT_SUITE_NAME:
-      MOCHA_GREP: ${MOCHA_GREP}
+      COVERAGE_UNIT_TESTS: ${COVERAGE_UNIT_TESTS:-}
+      MOCHA_GREP: ${MOCHA_GREP:-}
       LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
       REDIS_HOST: redis_test
+      MONOREPO:
     entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: npm run --silent test:unit:app
     user: node
@@ -47,11 +49,13 @@ services:
       CI:
       MODULE_NAME:
       JUNIT_ROOT_SUITE_NAME:
-      MOCHA_GREP: ${MOCHA_GREP}
+      COVERAGE_ACCEPTANCE_TESTS: ${COVERAGE_ACCEPTANCE_TESTS:-}
+      MOCHA_GREP: ${MOCHA_GREP:-}
       LOG_LEVEL: ${LOG_LEVEL:-}
       MONGO_SERVER_SELECTION_TIMEOUT: 600000
       MONGO_SOCKET_TIMEOUT: 300000
       REDIS_HOST: redis_test
+      MONOREPO:
       # OVERLEAF_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING: 'true'
 
     extra_hosts:

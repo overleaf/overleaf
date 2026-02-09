@@ -32,6 +32,7 @@ MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '
 MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)
 MODULE_NAME=$(shell basename $(MODULE))
 
+create_module_Makefiles: $(MODULE_MAKEFILES)
 $(MODULE_MAKEFILES): Makefile.module
 	cp Makefile.module $@ || diff Makefile.module $@
 
@@ -423,6 +424,13 @@ test_acceptance_modules: $(TEST_ACCEPTANCE_MODULES_MERGED_VARIANTS)
 #
 # CI tests
 #
+
+rebase_coverage_reports:
+	sed -i 's_path="/overleaf/_path="_' data/coverage/*/clover.xml
+
+# Create the bundle with full paths inside the monorepo to make it easier to organize them later.
+bundle_coverage_reports:
+	cd ../../ && tar -czf services/web/data/coverage.tar.gz services/web/data/coverage/*/clover.xml
 
 ci:
 	MOCHA_ARGS="--reporter tap" \

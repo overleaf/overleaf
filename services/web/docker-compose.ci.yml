@@ -12,6 +12,7 @@ services:
     user: node
     volumes:
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
+      - ./data/coverage:/overleaf/services/web/data/coverage
       - ./data/reports:/overleaf/services/web/data/reports
     entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: npm run test:unit:app
@@ -27,6 +28,8 @@ services:
       NODE_OPTIONS: "--unhandled-rejections=strict"
       REDIS_HOST: redis_test
       VITEST_NO_CACHE: true
+      COVERAGE_UNIT_TESTS:
+      MONOREPO:
     depends_on:
       - redis_test
       - mongo
@@ -47,21 +50,23 @@ services:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
       REDIS_HOST: redis_test
+      COVERAGE_ACCEPTANCE_TESTS:
+      MONOREPO:
     extra_hosts:
       - "www.overleaf.test:127.0.0.1"
     volumes:
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
+      - ./data/coverage:/overleaf/services/web/data/coverage
       - ./data/reports:/overleaf/services/web/data/reports
     entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: npm run test:acceptance:app
-    user: root
     depends_on:
       - redis_test
       - mongo
       - saml
       - ldap
     tmpfs:
-      - /overleaf/services/web/data
+      - /overleaf/services/web/data:uid=1000,gid=1000
 
   test_frontend:
     build:

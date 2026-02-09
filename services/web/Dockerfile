@@ -81,6 +81,9 @@ COPY tools/migrations/ /overleaf/tools/migrations/
 # Build the latex parser
 RUN cd /overleaf/services/web && npm run 'lezer-latex:generate'
 
+# The module folders are owned as root. The node user cannot create them. Create them in advance.
+RUN cd /overleaf/services/web && make create_module_Makefiles
+
 USER node
 
 

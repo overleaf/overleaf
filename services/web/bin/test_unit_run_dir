@@ -14,4 +14,3 @@ fi
 echo "Running unit tests in directory: $*"
 
 npm run test:unit -- "${vitest_args[@]}"
-
