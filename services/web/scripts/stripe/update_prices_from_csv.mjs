@@ -30,6 +30,11 @@ import { z } from '../../app/src/infrastructure/Validation.mjs'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
 import { getRegionClient } from '../../modules/subscriptions/app/src/StripeClient.mjs'
 import PlansLocator from '../../app/src/Features/Subscription/PlansLocator.mjs'
+import {
+  convertFromMinorUnits,
+  convertToMinorUnits,
+  rateLimitSleep,
+} from './helpers.mjs'
 
 /**
  * @import Stripe from 'stripe'
@@ -42,56 +47,6 @@ const paramsSchema = z.object({
   nextVersion: z.string(),
   commit: z.boolean().default(false),
 })
-
-/**
- * Sleep function to respect Stripe rate limits (100 requests per second)
- */
-async function rateLimitSleep() {
-  return new Promise(resolve => setTimeout(resolve, 50))
-}
-
-/**
- * Convert amount to minor units (cents for most currencies)
- * Some currencies like JPY, KRW, CLP, VND don't have cents
- *
- * Copied from services/web/frontend/js/shared/utils/currency.ts
- *
- * @param {number} amount - Amount in major units (dollars, euros, etc.)
- * @param {string} currency - Currency code (lowercase)
- * @returns {number} Amount in minor units
- */
-function convertToMinorUnits(amount, currency) {
-  const isNoCentsCurrency = ['clp', 'jpy', 'krw', 'vnd'].includes(
-    currency.toLowerCase()
-  )
-
-  // Determine the multiplier based on currency
-  let multiplier = 100 // default for most currencies (2 decimal places)
-
-  if (isNoCentsCurrency) {
-    multiplier = 1 // no decimal places
-  }
-
-  // Convert and round to an integer
-  return Math.round(amount * multiplier)
-}
-
-/**
- * Convert amount from minor units (cents for most currencies)
- * Some currencies like JPY, KRW, CLP, VND don't have cents
- *
- * Copied from services/web/modules/subscriptions/app/src/StripeClient.mjs
- *
- * @param {number} amount - price in the smallest currency unit (e.g. dollar cents, CLP units, ...)
- * @param {StripeCurrencyCode} currency - currency code
- * @return {number}
- */
-function convertFromMinorUnits(amount, currency) {
-  const isNoCentsCurrency = ['clp', 'jpy', 'krw', 'vnd'].includes(
-    currency.toLowerCase()
-  )
-  return isNoCentsCurrency ? amount : amount / 100
-}
 
 /**
  * @typedef {object} CsvPrice
