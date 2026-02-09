@@ -48,6 +48,7 @@ import {
 } from '../../modules/subscriptions/app/src/StripeClient.mjs'
 import RecurlyWrapper from '../../app/src/Features/Subscription/RecurlyWrapper.mjs'
 import { Subscription } from '../../app/src/models/Subscription.mjs'
+import { User } from '../../app/src/models/User.mjs'
 import AnalyticsManager from '../../app/src/Features/Analytics/AnalyticsManager.mjs'
 import AccountMappingHelper from '../../app/src/Features/Analytics/AccountMappingHelper.mjs'
 import PlansLocator from '../../app/src/Features/Subscription/PlansLocator.mjs'
@@ -276,7 +277,7 @@ async function preloadProductMetadata(region) {
 
 async function processMigration(input, commit) {
   const {
-    recurly_account_code: accountCode,
+    recurly_account_code: overleafUserId,
     target_stripe_account: targetStripeAccount,
     stripe_customer_id: stripeCustomerId,
   } = input
@@ -287,7 +288,7 @@ async function processMigration(input, commit) {
 
   // 1. Fetch Mongo subscription
   const mongoSubscription = await Subscription.findOne({
-    admin_id: accountCode,
+    admin_id: overleafUserId,
   }).exec()
   if (!mongoSubscription) {
     throw new ReportError(
@@ -380,14 +381,16 @@ async function processMigration(input, commit) {
   }
 
   // 7. If commit mode, perform migration
-  const adminUserId = mongoSubscription.admin_id.toString()
-  const analyticsId = await UserAnalyticsIdCache.get(adminUserId)
+  const analyticsId = await UserAnalyticsIdCache.get(overleafUserId)
+  const mongoUser = await User.findOne({
+    _id: overleafUserId,
+  }).exec()
   const result = {
     status: 'not-migrated',
     note: 'Not yet migrated',
     previousRecurlyStatus,
     previousRecurlySubscriptionId,
-    email: stripeCustomer.email,
+    email: mongoUser?.email || stripeCustomer.email,
     analyticsId,
   }
   if (commit) {
@@ -398,7 +401,8 @@ async function processMigration(input, commit) {
         recurlySubscription,
         stripeClient,
         stripeCustomer,
-        analyticsId
+        analyticsId,
+        mongoUser?.email
       )
     } catch (err) {
       if (err instanceof ReportError && err.status?.startsWith('migrated-')) {
@@ -511,7 +515,8 @@ async function performCutover(
   recurlySubscription,
   stripeClient,
   stripeCustomer,
-  analyticsId
+  analyticsId,
+  mongoUserEmail
 ) {
   const adminUserId = mongoSubscription.admin_id.toString()
 
@@ -621,7 +626,7 @@ async function performCutover(
       // TODO: request Recurly account and billingInfo to verify if tax info in Stripe is up to date
 
       CustomerIoHandler.updateUserAttributes(analyticsId, {
-        email: stripeCustomer.email,
+        email: mongoUserEmail || stripeCustomer.email,
         stripe_migration: {
           migration_date: migrationDate,
           needs_to_update_tax_id: needsToUpdateTaxInfo,
