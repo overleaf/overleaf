@@ -29,9 +29,9 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { setTimeout } from 'node:timers/promises'
 import * as csv from 'csv'
 import minimist from 'minimist'
+import PQueue from 'p-queue'
 import { z } from '../../app/src/infrastructure/Validation.mjs'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
 import { getRegionClient } from '../../modules/subscriptions/app/src/StripeClient.mjs'
@@ -42,17 +42,33 @@ import UserAnalyticsIdCache from '../../app/src/Features/Analytics/UserAnalytics
 import CustomerIoHandler from '../../modules/customer-io/app/src/CustomerIoHandler.mjs'
 import { ReportError } from './helpers.mjs'
 import AccountMappingHelper from '../../app/src/Features/Analytics/AccountMappingHelper.mjs'
+import {
+  createRateLimitedApiWrappers,
+  DEFAULT_RECURLY_RATE_LIMIT,
+  DEFAULT_STRIPE_RATE_LIMIT,
+  DEFAULT_RECURLY_API_RETRIES,
+  DEFAULT_RECURLY_RETRY_DELAY_MS,
+  DEFAULT_STRIPE_API_RETRIES,
+  DEFAULT_STRIPE_RETRY_DELAY_MS,
+} from './RateLimiter.mjs'
 
-const DEFAULT_THROTTLE = 40
+// rate limiters - initialized in main()
+let rateLimiters
 
 function usage() {
   console.error(`Usage: node scripts/stripe/rollback-finalized-stripe-migration.mjs [OPTS] [INPUT-FILE]
 
 Options:
-    --output PATH          Output file path (default: /tmp/rollback_output_<timestamp>.csv)
-    --commit               Apply changes (without this, runs in dry-run mode)
-    --throttle DURATION    Minimum time between requests in ms (default: ${DEFAULT_THROTTLE})
-    --help                 Show this help message
+    --output PATH                 Output file path (default: /tmp/rollback_output_<timestamp>.csv)
+    --commit                      Apply changes (without this, runs in dry-run mode)
+    --concurrency N               Number of rollbacks to process concurrently (default: 10)
+    --recurly-rate-limit N        Requests per second for Recurly (default: ${DEFAULT_RECURLY_RATE_LIMIT})
+    --recurly-api-retries N       Number of retries on Recurly 429s (default: ${DEFAULT_RECURLY_API_RETRIES})
+    --recurly-retry-delay-ms N    Delay between Recurly retries in ms (default: ${DEFAULT_RECURLY_RETRY_DELAY_MS})
+    --stripe-rate-limit N         Requests per second for Stripe (default: ${DEFAULT_STRIPE_RATE_LIMIT})
+    --stripe-api-retries N        Number of retries on Stripe 429s (default: ${DEFAULT_STRIPE_API_RETRIES})
+    --stripe-retry-delay-ms N     Delay between Stripe retries in ms (default: ${DEFAULT_STRIPE_RETRY_DELAY_MS})
+    --help                        Show this help message
 
 Note: This script does NOT cancel Stripe subscriptions. Use scripts/stripe/bulk-cancel-subscriptions.mjs separately.
 `)
@@ -63,12 +79,25 @@ async function main(trackProgress) {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
   const outputFile = opts.output ?? `/tmp/rollback_output_${timestamp}.csv`
 
+  // initialize rate limiters
+  rateLimiters = createRateLimitedApiWrappers({
+    recurlyRateLimit: opts.recurlyRateLimit,
+    recurlyApiRetries: opts.recurlyApiRetries,
+    recurlyRetryDelayMs: opts.recurlyRetryDelayMs,
+    stripeRateLimit: opts.stripeRateLimit,
+    stripeApiRetries: opts.stripeApiRetries,
+    stripeRetryDelayMs: opts.stripeRetryDelayMs,
+  })
+
   await trackProgress('Starting Stripe to Recurly rollback')
   await trackProgress(`Run mode: ${opts.commit ? 'COMMIT' : 'DRY RUN'}`)
   await trackProgress(
     'Note: Stripe subscriptions are NOT cancelled by this script'
   )
-  await trackProgress(`Throttle: ${opts.throttle}ms between requests`)
+  await trackProgress(
+    `Rate limits: Recurly ${opts.recurlyRateLimit}/s, Stripe ${opts.stripeRateLimit}/s`
+  )
+  await trackProgress(`Concurrency: ${opts.concurrency}`)
 
   const inputStream = opts.inputFile
     ? fs.createReadStream(opts.inputFile)
@@ -82,62 +111,70 @@ async function main(trackProgress) {
   let successCount = 0
   let errorCount = 0
 
-  let lastLoopTimestamp = 0
-  for await (const input of csvReader) {
-    const timeSinceLastLoop = Date.now() - lastLoopTimestamp
-    if (timeSinceLastLoop < opts.throttle) {
-      await setTimeout(opts.throttle - timeSinceLastLoop)
-    }
-    lastLoopTimestamp = Date.now()
+  const queue = new PQueue({ concurrency: opts.concurrency })
+  const maxQueueSize = opts.concurrency
 
-    processedCount++
+  try {
+    for await (const input of csvReader) {
+      // throttle input if queue is full
+      if (queue.size >= maxQueueSize) {
+        await queue.onSizeLessThan(maxQueueSize)
+      }
 
-    try {
-      const result = await processRollback(input, opts.commit)
+      queue.add(async () => {
+        processedCount++
 
-      csvWriter.write({
-        recurly_account_code: input.recurly_account_code,
-        target_stripe_account: input.target_stripe_account,
-        stripe_customer_id: input.stripe_customer_id,
-        status: result.status,
-        note: result.note,
+        try {
+          const result = await processRollback(input, opts.commit)
+
+          csvWriter.write({
+            recurly_account_code: input.recurly_account_code,
+            target_stripe_account: input.target_stripe_account,
+            stripe_customer_id: input.stripe_customer_id,
+            status: result.status,
+            note: result.note,
+          })
+
+          if (
+            result.status === 'rolled-back' ||
+            result.status === 'validated' ||
+            result.status === 'already-recurly'
+          ) {
+            successCount++
+          } else {
+            errorCount++
+          }
+
+          if (processedCount % 25 === 0) {
+            await trackProgress(
+              `Progress: ${processedCount} processed, ${successCount} successful, ${errorCount} errors`
+            )
+          }
+        } catch (err) {
+          errorCount++
+          if (err instanceof ReportError) {
+            csvWriter.write({
+              recurly_account_code: input.recurly_account_code,
+              target_stripe_account: input.target_stripe_account,
+              stripe_customer_id: input.stripe_customer_id,
+              status: err.status,
+              note: err.message,
+            })
+          } else {
+            csvWriter.write({
+              recurly_account_code: input.recurly_account_code,
+              target_stripe_account: input.target_stripe_account,
+              stripe_customer_id: input.stripe_customer_id,
+              status: 'error',
+              note: err.message,
+            })
+          }
+        }
       })
-
-      if (
-        result.status === 'rolled-back' ||
-        result.status === 'validated' ||
-        result.status === 'already-recurly'
-      ) {
-        successCount++
-      } else {
-        errorCount++
-      }
-
-      if (processedCount % 25 === 0) {
-        await trackProgress(
-          `Progress: ${processedCount} processed, ${successCount} successful, ${errorCount} errors`
-        )
-      }
-    } catch (err) {
-      errorCount++
-      if (err instanceof ReportError) {
-        csvWriter.write({
-          recurly_account_code: input.recurly_account_code,
-          target_stripe_account: input.target_stripe_account,
-          stripe_customer_id: input.stripe_customer_id,
-          status: err.status,
-          note: err.message,
-        })
-      } else {
-        csvWriter.write({
-          recurly_account_code: input.recurly_account_code,
-          target_stripe_account: input.target_stripe_account,
-          stripe_customer_id: input.stripe_customer_id,
-          status: 'error',
-          note: err.message,
-        })
-      }
     }
+  } finally {
+    // wait for all queued tasks to complete
+    await queue.onIdle()
   }
 
   await trackProgress(`✅ Total processed: ${processedCount}`)
@@ -229,8 +266,15 @@ async function processRollback(input, commit) {
   // 4. Find Recurly subscription ID from Stripe metadata
   let recurlySubscriptionId
   try {
-    const stripeSubData =
-      await stripeClient.stripe.subscriptions.retrieve(stripeSubscriptionId)
+    const stripeSubData = await rateLimiters.requestWithRetries(
+      stripeClient.serviceName,
+      () => stripeClient.stripe.subscriptions.retrieve(stripeSubscriptionId),
+      {
+        operation: 'subscriptions.retrieve',
+        stripeSubscriptionId,
+        region: stripeClient.serviceName,
+      }
+    )
     recurlySubscriptionId = stripeSubData.metadata?.recurly_subscription_id
     if (!recurlySubscriptionId) {
       throw new ReportError(
@@ -249,9 +293,13 @@ async function processRollback(input, commit) {
   // 5. Fetch Recurly subscription to get original billing date
   let recurlySubscription
   try {
-    recurlySubscription = await RecurlyWrapper.promises.getSubscription(
-      recurlySubscriptionId,
-      {}
+    recurlySubscription = await rateLimiters.requestWithRetries(
+      'recurly',
+      () => RecurlyWrapper.promises.getSubscription(recurlySubscriptionId, {}),
+      {
+        operation: 'getSubscription',
+        recurlySubscriptionId,
+      }
     )
   } catch (err) {
     throw new ReportError(
@@ -316,11 +364,19 @@ async function performRollback(
 
     if (targetBillingDateIsInFuture) {
       try {
-        await RecurlyWrapper.promises.apiRequest({
-          url: `subscriptions/${recurlySubscriptionId}/postpone`,
-          qs: { bulk: true, next_bill_date: nextBillingDate },
-          method: 'PUT',
-        })
+        await rateLimiters.requestWithRetries(
+          'recurly',
+          () =>
+            RecurlyWrapper.promises.apiRequest({
+              url: `subscriptions/${recurlySubscriptionId}/postpone`,
+              qs: { bulk: true, next_bill_date: nextBillingDate },
+              method: 'PUT',
+            }),
+          {
+            operation: 'postpone',
+            recurlySubscriptionId,
+          }
+        )
       } catch (err) {
         throw new ReportError(
           'rolled-back-recurly-restore-failed',
@@ -337,9 +393,18 @@ async function performRollback(
 
   // Step 4: Restore migration metadata to Stripe
   try {
-    await stripeClient.updateSubscriptionMetadata(stripeSubscriptionId, {
-      recurly_to_stripe_migration_status: 'in_progress',
-    })
+    await rateLimiters.requestWithRetries(
+      stripeClient.serviceName,
+      () =>
+        stripeClient.updateSubscriptionMetadata(stripeSubscriptionId, {
+          recurly_to_stripe_migration_status: 'in_progress',
+        }),
+      {
+        operation: 'updateSubscriptionMetadata',
+        stripeSubscriptionId,
+        region: stripeClient.serviceName,
+      }
+    )
   } catch (err) {
     throw new ReportError(
       'rolled-back-metadata-restore-failed',
@@ -381,12 +446,26 @@ async function performRollback(
 
 function parseArgs() {
   const args = minimist(process.argv.slice(2), {
-    string: ['output'],
-    number: ['throttle'],
+    string: [
+      'output',
+      'concurrency',
+      'recurly-rate-limit',
+      'recurly-api-retries',
+      'recurly-retry-delay-ms',
+      'stripe-rate-limit',
+      'stripe-api-retries',
+      'stripe-retry-delay-ms',
+    ],
     boolean: ['commit', 'help'],
     default: {
       commit: false,
-      throttle: DEFAULT_THROTTLE,
+      concurrency: 10,
+      'recurly-rate-limit': DEFAULT_RECURLY_RATE_LIMIT,
+      'recurly-api-retries': DEFAULT_RECURLY_API_RETRIES,
+      'recurly-retry-delay-ms': DEFAULT_RECURLY_RETRY_DELAY_MS,
+      'stripe-rate-limit': DEFAULT_STRIPE_RATE_LIMIT,
+      'stripe-api-retries': DEFAULT_STRIPE_API_RETRIES,
+      'stripe-retry-delay-ms': DEFAULT_STRIPE_RETRY_DELAY_MS,
     },
   })
 
@@ -399,7 +478,13 @@ function parseArgs() {
   const paramsSchema = z.object({
     output: z.string().optional(),
     commit: z.boolean(),
-    throttle: z.number().int().positive(),
+    concurrency: z.number().int().positive(),
+    recurlyRateLimit: z.number().positive(),
+    recurlyApiRetries: z.number().int().nonnegative(),
+    recurlyRetryDelayMs: z.number().int().nonnegative(),
+    stripeRateLimit: z.number().positive(),
+    stripeApiRetries: z.number().int().nonnegative(),
+    stripeRetryDelayMs: z.number().int().nonnegative(),
     inputFile: z.string().optional(),
   })
 
@@ -407,7 +492,13 @@ function parseArgs() {
     return paramsSchema.parse({
       output: args.output,
       commit: args.commit,
-      throttle: args.throttle,
+      concurrency: Number(args.concurrency),
+      recurlyRateLimit: Number(args['recurly-rate-limit']),
+      recurlyApiRetries: Number(args['recurly-api-retries']),
+      recurlyRetryDelayMs: Number(args['recurly-retry-delay-ms']),
+      stripeRateLimit: Number(args['stripe-rate-limit']),
+      stripeApiRetries: Number(args['stripe-api-retries']),
+      stripeRetryDelayMs: Number(args['stripe-retry-delay-ms']),
       inputFile,
     })
   } catch (err) {

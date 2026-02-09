@@ -91,7 +91,6 @@ import minimist from 'minimist'
 import PQueue from 'p-queue'
 import fs from 'node:fs'
 import * as csv from 'csv'
-import { setTimeout } from 'node:timers/promises'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 import {
@@ -101,6 +100,15 @@ import {
   coalesceOrThrowVATNumber,
   getTaxIdType,
 } from '../helpers/migrate_recurly_customers_to_stripe.helpers.mjs'
+import {
+  createRateLimitedApiWrappers,
+  DEFAULT_RECURLY_RATE_LIMIT,
+  DEFAULT_STRIPE_RATE_LIMIT,
+  DEFAULT_RECURLY_API_RETRIES,
+  DEFAULT_RECURLY_RETRY_DELAY_MS,
+  DEFAULT_STRIPE_API_RETRIES,
+  DEFAULT_STRIPE_RETRY_DELAY_MS,
+} from '../stripe/RateLimiter.mjs'
 
 // =============================================================================
 // STRIPE CLIENT SETUP
@@ -148,12 +156,16 @@ function getRegionClient(region) {
     )
   }
 
-  stripeClients[regionLower] = new Stripe(secretKey, {
+  const client = new Stripe(secretKey, {
     httpClient: Stripe.createFetchHttpClient(),
     telemetry: false,
   })
 
-  return stripeClients[regionLower]
+  // Add serviceName for rate limiter identification (stripe-us or stripe-uk)
+  client.serviceName = `stripe-${regionLower}`
+
+  stripeClients[regionLower] = client
+  return client
 }
 
 // =============================================================================
@@ -527,259 +539,8 @@ function createJsonArrayWriter(jsonPath) {
 // RATE LIMITING
 // =============================================================================
 
-/**
- * Rate limiter using sliding window algorithm.
- *
- * Rate limits (conservative targets, leaving headroom):
- * - Recurly: 2000 requests per 5 minutes → target 1500/5min = 300/min = 5/sec
- *   https://support.recurly.com/hc/en-us/articles/360034160731-What-Are-Recurly-s-API-Rate-Limits
- * - Stripe: 100 requests per second → target 50/sec (plenty of headroom)
- *   https://docs.stripe.com/rate-limits
- *
- * Recurly is the bottleneck. With 2 Recurly calls per customer (getAccount, getBillingInfo),
- * we can process ~2.5 customers/second = ~150 customers/minute = ~9000 customers/hour.
- * For 150K customers, expect ~17 hours at full throughput.
- */
-
-class RateLimiter {
-  /**
-   * @param {string} name - Name for logging
-   * @param {number} maxRequests - Maximum requests allowed in the window
-   * @param {number} windowMs - Window size in milliseconds
-   */
-  constructor(name, maxRequests, windowMs) {
-    this.name = name
-    this.maxRequests = maxRequests
-    this.windowMs = windowMs
-    this.requests = [] // timestamps of recent requests
-    this.totalRequests = 0
-    this._pending = Promise.resolve()
-  }
-
-  /**
-   * Wait if necessary to stay within rate limits, then record the request.
-   */
-  async throttle() {
-    this._pending = this._pending
-      .catch(error => {
-        // this should never happen since setTimeout or logDebug are very unlikely to ever fail
-        // but if it does, we log it and continue without blocking the queue (fail-open)
-        logWarn(`Rate limiter chain error for ${this.name}`, {
-          error: error?.message || String(error),
-        })
-      })
-      .then(async () => {
-        while (true) {
-          const now = Date.now()
-
-          // Remove requests outside the window
-          const windowStart = now - this.windowMs
-          this.requests = this.requests.filter(ts => ts > windowStart)
-
-          // If at limit, wait until the oldest request exits the window
-          if (this.requests.length >= this.maxRequests) {
-            const oldestRequest = this.requests[0]
-            const waitTime = oldestRequest - windowStart + 1
-            if (waitTime > 0) {
-              logDebug(
-                `Rate limit throttle for ${this.name}`,
-                {
-                  waitMs: waitTime,
-                  currentRequests: this.requests.length,
-                  maxRequests: this.maxRequests,
-                },
-                { verboseOnly: true }
-              )
-              await setTimeout(waitTime)
-              continue
-            }
-          }
-
-          // Record this request
-          this.requests.push(Date.now())
-          this.totalRequests++
-          break
-        }
-      })
-
-    return this._pending
-  }
-
-  /**
-   * Get current rate (requests per second over the last window)
-   */
-  getCurrentRate() {
-    const now = Date.now()
-    const windowStart = now - this.windowMs
-    const recentRequests = this.requests.filter(ts => ts > windowStart).length
-    return (recentRequests / this.windowMs) * 1000 // requests per second
-  }
-
-  getStats() {
-    return {
-      name: this.name,
-      totalRequests: this.totalRequests,
-      currentWindowRequests: this.requests.length,
-      maxRequests: this.maxRequests,
-      currentRate: this.getCurrentRate().toFixed(2) + '/sec',
-    }
-  }
-}
-
-const DEFAULT_RECURLY_RATE_LIMIT = 10 // requests per second
-const DEFAULT_STRIPE_RATE_LIMIT = 50 // requests per second
-const DEFAULT_RECURLY_API_RETRIES = 5
-const DEFAULT_RECURLY_RETRY_DELAY_MS = 1000
-const DEFAULT_STRIPE_API_RETRIES = 5
-const DEFAULT_STRIPE_RETRY_DELAY_MS = 1000
-const RATE_LIMIT_WINDOW_MS = 1000
-
-let recurlyRateLimiter
-let recurlyApiRetries = DEFAULT_RECURLY_API_RETRIES
-let recurlyRetryDelayMs = DEFAULT_RECURLY_RETRY_DELAY_MS
-let stripeRateLimitPerSecond = DEFAULT_STRIPE_RATE_LIMIT
-let stripeApiRetries = DEFAULT_STRIPE_API_RETRIES
-let stripeRetryDelayMs = DEFAULT_STRIPE_RETRY_DELAY_MS
-const stripeRateLimiters = new Map()
-
-function getStripeRateLimiter(region) {
-  const key = String(region || 'unknown').toLowerCase()
-  if (stripeRateLimiters.has(key)) return stripeRateLimiters.get(key)
-
-  const limiter = new RateLimiter(
-    `Stripe-${key}`,
-    stripeRateLimitPerSecond,
-    RATE_LIMIT_WINDOW_MS
-  )
-  stripeRateLimiters.set(key, limiter)
-  return limiter
-}
-
-/**
- * Throttle before making a Recurly API call
- */
-async function throttleRecurly() {
-  await recurlyRateLimiter.throttle()
-}
-
-async function recurlyRequestWithRetries(operation, { context } = {}) {
-  let attempt = 0
-  while (true) {
-    try {
-      return await operation()
-    } catch (error) {
-      const statusCode =
-        error?.statusCode ?? error?.status ?? error?.raw?.statusCode
-      if (statusCode === 429) {
-        logWarn('Recurly rate limited', {
-          rowNumber: context?.rowNumber,
-          recurlyAccountCode: context?.recurlyAccountCode,
-          attempt: attempt + 1,
-          maxRetries: recurlyApiRetries,
-        })
-
-        if (attempt < recurlyApiRetries) {
-          attempt++
-          await setTimeout(recurlyRetryDelayMs)
-          continue
-        }
-      }
-      throw error
-    }
-  }
-}
-
-async function recurlyCall(operation, context) {
-  return recurlyRequestWithRetries(
-    async () => {
-      await throttleRecurly()
-      return operation()
-    },
-    { context }
-  )
-}
-
-/**
- * Throttle before making a Stripe API call
- */
-async function throttleStripe(region) {
-  await getStripeRateLimiter(region).throttle()
-}
-
-/**
- * Get rate limiter statistics for logging
- */
-function getRateLimiterStats() {
-  const stripeLimiters = [...stripeRateLimiters.values()]
-  const stripeTotalRequests = stripeLimiters.reduce(
-    (sum, limiter) => sum + limiter.totalRequests,
-    0
-  )
-  const stripeCurrentRate = stripeLimiters.reduce(
-    (sum, limiter) => sum + limiter.getCurrentRate(),
-    0
-  )
-
-  return {
-    recurly: recurlyRateLimiter.getStats(),
-    stripe: {
-      totalRequests: stripeTotalRequests,
-      currentRate: stripeCurrentRate.toFixed(2) + '/sec',
-    },
-    stripeByRegion: stripeLimiters.map(limiter => limiter.getStats()),
-  }
-}
-
-function getStripeRateLimitReason(error) {
-  const headers =
-    error?.headers || error?.raw?.headers || error?.response?.headers || {}
-  return (
-    headers['stripe-rate-limit-reason'] ||
-    headers['Stripe-Rate-Limited-Reason'] ||
-    headers['stripe-rate-limited-reason'] ||
-    null
-  )
-}
-
-async function stripeRequestWithRetries(operation, { context } = {}) {
-  let attempt = 0
-  while (true) {
-    try {
-      return await operation()
-    } catch (error) {
-      const statusCode = error?.statusCode ?? error?.raw?.statusCode
-      if (statusCode === 429) {
-        const reason = getStripeRateLimitReason(error)
-        logWarn('Stripe rate limited', {
-          rowNumber: context?.rowNumber,
-          stripeCustomerId: context?.stripeCustomerId,
-          stripeAccount: context?.stripeAccount,
-          reason,
-          stripeApi: context?.stripeApi,
-          attempt: attempt + 1,
-          maxRetries: stripeApiRetries,
-        })
-
-        if (attempt < stripeApiRetries) {
-          attempt++
-          await setTimeout(stripeRetryDelayMs)
-          continue
-        }
-      }
-      throw error
-    }
-  }
-}
-
-async function stripeCall(region, operation, context) {
-  return stripeRequestWithRetries(
-    async () => {
-      await throttleStripe(region)
-      return operation()
-    },
-    { context }
-  )
-}
+// rate limiters - initialized in main()
+let rateLimiters
 
 // =============================================================================
 // DATA TRANSFORMATION
@@ -792,14 +553,16 @@ async function stripeCall(region, operation, context) {
  * @returns {Promise<{account: object, billingInfo: object|null}>}
  */
 async function fetchRecurlyData(accountCode, context) {
-  const account = await recurlyCall(
+  const account = await rateLimiters.requestWithRetries(
+    'recurly',
     () => recurlyClient.getAccount(`code-${accountCode}`),
     context
   )
 
   let billingInfo = null
   try {
-    billingInfo = await recurlyCall(
+    billingInfo = await rateLimiters.requestWithRetries(
+      'recurly',
       () => recurlyClient.getBillingInfo(`code-${accountCode}`),
       context
     )
@@ -826,12 +589,10 @@ async function fetchRecurlyData(accountCode, context) {
 async function fetchTargetStripeCustomer(
   stripeClient,
   stripeCustomerId,
-  region,
   context
 ) {
-  // TODO: consider getting the region from stripeClient.serviceName
-  const customer = await stripeCall(
-    region,
+  const customer = await rateLimiters.requestWithRetries(
+    stripeClient.serviceName,
     () => stripeClient.customers.retrieve(stripeCustomerId),
     { ...context, stripeApi: 'customers.retrieve' }
   )
@@ -853,11 +614,10 @@ async function fetchTargetStripeCustomer(
 async function fetchTargetStripeCustomerPaymentMethods(
   stripeClient,
   stripeCustomerId,
-  region,
   context
 ) {
-  const paymentMethods = await stripeCall(
-    region,
+  const paymentMethods = await rateLimiters.requestWithRetries(
+    stripeClient.serviceName,
     () => stripeClient.customers.listPaymentMethods(stripeCustomerId),
     { ...context, stripeApi: 'customers.listPaymentMethods' }
   )
@@ -874,8 +634,7 @@ async function replaceCustomerTaxIds(
   stripeClient,
   stripeCustomerId,
   { taxIdType, vatNumber },
-  context,
-  region
+  context
 ) {
   // Stripe customers can have multiple tax IDs. For this migration, we want a single
   // authoritative tax ID derived from Recurly, so we remove any existing ones first.
@@ -883,8 +642,8 @@ async function replaceCustomerTaxIds(
 
   let startingAfter
   while (true) {
-    const page = await stripeCall(
-      region,
+    const page = await rateLimiters.requestWithRetries(
+      stripeClient.serviceName,
       () =>
         stripeClient.customers.listTaxIds(stripeCustomerId, {
           limit: 100,
@@ -910,16 +669,16 @@ async function replaceCustomerTaxIds(
     )
 
     for (const taxId of existingTaxIds) {
-      await stripeCall(
-        region,
+      await rateLimiters.requestWithRetries(
+        stripeClient.serviceName,
         () => stripeClient.customers.deleteTaxId(stripeCustomerId, taxId.id),
         { ...context, stripeApi: 'customers.deleteTaxId' }
       )
     }
   }
 
-  return await stripeCall(
-    region,
+  return await rateLimiters.requestWithRetries(
+    stripeClient.serviceName,
     () =>
       stripeClient.customers.createTaxId(stripeCustomerId, {
         type: taxIdType,
@@ -1151,7 +910,6 @@ async function processCustomer(
     const existingCustomer = await fetchTargetStripeCustomer(
       stripeClient,
       stripeCustomerId,
-      region,
       stripeContext
     )
 
@@ -1236,8 +994,7 @@ async function processCustomer(
           stripeClient,
           stripeCustomerId,
           { taxIdType, vatNumber },
-          context,
-          region
+          context
         )
         logDebug(
           'Successfully created tax ID',
@@ -1426,8 +1183,8 @@ async function processCustomer(
         },
         { verboseOnly: true }
       )
-      await stripeCall(
-        region,
+      await rateLimiters.requestWithRetries(
+        stripeClient.serviceName,
         () => stripeClient.customers.update(stripeCustomerId, customerParams),
         { ...stripeContext, stripeApi: 'customers.update' }
       )
@@ -1694,6 +1451,7 @@ async function main(trackProgress) {
   let recurlyRateLimit
   let recurlyApiRetriesValue
   let recurlyRetryDelayMsValue
+  let stripeRateLimitPerSecond
   let stripeApiRetriesValue
   let stripeRetryDelayMsValue
   let limit
@@ -1733,16 +1491,17 @@ async function main(trackProgress) {
     process.exit(1)
   }
 
-  recurlyRateLimiter = new RateLimiter(
-    'Recurly',
+  // initialize rate limiters
+  rateLimiters = createRateLimitedApiWrappers({
     recurlyRateLimit,
-    RATE_LIMIT_WINDOW_MS
-  )
-  recurlyApiRetries = recurlyApiRetriesValue
-  recurlyRetryDelayMs = recurlyRetryDelayMsValue
-  stripeApiRetries = stripeApiRetriesValue
-  stripeRetryDelayMs = stripeRetryDelayMsValue
-  stripeRateLimiters.clear()
+    recurlyApiRetries: recurlyApiRetriesValue,
+    recurlyRetryDelayMs: recurlyRetryDelayMsValue,
+    stripeRateLimit: stripeRateLimitPerSecond,
+    stripeApiRetries: stripeApiRetriesValue,
+    stripeRetryDelayMs: stripeRetryDelayMsValue,
+    logDebug,
+    logWarn,
+  })
 
   // Set DEBUG_MODE only from CLI arg (--verbose/-v)
   DEBUG_MODE = !!verbose
@@ -1768,11 +1527,11 @@ async function main(trackProgress) {
     stripeExistingFieldsJsonPath,
     concurrency,
     recurlyRateLimit,
-    recurlyApiRetries,
-    recurlyRetryDelayMs,
+    recurlyApiRetries: recurlyApiRetriesValue,
+    recurlyRetryDelayMs: recurlyRetryDelayMsValue,
     stripeRateLimit: stripeRateLimitPerSecond,
-    stripeApiRetries,
-    stripeRetryDelayMs,
+    stripeApiRetries: stripeApiRetriesValue,
+    stripeRetryDelayMs: stripeRetryDelayMsValue,
     forceInvalidTax,
     ...(limit != null ? { limit } : {}),
   })
@@ -1981,7 +1740,7 @@ async function main(trackProgress) {
           // Progress update every 1000 customers (or 100 in debug mode)
           const progressInterval = DEBUG_MODE ? 100 : 1000
           if (processedThisRun % progressInterval === 0) {
-            const rateLimiterStats = getRateLimiterStats()
+            const rateLimiterStats = rateLimiters.getRateLimiterStats()
             const progress = {
               rowNumber: lastCompletedRowNumber,
               processedThisRun,
@@ -2039,7 +1798,7 @@ async function main(trackProgress) {
     const totalSuccessful = commit
       ? previouslyProcessed.size + updatedCount
       : previouslyProcessed.size
-    const finalRateLimiterStats = getRateLimiterStats()
+    const finalRateLimiterStats = rateLimiters.getRateLimiterStats()
 
     await trackProgress('=== FINAL SUMMARY ===')
     await trackProgress(`Start time: ${startTime.toISOString()}`)
@@ -2054,11 +1813,13 @@ async function main(trackProgress) {
     await trackProgress(`  - limit: ${limit != null ? limit : 'none'}`)
     await trackProgress(`  - concurrency: ${concurrency}`)
     await trackProgress(`  - recurly-rate-limit: ${recurlyRateLimit}`)
-    await trackProgress(`  - recurly-api-retries: ${recurlyApiRetries}`)
-    await trackProgress(`  - recurly-retry-delay-ms: ${recurlyRetryDelayMs}`)
+    await trackProgress(`  - recurly-api-retries: ${recurlyApiRetriesValue}`)
+    await trackProgress(
+      `  - recurly-retry-delay-ms: ${recurlyRetryDelayMsValue}`
+    )
     await trackProgress(`  - stripe-rate-limit: ${stripeRateLimitPerSecond}`)
-    await trackProgress(`  - stripe-api-retries: ${stripeApiRetries}`)
-    await trackProgress(`  - stripe-retry-delay-ms: ${stripeRetryDelayMs}`)
+    await trackProgress(`  - stripe-api-retries: ${stripeApiRetriesValue}`)
+    await trackProgress(`  - stripe-retry-delay-ms: ${stripeRetryDelayMsValue}`)
     await trackProgress(`  - force-invalid-tax: ${forceInvalidTax}`)
     await trackProgress(`Input file total rows: ${totalInInput}`)
     await trackProgress(
