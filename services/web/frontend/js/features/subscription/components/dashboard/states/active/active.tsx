@@ -164,13 +164,25 @@ export function ActiveSubscription({
             </a>
           </>
         ) : (
-          <a
-            href={subscription.payment.accountManagementLink}
-            rel="noreferrer noopener"
-            className="me-2"
-          >
-            {t('view_payment_portal')}
-          </a>
+          <>
+            <a
+              href={subscription.payment.accountManagementLink}
+              rel="noreferrer noopener"
+              className="me-2"
+            >
+              {t('view_payment_portal')}
+            </a>
+            {subscription.payment.isMigratedFromRecurly && (
+              <p>
+                <i style={{ fontSize: 'var(--font-size-01)' }}>
+                  <Trans
+                    i18nKey="view_payment_portal_disclaimer"
+                    components={[<a href="/contact" />]} // eslint-disable-line react/jsx-key, jsx-a11y/anchor-has-content
+                  />
+                </i>
+              </p>
+            )}
+          </>
         )}
       </div>
       <div className="mt-3">

@@ -721,6 +721,7 @@ describe('SubscriptionViewModelBuilder', function () {
           isEligibleForGroupPlan: true,
           isEligibleForPause: false,
           isEligibleForDowngradeUpsell: true,
+          isMigratedFromRecurly: false,
         })
       })
 

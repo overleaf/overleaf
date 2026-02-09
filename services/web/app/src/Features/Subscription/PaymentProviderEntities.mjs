@@ -53,6 +53,7 @@ export class PaymentProviderSubscription {
    * @param {Date|null} [props.pausePeriodStart]
    * @param {Date|null} [props.pausePeriodEnd]
    * @param {number|null} [props.remainingPauseCycles]
+   * @param {boolean} [props.isMigratedFromRecurly]
    */
   constructor(props) {
     this.id = props.id
@@ -80,6 +81,7 @@ export class PaymentProviderSubscription {
     this.pausePeriodStart = props.pausePeriodStart ?? null
     this.pausePeriodEnd = props.pausePeriodEnd ?? null
     this.remainingPauseCycles = props.remainingPauseCycles ?? null
+    this.isMigratedFromRecurly = props.isMigratedFromRecurly ?? false
   }
 
   /**

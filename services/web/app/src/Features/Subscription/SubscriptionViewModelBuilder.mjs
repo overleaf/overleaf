@@ -305,6 +305,8 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
       remainingPauseCycles: paymentRecord.subscription.remainingPauseCycles,
       isEligibleForPause,
       isEligibleForGroupPlan: !isInTrial,
+      isMigratedFromRecurly:
+        paymentRecord.subscription.isMigratedFromRecurly ?? false,
     }
 
     const isMonthlyCollaboratorPlan =

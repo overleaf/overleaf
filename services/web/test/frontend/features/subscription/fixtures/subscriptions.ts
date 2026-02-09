@@ -55,6 +55,7 @@ export const annualActiveSubscription: PaidSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: false,
     isEligibleForDowngradeUpsell: false,
+    isMigratedFromRecurly: false,
   },
 }
 
@@ -101,6 +102,7 @@ export const annualActiveSubscriptionWithCoupons: PaidSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: false,
     isEligibleForDowngradeUpsell: false,
+    isMigratedFromRecurly: false,
   },
 }
 
@@ -145,6 +147,7 @@ export const pendingPausedSubscription: PaidSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: false,
     isEligibleForDowngradeUpsell: false,
+    isMigratedFromRecurly: false,
   },
 }
 
@@ -189,6 +192,7 @@ export const pausedSubscription: PaidSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: false,
     isEligibleForDowngradeUpsell: false,
+    isMigratedFromRecurly: false,
   },
 }
 
@@ -234,6 +238,7 @@ export const annualActiveSubscriptionWithAddons: PaidSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: false,
     isEligibleForDowngradeUpsell: false,
+    isMigratedFromRecurly: false,
   },
   addOns: [{ addOnCode: 'assistant', quantity: 1, unitAmountInCents: 10000 }],
 }
@@ -278,6 +283,7 @@ export const annualActiveSubscriptionEuro: PaidSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: true,
     isEligibleForDowngradeUpsell: false,
+    isMigratedFromRecurly: false,
   },
 }
 
@@ -320,6 +326,7 @@ export const annualActiveSubscriptionPro: PaidSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: true,
     isEligibleForDowngradeUpsell: false,
+    isMigratedFromRecurly: false,
   },
 }
 
@@ -363,6 +370,7 @@ export const pastDueExpiredSubscription: PaidSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: true,
     isEligibleForDowngradeUpsell: false,
+    isMigratedFromRecurly: false,
   },
 }
 
@@ -406,6 +414,7 @@ export const canceledSubscription: PaidSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: true,
     isEligibleForDowngradeUpsell: false,
+    isMigratedFromRecurly: false,
   },
 }
 
@@ -456,6 +465,7 @@ export const pendingAddOnChange: PaidSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: false,
     isEligibleForDowngradeUpsell: false,
+    isMigratedFromRecurly: false,
   },
   pendingPlan: {
     planCode: 'collaborator-annual',
@@ -506,6 +516,7 @@ export const pendingSubscriptionChange: PaidSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: false,
     isEligibleForDowngradeUpsell: false,
+    isMigratedFromRecurly: false,
   },
   pendingPlan: {
     planCode: 'professional-annual',
@@ -560,6 +571,7 @@ export const groupActiveSubscription: GroupSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: false,
     isEligibleForDowngradeUpsell: false,
+    isMigratedFromRecurly: false,
   },
 }
 
@@ -607,6 +619,7 @@ export const groupProfessionalActiveSubscription: GroupSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: false,
     isEligibleForDowngradeUpsell: false,
+    isMigratedFromRecurly: false,
   },
 }
 
@@ -657,6 +670,7 @@ export const groupActiveSubscriptionWithPendingLicenseChange: GroupSubscription 
       isEligibleForGroupPlan: true,
       isEligibleForPause: false,
       isEligibleForDowngradeUpsell: false,
+      isMigratedFromRecurly: false,
     },
     pendingPlan: {
       planCode: 'group_collaborator_10_enterprise',
@@ -709,6 +723,7 @@ export const trialSubscription: PaidSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: false,
     isEligibleForDowngradeUpsell: false,
+    isMigratedFromRecurly: false,
   },
 }
 
@@ -772,6 +787,7 @@ export const trialCollaboratorSubscription: PaidSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: true,
     isEligibleForDowngradeUpsell: false,
+    isMigratedFromRecurly: false,
   },
 }
 
@@ -814,5 +830,6 @@ export const monthlyActiveCollaborator: PaidSubscription = {
     isEligibleForGroupPlan: true,
     isEligibleForPause: true,
     isEligibleForDowngradeUpsell: true,
+    isMigratedFromRecurly: false,
   },
 }

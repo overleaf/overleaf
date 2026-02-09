@@ -56,6 +56,7 @@ type PaymentProviderRecord = {
   isEligibleForPause: boolean
   isEligibleForGroupPlan: boolean
   isEligibleForDowngradeUpsell: boolean
+  isMigratedFromRecurly: boolean
 }
 
 export type GroupPolicy = {
