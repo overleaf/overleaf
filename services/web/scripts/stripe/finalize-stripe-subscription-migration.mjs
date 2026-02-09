@@ -433,16 +433,18 @@ function detectChanges(recurlySubscription, stripeSubscription, region) {
   const changes = []
 
   // Extract item details from Recurly subscription
+  const targetRecurlySubscription =
+    recurlySubscription.pending_subscription || recurlySubscription
   const recurlyPlanItem =
     PlansLocator.convertLegacyGroupPlanCodeToConsolidatedGroupPlanCodeIfNeeded(
-      recurlySubscription.plan.plan_code
+      targetRecurlySubscription.plan.plan_code
     )
   const simplifiedPlanCode = recurlyPlanItem.planCode.replace(
     /_free_trial.*$/,
     ''
   )
   const additionalLicenseQuantity =
-    (recurlySubscription.subscription_add_ons || []).find(
+    (targetRecurlySubscription.subscription_add_ons || []).find(
       addOn => addOn.add_on_code === 'additional-license'
     )?.quantity || 0
   const recurlyItems = [
@@ -450,9 +452,10 @@ function detectChanges(recurlySubscription, stripeSubscription, region) {
       code: simplifiedPlanCode,
       quantity: recurlyPlanItem.quantity + additionalLicenseQuantity,
       amount:
-        recurlySubscription.unit_amount_in_cents / recurlyPlanItem.quantity,
+        targetRecurlySubscription.unit_amount_in_cents /
+        recurlyPlanItem.quantity,
     },
-    ...(recurlySubscription.subscription_add_ons || [])
+    ...(targetRecurlySubscription.subscription_add_ons || [])
       .filter(addOn => addOn.add_on_code !== 'additional-license')
       .map(addOn => ({
         code: addOn.add_on_code,
@@ -497,11 +500,6 @@ function detectChanges(recurlySubscription, stripeSubscription, region) {
   const stripeState = convertStripeStatusToSubscriptionState(stripeSubscription)
   if (recurlyState !== stripeState) {
     changes.push(`State: Recurly=${recurlyState}, Stripe=${stripeState}`)
-  }
-
-  // Verify no changes have been scheduled in Recurly
-  if (recurlySubscription.pending_subscription != null) {
-    changes.push('Pending change now exists in Recurly subscription')
   }
 
   return changes
