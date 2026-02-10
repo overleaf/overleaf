@@ -1341,7 +1341,7 @@
   "need_more_than_x_licenses": "需要 __x__ 个以上的许可证？",
   "need_to_add_new_primary_before_remove": "在删除此电子邮件地址之前，您需要添加一个新的主电子邮件地址。",
   "need_to_leave": "确定要删除账号？",
-  "new_compile_domain_notice": "我们最近将 PDF 下载迁移到了新域，可能会阻止您的浏览器访问新域 <0>__compilesUserContentDomain__</0>。 这可能是由网络阻止或严格的浏览器插件规则引起的。 请查阅我们的<1>问题排查指南</1>。",
+  "new_compile_domain_notice": "可能会阻止您的浏览器访问 Overleaf 的 PDF 下载位置 <0>__compilesUserContentDomain__</0>。 这可能是由网络阻止或严格的浏览器插件规则引起的。 请查阅我们的<1>问题排查指南</1>。",
   "new_file": "新建文件",
   "new_folder": "新建目录",
   "new_font_open_dyslexic": "新字体：OpenDyslexic Mono 旨在提高阅读障碍患者的可读性。",

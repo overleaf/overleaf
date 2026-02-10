@@ -1484,7 +1484,7 @@
   "need_to_add_new_primary_before_remove": "You’ll need to add a new primary email address before you can remove this one.",
   "need_to_leave": "Need to leave?",
   "neither_agree_nor_disagree": "Neither agree nor disagree",
-  "new_compile_domain_notice": "We’ve recently migrated PDF downloads to a new domain. Something might be blocking your browser from accessing that new domain, <0>__compilesUserContentDomain__</0>. This could be caused by network blocking or a strict browser plugin rule. Please follow our <1>troubleshooting guide</1>.",
+  "new_compile_domain_notice": "Something might be blocking your browser from accessing Overleaf’s PDF download location, <0>__compilesUserContentDomain__</0>. This could be caused by network blocking or a strict browser plugin rule. Please follow our <1>troubleshooting guide</1>.",
   "new_compiles_in_this_project_will_automatically_use_the_newest_version": "New compiles in this project will automatically use the newest version. <0>Learn how to change compiler settings</0>",
   "new_create_tables_and_equations": "NEW! <sparkle/> Create tables and equations in seconds",
   "new_editor_look": "New editor look",
