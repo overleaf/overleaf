@@ -1,27 +1,30 @@
 const Logger = require('@overleaf/logger')
 const { SettingsError } = require('./Errors')
-const GcsPersistor = require('./GcsPersistor')
-const { S3Persistor } = require('./S3Persistor')
-const FSPersistor = require('./FSPersistor')
-const MigrationPersistor = require('./MigrationPersistor')
-const {
-  PerProjectEncryptedS3Persistor,
-} = require('./PerProjectEncryptedS3Persistor')
 
 function getPersistor(backend, settings) {
   switch (backend) {
     case 'aws-sdk':
-    case 's3':
+    case 's3': {
+      const { S3Persistor } = require('./S3Persistor')
       return new S3Persistor(settings.s3)
-    case 's3SSEC':
+    }
+    case 's3SSEC': {
+      const {
+        PerProjectEncryptedS3Persistor,
+      } = require('./PerProjectEncryptedS3Persistor')
       return new PerProjectEncryptedS3Persistor(settings.s3SSEC)
-    case 'fs':
+    }
+    case 'fs': {
+      const FSPersistor = require('./FSPersistor')
       return new FSPersistor({
         useSubdirectories: settings.useSubdirectories,
         paths: settings.paths,
       })
-    case 'gcs':
+    }
+    case 'gcs': {
+      const GcsPersistor = require('./GcsPersistor')
       return new GcsPersistor(settings.gcs)
+    }
     default:
       throw new SettingsError('unknown backend', { backend })
   }
@@ -44,6 +47,7 @@ module.exports = function create(settings) {
   if (settings.fallback && settings.fallback.backend) {
     const primary = persistor
     const fallback = getPersistor(settings.fallback.backend, settings)
+    const MigrationPersistor = require('./MigrationPersistor')
     persistor = new MigrationPersistor(primary, fallback, settings.fallback)
   }
 
