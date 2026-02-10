@@ -263,6 +263,7 @@ describe('RestoreManager', function () {
 
   afterEach(function () {
     tk.reset()
+    vi.resetModules()
   })
 
   describe('restoreFileFromV2', function () {
@@ -347,6 +348,35 @@ describe('RestoreManager', function () {
             false
           )
           .should.equal(true)
+      })
+    })
+
+    describe('when addEntity throws an error', function () {
+      beforeEach(function (ctx) {
+        ctx.pathname = 'foo.tex'
+        ctx.FileSystemImportManager.promises.addEntity = sinon
+          .stub()
+          .rejects(new Error('Failed to add entity'))
+        ctx.fsUnlink = sinon.stub().resolves()
+        vi.doMock('node:fs', () => ({
+          default: { promises: { unlink: ctx.fsUnlink } },
+        }))
+      })
+
+      it('should clean up the temporary file and propagate the error', async function (ctx) {
+        let error
+        try {
+          await ctx.RestoreManager.promises.restoreFileFromV2(
+            ctx.user_id,
+            ctx.project_id,
+            ctx.version,
+            ctx.pathname
+          )
+        } catch (err) {
+          error = err
+        }
+        expect(error).to.exist
+        expect(error.message).to.equal('Failed to add entity')
       })
     })
   })
