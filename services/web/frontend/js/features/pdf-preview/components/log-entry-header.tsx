@@ -17,7 +17,7 @@ import {
 } from '@/features/pdf-preview/util/types'
 import useResizeObserver from '@/features/preview/hooks/use-resize-observer'
 import OLIconButton from '@/shared/components/ol/ol-icon-button'
-import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'

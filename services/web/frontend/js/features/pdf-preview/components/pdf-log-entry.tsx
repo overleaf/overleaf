@@ -4,7 +4,7 @@ import PdfLogEntryContent from './pdf-log-entry-content'
 import HumanReadableLogsHints from '../../../ide/human-readable-logs/HumanReadableLogsHints'
 import getMeta from '@/utils/meta'
 import { ErrorLevel, LogEntry, SourceLocation } from '../util/types'
-import NewLogEntry from '@/features/ide-redesign/components/error-logs/log-entry'
+import NewLogEntry from '@/features/pdf-preview/components/log-entry'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import useHandleLogEntryClick from '../hooks/use-handle-log-entry-click'
 

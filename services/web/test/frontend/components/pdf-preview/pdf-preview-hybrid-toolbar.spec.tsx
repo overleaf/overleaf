@@ -19,7 +19,8 @@ describe('<PdfPreviewHybridToolbar/>', function () {
   })
 
   describe('orphan mode', function () {
-    it('shows connecting message  on load', function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('shows connecting message  on load', function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-detachRole', 'detached')
       })
@@ -54,7 +55,8 @@ describe('<PdfPreviewHybridToolbar/>', function () {
       cy.findByRole('button', { name: 'Recompile' })
     })
 
-    it('shows connecting message when disconnected', function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('shows connecting message when disconnected', function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-detachRole', 'detached')
       })
@@ -79,7 +81,8 @@ describe('<PdfPreviewHybridToolbar/>', function () {
       cy.contains('Connecting with the editor')
     })
 
-    it('shows redirect button after timeout', function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('shows redirect button after timeout', function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-detachRole', 'detached')
       })

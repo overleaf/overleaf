@@ -6,7 +6,6 @@ import { onRollingBuild } from '@/shared/utils/rolling-build'
 const RollingBuildSelectedReminder = () => {
   const { t } = useTranslation()
   const { project } = useProjectContext()
-
   if (!onRollingBuild(project?.imageName)) {
     return null
   }
@@ -26,6 +25,7 @@ const RollingBuildSelectedReminder = () => {
       title={t('this_project_is_compiled_using_untested_version')}
       content={content}
       type="info"
+      className="mb-0"
     />
   )
 }

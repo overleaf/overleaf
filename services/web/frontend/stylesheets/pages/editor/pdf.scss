@@ -1,79 +1,36 @@
 :root {
-  --pdf-bg: var(--neutral-10);
+  --pdf-bg: var(--bg-dark-secondary);
   --pdf-toolbar-btn-hover-color: rgb(125 125 125 / 20%);
   --synctex-control-size: 24px;
 }
 
 @include theme('light') {
   --pdf-toolbar-btn-hover-color: var(--neutral-10);
-
-  .ide-redesign-main {
-    --pdf-bg: var(--neutral-10);
-  }
+  --pdf-bg: var(--neutral-10);
 }
 
-.ide-redesign-main {
-  --pdf-bg: var(--bg-dark-secondary);
+.pdf-code-check-failed-banner-container {
+  position: absolute;
+  top: calc(var(--toolbar-small-height) + var(--spacing-04));
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--spacing-06);
+}
 
-  .pdf-viewer {
-    .pdfjs-viewer {
-      .page {
-        box-shadow:
-          0 5px 5px 0 #23282f0d,
-          0 3px 14px 0 #23282f08,
-          0 8px 10px 0 #23282f14;
-      }
-    }
-  }
-
-  .toolbar-pdf-left {
-    .compile-button-group {
-      height: 24px;
-      border-radius: 12px;
-      margin-left: var(--spacing-02);
-    }
-
-    .dropdown > .compile-button {
-      border-top-left-radius: 12px;
-      border-bottom-left-radius: 12px;
-      font-size: var(--font-size-02);
-    }
-
-    .dropdown > .compile-dropdown-toggle {
-      width: 26px;
-      padding: var(--spacing-01);
-    }
-  }
-
-  .pdf-code-check-failed-banner-container {
-    position: absolute;
-    top: calc(var(--toolbar-small-height) + var(--spacing-04));
-    left: 0;
-    right: 0;
-    z-index: 1;
-    display: flex;
-    justify-content: center;
-    padding: 0 var(--spacing-06);
-  }
-
-  .pdf-code-check-failed-banner {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-02);
-    background-color: var(--bg-light-primary);
-    color: var(--content-primary);
-    border: 1px solid var(--border-divider);
-    padding: var(--spacing-02) var(--spacing-03) var(--spacing-02)
-      var(--spacing-02);
-    border-radius: var(--border-radius-full);
-    box-shadow: 0 2px 4px 0 #1e253029;
-  }
-
-  .synctex-control {
-    .synctex-control-icon {
-      font-weight: normal;
-    }
-  }
+.pdf-code-check-failed-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-02);
+  background-color: var(--bg-light-primary);
+  color: var(--content-primary);
+  border: 1px solid var(--border-divider);
+  padding: var(--spacing-02) var(--spacing-03) var(--spacing-02)
+    var(--spacing-02);
+  border-radius: var(--border-radius-full);
+  box-shadow: 0 2px 4px 0 #1e253029;
 }
 
 .pdf .toolbar.toolbar-pdf {
@@ -95,10 +52,10 @@
   gap: var(--spacing-02);
 
   .compile-button-group {
-    height: 28px;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+    height: 24px;
     background-color: var(--bg-accent-01);
+    border-radius: 12px;
+    margin-left: var(--spacing-02);
 
     .btn-primary:hover {
       z-index: auto; // prevents border from being hidden
@@ -118,9 +75,19 @@
       cursor: not-allowed;
     }
   }
+
+  .dropdown > .compile-button {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    font-size: var(--font-size-02);
+  }
+
+  .dropdown > .compile-dropdown-toggle {
+    width: 26px;
+    padding: var(--spacing-01);
+  }
 }
 
-.toolbar-pdf-orphan,
 .toolbar-pdf-left,
 .toolbar-pdf-right,
 .toolbar-pdf-controls {
@@ -129,28 +96,15 @@
   align-self: stretch;
 }
 
-.toolbar-pdf-orphan,
-.toolbar-pdf-controls {
-  flex: 1 1 100%;
-}
-
 .toolbar-pdf-controls {
   margin-right: var(--spacing-02);
   justify-content: flex-end;
+  flex: 1 1 100%;
 }
 
 .toolbar-pdf-right {
   flex: 1;
   justify-content: flex-end;
-}
-
-.toolbar-pdf-orphan {
-  justify-content: center;
-  color: var(--toolbar-btn-color);
-
-  .btn {
-    margin-left: var(--spacing-03);
-  }
 }
 
 .btn.pdf-toolbar-btn {
@@ -294,7 +248,10 @@
     .page {
       box-sizing: content-box;
       margin: var(--spacing-05) auto;
-      box-shadow: 0 0 8px #bbb;
+      box-shadow:
+        0 5px 5px 0 #23282f0d,
+        0 3px 14px 0 #23282f08,
+        0 8px 10px 0 #23282f14;
       border: none;
     }
 
@@ -497,8 +454,8 @@
 
 .synctex-control {
   .synctex-control-icon {
-    font-weight: 700;
     font-size: var(--font-size-06);
+    font-weight: normal;
   }
 }
 

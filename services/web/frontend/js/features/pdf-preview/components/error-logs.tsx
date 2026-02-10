@@ -11,7 +11,7 @@ import { useDetachCompileContext as useCompileContext } from '@/shared/context/d
 import { Nav, NavLink, TabContainer, TabContent } from 'react-bootstrap'
 import { LogEntry as LogEntryData } from '@/features/pdf-preview/util/types'
 import LogEntry from './log-entry'
-import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import TimeoutUpgradePromptNew from '@/features/pdf-preview/components/timeout-upgrade-prompt-new'
 import getMeta from '@/utils/meta'
 import PdfClearCacheButton from '@/features/pdf-preview/components/pdf-clear-cache-button'

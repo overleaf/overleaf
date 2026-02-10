@@ -5,7 +5,7 @@ import {
   SetStateAction,
   useState,
 } from 'react'
-import HumanReadableLogsHints from '../../../../ide/human-readable-logs/HumanReadableLogsHints'
+import HumanReadableLogsHints from '../../../ide/human-readable-logs/HumanReadableLogsHints'
 import {
   ErrorLevel,
   LogEntry as LogEntryData,
