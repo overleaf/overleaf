@@ -252,7 +252,7 @@ export default ResourceWriter = {
     }
     if (
       path.match(/\.(pygtex|pygstyle)$/) ||
-      path.match(/(^|\/)_minted-[^\/]+\//)
+      path.match(/(^|\/)_minted(-[^\/]+)?\//)
     ) {
       // minted files/directory
       shouldDelete = false

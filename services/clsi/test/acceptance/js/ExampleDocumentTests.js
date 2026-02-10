@@ -8,6 +8,9 @@ import { promisify } from 'node:util'
 import ClsiApp from './helpers/ClsiApp.js'
 import Path from 'node:path'
 import process from 'node:process'
+import ResourceWriter from '../../../app/js/ResourceWriter.js'
+import { expect } from 'chai'
+
 const fixturePath = path => {
   if (path.slice(0, 3) === 'tmp') {
     return '/tmp/clsi_acceptance_tests' + path.slice(3)
@@ -154,9 +157,26 @@ describe('Example Documents', function () {
       describe(exampleDir, function () {
         before(function () {
           this.project_id = Client.randomId() + '_' + exampleDir
+          this.outputFiles = []
+          // Allow each test to provide a configuration file
+          const checksJsonPath = fixturePath(
+            Path.join('examples', exampleDir, 'checks.json')
+          )
+          this.checks = {}
+          const stats = fs.statSync(checksJsonPath, { throwIfNoEntry: false })
+          if (stats && stats.isFile()) {
+            const rawChecks = fs.readFileSync(checksJsonPath, 'utf8')
+            try {
+              this.checks = JSON.parse(rawChecks)
+            } catch (err) {
+              throw new Error(
+                `Failed to parse checks.json for example "${exampleDir}" at path "${checksJsonPath}": ${err.message}`
+              )
+            }
+          }
         })
 
-        it('should generate the correct pdf', async function () {
+        it('should generate the correct pdf and output files', async function () {
           this.timeout(MOCHA_LATEX_TIMEOUT)
           const body = await Client.compileDirectory(
             this.project_id,
@@ -169,6 +189,27 @@ describe('Example Documents', function () {
           }
           const pdf = Client.getOutputFile(body, 'pdf')
           await downloadAndComparePdf(this.project_id, exampleDir, pdf.url)
+
+          // pass the output files on to subsequent tests
+          this.outputFiles = body.compile.outputFiles
+
+          if (this.checks.mustNotDeleteRegex) {
+            const mustNotDeleteRegex = new RegExp(
+              this.checks.mustNotDeleteRegex
+            )
+            // On subsequent compiles the isExtraneousFile method is used
+            // to remove unwanted files - this check ensures that we don't
+            // remove any files that should be kept (e.g. cache files)
+            const filesToBeRemoved = this.outputFiles.filter(file =>
+              ResourceWriter.isExtraneousFile(file.path)
+            )
+            for (const file of filesToBeRemoved) {
+              expect(
+                file.path,
+                'should not remove any files that must be cached'
+              ).to.not.match(mustNotDeleteRegex)
+            }
+          }
         })
 
         it('should generate the correct pdf on the second run as well', async function () {
