@@ -172,6 +172,7 @@
     "pug": "^3.0.3",
     "pug-runtime": "^3.0.1",
     "rate-limiter-flexible": "^2.4.1",
+    "react-hook-form": "^7.71.1",
     "recurly": "^4.0.0",
     "referer-parser": "github:overleaf/nodejs-referer-parser#8b8b103762d05b7be4cfa2f810e1d408be67d7bb",
     "request": "2.88.2",
