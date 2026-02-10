@@ -322,6 +322,8 @@ async function processMigration(input, commit) {
         region: stripeClient.serviceName,
       }
     )
+
+    // handle no subscriptions found
     if (
       !stripeCustomer.subscriptions ||
       stripeCustomer.subscriptions.data.length === 0
@@ -331,13 +333,25 @@ async function processMigration(input, commit) {
         'No Stripe subscriptions found for customer'
       )
     }
-    // find the subscription with migration metadata
+
+    // handle multiple active subscriptions found
+    const activeSubscriptions = stripeCustomer.subscriptions.data.filter(sub =>
+      ['active', 'past_due', 'incomplete'].includes(sub.status)
+    )
+    if (activeSubscriptions.length > 1) {
+      throw new ReportError(
+        'multiple-active-stripe-subscriptions',
+        'Multiple active Stripe subscriptions found for customer'
+      )
+    }
+
+    // find the target subscription with migration metadata
     stripeSubscription = stripeCustomer.subscriptions.data.find(
       sub => sub.metadata?.recurly_to_stripe_migration_status === 'in_progress'
     )
     if (!stripeSubscription) {
       throw new ReportError(
-        'no-stripe-subscription',
+        'no-target-stripe-subscription',
         'No target Stripe subscription found for customer'
       )
     }
