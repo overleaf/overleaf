@@ -1,45 +1,53 @@
 diff --git a/node_modules/teeny-request/build/src/index.js b/node_modules/teeny-request/build/src/index.js
-index f209888..e9fe982 100644
+index a101736..a87f6b9 100644
 --- a/node_modules/teeny-request/build/src/index.js
 +++ b/node_modules/teeny-request/build/src/index.js
-@@ -166,27 +166,27 @@ function teenyRequest(reqOpts, callback) {
-     }
-     if (callback === undefined) {
+@@ -130,6 +130,9 @@ function createMultipartStream(boundary, multipart) {
+         }
+         else {
+             part.body.pipe(stream, { end: false });
++            part.body.on('error', (err) => {
++                stream.destroy(err);
++            });
+             part.body.on('end', () => {
+                 stream.write('\r\n');
+                 stream.write(finale);
+@@ -184,25 +187,25 @@ function teenyRequest(reqOpts, callback) {
          // Stream mode
--        const requestStream = streamEvents(new stream_1.PassThrough());
-+        const requestStream = new stream_1.PassThrough();
+         const requestStream = streamEvents(new stream_1.PassThrough());
          // eslint-disable-next-line @typescript-eslint/no-explicit-any
 -        let responseStream;
 -        requestStream.once('reading', () => {
 -            if (responseStream) {
--                responseStream.pipe(requestStream);
+-                (0, stream_1.pipeline)(responseStream, requestStream, () => { });
 -            }
 -            else {
 -                requestStream.once('response', () => {
--                    responseStream.pipe(requestStream);
+-                    (0, stream_1.pipeline)(responseStream, requestStream, () => { });
 -                });
 -            }
 -        });
 +        // let responseStream;
 +        // requestStream.once('reading', () => {
 +        //     if (responseStream) {
-+        //         responseStream.pipe(requestStream);
++        //         (0, stream_1.pipeline)(responseStream, requestStream, () => { });
 +        //     }
 +        //     else {
 +        //         requestStream.once('response', () => {
-+        //             responseStream.pipe(requestStream);
++        //             (0, stream_1.pipeline)(responseStream, requestStream, () => { });
 +        //         });
 +        //     }
 +        // });
          options.compress = false;
          teenyRequest.stats.requestStarting();
-         node_fetch_1.default(uri, options).then(res => {
+-        fetch(uri, options).then(res => {
++        (0, node_fetch_1.default)(uri, options).then(res => {
 -            teenyRequest.stats.requestFinished();
 -            responseStream = res.body;
 -            responseStream.on('error', (err) => {
 -                requestStream.emit('error', err);
 -            });
-+            teenyRequest.stats.requestFinished(); stream_1.pipeline(res.body, requestStream, () => {});
++            teenyRequest.stats.requestFinished(); (0, stream_1.pipeline)(res.body, requestStream, () => {});
 +            // responseStream = res.body;
 +            // responseStream.on('error', (err) => {
 +            //     requestStream.emit('error', err);

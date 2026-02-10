@@ -1,8 +1,18 @@
-diff --git a/node_modules/@google-cloud/storage/node_modules/teeny-request/build/src/index.js b/node_modules/@google-cloud/storage/node_modules/teeny-request/build/src/index.js
-index af5d15e..8a9bf77 100644
---- a/node_modules/@google-cloud/storage/node_modules/teeny-request/build/src/index.js
-+++ b/node_modules/@google-cloud/storage/node_modules/teeny-request/build/src/index.js
-@@ -168,31 +168,34 @@ function teenyRequest(reqOpts, callback) {
+diff --git a/node_modules/@google-cloud/profiler/node_modules/teeny-request/build/src/index.js b/node_modules/@google-cloud/profiler/node_modules/teeny-request/build/src/index.js
+index af5d15e..2b63d0c 100644
+--- a/node_modules/@google-cloud/profiler/node_modules/teeny-request/build/src/index.js
++++ b/node_modules/@google-cloud/profiler/node_modules/teeny-request/build/src/index.js
+@@ -115,6 +115,9 @@ function createMultipartStream(boundary, multipart) {
+         }
+         else {
+             part.body.pipe(stream, { end: false });
++            part.body.on('error', (err) => {
++                stream.destroy(err);
++            });
+             part.body.on('end', () => {
+                 stream.write('\r\n');
+                 stream.write(finale);
+@@ -168,25 +171,27 @@ function teenyRequest(reqOpts, callback) {
          // Stream mode
          const requestStream = streamEvents(new stream_1.PassThrough());
          // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,10 +56,3 @@ index af5d15e..8a9bf77 100644
              const response = fetchToRequestResponse(options, res);
              requestStream.emit('response', response);
          }, err => {
-             teenyRequest.stats.requestFinished();
-             requestStream.emit('error', err);
-         });
-+
-         // fetch doesn't supply the raw HTTP stream, instead it
-         // returns a PassThrough piped from the HTTP response
-         // stream.
