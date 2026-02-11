@@ -183,7 +183,7 @@ const bibEntryValidationRules = new Map<string, BibEntryValidationRule>([
   ],
 ])
 
-const checkRequiredFields = (
+export const checkRequiredFields = (
   nodeRef: SyntaxNodeRef,
   state: EditorState
 ): Diagnostic[] => {
