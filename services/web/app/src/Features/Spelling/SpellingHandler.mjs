@@ -1,6 +1,6 @@
 import OError from '@overleaf/o-error'
 import Metrics from '@overleaf/metrics'
-import { promisifyAll } from '@overleaf/promise-utils'
+import { promisify } from '@overleaf/promise-utils'
 import LearnedWordsManager from './LearnedWordsManager.mjs'
 
 const SpellingHandler = {
@@ -26,4 +26,13 @@ const SpellingHandler = {
   },
 }
 
-export default { ...SpellingHandler, promises: promisifyAll(SpellingHandler) }
+export default {
+  ...SpellingHandler,
+  promises: {
+    getUserDictionary: promisify(SpellingHandler.getUserDictionary),
+    deleteWordFromUserDictionary: promisify(
+      SpellingHandler.deleteWordFromUserDictionary
+    ),
+    deleteUserDictionary: promisify(SpellingHandler.deleteUserDictionary),
+  },
+}

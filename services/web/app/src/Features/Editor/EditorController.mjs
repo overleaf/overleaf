@@ -8,7 +8,7 @@ import ProjectDeleter from '../Project/ProjectDeleter.mjs'
 import EditorRealTimeController from './EditorRealTimeController.mjs'
 import async from 'async'
 import PublicAccessLevels from '../Authorization/PublicAccessLevels.mjs'
-import { promisifyAll } from '@overleaf/promise-utils'
+import { promisify, promisifyMultiResult } from '@overleaf/promise-utils'
 
 const EditorController = {
   addDoc(projectId, folderId, docName, docLines, source, userId, callback) {
@@ -687,9 +687,34 @@ const EditorController = {
   },
 }
 
-EditorController.promises = promisifyAll(EditorController, {
-  multiResult: {
-    mkdirp: ['newFolders', 'lastFolder'],
-  },
-})
+EditorController.promises = {
+  addDoc: promisify(EditorController.addDoc),
+  addDocWithRanges: promisify(EditorController.addDocWithRanges),
+  addFile: promisify(EditorController.addFile),
+  appendToDoc: promisify(EditorController.appendToDoc),
+  upsertDoc: promisify(EditorController.upsertDoc),
+  upsertFile: promisify(EditorController.upsertFile),
+  upsertDocWithPath: promisify(EditorController.upsertDocWithPath),
+  upsertFileWithPath: promisify(EditorController.upsertFileWithPath),
+  addFolder: promisify(EditorController.addFolder),
+  mkdirp: promisifyMultiResult(EditorController.mkdirp, [
+    'newFolders',
+    'lastFolder',
+  ]),
+  deleteEntity: promisify(EditorController.deleteEntity),
+  deleteEntityWithPath: promisify(EditorController.deleteEntityWithPath),
+  updateProjectDescription: promisify(
+    EditorController.updateProjectDescription
+  ),
+  deleteProject: promisify(EditorController.deleteProject),
+  renameEntity: promisify(EditorController.renameEntity),
+  moveEntity: promisify(EditorController.moveEntity),
+  renameProject: promisify(EditorController.renameProject),
+  setCompiler: promisify(EditorController.setCompiler),
+  setImageName: promisify(EditorController.setImageName),
+  setSpellCheckLanguage: promisify(EditorController.setSpellCheckLanguage),
+  setPublicAccessLevel: promisify(EditorController.setPublicAccessLevel),
+  setRootDoc: promisify(EditorController.setRootDoc),
+  setMainBibliographyDoc: promisify(EditorController.setMainBibliographyDoc),
+}
 export default EditorController

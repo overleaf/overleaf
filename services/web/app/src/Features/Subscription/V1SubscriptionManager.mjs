@@ -2,7 +2,7 @@ import UserGetter from '../User/UserGetter.mjs'
 import request from 'requestretry'
 import settings from '@overleaf/settings'
 import { V1ConnectionError, NotFoundError } from '../Errors/Errors.js'
-import { promisifyAll } from '@overleaf/promise-utils'
+import { promisify } from '@overleaf/promise-utils'
 
 const V1SubscriptionManager = {
   cancelV1Subscription(userId, callback) {
@@ -117,8 +117,9 @@ const V1SubscriptionManager = {
   },
 }
 
-V1SubscriptionManager.promises = promisifyAll(V1SubscriptionManager, {
-  without: ['getGrandfatheredFeaturesForV1User'],
-})
+V1SubscriptionManager.promises = {
+  cancelV1Subscription: promisify(V1SubscriptionManager.cancelV1Subscription),
+  v1IdForUser: promisify(V1SubscriptionManager.v1IdForUser),
+}
 
 export default V1SubscriptionManager

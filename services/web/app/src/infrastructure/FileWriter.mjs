@@ -15,7 +15,7 @@ import Settings from '@overleaf/settings'
 import request from 'request'
 import { Transform, pipeline } from 'node:stream'
 import { FileTooLargeError } from '../Features/Errors/Errors.js'
-import { promisifyAll } from '@overleaf/promise-utils'
+import { promisify } from '@overleaf/promise-utils'
 
 export class SizeLimitedStream extends Transform {
   constructor(options) {
@@ -180,8 +180,11 @@ const FileWriter = {
   },
 }
 
-FileWriter.promises = promisifyAll(FileWriter, {
-  without: ['ensureDumpFolderExists'],
-})
+FileWriter.promises = {
+  writeLinesToDisk: promisify(FileWriter.writeLinesToDisk),
+  writeContentToDisk: promisify(FileWriter.writeContentToDisk),
+  writeStreamToDisk: promisify(FileWriter.writeStreamToDisk),
+  writeUrlToDisk: promisify(FileWriter.writeUrlToDisk),
+}
 
 export default FileWriter

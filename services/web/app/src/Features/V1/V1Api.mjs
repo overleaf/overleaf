@@ -11,7 +11,7 @@ import request from 'request'
 
 import settings from '@overleaf/settings'
 import Errors from '../Errors/Errors.js'
-import { promisifyAll } from '@overleaf/promise-utils'
+import { promisifyMultiResult } from '@overleaf/promise-utils'
 
 // TODO: check what happens when these settings aren't defined
 const DEFAULT_V1_PARAMS = {
@@ -98,10 +98,8 @@ const V1Api = {
   },
 }
 
-V1Api.promises = promisifyAll(V1Api, {
-  multiResult: {
-    request: ['response', 'body'],
-    oauthRequest: ['response', 'body'],
-  },
-})
+V1Api.promises = {
+  request: promisifyMultiResult(V1Api.request, ['response', 'body']),
+  oauthRequest: promisifyMultiResult(V1Api.oauthRequest, ['response', 'body']),
+}
 export default V1Api

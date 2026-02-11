@@ -26,7 +26,7 @@ import {
   ZipContentsTooLargeError,
 } from './ArchiveErrors.mjs'
 import _ from 'lodash'
-import { promisifyAll } from '@overleaf/promise-utils'
+import { promisify } from '@overleaf/promise-utils'
 
 const ONE_MEG = 1024 * 1024
 
@@ -267,5 +267,8 @@ const ArchiveManager = {
   },
 }
 
-ArchiveManager.promises = promisifyAll(ArchiveManager)
+ArchiveManager.promises = {
+  extractZipArchive: promisify(ArchiveManager.extractZipArchive),
+  findTopLevelDirectory: promisify(ArchiveManager.findTopLevelDirectory),
+}
 export default ArchiveManager

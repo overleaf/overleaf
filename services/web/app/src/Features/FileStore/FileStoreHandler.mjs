@@ -6,7 +6,7 @@ import HistoryManager from '../History/HistoryManager.mjs'
 import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
 import { File } from '../../models/File.mjs'
 import OError from '@overleaf/o-error'
-import { promisifyAll } from '@overleaf/promise-utils'
+import { promisifyMultiResult } from '@overleaf/promise-utils'
 import Modules from '../../infrastructure/Modules.mjs'
 
 const FileStoreHandler = {
@@ -115,11 +115,15 @@ const FileStoreHandler = {
   },
 }
 
-FileStoreHandler.promises = promisifyAll(FileStoreHandler, {
-  multiResult: {
-    uploadFileFromDisk: ['fileRef', 'createdBlob', 'size'],
-    uploadFileFromDiskWithHistoryId: ['fileRef', 'createdBlob', 'size'],
-  },
-})
+FileStoreHandler.promises = {
+  uploadFileFromDisk: promisifyMultiResult(
+    FileStoreHandler.uploadFileFromDisk,
+    ['fileRef', 'createdBlob', 'size']
+  ),
+  uploadFileFromDiskWithHistoryId: promisifyMultiResult(
+    FileStoreHandler.uploadFileFromDiskWithHistoryId,
+    ['fileRef', 'createdBlob', 'size']
+  ),
+}
 
 export default FileStoreHandler

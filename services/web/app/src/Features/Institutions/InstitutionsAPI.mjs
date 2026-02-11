@@ -3,7 +3,7 @@ import OError from '@overleaf/o-error'
 import logger from '@overleaf/logger'
 import settings from '@overleaf/settings'
 import request from 'requestretry'
-import { promisifyAll, promiseMapWithLimit } from '@overleaf/promise-utils'
+import { promisify, promiseMapWithLimit } from '@overleaf/promise-utils'
 import NotificationsBuilder from '../Notifications/NotificationsBuilder.mjs'
 import {
   V1ConnectionError,
@@ -406,17 +406,28 @@ function makeAffiliationRequest(options, callback) {
   })
 }
 
-InstitutionsAPI.promises = promisifyAll(InstitutionsAPI, {
-  without: [
-    'addAffiliation',
-    'removeAffiliation',
-    'getUsersNeedingReconfirmationsLapsedProcessed',
-  ],
-})
-
-InstitutionsAPI.promises.addAffiliation = addAffiliation
-InstitutionsAPI.promises.removeAffiliation = removeAffiliation
-InstitutionsAPI.promises.getUsersNeedingReconfirmationsLapsedProcessed =
-  getUsersNeedingReconfirmationsLapsedProcessed
+InstitutionsAPI.promises = {
+  getInstitutionAffiliations: promisify(
+    InstitutionsAPI.getInstitutionAffiliations
+  ),
+  getConfirmedInstitutionAffiliations: promisify(
+    InstitutionsAPI.getConfirmedInstitutionAffiliations
+  ),
+  getInstitutionAffiliationsCounts: promisify(
+    InstitutionsAPI.getInstitutionAffiliationsCounts
+  ),
+  getLicencesForAnalytics: promisify(InstitutionsAPI.getLicencesForAnalytics),
+  getUserAffiliations: promisify(InstitutionsAPI.getUserAffiliations),
+  getUsersNeedingReconfirmationsLapsedProcessed,
+  addAffiliation,
+  removeAffiliation,
+  endorseAffiliation: promisify(InstitutionsAPI.endorseAffiliation),
+  deleteAffiliations: promisify(InstitutionsAPI.deleteAffiliations),
+  addEntitlement: promisify(InstitutionsAPI.addEntitlement),
+  removeEntitlement: promisify(InstitutionsAPI.removeEntitlement),
+  sendUsersWithReconfirmationsLapsedProcessed: promisify(
+    InstitutionsAPI.sendUsersWithReconfirmationsLapsedProcessed
+  ),
+}
 
 export default InstitutionsAPI
