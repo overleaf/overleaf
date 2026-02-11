@@ -9,15 +9,15 @@ import { useCallback, useEffect, useState } from 'react'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import OLButton from '@/shared/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
-import { useEditorContext } from '@/shared/context/editor-context'
 import { useIsNewToNewEditor } from '../utils/new-editor-utils'
 import { useNewEditorTourContext } from '../contexts/new-editor-tour-context'
 import promoVideo from './new-editor-promo-video.mp4'
+import { useTutorialContext } from '@/shared/context/tutorial-context'
 
 const TUTORIAL_KEY = 'new-editor-intro-2'
 
 export default function NewEditorOptOutIntroModal() {
-  const { inactiveTutorials } = useEditorContext()
+  const { inactiveTutorials } = useTutorialContext()
   const {
     tryShowingPopup,
     showPopup: showModal,

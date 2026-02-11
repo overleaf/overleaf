@@ -18,6 +18,8 @@ import { useScrolled } from '@/features/project-list/components/sidebar/use-scro
 import { useSendProjectListMB } from '@/features/project-list/components/project-list-events'
 import { SurveyWidgetDsNav } from '@/features/project-list/components/survey-widget-ds-nav'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { ThemedProjectDashboardNotification } from './themed-project-dashboard-notification'
+import { useThemedDashboardIntro } from './use-themed-dashboard-intro'
 
 function SidebarDsNav() {
   const { t } = useTranslation()
@@ -38,6 +40,12 @@ function SidebarDsNav() {
   ) as NavbarDropdownItemData
   const { containerRef, scrolledUp, scrolledDown } = useScrolled()
   const themedDsNav = useFeatureFlag('themed-project-dashboard')
+  const {
+    completeThemedDashboardIntro,
+    dismissThemedDashboardIntro,
+    targetRef,
+    showingThemedDashboardIntro,
+  } = useThemedDashboardIntro()
 
   return (
     <div
@@ -131,6 +139,12 @@ function SidebarDsNav() {
                       item: 'account',
                       location: 'sidebar',
                     })
+                    if (showingThemedDashboardIntro) {
+                      completeThemedDashboardIntro({
+                        action: 'complete',
+                        event: 'promo-click',
+                      })
+                    }
                   }
                 }}
                 role="menu"
@@ -144,7 +158,7 @@ function SidebarDsNav() {
                     }}
                     hidden={showAccountDropdown}
                   >
-                    <div>
+                    <div ref={targetRef}>
                       <User size={24} />
                     </div>
                   </OLTooltip>
@@ -166,7 +180,16 @@ function SidebarDsNav() {
                   />
                 </Dropdown.Menu>
               </Dropdown>
-              <UserProvider>{contactUsModal}</UserProvider>
+              <UserProvider>
+                {themedDsNav && (
+                  <ThemedProjectDashboardNotification
+                    target={targetRef.current}
+                    show={showingThemedDashboardIntro}
+                    onDismiss={dismissThemedDashboardIntro}
+                  />
+                )}
+                {contactUsModal}
+              </UserProvider>
             </>
           )}
         </nav>

@@ -5,12 +5,12 @@ import OLFormGroup from '@/shared/components/ol/ol-form-group'
 import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import { OLToast } from '@/shared/components/ol/ol-toast'
 import { OLToastContainer } from '@/shared/components/ol/ol-toast-container'
-import { useEditorContext } from '@/shared/context/editor-context'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import { useTranslation } from 'react-i18next'
+import { useTutorialContext } from '@/shared/context/tutorial-context'
 
 type EditorSurveyPage = 'ease-of-use' | 'meets-my-needs' | 'thank-you'
 
@@ -28,7 +28,7 @@ const EditorSurveyContent = () => {
   const [easeOfUse, setEaseOfUse] = useState<number | null>(null)
   const [meetsMyNeeds, setMeetsMyNeeds] = useState<number | null>(null)
   const [page, setPage] = useState<EditorSurveyPage>('ease-of-use')
-  const { inactiveTutorials } = useEditorContext()
+  const { inactiveTutorials } = useTutorialContext()
   const hasCompletedSurvey = inactiveTutorials.includes(TUTORIAL_KEY)
   const newEditor = useIsNewEditorEnabled()
 

@@ -1,17 +1,17 @@
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
-import { useEditorContext } from '@/shared/context/editor-context'
 import { useProjectContext } from '@/shared/context/project-context'
 import OLNotification from '@/shared/components/ol/ol-notification'
 import { useTranslation, Trans } from 'react-i18next'
 import { useCallback } from 'react'
 import { onRollingBuild } from '@/shared/utils/rolling-build'
+import { useTutorialContext } from '@/shared/context/tutorial-context'
 
 export const TUTORIAL_KEY = 'rolling-compile-image-changed'
 
 const RollingCompileImageChangedAlert = () => {
   const { completeTutorial } = useTutorial(TUTORIAL_KEY)
   const { project } = useProjectContext()
-  const { inactiveTutorials } = useEditorContext()
+  const { inactiveTutorials } = useTutorialContext()
 
   const { t } = useTranslation()
 

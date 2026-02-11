@@ -4,6 +4,7 @@ import { EditorProviders } from '../../helpers/editor-providers'
 import { EditorView } from '@codemirror/view'
 import type { FC, PropsWithChildren } from 'react'
 import { EditorViewContext } from '@/features/ide-react/context/editor-view-context'
+import { TutorialProvider } from '@/shared/context/tutorial-context'
 
 describe('Workbench', { scrollBehavior: false }, function () {
   beforeEach(function () {
@@ -34,7 +35,7 @@ describe('Workbench', { scrollBehavior: false }, function () {
     return (
       <EditorProviders
         features={{ aiErrorAssistant: aiAssistEnabled }}
-        providers={{ EditorViewProvider }}
+        providers={{ EditorViewProvider, TutorialProvider }}
       >
         <div style={{ backgroundColor: '#1b222c' }}>{children}</div>
       </EditorProviders>

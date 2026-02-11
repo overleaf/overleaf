@@ -4,6 +4,11 @@
   --theme-toggle-selected-background: var(--green-20);
   --ds-nav-content-bg-secondary: var(--bg-light-secondary);
   --table-icon-bg-hover: 27 34 44;
+  --themed-dashboard-popover-bg: var(--bg-dark-primary);
+  --themed-dashboard-popover-color: var(--content-primary-dark);
+  --themed-dashboard-popover-link-color: var(--link-ui-dark);
+  --themed-dashboard-popover-link-hover-color: var(--link-ui-hover-dark);
+  --themed-dashboard-popover-link-visited-color: var(--link-ui-visited-dark);
 
   @include theme('default') {
     --ds-nav-active-bg: var(--green-70);
@@ -11,6 +16,11 @@
     --theme-toggle-selected-background: var(--green-70);
     --ds-nav-content-bg-secondary: var(--bg-dark-secondary);
     --table-icon-bg-hover: 255 255 255;
+    --themed-dashboard-popover-bg: var(--bg-light-primary);
+    --themed-dashboard-popover-color: var(--content-primary);
+    --themed-dashboard-popover-link-color: var(--link-ui);
+    --themed-dashboard-popover-link-hover-color: var(--link-ui-hover);
+    --themed-dashboard-popover-link-visited-color: var(--link-ui-visited);
   }
 }
 
@@ -418,5 +428,28 @@ body {
 
   input:checked + label {
     background-color: var(--theme-toggle-selected-background);
+  }
+}
+
+.themed-dashboard-intro-popover {
+  --bs-popover-bg: var(--themed-dashboard-popover-bg);
+  --bs-popover-header-bg: var(--themed-dashboard-popover-bg);
+  --bs-popover-body-color: var(--themed-dashboard-popover-color);
+  --bs-popover-header-color: var(--themed-dashboard-popover-color);
+
+  .btn-link {
+    color: var(--bs-popover-body-color);
+  }
+
+  a {
+    color: var(--themed-dashboard-popover-link-color);
+
+    &:visited {
+      color: var(--themed-dashboard-popover-link-hover-color);
+    }
+
+    &:hover {
+      color: var(--themed-dashboard-popover-link-visited-color);
+    }
   }
 }

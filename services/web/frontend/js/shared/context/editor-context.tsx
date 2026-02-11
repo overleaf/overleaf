@@ -29,10 +29,6 @@ export const EditorContext = createContext<
       isProjectOwner: boolean
       isRestrictedTokenMember?: boolean
       isPendingEditor: boolean
-      deactivateTutorial: (tutorial: string) => void
-      inactiveTutorials: string[]
-      currentPopup: string | null
-      setCurrentPopup: Dispatch<SetStateAction<string | null>>
       hasPremiumSuggestion: boolean
       setHasPremiumSuggestion: (value: boolean) => void
       setPremiumSuggestionResetDate: (date: Date) => void
@@ -77,11 +73,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
     )
   }, [])
 
-  const [inactiveTutorials, setInactiveTutorials] = useState(
-    () => getMeta('ol-inactiveTutorials') || []
-  )
-
-  const [currentPopup, setCurrentPopup] = useState<string | null>(null)
   const [hasPremiumSuggestion, setHasPremiumSuggestion] = useState<boolean>(
     () => {
       return Boolean(
@@ -109,13 +100,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
         )
       ),
     [members, userId]
-  )
-
-  const deactivateTutorial = useCallback(
-    (tutorialKey: string) => {
-      setInactiveTutorials([...inactiveTutorials, tutorialKey])
-    },
-    [inactiveTutorials]
   )
 
   const renameProject = useCallback(
@@ -180,10 +164,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       isRestrictedTokenMember: getMeta('ol-isRestrictedTokenMember'),
       isPendingEditor,
       insertSymbol,
-      inactiveTutorials,
-      deactivateTutorial,
-      currentPopup,
-      setCurrentPopup,
       hasPremiumSuggestion,
       setHasPremiumSuggestion,
       premiumSuggestionResetDate,
@@ -201,10 +181,6 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       renameProject,
       isPendingEditor,
       insertSymbol,
-      inactiveTutorials,
-      deactivateTutorial,
-      currentPopup,
-      setCurrentPopup,
       hasPremiumSuggestion,
       setHasPremiumSuggestion,
       premiumSuggestionResetDate,

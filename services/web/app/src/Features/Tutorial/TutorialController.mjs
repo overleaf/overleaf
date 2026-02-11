@@ -31,6 +31,7 @@ const VALID_KEYS = [
   'old-editor-warning-tooltip',
   'old-editor-warning-tooltip-2',
   'workbench-rail-popover',
+  'themed-dashboard-intro',
 ]
 
 async function completeTutorial(req, res, next) {

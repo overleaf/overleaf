@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
-import { useEditorContext } from '@/shared/context/editor-context'
+import { useTutorialContext } from '@/shared/context/tutorial-context'
 
 type CompleteTutorialParams = {
   event: string
@@ -22,7 +22,7 @@ const useTutorial = (
   const [showPopup, setShowPopup] = useState(false)
 
   const { deactivateTutorial, currentPopup, setCurrentPopup } =
-    useEditorContext()
+    useTutorialContext()
 
   const completeTutorial = useCallback(
     async (

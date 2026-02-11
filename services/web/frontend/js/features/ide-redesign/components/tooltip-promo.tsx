@@ -1,5 +1,5 @@
 import Close from '@/shared/components/close'
-import { useEditorContext } from '@/shared/context/editor-context'
+import { useTutorialContext } from '@/shared/context/tutorial-context'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import classNames from 'classnames'
@@ -26,7 +26,7 @@ export default function TooltipPromotion({
   placement?: OverlayProps['placement']
   splitTestName?: string
 }) {
-  const { inactiveTutorials } = useEditorContext()
+  const { inactiveTutorials } = useTutorialContext()
   const { showPopup, tryShowingPopup, hideUntilReload, dismissTutorial } =
     useTutorial(tutorialKey, eventData)
 

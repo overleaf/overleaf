@@ -32,6 +32,7 @@ import { CommandRegistryProvider } from './command-registry-context'
 import { NewEditorTourProvider } from '@/features/ide-redesign/contexts/new-editor-tour-context'
 import { EditorSelectionProvider } from '@/shared/context/editor-selection-context'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+import { TutorialProvider } from '@/shared/context/tutorial-context'
 
 const rootContextProviders = importOverleafModules('rootContextProviders') as {
   import: { default: ElementType }
@@ -76,6 +77,7 @@ export const ReactContextRoot: FC<
     UserFeaturesProvider,
     NewEditorTourProvider,
     EditorSelectionProvider,
+    TutorialProvider,
     ...providers,
   }
 
@@ -105,47 +107,49 @@ export const ReactContextRoot: FC<
                         <Providers.EditorViewProvider>
                           <Providers.EditorOpenDocProvider>
                             <Providers.EditorProvider>
-                              <Providers.FileTreeDataProvider>
-                                <Providers.FileTreePathProvider>
-                                  <Providers.UserFeaturesProvider>
-                                    <Providers.PermissionsProvider>
-                                      <Providers.RailProvider>
-                                        <Providers.LayoutProvider>
-                                          <Providers.NewEditorTourProvider>
-                                            <Providers.ProjectSettingsProvider>
-                                              <Providers.EditorManagerProvider>
-                                                <Providers.ReferencesProvider>
-                                                  <Providers.LocalCompileProvider>
-                                                    <Providers.DetachCompileProvider>
-                                                      <Providers.ChatProvider>
-                                                        <Providers.FileTreeOpenProvider>
-                                                          <Providers.OnlineUsersProvider>
-                                                            <Providers.MetadataProvider>
-                                                              <Providers.OutlineProvider>
-                                                                <Providers.CommandRegistryProvider>
-                                                                  <Providers.EditorSelectionProvider>
-                                                                    {
-                                                                      childrenWrappedWithDynamicProviders
-                                                                    }
-                                                                  </Providers.EditorSelectionProvider>
-                                                                </Providers.CommandRegistryProvider>
-                                                              </Providers.OutlineProvider>
-                                                            </Providers.MetadataProvider>
-                                                          </Providers.OnlineUsersProvider>
-                                                        </Providers.FileTreeOpenProvider>
-                                                      </Providers.ChatProvider>
-                                                    </Providers.DetachCompileProvider>
-                                                  </Providers.LocalCompileProvider>
-                                                </Providers.ReferencesProvider>
-                                              </Providers.EditorManagerProvider>
-                                            </Providers.ProjectSettingsProvider>
-                                          </Providers.NewEditorTourProvider>
-                                        </Providers.LayoutProvider>
-                                      </Providers.RailProvider>
-                                    </Providers.PermissionsProvider>
-                                  </Providers.UserFeaturesProvider>
-                                </Providers.FileTreePathProvider>
-                              </Providers.FileTreeDataProvider>
+                              <Providers.TutorialProvider>
+                                <Providers.FileTreeDataProvider>
+                                  <Providers.FileTreePathProvider>
+                                    <Providers.UserFeaturesProvider>
+                                      <Providers.PermissionsProvider>
+                                        <Providers.RailProvider>
+                                          <Providers.LayoutProvider>
+                                            <Providers.NewEditorTourProvider>
+                                              <Providers.ProjectSettingsProvider>
+                                                <Providers.EditorManagerProvider>
+                                                  <Providers.ReferencesProvider>
+                                                    <Providers.LocalCompileProvider>
+                                                      <Providers.DetachCompileProvider>
+                                                        <Providers.ChatProvider>
+                                                          <Providers.FileTreeOpenProvider>
+                                                            <Providers.OnlineUsersProvider>
+                                                              <Providers.MetadataProvider>
+                                                                <Providers.OutlineProvider>
+                                                                  <Providers.CommandRegistryProvider>
+                                                                    <Providers.EditorSelectionProvider>
+                                                                      {
+                                                                        childrenWrappedWithDynamicProviders
+                                                                      }
+                                                                    </Providers.EditorSelectionProvider>
+                                                                  </Providers.CommandRegistryProvider>
+                                                                </Providers.OutlineProvider>
+                                                              </Providers.MetadataProvider>
+                                                            </Providers.OnlineUsersProvider>
+                                                          </Providers.FileTreeOpenProvider>
+                                                        </Providers.ChatProvider>
+                                                      </Providers.DetachCompileProvider>
+                                                    </Providers.LocalCompileProvider>
+                                                  </Providers.ReferencesProvider>
+                                                </Providers.EditorManagerProvider>
+                                              </Providers.ProjectSettingsProvider>
+                                            </Providers.NewEditorTourProvider>
+                                          </Providers.LayoutProvider>
+                                        </Providers.RailProvider>
+                                      </Providers.PermissionsProvider>
+                                    </Providers.UserFeaturesProvider>
+                                  </Providers.FileTreePathProvider>
+                                </Providers.FileTreeDataProvider>
+                              </Providers.TutorialProvider>
                             </Providers.EditorProvider>
                           </Providers.EditorOpenDocProvider>
                         </Providers.EditorViewProvider>

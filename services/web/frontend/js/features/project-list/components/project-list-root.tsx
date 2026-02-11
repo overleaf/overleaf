@@ -21,6 +21,7 @@ import { DsNavStyleProvider } from '@/features/project-list/components/use-is-ds
 import CookieBanner from '@/shared/components/cookie-banner'
 import useThemedPage from '@/shared/hooks/use-themed-page'
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
+import { TutorialProvider } from '@/shared/context/tutorial-context'
 
 function ProjectListRoot() {
   const { isReady } = useWaitForI18n()
@@ -37,9 +38,11 @@ export function ProjectListRootInner() {
     <ProjectListProvider>
       <ColorPickerProvider>
         <SplitTestProvider>
-          <UserSettingsProvider>
-            <ProjectListPageContent />
-          </UserSettingsProvider>
+          <TutorialProvider>
+            <UserSettingsProvider>
+              <ProjectListPageContent />
+            </UserSettingsProvider>
+          </TutorialProvider>
         </SplitTestProvider>
       </ColorPickerProvider>
     </ProjectListProvider>

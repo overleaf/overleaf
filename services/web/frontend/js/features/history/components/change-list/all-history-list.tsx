@@ -7,13 +7,13 @@ import { isVersionSelected } from '../../utils/history-details'
 import { useUserContext } from '../../../../shared/context/user-context'
 import useDropdownActiveItem from '../../hooks/use-dropdown-active-item'
 import { useHistoryContext } from '../../context/history-context'
-import { useEditorContext } from '../../../../shared/context/editor-context'
 import OLPopover from '@/shared/components/ol/ol-popover'
 import OLOverlay from '@/shared/components/ol/ol-overlay'
 import Close from '@/shared/components/close'
 import { Trans, useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
+import { useTutorialContext } from '@/shared/context/tutorial-context'
 
 function AllHistoryList() {
   const { id: currentUserId } = useUserContext()
@@ -91,7 +91,7 @@ function AllHistoryList() {
     }
   }, [updatesLoadingState])
 
-  const { inactiveTutorials } = useEditorContext()
+  const { inactiveTutorials } = useTutorialContext()
   const {
     showPopup: showHistoryTutorial,
     tryShowingPopup: tryShowingHistoryTutorial,
