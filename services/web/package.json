@@ -284,7 +284,7 @@
     "acorn-walk": "^7.1.1",
     "algoliasearch": "^3.35.1",
     "autoprefixer": "^10.4.16",
-    "axios": "^1.8.3",
+    "axios": "^1.13.5",
     "babel-loader": "^10.0.0",
     "babel-plugin-macros": "^3.1.0",
     "babel-plugin-module-resolver": "^5.0.2",
