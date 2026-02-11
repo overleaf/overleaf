@@ -54,6 +54,7 @@ import { UserSettings } from '@ol-types/user-settings'
 import { DetachCompileContext } from '@/shared/context/detach-compile-context'
 import { type CompileContext } from '@/shared/context/local-compile-context'
 import { EditorContext } from '@/shared/context/editor-context'
+import { Cobranding } from '@ol-types/cobranding'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -267,11 +268,21 @@ export function EditorProviders({
   )
 }
 
-export function makeEditorProvider({ isProjectOwner = true } = {}) {
+export function makeEditorProvider({
+  isProjectOwner = true,
+  cobranding = undefined,
+  renameProject = () => {},
+  isRestrictedTokenMember,
+}: {
+  isProjectOwner?: boolean
+  cobranding?: Cobranding
+  renameProject?: () => void
+  isRestrictedTokenMember?: boolean
+} = {}) {
   const EditorProvider: FC<PropsWithChildren> = ({ children }) => {
     const value = {
       isProjectOwner,
-      renameProject: () => {},
+      renameProject,
       isPendingEditor: false,
       deactivateTutorial: () => {},
       inactiveTutorials: [],
@@ -285,6 +296,8 @@ export function makeEditorProvider({ isProjectOwner = true } = {}) {
       setWritefullInstance: () => {},
       showUpgradeModal: false,
       setShowUpgradeModal: () => {},
+      cobranding,
+      isRestrictedTokenMember,
     }
 
     return (

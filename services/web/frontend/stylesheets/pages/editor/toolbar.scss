@@ -107,7 +107,7 @@
 
   .toolbar-right,
   .toolbar-left {
-    button:not(.back-to-editor-btn, .toolbar-experiment-button) {
+    button:not(.back-to-editor-btn) {
       background: transparent;
       box-shadow: none;
     }
@@ -133,7 +133,7 @@
   .toolbar-left > a:not(.btn),
   .toolbar-left > button,
   .toolbar-right > a:not(.btn),
-  .toolbar-right > button:not(.back-to-editor-btn, .toolbar-experiment-button) {
+  .toolbar-right > button:not(.back-to-editor-btn) {
     display: inline-block;
     color: var(--toolbar-btn-color);
     background-color: transparent;
@@ -198,11 +198,6 @@
       right: var(--spacing-02);
     }
 
-    &.header-cobranding-logo-container {
-      height: calc(var(--toolbar-height) - 1px);
-      padding: var(--spacing-04) var(--spacing-05);
-    }
-
     .spinner-border {
       vertical-align: middle;
       font-size: var(--font-size-02);
@@ -263,32 +258,10 @@
     display: flex;
     justify-content: center;
   }
-
-  .toolbar-cio-tooltip {
-    position: absolute;
-    top: var(--toolbar-height);
-    width: 391px;
-  }
-
-  #toolbar-cio-history {
-    @include media-breakpoint-down(lg) {
-      right: 10px;
-
-      /* The iframe a message renders in isn't aware of the page width, so we
-         make it 1px narrower to enable max-width media queries */
-      width: 390px;
-    }
-  }
 }
 
 .layout-dropdown .dropdown-item {
   align-items: center;
-}
-
-.header-cobranding-logo {
-  display: block;
-  width: auto;
-  max-height: 100%;
 }
 
 .toolbar-label {
@@ -308,71 +281,12 @@
   }
 }
 
-.toolbar-header-upgrade-prompt {
-  margin-left: var(--spacing-05);
-
-  @include media-breakpoint-down(lg) {
-    display: none !important;
-  }
-}
-
 .toolbar-filetree {
   @include toolbar-sm-height;
 
   background-color: var(--toolbar-filetree-bg-color);
   padding: 0 var(--spacing-03);
   flex-shrink: 0;
-}
-
-.editor-menu-icon {
-  &.material-symbols {
-    width: 1em;
-    text-indent: -9999px;
-    background: var(--editor-header-logo-background);
-  }
-}
-
-.project-name {
-  .name {
-    display: inline-block;
-
-    @include text-truncate;
-
-    padding: var(--spacing-03);
-    vertical-align: top;
-    color: var(--project-name-color);
-    font-weight: 700;
-  }
-
-  input {
-    height: 30px;
-    margin-top: var(--spacing-02);
-    padding: var(--spacing-03);
-    max-width: 500px;
-    text-align: center;
-    font-weight: 700;
-  }
-
-  a.rename {
-    visibility: hidden;
-    display: inline-block;
-    color: var(--project-rename-link-color);
-    padding: var(--spacing-03);
-    border-radius: var(--border-radius-base);
-    cursor: pointer;
-
-    &:hover {
-      text-shadow: 0 1px 0 rgb(0 0 0 / 25%);
-      color: var(--project-rename-link-color-hover);
-      text-decoration: none;
-    }
-  }
-
-  &:hover {
-    a.rename {
-      visibility: visible;
-    }
-  }
 }
 
 .toolbar-editor {
@@ -529,16 +443,6 @@
 
 .formatting-btn-icon:last-of-type {
   border-right: 1px solid var(--formatting-btn-border);
-}
-
-// Override a secondary button to ensure that the border is visible because
-// overriding a borderless button will not add a border.
-.toolbar-experiment-button.btn-secondary {
-  @include editor-switcher-button;
-
-  max-height: 39px;
-  font-size: var(--font-size-01);
-  margin-right: var(--spacing-04);
 }
 
 .try-new-editor-button {

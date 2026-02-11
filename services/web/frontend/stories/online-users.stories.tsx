@@ -1,7 +1,6 @@
 import { Meta } from '@storybook/react'
 import { OnlineUser } from '@/features/ide-react/context/online-users-context'
-import OnlineUsersWidgetOld from '@/features/editor-navigation-toolbar/components/online-users-widget'
-import { OnlineUsersWidget } from '@/features/ide-redesign/components/online-users/online-users-widget'
+import { OnlineUsersWidget } from '@/features/editor-navigation-toolbar/components/online-users-widget'
 
 const NAMES = [
   'Alice',
@@ -31,7 +30,7 @@ const generateUser = (_: any, index: number): OnlineUser => {
   }
 }
 
-export const OnlineUsersRedesign = ({ users }: { users: number }) => {
+export const OnlineUsers = ({ users }: { users: number }) => {
   const generatedUsers = Array.from({ length: users }, generateUser)
   return (
     <div
@@ -48,24 +47,7 @@ export const OnlineUsersRedesign = ({ users }: { users: number }) => {
   )
 }
 
-export const OnlineUsersOld = ({ users }: { users: number }) => {
-  const generatedUsers = Array.from({ length: users }, generateUser)
-  return (
-    <div
-      style={{
-        backgroundColor: 'var(--online-users-border-color)',
-        padding: '20px',
-      }}
-    >
-      <OnlineUsersWidgetOld
-        onlineUsers={generatedUsers}
-        goToUser={(async () => {}) as any}
-      />
-    </div>
-  )
-}
-
-const meta: Meta<typeof OnlineUsersRedesign> = {
+const meta: Meta<typeof OnlineUsers> = {
   title: 'Editor / Online Users Widget',
   args: {
     users: 6,

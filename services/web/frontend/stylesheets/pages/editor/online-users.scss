@@ -1,45 +1,13 @@
 :root {
-  --toolbar-btn-color: var(--white);
   --online-users-border-color: var(--bg-dark-primary);
   --online-users-text-color: var(--content-primary);
   --online-users-overflow-button-background-color: var(--bg-light-secondary);
 }
 
 @include theme('light') {
-  --toolbar-btn-color: var(--neutral-70);
   --online-users-border-color: var(--bg-light-primary);
   --online-users-text-color: var(--content-primary);
   --online-users-overflow-button-background-color: var(--bg-light-secondary);
-}
-
-.online-users {
-  display: flex;
-  align-items: center;
-
-  .online-user {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    line-height: 24px;
-    margin-right: var(--spacing-04);
-    text-align: center;
-    color: white;
-    text-transform: uppercase;
-    border-radius: var(--border-radius-base);
-    cursor: pointer;
-  }
-
-  .online-user-multi {
-    @include reset-button;
-
-    color: var(--toolbar-btn-color);
-    width: auto;
-    min-width: 24px;
-    padding-left: var(--spacing-04);
-    padding-right: var(--spacing-03);
-    display: flex;
-    align-items: center;
-  }
 }
 
 .online-users-row {

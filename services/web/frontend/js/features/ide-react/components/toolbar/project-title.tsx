@@ -59,15 +59,13 @@ export const ToolbarProjectTitle = () => {
     <Dropdown align="start" className="ide-redesign-toolbar-project-dropdown">
       <DropdownToggle
         id="project-title-options"
+        aria-label={t('project_title_options')}
         className="ide-redesign-toolbar-project-dropdown-toggle ide-redesign-toolbar-dropdown-toggle-subdued fw-bold ide-redesign-toolbar-button-subdued"
       >
         <span className="ide-redesign-toolbar-project-name" translate="no">
           {name}
         </span>
-        <MaterialIcon
-          type="keyboard_arrow_down"
-          accessibilityLabel={t('project_title_options')}
-        />
+        <MaterialIcon type="keyboard_arrow_down" />
       </DropdownToggle>
       <DropdownMenu renderOnMount>
         {shouldDisplaySubmitButton && !cobranding && (

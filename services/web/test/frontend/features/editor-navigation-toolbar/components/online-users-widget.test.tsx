@@ -1,115 +1,113 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import { fireEvent, render, screen } from '@testing-library/react'
+import { OnlineUsersWidget } from '@/features/editor-navigation-toolbar/components/online-users-widget'
 
-import OnlineUsersWidget from '../../../../../frontend/js/features/editor-navigation-toolbar/components/online-users-widget'
+const names = ['alice', 'bob', 'charlie', 'dave', 'erin', 'frank', 'grace']
+
+function makeUsers(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    id: `user_${index + 1}`,
+    user_id: `user_id_${index + 1}`,
+    name: names[index % names.length],
+    email: `${names[index % names.length]}_email`,
+  }))
+}
 
 describe('<OnlineUsersWidget />', function () {
   const defaultProps = {
-    onlineUsers: [
-      {
-        id: 'test_user',
-        user_id: 'test_user',
-        name: 'test_user',
-        email: 'test_email',
-      },
-      {
-        id: 'another_test_user',
-        user_id: 'another_test_user',
-        name: 'another_test_user',
-        email: 'another_test_email',
-      },
-    ],
-    goToUser: (async () => {}) as any,
+    onlineUsers: makeUsers(2),
+    goToUser: sinon.stub(),
   }
 
-  describe('with less than 4 users', function () {
+  describe('with less than 5 users', function () {
     it('displays user initials', function () {
       render(<OnlineUsersWidget {...defaultProps} />)
-      screen.getByText('t')
       screen.getByText('a')
+      screen.getByText('b')
     })
 
     it('displays user name in a tooltip', async function () {
       render(<OnlineUsersWidget {...defaultProps} />)
-      const icon = screen.getByText('t')
+      const icon = screen.getByText('a')
       fireEvent.mouseOver(icon)
-      await screen.findByRole('tooltip', { name: 'test_user' })
+      await screen.findByRole('tooltip', { name: 'alice' })
     })
 
     it('calls "goToUser" when the user initial is clicked', function () {
-      const props = {
-        ...defaultProps,
-        goToUser: sinon.stub(),
-      }
-      render(<OnlineUsersWidget {...props} />)
+      render(<OnlineUsersWidget {...defaultProps} />)
 
-      const icon = screen.getByText('t')
+      const icon = screen.getByText('a')
       fireEvent.click(icon)
 
-      expect(props.goToUser).to.be.calledWith({
-        id: 'test_user',
-        user_id: 'test_user',
-        name: 'test_user',
-        email: 'test_email',
+      expect(defaultProps.goToUser).to.be.calledWith({
+        id: 'user_1',
+        user_id: 'user_id_1',
+        name: 'alice',
+        email: 'alice_email',
       })
     })
   })
 
-  describe('with 4 users and more', function () {
+  describe('with 5 users', function () {
     const props = {
       ...defaultProps,
-      onlineUsers: defaultProps.onlineUsers.concat([
-        {
-          id: 'user_3',
-          user_id: 'user_3',
-          name: 'user_3',
-          email: 'user_3',
-        },
-        {
-          id: 'user_4',
-          user_id: 'user_4',
-          name: 'user_4',
-          email: 'user_4',
-        },
-      ]),
+      onlineUsers: makeUsers(5),
     }
 
-    it('displays the count of users', function () {
+    it('displays user initials', function () {
       render(<OnlineUsersWidget {...props} />)
-      screen.getByText('4')
+      screen.getByText('a')
+      screen.getByText('b')
+      screen.getByText('c')
+      screen.getByText('d')
+      screen.getByText('e')
+    })
+  })
+
+  describe('with more than 5 users', function () {
+    const props = {
+      ...defaultProps,
+      onlineUsers: makeUsers(7),
+    }
+
+    it('displays a maximum of 4 user initials and an overflow icon', function () {
+      render(<OnlineUsersWidget {...props} />)
+      screen.getByText('a')
+      screen.getByText('b')
+      screen.getByText('c')
+      screen.getByText('d')
+      screen.getByText('+3')
     })
 
-    it('displays user names on hover', function () {
+    it('displays the remaining users in a dropdown when the overflow icon is clicked', async function () {
       render(<OnlineUsersWidget {...props} />)
+      const overflowButton = screen.getByText('+3')
+      fireEvent.click(overflowButton)
 
-      const toggleButton = screen.getByRole('button')
-      fireEvent.click(toggleButton)
-
-      screen.getByText('test_user')
-      screen.getByText('another_test_user')
-      screen.getByText('user_3')
-      screen.getByText('user_4')
+      await screen.findByText('erin')
+      await screen.findByText('frank')
+      await screen.findByText('grace')
     })
 
-    it('calls "goToUser" when the user name is clicked', function () {
-      const testProps = {
-        ...props,
-        goToUser: sinon.stub(),
+    it('calls "goToUser" when a user in the overflow dropdown is clicked', async function () {
+      const props = {
+        ...defaultProps,
+        onlineUsers: makeUsers(7),
       }
-      render(<OnlineUsersWidget {...testProps} />)
 
-      const toggleButton = screen.getByRole('button')
-      fireEvent.click(toggleButton)
+      render(<OnlineUsersWidget {...props} />)
+      const overflowButton = screen.getByText('+3')
+      fireEvent.click(overflowButton)
 
-      const icon = screen.getByText('user_3')
-      fireEvent.click(icon)
+      const frankButton = await screen.findByText('frank')
+      fireEvent.click(frankButton)
 
-      expect(testProps.goToUser).to.be.calledWith({
-        id: 'user_3',
-        user_id: 'user_3',
-        name: 'user_3',
-        email: 'user_3',
+      expect(props.goToUser).to.be.calledWith({
+        id: 'user_6',
+        user_id: 'user_id_6',
+        name: 'frank',
+        email: 'frank_email',
       })
     })
   })

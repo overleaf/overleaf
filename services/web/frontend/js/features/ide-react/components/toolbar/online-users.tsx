@@ -4,7 +4,7 @@ import {
   useOnlineUsersContext,
 } from '@/features/ide-react/context/online-users-context'
 import { useCallback } from 'react'
-import { OnlineUsersWidget } from '@/features/ide-redesign/components/online-users/online-users-widget'
+import { OnlineUsersWidget } from '@/features/editor-navigation-toolbar/components/online-users-widget'
 
 export const OnlineUsers = () => {
   const { openDoc } = useEditorManagerContext()
