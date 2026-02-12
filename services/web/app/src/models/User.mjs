@@ -198,6 +198,10 @@ export const UserSchema = new Schema(
       isPremium: { type: Boolean, default: false },
       premiumSource: { type: String, default: null },
     },
+    aiFeatures: {
+      enabled: { type: Boolean, default: true },
+    },
+    // todo: assist clean-up: remove this once migration is finished
     aiErrorAssistant: {
       enabled: { type: Boolean, default: true },
     },

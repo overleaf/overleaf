@@ -45,7 +45,7 @@ function PdfLogEntry({
   logEntry?: LogEntry
   id?: string
 }) {
-  const showAiErrorAssistant = getMeta('ol-showAiErrorAssistant')
+  const showAiErrorAssistant = getMeta('ol-showAiFeatures')
 
   if (ruleId && HumanReadableLogsHints[ruleId]) {
     const hint = HumanReadableLogsHints[ruleId]

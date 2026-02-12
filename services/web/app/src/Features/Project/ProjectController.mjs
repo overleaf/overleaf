@@ -472,7 +472,7 @@ const _ProjectController = {
           user: (async () => {
             const user = await User.findById(
               userId,
-              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram labsExperiments completedTutorials writefull aiErrorAssistant'
+              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram labsExperiments completedTutorials writefull aiFeatures aiErrorAssistant'
             ).exec()
             // Handle case of deleted user
             if (!user) {
@@ -844,13 +844,10 @@ const _ProjectController = {
       }
 
       const hasPaidSubscription = isPaidSubscription(subscription)
-      const hasManuallyCollectedSubscription =
-        subscription?.collectionMethod === 'manual'
-      const assistantDisabled = user.aiErrorAssistant?.enabled === false // the assistant has been manually disabled by the user
-      const canUseErrorAssistant =
-        (!hasManuallyCollectedSubscription ||
-          fullFeatureSet?.aiErrorAssistant) &&
-        !assistantDisabled
+      // todo: assist clean-up: remove other case once migration finishes
+      const aiFeaturesDisabled =
+        user.aiFeatures?.enabled === false ||
+        user.aiErrorAssistant?.enabled === false // the assistant has been manually disabled by the user
 
       const addonPrices =
         isOverleafAssistBundleEnabled &&
@@ -958,7 +955,7 @@ const _ProjectController = {
         showSymbolPalette,
         symbolPaletteAvailable: Features.hasFeature('symbol-palette'),
         userRestrictions: Array.from(req.userRestrictions || []),
-        showAiErrorAssistant: aiFeaturesAllowed && canUseErrorAssistant,
+        showAiFeatures: aiFeaturesAllowed && !aiFeaturesDisabled,
         detachRole,
         metadata: { viewport: false },
         showUpgradePrompt,

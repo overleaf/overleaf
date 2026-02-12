@@ -168,7 +168,9 @@ async function projectListPage(req, res, next) {
   const user = await User.findById(
     userId,
     `email isAdmin emails features alphaProgram betaProgram lastPrimaryEmailCheck lastActive signUpDate ace refProviders${
-      isSaas ? ' enrollment writefull completedTutorials aiErrorAssistant' : ''
+      isSaas
+        ? ' enrollment writefull completedTutorials aiFeatures aiErrorAssistant'
+        : ''
     }`
   )
 
@@ -904,7 +906,11 @@ async function _userHasAIAssist(user) {
 // It does NOT determine if the user has AI Assist enabled
 async function _canUseAIAssist(user) {
   // Check if the assistant has been manually disabled by the user
-  if (user.aiErrorAssistant?.enabled === false) {
+  // todo: assist clean-up: remove other case once migration finishes
+  if (
+    user.aiErrorAssistant?.enabled === false ||
+    user.aiFeatures?.enabled === false
+  ) {
     return false
   }
 

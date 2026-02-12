@@ -147,8 +147,8 @@ async function settingsPage(req, res) {
       writefull: {
         enabled: Boolean(user.writefull?.enabled),
       },
-      aiErrorAssistant: {
-        enabled: Boolean(user.aiErrorAssistant?.enabled),
+      aiFeatures: {
+        enabled: Boolean(user.aiFeatures?.enabled),
       },
     },
     labsExperiments: user.labsExperiments ?? [],

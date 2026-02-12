@@ -76,7 +76,7 @@ const MockEditorViewProvider: FC<React.PropsWithChildren> = ({ children }) => {
 const Provider: FC<React.PropsWithChildren<{ children: ReactNode }>> = ({
   children,
 }) => {
-  useMeta({ 'ol-showAiErrorAssistant': true })
+  useMeta({ 'ol-showAiFeatures': true })
   return (
     <MockEditorViewProvider>
       <div className="logs-pane p-2">{children}</div>

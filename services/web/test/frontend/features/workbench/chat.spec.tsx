@@ -9,7 +9,7 @@ import { TutorialProvider } from '@/shared/context/tutorial-context'
 describe('Workbench', { scrollBehavior: false }, function () {
   beforeEach(function () {
     cy.window().then(win => {
-      win.metaAttributesCache.set('ol-showAiErrorAssistant', true)
+      win.metaAttributesCache.set('ol-showAiFeatures', true)
       win.metaAttributesCache.set('ol-splitTestVariants', {
         'ai-workbench-release': 'enabled',
       })
@@ -106,7 +106,7 @@ describe('Workbench', { scrollBehavior: false }, function () {
   describe('when AI assist is not enabled', function () {
     beforeEach(function () {
       cy.window().then(win => {
-        win.metaAttributesCache.set('ol-showAiErrorAssistant', false)
+        win.metaAttributesCache.set('ol-showAiFeatures', false)
       })
       cy.mount(
         <Providers aiAssistEnabled={false}>
