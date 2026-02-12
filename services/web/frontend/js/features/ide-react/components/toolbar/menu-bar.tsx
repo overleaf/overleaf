@@ -43,6 +43,8 @@ export const ToolbarMenuBar = () => {
   const openProject = useOpenProject()
 
   const anonymous = getMeta('ol-anonymous')
+  const showSupport = getMeta('ol-showSupport')
+  const showDocumentation = getMeta('ol-wikiEnabled')
 
   useCommandProvider(
     () => [
@@ -266,19 +268,25 @@ export const ToolbarMenuBar = () => {
             title={t('keyboard_shortcuts')}
             onClick={openKeyboardShortcutsModal}
           />
-          <MenuBarOption
-            title={t('documentation')}
-            eventKey="documentation"
-            href="/learn"
-            target="_blank"
-            rel="noopener noreferrer"
-          />
-          <DropdownDivider />
-          <MenuBarOption
-            eventKey="contact_us"
-            title={t('contact_us')}
-            onClick={openContactUsModal}
-          />
+          {showDocumentation && (
+            <MenuBarOption
+              title={t('documentation')}
+              eventKey="documentation"
+              href="/learn"
+              target="_blank"
+              rel="noopener noreferrer"
+            />
+          )}
+          {showSupport && (
+            <>
+              <DropdownDivider />
+              <MenuBarOption
+                eventKey="contact_us"
+                title={t('contact_us')}
+                onClick={openContactUsModal}
+              />
+            </>
+          )}
         </MenuBarDropdown>
       </MenuBar>
       <WordCountModal

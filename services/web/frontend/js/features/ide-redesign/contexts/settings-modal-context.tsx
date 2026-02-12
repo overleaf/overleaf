@@ -28,6 +28,7 @@ import DarkModePdfSetting from '../components/settings/appearance-settings/dark-
 import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import ProjectNotificationsSetting from '../components/settings/editor-settings/project-notifications-setting'
+import getMeta from '@/utils/meta'
 
 const [referenceSearchSettingModule] = importOverleafModules(
   'referenceSearchSetting'
@@ -81,6 +82,7 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const { t } = useTranslation()
+  const { isOverleaf } = getMeta('ol-ExposedSettings')
   const { overallTheme } = useProjectSettingsContext()
 
   // TODO ide-redesign-cleanup: Rename this field and move it directly into this context
@@ -258,9 +260,10 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
         title: t('subscription'),
         icon: 'account_balance',
         href: '/user/subscription',
+        hidden: !isOverleaf,
       },
     ],
-    [t, overallTheme, hasEmailNotifications]
+    [t, overallTheme, hasEmailNotifications, isOverleaf]
   )
 
   const settingsTabs = useMemo(

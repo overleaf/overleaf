@@ -10,6 +10,7 @@ import {
 
 export default function RailHelpDropdown() {
   const showSupport = getMeta('ol-showSupport')
+  const showDocumentation = getMeta('ol-wikiEnabled')
   const { t } = useTranslation()
   const { setActiveModal } = useRailContext()
   const openKeyboardShortcutsModal = useCallback(() => {
@@ -24,19 +25,23 @@ export default function RailHelpDropdown() {
       <DropdownItem onClick={openKeyboardShortcutsModal}>
         {t('keyboard_shortcuts')}
       </DropdownItem>
-      <DropdownItem
-        href="/learn"
-        role="menuitem"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {t('documentation')}
-      </DropdownItem>
-      <DropdownDivider />
-      {showSupport && (
-        <DropdownItem onClick={openContactUsModal}>
-          {t('contact_us')}
+      {showDocumentation && (
+        <DropdownItem
+          href="/learn"
+          role="menuitem"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t('documentation')}
         </DropdownItem>
+      )}
+      {showSupport && (
+        <>
+          <DropdownDivider />
+          <DropdownItem onClick={openContactUsModal}>
+            {t('contact_us')}
+          </DropdownItem>
+        </>
       )}
     </DropdownMenu>
   )
