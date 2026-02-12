@@ -1,7 +1,6 @@
 import { screen, within, render } from '@testing-library/react'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
-import SettingsOverallTheme from '../../../../../frontend/js/features/editor-left-menu/components/settings/settings-overall-theme'
 import type { OverallThemeMeta } from '../../../../../types/project-settings'
 import getMeta from '@/utils/meta'
 import { EditorProviders } from '../../../helpers/editor-providers'
@@ -76,7 +75,7 @@ describe('<OverallThemeSetting />', function () {
       render(
         <EditorProviders>
           <SettingsModalProvider>
-            <SettingsOverallTheme />
+            <OverallThemeSetting />
           </SettingsModalProvider>
         </EditorProviders>
       )
@@ -91,7 +90,7 @@ describe('<OverallThemeSetting />', function () {
       render(
         <EditorProviders>
           <SettingsModalProvider>
-            <SettingsOverallTheme />
+            <OverallThemeSetting />
           </SettingsModalProvider>
         </EditorProviders>
       )
@@ -104,7 +103,7 @@ describe('<OverallThemeSetting />', function () {
       render(
         <EditorProviders>
           <SettingsModalProvider>
-            <SettingsOverallTheme />
+            <OverallThemeSetting />
           </SettingsModalProvider>
         </EditorProviders>
       )

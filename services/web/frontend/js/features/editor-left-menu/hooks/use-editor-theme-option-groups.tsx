@@ -1,11 +1,19 @@
 import getMeta from '@/utils/meta'
 import { useMemo } from 'react'
-import { Option } from '../components/settings/settings-menu-select'
 import { useTranslation } from 'react-i18next'
 
 const overrides = new Map([['overleaf', 'overleaf light']])
 function getThemeName(theme: string): string {
   return (overrides.get(theme) ?? theme).replace(/_/g, ' ')
+}
+
+type PossibleValue = string | number | boolean
+
+type Option<T extends PossibleValue = string> = {
+  value: T
+  label: string
+  ariaHidden?: 'true' | 'false'
+  disabled?: boolean
 }
 
 export function useEditorThemesOptionGroups() {
