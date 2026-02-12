@@ -369,6 +369,18 @@ a.btn:visited {
   text-decoration: none;
 }
 
+.copy-button.copy-button-ghost {
+  @include ol-button-variant(
+    $color: var(--content-primary),
+    $background: transparent,
+    $hover-background: var(--bg-light-tertiary)
+  );
+
+  .button-content {
+    gap: var(--spacing-02);
+  }
+}
+
 .btn-reset {
   @include reset-button;
 }

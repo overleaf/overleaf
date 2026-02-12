@@ -313,7 +313,7 @@ function AccessToken({
   return (
     <div className="access-token">
       <code>{link}</code>
-      <CopyToClipboard content={link} tooltipId={tooltipId} />
+      <CopyToClipboard content={link} tooltipId={tooltipId} kind="button" />
     </div>
   )
 }
