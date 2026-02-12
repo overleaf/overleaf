@@ -11,7 +11,7 @@ function testLogRecorder() {
         if (name in entry) entry[name] = fn(entry[name])
       }
       currentTest.consoleErrors = (currentTest.consoleErrors || []).concat(
-        JSON.stringify(info, bunyan.safeCycles())
+        JSON.stringify(entry, bunyan.safeCycles())
       )
     }
   }

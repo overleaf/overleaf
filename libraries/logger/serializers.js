@@ -80,4 +80,9 @@ function getRemoteIp(req) {
   return null
 }
 
-module.exports = { err: errSerializer, req: reqSerializer, res: resSerializer }
+module.exports = {
+  err: errSerializer,
+  error: errSerializer,
+  req: reqSerializer,
+  res: resSerializer,
+}
