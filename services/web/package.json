@@ -241,7 +241,7 @@
     "@storybook/react-webpack5": "^8.6.15",
     "@storybook/theming": "^8.6.15",
     "@tailwindcss/container-queries": "^0.1.1",
-    "@testing-library/cypress": "^10.0.3",
+    "@testing-library/cypress": "10.0.3",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
