@@ -22,6 +22,7 @@ describe('CollaboratorsInviteController', function () {
     ctx.tokenHmac = 'some-hmac-token'
     ctx.targetEmail = 'user@example.com'
     ctx.privileges = 'readAndWrite'
+    ctx.role = 'Editor'
     ctx.projectOwner = {
       _id: 'project-owner-id',
       email: 'project-owner@example.com',
@@ -366,7 +367,7 @@ describe('CollaboratorsInviteController', function () {
           ctx.req.ip,
           {
             inviteId: ctx.invite._id,
-            privileges: ctx.privileges,
+            role: ctx.role,
           }
         )
       })
@@ -381,6 +382,7 @@ describe('CollaboratorsInviteController', function () {
         beforeEach(async function (ctx) {
           await new Promise(resolve => {
             ctx.privileges = 'readAndWrite'
+            ctx.role = 'Editor'
             ctx.CollaboratorsInviteController._checkShouldInviteEmail = sinon
               .stub()
               .resolves(true)
@@ -421,10 +423,23 @@ describe('CollaboratorsInviteController', function () {
 
       describe('readOnly collaborator (always allowed)', function () {
         beforeEach(async function (ctx) {
+          ctx.privileges = 'readOnly'
+          ctx.role = 'Viewer'
+          // Update the invite data to reflect the new privileges
+          ctx.invite.privileges = ctx.privileges
+          ctx.inviteReducedData = _.pick(ctx.invite, [
+            '_id',
+            'email',
+            'privileges',
+          ])
+          ctx.CollaboratorsInviteHandler.promises.inviteToProject.resolves(
+            ctx.inviteReducedData
+          )
+
           await new Promise(resolve => {
             ctx.req.body = {
               email: ctx.targetEmail,
-              privileges: (ctx.privileges = 'readOnly'),
+              privileges: ctx.privileges,
             }
             ctx.CollaboratorsInviteController._checkShouldInviteEmail = sinon
               .stub()
@@ -492,7 +507,7 @@ describe('CollaboratorsInviteController', function () {
             ctx.req.ip,
             {
               inviteId: ctx.invite._id,
-              privileges: ctx.privileges,
+              role: ctx.role,
             }
           )
         })
@@ -1389,7 +1404,7 @@ describe('CollaboratorsInviteController', function () {
           ctx.req.ip,
           {
             inviteId: ctx.invite._id,
-            privileges: ctx.privileges,
+            role: ctx.role,
           }
         )
       })

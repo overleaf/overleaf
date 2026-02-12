@@ -19,6 +19,9 @@ const MANAGED_GROUP_PROJECT_EVENTS = [
   'project-history-version-restored',
   'project-history-version-downloaded',
   'transfer-ownership',
+  'remove-collaborator',
+  'revoke-invite',
+  'toggle-access-level',
   'project-downloaded',
 ]
 

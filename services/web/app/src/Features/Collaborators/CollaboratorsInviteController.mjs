@@ -4,6 +4,7 @@ import UserGetter from '../User/UserGetter.mjs'
 import CollaboratorsGetter from './CollaboratorsGetter.mjs'
 import CollaboratorsInviteHandler from './CollaboratorsInviteHandler.mjs'
 import CollaboratorsInviteGetter from './CollaboratorsInviteGetter.mjs'
+import CollaboratorsInviteHelper from './CollaboratorsInviteHelper.mjs'
 import logger from '@overleaf/logger'
 import Settings from '@overleaf/settings'
 import EmailHelper from '../Helpers/EmailHelper.mjs'
@@ -171,7 +172,7 @@ async function inviteToProject(req, res) {
     req.ip,
     {
       inviteId: invite._id,
-      privileges,
+      role: CollaboratorsInviteHelper.privilegeLevelToRole(invite.privileges),
     }
   )
 
@@ -202,7 +203,7 @@ async function revokeInvite(req, res) {
       req.ip,
       {
         inviteId: invite._id,
-        privileges: invite.privileges,
+        role: CollaboratorsInviteHelper.privilegeLevelToRole(invite.privileges),
       }
     )
     EditorRealTimeController.emitToRoom(

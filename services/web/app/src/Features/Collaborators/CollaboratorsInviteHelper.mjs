@@ -11,7 +11,21 @@ function hashInviteToken(token) {
     .digest('hex')
 }
 
+function privilegeLevelToRole(privilegeLevel) {
+  switch (privilegeLevel) {
+    case 'readOnly':
+      return 'Viewer'
+    case 'readAndWrite':
+      return 'Editor'
+    case 'review':
+      return 'Reviewer'
+    default:
+      return privilegeLevel
+  }
+}
+
 export default {
   generateToken,
   hashInviteToken,
+  privilegeLevelToRole,
 }

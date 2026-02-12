@@ -7,6 +7,7 @@ import ContactManager from '../Contacts/ContactManager.mjs'
 import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
 import TpdsProjectFlusher from '../ThirdPartyDataStore/TpdsProjectFlusher.mjs'
 import CollaboratorsGetter from './CollaboratorsGetter.mjs'
+import CollaboratorsInviteHelper from './CollaboratorsInviteHelper.mjs'
 import Errors from '../Errors/Errors.js'
 import TpdsUpdateSender from '../ThirdPartyDataStore/TpdsUpdateSender.mjs'
 import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
@@ -361,7 +362,7 @@ async function setCollaboratorPrivilegeLevel(
     auditInfo.ipAddress,
     {
       userId,
-      role: _privilegeLevelToRole(privilegeLevel),
+      role: CollaboratorsInviteHelper.privilegeLevelToRole(privilegeLevel),
     }
   )
 
@@ -371,19 +372,6 @@ async function setCollaboratorPrivilegeLevel(
       'toggle-track-changes',
       update.$set.track_changes
     )
-  }
-}
-
-function _privilegeLevelToRole(privilegeLevel) {
-  switch (privilegeLevel) {
-    case 'readOnly':
-      return 'Viewer'
-    case 'readAndWrite':
-      return 'Editor'
-    case 'review':
-      return 'Reviewer'
-    default:
-      return privilegeLevel
   }
 }
 
