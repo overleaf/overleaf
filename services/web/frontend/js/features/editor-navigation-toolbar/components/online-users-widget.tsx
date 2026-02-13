@@ -15,6 +15,7 @@ import classNames from 'classnames'
 import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Doc } from '@ol-types/doc'
+import firstCharacter from '@/shared/utils/first-character'
 
 // Should be kept in sync with $max-user-circles-displayed CSS constant
 const MAX_USER_CIRCLES_DISPLAYED = 5
@@ -92,7 +93,7 @@ const OnlineUserWidget = ({
 const OnlineUserCircle = ({ user }: { user: OnlineUser }) => {
   const backgroundColor = getBackgroundColorForUserId(user.user_id)
   const luminance = hslStringToLuminance(backgroundColor)
-  const [character] = [...user.name]
+  const character = firstCharacter(user.name)
   return (
     <span
       className={classNames('online-user-circle', {
