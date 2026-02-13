@@ -9,6 +9,7 @@
   --themed-dashboard-popover-link-color: var(--link-ui-dark);
   --themed-dashboard-popover-link-hover-color: var(--link-ui-hover-dark);
   --themed-dashboard-popover-link-visited-color: var(--link-ui-visited-dark);
+  --ds-nav-color-scheme: light;
 
   @include theme('default') {
     --ds-nav-active-bg: var(--green-70);
@@ -21,6 +22,7 @@
     --themed-dashboard-popover-link-color: var(--link-ui);
     --themed-dashboard-popover-link-hover-color: var(--link-ui-hover);
     --themed-dashboard-popover-link-visited-color: var(--link-ui-visited);
+    --ds-nav-color-scheme: dark;
   }
 }
 
@@ -33,6 +35,7 @@ body {
 .project-ds-nav-page {
   @include full-height-stacked-page;
 
+  color-scheme: var(--ds-nav-color-scheme);
   color: var(--content-secondary-themed);
 
   // NOTE-AC: This code can be eliminated when we remove sidebar-navigation-ui-update
