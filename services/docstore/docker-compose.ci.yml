@@ -27,6 +27,7 @@ services:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     environment:
       CI:
+      RETRIES:
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
       GCS_API_ENDPOINT: http://gcs:9090

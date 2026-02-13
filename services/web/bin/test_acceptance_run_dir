@@ -9,4 +9,4 @@ if [[ "$COVERAGE_ACCEPTANCE_TESTS" == "true" ]]; then
   mocha_prefix+=("c8" "--reporter=clover" "--all" "--include={app.mjs,app/**/*.{mjs,js},modules/*/index.mjs,modules/*/app/**/*.{mjs,js}}" "--exclude=app/src/Features/Metadata/packageMapping.mjs" "--report-dir=${dir}")
 fi
 
-"${mocha_prefix[@]}" mocha --recursive --timeout 25000 --grep="$MOCHA_GREP" --require test/acceptance/bootstrap.js "$@"
+"${mocha_prefix[@]}" mocha --recursive --timeout 25000 --grep="$MOCHA_GREP" --require test/acceptance/bootstrap.js --retries="$RETRIES" "$@"

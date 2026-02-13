@@ -67,7 +67,7 @@
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
     "test:unit:_run": "mocha --recursive --exit $@ test/unit/js",
-    "test:acceptance:_run": "mocha --recursive --timeout 15000 --exit $@ test/acceptance/js",
+    "test:acceptance:_run": "mocha --recursive --timeout 15000 --exit --retries=$RETRIES $@ test/acceptance/js",
     "nodemon": "node --watch app.js",
     "migrate": "knex migrate:latest",
     "delete_old_chunks": "node storage/tasks/delete_old_chunks.js",

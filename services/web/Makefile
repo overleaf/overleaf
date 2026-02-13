@@ -1,4 +1,5 @@
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
+export RETRIES ?= $(if $(CI),3,0)
 
 BUILD_NUMBER ?= local
 ifeq ($(BRANCH_NAME),)

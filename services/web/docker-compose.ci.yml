@@ -52,6 +52,7 @@ services:
       REDIS_HOST: redis_test
       COVERAGE_ACCEPTANCE_TESTS:
       MONOREPO:
+      RETRIES:
     extra_hosts:
       - "www.overleaf.test:127.0.0.1"
     volumes:

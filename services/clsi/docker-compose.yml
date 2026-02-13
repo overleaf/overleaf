@@ -34,6 +34,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /overleaf/services/clsi
     environment:
+      RETRIES:
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       POSTGRES_HOST: postgres
       MOCHA_GREP: ${MOCHA_GREP}

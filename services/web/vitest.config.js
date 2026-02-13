@@ -57,7 +57,7 @@ module.exports = defineConfig({
       },
     ],
     ...reporterOptions,
-    hookTimeout: COVERAGE_ENABLED ? 20_000 : 10_000,
+    hookTimeout: process.env.CI ? 20_000 : 10_000,
     coverage: {
       enabled: COVERAGE_ENABLED,
       // Add 'sequential' / 'parallel' to the folder

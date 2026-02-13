@@ -38,6 +38,7 @@ services:
       - minio-certs:/certs
     working_dir: /overleaf/services/filestore
     environment:
+      RETRIES:
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       POSTGRES_HOST: postgres
       AWS_S3_ENDPOINT: https://minio:9000
