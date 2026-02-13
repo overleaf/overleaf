@@ -10,6 +10,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import RailPanelHeader from '@/features/ide-react/components/rail/rail-panel-header'
+import withErrorBoundary from '@/infrastructure/error-boundary'
 
 const MessageList = lazy(() => import('./message-list'))
 
@@ -104,4 +105,4 @@ function Placeholder() {
   )
 }
 
-export default ChatPane
+export default withErrorBoundary(ChatPane, () => <ChatFallbackError />)
