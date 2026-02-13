@@ -13,7 +13,6 @@ import Close from '@/shared/components/close'
 import { Trans, useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
-import { useTutorialContext } from '@/shared/context/tutorial-context'
 
 function AllHistoryList() {
   const { id: currentUserId } = useUserContext()
@@ -91,12 +90,12 @@ function AllHistoryList() {
     }
   }, [updatesLoadingState])
 
-  const { inactiveTutorials } = useTutorialContext()
   const {
     showPopup: showHistoryTutorial,
     tryShowingPopup: tryShowingHistoryTutorial,
     hideUntilReload: hideHistoryTutorialUntilReload,
     completeTutorial: completeHistoryTutorial,
+    checkCompletion: checkHistoryTutorialCompletion,
   } = useTutorial('react-history-buttons-tutorial', {
     name: 'react-history-buttons-tutorial',
   })
@@ -111,27 +110,23 @@ function AllHistoryList() {
     visibleUpdates.length === 2 && updatesInfo.freeHistoryLimitHit
 
   useEffect(() => {
-    const hasCompletedHistoryTutorial = inactiveTutorials.includes(
-      'react-history-buttons-tutorial'
-    )
-
     // wait for the layout to settle before showing popover, to avoid a flash/ instant move
     if (!layoutSettled) {
       return
     }
     if (
-      !hasCompletedHistoryTutorial &&
+      !checkHistoryTutorialCompletion() &&
       isMoreThanOneVersion &&
       !isPaywallAndNonComparable
     ) {
       tryShowingHistoryTutorial()
     }
   }, [
-    inactiveTutorials,
     isMoreThanOneVersion,
     isPaywallAndNonComparable,
     layoutSettled,
     tryShowingHistoryTutorial,
+    checkHistoryTutorialCompletion,
   ])
 
   const { t } = useTranslation()

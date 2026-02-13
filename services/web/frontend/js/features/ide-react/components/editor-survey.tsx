@@ -10,7 +10,6 @@ import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import { useTranslation } from 'react-i18next'
-import { useTutorialContext } from '@/shared/context/tutorial-context'
 
 type EditorSurveyPage = 'ease-of-use' | 'meets-my-needs' | 'thank-you'
 
@@ -28,8 +27,6 @@ const EditorSurveyContent = () => {
   const [easeOfUse, setEaseOfUse] = useState<number | null>(null)
   const [meetsMyNeeds, setMeetsMyNeeds] = useState<number | null>(null)
   const [page, setPage] = useState<EditorSurveyPage>('ease-of-use')
-  const { inactiveTutorials } = useTutorialContext()
-  const hasCompletedSurvey = inactiveTutorials.includes(TUTORIAL_KEY)
   const newEditor = useIsNewEditorEnabled()
 
   const { t } = useTranslation()
@@ -39,15 +36,16 @@ const EditorSurveyContent = () => {
     showPopup: showSurvey,
     dismissTutorial: dismissSurvey,
     completeTutorial: completeSurvey,
+    checkCompletion: checkSurveyCompletion,
   } = useTutorial(TUTORIAL_KEY, {
     name: TUTORIAL_KEY,
   })
 
   useEffect(() => {
-    if (!hasCompletedSurvey) {
+    if (!checkSurveyCompletion()) {
       tryShowingSurvey()
     }
-  }, [hasCompletedSurvey, tryShowingSurvey])
+  }, [checkSurveyCompletion, tryShowingSurvey])
 
   const onSubmit = useCallback(() => {
     sendMB('editor-survey-submit', {

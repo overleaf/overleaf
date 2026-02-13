@@ -1,5 +1,4 @@
 import Close from '@/shared/components/close'
-import { useTutorialContext } from '@/shared/context/tutorial-context'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import classNames from 'classnames'
@@ -26,15 +25,19 @@ export default function TooltipPromotion({
   placement?: OverlayProps['placement']
   splitTestName?: string
 }) {
-  const { inactiveTutorials } = useTutorialContext()
-  const { showPopup, tryShowingPopup, hideUntilReload, dismissTutorial } =
-    useTutorial(tutorialKey, eventData)
+  const {
+    showPopup,
+    tryShowingPopup,
+    hideUntilReload,
+    dismissTutorial,
+    checkCompletion,
+  } = useTutorial(tutorialKey, eventData)
 
   useEffect(() => {
-    if (!inactiveTutorials.includes(tutorialKey)) {
+    if (!checkCompletion()) {
       tryShowingPopup()
     }
-  }, [tryShowingPopup, inactiveTutorials, tutorialKey])
+  }, [tryShowingPopup, checkCompletion, tutorialKey])
 
   const isInSplitTestIfNeeded = splitTestName
     ? isSplitTestEnabled(splitTestName)

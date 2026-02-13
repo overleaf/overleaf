@@ -21,8 +21,17 @@ const useTutorial = (
 ) => {
   const [showPopup, setShowPopup] = useState(false)
 
-  const { deactivateTutorial, currentPopup, setCurrentPopup } =
-    useTutorialContext()
+  const {
+    deactivateTutorial,
+    currentPopup,
+    setCurrentPopup,
+    inactiveTutorials,
+  } = useTutorialContext()
+
+  const checkCompletion = useCallback(
+    () => inactiveTutorials.includes(tutorialKey),
+    [inactiveTutorials, tutorialKey]
+  )
 
   const completeTutorial = useCallback(
     async (
@@ -113,6 +122,7 @@ const useTutorial = (
     clearAndShow,
     showPopup,
     hideUntilReload,
+    checkCompletion,
   }
 }
 

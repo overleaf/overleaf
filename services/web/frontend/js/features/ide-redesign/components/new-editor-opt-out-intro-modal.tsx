@@ -12,18 +12,17 @@ import { useTranslation } from 'react-i18next'
 import { useIsNewToNewEditor } from '../utils/new-editor-utils'
 import { useNewEditorTourContext } from '../contexts/new-editor-tour-context'
 import promoVideo from './new-editor-promo-video.mp4'
-import { useTutorialContext } from '@/shared/context/tutorial-context'
 
 const TUTORIAL_KEY = 'new-editor-intro-2'
 
 export default function NewEditorOptOutIntroModal() {
-  const { inactiveTutorials } = useTutorialContext()
   const {
     tryShowingPopup,
     showPopup: showModal,
     dismissTutorial,
     completeTutorial,
     clearPopup,
+    checkCompletion,
   } = useTutorial(TUTORIAL_KEY, {
     name: TUTORIAL_KEY,
   })
@@ -35,15 +34,11 @@ export default function NewEditorOptOutIntroModal() {
   const isNewToNewEditor = useIsNewToNewEditor()
 
   useEffect(() => {
-    if (
-      isNewToNewEditor &&
-      !hasShown &&
-      !inactiveTutorials.includes(TUTORIAL_KEY)
-    ) {
+    if (isNewToNewEditor && !hasShown && !checkCompletion()) {
       tryShowingPopup('notification-prompt')
       setHasShown(true)
     }
-  }, [tryShowingPopup, inactiveTutorials, isNewToNewEditor, hasShown])
+  }, [tryShowingPopup, checkCompletion, isNewToNewEditor, hasShown])
 
   const startProductTour = useCallback(() => {
     completeTutorial({ event: 'notification-click', action: 'complete' })

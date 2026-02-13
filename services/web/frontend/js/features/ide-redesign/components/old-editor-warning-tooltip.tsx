@@ -6,7 +6,6 @@ import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import { useCallback, useEffect, useState } from 'react'
 import { useSwitchEnableNewEditorState } from '../hooks/use-switch-enable-new-editor-state'
 import { canUseNewEditor } from '../utils/new-editor-utils'
-import { useTutorialContext } from '@/shared/context/tutorial-context'
 
 const TUTORIAL_KEY = 'old-editor-warning-tooltip-2'
 
@@ -15,7 +14,6 @@ export default function OldEditorWarningTooltip({
 }: {
   target: HTMLElement | null
 }) {
-  const { inactiveTutorials } = useTutorialContext()
   const { t } = useTranslation()
   const { loading, setEditorRedesignStatus } = useSwitchEnableNewEditorState()
 
@@ -25,6 +23,7 @@ export default function OldEditorWarningTooltip({
     dismissTutorial,
     completeTutorial,
     clearPopup,
+    checkCompletion,
   } = useTutorial(TUTORIAL_KEY, {
     name: TUTORIAL_KEY,
   })
@@ -32,11 +31,11 @@ export default function OldEditorWarningTooltip({
   const canShow = canUseNewEditor()
 
   useEffect(() => {
-    if (canShow && !hasShown && !inactiveTutorials.includes(TUTORIAL_KEY)) {
+    if (canShow && !hasShown && !checkCompletion()) {
       tryShowingPopup('notification-prompt')
       setHasShown(true)
     }
-  }, [tryShowingPopup, inactiveTutorials, hasShown, canShow])
+  }, [tryShowingPopup, checkCompletion, hasShown, canShow])
 
   const onSwitch = useCallback(() => {
     completeTutorial({ event: 'notification-click', action: 'complete' })

@@ -249,7 +249,6 @@ export function EditorProviders({
     LayoutProvider: makeLayoutProvider(layoutContext),
     ProjectProvider: makeProjectProvider(project),
     ReferencesProvider: makeReferencesProvider(),
-    TutorialProvider: makeTutorialProvider(),
     ...providers,
   }
 
