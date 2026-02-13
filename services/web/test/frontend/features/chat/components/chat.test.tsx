@@ -78,7 +78,9 @@ describe('<ChatPane />', function () {
 
     // should now reconnect with placeholder message
     fireEvent.click(reconnectButton)
-    await screen.findByText('Send your first message to your collaborators')
+    await screen.findByText(
+      'Start the conversation by saying hello or sharing an update'
+    )
   })
 
   it('a loading spinner is rendered while the messages are loading, then disappears', async function () {
@@ -102,7 +104,9 @@ describe('<ChatPane />', function () {
 
       renderWithEditorContext(<ChatPane />, { user })
 
-      await screen.findByText('Send your first message to your collaborators')
+      await screen.findByText(
+        'Start the conversation by saying hello or sharing an update'
+      )
     })
 
     it('is not rendered when messages are displayed', function () {
@@ -111,7 +115,9 @@ describe('<ChatPane />', function () {
       renderWithEditorContext(<ChatPane />, { user })
 
       expect(
-        screen.queryByText('Send your first message to your collaborators')
+        screen.queryByText(
+          'Start the conversation by saying hello or sharing an update'
+        )
       ).to.not.exist
     })
   })

@@ -1,39 +1,89 @@
+import type { Message } from '@/features/chat/context/chat-context'
+import { User } from '../../../../../types/user'
 import {
-  Message as MessageType,
-  useChatContext,
-} from '@/features/chat/context/chat-context'
-import classNames from 'classnames'
-import MessageDropdown from '@/features/chat/components/message-dropdown'
+  getBackgroundColorForUserId,
+  hslStringToLuminance,
+} from '@/shared/utils/colors'
 import MessageContent from '@/features/chat/components/message-content'
+import classNames from 'classnames'
+import MaterialIcon from '@/shared/components/material-icon'
+import MessageDropdown from '@/features/chat/components/message-dropdown'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import firstCharacter from '@/shared/utils/first-character'
+
+function getAvatarStyle(user?: User) {
+  if (!user?.id) {
+    // Deleted user
+    return {
+      backgroundColor: 'var(--bg-light-disabled)',
+      borderColor: 'var(--bg-light-disabled)',
+      color: 'var(--content-disabled)',
+    }
+  }
+
+  const backgroundColor = getBackgroundColorForUserId(user.id)
+
+  return {
+    borderColor: backgroundColor,
+    backgroundColor,
+    color:
+      hslStringToLuminance(backgroundColor) < 0.5
+        ? 'var(--content-primary-dark)'
+        : 'var(--content-primary)',
+  }
+}
 
 export function MessageAndDropdown({
   message,
   fromSelf,
+  isLast,
+  isFirst,
 }: {
-  message: MessageType
+  message: Message
   fromSelf: boolean
+  isLast: boolean
+  isFirst: boolean
 }) {
-  const { idOfMessageBeingEdited } = useChatContext()
   const hasChatEditDelete = useFeatureFlag('chat-edit-delete')
 
-  const editing = idOfMessageBeingEdited === message.id
-
   return (
-    <div
-      className={classNames('message-and-dropdown', {
-        'pending-message': message.pending,
-      })}
-    >
-      {hasChatEditDelete && fromSelf && !message.pending && !editing ? (
-        <MessageDropdown message={message} />
-      ) : null}
-      <div className="message-content">
-        <MessageContent
-          content={message.content}
-          messageId={message.id}
-          edited={message.edited}
-        />
+    <div className="message-row">
+      {!fromSelf && isLast ? (
+        <div className="message-avatar">
+          <div className="avatar" style={getAvatarStyle(message.user)}>
+            {message.user?.id && message.user.email ? (
+              firstCharacter(message.user.first_name || message.user.email)
+            ) : (
+              <MaterialIcon
+                type="delete"
+                className="message-avatar-deleted-user-icon"
+              />
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="message-avatar-placeholder" />
+      )}
+      <div
+        className={classNames('message-container', {
+          'message-from-self': fromSelf,
+          'first-row-in-message': isFirst,
+          'last-row-in-message': isLast,
+          'pending-message': message.pending,
+        })}
+      >
+        <div>
+          {hasChatEditDelete && fromSelf ? (
+            <MessageDropdown message={message} />
+          ) : null}
+        </div>
+        <div className="message-content">
+          <MessageContent
+            content={message.content}
+            messageId={message.id}
+            edited={message.edited}
+          />
+        </div>
       </div>
     </div>
   )

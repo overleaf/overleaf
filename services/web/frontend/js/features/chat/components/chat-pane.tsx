@@ -1,27 +1,23 @@
-import React, { lazy, Suspense, useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-
-import MessageInput from './message-input'
-import InfiniteScroll from './infinite-scroll'
-import ChatFallbackError from './chat-fallback-error'
-import { useLayoutContext } from '../../../shared/context/layout-context'
-import { useUserContext } from '../../../shared/context/user-context'
-import withErrorBoundary from '../../../infrastructure/error-boundary'
-import { FetchError } from '../../../infrastructure/fetch-json'
-import { useChatContext } from '../context/chat-context'
-import { FullSizeLoadingSpinner } from '../../../shared/components/loading-spinner'
+import ChatFallbackError from '@/features/chat/components/chat-fallback-error'
+import InfiniteScroll from '@/features/chat/components/infinite-scroll'
+import MessageInput from '@/features/chat/components/message-input'
+import { useChatContext } from '@/features/chat/context/chat-context'
+import { FetchError } from '@/infrastructure/fetch-json'
+import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import MaterialIcon from '@/shared/components/material-icon'
+import { useUserContext } from '@/shared/context/user-context'
+import { lazy, Suspense, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import classNames from 'classnames'
+import RailPanelHeader from '@/features/ide-react/components/rail/rail-panel-header'
 
 const MessageList = lazy(() => import('./message-list'))
 
 const Loading = () => <FullSizeLoadingSpinner delay={500} className="pt-4" />
 
-const ChatPane = React.memo(function ChatPane() {
+export const ChatPane = () => {
   const { t } = useTranslation()
-
-  const { chatIsOpen } = useLayoutContext()
   const user = useUserContext()
-
   const {
     status,
     messages,
@@ -36,22 +32,12 @@ const ChatPane = React.memo(function ChatPane() {
   } = useChatContext()
 
   useEffect(() => {
-    if (chatIsOpen && !initialMessagesLoaded) {
+    if (!initialMessagesLoaded) {
       loadInitialMessages()
     }
-  }, [chatIsOpen, loadInitialMessages, initialMessagesLoaded])
+  }, [loadInitialMessages, initialMessagesLoaded])
 
   const shouldDisplayPlaceholder = status !== 'pending' && messages.length === 0
-
-  const messageContentCount = messages.length
-
-  // Keep the chat pane in the DOM to avoid resetting the form input and re-rendering MathJax content.
-  const [chatOpenedOnce, setChatOpenedOnce] = useState(chatIsOpen)
-  useEffect(() => {
-    if (chatIsOpen) {
-      setChatOpenedOnce(true)
-    }
-  }, [chatIsOpen])
 
   if (error) {
     // let user try recover from fetch errors
@@ -64,51 +50,58 @@ const ChatPane = React.memo(function ChatPane() {
   if (!user) {
     return null
   }
-  if (!chatOpenedOnce) {
-    return null
-  }
 
   return (
-    <aside className="chat" aria-label={t('chat')}>
-      <InfiniteScroll
-        atEnd={atEnd}
-        className="messages"
-        fetchData={loadMoreMessages}
-        isLoading={status === 'pending'}
-        itemCount={messageContentCount}
-      >
-        <div>
-          <h2 className="visually-hidden">{t('chat')}</h2>
-          <Suspense fallback={<Loading />}>
-            {status === 'pending' && <Loading />}
-            {shouldDisplayPlaceholder && <Placeholder />}
-            <MessageList
-              messages={messages}
-              resetUnreadMessages={markMessagesAsRead}
-            />
-          </Suspense>
-        </div>
-      </InfiniteScroll>
-      <MessageInput
-        resetUnreadMessages={markMessagesAsRead}
-        sendMessage={sendMessage}
-      />
-    </aside>
+    <div className="chat-panel">
+      <RailPanelHeader title={t('collaborator_chat')} />
+      <div className="chat-wrapper">
+        <aside className="chat" aria-label={t('chat')}>
+          <InfiniteScroll
+            atEnd={atEnd}
+            className="messages"
+            fetchData={loadMoreMessages}
+            isLoading={status === 'pending'}
+            itemCount={messages.length}
+          >
+            <div className={classNames({ 'h-100': shouldDisplayPlaceholder })}>
+              <h2 className="visually-hidden">{t('chat')}</h2>
+              <Suspense fallback={<Loading />}>
+                {status === 'pending' && <Loading />}
+                {shouldDisplayPlaceholder && <Placeholder />}
+                <MessageList
+                  messages={messages}
+                  resetUnreadMessages={markMessagesAsRead}
+                />
+              </Suspense>
+            </div>
+          </InfiniteScroll>
+          <MessageInput
+            resetUnreadMessages={markMessagesAsRead}
+            sendMessage={sendMessage}
+          />
+        </aside>
+      </div>
+    </div>
   )
-})
+}
 
 function Placeholder() {
   const { t } = useTranslation()
   return (
-    <>
-      <div className="no-messages text-center small">{t('no_messages')}</div>
-      <div className="first-message text-center">
-        {t('send_first_message')}
-        <br />
-        <MaterialIcon type="arrow_downward" />
+    <div className="chat-empty-state-placeholder">
+      <div>
+        <span className="chat-empty-state-icon">
+          <MaterialIcon type="forum" />
+        </span>
       </div>
-    </>
+      <div>
+        <div className="chat-empty-state-title">{t('no_messages_yet')}</div>
+        <div className="chat-empty-state-body">
+          {t('start_the_conversation_by_saying_hello_or_sharing_an_update')}
+        </div>
+      </div>
+    </div>
   )
 }
 
-export default withErrorBoundary(ChatPane, () => <ChatFallbackError />)
+export default ChatPane

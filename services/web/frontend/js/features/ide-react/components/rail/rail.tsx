@@ -7,10 +7,8 @@ import {
   useRailContext,
 } from '@/features/ide-react/context/rail-context'
 import FileTreeOutlinePanel from '@/features/ide-redesign/components/file-tree/file-tree-outline-panel'
-import {
-  ChatIndicator,
-  ChatPane,
-} from '@/features/ide-redesign/components/chat/chat'
+import ChatPane from '@/features/chat/components/chat-pane'
+import ChatIndicator from '@/features/chat/components/chat-indicator'
 import getMeta from '@/utils/meta'
 import classNames from 'classnames'
 import IntegrationsPanel from '@/features/ide-redesign/components/integrations-panel/integrations-panel'

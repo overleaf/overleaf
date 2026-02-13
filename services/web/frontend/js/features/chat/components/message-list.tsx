@@ -3,7 +3,6 @@ import type { Message as MessageType } from '@/features/chat/context/chat-contex
 import { useUserContext } from '@/shared/context/user-context'
 import { User } from '../../../../../types/user'
 import MessageGroup from '@/features/chat/components/message-group'
-import MessageGroupRedesign from '@/features/ide-redesign/components/chat/message-group'
 
 const FIVE_MINUTES = 5 * 60 * 1000
 const TIMESTAMP_GROUP_SIZE = FIVE_MINUTES
@@ -19,7 +18,6 @@ function formatTimestamp(date: moment.MomentInput) {
 interface MessageListProps {
   messages: MessageType[]
   resetUnreadMessages(...args: unknown[]): unknown
-  newDesign?: boolean
 }
 
 type MessageGroupType = {
@@ -63,14 +61,8 @@ function groupMessages(messages: MessageType[]) {
   return groups
 }
 
-function MessageList({
-  messages,
-  resetUnreadMessages,
-  newDesign,
-}: MessageListProps) {
+function MessageList({ messages, resetUnreadMessages }: MessageListProps) {
   const user = useUserContext()
-
-  const MessageGroupComponent = newDesign ? MessageGroupRedesign : MessageGroup
 
   function shouldRenderDate(messageIndex: number) {
     if (messageIndex === 0) {
@@ -110,7 +102,7 @@ function MessageList({
               </time>
             </div>
           )}
-          <MessageGroupComponent
+          <MessageGroup
             messages={group.messages}
             user={group.user}
             fromSelf={user ? group.user?.id === user.id : false}
