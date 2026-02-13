@@ -29,6 +29,8 @@
   li {
     background: url('../../../public/img/website-redesign/check-in-green-circle.svg')
       no-repeat left top;
+
+    @include body-lg;
   }
 }
 

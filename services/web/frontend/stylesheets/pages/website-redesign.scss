@@ -95,6 +95,9 @@
 
     // Specific overrides for link styles
     &.link-monospace {
+      @include heading-xs;
+
+      color: var(--green-50);
       text-decoration: none;
 
       &:hover {
@@ -332,13 +335,12 @@
 
   .header-description {
     p {
-      font-size: var(--font-size-05);
-      line-height: var(--line-height-03);
+      @include heading-sm;
+
       margin-bottom: 0;
 
       @include media-breakpoint-down(lg) {
-        font-size: var(--font-size-04);
-        line-height: var(--line-height-02);
+        @include body-base;
       }
     }
   }
@@ -551,6 +553,10 @@
     h2,
     p {
       text-align: center;
+    }
+
+    p {
+      @include heading-sm;
     }
 
     @include media-breakpoint-down(lg) {
@@ -878,6 +884,10 @@
         justify-content: space-evenly;
       }
     }
+
+    p {
+      @include heading-sm;
+    }
   }
 
   .security-info {
@@ -901,6 +911,8 @@
   }
 
   .security-heading-section {
+    font-size: var(--font-size-05);
+
     @include media-breakpoint-down(lg) {
       p {
         text-align: left;
@@ -993,12 +1005,11 @@
 
       p {
         margin-bottom: var(--spacing-06);
-        font-size: 1.125rem;
-        line-height: 1.333;
+
+        @include heading-xs;
 
         @include media-breakpoint-down(lg) {
-          font-size: 1rem;
-          line-height: 1.375;
+          @include body-base;
         }
       }
     }
@@ -1015,6 +1026,7 @@
       h3 {
         font-size: 1.875rem;
         line-height: 1.5;
+        margin-bottom: var(--spacing-06);
       }
 
       ul.list-simple-text,
@@ -1025,13 +1037,13 @@
 
         li {
           margin-bottom: var(--spacing-05);
-          font-size: 1.125rem;
-          line-height: 1.333;
+
+          @include heading-xs;
+
           display: flex;
 
           @include media-breakpoint-down(lg) {
-            font-size: 1rem;
-            line-height: 1.375;
+            @include body-base;
           }
         }
       }
