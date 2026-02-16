@@ -614,6 +614,7 @@ function _requestHistoryService(options, callback) {
     } else {
       const { method, url, qs } = requestOptions
       error = new OError(
+        // Keep the status code in the message. It is used by the ErrorRecorder.
         `history store a non-success status code: ${res.statusCode}`,
         { method, url, qs, statusCode: res.statusCode }
       )

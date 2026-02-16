@@ -93,7 +93,7 @@ describe('DocstoreManager', function () {
         expect(error).to.be.instanceOf(Error)
         expect(error).to.have.property(
           'message',
-          'docstore api responded with non-success code: 500'
+          'docstore api responded with non-success code'
         )
       })
     })
@@ -201,7 +201,7 @@ describe('DocstoreManager', function () {
         expect(error).to.be.instanceOf(Error)
         expect(error).to.have.property(
           'message',
-          'docstore api responded with non-success code: 500'
+          'docstore api responded with non-success code'
         )
       })
     })
@@ -269,7 +269,7 @@ describe('DocstoreManager', function () {
         expect(error).to.be.instanceOf(Error)
         expect(error).to.have.property(
           'message',
-          'docstore api responded with non-success code: 500'
+          'docstore api responded with non-success code'
         )
       })
     })
@@ -391,7 +391,7 @@ describe('DocstoreManager', function () {
         expect(error).to.be.instanceOf(Error)
         expect(error).to.have.property(
           'message',
-          'docstore api responded with non-success code: 500'
+          'docstore api responded with non-success code'
         )
       })
     })
@@ -464,7 +464,7 @@ describe('DocstoreManager', function () {
         expect(error).to.be.instanceOf(Error)
         expect(error).to.have.property(
           'message',
-          'docstore api responded with non-success code: 500'
+          'docstore api responded with non-success code'
         )
       })
     })
@@ -515,7 +515,7 @@ describe('DocstoreManager', function () {
         expect(error).to.be.instanceOf(Error)
         expect(error).to.have.property(
           'message',
-          'docstore api responded with non-success code: 500'
+          'docstore api responded with non-success code'
         )
       })
     })
@@ -549,7 +549,7 @@ describe('DocstoreManager', function () {
         expect(error).to.be.instanceOf(Error)
         expect(error).to.have.property(
           'message',
-          'docstore api responded with non-success code: 500'
+          'docstore api responded with non-success code'
         )
       })
     })
@@ -583,7 +583,7 @@ describe('DocstoreManager', function () {
         expect(error).to.be.instanceOf(Error)
         expect(error).to.have.property(
           'message',
-          'docstore api responded with non-success code: 500'
+          'docstore api responded with non-success code'
         )
       })
     })
@@ -617,7 +617,7 @@ describe('DocstoreManager', function () {
         expect(error).to.be.instanceOf(Error)
         expect(error).to.have.property(
           'message',
-          'docstore api responded with non-success code: 500'
+          'docstore api responded with non-success code'
         )
       })
     })

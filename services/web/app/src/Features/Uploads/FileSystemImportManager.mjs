@@ -6,6 +6,7 @@ import Errors from '../Errors/Errors.js'
 import FileTypeManager from './FileTypeManager.mjs'
 import SafePath from '../Project/SafePath.mjs'
 import logger from '@overleaf/logger'
+import OError from '@overleaf/o-error'
 
 export default {
   addEntity: callbackify(addEntity),
@@ -183,7 +184,7 @@ async function _isSafeOnFileSystem(path) {
 async function importFile(fsPath, projectPath) {
   const stat = await fs.promises.lstat(fsPath)
   if (!stat.isFile()) {
-    throw new Error(`can't import ${fsPath}: not a regular file`)
+    throw new OError("can't import file: not a regular file", { fsPath })
   }
   _validateProjectPath(projectPath)
   const filename = Path.basename(projectPath)
@@ -206,7 +207,7 @@ async function importFile(fsPath, projectPath) {
 async function importDir(dirPath) {
   const stat = await fs.promises.lstat(dirPath)
   if (!stat.isDirectory()) {
-    throw new Error(`can't import ${dirPath}: not a directory`)
+    throw new OError("can't import dir: not a directory", { dirPath })
   }
   const entries = []
   for await (const filePath of _walkDir(dirPath)) {

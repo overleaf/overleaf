@@ -213,8 +213,8 @@ export default ExportsHandler = {
           return callback(null, body.version)
         } else {
           err = new OError(
-            `project history version returned a failure status code: ${res.statusCode}`,
-            { project_id: projectId }
+            'project history version returned a failure status code',
+            { project_id: projectId, statusCode: res.statusCode }
           )
           return callback(err)
         }
@@ -241,10 +241,10 @@ export default ExportsHandler = {
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
           return callback(null, body)
         } else {
-          err = new OError(
-            `v1 export returned a failure status code: ${res.statusCode}`,
-            { export: exportId }
-          )
+          err = new OError('v1 export returned a failure status code', {
+            export: exportId,
+            statusCode: res.statusCode,
+          })
           return callback(err)
         }
       }
@@ -270,10 +270,10 @@ export default ExportsHandler = {
         } else if (res.statusCode >= 200 && res.statusCode < 300) {
           return callback(null, body)
         } else {
-          err = new OError(
-            `v1 export returned a failure status code: ${res.statusCode}`,
-            { export: exportId }
-          )
+          err = new OError('v1 export returned a failure status code', {
+            export: exportId,
+            statusCode: res.statusCode,
+          })
           return callback(err)
         }
       }

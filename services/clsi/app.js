@@ -25,6 +25,7 @@ import ForbidSymlinks from './app/js/StaticServerForbidSymlinks.js'
 
 import net from 'node:net'
 import os from 'node:os'
+import OError from '@overleaf/o-error'
 logger.initialize('clsi')
 logger.logger.serializers.clsiRequest = LoggerSerializers.clsiRequest
 
@@ -70,7 +71,7 @@ app.param('build_id', function (req, res, next, buildId) {
   if (buildId?.match(OutputCacheManager.BUILD_REGEX)) {
     next()
   } else {
-    next(new Error(`invalid build id ${buildId}`))
+    next(new OError('invalid build id', { buildId }))
   }
 })
 
@@ -78,7 +79,7 @@ app.param('contentId', function (req, res, next, contentId) {
   if (contentId?.match(OutputCacheManager.CONTENT_REGEX)) {
     next()
   } else {
-    next(new Error(`invalid content id ${contentId}`))
+    next(new OError('invalid content id', { contentId }))
   }
 })
 
@@ -86,7 +87,7 @@ app.param('hash', function (req, res, next, hash) {
   if (hash?.match(ContentCacheManager.HASH_REGEX)) {
     next()
   } else {
-    next(new Error(`invalid hash ${hash}`))
+    next(new OError('invalid hash', { hash }))
   }
 })
 

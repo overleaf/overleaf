@@ -152,9 +152,12 @@ describe('SAMLIdentityManager', function () {
         error = e
       } finally {
         expect(error).to.exist
-        expect(error.message).to.equal(
-          'invalid arguments: providerId: undefined, externalUserId: undefined, userIdAttribute: undefined'
-        )
+        expect(error.message).to.equal('invalid arguments')
+        expect(error.info).to.deep.equal({
+          providerId: undefined,
+          externalUserId: undefined,
+          userIdAttribute: undefined,
+        })
       }
     })
     it('should throw an error if missing provider ID', async function (ctx) {
@@ -165,9 +168,12 @@ describe('SAMLIdentityManager', function () {
         error = e
       } finally {
         expect(error).to.exist
-        expect(error.message).to.equal(
-          'invalid arguments: providerId: undefined, externalUserId: id123, userIdAttribute: someAttr'
-        )
+        expect(error.message).to.equal('invalid arguments')
+        expect(error.info).to.deep.equal({
+          providerId: undefined,
+          externalUserId: 'id123',
+          userIdAttribute: 'someAttr',
+        })
       }
     })
     it('should throw an error if missing external user ID', async function (ctx) {
@@ -178,6 +184,12 @@ describe('SAMLIdentityManager', function () {
         error = e
       } finally {
         expect(error).to.exist
+        expect(error.message).to.equal('invalid arguments')
+        expect(error.info).to.deep.equal({
+          providerId: '123',
+          externalUserId: null,
+          userIdAttribute: 'someAttr',
+        })
       }
     })
     it('should throw an error if missing attribute', async function (ctx) {
@@ -188,9 +200,12 @@ describe('SAMLIdentityManager', function () {
         error = e
       } finally {
         expect(error).to.exist
-        expect(error.message).to.equal(
-          'invalid arguments: providerId: 123, externalUserId: id123, userIdAttribute: undefined'
-        )
+        expect(error.message).to.equal('invalid arguments')
+        expect(error.info).to.deep.equal({
+          providerId: '123',
+          externalUserId: 'id123',
+          userIdAttribute: undefined,
+        })
       }
     })
   })

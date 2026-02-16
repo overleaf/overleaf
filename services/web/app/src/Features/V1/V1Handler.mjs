@@ -45,9 +45,9 @@ export default V1Handler = {
           )
           return callback(null, isValid, userProfile)
         } else {
-          err = new Error(
-            `Unexpected status from v1 login api: ${response.statusCode}`
-          )
+          err = new OError('Unexpected status from v1 login api', {
+            status: response.statusCode,
+          })
           return callback(err)
         }
       }
@@ -79,9 +79,9 @@ export default V1Handler = {
           )
           return callback(null, true)
         } else {
-          err = new Error(
-            `Unexpected status from v1 password reset api: ${response.statusCode}`
-          )
+          err = new OError('Unexpected status from v1 password reset api', {
+            status: response.statusCode,
+          })
           return callback(err, false)
         }
       }

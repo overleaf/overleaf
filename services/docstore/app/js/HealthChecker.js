@@ -4,6 +4,7 @@ import crypto from 'node:crypto'
 import settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import { fetchNothing, fetchJson } from '@overleaf/fetch-utils'
+import OError from '@overleaf/o-error'
 
 const { db, ObjectId } = mongodb
 
@@ -30,7 +31,10 @@ async function check() {
     await db.docs.deleteOne({ _id: docId, project_id: projectId })
   }
   if (!_.isEqual(body?.lines, lines)) {
-    throw new Error(`health check lines not equal ${body.lines} != ${lines}`)
+    throw new OError('health check lines not equal', {
+      got: body.lines,
+      want: lines,
+    })
   }
 }
 

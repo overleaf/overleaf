@@ -84,7 +84,7 @@ export async function healthCheck() {
 
   for (const historyId of HEALTH_CHECK_PROJECTS) {
     if (!(await projectHasLatestChunk(historyId))) {
-      throw new Error(`project has no history: ${historyId}`)
+      throw new OError('project has no history', { historyId })
     }
   }
 }

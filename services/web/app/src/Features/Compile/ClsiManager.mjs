@@ -609,17 +609,14 @@ async function _postToClsi(
       } else if (err.response.status === 503) {
         return { response: { compile: { status: 'unavailable' } } }
       } else {
-        throw new OError(
-          `CLSI returned non-success code: ${err.response.status}`,
-          {
-            projectId,
-            userId,
-            compileOptions: req.compile.options,
-            rootResourcePath: req.compile.rootResourcePath,
-            clsiResponse: err.body,
-            statusCode: err.response.status,
-          }
-        )
+        throw new OError('CLSI returned non-success code', {
+          projectId,
+          userId,
+          compileOptions: req.compile.options,
+          rootResourcePath: req.compile.rootResourcePath,
+          clsiResponse: err.body,
+          statusCode: err.response.status,
+        })
       }
     } else {
       throw new OError(

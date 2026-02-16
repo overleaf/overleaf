@@ -19,6 +19,7 @@ import LinkedFilesHandler from './LinkedFilesHandler.mjs'
 import LinkedFilesErrors from './LinkedFilesErrors.mjs'
 import { promisify } from '@overleaf/promise-utils'
 import HistoryManager from '../History/HistoryManager.mjs'
+import Errors from '../Errors/Errors.js'
 
 const {
   BadDataError,
@@ -197,7 +198,7 @@ export default ProjectFileAgent = {
               },
               function (err, entity, type) {
                 if (err != null) {
-                  if (/^not found.*/.test(err.message)) {
+                  if (err instanceof Errors.NotFoundError) {
                     err = new SourceFileNotFoundError()
                   }
                   return callback(err)

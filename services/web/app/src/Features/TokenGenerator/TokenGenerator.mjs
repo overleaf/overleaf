@@ -2,6 +2,7 @@ import crypto from 'node:crypto'
 import V1Api from '../V1/V1Api.mjs'
 import Features from '../../infrastructure/Features.mjs'
 import { callbackify } from 'node:util'
+import OError from '@overleaf/o-error'
 
 // (From Overleaf `random_token.rb`)
 //   Letters (not numbers! see generate_token) used in tokens. They're all
@@ -59,13 +60,13 @@ async function generateUniqueReadOnlyToken() {
     })
 
     if (response.statusCode !== 200) {
-      throw new Error(
-        `non-200 response from v1 read-token-exists api: ${response.statusCode}`
-      )
+      throw new OError('non-200 response from v1 read-token-exists api', {
+        statusCode: response.statusCode,
+      })
     }
 
     if (body.exists === true) {
-      throw new Error(`token already exists in v1: ${token}`)
+      throw new OError('token already exists in v1', { token })
     }
 
     return token

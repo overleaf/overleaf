@@ -37,10 +37,12 @@ export function getDocument(projectId, docId, callback) {
       )
       return callback(null, body.lines.join('\n'), body.version)
     } else {
-      error = new OError(
-        `doc updater returned a non-success status code: ${res.statusCode}`,
-        { project_id: projectId, doc_id: docId, url }
-      )
+      error = new OError('doc updater returned a non-success status code', {
+        project_id: projectId,
+        doc_id: docId,
+        url,
+        statusCode: res.statusCode,
+      })
       return callback(error)
     }
   })
@@ -69,10 +71,12 @@ export function setDocument(projectId, docId, content, userId, callback) {
       if (res.statusCode >= 200 && res.statusCode < 300) {
         return callback(null)
       } else {
-        error = new OError(
-          `doc updater returned a non-success status code: ${res.statusCode}`,
-          { project_id: projectId, doc_id: docId, url }
-        )
+        error = new OError('doc updater returned a non-success status code', {
+          project_id: projectId,
+          doc_id: docId,
+          url,
+          statusCode: res.statusCode,
+        })
         return callback(error)
       }
     }

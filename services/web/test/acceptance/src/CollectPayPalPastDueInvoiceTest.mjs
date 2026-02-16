@@ -198,7 +198,7 @@ describe('CollectPayPalPastDueInvoice', function () {
             body: invoiceCollectXml,
           }
         }
-        throw new OError(`Recurly API returned with status code: 404`, {
+        throw new OError('Recurly API returned with status code: 404', {
           statusCode: 404,
         })
       }

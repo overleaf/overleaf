@@ -53,13 +53,11 @@ async function deleteDoc(projectId, docId, name, deletedAt) {
           },
         })
       }
-      throw new OError(
-        `docstore api responded with non-success code: ${error.response.status}`,
-        {
-          projectId,
-          docId,
-        }
-      )
+      throw new OError('docstore api responded with non-success code', {
+        projectId,
+        docId,
+        status: error.response.status,
+      })
     }
     throw error
   }
@@ -75,10 +73,10 @@ async function getAllDocs(projectId) {
     return await fetchJson(url, { signal: AbortSignal.timeout(TIMEOUT) })
   } catch (error) {
     if (error instanceof RequestFailedError) {
-      throw new OError(
-        `docstore api responded with non-success code: ${error.response.status}`,
-        { projectId }
-      )
+      throw new OError('docstore api responded with non-success code', {
+        projectId,
+        status: error.response.status,
+      })
     }
     throw error
   }
@@ -96,10 +94,10 @@ async function getAllDeletedDocs(projectId) {
     return await fetchJson(url, { signal: AbortSignal.timeout(TIMEOUT) })
   } catch (error) {
     if (error instanceof RequestFailedError) {
-      throw new OError(
-        `docstore api responded with non-success code: ${error.response.status}`,
-        { projectId }
-      )
+      throw new OError('docstore api responded with non-success code', {
+        projectId,
+        status: error.response.status,
+      })
     }
     throw OError.tag(error, 'could not get deleted docs from docstore')
   }
@@ -131,10 +129,10 @@ async function getAllRanges(projectId) {
     return await fetchJson(url, { signal: AbortSignal.timeout(TIMEOUT) })
   } catch (error) {
     if (error instanceof RequestFailedError) {
-      throw new OError(
-        `docstore api responded with non-success code: ${error.response.status}`,
-        { projectId }
-      )
+      throw new OError('docstore api responded with non-success code', {
+        projectId,
+        status: error.response.status,
+      })
     }
     throw error
   }
@@ -191,13 +189,11 @@ async function getDoc(projectId, docId, options = {}) {
           },
         })
       }
-      throw new OError(
-        `docstore api responded with non-success code: ${error.response.status}`,
-        {
-          projectId,
-          docId,
-        }
-      )
+      throw new OError('docstore api responded with non-success code', {
+        projectId,
+        docId,
+        status: error.response.status,
+      })
     }
     throw error
   }
@@ -223,10 +219,11 @@ async function isDocDeleted(projectId, docId) {
           info: { projectId, docId },
         })
       }
-      throw new OError(
-        `docstore api responded with non-success code: ${error.response.status}`,
-        { projectId, docId }
-      )
+      throw new OError('docstore api responded with non-success code', {
+        projectId,
+        docId,
+        status: error.response.status,
+      })
     }
     throw error
   }
@@ -258,10 +255,11 @@ async function updateDoc(projectId, docId, lines, version, ranges) {
     return { modified: result.modified, rev: result.rev }
   } catch (error) {
     if (error instanceof RequestFailedError) {
-      throw new OError(
-        `docstore api responded with non-success code: ${error.response.status}`,
-        { projectId, docId }
-      )
+      throw new OError('docstore api responded with non-success code', {
+        projectId,
+        docId,
+        status: error.response.status,
+      })
     }
     throw error
   }
@@ -280,10 +278,10 @@ async function projectHasRanges(projectId) {
     return body.projectHasRanges
   } catch (error) {
     if (error instanceof RequestFailedError) {
-      throw new OError(
-        `docstore api responded with non-success code: ${error.response.status}`,
-        { projectId }
-      )
+      throw new OError('docstore api responded with non-success code', {
+        projectId,
+        status: error.response.status,
+      })
     }
     throw error
   }
@@ -332,9 +330,10 @@ async function _operateOnProject(projectId, method) {
     })
   } catch (err) {
     if (err instanceof RequestFailedError) {
-      const error = new Error(
-        `docstore api responded with non-success code: ${err.response.status}`
-      )
+      const error = new OError('docstore api responded with non-success code', {
+        projectId,
+        status: err.response.status,
+      })
       logger.warn(
         { err: error, projectId },
         `error calling ${method} project in docstore`

@@ -12,6 +12,7 @@ import request from 'request'
 import settings from '@overleaf/settings'
 import Errors from '../Errors/Errors.js'
 import { promisifyMultiResult } from '@overleaf/promise-utils'
+import OError from '@overleaf/o-error'
 
 // TODO: check what happens when these settings aren't defined
 const DEFAULT_V1_PARAMS = {
@@ -89,9 +90,11 @@ const V1Api = {
       error.statusCode = response.statusCode
       return callback(error)
     } else {
-      error = new Error(
-        `overleaf v1 returned non-success code: ${response?.statusCode} ${options.method} ${options.uri}`
-      )
+      error = new OError('overleaf v1 returned non-success code', {
+        status: response?.statusCode,
+        method: options.method,
+        url: options.uri,
+      })
       error.statusCode = response?.statusCode
       return callback(error)
     }

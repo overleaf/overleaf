@@ -373,7 +373,7 @@ const RedisManager = {
     const shareJSTextOT = Array.isArray(docLines)
     const currentVersion = await RedisManager.getDocVersion(docId)
     if (currentVersion + appliedOps.length !== newVersion) {
-      throw new OError(`Version mismatch. '${docId}' is corrupted.`, {
+      throw new OError('Version mismatch. doc is corrupted', {
         docId,
         currentVersion,
         newVersion,

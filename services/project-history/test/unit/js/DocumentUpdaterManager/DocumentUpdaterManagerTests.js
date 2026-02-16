@@ -93,7 +93,7 @@ describe('DocumentUpdaterManager', function () {
           .calledWith(
             sinon.match.has(
               'message',
-              'doc updater returned a non-success status code: 500'
+              'doc updater returned a non-success status code'
             )
           )
           .should.equal(true)
@@ -174,7 +174,7 @@ describe('DocumentUpdaterManager', function () {
           .calledWith(
             sinon.match.has(
               'message',
-              'doc updater returned a non-success status code: 500'
+              'doc updater returned a non-success status code'
             )
           )
           .should.equal(true)

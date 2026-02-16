@@ -212,7 +212,7 @@ async function queueChanges(
         baseVersion,
       })
     } else {
-      throw new Error(`unexpected result queuing changes: ${status}`)
+      throw new OError('unexpected result queuing changes', { status })
     }
   } catch (err) {
     if (err instanceof BaseVersionConflictError) {

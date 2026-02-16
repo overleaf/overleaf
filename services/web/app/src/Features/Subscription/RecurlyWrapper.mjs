@@ -446,10 +446,9 @@ const promises = {
           },
           'error returned from recurly'
         )
-        throw new OError(
-          `Recurly API returned with status code: ${error.response.status}`,
-          { statusCode: error.response.status }
-        )
+        throw new OError('Recurly API returned with status code', {
+          statusCode: error.response.status,
+        })
       } else {
         throw error
       }

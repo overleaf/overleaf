@@ -167,9 +167,11 @@ async function _findElementByPathWithProject(
       }
     }
     if (!found) {
-      throw new Error(
-        `not found project: ${project._id} search path: ${needlePath}, folder ${foldersList[level]} could not be found`
-      )
+      throw new Errors.NotFoundError('parent folder not found in project', {
+        projectId: project._id,
+        needlePath,
+        needleFolderName,
+      })
     }
   }
 
@@ -202,9 +204,11 @@ async function _findElementByPathWithProject(
     if (result != null) {
       return { element: result, type, folder }
     }
-    throw new Error(
-      `not found project: ${project._id} search path: ${needlePath}, entity ${entityName} could not be found`
-    )
+    throw new Errors.NotFoundError('element not found in project', {
+      projectId: project._id,
+      needlePath,
+      entityName,
+    })
   }
 
   if (project == null) {

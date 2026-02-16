@@ -16,6 +16,7 @@ import Errors from '../Errors/Errors.js'
 import { pipeline } from 'node:stream/promises'
 import ClsiCacheManager from '../Compile/ClsiCacheManager.mjs'
 import Path from 'node:path'
+import OError from '@overleaf/o-error'
 
 const { promises: ProjectRootDocManager } = ProjectRootDocManagerModule
 const { promises: ProjectOptionsHandler } = ProjectOptionsHandlerModule
@@ -64,7 +65,7 @@ const TemplatesManager = {
           { uri: zipUrl, statusCode: zipReq.response.status },
           'non-success code getting zip from template API'
         )
-        throw new Error(`get zip failed: ${zipReq.response.status}`)
+        throw new OError('get zip failed', { status: zipReq.response.status })
       }
       const { fileEntries, docEntries, project } =
         await ProjectUploadManager.promises.createProjectFromZipArchiveWithName(

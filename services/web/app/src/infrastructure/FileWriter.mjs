@@ -172,7 +172,9 @@ const FileWriter = {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         FileWriter.writeStreamToDisk(identifier, stream, options, callback)
       } else {
-        const err = new Error(`bad response from url: ${response.statusCode}`)
+        const err = new OError('bad response from url', {
+          statusCode: response.statusCode,
+        })
         logger.warn({ err, identifier, url }, `[writeUrlToDisk] ${err.message}`)
         return callback(err)
       }

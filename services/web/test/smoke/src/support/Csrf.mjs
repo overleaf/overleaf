@@ -17,7 +17,7 @@ export function getCsrfTokenForFactory({ request }) {
       assertHasStatusCode(response, 200)
       return _parseCsrf(response.body)
     } catch (err) {
-      throw new OError(`error fetching csrf token on ${endpoint}`, {}, err)
+      throw new OError('error fetching csrf token', { endpoint }, err)
     }
   }
 }

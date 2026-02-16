@@ -2,6 +2,7 @@ import _ from 'lodash'
 import { callbackify } from 'node:util'
 import { User } from '../../models/User.mjs'
 import Settings from '@overleaf/settings'
+import OError from '@overleaf/o-error'
 
 const ReferalFeatures = {
   async getBonusFeatures(userId) {
@@ -9,7 +10,7 @@ const ReferalFeatures = {
     const user = await User.findOne(query, { refered_user_count: 1 }).exec()
 
     if (user == null) {
-      throw new Error(`user not found ${userId} for assignBonus`)
+      throw new OError('user not found for assignBonus', { userId })
     }
 
     if (user.refered_user_count != null && user.refered_user_count > 0) {

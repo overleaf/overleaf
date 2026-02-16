@@ -2,6 +2,7 @@ import mongodb from 'mongodb-legacy'
 
 import _ from 'lodash'
 import Settings from '@overleaf/settings'
+import OError from '@overleaf/o-error'
 
 const { ObjectId } = mongodb
 
@@ -90,7 +91,7 @@ function ensureNameIsUnique(nameList, name, suffixes, maxLength) {
   if (uniqueName != null) {
     return uniqueName
   } else {
-    throw new Error(`Failed to generate a unique name for: ${name}`)
+    throw new OError('Failed to generate a unique name', { name })
   }
 }
 
