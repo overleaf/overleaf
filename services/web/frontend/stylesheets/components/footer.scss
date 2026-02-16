@@ -279,7 +279,7 @@ footer.site-footer {
       color: var(--footer-text-color);
     }
 
-    .fat-footer-base-meta a:not(.dropdown-toggle) {
+    .fat-footer-base-meta a:not(.dropdown-toggle, .dropdown-item) {
       color: inherit;
     }
 
