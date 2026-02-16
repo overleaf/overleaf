@@ -704,7 +704,7 @@ tar:
 build_storybook:
 	npm run lezer-latex:generate
 	mkdir -p data/storybook/
-	npm run build-storybook -- --output-dir data/storybook/$(BRANCH_NAME)
+	npm run build-storybook -- --output-dir data/storybook/$(BRANCH_NAME) --loglevel warn --quiet
 
 storybook_index:
 	mkdir -p data/storybook/

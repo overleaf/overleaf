@@ -7,12 +7,6 @@ import { isVersionSelected } from '../../utils/history-details'
 import { useUserContext } from '../../../../shared/context/user-context'
 import useDropdownActiveItem from '../../hooks/use-dropdown-active-item'
 import { useHistoryContext } from '../../context/history-context'
-import OLPopover from '@/shared/components/ol/ol-popover'
-import OLOverlay from '@/shared/components/ol/ol-overlay'
-import Close from '@/shared/components/close'
-import { Trans, useTranslation } from 'react-i18next'
-import MaterialIcon from '@/shared/components/material-icon'
-import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 
 function AllHistoryList() {
   const { id: currentUserId } = useUserContext()
@@ -90,127 +84,8 @@ function AllHistoryList() {
     }
   }, [updatesLoadingState])
 
-  const {
-    showPopup: showHistoryTutorial,
-    tryShowingPopup: tryShowingHistoryTutorial,
-    hideUntilReload: hideHistoryTutorialUntilReload,
-    completeTutorial: completeHistoryTutorial,
-    checkCompletion: checkHistoryTutorialCompletion,
-  } = useTutorial('react-history-buttons-tutorial', {
-    name: 'react-history-buttons-tutorial',
-  })
-
-  const isMoreThanOneVersion = visibleUpdates.length > 1
-  const [layoutSettled, setLayoutSettled] = useState(false)
-
-  // When there is a paywall and only two version's to compare,
-  // they are not comparable because the one that has a paywall will not have the compare button
-  // so we should not display on-boarding popover in that case
-  const isPaywallAndNonComparable =
-    visibleUpdates.length === 2 && updatesInfo.freeHistoryLimitHit
-
-  useEffect(() => {
-    // wait for the layout to settle before showing popover, to avoid a flash/ instant move
-    if (!layoutSettled) {
-      return
-    }
-    if (
-      !checkHistoryTutorialCompletion() &&
-      isMoreThanOneVersion &&
-      !isPaywallAndNonComparable
-    ) {
-      tryShowingHistoryTutorial()
-    }
-  }, [
-    isMoreThanOneVersion,
-    isPaywallAndNonComparable,
-    layoutSettled,
-    tryShowingHistoryTutorial,
-    checkHistoryTutorialCompletion,
-  ])
-
-  const { t } = useTranslation()
-
-  let popover = null
-
-  // hiding is different from dismissing, as we wont save a full dismissal to the user
-  // meaning the tutorial will show on page reload/ re-navigation
-  const hidePopover = () => {
-    hideHistoryTutorialUntilReload()
-  }
-
-  if (showHistoryTutorial) {
-    popover = (
-      <OLOverlay
-        placement="left-start"
-        show={showHistoryTutorial}
-        rootClose
-        onHide={hidePopover}
-        // using scrollerRef to position the popover in the middle of the viewport
-        target={scrollerRef.current}
-        popperConfig={{
-          modifiers: [
-            {
-              name: 'offset',
-              options: {
-                offset: [10, 10],
-              },
-            },
-          ],
-        }}
-      >
-        <OLPopover
-          id="popover-react-history-tutorial"
-          title={
-            <span>
-              {t('react_history_tutorial_title')}{' '}
-              <Close
-                variant="dark"
-                onDismiss={() =>
-                  completeHistoryTutorial({
-                    event: 'promo-click',
-                    action: 'complete',
-                  })
-                }
-              />
-            </span>
-          }
-          className="dark-themed history-popover"
-        >
-          <Trans
-            i18nKey="react_history_tutorial_content"
-            components={[
-              // eslint-disable-next-line react/jsx-key
-              <MaterialIcon
-                type="align_end"
-                className="history-dropdown-icon-inverted"
-              />,
-              <a href="https://www.overleaf.com/learn/latex/Using_the_History_feature" />, // eslint-disable-line jsx-a11y/anchor-has-content, react/jsx-key
-            ]}
-          />
-        </OLPopover>
-      </OLOverlay>
-    )
-  }
-
-  // give the components time to position before showing popover so we don't get an instant position change
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setLayoutSettled(true)
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [setLayoutSettled])
-
-  // resizes can cause the popover to point to the wrong thing, since it changes the horizontal layout of the page
-  useEffect(() => {
-    window.addEventListener('resize', hidePopover)
-    return () => window.removeEventListener('resize', hidePopover)
-  })
-
   return (
     <div ref={scrollerRef} className="history-all-versions-scroller">
-      {popover}
       <div className="history-all-versions-container">
         <div ref={bottomRef} className="history-versions-bottom" />
         {visibleUpdates.map((update, index) => {
