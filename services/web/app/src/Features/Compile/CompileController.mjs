@@ -22,6 +22,7 @@ import {
   RequestFailedError,
 } from '@overleaf/fetch-utils'
 import Features from '../../infrastructure/Features.mjs'
+import ClsiCacheController from './ClsiCacheController.mjs'
 
 const { z, zz, parseReq } = Validation
 const ClsiCookieManager = ClsiCookieManagerFactory(
@@ -341,6 +342,8 @@ const _CompileController = {
         req.params.build_id,
         'output.pdf'
       )
+      // Align params with the generic output file download (via getFileFromClsi / getFileFromClsiWithoutUser).
+      req.params.file = 'output.pdf'
       await CompileController._proxyToClsi(
         projectId,
         'output-file',
@@ -580,6 +583,16 @@ const _CompileController = {
       timer.labels.status = 'success'
       timer.done()
     } catch (err) {
+      if (canTryClsiCacheFallback(req, res, action, err)) {
+        await ClsiCacheController._downloadFromCacheWithParams(
+          req,
+          res,
+          projectId,
+          `${req.query.editorId}-${req.params.build_id}`,
+          req.params.file
+        )
+        return
+      }
       const reqAborted = Boolean(req.destroyed)
       const status = reqAborted ? 'req-aborted-late' : 'error'
       timer.labels.status = status
@@ -674,6 +687,27 @@ async function _getPersistenceOptions(
         : {},
     }
   }
+}
+
+function canTryClsiCacheFallback(req, res, action, err) {
+  const reqAborted = Boolean(req.destroyed)
+  const streamingStarted = Boolean(res.headersSent)
+  return (
+    action === 'output-file' &&
+    err instanceof RequestFailedError &&
+    err.response.status === 404 &&
+    !streamingStarted &&
+    !reqAborted &&
+    req.params.build_id &&
+    req.query.editorId &&
+    req.params.file &&
+    // clsi-cache only has a small subset of files available outside the tar-ball
+    // The ClsiCacheHandler will validate the filename again.
+    (['output.log', 'output.pdf', 'output.synctex.gz'].includes(
+      req.params.file
+    ) ||
+      req.params.file.endsWith('.blg'))
+  )
 }
 
 const CompileController = {

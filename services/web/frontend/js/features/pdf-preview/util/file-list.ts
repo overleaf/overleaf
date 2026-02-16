@@ -1,6 +1,7 @@
 import {
   CompileOutputFile,
   CompileResponseData,
+  PDFFile,
 } from '../../../../../types/compile'
 import { PdfFileDataList } from '@/features/pdf-preview/util/types'
 
@@ -26,8 +27,14 @@ export function buildFileList(
 
     if (fromCache) {
       params.set('clsiserverid', clsiCacheShard || 'cache')
-    } else if (clsiServerId) {
-      params.set('clsiserverid', clsiServerId)
+    } else {
+      if (clsiServerId) {
+        params.set('clsiserverid', clsiServerId)
+      }
+      const pdf = outputFiles.get('output.pdf') as PDFFile
+      if (pdf) {
+        params.set('editorId', pdf.editorId)
+      }
     }
     if (compileGroup) {
       params.set('compileGroup', compileGroup)

@@ -3,7 +3,10 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import sinon from 'sinon'
 import { projectsData } from '../../../../fixtures/projects-data'
 import { location } from '@/shared/components/location'
-import { CompileAndDownloadProjectPDFButtonTooltip } from '../../../../../../../../frontend/js/features/project-list/components/table/cells/action-buttons/compile-and-download-project-pdf-button'
+import {
+  CompileAndDownloadProjectPDFButtonTooltip,
+  FAKE_EDITOR_ID,
+} from '@/features/project-list/components/table/cells/action-buttons/compile-and-download-project-pdf-button'
 import fetchMock from 'fetch-mock'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import getMeta from '@/utils/meta'
@@ -116,7 +119,7 @@ describe('<CompileAndDownloadProjectPDFButton />', function () {
 
     expect(assignStub).to.have.been.calledOnce
     expect(assignStub).to.have.been.calledWith(
-      `/download/project/${projectsData[0].id}/build/123-321/output/output.pdf?compileGroup=standard&popupDownload=true&clsiserverid=server-1`
+      `/download/project/${projectsData[0].id}/build/123-321/output/output.pdf?compileGroup=standard&popupDownload=true&editorId=${FAKE_EDITOR_ID}&clsiserverid=server-1`
     )
 
     expect(sendMBSpy).to.have.been.calledOnce
@@ -154,7 +157,7 @@ describe('<CompileAndDownloadProjectPDFButton />', function () {
 
     expect(assignStub).to.have.been.calledOnce
     expect(assignStub).to.have.been.calledWith(
-      `/download/project/${projectsData[0].id}/build/123-321/output/output.pdf?compileGroup=standard&popupDownload=true&clsiserverid=server-1`
+      `/download/project/${projectsData[0].id}/build/123-321/output/output.pdf?compileGroup=standard&popupDownload=true&editorId=${FAKE_EDITOR_ID}&clsiserverid=server-1`
     )
 
     expect(sendMBSpy).to.have.been.calledOnce

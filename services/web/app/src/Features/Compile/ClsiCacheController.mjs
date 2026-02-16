@@ -23,6 +23,35 @@ import Metrics from '@overleaf/metrics'
  */
 async function downloadFromCache(req, res) {
   const { Project_id: projectId, buildId, filename } = req.params
+  return await _downloadFromCacheWithParams(
+    req,
+    res,
+    projectId,
+    buildId,
+    filename
+  )
+}
+
+/**
+ * Download a file from a specific build on the clsi-cache.
+ *
+ * @param req
+ * @param res
+ * @param projectId
+ * @param buildId
+ * @param filename
+ * @param projectId
+ * @param buildId
+ * @param filename
+ * @return {Promise<*>}
+ */
+async function _downloadFromCacheWithParams(
+  req,
+  res,
+  projectId,
+  buildId,
+  filename
+) {
   const userId = CompileController._getUserIdForCompile(req)
   const signal = AbortSignal.timeout(60 * 1000)
   let location, projectName
@@ -156,6 +185,7 @@ async function getLatestBuildFromCache(req, res) {
 }
 
 export default {
+  _downloadFromCacheWithParams,
   downloadFromCache: expressify(downloadFromCache),
   getLatestBuildFromCache: expressify(getLatestBuildFromCache),
 }

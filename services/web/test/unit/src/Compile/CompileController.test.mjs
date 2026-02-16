@@ -19,6 +19,9 @@ describe('CompileController', function () {
         compileTimeout: 100,
       },
     }
+    ctx.ClsiCacheController = {
+      _downloadFromCacheWithParams: sinon.stub().resolves(),
+    }
     ctx.CompileManager = {
       promises: {
         compile: sinon.stub(),
@@ -112,6 +115,13 @@ describe('CompileController', function () {
         },
       }),
     }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Compile/ClsiCacheController',
+      () => ({
+        default: ctx.ClsiCacheController,
+      })
+    )
 
     vi.doMock('../../../../app/src/Features/Compile/CompileManager', () => ({
       default: ctx.CompileManager,
@@ -798,6 +808,97 @@ describe('CompileController', function () {
           ctx.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
             `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`
           )
+        })
+      })
+
+      describe('when the output.pdf does not exist', function () {
+        beforeEach(async function (ctx) {
+          ctx.req.params.file = 'output.pdf'
+          ctx.req.params.build_id = ctx.build_id
+          ctx.url = `/project/${ctx.projectId}/build/${ctx.build_id}/output/${ctx.req.params.file}`
+          ctx.editorId = '00000000-0000-0000-0000-000000000042'
+          ctx.req.query = { editorId: ctx.editorId }
+          ctx.CompileManager.promises.getProjectCompileLimits = sinon
+            .stub()
+            .resolves({
+              compileGroup: 'priority',
+              compileBackendClass: 'c4d',
+            })
+          ctx.fetchUtils.fetchStreamWithResponse.rejects(
+            new RequestFailedError(
+              `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`,
+              { method: 'GET' },
+              { status: 404 }
+            )
+          )
+          await ctx.CompileController._proxyToClsi(
+            ctx.projectId,
+            'output-file',
+            ctx.url,
+            {},
+            ctx.req,
+            ctx.res,
+            ctx.next
+          )
+        })
+
+        it('should open a request to the CLSI', function (ctx) {
+          ctx.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
+            `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`
+          )
+        })
+
+        it('should fallback to clsi-cache', function (ctx) {
+          ctx.ClsiCacheController._downloadFromCacheWithParams.should.have.been.calledWith(
+            ctx.req,
+            ctx.res,
+            ctx.projectId,
+            `${ctx.editorId}-${ctx.build_id}`,
+            'output.pdf'
+          )
+        })
+      })
+      describe('when the output.stderr does not exist', function () {
+        beforeEach(async function (ctx) {
+          ctx.req.params.file = 'output.stderr'
+          ctx.req.params.build_id = ctx.build_id
+          ctx.url = `/project/${ctx.projectId}/build/${ctx.build_id}/output/${ctx.req.params.file}`
+          ctx.editorId = '00000000-0000-0000-0000-000000000042'
+          ctx.req.query = { editorId: ctx.editorId }
+          ctx.CompileManager.promises.getProjectCompileLimits = sinon
+            .stub()
+            .resolves({
+              compileGroup: 'priority',
+              compileBackendClass: 'c4d',
+            })
+          ctx.fetchUtils.fetchStreamWithResponse.rejects(
+            new RequestFailedError(
+              `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`,
+              { method: 'GET' },
+              { status: 404 }
+            )
+          )
+          await ctx.CompileController._proxyToClsi(
+            ctx.projectId,
+            'output-file',
+            ctx.url,
+            {},
+            ctx.req,
+            ctx.res,
+            ctx.next
+          )
+        })
+
+        it('should open a request to the CLSI', function (ctx) {
+          ctx.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
+            `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`
+          )
+        })
+
+        it('should not fallback to clsi-cache', function (ctx) {
+          ctx.ClsiCacheController._downloadFromCacheWithParams.should.not.have
+            .been.called
+          ctx.res.statusCode.should.equal(404)
         })
       })
 

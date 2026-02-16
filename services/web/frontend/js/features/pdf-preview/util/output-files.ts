@@ -52,6 +52,7 @@ export function handleOutputFiles(
   } else {
     // build the URL for downloading the PDF
     params.set('popupDownload', 'true') // save PDF download as file
+    params.set('editorId', outputFile.editorId)
 
     outputFile.pdfDownloadUrl = `/download/project/${projectId}/build/${outputFile.build}/output/output.pdf?${params}`
   }

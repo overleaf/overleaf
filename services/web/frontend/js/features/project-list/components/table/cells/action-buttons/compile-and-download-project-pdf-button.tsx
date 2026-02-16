@@ -19,7 +19,7 @@ import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import getMeta from '@/utils/meta'
 import { v4 as uuid } from 'uuid'
 
-const FAKE_EDITOR_ID = uuid()
+export const FAKE_EDITOR_ID = uuid()
 
 type CompileAndDownloadProjectPDFButtonProps = {
   project: Project
@@ -102,6 +102,7 @@ function CompileAndDownloadProjectPDFButton({
           const params = new URLSearchParams({
             compileGroup: data.compileGroup,
             popupDownload: 'true',
+            editorId: FAKE_EDITOR_ID,
           })
           if (data.clsiServerId) {
             params.set('clsiserverid', data.clsiServerId)

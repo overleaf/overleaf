@@ -56,6 +56,7 @@ import { type CompileContext } from '@/shared/context/local-compile-context'
 import { EditorContext } from '@/shared/context/editor-context'
 import { Cobranding } from '@ol-types/cobranding'
 import { TutorialContext } from '@/shared/context/tutorial-context'
+import { EDITOR_SESSION_ID } from '@/features/pdf-preview/util/metrics'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -778,6 +779,7 @@ const makeDetachCompileProvider = (mockCompileOnLoad: boolean = false) => {
           const params = [
             data.compileGroup && `compileGroup=${data.compileGroup}`,
             data.clsiServerId && `clsiserverid=${data.clsiServerId}`,
+            `editorId=${EDITOR_SESSION_ID}`,
             'popupDownload=true',
           ]
             .filter(Boolean)
