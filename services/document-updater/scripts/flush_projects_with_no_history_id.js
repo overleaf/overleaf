@@ -96,15 +96,18 @@ async function findDocsWithMissingHistoryIds(node, docIds) {
       .map(docId => [
         docUpdaterKeys.docVersion({ doc_id: docId }),
         docUpdaterKeys.projectHistoryId({ doc_id: docId }),
+        docUpdaterKeys.lastUpdatedAt({ doc_id: docId }),
+        docUpdaterKeys.unflushedTime({ doc_id: docId }),
       ])
       .flat()
   )
 
   const results = []
 
+  const nKeysPerDoc = 4
   for (const [index, docId] of docIds.entries()) {
-    const docVersion = fromRedis[index * 2]
-    const historyId = fromRedis[index * 2 + 1]
+    const [docVersion, historyId, lastUpdatedAt, unflushedTime] =
+      fromRedis.slice(index * nKeysPerDoc, index * nKeysPerDoc + nKeysPerDoc)
     if (!docVersion) {
       // Already removed from redis.
       continue
@@ -112,7 +115,14 @@ async function findDocsWithMissingHistoryIds(node, docIds) {
     if (!historyId) {
       try {
         const { projectId, historyId } = await getHistoryId(docId)
-        results.push({ projectId, historyId, docId, docVersion })
+        results.push({
+          projectId,
+          historyId,
+          docId,
+          docVersion,
+          lastUpdatedAt,
+          unflushedTime,
+        })
       } catch (error) {
         logger.warn(
           { error },
