@@ -50,13 +50,6 @@ export const SubscriptionSchema = new Schema(
     invited_emails: [String],
     teamInvites: [TeamInviteSchema],
     recurlySubscription_id: String,
-    lastSuccesfulSubscription: {
-      planCode: {
-        type: String,
-      },
-      addOns: Schema.Types.Mixed,
-    },
-    timesRevertedDueToFailedPayment: { type: Number, default: 0 },
     teamName: { type: String },
     teamNotice: { type: String },
     planCode: { type: String },

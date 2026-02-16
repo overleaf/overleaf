@@ -105,8 +105,6 @@ describe('SubscriptionHandler', function () {
           .resolves(ctx.activeRecurlyClientSubscription),
         pauseSubscriptionByUuid: sinon.stub().resolves(),
         resumeSubscriptionByUuid: sinon.stub().resolves(),
-        failInvoice: sinon.stub(),
-        getPastDueInvoices: sinon.stub(),
       },
     }
     ctx.SubscriptionUpdater = {
@@ -115,7 +113,6 @@ describe('SubscriptionHandler', function () {
         syncSubscription: sinon.stub().resolves(),
         syncStripeSubscription: sinon.stub().resolves(),
         startFreeTrial: sinon.stub().resolves(),
-        setSubscriptionWasReverted: sinon.stub().resolves(),
       },
     }
 
@@ -1001,152 +998,6 @@ describe('SubscriptionHandler', function () {
 
       it('should return true', function (ctx) {
         expect(ctx.isValid).to.equal(true)
-      })
-    })
-  })
-
-  describe('revertPlanChange', function () {
-    describe('with correct invoices', function () {
-      beforeEach(async function (ctx) {
-        ctx.subscriptionRestorePoint = {
-          planCode: 'collaborator',
-          addOns: [
-            { addOnCode: 'addon-1', quantity: 1, unitAmountInCents: 500 },
-          ],
-          _id: 'restore-point-id',
-        }
-        ctx.pastDueInvoice = {
-          id: 'invoice-123',
-          dueAt: new Date(),
-          collectionMethod: 'automatic',
-        }
-        ctx.user.id = ctx.activeRecurlySubscription.account.account_code
-        ctx.User.findById = (userId, projection) => ({
-          exec: () => {
-            userId.should.equal(ctx.user.id)
-            return Promise.resolve(ctx.user)
-          },
-        })
-        ctx.RecurlyClient.promises.getSubscription.resolves(
-          ctx.activeRecurlyClientSubscription
-        )
-        ctx.RecurlyClient.promises.getPastDueInvoices.resolves([
-          ctx.pastDueInvoice,
-        ])
-        ctx.RecurlyClient.promises.failInvoice.resolves()
-        ctx.SubscriptionUpdater.promises.setSubscriptionWasReverted.resolves()
-        ctx.RecurlyClient.promises.applySubscriptionChangeRequest.resolves()
-
-        await ctx.SubscriptionHandler.promises.revertPlanChange(
-          ctx.activeRecurlyClientSubscription.id,
-          ctx.subscriptionRestorePoint
-        )
-      })
-
-      it('should fetch the subscription from recurly', async function (ctx) {
-        expect(
-          ctx.RecurlyClient.promises.getSubscription.calledWith(
-            ctx.activeRecurlyClientSubscription.id
-          )
-        ).to.be.true
-      })
-
-      it('should fail the invoice', async function (ctx) {
-        expect(
-          ctx.RecurlyClient.promises.failInvoice.calledWith(
-            ctx.pastDueInvoice.id
-          )
-        ).to.be.true
-      })
-
-      it('should call setSubscriptionWasReverted', async function (ctx) {
-        expect(
-          ctx.SubscriptionUpdater.promises.setSubscriptionWasReverted.calledWith(
-            ctx.subscriptionRestorePoint._id
-          )
-        ).to.be.true
-      })
-
-      it('should sync the subscription', async function (ctx) {
-        ctx.SubscriptionUpdater.promises.syncSubscription.calledOnce.should.equal(
-          true
-        )
-        ctx.SubscriptionUpdater.promises.syncSubscription.args[0][0].should.deep.equal(
-          ctx.activeRecurlySubscription
-        )
-        ctx.SubscriptionUpdater.promises.syncSubscription.args[0][1].should.deep.equal(
-          ctx.user._id
-        )
-      })
-    })
-
-    describe('should throw an IndeterminateInvoiceError when', function () {
-      beforeEach(function (ctx) {
-        ctx.subscriptionRestorePoint = {
-          planCode: 'collaborator',
-          addOns: [
-            { addOnCode: 'addon-1', quantity: 1, unitAmountInCents: 500 },
-          ],
-          _id: 'restore-point-id',
-        }
-        ctx.RecurlyClient.promises.getSubscription.resolves(
-          ctx.activeRecurlyClientSubscription
-        )
-      })
-
-      it('finds a past due invoice older than 24 hours', async function (ctx) {
-        const oldInvoice = {
-          id: 'invoice-123',
-          dueAt: new Date(Date.now() - 25 * 60 * 60 * 1000), // 25 hours ago
-          collectionMethod: 'automatic',
-        }
-        ctx.RecurlyClient.promises.getPastDueInvoices.resolves([oldInvoice])
-
-        await expect(
-          ctx.SubscriptionHandler.promises.revertPlanChange(
-            ctx.activeRecurlyClientSubscription.id,
-            ctx.subscriptionRestorePoint
-          )
-        ).to.be.rejectedWith('cant determine invoice to fail for plan revert')
-      })
-
-      it('finds more than one past due invoice', async function (ctx) {
-        const invoices = [
-          {
-            id: 'invoice-123',
-            dueAt: new Date(),
-            collectionMethod: 'automatic',
-          },
-          {
-            id: 'invoice-456',
-            dueAt: new Date(),
-            collectionMethod: 'automatic',
-          },
-        ]
-        ctx.RecurlyClient.promises.getPastDueInvoices.resolves(invoices)
-
-        await expect(
-          ctx.SubscriptionHandler.promises.revertPlanChange(
-            ctx.activeRecurlyClientSubscription.id,
-            ctx.subscriptionRestorePoint
-          )
-        ).to.be.rejectedWith('cant determine invoice to fail for plan revert')
-      })
-
-      it('finds an invoice with a collectionMethod other than automatic', async function (ctx) {
-        const manualInvoice = {
-          id: 'invoice-123',
-          dueAt: new Date(),
-          collectionMethod: 'manual',
-        }
-        ctx.RecurlyClient.promises.getPastDueInvoices.resolves([manualInvoice])
-
-        await expect(
-          ctx.SubscriptionHandler.promises.revertPlanChange(
-            ctx.activeRecurlyClientSubscription.id,
-            ctx.subscriptionRestorePoint
-          )
-        ).to.be.rejectedWith('cant determine invoice to fail for plan revert')
       })
     })
   })

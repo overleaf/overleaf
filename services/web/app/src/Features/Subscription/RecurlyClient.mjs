@@ -884,38 +884,6 @@ function subscriptionUpdateRequestToApi(updateRequest) {
   return requestBody
 }
 
-/**
- * Retrieves a list of failed invoices for a given Recurly subscription ID.
- *
- * @async
- * @function
- * @param {string} subscriptionId - The ID of the Recurly subscription to fetch failed invoices for.
- * @returns {Promise<Array<recurly.Invoice>>} A promise that resolves to an array of failed invoice objects.
- */
-async function getPastDueInvoices(subscriptionId) {
-  const failed = []
-  const invoices = client.listSubscriptionInvoices(`uuid-${subscriptionId}`, {
-    params: { state: 'past_due' },
-  })
-
-  for await (const invoice of invoices.each()) {
-    failed.push(invoice)
-  }
-  return failed
-}
-
-/**
- * Marks an invoice as failed using the Recurly client.
- *
- * @async
- * @function failInvoice
- * @param {string} invoiceId - The ID of the invoice to be marked as failed.
- * @returns {Promise<void>} Resolves when the invoice has been successfully marked as failed.
- */
-async function failInvoice(invoiceId) {
-  await client.markInvoiceFailed(invoiceId)
-}
-
 async function terminateSubscriptionByUuid(subscriptionUuid) {
   const subscription = await client.terminateSubscription(
     'uuid-' + subscriptionUuid,
@@ -952,8 +920,6 @@ export default {
   subscriptionIsCanceledOrExpired,
   pauseSubscriptionByUuid: callbackify(pauseSubscriptionByUuid),
   resumeSubscriptionByUuid: callbackify(resumeSubscriptionByUuid),
-  getPastDueInvoices: callbackify(getPastDueInvoices),
-  failInvoice: callbackify(failInvoice),
   terminateSubscriptionByUuid: callbackify(terminateSubscriptionByUuid),
 
   promises: {
@@ -975,8 +941,6 @@ export default {
     getPaymentMethod,
     getAddOn,
     getPlan,
-    getPastDueInvoices,
-    failInvoice,
     terminateSubscriptionByUuid,
   },
 }

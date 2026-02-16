@@ -1,7 +1,3 @@
-/**
- * @import { AddOn } from '../../../../types/subscription/plan'
- */
-
 import { callbackifyAll } from '@overleaf/promise-utils'
 
 import { Subscription } from '../../models/Subscription.mjs'
@@ -181,27 +177,6 @@ const SubscriptionLocator = {
     } else if (userOrId) {
       return userOrId
     }
-  },
-
-  /**
-   * Retrieves the last successful subscription for a given user.
-   *
-   * @async
-   * @function
-   * @param {string} recurlyId - The ID of the recurly subscription tied to the mongo subscription to check for a previous successful state.
-   * @returns {Promise<{_id: ObjectId, planCode: string, addOns: [AddOn]}|null>} A promise that resolves to the last successful planCode and addon state,
-   *   or null if we havent stored a previous
-   */
-  async getLastSuccessfulSubscription(recurlyId) {
-    const subscription = await Subscription.findOne({
-      recurlySubscription_id: recurlyId,
-    }).exec()
-    return subscription && subscription.lastSuccesfulSubscription
-      ? {
-          ...subscription.lastSuccesfulSubscription,
-          _id: subscription._id,
-        }
-      : null
   },
 
   async getUserSubscriptionStatus(userId) {

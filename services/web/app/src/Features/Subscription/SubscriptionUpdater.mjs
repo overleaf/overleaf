@@ -20,7 +20,6 @@ import Modules from '../../infrastructure/Modules.mjs'
  * @typedef {import('../../../../types/subscription/dashboard/subscription').Subscription} Subscription
  * @typedef {import('../../../../types/subscription/dashboard/subscription').PaymentProvider} PaymentProvider
  * @typedef {import('../../../../types/group-management/group-audit-log').GroupAuditLog} GroupAuditLog
- * @import { AddOn } from '../../../../types/subscription/plan'
  * @typedef {InstanceType<Subscription>} MongoSubscription
  */
 
@@ -519,28 +518,6 @@ async function _sendSubscriptionEventForAllMembers(subscriptionId, event) {
 }
 
 /**
- * Sets the plan code and addon state to revert the plan to in case of failed upgrades, or clears the last restore point if it was used/ voided
- * @param {ObjectId} subscriptionId the mongo ID of the subscription to set the restore point for
- * @param {string} planCode the plan code to revert to
- * @param {Array<AddOn>} addOns the addOns to revert to
- * @param {Boolean} consumed whether the restore point was used to revert a subscription
- */
-async function setRestorePoint(subscriptionId, planCode, addOns, consumed) {
-  const update = {
-    $set: {
-      'lastSuccesfulSubscription.planCode': planCode,
-      'lastSuccesfulSubscription.addOns': addOns,
-    },
-  }
-
-  if (consumed) {
-    update.$inc = { timesRevertedDueToFailedPayment: 1 }
-  }
-
-  await Subscription.updateOne({ _id: subscriptionId }, update).exec()
-}
-
-/**
  * Change the ownershiop of the given subscription.
  * @param {MongoSubscription} subscription
  * @param {string} adminId
@@ -572,31 +549,6 @@ async function transferSubscriptionOwnership(
   await Subscription.updateOne(query, update).exec()
 }
 
-/**
- * Clears the restore point for a given subscription, and signals that the subscription was sucessfully reverted.
- *
- * @async
- * @function setSubscriptionWasReverted
- * @param {ObjectId} subscriptionId the mongo ID of the subscription to set the restore point for
- * @returns {Promise<void>} Resolves when the restore point has been cleared.
- */
-async function setSubscriptionWasReverted(subscriptionId) {
-  // consume the backup and flag that the subscription was reverted due to failed payment
-  await setRestorePoint(subscriptionId, null, null, true)
-}
-
-/**
- * Clears the restore point for a given subscription, and signals that the subscription was not reverted.
- *
- * @async
- * @function voidRestorePoint
- * @param {string} subscriptionId - The unique identifier of the subscription.
- * @returns {Promise<void>} Resolves when the restore point has been cleared.
- */
-async function voidRestorePoint(subscriptionId) {
-  await setRestorePoint(subscriptionId, null, null, false)
-}
-
 export default {
   updateAdmin: callbackify(updateAdmin),
   syncSubscription: callbackify(syncSubscription),
@@ -611,9 +563,6 @@ export default {
   restoreSubscription: callbackify(restoreSubscription),
   updateSubscriptionFromRecurly: callbackify(updateSubscriptionFromRecurly),
   scheduleRefreshFeatures: callbackify(scheduleRefreshFeatures),
-  setSubscriptionRestorePoint: callbackify(setRestorePoint),
-  setSubscriptionWasReverted: callbackify(setSubscriptionWasReverted),
-  voidRestorePoint: callbackify(voidRestorePoint),
   promises: {
     updateAdmin,
     syncSubscription,
@@ -628,9 +577,6 @@ export default {
     restoreSubscription,
     updateSubscriptionFromRecurly,
     scheduleRefreshFeatures,
-    setRestorePoint,
-    setSubscriptionWasReverted,
-    voidRestorePoint,
     handleExpiredSubscription,
     transferSubscriptionOwnership,
   },

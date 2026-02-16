@@ -33,7 +33,6 @@ import UserGetter from '../User/UserGetter.mjs'
 import PermissionsManager from '../Authorization/PermissionsManager.mjs'
 import { sanitizeSessionUserForFrontEnd } from '../../infrastructure/FrontEndUser.mjs'
 import { z, parseReq } from '../../infrastructure/Validation.mjs'
-import { IndeterminateInvoiceError } from '../Errors/Errors.js'
 import SubscriptionLocator from './SubscriptionLocator.mjs'
 import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities.mjs'
 
@@ -887,54 +886,7 @@ function recurlyCallback(req, res, next) {
     )
   )
 
-  // this is a recurly only case which is required since Recurly does not have a reliable way to check credit info pre-upgrade purchase
-  if (event === 'failed_payment_notification') {
-    if (!Settings.planReverts?.enabled) {
-      return res.sendStatus(200)
-    }
-
-    // A manual charge may have no subscription, in which case we get a
-    // <subscription_id nil="true"/> element, which produces an object instead
-    // of a string subscription_id.
-    const subscriptionId = eventData.transaction?.subscription_id
-    if (!subscriptionId || typeof subscriptionId !== 'string') {
-      logger.info(
-        { transactionId: eventData.transaction?.id },
-        'ignoring failed_payment_notification without subscription_id'
-      )
-      return res.sendStatus(200)
-    }
-
-    SubscriptionHandler.getSubscriptionRestorePoint(
-      subscriptionId,
-      function (err, lastSubscription) {
-        if (err) {
-          return next(err)
-        }
-        // if theres no restore point it could be a failed renewal, or no restore set. Either way it will be handled through dunning automatically
-        if (!lastSubscription || !lastSubscription?.planCode) {
-          return res.sendStatus(200)
-        }
-        SubscriptionHandler.revertPlanChange(
-          eventData.transaction.subscription_id,
-          lastSubscription,
-          function (err) {
-            if (err instanceof IndeterminateInvoiceError) {
-              logger.warn(
-                { recurlySubscriptionId: err.info.recurlySubscriptionId },
-                'could not determine invoice to fail for subscription'
-              )
-              return res.sendStatus(200)
-            }
-            if (err) {
-              return next(err)
-            }
-            return res.sendStatus(200)
-          }
-        )
-      }
-    )
-  } else if (
+  if (
     [
       'new_subscription_notification',
       'updated_subscription_notification',

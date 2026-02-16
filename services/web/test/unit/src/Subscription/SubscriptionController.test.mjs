@@ -57,7 +57,6 @@ describe('SubscriptionController', function () {
       syncSubscription: sinon.stub().yields(),
       attemptPaypalInvoiceCollection: sinon.stub().yields(),
       startFreeTrial: sinon.stub(),
-      revertPlanChange: sinon.stub(),
       promises: {
         createSubscription: sinon.stub().resolves(),
         updateSubscription: sinon.stub().resolves(),
@@ -85,7 +84,6 @@ describe('SubscriptionController', function () {
           tax: 0,
           total: 2000,
         }),
-        revertPlanChange: sinon.stub().resolves(),
       },
     }
 
@@ -132,9 +130,6 @@ describe('SubscriptionController', function () {
         recurly: {
           subdomain: 'sl',
         },
-      },
-      planReverts: {
-        enabled: false,
       },
       siteUrl: 'http://de.overleaf.dev:3000',
     }
@@ -867,144 +862,6 @@ describe('SubscriptionController', function () {
 
       it('should respond with a 200 status', function (ctx) {
         ctx.res.sendStatus.calledWith(200)
-      })
-    })
-
-    describe('with a failed payment notification', function () {
-      describe('with planReverts disabled in settings', function () {
-        beforeEach(async function (ctx) {
-          await new Promise(resolve => {
-            ctx.settings.planReverts = { enabled: false }
-            ctx.SubscriptionHandler.revertPlanChange = sinon.stub()
-
-            ctx.req.body = {
-              failed_payment_notification: {
-                transaction: {
-                  subscription_id: 'subscription-123',
-                },
-              },
-            }
-
-            ctx.res = {
-              sendStatus() {
-                resolve()
-              },
-            }
-            sinon.spy(ctx.res, 'sendStatus')
-            ctx.SubscriptionController.recurlyCallback(ctx.req, ctx.res)
-          })
-        })
-        it('should not call revertPlanChange', function (ctx) {
-          expect(ctx.SubscriptionHandler.revertPlanChange.called).to.be.false
-        })
-
-        it('should respond with 200', async function (ctx) {
-          await new Promise(resolve => {
-            ctx.res.sendStatus.calledWith(200)
-            resolve()
-          })
-        })
-      })
-
-      describe('with planReverts enabled in settings', function () {
-        beforeEach(function (ctx) {
-          ctx.settings.planReverts = { enabled: true }
-        })
-
-        describe('with no valid restore point', function () {
-          beforeEach(async function (ctx) {
-            await new Promise(resolve => {
-              ctx.SubscriptionHandler.getSubscriptionRestorePoint = sinon
-                .stub()
-                .yields(null, null)
-              ctx.SubscriptionHandler.revertPlanChange = sinon.stub()
-
-              ctx.req.body = {
-                failed_payment_notification: {
-                  transaction: {
-                    subscription_id: 'subscription-123',
-                  },
-                },
-              }
-              ctx.res = {
-                sendStatus() {
-                  resolve()
-                },
-              }
-              sinon.spy(ctx.res, 'sendStatus')
-              ctx.SubscriptionController.recurlyCallback(ctx.req, ctx.res)
-            })
-          })
-          it('should not call revertPlanChange()', function (ctx) {
-            expect(ctx.SubscriptionHandler.revertPlanChange.called).to.be.false
-          })
-
-          it('should respond with 200', function (ctx) {
-            ctx.res.sendStatus.calledWith(200)
-          })
-        })
-
-        describe('with a valid restore point', function () {
-          beforeEach(async function (ctx) {
-            await new Promise(resolve => {
-              ctx.addOns = [
-                {
-                  addOnCode: 'addon-1',
-                  quantity: 2,
-                  unitAmountInCents: 500,
-                },
-                {
-                  addOnCode: 'addon-2',
-                  quantity: 1,
-                  unitAmountInCents: 600,
-                },
-              ]
-              ctx.lastSubscription = {
-                planCode: 'gold',
-                addOns: ctx.addOns,
-              }
-              ctx.SubscriptionHandler.getSubscriptionRestorePoint = sinon
-                .stub()
-                .yields(null, ctx.lastSubscription)
-              ctx.SubscriptionHandler.revertPlanChange = sinon.stub().yields()
-              ctx.req.body = {
-                failed_payment_notification: {
-                  transaction: {
-                    subscription_id: 'subscription-123',
-                  },
-                },
-              }
-              ctx.res = {
-                sendStatus() {
-                  resolve()
-                },
-              }
-              sinon.spy(ctx.res, 'sendStatus')
-              ctx.SubscriptionController.recurlyCallback(ctx.req, ctx.res)
-            })
-          })
-
-          it('should get the subscription restore point', function (ctx) {
-            expect(
-              ctx.SubscriptionHandler.getSubscriptionRestorePoint.calledWith(
-                'subscription-123'
-              )
-            ).to.be.true
-          })
-
-          it('should call revertPlanChange()', function (ctx) {
-            expect(
-              ctx.SubscriptionHandler.revertPlanChange.calledWith(
-                'subscription-123',
-                ctx.lastSubscription
-              )
-            ).to.be.true
-          })
-
-          it('should respond with 200', function (ctx) {
-            ctx.res.sendStatus.calledWith(200)
-          })
-        })
       })
     })
   })
