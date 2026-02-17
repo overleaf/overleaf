@@ -108,8 +108,6 @@ async function main(trackProgress) {
       }
 
       queue.add(async () => {
-        processedCount++
-
         try {
           const result = await processTermination(input, opts.commit)
 
@@ -125,12 +123,6 @@ async function main(trackProgress) {
             successCount++
           } else {
             errorCount++
-          }
-
-          if (processedCount % 25 === 0) {
-            await trackProgress(
-              `Progress: ${processedCount} processed, ${successCount} successful, ${errorCount} errors`
-            )
           }
         } catch (err) {
           errorCount++
@@ -151,6 +143,13 @@ async function main(trackProgress) {
               note: err.message,
             })
           }
+        }
+
+        processedCount++
+        if (processedCount % 25 === 0) {
+          await trackProgress(
+            `Progress: ${processedCount} processed, ${successCount} successful, ${errorCount} errors`
+          )
         }
       })
     }
@@ -281,10 +280,10 @@ async function processTermination(input, commit) {
   } else {
     const note = isInExpectedEndState
       ? 'DRY RUN: Ready to terminate'
-      : `DRY RUN: Ready to terminate ${warning}`
+      : `DRY RUN: Can terminate, with this warning: ${warning}`
 
     return {
-      status: 'validated',
+      status: isInExpectedEndState ? 'validated' : 'validated-with-warnings',
       note,
     }
   }

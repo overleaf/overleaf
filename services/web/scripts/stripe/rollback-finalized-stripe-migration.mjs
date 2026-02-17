@@ -122,8 +122,6 @@ async function main(trackProgress) {
       }
 
       queue.add(async () => {
-        processedCount++
-
         try {
           const result = await processRollback(input, opts.commit)
 
@@ -144,12 +142,6 @@ async function main(trackProgress) {
           } else {
             errorCount++
           }
-
-          if (processedCount % 25 === 0) {
-            await trackProgress(
-              `Progress: ${processedCount} processed, ${successCount} successful, ${errorCount} errors`
-            )
-          }
         } catch (err) {
           errorCount++
           if (err instanceof ReportError) {
@@ -169,6 +161,13 @@ async function main(trackProgress) {
               note: err.message,
             })
           }
+        }
+
+        processedCount++
+        if (processedCount % 25 === 0) {
+          await trackProgress(
+            `Progress: ${processedCount} processed, ${successCount} successful, ${errorCount} errors`
+          )
         }
       })
     }

@@ -106,8 +106,6 @@ async function main(trackProgress) {
       }
 
       queue.add(async () => {
-        processedCount++
-
         try {
           const result = await processScheduleCancellation(input, opts.commit)
 
@@ -124,12 +122,6 @@ async function main(trackProgress) {
           } else {
             errorCount++
           }
-
-          if (processedCount % 25 === 0) {
-            await trackProgress(
-              `Progress: ${processedCount} processed, ${successCount} successful, ${errorCount} errors`
-            )
-          }
         } catch (err) {
           errorCount++
           csvWriter.write({
@@ -139,6 +131,13 @@ async function main(trackProgress) {
             status: err instanceof ReportError ? err.status : 'error',
             note: err.message,
           })
+        }
+
+        processedCount++
+        if (processedCount % 25 === 0) {
+          await trackProgress(
+            `Progress: ${processedCount} processed, ${successCount} successful, ${errorCount} errors`
+          )
         }
       })
     }

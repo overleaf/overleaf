@@ -593,7 +593,10 @@ async function fetchTargetStripeCustomer(
 ) {
   const customer = await rateLimiters.requestWithRetries(
     stripeClient.serviceName,
-    () => stripeClient.customers.retrieve(stripeCustomerId),
+    () =>
+      stripeClient.customers.retrieve(stripeCustomerId, {
+        expand: ['subscriptions'],
+      }),
     { ...context, stripeApi: 'customers.retrieve' }
   )
 
@@ -602,6 +605,37 @@ async function fetchTargetStripeCustomer(
   }
 
   return customer
+}
+
+/**
+ * Query for other matching customers from the target Stripe account by ID.
+ *
+ * @param {Stripe} stripeClient - The Stripe client for the target account
+ * @param {string} userId - The user id to query
+ * @param {string} stripeCustomerId - The Stripe customer ID to exclude from results (if any)
+ * @param {object} context - Context for logging and rate limiter identification
+ * @returns {Promise<Stripe.Customer | null>}
+ */
+async function fetchOtherStripeCustomerByUserId(
+  stripeClient,
+  userId,
+  stripeCustomerId,
+  context
+) {
+  const results = await rateLimiters.requestWithRetries(
+    stripeClient.serviceName,
+    () =>
+      stripeClient.customers.search({
+        query: `metadata['userId']:"${userId}"`,
+        limit: 100,
+      }),
+    { ...context, stripeApi: 'customers.search' }
+  )
+
+  return (
+    results.data?.find(customer => customer.id !== context.stripeCustomerId) ||
+    null
+  )
 }
 
 /**
@@ -913,6 +947,25 @@ async function processCustomer(
       stripeContext
     )
 
+    if (existingCustomer.subscriptions?.data.length > 0) {
+      throw new Error(
+        `Stripe customer ${stripeCustomerId} already has ${existingCustomer.subscriptions.data.length} active subscription(s).`
+      )
+    }
+
+    const otherMatchingCustomer = await fetchOtherStripeCustomerByUserId(
+      stripeClient,
+      recurlyAccountCode,
+      stripeCustomerId,
+      stripeContext
+    )
+
+    if (otherMatchingCustomer) {
+      throw new Error(
+        `Found another Stripe customer with matching userId metadata: ${otherMatchingCustomer.id}`
+      )
+    }
+
     logDebug(
       'Found existing Stripe customer',
       {
@@ -1062,19 +1115,25 @@ async function processCustomer(
     if (taxInfoPendingValue) {
       metadata.taxInfoPending = taxInfoPendingValue
     }
+
     if (
-      existingCustomer.metadata != null &&
-      existingCustomer.metadata.recurlyAccountCode === recurlyAccountCode &&
-      existingCustomer.metadata.userId == null
+      existingCustomer.metadata?.recurlyAccountCode &&
+      existingCustomer.metadata?.recurlyAccountCode !== recurlyAccountCode
     ) {
-      metadata.recurlyAccountCode = ''
-      metadata.userId = recurlyAccountCode
-    } else {
-      logWarn('Stripe customer metadata cannot be remapped', {
-        ...context,
-        existingCustomerMetadata: existingCustomer.metadata,
-      })
+      throw new Error(
+        `Existing Stripe customer has unexpected recurlyAccountCode: (expected) ${recurlyAccountCode} (actual) ${existingCustomer.metadata?.recurlyAccountCode}`
+      )
     }
+    if (
+      existingCustomer.metadata?.userId &&
+      existingCustomer.metadata?.userId !== recurlyAccountCode
+    ) {
+      throw new Error(
+        `Existing Stripe customer has unexpected userId: (expected) ${recurlyAccountCode} (actual) ${existingCustomer.metadata?.userId}`
+      )
+    }
+    metadata.recurlyAccountCode = ''
+    metadata.userId = recurlyAccountCode
 
     const { metadata: customFieldMetadata, counts: customFieldCounts } =
       extractRecurlyCustomFieldMetadata(account)

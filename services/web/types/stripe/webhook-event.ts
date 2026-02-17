@@ -3,7 +3,10 @@ import Stripe from 'stripe'
 type StripeSubscription = Stripe.Subscription & {
   metadata: {
     billing_migration_id?: string
-    recurly_to_stripe_migration_status?: 'in_progress' | 'completed'
+    recurly_to_stripe_migration_status?:
+      | 'in_progress'
+      | 'completed'
+      | 'cancelled'
   }
   customer: string
 }
@@ -57,7 +60,10 @@ export interface InvoicePaidWebhookEvent extends Stripe.EventBase {
         subscription_details: Stripe.Invoice.Parent.SubscriptionDetails & {
           metadata: {
             billing_migration_id?: string
-            recurly_to_stripe_migration_status?: 'in_progress' | 'completed'
+            recurly_to_stripe_migration_status?:
+              | 'in_progress'
+              | 'completed'
+              | 'cancelled'
           }
         }
       }
