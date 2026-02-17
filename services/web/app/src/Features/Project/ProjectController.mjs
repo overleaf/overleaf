@@ -1266,18 +1266,28 @@ const _ProjectController = {
     if (shouldAutoCreateAccount) {
       await UserUpdater.promises.updateUser(userId, {
         $set: {
-          writefull: { enabled: true, autoCreatedAccount: true },
+          writefull: {
+            enabled: true,
+            initialized: true,
+            autoCreatedAccount: true,
+          },
         },
       })
       user.writefull.enabled = true
+      user.writefull.initialized = true
       user.writefull.autoCreatedAccount = true
     } else if (shouldAutoLoad) {
       await UserUpdater.promises.updateUser(userId, {
         $set: {
-          writefull: { enabled: true, autoCreatedAccount: false },
+          writefull: {
+            enabled: true,
+            initialized: true,
+            autoCreatedAccount: false,
+          },
         },
       })
       user.writefull.enabled = true
+      user.writefull.initialized = true
       user.writefull.autoCreatedAccount = false
     }
   },
