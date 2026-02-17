@@ -23,6 +23,11 @@ export const openContextMenuEffect = StateEffect.define<{
 
 export const closeContextMenuEffect = StateEffect.define()
 
+const isTouchOnlyInput =
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(pointer: coarse)').matches &&
+  window.matchMedia('(hover: none)').matches
+
 type ContextMenuState = {
   tooltip: Tooltip | null
   mousePosition: { x: number; y: number } | null
@@ -238,8 +243,9 @@ const gutterContextMenuPlugin = (): Extension =>
     gutters.setAttribute('data-context-menu-attached', 'true')
     gutters.addEventListener('contextmenu', (event: Event) => {
       const mouseEvent = event as MouseEvent
-      event.preventDefault()
-
+      if (isTouchOnlyInput) {
+        return
+      }
       const pos = update.view.posAtCoords({
         x: mouseEvent.clientX,
         y: mouseEvent.clientY,
@@ -247,6 +253,8 @@ const gutterContextMenuPlugin = (): Extension =>
       if (pos === null) {
         return
       }
+
+      event.preventDefault()
 
       const selection = selectEntireLine(update.view, pos)
       if (selection) {
@@ -265,12 +273,16 @@ const gutterContextMenuPlugin = (): Extension =>
 const editorContextMenuHandlers = (): Extension =>
   EditorView.domEventHandlers({
     contextmenu(event: MouseEvent, view: EditorView) {
-      event.preventDefault()
+      if (isTouchOnlyInput) {
+        return false
+      }
 
       const pos = view.posAtCoords({ x: event.clientX, y: event.clientY })
       if (pos === null) {
         return false
       }
+
+      event.preventDefault()
 
       const clickedInsideSelection = isPositionInsideAnyRangeOrCursor(view, pos)
 
@@ -303,7 +315,8 @@ const editorContextMenuHandlers = (): Extension =>
       }
 
       // Prevent default on right-click to preserve selection
-      if (isRightClick) {
+      // But not on touch devices - they need native selection behavior
+      if (isRightClick && !isTouchOnlyInput) {
         event.preventDefault()
         return true
       }
