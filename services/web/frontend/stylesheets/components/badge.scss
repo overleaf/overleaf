@@ -1,3 +1,27 @@
+@mixin light-themed-badge-tag {
+  --badge-tag-themed-content-color: var(--content-primary);
+  --badge-tag-themed-btn-hover-bg: var(--neutral-40);
+  --badge-tag-themed-hover-bg: var(--neutral-30);
+  --badge-tag-themed-btn-bg: var(--neutral-20);
+}
+
+@mixin dark-themed-badge-tag {
+  --badge-tag-themed-content-color: var(--content-primary-dark);
+  --badge-tag-themed-btn-hover-bg: var(--neutral-60);
+  --badge-tag-themed-hover-bg: var(--neutral-50);
+  --badge-tag-themed-btn-bg: var(--neutral-70);
+}
+
+:root {
+  @include light-themed-badge-tag;
+
+  @include theme('default') {
+    .badge.badge-themed {
+      @include dark-themed-badge-tag;
+    }
+  }
+}
+
 $max-width: 160px;
 
 .badge {
@@ -148,5 +172,27 @@ $max-width: 160px;
 
   .badge {
     max-width: 200px;
+  }
+}
+
+.badge.badge-themed {
+  .badge-close,
+  .badge-tag-content-btn {
+    &:hover {
+      background-color: var(--badge-tag-themed-btn-hover-bg);
+    }
+  }
+
+  &.badge-tag {
+    color: var(--badge-tag-themed-content-color);
+    background-color: var(--badge-tag-themed-btn-bg) !important;
+
+    &:hover {
+      background-color: var(--badge-tag-themed-hover-bg) !important;
+    }
+  }
+
+  .badge-content {
+    color: var(--badge-tag-themed-content-color);
   }
 }

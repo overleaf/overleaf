@@ -56,7 +56,7 @@ function InlineTag({ tag, projectId }: InlineTagProps) {
       closeBtnProps={{
         onClick: () => handleRemoveTag(tag._id, projectId),
       }}
-      className="ms-2"
+      className="ms-2 badge-themed"
       translate="no"
     >
       {tag.name}
