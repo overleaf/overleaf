@@ -43,3 +43,4 @@ export type AdminRole =
   | 'super_admin'
   | 'support'
   | 'support_tier_1'
+  | 'ux'
