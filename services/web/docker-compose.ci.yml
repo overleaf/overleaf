@@ -69,7 +69,7 @@ services:
     tmpfs:
       - /overleaf/services/web/data:uid=1000,gid=1000
 
-  test_frontend:
+  test_frontend_jsdom:
     build:
       context: ../..
       dockerfile: services/web/Dockerfile

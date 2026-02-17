@@ -88,7 +88,7 @@ clean_ci:
 # Tests
 #
 
-test: test_unit test_acceptance test_frontend test_frontend_ct test_writefull
+test: test_unit test_acceptance test_frontend test_writefull
 
 test_module: test_unit_module test_acceptance_module
 
@@ -161,10 +161,12 @@ mongo_migrations_for_tests:
 # Frontend tests
 #
 
-test_frontend: export JUNIT_ROOT_SUITE_NAME = JSDOM frontend tests
-test_frontend:
-	COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend
+test_frontend_jsdom: export JUNIT_ROOT_SUITE_NAME = JSDOM frontend tests
+test_frontend_jsdom:
+	COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend_jsdom
 	COMPOSE_PROJECT_NAME=frontend_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+
+test_frontend: test_frontend_jsdom test_frontend_ct
 
 #
 # Frontend component tests in Cypress
@@ -732,7 +734,7 @@ $(MODULE_TARGETS):
 	$(MODULE_TARGETS) \
 	compile_modules compile_modules_full clean_ci \
 	test test_module mongo_migrations_for_tests test_unit test_unit_app \
-	test_unit_modules test_unit_module test_frontend \
+	test_unit_modules test_unit_module test_frontend_jsdom \
 	test_acceptance test_acceptance_app test_acceptance_modules \
 	test_acceptance_module ci format format_fix lint \
 	shellcheck shellcheck_fix \

@@ -69,7 +69,7 @@ services:
     entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
     command: npm run --silent test:acceptance:app
 
-  test_frontend:
+  test_frontend_jsdom:
     build:
       context: ../..
       dockerfile: services/web/Dockerfile
