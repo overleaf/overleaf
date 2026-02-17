@@ -1,8 +1,8 @@
 import moment from 'moment'
 
-export function formatUtcDate(date: moment.MomentInput) {
+export function formatLocalDate(date: moment.MomentInput) {
   if (date) {
-    return moment(date).utc().format('D MMM YYYY, HH:mm:ss') + ' UTC'
+    return moment(date).format('D MMM YYYY, HH:mm:ss Z')
   } else {
     return 'N/A'
   }
