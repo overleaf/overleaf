@@ -13,7 +13,7 @@ function getSafeProjectName(project) {
 
 export default {
   downloadProject(req, res, next) {
-    const userId = SessionManager.getSessionUser(req.session)
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const projectId = req.params.Project_id
     Metrics.inc('zip-downloads')
     DocumentUpdaterHandler.flushProjectToMongo(projectId, function (error) {
@@ -49,6 +49,7 @@ export default {
   },
 
   downloadMultipleProjects(req, res, next) {
+    const userId = SessionManager.getLoggedInUserId(req.session)
     const projectIds = req.query.project_ids.split(',')
     Metrics.inc('zip-downloads-multiple')
     DocumentUpdaterHandler.flushMultipleProjectsToMongo(
@@ -56,6 +57,15 @@ export default {
       function (error) {
         if (error) {
           return next(error)
+        }
+        // Log audit entry for each project in the batch
+        for (const projectId of projectIds) {
+          ProjectAuditLogHandler.addEntryInBackground(
+            projectId,
+            'project-downloaded',
+            userId,
+            req.ip
+          )
         }
         ProjectZipStreamManager.createZipStreamForMultipleProjects(
           projectIds,

@@ -42,6 +42,15 @@ describe('ProjectDownloadsController', function () {
       })
     )
 
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectAuditLogHandler.mjs',
+      () => ({
+        default: (ctx.ProjectAuditLogHandler = {
+          addEntryInBackground: sinon.stub(),
+        }),
+      })
+    )
+
     ctx.ProjectDownloadsController = (await import(modulePath)).default
   })
 
@@ -52,6 +61,13 @@ describe('ProjectDownloadsController', function () {
         .stub()
         .callsArgWith(1, null, ctx.stream)
       ctx.req.params = { Project_id: ctx.project_id }
+      ctx.req.ip = '192.168.1.1'
+      ctx.req.session = {
+        user: {
+          _id: 'user-id-123',
+          email: 'user@example.com',
+        },
+      }
       ctx.project_name = 'project name with accênts and % special characters'
       ctx.ProjectGetter.getProject = sinon
         .stub()
@@ -104,6 +120,17 @@ describe('ProjectDownloadsController', function () {
     it('should record the action via Metrics', function (ctx) {
       return ctx.metrics.inc.calledWith('zip-downloads').should.equal(true)
     })
+
+    it('should add an audit log entry', function (ctx) {
+      return ctx.ProjectAuditLogHandler.addEntryInBackground
+        .calledWith(
+          ctx.project_id,
+          'project-downloaded',
+          ctx.req.session.user._id,
+          ctx.req.ip
+        )
+        .should.equal(true)
+    })
   })
 
   describe('downloadMultipleProjects', function () {
@@ -114,6 +141,13 @@ describe('ProjectDownloadsController', function () {
         .callsArgWith(1, null, ctx.stream)
       ctx.project_ids = ['project-1', 'project-2']
       ctx.req.query = { project_ids: ctx.project_ids.join(',') }
+      ctx.req.ip = '192.168.1.1'
+      ctx.req.session = {
+        user: {
+          _id: 'user-id-123',
+          email: 'user@example.com',
+        },
+      }
       ctx.DocumentUpdaterHandler.flushMultipleProjectsToMongo = sinon
         .stub()
         .callsArgWith(1)
@@ -158,6 +192,22 @@ describe('ProjectDownloadsController', function () {
       return ctx.metrics.inc
         .calledWith('zip-downloads-multiple')
         .should.equal(true)
+    })
+
+    it('should add an audit log entry for each project', function (ctx) {
+      ctx.ProjectAuditLogHandler.addEntryInBackground.callCount.should.equal(
+        ctx.project_ids.length
+      )
+      for (const projectId of ctx.project_ids) {
+        ctx.ProjectAuditLogHandler.addEntryInBackground
+          .calledWith(
+            projectId,
+            'project-downloaded',
+            ctx.req.session.user._id,
+            ctx.req.ip
+          )
+          .should.equal(true)
+      }
     })
   })
 })
