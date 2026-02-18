@@ -338,11 +338,25 @@ export default async function (webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.use(function (req, res, next) {
+    // Notifications that are no longer used for which we want to remove the dismiss cookies.
+    // This can be removed after some time
+    const LEGACY_NOTIFICATIONS = [{ id: 'ciaminfo', paths: ['/login'] }]
+
     const KEY_PREFIX = 'readnotif-'
     const dismissedNotifications = []
     for (const cookieName in req.cookies) {
       if (cookieName.startsWith(KEY_PREFIX)) {
-        dismissedNotifications.push(cookieName.slice(KEY_PREFIX.length))
+        const legacyNotification = LEGACY_NOTIFICATIONS.find(
+          ({ id }) => cookieName === `${KEY_PREFIX}${id}`
+        )
+        if (legacyNotification) {
+          // Remove the cookie for legacy notifications that we no longer use.
+          for (const path of legacyNotification.paths) {
+            res.clearCookie(cookieName, { path, domain: Settings.cookieDomain })
+          }
+        } else {
+          dismissedNotifications.push(cookieName.slice(KEY_PREFIX.length))
+        }
       }
     }
     res.locals.dismissedNotifications = dismissedNotifications
