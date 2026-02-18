@@ -46,6 +46,7 @@ export const useContextMenuItems = () => {
 
   const closeMenu = useCallback(() => {
     view.dispatch({ effects: closeContextMenuEffect.of(null) })
+    view.focus()
   }, [view])
 
   // Handle closing the menu when it loses focus, e.g. click outside the editor
