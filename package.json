@@ -37,9 +37,6 @@
       "form-data": "2.5.5",
       "qs": "6.14.1"
     },
-    "streamdown": {
-      "mermaid": "file:./services/web/stubs/mermaid-stub"
-    },
     "cypress@13.13.2": {
       "@cypress/request@3.0.9": {
         "qs": "6.14.1"
