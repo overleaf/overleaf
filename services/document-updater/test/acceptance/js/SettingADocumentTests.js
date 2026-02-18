@@ -757,4 +757,163 @@ describe('Setting a document', function () {
       })
     }
   })
+  describe('when the first request returns a connection error', function () {
+    beforeEach(function () {
+      const origSetDocumentController =
+        MockWebApi.setDocumentController.bind(MockWebApi)
+      const setDocumentStub = sinon
+        .stub(MockWebApi, 'setDocumentController')
+        .onCall(0)
+        .callsFake((req, res, next) => {
+          res.destroy() // simulate a network error
+        })
+      setDocumentStub.onCall(1).callsFake(origSetDocumentController)
+    })
+
+    afterEach(function () {
+      MockWebApi.setDocumentController.restore()
+    })
+
+    it('should retry on connection error and set the document', async function () {
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
+      MockWebApi.insertDoc(this.project_id, this.doc_id, {
+        lines: this.lines,
+        version: this.version,
+        projectHistoryId: this.project_id,
+      })
+      await DocUpdaterClient.preloadDoc(this.project_id, this.doc_id)
+
+      await expect(
+        DocUpdaterClient.setDocLines(
+          this.project_id,
+          this.doc_id,
+          this.newLines,
+          this.source,
+          this.user_id,
+          false
+        )
+      ).to.eventually.deep.include({ rev: '123' })
+
+      expect(MockWebApi.setDocumentController).to.be.calledTwice
+    })
+  })
+
+  describe('when the document does not exist', function () {
+    before(function () {
+      sinon.spy(MockWebApi, 'setDocumentController')
+    })
+    after(function () {
+      MockWebApi.setDocumentController.restore()
+    })
+
+    it('should return 404', async function () {
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
+      MockWebApi.insertDoc(this.project_id, this.doc_id, {
+        lines: this.lines,
+        version: this.version,
+        projectHistoryId: this.project_id,
+      })
+      await DocUpdaterClient.preloadDoc(this.project_id, this.doc_id)
+      MockWebApi.clearDocs()
+
+      await expect(
+        DocUpdaterClient.setDocLines(
+          this.project_id,
+          this.doc_id,
+          this.newLines,
+          this.source,
+          this.user_id,
+          false
+        )
+      )
+        .to.be.rejectedWith(RequestFailedError)
+        .and.eventually.have.nested.property('response.status', 404)
+
+      expect(MockWebApi.setDocumentController).to.be.calledOnce
+    })
+  })
+
+  describe('when the document is too large', function () {
+    beforeEach(function () {
+      sinon
+        .stub(MockWebApi, 'setDocumentController')
+        .callsFake((req, res, next) => {
+          res.sendStatus(413) // simulate a large file error
+        })
+    })
+
+    afterEach(function () {
+      MockWebApi.setDocumentController.restore()
+    })
+
+    it('should return 413', async function () {
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
+      MockWebApi.insertDoc(this.project_id, this.doc_id, {
+        lines: this.lines,
+        version: this.version,
+        projectHistoryId: this.project_id,
+      })
+      await DocUpdaterClient.preloadDoc(this.project_id, this.doc_id)
+      MockWebApi.clearDocs()
+
+      await expect(
+        DocUpdaterClient.setDocLines(
+          this.project_id,
+          this.doc_id,
+          this.newLines,
+          this.source,
+          this.user_id,
+          false
+        )
+      )
+        .to.be.rejectedWith(RequestFailedError)
+        .and.eventually.have.nested.property('response.status', 413)
+      expect(MockWebApi.setDocumentController).to.be.calledOnce
+    })
+  })
+
+  describe('when the first request returns a 500 error', function () {
+    beforeEach(function () {
+      const origSetDocumentController =
+        MockWebApi.setDocumentController.bind(MockWebApi)
+      const setDocumentStub = sinon
+        .stub(MockWebApi, 'setDocumentController')
+        .onCall(0)
+        .callsFake((req, res, next) => {
+          res.sendStatus(500)
+        })
+      setDocumentStub.onCall(1).callsFake(origSetDocumentController)
+    })
+
+    afterEach(function () {
+      MockWebApi.setDocumentController.restore()
+    })
+
+    it('should retry on a 500 error and set the document', async function () {
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
+      MockWebApi.insertDoc(this.project_id, this.doc_id, {
+        lines: this.lines,
+        version: this.version,
+        projectHistoryId: this.project_id,
+      })
+      await DocUpdaterClient.preloadDoc(this.project_id, this.doc_id)
+
+      await expect(
+        DocUpdaterClient.setDocLines(
+          this.project_id,
+          this.doc_id,
+          this.newLines,
+          this.source,
+          this.user_id,
+          false
+        )
+      ).to.eventually.deep.include({ rev: '123' })
+
+      expect(MockWebApi.setDocumentController).to.be.calledTwice
+    })
+  })
 })

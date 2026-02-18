@@ -14,6 +14,9 @@ class OTTypeMismatchError extends OError {
     super('ot type mismatch', { got, want })
   }
 }
+// when the doc returned by web/API fails validation (e.g. missing/invalid fields)
+class DocumentValidationError extends OError {}
+class WebApiServerError extends OError {}
 
 module.exports = {
   NotFoundError,
@@ -22,4 +25,6 @@ module.exports = {
   DeleteMismatchError,
   FileTooLargeError,
   OTTypeMismatchError,
+  DocumentValidationError,
+  WebApiServerError,
 }

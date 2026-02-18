@@ -1,210 +1,272 @@
-const { promisify } = require('node:util')
-const { promisifyMultiResult } = require('@overleaf/promise-utils')
+// @ts-check
+const { setTimeout } = require('node:timers/promises')
 const Settings = require('@overleaf/settings')
 const Errors = require('./Errors')
+const OError = require('@overleaf/o-error')
 const Metrics = require('./Metrics')
 const logger = require('@overleaf/logger')
-const request = require('requestretry').defaults({
-  maxAttempts: 2,
-  retryDelay: 10,
-})
+const { fetchJson, RequestFailedError } = require('@overleaf/fetch-utils')
 
+const MAX_ATTEMPTS = 2
+const RETRY_DELAY_MS = 10
 // We have to be quick with HTTP calls because we're holding a lock that
 // expires after 30 seconds. We can't let any errors in the rest of the stack
 // hold us up, and need to bail out quickly if there is a problem.
 const MAX_HTTP_REQUEST_LENGTH = 5000 // 5 seconds
 
-function updateMetric(method, error, response) {
-  // find the status, with special handling for connection timeouts
-  // https://github.com/request/request#timeouts
-  let status
-  if (error && error.connect === true) {
-    status = `${error.code} (connect)`
-  } else if (error) {
-    status = error.code
-  } else if (response) {
-    status = response.statusCode
-  }
-
-  Metrics.inc(method, 1, { status })
-  if (error && error.attempts > 1) {
-    Metrics.inc(`${method}-retries`, 1, { status: 'error' })
-  }
-  if (response && response.attempts > 1) {
-    Metrics.inc(`${method}-retries`, 1, { status: 'success' })
-  }
-}
-
-function getDoc(projectId, docId, options = {}, _callback) {
+async function getDocOnce(projectId, docId, options = {}) {
   const timer = new Metrics.Timer('persistenceManager.getDoc')
-  if (typeof options === 'function') {
-    _callback = options
-    options = {}
-  }
-  const callback = function (...args) {
-    timer.done()
-    _callback(...args)
-  }
-
-  const urlPath = `/project/${projectId}/doc/${docId}`
-  const requestParams = {
-    url: `${Settings.apis.web.url}${urlPath}`,
-    method: 'GET',
-    headers: {
-      accept: 'application/json',
-    },
-    auth: {
-      user: Settings.apis.web.user,
-      pass: Settings.apis.web.pass,
-      sendImmediately: true,
-    },
-    jar: false,
-    timeout: MAX_HTTP_REQUEST_LENGTH,
-  }
+  const info = { projectId, docId } // for errors
+  const url = new URL(
+    `/project/${projectId}/doc/${docId}`,
+    Settings.apis.web.url
+  )
   if (options.peek) {
-    requestParams.qs = { peek: 'true' }
+    // used by resyncs
+    url.searchParams.set('peek', 'true')
   }
-  request(requestParams, (error, res, body) => {
-    updateMetric('getDoc', error, res)
-    if (error) {
-      logger.error({ err: error, projectId, docId }, 'web API request failed')
-      return callback(new Error('error connecting to web API'))
+  const fetchParams = {
+    method: 'GET',
+    basicAuth: {
+      user: Settings.apis.web.user,
+      password: Settings.apis.web.pass,
+    },
+    signal: AbortSignal.timeout(MAX_HTTP_REQUEST_LENGTH),
+  }
+  try {
+    const body = await fetchJson(url, fetchParams)
+
+    if (body.lines == null) {
+      throw new Errors.DocumentValidationError(
+        'web API response had no doc lines',
+        info
+      )
     }
-    if (res.statusCode >= 200 && res.statusCode < 300) {
-      try {
-        body = JSON.parse(body)
-      } catch (e) {
-        return callback(e)
-      }
-      if (body.lines == null) {
-        return callback(new Error('web API response had no doc lines'))
-      }
-      if (body.version == null) {
-        return callback(new Error('web API response had no valid doc version'))
-      }
-      if (body.pathname == null) {
-        return callback(new Error('web API response had no valid doc pathname'))
-      }
-      if (!body.pathname) {
-        logger.warn(
-          { projectId, docId },
-          'missing pathname in PersistenceManager getDoc'
-        )
-        Metrics.inc('pathname', 1, {
-          path: 'PersistenceManager.getDoc',
-          status: body.pathname === '' ? 'zero-length' : 'undefined',
+    if (body.version == null) {
+      throw new Errors.DocumentValidationError(
+        'web API response had no valid doc version',
+        info
+      )
+    }
+    if (body.pathname == null) {
+      throw new Errors.DocumentValidationError(
+        'web API response had no valid doc pathname',
+        info
+      )
+    }
+    if (!body.pathname) {
+      logger.warn(
+        { projectId, docId },
+        'missing pathname in PersistenceManager getDoc'
+      )
+      Metrics.inc('pathname', 1, {
+        path: 'PersistenceManager.getDoc',
+        status: body.pathname === '' ? 'zero-length' : 'undefined',
+      })
+    }
+
+    if (body.otMigrationStage > 0) {
+      // Use history-ot
+      body.lines = { content: body.lines.join('\n') }
+      body.ranges = {}
+    }
+
+    if (!body.projectHistoryId) {
+      logger.warn(
+        { projectId, docId },
+        'projectHistoryId not found for doc from web'
+      )
+    }
+    Metrics.inc('getDoc', 1, { status: '200' })
+    return {
+      lines: body.lines,
+      version: body.version,
+      ranges: body.ranges,
+      pathname: body.pathname,
+      projectHistoryId: body.projectHistoryId?.toString(),
+      historyRangesSupport: body.historyRangesSupport || false,
+      resolvedCommentIds: body.resolvedCommentIds || [],
+    }
+  } catch (err) {
+    let status
+    if (err instanceof RequestFailedError) {
+      status = err.response?.status
+    } else if (err instanceof Errors.DocumentValidationError) {
+      status = 'validation-error'
+    } else if (err instanceof Error && 'code' in err) {
+      status = err.code
+    } else {
+      status = 'unknown'
+    }
+    Metrics.inc('getDoc', 1, { status })
+    if (err instanceof RequestFailedError) {
+      if (status === 404) {
+        throw new Errors.NotFoundError('doc not found', info)
+      } else if (status === 413) {
+        throw new Errors.FileTooLargeError('doc exceeds maximum size', info)
+      } else {
+        throw new Errors.WebApiServerError('error accessing web API', {
+          ...info,
+          status,
         })
       }
-
-      if (body.otMigrationStage > 0) {
-        // Use history-ot
-        body.lines = { content: body.lines.join('\n') }
-        body.ranges = {}
-      }
-
-      if (!body.projectHistoryId) {
-        logger.warn(
-          { projectId, docId },
-          'projectHistoryId not found for doc from web'
-        )
-      }
-
-      callback(
-        null,
-        body.lines,
-        body.version,
-        body.ranges,
-        body.pathname,
-        body.projectHistoryId?.toString(),
-        body.historyRangesSupport || false,
-        body.resolvedCommentIds || []
-      )
-    } else if (res.statusCode === 404) {
-      callback(new Errors.NotFoundError(`doc not not found: ${urlPath}`))
-    } else if (res.statusCode === 413) {
-      callback(
-        new Errors.FileTooLargeError(`doc exceeds maximum size: ${urlPath}`)
-      )
+    } else if (err instanceof Errors.DocumentValidationError) {
+      throw err
     } else {
-      callback(
-        new Error(`error accessing web API: ${urlPath} ${res.statusCode}`)
-      )
+      throw OError.tag(err, 'getDoc failed', info)
     }
-  })
+  } finally {
+    timer.done()
+  }
 }
 
-function setDoc(
+async function setDocOnce(
   projectId,
   docId,
   lines,
   version,
   ranges,
   lastUpdatedAt,
-  lastUpdatedBy,
-  _callback
+  lastUpdatedBy
 ) {
   const timer = new Metrics.Timer('persistenceManager.setDoc')
-  const callback = function (...args) {
-    timer.done()
-    _callback(...args)
-  }
 
-  const urlPath = `/project/${projectId}/doc/${docId}`
-  request(
-    {
-      url: `${Settings.apis.web.url}${urlPath}`,
-      method: 'POST',
-      json: {
-        lines,
-        ranges,
-        version,
-        lastUpdatedBy,
-        lastUpdatedAt,
-      },
-      auth: {
-        user: Settings.apis.web.user,
-        pass: Settings.apis.web.pass,
-        sendImmediately: true,
-      },
-      jar: false,
-      timeout: MAX_HTTP_REQUEST_LENGTH,
+  const info = { projectId, docId } // for errors
+  const url = new URL(
+    `/project/${projectId}/doc/${docId}`,
+    Settings.apis.web.url
+  )
+  const fetchParams = {
+    method: 'POST',
+    json: {
+      lines,
+      ranges,
+      version,
+      lastUpdatedBy,
+      lastUpdatedAt,
     },
-    (error, res, body) => {
-      updateMetric('setDoc', error, res)
-      if (error) {
-        logger.error({ err: error, projectId, docId }, 'web API request failed')
-        return callback(new Error('error connecting to web API'))
-      }
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        callback(null, body)
-      } else if (res.statusCode === 404) {
-        callback(new Errors.NotFoundError(`doc not not found: ${urlPath}`))
-      } else if (res.statusCode === 413) {
-        callback(
-          new Errors.FileTooLargeError(`doc exceeds maximum size: ${urlPath}`)
-        )
+    basicAuth: {
+      user: Settings.apis.web.user,
+      password: Settings.apis.web.pass,
+    },
+    signal: AbortSignal.timeout(MAX_HTTP_REQUEST_LENGTH),
+  }
+  try {
+    const result = await fetchJson(url, fetchParams)
+    Metrics.inc('setDoc', 1, { status: '200' })
+    return result
+  } catch (err) {
+    let status
+    if (err instanceof RequestFailedError) {
+      status = err.response?.status
+    } else if (err instanceof Error && 'code' in err) {
+      status = err.code
+    } else {
+      status = 'unknown'
+    }
+    Metrics.inc('setDoc', 1, { status })
+    if (err instanceof RequestFailedError) {
+      if (status === 404) {
+        throw new Errors.NotFoundError('doc not found', info)
+      } else if (status === 413) {
+        throw new Errors.FileTooLargeError('doc exceeds maximum size', info)
       } else {
-        callback(
-          new Error(`error accessing web API: ${urlPath} ${res.statusCode}`)
-        )
+        throw new Errors.WebApiServerError('error accessing web API', {
+          ...info,
+          status,
+        })
+      }
+    } else {
+      throw OError.tag(err, 'setDoc failed', info)
+    }
+  } finally {
+    timer.done()
+  }
+}
+
+// Original set of retryable errors from requestretry
+const RETRYABLE_ERRORS = new Set([
+  'ECONNRESET',
+  'ENOTFOUND',
+  'ESOCKETTIMEDOUT',
+  'ETIMEDOUT',
+  'ECONNREFUSED',
+  'EHOSTUNREACH',
+  'EPIPE',
+  'EAI_AGAIN',
+  'EBUSY',
+])
+
+function isRetryable(error) {
+  // use the same retryable errors as requestretry
+  if (error instanceof Errors.WebApiServerError) {
+    const status = error.info?.status
+    return (
+      typeof status === 'number' &&
+      (status === 429 || (status >= 500 && status < 600))
+    )
+  } else if (typeof error?.code === 'string') {
+    return Boolean(RETRYABLE_ERRORS.has(error.code))
+  } else {
+    return false
+  }
+}
+
+async function callWithRetries(name, fn) {
+  let remainingAttempts = MAX_ATTEMPTS
+  while (true) {
+    try {
+      const result = await fn()
+      if (remainingAttempts < MAX_ATTEMPTS) {
+        Metrics.inc(`${name}-retries`, 1, { status: 'success' })
+      }
+      return result
+    } catch (err) {
+      remainingAttempts--
+      if (remainingAttempts > 0 && isRetryable(err)) {
+        await setTimeout(RETRY_DELAY_MS)
+        continue
+      } else {
+        if (remainingAttempts < MAX_ATTEMPTS - 1) {
+          Metrics.inc(`${name}-retries`, 1, { status: 'error' })
+        }
+        throw err
       }
     }
-  )
+  }
+}
+
+async function getDocWithRetries(projectId, docId, options = {}) {
+  return await callWithRetries('getDoc', async () => {
+    return await getDocOnce(projectId, docId, options)
+  })
+}
+
+async function setDocWithRetries(
+  projectId,
+  docId,
+  lines,
+  version,
+  ranges,
+  lastUpdatedAt,
+  lastUpdatedBy
+) {
+  return await callWithRetries('setDoc', async () => {
+    return await setDocOnce(
+      projectId,
+      docId,
+      lines,
+      version,
+      ranges,
+      lastUpdatedAt,
+      lastUpdatedBy
+    )
+  })
 }
 
 module.exports = {
-  getDoc,
-  setDoc,
   promises: {
-    getDoc: promisifyMultiResult(getDoc, [
-      'lines',
-      'version',
-      'ranges',
-      'pathname',
-      'projectHistoryId',
-      'historyRangesSupport',
-      'resolvedCommentIds',
-    ]),
-    setDoc: promisify(setDoc),
+    getDoc: getDocWithRetries,
+    setDoc: setDocWithRetries,
   },
 }

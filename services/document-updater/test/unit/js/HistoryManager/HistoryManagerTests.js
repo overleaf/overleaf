@@ -13,7 +13,6 @@ describe('HistoryManager', function () {
   beforeEach(function () {
     this.HistoryManager = SandboxedModule.require(modulePath, {
       requires: {
-        request: (this.request = {}),
         '@overleaf/fetch-utils': (this.fetchUtils = {
           fetchNothing: sinon.stub().resolves(),
         }),

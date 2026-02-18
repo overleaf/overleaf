@@ -882,7 +882,7 @@ describe('Applying updates to a doc', function () {
       JSON.parse(message).should.deep.include({
         project_id: this.project_id,
         doc_id: this.doc_id,
-        error: `doc not not found: /project/${this.project_id}/doc/${this.doc_id}`,
+        error: 'doc not found',
       })
     })
   })
