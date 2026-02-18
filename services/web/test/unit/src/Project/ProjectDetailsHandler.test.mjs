@@ -34,7 +34,6 @@ describe('ProjectDetailsHandler', function () {
     }
     ctx.ProjectGetter = {
       promises: {
-        getProjectWithoutDocLines: sinon.stub().resolves(ctx.project),
         getProject: sinon.stub().resolves(ctx.project),
         findAllUsersProjects: sinon.stub().resolves({
           owned: [],

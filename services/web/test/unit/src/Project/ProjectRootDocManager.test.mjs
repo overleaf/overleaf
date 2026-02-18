@@ -587,9 +587,7 @@ describe('ProjectRootDocManager', function () {
     beforeEach(function (ctx) {
       ctx.project = {}
       ctx.ProjectGetter.promises.getProject = sinon.stub().resolves(ctx.project)
-      ctx.ProjectGetter.promises.getProjectWithoutDocLines = sinon
-        .stub()
-        .resolves(ctx.project)
+      ctx.ProjectGetter.promises.getProject = sinon.stub().resolves(ctx.project)
       ctx.ProjectEntityUpdateHandler.promises.setRootDoc = sinon
         .stub()
         .resolves()
@@ -614,7 +612,7 @@ describe('ProjectRootDocManager', function () {
         })
 
         it('should find the project without doc lines', function (ctx) {
-          ctx.ProjectGetter.promises.getProjectWithoutDocLines
+          ctx.ProjectGetter.promises.getProject
             .calledWith(ctx.project_id)
             .should.equal(true)
         })
@@ -638,7 +636,7 @@ describe('ProjectRootDocManager', function () {
         })
 
         it('should find the project without doc lines', function (ctx) {
-          ctx.ProjectGetter.promises.getProjectWithoutDocLines
+          ctx.ProjectGetter.promises.getProject
             .calledWith(ctx.project_id)
             .should.equal(true)
         })
@@ -665,7 +663,7 @@ describe('ProjectRootDocManager', function () {
       })
 
       it('should find the project without doc lines', async function (ctx) {
-        ctx.ProjectGetter.promises.getProjectWithoutDocLines
+        ctx.ProjectGetter.promises.getProject
           .calledWith(ctx.project_id)
           .should.equal(true)
       })
@@ -679,9 +677,7 @@ describe('ProjectRootDocManager', function () {
 
     describe('when the project does not exist', function () {
       beforeEach(async function (ctx) {
-        ctx.ProjectGetter.promises.getProjectWithoutDocLines = sinon
-          .stub()
-          .resolves(null)
+        ctx.ProjectGetter.promises.getProject = sinon.stub().resolves(null)
       })
 
       it('should reject', async function (ctx) {

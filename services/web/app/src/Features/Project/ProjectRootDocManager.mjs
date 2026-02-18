@@ -146,8 +146,10 @@ async function ensureRootDocumentIsSet(projectId) {
  * @param {ObjectId | string} projectId
  */
 async function ensureRootDocumentIsValid(projectId) {
-  const project =
-    await ProjectGetter.promises.getProjectWithoutDocLines(projectId)
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    rootFolder: 1,
+    rootDoc_id: 1,
+  })
   if (!project) {
     throw new Error('project not found')
   }

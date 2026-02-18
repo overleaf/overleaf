@@ -77,8 +77,7 @@ async function joinProject(req, res, next) {
 }
 
 async function _buildJoinProjectView(req, projectId, userId) {
-  const project =
-    await ProjectGetter.promises.getProjectWithoutDocLines(projectId)
+  const project = await ProjectGetter.promises.getProject(projectId)
   if (project == null) {
     throw new Errors.NotFoundError('project not found')
   }

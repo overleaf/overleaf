@@ -131,7 +131,7 @@ describe('EditorHttpController', function () {
     }
     ctx.ProjectGetter = {
       promises: {
-        getProjectWithoutDocLines: sinon.stub().resolves(ctx.project),
+        getProject: sinon.stub().resolves(ctx.project),
       },
     }
     ctx.ProjectEditorHandler = {
@@ -461,7 +461,7 @@ describe('EditorHttpController', function () {
 
     describe('when project is not found', function () {
       beforeEach(async function (ctx) {
-        ctx.ProjectGetter.promises.getProjectWithoutDocLines.resolves(null)
+        ctx.ProjectGetter.promises.getProject.resolves(null)
         await new Promise(resolve => {
           ctx.next.callsFake(() => resolve())
           ctx.EditorHttpController.joinProject(ctx.req, ctx.res, ctx.next)

@@ -109,7 +109,6 @@ describe('ProjectEntityUpdateHandler', function () {
     ctx.ProjectGetter = {
       promises: {
         getProject: sinon.stub(),
-        getProjectWithoutDocLines: sinon.stub(),
       },
     }
     ctx.ProjectLocator = {

@@ -185,7 +185,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
           .stub()
           .withArgs(ctx.project._id)
           .resolves(ctx.project),
-        getProjectWithOnlyFolders: sinon.stub().resolves(ctx.project),
+        getProject: sinon.stub().resolves(ctx.project),
       },
     }
 

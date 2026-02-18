@@ -79,8 +79,9 @@ function getAllEntitiesFromProject(project) {
 }
 
 async function getAllDocPathsFromProjectById(projectId) {
-  const project =
-    await ProjectGetter.promises.getProjectWithoutDocLines(projectId)
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    rootFolder: 1,
+  })
   if (project == null) {
     throw new Errors.NotFoundError('no project')
   }
@@ -120,8 +121,9 @@ async function getDoc(projectId, docId, options = {}) {
  * @param {ObjectId | string} docId
  */
 async function getDocPathByProjectIdAndDocId(projectId, docId) {
-  const project =
-    await ProjectGetter.promises.getProjectWithoutDocLines(projectId)
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    rootFolder: 1,
+  })
   if (project == null) {
     throw new Errors.NotFoundError('no project')
   }
@@ -165,8 +167,9 @@ async function getDocPathFromProjectByDocId(project, docId) {
 }
 
 async function _getAllFolders(projectId) {
-  const project =
-    await ProjectGetter.promises.getProjectWithoutDocLines(projectId)
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    rootFolder: 1,
+  })
 
   if (project == null) {
     throw new Errors.NotFoundError('no project')
