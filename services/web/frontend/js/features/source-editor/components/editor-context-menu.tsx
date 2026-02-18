@@ -15,6 +15,7 @@ import { contextMenuStateField } from '../extensions/context-menu'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useContextMenuItems } from '../hooks/use-context-menu-items'
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
+import { EditorContextMenuFeedback } from './editor-context-menu-feedback'
 
 const EditorContextMenu: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -78,6 +79,7 @@ const EditorContextMenuContent: FC = memo(function EditorContextMenuContent() {
             </DropdownListItem>
           </Fragment>
         ))}
+        <EditorContextMenuFeedback />
       </DropdownMenu>
     </Dropdown>
   )
