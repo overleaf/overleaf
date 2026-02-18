@@ -4,6 +4,7 @@ import {
   Tooltip,
   TooltipView,
   keymap,
+  ViewPlugin,
 } from '@codemirror/view'
 import {
   Extension,
@@ -230,7 +231,7 @@ function isClickOnGutter(target: HTMLElement): boolean {
 // Gutter context menu plugin
 const gutterContextMenuPlugin = (): Extension =>
   EditorView.updateListener.of(update => {
-    if (!update.view.dom.parentElement) {
+    if (isTouchOnlyInput || !update.view.dom.parentElement) {
       return
     }
 
@@ -243,9 +244,7 @@ const gutterContextMenuPlugin = (): Extension =>
     gutters.setAttribute('data-context-menu-attached', 'true')
     gutters.addEventListener('contextmenu', (event: Event) => {
       const mouseEvent = event as MouseEvent
-      if (isTouchOnlyInput) {
-        return
-      }
+
       const pos = update.view.posAtCoords({
         x: mouseEvent.clientX,
         y: mouseEvent.clientY,
@@ -268,6 +267,48 @@ const gutterContextMenuPlugin = (): Extension =>
       }
     })
   })
+
+// Handle right-click on ol-cm-filler (empty line widget)
+// domEventHandlers doesn't fire for contenteditable="false" elements, so we use a direct DOM listener
+const emptyLineFillerContextMenuPlugin = (): Extension => {
+  if (isTouchOnlyInput) {
+    return []
+  }
+
+  return ViewPlugin.define(view => {
+    const contentDOM = view.contentDOM
+
+    const handleContextMenu = (event: Event) => {
+      const mouseEvent = event as MouseEvent
+      const target = mouseEvent.target as HTMLElement
+
+      // Only handle ol-cm-filler elements
+      if (!target.classList.contains('ol-cm-filler')) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+
+      // Re-dispatch on contentDOM so CodeMirror's domEventHandlers picks it up
+      const customEvent = new MouseEvent('contextmenu', {
+        bubbles: true,
+        cancelable: true,
+        clientX: mouseEvent.clientX,
+        clientY: mouseEvent.clientY,
+      })
+      contentDOM.dispatchEvent(customEvent)
+    }
+
+    contentDOM.addEventListener('contextmenu', handleContextMenu)
+
+    return {
+      destroy() {
+        contentDOM.removeEventListener('contextmenu', handleContextMenu)
+      },
+    }
+  })
+}
 
 // Editor view context menu handlers
 const editorContextMenuHandlers = (): Extension =>
@@ -353,6 +394,7 @@ export const contextMenu = (enabled: boolean): Extension =>
         contextMenuContainerTheme,
         contextMenuStateField,
         gutterContextMenuPlugin(),
+        emptyLineFillerContextMenuPlugin(),
         editorContextMenuHandlers(),
         contextMenuKeymap(),
       ]
