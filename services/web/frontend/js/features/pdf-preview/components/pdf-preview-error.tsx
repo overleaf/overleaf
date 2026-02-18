@@ -254,7 +254,7 @@ function PdfPreviewError({
 export default memo(PdfPreviewError)
 
 function ErrorLogEntry({
-  autoExpand,
+  autoExpand = true,
   title,
   headerIcon,
   children,

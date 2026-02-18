@@ -578,6 +578,39 @@ describe('<PdfPreview/>', function () {
         cy.findByText(message)
       })
     }
+
+    it('displays error messages expanded by default', function () {
+      cy.intercept('POST', '/project/*/compile*', {
+        body: {
+          status: 'failure',
+          clsiServerId: 'foo',
+          compileGroup: 'priority',
+        },
+      }).as('compile')
+
+      const scope = mockScope()
+
+      cy.mount(
+        <EditorProviders scope={scope}>
+          <PdfViewer>
+            <PdfPreview />
+          </PdfViewer>
+        </EditorProviders>
+      )
+
+      cy.findByRole('button', { name: 'Recompile' }).click()
+      cy.wait('@compile')
+
+      // The error message should be visible (expanded by default)
+      cy.findByText('No PDF')
+      cy.findByText(/This compile didn’t produce a PDF/)
+      // The collapse button should be available (meaning it's expanded)
+      cy.findByLabelText(
+        'An error which prevented this project from compiling'
+      ).within(() => {
+        cy.findByRole('button', { name: 'Collapse' })
+      })
+    })
   })
 
   it('displays expandable raw logs', function () {
