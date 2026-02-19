@@ -49,13 +49,8 @@ export type User = {
   features?: Features
   refProviders?: RefProviders
   writefull?: {
-    enabled: boolean
     autoCreatedAccount: boolean
-    firstAutoLoad: boolean
     premiumSource: string
-  }
-  aiErrorAssistant?: {
-    enabled: boolean
   }
   featureUsage?: FeatureUsage
   planCode?: string

@@ -473,7 +473,7 @@ const _ProjectController = {
           user: (async () => {
             const user = await User.findById(
               userId,
-              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram labsExperiments completedTutorials writefull aiFeatures aiErrorAssistant'
+              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram labsExperiments completedTutorials writefull aiFeatures'
             ).exec()
             // Handle case of deleted user
             if (!user) {
@@ -845,10 +845,7 @@ const _ProjectController = {
       }
 
       const hasPaidSubscription = isPaidSubscription(subscription)
-      // todo: assist clean-up: remove other case once migration finishes
-      const aiFeaturesDisabled =
-        user.aiFeatures?.enabled === false ||
-        user.aiErrorAssistant?.enabled === false // the assistant has been manually disabled by the user
+      const aiFeaturesDisabled = user.aiFeatures?.enabled === false
 
       const addonPrices =
         isOverleafAssistBundleEnabled &&
@@ -909,9 +906,7 @@ const _ProjectController = {
           featureUsage,
           refProviders: _.mapValues(user.refProviders, Boolean),
           writefull: {
-            enabled: Boolean(user.writefull?.enabled && aiFeaturesAllowed),
             autoCreatedAccount: Boolean(user.writefull?.autoCreatedAccount),
-            firstAutoLoad: Boolean(user.writefull?.firstAutoLoad),
           },
           alphaProgram: user.alphaProgram,
           betaProgram: user.betaProgram,
@@ -1242,6 +1237,10 @@ const _ProjectController = {
     aiFeaturesAllowed,
     userIsMemberOfGroupSubscription
   ) {
+    if (!aiFeaturesAllowed) {
+      return
+    }
+
     const affiliations = userValues.affiliations
     const affiliateLookupFailed = affiliations === false
 
@@ -1252,13 +1251,8 @@ const _ProjectController = {
         affiliation => affiliation.institution?.enterpriseCommons
       )
 
-    // check if a user has never tried writefull before (writefull.enabled will be null)
-    //  if they previously accepted writefull, or are have been already assigned to a trial, user.writefull will be true,
-    //  if they explicitly disabled it, user.writefull will be false
     const shouldPushWritefull =
-      aiFeaturesAllowed &&
-      user.writefull?.enabled === null &&
-      !userIsMemberOfGroupSubscription
+      user.writefull?.initialized === false && !userIsMemberOfGroupSubscription
 
     // we dont have legal approval to push enterprise commons into WF auto-account-create, but we are able to auto-load it into the toolbar
     const shouldAutoCreateAccount = shouldPushWritefull && !inEnterpriseCommons
@@ -1267,28 +1261,16 @@ const _ProjectController = {
     if (shouldAutoCreateAccount) {
       await UserUpdater.promises.updateUser(userId, {
         $set: {
-          writefull: {
-            enabled: true,
-            initialized: true,
-            autoCreatedAccount: true,
-          },
+          writefull: { autoCreatedAccount: true, initialized: true },
         },
       })
-      user.writefull.enabled = true
-      user.writefull.initialized = true
       user.writefull.autoCreatedAccount = true
     } else if (shouldAutoLoad) {
       await UserUpdater.promises.updateUser(userId, {
         $set: {
-          writefull: {
-            enabled: true,
-            initialized: true,
-            autoCreatedAccount: false,
-          },
+          writefull: { autoCreatedAccount: false, initialized: true },
         },
       })
-      user.writefull.enabled = true
-      user.writefull.initialized = true
       user.writefull.autoCreatedAccount = false
     }
   },
@@ -1316,6 +1298,9 @@ const defaultSettingsForAnonymousUser = userId => ({
   alphaProgram: false,
   betaProgram: false,
   writefull: {
+    initialized: true,
+  },
+  aiFeatures: {
     enabled: false,
   },
 })

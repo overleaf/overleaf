@@ -38,8 +38,8 @@ async function createUser(email) {
         // Override features.
         features,
         featuresOverrides: [{ features }],
-        // disable Writefull
-        'writefull.enabled': false,
+        // disable AI features
+        'aiFeatures.enabled': false,
       },
     }
   )

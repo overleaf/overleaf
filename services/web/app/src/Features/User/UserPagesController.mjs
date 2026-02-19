@@ -144,13 +144,8 @@ async function settingsPage(req, res) {
         zotero: Boolean(user.refProviders?.zotero),
         papers: Boolean(user.refProviders?.papers),
       },
-      writefull: {
-        enabled: Boolean(user.writefull?.enabled),
-      },
-      aiFeatures: {
-        enabled: Boolean(user.aiFeatures?.enabled),
-      },
     },
+    showAiFeatures: Boolean(user.aiFeatures?.enabled),
     labsExperiments: user.labsExperiments ?? [],
     hasPassword: !!user.hashedPassword,
     shouldAllowEditingDetails,
