@@ -464,6 +464,7 @@ const _ProjectController = {
       'email-notifications',
       'wf-enable-freemium-super-complete',
       'wf-enable-super-complete-promotion',
+      'plans-2026-phase-1',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
