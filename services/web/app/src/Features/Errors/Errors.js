@@ -221,6 +221,12 @@ class SAMLGroupMemberLimitReachedError extends OError {}
 
 class SAMLDomainCaptureManagedOptInUserMissingEmailError extends SAMLDomainCaptureError {}
 
+class SAMLSessionProviderDataMissing extends SAMLAuthenticationError {
+  get i18nKey() {
+    return 'try_again'
+  }
+}
+
 class SAMLSessionDataMissing extends BackwardCompatibleError {
   constructor(arg) {
     super(arg)
@@ -390,6 +396,7 @@ module.exports = {
   SAMLEmailNotAffiliatedError,
   SAMLEmailAffiliatedWithAnotherInstitutionError,
   SAMLSessionDataMissing,
+  SAMLSessionProviderDataMissing,
   SAMLAuthenticationError,
   SAMLGroupSSOLoginIdentityMismatchError,
   SAMLGroupSSOLoginIdentityNotFoundError,
