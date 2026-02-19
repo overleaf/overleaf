@@ -532,6 +532,34 @@ async function projectListPage(req, res, next) {
       : 'member'
     : undefined
 
+  Modules.promises.hooks
+    .fire('setUserProperties', userId, {
+      overleafId: userId,
+      lastActive: user.lastActive
+        ? Math.floor(user.lastActive.getTime() / 1000)
+        : null,
+      signUpDate: user.signUpDate
+        ? Math.floor(user.signUpDate.getTime() / 1000)
+        : null,
+      ...(usersBestSubscription?.type && {
+        'best-subscription-type': usersBestSubscription.type,
+      }),
+      aiBlocked,
+      hasAiAssist,
+      ...(subjectArea && { subjectArea }),
+      ...(role && { role }),
+      ...(primaryOccupation && { primaryOccupation }),
+      ...(usedLatex && { usedLatex }),
+      ...(countryCode && { country: countryCode }),
+      ...(commonsInstitution && { commonsInstitution }),
+      ...(groupRole && { groupRole }),
+      isManagedUser: Boolean(user.enrollment?.managedBy),
+      ...(user.email && { email: user.email }),
+    })
+    .catch(err => {
+      logger.error({ err }, 'Failed to set user properties for customer.io')
+    })
+
   res.render('project/list-react', {
     title: 'your_projects',
     usersBestSubscription,
@@ -566,23 +594,7 @@ async function projectListPage(req, res, next) {
     hasIndividualPaidSubscription,
     userRestrictions: Array.from(req.userRestrictions || []),
     customerIoEnabled,
-    aiBlocked,
-    hasAiAssist,
-    lastActive: user.lastActive
-      ? Math.floor(user.lastActive.getTime() / 1000)
-      : null,
-    signUpDate: user.signUpDate
-      ? Math.floor(user.signUpDate.getTime() / 1000)
-      : null,
-    subjectArea,
-    primaryOccupation,
-    role,
-    usedLatex,
     inactiveTutorials,
-    countryCode,
-    commonsInstitution,
-    groupRole,
-    isManagedUser: Boolean(user.enrollment?.managedBy),
   })
 }
 
