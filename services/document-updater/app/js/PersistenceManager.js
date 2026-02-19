@@ -199,7 +199,11 @@ const RETRYABLE_ERRORS = new Set([
 
 function isRetryable(error) {
   // use the same retryable errors as requestretry
-  if (error instanceof Errors.WebApiServerError) {
+  // node-fetch uses AbortError:
+  // https://github.com/node-fetch/node-fetch/blob/main/docs/ERROR-HANDLING.md
+  if (error.name === 'AbortError') {
+    return true
+  } else if (error instanceof Errors.WebApiServerError) {
     const status = error.info?.status
     return (
       typeof status === 'number' &&

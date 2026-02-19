@@ -338,12 +338,48 @@ describe('Getting a document', function () {
     })
   })
 
-  describe('when the web api http request takes a long time', function () {
+  describe('when the web api http request times out on the first request', function () {
+    before(function (done) {
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
+      MockWebApi.insertDoc(this.project_id, this.doc_id, {
+        lines: this.lines,
+        version: this.version,
+      })
+      sinon
+        .stub(MockWebApi, 'getDocument')
+        .onFirstCall()
+        .returns(
+          new Promise(resolve => {
+            setTimeout(() => resolve(null), 30_000)
+          })
+        )
+        .callThrough() // subsequent requests return normally
+      done()
+    })
+
+    after(function () {
+      MockWebApi.getDocument.restore()
+    })
+
+    it('should retry the request and return the document', async function () {
+      const returnedDoc = await DocUpdaterClient.getDoc(
+        this.project_id,
+        this.doc_id
+      )
+      expect(returnedDoc).to.deep.include({
+        lines: this.lines,
+        version: this.version,
+      })
+    })
+  })
+
+  describe('when the web api http request times out repeatedly', function () {
     before(function (done) {
       this.timeout = 10000
       sinon.stub(MockWebApi, 'getDocument').returns(
         new Promise(resolve => {
-          setTimeout(() => resolve(null), 30000)
+          setTimeout(() => resolve(null), 30_000)
         })
       )
       done()
@@ -353,7 +389,7 @@ describe('Getting a document', function () {
       MockWebApi.getDocument.restore()
     })
 
-    it('should return quickly(ish)', async function () {
+    it('should return an error after two attempts', async function () {
       const projectId = DocUpdaterClient.randomId()
       const docId = DocUpdaterClient.randomId()
       const start = Date.now()
@@ -361,7 +397,8 @@ describe('Getting a document', function () {
         .to.be.rejectedWith(RequestFailedError)
         .and.eventually.have.nested.property('response.status', 500)
       const delta = Date.now() - start
-      expect(delta).to.be.below(20000)
+      expect(delta).to.be.above(10_000)
+      expect(delta).to.be.below(20_000)
     })
   })
 })

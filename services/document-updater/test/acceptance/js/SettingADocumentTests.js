@@ -916,4 +916,89 @@ describe('Setting a document', function () {
       expect(MockWebApi.setDocumentController).to.be.calledTwice
     })
   })
+
+  describe('when the web api http request times out on the first request', function () {
+    beforeEach(async function () {
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
+      MockWebApi.insertDoc(this.project_id, this.doc_id, {
+        lines: this.lines,
+        version: this.version,
+        projectHistoryId: this.project_id,
+      })
+      await DocUpdaterClient.preloadDoc(this.project_id, this.doc_id)
+
+      const origSetDocumentController =
+        MockWebApi.setDocumentController.bind(MockWebApi)
+      const setDocumentStub = sinon
+        .stub(MockWebApi, 'setDocumentController')
+        .onFirstCall()
+        .callsFake(async (req, res, next) => {
+          await setTimeout(30_000)
+        })
+
+      setDocumentStub.onCall(1).callsFake(origSetDocumentController)
+    })
+
+    afterEach(function () {
+      MockWebApi.setDocumentController.restore()
+    })
+
+    it('should retry the request and return the document', async function () {
+      this.timeout(10000)
+      const returnedDoc = await DocUpdaterClient.setDocLines(
+        this.project_id,
+        this.doc_id,
+        this.newLines,
+        this.source,
+        this.user_id,
+        false
+      )
+      expect(returnedDoc).to.deep.include({ rev: '123' })
+      expect(MockWebApi.setDocumentController).to.be.calledTwice
+    })
+  })
+
+  describe('when the web api http request times out repeatedly', function () {
+    beforeEach(async function () {
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
+      MockWebApi.insertDoc(this.project_id, this.doc_id, {
+        lines: this.lines,
+        version: this.version,
+        projectHistoryId: this.project_id,
+      })
+      await DocUpdaterClient.preloadDoc(this.project_id, this.doc_id)
+
+      sinon
+        .stub(MockWebApi, 'setDocumentController')
+        .callsFake(async (req, res, next) => {
+          await setTimeout(30_000)
+        })
+    })
+
+    afterEach(function () {
+      MockWebApi.setDocumentController.restore()
+    })
+
+    it('should return an error after two attempts', async function () {
+      this.timeout(15000)
+      const start = Date.now()
+      await expect(
+        DocUpdaterClient.setDocLines(
+          this.project_id,
+          this.doc_id,
+          this.newLines,
+          this.source,
+          this.user_id,
+          false
+        )
+      ).to.be.rejectedWith('request failed')
+
+      const delta = Date.now() - start
+      expect(delta).to.be.above(10_000) // 2 * 5000ms timeout
+      expect(delta).to.be.below(20_000)
+      expect(MockWebApi.setDocumentController).to.be.calledTwice
+    })
+  })
 })
