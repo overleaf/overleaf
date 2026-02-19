@@ -1436,6 +1436,7 @@
   "missing_field_for_entry": "Missing field for",
   "missing_fields_for_entry": "Missing fields for",
   "missing_payment_details": "Missing payment details",
+  "missing_required_sso_fields": "Missing required SSO fields in order to update configuration. Please check the SSO configuration and try again. Missing: __missingFields__.",
   "money_back_guarantee": "14-day money back guarantee, hassle free",
   "month": "month",
   "month_plural": "months",
