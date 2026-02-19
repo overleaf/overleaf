@@ -480,6 +480,13 @@ const en = {
       'You’ve hit your Writefull quota',
     'citations-reviewer.chat.backend-quota-error.freemium.body':
       'To ensure fair access for all users, free accounts have a usage limit. You can check for citations again in __remainingTime__. Upgrade to Premium to unlock the full power of Writefull.',
+    'citations-reviewer.chat.non-english-error.title':
+      'Citation Reviewer only works on documents written in English',
+    'citations-reviewer.chat.non-english-error.body':
+      'Are you writing in English?',
+    'citations-reviewer.chat.non-english-error.yes':
+      'Yes, run citation reviewer',
+    'citations-reviewer.chat.non-english-error.no': 'No, return to main menu',
   },
 } as const
 
@@ -985,6 +992,14 @@ const es = {
       'Has agotado tu cuota de Writefull',
     'citations-reviewer.chat.backend-quota-error.freemium.body':
       'Para garantizar un acceso justo para todos los usuarios, las cuentas gratuitas tienen un límite de uso. Puedes volver a buscar citas en __remainingTime__. Actualiza a Premium para desbloquear todo el potencial de Writefull.',
+    'citations-reviewer.chat.non-english-error.title':
+      'El revisor de citas solo funciona en documentos escritos en inglés',
+    'citations-reviewer.chat.non-english-error.body':
+      '¿Estás escribiendo en inglés?',
+    'citations-reviewer.chat.non-english-error.yes':
+      'Sí, ejecutar el revisor de citas',
+    'citations-reviewer.chat.non-english-error.no':
+      'No, volver al menú principal',
   },
 }
 
