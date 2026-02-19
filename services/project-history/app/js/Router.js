@@ -1,4 +1,3 @@
-import OError from '@overleaf/o-error'
 import * as HttpController from './HttpController.js'
 
 export function initialize(app) {
@@ -87,10 +86,6 @@ export function initialize(app) {
   app.post('/flush/old', HttpController.flushOld)
 
   app.get('/status', (req, res, next) => res.send('project-history is up'))
-
-  app.get('/oops', function (req, res, next) {
-    throw new OError('dummy test error')
-  })
 
   app.get('/check_lock', HttpController.checkLock)
 
