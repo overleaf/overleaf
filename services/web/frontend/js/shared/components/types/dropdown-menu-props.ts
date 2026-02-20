@@ -4,7 +4,7 @@ import type { DropdownMenuProps as BS5DropdownMenuProps } from 'react-bootstrap'
 
 type SplitButtonVariants = Extract<
   ButtonProps['variant'],
-  'primary' | 'secondary' | 'danger' | 'link'
+  'primary' | 'secondary' | 'danger' | 'link' | 'ghost'
 >
 
 export type DropdownProps = {
