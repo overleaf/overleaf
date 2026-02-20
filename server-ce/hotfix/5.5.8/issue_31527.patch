@@ -1,0 +1,90 @@
+--- services/filestore/app/js/FileConverter.js
++++ services/filestore/app/js/FileConverter.js
+@@ -21,49 +21,44 @@
+ }
+ 
+ async function convert(sourcePath, requestedFormat) {
+-  const width = '600x'
++  const width = 1500
+   return await _convert(sourcePath, requestedFormat, [
+-    'convert',
+-    '-define',
+-    `pdf:fit-page=${width}`,
+-    '-flatten',
+-    '-density',
+-    '300',
+-    `${sourcePath}[0]`,
++    'pdftocairo',
++    '-png',
++    '-singlefile',
++    '-scale-to-x',
++    width.toString(),
++    '-scale-to-y',
++    '-1',
++    sourcePath,
+   ])
+ }
+ 
+ async function thumbnail(sourcePath) {
+-  const width = '260x'
+-  return await convert(sourcePath, 'png', [
+-    'convert',
+-    '-flatten',
+-    '-background',
+-    'white',
+-    '-density',
+-    '300',
+-    '-define',
+-    `pdf:fit-page=${width}`,
+-    `${sourcePath}[0]`,
+-    '-resize',
+-    width,
++  const width = 700
++  return await _convert(sourcePath, 'png', [
++    'pdftocairo',
++    '-png',
++    '-singlefile',
++    '-scale-to-x',
++    width.toString(),
++    '-scale-to-y',
++    '-1',
++    sourcePath,
+   ])
+ }
+ 
+ async function preview(sourcePath) {
+-  const width = '548x'
+-  return await convert(sourcePath, 'png', [
+-    'convert',
+-    '-flatten',
+-    '-background',
+-    'white',
+-    '-density',
+-    '300',
+-    '-define',
+-    `pdf:fit-page=${width}`,
+-    `${sourcePath}[0]`,
+-    '-resize',
+-    width,
++  const width = 1000
++  return await _convert(sourcePath, 'png', [
++    'pdftocairo',
++    '-png',
++    '-singlefile',
++    '-scale-to-x',
++    width.toString(),
++    '-scale-to-y',
++    '-1',
++    sourcePath,
+   ])
+ }
+ 
+@@ -77,7 +72,7 @@
+   const timer = new metrics.Timer('imageConvert')
+   const destPath = `${sourcePath}.${requestedFormat}`
+ 
+-  command.push(destPath)
++  command.push(sourcePath)
+   command = Settings.commands.convertCommandPrefix.concat(command)
+ 
+   try {

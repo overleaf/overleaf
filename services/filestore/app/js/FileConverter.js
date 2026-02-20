@@ -22,50 +22,91 @@ export default {
 }
 
 async function convert(sourcePath, requestedFormat) {
-  const width = '600x'
-  return await _convert(sourcePath, requestedFormat, [
-    'convert',
-    '-define',
-    `pdf:fit-page=${width}`,
-    '-flatten',
-    '-density',
-    '300',
-    `${sourcePath}[0]`,
-  ])
+  if (Settings.converter === 'pdftocairo') {
+    const width = 1500
+    return await _convert(sourcePath, requestedFormat, [
+      'pdftocairo',
+      '-png',
+      '-singlefile',
+      '-scale-to-x',
+      width.toString(),
+      '-scale-to-y',
+      '-1', // maintain aspect ratio
+      sourcePath,
+    ])
+  } else {
+    const width = '600x'
+    return await _convert(sourcePath, requestedFormat, [
+      'convert',
+      '-define',
+      `pdf:fit-page=${width}`,
+      '-flatten',
+      '-density',
+      '300',
+      `${sourcePath}[0]`,
+    ])
+  }
 }
 
 async function thumbnail(sourcePath) {
-  const width = '260x'
-  return await convert(sourcePath, 'png', [
-    'convert',
-    '-flatten',
-    '-background',
-    'white',
-    '-density',
-    '300',
-    '-define',
-    `pdf:fit-page=${width}`,
-    `${sourcePath}[0]`,
-    '-resize',
-    width,
-  ])
+  if (Settings.converter === 'pdftocairo') {
+    const width = 700
+    return await _convert(sourcePath, 'png', [
+      'pdftocairo',
+      '-png',
+      '-singlefile',
+      '-scale-to-x',
+      width.toString(),
+      '-scale-to-y',
+      '-1', // maintain aspect ratio
+      sourcePath,
+    ])
+  } else {
+    const width = '260x'
+    return await convert(sourcePath, 'png', [
+      'convert',
+      '-flatten',
+      '-background',
+      'white',
+      '-density',
+      '300',
+      '-define',
+      `pdf:fit-page=${width}`,
+      `${sourcePath}[0]`,
+      '-resize',
+      width,
+    ])
+  }
 }
 
 async function preview(sourcePath) {
-  const width = '548x'
-  return await convert(sourcePath, 'png', [
-    'convert',
-    '-flatten',
-    '-background',
-    'white',
-    '-density',
-    '300',
-    '-define',
-    `pdf:fit-page=${width}`,
-    `${sourcePath}[0]`,
-    '-resize',
-    width,
-  ])
+  const width = 1000
+  if (Settings.converter === 'pdftocairo') {
+    return await _convert(sourcePath, 'png', [
+      'pdftocairo',
+      '-png',
+      '-singlefile',
+      '-scale-to-x',
+      width.toString(),
+      '-scale-to-y',
+      '-1', // maintain aspect ratio
+      sourcePath,
+    ])
+  } else {
+    return await convert(sourcePath, 'png', [
+      'convert',
+      '-flatten',
+      '-background',
+      'white',
+      '-density',
+      '300',
+      '-define',
+      `pdf:fit-page=${width}`,
+      `${sourcePath}[0]`,
+      '-resize',
+      width,
+    ])
+  }
 }
 
 async function _convert(sourcePath, requestedFormat, command) {
@@ -78,7 +119,7 @@ async function _convert(sourcePath, requestedFormat, command) {
   const timer = new metrics.Timer('imageConvert')
   const destPath = `${sourcePath}.${requestedFormat}`
 
-  command.push(destPath)
+  command.push(Settings.converter === 'pdftocairo' ? sourcePath : destPath)
   command = Settings.commands.convertCommandPrefix.concat(command)
 
   try {

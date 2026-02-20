@@ -468,6 +468,8 @@ switch (process.env.OVERLEAF_FILESTORE_BACKEND) {
     }
 }
 
+settings.converter = process.env.CONVERTER || 'pdftocairo'
+
 if (
   !settings.trustedProxyIps.includes('loopback') &&
   !settings.trustedProxyIps.includes('localhost') &&
