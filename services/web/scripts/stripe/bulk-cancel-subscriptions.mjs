@@ -6,6 +6,12 @@
  * NOTE: this will email customers to inform them of the cancellation unless you turn off
  * the cancellation automation in Stripe beforehand: https://dashboard.stripe.com/<account>/revenue-recovery/automations
  *
+ * ⚠️ WARNING: For customers with PayPal billing agreements, do NOT extend this script to
+ * delete the Stripe customer (customers.del) or detach payment methods
+ * (paymentMethods.detach). Doing so will permanently destroy the PayPal billing
+ * agreement, which cannot be recovered without asking the customer to re-authorize.
+ * Cancelling a subscription is safe — it does not affect the payment method.
+ *
  * Usage:
  *   node scripts/stripe/bulk-cancel-subscriptions.mjs [OPTS] [INPUT-FILE]
  *

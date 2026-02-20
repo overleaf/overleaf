@@ -899,6 +899,36 @@ export function getTaxIdType(country, taxIdValue, postalCode) {
 }
 
 /**
+ * Remove paypal billing agreement id from account for logging purposes
+ *
+ * @param {object} account
+ * @returns {object} sanitized account object
+ */
+export function sanitizeAccount(account) {
+  return {
+    ...account,
+    billingInfo: sanitizeBillingInfo(account.billingInfo),
+  }
+}
+
+/**
+ * Remove paypal billing agreement id from billing info for logging purposes
+ *
+ * @param {object} billingInfo
+ * @returns {object} sanitized billing info object
+ */
+export function sanitizeBillingInfo(billingInfo) {
+  const sanitizedBillingInfo = structuredClone(billingInfo)
+  if (
+    sanitizedBillingInfo?.paymentMethod?.object === 'paypal_billing_agreement'
+  ) {
+    sanitizedBillingInfo.paymentMethod.billingAgreementId =
+      'REDACTED_FOR_LOGGING'
+  }
+  return sanitizedBillingInfo
+}
+
+/**
  *
  * @param {Stripe.PaymentMethod[]} paymentMethods
  * @param {string} stripeCustomerId
