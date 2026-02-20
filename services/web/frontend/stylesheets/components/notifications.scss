@@ -49,11 +49,21 @@
 :root {
   @include light-notification;
 
+  // Until we roll out dark mode notifications, make sure we show buttons in
+  // light mode even when the rest of the page is in dark mode
+  .ide-redesign-main .notification .btn {
+    @include light-buttons;
+  }
+
   @include theme('default') {
     .project-ds-nav-page {
       .notification {
         @include dark-notification;
         @include dark-bg;
+
+        .btn {
+          @include dark-buttons;
+        }
       }
     }
   }
