@@ -87,6 +87,7 @@ export default class FeatureUsageRateLimiter {
         upsert: true,
       }
     ).exec()
+
     const featureUsage = featureUsages.features?.[this.featureName] ?? {}
     setRateLimitHeaders(res, featureUsage, allowance)
     this._checkRateLimit(featureUsage, allowance)
@@ -184,6 +185,7 @@ function setRateLimitHeaders(res, featureUsage, allowance) {
   const usage = featureUsage.usage ?? 0
   const refreshEpoch = periodStart.getTime() + PERIOD_IN_MILLISECONDS
   const secondsTillReset = Math.ceil((refreshEpoch - Date.now()) / 1000)
+
   if (!res.headersSent) {
     res.set('RateLimit-Limit', String(allowance))
     res.set('RateLimit-Remaining', String(Math.max(0, allowance - usage)))

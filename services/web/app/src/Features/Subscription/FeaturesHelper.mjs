@@ -38,15 +38,6 @@ function mergeFeatures(featuresA, featuresB) {
         features.compileTimeout || 0,
         featuresB.compileTimeout || 0
       )
-    } else if (key === 'aiUsageQuota') {
-      if (
-        features.aiUsageQuota === Settings.aiFeatures.unlimitedQuota ||
-        featuresB.aiUsageQuota === Settings.aiFeatures.unlimitedQuota
-      ) {
-        features.aiUsageQuota = Settings.aiFeatures.unlimitedQuota
-      } else {
-        features.aiUsageQuota = Settings.aiFeatures.freeTrialQuota
-      }
     } else {
       // Boolean keys, true is better
       features[key] = features[key] || featuresB[key]

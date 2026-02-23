@@ -100,10 +100,7 @@ async function refreshFeatures(userId, reason) {
           },
           json: {
             userOverleafId: userId,
-            // todo: quota clean-up: collab with writefull to rename this, and check if still needed
-            hasAiAssist:
-              newFeatures.aiErrorAssistant ||
-              newFeatures.aiUsageQuota === Settings.aiFeatures.unlimitedQuota,
+            hasAiAssist: newFeatures.aiErrorAssistant,
           },
           method: 'POST',
         }
@@ -195,9 +192,6 @@ async function _getIndividualFeatures(userId) {
     featureSets.push(_subscriptionToFeatures(subscription))
   }
 
-  // todo: quota clean-up - remove
-  // if they are in the quota split test, we no longer look at the add-on, since every plan will now have the same quota
-  // standalone plan will receive correct state since their plan will provide the correct quota
   featureSets.push(_aiAddOnFeatures(subscription))
   return _.reduce(featureSets, FeaturesHelper.mergeFeatures, {})
 }
@@ -243,14 +237,9 @@ function _subscriptionToFeatures(subscription) {
   }
 }
 
-// todo: quota clean-up: remove post split test
 function _aiAddOnFeatures(subscription) {
   if (subscription?.addOns?.some(addOn => addOn.addOnCode === AI_ADD_ON_CODE)) {
-    return {
-      // allow both naming systems to work
-      aiErrorAssistant: true,
-      aiUsageQuota: Settings.aiFeatures.unlimitedQuota,
-    }
+    return { aiErrorAssistant: true }
   } else {
     return {}
   }

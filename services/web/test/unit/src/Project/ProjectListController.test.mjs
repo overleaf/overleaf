@@ -40,7 +40,6 @@ describe('ProjectListController', function () {
         theme: 'textmate',
         mode: 'none',
       },
-      aiFeatures: { enabled: false },
     }
     ctx.users = {
       'user-1': {

@@ -74,11 +74,6 @@ describe('FeaturesUpdater', function () {
       },
       writefull: {
         overleafApiUrl: 'https://www.writefull.com',
-        quotaTierGranted: 'unlimited',
-      },
-      aiFeatures: {
-        freeTrialQuota: 'basic',
-        unlimitedQuota: 'unlimited',
       },
     }
 
@@ -328,7 +323,6 @@ describe('FeaturesUpdater', function () {
           default: 'features',
           individual: 'features',
           aiErrorAssistant: true,
-          aiUsageQuota: 'unlimited',
         })
       })
     })
@@ -347,7 +341,6 @@ describe('FeaturesUpdater', function () {
         expect(features).to.deep.equal({
           default: 'features',
           aiErrorAssistant: true,
-          aiUsageQuota: 'unlimited',
         })
       })
     })

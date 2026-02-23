@@ -10,7 +10,6 @@ export type UserId = Brand<string, 'UserId'>
 
 export type Features = {
   aiErrorAssistant?: boolean
-  aiUsageQuota?: string
   collaborators?: number
   compileGroup?: 'standard' | 'priority'
   compileTimeout?: number

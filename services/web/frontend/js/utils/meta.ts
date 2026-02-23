@@ -213,7 +213,6 @@ export interface Meta {
   'ol-notificationsInstitution': InstitutionType[]
   'ol-oauthProviders': OAuthProviders
   'ol-odcData': OnboardingFormData
-  'ol-onAiFreeTrial': boolean
   'ol-otMigrationStage': number
   'ol-overallThemes': OverallThemeMeta[]
   'ol-ownerIsManaged': boolean

@@ -307,20 +307,6 @@ async function getOneTimeAssignment(splitTestName) {
 }
 
 /**
- * Checks if a feature flag is enabled for a specific user
- *
- * Retrieves the feature flag assignment for a user and determines if the assigned variant is 'enabled'
- *
- * @param {string} userId - The ID of the user to check the feature flag for
- * @param {string} splitTestName - The unique name of the feature flag
- * @returns {Promise<boolean>} True if the user's assigned variant is 'enabled', false otherwise
- */
-async function featureFlagEnabledForUser(userId, splitTestName) {
-  const { variant } = await getAssignmentForUser(userId, splitTestName)
-  return variant === 'enabled'
-}
-
-/**
  * Returns an array of valid variant names for the given split test, including default
  *
  * @param splitTestName
@@ -816,7 +802,6 @@ export default {
   getPercentile,
   getAssignment: callbackify(getAssignment),
   getAssignmentForUser: callbackify(getAssignmentForUser),
-  featureFlagEnabledForUser: callbackify(featureFlagEnabledForUser),
   getOneTimeAssignment: callbackify(getOneTimeAssignment),
   getActiveAssignmentsForUser: callbackify(getActiveAssignmentsForUser),
   hasUserBeenAssignedToVariant: callbackify(hasUserBeenAssignedToVariant),
@@ -825,7 +810,6 @@ export default {
   promises: {
     getAssignment,
     getAssignmentForUser,
-    featureFlagEnabledForUser,
     getOneTimeAssignment,
     getActiveAssignmentsForUser,
     hasUserBeenAssignedToVariant,

@@ -11,11 +11,8 @@ import { useUserContext } from './user-context'
 import { useReceiveUser } from '../hooks/user-channel/use-receive-user'
 import { getJSON } from '@/infrastructure/fetch-json'
 import { useEditorContext } from './editor-context'
-import getMeta from '@/utils/meta'
 
 export const UserFeaturesContext = createContext<User['features']>(undefined)
-
-const onAiFreeTrial = getMeta('ol-onAiFreeTrial')
 
 export const UserFeaturesProvider: FC<React.PropsWithChildren> = ({
   children,
@@ -34,12 +31,7 @@ export const UserFeaturesProvider: FC<React.PropsWithChildren> = ({
 
   useEffect(() => {
     const listener = async ({ isPremium }: { isPremium: boolean }) => {
-      // todo: quota clean-up: remove once we are transitioned off aiErrorAssistant naming
-      const hasPremiumQuota = !onAiFreeTrial
-      const alreadyPremium =
-        features?.aiErrorAssistant === isPremium ||
-        hasPremiumQuota === isPremium
-      if (alreadyPremium) {
+      if (features?.aiErrorAssistant === isPremium) {
         // the user is premium on writefull and has the AI assist, no need to refresh the features
         return
       }

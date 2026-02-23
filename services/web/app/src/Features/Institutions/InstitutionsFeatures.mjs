@@ -15,14 +15,7 @@ async function _getInstitutionsAddons(userId) {
   const hasAssistBundle = affiliates.some(
     affiliate => affiliate?.institution?.writefullCommonsAccount === true
   )
-
-  // todo: seperate quota value depending on source of entitlement if needed
-  // todo: quota clean-up: remove aiErrorAssistant once migration finishes
-  const bundleFeatures = {
-    aiUsageQuota: Settings.writefull.quotaTierGranted,
-    aiErrorAssistant: true,
-  }
-  return hasAssistBundle ? bundleFeatures : {}
+  return hasAssistBundle ? { aiErrorAssistant: true } : {}
 }
 
 async function getInstitutionsFeatures(userId) {

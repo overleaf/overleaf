@@ -66,10 +66,6 @@ describe('UserGetter', function () {
     vi.doMock('@overleaf/settings', () => ({
       default: (ctx.settings = {
         reconfirmNotificationDays: 14,
-        aiFeatures: {
-          freeTrialQuota: 'basic',
-          unlimitedQuota: 'unlimited',
-        },
       }),
     }))
 
@@ -1316,8 +1312,8 @@ describe('UserGetter', function () {
 
     it('should take into account features overrides from modules', async function (ctx) {
       // this case occurs when the user has bought the ai bundle on WF, which should include our error assistant
-      const bundleFeatures = { aiUsageQuota: 'unlimited' }
-      ctx.fakeUser.features = { aiUsageQuota: 'basic' }
+      const bundleFeatures = { aiErrorAssistant: true }
+      ctx.fakeUser.features = { aiErrorAssistant: false }
       ctx.Modules.promises.hooks.fire = sinon.stub().resolves([bundleFeatures])
       const features = await ctx.UserGetter.promises.getUserFeatures(
         ctx.fakeUser._id
