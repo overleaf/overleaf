@@ -146,7 +146,7 @@
     "lru-cache": "^7.10.1",
     "marked": "^4.1.0",
     "method-override": "^2.3.3",
-    "minimatch": "^7.4.2",
+    "minimatch": "^10.2.2",
     "minimist": "^1.2.7",
     "mmmagic": "^0.5.3",
     "moment": "^2.29.4",
