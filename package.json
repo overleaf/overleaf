@@ -83,6 +83,7 @@
     "services/tpdsworker",
     "services/web",
     "tools/dependency-management",
+    "tools/npm-overrides-helper",
     "tools/saas-e2e",
     "tools/migrations"
   ]
