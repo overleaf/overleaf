@@ -113,6 +113,13 @@ describe('FeaturesUpdater', function () {
     ctx.Modules = {
       promises: { hooks: { fire: sinon.stub().resolves() } },
     }
+    ctx.SubscriptionViewModelBuilder = {
+      promises: {
+        getUsersSubscriptionDetails: sinon.stub().resolves({
+          bestSubscription: { type: 'individual' },
+        }),
+      },
+    }
     ctx.Queues = {
       getQueue: sinon.stub().returns({
         add: sinon.stub().resolves(),
@@ -169,6 +176,13 @@ describe('FeaturesUpdater', function () {
     vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
       default: ctx.Modules,
     }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionViewModelBuilder',
+      () => ({
+        default: ctx.SubscriptionViewModelBuilder,
+      })
+    )
 
     vi.doMock('../../../../app/src/infrastructure/Queues', () => ({
       default: ctx.Queues,
@@ -373,6 +387,17 @@ describe('FeaturesUpdater', function () {
         expect(
           ctx.AnalyticsManager.setUserPropertyForUserInBackground
         ).to.have.been.calledWith(ctx.user._id, 'feature-set', 'all')
+      })
+
+      it('should sync features to customer.io', function (ctx) {
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'setUserProperties',
+          ctx.user._id,
+          {
+            features: ctx.Settings.features.all,
+            'best-subscription-type': 'individual',
+          }
+        )
       })
     })
 

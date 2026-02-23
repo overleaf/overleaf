@@ -15,6 +15,7 @@ import UserGetter from '../User/UserGetter.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import Queues from '../../infrastructure/Queues.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
+import SubscriptionViewModelBuilder from './SubscriptionViewModelBuilder.mjs'
 import { AI_ADD_ON_CODE } from './AiHelper.mjs'
 import { fetchNothing } from '@overleaf/fetch-utils'
 
@@ -54,6 +55,20 @@ async function refreshFeatures(userId, reason) {
 
   const { features: newFeatures, featuresChanged } =
     await UserFeaturesUpdater.promises.updateFeatures(userId, features)
+
+  // TODO: this call is quite expensive, so ideally we'd update cio with something
+  // that doesn't require the best subscription to be computed, ie. the plan code (or type)
+  const bestSubscriptionType = await _getBestSubscriptionType(userId)
+
+  Modules.promises.hooks
+    .fire('setUserProperties', userId, {
+      features,
+      'best-subscription-type': bestSubscriptionType,
+    })
+    .catch(err => {
+      logger.error({ err, userId }, 'Failed to sync features to customer.io')
+    })
+
   if (oldFeatures.dropbox === true && features.dropbox === false) {
     logger.debug({ userId }, '[FeaturesUpdater] must unlink dropbox')
     try {
@@ -99,6 +114,22 @@ async function refreshFeatures(userId, reason) {
     }
   }
   return { features: newFeatures, featuresChanged }
+}
+
+async function _getBestSubscriptionType(userId) {
+  try {
+    const { bestSubscription } =
+      await SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails({
+        _id: userId,
+      })
+    return bestSubscription?.type || 'free'
+  } catch (err) {
+    logger.warn(
+      { err, userId },
+      'Failed to calculate best-subscription-type for customer.io'
+    )
+    return 'free'
+  }
 }
 
 /**
