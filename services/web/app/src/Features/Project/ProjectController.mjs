@@ -952,6 +952,8 @@ const _ProjectController = {
         symbolPaletteAvailable: Features.hasFeature('symbol-palette'),
         userRestrictions: Array.from(req.userRestrictions || []),
         showAiFeatures: aiFeaturesAllowed && !aiFeaturesDisabled,
+        onAiFreeTrial:
+          user.features?.aiUsageQuota === Settings.aiFeatures?.freeTrialQuota,
         detachRole,
         metadata: { viewport: false },
         showUpgradePrompt,
