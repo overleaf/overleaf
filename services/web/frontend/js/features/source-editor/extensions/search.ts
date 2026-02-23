@@ -342,7 +342,7 @@ const searchFormTheme = EditorView.theme({
   '.ol-cm-search-input-group': {
     backgroundColor: 'var(--bg-primary-themed)',
     border: '1px solid var(--border-primary-themed)',
-    borderRadius: '20px',
+    borderRadius: 'var(--border-radius-base)',
     width: '100%',
     maxWidth: '50em',
     display: 'inline-flex',
@@ -354,7 +354,7 @@ const searchFormTheme = EditorView.theme({
     '& input[type="text"]': {
       background: 'none',
       boxShadow: 'none',
-      borderRadius: '20px',
+      borderRadius: 'var(--border-radius-base)',
     },
     '& input[type="text"]:focus': {
       outline: 'none',

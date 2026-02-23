@@ -41,7 +41,7 @@ const gotoLineTheme = EditorView.baseTheme({
         backgroundColor: 'var(--bg-primary-themed)',
         border: '1px solid var(--border-primary-themed)',
         backgroundImage: 'none',
-        borderRadius: 'var(--border-radius-full)',
+        borderRadius: 'var(--border-radius-base)',
         boxShadow: 'inset 0 1px 1px rgb(0 0 0 / 8%)',
         transition:
           'border-color ease-in-out .15s, box-shadow ease-in-out .15s',
