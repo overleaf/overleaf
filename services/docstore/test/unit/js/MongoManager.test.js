@@ -1,8 +1,10 @@
 import sinon from 'sinon'
-import { ObjectId } from 'mongodb-legacy'
+import mongodb from 'mongodb-legacy'
 import path from 'node:path'
 import { assert, beforeEach, describe, expect, it, vi } from 'vitest'
 import Errors from '../../../app/js/Errors.js'
+
+const { ObjectId, BSON } = mongodb
 
 const modulePath = path.join(
   import.meta.dirname,
@@ -22,6 +24,7 @@ describe('MongoManager', () => {
       default: {
         db: ctx.db,
         ObjectId,
+        BSON,
       },
     }))
 

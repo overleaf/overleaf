@@ -6,6 +6,7 @@ import DocArchive from './DocArchiveManager.js'
 import RangeManager from './RangeManager.js'
 import Settings from '@overleaf/settings'
 import { setTimeout } from 'node:timers/promises'
+import Metrics from '@overleaf/metrics'
 
 /**
  * @import { Document } from 'mongodb'
@@ -255,6 +256,19 @@ const DocManager = {
         })
       }
       updateLines = !_.isEqual(doc.lines, lines)
+      if (doc.lines.length === lines.length) {
+        Metrics.inc('mongo_docs_update_delta', 1, {
+          status: 'same-line-length',
+        })
+      } else if (doc.lines.length > lines.length) {
+        Metrics.inc('mongo_docs_update_delta', 1, {
+          status: 'smaller-line-length',
+        })
+      } else if (doc.lines.length < lines.length) {
+        Metrics.inc('mongo_docs_update_delta', 1, {
+          status: 'larger-line-length',
+        })
+      }
       updateVersion = doc.version !== version
       updateRanges = RangeManager.shouldUpdateRanges(doc.ranges, ranges)
     }

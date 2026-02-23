@@ -1,8 +1,9 @@
 import mongodb from './mongodb.js'
 import Settings from '@overleaf/settings'
 import Errors from './Errors.js'
+import Metrics from '@overleaf/metrics'
 
-const { db, ObjectId } = mongodb
+const { db, ObjectId, BSON } = mongodb
 
 const ARCHIVING_LOCK_DURATION_MS = Settings.archivingLockDurationMs
 
@@ -98,6 +99,8 @@ async function upsertIntoDocCollection(projectId, docId, previousRev, updates) {
     if (updates.lines || updates.ranges) {
       update.$inc = { rev: 1 }
     }
+    const payloadSize = BSON.calculateObjectSize(update)
+    Metrics.count('mongo_docs_write', payloadSize, 1, { method: 'update' })
     const result = await db.docs.updateOne(
       {
         _id: new ObjectId(docId),
@@ -110,6 +113,8 @@ async function upsertIntoDocCollection(projectId, docId, previousRev, updates) {
       throw new Errors.DocRevValueError()
     }
   } else {
+    const payloadSize = BSON.calculateObjectSize(updates)
+    Metrics.count('mongo_docs_write', payloadSize, 1, { method: 'insert' })
     try {
       await db.docs.insertOne({
         _id: new ObjectId(docId),
@@ -129,6 +134,8 @@ async function upsertIntoDocCollection(projectId, docId, previousRev, updates) {
 }
 
 async function patchDoc(projectId, docId, meta) {
+  const payloadSize = BSON.calculateObjectSize(meta)
+  Metrics.count('mongo_docs_write', payloadSize, 1, { method: 'patch' })
   await db.docs.updateOne(
     {
       _id: new ObjectId(docId),
@@ -195,6 +202,8 @@ async function restoreArchivedDoc(projectId, docId, archivedDoc) {
       inS3: true,
     },
   }
+  const payloadSize = BSON.calculateObjectSize(update)
+  Metrics.count('mongo_docs_write', payloadSize, 1, { method: 'restore' })
   const result = await db.docs.updateOne(query, update)
 
   if (result.matchedCount === 0) {

@@ -6,7 +6,7 @@ import Settings from '@overleaf/settings'
 import MongoUtils from '@overleaf/mongo-utils'
 import mongodb from 'mongodb-legacy'
 
-const { MongoClient, ObjectId } = mongodb
+const { MongoClient, ObjectId, BSON } = mongodb
 
 const mongoClient = new MongoClient(Settings.mongo.url, Settings.mongo.options)
 const mongoDb = mongoClient.db()
@@ -25,5 +25,6 @@ export default {
   db,
   mongoClient,
   ObjectId,
+  BSON,
   cleanupTestDatabase,
 }
