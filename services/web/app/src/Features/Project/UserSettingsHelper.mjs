@@ -30,6 +30,33 @@ async function getEnableNewEditorLegacyDefault(req, res, user) {
   return false
 }
 
+const SYSTEM_THEME_USER_CUTOFF_DATE = new Date(Date.UTC(2026, 1, 15, 12, 0, 0)) // 12pm GMT on February 15, 2026
+
+async function getOverallTheme(req, res, user) {
+  if (user.ace.overallTheme != null) {
+    return user.ace.overallTheme
+  }
+
+  if (user.signUpDate < SYSTEM_THEME_USER_CUTOFF_DATE) {
+    // default / dark
+    return ''
+  }
+
+  const systemOverallSplitTestAssignment =
+    await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'new-user-system-overall-theme'
+    )
+
+  if (systemOverallSplitTestAssignment.variant === 'system') {
+    return 'system'
+  }
+
+  // default / dark
+  return ''
+}
+
 async function buildUserSettings(req, res, user) {
   const defaultLegacyEnableNewEditor = await getEnableNewEditorLegacyDefault(
     req,
@@ -53,7 +80,7 @@ async function buildUserSettings(req, res, user) {
     syntaxValidation: user.ace.syntaxValidation,
     fontFamily: user.ace.fontFamily || 'lucida',
     lineHeight: user.ace.lineHeight || 'normal',
-    overallTheme: user.ace.overallTheme,
+    overallTheme: await getOverallTheme(req, res, user),
     mathPreview: user.ace.mathPreview,
     breadcrumbs: user.ace.breadcrumbs,
     referencesSearchMode: user.ace.referencesSearchMode,

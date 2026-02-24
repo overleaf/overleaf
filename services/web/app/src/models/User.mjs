@@ -77,7 +77,7 @@ export const UserSchema = new Schema(
     ace: {
       mode: { type: String, default: 'none' },
       theme: { type: String, default: 'textmate' },
-      overallTheme: { type: String, default: '' },
+      overallTheme: { type: String },
       // When overallTheme is `system`, we switch between `lightTheme` and `darkTheme` based on system settings
       // When overallTheme is `light-` or empty, we use the `theme` option.
       lightTheme: { type: String, default: 'textmate' },
