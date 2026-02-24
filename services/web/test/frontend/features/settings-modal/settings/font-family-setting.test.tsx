@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import { SettingsModalProvider } from '@/features/ide-redesign/contexts/settings-modal-context'
 import { EditorProviders } from '../../../helpers/editor-providers'
-import FontFamilySetting from '@/features/ide-redesign/components/settings/appearance-settings/font-family-setting'
+import FontFamilySetting from '@/features/settings/components/appearance-settings/font-family-setting'
 import userEvent from '@testing-library/user-event'
 
 const options = [

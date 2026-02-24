@@ -3,7 +3,7 @@ import DropdownSetting from '../dropdown-setting'
 import type { Option } from '../dropdown-setting'
 import { useTranslation } from 'react-i18next'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
-import { ProjectCompiler } from '../../../../../../../types/project-settings'
+import { ProjectCompiler } from '@ol-types/project-settings'
 import { useSetCompilationSettingWithEvent } from '@/features/editor-left-menu/hooks/use-set-compilation-setting'
 
 const OPTIONS: Option<ProjectCompiler>[] = [

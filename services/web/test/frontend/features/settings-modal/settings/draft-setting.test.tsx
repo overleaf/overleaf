@@ -6,7 +6,7 @@ import {
   projectDefaults,
 } from '../../../helpers/editor-providers'
 import userEvent from '@testing-library/user-event'
-import DraftSetting from '@/features/ide-redesign/components/settings/compiler-settings/draft-setting'
+import DraftSetting from '@/features/settings/components/compiler-settings/draft-setting'
 
 const OPTIONS = [
   {

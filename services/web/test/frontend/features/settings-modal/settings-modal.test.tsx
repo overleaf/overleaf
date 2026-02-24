@@ -2,7 +2,7 @@ import { screen, render } from '@testing-library/react'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import { EditorProviders } from '../../helpers/editor-providers'
-import SettingsModal from '@/features/ide-redesign/components/settings/settings-modal'
+import SettingsModal from '@/features/settings/components/settings-modal'
 import { Folder } from '@ol-types/folder'
 import { ImageName, OverallThemeMeta } from '@ol-types/project-settings'
 

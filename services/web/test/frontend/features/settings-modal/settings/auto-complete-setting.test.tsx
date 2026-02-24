@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import { SettingsModalProvider } from '@/features/ide-redesign/contexts/settings-modal-context'
 import { EditorProviders } from '../../../helpers/editor-providers'
-import AutoCompleteSetting from '@/features/ide-redesign/components/settings/editor-settings/auto-complete-setting'
+import AutoCompleteSetting from '@/features/settings/components/editor-settings/auto-complete-setting'
 
 describe('<AutoCompleteSetting />', function () {
   afterEach(function () {

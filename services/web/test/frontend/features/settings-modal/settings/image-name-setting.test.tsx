@@ -7,7 +7,7 @@ import {
   EditorProviders,
   projectDefaults,
 } from '../../../helpers/editor-providers'
-import ImageNameSetting from '@/features/ide-redesign/components/settings/compiler-settings/image-name-setting'
+import ImageNameSetting from '@/features/settings/components/compiler-settings/image-name-setting'
 import userEvent from '@testing-library/user-event'
 
 describe('<ImageNameSetting />', function () {

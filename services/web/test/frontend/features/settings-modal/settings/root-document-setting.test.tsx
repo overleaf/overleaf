@@ -7,7 +7,7 @@ import {
   EditorProviders,
   projectDefaults,
 } from '../../../helpers/editor-providers'
-import RootDocumentSetting from '@/features/ide-redesign/components/settings/compiler-settings/root-document-setting'
+import RootDocumentSetting from '@/features/settings/components/compiler-settings/root-document-setting'
 import userEvent from '@testing-library/user-event'
 
 const OPTIONS = [

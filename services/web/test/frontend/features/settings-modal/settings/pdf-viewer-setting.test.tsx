@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import { SettingsModalProvider } from '@/features/ide-redesign/contexts/settings-modal-context'
-import PDFViewerSetting from '@/features/ide-redesign/components/settings/editor-settings/pdf-viewer-setting'
+import PDFViewerSetting from '@/features/settings/components/editor-settings/pdf-viewer-setting'
 import userEvent from '@testing-library/user-event'
 
 const OPTIONS = [

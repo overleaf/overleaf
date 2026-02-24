@@ -2,7 +2,7 @@ import { fireEvent, screen, within, render } from '@testing-library/react'
 import { expect } from 'chai'
 import { SettingsModalProvider } from '@/features/ide-redesign/contexts/settings-modal-context'
 import { EditorProviders } from '../../../helpers/editor-providers'
-import DictionarySetting from '@/features/ide-redesign/components/settings/editor-settings/dictionary-setting'
+import DictionarySetting from '@/features/settings/components/editor-settings/dictionary-setting'
 import RailModals from '@/features/ide-react/components/rail/rail-modals'
 
 describe('<DictionarySetting />', function () {

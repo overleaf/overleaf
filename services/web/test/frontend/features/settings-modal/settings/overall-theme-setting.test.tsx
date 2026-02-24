@@ -5,7 +5,8 @@ import type { OverallThemeMeta } from '../../../../../types/project-settings'
 import getMeta from '@/utils/meta'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import { SettingsModalProvider } from '@/features/ide-redesign/contexts/settings-modal-context'
-import OverallThemeSetting from '@/features/ide-redesign/components/settings/appearance-settings/overall-theme-setting'
+import OverallThemeSetting from '@/features/settings/components/appearance-settings/overall-theme-setting'
+
 import userEvent from '@testing-library/user-event'
 
 const IEEE_BRAND_ID = 1234

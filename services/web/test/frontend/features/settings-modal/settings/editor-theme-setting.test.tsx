@@ -3,7 +3,7 @@ import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import { SettingsModalProvider } from '@/features/ide-redesign/contexts/settings-modal-context'
 import { EditorProviders } from '../../../helpers/editor-providers'
-import EditorThemeSetting from '@/features/ide-redesign/components/settings/appearance-settings/editor-theme-setting'
+import EditorThemeSetting from '@/features/settings/components/appearance-settings/editor-theme-setting'
 import userEvent from '@testing-library/user-event'
 
 const MOCK_IEEE_BRAND_ID = 123

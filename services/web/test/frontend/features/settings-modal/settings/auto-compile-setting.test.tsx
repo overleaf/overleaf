@@ -6,7 +6,7 @@ import {
   EditorProviders,
   projectDefaults,
 } from '../../../helpers/editor-providers'
-import AutoCompileSetting from '@/features/ide-redesign/components/settings/compiler-settings/auto-compile-setting'
+import AutoCompileSetting from '@/features/settings/components/compiler-settings/auto-compile-setting'
 import localStorage from '@/infrastructure/local-storage'
 import userEvent from '@testing-library/user-event'
 

@@ -1,7 +1,7 @@
 import MaterialIcon from '@/shared/components/material-icon'
 
 import { Nav, NavLink, TabContainer, TabContent } from 'react-bootstrap'
-import { SettingsEntry } from '../../contexts/settings-modal-context'
+import { SettingsEntry } from '../../ide-redesign/contexts/settings-modal-context'
 import SettingsTabPane from './settings-tab-pane'
 import BetaBadgeIcon from '@/shared/components/beta-badge-icon'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'

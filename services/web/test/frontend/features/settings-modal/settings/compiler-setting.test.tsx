@@ -6,7 +6,7 @@ import {
   EditorProviders,
   projectDefaults,
 } from '../../../helpers/editor-providers'
-import CompilerSetting from '@/features/ide-redesign/components/settings/compiler-settings/compiler-setting'
+import CompilerSetting from '@/features/settings/components/compiler-settings/compiler-setting'
 import userEvent from '@testing-library/user-event'
 
 const OPTIONS = [

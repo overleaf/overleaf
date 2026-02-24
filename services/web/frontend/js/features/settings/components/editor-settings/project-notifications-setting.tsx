@@ -3,7 +3,7 @@ import RadioButtonSetting, { RadioOption } from '../radio-button-setting'
 import {
   NotificationLevel,
   useProjectNotificationPreferences,
-} from '../../../hooks/use-project-notification-preferences'
+} from '../../../ide-redesign/hooks/use-project-notification-preferences'
 
 export default function ProjectNotificationsSetting() {
   const { t } = useTranslation()

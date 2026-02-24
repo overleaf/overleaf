@@ -8,7 +8,7 @@ import {
 } from '../../../helpers/editor-providers'
 import localStorage from '@/infrastructure/local-storage'
 import userEvent from '@testing-library/user-event'
-import StopOnFirstErrorSetting from '@/features/ide-redesign/components/settings/compiler-settings/stop-on-first-error-setting'
+import StopOnFirstErrorSetting from '@/features/settings/components/compiler-settings/stop-on-first-error-setting'
 
 describe('<StopOnFirstErrorSetting />', function () {
   afterEach(function () {

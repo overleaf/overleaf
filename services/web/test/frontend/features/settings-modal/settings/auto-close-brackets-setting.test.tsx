@@ -2,7 +2,7 @@ import { screen, render } from '@testing-library/react'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import { EditorProviders } from '../../../helpers/editor-providers'
-import AutoCloseBracketsSetting from '@/features/ide-redesign/components/settings/editor-settings/auto-close-brackets-setting'
+import AutoCloseBracketsSetting from '@/features/settings/components/editor-settings/auto-close-brackets-setting'
 import { SettingsModalProvider } from '@/features/ide-redesign/contexts/settings-modal-context'
 
 describe('<AutoCloseBracketsSetting />', function () {

@@ -1,7 +1,7 @@
 import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
 import { useTranslation } from 'react-i18next'
 import DropdownSetting from '../dropdown-setting'
-import { Keybindings } from '../../../../../../../types/user-settings'
+import { Keybindings } from '../../../../../../types/user-settings'
 
 const OPTIONS: { value: Keybindings; label: string }[] = [
   {
