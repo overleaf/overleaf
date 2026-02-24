@@ -947,11 +947,8 @@ export function coalesceOrThrowPaymentMethod(
     )
   }
 
-  const matchingPaymentMethods = paymentMethods.filter(
-    method =>
-      method.card?.last4 === billingInfo?.paymentMethod?.lastFour &&
-      method.card?.exp_month === billingInfo?.paymentMethod?.expMonth &&
-      method.card?.exp_year === billingInfo?.paymentMethod?.expYear
+  const matchingPaymentMethods = paymentMethods.filter(method =>
+    areStripeAndRecurlyCardDetailsEqual(method, billingInfo?.paymentMethod)
   )
 
   if (matchingPaymentMethods.length === 0) {
@@ -961,4 +958,32 @@ export function coalesceOrThrowPaymentMethod(
   }
 
   return matchingPaymentMethods[0]
+}
+
+/**
+ * Compare Stripe card details with Recurly card details to determine if they likely represent the same card.
+ *
+ * Checks last4 and expiry month/year.
+ *
+ * @param {Stripe.PaymentMethod} stripePaymentMethod
+ * @param {object} recurlyPaymentMethod - Recurly billingInfo.paymentMethod object
+ * @returns {boolean} true if details match, false otherwise
+ */
+export function areStripeAndRecurlyCardDetailsEqual(
+  stripePaymentMethod,
+  recurlyPaymentMethod
+) {
+  if (
+    stripePaymentMethod.type !== 'card' ||
+    !stripePaymentMethod?.card ||
+    !recurlyPaymentMethod?.lastFour
+  ) {
+    return false
+  }
+
+  return (
+    stripePaymentMethod.card.last4 === recurlyPaymentMethod.lastFour &&
+    stripePaymentMethod.card.exp_month === recurlyPaymentMethod.expMonth &&
+    stripePaymentMethod.card.exp_year === recurlyPaymentMethod.expYear
+  )
 }

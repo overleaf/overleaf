@@ -91,6 +91,7 @@ import * as csv from 'csv'
 import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 import {
+  areStripeAndRecurlyCardDetailsEqual,
   coalesceOrEqualOrThrowAddress,
   coalesceOrEqualOrThrowName,
   coalesceOrThrowPaymentMethod,
@@ -602,8 +603,50 @@ async function fetchOtherStripeCustomerByUserId(
     { ...context, stripeApi: 'customers.search' }
   )
 
-  return (
-    results.data?.find(customer => customer.id !== stripeCustomerId) || null
+  const matchingCustomers = results.data?.filter(
+    customer => customer.id !== stripeCustomerId
+  )
+
+  if (matchingCustomers.length > 1) {
+    throw new Error(
+      `Multiple Stripe customers found with userId metadata "${userId}": ${matchingCustomers.map(c => c.id).join(', ')}`
+    )
+  }
+
+  return matchingCustomers[0] || null
+}
+
+/**
+ * Mark a Stripe customer as a duplicate of another customer.
+ *
+ * @param {Stripe} stripeClient
+ * @param {string} stripeCustomerId
+ * @param {string} recurlyAccountCode
+ * @param {object} context
+ * @returns {Promise<void>}
+ */
+async function markCustomerAsDuplicate(
+  stripeClient,
+  stripeCustomerId,
+  recurlyAccountCode,
+  context
+) {
+  const email =
+    Settings.duplicateStripeCustomerAccountEmail?.replace(
+      '@',
+      `+${stripeCustomerId}@`
+    ) || ''
+  await rateLimiters.requestWithRetries(
+    stripeClient.serviceName,
+    () =>
+      stripeClient.customers.update(stripeCustomerId, {
+        email,
+        metadata: {
+          userId: '',
+          duplicateUserId: recurlyAccountCode,
+        },
+      }),
+    { ...context, stripeApi: 'customers.update' }
   )
 }
 
@@ -937,9 +980,68 @@ async function resolveStripeCustomer({
 
   if (otherMatchingCustomer) {
     if (stripeCustomerId) {
-      throw new Error(
-        `Found another Stripe customer with matching userId metadata: ${otherMatchingCustomer.id}`
+      const otherCustomerPaymentMethods =
+        await fetchTargetStripeCustomerPaymentMethods(
+          stripeClient,
+          otherMatchingCustomer.id,
+          stripeContext
+        )
+      const isRecurlyPaymentMethodPaypal =
+        account?.billingInfo?.paymentMethod?.object ===
+        'paypal_billing_agreement'
+      const isRecurlyPaymentMethodManual = !account?.billingInfo?.paymentMethod // billing info may be missing for manually billed customers
+      const hasMatchingPaymentMethod = otherCustomerPaymentMethods.some(
+        method =>
+          areStripeAndRecurlyCardDetailsEqual(
+            method,
+            account?.billingInfo?.paymentMethod
+          )
       )
+      if (
+        isRecurlyPaymentMethodPaypal ||
+        isRecurlyPaymentMethodManual ||
+        hasMatchingPaymentMethod
+      ) {
+        logDebug(
+          'Found another Stripe customer with matching userId metadata, reusing',
+          {
+            ...context,
+            nextStripeCustomerId: otherMatchingCustomer.id,
+          },
+          { verboseOnly: true }
+        )
+        if (commit) {
+          await markCustomerAsDuplicate(
+            stripeClient,
+            stripeCustomerId,
+            recurlyAccountCode,
+            stripeContext
+          )
+          logDebug(
+            'Marked CSV customer as a duplicate of the existing Stripe customer',
+            {
+              ...context,
+              nextStripeCustomerId: otherMatchingCustomer.id,
+            },
+            { verboseOnly: true }
+          )
+        } else {
+          logDebug(
+            'DRY RUN: Would mark CSV customer as a duplicate of the existing Stripe customer',
+            {
+              ...context,
+              nextStripeCustomerId: otherMatchingCustomer.id,
+              step: 'mark_duplicate',
+            },
+            { verboseOnly: true }
+          )
+        }
+        return otherMatchingCustomer
+      } else {
+        throw new Error(
+          `Found another Stripe customer with matching userId metadata but no matching payment method: ${otherMatchingCustomer.id}`
+        )
+      }
     }
 
     logDebug(
