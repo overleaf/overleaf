@@ -41,6 +41,7 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      DOWNLOAD_HOST: http://clsi-nginx:8080
       ALLOWED_COMPILE_GROUPS: "clsi-perf simple-latex-file"
       ENABLE_PDF_CACHING: "true"
       PDF_CACHING_ENABLE_WORKER_POOL: "true"
@@ -51,4 +52,19 @@ services:
       SANDBOXED_COMPILES: "true"
       SANDBOXED_COMPILES_HOST_DIR_COMPILES: $PWD/compiles
       SANDBOXED_COMPILES_HOST_DIR_OUTPUT: $PWD/output
+    depends_on:
+      clsi-nginx:
+        condition: service_started
     command: npm run --silent test:acceptance
+
+  clsi-nginx:
+    image: nginx:1.28
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /run
+    volumes:
+      - ./output:/output:ro
+      - ./nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+      - ./tiny.pdf:/var/clsi/tiny.pdf:ro

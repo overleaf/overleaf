@@ -27,6 +27,7 @@ services:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
+      DOWNLOAD_HOST: http://clsi-nginx:8080
       ALLOWED_COMPILE_GROUPS: "clsi-perf simple-latex-file"
       ENABLE_PDF_CACHING: "true"
       PDF_CACHING_ENABLE_WORKER_POOL: "true"
@@ -40,7 +41,11 @@ services:
     volumes:
       - ./reports:/overleaf/services/clsi/reports
       - ./compiles:/overleaf/services/clsi/compiles
+      - ./output:/overleaf/services/clsi/output
       - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      clsi-nginx:
+        condition: service_started
     command: npm run test:acceptance
 
   tar:
@@ -50,3 +55,15 @@ services:
       - ./:/tmp/build/
     command: tar -czf /tmp/build/build.tar.gz --exclude=build.tar.gz --exclude-vcs .
     user: root
+
+  clsi-nginx:
+    image: nginx:1.28
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /run
+    volumes:
+      - ./output:/output:ro
+      - ./nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+      - ./tiny.pdf:/var/clsi/tiny.pdf:ro

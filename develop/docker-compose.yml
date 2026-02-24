@@ -36,6 +36,17 @@ services:
       - ${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock
       - clsi-cache:/overleaf/services/clsi/cache
 
+  clsi-nginx:
+    image: nginx:1.28
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /run
+    volumes:
+      - ${PWD}/output:/output:ro
+      - ../services/clsi/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+
   contacts:
     build:
       context: ..

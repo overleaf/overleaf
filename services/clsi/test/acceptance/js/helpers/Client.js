@@ -7,7 +7,8 @@ import Settings from '@overleaf/settings'
 const host = Settings.apis.clsi.url
 
 function randomId() {
-  return Math.random().toString(16).slice(2)
+  // Avoid ids starting with 0, which get a dummy PDF served.
+  return 'a' + Math.random().toString(16).slice(2)
 }
 
 function compile(projectId, data) {

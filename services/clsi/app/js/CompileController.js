@@ -153,7 +153,7 @@ function compile(req, res, next) {
                 outputUrlPrefix: Settings.apis.clsi.outputUrlPrefix,
                 outputFiles: outputFiles.map(file => ({
                   url:
-                    `${Settings.apis.clsi.url}/project/${request.project_id}` +
+                    `${Settings.apis.clsi.downloadHost}/project/${request.project_id}` +
                     (request.user_id != null
                       ? `/user/${request.user_id}`
                       : '') +

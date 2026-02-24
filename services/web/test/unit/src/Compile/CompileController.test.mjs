@@ -42,7 +42,8 @@ describe('CompileController', function () {
     ctx.settings = {
       apis: {
         clsi: {
-          url: 'http://clsi.example.com',
+          url: 'http://clsi.example.com:3013',
+          downloadHost: 'http://clsi.example.com:8080',
           submissionBackendClass: 'c3d',
         },
         clsi_priority: {
@@ -776,7 +777,7 @@ describe('CompileController', function () {
 
         it('should open a request to the CLSI', function (ctx) {
           ctx.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
-            `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=standard&compileBackendClass=c3d&query=foo`
+            `${ctx.settings.apis.clsi.downloadHost}${ctx.url}?compileGroup=standard&compileBackendClass=c3d&query=foo`
           )
         })
 
@@ -806,7 +807,7 @@ describe('CompileController', function () {
 
         it('should open a request to the CLSI', function (ctx) {
           ctx.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
-            `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`
+            `${ctx.settings.apis.clsi.downloadHost}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`
           )
         })
       })
@@ -826,7 +827,7 @@ describe('CompileController', function () {
             })
           ctx.fetchUtils.fetchStreamWithResponse.rejects(
             new RequestFailedError(
-              `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`,
+              `${ctx.settings.apis.clsi.downloadHost}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`,
               { method: 'GET' },
               { status: 404 }
             )
@@ -844,7 +845,7 @@ describe('CompileController', function () {
 
         it('should open a request to the CLSI', function (ctx) {
           ctx.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
-            `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`
+            `${ctx.settings.apis.clsi.downloadHost}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`
           )
         })
 
@@ -873,7 +874,7 @@ describe('CompileController', function () {
             })
           ctx.fetchUtils.fetchStreamWithResponse.rejects(
             new RequestFailedError(
-              `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`,
+              `${ctx.settings.apis.clsi.downloadHost}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`,
               { method: 'GET' },
               { status: 404 }
             )
@@ -891,7 +892,7 @@ describe('CompileController', function () {
 
         it('should open a request to the CLSI', function (ctx) {
           ctx.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
-            `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`
+            `${ctx.settings.apis.clsi.downloadHost}${ctx.url}?compileGroup=priority&compileBackendClass=c4d`
           )
         })
 
@@ -924,7 +925,7 @@ describe('CompileController', function () {
 
         it('should open a request to the CLSI', function (ctx) {
           ctx.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
-            `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=standard&compileBackendClass=c3d`
+            `${ctx.settings.apis.clsi.downloadHost}${ctx.url}?compileGroup=standard&compileBackendClass=c3d`
           )
         })
 
@@ -955,7 +956,7 @@ describe('CompileController', function () {
 
         it('should proxy to the standard url', function (ctx) {
           ctx.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
-            `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=standard&compileBackendClass=c3d`
+            `${ctx.settings.apis.clsi.downloadHost}${ctx.url}?compileGroup=standard&compileBackendClass=c3d`
           )
         })
       })
@@ -982,7 +983,7 @@ describe('CompileController', function () {
 
         it('should proxy to the standard url without the build parameter', function (ctx) {
           ctx.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
-            `${ctx.settings.apis.clsi.url}${ctx.url}?compileGroup=standard&compileBackendClass=c3d`
+            `${ctx.settings.apis.clsi.downloadHost}${ctx.url}?compileGroup=standard&compileBackendClass=c3d`
           )
         })
       })

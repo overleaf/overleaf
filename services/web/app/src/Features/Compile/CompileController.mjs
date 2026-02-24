@@ -23,6 +23,7 @@ import {
 } from '@overleaf/fetch-utils'
 import Features from '../../infrastructure/Features.mjs'
 import ClsiCacheController from './ClsiCacheController.mjs'
+import { prepareZipAttachment } from '../../infrastructure/Response.mjs'
 
 const { z, zz, parseReq } = Validation
 const ClsiCookieManager = ClsiCookieManagerFactory(
@@ -30,6 +31,8 @@ const ClsiCookieManager = ClsiCookieManagerFactory(
 )
 
 const COMPILE_TIMEOUT_MS = 10 * 60 * 1000
+
+const buildIdSchema = z.string().regex(/[a-z0-9-]/)
 
 const pdfDownloadRateLimiter = new RateLimiter('full-pdf-download', {
   points: 1000,
@@ -409,6 +412,33 @@ const _CompileController = {
     )
   },
 
+  async getOutputZipFromClsi(req, res) {
+    const projectId = req.params.Project_id
+    const userId = CompileController._getUserIdForCompile(req)
+
+    const project = await ProjectGetter.promises.getProject(projectId, {
+      name: 1,
+    })
+    const filename = `${_CompileController._getSafeProjectName(project)}-output.zip`
+    prepareZipAttachment(res, filename)
+
+    const qs = {}
+    const url = _CompileController._getFileUrl(
+      projectId,
+      userId,
+      req.params.build_id,
+      'output.zip'
+    )
+    await CompileController._proxyToClsi(
+      projectId,
+      'output-zip-file',
+      url,
+      qs,
+      req,
+      res
+    )
+  },
+
   async getFileFromClsi(req, res) {
     const projectId = req.params.Project_id
     const userId = CompileController._getUserIdForCompile(req)
@@ -465,6 +495,7 @@ const _CompileController = {
     } else if (userId != null) {
       url = `/project/${projectId}/user/${userId}/output/${file}`
     } else if (buildId != null) {
+      buildId = buildIdSchema.parse(buildId)
       url = `/project/${projectId}/build/${buildId}/output/${file}`
     } else {
       url = `/project/${projectId}/output/${file}`
@@ -523,7 +554,15 @@ const _CompileController = {
     )
   },
 
-  async _proxyToClsiWithLimits(projectId, action, url, qs, limits, req, res) {
+  async _proxyToClsiWithLimits(
+    projectId,
+    action,
+    requestPath,
+    qs,
+    limits,
+    req,
+    res
+  ) {
     const persistenceOptions = await _getPersistenceOptions(
       req,
       projectId,
@@ -534,7 +573,12 @@ const _CompileController = {
       throw err
     })
 
-    url = new URL(`${Settings.apis.clsi.url}${url}`)
+    const url = new URL(
+      action === 'output-zip-file'
+        ? Settings.apis.clsi.url
+        : Settings.apis.clsi.downloadHost
+    )
+    url.pathname = requestPath
 
     const searchParams = {
       ...persistenceOptions.qs,
@@ -718,6 +762,7 @@ const CompileController = {
   downloadPdf: expressify(_CompileController.downloadPdf), //
   compileAndDownloadPdf: expressify(_CompileController.compileAndDownloadPdf),
   deleteAuxFiles: expressify(_CompileController.deleteAuxFiles),
+  getOutputZipFromClsi: expressify(_CompileController.getOutputZipFromClsi),
   getFileFromClsi: expressify(_CompileController.getFileFromClsi),
   getFileFromClsiWithoutUser: expressify(
     _CompileController.getFileFromClsiWithoutUser

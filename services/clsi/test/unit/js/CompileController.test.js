@@ -144,7 +144,7 @@ describe('CompileController', () => {
               buildId: ctx.buildId,
               outputUrlPrefix: '/zone/b',
               outputFiles: ctx.output_files.map(file => ({
-                url: `${ctx.Settings.apis.clsi.url}/project/${ctx.project_id}/build/${file.build}/output/${file.path}`,
+                url: `${ctx.Settings.apis.clsi.downloadHost}/project/${ctx.project_id}/build/${file.build}/output/${file.path}`,
                 ...file,
               })),
               clsiCacheShard: undefined,
@@ -172,7 +172,7 @@ describe('CompileController', () => {
               buildId: ctx.buildId,
               outputUrlPrefix: '',
               outputFiles: ctx.output_files.map(file => ({
-                url: `${ctx.Settings.apis.clsi.url}/project/${ctx.project_id}/build/${file.build}/output/${file.path}`,
+                url: `${ctx.Settings.apis.clsi.downloadHost}/project/${ctx.project_id}/build/${file.build}/output/${file.path}`,
                 ...file,
               })),
               clsiCacheShard: undefined,
@@ -220,7 +220,7 @@ describe('CompileController', () => {
             outputUrlPrefix: '/zone/b',
             buildId: ctx.buildId,
             outputFiles: ctx.output_files.map(file => ({
-              url: `${ctx.Settings.apis.clsi.url}/project/${ctx.project_id}/build/${file.build}/output/${file.path}`,
+              url: `${ctx.Settings.apis.clsi.downloadHost}/project/${ctx.project_id}/build/${file.build}/output/${file.path}`,
               ...file,
             })),
             clsiCacheShard: undefined,
@@ -268,7 +268,7 @@ describe('CompileController', () => {
             timings: ctx.timings,
             outputUrlPrefix: '/zone/b',
             outputFiles: ctx.output_files.map(file => ({
-              url: `${ctx.Settings.apis.clsi.url}/project/${ctx.project_id}/build/${file.build}/output/${file.path}`,
+              url: `${ctx.Settings.apis.clsi.downloadHost}/project/${ctx.project_id}/build/${file.build}/output/${file.path}`,
               ...file,
             })),
             clsiCacheShard: undefined,

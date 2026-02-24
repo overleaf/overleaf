@@ -67,6 +67,7 @@ module.exports = {
     },
     clsi: {
       url: 'http://127.0.0.1:23013',
+      downloadHost: 'http://127.0.0.1:23080',
     },
     realTime: {
       url: 'http://127.0.0.1:23026',

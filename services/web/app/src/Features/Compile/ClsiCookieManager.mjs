@@ -118,18 +118,17 @@ const ClsiCookieManagerFactory = function (backendGroup) {
   ) {
     let status
     try {
-      const params = new URLSearchParams({
+      const url = new URL(Settings.apis.clsi.url)
+      url.pathname = '/instance-state'
+      url.search = new URLSearchParams({
         clsiserverid,
         compileGroup,
         compileBackendClass,
       }).toString()
-      const { response, body } = await fetchStringWithResponse(
-        `${Settings.apis.clsi.url}/instance-state?${params}`,
-        {
-          method: 'GET',
-          signal: AbortSignal.timeout(30_000),
-        }
-      )
+      const { response, body } = await fetchStringWithResponse(url.href, {
+        method: 'GET',
+        signal: AbortSignal.timeout(30_000),
+      })
       status =
         response.status === 200 && body === `${clsiserverid},UP\n`
           ? 'load-shedding'

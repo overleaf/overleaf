@@ -49,7 +49,7 @@ module.exports = {
       outputUrlPrefix: `${process.env.ZONE ? `/zone/${process.env.ZONE}` : ''}`,
       clsiServerId: process.env.CLSI_SERVER_ID || CLSI_SERVER_ID,
 
-      downloadHost: process.env.DOWNLOAD_HOST || 'http://localhost:3013',
+      downloadHost: process.env.DOWNLOAD_HOST || 'http://localhost:8080',
     },
     clsiPerf: {
       host: `${process.env.CLSI_PERF_HOST || '127.0.0.1'}:${

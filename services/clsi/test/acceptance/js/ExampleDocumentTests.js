@@ -156,7 +156,7 @@ describe('Example Documents', function () {
     (exampleDir =>
       describe(exampleDir, function () {
         before(function () {
-          this.project_id = Client.randomId() + '_' + exampleDir
+          this.project_id = Client.randomId()
           this.outputFiles = []
           // Allow each test to provide a configuration file
           const checksJsonPath = fixturePath(

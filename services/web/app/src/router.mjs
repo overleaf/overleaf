@@ -609,6 +609,20 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     { params: ['Project_id'] }
   )
 
+  // Download all the output files of a specific build
+  webRouter.get(
+    '/project/:Project_id/build/:build_id/output/output.zip',
+    rateLimiterMiddlewareOutputFiles,
+    AuthorizationMiddleware.ensureUserCanReadProject,
+    CompileController.getOutputZipFromClsi
+  )
+  webRouter.get(
+    '/project/:Project_id/user/:user_id/build/:build_id/output/output.zip',
+    rateLimiterMiddlewareOutputFiles,
+    AuthorizationMiddleware.ensureUserCanReadProject,
+    CompileController.getOutputZipFromClsi
+  )
+
   // direct url access to output files for a specific build
   webRouter.get(
     /^\/project\/([^/]*)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
