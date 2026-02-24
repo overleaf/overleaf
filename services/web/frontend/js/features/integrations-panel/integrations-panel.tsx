@@ -1,5 +1,5 @@
 import { ElementType } from 'react'
-import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+import importOverleafModules from '../../../macros/import-overleaf-module.macro'
 import { useTranslation } from 'react-i18next'
 import RailPanelHeader from '@/features/ide-react/components/rail/rail-panel-header'
 

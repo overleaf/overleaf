@@ -1,6 +1,6 @@
 import { FC, JSXElementConstructor, useCallback } from 'react'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
-import { useRailContext } from '../../../ide-react/context/rail-context'
+import { useRailContext } from '../../context/rail-context'
 import getMeta from '@/utils/meta'
 
 const [contactUsModalModules] = importOverleafModules('contactUsModal')

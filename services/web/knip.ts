@@ -55,7 +55,7 @@ const knipConfig: KnipConfig = {
     // to work out a way to do that (@knipignore only works for
     // individual exports rather than whole files)
     'frontend/js/shared/components/labs/labs-experiments-widget.tsx',
-    'frontend/js/features/ide-redesign/components/tooltip-promo.tsx',
+    'frontend/js/shared/components/tooltip-promo.tsx',
   ],
   ignoreExportsUsedInFile: true,
   ignoreBinaries: ['.*'],

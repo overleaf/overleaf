@@ -28,8 +28,6 @@ const VALID_KEYS = [
   'new-editor-opt-in',
   'new-editor-intro',
   'new-editor-intro-2',
-  'old-editor-warning-tooltip',
-  'old-editor-warning-tooltip-2',
   'workbench-rail-popover',
   'themed-dashboard-intro',
 ]

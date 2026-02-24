@@ -11,13 +11,13 @@ import ChatPane from '@/features/chat/components/chat-pane'
 import ChatIndicator from '@/features/chat/components/chat-indicator'
 import getMeta from '@/utils/meta'
 import classNames from 'classnames'
-import IntegrationsPanel from '@/features/ide-redesign/components/integrations-panel/integrations-panel'
+import IntegrationsPanel from '@/features/integrations-panel/integrations-panel'
 import { useChatContext } from '@/features/chat/context/chat-context'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import {
   FullProjectSearchPanel,
   hasFullProjectSearch,
-} from '@/features/ide-redesign/components/full-project-search-panel'
+} from '@/features/ide-react/components/rail/full-project-search-panel'
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'

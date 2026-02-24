@@ -30,7 +30,7 @@ import { ToggleSearchButton } from '@/features/source-editor/components/toolbar/
 import ReviewPanelHeader from '@/features/review-panel/components/review-panel-header'
 import useReviewPanelLayout from '@/features/review-panel/hooks/use-review-panel-layout'
 import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
-import Breadcrumbs from '@/features/ide-redesign/components/breadcrumbs'
+import Breadcrumbs from '@/features/source-editor/extensions/breadcrumbs'
 import classNames from 'classnames'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
