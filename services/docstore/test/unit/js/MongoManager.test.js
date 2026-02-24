@@ -56,9 +56,9 @@ describe('MongoManager', () => {
       }
       const pipeline = ctx.MongoManager.convertUpdateToPipeline(update)
       expect(pipeline).to.deep.equal([
-        { $set: { lines: ['foo', 'bar'] } },
-        { $set: { ranges: { comments: [] } } },
-        { $set: { rev: 42 } },
+        { $set: { lines: { $literal: ['foo', 'bar'] } } },
+        { $set: { ranges: { $literal: { comments: [] } } } },
+        { $set: { rev: { $literal: 42 } } },
         { $unset: 'inS3' },
       ])
     })
@@ -243,8 +243,8 @@ describe('MongoManager', () => {
         project_id: new ObjectId(ctx.projectId),
         rev: ctx.oldRev,
       })
-      assert.equal(args[1][0].$set.lines, ctx.lines)
-      assert.equal(args[1][1].$set.rev, ctx.oldRev + 1)
+      assert.equal(args[1][0].$set.lines.$literal, ctx.lines)
+      assert.equal(args[1][1].$set.rev.$literal, ctx.oldRev + 1)
     })
 
     it('should fallback on mismatch', async ctx => {
@@ -418,16 +418,8 @@ describe('MongoManager', () => {
             rev: ctx.archivedDoc.rev,
           },
           [
-            {
-              $set: {
-                lines: ctx.archivedDoc.lines,
-              },
-            },
-            {
-              $set: {
-                ranges: ctx.archivedDoc.ranges,
-              },
-            },
+            { $set: { lines: { $literal: ctx.archivedDoc.lines } } },
+            { $set: { ranges: { $literal: ctx.archivedDoc.ranges } } },
             { $unset: 'inS3' },
           ]
         )
@@ -482,14 +474,12 @@ describe('MongoManager', () => {
           [
             {
               $set: {
-                lines: ctx.archivedDoc.lines,
+                lines: {
+                  $literal: ctx.archivedDoc.lines,
+                },
               },
             },
-            {
-              $set: {
-                ranges: {},
-              },
-            },
+            { $set: { ranges: { $literal: {} } } },
             { $unset: 'inS3' },
           ]
         )

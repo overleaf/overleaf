@@ -100,7 +100,8 @@ function convertUpdateToPipeline(update) {
         // $unset uses a different schema in a pipeline
         pipeline.push({ [operation]: field })
       } else {
-        pipeline.push({ [operation]: { [field]: value } })
+        // Avoid evaluating '$foo' strings
+        pipeline.push({ [operation]: { [field]: { $literal: value } } })
       }
     }
   }
