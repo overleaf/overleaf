@@ -430,7 +430,11 @@ describe('Project Sharing', function () {
       // block. The `before` hook always runs prior to the `beforeEach` hook.
 
       // Set up retained access before disabling link sharing
-      before(function () {
+      beforeWithReRunOnTestRetry(() => {
+        // undo the link sharing restriction before joining via link-sharing below
+        cy.wrap(reloadWith({ withDataDir: true, pro: true }), {
+          timeout: STARTUP_TIMEOUT,
+        })
         // Set up retained viewer access
         login(retainedViewerEmail)
         openProjectViaLinkSharingAsUser(
