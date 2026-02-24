@@ -2,6 +2,8 @@ import mongodb from './mongodb.js'
 import Settings from '@overleaf/settings'
 import Errors from './Errors.js'
 import Metrics from '@overleaf/metrics'
+import logger from '@overleaf/logger'
+import _ from 'lodash'
 
 const { db, ObjectId, BSON } = mongodb
 
@@ -90,6 +92,21 @@ async function getNonDeletedArchivedProjectDocs(projectId, maxResults) {
   return docs
 }
 
+function convertUpdateToPipeline(update) {
+  const pipeline = []
+  for (const [operation, ops] of Object.entries(update)) {
+    for (const [field, value] of Object.entries(ops)) {
+      if (operation === '$unset') {
+        // $unset uses a different schema in a pipeline
+        pipeline.push({ [operation]: field })
+      } else {
+        pipeline.push({ [operation]: { [field]: value } })
+      }
+    }
+  }
+  return pipeline
+}
+
 async function upsertIntoDocCollection(projectId, docId, previousRev, updates) {
   if (previousRev) {
     const update = {
@@ -97,20 +114,45 @@ async function upsertIntoDocCollection(projectId, docId, previousRev, updates) {
       $unset: { inS3: true },
     }
     if (updates.lines || updates.ranges) {
-      update.$inc = { rev: 1 }
+      update.$set.rev = previousRev + 1
     }
-    const payloadSize = BSON.calculateObjectSize(update)
+    const pipeline = convertUpdateToPipeline(update)
+    const payloadSize = BSON.calculateObjectSize(pipeline)
     Metrics.count('mongo_docs_write', payloadSize, 1, { method: 'update' })
-    const result = await db.docs.updateOne(
+    const result = await db.docs.findOneAndUpdate(
       {
         _id: new ObjectId(docId),
         project_id: new ObjectId(projectId),
         rev: previousRev,
       },
-      update
+      pipeline,
+      { returnDocument: 'after' }
     )
-    if (result.matchedCount !== 1) {
+    if (!result) {
       throw new Errors.DocRevValueError()
+    }
+    let fallbackUpdate = false
+    if (updates.lines && !_.isEqual(updates.lines, result.lines)) {
+      logger.warn({ projectId, docId }, 'lines are different after pipeline')
+      fallbackUpdate = true
+    }
+    if (updates.ranges && !_.isEqual(updates.ranges, result.ranges)) {
+      logger.warn({ projectId, docId }, 'ranges are different after pipeline')
+      fallbackUpdate = true
+    }
+    if (fallbackUpdate) {
+      update.$set.rev = previousRev + 2
+      const result = await db.docs.updateOne(
+        {
+          _id: new ObjectId(docId),
+          project_id: new ObjectId(projectId),
+          rev: previousRev + 1,
+        },
+        update
+      )
+      if (result.matchedCount !== 1) {
+        throw new Errors.DocRevValueError()
+      }
     }
   } else {
     const payloadSize = BSON.calculateObjectSize(updates)
@@ -202,15 +244,41 @@ async function restoreArchivedDoc(projectId, docId, archivedDoc) {
       inS3: true,
     },
   }
-  const payloadSize = BSON.calculateObjectSize(update)
+  const pipeline = convertUpdateToPipeline(update)
+  const payloadSize = BSON.calculateObjectSize(pipeline)
   Metrics.count('mongo_docs_write', payloadSize, 1, { method: 'restore' })
-  const result = await db.docs.updateOne(query, update)
-
-  if (result.matchedCount === 0) {
+  const result = await db.docs.findOneAndUpdate(query, pipeline, {
+    returnDocument: 'after',
+  })
+  if (!result) {
     throw new Errors.DocRevValueError('failed to unarchive doc', {
       docId,
       rev: archivedDoc.rev,
     })
+  }
+  let fallbackUpdate = false
+  if (!_.isEqual(update.$set.lines, result.lines)) {
+    logger.warn(
+      { projectId, docId },
+      'lines are different after pipeline when unarchiving'
+    )
+    fallbackUpdate = true
+  }
+  if (!_.isEqual(update.$set.ranges, result.ranges)) {
+    logger.warn(
+      { projectId, docId },
+      'ranges are different after pipeline when unarchiving'
+    )
+    fallbackUpdate = true
+  }
+  if (fallbackUpdate) {
+    const result = await db.docs.updateOne(query, update)
+    if (result.matchedCount === 0) {
+      throw new Errors.DocRevValueError('failed to unarchive doc', {
+        docId,
+        rev: archivedDoc.rev,
+      })
+    }
   }
 }
 
@@ -251,6 +319,7 @@ async function destroyProject(projectId) {
 }
 
 export default {
+  convertUpdateToPipeline,
   findDoc,
   getProjectsDeletedDocs,
   getProjectsDocs,
