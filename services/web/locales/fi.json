@@ -307,7 +307,7 @@
   "three_free_collab": "Kolme ilmaista työtoveria",
   "timedout": "Aikakatkaisu",
   "title": "Otsikko",
-  "to_many_login_requests_2_mins": "Tällä tilillä on liian monta sisäänkirjautumispyyntöä. Ole hyvä ja odota 2 minuuttia ennen kuin yrität kirjautua uudestaan",
+  "too_many_login_requests_2_mins": "Tällä tilillä on liian monta sisäänkirjautumispyyntöä. Ole hyvä ja odota 2 minuuttia ennen kuin yrität kirjautua uudestaan",
   "tr": "Turkki",
   "try_now": "Yritä nyt",
   "uk": "Ukraina",

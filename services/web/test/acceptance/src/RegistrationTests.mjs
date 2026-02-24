@@ -101,7 +101,7 @@ describe('Registration', function () {
           expect(results).to.deep.equal(
             Array(10)
               .fill('invalid-password-retry-or-reset')
-              .concat(Array(5).fill('to-many-login-requests-2-mins'))
+              .concat(Array(5).fill('too-many-login-requests-2-mins'))
           )
         })
 

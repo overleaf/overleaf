@@ -74,8 +74,8 @@ function loginRateLimitEmail(emailField = 'email') {
         res.json({
           message: {
             type: 'error',
-            text: req.i18n.translate('to_many_login_requests_2_mins'),
-            key: 'to-many-login-requests-2-mins',
+            text: req.i18n.translate('too_many_login_requests_2_mins'),
+            key: 'too-many-login-requests-2-mins',
           },
         })
       }
