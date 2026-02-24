@@ -2932,6 +2932,8 @@
   "zoom_in": "Zoom in",
   "zoom_out": "Zoom out",
   "zoom_to": "Zoom to",
+  "rotate_clockwise": "Rotate clockwise",
+  "rotate_counter_clockwise": "Rotate counter-clockwise",
   "zotero": "Zotero",
   "zotero_and_mendeley_integrations": "<0>Zotero</0> and <0>Mendeley</0> integrations",
   "zotero_dynamic_sync_description": "With the Zotero integration, you can import your references into __appName__. You can either import all your references at once or dynamically search your Zotero library directly from __appName__.",

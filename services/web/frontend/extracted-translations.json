@@ -2355,6 +2355,8 @@
   "zoom_in": "",
   "zoom_out": "",
   "zoom_to": "",
+  "rotate_clockwise": "",
+  "rotate_counter_clockwise": "",
   "zotero": "",
   "zotero_dynamic_sync_description": "",
   "zotero_groups_loading_error": "",
