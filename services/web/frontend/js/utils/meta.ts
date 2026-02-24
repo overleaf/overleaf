@@ -28,6 +28,7 @@ import { Tag } from '../../../app/src/Features/Tags/types'
 import { Institution } from '../../../types/institution'
 import {
   GroupPolicy,
+  GroupSubscription,
   ManagedGroupSubscription,
   MemberGroupSubscription,
   StripePaymentProviderService,
@@ -206,6 +207,9 @@ export interface Meta {
   'ol-memberGroupSubscriptions': MemberGroupSubscription[]
   'ol-memberOfSSOEnabledGroups': GroupSSOLinkingStatus[]
   'ol-members': MinimalUser[]
+  'ol-multiple-group-subscriptions': Array<
+    Pick<GroupSubscription, 'teamName'> & { id: string; email: string }
+  >
   'ol-navbar': DefaultNavbarMetadata
   'ol-newsletter-subscribed': boolean
   'ol-no-single-dollar': boolean

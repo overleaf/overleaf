@@ -404,15 +404,19 @@ const _ProjectController = {
         )
 
       if (domainCaptureRedirect === 'enabled') {
-        const subscription = (
+        const groupsWithEmails = (
           await Modules.promises.hooks.fire(
-            'findDomainCaptureGroupUserCouldBePartOf',
+            'findDomainCaptureGroupsUserCouldBePartOf',
             userId
           )
         )?.[0]
 
-        if (subscription) {
-          if (subscription.managedUsersEnabled) {
+        if (groupsWithEmails && groupsWithEmails.length > 0) {
+          if (
+            groupsWithEmails.some(
+              ({ subscription }) => subscription.managedUsersEnabled
+            )
+          ) {
             return res.redirect('/domain-capture')
           } else {
             // TODO show notification or anything else

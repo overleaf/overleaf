@@ -522,8 +522,14 @@ describe('ProjectListController', function () {
         .withArgs(ctx.req, ctx.res, 'domain-capture-redirect')
         .resolves({ variant: 'enabled' })
       ctx.Modules.promises.hooks.fire
-        .withArgs('findDomainCaptureGroupUserCouldBePartOf', ctx.user._id)
-        .resolves([{ _id: new ObjectId(), managedUsersEnabled: true }])
+        .withArgs('findDomainCaptureGroupsUserCouldBePartOf', ctx.user._id)
+        .resolves([
+          [
+            {
+              subscription: { managedUsersEnabled: true },
+            },
+          ],
+        ])
       ctx.res.redirect = url => {
         url.should.equal('/domain-capture')
       }
