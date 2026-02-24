@@ -510,8 +510,10 @@ async function projectListPage(req, res, next) {
     logger.error({ err: error }, 'Failed to get individual subscription')
   }
 
-  const aiBlocked = !(await _canUseAIAssist(user))
-  const hasAiAssist = await _userHasAIAssist(user)
+  const aiBlocked =
+    Features.hasFeature('saas') && !(await _canUseAIAssist(user))
+  const hasAiAssist =
+    Features.hasFeature('saas') && (await _userHasAIAssist(user))
 
   await SplitTestHandler.promises.getAssignment(
     req,
@@ -899,11 +901,25 @@ function _hasActiveFilter(filters) {
   )
 }
 
+// todo: quota clean-up: rename function and vars
 async function _userHasAIAssist(user) {
-  // Check if the user has AI Assist enabled via Overleaf
-  if (user.features?.aiErrorAssistant) {
+  let hasPremiumAiFeatures
+  const inQuotaSplitTest =
+    await SplitTestHandler.promises.featureFlagEnabledForUser(
+      user._id,
+      'plans-2026-phase-1'
+    )
+  if (inQuotaSplitTest) {
+    hasPremiumAiFeatures =
+      user.features?.aiUsageQuota === Settings.aiFeatures.unlimitedQuota
+  } else {
+    hasPremiumAiFeatures = user.features?.aiErrorAssistant === true
+  }
+  // Check if the user has a non free trial version of our AI features
+  if (hasPremiumAiFeatures) {
     return true
   }
+
   // Check if the user has AI Assist enabled via Writefull
   const { isPremium: hasAiAssistViaWritefull } =
     await UserGetter.promises.getWritefullData(user._id)
@@ -918,6 +934,7 @@ async function _userHasAIAssist(user) {
 // It does NOT determine if the user has AI Assist enabled
 async function _canUseAIAssist(user) {
   // Check if the assistant has been manually disabled by the user
+  // post https://github.com/overleaf/internal/pull/31273 we can rely on user.aiFeatures being populated
   if (user.aiFeatures?.enabled === false) {
     return false
   }

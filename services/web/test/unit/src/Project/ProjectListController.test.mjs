@@ -40,6 +40,7 @@ describe('ProjectListController', function () {
         theme: 'textmate',
         mode: 'none',
       },
+      aiFeatures: { enabled: false },
     }
     ctx.users = {
       'user-1': {
@@ -138,6 +139,7 @@ describe('ProjectListController', function () {
     ctx.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
+        featureFlagEnabledForUser: sinon.stub().resolves(false),
         hasUserBeenAssignedToVariant: sinon.stub().resolves(false),
       },
     }

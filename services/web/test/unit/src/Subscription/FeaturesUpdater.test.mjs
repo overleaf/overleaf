@@ -74,6 +74,11 @@ describe('FeaturesUpdater', function () {
       },
       writefull: {
         overleafApiUrl: 'https://www.writefull.com',
+        quotaTierGranted: 'unlimited',
+      },
+      aiFeatures: {
+        freeTrialQuota: 'basic',
+        unlimitedQuota: 'unlimited',
       },
     }
 
@@ -124,6 +129,12 @@ describe('FeaturesUpdater', function () {
       getQueue: sinon.stub().returns({
         add: sinon.stub().resolves(),
       }),
+    }
+
+    ctx.SplitTestHandler = {
+      promises: {
+        featureFlagEnabledForUser: sinon.stub().resolves(false),
+      },
     }
 
     vi.doMock(
@@ -193,6 +204,13 @@ describe('FeaturesUpdater', function () {
     vi.doMock('@overleaf/fetch-utils', () => ({
       fetchNothing: sinon.stub().resolves(),
     }))
+
+    vi.doMock(
+      '../../../../app/src/Features/SplitTests/SplitTestHandler',
+      () => ({
+        default: ctx.SplitTestHandler,
+      })
+    )
 
     ctx.FeaturesUpdater = (await import(MODULE_PATH)).default
   })
@@ -323,6 +341,7 @@ describe('FeaturesUpdater', function () {
           default: 'features',
           individual: 'features',
           aiErrorAssistant: true,
+          aiUsageQuota: 'unlimited',
         })
       })
     })
@@ -341,6 +360,7 @@ describe('FeaturesUpdater', function () {
         expect(features).to.deep.equal({
           default: 'features',
           aiErrorAssistant: true,
+          aiUsageQuota: 'unlimited',
         })
       })
     })

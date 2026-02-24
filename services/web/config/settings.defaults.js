@@ -421,6 +421,11 @@ module.exports = {
     personal: defaultFeatures,
   },
 
+  aiFeatures: {
+    freeTrialQuota: 'basic',
+    unlimitedQuota: 'unlimited',
+  },
+
   groupPlanModalOptions: {
     plan_codes: [],
     currencies: [],
