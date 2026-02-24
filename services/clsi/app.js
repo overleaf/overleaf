@@ -2,26 +2,20 @@
 import '@overleaf/metrics/initialize.js'
 
 import CompileController from './app/js/CompileController.js'
-import ContentController from './app/js/ContentController.js'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import LoggerSerializers from './app/js/LoggerSerializers.js'
 
 import Metrics from '@overleaf/metrics'
 import smokeTest from './test/smoke/js/SmokeTests.js'
-import ContentTypeMapper from './app/js/ContentTypeMapper.js'
 import Errors from './app/js/Errors.js'
 import OutputController from './app/js/OutputController.js'
-import Path from 'node:path'
 
 import ProjectPersistenceManager from './app/js/ProjectPersistenceManager.js'
 import OutputCacheManager from './app/js/OutputCacheManager.js'
-import ContentCacheManager from './app/js/ContentCacheManager.js'
 
 import express from 'express'
 import bodyParser from 'body-parser'
-
-import ForbidSymlinks from './app/js/StaticServerForbidSymlinks.js'
 
 import net from 'node:net'
 import os from 'node:os'
@@ -75,22 +69,6 @@ app.param('build_id', function (req, res, next, buildId) {
   }
 })
 
-app.param('contentId', function (req, res, next, contentId) {
-  if (contentId?.match(OutputCacheManager.CONTENT_REGEX)) {
-    next()
-  } else {
-    next(new OError('invalid content id', { contentId }))
-  }
-})
-
-app.param('hash', function (req, res, next, hash) {
-  if (hash?.match(ContentCacheManager.HASH_REGEX)) {
-    next()
-  } else {
-    next(new OError('invalid hash', { hash }))
-  }
-})
-
 app.post(
   '/project/:project_id/compile',
   bodyParser.json({ limit: Settings.compileSizeLimit }),
@@ -130,29 +108,6 @@ app.get(
   CompileController.wordcount
 )
 
-// create a static server which does not allow access to any symlinks
-// avoids possible mismatch of root directory between middleware check
-// and serving the files
-const staticOutputServer = ForbidSymlinks(
-  express.static,
-  Settings.path.outputDir,
-  {
-    setHeaders(res, path, stat) {
-      if (Path.basename(path) === 'output.pdf') {
-        // Calculate an etag in the same way as nginx
-        // https://github.com/tj/send/issues/65
-        const etag = (path, stat) =>
-          `"${Math.ceil(+stat.mtime / 1000).toString(16)}` +
-          '-' +
-          Number(stat.size).toString(16) +
-          '"'
-        res.set('Etag', etag(path, stat))
-      }
-      res.set('Content-Type', ContentTypeMapper.map(path))
-    },
-  }
-)
-
 // This needs to be before GET /project/:project_id/build/:build_id/output/*
 app.get(
   '/project/:project_id/build/:build_id/output/output.zip',
@@ -165,37 +120,6 @@ app.get(
   '/project/:project_id/user/:user_id/build/:build_id/output/output.zip',
   bodyParser.json(),
   OutputController.createOutputZip
-)
-
-app.get(
-  '/project/:project_id/user/:user_id/build/:build_id/output/*',
-  function (req, res, next) {
-    // for specific build get the path from the OutputCacheManager (e.g. .clsi/buildId)
-    req.url =
-      `/${req.params.project_id}-${req.params.user_id}/` +
-      OutputCacheManager.path(req.params.build_id, `/${req.params[0]}`)
-    staticOutputServer(req, res, next)
-  }
-)
-
-app.get(
-  '/project/:projectId/content/:contentId/:hash',
-  ContentController.getPdfRange
-)
-app.get(
-  '/project/:projectId/user/:userId/content/:contentId/:hash',
-  ContentController.getPdfRange
-)
-
-app.get(
-  '/project/:project_id/build/:build_id/output/*',
-  function (req, res, next) {
-    // for specific build get the path from the OutputCacheManager (e.g. .clsi/buildId)
-    req.url =
-      `/${req.params.project_id}/` +
-      OutputCacheManager.path(req.params.build_id, `/${req.params[0]}`)
-    staticOutputServer(req, res, next)
-  }
 )
 
 app.get('/status', (req, res, next) => res.send('CLSI is alive\n'))
