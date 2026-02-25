@@ -1,6 +1,6 @@
 import classNames from 'classnames'
 import moment from 'moment'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { User } from '@ol-types/group-management/user'
@@ -20,6 +20,18 @@ import getMeta from '@/utils/meta'
 
 import BackButton from './back-button'
 import { useGroupMembersContext } from '../context/group-members-context'
+import OffboardManagedUserModal from './members-table/offboard-managed-user-modal'
+import RemoveManagedUserModal from './members-table/remove-managed-user-modal'
+import UnlinkUserModal from './members-table/unlink-user-modal'
+import { GroupUserAlert } from '../utils/types'
+import DropdownButton from './members-table/dropdown-button'
+import {
+  OLModal,
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/shared/components/ol/ol-modal'
 
 const getUserRole = (user: User) =>
   user.isEntityAdmin ? 'admin' : user.isEntityManager ? 'manager' : 'member'
@@ -32,20 +44,27 @@ export default function GroupUsers() {
   const canUseAddSeatsFeature = getMeta('ol-canUseAddSeatsFeature')
   const groupSSOActive = getMeta('ol-groupSSOActive')
   const managedUsersActive = getMeta('ol-managedUsersActive')
+  const hasWriteAccess = getMeta('ol-hasWriteAccess')
+  const ownUserId = getMeta('ol-user_id')
+  const [userToOffboard, setUserToOffboard] = useState<User | undefined>(
+    undefined
+  )
+  const [userToRemove, setUserToRemove] = useState<User | undefined>(undefined)
+  const [userToUnlink, setUserToUnlink] = useState<User | undefined>(undefined)
+  const [_groupUserAlert, setGroupUserAlert] =
+    useState<GroupUserAlert>(undefined)
 
   const {
     users,
-    // selectedUsers,
-    // addMembers,
-    // removeMembers,
-    // removeMemberLoading,
-    // removeMemberError,
-    // inviteMemberLoading,
-    // inviteError,
-    // memberAdded,
-    // paths,
+    selectedUsers,
+    setSelectedUsers,
+    selectUser,
+    unselectUser,
+    addManager,
+    removeManager,
+    addMembers,
+    removeMember,
   } = useGroupMembersContext()
-
   const [page, setPage] = useState(1)
   const numPages = Math.ceil(users.length / 10)
 
@@ -55,7 +74,62 @@ export default function GroupUsers() {
     return users.slice(firstUser, lastUser)
   }, [users, page])
 
-  const addedUsersSize = users.filter(user => user.isEntityMember).length
+  const visibleNonMangedUsers = useMemo(
+    () => paginatedUsers.filter(user => !user.enrollment?.managedBy),
+    [paginatedUsers]
+  )
+
+  const handleSelectAll = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.checked) {
+        setSelectedUsers(visibleNonMangedUsers)
+      } else {
+        setSelectedUsers([])
+      }
+    },
+    [visibleNonMangedUsers, setSelectedUsers]
+  )
+
+  const handleSelectUser = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>, user: User) => {
+      if (e.target.checked) {
+        selectUser(user)
+      } else {
+        unselectUser(user)
+      }
+    },
+    [selectUser, unselectUser]
+  )
+
+  const handleChangeRole = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>, user: User) => {
+      if (e.target.value === 'manager') {
+        addManager(user.email)
+      } else if (e.target.value === 'member') {
+        if (user.isEntityManager) {
+          removeManager(user, true)
+        }
+        if (!user.isEntityMember && !user.invite) {
+          addMembers(user.email)
+        }
+      }
+    },
+    [addManager, removeManager, addMembers]
+  )
+
+  const handleRemoveUser = (user: User) => {
+    if (user.isEntityManager) {
+      removeManager(user)
+    }
+    if (user.isEntityMember || user.invite) {
+      removeMember(user)
+    }
+    setUserToRemove(undefined)
+  }
+
+  const allocatedLicenses = users.filter(
+    user => user.isEntityMember || user.invite
+  ).length
 
   return (
     <div className="container group-users-container">
@@ -79,7 +153,9 @@ export default function GroupUsers() {
             </a>
           </OLCol>
           <OLCol xs="auto" className="align-content-center">
-            <OLButton>{t('invite_users')}</OLButton>
+            <OLButton disabled={allocatedLicenses <= groupSize}>
+              {t('invite_users')}
+            </OLButton>
           </OLCol>
         </OLRow>
 
@@ -87,12 +163,12 @@ export default function GroupUsers() {
           <OLNotification
             type="info"
             content={
-              users.length === 1
+              allocatedLicenses === 1
                 ? t('you_have_1_license_and_your_plan_supports_up_to_y', {
                     groupSize,
                   })
                 : t('you_have_x_licenses_and_your_plan_supports_up_to_y', {
-                    addedUsersSize,
+                    addedUsersSize: allocatedLicenses,
                     groupSize,
                   })
             }
@@ -101,7 +177,7 @@ export default function GroupUsers() {
                 <a
                   href="/user/subscription/group/add-users"
                   className={classNames({
-                    'btn btn-premium': addedUsersSize === groupSize,
+                    'btn btn-premium': allocatedLicenses === groupSize,
                   })}
                 >
                   {t('buy_more_licenses')}
@@ -117,7 +193,16 @@ export default function GroupUsers() {
               <thead>
                 <tr>
                   <th>
-                    <OLFormCheckbox />
+                    {hasWriteAccess && visibleNonMangedUsers.length > 0 && (
+                      <OLFormCheckbox
+                        autoComplete="off"
+                        onChange={handleSelectAll}
+                        checked={
+                          selectedUsers.length === visibleNonMangedUsers.length
+                        }
+                        aria-label={t('select_all')}
+                      />
+                    )}
                   </th>
                   <th>{t('email')}</th>
                   <th>{t('name')}</th>
@@ -130,24 +215,34 @@ export default function GroupUsers() {
                   {managedUsersActive && (
                     <th className="text-center">{t('managed')}</th>
                   )}
-                  <th />
+                  {hasWriteAccess && <th />}
                 </tr>
               </thead>
               <tbody>
                 {paginatedUsers.map(user => (
                   <tr key={user.email} className="align-middle">
                     <td>
-                      <OLFormCheckbox />
+                      {hasWriteAccess &&
+                        !user.enrollment?.managedBy &&
+                        !user.isEntityAdmin &&
+                        user._id !== ownUserId && (
+                          <OLFormCheckbox
+                            autoComplete="off"
+                            onChange={e => handleSelectUser(e, user)}
+                            checked={selectedUsers.includes(user)}
+                            aria-label={t('select_user')}
+                          />
+                        )}
                     </td>
                     <td>{user.email}</td>
                     <td className="text-nowrap">
                       {user.first_name} {user.last_name}
                     </td>
                     <td className="text-nowrap">
-                      {user.invite ? (
-                        <OLTag>{t('pending_invite')}</OLTag>
-                      ) : (
+                      {user.last_active_at ? (
                         moment(user.last_active_at).format('Do MMM YYYY')
+                      ) : (
+                        <OLTag>{t('pending_invite')}</OLTag>
                       )}
                     </td>
                     <td>
@@ -156,9 +251,17 @@ export default function GroupUsers() {
                         name="user-role"
                         defaultValue={getUserRole(user)}
                         className="user-role-select"
-                        disabled
+                        onChange={e => handleChangeRole(e, user)}
+                        disabled={
+                          !hasWriteAccess ||
+                          user.isEntityAdmin ||
+                          user._id === null ||
+                          user._id === ownUserId
+                        }
                       >
-                        <option value="admin">{t('admin_titlecase')}</option>
+                        <option value="admin" hidden>
+                          {t('admin_titlecase')}
+                        </option>
                         <option value="manager">{t('manager')}</option>
                         <option value="member">{t('member')}</option>
                       </OLFormSelect>
@@ -169,6 +272,12 @@ export default function GroupUsers() {
                           type="check"
                           className="text-success"
                           accessibilityLabel={t('license_allocated')}
+                        />
+                      ) : user.invite ? (
+                        <MaterialIcon
+                          type="schedule"
+                          className="text-warning"
+                          accessibilityLabel={t('pending_invite')}
                         />
                       ) : (
                         <MaterialIcon
@@ -214,7 +323,21 @@ export default function GroupUsers() {
                         )}
                       </td>
                     )}
-                    <td>...</td>
+                    <td className="cell-dropdown">
+                      {hasWriteAccess &&
+                        !user.isEntityAdmin &&
+                        user._id !== ownUserId && (
+                          <DropdownButton
+                            user={user}
+                            openOffboardingModalForUser={setUserToOffboard}
+                            openRemoveModalForUser={setUserToRemove}
+                            openUnlinkUserModal={setUserToUnlink}
+                            setGroupUserAlert={setGroupUserAlert}
+                            groupId={groupId}
+                            combinedUserManagement
+                          />
+                        )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -277,6 +400,53 @@ export default function GroupUsers() {
           </OLCol>
         </OLRow>
       </OLCard>
+      {userToOffboard && (
+        <OffboardManagedUserModal
+          user={userToOffboard}
+          groupId={groupId}
+          allMembers={users.filter(user => user.isEntityMember)}
+          onClose={() => setUserToOffboard(undefined)}
+        />
+      )}
+      {userToRemove &&
+        (userToRemove.enrollment?.managedBy === groupId ? (
+          <RemoveManagedUserModal
+            user={userToRemove}
+            groupId={groupId}
+            onClose={() => setUserToRemove(undefined)}
+          />
+        ) : (
+          <OLModal
+            show={userToRemove !== undefined}
+            onHide={() => setUserToRemove(undefined)}
+          >
+            <OLModalHeader>
+              <OLModalTitle>Remove user from group?</OLModalTitle>
+            </OLModalHeader>
+            <OLModalBody>
+              Are you sure you want to remove {userToRemove.email} from the
+              group?
+            </OLModalBody>
+            <OLModalFooter>
+              <OLButton
+                onClick={() => setUserToRemove(undefined)}
+                variant="secondary"
+              >
+                Cancel
+              </OLButton>
+              <OLButton onClick={() => handleRemoveUser(userToRemove)}>
+                Remove
+              </OLButton>
+            </OLModalFooter>
+          </OLModal>
+        ))}
+      {userToUnlink && (
+        <UnlinkUserModal
+          user={userToUnlink}
+          onClose={() => setUserToUnlink(undefined)}
+          setGroupUserAlert={setGroupUserAlert}
+        />
+      )}
     </div>
   )
 }

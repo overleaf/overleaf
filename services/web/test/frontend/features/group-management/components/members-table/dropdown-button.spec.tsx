@@ -210,6 +210,7 @@ describe('DropdownButton', function () {
         last_active_at: new Date(),
         enrollment: {},
         isEntityAdmin: undefined,
+        isEntityMember: true,
       }
 
       beforeEach(function () {
@@ -451,6 +452,7 @@ describe('DropdownButton', function () {
           ],
         },
         isEntityAdmin: undefined,
+        isEntityMember: true,
       }
 
       beforeEach(function () {
@@ -493,6 +495,7 @@ describe('DropdownButton', function () {
           sso: [],
         },
         isEntityAdmin: undefined,
+        isEntityMember: true,
       }
 
       beforeEach(function () {
@@ -542,6 +545,7 @@ describe('DropdownButton', function () {
           ],
         },
         isEntityAdmin: true,
+        isEntityMember: true,
       }
 
       beforeEach(function () {
@@ -587,6 +591,7 @@ describe('DropdownButton', function () {
           sso: [],
         },
         isEntityAdmin: true,
+        isEntityMember: true,
       }
 
       beforeEach(function () {

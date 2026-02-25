@@ -74,7 +74,7 @@ describe('GroupUsers', function () {
 
     it('displays license information correctly', function () {
       cy.get('.license-info').contains(
-        'You have allocated 2 licenses and your plan supports up to 10'
+        'You have allocated 3 licenses and your plan supports up to 10'
       )
     })
 
@@ -110,7 +110,7 @@ describe('GroupUsers', function () {
             'have.value',
             'member'
           )
-          cy.contains('License not allocated')
+          cy.contains('Pending invite')
         })
 
         cy.get('tr:nth-child(4)').within(() => {

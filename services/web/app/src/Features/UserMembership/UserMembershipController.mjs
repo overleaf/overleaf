@@ -177,10 +177,26 @@ async function manageGroupUsers(req, res) {
     entityConfig
   )
 
+  const { usersNoInvites, invites } = Object.groupBy(users, user =>
+    user.invite ? 'invites' : 'usersNoInvites'
+  )
+
+  const deduplicatedUsers = _.uniqBy(usersNoInvites, 'email')
+  for (const invite of invites) {
+    const alreadyAdded = deduplicatedUsers.find(
+      user => user.email === invite.email
+    )
+    if (alreadyAdded) {
+      alreadyAdded.invite = true
+    } else {
+      deduplicatedUsers.unshift(invite)
+    }
+  }
+
   res.render('user_membership/group-users-react', {
     name: entityName,
     groupId: entityPrimaryKey,
-    users: _.uniqBy(users, 'email'),
+    users: deduplicatedUsers,
     groupSize: subscription.membersLimit,
     managedUsersActive: subscription.managedUsersEnabled,
     entityAccess: UserMembershipAuthorization.hasEntityAccess()(req),

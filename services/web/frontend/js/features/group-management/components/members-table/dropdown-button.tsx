@@ -33,6 +33,7 @@ type ManagedUserDropdownButtonProps = {
   openUnlinkUserModal: (user: User) => void
   groupId: string
   setGroupUserAlert: Dispatch<SetStateAction<GroupUserAlert>>
+  combinedUserManagement?: boolean
 }
 
 export default function DropdownButton({
@@ -42,9 +43,10 @@ export default function DropdownButton({
   openUnlinkUserModal,
   groupId,
   setGroupUserAlert,
+  combinedUserManagement = false,
 }: ManagedUserDropdownButtonProps) {
   const { t } = useTranslation()
-  const { removeMember } = useGroupMembersContext()
+  const { removeMember, addMembers } = useGroupMembersContext()
   const {
     runAsync: runResendManagedUserInviteAsync,
     isLoading: isResendingManagedUserInvite,
@@ -183,11 +185,23 @@ export default function DropdownButton({
   }
 
   const onRemoveFromGroup = () => {
-    removeMember(user)
+    if (combinedUserManagement) {
+      openRemoveModalForUser(user)
+    } else {
+      removeMember(user)
+    }
   }
 
   const onUnlinkUserClick = () => {
     openUnlinkUserModal(user)
+  }
+
+  const onAllocateLicenseClick = () => {
+    addMembers(user.email)
+  }
+
+  const onRevokeLicenseClick = () => {
+    removeMember(user, combinedUserManagement)
   }
 
   const buttons = []
@@ -204,7 +218,12 @@ export default function DropdownButton({
       </MenuItemButton>
     )
   }
-  if (managedUsersActive && !isUserManaged && !userPending) {
+  if (
+    managedUsersActive &&
+    !isUserManaged &&
+    !userPending &&
+    user.isEntityMember
+  ) {
     buttons.push(
       <MenuItemButton
         onClick={onResendManagedUserInviteClick}
@@ -215,6 +234,27 @@ export default function DropdownButton({
         {t('resend_managed_user_invite')}
       </MenuItemButton>
     )
+  }
+  if (combinedUserManagement && user.isEntityManager) {
+    if (!user.isEntityMember && !user.invite) {
+      buttons.push(
+        <MenuItemButton
+          onClick={onAllocateLicenseClick}
+          key="allocate-license-action"
+        >
+          {t('allocate_license')}
+        </MenuItemButton>
+      )
+    } else {
+      buttons.push(
+        <MenuItemButton
+          onClick={onRevokeLicenseClick}
+          key="revoke-license-action"
+        >
+          {t('revoke_license')}
+        </MenuItemButton>
+      )
+    }
   }
   if (groupSSOActive && isGroupSSOLinked) {
     buttons.push(
@@ -246,20 +286,20 @@ export default function DropdownButton({
   ) {
     buttons.push(
       <MenuItemButton
-        key="delete-user-action"
-        data-testid="delete-user-action"
-        onClick={onDeleteUserClick}
-      >
-        {t('delete_permanently')}
-      </MenuItemButton>
-    )
-    buttons.push(
-      <MenuItemButton
         key="release-user-action"
         data-testid="release-user-action"
         onClick={onReleaseUserClick}
       >
         {t('remove_from_group')}
+      </MenuItemButton>
+    )
+    buttons.push(
+      <MenuItemButton
+        key="delete-user-action"
+        data-testid="delete-user-action"
+        onClick={onDeleteUserClick}
+      >
+        {t('delete_permanently')}
       </MenuItemButton>
     )
   } else if (!isUserManaged) {
@@ -298,7 +338,9 @@ export default function DropdownButton({
       >
         <MaterialIcon type="more_vert" accessibilityLabel={t('actions')} />
       </DropdownToggle>
-      <DropdownMenu flip={false}>{buttons}</DropdownMenu>
+      <DropdownMenu flip renderOnMount popperConfig={{ strategy: 'fixed' }}>
+        {buttons}
+      </DropdownMenu>
     </Dropdown>
   )
 }
