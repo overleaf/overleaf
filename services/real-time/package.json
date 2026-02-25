@@ -46,7 +46,7 @@
     "mocha-junit-reporter": "^2.2.1",
     "mocha-multi-reporters": "^1.5.1",
     "sinon": "^9.2.4",
-    "sinon-chai": "4.0.1",
+    "sinon-chai": "^3.7.0",
     "timekeeper": "0.0.4",
     "typescript": "^5.0.4",
     "uid-safe": "^2.1.5",
