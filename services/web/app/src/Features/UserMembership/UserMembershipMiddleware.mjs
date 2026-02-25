@@ -292,7 +292,14 @@ function requireGraphAccess(req, res, next) {
   // call next router with fixed params to pass it to the correct middleware chain
   const { graph } = req.params
   const entityRoute = entityName === 'splitTest' ? 'split-test' : entityName
-  req.url = `/graphs/${entityRoute}/${graph}/${req.query.resource_id}`
+
+  // all other routes go through analytics, which map undefined graph type to index (to fetch all graphs)
+  // conversion still goes directly to v1, which can not handle an undefined graph param
+  if (!graph?.length && entityRoute === 'conversion') {
+    req.url = `/graphs/conversion/index/${req.query.resource_id}`
+  } else {
+    req.url = `/graphs/${entityRoute}/${graph}/${req.query.resource_id}`
+  }
   next('route')
 }
 
