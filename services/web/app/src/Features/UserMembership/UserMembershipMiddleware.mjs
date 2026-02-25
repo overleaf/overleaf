@@ -253,6 +253,7 @@ const ObjectIdEntitySchema = z.object({
     'groupAdmin',
     'groupManagers',
     'groupMember',
+    'groupUsers',
   ]),
   params: z.object({
     id: zz.coercedObjectId(),

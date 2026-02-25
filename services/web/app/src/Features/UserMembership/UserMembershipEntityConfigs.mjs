@@ -43,6 +43,22 @@ export default {
     },
   },
 
+  groupUsers: {
+    modelName: 'Subscription',
+    hasMembersLimit: true,
+    fields: {
+      primaryKey: '_id',
+      read: ['invited_emails', 'teamInvites', 'member_ids', 'manager_ids'],
+      write: 'manager_ids',
+      access: 'manager_ids',
+      membership: 'member_ids',
+      name: 'teamName',
+    },
+    baseQuery: {
+      groupPlan: true,
+    },
+  },
+
   groupMember: {
     modelName: 'Subscription',
     readOnly: true,

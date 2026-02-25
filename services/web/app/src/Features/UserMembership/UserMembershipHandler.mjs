@@ -125,6 +125,20 @@ async function getPopulatedListOfMembers(entity, attributes) {
     ) {
       user.isEntityAdmin = true
     }
+    if (
+      user?._id &&
+      entity?.manager_ids &&
+      entity.manager_ids.includes(user._id)
+    ) {
+      user.isEntityManager = true
+    }
+    if (
+      user?._id &&
+      entity?.member_ids &&
+      entity.member_ids.includes(user._id)
+    ) {
+      user.isEntityMember = true
+    }
   }
 
   return users

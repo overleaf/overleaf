@@ -12,6 +12,8 @@ import PlansLocator from '../Subscription/PlansLocator.mjs'
 import RecurlyClient from '../Subscription/RecurlyClient.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
 import UserMembershipAuthorization from './UserMembershipAuthorization.mjs'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import _ from 'lodash'
 
 async function manageGroupMembers(req, res, next) {
   const { entity: subscription, entityConfig } = req
@@ -133,6 +135,57 @@ async function _renderManagersPage(req, res, next, template) {
     users,
     groupId: entityPrimaryKey,
     entityAccess: UserMembershipAuthorization.hasEntityAccess()(req),
+  })
+}
+
+async function manageGroupUsers(req, res) {
+  const combinedUserManagement = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'combined-user-management'
+  )
+  const { entity: subscription, entityConfig } = req
+
+  const entityPrimaryKey =
+    subscription[entityConfig.fields.primaryKey].toString()
+
+  if (combinedUserManagement.variant !== 'enabled') {
+    return res.redirect(`/manage/groups/${entityPrimaryKey}/members`)
+  }
+
+  let entityName
+  if (entityConfig.fields.name) {
+    entityName = subscription[entityConfig.fields.name]
+  }
+  const userId = SessionManager.getLoggedInUserId(req.session)?.toString()
+  const plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
+  const isAdmin = subscription.admin_id.toString() === userId
+  const recurlySubscription = subscription.recurlySubscription_id
+    ? await RecurlyClient.promises.getSubscription(
+        subscription.recurlySubscription_id
+      )
+    : undefined
+  const canUseAddSeatsFeature =
+    plan?.canUseFlexibleLicensing &&
+    isAdmin &&
+    recurlySubscription &&
+    !recurlySubscription.pendingChange
+  const ssoConfig = await SSOConfig.findById(subscription.ssoConfig).exec()
+
+  const users = await UserMembershipHandler.promises.getUsers(
+    subscription,
+    entityConfig
+  )
+
+  res.render('user_membership/group-users-react', {
+    name: entityName,
+    groupId: entityPrimaryKey,
+    users: _.uniqBy(users, 'email'),
+    groupSize: subscription.membersLimit,
+    managedUsersActive: subscription.managedUsersEnabled,
+    entityAccess: UserMembershipAuthorization.hasEntityAccess()(req),
+    canUseAddSeatsFeature,
+    groupSSOActive: ssoConfig?.enabled,
   })
 }
 
@@ -284,6 +337,7 @@ async function create(req, res) {
 export default {
   manageGroupMembers: expressify(manageGroupMembers),
   manageGroupManagers: expressify(manageGroupManagers),
+  manageGroupUsers: expressify(manageGroupUsers),
   manageInstitutionManagers: expressify(manageInstitutionManagers),
   managePublisherManagers: expressify(managePublisherManagers),
   add: expressify(add),

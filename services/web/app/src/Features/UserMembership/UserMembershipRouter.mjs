@@ -52,6 +52,11 @@ export default {
       RateLimiterMiddleware.rateLimit(rateLimiters.exportTeamCsv),
       UserMembershipController.exportCsv
     )
+    webRouter.get(
+      '/manage/groups/:id/users',
+      UserMembershipMiddleware.requireEntityAccessOrAdminAccess('groupUsers'),
+      UserMembershipController.manageGroupUsers
+    )
 
     // group managers routes
     webRouter.get(

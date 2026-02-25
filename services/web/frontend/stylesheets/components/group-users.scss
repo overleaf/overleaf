@@ -1,0 +1,23 @@
+.group-users-container {
+  h2.page-title {
+    margin-bottom: 0;
+  }
+
+  a.learn-more {
+    @include body-sm;
+  }
+
+  .license-info {
+    margin-top: var(--spacing-08);
+    margin-bottom: var(--spacing-08);
+  }
+
+  .pagination-container .btn-ghost {
+    --bs-btn-hover-bg: none;
+    --bs-btn-disabled-bg: none;
+  }
+
+  .user-role-select {
+    min-width: 110px;
+  }
+}
