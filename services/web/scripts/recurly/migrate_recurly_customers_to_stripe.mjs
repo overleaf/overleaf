@@ -97,8 +97,8 @@ import {
   coalesceOrThrowPaymentMethod,
   coalesceOrThrowVATNumber,
   getTaxIdType,
+  normalisedGBVATNumber,
   sanitizeAccount,
-  sanitizeBillingInfo,
 } from '../helpers/migrate_recurly_customers_to_stripe.helpers.mjs'
 import {
   createRateLimitedApiWrappers,
@@ -520,32 +520,14 @@ let rateLimiters
  * Fetch Recurly account data for a given account code.
  *
  * @param {string} accountCode - The Recurly account code (Overleaf user ID)
- * @returns {Promise<{account: object, billingInfo: object|null}>}
+ * @returns {Promise<Account>}
  */
 async function fetchRecurlyData(accountCode, context) {
-  const account = await rateLimiters.requestWithRetries(
+  return await rateLimiters.requestWithRetries(
     'recurly',
     () => recurlyClient.getAccount(`code-${accountCode}`),
     context
   )
-
-  let billingInfo = null
-  try {
-    billingInfo = await rateLimiters.requestWithRetries(
-      'recurly',
-      () => recurlyClient.getBillingInfo(`code-${accountCode}`),
-      context
-    )
-  } catch (error) {
-    // Billing info may not exist for manually billed customers
-    if (error instanceof recurly.errors.NotFoundError) {
-      // This is expected for some customers
-    } else {
-      throw error
-    }
-  }
-
-  return { account, billingInfo }
 }
 
 /**
@@ -865,15 +847,24 @@ async function replaceCustomerTaxIds(
     }
   }
 
-  return await rateLimiters.requestWithRetries(
-    stripeClient.serviceName,
-    () =>
-      stripeClient.customers.createTaxId(stripeCustomerId, {
-        type: taxIdType,
-        value: vatNumber,
-      }),
-    { ...context, stripeApi: 'customers.createTaxId' }
-  )
+  try {
+    return await rateLimiters.requestWithRetries(
+      stripeClient.serviceName,
+      () =>
+        stripeClient.customers.createTaxId(stripeCustomerId, {
+          type: taxIdType,
+          value: vatNumber,
+        }),
+      { ...context, stripeApi: 'customers.createTaxId' }
+    )
+  } catch (error) {
+    const parts = [
+      `Failed to create Stripe tax ID (type=${taxIdType}, value=${vatNumber})`,
+    ]
+    if (error.code) parts.push(`code=${error.code}`)
+    if (error.message) parts.push(error.message)
+    throw new Error(parts.join(': '))
+  }
 }
 
 /**
@@ -883,13 +874,12 @@ async function replaceCustomerTaxIds(
  * Falls back to account company for manually-created accounts or legacy data.
  *
  * @param {object} account - Recurly account object
- * @param {object|null} billingInfo - Recurly billing info object
  * @returns {string|null}
  */
-function extractCompanyName(account, billingInfo) {
+function extractCompanyName(account) {
   // Prefer billing info company (entered during checkout)
-  if (billingInfo?.company) {
-    return billingInfo.company
+  if (account.billingInfo?.company) {
+    return account.billingInfo.company
   }
   // Fall back to account-level company (legacy or manually set)
   if (account.company) {
@@ -901,6 +891,24 @@ function extractCompanyName(account, billingInfo) {
 function normalizeComparableString(value) {
   if (value == null) return ''
   return String(value).trim()
+}
+
+const STRIPE_METADATA_MAX_ALT_EMAILS = 5
+
+function ccEmailsToArray(ccEmails) {
+  if (ccEmails == null || ccEmails === undefined) {
+    return []
+  }
+
+  // regex splits on commas, semicolons or whitespace and trims each email
+  // empty values are filtered out
+  const normalisedEmails = String(ccEmails)
+    .split(/[\s,;]+/)
+    .filter(Boolean)
+
+  const deDupedEmails = [...new Set(normalisedEmails)]
+
+  return deDupedEmails
 }
 
 function hasAnyAddressValue(address) {
@@ -1175,45 +1183,26 @@ async function processCustomer(
       { ...context, step: 'fetch_recurly' },
       { verboseOnly: true }
     )
-    const { account, billingInfo } = await fetchRecurlyData(
-      recurlyAccountCode,
-      context
-    )
+    const account = await fetchRecurlyData(recurlyAccountCode, context)
 
     logDebug(
       'Fetched Recurly account',
       {
         ...context,
         email: account.email,
-        hasBillingInfo: !!billingInfo,
+        hasBillingInfo: !!account.billingInfo,
         paymentMethod:
-          billingInfo?.paymentMethod?.object === 'paypal_billing_agreement'
+          account.billingInfo?.paymentMethod?.object ===
+          'paypal_billing_agreement'
             ? 'paypal'
-            : billingInfo?.cardType || 'none',
+            : account.billingInfo?.cardType || 'none',
         account: sanitizeAccount(account),
-        billingInfo: sanitizeBillingInfo(billingInfo),
       },
       { verboseOnly: true }
     )
 
-    // TODO: Handle tax exemption + CC emails in later phases of the migration.
-    const hasCcEmails =
-      typeof account.ccEmails === 'string'
-        ? !!account.ccEmails.trim()
-        : !!account.ccEmails
-    if (hasCcEmails) {
-      logDebug(
-        'Found CC emails on Recurly account - aborting',
-        {
-          ...context,
-          ccEmails: account.ccEmails,
-        },
-        { verboseOnly: true }
-      )
-      throw new Error(
-        'Customer has ccEmails set in Recurly, but this migration does not yet handle CC invoice emails'
-      )
-    }
+    // TODO: Handle tax exemption in later phases of the migration.
+
     if (account.exemptionCertificate) {
       logDebug(
         'Found tax exemption certificate on Recurly account - aborting',
@@ -1249,7 +1238,7 @@ async function processCustomer(
     }
 
     // Extract VAT number and country for tax ID creation
-    const vatNumber = coalesceOrThrowVATNumber(account, billingInfo)
+    let vatNumber = coalesceOrThrowVATNumber(account)
     let taxIdType = null
     let country = null
     let createdTaxId = null
@@ -1258,44 +1247,56 @@ async function processCustomer(
     // Determine VAT number tax ID type (if possible)
     if (vatNumber) {
       // We need to extract address first to get the country
-      const tempAddress = coalesceOrEqualOrThrowAddress(account, billingInfo)
+      const tempAddress = coalesceOrEqualOrThrowAddress(account)
       country = tempAddress?.country
+      if (country === 'GB') {
+        vatNumber = normalisedGBVATNumber(vatNumber)
+      }
+      const taxIdTypeResult = getTaxIdType(
+        country,
+        vatNumber,
+        tempAddress?.postal_code
+      )
+      taxIdType = taxIdTypeResult.type
+      const taxIdTypeFailureReason = taxIdTypeResult.reason
+
       if (!country) {
         if (!forceInvalidTax) {
-          throw new Error(`Unprocessable VAT number ${vatNumber} (no country)`)
+          throw new Error(
+            `Unprocessable VAT number ${vatNumber} (no country): ${taxIdTypeFailureReason}`
+          )
         }
         logWarn('VAT number present but no country in address', {
           ...context,
           vatNumber,
+          reason: taxIdTypeFailureReason,
+        })
+        taxInfoPendingValue = vatNumber
+      } else if (!taxIdType) {
+        if (!forceInvalidTax) {
+          throw new Error(
+            `Unprocessable VAT number ${vatNumber} (failed getTaxIdType): ${taxIdTypeFailureReason}`
+          )
+        }
+        logWarn('Unable to determine tax id type for VAT number', {
+          ...context,
+          vatNumber,
+          country,
+          postalCode: tempAddress?.postal_code,
+          reason: taxIdTypeFailureReason,
         })
         taxInfoPendingValue = vatNumber
       } else {
-        taxIdType = getTaxIdType(country, vatNumber, tempAddress?.postal_code)
-        if (!taxIdType) {
-          if (!forceInvalidTax) {
-            throw new Error(
-              `Unprocessable VAT number ${vatNumber} (failed getTaxIdType)`
-            )
-          }
-          logWarn('Unable to determine tax id type for VAT number', {
+        logDebug(
+          'Will create tax ID',
+          {
             ...context,
             vatNumber,
             country,
-            postalCode: tempAddress?.postal_code,
-          })
-          taxInfoPendingValue = vatNumber
-        } else {
-          logDebug(
-            'Will create tax ID',
-            {
-              ...context,
-              vatNumber,
-              country,
-              taxIdType,
-            },
-            { verboseOnly: true }
-          )
-        }
+            taxIdType,
+          },
+          { verboseOnly: true }
+        )
       }
     }
 
@@ -1344,14 +1345,14 @@ async function processCustomer(
       { verboseOnly: true }
     )
 
-    const name = coalesceOrEqualOrThrowName(account, billingInfo)
-    const address = coalesceOrEqualOrThrowAddress(account, billingInfo)
-    const companyName = extractCompanyName(account, billingInfo)
+    const name = coalesceOrEqualOrThrowName(account)
+    const address = coalesceOrEqualOrThrowAddress(account)
+    const companyName = extractCompanyName(account)
 
     const paymentMethod = await getPaymentMethod(
       stripeClient,
       stripeCustomerId,
-      billingInfo,
+      account.billingInfo,
       address,
       commit,
       stripeContext
@@ -1364,16 +1365,6 @@ async function processCustomer(
     // Current Stripe checkout only allows tax exemption for US customers with EIN (us_ein).
     // if (account.exemptionCertificate) {
     //   customerParams.tax_exempt = 'exempt'
-    // }
-
-    // TODO: Handle CC emails
-    // Recurly account.ccEmails field contains additional notification emails.
-    // Stripe doesn't have a direct equivalent.
-    // Options:
-    // 1. Store in metadata (limited to 500 chars per value)
-    // 2. Handle via application logic outside of Stripe
-    // if (account.ccEmails) {
-    //   customerParams.metadata.ccEmails = account.ccEmails
     // }
 
     /** @type {Record<string, string>} */
@@ -1411,6 +1402,31 @@ async function processCustomer(
       Object.assign(metadata, customFieldMetadata)
     }
 
+    const ccEmailList = ccEmailsToArray(account.ccEmails)
+    if (ccEmailList.length > STRIPE_METADATA_MAX_ALT_EMAILS) {
+      // this limit is arbitrary just to catch any extreme outliers
+      throw new Error(
+        `Customer has ${ccEmailList.length} ccEmails; max supported is ${STRIPE_METADATA_MAX_ALT_EMAILS}`
+      )
+    }
+    ccEmailList.forEach(email => {
+      if (email.length > 500) {
+        // The limit for account.email is 512 characters.
+        // assuming similar for additional_emails.cc but 500 is plenty
+        // as the longest ccEmails in Recurly is 179
+        throw new Error(
+          `Recurly ${recurlyAccountCode}: ccEmail ${email} exceeds the maximum length of 500 characters`
+        )
+      }
+    })
+
+    // if there are any ccEmails in Recurly or Stripe,
+    // then overwrite additional_emails.cc below with the Recurly value preserving any other fields
+    // that might exist in additional_emails in Stripe
+    const updateCCEmails =
+      ccEmailList.length > 0 ||
+      existingCustomer.additional_emails?.cc?.length > 0
+
     result.customFieldCounts = customFieldCounts
 
     /** @type {Stripe.CustomerUpdateParams} */
@@ -1422,6 +1438,14 @@ async function processCustomer(
       ...(companyName ? { business_name: companyName } : {}),
       ...(paymentMethod
         ? { invoice_settings: { default_payment_method: paymentMethod.id } }
+        : {}),
+      ...(updateCCEmails
+        ? {
+            additional_emails: {
+              ...existingCustomer.additional_emails,
+              cc: ccEmailList,
+            },
+          }
         : {}),
     }
 

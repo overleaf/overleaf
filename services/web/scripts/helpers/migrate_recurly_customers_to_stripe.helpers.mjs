@@ -39,18 +39,22 @@ function normalizeName(firstName, lastName) {
  * - If both billingInfo and account have a complete (first+last) name and they differ, throw.
  *
  * @param {object} account - Recurly account object
- * @param {object|null} billingInfo - Recurly billing info object
  * @returns {string|null}
  */
-export function coalesceOrEqualOrThrowName(account, billingInfo) {
-  const billingHasFullName = !!(billingInfo?.firstName && billingInfo?.lastName)
-  const accountHasFullName = !!(account?.firstName && account?.lastName)
+export function coalesceOrEqualOrThrowName(account) {
+  const billingHasFullName = !!(
+    account.billingInfo?.firstName && account.billingInfo?.lastName
+  )
+  const accountHasFullName = !!(account.firstName && account.lastName)
 
   const billingName = billingHasFullName
-    ? normalizeName(billingInfo.firstName, billingInfo.lastName)
+    ? normalizeName(
+        account.billingInfo?.firstName,
+        account.billingInfo?.lastName
+      )
     : null
   const accountName = accountHasFullName
-    ? normalizeName(account?.firstName, account?.lastName)
+    ? normalizeName(account.firstName, account.lastName)
     : null
 
   if (billingHasFullName && accountHasFullName && billingName !== accountName) {
@@ -71,11 +75,10 @@ export function coalesceOrEqualOrThrowName(account, billingInfo) {
  * - If both are set but differ, throw.
  *
  * @param {object} account - Recurly account object
- * @param {object|null} billingInfo - Recurly billing info object
  * @returns {string|null}
  */
-export function coalesceOrThrowVATNumber(account, billingInfo) {
-  const billingVat = billingInfo?.vatNumber?.trim() || null
+export function coalesceOrThrowVATNumber(account) {
+  const billingVat = account.billingInfo?.vatNumber?.trim() || null
   const accountVat = account?.vatNumber?.trim() || null
   return coalesceOrEqualOrThrow(billingVat, accountVat, 'vatNumber')
 }
@@ -126,11 +129,12 @@ export function normalizeRecurlyAddressToStripe(address) {
  * Falls back to account address for manually-created accounts or legacy data.
  *
  * @param {object} account - Recurly account object
- * @param {object|null} billingInfo - Recurly billing info object
  * @returns {import('stripe').Stripe.AddressParam|null}
  */
-export function coalesceOrEqualOrThrowAddress(account, billingInfo) {
-  const billingAddress = normalizeRecurlyAddressToStripe(billingInfo?.address)
+export function coalesceOrEqualOrThrowAddress(account) {
+  const billingAddress = normalizeRecurlyAddressToStripe(
+    account.billingInfo?.address
+  )
   const accountAddress = normalizeRecurlyAddressToStripe(account?.address)
 
   const isBillingAddressValid = !!billingAddress
@@ -581,8 +585,8 @@ export function getRussiaTaxIdType(taxIdValue) {
   const digits = digitsOnly(taxIdValue)
   if (!digits) return null
 
-  // INN: 10 digits (example: 1234567891)
-  if (/^\d{10}$/.test(digits)) return 'ru_inn'
+  // INN: 10 or 12 digits (example: 1234567891)
+  if (/^(\d{10}|\d{12})$/.test(digits)) return 'ru_inn'
 
   // KPP: 9 digits (example: 123456789)
   if (/^\d{9}$/.test(digits)) return 'ru_kpp'
@@ -674,11 +678,11 @@ export function getSwitzerlandTaxIdType(taxIdValue) {
 
   const alnum = normalized.replace(/[^A-Z0-9]/g, '')
 
-  // UID: CHE-123.456.789 HR
-  if (/^CHE\d{9}HR$/.test(alnum)) return 'ch_uid'
-
   // VAT: CHE-123.456.789 MWST
-  if (/^CHE\d{9}MWST$/.test(alnum)) return 'ch_vat'
+  if (/^CHE\d{9}(MWST|TVA|IVA)$/.test(alnum)) return 'ch_vat'
+
+  // UID: CHE-123.456.789 HR
+  if (/^CHE\d{9}(HR)?$/.test(alnum)) return 'ch_uid'
 
   return null
 }
@@ -701,9 +705,44 @@ export function getUkTaxIdType(taxIdValue) {
   if (/^XI[A-Z0-9]+$/.test(normalized)) return 'eu_vat'
 
   // GB VAT numbers use GB prefix
-  if (/^GB[A-Z0-9]+$/.test(normalized)) return 'gb_vat'
+  if (/^GB(\d{9}|\d{12})$/.test(normalized)) return 'gb_vat'
 
   return null
+}
+
+/**
+ * Normalize a GB VAT number to the standard format.
+ *
+ * @param {string|undefined|null} taxIdValue
+ * @returns {string|undefined|null} - Normalized GB VAT number if valid, otherwise original value
+ */
+export function normalisedGBVATNumber(taxIdValue) {
+  if (!taxIdValue) return taxIdValue
+
+  // Strip spaces and punctuation
+  let normalized = String(taxIdValue)
+    .trim()
+    .toUpperCase()
+    .replace(/[\s\-.]/g, '')
+
+  // Prepend GB if not already there (but don't prepend if it starts with XI for Northern Ireland)
+  if (!normalized.startsWith('GB') && !normalized.startsWith('XI')) {
+    normalized = 'GB' + normalized
+  }
+
+  // Remove any trailing GB (but not if it's the only GB at the start)
+  if (normalized.endsWith('GB') && normalized.length > 2) {
+    normalized = normalized.slice(0, -2)
+  }
+
+  // Check if it's a valid GB VAT number
+  const taxIdType = getUkTaxIdType(normalized)
+  if (taxIdType === 'gb_vat') {
+    return normalized
+  }
+
+  // Return original value if not valid
+  return taxIdValue
 }
 
 /**
@@ -729,6 +768,107 @@ export function getUzbekistanTaxIdType(taxIdValue) {
   return null
 }
 
+// we are now no longer pre-validating tax IDS based on country-specific formats before sending to Stripe.
+// however leaving the regexes and examples here for reference and potential future use
+const COUNTRY_TAX_ID_FORMATS = {
+  // Africa
+  AO: { taxIdType: 'ao_tin', regex: /^\d{10}$/ }, // Example: 5123456789
+  BH: { taxIdType: 'bh_vat', regex: /^\d{15}$/ }, // Example: 123456789012345
+  BF: { taxIdType: 'bf_ifu', regex: /^\d{8}[A-Z]$/ }, // Example: 12345678A
+  BJ: { taxIdType: 'bj_ifu', regex: /^\d{13}$/ }, // Example: 1234567890123
+  CM: { taxIdType: 'cm_niu', regex: /^[A-Z]\d{12}[A-Z]$/ }, // Example: M123456789000L
+  CV: { taxIdType: 'cv_nif', regex: /^\d{9}$/ }, // Example: 213456789
+  CD: { taxIdType: 'cd_nif', regex: /^[A-Z]\d{7}[A-Z]$/ }, // Example: A0123456M
+  EG: { taxIdType: 'eg_tin', regex: /^\d{9}$/ }, // Example: 123456789
+  ET: { taxIdType: 'et_tin', regex: /^\d{10}$/ }, // Example: 1234567890
+  GN: { taxIdType: 'gn_nif', regex: /^\d{9}$/ }, // Example: 123456789
+  KE: { taxIdType: 'ke_pin', regex: /^[A-Z]\d{9}[A-Z]$/ }, // Example: P000111111A
+  MA: { taxIdType: 'ma_vat', regex: /^\d{8}$/ }, // Example: 12345678
+  MR: { taxIdType: 'mr_nif', regex: /^\d{8}$/ }, // Example: 12345678
+  NG: { taxIdType: 'ng_tin', regex: /^\d{8,14}$/ }, // Example: 12345678-0001
+  SN: { taxIdType: 'sn_ninea', regex: /^\d{8}[A-Z]\d$/ }, // Example: 12345672A2
+  TZ: { taxIdType: 'tz_vat', regex: /^\d{8}[A-Z]$/ }, // Example: 12345678A
+  UG: { taxIdType: 'ug_tin', regex: /^\d{10}$/ }, // Example: 1014751879
+  ZA: { taxIdType: 'za_vat', regex: /^\d{10}$/ }, // Example: 4123456789
+  ZM: { taxIdType: 'zm_tin', regex: /^\d{10}$/ }, // Example: 1004751879
+  ZW: { taxIdType: 'zw_tin', regex: /^\d{10}$/ }, // Example: 1234567890
+
+  // Americas
+  AR: { taxIdType: 'ar_cuit', regex: /^\d{11}$/ }, // Example: 12-3456789-01
+  BO: { taxIdType: 'bo_tin', regex: /^\d{9}$/ }, // Example: 123456789
+  BS: { taxIdType: 'bs_tin', regex: /^\d{9}$/ }, // Example: 123.456.789
+  BB: { taxIdType: 'bb_tin', regex: /^\d{13}$/ }, // Example: 1123456789012
+  CL: { taxIdType: 'cl_tin', regex: /^\d{7,8}[0-9Kk]$/ }, // Example: 12.345.678-K
+  CO: { taxIdType: 'co_nit', regex: /^\d{10}$/ }, // Example: 123.456.789-0
+  CR: { taxIdType: 'cr_tin', regex: /^\d{10}$/ }, // Example: 1-234-567890
+  DO: { taxIdType: 'do_rcn', regex: /^\d{11}$/ }, // Example: 123-4567890-1
+  EC: { taxIdType: 'ec_ruc', regex: /^\d{13}$/ }, // Example: 1234567890001
+  // Accounts for Companies (12 chars). Individual entrepreneurs use 13 characters (4 letters at the start)
+  // Note: & is also a valid character in some Mexican company names
+  // and for companies, that first "alpha" section is derived directly from the legal name so may contain an ampersand.
+  MX: { taxIdType: 'mx_rfc', regex: /^[A-Z&]{3,4}\d{6}[A-Z0-9]{3}$/ }, // Example: ABC010203AB9
+  PE: { taxIdType: 'pe_ruc', regex: /^\d{11}$/ }, // Example: 12345678901
+  SR: { taxIdType: 'sr_fin', regex: /^\d{10}$/ }, // Example: 1234567890
+  SV: { taxIdType: 'sv_nit', regex: /^\d{14}$/ }, // Example: 1234-567890-123-4
+  US: { taxIdType: 'us_ein', regex: /^\d{9}$/ }, // Example: 12-3456789
+  UY: { taxIdType: 'uy_ruc', regex: /^\d{12}$/ }, // Example: 123456789012
+  VE: { taxIdType: 've_rif', regex: /^[JGVGE]\d{9}$/ }, // Example: A-12345678-9
+
+  // Asia-Pacific
+  BD: { taxIdType: 'bd_bin', regex: /^\d{13}$/ }, // Example: 123456789-0123
+  // the USCC (China) strictly excludes the letters I, O, S, V, and Z to prevent optical character recognition (OCR) errors.
+  CN: { taxIdType: 'cn_tin', regex: /^[0-9A-HJ-NP-RTUW-Y]{18}$/ }, // Example: 12350000426600329N
+  HK: { taxIdType: 'hk_br', regex: /^\d{8}$/ }, // Example: 12345678
+  ID: { taxIdType: 'id_npwp', regex: /^\d{15}$/ }, // Example: 012.345.678.9-012.345
+  IN: {
+    taxIdType: 'in_gst',
+    // The 13th character is usually a number but can be a letter. The 15th character (Check digit) can be a letter or a number.
+    // The 14th char is reserved by the Indian govt. One day it might be something other than 'Z' but for now it's always 'Z'.
+    regex: /^\d{2}[A-Z]{5}\d{4}[A-Z][A-Z0-9][Z][A-Z0-9]$/,
+  }, // Example: 12ABCDE3456FGZH
+  KH: { taxIdType: 'kh_tin', regex: /^\d{13}$/ }, // Example: 1001-123456789
+  KR: { taxIdType: 'kr_brn', regex: /^\d{10}$/ }, // Example: 123-45-67890
+  KZ: { taxIdType: 'kz_bin', regex: /^\d{12}$/ }, // Example: 123456789012
+  KG: { taxIdType: 'kg_tin', regex: /^\d{14}$/ }, // Example: 12345678901234
+  LA: { taxIdType: 'la_tin', regex: /^\d{12}$/ }, // Example: 123456789-000
+  NZ: { taxIdType: 'nz_gst', regex: /^\d{9}$/ }, // Example: 123456789
+  NP: { taxIdType: 'np_pan', regex: /^\d{9}$/ }, // Example: 123456789
+  PH: { taxIdType: 'ph_tin', regex: /^\d{12}$/ }, // Example: 123456789012
+  TH: { taxIdType: 'th_vat', regex: /^\d{13}$/ }, // Example: 1234567891234
+  TW: { taxIdType: 'tw_vat', regex: /^\d{8}$/ }, // Example: 12345678
+  VN: { taxIdType: 'vn_tin', regex: /^\d{10}$/ }, // Example: 1234567890
+
+  // Europe (non-EU)
+  AD: { taxIdType: 'ad_nrt', regex: /^[A-Z]\d{6}[A-Z]$/ }, // Example: A-123456-Z
+  AL: { taxIdType: 'al_tin', regex: /^[A-Z]\d{8}[A-Z]$/ }, // Example: J12345678N
+  AM: { taxIdType: 'am_tin', regex: /^\d{8}$/ }, // Example: 02538904
+  AW: { taxIdType: 'aw_tin', regex: /^\d{8}$/ }, // Example: 12345678
+  AZ: { taxIdType: 'az_tin', regex: /^\d{10}$/ }, // Example: 0123456789
+  BA: { taxIdType: 'ba_tin', regex: /^\d{12}$/ }, // Example: 123456789012
+  BY: { taxIdType: 'by_tin', regex: /^\d{9}$/ }, // Example: 123456789
+  // CH: { taxIdType: 'ch_vat', regex: /^CHE\d{9}MWST$/ }, // Example: CHE-123.456.789 MWST
+  GE: { taxIdType: 'ge_vat', regex: /^\d{9}$/ }, // Example: 123456789
+  IS: { taxIdType: 'is_vat', regex: /^\d{6}$/ }, // Example: 123456
+  LI: { taxIdType: 'li_uid', regex: /^CHE\d{9}$/ }, // Example: CHE123456789
+  MD: { taxIdType: 'md_vat', regex: /^\d{7}$/ }, // Example: 1234567
+  ME: { taxIdType: 'me_pib', regex: /^\d{8}$/ }, // Example: 12345678
+  MK: { taxIdType: 'mk_vat', regex: /^MK\d{13}$/ }, // Example: MK1234567890123
+  NO: { taxIdType: 'no_vat', regex: /^\d{9}MVA$/ }, // Example: 123456789MVA
+  RS: { taxIdType: 'rs_pib', regex: /^\d{9}$/ }, // Example: 123456789
+  RU: { taxIdType: 'ru_inn', regex: /^\d{10}$/ }, // Example: 1234567891
+  TR: { taxIdType: 'tr_tin', regex: /^\d{10}$/ }, // Example: 0123456789
+  UA: { taxIdType: 'ua_vat', regex: /^\d{9}$/ }, // Example: 123456789
+
+  // Middle East
+  AE: { taxIdType: 'ae_trn', regex: /^\d{15}$/ }, // Example: 123456789012345
+  IL: { taxIdType: 'il_vat', regex: /^\d{9}$/ }, // Example: 000012345
+  OM: { taxIdType: 'om_vat', regex: /^OM\d{10}$/ }, // Example: OM1234567890
+  SA: { taxIdType: 'sa_vat', regex: /^\d{15}$/ }, // Example: 123456789012345
+
+  // Other
+  EU: { taxIdType: 'eu_oss_vat', regex: /^EU\d+$/ }, // Example: EU123456789
+}
+
 /**
  * Get the Stripe tax ID type for a given country + tax ID value.
  *
@@ -738,19 +878,23 @@ export function getUzbekistanTaxIdType(taxIdValue) {
  * @param {string|undefined|null} country - ISO 3166-1 alpha-2
  * @param {string|undefined|null} taxIdValue
  * @param {string|undefined|null} postalCode - used for Canada province inference
- * @returns {string|null} - Stripe tax ID type, or null if country/type unsupported
+ * @returns {{type: string|null, reason: string|null}} - Stripe tax ID type + failure reason (when type is null)
  */
 // TODO: this function is naive - we need more than just country to determine tax ID type
 // for example canada has multiple types (BN, QST, GST/HST) depending on province (inferred from postal code)
 export function getTaxIdType(country, taxIdValue, postalCode) {
-  if (!country) return null
+  if (!country) return { type: null, reason: 'missing country' }
 
   const upperCountry = String(country).toUpperCase()
+  const normalizedTaxId = normalizeTaxIdCompact(taxIdValue)
+  if (!normalizedTaxId) return { type: null, reason: 'missing tax ID value' }
 
   if (upperCountry === 'EU') {
     // European One Stop Shop VAT number for non-Union scheme
     const normalized = normalizeTaxIdCompact(taxIdValue)
-    return /^EU\d+$/.test(normalized) ? 'eu_oss_vat' : null
+    return /^EU\d+$/.test(normalized)
+      ? { type: 'eu_oss_vat', reason: null }
+      : { type: null, reason: 'invalid EU OSS VAT number' }
   }
 
   // EU VAT
@@ -778,124 +922,139 @@ export function getTaxIdType(country, taxIdValue, postalCode) {
       'SE',
       'SK',
     ])
-    if (euVatOnlyCountries.has(upperCountry)) return 'eu_vat'
+    if (euVatOnlyCountries.has(upperCountry)) {
+      return { type: 'eu_vat', reason: null }
+    }
   }
 
   // Multi-type countries
-  if (upperCountry === 'CA') return getCanadaTaxIdType(taxIdValue, postalCode)
-  if (upperCountry === 'AU') return getAustraliaTaxIdType(taxIdValue)
-  if (upperCountry === 'BR') return getBrazilTaxIdType(taxIdValue)
-  if (upperCountry === 'BG') return getBulgariaTaxIdType(taxIdValue)
-  if (upperCountry === 'HR') return getCroatiaTaxIdType(taxIdValue)
-  if (upperCountry === 'DE') return getGermanyTaxIdType(taxIdValue)
-  if (upperCountry === 'HU') return getHungaryTaxIdType(taxIdValue)
-  if (upperCountry === 'JP') return getJapanTaxIdType(taxIdValue)
-  if (upperCountry === 'LI') return getLiechtensteinTaxIdType(taxIdValue)
-  if (upperCountry === 'MY') return getMalaysiaTaxIdType(taxIdValue)
-  if (upperCountry === 'NO') return getNorwayTaxIdType(taxIdValue)
-  if (upperCountry === 'PL') return getPolandTaxIdType(taxIdValue)
-  if (upperCountry === 'RO') return getRomaniaTaxIdType(taxIdValue)
-  if (upperCountry === 'RU') return getRussiaTaxIdType(taxIdValue)
-  if (upperCountry === 'SG') return getSingaporeTaxIdType(taxIdValue)
-  if (upperCountry === 'SI') return getSloveniaTaxIdType(taxIdValue)
-  if (upperCountry === 'ES') return getSpainTaxIdType(taxIdValue)
-  if (upperCountry === 'CH') return getSwitzerlandTaxIdType(taxIdValue)
-  if (upperCountry === 'GB') return getUkTaxIdType(taxIdValue)
-  if (upperCountry === 'UZ') return getUzbekistanTaxIdType(taxIdValue)
-
-  // Country-specific tax IDs (all Stripe-supported types)
-  // See: https://docs.stripe.com/billing/customer/tax-ids
-  const countryTaxIdTypes = {
-    // Africa
-    AO: 'ao_tin',
-    BH: 'bh_vat',
-    BF: 'bf_ifu',
-    BJ: 'bj_ifu',
-    CM: 'cm_niu',
-    CV: 'cv_nif',
-    CD: 'cd_nif',
-    EG: 'eg_tin',
-    ET: 'et_tin',
-    GN: 'gn_nif',
-    KE: 'ke_pin',
-    MA: 'ma_vat',
-    MR: 'mr_nif',
-    NG: 'ng_tin',
-    SN: 'sn_ninea',
-    TZ: 'tz_vat',
-    UG: 'ug_tin',
-    ZA: 'za_vat',
-    ZM: 'zm_tin',
-    ZW: 'zw_tin',
-
-    // Americas
-    AR: 'ar_cuit',
-    BO: 'bo_tin',
-    BS: 'bs_tin',
-    BB: 'bb_tin',
-    CL: 'cl_tin',
-    CO: 'co_nit',
-    CR: 'cr_tin',
-    DO: 'do_rcn',
-    EC: 'ec_ruc',
-    MX: 'mx_rfc',
-    PE: 'pe_ruc',
-    SR: 'sr_fin',
-    SV: 'sv_nit',
-    US: 'us_ein',
-    UY: 'uy_ruc',
-    VE: 've_rif',
-
-    // Asia-Pacific
-    BD: 'bd_bin',
-    CN: 'cn_tin',
-    HK: 'hk_br',
-    ID: 'id_npwp',
-    IN: 'in_gst',
-    KH: 'kh_tin',
-    KR: 'kr_brn',
-    KZ: 'kz_bin',
-    KG: 'kg_tin',
-    LA: 'la_tin',
-    NZ: 'nz_gst',
-    NP: 'np_pan',
-    PH: 'ph_tin',
-    TH: 'th_vat',
-    TW: 'tw_vat',
-    VN: 'vn_tin',
-
-    // Europe (non-EU)
-    AD: 'ad_nrt',
-    AL: 'al_tin',
-    AM: 'am_tin',
-    AW: 'aw_tin',
-    AZ: 'az_tin',
-    BA: 'ba_tin',
-    BY: 'by_tin',
-    CH: 'ch_vat',
-    GE: 'ge_vat',
-    IS: 'is_vat',
-    LI: 'li_uid',
-    MD: 'md_vat',
-    ME: 'me_pib',
-    MK: 'mk_vat',
-    NO: 'no_vat',
-    RS: 'rs_pib',
-    RU: 'ru_inn',
-    TR: 'tr_tin',
-    UA: 'ua_vat',
-
-    // Middle East
-    AE: 'ae_trn',
-    IL: 'il_vat',
-    OM: 'om_vat',
-    SA: 'sa_vat',
-
-    // Other
-    EU: 'eu_oss_vat',
+  if (upperCountry === 'CA') {
+    const type = getCanadaTaxIdType(taxIdValue, postalCode)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country CA' }
+  }
+  if (upperCountry === 'AU') {
+    const type = getAustraliaTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country AU' }
+  }
+  if (upperCountry === 'BR') {
+    const type = getBrazilTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country BR' }
+  }
+  if (upperCountry === 'BG') {
+    const type = getBulgariaTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country BG' }
+  }
+  if (upperCountry === 'HR') {
+    const type = getCroatiaTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country HR' }
+  }
+  if (upperCountry === 'DE') {
+    const type = getGermanyTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country DE' }
+  }
+  if (upperCountry === 'HU') {
+    const type = getHungaryTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country HU' }
+  }
+  if (upperCountry === 'JP') {
+    const type = getJapanTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country JP' }
+  }
+  if (upperCountry === 'LI') {
+    const type = getLiechtensteinTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country LI' }
+  }
+  if (upperCountry === 'MY') {
+    const type = getMalaysiaTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country MY' }
+  }
+  if (upperCountry === 'NO') {
+    const type = getNorwayTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country NO' }
+  }
+  if (upperCountry === 'PL') {
+    const type = getPolandTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country PL' }
+  }
+  if (upperCountry === 'RO') {
+    const type = getRomaniaTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country RO' }
+  }
+  if (upperCountry === 'RU') {
+    const type = getRussiaTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country RU' }
+  }
+  if (upperCountry === 'SG') {
+    const type = getSingaporeTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country SG' }
+  }
+  if (upperCountry === 'SI') {
+    const type = getSloveniaTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country SI' }
+  }
+  if (upperCountry === 'ES') {
+    const type = getSpainTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country ES' }
+  }
+  if (upperCountry === 'CH') {
+    const type = getSwitzerlandTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country CH' }
+  }
+  if (upperCountry === 'GB') {
+    const type = getUkTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country GB' }
+  }
+  if (upperCountry === 'UZ') {
+    const type = getUzbekistanTaxIdType(taxIdValue)
+    return type
+      ? { type, reason: null }
+      : { type: null, reason: 'unrecognized tax ID format for country UZ' }
   }
 
-  return countryTaxIdTypes[upperCountry] || null
+  const countryFormat = COUNTRY_TAX_ID_FORMATS[upperCountry]
+  if (countryFormat) {
+    return { type: countryFormat.taxIdType, reason: null }
+  }
+
+  return { type: null, reason: `unsupported country ${upperCountry}` }
 }
 
 /**

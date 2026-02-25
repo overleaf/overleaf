@@ -37,6 +37,7 @@ import {
   getUzbekistanTaxIdType,
   getTaxIdType,
   coalesceOrThrowPaymentMethod,
+  normalisedGBVATNumber,
 } from './migrate_recurly_customers_to_stripe.helpers.mjs'
 
 test('coalesceOrEqualOrThrow returns primary when set', () => {
@@ -59,20 +60,19 @@ test('coalesceOrEqualOrThrow throws when both are set but differ', () => {
 })
 
 test('coalesceOrEqualOrThrowAddress returns null when neither is valid', () => {
-  assert.equal(coalesceOrEqualOrThrowAddress({}, null), null)
+  assert.equal(coalesceOrEqualOrThrowAddress({}), null)
   assert.equal(
-    coalesceOrEqualOrThrowAddress(
-      { address: { street1: '', postalCode: '', country: '' } },
-      { address: { street1: '', postalCode: '', country: '' } }
-    ),
+    coalesceOrEqualOrThrowAddress({
+      address: { street1: '', postalCode: '', country: '' },
+      billingInfo: { address: { street1: '', postalCode: '', country: '' } },
+    }),
     null
   )
 
   assert.equal(
-    coalesceOrEqualOrThrowAddress(
-      { address: { street1: '   ', postalCode: '  ', country: '  ' } },
-      null
-    ),
+    coalesceOrEqualOrThrowAddress({
+      address: { street1: '   ', postalCode: '  ', country: '  ' },
+    }),
     null
   )
 })
@@ -80,11 +80,11 @@ test('coalesceOrEqualOrThrowAddress returns null when neither is valid', () => {
 test('coalesceOrEqualOrThrowAddress returns account when billing invalid', () => {
   const account = {
     address: { street1: '1 Road', postalCode: 'ABC', country: 'GB' },
+    billingInfo: {
+      address: { street1: '', postalCode: 'ABC', country: 'GB' },
+    },
   }
-  const billingInfo = {
-    address: { street1: '', postalCode: 'ABC', country: 'GB' },
-  }
-  assert.deepEqual(coalesceOrEqualOrThrowAddress(account, billingInfo), {
+  assert.deepEqual(coalesceOrEqualOrThrowAddress(account), {
     line1: '1 Road',
     postal_code: 'ABC',
     country: 'GB',
@@ -94,11 +94,11 @@ test('coalesceOrEqualOrThrowAddress returns account when billing invalid', () =>
 test('coalesceOrEqualOrThrowAddress returns billing when account invalid', () => {
   const account = {
     address: { street1: '', postalCode: 'ABC', country: 'GB' },
+    billingInfo: {
+      address: { street1: '1 Road', postalCode: 'ABC', country: 'GB' },
+    },
   }
-  const billingInfo = {
-    address: { street1: '1 Road', postalCode: 'ABC', country: 'GB' },
-  }
-  assert.deepEqual(coalesceOrEqualOrThrowAddress(account, billingInfo), {
+  assert.deepEqual(coalesceOrEqualOrThrowAddress(account), {
     line1: '1 Road',
     postal_code: 'ABC',
     country: 'GB',
@@ -108,24 +108,29 @@ test('coalesceOrEqualOrThrowAddress returns billing when account invalid', () =>
 test('coalesceOrEqualOrThrowAddress returns billing when both valid+equal', () => {
   const addr = { street1: '1 Road', postalCode: 'ABC', country: 'GB' }
   assert.deepEqual(
-    coalesceOrEqualOrThrowAddress({ address: { ...addr } }, { address: addr }),
+    coalesceOrEqualOrThrowAddress({
+      address: { ...addr },
+      billingInfo: { address: addr },
+    }),
     { line1: '1 Road', postal_code: 'ABC', country: 'GB' }
   )
 })
 
 test('coalesceOrEqualOrThrowAddress normalizes Recurly-style address fields', () => {
-  const billingInfo = {
-    address: {
-      street1: 'as',
-      street2: '',
-      city: '',
-      region: '',
-      postalCode: '12312',
-      country: 'AI',
+  const account = {
+    billingInfo: {
+      address: {
+        street1: 'as',
+        street2: '',
+        city: '',
+        region: '',
+        postalCode: '12312',
+        country: 'AI',
+      },
     },
   }
 
-  assert.deepEqual(coalesceOrEqualOrThrowAddress({}, billingInfo), {
+  assert.deepEqual(coalesceOrEqualOrThrowAddress(account), {
     line1: 'as',
     postal_code: '12312',
     country: 'AI',
@@ -135,91 +140,102 @@ test('coalesceOrEqualOrThrowAddress normalizes Recurly-style address fields', ()
 test('coalesceOrEqualOrThrowAddress throws when both valid but differ', () => {
   const account = {
     address: { street1: '1 Road', postalCode: 'ABC', country: 'GB' },
-  }
-  const billingInfo = {
-    address: { street1: '2 Road', postalCode: 'ABC', country: 'GB' },
+    billingInfo: {
+      address: { street1: '2 Road', postalCode: 'ABC', country: 'GB' },
+    },
   }
   assert.throws(
-    () => coalesceOrEqualOrThrowAddress(account, billingInfo),
+    () => coalesceOrEqualOrThrowAddress(account),
     /Billing address and account address differ/
   )
 })
 
 test('coalesceOrEqualOrThrowName returns billingInfo name when both sources match', () => {
-  const account = { firstName: 'Alice', lastName: 'Billing' }
-  const billingInfo = { firstName: 'Alice', lastName: 'Billing' }
-  assert.equal(
-    coalesceOrEqualOrThrowName(account, billingInfo),
-    'Alice Billing'
-  )
+  const account = {
+    firstName: 'Alice',
+    lastName: 'Billing',
+    billingInfo: { firstName: 'Alice', lastName: 'Billing' },
+  }
+  assert.equal(coalesceOrEqualOrThrowName(account), 'Alice Billing')
 })
 
 test('coalesceOrEqualOrThrowName prefers billingInfo when billingInfo is full but account is not', () => {
-  const account = { firstName: 'Alice', lastName: '' }
-  const billingInfo = { firstName: 'Alice', lastName: 'Billing' }
-  assert.equal(
-    coalesceOrEqualOrThrowName(account, billingInfo),
-    'Alice Billing'
-  )
+  const account = {
+    firstName: 'Alice',
+    lastName: '',
+    billingInfo: { firstName: 'Alice', lastName: 'Billing' },
+  }
+  assert.equal(coalesceOrEqualOrThrowName(account), 'Alice Billing')
 })
 
 test('coalesceOrEqualOrThrowName falls back to account when billingInfo missing last name', () => {
-  const account = { firstName: 'Alice', lastName: 'Account' }
-  const billingInfo = { firstName: 'Alice', lastName: '' }
-  assert.equal(
-    coalesceOrEqualOrThrowName(account, billingInfo),
-    'Alice Account'
-  )
+  const account = {
+    firstName: 'Alice',
+    lastName: 'Account',
+    billingInfo: { firstName: 'Alice', lastName: '' },
+  }
+  assert.equal(coalesceOrEqualOrThrowName(account), 'Alice Account')
 })
 
 test('coalesceOrEqualOrThrowName returns null when both sources are empty', () => {
-  assert.equal(coalesceOrEqualOrThrowName({}, null), null)
+  assert.equal(coalesceOrEqualOrThrowName({}), null)
   assert.equal(
-    coalesceOrEqualOrThrowName({ firstName: '', lastName: '' }, null),
+    coalesceOrEqualOrThrowName({ firstName: '', lastName: '' }),
     null
   )
 })
 
 test('coalesceOrEqualOrThrowName throws when both full names are present but differ', () => {
-  const account = { firstName: 'Alice', lastName: 'Account' }
-  const billingInfo = { firstName: 'Alice', lastName: 'Billing' }
+  const account = {
+    firstName: 'Alice',
+    lastName: 'Account',
+    billingInfo: { firstName: 'Alice', lastName: 'Billing' },
+  }
   assert.throws(
-    () => coalesceOrEqualOrThrowName(account, billingInfo),
+    () => coalesceOrEqualOrThrowName(account),
     /Name differs between billingInfo and account/
   )
 })
 
 test('coalesceOrThrowVATNumber returns billingInfo VAT when set', () => {
-  const account = { vatNumber: '' }
-  const billingInfo = { vatNumber: 'BILL456' }
-  assert.equal(coalesceOrThrowVATNumber(account, billingInfo), 'BILL456')
+  const account = {
+    vatNumber: '',
+    billingInfo: { vatNumber: 'BILL456' },
+  }
+  assert.equal(coalesceOrThrowVATNumber(account), 'BILL456')
 })
 
 test('coalesceOrThrowVATNumber returns account VAT when billingInfo VAT unset', () => {
-  const account = { vatNumber: 'ACCT123' }
-  const billingInfo = { vatNumber: '' }
-  assert.equal(coalesceOrThrowVATNumber(account, billingInfo), 'ACCT123')
+  const account = {
+    vatNumber: 'ACCT123',
+    billingInfo: { vatNumber: '' },
+  }
+  assert.equal(coalesceOrThrowVATNumber(account), 'ACCT123')
 })
 
 test('coalesceOrThrowVATNumber returns null when neither is set', () => {
-  assert.equal(coalesceOrThrowVATNumber({}, null), null)
+  assert.equal(coalesceOrThrowVATNumber({}), null)
   assert.equal(
-    coalesceOrThrowVATNumber({ vatNumber: '' }, { vatNumber: '' }),
+    coalesceOrThrowVATNumber({ vatNumber: '', billingInfo: { vatNumber: '' } }),
     null
   )
 })
 
 test('coalesceOrThrowVATNumber treats trimmed values as equal', () => {
-  const account = { vatNumber: ' GB123 ' }
-  const billingInfo = { vatNumber: 'GB123' }
-  assert.equal(coalesceOrThrowVATNumber(account, billingInfo), 'GB123')
+  const account = {
+    vatNumber: ' GB123 ',
+    billingInfo: { vatNumber: 'GB123' },
+  }
+  assert.equal(coalesceOrThrowVATNumber(account), 'GB123')
 })
 
 test('coalesceOrThrowVATNumber throws when both are set but differ', () => {
-  const account = { vatNumber: 'GB123' }
-  const billingInfo = { vatNumber: 'DE999' }
+  const account = {
+    vatNumber: 'GB123',
+    billingInfo: { vatNumber: 'DE999' },
+  }
   assert.throws(
-    () => coalesceOrThrowVATNumber(account, billingInfo),
+    () => coalesceOrThrowVATNumber(account),
     /Field vatNumber: Primary and fallback values are both set but differ/
   )
 })
@@ -350,8 +366,18 @@ test('getUzbekistanTaxIdType distinguishes TIN vs VAT', () => {
 })
 
 test('getTaxIdType handles EU OSS VAT and EU VAT defaults', () => {
-  assert.equal(getTaxIdType('EU', 'EU123456789'), 'eu_oss_vat')
-  assert.equal(getTaxIdType('AT', 'ATU12345678'), 'eu_vat')
+  assert.equal(getTaxIdType('EU', 'EU123456789').type, 'eu_oss_vat')
+  assert.equal(getTaxIdType('AT', 'ATU12345678').type, 'eu_vat')
+})
+
+test('getTaxIdType includes failure reason', () => {
+  const missingCountry = getTaxIdType(null, '12345', null)
+  assert.equal(missingCountry.type, null)
+  assert.equal(missingCountry.reason, 'missing country')
+
+  const invalidEuOss = getTaxIdType('EU', 'INVALID', null)
+  assert.equal(invalidEuOss.type, null)
+  assert.equal(invalidEuOss.reason, 'invalid EU OSS VAT number')
 })
 
 test('coalesceOrThrowPaymentMethod throws when payment methods array is empty', () => {
@@ -380,6 +406,7 @@ test('coalesceOrThrowPaymentMethod throws when no payment methods match billing 
 test('coalesceOrThrowPaymentMethod returns matching payment method', () => {
   const paymentMethod = {
     id: 'pm_match',
+    type: 'card',
     card: { last4: '1234', exp_month: 12, exp_year: 2030 },
   }
   const paymentMethods = [paymentMethod]
@@ -397,10 +424,12 @@ test('coalesceOrThrowPaymentMethod returns matching payment method', () => {
 test('coalesceOrThrowPaymentMethod matches first of multiple matching methods', () => {
   const paymentMethod1 = {
     id: 'pm_1',
+    type: 'card',
     card: { last4: '1234', exp_month: 12, exp_year: 2030 },
   }
   const paymentMethod2 = {
     id: 'pm_2',
+    type: 'card',
     card: { last4: '1234', exp_month: 12, exp_year: 2030 },
   }
   const paymentMethods = [paymentMethod1, paymentMethod2]
@@ -418,10 +447,12 @@ test('coalesceOrThrowPaymentMethod matches first of multiple matching methods', 
 test('coalesceOrThrowPaymentMethod filters out non-matching methods', () => {
   const matchingMethod = {
     id: 'pm_match',
+    type: 'card',
     card: { last4: '1234', exp_month: 12, exp_year: 2030 },
   }
   const nonMatchingMethod = {
     id: 'pm_no_match',
+    type: 'card',
     card: { last4: '5678', exp_month: 12, exp_year: 2030 },
   }
   const paymentMethods = [nonMatchingMethod, matchingMethod]
@@ -468,6 +499,7 @@ test('coalesceOrThrowPaymentMethod handles missing card in payment method', () =
     { id: 'pm_1' }, // no card property
     {
       id: 'pm_2',
+      type: 'card',
       card: { last4: '1234', exp_month: 12, exp_year: 2030 },
     },
   ]
@@ -480,4 +512,64 @@ test('coalesceOrThrowPaymentMethod handles missing card in payment method', () =
     billingInfo
   )
   assert.equal(result.id, 'pm_2')
+})
+
+test('normalisedGBVATNumber strips spaces and punctuation', () => {
+  assert.equal(normalisedGBVATNumber('123 456 789'), 'GB123456789')
+  assert.equal(normalisedGBVATNumber('123-456-789'), 'GB123456789')
+  assert.equal(normalisedGBVATNumber('123.456.789'), 'GB123456789')
+  assert.equal(normalisedGBVATNumber(' 123 456 789 '), 'GB123456789')
+})
+
+test('normalisedGBVATNumber prepends GB if not present', () => {
+  assert.equal(normalisedGBVATNumber('123456789'), 'GB123456789')
+  assert.equal(normalisedGBVATNumber('123456789012'), 'GB123456789012')
+})
+
+test('normalisedGBVATNumber does not prepend GB if already present', () => {
+  assert.equal(normalisedGBVATNumber('GB123456789'), 'GB123456789')
+  assert.equal(normalisedGBVATNumber('GB123456789012'), 'GB123456789012')
+  assert.equal(normalisedGBVATNumber('gb123456789'), 'GB123456789')
+})
+
+test('normalisedGBVATNumber removes trailing GB', () => {
+  assert.equal(normalisedGBVATNumber('123456789GB'), 'GB123456789')
+  assert.equal(normalisedGBVATNumber('GB123456789GB'), 'GB123456789')
+})
+
+test('normalisedGBVATNumber returns original if invalid after normalization', () => {
+  // Invalid length (8 digits instead of 9 or 12)
+  const invalid = '12345678'
+  assert.equal(normalisedGBVATNumber(invalid), invalid)
+
+  // Invalid length (10 digits instead of 9 or 12)
+  const invalid2 = '1234567890'
+  assert.equal(normalisedGBVATNumber(invalid2), invalid2)
+
+  // Invalid format with letters
+  const invalid3 = 'ABC123456'
+  assert.equal(normalisedGBVATNumber(invalid3), invalid3)
+})
+
+test('normalisedGBVATNumber handles null and undefined', () => {
+  assert.equal(normalisedGBVATNumber(null), null)
+  assert.equal(normalisedGBVATNumber(undefined), undefined)
+  assert.equal(normalisedGBVATNumber(''), '')
+})
+
+test('normalisedGBVATNumber handles valid 9-digit GB VAT numbers', () => {
+  assert.equal(normalisedGBVATNumber('123456789'), 'GB123456789')
+  assert.equal(normalisedGBVATNumber('GB123456789'), 'GB123456789')
+  assert.equal(normalisedGBVATNumber(' GB 123 456 789 '), 'GB123456789')
+})
+
+test('normalisedGBVATNumber handles valid 12-digit GB VAT numbers', () => {
+  assert.equal(normalisedGBVATNumber('123456789012'), 'GB123456789012')
+  assert.equal(normalisedGBVATNumber('GB123456789012'), 'GB123456789012')
+  assert.equal(normalisedGBVATNumber('GB 123 456 789 012'), 'GB123456789012')
+})
+
+test('normalisedGBVATNumber preserves Northern Ireland XI numbers', () => {
+  // XI numbers should not be modified to GB
+  assert.equal(normalisedGBVATNumber('XI123456789'), 'XI123456789')
 })
