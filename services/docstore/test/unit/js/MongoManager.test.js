@@ -224,33 +224,9 @@ describe('MongoManager', () => {
   describe('upsertIntoDocCollection', () => {
     beforeEach(ctx => {
       ctx.oldRev = 77
-      ctx.db.docs.findOneAndUpdate.resolves({
-        lines: ctx.lines,
-      })
     })
 
     it('should upsert the document', async ctx => {
-      await ctx.MongoManager.upsertIntoDocCollection(
-        ctx.projectId,
-        ctx.docId,
-        ctx.oldRev,
-        { lines: ctx.lines }
-      )
-
-      const args = ctx.db.docs.findOneAndUpdate.args[0]
-      assert.deepEqual(args[0], {
-        _id: new ObjectId(ctx.docId),
-        project_id: new ObjectId(ctx.projectId),
-        rev: ctx.oldRev,
-      })
-      assert.equal(args[1][0].$set.lines.$literal, ctx.lines)
-      assert.equal(args[1][1].$set.rev.$literal, ctx.oldRev + 1)
-    })
-
-    it('should fallback on mismatch', async ctx => {
-      ctx.db.docs.findOneAndUpdate.resolves({
-        lines: [],
-      })
       await ctx.MongoManager.upsertIntoDocCollection(
         ctx.projectId,
         ctx.docId,
@@ -262,30 +238,13 @@ describe('MongoManager', () => {
       assert.deepEqual(args[0], {
         _id: new ObjectId(ctx.docId),
         project_id: new ObjectId(ctx.projectId),
-        rev: ctx.oldRev + 1,
+        rev: ctx.oldRev,
       })
-      assert.equal(args[1].$set.lines, ctx.lines)
-      assert.equal(args[1].$set.rev, ctx.oldRev + 2)
+      assert.equal(args[1][0].$set.lines.$literal, ctx.lines)
+      assert.equal(args[1][1].$set.rev.$literal, ctx.oldRev + 1)
     })
 
     it('should handle update error', async ctx => {
-      ctx.db.docs.findOneAndUpdate.rejects(ctx.stubbedErr)
-      await expect(
-        ctx.MongoManager.upsertIntoDocCollection(
-          ctx.projectId,
-          ctx.docId,
-          ctx.rev,
-          {
-            lines: ctx.lines,
-          }
-        )
-      ).to.be.rejectedWith(ctx.stubbedErr)
-    })
-
-    it('should handle update error of the fallback', async ctx => {
-      ctx.db.docs.findOneAndUpdate.resolves({
-        lines: [],
-      })
       ctx.db.docs.updateOne.rejects(ctx.stubbedErr)
       await expect(
         ctx.MongoManager.upsertIntoDocCollection(
@@ -398,38 +357,7 @@ describe('MongoManager', () => {
     })
 
     describe('complete doc', () => {
-      beforeEach(async ctx => {
-        ctx.db.docs.findOneAndUpdate.resolves({
-          lines: ctx.archivedDoc.lines,
-          ranges: ctx.archivedDoc.ranges,
-        })
-      })
-
       it('updates Mongo', async ctx => {
-        await ctx.MongoManager.restoreArchivedDoc(
-          ctx.projectId,
-          ctx.docId,
-          ctx.archivedDoc
-        )
-        expect(ctx.db.docs.findOneAndUpdate).to.have.been.calledWith(
-          {
-            _id: new ObjectId(ctx.docId),
-            project_id: new ObjectId(ctx.projectId),
-            rev: ctx.archivedDoc.rev,
-          },
-          [
-            { $set: { lines: { $literal: ctx.archivedDoc.lines } } },
-            { $set: { ranges: { $literal: ctx.archivedDoc.ranges } } },
-            { $unset: 'inS3' },
-          ]
-        )
-      })
-
-      it('updates Mongo on fallback', async ctx => {
-        ctx.db.docs.findOneAndUpdate.resolves({
-          lines: ['foo'],
-          ranges: ctx.archivedDoc.ranges,
-        })
         await ctx.MongoManager.restoreArchivedDoc(
           ctx.projectId,
           ctx.docId,
@@ -441,15 +369,11 @@ describe('MongoManager', () => {
             project_id: new ObjectId(ctx.projectId),
             rev: ctx.archivedDoc.rev,
           },
-          {
-            $set: {
-              lines: ctx.archivedDoc.lines,
-              ranges: ctx.archivedDoc.ranges,
-            },
-            $unset: {
-              inS3: true,
-            },
-          }
+          [
+            { $set: { lines: { $literal: ctx.archivedDoc.lines } } },
+            { $set: { ranges: { $literal: ctx.archivedDoc.ranges } } },
+            { $unset: 'inS3' },
+          ]
         )
       })
     })
@@ -465,7 +389,7 @@ describe('MongoManager', () => {
           ctx.docId,
           ctx.archivedDoc
         )
-        expect(ctx.db.docs.findOneAndUpdate).to.have.been.calledWith(
+        expect(ctx.db.docs.updateOne).to.have.been.calledWith(
           {
             _id: new ObjectId(ctx.docId),
             project_id: new ObjectId(ctx.projectId),
@@ -488,21 +412,6 @@ describe('MongoManager', () => {
 
     describe("when the update doesn't succeed", () => {
       it('throws a DocRevValueError', async ctx => {
-        ctx.db.docs.findOneAndUpdate.resolves(null)
-        await expect(
-          ctx.MongoManager.restoreArchivedDoc(
-            ctx.projectId,
-            ctx.docId,
-            ctx.archivedDoc
-          )
-        ).to.be.rejectedWith(Errors.DocRevValueError)
-      })
-
-      it('throws a DocRevValueError on fallback', async ctx => {
-        ctx.db.docs.findOneAndUpdate.resolves({
-          lines: ['foo'],
-          ranges: ctx.archivedDoc.ranges,
-        })
         ctx.db.docs.updateOne.resolves({ matchedCount: 0 })
         await expect(
           ctx.MongoManager.restoreArchivedDoc(

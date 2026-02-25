@@ -2,8 +2,6 @@ import mongodb from './mongodb.js'
 import Settings from '@overleaf/settings'
 import Errors from './Errors.js'
 import Metrics from '@overleaf/metrics'
-import logger from '@overleaf/logger'
-import _ from 'lodash'
 
 const { db, ObjectId, BSON } = mongodb
 
@@ -120,40 +118,16 @@ async function upsertIntoDocCollection(projectId, docId, previousRev, updates) {
     const pipeline = convertUpdateToPipeline(update)
     const payloadSize = BSON.calculateObjectSize(pipeline)
     Metrics.count('mongo_docs_write', payloadSize, 1, { method: 'update' })
-    const result = await db.docs.findOneAndUpdate(
+    const result = await db.docs.updateOne(
       {
         _id: new ObjectId(docId),
         project_id: new ObjectId(projectId),
         rev: previousRev,
       },
-      pipeline,
-      { returnDocument: 'after' }
+      pipeline
     )
-    if (!result) {
+    if (result.matchedCount !== 1) {
       throw new Errors.DocRevValueError()
-    }
-    let fallbackUpdate = false
-    if (updates.lines && !_.isEqual(updates.lines, result.lines)) {
-      logger.warn({ projectId, docId }, 'lines are different after pipeline')
-      fallbackUpdate = true
-    }
-    if (updates.ranges && !_.isEqual(updates.ranges, result.ranges)) {
-      logger.warn({ projectId, docId }, 'ranges are different after pipeline')
-      fallbackUpdate = true
-    }
-    if (fallbackUpdate) {
-      update.$set.rev = previousRev + 2
-      const result = await db.docs.updateOne(
-        {
-          _id: new ObjectId(docId),
-          project_id: new ObjectId(projectId),
-          rev: previousRev + 1,
-        },
-        update
-      )
-      if (result.matchedCount !== 1) {
-        throw new Errors.DocRevValueError()
-      }
     }
   } else {
     const payloadSize = BSON.calculateObjectSize(updates)
@@ -248,38 +222,12 @@ async function restoreArchivedDoc(projectId, docId, archivedDoc) {
   const pipeline = convertUpdateToPipeline(update)
   const payloadSize = BSON.calculateObjectSize(pipeline)
   Metrics.count('mongo_docs_write', payloadSize, 1, { method: 'restore' })
-  const result = await db.docs.findOneAndUpdate(query, pipeline, {
-    returnDocument: 'after',
-  })
-  if (!result) {
+  const result = await db.docs.updateOne(query, pipeline)
+  if (result.matchedCount !== 1) {
     throw new Errors.DocRevValueError('failed to unarchive doc', {
       docId,
       rev: archivedDoc.rev,
     })
-  }
-  let fallbackUpdate = false
-  if (!_.isEqual(update.$set.lines, result.lines)) {
-    logger.warn(
-      { projectId, docId },
-      'lines are different after pipeline when unarchiving'
-    )
-    fallbackUpdate = true
-  }
-  if (!_.isEqual(update.$set.ranges, result.ranges)) {
-    logger.warn(
-      { projectId, docId },
-      'ranges are different after pipeline when unarchiving'
-    )
-    fallbackUpdate = true
-  }
-  if (fallbackUpdate) {
-    const result = await db.docs.updateOne(query, update)
-    if (result.matchedCount === 0) {
-      throw new Errors.DocRevValueError('failed to unarchive doc', {
-        docId,
-        rev: archivedDoc.rev,
-      })
-    }
   }
 }
 

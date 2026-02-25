@@ -8,13 +8,13 @@ describe('Applying updates to a doc', function () {
   beforeEach(async function () {
     this.project_id = new ObjectId()
     this.doc_id = new ObjectId()
-    this.originalLines = ['original', 'lines']
-    this.newLines = ['new', 'lines']
+    this.originalLines = ['original', 'lines', '$1.00', '$foo']
+    this.newLines = ['new', 'lines', '$2.00', '$bar']
     this.originalRanges = {
       changes: [
         {
           id: new ObjectId().toString(),
-          op: { i: 'foo', p: 3 },
+          op: { i: '$foo', p: 3 },
           meta: {
             user_id: new ObjectId().toString(),
             ts: new Date().toString(),
@@ -26,7 +26,7 @@ describe('Applying updates to a doc', function () {
       changes: [
         {
           id: new ObjectId().toString(),
-          op: { i: 'bar', p: 6 },
+          op: { i: '$bar', p: 6 },
           meta: {
             user_id: new ObjectId().toString(),
             ts: new Date().toString(),
