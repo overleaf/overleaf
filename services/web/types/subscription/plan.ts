@@ -113,3 +113,9 @@ export type StripeLookupKeyVersion = 'feb2026'
 
 export type StripeLookupKey =
   `${StripeBaseLookupKey}_${StripeLookupKeyVersion}_${StripeCurrencyCode}`
+
+export type IndividualPlanKey = 'collaborator' | 'professional' | 'student'
+export type LocalIndividualPlans = Record<
+  IndividualPlanKey | 'free',
+  { monthly: number; annual: number }
+>

@@ -11,7 +11,7 @@ import {
 } from '../../../types/project-settings'
 import { CurrencyCode } from '../../../types/subscription/currency'
 import { PricingFormState } from '../../../types/subscription/payment-context-value'
-import { Plan } from '../../../types/subscription/plan'
+import { LocalIndividualPlans, Plan } from '../../../types/subscription/plan'
 import { Affiliation } from '../../../types/affiliation'
 import type { PortalTemplate } from '../../../types/portal-template'
 import { UserEmailData } from '../../../types/user-email'
@@ -195,6 +195,7 @@ export interface Meta {
   'ol-legacyEditorThemes': { name: string; dark: boolean }[]
   'ol-licenseQuantity'?: number
   'ol-loadingText': string
+  'ol-localIndividualPlans': LocalIndividualPlans
   'ol-managedGroupSubscriptions': ManagedGroupSubscription[]
   'ol-managedInstitutions': ManagedInstitution[]
   'ol-managedPublishers': Publisher[]

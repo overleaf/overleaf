@@ -675,38 +675,42 @@ $z-index-group-member-picker-list: 1;
           }
         }
       }
+    }
+  }
 
-      .plans-new-edu-discount {
-        display: flex;
-        align-items: flex-start;
-        gap: var(--spacing-04);
-        margin-bottom: var(--spacing-06);
-        font-weight: 400;
+  .individual-edu-discount-form {
+    margin-top: calc(-1 * var(--spacing-05));
+  }
 
-        input[type='checkbox'] {
-          margin: var(--spacing-02);
-          accent-color: var(--green-50);
+  .plans-new-edu-discount {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-04);
+    margin-bottom: var(--spacing-06);
+    font-weight: 400;
 
-          &:focus-visible {
-            @include box-shadow-button-input;
-          }
-        }
+    input[type='checkbox'] {
+      margin: var(--spacing-03) var(--spacing-02);
+      accent-color: var(--green-50);
 
-        .plans-new-edu-discount-content {
-          display: flex;
-          flex-direction: column;
+      &:focus-visible {
+        @include box-shadow-button-input;
+      }
+    }
 
-          span {
-            line-height: var(--line-height-03);
-            color: var(--content-primary);
-          }
+    .plans-new-edu-discount-content {
+      display: flex;
+      flex-direction: column;
 
-          small {
-            color: var(--content-secondary);
-            font-size: var(--font-size-01);
-            line-height: var(--line-height-01);
-          }
-        }
+      span {
+        line-height: var(--line-height-03);
+        color: var(--content-primary);
+      }
+
+      small {
+        color: var(--content-secondary);
+        font-size: var(--font-size-01);
+        line-height: var(--line-height-01);
       }
     }
   }
