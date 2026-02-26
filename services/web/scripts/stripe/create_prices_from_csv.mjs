@@ -126,6 +126,7 @@ export async function main(trackProgress) {
 
   // Load and Parse CSV
   const content = fs.readFileSync(inputFile, 'utf-8')
+  /** @type {PriceRecord[]} */
   const records = csv.parse(content, { columns: true, skip_empty_lines: true })
 
   if (records.length === 0) {

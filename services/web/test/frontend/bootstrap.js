@@ -47,7 +47,6 @@ globalThis.MutationObserver = global.MutationObserver = window.MutationObserver
 globalThis.StorageEvent = global.StorageEvent = window.StorageEvent
 globalThis.SVGElement = global.SVGElement = window.SVGElement
 globalThis.localStorage = global.localStorage = window.localStorage
-globalThis.performance = global.performance = window.performance
 globalThis.cancelAnimationFrame = global.cancelAnimationFrame =
   window.cancelAnimationFrame
 globalThis.requestAnimationFrame = global.requestAnimationFrame =
