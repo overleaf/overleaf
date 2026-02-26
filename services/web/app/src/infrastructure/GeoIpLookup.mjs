@@ -1,9 +1,16 @@
+// @ts-check
+
 import settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import { fetchJson } from '@overleaf/fetch-utils'
 
-const DEFAULT_CURRENCY_CODE = 'USD'
+/**
+ * @typedef {import('../../../types/subscription/currency').CurrencyCode} CurrencyCode
+ */
 
+const DEFAULT_CURRENCY_CODE = /** @type {const} */ 'USD'
+
+/** @type {Record<string, CurrencyCode>} */
 const currencyMappings = {
   GB: 'GBP',
   US: 'USD',
@@ -84,6 +91,9 @@ async function getDetails(ip, callback) {
   return await fetchJson(url, { signal: AbortSignal.timeout(1_000) })
 }
 
+/**
+ * @returns {Promise<{currencyCode: CurrencyCode, countryCode: string|undefined}>}
+ */
 async function getCurrencyCode(ip) {
   let ipDetails
   try {
@@ -93,7 +103,7 @@ async function getCurrencyCode(ip) {
       { err, ip },
       `problem getting currencyCode for ip, defaulting to ${DEFAULT_CURRENCY_CODE}`
     )
-    return { currencyCode: DEFAULT_CURRENCY_CODE }
+    return { currencyCode: DEFAULT_CURRENCY_CODE, countryCode: undefined }
   }
   const countryCode =
     ipDetails && ipDetails.country_code

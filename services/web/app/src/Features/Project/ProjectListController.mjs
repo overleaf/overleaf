@@ -496,7 +496,8 @@ async function projectListPage(req, res, next) {
       showInrGeoBanner = true
     }
 
-    showLATAMBanner = ['MX', 'CO', 'CL', 'PE'].includes(countryCode)
+    showLATAMBanner =
+      !!countryCode && ['MX', 'CO', 'CL', 'PE'].includes(countryCode)
     // LATAM Banner needs to know which currency to display
     if (showLATAMBanner) {
       recommendedCurrency = currencyCode

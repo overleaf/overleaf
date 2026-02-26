@@ -49,6 +49,10 @@ const SUBSCRIPTION_PAUSED_REDIRECT_PATH =
   '/user/subscription?redirect-reason=subscription-paused'
 
 /**
+ * @typedef {import('../../../../types/subscription/currency').CurrencyCode} CurrencyCode
+ */
+
+/**
  * Check if a Stripe subscription is currently paused
  * @param {Object} subscription - The subscription object
  * @returns {Promise<boolean>}
@@ -972,6 +976,9 @@ async function refreshUserFeatures(req, res) {
   res.sendStatus(200)
 }
 
+/**
+ * @returns {Promise<{currency: CurrencyCode, recommendedCurrency: CurrencyCode, countryCode: string|undefined}>}
+ */
 async function getRecommendedCurrency(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   let ip = req.ip
