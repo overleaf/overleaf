@@ -148,6 +148,7 @@ describe('InstitutionsAPI', function () {
           foo: 'bar',
           institution: {
             commonsAccount: true,
+            confirmed: true,
           },
         },
       ]
@@ -173,6 +174,7 @@ describe('InstitutionsAPI', function () {
           foo: 'bar',
           institution: {
             commonsAccount: false,
+            confirmed: true,
           },
         },
       ]
@@ -208,6 +210,37 @@ describe('InstitutionsAPI', function () {
           group: {
             ...groupResponse,
           },
+        },
+      ])
+    })
+
+    it('does not query for group with domain capture if domain is not confirmed', async function (ctx) {
+      const responseBody = [
+        {
+          id: '123abc',
+          foo: 'bar',
+          institution: {
+            commonsAccount: false,
+            confirmed: false,
+          },
+        },
+      ]
+      ctx.request.callsArgWith(1, null, { statusCode: 201 }, responseBody)
+
+      const body = await ctx.InstitutionsAPI.promises.getUserAffiliations(
+        ctx.stubbedUser._id
+      )
+      ctx.request.calledOnce.should.equal(true)
+      const requestOptions = ctx.request.lastCall.args[0]
+      const expectedUrl = `v1.url/api/v2/users/${ctx.stubbedUser._id}/affiliations`
+      requestOptions.url.should.equal(expectedUrl)
+      requestOptions.method.should.equal('GET')
+      requestOptions.maxAttempts.should.equal(3)
+      ctx.Modules.promises.hooks.fire.should.not.have.been.called
+      expect(requestOptions.body).not.to.exist
+      expect(body).to.deep.equal([
+        {
+          ...responseBody[0],
         },
       ])
     })
