@@ -316,6 +316,15 @@ function sendUsersWithReconfirmationsLapsedProcessed(users, callback) {
   )
 }
 
+async function verifyDomainMatchesDomainMatcher(domain, institutionId) {
+  return await _affiliationRequestFetchJson({
+    method: 'POST',
+    path: `/api/v2/institutions/domain_matches_matcher`,
+    body: { domain, id: institutionId },
+    defaultErrorMessage: "Couldn't verify if domain matches matcher",
+  })
+}
+
 const InstitutionsAPI = {
   getInstitutionAffiliations,
 
@@ -431,6 +440,7 @@ InstitutionsAPI.promises = {
   sendUsersWithReconfirmationsLapsedProcessed: promisify(
     InstitutionsAPI.sendUsersWithReconfirmationsLapsedProcessed
   ),
+  verifyDomainMatchesDomainMatcher,
 }
 
 export default InstitutionsAPI

@@ -927,6 +927,7 @@
   "invalid_email": "",
   "invalid_file_name": "",
   "invalid_filename": "",
+  "invalid_organization_email": "",
   "invalid_password_contains_email": "",
   "invalid_password_too_similar": "",
   "invalid_regular_expression": "",

@@ -227,6 +227,12 @@ class SAMLSessionProviderDataMissing extends SAMLAuthenticationError {
   }
 }
 
+class SAMLDomainCaptureEmailDomainMismatchError extends SAMLDomainCaptureError {
+  get i18nKey() {
+    return 'invalid_organization_email'
+  }
+}
+
 class SAMLSessionDataMissing extends BackwardCompatibleError {
   constructor(arg) {
     super(arg)
@@ -388,6 +394,7 @@ module.exports = {
   SAMLAuthenticationRequiredError,
   SAMLCommonsUnavailable,
   SAMLDomainCaptureEmailExistsError,
+  SAMLDomainCaptureEmailDomainMismatchError,
   SAMLDomainCaptureError,
   SAMLDomainCaptureJoiningError,
   SAMLDomainCaptureMissingSessionDataError,
