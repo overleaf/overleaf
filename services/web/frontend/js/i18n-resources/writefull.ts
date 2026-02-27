@@ -487,6 +487,11 @@ const en = {
     'citations-reviewer.chat.non-english-error.yes':
       'Yes, run citation reviewer',
     'citations-reviewer.chat.non-english-error.no': 'No, return to main menu',
+    'paywall.title': 'You’ve hit your Overleaf AI limit',
+    'paywall.body':
+      'Upgrade for unlimited access to all AI features or check back at __date__, __time__.',
+    'paywall.upgrade': 'Upgrade',
+    'paywall.hide': 'Hide for now',
   },
 } as const
 
@@ -1000,6 +1005,11 @@ const es = {
       'Sí, ejecutar el revisor de citas',
     'citations-reviewer.chat.non-english-error.no':
       'No, volver al menú principal',
+    'paywall.title': 'Has alcanzado tu límite de Overleaf AI',
+    'paywall.body':
+      'Actualiza para acceso ilimitado a todas las funciones de AI o vuelve a intentar el __date__ a las __time__.',
+    'paywall.upgrade': 'Actualizar',
+    'paywall.hide': 'Ocultar por ahora',
   },
 }
 
