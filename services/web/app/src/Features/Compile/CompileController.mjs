@@ -598,10 +598,12 @@ const _CompileController = {
       [0, 100, 1000, 2000, 5000, 10000, 15000, 20000, 30000, 45000, 60000]
     )
     Metrics.inc('proxy_to_clsi', 1, { path: action, status: 'start' })
+    const ac = new AbortController()
+    let timeout = setTimeout(() => ac.abort(), 10_000)
     try {
       const { stream, response } = await fetchStreamWithResponse(url.href, {
         method: req.method,
-        signal: AbortSignal.timeout(60 * 1000),
+        signal: ac.signal,
         headers: persistenceOptions.headers,
       })
       if (req.destroyed) {
@@ -610,6 +612,7 @@ const _CompileController = {
           path: action,
           status: 'req-aborted',
         })
+        stream.destroy(new Error('user aborted the request'))
         return
       }
       Metrics.inc('proxy_to_clsi', 1, {
@@ -622,6 +625,13 @@ const _CompileController = {
           res.setHeader(key, response.headers.get(key))
         }
       }
+
+      // Downloads can take a while on a slow connection, increase timeouts to 10min
+      const TEN_MINUTES_IN_MS = 10 * 60 * 1000
+      res.setTimeout(TEN_MINUTES_IN_MS)
+      clearTimeout(timeout)
+      timeout = setTimeout(() => ac.abort(), TEN_MINUTES_IN_MS)
+
       res.writeHead(response.status)
       await pipeline(stream, res)
       timer.labels.status = 'success'
@@ -679,6 +689,8 @@ const _CompileController = {
         },
         'CLSI proxy error'
       )
+    } finally {
+      clearTimeout(timeout)
     }
   },
 

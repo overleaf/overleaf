@@ -53,7 +53,8 @@ async function _downloadFromCacheWithParams(
   filename
 ) {
   const userId = CompileController._getUserIdForCompile(req)
-  const signal = AbortSignal.timeout(60 * 1000)
+  const ac = new AbortController()
+  let timer = setTimeout(() => ac.abort(), 10_000)
   let location, projectName
   try {
     ;[{ location }, { name: projectName }] = await Promise.all([
@@ -62,11 +63,12 @@ async function _downloadFromCacheWithParams(
         userId,
         buildId,
         filename,
-        signal
+        ac.signal
       ),
       ProjectGetter.promises.getProject(projectId, { name: 1 }),
     ])
   } catch (err) {
+    clearTimeout(timer)
     if (err instanceof NotFoundError) {
       // res.sendStatus() sends a description of the status as body.
       // Using res.status().end() avoids sending that fake body.
@@ -76,11 +78,17 @@ async function _downloadFromCacheWithParams(
     }
   }
 
-  const { stream, response } = await fetchStreamWithResponse(location, {
-    signal,
-  })
+  let stream, response
+  try {
+    ;({ stream, response } = await fetchStreamWithResponse(location, {
+      signal: ac.signal,
+    }))
+  } finally {
+    clearTimeout(timer)
+  }
   if (req.destroyed) {
     // The client has disconnected already, avoid trying to write into the broken connection.
+    stream.destroy(new Error('user aborted the request'))
     return
   }
 
@@ -93,6 +101,10 @@ async function _downloadFromCacheWithParams(
       ? `${CompileController._getSafeProjectName({ name: projectName })}.pdf`
       : filename
   )
+  // Downloads can take a while on a slow connection, increase timeouts to 10min
+  const TEN_MINUTES_IN_MS = 10 * 60 * 1000
+  res.setTimeout(TEN_MINUTES_IN_MS)
+  timer = setTimeout(() => ac.abort(), TEN_MINUTES_IN_MS)
   try {
     res.writeHead(response.status)
     await pipeline(
@@ -132,6 +144,8 @@ async function _downloadFromCacheWithParams(
       },
       'CLSI-cache proxy error'
     )
+  } finally {
+    clearTimeout(timer)
   }
 }
 
