@@ -95,9 +95,12 @@ import {
   coalesceOrEqualOrThrowAddress,
   coalesceOrEqualOrThrowName,
   coalesceOrThrowPaymentMethod,
-  coalesceOrThrowVATNumber,
+  extractNameFromAccount,
+  extractNameFromBillingInfo,
   getTaxIdType,
   normalisedGBVATNumber,
+  normalizeRecurlyAddressToStripe,
+  normalizeName,
   sanitizeAccount,
 } from '../helpers/migrate_recurly_customers_to_stripe.helpers.mjs'
 import {
@@ -531,6 +534,54 @@ async function fetchRecurlyData(accountCode, context) {
 }
 
 /**
+ * Fetch live Recurly subscriptions for an account and ensure there is at most one.
+ *
+ * Returns the subscription object, or null if no live subscription exists.
+ * Throws if more than one live subscription exists.
+ *
+ * @param {string} accountCode - Recurly account code
+ * @param {object} context - Logging context
+ * @returns {Promise<object|null>}
+ */
+async function fetchRecurlyActiveSubscription(accountCode, context) {
+  const subscriptions = await rateLimiters.requestWithRetries(
+    'recurly',
+    async () => {
+      const pager = recurlyClient.listAccountSubscriptions(
+        `code-${accountCode}`,
+        {
+          params: { state: 'live' },
+        }
+      )
+
+      // we don't strictly need to fetch all subscriptions since we only
+      // care if there is one or more than one, but this is an unlikely
+      // edge case and knowing the actual number may be helpful for debugging, so we fetch them all
+      const results = []
+      for await (const subscription of pager.each()) {
+        results.push(subscription)
+      }
+      return results
+    },
+    context
+  )
+
+  if (subscriptions.length > 1) {
+    const subscriptionIds = subscriptions
+      .map(subscription => subscription?.id)
+      .filter(Boolean)
+
+    throw new Error(
+      `Expected at most one live Recurly subscription for account ${accountCode}, found ${subscriptions.length}${
+        subscriptionIds.length > 0 ? ` (${subscriptionIds.join(', ')})` : ''
+      }`
+    )
+  }
+
+  return subscriptions[0] ?? null
+}
+
+/**
  * Fetch existing customer from the target Stripe account by ID.
  *
  * @param {Stripe} stripeClient - The Stripe client for the target account
@@ -863,29 +914,18 @@ async function replaceCustomerTaxIds(
     ]
     if (error.code) parts.push(`code=${error.code}`)
     if (error.message) parts.push(error.message)
-    throw new Error(parts.join(': '))
+    const wrappedError = new Error(parts.join(': '))
+    wrappedError.code = error.code
+    wrappedError.type = error.type
+    wrappedError.statusCode = error.statusCode
+    throw wrappedError
   }
 }
 
-/**
- * Extract company name from Recurly data.
- *
- * Prefers billingInfo company as this is what the customer entered during checkout.
- * Falls back to account company for manually-created accounts or legacy data.
- *
- * @param {object} account - Recurly account object
- * @returns {string|null}
- */
-function extractCompanyName(account) {
-  // Prefer billing info company (entered during checkout)
-  if (account.billingInfo?.company) {
-    return account.billingInfo.company
-  }
-  // Fall back to account-level company (legacy or manually set)
-  if (account.company) {
-    return account.company
-  }
-  return null
+function isStripeTaxIdInvalidError(error) {
+  if (!error) return false
+
+  return error.code === 'tax_id_invalid'
 }
 
 function normalizeComparableString(value) {
@@ -1109,6 +1149,223 @@ async function resolveStripeCustomer({
 }
 
 /**
+ * Compute the billing_details params for a Stripe payment method from Recurly billing info.
+ *
+ * @param {object} billingInfo - Recurly billing info object
+ * @returns {object|null} - billing_details params, or null if there is nothing to set
+ */
+function computePaymentMethodBillingDetails(billingInfo) {
+  const name = normalizeName(billingInfo?.firstName, billingInfo?.lastName)
+  const address = normalizeRecurlyAddressToStripe(billingInfo?.address)
+
+  const details = {}
+  if (name) details.name = name
+  if (address) details.address = address
+
+  return Object.keys(details).length > 0 ? details : null
+}
+
+/**
+ * Update billing_details on a Stripe payment method with data from Recurly billing info.
+ *
+ * Used for manual-collection customers when billing info and account info differ:
+ * the account info is written to the Stripe customer record, and the billing info
+ * is copied to the payment method's billing_details.
+ *
+ * @param {Stripe} stripeClient
+ * @param {string} paymentMethodId
+ * @param {object} billingInfo - Recurly billing info object
+ * @param {object} context
+ * @returns {Promise<void>}
+ */
+async function updatePaymentMethodBillingDetails(
+  stripeClient,
+  paymentMethodId,
+  billingInfo,
+  context
+) {
+  const billingDetails = computePaymentMethodBillingDetails(billingInfo)
+  if (!billingDetails) {
+    logDebug(
+      'No billing info details to copy to payment method billing_details',
+      context,
+      { verboseOnly: true }
+    )
+    return
+  }
+
+  logDebug(
+    'Updating payment method billing_details with Recurly billing info',
+    {
+      ...context,
+      paymentMethodId,
+      step: 'update_payment_method_billing_details',
+    },
+    { verboseOnly: true }
+  )
+  await rateLimiters.requestWithRetries(
+    stripeClient.serviceName,
+    () =>
+      stripeClient.paymentMethods.update(paymentMethodId, {
+        billing_details: billingDetails,
+      }),
+    { ...context, stripeApi: 'paymentMethods.update' }
+  )
+  logDebug(
+    'Successfully updated payment method billing_details',
+    { ...context, paymentMethodId },
+    { verboseOnly: true }
+  )
+}
+
+/**
+ * Resolve customer name, address, company, and VAT number from Recurly account data.
+ *
+ * For most customers, billing info and account info agree (or only one source is set),
+ * and the standard coalesce logic applies (billing info preferred, account as fallback).
+ *
+ * When any field has conflicting values across both sources, the subscription's
+ * collection_method is fetched to determine which source wins:
+ *
+ * - automatic (web sales): billing info is used for the Stripe customer record.
+ * - manual (manual billing): account info is used for the Stripe customer record,
+ *   and billing info is returned separately to be copied to the payment method's
+ *   billing_details.
+ *
+ * @param {object} account - Recurly account object
+ * @param {string} recurlyAccountCode - Account code (used for subscription lookup on conflict)
+ * @param {object} context - Logging context
+ * @returns {Promise<{
+ *   name: string|null,
+ *   address: import('stripe').Stripe.AddressParam|null,
+ *   companyName: string|null,
+ *   vatNumber: string|null,
+ *   collectionMethod: string|null,
+ *   billingInfoForPaymentMethod: object|null
+ * }>}
+ */
+async function resolveCustomerIdentity(account, recurlyAccountCode, context) {
+  // Detect conflicts between billing info and account fields
+  const billingName = extractNameFromBillingInfo(account)
+  const accountName = extractNameFromAccount(account)
+  const nameConflict =
+    billingName !== null && accountName !== null && billingName !== accountName
+
+  const billingAddress = normalizeRecurlyAddressToStripe(
+    account.billingInfo?.address
+  )
+  const accountAddress = normalizeRecurlyAddressToStripe(account?.address)
+  const addressConflict =
+    billingAddress !== null &&
+    accountAddress !== null &&
+    !addressesEqual(billingAddress, accountAddress)
+
+  const billingCompany = account.billingInfo?.company?.trim() || null
+  const accountCompany = account.company?.trim() || null
+  const companyConflict =
+    billingCompany !== null &&
+    accountCompany !== null &&
+    billingCompany !== accountCompany
+
+  const billingVat = account.billingInfo?.vatNumber?.trim() || null
+  const accountVat = account?.vatNumber?.trim() || null
+  const vatConflict =
+    billingVat !== null && accountVat !== null && billingVat !== accountVat
+
+  const hasConflict =
+    nameConflict || addressConflict || companyConflict || vatConflict
+
+  let name,
+    address,
+    companyName,
+    vatNumber,
+    collectionMethod,
+    billingInfoForPaymentMethod
+
+  if (!hasConflict) {
+    // No conflict: use the standard coalesce logic (billing info preferred)
+    name = coalesceOrEqualOrThrowName(account)
+    address = coalesceOrEqualOrThrowAddress(account)
+    companyName = billingCompany ?? accountCompany
+    vatNumber = billingVat ?? accountVat
+    collectionMethod = null
+    billingInfoForPaymentMethod = null
+  } else {
+    // Conflict detected: fetch the subscription to determine which source wins
+    logWarn(
+      'Conflict between billing info and account fields; fetching subscription collection method to resolve',
+      {
+        ...context,
+        nameConflict,
+        addressConflict,
+        companyConflict,
+        vatConflict,
+      }
+    )
+
+    const subscription = await fetchRecurlyActiveSubscription(
+      recurlyAccountCode,
+      context
+    )
+    collectionMethod = subscription?.collectionMethod || null
+
+    if (!collectionMethod) {
+      throw new Error(
+        'Conflict between billing info and account fields, but no live subscription found to determine collection method'
+      )
+    }
+
+    logDebug(
+      'Resolving billing info / account conflict using subscription collection method',
+      {
+        ...context,
+        collectionMethod,
+        nameConflict,
+        addressConflict,
+        companyConflict,
+        vatConflict,
+      },
+      { verboseOnly: true }
+    )
+
+    if (collectionMethod === 'automatic') {
+      // Web sales: use billing info for the Stripe customer record
+      name = billingName ?? accountName
+      address = billingAddress ?? accountAddress
+      companyName = billingCompany ?? accountCompany
+      vatNumber = billingVat ?? accountVat
+      billingInfoForPaymentMethod = null
+    } else if (collectionMethod === 'manual') {
+      // Manual billing: use account info for the Stripe customer record,
+      // and return billing info to be copied to the payment method's billing_details
+      name = accountName ?? billingName
+      address = accountAddress ?? billingAddress
+      companyName = accountCompany ?? billingCompany
+      vatNumber = accountVat ?? billingVat
+      billingInfoForPaymentMethod = account.billingInfo
+    } else {
+      throw new Error(
+        `Unknown collection method "${collectionMethod}" encountered while resolving billing info / account conflict`
+      )
+    }
+  }
+
+  // Normalise GB VAT numbers using the resolved address country
+  if (vatNumber && address?.country === 'GB') {
+    vatNumber = normalisedGBVATNumber(vatNumber)
+  }
+
+  return {
+    name,
+    address,
+    companyName,
+    vatNumber,
+    collectionMethod,
+    billingInfoForPaymentMethod,
+  }
+}
+
+/**
  * Process a single customer row from the input CSV.
  *
  * Customers are expected to already exist in the target Stripe account
@@ -1201,22 +1458,6 @@ async function processCustomer(
       { verboseOnly: true }
     )
 
-    // TODO: Handle tax exemption in later phases of the migration.
-
-    if (account.exemptionCertificate) {
-      logDebug(
-        'Found tax exemption certificate on Recurly account - aborting',
-        {
-          ...context,
-          exemptionCertificate: account.exemptionCertificate,
-        },
-        { verboseOnly: true }
-      )
-      throw new Error(
-        'Customer appears to be tax exempt in Recurly, but this migration does not yet handle tax exemption status'
-      )
-    }
-
     const existingCustomer = await resolveStripeCustomer({
       stripeClient,
       stripeCustomerId,
@@ -1237,30 +1478,34 @@ async function processCustomer(
       )
     }
 
-    // Extract VAT number and country for tax ID creation
-    let vatNumber = coalesceOrThrowVATNumber(account)
+    // Resolve customer identity (name, address, company, VAT number), handling
+    // conflicts between billing info and account fields via the subscription's
+    // collection_method.
+    const {
+      name,
+      address,
+      companyName,
+      vatNumber,
+      billingInfoForPaymentMethod,
+    } = await resolveCustomerIdentity(account, recurlyAccountCode, context)
+
     let taxIdType = null
-    let country = null
     let createdTaxId = null
     let taxInfoPendingValue = null
 
     // Determine VAT number tax ID type (if possible)
     if (vatNumber) {
-      // We need to extract address first to get the country
-      const tempAddress = coalesceOrEqualOrThrowAddress(account)
-      country = tempAddress?.country
-      if (country === 'GB') {
-        vatNumber = normalisedGBVATNumber(vatNumber)
-      }
+      const preValidateFormat = !commit
       const taxIdTypeResult = getTaxIdType(
-        country,
+        address?.country,
         vatNumber,
-        tempAddress?.postal_code
+        address?.postal_code,
+        preValidateFormat
       )
       taxIdType = taxIdTypeResult.type
       const taxIdTypeFailureReason = taxIdTypeResult.reason
 
-      if (!country) {
+      if (!address?.country) {
         if (!forceInvalidTax) {
           throw new Error(
             `Unprocessable VAT number ${vatNumber} (no country): ${taxIdTypeFailureReason}`
@@ -1281,8 +1526,8 @@ async function processCustomer(
         logWarn('Unable to determine tax id type for VAT number', {
           ...context,
           vatNumber,
-          country,
-          postalCode: tempAddress?.postal_code,
+          country: address?.country,
+          postalCode: address?.postal_code,
           reason: taxIdTypeFailureReason,
         })
         taxInfoPendingValue = vatNumber
@@ -1292,7 +1537,7 @@ async function processCustomer(
           {
             ...context,
             vatNumber,
-            country,
+            country: address?.country,
             taxIdType,
           },
           { verboseOnly: true }
@@ -1316,22 +1561,43 @@ async function processCustomer(
           { verboseOnly: true }
         )
 
-        createdTaxId = await replaceCustomerTaxIds(
-          stripeClient,
-          stripeCustomerId,
-          { taxIdType, vatNumber },
-          context
-        )
-        logDebug(
-          'Successfully created tax ID',
-          {
-            ...context,
-            taxId: createdTaxId.id,
-            taxIdType: createdTaxId.type,
-            taxIdValue: createdTaxId.value,
-          },
-          { verboseOnly: true }
-        )
+        // Note: if re-running for a customer where the vatNumber was previously present in Recurly
+        // but removed since the last run, this code will not erase that vatNumber from Stripe.
+        // unlikely to ever occur but worth noting
+        try {
+          createdTaxId = await replaceCustomerTaxIds(
+            stripeClient,
+            stripeCustomerId,
+            { taxIdType, vatNumber },
+            context
+          )
+          logDebug(
+            'Successfully created tax ID',
+            {
+              ...context,
+              taxId: createdTaxId.id,
+              taxIdType: createdTaxId.type,
+              taxIdValue: createdTaxId.value,
+            },
+            { verboseOnly: true }
+          )
+        } catch (error) {
+          if (forceInvalidTax && isStripeTaxIdInvalidError(error)) {
+            logWarn(
+              'Stripe rejected tax ID as invalid; continuing because --force-invalid-tax is enabled',
+              {
+                ...context,
+                vatNumber,
+                country: address?.country,
+                taxIdType,
+                error: error.message,
+              }
+            )
+            taxInfoPendingValue = vatNumber
+          } else {
+            throw error
+          }
+        }
       }
     }
 
@@ -1345,10 +1611,6 @@ async function processCustomer(
       { verboseOnly: true }
     )
 
-    const name = coalesceOrEqualOrThrowName(account)
-    const address = coalesceOrEqualOrThrowAddress(account)
-    const companyName = extractCompanyName(account)
-
     const paymentMethod = await getPaymentMethod(
       stripeClient,
       stripeCustomerId,
@@ -1358,15 +1620,6 @@ async function processCustomer(
       stripeContext
     )
 
-    // TODO: Handle tax exempt status
-    // Recurly has account.exemptionCertificate for tax exemption
-    // Stripe has customer.tax_exempt: 'none' | 'exempt' | 'reverse'
-    // Need to determine when customers are tax exempt and how to map.
-    // Current Stripe checkout only allows tax exemption for US customers with EIN (us_ein).
-    // if (account.exemptionCertificate) {
-    //   customerParams.tax_exempt = 'exempt'
-    // }
-
     /** @type {Record<string, string>} */
     const metadata = {}
     if (account.createdAt) {
@@ -1374,6 +1627,8 @@ async function processCustomer(
     }
     if (taxInfoPendingValue) {
       metadata.taxInfoPending = taxInfoPendingValue
+    } else {
+      metadata.taxInfoPending = ''
     }
 
     if (
@@ -1447,6 +1702,8 @@ async function processCustomer(
             },
           }
         : {}),
+      // Recurly docs say the field is tax_exempt but in the actual response is taxExempt
+      tax_exempt: account.taxExempt ? 'exempt' : 'none',
     }
 
     // If Stripe already has any of the fields we're about to set, and the value is
@@ -1541,6 +1798,23 @@ async function processCustomer(
         { ...stripeContext, stripeApi: 'customers.update' }
       )
 
+      // For manual-collection customers where billing info and account info differ,
+      // copy the billing info to the payment method's billing_details.
+      //
+      // Note: If re-running this script for a given customer,
+      // then if by some chance the payment collection method has changed from automatic to manual since the last run,
+      // then we would potentially leave billing details in an inconsistent state
+      // I think this is vanishingly unlikely to be an issue in practice and a tricky problem to solve
+      // Highlighting here just in case.
+      if (billingInfoForPaymentMethod && paymentMethod) {
+        await updatePaymentMethodBillingDetails(
+          stripeClient,
+          paymentMethod.id,
+          billingInfoForPaymentMethod,
+          { ...context, step: 'update_payment_method_billing_details' }
+        )
+      }
+
       result.outcome = 'updated'
       logDebug(
         'Successfully updated Stripe customer',
@@ -1558,12 +1832,22 @@ async function processCustomer(
           ? {
               type: taxIdType,
               value: vatNumber,
-              country,
+              country: address?.country,
               createdTaxId,
             }
           : null,
         _isPaypal: paymentMethod?.type === 'paypal',
         _targetStripeCustomerId: stripeCustomerId,
+        // Include payment method billing_details update for dry-run review
+        _paymentMethodBillingDetailsUpdate:
+          billingInfoForPaymentMethod && paymentMethod
+            ? {
+                paymentMethodId: paymentMethod.id,
+                billingDetails: computePaymentMethodBillingDetails(
+                  billingInfoForPaymentMethod
+                ),
+              }
+            : null,
       }
       logDebug(
         'DRY RUN: Would update Stripe customer',

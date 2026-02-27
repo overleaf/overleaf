@@ -21,7 +21,7 @@ export function coalesceOrEqualOrThrow(a, b, fieldName) {
   return isSetA ? a : b
 }
 
-function normalizeName(firstName, lastName) {
+export function normalizeName(firstName, lastName) {
   const first = (firstName || '').trim()
   const last = (lastName || '').trim()
   const full = `${first} ${last}`.trim()
@@ -64,6 +64,34 @@ export function coalesceOrEqualOrThrowName(account) {
   }
 
   return billingName ?? accountName
+}
+
+/**
+ * Extract customer name from billing info only (no fallback to account).
+ *
+ * @param {object} account - Recurly account object
+ * @returns {string|null}
+ */
+export function extractNameFromBillingInfo(account) {
+  const billingHasFullName = !!(
+    account.billingInfo?.firstName && account.billingInfo?.lastName
+  )
+  return billingHasFullName
+    ? normalizeName(account.billingInfo.firstName, account.billingInfo.lastName)
+    : null
+}
+
+/**
+ * Extract customer name from account level only (no fallback to billing info).
+ *
+ * @param {object} account - Recurly account object
+ * @returns {string|null}
+ */
+export function extractNameFromAccount(account) {
+  const accountHasFullName = !!(account.firstName && account.lastName)
+  return accountHasFullName
+    ? normalizeName(account.firstName, account.lastName)
+    : null
 }
 
 /**
@@ -195,6 +223,11 @@ function normalizeTaxId(value) {
 
 function normalizeTaxIdCompact(value) {
   return normalizeTaxId(value).replace(/\s+/g, '')
+}
+
+function normalizeTaxIdAlnum(value) {
+  // Keep alphanumerics and '&' (used by some MX RFC values), strip separators.
+  return normalizeTaxId(value).replace(/[^A-Z0-9&]+/g, '')
 }
 
 function digitsOnly(value) {
@@ -878,11 +911,17 @@ const COUNTRY_TAX_ID_FORMATS = {
  * @param {string|undefined|null} country - ISO 3166-1 alpha-2
  * @param {string|undefined|null} taxIdValue
  * @param {string|undefined|null} postalCode - used for Canada province inference
+ * @param {boolean} [preValidateFormat=false] - Optional behavior flag to pre-validate format.
  * @returns {{type: string|null, reason: string|null}} - Stripe tax ID type + failure reason (when type is null)
  */
 // TODO: this function is naive - we need more than just country to determine tax ID type
 // for example canada has multiple types (BN, QST, GST/HST) depending on province (inferred from postal code)
-export function getTaxIdType(country, taxIdValue, postalCode) {
+export function getTaxIdType(
+  country,
+  taxIdValue,
+  postalCode,
+  preValidateFormat = false
+) {
   if (!country) return { type: null, reason: 'missing country' }
 
   const upperCountry = String(country).toUpperCase()
@@ -923,6 +962,12 @@ export function getTaxIdType(country, taxIdValue, postalCode) {
       'SK',
     ])
     if (euVatOnlyCountries.has(upperCountry)) {
+      if (preValidateFormat && !hasEuVatPrefix(upperCountry, taxIdValue)) {
+        return {
+          type: null,
+          reason: `invalid tax ID format for country ${upperCountry}`,
+        }
+      }
       return { type: 'eu_vat', reason: null }
     }
   }
@@ -1051,6 +1096,15 @@ export function getTaxIdType(country, taxIdValue, postalCode) {
 
   const countryFormat = COUNTRY_TAX_ID_FORMATS[upperCountry]
   if (countryFormat) {
+    if (preValidateFormat) {
+      const normalized = normalizeTaxIdAlnum(taxIdValue)
+      if (!countryFormat.regex.test(normalized)) {
+        return {
+          type: null,
+          reason: `invalid tax ID format for country ${upperCountry}`,
+        }
+      }
+    }
     return { type: countryFormat.taxIdType, reason: null }
   }
 

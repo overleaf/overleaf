@@ -380,6 +380,33 @@ test('getTaxIdType includes failure reason', () => {
   assert.equal(invalidEuOss.reason, 'invalid EU OSS VAT number')
 })
 
+test('getTaxIdType pre-validation is opt-in', () => {
+  // Default behavior: no country-format pre-validation
+  const noPreValidation = getTaxIdType('US', 'NOT_A_VALID_EIN', null)
+  assert.equal(noPreValidation.type, 'us_ein')
+  assert.equal(noPreValidation.reason, null)
+
+  // Optional behavior: enable country-format pre-validation
+  const withPreValidation = getTaxIdType('US', 'NOT_A_VALID_EIN', null, true)
+  assert.equal(withPreValidation.type, null)
+  assert.equal(withPreValidation.reason, 'invalid tax ID format for country US')
+})
+
+test('getTaxIdType pre-validates EU VAT-only countries when enabled', () => {
+  const invalidWithPreValidation = getTaxIdType('AT', '12345678', null, true)
+
+  assert.equal(invalidWithPreValidation.type, null)
+  assert.equal(
+    invalidWithPreValidation.reason,
+    'invalid tax ID format for country AT'
+  )
+
+  const validWithPreValidation = getTaxIdType('AT', 'ATU12345678', null, true)
+
+  assert.equal(validWithPreValidation.type, 'eu_vat')
+  assert.equal(validWithPreValidation.reason, null)
+})
+
 test('coalesceOrThrowPaymentMethod throws when payment methods array is empty', () => {
   assert.throws(
     () => coalesceOrThrowPaymentMethod([], 'cus_123', {}),
