@@ -62,6 +62,7 @@ function getModuleDirectory(moduleName) {
 const mathjaxDir = getModuleDirectory('mathjax')
 const pdfjsDir = getModuleDirectory('pdfjs-dist')
 const dictionariesDir = getModuleDirectory('@overleaf/dictionaries')
+const pyodideDir = getModuleDirectory('pyodide')
 
 const vendorDir = path.join(__dirname, 'frontend/js/vendor')
 
@@ -406,6 +407,37 @@ module.exports = {
           to: `js/dictionaries/${PackageVersions.version.dictionaries}`,
           toType: 'dir',
           context: `${dictionariesDir}/dictionaries`,
+        },
+        // Copy Pyodide runtime assets from npm package for local serving.
+        {
+          from: 'pyodide.mjs',
+          to: 'js/libs/pyodide',
+          toType: 'dir',
+          context: pyodideDir,
+        },
+        {
+          from: 'pyodide.asm.js',
+          to: 'js/libs/pyodide',
+          toType: 'dir',
+          context: pyodideDir,
+        },
+        {
+          from: 'pyodide.asm.wasm',
+          to: 'js/libs/pyodide',
+          toType: 'dir',
+          context: pyodideDir,
+        },
+        {
+          from: 'python_stdlib.zip',
+          to: 'js/libs/pyodide',
+          toType: 'dir',
+          context: pyodideDir,
+        },
+        {
+          from: 'pyodide-lock.json',
+          to: 'js/libs/pyodide',
+          toType: 'dir',
+          context: pyodideDir,
         },
         // Copy CMap files (used to provide support for non-Latin characters),
         // wasm, ICC profiles, fonts and images from pdfjs-dist package to build output.

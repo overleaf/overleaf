@@ -54,6 +54,47 @@
   height: 100%;
 }
 
+.ide-redesign-python-editor-split {
+  height: 100%;
+}
+
+.ide-redesign-python-output-pane {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--ide-redesign-background);
+  color: var(--ide-redesign-color);
+  border-top: 1px solid var(--border-divider);
+}
+
+.ide-redesign-python-output-pane-body {
+  flex: 1;
+  overflow: auto;
+  padding: var(--spacing-06);
+  font-family: 'DM Mono', monospace;
+  font-size: var(--font-size-02);
+  line-height: var(--line-height-03);
+}
+
+.ide-redesign-python-output-pane-placeholder {
+  color: var(--content-secondary);
+}
+
+.ide-redesign-python-output-pane-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ide-redesign-python-output-pane-placeholder,
+.ide-redesign-python-output-pane-error {
+  white-space: pre-wrap;
+}
+
+.ide-redesign-python-output-pane-error {
+  margin-bottom: var(--spacing-03);
+  color: var(--red-50);
+}
+
 .ide-redesign-labs-user-beta-promo {
   position: absolute;
   top: 60px;

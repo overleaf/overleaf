@@ -65,4 +65,11 @@ export const languages = [
       return import('./markdown').then(m => m.markdown())
     },
   }),
+  LanguageDescription.of({
+    name: 'python',
+    extensions: ['py'],
+    load: () => {
+      return import('@codemirror/lang-python').then(m => m.python())
+    },
+  }),
 ]
