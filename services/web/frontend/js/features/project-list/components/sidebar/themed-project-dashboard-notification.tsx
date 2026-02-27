@@ -6,8 +6,7 @@ import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 import { Overlay, Popover } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 
-// TODO: Update this before release
-const NEW_USER_CUTOFF_DATE = new Date('2026-02-15')
+const SYSTEM_THEME_USER_CUTOFF_DATE = new Date(Date.UTC(2026, 2, 2, 12, 0, 0)) // 12pm GMT on March 2, 2026
 
 type ThemedProjectDashboardNotificationProps = {
   target: HTMLElement | null
@@ -25,7 +24,7 @@ export const ThemedProjectDashboardNotification = ({
   } = useUserSettingsContext()
   const { signUpDate: signUpDateString } = useUserContext()
   const signUpDate = signUpDateString ? new Date(signUpDateString) : new Date(0)
-  const isNewUser = signUpDate > NEW_USER_CUTOFF_DATE
+  const isNewUser = signUpDate >= SYSTEM_THEME_USER_CUTOFF_DATE
   const { t } = useTranslation()
 
   if (!target) {

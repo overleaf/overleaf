@@ -30,7 +30,7 @@ async function getEnableNewEditorLegacyDefault(req, res, user) {
   return false
 }
 
-const SYSTEM_THEME_USER_CUTOFF_DATE = new Date(Date.UTC(2026, 1, 15, 12, 0, 0)) // 12pm GMT on February 15, 2026
+const SYSTEM_THEME_USER_CUTOFF_DATE = new Date(Date.UTC(2026, 2, 2, 12, 0, 0)) // 12pm GMT on March 2, 2026
 
 async function getOverallTheme(req, res, user) {
   if (user.ace.overallTheme != null) {

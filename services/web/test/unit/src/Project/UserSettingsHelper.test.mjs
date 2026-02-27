@@ -50,7 +50,7 @@ describe('UserSettingsHelper', function () {
       beforeEach(async function (ctx) {
         const user = {
           ace: {},
-          signUpDate: new Date('2026-02-16T00:00:00Z'),
+          signUpDate: new Date('2027-02-16T00:00:00Z'),
         }
 
         ctx.SplitTestHandler.promises.getAssignment
@@ -79,7 +79,7 @@ describe('UserSettingsHelper', function () {
       beforeEach(async function (ctx) {
         const user = {
           ace: {},
-          signUpDate: new Date('2026-02-16T00:00:00Z'),
+          signUpDate: new Date('2027-02-16T00:00:00Z'),
         }
 
         ctx.SplitTestHandler.promises.getAssignment
