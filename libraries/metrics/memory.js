@@ -104,7 +104,7 @@ module.exports = MemoryMonitor = {
         },
         'global.gc() forced'
       )
-      // Metrics.timing("memory.gc-time", gcTime)
+      Metrics.timing('memory.gc-time', +gcTime)
       Metrics.gauge('memory.gc-rss-freed', -deltaMem.rss)
       Metrics.gauge('memory.gc-heaptotal-freed', -deltaMem.heapTotal)
       return Metrics.gauge('memory.gc-heapused-freed', -deltaMem.heapUsed)
