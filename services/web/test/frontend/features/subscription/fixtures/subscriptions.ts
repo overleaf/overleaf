@@ -27,7 +27,7 @@ export const annualActiveSubscription: PaidSubscription = {
   planCode: 'collaborator-annual',
   plan: {
     planCode: 'collaborator-annual',
-    name: 'Standard (Collaborator) Annual',
+    name: 'Standard Annual',
     price_in_cents: 21900,
     annual: true,
     featureDescription: [],
@@ -71,7 +71,7 @@ export const annualActiveSubscriptionWithCoupons: PaidSubscription = {
   planCode: 'collaborator-annual',
   plan: {
     planCode: 'collaborator-annual',
-    name: 'Standard (Collaborator) Annual',
+    name: 'Standard Annual',
     price_in_cents: 21900,
     annual: true,
     featureDescription: [],
@@ -118,7 +118,7 @@ export const pendingPausedSubscription: PaidSubscription = {
   planCode: 'collaborator-annual',
   plan: {
     planCode: 'collaborator-annual',
-    name: 'Standard (Collaborator) Annual',
+    name: 'Standard Annual',
     price_in_cents: 21900,
     annual: true,
     featureDescription: [],
@@ -163,7 +163,7 @@ export const pausedSubscription: PaidSubscription = {
   planCode: 'collaborator-annual',
   plan: {
     planCode: 'collaborator-annual',
-    name: 'Standard (Collaborator) Annual',
+    name: 'Standard Annual',
     price_in_cents: 21900,
     annual: true,
     featureDescription: [],
@@ -208,7 +208,7 @@ export const annualActiveSubscriptionWithAddons: PaidSubscription = {
   planCode: 'collaborator-annual',
   plan: {
     planCode: 'collaborator-annual',
-    name: 'Standard (Collaborator) Annual',
+    name: 'Standard Annual',
     price_in_cents: 21900,
     annual: true,
     featureDescription: [],
@@ -255,7 +255,7 @@ export const annualActiveSubscriptionEuro: PaidSubscription = {
   planCode: 'collaborator-annual',
   plan: {
     planCode: 'collaborator-annual',
-    name: 'Standard (Collaborator) Annual',
+    name: 'Standard Annual',
     price_in_cents: 21900,
     annual: true,
     featureDescription: [],
@@ -342,7 +342,7 @@ export const pastDueExpiredSubscription: PaidSubscription = {
   planCode: 'collaborator-annual',
   plan: {
     planCode: 'collaborator-annual',
-    name: 'Standard (Collaborator) Annual',
+    name: 'Standard Annual',
     price_in_cents: 21900,
     annual: true,
     featureDescription: [],
@@ -386,7 +386,7 @@ export const canceledSubscription: PaidSubscription = {
   planCode: 'collaborator-annual',
   plan: {
     planCode: 'collaborator-annual',
-    name: 'Standard (Collaborator) Annual',
+    name: 'Standard Annual',
     price_in_cents: 21900,
     annual: true,
     featureDescription: [],
@@ -430,7 +430,7 @@ export const pendingAddOnChange: PaidSubscription = {
   planCode: 'collaborator-annual',
   plan: {
     planCode: 'collaborator-annual',
-    name: 'Standard (Collaborator) Annual',
+    name: 'Standard Annual',
     price_in_cents: 21900,
     annual: true,
     featureDescription: [],
@@ -469,7 +469,7 @@ export const pendingAddOnChange: PaidSubscription = {
   },
   pendingPlan: {
     planCode: 'collaborator-annual',
-    name: 'Standard (Collaborator) Annual',
+    name: 'Standard Annual',
     price_in_cents: 21900,
     annual: true,
     featureDescription: [],
@@ -488,7 +488,7 @@ export const pendingSubscriptionChange: PaidSubscription = {
   planCode: 'collaborator-annual',
   plan: {
     planCode: 'collaborator-annual',
-    name: 'Standard (Collaborator) Annual',
+    name: 'Standard Annual',
     price_in_cents: 21900,
     annual: true,
     featureDescription: [],
@@ -540,7 +540,7 @@ export const groupActiveSubscription: GroupSubscription = {
   planCode: 'group_collaborator_10_enterprise',
   plan: {
     planCode: 'group_collaborator_10_enterprise',
-    name: 'Overleaf Standard (Collaborator) - Group Account (10 licenses) - Enterprise',
+    name: 'Overleaf Standard - Group Account (10 licenses) - Enterprise',
     hideFromUsers: true,
     price_in_cents: 129000,
     annual: true,
@@ -637,7 +637,7 @@ export const groupActiveSubscriptionWithPendingLicenseChange: GroupSubscription 
     planCode: 'group_collaborator_10_enterprise',
     plan: {
       planCode: 'group_collaborator_10_enterprise',
-      name: 'Overleaf Standard (Collaborator) - Group Account (10 licenses) - Enterprise',
+      name: 'Overleaf Standard - Group Account (10 licenses) - Enterprise',
       hideFromUsers: true,
       price_in_cents: 129000,
       annual: true,
@@ -674,7 +674,7 @@ export const groupActiveSubscriptionWithPendingLicenseChange: GroupSubscription 
     },
     pendingPlan: {
       planCode: 'group_collaborator_10_enterprise',
-      name: 'Overleaf Standard (Collaborator) - Group Account (10 licenses) - Enterprise',
+      name: 'Overleaf Standard - Group Account (10 licenses) - Enterprise',
       hideFromUsers: true,
       price_in_cents: 129000,
       annual: true,
@@ -739,7 +739,7 @@ export const customSubscription: CustomSubscription = {
   planCode: 'collaborator-annual',
   plan: {
     planCode: 'collaborator-annual',
-    name: 'Standard (Collaborator) Annual',
+    name: 'Standard Annual',
     price_in_cents: 21900,
     annual: true,
     featureDescription: [],
@@ -759,7 +759,7 @@ export const trialCollaboratorSubscription: PaidSubscription = {
   planCode: 'collaborator_free_trial_7_days',
   plan: {
     planCode: 'collaborator_free_trial_7_days',
-    name: 'Standard (Collaborator)',
+    name: 'Standard',
     price_in_cents: 2300,
     featureDescription: [],
     hideFromUsers: true,
@@ -803,7 +803,7 @@ export const monthlyActiveCollaborator: PaidSubscription = {
   planCode: 'collaborator',
   plan: {
     planCode: 'collaborator',
-    name: 'Standard (Collaborator)',
+    name: 'Standard',
     price_in_cents: 212300900,
     featureDescription: [],
     canUseFlexibleLicensing: false,
