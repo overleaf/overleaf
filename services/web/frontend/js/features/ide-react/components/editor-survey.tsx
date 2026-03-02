@@ -21,7 +21,7 @@ export default memo(function EditorSurvey() {
   )
 })
 
-const TUTORIAL_KEY = 'editor-popup-ux-survey'
+const TUTORIAL_KEY = 'editor-popup-ux-survey-03-2026'
 
 const EditorSurveyContent = () => {
   const [easeOfUse, setEaseOfUse] = useState<number | null>(null)

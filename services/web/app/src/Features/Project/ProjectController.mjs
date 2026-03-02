@@ -452,7 +452,7 @@ const _ProjectController = {
       'hotjar',
       'overleaf-assist-bundle',
       'word-count-client',
-      'editor-popup-ux-survey',
+      'editor-popup-ux-survey-03-2026',
       'editor-redesign-new-users',
       'writefull-frontend-migration',
       'chat-edit-delete',

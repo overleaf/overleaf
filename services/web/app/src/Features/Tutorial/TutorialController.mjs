@@ -13,7 +13,7 @@ const VALID_KEYS = [
   'history-restore-promo',
   'us-gov-banner',
   'us-gov-banner-fedramp',
-  'editor-popup-ux-survey',
+  'editor-popup-ux-survey-03-2026',
   'wf-features-moved',
   'review-mode',
   'new-error-logs-promo',

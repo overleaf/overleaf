@@ -24,8 +24,7 @@ export default function IdePage() {
   useStatusFavicon() // update the favicon based on the compile status
   useThemedPage() // set the page theme based on user settings
 
-  const editorSurveyFlag = useFeatureFlag('editor-popup-ux-survey')
-  const showEditorSurvey = editorSurveyFlag
+  const showEditorSurvey = useFeatureFlag('editor-popup-ux-survey-03-2026')
 
   return (
     <GlobalAlertsProvider>
