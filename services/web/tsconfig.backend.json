@@ -4,11 +4,9 @@
     "app/src/**/*",
     "modules/*/app/src/**/*",
     "modules/*/test/acceptance/**/*",
-    "modules/*/test/smoke/**/*",
     "modules/*/test/unit/**/*",
     "scripts/**/*",
     "test/acceptance/**/*",
-    "test/smoke/**/*",
     "test/unit/**/*",
     "types/backend/**/*"
   ]

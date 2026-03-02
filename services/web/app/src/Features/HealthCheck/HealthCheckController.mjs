@@ -2,23 +2,10 @@ import RedisWrapper from '../../infrastructure/RedisWrapper.mjs'
 import settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import UserGetter from '../User/UserGetter.mjs'
-import SmokeTests from './../../../../test/smoke/src/SmokeTests.mjs'
-
-const { SmokeTestFailure, runSmokeTests } = SmokeTests
 
 const rclient = RedisWrapper.client('health_check')
 
 export default {
-  check(req, res, next) {
-    if (!settings.siteIsOpen || !settings.editorIsOpen) {
-      // always return successful health checks when site is closed
-      res.sendStatus(200)
-    } else {
-      // detach from express for cleaner stack traces
-      setTimeout(() => runSmokeTestsDetached(req, res).catch(next))
-    }
-  },
-
   checkActiveHandles(req, res, next) {
     if (!(settings.maxActiveHandles > 0) || !process._getActiveHandles) {
       return next()
@@ -93,32 +80,4 @@ export default {
       }
     )
   },
-}
-
-async function runSmokeTestsDetached(req, res) {
-  function isAborted() {
-    return req.destroyed
-  }
-  const stats = { start: new Date(), steps: [] }
-  let status, response
-  try {
-    try {
-      await runSmokeTests({ isAborted, stats })
-    } finally {
-      stats.end = new Date()
-      stats.duration = stats.end - stats.start
-    }
-    status = 200
-    response = { stats }
-  } catch (e) {
-    let err = e
-    if (!(e instanceof SmokeTestFailure)) {
-      err = new SmokeTestFailure('low level error', {}, e)
-    }
-    logger.err({ err, stats }, 'health check failed')
-    status = 500
-    response = { stats, error: err.message }
-  }
-  if (isAborted()) return
-  res.status(status).json(response)
 }

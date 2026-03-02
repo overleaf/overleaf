@@ -773,12 +773,7 @@ module.exports = {
   // some basic smoke tests to check the core functionality.
   //
   smokeTest: {
-    user: process.env.SMOKE_TEST_USER,
     userId: process.env.SMOKE_TEST_USER_ID,
-    password: process.env.SMOKE_TEST_PASSWORD,
-    projectId: process.env.SMOKE_TEST_PROJECT_ID,
-    rateLimitSubject: process.env.SMOKE_TEST_RATE_LIMIT_SUBJECT || '127.0.0.1',
-    stepTimeout: parseInt(process.env.SMOKE_TEST_STEP_TIMEOUT || '10000', 10),
   },
 
   appName: process.env.APP_NAME || 'Overleaf (Community Edition)',
