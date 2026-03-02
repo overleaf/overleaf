@@ -362,7 +362,9 @@
   gap: var(--spacing-02);
 
   input {
-    border: 1px solid var(--neutral-60);
+    background-color: var(--bg-primary-themed);
+    color: var(--content-primary-themed);
+    border: 1px solid var(--border-primary-themed);
     width: 32px;
     height: 24px;
     border-radius: var(--border-radius-base);

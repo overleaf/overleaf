@@ -423,7 +423,7 @@ del.review-panel-content-highlight {
   font-size: var(--rp-base-font-size);
   padding: 2px var(--spacing-03);
   border-radius: var(--border-radius-base);
-  border: solid 1px var(--neutral-60);
+  border: solid 1px var(--border-primary-themed);
   resize: vertical;
   color: var(--review-panel-color-secondary);
   background-color: var(--review-panel-entry-bg-color);
@@ -431,6 +431,10 @@ del.review-panel-content-highlight {
   min-height: 25px;
   overflow-x: hidden;
   max-height: 400px;
+
+  &::placeholder {
+    color: var(--content-placeholder-themed);
+  }
 }
 
 .review-panel-comment-edit {
@@ -548,6 +552,14 @@ del.review-panel-content-highlight {
   padding: var(--spacing-01) var(--spacing-03);
   resize: vertical;
   min-height: 44px;
+  background: var(--bg-primary-themed);
+  color: var(--content-primary-themed);
+  border: 1px solid var(--border-primary-themed);
+  border-radius: var(--border-radius-base);
+
+  &::placeholder {
+    color: var(--content-placeholder-themed);
+  }
 }
 
 .review-panel-add-comment-buttons {
