@@ -90,6 +90,7 @@ function PdfZoomDropdown({
             <FormControl
               onFocus={event => event.target.select()}
               value={customZoomValue}
+              type="text"
               onKeyDown={event => {
                 if (event.key === 'Enter') {
                   const zoom = Number(customZoomValue.replace('%', '')) / 100

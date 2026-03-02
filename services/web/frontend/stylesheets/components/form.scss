@@ -121,9 +121,7 @@
   .ide-redesign-main,
   .project-ds-nav-page {
     @include form-check-dark;
-  }
 
-  .project-ds-nav-page {
     .form-control,
     .form-control-wrapper {
       @include dark-input;
@@ -467,13 +465,21 @@ input[type='range'] {
   }
 }
 
-input.form-control[type='text'] {
+input.form-control[type='text'],
+input.form-control[type='search'] {
   color: var(--input-field-color);
   background-color: var(--input-field-bg);
   border-color: var(--input-field-border-color);
 
   &::placeholder {
     color: var(--input-placeholder-content);
+  }
+
+  &[disabled],
+  &:disabled {
+    &::placeholder {
+      color: var(--input-field-content-disabled);
+    }
   }
 
   &:focus,
