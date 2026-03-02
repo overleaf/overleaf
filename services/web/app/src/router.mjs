@@ -205,6 +205,21 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get('*', AnalyticsRegistrationSourceMiddleware.setInbound())
   webRouter.get('*', AnalyticsUTMTrackingMiddleware.recordUTMTags())
 
+  if (process.env.NODE_ENV === 'development' && global.__coverage__) {
+    // Expose code coverage via an endpoint when running with code coverage enabled
+    webRouter.get('/coverage', (req, res) => {
+      const coverage = {}
+      for (const [key, value] of Object.entries(global.__coverage__)) {
+        coverage[key] = {
+          ...value,
+          // Transform for Jenkins sourcemap
+          path: value.path.replace('/overleaf/', '/workspace/'),
+        }
+      }
+      res.json({ coverage })
+    })
+  }
+
   // Mount onto /login in order to get the deviceHistory cookie.
   webRouter.post(
     '/login/can-skip-captcha',

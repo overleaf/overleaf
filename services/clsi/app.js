@@ -122,6 +122,19 @@ app.get(
   OutputController.createOutputZip
 )
 
+if (process.env.NODE_ENV === 'development' && global.__coverage__) {
+  app.get('/coverage', (req, res) => {
+    const coverage = {}
+    for (const [key, value] of Object.entries(global.__coverage__)) {
+      coverage[key] = {
+        ...value,
+        path: value.path.replace('/overleaf/', '/workspace/'),
+      }
+    }
+    res.json({ coverage })
+  })
+}
+
 app.get('/status', (req, res, next) => res.send('CLSI is alive\n'))
 
 Settings.processTooOld = false

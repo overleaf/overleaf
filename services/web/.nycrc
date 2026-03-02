@@ -1,0 +1,7 @@
+{
+  "extension": [".js", ".cjs", ".mjs", ".ts"],
+  "cwd": "../../",
+  "produce-source-map": true,
+  "source-map": true,
+  "temp-dir": "/tmp/.nyc_output"
+}
