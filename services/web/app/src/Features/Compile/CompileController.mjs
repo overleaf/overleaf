@@ -632,6 +632,9 @@ const _CompileController = {
       clearTimeout(timeout)
       timeout = setTimeout(() => ac.abort(), TEN_MINUTES_IN_MS)
 
+      // Disable buffering in nginx
+      res.setHeader('X-Accel-Buffering', 'no')
+
       res.writeHead(response.status)
       await pipeline(stream, res)
       timer.labels.status = 'success'

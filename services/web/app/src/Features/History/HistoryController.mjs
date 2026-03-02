@@ -89,6 +89,9 @@ async function requestBlob(method, req, res) {
   res.setHeader('Content-Type', 'application/octet-stream')
   setBlobCacheHeaders(res, hash)
 
+  // Disable buffering in nginx
+  res.setHeader('X-Accel-Buffering', 'no')
+
   try {
     await pipeline(stream, res)
   } catch (err) {

@@ -31,6 +31,8 @@ export function prepareZipAttachment(res, filename) {
   // res.attachment sets both content-type and content-disposition headers.
   res.attachment(filename)
   res.setHeader('X-Content-Type-Options', 'nosniff')
+  // Disable buffering in nginx
+  res.setHeader('X-Accel-Buffering', 'no')
 }
 
 export function zipAttachment(res, body, filename) {

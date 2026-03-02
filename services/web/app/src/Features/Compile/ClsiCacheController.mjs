@@ -105,6 +105,10 @@ async function _downloadFromCacheWithParams(
   const TEN_MINUTES_IN_MS = 10 * 60 * 1000
   res.setTimeout(TEN_MINUTES_IN_MS)
   timer = setTimeout(() => ac.abort(), TEN_MINUTES_IN_MS)
+
+  // Disable buffering in nginx
+  res.setHeader('X-Accel-Buffering', 'no')
+
   try {
     res.writeHead(response.status)
     await pipeline(

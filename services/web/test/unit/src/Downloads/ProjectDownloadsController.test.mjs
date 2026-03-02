@@ -113,6 +113,7 @@ describe('ProjectDownloadsController', function () {
       ctx.res.headers.should.deep.equal({
         'Content-Disposition': `attachment; filename="project_name_with_accênts_and___special_characters.zip"`,
         'Content-Type': 'application/zip',
+        'X-Accel-Buffering': 'no',
         'X-Content-Type-Options': 'nosniff',
       })
     })
@@ -184,6 +185,7 @@ describe('ProjectDownloadsController', function () {
         'Content-Disposition':
           'attachment; filename="Overleaf Projects (2 items).zip"',
         'Content-Type': 'application/zip',
+        'X-Accel-Buffering': 'no',
         'X-Content-Type-Options': 'nosniff',
       })
     })
