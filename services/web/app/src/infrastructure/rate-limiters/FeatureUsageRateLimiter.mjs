@@ -1,7 +1,7 @@
 // @ts-check
 
-import { UserFeatureUsage } from '../models/UserFeatureUsage.mjs'
-import { TooManyRequestsError } from '../Features/Errors/Errors.js'
+import { UserFeatureUsage } from '../../models/UserFeatureUsage.mjs'
+import { TooManyRequestsError } from '../../Features/Errors/Errors.js'
 
 const PERIOD = 24 // hours
 const PERIOD_IN_MILLISECONDS = PERIOD * 60 * 60 * 1000
@@ -166,9 +166,7 @@ export default class FeatureUsageRateLimiter {
     const pastUsageLimit = usage > allowance && refreshEpoch > Date.now()
 
     if (pastUsageLimit) {
-      throw new TooManyRequestsError(
-        `${this.featureName} assistant rate limit exceeded`
-      )
+      throw new TooManyRequestsError(`${this.featureName} rate limit exceeded`)
     }
   }
 }

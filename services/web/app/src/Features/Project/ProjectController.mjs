@@ -52,6 +52,7 @@ import { isStandaloneAiAddOnPlanCode } from '../Subscription/AiHelper.mjs'
 import SubscriptionController from '../Subscription/SubscriptionController.mjs'
 import { formatCurrency } from '../../util/currency.js'
 import UserSettingsHelper from './UserSettingsHelper.mjs'
+import AiFeatureUsageRateLimiter from '../../infrastructure/rate-limiters/AiFeatureUsageRateLimiter.mjs'
 
 const { isPaidSubscription } = SubscriptionHelper
 const { hasAdminAccess } = AdminAuthorizationHelper
@@ -795,13 +796,8 @@ const _ProjectController = {
       let featureUsage = {}
 
       if (Features.hasFeature('saas')) {
-        const usagesLeft = await Modules.promises.hooks.fire(
-          'remainingFeatureAllocation',
-          userId
-        )
-        usagesLeft?.forEach(usage => {
-          featureUsage = { ...featureUsage, ...usage }
-        })
+        featureUsage =
+          await AiFeatureUsageRateLimiter.getRemainingFeatureUses(userId)
       }
 
       await ProjectController._setWritefullTrialState(

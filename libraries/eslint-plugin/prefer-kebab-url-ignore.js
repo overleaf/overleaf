@@ -49,6 +49,7 @@ const ignoreWords = {
   camel: new Set([
     'addWorkflowScope',
     'aiErrorAssistant',
+    'aiFeatureUsage',
     'beginAuth',
     'brandVariationId',
     'closeEditor',

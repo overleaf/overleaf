@@ -230,6 +230,12 @@ describe('ProjectController', function () {
       promises: { hooks: { fire: sinon.stub().resolves() } },
     }
 
+    ctx.AiFeatureUsageRateLimiter = {
+      getRemainingFeatureUses: sinon.stub().resolves({
+        aiFeatureUsage: { remainingUsage: 0 },
+      }),
+    }
+
     vi.doMock('mongodb-legacy', () => ({
       default: { ObjectId },
     }))
@@ -484,6 +490,13 @@ describe('ProjectController', function () {
     vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
       default: ctx.Modules,
     }))
+
+    vi.doMock(
+      '../../../../app/src/infrastructure/rate-limiters/AiFeatureUsageRateLimiter',
+      () => ({
+        default: ctx.AiFeatureUsageRateLimiter,
+      })
+    )
 
     ctx.ProjectController = (await import(MODULE_PATH)).default
 

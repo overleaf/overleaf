@@ -76,15 +76,15 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const [hasPremiumSuggestion, setHasPremiumSuggestion] = useState<boolean>(
     () => {
       return Boolean(
-        featureUsage?.aiErrorAssistant &&
-        featureUsage?.aiErrorAssistant.remainingUsage > 0
+        featureUsage?.aiFeatureUsage &&
+        featureUsage?.aiFeatureUsage.remainingUsage > 0
       )
     }
   )
   const [premiumSuggestionResetDate, setPremiumSuggestionResetDate] =
     useState<Date>(() => {
-      return featureUsage?.aiErrorAssistant?.resetDate
-        ? new Date(featureUsage.aiErrorAssistant.resetDate)
+      return featureUsage?.aiFeatureUsage?.resetDate
+        ? new Date(featureUsage.aiFeatureUsage.resetDate)
         : new Date()
     })
 

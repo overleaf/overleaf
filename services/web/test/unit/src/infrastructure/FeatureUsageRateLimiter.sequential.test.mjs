@@ -19,7 +19,7 @@ vi.mock('../../../../app/src/Features/Errors/Errors.js', () => {
 const MOCKED_FEATURE_NAME = 'aiWorkbench'
 
 const modulePath =
-  '../../../../app/src/infrastructure/FeatureUsageRateLimiter.mjs'
+  '../../../../app/src/infrastructure/rate-limiters/FeatureUsageRateLimiter'
 
 describe('FeatureUsageRateLimiter', function () {
   beforeAll(async function () {

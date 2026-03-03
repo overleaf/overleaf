@@ -8,7 +8,7 @@ const Usage = new Schema({
 
 export const UserFeatureUsageSchema = new Schema({
   features: {
-    aiErrorAssistant: Usage,
+    aiFeatureUsage: Usage,
     aiWorkbench: Usage,
   },
 })
