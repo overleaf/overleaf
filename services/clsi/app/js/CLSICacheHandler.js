@@ -220,9 +220,22 @@ function notifyCLSICacheAboutBuild({
       enqueue([{ path: 'output.tar.gz' }])
     })
     .catch(err => {
+      if (isENOENT(err)) return
       logger.warn(
         { err, projectId, userId, buildId, shard },
         'build output.tar.gz for clsi-cache failed'
+      )
+    })
+
+  copyHistorySnapshot({ projectId, userId, buildId })
+    .then(() => {
+      enqueue([{ path: 'history-resync.json.gz' }])
+    })
+    .catch(err => {
+      if (isENOENT(err)) return
+      logger.warn(
+        { err, projectId, userId, buildId, shard },
+        'copy history-resync.json.gz for clsi-cache failed'
       )
     })
 
@@ -234,17 +247,29 @@ function notifyCLSICacheAboutBuild({
  * @param {string} opts.projectId
  * @param {string} opts.userId
  * @param {string} opts.buildId
+ * @return {Promise<void>}
+ */
+async function copyHistorySnapshot({ projectId, userId, buildId }) {
+  const src = Path.join(
+    Settings.path.clsiCacheDir,
+    userId ? `${projectId}-${userId}` : projectId,
+    'history.json.gz'
+  )
+  const outputDir = getOutputDir({ projectId, userId, buildId })
+  const dst = Path.join(outputDir, 'history-resync.json.gz')
+  await fs.promises.cp(src, dst)
+}
+/**
+ * @param {Object} opts
+ * @param {string} opts.projectId
+ * @param {string} opts.userId
+ * @param {string} opts.buildId
  * @param {[{path: string}]} opts.outputFiles
  * @return {Promise<void>}
  */
 async function buildTarball({ projectId, userId, buildId, outputFiles }) {
   const timer = new Metrics.Timer('clsi_cache_build', 1, {}, TIMING_BUCKETS)
-  const outputDir = Path.join(
-    Settings.path.outputDir,
-    userId ? `${projectId}-${userId}` : projectId,
-    CACHE_SUBDIR,
-    buildId
-  )
+  const outputDir = getOutputDir({ projectId, userId, buildId })
 
   const files = outputFiles.filter(f => !isExtraneousFile(f.path))
   if (files.length > MAX_ENTRIES_IN_OUTPUT_TAR) {
@@ -287,6 +312,33 @@ async function downloadOutputDotSynctexFromCompileCache(
   buildId,
   outputDir
 ) {
+  const requestPath = `/project/${projectId}/${
+    userId ? `user/${userId}/` : ''
+  }build/${editorId}-${buildId}/search/output/output.synctex.gz`
+  return await downloadSingleFile(projectId, requestPath, outputDir, 'synctex')
+}
+
+/**
+ * @param {string} projectId
+ * @param {string} userId
+ * @param {string} cacheDir
+ * @return {Promise<boolean>}
+ */
+async function downloadHistorySnapshot(projectId, userId, cacheDir) {
+  const requestPath = `/project/${projectId}/${
+    userId ? `user/${userId}/` : ''
+  }latest/output/history-resync.json.gz`
+  return await downloadSingleFile(projectId, requestPath, cacheDir, 'snapshot')
+}
+
+/**
+ * @param {string} projectId
+ * @param {string} requestPath
+ * @param {string} outputDir
+ * @param {string} label
+ * @return {Promise<boolean>}
+ */
+async function downloadSingleFile(projectId, requestPath, outputDir, label) {
   if (!Settings.apis.clsiCache.enabled) return false
   if (!OBJECT_ID_REGEX.test(projectId)) return false
   const shardCfg = getAvailableShard(projectId)
@@ -296,20 +348,17 @@ async function downloadOutputDotSynctexFromCompileCache(
   const timer = new Metrics.Timer(
     'clsi_cache_download',
     1,
-    { method: 'synctex' },
+    { method: label },
     TIMING_BUCKETS
   )
+  const u = new URL(url)
+  u.pathname = requestPath
   let stream
   try {
-    stream = await fetchStream(
-      `${url}/project/${projectId}/${
-        userId ? `user/${userId}/` : ''
-      }build/${editorId}-${buildId}/search/output/output.synctex.gz`,
-      {
-        method: 'GET',
-        signal: AbortSignal.timeout(TIMEOUT),
-      }
-    )
+    stream = await fetchStream(u, {
+      method: 'GET',
+      signal: AbortSignal.timeout(TIMEOUT),
+    })
   } catch (err) {
     if (err instanceof RequestFailedError && err.response.status === 404) {
       closeCircuitBreaker(url)
@@ -321,13 +370,14 @@ async function downloadOutputDotSynctexFromCompileCache(
     throw OError.tag(err, 'download failed', { shard })
   }
   await fs.promises.mkdir(outputDir, { recursive: true })
-  const dst = Path.join(outputDir, 'output.synctex.gz')
+  const name = Path.basename(requestPath)
+  const dst = Path.join(outputDir, name)
   const tmp = dst + crypto.randomUUID()
   try {
     await pipeline(
       stream,
       new MeteredStream(Metrics, 'clsi_cache_egress', {
-        path: 'output.synctex.gz',
+        path: name,
       }),
       fs.createWriteStream(tmp)
     )
@@ -438,7 +488,24 @@ async function downloadLatestCompileCache(projectId, userId, compileDir) {
 }
 
 /**
+ * @param {Object} opts
+ * @param {string} opts.projectId
+ * @param {string} opts.userId
+ * @param {string} opts.buildId
+ * @return {string}
+ */
+function getOutputDir({ projectId, userId, buildId }) {
+  return Path.join(
+    Settings.path.outputDir,
+    userId ? `${projectId}-${userId}` : projectId,
+    CACHE_SUBDIR,
+    buildId
+  )
+}
+
+/**
  * @param {unknown} err
+ * @return {boolean}
  */
 function isENOENT(err) {
   return err instanceof Error && 'code' in err && err.code === 'ENOENT'
@@ -447,5 +514,6 @@ function isENOENT(err) {
 export default {
   notifyCLSICacheAboutBuild,
   downloadLatestCompileCache,
+  downloadHistorySnapshot,
   downloadOutputDotSynctexFromCompileCache,
 }

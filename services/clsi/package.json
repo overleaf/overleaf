@@ -30,6 +30,7 @@
     "dockerode": "^4.0.9",
     "express": "4.22.1",
     "lodash": "^4.17.21",
+    "overleaf-editor-core": "*",
     "p-limit": "^3.1.0",
     "request": "2.88.2",
     "send": "^0.19.0",

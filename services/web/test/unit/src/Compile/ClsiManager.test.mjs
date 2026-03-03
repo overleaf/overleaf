@@ -176,6 +176,18 @@ describe('ClsiManager', function () {
       recordEventForUserInBackground: sinon.stub(),
     }
 
+    ctx.redis = {
+      auth() {},
+      del: sinon.stub(),
+      get: sinon.stub(),
+      setex: sinon.stub().resolves(),
+    }
+    vi.doMock('../../../../app/src/infrastructure/RedisWrapper', () => ({
+      default: (ctx.RedisWrapper = {
+        client: () => ctx.redis,
+      }),
+    }))
+
     vi.doMock('@overleaf/settings', () => ({
       default: ctx.Settings,
     }))

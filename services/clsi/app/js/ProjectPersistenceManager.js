@@ -16,6 +16,7 @@ import Settings from '@overleaf/settings'
 import { callbackify } from 'node:util'
 import Path from 'node:path'
 import fs from 'node:fs'
+import * as HistoryResourceWriter from './HistoryResourceWriter.js'
 let ProjectPersistenceManager
 const oneDay = 24 * 60 * 60 * 1000
 
@@ -204,19 +205,15 @@ export default ProjectPersistenceManager = {
     }
     logger.debug({ projectId, userId }, 'clearing project for user')
     return CompileManager.clearProject(projectId, userId, function (error) {
-      if (error != null) {
-        return callback(error)
-      }
-      return ProjectPersistenceManager.clearProjectFromCache(
-        projectId,
-        { reason: 'cleared' },
-        function (error) {
-          if (error != null) {
-            return callback(error)
-          }
-          return callback()
-        }
-      )
+      if (error) return callback(error)
+      HistoryResourceWriter.clearCacheCb(projectId, userId, error => {
+        if (error) return callback(error)
+        ProjectPersistenceManager.clearProjectFromCache(
+          projectId,
+          { reason: 'cleared' },
+          callback
+        )
+      })
     })
   },
 

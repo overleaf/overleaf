@@ -21,6 +21,14 @@ describe('ProjectPersistenceManager', () => {
       default: (ctx.UrlCache = {}),
     }))
 
+    vi.doMock(
+      '../../../app/js/HistoryResourceWriter',
+      () =>
+        (ctx.HistoryResourceWriter = {
+          clearCacheCb: sinon.stub().yields(null),
+        })
+    )
+
     vi.doMock('../../../app/js/CompileManager', () => ({
       default: (ctx.CompileManager = {}),
     }))
@@ -161,6 +169,13 @@ describe('ProjectPersistenceManager', () => {
       return ctx.ProjectPersistenceManager._clearProjectFromDatabase
         .calledWith(ctx.project_id)
         .should.equal(true)
+    })
+
+    it('should clear the history cache', ctx => {
+      ctx.HistoryResourceWriter.clearCacheCb.should.have.been.calledWith(
+        ctx.project_id,
+        ctx.user_id
+      )
     })
 
     it('should clear all the cached Urls for the project', ctx => {

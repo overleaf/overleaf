@@ -52,7 +52,7 @@ function getPdfCachingMinChunkSize(req, res) {
   return Settings.pdfCachingMinChunkSize
 }
 
-function _getSplitTestOptions(req, res) {
+async function _getSplitTestOptions(req, res) {
   // Use the query flags from the editor request for overriding the split test.
   let query = {}
   try {
@@ -61,12 +61,20 @@ function _getSplitTestOptions(req, res) {
   } catch (e) {}
   const editorReq = { ...req, query }
 
+  const { variant } = await SplitTestHandler.promises.getAssignment(
+    editorReq,
+    res,
+    'compile-from-history'
+  )
+  const compileFromHistory = variant === 'enabled'
+
   const pdfDownloadDomain = Settings.pdfDownloadDomain
   const enablePdfCaching = Settings.enablePdfCaching
 
   if (!enablePdfCaching || !req.query.enable_pdf_caching) {
     // The frontend does not want to do pdf caching.
     return {
+      compileFromHistory,
       pdfDownloadDomain,
       enablePdfCaching: false,
     }
@@ -74,6 +82,7 @@ function _getSplitTestOptions(req, res) {
 
   const pdfCachingMinChunkSize = getPdfCachingMinChunkSize(editorReq, res)
   return {
+    compileFromHistory,
     pdfDownloadDomain,
     enablePdfCaching,
     pdfCachingMinChunkSize,
@@ -137,6 +146,7 @@ const _CompileController = {
       fileLineErrors,
       stopOnFirstError,
       editorId: req.body.editorId,
+      rootResourcePath: req.body.rootResourcePath,
     }
 
     if (req.body.rootDoc_id) {
@@ -161,11 +171,16 @@ const _CompileController = {
       options.incrementalCompilesEnabled = true
     }
 
-    let { enablePdfCaching, pdfCachingMinChunkSize, pdfDownloadDomain } =
-      _getSplitTestOptions(req, res)
+    let {
+      enablePdfCaching,
+      pdfCachingMinChunkSize,
+      pdfDownloadDomain,
+      compileFromHistory,
+    } = await _getSplitTestOptions(req, res)
     if (Features.hasFeature('saas')) {
       options.compileFromClsiCache = true
       options.populateClsiCache = true
+      options.compileFromHistory = compileFromHistory
     }
     options.enablePdfCaching = enablePdfCaching
     if (enablePdfCaching) {

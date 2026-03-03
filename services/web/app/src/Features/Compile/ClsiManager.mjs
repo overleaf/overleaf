@@ -23,6 +23,10 @@ import ClsiCacheHandler from './ClsiCacheHandler.mjs'
 import HistoryManager from '../History/HistoryManager.mjs'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
+import RedisWrapper from '../../infrastructure/RedisWrapper.mjs'
+
+// use the redis db with eviction policy enabled
+const rclient = RedisWrapper.client('clsi_cookie')
 
 const ClsiCookieManager = ClsiCookieManagerFactory(
   Settings.apis.clsi?.backendGroupName
@@ -37,6 +41,41 @@ const CLSI_COOKIES_ENABLED = (Settings.clsiCookie?.key ?? '') !== ''
 
 // The timeout in services/clsi/app.js is 10 minutes, so we'll be on the safe side with 12 minutes
 const COMPILE_REQUEST_TIMEOUT_MS = 12 * 60 * 1000
+
+function _baseHistoryVersionKey(projectId, userId) {
+  return `baseHistoryVersion:${projectId}:${userId}`
+}
+
+async function getBaseHistoryVersion(projectId, userId) {
+  let v
+  try {
+    v = await rclient.get(_baseHistoryVersionKey(projectId, userId))
+  } catch (err) {
+    logger.warn({ err, projectId, userId }, 'failed to get baseHistoryVersion')
+    return -1
+  }
+  if (!v) return -1
+  const n = parseInt(v, 10)
+  if (Number.isNaN(n)) return -1
+  return n
+}
+
+async function setBaseHistoryVersion(projectId, userId, baseHistoryVersion) {
+  const clsiCacheExpiryInSeconds = 8 * 24 * 60 * 60 // 8 days
+  try {
+    await rclient.setex(
+      _baseHistoryVersionKey(projectId, userId),
+      clsiCacheExpiryInSeconds,
+      baseHistoryVersion
+    )
+  } catch (err) {
+    logger.warn({ err, projectId, userId }, 'failed to set baseHistoryVersion')
+  }
+}
+
+async function clearBaseHistoryVersion(projectId, userId) {
+  await rclient.del(_baseHistoryVersionKey(projectId, userId))
+}
 
 function getNewCompileBackendClass(projectId, compileBackendClass) {
   // Sample x% of projects to move up one bracket.
@@ -111,7 +150,13 @@ async function sendRequest(projectId, userId, options) {
     options = {}
   }
   let result = await sendRequestOnce(projectId, userId, options)
-  if (result.status === 'conflict') {
+  if (result.status === 'missing-updates') {
+    // try again with updated baseline
+    result = await sendRequestOnce(projectId, userId, {
+      ...options,
+      baseHistoryVersion: result.baseHistoryVersion,
+    })
+  } else if (result.status === 'conflict') {
     // Try again, with a full compile
     result = await sendRequestOnce(projectId, userId, {
       ...options,
@@ -130,7 +175,7 @@ async function sendRequest(projectId, userId, options) {
 async function sendRequestOnce(projectId, userId, options) {
   let req
   try {
-    req = await _buildRequest(projectId, options)
+    req = await _buildRequest(projectId, userId, options)
   } catch (err) {
     if (err.message === 'no main file specified') {
       return {
@@ -178,6 +223,16 @@ async function stopCompile(projectId, userId, options) {
   )
 }
 
+/**
+ * @param {PromiseSettledResult} result
+ * @private
+ */
+function _throwIfRejected(result) {
+  if (result.status === 'rejected') {
+    throw result.reason
+  }
+}
+
 async function deleteAuxFiles(projectId, userId, options, clsiserverid) {
   if (options == null) {
     options = {}
@@ -189,37 +244,42 @@ async function deleteAuxFiles(projectId, userId, options, clsiserverid) {
     projectId,
     userId
   )
-  const opts = {
-    method: 'DELETE',
-  }
-
-  try {
-    await _makeRequestWithClsiServerId(
+  const [
+    clsiResult,
+    clsiCacheResult,
+    documentUpdaterResult,
+    clsiServerIdResult,
+    baseHistoryVersionResult,
+  ] = await Promise.allSettled([
+    _makeRequestWithClsiServerId(
       projectId,
       userId,
       compileGroup,
       compileBackendClass,
       url,
-      opts,
+      { method: 'DELETE' },
       clsiserverid
+    ),
+    ClsiCacheHandler.clearCache(projectId, userId),
+    DocumentUpdaterHandler.promises.clearProjectState(projectId),
+    clearClsiServerId(projectId, userId, compileBackendClass),
+    clearBaseHistoryVersion(projectId, userId),
+  ])
+  if (clsiCacheResult.status === 'rejected') {
+    logger.warn(
+      { err: clsiCacheResult.reason, projectId, userId },
+      'purge clsi-cache failed'
     )
-  } finally {
-    // always clear the clsi-cache
-    try {
-      await ClsiCacheHandler.clearCache(projectId, userId)
-    } catch (err) {
-      logger.warn({ err, projectId, userId }, 'purge clsi-cache failed')
-    }
-
-    // always clear the project state from the docupdater, even if there
-    // was a problem with the request to the clsi
-    try {
-      await DocumentUpdaterHandler.promises.clearProjectState(projectId)
-    } finally {
-      // always clear the clsi server id, even if prior actions failed
-      await clearClsiServerId(projectId, userId, compileBackendClass)
-    }
   }
+  if (baseHistoryVersionResult.status === 'rejected') {
+    logger.warn(
+      { err: baseHistoryVersionResult.reason, projectId, userId },
+      'failed to clear baseHistoryVersion'
+    )
+  }
+  _throwIfRejected(clsiResult)
+  _throwIfRejected(documentUpdaterResult)
+  _throwIfRejected(clsiServerIdResult)
 }
 
 async function _sendBuiltRequest(projectId, userId, req, options) {
@@ -254,6 +314,9 @@ async function _sendBuiltRequest(projectId, userId, req, options) {
   )
   collectMetricsOnBlgFiles(outputFiles)
   const compile = response?.compile || {}
+  if (compile.baseHistoryVersion) {
+    await setBaseHistoryVersion(projectId, userId, compile.baseHistoryVersion)
+  }
   return {
     status: compile.status,
     outputFiles,
@@ -263,6 +326,7 @@ async function _sendBuiltRequest(projectId, userId, req, options) {
     timings: compile.timings,
     outputUrlPrefix: compile.outputUrlPrefix,
     clsiCacheShard: compile.clsiCacheShard,
+    baseHistoryVersion: compile.baseHistoryVersion,
   }
 }
 
@@ -604,6 +668,12 @@ async function _postToClsi(
       if (err.response.status === 413) {
         return { response: { compile: { status: 'project-too-large' } } }
       } else if (err.response.status === 409) {
+        try {
+          const body = JSON.parse(err.body || '{}')
+          if (body.compile?.status === 'missing-updates') {
+            return { response: body }
+          }
+        } catch {}
         return { response: { compile: { status: 'conflict' } } }
       } else if (err.response.status === 423) {
         return { response: { compile: { status: 'compile-in-progress' } } }
@@ -657,19 +727,43 @@ function _parseOutputFiles(projectId, rawOutputFiles = []) {
   return outputFiles
 }
 
-async function _buildRequest(projectId, options) {
+async function _buildRequest(projectId, userId, options) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     compiler: 1,
-    rootDoc_id: 1,
     imageName: 1,
-    rootFolder: 1,
     'overleaf.history.id': 1,
+    ...(options.compileFromHistory ? {} : { rootDoc_id: 1, rootFolder: 1 }),
   })
   if (project == null) {
     throw new Errors.NotFoundError(`project does not exist: ${projectId}`)
   }
   if (!VALID_COMPILERS.includes(project.compiler)) {
     project.compiler = 'pdflatex'
+  }
+  const historyId = project.overleaf.history.id
+  let { baseHistoryVersion } = options
+
+  if (options.compileFromHistory && !baseHistoryVersion) {
+    baseHistoryVersion = await getBaseHistoryVersion(projectId, userId)
+  }
+
+  if (options.compileFromHistory && baseHistoryVersion === -1) {
+    // full sync
+    return await _buildRequestFromHistoryFull(
+      projectId,
+      historyId,
+      options,
+      project
+    )
+  } else if (options.compileFromHistory) {
+    // incremental sync
+    return await _buildRequestFromHistoryIncremental(
+      projectId,
+      historyId,
+      options,
+      project,
+      baseHistoryVersion
+    )
   }
 
   if (options.incrementalCompilesEnabled || options.syncType != null) {
@@ -755,6 +849,119 @@ async function getOutputFileStream(
   }
 }
 
+/**
+ * @param {import('overleaf-editor-core/lib/types.js').RawChange[]} changes
+ * @return {import('overleaf-editor-core/lib/types.js').RawOperation[][]}
+ * @private
+ */
+function _rawChangeOperationsFromChanges(changes) {
+  // omit timestamp (required, back-filled in clsi)
+  // omit authors (optional)
+  // omit v2Authors (optional)
+  // omit origin (optional)
+  // omit projectVersion (optional)
+  // omit v2DocVersions (optional)
+  return changes.map(change => change.operations)
+}
+
+/**
+ * @param {import('overleaf-editor-core/lib/types.js').RawOperation[][]} rawChangeOperations
+ * @return {Set<string>}
+ * @private
+ */
+function _collectGlobalBlobs(rawChangeOperations) {
+  const globalBlobs = new Set()
+  for (const operations of rawChangeOperations) {
+    for (const operation of operations) {
+      const hash = operation?.file?.hash
+      if (hash && HistoryManager.isGlobalBlob(hash)) {
+        globalBlobs.add(hash)
+      }
+    }
+  }
+  return globalBlobs
+}
+
+async function _buildRequestFromHistoryFull(
+  projectId,
+  historyId,
+  options,
+  project
+) {
+  await HistoryManager.promises.flushProject(projectId)
+  const {
+    chunk: {
+      history: { snapshot: rawSnapshot, changes: rawChanges },
+      startVersion,
+    },
+  } = await HistoryManager.promises.getLatestHistory(historyId)
+  const rawChangeOperations = _rawChangeOperationsFromChanges(rawChanges)
+  const globalBlobs = _collectGlobalBlobs(rawChangeOperations)
+  for (const { hash, rangesHash } of Object.values(rawSnapshot.files)) {
+    if (hash && HistoryManager.isGlobalBlob(hash)) {
+      globalBlobs.add(hash)
+    }
+    if (rangesHash && HistoryManager.isGlobalBlob(rangesHash)) {
+      globalBlobs.add(rangesHash)
+    }
+  }
+  options = {
+    ...options,
+    syncType: 'history-full',
+    historyId,
+    baseHistoryVersion: startVersion,
+    rawSnapshot,
+    rawChangeOperations,
+    globalBlobs: Array.from(globalBlobs),
+  }
+  return _finaliseRequest(projectId, options, project, [], [])
+}
+
+async function _buildRequestFromHistoryIncremental(
+  projectId,
+  historyId,
+  options,
+  project,
+  baseHistoryVersion
+) {
+  await HistoryManager.promises.flushProject(projectId)
+  const rawChangeOperations = []
+  let hasMore = true
+  let since = baseHistoryVersion
+  let size = 0
+  while (hasMore) {
+    let changes
+    ;({ changes, hasMore } = await HistoryManager.promises.getChanges(
+      historyId,
+      { since }
+    ))
+    since += changes.length
+    const newRawChangeOperations = _rawChangeOperationsFromChanges(changes)
+    size += Buffer.from(JSON.stringify(newRawChangeOperations)).byteLength
+    if (size > 6.5 * 1024 * 1024) {
+      // clsi has a payload limit of 7MiB. Do not send too many operations.
+      // Fall back to sending the latest snapshot instead.
+      return await _buildRequestFromHistoryFull(
+        projectId,
+        historyId,
+        options,
+        project
+      )
+    }
+    rawChangeOperations.push(...newRawChangeOperations)
+  }
+  const globalBlobs = _collectGlobalBlobs(rawChangeOperations)
+  options = {
+    ...options,
+    syncType: 'history-incremental',
+    historyId,
+    baseHistoryVersion,
+    rawChangeOperations,
+    globalBlobs: Array.from(globalBlobs),
+  }
+  return _finaliseRequest(projectId, options, project, [], [])
+}
+
 function _buildRequestFromDocupdater(
   projectId,
   options,
@@ -812,7 +1019,7 @@ async function _getContentFromMongo(projectId) {
 function _finaliseRequest(projectId, options, project, docs, files) {
   const resources = []
   let flags
-  let rootResourcePath = null
+  let rootResourcePath = options.rootResourcePath
   let rootResourcePathOverride = null
   let hasMainFile = false
   let numberOfDocsInProject = 0
@@ -883,6 +1090,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
   return {
     compile: {
       options: {
+        historyId: options.historyId?.toString(), // send as string, if set
         buildId: options.buildId,
         editorId: options.editorId,
         compiler: project.compiler,
@@ -909,6 +1117,10 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         metricsMethod: options.compileGroup,
         metricsPath: options.metricsPath,
       },
+      baseHistoryVersion: options.baseHistoryVersion,
+      rawSnapshot: options.rawSnapshot,
+      rawChangeOperations: options.rawChangeOperations,
+      globalBlobs: options.globalBlobs,
       rootResourcePath,
       resources,
     },
@@ -917,7 +1129,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
 
 async function wordCount(projectId, userId, file, limits, clsiserverid) {
   const { compileBackendClass, compileGroup } = limits
-  const req = await _buildRequest(projectId, limits)
+  const req = await _buildRequest(projectId, userId, limits)
   const filename = file || req.compile.rootResourcePath
   const url = _getCompilerUrl(
     compileBackendClass,

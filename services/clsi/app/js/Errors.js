@@ -33,6 +33,7 @@ export class TimedOutError extends OError {}
 export class NoXrefTableError extends OError {}
 export class TooManyCompileRequestsError extends OError {}
 export class InvalidParameter extends OError {}
+export class MissingUpdatesError extends OError {}
 
 export default {
   QueueLimitReachedError,
@@ -43,4 +44,5 @@ export default {
   NoXrefTableError,
   TooManyCompileRequestsError,
   InvalidParameter,
+  MissingUpdatesError,
 }

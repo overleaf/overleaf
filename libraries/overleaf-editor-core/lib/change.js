@@ -74,6 +74,14 @@ class Change {
 
   static fromRaw(raw) {
     if (!raw) return null
+    return Change.mustFromRaw(raw)
+  }
+
+  /**
+   * @param {RawChange} raw
+   * @return {Change}
+   */
+  static mustFromRaw(raw) {
     assert.array.of.object(raw.operations, 'bad raw.operations')
     assert.nonEmptyString(raw.timestamp, 'bad raw.timestamp')
 

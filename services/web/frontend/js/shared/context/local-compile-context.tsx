@@ -151,7 +151,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   const { features, alphaProgram } = useUserContext()
 
   const { fileTreeData } = useFileTreeData()
-  const { findEntityByPath } = useFileTreePathContext()
+  const { pathInFolder, findEntityByPath } = useFileTreePathContext()
 
   // whether a compile is in progress
   const [compiling, setCompiling] = useState(false)
@@ -342,8 +342,12 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
 
   // keep the project rootDocId in sync with the compiler
   useEffect(() => {
-    compiler.projectRootDocId = rootDocId
+    compiler.projectRootDocId = rootDocId || null
   }, [compiler, rootDocId])
+  // keep pathInFolder in sync with the compiler
+  useEffect(() => {
+    compiler.pathInFolder = pathInFolder
+  }, [compiler, pathInFolder])
 
   // keep draft setting in sync with the compiler
   useEffect(() => {

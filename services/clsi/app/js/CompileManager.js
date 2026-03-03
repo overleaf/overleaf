@@ -22,6 +22,7 @@ import StatsManager from './StatsManager.js'
 import SafeReader from './SafeReader.js'
 import LatexMetrics from './LatexMetrics.js'
 import { callbackifyMultiResult } from '@overleaf/promise-utils'
+import * as HistoryResourceWriter from './HistoryResourceWriter.js'
 
 const { downloadLatestCompileCache, downloadOutputDotSynctexFromCompileCache } =
   CLSICacheHandler
@@ -104,13 +105,24 @@ async function doCompile(request, stats, timings) {
     'syncing resources to disk'
   )
 
-  let resourceList
+  let resourceList, baseHistoryVersion
   try {
-    // NOTE: resourceList is insecure, it should only be used to exclude files from the output list
-    resourceList = await ResourceWriter.promises.syncResourcesToDisk(
-      request,
-      compileDir
-    )
+    if (request.historyId) {
+      ;({ resourceList, baseHistoryVersion } =
+        await HistoryResourceWriter.syncResourcesToDisk(
+          projectId,
+          userId,
+          request,
+          compileDir,
+          timings
+        ))
+    } else {
+      // NOTE: resourceList is insecure, it should only be used to exclude files from the output list
+      resourceList = await ResourceWriter.promises.syncResourcesToDisk(
+        request,
+        compileDir
+      )
+    }
   } catch (error) {
     if (error instanceof Errors.FilesOutOfSyncError) {
       OError.tag(error, 'files out of sync, please retry', {
@@ -326,7 +338,7 @@ async function doCompile(request, stats, timings) {
     )
   }
 
-  return { outputFiles, buildId }
+  return { outputFiles, buildId, baseHistoryVersion }
 }
 
 async function _saveOutputFiles({
@@ -837,6 +849,7 @@ function _emitMetrics(request, status, stats, timings) {
   if (timings.compileE2E != null) {
     ClsiMetrics.e2eCompileDurationSeconds.observe(
       {
+        compileFromHistory: !!request.historyId,
         compile: request.metricsOpts.compile,
         group: request.compileGroup,
       },

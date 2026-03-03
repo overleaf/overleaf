@@ -59,10 +59,10 @@ export type RawChange = {
   operations: RawOperation[]
   timestamp: string
   authors?: (number | null)[]
-  v2Authors: string[]
-  origin: RawOrigin
-  projectVersion: string
-  v2DocVersions: RawV2DocVersions
+  v2Authors?: string[]
+  origin?: RawOrigin
+  projectVersion?: string
+  v2DocVersions?: RawV2DocVersions
 }
 
 export type RawOperation =

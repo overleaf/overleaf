@@ -308,10 +308,12 @@ describe('CompileController', function () {
             isAutoCompile: false,
             compileFromClsiCache: true,
             populateClsiCache: true,
+            compileFromHistory: false,
             enablePdfCaching: false,
             fileLineErrors: false,
             stopOnFirstError: false,
             editorId: undefined,
+            rootResourcePath: undefined,
           }
         )
       })
@@ -350,10 +352,12 @@ describe('CompileController', function () {
             isAutoCompile: true,
             compileFromClsiCache: true,
             populateClsiCache: true,
+            compileFromHistory: false,
             enablePdfCaching: false,
             fileLineErrors: false,
             stopOnFirstError: false,
             editorId: undefined,
+            rootResourcePath: undefined,
           }
         )
       })
@@ -373,11 +377,13 @@ describe('CompileController', function () {
             isAutoCompile: false,
             compileFromClsiCache: true,
             populateClsiCache: true,
+            compileFromHistory: false,
             enablePdfCaching: false,
             draft: true,
             fileLineErrors: false,
             stopOnFirstError: false,
             editorId: undefined,
+            rootResourcePath: undefined,
           }
         )
       })
@@ -397,10 +403,36 @@ describe('CompileController', function () {
             isAutoCompile: false,
             compileFromClsiCache: true,
             populateClsiCache: true,
+            compileFromHistory: false,
             enablePdfCaching: false,
             fileLineErrors: false,
             stopOnFirstError: false,
             editorId: 'the-editor-id',
+            rootResourcePath: undefined,
+          }
+        )
+      })
+    })
+    describe('with a rootResourcePath', function () {
+      beforeEach(async function (ctx) {
+        ctx.req.body = { rootResourcePath: 'foo.tex' }
+        await ctx.CompileController.compile(ctx.req, ctx.res, ctx.next)
+      })
+
+      it('should pass the rootResourcePath to the compiler', function (ctx) {
+        ctx.CompileManager.promises.compile.should.have.been.calledWith(
+          ctx.projectId,
+          ctx.user_id,
+          {
+            isAutoCompile: false,
+            compileFromClsiCache: true,
+            populateClsiCache: true,
+            compileFromHistory: false,
+            enablePdfCaching: false,
+            fileLineErrors: false,
+            stopOnFirstError: false,
+            editorId: undefined,
+            rootResourcePath: 'foo.tex',
           }
         )
       })

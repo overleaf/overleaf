@@ -148,6 +148,7 @@ describe('CompileController', () => {
                 ...file,
               })),
               clsiCacheShard: undefined,
+              baseHistoryVersion: undefined,
             },
           })
           .should.equal(true)
@@ -176,6 +177,7 @@ describe('CompileController', () => {
                 ...file,
               })),
               clsiCacheShard: undefined,
+              baseHistoryVersion: undefined,
             },
           })
           .should.equal(true)
@@ -224,6 +226,7 @@ describe('CompileController', () => {
               ...file,
             })),
             clsiCacheShard: undefined,
+            baseHistoryVersion: undefined,
           },
         })
       })
@@ -272,6 +275,7 @@ describe('CompileController', () => {
               ...file,
             })),
             clsiCacheShard: undefined,
+            baseHistoryVersion: undefined,
           },
         })
       })
@@ -304,6 +308,7 @@ describe('CompileController', () => {
               stats: ctx.stats,
               timings: ctx.timings,
               clsiCacheShard: undefined,
+              baseHistoryVersion: undefined,
             },
           })
           .should.equal(true)
@@ -339,6 +344,7 @@ describe('CompileController', () => {
               // JSON.stringify will omit these undefined values
               buildId: undefined,
               clsiCacheShard: undefined,
+              baseHistoryVersion: undefined,
             },
           })
           .should.equal(true)
@@ -373,6 +379,7 @@ describe('CompileController', () => {
               // JSON.stringify will omit these undefined values
               buildId: undefined,
               clsiCacheShard: undefined,
+              baseHistoryVersion: undefined,
             },
           })
           .should.equal(true)
@@ -405,6 +412,7 @@ describe('CompileController', () => {
               // JSON.stringify will omit these undefined values
               buildId: undefined,
               clsiCacheShard: undefined,
+              baseHistoryVersion: undefined,
             },
           })
           .should.equal(true)

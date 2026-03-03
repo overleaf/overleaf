@@ -36,13 +36,14 @@ export default class DocumentCompiler {
   cleanupCompileResult: () => void
   signal: AbortSignal
   openDocs: OpenDocuments
-  projectRootDocId?: string | null
+  projectRootDocId: string | null
   clsiServerId: string | null
   currentDoc: DocumentContainer | null
   error: Error | undefined
   timer: number
   defaultOptions: CompileOptions
   debouncedAutoCompile: DebouncedFunc<() => void>
+  pathInFolder: (docId: string) => string | null
 
   constructor({
     compilingRef,
@@ -80,6 +81,7 @@ export default class DocumentCompiler {
     this.cleanupCompileResult = cleanupCompileResult
     this.signal = signal
     this.openDocs = openDocs
+    this.pathInFolder = () => null
 
     this.projectRootDocId = null
     this.clsiServerId = null
@@ -134,10 +136,19 @@ export default class DocumentCompiler {
 
       const t0 = performance.now()
 
-      const rootDocId = this.getRootDocOverrideId()
+      let rootDocIdOverride = this.getRootDocOverrideId()
+      let rootResourcePath
+      try {
+        // Only required for compile-from-history
+        rootDocIdOverride = rootDocIdOverride || this.projectRootDocId
+        rootResourcePath = rootDocIdOverride
+          ? this.pathInFolder(rootDocIdOverride)
+          : 'main.tex'
+      } catch {}
 
       const body = {
-        rootDoc_id: rootDocId,
+        rootDoc_id: rootDocIdOverride,
+        rootResourcePath,
         draft: options.draft,
         check: 'silent', // NOTE: 'error' and 'validate' are possible, but unused
         // use incremental compile for all users but revert to a full compile
@@ -165,7 +176,7 @@ export default class DocumentCompiler {
       this.setError(undefined)
 
       data.options = options
-      data.rootDocId = rootDocId
+      data.rootDocId = rootDocIdOverride
       if (data.clsiServerId) {
         this.clsiServerId = data.clsiServerId
       }

@@ -4,6 +4,7 @@ import OutputCacheManager from './OutputCacheManager.js'
 const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
 const MAX_TIMEOUT = 600
 const EDITOR_ID_REGEX = /^[a-f0-9-]{36}$/ // UUID
+const HISTORY_ID_REGEX = /^([0-9a-f]{24}|[1-9][0-9]{0,9})$/ // mongo id or postgres id
 
 function parse(body, callback) {
   const response = {}
@@ -112,7 +113,12 @@ function parse(body, callback) {
     // resources (full) or only those resources to be updated
     // in-place (incremental).
     response.syncType = _parseAttribute('syncType', compile.options.syncType, {
-      validValues: ['full', 'incremental'],
+      validValues: [
+        'full',
+        'incremental',
+        'history-full',
+        'history-incremental',
+      ],
       type: 'string',
     })
 
@@ -139,6 +145,22 @@ function parse(body, callback) {
     response.resources = (compile.resources || []).map(resource =>
       _parseResource(resource)
     )
+    response.historyId = _parseAttribute(
+      'historyId',
+      compile.options.historyId,
+      { type: 'string', regex: HISTORY_ID_REGEX }
+    )
+    response.baseHistoryVersion = _parseAttribute(
+      'baseHistoryVersion',
+      compile.baseHistoryVersion,
+      { type: 'number' }
+    )
+    response.globalBlobs = _parseAttribute('globalBlobs', compile.globalBlobs, {
+      type: 'array',
+    })
+    // The snapshot and changes are validated when loading them in editor-core.
+    response.rawSnapshot = compile.rawSnapshot
+    response.rawChangeOperations = compile.rawChangeOperations
 
     const rootResourcePath = _parseAttribute(
       'rootResourcePath',
@@ -216,7 +238,11 @@ function _parseAttribute(name, attribute, options) {
         )
       }
     }
-    if (options.type != null) {
+    if (options.type === 'array') {
+      if (!Array.isArray(attribute)) {
+        throw new Error(`${name} attribute should be an array`)
+      }
+    } else if (options.type != null) {
       // eslint-disable-next-line valid-typeof
       if (typeof attribute !== options.type) {
         throw new Error(`${name} attribute should be a ${options.type}`)

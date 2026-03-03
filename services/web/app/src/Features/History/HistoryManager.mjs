@@ -35,6 +35,10 @@ async function loadGlobalBlobs() {
 
 // END copy from services/history-v1/storage/lib/blob_store/index.js
 
+function isGlobalBlob(hash) {
+  return GLOBAL_BLOBS.has(hash)
+}
+
 function getFilestoreBlobURL(historyId, hash) {
   if (GLOBAL_BLOBS.has(hash)) {
     return `${settings.apis.filestore.url}/history/global/hash/${hash}`
@@ -405,6 +409,7 @@ function _userView(user) {
 const loadGlobalBlobsPromise = loadGlobalBlobs()
 
 export default {
+  isGlobalBlob,
   getFilestoreBlobURL,
   loadGlobalBlobsPromise,
   initializeProject: callbackify(initializeProject),

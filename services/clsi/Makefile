@@ -20,6 +20,7 @@ IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/libraries/logger/package.json \
 	$(MONOREPO)/libraries/metrics/package.json \
 	$(MONOREPO)/libraries/o-error/package.json \
+	$(MONOREPO)/libraries/overleaf-editor-core/package.json \
 	$(MONOREPO)/libraries/promise-utils/package.json \
 	$(MONOREPO)/libraries/settings/package.json \
 	$(MONOREPO)/libraries/stream-utils/package.json \

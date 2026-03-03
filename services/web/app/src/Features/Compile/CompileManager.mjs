@@ -84,6 +84,7 @@ async function compile(projectId, userId, options = {}) {
     outputUrlPrefix,
     buildId,
     clsiCacheShard,
+    baseHistoryVersion,
   } = await ClsiManager.promises.sendRequest(projectId, compileAsUser, options)
 
   return {
@@ -97,6 +98,7 @@ async function compile(projectId, userId, options = {}) {
     outputUrlPrefix,
     buildId,
     clsiCacheShard,
+    baseHistoryVersion,
   }
 }
 

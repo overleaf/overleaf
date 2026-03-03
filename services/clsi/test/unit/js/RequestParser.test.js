@@ -494,7 +494,8 @@ describe('RequestParser', () => {
     it('should return an error', ctx => {
       ctx.callback
         .calledWithMatch({
-          message: 'syncType attribute should be one of: full, incremental',
+          message:
+            'syncType attribute should be one of: full, incremental, history-full, history-incremental',
         })
         .should.equal(true)
     })

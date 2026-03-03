@@ -62,6 +62,11 @@ module.exports = {
         ({ zone, readOnly }) => zone === process.env.ZONE && !readOnly
       ),
     },
+    filestore: {
+      url:
+        process.env.FILESTORE_DOMAIN_OVERRIDE ||
+        `http://${process.env.FILESTORE_HOST || '127.0.0.1'}:3009`,
+    },
   },
 
   smokeTest: process.env.SMOKE_TEST || false,
