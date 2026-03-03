@@ -395,7 +395,7 @@
     "sinon": "^7.5.0",
     "sinon-chai": "^3.7.0",
     "sinon-mongoose": "^2.3.0",
-    "storybook": "^8.6.15",
+    "storybook": "^8.6.17",
     "streamdown": "^2.2.0",
     "stylelint": "^16.26.1",
     "stylelint-config-standard-scss": "^13.1.0",
