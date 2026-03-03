@@ -235,6 +235,14 @@ TEST_ACCEPTANCE_APP :=  \
 	test_acceptance_app_server_ce \
 	test_acceptance_app_server_pro \
 
+ifeq ($(DEBUG),true)
+TEST_ACCEPTANCE_DEBUG_PORT := -p 127.0.0.1:19999:19999
+TEST_ACCEPTANCE_NPM_SCRIPT := npm run --silent test:acceptance:app:debug
+else
+TEST_ACCEPTANCE_DEBUG_PORT :=
+TEST_ACCEPTANCE_NPM_SCRIPT := npm run --silent test:acceptance:app
+endif
+
 test_acceptance_app: $(TEST_ACCEPTANCE_APP)
 test_acceptance_app_saas: export JUNIT_ROOT_SUITE_NAME = SaaS app acceptance tests
 test_acceptance_app_saas: export COMPOSE_PROJECT_NAME=acceptance_test_saas_$(BUILD_DIR_NAME)
@@ -247,7 +255,7 @@ test_acceptance_app_server_pro: export COMPOSE_PROJECT_NAME=acceptance_test_serv
 test_acceptance_app_server_pro: export OVERLEAF_CONFIG=$(CFG_SERVER_PRO)
 
 $(TEST_ACCEPTANCE_APP):
-	$(DOCKER_COMPOSE) run --rm test_acceptance
+	$(DOCKER_COMPOSE) run --rm $(TEST_ACCEPTANCE_DEBUG_PORT) test_acceptance $(TEST_ACCEPTANCE_NPM_SCRIPT)
 	$(DOCKER_COMPOSE) down -v -t 0
 
 # We are using _make magic_ for turning these file-targets into calls to

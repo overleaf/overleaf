@@ -46,6 +46,14 @@ $(ALL_TEST_ACCEPTANCE_VARIANTS) test_acceptance_merged_inner:
 clean_test_acceptance:
 
 else
+ifeq ($(DEBUG),true)
+TEST_ACCEPTANCE_DEBUG_PORT := -p 127.0.0.1:19999:19999
+TEST_ACCEPTANCE_NPM_SCRIPT := test:acceptance:debug:run_dir
+else
+TEST_ACCEPTANCE_DEBUG_PORT :=
+TEST_ACCEPTANCE_NPM_SCRIPT := test:acceptance:run_dir
+endif
+
 test_acceptance_saas: export BASE_CONFIG = $(CFG_SAAS)
 test_acceptance_server_ce: export BASE_CONFIG = $(CFG_SERVER_CE)
 test_acceptance_server_pro: export BASE_CONFIG = $(CFG_SERVER_PRO)
@@ -53,7 +61,7 @@ test_acceptance_server_pro: export BASE_CONFIG = $(CFG_SERVER_PRO)
 $(ALL_TEST_ACCEPTANCE_VARIANTS): export COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE_NAME)
 $(ALL_TEST_ACCEPTANCE_VARIANTS):
 	$(MAKE) --no-print-directory clean_test_acceptance
-	${DOCKER_COMPOSE} run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/src
+	${DOCKER_COMPOSE} run --rm $(TEST_ACCEPTANCE_DEBUG_PORT) test_acceptance npm -q run $(TEST_ACCEPTANCE_NPM_SCRIPT) -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/src
 	$(MAKE) --no-print-directory clean_test_acceptance
 
 test_acceptance_merged_inner:

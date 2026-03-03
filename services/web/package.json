@@ -9,6 +9,8 @@
   "scripts": {
     "test:acceptance:run_dir": "bin/test_acceptance_run_dir",
     "test:acceptance:app": "npm run test:acceptance:run_dir -- test/acceptance/src",
+    "test:acceptance:app:debug": "npm run test:acceptance:debug:run_dir -- test/acceptance/src",
+    "test:acceptance:debug:run_dir": "mocha --recursive --timeout 25000 --grep=$MOCHA_GREP --require test/acceptance/bootstrap.js --inspect=0.0.0.0:19999 --inspect-brk",
     "test:unit:run_dir": "bin/test_unit_run_dir",
     "test:unit:all": "npm run test:unit:run_dir -- test/unit/src modules/*/test/unit/src",
     "test:unit:all:silent": "npm run test:unit:all -- --reporter dot",
