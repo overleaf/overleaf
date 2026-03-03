@@ -19,10 +19,10 @@ import UserGetter from '../User/UserGetter.mjs'
 async function getSurvey(userId) {
   const survey = await SurveyCache.get(true)
   if (survey) {
-    if (survey.options?.hasRecurlyGroupSubscription) {
-      const hasRecurlyGroupSubscription =
-        await SubscriptionLocator.promises.hasRecurlyGroupSubscription(userId)
-      if (!hasRecurlyGroupSubscription) {
+    if (survey.options?.hasGroupSubscription) {
+      const hasGroupSubscription =
+        await SubscriptionLocator.promises.hasGroupSubscription(userId)
+      if (!hasGroupSubscription) {
         return
       }
     }

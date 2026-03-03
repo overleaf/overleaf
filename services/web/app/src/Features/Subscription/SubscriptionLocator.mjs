@@ -71,12 +71,11 @@ const SubscriptionLocator = {
     return subscription?.admin_id
   },
 
-  async hasRecurlyGroupSubscription(userOrId) {
+  async hasGroupSubscription(userOrId) {
     if (!Features.hasFeature('saas')) return false
     const userId = SubscriptionLocator._getUserId(userOrId)
     return await Subscription.exists({
       groupPlan: true,
-      recurlySubscription_id: { $exists: true },
       $or: [
         { member_ids: userId },
         { manager_ids: userId },

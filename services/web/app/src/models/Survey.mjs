@@ -36,7 +36,7 @@ export const SurveySchema = new Schema(
       required: true,
     },
     options: {
-      hasRecurlyGroupSubscription: {
+      hasGroupSubscription: {
         type: Boolean,
         default: false,
       },
