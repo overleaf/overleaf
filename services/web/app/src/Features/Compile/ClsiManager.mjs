@@ -609,6 +609,8 @@ async function _postToClsi(
         return { response: { compile: { status: 'compile-in-progress' } } }
       } else if (err.response.status === 503) {
         return { response: { compile: { status: 'unavailable' } } }
+      } else if (err.response.status === 504) {
+        return { response: { compile: { status: 'timedout' } } }
       } else {
         throw new OError('CLSI returned non-success code', {
           projectId,

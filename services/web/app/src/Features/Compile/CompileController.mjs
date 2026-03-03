@@ -30,7 +30,7 @@ const ClsiCookieManager = ClsiCookieManagerFactory(
   Settings.apis.clsi?.backendGroupName
 )
 
-const COMPILE_TIMEOUT_MS = 10 * 60 * 1000
+const COMPILE_TIMEOUT_MS = 12 * 60 * 1000
 
 const buildIdSchema = z.string().regex(/[a-z0-9-]/)
 
