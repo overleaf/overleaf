@@ -450,7 +450,6 @@ const _ProjectController = {
       'track-pdf-download',
       !anonymous && 'writefull-oauth-promotion',
       'hotjar',
-      'overleaf-assist-bundle',
       'word-count-client',
       'editor-popup-ux-survey-03-2026',
       'editor-redesign-new-users',
@@ -840,9 +839,6 @@ const _ProjectController = {
         capabilities.push('link-sharing')
       }
 
-      const isOverleafAssistBundleEnabled =
-        splitTestAssignments['overleaf-assist-bundle']?.variant === 'enabled'
-
       let fullFeatureSet = user?.features
       if (!anonymous) {
         fullFeatureSet = await UserGetter.promises.getUserFeatures(userId)
@@ -851,9 +847,10 @@ const _ProjectController = {
       const hasPaidSubscription = isPaidSubscription(subscription)
       const aiFeaturesDisabled = user.aiFeatures?.enabled === false
 
+      const showAiFeatures = aiFeaturesAllowed && !aiFeaturesDisabled
+      // only add-on is ai based, so we only need its pricing info if ai features are usable
       const addonPrices =
-        isOverleafAssistBundleEnabled &&
-        (await ProjectController._getAddonPrices(req, res))
+        showAiFeatures && (await ProjectController._getAddonPrices(req, res))
 
       let standardPlanPricing
       let recommendedCurrency
@@ -955,7 +952,7 @@ const _ProjectController = {
         showSymbolPalette,
         symbolPaletteAvailable: Features.hasFeature('symbol-palette'),
         userRestrictions: Array.from(req.userRestrictions || []),
-        showAiFeatures: aiFeaturesAllowed && !aiFeaturesDisabled,
+        showAiFeatures,
         onAiFreeTrial:
           user.features?.aiUsageQuota === Settings.aiFeatures?.freeTrialQuota,
         detachRole,
@@ -967,7 +964,6 @@ const _ProjectController = {
         projectTags,
         isSaas: Features.hasFeature('saas'),
         shouldLoadHotjar,
-        isOverleafAssistBundleEnabled,
         customerIoEnabled: true,
         addonPrices,
         compileSettings: {
@@ -1012,6 +1008,7 @@ const _ProjectController = {
     }
   },
 
+  // todo: quota clean-up: these can be removed potentially?
   async _getAddonPrices(req, res, addonPlans = ['assistant']) {
     const plansData = {}
 
