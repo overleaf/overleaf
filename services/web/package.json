@@ -193,7 +193,6 @@
     "zod-validation-error": "^4.0.1"
   },
   "devDependencies": {
-    "5to6-codemod": "^1.8.0",
     "@ai-sdk/react": "^3.0.2",
     "@babel/core": "^7.28.5",
     "@babel/plugin-proposal-decorators": "^7.28.0",
