@@ -6,6 +6,12 @@ import { callbackifyAll } from '@overleaf/promise-utils'
 import OError from '@overleaf/o-error'
 import { iterablePaths } from './IterablePath.mjs'
 
+/** @import {ProjectDoc, ProjectFile} from './types' */
+
+/**
+ * @param {string} projectId
+ * @returns {Promise<Record<string, ProjectDoc>>}
+ */
 async function getAllDocs(projectId) {
   // We get the path and name info from the project, and the lines and
   // version info from the doc store.
@@ -37,6 +43,10 @@ async function getAllDocs(projectId) {
   return docs
 }
 
+/**
+ * @param {string} projectId
+ * @returns {Promise<Record<string, ProjectFile>>}
+ */
 async function getAllFiles(projectId) {
   const folders = await _getAllFolders(projectId)
   const files = {}

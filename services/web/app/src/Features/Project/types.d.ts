@@ -5,6 +5,7 @@ import {
   ProjectAccessLevel,
   UserRef,
 } from '../../../../types/project/dashboard/api'
+import { Folder } from '../../../../types/folder'
 import { ObjectId } from 'mongodb-legacy'
 import { Source } from '../Authorization/types'
 
@@ -61,4 +62,20 @@ export type FormattedProject = {
   trashed: boolean
   accessLevel: ProjectAccessLevel
   source: Source
+}
+
+export type ProjectDoc = {
+  _id: ObjectId
+  name: string
+  lines: string[]
+  rev: number
+  folder: Folder
+}
+
+export type ProjectFile = {
+  _id: ObjectId
+  name: string
+  hash: string
+  rev: number
+  folder: Folder
 }
