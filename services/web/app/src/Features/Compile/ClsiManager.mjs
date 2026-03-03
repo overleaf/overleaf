@@ -894,7 +894,7 @@ async function _buildRequestFromHistoryFull(
       history: { snapshot: rawSnapshot, changes: rawChanges },
       startVersion,
     },
-  } = await HistoryManager.promises.getLatestHistory(historyId)
+  } = await HistoryManager.promises.getLatestHistoryWithHistoryId(historyId)
   const rawChangeOperations = _rawChangeOperationsFromChanges(rawChanges)
   const globalBlobs = _collectGlobalBlobs(rawChangeOperations)
   for (const { hash, rangesHash } of Object.values(rawSnapshot.files)) {
