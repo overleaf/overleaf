@@ -1,59 +1,18 @@
 import path from 'path-browserify'
+import type { PyodideInterface } from 'pyodide'
 import type {
   ProjectFileData,
   PyodideWorkerRequest,
   RunCodeRequest,
 } from './pyodide-worker-messages'
 
-type PyodideRuntimeModule = {
-  loadPyodide: (options: {
-    indexURL: string
-    packageBaseUrl?: string
-    env?: Record<string, string>
-    packages?: string[]
-  }) => Promise<PyodideInstance>
-}
-
-type PyodideInstance = {
-  FS: unknown
-  runPythonAsync: (code: string) => Promise<unknown>
-  setStdout: (options: { batched: (line: string) => void }) => void
-  setStderr: (options: { batched: (line: string) => void }) => void
-}
-
-type PyodideFs = {
-  analyzePath: (filePath: string) => { exists: boolean }
-  mkdir: (filePath: string) => void
-  writeFile: (
-    filePath: string,
-    content: string | ArrayBuffer | Uint8Array
-  ) => void
-  chdir: (filePath: string) => void
-}
+type PyodideFS = PyodideInterface['FS']
+type PyodideModule = typeof import('pyodide')
 
 const PROJECT_FS_ROOT = '/project'
 const PYODIDE_INDEX_PATH = 'js/libs/pyodide/'
 
-function getPyodideIndexUrl(baseAssetPath: string): string {
-  return new URL(PYODIDE_INDEX_PATH, baseAssetPath).toString()
-}
-
-function toRuntimeProjectPath(relativePath: string): string {
-  return path.posix.join(PROJECT_FS_ROOT, path.posix.normalize(relativePath))
-}
-
-function ensureProjectRootExists(fs: PyodideFs) {
-  try {
-    const projectRootAnalysis = fs.analyzePath(PROJECT_FS_ROOT)
-    if (!projectRootAnalysis.exists) {
-      fs.mkdir(PROJECT_FS_ROOT)
-    }
-  } catch {
-    fs.mkdir(PROJECT_FS_ROOT)
-  }
-}
-
-function ensureDirectoryExists(fs: PyodideFs, filePath: string) {
+function ensureDirectoryExists(fs: PyodideFS, filePath: string) {
   const directory = path.dirname(filePath)
   if (directory === '.' || directory === '/') {
     return
@@ -73,11 +32,12 @@ function ensureDirectoryExists(fs: PyodideFs, filePath: string) {
   }
 }
 
-function syncProjectFiles(fs: PyodideFs, files: ProjectFileData[]) {
-  ensureProjectRootExists(fs)
-
+function syncProjectFiles(fs: PyodideFS, files: ProjectFileData[]) {
   for (const file of files) {
-    const runtimePath = toRuntimeProjectPath(file.relativePath)
+    const runtimePath = path.posix.join(
+      PROJECT_FS_ROOT,
+      path.posix.normalize(file.relativePath)
+    )
     ensureDirectoryExists(fs, runtimePath)
     fs.writeFile(runtimePath, file.content)
   }
@@ -85,18 +45,15 @@ function syncProjectFiles(fs: PyodideFs, files: ProjectFileData[]) {
   fs.chdir(PROJECT_FS_ROOT)
 }
 
-let pyodideInstance: PyodideInstance | null = null
-let activeRunRequestId: string | null = null
+let pyodideModule: PyodideModule | null = null
 
-async function loadPyodideModule(
-  pyodideIndexUrl: string
-): Promise<PyodideRuntimeModule> {
+async function loadPyodideModule(pyodideIndexUrl: string) {
   const runtimeModuleUrl = `${pyodideIndexUrl}pyodide.mjs`
 
   try {
     return (await import(
       /* webpackIgnore: true */ runtimeModuleUrl
-    )) as PyodideRuntimeModule
+    )) as PyodideModule
   } catch (loadError) {
     const loadErrorMessage =
       loadError instanceof Error ? loadError.message : String(loadError)
@@ -107,38 +64,13 @@ async function loadPyodideModule(
 }
 
 async function handleInit(msg: { baseAssetPath: string }) {
-  const pyodideIndexUrl = getPyodideIndexUrl(msg.baseAssetPath)
+  const pyodideIndexUrl = new URL(
+    PYODIDE_INDEX_PATH,
+    msg.baseAssetPath
+  ).toString()
 
   try {
-    const pyodideModule = await loadPyodideModule(pyodideIndexUrl)
-    const instance = await pyodideModule.loadPyodide({
-      indexURL: pyodideIndexUrl,
-      packageBaseUrl: pyodideIndexUrl,
-      env: { MPLBACKEND: 'Agg' },
-    })
-
-    instance.setStdout({
-      batched: (line: string) => {
-        self.postMessage({
-          type: 'output-line',
-          stream: 'stdout',
-          line,
-          requestId: activeRunRequestId ?? undefined,
-        })
-      },
-    })
-    instance.setStderr({
-      batched: (line: string) => {
-        self.postMessage({
-          type: 'output-line',
-          stream: 'stderr',
-          line,
-          requestId: activeRunRequestId ?? undefined,
-        })
-      },
-    })
-
-    pyodideInstance = instance
+    pyodideModule = await loadPyodideModule(pyodideIndexUrl)
     self.postMessage({ type: 'loaded' })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
@@ -151,7 +83,7 @@ async function handleInit(msg: { baseAssetPath: string }) {
 }
 
 async function handleRunCode(msg: RunCodeRequest) {
-  if (!pyodideInstance) {
+  if (!pyodideModule) {
     const error = 'Pyodide is not initialized'
     self.postMessage({
       type: 'output-line',
@@ -166,33 +98,56 @@ async function handleRunCode(msg: RunCodeRequest) {
     return
   }
 
-  activeRunRequestId = msg.id
+  const instance = await pyodideModule.loadPyodide({
+    env: { MPLBACKEND: 'Agg' },
+  })
+
+  instance.setStdout({
+    batched: (line: string) => {
+      self.postMessage({
+        type: 'output-line',
+        stream: 'stdout',
+        line,
+        requestId: msg.id,
+      })
+    },
+  })
+  instance.setStderr({
+    batched: (line: string) => {
+      self.postMessage({
+        type: 'output-line',
+        stream: 'stderr',
+        line,
+        requestId: msg.id,
+      })
+    },
+  })
+
   try {
     if (msg.files.length > 0) {
-      const fs = pyodideInstance.FS as PyodideFs
+      const fs = instance.FS
       syncProjectFiles(fs, msg.files)
     }
 
-    const result = await pyodideInstance.runPythonAsync(msg.code)
+    const result = await instance.runPythonAsync(msg.code)
     if (result !== undefined) {
       self.postMessage({
         type: 'output-line',
         stream: 'stdout',
         line: String(result),
-        requestId: activeRunRequestId ?? undefined,
+        requestId: msg.id,
       })
     }
   } catch (runError) {
     const errorMessage =
       runError instanceof Error ? runError.message : String(runError)
+
     self.postMessage({
       type: 'output-line',
       stream: 'stderr',
       line: errorMessage,
-      requestId: activeRunRequestId ?? undefined,
+      requestId: msg.id,
     })
-  } finally {
-    activeRunRequestId = null
   }
 
   self.postMessage({
