@@ -4,6 +4,7 @@ import { placeSelectionInsideBlock } from '../selection'
 
 export class MathWidget extends WidgetType {
   destroyed = false
+  cachedHeight: number | undefined = undefined
 
   constructor(
     public math: string,
@@ -76,7 +77,7 @@ export class MathWidget extends WidgetType {
   }
 
   get estimatedHeight() {
-    return this.math.split('\n').length * 40
+    return this.cachedHeight ?? this.math.split('\n').length * 40
   }
 
   coordsAt(element: HTMLElement) {
@@ -111,5 +112,6 @@ export class MathWidget extends WidgetType {
     })
     element.replaceChildren(math)
     element.style.height = 'auto'
+    this.cachedHeight = element.offsetHeight
   }
 }
