@@ -105,6 +105,20 @@ describe('AiFeatureUsageRateLimiter', function () {
     describe('with some remaining allowance left', function () {
       it('should suceed', async function (ctx) {
         const res = { set: () => null }
+        await expect(
+          ctx.AiFeatureUsageRateLimiter.useFeature(ctx.userId, res, 1)
+        ).to.not.be.rejected
+      })
+
+      it('should succeed with cost=0', async function (ctx) {
+        const res = { set: () => null }
+        await expect(
+          ctx.AiFeatureUsageRateLimiter.useFeature(ctx.userId, res, 0)
+        ).to.not.be.rejected
+      })
+
+      it('should succeed with default cost when cost is omitted', async function (ctx) {
+        const res = { set: () => null }
         await expect(ctx.AiFeatureUsageRateLimiter.useFeature(ctx.userId, res))
           .to.not.be.rejected
       })
@@ -127,7 +141,7 @@ describe('AiFeatureUsageRateLimiter', function () {
       it('should be rejected with TooManyRequestsError', async function (ctx) {
         const res = { set: () => null }
         await expect(
-          ctx.AiFeatureUsageRateLimiter.useFeature(ctx.userId, res)
+          ctx.AiFeatureUsageRateLimiter.useFeature(ctx.userId, res, 1)
         ).to.be.rejectedWith('aiFeatureUsage rate limit exceeded')
       })
     })
@@ -177,6 +191,32 @@ describe('AiFeatureUsageRateLimiter', function () {
       await expect(usages.aiFeatureUsage.remainingUsage).to.equal(
         ctx.settings.quotaGrants.ai.basic
       )
+    })
+  })
+
+  describe('decrementFeatureUsage', function () {
+    it('should call findOneAndUpdate to decrement usage', async function (ctx) {
+      const res = { set: () => null }
+      await ctx.AiFeatureUsageRateLimiter.decrementFeatureUsage(
+        ctx.userId,
+        res,
+        1
+      )
+      expect(ctx.UserFeatureUsageModel.findOneAndUpdate).to.have.been.called
+    })
+
+    it('should accept a custom cost parameter', async function (ctx) {
+      const res = { set: () => null }
+      await expect(
+        ctx.AiFeatureUsageRateLimiter.decrementFeatureUsage(ctx.userId, res, 3)
+      ).to.not.be.rejected
+    })
+
+    it('should use default cost of 1 when cost is omitted', async function (ctx) {
+      const res = { set: () => null }
+      await expect(
+        ctx.AiFeatureUsageRateLimiter.decrementFeatureUsage(ctx.userId, res)
+      ).to.not.be.rejected
     })
   })
 })

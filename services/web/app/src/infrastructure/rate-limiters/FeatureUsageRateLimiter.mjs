@@ -53,9 +53,10 @@ export default class FeatureUsageRateLimiter {
   /**
    *
    * @param {string} userId
+   * @param {number} cost - the amount to increment the users usage by, may be 0 for features that are quota locked but dont consume any uses
    * @param {import('express').Response} res
    */
-  async useFeature(userId, res) {
+  async useFeature(userId, res, cost = 1) {
     const allowance = await this._getAllowance(userId)
 
     const featureUsages = await UserFeatureUsage.findOneAndUpdate(
@@ -72,7 +73,7 @@ export default class FeatureUsageRateLimiter {
                       $lte: [`$features.${this.featureName}.usage`, allowance],
                     },
                     then: {
-                      $add: [`$features.${this.featureName}.usage`, 1],
+                      $add: [`$features.${this.featureName}.usage`, cost],
                     },
                     else: `$features.${this.featureName}.usage`,
                   },
@@ -97,7 +98,7 @@ export default class FeatureUsageRateLimiter {
    * @param {string} userId
    * @param {import('express').Response} res
    */
-  async decrementFeatureUsage(userId, res) {
+  async decrementFeatureUsage(userId, res, cost = 1) {
     const allowance = await this._getAllowance(userId)
     const featureUsages = await UserFeatureUsage.findOneAndUpdate(
       { _id: userId },
@@ -106,7 +107,7 @@ export default class FeatureUsageRateLimiter {
         {
           $set: {
             [`features.${this.featureName}.usage`]: {
-              $add: [`$features.${this.featureName}.usage`, -1],
+              $add: [`$features.${this.featureName}.usage`, -cost],
             },
           },
         },
