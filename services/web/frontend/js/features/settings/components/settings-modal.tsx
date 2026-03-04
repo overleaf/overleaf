@@ -9,8 +9,8 @@ import { SettingsModalBody } from './settings-modal-body'
 import {
   SettingsModalProvider,
   useSettingsModalContext,
-} from '../../ide-redesign/contexts/settings-modal-context'
-import useFocusOnSetting from '../../ide-redesign/hooks/use-focus-on-setting'
+} from '../context/settings-modal-context'
+import useFocusOnSetting from '../hooks/use-focus-on-setting'
 
 const SettingsModalWrapper = () => {
   return (

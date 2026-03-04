@@ -1,6 +1,6 @@
 import { screen, within, render } from '@testing-library/react'
 import { expect } from 'chai'
-import { SettingsModalProvider } from '@/features/ide-redesign/contexts/settings-modal-context'
+import { SettingsModalProvider } from '@/features/settings/context/settings-modal-context'
 import {
   EditorProviders,
   projectDefaults,

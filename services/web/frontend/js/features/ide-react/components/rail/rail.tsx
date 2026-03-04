@@ -6,7 +6,7 @@ import {
   RailTabKey,
   useRailContext,
 } from '@/features/ide-react/context/rail-context'
-import FileTreeOutlinePanel from '@/features/ide-redesign/components/file-tree/file-tree-outline-panel'
+import FileTreeOutlinePanel from '@/features/file-tree/components/file-tree-outline-panel'
 import ChatPane from '@/features/chat/components/chat-pane'
 import ChatIndicator from '@/features/chat/components/chat-indicator'
 import getMeta from '@/utils/meta'
@@ -29,7 +29,7 @@ import RailPanel from './rail-panel'
 import RailResizeHandle from './rail-resize-handle'
 import RailModals from './rail-modals'
 import RailOverflowDropdown from './rail-overflow-dropdown'
-import useRailOverflow from '@/features/ide-redesign/hooks/use-rail-overflow'
+import useRailOverflow from '@/features/ide-react/hooks/use-rail-overflow'
 import EditorTourRailTooltip from '@/features/ide-redesign/components/editor-tour/editor-tour-rail-tooltip'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import EditorTourThemeTooltip from '@/features/ide-redesign/components/editor-tour/editor-tour-theme-tooltip'

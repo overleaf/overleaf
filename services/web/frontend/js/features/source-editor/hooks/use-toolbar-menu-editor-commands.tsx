@@ -13,7 +13,7 @@ import { redo, selectAll, undo } from '@codemirror/commands'
 import { openSearchPanel } from '@codemirror/search'
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useIsNewEditorEnabled } from '../utils/new-editor-utils'
+import { useIsNewEditorEnabled } from '../../ide-redesign/utils/new-editor-utils'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { language } from '@codemirror/language'
 

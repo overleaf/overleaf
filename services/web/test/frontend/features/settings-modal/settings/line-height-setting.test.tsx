@@ -2,7 +2,7 @@ import { screen, within, render } from '@testing-library/react'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import { EditorProviders } from '../../../helpers/editor-providers'
-import { SettingsModalProvider } from '@/features/ide-redesign/contexts/settings-modal-context'
+import { SettingsModalProvider } from '@/features/settings/context/settings-modal-context'
 import LineHeightSetting from '@/features/settings/components/appearance-settings/line-height-setting'
 import userEvent from '@testing-library/user-event'
 

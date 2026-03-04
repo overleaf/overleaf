@@ -1,6 +1,6 @@
 import { useEditorLeftMenuContext } from '@/features/editor-left-menu/components/editor-left-menu-context'
 import { useEffect, useState } from 'react'
-import { useSettingsModalContext } from '../contexts/settings-modal-context'
+import { useSettingsModalContext } from '../context/settings-modal-context'
 
 /**
  *  A hook to scroll to and focus on a specific setting in the settings modal

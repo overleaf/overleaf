@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { RailElement } from '../../ide-react/util/rail-types'
+import { RailElement } from '../util/rail-types'
 import { useResizeObserver } from '@/shared/hooks/use-resize-observer'
 
 const useRailOverflow = (railTabs: RailElement[]) => {

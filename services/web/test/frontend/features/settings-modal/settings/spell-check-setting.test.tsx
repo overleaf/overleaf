@@ -6,7 +6,7 @@ import {
   EditorProviders,
   projectDefaults,
 } from '../../../helpers/editor-providers'
-import { SettingsModalProvider } from '@/features/ide-redesign/contexts/settings-modal-context'
+import { SettingsModalProvider } from '@/features/settings/context/settings-modal-context'
 import SpellCheckSetting from '@/features/settings/components/editor-settings/spell-check-setting'
 import userEvent from '@testing-library/user-event'
 

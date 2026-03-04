@@ -2,7 +2,7 @@ import { screen, render } from '@testing-library/react'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import { EditorProviders } from '../../../helpers/editor-providers'
-import { SettingsModalProvider } from '@/features/ide-redesign/contexts/settings-modal-context'
+import { SettingsModalProvider } from '@/features/settings/context/settings-modal-context'
 import CodeCheckSetting from '@/features/settings/components/editor-settings/code-check-setting'
 
 describe('<CodeCheckSetting />', function () {

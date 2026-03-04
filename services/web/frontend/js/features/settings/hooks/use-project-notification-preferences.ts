@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useProjectContext } from '@/shared/context/project-context'
 import { getJSON, postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
-import type { NotificationPreferencesSchema } from '../../../../../modules/notifications/app/src/types.ts'
+import type { NotificationPreferencesSchema } from '../../../../../modules/notifications/app/src/types.js'
 
 export type NotificationLevel = 'all' | 'replies' | 'off'
 
