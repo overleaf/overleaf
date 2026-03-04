@@ -5,6 +5,7 @@ import {
   openSearchPanel,
   searchPanelOpen,
 } from '@codemirror/search'
+import { sendMB } from '@/infrastructure/event-tracking'
 import { toggleRanges, wrapRanges } from '../../commands/ranges'
 import {
   ancestorListType,
@@ -163,7 +164,10 @@ export const toggleSearch: Command = view => {
   return true
 }
 
-export const addComment = () => {
+export const addComment = (location: string) => {
+  sendMB('add-comment', {
+    location,
+  })
   window.dispatchEvent(new Event('add-new-review-comment'))
 }
 

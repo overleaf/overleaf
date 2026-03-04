@@ -292,10 +292,10 @@ export function makeEditorProvider({
       setPremiumSuggestionResetDate: () => {},
       writefullInstance: null,
       setWritefullInstance: () => {},
-      showUpgradeModal: false,
-      setShowUpgradeModal: () => {},
       cobranding,
       isRestrictedTokenMember,
+      upgradeTrackChangesModal: { show: false },
+      setUpgradeTrackChangesModal: () => {},
     }
 
     return (

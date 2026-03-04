@@ -6,9 +6,15 @@ import {
 } from '@/shared/components/dropdown/dropdown-menu'
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
 import SplitTestBadge from '@/shared/components/split-test-badge'
+import { sendContextMenuEvent } from '../utils/context-menu-analytics'
 
 const FEEDBACK_FORM_URL = 'https://forms.gle/BsbNQeSwGKEwXpxTA'
-const handleClick = () => {
+
+function handleClick() {
+  sendContextMenuEvent('menu-click', {
+    location: 'editor-context-menu',
+    item: 'give-feedback',
+  })
   window.open(FEEDBACK_FORM_URL, '_blank', 'noopener,noreferrer')
 }
 

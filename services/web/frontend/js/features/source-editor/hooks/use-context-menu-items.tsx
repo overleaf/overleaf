@@ -26,6 +26,10 @@ import {
 import { isVisual } from '../extensions/visual/visual'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { useTrackingChangesMode } from '@/shared/hooks/use-tracking-changes-mode'
+import {
+  sendContextMenuEvent,
+  ContextMenuItemSegmentation,
+} from '../utils/context-menu-analytics'
 
 export const useContextMenuItems = () => {
   const view = useCodeMirrorViewContext()
@@ -45,7 +49,7 @@ export const useContextMenuItems = () => {
   const { shortcuts } = useCommandRegistry()
   const { features } = useProjectContext()
   const requestedPdfSyncRef = useRef(false)
-  const { setShowUpgradeModal } = useEditorContext()
+  const { setUpgradeTrackChangesModal } = useEditorContext()
   const trackingChangesMode = useTrackingChangesMode()
   const isReview = trackingChangesMode === 'review'
 
@@ -87,40 +91,58 @@ export const useContextMenuItems = () => {
     pdfUrl && pdfViewer !== 'native' && !visualPreviewEnabled && canSyncToPdf
 
   const wrapForContextMenu = useCallback(
-    (command: () => Promise<boolean> | boolean) => async () => {
-      const result = await command()
-      if (result !== false) {
-        view.focus()
-        closeMenu()
-      }
-    },
+    (
+      item: ContextMenuItemSegmentation,
+      command: () => Promise<boolean> | boolean
+    ) =>
+      async () => {
+        sendContextMenuEvent('menu-click', {
+          location: 'editor-context-menu',
+          item,
+        })
+        const result = await command()
+        if (result !== false) {
+          view.focus()
+          closeMenu()
+        }
+      },
     [view, closeMenu]
   )
 
   const inVisualMode = isVisual(view)
 
-  const handleCut = wrapForContextMenu(() => cutSelection(view))
-  const handleCopy = wrapForContextMenu(() => copySelection(view))
-  const handlePaste = wrapForContextMenu(() =>
+  const handleCut = wrapForContextMenu('cut', () => cutSelection(view))
+  const handleCopy = wrapForContextMenu('copy', () => copySelection(view))
+  const handlePaste = wrapForContextMenu('paste', () =>
     inVisualMode ? pasteWithFormatting(view) : pasteWithoutFormatting(view)
   )
-  const handlePasteSpecial = wrapForContextMenu(() =>
-    inVisualMode ? pasteWithoutFormatting(view) : pasteWithFormatting(view)
+  const handlePasteSpecial = wrapForContextMenu(
+    inVisualMode ? 'paste-without-formatting' : 'paste-with-formatting',
+    () =>
+      inVisualMode ? pasteWithoutFormatting(view) : pasteWithFormatting(view)
   )
-  const handleDelete = wrapForContextMenu(() => commands.deleteSelection(view))
+  const handleDelete = wrapForContextMenu('delete', () =>
+    commands.deleteSelection(view)
+  )
 
-  const handleToggleTrackChanges = wrapForContextMenu(() => {
-    // Matching the logic in review toggle to ensure consistency for server pro
-    if (!features.trackChanges && !isReview) {
-      setShowUpgradeModal(true)
+  const handleToggleTrackChanges = wrapForContextMenu(
+    wantTrackChanges ? 'back-to-editing' : 'suggest-edits',
+    () => {
+      // Matching the logic in review toggle to ensure consistency for server pro
+      if (!features.trackChanges && !isReview) {
+        setUpgradeTrackChangesModal({
+          show: true,
+          location: 'editor-context-menu',
+        })
+        return true
+      }
+      window.dispatchEvent(new Event('toggle-track-changes'))
       return true
     }
-    window.dispatchEvent(new Event('toggle-track-changes'))
-    return true
-  })
+  )
 
-  const handleComment = wrapForContextMenu(() => {
-    commands.addComment()
+  const handleComment = wrapForContextMenu('comment', () => {
+    commands.addComment('editor-context-menu')
     return true
   })
 
@@ -130,6 +152,15 @@ export const useContextMenuItems = () => {
     if (isEditorOnly) {
       changeLayout('sideBySide')
     }
+
+    sendContextMenuEvent('menu-click', {
+      location: 'editor-context-menu',
+      item: 'jump-to-location-in-pdf',
+    })
+    sendContextMenuEvent('jump-to-location', {
+      method: 'editor-context-menu',
+      direction: 'code-location-in-pdf',
+    })
     requestedPdfSyncRef.current = true
     syncToPdf()
     view.focus()

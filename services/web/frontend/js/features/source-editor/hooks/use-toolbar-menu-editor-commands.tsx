@@ -175,7 +175,7 @@ export const useToolbarMenuBarEditorCommands = () => {
         id: 'comment',
         label: t('comment'),
         handler: () => {
-          commands.addComment()
+          commands.addComment('toolbar')
         },
         disabled: !comment || state.selection.main.empty,
       },

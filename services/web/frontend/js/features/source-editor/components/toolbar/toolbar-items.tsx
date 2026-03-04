@@ -17,6 +17,8 @@ import { useProjectContext } from '@/shared/context/project-context'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 
+const addCommentFromToolbar = () => commands.addComment('toolbar')
+
 export const ToolbarItems: FC<{
   state: EditorState
   overflowed?: Set<string>
@@ -135,7 +137,7 @@ export const ToolbarItems: FC<{
                   id="toolbar-add-comment"
                   label={t('add_comment')}
                   disabled={state.selection.main.empty}
-                  command={commands.addComment}
+                  command={addCommentFromToolbar}
                   icon="add_comment"
                 />
               )}

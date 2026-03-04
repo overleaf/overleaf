@@ -28,7 +28,7 @@ function ReviewModeSwitcher() {
   const { permissionsLevel } = useIdeReactContext()
   const { write, trackedWrite } = usePermissionsContext()
   const { features } = useProjectContext()
-  const { setShowUpgradeModal } = useEditorContext()
+  const { setUpgradeTrackChangesModal } = useEditorContext()
   const showViewOption = permissionsLevel === 'readOnly'
   const view = useCodeMirrorViewContext()
 
@@ -73,7 +73,10 @@ function ReviewModeSwitcher() {
                 return
               }
               if (!features.trackChanges) {
-                setShowUpgradeModal(true)
+                setUpgradeTrackChangesModal({
+                  show: true,
+                  location: 'review-switcher',
+                })
               } else {
                 sendMB('editing-mode-change', {
                   role: permissionsLevel,

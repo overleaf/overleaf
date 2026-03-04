@@ -16,6 +16,7 @@ import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useContextMenuItems } from '../hooks/use-context-menu-items'
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
 import { EditorContextMenuFeedback } from './editor-context-menu-feedback'
+import { sendContextMenuEvent } from '../utils/context-menu-analytics'
 
 const EditorContextMenu: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -40,6 +41,9 @@ const EditorContextMenuContent: FC = memo(function EditorContextMenuContent() {
   const menuRef = useRef<any>(null)
 
   useEffect(() => {
+    sendContextMenuEvent('menu-expand', {
+      location: 'editor-context-menu',
+    })
     menuRef.current?.focus()
   }, [])
 

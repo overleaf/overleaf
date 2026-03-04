@@ -20,6 +20,11 @@ import { WritefullAPI } from './types/writefull-instance'
 import { Cobranding } from '../../../../types/cobranding'
 import { SymbolWithCharacter } from '../../../../modules/symbol-palette/frontend/js/data/symbols'
 
+type UpgradeTrackChangesModal = {
+  show: boolean
+  location?: string
+}
+
 export const EditorContext = createContext<
   | {
       cobranding?: Cobranding
@@ -35,8 +40,10 @@ export const EditorContext = createContext<
       premiumSuggestionResetDate: Date
       writefullInstance: WritefullAPI | null
       setWritefullInstance: (instance: WritefullAPI) => void
-      showUpgradeModal: boolean
-      setShowUpgradeModal: Dispatch<SetStateAction<boolean>>
+      upgradeTrackChangesModal: UpgradeTrackChangesModal
+      setUpgradeTrackChangesModal: Dispatch<
+        SetStateAction<UpgradeTrackChangesModal>
+      >
     }
   | undefined
 >(undefined)
@@ -88,7 +95,8 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
         : new Date()
     })
 
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] =
+    useState<UpgradeTrackChangesModal>({ show: false })
 
   const isPendingEditor = useMemo(
     () =>
@@ -170,8 +178,8 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       setPremiumSuggestionResetDate,
       writefullInstance,
       setWritefullInstance,
-      showUpgradeModal,
-      setShowUpgradeModal,
+      upgradeTrackChangesModal: showUpgradeModal,
+      setUpgradeTrackChangesModal: setShowUpgradeModal,
     }),
     [
       cobranding,

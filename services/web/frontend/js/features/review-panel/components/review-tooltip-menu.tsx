@@ -36,6 +36,7 @@ import classNames from 'classnames'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import useReviewPanelLayout from '../hooks/use-review-panel-layout'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 const EDIT_MODE_SWITCH_WIDGET_HEIGHT = 40
 const CM_LINE_RIGHT_PADDING = 8
@@ -109,6 +110,13 @@ const ReviewTooltipMenuContent = memo<{ onAddComment: () => void }>(
       CSSProperties | undefined
     >()
     const [visible, setVisible] = useState(false)
+
+    const handleAddCommentClick = useCallback(() => {
+      sendMB('add-comment', {
+        location: 'tooltip',
+      })
+      onAddComment()
+    }, [onAddComment])
 
     const changesInSelection = useMemo(() => {
       return (ranges?.changes ?? []).filter(({ op }) => {
@@ -219,7 +227,7 @@ const ReviewTooltipMenuContent = memo<{ onAddComment: () => void }>(
       >
         <button
           className="review-tooltip-menu-button review-tooltip-add-comment-button"
-          onClick={onAddComment}
+          onClick={handleAddCommentClick}
         >
           <MaterialIcon type="chat" />
           {t('add_comment')}
