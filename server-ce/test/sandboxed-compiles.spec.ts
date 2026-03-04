@@ -294,11 +294,11 @@ describe('SandboxedCompiles', function () {
       cy.log('wait for compile')
       cy.findByRole('region', { name: 'PDF preview' }).findByText('sandboxed')
 
-      cy.log('Check which compiler version was used, expect 2025')
+      cy.log('Check which compiler version was used, expect 2026')
       cy.findByRole('button', { name: 'View logs' }).click()
       cy.findByLabelText('Raw logs from the LaTeX compiler').within(() => {
         cy.findByRole('button', { name: 'Expand' }).click()
-        cy.findByText(/This is pdfTeX, Version .+ \(TeX Live 2025\) /)
+        cy.findByText(/This is pdfTeX, Version .+ \(TeX Live 2026\) /)
       })
 
       cy.log('Check that there is no TeX Live version toggle')
