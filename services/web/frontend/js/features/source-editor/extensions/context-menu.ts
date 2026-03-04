@@ -13,6 +13,7 @@ import {
   TransactionSpec,
   EditorSelection,
   Prec,
+  Annotation,
 } from '@codemirror/state'
 import { closeAllContextMenusEffect } from '../utils/close-all-context-menus-effect'
 
@@ -23,6 +24,8 @@ export const openContextMenuEffect = StateEffect.define<{
 }>()
 
 export const closeContextMenuEffect = StateEffect.define()
+
+export const openContextMenuAnnotation = Annotation.define<boolean>()
 
 const isTouchOnlyInput =
   typeof window.matchMedia === 'function' &&
@@ -206,6 +209,7 @@ function openContextMenuAtPosition(
         y: clientY,
       }),
     ],
+    annotations: [openContextMenuAnnotation.of(true)],
   })
 }
 
