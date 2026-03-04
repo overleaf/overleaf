@@ -6,7 +6,6 @@ import HistoryFileTreeFolderList from './history-file-tree-folder-list'
 
 import type { HistoryDoc, HistoryFileTree } from '../../utils/file-tree'
 import MaterialIcon from '@/shared/components/material-icon'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 type HistoryFileTreeFolderProps = {
   name: string
@@ -36,7 +35,6 @@ function HistoryFileTreeFolder({
   docs,
 }: HistoryFileTreeFolderProps) {
   const { t } = useTranslation()
-  const newEditor = useIsNewEditorEnabled()
 
   const [expanded, setExpanded] = useState(() => {
     return hasChanges({ name, folders, docs })
@@ -54,12 +52,6 @@ function HistoryFileTreeFolder({
           className="file-tree-expand-icon"
         />
       </button>
-      {!newEditor && (
-        <MaterialIcon
-          type={expanded ? 'folder_open' : 'folder'}
-          className="file-tree-folder-icon"
-        />
-      )}
     </>
   )
 

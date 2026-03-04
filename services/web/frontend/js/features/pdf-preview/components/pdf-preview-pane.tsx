@@ -7,7 +7,6 @@ import { PdfPreviewMessages } from './pdf-preview-messages'
 import CompileTimeWarningUpgradePrompt from './compile-time-warning-upgrade-prompt'
 import { PdfPreviewProvider } from './pdf-preview-provider'
 import PdfPreviewHybridToolbar from '@/features/pdf-preview/components/pdf-preview-hybrid-toolbar'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import PdfCodeCheckFailedBanner from '@/features/pdf-preview/components/pdf-code-check-failed-banner'
 import getMeta from '@/utils/meta'
@@ -21,12 +20,8 @@ function PdfPreviewPane() {
     activeOverallTheme,
   } = useCompileContext()
   const { compileTimeout } = getMeta('ol-compileSettings')
-  const usesNewEditor = useIsNewEditorEnabled()
   const darkModePdf =
-    usesNewEditor &&
-    pdfViewer === 'pdfjs' &&
-    activeOverallTheme === 'dark' &&
-    darkModeSetting
+    pdfViewer === 'pdfjs' && activeOverallTheme === 'dark' && darkModeSetting
 
   const classes = classNames('pdf', 'full-size', {
     'pdf-empty': !pdfUrl,

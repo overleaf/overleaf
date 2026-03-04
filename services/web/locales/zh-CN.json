@@ -504,7 +504,6 @@
   "disable_ai_features": "禁用 AI 功能",
   "disable_equation_preview": "禁用公式预览",
   "disable_equation_preview_confirm": "这将在所有项目中禁用公式预览。",
-  "disable_equation_preview_enable": "您可以从<b>菜单</b>再次启用它。",
   "disable_single_sign_on": "禁用 单点登录(SSO)",
   "disable_sso": "关闭 SSO",
   "disable_stop_on_first_error": "禁用 “出现第一个错误时停止”",

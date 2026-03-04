@@ -8,7 +8,6 @@ import { OLToastContainer } from '@/shared/components/ol/ol-toast-container'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { sendMB } from '@/infrastructure/event-tracking'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import { useTranslation } from 'react-i18next'
 
 type EditorSurveyPage = 'ease-of-use' | 'meets-my-needs' | 'thank-you'
@@ -27,7 +26,6 @@ const EditorSurveyContent = () => {
   const [easeOfUse, setEaseOfUse] = useState<number | null>(null)
   const [meetsMyNeeds, setMeetsMyNeeds] = useState<number | null>(null)
   const [page, setPage] = useState<EditorSurveyPage>('ease-of-use')
-  const newEditor = useIsNewEditorEnabled()
 
   const { t } = useTranslation()
 
@@ -51,11 +49,10 @@ const EditorSurveyContent = () => {
     sendMB('editor-survey-submit', {
       easeOfUse,
       meetsMyNeeds,
-      newEditor,
     })
     setPage('thank-you')
     completeSurvey({ event: 'promo-click', action: 'complete' })
-  }, [easeOfUse, meetsMyNeeds, completeSurvey, newEditor])
+  }, [easeOfUse, meetsMyNeeds, completeSurvey])
 
   if (!showSurvey && page !== 'thank-you') {
     return null

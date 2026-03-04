@@ -11,7 +11,6 @@ import FileTreeItemMenu from './file-tree-item-menu'
 import { useFileTreeSelectable } from '../../contexts/file-tree-selectable'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 import { useDragDropManager } from 'react-dnd'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 function FileTreeItemInner({
   id,
@@ -113,39 +112,24 @@ const FileTreeItemIconsAndName = ({
   onClick?: () => void
   setIsDraggable: (isDraggable: boolean) => void
 }) => {
-  const newEditor = useIsNewEditorEnabled()
-
-  if (newEditor) {
-    return onClick ? (
-      <button className="file-tree-entity-button" onClick={onClick}>
-        {icons}
-        <FileTreeItemName
-          name={name}
-          isSelected={isSelected}
-          setIsDraggable={setIsDraggable}
-        />
-      </button>
-    ) : (
-      <div className="file-tree-entity-details">
-        {icons}
-        <FileTreeItemName
-          name={name}
-          isSelected={isSelected}
-          setIsDraggable={setIsDraggable}
-        />
-      </div>
-    )
-  }
-
-  return (
-    <>
+  return onClick ? (
+    <button className="file-tree-entity-button" onClick={onClick}>
       {icons}
       <FileTreeItemName
         name={name}
         isSelected={isSelected}
         setIsDraggable={setIsDraggable}
       />
-    </>
+    </button>
+  ) : (
+    <div className="file-tree-entity-details">
+      {icons}
+      <FileTreeItemName
+        name={name}
+        isSelected={isSelected}
+        setIsDraggable={setIsDraggable}
+      />
+    </div>
   )
 }
 

@@ -24,13 +24,11 @@ import {
   prependMessages,
 } from '../utils/message-list-utils'
 import useBrowserWindow from '../../../shared/hooks/use-browser-window'
-import { useLayoutContext } from '../../../shared/context/layout-context'
 import { useIdeContext } from '@/shared/context/ide-context'
 import getMeta from '@/utils/meta'
 import { debugConsole } from '@/utils/debugging'
 import { User } from '../../../../../types/user'
 import { useRailContext } from '@/features/ide-react/context/rail-context'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 const PAGE_SIZE = 50
 
@@ -272,12 +270,8 @@ export const ChatProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const user = useUserContext()
   const { projectId } = useProjectContext()
 
-  const { chatIsOpen: chatIsOpenOldEditor } = useLayoutContext()
   const { selectedTab: selectedRailTab, isOpen: railIsOpen } = useRailContext()
-  const newEditor = useIsNewEditorEnabled()
-  const chatIsOpen = newEditor
-    ? selectedRailTab === 'chat' && railIsOpen
-    : chatIsOpenOldEditor
+  const chatIsOpen = selectedRailTab === 'chat' && railIsOpen
 
   const {
     hasFocus: windowHasFocus,

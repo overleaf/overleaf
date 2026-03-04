@@ -13,7 +13,6 @@ import { redo, selectAll, undo } from '@codemirror/commands'
 import { openSearchPanel } from '@codemirror/search'
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useIsNewEditorEnabled } from '../../ide-redesign/utils/new-editor-utils'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { language } from '@codemirror/language'
 
@@ -35,10 +34,8 @@ export const useToolbarMenuBarEditorCommands = () => {
     )
   }, [])
 
-  const newEditor = useIsNewEditorEnabled()
-
   useCommandProvider(() => {
-    if (!newEditor || !editorIsVisible) {
+    if (!editorIsVisible) {
       return
     }
 
@@ -80,11 +77,11 @@ export const useToolbarMenuBarEditorCommands = () => {
         },
       },
     ]
-  }, [editorIsVisible, t, view, trackedWrite, newEditor])
+  }, [editorIsVisible, t, view, trackedWrite])
 
   // LaTeX commands
   useCommandProvider(() => {
-    if (!newEditor || !editorIsVisible) {
+    if (!editorIsVisible) {
       return
     }
     if (!isTeXFile || !trackedWrite) {
@@ -284,7 +281,6 @@ export const useToolbarMenuBarEditorCommands = () => {
     t,
     editorIsVisible,
     openFigureModal,
-    newEditor,
     trackedWrite,
     isTeXFile,
     state.selection.main.empty,
@@ -294,7 +290,7 @@ export const useToolbarMenuBarEditorCommands = () => {
   const { toggleSymbolPalette } = useEditorPropertiesContext()
   const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
   useCommandProvider(() => {
-    if (!newEditor || !editorIsVisible) {
+    if (!editorIsVisible) {
       return
     }
 
@@ -322,6 +318,5 @@ export const useToolbarMenuBarEditorCommands = () => {
     editorIsVisible,
     isTeXFile,
     trackedWrite,
-    newEditor,
   ])
 }

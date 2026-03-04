@@ -29,7 +29,6 @@ import { useTranslation } from 'react-i18next'
 import { ToggleSearchButton } from '@/features/source-editor/components/toolbar/toggle-search-button'
 import ReviewPanelHeader from '@/features/review-panel/components/review-panel-header'
 import useReviewPanelLayout from '@/features/review-panel/hooks/use-review-panel-layout'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import Breadcrumbs from '@/features/source-editor/extensions/breadcrumbs'
 import classNames from 'classnames'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
@@ -73,7 +72,6 @@ const Toolbar = memo(function Toolbar() {
 
   const listDepth = minimumListDepthForSelection(state)
 
-  const newEditor = useIsNewEditorEnabled()
   const { showHeader: showReviewPanelHeader } = useReviewPanelLayout()
 
   const {
@@ -162,11 +160,11 @@ const Toolbar = memo(function Toolbar() {
 
   return (
     <>
-      {newEditor && showReviewPanelHeader && <ReviewPanelHeader />}
+      {showReviewPanelHeader && <ReviewPanelHeader />}
       <div
         id="ol-cm-toolbar-wrapper"
         className={classNames('ol-cm-toolbar-wrapper', {
-          'ol-cm-toolbar-wrapper-indented': newEditor && showReviewPanelHeader,
+          'ol-cm-toolbar-wrapper-indented': showReviewPanelHeader,
         })}
       >
         <div
@@ -224,7 +222,7 @@ const Toolbar = memo(function Toolbar() {
             <Component key={path} />
           )
         )}
-        {newEditor && breadcrumbs && <Breadcrumbs />}
+        {breadcrumbs && <Breadcrumbs />}
       </div>
     </>
   )
