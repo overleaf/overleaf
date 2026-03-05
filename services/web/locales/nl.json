@@ -186,7 +186,7 @@
   "generic_something_went_wrong": "Sorry, er ging iets fout",
   "get_in_touch": "Contacteer ons",
   "github_commit_message_placeholder": "Bericht voor wijzigingen aangebracht in __appName__...",
-  "github_integration_lowercase": "Github integratie",
+  "github_integration_lowercase": "GitHub integratie",
   "github_is_premium": "GitHubsnychronisatie is een premium functie",
   "github_public_description": "Iedereen kan deze repository zien. Jij kiest wie eraan kan bijdragen.",
   "github_successfully_linked_description": "Bedankt, we hebben je GitHub-account kunnen koppelen aan __appName__. Je kunt nu je __appName__-projecten exporteren naar GitHub, of je projecten vanuit je GitHub repositories importeren.",

@@ -5,10 +5,12 @@ import { useUserContext } from '@/shared/context/user-context'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 import OLButton from '@/shared/components/ol/ol-button'
 import addMoreEditorsImage from '../images/add-more-editors.svg'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export default function CollaboratorsLimitUpgrade() {
   const { t } = useTranslation()
   const user = useUserContext()
+  const plans2026 = useFeatureFlag('plans-2026-phase-1')
 
   return (
     <div className="invite-warning">
@@ -18,9 +20,11 @@ export default function CollaboratorsLimitUpgrade() {
         title={t('add_more_collaborators')}
         content={
           <p>
-            {t(
-              'upgrade_to_add_more_collaborators_and_access_collaboration_features'
-            )}
+            {plans2026
+              ? t('upgrade_to_add_more_collaborators_and_more')
+              : t(
+                  'upgrade_to_add_more_collaborators_and_access_collaboration_features'
+                )}
           </p>
         }
         isActionBelowContent

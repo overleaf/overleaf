@@ -311,7 +311,7 @@
   "github_private_description": "Du kan välja vem som kan se och checka in till detta kodförråd.",
   "github_public_description": "Alla kan se detta repo. Du bestämmer vem som kan commita.",
   "github_successfully_linked_description": "Tack, vi har länkat ditt GitHub konto till __appName__. Du kan du exportera dina __appName__ projekt till GitHub, eller importera projekt från dina GitHub repon.",
-  "github_symlink_error": "Ditt Github-arkiv innehåller symboliska länkfiler som för närvarande inte stöds av Overleaf. Vänligen ta bort dessa och försök igen.",
+  "github_symlink_error": "Ditt GitHub-arkiv innehåller symboliska länkfiler som för närvarande inte stöds av Overleaf. Vänligen ta bort dessa och försök igen.",
   "github_sync": "GitHub Synk",
   "github_sync_description": "Med GitHub synk kan du koppla dina __appName__ projekt till GitHub repon. Skapa nya commits från __appName__ och slå samman commits som har gjorts i offlineläge eller i GitHub.",
   "github_sync_error": "Ett fel uppstod vid kommunikationen med GitHub. Vänligen försök igen om en stund.",

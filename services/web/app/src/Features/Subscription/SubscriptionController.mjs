@@ -184,7 +184,7 @@ async function userSubscriptionPage(req, res) {
     res,
     'combined-user-management'
   )
-
+  await SplitTestHandler.promises.getAssignment(req, res, 'plans-2026-phase-1')
   const groupPricingDiscount = await SplitTestHandler.promises.getAssignment(
     req,
     res,

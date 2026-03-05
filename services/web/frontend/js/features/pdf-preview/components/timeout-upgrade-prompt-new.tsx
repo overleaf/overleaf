@@ -8,10 +8,10 @@ import getMeta from '@/utils/meta'
 import { populateEditorRedesignSegmentation } from '@/shared/hooks/use-editor-analytics'
 import CompileTimeoutPaywallModal from '@/features/pdf-preview/components/compile-timeout-paywall-modal'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function TimeoutUpgradePromptNew() {
   const { isProjectOwner } = useDetachCompileContext()
-
   const isCompileTimeoutTargetPlansEnabled = isSplitTestEnabled(
     'compile-timeout-target-plans'
   )
@@ -61,6 +61,7 @@ const CompileTimeout = memo(function CompileTimeout({
   isCompileTimeoutTargetPlansEnabled,
 }: CompileTimeoutProps) {
   const { t } = useTranslation()
+  const plans2026 = useFeatureFlag('plans-2026-phase-1')
   const extraSearchParams = useMemo(() => {
     return {
       itm_content: 'new-editor',
@@ -93,9 +94,11 @@ const CompileTimeout = memo(function CompileTimeout({
             {isProjectOwner ? (
               <p>
                 <strong>{t('upgrade_for_more_compile_time')}</strong>{' '}
-                {t(
-                  'plus_additional_collaborators_document_history_track_changes_and_more'
-                )}
+                {plans2026
+                  ? t('plus_additional_collaborators_and_more')
+                  : t(
+                      'plus_additional_collaborators_document_history_track_changes_and_more'
+                    )}
               </p>
             ) : (
               <Trans
