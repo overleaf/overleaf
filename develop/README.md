@@ -19,18 +19,6 @@ bin/up
 
 Once the services are running, open <http://localhost/launchpad> to create the first admin account.
 
-## TeX Live
-
-Compiling a PDF requires building a TeX Live image to handle the compilation inside Docker:
-
-```shell
-docker build texlive -t texlive-full
-```
-
-> [!NOTE]
-> To compile on a macOS host, you may need to override the path to the Docker socket by creating a `.env` file in this directory, containing
-> `DOCKER_SOCKET_PATH=/var/run/docker.sock.raw`
-
 ## Development
 
 To avoid running `bin/build && bin/up` after every code change, you can run Overleaf

@@ -39,6 +39,18 @@ COPY libraries/settings/ /overleaf/libraries/settings/
 COPY libraries/stream-utils/ /overleaf/libraries/stream-utils/
 COPY services/clsi/ /overleaf/services/clsi/
 
+FROM app AS with-texlive
+
+RUN apt-get update \
+    && apt-cache depends texlive-full | grep "Depends: " | grep -v -- "-doc" | grep -v -- "-lang-" | sed 's/Depends: //' | xargs apt-get install -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends fontconfig inkscape python3-pygments qpdf \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p cache compiles output \
+&&  chown node:node cache compiles output
+
+CMD ["node", "--expose-gc", "app.js"]
+
 FROM app
 RUN mkdir -p cache compiles output \
 &&  chown node:node cache compiles output
