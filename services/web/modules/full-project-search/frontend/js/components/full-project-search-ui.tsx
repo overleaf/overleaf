@@ -28,14 +28,12 @@ import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { FullProjectMatchCounts } from './full-project-match-counts'
 import { FullProjectSearchModifiers } from './full-project-search-modifiers'
 import { isMac } from '@/shared/utils/os'
-import { PanelHeading } from '@/shared/components/panel-heading'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import { createRegExp } from '@/features/source-editor/utils/regexp'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { FullProjectSearchResults } from './full-project-search-results'
 import { signalWithTimeout } from '@/utils/abort-signal'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import RailPanelHeader from '@/features/ide-react/components/rail/rail-panel-header'
 import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 
@@ -45,7 +43,6 @@ const FullProjectSearchUI: FC = () => {
   const { projectSnapshot } = useProjectContext()
   const { openDocs } = useEditorManagerContext()
   const { pathInFolder } = useFileTreePathContext()
-  const newEditor = useIsNewEditorEnabled()
 
   const { currentDocument: currentDoc } = useEditorOpenDocContext()
 
@@ -111,11 +108,7 @@ const FullProjectSearchUI: FC = () => {
 
         await projectSnapshot.refresh()
         if (!abortControllerRef.current.signal.aborted) {
-          const results = await searchSnapshot(
-            projectSnapshot,
-            searchQuery,
-            newEditor
-          )
+          const results = await searchSnapshot(projectSnapshot, searchQuery)
           setMatchedFiles(results)
         }
       } catch (error) {
@@ -125,7 +118,7 @@ const FullProjectSearchUI: FC = () => {
         setLoading(false)
       }
     },
-    [openDocs, projectSnapshot, t, newEditor]
+    [openDocs, projectSnapshot, t]
   )
 
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -191,15 +184,7 @@ const FullProjectSearchUI: FC = () => {
       style={variableStyle}
       data-bs-theme={activeOverallTheme === 'light' ? 'light' : 'dark'}
     >
-      {newEditor ? (
-        <RailPanelHeader title={t('search')} />
-      ) : (
-        <PanelHeading
-          title={t('search')}
-          handleClose={() => setProjectSearchIsOpen(false)}
-          splitTestName="full-project-search"
-        />
-      )}
+      <RailPanelHeader title={t('search')} />
 
       <div // eslint-disable-line jsx-a11y/no-static-element-interactions
         className="full-project-search-form"

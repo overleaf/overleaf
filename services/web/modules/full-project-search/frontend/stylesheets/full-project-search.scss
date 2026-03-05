@@ -34,7 +34,6 @@
       --matched-hit-selected-unfocused-highlight-color: var(--content-primary);
       --collapsible-file-header-count-color: var(--content-primary);
       --collapsible-file-header-count-bg-color: var(--bg-light-tertiary);
-      --panel-heading-color: var(--content-primary-dark);
       --search-modifier-checked-bg: var(--green-70);
       --search-modifier-hover-color: var(--bg-dark-secondary);
 
@@ -144,7 +143,6 @@
     --matched-hit-selected-unfocused-highlight-color: var(--bg-dark-primary);
     --collapsible-file-header-count-color: var(--bs-body-color);
     --collapsible-file-header-count-bg-color: var(--bg-dark-secondary);
-    --panel-heading-color: var(--content-primary-dark);
     --search-modifier-checked-bg: var(--neutral-90);
     --search-modifier-hover-color: var(--neutral-70);
 
@@ -155,15 +153,6 @@
     .full-project-search-modifiers {
       .form-check-label {
         color: inherit;
-      }
-    }
-
-    .panel-heading-close-button {
-      color: var(--content-primary-dark);
-
-      &:hover,
-      &:focus {
-        color: var(--content-primary);
       }
     }
   }
@@ -183,10 +172,6 @@
     align-items: center;
     gap: var(--spacing-02);
     font-weight: bold;
-  }
-
-  .panel-heading-label {
-    margin-left: var(--spacing-02);
   }
 
   .full-project-search-form {

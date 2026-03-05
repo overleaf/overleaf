@@ -21,8 +21,7 @@ const toLowerCase = (string: string) => string.toLowerCase()
 
 export const searchSnapshot = async (
   projectSnapshot: ProjectSnapshot,
-  searchQuery: SearchQuery,
-  newEditor: boolean
+  searchQuery: SearchQuery
 ) => {
   if (!searchQuery.search.trim().length) {
     return
@@ -86,14 +85,11 @@ export const searchSnapshot = async (
 
   sendSearchEvent(
     'search-execute',
-    populateEditorRedesignSegmentation(
-      {
-        searchType: 'full-project',
-        totalDocs: docPaths.length,
-        totalResults: results.flatMap(file => file.hits).length,
-      },
-      newEditor
-    )
+    populateEditorRedesignSegmentation({
+      searchType: 'full-project',
+      totalDocs: docPaths.length,
+      totalResults: results.flatMap(file => file.hits).length,
+    })
   )
 
   return results
