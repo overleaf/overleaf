@@ -98,7 +98,7 @@ services:
       - history-v1-buckets:/buckets
 
   mongo:
-    image: mongo:6.0
+    image: mongo:8
     command: --replSet overleaf
     ports:
       - "127.0.0.1:27017:27017" # for debugging
@@ -135,7 +135,7 @@ services:
       - dev.env
 
   redis:
-    image: redis:5
+    image: redis:7
     ports:
       - "127.0.0.1:6379:6379" # for debugging
     volumes:
