@@ -119,6 +119,7 @@ export interface Meta {
   'ol-dictionariesRoot': 'string'
   'ol-domainCaptureEnabled': boolean | undefined
   'ol-domainCaptureTestURL': string | undefined
+  'ol-domainVerificationUIEnabled': boolean
   'ol-dropbox': { error: boolean; registered: boolean }
   'ol-editorThemes': { name: string; dark: boolean }[]
   'ol-email': string
