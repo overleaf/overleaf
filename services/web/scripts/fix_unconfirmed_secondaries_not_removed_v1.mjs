@@ -61,7 +61,7 @@ async function removeAffiliationV1(userId, email) {
 
   await fetchNothing(url, {
     method: 'POST',
-    // json: { email },
+    json: { email },
     basicAuth: {
       user: Settings.apis.v1.user,
       password: Settings.apis.v1.pass,
