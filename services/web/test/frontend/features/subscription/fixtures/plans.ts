@@ -1,8 +1,9 @@
-import { GroupPlans } from '../../../../../types/subscription/dashboard/group-plans'
-import { Plan } from '../../../../../types/subscription/plan'
+import { GroupPlans } from '@ol-types/subscription/dashboard/group-plans'
+import { Features, Plan } from '@ol-types/subscription/plan'
 
 const features = {
   student: {
+    aiUsageQuota: 'unlimited',
     collaborators: 6,
     dropbox: true,
     versioning: true,
@@ -19,6 +20,7 @@ const features = {
     symbolPalette: true,
   },
   personal: {
+    aiUsageQuota: 'basic',
     collaborators: 1,
     dropbox: true,
     versioning: true,
@@ -35,6 +37,7 @@ const features = {
     symbolPalette: true,
   },
   collaborator: {
+    aiUsageQuota: 'unlimited',
     collaborators: 10,
     dropbox: true,
     versioning: true,
@@ -51,6 +54,7 @@ const features = {
     symbolPalette: true,
   },
   professional: {
+    aiUsageQuota: 'unlimited',
     collaborators: -1,
     dropbox: true,
     versioning: true,
@@ -66,7 +70,7 @@ const features = {
     trackChanges: true,
     symbolPalette: true,
   },
-}
+} satisfies Record<string, Features>
 
 const studentAccounts: Array<Plan> = [
   {

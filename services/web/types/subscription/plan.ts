@@ -1,6 +1,7 @@
 import { StripeCurrencyCode } from './currency'
 
-type Features = {
+export type Features = {
+  aiUsageQuota: 'basic' | 'unlimited'
   collaborators: number
   compileGroup: string
   compileTimeout: number
