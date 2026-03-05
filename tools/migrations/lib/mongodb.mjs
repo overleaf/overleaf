@@ -20,6 +20,7 @@ export const db = {
   dropboxProjects: internalDb.collection('dropboxProjects'),
   docSnapshots: internalDb.collection('docSnapshots'),
   docs: internalDb.collection('docs'),
+  domainVerifications: internalDb.collection('domainVerifications'),
   feedbacks: internalDb.collection('feedbacks'),
   githubSyncEntityVersions: internalDb.collection('githubSyncEntityVersions'),
   githubSyncProjectStates: internalDb.collection('githubSyncProjectStates'),

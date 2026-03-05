@@ -38,6 +38,7 @@ export const db = {
   deletedProjects: internalDb.collection('deletedProjects'),
   deletedSubscriptions: internalDb.collection('deletedSubscriptions'),
   deletedUsers: internalDb.collection('deletedUsers'),
+  domainVerifications: internalDb.collection('domainVerifications'),
   dropboxEntities: internalDb.collection('dropboxEntities'),
   dropboxProjects: internalDb.collection('dropboxProjects'),
   docSnapshots: internalDb.collection('docSnapshots'),
