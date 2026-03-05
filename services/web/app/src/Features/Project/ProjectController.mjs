@@ -880,6 +880,10 @@ const _ProjectController = {
         user
       )
 
+      const initialLoadingScreenTheme = getInitialLoadingScreenTheme(
+        userSettings?.overallTheme
+      )
+
       res.render(template, {
         title: project.name,
         priority_title: true,
@@ -916,6 +920,7 @@ const _ProjectController = {
           isMemberOfGroupSubscription: userIsMemberOfGroupSubscription,
           hasInstitutionLicence: userHasInstitutionLicence,
         },
+        initialLoadingScreenTheme,
         userSettings,
         labsExperiments: user.labsExperiments ?? [],
         privilegeLevel,
@@ -1273,6 +1278,19 @@ const _ProjectController = {
       user.writefull.autoCreatedAccount = false
     }
   },
+}
+
+function getInitialLoadingScreenTheme(overallThemeSetting) {
+  switch (overallThemeSetting) {
+    case 'light-':
+      return 'light'
+    case '':
+      return 'dark'
+    case 'system':
+      return 'system'
+    default:
+      return 'dark'
+  }
 }
 
 const defaultSettingsForAnonymousUser = userId => ({

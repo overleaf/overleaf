@@ -1,5 +1,45 @@
 @use 'sass:math';
 
+@mixin loading-screen-dark {
+  --loading-screen-ol-logo-empty-url: url(../../../../public/img/ol-brand/overleaf-o-grey.svg);
+  --loading-screen-ol-logo-full-url: url(../../../../public/img/ol-brand/overleaf-o-white.svg);
+  --loading-screen-bg-color: var(--bg-dark-primary);
+  --loading-screen-color: var(--content-secondary-dark);
+  --loading-screen-danger-color: var(--content-danger-dark);
+}
+
+@mixin loading-screen-light {
+  --loading-screen-ol-logo-empty-url: url(../../../../public/img/ol-brand/overleaf-o-grey.svg);
+  --loading-screen-ol-logo-full-url: url(../../../../public/img/ol-brand/overleaf-o.svg);
+  --loading-screen-bg-color: var(--bg-light-primary);
+  --loading-screen-color: var(--content-secondary);
+  --loading-screen-danger-color: var(--content-danger);
+}
+
+:root {
+  @include loading-screen-light;
+
+  @include theme('default') {
+    @include loading-screen-dark;
+  }
+
+  .loading-screen-init-system {
+    @include loading-screen-light;
+
+    @media (prefers-color-scheme: dark) {
+      @include loading-screen-dark;
+    }
+  }
+
+  .loading-screen-init-light {
+    @include loading-screen-light;
+  }
+
+  .loading-screen-init-dark {
+    @include loading-screen-dark;
+  }
+}
+
 @keyframes blink {
   0% {
     opacity: 0.2;
@@ -21,7 +61,7 @@
   align-items: center;
   width: 100%;
   height: 100%;
-  background-color: #fff;
+  background-color: var(--loading-screen-bg-color);
 
   .loading-screen-brand-container {
     min-width: 200px;
@@ -31,8 +71,7 @@
     position: relative;
     padding-top: math.percentage(math.div(150, 130)); // dimensions of the SVG
     height: 0;
-    background: url(../../../../public/img/ol-brand/overleaf-o-grey.svg)
-      no-repeat bottom / 100%;
+    background: var(--loading-screen-ol-logo-empty-url) no-repeat bottom / 100%;
 
     &::after {
       content: '';
@@ -41,8 +80,7 @@
       right: 0;
       bottom: 0;
       left: 0;
-      background: url(../../../../public/img/ol-brand/overleaf-o.svg) no-repeat
-        bottom / 100%;
+      background: var(--loading-screen-ol-logo-full-url) no-repeat bottom / 100%;
       transition: height 0.5s;
     }
   }
@@ -52,7 +90,7 @@
     padding-top: var(--spacing-09);
     font-family: $font-family-serif;
     font-size: var(--font-size-07);
-    color: var(--content-secondary);
+    color: var(--loading-screen-color);
   }
 
   .loading-screen-ellip {
@@ -70,6 +108,6 @@
   .loading-screen-error {
     margin: 0;
     padding-top: var(--spacing-06);
-    color: var(--content-danger);
+    color: var(--loading-screen-danger-color);
   }
 }

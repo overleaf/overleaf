@@ -1,0 +1,37 @@
+#token-access-page {
+  height: 100vh;
+  height: 100dvh;
+}
+
+@include theme('default') {
+  .token-access-content {
+    @include dark-bg;
+  }
+}
+
+.token-access-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.token-access-action-header {
+  background-color: var(--bg-primary-themed);
+  flex: 0 0 auto;
+}
+
+.token-access-content {
+  flex: 1 1 auto;
+  color: var(--content-primary-themed);
+
+  h1,
+  h2 {
+    color: var(--content-primary-themed);
+  }
+}
+
+.token-access-home-link {
+  font-size: 2rem;
+  margin-left: 1rem;
+  color: var(--content-primary-themed);
+}

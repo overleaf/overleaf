@@ -14,7 +14,7 @@ block entrypointVar
 block content
 	//- TODO: remove `main` once it's no longer needed by browser extensions
 	main#ide-root
-		.loading-screen
+		div(class=['loading-screen', `loading-screen-init-${initialLoadingScreenTheme}`])
 			.loading-screen-brand-container
 				.loading-screen-brand(style='height: 20%')
 			h3.loading-screen-label #{translate("loading")}

@@ -5,6 +5,7 @@ import getMeta from '@/utils/meta'
 import { useConnectionContext } from '../context/connection-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { LoadingError, LoadingErrorProps } from './loading-error'
+import useThemedPage from '@/shared/hooks/use-themed-page'
 
 type Part = 'initial' | 'render' | 'connection' | 'translations' | 'project'
 
@@ -22,7 +23,7 @@ export const Loading: FC<{
   setLoaded: (value: boolean) => void
 }> = ({ setLoaded }) => {
   const [loadedParts, setLoadedParts] = useState(initialParts)
-
+  useThemedPage()
   const progress = (loadedParts.size / totalParts.size) * 100
 
   useEffect(() => {

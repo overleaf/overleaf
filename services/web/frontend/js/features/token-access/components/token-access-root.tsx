@@ -111,28 +111,25 @@ function TokenAccessRoot() {
   }
 
   return (
-    <div>
-      <div>
-        <a
-          href="/project"
-          // TODO: class name
-          style={{ fontSize: '2rem', marginLeft: '1rem', color: '#ddd' }}
-        >
+    <div className="token-access-container">
+      <div className="token-access-action-header">
+        <a href="/project" className="token-access-home-link">
           <MaterialIcon type="arrow_left_alt" style={{ fontSize: 'inherit' }} />
         </a>
       </div>
+      <div className="token-access-content">
+        {mode === 'access-attempt' && (
+          <AccessAttemptScreen
+            accessError={accessError}
+            inflight={inflight}
+            loadingScreenBrandHeight={loadingScreenBrandHeight}
+          />
+        )}
 
-      {mode === 'access-attempt' && (
-        <AccessAttemptScreen
-          accessError={accessError}
-          inflight={inflight}
-          loadingScreenBrandHeight={loadingScreenBrandHeight}
-        />
-      )}
-
-      {V1ImportDataScreen && mode === 'v1Import' && v1ImportData && (
-        <V1ImportDataScreen v1ImportData={v1ImportData} />
-      )}
+        {V1ImportDataScreen && mode === 'v1Import' && v1ImportData && (
+          <V1ImportDataScreen v1ImportData={v1ImportData} />
+        )}
+      </div>
     </div>
   )
 }
