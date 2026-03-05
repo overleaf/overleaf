@@ -20,6 +20,7 @@ import UrlHelper from '../Helpers/UrlHelper.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import Settings from '@overleaf/settings'
 import LimitationsManager from '../Subscription/LimitationsManager.mjs'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 
 const { getSafeAdminDomainRedirect } = UrlHelper
 const { canRedirectToAdminDomain } = AdminAuthorizationHelper
@@ -113,7 +114,15 @@ async function tokenAccessPage(req, res, next) {
       }
     }
 
-    res.render('project/token/access-react', {
+    const { variant: sharingUpdates } =
+      await SplitTestHandler.promises.getAssignment(req, res, 'sharing-updates')
+
+    const viewPath =
+      sharingUpdates === 'enabled'
+        ? 'project/token/access-react'
+        : 'project/token/access-react-legacy'
+
+    res.render(viewPath, {
       postUrl: makePostUrl(token),
     })
   } catch (err) {

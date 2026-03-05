@@ -763,59 +763,105 @@ describe('CollaboratorsInviteController', function () {
     })
 
     describe('when the token is valid', function () {
-      beforeEach(async function (ctx) {
-        await new Promise(resolve => {
-          ctx.res.callback = () => resolve()
-          ctx.CollaboratorsInviteController.viewInvite(
-            ctx.req,
-            ctx.res,
-            ctx.next
+      describe('when the sharing-updates variant is "enabled"', function () {
+        beforeEach(async function (ctx) {
+          ctx.SplitTestHandler.promises.getAssignment.resolves({
+            variant: 'enabled',
+          })
+          await new Promise(resolve => {
+            ctx.res.callback = () => resolve()
+            ctx.CollaboratorsInviteController.viewInvite(
+              ctx.req,
+              ctx.res,
+              ctx.next
+            )
+          })
+        })
+
+        it('should render the new view template', function (ctx) {
+          expect(ctx.res.render).toHaveBeenCalledTimes(1)
+          expect(ctx.res.render).toHaveBeenCalledWith(
+            'project/invite/show',
+            expect.anything()
           )
+        })
+
+        it('should not call next', function (ctx) {
+          ctx.next.callCount.should.equal(0)
         })
       })
 
-      it('should render the view template', function (ctx) {
-        expect(ctx.res.render).toHaveBeenCalledTimes(1)
-        expect(ctx.res.render).toHaveBeenCalledWith(
-          'project/invite/show',
-          expect.anything()
-        )
+      describe('when the sharing-updates variant is "default"', function () {
+        beforeEach(async function (ctx) {
+          ctx.SplitTestHandler.promises.getAssignment.resolves({
+            variant: 'default',
+          })
+          await new Promise(resolve => {
+            ctx.res.callback = () => resolve()
+            ctx.CollaboratorsInviteController.viewInvite(
+              ctx.req,
+              ctx.res,
+              ctx.next
+            )
+          })
+        })
+
+        it('should render the legacy view template', function (ctx) {
+          expect(ctx.res.render).toHaveBeenCalledTimes(1)
+          expect(ctx.res.render).toHaveBeenCalledWith(
+            'project/invite/show-legacy',
+            expect.anything()
+          )
+        })
+
+        it('should not call next', function (ctx) {
+          ctx.next.callCount.should.equal(0)
+        })
       })
 
-      it('should not call next', function (ctx) {
-        ctx.next.callCount.should.equal(0)
-      })
+      describe('common behaviour', function () {
+        beforeEach(async function (ctx) {
+          await new Promise(resolve => {
+            ctx.res.callback = () => resolve()
+            ctx.CollaboratorsInviteController.viewInvite(
+              ctx.req,
+              ctx.res,
+              ctx.next
+            )
+          })
+        })
 
-      it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function (ctx) {
-        ctx.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.callCount.should.equal(
-          1
-        )
-        ctx.CollaboratorsGetter.promises.isUserInvitedMemberOfProject
-          .calledWith(ctx.currentUser._id, ctx.projectId)
-          .should.equal(true)
-      })
+        it('should call CollaboratorsGetter.isUserInvitedMemberOfProject', function (ctx) {
+          ctx.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.callCount.should.equal(
+            1
+          )
+          ctx.CollaboratorsGetter.promises.isUserInvitedMemberOfProject
+            .calledWith(ctx.currentUser._id, ctx.projectId)
+            .should.equal(true)
+        })
 
-      it('should call getInviteByToken', function (ctx) {
-        ctx.CollaboratorsInviteGetter.promises.getInviteByToken.callCount.should.equal(
-          1
-        )
-        ctx.CollaboratorsInviteGetter.promises.getInviteByToken
-          .calledWith(ctx.fakeProject._id, ctx.invite.token)
-          .should.equal(true)
-      })
+        it('should call getInviteByToken', function (ctx) {
+          ctx.CollaboratorsInviteGetter.promises.getInviteByToken.callCount.should.equal(
+            1
+          )
+          ctx.CollaboratorsInviteGetter.promises.getInviteByToken
+            .calledWith(ctx.fakeProject._id, ctx.invite.token)
+            .should.equal(true)
+        })
 
-      it('should call User.getUser', function (ctx) {
-        ctx.UserGetter.promises.getUser.callCount.should.equal(1)
-        ctx.UserGetter.promises.getUser
-          .calledWith({ _id: ctx.fakeProject.owner_ref })
-          .should.equal(true)
-      })
+        it('should call User.getUser', function (ctx) {
+          ctx.UserGetter.promises.getUser.callCount.should.equal(1)
+          ctx.UserGetter.promises.getUser
+            .calledWith({ _id: ctx.fakeProject.owner_ref })
+            .should.equal(true)
+        })
 
-      it('should call ProjectGetter.getProject', function (ctx) {
-        ctx.ProjectGetter.promises.getProject.callCount.should.equal(1)
-        ctx.ProjectGetter.promises.getProject
-          .calledWith(ctx.projectId)
-          .should.equal(true)
+        it('should call ProjectGetter.getProject', function (ctx) {
+          ctx.ProjectGetter.promises.getProject.callCount.should.equal(1)
+          ctx.ProjectGetter.promises.getProject
+            .calledWith(ctx.projectId)
+            .should.equal(true)
+        })
       })
     })
 

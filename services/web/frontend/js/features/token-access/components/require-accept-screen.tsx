@@ -1,6 +1,8 @@
 import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import getMeta from '@/utils/meta'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
+import Invite from '@/features/share-project/invite'
 
 export type RequireAcceptData = {
   projectName?: string
@@ -12,6 +14,17 @@ export const RequireAcceptScreen: FC<{
 }> = ({ requireAcceptData, sendPostRequest }) => {
   const { t } = useTranslation()
   const user = getMeta('ol-user')
+  const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
+
+  if (isSharingUpdatesEnabled) {
+    return (
+      <Invite
+        projectName={requireAcceptData.projectName || 'This project'}
+        email={user?.email || ''}
+        submitHandler={() => sendPostRequest(true)}
+      />
+    )
+  }
 
   return (
     <div className="container">

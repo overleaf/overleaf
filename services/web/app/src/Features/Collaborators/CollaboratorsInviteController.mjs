@@ -18,6 +18,7 @@ import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 import Errors from '../Errors/Errors.js'
 import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 
 // This rate limiter allows a different number of requests depending on the
 // number of callaborators a user is allowed. This is implemented by providing
@@ -328,14 +329,26 @@ async function viewInvite(req, res) {
   // cleanup if set for register page
   delete req.session.sharedProjectData
 
+  const { variant: sharingUpdates } =
+    await SplitTestHandler.promises.getAssignment(req, res, 'sharing-updates')
+
   // finally render the invite
-  res.render('project/invite/show', {
-    invite,
-    token,
-    project,
-    owner,
-    title: 'Project Invite',
-  })
+  if (sharingUpdates === 'enabled') {
+    res.render('project/invite/show', {
+      token,
+      projectName: project.name,
+      projectId: invite.projectId,
+      title: 'Project Invite',
+    })
+  } else {
+    res.render('project/invite/show-legacy', {
+      invite,
+      token,
+      project,
+      owner,
+      title: 'Project Invite',
+    })
+  }
 }
 
 async function acceptInvite(req, res) {
