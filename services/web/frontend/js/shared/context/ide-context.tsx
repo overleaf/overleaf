@@ -4,7 +4,6 @@ import { ScopeEventEmitter } from '../../../../types/ide/scope-event-emitter'
 import { Socket } from '@/features/ide-react/connection/types/socket'
 import { useUserSettingsContext } from './user-settings-context'
 import { userStyles } from '../utils/styles'
-import { canUseNewEditor } from '@/features/ide-redesign/utils/new-editor-utils'
 import { useActiveOverallTheme } from '../hooks/use-active-overall-theme'
 
 export type Ide = {
@@ -59,7 +58,7 @@ export const IdeProvider: FC<
       fontFamily,
       lineHeight,
       fontSize: userSettings.fontSize,
-      isNewEditor: canUseNewEditor() && userSettings.enableNewEditor,
+      isNewEditor: true,
     })
   }, [unstableStore, userSettings, activeOverallTheme])
 

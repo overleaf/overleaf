@@ -148,7 +148,7 @@
     gap: var(--spacing-02);
   }
 
-  .item-name-button,
+  .item-name,
   .folder-expand-collapse-button {
     display: flex;
     align-items: center;
@@ -183,7 +183,7 @@
     }
   }
 
-  .item-name-button {
+  .item-name {
     margin-left: var(--spacing-02);
     overflow: hidden;
 
@@ -352,7 +352,7 @@
           border: 0;
           padding: 0;
 
-          &.item-name-button {
+          &.item-name {
             color: inherit;
             width: 100%;
             overflow: hidden;
@@ -421,11 +421,6 @@
               border-radius: var(--spacing-01);
             }
           }
-        }
-
-        &.file-tree-folder-icon {
-          margin-right: var(--spacing-02);
-          vertical-align: sub;
         }
 
         &.file-tree-expand-icon {

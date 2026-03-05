@@ -1,7 +1,6 @@
 import { useState, useEffect, RefObject } from 'react'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 
 function FileTreeItemName({
   name,
@@ -12,8 +11,7 @@ function FileTreeItemName({
   isSelected: boolean
   setIsDraggable: (isDraggable: boolean) => void
 }) {
-  const { isRenaming, startRenaming, finishRenaming, error, cancel } =
-    useFileTreeActionable()
+  const { isRenaming, finishRenaming, error, cancel } = useFileTreeActionable()
 
   const isRenamingEntity = isRenaming && isSelected && !error
 
@@ -30,58 +28,14 @@ function FileTreeItemName({
       />
     )
   }
-  return (
-    <DisplayName
-      name={name}
-      isSelected={isSelected}
-      startRenaming={startRenaming}
-    />
-  )
+  return <DisplayName name={name} />
 }
 
-function DisplayName({
-  name,
-  isSelected,
-  startRenaming,
-}: {
-  name: string
-  isSelected: boolean
-  startRenaming: () => void
-}) {
-  const [clicksInSelectedCount, setClicksInSelectedCount] = useState(0)
-  const newEditor = useIsNewEditorEnabled()
-
-  function onClick() {
-    setClicksInSelectedCount(clicksInSelectedCount + 1)
-    if (!isSelected) setClicksInSelectedCount(0)
-  }
-
-  function onDoubleClick() {
-    // only start renaming if the button got two or more clicks while the item
-    // was selected. This is to prevent starting a rename on an unselected item.
-    // When the item is being selected it can trigger a loss of focus which
-    // causes UI problems.
-    if (clicksInSelectedCount < 2) return
-    startRenaming()
-  }
-
-  if (newEditor) {
-    return (
-      // TODO ide-redesign-cleanup: rename the class now its no longer a button
-      <div className="item-name-button">
-        <span>{name}</span>
-      </div>
-    )
-  }
-
+function DisplayName({ name }: { name: string }) {
   return (
-    <button
-      className="item-name-button"
-      onClick={onClick}
-      onDoubleClick={onDoubleClick}
-    >
+    <div className="item-name">
       <span>{name}</span>
-    </button>
+    </div>
   )
 }
 

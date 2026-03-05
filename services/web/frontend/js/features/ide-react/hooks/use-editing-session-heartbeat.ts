@@ -6,7 +6,6 @@ import { debugConsole } from '@/utils/debugging'
 import { useCallback, useEffect, useRef } from 'react'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import useDomEventListener from '@/shared/hooks/use-dom-event-listener'
-import { useIsNewEditorEnabled } from '@/features/ide-redesign/utils/new-editor-utils'
 import {
   IdeLayout,
   IdeView,
@@ -19,17 +18,15 @@ import {
 
 function createEditingSessionHeartbeatData(
   editorType: EditorType,
-  newEditor: boolean,
   view: IdeView | null,
   layout: IdeLayout,
   railOpen: boolean,
   railTab: RailTabKey,
   hasDetachedPdf: boolean
 ) {
-  const newEditorSegmentation = newEditor ? { railOpen, railTab } : {}
+  const newEditorSegmentation = { railOpen, railTab }
   return {
     editorType,
-    editorRedesign: newEditor,
     editorView: view,
     editorLayout: layout,
     hasDetachedPdf,
@@ -49,7 +46,6 @@ function sendEditingSessionHeartbeat(
 export function useEditingSessionHeartbeat() {
   const { projectId } = useIdeReactContext()
   const { getEditorType } = useEditorManagerContext()
-  const newEditor = useIsNewEditorEnabled()
   const { view, pdfLayout: layout, detachIsLinked } = useLayoutContext()
   const { isOpen: railIsOpen, selectedTab: selectedRailTab } = useRailContext()
 
@@ -80,7 +76,6 @@ export function useEditingSessionHeartbeat() {
 
     const segmentation = createEditingSessionHeartbeatData(
       editorType,
-      newEditor,
       view,
       layout,
       railIsOpen,
@@ -109,7 +104,6 @@ export function useEditingSessionHeartbeat() {
   }, [
     getEditorType,
     projectId,
-    newEditor,
     view,
     layout,
     railIsOpen,
