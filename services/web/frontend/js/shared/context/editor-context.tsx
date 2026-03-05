@@ -34,10 +34,16 @@ export const EditorContext = createContext<
       isProjectOwner: boolean
       isRestrictedTokenMember?: boolean
       isPendingEditor: boolean
-      hasPremiumSuggestion: boolean
-      setHasPremiumSuggestion: (value: boolean) => void
-      setPremiumSuggestionResetDate: (date: Date) => void
+      hasSuggestionsLeft: boolean
+      suggestionsLeft: number
+      setSuggestionsLeft: (value: number) => void
       premiumSuggestionResetDate: Date
+      setPremiumSuggestionResetDate: (date: Date) => void
+      hasTokensLeft: boolean
+      tokensLeft: number
+      setTokensLeft: (value: number) => void
+      tokenResetDate: Date
+      setTokenResetDate: (date: Date) => void
       writefullInstance: WritefullAPI | null
       setWritefullInstance: (instance: WritefullAPI) => void
       upgradeTrackChangesModal: UpgradeTrackChangesModal
@@ -80,20 +86,33 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
     )
   }, [])
 
-  const [hasPremiumSuggestion, setHasPremiumSuggestion] = useState<boolean>(
-    () => {
-      return Boolean(
-        featureUsage?.aiFeatureUsage &&
-        featureUsage?.aiFeatureUsage.remainingUsage > 0
-      )
-    }
+  const [suggestionsLeft, setSuggestionsLeft] = useState<number>(() => {
+    return featureUsage?.aiFeatureUsage?.remainingUsage || 0
+  })
+
+  const hasSuggestionsLeft = useMemo(
+    () => suggestionsLeft > 0,
+    [suggestionsLeft]
   )
+
   const [premiumSuggestionResetDate, setPremiumSuggestionResetDate] =
     useState<Date>(() => {
       return featureUsage?.aiFeatureUsage?.resetDate
         ? new Date(featureUsage.aiFeatureUsage.resetDate)
         : new Date()
     })
+
+  const [tokensLeft, setTokensLeft] = useState<number>(() => {
+    return featureUsage?.aiWorkbench?.remainingTokens || 0
+  })
+
+  const hasTokensLeft = useMemo(() => tokensLeft > 0, [tokensLeft])
+
+  const [tokenResetDate, setTokenResetDate] = useState<Date>(() => {
+    return featureUsage?.aiWorkbench?.resetDate
+      ? new Date(featureUsage.aiWorkbench.resetDate)
+      : new Date()
+  })
 
   const [showUpgradeModal, setShowUpgradeModal] =
     useState<UpgradeTrackChangesModal>({ show: false })
@@ -172,10 +191,16 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       isRestrictedTokenMember: getMeta('ol-isRestrictedTokenMember'),
       isPendingEditor,
       insertSymbol,
-      hasPremiumSuggestion,
-      setHasPremiumSuggestion,
+      hasSuggestionsLeft,
+      suggestionsLeft,
+      setSuggestionsLeft,
       premiumSuggestionResetDate,
       setPremiumSuggestionResetDate,
+      hasTokensLeft,
+      tokensLeft,
+      setTokensLeft,
+      tokenResetDate,
+      setTokenResetDate,
       writefullInstance,
       setWritefullInstance,
       upgradeTrackChangesModal: showUpgradeModal,
@@ -189,10 +214,16 @@ export const EditorProvider: FC<React.PropsWithChildren> = ({ children }) => {
       renameProject,
       isPendingEditor,
       insertSymbol,
-      hasPremiumSuggestion,
-      setHasPremiumSuggestion,
+      hasSuggestionsLeft,
+      suggestionsLeft,
+      setSuggestionsLeft,
       premiumSuggestionResetDate,
       setPremiumSuggestionResetDate,
+      hasTokensLeft,
+      tokensLeft,
+      setTokensLeft,
+      tokenResetDate,
+      setTokenResetDate,
       writefullInstance,
       setWritefullInstance,
       showUpgradeModal,

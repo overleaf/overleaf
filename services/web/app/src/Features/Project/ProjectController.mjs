@@ -53,6 +53,7 @@ import SubscriptionController from '../Subscription/SubscriptionController.mjs'
 import { formatCurrency } from '../../util/currency.js'
 import UserSettingsHelper from './UserSettingsHelper.mjs'
 import AiFeatureUsageRateLimiter from '../../infrastructure/rate-limiters/AiFeatureUsageRateLimiter.mjs'
+import WorkbenchRateLimiter from '../../infrastructure/rate-limiters/WorkbenchRateLimiter.mjs'
 
 const { isPaidSubscription } = SubscriptionHelper
 const { hasAdminAccess } = AdminAuthorizationHelper
@@ -469,6 +470,7 @@ const _ProjectController = {
       'wf-enable-freemium-super-complete',
       'wf-enable-super-complete-promotion',
       'plans-2026-phase-1',
+      'testing-ai-usage',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
@@ -795,9 +797,11 @@ const _ProjectController = {
 
       let featureUsage = {}
 
-      if (Features.hasFeature('saas')) {
-        featureUsage =
-          await AiFeatureUsageRateLimiter.getRemainingFeatureUses(userId)
+      if (Features.hasFeature('saas') && !anonymous) {
+        featureUsage = {
+          ...(await AiFeatureUsageRateLimiter.getRemainingFeatureUses(userId)),
+          ...(await WorkbenchRateLimiter.getRemainingTokens(userId)),
+        }
       }
 
       await ProjectController._setWritefullTrialState(

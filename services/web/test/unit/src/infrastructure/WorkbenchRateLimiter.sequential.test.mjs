@@ -179,16 +179,16 @@ describe('WorkbenchRateLimiter', function () {
       it('sets rate limit headers', async function (ctx) {
         await ctx.WorkbenchRateLimiter.checkUsage(ctx.alphaUserId, ctx.res)
         expect(ctx.res.set).to.have.been.calledWith(
-          'RateLimit-Limit',
+          'Token-RateLimit-Limit',
           '8000000'
         )
         expect(ctx.res.set).to.have.been.calledWith(
-          'RateLimit-Remaining',
+          'Token-RateLimit-Remaining',
           '8000000'
         )
         // We can't mock the mongo date, so just check that something was set
         expect(ctx.res.set).to.have.been.calledWith(
-          'RateLimit-Reset',
+          'Token-RateLimit-Reset',
           matchRateLimit(24 * 60 * 60)
         )
       })
@@ -222,15 +222,15 @@ describe('WorkbenchRateLimiter', function () {
       it('sets rate limit headers', async function (ctx) {
         await ctx.WorkbenchRateLimiter.checkUsage(ctx.alphaUserId, ctx.res)
         expect(ctx.res.set).to.have.been.calledWith(
-          'RateLimit-Limit',
+          'Token-RateLimit-Limit',
           '8000000'
         )
         expect(ctx.res.set).to.have.been.calledWith(
-          'RateLimit-Remaining',
+          'Token-RateLimit-Remaining',
           '6000000'
         )
         expect(ctx.res.set).to.have.been.calledWith(
-          'RateLimit-Reset',
+          'Token-RateLimit-Reset',
           matchRateLimit(23 * 60 * 60)
         )
       })
@@ -276,16 +276,16 @@ describe('WorkbenchRateLimiter', function () {
       it('sets rate limit headers', async function (ctx) {
         await ctx.WorkbenchRateLimiter.checkUsage(ctx.alphaUserId, ctx.res)
         expect(ctx.res.set).to.have.been.calledWith(
-          'RateLimit-Limit',
+          'Token-RateLimit-Limit',
           '8000000'
         )
         expect(ctx.res.set).to.have.been.calledWith(
-          'RateLimit-Remaining',
+          'Token-RateLimit-Remaining',
           '8000000'
         )
         // A new period
         expect(ctx.res.set).to.have.been.calledWith(
-          'RateLimit-Reset',
+          'Token-RateLimit-Reset',
           matchRateLimit(24 * 60 * 60)
         )
       })
@@ -347,16 +347,16 @@ describe('WorkbenchRateLimiter', function () {
       })
       it('sets rate limit headers', async function (ctx) {
         expect(ctx.res.set).to.have.been.calledWith(
-          'RateLimit-Limit',
+          'Token-RateLimit-Limit',
           '8000000'
         )
         expect(ctx.res.set).to.have.been.calledWith(
-          'RateLimit-Remaining',
+          'Token-RateLimit-Remaining',
           '5000000'
         )
         // Keeps the original period start time
         expect(ctx.res.set).to.have.been.calledWith(
-          'RateLimit-Reset',
+          'Token-RateLimit-Reset',
           matchRateLimit(23 * 60 * 60)
         )
       })
@@ -391,16 +391,16 @@ describe('WorkbenchRateLimiter', function () {
 
       it('sets rate limit headers', async function (ctx) {
         expect(ctx.res.set).to.have.been.calledWith(
-          'RateLimit-Limit',
+          'Token-RateLimit-Limit',
           '8000000'
         )
         expect(ctx.res.set).to.have.been.calledWith(
-          'RateLimit-Remaining',
+          'Token-RateLimit-Remaining',
           '7000000'
         )
         // New period start time
         expect(ctx.res.set).to.have.been.calledWith(
-          'RateLimit-Reset',
+          'Token-RateLimit-Reset',
           matchRateLimit(24 * 60 * 60)
         )
       })

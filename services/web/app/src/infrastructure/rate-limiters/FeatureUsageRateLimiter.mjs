@@ -127,10 +127,6 @@ export default class FeatureUsageRateLimiter {
    * @returns {Promise<{[featureName: string]: { remainingUsage: number, resetDate?: string}}>}
    */
   async getRemainingFeatureUses(userId) {
-    if (!userId) {
-      return { [this.featureName]: { remainingUsage: 0 } }
-    }
-
     const allowance = await this._getAllowance(userId)
     const reportedUsage = await UserFeatureUsage.findOne({ _id: userId }).exec()
     const featureUsage = reportedUsage?.features?.[this.featureName] ?? {}

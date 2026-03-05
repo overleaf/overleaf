@@ -11,13 +11,15 @@ import { useDetachCompileContext as useCompileContext } from '@/shared/context/d
 import { Nav, NavLink, TabContainer, TabContent } from 'react-bootstrap'
 import { LogEntry as LogEntryData } from '@/features/pdf-preview/util/types'
 import LogEntry from './log-entry'
-import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import TimeoutUpgradePromptNew from '@/features/pdf-preview/components/timeout-upgrade-prompt-new'
 import getMeta from '@/utils/meta'
 import PdfClearCacheButton from '@/features/pdf-preview/components/pdf-clear-cache-button'
 import PdfDownloadFilesButton from '@/features/pdf-preview/components/pdf-download-files-button'
 import RollingBuildSelectedReminder from './rolling-build-selected-reminder'
+import AiPaywallNotification from '@/shared/components/ai-paywall-notification'
+import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 
+// todo: quota clean-up remove unneeded old paywall component
 const logsComponents: Array<{
   import: { default: ElementType }
   path: string
@@ -82,6 +84,7 @@ function ErrorLogs({
       {logsComponents.map(({ import: { default: Component }, path }) => (
         <Component key={path} />
       ))}
+      <AiPaywallNotification featureLocation="errorAssist" />
       <TabContent className="error-logs new-error-logs">
         <div className="logs-pane-content">
           <RollingBuildSelectedReminder />

@@ -236,6 +236,12 @@ describe('ProjectController', function () {
       }),
     }
 
+    ctx.WorkbenchRateLimiter = {
+      getRemainingTokens: sinon.stub().resolves({
+        aiWorkbench: { remainingTokens: 0 },
+      }),
+    }
+
     vi.doMock('mongodb-legacy', () => ({
       default: { ObjectId },
     }))
@@ -495,6 +501,13 @@ describe('ProjectController', function () {
       '../../../../app/src/infrastructure/rate-limiters/AiFeatureUsageRateLimiter',
       () => ({
         default: ctx.AiFeatureUsageRateLimiter,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/infrastructure/rate-limiters/WorkbenchRateLimiter',
+      () => ({
+        default: ctx.WorkbenchRateLimiter,
       })
     )
 

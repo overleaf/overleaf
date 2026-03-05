@@ -17,7 +17,7 @@ function scrollIntoView(element: Element) {
  */
 export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
   const { pdfLayout, setView } = useLayoutContext()
-  const { hasPremiumSuggestion } = useEditorContext()
+  const { hasSuggestionsLeft } = useEditorContext()
 
   const selectLogNewLogs = useCallback(
     (
@@ -45,7 +45,7 @@ export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
           }
 
           if (suggestFix) {
-            if (hasPremiumSuggestion) {
+            if (hasSuggestionsLeft) {
               logEntry
                 .querySelector<HTMLButtonElement>(
                   'button[data-action="suggest-fix"]'
@@ -62,7 +62,7 @@ export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
         }
       })
     },
-    [hasPremiumSuggestion]
+    [hasSuggestionsLeft]
   )
 
   const openLogs = useCallback(() => {

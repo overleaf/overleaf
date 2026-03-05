@@ -3,7 +3,7 @@ import { UserFeatureUsage } from '../../models/UserFeatureUsage.mjs'
 import { TooManyRequestsError } from '../../Features/Errors/Errors.js'
 import AnalyticsManager from '../../Features/Analytics/AnalyticsManager.mjs'
 /** @typedef {{usage?: number | null, periodStart?: Date | null}} FeatureUsage */
-/** @typedef {{remainingUsage: number, resetDate?: string}} RemainingUsage */
+/** @typedef {{remainingTokens?: number | null, periodStart?: Date | null}} RemainingTokens */
 
 const PERIOD = 24 // hours
 const PERIOD_IN_MILLISECONDS = PERIOD * 60 * 60 * 1000
@@ -101,6 +101,31 @@ export default class TokenUsageRateLimiter {
   }
 
   /**
+   * Gets the remaining token allowance for a user within the current period.
+   *
+   * @param {string} userId - The user ID to check remaining tokens for
+   * @returns {Promise<RemainingTokens>}
+   *   Object with feature name as key and remaining usage details as value.
+   *   If the current period has expired, returns the full allowance.
+   *   If no userId provided, returns 0 remaining usage.
+   */
+  async getRemainingTokens(userId) {
+    const allowance = await this._getAllowance(userId)
+    const reportedUsage = await UserFeatureUsage.findOne({ _id: userId }).exec()
+    const featureUsage = reportedUsage?.features?.[this.featureName] ?? {}
+    const periodStart = featureUsage.periodStart ?? new Date()
+    const usage = featureUsage.usage ?? 0
+    const usesLeft = allowance - usage
+    const refreshEpoch = periodStart.getTime() + PERIOD_IN_MILLISECONDS
+    return {
+      [this.featureName]: {
+        remainingTokens: Date.now() > refreshEpoch ? allowance : usesLeft,
+        resetDate: new Date(refreshEpoch).toString(),
+      },
+    }
+  }
+
+  /**
    *
    * @param {string} userId
    * @param {import('express').Response} res
@@ -143,9 +168,12 @@ export default class TokenUsageRateLimiter {
     const secondsTillReset = Math.ceil((refreshEpoch - Date.now()) / 1000)
 
     if (!res.headersSent) {
-      res.set('RateLimit-Limit', allowance.toString())
-      res.set('RateLimit-Remaining', Math.max(0, allowance - usage).toString())
-      res.set('RateLimit-Reset', Math.max(0, secondsTillReset).toString())
+      res.set('Token-RateLimit-Limit', allowance.toString())
+      res.set(
+        'Token-RateLimit-Remaining',
+        Math.max(0, allowance - usage).toString()
+      )
+      res.set('Token-RateLimit-Reset', Math.max(0, secondsTillReset).toString())
     }
   }
 

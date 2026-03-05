@@ -3,7 +3,6 @@ import SplitTestHandler from '../../Features/SplitTests/SplitTestHandler.mjs'
 import UserGetter from '../../Features/User/UserGetter.mjs'
 import TokenUsageRateLimiter from './TokenUsageRateLimiter.mjs'
 /** @typedef {{usage?: number | null, periodStart?: Date | null}} FeatureUsage */
-/** @typedef {{remainingUsage: number, resetDate?: string}} RemainingUsage */
 
 const DEFAULT_USER_TOKEN_ALLOWANCE = 8_000_000
 const ALPHA_USER_TOKEN_ALLOWANCE = 8_000_000

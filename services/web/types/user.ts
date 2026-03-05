@@ -29,7 +29,11 @@ export type Features = {
 }
 
 export type FeatureUsage = {
-  [feature: string]: {
+  aiWorkbench: {
+    remainingTokens: number
+    resetDate: string // date string
+  }
+  aiFeatureUsage: {
     remainingUsage: number
     resetDate: string // date string
   }
