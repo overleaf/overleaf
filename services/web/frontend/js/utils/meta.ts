@@ -135,6 +135,7 @@ export interface Meta {
   'ol-gitBridgePublicBaseUrl': string
   'ol-github': { enabled: boolean; error: boolean }
   'ol-groupAuditLogs': []
+  'ol-groupDomains': []
   'ol-groupId': string
   'ol-groupName': string
   'ol-groupPlans': GroupPlans

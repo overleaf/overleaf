@@ -2732,6 +2732,7 @@
   "value_must_be_at_least_x": "Value must be at least __value__",
   "vat": "VAT",
   "vat_number": "VAT Number",
+  "verification": "Verification",
   "verification_code": "Verification code",
   "verify_email_address_before_enabling_managed_users": "You need to verify your email address before enabling managed users.",
   "verify_your_email_address": "Verify your email address",

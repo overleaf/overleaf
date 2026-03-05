@@ -2179,6 +2179,7 @@
   "value_must_be_at_least_x": "",
   "vat": "",
   "vat_number": "",
+  "verification": "",
   "verification_code": "",
   "verify_email_address_before_enabling_managed_users": "",
   "verify_your_email_address": "",
