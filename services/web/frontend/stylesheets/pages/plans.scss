@@ -624,6 +624,16 @@ $z-index-group-member-picker-list: 1;
           }
         }
 
+        &[data-highlighted='true'] {
+          p {
+            @extend %input-focus-style;
+          }
+
+          input[type='radio']:not(:checked) + p {
+            background-color: var(--bg-light-secondary);
+          }
+        }
+
         input[type='radio'] {
           position: absolute;
           opacity: 0;
