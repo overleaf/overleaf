@@ -28,6 +28,10 @@ const rateLimiters = {
     points: 20,
     duration: 60,
   }),
+  acceptProjectInvite: new RateLimiter('accept-project-invite', {
+    points: 25, // just over view-project-invite
+    duration: 60,
+  }),
 }
 
 export default {
@@ -124,6 +128,7 @@ export default {
         'project-invite'
       ),
       AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(rateLimiters.acceptProjectInvite),
       CollaboratorsInviteController.acceptInvite,
       AnalyticsRegistrationSourceMiddleware.clearSource()
     )
