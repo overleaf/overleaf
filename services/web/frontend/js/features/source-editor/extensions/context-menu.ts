@@ -16,6 +16,7 @@ import {
   Annotation,
 } from '@codemirror/state'
 import { closeAllContextMenusEffect } from '../utils/close-all-context-menus-effect'
+import { isContextMenuMouseEvent } from '../utils/context-menu-mouse-event'
 
 export const openContextMenuEffect = StateEffect.define<{
   pos: number
@@ -352,7 +353,7 @@ const editorContextMenuHandlers = (): Extension =>
     mousedown(event: MouseEvent, view: EditorView) {
       const target = event.target as HTMLElement
       const isGutter = isClickOnGutter(target)
-      const isRightClick = event.button === 2 || event.ctrlKey
+      const isRightClick = isContextMenuMouseEvent(event)
 
       // Close menu on any click except right-click on non-gutter
       if (!isRightClick || isGutter) {
