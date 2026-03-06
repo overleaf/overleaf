@@ -1,8 +1,8 @@
 diff --git a/node_modules/multer/lib/make-middleware.js b/node_modules/multer/lib/make-middleware.js
-index 260dcb4..895b4b2 100644
+index ee50988..de77364 100644
 --- a/node_modules/multer/lib/make-middleware.js
 +++ b/node_modules/multer/lib/make-middleware.js
-@@ -113,7 +113,7 @@ function makeMiddleware (setup) {
+@@ -164,7 +164,7 @@ function makeMiddleware (setup) {
        if (fieldname == null) return abortWithCode('MISSING_FIELD_NAME')
  
        // don't attach to the files object, if there is no file
