@@ -12,6 +12,7 @@ import { useProjectContext } from '@/shared/context/project-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
+import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 import {
   FileTreeDocumentFindResult,
   FileTreeFileRefFindResult,
@@ -22,6 +23,7 @@ import { convertFileRefToBinaryFile } from '@/features/ide-react/util/file-view'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { FileRef } from '../../../../../types/file-ref'
 import { useLayoutContext } from '@/shared/context/layout-context'
+import { isVisualEditorAvailable } from '@/features/source-editor/utils/visual-editor'
 
 const FileTreeOpenContext = createContext<
   | {
@@ -47,6 +49,7 @@ export const FileTreeOpenProvider: FC<React.PropsWithChildren> = ({
   const { eventEmitter, projectJoined } = useIdeReactContext()
   const { openDocWithId, openInitialDoc } = useEditorManagerContext()
   const { currentDocumentId } = useEditorOpenDocContext()
+  const { showVisual } = useEditorPropertiesContext()
   const { setOpenFile } = useLayoutContext()
   const [openEntity, setOpenEntity] = useState<
     FileTreeDocumentFindResult | FileTreeFileRefFindResult | null
@@ -89,6 +92,11 @@ export const FileTreeOpenProvider: FC<React.PropsWithChildren> = ({
       }
 
       setOpenEntity(selected)
+      const editorMode =
+        isVisualEditorAvailable(selected.entity.name) && showVisual
+          ? 'visual'
+          : 'code'
+
       if (selected.type === 'doc' && fileTreeReady) {
         openDocWithId(selected.entity._id, { keepCurrentView: true })
         if (selected.entity.name.endsWith('.bib')) {
@@ -96,6 +104,7 @@ export const FileTreeOpenProvider: FC<React.PropsWithChildren> = ({
             projectOwner,
             isSampleFile: selected.entity.name === 'sample.bib',
             linkedFileProvider: null,
+            editorMode,
           })
         }
       }
@@ -112,12 +121,13 @@ export const FileTreeOpenProvider: FC<React.PropsWithChildren> = ({
             isSampleFile: false,
             linkedFileProvider: (selected.entity as FileRef).linkedFileData
               ?.provider,
+            editorMode,
           })
         }
         window.dispatchEvent(new CustomEvent('file-view:file-opened'))
       }
     },
-    [fileTreeReady, setOpenFile, openDocWithId, projectOwner]
+    [fileTreeReady, openDocWithId, projectOwner, setOpenFile, showVisual]
   )
 
   const handleFileTreeDelete = useCallback(

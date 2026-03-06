@@ -4,6 +4,7 @@ import { sendMB } from '../../../infrastructure/event-tracking'
 import { useTranslation } from 'react-i18next'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
+import { getFileExtension } from '../utils/file'
 import { isVisualEditorAvailable } from '../utils/visual-editor'
 
 function EditorSwitch() {
@@ -16,6 +17,7 @@ function EditorSwitch() {
   const richTextAvailable = openDocName
     ? isVisualEditorAvailable(openDocName)
     : false
+  const extension = getFileExtension(openDocName || '')
 
   const handleChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -31,9 +33,9 @@ function EditorSwitch() {
           break
       }
 
-      sendMB('editor-switch-change', { editorType })
+      sendMB('editor-switch-change', { editorType, extension })
     },
-    [setVisual]
+    [extension, setVisual]
   )
 
   return (
