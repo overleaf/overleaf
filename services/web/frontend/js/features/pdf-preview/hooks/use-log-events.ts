@@ -33,10 +33,9 @@ export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
         if (logEntry) {
           scrollIntoView(logEntry)
 
-          const expandCollapseButton =
-            logEntry.querySelector<HTMLButtonElement>(
-              'button[data-action="expand-collapse"]'
-            )
+          const expandCollapseButton = logEntry.querySelector<HTMLElement>(
+            '[data-action="expand-collapse"]'
+          )
 
           const collapsed = expandCollapseButton?.dataset.collapsed === 'true'
 
