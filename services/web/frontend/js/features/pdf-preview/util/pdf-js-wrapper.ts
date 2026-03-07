@@ -204,6 +204,40 @@ export default class PDFJSWrapper {
     })
   }
 
+  rotatePages(rotation: number) {
+    if (!this.viewer.pdfDocument) {
+      return
+    }
+
+    const numPages = this.viewer.pdfDocument.numPages
+
+    for (let pageIndex = 0; pageIndex < numPages; pageIndex++) {
+      const pageView = this.viewer.getPageView(pageIndex)
+      if (!pageView || !pageView.pdfPage) {
+        continue
+      }
+
+      const currentScale = pageView.viewport.scale
+      const page = pageView.pdfPage
+      const viewport = page.getViewport({ scale: currentScale, rotation })
+
+      pageView.viewport = viewport
+
+      const canvas = pageView.div?.querySelector('canvas') as HTMLCanvasElement
+      if (canvas) {
+        const devicePixelRatio = window.devicePixelRatio || 1
+        canvas.width = viewport.width * devicePixelRatio
+        canvas.height = viewport.height * devicePixelRatio
+        canvas.style.width = `${viewport.width}px`
+        canvas.style.height = `${viewport.height}px`
+      }
+
+      pageView.update()
+    }
+
+    this.viewer.update()
+  }
+
   isVisible() {
     return this.viewer.container.offsetParent !== null
   }
