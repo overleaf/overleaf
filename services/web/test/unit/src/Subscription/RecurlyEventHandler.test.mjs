@@ -135,7 +135,6 @@ describe('RecurlyEventHandler', function () {
         has_ai_add_on: false,
         subscriptionId: ctx.eventData.subscription.uuid,
         payment_provider: 'recurly',
-        'customerio-integration': true,
       }
     )
     sinon.assert.calledWith(
@@ -191,7 +190,6 @@ describe('RecurlyEventHandler', function () {
         has_ai_add_on: false,
         subscriptionId: ctx.eventData.subscription.uuid,
         payment_provider: 'recurly',
-        'customerio-integration': true,
       }
     )
     sinon.assert.calledWith(
@@ -226,7 +224,6 @@ describe('RecurlyEventHandler', function () {
         has_ai_add_on: false,
         subscriptionId: ctx.eventData.subscription.uuid,
         payment_provider: 'recurly',
-        'customerio-integration': true,
       }
     )
     sinon.assert.calledWith(
@@ -266,7 +263,6 @@ describe('RecurlyEventHandler', function () {
         has_ai_add_on: false,
         subscriptionId: ctx.eventData.subscription.uuid,
         payment_provider: 'recurly',
-        'customerio-integration': true,
       }
     )
     sinon.assert.calledWith(
@@ -300,7 +296,6 @@ describe('RecurlyEventHandler', function () {
         has_ai_add_on: false,
         subscriptionId: ctx.eventData.subscription.uuid,
         payment_provider: 'recurly',
-        'customerio-integration': true,
       }
     )
     sinon.assert.calledWith(
@@ -339,7 +334,6 @@ describe('RecurlyEventHandler', function () {
         has_ai_add_on: false,
         subscriptionId: ctx.eventData.subscription.uuid,
         payment_provider: 'recurly',
-        'customerio-integration': true,
       }
     )
   })
@@ -359,7 +353,6 @@ describe('RecurlyEventHandler', function () {
         has_ai_add_on: false,
         subscriptionId: ctx.eventData.subscription.uuid,
         payment_provider: 'recurly',
-        'customerio-integration': true,
       }
     )
   })
