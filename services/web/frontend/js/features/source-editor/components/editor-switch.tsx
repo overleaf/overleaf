@@ -17,7 +17,7 @@ function EditorSwitch() {
   const richTextAvailable = openDocName
     ? isVisualEditorAvailable(openDocName)
     : false
-  const extension = getFileExtension(openDocName || '')
+  const extension = getFileExtension(openDocName || '') ?? ''
 
   const handleChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
