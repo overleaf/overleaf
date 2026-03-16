@@ -11,7 +11,6 @@ import EmailHandler from '../Email/EmailHandler.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 import UserUpdater from '../User/UserUpdater.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 import { AI_ADD_ON_CODE } from './AiHelper.mjs'
 
 /**
@@ -155,11 +154,6 @@ async function cancelPendingSubscriptionChange(user) {
  * @param user
  */
 async function _sendCancellationEmail(user) {
-  const { variant } = await SplitTestHandler.promises.getAssignmentForUser(
-    user._id,
-    'cancellation-survey-ai-assist'
-  )
-
   const emailOpts = {
     to: user.email,
     first_name: user.first_name,
@@ -167,26 +161,16 @@ async function _sendCancellationEmail(user) {
 
   const ONE_HOUR_IN_MS = 1000 * 60 * 60
 
-  if (variant === 'enabled') {
-    logger.debug(
-      { userId: user._id },
-      'deferred email: canceledSubscriptionOrAddOn'
-    )
+  logger.debug(
+    { userId: user._id },
+    'deferred email: canceledSubscriptionOrAddOn'
+  )
 
-    EmailHandler.sendDeferredEmail(
-      'canceledSubscriptionOrAddOn',
-      emailOpts,
-      ONE_HOUR_IN_MS
-    )
-  } else {
-    logger.debug({ userId: user._id }, 'deferred email: canceledSubscription')
-
-    EmailHandler.sendDeferredEmail(
-      'canceledSubscription',
-      emailOpts,
-      ONE_HOUR_IN_MS
-    )
-  }
+  EmailHandler.sendDeferredEmail(
+    'canceledSubscriptionOrAddOn',
+    emailOpts,
+    ONE_HOUR_IN_MS
+  )
 }
 
 /**

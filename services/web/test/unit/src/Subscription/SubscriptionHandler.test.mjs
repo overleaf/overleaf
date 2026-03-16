@@ -516,7 +516,7 @@ describe('SubscriptionHandler', function () {
       it('should send the email after 1 hour', function (ctx) {
         const ONE_HOUR_IN_MS = 1000 * 60 * 60
         expect(ctx.EmailHandler.sendDeferredEmail).to.have.been.calledWith(
-          'canceledSubscription',
+          'canceledSubscriptionOrAddOn',
           { to: ctx.user.email, first_name: ctx.user.first_name },
           ONE_HOUR_IN_MS
         )
@@ -618,7 +618,7 @@ describe('SubscriptionHandler', function () {
         it('should send the email after 1 hour', function (ctx) {
           const ONE_HOUR_IN_MS = 1000 * 60 * 60
           expect(ctx.EmailHandler.sendDeferredEmail).to.have.been.calledWith(
-            'canceledSubscription',
+            'canceledSubscriptionOrAddOn',
             { to: ctx.user.email, first_name: ctx.user.first_name },
             ONE_HOUR_IN_MS
           )
