@@ -126,9 +126,10 @@ const en = {
     'suggestion-card.banner.quick-guide.welcome': 'Welcome to Writefull!',
     'suggestion-card.banner.quick-guide.start':
       'Click here to start a quick guide',
-    'suggestion-card.banner.non-english.question': 'Is your text non-English?',
-    'suggestion-card.banner.non-english.yes': 'Yes, switch to GPT.',
-    'suggestion-card.banner.non-english.no': 'No, continue with English.',
+    'suggestion-card.banner.non-english.introduction':
+      "To view AI-powered language suggestions you'll need to use the GPT model.",
+    'suggestion-card.banner.non-english.choose-model': 'Choose model',
+    'suggestion-card.banner.non-english.disable': 'Disable',
     'suggestion-card.track-changes.show': 'Show track changes',
     'suggestion-card.track-changes.hide': 'Hide track changes',
     'suggestion-card.information-tooltip':
@@ -631,10 +632,10 @@ const es = {
     'suggestion-card.banner.quick-guide.welcome': '¡Bienvenido a Writefull!',
     'suggestion-card.banner.quick-guide.start':
       'Haga clic aquí para una guía rápida',
-    'suggestion-card.banner.non-english.question':
-      '¿Tu texto está en otro idioma que no sea inglés?',
-    'suggestion-card.banner.non-english.yes': 'Sí, cambiar a GPT.',
-    'suggestion-card.banner.non-english.no': 'No, continuar con inglés.',
+    'suggestion-card.banner.non-english.introduction':
+      'Para ver sugerencias de lenguaje impulsadas por IA, necesitarás usar el modelo GPT.',
+    'suggestion-card.banner.non-english.choose-model': 'Elegir modelo',
+    'suggestion-card.banner.non-english.disable': 'Deshabilitar',
     'suggestion-card.track-changes.show': 'Mostrar cambios',
     'suggestion-card.track-changes.hide': 'Ocultar cambios',
     'suggestion-card.information-tooltip':

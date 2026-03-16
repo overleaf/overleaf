@@ -471,6 +471,7 @@ const _ProjectController = {
       'wf-enable-super-complete-promotion',
       'plans-2026-phase-1',
       'testing-ai-usage',
+      'wf-fake-non-english-suggestions',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
