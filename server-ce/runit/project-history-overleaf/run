@@ -8,5 +8,6 @@ fi
 
 source /etc/overleaf/env.sh
 export LISTEN_ADDRESS=127.0.0.1
+export PROJECT_HISTORY_PORT=3054
 
 exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/project-history/app.js >> /var/log/overleaf/project-history.log 2>&1
