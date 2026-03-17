@@ -469,6 +469,7 @@ const _ProjectController = {
       'email-notifications',
       'wf-enable-freemium-super-complete',
       'wf-enable-super-complete-promotion',
+      'wf-rebrand',
       'plans-2026-phase-1',
       'testing-ai-usage',
       'wf-fake-non-english-suggestions',
