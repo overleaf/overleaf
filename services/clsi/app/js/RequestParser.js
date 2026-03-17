@@ -162,6 +162,11 @@ function parse(body, callback) {
     response.rawSnapshot = compile.rawSnapshot
     response.rawChangeOperations = compile.rawChangeOperations
 
+    // v1 conversions / submissions
+    if (compile.filestoreBlobPrefix) {
+      response.filestoreBlobPrefix = _checkPath(compile.filestoreBlobPrefix)
+    }
+
     const rootResourcePath = _parseAttribute(
       'rootResourcePath',
       compile.rootResourcePath,

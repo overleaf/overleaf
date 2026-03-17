@@ -287,7 +287,7 @@ async function _sendBuiltRequest(projectId, userId, req, options) {
     await clearClsiServerId(projectId, userId, options.compileBackendClass)
   }
   const validationProblems = ClsiFormatChecker.checkRecoursesForProblems(
-    req.compile?.resources
+    req.compile?.resources || []
   )
   if (validationProblems != null) {
     logger.debug(

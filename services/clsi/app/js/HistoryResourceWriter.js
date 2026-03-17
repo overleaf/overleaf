@@ -421,7 +421,11 @@ export async function syncResourcesToDisk(
     )
   }
 
-  const blobStore = new BlobStore(request.historyId, globalBlobs)
+  const blobStore = new BlobStore(
+    request.historyId,
+    request.filestoreBlobPrefix,
+    globalBlobs
+  )
   const loadEagerStart = performance.now()
   await snapshot.loadFiles('eager', blobStore)
   timings.snapshotLoadEager = Math.ceil(performance.now() - loadEagerStart)
@@ -503,13 +507,17 @@ class BlobStore {
   #historyId
   /** @type {string[]} */
   #globalBlobs
+  /** @type {string} */
+  #filestoreBlobPrefix
 
   /**
    * @param {string} historyId
+   * @param {string} filestoreBlobPrefix
    * @param {string[]} globalBlobs
    */
-  constructor(historyId, globalBlobs) {
+  constructor(historyId, filestoreBlobPrefix, globalBlobs) {
     this.#historyId = historyId
+    this.#filestoreBlobPrefix = filestoreBlobPrefix
     this.#globalBlobs = globalBlobs
   }
 
@@ -519,7 +527,9 @@ class BlobStore {
    */
   getBlobURL(hash) {
     const u = new URL(Settings.apis.filestore.url)
-    if (this.#globalBlobs.includes(hash)) {
+    if (this.#filestoreBlobPrefix) {
+      u.pathname = `${this.#filestoreBlobPrefix}/${hash}`
+    } else if (this.#globalBlobs.includes(hash)) {
       u.pathname = `/history/global/hash/${hash}`
     } else {
       u.pathname = `/history/project/${this.#historyId}/hash/${hash}`
