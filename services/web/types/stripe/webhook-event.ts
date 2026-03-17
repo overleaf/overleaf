@@ -144,6 +144,8 @@ export interface CustomerUpdatedWebhookEvent extends Stripe.EventBase {
   }
 }
 
+export type MandateUpdatedWebhookEvent = Stripe.MandateUpdatedEvent
+
 export type CustomerSubscriptionWebhookEvent =
   | CustomerSubscriptionUpdatedWebhookEvent
   | CustomerSubscriptionCreatedWebhookEvent
@@ -159,3 +161,4 @@ export type WebhookEvent =
   | InvoiceOverdueWebhookEvent
   | CustomerCreatedWebhookEvent
   | CustomerUpdatedWebhookEvent
+  | MandateUpdatedWebhookEvent
