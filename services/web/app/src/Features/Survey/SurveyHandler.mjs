@@ -3,6 +3,7 @@ import crypto from 'node:crypto'
 
 import SurveyCache from './SurveyCache.mjs'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
+import PlansHelper from '../Subscription/PlansHelper.mjs'
 import { callbackify } from '@overleaf/promise-utils'
 import UserGetter from '../User/UserGetter.mjs'
 
@@ -19,10 +20,31 @@ import UserGetter from '../User/UserGetter.mjs'
 async function getSurvey(userId) {
   const survey = await SurveyCache.get(true)
   if (survey) {
-    if (survey.options?.hasGroupSubscription) {
-      const hasGroupSubscription =
-        await SubscriptionLocator.promises.hasGroupSubscription(userId)
-      if (!hasGroupSubscription) {
+    const hasFilters =
+      survey.options.hasFreeSubscription ||
+      survey.options.hasIndividualStandardSubscription ||
+      survey.options.hasIndividualProfessionalSubscription ||
+      survey.options.hasGroupStandardSubscription ||
+      survey.options.hasGroupProfessionalSubscription
+
+    if (hasFilters) {
+      const subscriptions =
+        await SubscriptionLocator.promises.getAllAssociatedSubscriptions(
+          userId,
+          {
+            groupPlan: 1,
+            planCode: 1,
+          }
+        )
+      const isFreeSubscription = Boolean(!subscriptions?.length)
+
+      if (isFreeSubscription) {
+        if (!survey.options?.hasFreeSubscription) {
+          return
+        }
+      } else if (
+        !subscriptions.some(sub => _canDisplaySurvey(sub, survey.options))
+      ) {
         return
       }
     }
@@ -62,6 +84,24 @@ async function getSurvey(userId) {
 
     return { name, title, text, cta, url }
   }
+}
+
+function _canDisplaySurvey(subscription, options = {}) {
+  const {
+    hasIndividualStandardSubscription,
+    hasIndividualProfessionalSubscription,
+    hasGroupStandardSubscription,
+    hasGroupProfessionalSubscription,
+  } = options
+  const isGroupPlan = subscription.groupPlan
+  const isProfessional = PlansHelper.isProfessionalPlan(subscription.planCode)
+
+  return (
+    (hasIndividualStandardSubscription && !isGroupPlan && !isProfessional) ||
+    (hasIndividualProfessionalSubscription && !isGroupPlan && isProfessional) ||
+    (hasGroupStandardSubscription && isGroupPlan && !isProfessional) ||
+    (hasGroupProfessionalSubscription && isGroupPlan && isProfessional)
+  )
 }
 
 function _userRolloutPercentile(userId, surveyName) {

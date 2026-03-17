@@ -36,7 +36,23 @@ export const SurveySchema = new Schema(
       required: true,
     },
     options: {
-      hasGroupSubscription: {
+      hasFreeSubscription: {
+        type: Boolean,
+        default: false,
+      },
+      hasIndividualStandardSubscription: {
+        type: Boolean,
+        default: false,
+      },
+      hasIndividualProfessionalSubscription: {
+        type: Boolean,
+        default: false,
+      },
+      hasGroupStandardSubscription: {
+        type: Boolean,
+        default: false,
+      },
+      hasGroupProfessionalSubscription: {
         type: Boolean,
         default: false,
       },

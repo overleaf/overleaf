@@ -71,17 +71,19 @@ const SubscriptionLocator = {
     return subscription?.admin_id
   },
 
-  async hasGroupSubscription(userOrId) {
-    if (!Features.hasFeature('saas')) return false
+  async getAllAssociatedSubscriptions(userOrId, projection = {}) {
+    if (!Features.hasFeature('saas')) return []
     const userId = SubscriptionLocator._getUserId(userOrId)
-    return await Subscription.exists({
-      groupPlan: true,
-      $or: [
-        { member_ids: userId },
-        { manager_ids: userId },
-        { admin_id: userId },
-      ],
-    }).exec()
+    return await Subscription.find(
+      {
+        $or: [
+          { admin_id: userId },
+          { manager_ids: userId },
+          { member_ids: userId },
+        ],
+      },
+      projection
+    ).exec()
   },
 
   async getSubscription(subscriptionId) {
