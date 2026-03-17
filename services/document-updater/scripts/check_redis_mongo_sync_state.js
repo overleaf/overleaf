@@ -75,7 +75,7 @@ async function updateDocVersionInRedis(docId, redisDoc, mongoDoc) {
 async function fixPartiallyDeletedDocMetadata(projectId, docId, pathname) {
   try {
     await fetchNothing(
-      `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016/project/${projectId}/doc/${docId}`,
+      `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:${process.env.DOCSTORE_PORT || 3016}/project/${projectId}/doc/${docId}`,
       {
         method: 'PATCH',
         signal: AbortSignal.timeout(60_000),
@@ -102,7 +102,7 @@ async function getDocFromMongo(projectId, docId) {
   let docstoreDoc
   try {
     docstoreDoc = await fetchJson(
-      `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016/project/${projectId}/doc/${docId}/peek`,
+      `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:${process.env.DOCSTORE_PORT || 3016}/project/${projectId}/doc/${docId}/peek`,
       { signal: AbortSignal.timeout(60_000) }
     )
   } catch (err) {
@@ -111,7 +111,7 @@ async function getDocFromMongo(projectId, docId) {
   let deletedDocName
   try {
     const body = await fetchJson(
-      `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016/project/${projectId}/doc-deleted`,
+      `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:${process.env.DOCSTORE_PORT || 3016}/project/${projectId}/doc-deleted`,
       { signal: AbortSignal.timeout(60_000) }
     )
     deletedDocName = body.find(doc => doc._id === docId)?.name

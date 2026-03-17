@@ -27,7 +27,7 @@ module.exports = {
 
   internal: {
     clsi: {
-      port: 3013,
+      port: process.env.CLSI_PORT || 3013,
       host: process.env.LISTEN_ADDRESS || '127.0.0.1',
     },
 
@@ -44,12 +44,16 @@ module.exports = {
   apis: {
     clsi: {
       // Internal requests (used by tests only at the time of writing).
-      url: `http://${process.env.CLSI_HOST || '127.0.0.1'}:3013`,
+      url: `http://${process.env.CLSI_HOST || '127.0.0.1'}:${
+        process.env.CLSI_PORT || 3013
+      }`,
       // External url prefix for output files, e.g. for requests via load-balancers.
       outputUrlPrefix: `${process.env.ZONE ? `/zone/${process.env.ZONE}` : ''}`,
       clsiServerId: process.env.CLSI_SERVER_ID || CLSI_SERVER_ID,
 
-      downloadHost: process.env.DOWNLOAD_HOST || 'http://localhost:8080',
+      downloadHost: `${process.env.DOWNLOAD_HOST || '127.0.0.1'}:${
+        process.env.DOWNLOAD_PORT || 8080
+      }`,
     },
     clsiPerf: {
       host: `${process.env.CLSI_PERF_HOST || '127.0.0.1'}:${
@@ -65,7 +69,9 @@ module.exports = {
     filestore: {
       url:
         process.env.FILESTORE_DOMAIN_OVERRIDE ||
-        `http://${process.env.FILESTORE_HOST || '127.0.0.1'}:3009`,
+        `http://${process.env.FILESTORE_HOST || '127.0.0.1'}:${
+          process.env.FILESTORE_PORT || 3009
+        }`,
     },
   },
 

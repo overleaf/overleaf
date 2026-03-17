@@ -216,8 +216,9 @@ module.exports = {
   apis: {
     web: {
       url: `http://${
-        process.env.WEB_API_HOST || process.env.WEB_HOST || '127.0.0.1'
-      }:${process.env.WEB_API_PORT || process.env.WEB_PORT || 3000}`,
+        process.env.WEB_API_HOST || process.env.WEB_HOST || '127.0.0.1'}:${
+          process.env.WEB_API_PORT || process.env.WEB_PORT || 3000
+        }`,
       user: httpAuthUser,
       pass: httpAuthPass,
     },
@@ -225,24 +226,37 @@ module.exports = {
       url: `http://${
         process.env.DOCUPDATER_HOST ||
         process.env.DOCUMENT_UPDATER_HOST ||
-        '127.0.0.1'
-      }:3003`,
+        '127.0.0.1'}:${
+          process.env.DOCUPDATER_PORT || 3003
+        }`,
     },
     docstore: {
-      url: `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016`,
-      pubUrl: `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016`,
+      url: `http://${
+        process.env.DOCSTORE_HOST || '127.0.0.1'}:${
+          process.env.DOCSTORE_PORT || 3016
+        }`,
+      pubUrl: `http://${
+        process.env.DOCSTORE_HOST || '127.0.0.1'}:${
+          process.env.DOCSTORE_PORT || 3016
+        }`,
     },
     chat: {
-      internal_url: `http://${process.env.CHAT_HOST || '127.0.0.1'}:3010`,
+      internal_url: `http://${process.env.CHAT_HOST || '127.0.0.1'}:${process.env.CHAT_PORT || 3010}`,
     },
     filestore: {
-      url: `http://${process.env.FILESTORE_HOST || '127.0.0.1'}:3009`,
+      url: `http://${process.env.FILESTORE_HOST || '127.0.0.1'}:${
+        process.env.FILESTORE_PORT || 3009
+      }`,
     },
     clsi: {
-      url: `http://${process.env.CLSI_HOST || '127.0.0.1'}:3013`,
+      url: `http://${process.env.CLSI_HOST || '127.0.0.1'}:${
+        process.env.CLSI_PORT || 3013
+      }`,
       downloadHost: process.env.CLSI_LB_IP
         ? `http://${process.env.CLSI_LB_IP}:80`
-        : `http://${process.env.DOWNLOAD_HOST || '127.0.0.1'}:8080`,
+        : `http://${process.env.DOWNLOAD_HOST || '127.0.0.1'}:${
+          process.env.DOWNLOAD_PORT || 8080
+        }`,
       backendGroupName: undefined,
       submissionBackendClass:
         process.env.CLSI_SUBMISSION_BACKEND_CLASS || 'c3d',
@@ -252,25 +266,27 @@ module.exports = {
     },
     project_history: {
       sendProjectStructureOps: true,
-      url: `http://${process.env.PROJECT_HISTORY_HOST || '127.0.0.1'}:3054`,
+      url: `http://${process.env.PROJECT_HISTORY_HOST || '127.0.0.1'}:${
+        process.env.PROJECT_HISTORY_PORT || 3054
+      }`,
     },
     historyBackupDeletion: {
       enabled: false,
-      url: `http://${process.env.HISTORY_BACKUP_DELETION_HOST || '127.0.0.1'}:3101`,
+      url: `http://${process.env.HISTORY_BACKUP_DELETION_HOST || '127.0.0.1'}:${process.env.HISTORY_BACKUP_DELETION_PORT || 3101}`,
       user: process.env.HISTORY_BACKUP_DELETION_USER || 'staging',
       pass: process.env.HISTORY_BACKUP_DELETION_PASS,
     },
     realTime: {
-      url: `http://${process.env.REALTIME_HOST || '127.0.0.1'}:3026`,
+      url: `http://${process.env.REALTIME_HOST || '127.0.0.1'}:${process.env.REALTIME_PORT || 3026}`,
     },
     contacts: {
-      url: `http://${process.env.CONTACTS_HOST || '127.0.0.1'}:3036`,
+      url: `http://${process.env.CONTACTS_HOST || '127.0.0.1'}:${process.env.CONTACTS_PORT || 3036}`,
     },
     notifications: {
-      url: `http://${process.env.NOTIFICATIONS_HOST || '127.0.0.1'}:3042`,
+      url: `http://${process.env.NOTIFICATIONS_HOST || '127.0.0.1'}:${process.env.NOTIFICATIONS_PORT || 3042}`,
     },
     webpack: {
-      url: `http://${process.env.WEBPACK_HOST || '127.0.0.1'}:3808`,
+      url: `http://${process.env.WEBPACK_HOST || '127.0.0.1'}:${process.env.WEBPACK_PORT || 3808}`,
     },
     wiki: {
       url: process.env.WIKI_URL || 'https://learnwiki.overleaf.com',
