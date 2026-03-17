@@ -931,10 +931,10 @@ async function _buildRequestFromHistoryIncremental(
   let size = 0
   while (hasMore) {
     let changes
-    ;({ changes, hasMore } = await HistoryManager.promises.getChanges(
-      historyId,
-      { since }
-    ))
+    ;({ changes, hasMore } =
+      await HistoryManager.promises.getChangesWithHistoryId(historyId, {
+        since,
+      }))
     since += changes.length
     const newRawChangeOperations = _rawChangeOperationsFromChanges(changes)
     size += Buffer.from(JSON.stringify(newRawChangeOperations)).byteLength

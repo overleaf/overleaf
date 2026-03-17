@@ -9,6 +9,8 @@ import ProjectDeleter from '../app/src/Features/Project/ProjectDeleter.mjs'
 import SplitTestManager from '../app/src/Features/SplitTests/SplitTestManager.mjs'
 import UserDeleter from '../app/src/Features/User/UserDeleter.mjs'
 import UserRegistrationHandler from '../app/src/Features/User/UserRegistrationHandler.mjs'
+import HistoryManager from '../app/src/Features/History/HistoryManager.mjs'
+import ProjectCreationHandler from '../app/src/Features/Project/ProjectCreationHandler.mjs'
 
 const MONOREPO = Path.dirname(
   Path.dirname(Path.dirname(Path.dirname(fileURLToPath(import.meta.url))))
@@ -16,7 +18,7 @@ const MONOREPO = Path.dirname(
 
 /**
  * @param {string} email
- * @return {Promise<void>}
+ * @return {Promise<string>}
  */
 async function createUser(email) {
   const user = await UserRegistrationHandler.promises.registerNewUser({
@@ -43,6 +45,7 @@ async function createUser(email) {
       },
     }
   )
+  return user._id.toString()
 }
 
 /**
@@ -75,6 +78,19 @@ async function deleteUser(email) {
   await UserDeleter.promises.expireDeletedUser(user._id)
 }
 
+async function createProjectWithOldHistoryId(userId) {
+  const projectName = 'old history id'
+  const historyId = parseInt(
+    await HistoryManager.promises.initializeProject(),
+    10
+  )
+  await ProjectCreationHandler.promises.createExampleProject(
+    userId,
+    projectName,
+    { overleaf: { history: { id: historyId } } }
+  )
+}
+
 /**
  * @param {string} email
  * @return {Promise<void>}
@@ -86,7 +102,11 @@ async function provisionUser(email) {
     )
   }
   await deleteUser(email)
-  await createUser(email)
+  const userId = await createUser(email)
+
+  if (email === 'user+old-history-id@example.com') {
+    await createProjectWithOldHistoryId(userId)
+  }
 }
 
 async function provisionUsers() {

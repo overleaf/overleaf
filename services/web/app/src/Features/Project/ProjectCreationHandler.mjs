@@ -163,8 +163,8 @@ async function populateClsiCacheForExampleProject(
   return projectId
 }
 
-async function createExampleProject(ownerId, projectName) {
-  const project = await _createBlankProject(ownerId, projectName)
+async function createExampleProject(ownerId, projectName, attributes = {}) {
+  const project = await _createBlankProject(ownerId, projectName, attributes)
 
   const { fileEntries, docEntries } = await _addExampleProjectFiles(
     ownerId,
