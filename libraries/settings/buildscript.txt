@@ -5,5 +5,5 @@ settings
 --esmock-loader=False
 --is-library=True
 --node-version=24.13.0
---pipeline-owner=🚉 Platform
+--pipeline-owner=32
 --public-repo=False

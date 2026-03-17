@@ -5,5 +5,5 @@ ranges-tracker
 --esmock-loader=False
 --is-library=True
 --node-version=24.13.0
---pipeline-owner=🥑 Core
+--pipeline-owner=44
 --public-repo=False

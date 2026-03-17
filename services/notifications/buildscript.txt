@@ -4,7 +4,7 @@ notifications
 --env-pass-through=
 --esmock-loader=False
 --node-version=24.13.0
---pipeline-owner=🚉 Platform
+--pipeline-owner=32
 --public-repo=True
 --test-acceptance-vitest=True
 --test-unit-vitest=True
