@@ -314,7 +314,11 @@ async function processMigration(input, commit) {
   try {
     stripeCustomer = await rateLimiters.requestWithRetries(
       stripeClient.serviceName,
-      () => stripeClient.getCustomerById(stripeCustomerId, ['subscriptions']),
+      () =>
+        stripeClient.getCustomerById(stripeCustomerId, [
+          'subscriptions',
+          'subscriptions.data.schedule',
+        ]),
       {
         operation: 'getCustomerById',
         stripeCustomerId,
@@ -649,6 +653,34 @@ async function performCutover(
       throw new ReportError(
         'migrated-customerio-upload-failed',
         `Successfully migrated to Stripe but failed to upload user to customer.io: ${err.message}`
+      )
+    }
+  }
+
+  // Step 7: Release subscription schedule associated with the migration
+  const schedule = stripeSubscription.schedule
+  if (
+    schedule &&
+    typeof schedule !== 'string' &&
+    schedule.metadata?.billing_migration_id
+  ) {
+    try {
+      await rateLimiters.requestWithRetries(
+        stripeClient.serviceName,
+        () =>
+          stripeClient.stripe.subscriptionSchedules.release(schedule.id, {
+            preserve_cancel_date: true,
+          }),
+        {
+          operation: 'subscriptionSchedules.release',
+          scheduleId: schedule.id,
+          region: stripeClient.serviceName,
+        }
+      )
+    } catch (err) {
+      throw new ReportError(
+        'migrated-schedule-release-failed',
+        `Successfully migrated to Stripe but failed to release subscription schedule: ${err.message}`
       )
     }
   }
