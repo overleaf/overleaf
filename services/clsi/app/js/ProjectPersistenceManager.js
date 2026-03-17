@@ -22,6 +22,11 @@ import { LAST_ACCESS } from './LastProjectAccess.js'
 let ProjectPersistenceManager
 const oneDay = 24 * 60 * 60 * 1000
 
+function setLastAccessIfNewer(id, ts) {
+  const prev = LAST_ACCESS.get(id) ?? 0
+  LAST_ACCESS.set(id, Math.max(ts, prev))
+}
+
 let ANY_DISK_LOW = false
 let ANY_DISK_CRITICAL_LOW = false
 
@@ -118,14 +123,23 @@ export default ProjectPersistenceManager = {
             Settings.path.compilesDir,
             projectAndUserId
           )
+          if (!/^[a-f0-9]{24}(-[a-f0-9]{24})?$/.test(projectAndUserId)) {
+            // Submissions etc. Schedule for cleanup in 5-10min with jitter.
+            const delay = (5 + 5 * Math.random()) * 60_000
+            setLastAccessIfNewer(
+              projectAndUserId,
+              Date.now() - ProjectPersistenceManager.EXPIRY_TIMEOUT + delay
+            )
+            return cb()
+          }
           const projectId = projectAndUserId.slice(0, 24)
           fs.stat(compileDir, (err, stats) => {
             if (err) {
               // Schedule for immediate cleanup
-              LAST_ACCESS.set(projectId, 0)
+              setLastAccessIfNewer(projectId, 0)
             } else {
               // Cleanup eventually.
-              LAST_ACCESS.set(projectId, stats.mtime.getTime())
+              setLastAccessIfNewer(projectId, stats.mtime.getTime())
             }
             cb()
           })
