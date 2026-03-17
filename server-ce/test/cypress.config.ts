@@ -52,7 +52,6 @@ export default defineConfig({
   viewportHeight: 768,
   viewportWidth: 1024,
   e2e: {
-    baseUrl: 'http://localhost',
     setupNodeEvents(on) {
       on('task', {
         readPdf,

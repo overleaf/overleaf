@@ -18,10 +18,20 @@ IMAGE_TAG_PRO_BASE := $(shell echo $(IMAGE_TAG_PRO) | sed -E s/:.+//)
 
 test-e2e-native:
 	docker compose -f docker-compose.yml -f docker-compose.native.yml up --no-log-prefix sharelatex host-admin -d
-	CYPRESS_HOST_ADMIN_URL='http://localhost:8081' \
-	CYPRESS_SAML_URL='http://localhost:8082' \
-	CYPRESS_MAILTRAP_URL='http://localhost:8083' \
+	CYPRESS_BASE_URL='http://127.0.0.1:3231' \
+	CYPRESS_HOST_ADMIN_URL='http://127.0.0.1:3232' \
+	CYPRESS_SAML_URL='http://127.0.0.1:3233' \
+	CYPRESS_MAILTRAP_URL='http://127.0.0.1:3234' \
 		npm run cypress:open
+
+# For testing "native" on Linux
+test-e2e-native-linux:
+	docker compose -f docker-compose.yml -f docker-compose.native.yml up --no-log-prefix sharelatex host-admin -d
+	CYPRESS_BASE_URL='http://127.0.0.1:3231' \
+	CYPRESS_HOST_ADMIN_URL='http://127.0.0.1:3232' \
+	CYPRESS_SAML_URL='http://127.0.0.1:3233' \
+	CYPRESS_MAILTRAP_URL='http://127.0.0.1:3234' \
+		docker compose -f docker-compose.yml -f docker-compose.native.yml up --no-log-prefix cypress
 
 test-e2e:
 	docker compose build host-admin
