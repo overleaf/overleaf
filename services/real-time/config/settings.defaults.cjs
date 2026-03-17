@@ -90,7 +90,7 @@ const settings = {
 
   internal: {
     realTime: {
-      port: process.env.REAL_TIME_PORT || 3026,
+      port: process.env.REALTIME_PORT || 3026,
       host: process.env.LISTEN_ADDRESS || '127.0.0.1',
     },
   },

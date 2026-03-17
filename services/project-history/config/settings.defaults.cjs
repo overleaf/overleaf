@@ -22,7 +22,7 @@ module.exports = {
   apis: {
     documentupdater: {
       url: `http://${process.env.DOCUPDATER_HOST || '127.0.0.1'}:${
-        process.env.DOCUPDATER_PORT || 3003
+        process.env.DOCUMENT_UPDATER_PORT || 3003
       }`,
     },
     docstore: {

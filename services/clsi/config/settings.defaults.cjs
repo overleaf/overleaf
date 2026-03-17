@@ -51,7 +51,7 @@ module.exports = {
       outputUrlPrefix: `${process.env.ZONE ? `/zone/${process.env.ZONE}` : ''}`,
       clsiServerId: process.env.CLSI_SERVER_ID || CLSI_SERVER_ID,
 
-      downloadHost: `${process.env.DOWNLOAD_HOST || '127.0.0.1'}:${
+      downloadHost: `http://${process.env.DOWNLOAD_HOST || '127.0.0.1'}:${
         process.env.DOWNLOAD_PORT || 8080
       }`,
     },

@@ -227,7 +227,7 @@ module.exports = {
         process.env.DOCUPDATER_HOST ||
         process.env.DOCUMENT_UPDATER_HOST ||
         '127.0.0.1'}:${
-          process.env.DOCUPDATER_PORT || 3003
+          process.env.DOCUMENT_UPDATER_PORT || 3003
         }`,
     },
     docstore: {
