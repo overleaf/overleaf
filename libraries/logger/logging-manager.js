@@ -6,6 +6,7 @@ const {
   FileLogLevelChecker,
   GCEMetadataLogLevelChecker,
 } = require('./log-level-checker')
+const { setLogger } = require('@overleaf/fetch-utils')
 
 const LoggingManager = {
   /**
@@ -31,6 +32,7 @@ const LoggingManager = {
     })
     this._setupRingBuffer()
     this._setupLogLevelChecker()
+    setLogger(this)
     return this
   },
 
