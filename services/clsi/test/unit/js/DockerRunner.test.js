@@ -57,6 +57,14 @@ describe('DockerRunner', () => {
       },
     }))
 
+    ctx.LastProjectAccess = {
+      getLastProjectAccessTime: sinon
+        .stub()
+        .returns(Date.now() - 24 * 60 * 60 * 1000),
+    }
+
+    vi.doMock('../../../app/js/LastProjectAccess', () => ctx.LastProjectAccess)
+
     vi.doMock('../../../app/js/LockManager', () => ({
       default: {
         runWithLock(key, runner, callback) {
@@ -782,16 +790,25 @@ describe('DockerRunner', () => {
         const oneHourInSeconds = 60 * 60
         const oneHourInMilliseconds = oneHourInSeconds * 1000
         const nowInSeconds = Date.now() / 1000
+        ctx.recentlyAccessProjectId = '68494e7daa5c3680ee7182b1'
+        ctx.LastProjectAccess.getLastProjectAccessTime
+          .withArgs(ctx.recentlyAccessProjectId)
+          .returns(Date.now() - 1)
         ctx.containers = [
           {
-            Name: '/project-old-container-name',
+            Name: '/project-69b72c66b1a8c2f5846b24a8-container-name',
             Id: 'old-container-id',
             Created: nowInSeconds - oneHourInSeconds - 100,
           },
           {
-            Name: '/project-new-container-name',
+            Name: '/project-69b72c66b1a8c2f5846b24a9-container-name',
             Id: 'new-container-id',
             Created: nowInSeconds - oneHourInSeconds + 100,
+          },
+          {
+            Name: `/project-${ctx.recentlyAccessProjectId}-container-name`,
+            Id: 'recent-access-container-id',
+            Created: nowInSeconds - 2 * oneHourInSeconds,
           },
           {
             Name: '/totally-not-a-project-container',
@@ -816,13 +833,28 @@ describe('DockerRunner', () => {
     it('should destroy old containers', ctx => {
       ctx.DockerRunner.destroyContainer.callCount.should.equal(1)
       ctx.DockerRunner.destroyContainer
-        .calledWith('project-old-container-name', 'old-container-id')
+        .calledWith(
+          'project-69b72c66b1a8c2f5846b24a8-container-name',
+          'old-container-id'
+        )
         .should.equal(true)
     })
 
     it('should not destroy new containers', ctx => {
       ctx.DockerRunner.destroyContainer
-        .calledWith('project-new-container-name', 'new-container-id')
+        .calledWith(
+          'project-69b72c66b1a8c2f5846b24a9-container-name',
+          'new-container-id'
+        )
+        .should.equal(false)
+    })
+
+    it('should not destroy old containers that were recently used', ctx => {
+      ctx.DockerRunner.destroyContainer
+        .calledWith(
+          'project-68494e7daa5c3680ee7182b1-container-name',
+          'recent-access-container-id'
+        )
         .should.equal(false)
     })
 

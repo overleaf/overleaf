@@ -17,11 +17,10 @@ import { callbackify } from 'node:util'
 import Path from 'node:path'
 import fs from 'node:fs'
 import * as HistoryResourceWriter from './HistoryResourceWriter.js'
+import { LAST_ACCESS } from './LastProjectAccess.js'
+
 let ProjectPersistenceManager
 const oneDay = 24 * 60 * 60 * 1000
-
-// projectId -> timestamp mapping.
-const LAST_ACCESS = new Map()
 
 let ANY_DISK_LOW = false
 let ANY_DISK_CRITICAL_LOW = false
