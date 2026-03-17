@@ -255,6 +255,7 @@ for (const eventName of events) {
 }
 
 const port =
+  process.env.DOCUPDATER_PORT ||
   Settings.internal.documentupdater.port ||
   (Settings.api &&
     Settings.api.documentupdater &&
