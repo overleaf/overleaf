@@ -263,10 +263,18 @@ async function viewInvite(req, res) {
   const projectId = req.params.Project_id
   const { token } = req.params
 
+  const { variant: sharingUpdates } =
+    await SplitTestHandler.promises.getAssignment(req, res, 'sharing-updates')
+
   const _renderInvalidPage = function () {
     res.status(404)
     logger.debug({ projectId }, 'invite not valid, rendering not-valid page')
-    res.render('project/invite/not-valid', { title: 'Invalid Invite' })
+
+    if (sharingUpdates === 'enabled') {
+      res.render('project/invite/not-valid', { title: 'Invalid Invite' })
+    } else {
+      res.render('project/invite/not-valid-legacy', { title: 'Invalid Invite' })
+    }
   }
 
   // check if the user is already a member of the project
@@ -328,9 +336,6 @@ async function viewInvite(req, res) {
 
   // cleanup if set for register page
   delete req.session.sharedProjectData
-
-  const { variant: sharingUpdates } =
-    await SplitTestHandler.promises.getAssignment(req, res, 'sharing-updates')
 
   // finally render the invite
   if (sharingUpdates === 'enabled') {

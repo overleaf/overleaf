@@ -1,5 +1,8 @@
 import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
+import InviteNotValid from '@/features/share-project/invite-not-valid'
+import getMeta from '@/utils/meta'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export const AccessAttemptScreen: FC<{
   loadingScreenBrandHeight: string
@@ -7,6 +10,32 @@ export const AccessAttemptScreen: FC<{
   accessError: string | boolean
 }> = ({ loadingScreenBrandHeight, inflight, accessError }) => {
   const { t } = useTranslation()
+  const user = getMeta('ol-user')
+  const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
+
+  if (isSharingUpdatesEnabled) {
+    if (accessError) {
+      return <InviteNotValid email={user?.email} />
+    }
+
+    return (
+      <div className="vertically-centered-content">
+        <div className="loading-screen">
+          <div className="loading-screen-brand-container">
+            <div
+              className="loading-screen-brand"
+              style={{ height: loadingScreenBrandHeight }}
+            />
+          </div>
+
+          <h3 className="loading-screen-label text-center">
+            {t('join_project')}
+            {inflight && <LoadingScreenEllipses />}
+          </h3>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="loading-screen">

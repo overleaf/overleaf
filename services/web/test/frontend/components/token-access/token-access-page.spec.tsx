@@ -79,10 +79,16 @@ describe('<TokenAccessPage/>', function () {
 
     cy.wait('@grantRequest')
 
-    cy.get('h3').should('have.text', 'Join Project')
-    cy.get('h4').should('have.text', 'Project not found')
-
+    cy.findByRole('heading', { name: /sorry, this project isn’t available/i })
+    cy.findByText(/the link may be broken or you may not have access rights/i)
     cy.findByRole('button', { name: 'Join Project' }).should('not.exist')
+    cy.contains(
+      new RegExp(
+        'you are currently logged in as test@example.com. ' +
+          'you might need to log in with a different email address',
+        'i'
+      )
+    )
   })
 
   it('handles a redirect response', function () {

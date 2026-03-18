@@ -1,6 +1,12 @@
 #token-access-page {
-  height: 100vh;
-  height: 100dvh;
+  &.token-access-legacy-page {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .vertically-centered-content {
+    height: $thin-footer-content-height;
+  }
 }
 
 @include theme('default') {
