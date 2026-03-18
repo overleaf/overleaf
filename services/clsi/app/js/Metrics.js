@@ -17,6 +17,7 @@ const compilesTotal = new prom.Counter({
     'draft',
     'stop_on_first_error',
     'passes',
+    'type',
   ],
 })
 
