@@ -74,9 +74,15 @@ function isENOENT(err) {
  * @param {string} projectId
  * @param {string} userId
  * @param {number} remoteBaseVersion
+ * @param {boolean} populateClsiCache
  * @return {Promise<{rawSnapshot: import('overleaf-editor-core/lib/types.js').RawSnapshot, globalBlobs: string[], fullSync: boolean,localBaseVersion: number}>}
  */
-async function loadSnapshot(projectId, userId, remoteBaseVersion) {
+async function loadSnapshot(
+  projectId,
+  userId,
+  remoteBaseVersion,
+  populateClsiCache
+) {
   const { path, resyncPath } = snapshotPath(projectId, userId)
   let maxLocalBaseVersion = -1
   for (const candidate of [path, resyncPath]) {
@@ -97,19 +103,25 @@ async function loadSnapshot(projectId, userId, remoteBaseVersion) {
       }
     }
   }
-  try {
-    return await loadSnapshotFromClsiCache(projectId, userId, remoteBaseVersion)
-  } catch (err) {
-    if (err instanceof Errors.MissingUpdatesError) {
-      maxLocalBaseVersion = Math.max(
-        maxLocalBaseVersion,
-        err.info.baseHistoryVersion
+  if (populateClsiCache) {
+    try {
+      return await loadSnapshotFromClsiCache(
+        projectId,
+        userId,
+        remoteBaseVersion
       )
-    } else if (!isENOENT(err)) {
-      logger.warn(
-        { err, projectId, userId },
-        'compile from cache: cannot download from clsi-cache'
-      )
+    } catch (err) {
+      if (err instanceof Errors.MissingUpdatesError) {
+        maxLocalBaseVersion = Math.max(
+          maxLocalBaseVersion,
+          err.info.baseHistoryVersion
+        )
+      } else if (!isENOENT(err)) {
+        logger.warn(
+          { err, projectId, userId },
+          'compile from cache: cannot download from clsi-cache'
+        )
+      }
     }
   }
   throw new Errors.MissingUpdatesError('needs more updates', {
@@ -349,7 +361,12 @@ export async function syncResourcesToDisk(
   let fullSync = true
   try {
     ;({ rawSnapshot, globalBlobs, fullSync, localBaseVersion } =
-      await loadSnapshot(projectId, userId, remoteBaseVersion))
+      await loadSnapshot(
+        projectId,
+        userId,
+        remoteBaseVersion,
+        request.populateClsiCache
+      ))
     source = fullSync ? 'clsi-cache' : 'local'
     logger.debug(
       { projectId, userId, localBaseVersion, remoteBaseVersion },
@@ -424,6 +441,7 @@ export async function syncResourcesToDisk(
   const blobStore = new BlobStore(
     request.historyId,
     request.filestoreBlobPrefix,
+    request.clsiPerfVariant,
     globalBlobs
   )
   const loadEagerStart = performance.now()
@@ -509,15 +527,19 @@ class BlobStore {
   #globalBlobs
   /** @type {string} */
   #filestoreBlobPrefix
+  /** @type {string} */
+  #clsiPerfVariant
 
   /**
    * @param {string} historyId
    * @param {string} filestoreBlobPrefix
+   * @param {string} clsiPerfVariant
    * @param {string[]} globalBlobs
    */
-  constructor(historyId, filestoreBlobPrefix, globalBlobs) {
+  constructor(historyId, filestoreBlobPrefix, clsiPerfVariant, globalBlobs) {
     this.#historyId = historyId
     this.#filestoreBlobPrefix = filestoreBlobPrefix
+    this.#clsiPerfVariant = clsiPerfVariant
     this.#globalBlobs = globalBlobs
   }
 
@@ -529,6 +551,9 @@ class BlobStore {
     const u = new URL(Settings.apis.filestore.url)
     if (this.#filestoreBlobPrefix) {
       u.pathname = `${this.#filestoreBlobPrefix}/${hash}`
+    } else if (this.#clsiPerfVariant) {
+      u.host = Settings.apis.clsiPerf.host
+      u.pathname = `/variant/${this.#clsiPerfVariant}/hash/${hash}`
     } else if (this.#globalBlobs.includes(hash)) {
       u.pathname = `/history/global/hash/${hash}`
     } else {

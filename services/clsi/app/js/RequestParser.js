@@ -167,6 +167,13 @@ function parse(body, callback) {
       response.filestoreBlobPrefix = _checkPath(compile.filestoreBlobPrefix)
     }
 
+    // clsi-perf
+    response.clsiPerfVariant = _parseAttribute(
+      'clsiPerfVariant',
+      compile.options.clsiPerfVariant,
+      { type: 'string' }
+    )
+
     const rootResourcePath = _parseAttribute(
       'rootResourcePath',
       compile.rootResourcePath,
