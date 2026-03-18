@@ -12,9 +12,8 @@ import assert from 'node:assert/strict'
 
 import {
   coalesceOrEqualOrThrow,
-  coalesceOrEqualOrThrowAddress,
-  coalesceOrEqualOrThrowName,
   coalesceOrThrowVATNumber,
+  extractNameFromAccount,
   getCanadaTaxIdType,
   getAustraliaTaxIdType,
   getBrazilTaxIdType,
@@ -40,6 +39,24 @@ import {
   normalisedGBVATNumber,
 } from './migrate_recurly_customers_to_stripe.helpers.mjs'
 
+test('extractNameFromAccount returns normalized full name when first and last are present', () => {
+  const account = {
+    firstName: ' Alice ',
+    lastName: ' Example ',
+  }
+
+  assert.equal(extractNameFromAccount(account), 'Alice Example')
+})
+
+test('extractNameFromAccount falls back to firstName when lastName is missing', () => {
+  const account = {
+    firstName: 'Alice Example',
+    lastName: '',
+  }
+
+  assert.equal(extractNameFromAccount(account), 'Alice Example')
+})
+
 test('coalesceOrEqualOrThrow returns primary when set', () => {
   assert.equal(coalesceOrEqualOrThrow('a', undefined, 'field'), 'a')
 })
@@ -56,144 +73,6 @@ test('coalesceOrEqualOrThrow throws when both are set but differ', () => {
   assert.throws(
     () => coalesceOrEqualOrThrow('a', 'b', 'field'),
     /Primary and fallback values are both set but differ/
-  )
-})
-
-test('coalesceOrEqualOrThrowAddress returns null when neither is valid', () => {
-  assert.equal(coalesceOrEqualOrThrowAddress({}), null)
-  assert.equal(
-    coalesceOrEqualOrThrowAddress({
-      address: { street1: '', postalCode: '', country: '' },
-      billingInfo: { address: { street1: '', postalCode: '', country: '' } },
-    }),
-    null
-  )
-
-  assert.equal(
-    coalesceOrEqualOrThrowAddress({
-      address: { street1: '   ', postalCode: '  ', country: '  ' },
-    }),
-    null
-  )
-})
-
-test('coalesceOrEqualOrThrowAddress returns account when billing invalid', () => {
-  const account = {
-    address: { street1: '1 Road', postalCode: 'ABC', country: 'GB' },
-    billingInfo: {
-      address: { street1: '', postalCode: 'ABC', country: 'GB' },
-    },
-  }
-  assert.deepEqual(coalesceOrEqualOrThrowAddress(account), {
-    line1: '1 Road',
-    postal_code: 'ABC',
-    country: 'GB',
-  })
-})
-
-test('coalesceOrEqualOrThrowAddress returns billing when account invalid', () => {
-  const account = {
-    address: { street1: '', postalCode: 'ABC', country: 'GB' },
-    billingInfo: {
-      address: { street1: '1 Road', postalCode: 'ABC', country: 'GB' },
-    },
-  }
-  assert.deepEqual(coalesceOrEqualOrThrowAddress(account), {
-    line1: '1 Road',
-    postal_code: 'ABC',
-    country: 'GB',
-  })
-})
-
-test('coalesceOrEqualOrThrowAddress returns billing when both valid+equal', () => {
-  const addr = { street1: '1 Road', postalCode: 'ABC', country: 'GB' }
-  assert.deepEqual(
-    coalesceOrEqualOrThrowAddress({
-      address: { ...addr },
-      billingInfo: { address: addr },
-    }),
-    { line1: '1 Road', postal_code: 'ABC', country: 'GB' }
-  )
-})
-
-test('coalesceOrEqualOrThrowAddress normalizes Recurly-style address fields', () => {
-  const account = {
-    billingInfo: {
-      address: {
-        street1: 'as',
-        street2: '',
-        city: '',
-        region: '',
-        postalCode: '12312',
-        country: 'AI',
-      },
-    },
-  }
-
-  assert.deepEqual(coalesceOrEqualOrThrowAddress(account), {
-    line1: 'as',
-    postal_code: '12312',
-    country: 'AI',
-  })
-})
-
-test('coalesceOrEqualOrThrowAddress throws when both valid but differ', () => {
-  const account = {
-    address: { street1: '1 Road', postalCode: 'ABC', country: 'GB' },
-    billingInfo: {
-      address: { street1: '2 Road', postalCode: 'ABC', country: 'GB' },
-    },
-  }
-  assert.throws(
-    () => coalesceOrEqualOrThrowAddress(account),
-    /Billing address and account address differ/
-  )
-})
-
-test('coalesceOrEqualOrThrowName returns billingInfo name when both sources match', () => {
-  const account = {
-    firstName: 'Alice',
-    lastName: 'Billing',
-    billingInfo: { firstName: 'Alice', lastName: 'Billing' },
-  }
-  assert.equal(coalesceOrEqualOrThrowName(account), 'Alice Billing')
-})
-
-test('coalesceOrEqualOrThrowName prefers billingInfo when billingInfo is full but account is not', () => {
-  const account = {
-    firstName: 'Alice',
-    lastName: '',
-    billingInfo: { firstName: 'Alice', lastName: 'Billing' },
-  }
-  assert.equal(coalesceOrEqualOrThrowName(account), 'Alice Billing')
-})
-
-test('coalesceOrEqualOrThrowName falls back to account when billingInfo missing last name', () => {
-  const account = {
-    firstName: 'Alice',
-    lastName: 'Account',
-    billingInfo: { firstName: 'Alice', lastName: '' },
-  }
-  assert.equal(coalesceOrEqualOrThrowName(account), 'Alice Account')
-})
-
-test('coalesceOrEqualOrThrowName returns null when both sources are empty', () => {
-  assert.equal(coalesceOrEqualOrThrowName({}), null)
-  assert.equal(
-    coalesceOrEqualOrThrowName({ firstName: '', lastName: '' }),
-    null
-  )
-})
-
-test('coalesceOrEqualOrThrowName throws when both full names are present but differ', () => {
-  const account = {
-    firstName: 'Alice',
-    lastName: 'Account',
-    billingInfo: { firstName: 'Alice', lastName: 'Billing' },
-  }
-  assert.throws(
-    () => coalesceOrEqualOrThrowName(account),
-    /Name differs between billingInfo and account/
   )
 })
 

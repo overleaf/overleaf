@@ -1,12 +1,9 @@
 /* eslint-disable @overleaf/require-script-runner */
-import lodash from 'lodash'
 
 /*
  *
  * This file can be deleted once the Recurly to Stripe migration is complete.
  */
-
-const { isEqual } = lodash
 
 export function coalesceOrEqualOrThrow(a, b, fieldName) {
   const isSetA = !!a
@@ -26,44 +23,6 @@ export function normalizeName(firstName, lastName) {
   const last = (lastName || '').trim()
   const full = `${first} ${last}`.trim()
   return full || null
-}
-
-/**
- * Extract and coalesce customer name from Recurly data.
- *
- * Atomic behavior: first+last name are taken from the same source.
- *
- * Coalesce/equality behavior:
- * - Prefer billingInfo name when both first+last are present.
- * - Fall back to account name otherwise.
- * - If both billingInfo and account have a complete (first+last) name and they differ, throw.
- *
- * @param {object} account - Recurly account object
- * @returns {string|null}
- */
-export function coalesceOrEqualOrThrowName(account) {
-  const billingHasFullName = !!(
-    account.billingInfo?.firstName && account.billingInfo?.lastName
-  )
-  const accountHasFullName = !!(account.firstName && account.lastName)
-
-  const billingName = billingHasFullName
-    ? normalizeName(
-        account.billingInfo?.firstName,
-        account.billingInfo?.lastName
-      )
-    : null
-  const accountName = accountHasFullName
-    ? normalizeName(account.firstName, account.lastName)
-    : null
-
-  if (billingHasFullName && accountHasFullName && billingName !== accountName) {
-    throw new Error(
-      `Name differs between billingInfo and account (${billingName} != ${accountName})`
-    )
-  }
-
-  return billingName ?? accountName
 }
 
 /**
@@ -88,10 +47,8 @@ export function extractNameFromBillingInfo(account) {
  * @returns {string|null}
  */
 export function extractNameFromAccount(account) {
-  const accountHasFullName = !!(account.firstName && account.lastName)
-  return accountHasFullName
-    ? normalizeName(account.firstName, account.lastName)
-    : null
+  // some accounts have only a firstName field populated with the full name, so normalizeName falls back to just firstName if lastName is missing
+  return normalizeName(account.firstName, account.lastName)
 }
 
 /**
@@ -131,52 +88,24 @@ export function normalizeRecurlyAddressToStripe(address) {
     .toUpperCase()
 
   // Only send an address if it has enough data to be plausibly accepted/usable by Stripe.
-  // eslint-disable-next-line camelcase
-  if (!line1 || !postal_code || !country) return null
+  // For now we'll accept just bare minimum of a country code
   if (!/^[A-Z]{2}$/.test(country)) return null
 
   const line2 = (address.street2 || '').trim()
   const city = (address.city || '').trim()
   const state = (address.region || '').trim()
 
+  // Intentionally include empty-string fields so Stripe clears any existing
+  // stale values on the customer address when Recurly has blanks.
   return {
     line1,
-    ...(line2 ? { line2 } : {}),
-    ...(city ? { city } : {}),
-    ...(state ? { state } : {}),
+    line2,
+    city,
+    state,
     // eslint-disable-next-line camelcase
     postal_code,
     country,
   }
-}
-
-/**
- * Extract address from Recurly data.
- *
- * Prefers billingInfo address as this is what the customer entered during checkout.
- * Falls back to account address for manually-created accounts or legacy data.
- *
- * @param {object} account - Recurly account object
- * @returns {import('stripe').Stripe.AddressParam|null}
- */
-export function coalesceOrEqualOrThrowAddress(account) {
-  const billingAddress = normalizeRecurlyAddressToStripe(
-    account.billingInfo?.address
-  )
-  const accountAddress = normalizeRecurlyAddressToStripe(account?.address)
-
-  const isBillingAddressValid = !!billingAddress
-  const isAccountAddressValid = !!accountAddress
-
-  if (!isBillingAddressValid && !isAccountAddressValid) return null
-  if (isBillingAddressValid && !isAccountAddressValid) return billingAddress
-  if (!isBillingAddressValid && isAccountAddressValid) return accountAddress
-
-  if (!isEqual(billingAddress, accountAddress)) {
-    throw new Error('Billing address and account address differ')
-  }
-
-  return billingAddress
 }
 
 /**

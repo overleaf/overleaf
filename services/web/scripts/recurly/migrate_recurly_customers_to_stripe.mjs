@@ -92,8 +92,6 @@ import { scriptRunner } from '../lib/ScriptRunner.mjs'
 
 import {
   areStripeAndRecurlyCardDetailsEqual,
-  coalesceOrEqualOrThrowAddress,
-  coalesceOrEqualOrThrowName,
   coalesceOrThrowPaymentMethod,
   extractNameFromAccount,
   extractNameFromBillingInfo,
@@ -1284,8 +1282,8 @@ async function resolveCustomerIdentity(account, recurlyAccountCode, context) {
 
   if (!hasConflict) {
     // No conflict: use the standard coalesce logic (billing info preferred)
-    name = coalesceOrEqualOrThrowName(account)
-    address = coalesceOrEqualOrThrowAddress(account)
+    name = billingName ?? accountName
+    address = billingAddress ?? accountAddress
     companyName = billingCompany ?? accountCompany
     vatNumber = billingVat ?? accountVat
     collectionMethod = null
@@ -1488,6 +1486,13 @@ async function processCustomer(
       vatNumber,
       billingInfoForPaymentMethod,
     } = await resolveCustomerIdentity(account, recurlyAccountCode, context)
+
+    if (name === null && companyName === null) {
+      // This should not happen since we're handling all the known cases in resolveCustomerIdentity but just in case
+      throw new Error(
+        'Unable to resolve customer name: both billing info and account fields are missing'
+      )
+    }
 
     let taxIdType = null
     let createdTaxId = null
