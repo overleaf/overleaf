@@ -200,7 +200,9 @@ async function saveSnapshot(
         globalBlobs,
         localBaseVersion,
         rawSnapshot: snapshot.toRaw(),
-      })
+      }),
+      // use cheapest gzip compression level
+      { level: 1 }
     ),
     { flag: 'wx' }
   )
