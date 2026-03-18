@@ -153,13 +153,11 @@ function isPositionInsideSelection(pos: number, from: number, to: number) {
 
 function isPositionInsideAnyRangeOrCursor(view: EditorView, pos: number) {
   for (const range of view.state.selection.ranges) {
-    // If it's a cursor, treat a right-click anywhere on the same line as "inside".
-    // This avoids collapsing multi-cursor selections when right-clicking on blank lines
-    // or to the right of the caret.
+    // If it's a cursor (not a selection), only treat it as "inside" when
+    // right-clicking exactly on the cursor position. This allows cursor
+    // movement when clicking elsewhere on the same line.
     if (range.from === range.to) {
-      const clickedLine = view.state.doc.lineAt(pos)
-      const cursorLine = view.state.doc.lineAt(range.from)
-      if (clickedLine.number === cursorLine.number) {
+      if (pos === range.from) {
         return true
       }
       continue
