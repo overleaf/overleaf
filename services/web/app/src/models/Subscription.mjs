@@ -112,6 +112,18 @@ export const SubscriptionSchema = new Schema(
       },
     },
     ssoConfig: { type: ObjectId, ref: 'SSOConfig' },
+    sharingPermissions: {
+      byEmail: {
+        type: String,
+        enum: ['anyone_in_x', 'anyone'],
+        default: 'anyone',
+      },
+      byLinkSharing: {
+        type: String,
+        enum: ['no_one', 'anyone_in_x', 'anyone'],
+        default: 'anyone',
+      },
+    },
   },
   { minimize: false }
 )

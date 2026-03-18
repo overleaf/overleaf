@@ -96,6 +96,8 @@ export default function ManagedGroupSubscriptions() {
 
   const combinedUserManagement = useFeatureFlag('combined-user-management')
 
+  const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
+
   if (!managedGroupSubscriptions) {
     return null
   }
@@ -147,17 +149,28 @@ export default function ManagedGroupSubscriptions() {
                 <GroupSettingsButtonWithAdBadge subscription={subscription} />
               )}
               {isAdmin && (
-                <RowLink
-                  href={`/manage/groups/${subscription._id}/audit-logs`}
-                  heading={t('audit_logs')}
-                  subtext={t('view_audit_logs_group_subtext')}
-                  icon="list"
-                  onClick={() =>
-                    sendMB('group-audit-log-click', {
-                      subscriptionId: subscription._id,
-                    })
-                  }
-                />
+                <>
+                  {isSharingUpdatesEnabled &&
+                    subscription.planLevelName === 'Professional' && (
+                      <RowLink
+                        href={`/manage/groups/${subscription._id}/sharing-permissions`}
+                        heading={t('sharing_permissions')}
+                        subtext={t('manage_group_sharing_permissions_subtext')}
+                        icon="share"
+                      />
+                    )}
+                  <RowLink
+                    href={`/manage/groups/${subscription._id}/audit-logs`}
+                    heading={t('audit_logs')}
+                    subtext={t('view_audit_logs_group_subtext')}
+                    icon="list"
+                    onClick={() =>
+                      sendMB('group-audit-log-click', {
+                        subscriptionId: subscription._id,
+                      })
+                    }
+                  />
+                </>
               )}
               <RowLink
                 href={`/metrics/groups/${subscription._id}`}

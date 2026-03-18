@@ -178,6 +178,7 @@ function formatGroupPlansDataForDash() {
 
 async function userSubscriptionPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
+  await SplitTestHandler.promises.getAssignment(req, res, 'sharing-updates')
   await SplitTestHandler.promises.getAssignment(req, res, 'pause-subscription')
   await SplitTestHandler.promises.getAssignment(
     req,

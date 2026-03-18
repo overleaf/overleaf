@@ -68,6 +68,7 @@ import { AdminCapability } from '../../../types/admin-capabilities'
 import { AlgoliaConfig } from '../../../modules/algolia-search/frontend/js/types'
 import { WritefullPublicEnv } from '@wf/domain/writefull-public-env'
 import { UserNotificationPreferences } from '../../../types/notifications'
+import { SharingPermissions } from '../../../modules/sharing-permissions/app/src/types'
 
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
@@ -266,6 +267,7 @@ export interface Meta {
   'ol-script-logs': ScriptLogType[]
   'ol-settingsGroupSSO': { enabled: boolean } | undefined
   'ol-settingsPlans': Plan[]
+  'ol-sharingPermissions': SharingPermissions
   'ol-shouldAllowEditingDetails': boolean
   'ol-shouldLoadHotjar': boolean
   'ol-showAiFeatures': boolean

@@ -208,6 +208,48 @@ describe('<ManagedGroupSubscriptions />', function () {
     await screen.findAllByText('Audit logs')
   })
 
+  it('does not render the Sharing Permissions settings row when the user is not the group admin', function () {
+    renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+      metaTags: [
+        {
+          name: 'ol-managedGroupSubscriptions',
+          value: managedGroupSubscriptions2,
+        },
+        {
+          name: 'ol-groupSettingsEnabledFor',
+          value: [],
+        },
+        {
+          name: 'ol-splitTestVariants',
+          value: { 'sharing-updates': 'enabled' },
+        },
+      ],
+    })
+
+    expect(screen.queryByText(/sharing permissions/i)).to.be.null
+    expect(screen.queryByText(/manage how group members share projects/i)).to.be
+      .null
+  })
+
+  it('renders the Sharing Permissions settings row when the user is the group admin and plan is professional', async function () {
+    renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+      metaTags: [
+        {
+          name: 'ol-managedGroupSubscriptions',
+          value: managedGroupSubscriptions,
+        },
+        { name: 'ol-usersEmail', value: 'you@example.com' },
+        {
+          name: 'ol-splitTestVariants',
+          value: { 'sharing-updates': 'enabled' },
+        },
+      ],
+    })
+
+    await screen.findAllByText(/sharing permissions/i)
+    await screen.findAllByText(/manage how group members share projects/i)
+  })
+
   it('renders Managed Group / Group SSO settings row when both features are turned on', async function () {
     renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
       metaTags: [
