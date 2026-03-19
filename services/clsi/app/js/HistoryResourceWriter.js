@@ -22,6 +22,7 @@ import UrlCache from './UrlCache.js'
 import OError from '@overleaf/o-error'
 import ClsiMetrics from './Metrics.js'
 import { promiseMapSettledWithLimit } from '@overleaf/promise-utils'
+import Metrics from '@overleaf/metrics'
 
 const gzip = promisify(zlib.gzip)
 const gunzip = promisify(zlib.gunzip)
@@ -482,19 +483,28 @@ export async function syncResourcesToDisk(
         if (!hash) {
           throw new OError('unexpected file without content and hash', { path })
         }
-        const fallbackURL = null // no fallback
-        const lastModified = new Date(0) // content is static
         if (!createCacheFolder) {
           createCacheFolder = UrlCache.promises.createProjectDir(projectId)
         }
         await createCacheFolder
-        await UrlCache.promises.downloadUrlToFile(
-          projectId,
-          blobStore.getBlobURL(hash).href,
-          fallbackURL,
-          Path.join(compileDir, path),
-          lastModified
-        )
+        const url = blobStore.getBlobURL(hash).href
+        try {
+          const fallbackURL = null // no fallback
+          const lastModified = new Date(0) // content is static
+          await UrlCache.promises.downloadUrlToFile(
+            projectId,
+            url,
+            fallbackURL,
+            Path.join(compileDir, path),
+            lastModified
+          )
+        } catch (err) {
+          logger.err(
+            { err, projectId, path, resourceUrl: url },
+            'error downloading file for resources'
+          )
+          Metrics.inc('download-failed')
+        }
       }
     }
   )
