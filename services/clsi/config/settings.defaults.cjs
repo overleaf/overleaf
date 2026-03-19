@@ -61,6 +61,10 @@ module.exports = {
       shards: JSON.parse(process.env.CLSI_CACHE_INSTANCES || '[]').filter(
         ({ zone, readOnly }) => zone === process.env.ZONE && !readOnly
       ),
+      currentShards: parseInt(process.env.CLSI_CACHE_CURRENT_SHARDS, 10),
+      desiredShards: parseInt(process.env.CLSI_CACHE_DESIRED_SHARDS, 10),
+      reshardFrom: new Date(process.env.CLSI_CACHE_RESHARD_FROM),
+      reshardUntil: new Date(process.env.CLSI_CACHE_RESHARD_UNTIL),
     },
     filestore: {
       url:
