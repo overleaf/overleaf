@@ -476,6 +476,25 @@ class MockV1Api extends AbstractMockApi {
       }
       res.json(template)
     })
+
+    this.app.get(
+      '/api/v1/overleaf/fake_route_api_handler_tests',
+      (req, res) => {
+        const expectedStatus = req.query.expectedStatus
+        const expectedBody = req.query.expectedBody
+        const statusCode = Number(expectedStatus)
+        if (
+          !Number.isInteger(statusCode) ||
+          statusCode < 100 ||
+          statusCode > 599
+        ) {
+          return res
+            .status(500)
+            .json({ error: 'Invalid expectedStatus query parameter' })
+        }
+        return res.status(statusCode).json(JSON.parse(expectedBody))
+      }
+    )
   }
 }
 
