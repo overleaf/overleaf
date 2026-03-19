@@ -137,6 +137,7 @@ const en = {
       'This is a language suggestion. You can accept, reject or block the suggestion.',
     'suggestion-card.unpin': 'Unpin the card to show it near the edits',
     'suggestion-card.pin': 'Pin the card to keep its size and position',
+    'suggestion-card.show-info': 'Show information',
     'suggestion-card.block-edit': 'Block this edit from appearing again',
     'suggestion-card.hide-suggestions.title': 'Hide suggestions too?',
     'suggestion-card.hide-suggestions.question':
@@ -375,6 +376,7 @@ const en = {
       'Enter your password below to link the accounts associated with',
     'welcome.choose-a-different-writefull-account':
       'choose a different Writefull account',
+    'welcome.language-suggestions': 'Language suggestions',
     'welcome.writefull':
       'Get Writefull’s AI-powered language suggestions and editing tools in Overleaf to help you write smarter and faster.',
     'welcome.writefull-enabled':
@@ -408,6 +410,7 @@ const en = {
       'information Overleaf shares with Writefull',
     'welcome.and-its': 'and its',
     'welcome.privacy-notice': 'privacy notice',
+    'welcome.ok': 'OK',
     'welcome.go-back': 'Go back',
     'welcome.reset-password': 'Reset password',
     'welcome.enable-writefull':
@@ -649,6 +652,7 @@ const es = {
       'Desanclar la tarjeta para mostrarla cerca de las sugerencias',
     'suggestion-card.pin':
       'Anclar la tarjeta para mantener su tamaño y posición',
+    'suggestion-card.show-info': 'Mostrar información',
     'suggestion-card.block-edit':
       'Bloquear esta sugerencia para que no aparezca de nuevo',
     'suggestion-card.hide-suggestions.title':
@@ -896,6 +900,7 @@ const es = {
       'Introduce tu contraseña a continuación para vincular las cuentas asociadas con',
     'welcome.choose-a-different-writefull-account':
       'elige una cuenta de Writefull diferente',
+    'welcome.language-suggestions': 'Sugerencias de lenguaje',
     'welcome.writefull':
       'Obtén las sugerencias de lenguaje y las herramientas de edición impulsadas por IA de Writefull en Overleaf para ayudarte a escribir de manera más inteligente y rápida.',
     'welcome.writefull-enabled':
@@ -929,6 +934,7 @@ const es = {
     'welcome.and-its': 'y su',
     'welcome.privacy-notice': 'aviso de privacidad',
     'welcome.go-back': 'Volver',
+    'welcome.ok': 'OK',
     'welcome.reset-password': 'Restablecer contraseña',
     'welcome.enable-writefull':
       'Habilitar Writefull para soporte de lenguaje y LaTeX',
