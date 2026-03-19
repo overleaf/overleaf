@@ -3,6 +3,7 @@ import { fetchNothing, fetchString } from '@overleaf/fetch-utils'
 import ClsiApp from './helpers/ClsiApp.js'
 import { expect } from 'chai'
 import Settings from '@overleaf/settings'
+import Metrics from '@overleaf/metrics'
 
 describe('Simple LaTeX file', function () {
   const content = `\
@@ -20,6 +21,18 @@ Hello world
           compileGroup: 'simple-latex-file',
         },
       },
+    },
+    {
+      description: 'simple file (TL2017)',
+      request: {
+        resources: [{ path: 'main.tex', content }],
+        options: {
+          compileGroup: 'simple-latex-file',
+          imageName: 'quay.io/sharelatex/texlive-full:2017.1',
+        },
+      },
+      // In TL2017 latexmk performs an extra LaTeX pass even for this simple document.
+      expectedRuns: 2,
     },
     {
       description: 'clsi-perf request',
@@ -46,6 +59,13 @@ Hello world
           this.body = await Client.compile(this.project_id, this.request)
         } catch (error) {
           this.error = error
+        }
+      })
+
+      after(function () {
+        // Clear all metrics after each scenario
+        if (Metrics.prom && Metrics.prom.register) {
+          Metrics.prom.register.resetMetrics()
         }
       })
 
@@ -111,14 +131,15 @@ Hello world
           ]
         }
 
+        const expectedRuns = scenario.expectedRuns ?? 1
         // Note: chai's all.keys assertion rejects extra keys
         stats.should.have.all.keys(
           'isInitialCompile',
           'latexmk-errors',
           'latex-runs',
           'latex-runs-with-errors',
-          'latex-runs-1',
-          'latex-runs-with-errors-1',
+          `latex-runs-${expectedRuns}`,
+          `latex-runs-with-errors-${expectedRuns}`,
           'pdf-size',
           ...pdfCachingStats
         )
@@ -129,6 +150,11 @@ Hello world
           'compileE2E',
           ...pdfCachingTimings
         )
+      })
+
+      it('should report the correct number of runs', function () {
+        const { stats } = this.body.compile
+        expect(stats['latex-runs']).to.equal(scenario.expectedRuns ?? 1)
       })
     })
   }
