@@ -530,13 +530,14 @@ describe('<FileTreeModalCreateFile/>', function () {
 
     // the submit button should not be present
     cy.findByRole('button', { name: 'Create' }).should('not.exist')
+    cy.findByRole('button', { name: 'Select files' }).should('be.focused')
 
     cy.wrap(null).then(() => {
       const clipboardData = new DataTransfer()
       clipboardData.items.add(
         new File(['test'], 'test.tex', { type: 'text/plain' })
       )
-      cy.findByLabelText('Uppy Dashboard').trigger('paste', { clipboardData })
+      cy.focused().trigger('paste', { clipboardData })
     })
 
     cy.wait('@uploadFile')
