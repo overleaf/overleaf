@@ -161,11 +161,23 @@ export default class PDFJSWrapper {
 
   // get the current page, offset and page size
   get currentPosition() {
-    const pageIndex = this.viewer.currentPageNumber - 1
+    const containerRect = this.container.getBoundingClientRect()
+
+    let pageIndex = this.viewer.currentPageNumber - 1
+    for (let i = pageIndex; i >= 0; i--) {
+      const pageView = this.viewer.getPageView(i)
+      if (!pageView?.div) continue
+      const pageRect = pageView.div.getBoundingClientRect()
+      if (pageRect.bottom < containerRect.top) {
+        pageIndex = i + 1
+        break
+      }
+      pageIndex = i
+    }
+
     const pageView = this.viewer.getPageView(pageIndex)
     const pageRect = pageView.div.getBoundingClientRect()
 
-    const containerRect = this.container.getBoundingClientRect()
     const dy = containerRect.top - pageRect.top
     const dx = containerRect.left - pageRect.left
     const [left, top] = pageView.viewport.convertToPdfPoint(dx, dy)
