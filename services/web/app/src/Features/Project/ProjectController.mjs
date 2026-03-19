@@ -473,6 +473,7 @@ const _ProjectController = {
       'plans-2026-phase-1',
       'testing-ai-usage',
       'wf-fake-non-english-suggestions',
+      'tabs-experiment',
     ].filter(Boolean)
 
     const getUserValues = async userId =>

@@ -7,6 +7,7 @@ export type ActiveExperiment =
   | 'monthly-texlive'
   | 'bibtex-visual-editor'
   | 'overleaf-code'
+  | 'editor-tabs'
 
 export const isInExperiment = (experiment: ActiveExperiment): boolean => {
   const experiments = getMeta('ol-labsExperiments')

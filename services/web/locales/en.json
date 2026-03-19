@@ -376,6 +376,7 @@
   "clone_with_git": "Clone with Git",
   "close": "Close",
   "close_dialog": "Close dialog",
+  "close_tab": "Close tab",
   "clsi_maintenance": "The compile servers are down for maintenance, and will be back shortly.",
   "clsi_unavailable": "Sorry, the compile server for your project was temporarily unavailable. Please try again in a few moments.",
   "cn": "Chinese (Simplified)",

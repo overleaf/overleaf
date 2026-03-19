@@ -1,0 +1,79 @@
+:root {
+  --editor-tab-max-path-length: 150px;
+}
+
+.editor-tabs-container {
+  display: flex;
+  flex-direction: row;
+  list-style: none;
+  padding: 0;
+  border-bottom: 1px solid var(--border-divider-themed);
+  margin: 0;
+  flex: 0 0 auto;
+  background: var(--bg-primary-themed);
+  overflow-x: auto;
+}
+
+.editor-file-tab {
+  --tab-bg-color: transparent;
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-02);
+  justify-content: center;
+  box-sizing: border-box;
+  padding: var(--spacing-02) var(--spacing-03);
+  background: var(--tab-bg-color);
+  outline: none;
+  color: var(--content-primary-themed);
+  border: none;
+  font-size: var(--font-size-02);
+  flex-direction: row;
+  cursor: pointer;
+  border-right: 1px solid var(--border-divider-themed);
+  border-left: 1px solid var(--tab-bg-color);
+  user-select: none;
+
+  &.tab-selected {
+    --tab-bg-color: var(--bg-secondary-themed);
+  }
+
+  .material-symbols {
+    vertical-align: middle;
+    font-size: var(--font-size-03);
+  }
+
+  &.tab-drop-right {
+    border-right-color: var(--border-primary-themed);
+  }
+
+  &.tab-drop-left {
+    border-left-color: var(--border-primary-themed);
+  }
+
+  &.tab-temporary {
+    font-style: italic;
+  }
+
+  .editor-file-tab-close-action {
+    background: transparent;
+    border: none;
+    color: var(--content-primary-themed);
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+
+    &:hover {
+      color: var(--content-secondary-themed);
+    }
+  }
+}
+
+.editor-file-tab-path {
+  text-wrap: nowrap;
+  max-width: var(--editor-tab-max-path-length);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  overflow: hidden;
+}

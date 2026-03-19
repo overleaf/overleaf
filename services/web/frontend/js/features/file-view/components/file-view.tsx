@@ -60,7 +60,7 @@ export default function FileView({ file }: { file: BinaryFile }) {
   )
 
   return (
-    <div className="file-view full-size">
+    <div className="file-view">
       {!hasError && content}
       {!isUnpreviewableFile && contentLoading && <FileViewLoadingIndicator />}
       {(isUnpreviewableFile || hasError) && (
