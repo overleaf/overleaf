@@ -1,0 +1,21 @@
+.themed-tooltip {
+  --bs-popover-bg: var(--bg-light-primary);
+  --bs-popover-header-bg: var(--bg-light-primary);
+  --bs-popover-body-color: var(--content-primary);
+  --bs-popover-header-color: var(--content-primary);
+
+  .material-symbols {
+    color: var(--bs-popover-header-color);
+  }
+}
+
+@include theme('light') {
+  .themed-tooltip {
+    @include dark-bg;
+
+    --bs-popover-bg: var(--bg-dark-primary);
+    --bs-popover-header-bg: var(--bg-dark-primary);
+    --bs-popover-body-color: var(--content-primary-dark);
+    --bs-popover-header-color: var(--content-primary-dark);
+  }
+}

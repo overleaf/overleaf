@@ -1,4 +1,4 @@
-import { FC, RefObject, useCallback, useEffect, useMemo, useRef } from 'react'
+import { FC, RefObject, useCallback, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Nav, TabContainer } from 'react-bootstrap'
 import { useLayoutContext } from '@/shared/context/layout-context'
@@ -30,10 +30,7 @@ import RailResizeHandle from './rail-resize-handle'
 import RailModals from './rail-modals'
 import RailOverflowDropdown from './rail-overflow-dropdown'
 import useRailOverflow from '@/features/ide-react/hooks/use-rail-overflow'
-import EditorTourRailTooltip from '@/features/ide-redesign/components/editor-tour/editor-tour-rail-tooltip'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
-import EditorTourThemeTooltip from '@/features/ide-redesign/components/editor-tour/editor-tour-theme-tooltip'
-import EditorTourGotQuestionsTooltip from '@/features/ide-redesign/components/editor-tour/editor-tour-got-questions'
 import { shouldIncludeElement } from '@/features/ide-react/util/rail-utils'
 import { useEditorContext } from '@/shared/context/editor-context'
 import useEventListener from '@/shared/hooks/use-event-listener'
@@ -75,9 +72,6 @@ export const RailLayout = () => {
 
   const isHistoryView = view === 'history'
 
-  const fileTreeRef = useRef<HTMLButtonElement>(null)
-  const settingsRef = useRef<HTMLButtonElement>(null)
-
   useEventListener(
     'ui:select-rail-tab',
     useCallback(
@@ -105,7 +99,6 @@ export const RailLayout = () => {
         // NOTE: We always need to mount the file tree on first load
         // since it is responsible for opening the initial document.
         mountOnFirstLoad: true,
-        ref: fileTreeRef,
       },
       {
         key: 'full-project-search',
@@ -167,7 +160,6 @@ export const RailLayout = () => {
           sendEvent('rail-click', { tab: 'settings' })
           setLeftMenuShown(true)
         },
-        ref: settingsRef,
       },
     ],
     [setLeftMenuShown, t, sendEvent]
@@ -305,9 +297,6 @@ export const RailLayout = () => {
           </nav>
         </Nav>
       </nav>
-      <EditorTourRailTooltip target={fileTreeRef.current} />
-      <EditorTourThemeTooltip target={settingsRef.current} />
-      <EditorTourGotQuestionsTooltip target={settingsRef.current} />
       {moduleRailPopovers
         .filter(shouldIncludeElement)
         .map(({ key, Component, ref }) => (
