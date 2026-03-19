@@ -48,6 +48,12 @@
       padding: var(--image-padding);
     }
 
+    .labs-experiment-icon {
+      padding: var(--spacing-03);
+      color: var(--green-70);
+      font-size: 24px;
+    }
+
     img {
       width: calc(var(--image-size) - var(--image-padding) * 2);
       height: calc(var(--image-size) - var(--image-padding) * 2);

@@ -39,8 +39,7 @@ const MonthlyTexliveLabsWidget = ({
   const logo = (
     <MaterialIcon
       type="construction"
-      size="2x"
-      className="rounded bg-primary-subtle"
+      className="rounded bg-primary-subtle labs-experiment-icon"
     />
   )
 

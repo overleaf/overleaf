@@ -34,8 +34,7 @@ const LabsWidget = ({ setErrorMessage, labsProgram }: LabsWidgetProps) => {
       logo={
         <MaterialIcon
           type="code"
-          size="2x"
-          className="rounded bg-primary-subtle"
+          className="rounded bg-primary-subtle labs-experiment-icon"
         />
       }
       optedInDescription={description}
