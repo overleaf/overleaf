@@ -42,7 +42,7 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const { openEntity } = useFileTreeOpenContext()
   const { openDocWithId, openFileWithId } = useEditorManagerContext()
   const tabsEnabled =
-    isInExperiment('editor-tabs') && isSplitTestEnabled('tabs-experiment')
+    isInExperiment('editor-tabs') && isSplitTestEnabled('editor-tabs')
 
   const [openTabs, setOpenTabs] = usePersistedState<PersistedTabInfo[]>(
     `open-tabs:${projectId}`,

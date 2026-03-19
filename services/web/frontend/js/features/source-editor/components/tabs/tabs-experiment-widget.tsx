@@ -37,6 +37,6 @@ const LabsWidget = ({ setErrorMessage, labsProgram }: LabsWidgetProps) => {
   )
 }
 
-export const hidden = () => !isSplitTestEnabled('tabs-experiment')
+export const hidden = () => !isSplitTestEnabled('editor-tabs')
 
 export default LabsWidget

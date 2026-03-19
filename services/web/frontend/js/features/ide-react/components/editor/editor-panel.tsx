@@ -11,7 +11,7 @@ import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 export default function EditorPanel() {
   const { selectedEntityCount, openEntity } = useFileTreeOpenContext()
   const tabsEnabled =
-    isInExperiment('editor-tabs') && isSplitTestEnabled('tabs-experiment')
+    isInExperiment('editor-tabs') && isSplitTestEnabled('editor-tabs')
 
   return (
     <div className="ide-redesign-editor-container">
