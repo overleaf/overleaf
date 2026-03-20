@@ -459,7 +459,8 @@ describe('ProjectDuplicator', function () {
 
     it('should delete the broken cloned project', function (ctx) {
       ctx.ProjectDeleter.promises.deleteProject.should.have.been.calledWith(
-        ctx.newBlankProject._id
+        ctx.newBlankProject._id,
+        { deletedReason: 'clone-failure' }
       )
     })
 

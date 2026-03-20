@@ -20,6 +20,7 @@ export const DeleterDataSchema = new Schema({
   deletedProjectLastUpdatedAt: { type: Date },
   deletedProjectOverleafId: { type: Number },
   deletedProjectOverleafHistoryId: { type: Schema.Types.Mixed },
+  deletedReason: { type: String },
 })
 
 const DeletedProjectSchema = new Schema(

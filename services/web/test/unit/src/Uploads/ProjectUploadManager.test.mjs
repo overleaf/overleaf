@@ -445,7 +445,8 @@ describe('ProjectUploadManager', function () {
 
       it('should cleanup the blank project created', async function (ctx) {
         ctx.ProjectDeleter.promises.deleteProject.should.have.been.calledWith(
-          ctx.project._id
+          ctx.project._id,
+          { deletedReason: 'zip-import-failure' }
         )
       })
 
@@ -471,7 +472,8 @@ describe('ProjectUploadManager', function () {
 
       it('should cleanup the blank project created', function (ctx) {
         ctx.ProjectDeleter.promises.deleteProject.should.have.been.calledWith(
-          ctx.project._id
+          ctx.project._id,
+          { deletedReason: 'zip-import-failure' }
         )
       })
 

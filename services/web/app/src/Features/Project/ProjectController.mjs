@@ -7,6 +7,7 @@ import logger from '@overleaf/logger'
 import { expressify } from '@overleaf/promise-utils'
 import mongodb from 'mongodb-legacy'
 import ProjectDeleter from './ProjectDeleter.mjs'
+import { DeletedProjectReasons } from './DeletedProjectReasons.mjs'
 import ProjectDuplicator from './ProjectDuplicator.mjs'
 import ProjectCreationHandler from './ProjectCreationHandler.mjs'
 import EditorController from '../Editor/EditorController.mjs'
@@ -171,6 +172,7 @@ const _ProjectController = {
     await ProjectDeleter.promises.deleteProject(projectId, {
       deleterUser: user,
       ipAddress: req.ip,
+      deletedReason: DeletedProjectReasons.USER,
     })
     ProjectAuditLogHandler.addEntryIfManagedInBackground(
       projectId,

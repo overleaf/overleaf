@@ -684,7 +684,7 @@ describe('EditorController', function () {
   describe('deleteProject', function () {
     beforeEach(function (ctx) {
       ctx.err = 'errro'
-      ctx.ProjectDeleter.deleteProject.callsArgWith(1, ctx.err)
+      ctx.ProjectDeleter.deleteProject.callsArgWith(2, ctx.err)
     })
 
     it('should call the project handler', async function (ctx) {
@@ -692,7 +692,9 @@ describe('EditorController', function () {
         ctx.EditorController.deleteProject(ctx.project_id, err => {
           err.should.equal(ctx.err)
           ctx.ProjectDeleter.deleteProject
-            .calledWith(ctx.project_id)
+            .calledWith(ctx.project_id, {
+              deletedReason: 'user',
+            })
             .should.equal(true)
           resolve()
         })

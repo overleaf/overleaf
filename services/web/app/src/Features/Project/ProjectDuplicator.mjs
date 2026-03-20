@@ -10,6 +10,7 @@ import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mj
 import HistoryManager from '../History/HistoryManager.mjs'
 import ProjectCreationHandler from './ProjectCreationHandler.mjs'
 import ProjectDeleter from './ProjectDeleter.mjs'
+import { DeletedProjectReasons } from './DeletedProjectReasons.mjs'
 import ProjectEntityMongoUpdateHandler from './ProjectEntityMongoUpdateHandler.mjs'
 import ProjectEntityUpdateHandler from './ProjectEntityUpdateHandler.mjs'
 import ProjectGetter from './ProjectGetter.mjs'
@@ -161,7 +162,9 @@ async function duplicate(
   } catch (err) {
     // Clean up broken clone on error.
     // Make sure we delete the new failed project, not the original one!
-    await ProjectDeleter.promises.deleteProject(newProject._id)
+    await ProjectDeleter.promises.deleteProject(newProject._id, {
+      deletedReason: DeletedProjectReasons.CLONE_FAILURE,
+    })
     throw OError.tag(err, 'error cloning project, broken clone deleted', {
       originalProjectId,
       newProjectName,

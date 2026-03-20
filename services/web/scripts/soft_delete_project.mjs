@@ -1,5 +1,6 @@
 import minimist from 'minimist'
 import ProjectDeleter from '../app/src/Features/Project/ProjectDeleter.mjs'
+import { DeletedProjectReasons } from '../app/src/Features/Project/DeletedProjectReasons.mjs'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 async function main() {
@@ -11,7 +12,9 @@ async function main() {
   }
   console.log(`Soft deleting project ${projectId}`)
   // soft delete, project will be permanently deleted after 90 days
-  await ProjectDeleter.promises.deleteProject(projectId)
+  await ProjectDeleter.promises.deleteProject(projectId, {
+    deletedReason: DeletedProjectReasons.SCRIPT,
+  })
 }
 
 try {

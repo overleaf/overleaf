@@ -288,7 +288,7 @@ describe('ProjectDeleter', function () {
             { 'deleterData.deletedProjectId': project._id },
             {
               project,
-              deleterData: sinon.match.object,
+              deleterData: sinon.match.has('deletedReason', 'account-deletion'),
             },
             { upsert: true }
           )
@@ -343,6 +343,7 @@ describe('ProjectDeleter', function () {
     it('should save a DeletedProject with additional deleterData', async function (ctx) {
       ctx.deleterData.deleterIpAddress = ctx.ip
       ctx.deleterData.deleterId = ctx.user._id
+      ctx.deleterData.deletedReason = 'user'
 
       ctx.ProjectMock.expects('deleteOne').chain('exec').resolves()
       ctx.DeletedProjectMock.expects('updateOne')
@@ -359,6 +360,7 @@ describe('ProjectDeleter', function () {
       await ctx.ProjectDeleter.promises.deleteProject(ctx.project._id, {
         deleterUser: ctx.user,
         ipAddress: ctx.ip,
+        deletedReason: 'user',
       })
       ctx.DeletedProjectMock.verify()
     })

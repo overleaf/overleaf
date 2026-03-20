@@ -13,6 +13,7 @@ import ProjectEntityMongoUpdateHandler from '../Project/ProjectEntityMongoUpdate
 import ProjectRootDocManager from '../Project/ProjectRootDocManager.mjs'
 import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
 import ProjectDeleter from '../Project/ProjectDeleter.mjs'
+import { DeletedProjectReasons } from '../Project/DeletedProjectReasons.mjs'
 import TpdsProjectFlusher from '../ThirdPartyDataStore/TpdsProjectFlusher.mjs'
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
@@ -55,7 +56,9 @@ async function createProjectFromZipArchive(ownerId, defaultName, zipPath) {
     } catch (err) {
       // no need to wait for the cleanup here
       ProjectDeleter.promises
-        .deleteProject(project._id)
+        .deleteProject(project._id, {
+          deletedReason: DeletedProjectReasons.ZIP_IMPORT_FAILURE,
+        })
         .catch(err =>
           logger.error(
             { err, projectId: project._id },
@@ -97,7 +100,9 @@ async function createProjectFromZipArchiveWithName(
     } catch (err) {
       // no need to wait for the cleanup here
       ProjectDeleter.promises
-        .deleteProject(project._id)
+        .deleteProject(project._id, {
+          deletedReason: DeletedProjectReasons.ZIP_IMPORT_FAILURE,
+        })
         .catch(err =>
           logger.error(
             { err, projectId: project._id },

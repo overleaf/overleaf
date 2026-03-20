@@ -710,6 +710,7 @@ describe('ProjectController', function () {
             .calledWith(ctx.project_id, {
               deleterUser: ctx.user,
               ipAddress: ctx.req.ip,
+              deletedReason: 'user',
             })
             .should.equal(true)
           code.should.equal(200)

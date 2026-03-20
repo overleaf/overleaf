@@ -22,6 +22,7 @@ import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
 import HistoryManager from '../History/HistoryManager.mjs'
 import ChatApiHandler from '../Chat/ChatApiHandler.mjs'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
+import { DeletedProjectReasons } from './DeletedProjectReasons.mjs'
 
 const PROJECT_EXPIRATION_BATCH_SIZE = 10000
 
@@ -84,7 +85,11 @@ async function deleteUsersProjects(userId) {
     { userId, projectCount: projects.length },
     'found user projects to delete'
   )
-  await promiseMapWithLimit(5, projects, project => deleteProject(project._id))
+  await promiseMapWithLimit(5, projects, project =>
+    deleteProject(project._id, {
+      deletedReason: DeletedProjectReasons.ACCOUNT_DELETION,
+    })
+  )
   logger.info({ userId }, 'deleted all user projects')
   await CollaboratorsHandler.promises.removeUserFromAllProjects(userId)
 }
@@ -214,6 +219,7 @@ async function deleteProject(projectId, options = {}) {
       deleterId:
         options.deleterUser != null ? options.deleterUser._id : undefined,
       deleterIpAddress: options.ipAddress,
+      deletedReason: options.deletedReason,
       deletedProjectId: project._id,
       deletedProjectOwnerId: project.owner_ref,
       deletedProjectCollaboratorIds: project.collaberator_refs,

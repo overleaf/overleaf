@@ -5,6 +5,7 @@ import ProjectEntityUpdateHandler from '../Project/ProjectEntityUpdateHandler.mj
 import ProjectOptionsHandler from '../Project/ProjectOptionsHandler.mjs'
 import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
 import ProjectDeleter from '../Project/ProjectDeleter.mjs'
+import { DeletedProjectReasons } from '../Project/DeletedProjectReasons.mjs'
 import EditorRealTimeController from './EditorRealTimeController.mjs'
 import async from 'async'
 import PublicAccessLevels from '../Authorization/PublicAccessLevels.mjs'
@@ -445,7 +446,11 @@ const EditorController = {
 
   deleteProject(projectId, callback) {
     Metrics.inc('editor.delete-project')
-    ProjectDeleter.deleteProject(projectId, callback)
+    ProjectDeleter.deleteProject(
+      projectId,
+      { deletedReason: DeletedProjectReasons.USER },
+      callback
+    )
   },
 
   renameEntity(
