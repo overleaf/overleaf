@@ -25,8 +25,6 @@ export const defaultSettings: UserSettings = {
   lineHeight: 'normal',
   mathPreview: true,
   referencesSearchMode: 'advanced',
-  enableNewEditor: true,
-  enableNewEditorLegacy: true,
   breadcrumbs: true,
   darkModePdf: false,
 }

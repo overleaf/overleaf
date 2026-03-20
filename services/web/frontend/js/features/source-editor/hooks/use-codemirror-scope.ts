@@ -89,7 +89,6 @@ function useCodeMirrorScope(view: EditorView) {
     syntaxValidation,
     mathPreview,
     referencesSearchMode,
-    enableNewEditor,
   } = userSettings
   const activeOverallTheme = useActiveOverallTheme()
   const editorTheme = useActiveEditorTheme()
@@ -160,7 +159,6 @@ function useCodeMirrorScope(view: EditorView) {
     syntaxValidation,
     mathPreview,
     referencesSearchMode,
-    enableNewEditor,
   })
 
   const currentDocRef = useRef({

@@ -66,8 +66,6 @@ export const USER_EMAIL = 'testuser@example.com'
 
 const defaultUserSettings = {
   ...defaultSettings,
-  enableNewEditor: false,
-  enableNewEditorLegacy: false,
   referencesSearchMode: 'simple',
 } satisfies UserSettings
 

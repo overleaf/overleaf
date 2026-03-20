@@ -410,9 +410,6 @@ async function updateUserSettings(req, res, next) {
     const mode = body.referencesSearchMode === 'simple' ? 'simple' : 'advanced'
     user.ace.referencesSearchMode = mode
   }
-  if (body.enableNewEditor != null) {
-    user.ace.enableNewEditorStageFour = Boolean(body.enableNewEditor)
-  }
   if (body.darkModePdf != null) {
     user.ace.darkModePdf = Boolean(body.darkModePdf)
   }

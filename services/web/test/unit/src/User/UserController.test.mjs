@@ -532,39 +532,6 @@ describe('UserController', function () {
       })
     })
 
-    it('should set enableNewEditorStageFour to true', function (ctx) {
-      return new Promise(resolve => {
-        ctx.req.body = { enableNewEditor: true }
-        ctx.res.sendStatus = code => {
-          ctx.user.ace.enableNewEditorStageFour.should.equal(true)
-          resolve()
-        }
-        ctx.UserController.updateUserSettings(ctx.req, ctx.res)
-      })
-    })
-
-    it('should set enableNewEditorStageFour to false', function (ctx) {
-      return new Promise(resolve => {
-        ctx.req.body = { enableNewEditor: false }
-        ctx.res.sendStatus = code => {
-          ctx.user.ace.enableNewEditorStageFour.should.equal(false)
-          resolve()
-        }
-        ctx.UserController.updateUserSettings(ctx.req, ctx.res)
-      })
-    })
-
-    it('should keep enableNewEditorStageFour a boolean', function (ctx) {
-      return new Promise(resolve => {
-        ctx.req.body = { enableNewEditor: 'foobar' }
-        ctx.res.sendStatus = code => {
-          ctx.user.ace.enableNewEditorStageFour.should.equal(true)
-          resolve()
-        }
-        ctx.UserController.updateUserSettings(ctx.req, ctx.res)
-      })
-    })
-
     it('should set darkModePdf to true', function (ctx) {
       return new Promise(resolve => {
         ctx.req.body = { darkModePdf: true }
