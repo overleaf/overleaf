@@ -62,7 +62,8 @@ async function getLatestBuildFromCache(projectId, userId, filename, signal) {
       isUpToDate,
       lastUpdated,
       size,
-      allFiles,
+      // Hide history snapshot from frontend
+      allFiles: allFiles.filter(f => f !== 'history-resync.json.gz'),
       shard,
       zone,
     },
