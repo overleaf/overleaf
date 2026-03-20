@@ -5,7 +5,7 @@ import { expect } from 'chai'
 
 const sleep = promisify(setTimeout)
 
-describe('Stop compile', function () {
+describe('Clear cache', function () {
   before(async function () {
     this.request = {
       options: {
@@ -40,7 +40,7 @@ describe('Stop compile', function () {
     await sleep(1000)
 
     try {
-      const res = await Client.stopCompile(this.project_id)
+      const res = await Client.clearCache(this.project_id)
       this.stopResult = { res }
     } catch (error) {
       this.stopResult = { error }
@@ -50,7 +50,7 @@ describe('Stop compile', function () {
     await sleep(1000)
   })
 
-  it('should force a compile response with an error status', function () {
+  it('should emit a compile response with terminated status', function () {
     expect(this.stopResult.error).not.to.exist
     expect(this.stopResult.res.status).to.equal(204)
     expect(this.compileResult.error).not.to.exist
@@ -67,7 +67,7 @@ describe('Stop compile', function () {
   })
 
   it('should work with not pending compile', async function () {
-    const res = await Client.stopCompile(this.project_id)
+    const res = await Client.clearCache(this.project_id)
     expect(res.status).to.equal(204)
   })
 })

@@ -31,7 +31,7 @@ async function stopCompile(projectId) {
 }
 
 async function clearCache(projectId) {
-  await fetchNothing(`${host}/project/${projectId}`, {
+  return await fetchNothing(`${host}/project/${projectId}`, {
     method: 'DELETE',
   })
 }

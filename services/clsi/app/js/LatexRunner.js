@@ -144,10 +144,15 @@ function _writeLogOutput(projectId, directory, output, callback) {
   })
 }
 
+function isRunning(projectId) {
+  const id = `${projectId}`
+  return ProcessTable[id] != null
+}
+
 function killLatex(projectId, callback) {
   const id = `${projectId}`
   logger.debug({ id }, 'killing running compile')
-  if (ProcessTable[id] == null) {
+  if (!isRunning(projectId)) {
     logger.warn({ id }, 'no such project to kill')
     callback(null)
   } else {
@@ -208,6 +213,7 @@ function _buildLatexCommand(mainFile, opts = {}) {
 }
 
 export default {
+  isRunning,
   runLatex,
   killLatex,
   promises: {

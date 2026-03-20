@@ -10,6 +10,14 @@ const LOCK_TIMEOUT_MS = RequestParser.MAX_TIMEOUT * 1000 + 120000
 
 const LOCKS = new Map()
 
+/**
+ * @param key
+ * @return {Lock | undefined}
+ */
+function getExistingLock(key) {
+  return LOCKS.get(key)
+}
+
 function acquire(key) {
   const currentLock = LOCKS.get(key)
   if (currentLock != null) {
@@ -52,7 +60,16 @@ class Lock {
     return Date.now() >= this.expiresAt
   }
 
+  waitForRelease() {
+    if (this.waitingForRelease) return this.waitingForRelease
+    this.waitingForRelease = new Promise(resolve => {
+      this.onRelease = resolve
+    })
+    return this.waitingForRelease
+  }
+
   release() {
+    if (this.onRelease) this.onRelease()
     const lockWasActive = LOCKS.delete(this.key)
     if (!lockWasActive) {
       logger.error({ key: this.key }, 'Lock was released twice')
@@ -63,4 +80,4 @@ class Lock {
   }
 }
 
-export default { acquire }
+export default { acquire, getExistingLock }
