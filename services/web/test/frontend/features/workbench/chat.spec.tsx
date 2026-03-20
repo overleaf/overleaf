@@ -1,4 +1,4 @@
-import { consentTutorialKey } from '@modules/workbench/frontend/js/components/chat'
+import { AI_CONSENT_TUTORIAL_KEY } from '@/shared/hooks/use-ai-consent'
 import Workbench from '@modules/workbench/frontend/js/components/workbench'
 import { EditorProviders } from '../../helpers/editor-providers'
 import { EditorView } from '@codemirror/view'
@@ -13,7 +13,9 @@ describe('Workbench', { scrollBehavior: false }, function () {
       win.metaAttributesCache.set('ol-splitTestVariants', {
         'ai-workbench-release': 'enabled',
       })
-      win.metaAttributesCache.set('ol-inactiveTutorials', [consentTutorialKey])
+      win.metaAttributesCache.set('ol-inactiveTutorials', [
+        AI_CONSENT_TUTORIAL_KEY,
+      ])
     })
   })
 

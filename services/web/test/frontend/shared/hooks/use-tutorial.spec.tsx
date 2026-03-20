@@ -1,9 +1,7 @@
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import { useEffect, useState } from 'react'
-import {
-  EditorProviders,
-  makeTutorialProvider,
-} from '../../helpers/editor-providers'
+import { EditorProviders } from '../../helpers/editor-providers'
+import { makeTutorialProvider } from '../../helpers/make-tutorial-provider'
 
 const TutorialTester = ({
   tutorial,
