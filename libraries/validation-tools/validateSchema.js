@@ -49,6 +49,9 @@ function validateSchema(schema, data) {
     if (isZodErrorLike(err)) {
       const errorMessages = err.issues.map(issue => {
         const value = getPathValue(data, issue.path)
+        if (issue.path.length === 0) {
+          return issue.message
+        }
         const fieldName = String(issue.path[issue.path.length - 1])
         if (isRequiredError(issue, value)) {
           return `"${fieldName}" is required`
