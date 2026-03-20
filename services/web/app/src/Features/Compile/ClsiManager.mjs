@@ -681,7 +681,7 @@ async function _postToClsi(
         return { response: { compile: { status: 'conflict' } } }
       } else if (err.response.status === 423) {
         return { response: { compile: { status: 'compile-in-progress' } } }
-      } else if (err.response.status === 503) {
+      } else if (err.response.status === 502 || err.response.status === 503) {
         enableCompileFromCacheUntil =
           Date.now() + ENABLE_COMPILE_FROM_CACHE_ON_503_MS
         return { response: { compile: { status: 'unavailable' } } }
