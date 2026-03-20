@@ -246,6 +246,7 @@
     "@streamdown/cjk": "^1.0.2",
     "@streamdown/math": "^1.0.2",
     "@tailwindcss/container-queries": "^0.1.1",
+    "@tanstack/react-virtual": "^3.13.23",
     "@testing-library/cypress": "10.0.3",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
