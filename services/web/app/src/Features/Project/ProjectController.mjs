@@ -1082,10 +1082,11 @@ const _ProjectController = {
       refreshTimeoutHandler(),
       (async () => {
         try {
-          user.features = await FeaturesUpdater.promises.refreshFeatures(
+          const { features } = await FeaturesUpdater.promises.refreshFeatures(
             user._id,
             'load-editor'
           )
+          user.features = features
           metrics.inc('features-refresh', 1, {
             path: 'load-editor',
             status: 'success',

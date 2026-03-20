@@ -169,7 +169,10 @@ describe('ProjectController', function () {
     ctx.FeaturesUpdater = {
       featuresEpochIsCurrent: sinon.stub().returns(true),
       promises: {
-        refreshFeatures: sinon.stub().resolves(ctx.user),
+        refreshFeatures: sinon.stub().resolves({
+          features: { symbolPalette: true },
+          featuresChanged: true,
+        }),
       },
     }
     ctx.BrandVariationsHandler = {
@@ -1112,16 +1115,20 @@ describe('ProjectController', function () {
     })
 
     it('should refresh the user features if the epoch is outdated', async function (ctx) {
-      await new Promise(resolve => {
+      ctx.Features.hasFeature.withArgs('saas').returns(true)
+      await new Promise((resolve, reject) => {
         ctx.FeaturesUpdater.featuresEpochIsCurrent = sinon.stub().returns(false)
-        ctx.res.render = () => {
+        ctx.res.render = (_, data) => {
           ctx.FeaturesUpdater.promises.refreshFeatures.should.have.been.calledWith(
             ctx.user._id,
             'load-editor'
           )
+          expect(data.showSymbolPalette).to.equal(true)
           resolve()
         }
-        ctx.ProjectController.loadEditor(ctx.req, ctx.res)
+        ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+          if (err) reject(err)
+        })
       })
     })
 
