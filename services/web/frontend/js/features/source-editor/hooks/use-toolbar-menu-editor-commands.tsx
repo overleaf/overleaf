@@ -15,6 +15,7 @@ import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { language } from '@codemirror/language'
+import { isCursorOnEmptyLine } from '@/features/source-editor/utils/is-cursor-on-empty-line'
 
 export const useToolbarMenuBarEditorCommands = () => {
   const view = useCodeMirrorViewContext()
@@ -25,6 +26,7 @@ export const useToolbarMenuBarEditorCommands = () => {
   const { trackedWrite, comment } = usePermissionsContext()
   const languageName = state.facet(language)?.name
   const isTeXFile = languageName === 'latex'
+  const canComment = !isCursorOnEmptyLine(state)
 
   const openFigureModal = useCallback((source: FigureModalSource) => {
     window.dispatchEvent(
@@ -174,7 +176,7 @@ export const useToolbarMenuBarEditorCommands = () => {
         handler: () => {
           commands.addComment('toolbar')
         },
-        disabled: !comment || state.selection.main.empty,
+        disabled: !comment || !canComment,
       },
       /************************************
        *         Format menu
@@ -283,7 +285,7 @@ export const useToolbarMenuBarEditorCommands = () => {
     openFigureModal,
     trackedWrite,
     isTeXFile,
-    state.selection.main.empty,
+    canComment,
     comment,
   ])
 

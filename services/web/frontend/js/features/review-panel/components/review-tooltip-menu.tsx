@@ -18,6 +18,8 @@ import {
   buildAddNewCommentRangeEffect,
   reviewTooltipStateField,
 } from '@/features/source-editor/extensions/review-tooltip'
+import { selectHighlightedOrNearestToken } from '@/features/source-editor/utils/select-highlighted-or-nearest-token'
+import { EditorSelection } from '@codemirror/state'
 import { EditorView, getTooltip } from '@codemirror/view'
 import usePreviousValue from '@/shared/hooks/use-previous-value'
 import { useLayoutContext } from '@/shared/context/layout-context'
@@ -59,9 +61,18 @@ const ReviewTooltipMenu: FC = () => {
   }, [tooltipState, previousTooltipState])
 
   const addComment = useCallback(() => {
-    const { main } = view.state.selection
-    if (main.empty || !permissions.comment) {
+    if (!permissions.comment) {
       return
+    }
+
+    let { main } = view.state.selection
+
+    if (main.empty) {
+      const tokenRange = selectHighlightedOrNearestToken(view.state)
+      if (!tokenRange) {
+        return
+      }
+      main = EditorSelection.range(tokenRange.from, tokenRange.to)
     }
 
     openReviewPanel()
@@ -74,7 +85,10 @@ const ReviewTooltipMenu: FC = () => {
         ]
       : [buildAddNewCommentRangeEffect(main)]
 
-    view.dispatch({ effects })
+    view.dispatch({
+      selection: { anchor: main.anchor, head: main.head },
+      effects,
+    })
     setShow(false)
   }, [view, permissions.comment, openReviewPanel, setView])
 

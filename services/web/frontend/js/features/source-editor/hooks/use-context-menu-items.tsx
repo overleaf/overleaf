@@ -31,6 +31,7 @@ import {
   sendContextMenuEvent,
   ContextMenuItemSegmentation,
 } from '../utils/context-menu-analytics'
+import { isCursorOnEmptyLine } from '../utils/is-cursor-on-empty-line'
 
 export const useContextMenuItems = () => {
   const view = useCodeMirrorViewContext()
@@ -248,7 +249,7 @@ export const useContextMenuItems = () => {
       {
         label: t('comment'),
         handler: handleComment,
-        disabled: !hasSelection,
+        disabled: isCursorOnEmptyLine(state),
         show: permissions.comment,
         shortcut: getShortcut('insert-comment'),
       },

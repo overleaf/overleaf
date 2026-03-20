@@ -16,6 +16,7 @@ import { isMac } from '@/shared/utils/os'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
+import { isCursorOnEmptyLine } from '@/features/source-editor/utils/is-cursor-on-empty-line'
 
 const addCommentFromToolbar = () => commands.addComment('toolbar')
 
@@ -136,7 +137,7 @@ export const ToolbarItems: FC<{
                 <ToolbarButton
                   id="toolbar-add-comment"
                   label={t('add_comment')}
-                  disabled={state.selection.main.empty}
+                  disabled={isCursorOnEmptyLine(state)}
                   command={addCommentFromToolbar}
                   icon="add_comment"
                 />

@@ -239,7 +239,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
   })
 
   describe('when nothing is selected', function () {
-    it('should enable Cut, Copy, Paste, Suggest edits and disable Delete, Comment', function () {
+    it('should enable Cut, Copy, Paste, Suggest edits, Comment and disable Delete', function () {
       const scope = mockScope()
 
       cy.mount(
@@ -269,11 +269,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
           'aria-disabled',
           'true'
         )
-        cy.findByRole('menuitem', { name: /comment/i }).should(
-          'have.attr',
-          'aria-disabled',
-          'true'
-        )
+        cy.findByRole('menuitem', { name: /comment/i }).should('be.enabled')
         cy.findByRole('menuitem', { name: /suggest edits/i }).should(
           'be.enabled'
         )
