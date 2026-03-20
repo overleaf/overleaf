@@ -5,6 +5,7 @@ import { Fragment, memo, ReactElement, useCallback, useState } from 'react'
 import { debugConsole } from '@/utils/debugging'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { OLToastContainer } from '@/shared/components/ol/ol-toast-container'
+import clipboardToastGenerators from '@/features/source-editor/components/clipboard-toasts'
 
 const moduleGeneratorsImport = importOverleafModules('toastGenerators') as {
   import: { default: GlobalToastGeneratorEntry[] }
@@ -23,7 +24,10 @@ type GlobalToastGenerator = (
   args: Record<string, any>
 ) => Omit<OLToastProps, 'onDismiss'>
 
-const GENERATOR_LIST: GlobalToastGeneratorEntry[] = moduleGenerators.flat()
+const GENERATOR_LIST: GlobalToastGeneratorEntry[] = [
+  ...moduleGenerators.flat(),
+  ...clipboardToastGenerators,
+]
 const GENERATOR_MAP: Map<string, GlobalToastGenerator> = new Map(
   GENERATOR_LIST.map(({ key, generator }) => [key, generator])
 )

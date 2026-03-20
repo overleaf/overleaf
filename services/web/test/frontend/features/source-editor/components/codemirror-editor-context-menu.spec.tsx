@@ -13,6 +13,7 @@ import { DetachCompileContext } from '@/shared/context/detach-compile-context'
 import { FileTreeDataContext } from '@/shared/context/file-tree-data-context'
 import PackageVersions from '../../../../../app/src/infrastructure/PackageVersions'
 import { mockProject } from '../helpers/mock-project'
+import { GlobalToasts } from '@/features/ide-react/components/global-toasts'
 
 const createPermissionsProvider = (
   permissions: Partial<Permissions>
@@ -714,6 +715,62 @@ describe('editor context menu', { scrollBehavior: false }, function () {
         cy.findByRole('menuitem', { name: /copy/i }).should('be.enabled')
         cy.findByRole('menuitem', { name: /comment/i }).should('not.exist')
       })
+    })
+  })
+
+  describe('when clipboard access is blocked', function () {
+    beforeEach(function () {
+      cy.window().then(win => {
+        const blocked = new DOMException('Not allowed', 'NotAllowedError')
+        cy.stub(win.navigator.clipboard, 'read').rejects(blocked)
+        cy.stub(win.navigator.clipboard, 'readText').rejects(blocked)
+      })
+    })
+
+    it('should show a toast when clicking Paste', function () {
+      const scope = mockScope()
+
+      cy.mount(
+        <TestContainer>
+          <EditorProviders scope={scope}>
+            <GlobalToasts />
+            <CodeMirrorEditor />
+          </EditorProviders>
+        </TestContainer>
+      )
+
+      cy.get('.cm-line').eq(10).rightclick()
+      cy.findByRole('menu').within(() => {
+        cy.findByRole('menuitem', { name: pasteLabelMatcher }).click()
+      })
+
+      cy.get('.global-toasts').should(
+        'contain.text',
+        'Use the shortcut key to paste'
+      )
+    })
+
+    it('should show a toast when clicking Paste with formatting', function () {
+      const scope = mockScope()
+
+      cy.mount(
+        <TestContainer>
+          <EditorProviders scope={scope}>
+            <GlobalToasts />
+            <CodeMirrorEditor />
+          </EditorProviders>
+        </TestContainer>
+      )
+
+      cy.get('.cm-line').eq(10).rightclick()
+      cy.findByRole('menu').within(() => {
+        cy.findByRole('menuitem', { name: /paste with formatting/i }).click()
+      })
+
+      cy.get('.global-toasts').should(
+        'contain.text',
+        'Use the shortcut key to paste'
+      )
     })
   })
 

@@ -23,6 +23,7 @@ import {
   pasteWithoutFormatting,
   pasteWithFormatting,
 } from '../commands/clipboard'
+import { showClipboardPasteErrorToast } from '../components/clipboard-toasts'
 import { isVisual } from '../extensions/visual/visual'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { useTrackingChangesMode } from '@/shared/hooks/use-tracking-changes-mode'
@@ -109,17 +110,38 @@ export const useContextMenuItems = () => {
     [view, closeMenu]
   )
 
+  const getShortcut = useCallback(
+    (id: string) => {
+      const shortcut = shortcuts[id]?.[0]
+      return shortcut ? formatShortcut(shortcut) : undefined
+    },
+    [shortcuts]
+  )
+
   const inVisualMode = isVisual(view)
 
   const handleCut = wrapForContextMenu('cut', () => cutSelection(view))
   const handleCopy = wrapForContextMenu('copy', () => copySelection(view))
-  const handlePaste = wrapForContextMenu('paste', () =>
-    inVisualMode ? pasteWithFormatting(view) : pasteWithoutFormatting(view)
-  )
+  const handlePaste = wrapForContextMenu('paste', async () => {
+    const result = await (inVisualMode
+      ? pasteWithFormatting(view)
+      : pasteWithoutFormatting(view))
+    if (result === false) {
+      showClipboardPasteErrorToast(getShortcut('paste'))
+    }
+    return result
+  })
   const handlePasteSpecial = wrapForContextMenu(
     inVisualMode ? 'paste-without-formatting' : 'paste-with-formatting',
-    () =>
-      inVisualMode ? pasteWithoutFormatting(view) : pasteWithFormatting(view)
+    async () => {
+      const result = await (inVisualMode
+        ? pasteWithoutFormatting(view)
+        : pasteWithFormatting(view))
+      if (result === false) {
+        showClipboardPasteErrorToast(getShortcut('paste'))
+      }
+      return result
+    }
   )
   const handleDelete = wrapForContextMenu('delete', () =>
     commands.deleteSelection(view)
@@ -165,14 +187,6 @@ export const useContextMenuItems = () => {
     syncToPdf()
     view.focus()
   }, [syncToPdf, view, changeLayout, isEditorOnly])
-
-  const getShortcut = useCallback(
-    (id: string) => {
-      const shortcut = shortcuts[id]?.[0]
-      return shortcut ? formatShortcut(shortcut) : undefined
-    },
-    [shortcuts]
-  )
 
   return {
     closeMenu,

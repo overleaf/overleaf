@@ -105,7 +105,7 @@ export const pasteWithoutFormatting = async (
     pastePlainText(view, text)
     return true
   } catch {
-    // Clipboard access denied or empty
+    // Clipboard access denied
     return false
   }
 }
