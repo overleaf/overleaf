@@ -961,7 +961,7 @@ const _ProjectController = {
         userRestrictions: Array.from(req.userRestrictions || []),
         showAiFeatures,
         onAiFreeTrial:
-          user.features?.aiUsageQuota === Settings.aiFeatures?.freeTrialQuota,
+          fullFeatureSet?.aiUsageQuota === Settings.aiFeatures?.freeTrialQuota,
         detachRole,
         metadata: { viewport: false },
         showUpgradePrompt,
