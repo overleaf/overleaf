@@ -3,10 +3,11 @@ extends ../layout-react
 block vars
 	- var suppressNavbar = true
 	- var suppressSkipToContent = true
+	- isWebsiteRedesign = true
 
 block entrypointVar
 	- entrypoint = 'pages/user/add-secondary-email'
 
 block content
-	main.content.content-alt
+	main.content
 		#add-secondary-email
