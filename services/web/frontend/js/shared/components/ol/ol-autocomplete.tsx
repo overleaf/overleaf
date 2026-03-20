@@ -164,7 +164,7 @@ function OLAutocompleteInternal({
   }
 
   return (
-    <div className={classnames('dropdown', 'd-block')}>
+    <div className={classnames('dropdown', 'd-block', 'ol-autocomplete')}>
       <OLFormLabel
         {...getLabelProps()}
         className={showLabel ? '' : 'visually-hidden'}
