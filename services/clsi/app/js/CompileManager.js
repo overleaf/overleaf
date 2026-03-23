@@ -1,37 +1,33 @@
-import fsPromises from 'node:fs/promises'
-import os from 'node:os'
-import Path from 'node:path'
-import { callbackify, promisify } from 'node:util'
-import { execFile } from 'node:child_process'
-import Settings from '@overleaf/settings'
-import logger from '@overleaf/logger'
-import Metrics from '@overleaf/metrics'
-import OError from '@overleaf/o-error'
-import ResourceWriter from './ResourceWriter.js'
-import LatexRunner from './LatexRunner.js'
-import OutputFileFinder from './OutputFileFinder.js'
-import OutputCacheManager from './OutputCacheManager.js'
-import ClsiMetrics from './Metrics.js'
-import DraftModeManager from './DraftModeManager.js'
-import TikzManager from './TikzManager.js'
-import LockManager from './LockManager.js'
-import Errors from './Errors.js'
-import CommandRunner from './CommandRunner.js'
-import ContentCacheMetrics from './ContentCacheMetrics.js'
-import SynctexOutputParser from './SynctexOutputParser.js'
-import CLSICacheHandler from './CLSICacheHandler.js'
-import StatsManager from './StatsManager.js'
-import SafeReader from './SafeReader.js'
-import LatexMetrics from './LatexMetrics.js'
-import { callbackifyMultiResult } from '@overleaf/promise-utils'
-import * as HistoryResourceWriter from './HistoryResourceWriter.js'
-import Png2Pdf from './Png2Pdf.js'
+const fsPromises = require('node:fs/promises')
+const os = require('node:os')
+const Path = require('node:path')
+const { callbackify, promisify } = require('node:util')
+const { execFile } = require('node:child_process')
 
-const { downloadLatestCompileCache, downloadOutputDotSynctexFromCompileCache } =
-  CLSICacheHandler
-const { emitPdfStats } = ContentCacheMetrics
-const { enableLatexMkMetrics, addLatexFdbMetrics } = LatexMetrics
-const { shouldSkipMetrics } = ClsiMetrics
+const Settings = require('@overleaf/settings')
+const logger = require('@overleaf/logger')
+const OError = require('@overleaf/o-error')
+
+const ResourceWriter = require('./ResourceWriter')
+const LatexRunner = require('./LatexRunner')
+const OutputFileFinder = require('./OutputFileFinder')
+const OutputCacheManager = require('./OutputCacheManager')
+const ClsiMetrics = require('./Metrics')
+const DraftModeManager = require('./DraftModeManager')
+const TikzManager = require('./TikzManager')
+const LockManager = require('./LockManager')
+const Errors = require('./Errors')
+const CommandRunner = require('./CommandRunner')
+const { emitPdfStats } = require('./ContentCacheMetrics')
+const SynctexOutputParser = require('./SynctexOutputParser')
+const {
+  downloadLatestCompileCache,
+  downloadOutputDotSynctexFromCompileCache,
+} = require('./CLSICacheHandler')
+const StatsManager = require('./StatsManager')
+const SafeReader = require('./SafeReader')
+const { enableLatexMkMetrics, addLatexFdbMetrics } = require('./LatexMetrics')
+const { callbackifyMultiResult } = require('@overleaf/promise-utils')
 
 const KNOWN_LATEXMK_RULES = new Set([
   'biber',
@@ -57,279 +53,9 @@ const MISSING_FILE_PATTERNS = [
   /^Package inputenc Error:.*`([^']+)' not found/gm,
 ]
 
-// Matches: ! Package babel Error: Unknown option 'ngerman'.
-const BABEL_UNKNOWN_LANG_PATTERN =
-  /Package babel Error: Unknown option '([a-zA-Z]+)'/gm
-
-// Matches tikz library not found errors
-const TIKZ_LIBRARY_PATTERN =
-  /^! Package tikz Error: I did not find the tikz library '([^']+)'/gm
-
-// Matches packages that fatally error at load time (e.g. bidi requires XeTeX)
-const FATAL_PACKAGE_PATTERN =
-  /^! Fatal Package (\w+) Error:/gm
-
-// Persistent stub directory in texmf-local (survives across compiles)
-const PERSISTENT_STUB_DIR = '/usr/local/texlive/texmf-local/tex/latex/auto-stubs'
-
-// Core LaTeX packages that must NEVER be stubbed — they're part of the base
-// TeX Live installation and stubbing them breaks fundamental functionality.
-const NEVER_STUB_PACKAGES = new Set([
-  'fontenc', 'inputenc', 'babel', 'amsmath', 'amssymb', 'amsfonts',
-  'graphicx', 'graphics', 'color', 'xcolor', 'hyperref', 'geometry',
-  'fancyhdr', 'enumitem', 'booktabs', 'array', 'tabularx', 'longtable',
-  'xkeyval', 'keyval', 'xparse', 'l3keys2e', 'expl3', 'l3packages',
-  'pgf', 'tikz', 'pgfcore', 'pgfplots', 'calc', 'ifthen', 'etoolbox',
-  'kvoptions', 'kvsetkeys', 'kvdefinekeys', 'pdftexcmds', 'infwarerr',
-  'textcomp', 'fix-cm', 'lmodern', 'fontspec', 'unicode-math',
-  'natbib', 'biblatex', 'csquotes', 'url', 'microtype', 'parskip',
-  'setspace', 'caption', 'subcaption', 'float', 'wrapfig',
-  'textpos', 'listings', 'verbatim', 'fancyvrb', 'tcolorbox',
-  'multicol', 'multirow', 'makeidx', 'tocbibind', 'tocloft',
-  'titlesec', 'titletoc', 'appendix', 'pdfpages',
-])
-
-/**
- * Remove persistent stubs for packages that now have real .sty files
- * available in the TeX distribution (not our stub directory).
- */
-async function _cleanupStalePersistentStubs() {
-  let files
-  try {
-    files = await fsPromises.readdir(PERSISTENT_STUB_DIR)
-  } catch {
-    return // stub directory doesn't exist yet
-  }
-  for (const file of files) {
-    if (!file.endsWith('.sty')) continue
-    try {
-      const { stdout } = await execFilePromise('kpsewhich', ['-all', file])
-      const paths = stdout.trim().split('\n').filter(p => p.trim())
-      // If any path is NOT in our auto-stubs directory, a real package exists
-      const hasReal = paths.some(p => !p.includes('auto-stubs'))
-      if (hasReal) {
-        await fsPromises.unlink(Path.join(PERSISTENT_STUB_DIR, file))
-        logger.info({ file }, 'auto-install: removed stale stub (real package now available)')
-      }
-    } catch {
-      // kpsewhich failed, package not available, keep stub
-    }
-  }
-}
-
-/**
- * Remove persistent stub for a specific package if it exists.
- */
-async function _removePersistentStub(pkg) {
-  try {
-    await fsPromises.unlink(Path.join(PERSISTENT_STUB_DIR, `${pkg}.sty`))
-  } catch {
-    // stub didn't exist or already removed
-  }
-}
-
-/**
- * Find the correct TeX Live package name for a given .sty file using tlmgr search.
- * Returns the package name if found, or null.
- */
-async function _findTlmgrPackageName(styFile) {
-  try {
-    const { stdout } = await execFilePromise('tlmgr', [
-      'search', '--global', '--file', `/${styFile}`,
-    ], { timeout: 30000 })
-    const pkgMatch = stdout.match(/^(\S+):$/m)
-    return pkgMatch ? pkgMatch[1] : null
-  } catch {
-    return null
-  }
-}
-
-/**
- * Pre-install step: scan .tex source files for \usepackage and \RequirePackage,
- * batch-check availability with kpsewhich, and install/stub everything upfront
- * BEFORE compilation even starts. This avoids the slow one-at-a-time loop.
- */
-async function _preInstallFromSource(compileDir, mainFile, projectId) {
-  const texPath = Path.join(compileDir, mainFile)
-  let texContent
-  try {
-    texContent = await fsPromises.readFile(texPath, 'utf-8')
-  } catch {
-    return
-  }
-
-  // Extract all \usepackage{...} and \RequirePackage{...} (handles comma-separated)
-  const packagePattern = /\\(?:usepackage|RequirePackage)(?:\s*\[[^\]]*\])?\s*\{([^}]+)\}/g
-  const packages = new Set()
-  let m
-  while ((m = packagePattern.exec(texContent)) !== null) {
-    for (const pkg of m[1].split(',')) {
-      const name = pkg.trim()
-      if (name) packages.add(name)
-    }
-  }
-
-  if (packages.size === 0) return
-
-  // Clean up any stale persistent stubs before checking availability
-  await _cleanupStalePersistentStubs()
-
-  // Batch-check which packages are missing
-  const missing = []
-  for (const pkg of packages) {
-    try {
-      const { stdout } = await execFilePromise('kpsewhich', [`${pkg}.sty`])
-      if (stdout.trim()) {
-        // Found — but make sure it's not one of our stubs shadowing nothing
-        const foundPath = stdout.trim()
-        if (foundPath.includes('auto-stubs')) {
-          // Check if a real version exists too
-          try {
-            const { stdout: allPaths } = await execFilePromise('kpsewhich', ['-all', `${pkg}.sty`])
-            const hasReal = allPaths.trim().split('\n').some(p => p.trim() && !p.includes('auto-stubs'))
-            if (hasReal) {
-              // Real package exists, remove the stale stub
-              await _removePersistentStub(pkg)
-              continue
-            }
-          } catch {
-            // fall through to treat as missing
-          }
-          // Only our stub exists — still "missing" from TeX Live
-          // but don't re-install if we already know it's unresolvable
-          continue
-        }
-        continue // genuinely available
-      }
-    } catch {
-      // kpsewhich failed = not found
-    }
-    missing.push(pkg)
-  }
-
-  if (missing.length === 0) return
-
-  logger.info(
-    { projectId, count: missing.length, packages: missing.slice(0, 20) },
-    'auto-install: pre-scan found missing packages, batch-installing'
-  )
-
-  const toStub = []
-  let anyInstalled = false
-
-  // Batch install all missing packages using proper tlmgr search
-  for (const pkg of missing) {
-    const styFile = `${pkg}.sty`
-
-    // First try: find the real TeX Live package name via tlmgr search
-    let packageName = await _findTlmgrPackageName(styFile)
-
-    // Second try: use the package name directly (sometimes they match)
-    if (!packageName) {
-      packageName = pkg
-    }
-
-    try {
-      await execFilePromise('tlmgr', ['install', packageName], { timeout: 120000 })
-      // Verify it actually provides the .sty after install
-      try {
-        const { stdout } = await execFilePromise('kpsewhich', [styFile])
-        if (stdout.trim() && !stdout.trim().includes('auto-stubs')) {
-          anyInstalled = true
-          // Remove any stale persistent stub for this package
-          await _removePersistentStub(pkg)
-          continue
-        }
-      } catch {
-        // kpsewhich failed after install
-      }
-    } catch {
-      // tlmgr install failed
-    }
-
-    // If we also tried the direct name and it differed, try that too
-    if (packageName !== pkg) {
-      try {
-        await execFilePromise('tlmgr', ['install', pkg], { timeout: 120000 })
-        try {
-          const { stdout } = await execFilePromise('kpsewhich', [styFile])
-          if (stdout.trim() && !stdout.trim().includes('auto-stubs')) {
-            anyInstalled = true
-            await _removePersistentStub(pkg)
-            continue
-          }
-        } catch {
-          // still not found
-        }
-      } catch {
-        // direct install also failed
-      }
-    }
-
-    // Only stub if NOT a core package
-    if (!NEVER_STUB_PACKAGES.has(pkg)) {
-      toStub.push(pkg)
-    } else {
-      logger.warn(
-        { pkg, projectId },
-        'auto-install: refusing to stub core package — it should be part of base TeX Live'
-      )
-    }
-  }
-
-  // Create persistent stubs ONLY for truly unresolvable non-core packages
-  if (toStub.length > 0) {
-    try {
-      await fsPromises.mkdir(PERSISTENT_STUB_DIR, { recursive: true })
-    } catch {
-      // directory may already exist
-    }
-    for (const pkg of toStub) {
-      try {
-        const stubPath = Path.join(PERSISTENT_STUB_DIR, `${pkg}.sty`)
-        await fsPromises.writeFile(
-          stubPath,
-          `\\ProvidesPackage{${pkg}}%% auto-install stub\n`
-        )
-      } catch {
-        // ignore individual stub failures
-      }
-    }
-    try {
-      await execFilePromise('texhash', [], { timeout: 60000 })
-    } catch {
-      // texhash failure is non-critical
-    }
-    logger.info(
-      { projectId, stubbed: toStub },
-      'auto-install: pre-scan created persistent stubs'
-    )
-  }
-
-  // texhash for any successfully installed packages
-  if (anyInstalled) {
-    try {
-      await execFilePromise('texhash', [], { timeout: 60000 })
-    } catch {
-      // non-critical
-    }
-    // Clean up any stubs that are now shadowing real packages
-    await _cleanupStalePersistentStubs()
-    try {
-      await execFilePromise('texhash', [], { timeout: 60000 })
-    } catch {
-      // non-critical
-    }
-    logger.info(
-      { projectId, installed: missing.length - toStub.length },
-      'auto-install: pre-scan installed packages'
-    )
-  }
-}
-
 /**
  * Parse output.log for missing LaTeX packages/files.
- * Returns { missingFiles, missingBabelLangs, missingTikzLibs, fatalPackages }
+ * Returns an array of missing file names (e.g. ["tikz.sty", "babel.def"]).
  */
 async function _parseMissingPackages(compileDir) {
   const logPath = Path.join(compileDir, 'output.log')
@@ -337,7 +63,7 @@ async function _parseMissingPackages(compileDir) {
   try {
     logContent = await fsPromises.readFile(logPath, 'utf-8')
   } catch {
-    return { missingFiles: [], missingBabelLangs: [], missingTikzLibs: [], fatalPackages: [] }
+    return []
   }
 
   const missingFiles = new Set()
@@ -348,175 +74,45 @@ async function _parseMissingPackages(compileDir) {
       missingFiles.add(match[1])
     }
   }
-
-  const missingBabelLangs = new Set()
-  BABEL_UNKNOWN_LANG_PATTERN.lastIndex = 0
-  let match
-  while ((match = BABEL_UNKNOWN_LANG_PATTERN.exec(logContent)) !== null) {
-    missingBabelLangs.add(match[1])
-  }
-
-  const missingTikzLibs = new Set()
-  TIKZ_LIBRARY_PATTERN.lastIndex = 0
-  while ((match = TIKZ_LIBRARY_PATTERN.exec(logContent)) !== null) {
-    missingTikzLibs.add(match[1])
-  }
-
-  const fatalPackages = new Set()
-  FATAL_PACKAGE_PATTERN.lastIndex = 0
-  while ((match = FATAL_PACKAGE_PATTERN.exec(logContent)) !== null) {
-    fatalPackages.add(match[1])
-  }
-
-  // Detect packages that cause emergency stops (e.g. packages requiring
-  // interactive terminal input like eemeir, which cannot work in nonstop mode).
-  const emergencyStopPattern = /^! Emergency stop\./gm
-  let emMatch
-  while ((emMatch = emergencyStopPattern.exec(logContent)) !== null) {
-    const beforeText = logContent.slice(
-      Math.max(0, emMatch.index - 5000),
-      emMatch.index
-    )
-    const pkgMatches = [...beforeText.matchAll(/^Package:\s+([\w-]+)\s/gm)]
-    if (pkgMatches.length > 0) {
-      fatalPackages.add(pkgMatches[pkgMatches.length - 1][1])
-    }
-  }
-
-  // Generic fallback: if the compilation produced a fatal error but none of
-  // the specific patterns above found anything, identify the last package
-  // that was being loaded when the error occurred and flag it for stubbing.
-  if (
-    missingFiles.size === 0 &&
-    missingBabelLangs.size === 0 &&
-    missingTikzLibs.size === 0 &&
-    fatalPackages.size === 0
-  ) {
-    const fatalMatch = logContent.match(
-      /^!\s+==> Fatal error occurred, no output PDF file produced!/m
-    )
-    if (fatalMatch) {
-      const beforeFatal = logContent.slice(
-        Math.max(0, fatalMatch.index - 10000),
-        fatalMatch.index
-      )
-      const pkgMatches = [...beforeFatal.matchAll(/^Package:\s+([\w-]+)\s/gm)]
-      if (pkgMatches.length > 0) {
-        const lastPkg = pkgMatches[pkgMatches.length - 1][1]
-        fatalPackages.add(lastPkg)
-        logger.info(
-          { pkg: lastPkg },
-          'auto-install: generic fallback identified failing package'
-        )
-      }
-    }
-  }
-
-  return {
-    missingFiles: Array.from(missingFiles),
-    missingBabelLangs: Array.from(missingBabelLangs),
-    missingTikzLibs: Array.from(missingTikzLibs),
-    fatalPackages: Array.from(fatalPackages),
-  }
-}
-
-/**
- * Create a persistent stub for a package in texmf-local so it survives
- * across compiles. Also creates a copy in compileDir for immediate use.
- */
-async function _createPersistentStub(pkg, compileDir, projectId) {
-  const fname = `${pkg}.sty`
-  // Write to persistent texmf-local directory
-  try {
-    await fsPromises.mkdir(PERSISTENT_STUB_DIR, { recursive: true })
-    const persistentPath = Path.join(PERSISTENT_STUB_DIR, fname)
-    await fsPromises.writeFile(
-      persistentPath,
-      `\\ProvidesPackage{${pkg}}%% auto-install stub\n`
-    )
-  } catch (err) {
-    logger.warn({ err, pkg, projectId }, 'auto-install: failed to create persistent stub')
-  }
-  // Also write to compileDir for immediate use (before texhash runs)
-  try {
-    const localPath = Path.join(compileDir, fname)
-    await fsPromises.writeFile(
-      localPath,
-      `\\ProvidesPackage{${pkg}}%% auto-install stub\n`
-    )
-  } catch {
-    // non-critical
-  }
+  return Array.from(missingFiles)
 }
 
 /**
  * Attempt to install missing LaTeX packages using tlmgr.
- * Returns { installed: string[], unresolvable: string[] }.
+ * Returns an array of successfully installed package names.
  */
-async function _autoInstallPackages({ missingFiles, missingBabelLangs, missingTikzLibs }, projectId) {
+async function _autoInstallPackages(missingFiles, projectId) {
   const installed = []
-  const unresolvable = []
-
-  for (const lib of missingTikzLibs) {
-    try {
-      logger.info({ lib, projectId }, 'auto-install: installing tikz library')
-      await execFilePromise('tlmgr', ['install', lib], { timeout: 120000 })
-      installed.push(lib)
-    } catch (err) {
-      logger.warn({ err, lib, projectId }, 'auto-install: failed to install tikz library')
-    }
-  }
-
   for (const file of missingFiles) {
     try {
       const { stdout: searchResult } = await execFilePromise('tlmgr', [
-        'search', '--global', '--file', `/${file}`,
+        'search',
+        '--global',
+        '--file',
+        `/${file}`,
       ])
       const pkgMatch = searchResult.match(/^(\S+):$/m)
-      let packageName
       if (!pkgMatch) {
-        packageName = file.replace(/\.\w+$/, '')
         logger.warn(
-          { file, packageName, projectId },
-          'auto-install: tlmgr search found nothing, trying direct install'
+          { file, projectId },
+          'auto-install: no tlmgr package found for file'
         )
-      } else {
-        packageName = pkgMatch[1]
+        continue
       }
-      logger.info({ file, packageName, projectId }, 'auto-install: installing package')
-      await execFilePromise('tlmgr', ['install', packageName], { timeout: 120000 })
-      try {
-        const { stdout: found } = await execFilePromise('kpsewhich', [file])
-        if (found.trim()) {
-          installed.push(packageName)
-        } else {
-          unresolvable.push(file)
-        }
-      } catch {
-        unresolvable.push(file)
-      }
-    } catch (err) {
-      logger.warn({ err, file, projectId }, 'auto-install: failed to install package')
-      unresolvable.push(file)
-    }
-  }
-
-  for (const lang of missingBabelLangs) {
-    const packageName = `babel-${lang}`
-    try {
-      logger.info({ lang, packageName, projectId }, 'auto-install: installing babel language')
-      await execFilePromise('tlmgr', ['install', packageName], { timeout: 120000 })
+      const packageName = pkgMatch[1]
+      logger.info(
+        { file, packageName, projectId },
+        'auto-install: installing LaTeX package'
+      )
+      await execFilePromise('tlmgr', ['install', packageName], {
+        timeout: 120000,
+      })
       installed.push(packageName)
     } catch (err) {
-      logger.warn({ err, lang, packageName, projectId }, 'auto-install: failed to install babel language')
-    }
-    // Also install hyphenation patterns for the language
-    const hyphenPkg = `hyphen-${lang}`
-    try {
-      await execFilePromise('tlmgr', ['install', hyphenPkg], { timeout: 120000 })
-      installed.push(hyphenPkg)
-    } catch {
-      // hyphenation package may not exist for all languages — non-critical
+      logger.warn(
+        { err, file, projectId },
+        'auto-install: failed to install package'
+      )
     }
   }
 
@@ -528,7 +124,7 @@ async function _autoInstallPackages({ missingFiles, missingBabelLangs, missingTi
     }
   }
 
-  return { installed, unresolvable }
+  return installed
 }
 
 function getCompileName(projectId, userId) {
@@ -592,44 +188,13 @@ async function doCompile(request, stats, timings) {
     'syncing resources to disk'
   )
 
-  let resourceList, baseHistoryVersion
+  let resourceList
   try {
-    if (request.isCompileFromHistory) {
-      ;({ resourceList, baseHistoryVersion } =
-        await HistoryResourceWriter.syncResourcesToDisk(
-          projectId,
-          userId,
-          request,
-          compileDir,
-          timings,
-          stats
-        ))
-    } else {
-      // NOTE: resourceList is insecure, it should only be used to exclude files from the output list
-      resourceList = await ResourceWriter.promises.syncResourcesToDisk(
-        request,
-        compileDir
-      )
-
-      // apply a series of file modifications/creations for draft mode and tikz
-      if (request.draft) {
-        await DraftModeManager.promises.injectDraftMode(
-          Path.join(compileDir, request.rootResourcePath)
-        )
-      }
-
-      const needsMainFile = await TikzManager.promises.checkMainFile(
-        compileDir,
-        request.rootResourcePath,
-        resourceList
-      )
-      if (needsMainFile) {
-        await TikzManager.promises.injectOutputFile(
-          compileDir,
-          request.rootResourcePath
-        )
-      }
-    }
+    // NOTE: resourceList is insecure, it should only be used to exclude files from the output list
+    resourceList = await ResourceWriter.promises.syncResourcesToDisk(
+      request,
+      compileDir
+    )
   } catch (error) {
     if (error instanceof Errors.FilesOutOfSyncError) {
       OError.tag(error, 'files out of sync, please retry', {
@@ -722,144 +287,33 @@ async function doCompile(request, stats, timings) {
       timings,
     }
 
-    // Auto-install: pre-scan source files and batch-install before first compile
-    if (Settings.autoInstallPackages) {
-      await _preInstallFromSource(
-        compileDir,
-        request.rootResourcePath,
-        request.project_id
-      )
-    }
-
     await LatexRunner.promises.runLatex(compileName, runLatexArgs)
 
-    // Auto-install: retry loop for packages that couldn't be pre-installed
-    // (dependencies, conditionally loaded packages, fatal errors, etc.)
+    // Auto-install: retry up to 10 times, each pass installing any newly
+    // detected missing packages, until the compile succeeds or no new
+    // packages can be found/installed.
     if (Settings.autoInstallPackages) {
-      const alreadyAttempted = new Set()
-      const stubFiles = new Set()
-      let needsTexhash = false
-      for (let attempt = 0; attempt < 100; attempt++) {
-        // On subsequent attempts, only continue if the last compile had errors
-        if (attempt > 0 && !stats['latexmk-errors']) break
-        const { missingFiles, missingBabelLangs, missingTikzLibs, fatalPackages } =
-          await _parseMissingPackages(compileDir)
-        const newFiles = missingFiles.filter(f => !alreadyAttempted.has(f))
-        const newLangs = missingBabelLangs.filter(
-          l => !alreadyAttempted.has(`babel-${l}`)
-        )
-        const newTikzLibs = missingTikzLibs.filter(
-          l => !alreadyAttempted.has(`tikzlib-${l}`)
-        )
-        const newFatalPkgs = fatalPackages.filter(
-          p => !alreadyAttempted.has(`fatal-${p}`)
-        )
-        if (
-          newFiles.length === 0 &&
-          newLangs.length === 0 &&
-          newTikzLibs.length === 0 &&
-          newFatalPkgs.length === 0
-        ) break
+      const alreadyInstalled = new Set()
+      for (let attempt = 0; attempt < 10; attempt++) {
+        if (!stats['latexmk-errors']) break
+        const missingFiles = await _parseMissingPackages(compileDir)
+        const newFiles = missingFiles.filter(f => !alreadyInstalled.has(f))
+        if (newFiles.length === 0) break
         logger.info(
-          {
-            projectId: request.project_id,
-            missingFiles: newFiles,
-            missingBabelLangs: newLangs,
-            missingTikzLibs: newTikzLibs,
-            fatalPackages: newFatalPkgs,
-            attempt,
-          },
+          { projectId: request.project_id, missingFiles: newFiles },
           'auto-install: detected missing packages, attempting install'
         )
-        for (const f of newFiles) alreadyAttempted.add(f)
-        for (const l of newLangs) alreadyAttempted.add(`babel-${l}`)
-        for (const l of newTikzLibs) alreadyAttempted.add(`tikzlib-${l}`)
-        for (const p of newFatalPkgs) alreadyAttempted.add(`fatal-${p}`)
-        const { installed, unresolvable } = await _autoInstallPackages(
-          { missingFiles: newFiles, missingBabelLangs: newLangs, missingTikzLibs: newTikzLibs },
+        const installed = await _autoInstallPackages(
+          newFiles,
           request.project_id
         )
-        // After successful installs, remove any stubs that are now shadowed
-        if (installed.length > 0) {
-          needsTexhash = true
-          try {
-            await execFilePromise('texhash', [], { timeout: 60000 })
-          } catch {
-            // non-critical
-          }
-          await _cleanupStalePersistentStubs()
-          // Also remove compile-dir stubs for installed packages
-          for (const pkg of installed) {
-            try {
-              await fsPromises.unlink(Path.join(compileDir, `${pkg}.sty`))
-            } catch {
-              // may not exist
-            }
-          }
-        }
-        // Create persistent stubs for unresolvable .sty files (skip core packages)
-        for (const f of unresolvable) {
-          if (!f.endsWith('.sty')) continue
-          const pkgName = f.replace(/\.sty$/, '')
-          if (NEVER_STUB_PACKAGES.has(pkgName)) {
-            logger.warn(
-              { file: f, projectId: request.project_id },
-              'auto-install: refusing to stub core package in retry loop'
-            )
-            continue
-          }
-          await _createPersistentStub(pkgName, compileDir, request.project_id)
-          stubFiles.add(f)
-          needsTexhash = true
-          logger.info(
-            { file: f, projectId: request.project_id },
-            'auto-install: created persistent stub for unresolvable file'
-          )
-        }
-        // Create persistent stubs for fatally-erroring packages (skip core packages)
-        for (const pkg of newFatalPkgs) {
-          const fname = `${pkg}.sty`
-          if (stubFiles.has(fname)) continue
-          if (NEVER_STUB_PACKAGES.has(pkg)) {
-            logger.warn(
-              { pkg, projectId: request.project_id },
-              'auto-install: refusing to stub core package for fatal error'
-            )
-            continue
-          }
-          await _createPersistentStub(pkg, compileDir, request.project_id)
-          stubFiles.add(fname)
-          needsTexhash = true
-          logger.info(
-            { pkg, projectId: request.project_id },
-            'auto-install: created persistent stub for fatally-erroring package'
-          )
-        }
-        // Run texhash if we created any persistent stubs
-        if (needsTexhash) {
-          try {
-            await execFilePromise('texhash', [], { timeout: 60000 })
-          } catch {
-            // non-critical
-          }
-          needsTexhash = false
-        }
-        const madeProgress =
-          installed.length > 0 ||
-          unresolvable.length > 0 ||
-          newFatalPkgs.length > 0
-        if (!madeProgress) break
+        if (installed.length === 0) break
+        for (const f of newFiles) alreadyInstalled.add(f)
         logger.info(
-          { projectId: request.project_id, installed, stubbed: Array.from(stubFiles), attempt },
-          'auto-install: retrying compilation'
+          { projectId: request.project_id, installed },
+          'auto-install: packages installed, retrying compilation'
         )
         await LatexRunner.promises.runLatex(compileName, runLatexArgs)
-      }
-      if (stubFiles.size > 0) {
-        logger.info(
-          { projectId: request.project_id, stubs: Array.from(stubFiles) },
-          'auto-install: compile completed with stubs for unavailable packages'
-        )
       }
     }
 
@@ -902,7 +356,7 @@ async function doCompile(request, stats, timings) {
       )
     }
 
-    if (!shouldSkipMetrics(request)) {
+    if (!_shouldSkipMetrics(request)) {
       const status = error.timedout
         ? 'timeout'
         : error.terminated
@@ -957,7 +411,7 @@ async function doCompile(request, stats, timings) {
   const status = stats['latexmk-errors'] ? 'error' : 'success'
   _emitMetrics(request, status, stats, timings)
 
-  if (stats['pdf-size'] && !shouldSkipMetrics(request)) {
+  if (stats['pdf-size']) {
     emitPdfStats(stats, timings, request)
   }
 
@@ -997,7 +451,8 @@ async function doCompile(request, stats, timings) {
       'sampled performance log'
     )
   }
-  return { outputFiles, buildId, baseHistoryVersion }
+
+  return { outputFiles, buildId }
 }
 
 async function _saveOutputFiles({
@@ -1042,17 +497,7 @@ async function _readFdbFile(compileDir) {
 
 async function stopCompile(projectId, userId) {
   const compileName = getCompileName(projectId, userId)
-  const lock = LockManager.getExistingLock(getCompileDir(projectId, userId))
-  let lockReleased
-  if (lock) {
-    lockReleased = lock.waitForRelease()
-  } else {
-    if (!LatexRunner.isRunning(compileName)) return
-    logger.warn({ projectId, userId }, 'found running compile without lock')
-    lockReleased = Promise.resolve()
-  }
   await LatexRunner.promises.killLatex(compileName)
-  await lockReleased
 }
 
 async function clearProject(projectId, userId) {
@@ -1507,14 +952,12 @@ function _getImageVariantSettings(request) {
   return { imageName, env: {} }
 }
 
+function _shouldSkipMetrics(request) {
+  return ['clsi-perf', 'health-check'].includes(request.metricsOpts.path)
+}
+
 function _emitMetrics(request, status, stats, timings) {
-  if (request.metricsOpts.path === 'clsi-perf') {
-    ClsiMetrics.e2eCompileDurationClsiPerfSeconds.set(
-      { variant: request.metricsOpts.method },
-      timings.compileE2E / 1000
-    )
-  }
-  if (shouldSkipMetrics(request)) {
+  if (_shouldSkipMetrics(request)) {
     return
   }
 
@@ -1578,8 +1021,6 @@ function _emitMetrics(request, status, stats, timings) {
     draft: request.draft ? 'true' : 'false',
     stop_on_first_error: request.stopOnFirstError ? 'true' : 'false',
     passes,
-    type: request.syncType,
-    png2pdf: request.png2pdf ? 'true' : 'false',
   })
 
   if (timings.sync != null) {
@@ -1617,18 +1058,11 @@ function _emitMetrics(request, status, stats, timings) {
   }
 
   if (timings.compileE2E != null) {
-    ClsiMetrics.e2eCompileDurationSeconds.observe(
-      {
-        compileFromHistory: request.isCompileFromHistory,
-        compile: request.metricsOpts.compile,
-        group: request.compileGroup,
-      },
-      timings.compileE2E / 1000
-    )
+    ClsiMetrics.e2eCompileDurationSeconds.observe(timings.compileE2E / 1000)
   }
 }
 
-export default {
+module.exports = {
   doCompileWithLock: callbackify(doCompileWithLock),
   stopCompile: callbackify(stopCompile),
   clearProject: callbackify(clearProject),
