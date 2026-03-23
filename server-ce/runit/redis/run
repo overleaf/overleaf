@@ -1,0 +1,18 @@
+#!/bin/bash
+# Redis runit service for simplified all-in-one deployment
+# Only starts when EMBEDDED_REDIS=true (set in Dockerfile.simplified)
+
+if [ "$EMBEDDED_REDIS" != "true" ]; then
+  echo "EMBEDDED_REDIS is not true, disabling embedded Redis service"
+  touch /etc/service/redis/down
+  sv stop redis 2>/dev/null || true
+  exit 0
+fi
+
+mkdir -p /var/lib/redis /var/log/overleaf
+
+exec /usr/bin/redis-server \
+  --bind 127.0.0.1 \
+  --dir /var/lib/redis \
+  --loglevel notice \
+  >> /var/log/overleaf/redis.log 2>&1

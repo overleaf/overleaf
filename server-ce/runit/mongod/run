@@ -1,0 +1,20 @@
+#!/bin/bash
+# MongoDB runit service for simplified all-in-one deployment
+# Only starts when EMBEDDED_MONGO=true (set in Dockerfile.simplified)
+
+if [ "$EMBEDDED_MONGO" != "true" ]; then
+  echo "EMBEDDED_MONGO is not true, disabling embedded MongoDB service"
+  touch /etc/service/mongod/down
+  sv stop mongod 2>/dev/null || true
+  exit 0
+fi
+
+mkdir -p /var/lib/mongodb /var/log/overleaf
+chown -R mongodb:mongodb /var/lib/mongodb
+
+exec /usr/bin/mongod \
+  --dbpath /var/lib/mongodb \
+  --bind_ip 127.0.0.1 \
+  --port 27017 \
+  --noauth \
+  >> /var/log/overleaf/mongod.log 2>&1
