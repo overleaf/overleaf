@@ -5,13 +5,38 @@
 .editor-tabs-container {
   display: flex;
   flex-direction: row;
-  list-style: none;
-  padding: 0;
-  border-bottom: 1px solid var(--border-divider-themed);
-  margin: 0;
+  align-items: center;
+  gap: var(--spacing-02);
   flex: 0 0 auto;
   background: var(--bg-primary-themed);
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-divider-themed);
+
+  .editor-tabs-labs-icon {
+    flex: 0 0 auto;
+    padding: 0 var(--spacing-02);
+
+    .material-symbols {
+      font-size: 16px;
+    }
+  }
+}
+
+.editor-tabs-row {
+  display: flex;
+  flex-direction: row;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  background: var(--bg-primary-themed);
   overflow-x: auto;
+
+  &.editor-tabs-row-hovered {
+    .editor-file-tab:last-child {
+      border-right-color: var(--border-primary-themed);
+    }
+  }
 }
 
 .editor-file-tab {

@@ -20,6 +20,8 @@ export type EditorFileTab = {
   lifetime: Lifetime
 }
 
+export const TAB_TRANSFER_TYPE = 'text/x.tab-id'
+
 const TabsContext = React.createContext<
   | {
       tabs: EditorFileTab[]

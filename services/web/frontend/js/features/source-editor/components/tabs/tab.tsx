@@ -1,9 +1,20 @@
-import { EditorFileTab } from '@/features/ide-react/context/tabs-context'
+import {
+  EditorFileTab,
+  TAB_TRANSFER_TYPE,
+} from '@/features/ide-react/context/tabs-context'
 import MaterialIcon from '@/shared/components/material-icon'
 import { debugConsole } from '@/utils/debugging'
 import classNames from 'classnames'
 import { throttle } from 'lodash'
-import { memo, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 
 type TabProps = {
@@ -31,8 +42,6 @@ function getSideOfTargetFromEvent(
   }
 }
 
-const TAB_TRANSFER_TYPE = 'text/x.tab-id'
-
 export const Tab = memo(function Tab({
   tab,
   openTab,
@@ -42,12 +51,14 @@ export const Tab = memo(function Tab({
   onTabDrop,
 }: TabProps) {
   const { t } = useTranslation()
+  const tabRef = useRef<HTMLDivElement>(null)
 
   const [dropTargetPosition, setDropTargetPosition] = useState<
     'left' | 'right' | null
   >(null)
   const onDragStart = useCallback(
     (e: React.DragEvent) => {
+      e.stopPropagation()
       e.dataTransfer.setData(TAB_TRANSFER_TYPE, tab.id)
       e.dataTransfer.effectAllowed = 'move'
     },
@@ -65,22 +76,28 @@ export const Tab = memo(function Tab({
   const onDragOver = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault()
+      e.stopPropagation()
       e.dataTransfer.dropEffect = 'move'
       throttledOnDragOver(e.currentTarget, e.clientX)
     },
     [throttledOnDragOver]
   )
 
-  const onDragLeave = useCallback(() => {
-    throttledOnDragOver.cancel()
-    setDropTargetPosition(null)
-  }, [throttledOnDragOver])
+  const onDragLeave = useCallback(
+    (e: React.DragEvent) => {
+      e.stopPropagation()
+      throttledOnDragOver.cancel()
+      setDropTargetPosition(null)
+    },
+    [throttledOnDragOver]
+  )
 
   const onDrop = useCallback(
     (e: React.DragEvent) => {
       throttledOnDragOver.cancel()
       setDropTargetPosition(null)
       e.preventDefault()
+      e.stopPropagation()
       const draggedTabId = e.dataTransfer.getData(TAB_TRANSFER_TYPE)
       if (!draggedTabId) {
         debugConsole.warn('No dragged tab id found in dataTransfer')
@@ -135,6 +152,15 @@ export const Tab = memo(function Tab({
     [closeTab, tab]
   )
 
+  useLayoutEffect(() => {
+    if (isSelected && tabRef.current) {
+      tabRef.current.scrollIntoView({
+        block: 'nearest',
+        inline: 'nearest',
+      })
+    }
+  }, [isSelected])
+
   useEffect(() => {
     if (isSelected && tab.lifetime === 'temporary') {
       const handler = () => {
@@ -149,6 +175,7 @@ export const Tab = memo(function Tab({
 
   return (
     <div
+      ref={tabRef}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
