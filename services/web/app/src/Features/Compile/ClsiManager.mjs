@@ -1115,16 +1115,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
             // enable for free for short period when we saw low capacity
             enableCompileFromCacheUntil > Date.now()) &&
           options.compileFromClsiCache,
-        populateClsiCache:
-          // enable for premium compiles
-          (['alpha', 'priority'].includes(options.compileGroup) ||
-            // enable when populating template cache
-            options.metricsPath === 'clsi-cache-template' ||
-            // populate indefinitely for free when we saw low capacity
-            !!enableCompileFromCacheUntil ||
-            // populate with compile from history enabled to re-use snapshot from cache
-            !!options.rawChangeOperations) &&
-          options.populateClsiCache,
+        populateClsiCache: options.populateClsiCache,
         enablePdfCaching:
           (Settings.enablePdfCaching && options.enablePdfCaching) || false,
         pdfCachingMinChunkSize: options.pdfCachingMinChunkSize,
