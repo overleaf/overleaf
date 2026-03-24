@@ -40,6 +40,7 @@ RUN chmod +x /etc/my_init.d/010_wait_for_embedded_dbs.sh
 # Override CLSI source with auto-install-packages support
 # -------------------------------------------------------
 COPY services/clsi/app/js/CompileManager.js /overleaf/services/clsi/app/js/CompileManager.js
+COPY services/clsi/app/js/LatexMetrics.js /overleaf/services/clsi/app/js/LatexMetrics.js
 COPY services/clsi/config/settings.defaults.cjs /overleaf/services/clsi/config/settings.defaults.cjs
 
 # Create data directories (overleaf dir already exists; add mongo/redis)
