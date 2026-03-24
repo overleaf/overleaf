@@ -1,20 +1,15 @@
-# Simplified Overleaf Deployment Guide
+# Overleaf Deployment Guide
 
 This guide explains how to deploy Overleaf in a single Docker container with embedded databases and automatic LaTeX package installation.
 
-## Architecture Differences
+## Architecture
 
-### Standard Overleaf (docker-compose.yml)
-- **3 separate containers**: Overleaf, MongoDB (replica set), Redis
-- **Sandboxed compiles**: Uses sibling Docker containers for LaTeX compilation
-- **Complex setup**: Requires replica set initialization, multiple volumes
+All 11 Overleaf microservices, MongoDB 8.0, and Redis run inside a **single container**:
 
-### Simplified Overleaf (docker-compose.simplified.yml)
-- **1 container**: All services embedded (Overleaf + MongoDB 8.0 + Redis)
 - **Direct compilation**: LaTeX runs directly in the same container
-- **Simple setup**: Single command deployment, no replica set
+- **Simple setup**: Single command deployment
 - **Auto-install packages**: Missing LaTeX packages are installed automatically during compilation
-- **Process management**: Uses Phusion Baseimage with runit (same supervisor as standard Overleaf)
+- **Process management**: Uses Phusion Baseimage with runit
 
 ## Trade-offs
 
@@ -43,7 +38,7 @@ docker build -f Dockerfile.simplified -t overleaf/overleaf-simplified:latest .
 ### 2. Start the Container
 
 ```bash
-docker compose -f docker-compose.simplified.yml up -d
+docker compose up -d
 ```
 
 ### 3. Access Overleaf
@@ -140,7 +135,7 @@ done
 
 ## Environment Variables
 
-Key variables you can customize in `docker-compose.simplified.yml`:
+Key variables you can customize in `docker-compose.yml`:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -156,13 +151,13 @@ Key variables you can customize in `docker-compose.simplified.yml`:
 
 ### Check Container Status
 ```bash
-docker compose -f docker-compose.simplified.yml ps
+docker compose ps
 ```
 
 ### View Logs
 ```bash
 # All logs
-docker compose -f docker-compose.simplified.yml logs -f
+docker compose logs -f
 
 # Inside the container — each service has its own runit log
 docker exec overleaf sv status /etc/service/*
@@ -228,8 +223,8 @@ git pull
 docker build -f Dockerfile.simplified -t overleaf/overleaf-simplified:latest .
 
 # Restart container (volumes preserve all data)
-docker compose -f docker-compose.simplified.yml down
-docker compose -f docker-compose.simplified.yml up -d
+docker compose down
+docker compose up -d
 ```
 
 ### Option 2: In-place Update
@@ -238,7 +233,7 @@ docker compose -f docker-compose.simplified.yml up -d
 docker exec overleaf-simplified bash -c 'cd /overleaf && npm update'
 
 # Restart services
-docker-compose -f docker-compose.simplified.yml restart
+docker-compose restart
 ```
 
 ## Migration from Standard Overleaf
@@ -291,7 +286,7 @@ RUN tlmgr option repository https://your-mirror.example.com/systems/texlive/tlne
 ```
 
 ### Resource Limits
-Add to docker-compose.simplified.yml:
+Add to `docker-compose.yml`:
 ```yaml
 deploy:
   resources:
