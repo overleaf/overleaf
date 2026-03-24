@@ -768,6 +768,10 @@ async function _buildRequest(projectId, userId, options) {
         'failed to compose history-full request'
       )
       // fall back to old compile mode
+      return await _buildRequest(projectId, userId, {
+        ...options,
+        compileFromHistory: false,
+      })
     }
   } else if (options.compileFromHistory) {
     // incremental sync
@@ -785,6 +789,10 @@ async function _buildRequest(projectId, userId, options) {
         'failed to compose history-incremental request'
       )
       // fall back to old compile mode
+      return await _buildRequest(projectId, userId, {
+        ...options,
+        compileFromHistory: false,
+      })
     }
   }
 

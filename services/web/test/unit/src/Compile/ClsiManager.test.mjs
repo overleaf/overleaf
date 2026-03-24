@@ -3,6 +3,7 @@ import { setTimeout } from 'node:timers/promises'
 import sinon from 'sinon'
 import tk from 'timekeeper'
 import { RequestFailedError } from '@overleaf/fetch-utils'
+import _ from 'lodash'
 
 const FILESTORE_URL = 'http://filestore.example.com'
 const CLSI_HOST = 'clsi.example.com'
@@ -15,13 +16,6 @@ describe('ClsiManager', function () {
     tk.freeze(Date.now())
 
     ctx.user_id = 'user-id'
-    ctx.project = {
-      _id: 'project-id',
-      compiler: 'latex',
-      rootDoc_id: 'mock-doc-id-1',
-      imageName: 'mock-image-name',
-      overleaf: { history: { id: 42 } },
-    }
     ctx.docs = {
       '/main.tex': {
         name: 'main.tex',
@@ -52,6 +46,20 @@ describe('ClsiManager', function () {
         _id: 'mock-file-id-3',
         created: new Date(),
       },
+    }
+    ctx.project = {
+      _id: 'project-id',
+      compiler: 'latex',
+      rootDoc_id: 'mock-doc-id-1',
+      imageName: 'mock-image-name',
+      overleaf: { history: { id: 42 } },
+      rootFolder: [
+        {
+          docs: [],
+          files: [],
+          folders: [],
+        },
+      ],
     }
     ctx.clsiCookieKey = 'clsiserver'
     ctx.clsiServerId = 'clsi-server-id'
@@ -121,7 +129,17 @@ describe('ClsiManager', function () {
     ctx.ProjectGetter = {
       promises: {
         findById: sinon.stub().resolves(ctx.project),
-        getProject: sinon.stub().resolves(ctx.project),
+        getProject: sinon.stub().callsFake((projectId, projection) => {
+          const result = { _id: ctx.project._id }
+          for (const [field, v] of Object.entries(projection)) {
+            if (v) {
+              _.set(result, field, _.get(ctx.project, field))
+            } else {
+              _.unset(result, field)
+            }
+          }
+          return result
+        }),
       },
     }
     ctx.DocumentUpdaterHandler = {
@@ -162,6 +180,9 @@ describe('ClsiManager', function () {
       clearCache: sinon.stub().resolves(),
     }
     ctx.HistoryManager = {
+      promises: {
+        flushProject: sinon.stub().resolves(),
+      },
       getFilestoreBlobURL: sinon.stub().callsFake((historyId, hash) => {
         if (hash === GLOBAL_BLOB_HASH) {
           return `${FILESTORE_URL}/history/global/hash/${hash}`
@@ -392,6 +413,155 @@ describe('ClsiManager', function () {
       })
     })
 
+    describe('with compile from history fallback to incremental', function () {
+      const buildId = '18fbe9e7564-30dcb2f71250c690'
+
+      beforeEach(async function (ctx) {
+        ctx.outputFiles = [
+          {
+            url: `/project/${ctx.project_id}/user/${ctx.user_id}/build/1234/output/output.pdf`,
+            path: 'output.pdf',
+            type: 'pdf',
+            build: buildId,
+          },
+          {
+            url: `/project/${ctx.project_id}/user/${ctx.user_id}/build/1234/output/output.log`,
+            path: 'output.log',
+            type: 'log',
+            build: buildId,
+          },
+        ]
+        ctx.responseBody.compile.outputFiles = ctx.outputFiles.map(
+          outputFile => ({
+            ...outputFile,
+            url: `http://${CLSI_HOST}${outputFile.url}`,
+          })
+        )
+        ctx.responseBody.compile.buildId = buildId
+        ctx.timeout = 100
+        ctx.HistoryManager.promises.flushProject.rejects()
+        const doc = ctx.docs['/main.tex']
+        ctx.DocumentUpdaterHandler.promises.getProjectDocsIfMatch.resolves([
+          { _id: doc._id, lines: doc.lines, v: 123 },
+        ])
+        ctx.ProjectEntityHandler.getAllDocPathsFromProject.returns({
+          'mock-doc-id-1': 'main.tex',
+        })
+        ctx.result = await ctx.ClsiManager.promises.sendRequest(
+          ctx.project._id,
+          ctx.user_id,
+          {
+            compileBackendClass: 'c3d',
+            compileGroup: 'standard',
+            timeout: ctx.timeout,
+            compileFromHistory: true,
+            incrementalCompilesEnabled: true,
+          }
+        )
+      })
+
+      it('should send the request to the CLSI', function (ctx) {
+        const doc = ctx.docs['/main.tex']
+        ctx.FetchUtils.fetchStringWithResponse.should.have.been.calledWith(
+          sinon.match(
+            url =>
+              url.host === CLSI_HOST &&
+              url.pathname ===
+                `/project/${ctx.project._id}/user/${ctx.user_id}/compile` &&
+              url.searchParams.get('compileBackendClass') === 'c3d' &&
+              url.searchParams.get('compileGroup') === 'standard'
+          ),
+          {
+            method: 'POST',
+            json: sinon.match({
+              compile: {
+                options: {
+                  compiler: ctx.project.compiler,
+                  imageName: ctx.project.imageName,
+                  timeout: ctx.timeout,
+                  draft: false,
+                  compileGroup: 'standard',
+                  metricsMethod: 'standard',
+                  stopOnFirstError: false,
+                  syncType: 'incremental',
+                  syncState: '01234567890abcdef',
+                },
+                rootResourcePath: 'main.tex',
+                resources: [
+                  { path: 'main.tex', content: doc.lines.join('\n') },
+                ],
+              },
+            }),
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+              Cookie: `${ctx.clsiCookieKey}=${ctx.clsiServerId}`,
+            },
+            signal: sinon.match.instanceOf(AbortSignal),
+          }
+        )
+      })
+
+      it('should compute the hash with the full project', function (ctx) {
+        ctx.ClsiStateManager.computeHash.should.have.been.calledWithMatch({
+          rootFolder: ctx.project.rootFolder,
+        })
+      })
+
+      it('should get the project with the required fields', function (ctx) {
+        ctx.ProjectGetter.promises.getProject.should.have.been.calledWith(
+          ctx.project._id,
+          {
+            compiler: 1,
+            rootDoc_id: 1,
+            imageName: 1,
+            rootFolder: 1,
+            'overleaf.history.id': 1,
+          }
+        )
+      })
+
+      it('should get only the live docs from the docupdater with a background flush in docupdater', function (ctx) {
+        ctx.DocumentUpdaterHandler.promises.getProjectDocsIfMatch.should.have.been.calledWith(
+          ctx.project._id
+        )
+      })
+
+      it('should not get any docs from mongo', function (ctx) {
+        ctx.ProjectEntityHandler.promises.getAllDocs.should.not.have.been.calledWith(
+          ctx.project._id
+        )
+      })
+
+      it('should not get any of the files', function (ctx) {
+        ctx.ProjectEntityHandler.promises.getAllFiles.should.not.have.been
+          .called
+      })
+
+      it('should return the status and output files', function (ctx) {
+        expect(ctx.result.status).to.equal('success')
+        expect(ctx.result.outputFiles.map(f => f.path)).to.have.members(
+          ctx.outputFiles.map(f => f.path)
+        )
+      })
+
+      it('should return the buildId', function (ctx) {
+        expect(ctx.result.buildId).to.equal(buildId)
+      })
+
+      it('should persist the cookie from the response', function (ctx) {
+        expect(
+          ctx.ClsiCookieManager.promises.setServerId
+        ).to.have.been.calledWith(
+          ctx.project._id,
+          ctx.user_id,
+          'standard',
+          'c3d',
+          ctx.newClsiServerId
+        )
+      })
+    })
+
     describe('with ranges on the pdf and stats/timings details', function () {
       beforeEach(async function (ctx) {
         ctx.ranges = [{ start: 1, end: 42, hash: 'foo' }]
@@ -495,6 +665,12 @@ describe('ClsiManager', function () {
 
       it('should get only the live docs from the docupdater with a background flush in docupdater', function (ctx) {
         ctx.DocumentUpdaterHandler.promises.getProjectDocsIfMatch.should.have.been.calledWith(
+          ctx.project._id
+        )
+      })
+
+      it('should not get any docs from mongo', function (ctx) {
+        ctx.ProjectEntityHandler.promises.getAllDocs.should.not.have.been.calledWith(
           ctx.project._id
         )
       })
