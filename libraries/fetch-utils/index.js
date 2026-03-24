@@ -188,16 +188,25 @@ function parseOpts(opts, url) {
   if (opts.signal) {
     detachSignal = abortOnSignal(abortController, opts.signal)
   } else {
+    let overTimeoutStart
+    const stack = new Error().stack
     const timeout = setTimeout(() => {
-      if (logger) {
-        logger.warn(
-          { url, method: opts.method ?? 'GET' },
-          'Fetch request did not complete within 120 seconds'
-        )
-      }
+      overTimeoutStart = process.hrtime.bigint()
     }, 120000)
     detachSignal = () => {
       clearTimeout(timeout)
+      if (overTimeoutStart && logger) {
+        logger.warn(
+          {
+            url,
+            method: opts.method ?? 'GET',
+            overTimeoutMs:
+              Number(process.hrtime.bigint() - overTimeoutStart) / 1e6,
+            stack,
+          },
+          'Fetch request did not complete within 120 seconds'
+        )
+      }
     }
   }
   if (opts.body instanceof Readable) {
