@@ -35,7 +35,8 @@ RUN apt-get update \
 # Note: starts mongod --fork and redis-server --daemonize, then waits.
 # Runit services are NOT used for mongod/redis to avoid process conflicts.
 COPY server-ce/init_scripts/010_wait_for_embedded_dbs.sh /etc/my_init.d/010_wait_for_embedded_dbs.sh
-RUN chmod +x /etc/my_init.d/010_wait_for_embedded_dbs.sh
+RUN sed -i 's/\r$//' /etc/my_init.d/010_wait_for_embedded_dbs.sh \
+ && chmod +x /etc/my_init.d/010_wait_for_embedded_dbs.sh
 
 # Override CLSI source with auto-install-packages support
 # -------------------------------------------------------
