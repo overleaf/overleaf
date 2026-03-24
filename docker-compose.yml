@@ -11,6 +11,9 @@
 
 services:
   overleaf:
+    build:
+      context: .
+      dockerfile: Dockerfile.simplified
     image: blacksamuron05/overleaf-simplified:latest
     container_name: overleaf
     restart: always
