@@ -53,7 +53,8 @@ RUN mkdir -p /var/lib/mongodb /var/lib/redis /var/lib/texlive/texmf-local \
 # -----------------------------------------------------
 RUN tlmgr option autobackup -- -1 \
     && tlmgr option repository https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2025/tlnet-final/ \
-    && chown -R www-data:www-data /usr/local/texlive/2025
+    && chown -R www-data:www-data /usr/local/texlive/2025 \
+    && chown -R www-data:www-data /usr/local/texlive/texmf-local
 
 # Create install-tex-package helper script
 # -----------------------------------------
