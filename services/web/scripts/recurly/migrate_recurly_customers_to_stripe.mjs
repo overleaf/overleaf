@@ -93,13 +93,17 @@ import { scriptRunner } from '../lib/ScriptRunner.mjs'
 import {
   areStripeAndRecurlyCardDetailsEqual,
   coalesceOrThrowPaymentMethod,
-  extractNameFromAccount,
-  extractNameFromBillingInfo,
   getTaxIdType,
-  normalisedGBVATNumber,
   normalizeRecurlyAddressToStripe,
   normalizeName,
+  addressesEqual,
+  resolveCustomerIdentity,
   sanitizeAccount,
+  normalizeComparableString,
+  hasAnyAddressValue,
+  ccEmailsToArray,
+  RECURLY_CUSTOM_FIELD_NAMES,
+  extractRecurlyCustomFieldMetadata,
 } from '../helpers/migrate_recurly_customers_to_stripe.helpers.mjs'
 import {
   createRateLimitedApiWrappers,
@@ -181,66 +185,6 @@ if (!recurlyApiKey) {
   )
 }
 const recurlyClient = new recurly.Client(recurlyApiKey)
-
-// =============================================================================
-// CUSTOM FIELDS
-// =============================================================================
-
-const RECURLY_CUSTOM_FIELD_NAMES = [
-  'channel',
-  'Industry',
-  'ol_sales_person',
-  'MigratedfromFreeAgent',
-]
-
-function getRecurlyCustomFields(account) {
-  const customFields = account?.customFields
-  if (customFields == null) {
-    throw new Error(
-      'Recurly account is missing customFields (empty array is acceptable)'
-    )
-  }
-  if (!Array.isArray(customFields)) {
-    throw new Error('Recurly account customFields is not an array')
-  }
-  return customFields
-}
-
-function extractRecurlyCustomFieldMetadata(account) {
-  const customFields = getRecurlyCustomFields(account)
-
-  /** @type {Record<string, string>} */
-  const metadata = {}
-
-  const counts = {
-    channel: 0,
-    Industry: 0,
-    ol_sales_person: 0,
-    MigratedfromFreeAgent: 0,
-    noCustomFields: 0,
-  }
-
-  if (customFields.length === 0) {
-    counts.noCustomFields = 1
-    return { metadata, counts }
-  }
-
-  for (const field of customFields) {
-    const name = field?.name?.trim()
-    if (!RECURLY_CUSTOM_FIELD_NAMES.includes(name)) continue
-
-    const rawValue = field?.value
-    if (rawValue == null) continue
-
-    const value = String(rawValue).trim()
-    if (!value) continue
-
-    metadata[name] = value
-    counts[name] = 1
-  }
-
-  return { metadata, counts }
-}
 
 // =============================================================================
 // LOGGING UTILITIES
@@ -926,64 +870,7 @@ function isStripeTaxIdInvalidError(error) {
   return error.code === 'tax_id_invalid'
 }
 
-function normalizeComparableString(value) {
-  if (value == null) return ''
-  return String(value).trim()
-}
-
 const STRIPE_METADATA_MAX_ALT_EMAILS = 5
-
-function ccEmailsToArray(ccEmails) {
-  if (ccEmails == null || ccEmails === undefined) {
-    return []
-  }
-
-  // regex splits on commas, semicolons or whitespace and trims each email
-  // empty values are filtered out
-  const normalisedEmails = String(ccEmails)
-    .split(/[\s,;]+/)
-    .filter(Boolean)
-
-  const deDupedEmails = [...new Set(normalisedEmails)]
-
-  return deDupedEmails
-}
-
-function hasAnyAddressValue(address) {
-  if (!address || typeof address !== 'object') return false
-  return Object.values(address).some(v => normalizeComparableString(v) !== '')
-}
-
-function normalizeComparableAddress(address) {
-  if (!address || typeof address !== 'object') return null
-
-  const norm = {
-    line1: normalizeComparableString(address.line1),
-    line2: normalizeComparableString(address.line2),
-    city: normalizeComparableString(address.city),
-    state: normalizeComparableString(address.state),
-    postal_code: normalizeComparableString(address.postal_code),
-    country: normalizeComparableString(address.country).toUpperCase(),
-  }
-
-  return hasAnyAddressValue(norm) ? norm : null
-}
-
-function addressesEqual(a, b) {
-  const na = normalizeComparableAddress(a)
-  const nb = normalizeComparableAddress(b)
-  if (!na && !nb) return true
-  if (!na || !nb) return false
-
-  return (
-    na.line1 === nb.line1 &&
-    na.line2 === nb.line2 &&
-    na.city === nb.city &&
-    na.state === nb.state &&
-    na.postal_code === nb.postal_code &&
-    na.country === nb.country
-  )
-}
 
 // =============================================================================
 // MAIN PROCESSING
@@ -1217,153 +1104,6 @@ async function updatePaymentMethodBillingDetails(
 }
 
 /**
- * Resolve customer name, address, company, and VAT number from Recurly account data.
- *
- * For most customers, billing info and account info agree (or only one source is set),
- * and the standard coalesce logic applies (billing info preferred, account as fallback).
- *
- * When any field has conflicting values across both sources, the subscription's
- * collection_method is fetched to determine which source wins:
- *
- * - automatic (web sales): billing info is used for the Stripe customer record.
- * - manual (manual billing): account info is used for the Stripe customer record,
- *   and billing info is returned separately to be copied to the payment method's
- *   billing_details.
- *
- * @param {object} account - Recurly account object
- * @param {string} recurlyAccountCode - Account code (used for subscription lookup on conflict)
- * @param {object} context - Logging context
- * @returns {Promise<{
- *   name: string|null,
- *   address: import('stripe').Stripe.AddressParam|null,
- *   companyName: string|null,
- *   vatNumber: string|null,
- *   collectionMethod: string|null,
- *   billingInfoForPaymentMethod: object|null
- * }>}
- */
-async function resolveCustomerIdentity(account, recurlyAccountCode, context) {
-  // Detect conflicts between billing info and account fields
-  const billingName = extractNameFromBillingInfo(account)
-  const accountName = extractNameFromAccount(account)
-  const nameConflict =
-    billingName !== null && accountName !== null && billingName !== accountName
-
-  const billingAddress = normalizeRecurlyAddressToStripe(
-    account.billingInfo?.address
-  )
-  const accountAddress = normalizeRecurlyAddressToStripe(account?.address)
-  const addressConflict =
-    billingAddress !== null &&
-    accountAddress !== null &&
-    !addressesEqual(billingAddress, accountAddress)
-
-  const billingCompany = account.billingInfo?.company?.trim() || null
-  const accountCompany = account.company?.trim() || null
-  const companyConflict =
-    billingCompany !== null &&
-    accountCompany !== null &&
-    billingCompany !== accountCompany
-
-  const billingVat = account.billingInfo?.vatNumber?.trim() || null
-  const accountVat = account?.vatNumber?.trim() || null
-  const vatConflict =
-    billingVat !== null && accountVat !== null && billingVat !== accountVat
-
-  const hasConflict =
-    nameConflict || addressConflict || companyConflict || vatConflict
-
-  let name,
-    address,
-    companyName,
-    vatNumber,
-    collectionMethod,
-    billingInfoForPaymentMethod
-
-  if (!hasConflict) {
-    // No conflict: use the standard coalesce logic (billing info preferred)
-    name = billingName ?? accountName
-    address = billingAddress ?? accountAddress
-    companyName = billingCompany ?? accountCompany
-    vatNumber = billingVat ?? accountVat
-    collectionMethod = null
-    billingInfoForPaymentMethod = null
-  } else {
-    // Conflict detected: fetch the subscription to determine which source wins
-    logWarn(
-      'Conflict between billing info and account fields; fetching subscription collection method to resolve',
-      {
-        ...context,
-        nameConflict,
-        addressConflict,
-        companyConflict,
-        vatConflict,
-      }
-    )
-
-    const subscription = await fetchRecurlyActiveSubscription(
-      recurlyAccountCode,
-      context
-    )
-    collectionMethod = subscription?.collectionMethod || null
-
-    if (!collectionMethod) {
-      throw new Error(
-        'Conflict between billing info and account fields, but no live subscription found to determine collection method'
-      )
-    }
-
-    logDebug(
-      'Resolving billing info / account conflict using subscription collection method',
-      {
-        ...context,
-        collectionMethod,
-        nameConflict,
-        addressConflict,
-        companyConflict,
-        vatConflict,
-      },
-      { verboseOnly: true }
-    )
-
-    if (collectionMethod === 'automatic') {
-      // Web sales: use billing info for the Stripe customer record
-      name = billingName ?? accountName
-      address = billingAddress ?? accountAddress
-      companyName = billingCompany ?? accountCompany
-      vatNumber = billingVat ?? accountVat
-      billingInfoForPaymentMethod = null
-    } else if (collectionMethod === 'manual') {
-      // Manual billing: use account info for the Stripe customer record,
-      // and return billing info to be copied to the payment method's billing_details
-      name = accountName ?? billingName
-      address = accountAddress ?? billingAddress
-      companyName = accountCompany ?? billingCompany
-      vatNumber = accountVat ?? billingVat
-      billingInfoForPaymentMethod = account.billingInfo
-    } else {
-      throw new Error(
-        `Unknown collection method "${collectionMethod}" encountered while resolving billing info / account conflict`
-      )
-    }
-  }
-
-  // Normalise GB VAT numbers using the resolved address country
-  if (vatNumber && address?.country === 'GB') {
-    vatNumber = normalisedGBVATNumber(vatNumber)
-  }
-
-  return {
-    name,
-    address,
-    companyName,
-    vatNumber,
-    collectionMethod,
-    billingInfoForPaymentMethod,
-  }
-}
-
-/**
  * Process a single customer row from the input CSV.
  *
  * Customers are expected to already exist in the target Stripe account
@@ -1485,7 +1225,23 @@ async function processCustomer(
       companyName,
       vatNumber,
       billingInfoForPaymentMethod,
-    } = await resolveCustomerIdentity(account, recurlyAccountCode, context)
+    } = await resolveCustomerIdentity(account, async () => {
+      logWarn(
+        'Conflict between billing info and account fields; fetching subscription collection method to resolve',
+        { ...context }
+      )
+      const subscription = await fetchRecurlyActiveSubscription(
+        recurlyAccountCode,
+        context
+      )
+      const cm = subscription?.collectionMethod || null
+      logDebug(
+        'Resolved collection method for conflict',
+        { ...context, collectionMethod: cm },
+        { verboseOnly: true }
+      )
+      return cm
+    })
 
     if (name === null && companyName === null) {
       // This should not happen since we're handling all the known cases in resolveCustomerIdentity but just in case

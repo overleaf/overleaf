@@ -37,6 +37,15 @@ import {
   getTaxIdType,
   coalesceOrThrowPaymentMethod,
   normalisedGBVATNumber,
+  normalizeComparableString,
+  hasAnyAddressValue,
+  ccEmailsToArray,
+  normalizeTaxIdValue,
+  extractRecurlyCustomFieldMetadata,
+  addressesEqual,
+  resolveCustomerIdentity,
+  compareAccountFields,
+  areStripeAndRecurlyCardDetailsEqual,
 } from './migrate_recurly_customers_to_stripe.helpers.mjs'
 
 test('extractNameFromAccount returns normalized full name when first and last are present', () => {
@@ -478,4 +487,569 @@ test('normalisedGBVATNumber handles valid 12-digit GB VAT numbers', () => {
 test('normalisedGBVATNumber preserves Northern Ireland XI numbers', () => {
   // XI numbers should not be modified to GB
   assert.equal(normalisedGBVATNumber('XI123456789'), 'XI123456789')
+})
+
+test('normalizeComparableString returns empty string for null/undefined', () => {
+  assert.equal(normalizeComparableString(null), '')
+  assert.equal(normalizeComparableString(undefined), '')
+})
+
+test('normalizeComparableString trims whitespace', () => {
+  assert.equal(normalizeComparableString('  hello  '), 'hello')
+  assert.equal(normalizeComparableString(' '), '')
+})
+
+test('normalizeComparableString converts non-strings', () => {
+  assert.equal(normalizeComparableString(42), '42')
+  assert.equal(normalizeComparableString(0), '0')
+})
+
+test('hasAnyAddressValue returns false for null/undefined/non-object', () => {
+  assert.equal(hasAnyAddressValue(null), false)
+  assert.equal(hasAnyAddressValue(undefined), false)
+  assert.equal(hasAnyAddressValue('string'), false)
+})
+
+test('hasAnyAddressValue returns false for all-empty address', () => {
+  assert.equal(hasAnyAddressValue({ line1: '', line2: '', city: '' }), false)
+  assert.equal(hasAnyAddressValue({ line1: '  ', city: null }), false)
+})
+
+test('hasAnyAddressValue returns true when any field is non-empty', () => {
+  assert.equal(hasAnyAddressValue({ line1: '123 Main St' }), true)
+  assert.equal(hasAnyAddressValue({ country: 'US' }), true)
+})
+
+test('ccEmailsToArray returns empty array for null/undefined', () => {
+  assert.deepEqual(ccEmailsToArray(null), [])
+  assert.deepEqual(ccEmailsToArray(undefined), [])
+})
+
+test('ccEmailsToArray splits on commas, semicolons, and whitespace', () => {
+  assert.deepEqual(ccEmailsToArray('a@b.com,c@d.com'), ['a@b.com', 'c@d.com'])
+  assert.deepEqual(ccEmailsToArray('a@b.com;c@d.com'), ['a@b.com', 'c@d.com'])
+  assert.deepEqual(ccEmailsToArray('a@b.com c@d.com'), ['a@b.com', 'c@d.com'])
+})
+
+test('ccEmailsToArray deduplicates', () => {
+  assert.deepEqual(ccEmailsToArray('a@b.com,a@b.com,c@d.com'), [
+    'a@b.com',
+    'c@d.com',
+  ])
+})
+
+test('ccEmailsToArray handles empty string', () => {
+  assert.deepEqual(ccEmailsToArray(''), [])
+})
+
+test('normalizeTaxIdValue strips punctuation and lowercases', () => {
+  assert.equal(normalizeTaxIdValue('GB.123-456_789'), 'gb123456789')
+  assert.equal(normalizeTaxIdValue('  DE:123/456 '), 'de123456')
+})
+
+test('normalizeTaxIdValue handles null/undefined', () => {
+  assert.equal(normalizeTaxIdValue(null), '')
+  assert.equal(normalizeTaxIdValue(undefined), '')
+})
+
+test('extractRecurlyCustomFieldMetadata extracts known fields', () => {
+  const account = {
+    customFields: [
+      { name: 'channel', value: 'web' },
+      { name: 'Industry', value: 'Education' },
+      { name: 'unknown_field', value: 'ignored' },
+    ],
+  }
+  const { metadata, counts } = extractRecurlyCustomFieldMetadata(account)
+  assert.deepEqual(metadata, { channel: 'web', Industry: 'Education' })
+  assert.equal(counts.channel, 1)
+  assert.equal(counts.Industry, 1)
+  assert.equal(counts.ol_sales_person, 0)
+})
+
+test('extractRecurlyCustomFieldMetadata returns empty for no custom fields', () => {
+  const { metadata, counts } = extractRecurlyCustomFieldMetadata({
+    customFields: [],
+  })
+  assert.deepEqual(metadata, {})
+  assert.equal(counts.noCustomFields, 1)
+})
+
+test('extractRecurlyCustomFieldMetadata throws for missing customFields', () => {
+  assert.throws(
+    () => extractRecurlyCustomFieldMetadata({}),
+    /account.customFields is missing or not an array/
+  )
+})
+
+test('extractRecurlyCustomFieldMetadata skips null/empty values', () => {
+  const account = {
+    customFields: [
+      { name: 'channel', value: null },
+      { name: 'Industry', value: '' },
+      { name: 'ol_sales_person', value: '  ' },
+    ],
+  }
+  const { metadata } = extractRecurlyCustomFieldMetadata(account)
+  assert.deepEqual(metadata, {})
+})
+
+test('addressesEqual returns true for two null addresses', () => {
+  assert.equal(addressesEqual(null, null), true)
+})
+
+test('addressesEqual returns false when one is null', () => {
+  assert.equal(
+    addressesEqual({ line1: '123 Main St', country: 'US' }, null),
+    false
+  )
+  assert.equal(
+    addressesEqual(null, { line1: '123 Main St', country: 'US' }),
+    false
+  )
+})
+
+test('addressesEqual returns true for matching addresses', () => {
+  const a = {
+    line1: '123 Main St',
+    line2: '',
+    city: 'London',
+    state: '',
+    postal_code: 'SW1A 1AA',
+    country: 'GB',
+  }
+  const b = {
+    line1: '123 Main St',
+    line2: '',
+    city: 'London',
+    state: '',
+    postal_code: 'SW1A 1AA',
+    country: 'gb',
+  }
+  assert.equal(addressesEqual(a, b), true)
+})
+
+test('addressesEqual returns false for differing addresses', () => {
+  const a = {
+    line1: '123 Main St',
+    city: 'London',
+    country: 'GB',
+  }
+  const b = {
+    line1: '456 High St',
+    city: 'London',
+    country: 'GB',
+  }
+  assert.equal(addressesEqual(a, b), false)
+})
+
+test('addressesEqual normalizes whitespace', () => {
+  const a = { line1: ' 123 Main St ', country: ' GB ' }
+  const b = { line1: '123 Main St', country: 'GB' }
+  assert.equal(addressesEqual(a, b), true)
+})
+
+test('areStripeAndRecurlyCardDetailsEqual returns false for null inputs', () => {
+  assert.equal(areStripeAndRecurlyCardDetailsEqual(null, null), false)
+  assert.equal(
+    areStripeAndRecurlyCardDetailsEqual(null, { lastFour: '1234' }),
+    false
+  )
+  assert.equal(
+    areStripeAndRecurlyCardDetailsEqual(
+      { type: 'card', card: { last4: '1234', exp_month: 12, exp_year: 2030 } },
+      null
+    ),
+    false
+  )
+})
+
+test('areStripeAndRecurlyCardDetailsEqual returns false for non-card type', () => {
+  assert.equal(
+    areStripeAndRecurlyCardDetailsEqual(
+      { type: 'paypal' },
+      { lastFour: '1234' }
+    ),
+    false
+  )
+})
+
+test('areStripeAndRecurlyCardDetailsEqual returns true for matching cards', () => {
+  assert.equal(
+    areStripeAndRecurlyCardDetailsEqual(
+      { type: 'card', card: { last4: '4242', exp_month: 6, exp_year: 2025 } },
+      { lastFour: '4242', expMonth: 6, expYear: 2025 }
+    ),
+    true
+  )
+})
+
+test('areStripeAndRecurlyCardDetailsEqual returns false for mismatched last4', () => {
+  assert.equal(
+    areStripeAndRecurlyCardDetailsEqual(
+      { type: 'card', card: { last4: '4242', exp_month: 6, exp_year: 2025 } },
+      { lastFour: '1111', expMonth: 6, expYear: 2025 }
+    ),
+    false
+  )
+})
+
+test('resolveCustomerIdentity uses billing info when no conflict', async () => {
+  const account = {
+    billingInfo: {
+      firstName: 'Bill',
+      lastName: 'User',
+      address: { street1: '123 Bill St', country: 'US' },
+      company: 'Bill Corp',
+      vatNumber: 'US123',
+    },
+    firstName: 'Account',
+    lastName: 'User',
+    address: { street1: '456 Acct St', country: 'US' },
+    company: 'Acct Corp',
+    vatNumber: 'US123',
+  }
+  // No conflict on vatNumber (same), but name differs -> conflict
+  const result = await resolveCustomerIdentity(account, async () => 'automatic')
+  assert.equal(result.name, 'Bill User')
+})
+
+test('resolveCustomerIdentity uses account info for manual collection', async () => {
+  const account = {
+    billingInfo: {
+      firstName: 'Bill',
+      lastName: 'User',
+      address: { street1: '123 Bill St', country: 'US' },
+    },
+    firstName: 'Account',
+    lastName: 'User',
+    address: { street1: '456 Acct St', country: 'US' },
+  }
+  const result = await resolveCustomerIdentity(account, async () => 'manual')
+  assert.equal(result.name, 'Account User')
+  assert.notEqual(result.billingInfoForPaymentMethod, null)
+})
+
+test('resolveCustomerIdentity returns billing info preferred when no conflict', async () => {
+  const account = {
+    billingInfo: {
+      firstName: 'Same',
+      lastName: 'Name',
+      vatNumber: 'GB123456789',
+    },
+    firstName: 'Same',
+    lastName: 'Name',
+    vatNumber: 'GB123456789',
+  }
+  const result = await resolveCustomerIdentity(account, async () => {
+    throw new Error('should not be called')
+  })
+  assert.equal(result.name, 'Same Name')
+  assert.equal(result.collectionMethod, null)
+})
+
+test('resolveCustomerIdentity does not call fetchCollectionMethod when no conflict', async () => {
+  let called = false
+  const account = {
+    billingInfo: { firstName: 'Only', lastName: 'Billing' },
+  }
+  await resolveCustomerIdentity(account, async () => {
+    called = true
+    return 'automatic'
+  })
+  assert.equal(called, false)
+})
+
+test('resolveCustomerIdentity throws when conflict but no collection method', async () => {
+  const account = {
+    billingInfo: {
+      firstName: 'Bill',
+      lastName: 'Name',
+    },
+    firstName: 'Acct',
+    lastName: 'Name',
+  }
+  await assert.rejects(
+    () => resolveCustomerIdentity(account, async () => null),
+    /no subscription found to determine collection method/
+  )
+})
+
+test('resolveCustomerIdentity normalises GB VAT', async () => {
+  const account = {
+    billingInfo: {
+      firstName: 'Test',
+      lastName: 'User',
+      address: { country: 'GB' },
+      vatNumber: '123456789',
+    },
+  }
+  const result = await resolveCustomerIdentity(account, async () => 'automatic')
+  assert.equal(result.vatNumber, 'GB123456789')
+})
+
+test('compareAccountFields returns empty diffs when everything matches', async () => {
+  const account = {
+    email: 'user@example.com',
+    firstName: 'Test',
+    lastName: 'User',
+    customFields: [],
+    billingInfo: {
+      firstName: 'Test',
+      lastName: 'User',
+    },
+  }
+  const stripeCustomer = {
+    email: 'user@example.com',
+    name: 'Test User',
+    metadata: {
+      recurlyAccountCode: '',
+      userId: 'user123',
+      taxInfoPending: '',
+    },
+    tax_exempt: 'none',
+  }
+
+  const diffs = await compareAccountFields({
+    account,
+    stripeCustomer,
+    overleafUserId: 'user123',
+    fetchCollectionMethod: async () => null,
+    stripePaymentMethods: [],
+    stripeServiceName: 'stripe-uk',
+  })
+
+  assert.deepEqual(diffs, {})
+})
+
+test('compareAccountFields detects email drift', async () => {
+  const account = {
+    email: 'new@example.com',
+    customFields: [],
+    billingInfo: {},
+  }
+  const stripeCustomer = {
+    email: 'old@example.com',
+    metadata: {
+      recurlyAccountCode: '',
+      userId: 'user123',
+      taxInfoPending: '',
+    },
+    tax_exempt: 'none',
+  }
+
+  const diffs = await compareAccountFields({
+    account,
+    stripeCustomer,
+    overleafUserId: 'user123',
+    fetchCollectionMethod: async () => null,
+    stripePaymentMethods: [],
+    stripeServiceName: 'stripe-uk',
+  })
+
+  assert.ok(diffs.email)
+  assert.equal(diffs.email.recurly, 'new@example.com')
+  assert.equal(diffs.email.stripe, 'old@example.com')
+})
+
+test('compareAccountFields detects name drift', async () => {
+  const account = {
+    email: 'user@example.com',
+    customFields: [],
+    billingInfo: {
+      firstName: 'New',
+      lastName: 'Name',
+    },
+  }
+  const stripeCustomer = {
+    email: 'user@example.com',
+    name: 'Old Name',
+    metadata: {
+      recurlyAccountCode: '',
+      userId: 'user123',
+      taxInfoPending: '',
+    },
+    tax_exempt: 'none',
+  }
+
+  const diffs = await compareAccountFields({
+    account,
+    stripeCustomer,
+    overleafUserId: 'user123',
+    fetchCollectionMethod: async () => null,
+    stripePaymentMethods: [],
+    stripeServiceName: 'stripe-uk',
+  })
+
+  assert.ok(diffs.name)
+  assert.equal(diffs.name.recurly, 'New Name')
+  assert.equal(diffs.name.stripe, 'Old Name')
+})
+
+test('compareAccountFields detects tax ID drift', async () => {
+  const account = {
+    email: 'user@example.com',
+    customFields: [],
+    billingInfo: {
+      firstName: 'Test',
+      lastName: 'User',
+      address: { country: 'DE' },
+      vatNumber: 'DE123456789',
+    },
+  }
+  const stripeCustomer = {
+    email: 'user@example.com',
+    name: 'Test User',
+    address: { country: 'DE' },
+    metadata: {
+      recurlyAccountCode: '',
+      userId: 'user123',
+      taxInfoPending: '',
+    },
+    tax_exempt: 'none',
+    tax_ids: { data: [] },
+  }
+
+  const diffs = await compareAccountFields({
+    account,
+    stripeCustomer,
+    overleafUserId: 'user123',
+    fetchCollectionMethod: async () => null,
+    stripePaymentMethods: [],
+    stripeServiceName: 'stripe-uk',
+  })
+
+  assert.ok(diffs.tax_id)
+  assert.equal(diffs.tax_id.recurly.type, 'eu_vat')
+  assert.equal(diffs.tax_id.recurly.value, 'DE123456789')
+})
+
+test('compareAccountFields does not report tax ID diff when values match after normalization', async () => {
+  const account = {
+    email: 'user@example.com',
+    customFields: [],
+    billingInfo: {
+      firstName: 'Test',
+      lastName: 'User',
+      address: { country: 'DE' },
+      vatNumber: 'DE-123.456.789',
+    },
+  }
+  const stripeCustomer = {
+    email: 'user@example.com',
+    name: 'Test User',
+    address: { country: 'DE' },
+    metadata: {
+      recurlyAccountCode: '',
+      userId: 'user123',
+      taxInfoPending: '',
+    },
+    tax_exempt: 'none',
+    tax_ids: {
+      data: [{ type: 'eu_vat', value: 'DE123456789' }],
+    },
+  }
+
+  const diffs = await compareAccountFields({
+    account,
+    stripeCustomer,
+    overleafUserId: 'user123',
+    fetchCollectionMethod: async () => null,
+    stripePaymentMethods: [],
+    stripeServiceName: 'stripe-uk',
+  })
+
+  assert.equal(diffs.tax_id, undefined)
+})
+
+test('compareAccountFields handles no payment methods on either side without crashing', async () => {
+  const account = {
+    email: 'user@example.com',
+    customFields: [],
+    billingInfo: {},
+  }
+  const stripeCustomer = {
+    email: 'user@example.com',
+    metadata: {
+      recurlyAccountCode: '',
+      userId: 'user123',
+      taxInfoPending: '',
+    },
+    tax_exempt: 'none',
+    invoice_settings: { default_payment_method: null },
+  }
+
+  // This should not throw (regression test for null payment method crash)
+  const diffs = await compareAccountFields({
+    account,
+    stripeCustomer,
+    overleafUserId: 'user123',
+    fetchCollectionMethod: async () => null,
+    stripePaymentMethods: [],
+    stripeServiceName: 'stripe-uk',
+  })
+
+  assert.equal(diffs.default_payment_method, undefined)
+})
+
+test('compareAccountFields detects metadata drift', async () => {
+  const account = {
+    email: 'user@example.com',
+    customFields: [{ name: 'channel', value: 'web' }],
+    billingInfo: {},
+  }
+  const stripeCustomer = {
+    email: 'user@example.com',
+    metadata: {
+      recurlyAccountCode: '',
+      userId: 'user123',
+      taxInfoPending: '',
+      channel: 'api',
+    },
+    tax_exempt: 'none',
+  }
+
+  const diffs = await compareAccountFields({
+    account,
+    stripeCustomer,
+    overleafUserId: 'user123',
+    fetchCollectionMethod: async () => null,
+    stripePaymentMethods: [],
+    stripeServiceName: 'stripe-uk',
+  })
+
+  assert.ok(diffs['metadata.channel'])
+  assert.equal(diffs['metadata.channel'].recurly, 'web')
+  assert.equal(diffs['metadata.channel'].stripe, 'api')
+})
+
+test('compareAccountFields detects tax_exempt drift', async () => {
+  const account = {
+    email: 'user@example.com',
+    customFields: [],
+    billingInfo: {},
+    taxExempt: true,
+  }
+  const stripeCustomer = {
+    email: 'user@example.com',
+    metadata: {
+      recurlyAccountCode: '',
+      userId: 'user123',
+      taxInfoPending: '',
+    },
+    tax_exempt: 'none',
+  }
+
+  const diffs = await compareAccountFields({
+    account,
+    stripeCustomer,
+    overleafUserId: 'user123',
+    fetchCollectionMethod: async () => null,
+    stripePaymentMethods: [],
+    stripeServiceName: 'stripe-uk',
+  })
+
+  assert.ok(diffs.tax_exempt)
+  assert.equal(diffs.tax_exempt.recurly, 'exempt')
+  assert.equal(diffs.tax_exempt.stripe, 'none')
 })
