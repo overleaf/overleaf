@@ -15,7 +15,7 @@ services:
     container_name: overleaf
     restart: always
     ports:
-      - "8080:80"
+      - "8085:80"
     volumes:
       # Persistent data storage
       - overleaf_data:/var/lib/overleaf
