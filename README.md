@@ -56,17 +56,19 @@ This is a **deployment-ready fork** of the [official Overleaf Community Edition]
 
 ## Quick Start
 
+### Option 1: Simplified All-in-One (Recommended — no build required)
+
 ```bash
 # Pull the pre-built image from Docker Hub
 docker pull blacksamuron05/overleaf-simplified:latest
 
 # Download the compose file
-curl -O https://raw.githubusercontent.com/BlackSamuron0305/overleaf/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/overleaf/overleaf/main/docker-compose.simplified.yml
 # Or clone the repo:
-# git clone https://github.com/BlackSamuron0305/overleaf.git && cd overleaf
+# git clone https://github.com/overleaf/overleaf.git && cd overleaf
 
 # Start (single container with embedded databases)
-docker compose up -d
+docker compose -f docker-compose.simplified.yml up -d
 
 # Open http://localhost/launchpad to create your admin account
 ```
@@ -74,7 +76,16 @@ docker compose up -d
 That's it. One command. MongoDB + Redis + all 11 Overleaf microservices run inside a single container.
 Missing LaTeX packages are **automatically installed** the first time a document needs them — no manual steps.
 
-See the detailed [Deployment Guide](SIMPLIFIED-DEPLOYMENT.md) for configuration options.
+### Option 2: Standard Multi-Container Setup
+
+For production environments or when you need MongoDB replica set features:
+
+```bash
+docker compose up -d
+# Wait for MongoDB replica set to initialize, then visit http://localhost/launchpad
+```
+
+See the detailed [Simplified Deployment Guide](SIMPLIFIED-DEPLOYMENT.md) for configuration options.
 
 ---
 
@@ -111,7 +122,7 @@ The base Overleaf image ships with `scheme-basic` (minimal TeX Live). This fork 
 
 ### Automatic On-Demand Installation (Default)
 
-With `AUTO_INSTALL_PACKAGES: "true"` (the default in `docker-compose.yml`), missing packages are installed automatically on first compile. See the [Auto-Install](#auto-install-latex-packages) section above.
+With `AUTO_INSTALL_PACKAGES: "true"` (the default in `docker-compose.simplified.yml`), missing packages are installed automatically on first compile. See the [Auto-Install](#auto-install-latex-packages) section above.
 
 ### Pre-installed Packages (Dockerfile.custom)
 
@@ -122,7 +133,7 @@ The `Dockerfile.custom` already includes commonly needed packages:
 - `collection-latexrecommended` — recommended base packages
 - `koma-script`, `babel-german`, `csquotes`, `subfigure`, and more
 
-The `Dockerfile.custom` can be used to build a custom image with these pre-installed.
+The standard `docker-compose.yml` builds from `Dockerfile.custom` by default.
 
 ### Manual Installation (Runtime)
 
@@ -160,20 +171,13 @@ When compilation fails with `File 'xxx.sty' not found` (and auto-install is off)
 
 ---
 
-## Architecture
+## Deployment Options
 
-Overleaf consists of **11 Node.js microservices** that communicate over HTTP on localhost, fronted by nginx — all running inside a single container:
+### Architecture Overview
+
+Overleaf consists of **11 Node.js microservices** that communicate over HTTP on localhost, fronted by nginx:
 
 ```
-┌─────────────────────────────────────────┐
-│  Single Docker Container                │
-│  ┌─────────┐ ┌───────┐ ┌─────────────┐ │
-│  │ MongoDB  │ │ Redis │ │ 11 Services │ │
-│  │   8.0   │ │       │ │  + nginx    │ │
-│  └─────────┘ └───────┘ └─────────────┘ │
-│  + TeX Live with on-demand packages     │
-└─────────────────────────────────────────┘
-
 nginx (port 80)
   ├── web (main app, port 4000)
   ├── real-time (WebSocket, port 3026)
@@ -188,13 +192,54 @@ nginx (port 80)
   └── history-v1 (history API, port 3100)
 ```
 
-All services are managed by [Phusion Baseimage](https://github.com/phusion/baseimage-docker) + `runit`.
+All services run inside a single container managed by [Phusion Baseimage](https://github.com/phusion/baseimage-docker) + `runit`.
+
+### Simplified Deployment (Single Container)
+
+**Best for**: Personal use, small teams, labs, workshops
+
+```
+┌─────────────────────────────────────────┐
+│  Single Docker Container                │
+│  ┌─────────┐ ┌───────┐ ┌─────────────┐ │
+│  │ MongoDB  │ │ Redis │ │ 11 Services │ │
+│  │ (standalone)│       │ │  + nginx    │ │
+│  └─────────┘ └───────┘ └─────────────┘ │
+│  + TeX Live with on-demand packages     │
+└─────────────────────────────────────────┘
+```
+
+- **Pros**: Zero config, single command deploy, can install packages at runtime
+- **Cons**: No MongoDB transactions, single point of failure, not for large-scale production
+
+### Standard Deployment (Multi-Container)
+
+**Best for**: Organizations, production environments, >50 users
+
+```
+┌────────────┐  ┌────────────┐  ┌────────────┐
+│  Overleaf  │  │  MongoDB   │  │   Redis    │
+│  Container │──│  (replica  │  │            │
+│            │  │   set)     │  │            │
+└────────────┘  └────────────┘  └────────────┘
+```
+
+- **Pros**: Full MongoDB features, independent scaling, standard backup tools
+- **Cons**: More complex setup, requires replica set initialization
+
+### Docker Compose Files
+
+| File | Description |
+|------|-------------|
+| `docker-compose.simplified.yml` | All-in-one single container (recommended for quick start) |
+| `docker-compose.yml` | Standard 3-container setup with MongoDB replica set |
+| `docker-compose.debug.yml` | Overlay that exposes Node.js debugger ports |
 
 ---
 
 ## Configuration
 
-Key environment variables (set in `docker-compose.yml`):
+Key environment variables (set in docker-compose files):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -211,6 +256,8 @@ See the full list in `server-ce/config/settings.js`.
 
 ## Data & Backups
 
+### Simplified Container
+
 ```bash
 # Backup all volumes
 docker run --rm -v overleaf_data:/data -v $(pwd):/backup alpine tar czf /backup/overleaf-backup.tar.gz /data
@@ -219,6 +266,10 @@ docker run --rm -v mongodb_data:/data -v $(pwd):/backup alpine tar czf /backup/m
 # Restore
 docker run --rm -v overleaf_data:/data -v $(pwd):/backup alpine tar xzf /backup/overleaf-backup.tar.gz -C /
 ```
+
+### Standard Setup
+
+MongoDB and Redis data are in host-mounted volumes (`~/mongo_data`, `~/redis_data`, `~/sharelatex_data`). Use standard backup tools.
 
 ---
 
@@ -229,7 +280,7 @@ docker run --rm -v overleaf_data:/data -v $(pwd):/backup alpine tar xzf /backup/
 docker pull blacksamuron05/overleaf-simplified:latest
 
 # Restart the container with the new image
-docker compose up -d
+docker compose -f docker-compose.simplified.yml up -d
 ```
 
 For version-specific notes, see the [Release Notes on the Wiki](https://github.com/overleaf/overleaf/wiki#release-notes).
