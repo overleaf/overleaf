@@ -1,30 +1,30 @@
-import fsPromises from 'node:fs/promises'
-import os from 'node:os'
-import Path from 'node:path'
-import { callbackify, promisify } from 'node:util'
-import { execFile } from 'node:child_process'
+const fsPromises = require('node:fs/promises')
+const os = require('node:os')
+const Path = require('node:path')
+const { callbackify, promisify } = require('node:util')
+const { execFile } = require('node:child_process')
 
-import Settings from '@overleaf/settings'
-import logger from '@overleaf/logger'
-import OError from '@overleaf/o-error'
+const Settings = require('@overleaf/settings')
+const logger = require('@overleaf/logger')
+const OError = require('@overleaf/o-error')
 
-import ResourceWriter from './ResourceWriter.js'
-import LatexRunner from './LatexRunner.js'
-import OutputFileFinder from './OutputFileFinder.js'
-import OutputCacheManager from './OutputCacheManager.js'
-import ClsiMetrics from './Metrics.js'
-import DraftModeManager from './DraftModeManager.js'
-import TikzManager from './TikzManager.js'
-import LockManager from './LockManager.js'
-import Errors from './Errors.js'
-import CommandRunner from './CommandRunner.js'
-import ContentCacheMetrics from './ContentCacheMetrics.js'
-import SynctexOutputParser from './SynctexOutputParser.js'
-import CLSICacheHandler from './CLSICacheHandler.js'
-import StatsManager from './StatsManager.js'
-import SafeReader from './SafeReader.js'
-import LatexMetrics from './LatexMetrics.js'
-import { callbackifyMultiResult } from '@overleaf/promise-utils'
+const ResourceWriter = require('./ResourceWriter')
+const LatexRunner = require('./LatexRunner')
+const OutputFileFinder = require('./OutputFileFinder')
+const OutputCacheManager = require('./OutputCacheManager')
+const ClsiMetrics = require('./Metrics')
+const DraftModeManager = require('./DraftModeManager')
+const TikzManager = require('./TikzManager')
+const LockManager = require('./LockManager')
+const Errors = require('./Errors')
+const CommandRunner = require('./CommandRunner')
+const ContentCacheMetrics = require('./ContentCacheMetrics')
+const SynctexOutputParser = require('./SynctexOutputParser')
+const CLSICacheHandler = require('./CLSICacheHandler')
+const StatsManager = require('./StatsManager')
+const SafeReader = require('./SafeReader')
+const LatexMetrics = require('./LatexMetrics')
+const { callbackifyMultiResult } = require('@overleaf/promise-utils')
 
 const { downloadLatestCompileCache, downloadOutputDotSynctexFromCompileCache } =
   CLSICacheHandler
@@ -1566,7 +1566,7 @@ function _emitMetrics(request, status, stats, timings) {
   }
 }
 
-export default {
+module.exports = {
   doCompileWithLock: callbackify(doCompileWithLock),
   stopCompile: callbackify(stopCompile),
   clearProject: callbackify(clearProject),

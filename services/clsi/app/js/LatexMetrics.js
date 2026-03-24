@@ -408,4 +408,4 @@ function convertToArray(object) {
     .sort((a, b) => b.size - a.size) // sort by size descending
 }
 
-export default { enableLatexMkMetrics, addLatexMkMetrics, addLatexFdbMetrics }
+module.exports = { enableLatexMkMetrics, addLatexMkMetrics, addLatexFdbMetrics }
