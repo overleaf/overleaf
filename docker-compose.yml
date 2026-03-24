@@ -11,14 +11,11 @@
 
 services:
   overleaf:
-    build:
-      context: .
-      dockerfile: Dockerfile.simplified
     image: blacksamuron05/overleaf-simplified:latest
     container_name: overleaf
     restart: always
     ports:
-      - "8085:80"
+      - "80:80"
     volumes:
       # Persistent data storage
       - overleaf_data:/var/lib/overleaf
@@ -40,9 +37,6 @@ services:
       # OVERLEAF_EMAIL_SMTP_SECURE: "false"
       # OVERLEAF_EMAIL_SMTP_USER: ""
       # OVERLEAF_EMAIL_SMTP_PASS: ""
-
-      # IMPORTANT: Required for invite token generation
-      # OVERLEAF_INVITE_TOKEN_SECRET: generate with `openssl rand -base64 32`
 
       # Embedded databases (run MongoDB + Redis inside this container)
       EMBEDDED_MONGO: "true"
