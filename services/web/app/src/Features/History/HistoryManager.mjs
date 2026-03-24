@@ -290,6 +290,13 @@ async function getLatestHistoryWithHistoryId(historyId) {
   )
 }
 
+async function ensureNoResyncPending(projectId) {
+  const { resyncPending } = await fetchJson(
+    `${settings.apis.project_history.url}/project/${projectId}/resync-pending`
+  )
+  if (resyncPending) throw new OError('broken history with pending resync')
+}
+
 /**
  * Get history changes since a given version
  *
@@ -463,5 +470,6 @@ export default {
     getProjectBlobStats,
     getBlobStats,
     getLatestHistoryWithHistoryId,
+    ensureNoResyncPending,
   },
 }

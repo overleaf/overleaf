@@ -1,9 +1,9 @@
 import { callbackify } from 'node:util'
 import { callbackifyMultiResult } from '@overleaf/promise-utils'
 import {
+  fetchStream,
   fetchString,
   fetchStringWithResponse,
-  fetchStream,
   RequestFailedError,
 } from '@overleaf/fetch-utils'
 import Settings from '@overleaf/settings'
@@ -755,21 +755,37 @@ async function _buildRequest(projectId, userId, options) {
 
   if (options.compileFromHistory && baseHistoryVersion === -1) {
     // full sync
-    return await _buildRequestFromHistoryFull(
-      projectId,
-      historyId,
-      options,
-      project
-    )
+    try {
+      return await _buildRequestFromHistoryFull(
+        projectId,
+        historyId,
+        options,
+        project
+      )
+    } catch (err) {
+      logger.warn(
+        { err, projectId, historyId },
+        'failed to compose history-full request'
+      )
+      // fall back to old compile mode
+    }
   } else if (options.compileFromHistory) {
     // incremental sync
-    return await _buildRequestFromHistoryIncremental(
-      projectId,
-      historyId,
-      options,
-      project,
-      baseHistoryVersion
-    )
+    try {
+      return await _buildRequestFromHistoryIncremental(
+        projectId,
+        historyId,
+        options,
+        project,
+        baseHistoryVersion
+      )
+    } catch (err) {
+      logger.warn(
+        { err, projectId, historyId, baseHistoryVersion },
+        'failed to compose history-incremental request'
+      )
+      // fall back to old compile mode
+    }
   }
 
   if (options.incrementalCompilesEnabled || options.syncType != null) {
@@ -895,12 +911,18 @@ async function _buildRequestFromHistoryFull(
   project
 ) {
   await HistoryManager.promises.flushProject(projectId)
-  const {
-    chunk: {
-      history: { snapshot: rawSnapshot, changes: rawChanges },
-      startVersion,
+  const [
+    {
+      chunk: {
+        history: { snapshot: rawSnapshot, changes: rawChanges },
+        startVersion,
+      },
     },
-  } = await HistoryManager.promises.getLatestHistoryWithHistoryId(historyId)
+    /* ensureNoResyncPending throws */
+  ] = await Promise.all([
+    HistoryManager.promises.getLatestHistoryWithHistoryId(historyId),
+    HistoryManager.promises.ensureNoResyncPending(projectId),
+  ])
   const rawChangeOperations = _rawChangeOperationsFromChanges(rawChanges)
   const globalBlobs = _collectGlobalBlobs(rawChangeOperations)
   for (const { hash, rangesHash } of Object.values(rawSnapshot.files)) {
@@ -937,22 +959,26 @@ async function _buildRequestFromHistoryIncremental(
   let size = 0
   while (hasMore) {
     let changes
-    ;({ changes, hasMore } =
-      await HistoryManager.promises.getChangesWithHistoryId(historyId, {
-        since,
-      }))
+    ;[{ changes, hasMore } /* resyncPending throws */] = await Promise.all([
+      HistoryManager.promises.getChangesWithHistoryId(historyId, { since }),
+      HistoryManager.promises.ensureNoResyncPending(projectId),
+    ])
     since += changes.length
     const newRawChangeOperations = _rawChangeOperationsFromChanges(changes)
     size += Buffer.from(JSON.stringify(newRawChangeOperations)).byteLength
     if (size > 6.5 * 1024 * 1024) {
       // clsi has a payload limit of 7MiB. Do not send too many operations.
       // Fall back to sending the latest snapshot instead.
-      return await _buildRequestFromHistoryFull(
-        projectId,
-        historyId,
-        options,
-        project
-      )
+      try {
+        return await _buildRequestFromHistoryFull(
+          projectId,
+          historyId,
+          options,
+          project
+        )
+      } catch (err) {
+        throw OError.tag(err, 'upgrade to history-full failed', { size })
+      }
     }
     rawChangeOperations.push(...newRawChangeOperations)
   }

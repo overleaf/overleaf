@@ -91,7 +91,7 @@ async function startHardResync(projectId, options = {}) {
 async function startResyncWithoutLock(projectId, options) {
   await ErrorRecorder.promises.recordSyncStart(projectId)
 
-  const syncState = await _getResyncState(projectId)
+  const syncState = await getResyncState(projectId)
   if (syncState.isSyncOngoing()) {
     throw new OError('sync ongoing')
   }
@@ -109,7 +109,11 @@ async function startResyncWithoutLock(projectId, options) {
   await setResyncState(projectId, syncState)
 }
 
-async function _getResyncState(projectId) {
+/**
+ * @param {string} projectId
+ * @return {Promise<SyncState>}
+ */
+async function getResyncState(projectId) {
   const rawSyncState = await db.projectHistorySyncState.findOne({
     project_id: new ObjectId(projectId.toString()),
   })
@@ -185,7 +189,7 @@ async function clearResyncStateIfAllAfter(projectId, date) {
 }
 
 async function skipUpdatesDuringSync(projectId, updates) {
-  const syncState = await _getResyncState(projectId)
+  const syncState = await getResyncState(projectId)
   if (!syncState.isSyncOngoing()) {
     logger.debug({ projectId }, 'not skipping updates: no resync in progress')
     // don't return syncState when unchanged
@@ -229,7 +233,7 @@ async function expandSyncUpdates(
     return updates
   }
 
-  const syncState = await _getResyncState(projectId)
+  const syncState = await getResyncState(projectId)
 
   // compute the current snapshot from the most recent chunk
   const snapshotFiles =
@@ -1284,6 +1288,7 @@ function trackingDirectivesEqual(a, b) {
 
 // EXPORTS
 
+const getResyncStateCb = callbackify(getResyncState)
 const startResyncCb = callbackify(startResync)
 const startResyncWithoutLockCb = callbackify(startResyncWithoutLock)
 const startHardResyncCb = callbackify(startHardResync)
@@ -1327,6 +1332,7 @@ const expandSyncUpdatesCb = (
 }
 
 export {
+  getResyncStateCb as getResyncState,
   startResyncCb as startResync,
   startResyncWithoutLockCb as startResyncWithoutLock,
   startHardResyncCb as startHardResync,
@@ -1337,6 +1343,7 @@ export {
 }
 
 export const promises = {
+  getResyncState,
   startResync,
   startResyncWithoutLock,
   startHardResync,

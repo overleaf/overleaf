@@ -25,6 +25,11 @@ export function initialize(app) {
 
   app.post('/project/:project_id/flush', HttpController.flushProject)
 
+  app.get(
+    '/project/:project_id/resync-pending',
+    HttpController.getResyncPending
+  )
+
   app.post('/project/:project_id/resync', HttpController.resyncProject)
 
   app.get('/project/:project_id/dump', HttpController.dumpProject)

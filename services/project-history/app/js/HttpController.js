@@ -244,6 +244,24 @@ export function getUpdates(req, res, next) {
   )
 }
 
+const getResyncPendingSchema = z.object({
+  params: z.object({
+    project_id: zz.objectId(),
+  }),
+})
+
+export function getResyncPending(req, res, next) {
+  const {
+    params: { project_id: projectId },
+  } = parseReq(req, getResyncPendingSchema)
+  SyncManager.getResyncState(projectId, (err, state) => {
+    if (err) return next(err)
+    res.json({
+      resyncPending: state.isSyncOngoing(),
+    })
+  })
+}
+
 const latestVersionSchema = z.object({
   params: z.object({
     project_id: zz.objectId().or(z.coerce.number()),
