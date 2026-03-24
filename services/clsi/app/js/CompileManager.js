@@ -508,6 +508,14 @@ async function _autoInstallPackages({ missingFiles, missingBabelLangs, missingTi
     } catch (err) {
       logger.warn({ err, lang, packageName, projectId }, 'auto-install: failed to install babel language')
     }
+    // Also install hyphenation patterns for the language
+    const hyphenPkg = `hyphen-${lang}`
+    try {
+      await execFilePromise('tlmgr', ['install', hyphenPkg], { timeout: 120000 })
+      installed.push(hyphenPkg)
+    } catch {
+      // hyphenation package may not exist for all languages — non-critical
+    }
   }
 
   if (installed.length > 0) {
@@ -699,7 +707,8 @@ async function doCompile(request, stats, timings) {
       const stubFiles = new Set()
       let needsTexhash = false
       for (let attempt = 0; attempt < 100; attempt++) {
-        if (!stats['latexmk-errors']) break
+        // On subsequent attempts, only continue if the last compile had errors
+        if (attempt > 0 && !stats['latexmk-errors']) break
         const { missingFiles, missingBabelLangs, missingTikzLibs, fatalPackages } =
           await _parseMissingPackages(compileDir)
         const newFiles = missingFiles.filter(f => !alreadyAttempted.has(f))
