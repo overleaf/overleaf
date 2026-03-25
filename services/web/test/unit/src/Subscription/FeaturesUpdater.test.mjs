@@ -77,18 +77,8 @@ describe('FeaturesUpdater', function () {
         quotaTierGranted: 'unlimited',
       },
       aiFeatures: {
-        freeQuota: 'free',
-        standardQuota: 'standard',
-        basicQuota: 'basic',
+        freeTrialQuota: 'basic',
         unlimitedQuota: 'unlimited',
-      },
-      quotaGrants: {
-        ai: {
-          free: 5,
-          basic: 5,
-          standard: 10,
-          unlimited: 200,
-        },
       },
     }
 

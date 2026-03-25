@@ -152,7 +152,6 @@ export interface Meta {
   'ol-groupSubscriptionsPendingEnrollment': PendingGroupSubscriptionEnrollment[]
   'ol-groupsAndEnterpriseBannerVariant': GroupsAndEnterpriseBannerVariant
   'ol-hasAiAssistViaWritefull': boolean
-  'ol-hasAiFreeTier': boolean
   'ol-hasGroupSSOFeature': boolean
   'ol-hasIndividualPaidSubscription': boolean
   'ol-hasManagedUsersFeature': boolean
@@ -161,7 +160,6 @@ export interface Meta {
   'ol-hasSplitTestWriteAccess': boolean
   'ol-hasSubscription': boolean
   'ol-hasTrackChangesFeature': boolean
-  'ol-hasUnlimitedAi': boolean
   'ol-hasWriteAccess': boolean
   'ol-hideLinkingWidgets': boolean // CI only
   'ol-historyBlobStats': {
@@ -223,6 +221,7 @@ export interface Meta {
   'ol-notificationsInstitution': InstitutionType[]
   'ol-oauthProviders': OAuthProviders
   'ol-odcData': OnboardingFormData
+  'ol-onAiFreeTrial': boolean
   'ol-otMigrationStage': number
   'ol-overallThemes': OverallThemeMeta[]
   'ol-ownerIsManaged': boolean

@@ -39,12 +39,14 @@ function mergeFeatures(featuresA, featuresB) {
         featuresB.compileTimeout || 0
       )
     } else if (key === 'aiUsageQuota') {
-      // later entries have higher precedence
-      const QUOTA_TIER_LIST = ['free', 'basic', 'standard', 'unlimited']
-      const quotaA = QUOTA_TIER_LIST.indexOf(features.aiUsageQuota)
-      const quotaB = QUOTA_TIER_LIST.indexOf(featuresB.aiUsageQuota)
-      features.aiUsageQuota =
-        quotaA > quotaB ? features.aiUsageQuota : featuresB.aiUsageQuota
+      if (
+        features.aiUsageQuota === Settings.aiFeatures.unlimitedQuota ||
+        featuresB.aiUsageQuota === Settings.aiFeatures.unlimitedQuota
+      ) {
+        features.aiUsageQuota = Settings.aiFeatures.unlimitedQuota
+      } else {
+        features.aiUsageQuota = Settings.aiFeatures.freeTrialQuota
+      }
     } else {
       // Boolean keys, true is better
       features[key] = features[key] || featuresB[key]

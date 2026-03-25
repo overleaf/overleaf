@@ -425,19 +425,8 @@ module.exports = {
   },
 
   aiFeatures: {
-    freeQuota: 'free',
-    standardQuota: 'standard',
-    basicQuota: 'basic',
+    freeTrialQuota: 'basic',
     unlimitedQuota: 'unlimited',
-  },
-
-  quotaGrants: {
-    ai: {
-      free: 0,
-      basic: 0,
-      standard: 0,
-      unlimited: 0,
-    },
   },
 
   groupPlanModalOptions: {

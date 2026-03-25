@@ -964,12 +964,6 @@ const _ProjectController = {
         showAiFeatures,
         onAiFreeTrial:
           fullFeatureSet?.aiUsageQuota === Settings.aiFeatures?.freeTrialQuota,
-        // default to free tier if they dont have a quota
-        hasAiFreeTier:
-          fullFeatureSet?.aiUsageQuota === Settings.aiFeatures?.freeQuota ||
-          !fullFeatureSet?.aiUsageQuota,
-        hasUnlimitedAi:
-          fullFeatureSet?.aiUsageQuota === Settings.aiFeatures?.unlimitedQuota,
         detachRole,
         metadata: { viewport: false },
         showUpgradePrompt,

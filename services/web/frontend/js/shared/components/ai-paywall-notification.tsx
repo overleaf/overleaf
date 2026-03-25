@@ -7,7 +7,7 @@ import { formatSecondsToHoursAndMinutes } from '@/shared/utils/time'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 import getMeta from '@/utils/meta'
-const hasUnlimitedAi = getMeta('ol-hasUnlimitedAi')
+const onAiFreeTrial = getMeta('ol-onAiFreeTrial')
 
 type aiFeatureLocations = 'errorAssist' | 'workbench'
 
@@ -33,8 +33,8 @@ function AiPaywallNotification({
     return null
   }
 
-  // todo: quota clean-up: remove once we are transitioned off aiErrorAssistant naming and replace with just hasUnlimitedAi, also remove null FF check
-  const hasAddOn = hasUnlimitedAi || Boolean(features?.aiErrorAssistant)
+  // todo: quota clean-up: remove once we are transitioned off aiErrorAssistant naming and replace with just !onAiFreeTrial, also remove null FF check
+  const hasAddOn = !onAiFreeTrial || Boolean(features?.aiErrorAssistant)
 
   // error assist only needs usage quota
   const canUseErrorAssist = hasSuggestionsLeft
