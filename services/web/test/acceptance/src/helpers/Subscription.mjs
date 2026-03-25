@@ -27,6 +27,7 @@ class PromisifiedSubscription {
     this.addOns = options.addOns
     this.paymentProvider = options.paymentProvider
     this.managedUsersEnabled = options.managedUsersEnabled
+    this.v1_id = options.v1_id
   }
 
   async ensureExists() {
