@@ -325,4 +325,52 @@ describe('SplitTestSessionHandler', function () {
       ],
     })
   })
+
+  describe('clearCachedVariant', function () {
+    it('should remove all cached entries for a given split test name', function (ctx) {
+      const session = {
+        cachedSplitTestAssignments: {
+          'my-test-1': 'variant-1',
+          'my-test-2': 'variant-2',
+          'other-test-1': 'variant-1',
+        },
+      }
+      ctx.SplitTestSessionHandler.clearCachedVariant(session, 'my-test')
+      expect(session.cachedSplitTestAssignments).to.deep.equal({
+        'other-test-1': 'variant-1',
+      })
+    })
+
+    it('should handle split test names with hyphens correctly', function (ctx) {
+      const session = {
+        cachedSplitTestAssignments: {
+          'monthly-texlive-1': 'enabled',
+          'monthly-texlive-2': 'enabled',
+          'monthly-1': 'variant-1',
+        },
+      }
+      ctx.SplitTestSessionHandler.clearCachedVariant(session, 'monthly-texlive')
+      expect(session.cachedSplitTestAssignments).to.deep.equal({
+        'monthly-1': 'variant-1',
+      })
+    })
+
+    it('should do nothing when session has no cached assignments', function (ctx) {
+      const session = {}
+      ctx.SplitTestSessionHandler.clearCachedVariant(session, 'my-test')
+      expect(session.cachedSplitTestAssignments).to.be.undefined
+    })
+
+    it('should do nothing when there are no matching entries', function (ctx) {
+      const session = {
+        cachedSplitTestAssignments: {
+          'other-test-1': 'variant-1',
+        },
+      }
+      ctx.SplitTestSessionHandler.clearCachedVariant(session, 'my-test')
+      expect(session.cachedSplitTestAssignments).to.deep.equal({
+        'other-test-1': 'variant-1',
+      })
+    })
+  })
 })

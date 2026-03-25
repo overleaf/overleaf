@@ -114,6 +114,16 @@ function getCachedVariant(session, splitTestName, currentVersion) {
   return session.cachedSplitTestAssignments[cacheKey]
 }
 
+function clearCachedVariant(session, splitTestName) {
+  if (!session.cachedSplitTestAssignments) return
+  for (const cacheKey of Object.keys(session.cachedSplitTestAssignments)) {
+    const name = cacheKey.split('-').slice(0, -1).join('-')
+    if (name === splitTestName) {
+      delete session.cachedSplitTestAssignments[cacheKey]
+    }
+  }
+}
+
 function setVariantInCache({
   session,
   splitTestName,
@@ -248,6 +258,7 @@ export default {
   getAssignments: callbackify(getAssignments),
   appendAssignment: callbackify(appendAssignment),
   getCachedVariant,
+  clearCachedVariant,
   setVariantInCache,
   sessionMaintenance: callbackify(sessionMaintenance),
   collectSessionStats,

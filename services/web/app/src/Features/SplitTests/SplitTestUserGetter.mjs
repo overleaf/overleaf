@@ -7,6 +7,8 @@ async function getUser(id, splitTestName) {
     analyticsId: 1,
     alphaProgram: 1,
     betaProgram: 1,
+    labsProgram: 1,
+    labsExperiments: 1,
   }
   if (splitTestName) {
     projection[`splitTests.${splitTestName}`] = 1

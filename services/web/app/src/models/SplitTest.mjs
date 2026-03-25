@@ -33,6 +33,7 @@ const BadgeSchema = new Schema(
 const BadgeInfoSchema = new Schema(
   {
     alpha: BadgeSchema,
+    labs: BadgeSchema,
     beta: BadgeSchema,
     release: BadgeSchema,
   },
@@ -85,7 +86,7 @@ const VersionSchema = new Schema(
     phase: {
       type: String,
       default: 'alpha',
-      enum: ['alpha', 'beta', 'release'],
+      enum: ['alpha', 'labs', 'beta', 'release'],
       required: true,
     },
     active: {
@@ -172,6 +173,18 @@ export const SplitTestSchema = new Schema(
     archivedBy: { type: ObjectId, ref: 'User' },
     badgeInfo: {
       type: BadgeInfoSchema,
+      required: false,
+    },
+    labsTitle: {
+      type: String,
+      required: false,
+    },
+    labsDescription: {
+      type: String,
+      required: false,
+    },
+    labsIcon: {
+      type: String,
       required: false,
     },
   },

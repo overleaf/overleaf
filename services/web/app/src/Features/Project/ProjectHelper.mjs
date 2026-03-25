@@ -3,6 +3,7 @@ import mongodb from 'mongodb-legacy'
 import _ from 'lodash'
 import Settings from '@overleaf/settings'
 import OError from '@overleaf/o-error'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 
 const { ObjectId } = mongodb
 
@@ -148,25 +149,45 @@ function _addNumericSuffixToProjectName(name, allProjectNames, maxLength) {
   return null
 }
 
-function _imageAllowed(user, image) {
-  if (image.alphaOnly) {
-    return Boolean(user?.alphaProgram)
+async function _monthlyExperimentalImageAllowed(user) {
+  const userId = user?._id?.toString()
+  if (!userId) return false
+  const { variant } = await SplitTestHandler.promises.getAssignmentForUser(
+    userId,
+    'monthly-texlive'
+  )
+  return variant === 'enabled'
+}
+
+function _imageAllowed(
+  image,
+  alphaImagesAllowed,
+  monthlyExperimentalImagesAllowed
+) {
+  if (image.alphaOnly && !alphaImagesAllowed) {
+    return false
   }
-  if (image.monthlyExperimental) {
-    return Boolean(
-      user?.labsProgram && user.labsExperiments.includes('monthly-texlive')
-    )
+  if (image.monthlyExperimental && !monthlyExperimentalImagesAllowed) {
+    return false
   }
   return true
 }
 
-function getAllowedImagesForUser(user) {
+async function getAllowedImagesForUser(user) {
   let images = Settings.allowedImageNames || []
+
+  const alphaImagesAllowed = Boolean(user?.alphaProgram)
+  const monthlyExperimentalImagesAllowed =
+    await _monthlyExperimentalImageAllowed(user)
 
   images = images.map(image => {
     return {
       ...image,
-      allowed: _imageAllowed(user, image),
+      allowed: _imageAllowed(
+        image,
+        alphaImagesAllowed,
+        monthlyExperimentalImagesAllowed
+      ),
       rolling: image.monthlyExperimental,
     }
   })

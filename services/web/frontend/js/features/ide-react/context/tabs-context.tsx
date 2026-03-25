@@ -6,7 +6,6 @@ import React, { FC, useCallback, useContext, useEffect, useMemo } from 'react'
 import { useFileTreeOpenContext } from './file-tree-open-context'
 import { useEditorManagerContext } from './editor-manager-context'
 import { debugConsole } from '@/utils/debugging'
-import { isInExperiment } from '@/utils/labs-utils'
 import { disambiguatePaths } from '../util/disambiguate-paths'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
@@ -43,8 +42,7 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
 
   const { openEntity } = useFileTreeOpenContext()
   const { openDocWithId, openFileWithId } = useEditorManagerContext()
-  const tabsEnabled =
-    isInExperiment('editor-tabs') && isSplitTestEnabled('editor-tabs')
+  const tabsEnabled = isSplitTestEnabled('editor-tabs')
 
   const [openTabs, setOpenTabs] = usePersistedState<PersistedTabInfo[]>(
     `open-tabs:${projectId}`,

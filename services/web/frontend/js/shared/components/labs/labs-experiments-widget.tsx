@@ -73,14 +73,14 @@ export function LabsExperimentWidget({
           <h3 className="h4">{title}</h3>
           {optedIn && <OLBadge bg="info">{t('enabled')}</OLBadge>}
         </div>
-        <p className="small">
+        <div className="small">
           {optedIn && optedInDescription ? optedInDescription : description}{' '}
           {helpPath && (
             <a href={helpPath} target="_blank" rel="noreferrer">
               {t('learn_more')}
             </a>
           )}
-        </p>
+        </div>
       </div>
       <div>
         {optedIn && feedbackLink && (

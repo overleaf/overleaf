@@ -15,7 +15,6 @@ import SessionManager from '../Authentication/SessionManager.mjs'
 import logger from '@overleaf/logger'
 import SplitTestSessionHandler from './SplitTestSessionHandler.mjs'
 import SplitTestUserGetter from './SplitTestUserGetter.mjs'
-import SplitTestManager from './SplitTestManager.mjs'
 
 /**
  * @import { Assignment } from "./types"
@@ -23,6 +22,7 @@ import SplitTestManager from './SplitTestManager.mjs'
 
 const DEFAULT_VARIANT = 'default'
 const ALPHA_PHASE = 'alpha'
+const LABS_PHASE = 'labs'
 const BETA_PHASE = 'beta'
 const RELEASE_PHASE = 'release'
 const DEFAULT_ASSIGNMENT = {
@@ -417,8 +417,10 @@ async function _getAssignment(
   }
 
   if (activeForUser) {
-    if (_isSplitTest(splitTest)) {
-      // if the user is logged in, persist the assignment
+    const hasUserLimit = _currentVersionHasUserLimit(splitTest)
+
+    if (_isSplitTest(splitTest) || hasUserLimit) {
+      // if the user is logged in, persist the assignment (and increment user count if needed)
       if (userId) {
         const assignmentData = {
           user,
@@ -447,7 +449,7 @@ async function _getAssignment(
         }
       }
       // otherwise this is an anonymous user, we store assignments in session to persist them on registration
-      else {
+      else if (_isSplitTest(splitTest)) {
         await SplitTestSessionHandler.promises.appendAssignment(session, {
           splitTestId: splitTest._id,
           splitTestName,
@@ -458,23 +460,25 @@ async function _getAssignment(
         })
       }
 
-      const effectiveAnalyticsId = user?.analyticsId || analyticsId || userId
-      AnalyticsManager.setUserPropertyForAnalyticsId(
-        effectiveAnalyticsId,
-        `split-test-${splitTestName}-${versionNumber}`,
-        selectedVariantName
-      ).catch(err => {
-        logger.warn(
-          {
-            err,
-            analyticsId: effectiveAnalyticsId,
-            splitTest: splitTestName,
-            versionNumber,
-            variant: selectedVariantName,
-          },
-          'failed to set user property for analytics id'
-        )
-      })
+      if (_isSplitTest(splitTest)) {
+        const effectiveAnalyticsId = user?.analyticsId || analyticsId || userId
+        AnalyticsManager.setUserPropertyForAnalyticsId(
+          effectiveAnalyticsId,
+          `split-test-${splitTestName}-${versionNumber}`,
+          selectedVariantName
+        ).catch(err => {
+          logger.warn(
+            {
+              err,
+              analyticsId: effectiveAnalyticsId,
+              splitTest: splitTestName,
+              versionNumber,
+              variant: selectedVariantName,
+            },
+            'failed to set user property for analytics id'
+          )
+        })
+      }
     }
     let isFirstNonDefaultAssignment
     if (userId) {
@@ -501,11 +505,15 @@ async function _getAssignmentMetadata(analyticsId, user, splitTest) {
   const phase = currentVersion.phase
 
   // For continuity on phase rollout for gradual rollouts, we keep all users from the previous phase enrolled to the variant.
-  // In beta, all alpha users are cohorted to the variant, and the same in release phase all alpha & beta users.
+  // In beta, all alpha and labs users are cohorted to the variant, and the same in release phase all alpha, labs & beta users.
   if (
     _isGradualRollout(splitTest) &&
     ((phase === BETA_PHASE && user?.alphaProgram) ||
-      (phase === RELEASE_PHASE && (user?.alphaProgram || user?.betaProgram)))
+      (phase === RELEASE_PHASE &&
+        (user?.alphaProgram ||
+          user?.betaProgram ||
+          (user?.labsProgram &&
+            user?.labsExperiments?.includes(splitTest.name)))))
   ) {
     return {
       activeForUser: true,
@@ -513,6 +521,27 @@ async function _getAssignmentMetadata(analyticsId, user, splitTest) {
       phase,
       versionNumber,
       isFirstNonDefaultAssignment: false,
+    }
+  }
+
+  // Labs phase: user must be in labs program AND have opted into this experiment.
+  // The userCount/userLimit check is enforced at enrollment time (see
+  // incrementLabsVariantCounterIfBelowLimit), so we trust the enrollment here.
+  if (phase === LABS_PHASE) {
+    if (user?.labsProgram && user?.labsExperiments?.includes(splitTest.name)) {
+      const selectedVariant = currentVersion.variants[0]
+      const selectedVariantName = selectedVariant.name
+
+      return {
+        activeForUser: true,
+        selectedVariantName,
+        phase,
+        versionNumber,
+        isFirstNonDefaultAssignment: false,
+      }
+    }
+    return {
+      activeForUser: false,
     }
   }
 
@@ -549,8 +578,7 @@ async function _getAssignmentMetadata(analyticsId, user, splitTest) {
         : null
 
       if (!existingAssignment) {
-        const currentCount =
-          selectedVariant.userCount ?? Number.MAX_SAFE_INTEGER
+        const currentCount = selectedVariant.userCount ?? 0
 
         if (currentCount >= userLimit) {
           selectedVariantName = DEFAULT_VARIANT
@@ -674,6 +702,12 @@ async function _shouldIncrementVariantCounter(
     return false
   }
 
+  // Labs variant counters are managed at enrollment/unenrollment time,
+  // not at assignment time.
+  if (phase === LABS_PHASE) {
+    return false
+  }
+
   const splitTest = await _getSplitTest(splitTestName)
   if (!splitTest) {
     return false
@@ -702,42 +736,6 @@ async function _shouldIncrementVariantCounter(
 
   // Only increment if user hasn't been assigned to this variant in this phase before
   return !existingPhaseAssignment
-}
-
-/**
- * Increment the user counter for a specific variant
- * @param {string} splitTestName - The name of the split test
- * @param {string} variantName - The name of the variant
- * @param {number} versionNumber - The version to update
- */
-async function _incrementVariantCounter(
-  splitTestName,
-  variantName,
-  versionNumber
-) {
-  try {
-    await SplitTest.updateOne(
-      {
-        name: splitTestName,
-        'versions.versionNumber': versionNumber,
-        'versions.variants.name': variantName,
-      },
-      {
-        $inc: {
-          'versions.$.variants.$[variant].userCount': 1,
-        },
-      },
-      {
-        arrayFilters: [{ 'variant.name': variantName }],
-      }
-    ).exec()
-    await SplitTestManager.clearCache()
-  } catch (error) {
-    logger.error(
-      { err: error, splitTestName, variantName, versionNumber },
-      'Failed to increment variant counter'
-    )
-  }
 }
 
 function _makeAssignment({
@@ -812,6 +810,138 @@ function _isGradualRollout(featureFlag) {
   return !SplitTestUtils.getCurrentVersion(featureFlag).analyticsEnabled
 }
 
+function _currentVersionHasUserLimit(featureFlag) {
+  const currentVersion = SplitTestUtils.getCurrentVersion(featureFlag)
+  return currentVersion.variants.some(
+    v => v.userLimit && typeof v.userLimit === 'number'
+  )
+}
+
+/**
+ * Increment the user counter for a specific variant
+ * @param {string} splitTestName - The name of the split test
+ * @param {string} variantName - The name of the variant
+ * @param {number} versionNumber - The version to update
+ */
+async function _incrementVariantCounter(
+  splitTestName,
+  variantName,
+  versionNumber
+) {
+  try {
+    await SplitTest.updateOne(
+      {
+        name: splitTestName,
+        'versions.versionNumber': versionNumber,
+        'versions.variants.name': variantName,
+      },
+      {
+        $inc: {
+          'versions.$.variants.$[variant].userCount': 1,
+        },
+      },
+      {
+        arrayFilters: [{ 'variant.name': variantName }],
+      }
+    ).exec()
+  } catch (error) {
+    logger.error(
+      { err: error, splitTestName, variantName, versionNumber },
+      'Failed to increment variant counter'
+    )
+  }
+}
+
+/**
+ * Atomically increment the labs variant counter only if below the user limit.
+ * Returns true if a slot was claimed, false if the limit has been reached.
+ * When there is no userLimit, enrollment is always allowed (returns true).
+ * @param {string} splitTestName
+ * @returns {Promise<boolean>}
+ */
+async function incrementLabsVariantCounterIfBelowLimit(splitTestName) {
+  const splitTest = await _getSplitTest(splitTestName)
+  if (!splitTest) return false
+
+  const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
+  if (!currentVersion || currentVersion.phase !== LABS_PHASE) return false
+
+  const variant = currentVersion.variants[0]
+  if (!variant) return false
+
+  if (!variant.userLimit || typeof variant.userLimit !== 'number') {
+    return true
+  }
+
+  const result = await SplitTest.updateOne(
+    {
+      name: splitTestName,
+      'versions.versionNumber': currentVersion.versionNumber,
+    },
+    {
+      $inc: {
+        'versions.$.variants.$[variant].userCount': 1,
+      },
+    },
+    {
+      arrayFilters: [
+        {
+          'variant.name': variant.name,
+          'variant.userCount': { $not: { $gte: variant.userLimit } },
+        },
+      ],
+    }
+  ).exec()
+
+  return result.modifiedCount > 0
+}
+
+/**
+ * Decrement the user counter for a labs experiment when a user opts out.
+ * This frees up a slot so another user can enroll.
+ * @param {string} splitTestName
+ */
+async function decrementLabsVariantCounter(splitTestName) {
+  const splitTest = await _getSplitTest(splitTestName)
+  if (!splitTest) return
+
+  const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
+  if (!currentVersion || currentVersion.phase !== LABS_PHASE) return
+
+  const variant = currentVersion.variants[0]
+  if (!variant?.userLimit || typeof variant.userLimit !== 'number') return
+  if (!variant.userCount || variant.userCount <= 0) return
+
+  try {
+    const result = await SplitTest.updateOne(
+      {
+        name: splitTestName,
+        'versions.versionNumber': currentVersion.versionNumber,
+        'versions.variants.name': variant.name,
+      },
+      {
+        $inc: {
+          'versions.$.variants.$[variant].userCount': -1,
+        },
+      },
+      {
+        arrayFilters: [{ 'variant.name': variant.name }],
+      }
+    ).exec()
+    if (result.modifiedCount === 0) {
+      logger.warn(
+        { splitTestName },
+        'Labs variant counter decrement matched no documents'
+      )
+    }
+  } catch (error) {
+    logger.error(
+      { err: error, splitTestName },
+      'Failed to decrement labs variant counter'
+    )
+  }
+}
+
 export default {
   getPercentile,
   getAssignment: callbackify(getAssignment),
@@ -829,5 +959,7 @@ export default {
     getOneTimeAssignment,
     getActiveAssignmentsForUser,
     hasUserBeenAssignedToVariant,
+    decrementLabsVariantCounter,
+    incrementLabsVariantCounterIfBelowLimit,
   },
 }

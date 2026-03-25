@@ -10,7 +10,7 @@ import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import SymbolPalettePane from '@/features/ide-react/components/editor/symbol-palette-pane'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 import { PythonEditorSplit } from '@/features/ide-react/components/layout/python-editor-split'
-import { isInExperiment } from '@/utils/labs-utils'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 export const Editor = () => {
   const { opening, errorState, showSymbolPalette } =
@@ -20,7 +20,7 @@ export const Editor = () => {
   const isPythonDocument =
     openEntity?.type === 'doc' &&
     openEntity.entity.name.toLowerCase().endsWith('.py')
-  const pythonExecutionEnabled = isInExperiment('overleaf-code')
+  const pythonExecutionEnabled = isSplitTestEnabled('overleaf-code')
 
   if (!currentDocumentId) {
     return null
