@@ -4,6 +4,7 @@ import UserGetter from '../../Features/User/UserGetter.mjs'
 import FeatureUsageRateLimiter from './FeatureUsageRateLimiter.mjs'
 import Settings from '@overleaf/settings'
 import SplitTestHandler from '../../Features/SplitTests/SplitTestHandler.mjs'
+import FeaturesHelper from '../../Features/Subscription/FeaturesHelper.mjs'
 
 class AiFeatureUsageRateLimiter extends FeatureUsageRateLimiter {
   constructor() {
@@ -27,9 +28,13 @@ class AiFeatureUsageRateLimiter extends FeatureUsageRateLimiter {
       )
 
     if (inQuotaSplitTest) {
-      const quotaTier = user?.writefull?.isPremium
+      const wfQuota = user.writefull?.isPremium
         ? Settings.writefull.quotaTierGranted
-        : user.features.aiUsageQuota
+        : Settings.aiFeatures.freeTrialQuota
+      const mergedFeatures = FeaturesHelper.mergeFeatures(user.features, {
+        aiUsageQuota: wfQuota,
+      })
+      const quotaTier = mergedFeatures.aiUsageQuota
       return _quotaTierToAllowance(quotaTier)
     } else {
       const DEFAULT_ALLOWANCE = 1
