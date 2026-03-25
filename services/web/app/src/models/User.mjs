@@ -7,6 +7,19 @@ const { ObjectId } = Schema
 // See https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address/574698#574698
 const MAX_EMAIL_LENGTH = 254
 const MAX_NAME_LENGTH = 255
+const refProviderSettingsSchema = {
+  enabled: { type: Boolean, default: true },
+  groups: {
+    type: [
+      {
+        id: { type: String },
+      },
+    ],
+    default: [],
+  },
+  disablePersonalLibrary: { type: Boolean, default: false },
+  migrated: { type: Boolean, default: false },
+}
 
 export const UserSchema = new Schema(
   {
@@ -94,6 +107,9 @@ export const UserSchema = new Schema(
       breadcrumbs: { type: Boolean, default: true },
       referencesSearchMode: { type: String, default: 'advanced' }, // 'advanced' or 'simple'
       darkModePdf: { type: Boolean, default: false },
+      zotero: refProviderSettingsSchema,
+      mendeley: refProviderSettingsSchema,
+      papers: refProviderSettingsSchema,
     },
     features: {
       collaborators: {

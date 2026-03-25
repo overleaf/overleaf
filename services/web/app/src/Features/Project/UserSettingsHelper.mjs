@@ -45,6 +45,9 @@ async function buildUserSettings(req, res, user) {
     breadcrumbs: user.ace.breadcrumbs,
     referencesSearchMode: user.ace.referencesSearchMode,
     darkModePdf: user.ace.darkModePdf ?? false,
+    zotero: user.ace.zotero,
+    mendeley: user.ace.mendeley,
+    papers: user.ace.papers,
   }
 }
 

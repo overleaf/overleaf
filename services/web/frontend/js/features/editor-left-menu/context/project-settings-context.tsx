@@ -33,6 +33,9 @@ type ProjectSettingsSetterContextValue = {
   setMathPreview: (mathPreview: UserSettings['mathPreview']) => void
   setBreadcrumbs: (breadcrumbs: UserSettings['breadcrumbs']) => void
   setDarkModePdf: (darkModePdf: UserSettings['darkModePdf']) => void
+  setZotero: (zotero: UserSettings['zotero']) => void
+  setMendeley: (mendeley: UserSettings['mendeley']) => void
+  setPapers: (papers: UserSettings['papers']) => void
 }
 
 type ProjectSettingsContextValue = Partial<ProjectSettings> &
@@ -88,6 +91,12 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
     setBreadcrumbs,
     darkModePdf,
     setDarkModePdf,
+    zotero,
+    setZotero,
+    mendeley,
+    setMendeley,
+    papers,
+    setPapers,
   } = useUserWideSettings()
 
   useProjectWideSettingsSocketListener()
@@ -132,6 +141,12 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setBreadcrumbs,
       darkModePdf,
       setDarkModePdf,
+      zotero,
+      setZotero,
+      mendeley,
+      setMendeley,
+      papers,
+      setPapers,
     }),
     [
       compiler,
@@ -172,6 +187,12 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setBreadcrumbs,
       darkModePdf,
       setDarkModePdf,
+      zotero,
+      setZotero,
+      mendeley,
+      setMendeley,
+      papers,
+      setPapers,
     ]
   )
 

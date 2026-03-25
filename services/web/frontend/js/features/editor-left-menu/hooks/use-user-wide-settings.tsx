@@ -24,6 +24,9 @@ export default function useUserWideSettings() {
     mathPreview,
     breadcrumbs,
     darkModePdf,
+    zotero,
+    mendeley,
+    papers,
   } = userSettings
 
   const setOverallTheme = useSetOverallTheme()
@@ -125,6 +128,27 @@ export default function useUserWideSettings() {
     [saveUserSettings]
   )
 
+  const setZotero = useCallback(
+    (zotero: UserSettings['zotero']) => {
+      saveUserSettings('zotero', { ...zotero, migrated: true })
+    },
+    [saveUserSettings]
+  )
+
+  const setMendeley = useCallback(
+    (mendeley: UserSettings['mendeley']) => {
+      saveUserSettings('mendeley', { ...mendeley, migrated: true })
+    },
+    [saveUserSettings]
+  )
+
+  const setPapers = useCallback(
+    (papers: UserSettings['papers']) => {
+      saveUserSettings('papers', { ...papers, migrated: true })
+    },
+    [saveUserSettings]
+  )
+
   return {
     autoComplete,
     setAutoComplete,
@@ -156,5 +180,11 @@ export default function useUserWideSettings() {
     setBreadcrumbs,
     darkModePdf,
     setDarkModePdf,
+    zotero,
+    setZotero,
+    mendeley,
+    setMendeley,
+    papers,
+    setPapers,
   }
 }
