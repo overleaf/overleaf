@@ -318,3 +318,29 @@ h4.group-settings-title {
     flex-shrink: 0;
   }
 }
+
+.group-domains-table {
+  thead {
+    td {
+      border-bottom-width: var(--bs-border-width) !important;
+    }
+  }
+
+  tr:not(.domain-extra-details-row) {
+    td {
+      border-bottom-width: 0;
+    }
+  }
+
+  .domain-extra-details-row {
+    font-size: var(--font-size-02);
+
+    td {
+      padding-top: 0;
+    }
+  }
+
+  .domain-verification-status-table-cell {
+    text-wrap: nowrap;
+  }
+}
