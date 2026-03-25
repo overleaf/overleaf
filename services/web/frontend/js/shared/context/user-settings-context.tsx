@@ -68,10 +68,6 @@ export const UserSettingsProvider: FC<React.PropsWithChildren> = ({
 
   useEffect(() => {
     const { patch, keysToRemove } = getLegacyWriteAndCiteMigration(userSettings)
-    if (keysToRemove.length === 0) {
-      return
-    }
-
     if (Object.keys(patch).length === 0) {
       keysToRemove.forEach(customLocalStorage.removeItem)
       return
