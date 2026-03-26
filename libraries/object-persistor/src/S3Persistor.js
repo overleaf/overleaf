@@ -77,14 +77,53 @@ class SSECOptions {
   }
 }
 
+/**
+ * @typedef {import('@aws-sdk/client-s3').StorageClass} StorageClass
+ * @typedef {import('@aws-sdk/client-s3').PutObjectCommandInput} PutObjectCommandInput
+ * @typedef {import('@aws-sdk/client-s3').HeadObjectCommandOutput} HeadObjectCommandOutput
+ * @typedef {import('@aws-sdk/client-s3').GetObjectCommandOutput} GetObjectCommandOutput
+ * @typedef {import('@aws-sdk/client-s3').S3ClientConfig} S3ClientConfig
+ */
+
+/**
+ * @typedef {Object} StreamOptions
+ * @property {string} [contentType]
+ * @property {string} [contentEncoding]
+ * @property {number} [contentLength]
+ * @property {'*'} [ifNoneMatch]
+ * @property {SSECOptions} [ssecOptions]
+ */
+
+/**
+ * @typedef {Object} S3PersistorSettings
+ * @property {Object<string, StorageClass>} [storageClass]
+ * @property {string} [key]
+ * @property {string} [secret]
+ * @property {string} [region]
+ * @property {string} [endpoint]
+ * @property {boolean} [pathStyle]
+ * @property {number} [maxRetries]
+ * @property {Object} [httpOptions]
+ * @property {string} [ca]
+ * @property {number} [signedUrlExpiryInMs]
+ * @property {number} [partSize]
+ * @property {Object<string, {auth_key: string, auth_secret: string}>} [bucketCreds]
+ */
+
 class S3Persistor extends AbstractPersistor {
   /** @type {Map<string, S3Client>} */
   #clients = new Map()
+  /** @type {S3PersistorSettings} */
+  settings
 
+  /**
+   * @param {S3PersistorSettings} [settings]
+   */
   constructor(settings = {}) {
     super()
-
-    settings.storageClass = settings.storageClass || {}
+    settings.storageClass = /** @type {Object<string, StorageClass>} */ (
+      settings.storageClass || {}
+    )
     this.settings = settings
   }
 
@@ -102,12 +141,7 @@ class S3Persistor extends AbstractPersistor {
    * @param {string} bucketName
    * @param {string} key
    * @param {NodeJS.ReadableStream} readStream
-   * @param {Object} opts
-   * @param {string} [opts.contentType]
-   * @param {string} [opts.contentEncoding]
-   * @param {number} [opts.contentLength]
-   * @param {'*'} [opts.ifNoneMatch]
-   * @param {SSECOptions} [opts.ssecOptions]
+   * @param {StreamOptions} opts
    * @return {Promise<void>}
    */
   async sendStream(bucketName, key, readStream, opts = {}) {
@@ -128,8 +162,11 @@ class S3Persistor extends AbstractPersistor {
         Body: observer,
       }
 
-      if (this.settings.storageClass[bucketName]) {
-        uploadOptions.StorageClass = this.settings.storageClass[bucketName]
+      const storageClass = /** @type {Object<string, StorageClass>} */ (
+        this.settings.storageClass
+      )
+      if (storageClass[bucketName]) {
+        uploadOptions.StorageClass = storageClass[bucketName]
       }
 
       if ('sourceMd5' in opts) {
@@ -239,7 +276,9 @@ class S3Persistor extends AbstractPersistor {
    * @return {Promise<string>}
    */
   async getRedirectUrl(bucketName, key) {
-    const expiresSeconds = Math.round(this.settings.signedUrlExpiryInMs / 1000)
+    const expiresSeconds = Math.round(
+      /** @type {number} */ (this.settings.signedUrlExpiryInMs) / 1000
+    )
     try {
       return await getSignedUrl(
         this._getClientForBucket(bucketName),
@@ -311,6 +350,7 @@ class S3Persistor extends AbstractPersistor {
    */
   async #listDirectory(bucketName, key, continuationToken) {
     let response
+    /** @type {{ Bucket: string, Prefix: string, ContinuationToken?: string }} */
     const options = { Bucket: bucketName, Prefix: key }
     if (continuationToken) {
       options.ContinuationToken = continuationToken
@@ -501,6 +541,7 @@ class S3Persistor extends AbstractPersistor {
    */
   async directorySize(bucketName, key, continuationToken) {
     try {
+      /** @type {{ Bucket: string, Prefix: string, ContinuationToken?: string }} */
       const options = {
         Bucket: bucketName,
         Prefix: key,
@@ -621,7 +662,7 @@ class S3Persistor extends AbstractPersistor {
   }
 
   /**
-   * @param {Object} bucketCredentials
+   * @param {{auth_key: string, auth_secret: string} | undefined} bucketCredentials
    * @param {import('@aws-sdk/client-s3').S3ClientConfig} clientOptions
    * @return {import('@aws-sdk/client-s3').S3ClientConfig}
    * @private
@@ -637,7 +678,7 @@ class S3Persistor extends AbstractPersistor {
     } else if (this.settings.key) {
       options.credentials = {
         accessKeyId: this.settings.key,
-        secretAccessKey: this.settings.secret,
+        secretAccessKey: /** @type {string} */ (this.settings.secret),
       }
     } else {
       // Use the default credentials provider (process.env -> SSP -> ini -> IAM)
@@ -709,6 +750,9 @@ class S3Persistor extends AbstractPersistor {
   }
 
   // test-only
+  /**
+   * @param {string} bucketName
+   */
   _createBucket(bucketName) {
     return this._getClientForBucket(bucketName).send(
       new CreateBucketCommand({ Bucket: bucketName })
@@ -716,6 +760,10 @@ class S3Persistor extends AbstractPersistor {
   }
 
   // test-only
+  /**
+   * @param {string} bucketName
+   * @param {import('@aws-sdk/client-s3').PutObjectCommandInput} uploadOptions
+   */
   _upload(bucketName, uploadOptions) {
     return this._getClientForBucket(bucketName).send(
       new PutObjectCommand(uploadOptions)

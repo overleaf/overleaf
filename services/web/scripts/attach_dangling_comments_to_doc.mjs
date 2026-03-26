@@ -65,6 +65,10 @@ async function getDanglingThreads(projectId) {
   return danglingThreads
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} docId
+ */
 const ensureDocExists = async (projectId, docId) => {
   const doc = await DocstoreManager.promises.getDoc(projectId, docId)
   if (!doc) {

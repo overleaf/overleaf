@@ -88,7 +88,12 @@ export default class FeatureUsageRateLimiter {
         upsert: true,
       }
     ).exec()
-    const featureUsage = featureUsages.features?.[this.featureName] ?? {}
+
+    const featureUsage =
+      /** @type {Record<string, any>} */ (featureUsages.features ?? {})[
+        this.featureName
+      ] ?? {}
+
     setRateLimitHeaders(res, featureUsage, allowance)
     this._checkRateLimit(featureUsage, allowance)
   }
@@ -118,7 +123,10 @@ export default class FeatureUsageRateLimiter {
       }
     ).exec()
 
-    const featureUsage = featureUsages.features?.[this.featureName] ?? {}
+    const featureUsage =
+      /** @type {Record<string, any>} */ (featureUsages.features ?? {})[
+        this.featureName
+      ] ?? {}
     setRateLimitHeaders(res, featureUsage, allowance)
   }
 
@@ -129,7 +137,10 @@ export default class FeatureUsageRateLimiter {
   async getRemainingFeatureUses(userId) {
     const allowance = await this._getAllowance(userId)
     const reportedUsage = await UserFeatureUsage.findOne({ _id: userId }).exec()
-    const featureUsage = reportedUsage?.features?.[this.featureName] ?? {}
+    const featureUsage =
+      /** @type {Record<string, any>} */ (reportedUsage?.features ?? {})[
+        this.featureName
+      ] ?? {}
     const periodStart = featureUsage.periodStart ?? new Date()
     const usage = featureUsage.usage ?? 0
     const usesLeft = allowance - usage

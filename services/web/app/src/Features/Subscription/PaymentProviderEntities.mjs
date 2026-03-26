@@ -601,6 +601,9 @@ export class PaymentProviderSubscriptionChange {
     this.total = this.subtotal + this.tax
   }
 
+  /**
+   * @param {any} addOnCode
+   */
   getAddOn(addOnCode) {
     return this.nextAddOns.find(addOn => addOn.code === addOnCode)
   }

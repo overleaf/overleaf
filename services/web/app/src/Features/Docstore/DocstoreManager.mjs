@@ -238,7 +238,13 @@ async function isDocDeleted(projectId, docId) {
  * @param ranges
  * @return {Promise<{modified: *, rev: *}>}
  */
-async function updateDoc(projectId, docId, lines, version, ranges) {
+async function updateDoc(
+  projectId,
+  docId,
+  lines,
+  version,
+  /** @type {any} */ ranges
+) {
   const url = new URL(settings.apis.docstore.url)
   url.pathname = path.posix.join('project', projectId, 'doc', docId)
   try {

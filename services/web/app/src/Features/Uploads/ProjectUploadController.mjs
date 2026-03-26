@@ -28,6 +28,11 @@ const upload = multer(
   )
 )
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 function uploadProject(req, res, next) {
   const timer = new metrics.Timer('project-upload')
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -63,6 +68,11 @@ function uploadProject(req, res, next) {
   )
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function uploadFile(req, res, next) {
   const timer = new metrics.Timer('file-upload')
   const name = req.body.name
@@ -156,27 +166,36 @@ async function uploadFile(req, res, next) {
   )
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 function multerMiddleware(req, res, next) {
   if (upload == null) {
     return res
       .status(500)
       .json({ success: false, error: req.i18n.translate('upload_failed') })
   }
-  return upload.single('qqfile')(req, res, function (err) {
-    if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
-      return res
-        .status(422)
-        .json({ success: false, error: req.i18n.translate('file_too_large') })
+  return upload.single('qqfile')(
+    req,
+    res,
+    /** @param {any} err */ function (err) {
+      if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
+        return res
+          .status(422)
+          .json({ success: false, error: req.i18n.translate('file_too_large') })
+      }
+      if (err) return next(err)
+      if (!req.file?.path) {
+        logger.info({ req }, 'missing req.file.path on upload')
+        return res
+          .status(400)
+          .json({ success: false, error: 'invalid_upload_request' })
+      }
+      next()
     }
-    if (err) return next(err)
-    if (!req.file?.path) {
-      logger.info({ req }, 'missing req.file.path on upload')
-      return res
-        .status(400)
-        .json({ success: false, error: 'invalid_upload_request' })
-    }
-    next()
-  })
+  )
 }
 
 export default {

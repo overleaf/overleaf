@@ -17,10 +17,12 @@ const MODULE_BASE_PATH = Path.join(import.meta.dirname, '/../../../modules')
 /** @type {WebModule[]} */
 const _modules = []
 let _modulesLoaded = false
+/** @type {Record<string, any>} */
 const _hooks = {}
 
 /** @type {Record<string, RequestHandler[]>} */
 const _middleware = {}
+/** @type {Record<string, any>} */
 let _viewIncludes = {}
 
 async function modules() {
@@ -74,6 +76,11 @@ async function loadModulesImpl() {
 
 const loadModules = _.memoize(loadModulesImpl)
 
+/**
+ * @param {any} webRouter
+ * @param {any} privateApiRouter
+ * @param {any} publicApiRouter
+ */
 async function applyRouter(webRouter, privateApiRouter, publicApiRouter) {
   for (const module of await modules()) {
     if (module.router && module.router.apply) {
@@ -82,6 +89,11 @@ async function applyRouter(webRouter, privateApiRouter, publicApiRouter) {
   }
 }
 
+/**
+ * @param {any} webRouter
+ * @param {any} privateApiRouter
+ * @param {any} publicApiRouter
+ */
 async function applyNonCsrfRouter(
   webRouter,
   privateApiRouter,
@@ -107,10 +119,18 @@ async function start() {
   }
 }
 
+/**
+ * @param {any} app
+ */
 function loadViewIncludes(app) {
   _viewIncludes = Views.compileViewIncludes(app)
 }
 
+/**
+ * @param {any} appOrRouter
+ * @param {any} middlewareName
+ * @param {any} [options]
+ */
 async function applyMiddleware(appOrRouter, middlewareName, options) {
   if (!middlewareName) {
     throw new Error(
@@ -118,30 +138,42 @@ async function applyMiddleware(appOrRouter, middlewareName, options) {
     )
   }
   for (const module of await modules()) {
-    if (module[middlewareName]) {
-      module[middlewareName](appOrRouter, options)
+    /** @type {Record<string, any>} */
+    const typedModule = module
+    if (typedModule[middlewareName]) {
+      typedModule[middlewareName](appOrRouter, options)
     }
   }
 }
 
+/**
+ * @param {any} view
+ * @param {any} locals
+ */
 function moduleIncludes(view, locals) {
   const compiledPartials = _viewIncludes[view] || []
   let html = ''
-  for (const compiledPartial of compiledPartials) {
+  for (const /** @type {any} */ compiledPartial of compiledPartials) {
     html += compiledPartial(locals)
   }
   return html
 }
 
+/**
+ * @param {any} view
+ */
 function moduleIncludesAvailable(view) {
   return (_viewIncludes[view] || []).length > 0
 }
 
 async function linkedFileAgentsIncludes() {
+  /** @type {Record<string, any>} */
   const agents = {}
   for (const module of await modules()) {
     for (const name in module.linkedFileAgents) {
-      const agentFunction = module.linkedFileAgents[name]
+      const agentFunction = /** @type {Record<string, any>} */ (
+        module.linkedFileAgents
+      )[name]
       agents[name] = agentFunction()
     }
   }
@@ -155,12 +187,16 @@ async function attachHooks() {
       attachHook(hook, method)
     }
     for (const hook in hooks || {}) {
-      const method = hooks[hook]
+      const method = /** @type {Record<string, any>} */ (hooks)[hook]
       attachHook(hook, promisify(method))
     }
   }
 }
 
+/**
+ * @param {any} name
+ * @param {any} method
+ */
 function attachHook(name, method) {
   if (_hooks[name] == null) {
     _hooks[name] = []
@@ -172,7 +208,9 @@ async function attachMiddleware() {
   for (const module of await modules()) {
     if (module.middleware) {
       for (const middleware in module.middleware) {
-        const method = module.middleware[middleware]
+        const method = /** @type {Record<string, any>} */ (module.middleware)[
+          middleware
+        ]
         if (_middleware[middleware] == null) {
           _middleware[middleware] = []
         }
@@ -182,6 +220,10 @@ async function attachMiddleware() {
   }
 }
 
+/**
+ * @param {any} name
+ * @param {...any} args
+ */
 async function fireHook(name, ...args) {
   // ensure that modules are loaded if we need to fire a hook
   // this can happen if a script calls a method that fires a hook

@@ -7,3 +7,4 @@ mongo-utils
 --node-version=24.13.0
 --pipeline-owner=32
 --public-repo=False
+--tsconfig-no-implicit-any=True

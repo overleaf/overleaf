@@ -13,6 +13,9 @@ const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY || '10', 10)
 
 const mixpanelSinkQueue = getQueue('analytics-mixpanel-sink')
 
+/**
+ * @param {any} user
+ */
 async function processUser(user) {
   const analyticsId = user.analyticsId || user._id
 
@@ -58,6 +61,9 @@ async function processUser(user) {
   }
 }
 
+/**
+ * @param {any} userId
+ */
 async function _getGroupSubscriptionPlanCode(userId) {
   const subscriptions =
     await SubscriptionLocator.promises.getMemberSubscriptions(userId)
@@ -77,6 +83,12 @@ async function _getGroupSubscriptionPlanCode(userId) {
   return bestPlanCode
 }
 
+/**
+ * @param {any} analyticsId
+ * @param {any} propertyName
+ * @param {any} propertyValue
+ * @param {any} [createdAt]
+ */
 async function _sendPropertyToQueue(
   analyticsId,
   propertyName,
@@ -94,6 +106,10 @@ async function _sendPropertyToQueue(
   })
 }
 
+/**
+ * @param {any} _
+ * @param {any} users
+ */
 async function processBatch(_, users) {
   await promiseMapWithLimit(WRITE_CONCURRENCY, users, async user => {
     await processUser(user)

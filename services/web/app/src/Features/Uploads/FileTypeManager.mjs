@@ -17,12 +17,17 @@ const FILE_IGNORE_MATCHER = new Minimatch(Settings.fileIgnorePattern, {
   dot: true,
 })
 
-const TEXT_EXTENSIONS = new Set(Settings.textExtensions.map(ext => `.${ext}`))
+const TEXT_EXTENSIONS = new Set(
+  Settings.textExtensions.map((/** @type {string} */ ext) => `.${ext}`)
+)
 const EDITABLE_FILENAMES = Settings.editableFilenames
 
 // allow 3 bytes for every character
 const MAX_TEXT_FILE_SIZE = 3 * Settings.max_doc_length
 
+/**
+ * @param {string} path
+ */
 async function isDirectory(path) {
   const stats = await fs.stat(path)
   return stats.isDirectory()
@@ -86,11 +91,17 @@ async function getType(name, fsPath, existingFileType) {
   }
 }
 
+/**
+ * @param {string} path
+ */
 function shouldIgnore(path) {
   // use minimatch file matching to check if the path should be ignored
   return FILE_IGNORE_MATCHER.match(path)
 }
 
+/**
+ * @param {string} filename
+ */
 function _isTextFilename(filename) {
   const basename = Path.basename(filename)
   const extension = Path.extname(filename).toLowerCase()
@@ -100,6 +111,9 @@ function _isTextFilename(filename) {
   )
 }
 
+/**
+ * @param {Buffer<ArrayBufferLike>} bytes
+ */
 function _detectEncoding(bytes) {
   if (isUtf8(bytes)) {
     return 'utf-8'

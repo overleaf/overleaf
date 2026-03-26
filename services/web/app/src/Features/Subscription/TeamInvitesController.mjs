@@ -25,6 +25,11 @@ const rateLimiters = {
   }),
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function createInvite(req, res, next) {
   const teamManagerId = SessionManager.getLoggedInUserId(req.session)
   const subscription = req.entity
@@ -70,6 +75,11 @@ async function createInvite(req, res, next) {
   }
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function viewInvite(req, res, next) {
   const { token } = req.params
   const sessionUser = SessionManager.getSessionUser(req.session)
@@ -186,6 +196,11 @@ async function viewInvite(req, res, next) {
   }
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function viewInvites(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   const groupSubscriptions =
@@ -201,6 +216,11 @@ async function viewInvites(req, res, next) {
   })
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function acceptInvite(req, res, next) {
   const { token } = req.params
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -232,6 +252,11 @@ async function acceptInvite(req, res, next) {
   res.json({ groupSSOActive })
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 function revokeInvite(req, res, next) {
   const subscription = req.entity
   const email = EmailHelper.parseEmail(req.params.email)
@@ -244,6 +269,10 @@ function revokeInvite(req, res, next) {
     teamManagerId,
     subscription,
     email,
+    /**
+     * @param {any} err
+     * @param {any} results
+     */
     function (err, results) {
       if (err) {
         return next(err)
@@ -253,6 +282,11 @@ function revokeInvite(req, res, next) {
   )
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function resendInvite(req, res, next) {
   const { entity: subscription } = req
   const userEmail = EmailHelper.parseEmail(req.body.email)

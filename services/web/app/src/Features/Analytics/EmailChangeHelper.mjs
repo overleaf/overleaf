@@ -50,7 +50,9 @@ async function registerEmailUpdate(userId, email, eventData = {}) {
  */
 async function makeEmailChangeEvent(userId, email, eventData) {
   const userEmails = await UserGetter.promises.getUserFullEmails(userId)
-  const emailData = userEmails.find(userEmail => userEmail.email === email)
+  const emailData = userEmails.find(
+    /** @param {any} userEmail */ userEmail => userEmail.email === email
+  )
 
   const filledEventData = fillMissingEventData(eventData, emailData)
 

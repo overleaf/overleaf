@@ -54,7 +54,7 @@ const SUBSCRIPTION_PAUSED_REDIRECT_PATH =
 
 /**
  * Check if a Stripe subscription is currently paused
- * @param {Object} subscription - The subscription object
+ * @param {Record<string, any>} subscription - The subscription object
  * @returns {Promise<boolean>}
  */
 async function _checkStripeSubscriptionPauseStatus(subscription) {
@@ -78,7 +78,7 @@ async function _checkStripeSubscriptionPauseStatus(subscription) {
 
 /**
  * Check if a Recurly subscription is currently paused
- * @param {Object} subscription - The subscription object
+ * @param {Record<string, any>} subscription - The subscription object
  * @returns {Promise<boolean>}
  */
 async function _checkRecurlySubscriptionPauseStatus(subscription) {
@@ -102,7 +102,7 @@ async function _checkRecurlySubscriptionPauseStatus(subscription) {
 }
 
 /** Check if a user's subscription is manual or custom
- * @param {Object} user - The user object
+ * @param {Record<string, any>} user - The user object
  * @returns {Promise<boolean>}
  */
 async function _isManualOrCustomSubscription(user) {
@@ -120,7 +120,7 @@ async function _isManualOrCustomSubscription(user) {
 
 /**
  * Check if a user's subscription is currently paused
- * @param {Object} user - The user object
+ * @param {Record<string, any>} user - The user object
  * @returns {Promise<{isPaused: boolean, redirectPath?: string}>}
  */
 async function checkSubscriptionPauseStatus(user) {
@@ -176,6 +176,10 @@ function formatGroupPlansDataForDash() {
   }
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ */
 async function userSubscriptionPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
   await SplitTestHandler.promises.getAssignment(req, res, 'sharing-updates')
@@ -242,6 +246,7 @@ async function userSubscriptionPage(req, res) {
   try {
     const managedGroups = await async.filter(
       managedGroupSubscriptions || [],
+      /** @param {any} subscription */
       async subscription => {
         const managedUsersResults = await Modules.promises.hooks.fire(
           'hasManagedUsersFeature',
@@ -261,8 +266,8 @@ async function userSubscriptionPage(req, res) {
         )
       }
     )
-    groupSettingsEnabledFor = managedGroups.map(subscription =>
-      subscription._id.toString()
+    groupSettingsEnabledFor = managedGroups.map(
+      (/** @type {any} */ subscription) => subscription._id.toString()
     )
   } catch (error) {
     logger.error(
@@ -275,7 +280,7 @@ async function userSubscriptionPage(req, res) {
   try {
     const managedGroups = await async.filter(
       managedGroupSubscriptions || [],
-      async subscription => {
+      async (/** @type {any} */ subscription) => {
         const managedUsersResults = await Modules.promises.hooks.fire(
           'hasManagedUsersFeatureOnNonProfessionalPlan',
           subscription
@@ -296,8 +301,8 @@ async function userSubscriptionPage(req, res) {
         )
       }
     )
-    groupSettingsAdvertisedFor = managedGroups.map(subscription =>
-      subscription._id.toString()
+    groupSettingsAdvertisedFor = managedGroups.map(
+      (/** @type {any} */ subscription) => subscription._id.toString()
     )
   } catch (error) {
     logger.error(
@@ -339,6 +344,10 @@ async function userSubscriptionPage(req, res) {
   res.render('subscriptions/dashboard-react', data)
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ */
 async function successfulSubscription(req, res) {
   const user = SessionManager.getSessionUser(req.session)
   if (!user) {
@@ -382,6 +391,11 @@ const pauseSubscriptionSchema = z.object({
   }),
 })
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function pauseSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   const { params } = parseReq(req, pauseSubscriptionSchema)
@@ -425,6 +439,11 @@ async function pauseSubscription(req, res, next) {
   }
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function resumeSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   logger.debug({ userId: user._id }, `resuming subscription`)
@@ -441,6 +460,11 @@ async function resumeSubscription(req, res, next) {
   }
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function cancelSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   logger.debug({ userId: user._id }, 'canceling subscription')
@@ -456,6 +480,9 @@ async function cancelSubscription(req, res, next) {
 }
 
 /**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
  * @returns {Promise<void>}
  */
 async function canceledSubscription(req, res, next) {
@@ -467,20 +494,32 @@ async function canceledSubscription(req, res, next) {
   })
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 function cancelV1Subscription(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   logger.debug({ userId }, 'canceling v1 subscription')
-  V1SubscriptionManager.cancelV1Subscription(userId, function (err) {
-    if (err) {
-      OError.tag(err, 'something went wrong canceling v1 subscription', {
-        userId,
-      })
-      return next(err)
+  V1SubscriptionManager.cancelV1Subscription(
+    userId,
+    /** @param {any} err */ function (err) {
+      if (err) {
+        OError.tag(err, 'something went wrong canceling v1 subscription', {
+          userId,
+        })
+        return next(err)
+      }
+      res.redirect('/user/subscription')
     }
-    res.redirect('/user/subscription')
-  })
+  )
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ */
 async function previewAddonPurchase(req, res) {
   const user = SessionManager.getSessionUser(req.session)
   const userId = user._id
@@ -600,6 +639,11 @@ const purchaseAddonSchema = z.object({
   }),
 })
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function purchaseAddon(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   const { params } = parseReq(req, purchaseAddonSchema)
@@ -642,22 +686,22 @@ async function purchaseAddon(req, res, next) {
       )
       return res.status(402).json({
         message: 'Payment action required',
-        clientSecret: err.info.clientSecret,
-        publicKey: err.info.publicKey,
+        clientSecret: /** @type {any} */ (err).info.clientSecret,
+        publicKey: /** @type {any} */ (err).info.publicKey,
       })
     } else if (err instanceof PaymentFailedError) {
       logger.debug(
         {
           userId: user._id,
-          reason: err.info.reason,
-          adviceCode: err.info.adviceCode,
+          reason: /** @type {any} */ (err).info.reason,
+          adviceCode: /** @type {any} */ (err).info.adviceCode,
         },
         'Payment failed for transaction'
       )
       return res.status(402).json({
         message: 'Payment failed',
-        reason: err.info.reason,
-        adviceCode: err.info.adviceCode,
+        reason: /** @type {any} */ (err).info.reason,
+        adviceCode: /** @type {any} */ (err).info.adviceCode,
       })
     } else if (err instanceof MultiplePendingChangesError) {
       logger.warn(
@@ -695,6 +739,11 @@ const removeAddonSchema = z.object({
   }),
 })
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function removeAddon(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   const { params } = parseReq(req, removeAddonSchema)
@@ -749,6 +798,8 @@ const reactivateAddonSchema = z.object({
  * Reactivate an add-on pending cancellation
  *
  * This "cancels" the cancellation.
+ * @param {any} req
+ * @param {any} res
  */
 async function reactivateAddon(req, res) {
   const user = SessionManager.getSessionUser(req.session)
@@ -776,6 +827,11 @@ async function reactivateAddon(req, res) {
   }
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function previewSubscription(req, res, next) {
   const planCode = req.query.planCode
   if (!planCode) {
@@ -822,24 +878,37 @@ async function previewSubscription(req, res, next) {
   })
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 function cancelPendingSubscriptionChange(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   logger.debug({ userId: user._id }, 'canceling pending subscription change')
-  SubscriptionHandler.cancelPendingSubscriptionChange(user, function (err) {
-    if (err) {
-      OError.tag(
-        err,
-        'something went wrong canceling pending subscription change',
-        {
-          user_id: user._id,
-        }
-      )
-      return next(err)
+  SubscriptionHandler.cancelPendingSubscriptionChange(
+    user,
+    /** @param {any} err */ function (err) {
+      if (err) {
+        OError.tag(
+          err,
+          'something went wrong canceling pending subscription change',
+          {
+            user_id: user._id,
+          }
+        )
+        return next(err)
+      }
+      res.redirect('/user/subscription')
     }
-    res.redirect('/user/subscription')
-  })
+  )
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function updateAccountEmailAddress(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   try {
@@ -854,6 +923,11 @@ async function updateAccountEmailAddress(req, res, next) {
   }
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 function reactivateSubscription(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   logger.debug({ userId: user._id }, 'reactivating subscription')
@@ -878,6 +952,11 @@ function reactivateSubscription(req, res, next) {
   })
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 function recurlyCallback(req, res, next) {
   logger.debug({ data: req.body }, 'received recurly callback')
   const event = Object.keys(req.body)[0]
@@ -926,6 +1005,10 @@ function recurlyCallback(req, res, next) {
   }
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ */
 async function extendTrial(req, res) {
   const user = SessionManager.getSessionUser(req.session)
   const { subscription } =
@@ -951,20 +1034,36 @@ async function extendTrial(req, res) {
   res.sendStatus(200)
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 function recurlyNotificationParser(req, res, next) {
   let xml = ''
-  req.on('data', chunk => (xml += chunk))
+  req.on('data', /** @param {any} chunk */ chunk => (xml += chunk))
   req.on('end', () =>
-    RecurlyWrapper._parseXml(xml, function (error, body) {
-      if (error) {
-        return next(error)
+    RecurlyWrapper._parseXml(
+      xml,
+      /**
+       * @param {any} error
+       * @param {any} body
+       */
+      function (error, body) {
+        if (error) {
+          return next(error)
+        }
+        req.body = body
+        next()
       }
-      req.body = body
-      next()
-    })
+    )
   )
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ */
 async function refreshUserFeatures(req, res) {
   const { user_id: userId } = req.params
   await FeaturesUpdater.promises.refreshFeatures(userId, 'acceptance-test')
@@ -972,6 +1071,8 @@ async function refreshUserFeatures(req, res) {
 }
 
 /**
+ * @param {any} req
+ * @param {any} res
  * @returns {Promise<{currency: CurrencyCode, recommendedCurrency: CurrencyCode, countryCode: string|undefined}>}
  */
 async function getRecommendedCurrency(req, res) {
@@ -1002,6 +1103,10 @@ async function getRecommendedCurrency(req, res) {
   }
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ */
 async function getLatamCountryBannerDetails(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   let ip = req.ip

@@ -11,6 +11,9 @@ import CollaboratorsInvitesGetter from '../Collaborators/CollaboratorsInviteGett
 import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
 import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
 
+/**
+ * @param {any} projectId
+ */
 async function allowedNumberOfCollaboratorsInProject(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     owner_ref: true,
@@ -18,15 +21,21 @@ async function allowedNumberOfCollaboratorsInProject(projectId) {
   return await allowedNumberOfCollaboratorsForUser(project.owner_ref)
 }
 
+/**
+ * @param {any} userId
+ */
 async function allowedNumberOfCollaboratorsForUser(userId) {
   const user = await UserGetter.promises.getUser(userId, { features: 1 })
-  if (user.features && user.features.collaborators) {
+  if (user?.features?.collaborators) {
     return user.features.collaborators
   } else {
     return Settings.defaultFeatures.collaborators
   }
 }
 
+/**
+ * @param {any} projectId
+ */
 async function canAcceptEditCollaboratorInvite(projectId) {
   const allowedNumber = await allowedNumberOfCollaboratorsInProject(projectId)
   if (allowedNumber < 0) {
@@ -39,6 +48,10 @@ async function canAcceptEditCollaboratorInvite(projectId) {
   return currentEditors + 1 <= allowedNumber
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} numberOfNewEditCollaborators
+ */
 async function canAddXEditCollaborators(
   projectId,
   numberOfNewEditCollaborators
@@ -106,6 +119,9 @@ async function canChangeCollaboratorPrivilegeLevel(
   return slotsTaken + inviteCount < allowedNumber
 }
 
+/**
+ * @param {any} user
+ */
 async function hasPaidSubscription(user) {
   const { hasSubscription, subscription } = await userHasSubscription(user)
   const { isMember } = await userIsMemberOfGroupSubscription(user)
@@ -115,11 +131,17 @@ async function hasPaidSubscription(user) {
   }
 }
 
+/**
+ * @param {any} user
+ */
 // alias for backward-compatibility with modules. Use `haspaidsubscription` instead
 async function userHasSubscriptionOrIsGroupMember(user) {
   return await hasPaidSubscription(user)
 }
 
+/**
+ * @param {any} user
+ */
 async function userHasSubscription(user) {
   const subscription = await SubscriptionLocator.promises.getUsersSubscription(
     user._id
@@ -140,12 +162,18 @@ async function userHasSubscription(user) {
   }
 }
 
+/**
+ * @param {any} user
+ */
 async function userIsMemberOfGroupSubscription(user) {
   const subscriptions =
     (await SubscriptionLocator.promises.getMemberSubscriptions(user._id)) || []
   return { isMember: subscriptions.length > 0, subscriptions }
 }
 
+/**
+ * @param {any} subscription
+ */
 function teamHasReachedMemberLimit(subscription) {
   const currentTotal =
     (subscription.member_ids || []).length +
@@ -155,6 +183,10 @@ function teamHasReachedMemberLimit(subscription) {
   return currentTotal >= subscription.membersLimit
 }
 
+/**
+ * @param {any} subscriptionId
+ * @param {any} callback
+ */
 async function hasGroupMembersLimitReached(subscriptionId, callback) {
   const subscription =
     await SubscriptionLocator.promises.getSubscription(subscriptionId)

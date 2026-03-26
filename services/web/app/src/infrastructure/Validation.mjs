@@ -11,10 +11,14 @@ import {
 
 export { z, zz } from '@overleaf/validation-tools'
 
+/**
+ * @param {any} req
+ * @param {any} schema
+ */
 export const parseReq = (req, schema) => {
   try {
     return parseReqBase(req, schema)
-  } catch (err) {
+  } catch (/** @type {any} */ err) {
     if (err instanceof ParamsError) {
       // convert into a NotFoundError that web understands
       throw new NotFoundError('Not found').withCause(err)

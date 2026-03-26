@@ -1,8 +1,8 @@
 // @ts-check
 
 /**
- * @import { MongoClient } from 'mongodb'
- * @import { MongoClient as LegacyMongoClient } from 'mongodb-legacy'
+ * @typedef {import('mongodb').MongoClient} MongoClient
+ * @typedef {import('mongodb-legacy').MongoClient} LegacyMongoClient
  */
 
 /**

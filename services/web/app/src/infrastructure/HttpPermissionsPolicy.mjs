@@ -72,11 +72,16 @@ class HttpPermissionsPolicyMiddleware {
     return policyElements.join(', ')
   }
 
+  /**
+   * @param {any} req
+   * @param {any} res
+   * @param {any} next
+   */
   middleware(req, res, next) {
     if (this.policy && Settings.useHttpPermissionsPolicy) {
       const originalRender = res.render
 
-      res.render = (...args) => {
+      res.render = (/** @type {any} */ ...args) => {
         res.setHeader('Permissions-Policy', this.policy)
         originalRender.apply(res, args)
       }

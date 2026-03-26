@@ -212,6 +212,9 @@ class ProjectAccess {
   }
 }
 
+/**
+ * @param {any} projectId
+ */
 async function getProjectAccess(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     owner_ref: 1,
@@ -230,18 +233,33 @@ async function getProjectAccess(projectId) {
   return new ProjectAccess(project)
 }
 
+/**
+ * @param {any} projectId
+ */
 async function getMemberIdsWithPrivilegeLevels(projectId) {
   return (await getProjectAccess(projectId)).allMembers()
 }
 
+/**
+ * @param {any} projectId
+ */
 async function getMemberIds(projectId) {
   return (await getProjectAccess(projectId)).memberIds()
 }
 
+/**
+ * @param {any} projectId
+ */
 async function getInvitedMemberIds(projectId) {
   return (await getProjectAccess(projectId)).invitedMemberIds()
 }
 
+/**
+ * @param {any} ownerId
+ * @param {any} collaboratorIds
+ * @param {any} readOnlyIds
+ * @param {any} reviewerIds
+ */
 async function getInvitedMembersWithPrivilegeLevelsFromFields(
   ownerId,
   collaboratorIds,
@@ -262,6 +280,10 @@ async function getInvitedMembersWithPrivilegeLevelsFromFields(
   return _loadMembers(members)
 }
 
+/**
+ * @param {any} userId
+ * @param {any} projectId
+ */
 async function getMemberIdPrivilegeLevel(userId, projectId) {
   // In future if the schema changes and getting all member ids is more expensive (multiple documents)
   // then optimise this.
@@ -271,14 +293,24 @@ async function getMemberIdPrivilegeLevel(userId, projectId) {
   return (await getProjectAccess(projectId)).privilegeLevelForUser(userId)
 }
 
+/**
+ * @param {any} projectId
+ */
 async function getInvitedEditCollaboratorCount(projectId) {
   return (await getProjectAccess(projectId)).countInvitedEditCollaborators()
 }
 
+/**
+ * @param {any} projectId
+ */
 async function getInvitedPendingEditorCount(projectId) {
   return (await getProjectAccess(projectId)).countInvitedPendingEditors()
 }
 
+/**
+ * @param {any} userId
+ * @param {any} projectId
+ */
 async function isUserInvitedMemberOfProject(userId, projectId) {
   if (!userId) {
     return false
@@ -286,6 +318,10 @@ async function isUserInvitedMemberOfProject(userId, projectId) {
   return (await getProjectAccess(projectId)).isUserInvitedMember(userId)
 }
 
+/**
+ * @param {any} userId
+ * @param {any} projectId
+ */
 async function isUserInvitedReadWriteMemberOfProject(userId, projectId) {
   if (!userId) {
     return false
@@ -295,6 +331,10 @@ async function isUserInvitedReadWriteMemberOfProject(userId, projectId) {
   )
 }
 
+/**
+ * @param {any} userId
+ * @param {any} projectId
+ */
 async function getPublicShareTokens(userId, projectId) {
   const memberInfo = await Project.findOne(
     {
@@ -335,6 +375,10 @@ async function getPublicShareTokens(userId, projectId) {
 // This function returns all the projects that a user currently has access to,
 // excluding projects where the user is listed in the token access fields when
 // token access has been disabled.
+/**
+ * @param {any} userId
+ * @param {any} fields
+ */
 async function getProjectsUserIsMemberOf(userId, fields) {
   // @ts-ignore
   const limit = pLimit(2)
@@ -368,6 +412,10 @@ async function getProjectsUserIsMemberOf(userId, fields) {
 // This function returns all the projects that a user is a member of, regardless of
 // the current state of the project, so it includes those projects where token access
 // has been disabled.
+/**
+ * @param {any} userId
+ * @param {any} fields
+ */
 async function dangerouslyGetAllProjectsUserIsMemberOf(userId, fields) {
   const readAndWrite = await Project.find(
     { collaberator_refs: userId },
@@ -385,6 +433,9 @@ async function dangerouslyGetAllProjectsUserIsMemberOf(userId, fields) {
   return { readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly }
 }
 
+/**
+ * @param {any} projectId
+ */
 async function getAllInvitedMembers(projectId) {
   try {
     const projectAccess = await getProjectAccess(projectId)
@@ -395,6 +446,10 @@ async function getAllInvitedMembers(projectId) {
   }
 }
 
+/**
+ * @param {any} userId
+ * @param {any} projectId
+ */
 async function userIsTokenMember(userId, projectId) {
   userId = new ObjectId(userId.toString())
   projectId = new ObjectId(projectId.toString())
@@ -413,6 +468,10 @@ async function userIsTokenMember(userId, projectId) {
   return project != null
 }
 
+/**
+ * @param {any} userId
+ * @param {any} projectId
+ */
 async function userIsReadWriteTokenMember(userId, projectId) {
   userId = new ObjectId(userId.toString())
   projectId = new ObjectId(projectId.toString())
@@ -476,15 +535,20 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
   }
 
   for (const memberId of readOnlyIds || []) {
+    /** @type {ProjectMember} */
     const record = {
       id: memberId.toString(),
       privilegeLevel: PrivilegeLevels.READ_ONLY,
       source: Sources.INVITE,
     }
 
-    if (pendingEditorIds?.some(pe => memberId.equals(pe))) {
+    if (
+      pendingEditorIds?.some(/** @param {any} pe */ pe => memberId.equals(pe))
+    ) {
       record.pendingEditor = true
-    } else if (pendingReviewerIds?.some(pr => memberId.equals(pr))) {
+    } else if (
+      pendingReviewerIds?.some(/** @param {any} pr */ pr => memberId.equals(pr))
+    ) {
       record.pendingReviewer = true
     }
     members.push(record)
@@ -533,6 +597,7 @@ async function _loadMembers(members) {
     .map(member => {
       const user = users.get(member.id)
       if (!user) return null
+      /** @type {any} */
       const record = {
         user,
         privilegeLevel: member.privilegeLevel,

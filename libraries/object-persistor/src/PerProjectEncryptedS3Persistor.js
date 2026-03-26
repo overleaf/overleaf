@@ -21,12 +21,32 @@ const hkdf = promisify(Crypto.hkdf)
 const AES256_KEY_LENGTH = 32
 
 /**
- * @typedef {Object} Settings
+ * @typedef {Object} EncryptionSettings
  * @property {boolean} automaticallyRotateDEKEncryption
  * @property {string} dataEncryptionKeyBucketName
  * @property {boolean} ignoreErrorsFromDEKReEncryption
  * @property {(bucketName: string, path: string) => string} pathToProjectFolder
  * @property {() => Promise<Array<RootKeyEncryptionKey>>} getRootKeyEncryptionKeys
+ */
+
+/**
+ * @typedef {Object} S3PersistorSettings
+ * @property {Object<string, import('@aws-sdk/client-s3').StorageClass>} [storageClass]
+ * @property {string} [key]
+ * @property {string} [secret]
+ * @property {string} [region]
+ * @property {string} [endpoint]
+ * @property {boolean} [pathStyle]
+ * @property {number} [maxRetries]
+ * @property {Object} [httpOptions]
+ * @property {string} [ca]
+ * @property {number} [signedUrlExpiryInMs]
+ * @property {number} [partSize]
+ * @property {Object<string, {auth_key: string, auth_secret: string}>} [bucketCreds]
+ */
+
+/**
+ * @typedef {S3PersistorSettings & EncryptionSettings} Settings
  */
 
 /**
@@ -103,10 +123,6 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
         if (rootKEKs.length === 0) throw new Error('no root kek provided')
         return rootKEKs
       })
-  }
-
-  async ensureKeyEncryptionKeysLoaded() {
-    await this.#availableKeyEncryptionKeysPromise
   }
 
   /**
@@ -289,6 +305,13 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
     }
   }
 
+  /**
+   * @param {string} bucketName
+   * @param {string} path
+   * @param {NodeJS.ReadableStream} sourceStream
+   * @param {import('./S3Persistor.js').StreamOptions} opts
+   * @return {Promise<void>}
+   */
   async sendStream(bucketName, path, sourceStream, opts = {}) {
     const ssecOptions =
       opts.ssecOptions ||
@@ -299,6 +322,13 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
     })
   }
 
+  /**
+   * @param {string} bucketName
+   * @param {string} path
+   * @param {Object} opts
+   * @param {SSECOptions} [opts.ssecOptions]
+   * @return {Promise<NodeJS.ReadableStream>}
+   */
   async getObjectStream(bucketName, path, opts = {}) {
     const ssecOptions =
       opts.ssecOptions ||
@@ -309,6 +339,13 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
     })
   }
 
+  /**
+   * @param {string} bucketName
+   * @param {string} path
+   * @param {Object} opts
+   * @param {SSECOptions} [opts.ssecOptions]
+   * @return {Promise<number>}
+   */
   async getObjectSize(bucketName, path, opts = {}) {
     const ssecOptions =
       opts.ssecOptions ||
@@ -316,6 +353,13 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
     return await super.getObjectSize(bucketName, path, { ...opts, ssecOptions })
   }
 
+  /**
+   * @param {string} bucketName
+   * @param {string} path
+   * @param {Object} opts
+   * @param {SSECOptions} [opts.ssecOptions]
+   * @return {Promise<string | undefined>}
+   */
   async getObjectStorageClass(bucketName, path, opts = {}) {
     const ssecOptions =
       opts.ssecOptions ||
@@ -326,11 +370,23 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
     })
   }
 
+  /**
+   * @param {string} bucketName
+   * @param {string} path
+   * @param {string} [continuationToken]
+   * @return {Promise<number>}
+   */
   async directorySize(bucketName, path, continuationToken) {
     // Note: Listing a bucket does not require SSE-C credentials.
     return await super.directorySize(bucketName, path, continuationToken)
   }
 
+  /**
+   * @param {string} bucketName
+   * @param {string} path
+   * @param {string} [continuationToken]
+   * @return {Promise<void>}
+   */
   async deleteDirectory(bucketName, path, continuationToken) {
     // Let [Settings.pathToProjectFolder] validate the project path before deleting things.
     const { projectFolder, dekPath } = this.#buildProjectPaths(bucketName, path)
@@ -344,12 +400,27 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
     }
   }
 
+  /**
+   * @param {string} bucketName
+   * @param {string} path
+   * @param {Object} opts
+   * @return {Promise<string>}
+   */
   async getObjectMd5Hash(bucketName, path, opts = {}) {
     // The ETag in object metadata is not the MD5 content hash, skip the HEAD request.
     opts = { ...opts, etagIsNotMD5: true }
     return await super.getObjectMd5Hash(bucketName, path, opts)
   }
 
+  /**
+   * @param {string} bucketName
+   * @param {string} sourcePath
+   * @param {string} destinationPath
+   * @param {Object} opts
+   * @param {SSECOptions} [opts.ssecOptions]
+   * @param {SSECOptions} [opts.ssecSrcOptions]
+   * @return {Promise<void>}
+   */
   async copyObject(bucketName, sourcePath, destinationPath, opts = {}) {
     const ssecOptions =
       opts.ssecOptions ||

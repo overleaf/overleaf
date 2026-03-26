@@ -62,6 +62,7 @@ async function getExistingPrices(stripe) {
   let startingAfter
 
   do {
+    /** @type {any} */
     const response = await stripe.prices.list({
       limit: 100,
       starting_after: startingAfter,
@@ -89,6 +90,7 @@ async function getExistingProducts(stripe) {
   let startingAfter
 
   do {
+    /** @type {any} */
     const response = await stripe.products.list({
       limit: 100,
       starting_after: startingAfter,
@@ -104,6 +106,9 @@ async function getExistingProducts(stripe) {
   return productsById
 }
 
+/**
+ * @param {any} trackProgress
+ */
 export async function main(trackProgress) {
   const args = minimist(process.argv.slice(2), {
     boolean: ['commit'],
@@ -175,7 +180,10 @@ export async function main(trackProgress) {
         record.productName ||
         planCode
           .split(/[_-]/) // Handle underscores or hyphens
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .map(
+            /** @param {any} word */
+            word => word.charAt(0).toUpperCase() + word.slice(1)
+          )
           .join(' ')
 
       if (commit) {
@@ -203,7 +211,7 @@ export async function main(trackProgress) {
 
     // 2. Handle Prices for each currency column
     for (const currency of currencyKeys) {
-      const amountValue = parseFloat(record[currency])
+      const amountValue = parseFloat(/** @type {any} */ (record)[currency])
       if (isNaN(amountValue) || amountValue <= 0) continue
 
       const currencyLower = currency.toLowerCase()

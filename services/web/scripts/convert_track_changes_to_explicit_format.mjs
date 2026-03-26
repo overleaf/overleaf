@@ -48,6 +48,9 @@ async function main(trackProgress) {
   )
 }
 
+/**
+ * @param {any} project
+ */
 async function processProject(project) {
   if (DEBUG) {
     console.log(

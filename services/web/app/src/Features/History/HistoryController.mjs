@@ -15,17 +15,24 @@ import {
 } from '@overleaf/fetch-utils'
 
 import settings from '@overleaf/settings'
+/** @type {any} */
 import SessionManager from '../Authentication/SessionManager.mjs'
 import UserGetter from '../User/UserGetter.mjs'
+/** @type {any} */
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import Errors from '../Errors/Errors.js'
+/** @type {any} */
 import HistoryManager from './HistoryManager.mjs'
+/** @type {any} */
 import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
+/** @type {any} */
 import ProjectEntityUpdateHandler from '../Project/ProjectEntityUpdateHandler.mjs'
+/** @type {any} */
 import RestoreManager from './RestoreManager.mjs'
 import { prepareZipAttachment } from '../../infrastructure/Response.mjs'
 import Features from '../../infrastructure/Features.mjs'
 import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
+/** @type {any} */
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 
 // Number of seconds after which the browser should send a request to revalidate
@@ -38,10 +45,18 @@ const STALE_WHILE_REVALIDATE_SECONDS = 365 * 86400 // 1 year
 
 const MAX_HISTORY_ZIP_ATTEMPTS = 40
 
+/**
+ * @param {any} req
+ * @param {any} res
+ */
 async function getBlob(req, res) {
   await requestBlob('GET', req, res)
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ */
 async function headBlob(req, res) {
   await requestBlob('HEAD', req, res)
 }
@@ -56,6 +71,11 @@ const requestBlobSchema = z.object({
   }),
 })
 
+/**
+ * @param {any} method
+ * @param {any} req
+ * @param {any} res
+ */
 async function requestBlob(method, req, res) {
   const { params } = parseReq(req, requestBlobSchema)
   const { project_id: projectId, hash } = params
@@ -76,7 +96,7 @@ async function requestBlob(method, req, res) {
         method,
         range
       ))
-  } catch (err) {
+  } catch (/** @type {any} */ err) {
     if (err instanceof Errors.NotFoundError) return res.status(404).end()
     throw err
   }
@@ -94,7 +114,7 @@ async function requestBlob(method, req, res) {
 
   try {
     await pipeline(stream, res)
-  } catch (err) {
+  } catch (/** @type {any} */ err) {
     // If the downstream request is cancelled, we get an
     // ERR_STREAM_PREMATURE_CLOSE, ignore these "errors".
     if (!isPrematureClose(err)) {
@@ -103,6 +123,10 @@ async function requestBlob(method, req, res) {
   }
 }
 
+/**
+ * @param {any} res
+ * @param {any} etag
+ */
 function setBlobCacheHeaders(res, etag) {
   // Blobs are immutable, so they can in principle be cached indefinitely. Here,
   // we ask the browser to cache them for some time, but then check back
@@ -115,6 +139,11 @@ function setBlobCacheHeaders(res, etag) {
   res.set('ETag', etag)
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function proxyToHistoryApi(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const url = settings.apis.project_history.url + req.url
@@ -135,7 +164,7 @@ async function proxyToHistoryApi(req, res, next) {
 
   try {
     await pipeline(stream, res)
-  } catch (err) {
+  } catch (/** @type {any} */ err) {
     // If the downstream request is cancelled, we get an
     // ERR_STREAM_PREMATURE_CLOSE.
     if (!isPrematureClose(err)) {
@@ -144,6 +173,11 @@ async function proxyToHistoryApi(req, res, next) {
   }
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function proxyToHistoryApiAndInjectUserDetails(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const url = settings.apis.project_history.url + req.url
@@ -155,6 +189,11 @@ async function proxyToHistoryApiAndInjectUserDetails(req, res, next) {
   res.json(data)
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function resyncProjectHistory(req, res, next) {
   // increase timeout to 6 minutes
   res.setTimeout(6 * 60 * 1000)
@@ -173,7 +212,7 @@ async function resyncProjectHistory(req, res, next) {
       projectId,
       opts
     )
-  } catch (err) {
+  } catch (/** @type {any} */ err) {
     if (err instanceof Errors.ProjectHistoryDisabledError) {
       return res.sendStatus(404)
     } else {
@@ -184,6 +223,11 @@ async function resyncProjectHistory(req, res, next) {
   res.sendStatus(204)
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function restoreFileFromV2(req, res, next) {
   const { project_id: projectId } = req.params
   const { version, pathname } = req.body
@@ -215,6 +259,11 @@ async function restoreFileFromV2(req, res, next) {
   })
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function revertFile(req, res, next) {
   const { project_id: projectId } = req.params
   const { version, pathname } = req.body
@@ -247,6 +296,11 @@ async function revertFile(req, res, next) {
   })
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function revertProject(req, res, next) {
   const { project_id: projectId } = req.params
   const { version } = req.body
@@ -273,6 +327,11 @@ async function revertProject(req, res, next) {
   res.json(reverted)
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function getLabels(req, res, next) {
   const projectId = req.params.Project_id
 
@@ -284,6 +343,11 @@ async function getLabels(req, res, next) {
   res.json(labels)
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function createLabel(req, res, next) {
   const projectId = req.params.Project_id
   const { comment, version } = req.body
@@ -301,6 +365,9 @@ async function createLabel(req, res, next) {
   res.json(label)
 }
 
+/**
+ * @param {any} label
+ */
 async function _enrichLabel(label) {
   const newLabel = Object.assign({}, label)
   if (!label.user_id) {
@@ -317,11 +384,16 @@ async function _enrichLabel(label) {
   return newLabel
 }
 
+/**
+ * @param {any} labels
+ */
 async function _enrichLabels(labels) {
   if (!labels || !labels.length) {
     return []
   }
-  const uniqueUsers = new Set(labels.map(label => label.user_id))
+  const uniqueUsers = new Set(
+    labels.map(/** @param {any} label */ label => label.user_id)
+  )
 
   // For backwards compatibility, and for anonymously created labels in SP
   // expect missing user_id fields
@@ -336,15 +408,22 @@ async function _enrichLabels(labels) {
     last_name: 1,
     email: 1,
   })
-  const users = new Map(rawUsers.map(user => [String(user._id), user]))
+  const users = new Map(
+    rawUsers.map(/** @param {any} user */ user => [String(user._id), user])
+  )
 
-  labels.forEach(label => {
-    const user = users.get(label.user_id)
-    label.user_display_name = _displayNameForUser(user)
-  })
+  labels.forEach(
+    /** @param {any} label */ label => {
+      const user = users.get(label.user_id)
+      label.user_display_name = _displayNameForUser(user)
+    }
+  )
   return labels
 }
 
+/**
+ * @param {any} user
+ */
 function _displayNameForUser(user) {
   if (user == null) {
     return 'Anonymous'
@@ -365,6 +444,11 @@ function _displayNameForUser(user) {
   return name
 }
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function deleteLabel(req, res, next) {
   const { Project_id: projectId, label_id: labelId } = req.params
   const userId = SessionManager.getLoggedInUserId(req.session)
@@ -393,11 +477,17 @@ const downloadZipOfVersionSchema = z.object({
   }),
 })
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function downloadZipOfVersion(req, res, next) {
   const { params } = parseReq(req, downloadZipOfVersionSchema)
   const { project_id: projectId, version } = params
   const userId = SessionManager.getLoggedInUserId(req.session)
 
+  /** @type {any} */
   const project = await ProjectDetailsHandler.promises.getDetails(projectId)
   const v1Id =
     project.overleaf && project.overleaf.history && project.overleaf.history.id
@@ -430,6 +520,13 @@ async function downloadZipOfVersion(req, res, next) {
   )
 }
 
+/**
+ * @param {any} v1ProjectId
+ * @param {any} version
+ * @param {any} name
+ * @param {any} req
+ * @param {any} res
+ */
 async function _pipeHistoryZipToResponse(v1ProjectId, version, name, req, res) {
   if (req.destroyed) {
     // client has disconnected -- skip project history api call and download
@@ -447,7 +544,7 @@ async function _pipeHistoryZipToResponse(v1ProjectId, version, name, req, res) {
     let stream
     try {
       stream = await fetchStream(url, { basicAuth })
-    } catch (err) {
+    } catch (/** @type {any} */ err) {
       if (err instanceof RequestFailedError && err.response.status === 404) {
         return res.sendStatus(404)
       } else {
@@ -459,7 +556,7 @@ async function _pipeHistoryZipToResponse(v1ProjectId, version, name, req, res) {
 
     try {
       await pipeline(stream, res)
-    } catch (err) {
+    } catch (/** @type {any} */ err) {
       // If the downstream request is cancelled, we get an
       // ERR_STREAM_PREMATURE_CLOSE.
       if (!isPrematureClose(err)) {
@@ -472,7 +569,7 @@ async function _pipeHistoryZipToResponse(v1ProjectId, version, name, req, res) {
   let body
   try {
     body = await fetchJson(url, { method: 'POST', basicAuth })
-  } catch (err) {
+  } catch (/** @type {any} */ err) {
     if (err instanceof RequestFailedError && err.response.status === 404) {
       throw new Errors.NotFoundError('zip not found')
     } else {
@@ -513,7 +610,7 @@ async function _pipeHistoryZipToResponse(v1ProjectId, version, name, req, res) {
       const stream = await fetchStream(body.zipUrl)
       prepareZipAttachment(res, `${name}.zip`)
       await pipeline(stream, res)
-    } catch (err) {
+    } catch (/** @type {any} */ err) {
       if (attempt > MAX_HISTORY_ZIP_ATTEMPTS) {
         throw err
       }
@@ -545,6 +642,11 @@ const getLatestHistorySchema = z.object({
   }),
 })
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function getLatestHistory(req, res, next) {
   const { params } = parseReq(req, getLatestHistorySchema)
   const projectId = params.project_id
@@ -562,6 +664,11 @@ const getChangesSchema = z.object({
   }),
 })
 
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 async function getChanges(req, res, next) {
   const { params, query } = parseReq(req, getChangesSchema)
   const projectId = params.project_id
@@ -598,6 +705,9 @@ async function getChanges(req, res, next) {
   }
 }
 
+/**
+ * @param {any} err
+ */
 function isPrematureClose(err) {
   return (
     err instanceof Error &&

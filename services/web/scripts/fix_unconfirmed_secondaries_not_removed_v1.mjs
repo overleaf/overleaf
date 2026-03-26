@@ -42,6 +42,9 @@ if (!doNotListUsers) {
  */
 const parseAsync = promisify(csv.parse)
 
+/**
+ * @param {any} userId
+ */
 async function getV1Affiliations(userId) {
   const url = `${Settings.apis.v1.url}/api/v2/users/${userId}/affiliations`
 
@@ -56,6 +59,10 @@ async function getV1Affiliations(userId) {
   return affiliations
 }
 
+/**
+ * @param {any} userId
+ * @param {any} email
+ */
 async function removeAffiliationV1(userId, email) {
   const url = `${Settings.apis.v1.url}/api/v2/users/${userId}/affiliations/remove`
 
@@ -92,6 +99,9 @@ const results = {
   errorRemovingAffiliationInV1: [],
 }
 
+/**
+ * @param {any} trackProgress
+ */
 async function main(trackProgress) {
   console.time('check_removed_emails')
 
@@ -99,6 +109,7 @@ async function main(trackProgress) {
   const csvContent = await fs.readFile(filePath, 'utf8')
   const rows = await parseAsync(csvContent)
   rows.shift() // Remove header row
+  /** @type {Record<string, string[]>} */
   const emailsByUserId = {}
 
   for (const [userId, email] of rows) {
@@ -124,12 +135,12 @@ async function main(trackProgress) {
         // nothing to cleanup in v1 if no affiliations for the user
         continue
       }
-    } catch (e) {
+    } catch (/** @type {any} */ e) {
       results.errorCheckingAffiliations.push(userId)
     }
 
     const affiliationsEmailsInV1 = affiliations.map(
-      affiliation => affiliation.email
+      (/** @type {any} */ affiliation) => affiliation.email
     )
 
     const user = await db.users.findOne(
@@ -151,7 +162,9 @@ async function main(trackProgress) {
         continue
       }
 
-      const emailOnAccount = user?.emails?.find(e => e.email === email)
+      const emailOnAccount = user?.emails?.find(
+        (/** @type {any} */ e) => e.email === email
+      )
 
       if (emailOnAccount) {
         // the email is still on the user account, we should not remove the affiliation in v1
@@ -181,7 +194,7 @@ async function main(trackProgress) {
           // remove the affiliation in v1
           await removeAffiliationV1(userId, email)
           results.successfullyRemovedEmailInV1ForUser.push({ userId, email })
-        } catch (e) {
+        } catch (/** @type {any} */ e) {
           results.errorRemovingAffiliationInV1.push({
             userId,
             email,
@@ -200,18 +213,18 @@ async function main(trackProgress) {
 
   console.log('Results:')
   for (const key in results) {
-    console.log(`   ${key}:`, results[key].length)
+    console.log(`   ${key}:`, /** @type {any} */ (results)[key].length)
   }
   for (const key in results) {
     if (
       !doNotListUsers &&
-      results[key].length > 0 &&
+      /** @type {any} */ (results)[key].length > 0 &&
       key !== 'needToRemoveEmailInV1'
     ) {
       // skip needToRemoveEmailInV1 since we'll only output that if this list length does not match success list length
       console.log('----------------------------')
       console.log(`${key}:`)
-      console.log(results[key])
+      console.log(/** @type {any} */ (results)[key])
     }
   }
 

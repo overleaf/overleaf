@@ -14,6 +14,7 @@ async function main() {
     process.exit(1)
   }
 
+  /** @type {Record<string, any>} */
   const localizedAddOnsPricing = {}
 
   const monthlyPlan = await getPlan(ADD_ON_CODE)
@@ -22,10 +23,12 @@ async function main() {
     process.exit(1)
   }
   for (const { currency, unitAmount } of monthlyPlan.currencies ?? []) {
-    if (!localizedAddOnsPricing[currency]) {
-      localizedAddOnsPricing[currency] = { [ADD_ON_CODE]: {} }
+    /** @type {any} */
+    const curr = currency
+    if (!localizedAddOnsPricing[curr]) {
+      localizedAddOnsPricing[curr] = { [ADD_ON_CODE]: {} }
     }
-    localizedAddOnsPricing[currency][ADD_ON_CODE].monthly = unitAmount
+    localizedAddOnsPricing[curr][ADD_ON_CODE].monthly = unitAmount
   }
 
   const annualPlan = await getPlan(`${ADD_ON_CODE}-annual`)
@@ -34,11 +37,13 @@ async function main() {
     process.exit(1)
   }
   for (const { currency, unitAmount } of annualPlan.currencies ?? []) {
-    if (!localizedAddOnsPricing[currency]) {
-      localizedAddOnsPricing[currency] = { [ADD_ON_CODE]: {} }
+    /** @type {any} */
+    const curr = currency
+    if (!localizedAddOnsPricing[curr]) {
+      localizedAddOnsPricing[curr] = { [ADD_ON_CODE]: {} }
     }
-    localizedAddOnsPricing[currency][ADD_ON_CODE].annual = unitAmount
-    localizedAddOnsPricing[currency][ADD_ON_CODE].annualDividedByTwelve =
+    localizedAddOnsPricing[curr][ADD_ON_CODE].annual = unitAmount
+    localizedAddOnsPricing[curr][ADD_ON_CODE].annualDividedByTwelve =
       (unitAmount || 0) / 12
   }
 

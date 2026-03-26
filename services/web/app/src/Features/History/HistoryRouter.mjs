@@ -23,6 +23,10 @@ const rateLimiters = {
   }),
 }
 
+/**
+ * @param {any} webRouter
+ * @param {any} privateApiRouter
+ */
 function apply(webRouter, privateApiRouter) {
   // Blobs
 

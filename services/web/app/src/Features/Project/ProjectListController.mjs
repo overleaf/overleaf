@@ -42,8 +42,8 @@ import UserSettingsHelper from './UserSettingsHelper.mjs'
 
 /**
  * @param {Affiliation} affiliation
- * @param session
- * @param linkedInstitutionIds
+ * @param {any} session
+ * @param {string[]} linkedInstitutionIds
  * @returns {boolean}
  * @private
  */
@@ -99,6 +99,9 @@ const _buildPortalTemplatesList = affiliations => {
   return portalTemplates
 }
 
+/**
+ * @param {any} req
+ */
 function cleanupSession(req) {
   // cleanup redirects at the end of the redirect chain
   delete req.session.postCheckoutRedirect
@@ -124,10 +127,12 @@ async function projectListPage(req, res, next) {
   // - object - the subscription data object
   let usersBestSubscription
   let usersIndividualSubscription
+  /** @type {any[]} */
   let usersGroupSubscriptions = []
   let usersManagedGroupSubscriptions = []
   let survey
   let userIsMemberOfGroupSubscription = false
+  /** @type {any[]} */
   let groupSubscriptionsPendingEnrollment = []
 
   const isSaas = Features.hasFeature('saas')
@@ -153,7 +158,8 @@ async function projectListPage(req, res, next) {
       if (groupsWithEmails && groupsWithEmails.length > 0) {
         if (
           groupsWithEmails.some(
-            ({ subscription }) => subscription.managedUsersEnabled
+            (/** @type {any} */ { subscription }) =>
+              subscription.managedUsersEnabled
           )
         ) {
           return res.redirect('/domain-capture')
@@ -338,6 +344,7 @@ async function projectListPage(req, res, next) {
     reconfirmedViaSAML = _.get(req.session, ['saml', 'reconfirmed'])
     const samlSession = req.session.saml
     // Notification: SSO Available
+    /** @type {string[]} */
     const linkedInstitutionIds = []
     userEmails.forEach(email => {
       if (email.samlProviderId) {
@@ -906,6 +913,9 @@ function _hasActiveFilter(filters) {
   )
 }
 
+/**
+ * @param {any} user
+ */
 // todo: quota clean-up: rename function and vars
 async function _userHasAIAssist(user) {
   let hasPremiumAiFeatures
@@ -937,6 +947,9 @@ async function _userHasAIAssist(user) {
 // Determines if user is able to enable AI assist
 // based on their permissions and settings
 // It does NOT determine if the user has AI Assist enabled
+/**
+ * @param {any} user
+ */
 async function _canUseAIAssist(user) {
   // Check if the assistant has been manually disabled by the user
   // post https://github.com/overleaf/internal/pull/31273 we can rely on user.aiFeatures being populated

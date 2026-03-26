@@ -274,6 +274,24 @@ const UserGetter = {
   // check for duplicate email address. This is also enforced at the DB level
   ensureUniqueEmailAddress: callbackify(ensureUniqueEmailAddress),
   getWritefullData: callbackify(getWritefullData),
+
+  promises: {
+    getSsoUsersAtInstitution,
+    getUser,
+    getUserFeatures,
+    getUserEmail,
+    getUserFullEmails,
+    getUserConfirmedEmails,
+    getUserByMainEmail,
+    getUserByAnyEmail,
+    getUsersByAnyConfirmedEmail,
+    getUsersByV1Ids,
+    getUsersByHostname,
+    getInstitutionUsersByHostname,
+    getUsers,
+    ensureUniqueEmailAddress,
+    getWritefullData,
+  },
 }
 
 const decorateFullEmails = (
@@ -350,24 +368,6 @@ const decorateFullEmails = (
   })
 
   return emailsData
-}
-
-UserGetter.promises = {
-  getSsoUsersAtInstitution,
-  getUser,
-  getUserFeatures,
-  getUserEmail,
-  getUserFullEmails,
-  getUserConfirmedEmails,
-  getUserByMainEmail,
-  getUserByAnyEmail,
-  getUsersByAnyConfirmedEmail,
-  getUsersByV1Ids,
-  getUsersByHostname,
-  getInstitutionUsersByHostname,
-  getUsers,
-  ensureUniqueEmailAddress,
-  getWritefullData,
 }
 
 export default UserGetter

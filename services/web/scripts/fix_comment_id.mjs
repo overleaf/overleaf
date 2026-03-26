@@ -24,6 +24,9 @@ function parseArgs() {
   }
 }
 
+/**
+ * @param {any} projectId
+ */
 async function processProject(projectId) {
   console.log(`Processing project ${projectId}...`)
   const docRanges = await DocstoreManager.promises.getAllRanges(projectId)
@@ -38,6 +41,9 @@ async function processProject(projectId) {
   }
 }
 
+/**
+ * @param {any} doc
+ */
 async function processDoc(doc) {
   let commentsUpdated = 0
   for (const comment of doc.ranges.comments ?? []) {

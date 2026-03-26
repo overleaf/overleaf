@@ -25,10 +25,16 @@ const {
  * @returns {() => (req: Request, res: Response, next: NextFunction) => void} The middleware function that adds the `assertPermission` function to the request object.
  */
 function useCapabilities() {
+  /**
+   * @param {any} req
+   * @param {any} res
+   * @param {any} next
+   */
   const middleware = async function (req, res, next) {
     // attach the user's capabilities to the request object
     req.capabilitySet = new Set()
     // provide a function to assert that a capability is present
+    /** @param {any} capability */
     req.assertPermission = capability => {
       if (!req.capabilitySet.has(capability)) {
         throw new ForbiddenError(
@@ -52,7 +58,9 @@ function useCapabilities() {
 
       if (results.length > 0) {
         // get the combined group policy applying to the user
-        const groupPolicies = results.map(result => result.groupPolicy)
+        const groupPolicies = results.map(
+          /** @param {any} result */ result => result.groupPolicy
+        )
         const combinedGroupPolicy = combineGroupPolicies(groupPolicies)
         // attach the new capabilities to the request object
         for (const cap of getUserCapabilities(combinedGroupPolicy)) {
@@ -68,7 +76,7 @@ function useCapabilities() {
         }
       }
       next()
-    } catch (error) {
+    } catch (/** @type {any} */ error) {
       if (error instanceof UserNotFoundError) {
         // the user is logged in but doesn't exist in the database
         // this can happen if the user has just deleted their account
@@ -89,7 +97,10 @@ function useCapabilities() {
 function requirePermission(...requiredCapabilities) {
   if (
     requiredCapabilities.length === 0 ||
-    requiredCapabilities.some(capability => typeof capability !== 'string')
+    requiredCapabilities.some(
+      /** @param {any} capability */ capability =>
+        typeof capability !== 'string'
+    )
   ) {
     throw new Error('invalid required capabilities')
   }
@@ -102,16 +113,14 @@ function requirePermission(...requiredCapabilities) {
     if (!Features.hasFeature('saas')) {
       return next()
     }
-    if (!req.user && !req.oauth_user) {
+    const user = req.user || req.oauth_user
+    if (!user) {
       return next(new Error('no user'))
     }
     try {
-      await assertUserPermissions(
-        req.user || req.oauth_user,
-        requiredCapabilities
-      )
+      await assertUserPermissions(user, requiredCapabilities)
       next()
-    } catch (error) {
+    } catch (/** @type {any} */ error) {
       next(error)
     }
   }

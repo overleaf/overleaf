@@ -4,6 +4,7 @@ const crypto = require('node:crypto')
 const os = require('node:os')
 const { promisify } = require('node:util')
 
+// @ts-ignore - ioredis types may not be available in all contexts
 const Redis = require('ioredis')
 
 const {
@@ -20,6 +21,9 @@ const PID = process.pid
 const RND = crypto.randomBytes(4).toString('hex')
 let COUNT = 0
 
+/**
+ * @param {any} opts
+ */
 function createClient(opts) {
   const standardOpts = Object.assign({}, opts)
   delete standardOpts.key_schema
@@ -42,6 +46,7 @@ function createClient(opts) {
     client = new Redis(standardOpts)
   }
   monkeyPatchIoRedisExec(client)
+  /** @param {any} callback */
   client.healthCheck = callback => {
     if (callback) {
       // callback based invocation
@@ -54,6 +59,9 @@ function createClient(opts) {
   return client
 }
 
+/**
+ * @param {any} client
+ */
 async function healthCheck(client) {
   // check the redis connection by storing and retrieving a unique key/value pair
   const uniqueToken = `host=${HOST}:pid=${PID}:random=${RND}:time=${Date.now()}:count=${COUNT++}`
@@ -71,6 +79,11 @@ async function healthCheck(client) {
   })
 }
 
+/**
+ * @param {any} client
+ * @param {any} uniqueToken
+ * @param {any} context
+ */
 async function runCheck(client, uniqueToken, context) {
   const healthCheckKey = `_redis-wrapper:healthCheckKey:{${uniqueToken}}`
   const healthCheckValue = `_redis-wrapper:healthCheckValue:{${uniqueToken}}`
@@ -79,9 +92,11 @@ async function runCheck(client, uniqueToken, context) {
   context.stage = 'write'
   const writeAck = await client
     .set(healthCheckKey, healthCheckValue, 'EX', 60)
-    .catch(err => {
-      throw new RedisHealthCheckWriteError('write errored', context, err)
-    })
+    .catch(
+      /** @param {any} err */ err => {
+        throw new RedisHealthCheckWriteError('write errored', context, err)
+      }
+    )
   if (writeAck !== 'OK') {
     context.writeAck = writeAck
     throw new RedisHealthCheckWriteError('write failed', context)
@@ -94,9 +109,15 @@ async function runCheck(client, uniqueToken, context) {
     .get(healthCheckKey)
     .del(healthCheckKey)
     .exec()
-    .catch(err => {
-      throw new RedisHealthCheckVerifyError('read/delete errored', context, err)
-    })
+    .catch(
+      /** @param {any} err */ err => {
+        throw new RedisHealthCheckVerifyError(
+          'read/delete errored',
+          context,
+          err
+        )
+      }
+    )
   if (roundTrippedHealthCheckValue !== healthCheckValue) {
     context.roundTrippedHealthCheckValue = roundTrippedHealthCheckValue
     throw new RedisHealthCheckVerifyError('read failed', context)
@@ -107,6 +128,10 @@ async function runCheck(client, uniqueToken, context) {
   }
 }
 
+/**
+ * @param {any} result
+ * @param {any} callback
+ */
 function unwrapMultiResult(result, callback) {
   // ioredis exec returns a results like:
   // [ [null, 42], [null, "foo"] ]
@@ -130,19 +155,30 @@ function unwrapMultiResult(result, callback) {
 }
 const unwrapMultiResultPromisified = promisify(unwrapMultiResult)
 
+/**
+ * @param {any} client
+ */
 function monkeyPatchIoRedisExec(client) {
   const _multi = client.multi
   client.multi = function () {
     const multi = _multi.apply(client, arguments)
     const _exec = multi.exec
+    /** @param {any} callback */
     multi.exec = callback => {
       if (callback) {
         // callback based invocation
-        _exec.call(multi, (error, result) => {
-          // The command can fail all-together due to syntax errors
-          if (error) return callback(error)
-          unwrapMultiResult(result, callback)
-        })
+        _exec.call(
+          multi,
+          /**
+           * @param {any} error
+           * @param {any} result
+           */
+          (error, result) => {
+            // The command can fail all-together due to syntax errors
+            if (error) return callback(error)
+            unwrapMultiResult(result, callback)
+          }
+        )
       } else {
         // Promise based invocation
         return _exec.call(multi).then(unwrapMultiResultPromisified)
@@ -152,7 +188,11 @@ function monkeyPatchIoRedisExec(client) {
   }
 }
 
+/**
+ * @param {{runner: any, timeout: any, context: any}} param0
+ */
 async function runWithTimeout({ runner, timeout, context }) {
+  /** @type {any} */
   let healthCheckDeadline
   await Promise.race([
     new Promise((resolve, reject) => {

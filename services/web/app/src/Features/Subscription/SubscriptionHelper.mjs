@@ -12,8 +12,8 @@ const MILLISECONDS = 1_000
  * This function checks if a subscription should transition between 'active' and 'paused'
  * states based on the current time and pause period metadata.
  *
- * @param {Object} subscription - The MongoDB subscription document
- * @returns {Promise<Object>} - The updated subscription document with recomputed state
+ * @param {any} subscription - The MongoDB subscription document
+ * @returns {Promise<any>} - The updated subscription document with recomputed state
  */
 async function recomputeSubscriptionState(subscription) {
   if (
@@ -65,6 +65,9 @@ async function recomputeSubscriptionState(subscription) {
 /**
  * If the user changes to a less expensive plan, we shouldn't apply the change immediately.
  * This is to avoid unintended/artifical credits on users Recurly accounts.
+ * @param {any} oldPlan
+ * @param {any} newPlan
+ * @param {any} isInTrial
  */
 function shouldPlanChangeAtTermEnd(oldPlan, newPlan, isInTrial) {
   if (isInTrial) {
@@ -138,6 +141,9 @@ function generateInitialLocalizedGroupPrice(recommendedCurrency, locale) {
   }
 }
 
+/**
+ * @param {any} subscription
+ */
 function isPaidSubscription(subscription) {
   const hasRecurlySubscription =
     subscription?.recurlySubscription_id &&
@@ -148,6 +154,9 @@ function isPaidSubscription(subscription) {
   return !!(subscription && (hasRecurlySubscription || hasStripeSubscription))
 }
 
+/**
+ * @param {any} subscription
+ */
 function isIndividualActivePaidSubscription(subscription) {
   return (
     isPaidSubscription(subscription) &&
@@ -157,6 +166,9 @@ function isIndividualActivePaidSubscription(subscription) {
   )
 }
 
+/**
+ * @param {any} subscription
+ */
 function getPaymentProviderSubscriptionId(subscription) {
   if (subscription?.recurlySubscription_id) {
     return subscription.recurlySubscription_id
@@ -167,6 +179,9 @@ function getPaymentProviderSubscriptionId(subscription) {
   return null
 }
 
+/**
+ * @param {any} subscription
+ */
 function getPaidSubscriptionState(subscription) {
   if (subscription?.recurlyStatus?.state) {
     return subscription.recurlyStatus.state
@@ -177,6 +192,9 @@ function getPaidSubscriptionState(subscription) {
   return null
 }
 
+/**
+ * @param {any} subscription
+ */
 function getSubscriptionTrialStartedAt(subscription) {
   if (subscription?.recurlyStatus?.trialStartedAt) {
     return subscription.recurlyStatus?.trialStartedAt
@@ -184,6 +202,9 @@ function getSubscriptionTrialStartedAt(subscription) {
   return subscription?.paymentProvider?.trialStartedAt
 }
 
+/**
+ * @param {any} subscription
+ */
 function getSubscriptionTrialEndsAt(subscription) {
   if (subscription?.recurlyStatus?.trialEndsAt) {
     return subscription.recurlyStatus?.trialEndsAt
@@ -191,6 +212,9 @@ function getSubscriptionTrialEndsAt(subscription) {
   return subscription?.paymentProvider?.trialEndsAt
 }
 
+/**
+ * @param {any} trialEndsAt
+ */
 function isInTrial(trialEndsAt) {
   if (!trialEndsAt) {
     return false

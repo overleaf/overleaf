@@ -2,8 +2,8 @@
 import { AsyncLocalStorage } from 'node:async_hooks'
 
 /**
- * @typedef {Object} RequestContext
- * @property {Object.<string, array>} [userFullEmails] - Dictionary mapping userId to an array of full emails
+ * @typedef {Record<string, any>} RequestContext
+ * @property {Record<string, any[]>} [userFullEmails] - Dictionary mapping userId to an array of full emails
  */
 
 /** @type {AsyncLocalStorage<RequestContext>} */

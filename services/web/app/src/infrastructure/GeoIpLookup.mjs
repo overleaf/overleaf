@@ -73,6 +73,9 @@ for (const country of EuroCountries) {
   currencyMappings[country] = 'EUR'
 }
 
+/**
+ * @param {any} currency
+ */
 function isValidCurrencyParam(currency) {
   if (!currency) {
     return false
@@ -80,6 +83,10 @@ function isValidCurrencyParam(currency) {
   return validCurrencyParams.includes(currency)
 }
 
+/**
+ * @param {any} ip
+ * @param {any} [callback]
+ */
 async function getDetails(ip, callback) {
   if (!ip) {
     return callback(new Error('no ip passed'))
@@ -92,6 +99,7 @@ async function getDetails(ip, callback) {
 }
 
 /**
+ * @param {any} ip
  * @returns {Promise<{currencyCode: CurrencyCode, countryCode: string|undefined}>}
  */
 async function getCurrencyCode(ip) {

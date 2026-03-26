@@ -5,24 +5,44 @@ import { fetchJson, fetchNothing } from '@overleaf/fetch-utils'
 import settings from '@overleaf/settings'
 import { callbackify } from 'node:util'
 
+/**
+ * @param {any} projectId
+ * @param {any} threadId
+ */
 async function getThread(projectId, threadId) {
   return await fetchJson(chatApiUrl(`/project/${projectId}/thread/${threadId}`))
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} threadId
+ * @param {any} messageId
+ */
 async function getThreadMessage(projectId, threadId, messageId) {
   return await fetchJson(
     chatApiUrl(`/project/${projectId}/thread/${threadId}/messages/${messageId}`)
   )
 }
 
+/**
+ * @param {any} projectId
+ */
 async function getThreads(projectId) {
   return await fetchJson(chatApiUrl(`/project/${projectId}/threads`))
 }
 
+/**
+ * @param {any} projectId
+ */
 async function destroyProject(projectId) {
   await fetchNothing(chatApiUrl(`/project/${projectId}`), { method: 'DELETE' })
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} userId
+ * @param {any} content
+ */
 async function sendGlobalMessage(projectId, userId, content) {
   const message = await fetchJson(
     chatApiUrl(`/project/${projectId}/messages`),
@@ -34,6 +54,11 @@ async function sendGlobalMessage(projectId, userId, content) {
   return message
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} limit
+ * @param {any} before
+ */
 async function getGlobalMessages(projectId, limit, before) {
   const url = chatApiUrl(`/project/${projectId}/messages`)
   if (limit != null) {
@@ -46,12 +71,22 @@ async function getGlobalMessages(projectId, limit, before) {
   return await fetchJson(url)
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} messageId
+ */
 async function getGlobalMessage(projectId, messageId) {
   return await fetchJson(
     chatApiUrl(`/project/${projectId}/messages/${messageId}`)
   )
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} threadId
+ * @param {any} userId
+ * @param {any} content
+ */
 async function sendComment(projectId, threadId, userId, content) {
   const comment = await fetchJson(
     chatApiUrl(`/project/${projectId}/thread/${threadId}/messages`),
@@ -63,6 +98,11 @@ async function sendComment(projectId, threadId, userId, content) {
   return comment
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} threadId
+ * @param {any} userId
+ */
 async function resolveThread(projectId, threadId, userId) {
   await fetchNothing(
     chatApiUrl(`/project/${projectId}/thread/${threadId}/resolve`),
@@ -73,6 +113,10 @@ async function resolveThread(projectId, threadId, userId) {
   )
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} threadId
+ */
 async function reopenThread(projectId, threadId) {
   await fetchNothing(
     chatApiUrl(`/project/${projectId}/thread/${threadId}/reopen`),
@@ -80,12 +124,23 @@ async function reopenThread(projectId, threadId) {
   )
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} threadId
+ */
 async function deleteThread(projectId, threadId) {
   await fetchNothing(chatApiUrl(`/project/${projectId}/thread/${threadId}`), {
     method: 'DELETE',
   })
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} threadId
+ * @param {any} messageId
+ * @param {any} userId
+ * @param {any} content
+ */
 async function editMessage(projectId, threadId, messageId, userId, content) {
   await fetchNothing(
     chatApiUrl(
@@ -98,6 +153,12 @@ async function editMessage(projectId, threadId, messageId, userId, content) {
   )
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} messageId
+ * @param {any} userId
+ * @param {any} content
+ */
 async function editGlobalMessage(projectId, messageId, userId, content) {
   await fetchNothing(
     chatApiUrl(`/project/${projectId}/messages/${messageId}/edit`),
@@ -108,6 +169,11 @@ async function editGlobalMessage(projectId, messageId, userId, content) {
   )
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} threadId
+ * @param {any} messageId
+ */
 async function deleteMessage(projectId, threadId, messageId) {
   await fetchNothing(
     chatApiUrl(
@@ -117,6 +183,12 @@ async function deleteMessage(projectId, threadId, messageId) {
   )
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} threadId
+ * @param {any} userId
+ * @param {any} messageId
+ */
 async function deleteUserMessage(projectId, threadId, userId, messageId) {
   await fetchNothing(
     chatApiUrl(
@@ -126,6 +198,10 @@ async function deleteUserMessage(projectId, threadId, userId, messageId) {
   )
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} messageId
+ */
 async function deleteGlobalMessage(projectId, messageId) {
   await fetchNothing(
     chatApiUrl(`/project/${projectId}/messages/${messageId}`),
@@ -133,6 +209,9 @@ async function deleteGlobalMessage(projectId, messageId) {
   )
 }
 
+/**
+ * @param {any} projectId
+ */
 async function getResolvedThreadIds(projectId) {
   const body = await fetchJson(
     chatApiUrl(`/project/${projectId}/resolved-thread-ids`)
@@ -140,6 +219,10 @@ async function getResolvedThreadIds(projectId) {
   return body.resolvedThreadIds
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} threads
+ */
 async function duplicateCommentThreads(projectId, threads) {
   return await fetchJson(
     chatApiUrl(`/project/${projectId}/duplicate-comment-threads`),
@@ -152,6 +235,10 @@ async function duplicateCommentThreads(projectId, threads) {
   )
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} threads
+ */
 async function generateThreadData(projectId, threads) {
   return await fetchJson(
     chatApiUrl(`/project/${projectId}/generate-thread-data`),
@@ -162,6 +249,9 @@ async function generateThreadData(projectId, threads) {
   )
 }
 
+/**
+ * @param {any} path
+ */
 function chatApiUrl(path) {
   return new URL(path, settings.apis.chat.internal_url)
 }

@@ -149,6 +149,9 @@ function getProjectIds() {
     .map(x => x._id.toString())
 }
 
+/**
+ * @param {any} projectId
+ */
 async function getDocs(projectId) {
   const mongoDocs = db.docs.find(
     {
@@ -192,6 +195,10 @@ async function getDocs(projectId) {
   return docs
 }
 
+/**
+ * @param {any} projectId
+ * @param {any} docs
+ */
 async function findDanglingThreadIds(projectId, docs) {
   const threadIds = new Set()
   for (const doc of docs) {
@@ -219,6 +226,9 @@ async function findDanglingThreadIds(projectId, docs) {
   return Array.from(threadIds)
 }
 
+/**
+ * @param {any} docs
+ */
 function docsHaveTrackedChanges(docs) {
   for (const doc of docs) {
     const changes = doc.ranges?.changes ?? []
@@ -229,6 +239,9 @@ function docsHaveTrackedChanges(docs) {
   return false
 }
 
+/**
+ * @param {any} docs
+ */
 function docsHaveAnyComments(docs) {
   for (const doc of docs) {
     const comments = doc.ranges?.comments ?? []

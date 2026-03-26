@@ -1,3 +1,5 @@
+@use 'sass:list';
+
 // Button
 
 @mixin ol-button-size(
@@ -105,7 +107,7 @@
 }
 
 @mixin theme($name) {
-  @if index($themes, $name) {
+  @if list.index($themes, $name) {
     [data-theme='#{$name}'] {
       @content;
     }

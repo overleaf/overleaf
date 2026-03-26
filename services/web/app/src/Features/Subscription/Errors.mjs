@@ -5,6 +5,9 @@ import Errors from '../Errors/Errors.js'
 import OError from '@overleaf/o-error'
 
 export class RecurlyTransactionError extends Errors.BackwardCompatibleError {
+  /**
+   * @param {any} options
+   */
   constructor(options) {
     super({
       message: 'Unknown transaction error',

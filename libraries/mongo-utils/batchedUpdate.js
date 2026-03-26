@@ -8,13 +8,20 @@ const READ_PREFERENCE_SECONDARY =
     : ReadPreference.secondaryPreferred.mode
 
 const ONE_MONTH_IN_MS = 1000 * 60 * 60 * 24 * 31
+/** @type {ObjectId | null} */
 let ID_EDGE_PAST
 const ID_EDGE_FUTURE = objectIdFromMs(Date.now() + 1000)
+/** @type {boolean} */
 let BATCH_DESCENDING
+/** @type {number} */
 let BATCH_SIZE
+/** @type {boolean} */
 let VERBOSE_LOGGING
+/** @type {ObjectId} */
 let BATCH_RANGE_START
+/** @type {ObjectId} */
 let BATCH_RANGE_END
+/** @type {number} */
 let BATCH_MAX_TIME_SPAN_IN_MS
 let BATCHED_UPDATE_RUNNING = false
 
@@ -55,7 +62,7 @@ function refreshGlobalOptionsForBatchedUpdate(options = {}) {
     if (BATCH_DESCENDING) {
       BATCH_RANGE_START = ID_EDGE_FUTURE
     } else {
-      BATCH_RANGE_START = ID_EDGE_PAST
+      BATCH_RANGE_START = /** @type {ObjectId} */ (ID_EDGE_PAST)
     }
   }
   BATCH_MAX_TIME_SPAN_IN_MS = parseInt(
@@ -66,7 +73,7 @@ function refreshGlobalOptionsForBatchedUpdate(options = {}) {
     BATCH_RANGE_END = objectIdFromInput(options.BATCH_RANGE_END)
   } else {
     if (BATCH_DESCENDING) {
-      BATCH_RANGE_END = ID_EDGE_PAST
+      BATCH_RANGE_END = /** @type {ObjectId} */ (ID_EDGE_PAST)
     } else {
       BATCH_RANGE_END = ID_EDGE_FUTURE
     }

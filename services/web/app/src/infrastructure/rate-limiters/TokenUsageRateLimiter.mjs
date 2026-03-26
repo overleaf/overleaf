@@ -57,9 +57,15 @@ export default class TokenUsageRateLimiter {
     throw new Error('_getAllowance must be implemented by subclasses')
   }
 
+  /**
+   * @param {any} userId
+   * @param {any} res
+   * @param {any} amount
+   */
   async recordUsage(userId, res, amount) {
     const allowance = await this._getAllowance(userId)
 
+    /** @type {any} */
     const featureUsages = await UserFeatureUsage.findOneAndUpdate(
       { _id: userId },
       [
@@ -93,7 +99,8 @@ export default class TokenUsageRateLimiter {
    */
   async getCurrentUsage(userId) {
     const reportedUsage = await UserFeatureUsage.findOne({ _id: userId }).exec()
-    const featureUsage = reportedUsage?.features?.[this.featureName] ?? {}
+    const featureUsage =
+      /** @type {any} */ (reportedUsage)?.features?.[this.featureName] ?? {}
     return {
       usage: featureUsage.usage ?? 0,
       periodStart: featureUsage.periodStart ?? new Date(),
@@ -112,7 +119,8 @@ export default class TokenUsageRateLimiter {
   async getRemainingTokens(userId) {
     const allowance = await this._getAllowance(userId)
     const reportedUsage = await UserFeatureUsage.findOne({ _id: userId }).exec()
-    const featureUsage = reportedUsage?.features?.[this.featureName] ?? {}
+    const featureUsage =
+      /** @type {any} */ (reportedUsage)?.features?.[this.featureName] ?? {}
     const periodStart = featureUsage.periodStart ?? new Date()
     const usage = featureUsage.usage ?? 0
     const usesLeft = allowance - usage

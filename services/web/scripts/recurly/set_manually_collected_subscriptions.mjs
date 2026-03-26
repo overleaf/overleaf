@@ -73,6 +73,9 @@ function usage() {
     where FILE contains the list of subscription ids that are manually collected`)
 }
 
+/**
+ * @param {any} filename
+ */
 function readFile(filename) {
   const contents = fs.readFileSync(filename, { encoding: 'utf-8' })
   const subscriptionIds = contents.split('\n').filter(id => id.length > 0)

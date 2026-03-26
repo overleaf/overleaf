@@ -17,23 +17,41 @@ const unlearnSchema = z.object({
 })
 
 export default {
+  /**
+   * @param {any} req
+   * @param {any} res
+   * @param {any} next
+   */
   learn(req, res, next) {
     const { body } = parseReq(req, learnSchema)
     const { word } = body
     const userId = SessionManager.getLoggedInUserId(req.session)
-    LearnedWordsManager.learnWord(userId, word, err => {
-      if (err) return next(err)
-      res.sendStatus(204)
-    })
+    LearnedWordsManager.learnWord(
+      userId,
+      word,
+      /** @param {any} err */ err => {
+        if (err) return next(err)
+        res.sendStatus(204)
+      }
+    )
   },
 
+  /**
+   * @param {any} req
+   * @param {any} res
+   * @param {any} next
+   */
   unlearn(req, res, next) {
     const { body } = parseReq(req, unlearnSchema)
     const { word } = body
     const userId = SessionManager.getLoggedInUserId(req.session)
-    LearnedWordsManager.unlearnWord(userId, word, err => {
-      if (err) return next(err)
-      res.sendStatus(204)
-    })
+    LearnedWordsManager.unlearnWord(
+      userId,
+      word,
+      /** @param {any} err */ err => {
+        if (err) return next(err)
+        res.sendStatus(204)
+      }
+    )
   },
 }
