@@ -186,7 +186,7 @@ const ModeSwitcherToggleButtonContent = forwardRef<
       }}
       aria-expanded={ariaExpanded}
     >
-      <MaterialIcon className="material-symbols-outlined" type={iconType} />
+      <MaterialIcon type={iconType} />
       <div className="review-mode-switcher-toggle-label" aria-label={label}>
         {label}
       </div>
