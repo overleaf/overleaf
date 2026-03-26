@@ -104,7 +104,11 @@ export function IndividualPlansTable({ plans }: { plans: Array<Plan> }) {
     () =>
       plans?.filter(
         plan =>
-          !['paid-personal', 'paid-personal-annual'].includes(plan.planCode)
+          ![
+            'paid-personal',
+            'paid-personal-annual',
+            'institutional_commons',
+          ].includes(plan.planCode)
       ),
     [plans]
   )
