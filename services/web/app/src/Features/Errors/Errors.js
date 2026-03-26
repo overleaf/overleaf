@@ -369,6 +369,8 @@ class ConcurrentLoadingOfDocsDetectedError extends OError {
   }
 }
 
+class DomainAlreadyExistsError extends OErrorV2CompatibleError {}
+
 module.exports = {
   OError,
   BackwardCompatibleError,
@@ -442,4 +444,5 @@ module.exports = {
   NonDeletableEntityError,
   FoundConnectedClientsError,
   ConcurrentLoadingOfDocsDetectedError,
+  DomainAlreadyExistsError,
 }
