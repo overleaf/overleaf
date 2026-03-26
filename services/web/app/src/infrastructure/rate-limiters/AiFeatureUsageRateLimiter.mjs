@@ -30,7 +30,7 @@ class AiFeatureUsageRateLimiter extends FeatureUsageRateLimiter {
     if (inQuotaSplitTest) {
       const wfQuota = user.writefull?.isPremium
         ? Settings.writefull.quotaTierGranted
-        : Settings.aiFeatures.freeTrialQuota
+        : Settings.aiFeatures.freeQuota
       const mergedFeatures = FeaturesHelper.mergeFeatures(user.features, {
         aiUsageQuota: wfQuota,
       })

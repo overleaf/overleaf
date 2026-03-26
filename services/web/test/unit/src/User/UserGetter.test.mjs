@@ -67,8 +67,18 @@ describe('UserGetter', function () {
       default: (ctx.settings = {
         reconfirmNotificationDays: 14,
         aiFeatures: {
-          freeTrialQuota: 'basic',
+          freeQuota: 'free',
+          standardQuota: 'standard',
+          basicQuota: 'basic',
           unlimitedQuota: 'unlimited',
+        },
+        quotaGrants: {
+          ai: {
+            free: 5,
+            basic: 5,
+            standard: 10,
+            unlimited: 200,
+          },
         },
       }),
     }))

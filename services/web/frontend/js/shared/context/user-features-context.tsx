@@ -15,7 +15,7 @@ import getMeta from '@/utils/meta'
 
 export const UserFeaturesContext = createContext<User['features']>(undefined)
 
-const onAiFreeTrial = getMeta('ol-onAiFreeTrial')
+const hasUnlimitedAi = getMeta('ol-hasUnlimitedAi')
 
 export const UserFeaturesProvider: FC<React.PropsWithChildren> = ({
   children,
@@ -35,7 +35,7 @@ export const UserFeaturesProvider: FC<React.PropsWithChildren> = ({
   useEffect(() => {
     const listener = async ({ isPremium }: { isPremium: boolean }) => {
       // todo: quota clean-up: remove once we are transitioned off aiErrorAssistant naming
-      const hasPremiumQuota = !onAiFreeTrial
+      const hasPremiumQuota = hasUnlimitedAi
       const alreadyPremium =
         features?.aiErrorAssistant === isPremium ||
         hasPremiumQuota === isPremium
