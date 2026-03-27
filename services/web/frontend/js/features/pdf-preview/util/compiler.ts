@@ -136,18 +136,12 @@ export default class DocumentCompiler {
 
       const t0 = performance.now()
 
-      let rootDocIdOverride = this.getRootDocOverrideId()
-      let rootResourcePath
-      try {
-        // Only required for compile-from-history
-        rootDocIdOverride = rootDocIdOverride || this.projectRootDocId
-        rootResourcePath = rootDocIdOverride
-          ? this.pathInFolder(rootDocIdOverride)
-          : 'main.tex'
-      } catch {}
+      const rootDocId = this.getRootDocOverrideId() || this.projectRootDocId
+      const rootResourcePath =
+        (rootDocId && this.pathInFolder(rootDocId)) || 'main.tex'
 
       const body = {
-        rootDoc_id: rootDocIdOverride,
+        rootDoc_id: rootDocId,
         rootResourcePath,
         draft: options.draft,
         check: 'silent', // NOTE: 'error' and 'validate' are possible, but unused
@@ -176,7 +170,7 @@ export default class DocumentCompiler {
       this.setError(undefined)
 
       data.options = options
-      data.rootDocId = rootDocIdOverride
+      data.rootDocId = rootDocId
       if (data.clsiServerId) {
         this.clsiServerId = data.clsiServerId
       }

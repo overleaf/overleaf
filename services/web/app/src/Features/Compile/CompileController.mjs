@@ -187,6 +187,24 @@ const _CompileController = {
       options.pdfCachingMinChunkSize = pdfCachingMinChunkSize
     }
 
+    if (!options.rootResourcePath) {
+      const agent = (req.headers['user-agent'] || '').toLowerCase()
+      const isKnownOtherFrontend = agent.includes('node-fetch')
+      logger.warn(
+        { isKnownOtherFrontend, req, projectId, userId, options },
+        'rootResourcePath is missing in request body'
+      )
+      if (isKnownOtherFrontend) {
+        // Reject malformed compile request from "known" other frontend.
+        res.status(400).json({
+          error: 'rootResourcePath is missing in request body',
+        })
+        return
+      }
+      // All others: Log for now and fall back to old compile mode.
+      options.compileFromHistory = false
+    }
+
     const {
       status,
       outputFiles,
