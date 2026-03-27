@@ -1104,6 +1104,8 @@ module.exports = {
   managedUsers: {
     enabled: false,
   },
+
+  enablePandocConversions: process.env.ENABLE_PANDOC_CONVERSIONS === 'true',
 }
 
 module.exports.mergeWith = function (overrides) {

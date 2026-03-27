@@ -58,7 +58,9 @@ function NewProjectButton({
   const portalTemplates = getMeta('ol-portalTemplates') || []
   const { show: enableAddAffiliationWidget } = useAddAffiliation()
   const sendProjectListMB = useSendProjectListMB()
-  const docxImportEnabled = useFeatureFlag('import-docx')
+  const docxImportEnabled =
+    useFeatureFlag('import-docx') &&
+    getMeta('ol-ExposedSettings').enablePandocConversions
   const sendTrackingEvent = useCallback(
     ({
       dropdownMenu,

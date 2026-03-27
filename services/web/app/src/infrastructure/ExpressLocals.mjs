@@ -417,6 +417,7 @@ export default async function (webRouter, privateApiRouter, publicApiRouter) {
       cioWriteKey: Settings.analytics?.cio?.writeKey,
       cioSiteId: Settings.analytics?.cio?.siteId,
       linkedInInsightsPartnerId: Settings.analytics?.linkedIn?.partnerId,
+      enablePandocConversions: Settings.enablePandocConversions,
     }
     next()
   })

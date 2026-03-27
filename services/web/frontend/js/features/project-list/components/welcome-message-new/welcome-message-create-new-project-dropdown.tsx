@@ -60,7 +60,9 @@ function WelcomeMessageCreateNewProjectDropdown({
 }: WelcomeMessageCreateNewProjectDropdownProps) {
   const { t } = useTranslation()
   const portalTemplates = getMeta('ol-portalTemplates') || []
-  const docxImportEnabled = useFeatureFlag('import-docx')
+  const docxImportEnabled =
+    useFeatureFlag('import-docx') &&
+    getMeta('ol-ExposedSettings').enablePandocConversions
 
   const { isOverleaf } = getMeta('ol-ExposedSettings')
 

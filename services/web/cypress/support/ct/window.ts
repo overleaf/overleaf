@@ -9,6 +9,7 @@ export function resetMeta() {
     hasLinkedProjectFileFeature: true,
     hasLinkedProjectOutputFileFeature: true,
     hasLinkUrlFeature: true,
+    enablePandocConversions: true,
   })
 }
 
