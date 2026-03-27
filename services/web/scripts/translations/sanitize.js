@@ -11,7 +11,7 @@ function sanitize(input) {
   // Ticket: https://github.com/overleaf/issues/issues/4478
   input = input.replace(/'/g, '’')
   // Use left quote where (likely) appropriate.
-  input.replace(/ ’/g, ' ‘')
+  input = input.replace(/ ’/g, ' ‘')
 
   // Allow "replacement" tags (in the format <0>, <1>, <2>, etc) used by
   // react-i18next to allow for HTML insertion via the Trans component.
