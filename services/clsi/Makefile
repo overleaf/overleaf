@@ -154,6 +154,8 @@ test_acceptance_clean:
 	$(DOCKER_COMPOSE_TEST_ACCEPTANCE) down -v -t 0
 
 test_acceptance_pre_run:
+	docker pull us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pandoc:3.9
+	docker pull us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pandoc-staging:3.9
 ifneq (,$(wildcard test/acceptance/js/scripts/pre-run))
 	$(DOCKER_COMPOSE_TEST_ACCEPTANCE) run --rm test_acceptance test/acceptance/js/scripts/pre-run
 endif

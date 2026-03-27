@@ -116,7 +116,15 @@ async function _getProjectCompileLimits(project) {
   if (!project) {
     throw new Error('project not found')
   }
-  const owner = await UserGetter.promises.getUser(project.owner_ref, {
+  const limits = await _getUserCompileLimits(project.owner_ref)
+  if (project.fromV1TemplateId === Settings.overrideCompileTimeForTemplate) {
+    limits.timeout = Math.max(limits.timeout, 20)
+  }
+  return limits
+}
+
+async function _getUserCompileLimits(userId) {
+  const owner = await UserGetter.promises.getUser(userId, {
     _id: 1,
     alphaProgram: 1,
     analyticsId: 1,
@@ -141,9 +149,7 @@ async function _getProjectCompileLimits(project) {
     compileBackendClass: compileGroup === 'standard' ? 'c3d' : 'c4d',
     ownerAnalyticsId: analyticsId,
   }
-  if (project.fromV1TemplateId === Settings.overrideCompileTimeForTemplate) {
-    limits.timeout = Math.max(limits.timeout, 20)
-  }
+
   return limits
 }
 
@@ -208,6 +214,7 @@ export default CompileManager = {
     stopCompile,
     wordCount,
     syncTeX,
+    _getUserCompileLimits,
   },
   compile: callbackifyMultiResult(instrumentedCompile, [
     'status',

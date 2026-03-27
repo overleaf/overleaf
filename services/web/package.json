@@ -135,6 +135,7 @@
     "express-session": "^1.17.1",
     "file-type": "^21.3.4",
     "focus-trap-react": "^11.0.4",
+    "form-data": "^4.0.5",
     "globby": "^5.0.0",
     "helmet": "^6.0.1",
     "https-proxy-agent": "^7.0.6",

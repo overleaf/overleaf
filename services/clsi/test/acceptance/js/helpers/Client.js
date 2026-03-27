@@ -1,8 +1,14 @@
 import express from 'express'
-import { fetchJson, fetchNothing, fetchString } from '@overleaf/fetch-utils'
+import {
+  fetchJson,
+  fetchNothing,
+  fetchStream,
+  fetchString,
+} from '@overleaf/fetch-utils'
 import fs from 'node:fs'
 import fsPromises from 'node:fs/promises'
 import Settings from '@overleaf/settings'
+import FormData from 'form-data'
 
 const host = Settings.apis.clsi.url
 
@@ -21,6 +27,15 @@ function compile(projectId, data) {
     json: {
       compile: data,
     },
+  })
+}
+
+async function convertDocx(path) {
+  const formData = new FormData()
+  formData.append('qqfile', fs.createReadStream(path))
+  return await fetchStream(`${host}/convert/docx-to-latex`, {
+    method: 'POST',
+    body: formData,
   })
 }
 
@@ -187,6 +202,7 @@ function smokeTest() {
 export default {
   randomId,
   compile,
+  convertDocx,
   stopCompile,
   clearCache,
   getOutputFile,

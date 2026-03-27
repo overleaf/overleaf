@@ -20,6 +20,8 @@ import bodyParser from 'body-parser'
 import net from 'node:net'
 import os from 'node:os'
 import OError from '@overleaf/o-error'
+import ConversionController from './app/js/ConversionController.js'
+import FileUploadMiddleware from './app/js/FileUploadMiddleware.js'
 logger.initialize('clsi')
 logger.logger.serializers.clsiRequest = LoggerSerializers.clsiRequest
 
@@ -120,6 +122,13 @@ app.get(
   '/project/:project_id/user/:user_id/build/:build_id/output/output.zip',
   bodyParser.json(),
   OutputController.createOutputZip
+)
+
+// Conversion endpoints
+app.post(
+  '/convert/docx-to-latex',
+  FileUploadMiddleware.multerMiddleware,
+  ConversionController.convertDocxToLaTeX
 )
 
 if (process.env.NODE_ENV === 'development' && global.__coverage__) {

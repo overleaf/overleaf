@@ -82,7 +82,7 @@ export default CommandRunner = {
         err.code = code
         return callback(err)
       } else {
-        return callback(null, { stdout })
+        return callback(null, { stdout, exitCode: code })
       }
     })
 

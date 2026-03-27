@@ -1,6 +1,7 @@
 import logger from '@overleaf/logger'
 import metrics from '@overleaf/metrics'
 import fs from 'node:fs'
+import fsPromises from 'node:fs/promises'
 import Path from 'node:path'
 import FileSystemImportManager from './FileSystemImportManager.mjs'
 import ProjectUploadManager from './ProjectUploadManager.mjs'
@@ -12,7 +13,8 @@ import { InvalidZipFileError } from './ArchiveErrors.mjs'
 import multer from 'multer'
 import lodash from 'lodash'
 import { expressify } from '@overleaf/promise-utils'
-import { DuplicateNameError } from '../Errors/Errors.js'
+import { DuplicateNameError, FileTooLargeError } from '../Errors/Errors.js'
+import DocumentConversionManager from './DocumentConversionManager.mjs'
 
 const defaultsDeep = lodash.defaultsDeep
 
@@ -171,6 +173,53 @@ async function uploadFile(req, res, next) {
  * @param {any} res
  * @param {any} next
  */
+async function importDocx(req, res, next) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  logger.debug({ path: req.file?.path, userId }, 'importing docx file')
+  const { path } = req.file
+  const name = Path.basename(req.body.name, '.docx')
+  try {
+    const archivePath =
+      await DocumentConversionManager.promises.convertDocxToLaTeXZipArchive(
+        path,
+        userId
+      )
+    try {
+      const project =
+        await ProjectUploadManager.promises.createProjectFromZipArchive(
+          userId,
+          name,
+          archivePath
+        )
+      res.json({ success: true, project_id: project._id })
+    } finally {
+      await fsPromises.unlink(archivePath).catch(() => {})
+    }
+  } catch (error) {
+    logger.error({ error }, 'error importing docx file')
+    if (
+      error instanceof FileTooLargeError ||
+      error?.name === 'FileTooLargeError'
+    ) {
+      return res.status(422).json({
+        success: false,
+        error: 'file_too_large',
+      })
+    }
+    res.status(500).json({
+      success: false,
+      error: req.i18n.translate('upload_failed'),
+    })
+  } finally {
+    await fsPromises.unlink(path).catch(() => {})
+  }
+}
+
+/**
+ * @param {any} req
+ * @param {any} res
+ * @param {any} next
+ */
 function multerMiddleware(req, res, next) {
   if (upload == null) {
     return res
@@ -202,4 +251,5 @@ export default {
   uploadProject,
   uploadFile: expressify(uploadFile),
   multerMiddleware,
+  importDocx: expressify(importDocx),
 }

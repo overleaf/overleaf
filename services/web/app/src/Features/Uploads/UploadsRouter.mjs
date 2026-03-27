@@ -26,6 +26,14 @@ export default {
       ProjectUploadController.uploadProject
     )
 
+    webRouter.post(
+      '/project/new/import-docx',
+      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(rateLimiters.projectUpload),
+      ProjectUploadController.multerMiddleware,
+      ProjectUploadController.importDocx
+    )
+
     const fileUploadEndpoint = '/Project/:Project_id/upload'
     const fileUploadRateLimit = RateLimiterMiddleware.rateLimit(
       rateLimiters.fileUpload,

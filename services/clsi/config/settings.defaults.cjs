@@ -20,10 +20,18 @@ module.exports = {
       process.env.CLSI_OUTPUT_PATH || Path.resolve(__dirname, '../output'),
     clsiCacheDir:
       process.env.CLSI_CACHE_PATH || Path.resolve(__dirname, '../cache'),
+    uploadFolder:
+      process.env.CLSI_UPLOAD_PATH || Path.resolve(__dirname, '../uploads'),
     synctexBaseDir(projectId) {
       return Path.join(this.compilesDir, projectId)
     },
   },
+
+  conversionTimeoutSeconds:
+    parseInt(process.env.CLSI_CONVERSION_TIMEOUT_SECONDS, 10) || 60,
+  pandocImage: process.env.PANDOC_IMAGE || 'quay.io/sharelatex/pandoc:3.9',
+  enablePandocConversions: process.env.ENABLE_PANDOC_CONVERSIONS === 'true',
+  maxUploadSize: 50 * 1024 * 1024,
 
   internal: {
     clsi: {
@@ -152,6 +160,7 @@ if ((process.env.DOCKER_RUNNER || process.env.SANDBOXED_COMPILES) === 'true') {
       wordcount: { 'HostConfig.AutoRemove': true },
       synctex: { 'HostConfig.AutoRemove': true },
       'synctex-output': { 'HostConfig.AutoRemove': true },
+      conversions: { 'HostConfig.AutoRemove': true },
     }
     module.exports.clsi.docker.compileGroupConfig = Object.assign(
       defaultCompileGroupConfig,

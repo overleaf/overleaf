@@ -1,7 +1,16 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import WelcomeMessage from '../../../../../frontend/js/features/project-list/components/welcome-message'
+import WelcomeMessageComponent from '../../../../../frontend/js/features/project-list/components/welcome-message'
 import { expect } from 'chai'
 import getMeta from '@/utils/meta'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
+
+const WelcomeMessage = () => {
+  return (
+    <SplitTestProvider>
+      <WelcomeMessageComponent />
+    </SplitTestProvider>
+  )
+}
 
 describe('<WelcomeMessage />', function () {
   beforeEach(function () {

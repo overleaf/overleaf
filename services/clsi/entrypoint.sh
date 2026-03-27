@@ -9,5 +9,6 @@ usermod -aG dockeronhost node
 mkdir -p /overleaf/services/clsi/cache && chown node:node /overleaf/services/clsi/cache
 mkdir -p /overleaf/services/clsi/compiles && chown node:node /overleaf/services/clsi/compiles
 mkdir -p /overleaf/services/clsi/output && chown node:node /overleaf/services/clsi/output
+mkdir -p /overleaf/services/clsi/uploads && chown node:node /overleaf/services/clsi/uploads
 
 exec runuser -u node -- "$@"

@@ -19,6 +19,7 @@ import {
 } from '@/shared/components/dropdown/dropdown-menu'
 import { useSendProjectListMB } from '@/features/project-list/components/project-list-events'
 import type { PortalTemplate } from '../../../../../types/portal-template'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type SendTrackingEvent = {
   dropdownMenu: string
@@ -57,6 +58,7 @@ function NewProjectButton({
   const portalTemplates = getMeta('ol-portalTemplates') || []
   const { show: enableAddAffiliationWidget } = useAddAffiliation()
   const sendProjectListMB = useSendProjectListMB()
+  const docxImportEnabled = useFeatureFlag('import-docx')
   const sendTrackingEvent = useCallback(
     ({
       dropdownMenu,
@@ -208,6 +210,20 @@ function NewProjectButton({
               {t('upload_project')}
             </DropdownItem>
           </li>
+          {docxImportEnabled && (
+            <li role="none">
+              <DropdownItem
+                onClick={e =>
+                  handleModalMenuClick(e, {
+                    modalVariant: 'import_docx',
+                    dropdownMenuEvent: 'import-docx',
+                  })
+                }
+              >
+                {t('import_word_document')}
+              </DropdownItem>
+            </li>
+          )}
           <li role="none">
             {ImportProjectFromGithubMenu && (
               <ImportProjectFromGithubMenu

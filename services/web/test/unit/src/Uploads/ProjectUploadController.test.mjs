@@ -10,6 +10,7 @@ import sinon from 'sinon'
 import MockRequest from '../helpers/MockRequest.mjs'
 import MockResponse from '../helpers/MockResponse.mjs'
 import ArchiveErrors from '../../../../app/src/Features/Uploads/ArchiveErrors.mjs'
+import { FileTooLargeError } from '../../../../app/src/Features/Errors/Errors.js'
 
 const modulePath =
   '../../../../app/src/Features/Uploads/ProjectUploadController.mjs'
@@ -40,6 +41,11 @@ describe('ProjectUploadController', function () {
     ctx.EditorController = {
       promises: {},
     }
+    ctx.DocumentConversionManager = {
+      promises: {
+        convertDocxToLaTeXZipArchive: sinon.stub(),
+      },
+    }
 
     vi.doMock('multer', () => ({
       default: sinon.stub(),
@@ -52,7 +58,7 @@ describe('ProjectUploadController', function () {
     vi.doMock(
       '../../../../app/src/Features/Uploads/ProjectUploadManager',
       () => ({
-        default: (ctx.ProjectUploadManager = {}),
+        default: (ctx.ProjectUploadManager = { promises: {} }),
       })
     )
 
@@ -87,8 +93,19 @@ describe('ProjectUploadController', function () {
       default: ctx.EditorController,
     }))
 
+    vi.doMock(
+      '../../../../app/src/Features/Uploads/DocumentConversionManager.mjs',
+      () => ({
+        default: ctx.DocumentConversionManager,
+      })
+    )
+
     vi.doMock('fs', () => ({
       default: (ctx.fs = {}),
+    }))
+
+    vi.doMock('node:fs/promises', () => ({
+      default: (ctx.fsPromises = {}),
     }))
 
     ctx.ProjectUploadController = (await import(modulePath)).default
@@ -412,6 +429,115 @@ describe('ProjectUploadController', function () {
 
       it('should remove the uploaded file', function (ctx) {
         ctx.fs.unlink.calledWith(ctx.path).should.equal(true)
+      })
+    })
+  })
+
+  describe('importDocx', function () {
+    beforeEach(async function (ctx) {
+      ctx.req.file = {
+        path: '/path/to/uploaded/file.docx',
+      }
+      ctx.req.body = {
+        name: 'file.docx',
+      }
+      ctx.archivePath = '/path/to/archive.zip'
+      ctx.fsPromises.unlink = sinon.stub().resolves()
+    })
+
+    describe('successfully', async function () {
+      beforeEach(async function (ctx) {
+        ctx.DocumentConversionManager.promises.convertDocxToLaTeXZipArchive =
+          sinon.stub().resolves(ctx.archivePath)
+        ctx.ProjectUploadManager.promises.createProjectFromZipArchive = sinon
+          .stub()
+          .resolves({
+            _id: 'new-project-id',
+          })
+
+        await new Promise(resolve => {
+          ctx.res.json = data => {
+            expect(data.success).to.be.true
+            expect(data.project_id).to.equal('new-project-id')
+            resolve()
+          }
+          ctx.ProjectUploadController.importDocx(ctx.req, ctx.res)
+        })
+      })
+
+      it('should call the DocumentConversionManager to convert the file', function (ctx) {
+        expect(
+          ctx.DocumentConversionManager.promises.convertDocxToLaTeXZipArchive
+        ).to.have.been.calledWith(ctx.req.file.path, ctx.user_id)
+      })
+
+      it('should use the resulting archive to create a new project', function (ctx) {
+        expect(
+          ctx.ProjectUploadManager.promises.createProjectFromZipArchive
+        ).to.have.been.calledWith(ctx.user_id, 'file', ctx.archivePath)
+      })
+
+      it('should unlink the archive after creating the project', function (ctx) {
+        expect(ctx.fsPromises.unlink).to.have.been.calledWith(ctx.archivePath)
+      })
+
+      it('should unlink the uploaded file', function (ctx) {
+        expect(ctx.fsPromises.unlink).to.have.been.calledWith(ctx.req.file.path)
+      })
+    })
+
+    describe('unsuccessfully', async function () {
+      beforeEach(async function (ctx) {
+        ctx.DocumentConversionManager.promises.convertDocxToLaTeXZipArchive =
+          sinon.stub().rejects(new Error('Conversion failed'))
+
+        await new Promise(resolve => {
+          ctx.res.json = data => {
+            expect(data.success).to.be.false
+            resolve()
+          }
+          ctx.ProjectUploadController.importDocx(ctx.req, ctx.res)
+        })
+      })
+
+      it('should call the DocumentConversionManager to convert the file', function (ctx) {
+        expect(
+          ctx.DocumentConversionManager.promises.convertDocxToLaTeXZipArchive
+        ).to.have.been.calledWith(ctx.req.file.path, ctx.user_id)
+      })
+
+      it('should unlink the uploaded file', function (ctx) {
+        expect(ctx.fsPromises.unlink).to.have.been.calledWith(ctx.req.file.path)
+      })
+
+      it('should return http 500', function (ctx) {
+        expect(ctx.res.statusCode).to.equal(500)
+      })
+    })
+
+    describe('when the converted archive is too large', async function () {
+      beforeEach(async function (ctx) {
+        ctx.DocumentConversionManager.promises.convertDocxToLaTeXZipArchive =
+          sinon.stub().rejects(new FileTooLargeError('file too large'))
+
+        await new Promise(resolve => {
+          ctx.res.json = data => {
+            expect(data).to.deep.equal({
+              success: false,
+              error: 'file_too_large',
+            })
+            resolve()
+          }
+          ctx.ProjectUploadController.importDocx(ctx.req, ctx.res)
+        })
+      })
+
+      it('should return http 422', function (ctx) {
+        expect(ctx.res.statusCode).to.equal(422)
+      })
+
+      it('should unlink the uploaded file', function (ctx) {
+        expect(ctx.fsPromises.unlink).to.have.been.calledWith(ctx.req.file.path)
       })
     })
   })

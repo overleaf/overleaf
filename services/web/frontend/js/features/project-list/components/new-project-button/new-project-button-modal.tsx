@@ -7,12 +7,14 @@ import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import { useLocation } from '@/shared/hooks/use-location'
 
 const UploadProjectModal = lazy(() => import('./upload-project-modal'))
+const ImportDocxModal = lazy(() => import('./import-docx-modal'))
 
 export type NewProjectButtonModalVariant =
   | 'blank_project'
   | 'example_project'
   | 'upload_project'
   | 'import_from_github'
+  | 'import_docx'
 
 type NewProjectButtonModalProps = {
   modal: Nullable<NewProjectButtonModalVariant>
@@ -45,6 +47,12 @@ function NewProjectButtonModal({ modal, onHide }: NewProjectButtonModalProps) {
       return (
         <Suspense fallback={<FullSizeLoadingSpinner delay={500} />}>
           <UploadProjectModal onHide={onHide} openProject={openProject} />
+        </Suspense>
+      )
+    case 'import_docx':
+      return (
+        <Suspense fallback={<FullSizeLoadingSpinner delay={500} />}>
+          <ImportDocxModal onHide={onHide} openProject={openProject} />
         </Suspense>
       )
     case 'import_from_github':

@@ -12,6 +12,7 @@ import {
   DropdownToggle,
 } from '@/shared/components/dropdown/dropdown-menu'
 import createNewProjectImage from '../../images/create-a-new-project.svg'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const CustomDropdownToggle = forwardRef<
   HTMLButtonElement,
@@ -59,6 +60,7 @@ function WelcomeMessageCreateNewProjectDropdown({
 }: WelcomeMessageCreateNewProjectDropdownProps) {
   const { t } = useTranslation()
   const portalTemplates = getMeta('ol-portalTemplates') || []
+  const docxImportEnabled = useFeatureFlag('import-docx')
 
   const { isOverleaf } = getMeta('ol-ExposedSettings')
 
@@ -134,6 +136,19 @@ function WelcomeMessageCreateNewProjectDropdown({
             {t('upload_project')}
           </DropdownItem>
         </li>
+        {docxImportEnabled && (
+          <li role="none">
+            <DropdownItem
+              as="button"
+              onClick={e =>
+                handleDropdownItemClick(e, 'import_docx', 'import-docx')
+              }
+              tabIndex={-1}
+            >
+              {t('import_word_document')}
+            </DropdownItem>
+          </li>
+        )}
         {isOverleaf && (
           <li role="none">
             <DropdownItem

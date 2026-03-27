@@ -123,7 +123,7 @@ describe('DockerRunner', () => {
         await new Promise((resolve, reject) => {
           ctx.DockerRunner._runAndWaitForContainer = sinon
             .stub()
-            .callsArgWith(3, null, (ctx.output = 'mock-output'))
+            .callsArgWith(3, null, (ctx.output = { stdout: 'mock-output' }))
           return ctx.DockerRunner.run(
             ctx.project_id,
             ctx.command,
@@ -168,7 +168,7 @@ describe('DockerRunner', () => {
         ctx.directory = '/var/lib/overleaf/data/compiles/xyz'
         ctx.DockerRunner._runAndWaitForContainer = sinon
           .stub()
-          .callsArgWith(3, null, (ctx.output = 'mock-output'))
+          .callsArgWith(3, null, (ctx.output = { stdout: 'mock-output' }))
         return ctx.DockerRunner.run(
           ctx.project_id,
           ctx.command,
@@ -199,7 +199,7 @@ describe('DockerRunner', () => {
         ctx.directory = '/var/lib/overleaf/data/output/xyz/generated-files/id'
         ctx.DockerRunner._runAndWaitForContainer = sinon
           .stub()
-          .callsArgWith(3, null, (ctx.output = 'mock-output'))
+          .callsArgWith(3, null, (ctx.output = { stdout: 'mock-output' }))
         ctx.DockerRunner.run(
           ctx.project_id,
           ctx.command,
@@ -230,7 +230,7 @@ describe('DockerRunner', () => {
         ctx.directory = '/var/lib/overleaf/data/compile/xyz'
         ctx.DockerRunner._runAndWaitForContainer = sinon
           .stub()
-          .callsArgWith(3, null, (ctx.output = 'mock-output'))
+          .callsArgWith(3, null, (ctx.output = { stdout: 'mock-output' }))
         ctx.DockerRunner.run(
           ctx.project_id,
           ctx.command,
@@ -261,7 +261,7 @@ describe('DockerRunner', () => {
         ctx.directory = '/var/lib/overleaf/data/compile/xyz'
         ctx.DockerRunner._runAndWaitForContainer = sinon
           .stub()
-          .callsArgWith(3, null, (ctx.output = 'mock-output'))
+          .callsArgWith(3, null, (ctx.output = { stdout: 'mock-output' }))
         ctx.DockerRunner.run(
           ctx.project_id,
           ctx.command,
@@ -290,7 +290,7 @@ describe('DockerRunner', () => {
     describe('when the run throws an error', () => {
       beforeEach(ctx => {
         let firstTime = true
-        ctx.output = 'mock-output'
+        ctx.output = { stdout: 'mock-output' }
         ctx.DockerRunner._runAndWaitForContainer = (
           options,
           volumes,
@@ -342,7 +342,7 @@ describe('DockerRunner', () => {
       beforeEach(ctx => {
         ctx.DockerRunner._runAndWaitForContainer = sinon
           .stub()
-          .callsArgWith(3, null, (ctx.output = 'mock-output'))
+          .callsArgWith(3, null, (ctx.output = { stdout: 'mock-output' }))
         ctx.DockerRunner.run(
           ctx.project_id,
           ctx.command,
@@ -372,7 +372,7 @@ describe('DockerRunner', () => {
         ctx.Settings.texliveImageNameOveride = 'overrideimage.com/something'
         ctx.DockerRunner._runAndWaitForContainer = sinon
           .stub()
-          .callsArgWith(3, null, (ctx.output = 'mock-output'))
+          .callsArgWith(3, null, (ctx.output = { stdout: 'mock-output' }))
         ctx.DockerRunner.run(
           ctx.project_id,
           ctx.command,
@@ -399,7 +399,7 @@ describe('DockerRunner', () => {
         ]
         ctx.DockerRunner._runAndWaitForContainer = sinon
           .stub()
-          .callsArgWith(3, null, (ctx.output = 'mock-output'))
+          .callsArgWith(3, null, (ctx.output = { stdout: 'mock-output' }))
       })
 
       describe('with a valid image', () => {
@@ -477,7 +477,7 @@ describe('DockerRunner', () => {
         }
         ctx.DockerRunner._runAndWaitForContainer = sinon
           .stub()
-          .callsArgWith(3, null, (ctx.output = 'mock-output'))
+          .callsArgWith(3, null, (ctx.output = { stdout: 'mock-output' }))
         ctx.DockerRunner.run(
           ctx.project_id,
           ctx.command,
@@ -520,7 +520,7 @@ describe('DockerRunner', () => {
         attachStreamHandler,
         callback
       ) => {
-        attachStreamHandler(null, (ctx.output = 'mock-output'))
+        attachStreamHandler(null, (ctx.output = { stdout: 'mock-output' }))
         callback(null, (ctx.containerId = 'container-id'))
       }
       sinon.spy(ctx.DockerRunner, 'startContainer')

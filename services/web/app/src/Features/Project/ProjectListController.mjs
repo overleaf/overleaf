@@ -527,10 +527,16 @@ async function projectListPage(req, res, next) {
   const hasAiAssist =
     Features.hasFeature('saas') && (await _userHasAIAssist(user))
 
-  await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'themed-project-dashboard'
+  const splitTests = [
+    // Split tests that will be made available to the frontend
+    'themed-project-dashboard',
+    'import-docx',
+  ].filter(Boolean)
+
+  await Promise.all(
+    splitTests.map(splitTestName =>
+      SplitTestHandler.promises.getAssignment(req, res, splitTestName)
+    )
   )
 
   const userSettings = await UserSettingsHelper.buildUserSettings(
