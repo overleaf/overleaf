@@ -252,29 +252,53 @@ async function createTemplateClsiCache({
   const compileBackendClass = Settings.apis.clsi.submissionBackendClass
   const submissionId = new ObjectId().toString()
   const editorId = Crypto.randomUUID()
+  const historyId = project.overleaf.history.id
+  const rawSnapshot = {
+    files: Object.fromEntries(
+      docEntries
+        .map(doc => [doc.path.replace(/^\//, ''), { content: doc.docLines }])
+        .concat(
+          fileEntries.map(file => [
+            file.path.replace(/^\//, ''),
+            { hash: file.file.hash, byteLength: 0 /* stub */ },
+          ])
+        )
+    ),
+  }
+  const globalBlobs = new Set()
+  ClsiManager.collectGlobalBlobsFromRawSnapshot(rawSnapshot, globalBlobs)
+  let rootResourcePath
+  for (const doc of docEntries) {
+    if (project.rootDoc_id.equals(doc.doc._id)) {
+      rootResourcePath = doc.path.replace(/^\//, '')
+      break
+    }
+  }
   const options = {
     editorId,
     compileGroup,
     compileBackendClass,
     timeout: 60,
-    syncType: 'full',
+    syncType: 'history-full',
     compileFromClsiCache: false,
     populateClsiCache: true,
     enablePdfCaching: false,
     pdfCachingMinChunkSize: 0,
     metricsPath: 'clsi-cache-template',
+    rootResourcePath,
+    historyId,
+    rawSnapshot,
+    rawChangeOperations: [],
+    globalBlobs: Array.from(globalBlobs),
+    // Trigger a full sync
+    baseHistoryVersion: Date.now(),
   }
   const req = ClsiManager._finaliseRequest(
     submissionId,
     options,
     project,
-    Object.fromEntries(
-      docEntries.map(doc => [
-        doc.path,
-        { _id: doc.doc._id, lines: doc.docLines.split('\n') },
-      ])
-    ),
-    Object.fromEntries(fileEntries.map(file => [file.path, file.file]))
+    [],
+    []
   )
   let clsiServerId = await ClsiCookieManager.promises.getServerId(
     submissionId,

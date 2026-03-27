@@ -912,6 +912,17 @@ function _collectGlobalBlobs(rawChangeOperations) {
   return globalBlobs
 }
 
+function collectGlobalBlobsFromRawSnapshot(rawSnapshot, globalBlobs) {
+  for (const { hash, rangesHash } of Object.values(rawSnapshot.files)) {
+    if (hash && HistoryManager.isGlobalBlob(hash)) {
+      globalBlobs.add(hash)
+    }
+    if (rangesHash && HistoryManager.isGlobalBlob(rangesHash)) {
+      globalBlobs.add(rangesHash)
+    }
+  }
+}
+
 async function _buildRequestFromHistoryFull(
   projectId,
   historyId,
@@ -933,14 +944,7 @@ async function _buildRequestFromHistoryFull(
   ])
   const rawChangeOperations = _rawChangeOperationsFromChanges(rawChanges)
   const globalBlobs = _collectGlobalBlobs(rawChangeOperations)
-  for (const { hash, rangesHash } of Object.values(rawSnapshot.files)) {
-    if (hash && HistoryManager.isGlobalBlob(hash)) {
-      globalBlobs.add(hash)
-    }
-    if (rangesHash && HistoryManager.isGlobalBlob(rangesHash)) {
-      globalBlobs.add(rangesHash)
-    }
-  }
+  collectGlobalBlobsFromRawSnapshot(rawSnapshot, globalBlobs)
   options = {
     ...options,
     syncType: 'history-full',
@@ -1258,6 +1262,7 @@ function _getClsiServerIdFromResponse(response) {
 }
 
 export default {
+  collectGlobalBlobsFromRawSnapshot,
   _finaliseRequest,
   sendRequest: callbackifyMultiResult(sendRequest, [
     'status',
