@@ -184,9 +184,30 @@ async function deleteProject(projectId, options = {}) {
       throw new Errors.NotFoundError('project not found')
     }
 
-    await DocumentUpdaterHandler.promises.flushProjectToMongoAndDelete(
-      projectId
-    )
+    try {
+      // flushProjectToMongoAndDelete performs flush to mongo and history.
+      await DocumentUpdaterHandler.promises.flushProjectToMongoAndDelete(
+        projectId
+      )
+    } catch (err) {
+      // Try harder at flushing the project.
+      // Step 1: Flush to mongo, do not delete yet
+      await DocumentUpdaterHandler.promises.flushProjectToMongo(projectId)
+      try {
+        // Step 2: Attempt to flush the history, this will likely fail.
+        await HistoryManager.promises.flushProject(projectId)
+      } catch {
+        // We found a project with a broken history.
+        // Step 3: Resync the history
+        await HistoryManager.promises.resyncProject(projectId, {
+          force: true,
+        })
+      }
+      // Step 4: Try again, this time delete the docs
+      await DocumentUpdaterHandler.promises.flushProjectToMongoAndDelete(
+        projectId
+      )
+    }
 
     try {
       // OPTIMIZATION: flush docs out of mongo
