@@ -56,7 +56,7 @@ import AccountMappingHelper from '../../app/src/Features/Analytics/AccountMappin
 import PlansLocator from '../../app/src/Features/Subscription/PlansLocator.mjs'
 import UserAnalyticsIdCache from '../../app/src/Features/Analytics/UserAnalyticsIdCache.mjs'
 import CustomerIoHandler from '../../modules/customer-io/app/src/CustomerIoHandler.mjs'
-import { ReportError } from './helpers.mjs'
+import { ReportError, convertToMinorUnits } from './helpers.mjs'
 import isEqual from 'lodash/isEqual.js'
 import { compareAccountFields } from '../helpers/migrate_recurly_customers_to_stripe.helpers.mjs'
 import {
@@ -472,6 +472,12 @@ async function processMigration(input, commit) {
 
     result.status = 'migrated'
     result.note = 'Successfully migrated to Stripe'
+
+    if (stripeCustomer.metadata?.taxInfoPending) {
+      result.status += '-tax-info-pending'
+      result.note += '; Tax info pending'
+    }
+
     return result
   } else {
     result.status = 'validated'
@@ -511,12 +517,13 @@ function detectSubscriptionChanges(
     (targetRecurlySubscription.addOns || []).find(
       addOn => addOn.addOn.code === 'additional-license'
     )?.quantity || 0
+  const currency = recurlySubscription.currency
   const recurlyItems = [
     {
       code: simplifiedPlanCode,
       quantity: recurlyPlanItem.quantity + additionalLicenseQuantity,
       amount:
-        Math.round(targetRecurlySubscription.unitAmount * 100) /
+        convertToMinorUnits(targetRecurlySubscription.unitAmount, currency) /
         recurlyPlanItem.quantity,
     },
     ...(targetRecurlySubscription.addOns || [])
@@ -524,7 +531,7 @@ function detectSubscriptionChanges(
       .map(addOn => ({
         code: addOn.addOn.code,
         quantity: addOn.quantity,
-        amount: Math.round(addOn.unitAmount * 100),
+        amount: convertToMinorUnits(addOn.unitAmount, currency),
       })),
   ].sort((a, b) => a.code.localeCompare(b.code))
 

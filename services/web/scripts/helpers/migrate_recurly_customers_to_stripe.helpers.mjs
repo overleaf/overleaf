@@ -1459,12 +1459,7 @@ export async function compareAccountFields({
     if (taxIdTypeResult.type && address?.country) {
       expectedTaxIdType = taxIdTypeResult.type
       expectedTaxIdValue = vatNumber
-    } else {
-      expectedMetadata.taxInfoPending = vatNumber
     }
-  }
-  if (!expectedMetadata.taxInfoPending) {
-    expectedMetadata.taxInfoPending = ''
   }
 
   for (const [key, expectedValue] of Object.entries(expectedMetadata)) {
@@ -1504,7 +1499,19 @@ export async function compareAccountFields({
   // Tax ID
   if (expectedTaxIdType && expectedTaxIdValue) {
     const normalizedExpectedTaxIdValue = normalizeTaxIdValue(expectedTaxIdValue)
-    const stripeTaxIds = stripeCustomer.tax_ids?.data || []
+    const stripePendingTaxId = stripeCustomer.metadata?.taxInfoPending
+      ? [
+          {
+            type: expectedTaxIdType,
+            value: stripeCustomer.metadata.taxInfoPending,
+          },
+        ]
+      : null
+    const stripeTaxIdsFromStripe = stripeCustomer.tax_ids?.data
+    const stripeTaxIds =
+      Array.isArray(stripeTaxIdsFromStripe) && stripeTaxIdsFromStripe.length > 0
+        ? stripeTaxIdsFromStripe
+        : stripePendingTaxId || []
     const matchingTaxId = stripeTaxIds.find(
       tid =>
         tid.type === expectedTaxIdType &&
