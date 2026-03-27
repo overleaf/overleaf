@@ -53,7 +53,7 @@ public class SwapJobConfig {
   public SwapJob.CompressionMethod getCompressionMethod() {
     CompressionMethod result = SwapJob.stringToCompressionMethod(compressionMethod);
     if (result == null) {
-      Log.info(
+      Log.warn(
           "SwapJobConfig: un-supported compressionMethod '{}', default to 'bzip2'",
           compressionMethod);
       result = CompressionMethod.Bzip2;

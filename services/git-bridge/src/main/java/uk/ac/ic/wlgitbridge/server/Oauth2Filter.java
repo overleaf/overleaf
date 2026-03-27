@@ -65,7 +65,7 @@ public class Oauth2Filter implements Filter {
     String requestUri = request.getRequestURI();
 
     if (requestUri.startsWith("/project")) {
-      Log.info("[{}] Invalid request URI", requestUri);
+      Log.debug("[{}] Invalid request URI", requestUri);
       sendResponse(
           response, 404, Arrays.asList("Invalid Project ID (must not have a '/project' prefix)"));
       return;
@@ -157,7 +157,7 @@ public class Oauth2Filter implements Filter {
   private void handleLinkSharingId(
       String projectId, String username, HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    Log.info("[{}] Bad project id, User '{}' ip={}", projectId, username, getClientIp(request));
+    Log.debug("[{}] Bad project id, User '{}' ip={}", projectId, username, getClientIp(request));
     sendResponse(
         response,
         404,
@@ -174,7 +174,7 @@ public class Oauth2Filter implements Filter {
   private void handleBadProjectId(
       String projectId, String username, HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    Log.info("[{}] Bad project id, User '{}' ip={}", projectId, username, getClientIp(request));
+    Log.debug("[{}] Bad project id, User '{}' ip={}", projectId, username, getClientIp(request));
     sendResponse(
         response,
         404,
@@ -188,7 +188,7 @@ public class Oauth2Filter implements Filter {
   private void handleRateLimit(
       String projectId, String username, HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    Log.info("[{}] Rate limit, User '{}' ip={}", projectId, username, getClientIp(request));
+    Log.debug("[{}] Rate limit, User '{}' ip={}", projectId, username, getClientIp(request));
     sendResponse(
         response, 429, Arrays.asList("Rate limit exceeded. Please wait and try again later."));
   }
@@ -196,7 +196,7 @@ public class Oauth2Filter implements Filter {
   private void handleNeedAuthorization(
       String projectId, String username, HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    Log.info("[{}] Unauthorized, User '{}' ip={}", projectId, username, getClientIp(request));
+    Log.debug("[{}] Unauthorized, User '{}' ip={}", projectId, username, getClientIp(request));
     response.setHeader("WWW-Authenticate", "Basic realm=\"Git Bridge\"");
     if (this.isUserPasswordEnabled) {
       sendResponse(
@@ -226,7 +226,7 @@ public class Oauth2Filter implements Filter {
   private void handleBadAccessToken(
       String projectId, HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    Log.info("[{}] Bad access token, ip={}", projectId, getClientIp(request));
+    Log.debug("[{}] Bad access token, ip={}", projectId, getClientIp(request));
     sendResponse(
         response,
         401,
@@ -254,7 +254,7 @@ public class Oauth2Filter implements Filter {
   private void handleUnknownOauthServerError(
       String projectId, int statusCode, HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    Log.info(
+    Log.debug(
         "[{}] OAuth server error, statusCode={}, ip={}",
         projectId,
         statusCode,
@@ -266,14 +266,14 @@ public class Oauth2Filter implements Filter {
       String projectId, String username, HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     if (username.contains("@")) {
-      Log.info("[{}] Password authentication deprecated, ip={}", projectId, getClientIp(request));
+      Log.debug("[{}] Password authentication deprecated, ip={}", projectId, getClientIp(request));
       sendResponse(
           response,
           403,
           Arrays.asList(
               "Overleaf now only supports Git authentication tokens to access git. See: https://www.overleaf.com/learn/how-to/Git_integration_authentication_tokens"));
     } else {
-      Log.info("[{}] Wrong git URL format, ip={}", projectId, getClientIp(request));
+      Log.debug("[{}] Wrong git URL format, ip={}", projectId, getClientIp(request));
       sendResponse(
           response,
           403,

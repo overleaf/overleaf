@@ -58,13 +58,13 @@ public class GcJobImpl implements GcJob {
 
   @Override
   public void start() {
-    Log.info("Starting GC job to run every [{}] ms", intervalMs);
+    Log.debug("Starting GC job to run every [{}] ms", intervalMs);
     timer.scheduleAtFixedRate(TimerUtils.makeTimerTask(this::doGC), intervalMs, intervalMs);
   }
 
   @Override
   public void stop() {
-    Log.info("Stopping GC job");
+    Log.debug("Stopping GC job");
     timer.cancel();
   }
 
@@ -100,7 +100,7 @@ public class GcJobImpl implements GcJob {
   }
 
   private void doGC() {
-    Log.info("GC job running");
+    Log.debug("GC job running");
     int numGcs = 0;
     preGc.get().run();
     for (Iterator<String> it = gcQueue.iterator(); it.hasNext(); it.remove(), ++numGcs) {
@@ -118,7 +118,7 @@ public class GcJobImpl implements GcJob {
         Log.warn("[{}] Cannot acquire project lock, skipping GC", proj);
       }
     }
-    Log.info("GC job finished, num gcs: {}", numGcs);
+    Log.debug("GC job finished, num gcs: {}", numGcs);
     jobWaitersLock.lock();
     try {
       jobWaiters.forEach(w -> w.complete(null));

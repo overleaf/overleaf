@@ -178,7 +178,7 @@ public class SwapJobImpl implements SwapJob {
   @Override
   public void evict(String projName) throws IOException {
     Preconditions.checkNotNull(projName, "projName was null");
-    Log.info("Evicting project: {}", projName);
+    Log.debug("Evicting project: {}", projName);
     try (LockGuard __ = lock.lockGuard(projName)) {
       try {
         repoStore.gcProject(projName);
@@ -199,7 +199,7 @@ public class SwapJobImpl implements SwapJob {
       Log.warn("[{}] Cannot acquire project lock, skipping swap", projName);
       return;
     }
-    Log.info("Evicted project: {}", projName);
+    Log.debug("Evicted project: {}", projName);
   }
 
   private InputStream getBlobStream(String projName, long[] sizePtr) throws IOException {

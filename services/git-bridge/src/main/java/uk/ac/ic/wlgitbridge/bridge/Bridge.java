@@ -162,7 +162,7 @@ public class Bridge {
       SwapStore swapStore,
       SnapshotApi snapshotApi) {
     ProjectLock lock =
-        new ProjectLockImpl((int threads) -> Log.info("Waiting for " + threads + " projects..."));
+        new ProjectLockImpl((int threads) -> Log.debug("Waiting for " + threads + " projects..."));
     return new Bridge(
         config,
         lock,
@@ -261,7 +261,7 @@ public class Bridge {
    * the schema.
    */
   public void checkDB() {
-    Log.info("Checking DB");
+    Log.debug("Checking DB");
     File rootDir = repoStore.getRootDirectory();
     for (File f : rootDir.listFiles()) {
       if (f.getName().equals(".wlgb")) {
@@ -342,7 +342,7 @@ public class Bridge {
     ProjectState state = dbStore.getProjectState(projectName);
     switch (state) {
       case NOT_PRESENT:
-        Log.info("[{}] Repo not present", projectName);
+        Log.debug("[{}] Repo not present", projectName);
         repo = repoStore.initRepo(projectName);
         break;
       case SWAPPED:
@@ -391,7 +391,7 @@ public class Bridge {
           CannotAcquireLockException {
     Log.debug("[{}] pushing to Overleaf", projectName);
     try (LockGuard __ = lock.lockGuard(projectName)) {
-      Log.info("[{}] got project lock", projectName);
+      Log.debug("[{}] got project lock", projectName);
       pushCritical(oauth2, projectName, directoryContents, oldDirectoryContents);
     } catch (SevereSnapshotPostException e) {
       Log.warn("[" + projectName + "] Failed to put to Overleaf", e);

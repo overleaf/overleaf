@@ -83,7 +83,7 @@ public class GitBridgeApp implements Runnable {
   }
 
   private void loadConfigFile() throws ConfigFileException, IOException {
-    Log.info("Loading config file at path: " + configFilePath);
+    Log.debug("Loading config file at path: " + configFilePath);
     config = new Config(configFilePath);
   }
 
