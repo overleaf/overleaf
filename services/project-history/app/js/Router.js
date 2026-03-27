@@ -29,6 +29,7 @@ export function initialize(app) {
     '/project/:project_id/resync-pending',
     HttpController.getResyncPending
   )
+  app.get('/project/:project_id/debug-info', HttpController.getDebugInfo)
 
   app.post('/project/:project_id/resync', HttpController.resyncProject)
 

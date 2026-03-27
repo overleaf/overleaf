@@ -142,6 +142,15 @@ const DocManager = {
     return docs
   },
 
+  async getAllDocVersions(projectId) {
+    // Do not unarchive all the docs: The version of archived docs is retained in mongo.
+    return await MongoManager.getProjectsDocs(
+      projectId,
+      { include_deleted: false },
+      { _id: true, version: true }
+    )
+  },
+
   async getCommentThreadIds(projectId) {
     const docs = await DocManager.getAllNonDeletedDocs(projectId, {
       _id: true,

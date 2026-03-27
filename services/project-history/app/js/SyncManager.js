@@ -143,12 +143,14 @@ async function setResyncState(projectId, syncState) {
     // starting a new sync; prevent the entry expiring while sync is in ongoing
     update.$inc = { resyncCount: 1 }
     update.$unset = { expiresAt: true }
+    update.$min = { resyncPendingSince: new Date() }
   } else {
     // successful completion of existing sync; set the entry to expire in the
     // future
     update.$set.expiresAt = new Date(
       Date.now() + EXPIRE_RESYNC_HISTORY_INTERVAL_MS
     )
+    update.$unset = { resyncPendingSince: 1 }
   }
 
   // apply the update
@@ -270,11 +272,24 @@ async function expandSyncUpdates(
 }
 
 class SyncState {
-  constructor(projectId, resyncProjectStructure, resyncDocContents, origin) {
+  constructor(
+    projectId,
+    resyncProjectStructure,
+    resyncDocContents,
+    origin,
+    resyncCount,
+    resyncPendingSince,
+    lastUpdated,
+    history
+  ) {
     this.projectId = projectId
     this.resyncProjectStructure = resyncProjectStructure
     this.resyncDocContents = resyncDocContents
     this.origin = origin
+    this.resyncCount = resyncCount
+    this.resyncPendingSince = resyncPendingSince
+    this.lastUpdated = lastUpdated
+    this.history = history
   }
 
   static fromRaw(projectId, rawSyncState) {
@@ -282,11 +297,37 @@ class SyncState {
     const resyncProjectStructure = rawSyncState.resyncProjectStructure || false
     const resyncDocContents = new Set(rawSyncState.resyncDocContents || [])
     const origin = rawSyncState.origin
+    const resyncCount = rawSyncState.resyncCount || 0
+    let resyncPendingSince = rawSyncState.resyncPendingSince
+    const history = rawSyncState.history || []
+    if (
+      (resyncProjectStructure || resyncDocContents.size > 0) &&
+      !resyncPendingSince &&
+      history.length > 0
+    ) {
+      // The resyncPendingSince field was added later.
+      // Back-fill it as the next ts after a successful sync. History is DESC.
+      for (const other of history.slice().reverse()) {
+        const isSyncOngoing =
+          other.syncState.resyncProjectStructure ||
+          other.syncState.resyncDocContents.length > 0
+        if (isSyncOngoing) {
+          resyncPendingSince = resyncPendingSince || other.timestamp
+        } else {
+          resyncPendingSince = undefined
+        }
+      }
+    }
+    const lastUpdated = rawSyncState.lastUpdated
     return new SyncState(
       projectId,
       resyncProjectStructure,
       resyncDocContents,
-      origin
+      origin,
+      resyncCount,
+      resyncPendingSince,
+      lastUpdated,
+      history
     )
   }
 

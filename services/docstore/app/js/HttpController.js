@@ -58,6 +58,12 @@ async function getAllDocs(req, res) {
   res.json(docViews)
 }
 
+async function getAllDocVersions(req, res) {
+  const { project_id: projectId } = req.params
+  const docs = await DocManager.getAllDocVersions(projectId)
+  res.json(docs)
+}
+
 async function getAllDeletedDocs(req, res) {
   const { project_id: projectId } = req.params
   logger.debug({ projectId }, 'getting all deleted docs')
@@ -244,6 +250,7 @@ export default {
   getAllDocs: expressify(getAllDocs),
   getAllDeletedDocs: expressify(getAllDeletedDocs),
   getAllRanges: expressify(getAllRanges),
+  getAllDocVersions: expressify(getAllDocVersions),
   getTrackedChangesUserIds: expressify(getTrackedChangesUserIds),
   getCommentThreadIds: expressify(getCommentThreadIds),
   projectHasRanges: expressify(projectHasRanges),

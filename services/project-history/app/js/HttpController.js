@@ -262,6 +262,35 @@ export function getResyncPending(req, res, next) {
   })
 }
 
+const getDebugInfoSchema = z.object({
+  params: z.object({
+    project_id: zz.objectId(),
+  }),
+})
+
+export function getDebugInfo(req, res, next) {
+  const {
+    params: { project_id: projectId },
+  } = parseReq(req, getDebugInfoSchema)
+  SyncManager.getResyncState(projectId, (err, state) => {
+    if (err) return next(err)
+    ErrorRecorder.getFailureRecord(projectId, (err, failureRecord) => {
+      if (err) return next(err)
+      res.json({
+        failureRecord,
+        syncState: {
+          resyncPending: state.isSyncOngoing(),
+          resyncCount: state.resyncCount,
+          resyncPendingSince: state.resyncPendingSince,
+          lastUpdated: state.lastUpdated,
+          history: state.history,
+          ...state.toRaw(),
+        },
+      })
+    })
+  })
+}
+
 const latestVersionSchema = z.object({
   params: z.object({
     project_id: zz.objectId().or(z.coerce.number()),
