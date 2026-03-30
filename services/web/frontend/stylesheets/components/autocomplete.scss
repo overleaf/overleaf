@@ -9,5 +9,10 @@
     margin: 0;
     margin-top: 2px;
     max-height: 400px;
+
+    &.select-dropdown-menu-expand-up {
+      margin-top: 0;
+      margin-bottom: 2px;
+    }
   }
 }

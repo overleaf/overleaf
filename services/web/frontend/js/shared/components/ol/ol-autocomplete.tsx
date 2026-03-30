@@ -31,6 +31,7 @@ export type OLAutocompleteProps = {
   createOptionPrefix?: string
   useFuzzySearch?: boolean
   inputRef?: React.ForwardedRef<HTMLInputElement>
+  expandUp?: boolean
 }
 
 type OLAutocompleteDisplayItem =
@@ -55,6 +56,7 @@ function OLAutocompleteInternal({
   createOptionPrefix = '+ Create',
   useFuzzySearch = false,
   inputRef,
+  expandUp = false,
 }: OLAutocompleteProps) {
   const { t } = useTranslation()
 
@@ -163,8 +165,8 @@ function OLAutocompleteInternal({
     onChange('')
   }
 
-  return (
-    <div className={classnames('dropdown', 'd-block', 'ol-autocomplete')}>
+  const getSearchBar = () => (
+    <div className={classnames({ 'mb-3': !expandUp, 'mt-3': expandUp })}>
       <OLFormLabel
         {...getLabelProps()}
         className={showLabel ? '' : 'visually-hidden'}
@@ -191,11 +193,16 @@ function OLAutocompleteInternal({
           </OLButton>
         )}
       </div>
+    </div>
+  )
 
+  const getResultsList = () => (
+    <>
       <ul
         {...getMenuProps()}
         className={classnames('dropdown-menu', 'select-dropdown-menu', {
           show: shouldShowDropdown,
+          'select-dropdown-menu-expand-up': expandUp,
         })}
       >
         {hasGroupedItems ? (
@@ -304,6 +311,22 @@ function OLAutocompleteInternal({
           })
         )}
       </ul>
+    </>
+  )
+
+  return (
+    <div className={classnames('dropdown', 'd-block', 'ol-autocomplete')}>
+      {expandUp ? (
+        <>
+          {getResultsList()}
+          {getSearchBar()}
+        </>
+      ) : (
+        <>
+          {getSearchBar()}
+          {getResultsList()}
+        </>
+      )}
     </div>
   )
 }

@@ -58,6 +58,7 @@ function render(props: RenderProps) {
           disabled={props.disabled}
           createOptionPrefix={props.createOptionPrefix}
           useFuzzySearch={props.useFuzzySearch}
+          expandUp={props.expandUp}
         />
         <button type="submit">submit</button>
       </form>
@@ -526,6 +527,56 @@ describe('<OLAutocomplete />', function () {
       cy.findByRole('combobox').type('  apple  ')
 
       cy.contains('+ Create').should('exist')
+    })
+  })
+
+  describe('expandUp prop', function () {
+    it('renders search bar before results list when expandUp is false', function () {
+      render({ items: testItems, expandUp: false })
+      cy.findByRole('combobox').click()
+
+      cy.get('.ol-autocomplete').within(() => {
+        cy.get('.dropdown-menu').then($menu => {
+          cy.findByRole('combobox').then($input => {
+            const inputTop = $input[0].getBoundingClientRect().top
+            const menuTop = $menu[0].getBoundingClientRect().top
+            expect(inputTop).to.be.lessThan(menuTop)
+          })
+        })
+      })
+    })
+
+    it('renders results list before search bar when expandUp is true', function () {
+      render({ items: testItems, expandUp: true })
+      cy.findByRole('combobox').click()
+
+      cy.get('.ol-autocomplete').within(() => {
+        cy.get('.dropdown-menu').then($menu => {
+          cy.findByRole('combobox').then($input => {
+            const inputTop = $input[0].getBoundingClientRect().top
+            const menuTop = $menu[0].getBoundingClientRect().top
+            expect(menuTop).to.be.lessThan(inputTop)
+          })
+        })
+      })
+    })
+
+    it('applies correct margin class when expandUp is false', function () {
+      render({ items: testItems, expandUp: false })
+
+      cy.get('.ol-autocomplete').within(() => {
+        cy.get('.mb-3').should('exist')
+        cy.get('.mt-3').should('not.exist')
+      })
+    })
+
+    it('applies correct margin class when expandUp is true', function () {
+      render({ items: testItems, expandUp: true })
+
+      cy.get('.ol-autocomplete').within(() => {
+        cy.get('.mt-3').should('exist')
+        cy.get('.mb-3').should('not.exist')
+      })
     })
   })
 })

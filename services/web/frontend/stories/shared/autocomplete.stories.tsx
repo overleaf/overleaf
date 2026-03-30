@@ -239,6 +239,30 @@ export const GroupedFuzzySearch: StoryObj<Args> = {
   },
 }
 
+export const ExpandUp: StoryObj<Args> = {
+  render: args => <InteractiveAutocomplete {...args} />,
+  args: {
+    items: sampleItems,
+    label: 'Framework (expand up)',
+    placeholder: 'Dropdown expands upward',
+    showLabel: true,
+    allowCreate: true,
+    expandUp: true,
+  },
+}
+
+export const ExpandUpGrouped: StoryObj<Args> = {
+  render: args => <InteractiveAutocomplete {...args} />,
+  args: {
+    items: entryTypeItems,
+    label: 'Entry type (expand up)',
+    placeholder: 'Grouped items expanding upward',
+    showLabel: true,
+    allowCreate: true,
+    expandUp: true,
+  },
+}
+
 const meta: Meta<typeof OLAutocomplete> = {
   title: 'Shared / Components / Autocomplete',
   component: OLAutocomplete,
@@ -254,6 +278,7 @@ const meta: Meta<typeof OLAutocomplete> = {
         'disabled',
         'createOptionPrefix',
         'useFuzzySearch',
+        'expandUp',
       ],
     },
   },
@@ -299,6 +324,11 @@ const meta: Meta<typeof OLAutocomplete> = {
     useFuzzySearch: {
       control: 'boolean',
       description: 'Enable fuzzy search matching for suggestions',
+    },
+    expandUp: {
+      control: 'boolean',
+      description:
+        'When true, the dropdown expands upward and the search bar appears below the results list',
     },
   },
 }
