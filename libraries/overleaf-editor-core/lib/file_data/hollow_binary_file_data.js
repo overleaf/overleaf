@@ -36,6 +36,15 @@ class HollowBinaryFileData extends FileData {
     return { byteLength: this.byteLength }
   }
 
+  /**
+   * @returns {Record<string, number>}
+   */
+  toStats() {
+    return {
+      byteLength: this.byteLength,
+    }
+  }
+
   /** @inheritdoc */
   getByteLength() {
     return this.byteLength

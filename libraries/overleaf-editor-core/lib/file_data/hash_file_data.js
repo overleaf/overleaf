@@ -55,6 +55,15 @@ class HashFileData extends FileData {
   }
 
   /**
+   * @returns {Record<string, number>}
+   */
+  toStats() {
+    return {
+      hashes: 1 + (this.rangesHash ? 1 : 0),
+    }
+  }
+
+  /**
    * @inheritdoc
    * @returns {string}
    */

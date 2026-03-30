@@ -71,6 +71,25 @@ class LazyStringFileData extends FileData {
     return raw
   }
 
+  /**
+   * @returns {Record<string, number>}
+   */
+  toStats() {
+    return {
+      hashes: 1 + (this.rangesHash ? 1 : 0),
+      stringLength: this.stringLength,
+      nOperations: this.operations.length,
+      operationsSize:
+        this.operations.length > 0
+          ? this.operations.reduce(
+              // Note: Buffer does not exist in frontend. Use string length instead.
+              (sum, op) => sum + JSON.stringify(op.toJSON()).length,
+              0
+            )
+          : 0,
+    }
+  }
+
   /** @inheritdoc */
   getHash() {
     if (this.operations.length) return null

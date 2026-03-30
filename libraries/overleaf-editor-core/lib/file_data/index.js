@@ -82,6 +82,13 @@ class FileData {
   }
 
   /**
+   * @returns {Record<string, number>}
+   */
+  toStats() {
+    throw new Error('FileData: toStats not implemented')
+  }
+
+  /**
    * @see File#getHash
    * @return {string | null | undefined}
    */

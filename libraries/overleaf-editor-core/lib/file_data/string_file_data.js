@@ -58,6 +58,27 @@ class StringFileData extends FileData {
     return raw
   }
 
+  /**
+   * @returns {Record<string, number>}
+   */
+  toStats() {
+    // Note: Buffer does not exist in frontend. Use string length instead.
+    return {
+      nContent: 1,
+      contentSize: this.content.length,
+      nComments: this.comments.length,
+      commentsSize:
+        this.comments.length > 0
+          ? JSON.stringify(this.comments.toRaw()).length
+          : 0,
+      nTrackedChanges: this.trackedChanges.length,
+      trackedChangesSize:
+        this.trackedChanges.length > 0
+          ? JSON.stringify(this.trackedChanges.toRaw()).length
+          : 0,
+    }
+  }
+
   /** @inheritdoc */
   isEditable() {
     return true

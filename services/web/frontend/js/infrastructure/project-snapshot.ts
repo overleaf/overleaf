@@ -256,7 +256,7 @@ export class ProjectSnapshot {
 /**
  * Blob store that fetches blobs from the history service
  */
-class SimpleBlobStore {
+export class SimpleBlobStore {
   private projectId: string
 
   constructor(projectId: string) {
@@ -280,7 +280,7 @@ async function flushHistory(projectId: string) {
   await postJSON(`/project/${projectId}/flush`)
 }
 
-async function fetchLatestChunk(projectId: string): Promise<Chunk> {
+export async function fetchLatestChunk(projectId: string): Promise<Chunk> {
   const response = await getJSON<{ chunk: RawChunk }>(
     `/project/${projectId}/latest/history`
   )

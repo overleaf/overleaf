@@ -42,6 +42,15 @@ class HollowStringFileData extends FileData {
     return { stringLength: this.stringLength }
   }
 
+  /**
+   * @returns {Record<string, number>}
+   */
+  toStats() {
+    return {
+      stringLength: this.stringLength,
+    }
+  }
+
   /** @inheritdoc */
   getStringLength() {
     return this.stringLength
