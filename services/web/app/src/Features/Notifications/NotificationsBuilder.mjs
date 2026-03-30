@@ -241,7 +241,7 @@ function personalAndGroupSubscriptions(userId) {
 function oldDebugProjects(userId) {
   return {
     key: `old-debug-projects-${userId}`,
-    async create(userId) {
+    async create() {
       return await NotificationsHandler.promises.createNotification(
         userId,
         this.key,

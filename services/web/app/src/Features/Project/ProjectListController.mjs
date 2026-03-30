@@ -642,7 +642,9 @@ async function _checkForOldDebugProjects(userId) {
     7
   )
   if (exists) {
-    await NotificationsBuilder.promises.oldDebugProjects(userId).create(userId)
+    await NotificationsBuilder.promises.oldDebugProjects(userId).create()
+  } else {
+    await NotificationsBuilder.promises.oldDebugProjects(userId).read()
   }
 }
 
