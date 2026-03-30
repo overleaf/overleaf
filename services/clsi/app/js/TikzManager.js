@@ -23,13 +23,39 @@ let TikzManager
 // copy of the main file as 'output.tex'.
 
 export default TikzManager = {
+  OUTPUT_TEX: 'output.tex',
+
+  /**
+   * @param {string} content
+   * @return {boolean}
+   */
+  usesTikzExternalize(content) {
+    return content.includes('\\tikzexternalize') || content.includes('{pstool}')
+  },
+
+  /**
+   * @param {string} compileDir
+   * @param {import('overleaf-editor-core').Snapshot} snapshot
+   * @param {string} content
+   * @return {Promise<void>}
+   */
+  async writeOutputFileIfNeeded(compileDir, snapshot, content) {
+    if (snapshot.getFile(TikzManager.OUTPUT_TEX)) return
+    if (!TikzManager.usesTikzExternalize(content)) return
+    await fs.promises.writeFile(
+      Path.join(compileDir, TikzManager.OUTPUT_TEX),
+      content,
+      'utf-8'
+    )
+  },
+
   checkMainFile(compileDir, mainFile, resources, callback) {
     // if there's already an output.tex file, we don't want to touch it
     if (callback == null) {
       callback = function () {}
     }
     for (const resource of Array.from(resources)) {
-      if (resource.path === 'output.tex') {
+      if (resource.path === TikzManager.OUTPUT_TEX) {
         logger.debug(
           { compileDir, mainFile },
           'output.tex already in resources'
@@ -53,17 +79,11 @@ export default TikzManager = {
             if (error != null) {
               return callback(error)
             }
-            const usesTikzExternalize =
-              (content != null
-                ? content.indexOf('\\tikzexternalize')
-                : undefined) >= 0
-            const usesPsTool =
-              (content != null ? content.indexOf('{pstool}') : undefined) >= 0
+            const needsMainFile = TikzManager.usesTikzExternalize(content)
             logger.debug(
-              { compileDir, mainFile, usesTikzExternalize, usesPsTool },
+              { compileDir, mainFile, needsMainFile },
               'checked for packages needing main file as output.tex'
             )
-            const needsMainFile = usesTikzExternalize || usesPsTool
             return callback(null, needsMainFile)
           }
         )
@@ -92,7 +112,7 @@ export default TikzManager = {
           )
           // use wx flag to ensure that output file does not already exist
           return fs.writeFile(
-            Path.join(compileDir, 'output.tex'),
+            Path.join(compileDir, TikzManager.OUTPUT_TEX),
             content,
             { flag: 'wx' },
             callback

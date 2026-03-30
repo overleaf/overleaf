@@ -26,7 +26,7 @@ export default SafeReader = {
     }
     return fs.open(file, 'r', function (err, fd) {
       if (err != null && err.code === 'ENOENT') {
-        return callback()
+        return callback(null, '', 0)
       }
       if (err != null) {
         return callback(err)

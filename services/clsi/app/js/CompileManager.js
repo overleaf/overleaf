@@ -122,6 +122,25 @@ async function doCompile(request, stats, timings) {
         request,
         compileDir
       )
+
+      // apply a series of file modifications/creations for draft mode and tikz
+      if (request.draft) {
+        await DraftModeManager.promises.injectDraftMode(
+          Path.join(compileDir, request.rootResourcePath)
+        )
+      }
+
+      const needsMainFile = await TikzManager.promises.checkMainFile(
+        compileDir,
+        request.rootResourcePath,
+        resourceList
+      )
+      if (needsMainFile) {
+        await TikzManager.promises.injectOutputFile(
+          compileDir,
+          request.rootResourcePath
+        )
+      }
     }
   } catch (error) {
     if (error instanceof Errors.FilesOutOfSyncError) {
@@ -171,25 +190,6 @@ async function doCompile(request, stats, timings) {
     if (request.check === 'validate') {
       env.CHKTEX_VALIDATE = 1
     }
-  }
-
-  // apply a series of file modifications/creations for draft mode and tikz
-  if (request.draft) {
-    await DraftModeManager.promises.injectDraftMode(
-      Path.join(compileDir, request.rootResourcePath)
-    )
-  }
-
-  const needsMainFile = await TikzManager.promises.checkMainFile(
-    compileDir,
-    request.rootResourcePath,
-    resourceList
-  )
-  if (needsMainFile) {
-    await TikzManager.promises.injectOutputFile(
-      compileDir,
-      request.rootResourcePath
-    )
   }
 
   const compileStart = Date.now()
