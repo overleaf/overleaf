@@ -145,11 +145,18 @@ describe('TextOperation', function () {
       const str = random.string(50)
       const comments = random.comments(6)
       const o = randomOperation(str, comments.ids)
-      expect(str.length).to.equal(o.baseLength)
-      const file = new StringFileData(str, comments.comments)
-      o.apply(file)
-      const result = file.getContent()
-      expect(result.length).to.equal(o.targetLength)
+      try {
+        expect(str.length).to.equal(o.baseLength)
+        const file = new StringFileData(str, comments.comments)
+        o.apply(file)
+        const result = file.getContent()
+        expect(result.length).to.equal(o.targetLength)
+      } catch (err) {
+        if (err instanceof Error) {
+          err.message = `Failing inputs:\n  str: ${JSON.stringify(str)}\n  comments: ${JSON.stringify(comments)}\n  o: ${JSON.stringify(o.toJSON())}\n\n${err.message}`
+        }
+        throw err
+      }
     })
   )
 
@@ -159,8 +166,15 @@ describe('TextOperation', function () {
       const doc = random.string(50)
       const comments = random.comments(2)
       const operation = randomOperation(doc, comments.ids)
-      const roundTripOperation = TextOperation.fromJSON(operation.toJSON())
-      expect(operation.equals(roundTripOperation)).to.be.true
+      try {
+        const roundTripOperation = TextOperation.fromJSON(operation.toJSON())
+        expect(operation.equals(roundTripOperation)).to.be.true
+      } catch (err) {
+        if (err instanceof Error) {
+          err.message = `Failing inputs:\n  doc: ${JSON.stringify(doc)}\n  comments: ${JSON.stringify(comments)}\n  operation: ${JSON.stringify(operation.toJSON())}\n\n${err.message}`
+        }
+        throw err
+      }
     })
   )
 
@@ -213,15 +227,22 @@ describe('TextOperation', function () {
         const str = random.string(50)
         const comments = random.comments(6)
         const o = randomOperation(str, comments.ids)
-        const originalFile = new StringFileData(str, comments.comments)
-        const p = o.invert(originalFile)
-        expect(o.baseLength).to.equal(p.targetLength)
-        expect(o.targetLength).to.equal(p.baseLength)
-        const file = new StringFileData(str, comments.comments)
-        o.apply(file)
-        p.apply(file)
-        const result = file.toRaw()
-        expect(result).to.deep.equal(originalFile.toRaw())
+        try {
+          const originalFile = new StringFileData(str, comments.comments)
+          const p = o.invert(originalFile)
+          expect(o.baseLength).to.equal(p.targetLength)
+          expect(o.targetLength).to.equal(p.baseLength)
+          const file = new StringFileData(str, comments.comments)
+          o.apply(file)
+          p.apply(file)
+          const result = file.toRaw()
+          expect(result).to.deep.equal(originalFile.toRaw())
+        } catch (err) {
+          if (err instanceof Error) {
+            err.message = `Failing inputs:\n  str: ${JSON.stringify(str)}\n  comments: ${JSON.stringify(comments)}\n  o: ${JSON.stringify(o.toJSON())}\n\n${err.message}`
+          }
+          throw err
+        }
       })
     )
 
@@ -376,16 +397,23 @@ describe('TextOperation', function () {
         const file = new StringFileData(str, comments.comments)
         a.apply(file)
         const afterA = file.toRaw()
-        expect(afterA.content.length).to.equal(a.targetLength)
         const b = randomOperation(afterA.content, comments.ids)
-        b.apply(file)
-        const afterB = file.toRaw()
-        expect(afterB.content.length).to.equal(b.targetLength)
-        const ab = a.compose(b)
-        expect(ab.targetLength).to.equal(b.targetLength)
-        ab.apply(new StringFileData(str, comments.comments))
-        const afterAB = file.toRaw()
-        expect(afterAB).to.deep.equal(afterB)
+        try {
+          expect(afterA.content.length).to.equal(a.targetLength)
+          b.apply(file)
+          const afterB = file.toRaw()
+          expect(afterB.content.length).to.equal(b.targetLength)
+          const ab = a.compose(b)
+          expect(ab.targetLength).to.equal(b.targetLength)
+          ab.apply(new StringFileData(str, comments.comments))
+          const afterAB = file.toRaw()
+          expect(afterAB).to.deep.equal(afterB)
+        } catch (err) {
+          if (err instanceof Error) {
+            err.message = `Failing inputs:\n  str: ${JSON.stringify(str)}\n  comments: ${JSON.stringify(comments)}\n  a: ${JSON.stringify(a.toJSON())}\n  b: ${JSON.stringify(b.toJSON())}\n\n${err.message}`
+          }
+          throw err
+        }
       })
     )
 
@@ -594,17 +622,24 @@ describe('TextOperation', function () {
         const comments = random.comments(6)
         const a = randomOperation(str, comments.ids)
         const b = randomOperation(str, comments.ids)
-        const primes = TextOperation.transform(a, b)
-        const aPrime = primes[0]
-        const bPrime = primes[1]
-        const abPrime = a.compose(bPrime)
-        const baPrime = b.compose(aPrime)
-        const abFile = new StringFileData(str, comments.comments)
-        const baFile = new StringFileData(str, comments.comments)
-        abPrime.apply(abFile)
-        baPrime.apply(baFile)
-        expect(abPrime.equals(baPrime)).to.be.true
-        expect(abFile.toRaw()).to.deep.equal(baFile.toRaw())
+        try {
+          const primes = TextOperation.transform(a, b)
+          const aPrime = primes[0]
+          const bPrime = primes[1]
+          const abPrime = a.compose(bPrime)
+          const baPrime = b.compose(aPrime)
+          const abFile = new StringFileData(str, comments.comments)
+          const baFile = new StringFileData(str, comments.comments)
+          abPrime.apply(abFile)
+          baPrime.apply(baFile)
+          expect(abPrime.equals(baPrime)).to.be.true
+          expect(abFile.toRaw()).to.deep.equal(baFile.toRaw())
+        } catch (err) {
+          if (err instanceof Error) {
+            err.message = `Failing inputs:\n  str: ${JSON.stringify(str)}\n  comments: ${JSON.stringify(comments)}\n  a: ${JSON.stringify(a.toJSON())}\n  b: ${JSON.stringify(b.toJSON())}\n\n${err.message}`
+          }
+          throw err
+        }
       })
     )
 
