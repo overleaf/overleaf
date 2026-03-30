@@ -6,7 +6,6 @@ const MODULE_PATH = '../../../../app/js/DiffManager.js'
 
 describe('DiffManager', function () {
   beforeEach(async function () {
-    this.DocumentUpdaterManager = {}
     this.DiffGenerator = {
       buildDiff: sinon.stub(),
     }
@@ -24,8 +23,6 @@ describe('DiffManager', function () {
     }
     this.FileTreeDiffGenerator = {}
     this.DiffManager = await esmock(MODULE_PATH, {
-      '../../../../app/js/DocumentUpdaterManager.js':
-        this.DocumentUpdaterManager,
       '../../../../app/js/DiffGenerator.js': this.DiffGenerator,
       '../../../../app/js/UpdatesProcessor.js': this.UpdatesProcessor,
       '../../../../app/js/HistoryStoreManager.js': this.HistoryStoreManager,
