@@ -71,7 +71,7 @@ describe('pdfjs', function () {
         snapshot = ctx.snapshot
       })
 
-      beforeAll(async function (ctx) {
+      beforeAll(async function () {
         // back fill new snapshot
         if (snapshot === null) {
           console.error('back filling snapshot for', example)
