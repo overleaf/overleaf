@@ -3,6 +3,8 @@ import SessionManager from '../Authentication/SessionManager.mjs'
 
 const UserMembershipAuthorization = {
   hasAdminCapability: AdminAuthorizationHelper.hasAdminCapability,
+  hasNonAdminDomainCapability:
+    AdminAuthorizationHelper.hasNonAdminDomainCapability,
 
   hasAdminAccess(req) {
     return AdminAuthorizationHelper.hasAdminAccess(

@@ -28,13 +28,20 @@ async function createUser(email) {
   const features = email.startsWith('free+')
     ? Settings.defaultFeatures
     : Settings.features.professional
+  const isAdmin = email.startsWith('admin+')
+  let adminRoles = []
+  if (email.startsWith('admin+finance')) {
+    adminRoles = ['finance']
+  } else if (isAdmin) {
+    adminRoles = ['engineering']
+  }
   await db.users.updateOne(
     { _id: user._id },
     {
       $set: {
         // Set admin flag.
-        isAdmin: email.startsWith('admin+'),
-        adminRoles: email.startsWith('admin+') ? ['engineering'] : [],
+        isAdmin,
+        adminRoles,
         // Disable spell-checking for performance and flakiness reasons.
         'ace.spellCheckLanguage': '',
         // Override features.

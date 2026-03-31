@@ -11,6 +11,9 @@ export default {
   getAdminCapabilities,
   useHasAdminCapability,
   useAdminCapabilities: expressify(useAdminCapabilities),
+  useNonAdminDomainCapabilities: expressify(useNonAdminDomainCapabilities),
+  hasNonAdminDomainCapability,
+  useHasNonAdminDomainCapability,
 }
 
 function hasAdminAccess(user) {
@@ -34,6 +37,36 @@ function hasAdminCapability(capability, requireAdminRoles = true) {
     }
     return adminCapabilities?.includes(capability)
   }
+}
+
+function hasNonAdminDomainCapability(capability) {
+  return req => {
+    return req.nonAdminDomainCapabilities?.includes(capability)
+  }
+}
+
+async function useNonAdminDomainCapabilities(req, _res, next) {
+  if (req.nonAdminDomainCapabilities) {
+    return next()
+  }
+  const user = SessionManager.getSessionUser(req.session)
+  // Equivalent to `hasAdminAccess` but without the `Settings.adminPrivilegeAvailable` check.
+  if (!user?.isAdmin) {
+    req.nonAdminDomainCapabilities = []
+    return next()
+  }
+
+  try {
+    const capabilities = await Modules.promises.hooks.fire(
+      'getNonAdminDomainCapabilities',
+      user
+    )
+    req.nonAdminDomainCapabilities = [...new Set(capabilities.flat())]
+  } catch (err) {
+    // This can throw when the user doesn't exist or isn't logged in.
+    req.nonAdminDomainCapabilities = []
+  }
+  next()
 }
 
 async function getAdminCapabilities(user) {
@@ -74,6 +107,12 @@ async function useAdminCapabilities(req, res, next) {
 function useHasAdminCapability(req, res, next) {
   res.locals.hasAdminCapability = (capability, requireAdminRoles = true) =>
     hasAdminCapability(capability, requireAdminRoles)(req)
+  next()
+}
+
+function useHasNonAdminDomainCapability(req, res, next) {
+  res.locals.hasNonAdminDomainCapability = capability =>
+    hasNonAdminDomainCapability(capability)(req)
   next()
 }
 

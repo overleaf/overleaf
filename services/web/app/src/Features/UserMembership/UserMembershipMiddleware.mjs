@@ -12,7 +12,8 @@ import TemplatesManager from '../Templates/TemplatesManager.mjs'
 import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import AdminAuthorizationHelper from '../Helpers/AdminAuthorizationHelper.mjs'
 
-const { useAdminCapabilities } = AdminAuthorizationHelper
+const { useAdminCapabilities, useNonAdminDomainCapabilities } =
+  AdminAuthorizationHelper
 // set of middleware arrays or functions that checks user access to an entity
 // (publisher, institution, group, template, etc.)
 const UserMembershipMiddleware = {
@@ -209,17 +210,21 @@ const UserMembershipMiddleware = {
 
   requireSplitTestMetricsAccess: [
     AuthenticationController.requireLogin(),
-    useAdminCapabilities,
+    useNonAdminDomainCapabilities,
     allowAccessIfAny([
-      UserMembershipAuthorization.hasAdminCapability('view-split-test'),
+      UserMembershipAuthorization.hasNonAdminDomainCapability(
+        'view-split-test'
+      ),
     ]),
   ],
 
   requireSplitTestManagementAccess: [
     AuthenticationController.requireLogin(),
-    useAdminCapabilities,
+    useNonAdminDomainCapabilities,
     allowAccessIfAny([
-      UserMembershipAuthorization.hasAdminCapability('modify-split-test'),
+      UserMembershipAuthorization.hasNonAdminDomainCapability(
+        'modify-split-test'
+      ),
     ]),
   ],
 

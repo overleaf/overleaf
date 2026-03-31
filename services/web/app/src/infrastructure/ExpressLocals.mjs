@@ -21,6 +21,8 @@ const {
   hasAdminAccess,
   useAdminCapabilities,
   useHasAdminCapability,
+  useNonAdminDomainCapabilities,
+  useHasNonAdminDomainCapability,
 } = AdminAuthorizationHelper
 const IEEE_BRAND_ID = Settings.ieeeBrandId
 
@@ -279,8 +281,9 @@ export default async function (webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.use(useAdminCapabilities)
-
   webRouter.use(useHasAdminCapability)
+  webRouter.use(useNonAdminDomainCapabilities)
+  webRouter.use(useHasNonAdminDomainCapability)
 
   webRouter.use(function (req, res, next) {
     // Clone the nav settings so they can be modified for each request
