@@ -322,7 +322,7 @@
     "d3": "^3.5.16",
     "daterangepicker": "2.1.27",
     "diff": "^5.1.0",
-    "dompurify": "^3.2.4",
+    "dompurify": "^3.3.2",
     "downshift": "^9.0.9",
     "es6-promise": "^4.2.8",
     "escodegen": "^2.0.0",
