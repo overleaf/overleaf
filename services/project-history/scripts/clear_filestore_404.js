@@ -10,10 +10,10 @@
 
 import async from 'async'
 import logger from '@overleaf/logger'
-import request from 'request'
 import Settings from '@overleaf/settings'
 import redis from '@overleaf/redis-wrapper'
 import { db, ObjectId } from '../app/js/mongodb.js'
+import { fetchStringWithResponse } from '@overleaf/fetch-utils'
 
 logger.logger.level('fatal')
 
@@ -100,15 +100,16 @@ function checkAndClear(project, callback) {
     const url = Settings.apis.documentupdater.url + '/project/' + projectId
     if (force) {
       console.log('3. making request to clear docupdater', url)
-      request.delete(url, (err, response, body) => {
-        console.log(
-          ' - result of request',
-          err,
-          response && response.statusCode,
-          body
-        )
-        cb(err)
-      })
+      fetchStringWithResponse(url, { method: 'DELETE' }).then(
+        ({ response, body }) => {
+          console.log(' - result of request: success', response.status, body)
+          cb()
+        },
+        err => {
+          console.log(' - result of request: error', err)
+          cb(err)
+        }
+      )
     } else {
       console.log('3. dry run, would request DELETE on url', url)
       cb()

@@ -1,6 +1,5 @@
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
-import request from 'request'
 import * as UpdatesProcessor from './UpdatesProcessor.js'
 import * as SummarizedUpdatesManager from './SummarizedUpdatesManager.js'
 import * as DiffManager from './DiffManager.js'
@@ -16,7 +15,7 @@ import * as HistoryApiManager from './HistoryApiManager.js'
 import * as RetryManager from './RetryManager.js'
 import * as FlushManager from './FlushManager.js'
 import { pipeline } from 'node:stream'
-import { RequestFailedError } from '@overleaf/fetch-utils'
+import { fetchNothing, RequestFailedError } from '@overleaf/fetch-utils'
 import { z, zz, parseReq } from '@overleaf/validation-tools'
 
 const ONE_DAY_IN_SECONDS = 24 * 60 * 60
@@ -800,7 +799,9 @@ export function retryFailures(req, res, next) {
             const found = key.match(/^X-CALLBACK-(.*)/i)
             callbackHeaders[found[1]] = req.headers[key]
           }
-          request({ url: callbackUrl, headers: callbackHeaders })
+          fetchNothing(callbackUrl, { headers: callbackHeaders }).catch(err => {
+            logger.warn({ err }, 'failed to ping callback url')
+          })
         }
       } else {
         if (error != null) {

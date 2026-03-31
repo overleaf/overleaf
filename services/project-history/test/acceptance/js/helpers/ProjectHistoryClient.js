@@ -1,5 +1,4 @@
 import { expect } from 'chai'
-import request from 'request'
 import Settings from '@overleaf/settings'
 import RedisWrapper from '@overleaf/redis-wrapper'
 import { db } from '../../../../app/js/mongodb.js'
@@ -152,16 +151,6 @@ export async function clearFirstOpTimestamp(projectId) {
 
 export function getQueueLength(projectId, callback) {
   rclient.llen(Keys.projectHistoryOps({ project_id: projectId }), callback)
-}
-
-export function getQueueCounts(callback) {
-  return request.get(
-    {
-      url: 'http://127.0.0.1:3054/status/queue',
-      json: true,
-    },
-    callback
-  )
 }
 
 export async function resyncHistory(projectId) {

@@ -1,8 +1,8 @@
 import { expect } from 'chai'
 import nock from 'nock'
-import request from 'request'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
+import { fetchStringWithResponse } from '@overleaf/fetch-utils'
 
 const MockHistoryStore = () => nock('http://127.0.0.1:3100')
 const MockWeb = () => nock('http://127.0.0.1:3000')
@@ -57,12 +57,13 @@ describe('NumericProjectId', function () {
     nock.cleanAll()
   })
 
-  function makeRequest(options) {
-    return new Promise((resolve, reject) => {
-      request(options, (error, response, body) => {
-        if (error) return reject(error)
-        resolve({ response, body })
-      })
+  async function makeRequest(options) {
+    const { method, url, qs = {}, json } = options
+    const u = new URL(url)
+    u.search = new URLSearchParams(qs).toString()
+    return await fetchStringWithResponse(u, {
+      method,
+      json,
     })
   }
 
@@ -71,7 +72,7 @@ describe('NumericProjectId', function () {
       method: 'POST',
       url: `http://127.0.0.1:3054/project/${this.numericProjectId}/flush`,
     })
-    expect(response.statusCode).to.equal(204)
+    expect(response.status).to.equal(204)
   })
 
   it('should accept numeric project_id for dump', async function () {
@@ -79,7 +80,7 @@ describe('NumericProjectId', function () {
       method: 'GET',
       url: `http://127.0.0.1:3054/project/${this.numericProjectId}/dump`,
     })
-    expect(response.statusCode).to.equal(200)
+    expect(response.status).to.equal(200)
   })
 
   it('should accept numeric project_id for filetree diff', async function () {
@@ -88,7 +89,7 @@ describe('NumericProjectId', function () {
       url: `http://127.0.0.1:3054/project/${this.numericProjectId}/filetree/diff`,
       qs: { from: 7, to: 8 },
     })
-    expect(response.statusCode).to.equal(200)
+    expect(response.status).to.equal(200)
   })
 
   it('should accept numeric project_id for updates', async function () {
@@ -97,7 +98,7 @@ describe('NumericProjectId', function () {
       url: `http://127.0.0.1:3054/project/${this.numericProjectId}/updates`,
       qs: { min_count: 1 },
     })
-    expect(response.statusCode).to.equal(200)
+    expect(response.status).to.equal(200)
   })
 
   it('should accept numeric project_id for version', async function () {
@@ -105,7 +106,7 @@ describe('NumericProjectId', function () {
       method: 'GET',
       url: `http://127.0.0.1:3054/project/${this.numericProjectId}/version`,
     })
-    expect(response.statusCode).to.equal(200)
+    expect(response.status).to.equal(200)
   })
 
   it('should accept numeric project_id for snapshot', async function () {
@@ -113,7 +114,7 @@ describe('NumericProjectId', function () {
       method: 'GET',
       url: `http://127.0.0.1:3054/project/${this.numericProjectId}/snapshot`,
     })
-    expect(response.statusCode).to.equal(200)
+    expect(response.status).to.equal(200)
   })
 
   it('should accept numeric project_id for getLabels', async function () {
@@ -121,7 +122,7 @@ describe('NumericProjectId', function () {
       method: 'GET',
       url: `http://127.0.0.1:3054/project/${this.numericProjectId}/labels`,
     })
-    expect(response.statusCode).to.equal(200)
+    expect(response.status).to.equal(200)
   })
 
   it('should accept numeric project_id for createLabel', async function () {
@@ -134,7 +135,7 @@ describe('NumericProjectId', function () {
         user_id: '507f1f77bcf86cd799439011',
       },
     })
-    expect(response.statusCode).to.equal(200)
+    expect(response.status).to.equal(200)
   })
 
   it('should accept numeric history_id for getProjectBlob', async function () {
@@ -149,7 +150,7 @@ describe('NumericProjectId', function () {
       method: 'GET',
       url: `http://127.0.0.1:3054/project/${this.historyId}/blob/${blobHash}`,
     })
-    expect(response.statusCode).to.equal(200)
+    expect(response.status).to.equal(200)
     expect(body).to.equal(blobContent)
   })
 })
