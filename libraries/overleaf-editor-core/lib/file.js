@@ -129,9 +129,9 @@ class File {
   toStats() {
     const stats = this.data.toStats()
     if (!_.isEmpty(this.metadata)) {
-      stats.nMeta = 1
+      stats.nMetadata = 1
       // Note: Buffer does not exist in frontend. Use string length instead.
-      stats.metaSize = JSON.stringify(this.metadata).length
+      stats.metadataSize = JSON.stringify(this.metadata).length
     }
     return stats
   }
