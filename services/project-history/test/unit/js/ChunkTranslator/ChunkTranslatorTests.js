@@ -3045,6 +3045,98 @@ describe('ChunkTranslator', function () {
           )
         })
       })
+
+      it('should handle tracked delete insert that merges with existing tracked delete before retain with none tracking', function (done) {
+        // Bug reproduction: when an insert with tracking type 'delete' is
+        // placed at the start of an existing tracked delete (same userId),
+        // the two tracked deletes merge. A subsequent retain with 'none'
+        // tracking then encounters the merged range. The sourceOffset
+        // (sourceCursor - result.length) is negative due to the insert
+        // advancing result.length without advancing sourceCursor. When
+        // moveBy(sourceOffset) is called on the merged range, the position
+        // becomes negative, triggering "OError: Invalid range".
+        this.fileContents = 'Hello world'
+        this.ranges = JSON.stringify({
+          trackedChanges: [
+            {
+              range: { pos: 0, length: 11 },
+              tracking: {
+                type: 'delete',
+                userId: this.author1.id,
+                ts: '2024-01-01T00:00:00.000Z',
+              },
+            },
+          ],
+        })
+        this.HistoryStoreManager.getProjectBlob
+          .withArgs(this.historyId, this.rangesHash)
+          .yields(null, this.ranges)
+        this.HistoryStoreManager.getProjectBlob
+          .withArgs(this.historyId, this.fileHash)
+          .yields(null, this.fileContents)
+
+        this.chunk = {
+          chunk: {
+            startVersion: 0,
+            history: {
+              snapshot: {
+                files: {
+                  'main.tex': {
+                    hash: this.fileHash,
+                    rangesHash: this.rangesHash,
+                    stringLength: this.fileContents.length,
+                  },
+                },
+              },
+              changes: [
+                {
+                  operations: [
+                    {
+                      pathname: 'main.tex',
+                      textOperation: [
+                        // Initial state: [Hello world] (all tracked-deleted)
+                        // Insert "X" tracked as delete at position 0,
+                        // then retain all 11 chars clearing tracking
+                        {
+                          i: 'X',
+                          tracking: {
+                            type: 'delete',
+                            userId: this.author1.id,
+                            ts: '2024-01-01T00:00:00.000Z',
+                          },
+                        },
+                        {
+                          r: 11,
+                          tracking: { type: 'none' },
+                        },
+                      ],
+                    },
+                  ],
+                  timestamp: this.date.toISOString(),
+                  authors: [this.author1.id],
+                },
+              ],
+            },
+          },
+          authors: [this.author1.id],
+        }
+
+        this.ChunkTranslator.convertToDiffUpdates(
+          this.projectId,
+          this.chunk,
+          'main.tex',
+          0,
+          1,
+          (error, diff) => {
+            expect(error).to.be.null
+            expect(diff.updates.length).to.equal(1)
+            expect(diff.updates[0].op).to.deep.equal([
+              { i: 'Hello world', p: 0 },
+            ])
+            done()
+          }
+        )
+      })
     })
   })
 })

@@ -470,8 +470,20 @@ class TextUpdateBuilder {
 
       const sourceOffset = this.sourceCursor - this.result.length
       for (const trackedDelete of trackedDeletes) {
-        const resultTrackedDelete = trackedDelete.range
-        const sourceTrackedDelete = trackedDelete.range.moveBy(sourceOffset)
+        // Clamp the tracked delete to the retention range start. A prior
+        // insert (tracked as delete) can merge with an existing tracked
+        // delete, extending it before the retention range. That part has no
+        // source equivalent, so mapping it with sourceOffset would produce a
+        // negative position.
+        const clampedStart = Math.max(
+          trackedDelete.range.start,
+          resultRetentionRange.start
+        )
+        const resultTrackedDelete = new Range(
+          clampedStart,
+          trackedDelete.range.end - clampedStart
+        )
+        const sourceTrackedDelete = resultTrackedDelete.moveBy(sourceOffset)
 
         if (scanCursor < resultTrackedDelete.start) {
           if (retain.tracking.type === 'delete') {
@@ -573,8 +585,17 @@ class TextUpdateBuilder {
     const sourceOffset = this.sourceCursor - this.result.length
 
     for (const trackedDelete of trackedDeletes) {
-      const resultTrackDeleteRange = trackedDelete.range
-      const sourceTrackDeleteRange = trackedDelete.range.moveBy(sourceOffset)
+      // Clamp the tracked delete to the deletion range start (see applyRetain
+      // for the full explanation).
+      const clampedStart = Math.max(
+        trackedDelete.range.start,
+        resultDeletionRange.start
+      )
+      const resultTrackDeleteRange = new Range(
+        clampedStart,
+        trackedDelete.range.end - clampedStart
+      )
+      const sourceTrackDeleteRange = resultTrackDeleteRange.moveBy(sourceOffset)
 
       if (scanCursor < resultTrackDeleteRange.start) {
         this.changes.push({
