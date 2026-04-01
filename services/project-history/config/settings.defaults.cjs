@@ -15,20 +15,26 @@ module.exports = {
   },
   internal: {
     history: {
-      port: 3054,
+      port: process.env.PROJECT_HISTORY_PORT || 3054,
       host: process.env.LISTEN_ADDRESS || '127.0.0.1',
     },
   },
   apis: {
     documentupdater: {
-      url: `http://${process.env.DOCUPDATER_HOST || '127.0.0.1'}:3003`,
+      url: `http://${process.env.DOCUPDATER_HOST || '127.0.0.1'}:${
+        process.env.DOCUMENT_UPDATER_PORT || 3003
+      }`,
     },
     docstore: {
-      url: `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016`,
+      url: `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:${
+        process.env.DOCSTORE_PORT || 3016
+      }`,
     },
     filestore: {
       enabled: process.env.FILESTORE_ENABLED !== 'false',
-      url: `http://${process.env.FILESTORE_HOST || '127.0.0.1'}:3009`,
+      url: `http://${process.env.FILESTORE_HOST || '127.0.0.1'}:${
+        process.env.FILESTORE_PORT || 3009
+      }`,
     },
     web: {
       url: `http://${
@@ -42,7 +48,9 @@ module.exports = {
       ),
     },
     project_history: {
-      url: `http://${process.env.PROJECT_HISTORY_HOST || '127.0.0.1'}:3054`,
+      url: `http://${process.env.PROJECT_HISTORY_HOST || '127.0.0.1'}:${
+        process.env.PROJECT_HISTORY_PORT || 3054
+      }`,
     },
   },
   redis: {
@@ -89,8 +97,9 @@ module.exports = {
         `http://${
           process.env.V1_HISTORY_HOST ||
           process.env.HISTORY_V1_HOST ||
-          '127.0.0.1'
-        }:3100/api`,
+          '127.0.0.1'}:${
+            process.env.V1_HISTORY_PORT || 3100
+          }/api`,
       user: process.env.V1_HISTORY_USER || 'staging',
       pass: process.env.V1_HISTORY_PASSWORD || 'password',
       sync: {

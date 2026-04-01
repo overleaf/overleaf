@@ -274,16 +274,25 @@ const settings = {
 
   apis: {
     web: {
-      url: 'http://127.0.0.1:3000',
+      url: `http://${
+              process.env.WEB_API_HOST || process.env.WEB_HOST || '127.0.0.1'}:${
+                process.env.WEB_API_PORT || process.env.WEB_PORT || 3000
+              }`,
       user: httpAuthUser,
       pass: httpAuthPass,
     },
     project_history: {
       sendProjectStructureOps: true,
-      url: 'http://127.0.0.1:3054',
+      url: `http://${process.env.PROJECT_HISTORY_HOST || '127.0.0.1'}:${
+        process.env.PROJECT_HISTORY_PORT || 3054
+      }`,
     },
     v1_history: {
-      url: process.env.V1_HISTORY_URL || 'http://127.0.0.1:3100/api',
+      url:
+        process.env.V1_HISTORY_URL ||
+        `http://${process.env.V1_HISTORY_HOST || '127.0.0.1'}:${
+          process.env.V1_HISTORY_PORT || '3100'
+        }/api`,
       user: 'staging',
       pass: process.env.STAGING_PASSWORD,
       requestTimeout: parseInt(
