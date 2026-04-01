@@ -457,7 +457,6 @@ async function processMigration(input, commit) {
         recurlySubscription,
         stripeClient,
         stripeCustomer,
-        analyticsId,
         mongoUser?.email
       )
     } catch (err) {
@@ -685,7 +684,6 @@ async function performCutover(
   recurlySubscription,
   stripeClient,
   stripeCustomer,
-  analyticsId,
   mongoUserEmail
 ) {
   const adminUserId = mongoSubscription.admin_id.toString()
@@ -785,27 +783,25 @@ async function performCutover(
   }
 
   // Step 6. Send data to customer.io
-  if (analyticsId) {
-    try {
-      const migrationDate = new Date().toISOString().slice(0, 10)
-      const needsToUpdateTaxInfo =
-        (stripeCustomer.metadata?.taxInfoPending || '').length > 0
+  try {
+    const migrationDate = new Date().toISOString().slice(0, 10)
+    const needsToUpdateTaxInfo =
+      (stripeCustomer.metadata?.taxInfoPending || '').length > 0
 
-      // TODO: request Recurly account and billingInfo to verify if tax info in Stripe is up to date
+    // TODO: request Recurly account and billingInfo to verify if tax info in Stripe is up to date
 
-      CustomerIoHandler.updateUserAttributes(analyticsId, {
-        email: mongoUserEmail || stripeCustomer.email,
-        stripe_migration: {
-          migration_date: migrationDate,
-          needs_to_update_tax_id: needsToUpdateTaxInfo,
-        },
-      })
-    } catch (err) {
-      throw new ReportError(
-        'migrated-customerio-upload-failed',
-        `Successfully migrated to Stripe but failed to upload user to customer.io: ${err.message}`
-      )
-    }
+    CustomerIoHandler.updateUserAttributes(adminUserId, {
+      email: mongoUserEmail || stripeCustomer.email,
+      stripe_migration: {
+        migration_date: migrationDate,
+        needs_to_update_tax_id: needsToUpdateTaxInfo,
+      },
+    })
+  } catch (err) {
+    throw new ReportError(
+      'migrated-customerio-upload-failed',
+      `Successfully migrated to Stripe but failed to upload user to customer.io: ${err.message}`
+    )
   }
 
   // Step 7: Release subscription schedule associated with the migration

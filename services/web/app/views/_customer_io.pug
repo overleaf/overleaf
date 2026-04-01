@@ -1,7 +1,8 @@
 if(customerIoEnabled && ExposedSettings.cioWriteKey && ExposedSettings.cioSiteId)
-	script(type="text/javascript", id="cio-loader", nonce=scriptNonce, data-cio-write-key=ExposedSettings.cioWriteKey, data-cio-site-id=ExposedSettings.cioSiteId, data-session-analytics-id=getSessionAnalyticsId()).
+	script(type="text/javascript", id="cio-loader", nonce=scriptNonce, data-cio-write-key=ExposedSettings.cioWriteKey, data-cio-site-id=ExposedSettings.cioSiteId, data-session-analytics-id=getSessionAnalyticsId(), data-user-id=((user && user._id) || '')).
 		var cioSettings = document.querySelector('#cio-loader').dataset;
 		var analyticsId = cioSettings.sessionAnalyticsId;
+		var userId = cioSettings.userId;
 		var siteId = cioSettings.cioSiteId;
 		var writeKey = cioSettings.cioWriteKey;
 
@@ -19,6 +20,8 @@ if(customerIoEnabled && ExposedSettings.cioWriteKey && ExposedSettings.cioSiteId
 			);
 			if (analyticsId) {
 				analytics.setAnonymousId(analyticsId);
-				analytics.identify(analyticsId);
+			}
+			if (userId) {
+				analytics.identify(userId);
 			};
 		}}();
