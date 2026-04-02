@@ -1,7 +1,9 @@
+import { callbackify } from 'node:util'
 import OError from '@overleaf/o-error'
 import logger from '@overleaf/logger'
 import settings from '@overleaf/settings'
-import { promiseMapWithLimit, callbackifyAll } from '@overleaf/promise-utils'
+import request from 'requestretry'
+import { promisify, promiseMapWithLimit } from '@overleaf/promise-utils'
 import NotificationsBuilder from '../Notifications/NotificationsBuilder.mjs'
 import {
   V1ConnectionError,
@@ -14,7 +16,7 @@ function _makeRequestOptions(options) {
   const requestOptions = {
     method: options.method,
     basicAuth: { user: settings.apis.v1.user, password: settings.apis.v1.pass },
-    signal: AbortSignal.timeout(options.timeout ?? settings.apis.v1.timeout),
+    signal: AbortSignal.timeout(settings.apis.v1.timeout),
   }
 
   if (options.body) {
@@ -25,7 +27,7 @@ function _makeRequestOptions(options) {
 }
 
 function _responseErrorHandling(options, error) {
-  const status = error.response?.status
+  const status = error.response.status
 
   if (status >= 500) {
     throw new V1ConnectionError({
@@ -98,77 +100,94 @@ async function _affiliationRequestFetchNothing404Ok(options) {
   }
 }
 
-async function getInstitutionAffiliations(institutionId) {
-  const json = await _affiliationRequestFetchJson({
-    method: 'GET',
-    path: `/api/v2/institutions/${institutionId.toString()}/affiliations`,
-    defaultErrorMessage: "Couldn't get institution affiliations",
-  })
-  return json || []
+function getInstitutionAffiliations(institutionId, callback) {
+  makeAffiliationRequest(
+    {
+      method: 'GET',
+      path: `/api/v2/institutions/${institutionId.toString()}/affiliations`,
+      defaultErrorMessage: "Couldn't get institution affiliations",
+    },
+    (error, body) => callback(error, body || [])
+  )
 }
 
-async function getConfirmedInstitutionAffiliations(institutionId) {
-  const json = await _affiliationRequestFetchJson({
-    method: 'GET',
-    path: `/api/v2/institutions/${institutionId.toString()}/confirmed_affiliations`,
-    defaultErrorMessage: "Couldn't get institution affiliations",
-  })
-  return json || []
+function getConfirmedInstitutionAffiliations(institutionId, callback) {
+  makeAffiliationRequest(
+    {
+      method: 'GET',
+      path: `/api/v2/institutions/${institutionId.toString()}/confirmed_affiliations`,
+      defaultErrorMessage: "Couldn't get institution affiliations",
+    },
+    (error, body) => callback(error, body || [])
+  )
 }
 
-async function getInstitutionAffiliationsCounts(institutionId) {
-  const json = await _affiliationRequestFetchJson({
-    method: 'GET',
-    path: `/api/v2/institutions/${institutionId.toString()}/affiliations_counts`,
-    defaultErrorMessage: "Couldn't get institution counts",
-  })
-  return json || []
+function getInstitutionAffiliationsCounts(institutionId, callback) {
+  makeAffiliationRequest(
+    {
+      method: 'GET',
+      path: `/api/v2/institutions/${institutionId.toString()}/affiliations_counts`,
+      defaultErrorMessage: "Couldn't get institution counts",
+    },
+    (error, body) => callback(error, body || [])
+  )
 }
 
-async function getLicencesForAnalytics(lag, queryDate) {
-  const json = await _affiliationRequestFetchJson({
-    method: 'GET',
-    path: `/api/v2/institutions/institutions_licences`,
-    body: { query_date: queryDate, lag },
-    defaultErrorMessage: 'Could not get institutions licences',
-    timeout: 60_000,
-  })
-  return json
+function getLicencesForAnalytics(lag, queryDate, callback) {
+  makeAffiliationRequest(
+    {
+      method: 'GET',
+      path: `/api/v2/institutions/institutions_licences`,
+      body: { query_date: queryDate, lag },
+      defaultErrorMessage: 'Could not get institutions licences',
+      timeout: 60_000,
+    },
+    callback
+  )
 }
 
-async function getUserAffiliations(userId) {
-  const json = await _affiliationRequestFetchJson({
-    method: 'GET',
-    path: `/api/v2/users/${userId.toString()}/affiliations`,
-    defaultErrorMessage: "Couldn't get user affiliations",
-  })
-
-  const affiliations = []
-
-  if (json?.length > 0) {
-    const concurrencyLimit = 10
-    await promiseMapWithLimit(concurrencyLimit, json, async affiliation => {
-      if (affiliation.institution.confirmed) {
-        // only check groups if domain is confirmed
-        const group = (
-          await Modules.promises.hooks.fire(
-            'getGroupWithDomainCaptureByV1Id',
-            affiliation.institution.id
-          )
-        )?.[0]
-
-        if (group) {
-          affiliation.group = {
-            _id: group._id,
-            managedUsersEnabled: Boolean(group.managedUsersEnabled),
-            domainCaptureEnabled: Boolean(group.domainCaptureEnabled),
-          }
-        }
+function getUserAffiliations(userId, callback) {
+  makeAffiliationRequest(
+    {
+      method: 'GET',
+      path: `/api/v2/users/${userId.toString()}/affiliations`,
+      defaultErrorMessage: "Couldn't get user affiliations",
+    },
+    async (error, body) => {
+      if (error) {
+        return callback(error, [])
       }
-      affiliations.push(affiliation)
-    })
-  }
-  return affiliations
+
+      const affiliations = []
+
+      if (body?.length > 0) {
+        const concurrencyLimit = 10
+        await promiseMapWithLimit(concurrencyLimit, body, async affiliation => {
+          if (affiliation.institution.confirmed) {
+            // only check groups if domain is confirmed
+            const group = (
+              await Modules.promises.hooks.fire(
+                'getGroupWithDomainCaptureByV1Id',
+                affiliation.institution.id
+              )
+            )?.[0]
+
+            if (group) {
+              affiliation.group = {
+                _id: group._id,
+                managedUsersEnabled: Boolean(group.managedUsersEnabled),
+                domainCaptureEnabled: Boolean(group.domainCaptureEnabled),
+              }
+            }
+          }
+
+          affiliations.push(affiliation)
+        })
+      }
+
+      callback(null, affiliations)
+    }
+  )
 }
 
 async function getUsersNeedingReconfirmationsLapsedProcessed() {
@@ -236,50 +255,65 @@ async function removeAffiliation(userId, email) {
   })
 }
 
-async function endorseAffiliation(userId, email, role, department) {
-  await _affiliationRequestFetchNothing({
-    method: 'POST',
-    path: `/api/v2/users/${userId.toString()}/affiliations/endorse`,
-    body: { email, role, department },
-    defaultErrorMessage: "Couldn't endorse affiliation",
-  })
+function endorseAffiliation(userId, email, role, department, callback) {
+  makeAffiliationRequest(
+    {
+      method: 'POST',
+      path: `/api/v2/users/${userId.toString()}/affiliations/endorse`,
+      body: { email, role, department },
+      defaultErrorMessage: "Couldn't endorse affiliation",
+    },
+    callback
+  )
 }
 
-async function deleteAffiliations(userId) {
-  await _affiliationRequestFetchNothing({
-    method: 'DELETE',
-    path: `/api/v2/users/${userId.toString()}/affiliations`,
-    defaultErrorMessage: "Couldn't delete affiliations",
-  })
+function deleteAffiliations(userId, callback) {
+  makeAffiliationRequest(
+    {
+      method: 'DELETE',
+      path: `/api/v2/users/${userId.toString()}/affiliations`,
+      defaultErrorMessage: "Couldn't delete affiliations",
+    },
+    callback
+  )
 }
 
-// only used by syncUserEntitlements, safe to remove once that script isnt needed
-async function addEntitlement(userId, email) {
-  const json = await _affiliationRequestFetchJson({
-    method: 'POST',
-    path: `/api/v2/users/${userId}/affiliations/add_entitlement`,
-    body: { email },
-    defaultErrorMessage: "Couldn't add entitlement",
-  })
-  return json
+function addEntitlement(userId, email, callback) {
+  makeAffiliationRequest(
+    {
+      method: 'POST',
+      path: `/api/v2/users/${userId}/affiliations/add_entitlement`,
+      body: { email },
+      defaultErrorMessage: "Couldn't add entitlement",
+    },
+    callback
+  )
 }
 
-async function removeEntitlement(userId, email) {
-  await _affiliationRequestFetchNothing404Ok({
-    method: 'POST',
-    path: `/api/v2/users/${userId}/affiliations/remove_entitlement`,
-    body: { email },
-    defaultErrorMessage: "Couldn't remove entitlement",
-  })
+function removeEntitlement(userId, email, callback) {
+  makeAffiliationRequest(
+    {
+      method: 'POST',
+      path: `/api/v2/users/${userId}/affiliations/remove_entitlement`,
+      body: { email },
+      defaultErrorMessage: "Couldn't remove entitlement",
+      extraSuccessStatusCodes: [404],
+    },
+    callback
+  )
 }
 
-async function sendUsersWithReconfirmationsLapsedProcessed(users) {
-  await _affiliationRequestFetchNothing({
-    method: 'POST',
-    path: '/api/v2/institutions/reconfirmation_lapsed_processed',
-    body: { users },
-    defaultErrorMessage: 'Could not update reconfirmation_lapsed_processed_at',
-  })
+function sendUsersWithReconfirmationsLapsedProcessed(users, callback) {
+  makeAffiliationRequest(
+    {
+      method: 'POST',
+      path: '/api/v2/institutions/reconfirmation_lapsed_processed',
+      body: { users },
+      defaultErrorMessage:
+        'Could not update reconfirmation_lapsed_processed_at',
+    },
+    (error, body) => callback(error, body || [])
+  )
 }
 
 async function verifyDomainMatchesDomainMatcher(domain, institutionId) {
@@ -293,22 +327,120 @@ async function verifyDomainMatchesDomainMatcher(domain, institutionId) {
 
 const InstitutionsAPI = {
   getInstitutionAffiliations,
+
   getConfirmedInstitutionAffiliations,
+
   getInstitutionAffiliationsCounts,
+
   getLicencesForAnalytics,
+
   getUserAffiliations,
+
+  getUsersNeedingReconfirmationsLapsedProcessed: callbackify(
+    getUsersNeedingReconfirmationsLapsedProcessed
+  ),
+
+  addAffiliation: callbackify(addAffiliation),
+
+  removeAffiliation: callbackify(removeAffiliation),
+
+  endorseAffiliation,
+
+  deleteAffiliations,
+
+  addEntitlement,
+
+  removeEntitlement,
+
+  sendUsersWithReconfirmationsLapsedProcessed,
+}
+
+function makeAffiliationRequest(options, callback) {
+  if (!settings.apis.v1.url) {
+    return callback(null)
+  } // service is not configured
+  if (!options.extraSuccessStatusCodes) {
+    options.extraSuccessStatusCodes = []
+  }
+  const timeout = options.timeout ? options.timeout : settings.apis.v1.timeout
+  const requestOptions = {
+    method: options.method,
+    url: `${settings.apis.v1.url}${options.path}`,
+    body: options.body,
+    auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass },
+    json: true,
+    timeout,
+  }
+  if (options.method === 'GET') {
+    requestOptions.maxAttempts = 3
+    requestOptions.retryDelay = 500
+  } else {
+    requestOptions.maxAttempts = 0
+  }
+  request(requestOptions, function (error, response, body) {
+    if (error) {
+      return callback(
+        new V1ConnectionError('error getting affiliations from v1').withCause(
+          error
+        )
+      )
+    }
+    if (response && response.statusCode >= 500) {
+      return callback(
+        new V1ConnectionError({
+          message: 'error getting affiliations from v1',
+          info: {
+            status: response.statusCode,
+            body,
+          },
+        })
+      )
+    }
+    let isSuccess = response.statusCode >= 200 && response.statusCode < 300
+    if (!isSuccess) {
+      isSuccess = options.extraSuccessStatusCodes.includes(response.statusCode)
+    }
+    if (!isSuccess) {
+      let errorMessage
+      if (body && body.errors) {
+        errorMessage = `${response.statusCode}: ${body.errors}`
+      } else {
+        errorMessage = `${options.defaultErrorMessage}: ${response.statusCode}`
+      }
+
+      logger.warn({ path: options.path, body: options.body }, errorMessage)
+      return callback(
+        new OError(errorMessage, { statusCode: response.statusCode })
+      )
+    }
+
+    callback(null, body)
+  })
+}
+
+InstitutionsAPI.promises = {
+  getInstitutionAffiliations: promisify(
+    InstitutionsAPI.getInstitutionAffiliations
+  ),
+  getConfirmedInstitutionAffiliations: promisify(
+    InstitutionsAPI.getConfirmedInstitutionAffiliations
+  ),
+  getInstitutionAffiliationsCounts: promisify(
+    InstitutionsAPI.getInstitutionAffiliationsCounts
+  ),
+  getLicencesForAnalytics: promisify(InstitutionsAPI.getLicencesForAnalytics),
+  getUserAffiliations: promisify(InstitutionsAPI.getUserAffiliations),
   getUsersNeedingReconfirmationsLapsedProcessed,
   addAffiliation,
   removeAffiliation,
-  endorseAffiliation,
-  deleteAffiliations,
-  addEntitlement,
-  removeEntitlement,
-  sendUsersWithReconfirmationsLapsedProcessed,
+  endorseAffiliation: promisify(InstitutionsAPI.endorseAffiliation),
+  deleteAffiliations: promisify(InstitutionsAPI.deleteAffiliations),
+  addEntitlement: promisify(InstitutionsAPI.addEntitlement),
+  removeEntitlement: promisify(InstitutionsAPI.removeEntitlement),
+  sendUsersWithReconfirmationsLapsedProcessed: promisify(
+    InstitutionsAPI.sendUsersWithReconfirmationsLapsedProcessed
+  ),
   verifyDomainMatchesDomainMatcher,
 }
 
-export default {
-  promises: InstitutionsAPI,
-  ...callbackifyAll(InstitutionsAPI),
-}
+export default InstitutionsAPI
