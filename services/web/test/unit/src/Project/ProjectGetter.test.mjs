@@ -396,6 +396,14 @@ describe('ProjectGetter', function () {
   })
 
   describe('existUsersDebugProjectsOlderThan', function () {
+    beforeEach(function () {
+      vi.useFakeTimers()
+    })
+
+    afterEach(function () {
+      vi.useRealTimers()
+    })
+
     it('should check for existence of debug projects older than given days', async function (ctx) {
       const days = 10
       const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
