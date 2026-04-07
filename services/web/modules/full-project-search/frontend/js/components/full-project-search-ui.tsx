@@ -123,6 +123,12 @@ const FullProjectSearchUI: FC = () => {
 
   const searchInputRef = useRef<HTMLInputElement>(null)
 
+  useEffect(() => {
+    if (!document.activeElement?.closest('.ide-rail')) {
+      searchInputRef.current?.focus()
+    }
+  }, [])
+
   const handleKeyDown: React.KeyboardEventHandler<HTMLElement> = useCallback(
     event => {
       if (event.key === 'Escape') {
@@ -203,7 +209,6 @@ const FullProjectSearchUI: FC = () => {
                 name="search"
                 size="sm"
                 aria-label={t('search')}
-                autoFocus // eslint-disable-line jsx-a11y/no-autofocus
                 spellCheck={false}
                 autoComplete="off"
                 ref={searchInputRef}
