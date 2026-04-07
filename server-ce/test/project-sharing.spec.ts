@@ -27,7 +27,19 @@ describe('Project Sharing', function () {
   let projectName: string
   let recompile: () => void
   let waitForCompile: (triggerCompile: () => void) => void
+
+  // Link-sharing urls have to be created before disabling link sharing.
+  // We use the `beforeEach` hook to reload the server with link sharing
+  // disabled **after** the initial setup which happens in the `before`
+  // block. The `before` hook always runs prior to the `beforeEach` hook.
+
+  // Set up retained access before disabling link sharing
   beforeWithReRunOnTestRetry(() => {
+    // undo the link sharing restriction before joining via link-sharing below
+    cy.wrap(reloadWith({ withDataDir: true, pro: true }), {
+      timeout: STARTUP_TIMEOUT,
+    })
+
     projectName = getSpamSafeProjectName()
     ;({ recompile, waitForCompile } = prepareWaitForNextCompileSlot())
     setupTestProject()
@@ -424,17 +436,7 @@ describe('Project Sharing', function () {
       const retainedEditorEmail = 'collaborator-retained-editor@example.com'
       ensureUserExists({ email: retainedEditorEmail })
 
-      // Link-sharing urls have to be created before disabling link sharing.
-      // We use the `beforeEach` hook to reload the server with link sharing
-      // disabled **after** the initial setup which happens in the `before`
-      // block. The `before` hook always runs prior to the `beforeEach` hook.
-
-      // Set up retained access before disabling link sharing
       beforeWithReRunOnTestRetry(() => {
-        // undo the link sharing restriction before joining via link-sharing below
-        cy.wrap(reloadWith({ withDataDir: true, pro: true }), {
-          timeout: STARTUP_TIMEOUT,
-        })
         // Set up retained viewer access
         login(retainedViewerEmail)
         openProjectViaLinkSharingAsUser(
