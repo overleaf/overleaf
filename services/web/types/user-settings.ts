@@ -15,6 +15,7 @@ export type UserSettings = {
   autoComplete: boolean
   autoPairDelimiters: boolean
   syntaxValidation: boolean
+  previewTabs: boolean
   editorTheme: string
   editorLightTheme: string
   editorDarkTheme: string

@@ -19,6 +19,7 @@ type ProjectSettingsSetterContextValue = {
   setSyntaxValidation: (
     syntaxValidation: UserSettings['syntaxValidation']
   ) => void
+  setPreviewTabs: (previewTabs: UserSettings['previewTabs']) => void
   setMode: (mode: UserSettings['mode']) => void
   setEditorTheme: (editorTheme: UserSettings['editorTheme']) => void
   setEditorLightTheme: (
@@ -67,6 +68,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
     setAutoPairDelimiters,
     syntaxValidation,
     setSyntaxValidation,
+    previewTabs,
+    setPreviewTabs,
     editorTheme,
     setEditorTheme,
     editorLightTheme,
@@ -117,6 +120,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setAutoPairDelimiters,
       syntaxValidation,
       setSyntaxValidation,
+      previewTabs,
+      setPreviewTabs,
       editorTheme,
       setEditorTheme,
       editorLightTheme,
@@ -163,6 +168,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setAutoPairDelimiters,
       syntaxValidation,
       setSyntaxValidation,
+      previewTabs,
+      setPreviewTabs,
       editorTheme,
       setEditorTheme,
       editorLightTheme,

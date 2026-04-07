@@ -8,6 +8,7 @@ import { useEditorManagerContext } from './editor-manager-context'
 import { debugConsole } from '@/utils/debugging'
 import { disambiguatePaths } from '../util/disambiguate-paths'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 
 type PersistedTabInfo = { id: string; lifetime: Lifetime }
 
@@ -43,6 +44,8 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const { openEntity } = useFileTreeOpenContext()
   const { openDocWithId, openFileWithId } = useEditorManagerContext()
   const tabsEnabled = isSplitTestEnabled('editor-tabs')
+  const { userSettings } = useUserSettingsContext()
+  const { previewTabs } = userSettings
 
   const [openTabs, setOpenTabs] = usePersistedState<PersistedTabInfo[]>(
     `open-tabs:${projectId}`,
@@ -183,10 +186,13 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
       }
       return [
         ...current.filter(tab => tab.lifetime !== 'temporary'),
-        { id: openEntity.entity._id, lifetime: 'temporary' },
+        {
+          id: openEntity.entity._id,
+          lifetime: previewTabs ? 'temporary' : 'permanent',
+        },
       ]
     })
-  }, [openEntity, setOpenTabs, tabsEnabled])
+  }, [openEntity, previewTabs, setOpenTabs, tabsEnabled])
 
   const value = useMemo(
     () => ({ tabs, openTab, closeTab, moveTab, makeTabPermanent }),

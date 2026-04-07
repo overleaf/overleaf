@@ -101,6 +101,7 @@ export const UserSchema = new Schema(
       spellCheckLanguage: { type: String, default: 'en' },
       pdfViewer: { type: String, default: 'pdfjs' },
       syntaxValidation: { type: Boolean },
+      previewTabs: { type: Boolean, default: false },
       fontFamily: { type: String },
       lineHeight: { type: String },
       mathPreview: { type: Boolean, default: true },

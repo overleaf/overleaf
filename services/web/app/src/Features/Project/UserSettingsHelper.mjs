@@ -38,6 +38,7 @@ async function buildUserSettings(req, res, user) {
     autoPairDelimiters: user.ace.autoPairDelimiters,
     pdfViewer: user.ace.pdfViewer,
     syntaxValidation: user.ace.syntaxValidation,
+    previewTabs: user.ace.previewTabs ?? false,
     fontFamily: user.ace.fontFamily || 'lucida',
     lineHeight: user.ace.lineHeight || 'normal',
     overallTheme: await getOverallTheme(req, res, user),

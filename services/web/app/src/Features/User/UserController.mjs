@@ -406,6 +406,9 @@ async function updateUserSettings(req, res, next) {
   if (body.syntaxValidation != null) {
     user.ace.syntaxValidation = body.syntaxValidation
   }
+  if (body.previewTabs != null) {
+    user.ace.previewTabs = Boolean(body.previewTabs)
+  }
   if (body.fontFamily != null) {
     user.ace.fontFamily = body.fontFamily
   }

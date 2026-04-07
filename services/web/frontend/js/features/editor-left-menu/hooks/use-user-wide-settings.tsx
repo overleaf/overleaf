@@ -13,6 +13,7 @@ export default function useUserWideSettings() {
     autoComplete,
     autoPairDelimiters,
     syntaxValidation,
+    previewTabs,
     editorTheme,
     editorLightTheme,
     editorDarkTheme,
@@ -47,6 +48,13 @@ export default function useUserWideSettings() {
   const setSyntaxValidation = useCallback(
     (syntaxValidation: UserSettings['syntaxValidation']) => {
       saveUserSettings('syntaxValidation', syntaxValidation)
+    },
+    [saveUserSettings]
+  )
+
+  const setPreviewTabs = useCallback(
+    (previewTabs: UserSettings['previewTabs']) => {
+      saveUserSettings('previewTabs', previewTabs)
     },
     [saveUserSettings]
   )
@@ -156,6 +164,8 @@ export default function useUserWideSettings() {
     setAutoPairDelimiters,
     syntaxValidation,
     setSyntaxValidation,
+    previewTabs,
+    setPreviewTabs,
     editorTheme,
     setEditorTheme,
     editorLightTheme,

@@ -162,6 +162,7 @@ function selectEntity(
   document.dispatchEvent(
     new CustomEvent('test:selectEntity', { detail: entity })
   )
+  cy.findByRole('tab', { name: new RegExp(entity.entity.name) }).should('exist')
 }
 
 function selectDoc(id: string, path?: string[]) {
@@ -178,12 +179,13 @@ function enableEditorTabs() {
 }
 
 describe('File Tabs', function () {
-  function mountTabs(options?: { rootFolder?: any }) {
+  function mountTabs(options?: { rootFolder?: any; userSettings?: any }) {
     const rootFolder = options?.rootFolder ?? defaultRootFolder
     cy.mount(
       <EditorProviders
         rootFolder={rootFolder as any}
         rootDocId={DOC_IDS.main}
+        userSettings={options?.userSettings}
         providers={{
           EditorManagerProvider: makeEditorManagerProvider(),
         }}
@@ -285,6 +287,10 @@ describe('File Tabs', function () {
   })
 
   describe('Temporary tabs', function () {
+    beforeEach(function () {
+      mountTabs({ userSettings: { previewTabs: true } })
+    })
+
     it('opens a newly selected file as a temporary tab', function () {
       cy.then(() => selectDoc(DOC_IDS.main))
       // The first tab is temporary until a keypress
@@ -346,17 +352,25 @@ describe('File Tabs', function () {
         'tab-temporary'
       )
     })
+
+    it('opens a new tab as permanent when previewTabs is disabled', function () {
+      mountTabs({ userSettings: { previewTabs: false } })
+
+      cy.then(() => selectDoc(DOC_IDS.main))
+
+      cy.findByRole('tab', { name: /main\.tex/ }).should(
+        'not.have.class',
+        'tab-temporary'
+      )
+    })
   })
 
   describe('Closing tabs', function () {
     it('closes a tab via the close button', function () {
-      // Open main (permanent)
+      // Open main
       cy.then(() => selectDoc(DOC_IDS.main))
-      cy.get('body').type('a')
-
-      // Open intro (permanent)
+      // Open intro
       cy.then(() => selectDoc(DOC_IDS.intro))
-      cy.get('body').type('a')
 
       cy.findAllByRole('tab').should('have.length', 2)
 
@@ -384,15 +398,10 @@ describe('File Tabs', function () {
     })
 
     it('switches to an adjacent tab when closing the currently active tab', function () {
-      // Open three permanent tabs
+      // Open three tabs
       cy.then(() => selectDoc(DOC_IDS.main))
-      cy.get('body').type('a')
-
       cy.then(() => selectDoc(DOC_IDS.intro))
-      cy.get('body').type('a')
-
       cy.then(() => selectDoc(DOC_IDS.appendix))
-      cy.get('body').type('a')
 
       cy.findAllByRole('tab').should('have.length', 3)
 
@@ -408,12 +417,9 @@ describe('File Tabs', function () {
     })
 
     it('closes a tab on middle-click', function () {
-      // Open two permanent tabs
+      // Open two tabs
       cy.then(() => selectDoc(DOC_IDS.main))
-      cy.get('body').type('a')
-
       cy.then(() => selectDoc(DOC_IDS.intro))
-      cy.get('body').type('a')
 
       cy.findAllByRole('tab').should('have.length', 2)
 
@@ -428,12 +434,9 @@ describe('File Tabs', function () {
 
   describe('Tab interaction', function () {
     it('calls openDocWithId when clicking a non-selected doc tab', function () {
-      // Open two permanent tabs
+      // Open two tabs
       cy.then(() => selectDoc(DOC_IDS.main))
-      cy.get('body').type('a')
-
       cy.then(() => selectDoc(DOC_IDS.intro))
-      cy.get('body').type('a')
 
       // Click main tab
       cy.findByRole('tab', { name: /main\.tex/ }).click()
@@ -450,15 +453,13 @@ describe('File Tabs', function () {
 
       mountTabs({ rootFolder })
 
-      // Open main doc (permanent)
+      // Open main doc
       cy.then(() => selectDoc(DOC_IDS.main))
-      cy.get('body').type('a')
 
-      // Open fileRef (permanent)
+      // Open fileRef
       cy.then(() =>
         selectEntity(makeFileRefEntity(DOC_IDS.bibFile, 'refs.bib'))
       )
-      cy.get('body').type('a')
 
       // Switch back to main so refs.bib is no longer selected
       cy.findByRole('tab', { name: /main\.tex/ }).click()
@@ -472,15 +473,10 @@ describe('File Tabs', function () {
 
   describe('Drag and drop', function () {
     it('reorders tabs by dragging to the right of another tab', function () {
-      // Open three permanent tabs
+      // Open three tabs
       cy.then(() => selectDoc(DOC_IDS.main))
-      cy.get('body').type('a')
-
       cy.then(() => selectDoc(DOC_IDS.intro))
-      cy.get('body').type('a')
-
       cy.then(() => selectDoc(DOC_IDS.appendix))
-      cy.get('body').type('a')
 
       cy.findAllByRole('tab').should('have.length', 3)
 
@@ -516,15 +512,10 @@ describe('File Tabs', function () {
     })
 
     it('reorders tabs by dragging to the left of another tab', function () {
-      // Open three permanent tabs
+      // Open three tabs
       cy.then(() => selectDoc(DOC_IDS.main))
-      cy.get('body').type('a')
-
       cy.then(() => selectDoc(DOC_IDS.intro))
-      cy.get('body').type('a')
-
       cy.then(() => selectDoc(DOC_IDS.appendix))
-      cy.get('body').type('a')
 
       // Verify initial order
       cy.findAllByRole('tab').eq(0).should('contain.text', 'main.tex')
@@ -558,12 +549,9 @@ describe('File Tabs', function () {
     })
 
     it('shows a drop indicator when dragging over a tab', function () {
-      // Open two permanent tabs
+      // Open two tabs
       cy.then(() => selectDoc(DOC_IDS.main))
-      cy.get('body').type('a')
-
       cy.then(() => selectDoc(DOC_IDS.intro))
-      cy.get('body').type('a')
 
       const dataTransfer = new DataTransfer()
       dataTransfer.setData(TAB_TRANSFER_TYPE, DOC_IDS.intro)
@@ -596,15 +584,10 @@ describe('File Tabs', function () {
     })
 
     it('drops onto the tablist to move a tab to the end', function () {
-      // Open three permanent tabs
+      // Open three tabs
       cy.then(() => selectDoc(DOC_IDS.main))
-      cy.get('body').type('a')
-
       cy.then(() => selectDoc(DOC_IDS.intro))
-      cy.get('body').type('a')
-
       cy.then(() => selectDoc(DOC_IDS.appendix))
-      cy.get('body').type('a')
 
       cy.findAllByRole('tab').eq(0).should('contain.text', 'main.tex')
 
@@ -624,12 +607,9 @@ describe('File Tabs', function () {
     })
 
     it('does nothing when dropping a tab on itself', function () {
-      // Open two permanent tabs
+      // Open two tabs
       cy.then(() => selectDoc(DOC_IDS.main))
-      cy.get('body').type('a')
-
       cy.then(() => selectDoc(DOC_IDS.intro))
-      cy.get('body').type('a')
 
       cy.findAllByRole('tab').eq(0).should('contain.text', 'main.tex')
       cy.findAllByRole('tab').eq(1).should('contain.text', 'intro.tex')
@@ -686,19 +666,16 @@ describe('File Tabs', function () {
 
       // Open main.tex (unique name, no disambiguation needed)
       cy.then(() => selectDoc(DOC_IDS.main))
-      cy.get('body').type('a')
 
       // Open intro.tex from chapter-a
       cy.then(() =>
         selectDoc(DOC_IDS.introA, ['root-folder-id', FOLDER_IDS.chapterA])
       )
-      cy.get('body').type('a')
 
       // Open intro.tex from chapter-b
       cy.then(() =>
         selectDoc(DOC_IDS.introB, ['root-folder-id', FOLDER_IDS.chapterB])
       )
-      cy.get('body').type('a')
 
       cy.findAllByRole('tab').should('have.length', 3)
 
@@ -721,7 +698,6 @@ describe('File Tabs', function () {
       cy.then(() =>
         selectDoc(DOC_IDS.introA, ['root-folder-id', FOLDER_IDS.chapterA])
       )
-      cy.get('body').type('a')
 
       // With only one intro.tex open, no disambiguation is needed
       cy.findByRole('tab', { name: /intro\.tex/ }).should('exist')
@@ -744,13 +720,11 @@ describe('File Tabs', function () {
 
       // Open main doc
       cy.then(() => selectDoc(DOC_IDS.main))
-      cy.get('body').type('a')
 
       // Open a fileRef
       cy.then(() =>
         selectEntity(makeFileRefEntity(DOC_IDS.bibFile, 'refs.bib'))
       )
-      cy.get('body').type('a')
 
       cy.findByRole('tab', { name: /main\.tex/ }).should('exist')
       cy.findByRole('tab', { name: /refs\.bib/ }).should('exist')
@@ -769,9 +743,8 @@ describe('File Tabs', function () {
       const rootFolder = makeRootFolder(manyDocs)
       mountTabs({ rootFolder })
 
-      // Open main and make it permanent
+      // Open main
       cy.then(() => selectDoc(DOC_IDS.main))
-      cy.get('body').type('a')
 
       // Open all chapter tabs first so they push main.tex out of view
       for (let i = 1; i <= 10; i++) {

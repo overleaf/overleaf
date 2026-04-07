@@ -3,6 +3,7 @@ import { useLayoutContext } from '@/shared/context/layout-context'
 import AutoCloseBracketsSetting from '@/features/settings/components/editor-settings/auto-close-brackets-setting'
 import AutoCompleteSetting from '@/features/settings/components/editor-settings/auto-complete-setting'
 import CodeCheckSetting from '@/features/settings/components/editor-settings/code-check-setting'
+import PreviewTabsSetting from '@/features/settings/components/editor-settings/preview-tabs-setting'
 import KeybindingSetting from '@/features/settings/components/editor-settings/keybinding-setting'
 import PDFViewerSetting from '@/features/settings/components/editor-settings/pdf-viewer-setting'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
@@ -90,6 +91,7 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
   const { leftMenuShown, setLeftMenuShown } = useLayoutContext()
 
   const hasEmailNotifications = useFeatureFlag('email-notifications')
+  const hasEditorTabs = useFeatureFlag('editor-tabs')
 
   const allSettingsTabs: SettingsEntry[] = useMemo(
     () => [
@@ -112,6 +114,11 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
               {
                 key: 'syntaxValidation',
                 component: <CodeCheckSetting />,
+              },
+              {
+                key: 'previewTabs',
+                component: <PreviewTabsSetting />,
+                hidden: !hasEditorTabs,
               },
               {
                 key: 'mode',
@@ -264,7 +271,7 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
         hidden: !isOverleaf,
       },
     ],
-    [t, overallTheme, hasEmailNotifications, isOverleaf]
+    [t, overallTheme, hasEmailNotifications, isOverleaf, hasEditorTabs]
   )
 
   const settingsTabs = useMemo(

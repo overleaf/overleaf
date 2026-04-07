@@ -19,6 +19,7 @@ export const defaultSettings: UserSettings = {
   autoComplete: true,
   autoPairDelimiters: true,
   syntaxValidation: false,
+  previewTabs: false,
   editorTheme: 'textmate',
   editorDarkTheme: 'overleaf_dark',
   editorLightTheme: 'textmate',
