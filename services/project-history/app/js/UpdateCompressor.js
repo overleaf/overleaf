@@ -394,6 +394,16 @@ function _concatTwoUpdates(firstUpdate, secondUpdate) {
     firstOp.p <= secondOp.p && secondOp.p <= firstOp.p + firstSize
   const combinedLengthUnderLimit = firstSize + secondSize < MAX_UPDATE_SIZE
 
+  // When ops come from a multi-component update, the history position offset
+  // (hpos - p) may differ between ops because each component's hpos is computed
+  // against a different tracked-change state. Merging ops with different
+  // offsets would produce incorrect history positions, so we bail out.
+  const firstHposOffset = (firstOp.hpos ?? firstOp.p) - firstOp.p
+  const secondHposOffset = (secondOp.hpos ?? secondOp.p) - secondOp.p
+  if (firstHposOffset !== secondHposOffset) {
+    return [firstUpdate, secondUpdate]
+  }
+
   // Two inserts
   if (
     firstOp.i != null &&

@@ -877,6 +877,36 @@ describe('UpdateCompressor', function () {
         ])
       })
 
+      it('should not merge inserts with different hpos offsets (multi-component update)', function () {
+        // hpos offsets: first op has offset 10 (13-3),
+        // second op has offset 12 (18-6)
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              op: { p: 3, i: 'foo', hpos: 13 },
+              meta: { ts: this.ts1, user_id: this.user_id },
+              v: 42,
+            },
+            {
+              op: { p: 6, i: 'bar', hpos: 18 },
+              meta: { ts: this.ts2, user_id: this.user_id },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            op: { p: 3, i: 'foo', hpos: 13 },
+            meta: { ts: this.ts1, user_id: this.user_id },
+            v: 42,
+          },
+          {
+            op: { p: 6, i: 'bar', hpos: 18 },
+            meta: { ts: this.ts2, user_id: this.user_id },
+            v: 43,
+          },
+        ])
+      })
+
       it('should not merge updates from different users', function () {
         expect(
           this.UpdateCompressor.compressUpdates([
@@ -1091,6 +1121,36 @@ describe('UpdateCompressor', function () {
         ])
       })
 
+      it('should not merge deletes with different hpos offsets (multi-component update)', function () {
+        // hpos offsets: first op has offset 10 (13-3),
+        // second op has offset 12 (15-3)
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              op: { p: 3, d: 'foo', hpos: 13 },
+              meta: { ts: this.ts1, user_id: this.user_id },
+              v: 42,
+            },
+            {
+              op: { p: 3, d: 'bar', hpos: 15 },
+              meta: { ts: this.ts2, user_id: this.user_id },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            op: { p: 3, d: 'foo', hpos: 13 },
+            meta: { ts: this.ts1, user_id: this.user_id },
+            v: 42,
+          },
+          {
+            op: { p: 3, d: 'bar', hpos: 15 },
+            meta: { ts: this.ts2, user_id: this.user_id },
+            v: 43,
+          },
+        ])
+      })
+
       it('should not merge when the deletes are tracked', function () {
         // TODO: We should be able to lift that constraint, but it would
         // require recalculating the hpos on the second op.
@@ -1260,6 +1320,36 @@ describe('UpdateCompressor', function () {
           {
             op: { p: 3, i: 'fo', hpos: 13 },
             meta: { ts: this.ts1, user_id: this.user_id },
+            v: 43,
+          },
+        ])
+      })
+
+      it('should not merge insert and delete with different hpos offsets (multi-component update)', function () {
+        // hpos offsets: first op has offset 10 (13-3),
+        // second op has offset 12 (17-5)
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              op: { p: 3, i: 'foo', hpos: 13 },
+              meta: { ts: this.ts1, user_id: this.user_id },
+              v: 42,
+            },
+            {
+              op: { p: 5, d: 'o', hpos: 17 },
+              meta: { ts: this.ts2, user_id: this.user_id },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            op: { p: 3, i: 'foo', hpos: 13 },
+            meta: { ts: this.ts1, user_id: this.user_id },
+            v: 42,
+          },
+          {
+            op: { p: 5, d: 'o', hpos: 17 },
+            meta: { ts: this.ts2, user_id: this.user_id },
             v: 43,
           },
         ])
