@@ -19,12 +19,6 @@ const families = [
     ],
   },
   {
-    folder: 'font-awesome',
-    url: 'https://fontawesome.com/v4/',
-    archive: 'https://fontawesome.com/v4/assets/font-awesome-4.7.0.zip',
-    fonts: ['font-awesome-4.7.0/fonts/fontawesome-webfont.woff2'],
-  },
-  {
     folder: 'inter',
     url: 'https://github.com/rsms/inter/releases/tag/v4.1',
     archive:

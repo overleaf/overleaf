@@ -44,22 +44,6 @@
   &.dropbox-sync-icon-success {
     color: var(--content-positive);
   }
-
-  &.status-pending,
-  &.dropbox-sync-icon-updating {
-    color: var(--bg-info-01);
-
-    &::after {
-      content: '\f021';
-      position: absolute;
-      top: 0;
-      left: 50%;
-      margin-left: -20%;
-      font-size: 60%;
-      color: #fff;
-      animation: fa-spin 2s infinite linear;
-    }
-  }
 }
 
 .unboxed-setting-row {

@@ -290,10 +290,6 @@
   display: flex;
   width: 100%;
 
-  .fa-warning {
-    margin-right: $spacing-05;
-  }
-
   .btn-reconfirm {
     float: right;
     margin-left: $spacing-05;
@@ -326,10 +322,6 @@
         .reconfirm-notification {
           background-color: var(--notification-reconfirmation-bg);
           border-radius: $border-radius-base;
-
-          .fa-warning {
-            color: var(--notification-icon-warning);
-          }
         }
       }
     }

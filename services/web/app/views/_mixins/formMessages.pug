@@ -72,12 +72,6 @@ mixin customFormMessageNewStyle(key, kind, extraClass = 'mb-3')
 			.notification-content.text-left
 				block
 
-mixin customValidationMessage(key)
-	.invalid-feedback.mt-2(hidden data-ol-custom-form-message=key)
-		i.fa.fa-fw.fa-warning.me-1(aria-hidden='true')
-		div
-			block
-
 mixin customValidationMessageNewStyle(key)
 	.notification.notification-type-error(hidden data-ol-custom-form-message=key)
 		.notification-icon

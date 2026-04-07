@@ -44,7 +44,7 @@ mixin linkPlansAndPricing(linkText, linkClass)
 	a(href='/user/subscription/plans' class=linkClass)
 		| #{linkText ? linkText : 'plans and pricing'}
 
-mixin linkPrintNewTab(linkText, linkClass, icon, track)
+mixin linkPrintNewTab(linkText, linkClass, track)
 	- var gaCategory = track && track.category ? track.category : null
 	- var gaAction = track && track.action ? track.action : null
 	- var gaLabel = track && track.label ? track.label : null
@@ -64,9 +64,6 @@ mixin linkPrintNewTab(linkText, linkClass, icon, track)
 		target='_BLANK'
 		rel='noopener noreferrer'
 	)
-		if icon
-			i(class='fa fa-print')
-			| &nbsp;
 		span #{linkText ? linkText : 'print'}
 
 mixin linkSignIn(linkText, linkClass, redirect)
