@@ -83,17 +83,15 @@ function DropdownItem(
       ref={ref}
     >
       {leadingIconComponent}
-      <div
-        className={classnames({
-          'dropdown-item-description-container': description,
-        })}
-      >
-        {children}
-        {trailingIconComponent}
-        {description && (
+      {description ? (
+        <span className="dropdown-item-description-container">
+          {children}
           <span className="dropdown-item-description">{description}</span>
-        )}
-      </div>
+        </span>
+      ) : (
+        children
+      )}
+      {trailingIconComponent}
     </BS5DropdownItem>
   )
 }

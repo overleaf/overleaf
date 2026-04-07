@@ -64,18 +64,13 @@ export function setupSearch(formEl: Element) {
         linkEl.setAttribute('role', 'menuitem')
         liEl.append(linkEl)
 
-        const contentWrapperEl = document.createElement('div')
+        const contentWrapperEl = document.createElement('span')
         contentWrapperEl.className = 'dropdown-item-description-container'
         linkEl.append(contentWrapperEl)
 
-        const pageNameEl = document.createElement('div')
+        const pageNameEl = document.createElement('span')
         pageNameEl.innerHTML = DOMPurify.sanitize(rawPageName)
         contentWrapperEl.append(pageNameEl)
-
-        const iconEl = materialIcon('open_in_new')
-        iconEl.classList.add('dropdown-item-trailing-icon')
-        iconEl.setAttribute('aria-hidden', 'true')
-        contentWrapperEl.append(iconEl)
 
         if (sectionName) {
           const sectionEl = document.createElement('span')
@@ -83,6 +78,11 @@ export function setupSearch(formEl: Element) {
           sectionEl.innerHTML = DOMPurify.sanitize(sectionName)
           contentWrapperEl.append(sectionEl)
         }
+
+        const iconEl = materialIcon('open_in_new')
+        iconEl.classList.add('dropdown-item-trailing-icon')
+        iconEl.setAttribute('aria-hidden', 'true')
+        linkEl.append(iconEl)
 
         resultsContainerEl.append(liEl)
       }

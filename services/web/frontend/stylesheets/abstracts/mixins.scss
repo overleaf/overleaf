@@ -117,7 +117,8 @@
 }
 
 @mixin box-shadow-button-input {
-  box-shadow: 0 0 0 2px var(--blue-30);
+  box-shadow: inset 0 0 0 2px var(--blue-30);
+  outline: 2px solid transparent;
 }
 
 @mixin animation($animation) {
