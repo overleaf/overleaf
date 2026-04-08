@@ -741,11 +741,11 @@ module.exports = {
 
   // Maximum Delay before sending comment mention notifications
   notificationMaxDelay:
-    parseInt(process.env.COMMENT_MENTION_DELAY_MINUTES) || 30 * 60 * 1000, // 30 minutes
+    parseInt(process.env.COMMENT_MENTION_DELAY_MS) || 30 * 60 * 1000, // 30 minutes
 
   // Comment mention notifications will wait at least this long before being sent
   notificationMinDelay:
-    parseInt(process.env.COMMENT_MENTION_DELAY_MINUTES) || 10 * 60 * 1000, // 10 minutes
+    parseInt(process.env.COMMENT_MENTION_DELAY_MS) || 10 * 60 * 1000, // 10 minutes
 
   // Maximum JSON size in HTTP requests
   // We should be able to process twice the max doc length, to allow for
