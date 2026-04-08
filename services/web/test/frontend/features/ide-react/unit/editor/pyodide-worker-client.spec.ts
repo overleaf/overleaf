@@ -32,7 +32,7 @@ class WorkerMock {
 
   emitMessage(message: unknown) {
     for (const listener of this.messageListeners) {
-      listener({ data: message } as MessageEvent)
+      listener({ data: message, target: this } as unknown as MessageEvent)
     }
   }
 }
@@ -152,5 +152,84 @@ describe('PyodideWorkerClient', function () {
     client.destroy()
 
     expect(worker.terminated).to.equal(true)
+  })
+
+  describe('stop', function () {
+    it('terminates the current worker and creates a new one', function () {
+      const client = new PyodideWorkerClient({
+        baseAssetPath: BASE_ASSET_PATH,
+      })
+      const originalWorker = WorkerMock.instances[0]
+      originalWorker.emitMessage({ type: 'listening' })
+      originalWorker.emitMessage({ type: 'loaded' })
+
+      client.stop()
+
+      expect(originalWorker.terminated).to.equal(true)
+      expect(WorkerMock.instances).to.have.length(2)
+    })
+
+    it('sends init to the new worker once it reports listening', function () {
+      const client = new PyodideWorkerClient({
+        baseAssetPath: BASE_ASSET_PATH,
+      })
+      const originalWorker = WorkerMock.instances[0]
+      originalWorker.emitMessage({ type: 'listening' })
+      originalWorker.emitMessage({ type: 'loaded' })
+
+      client.stop()
+
+      const newWorker = WorkerMock.instances[1]
+      expect(newWorker.postedMessages).to.have.length(0)
+
+      newWorker.emitMessage({ type: 'listening' })
+      expect(newWorker.postedMessages).to.deep.equal([
+        { type: 'init', baseAssetPath: BASE_ASSET_PATH },
+      ])
+    })
+
+    it('allows running code on the new worker after stop', function () {
+      const client = new PyodideWorkerClient({
+        baseAssetPath: BASE_ASSET_PATH,
+      })
+      const originalWorker = WorkerMock.instances[0]
+      originalWorker.emitMessage({ type: 'listening' })
+      originalWorker.emitMessage({ type: 'loaded' })
+
+      client.stop()
+
+      const newWorker = WorkerMock.instances[1]
+      newWorker.emitMessage({ type: 'listening' })
+      newWorker.emitMessage({ type: 'loaded' })
+
+      client.runCode('print("after stop")', {
+        requestId: 'main.py',
+        files: [],
+      })
+
+      const runRequest = newWorker.postedMessages.find(
+        (message: any) => message.type === 'run-code'
+      )
+      expect(runRequest).to.include({
+        type: 'run-code',
+        id: 'main.py',
+        code: 'print("after stop")',
+      })
+    })
+
+    it('is a no-op after destroy', function () {
+      const client = new PyodideWorkerClient({
+        baseAssetPath: BASE_ASSET_PATH,
+      })
+      const originalWorker = WorkerMock.instances[0]
+      originalWorker.emitMessage({ type: 'listening' })
+      originalWorker.emitMessage({ type: 'loaded' })
+
+      client.destroy()
+      client.stop()
+
+      // No new worker should have been created
+      expect(WorkerMock.instances).to.have.length(1)
+    })
   })
 })

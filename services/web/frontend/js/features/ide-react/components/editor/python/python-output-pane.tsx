@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import path from 'path-browserify'
 import OLButton from '@/shared/components/ol/ol-button'
 import OLButtonToolbar from '@/shared/components/ol/ol-button-toolbar'
@@ -10,6 +11,7 @@ import getMeta from '@/utils/meta'
 import { PyodideWorkerClient } from './pyodide-worker-client'
 
 export default function PythonOutputPane() {
+  const { t } = useTranslation()
   const { currentDocument, currentDocumentId } = useEditorOpenDocContext()
   const { pathInFolder } = useFileTreePathContext()
   const clientRef = useRef<PyodideWorkerClient | null>(null)
@@ -17,8 +19,8 @@ export default function PythonOutputPane() {
   const [isReady, setIsReady] = useState(false)
   const [output, setOutput] = useState<string[]>([])
   const [isRunning, setIsRunning] = useState(false)
-  const [isLoadingPyodide, setIsLoadingPyodide] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isLoadingPyodide, setIsLoadingPyodide] = useState(true)
 
   const appendOutput = useCallback((line: string) => {
     setOutput(previousOutput => [...previousOutput, line])
@@ -46,8 +48,8 @@ export default function PythonOutputPane() {
 
         case 'loading-failed':
           debugConsole.error('Failed to load Python runtime', event.error)
-          setError(formatError(event.error))
           setIsLoadingPyodide(false)
+          setError(formatError(event.error))
           setIsRunning(false)
           return
 
@@ -136,21 +138,39 @@ export default function PythonOutputPane() {
     }
   }, [buildCurrentDocumentSyncFile, isReady])
 
+  const handleStop = useCallback(() => {
+    const client = clientRef.current
+    if (!client) {
+      return
+    }
+
+    currentRequestIdRef.current = null
+    client.stop()
+    setIsRunning(false)
+    setIsReady(false)
+    setIsLoadingPyodide(true)
+    appendOutput(t('execution_stopped'))
+  }, [appendOutput, t])
+
   return (
     <div className="ide-redesign-python-output-pane">
       <OLButtonToolbar className="toolbar toolbar-pdf toolbar-pdf-hybrid">
         <div className="toolbar-pdf-left">
           <div className="compile-button-group">
             <OLButton
-              onClick={handleRun}
-              variant="primary"
+              onClick={isRunning ? handleStop : handleRun}
+              variant={isRunning ? 'danger' : 'primary'}
               className="compile-button align-items-center py-0 px-3"
-              disabled={!isReady || isLoadingPyodide || isRunning}
-              aria-label="Run Python Code"
-              style={{ borderRadius: '12px' }}
+              disabled={!isRunning && !isReady}
+              aria-label={
+                isRunning ? t('stop_python_execution') : t('run_python_code')
+              }
             >
-              {isRunning ? 'Running...' : 'Run'}
-              <MaterialIcon type="play_arrow" className="ml-2" />
+              {isRunning ? t('stop') : t('run')}
+              <MaterialIcon
+                type={isRunning ? 'stop' : 'play_arrow'}
+                className="ml-2"
+              />
             </OLButton>
           </div>
         </div>
@@ -159,12 +179,12 @@ export default function PythonOutputPane() {
       <div className="ide-redesign-python-output-pane-body">
         {isLoadingPyodide && (
           <div className="ide-redesign-python-output-pane-placeholder">
-            Loading Python runtime...
+            {t('loading_python_runtime')}
           </div>
         )}
         {!isLoadingPyodide && !error && output.length === 0 && (
           <div className="ide-redesign-python-output-pane-placeholder">
-            Run the current script to see output.
+            {t('run_current_script_to_see_output')}
           </div>
         )}
         {error && (

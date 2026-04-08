@@ -475,6 +475,7 @@ const _ProjectController = {
       'testing-ai-usage',
       'wf-fake-non-english-suggestions',
       'editor-tabs',
+      'overleaf-code',
     ].filter(Boolean)
 
     const getUserValues = async userId =>

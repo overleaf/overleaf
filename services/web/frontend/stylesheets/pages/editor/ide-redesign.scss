@@ -68,6 +68,10 @@
   background-color: var(--ide-redesign-background);
   color: var(--ide-redesign-color);
   border-top: 1px solid var(--border-divider);
+
+  .compile-button-group {
+    border-radius: var(--ds-border-radius-300);
+  }
 }
 
 .ide-redesign-python-output-pane-body {

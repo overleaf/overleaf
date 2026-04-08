@@ -19,6 +19,7 @@ export type LifecycleCallback = (
 
 export class PyodideWorkerClient {
   private worker: Worker
+  private baseAssetPath: string
   private listening = false
   private loaded = false
   private destroyed = false
@@ -28,19 +29,12 @@ export class PyodideWorkerClient {
   private lifecycleCallback: LifecycleCallback | null = null
 
   constructor(options: { baseAssetPath: string }) {
-    const { baseAssetPath } = options
-
-    this.worker = new Worker(
-      /* webpackChunkName: "pyodide-worker" */
-      new URL('./pyodide.worker.ts', import.meta.url),
-      { type: 'module' }
-    )
-
-    this.worker.addEventListener('message', this.receive.bind(this))
+    this.baseAssetPath = options.baseAssetPath
+    this.worker = this.createWorker()
 
     this.queueMessage({
       type: 'init',
-      baseAssetPath,
+      baseAssetPath: this.baseAssetPath,
     })
   }
 
@@ -80,6 +74,28 @@ export class PyodideWorkerClient {
     })
   }
 
+  stop(): void {
+    if (this.destroyed) {
+      return
+    }
+
+    // Terminate the current worker immediately
+    this.worker.terminate()
+    this.pendingMessages.length = 0
+
+    // Reset state for the new worker
+    this.listening = false
+    this.loaded = false
+    this.loadingError = null
+
+    // Create a fresh worker and re-initialize Pyodide
+    this.worker = this.createWorker()
+    this.queueMessage({
+      type: 'init',
+      baseAssetPath: this.baseAssetPath,
+    })
+  }
+
   destroy() {
     if (this.destroyed) {
       return
@@ -95,6 +111,16 @@ export class PyodideWorkerClient {
     this.worker.terminate()
   }
 
+  private createWorker(): Worker {
+    const worker = new Worker(
+      /* webpackChunkName: "pyodide-worker" */
+      new URL('./pyodide.worker.ts', import.meta.url),
+      { type: 'module' }
+    )
+    worker.addEventListener('message', this.receive)
+    return worker
+  }
+
   private queueMessage(message: PyodideWorkerRequest) {
     if (this.listening) {
       this.worker.postMessage(message)
@@ -103,7 +129,12 @@ export class PyodideWorkerClient {
     }
   }
 
-  private receive(event: MessageEvent<PyodideWorkerResponse>) {
+  private receive = (event: MessageEvent<PyodideWorkerResponse>) => {
+    // Discard messages from a previously terminated worker
+    if (event.target !== this.worker) {
+      return
+    }
+
     const response = event.data
 
     switch (response.type) {
