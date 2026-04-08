@@ -20,6 +20,11 @@ export const DomainVerificationSchema = new Schema(
     verificationAttemptCount: { type: Number, default: 0 },
     groupId: Schema.Types.ObjectId,
     lastVerificationAttemptAt: Date,
+    lastFailureReason: {
+      type: String,
+      enum: ['no_record', 'wrong_token', 'dns_error'],
+      default: null,
+    },
   },
   {
     collection: 'domainVerifications',
