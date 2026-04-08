@@ -343,4 +343,8 @@ h4.group-settings-title {
   .domain-verification-status-table-cell {
     text-wrap: nowrap;
   }
+
+  .domain-verification-failure-reason {
+    margin-bottom: var(--spacing-05);
+  }
 }
