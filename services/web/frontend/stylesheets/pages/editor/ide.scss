@@ -162,6 +162,12 @@ $editor-toggler-bg-dark-color: color.adjust(
   }
 }
 
+.docx-modal-list {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
 .out-of-sync-modal {
   .text-preview {
     margin-top: var(--spacing-05);

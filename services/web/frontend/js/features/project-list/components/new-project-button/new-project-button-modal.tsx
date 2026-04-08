@@ -32,8 +32,12 @@ function NewProjectButtonModal({ modal, onHide }: NewProjectButtonModalProps) {
   const location = useLocation()
 
   const openProject = useCallback(
-    (projectId: string) => {
-      location.assign(`/project/${projectId}`)
+    (projectId: string, isConvertedFromDocx: boolean = false) => {
+      const url = isConvertedFromDocx
+        ? `/project/${projectId}?converted-from-docx=true`
+        : `/project/${projectId}`
+
+      location.assign(url)
     },
     [location]
   )
