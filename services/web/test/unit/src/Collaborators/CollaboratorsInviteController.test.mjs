@@ -70,7 +70,7 @@ describe('CollaboratorsInviteController', function () {
     ctx.UserGetter = {
       promises: {
         getUserByAnyEmail: sinon.stub(),
-        getUser: sinon.stub(),
+        getUser: sinon.stub().resolves(ctx.currentUser),
       },
     }
 
@@ -1600,6 +1600,7 @@ describe('CollaboratorsInviteController', function () {
           ctx.req.ip,
           {
             inviteId: ctx.invite._id,
+            collaboratorEmail: ctx.invite.email,
             role: ctx.role,
           }
         )
@@ -1689,6 +1690,7 @@ describe('CollaboratorsInviteController', function () {
           ctx.req.ip,
           {
             inviteId: ctx.invite._id,
+            collaboratorEmail: ctx.invite.email,
             privileges: ctx.privileges,
           }
         )

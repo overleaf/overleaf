@@ -204,6 +204,7 @@ async function revokeInvite(req, res) {
       req.ip,
       {
         inviteId: invite._id,
+        collaboratorEmail: invite.email,
         role: CollaboratorsInviteHelper.privilegeLevelToRole(invite.privileges),
       }
     )
@@ -380,6 +381,7 @@ async function acceptInvite(req, res) {
     req.ip,
     {
       inviteId: invite._id,
+      collaboratorEmail: invite.email,
       privileges: invite.privileges,
     }
   )

@@ -17,6 +17,7 @@ import LimitationsManager from '../Subscription/LimitationsManager.mjs'
 import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
 import { z, zz, parseReq } from '../../infrastructure/Validation.mjs'
 import Features from '../../infrastructure/Features.mjs'
+import UserGetter from '../User/UserGetter.mjs'
 
 const { hasAdminAccess } = AdminAuthorizationHelper
 const ObjectId = mongodb.ObjectId
@@ -39,12 +40,20 @@ async function removeUserFromProject(req, res, next) {
     members: true,
   })
 
+  const removedUser = await UserGetter.promises.getUser(
+    { _id: userId },
+    { email: 1 }
+  )
+
   ProjectAuditLogHandler.addEntryInBackground(
     projectId,
     'remove-collaborator',
     sessionUserId,
     req.ip,
-    { userId }
+    {
+      userId,
+      collaboratorEmail: removedUser?.email,
+    }
   )
 
   res.sendStatus(204)

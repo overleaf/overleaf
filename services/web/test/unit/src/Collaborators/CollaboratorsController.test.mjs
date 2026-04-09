@@ -19,7 +19,7 @@ describe('CollaboratorsController', function () {
     ctx.res = new MockResponse(vi)
     ctx.req = new MockRequest(vi)
 
-    ctx.user = { _id: new ObjectId() }
+    ctx.user = { _id: new ObjectId(), email: 'user@example.com' }
     ctx.projectId = new ObjectId()
     ctx.callback = sinon.stub()
 
@@ -50,6 +50,13 @@ describe('CollaboratorsController', function () {
     ctx.SessionManager = {
       getSessionUser: sinon.stub().returns(ctx.user),
       getLoggedInUserId: sinon.stub().returns(ctx.user._id),
+    }
+
+    ctx.UserGetter = {
+      promises: {
+        getAllInvitedMembers: sinon.stub(),
+        getUser: sinon.stub().resolves(ctx.user),
+      },
     }
     ctx.OwnershipTransferHandler = {
       promises: {
@@ -133,6 +140,10 @@ describe('CollaboratorsController', function () {
       })
     )
 
+    vi.doMock('../../../../app/src/Features/User/UserGetter.mjs', () => ({
+      default: ctx.UserGetter,
+    }))
+
     vi.doMock(
       '../../../../app/src/Features/TokenAccess/TokenAccessHandler.mjs',
       () => ({
@@ -207,13 +218,23 @@ describe('CollaboratorsController', function () {
       )
     })
 
+    it('should look up the collaborator email', function (ctx) {
+      expect(ctx.UserGetter.promises.getUser).to.have.been.calledWith(
+        { _id: ctx.user._id },
+        { email: 1 }
+      )
+    })
+
     it('should write a project audit log', function (ctx) {
       ctx.ProjectAuditLogHandler.addEntryInBackground.should.have.been.calledWith(
         ctx.projectId,
         'remove-collaborator',
         ctx.user._id,
         ctx.req.ip,
-        { userId: ctx.user._id }
+        {
+          userId: ctx.user._id,
+          collaboratorEmail: 'user@example.com',
+        }
       )
     })
   })
