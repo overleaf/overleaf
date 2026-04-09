@@ -1,0 +1,465 @@
+// Styles for plans_2026.pug (plans-2026-phase-1 split test).
+// All rules are scoped to .plans-new-design or sub-selectors that
+// only appear in plans_2026.pug, so plans.pug is unaffected.
+
+.plans-new-design {
+  .plans-and-pricing-section {
+    padding-block: var(--spacing-09);
+
+    &:first-of-type {
+      padding-block-start: var(--spacing-10);
+    }
+
+    @include media-breakpoint-up(md) {
+      padding-block: var(--spacing-13);
+
+      &:first-of-type {
+        padding-block-start: var(--spacing-15);
+      }
+    }
+  }
+
+  // Period toggle switch — used only by _plans-period-toggle.pug
+  .plans-period-switch-wrapper {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--spacing-04);
+  }
+
+  .plans-period-label {
+    font-size: var(--font-size-02);
+    font-weight: 400;
+    line-height: var(--line-height-02);
+    margin: 0;
+
+    @include media-breakpoint-up(md) {
+      font-size: var(--font-size-03);
+      line-height: var(--line-height-03);
+    }
+  }
+
+  .plans-period-switch-discount-badge {
+    color: var(--neutral-60);
+    font-size: var(--font-size-01);
+  }
+
+  // Card-specific period spacings — scoped to .plans-cards-section
+  // so plans.pug is unaffected
+  &[data-ol-current-plan-period='annual'] {
+    .plans-cards-section .card-cta > .show-for-plan-period-annual {
+      display: grid;
+      grid-row: span 2;
+      grid-template-rows: subgrid;
+      padding-block-end: 0;
+    }
+
+    .plans-cards-section
+      .card-includes-list
+      .card-includes-list-item.show-for-plan-period-annual {
+      display: flex;
+    }
+
+    .plans-cards-section .show-for-plan-period-annual {
+      padding-block-end: var(--spacing-07);
+      position: relative;
+    }
+  }
+
+  &[data-ol-current-plan-period='monthly'] {
+    .plans-cards-section .card-cta > .show-for-plan-period-monthly {
+      display: grid;
+      grid-row: span 2;
+      grid-template-rows: subgrid;
+    }
+
+    .plans-cards-section
+      .card-includes-list
+      .card-includes-list-item.show-for-plan-period-monthly {
+      display: flex;
+    }
+
+    .plans-cards-section .plans-new-group-member-picker {
+      display: none;
+    }
+  }
+
+  // ─── Plan cards ──────────────────────────────────────────────────────────────
+
+  .plans-cards-section {
+    background-color: var(--bg-light-primary);
+
+    .plans-cards-content {
+      padding-block: var(--spacing-08);
+    }
+
+    .plans-cards-toggles {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .plans-new-period-switcher-container {
+      background: none;
+      border-radius: 0;
+      gap: var(--spacing-04);
+      margin-bottom: 0;
+      margin-top: 0;
+      padding: 0;
+      position: static;
+
+      label {
+        font-size: var(--font-size-02);
+        font-weight: 400;
+        padding: 0;
+
+        @include media-breakpoint-up(md) {
+          font-size: var(--font-size-03);
+        }
+
+        &:hover {
+          background-color: transparent;
+          cursor: default;
+        }
+      }
+    }
+
+    .plans-period-switch-wrapper,
+    .plans-student-info-icon,
+    .plans-student-toggle-wrapper {
+      align-items: center;
+      display: inline-flex;
+    }
+
+    .plans-student-info-icon {
+      color: var(--content-secondary);
+      cursor: default;
+      font-size: var(--font-size-05);
+    }
+
+    .plans-student-toggle-wrapper {
+      gap: var(--spacing-04);
+    }
+
+    .plans-student-toggle-label-container {
+      position: relative;
+    }
+
+    &:not([data-ol-student-mode='true']) .plans-price-student,
+    &:not([data-ol-student-mode='true']) .show-for-plan-type-student {
+      display: none;
+    }
+
+    &[data-ol-student-mode='true'] {
+      .plans-new-group-member-picker,
+      .plans-educational-discount {
+        display: none;
+      }
+
+      .show-for-plan-type-student {
+        display: block;
+      }
+
+      .plans-card-col.show-for-plan-type-student {
+        display: grid;
+      }
+
+      .plans-card-col[data-ol-disabled-for-student='true'] {
+        display: none;
+      }
+
+      @include media-breakpoint-up(xl) {
+        .plans-cards-row-wrapper {
+          grid-auto-columns: auto;
+          grid-auto-flow: row;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+    }
+
+    .plans-cards-row-wrapper {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 90%;
+      grid-template-rows: 1fr auto auto auto;
+      column-gap: var(--spacing-04);
+      overflow-x: auto;
+      padding-top: var(--spacing-08);
+      padding-bottom: var(--spacing-06);
+      -webkit-overflow-scrolling: touch;
+
+      @include media-breakpoint-up(md) {
+        grid-auto-columns: 60%;
+      }
+
+      @include media-breakpoint-up(lg) {
+        grid-auto-columns: 50%;
+      }
+
+      @include media-breakpoint-up(xl) {
+        grid-auto-columns: auto;
+        grid-auto-flow: row;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        overflow-x: visible;
+        padding-bottom: 0;
+      }
+    }
+
+    .plans-card-col {
+      display: grid;
+      grid-row: span 4;
+      grid-template-rows: subgrid;
+      min-width: 280px;
+
+      @include media-breakpoint-up(xl) {
+        min-width: 0;
+      }
+    }
+
+    .price-plan-card {
+      background-color: var(--bg-light-primary);
+      border: 1px solid var(--neutral-30);
+      border-radius: var(--border-radius-medium);
+      color: var(--neutral-60);
+      display: grid;
+      grid-row: span 4;
+      grid-template-rows: subgrid;
+      position: relative;
+      width: 100%;
+
+      &[data-ol-plan-type='free'] {
+        background-color: var(--bg-light-secondary);
+      }
+
+      &.price-plan-card-highlighted {
+        border: 3px solid var(--green-50);
+        border-radius: var(--border-radius-medium);
+        outline: var(--spacing-02) solid var(--green-bright-tint-50);
+        outline-offset: 0;
+      }
+
+      .price-plan-card-badge {
+        @extend .mono-text;
+
+        background-color: var(--green-bright-tint-50);
+        border-radius: var(--border-radius-medium);
+        color: var(--neutral-90);
+        font-size: var(--font-size-03);
+        left: 50%;
+        padding: var(--spacing-04) var(--spacing-06);
+        position: absolute;
+        top: 0;
+        transform: translate(-50%, -50%);
+        white-space: nowrap;
+      }
+    }
+
+    .card-content-top {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-05);
+      padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x) var(--spacing-05);
+    }
+
+    .card-picker-area {
+      &:not(:empty) {
+        padding: 0 var(--bs-card-spacer-x) var(--spacing-05);
+      }
+    }
+
+    .card-cta {
+      align-self: start;
+      display: grid;
+      grid-row: span 2;
+      grid-template-rows: subgrid;
+
+      --secondary-cta-top-padding: var(--spacing-04);
+
+      // Secondary CTA (e.g. "Try for free →") spacing.
+      // padding-top is calculated because the a.btn inside already has top
+      // padding --spacing-03, while .plans-cta-plain-link has
+      // var(--spacing-04)
+      > .only-show-for-specific-plan-period > .plans-cta:nth-child(2) {
+        align-self: start;
+        padding-top: calc(var(--secondary-cta-top-padding) - var(--spacing-03));
+      }
+
+      // Plain-link and edu discount occupy row 4 of the PAGE subgrid.
+      // Edu discount lives inside the annual period wrapper (a subgrid child),
+      // so two levels of '>' are needed. Plain-link is a direct card-cta child.
+      > .plans-cta-plain-link {
+        align-self: start;
+        grid-row: 4;
+        padding-top: var(--secondary-cta-top-padding);
+      }
+
+      > .only-show-for-specific-plan-period > .plans-educational-discount {
+        align-self: center;
+        grid-row: 4;
+        padding-top: var(--spacing-04);
+      }
+    }
+
+    .card-eyebrow {
+      color: var(--green-60);
+      font-size: var(--font-size-05);
+      font-weight: 600;
+    }
+
+    .card-title {
+      color: var(--content-primary);
+      font-size: var(--font-size-07);
+      font-weight: 600;
+      margin-block: 0;
+    }
+
+    .plans-price-card-yearly-summary,
+    .student-plan-saving-badge {
+      font-size: var(--font-size-02);
+      line-height: var(--line-height-02);
+      position: absolute;
+    }
+
+    .card-title-suffix {
+      font-size: var(--font-size-03);
+      font-weight: 400;
+    }
+
+    .card-description {
+      color: var(--neutral-60);
+      margin-block: 0;
+    }
+
+    .card-includes-list {
+      display: flex;
+      flex-direction: column;
+      font-size: var(--font-size-02);
+      gap: var(--spacing-03);
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .card-includes-list-item.only-show-for-specific-plan-period {
+      display: none;
+    }
+
+    .card-includes-list-heading {
+      color: var(--content-primary);
+
+      &::first-letter {
+        text-transform: uppercase;
+      }
+    }
+
+    li.card-includes-list-item {
+      display: flex;
+      align-items: baseline;
+
+      &::before {
+        color: var(--neutral-40);
+        content: '\2022';
+        flex-shrink: 0;
+        margin-right: var(--spacing-03);
+      }
+    }
+
+    .card-include-has-tooltip {
+      border-bottom: 1px dotted var(--content-secondary);
+      cursor: help;
+    }
+
+    .plans-cta-plain-link {
+      color: var(--content-secondary);
+      font-size: var(--font-size-02);
+      text-align: center;
+      text-decoration: underline;
+
+      &:hover {
+        color: var(--content-primary);
+      }
+    }
+
+    .card-footer {
+      background-color: transparent;
+      border: none;
+      border-radius: 0;
+      display: grid;
+      grid-row: span 2;
+      grid-template-rows: subgrid;
+      padding: 0 var(--spacing-08) var(--spacing-08);
+    }
+
+    .plans-educational-discount-label {
+      align-items: center;
+      color: var(--content-primary);
+      cursor: pointer;
+      display: flex;
+      gap: var(--spacing-03);
+      justify-content: center;
+      margin: 0;
+      text-align: center;
+
+      &:has(input:disabled) {
+        color: var(--content-secondary);
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+    }
+
+    .plans-educational-discount-checkbox {
+      background-color: var(--bg-light-primary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--border-radius-base);
+      flex-shrink: 0;
+      height: 16px;
+      width: 16px;
+
+      &:disabled {
+        background-color: var(--bg-light-tertiary);
+        border-color: var(--bg-light-tertiary);
+      }
+    }
+
+    .plans-educational-discount-text {
+      cursor: help;
+      font-size: var(--font-size-02);
+      font-weight: 400;
+      line-height: var(--line-height-02);
+      text-decoration: underline dotted;
+      text-underline-offset: var(--spacing-01);
+    }
+
+    // Group member picker overrides inside cards
+    .plans-new-group-member-picker {
+      background-color: var(--bg-light-secondary);
+      border: 1px solid var(--neutral-20);
+      border-radius: var(--border-radius-medium);
+      padding: var(--spacing-04);
+      position: relative;
+
+      ul.plans-new-group-member-picker-list {
+        position: absolute;
+        left: 0;
+        right: 0;
+        z-index: 10;
+      }
+    }
+  }
+
+  .plans-cards-section .plans-cta .btn-ghost {
+    color: var(--green-50);
+    font-family: 'DM Mono', monospace;
+    font-size: var(--font-size-02);
+    font-weight: 500;
+    letter-spacing: -1px;
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+
+  .plans-cta-arrow {
+    margin-left: var(--spacing-02);
+    padding-bottom: 3px;
+    vertical-align: middle;
+  }
+}

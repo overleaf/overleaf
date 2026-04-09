@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 /* Website redesign */
 $vivid-tangerine: #f1a695;
 $ceil: #9597c9;
@@ -7,6 +9,7 @@ $sapphire-blue: #4354a3;
 $sapphire-blue-dark: #3c4c93;
 $purple-bright: #939aff;
 $green-bright: #13c965;
+$green-bright-tint-50: color.mix($green-bright, #fff, 50%);
 
 :root {
   --vivid-tangerine: #{$vivid-tangerine};
@@ -16,5 +19,6 @@ $green-bright: #13c965;
   --sapphire-blue: #{$sapphire-blue};
   --sapphire-blue-dark: #{$sapphire-blue-dark};
   --green-bright: #{$green-bright};
+  --green-bright-tint-50: #{$green-bright-tint-50};
   --purple-bright: #{$purple-bright};
 }
