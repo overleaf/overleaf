@@ -8,6 +8,7 @@ import {
 } from '@/shared/components/ol/ol-modal'
 import OLButton from '@/shared/components/ol/ol-button'
 import { useEffect, useState } from 'react'
+import { showImportDocxFeedbackToast } from '@/features/project-list/components/new-project-button/import-docx-feedback-toast'
 
 function ProjectConvertedFromDocxModal() {
   const [
@@ -34,7 +35,10 @@ function ProjectConvertedFromDocxModal() {
     <>
       {showProjectConvertedFromDocxModal && (
         <ProjectConvertedFromDocxModalContent
-          onHide={() => setShowProjectConvertedFromDocxModal(false)}
+          onHide={() => {
+            setShowProjectConvertedFromDocxModal(false)
+            showImportDocxFeedbackToast()
+          }}
         />
       )}
     </>
