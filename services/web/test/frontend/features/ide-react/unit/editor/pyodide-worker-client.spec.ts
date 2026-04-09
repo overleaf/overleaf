@@ -97,25 +97,70 @@ describe('PyodideWorkerClient', function () {
     expect(runRequest).to.include({ type: 'run-code', id: 'boom.py' })
   })
 
-  it('emits run-finished lifecycle event from run-code-result', function () {
+  function setupClientWithLifecycleTracking() {
     const client = new PyodideWorkerClient({ baseAssetPath: BASE_ASSET_PATH })
     const worker = WorkerMock.instances[0]
-    const lifecycleEvents: Array<{ type: string; requestId?: string }> = []
-
-    client.setLifecycleCallback(event => {
-      lifecycleEvents.push(event)
-    })
+    const lifecycleEvents: Array<{
+      type: string
+      requestId?: string
+      outputs?: string[]
+    }> = []
+    client.setLifecycleCallback(event => lifecycleEvents.push(event))
     worker.emitMessage({ type: 'listening' })
+    return { client, worker, lifecycleEvents }
+  }
+
+  it('emits run-finished lifecycle event from run-code-result', function () {
+    const { client, worker, lifecycleEvents } =
+      setupClientWithLifecycleTracking()
 
     client.runCode('print("ok")', { requestId: 'main.py', files: [] })
     worker.emitMessage({
       type: 'run-code-result',
       id: 'main.py',
+      outputs: ['/project/output.txt'],
     })
 
     expect(lifecycleEvents).to.deep.include({
       type: 'run-finished',
       requestId: 'main.py',
+      outputs: ['/project/output.txt'],
+    })
+  })
+
+  it('surfaces outputs array from run-code-result with multiple files', function () {
+    const { client, worker, lifecycleEvents } =
+      setupClientWithLifecycleTracking()
+
+    client.runCode('write_files()', { requestId: 'main.py', files: [] })
+    worker.emitMessage({
+      type: 'run-code-result',
+      id: 'main.py',
+      outputs: ['/project/fig1.png', '/project/results/data.csv'],
+    })
+
+    expect(lifecycleEvents).to.deep.include({
+      type: 'run-finished',
+      requestId: 'main.py',
+      outputs: ['/project/fig1.png', '/project/results/data.csv'],
+    })
+  })
+
+  it('surfaces empty outputs when no project files were written', function () {
+    const { client, worker, lifecycleEvents } =
+      setupClientWithLifecycleTracking()
+
+    client.runCode('print("no writes")', { requestId: 'main.py', files: [] })
+    worker.emitMessage({
+      type: 'run-code-result',
+      id: 'main.py',
+      outputs: [],
+    })
+
+    expect(lifecycleEvents).to.deep.include({
+      type: 'run-finished',
+      requestId: 'main.py',
+      outputs: [],
     })
   })
 

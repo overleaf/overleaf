@@ -43,6 +43,7 @@ export type PyodideWorkerEvent =
 export type RunCodeResult = {
   type: 'run-code-result'
   id: string
+  outputs: string[]
 }
 
 export type PyodideWorkerResponse = PyodideWorkerEvent | RunCodeResult

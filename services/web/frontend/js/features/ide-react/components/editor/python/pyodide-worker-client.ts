@@ -14,7 +14,7 @@ export type LifecycleCallback = (
   event:
     | { type: 'loaded' }
     | { type: 'loading-failed'; error: string }
-    | { type: 'run-finished'; requestId: string }
+    | { type: 'run-finished'; requestId: string; outputs: string[] }
 ) => void
 
 export class PyodideWorkerClient {
@@ -172,6 +172,7 @@ export class PyodideWorkerClient {
         this.lifecycleCallback?.({
           type: 'run-finished',
           requestId: response.id,
+          outputs: response.outputs,
         })
         break
     }
