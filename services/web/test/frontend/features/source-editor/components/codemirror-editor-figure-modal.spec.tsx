@@ -149,6 +149,19 @@ describe('<FigureModal />', function () {
       cy.findByLabelText('File size').should('have.text', '10 B')
     })
 
+    it('Shows file name and zero size when selecting a zero-byte file', function () {
+      cy.get('@file-input').selectFile(
+        {
+          fileName: 'empty.jpg',
+          contents: Cypress.Buffer.alloc(0),
+          mimeType: 'image/jpg',
+        },
+        { force: true }
+      )
+      cy.findByLabelText('File name').should('have.text', 'empty.jpg')
+      cy.findByLabelText('File size').should('have.text', '0 B')
+    })
+
     it('Uploads file when clicking insert', function () {
       chooseFileFromComputer()
       cy.get('@uploadRequest').should('not.have.been.called')

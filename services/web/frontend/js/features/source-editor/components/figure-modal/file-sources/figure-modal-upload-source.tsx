@@ -331,10 +331,10 @@ const FileSize: FC<{ size: number; className?: string }> = ({
     ['TB', 1e12],
     ['PB', 1e15],
   ]
-  const labelIndex = Math.min(
-    Math.floor(Math.log10(size) / 3),
-    BYTE_UNITS.length - 1
-  )
+  const labelIndex =
+    size > 0
+      ? Math.min(Math.floor(Math.log10(size) / 3), BYTE_UNITS.length - 1)
+      : 0
 
   const [label, bytesPerUnit] = BYTE_UNITS[labelIndex]
   const sizeInUnits = Math.round(size / bytesPerUnit)
