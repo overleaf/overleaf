@@ -56,7 +56,7 @@ export const ToolbarProjectTitle = () => {
   }
 
   return (
-    <Dropdown align="start" className="ide-redesign-toolbar-project-dropdown">
+    <Dropdown align="end" className="ide-redesign-toolbar-project-dropdown">
       <DropdownToggle
         id="project-title-options"
         aria-label={t('project_title_options')}
