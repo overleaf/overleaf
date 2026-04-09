@@ -127,13 +127,13 @@ async function handleRunCode(msg: RunCodeRequest) {
     },
   })
 
+  const fs = instance.FS
+  const originalWrite = fs.write as PyodideFS['write']
   try {
-    const fs = instance.FS
     if (msg.files.length > 0) {
       syncProjectFiles(fs, msg.files)
     }
 
-    const originalWrite = fs.write as PyodideFS['write']
     fs.write = ((...args: Parameters<PyodideFS['write']>) => {
       const [stream] = args
       // Only surface writes to the synced project workspace, not Pyodide internals.
@@ -144,7 +144,7 @@ async function handleRunCode(msg: RunCodeRequest) {
         writtenPaths.add(stream.path)
       }
 
-      return originalWrite(...args)
+      return originalWrite.call(fs, ...args)
     }) as PyodideFS['write']
 
     const result = await instance.runPythonAsync(msg.code)
@@ -167,6 +167,7 @@ async function handleRunCode(msg: RunCodeRequest) {
       requestId: msg.id,
     })
   } finally {
+    fs.write = originalWrite
     const outputs = [...writtenPaths].sort()
     self.postMessage({
       type: 'run-code-result',
