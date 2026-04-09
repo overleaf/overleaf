@@ -60,6 +60,27 @@ const ReviewTooltipMenu: FC = () => {
     }
   }, [tooltipState, previousTooltipState])
 
+  useEffect(() => {
+    if (!show || !tooltipState || !permissions.comment) {
+      return
+    }
+    const handleMouseDown = (event: MouseEvent) => {
+      const target = event.target as Element | null
+      if (
+        !view.contentDOM.contains(target) &&
+        !target?.closest?.('.review-tooltip-menu-container') &&
+        !target?.closest?.('.modal') &&
+        !target?.closest?.('.modal-backdrop')
+      ) {
+        setShow(false)
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown)
+    }
+  }, [show, tooltipState, permissions.comment, view])
+
   const addComment = useCallback(() => {
     if (!permissions.comment) {
       return
