@@ -15,6 +15,7 @@ import lodash from 'lodash'
 import { expressify } from '@overleaf/promise-utils'
 import { DuplicateNameError, FileTooLargeError } from '../Errors/Errors.js'
 import DocumentConversionManager from './DocumentConversionManager.mjs'
+import ProjectOptionsHandler from '../Project/ProjectOptionsHandler.mjs'
 
 const defaultsDeep = lodash.defaultsDeep
 
@@ -191,6 +192,7 @@ async function importDocx(req, res, next) {
           name,
           archivePath
         )
+      await ProjectOptionsHandler.promises.setCompiler(project._id, 'lualatex')
       res.json({ success: true, project_id: project._id })
     } finally {
       await fsPromises.unlink(archivePath).catch(() => {})

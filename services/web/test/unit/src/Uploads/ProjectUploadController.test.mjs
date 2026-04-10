@@ -41,6 +41,11 @@ describe('ProjectUploadController', function () {
     ctx.EditorController = {
       promises: {},
     }
+    ctx.ProjectOptionsHandler = {
+      promises: {
+        setCompiler: sinon.stub().resolves(),
+      },
+    }
     ctx.DocumentConversionManager = {
       promises: {
         convertDocxToLaTeXZipArchive: sinon.stub(),
@@ -92,6 +97,13 @@ describe('ProjectUploadController', function () {
     vi.doMock('../../../../app/src/Features/Editor/EditorController', () => ({
       default: ctx.EditorController,
     }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Project/ProjectOptionsHandler',
+      () => ({
+        default: ctx.ProjectOptionsHandler,
+      })
+    )
 
     vi.doMock(
       '../../../../app/src/Features/Uploads/DocumentConversionManager.mjs',
@@ -475,6 +487,12 @@ describe('ProjectUploadController', function () {
         expect(
           ctx.ProjectUploadManager.promises.createProjectFromZipArchive
         ).to.have.been.calledWith(ctx.user_id, 'file', ctx.archivePath)
+      })
+
+      it('should set the compiler to lualatex', function (ctx) {
+        expect(
+          ctx.ProjectOptionsHandler.promises.setCompiler
+        ).to.have.been.calledWith('new-project-id', 'lualatex')
       })
 
       it('should unlink the archive after creating the project', function (ctx) {
