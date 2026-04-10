@@ -147,4 +147,8 @@ if metadata && metadata.canonicalURL
 
 //- Manifest
 //- Does not currently contain a start_url to prevent browser installation prompts
-link(rel='manifest' href=buildBaseAssetPath() + 'web.sitemanifest')
+link(
+	rel='manifest'
+	href=buildBaseAssetPath() + 'web.sitemanifest.json'
+	crossorigin=settings.isCodeSpace ? 'use-credentials' : false
+)

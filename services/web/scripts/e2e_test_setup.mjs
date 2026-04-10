@@ -85,7 +85,7 @@ async function deleteUser(email) {
   await UserDeleter.promises.expireDeletedUser(user._id)
 }
 
-async function createProjectWithOldHistoryId(userId) {
+export async function createProjectWithOldHistoryId(userId) {
   const projectName = 'old history id'
   const historyId = parseInt(
     await HistoryManager.promises.initializeProject(),
@@ -137,7 +137,7 @@ async function purgeNewUsers() {
   )
 }
 
-async function provisionSplitTests() {
+export async function provisionSplitTests() {
   const backup = Path.join(
     MONOREPO,
     'backup',
@@ -213,12 +213,7 @@ async function main() {
   await Promise.all([purgeNewUsers(), provisionUsers(), provisionSplitTests()])
 }
 
-await main()
-await GracefulShutdown.gracefulShutdown(
-  {
-    close(cb) {
-      cb()
-    },
-  },
-  'SIGTERM'
-)
+if (import.meta.main) {
+  await main()
+  await GracefulShutdown.gracefulShutdown()
+}

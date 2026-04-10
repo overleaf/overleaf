@@ -308,6 +308,7 @@ module.exports = {
         'scripts/delete_orphaned_chat_threads.mjs',
         'scripts/delete_orphaned_data_helper.mjs',
         'scripts/delete_subscriptions.mjs',
+        'scripts/devcontainer_setup.mjs',
         'scripts/e2e_test_setup.mjs',
         'scripts/ensure_affiliations.mjs',
         'scripts/esm-check-migration.mjs',
