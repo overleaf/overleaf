@@ -426,6 +426,27 @@ describe('FeaturesUpdater', function () {
           {
             features: ctx.Settings.features.all,
             'best-subscription-type': 'individual',
+            overleafId: ctx.user._id,
+          }
+        )
+      })
+    })
+
+    describe('when user has an email', function () {
+      beforeEach(async function (ctx) {
+        ctx.user.email = 'user@example.com'
+        await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+      })
+
+      it('should include email in customer.io properties', function (ctx) {
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'setUserProperties',
+          ctx.user._id,
+          {
+            features: ctx.Settings.features.all,
+            'best-subscription-type': 'individual',
+            overleafId: ctx.user._id,
+            email: 'user@example.com',
           }
         )
       })

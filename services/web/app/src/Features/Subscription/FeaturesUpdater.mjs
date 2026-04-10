@@ -42,6 +42,7 @@ async function refreshFeatures(userId, reason) {
   const user = await UserGetter.promises.getUser(userId, {
     _id: 1,
     features: 1,
+    email: 1,
   })
   const oldFeatures = _.clone(user.features)
   const features = await computeFeatures(userId)
@@ -57,14 +58,14 @@ async function refreshFeatures(userId, reason) {
   const { features: newFeatures, featuresChanged } =
     await UserFeaturesUpdater.promises.updateFeatures(userId, features)
 
-  // TODO: this call is quite expensive, so ideally we'd update cio with something
-  // that doesn't require the best subscription to be computed, ie. the plan code (or type)
   const bestSubscriptionType = await _getBestSubscriptionType(userId)
 
   Modules.promises.hooks
     .fire('setUserProperties', userId, {
       features,
       'best-subscription-type': bestSubscriptionType,
+      overleafId: userId,
+      ...(user.email && { email: user.email }),
     })
     .catch(err => {
       logger.error({ err, userId }, 'Failed to sync features to customer.io')
