@@ -163,6 +163,31 @@ describe('useAsync', function () {
     })
   })
 
+  it('clears the error on retry', async function () {
+    const mockError = new Error('rejected value')
+    const { result } = renderHook(() => useAsync())
+
+    act(() => {
+      result.current.setError(mockError)
+    })
+
+    expect(result.current).to.include({
+      ...rejectedState,
+      error: mockError,
+    })
+
+    const mockData = Symbol('resolved value')
+    await act(async () => {
+      await result.current.runAsync(Promise.resolve(mockData))
+    })
+
+    expect(result.current).to.include({
+      ...resolvedState,
+      error: null,
+      data: mockData,
+    })
+  })
+
   it('no state updates happen if the component is unmounted while pending', async function () {
     const { promise, resolve } = deferred()
     const { result, unmount } = renderHook(() => useAsync())
