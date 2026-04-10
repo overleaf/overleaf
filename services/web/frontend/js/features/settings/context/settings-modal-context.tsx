@@ -11,6 +11,7 @@ import SpellCheckSetting from '@/features/settings/components/editor-settings/sp
 import DictionarySetting from '@/features/settings/components/editor-settings/dictionary-setting'
 import { useTranslation } from 'react-i18next'
 import BreadcrumbsSetting from '@/features/settings/components/editor-settings/breadcrumbs-setting'
+import NonBlinkingCursorSetting from '@/features/settings/components/editor-settings/non-blinking-cursor-setting'
 import MathPreviewSetting from '@/features/settings/components/editor-settings/math-preview-setting'
 import RootDocumentSetting from '@/features/settings/components/compiler-settings/root-document-setting'
 import CompilerSetting from '@/features/settings/components/compiler-settings/compiler-setting'
@@ -110,6 +111,10 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
               {
                 key: 'autoPairDelimiters',
                 component: <AutoCloseBracketsSetting />,
+              },
+              {
+                key: 'nonBlinkingCursor',
+                component: <NonBlinkingCursorSetting />,
               },
               {
                 key: 'syntaxValidation',

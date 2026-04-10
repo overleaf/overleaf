@@ -31,6 +31,7 @@ export const defaultSettings: UserSettings = {
   mathPreview: true,
   referencesSearchMode: 'advanced',
   breadcrumbs: true,
+  nonBlinkingCursor: false,
   darkModePdf: false,
   zotero: {
     enabled: true,

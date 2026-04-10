@@ -44,6 +44,7 @@ import { useMetadataContext } from '@/features/ide-react/context/metadata-contex
 import { useUserContext } from '@/shared/context/user-context'
 import { useReferencesContext } from '@/features/ide-react/context/references-context'
 import { setMathPreview } from '@/features/source-editor/extensions/math-preview'
+import { setNonBlinkingCursor } from '@/features/source-editor/extensions/non-blinking-cursor'
 import { useRangesContext } from '@/features/review-panel/context/ranges-context'
 import { updateRanges } from '@/features/source-editor/extensions/ranges'
 import { useThreadsContext } from '@/features/review-panel/context/threads-context'
@@ -88,6 +89,7 @@ function useCodeMirrorScope(view: EditorView) {
     mode,
     syntaxValidation,
     mathPreview,
+    nonBlinkingCursor,
     referencesSearchMode,
   } = userSettings
   const activeOverallTheme = useActiveOverallTheme()
@@ -158,6 +160,7 @@ function useCodeMirrorScope(view: EditorView) {
     mode,
     syntaxValidation,
     mathPreview,
+    nonBlinkingCursor,
     referencesSearchMode,
   })
 
@@ -466,6 +469,13 @@ function useCodeMirrorScope(view: EditorView) {
       view.dispatch(setMathPreview(mathPreview))
     })
   }, [view, mathPreview])
+
+  useEffect(() => {
+    settingsRef.current.nonBlinkingCursor = nonBlinkingCursor
+    window.setTimeout(() => {
+      view.dispatch(setNonBlinkingCursor(nonBlinkingCursor))
+    })
+  }, [view, nonBlinkingCursor])
 
   useEffect(() => {
     settingsRef.current.referencesSearchMode = referencesSearchMode

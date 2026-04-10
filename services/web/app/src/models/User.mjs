@@ -106,6 +106,7 @@ export const UserSchema = new Schema(
       lineHeight: { type: String },
       mathPreview: { type: Boolean, default: true },
       breadcrumbs: { type: Boolean, default: true },
+      nonBlinkingCursor: { type: Boolean, default: false },
       referencesSearchMode: { type: String, default: 'advanced' }, // 'advanced' or 'simple'
       darkModePdf: { type: Boolean, default: false },
       zotero: refProviderSettingsSchema,

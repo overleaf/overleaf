@@ -24,6 +24,7 @@ export default function useUserWideSettings() {
     pdfViewer,
     mathPreview,
     breadcrumbs,
+    nonBlinkingCursor,
     darkModePdf,
     zotero,
     mendeley,
@@ -129,6 +130,13 @@ export default function useUserWideSettings() {
     [saveUserSettings]
   )
 
+  const setNonBlinkingCursor = useCallback(
+    (nonBlinkingCursor: UserSettings['nonBlinkingCursor']) => {
+      saveUserSettings('nonBlinkingCursor', nonBlinkingCursor)
+    },
+    [saveUserSettings]
+  )
+
   const setDarkModePdf = useCallback(
     (darkModePdf: UserSettings['darkModePdf']) => {
       saveUserSettings('darkModePdf', darkModePdf)
@@ -188,6 +196,8 @@ export default function useUserWideSettings() {
     setMathPreview,
     breadcrumbs,
     setBreadcrumbs,
+    nonBlinkingCursor,
+    setNonBlinkingCursor,
     darkModePdf,
     setDarkModePdf,
     zotero,

@@ -9,6 +9,8 @@ import browser from './browser'
  * copied to make use of a custom version of rectangleMarkerForRange which calls
  * fullHeightCoordsAtPos when in Source mode, extending the top and bottom
  * of the coords to cover the full line height.
+ *
+ * Whenever possible, we should avoid making changes to this extension.
  */
 export const drawSelection = () => {
   return [cursorLayer, selectionLayer, Prec.highest(hideNativeSelection)]

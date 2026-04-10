@@ -421,6 +421,9 @@ async function updateUserSettings(req, res, next) {
   if (body.breadcrumbs != null) {
     user.ace.breadcrumbs = Boolean(body.breadcrumbs)
   }
+  if (body.nonBlinkingCursor != null) {
+    user.ace.nonBlinkingCursor = Boolean(body.nonBlinkingCursor)
+  }
   if (body.referencesSearchMode != null) {
     const mode = body.referencesSearchMode === 'simple' ? 'simple' : 'advanced'
     user.ace.referencesSearchMode = mode

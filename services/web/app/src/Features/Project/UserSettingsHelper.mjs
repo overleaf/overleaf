@@ -44,6 +44,7 @@ async function buildUserSettings(req, res, user) {
     overallTheme: await getOverallTheme(req, res, user),
     mathPreview: user.ace.mathPreview,
     breadcrumbs: user.ace.breadcrumbs,
+    nonBlinkingCursor: user.ace.nonBlinkingCursor ?? false,
     referencesSearchMode: user.ace.referencesSearchMode,
     darkModePdf: user.ace.darkModePdf ?? false,
     zotero: user.ace.zotero,

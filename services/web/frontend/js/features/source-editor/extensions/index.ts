@@ -35,6 +35,7 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import { emptyLineFiller } from './empty-line-filler'
 import { goToLinePanel } from './go-to-line'
 import { drawSelection } from './draw-selection'
+import { nonBlinkingCursor } from './non-blinking-cursor'
 import { sourceOnly, visual } from './visual/visual'
 import { inlineBackground } from './inline-background'
 import { indentationMarkers } from './indentation-markers'
@@ -75,6 +76,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
     closedText: '▸',
   }),
   drawSelection(),
+  nonBlinkingCursor(),
   // A built-in facet that is set to true to allow multiple selections.
   // This makes the editor more like a code editor than Google Docs or Microsoft Word,
   // which only have single selections.

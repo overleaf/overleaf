@@ -27,6 +27,7 @@ export type UserSettings = {
   mathPreview: boolean
   referencesSearchMode: 'advanced' | 'simple'
   breadcrumbs: boolean
+  nonBlinkingCursor: boolean
   darkModePdf: boolean
   zotero: RefProviderSettings
   mendeley: RefProviderSettings
