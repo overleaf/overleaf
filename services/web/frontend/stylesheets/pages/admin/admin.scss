@@ -1,3 +1,17 @@
+.user-has-admin-access {
+  .navbar-default {
+    background: linear-gradient(
+      to right,
+      var(--navbar-bg) 10rem,
+      var(--red-50) 40rem
+    );
+  }
+
+  .ide-redesign-toolbar {
+    --redesign-toolbar-background: var(--red-50);
+  }
+}
+
 #survey-form,
 #split-test-edit,
 #split-test-create {
