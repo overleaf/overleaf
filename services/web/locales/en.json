@@ -1646,6 +1646,7 @@
   "only_group_admin_or_managers_can_delete_your_account_7": "Only your group admin or group managers will be able to delete your account or change your account into an unmanaged account.",
   "only_group_admin_or_managers_can_delete_your_account_9": "Once you have become a managed user, <0>you yourself cannot change it back to an unmanaged account</0>. <1>Learn more about managed Overleaf accounts.</1>",
   "only_importer_can_refresh": "Only the person who originally imported this __provider__ file can refresh it.",
+  "only_project_owner_can_link_github": "Only the project owner can link this project to a GitHub repository. Please contact the project owner if you would like to set this up.",
   "open_action_menu": "Open __name__ action menu",
   "open_advanced_reference_search": "Open advanced reference search",
   "open_as_template": "Open as Template",
