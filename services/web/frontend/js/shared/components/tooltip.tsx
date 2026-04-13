@@ -64,6 +64,12 @@ function Tooltip({
   )
 
   useEffect(() => {
+    if (hidden) {
+      setShow(false)
+    }
+  }, [hidden])
+
+  useEffect(() => {
     document.addEventListener('keydown', handleKeyDown, true)
     return () => document.removeEventListener('keydown', handleKeyDown, true)
   }, [handleKeyDown])
@@ -97,8 +103,8 @@ function Tooltip({
       {...overlayProps}
       delay={{ show: delayShow, hide: delayHide }}
       placement={overlayProps?.placement || 'top'}
-      show={show}
-      onToggle={setShow}
+      show={hidden ? false : show}
+      onToggle={hidden ? undefined : setShow}
     >
       {overlayProps?.trigger === 'click'
         ? children
