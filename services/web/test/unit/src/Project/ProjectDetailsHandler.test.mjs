@@ -104,6 +104,8 @@ describe('ProjectDetailsHandler', function () {
       default: ctx.settings,
     }))
 
+    vi.doMock('@overleaf/metrics', () => ({ default: {} }))
+
     ctx.handler = (await import(MODULE_PATH)).default
   })
 

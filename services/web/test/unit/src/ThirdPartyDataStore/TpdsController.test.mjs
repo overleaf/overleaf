@@ -58,6 +58,9 @@ describe('TpdsController', function () {
         generateUniqueName: sinon.stub().resolves('unique'),
       },
     }
+    ctx.Metrics = {
+      inc: sinon.stub(),
+    }
 
     vi.doMock(
       '../../../../app/src/Features/ThirdPartyDataStore/TpdsUpdateHandler',
@@ -111,6 +114,8 @@ describe('TpdsController', function () {
         default: ctx.ProjectDetailsHandler,
       })
     )
+
+    vi.doMock('@overleaf/metrics', () => ({ default: ctx.Metrics }))
 
     ctx.TpdsController = (await import(MODULE_PATH)).default
 

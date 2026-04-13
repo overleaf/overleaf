@@ -10,8 +10,22 @@ const modulePath =
 
 const { ObjectId } = mongodb
 
+// We use vi.hoisted + vi.mock for @overleaf/metrics here because it is statically imported
+// by AuthenticationErrors.mjs at the top of this file. If we instead used vi.doMock inside
+// the beforeEach block, AuthenticationErrors.mjs would bind to the real unmocked metrics
+// module before the test setup even begins, causing errors when AuthenticationErrors calls it.
+const hoistedMocks = vi.hoisted(() => ({
+  metricsInc: vi.fn(),
+}))
+
+vi.mock('@overleaf/metrics', () => ({
+  default: {
+    inc: (...args) => hoistedMocks.metricsInc(...args),
+  },
+}))
+
 vi.mock(
-  '../../../../app/src/Features/Analytics/AnalyticsRegistrationSourceHelper.js',
+  '../../../../app/src/Features/Analytics/AnalyticsRegistrationSourceHelper.mjs',
   () => ({
     default: {
       clearInbound: vi.fn(),
@@ -53,6 +67,7 @@ describe('AuthenticationController', function () {
 
     vi.doMock(
       '../../../../app/src/Features/Authentication/AuthenticationErrors',
+      // () => ({ ...AuthenticationErrors })
       () => AuthenticationErrors
     )
 
@@ -93,9 +108,8 @@ describe('AuthenticationController', function () {
       }),
     }))
 
-    vi.doMock('@overleaf/metrics', () => ({
-      default: (ctx.Metrics = { inc: sinon.stub() }),
-    }))
+    ctx.Metrics = { inc: sinon.stub() }
+    hoistedMocks.metricsInc = ctx.Metrics.inc
 
     vi.doMock('../../../../app/src/Features/Security/LoginRateLimiter', () => ({
       default: (ctx.LoginRateLimiter = {
@@ -1557,7 +1571,7 @@ describe('AuthenticationController', function () {
     beforeEach(function (ctx) {
       ctx.userDetailsMap = new Map()
       ctx.logger.err = sinon.stub()
-      ctx.Metrics.inc = sinon.stub()
+      ctx.Metrics.inc.resetHistory()
     })
 
     describe('with valid credentials', function () {

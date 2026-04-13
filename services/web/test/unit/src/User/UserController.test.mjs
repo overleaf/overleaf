@@ -140,6 +140,10 @@ describe('UserController', function () {
       },
     }
 
+    ctx.Metrics = {
+      inc: sinon.stub(),
+    }
+
     vi.doMock(
       '../../../../app/src/Features/Analytics/AnalyticsManager',
       () => ({
@@ -235,6 +239,8 @@ describe('UserController', function () {
     vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
       default: ctx.Modules,
     }))
+
+    vi.doMock('@overleaf/metrics', () => ({ default: ctx.Metrics }))
 
     ctx.UserController = (await import(modulePath)).default
 

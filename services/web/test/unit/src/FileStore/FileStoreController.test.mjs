@@ -21,6 +21,9 @@ describe('FileStoreController', function () {
     ctx.HistoryManager = {
       promises: { requestBlobWithProjectId: sinon.stub() },
     }
+    ctx.Metrics = {
+      inc: sinon.stub(),
+    }
 
     vi.doMock('node:stream/promises', () => ctx.Stream)
 
@@ -35,6 +38,8 @@ describe('FileStoreController', function () {
     vi.doMock('../../../../app/src/Features/History/HistoryManager', () => ({
       default: ctx.HistoryManager,
     }))
+
+    vi.doMock('@overleaf/metrics', () => ({ default: ctx.Metrics }))
 
     ctx.controller = (await import(MODULE_PATH)).default
     ctx.stream = {}

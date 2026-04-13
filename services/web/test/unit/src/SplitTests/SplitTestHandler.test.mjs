@@ -68,6 +68,9 @@ describe('SplitTestHandler', function () {
     ctx.SessionManager = {
       isUserLoggedIn: sinon.stub().returns(false),
     }
+    ctx.Metrics = {
+      inc: sinon.stub(),
+    }
 
     Features = {
       hasFeature: vi.fn().mockReturnValue(true),
@@ -128,6 +131,8 @@ describe('SplitTestHandler', function () {
     vi.doMock('@overleaf/settings', () => ({
       default: ctx.Settings,
     }))
+
+    vi.doMock('@overleaf/metrics', () => ({ default: ctx.Metrics }))
 
     ctx.SplitTestHandler = (await import(MODULE_PATH)).default
 

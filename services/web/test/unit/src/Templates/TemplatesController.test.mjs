@@ -42,6 +42,8 @@ describe('TemplatesController', function () {
       })
     )
 
+    vi.doMock('@overleaf/metrics', () => ({ default: {} }))
+
     ctx.TemplatesController = (await import(modulePath)).default
     ctx.next = sinon.stub()
     ctx.req = {

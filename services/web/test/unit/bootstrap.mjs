@@ -39,6 +39,13 @@ vi.mock('@overleaf/logger', async () => {
   }
 })
 
+// Mock metrics in unit tests, can be overridden
+vi.mock('@overleaf/metrics', () => {
+  return {
+    default: { prom: { Counter: vi.fn(), Histogram: vi.fn() } },
+  }
+})
+
 beforeEach(ctx => {
   // This function is a utility to duplicate the behaviour of passing `done` in place of `next` in an express route handler.
   ctx.rejectOnError = reject => {

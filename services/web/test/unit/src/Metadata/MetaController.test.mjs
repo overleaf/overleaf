@@ -32,6 +32,17 @@ describe('MetaController', function () {
       () => ({ default: {} })
     )
 
+    vi.doMock(
+      '../../../../app/src/Features/SplitTests/SplitTestHandler',
+      () => ({
+        default: {
+          promises: {
+            getAssignment: sinon.stub().resolves({}),
+          },
+        },
+      })
+    )
+
     ctx.MetadataController = (await import(modulePath)).default
   })
 
