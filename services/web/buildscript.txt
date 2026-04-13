@@ -4,5 +4,5 @@ web
 --env-add=
 --env-pass-through=
 --esmock-loader=False
---node-version=24.13.0
+--node-version=24.14.1
 --public-repo=False

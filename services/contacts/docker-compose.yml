@@ -4,7 +4,7 @@
 
 services:
   test_unit:
-    image: node:24.13.0
+    image: node:24.14.1
     volumes:
       - .:/overleaf/services/contacts
       - ../../node_modules:/overleaf/node_modules
@@ -26,7 +26,7 @@ services:
         condition: service_started
 
   test_acceptance:
-    image: node:24.13.0
+    image: node:24.14.1
     volumes:
       - .:/overleaf/services/contacts
       - ../../node_modules:/overleaf/node_modules

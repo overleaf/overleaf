@@ -2,13 +2,23 @@ import getMeta from '@/utils/meta'
 
 const DEFAULT_LOCALE = getMeta('ol-i18n')?.currentLangCode ?? 'en'
 
+const ZERO_DECIMAL_CURRENCIES = ['clp', 'jpy', 'krw', 'vnd']
+
 export function formatCurrency(
   amount: number,
   currency: string,
   locale: string = DEFAULT_LOCALE,
   stripIfInteger = false
 ): string {
-  const options: Intl.NumberFormatOptions = { style: 'currency', currency }
+  const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.includes(currency.toLowerCase())
+  const fractionDigits = isZeroDecimal ? 0 : 2
+
+  const options: Intl.NumberFormatOptions = {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  }
   if (stripIfInteger && Number.isInteger(amount)) {
     options.minimumFractionDigits = 0
   }
