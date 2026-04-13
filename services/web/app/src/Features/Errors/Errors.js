@@ -120,6 +120,13 @@ class SAMLAuthenticationError extends OError {
     return 'saml_auth_error'
   }
 }
+
+class SAMLCommonsReconfirmationUnableToFindUserError extends SAMLAuthenticationError {
+  get i18nKey() {
+    return 'saml_commons_reconfirmation_unable_to_find_user'
+  }
+}
+
 class SAMLAssertionAudienceMismatch extends SAMLAuthenticationError {}
 
 class SAMLAuthenticationRequiredError extends SAMLAuthenticationError {
@@ -394,6 +401,7 @@ module.exports = {
   OutputFileFetchFailedError,
   SAMLAssertionAudienceMismatch,
   SAMLAuthenticationRequiredError,
+  SAMLCommonsReconfirmationUnableToFindUserError,
   SAMLCommonsUnavailable,
   SAMLDomainCaptureEmailExistsError,
   SAMLDomainCaptureEmailDomainMismatchError,

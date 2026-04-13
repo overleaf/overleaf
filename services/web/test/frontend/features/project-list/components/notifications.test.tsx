@@ -627,6 +627,31 @@ describe('<UserNotifications />', function () {
 
       expect(screen.queryByRole('alert')).to.be.null
     })
+
+    it('shows reconfirmation unable-to-find-user error content', function () {
+      const institution: DeepPartial<InstitutionType> = {
+        templateKey: 'notification_institution_sso_error',
+        error: {
+          name: 'SAMLCommonsReconfirmationUnableToFindUserError',
+        },
+      }
+      window.metaAttributesCache.set('ol-notificationsInstitution', [
+        { ...notificationsInstitution, ...institution },
+      ])
+      render(<Institution />)
+
+      screen.getByRole('alert')
+      screen.getByText(/unable to confirm your affiliation/i)
+
+      const contactLink = screen.getByRole('link', { name: /contact us/i })
+      expect(contactLink.getAttribute('href')).to.equal('/contact')
+      expect(contactLink.getAttribute('target')).to.equal('_blank')
+
+      const closeBtn = screen.getByRole('button', { name: /close/i })
+      fireEvent.click(closeBtn)
+
+      expect(screen.queryByRole('alert')).to.be.null
+    })
   })
 
   describe('getEmailDeletionDate', function () {

@@ -93,6 +93,7 @@ export type Institution = {
     translatedMessage?: string
     message?: string
     tryAgain?: boolean
+    name?: string
   }
 }
 

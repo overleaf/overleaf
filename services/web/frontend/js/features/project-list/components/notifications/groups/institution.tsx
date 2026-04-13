@@ -183,23 +183,37 @@ function Institution() {
                 }
               />
             )}
-            {templateKey === 'notification_institution_sso_error' && (
-              <Notification
-                type="error"
-                onDismiss={() => id && handleDismiss(id)}
-                content={
-                  <>
-                    {t('generic_something_went_wrong')}.
-                    <div>
-                      {error?.translatedMessage
-                        ? error?.translatedMessage
-                        : error?.message}
-                    </div>
-                    {error?.tryAgain ? `${t('try_again')}.` : null}
-                  </>
-                }
-              />
-            )}
+            {templateKey === 'notification_institution_sso_error' &&
+              (error?.name ===
+              'SAMLCommonsReconfirmationUnableToFindUserError' ? (
+                <Notification
+                  type="error"
+                  onDismiss={() => id && handleDismiss(id)}
+                  content={
+                    <Trans
+                      i18nKey="saml_commons_reconfirmation_unable_to_find_user"
+                      // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
+                      components={[<a href="/contact" target="_blank" />]}
+                    />
+                  }
+                />
+              ) : (
+                <Notification
+                  type="error"
+                  onDismiss={() => id && handleDismiss(id)}
+                  content={
+                    <>
+                      {t('generic_something_went_wrong')}.
+                      <div>
+                        {error?.translatedMessage
+                          ? error?.translatedMessage
+                          : error?.message}
+                      </div>
+                      {error?.tryAgain ? `${t('try_again')}.` : null}
+                    </>
+                  }
+                />
+              ))}
           </Fragment>
         )
       )}

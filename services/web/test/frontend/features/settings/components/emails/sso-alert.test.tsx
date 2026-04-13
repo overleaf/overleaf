@@ -84,6 +84,19 @@ describe('<SSOAlert/>', function () {
       screen.getByText('Please try again')
     })
 
+    it('should render reconfirmation unable-to-find-user message for matching SAML error name', function () {
+      window.metaAttributesCache.set('ol-samlError', {
+        name: 'SAMLCommonsReconfirmationUnableToFindUserError',
+      })
+
+      render(<SSOAlert />)
+
+      screen.getByText(/unable to confirm your affiliation/i)
+      const contactLink = screen.getByRole('link', { name: /contact us/i })
+      expect(contactLink.getAttribute('href')).to.equal('/contact')
+      expect(contactLink.getAttribute('target')).to.equal('_blank')
+    })
+
     it('the alert should be closeable', function () {
       render(<SSOAlert />)
       const closeButton = screen.getByRole('button', {

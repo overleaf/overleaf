@@ -2089,6 +2089,7 @@
   "saml": "SAML",
   "saml_auth_error": "Sorry, your identity provider responded with an error.  Please contact your administrator for more information.",
   "saml_authentication_required_error": "Other login methods have been disabled by your group administrator. Please use your group SSO login.",
+  "saml_commons_reconfirmation_unable_to_find_user": "Sorry, we were unable to confirm your affiliation. This may have been caused by a change in the SSO data that is being sent to us from your institution. Please <0>contact us</0> for help with relinking your Overleaf account to your institution’s SSO.",
   "saml_commons_unavailable": "Institution SSO is currently unavailable. For more details, please see <0>__linkText__</0>.",
   "saml_create_admin_instructions": "Choose an email address for the first __appName__ admin account. This should correspond to an account in the SAML system. You will then be asked to log in with this account.",
   "saml_email_not_in_account_error_managed_users_2": "Your email address <0>__userEmail__</0> was not recognized. Your organization’s identity provider returned <1>__samlEmail__</1>. You will need to log out of <0>__userEmail__</0> and use <1>__samlEmail__</1> to create an account via SSO. You can <2>transfer your existing projects</2> to the new account.",

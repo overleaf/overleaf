@@ -1601,6 +1601,7 @@
   "run_current_script_to_see_output": "",
   "run_python_code": "",
   "saml_auth_error": "",
+  "saml_commons_reconfirmation_unable_to_find_user": "",
   "saml_email_not_in_account_error_managed_users_2": "",
   "saml_identity_exists_error": "",
   "saml_invalid_signature_error": "",
