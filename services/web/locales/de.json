@@ -957,7 +957,7 @@
   "raw_logs_description": "Raw Logs vom LaTeX-Compiler",
   "realtime_track_changes": "Änderungen in Echtzeit nachverfolgen",
   "reauthorize_github_account": "Autorisiere dein GitHub-Konto erneut",
-  "recaptcha_conditions": "Diese Website ist durch reCAPTCHA geschützt und es gelten die <1>Datenschutzerklärung</1> und die <2>Nutzungsbedingungen</2> von Google.",
+  "recaptcha_conditions": "Diese Website ist durch reCAPTCHA geschützt.",
   "recent": "Kürzlich",
   "recent_commits_in_github": "Neueste Commits auf GitHub",
   "recompile": "Aktualisieren",

@@ -123,6 +123,13 @@
 
   padding-bottom: var(--ds-spacing-250);
   margin: 0;
+  text-align: center;
+}
+
+.ciam-register-container .ciam-disclaimers p {
+  // disclaimers are longer on the register page,
+  // so we left-align them to improve readability
+  text-align: left;
 }
 
 .ciam-card-separator {

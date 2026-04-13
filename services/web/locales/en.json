@@ -1932,7 +1932,7 @@
   "real_time_track_changes": "Real-time track-changes",
   "realtime_track_changes": "Real-time track changes",
   "reauthorize_github_account": "Reauthorize your GitHub Account",
-  "recaptcha_conditions": "The site is protected by reCAPTCHA and the Google <1>Privacy Policy</1> and <2>Terms of Service</2> apply.",
+  "recaptcha_conditions": "The site is protected by reCAPTCHA.",
   "recent": "Recent",
   "recent_commits_in_github": "Recent commits in GitHub",
   "recommended": "Recommended",

@@ -1376,7 +1376,7 @@
   "real_time_track_changes": "Realtids <0>ændringshistorik</0>",
   "realtime_track_changes": "Realtids ændringshistorik",
   "reauthorize_github_account": "Autoriser din GitHub konto igen",
-  "recaptcha_conditions": "Denne side er beskyttet af reCAPTCHA og Googles <1>Privatlivspolitik</1> og <2>Brugsvilkår</2> gælder.",
+  "recaptcha_conditions": "Denne side er beskyttet af reCAPTCHA.",
   "recent": "Seneste",
   "recent_commits_in_github": "Seneste commits i GitHub",
   "recompile": "Genkompilér",

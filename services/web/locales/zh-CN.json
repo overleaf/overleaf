@@ -1606,7 +1606,7 @@
   "real_time_track_changes": "实时<0>跟踪更改</0>",
   "realtime_track_changes": "实时跟踪更改",
   "reauthorize_github_account": "重新授权 GitHub 帐号",
-  "recaptcha_conditions": "本网站受reCAPTCHA保护，谷歌<1>隐私政策</1>和<2>服务条款</2>适用。",
+  "recaptcha_conditions": "本网站受reCAPTCHA保护。",
   "recent": "最近的",
   "recent_commits_in_github": "GitHub中最近的提交",
   "recommended": "推荐的",
