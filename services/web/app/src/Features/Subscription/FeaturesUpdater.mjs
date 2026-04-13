@@ -117,6 +117,7 @@ async function refreshFeatures(userId, reason) {
             userOverleafId: userId,
             // todo: quota clean-up: collab with writefull to rename this, and check if still needed
             hasAiAssist: hasPremiumAiFeatures,
+            aiUsageQuota: newFeatures.aiUsageQuota,
           },
           method: 'POST',
         }
