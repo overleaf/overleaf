@@ -8,6 +8,7 @@ import PublicAccessLevels from '../Authorization/PublicAccessLevels.mjs'
 import Errors from '../Errors/Errors.js'
 import TokenGenerator from '../TokenGenerator/TokenGenerator.mjs'
 import ProjectHelper from './ProjectHelper.mjs'
+import { sanitizeControlCharacters } from '../../infrastructure/Sanitize.mjs'
 import settings from '@overleaf/settings'
 import { callbackify } from 'node:util'
 
@@ -121,6 +122,9 @@ async function renameProject(projectId, newName) {
 }
 
 async function validateProjectName(name) {
+  if (name != null) {
+    name = sanitizeControlCharacters(name)
+  }
   if (name == null || name.length === 0) {
     throw new Errors.InvalidNameError('Project name cannot be blank')
   }

@@ -18,6 +18,7 @@ import EmailHandler from '../Email/EmailHandler.mjs'
 import UrlHelper from '../Helpers/UrlHelper.mjs'
 import { promisify } from 'node:util'
 import { expressify } from '@overleaf/promise-utils'
+import { sanitizeControlCharacters } from '../../infrastructure/Sanitize.mjs'
 import { acceptsJson } from '../../infrastructure/RequestContentTypeDetection.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
 import OneTimeTokenHandler from '../Security/OneTimeTokenHandler.mjs'
@@ -361,17 +362,17 @@ async function updateUserSettings(req, res, next) {
     throw new OError('problem updating user settings', { userId })
   }
 
-  if (body.first_name != null) {
-    user.first_name = body.first_name.trim()
+  if (typeof body.first_name === 'string') {
+    user.first_name = sanitizeControlCharacters(body.first_name).trim()
   }
-  if (body.last_name != null) {
-    user.last_name = body.last_name.trim()
+  if (typeof body.last_name === 'string') {
+    user.last_name = sanitizeControlCharacters(body.last_name).trim()
   }
-  if (body.role != null) {
-    user.role = body.role.trim()
+  if (typeof body.role === 'string') {
+    user.role = sanitizeControlCharacters(body.role).trim()
   }
-  if (body.institution != null) {
-    user.institution = body.institution.trim()
+  if (typeof body.institution === 'string') {
+    user.institution = sanitizeControlCharacters(body.institution).trim()
   }
   if (body.mode != null) {
     user.ace.mode = body.mode

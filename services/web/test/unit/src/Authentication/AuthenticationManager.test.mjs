@@ -148,6 +148,30 @@ describe('AuthenticationManager', function () {
         })
       })
 
+      describe('when the password contains control characters', function () {
+        it('should escape control characters before comparing', async function (ctx) {
+          const { user } =
+            await ctx.AuthenticationManager.promises.authenticate(
+              { email: ctx.email },
+              'test\u0000password',
+              null,
+              { enforceHIBPCheck: false }
+            )
+          expect(user).to.equal(null)
+        })
+
+        it('should escape zero-width spaces before comparing', async function (ctx) {
+          const { user } =
+            await ctx.AuthenticationManager.promises.authenticate(
+              { email: ctx.email },
+              'test\u200bpassword',
+              null,
+              { enforceHIBPCheck: false }
+            )
+          expect(user).to.equal(null)
+        })
+      })
+
       describe('when the encrypted passwords do not match', function () {
         beforeEach(async function (ctx) {
           ;({ user: ctx.result } =
@@ -250,6 +274,42 @@ describe('AuthenticationManager', function () {
         expect(hashedPassword).to.exist
         expect(hashedPassword.length).to.equal(60)
         expect(hashedPassword).to.match(/^\$2a\$04\$[a-zA-Z0-9/.]{53}$/)
+      })
+
+      it('should escape control characters before hashing so login matches', async function (ctx) {
+        ctx.settings.passwordStrengthOptions = { allowAnyChars: true }
+        await ctx.AuthenticationManager.promises.setUserPasswordInV2(
+          ctx.user,
+          'test\u0000password'
+        )
+        const { hashedPassword } = ctx.db.users.updateOne.lastCall.args[1].$set
+
+        const matchEscaped = await bcrypt.compare(
+          'test\\u0000password',
+          hashedPassword
+        )
+        expect(matchEscaped).to.equal(true)
+
+        const matchRaw = await bcrypt.compare(
+          'test\u0000password',
+          hashedPassword
+        )
+        expect(matchRaw).to.equal(false)
+      })
+
+      it('should escape zero-width characters before hashing', async function (ctx) {
+        ctx.settings.passwordStrengthOptions = { allowAnyChars: true }
+        await ctx.AuthenticationManager.promises.setUserPasswordInV2(
+          ctx.user,
+          'test\u200bpassword'
+        )
+        const { hashedPassword } = ctx.db.users.updateOne.lastCall.args[1].$set
+
+        const matchEscaped = await bcrypt.compare(
+          'test\\u200bpassword',
+          hashedPassword
+        )
+        expect(matchEscaped).to.equal(true)
       })
     })
   })

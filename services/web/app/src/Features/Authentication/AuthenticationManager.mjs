@@ -3,6 +3,7 @@ import { User } from '../../models/User.mjs'
 import { db, ObjectId } from '../../infrastructure/mongodb.mjs'
 import bcrypt from 'bcrypt'
 import EmailHelper from '../Helpers/EmailHelper.mjs'
+import { sanitizeControlCharacters } from '../../infrastructure/Sanitize.mjs'
 
 import {
   InvalidEmailError,
@@ -114,6 +115,9 @@ const AuthenticationManager = {
   },
 
   async authenticate(query, password, auditLog, { enforceHIBPCheck = true }) {
+    if (typeof password === 'string') {
+      password = sanitizeControlCharacters(password)
+    }
     const { user, match } = await AuthenticationManager._checkUserPassword(
       query,
       password
@@ -312,6 +316,7 @@ const AuthenticationManager = {
     if (!user || !user.email || !user._id) {
       throw new Error('invalid user object')
     }
+    password = sanitizeControlCharacters(password)
     const validationError = this.validatePassword(password, user.email)
     if (validationError) {
       throw validationError
