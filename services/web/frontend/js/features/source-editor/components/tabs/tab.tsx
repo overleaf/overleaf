@@ -2,6 +2,7 @@ import {
   EditorFileTab,
   TAB_TRANSFER_TYPE,
 } from '@/features/ide-react/context/tabs-context'
+import FileTreeIcon from '@/features/file-tree/components/file-tree-icon'
 import MaterialIcon from '@/shared/components/material-icon'
 import { debugConsole } from '@/utils/debugging'
 import classNames from 'classnames'
@@ -196,6 +197,9 @@ export const Tab = memo(function Tab({
         'tab-temporary': tab.lifetime === 'temporary',
       })}
     >
+      <span className="editor-file-tab-icon">
+        <FileTreeIcon isLinkedFile={tab.isLinkedFile} name={tab.name} />
+      </span>
       <div className="editor-file-tab-path">&lrm;{tab.displayPath}</div>
       <div className="editor-file-tab-action">
         <button

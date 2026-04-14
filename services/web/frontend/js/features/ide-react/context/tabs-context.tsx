@@ -9,6 +9,10 @@ import { debugConsole } from '@/utils/debugging'
 import { disambiguatePaths } from '../util/disambiguate-paths'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
+import {
+  FileTreeFindResult,
+  isFileRefResult,
+} from '@/features/ide-react/types/file-tree'
 
 type PersistedTabInfo = { id: string; lifetime: Lifetime }
 
@@ -16,7 +20,9 @@ type Lifetime = 'permanent' | 'temporary'
 
 export type EditorFileTab = {
   id: string
+  name: string
   displayPath: string
+  isLinkedFile: boolean
   lifetime: Lifetime
 }
 
@@ -64,19 +70,29 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
         lifetime: tab.lifetime,
         result: findInTree(fileTreeData, tab.id),
       }))
-      .filter(x => !!x.result)
+      .filter(x => !!x.result) as {
+      lifetime: Lifetime
+      result: FileTreeFindResult
+    }[]
 
     const pathLookup = disambiguatePaths(
-      tabsFileTreeLookup.map(tab => tab.result!),
+      tabsFileTreeLookup.map(tab => tab.result),
       fileTreeData
     )
 
-    return tabsFileTreeLookup.map(tab => ({
-      id: tab.result!.entity._id,
-      displayPath:
-        pathLookup.get(tab.result!.entity._id) || tab.result!.entity.name,
-      lifetime: tab.lifetime,
-    }))
+    return tabsFileTreeLookup.map(tab => {
+      const entity = tab.result.entity
+
+      return {
+        id: entity._id,
+        name: entity.name,
+        displayPath: pathLookup.get(entity._id) || entity.name,
+        isLinkedFile:
+          isFileRefResult(tab.result) &&
+          !!tab.result.entity.linkedFileData?.provider,
+        lifetime: tab.lifetime,
+      }
+    })
   }, [fileTreeData, openTabs, tabsEnabled])
 
   const openTab = useCallback(

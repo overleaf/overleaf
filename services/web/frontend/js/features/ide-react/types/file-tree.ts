@@ -29,3 +29,15 @@ export type FileTreeFindResult =
   | FileTreeFolderFindResult
   | FileTreeDocumentFindResult
   | FileTreeFileRefFindResult
+
+export const isFolderResult = (
+  result: FileTreeFindResult
+): result is FileTreeFolderFindResult => result.type === 'folder'
+
+export const isDocResult = (
+  result: FileTreeFindResult
+): result is FileTreeDocumentFindResult => result.type === 'doc'
+
+export const isFileRefResult = (
+  result: FileTreeFindResult
+): result is FileTreeFileRefFindResult => result.type === 'fileRef'

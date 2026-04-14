@@ -41,6 +41,7 @@
 
 .editor-file-tab {
   --tab-bg-color: transparent;
+  --tab-icon-colour: var(--content-secondary-themed);
 
   display: inline-flex;
   align-items: center;
@@ -61,11 +62,40 @@
 
   &.tab-selected {
     --tab-bg-color: var(--bg-secondary-themed);
+    --tab-icon-colour: var(--content-primary-themed);
   }
 
   .material-symbols {
     vertical-align: middle;
     font-size: var(--font-size-03);
+  }
+
+  .file-tree-icon,
+  .linked-file-highlight {
+    color: var(--tab-icon-colour);
+  }
+
+  .editor-file-tab-icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+  }
+
+  .file-tree-icon {
+    margin-right: var(--spacing-01);
+  }
+
+  .linked-file-icon {
+    position: relative;
+    left: -2px;
+  }
+
+  .linked-file-highlight {
+    position: absolute;
+    top: 6px;
+    left: 6px !important;
+    font-size: var(--font-size-01);
   }
 
   &.tab-drop-right {
@@ -80,6 +110,11 @@
     font-style: italic;
   }
 
+  .editor-file-tab-action {
+    display: flex;
+    align-items: center;
+  }
+
   .editor-file-tab-close-action {
     background: transparent;
     border: none;
@@ -87,6 +122,8 @@
     cursor: pointer;
     margin: 0;
     padding: 0;
+    display: flex;
+    align-items: center;
 
     &:hover {
       color: var(--content-secondary-themed);
