@@ -27,7 +27,7 @@ async function mergeUpdate(userId, projectId, path, updateRequest, source) {
 async function writeUpdateToDisk(projectId, updateStream) {
   const fsPath = `${
     Settings.path.dumpFolder
-  }/${projectId}_${crypto.randomUUID()}`
+  }/${projectId}_${crypto.randomUUID()}_update-merger`
   const writeStream = fs.createWriteStream(fsPath)
   try {
     await pipeline(updateStream, writeStream)

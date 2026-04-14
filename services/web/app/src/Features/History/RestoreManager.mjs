@@ -437,13 +437,16 @@ const RestoreManager = {
     const url = `${
       Settings.apis.project_history.url
     }/project/${projectId}/version/${version}/${encodeURIComponent(pathname)}`
-    return await FileWriter.promises.writeUrlToDisk(projectId, url)
+    return await FileWriter.promises.writeUrlToDisk(
+      projectId + '_restore-manager-version',
+      url
+    )
   },
 
   async _writeSnapshotFileToDisk(historyId, file) {
     if (file.isEditable()) {
       return await FileWriter.promises.writeContentToDisk(
-        historyId,
+        historyId + '_restore-manager-editable',
         file.getContent()
       )
     } else {
@@ -452,7 +455,10 @@ const RestoreManager = {
         historyId,
         hash
       )
-      return await FileWriter.promises.writeStreamToDisk(historyId, stream)
+      return await FileWriter.promises.writeStreamToDisk(
+        historyId + '_restore-manager-blob',
+        stream
+      )
     }
   },
 }

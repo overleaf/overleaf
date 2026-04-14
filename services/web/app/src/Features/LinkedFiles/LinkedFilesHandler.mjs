@@ -60,7 +60,7 @@ const LinkedFilesHandler = {
     userId
   ) {
     const fsPath = await FileWriter.promises.writeStreamToDisk(
-      projectId,
+      projectId + '_linked-files-handler-stream',
       readStream
     )
 
@@ -88,7 +88,7 @@ const LinkedFilesHandler = {
     userId
   ) {
     const fsPath = await FileWriter.promises.writeContentToDisk(
-      projectId,
+      projectId + '_linked-files-handler-content',
       content
     )
 

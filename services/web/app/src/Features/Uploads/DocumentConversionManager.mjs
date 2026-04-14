@@ -26,7 +26,7 @@ async function convertDocxToLaTeXZipArchive(path, userId) {
     'sending docx to CLSI for conversion'
   )
 
-  const outputFileName = crypto.randomUUID() + '.zip'
+  const outputFileName = crypto.randomUUID() + '_document-conversion' + '.zip'
   const outputPath = Path.join(Settings.path.dumpFolder, outputFileName)
   let outputStream
   const abortController = new AbortController()

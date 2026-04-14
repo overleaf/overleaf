@@ -131,7 +131,7 @@ describe('DocumentConversionManager', function () {
 
       it('should return a path to the output file', function (ctx) {
         expect(ctx.result).to.match(
-          /\/path\/to\/dump\/folder\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.zip/
+          /\/path\/to\/dump\/folder\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}_document-conversion\.zip/
         )
       })
     })
@@ -157,7 +157,7 @@ describe('DocumentConversionManager', function () {
         sinon.assert.calledWith(
           ctx.fsPromises.unlink,
           sinon.match(
-            /\/path\/to\/dump\/folder\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.zip/
+            /\/path\/to\/dump\/folder\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}_document-conversion\.zip/
           )
         )
       })
@@ -210,7 +210,7 @@ describe('DocumentConversionManager', function () {
         sinon.assert.calledWith(
           ctx.fsPromises.unlink,
           sinon.match(
-            /\/path\/to\/dump\/folder\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.zip/
+            /\/path\/to\/dump\/folder\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}_document-conversion\.zip/
           )
         )
       })
@@ -248,7 +248,7 @@ describe('DocumentConversionManager', function () {
         sinon.assert.calledWith(
           ctx.fsPromises.unlink,
           sinon.match(
-            /\/path\/to\/dump\/folder\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.zip/
+            /\/path\/to\/dump\/folder\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}_document-conversion\.zip/
           )
         )
       })

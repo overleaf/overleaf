@@ -47,7 +47,7 @@ const TemplatesManager = {
     })
 
     const projectName = ProjectDetailsHandler.fixProjectName(templateName)
-    const dumpPath = `${settings.path.dumpFolder}/${crypto.randomUUID()}`
+    const dumpPath = `${settings.path.dumpFolder}/${crypto.randomUUID()}_templates-manager`
     const writeStream = fs.createWriteStream(dumpPath)
     try {
       const attributes = {

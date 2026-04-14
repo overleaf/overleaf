@@ -26,7 +26,7 @@ describe('UpdateMerger :', function () {
     ctx.existingDocs = [{ path: '/main.tex' }, { path: '/folder/other.tex' }]
     ctx.existingFiles = [{ path: '/figure.pdf' }, { path: '/folder/fig1.pdf' }]
 
-    ctx.fsPath = `${ctx.dumpPath}/${ctx.projectId}_${ctx.randomUUID}`
+    ctx.fsPath = `${ctx.dumpPath}/${ctx.projectId}_${ctx.randomUUID}_update-merger`
     ctx.fileContents = `\\documentclass{article}
 \\usepackage[utf8]{inputenc}
 
