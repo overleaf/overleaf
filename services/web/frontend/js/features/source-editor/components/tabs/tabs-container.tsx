@@ -59,6 +59,14 @@ export const TabsContainer = () => {
     setHovered(false)
   }, [throttledOnDragOver])
 
+  const onWheel = useCallback((e: React.WheelEvent) => {
+    if (e.deltaY !== 0 && e.deltaX === 0) {
+      // if this is a purely vertical scroll, convert it to a horizontal scroll
+      // instead
+      e.currentTarget.scrollLeft += e.deltaY
+    }
+  }, [])
+
   return (
     <div className="editor-tabs-container">
       <div
@@ -69,6 +77,7 @@ export const TabsContainer = () => {
         onDragOver={onDragOver}
         onDrop={onDrop}
         onDragLeave={onDragLeave}
+        onWheel={onWheel}
         tabIndex={-1}
       >
         {tabs.map(tab => (

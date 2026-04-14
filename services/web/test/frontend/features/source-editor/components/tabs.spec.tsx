@@ -731,7 +731,7 @@ describe('File Tabs', function () {
     })
   })
 
-  describe('Tab scroll into view', function () {
+  describe('Tab scrolling', function () {
     it('scrolls the selected tab into view', function () {
       const manyDocs = [
         { _id: DOC_IDS.main, name: 'main.tex' },
@@ -760,6 +760,38 @@ describe('File Tabs', function () {
       cy.then(() => selectDoc(DOC_IDS.main))
 
       cy.findByRole('tab', { name: /main\.tex/ }).should('be.visible')
+    })
+
+    it('scrolls horizontally on vertical mouse wheel', function () {
+      const manyDocs = [
+        { _id: DOC_IDS.main, name: 'main.tex' },
+        ...Array.from({ length: 10 }, (_, i) => ({
+          _id: `ch${i + 1}`,
+          name: `chapter-${i + 1}.tex`,
+        })),
+      ]
+      const rootFolder = makeRootFolder(manyDocs)
+      mountTabs({ rootFolder })
+
+      // Open enough tabs to cause overflow
+      cy.then(() => selectDoc(DOC_IDS.main))
+      for (let i = 1; i <= 10; i++) {
+        const id = `ch${i}`
+        cy.then(() => selectEntity(makeDocEntity(id, `chapter-${i}.tex`)))
+      }
+
+      // Scroll back to the start
+      cy.findByRole('tablist').then($el => {
+        $el[0].scrollLeft = 0
+      })
+
+      // Trigger a vertical wheel event on the tablist
+      cy.findByRole('tablist').trigger('wheel', { deltaY: 100, deltaX: 0 })
+
+      // scrollLeft should have increased
+      cy.findByRole('tablist').should($el => {
+        expect($el[0].scrollLeft).to.be.greaterThan(0)
+      })
     })
   })
 
