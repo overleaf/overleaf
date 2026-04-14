@@ -16,7 +16,6 @@ describe('ClsiCookieManager', function () {
       fetchNothing: sinon.stub().returns(Promise.resolve()),
       fetchStringWithResponse: sinon.stub().returns(Promise.resolve()),
     }
-    ctx.metrics = { inc: sinon.stub() }
     ctx.settings = {
       redis: {
         web: 'redis.something',
@@ -41,9 +40,6 @@ describe('ClsiCookieManager', function () {
       default: ctx.settings,
     }))
     vi.doMock('@overleaf/fetch-utils', () => ctx.fetchUtils)
-    vi.doMock('@overleaf/metrics', () => ({
-      default: ctx.metrics,
-    }))
 
     ctx.ClsiCookieManager = (await import(modulePath)).default()
   })
@@ -296,7 +292,7 @@ describe('ClsiCookieManager', function () {
           body: 'previous-clsi-server-id,UP\n',
         })
         await ctx.call()
-        expect(ctx.metrics.inc).to.have.been.calledWith(
+        expect(ctx.Metrics.inc).to.have.been.calledWith(
           'clsi-lb-switch-backend',
           1,
           { status: 'load-shedding' }
@@ -309,7 +305,7 @@ describe('ClsiCookieManager', function () {
           body: 'other-clsi-server-id,UP\n',
         })
         await ctx.call()
-        expect(ctx.metrics.inc).to.have.been.calledWith(
+        expect(ctx.Metrics.inc).to.have.been.calledWith(
           'clsi-lb-switch-backend',
           1,
           { status: 'cycle' }
@@ -321,7 +317,7 @@ describe('ClsiCookieManager', function () {
           response: { status: 404 },
         })
         await ctx.call()
-        expect(ctx.metrics.inc).to.have.been.calledWith(
+        expect(ctx.Metrics.inc).to.have.been.calledWith(
           'clsi-lb-switch-backend',
           1,
           { status: 'cycle' }

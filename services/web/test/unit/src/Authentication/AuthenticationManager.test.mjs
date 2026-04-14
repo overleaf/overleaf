@@ -14,7 +14,6 @@ describe('AuthenticationManager', function () {
   beforeEach(async function (ctx) {
     tk.freeze(Date.now())
     ctx.settings = { security: { bcryptRounds: 4 } }
-    ctx.metrics = { inc: sinon.stub().returns() }
     ctx.HaveIBeenPwned = {
       promises: {
         checkPasswordForReuse: sinon.stub().resolves(false),
@@ -73,10 +72,6 @@ describe('AuthenticationManager', function () {
       }),
     }))
 
-    vi.doMock('@overleaf/metrics', () => ({
-      default: ctx.metrics,
-    }))
-
     ctx.AuthenticationManager = (await import(modulePath)).default
   })
 
@@ -105,7 +100,7 @@ describe('AuthenticationManager', function () {
         ctx.User.findOne = sinon
           .stub()
           .returns({ exec: sinon.stub().resolves(ctx.user) })
-        ctx.metrics.inc.reset()
+        ctx.Metrics.inc.reset()
       })
 
       describe('when the hashed password matches', function () {
@@ -143,7 +138,7 @@ describe('AuthenticationManager', function () {
 
         it('should send metrics', function (ctx) {
           expect(
-            ctx.metrics.inc.calledWith('check-password', { status: 'success' })
+            ctx.Metrics.inc.calledWith('check-password', { status: 'success' })
           ).to.equal(true)
         })
       })
@@ -333,7 +328,7 @@ describe('AuthenticationManager', function () {
         ctx.User.findOne = sinon
           .stub()
           .returns({ exec: sinon.stub().resolves(ctx.user) })
-        ctx.metrics.inc.reset()
+        ctx.Metrics.inc.reset()
       })
 
       describe('when the hashed password matches', function () {
@@ -362,7 +357,7 @@ describe('AuthenticationManager', function () {
 
         it('should send metrics', function (ctx) {
           expect(
-            ctx.metrics.inc.calledWith('check-password', {
+            ctx.Metrics.inc.calledWith('check-password', {
               status: 'too_short',
             })
           ).to.equal(true)
@@ -509,7 +504,7 @@ describe('AuthenticationManager', function () {
         })
 
         it('should check the number of rounds', function (ctx) {
-          expect(ctx.metrics.inc).to.have.been.calledWith(
+          expect(ctx.Metrics.inc).to.have.been.calledWith(
             'bcrypt_check_rounds',
             1,
             { status: 'upgrade' }
@@ -546,7 +541,7 @@ describe('AuthenticationManager', function () {
         })
 
         it('should not check the number of rounds', function (ctx) {
-          expect(ctx.metrics.inc).to.have.been.calledWith(
+          expect(ctx.Metrics.inc).to.have.been.calledWith(
             'bcrypt_check_rounds',
             1,
             { status: 'disabled' }
@@ -633,12 +628,12 @@ describe('AuthenticationManager', function () {
     describe('password length', function () {
       describe('with the default password length options', function () {
         beforeEach(function (ctx) {
-          ctx.metrics.inc.reset()
+          ctx.Metrics.inc.reset()
         })
 
         it('should send a metric', function (ctx) {
           ctx.AuthenticationManager.validatePassword('foo')
-          expect(ctx.metrics.inc.calledWith('try-validate-password')).to.equal(
+          expect(ctx.Metrics.inc.calledWith('try-validate-password')).to.equal(
             true
           )
         })
@@ -832,7 +827,7 @@ describe('AuthenticationManager', function () {
 
   describe('_validatePasswordNotTooSimilar', function () {
     beforeEach(function (ctx) {
-      ctx.metrics.inc.reset()
+      ctx.Metrics.inc.reset()
     })
 
     it('should return an error when the password is too similar to email', function (ctx) {
@@ -1043,7 +1038,7 @@ describe('AuthenticationManager', function () {
       beforeEach(function (ctx) {
         ctx.user.email = 'foobarbazquux@example.com'
         ctx.password = 'foo21barbaz'
-        ctx.metrics.inc.reset()
+        ctx.Metrics.inc.reset()
       })
 
       it('should produce an error when the password is too similar to the email', async function (ctx) {
@@ -1061,7 +1056,7 @@ describe('AuthenticationManager', function () {
         }
 
         expect(
-          ctx.metrics.inc.calledWith('password-too-similar-to-email')
+          ctx.Metrics.inc.calledWith('password-too-similar-to-email')
         ).to.equal(true)
       })
 
@@ -1080,14 +1075,14 @@ describe('AuthenticationManager', function () {
         }
 
         expect(
-          ctx.metrics.inc.calledWith('password-too-similar-to-email')
+          ctx.Metrics.inc.calledWith('password-too-similar-to-email')
         ).to.equal(true)
       })
     })
 
     describe('successful password set attempt', function () {
       beforeEach(async function (ctx) {
-        ctx.metrics.inc.reset()
+        ctx.Metrics.inc.reset()
         ctx.UserGetter.promises.getUser = sinon
           .stub()
           .resolves({ overleaf: null })
@@ -1119,7 +1114,7 @@ describe('AuthenticationManager', function () {
 
       it('should not send a metric for password-too-similar-to-email', function (ctx) {
         expect(
-          ctx.metrics.inc.calledWith('password-too-similar-to-email')
+          ctx.Metrics.inc.calledWith('password-too-similar-to-email')
         ).to.equal(false)
       })
     })

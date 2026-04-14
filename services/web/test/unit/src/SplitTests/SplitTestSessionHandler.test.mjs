@@ -16,7 +16,6 @@ describe('SplitTestSessionHandler', function () {
       get: sinon.stub().resolves(),
     }
     ctx.SplitTestUserGetter = {}
-    ctx.Metrics = {}
 
     ctx.SplitTestCache.get = sinon.stub().resolves(
       new Map(
@@ -66,10 +65,6 @@ describe('SplitTestSessionHandler', function () {
         default: ctx.SplitTestUserGetter,
       })
     )
-
-    vi.doMock('@overleaf/metrics', () => ({
-      default: ctx.Metrics,
-    }))
 
     vi.doMock('mongodb-legacy', () => ({
       default: { ObjectId },

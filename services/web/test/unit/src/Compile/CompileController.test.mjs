@@ -104,19 +104,6 @@ describe('CompileController', function () {
       }),
     }))
 
-    vi.doMock('@overleaf/metrics', () => ({
-      default: (ctx.Metrics = {
-        inc: sinon.stub(),
-        Timer: class {
-          constructor() {
-            this.labels = {}
-          }
-
-          done() {}
-        },
-      }),
-    }))
-
     vi.doMock(
       '../../../../app/src/Features/Compile/ClsiCacheController',
       () => ({

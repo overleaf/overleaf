@@ -108,7 +108,6 @@ describe('AuthenticationController', function () {
       }),
     }))
 
-    ctx.Metrics = { inc: sinon.stub() }
     hoistedMocks.metricsInc = ctx.Metrics.inc
 
     vi.doMock('../../../../app/src/Features/Security/LoginRateLimiter', () => ({

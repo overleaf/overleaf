@@ -10,7 +10,6 @@ const modulePath =
 describe('InactiveProjectManager', function () {
   beforeEach(async function (ctx) {
     ctx.settings = {}
-    ctx.metrics = { inc: sinon.stub() }
     ctx.DocstoreManager = {
       promises: {
         unarchiveProject: sinon.stub(),
@@ -37,10 +36,6 @@ describe('InactiveProjectManager', function () {
 
     vi.doMock('@overleaf/settings', () => ({
       default: ctx.settings,
-    }))
-
-    vi.doMock('@overleaf/metrics', () => ({
-      default: ctx.metrics,
     }))
 
     vi.doMock('../../../../app/src/Features/Docstore/DocstoreManager', () => ({

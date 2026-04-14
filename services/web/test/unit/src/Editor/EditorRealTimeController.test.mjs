@@ -9,7 +9,6 @@ const modulePath = path.join(
 describe('EditorRealTimeController', function () {
   beforeEach(async function (ctx) {
     ctx.rclient = { publish: sinon.stub() }
-    ctx.Metrics = { summary: sinon.stub() }
 
     vi.doMock('../../../../app/src/infrastructure/RedisWrapper', () => ({
       default: {
@@ -25,10 +24,6 @@ describe('EditorRealTimeController', function () {
 
     vi.doMock('@overleaf/settings', () => ({
       default: { redis: {} },
-    }))
-
-    vi.doMock('@overleaf/metrics', () => ({
-      default: ctx.Metrics,
     }))
 
     vi.doMock('node:crypto', () => ({

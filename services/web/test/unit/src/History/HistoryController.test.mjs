@@ -67,10 +67,6 @@ describe('HistoryController', function () {
       fetchNothing: ctx.fetchNothing,
     }))
 
-    vi.doMock('@overleaf/Metrics', () => ({
-      default: {},
-    }))
-
     vi.doMock('../../../../app/src/infrastructure/mongodb.mjs', () => ({
       default: { ObjectId },
     }))

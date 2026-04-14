@@ -45,13 +45,6 @@ describe('LockManager - getting the lock', function () {
       },
     }))
 
-    vi.doMock('@overleaf/metrics', () => ({
-      default: {
-        inc() {},
-        gauge() {},
-      },
-    }))
-
     ctx.LockManager = (await import(modulePath)).default
 
     ctx.callback = sinon.stub()

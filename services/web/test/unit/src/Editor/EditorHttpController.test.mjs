@@ -137,7 +137,6 @@ describe('EditorHttpController', function () {
     ctx.ProjectEditorHandler = {
       buildProjectModelView: sinon.stub().returns(ctx.projectView),
     }
-    ctx.Metrics = { inc: sinon.stub() }
     ctx.TokenAccessHandler = {
       getRequestToken: sinon.stub().returns(ctx.token),
     }
@@ -195,9 +194,6 @@ describe('EditorHttpController', function () {
         default: ctx.EditorController,
       })
     )
-    vi.doMock('@overleaf/metrics', () => ({
-      default: ctx.Metrics,
-    }))
     vi.doMock(
       '../../../../app/src/Features/Collaborators/CollaboratorsGetter.mjs',
       () => ({

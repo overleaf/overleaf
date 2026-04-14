@@ -25,10 +25,6 @@ describe('LaunchpadController', function () {
 
     vi.doMock('@overleaf/settings', () => ({ default: ctx.Settings }))
 
-    vi.doMock('@overleaf/metrics', () => ({
-      default: (ctx.Metrics = {}),
-    }))
-
     vi.doMock(
       '../../../../../app/src/Features/User/UserRegistrationHandler.mjs',
       () => ({

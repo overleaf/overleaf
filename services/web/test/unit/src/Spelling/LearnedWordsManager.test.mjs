@@ -22,12 +22,6 @@ describe('LearnedWordsManager', function () {
       default: { db: ctx.db },
     }))
 
-    vi.doMock('@overleaf/metrics', () => ({
-      default: {
-        inc: vi.fn(),
-      },
-    }))
-
     vi.doMock('@overleaf/settings', () => ({
       default: {
         maxDictionarySize: 20,

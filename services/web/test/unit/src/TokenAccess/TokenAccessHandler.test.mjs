@@ -41,10 +41,6 @@ describe('TokenAccessHandler', function () {
       Project: (ctx.Project = {}),
     }))
 
-    vi.doMock('@overleaf/metrics', () => ({
-      default: (ctx.Metrics = { inc: sinon.stub() }),
-    }))
-
     vi.doMock('@overleaf/settings', () => ({
       default: (ctx.settings = { disableLinkSharing: false }),
     }))

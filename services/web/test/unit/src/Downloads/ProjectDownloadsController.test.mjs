@@ -31,10 +31,6 @@ describe('ProjectDownloadsController', function () {
       default: (ctx.ProjectGetter = {}),
     }))
 
-    vi.doMock('@overleaf/metrics', () => ({
-      default: (ctx.metrics = {}),
-    }))
-
     vi.doMock(
       '../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.mjs',
       () => ({
@@ -75,7 +71,7 @@ describe('ProjectDownloadsController', function () {
       ctx.DocumentUpdaterHandler.flushProjectToMongo = sinon
         .stub()
         .callsArgWith(1)
-      ctx.metrics.inc = sinon.stub()
+      ctx.Metrics.inc = sinon.stub()
       return ctx.ProjectDownloadsController.downloadProject(
         ctx.req,
         ctx.res,
@@ -119,7 +115,7 @@ describe('ProjectDownloadsController', function () {
     })
 
     it('should record the action via Metrics', function (ctx) {
-      return ctx.metrics.inc.calledWith('zip-downloads').should.equal(true)
+      return ctx.Metrics.inc.calledWith('zip-downloads').should.equal(true)
     })
 
     it('should add an audit log entry', function (ctx) {
@@ -152,7 +148,7 @@ describe('ProjectDownloadsController', function () {
       ctx.DocumentUpdaterHandler.flushMultipleProjectsToMongo = sinon
         .stub()
         .callsArgWith(1)
-      ctx.metrics.inc = sinon.stub()
+      ctx.Metrics.inc = sinon.stub()
       return ctx.ProjectDownloadsController.downloadMultipleProjects(
         ctx.req,
         ctx.res,
@@ -191,7 +187,7 @@ describe('ProjectDownloadsController', function () {
     })
 
     it('should record the action via Metrics', function (ctx) {
-      return ctx.metrics.inc
+      return ctx.Metrics.inc
         .calledWith('zip-downloads-multiple')
         .should.equal(true)
     })

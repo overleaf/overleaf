@@ -35,7 +35,6 @@ describe('LockManager - releasing the lock', function () {
         },
       },
     }))
-    vi.doMock('@overleaf/metrics', () => ({}))
     vi.doMock('../../../../../app/src/infrastructure/RedisWrapper', () => ({
       default: {
         client() {

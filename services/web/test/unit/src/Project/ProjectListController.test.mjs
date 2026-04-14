@@ -133,9 +133,6 @@ describe('ProjectListController', function () {
     ctx.Features = {
       hasFeature: sinon.stub(),
     }
-    ctx.Metrics = {
-      inc: sinon.stub(),
-    }
     ctx.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
@@ -206,10 +203,6 @@ describe('ProjectListController', function () {
 
     vi.doMock('@overleaf/settings', () => ({
       default: ctx.settings,
-    }))
-
-    vi.doMock('@overleaf/metrics', () => ({
-      default: ctx.Metrics,
     }))
 
     vi.doMock(

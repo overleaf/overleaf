@@ -51,12 +51,6 @@ describe('EmailSender', function () {
       () => ctx.RateLimiter
     )
 
-    vi.doMock('@overleaf/metrics', () => ({
-      default: {
-        inc() {},
-      },
-    }))
-
     ctx.EmailSender = (await import(MODULE_PATH)).default
 
     ctx.opts = {

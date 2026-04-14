@@ -22,12 +22,6 @@ describe('BetaProgramHandler', function () {
       save: sinon.stub().callsArgWith(0, null),
     }
 
-    vi.doMock('@overleaf/metrics', () => ({
-      default: {
-        inc: sinon.stub(),
-      },
-    }))
-
     vi.doMock('../../../../app/src/Features/User/UserUpdater', () => ({
       default: (ctx.UserUpdater = {
         promises: {

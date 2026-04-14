@@ -83,10 +83,6 @@ describe('EditorController', function () {
       })
     )
 
-    vi.doMock('@overleaf/metrics', () => ({
-      default: (ctx.Metrics = { inc: sinon.stub() }),
-    }))
-
     ctx.EditorController = (await import(modulePath)).default
   })
 

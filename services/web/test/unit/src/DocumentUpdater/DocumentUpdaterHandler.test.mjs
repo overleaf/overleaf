@@ -68,14 +68,6 @@ describe('DocumentUpdaterHandler', function () {
       default: {},
     }))
 
-    vi.doMock('@overleaf/metrics', () => ({
-      default: {
-        Timer: class {
-          done() {}
-        },
-      },
-    }))
-
     vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
       default: {
         promises: {

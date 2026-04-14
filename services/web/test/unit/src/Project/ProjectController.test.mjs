@@ -185,12 +185,6 @@ describe('ProjectController', function () {
         flushProjectToTpdsIfNeeded: sinon.stub().resolves(),
       },
     }
-    ctx.Metrics = {
-      Timer: class {
-        done() {}
-      },
-      inc: sinon.stub(),
-    }
     ctx.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
@@ -251,10 +245,6 @@ describe('ProjectController', function () {
 
     vi.doMock('@overleaf/settings', () => ({
       default: ctx.settings,
-    }))
-
-    vi.doMock('@overleaf/metrics', () => ({
-      default: ctx.Metrics,
     }))
 
     vi.doMock(

@@ -97,12 +97,6 @@ describe('TpdsUpdateSender', function () {
       default: ctx.UserGetter,
     }))
 
-    vi.doMock('@overleaf/metrics', () => ({
-      default: {
-        inc() {},
-      },
-    }))
-
     ctx.TpdsUpdateSender = (await import(modulePath)).default
   })
 
