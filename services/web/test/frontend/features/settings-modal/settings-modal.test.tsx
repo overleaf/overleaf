@@ -1,4 +1,4 @@
-import { screen, render } from '@testing-library/react'
+import { screen, render, waitFor } from '@testing-library/react'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import { EditorProviders } from '../../helpers/editor-providers'
@@ -129,6 +129,62 @@ describe('<SettingsModal />', function () {
     Object.entries(TAB_SETTINGS).forEach(([tabName, settings]) => {
       selectTab(tabName)
       settings.forEach(setting => assertSettingIsVisible(setting))
+    })
+  })
+
+  describe('when open=project-notifications query param is present', function () {
+    beforeEach(function () {
+      window.metaAttributesCache.set('ol-splitTestVariants', {
+        'email-notifications': 'enabled',
+      })
+      fetchMock.get(/\/notifications\/preferences\/project\//, {
+        trackedChangesOnOwnProject: false,
+        trackedChangesOnInvitedProject: false,
+        commentOnOwnProject: false,
+        commentOnInvitedProject: false,
+        repliesOnOwnProject: false,
+        repliesOnInvitedProject: false,
+        repliesOnAuthoredThread: false,
+        repliesOnParticipatingThread: false,
+      })
+      window.history.pushState({}, '', '?open=project-notifications')
+    })
+
+    afterEach(function () {
+      window.history.pushState({}, '', window.location.pathname)
+      window.metaAttributesCache.delete('ol-splitTestVariants')
+    })
+
+    it('opens the modal and selects the Project notifications tab', async function () {
+      render(
+        <EditorProviders rootFolder={[rootFolder as any]}>
+          <SettingsModal />
+        </EditorProviders>
+      )
+
+      await waitFor(
+        () =>
+          expect(
+            screen.getByRole('tab', {
+              name: /Project notifications/,
+              selected: true,
+            })
+          ).to.exist
+      )
+    })
+
+    it('removes the open param from the URL', async function () {
+      render(
+        <EditorProviders rootFolder={[rootFolder as any]}>
+          <SettingsModal />
+        </EditorProviders>
+      )
+
+      await waitFor(() => {
+        expect(window.location.search).to.not.include(
+          'open=project-notifications'
+        )
+      })
     })
   })
 })

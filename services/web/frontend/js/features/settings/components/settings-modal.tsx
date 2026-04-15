@@ -11,6 +11,7 @@ import {
   useSettingsModalContext,
 } from '../context/settings-modal-context'
 import useFocusOnSetting from '../hooks/use-focus-on-setting'
+import useOpenSettingsViaQueryParam from '../hooks/use-open-settings-via-query-param'
 
 const SettingsModalWrapper = () => {
   return (
@@ -26,6 +27,7 @@ const SettingsModal = () => {
     useSettingsModalContext()
 
   useFocusOnSetting()
+  useOpenSettingsViaQueryParam()
 
   return (
     <OLModal
