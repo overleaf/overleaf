@@ -10,6 +10,32 @@ async function initialize(projectId) {
 }
 
 /**
+ * Copy the data structures for a given project.
+ * @param {string} sourceProjectId
+ * @param {string} targetProjectId
+ */
+async function clone(sourceProjectId, targetProjectId) {
+  assert.postgresId(targetProjectId, 'bad target projectId')
+  assert.postgresId(sourceProjectId, 'bad source projectId')
+
+  const result = await knex.raw(
+    `INSERT INTO project_blobs (
+      project_id, hash_bytes, byte_length, string_length
+    )
+    SELECT ?, hash_bytes, byte_length, string_length
+    FROM project_blobs
+    WHERE project_id = ?
+    RETURNING hash_bytes`,
+    [parseInt(targetProjectId, 10), parseInt(sourceProjectId, 10)]
+  )
+  const blobHashes = []
+  for (const row of result.rows) {
+    blobHashes.push(row.hash_bytes.toString('hex'))
+  }
+  return blobHashes
+}
+
+/**
  * Return blob metadata for the given project and hash
  */
 async function findBlob(projectId, hash) {
@@ -152,6 +178,7 @@ function hashFromBuffer(buffer) {
 
 module.exports = {
   initialize,
+  clone,
   findBlob,
   findBlobs,
   getProjectBlobs,

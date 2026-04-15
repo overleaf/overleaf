@@ -14,11 +14,113 @@ import * as LabelsManager from './LabelsManager.js'
 import * as HistoryApiManager from './HistoryApiManager.js'
 import * as RetryManager from './RetryManager.js'
 import * as FlushManager from './FlushManager.js'
-import { pipeline } from 'node:stream'
+import Stream, { pipeline } from 'node:stream'
 import { fetchNothing, RequestFailedError } from '@overleaf/fetch-utils'
 import { z, zz, parseReq } from '@overleaf/validation-tools'
+import { IncrementalResponse } from '@overleaf/stream-utils'
 
 const ONE_DAY_IN_SECONDS = 24 * 60 * 60
+
+const cloneProjectSchema = z.object({
+  body: z.object({
+    targetProjectId: z.string(),
+  }),
+
+  params: z.object({
+    project_id: z.string(),
+  }),
+})
+
+export function cloneProject(req, res) {
+  const {
+    params: { project_id: sourceProjectId },
+    body: { targetProjectId },
+  } = parseReq(req, cloneProjectSchema)
+  const incrResp = new IncrementalResponse({
+    res,
+    timeout: 10 * 60_000 - 5_000,
+    logger,
+    label: 'clone history in project-history',
+    info: { targetProjectId, sourceProjectId },
+  })
+
+  WebApiManager.getHistoryId(targetProjectId, (err, targetHistoryId) => {
+    if (err) return incrResp.fail(OError.tag(err, 'get target historyId'))
+    WebApiManager.getHistoryId(sourceProjectId, (err, sourceHistoryId) => {
+      if (err) return incrResp.fail(OError.tag(err, 'get source historyId'))
+
+      incrResp.sendUpdate('cloning full project history data: pending')
+      HistoryStoreManager.cloneProject(
+        sourceHistoryId.toString(),
+        targetHistoryId.toString(),
+        incrResp.signal(),
+        (err, stream) => {
+          if (err) {
+            incrResp.fail(OError.tag(err, 'clone history-v1 data'))
+            return
+          }
+
+          // aborted. pipeline() would throw.
+          if (res.destroyed) {
+            stream.destroy()
+            incrResp.fail(new Error('request aborted'))
+            return
+          }
+
+          // The stream.pipeline callback API does not support options.
+          Stream.promises.pipeline(stream, res, { end: false }).then(
+            () => {
+              incrResp.sendUpdate('clone labels: pending')
+              LabelsManager.cloneLabels(
+                sourceProjectId,
+                targetProjectId,
+                err => {
+                  if (err) {
+                    incrResp.fail(OError.tag(err, 'clone labels'))
+                    return
+                  }
+                  incrResp.sendUpdate('clone labels: done')
+
+                  incrResp.sendUpdate('clone resync state: pending')
+                  SyncManager.cloneResyncState(
+                    sourceProjectId,
+                    targetProjectId,
+                    err => {
+                      if (err) {
+                        incrResp.fail(OError.tag(err, 'clone resync state'))
+                        return
+                      }
+                      incrResp.sendUpdate('clone resync state: done')
+
+                      incrResp.sendUpdate('clone failure record: pending')
+                      ErrorRecorder.cloneFailure(
+                        sourceProjectId,
+                        targetProjectId,
+                        err => {
+                          if (err) {
+                            incrResp.fail(OError.tag(err, 'clone failure'))
+                            return
+                          }
+                          incrResp.sendUpdate('clone failure record: done')
+
+                          incrResp.sendUpdate('done')
+                          incrResp.end()
+                        }
+                      )
+                    }
+                  )
+                }
+              )
+            },
+            err => {
+              incrResp.fail(OError.tag(err, 'stream history-v1 response'))
+            }
+          )
+        }
+      )
+    })
+  })
+}
 
 const getProjectBlobSchema = z.object({
   params: z.object({

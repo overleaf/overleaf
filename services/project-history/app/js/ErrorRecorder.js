@@ -87,6 +87,23 @@ async function recordSyncStart(projectId) {
 }
 
 /**
+ * @param {string} sourceProjectId
+ * @param {string} targetProjectId
+ * @return {Promise<void>}
+ */
+async function cloneFailure(sourceProjectId, targetProjectId) {
+  const failure = await db.projectHistoryFailures.findOne(
+    { project_id: sourceProjectId.toString() },
+    { projection: { _id: 0, project_id: 0 } }
+  )
+  if (!failure) return
+  await db.projectHistoryFailures.insertOne({
+    ...failure,
+    project_id: targetProjectId.toString(),
+  })
+}
+
+/**
  * @param projectId
  */
 async function getFailureRecord(projectId) {
@@ -238,6 +255,7 @@ async function getFailures() {
 const getFailedProjectsCb = callbackify(getFailedProjects)
 const getFailureRecordCb = callbackify(getFailureRecord)
 const getFailuresCb = callbackify(getFailures)
+const cloneFailureCb = callbackify(cloneFailure)
 const getLastFailureCb = callbackify(getLastFailure)
 const recordCb = callbackify(record)
 const clearErrorCb = callbackify(clearError)
@@ -245,6 +263,7 @@ const recordSyncStartCb = callbackify(recordSyncStart)
 const setForceDebugCb = callbackify(setForceDebug)
 
 export {
+  cloneFailureCb as cloneFailure,
   getFailedProjectsCb as getFailedProjects,
   getFailureRecordCb as getFailureRecord,
   getLastFailureCb as getLastFailure,
@@ -257,6 +276,7 @@ export {
 
 export const promises = {
   getFailedProjects,
+  cloneFailure,
   getFailureRecord,
   getLastFailure,
   getFailures,

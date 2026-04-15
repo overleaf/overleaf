@@ -58,6 +58,24 @@ async function getAllDocs(req, res) {
   res.json(docViews)
 }
 
+async function getAllDocsWithRanges(req, res) {
+  const { project_id: projectId } = req.params
+  logger.debug({ projectId }, 'getting all docs with ranges')
+  const docs = await DocManager.getAllNonDeletedDocs(projectId, {
+    lines: true,
+    rev: true,
+    ranges: true,
+  })
+  const docViews = _buildDocsArrayView(projectId, docs)
+  for (const docView of docViews) {
+    if (!docView.lines) {
+      logger.warn({ projectId, docId: docView._id }, 'missing doc lines')
+      docView.lines = []
+    }
+  }
+  res.json(docViews)
+}
+
 async function getAllDocVersions(req, res) {
   const { project_id: projectId } = req.params
   const docs = await DocManager.getAllDocVersions(projectId)
@@ -248,6 +266,7 @@ export default {
   isDocDeleted: expressify(isDocDeleted),
   getRawDoc: expressify(getRawDoc),
   getAllDocs: expressify(getAllDocs),
+  getAllDocsWithRanges: expressify(getAllDocsWithRanges),
   getAllDeletedDocs: expressify(getAllDeletedDocs),
   getAllRanges: expressify(getAllRanges),
   getAllDocVersions: expressify(getAllDocVersions),

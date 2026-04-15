@@ -137,6 +137,43 @@ async function getProjectChunks(projectId) {
 }
 
 /**
+ * Copy the data structures for a given project.
+ * @param {string} sourceProjectId
+ * @param {string} targetProjectId
+ */
+async function clone(sourceProjectId, targetProjectId) {
+  assert.mongoId(targetProjectId, 'bad target projectId')
+  assert.mongoId(sourceProjectId, 'bad source projectId')
+
+  const cursor = mongodb.chunks.find(
+    {
+      projectId: new ObjectId(sourceProjectId),
+      state: { $in: ['active', 'closed'] },
+    },
+    { projection: { projectId: 0 } }
+  )
+
+  const chunkIds = new Map()
+  const batch = []
+  async function flushBatch() {
+    await mongodb.chunks.insertMany(batch)
+    batch.length = 0
+  }
+  for await (const chunk of cursor) {
+    const newChunkId = new ObjectId()
+    chunkIds.set(chunk._id.toString(), newChunkId.toString())
+    batch.push({
+      ...chunk,
+      _id: newChunkId,
+      projectId: new ObjectId(targetProjectId),
+    })
+    if (batch.length > 100) await flushBatch()
+  }
+  if (batch.length > 0) await flushBatch()
+  return chunkIds
+}
+
+/**
  * Insert a pending chunk before sending it to object storage.
  */
 async function insertPendingChunk(projectId, chunk) {
@@ -477,6 +514,7 @@ function chunkFromRecord(record) {
 }
 
 module.exports = {
+  clone,
   getLatestChunk,
   getChunkForVersion,
   getChunkForTimestamp,

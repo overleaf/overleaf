@@ -22,6 +22,7 @@ const {
   HashCheckBlobStore,
   ProjectArchive,
   zipStore,
+  persistBuffer,
 } = require('../../storage')
 
 const render = require('./render')
@@ -31,6 +32,7 @@ const StreamSizeLimit = require('./stream_size_limit')
 const { getProjectBlobsBatch } = require('../../storage/lib/blob_store')
 const assert = require('../../storage/lib/assert')
 const { getChunkMetadataForVersion } = require('../../storage/lib/chunk_store')
+const { IncrementalResponse } = require('@overleaf/stream-utils')
 
 const pipeline = promisify(Stream.pipeline)
 
@@ -47,6 +49,62 @@ async function initializeProject(req, res, next) {
     } else {
       throw err
     }
+  }
+}
+
+async function cloneProject(req, res) {
+  const {
+    body: { targetProjectId },
+    params: { project_id: sourceProjectId },
+  } = parseReq(req, schemas.cloneProject)
+
+  const incrResp = new IncrementalResponse({
+    res,
+    timeout: 10 * 60_000 - 5_000,
+    logger,
+    label: 'clone history in history-v1',
+    info: { targetProjectId, sourceProjectId },
+  })
+  const signal = incrResp.signal()
+
+  try {
+    try {
+      // Use the same limits importChanges, since these are passed to persistChanges
+      const farFuture = new Date()
+      farFuture.setTime(farFuture.getTime() + 7 * 24 * 3600 * 1000)
+      const limits = {
+        maxChanges: 0,
+        minChangeTimestamp: farFuture,
+        maxChangeTimestamp: farFuture,
+        autoResync: true,
+      }
+      incrResp.sendUpdate('flushing redis buffer: pending')
+      await persistBuffer(sourceProjectId, limits)
+      incrResp.sendUpdate('flushing redis buffer: done')
+    } catch (err) {
+      incrResp.sendUpdate('failed to flush redis buffer')
+      logger.error(
+        { err, targetProjectId, sourceProjectId },
+        'failed to persist buffer during clone'
+      )
+    }
+
+    await chunkStore.cloneProject(
+      sourceProjectId,
+      targetProjectId,
+      progress => {
+        if (signal.aborted) return
+        incrResp.sendUpdate(progress)
+      },
+      signal
+    )
+    if (!signal.aborted) {
+      incrResp.sendUpdate('cloning full project history data: done')
+    }
+  } catch (err) {
+    incrResp.fail(err)
+  } finally {
+    incrResp.end()
   }
 }
 
@@ -510,6 +568,7 @@ async function getProjectBlobsStats(req, res) {
 
 module.exports = {
   initializeProject: expressify(initializeProject),
+  cloneProject: expressify(cloneProject),
   getLatestContent: expressify(getLatestContent),
   getContentAtVersion: expressify(getContentAtVersion),
   getLatestHashedContent: expressify(getLatestHashedContent),

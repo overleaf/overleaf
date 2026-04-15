@@ -135,6 +135,47 @@ async function getProjectChunks(projectId) {
     .orderBy('end_version')
   return records.map(chunkFromRecord)
 }
+/**
+ * Copy the data structures for a given project.
+ * @param {string} sourceProjectId
+ * @param {string} targetProjectId
+ */
+async function clone(sourceProjectId, targetProjectId) {
+  assert.postgresId(targetProjectId, 'bad target projectId')
+  assert.postgresId(sourceProjectId, 'bad source projectId')
+
+  const cursor = knex('chunks')
+    .select()
+    .where('doc_id', parseInt(sourceProjectId, 10))
+    .stream()
+
+  const chunkIds = new Map()
+  const batch = []
+  async function flushBatch() {
+    const newIds = await knex.raw(
+      "SELECT nextval('chunks_id_seq'::regclass)::integer AS chunk_id FROM generate_series(1, ?)",
+      batch.length
+    )
+    const newRecords = []
+    for (const [i, chunk] of batch.entries()) {
+      const newId = newIds.rows[i].chunk_id
+      chunkIds.set(chunk.id.toString(), newId.toString())
+      newRecords.push({
+        ...chunk,
+        id: newId,
+        doc_id: parseInt(targetProjectId, 10),
+      })
+    }
+    await knex('chunks').insert(newRecords)
+    batch.length = 0
+  }
+  for await (const chunk of cursor) {
+    batch.push(chunk)
+    if (batch.length > 100) await flushBatch()
+  }
+  if (batch.length > 0) await flushBatch()
+  return chunkIds
+}
 
 /**
  * Insert a pending chunk before sending it to object storage.
@@ -330,7 +371,7 @@ async function _closeChunk(tx, projectId, chunkId) {
  */
 async function deleteChunk(projectId, chunkId) {
   assert.postgresId(projectId, 'bad projectId')
-  assert.integer(chunkId, 'bad chunkId')
+  assert.chunkId(chunkId, 'bad chunkId')
 
   await _deleteChunks(knex, {
     doc_id: parseInt(projectId, 10),
@@ -422,6 +463,7 @@ async function resolveHistoryIdToMongoProjectId(projectId) {
 }
 
 module.exports = {
+  clone,
   getLatestChunk,
   getChunkForVersion,
   getChunkForTimestamp,

@@ -163,6 +163,80 @@ class MeteredStream extends Transform {
   }
 }
 
+class IncrementalResponse {
+  #res
+  #ac
+  #timeout
+  #logger
+  #label
+  #info
+  constructor({ res, timeout, label, info, logger }) {
+    this.#res = res
+    this.#logger = logger
+    this.#label = label
+    this.#info = info
+    this.#ac = new AbortController()
+    this.#timeout = setTimeout(() => {
+      this.#logger.warn({ ...this.#info, timeout }, `${this.#label}: aborting`)
+      this.sendUpdate(
+        `error: ${label}: aborting after ${this.#humanReadableTimeout(timeout)}`
+      )
+      this.#ac.abort()
+    }, timeout)
+  }
+
+  signal() {
+    return this.#ac.signal
+  }
+
+  end() {
+    this.#ac.abort()
+    clearTimeout(this.#timeout)
+    try {
+      this.#res.end()
+    } catch {
+      try {
+        this.#res.destroy()
+      } catch {}
+    }
+  }
+
+  sendUpdate(msg) {
+    try {
+      this.#res.write(msg + '\n')
+    } catch (err) {
+      this.#ac.abort()
+      this.#logger.warn(
+        { err, ...this.#info },
+        `${this.#label}: failed to send progress update`
+      )
+    }
+  }
+
+  fail(err) {
+    const aborted = this.#ac.signal.aborted
+    this.#ac.abort()
+    if (!aborted) {
+      this.#logger.err({ err, ...this.#info }, `${this.#label}: error`)
+      this.sendUpdate(`error: ${this.#label}`)
+    }
+    this.end()
+  }
+
+  #humanReadableTimeout(timeout) {
+    let ms = timeout
+    const minutes = Math.floor(ms / 60_000)
+    ms -= minutes * 60_000
+    const seconds = Math.floor(ms / 1_000)
+    ms -= seconds * 1_000
+    let t = ''
+    if (minutes) t += `${minutes}min`
+    if (seconds) t += `${seconds}s`
+    if (ms) t += `${ms}ms`
+    return t
+  }
+}
+
 // Export our classes
 
 module.exports = {
@@ -174,4 +248,5 @@ module.exports = {
   MeteredStream,
   SizeExceededError,
   AbortError,
+  IncrementalResponse,
 }

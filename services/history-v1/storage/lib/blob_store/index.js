@@ -21,6 +21,7 @@ const streams = require('../streams')
 const postgresBackend = require('./postgres')
 const mongoBackend = require('./mongo')
 const logger = require('@overleaf/logger')
+const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 
 /** @import { Readable } from 'stream' */
 
@@ -33,6 +34,25 @@ function makeGlobalKey(hash) {
 
 function makeProjectKey(projectId, hash) {
   return `${projectKey.format(projectId)}/${hash.slice(0, 2)}/${hash.slice(2)}`
+}
+
+/**
+ * Copy the data structures for a given project.
+ * @param {string} sourceProjectId
+ * @param {string} targetProjectId
+ * @param {string} hash
+ */
+async function cloneBlob(sourceProjectId, targetProjectId, hash) {
+  const bucket = config.get('blobStore.projectBucket')
+  const dst = makeProjectKey(targetProjectId, hash)
+  const src = makeProjectKey(sourceProjectId, hash)
+  const info = { targetProjectId, sourceProjectId, hash }
+  logger.debug(info, 'cloneBlob started')
+  try {
+    await persistor.copyObject(bucket, src, dst)
+  } finally {
+    logger.debug(info, 'cloneBlob finished')
+  }
 }
 
 async function uploadBlob(projectId, blob, stream, opts = {}) {
@@ -176,6 +196,21 @@ class BlobStore {
    */
   async initialize() {
     await this.backend.initialize(this.projectId)
+  }
+
+  /**
+   * Set up the initial data structure for a given project
+   */
+  async clone(sourceProjectId, onProgress, signal) {
+    const hashes = await this.backend.clone(sourceProjectId, this.projectId)
+    onProgress(`blobs-metadata-imported: ${hashes.length}`)
+    let done = 0
+    await promiseMapWithLimit(50, hashes, async hash => {
+      if (signal.aborted) return
+      await cloneBlob(sourceProjectId, this.projectId, hash)
+      done++
+      onProgress(`blobs-copied: ${done}`)
+    })
   }
 
   /**

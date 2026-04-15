@@ -38,7 +38,11 @@ async function duplicate(
   originalProjectId,
   newProjectName,
   tags = [],
-  isDebugCopy
+  opts = {
+    isDebugCopy: false,
+    cloneHistory: false,
+    cloneRanges: false,
+  }
 ) {
   await DocumentUpdaterHandler.promises.flushProjectToMongo(originalProjectId)
   const originalProject = await ProjectGetter.promises.getProject(
@@ -54,7 +58,7 @@ async function duplicate(
     }
   )
   const { path: rootDocPath } = await ProjectLocator.promises.findRootDoc({
-    project_id: originalProjectId,
+    project: originalProject,
   })
 
   const originalEntries = _getFolderEntries(originalProject.rootFolder[0])
@@ -69,7 +73,7 @@ async function duplicate(
   })
 
   const attributes = {}
-  if (isDebugCopy) {
+  if (opts.isDebugCopy) {
     attributes.isDebugCopyOf = originalProjectId
     // - Create new tag on owner._id if it doesn't already exist
     const debugTag = await TagsHandler.promises.createTag(
@@ -101,6 +105,18 @@ async function duplicate(
   // remove any leading or trailing spaces
   newProjectName = newProjectName.trim()
 
+  if (
+    opts.cloneHistory &&
+    typeof originalProject.overleaf?.history?.id === 'number'
+  ) {
+    // Obtain an old history id. We want to store the data in the same DB.
+    const newHistoryId = parseInt(
+      await HistoryManager.promises.initializeProject(),
+      10
+    )
+    attributes.overleaf = { history: { id: newHistoryId } }
+  }
+
   // Now create the new project, cleaning it up on failure if necessary
   const newProject = await ProjectCreationHandler.promises.createBlankProject(
     owner._id,
@@ -129,8 +145,18 @@ async function duplicate(
       originalProject.compiler
     )
     const [docEntries, fileEntries] = await Promise.all([
-      _copyDocs(originalEntries.docEntries, originalProject, newProject),
-      _copyFiles(originalEntries.fileEntries, originalProject, newProject),
+      _copyDocs(
+        originalEntries.docEntries,
+        originalProject,
+        newProject,
+        opts.cloneRanges
+      ),
+      _copyFiles(
+        originalEntries.fileEntries,
+        originalProject,
+        newProject,
+        opts.cloneHistory
+      ),
     ])
     const projectVersion =
       await ProjectEntityMongoUpdateHandler.promises.createNewFolderStructure(
@@ -139,17 +165,23 @@ async function duplicate(
         fileEntries
       )
     // Silently ignore the rootDoc in case it's not valid per the new limits.
+    // Ignore the new limits in case we are creating a debug copoy.
     if (
       rootDocPath &&
-      ProjectEntityUpdateHandler.isPathValidForRootDoc(rootDocPath.fileSystem)
+      (ProjectEntityUpdateHandler.isPathValidForRootDoc(
+        rootDocPath.fileSystem
+      ) ||
+        opts.isDebugCopy)
     ) {
       await _setRootDoc(newProject._id, rootDocPath.fileSystem)
     }
-    await _notifyDocumentUpdater(newProject, owner._id, {
-      newFiles: fileEntries,
-      newDocs: docEntries,
-      newProject: { version: projectVersion },
-    })
+    if (!opts.cloneHistory) {
+      await _notifyDocumentUpdater(newProject, owner._id, {
+        newFiles: fileEntries,
+        newDocs: docEntries,
+        newProject: { version: projectVersion },
+      })
+    }
     await TpdsProjectFlusher.promises.flushProjectToTpds(newProject._id)
 
     if (tags?.length > 0) {
@@ -218,33 +250,50 @@ function _getFolderEntries(folder, folderPath = '/') {
   return { docEntries, fileEntries }
 }
 
-async function _copyDocs(sourceEntries, sourceProject, targetProject) {
-  const docLinesById = await _getDocLinesForProject(sourceProject._id)
+async function _copyDocs(
+  sourceEntries,
+  sourceProject,
+  targetProject,
+  cloneRanges
+) {
+  const docsById = await _getDocContentForProject(
+    sourceProject._id,
+    cloneRanges
+  )
   const targetEntries = []
   for (const sourceEntry of sourceEntries) {
     const sourceDoc = sourceEntry.doc
     const path = sourceEntry.path
     const doc = new Doc({ name: sourceDoc.name })
-    const docLines = docLinesById.get(sourceDoc._id.toString())
+    const { lines, ranges } = docsById.get(sourceDoc._id.toString())
     await DocstoreManager.promises.updateDoc(
       targetProject._id.toString(),
       doc._id.toString(),
-      docLines,
+      lines,
       0,
-      {}
+      ranges || {}
     )
-    targetEntries.push({ doc, path, docLines: docLines.join('\n') })
+    targetEntries.push({ doc, path, docLines: lines.join('\n') })
   }
   return targetEntries
 }
 
-async function _getDocLinesForProject(projectId) {
-  const docs = await DocstoreManager.promises.getAllDocs(projectId)
-  const docLinesById = new Map(docs.map(doc => [doc._id, doc.lines]))
-  return docLinesById
+async function _getDocContentForProject(projectId, cloneRanges) {
+  let docs
+  if (cloneRanges) {
+    docs = await DocstoreManager.promises.getAllDocsWithRanges(projectId)
+  } else {
+    docs = await DocstoreManager.promises.getAllDocs(projectId)
+  }
+  return new Map(docs.map(doc => [doc._id, doc]))
 }
 
-async function _copyFiles(sourceEntries, sourceProject, targetProject) {
+async function _copyFiles(
+  sourceEntries,
+  sourceProject,
+  targetProject,
+  cloneHistory
+) {
   const sourceHistoryId = sourceProject.overleaf?.history?.id
   const targetHistoryId = targetProject.overleaf?.history?.id
   if (!sourceHistoryId) {
@@ -267,6 +316,10 @@ async function _copyFiles(sourceEntries, sourceProject, targetProject) {
       if (sourceFile.linkedFileData != null) {
         file.linkedFileData = sourceFile.linkedFileData
         file.created = sourceFile.created
+      }
+      if (cloneHistory) {
+        // All blobs will be cloned in bulk. Do not clone each individually.
+        return { createdBlob: true, file, path }
       }
       try {
         await HistoryManager.promises.copyBlob(

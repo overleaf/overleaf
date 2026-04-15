@@ -72,6 +72,16 @@ const schemas = {
       .optional(),
   }),
 
+  cloneProject: z.object({
+    body: z.object({
+      targetProjectId: z.string(),
+    }),
+
+    params: z.object({
+      project_id: z.string(),
+    }),
+  }),
+
   getProjectBlobsStats: z.object({
     body: z.object({
       projectIds: z.array(z.string()),

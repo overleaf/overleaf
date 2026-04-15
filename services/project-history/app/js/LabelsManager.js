@@ -4,6 +4,26 @@ import * as HistoryStoreManager from './HistoryStoreManager.js'
 import * as UpdatesProcessor from './UpdatesProcessor.js'
 import * as WebApiManager from './WebApiManager.js'
 
+export function cloneLabels(sourceProjectId, targetProjectId, callback) {
+  db.projectHistoryLabels
+    .find({ project_id: new ObjectId(sourceProjectId) })
+    .project({ _id: 0, project_id: 0 })
+    .toArray((err, labels) => {
+      if (err) return callback(OError.tag(err))
+      if (labels.length === 0) return callback()
+      db.projectHistoryLabels.insertMany(
+        labels.map(label => ({
+          ...label,
+          project_id: new ObjectId(targetProjectId),
+        })),
+        err => {
+          if (err) return callback(OError.tag(err))
+          callback()
+        }
+      )
+    })
+}
+
 export function getLabels(projectId, callback) {
   _toObjectId(projectId, function (error, projectId) {
     if (error) {

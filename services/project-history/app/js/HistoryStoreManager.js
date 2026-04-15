@@ -17,7 +17,7 @@ import * as Errors from './Errors.js'
 import * as LocalFileWriter from './LocalFileWriter.js'
 import * as HashManager from './HashManager.js'
 import * as HistoryBlobTranslator from './HistoryBlobTranslator.js'
-import { promisifyMultiResult } from '@overleaf/promise-utils'
+import { callbackify, promisifyMultiResult } from '@overleaf/promise-utils'
 
 const HTTP_REQUEST_TIMEOUT = Settings.overleaf.history.requestTimeout
 
@@ -531,6 +531,18 @@ export function initializeProject(historyId, callback) {
   )
 }
 
+async function _cloneProject(sourceProjectId, targetProjectId, signal) {
+  return await fetchStream(
+    `${Settings.overleaf.history.host}/projects/${sourceProjectId}/clone`,
+    {
+      method: 'POST',
+      json: { targetProjectId },
+      ...getHistoryFetchOptions(),
+      signal,
+    }
+  )
+}
+
 export function deleteProject(projectId, callback) {
   _requestHistoryService(
     { method: 'DELETE', path: `projects/${projectId}` },
@@ -623,6 +635,8 @@ function _requestHistoryService(options, callback) {
   })
 }
 
+export const cloneProject = callbackify(_cloneProject)
+
 export const promises = {
   /** @type {(projectId: string, historyId: string) => Promise<{chunk: import('overleaf-editor-core/lib/types.js').RawChunk}>} */
   getMostRecentChunk: promisify(getMostRecentChunk),
@@ -640,4 +654,5 @@ export const promises = {
   createBlobForUpdate: promisify(createBlobForUpdate),
   initializeProject: promisify(initializeProject),
   deleteProject: promisify(deleteProject),
+  cloneProject: _cloneProject,
 }

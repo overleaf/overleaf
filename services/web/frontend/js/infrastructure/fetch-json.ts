@@ -190,7 +190,7 @@ function fetchJSON<T>(
   })
 }
 
-async function parseResponseBody(response: Response) {
+export async function parseResponseBody(response: Response) {
   const contentType = response.headers.get('Content-Type')
 
   if (!contentType) {

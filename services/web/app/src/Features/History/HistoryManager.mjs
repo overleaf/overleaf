@@ -2,6 +2,7 @@ import { callbackify } from 'node:util'
 import {
   fetchJson,
   fetchNothing,
+  fetchStream,
   fetchStreamWithResponse,
   RequestFailedError,
 } from '@overleaf/fetch-utils'
@@ -57,6 +58,17 @@ async function initializeProject(projectId) {
     throw new OError('project-history did not provide an id', { body })
   }
   return historyId
+}
+
+async function cloneProject(sourceProjectId, targetProjectId) {
+  return await fetchStream(
+    `${settings.apis.project_history.url}/project/${sourceProjectId}/clone`,
+    {
+      method: 'POST',
+      json: { targetProjectId },
+      signal: AbortSignal.timeout(10 * 60_000),
+    }
+  )
 }
 
 async function flushProject(projectId) {
@@ -460,6 +472,7 @@ export default {
   getChanges: callbackify(getChanges),
   promises: {
     initializeProject,
+    cloneProject,
     flushProject,
     resyncProject,
     deleteProject,

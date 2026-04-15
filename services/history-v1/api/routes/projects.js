@@ -15,6 +15,12 @@ const {
 router.post('/projects', handleBasicAuth, projectsController.initializeProject)
 
 router.post(
+  '/projects/:project_id/clone',
+  handleBasicAuth,
+  projectsController.cloneProject
+)
+
+router.post(
   '/projects/blob-stats',
   handleBasicAuth,
   projectsController.getProjectBlobsStats

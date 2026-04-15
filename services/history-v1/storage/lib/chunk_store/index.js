@@ -38,6 +38,7 @@ const {
   ChunkVersionConflictError,
   VersionOutOfBoundsError,
 } = require('./errors')
+const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 
 /**
  * @import { Change } from 'overleaf-editor-core'
@@ -76,6 +77,71 @@ async function initializeProject(projectId, snapshot) {
   const chunk = new Chunk(history, 0)
   await create(projectId, chunk)
   return projectId
+}
+
+/**
+ * Clone the project data.
+ * @param {string} sourceProjectId
+ * @param {string} targetProjectId
+ * @param {(string) => void} onProgress
+ * @param {AbortSignal} signal
+ */
+async function cloneProject(
+  sourceProjectId,
+  targetProjectId,
+  onProgress,
+  signal
+) {
+  assert.projectId(targetProjectId, 'bad target projectId')
+  assert.projectId(sourceProjectId, 'bad source projectId')
+
+  onProgress('existing history: checking')
+  const backend = getBackend(targetProjectId)
+  const chunkRecord = await backend.getLatestChunk(targetProjectId)
+  if (!chunkRecord) {
+    onProgress('existing history: not found, aborting')
+    throw new OError('target project is not initialized yet')
+  }
+  if (chunkRecord?.endVersion > 0) {
+    onProgress('existing history: found changes, aborting')
+    throw new AlreadyInitialized(targetProjectId)
+  }
+
+  onProgress('existing history: deleting empty chunk')
+  await backend.deleteChunk(targetProjectId, chunkRecord.id)
+  onProgress('existing history: deleted empty chunk')
+
+  async function cloneBlobs() {
+    onProgress('cloning blobs metadata: pending')
+    const blobStore = new BlobStore(targetProjectId)
+    await blobStore.clone(sourceProjectId, onProgress, signal)
+    onProgress('cloning blobs metadata: done')
+  }
+
+  async function cloneChunks() {
+    onProgress('cloning chunks metadata: pending')
+    const chunkIds = await backend.clone(sourceProjectId, targetProjectId)
+    onProgress(`chunks-metadata-imported: ${chunkIds.size}`)
+    let done = 0
+    await promiseMapWithLimit(
+      50,
+      Array.from(chunkIds.entries()),
+      async ([sourceChunkId, targetChunkId]) => {
+        if (signal.aborted) return
+        await historyStore.cloneChunk(
+          sourceProjectId,
+          sourceChunkId,
+          targetProjectId,
+          targetChunkId
+        )
+        done++
+        onProgress(`chunks-copied: ${done}`)
+      }
+    )
+    onProgress('cloning chunks metadata: done')
+  }
+
+  await Promise.all([cloneBlobs(), cloneChunks()])
 }
 
 /**
@@ -619,6 +685,7 @@ class AlreadyInitialized extends OError {
 module.exports = {
   getBackend,
   initializeProject,
+  cloneProject,
   loadLatest,
   getLatestChunkMetadata,
   loadAtVersion,

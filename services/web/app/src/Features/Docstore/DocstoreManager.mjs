@@ -83,6 +83,29 @@ async function getAllDocs(projectId) {
 }
 
 /**
+ * @param {string} projectId
+ */
+async function getAllDocsWithRanges(projectId) {
+  const url = new URL(settings.apis.docstore.url)
+  url.pathname = path.posix.join(
+    'project',
+    projectId.toString(),
+    'doc-with-ranges'
+  )
+  try {
+    return await fetchJson(url, { signal: AbortSignal.timeout(TIMEOUT) })
+  } catch (error) {
+    if (error instanceof RequestFailedError) {
+      throw new OError('docstore api responded with non-success code', {
+        projectId,
+        status: error.response.status,
+      })
+    }
+    throw error
+  }
+}
+
+/**
  *
  * @param {string|ObjectId} projectId
  * @return {Promise<*>}
@@ -395,6 +418,7 @@ export default {
     deleteDoc,
     getAllDocVersions,
     getAllDocs,
+    getAllDocsWithRanges,
     getAllDeletedDocs,
     getAllRanges,
     getDoc,

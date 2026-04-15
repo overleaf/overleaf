@@ -177,6 +177,46 @@ class HistoryStore {
   }
 
   /**
+   * Compress and store a {@link History}.
+   *
+   * @param {string} sourceProjectId
+   * @param {string} sourceChunkId
+   * @param {string} targetProjectId
+   * @param {string} targetChunkId
+   */
+  async cloneChunk(
+    sourceProjectId,
+    sourceChunkId,
+    targetProjectId,
+    targetChunkId
+  ) {
+    assert.projectId(targetProjectId, 'bad target projectId')
+    assert.projectId(sourceProjectId, 'bad source projectId')
+    assert.chunkId(targetChunkId, 'bad chunkId')
+    assert.chunkId(sourceChunkId, 'bad chunkId')
+    const dstKey = getKey(targetProjectId, targetChunkId)
+    const srcKey = getKey(sourceProjectId, sourceChunkId)
+
+    const info = {
+      targetProjectId,
+      sourceProjectId,
+      sourceChunkId,
+      targetChunkId,
+      srcKey,
+      dstKey,
+    }
+    logger.debug(info, 'cloneChunk started')
+
+    try {
+      await this.#persistor.copyObject(this.#bucket, srcKey, dstKey)
+    } catch (err) {
+      throw new StoreError(sourceProjectId, sourceChunkId, err)
+    } finally {
+      logger.debug(info, 'cloneChunk finished')
+    }
+  }
+
+  /**
    * Delete multiple chunks from bucket. Expects an Array of objects with
    * projectId and chunkId properties
    * @param {Array<{projectId: string,chunkId:string}>} chunks

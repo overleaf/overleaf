@@ -185,11 +185,10 @@ const ModeSwitcherToggleButtonContent = forwardRef<
         onClick(event)
       }}
       aria-expanded={ariaExpanded}
+      aria-label={label}
     >
       <MaterialIcon type={iconType} />
-      <div className="review-mode-switcher-toggle-label" aria-label={label}>
-        {label}
-      </div>
+      <div className="review-mode-switcher-toggle-label">{label}</div>
       <MaterialIcon type="keyboard_arrow_down" />
     </button>
   )

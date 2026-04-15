@@ -110,6 +110,23 @@ async function startResyncWithoutLock(projectId, options) {
 }
 
 /**
+ * @param {string} sourceProjectId
+ * @param {string} targetProjectId
+ * @return {Promise<void>}
+ */
+async function cloneResyncState(sourceProjectId, targetProjectId) {
+  const rawSyncState = await db.projectHistorySyncState.findOne(
+    { project_id: new ObjectId(sourceProjectId) },
+    { projection: { _id: 0, project_id: 0 } }
+  )
+  if (!rawSyncState) return
+  await db.projectHistorySyncState.insertOne({
+    ...rawSyncState,
+    project_id: new ObjectId(targetProjectId),
+  })
+}
+
+/**
  * @param {string} projectId
  * @return {Promise<SyncState>}
  */
@@ -1329,6 +1346,7 @@ function trackingDirectivesEqual(a, b) {
 
 // EXPORTS
 
+const cloneResyncStateCb = callbackify(cloneResyncState)
 const getResyncStateCb = callbackify(getResyncState)
 const startResyncCb = callbackify(startResync)
 const startResyncWithoutLockCb = callbackify(startResyncWithoutLock)
@@ -1373,6 +1391,7 @@ const expandSyncUpdatesCb = (
 }
 
 export {
+  cloneResyncStateCb as cloneResyncState,
   getResyncStateCb as getResyncState,
   startResyncCb as startResync,
   startResyncWithoutLockCb as startResyncWithoutLock,
@@ -1384,6 +1403,7 @@ export {
 }
 
 export const promises = {
+  cloneResyncState,
   getResyncState,
   startResync,
   startResyncWithoutLock,

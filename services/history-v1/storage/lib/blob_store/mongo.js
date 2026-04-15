@@ -47,6 +47,64 @@ async function initialize(projectId) {
 }
 
 /**
+ * Copy the data structures for a given project.
+ * @param {string} sourceProjectId
+ * @param {string} targetProjectId
+ */
+async function clone(sourceProjectId, targetProjectId) {
+  assert.mongoId(targetProjectId, 'bad target projectId')
+  assert.mongoId(sourceProjectId, 'bad source projectId')
+  const result = await mongodb.blobs.findOne({
+    _id: new ObjectId(sourceProjectId),
+  })
+  if (!result || !('blobs' in result)) {
+    throw new Error('missing blobs for source project')
+  }
+  const blobHashes = []
+  for (const bucket of Object.values(result.blobs)) {
+    for (const record of bucket) {
+      blobHashes.push(record.h.toString('hex'))
+    }
+  }
+
+  await mongodb.blobs.updateOne(
+    { _id: new ObjectId(targetProjectId) },
+    { $set: { blobs: result.blobs } }
+  )
+
+  const minShardedId = makeShardedId(sourceProjectId, '0')
+  const maxShardedId = makeShardedId(sourceProjectId, 'f')
+  // @ts-ignore We are using a custom _id here.
+  const sharded = mongodb.shardedBlobs.find({
+    _id: { $gte: minShardedId, $lte: maxShardedId },
+  })
+  const newShards = [] // gather up-to 16 shards
+  for await (const shardedRecord of sharded) {
+    if (shardedRecord.blobs == null) {
+      continue
+    }
+    // Schema of shard id: <projectId>0<shard id: hex>
+    const shard = shardedRecord._id.toString('hex').slice(25)
+    const newId = makeShardedId(targetProjectId, shard)
+    newShards.push({
+      ...shardedRecord,
+      _id: newId,
+    })
+
+    for (const bucket of Object.values(shardedRecord.blobs)) {
+      for (const record of bucket) {
+        blobHashes.push(record.h.toString('hex'))
+      }
+    }
+  }
+  if (newShards.length > 0) {
+    // @ts-ignore We are using a custom _id here.
+    await mongodb.shardedBlobs.insertMany(newShards)
+  }
+  return blobHashes
+}
+
+/**
  * Return blob metadata for the given project and hash.
  * @param {string} projectId
  * @param {string} hash
@@ -428,6 +486,7 @@ function recordToBlob(record) {
 
 module.exports = {
   initialize,
+  clone,
   findBlob,
   findBlobs,
   getProjectBlobs,

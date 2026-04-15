@@ -83,6 +83,8 @@ export function initialize(app) {
 
   app.get('/project/:history_id/blob/:hash', HttpController.getProjectBlob)
 
+  app.post('/project/:project_id/clone', HttpController.cloneProject)
+
   app.get('/status/failures', HttpController.getFailures)
 
   app.get('/status/queue', HttpController.getQueueCounts)
