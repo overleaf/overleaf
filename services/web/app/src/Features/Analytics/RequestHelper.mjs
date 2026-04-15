@@ -8,6 +8,7 @@ const UTM_KEYS = [
   'utm_content',
   'utm_medium',
   'utm_count',
+  'utm_id',
 ]
 
 function parseUtm(query) {
@@ -49,8 +50,11 @@ function parseReferrer(referrer, url) {
   return referrerValues
 }
 
+const REGISTRATION_UTM_KEYS = UTM_KEYS.filter(k => k !== 'utm_id')
+
 export default {
   UTM_KEYS,
+  REGISTRATION_UTM_KEYS,
   parseUtm,
   parseReferrer,
 }

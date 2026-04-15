@@ -75,7 +75,7 @@ function addUserProperties(userId, session) {
     }
 
     if (session.inbound.utm) {
-      for (const utmKey of RequestHelper.UTM_KEYS) {
+      for (const utmKey of RequestHelper.REGISTRATION_UTM_KEYS) {
         if (session.inbound.utm[utmKey]) {
           AnalyticsManager.setUserPropertyForUserInBackground(
             userId,
