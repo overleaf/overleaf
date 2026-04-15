@@ -56,6 +56,10 @@ export const SurveySchema = new Schema(
         type: Boolean,
         default: false,
       },
+      hasEnterpriseSubscription: {
+        type: Boolean,
+        default: false,
+      },
       earliestSignupDate: {
         type: Date,
       },

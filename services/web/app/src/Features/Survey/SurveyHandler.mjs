@@ -25,7 +25,8 @@ async function getSurvey(userId) {
       survey.options.hasIndividualStandardSubscription ||
       survey.options.hasIndividualProfessionalSubscription ||
       survey.options.hasGroupStandardSubscription ||
-      survey.options.hasGroupProfessionalSubscription
+      survey.options.hasGroupProfessionalSubscription ||
+      survey.options.hasEnterpriseSubscription
 
     if (hasFilters) {
       const subscriptions =
@@ -92,15 +93,19 @@ function _canDisplaySurvey(subscription, options = {}) {
     hasIndividualProfessionalSubscription,
     hasGroupStandardSubscription,
     hasGroupProfessionalSubscription,
+    hasEnterpriseSubscription,
   } = options
   const isGroupPlan = subscription.groupPlan
   const isProfessional = PlansHelper.isProfessionalPlan(subscription.planCode)
+  const isEnterprise =
+    isGroupPlan && subscription.planCode?.includes('enterprise')
 
   return (
     (hasIndividualStandardSubscription && !isGroupPlan && !isProfessional) ||
     (hasIndividualProfessionalSubscription && !isGroupPlan && isProfessional) ||
     (hasGroupStandardSubscription && isGroupPlan && !isProfessional) ||
-    (hasGroupProfessionalSubscription && isGroupPlan && isProfessional)
+    (hasGroupProfessionalSubscription && isGroupPlan && isProfessional) ||
+    (hasEnterpriseSubscription && isEnterprise)
   )
 }
 
