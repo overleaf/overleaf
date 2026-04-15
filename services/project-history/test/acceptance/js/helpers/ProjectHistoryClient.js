@@ -197,9 +197,9 @@ export async function deleteLabel(projectId, labelId) {
   expect(response.status).to.equal(204)
 }
 
-export async function setFailure(failureEntry) {
-  await db.projectHistoryFailures.deleteOne({ project_id: { $exists: true } })
-  return await db.projectHistoryFailures.insertOne(failureEntry)
+export async function setFailures(failureEntries) {
+  await db.projectHistoryFailures.deleteMany({})
+  return await db.projectHistoryFailures.insertMany(failureEntries)
 }
 
 export function getFailure(projectId, callback) {
@@ -216,6 +216,11 @@ export async function transferLabelOwnership(fromUser, toUser) {
 
 export async function getDump(projectId) {
   return await fetchJson(`http://127.0.0.1:3054/project/${projectId}/dump`)
+}
+
+export async function getFailures() {
+  const { failures } = await fetchJson('http://127.0.0.1:3054/status/failures')
+  return failures
 }
 
 export async function deleteProject(projectId) {

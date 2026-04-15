@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import nock from 'nock'
 import { expect } from 'chai'
 import { fetchStringWithResponse } from '@overleaf/fetch-utils'
@@ -54,6 +55,37 @@ describe('Retrying failed projects', function () {
     nock.cleanAll()
   })
 
+  describe('normalizeFailure', function () {
+    it('should normalize the error', async function () {
+      const baseLineFailures = await ProjectHistoryClient.getFailures()
+
+      await ProjectHistoryClient.setFailures([
+        {
+          project_id: new ObjectId(),
+          attempts: 1,
+          error: 'Error: ESOCKETTIMEDOUT',
+        },
+        {
+          project_id: new ObjectId(),
+          attempts: 1,
+          error: 'OError: ESOCKETTIMEDOUT',
+        },
+      ])
+
+      const body = await ProjectHistoryClient.getFailures()
+      expect(body).to.deep.equal(
+        _.merge(baseLineFailures, {
+          attempts: {
+            'socket-timeout': 2,
+          },
+          counts: {
+            'socket-timeout': 2,
+          },
+        })
+      )
+    })
+  })
+
   describe('retrying project history', function () {
     describe('when there is a soft failure', function () {
       beforeEach(async function () {
@@ -72,11 +104,13 @@ describe('Retrying failed projects', function () {
         }
 
         await ProjectHistoryClient.pushRawUpdate(this.project_id, update)
-        await ProjectHistoryClient.setFailure({
-          project_id: this.project_id,
-          attempts: 1,
-          error: 'soft-error',
-        })
+        await ProjectHistoryClient.setFailures([
+          {
+            project_id: this.project_id,
+            attempts: 1,
+            error: 'soft-error',
+          },
+        ])
       })
 
       it('flushes the project history queue', async function () {
@@ -140,11 +174,13 @@ describe('Retrying failed projects', function () {
               },
             },
           })
-        await ProjectHistoryClient.setFailure({
-          project_id: this.project_id,
-          attempts: 100,
-          error: 'hard-error',
-        })
+        await ProjectHistoryClient.setFailures([
+          {
+            project_id: this.project_id,
+            attempts: 100,
+            error: 'hard-error',
+          },
+        ])
       })
 
       it('calls web to resync the project', async function () {

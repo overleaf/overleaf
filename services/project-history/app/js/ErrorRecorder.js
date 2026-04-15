@@ -11,6 +11,18 @@ import { db } from './mongodb.js'
  */
 
 /**
+ * @template {{error?: string}} T
+ * @param {T} failure
+ * @return {T}
+ */
+function normalizeFailure(failure) {
+  return {
+    ...failure,
+    error: failure.error?.replace('OError:', 'Error:'),
+  }
+}
+
+/**
  * @param {string} projectId
  * @param {number} queueSize
  * @param {Error} error
@@ -47,7 +59,7 @@ async function record(projectId, queueSize, error) {
     // Since we upsert, the result should always have a value
     throw new OError('no value returned when recording an error', { projectId })
   }
-  return result.value
+  return normalizeFailure(result.value)
 }
 
 async function clearError(projectId) {
@@ -107,7 +119,10 @@ async function cloneFailure(sourceProjectId, targetProjectId) {
  * @param projectId
  */
 async function getFailureRecord(projectId) {
-  return await db.projectHistoryFailures.findOne({ project_id: projectId })
+  const result = await db.projectHistoryFailures.findOne({
+    project_id: projectId,
+  })
+  return result && normalizeFailure(result)
 }
 
 async function getLastFailure(projectId) {
@@ -116,15 +131,18 @@ async function getLastFailure(projectId) {
     { $inc: { requestCount: 1 } }, // increment the request count every time we check the last failure
     { projection: { error: 1, ts: 1 } }
   )
-  return result && result.value
+  return result?.value && normalizeFailure(result.value)
 }
 
 async function getFailedProjects() {
-  return await db.projectHistoryFailures.find({}).toArray()
+  return await db.projectHistoryFailures
+    .find({})
+    .map(normalizeFailure)
+    .toArray()
 }
 
 async function getFailuresByType() {
-  const results = await db.projectHistoryFailures.find({}).toArray()
+  const results = await getFailedProjects()
   const failureCounts = {}
   const failureAttempts = {}
   const failureRequests = {}
@@ -160,10 +178,6 @@ async function getFailures() {
     'Error: bad response from filestore: 404': 'filestore-404',
     'Error: bad response from filestore: 500': 'filestore-500',
     'NotFoundError: got a 404 from web api': 'web-api-404',
-    'OError: history store a non-success status code: 413': 'history-store-413',
-    'OError: history store a non-success status code: 422': 'history-store-422',
-    'OError: history store a non-success status code: 500': 'history-store-500',
-    'OError: history store a non-success status code: 503': 'history-store-503',
     'Error: history store a non-success status code: 413': 'history-store-413',
     'Error: history store a non-success status code: 422': 'history-store-422',
     'Error: history store a non-success status code: 500': 'history-store-500',
