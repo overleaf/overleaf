@@ -30,7 +30,7 @@ export type SyncStartRecordSchema = {
 export type SyncStateSchema = {
   resyncProjectStructure: boolean
   resyncDocContents: string[]
-  origin: { kind: string }
+  origin?: { kind: string }
 }
 
 export type SyncStateHistoryEntry = {
