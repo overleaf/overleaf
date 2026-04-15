@@ -3,6 +3,8 @@ import { useProjectContext } from '@/shared/context/project-context'
 import { getJSON, postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
 import type { NotificationPreferencesSchema } from '../../../../../modules/notifications/app/src/types.js'
+import { sendMB } from '@/infrastructure/event-tracking'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 
 export type NotificationLevel = 'all' | 'replies' | 'off'
 
@@ -83,6 +85,7 @@ function preferencesToLevel(
 
 export function useProjectNotificationPreferences() {
   const { projectId } = useProjectContext()
+  const { permissionsLevel } = useIdeReactContext()
   const [notificationLevel, setNotificationLevel] =
     useState<NotificationLevel>('all')
   const [isLoading, setIsLoading] = useState(true)
@@ -103,11 +106,16 @@ export function useProjectNotificationPreferences() {
     (level: NotificationLevel) => {
       setNotificationLevel(level)
       const preferences = levelToPreferences(level)
+      sendMB('setting-changed', {
+        changedSetting: 'projectEmailNotifications',
+        changedSettingVal: level,
+        projectRole: permissionsLevel,
+      })
       postJSON(`/notifications/preferences/project/${projectId}`, {
         body: preferences,
       }).catch(debugConsole.error)
     },
-    [projectId]
+    [projectId, permissionsLevel]
   )
 
   return {
