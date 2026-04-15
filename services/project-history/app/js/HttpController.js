@@ -719,6 +719,13 @@ export function getFailures(req, res, next) {
   })
 }
 
+export function getFailuresFull(req, res, next) {
+  ErrorRecorder.getFailuresFull((error, result) => {
+    if (error) return next(error)
+    res.send(result)
+  })
+}
+
 export function getQueueCounts(req, res, next) {
   RedisManager.getProjectIdsWithHistoryOpsCount((err, queuedProjectsCount) => {
     if (err != null) {

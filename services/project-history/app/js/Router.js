@@ -87,6 +87,8 @@ export function initialize(app) {
 
   app.get('/status/failures', HttpController.getFailures)
 
+  app.get('/status/failures-full', HttpController.getFailuresFull)
+
   app.get('/status/queue', HttpController.getQueueCounts)
 
   app.post('/retry/failures', HttpController.retryFailures)

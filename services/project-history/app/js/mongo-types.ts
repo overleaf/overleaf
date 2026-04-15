@@ -7,8 +7,10 @@ export type ProjectHistoryFailure = {
   resyncAttempts: number
   resyncStartedAt: Date
   requestCount?: number
-  history: (ErrorRecord | SyncStartRecord)[]
-} & ErrorRecord
+  history: FailureRecord[]
+} & FailureRecord
+
+type FailureRecord = ErrorRecord | SyncStartRecord
 
 type ErrorRecord = {
   error: string

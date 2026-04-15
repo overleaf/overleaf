@@ -316,6 +316,12 @@ async function getDebugInfo(projectId) {
   )
 }
 
+async function getHistoryFailures() {
+  return await fetchJson(
+    `${settings.apis.project_history.url}/status/failures-full`
+  )
+}
+
 /**
  * Get history changes since a given version
  *
@@ -492,5 +498,6 @@ export default {
     getLatestHistoryWithHistoryId,
     ensureNoResyncPending,
     getDebugInfo,
+    getHistoryFailures,
   },
 }

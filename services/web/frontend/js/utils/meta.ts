@@ -68,6 +68,7 @@ import { AlgoliaConfig } from '../../../modules/algolia-search/frontend/js/types
 import { WritefullPublicEnv } from '@wf/domain/writefull-public-env'
 import { UserNotificationPreferences } from '../../../types/notifications'
 import { SharingPermissions } from '../../../modules/sharing-permissions/app/src/types'
+import { FullHistoryFailure } from '@ol-types/history/projectHistory'
 
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
@@ -249,6 +250,7 @@ export interface Meta {
   'ol-primaryEmail': { email: string; confirmed: boolean }
   'ol-project': any // TODO
   'ol-projectEntityCounts': { files: number; docs: number }
+  'ol-projectHistoryFailures': FullHistoryFailure[]
   'ol-projectName': string
   'ol-projectSyncSuccessMessage': string
   'ol-projectTags': Tag[]

@@ -70,6 +70,11 @@ describe('Retrying failed projects', function () {
           attempts: 1,
           error: 'OError: ESOCKETTIMEDOUT',
         },
+        {
+          project_id: new ObjectId(),
+          attempts: 1,
+          resyncStartedAt: new Date(),
+        },
       ])
 
       const body = await ProjectHistoryClient.getFailures()
@@ -77,9 +82,11 @@ describe('Retrying failed projects', function () {
         _.merge(baseLineFailures, {
           attempts: {
             'socket-timeout': 2,
+            other: 1,
           },
           counts: {
             'socket-timeout': 2,
+            other: 1,
           },
         })
       )
