@@ -85,8 +85,10 @@ async function deleteUser(email) {
   await UserDeleter.promises.expireDeletedUser(user._id)
 }
 
-export async function createProjectWithOldHistoryId(userId) {
-  const projectName = 'old history id'
+export async function createProjectWithOldHistoryId(
+  userId,
+  projectName = 'old history id'
+) {
   const historyId = parseInt(
     await HistoryManager.promises.initializeProject(),
     10
@@ -137,7 +139,7 @@ async function purgeNewUsers() {
   )
 }
 
-export async function provisionSplitTests() {
+export async function provisionSplitTests(merge = false) {
   const backup = Path.join(
     MONOREPO,
     'backup',
@@ -181,7 +183,11 @@ export async function provisionSplitTests() {
     ],
   })
   console.log(`> Importing ${SPLIT_TESTS.length} split-tests from production.`)
-  await SplitTestManager.replaceSplitTests(SPLIT_TESTS)
+  if (merge) {
+    await SplitTestManager.mergeSplitTests(SPLIT_TESTS, false)
+  } else {
+    await SplitTestManager.replaceSplitTests(SPLIT_TESTS)
+  }
 }
 
 async function checkNoTableScan() {

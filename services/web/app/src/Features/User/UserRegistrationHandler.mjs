@@ -39,6 +39,10 @@ const UserRegistrationHandler = {
     return user
   },
 
+  /**
+   * @param {Object} userDetails
+   * @return {Promise<{ _id: import('mongodb-legacy').ObjectId }>}
+   */
   async registerNewUser(userDetails) {
     const requestIsValid =
       UserRegistrationHandler._registrationRequestIsValid(userDetails)
