@@ -48,8 +48,8 @@ function ImportDocxModal({
           height={300}
           locale={{
             strings: {
-              browseFiles: 'Select a .docx file',
-              dropPasteFiles: '%{browseFiles} or \n\n drag a .docx file',
+              browseFiles: 'Select .docx file',
+              dropPasteFiles: '%{browseFiles} or \n\n Drag .docx file',
             },
           }}
           className="project-list-upload-project-modal-uppy-dashboard"

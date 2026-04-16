@@ -20,6 +20,7 @@ import {
 import { useSendProjectListMB } from '@/features/project-list/components/project-list-events'
 import type { PortalTemplate } from '../../../../../types/portal-template'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import MaterialIcon from '@/shared/components/material-icon'
 
 type SendTrackingEvent = {
   dropdownMenu: string
@@ -221,6 +222,7 @@ function NewProjectButton({
                     dropdownMenuEvent: 'import-docx',
                   })
                 }
+                trailingIcon={<MaterialIcon type="fiber_new" />}
               >
                 {t('import_word_document')}
               </DropdownItem>

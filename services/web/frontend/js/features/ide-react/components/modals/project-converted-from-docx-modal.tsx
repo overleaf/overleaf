@@ -61,20 +61,21 @@ function ProjectConvertedFromDocxModalContent({
       backdrop="static"
     >
       <OLModalHeader>
-        <OLModalTitle as="h3">
-          {t('document_successfully_imported')}
-        </OLModalTitle>
+        <OLModalTitle as="h3">{t('document_ready_for_editing')}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>
-        <ul className="docx-modal-list">
-          <li>{t('the_document_has_been_converted_to')}</li>
-          <li>
-            <Trans
-              i18nKey="citations_and_cross_references_may_be_written_as_plain_text"
-              components={{ code: <code /> }}
-            />
-          </li>
-        </ul>
+        <Trans
+          i18nKey="weve_converted_your_content_to_latex"
+          components={[
+            // eslint-disable-next-line jsx-a11y/anchor-has-content
+            <a
+              href="/learn"
+              key="wiki-link"
+              rel="noopener noreferrer"
+              target="_blank"
+            />,
+          ]}
+        />
       </OLModalBody>
       <OLModalFooter>
         <OLButton variant="primary" onClick={onHide}>
