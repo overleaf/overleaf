@@ -1,4 +1,4 @@
-import { User, Features } from '../../../types/user'
+import { User, Features, FeatureUsage } from '../../../types/user'
 import { User as MinimalUser } from '../../../types/admin/user'
 import { User as ManagedUser } from '../../../types/group-management/user'
 import { UserSettings } from '../../../types/user-settings'
@@ -128,6 +128,7 @@ export interface Meta {
   'ol-error': { name: string } | undefined
   'ol-errorType': string | undefined
   'ol-expired': boolean
+  'ol-featureUsage': FeatureUsage
   'ol-features': Features
   'ol-footer': FooterMetadata
   'ol-fromPlansPage': boolean
