@@ -314,6 +314,15 @@ function _concatTwoUpdates(firstUpdate, secondUpdate) {
     return [firstUpdate, secondUpdate]
   }
 
+  if (firstUpdate.meta.resync || secondUpdate.meta.resync) {
+    // Do not merge ops where one of them is a resync. We produce a list of
+    // resync ops that first corrects the content, then the ranges. By
+    // compressing the content updates seperately from the ranges updates,
+    // the ranges can become out-of-sync. To stop this, disallow compressing
+    // any resync updates.
+    return [firstUpdate, secondUpdate]
+  }
+
   if (firstUpdate.meta.user_id !== secondUpdate.meta.user_id) {
     return [firstUpdate, secondUpdate]
   }

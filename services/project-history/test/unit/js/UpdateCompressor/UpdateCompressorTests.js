@@ -1656,6 +1656,98 @@ describe('UpdateCompressor', function () {
         ])
       })
 
+      it('should not compress when first update is a resync', function () {
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              op: { p: 3, d: 'one two three four five six seven eight' },
+              meta: {
+                ts: this.ts1,
+                user_id: this.user_id,
+                doc_length: 100,
+                resync: true,
+              },
+              v: 42,
+            },
+            {
+              op: { p: 3, i: 'one 2 three four five six seven eight' },
+              meta: {
+                ts: this.ts2,
+                user_id: this.user_id,
+                doc_length: 100,
+              },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            op: { p: 3, d: 'one two three four five six seven eight' },
+            meta: {
+              ts: this.ts1,
+              user_id: this.user_id,
+              doc_length: 100,
+              resync: true,
+            },
+            v: 42,
+          },
+          {
+            op: { p: 3, i: 'one 2 three four five six seven eight' },
+            meta: {
+              ts: this.ts2,
+              user_id: this.user_id,
+              doc_length: 100,
+            },
+            v: 43,
+          },
+        ])
+      })
+
+      it('should not compress when second update is a resync', function () {
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              op: { p: 3, d: 'one two three four five six seven eight' },
+              meta: {
+                ts: this.ts1,
+                user_id: this.user_id,
+                doc_length: 100,
+              },
+              v: 42,
+            },
+            {
+              op: { p: 3, i: 'one 2 three four five six seven eight' },
+              meta: {
+                ts: this.ts2,
+                user_id: this.user_id,
+                doc_length: 100,
+                resync: true,
+              },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            op: { p: 3, d: 'one two three four five six seven eight' },
+            meta: {
+              ts: this.ts1,
+              user_id: this.user_id,
+              doc_length: 100,
+            },
+            v: 42,
+          },
+          {
+            op: { p: 3, i: 'one 2 three four five six seven eight' },
+            meta: {
+              ts: this.ts2,
+              user_id: this.user_id,
+              doc_length: 100,
+              resync: true,
+            },
+            v: 43,
+          },
+        ])
+      })
+
       it('special case for delete + insert triggering diff', function () {
         const meta = { ts: this.ts1, user_id: this.user_id, doc_length: 10 }
         expect(

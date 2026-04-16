@@ -4,11 +4,19 @@ import assert from 'node:assert'
 import mongodb from 'mongodb-legacy'
 import logger from '@overleaf/logger'
 import Settings from '@overleaf/settings'
+import {
+  Snapshot,
+  File,
+  FileMap,
+  StringFileData,
+  Change,
+} from 'overleaf-editor-core'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
 import sinon from 'sinon'
 import { getFailure } from './helpers/ProjectHistoryClient.js'
 import { fetchNothing, RequestFailedError } from '@overleaf/fetch-utils'
+import { _getBlobHashFromString } from '../../../app/js/HashManager.js'
 const { ObjectId } = mongodb
 
 const EMPTY_FILE_HASH = 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'
@@ -2377,6 +2385,169 @@ describe('Syncing with web and doc-updater', function () {
           )
         })
       })
+    })
+  })
+
+  // Regression: UpdateCompressor.compressUpdates optimizes a delete+insert
+  // at the same position by diffing the two strings and retaining common
+  // substrings. The TC retain ops are computed by the SyncManager based on
+  // the original (unoptimized) content diff. When the optimized ops retain
+  // characters that the original diff deleted, tracked changes on those
+  // characters survive — but the TC retains don't clear them, producing a
+  // ghost tracked change.
+  describe('resync with tracked changes overlapping content diff', function () {
+    const TIMESTAMP = '2025-01-01T00:00:00.000Z'
+
+    const persisted = {
+      content: 'lblcdhqcmihkrvzlifscqmwytt\n\ndgakoxboqpzdbbjtom',
+      trackedChanges: [
+        {
+          range: { pos: 2, length: 3 },
+          tracking: { type: 'insert', userId: 'user-2', ts: TIMESTAMP },
+        },
+        {
+          range: { pos: 12, length: 4 },
+          tracking: { type: 'delete', userId: 'user-2', ts: TIMESTAMP },
+        },
+        {
+          range: { pos: 26, length: 3 },
+          tracking: { type: 'delete', userId: 'user-2', ts: TIMESTAMP },
+        },
+        {
+          range: { pos: 32, length: 5 },
+          tracking: { type: 'delete', userId: 'user-2', ts: TIMESTAMP },
+        },
+      ],
+    }
+
+    const expected = {
+      content: 'lblchfjaqdhqcmihkrvzliftt\ndoqpzdbom',
+      trackedChanges: [
+        {
+          range: { pos: 0, length: 4 },
+          tracking: { type: 'insert', userId: 'user-2', ts: TIMESTAMP },
+        },
+        {
+          range: { pos: 11, length: 1 },
+          tracking: { type: 'delete', userId: 'user-2', ts: TIMESTAMP },
+        },
+        {
+          range: { pos: 17, length: 5 },
+          tracking: { type: 'delete', userId: 'user-2', ts: TIMESTAMP },
+        },
+        {
+          range: { pos: 22, length: 3 },
+          tracking: { type: 'insert', userId: 'user-1', ts: TIMESTAMP },
+        },
+        {
+          range: { pos: 26, length: 5 },
+          tracking: { type: 'delete', userId: 'user-1', ts: TIMESTAMP },
+        },
+      ],
+    }
+
+    it('should not leave ghost tracked changes after resync', async function () {
+      const rangesBlob = JSON.stringify({
+        comments: [],
+        trackedChanges: persisted.trackedChanges,
+      })
+      const contentHash = _getBlobHashFromString(persisted.content)
+      const rangesHash = _getBlobHashFromString(rangesBlob)
+
+      MockHistoryStore()
+        .get(`/api/projects/${historyId}/latest/history`)
+        .reply(200, {
+          chunk: {
+            history: {
+              snapshot: {
+                files: {
+                  'main.tex': {
+                    hash: contentHash,
+                    stringLength: persisted.content.length,
+                    rangesHash,
+                  },
+                },
+              },
+              changes: [],
+            },
+            startVersion: 0,
+          },
+        })
+
+      MockHistoryStore()
+        .get(`/api/projects/${historyId}/blobs/${contentHash}`)
+        .reply(200, persisted.content)
+
+      MockHistoryStore()
+        .get(`/api/projects/${historyId}/blobs/${rangesHash}`)
+        .reply(200, rangesBlob)
+
+      MockHistoryStore()
+        .put(/\/api\/projects\/[^/]+\/blobs\/[0-9a-f]+/)
+        .optionally()
+        .reply(201)
+
+      const allCapturedChanges = []
+      MockHistoryStore()
+        .post(`/api/projects/${historyId}/legacy_changes`, body => {
+          allCapturedChanges.push(...body)
+          return true
+        })
+        .query(true)
+        .times(5)
+        .optionally()
+        .reply(204)
+
+      MockWeb().post(`/project/${this.project_id}/history/resync`).reply(204)
+
+      await ProjectHistoryClient.resyncHistory(this.project_id)
+
+      await ProjectHistoryClient.pushRawUpdate(this.project_id, {
+        projectHistoryId: historyId,
+        resyncProjectStructure: {
+          docs: [{ path: '/main.tex' }],
+          files: [],
+        },
+        meta: { ts: this.timestamp },
+      })
+
+      await ProjectHistoryClient.pushRawUpdate(this.project_id, {
+        path: '/main.tex',
+        projectHistoryId: historyId,
+        resyncDocContent: {
+          content: expected.content,
+          historyOTRanges: {
+            comments: [],
+            trackedChanges: expected.trackedChanges,
+          },
+        },
+        doc: this.doc_id,
+        meta: { ts: this.timestamp },
+      })
+
+      await ProjectHistoryClient.flushProject(this.project_id)
+
+      const fileData = new StringFileData(
+        persisted.content,
+        [],
+        persisted.trackedChanges
+      )
+      const snapshot = new Snapshot(
+        new FileMap({ 'main.tex': new File(fileData) })
+      )
+      for (const rawChange of allCapturedChanges) {
+        Change.fromRaw(rawChange).applyTo(snapshot)
+      }
+
+      const file = snapshot.getFile('main.tex')
+      assert.strictEqual(file.getContent(), expected.content, 'content')
+      assert.deepStrictEqual(
+        file.getTrackedChanges().toRaw(),
+        expected.trackedChanges,
+        `TC mismatch.\n` +
+          `  expected: ${JSON.stringify(expected.trackedChanges)}\n` +
+          `  actual:   ${JSON.stringify(file.getTrackedChanges().toRaw())}`
+      )
     })
   })
 })
