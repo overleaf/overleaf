@@ -5,6 +5,7 @@ import OLButton from '@/shared/components/ol/ol-button'
 import OLButtonToolbar from '@/shared/components/ol/ol-button-toolbar'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
+import { useProjectContext } from '@/shared/context/project-context'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { debugConsole } from '@/utils/debugging'
 import getMeta from '@/utils/meta'
@@ -14,6 +15,7 @@ export default function PythonOutputPane() {
   const { t } = useTranslation()
   const { currentDocument, currentDocumentId } = useEditorOpenDocContext()
   const { pathInFolder } = useFileTreePathContext()
+  const { projectSnapshot } = useProjectContext()
   const clientRef = useRef<PyodideWorkerClient | null>(null)
   const currentRequestIdRef = useRef<string | null>(null)
   const [isReady, setIsReady] = useState(false)
@@ -108,7 +110,21 @@ export default function PythonOutputPane() {
     }
   }, [currentDocument, currentDocumentId, pathInFolder])
 
-  const handleRun = useCallback(() => {
+  const getLatestProjectFiles = useCallback(async () => {
+    await projectSnapshot.refresh()
+    return projectSnapshot.getDocPaths().reduce(
+      (files, relativePath) => {
+        const content = projectSnapshot.getDocContents(relativePath)
+        if (content !== null) {
+          files.push({ relativePath, content })
+        }
+        return files
+      },
+      [] as { relativePath: string; content: string }[]
+    )
+  }, [projectSnapshot])
+
+  const handleRun = useCallback(async () => {
     const client = clientRef.current
     if (!client || !isReady) {
       return
@@ -126,17 +142,19 @@ export default function PythonOutputPane() {
     currentRequestIdRef.current = requestId
     setIsRunning(true)
 
+    const isCancelled = () => currentRequestIdRef.current !== requestId
+
     try {
-      client.runCode(syncFile.content, { requestId, files: [syncFile] })
+      const files = await getLatestProjectFiles()
+      if (isCancelled()) return
+      client.runCode(syncFile.content, { requestId, files })
     } catch (runError) {
-      if (currentRequestIdRef.current !== requestId) {
-        return
-      }
+      if (isCancelled()) return
       currentRequestIdRef.current = null
       setIsRunning(false)
       setError(formatError(runError))
     }
-  }, [buildCurrentDocumentSyncFile, isReady])
+  }, [buildCurrentDocumentSyncFile, getLatestProjectFiles, isReady])
 
   const handleStop = useCallback(() => {
     const client = clientRef.current
