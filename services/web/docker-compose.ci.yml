@@ -131,7 +131,7 @@ services:
     user: root
 
   redis_test:
-    image: redis:7.4.3
+    image: redis:7.4.8
 
   mongo:
     image: mongo:8.0.11
