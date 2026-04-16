@@ -7,5 +7,6 @@ module.exports = {
     'require-script-runner': require('./require-script-runner'),
     'require-vi-doMock-valid-path': require('./require-vi-doMock-valid-path'),
     'require-loading-label': require('./require-loading-label'),
+    'require-cio-snake-case-properties': require('./require-cio-snake-case-properties'),
   },
 }

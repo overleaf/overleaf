@@ -34,7 +34,7 @@ import { OnboardingDataCollection } from '../../models/OnboardingDataCollection.
 import UserSettingsHelper from './UserSettingsHelper.mjs'
 
 /**
- * @import { GetProjectsRequest, GetProjectsResponse, AllUsersProjects, MongoProject, FormattedProject, MongoTag } from "./types"
+ * @import { GetProjectsRequest, GetProjectsResponse, AllUsersProjects, MongoProject, FormattedProject, MongoTag, SubscriptionRecord } from "./types"
  * @import { Project, ProjectApi, ProjectAccessLevel, Filters, Page, Sort, UserRef } from "../../../../types/project/dashboard/api"
  * @import { Affiliation } from "../../../../types/affiliation"
  * @import { Source } from "../Authorization/types"
@@ -554,26 +554,26 @@ async function projectListPage(req, res, next) {
 
   Modules.promises.hooks
     .fire('setUserProperties', userId, {
-      overleafId: userId,
-      lastActive: user.lastActive
+      overleaf_id: userId,
+      last_active: user.lastActive
         ? Math.floor(user.lastActive.getTime() / 1000)
         : null,
-      signUpDate: user.signUpDate
+      sign_up_date: user.signUpDate
         ? Math.floor(user.signUpDate.getTime() / 1000)
         : null,
       ...(usersBestSubscription?.type && {
-        'best-subscription-type': usersBestSubscription.type,
+        best_subscription_type: usersBestSubscription.type,
       }),
-      aiBlocked,
-      hasAiAssist,
-      ...(subjectArea && { subjectArea }),
+      ai_blocked: aiBlocked,
+      has_ai_assist: hasAiAssist,
+      ...(subjectArea && { subject_area: subjectArea }),
       ...(role && { role }),
-      ...(primaryOccupation && { primaryOccupation }),
-      ...(usedLatex && { usedLatex }),
+      ...(primaryOccupation && { primary_occupation: primaryOccupation }),
+      ...(usedLatex && { used_latex: usedLatex }),
       ...(countryCode && { country: countryCode }),
-      ...(commonsInstitution && { commonsInstitution }),
-      ...(groupRole && { groupRole }),
-      isManagedUser: Boolean(user.enrollment?.managedBy),
+      ...(commonsInstitution && { commons_institution: commonsInstitution }),
+      ...(groupRole && { group_role: groupRole }),
+      is_managed_user: Boolean(user.enrollment?.managedBy),
       ...(user.email && { email: user.email }),
     })
     .catch(err => {

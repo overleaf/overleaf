@@ -29,6 +29,7 @@ module.exports = {
     'import/no-extraneous-dependencies': 'error',
 
     '@overleaf/prefer-kebab-url': 'error',
+    '@overleaf/require-cio-snake-case-properties': 'error',
 
     // disable some TypeScript rules
     '@typescript-eslint/no-var-requires': 'off',

@@ -467,6 +467,34 @@ describe('ProjectListController', function () {
       await ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
     })
 
+    it('should send groupRole to customer.io for group admins', async function (ctx) {
+      ctx.Features.hasFeature.withArgs('saas').returns(true)
+      ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+        {
+          bestSubscription: { type: 'free' },
+          individualSubscription: null,
+          memberGroupSubscriptions: [],
+          managedGroupSubscriptions: [
+            {
+              planCode: 'group_professional',
+              membersLimit: 12,
+            },
+          ],
+        }
+      )
+      ctx.res.render = () => {}
+
+      await ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'setUserProperties',
+        ctx.user._id,
+        sinon.match({
+          group_role: 'admin',
+        })
+      )
+    })
+
     it('should show INR Banner for Indian users with free account', async function (ctx) {
       // usersBestSubscription is only available when saas feature is present
       ctx.Features.hasFeature.withArgs('saas').returns(true)

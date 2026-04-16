@@ -1,6 +1,5 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
-import ProjectHelper from '../../../../app/src/Features/Project/ProjectHelper.mjs'
 
 const modulePath =
   '../../../../app/src/Features/Templates/TemplatesController.mjs'
@@ -9,8 +8,12 @@ describe('TemplatesController', function () {
   beforeEach(async function (ctx) {
     ctx.user_id = 'user-id'
 
+    ctx.ProjectHelper = {
+      compilerFromV1Engine: sinon.stub(),
+    }
+
     vi.doMock('../../../../app/src/Features/Project/ProjectHelper', () => ({
-      default: ProjectHelper,
+      default: ctx.ProjectHelper,
     }))
 
     vi.doMock(

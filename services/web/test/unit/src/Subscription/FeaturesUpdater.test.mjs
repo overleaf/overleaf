@@ -9,6 +9,7 @@ const MODULE_PATH = '../../../../app/src/Features/Subscription/FeaturesUpdater'
 
 describe('FeaturesUpdater', function () {
   beforeEach(async function (ctx) {
+    ctx.renewalDate = new Date('2099-04-01T00:00:00Z')
     ctx.v1UserId = 12345
     ctx.user = {
       _id: new ObjectId(),
@@ -17,7 +18,12 @@ describe('FeaturesUpdater', function () {
     }
     ctx.aiAddOn = { addOnCode: AI_ADD_ON_CODE, quantity: 1 }
     ctx.subscriptions = {
-      individual: { planCode: 'individual-plan' },
+      individual: {
+        planCode: 'individual-plan',
+        groupPlan: false,
+        recurlySubscription_id: 'sub-individual',
+        recurlyStatus: { state: 'active' },
+      },
       group1: { planCode: 'group-plan-1', groupPlan: true },
       group2: { planCode: 'group-plan-2', groupPlan: true },
       noDropbox: { planCode: 'no-dropbox' },
@@ -115,6 +121,7 @@ describe('FeaturesUpdater', function () {
     ctx.UserGetter = {
       promises: {
         getUser: sinon.stub().resolves(null),
+        getWritefullData: sinon.stub().resolves(null),
       },
     }
     ctx.UserGetter.promises.getUser.withArgs(ctx.user._id).resolves(ctx.user)
@@ -126,12 +133,25 @@ describe('FeaturesUpdater', function () {
       setUserPropertyForUserInBackground: sinon.stub(),
     }
     ctx.Modules = {
-      promises: { hooks: { fire: sinon.stub().resolves() } },
+      promises: { hooks: { fire: sinon.stub().resolves([]) } },
     }
+    ctx.Modules.promises.hooks.fire
+      .withArgs('getPaymentFromRecordPromise', ctx.subscriptions.individual)
+      .resolves([
+        {
+          subscription: {
+            state: 'active',
+            periodEnd: ctx.renewalDate,
+          },
+        },
+      ])
     ctx.SubscriptionViewModelBuilder = {
       promises: {
         getUsersSubscriptionDetails: sinon.stub().resolves({
           bestSubscription: { type: 'individual' },
+          individualSubscription: ctx.subscriptions.individual,
+          memberGroupSubscriptions: [],
+          managedGroupSubscriptions: [],
         }),
       },
     }
@@ -419,35 +439,114 @@ describe('FeaturesUpdater', function () {
         ).to.have.been.calledWith(ctx.user._id, 'feature-set', 'all')
       })
 
-      it('should sync features to customer.io', function (ctx) {
+      it('should sync subscription properties to customer.io', function (ctx) {
         expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
           'setUserProperties',
           ctx.user._id,
-          {
-            features: ctx.Settings.features.all,
-            'best-subscription-type': 'individual',
-            overleafId: ctx.user._id,
-          }
+          sinon.match({
+            plan_type: 'individual',
+            display_plan_type: 'individual',
+            ai_plan: 'none',
+            next_renewal_date: Math.floor(ctx.renewalDate.getTime() / 1000),
+            expiry_date: '',
+            features: sinon.match.object,
+          })
         )
       })
     })
 
-    describe('when user has an email', function () {
+    describe('when the individual subscription has a pending cancellation', function () {
       beforeEach(async function (ctx) {
-        ctx.user.email = 'user@example.com'
+        const pendingCancellationSubscription = {
+          ...ctx.subscriptions.individual,
+          recurlyStatus: { state: 'canceled' },
+        }
+        ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+          {
+            bestSubscription: { type: 'individual' },
+            individualSubscription: pendingCancellationSubscription,
+            memberGroupSubscriptions: [],
+            managedGroupSubscriptions: [],
+          }
+        )
+        ctx.Modules.promises.hooks.fire
+          .withArgs(
+            'getPaymentFromRecordPromise',
+            pendingCancellationSubscription
+          )
+          .resolves([
+            {
+              subscription: {
+                state: 'canceled',
+                periodEnd: ctx.renewalDate,
+              },
+            },
+          ])
+
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
       })
 
-      it('should include email in customer.io properties', function (ctx) {
+      it('should sync expiry_date and blank next_renewal_date in customer.io', function (ctx) {
         expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
           'setUserProperties',
           ctx.user._id,
+          sinon.match({
+            plan_type: 'individual',
+            display_plan_type: 'individual',
+            ai_plan: 'none',
+            next_renewal_date: '',
+            expiry_date: Math.floor(ctx.renewalDate.getTime() / 1000),
+            features: sinon.match.object,
+          })
+        )
+      })
+    })
+
+    describe('when the user is in a group subscription', function () {
+      beforeEach(async function (ctx) {
+        ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
           {
-            features: ctx.Settings.features.all,
-            'best-subscription-type': 'individual',
-            overleafId: ctx.user._id,
-            email: 'user@example.com',
+            bestSubscription: {
+              type: 'group',
+              plan: {
+                planCode: 'group-plan-1',
+                groupPlan: true,
+                membersLimit: 5,
+              },
+              subscription: {
+                teamName: 'Team Alpha',
+              },
+            },
+            memberGroupSubscriptions: [
+              {
+                planCode: 'group-plan-1',
+                teamName: 'Team Alpha',
+                membersLimit: 8,
+              },
+            ],
+            managedGroupSubscriptions: [],
+            individualSubscription: null,
           }
+        )
+        await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+      })
+
+      it('should sync groupSize to customer.io', function (ctx) {
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'setUserProperties',
+          ctx.user._id,
+          sinon.match({
+            plan_type: 'group-standard',
+            display_plan_type: 'Group Standard',
+            plan_term_label: 'monthly',
+            ai_plan: 'none',
+            group_ai_enabled: false,
+            group_size: 8,
+            next_renewal_date: '',
+            expiry_date: '',
+            features: sinon.match.object,
+            overleaf_id: ctx.user._id,
+          })
         )
       })
     })

@@ -4,6 +4,7 @@ const noUnnecessaryTrans = require('./no-unnecessary-trans')
 const shouldUnescapeTrans = require('./should-unescape-trans')
 const noGeneratedEditorThemes = require('./no-generated-editor-themes')
 const viDoMockValidPath = require('./require-vi-doMock-valid-path')
+const requireCioSnakeCaseProperties = require('./require-cio-snake-case-properties')
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -166,3 +167,103 @@ ruleTester.run('domock-require-valid-path', viDoMockValidPath, {
     },
   ],
 })
+
+ruleTester.run(
+  'require-cio-snake-case-properties',
+  requireCioSnakeCaseProperties,
+  {
+    valid: [
+      // updateUserAttributes with snake_case keys
+      {
+        code: `CustomerIoHandler.updateUserAttributes(userId, { plan_type: 'free', group_size: 10 })`,
+      },
+      // Modules.promises.hooks.fire with snake_case keys
+      {
+        code: `Modules.promises.hooks.fire('setUserProperties', userId, { plan_type: 'free', last_active: 123 })`,
+      },
+      // Modules.hooks.fire with snake_case keys
+      {
+        code: `Modules.hooks.fire('setUserProperties', userId, { plan_type: 'free' })`,
+      },
+      // Single-word keys are valid snake_case
+      {
+        code: `CustomerIoHandler.updateUserAttributes(userId, { email: 'a@b.com', role: 'admin' })`,
+      },
+      // Computed/dynamic keys are skipped
+      {
+        code: `CustomerIoHandler.updateUserAttributes(userId, { [dynamicKey]: true })`,
+      },
+      // Spread elements are skipped
+      {
+        code: `CustomerIoHandler.updateUserAttributes(userId, { ...existingAttrs })`,
+      },
+      // Unrelated function calls are not checked
+      {
+        code: `SomeOtherHandler.updateUserAttributes(userId, { camelCase: true })`,
+      },
+      // fire() with a different event name is not checked
+      {
+        code: `Modules.promises.hooks.fire('someOtherEvent', userId, { camelCase: true })`,
+      },
+    ],
+    invalid: [
+      // camelCase key in updateUserAttributes
+      {
+        code: `CustomerIoHandler.updateUserAttributes(userId, { planType: 'free' })`,
+        errors: [
+          {
+            message: `Customer.io attribute 'planType' must be in snake_case.`,
+          },
+        ],
+      },
+      // kebab-case string key
+      {
+        code: `CustomerIoHandler.updateUserAttributes(userId, { 'plan-type': 'free' })`,
+        errors: [
+          {
+            message: `Customer.io attribute 'plan-type' must be in snake_case.`,
+          },
+        ],
+      },
+      // PascalCase key
+      {
+        code: `CustomerIoHandler.updateUserAttributes(userId, { PlanType: 'free' })`,
+        errors: [
+          {
+            message: `Customer.io attribute 'PlanType' must be in snake_case.`,
+          },
+        ],
+      },
+      // camelCase in Modules.promises.hooks.fire
+      {
+        code: `Modules.promises.hooks.fire('setUserProperties', userId, { planType: 'free' })`,
+        errors: [
+          {
+            message: `Customer.io attribute 'planType' must be in snake_case.`,
+          },
+        ],
+      },
+      // camelCase in Modules.hooks.fire
+      {
+        code: `Modules.hooks.fire('setUserProperties', userId, { planType: 'free' })`,
+        errors: [
+          {
+            message: `Customer.io attribute 'planType' must be in snake_case.`,
+          },
+        ],
+      },
+      // Multiple invalid keys report multiple errors
+      {
+        code: `CustomerIoHandler.updateUserAttributes(userId, { planType: 'free', groupSize: 10, plan_term: 'annual' })`,
+        errors: [
+          {
+            message: `Customer.io attribute 'planType' must be in snake_case.`,
+          },
+          {
+            message: `Customer.io attribute 'groupSize' must be in snake_case.`,
+          },
+        ],
+      },
+    ],
+  }
+)
