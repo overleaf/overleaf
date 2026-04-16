@@ -70,9 +70,9 @@ function _responseHandler(options, error, response, body, callback) {
 
 const V1Api = {
   request: makeRequest,
+  promises: {
+    request: promisifyMultiResult(makeRequest, ['response', 'body']),
+  },
 }
 
-V1Api.promises = {
-  request: promisifyMultiResult(V1Api.request, ['response', 'body']),
-}
 export default V1Api
