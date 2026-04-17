@@ -518,6 +518,9 @@ else
 	npm run lint:styles
 endif
 
+lint_stylelint_fix:
+	npm run --silent lint:styles:fix
+
 lint: lint_pug
 lint_pug:
 	bin/lint_pug_templates
