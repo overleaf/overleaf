@@ -22,6 +22,7 @@ import _ from 'lodash'
 import TagsHandler from '../Tags/TagsHandler.mjs'
 import ClsiCacheManager from '../Compile/ClsiCacheManager.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
+import ChatApiHandler from '../Chat/ChatApiHandler.mjs'
 
 const TAG_COLOR_RED = '#f04343'
 const DEBUG_TAG_NAME = 'Debug'
@@ -189,6 +190,12 @@ async function duplicate(
         owner._id,
         tags.map(tag => tag.id),
         newProject._id
+      )
+    }
+    if (opts.cloneRanges) {
+      await ChatApiHandler.promises.cloneCommentThreads(
+        originalProject._id.toString(),
+        newProject._id.toString()
       )
     }
   } catch (err) {

@@ -19,6 +19,7 @@
     "@overleaf/logger": "*",
     "@overleaf/metrics": "*",
     "@overleaf/mongo-utils": "*",
+    "@overleaf/promise-utils": "*",
     "@overleaf/settings": "*",
     "async": "^3.2.5",
     "body-parser": "1.20.4",

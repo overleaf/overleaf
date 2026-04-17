@@ -4,6 +4,29 @@ export class MissingThreadError extends Error {}
 
 export const GLOBAL_THREAD = 'GLOBAL'
 
+/**
+ * @param {string} sourceProjectId
+ * @param {string} targetProjectId
+ * @return {Promise<{from:ObjectId, to: ObjectId}[]>}
+ */
+export async function cloneThreads(sourceProjectId, targetProjectId) {
+  sourceProjectId = new ObjectId(sourceProjectId)
+  targetProjectId = new ObjectId(targetProjectId)
+  const rooms = await db.rooms
+    .find({ project_id: sourceProjectId, thread_id: { $exists: true } })
+    .toArray()
+  const mapping = []
+  await db.rooms.insertMany(
+    rooms.map(room => {
+      const from = room._id
+      const to = new ObjectId()
+      mapping.push({ from, to })
+      return { ...room, _id: to, project_id: targetProjectId }
+    })
+  )
+  return mapping
+}
+
 export async function findOrCreateThread(projectId, threadId) {
   let query, update
   projectId = new ObjectId(projectId.toString())

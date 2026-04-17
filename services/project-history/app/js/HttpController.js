@@ -44,80 +44,95 @@ export function cloneProject(req, res) {
     info: { targetProjectId, sourceProjectId },
   })
 
-  WebApiManager.getHistoryId(targetProjectId, (err, targetHistoryId) => {
-    if (err) return incrResp.fail(OError.tag(err, 'get target historyId'))
-    WebApiManager.getHistoryId(sourceProjectId, (err, sourceHistoryId) => {
-      if (err) return incrResp.fail(OError.tag(err, 'get source historyId'))
-
-      incrResp.sendUpdate('cloning full project history data: pending')
-      HistoryStoreManager.cloneProject(
-        sourceHistoryId.toString(),
-        targetHistoryId.toString(),
-        incrResp.signal(),
-        (err, stream) => {
-          if (err) {
-            incrResp.fail(OError.tag(err, 'clone history-v1 data'))
-            return
-          }
-
-          // aborted. pipeline() would throw.
-          if (res.destroyed) {
-            stream.destroy()
-            incrResp.fail(new Error('request aborted'))
-            return
-          }
-
-          // The stream.pipeline callback API does not support options.
-          Stream.promises.pipeline(stream, res, { end: false }).then(
-            () => {
-              incrResp.sendUpdate('clone labels: pending')
-              LabelsManager.cloneLabels(
-                sourceProjectId,
-                targetProjectId,
-                err => {
-                  if (err) {
-                    incrResp.fail(OError.tag(err, 'clone labels'))
-                    return
-                  }
-                  incrResp.sendUpdate('clone labels: done')
-
-                  incrResp.sendUpdate('clone resync state: pending')
-                  SyncManager.cloneResyncState(
-                    sourceProjectId,
-                    targetProjectId,
-                    err => {
-                      if (err) {
-                        incrResp.fail(OError.tag(err, 'clone resync state'))
-                        return
-                      }
-                      incrResp.sendUpdate('clone resync state: done')
-
-                      incrResp.sendUpdate('clone failure record: pending')
-                      ErrorRecorder.cloneFailure(
-                        sourceProjectId,
-                        targetProjectId,
-                        err => {
-                          if (err) {
-                            incrResp.fail(OError.tag(err, 'clone failure'))
-                            return
-                          }
-                          incrResp.sendUpdate('clone failure record: done')
-
-                          incrResp.sendUpdate('done')
-                          incrResp.end()
-                        }
-                      )
-                    }
-                  )
-                }
-              )
-            },
-            err => {
-              incrResp.fail(OError.tag(err, 'stream history-v1 response'))
-            }
-          )
-        }
+  incrResp.sendUpdate('best effort history flush: pending')
+  UpdatesProcessor.processUpdatesForProject(sourceProjectId, err => {
+    if (err) {
+      logger.warn(
+        { err, sourceProjectId },
+        'failed to flush during history clone'
       )
+      incrResp.sendUpdate(
+        'best effort history flush: failed, a resync will be required'
+      )
+    } else {
+      incrResp.sendUpdate('best effort history flush: done')
+    }
+
+    WebApiManager.getHistoryId(targetProjectId, (err, targetHistoryId) => {
+      if (err) return incrResp.fail(OError.tag(err, 'get target historyId'))
+      WebApiManager.getHistoryId(sourceProjectId, (err, sourceHistoryId) => {
+        if (err) return incrResp.fail(OError.tag(err, 'get source historyId'))
+
+        incrResp.sendUpdate('cloning full project history data: pending')
+        HistoryStoreManager.cloneProject(
+          sourceHistoryId.toString(),
+          targetHistoryId.toString(),
+          incrResp.signal(),
+          (err, stream) => {
+            if (err) {
+              incrResp.fail(OError.tag(err, 'clone history-v1 data'))
+              return
+            }
+
+            // aborted. pipeline() would throw.
+            if (res.destroyed) {
+              stream.destroy()
+              incrResp.fail(new Error('request aborted'))
+              return
+            }
+
+            // The stream.pipeline callback API does not support options.
+            Stream.promises.pipeline(stream, res, { end: false }).then(
+              () => {
+                incrResp.sendUpdate('clone labels: pending')
+                LabelsManager.cloneLabels(
+                  sourceProjectId,
+                  targetProjectId,
+                  err => {
+                    if (err) {
+                      incrResp.fail(OError.tag(err, 'clone labels'))
+                      return
+                    }
+                    incrResp.sendUpdate('clone labels: done')
+
+                    incrResp.sendUpdate('clone resync state: pending')
+                    SyncManager.cloneResyncState(
+                      sourceProjectId,
+                      targetProjectId,
+                      err => {
+                        if (err) {
+                          incrResp.fail(OError.tag(err, 'clone resync state'))
+                          return
+                        }
+                        incrResp.sendUpdate('clone resync state: done')
+
+                        incrResp.sendUpdate('clone failure record: pending')
+                        ErrorRecorder.cloneFailure(
+                          sourceProjectId,
+                          targetProjectId,
+                          err => {
+                            if (err) {
+                              incrResp.fail(OError.tag(err, 'clone failure'))
+                              return
+                            }
+                            incrResp.sendUpdate('clone failure record: done')
+
+                            incrResp.sendUpdate('done')
+                            incrResp.end()
+                          }
+                        )
+                      }
+                    )
+                  }
+                )
+              },
+              err => {
+                incrResp.fail(OError.tag(err, 'stream history-v1 response'))
+              }
+            )
+          }
+        )
+      })
     })
   })
 }

@@ -490,6 +490,28 @@ paths:
               schema:
                 type: object
       description: Load threads and generate a json blob containing all messages in all the threads
+  "/project/{projectId}/clone-comment-threads":
+    parameters:
+      - schema:
+          type: string
+        name: projectId
+        in: path
+        required: true
+    post:
+      summary: Clone a projects comment threads
+      operationId: cloneCommentThreads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                targetProjectId:
+                  type: string
+      responses:
+        "204":
+          description: OK
+      description: Clone a projects comment threads
 components:
   schemas:
     Message:

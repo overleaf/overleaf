@@ -3,6 +3,7 @@ import * as MessageManager from './MessageManager.js'
 import * as MessageFormatter from './MessageFormatter.js'
 import * as ThreadManager from '../Threads/ThreadManager.js'
 import { ObjectId } from '../../mongodb.js'
+import { promiseMapWithLimit } from '@overleaf/promise-utils'
 
 const DEFAULT_MESSAGE_LIMIT = 50
 const MAX_MESSAGE_LENGTH = 10 * 1024 // 10kb, about 1,500 words
@@ -112,6 +113,10 @@ export async function duplicateCommentThreads(context) {
 
 export async function generateThreadData(context) {
   return await callMessageHttpController(context, _generateThreadData)
+}
+
+export async function cloneCommentThreads(context) {
+  return await callMessageHttpController(context, _cloneCommentThreads)
 }
 
 export async function getStatus(context) {
@@ -435,4 +440,17 @@ async function _duplicateCommentThreads(req, res) {
     }
   }
   res.json({ newThreads: result })
+}
+
+async function _cloneCommentThreads(req, res) {
+  const { projectId: sourceProjectId } = req.params
+  const { targetProjectId } = req.body
+  const rooms = await ThreadManager.cloneThreads(
+    sourceProjectId,
+    targetProjectId
+  )
+  await promiseMapWithLimit(10, rooms, async ({ from, to }) => {
+    await MessageManager.duplicateRoomToOtherRoom(from, to)
+  })
+  res.status(204)
 }

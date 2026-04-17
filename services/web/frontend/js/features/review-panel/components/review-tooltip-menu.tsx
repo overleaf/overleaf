@@ -263,6 +263,7 @@ const ReviewTooltipMenuContent = memo<{ onAddComment: () => void }>(
         <button
           className="review-tooltip-menu-button review-tooltip-add-comment-button"
           onClick={handleAddCommentClick}
+          aria-label={t('add_comment')}
         >
           <MaterialIcon type="chat" />
           {t('add_comment')}

@@ -250,6 +250,21 @@ async function generateThreadData(projectId, threads) {
 }
 
 /**
+ * @param {string} sourceProjectId
+ * @param {string} targetProjectId
+ * @return {Promise<void>}
+ */
+async function cloneCommentThreads(sourceProjectId, targetProjectId) {
+  await fetchNothing(
+    chatApiUrl(`/project/${sourceProjectId}/clone-comment-threads`),
+    {
+      method: 'POST',
+      json: { targetProjectId },
+    }
+  )
+}
+
+/**
  * @param {any} path
  */
 function chatApiUrl(path) {
@@ -296,5 +311,6 @@ export default {
     getResolvedThreadIds,
     duplicateCommentThreads,
     generateThreadData,
+    cloneCommentThreads,
   },
 }
