@@ -103,7 +103,7 @@ html(
 			'thin-footer': showThinFooter,
 			'website-redesign': isWebsiteRedesign === true || websiteRedesignOverride,
 			'application-page': isApplicationPage,
-			'user-has-admin-access': hasFeature('saas') && hasAdminAccess(),
+			'red-nav-bar-for-admins': !settings.isDevEnv && hasFeature('saas') && hasAdminAccess(),
 		}
 		data-theme='light'
 	)
