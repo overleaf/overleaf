@@ -70,6 +70,10 @@ describe('CollaboratorsGetter', function () {
       buildUserModelView: sinon.stub(),
     }
 
+    vi.doMock('@overleaf/metrics', () => ({
+      default: { inc: sinon.stub() },
+    }))
+
     vi.doMock('mongodb-legacy', () => ({
       default: { ObjectId },
     }))

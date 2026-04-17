@@ -589,6 +589,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     RateLimiterMiddleware.rateLimit(rateLimiters.compileProjectHttp, {
       params: ['Project_id'],
     }),
+    AsyncLocalStorage.middleware,
     AuthorizationMiddleware.ensureUserCanReadProject,
     CompileController.compile
   )
@@ -601,6 +602,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.get(
     '/project/:Project_id/output/cached/output.overleaf.json',
+    AsyncLocalStorage.middleware,
     AuthorizationMiddleware.ensureUserCanReadProject,
     ClsiCacheController.getLatestBuildFromCache
   )
@@ -680,11 +682,13 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   webRouter.get(
     '/project/:Project_id/sync/code',
+    AsyncLocalStorage.middleware,
     AuthorizationMiddleware.ensureUserCanReadProject,
     CompileController.proxySyncCode
   )
   webRouter.get(
     '/project/:Project_id/sync/pdf',
+    AsyncLocalStorage.middleware,
     AuthorizationMiddleware.ensureUserCanReadProject,
     CompileController.proxySyncPdf
   )
@@ -778,6 +782,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.get(
     '/project/:project_id/metadata',
+    AsyncLocalStorage.middleware,
     AuthorizationMiddleware.ensureUserCanReadProject,
     Settings.allowAnonymousReadAndWriteSharing
       ? (req, res, next) => {
@@ -788,6 +793,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
   webRouter.post(
     '/project/:project_id/doc/:doc_id/metadata',
+    AsyncLocalStorage.middleware,
     AuthorizationMiddleware.ensureUserCanReadProject,
     Settings.allowAnonymousReadAndWriteSharing
       ? (req, res, next) => {

@@ -3,6 +3,7 @@ import AuthenticationController from '../Authentication/AuthenticationController
 import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'
+import AsyncLocalStorage from '../../infrastructure/AsyncLocalStorage.mjs'
 
 const rateLimiters = {
   addDocToProject: new RateLimiter('add-doc-to-project', {
@@ -20,6 +21,7 @@ export default {
   apply(webRouter, privateApiRouter) {
     webRouter.post(
       '/project/:Project_id/doc',
+      AsyncLocalStorage.middleware,
       AuthorizationMiddleware.ensureUserCanWriteProjectContent,
       RateLimiterMiddleware.rateLimit(rateLimiters.addDocToProject, {
         params: ['Project_id'],
@@ -37,6 +39,7 @@ export default {
 
     webRouter.post(
       '/project/:Project_id/:entity_type/:entity_id/rename',
+      AsyncLocalStorage.middleware,
       AuthorizationMiddleware.ensureUserCanWriteProjectContent,
       EditorHttpController.renameEntity
     )
@@ -48,6 +51,7 @@ export default {
 
     webRouter.delete(
       '/project/:Project_id/file/:entity_id',
+      AsyncLocalStorage.middleware,
       AuthorizationMiddleware.ensureUserCanWriteProjectContent,
       EditorHttpController.deleteFile
     )

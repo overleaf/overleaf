@@ -56,10 +56,6 @@ describe('InactiveProjectManager', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
-      default: ctx.ProjectGetter,
-    }))
-
     vi.doMock('../../../../app/src/models/Project', () => ({}))
 
     vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
@@ -79,15 +75,14 @@ describe('InactiveProjectManager', function () {
 
   describe('reactivateProjectIfRequired', function () {
     beforeEach(function (ctx) {
-      ctx.project = { active: false }
-      ctx.ProjectGetter.promises.getProject.resolves(ctx.project)
+      ctx.project = { _id: ctx.project_id, active: false }
       ctx.ProjectUpdateHandler.promises.markAsActive.resolves()
     })
 
     it('should call unarchiveProject', async function (ctx) {
       ctx.DocstoreManager.promises.unarchiveProject.resolves()
       await ctx.InactiveProjectManager.promises.reactivateProjectIfRequired(
-        ctx.project_id
+        ctx.project
       )
 
       ctx.DocstoreManager.promises.unarchiveProject
@@ -102,7 +97,7 @@ describe('InactiveProjectManager', function () {
       ctx.DocstoreManager.promises.unarchiveProject.rejects()
       await expect(
         ctx.InactiveProjectManager.promises.reactivateProjectIfRequired(
-          ctx.project_id
+          ctx.project
         )
       ).to.be.rejected
 
@@ -118,7 +113,7 @@ describe('InactiveProjectManager', function () {
       ctx.project.active = true
       ctx.DocstoreManager.promises.unarchiveProject.resolves()
       await ctx.InactiveProjectManager.promises.reactivateProjectIfRequired(
-        ctx.project_id
+        ctx.project
       )
       ctx.DocstoreManager.promises.unarchiveProject
         .calledWith(ctx.project_id)

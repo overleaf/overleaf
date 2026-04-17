@@ -13,17 +13,6 @@ describe('LimitationsManager', function () {
       _id: (ctx.projectId = 'project-id'),
       owner_ref: ctx.userId,
     }
-    ctx.ProjectGetter = {
-      promises: {
-        getProject: sinon.stub().callsFake(async (projectId, fields) => {
-          if (projectId === ctx.projectId) {
-            return ctx.project
-          } else {
-            return null
-          }
-        }),
-      },
-    }
     ctx.UserGetter = {
       promises: {
         getUser: sinon.stub().callsFake(async (userId, filter) => {
@@ -48,6 +37,7 @@ describe('LimitationsManager', function () {
       promises: {
         getInvitedEditCollaboratorCount: sinon.stub().resolves(0),
         getMemberIdPrivilegeLevel: sinon.stub(),
+        getProjectOwnerId: sinon.stub().resolves(ctx.project.owner_ref),
       },
     }
 
@@ -56,10 +46,6 @@ describe('LimitationsManager', function () {
         getEditInviteCount: sinon.stub().resolves(0),
       },
     }
-
-    vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
-      default: ctx.ProjectGetter,
-    }))
 
     vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
       default: ctx.UserGetter,

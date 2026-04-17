@@ -13,6 +13,7 @@ import OError from '@overleaf/o-error'
 import TagsHandler from '../Tags/TagsHandler.mjs'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
 import LimitationsManager from '../Subscription/LimitationsManager.mjs'
+import AsyncLocalStorage from '../../infrastructure/AsyncLocalStorage.mjs'
 
 export default {
   promises: {
@@ -212,6 +213,7 @@ async function _determinePrivilegeLevelForPreviousOwner(projectId) {
 }
 
 async function _transferOwnership(projectId, previousOwnerId, newOwnerId) {
+  AsyncLocalStorage.removeItem(`projectAccess:${projectId}`)
   // Remove new owner from collaborators list
   await CollaboratorsHandler.promises.removeUserFromProject(
     projectId,

@@ -4,6 +4,7 @@ import ProjectUploadController from './ProjectUploadController.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'
 import Settings from '@overleaf/settings'
+import AsyncLocalStorage from '../../infrastructure/AsyncLocalStorage.mjs'
 
 const rateLimiters = {
   projectUpload: new RateLimiter('project-upload', {
@@ -47,6 +48,7 @@ export default {
       webRouter.post(
         fileUploadEndpoint,
         fileUploadRateLimit,
+        AsyncLocalStorage.middleware,
         AuthorizationMiddleware.ensureUserCanWriteProjectContent,
         ProjectUploadController.multerMiddleware,
         ProjectUploadController.uploadFile
@@ -56,6 +58,7 @@ export default {
         fileUploadEndpoint,
         fileUploadRateLimit,
         AuthenticationController.requireLogin(),
+        AsyncLocalStorage.middleware,
         AuthorizationMiddleware.ensureUserCanWriteProjectContent,
         ProjectUploadController.multerMiddleware,
         ProjectUploadController.uploadFile

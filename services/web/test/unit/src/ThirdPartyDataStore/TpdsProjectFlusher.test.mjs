@@ -197,7 +197,7 @@ describe('TpdsProjectFlusher', function () {
         beforeEach(async function (ctx) {
           ctx.project.deferredTpdsFlushCounter = counterValue
           await ctx.TpdsProjectFlusher.promises.flushProjectToTpdsIfNeeded(
-            ctx.project._id
+            ctx.project
           )
         })
 
@@ -232,7 +232,7 @@ describe('TpdsProjectFlusher', function () {
             .chain('exec')
             .resolves()
           await ctx.TpdsProjectFlusher.promises.flushProjectToTpdsIfNeeded(
-            ctx.project._id
+            ctx.project
           )
         })
 

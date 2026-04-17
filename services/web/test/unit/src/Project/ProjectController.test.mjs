@@ -112,7 +112,9 @@ describe('ProjectController', function () {
       },
     }
     ctx.InactiveProjectManager = {
-      promises: { reactivateProjectIfRequired: sinon.stub() },
+      promises: {
+        reactivateProjectIfRequired: sinon.stub(),
+      },
     }
     ctx.ProjectUpdateHandler = {
       promises: {
@@ -144,6 +146,15 @@ describe('ProjectController', function () {
     }
     ctx.CollaboratorsGetter = {
       promises: {
+        getProjectAccess: sinon.stub().resolves({
+          getStats() {
+            return {
+              namedEditors: 1,
+              pendingEditors: 2,
+              tokenEditors: 3,
+            }
+          },
+        }),
         userIsTokenMember: sinon.stub().resolves(false),
         isUserInvitedMemberOfProject: sinon.stub().resolves(true),
         userIsReadWriteTokenMember: sinon.stub().resolves(false),
@@ -1018,11 +1029,11 @@ describe('ProjectController', function () {
       })
     })
 
-    it('should reactivateProjectIfRequired', async function (ctx) {
+    it('should call reactivateProjectIfRequired', async function (ctx) {
       await new Promise(resolve => {
         ctx.res.render = (pageName, opts) => {
           ctx.InactiveProjectManager.promises.reactivateProjectIfRequired
-            .calledWith(ctx.project_id)
+            .calledWith(ctx.project)
             .should.equal(true)
           resolve()
         }
@@ -1096,7 +1107,7 @@ describe('ProjectController', function () {
       await new Promise(resolve => {
         ctx.res.render = () => {
           ctx.TpdsProjectFlusher.promises.flushProjectToTpdsIfNeeded.should.have.been.calledWith(
-            ctx.project_id
+            ctx.project
           )
           resolve()
         }

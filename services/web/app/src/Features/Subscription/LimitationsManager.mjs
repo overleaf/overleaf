@@ -2,7 +2,6 @@
 
 import logger from '@overleaf/logger'
 
-import ProjectGetter from '../Project/ProjectGetter.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import SubscriptionLocator from './SubscriptionLocator.mjs'
 import Settings from '@overleaf/settings'
@@ -15,10 +14,9 @@ import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
  * @param {any} projectId
  */
 async function allowedNumberOfCollaboratorsInProject(projectId) {
-  const project = await ProjectGetter.promises.getProject(projectId, {
-    owner_ref: true,
-  })
-  return await allowedNumberOfCollaboratorsForUser(project.owner_ref)
+  const ownerId =
+    await CollaboratorsGetter.promises.getProjectOwnerId(projectId)
+  return await allowedNumberOfCollaboratorsForUser(ownerId)
 }
 
 /**

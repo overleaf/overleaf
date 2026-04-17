@@ -2,7 +2,6 @@ import OError from '@overleaf/o-error'
 import logger from '@overleaf/logger'
 import DocstoreManager from '../Docstore/DocstoreManager.mjs'
 import DocumentUpdaterHandler from '../DocumentUpdater/DocumentUpdaterHandler.mjs'
-import ProjectGetter from '../Project/ProjectGetter.mjs'
 import ProjectUpdateHandler from '../Project/ProjectUpdateHandler.mjs'
 import { Project } from '../../models/Project.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
@@ -33,19 +32,12 @@ function findInactiveProjects(limit, daysOld) {
 }
 
 const InactiveProjectManager = {
-  async reactivateProjectIfRequired(projectId) {
-    let project
-    try {
-      project = await ProjectGetter.promises.getProject(projectId, {
-        active: true,
-      })
-    } catch (err) {
-      OError.tag(err, 'error getting project', {
-        project_id: projectId,
-      })
-      throw err
-    }
-
+  /**
+   * @param {{_id: ObjectId, active: boolean }} project
+   * @return {Promise<void>}
+   */
+  async reactivateProjectIfRequired(project) {
+    const projectId = project._id.toString()
     logger.debug(
       { projectId, active: project.active },
       'seeing if need to reactivate project'

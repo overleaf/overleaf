@@ -12,6 +12,8 @@ import Errors from '../Errors/Errors.js'
 import ProjectEditorHandler from '../Project/ProjectEditorHandler.mjs'
 import Sources from '../Authorization/Sources.mjs'
 import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
+import AsyncLocalStorage from '../../infrastructure/AsyncLocalStorage.mjs'
+import Metrics from '@overleaf/metrics'
 
 const { ObjectId } = mongodb
 
@@ -44,6 +46,12 @@ class ProjectAccess {
   /** @type {PublicAccessLevel} */
   #publicAccessLevel
 
+  /** @type {ObjectId} */
+  #ownerId
+
+  /** @type {Record<string, number>} */
+  #stats
+
   /**
    * @param {{ owner_ref: ObjectId; collaberator_refs: ObjectId[]; readOnly_refs: ObjectId[]; tokenAccessReadAndWrite_refs: ObjectId[]; tokenAccessReadOnly_refs: ObjectId[]; publicAccesLevel: PublicAccessLevel; pendingEditor_refs: ObjectId[]; reviewer_refs: ObjectId[]; pendingReviewer_refs: ObjectId[]; }} project
    */
@@ -59,7 +67,28 @@ class ProjectAccess {
       project.reviewer_refs,
       project.pendingReviewer_refs
     )
+    this.#stats = {
+      reviewers: (project.reviewer_refs || []).length,
+      namedEditors: (project.collaberator_refs || []).length,
+      pendingEditors: (project.pendingEditor_refs || []).length,
+      tokenEditors: (project.tokenAccessReadAndWrite_refs || []).length,
+    }
     this.#publicAccessLevel = project.publicAccesLevel
+    this.#ownerId = project.owner_ref
+  }
+
+  /**
+   * @return {ObjectId}
+   */
+  getOwnerId() {
+    return this.#ownerId
+  }
+
+  /**
+   * @return {Record<string, number>}
+   */
+  getStats() {
+    return this.#stats
   }
 
   /**
@@ -158,6 +187,24 @@ class ProjectAccess {
    * @param {string | ObjectId} userId
    * @return {boolean}
    */
+  isUserReadWriteTokenMember(userId) {
+    if (!userId) return false
+    for (const member of this.#members) {
+      if (
+        member.id === userId.toString() &&
+        member.source === Sources.TOKEN &&
+        member.privilegeLevel === PrivilegeLevels.READ_AND_WRITE
+      ) {
+        return true
+      }
+    }
+    return false
+  }
+
+  /**
+   * @param {string | ObjectId} userId
+   * @return {boolean}
+   */
   isUserInvitedMember(userId) {
     if (!userId) return false
     for (const member of this.#members) {
@@ -213,9 +260,29 @@ class ProjectAccess {
 }
 
 /**
+ * @param {string} projectId
+ * @param {string} path
+ * @return {ProjectAccess|null}
+ * @private
+ */
+function _getCachedProjectAccess(projectId, path) {
+  const store = AsyncLocalStorage.storage.getStore()
+  const key = `projectAccess:${projectId}`
+  if (store && store[key]) {
+    Metrics.inc('project_access_cache', 1, { status: 'hit', path })
+    return store[key]
+  }
+  Metrics.inc('project_access_cache', 1, { status: 'miss', path })
+  return null
+}
+
+/**
  * @param {any} projectId
  */
 async function getProjectAccess(projectId) {
+  let projectAccess = _getCachedProjectAccess(projectId, 'full')
+  if (projectAccess) return projectAccess
+
   const project = await ProjectGetter.promises.getProject(projectId, {
     owner_ref: 1,
     collaberator_refs: 1,
@@ -230,7 +297,25 @@ async function getProjectAccess(projectId) {
   if (!project) {
     throw new Errors.NotFoundError(`no project found with id ${projectId}`)
   }
-  return new ProjectAccess(project)
+  projectAccess = new ProjectAccess(project)
+  const store = AsyncLocalStorage.storage.getStore()
+  const key = `projectAccess:${projectId}`
+  if (store) store[key] = projectAccess
+  return projectAccess
+}
+
+/**
+ * @param {string} projectId
+ * @return {Promise<ObjectId>}
+ */
+async function getProjectOwnerId(projectId) {
+  const projectAccess = _getCachedProjectAccess(projectId, 'project-owner')
+  if (projectAccess) return projectAccess.getOwnerId()
+
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    owner_ref: true,
+  })
+  return project.owner_ref
 }
 
 /**
@@ -451,6 +536,9 @@ async function getAllInvitedMembers(projectId) {
  * @param {any} projectId
  */
 async function userIsTokenMember(userId, projectId) {
+  const projectAccess = _getCachedProjectAccess(projectId, 'token-member')
+  if (projectAccess) return projectAccess.isUserTokenMember(userId)
+
   userId = new ObjectId(userId.toString())
   projectId = new ObjectId(projectId.toString())
   const project = await Project.findOne(
@@ -473,6 +561,9 @@ async function userIsTokenMember(userId, projectId) {
  * @param {any} projectId
  */
 async function userIsReadWriteTokenMember(userId, projectId) {
+  const projectAccess = _getCachedProjectAccess(projectId, 'rw-token-member')
+  if (projectAccess) return projectAccess.isUserReadWriteTokenMember(userId)
+
   userId = new ObjectId(userId.toString())
   projectId = new ObjectId(projectId.toString())
   const project = await Project.findOne(
@@ -645,6 +736,7 @@ export default {
     userIsTokenMember,
     userIsReadWriteTokenMember,
     getAllInvitedMembers,
+    getProjectOwnerId,
   },
   ProjectAccess,
 }
