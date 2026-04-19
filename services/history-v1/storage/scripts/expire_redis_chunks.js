@@ -15,7 +15,7 @@ const optionDefinitions = [
 const options = commandLineArgs(optionDefinitions)
 const DRY_RUN = options['dry-run'] || false
 const POST_REQUEST = options['post-request'] || false
-const HISTORY_V1_URL = `http://${process.env.HISTORY_V1_HOST || 'localhost'}:${process.env.PORT || 3100}`
+const HISTORY_V1_URL = `http://${process.env.V1_HISTORY_HOST || 'localhost'}:${process.env.V1_HISTORY_PORT || 3100}`
 
 logger.initialize('expire-redis-chunks')
 

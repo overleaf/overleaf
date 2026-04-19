@@ -11,7 +11,8 @@ export async function ensureRunning() {
   if (!serverPromise) {
     const { app } = await createServer()
     const startServer = promisify(app.listen.bind(app))
-    serverPromise = startServer(3010, '127.0.0.1')
+    const port = Number(process.env.CHAT_PORT || 3010)
+    serverPromise = startServer(port, '127.0.0.1')
   }
   return serverPromise
 }
