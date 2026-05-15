@@ -50,6 +50,6 @@
     "timekeeper": "0.0.4",
     "typescript": "^5.0.4",
     "uid-safe": "^2.1.5",
-    "vitest": "^4.0.0"
+    "vitest": "4.1.5"
   }
 }

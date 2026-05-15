@@ -46,6 +46,6 @@
     "sinon-chai": "^3.7.0",
     "streamifier": "^0.1.1",
     "typescript": "^5.0.4",
-    "vitest": "^4.0.0"
+    "vitest": "4.1.5"
   }
 }
