@@ -70,6 +70,9 @@ public class WriteLatexPutHook implements PreReceiveHook {
       } catch (OutOfDateException e) {
         Log.error("OutOfDateException on pre receive", e);
         receiveCommand.setResult(Result.REJECTED_NONFASTFORWARD);
+      } catch (WrongBranchException | ForcedPushException e) {
+        Log.warn("User push rejected on pre receive: {}", e.getMessage());
+        handleSnapshotPostException(receivePack, receiveCommand, e);
       } catch (GitUserException e) {
         Log.error("GitUserException on pre receive", e);
         handleSnapshotPostException(receivePack, receiveCommand, e);
