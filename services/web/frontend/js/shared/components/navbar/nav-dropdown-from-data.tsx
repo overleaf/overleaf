@@ -71,6 +71,7 @@ export function NavDropdownMenuItems({
             <NavDropdownLinkItem
               key={index}
               href={child.url}
+              openInNewWindow={child.openInNewWindow}
               onClick={() => {
                 sendProjectListMB('menu-click', {
                   item: child.trackingKey as ExtraSegmentations['menu-click']['item'],

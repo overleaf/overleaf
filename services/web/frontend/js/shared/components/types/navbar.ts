@@ -16,6 +16,7 @@ export interface NavbarDropdownLinkItem extends NavbarDropdownTextItem {
   url: string
   trackingKey: string
   eventSegmentation?: Record<string, any>
+  openInNewWindow?: boolean
 }
 
 export type NavbarDropdownItem =

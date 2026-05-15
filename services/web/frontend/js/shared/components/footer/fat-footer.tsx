@@ -5,6 +5,8 @@ import FatFooterBase from './fat-footer-base'
 type FooterLinkProps = {
   href: string
   label: string
+  target?: string
+  rel?: string
 }
 
 type FooterSectionProps = {
@@ -39,12 +41,24 @@ function FatFooter() {
       title: t('Learn'),
       links: [
         {
-          href: '/learn/latex/Learn_LaTeX_in_30_minutes',
-          label: t('latex_in_thirty_minutes'),
+          href: 'https://learn.overleaf.com/101-get-started-with-latex-in-overleaf',
+          label: t('get_started_with_latex'),
+          target: '_blank',
+          rel: 'noopener noreferrer',
         },
         { href: '/latex/templates', label: t('templates') },
-        { href: '/events/webinars', label: t('webinars') },
-        { href: '/learn/latex/Tutorials', label: t('tutorials') },
+        {
+          href: 'https://learn.overleaf.com/calendar',
+          label: t('webinars'),
+          target: '_blank',
+          rel: 'noopener noreferrer',
+        },
+        {
+          href: 'https://learn.overleaf.com/',
+          label: t('overleaf_learning_center'),
+          target: '_blank',
+          rel: 'noopener noreferrer',
+        },
         {
           href: '/learn/latex/Inserting_Images',
           label: t('how_to_insert_images'),
@@ -121,7 +135,9 @@ function FooterSection({ title, links }: FooterSectionProps) {
       <ul className="list-unstyled">
         {links.map(link => (
           <li key={link.href}>
-            <a href={link.href}>{t(link.label)}</a>
+            <a href={link.href} target={link.target} rel={link.rel}>
+              {t(link.label)}
+            </a>
           </li>
         ))}
       </ul>

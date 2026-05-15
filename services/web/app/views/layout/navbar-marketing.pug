@@ -125,6 +125,8 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(
 													+dropdown-menu-link-item(
 														href=child.url
 														class=child.class
+														target=child.openInNewWindow ? '_blank' : false
+														rel=child.openInNewWindow ? 'noopener noreferrer' : false
 														event-tracking='menu-click'
 														event-tracking-mb='true'
 														event-tracking-trigger='click'
