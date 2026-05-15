@@ -22,7 +22,6 @@ import AuthorizationManager from '../Authorization/AuthorizationManager.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
 import async from 'async'
 import HttpErrorHandler from '../Errors/HttpErrorHandler.mjs'
-import RecurlyClient from './RecurlyClient.mjs'
 import {
   AI_ADD_ON_CODE,
   subscriptionChangeIsAiAssistUpgrade,
@@ -628,18 +627,17 @@ async function previewAddonPurchase(req, res) {
     throw err
   }
 
-  const subscription = subscriptionChange.subscription
-  const addOn = await RecurlyClient.promises.getAddOn(
-    subscription.planCode,
-    addOnCode
-  )
+  const addOn = PlansLocator.findLocalPlanInSettings(addOnCode)
+  if (!addOn) {
+    return HttpErrorHandler.notFound(req, res, `Unknown add-on: ${addOnCode}`)
+  }
 
   /** @type {SubscriptionChangePreview} */
   const changePreview = makeChangePreview(
     {
       type: 'add-on-purchase',
       addOn: {
-        code: addOn.code,
+        code: addOn.planCode,
         name: addOn.name,
       },
     },
@@ -868,8 +866,10 @@ async function previewSubscription(req, res, next) {
   if (!planCode) {
     return HttpErrorHandler.notFound(req, res, 'Missing plan code')
   }
-  // TODO: use PaymentService to fetch plan information
-  const plan = await RecurlyClient.promises.getPlan(planCode)
+  const plan = PlansLocator.findLocalPlanInSettings(planCode)
+  if (!plan) {
+    return HttpErrorHandler.notFound(req, res, `Unknown plan: ${planCode}`)
+  }
   const user = SessionManager.getSessionUser(req.session)
   const userId = user?._id
 
@@ -896,7 +896,7 @@ async function previewSubscription(req, res, next) {
   const changePreview = makeChangePreview(
     {
       type: 'premium-subscription',
-      plan: { code: plan.code, name: plan.name },
+      plan: { code: plan.planCode, name: plan.name },
     },
     subscriptionChange,
     paymentMethod[0]
@@ -1277,7 +1277,7 @@ function makeChangePreview(
       date: subscription.periodEnd.toISOString(),
       plan: {
         name: getPlanNameForDisplay(
-          futureInvoiceChange.nextPlanName,
+          nextPlan?.name ?? futureInvoiceChange.nextPlanName,
           futureInvoiceChange.nextPlanCode
         ),
         amount: futureInvoiceChange.nextPlanPrice,
