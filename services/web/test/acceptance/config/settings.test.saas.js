@@ -33,11 +33,6 @@ const overrides = {
       webhookPass: 'webhook',
     },
 
-    tpdsworker: {
-      // Disable tpdsworker in CI.
-      url: undefined,
-    },
-
     v1: {
       url: `http://127.0.0.1:25000`,
       user: 'overleaf',

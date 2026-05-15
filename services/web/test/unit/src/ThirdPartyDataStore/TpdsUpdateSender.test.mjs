@@ -28,7 +28,7 @@ describe('TpdsUpdateSender', function () {
     }
     ctx.memberIds = [userId, collaberatorRef, readOnlyRef]
     ctx.enqueueUrl = new URL(
-      'http://tpdsworker/enqueue/web_to_tpds_http_requests'
+      `${thirdPartyDataStoreApiUrl}/enqueue/web_to_tpds_http_requests`
     )
 
     ctx.CollaboratorsGetter = {
@@ -101,13 +101,13 @@ describe('TpdsUpdateSender', function () {
   })
 
   describe('enqueue', function () {
-    it('should not call request if there is no tpdsworker url', async function (ctx) {
+    it('should not call request if thirdPartyDataStore is not configured', async function (ctx) {
+      delete ctx.settings.apis.thirdPartyDataStore
       await ctx.TpdsUpdateSender.promises.enqueue(null, null, null)
       ctx.FetchUtils.fetchNothing.should.not.have.been.called
     })
 
-    it('should post the message to the tpdsworker', async function (ctx) {
-      ctx.settings.apis.tpdsworker = { url: 'http://tpdsworker' }
+    it('should post the message to tpds', async function (ctx) {
       const group0 = 'myproject'
       const method0 = 'somemethod0'
       const job0 = 'do something'
@@ -123,10 +123,6 @@ describe('TpdsUpdateSender', function () {
   })
 
   describe('sending updates', function () {
-    beforeEach(function (ctx) {
-      ctx.settings.apis.tpdsworker = { url: 'http://tpdsworker' }
-    })
-
     it('queues a post the file with user and file id and hash', async function (ctx) {
       const fileId = '4545345'
       const hash = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'

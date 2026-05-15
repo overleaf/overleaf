@@ -173,13 +173,12 @@ async function createProject(params) {
 }
 
 async function enqueue(group, method, job) {
-  const tpdsWorkerUrl = _.get(settings, ['apis', 'tpdsworker', 'url'])
-  // silently do nothing if worker url is not in settings
-  if (!tpdsWorkerUrl) {
+  const enqueueBaseUrl = _.get(settings, ['apis', 'thirdPartyDataStore', 'url'])
+  if (!enqueueBaseUrl) {
     return
   }
   try {
-    const url = new URL('/enqueue/web_to_tpds_http_requests', tpdsWorkerUrl)
+    const url = new URL('/enqueue/web_to_tpds_http_requests', enqueueBaseUrl)
     await fetchNothing(url, {
       method: 'POST',
       json: { group, job, method },
@@ -187,7 +186,7 @@ async function enqueue(group, method, job) {
     })
   } catch (err) {
     // log error and continue
-    logger.error({ err, group, job, method }, 'error enqueueing tpdsworker job')
+    logger.error({ err, group, job, method }, 'error enqueueing tpds job')
   }
 }
 
