@@ -99,7 +99,7 @@ app.get('/health_check', (req, res) => {
 
 app.use(RequestLogger.errorHandler)
 
-const port = settings.internal.filestore.port || 3009
+const port = Number(process.env.FILESTORE_PORT || settings.internal.filestore.port || 3009)
 const host = settings.internal.filestore.host || '0.0.0.0'
 
 let server = null

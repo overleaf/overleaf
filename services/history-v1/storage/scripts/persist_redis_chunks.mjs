@@ -31,7 +31,7 @@ const DRY_RUN = options['dry-run'] || false
 const USE_QUEUE = options.queue || false
 const MAX_TIME = options['max-time'] || null
 const MIN_RATE = options['min-rate']
-const HISTORY_V1_URL = `http://${process.env.HISTORY_V1_HOST || 'localhost'}:${process.env.PORT || 3100}`
+const HISTORY_V1_URL = `http://${process.env.V1_HISTORY_HOST || 'localhost'}:${process.env.PORT || 3100}`
 let isShuttingDown = false
 
 logger.initialize('persist-redis-chunks')

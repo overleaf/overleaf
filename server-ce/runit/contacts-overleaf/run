@@ -8,5 +8,6 @@ fi
 
 source /etc/overleaf/env.sh
 export LISTEN_ADDRESS=127.0.0.1
+export CONTACTS_PORT=3036
 
 exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/contacts/app.js >> /var/log/overleaf/contacts.log 2>&1

@@ -8,7 +8,7 @@ https.globalAgent.keepAlive = false
 module.exports = {
   internal: {
     contacts: {
-      port: 3036,
+      port: process.env.CONTACTS_PORT || 3036,
       host: process.env.LISTEN_ADDRESS || '127.0.0.1',
     },
   },

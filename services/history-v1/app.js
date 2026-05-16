@@ -118,7 +118,7 @@ app.setup = async function appSetup() {
 async function startApp() {
   await app.setup()
 
-  const port = parseInt(process.env.PORT, 10) || 3100
+  const port = parseInt(process.env.V1_HISTORY_PORT, 10) || 3100
   app.listen(port, err => {
     if (err) {
       console.error(err)
