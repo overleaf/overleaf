@@ -2,6 +2,7 @@
 set -e
 
 mkdir -p /var/lib/overleaf/data
+chown www-data:www-data /var/lib/overleaf
 chown www-data:www-data /var/lib/overleaf/data
 
 mkdir -p /var/lib/overleaf/data/compiles
