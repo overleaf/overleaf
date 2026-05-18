@@ -330,6 +330,7 @@ module.exports = {
 
   isCodeSpace: process.env.IS_CODE_SPACE === 'true',
   isDevEnv: process.env.NODE_ENV === 'development',
+  isCI: process.env.NODE_ENV === 'test',
 
   lockManager: {
     lockTestInterval: intFromEnv('LOCK_MANAGER_LOCK_TEST_INTERVAL', 50),
