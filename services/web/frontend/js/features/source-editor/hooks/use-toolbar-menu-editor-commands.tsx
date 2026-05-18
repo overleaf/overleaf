@@ -36,6 +36,11 @@ export const useToolbarMenuBarEditorCommands = () => {
     )
   }, [])
 
+  const {
+    hasLinkedProjectFileFeature,
+    hasLinkedProjectOutputFileFeature,
+    hasLinkUrlFeature,
+  } = getMeta('ol-ExposedSettings')
   useCommandProvider(() => {
     if (!editorIsVisible) {
       return
@@ -124,6 +129,20 @@ export const useToolbarMenuBarEditorCommands = () => {
           openFigureModal(FigureModalSource.FILE_TREE)
         },
       },
+    ]
+  }, [view, t, editorIsVisible, openFigureModal, trackedWrite, isTeXFile])
+
+  useCommandProvider(() => {
+    if (!editorIsVisible) {
+      return
+    }
+    if (!isTeXFile || !trackedWrite) {
+      return
+    }
+    if (!hasLinkedProjectFileFeature || !hasLinkedProjectOutputFileFeature) {
+      return
+    }
+    return [
       {
         label: t('from_another_project'),
         id: 'insert-figure-from-another-project',
@@ -131,6 +150,28 @@ export const useToolbarMenuBarEditorCommands = () => {
           openFigureModal(FigureModalSource.OTHER_PROJECT)
         },
       },
+    ]
+  }, [
+    t,
+    editorIsVisible,
+    openFigureModal,
+    trackedWrite,
+    isTeXFile,
+    hasLinkedProjectFileFeature,
+    hasLinkedProjectOutputFileFeature,
+  ])
+
+  useCommandProvider(() => {
+    if (!editorIsVisible) {
+      return
+    }
+    if (!isTeXFile || !trackedWrite) {
+      return
+    }
+    if (!hasLinkUrlFeature) {
+      return
+    }
+    return [
       {
         label: t('from_url'),
         id: 'insert-figure-from-url',
@@ -138,6 +179,25 @@ export const useToolbarMenuBarEditorCommands = () => {
           openFigureModal(FigureModalSource.FROM_URL)
         },
       },
+    ]
+  }, [
+    t,
+    editorIsVisible,
+    openFigureModal,
+    trackedWrite,
+    isTeXFile,
+    hasLinkUrlFeature,
+  ])
+
+  useCommandProvider(() => {
+    if (!editorIsVisible) {
+      return
+    }
+    if (!isTeXFile || !trackedWrite) {
+      return
+    }
+
+    return [
       {
         id: 'insert-table',
         label: t('table'),
@@ -278,16 +338,7 @@ export const useToolbarMenuBarEditorCommands = () => {
         },
       },
     ]
-  }, [
-    view,
-    t,
-    editorIsVisible,
-    openFigureModal,
-    trackedWrite,
-    isTeXFile,
-    canComment,
-    comment,
-  ])
+  }, [view, t, editorIsVisible, trackedWrite, isTeXFile, canComment, comment])
 
   const { toggleSymbolPalette } = useEditorPropertiesContext()
   const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
