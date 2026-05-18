@@ -66,15 +66,15 @@ const LATEX_TO_DOCUMENT_CASES = [
     compressOutput: true,
     pandocArgs: outputId => [
       'pandoc',
-      'main.tex',
+      Path.join('..', 'main.tex'),
       '--output',
-      Path.join(outputId, 'main.md'),
+      'main.md',
       '--from',
       'latex',
       '--to',
       'markdown',
-      '--resource-path=.',
-      `--extract-media=${outputId}`,
+      '--resource-path=..',
+      '--extract-media=.',
     ],
   },
 ]
@@ -409,13 +409,23 @@ describe('ConversionManager', function () {
           )
         })
 
+        it('should run the conversion in the uuid-named subdirectory', function (ctx) {
+          expect(ctx.CommandRunner.promises.run.firstCall.args[7]).toBe(
+            'output-uuid'
+          )
+        })
+
         it('should run pandoc then zip the subdirectory and return the zip path', function (ctx) {
           expect(ctx.CommandRunner.promises.run.callCount).toBe(2)
           expect(ctx.CommandRunner.promises.run.secondCall.args[1]).toEqual([
-            'sh',
-            '-c',
-            'cd output-uuid && zip -r ../output-uuid.zip .',
+            'zip',
+            '-r',
+            Path.join('..', 'output-uuid.zip'),
+            '.',
           ])
+          expect(ctx.CommandRunner.promises.run.secondCall.args[7]).toBe(
+            'output-uuid'
+          )
           expect(ctx.result).toBe(Path.join(ctx.compileDir, 'output-uuid.zip'))
         })
       })

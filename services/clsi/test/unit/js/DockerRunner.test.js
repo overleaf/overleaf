@@ -132,6 +132,7 @@ describe('DockerRunner', () => {
             ctx.timeout,
             ctx.env,
             ctx.compileGroup,
+            null,
             (err, output) => {
               ctx.callback(err, output)
               return resolve()
@@ -177,6 +178,7 @@ describe('DockerRunner', () => {
           ctx.timeout,
           ctx.env,
           ctx.compileGroup,
+          null,
           ctx.callback
         )
       })
@@ -208,6 +210,7 @@ describe('DockerRunner', () => {
           ctx.timeout,
           ctx.env,
           'synctex-output',
+          null,
           ctx.callback
         )
       })
@@ -239,6 +242,7 @@ describe('DockerRunner', () => {
           ctx.timeout,
           ctx.env,
           'synctex',
+          null,
           ctx.callback
         )
       })
@@ -270,6 +274,7 @@ describe('DockerRunner', () => {
           ctx.timeout,
           ctx.env,
           'wordcount',
+          null,
           ctx.callback
         )
       })
@@ -284,6 +289,39 @@ describe('DockerRunner', () => {
 
       it('should call the callback', ctx => {
         ctx.callback.calledWith(null, ctx.output).should.equal(true)
+      })
+    })
+
+    describe('with a cwd', () => {
+      beforeEach(ctx => {
+        ctx.DockerRunner._runAndWaitForContainer = sinon
+          .stub()
+          .callsArgWith(3, null, (ctx.output = { stdout: 'mock-output' }))
+        ctx.DockerRunner.run(
+          ctx.project_id,
+          ctx.command,
+          ctx.directory,
+          ctx.image,
+          ctx.timeout,
+          ctx.env,
+          ctx.compileGroup,
+          'subdir',
+          ctx.callback
+        )
+      })
+
+      it('should pass the cwd through to _getContainerOptions', ctx => {
+        ctx.DockerRunner._getContainerOptions
+          .calledWith(
+            ctx.command_with_dir,
+            ctx.image,
+            ctx.volumes,
+            ctx.timeout,
+            ctx.env,
+            ctx.compileGroup,
+            'subdir'
+          )
+          .should.equal(true)
       })
     })
 
@@ -319,6 +357,7 @@ describe('DockerRunner', () => {
           ctx.timeout,
           ctx.env,
           ctx.compileGroup,
+          null,
           ctx.callback
         )
       })
@@ -351,6 +390,7 @@ describe('DockerRunner', () => {
           ctx.timeout,
           ctx.env,
           ctx.compileGroup,
+          null,
           ctx.callback
         )
       })
@@ -381,6 +421,7 @@ describe('DockerRunner', () => {
           ctx.timeout,
           ctx.env,
           ctx.compileGroup,
+          null,
           ctx.callback
         )
       })
@@ -412,6 +453,7 @@ describe('DockerRunner', () => {
             ctx.timeout,
             ctx.env,
             ctx.compileGroup,
+            null,
             ctx.callback
           )
         })
@@ -431,6 +473,7 @@ describe('DockerRunner', () => {
             ctx.timeout,
             ctx.env,
             ctx.compileGroup,
+            null,
             ctx.callback
           )
         })
@@ -486,6 +529,7 @@ describe('DockerRunner', () => {
           ctx.timeout,
           ctx.env,
           ctx.compileGroup,
+          null,
           ctx.callback
         )
       })
@@ -504,6 +548,48 @@ describe('DockerRunner', () => {
 
       it('should call the callback', ctx => {
         ctx.callback.calledWith(null, ctx.output).should.equal(true)
+      })
+    })
+
+    describe('WorkingDir with cwd', () => {
+      beforeEach(ctx => {
+        ctx.DockerRunner._runAndWaitForContainer = sinon
+          .stub()
+          .callsArgWith(3, null, (ctx.output = { stdout: 'mock-output' }))
+      })
+
+      it('should default WorkingDir to /compile when cwd is null', ctx => {
+        ctx.DockerRunner.run(
+          ctx.project_id,
+          ctx.command,
+          ctx.directory,
+          ctx.image,
+          ctx.timeout,
+          ctx.env,
+          ctx.compileGroup,
+          null,
+          ctx.callback
+        )
+        const options =
+          ctx.DockerRunner._runAndWaitForContainer.lastCall.args[0]
+        expect(options.WorkingDir).to.equal('/compile')
+      })
+
+      it('should join cwd onto /compile when provided', ctx => {
+        ctx.DockerRunner.run(
+          ctx.project_id,
+          ctx.command,
+          ctx.directory,
+          ctx.image,
+          ctx.timeout,
+          ctx.env,
+          ctx.compileGroup,
+          'subdir/nested',
+          ctx.callback
+        )
+        const options =
+          ctx.DockerRunner._runAndWaitForContainer.lastCall.args[0]
+        expect(options.WorkingDir).to.equal('/compile/subdir/nested')
       })
     })
   })

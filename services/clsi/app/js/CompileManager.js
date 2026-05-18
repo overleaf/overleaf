@@ -626,7 +626,8 @@ async function _runSynctex(projectId, userId, command, opts) {
           imageName || defaultImageName,
           timeout,
           {},
-          compileGroup
+          compileGroup,
+          null
         )
         return {
           stdout,
@@ -674,7 +675,8 @@ async function wordcount(projectId, userId, filename, image) {
       image,
       timeout,
       {},
-      compileGroup
+      compileGroup,
+      null
     )
     const results = _parseWordcountFromOutput(stdout)
     logger.debug(

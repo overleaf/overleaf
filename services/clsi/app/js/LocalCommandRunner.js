@@ -13,6 +13,7 @@
  */
 import { spawn } from 'node:child_process'
 import { promisify } from 'node:util'
+import Path from 'node:path'
 import _ from 'lodash'
 import logger from '@overleaf/logger'
 let CommandRunner
@@ -28,14 +29,19 @@ export default CommandRunner = {
     timeout,
     environment,
     compileGroup,
+    cwd,
     callback
   ) {
     let key, value
     callback = _.once(callback)
+    const spawnCwd = cwd ? Path.join(directory, cwd) : directory
     command = Array.from(command).map(arg =>
       arg.toString().replace('$COMPILE_DIR', directory)
     )
-    logger.debug({ projectId, command, directory }, 'running command')
+    logger.debug(
+      { projectId, command, directory, cwd: spawnCwd },
+      'running command'
+    )
     logger.warn('timeouts and sandboxing are not enabled with CommandRunner')
 
     // merge environment settings
@@ -51,7 +57,7 @@ export default CommandRunner = {
 
     // run command as detached process so it has its own process group (which can be killed if needed)
     const proc = spawn(command[0], command.slice(1), {
-      cwd: directory,
+      cwd: spawnCwd,
       env,
       stdio: ['pipe', 'pipe', 'ignore'],
       detached: true,
