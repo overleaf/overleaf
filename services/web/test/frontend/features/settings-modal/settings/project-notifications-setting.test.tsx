@@ -20,6 +20,7 @@ const allNotificationsOn = {
   trackedChangesOnOwnProject: true,
   trackedChangesOnInvitedProject: true,
   trackChangesAcceptedOnAuthoredChange: true,
+  trackChangesRejectedOnAuthoredChange: true,
 }
 
 const repliesOnlyPreferences = {
@@ -34,6 +35,7 @@ const repliesOnlyPreferences = {
   trackedChangesOnOwnProject: false,
   trackedChangesOnInvitedProject: false,
   trackChangesAcceptedOnAuthoredChange: true,
+  trackChangesRejectedOnAuthoredChange: true,
 }
 
 const globallyMutedPreferences = {
@@ -49,6 +51,7 @@ const globallyMutedPreferences = {
   commentReopenedOnAuthoredThread: false,
   commentReopenedOnParticipatingThread: false,
   trackChangesAcceptedOnAuthoredChange: false,
+  trackChangesRejectedOnAuthoredChange: false,
 }
 
 const allNotificationsOff = {
@@ -63,6 +66,7 @@ const allNotificationsOff = {
   trackedChangesOnOwnProject: false,
   trackedChangesOnInvitedProject: false,
   trackChangesAcceptedOnAuthoredChange: false,
+  trackChangesRejectedOnAuthoredChange: false,
 }
 
 const defaultPreferences = {

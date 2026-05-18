@@ -33,6 +33,7 @@ function levelToPreferences(
         trackedChangesOnOwnProject: true,
         trackedChangesOnInvitedProject: true,
         trackChangesAcceptedOnAuthoredChange: true,
+        trackChangesRejectedOnAuthoredChange: true,
       }
     case 'replies':
       return {
@@ -47,6 +48,7 @@ function levelToPreferences(
         trackedChangesOnOwnProject: false,
         trackedChangesOnInvitedProject: false,
         trackChangesAcceptedOnAuthoredChange: true,
+        trackChangesRejectedOnAuthoredChange: true,
       }
     case 'off':
       return {
@@ -61,6 +63,7 @@ function levelToPreferences(
         trackedChangesOnOwnProject: false,
         trackedChangesOnInvitedProject: false,
         trackChangesAcceptedOnAuthoredChange: false,
+        trackChangesRejectedOnAuthoredChange: false,
       }
   }
 }
@@ -91,6 +94,7 @@ function preferencesToLevel(
     preferences.repliesOnAuthoredThread ||
     preferences.repliesOnParticipatingThread ||
     preferences.trackChangesAcceptedOnAuthoredChange ||
+    preferences.trackChangesRejectedOnAuthoredChange ||
     preferences.commentResolvedOnAuthoredThread ||
     preferences.commentResolvedOnParticipatingThread ||
     preferences.commentReopenedOnAuthoredThread ||
