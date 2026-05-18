@@ -85,6 +85,7 @@ describe('ProjectEntityUpdateHandler', function () {
         flushDocToMongo: sinon.stub().resolves(),
         flushProjectToMongo: sinon.stub().resolves(),
         updateProjectStructure: sinon.stub().resolves(),
+        getDocument: sinon.stub(),
         setDocument: sinon.stub(),
         resyncProjectHistory: sinon.stub().resolves(),
         deleteDoc: sinon.stub().resolves(),
@@ -2870,7 +2871,7 @@ describe('ProjectEntityUpdateHandler', function () {
         })
         .resolves({
           element: ctx.doc,
-          path: { fileSystem: ctx.path },
+          path: { fileSystem: ctx.docPath },
           folder: ctx.folder,
         })
       ctx.ProjectLocator.promises.findElement
@@ -2881,12 +2882,12 @@ describe('ProjectEntityUpdateHandler', function () {
         })
         .resolves({
           element: ctx.file,
-          path: ctx.docPath,
+          path: { fileSystem: ctx.docPath },
           folder: ctx.folder,
         })
-      ctx.DocstoreManager.promises.getDoc
-        .withArgs(ctx.project._id, ctx.doc._id)
-        .resolves({ lines: ctx.docLines, rev: ctx.rev })
+      ctx.DocumentUpdaterHandler.promises.getDocument
+        .withArgs(ctx.project._id, ctx.doc._id, -1)
+        .resolves({ lines: ctx.docLines })
       ctx.FileWriter.promises.writeLinesToDisk.resolves(ctx.tmpFilePath)
       ctx.FileStoreHandler.promises.uploadFileFromDisk.resolves({
         fileRef: ctx.file,
@@ -2918,7 +2919,7 @@ describe('ProjectEntityUpdateHandler', function () {
           ctx.FileStoreHandler.promises.uploadFileFromDisk
         ).to.have.been.calledWith(
           ctx.project._id,
-          { name: ctx.doc.name, rev: ctx.rev + 1 },
+          { name: ctx.doc.name },
           ctx.tmpFilePath
         )
       })
@@ -2946,11 +2947,11 @@ describe('ProjectEntityUpdateHandler', function () {
           ctx.project.overleaf.history.id,
           userId,
           {
-            oldDocs: [{ doc: ctx.doc, path: ctx.path }],
+            oldDocs: [{ doc: ctx.doc, path: ctx.docPath }],
             newFiles: [
               {
                 file: ctx.file,
-                path: ctx.path,
+                path: ctx.docPath,
                 createdBlob: true,
               },
             ],
@@ -2984,12 +2985,10 @@ describe('ProjectEntityUpdateHandler', function () {
     describe('when the doc has ranges', function () {
       it('should throw a DocHasRangesError', async function (ctx) {
         ctx.ranges = { comments: [{ id: 123 }] }
-        ctx.DocstoreManager.promises.getDoc
-          .withArgs(ctx.project._id, ctx.doc._id)
+        ctx.DocumentUpdaterHandler.promises.getDocument
+          .withArgs(ctx.project._id, ctx.doc._id, -1)
           .resolves({
             lines: ctx.docLines,
-            rev: 'rev',
-            version: 'version',
             ranges: ctx.ranges,
           })
         let error

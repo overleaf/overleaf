@@ -5,7 +5,7 @@ import Settings from '@overleaf/settings'
 import Path from 'node:path'
 import fs from 'node:fs'
 import { Doc } from '../../models/Doc.mjs'
-import DocstoreManager from '../Docstore/DocstoreManager.mjs'
+import DocstoreManager from '../../Features/Docstore/DocstoreManager.mjs'
 import DocumentUpdaterHandler from '../../Features/DocumentUpdater/DocumentUpdaterHandler.mjs'
 import Errors from '../Errors/Errors.js'
 import FileStoreHandler from '../FileStore/FileStoreHandler.mjs'
@@ -1050,28 +1050,32 @@ const resyncProjectHistory = wrapWithLock(
   LockManager.withTimeout(6 * 60) // use an extended lock for the resync operations
 )
 
-const convertDocToFile = wrapWithLock({
-  async beforeLock(projectId, docId, userId, source) {
-    await DocumentUpdaterHandler.promises.flushDocToMongo(projectId, docId)
-    const { element: doc, path } = await ProjectLocator.promises.findElement({
-      project_id: projectId,
-      element_id: docId,
-      type: 'doc',
-    })
-    const docPath = path.fileSystem
-    const { lines, rev, ranges } = await DocstoreManager.promises.getDoc(
+const convertDocToFile = wrapWithLock(
+  async (projectId, docId, userId, source) => {
+    const { lines, ranges } = await DocumentUpdaterHandler.promises.getDocument(
       projectId,
-      docId
+      docId,
+      -1
     )
     if (!_.isEmpty(ranges)) {
       throw new Errors.DocHasRangesError({})
     }
-    await DocumentUpdaterHandler.promises.deleteDoc(projectId, docId, false)
+
+    const {
+      folder,
+      element: doc,
+      path: { fileSystem: path },
+    } = await ProjectLocator.promises.findElement({
+      project_id: projectId,
+      element_id: docId,
+      type: 'doc',
+    })
+
     const fsPath = await FileWriter.promises.writeLinesToDisk(projectId, lines)
     const { fileRef, createdBlob } =
       await FileStoreHandler.promises.uploadFileFromDisk(
         projectId,
-        { name: doc.name, rev: rev + 1 },
+        { name: doc.name },
         fsPath
       )
     try {
@@ -1079,25 +1083,7 @@ const convertDocToFile = wrapWithLock({
     } catch (err) {
       logger.warn({ err, path: fsPath }, 'failed to clean up temporary file')
     }
-    return {
-      projectId,
-      doc,
-      path: docPath,
-      fileRef,
-      userId,
-      source,
-      createdBlob,
-    }
-  },
-  async withLock({
-    projectId,
-    doc,
-    path,
-    fileRef,
-    userId,
-    source,
-    createdBlob,
-  }) {
+
     const project =
       await ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile(
         projectId,
@@ -1117,11 +1103,7 @@ const convertDocToFile = wrapWithLock({
       },
       source
     )
-    const { folder } = await ProjectLocator.promises.findElement({
-      project_id: projectId,
-      element_id: fileRef._id,
-      type: 'file',
-    })
+
     EditorRealTimeController.emitToRoom(
       projectId,
       'removeEntity',
@@ -1137,9 +1119,28 @@ const convertDocToFile = wrapWithLock({
       null,
       userId
     )
+
+    try {
+      // Mark doc as deleted in docstore
+      await DocstoreManager.promises.deleteDoc(
+        projectId,
+        docId,
+        Path.basename(path),
+        new Date()
+      )
+    } catch (err) {
+      logger.warn(
+        { err, projectId, docId, path },
+        'failed to mark converted doc as deleted in docstore, continuing with document-updater cleanup'
+      )
+    } finally {
+      // Hard delete document in redis now that it has been successfully converted to a file
+      await DocumentUpdaterHandler.promises.deleteDoc(projectId, docId, true)
+    }
+
     return fileRef
-  },
-})
+  }
+)
 
 async function setMainBibliographyDoc(projectId, newBibliographyDocId) {
   logger.debug(
