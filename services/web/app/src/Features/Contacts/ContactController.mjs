@@ -14,12 +14,15 @@ function _formatContact(contact) {
   }
 }
 
+const MAX_CONTACTS = 50
+
 async function getContacts(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
 
-  const contactIds = await ContactManager.promises.getContactIds(userId, {
-    limit: 50,
-  })
+  const contactIds = await ContactManager.promises.getContactIds(
+    userId,
+    MAX_CONTACTS
+  )
 
   let contacts = await UserGetter.promises.getUsers(contactIds, {
     email: 1,

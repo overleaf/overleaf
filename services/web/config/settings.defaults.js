@@ -264,9 +264,6 @@ module.exports = {
     realTime: {
       url: `http://${process.env.REALTIME_HOST || '127.0.0.1'}:3026`,
     },
-    contacts: {
-      url: `http://${process.env.CONTACTS_HOST || '127.0.0.1'}:3036`,
-    },
     notifications: {
       url: `http://${process.env.NOTIFICATIONS_HOST || '127.0.0.1'}:3042`,
     },

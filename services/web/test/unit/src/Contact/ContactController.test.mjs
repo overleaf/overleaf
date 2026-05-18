@@ -83,7 +83,7 @@ describe('ContactController', function () {
       ctx.res.callback = () => {
         expect(
           ctx.ContactManager.promises.getContactIds
-        ).to.have.been.calledWith(ctx.user_id, { limit: 50 })
+        ).to.have.been.calledWith(ctx.user_id, 50)
       }
       ctx.ContactController.getContacts(ctx.req, ctx.res)
     })

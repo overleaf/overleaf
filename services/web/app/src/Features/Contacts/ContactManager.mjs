@@ -1,44 +1,44 @@
 import { callbackify } from 'node:util'
-import OError from '@overleaf/o-error'
-import { fetchJson } from '@overleaf/fetch-utils'
-import settings from '@overleaf/settings'
+import { db, ObjectId } from '../../infrastructure/mongodb.mjs'
 
-async function getContactIds(userId, options) {
-  options = options ?? { limit: 50 }
+async function touchContact(userId, contactId) {
+  await db.contacts.updateOne(
+    { user_id: new ObjectId(userId.toString()) },
+    {
+      $inc: { [`contacts.${contactId}.n`]: 1 },
+      $set: { [`contacts.${contactId}.ts`]: new Date() },
+    },
+    { upsert: true }
+  )
+}
 
-  const url = new URL(`${settings.apis.contacts.url}/user/${userId}/contacts`)
+async function getContactIds(userId, limit) {
+  const user = await db.contacts.findOne({
+    user_id: new ObjectId(userId.toString()),
+  })
 
-  for (const [key, val] of Object.entries(options)) {
-    url.searchParams.set(key, val)
-  }
-
-  let body
-  try {
-    body = await fetchJson(url)
-  } catch (err) {
-    throw OError.tag(err, 'failed request to contacts API', { userId })
-  }
-
-  return body?.contact_ids || []
+  return buildContactIds(user?.contacts, limit)
 }
 
 async function addContact(userId, contactId) {
-  const url = new URL(`${settings.apis.contacts.url}/user/${userId}/contacts`)
+  await Promise.all([
+    touchContact(userId, contactId),
+    touchContact(contactId, userId),
+  ])
+}
 
-  let body
-  try {
-    body = await fetchJson(url, {
-      method: 'POST',
-      json: { contact_id: contactId },
-    })
-  } catch (err) {
-    throw OError.tag(err, 'failed request to contacts API', {
-      userId,
-      contactId,
-    })
-  }
+// sort by decreasing count, decreasing timestamp.
+// i.e. highest count, most recent first.
+function sortContacts(a, b) {
+  return a.n === b.n ? b.ts - a.ts : b.n - a.n
+}
 
-  return body?.contact_ids || []
+function buildContactIds(contacts, limit) {
+  return Object.entries(contacts || {})
+    .map(([id, { n, ts }]) => ({ id, n, ts }))
+    .sort(sortContacts)
+    .slice(0, limit)
+    .map(contact => contact.id)
 }
 
 export default {
