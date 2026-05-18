@@ -53,7 +53,7 @@ function _extractIds(keyList) {
 }
 
 async function flushAllProjects(options) {
-  logger.info({ options }, 'flushing all projects')
+  logger.debug({ options }, 'listing all projects with docs')
   const projectKeys = await _getKeys(
     docUpdaterKeys.docsInProject({ project_id: '*' }),
     options.limit
@@ -62,13 +62,21 @@ async function flushAllProjects(options) {
   if (options.dryRun) {
     return projectIds
   }
+  const total = projectIds.length
+  logger.info({ total, options }, 'flushing all projects')
+  let flushed = 0
   const results = await promiseMapSettledWithLimit(
     options.concurrency,
     projectIds,
-    projectId =>
-      ProjectManager.promises.flushAndDeleteProjectWithLocks(projectId, {
+    async projectId => {
+      await ProjectManager.promises.flushAndDeleteProjectWithLocks(projectId, {
         background: true,
       })
+      flushed++
+      if (options.logProgress && flushed % options.logProgress === 0) {
+        logger.info({ flushed, total }, 'Flush all projects progress')
+      }
+    }
   )
 
   const success = []
