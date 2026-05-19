@@ -7477,7 +7477,7 @@ __metadata:
     mock-fs: "npm:^5.1.2"
     moment: "npm:^2.29.4"
     mongodb-legacy: "npm:6.1.3"
-    mongoose: "npm:8.9.5"
+    mongoose: "npm:8.22.1"
     multer: "npm:2.1.1"
     nocache: "npm:^2.1.0"
     nock: "npm:^13.5.6"
@@ -24810,7 +24810,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mongodb@npm:6.12.0, mongodb@npm:~6.12.0":
+"mongodb@npm:6.12.0":
   version: 6.12.0
   resolution: "mongodb@npm:6.12.0"
   dependencies:
@@ -24878,18 +24878,52 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mongoose@npm:8.9.5":
-  version: 8.9.5
-  resolution: "mongoose@npm:8.9.5"
+"mongodb@npm:~6.20.0":
+  version: 6.20.0
+  resolution: "mongodb@npm:6.20.0"
   dependencies:
-    bson: "npm:^6.10.1"
+    "@mongodb-js/saslprep": "npm:^1.3.0"
+    bson: "npm:^6.10.4"
+    mongodb-connection-string-url: "npm:^3.0.2"
+  peerDependencies:
+    "@aws-sdk/credential-providers": ^3.188.0
+    "@mongodb-js/zstd": ^1.1.0 || ^2.0.0
+    gcp-metadata: ^5.2.0
+    kerberos: ^2.0.1
+    mongodb-client-encryption: ">=6.0.0 <7"
+    snappy: ^7.3.2
+    socks: ^2.7.1
+  peerDependenciesMeta:
+    "@aws-sdk/credential-providers":
+      optional: true
+    "@mongodb-js/zstd":
+      optional: true
+    gcp-metadata:
+      optional: true
+    kerberos:
+      optional: true
+    mongodb-client-encryption:
+      optional: true
+    snappy:
+      optional: true
+    socks:
+      optional: true
+  checksum: 10c0/a42d5a04cd2dc195c80293cdc2deb8efd1887559f3a37ffa42bade0d7709a980b6655bf38dd3e774dd68ad063a2c0c577fca9d5bcae1cafa2582083cf39e1e6c
+  languageName: node
+  linkType: hard
+
+"mongoose@npm:8.22.1":
+  version: 8.22.1
+  resolution: "mongoose@npm:8.22.1"
+  dependencies:
+    bson: "npm:^6.10.4"
     kareem: "npm:2.6.3"
-    mongodb: "npm:~6.12.0"
+    mongodb: "npm:~6.20.0"
     mpath: "npm:0.9.0"
     mquery: "npm:5.0.0"
     ms: "npm:2.1.3"
     sift: "npm:17.1.3"
-  checksum: 10c0/9d4741fdd8a047ca56a6b375f54cdb6e5f7b00baddf7675369dddd28e89abcb644fd15c65794d8321adc39a8baa53a987a02c4aac619fea712660003de135a88
+  checksum: 10c0/fd8ca6cc3dd2bec78cc1b2e446b93f8bfd583fa9bb12f32abf57849a4a44286d59972c53b3e45bb3ef46504b39982a783c38e2329bb32a25a221a705a167504f
   languageName: node
   linkType: hard
 
