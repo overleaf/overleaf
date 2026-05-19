@@ -1,5 +1,6 @@
 import { useMemo, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
+import classNames from 'classnames'
 import OLButton from '@/shared/components/ol/ol-button'
 import OLButtonToolbar from '@/shared/components/ol/ol-button-toolbar'
 import MaterialIcon from '@/shared/components/material-icon'
@@ -33,7 +34,14 @@ export default function PythonOutputPane() {
     <div className="ide-redesign-python-output-pane">
       <OLButtonToolbar className="ide-redesign-python-output-pane-toolbar">
         <div className="ide-redesign-python-output-pane-toolbar-left">
-          <div className="ide-redesign-python-output-pane-run-button-wrapper">
+          <div
+            className={classNames(
+              'ide-redesign-python-output-pane-run-button-wrapper',
+              {
+                'compile-button-group-running': status === 'running',
+              }
+            )}
+          >
             <OLButton
               onClick={() => {
                 if (status === 'running') {

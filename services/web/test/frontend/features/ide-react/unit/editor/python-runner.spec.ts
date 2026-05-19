@@ -203,6 +203,137 @@ describe('PythonRunner', function () {
     })
   })
 
+  describe('files-saved toast', function () {
+    let toastEvents: CustomEvent[]
+    let toastListener: (event: Event) => void
+
+    beforeEach(function () {
+      toastEvents = []
+      toastListener = event => {
+        toastEvents.push(event as CustomEvent)
+      }
+      window.addEventListener('ide:show-toast', toastListener)
+    })
+
+    afterEach(function () {
+      window.removeEventListener('ide:show-toast', toastListener)
+    })
+
+    it('dispatches a files-saved toast with successfully uploaded paths', async function () {
+      const runner = createRunner()
+      const worker = initAndLoad(runner)
+
+      await runner.run()
+      const runMsg = worker.postedMessages.find(m => m.type === 'run-code')
+      worker.emitMessage({
+        type: 'run-code-result',
+        fileId: FILE_ID,
+        executionId: runMsg.executionId,
+        success: true,
+        outputs: ['/project/foo.txt', '/project/bar.csv'],
+        outputFiles: [],
+        imports: [],
+        failedUploads: [],
+      })
+
+      await waitForState(runner, s => s.status === 'finished')
+
+      expect(toastEvents).to.have.length(1)
+      expect(toastEvents[0].detail).to.deep.equal({
+        key: 'python:files-saved',
+        paths: ['foo.txt', 'bar.csv'],
+      })
+    })
+
+    it('excludes failed uploads from the toast', async function () {
+      const fileUploader = sinon.stub().resolves([
+        { status: 'success', name: 'foo.txt', relativePath: 'foo.txt' },
+        {
+          status: 'error',
+          name: 'bar.csv',
+          relativePath: 'bar.csv',
+          error: 'boom',
+        },
+      ])
+      const runner = createRunner({ fileUploader })
+      const worker = initAndLoad(runner)
+
+      await runner.run()
+      const runMsg = worker.postedMessages.find(m => m.type === 'run-code')
+      worker.emitMessage({
+        type: 'run-code-result',
+        fileId: FILE_ID,
+        executionId: runMsg.executionId,
+        success: true,
+        outputs: ['/project/foo.txt', '/project/bar.csv'],
+        outputFiles: [
+          { relativePath: 'foo.txt', content: new Uint8Array() },
+          { relativePath: 'bar.csv', content: new Uint8Array() },
+        ],
+        imports: [],
+      })
+
+      await waitForState(runner, s => s.status === 'finished')
+
+      expect(toastEvents).to.have.length(1)
+      expect(toastEvents[0].detail).to.deep.equal({
+        key: 'python:files-saved',
+        paths: ['foo.txt'],
+      })
+    })
+
+    it('does not dispatch a toast when no outputs were written', async function () {
+      const runner = createRunner()
+      const worker = initAndLoad(runner)
+
+      await runner.run()
+      const runMsg = worker.postedMessages.find(m => m.type === 'run-code')
+      worker.emitMessage({
+        type: 'run-code-result',
+        fileId: FILE_ID,
+        executionId: runMsg.executionId,
+        success: true,
+        outputs: [],
+        outputFiles: [],
+        imports: [],
+        failedUploads: [],
+      })
+
+      await waitForState(runner, s => s.status === 'finished')
+
+      expect(toastEvents).to.have.length(0)
+    })
+
+    it('does not dispatch a toast when every output failed to upload', async function () {
+      const fileUploader = sinon.stub().resolves([
+        {
+          status: 'error',
+          name: 'foo.txt',
+          relativePath: 'foo.txt',
+          error: 'boom',
+        },
+      ])
+      const runner = createRunner({ fileUploader })
+      const worker = initAndLoad(runner)
+
+      await runner.run()
+      const runMsg = worker.postedMessages.find(m => m.type === 'run-code')
+      worker.emitMessage({
+        type: 'run-code-result',
+        fileId: FILE_ID,
+        executionId: runMsg.executionId,
+        success: true,
+        outputs: ['/project/foo.txt'],
+        outputFiles: [{ relativePath: 'foo.txt', content: new Uint8Array() }],
+        imports: [],
+      })
+
+      await waitForState(runner, s => s.status === 'finished')
+
+      expect(toastEvents).to.have.length(0)
+    })
+  })
+
   describe('output', function () {
     it('accumulates output lines for the matching file', async function () {
       const runner = createRunner()

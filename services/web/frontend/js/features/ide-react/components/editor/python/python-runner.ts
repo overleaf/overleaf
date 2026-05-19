@@ -6,6 +6,7 @@ import { v4 as uuid } from 'uuid'
 import { debugConsole } from '@/utils/debugging'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { PyodideWorkerClient } from './pyodide-worker-client'
+import { showPythonFilesSavedToast } from './python-output-toasts'
 import type { OutputStream } from './pyodide-worker-messages'
 import type {
   BatchUploadItem,
@@ -15,6 +16,11 @@ import type {
 export type FileUploader = (items: BatchUploadItem[]) => Promise<UploadResult[]>
 
 const MAX_OUTPUT_LINES = 100
+const PROJECT_FS_PREFIX = '/project/'
+
+function stripProjectFsPrefix(p: string): string {
+  return p.startsWith(PROJECT_FS_PREFIX) ? p.slice(PROJECT_FS_PREFIX.length) : p
+}
 
 export type ExecutionStatus =
   | 'loading'
@@ -144,6 +150,17 @@ export class PythonRunner {
               filesWrittenCount: event.outputs.length,
               filesWrittenExtensions: collectExtensions(event.outputs),
             })
+
+            // event.outputs are full worker paths (/project/foo.txt) while
+            // event.failedUploads are relativePaths (foo.txt); strip the
+            // prefix before comparing.
+            const failed = new Set(event.failedUploads)
+            const uploadedPaths = event.outputs
+              .map(stripProjectFsPrefix)
+              .filter(p => !failed.has(p))
+            if (uploadedPaths.length > 0) {
+              showPythonFilesSavedToast(uploadedPaths)
+            }
 
             this.updateState({ status: 'finished' })
           }

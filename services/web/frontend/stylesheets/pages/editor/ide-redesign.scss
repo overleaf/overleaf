@@ -90,6 +90,10 @@
   border-radius: var(--ds-border-radius-300);
   margin-left: var(--spacing-02);
 
+  &.compile-button-group-running {
+    background-color: var(--bg-danger-01);
+  }
+
   .btn-primary:hover {
     z-index: auto;
   }
