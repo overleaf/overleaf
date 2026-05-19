@@ -27,6 +27,7 @@ function matchLocalAndDomain(emailHint: string) {
 export type DomainInfo = {
   hostname: string
   confirmed?: boolean
+  capturedByGroup?: boolean
   university: {
     id: number
     name: string

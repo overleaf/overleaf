@@ -22,6 +22,17 @@ import { ConfirmEmailForm } from '@/features/settings/components/emails/confirm-
 import RecaptchaConditions from '@/shared/components/recaptcha-conditions'
 import SsoLinkingInfoGroup from './add-email/sso-linking-info-group'
 import Notification from '@/shared/components/notification'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
+
+function isDomainCapturedByGroup(
+  domainInfo: DomainInfo,
+  domainCapturedByGroupRolloutFlagEnabled: boolean
+): boolean {
+  return domainCapturedByGroupRolloutFlagEnabled
+    ? (domainInfo.capturedByGroup && domainInfo.group?.domainCaptureEnabled) ||
+        false
+    : domainInfo.group?.domainCaptureEnabled || false
+}
 
 function AddEmail() {
   const { t } = useTranslation()
@@ -48,6 +59,10 @@ function AddEmail() {
 
   const emailAddressLimit = getMeta('ol-emailAddressLimit') || 10
   const { ref: recaptchaRef, getReCaptchaToken } = useRecaptcha()
+
+  const domainCapturedByGroupRolloutFlagEnabled = useFeatureFlag(
+    'domain-captured-by-group'
+  )
 
   useEffect(() => {
     setUserEmailsContextLoading(isLoading)
@@ -196,8 +211,15 @@ function AddEmail() {
     )
   }
 
+  const isDomainCaptured = newEmailMatchedDomain
+    ? isDomainCapturedByGroup(
+        newEmailMatchedDomain,
+        domainCapturedByGroupRolloutFlagEnabled
+      )
+    : false
   const isSsoAvailableForDomain =
-    newEmailMatchedDomain && ssoAvailableForDomain(newEmailMatchedDomain)
+    newEmailMatchedDomain &&
+    ssoAvailableForDomain(newEmailMatchedDomain, isDomainCaptured)
 
   return (
     <form>
@@ -243,6 +265,7 @@ function AddEmail() {
                 <AddEmailViaSSO
                   email={newEmail}
                   domainInfo={newEmailMatchedDomain}
+                  isDomainCaptured={isDomainCaptured}
                   userInstitutions={state.data.linkedInstitutionIds}
                 />
               </div>
@@ -259,15 +282,14 @@ function AddEmailViaSSO({
   email,
   domainInfo,
   userInstitutions,
+  isDomainCaptured,
 }: {
   email: string
   domainInfo: DomainInfo
   userInstitutions: string[]
+  isDomainCaptured: boolean
 }) {
-  if (
-    domainInfo.group?.domainCaptureEnabled &&
-    domainInfo.group?.managedUsersEnabled
-  ) {
+  if (isDomainCaptured && domainInfo.group?.managedUsersEnabled) {
     return (
       <Notification
         type="error"
@@ -298,10 +320,7 @@ function AddEmailViaSSO({
       )
     }
     return <SsoLinkingInfo email={email} domainInfo={domainInfo} />
-  } else if (
-    domainInfo.group?.domainCaptureEnabled &&
-    domainInfo.group?.ssoConfig?.enabled
-  ) {
+  } else if (isDomainCaptured && domainInfo.group?.ssoConfig?.enabled) {
     return <SsoLinkingInfoGroup domainInfo={domainInfo} />
   }
 }
