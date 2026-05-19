@@ -13,8 +13,9 @@ import {
   EmptyZipFileError,
   ZipContentsTooLargeError,
 } from './ArchiveErrors.mjs'
+import FileTypeManager from './FileTypeManager.mjs'
 
-const ONE_MEG = 1024 * 1024
+const MAX_UNCOMPRESSED_BYTES = 1024 * 1024 * 300 // 300MB
 
 /**
  * Check if a zip entry's file path is safe and return the destination path.
@@ -69,34 +70,55 @@ function _isZipTooLarge(source) {
         return done(new InvalidZipFileError().withCause(err))
       }
 
+      // Initial rejection of pathological zips without enumerating the central directory.
+      // The per-entry check below applies the real limit after filtering out ignored files.
       if (
-        Settings.maxEntitiesPerProject != null &&
-        zipfile.entryCount > Settings.maxEntitiesPerProject
+        Number.isFinite(Settings.maxEntitiesPerProject) &&
+        zipfile.entryCount > Settings.maxEntitiesPerProject * 10
       ) {
         zipfile.close()
-        return done(null, true) // too many files in zip file
+        return done(null, true)
       }
 
       let totalSizeInBytes = null
+      let projectEntryCount = 0
       zipfile.on('error', err => done(err))
 
       // read all the entries
       zipfile.readEntry()
       zipfile.on('entry', entry => {
-        totalSizeInBytes += entry.uncompressedSize
+        if (!FileTypeManager.shouldIgnore(entry.fileName)) {
+          totalSizeInBytes += entry.uncompressedSize
+
+          if (totalSizeInBytes > MAX_UNCOMPRESSED_BYTES) {
+            zipfile.close()
+            return done(null, true) // total uncompressed size too large
+          }
+
+          projectEntryCount++
+
+          if (
+            Number.isFinite(Settings.maxEntitiesPerProject) &&
+            projectEntryCount > Settings.maxEntitiesPerProject
+          ) {
+            zipfile.close()
+            return done(null, true) // too many files in zip file
+          }
+        }
+
         zipfile.readEntry()
       })
 
       // no more entries to read
       zipfile.on('end', () => {
-        if (totalSizeInBytes == null || isNaN(totalSizeInBytes)) {
+        if (!Number.isFinite(totalSizeInBytes)) {
           logger.warn(
             { source, totalSizeInBytes },
             'error getting bytes of zip'
           )
           return done(new InvalidZipFileError({ info: { totalSizeInBytes } }))
         }
-        done(null, totalSizeInBytes > ONE_MEG * 300)
+        done(null, false)
       })
     })
   })
@@ -121,6 +143,10 @@ function _extractZipFiles(source, destination) {
 
       let entryFileCount = 0
       zipfile.on('entry', entry => {
+        if (FileTypeManager.shouldIgnore(entry.fileName)) {
+          return zipfile.readEntry()
+        }
+
         let destFile
         try {
           destFile = _checkFilePath(entry, destination)

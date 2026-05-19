@@ -52,6 +52,14 @@ describe('ArchiveManager', function () {
       () => ArchiveErrors
     )
 
+    ctx.FileTypeManager = {
+      shouldIgnore: sinon.stub().returns(false),
+    }
+    vi.doMock(
+      '../../../../app/src/Features/Uploads/FileTypeManager.mjs',
+      () => ({ default: ctx.FileTypeManager })
+    )
+
     ctx.ArchiveManager = (await import(modulePath)).default
   })
 
@@ -348,6 +356,43 @@ describe('ArchiveManager', function () {
       })
     })
 
+    describe('with an entry that FileTypeManager wants ignored', function () {
+      beforeEach(async function (ctx) {
+        ctx.FileTypeManager.shouldIgnore
+          .withArgs('__MACOSX/project/._file.tex')
+          .returns(true)
+
+        ctx.readStream = new PassThrough()
+        ctx.zipfile.openReadStream = sinon
+          .stub()
+          .callsArgWith(1, null, ctx.readStream)
+        ctx.writeStream = new PassThrough()
+        ctx.fs.createWriteStream = sinon.stub().returns(ctx.writeStream)
+
+        const promise = ctx.ArchiveManager.promises.extractZipArchive(
+          ctx.source,
+          ctx.destination
+        )
+        await Promise.resolve()
+
+        ctx.zipfile.emit('entry', { fileName: 'project/file.tex' })
+        ctx.readStream.end()
+        await new Promise(resolve => process.nextTick(resolve))
+        ctx.zipfile.emit('entry', {
+          fileName: '__MACOSX/project/._file.tex',
+        })
+        ctx.zipfile.emit('end')
+        await promise
+      })
+
+      it('should not open a read stream for the ignored entry', function (ctx) {
+        ctx.zipfile.openReadStream.callCount.should.equal(1)
+        ctx.zipfile.openReadStream.firstCall.args[0].should.deep.equal({
+          fileName: 'project/file.tex',
+        })
+      })
+    })
+
     describe('with an error opening the file read stream', function () {
       beforeEach(async function (ctx) {
         ctx.zipfile.openReadStream = sinon
@@ -504,12 +549,79 @@ describe('ArchiveManager', function () {
       )
     })
 
-    it('should return true and close zipfile when entryCount exceeds maxEntitiesPerProject', async function (ctx) {
-      ctx.zipfile.entryCount = 100
-      ctx.Settings.maxEntitiesPerProject = 50
+    it('should reject upfront when entryCount far exceeds the limit', async function (ctx) {
+      ctx.Settings.maxEntitiesPerProject = 10
+      ctx.zipfile.entryCount = 1_000_000_000
       const isTooLarge = await ctx.ArchiveManager._isZipTooLarge(ctx.source)
       isTooLarge.should.equal(true)
+      ctx.zipfile.readEntry.called.should.equal(false)
       ctx.zipfile.close.called.should.equal(true)
+    })
+
+    it('should not reject a __MACOSX-padded zip whose real entry count is within the limit', async function (ctx) {
+      ctx.Settings.maxEntitiesPerProject = 10
+      ctx.FileTypeManager.shouldIgnore.callsFake(name =>
+        name.startsWith('__MACOSX/')
+      )
+      const promise = ctx.ArchiveManager._isZipTooLarge(ctx.source)
+      for (let i = 0; i < 6; i++) {
+        ctx.zipfile.emit('entry', {
+          fileName: `project/file-${i}.tex`,
+          uncompressedSize: 100,
+        })
+      }
+      ctx.zipfile.emit('entry', {
+        fileName: '__MACOSX/',
+        uncompressedSize: 0,
+      })
+      ctx.zipfile.emit('entry', {
+        fileName: '__MACOSX/project/',
+        uncompressedSize: 0,
+      })
+      for (let i = 0; i < 6; i++) {
+        ctx.zipfile.emit('entry', {
+          fileName: `__MACOSX/project/._file-${i}.tex`,
+          uncompressedSize: 200,
+        })
+      }
+      ctx.zipfile.emit('end')
+      const isTooLarge = await promise
+      isTooLarge.should.equal(false)
+    })
+
+    it('should reject and stop iterating once the limit is exceeded', async function (ctx) {
+      ctx.Settings.maxEntitiesPerProject = 3
+      const promise = ctx.ArchiveManager._isZipTooLarge(ctx.source)
+      for (let i = 0; i < 4; i++) {
+        ctx.zipfile.emit('entry', {
+          fileName: `file-${i}.tex`,
+          uncompressedSize: 100,
+        })
+      }
+      const isTooLarge = await promise
+      isTooLarge.should.equal(true)
+      ctx.zipfile.close.called.should.equal(true)
+      // 3 readEntry()s for the first three entries, none after the 4th bails
+      ctx.zipfile.readEntry.callCount.should.equal(4)
+    })
+
+    it('should ignore __MACOSX bytes when computing total size', async function (ctx) {
+      ctx.FileTypeManager.shouldIgnore
+        .withArgs('__MACOSX/._file.tex')
+        .returns(true)
+      const promise = ctx.ArchiveManager._isZipTooLarge(ctx.source)
+      ctx.zipfile.emit('entry', {
+        fileName: 'file.tex',
+        uncompressedSize: 100,
+      })
+      // Huge AppleDouble entry that would otherwise trip the size check.
+      ctx.zipfile.emit('entry', {
+        fileName: '__MACOSX/._file.tex',
+        uncompressedSize: 109e16,
+      })
+      ctx.zipfile.emit('end')
+      const isTooLarge = await promise
+      isTooLarge.should.equal(false)
     })
   })
 
