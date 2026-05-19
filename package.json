@@ -196,7 +196,8 @@
     "teeny-request@npm:^9.0.0": "patch:teeny-request@npm%3A9.0.0#~/.yarn/patches/teeny-request-npm-9.0.0-4d571e3c55.patch",
     "fast-xml-builder": "1.1.7",
     "ip-address": "10.1.1",
-    "systeminformation": "5.31.6"
+    "systeminformation": "5.31.6",
+    "fast-uri": "3.1.2"
   },
   "scripts": {
     "format": "prettier --cache --cache-location ./node_modules/.cache/prettier/.prettier-cache --check",
