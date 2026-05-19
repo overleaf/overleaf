@@ -1692,6 +1692,7 @@
   "search_command_replace": "",
   "search_in_all_projects": "",
   "search_in_archived_projects": "",
+  "search_in_library": "",
   "search_in_shared_projects": "",
   "search_in_trashed_projects": "",
   "search_in_your_projects": "",
