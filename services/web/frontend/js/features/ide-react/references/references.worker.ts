@@ -14,11 +14,11 @@ const indices = importOverleafModules('referenceIndices') as {
 
 export type ReferenceWorkerRequest =
   | { type: 'update'; changes: Changes }
-  | { type: 'search'; query: string }
+  | { id: string; type: 'search'; query: string }
 
 export type ReferenceWorkerResponse =
   | { type: 'updateKeys'; keys: Set<string> }
-  | { type: 'searchResult'; result: AdvancedReferenceSearchResult }
+  | { id: string; type: 'searchResult'; result: AdvancedReferenceSearchResult }
 
 function createIndex(): ReferenceIndex {
   const Klass = indices[0]?.import.default ?? BasicReferenceIndex
@@ -37,7 +37,7 @@ self.addEventListener('message', async (event: MessageEvent) => {
 
     case 'search': {
       const result = await indexer.search(message.query)
-      self.postMessage({ type: 'searchResult', result })
+      self.postMessage({ id: message.id, type: 'searchResult', result })
       break
     }
 

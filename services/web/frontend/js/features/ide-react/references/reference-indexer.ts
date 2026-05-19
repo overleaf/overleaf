@@ -3,6 +3,7 @@ import { generateSHA1Hash } from '@/shared/utils/sha1'
 import { AdvancedReferenceSearchResult, Changes } from './types'
 import { debugConsole } from '@/utils/debugging'
 import type { ReferenceWorkerResponse } from './references.worker'
+import { v4 as uuid } from 'uuid'
 
 const ONE_MB = 1024 * 1024
 const MAX_BIB_DATA_SIZE = 6 * ONE_MB
@@ -11,9 +12,10 @@ export class ReferenceIndexer {
   private fileIndexHash: Map<string, string> = new Map()
   private worker: Worker
   private updateResolve: ((result: Set<string>) => void) | null = null
-  private searchResolve:
-    | ((result: AdvancedReferenceSearchResult) => void)
-    | null = null
+  private searchResolvers = new Map<
+    string,
+    (result: AdvancedReferenceSearchResult) => void
+  >()
 
   constructor() {
     this.worker = new Worker(
@@ -26,9 +28,12 @@ export class ReferenceIndexer {
 
   private handleMessage(event: MessageEvent) {
     const data = event.data as ReferenceWorkerResponse
-    if (data.type === 'searchResult' && this.searchResolve) {
-      this.searchResolve(data.result)
-      this.searchResolve = null
+    if (data.type === 'searchResult') {
+      const searchResolver = this.searchResolvers.get(data.id)
+      if (searchResolver) {
+        searchResolver(data.result)
+        this.searchResolvers.delete(data.id)
+      }
     } else if (data.type === 'updateKeys' && this.updateResolve) {
       this.updateResolve(data.keys)
       this.updateResolve = null
@@ -127,11 +132,14 @@ export class ReferenceIndexer {
     })
   }
 
-  async search(query: string): Promise<AdvancedReferenceSearchResult> {
-    this.worker.postMessage({ type: 'search', query })
+  async search(
+    query: string,
+    id: string = uuid()
+  ): Promise<AdvancedReferenceSearchResult> {
+    this.worker.postMessage({ id, type: 'search', query })
     const { promise, resolve } =
       Promise.withResolvers<AdvancedReferenceSearchResult>()
-    this.searchResolve = resolve
+    this.searchResolvers.set(id, resolve)
     return promise
   }
 }
