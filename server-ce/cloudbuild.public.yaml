@@ -10,9 +10,9 @@ steps:
     script: |
       #!/usr/bin/env bash
       set -e
-      if [ ${BRANCH_NAME} == main ]; then
-        docker tag ${_IMAGE_BASE} ${_IMAGE_BASE_LATEST};
-        docker push ${_IMAGE_BASE_LATEST};
+      if [ "${BRANCH_NAME}" = "main" ]; then
+        docker tag "${_IMAGE_BASE}" "${_IMAGE_BASE_LATEST}";
+        docker push "${_IMAGE_BASE_LATEST}";
       fi
     automapSubstitutions: true
   - id: prefetch_ce
@@ -39,9 +39,9 @@ steps:
     script: |
       #!/usr/bin/env bash
       set -e
-      if [ $BRANCH_NAME == main ]; then
-        docker tag ${_IMAGE_TAG} ${_IMAGE_TAG_LATEST};
-        docker push ${_IMAGE_TAG_LATEST};
+      if [ "${BRANCH_NAME}" = "main" ]; then
+        docker tag "${_IMAGE_TAG}" "${_IMAGE_TAG_LATEST}";
+        docker push "${_IMAGE_TAG_LATEST}";
       fi
     automapSubstitutions: true
     waitFor:
