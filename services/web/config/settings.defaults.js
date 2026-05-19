@@ -54,6 +54,7 @@ const defaultTextExtensions = [
   'clo',
   'ldf',
   'rmd',
+  'qmd',
   'lua',
   'py',
   'gv',
