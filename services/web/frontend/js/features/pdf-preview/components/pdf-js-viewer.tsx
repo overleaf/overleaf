@@ -114,6 +114,9 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
     }
 
     const handlePagesinit = () => {
+      // Set scale immediately to avoid a one-frame flash at PDF.js's default
+      // 1.333 scale (96/72 DPI) before the React restore effect can correct it.
+      pdfJsWrapper.viewer.currentScaleValue = scaleRef.current
       setInitialised(true)
       timePDFFetched = performance.now()
       if (document.hidden) {

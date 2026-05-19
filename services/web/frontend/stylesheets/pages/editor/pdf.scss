@@ -255,6 +255,7 @@
     }
 
     .page {
+      display: block; // prevent Overleaf's .loading class (display:inline-flex) from affecting PDF.js page state
       box-sizing: content-box;
       margin: var(--spacing-05) auto;
       box-shadow:
@@ -262,6 +263,13 @@
         0 3px 14px 0 #23282f08,
         0 8px 10px 0 #23282f14;
       border: none;
+
+      // Overleaf has its own loading state UI; suppress the PDF.js page-level loading
+      // spinner so the loadingIcon/loading classes have no layout or visual effect.
+      /* stylelint-disable-next-line selector-class-pattern */
+      &.loadingIcon::after {
+        display: none;
+      }
     }
 
     .pdfjs-viewer-inner {
@@ -271,6 +279,7 @@
       height: 100%;
       -webkit-font-smoothing: initial;
       -moz-osx-font-smoothing: initial;
+      view-transition-name: pdf-viewer;
 
       /* fix review-panel overflow issue, see: https://github.com/overleaf/internal/issues/6781#issuecomment-1112708638 */
       /* stylelint-disable-next-line selector-class-pattern */
@@ -314,6 +323,11 @@
       background-color: var(--link-color);
     }
   }
+}
+
+::view-transition-old(pdf-viewer),
+::view-transition-new(pdf-viewer) {
+  animation-duration: 0.25s;
 }
 
 .pdfjs-viewer-controls {
