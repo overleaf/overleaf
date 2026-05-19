@@ -331,7 +331,7 @@ const mockDoc = (content: string, changes: Array<Record<string, any>> = []) => {
       // Do nothing
     },
     getType: () => {
-      return 'history-ot'
+      return 'sharejs-text-ot'
     },
     on: () => {
       // Do nothing
