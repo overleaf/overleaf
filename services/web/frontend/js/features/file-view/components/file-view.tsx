@@ -9,7 +9,7 @@ import LoadingSpinner from '@/shared/components/loading-spinner'
 import getMeta from '@/utils/meta'
 import { BinaryFile } from '../types/binary-file'
 
-const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'svg']
+const imageExtensions = ['png', 'jpg', 'jpeg', 'gif']
 
 export default function FileView({ file }: { file: BinaryFile }) {
   const [contentLoading, setContentLoading] = useState(true)
