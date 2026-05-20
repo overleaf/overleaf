@@ -88,7 +88,7 @@
     "@contentful/rich-text-html-renderer": "16.0.2",
     "@contentful/rich-text-types": "16.0.2",
     "i18next": "23.10.0",
-    "sanitize-html": "2.12.1",
+    "sanitize-html": "2.17.4",
     "lodash": "4.18.1",
     "express-session": "1.17.2",
     "ioredis": "4.27.11",

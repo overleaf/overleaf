@@ -180,7 +180,7 @@
     "referer-parser": "patch:referer-parser@npm%3A0.0.3#~/.yarn/patches/referer-parser-npm-0.0.3.patch",
     "request": "2.88.2",
     "requestretry": "7.1.0",
-    "sanitize-html": "^2.8.1",
+    "sanitize-html": "^2.17.4",
     "stripe": "^18.4.0",
     "tough-cookie": "^4.0.0",
     "tsscmp": "^1.0.6",
