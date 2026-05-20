@@ -5,7 +5,6 @@ import { db, ObjectId } from '../../infrastructure/mongodb.mjs'
 import Errors from '../Errors/Errors.js'
 import mongodb from 'mongodb-legacy'
 import OError from '@overleaf/o-error'
-const safeCompilers = ['xelatex', 'pdflatex', 'latex', 'lualatex']
 
 const { ReturnDocument } = mongodb
 
@@ -16,7 +15,7 @@ const ProjectOptionsHandler = {
    */
   normalizeCompiler(compiler) {
     compiler = compiler.toLowerCase()
-    if (!safeCompilers.includes(compiler)) {
+    if (!settings.safeCompilers.includes(compiler)) {
       throw new OError('invalid compiler', { compiler })
     }
     return compiler

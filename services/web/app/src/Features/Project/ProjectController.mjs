@@ -955,6 +955,7 @@ const _ProjectController = {
         capabilities,
         roMirrorOnClientNoLocalStorage:
           Settings.adminOnlyLogin || project.name.startsWith('Debug: '),
+        defaultLatexCompiler: Settings.defaultLatexCompiler,
         languages: Settings.languages,
         learnedWords,
         editorThemes: THEME_LIST,

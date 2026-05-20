@@ -1,5 +1,6 @@
 import mongoose from '../infrastructure/Mongoose.mjs'
 import _ from 'lodash'
+import settings from '@overleaf/settings'
 import { FolderSchema } from './Folder.mjs'
 import Errors from '../Features/Errors/Errors.js'
 
@@ -36,7 +37,7 @@ export const ProjectSchema = new Schema(
     mainBibliographyDoc_id: { type: ObjectId },
     version: { type: Number }, // incremented for every change in the project structure (folders and filenames)
     publicAccesLevel: { type: String, default: 'private' },
-    compiler: { type: String, default: 'pdflatex' },
+    compiler: { type: String, default: settings.defaultLatexCompiler },
     spellCheckLanguage: { type: String, default: 'en' },
     deletedByExternalDataSource: { type: Boolean, default: false },
     description: { type: String, default: '' },

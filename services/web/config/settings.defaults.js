@@ -115,6 +115,8 @@ const httpPermissionsPolicy = {
   },
 }
 
+const safeCompilers = ['xelatex', 'pdflatex', 'latex', 'lualatex']
+
 module.exports = {
   env: 'server-ce',
 
@@ -460,6 +462,12 @@ module.exports = {
 
   disableChat: process.env.OVERLEAF_DISABLE_CHAT === 'true',
   disableLinkSharing: process.env.OVERLEAF_DISABLE_LINK_SHARING === 'true',
+  safeCompilers,
+  defaultLatexCompiler: safeCompilers.includes(
+    process.env.DEFAULT_LATEX_COMPILER
+  )
+    ? process.env.DEFAULT_LATEX_COMPILER
+    : 'pdflatex',
   enableSubscriptions: false,
   restrictedCountries: [],
   enableOnboardingEmails: process.env.ENABLE_ONBOARDING_EMAILS === 'true',

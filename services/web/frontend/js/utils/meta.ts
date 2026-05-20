@@ -7,6 +7,7 @@ import { ExposedSettings } from '../../../types/exposed-settings'
 import {
   type ImageName,
   OverallThemeMeta,
+  ProjectCompiler,
   type SpellCheckLanguage,
 } from '../../../types/project-settings'
 import { CurrencyCode } from '../../../types/subscription/currency'
@@ -116,6 +117,7 @@ export interface Meta {
   'ol-currentUrl': string
   'ol-customerIoEnabled': boolean
   'ol-debugPdfDetach': boolean
+  'ol-defaultLatexCompiler': ProjectCompiler
   'ol-detachRole': 'detached' | 'detacher' | ''
   'ol-dictionariesRoot': 'string'
   'ol-domainCaptureEnabled': boolean | undefined

@@ -112,6 +112,7 @@ describe('TemplatesManager', function () {
           dumpFolder: ctx.dumpFolder,
         },
         siteUrl: (ctx.siteUrl = 'http://127.0.0.1:3000'),
+        defaultLatexCompiler: 'pdflatex',
         apis: {
           v1: {
             url: (ctx.v1Url = 'http://overleaf.com'),

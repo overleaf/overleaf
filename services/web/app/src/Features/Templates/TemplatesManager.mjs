@@ -32,7 +32,9 @@ const TemplatesManager = {
     userId,
     imageName
   ) {
-    compiler = ProjectOptionsHandler.normalizeCompiler(compiler || 'pdflatex')
+    compiler = ProjectOptionsHandler.normalizeCompiler(
+      compiler || settings.defaultLatexCompiler
+    )
     imageName = ProjectOptionsHandler.normalizeImageName(
       imageName || 'wl_texlive:2018.1'
     )

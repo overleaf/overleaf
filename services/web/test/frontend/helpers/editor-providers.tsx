@@ -197,6 +197,7 @@ export function EditorProviders({
     'dropbox',
     'link-sharing',
   ])
+  window.metaAttributesCache.set('ol-defaultLatexCompiler', 'pdflatex')
 
   const scope = merge(
     {

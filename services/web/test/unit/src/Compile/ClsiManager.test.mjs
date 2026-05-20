@@ -182,6 +182,8 @@ describe('ClsiManager', function () {
       },
       enablePdfCaching: true,
       clsiCookie: { key: 'clsiserver' },
+      safeCompilers: ['pdflatex', 'latex', 'xelatex', 'lualatex'],
+      defaultLatexCompiler: 'pdflatex',
     }
     ctx.ClsiCacheHandler = {
       clearCache: sinon.stub().resolves(),

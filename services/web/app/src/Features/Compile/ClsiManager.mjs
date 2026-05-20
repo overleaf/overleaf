@@ -36,7 +36,7 @@ const NewBackendCloudClsiCookieManager = ClsiCookieManagerFactory(
   Settings.apis.clsi_new?.backendGroupName
 )
 
-const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
+const VALID_COMPILERS = Settings.safeCompilers
 const OUTPUT_FILE_TIMEOUT_MS = 60000
 const CLSI_COOKIES_ENABLED = (Settings.clsiCookie?.key ?? '') !== ''
 
@@ -747,7 +747,7 @@ async function _buildRequest(projectId, userId, options) {
     throw new Errors.NotFoundError(`project does not exist: ${projectId}`)
   }
   if (!VALID_COMPILERS.includes(project.compiler)) {
-    project.compiler = 'pdflatex'
+    project.compiler = Settings.defaultLatexCompiler
   }
   const historyId = project.overleaf.history.id
   let { baseHistoryVersion } = options

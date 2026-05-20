@@ -35,6 +35,7 @@ describe('ProjectOptionsHandler', function () {
           { imageName: 'texlive-0000.0', imageDesc: 'test image 0' },
           { imageName: 'texlive-1234.5', imageDesc: 'test image 1' },
         ],
+        safeCompilers: ['pdflatex', 'latex', 'xelatex', 'lualatex'],
       },
     }))
 
