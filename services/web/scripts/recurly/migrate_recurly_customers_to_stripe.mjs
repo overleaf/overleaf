@@ -637,12 +637,30 @@ async function fetchTargetStripeCustomerPaymentMethods(
   stripeCustomerId,
   context
 ) {
-  const paymentMethods = await rateLimiters.requestWithRetries(
-    stripeClient.serviceName,
-    () => stripeClient.customers.listPaymentMethods(stripeCustomerId),
-    { ...context, stripeApi: 'customers.listPaymentMethods' }
-  )
-  return paymentMethods.data
+  const paymentMethods = []
+  let startingAfter
+
+  while (true) {
+    const page = await rateLimiters.requestWithRetries(
+      stripeClient.serviceName,
+      () =>
+        stripeClient.customers.listPaymentMethods(stripeCustomerId, {
+          limit: 100,
+          ...(startingAfter ? { starting_after: startingAfter } : {}),
+        }),
+      { ...context, stripeApi: 'customers.listPaymentMethods' }
+    )
+
+    paymentMethods.push(...page.data)
+
+    if (!page.has_more || page.data.length === 0) {
+      break
+    }
+
+    startingAfter = page.data[page.data.length - 1].id
+  }
+
+  return paymentMethods
 }
 
 /**
@@ -724,6 +742,123 @@ async function createPayPalPaymentMethod(
   return setupIntent.payment_method
 }
 
+// Some Stripe API objects can be returned as either an ID string or a full object depending on context.
+// This helper normalizes to just the ID string for easier comparison
+function normalizeExpandableId(value) {
+  if (!value) return null
+  if (typeof value === 'string') return value
+  if (typeof value === 'object' && typeof value.id === 'string') {
+    return value.id
+  }
+  return null
+}
+
+async function findPayPalPaymentMethodByBillingAgreementId(
+  stripeClient,
+  stripeCustomerId,
+  paypalPaymentMethods,
+  billingAgreementId,
+  context
+) {
+  if (!billingAgreementId) {
+    return {
+      paymentMethod: null,
+      reason: 'billing_agreement_id_not_available',
+    }
+  }
+
+  if (paypalPaymentMethods.length === 0) {
+    return {
+      paymentMethod: null,
+      reason: 'no_existing_paypal_payment_methods',
+    }
+  }
+
+  const matchedPaymentMethods = []
+
+  for (const paymentMethod of paypalPaymentMethods) {
+    let matched = false
+    let startingAfter
+
+    while (true) {
+      const setupIntents = await rateLimiters.requestWithRetries(
+        stripeClient.serviceName,
+        () =>
+          stripeClient.setupIntents.list({
+            payment_method: paymentMethod.id,
+            limit: 100,
+            ...(startingAfter ? { starting_after: startingAfter } : {}),
+          }),
+        { ...context, stripeApi: 'setupIntents.list' }
+      )
+
+      for (const setupIntent of setupIntents.data) {
+        if (setupIntent.status !== 'succeeded') continue
+
+        const setupIntentCustomerId = normalizeExpandableId(
+          setupIntent.customer
+        )
+        if (
+          setupIntentCustomerId &&
+          setupIntentCustomerId !== stripeCustomerId
+        ) {
+          continue
+        }
+
+        const mandateId = normalizeExpandableId(setupIntent.mandate)
+        if (!mandateId) continue
+
+        const mandate = await rateLimiters.requestWithRetries(
+          stripeClient.serviceName,
+          () => stripeClient.mandates.retrieve(mandateId),
+          { ...context, stripeApi: 'mandates.retrieve' }
+        )
+
+        const mandateBaid =
+          mandate?.payment_method_details?.paypal?.billing_agreement_id || null
+        if (mandateBaid === billingAgreementId) {
+          matchedPaymentMethods.push(paymentMethod)
+          matched = true
+          break
+        }
+      }
+
+      if (matched || !setupIntents.has_more || setupIntents.data.length === 0) {
+        break
+      }
+
+      startingAfter = setupIntents.data[setupIntents.data.length - 1].id
+    }
+  }
+
+  if (matchedPaymentMethods.length === 1) {
+    return {
+      paymentMethod: matchedPaymentMethods[0],
+      reason: 'reuse_payment_method_matching_mandate_billing_agreement_id',
+    }
+  }
+
+  if (matchedPaymentMethods.length > 1) {
+    logDebug(
+      "multiple payment methods matched billing agreement ID, we'll reuse the most recently created one",
+      {
+        ...context,
+        paymentMethodIds: matchedPaymentMethods.map(method => method.id),
+      }
+    )
+    matchedPaymentMethods.sort((a, b) => b.created - a.created)
+    return {
+      paymentMethod: matchedPaymentMethods[0],
+      reason: 'reuse_payment_method_matching_mandate_billing_agreement_id',
+    }
+  }
+
+  return {
+    paymentMethod: null,
+    reason: 'no_payment_method_matches_billing_agreement_id',
+  }
+}
+
 /**
  * Determines the payment method to set on the Stripe customer.
  *
@@ -747,7 +882,10 @@ async function getPaymentMethod(
   commit,
   context
 ) {
-  if (billingInfo?.paymentMethod?.object === 'paypal_billing_agreement') {
+  const isPayPalBillingAgreement =
+    billingInfo?.paymentMethod?.object === 'paypal_billing_agreement'
+
+  if (isPayPalBillingAgreement) {
     const addressCountry = address?.country
     if (
       addressCountry === 'CA' ||
@@ -758,12 +896,75 @@ async function getPaymentMethod(
         `PayPal billing agreement migration is not supported for ${addressCountry} customers`
       )
     }
+  }
+
+  const paymentMethods = await fetchTargetStripeCustomerPaymentMethods(
+    stripeClient,
+    stripeCustomerId,
+    context
+  )
+
+  if (isPayPalBillingAgreement) {
+    const paypalPaymentMethods = paymentMethods.filter(
+      method => method.type === 'paypal'
+    )
+
+    const billingAgreementId = billingInfo.paymentMethod.billingAgreementId
+
+    if (!billingAgreementId) {
+      throw new Error(
+        `PayPal billing agreement migration requires billingAgreementId for Stripe customer ${stripeCustomerId}`
+      )
+    }
+
+    logDebug(
+      'Evaluating existing PayPal payment methods by billing agreement ID',
+      {
+        ...context,
+        step: 'evaluate_paypal_payment_methods',
+        paypalPaymentMethodCount: paypalPaymentMethods.length,
+        paypalPaymentMethodIds: paypalPaymentMethods.map(method => method.id),
+      },
+      { verboseOnly: true }
+    )
+
+    const { paymentMethod: baidMatchedPaymentMethod, reason: baidMatchReason } =
+      await findPayPalPaymentMethodByBillingAgreementId(
+        stripeClient,
+        stripeCustomerId,
+        paypalPaymentMethods,
+        billingAgreementId,
+        context
+      )
+
+    if (baidMatchedPaymentMethod) {
+      logDebug(
+        'Reusing existing PayPal payment method by billing agreement ID',
+        {
+          ...context,
+          paymentMethodId: baidMatchedPaymentMethod.id,
+          reason: baidMatchReason,
+          step: 'reuse_paypal_payment_method',
+        },
+        { verboseOnly: true }
+      )
+      return baidMatchedPaymentMethod
+    }
 
     if (commit) {
+      logDebug(
+        'No PayPal payment method matched billing agreement ID; creating setup intent',
+        {
+          ...context,
+          reason: baidMatchReason,
+          step: 'create_paypal_setup_intent',
+        },
+        { verboseOnly: true }
+      )
       return await createPayPalPaymentMethod(
         stripeClient,
         stripeCustomerId,
-        billingInfo.paymentMethod.billingAgreementId,
+        billingAgreementId,
         context
       )
     } else {
@@ -775,11 +976,6 @@ async function getPaymentMethod(
     }
   }
 
-  const paymentMethods = await fetchTargetStripeCustomerPaymentMethods(
-    stripeClient,
-    stripeCustomerId,
-    context
-  )
   return coalesceOrThrowPaymentMethod(
     paymentMethods,
     stripeCustomerId,
