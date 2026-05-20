@@ -759,14 +759,16 @@ describe('LaunchpadController', function () {
         ctx.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           1
         )
-        ctx.UserRegistrationHandler.promises.registerNewUser
-          .calledWith({
-            email: ctx.email,
-            password: 'password_here',
-            first_name: ctx.email,
-            last_name: '',
-          })
-          .should.equal(true)
+        const call =
+          ctx.UserRegistrationHandler.promises.registerNewUser.firstCall
+        expect(call.args[0]).to.include({
+          email: ctx.email,
+          first_name: ctx.email,
+          last_name: '',
+        })
+        expect(call.args[0].password).to.be.a('string')
+        expect(call.args[0].password).to.not.equal('password_here')
+        expect(call.args[0].password.length).to.be.at.least(16)
       })
 
       it('should have updated the user to make them an admin', function (ctx) {
@@ -964,14 +966,16 @@ describe('LaunchpadController', function () {
         ctx.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           1
         )
-        ctx.UserRegistrationHandler.promises.registerNewUser
-          .calledWith({
-            email: ctx.email,
-            password: 'password_here',
-            first_name: ctx.email,
-            last_name: '',
-          })
-          .should.equal(true)
+        const call =
+          ctx.UserRegistrationHandler.promises.registerNewUser.firstCall
+        expect(call.args[0]).to.include({
+          email: ctx.email,
+          first_name: ctx.email,
+          last_name: '',
+        })
+        expect(call.args[0].password).to.be.a('string')
+        expect(call.args[0].password).to.not.equal('password_here')
+        expect(call.args[0].password.length).to.be.at.least(16)
       })
 
       it('should not call update', function (ctx) {
@@ -1015,14 +1019,16 @@ describe('LaunchpadController', function () {
         ctx.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           1
         )
-        ctx.UserRegistrationHandler.promises.registerNewUser
-          .calledWith({
-            email: ctx.email,
-            password: 'password_here',
-            first_name: ctx.email,
-            last_name: '',
-          })
-          .should.equal(true)
+        const call =
+          ctx.UserRegistrationHandler.promises.registerNewUser.firstCall
+        expect(call.args[0]).to.include({
+          email: ctx.email,
+          first_name: ctx.email,
+          last_name: '',
+        })
+        expect(call.args[0].password).to.be.a('string')
+        expect(call.args[0].password).to.not.equal('password_here')
+        expect(call.args[0].password.length).to.be.at.least(16)
       })
     })
   })

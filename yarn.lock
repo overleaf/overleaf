@@ -6770,6 +6770,7 @@ __metadata:
     "@overleaf/o-error": "workspace:*"
     "@overleaf/promise-utils": "workspace:*"
     "@overleaf/settings": "workspace:*"
+    bcrypt: "npm:^6.0.0"
     east: "npm:2.0.3"
     mongodb: "npm:6.12.0"
   languageName: unknown
