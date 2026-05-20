@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { memo } from 'react'
+import { memo, useCallback } from 'react'
 import classNames from 'classnames'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
@@ -17,6 +17,7 @@ import {
 import OLButton from '@/shared/components/ol/ol-button'
 import OLButtonGroup from '@/shared/components/ol/ol-button-group'
 import { useLayoutContext } from '@/shared/context/layout-context'
+import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 
 const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'
 
@@ -55,12 +56,12 @@ function PdfCompileButton() {
 
   const { detachRole } = useLayoutContext()
 
-  const fromScratchWithEvent = () => {
+  const fromScratchWithEvent = useCallback(() => {
     eventTracking.sendMB('recompile-setting-changed', {
       setting: 'from-scratch',
     })
     recompileFromScratch()
-  }
+  }, [recompileFromScratch])
 
   const tooltipElement = (
     <>
@@ -85,6 +86,30 @@ function PdfCompileButton() {
     {
       'btn-striped-animated': hasChanges,
     }
+  )
+
+  useCommandProvider(
+    () => [
+      {
+        id: 'compile',
+        handler: () => startCompile(),
+        label: t('recompile'),
+        disabled: compiling,
+      },
+      {
+        id: 'stop-compile',
+        handler: () => stopCompile(),
+        label: t('stop_compile'),
+        disabled: !compiling,
+      },
+      {
+        id: 'recompile-from-scratch',
+        handler: fromScratchWithEvent,
+        label: t('recompile_from_scratch'),
+        disabled: compiling,
+      },
+    ],
+    [startCompile, t, compiling, stopCompile, fromScratchWithEvent]
   )
 
   return (

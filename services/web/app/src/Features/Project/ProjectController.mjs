@@ -484,6 +484,7 @@ const _ProjectController = {
       'export-docx',
       'sharing-updates',
       'export-markdown',
+      'command-palette',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
