@@ -21,13 +21,13 @@ const argv = minimist(process.argv.slice(2), {
 
 if (argv.help) {
   console.log(`
-project_notifications.ts - Queue project update notifications
+project_notifications.mts - Queue project update notifications
 
 This script scans Redis for projects that have pending notification timestamps and queues
 them for notification. It's used to notify project collaborators when changes have been
 made to a project. Only projects with collaborators are processed.
 
-Usage: project_notifications.ts [options]
+Usage: node scripts/project_notifications.mts [options]
 
 Options:
   -n, --dry-run    Show what would be done without making changes
@@ -35,10 +35,10 @@ Options:
 
 Examples:
   # Dry run to see what would be notified
-  project_notifications.ts --dry-run
+  node scripts/project_notifications.mts --dry-run
 
   # Actually queue the notifications
-  project_notifications.ts
+  node scripts/project_notifications.mts
 `)
   process.exit(0)
 }
@@ -97,7 +97,7 @@ async function main() {
   if (dryRun) {
     console.log('\n[DRY RUN] Projects that would be queued:')
     for (const { projectId, timestamp } of projects) {
-      const date = new Date(parseInt(timestamp))
+      const date = new Date(parseInt(timestamp, 10))
       console.log(
         `  ${projectId}: ${timestamp} (${date.toISOString()}) - would be queued`
       )
@@ -110,13 +110,12 @@ async function main() {
   console.log('Queue is ready.')
 
   for (const { projectId, timestamp } of projects) {
+    const numericTimestamp = parseInt(timestamp, 10)
     try {
       await projectNotificationQueue.add(
-        { projectId, timestamp },
+        { projectId, timestamp: numericTimestamp },
         {
           jobId: projectId,
-        },
-        {
           delay: 1000,
         }
       )
@@ -124,7 +123,7 @@ async function main() {
       // Delete the timestamp key after scheduling (only if it still matches)
       await deleteProjectNotificationTimestamp(projectId, timestamp)
 
-      const date = new Date(parseInt(timestamp))
+      const date = new Date(numericTimestamp)
       console.log(
         `  ${projectId}: ${timestamp} (${date.toISOString()}) - queued`
       )
@@ -155,7 +154,7 @@ type ProjectNotification = {
 
 /**
  * Check if a project has any collaborators (excluding owner)
- * Uses Redis caching with 1 hour expiration to avoid repeated MongoDB queries
+ * Uses Redis caching with 1-2 hour randomized expiration to avoid repeated MongoDB queries
  */
 async function projectHasCollaborators(projectId: string): Promise<boolean> {
   // Check Redis cache first
@@ -185,7 +184,7 @@ async function projectHasCollaborators(projectId: string): Promise<boolean> {
   const randomTTL = 3600 + Math.floor(Math.random() * 3600)
 
   if (hasCollaborators === null) {
-    // Cache false result for non-existent projects
+    // Cache negative result (no collaborators or project not found)
     await redisClient.setex(cacheKey, randomTTL, '0')
     return false
   }
@@ -212,6 +211,7 @@ async function getProjectsToNotify(): Promise<ProjectNotification[]> {
     // Scan for all ProjectNotificationTimestamp keys
     const stream = node.scanStream({
       match: docUpdaterKeys.projectNotificationTimestamp({ project_id: '*' }),
+      count: 1000,
     })
 
     for await (const keys of stream) {
@@ -243,6 +243,14 @@ async function getProjectsToNotify(): Promise<ProjectNotification[]> {
         const hasCollaborators = await projectHasCollaborators(projectId)
         if (!hasCollaborators) {
           console.log(`Skipping project ${projectId} - no collaborators`)
+          continue
+        }
+
+        const numericTimestamp = parseInt(timestamp, 10)
+        if (Number.isNaN(numericTimestamp)) {
+          console.log(
+            `Skipping project ${projectId} - non-numeric timestamp: ${timestamp}`
+          )
           continue
         }
 
