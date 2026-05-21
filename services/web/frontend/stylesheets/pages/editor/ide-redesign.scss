@@ -115,6 +115,7 @@
 .ide-redesign-python-output-pane-line {
   white-space: pre-wrap;
   word-break: break-word;
+  min-height: var(--line-height-03);
 }
 
 .ide-redesign-python-output-pane-line-info {
