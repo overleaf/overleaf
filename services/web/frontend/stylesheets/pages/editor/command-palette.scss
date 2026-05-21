@@ -2,12 +2,14 @@
   --command-palette-color-scheme: dark;
   --command-palette-selected-bg: var(--green-70);
   --command-palette-selected-color: var(--green-10);
+  --command-palette-border-color: var(--border-primary);
 }
 
 @include theme('light') {
   --command-palette-color-scheme: light;
   --command-palette-selected-bg: var(--bg-accent-03);
   --command-palette-selected-color: var(--green-70);
+  --command-palette-border-color: var(--border-divider);
 }
 
 .command-palette {
@@ -24,7 +26,7 @@
 
   .modal-content {
     background-color: var(--bg-primary-themed);
-    border: 1px solid var(--border-divider-themed);
+    border: 1px solid var(--command-palette-border-color);
   }
 
   .command-palette-input {
