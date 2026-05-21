@@ -1,4 +1,12 @@
-import React, { forwardRef } from 'react'
+import React, {
+  createContext,
+  forwardRef,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react'
 import {
   Dropdown as BS5Dropdown,
   DropdownToggle as BS5DropdownToggle,
@@ -20,8 +28,34 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { fixedForwardRef } from '@/utils/react'
 import classnames from 'classnames'
 
-export function Dropdown({ ...props }: DropdownProps) {
-  return <BS5Dropdown {...props} />
+// Lets DropdownToggle register its presence with the parent Dropdown so that
+// DropdownMenu can know whether a toggle exists (and therefore whether Popper
+// will run to position the menu).
+type DropdownInternalContextValue = {
+  registerToggle: () => () => void
+  hasToggle: boolean
+}
+const DropdownInternalContext =
+  createContext<DropdownInternalContextValue | null>(null)
+
+export function Dropdown({ children, ...props }: DropdownProps) {
+  const [toggleCount, setToggleCount] = useState(0)
+
+  const registerToggle = useCallback(() => {
+    setToggleCount(c => c + 1)
+    return () => setToggleCount(c => c - 1)
+  }, [])
+
+  const value = useMemo(
+    () => ({ registerToggle, hasToggle: toggleCount > 0 }),
+    [registerToggle, toggleCount]
+  )
+
+  return (
+    <DropdownInternalContext.Provider value={value}>
+      <BS5Dropdown {...props}>{children}</BS5Dropdown>
+    </DropdownInternalContext.Provider>
+  )
 }
 
 function DropdownItem(
@@ -124,14 +158,32 @@ DropdownToggleCustom.displayName = 'DropdownToggleCustom'
 export const DropdownToggle = forwardRef<
   typeof BS5DropdownToggle,
   DropdownToggleProps
->((props, ref) => <BS5DropdownToggle {...props} ref={ref} />)
+>((props, ref) => {
+  const registerToggle = useContext(DropdownInternalContext)?.registerToggle
+
+  useLayoutEffect(() => registerToggle?.(), [registerToggle])
+
+  return <BS5DropdownToggle {...props} ref={ref} />
+})
 DropdownToggle.displayName = 'DropdownToggle'
 
 export const DropdownMenu = forwardRef<
   typeof BS5DropdownMenu,
   DropdownMenuProps
->(({ as = 'ul', ...props }, ref) => {
-  return <BS5DropdownMenu as={as} role="menu" {...props} ref={ref} />
+>(({ as = 'ul', className, ...props }, ref) => {
+  const context = useContext(DropdownInternalContext)
+
+  return (
+    <BS5DropdownMenu
+      as={as}
+      role="menu"
+      className={classnames(className, {
+        'dropdown-menu-popper': !!context?.hasToggle,
+      })}
+      {...props}
+      ref={ref}
+    />
+  )
 })
 DropdownMenu.displayName = 'DropdownMenu'
 

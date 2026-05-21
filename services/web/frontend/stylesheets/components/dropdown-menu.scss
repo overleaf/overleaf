@@ -103,6 +103,11 @@ $dropdown-item-min-height: 36px;
   .subdued {
     color: var(--content-disabled);
   }
+
+  &.show.dropdown-menu-popper:not([data-popper-placement], [data-bs-popper]) {
+    // Prevents flickering before Popper positions the menu
+    visibility: hidden;
+  }
 }
 
 .dropdown-item {
