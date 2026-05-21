@@ -49,7 +49,7 @@ const useFileTreeCommandSource = (): CommandPaletteSource => {
       .slice(0, 10)
       .map(({ path, name, id }) => ({
         title: name,
-        description: path,
+        description: path === name ? undefined : path,
         onSelect: () => onSelect(id),
         score: 1,
       }))
@@ -70,7 +70,7 @@ const useFileTreeCommandSource = (): CommandPaletteSource => {
         })
         return result.map(({ path, name, id, score }) => ({
           title: name,
-          description: path,
+          description: path === name ? undefined : path,
           onSelect: () => onSelect(id),
           score,
         }))

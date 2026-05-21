@@ -1,4 +1,17 @@
+:root {
+  --command-palette-color-scheme: dark;
+  --command-palette-selected-bg: var(--green-70);
+  --command-palette-selected-color: var(--green-10);
+}
+
+@include theme('light') {
+  --command-palette-color-scheme: light;
+  --command-palette-selected-bg: var(--bg-accent-03);
+  --command-palette-selected-color: var(--green-70);
+}
+
 .command-palette {
+  color-scheme: var(--command-palette-color-scheme);
   pointer-events: none;
 
   .modal-dialog {
@@ -9,18 +22,23 @@
     padding: 0;
   }
 
+  .modal-content {
+    background-color: var(--bg-primary-themed);
+    border: 1px solid var(--border-divider-themed);
+  }
+
   .command-palette-input {
     width: 100%;
     padding: var(--spacing-05);
     border: 0;
-    border-bottom: 1px solid var(--border-divider);
+    border-bottom: 1px solid var(--border-divider-themed);
     background: transparent;
-    color: var(--content-primary);
+    color: var(--content-primary-themed);
     font-size: var(--font-size-04);
     outline: none;
 
     &::placeholder {
-      color: var(--content-secondary);
+      color: var(--content-placeholder-themed);
     }
   }
 
@@ -30,6 +48,7 @@
     padding: var(--spacing-02);
     max-height: 50vh;
     overflow-y: auto;
+    color: var(--content-primary-themed);
 
     &:empty {
       display: none;
@@ -49,7 +68,7 @@
       border: 0;
       border-radius: var(--border-radius-base);
       background: transparent;
-      color: var(--content-primary);
+      color: var(--content-primary-themed);
       text-align: left;
       cursor: pointer;
 
@@ -59,16 +78,17 @@
     }
 
     &.command-palette-result-selected button {
-      background-color: var(--bg-accent-01);
-      color: var(--content-primary-dark);
+      background-color: var(--command-palette-selected-bg);
+      color: var(--command-palette-selected-color);
     }
 
     &.command-palette-result-selected .command-palette-result-description {
-      color: var(--content-secondary-dark);
+      color: var(--command-palette-selected-color);
     }
   }
 
   .command-palette-result-title {
+    color: var(--content-primary-themed);
     font-size: var(--font-size-03);
     font-weight: 500;
     line-height: 1.2;
@@ -76,7 +96,7 @@
 
   .command-palette-result-description {
     font-size: var(--font-size-02);
-    color: var(--content-secondary);
+    color: var(--content-secondary-themed);
     line-height: 1.2;
   }
 }

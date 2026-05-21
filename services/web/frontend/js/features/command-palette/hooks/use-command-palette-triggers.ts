@@ -1,10 +1,12 @@
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { Dispatch, SetStateAction, useCallback } from 'react'
+import { isMac } from '@/shared/utils/os'
 
 const useCommandPaletteTriggers = (show: Dispatch<SetStateAction<boolean>>) => {
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.code === 'KeyP') {
+      const modifierKey = isMac ? event.metaKey : event.ctrlKey
+      if (modifierKey && event.code === 'KeyP') {
         event.preventDefault()
         show(prev => !prev)
       }
