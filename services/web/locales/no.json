@@ -104,6 +104,7 @@
   "dropbox_sync_description": "Synkroniser __appName__-prosjektene dine med Dropbox. Endringer i __appName__ blir automatisk sendt til din Dropbox, og motsatt.",
   "editing": "Redigerer",
   "editor_disconected_click_to_reconnect": "Editor frakoblet, klikk hvor som helst for å koble til igjen.",
+  "educational_discount_tooltip": "Tilgjengelig for grupper ved gradgivende institusjoner.",
   "email": "Epost",
   "email_already_registered": "Denne eposten er allerede registrert",
   "email_or_password_wrong_try_again": "Epostadressen eller passordet er feil. Vennligst prøv på nytt",

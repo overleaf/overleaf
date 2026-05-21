@@ -498,6 +498,7 @@
   "editor_disconected_click_to_reconnect": "Skriveprogrammets forbindelse afbrudt, klik hvor som helst for at forbinde igen.",
   "editor_limit_exceeded_in_this_project": "For mange redaktører i dette projekt",
   "editor_theme": "Tema for skrivevinduet",
+  "educational_discount_tooltip": "Tilgængelig for grupper på institutioner, der tildeler akademiske grader.",
   "educational_percent_discount_applied": "__percent__% studierabat anvendt!",
   "email": "E-mail",
   "email_address": "E-mailadresse",

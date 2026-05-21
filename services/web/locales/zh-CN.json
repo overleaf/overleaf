@@ -583,6 +583,7 @@
   "edits_become_suggestions": "编辑成建议修改",
   "educational_disclaimer": "我确认用户是主要使用 Overleaf 进行学习和教学的学生或教师，并且可以在被要求时提供证据。",
   "educational_disclaimer_heading": "教育折扣确认",
+  "educational_discount_tooltip": "适用于学位授予机构内的团队。",
   "educational_percent_discount_applied": "应用 __percent__% 教育折扣！",
   "email": "电子邮件",
   "email_address": "邮件地址",

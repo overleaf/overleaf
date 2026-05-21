@@ -137,6 +137,7 @@
   "dropbox_sync": "Синхронизация с Dropbox",
   "dropbox_sync_description": "Синхронизируйте Ваши __appName__ проекты с Вашим Dropbox. Изменения в __appName__ автоматически сохраняются в Вашем Dropbox, и наоборот.",
   "editing": "Редактор",
+  "educational_discount_tooltip": "Доступно для групп из высших учебных заведений.",
   "email": "Адрес электронной почты",
   "email_already_registered": "Этот адрес уже зарегистрирован.",
   "email_link_expired": "Срок действия ссылки истёк. Пожалуйста, повторите запрос!",

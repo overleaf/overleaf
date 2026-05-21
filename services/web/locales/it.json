@@ -99,6 +99,7 @@
   "dropbox_sync_description": "Mantieni i tuoi progetti __appName__ in sincrono con il tuo Dropbox. Le modifiche in __appName__ saranno automaticamente inviate nel tuo Dropbox, e viceversa.",
   "editing": "Modifica",
   "editor_disconected_click_to_reconnect": "Editor disconnesso, clicca in qualsiasi punto per riconnettere.",
+  "educational_discount_tooltip": "Disponibile per gruppi presso istituzioni che conferiscono titoli accademici.",
   "email": "Email",
   "email_link_expired": "Collegamento email scaduto, per favore richiedine un altro.",
   "email_or_password_wrong_try_again": "La tua email o password è errata.",

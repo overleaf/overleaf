@@ -85,6 +85,7 @@
   "dropbox_sync": "Dropbox-synkronointi",
   "dropbox_sync_description": "Pidä __appName__-projektisi synkronoituna Dropboxiisi. Sovelluksessa __appName__ tehdyt muutokset lähetetään automaattisesti Dropboxiin ja toisin päin.",
   "editing": "Muokkaaminen",
+  "educational_discount_tooltip": "Saatavilla ryhmille tutkintoja myöntävissä oppilaitoksissa.",
   "email": "Sähköposti",
   "email_link_expired": "Sähköpostilinkki on vanhentunut, ole hyvä ja pyydä uusi.",
   "email_or_password_wrong_try_again": "Sähköpostiosoitteesi tai salasanasi oli väärä. Ole hyvä ja yritä uudelleen",

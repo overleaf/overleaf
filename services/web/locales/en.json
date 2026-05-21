@@ -761,7 +761,7 @@
   "edits_become_suggestions": "Edits become suggestions",
   "educational_disclaimer": "I confirm that users will be students or faculty using Overleaf primarily for study and teaching, and can provide evidence of this if requested.",
   "educational_disclaimer_heading": "Educational discount confirmation",
-  "educational_discount_tooltip": "Available to people working at a degree-granting institution.",
+  "educational_discount_tooltip": "Available to groups at degree-granting institutions.",
   "educational_percent_discount_applied": "__percent__% educational discount applied!",
   "email": "Email",
   "email_address": "Email address",

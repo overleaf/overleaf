@@ -102,6 +102,7 @@
   "dropbox_sync_description": "__appName__ projelerinizi, Dropbox ile senkronize edin. Bu sayede __appName__ üzerinden yaptığınız değişiklikler otomatik olarak Dropbox üzerinde ve Dropbox üzerinde yapılan değişiklikler de __appName__ üzerinde işlenecektir.",
   "editing": "Düzenleme",
   "editor_disconected_click_to_reconnect": "Editör bağlantısı koptu, yeniden bağlanmak için herhangi bir yere tıklayın.",
+  "educational_discount_tooltip": "Akademik derece veren kurumlardaki gruplar için geçerlidir.",
   "email": "E-posta",
   "email_or_password_wrong_try_again": "E-posta adresiniz ya da şifreniz yanlış. Lütfen tekrar deneyin",
   "en": "İngilizce",

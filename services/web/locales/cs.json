@@ -83,6 +83,7 @@
   "dropbox_sync_description": "Udržujte své projekty v __appName__u synchronizované s vašim Dropboxem. Změny v __appName__u budou automaticky poslány do Dropboxu a obráceně.",
   "duplicate_file": "Zduplikovat soubor",
   "editing": "Pro úpravy",
+  "educational_discount_tooltip": "Dostupné pro skupiny z institucí udělujících akademické tituly.",
   "email": "Email",
   "email_or_password_wrong_try_again": "Váš email, nebo heslo není správně.",
   "en": "Angličtina",
