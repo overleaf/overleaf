@@ -66,8 +66,6 @@ export default function PythonOutputPane() {
               />
             </OLButton>
           </div>
-        </div>
-        <div className="ide-redesign-python-output-pane-toolbar-right">
           <SplitTestBadge
             splitTestName="overleaf-code"
             displayOnVariants={['enabled']}

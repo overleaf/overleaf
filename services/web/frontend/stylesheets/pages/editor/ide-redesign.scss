@@ -99,19 +99,6 @@
   }
 }
 
-.ide-redesign-python-output-pane-toolbar-right {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  align-self: stretch;
-  padding-right: var(--spacing-02);
-
-  .material-symbols {
-    font-size: 16px;
-  }
-}
-
 .ide-redesign-python-output-pane-body {
   flex: 1;
   overflow: auto;
