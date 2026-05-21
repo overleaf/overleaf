@@ -163,32 +163,32 @@ function AddOns({
 
   const hasAddons =
     (addOnsToDisplay && addOnsToDisplay.length > 0) || hasAiAssistViaWritefull
+
+  if (!hasAddons) {
+    return null
+  }
+
   return (
     <>
+      <hr />
       <h2 className="h3 fw-bold">{t('add_ons')}</h2>
-      {hasAddons ? (
-        <>
-          {addOnsToDisplay?.map(addOn => (
-            <AddOn
-              addOnCode={addOn.addOnCode}
-              key={addOn.addOnCode}
-              isAnnual={Boolean(subscription.plan.annual)}
-              handleCancelClick={handleCancelClick}
-              pendingCancellation={
-                subscription.pendingPlan !== undefined &&
-                (subscription.pendingPlan.addOns ?? []).every(
-                  pendingAddOn => pendingAddOn.code !== addOn.addOnCode
-                )
-              }
-              displayPrice={addOnsDisplayPrices[addOn.addOnCode]}
-              nextBillingDate={subscription.payment.nextPaymentDueDate}
-            />
-          ))}
-          {hasAiAssistViaWritefull && <WritefullManagedBundleAddOn />}
-        </>
-      ) : (
-        <p>{t('you_dont_have_any_add_ons_on_your_account')}</p>
-      )}
+      {addOnsToDisplay?.map(addOn => (
+        <AddOn
+          addOnCode={addOn.addOnCode}
+          key={addOn.addOnCode}
+          isAnnual={Boolean(subscription.plan.annual)}
+          handleCancelClick={handleCancelClick}
+          pendingCancellation={
+            subscription.pendingPlan !== undefined &&
+            (subscription.pendingPlan.addOns ?? []).every(
+              pendingAddOn => pendingAddOn.code !== addOn.addOnCode
+            )
+          }
+          displayPrice={addOnsDisplayPrices[addOn.addOnCode]}
+          nextBillingDate={subscription.payment.nextPaymentDueDate}
+        />
+      ))}
+      {hasAiAssistViaWritefull && <WritefullManagedBundleAddOn />}
     </>
   )
 }

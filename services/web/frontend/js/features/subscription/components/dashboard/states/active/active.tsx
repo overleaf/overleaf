@@ -283,7 +283,6 @@ export function ActiveSubscription({
           cancelPauseReq={cancelPauseReq}
         />
       )}
-      <hr />
       <AddOns
         subscription={subscription}
         onStandalonePlan={onStandalonePlan}

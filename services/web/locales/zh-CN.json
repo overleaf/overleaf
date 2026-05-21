@@ -2449,7 +2449,6 @@
   "you_cant_add_or_change_password_due_to_sso": "您无法添加或更改密码，因为您的群组或组织使用<0>单点登录 (SSO)</0>。",
   "you_cant_join_this_group_subscription": "您无法加入此团队订阅",
   "you_cant_reset_password_due_to_sso": "您无法重置密码，因为您的群组或组织使用 SSO。 <0>使用单点登录登录</0>。",
-  "you_dont_have_any_add_ons_on_your_account": "您的帐户中没有任何附加组件。",
   "you_dont_have_any_repositories": "您没有任何仓库",
   "you_have_1_license_and_your_plan_supports_up_to_y": "您有 1 个许可证并且您的计划最多支持 __groupSize__。",
   "you_have_added_x_of_group_size_y": "您已经添加 <0>__addedUsersSize__</0> / <1>__groupSize__</1> 个可用成员。",

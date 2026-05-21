@@ -224,9 +224,9 @@ describe('<ActiveSubscription />', function () {
     screen.getByText('AI Assist')
   })
 
-  it('shows empty add-ons message if none present', function () {
+  it('hides the add-ons section when none are present', function () {
     renderActiveSubscription(annualActiveSubscription)
-    screen.getByText(/You don’t have any add-ons on your account/i)
+    expect(screen.queryByRole('heading', { name: 'Add-ons' })).to.be.null
   })
 
   it('shows multiple active coupons', function () {
