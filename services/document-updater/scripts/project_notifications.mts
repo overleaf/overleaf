@@ -71,6 +71,7 @@ const queueRedisConfig = {
   password: process.env.QUEUES_REDIS_PASSWORD,
 }
 const QUEUE_NAME = 'project-notification'
+const PROGRESS_LOG_INTERVAL_MS = 15_000
 
 const projectNotificationQueue = new Queue(QUEUE_NAME, {
   redis: queueRedisConfig,
@@ -86,13 +87,20 @@ const projectNotificationQueue = new Queue(QUEUE_NAME, {
 })
 
 async function main() {
+  console.time('total')
+
   if (dryRun) {
     console.log('[DRY RUN MODE] - No changes will be made')
   }
 
   console.log('Scanning for projects that need to be notified...')
-  const projects = await getProjectsToNotify()
-  console.log(`\nFound ${projects.length} project(s) that need to be notified`)
+  const { projects, stats } = await getProjectsToNotify()
+  console.log(
+    `Scan complete: scanned=${stats.scanned}, matched=${stats.matched}, skippedNoCollaborators=${stats.skippedNoCollaborators}, skippedNoTimestamp=${stats.skippedNoTimestamp}, skippedInvalidTimestamp=${stats.skippedInvalidTimestamp}, skippedNoProjectId=${stats.skippedNoProjectId}`
+  )
+  console.log(
+    `Collaborator lookups: cacheHitWithCollaborators=${stats.collaboratorCacheHitWithCollaborators}, cacheHitNoCollaborators=${stats.collaboratorCacheHitNoCollaborators}, cacheMissWithCollaborators=${stats.collaboratorCacheMissWithCollaborators}, cacheMissNoCollaborators=${stats.collaboratorCacheMissNoCollaborators}`
+  )
 
   if (dryRun) {
     console.log('\n[DRY RUN] Projects that would be queued:')
@@ -102,12 +110,18 @@ async function main() {
         `  ${projectId}: ${timestamp} (${date.toISOString()}) - would be queued`
       )
     }
+    console.timeEnd('total')
     return
   }
 
   console.log('Waiting for queue to be ready...')
   await projectNotificationQueue.isReady()
   console.log('Queue is ready.')
+
+  let queued = 0
+  let failed = 0
+  let deleteMismatches = 0
+  let lastProgressLog = Date.now()
 
   for (const { projectId, timestamp } of projects) {
     const numericTimestamp = parseInt(timestamp, 10)
@@ -120,20 +134,35 @@ async function main() {
         }
       )
 
-      // Delete the timestamp key after scheduling (only if it still matches)
-      await deleteProjectNotificationTimestamp(projectId, timestamp)
-
-      const date = new Date(numericTimestamp)
-      console.log(
-        `  ${projectId}: ${timestamp} (${date.toISOString()}) - queued`
+      const deleted = await deleteProjectNotificationTimestamp(
+        projectId,
+        timestamp
       )
+      if (!deleted) {
+        deleteMismatches++
+      }
+
+      queued++
     } catch (err) {
+      failed++
       console.error(
         `Error scheduling notification for project ${projectId}:`,
         err
       )
     }
+
+    if (Date.now() - lastProgressLog >= PROGRESS_LOG_INTERVAL_MS) {
+      console.log(
+        `Queue progress: queued=${queued}, failed=${failed} of ${projects.length}`
+      )
+      lastProgressLog = Date.now()
+    }
   }
+
+  console.log(
+    `Queue complete: queued=${queued}, failed=${failed}, deleteMismatches=${deleteMismatches}`
+  )
+  console.timeEnd('total')
 }
 
 /**
@@ -156,12 +185,20 @@ type ProjectNotification = {
  * Check if a project has any collaborators (excluding owner)
  * Uses Redis caching with 1-2 hour randomized expiration to avoid repeated MongoDB queries
  */
-async function projectHasCollaborators(projectId: string): Promise<boolean> {
+async function projectHasCollaborators(
+  projectId: string,
+  stats: NotificationStats
+): Promise<boolean> {
   // Check Redis cache first
   const cacheKey = `ProjectHasCollaborators:{${projectId}}`
   const cachedResult = await redisClient.get(cacheKey)
 
   if (cachedResult !== null) {
+    if (cachedResult === '1') {
+      stats.collaboratorCacheHitWithCollaborators++
+    } else {
+      stats.collaboratorCacheHitNoCollaborators++
+    }
     return cachedResult === '1'
   }
 
@@ -185,81 +222,123 @@ async function projectHasCollaborators(projectId: string): Promise<boolean> {
 
   if (hasCollaborators === null) {
     // Cache negative result (no collaborators or project not found)
+    stats.collaboratorCacheMissNoCollaborators++
     await redisClient.setex(cacheKey, randomTTL, '0')
     return false
   }
 
   // Cache the result in Redis
+  stats.collaboratorCacheMissWithCollaborators++
   await redisClient.setex(cacheKey, randomTTL, hasCollaborators ? '1' : '0')
-
   return true
 }
 
 /**
  * Scan Redis for all projectNotificationTimestamp keys and return list of projects with timestamps
  */
-async function getProjectsToNotify(): Promise<ProjectNotification[]> {
+type NotificationStats = {
+  scanned: number
+  matched: number
+  skippedNoCollaborators: number
+  skippedNoTimestamp: number
+  skippedInvalidTimestamp: number
+  skippedNoProjectId: number
+  collaboratorCacheHitWithCollaborators: number
+  collaboratorCacheHitNoCollaborators: number
+  collaboratorCacheMissWithCollaborators: number
+  collaboratorCacheMissNoCollaborators: number
+}
+
+async function getProjectsToNotify(): Promise<{
+  projects: ProjectNotification[]
+  stats: NotificationStats
+}> {
   const nodes = (typeof redisClient.nodes === 'function'
     ? redisClient.nodes('master')
     : undefined) || [redisClient]
 
   const projects: ProjectNotification[] = []
+  const stats: NotificationStats = {
+    scanned: 0,
+    matched: 0,
+    skippedNoCollaborators: 0,
+    skippedNoTimestamp: 0,
+    skippedInvalidTimestamp: 0,
+    skippedNoProjectId: 0,
+    collaboratorCacheHitWithCollaborators: 0,
+    collaboratorCacheHitNoCollaborators: 0,
+    collaboratorCacheMissWithCollaborators: 0,
+    collaboratorCacheMissNoCollaborators: 0,
+  }
+  let lastProgressLog = Date.now()
 
-  for (const node of nodes) {
-    console.log('Scanning Redis node for projectNotificationTimestamp keys...')
+  console.time('redis-scan')
+  try {
+    for (const node of nodes) {
+      const stream = node.scanStream({
+        match: docUpdaterKeys.projectNotificationTimestamp({ project_id: '*' }),
+        count: 1000,
+      })
 
-    // Scan for all ProjectNotificationTimestamp keys
-    const stream = node.scanStream({
-      match: docUpdaterKeys.projectNotificationTimestamp({ project_id: '*' }),
-      count: 1000,
-    })
-
-    for await (const keys of stream) {
-      if (keys.length === 0) {
-        continue
-      }
-
-      console.log(`Found batch of ${keys.length} keys`)
-
-      // Get timestamps for all keys in this batch
-      const timestamps = await redisClient.mget(keys)
-
-      // Extract project IDs and pair with timestamps, checking for collaborators
-      for (const [index, key] of keys.entries()) {
-        const projectId = extractProjectId(key as string)
-        const timestamp = timestamps[index]
-
-        if (!projectId) {
-          console.log('Could not extract project ID from key:', key)
+      for await (const keys of stream) {
+        if (keys.length === 0) {
           continue
         }
 
-        if (!timestamp) {
-          console.log('No timestamp found for key:', key)
-          continue
-        }
+        const timestamps = await redisClient.mget(keys)
 
-        // Check if project has collaborators before adding to list
-        const hasCollaborators = await projectHasCollaborators(projectId)
-        if (!hasCollaborators) {
-          console.log(`Skipping project ${projectId} - no collaborators`)
-          continue
-        }
+        for (const [index, key] of keys.entries()) {
+          stats.scanned++
+          const projectId = extractProjectId(key as string)
+          const timestamp = timestamps[index]
 
-        const numericTimestamp = parseInt(timestamp, 10)
-        if (Number.isNaN(numericTimestamp)) {
-          console.log(
-            `Skipping project ${projectId} - non-numeric timestamp: ${timestamp}`
+          if (!projectId) {
+            stats.skippedNoProjectId++
+            console.error('Could not extract project ID from key:', key)
+            continue
+          }
+
+          if (!timestamp) {
+            stats.skippedNoTimestamp++
+            console.error(`No timestamp found for key: ${key}`)
+            continue
+          }
+
+          const hasCollaborators = await projectHasCollaborators(
+            projectId,
+            stats
           )
-          continue
+          if (!hasCollaborators) {
+            stats.skippedNoCollaborators++
+            continue
+          }
+
+          const numericTimestamp = parseInt(timestamp, 10)
+          if (Number.isNaN(numericTimestamp)) {
+            stats.skippedInvalidTimestamp++
+            console.error(
+              `Non-numeric timestamp for project ${projectId}: ${timestamp}`
+            )
+            continue
+          }
+
+          stats.matched++
+          projects.push({ projectId, timestamp })
         }
 
-        projects.push({ projectId, timestamp })
+        if (Date.now() - lastProgressLog >= PROGRESS_LOG_INTERVAL_MS) {
+          console.log(
+            `Scan progress: scanned=${stats.scanned}, matched=${stats.matched}, skipped=${stats.scanned - stats.matched}`
+          )
+          lastProgressLog = Date.now()
+        }
       }
     }
+  } finally {
+    console.timeEnd('redis-scan')
   }
 
-  return projects
+  return { projects, stats }
 }
 
 /**
@@ -269,7 +348,7 @@ async function getProjectsToNotify(): Promise<ProjectNotification[]> {
 async function deleteProjectNotificationTimestamp(
   projectId: string,
   expectedTimestamp: string
-): Promise<void> {
+): Promise<boolean> {
   const key = docUpdaterKeys.projectNotificationTimestamp({
     project_id: projectId,
   })
@@ -277,22 +356,16 @@ async function deleteProjectNotificationTimestamp(
     key,
     expectedTimestamp
   )
-  if (deleted === 1) {
-    console.log(`Deleted timestamp key for project ${projectId}`)
-  } else {
-    console.log(
-      `Timestamp key for project ${projectId} was not deleted (value mismatch or key not found)`
-    )
-  }
+  return deleted === 1
 }
 
 main()
   .then(() => {
-    console.log('\nDone.')
     process.exit(0)
   })
   .catch(error => {
     console.error('Error scanning for project notifications:', error)
+    console.timeEnd('total')
     process.exit(1)
   })
   .finally(async () => {
