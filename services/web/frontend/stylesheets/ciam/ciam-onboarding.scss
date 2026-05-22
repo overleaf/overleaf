@@ -1,15 +1,5 @@
-// Warm off-white background + diamond decoration — Briefly step only.
-.ciam-card:has(.onboarding-step-briefly) {
-  background-color: #f8f4ef;
-  background-image: url('../../../public/img/briefly-bg.svg');
-  background-repeat: no-repeat;
-  background-position: right -38px bottom 85px;
-  background-size: 220px 200px;
-}
-
 .btn.btn-ds.ciam-onboarding-back-button {
   --bs-btn-padding-x: 0;
-  --bs-btn-bg: transparent;
   --bs-btn-hover-bg: transparent;
 }
 
@@ -31,59 +21,6 @@
 
   legend {
     @include ciam-h1;
-  }
-}
-
-.onboarding-step-briefly {
-  .briefly-heading-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--ds-spacing-200);
-  }
-
-  .briefly-logo {
-    height: 40px;
-  }
-
-  .briefly-paper-plane {
-    width: 160px;
-    flex-shrink: 0;
-    margin-right: calc(-1 * var(--ciam-card-padding-x));
-
-    @include media-breakpoint-up(sm) {
-      width: 200px;
-    }
-  }
-
-  .briefly-features {
-    padding: 0 0 var(--ds-spacing-400) 0;
-  }
-
-  .briefly-stores {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--ds-spacing-300);
-  }
-
-  .briefly-store-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--ds-spacing-250);
-  }
-
-  .briefly-qr-code {
-    width: 130px;
-    height: 130px;
-
-    @include media-breakpoint-down(sm) {
-      display: none;
-    }
-  }
-
-  .briefly-store-link img {
-    height: 40px;
   }
 }
 

@@ -100,21 +100,17 @@
 .ciam-card {
   @include ciam-vertically-spaced;
 
-  --ciam-card-padding-x: var(--ds-spacing-400);
-  --ciam-card-padding-y: var(--ds-spacing-800);
-
   background-color: var(--bg-light-primary);
   box-shadow:
     0 4px 6px -4px rgb(0 0 0 / 10%),
     0 1px 29px -3px rgb(0 0 0 / 16%);
-  padding: var(--ciam-card-padding-y) var(--ciam-card-padding-x);
+  padding: var(--ds-spacing-800) var(--ds-spacing-400);
   border-radius: var(--ds-border-radius-400);
   max-width: 464px;
   margin: 0 auto;
 
   @include media-breakpoint-up(sm) {
-    --ciam-card-padding-x: var(--ds-spacing-1300);
-    --ciam-card-padding-y: var(--ds-spacing-1300);
+    padding: var(--ds-spacing-1300);
   }
 }
 
