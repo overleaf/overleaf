@@ -37,7 +37,7 @@ const features = {
     symbolPalette: true,
   },
   collaborator: {
-    aiUsageQuota: 'unlimited',
+    aiUsageQuota: 'standard',
     collaborators: 10,
     dropbox: true,
     versioning: true,
