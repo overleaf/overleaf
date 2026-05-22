@@ -6,6 +6,7 @@ import {
   ProcessedPDFFile,
 } from '@ol-types/compile'
 import OError from '@overleaf/o-error'
+import { normalizeStringError } from './normalize-string-error'
 import { PdfCachingMetricsFull } from './types'
 
 const PDF_JS_CHUNK_SIZE = 128 * 1024
@@ -523,7 +524,11 @@ export async function fallbackRequest({
     checkChunkResponse(response, end - start, init)
     return await response.arrayBuffer()
   } catch (e) {
-    throw OError.tag(e, 'fallback request failed', { url, start, end })
+    throw OError.tag(normalizeStringError(e), 'fallback request failed', {
+      url,
+      start,
+      end,
+    })
   }
 }
 
@@ -650,7 +655,8 @@ async function fetchChunk({
       delete init.signal // omit the signal from the cache
       cachedUrls.set(chunk.hash, { url, init })
     }
-  } catch (err1) {
+  } catch (rawErr1) {
+    const err1 = normalizeStringError(rawErr1)
     if ('hash' in chunk && chunk.hash) {
       cachedUrls.delete(chunk.hash)
     }
@@ -1046,7 +1052,11 @@ export async function fetchRange({
           metrics,
         })
       } catch (err) {
-        throw OError.tag(err, 'cannot fetch chunk', { chunk, url, init })
+        throw OError.tag(normalizeStringError(err), 'cannot fetch chunk', {
+          chunk,
+          url,
+          init,
+        })
       } finally {
         timer.finishBlockingCompute()
       }

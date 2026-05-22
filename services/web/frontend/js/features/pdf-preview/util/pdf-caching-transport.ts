@@ -1,5 +1,6 @@
 import OError from '@overleaf/o-error'
 import { fallbackRequest, fetchRange, preprocessFileOnce } from './pdf-caching'
+import { normalizeStringError } from './normalize-string-error'
 import { captureException } from '@/infrastructure/error-reporter'
 import { EDITOR_SESSION_ID, getPdfCachingMetrics } from './metrics'
 import {
@@ -210,6 +211,7 @@ export function generatePdfCachingTransportFactory() {
         fallbackToCacheURL: getOutputPDFURLFromCache(),
       })
         .catch(err => {
+          err = normalizeStringError(err)
           if (abortSignal.aborted) return
           if (canTryFromCache(err)) return fetchFromCache()
           if (isExpectedError(err)) {
