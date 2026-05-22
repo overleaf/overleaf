@@ -329,6 +329,17 @@ async function switchToNextPhase(
     )
   }
 
+  // Labs phase requires labs config to be set
+  if (lastVersionCopy.phase === LABS_PHASE) {
+    if (!splitTest.labsTitle || !splitTest.labsDescription) {
+      // Cannot be a required fields as we do not always promote to labs
+      throw new Errors.InvalidError(
+        'Labs phase requires Labs Title and Labs Description to be set',
+        { name }
+      )
+    }
+  }
+
   // Labs phase requires exactly one variant
   if (lastVersionCopy.phase === LABS_PHASE) {
     if (lastVersionCopy.variants.length !== 1) {

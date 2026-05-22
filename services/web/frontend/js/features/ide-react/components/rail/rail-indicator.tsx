@@ -1,7 +1,7 @@
 import OLBadge from '@/shared/components/ol/ol-badge'
 
 type RailIndicatorProps = {
-  type: 'danger' | 'warning' | 'info'
+  type: 'danger' | 'warning' | 'info' | 'success'
   count: number
 }
 

@@ -664,6 +664,255 @@ describe('SplitTestHandler', function () {
     })
   })
 
+  describe('_loadSplitTestInfoInLocals labsDetails population', function () {
+    beforeEach(function (ctx) {
+      ctx.AnalyticsManager.getIdsFromSession.returns({
+        userId: 'abc123abc123',
+      })
+    })
+
+    it('populates labsDetails for a labs-phase split test', async function (ctx) {
+      const createdAt = new Date('2024-06-15T12:00:00.000Z')
+      ctx.cachedSplitTests.set('labs-info-test', {
+        name: 'labs-info-test',
+        labsTitle: 'My Labs Feature',
+        labsDescription: 'A great feature',
+        labsIcon: 'star',
+        badgeInfo: { labs: { url: 'https://example.com/survey' } },
+        versions: [
+          {
+            active: true,
+            analyticsEnabled: true,
+            phase: 'labs',
+            versionNumber: 1,
+            createdAt,
+            variants: [
+              {
+                name: 'variant-1',
+                rolloutPercent: 100,
+                rolloutStripes: [{ start: 0, end: 100 }],
+              },
+            ],
+          },
+        ],
+      })
+
+      await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
+        'labs-info-test'
+      )
+
+      expect(ctx.LocalsHelper.setSplitTestInfo).to.have.been.calledWith(
+        ctx.res.locals,
+        'labs-info-test',
+        sinon.match({
+          phase: 'labs',
+          labsDetails: sinon.match({
+            isFull: false,
+            versionCreatedAt: createdAt.toISOString(),
+            title: 'My Labs Feature',
+            description: 'A great feature',
+            icon: 'star',
+            surveyLink: 'https://example.com/survey',
+          }),
+        })
+      )
+    })
+
+    it('handles missing labsTitle defensively', async function (ctx) {
+      const createdAt = new Date('2024-01-01T00:00:00.000Z')
+      ctx.cachedSplitTests.set('my-labs-experiment', {
+        name: 'my-labs-experiment',
+        versions: [
+          {
+            active: true,
+            analyticsEnabled: true,
+            phase: 'labs',
+            versionNumber: 1,
+            createdAt,
+            variants: [
+              {
+                name: 'variant-1',
+                rolloutPercent: 100,
+                rolloutStripes: [{ start: 0, end: 100 }],
+              },
+            ],
+          },
+        ],
+      })
+
+      await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
+        'my-labs-experiment'
+      )
+
+      expect(ctx.LocalsHelper.setSplitTestInfo).to.have.been.calledWith(
+        ctx.res.locals,
+        'my-labs-experiment',
+        sinon.match({
+          labsDetails: sinon.match({ title: '' }),
+        })
+      )
+    })
+
+    it('sets description to empty string when labsDescription is absent', async function (ctx) {
+      ctx.cachedSplitTests.set('labs-nodesc', {
+        name: 'labs-nodesc',
+        labsTitle: 'No Description',
+        versions: [
+          {
+            active: true,
+            analyticsEnabled: true,
+            phase: 'labs',
+            versionNumber: 1,
+            createdAt: new Date(),
+            variants: [
+              {
+                name: 'variant-1',
+                rolloutPercent: 100,
+                rolloutStripes: [{ start: 0, end: 100 }],
+              },
+            ],
+          },
+        ],
+      })
+
+      await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
+        'labs-nodesc'
+      )
+
+      expect(ctx.LocalsHelper.setSplitTestInfo).to.have.been.calledWith(
+        ctx.res.locals,
+        'labs-nodesc',
+        sinon.match({ labsDetails: sinon.match({ description: '' }) })
+      )
+    })
+
+    it('marks isFull true when userCount >= userLimit', async function (ctx) {
+      ctx.cachedSplitTests.set('labs-full', {
+        name: 'labs-full',
+        versions: [
+          {
+            active: true,
+            analyticsEnabled: true,
+            phase: 'labs',
+            versionNumber: 1,
+            createdAt: new Date(),
+            variants: [
+              {
+                name: 'variant-1',
+                rolloutPercent: 100,
+                rolloutStripes: [{ start: 0, end: 100 }],
+                userLimit: 10,
+                userCount: 10,
+              },
+            ],
+          },
+        ],
+      })
+
+      await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
+        'labs-full'
+      )
+
+      expect(ctx.LocalsHelper.setSplitTestInfo).to.have.been.calledWith(
+        ctx.res.locals,
+        'labs-full',
+        sinon.match({ labsDetails: sinon.match({ isFull: true }) })
+      )
+    })
+
+    it('marks isFull false when userCount < userLimit', async function (ctx) {
+      ctx.cachedSplitTests.set('labs-not-full', {
+        name: 'labs-not-full',
+        versions: [
+          {
+            active: true,
+            analyticsEnabled: true,
+            phase: 'labs',
+            versionNumber: 1,
+            createdAt: new Date(),
+            variants: [
+              {
+                name: 'variant-1',
+                rolloutPercent: 100,
+                rolloutStripes: [{ start: 0, end: 100 }],
+                userLimit: 10,
+                userCount: 5,
+              },
+            ],
+          },
+        ],
+      })
+
+      await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
+        'labs-not-full'
+      )
+
+      expect(ctx.LocalsHelper.setSplitTestInfo).to.have.been.calledWith(
+        ctx.res.locals,
+        'labs-not-full',
+        sinon.match({ labsDetails: sinon.match({ isFull: false }) })
+      )
+    })
+
+    it('marks isFull false when no userLimit is set', async function (ctx) {
+      ctx.cachedSplitTests.set('labs-no-limit', {
+        name: 'labs-no-limit',
+        versions: [
+          {
+            active: true,
+            analyticsEnabled: true,
+            phase: 'labs',
+            versionNumber: 1,
+            createdAt: new Date(),
+            variants: [
+              {
+                name: 'variant-1',
+                rolloutPercent: 100,
+                rolloutStripes: [{ start: 0, end: 100 }],
+              },
+            ],
+          },
+        ],
+      })
+
+      await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
+        'labs-no-limit'
+      )
+
+      expect(ctx.LocalsHelper.setSplitTestInfo).to.have.been.calledWith(
+        ctx.res.locals,
+        'labs-no-limit',
+        sinon.match({ labsDetails: sinon.match({ isFull: false }) })
+      )
+    })
+
+    it('does not set labsDetails for a release-phase split test', async function (ctx) {
+      await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
+        'active-test'
+      )
+
+      expect(ctx.LocalsHelper.setSplitTestInfo).to.have.been.calledWith(
+        ctx.res.locals,
+        'active-test',
+        sinon.match(info => info.labsDetails === undefined)
+      )
+    })
+  })
+
   describe('labs phase assignment (gradual rollout)', function () {
     beforeEach(function (ctx) {
       ctx.AnalyticsManager.getIdsFromSession.returns({

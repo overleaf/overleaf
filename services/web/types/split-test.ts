@@ -12,4 +12,14 @@ export type SplitTestInfo = {
     url?: string
     tooltipText?: string
   }
+  labsDetails?: LabsDetails
+}
+
+export type LabsDetails = {
+  isFull: boolean
+  versionCreatedAt: string
+  title: string
+  description: string
+  icon: string
+  surveyLink: string
 }

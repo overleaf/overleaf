@@ -206,6 +206,7 @@ export interface Meta {
     surveyLink: string
     isFull: boolean
     optedIn: boolean
+    versionCreatedAt: string | null
   }>
   'ol-languages': SpellCheckLanguage[]
   'ol-learnedWords': string[]

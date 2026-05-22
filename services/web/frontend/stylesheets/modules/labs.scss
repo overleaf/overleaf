@@ -9,10 +9,6 @@
   }
 
   #experiments-container {
-    .title-row {
-      display: flex;
-    }
-
     .labs-experiment-widget-container {
       border: 1px solid var(--border-divider);
     }
@@ -60,13 +56,12 @@
     }
 
     .title-row {
-      margin: 0;
-      margin-bottom: var(--spacing-04);
+      display: flex;
       align-items: center;
+      margin: 0 0 var(--spacing-04) 0;
 
       > h3 {
-        margin: 0;
-        margin-right: var(--spacing-04);
+        margin: 0 var(--spacing-04) 0 0;
       }
     }
 
@@ -96,14 +91,229 @@
   }
 }
 
-.labs-workbench-logo {
-  width: 32px;
-  height: 32px;
-  padding: var(--spacing-01);
+// Feature Preview Modal
+.labs-feature-preview-modal {
+  .modal-header {
+    padding-bottom: var(--spacing-04);
+    border-bottom: 1px solid var(--border-divider);
+  }
 
-  img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+  .modal-body {
+    padding: 0;
+  }
+}
+
+.labs-feature-preview-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-09);
+  color: var(--content-secondary);
+}
+
+// Experiment Browser (two-panel layout)
+.lab-experiment-modal-content {
+  container-type: inline-size;
+  container-name: lab-experiment-modal-content;
+}
+
+.lab-experiment-modal-content-inner {
+  display: flex;
+  height: 100%;
+}
+
+.labs-experiment-tab-content {
+  flex: 1;
+  min-width: 0;
+}
+
+// Fixed height in the feature preview modal, where the modal body constrains the layout
+.labs-feature-preview-modal .lab-experiment-modal-content-inner {
+  height: 500px;
+}
+
+.labs-experiment-sidebar {
+  width: 320px;
+  border-right: 1px solid var(--border-divider);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.labs-experiment-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-04);
+  padding: var(--spacing-04) var(--spacing-05);
+  text-align: left;
+  color: var(--content-primary);
+  font-size: var(--font-size-02);
+  min-height: 44px;
+  text-decoration: none;
+
+  &:hover {
+    background: var(--bg-light-secondary);
+    color: var(--content-primary);
+  }
+
+  &.active {
+    background: var(--bg-accent-03);
+    color: var(--content-primary);
+
+    .labs-experiment-sidebar-title {
+      color: var(--green-70);
+      font-weight: 600;
+    }
+  }
+}
+
+.labs-experiment-sidebar-icon {
+  font-size: 20px;
+  color: var(--content-primary);
+}
+
+.labs-experiment-sidebar-title {
+  flex: 1;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.labs-experiment-sidebar-badge {
+  // Reserve a fixed width so layout is stable whether badge is shown or not
+  min-width: 60px;
+  text-align: right;
+}
+
+.labs-settings-link {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--spacing-04);
+  padding: var(--spacing-04) var(--spacing-05);
+  text-align: left;
+  color: var(--content-primary);
+  font-size: var(--font-size-02);
+  min-height: 44px;
+  width: 100%;
+  text-decoration: none;
+
+  &:visited {
+    color: var(--content-primary);
+  }
+
+  &:hover {
+    background: var(--bg-light-secondary);
+    color: var(--content-primary);
+  }
+}
+
+.labs-settings-link-external-icon {
+  font-size: 20px;
+  color: var(--content-secondary);
+}
+
+.labs-badge {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 8px;
+}
+
+.labs-experiment-sidebar-arrow {
+  display: none;
+  font-size: 18px;
+  color: var(--content-secondary);
+}
+
+// !important needed to override Bootstrap's d-inline-grid utility on OLIconButton
+.labs-experiment-detail-back {
+  display: none !important;
+}
+
+.labs-experiment-detail {
+  padding: var(--spacing-06);
+  overflow-y: auto;
+
+  > .notification {
+    margin-bottom: var(--spacing-06);
+
+    .notification-cta {
+      align-self: center;
+      height: auto;
+    }
+  }
+}
+
+.labs-experiment-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-06);
+
+  h3 {
+    margin: 0;
+    font-size: var(--font-size-05);
+  }
+}
+
+.labs-experiment-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-04);
+  margin-bottom: var(--spacing-06);
+}
+
+.labs-experiment-detail-description {
+  margin-bottom: var(--spacing-06);
+  color: var(--content-secondary);
+  font-size: var(--font-size-02);
+  line-height: var(--line-height-03);
+}
+
+// Narrow layout: drill-down navigation instead of side-by-side panels
+// Uses container queries so this triggers based on the browser component's own width,
+// not the viewport — works correctly whether embedded in the labs modal or the settings modal.
+@container lab-experiment-modal-content (width < 600px) {
+  .lab-experiment-modal-content-inner {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .labs-experiment-sidebar {
+    width: 100%;
+    border-right: none;
+  }
+
+  .labs-experiment-sidebar-item {
+    padding: var(--spacing-05) var(--spacing-06);
+  }
+
+  .labs-experiment-sidebar-arrow {
+    display: block;
+  }
+
+  .labs-experiment-sidebar-badge {
+    min-width: auto;
+  }
+
+  .labs-experiment-tab-content {
+    display: none;
+  }
+
+  .labs-experiment-detail-back {
+    display: inline-flex !important;
+    margin-bottom: var(--spacing-05);
+  }
+
+  // When an experiment is selected, show detail and hide sidebar
+  .lab-experiment-modal-content.mobile-detail-active {
+    .labs-experiment-sidebar {
+      display: none;
+    }
+
+    .labs-experiment-tab-content {
+      display: block;
+    }
   }
 }

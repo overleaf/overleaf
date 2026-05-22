@@ -828,6 +828,22 @@ async function _loadSplitTestInfoInLocals(locals, splitTestName, session) {
       phase,
       badgeInfo: splitTest.badgeInfo?.[phase],
     }
+
+    if (phase === 'labs') {
+      const variant = currentVersion.variants?.[0]
+      info.labsDetails = {
+        title: splitTest.labsTitle || '',
+        description: splitTest.labsDescription || '',
+        icon: splitTest.labsIcon || '',
+        surveyLink: splitTest.badgeInfo?.labs?.url || '',
+        isFull: SplitTestUtils.isExperimentFull(variant),
+        versionCreatedAt:
+          currentVersion.createdAt instanceof Date
+            ? currentVersion.createdAt.toISOString()
+            : currentVersion.createdAt,
+      }
+    }
+
     if (Settings.devToolbar.enabled) {
       info.active = currentVersion.active
       info.variants = currentVersion.variants.map(variant => ({

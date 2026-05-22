@@ -1083,6 +1083,8 @@ module.exports = {
     referenceIndices: [],
     railEntries: [],
     railPopovers: [],
+    railActions: [],
+    railModals: [],
   },
 
   moduleImportSequence: [

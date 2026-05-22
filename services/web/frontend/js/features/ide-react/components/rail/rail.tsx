@@ -56,6 +56,13 @@ const moduleRailPopovers = (
   }[]
 ).map(({ import: { default: element } }) => element)
 
+const moduleRailActions = (
+  importOverleafModules('railActions') as {
+    import: { default: RailAction }
+    path: string
+  }[]
+).map(({ import: { default: action } }) => action)
+
 export const RailLayout = () => {
   const { sendEvent } = useEditorAnalytics()
   const { t } = useTranslation()
@@ -152,6 +159,7 @@ export const RailLayout = () => {
         title: t('help'),
         dropdown: <RailHelpDropdown />,
       },
+      ...moduleRailActions,
       {
         key: 'settings',
         icon: 'settings',

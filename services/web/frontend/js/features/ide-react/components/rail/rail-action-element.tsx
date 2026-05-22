@@ -14,6 +14,7 @@ type RailActionButton = {
   icon: AvailableUnfilledIcon
   title: string
   action: () => void
+  indicator?: ReactElement
   hide?: boolean
   ref?: React.Ref<HTMLButtonElement>
 }
@@ -23,6 +24,7 @@ type RailDropdown = {
   icon: AvailableUnfilledIcon
   title: string
   dropdown: ReactElement
+  indicator?: ReactElement
   hide?: boolean
   ref?: React.Ref<HTMLButtonElement>
 }
@@ -57,10 +59,9 @@ const RailActionElement = forwardRef<HTMLButtonElement, { action: RailAction }>(
                 as="button"
                 aria-label={action.title}
               >
-                <MaterialIcon
-                  className="ide-rail-tab-link-icon"
+                <RailActionIcon
                   type={action.icon}
-                  unfilled
+                  indicator={action.indicator}
                 />
               </DropdownToggle>
             </span>
@@ -81,17 +82,28 @@ const RailActionElement = forwardRef<HTMLButtonElement, { action: RailAction }>(
             className="ide-rail-tab-link ide-rail-tab-button"
             aria-label={action.title}
           >
-            <MaterialIcon
-              className="ide-rail-tab-link-icon"
-              type={action.icon}
-              unfilled
-            />
+            <RailActionIcon type={action.icon} indicator={action.indicator} />
           </button>
         </OLTooltip>
       )
     }
   }
 )
+
+function RailActionIcon({
+  type,
+  indicator,
+}: {
+  type: AvailableUnfilledIcon
+  indicator?: ReactElement
+}) {
+  return (
+    <>
+      <MaterialIcon className="ide-rail-tab-link-icon" type={type} unfilled />
+      {indicator}
+    </>
+  )
+}
 
 RailActionElement.displayName = 'RailActionElement'
 

@@ -14,7 +14,17 @@ function getVersion(splitTest, versionNumber) {
   })
 }
 
+function isExperimentFull(variant) {
+  const { userLimit, userCount } = variant
+  if (typeof userLimit === 'number') {
+    const currentCount = userCount ?? 0
+    return currentCount >= userLimit
+  }
+  return false
+}
+
 export default {
   getCurrentVersion,
   getVersion,
+  isExperimentFull,
 }
