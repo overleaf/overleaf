@@ -1529,6 +1529,146 @@ describe('SubscriptionController', function () {
       expect(preview.nextInvoice.plan.amount).to.equal(2000)
     })
 
+    describe('nextInvoice.date', function () {
+      it('uses subscription.periodEnd when cadence does not change', function (ctx) {
+        baseSubscription.pendingChange = undefined
+        baseSubscription.planCode = 'collaborator'
+        ctx.PlansLocator.findLocalPlanInSettings = sinon
+          .stub()
+          .returns({ annual: false, price_in_cents: 2300 })
+        const preview = ctx.SubscriptionController.makeChangePreview(
+          {
+            type: 'premium-subscription',
+            plan: { code: 'professional', name: 'Professional' },
+          },
+          subscriptionChange
+        )
+        expect(preview.nextInvoice.date).to.equal(
+          new Date('2027-04-29').toISOString()
+        )
+      })
+
+      it('uses now + 1 year on a monthly → annual upgrade (applied immediately)', function (ctx) {
+        baseSubscription.pendingChange = undefined
+        baseSubscription.planCode = 'student'
+        ctx.PlansLocator.findLocalPlanInSettings = sinon.stub()
+        ctx.PlansLocator.findLocalPlanInSettings
+          .withArgs('student')
+          .returns({ annual: false, price_in_cents: 1000 })
+        ctx.PlansLocator.findLocalPlanInSettings
+          .withArgs('collaborator-annual')
+          .returns({ annual: true, price_in_cents: 21900 })
+        subscriptionChange.nextPlanCode = 'collaborator-annual'
+
+        const before = new Date()
+        const preview = ctx.SubscriptionController.makeChangePreview(
+          {
+            type: 'premium-subscription',
+            plan: { code: 'collaborator-annual', name: 'Standard annual' },
+          },
+          subscriptionChange
+        )
+        const after = new Date()
+
+        const date = new Date(preview.nextInvoice.date)
+        const minExpected = new Date(before)
+        minExpected.setFullYear(minExpected.getFullYear() + 1)
+        const maxExpected = new Date(after)
+        maxExpected.setFullYear(maxExpected.getFullYear() + 1)
+        expect(date.getTime()).to.be.at.least(minExpected.getTime())
+        expect(date.getTime()).to.be.at.most(maxExpected.getTime())
+      })
+
+      it('uses now + 1 month on an annual → monthly cadence flip while in trial (applied immediately)', function (ctx) {
+        // shouldPlanChangeAtTermEnd returns false during a trial regardless
+        // of price direction, so the override applies and the next invoice
+        // is one new term from today.
+        baseSubscription.pendingChange = undefined
+        baseSubscription.planCode = 'collaborator-annual'
+        baseSubscription.trialPeriodEnd = new Date(
+          Date.now() + 24 * 60 * 60 * 1000
+        )
+        ctx.PlansLocator.findLocalPlanInSettings = sinon.stub()
+        ctx.PlansLocator.findLocalPlanInSettings
+          .withArgs('collaborator-annual')
+          .returns({ annual: true, price_in_cents: 21900 })
+        ctx.PlansLocator.findLocalPlanInSettings
+          .withArgs('collaborator')
+          .returns({ annual: false, price_in_cents: 2300 })
+        subscriptionChange.nextPlanCode = 'collaborator'
+
+        const before = new Date()
+        const preview = ctx.SubscriptionController.makeChangePreview(
+          {
+            type: 'premium-subscription',
+            plan: { code: 'collaborator', name: 'Standard' },
+          },
+          subscriptionChange
+        )
+        const after = new Date()
+
+        const date = new Date(preview.nextInvoice.date)
+        const minExpected = new Date(before)
+        minExpected.setMonth(minExpected.getMonth() + 1)
+        const maxExpected = new Date(after)
+        maxExpected.setMonth(maxExpected.getMonth() + 1)
+        expect(date.getTime()).to.be.at.least(minExpected.getTime())
+        expect(date.getTime()).to.be.at.most(maxExpected.getTime())
+      })
+
+      it('keeps subscription.periodEnd on an annual → monthly cadence flip (scheduled at term end)', function (ctx) {
+        // shouldPlanChangeAtTermEnd returns true for this case
+        // (annual yearly cents > monthly cents), so the change is deferred
+        // and the next invoice lands at the existing annual period end —
+        // not one month from now.
+        baseSubscription.pendingChange = undefined
+        baseSubscription.planCode = 'collaborator-annual'
+        ctx.PlansLocator.findLocalPlanInSettings = sinon.stub()
+        ctx.PlansLocator.findLocalPlanInSettings
+          .withArgs('collaborator-annual')
+          .returns({ annual: true, price_in_cents: 21900 })
+        ctx.PlansLocator.findLocalPlanInSettings
+          .withArgs('collaborator')
+          .returns({ annual: false, price_in_cents: 2300 })
+        subscriptionChange.nextPlanCode = 'collaborator'
+
+        const preview = ctx.SubscriptionController.makeChangePreview(
+          {
+            type: 'premium-subscription',
+            plan: { code: 'collaborator', name: 'Standard' },
+          },
+          subscriptionChange
+        )
+        expect(preview.nextInvoice.date).to.equal(
+          new Date('2027-04-29').toISOString()
+        )
+      })
+
+      it('falls back to subscription.periodEnd if current plan cannot be resolved', function (ctx) {
+        baseSubscription.pendingChange = undefined
+        baseSubscription.planCode = 'unknown-plan'
+        ctx.PlansLocator.findLocalPlanInSettings = sinon.stub()
+        ctx.PlansLocator.findLocalPlanInSettings
+          .withArgs('unknown-plan')
+          .returns(null)
+        ctx.PlansLocator.findLocalPlanInSettings
+          .withArgs('collaborator-annual')
+          .returns({ annual: true, price_in_cents: 21900 })
+        subscriptionChange.nextPlanCode = 'collaborator-annual'
+
+        const preview = ctx.SubscriptionController.makeChangePreview(
+          {
+            type: 'premium-subscription',
+            plan: { code: 'collaborator-annual', name: 'Standard annual' },
+          },
+          subscriptionChange
+        )
+        expect(preview.nextInvoice.date).to.equal(
+          new Date('2027-04-29').toISOString()
+        )
+      })
+    })
+
     it('prefers the local plan name over the legacy payment-provider name for the future invoice', function (ctx) {
       baseSubscription.pendingChange = undefined
       ctx.PlansLocator.findLocalPlanInSettings

@@ -49,6 +49,8 @@ const SUBSCRIPTION_PAUSED_REDIRECT_PATH =
 
 /**
  * @typedef {import('../../../../types/subscription/currency').CurrencyCode} CurrencyCode
+ * @typedef {import('./PaymentProviderEntities.mjs').PaymentProviderSubscription} PaymentProviderSubscription
+ * @typedef {import('../../../../types/subscription/plan').Plan} Plan
  */
 
 /**
@@ -1207,6 +1209,48 @@ function getPlanNameForDisplay(planName, planCode) {
 }
 
 /**
+ * Compute the date displayed as the user's next invoice on the preview page.
+ *
+ * Default: the current cycle's end (`subscription.periodEnd`).
+ *
+ * Exception: when the change is applied immediately AND flips cadence
+ * (monthly ↔ annual), the user starts a new term today and the next invoice
+ * lands one new-term-length from now. We reuse
+ * `SubscriptionHelper.shouldPlanChangeAtTermEnd` so the immediate-vs-deferred
+ * decision stays in step with the apply path (including the trial case).
+ *
+ * @param {PaymentProviderSubscription} subscription
+ * @param {Plan | null | undefined} currentPlan Plan settings for the current plan, or null/undefined when unknown.
+ * @param {Plan | null | undefined} nextPlan Plan settings for the post-change plan, or null/undefined when unknown.
+ * @return {Date}
+ */
+function _getNextInvoiceDate(subscription, currentPlan, nextPlan) {
+  if (currentPlan == null || nextPlan == null) {
+    return subscription.periodEnd
+  }
+  const isCadenceChange =
+    Boolean(currentPlan.annual) !== Boolean(nextPlan.annual)
+  if (!isCadenceChange) {
+    return subscription.periodEnd
+  }
+  const isAppliedImmediately = !SubscriptionHelper.shouldPlanChangeAtTermEnd(
+    currentPlan,
+    nextPlan,
+    SubscriptionHelper.isInTrial(subscription.trialPeriodEnd)
+  )
+  if (!isAppliedImmediately) {
+    return subscription.periodEnd
+  }
+  const nextInvoiceDate = new Date()
+  if (nextPlan.annual) {
+    nextInvoiceDate.setFullYear(nextInvoiceDate.getFullYear() + 1)
+  } else {
+    nextInvoiceDate.setMonth(nextInvoiceDate.getMonth() + 1)
+  }
+  return nextInvoiceDate
+}
+
+/**
  * Build a subscription change preview for display purposes
  *
  * @param {SubscriptionChangeDescription} subscriptionChangeDescription A description of the change for the frontend
@@ -1263,6 +1307,14 @@ function makeChangePreview(
   const nextPlan = PlansLocator.findLocalPlanInSettings(
     futureInvoiceChange.nextPlanCode
   )
+  const currentPlan = PlansLocator.findLocalPlanInSettings(
+    subscription.planCode
+  )
+  const nextInvoiceDate = _getNextInvoiceDate(
+    subscription,
+    currentPlan,
+    nextPlan
+  )
 
   return {
     change: subscriptionChangeDescription,
@@ -1274,7 +1326,7 @@ function makeChangePreview(
       annual: nextPlan?.annual ?? false,
     },
     nextInvoice: {
-      date: subscription.periodEnd.toISOString(),
+      date: nextInvoiceDate.toISOString(),
       plan: {
         name: getPlanNameForDisplay(
           nextPlan?.name ?? futureInvoiceChange.nextPlanName,
