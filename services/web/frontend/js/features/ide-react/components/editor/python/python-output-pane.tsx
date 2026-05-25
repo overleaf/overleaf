@@ -1,10 +1,11 @@
-import { useMemo, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import OLButton from '@/shared/components/ol/ol-button'
 import OLButtonToolbar from '@/shared/components/ol/ol-button-toolbar'
 import MaterialIcon from '@/shared/components/material-icon'
 import SplitTestBadge from '@/shared/components/split-test-badge'
+import { sendMB } from '@/infrastructure/event-tracking'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { usePythonExecutionContext } from '@/features/ide-react/context/python-execution-context'
 import { DEFAULT_STATE } from './python-runner'
@@ -14,12 +15,23 @@ const getDefaultState = () => DEFAULT_STATE
 
 export default function PythonOutputPane() {
   const { t } = useTranslation()
-  const { currentDocumentId } = useEditorOpenDocContext()
+  const { currentDocumentId, openDocName } = useEditorOpenDocContext()
   const { getPythonRunner } = usePythonExecutionContext()
   const pythonRunner = useMemo(
     () => (currentDocumentId ? getPythonRunner(currentDocumentId) : null),
     [currentDocumentId, getPythonRunner]
   )
+
+  useEffect(() => {
+    if (!currentDocumentId || !openDocName) {
+      return
+    }
+    sendMB('script-runner-opened', {
+      fileName: openDocName,
+      fileExtension: 'py',
+      editorMode: 'code',
+    })
+  }, [currentDocumentId, openDocName])
 
   const { output, error, status } = useSyncExternalStore(
     pythonRunner ? pythonRunner.subscribe : emptySubscribe,
