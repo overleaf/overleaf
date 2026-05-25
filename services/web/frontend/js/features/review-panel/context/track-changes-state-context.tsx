@@ -6,7 +6,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
 } from 'react'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
@@ -48,16 +47,23 @@ export const TrackChangesStateProvider: FC<React.PropsWithChildren> = ({
 }) => {
   const permissions = usePermissionsContext()
   const { socket } = useConnectionContext()
-  const { projectId, project, features } = useProjectContext()
+  const { projectId, project, updateProject, features } = useProjectContext()
   const user = useUserContext()
   const { setWantTrackChanges } = useEditorPropertiesContext()
 
-  // TODO: update project.trackChangesState instead?
-  const [trackChangesValue, setTrackChangesValue] = useState<
-    ProjectMetadata['trackChangesState']
-  >(project?.trackChangesState ?? false)
+  const trackChangesValue: ProjectMetadata['trackChangesState'] =
+    project?.trackChangesState ?? false
 
-  useSocketListener(socket, 'toggle-track-changes', setTrackChangesValue)
+  useSocketListener(
+    socket,
+    'toggle-track-changes',
+    useCallback(
+      (newValue: ProjectMetadata['trackChangesState']) => {
+        updateProject({ trackChangesState: newValue })
+      },
+      [updateProject]
+    )
+  )
 
   useEffect(() => {
     setWantTrackChanges(
