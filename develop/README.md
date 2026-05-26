@@ -59,7 +59,6 @@ each service:
 | `web`              | 9229 |
 | `clsi`             | 9230 |
 | `chat`             | 9231 |
-| `contacts`         | 9232 |
 | `docstore`         | 9233 |
 | `document-updater` | 9234 |
 | `filestore`        | 9235 |

@@ -72,9 +72,6 @@ module.exports = {
     realTime: {
       url: 'http://127.0.0.1:23026',
     },
-    contacts: {
-      url: 'http://127.0.0.1:23036',
-    },
     notifications: {
       url: 'http://127.0.0.1:23042',
     },

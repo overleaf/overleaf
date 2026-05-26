@@ -224,7 +224,6 @@
     "services/clsi",
     "services/clsi-cache",
     "services/clsi-perf",
-    "services/contacts",
     "services/docstore",
     "services/document-updater",
     "services/filestore",

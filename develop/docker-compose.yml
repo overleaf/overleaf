@@ -45,13 +45,6 @@ services:
       - ${PWD}/output:/output:ro
       - ../services/clsi/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
 
-  contacts:
-    build:
-      context: ..
-      dockerfile: services/contacts/Dockerfile
-    env_file:
-      - dev.env
-
   docstore:
     build:
       context: ..
@@ -161,7 +154,6 @@ services:
       - redis
       - chat
       - clsi
-      - contacts
       - docstore
       - document-updater
       - filestore

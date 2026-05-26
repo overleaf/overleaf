@@ -6477,34 +6477,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@overleaf/contacts@workspace:services/contacts":
-  version: 0.0.0-use.local
-  resolution: "@overleaf/contacts@workspace:services/contacts"
-  dependencies:
-    "@overleaf/logger": "workspace:*"
-    "@overleaf/metrics": "workspace:*"
-    "@overleaf/migrations": "workspace:*"
-    "@overleaf/mongo-utils": "workspace:*"
-    "@overleaf/settings": "workspace:*"
-    async: "npm:^3.2.5"
-    body-parser: "npm:1.20.4"
-    bunyan: "npm:^1.8.15"
-    chai: "npm:^4.3.6"
-    chai-as-promised: "npm:^7.1.1"
-    esmock: "npm:^2.6.3"
-    express: "npm:4.22.1"
-    mocha: "npm:^11.1.0"
-    mocha-junit-reporter: "npm:^2.2.1"
-    mocha-multi-reporters: "npm:^1.5.1"
-    mongodb: "npm:6.12.0"
-    request: "npm:2.88.2"
-    sinon: "npm:~9.0.1"
-    sinon-chai: "npm:^3.7.0"
-    typescript: "npm:^5.0.4"
-    underscore: "npm:~1.13.1"
-  languageName: unknown
-  linkType: soft
-
 "@overleaf/dictionaries@https://github.com/overleaf/dictionaries/archive/refs/tags/v0.0.3.tar.gz":
   version: 0.0.3
   resolution: "@overleaf/dictionaries@https://github.com/overleaf/dictionaries/archive/refs/tags/v0.0.3.tar.gz"
@@ -18078,7 +18050,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esmock@npm:^2.6.3, esmock@npm:^2.7.3":
+"esmock@npm:^2.7.3":
   version: 2.7.3
   resolution: "esmock@npm:2.7.3"
   checksum: 10c0/71aebd7b82ad11bab56b9ff3897e105c0fc51eef9e9268c9406c3ca14401eddc8a69f2f381ae82e24d039452de5fc7f32ec694fdf3b1c6d724af22cf69e5f9dd
@@ -33298,7 +33270,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"underscore@npm:1.13.8, underscore@npm:>=1.8.3, underscore@npm:~1.13.1":
+"underscore@npm:1.13.8, underscore@npm:>=1.8.3":
   version: 1.13.8
   resolution: "underscore@npm:1.13.8"
   checksum: 10c0/6677688daeda30484823e77c0b89ce4dcf29964a77d5a06f37299c007ab4bb1c66a0ff75e0d274620b62a1fe2a6ba29879f8214533ca611d71a1ae504f2bfc9b

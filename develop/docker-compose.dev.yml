@@ -21,17 +21,6 @@ services:
       - ../services/chat/app.js:/overleaf/services/chat/app.js
       - ../services/chat/config:/overleaf/services/chat/config
 
-  contacts:
-    command: ["node", "--watch", "app.js"]
-    environment:
-      - NODE_OPTIONS=--inspect=0.0.0.0:9229
-    ports:
-      - "127.0.0.1:9232:9229"
-    volumes:
-      - ../services/contacts/app:/overleaf/services/contacts/app
-      - ../services/contacts/app.js:/overleaf/services/contacts/app.js
-      - ../services/contacts/config:/overleaf/services/contacts/config
-
   docstore:
     command: ["node", "--watch", "app.js"]
     environment:
