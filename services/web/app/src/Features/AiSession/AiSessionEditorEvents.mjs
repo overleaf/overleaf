@@ -26,7 +26,19 @@ export default {
     res.flushHeaders()
     res.write('retry: 5000\n\n')
 
-    const rclient = redis.createClient(Settings.redis.pubsub)
+    // Settings.redis.pubsub is only defined on Server Pro; CE leaves it
+    // unset and the same Redis is used for everything via Settings.redis.web.
+    // Without the fallback, ioredis defaults to 127.0.0.1:6379, retries 20x,
+    // and the unhandled MaxRetriesPerRequestError kills the whole web process.
+    const rclient = redis.createClient(
+      Settings.redis.pubsub || Settings.redis.web
+    )
+    // Belt-and-braces: even with the right host configured, a transient
+    // redis hiccup must not take web down. Log and move on; the subscribe
+    // callback handles the steady-state error path.
+    rclient.on('error', err => {
+      logger.warn({ err, projectId }, 'editor-events redis client error')
+    })
 
     function send(data) {
       try {
