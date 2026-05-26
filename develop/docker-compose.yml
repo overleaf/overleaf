@@ -167,6 +167,11 @@ services:
       # Claude Code containers. Comment this out (and unset AI_SESSION_IMAGE
       # in dev.env) to disable the feature.
       - ${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock
+    # Web runs as uid 1000; the docker socket is root:docker (gid varies by
+    # host). Add the host's docker gid as a supplementary group so dockerode
+    # can connect. Override via DOCKER_GID env if your host differs.
+    group_add:
+      - "${DOCKER_GID:-983}"
     depends_on:
       - mongo
       - redis
