@@ -128,6 +128,7 @@
     "csurf": "^1.11.0",
     "csv": "^6.2.5",
     "dateformat": "1.0.4-1.2.3",
+    "dockerode": "^4.0.9",
     "ejs": "^3.1.10",
     "email-addresses": "^5.0.0",
     "eventsource-parser": "^1.1.2",

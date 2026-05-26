@@ -7,6 +7,7 @@ import {
   useRailContext,
 } from '@/features/ide-react/context/rail-context'
 import FileTreeOutlinePanel from '@/features/file-tree/components/file-tree-outline-panel'
+import AiAssistantPane from '@/features/ai-assistant/components/ai-assistant-pane'
 import ChatPane from '@/features/chat/components/chat-pane'
 import ChatIndicator from '@/features/chat/components/chat-indicator'
 import getMeta from '@/utils/meta'
@@ -72,6 +73,7 @@ export const RailLayout = () => {
   const { isRestrictedTokenMember } = useEditorContext()
   const gitBridgeEnabled = getMeta('ol-gitBridgeEnabled')
   const { isOverleaf } = getMeta('ol-ExposedSettings')
+  const aiAssistantEnabled = getMeta('ol-aiAssistantEnabled')
 
   const { view, setLeftMenuShown } = useLayoutContext()
 
@@ -139,6 +141,13 @@ export const RailLayout = () => {
           !getMeta('ol-capabilities')?.includes('chat') ||
           isRestrictedTokenMember,
       },
+      {
+        key: 'ai-assistant',
+        icon: 'smart_toy',
+        component: <AiAssistantPane />,
+        title: t('ai_assistant'),
+        hide: !aiAssistantEnabled || isRestrictedTokenMember,
+      },
       ...moduleRailEntries,
     ],
     [
@@ -148,6 +157,7 @@ export const RailLayout = () => {
       isRestrictedTokenMember,
       isOverleaf,
       gitBridgeEnabled,
+      aiAssistantEnabled,
     ]
   )
 

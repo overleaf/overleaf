@@ -1,2 +1,5 @@
 node_modules/
 *.log
+# This is a yarn-workspace package; the root yarn.lock is the source of truth.
+# A package-lock.json only appears if someone runs `npm install` locally.
+package-lock.json

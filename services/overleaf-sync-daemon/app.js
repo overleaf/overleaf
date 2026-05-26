@@ -10,10 +10,12 @@
 //   WORKSPACE_DIR         e.g. /workspace
 //
 // Optional:
-//   LOG_LEVEL             debug|info  (default info)
+//   AI_SESSION_HEARTBEAT_URL  if set, POST a liveness ping every 15s
+//   LOG_LEVEL                 debug|info  (default info)
 
 const { OverleafClient } = require('./lib/overleaf-client')
 const { Syncer } = require('./lib/syncer')
+const { startHeartbeat } = require('./lib/heartbeat')
 
 function log(msg, fields) {
   const line = { ts: new Date().toISOString(), msg, ...(fields || {}) }
@@ -44,6 +46,14 @@ async function main() {
   process.on('SIGINT', () => shutdown(syncer))
 
   await syncer.start()
+
+  if (process.env.AI_SESSION_HEARTBEAT_URL) {
+    startHeartbeat({
+      url: process.env.AI_SESSION_HEARTBEAT_URL,
+      auth: webAuth,
+      log,
+    })
+  }
 }
 
 async function shutdown(syncer) {
