@@ -234,6 +234,7 @@
     "services/idp",
     "services/latexqc",
     "services/notifications",
+    "services/overleaf-sync-daemon",
     "services/project-history",
     "services/real-time",
     "services/templates",
