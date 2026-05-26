@@ -22,7 +22,9 @@ class OverleafClient {
   // services/real-time does on Socket.IO joinProject.
   async joinProject(userId) {
     const url = `${this.webUrl}/project/${this.projectId}/join`
-    const body = JSON.stringify({ userId, anonymousAccessToken: null })
+    // anonymousAccessToken is optional but the server validator rejects
+    // explicit null (it's `z.string().optional()`), so omit it entirely.
+    const body = JSON.stringify({ userId })
     const res = await request('POST', url, body, this.webAuth)
     if (res.statusCode !== 200) {
       throw new Error(`joinProject failed: ${res.statusCode} ${res.body}`)
