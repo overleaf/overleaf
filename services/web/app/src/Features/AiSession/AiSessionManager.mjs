@@ -9,6 +9,7 @@
 // Overleaf session before forwarding any request to a container.
 
 import crypto from 'node:crypto'
+import net from 'node:net'
 import OError from '@overleaf/o-error'
 import logger from '@overleaf/logger'
 import Settings from '@overleaf/settings'
@@ -137,6 +138,13 @@ async function ensureSession({ userId, projectId }) {
     })
   }
 
+  // code-server inside the container takes ~2s after `container.start()`
+  // before it binds the TCP port. Returning the iframe URL before that
+  // window makes the browser's first request hit ECONNREFUSED and render
+  // "AI session unavailable" (which then sticks until the user reloads).
+  // Block here until the upstream is reachable, with a generous timeout.
+  await waitForUpstream(ip, internalPort, 20000)
+
   const session = {
     sessionId,
     containerId: info.Id,
@@ -149,6 +157,37 @@ async function ensureSession({ userId, projectId }) {
   sessions.set(sessionId, session)
   sessionIndex.set(key, sessionId)
   return session
+}
+
+function probeTcp(host, port, timeoutMs) {
+  return new Promise(resolve => {
+    const sock = net.connect({ host, port })
+    let done = false
+    const finish = ok => {
+      if (done) return
+      done = true
+      sock.destroy()
+      resolve(ok)
+    }
+    sock.once('connect', () => finish(true))
+    sock.once('error', () => finish(false))
+    sock.setTimeout(timeoutMs, () => finish(false))
+  })
+}
+
+async function waitForUpstream(host, port, totalMs) {
+  const deadline = Date.now() + totalMs
+  let attempt = 0
+  while (Date.now() < deadline) {
+    attempt++
+    if (await probeTcp(host, port, 1000)) return
+    await new Promise(r => setTimeout(r, 250))
+  }
+  throw new OError('upstream did not start listening in time', {
+    host,
+    port,
+    waitedMs: totalMs,
+  })
 }
 
 function getSession(sessionId) {
