@@ -4,6 +4,7 @@ import fetchMock from 'fetch-mock'
 import sinon from 'sinon'
 import ModalContentNewProjectForm from '../../../../../../frontend/js/features/project-list/components/new-project-button/modal-content-new-project-form'
 import { location } from '@/shared/components/location'
+import * as projectListApi from '@/features/project-list/util/api'
 
 describe('<ModalContentNewProjectForm />', function () {
   beforeEach(function () {
@@ -49,6 +50,45 @@ describe('<ModalContentNewProjectForm />', function () {
       sinon.assert.calledOnce(assignStub)
     })
     sinon.assert.calledWith(assignStub, `/project/${projectId}`)
+  })
+
+  it('redirects even when adding tags fails', async function () {
+    const projectId = 'ab123'
+
+    fetchMock.post('/project/new', {
+      status: 200,
+      body: {
+        project_id: projectId,
+      },
+    })
+
+    const addProjectsToTagStub = this.locationWrapperSandbox
+      .stub(projectListApi, 'addProjectsToTag')
+      .rejects(new Error('tag add failed'))
+
+    render(
+      <ModalContentNewProjectForm
+        onCancel={() => {}}
+        initialTags={[{ _id: 'tag-1', user_id: 'user-1', name: 'Tag 1' }]}
+      />
+    )
+
+    fireEvent.change(screen.getByLabelText('Project name'), {
+      target: { value: 'Test Name' },
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Create',
+      })
+    )
+
+    const assignStub = this.locationWrapperStub.assign
+    await waitFor(() => {
+      sinon.assert.calledOnce(assignStub)
+    })
+    sinon.assert.calledWith(assignStub, `/project/${projectId}`)
+    sinon.assert.calledWith(addProjectsToTagStub, 'tag-1', [projectId])
   })
 
   it('shows error when project name contains "/"', async function () {

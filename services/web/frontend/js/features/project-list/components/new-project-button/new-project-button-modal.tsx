@@ -5,6 +5,7 @@ import { JSXElementConstructor, lazy, Suspense, useCallback } from 'react'
 import { Nullable } from '../../../../../../types/utils'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import { useLocation } from '@/shared/hooks/use-location'
+import { Tag } from '../../../../../../app/src/Features/Tags/types'
 
 const UploadProjectModal = lazy(() => import('./upload-project-modal'))
 const ImportDocumentModal = lazy(() => import('./import-document-modal'))
@@ -20,9 +21,14 @@ export type NewProjectButtonModalVariant =
 type NewProjectButtonModalProps = {
   modal: Nullable<NewProjectButtonModalVariant>
   onHide: () => void
+  initialTags?: Tag[]
 }
 
-function NewProjectButtonModal({ modal, onHide }: NewProjectButtonModalProps) {
+function NewProjectButtonModal({
+  modal,
+  onHide,
+  initialTags,
+}: NewProjectButtonModalProps) {
   const [importProjectFromGithubModalWrapper] = importOverleafModules(
     'importProjectFromGithubModalWrapper'
   )
@@ -45,9 +51,9 @@ function NewProjectButtonModal({ modal, onHide }: NewProjectButtonModalProps) {
 
   switch (modal) {
     case 'blank_project':
-      return <BlankProjectModal onHide={onHide} />
+      return <BlankProjectModal onHide={onHide} initialTags={initialTags} />
     case 'example_project':
-      return <ExampleProjectModal onHide={onHide} />
+      return <ExampleProjectModal onHide={onHide} initialTags={initialTags} />
     case 'upload_project':
       return (
         <Suspense fallback={<FullSizeLoadingSpinner delay={500} />}>

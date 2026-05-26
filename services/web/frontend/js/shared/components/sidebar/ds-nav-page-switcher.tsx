@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { BookBookmark, Folder } from '@phosphor-icons/react'
 import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
+import getMeta from '@/utils/meta'
 import overleafLogo from '@/shared/svgs/overleaf-a-ds-solution-mallard.svg'
 import overleafLogoDark from '@/shared/svgs/overleaf-a-ds-solution-mallard-dark.svg'
 
@@ -18,20 +19,23 @@ export function DsNavPageSwitcher({
   onProjectsClick?: React.MouseEventHandler
 }) {
   const { t } = useTranslation()
+  const appName = getMeta('ol-ExposedSettings')?.appName ?? 'Overleaf'
   const activeOverallTheme = useActiveOverallTheme()
 
   return (
     <>
       {showLogo && (
         <div className="ds-nav-page-switcher-logo">
-          <img
-            src={
-              activeOverallTheme === 'dark' ? overleafLogoDark : overleafLogo
-            }
-            alt="Overleaf, A Digital Science Solution"
-            height="59"
-            width="130"
-          />
+          <a href="/" aria-label={appName}>
+            <img
+              src={
+                activeOverallTheme === 'dark' ? overleafLogoDark : overleafLogo
+              }
+              alt="Overleaf, A Digital Science Solution"
+              height="59"
+              width="130"
+            />
+          </a>
         </div>
       )}
       <ul

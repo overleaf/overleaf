@@ -12,8 +12,11 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from '@/shared/components/dropdown/dropdown-menu'
+import MaterialIcon from '@/shared/components/material-icon'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import ProjectsFilterMenu from '../projects-filter-menu'
 import TagsList from '../tags-list'
+import MobilePageSwitcherItems from './mobile-page-switcher-items'
 
 type ItemProps = {
   filter: Filter
@@ -48,7 +51,9 @@ export function Item({ filter, text, onClick }: ItemProps) {
 function ProjectsDropdown() {
   const { t } = useTranslation()
   const [title, setTitle] = useState(() => t('all_projects'))
+  const [view, setView] = useState<'top' | 'submenu'>('submenu')
   const { filter, selectedTagId, tags } = useProjectListContext()
+  const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
   const filterTranslations = useRef<Record<Filter, string>>({
     all: t('all_projects'),
     owned: t('your_projects'),
@@ -73,8 +78,40 @@ function ProjectsDropdown() {
     }
   }, [filter, tags, selectedTagId, t])
 
+  const submenuItems = (
+    <>
+      <li role="none">
+        <Item filter="all" text={t('all_projects')} />
+      </li>
+      <li role="none">
+        <Item filter="owned" text={t('your_projects')} />
+      </li>
+      <li role="none">
+        <Item filter="shared" text={t('shared_with_you')} />
+      </li>
+      <li role="none">
+        <Item filter="archived" text={t('archived_projects')} />
+      </li>
+      <li role="none">
+        <Item filter="trashed" text={t('trashed_projects')} />
+      </li>
+      <DropdownHeader className="text-uppercase">{t('tags')}:</DropdownHeader>
+      <TagsList />
+    </>
+  )
+
   return (
-    <Dropdown>
+    <Dropdown
+      onToggle={
+        isLibraryEnabled
+          ? show => {
+              if (!show) {
+                setView('submenu')
+              }
+            }
+          : undefined
+      }
+    >
       <DropdownToggle
         id="projects-types-dropdown-toggle-btn"
         className="ps-0 mb-0 btn-transparent h3"
@@ -86,23 +123,32 @@ function ProjectsDropdown() {
         </span>
       </DropdownToggle>
       <DropdownMenu flip={false}>
-        <li role="none">
-          <Item filter="all" text={t('all_projects')} />
-        </li>
-        <li role="none">
-          <Item filter="owned" text={t('your_projects')} />
-        </li>
-        <li role="none">
-          <Item filter="shared" text={t('shared_with_you')} />
-        </li>
-        <li role="none">
-          <Item filter="archived" text={t('archived_projects')} />
-        </li>
-        <li role="none">
-          <Item filter="trashed" text={t('trashed_projects')} />
-        </li>
-        <DropdownHeader className="text-uppercase">{t('tags')}:</DropdownHeader>
-        <TagsList />
+        {!isLibraryEnabled && submenuItems}
+        {isLibraryEnabled && view === 'submenu' && (
+          <>
+            <li role="none">
+              <DropdownItem
+                as="button"
+                tabIndex={-1}
+                leadingIcon={<MaterialIcon type="chevron_left" />}
+                aria-label={t('back')}
+                onClick={e => {
+                  e.stopPropagation()
+                  setView('top')
+                }}
+              >
+                {t('projects')}
+              </DropdownItem>
+            </li>
+            {submenuItems}
+          </>
+        )}
+        {isLibraryEnabled && view === 'top' && (
+          <MobilePageSwitcherItems
+            activePage="projects"
+            onProjectsClick={() => setView('submenu')}
+          />
+        )}
       </DropdownMenu>
     </Dropdown>
   )

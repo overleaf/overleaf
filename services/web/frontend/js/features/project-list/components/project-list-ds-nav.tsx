@@ -42,6 +42,9 @@ export function ProjectListDsNav() {
   const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
 
   const selectedTag = tags.find(tag => tag._id === selectedTagId)
+  const showNewProjectButton =
+    !isLibraryEnabled ||
+    (filter !== 'shared' && filter !== 'archived' && filter !== 'trashed')
 
   const tableTopArea = (
     <div className="pt-2 pb-3 d-md-none d-flex gap-2">
@@ -54,10 +57,12 @@ export function ProjectListDsNav() {
             selectedTag={selectedTag}
             className="overflow-hidden flex-grow-1"
           />
-          <NewProjectButton
-            id="new-project-button-projects-table"
-            showAddAffiliationWidget
-          />
+          {showNewProjectButton && (
+            <NewProjectButton
+              id="new-project-button-projects-table"
+              showAddAffiliationWidget
+            />
+          )}
         </>
       ) : (
         <>
@@ -127,7 +132,7 @@ export function ProjectListDsNav() {
                         selectedTag={selectedTag}
                       />
                     </OLCol>
-                    {isLibraryEnabled && (
+                    {isLibraryEnabled && showNewProjectButton && (
                       <OLCol className="ms-auto" xs="auto">
                         <NewProjectButton
                           id="new-project-button-projects-table"

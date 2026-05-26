@@ -21,6 +21,8 @@ import { useSendProjectListMB } from '@/features/project-list/components/project
 import type { PortalTemplate } from '../../../../../types/portal-template'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import MaterialIcon from '@/shared/components/material-icon'
+import { useProjectListContext } from '@/features/project-list/context/project-list-context'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 type SendTrackingEvent = {
   dropdownMenu: string
@@ -65,6 +67,12 @@ function NewProjectButton({
   const markdownImportEnabled =
     useFeatureFlag('import-markdown') &&
     getMeta('ol-ExposedSettings').enablePandocConversions
+  const { selectedTagId, tags } = useProjectListContext()
+  const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
+  const initialTags =
+    isLibraryEnabled && selectedTagId
+      ? tags.filter(tag => tag._id === selectedTagId)
+      : []
   const sendTrackingEvent = useCallback(
     ({
       dropdownMenu,
@@ -310,7 +318,11 @@ function NewProjectButton({
           ) : null}
         </DropdownMenu>
       </Dropdown>
-      <NewProjectButtonModal modal={modal} onHide={() => setModal(null)} />
+      <NewProjectButtonModal
+        modal={modal}
+        onHide={() => setModal(null)}
+        initialTags={initialTags}
+      />
     </>
   )
 }

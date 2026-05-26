@@ -1,11 +1,13 @@
 import ModalContentNewProjectForm from './modal-content-new-project-form'
 import { OLModal } from '@/shared/components/ol/ol-modal'
+import { Tag } from '../../../../../../app/src/Features/Tags/types'
 
 type BlankProjectModalProps = {
   onHide: () => void
+  initialTags?: Tag[]
 }
 
-function BlankProjectModal({ onHide }: BlankProjectModalProps) {
+function BlankProjectModal({ onHide, initialTags }: BlankProjectModalProps) {
   return (
     <OLModal
       show
@@ -14,7 +16,7 @@ function BlankProjectModal({ onHide }: BlankProjectModalProps) {
       id="blank-project-modal"
       backdrop="static"
     >
-      <ModalContentNewProjectForm onCancel={onHide} />
+      <ModalContentNewProjectForm onCancel={onHide} initialTags={initialTags} />
     </OLModal>
   )
 }

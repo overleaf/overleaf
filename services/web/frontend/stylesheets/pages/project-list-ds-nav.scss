@@ -112,23 +112,29 @@ body {
     }
 
     .project-list-wrapper .project-list-sidebar-wrapper-react {
+      padding-top: calc(var(--spacing-08) - 1px);
+
       .ds-nav-page-switcher-divider {
         margin: var(--spacing-05) 0;
       }
 
       .project-list-sidebar-scroll {
         padding-top: 0;
+        padding-right: var(--spacing-05);
       }
-    }
-  }
 
-  &.library-page {
-    .project-list-wrapper
-      .project-ds-nav-content-and-messages
-      .project-ds-nav-content {
-      @include media-breakpoint-up(md) {
-        border-top-left-radius: 0;
-        border-top: none;
+      ul.project-list-filters {
+        > li > button {
+          padding-left: calc(var(--spacing-05) + 24px + var(--spacing-05));
+        }
+
+        .dropdown-header {
+          padding-left: calc(var(--spacing-06) + 24px + var(--spacing-05));
+        }
+
+        > li.tag button.tag-name {
+          padding-left: calc(var(--spacing-06) + 24px + var(--spacing-05));
+        }
       }
     }
   }
