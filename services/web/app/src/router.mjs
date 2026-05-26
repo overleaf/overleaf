@@ -6,6 +6,7 @@ import ProjectApiController from './Features/Project/ProjectApiController.mjs'
 import ProjectListController from './Features/Project/ProjectListController.mjs'
 import SpellingController from './Features/Spelling/SpellingController.mjs'
 import EditorRouter from './Features/Editor/EditorRouter.mjs'
+import AiSessionRouter from './Features/AiSession/AiSessionRouter.mjs'
 import Settings from '@overleaf/settings'
 import TpdsController from './Features/ThirdPartyDataStore/TpdsController.mjs'
 import SubscriptionRouter from './Features/Subscription/SubscriptionRouter.mjs'
@@ -304,6 +305,7 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   UserMembershipRouter.apply(webRouter)
   TokenAccessRouter.apply(webRouter)
   HistoryRouter.apply(webRouter, privateApiRouter)
+  AiSessionRouter.apply(webRouter, privateApiRouter)
 
   await Modules.applyRouter(webRouter, privateApiRouter, publicApiRouter)
 

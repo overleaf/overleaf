@@ -12,6 +12,8 @@ const { getTotalSizeOfLines } = require('./Limits')
 const { StringFileData } = require('overleaf-editor-core')
 const { addTrackedDeletesToContent } = require('./Utils')
 const HistoryConversions = require('./HistoryConversions')
+const InjectOpsManager = require('./InjectOpsManager')
+const AppliedOpsStream = require('./AppliedOpsStream')
 
 async function getDoc(req, res) {
   let fromVersion
@@ -524,6 +526,61 @@ async function flushQueuedProjects(req, res) {
 }
 
 /**
+ * Inject an OT op as if it came from a real client. Used by external sync
+ * agents (e.g. the Claude Code sync daemon) that don't speak Socket.IO.
+ *
+ * Body: { op, v, userId, source, hash?, dupIfSource? }
+ *  - op: array of sharejs ops, e.g. [{i: "abc", p: 5}, {d: "xyz", p: 10}]
+ *  - v: client's known doc version (will be transformed if stale)
+ *  - userId: Overleaf user id to credit the edit to
+ *  - source: caller-supplied tag, echoed back on applied-ops so caller can
+ *    skip its own ops (loop guard)
+ */
+async function injectOp(req, res) {
+  const { project_id: projectId, doc_id: docId } = req.params
+  const { op, v, userId, source, hash, dupIfSource } = req.body
+
+  if (!Array.isArray(op) || op.length === 0) {
+    return res.status(400).json({ error: 'op must be a non-empty array' })
+  }
+  if (typeof v !== 'number') {
+    return res.status(400).json({ error: 'v (version) is required' })
+  }
+  if (typeof source !== 'string' || source.length === 0) {
+    return res.status(400).json({ error: 'source is required' })
+  }
+
+  const timer = new Metrics.Timer('http.injectOp')
+  try {
+    await InjectOpsManager.promises.queueOp(projectId, docId, {
+      op,
+      v,
+      meta: { user_id: userId || null, source },
+      hash,
+      dupIfSource,
+    })
+    timer.done()
+    res.status(202).json({ queued: true })
+  } catch (err) {
+    timer.done()
+    logger.error({ err, projectId, docId }, 'failed to inject op')
+    res.status(500).json({ error: err.message })
+  }
+}
+
+/**
+ * Server-Sent Events stream of applied ops for a project. External sync
+ * agents subscribe here to learn about edits made by other clients.
+ *
+ * Each SSE event carries the applied-ops payload as JSON:
+ *   { project_id, doc_id, op: { v, op: [...], meta: { source, user_id } } }
+ */
+async function streamAppliedOps(req, res) {
+  const projectId = req.params.project_id
+  AppliedOpsStream.attach(projectId, req, res)
+}
+
+/**
  * Block a project from getting loaded in docupdater
  *
  * The project is blocked only if it's not already loaded in docupdater. The
@@ -569,4 +626,6 @@ module.exports = {
   blockProject: expressify(blockProject),
   unblockProject: expressify(unblockProject),
   getComment: expressify(getComment),
+  injectOp: expressify(injectOp),
+  streamAppliedOps: expressify(streamAppliedOps),
 }

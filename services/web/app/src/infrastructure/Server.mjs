@@ -31,6 +31,8 @@ import AuthenticationController from '../Features/Authentication/AuthenticationC
 import SessionManager from '../Features/Authentication/SessionManager.mjs'
 import AdminAuthorizationHelper from '../Features/Helpers/AdminAuthorizationHelper.mjs'
 import Modules from './Modules.mjs'
+import AiSessionManager from '../Features/AiSession/AiSessionManager.mjs'
+import AiSessionProxy from '../Features/AiSession/AiSessionProxy.mjs'
 import expressLocals from './ExpressLocals.mjs'
 import noCache from 'nocache'
 import os from 'node:os'
@@ -185,23 +187,22 @@ SessionAutostartMiddleware.applyInitialMiddleware(webRouter)
 await Modules.applyMiddleware(webRouter, 'sessionMiddleware', {
   store: sessionStore,
 })
-webRouter.use(
-  session({
-    resave: false,
-    saveUninitialized: false,
-    secret: sessionSecrets,
-    proxy: Settings.behindProxy,
-    cookie: {
-      domain: Settings.cookieDomain,
-      maxAge: Settings.cookieSessionLength, // in milliseconds, see https://github.com/expressjs/session#cookiemaxage
-      secure: Settings.secureCookie,
-      sameSite: Settings.sameSiteCookie,
-    },
-    store: sessionStore,
-    key: Settings.cookieName,
-    rolling: Settings.cookieRollingSession === true,
-  })
-)
+const sessionMiddleware = session({
+  resave: false,
+  saveUninitialized: false,
+  secret: sessionSecrets,
+  proxy: Settings.behindProxy,
+  cookie: {
+    domain: Settings.cookieDomain,
+    maxAge: Settings.cookieSessionLength, // in milliseconds, see https://github.com/expressjs/session#cookiemaxage
+    secure: Settings.secureCookie,
+    sameSite: Settings.sameSiteCookie,
+  },
+  store: sessionStore,
+  key: Settings.cookieName,
+  rolling: Settings.cookieRollingSession === true,
+})
+webRouter.use(sessionMiddleware)
 
 if (Features.hasFeature('saas')) {
   webRouter.use(AnalyticsManager.analyticsIdMiddleware)
@@ -350,6 +351,19 @@ if (Settings.csp && Settings.csp.enabled) {
 
 logger.debug('creating HTTP server'.yellow)
 const server = http.createServer(app)
+
+// AI assistant: bring up the per-(user, project) container orchestrator and
+// attach the WebSocket-upgrade proxy that fronts code-server. Init is
+// awaited so that any containers left from a previous process are adopted
+// before we start serving requests.
+if (Settings.aiSession) {
+  try {
+    await AiSessionManager.initialize()
+  } catch (err) {
+    logger.error({ err }, 'AiSessionManager initialize failed')
+  }
+  AiSessionProxy.attachUpgradeHandler(server, sessionMiddleware)
+}
 
 // provide settings for separate web and api processes
 if (Settings.enabledServices.includes('api')) {

@@ -1,0 +1,19 @@
+{
+  "name": "@overleaf/overleaf-sync-daemon",
+  "description": "Bidirectional OT sync bridge between a working directory and an Overleaf project. Runs inside the per-user Claude Code container.",
+  "private": true,
+  "version": "0.0.1",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "mocha --recursive --exit --timeout 10000 test"
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "diff-match-patch": "1.0.5"
+  },
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "mocha": "^11.1.0"
+  }
+}
