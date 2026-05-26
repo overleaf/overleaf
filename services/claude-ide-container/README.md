@@ -20,8 +20,19 @@ Contents:
 
 ## Build
 
-The Dockerfile expects the monorepo root as build context so it can copy
-`services/overleaf-sync-daemon` in:
+This image is built automatically by `develop/bin/build` (and on
+`develop/bin/up` if it's missing), as the `claude-ide` service in
+`develop/docker-compose.yml`. You usually don't need to build it
+manually.
+
+To rebuild after editing the Dockerfile or the daemon source:
+
+```
+cd develop && bin/build claude-ide
+```
+
+To build outside the develop compose stack (monorepo root must be the
+build context, so the `services/overleaf-sync-daemon` copy works):
 
 ```
 docker build -f services/claude-ide-container/Dockerfile \
