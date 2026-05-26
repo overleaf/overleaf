@@ -119,7 +119,8 @@ const safeCompilers = ['xelatex', 'pdflatex', 'latex', 'lualatex']
 
 // AI assistant (Claude Code) per-user container orchestration. Enabled when
 // AI_SESSION_IMAGE is set; otherwise the feature is dormant and the rail
-// entry won't be shown.
+// entry won't be shown. Sessions are user-managed — they stay running until
+// the user clicks "Stop session" or the web process restarts.
 const aiSession = process.env.AI_SESSION_IMAGE
   ? {
       image: process.env.AI_SESSION_IMAGE,
@@ -128,7 +129,6 @@ const aiSession = process.env.AI_SESSION_IMAGE
       containerPort: intFromEnv('AI_SESSION_CONTAINER_PORT', 8080),
       memoryMb: intFromEnv('AI_SESSION_MEMORY_MB', 1024),
       cpus: parseFloat(process.env.AI_SESSION_CPUS || '1'),
-      idleTimeoutSecs: intFromEnv('AI_SESSION_IDLE_TIMEOUT_SECS', 15 * 60),
       unhealthyAfterMs: intFromEnv('AI_SESSION_UNHEALTHY_AFTER_MS', 60_000),
       claudeVolumePrefix:
         process.env.AI_SESSION_CLAUDE_VOLUME_PREFIX || 'overleaf-claude-',

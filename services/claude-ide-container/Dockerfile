@@ -8,7 +8,8 @@
 #   * overleaf-sync-daemon — bidirectional OT sync against the Overleaf project
 #
 # Built and pulled by services/web's AiSessionManager. One container per
-# (user, project). Idle containers are reaped after IDLE_TIMEOUT_SECS.
+# (user, project). The user explicitly stops the session from the rail panel;
+# there is no automatic idle reclaim.
 
 FROM codercom/code-server:4.104.1
 

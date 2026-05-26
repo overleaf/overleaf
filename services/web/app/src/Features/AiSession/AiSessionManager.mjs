@@ -25,7 +25,7 @@ const docker = new Docker(
     : {} // dockerode falls back to DOCKER_HOST or /var/run/docker.sock
 )
 
-// sessionId -> { containerId, projectId, userId, internalUrl, lastActivity,
+// sessionId -> { containerId, projectId, userId, internalUrl,
 //                lastHeartbeat, createdAt }
 const sessions = new Map()
 // `${userId}:${projectId}` -> sessionId (so we reuse instead of double-spawning)
@@ -59,7 +59,6 @@ async function ensureSession({ userId, projectId }) {
         const c = docker.getContainer(s.containerId)
         const info = await c.inspect()
         if (info.State?.Running) {
-          s.lastActivity = Date.now()
           return s
         }
       } catch (err) {
@@ -135,7 +134,6 @@ async function ensureSession({ userId, projectId }) {
     projectId,
     userId: String(userId),
     internalUrl: `http://${ip}:${internalPort}`,
-    lastActivity: Date.now(),
     lastHeartbeat: Date.now(),
     createdAt: Date.now(),
   }
@@ -153,16 +151,10 @@ function getSessionForUserProject(userId, projectId) {
   return id ? sessions.get(id) : null
 }
 
-function recordActivity(sessionId) {
-  const s = sessions.get(sessionId)
-  if (s) s.lastActivity = Date.now()
-}
-
 function recordHeartbeat(sessionId) {
   const s = sessions.get(sessionId)
   if (s) {
     s.lastHeartbeat = Date.now()
-    s.lastActivity = Date.now()
   }
 }
 
@@ -178,24 +170,6 @@ async function stopSession(sessionId, reason) {
   }
   sessions.delete(sessionId)
   sessionIndex.delete(indexKey(s.userId, s.projectId))
-}
-
-// Reaper: idle containers are stopped after `idleTimeoutSecs` of no proxy
-// activity. Runs every 60s.
-function startIdleReaper() {
-  const cfg = Settings.aiSession
-  if (!cfg) return
-  const idleMs = (cfg.idleTimeoutSecs || 900) * 1000
-  setInterval(() => {
-    const now = Date.now()
-    for (const [sessionId, s] of sessions) {
-      if (now - s.lastActivity > idleMs) {
-        stopSession(sessionId, 'idle-timeout').catch(err =>
-          logger.warn({ err, sessionId }, 'reaper failed')
-        )
-      }
-    }
-  }, 60_000).unref()
 }
 
 // On boot, look for orphaned ai-session containers (from a previous web
@@ -223,7 +197,6 @@ async function adoptOrphans() {
           projectId,
           userId,
           internalUrl: `http://${ip}:${internalPort}`,
-          lastActivity: Date.now(),
           lastHeartbeat: Date.now(),
           createdAt: Date.parse(inspected.State?.StartedAt) || Date.now(),
         })
@@ -247,7 +220,6 @@ async function initialize() {
     return
   }
   await adoptOrphans()
-  startIdleReaper()
   logger.info({ adopted: sessions.size }, 'AiSessionManager initialized')
 }
 
@@ -256,7 +228,6 @@ export default {
   ensureSession,
   getSession,
   getSessionForUserProject,
-  recordActivity,
   recordHeartbeat,
   stopSession,
   _sessions: sessions, // exposed for tests

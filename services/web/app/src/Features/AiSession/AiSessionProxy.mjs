@@ -51,7 +51,6 @@ function httpMiddleware(req, res, next) {
     return
   }
   const { session } = auth
-  AiSessionManager.recordActivity(session.sessionId)
 
   const target = new URL(parsed.remainder, session.internalUrl)
   const headers = { ...req.headers, host: target.host }
@@ -106,7 +105,6 @@ function attachUpgradeHandler(server, sessionMiddleware) {
         return
       }
       const { session } = auth
-      AiSessionManager.recordActivity(session.sessionId)
 
       const target = new URL(parsed.remainder, session.internalUrl)
       const upstream = http.request({

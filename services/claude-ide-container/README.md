@@ -2,7 +2,8 @@
 
 The per-user Docker image that hosts Claude Code inside Overleaf. One
 container per `(userId, projectId)`, spun up on demand by
-`services/web`'s `AiSessionManager` and torn down after idle timeout.
+`services/web`'s `AiSessionManager` and torn down when the user clicks
+"Stop session" in the rail panel.
 
 Contents:
 
