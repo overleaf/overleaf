@@ -56,6 +56,103 @@ class OverleafClient {
     const url = `${this.docUpdaterUrl}/project/${this.projectId}/applied-ops/stream`
     return new SSEStream(url)
   }
+
+  openEditorEventsStream() {
+    const url = `${this.webUrl}/internal/ai-sync/project/${this.projectId}/editor-events/stream`
+    return new SSEStream(url, this.webAuth)
+  }
+
+  async addDoc({ userId, name, parentFolderId, lines }) {
+    const url = `${this.webUrl}/internal/ai-sync/project/${this.projectId}/doc`
+    const body = JSON.stringify({
+      userId,
+      name,
+      parent_folder_id: parentFolderId,
+      lines,
+    })
+    const res = await request('POST', url, body, this.webAuth)
+    if (res.statusCode !== 200) {
+      throw new Error(`addDoc failed: ${res.statusCode} ${res.body}`)
+    }
+    return JSON.parse(res.body)
+  }
+
+  async addFolder({ userId, name, parentFolderId }) {
+    const url = `${this.webUrl}/internal/ai-sync/project/${this.projectId}/folder`
+    const body = JSON.stringify({
+      userId,
+      name,
+      parent_folder_id: parentFolderId,
+    })
+    const res = await request('POST', url, body, this.webAuth)
+    if (res.statusCode !== 200) {
+      throw new Error(`addFolder failed: ${res.statusCode} ${res.body}`)
+    }
+    return JSON.parse(res.body)
+  }
+
+  async deleteEntity({ userId, entityType, entityId }) {
+    const url = `${this.webUrl}/internal/ai-sync/project/${this.projectId}/entity/${entityType}/${entityId}`
+    const body = JSON.stringify({ userId })
+    const res = await request('DELETE', url, body, this.webAuth)
+    if (res.statusCode !== 204) {
+      throw new Error(`deleteEntity failed: ${res.statusCode} ${res.body}`)
+    }
+  }
+
+  async getProjectStructure() {
+    const url = `${this.webUrl}/internal/ai-sync/project/${this.projectId}/structure`
+    const res = await request('GET', url, null, this.webAuth)
+    if (res.statusCode !== 200) {
+      throw new Error(`getProjectStructure failed: ${res.statusCode} ${res.body}`)
+    }
+    return JSON.parse(res.body)
+  }
+
+  // Returns a Promise<Buffer> for a binary file.
+  getFile(fileId) {
+    const url = `${this.webUrl}/internal/ai-sync/project/${this.projectId}/file/${fileId}`
+    return requestRaw('GET', url, null, this.webAuth)
+  }
+}
+
+function requestRaw(method, urlStr, body, basicAuth) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(urlStr)
+    const lib = url.protocol === 'https:' ? https : http
+    const opts = {
+      method,
+      hostname: url.hostname,
+      port: url.port,
+      path: url.pathname + url.search,
+      headers: {},
+    }
+    if (body) opts.headers['content-length'] = Buffer.byteLength(body)
+    if (basicAuth) {
+      const token = Buffer.from(
+        `${basicAuth.user}:${basicAuth.password || ''}`
+      ).toString('base64')
+      opts.headers.authorization = `Basic ${token}`
+    }
+    const req = lib.request(opts, res => {
+      const chunks = []
+      res.on('data', c => chunks.push(c))
+      res.on('end', () => {
+        if (res.statusCode !== 200) {
+          reject(
+            new Error(
+              `requestRaw ${method} ${urlStr} failed: ${res.statusCode}`
+            )
+          )
+        } else {
+          resolve(Buffer.concat(chunks))
+        }
+      })
+    })
+    req.on('error', reject)
+    if (body) req.write(body)
+    req.end()
+  })
 }
 
 function request(method, urlStr, body, basicAuth) {
@@ -98,8 +195,9 @@ function request(method, urlStr, body, basicAuth) {
 // Minimal SSE client — Node has no built-in EventSource, and we don't want
 // the npm `eventsource` dep for one consumer.
 class SSEStream {
-  constructor(urlStr) {
+  constructor(urlStr, basicAuth) {
     this.urlStr = urlStr
+    this.basicAuth = basicAuth || null
     this.listeners = new Map()
     this.buffer = ''
     this.closed = false
@@ -128,13 +226,20 @@ class SSEStream {
     if (this.closed) return
     const url = new URL(this.urlStr)
     const lib = url.protocol === 'https:' ? https : http
+    const headers = { accept: 'text/event-stream' }
+    if (this.basicAuth) {
+      const token = Buffer.from(
+        `${this.basicAuth.user}:${this.basicAuth.password || ''}`
+      ).toString('base64')
+      headers.authorization = `Basic ${token}`
+    }
     const req = lib.request(
       {
         method: 'GET',
         hostname: url.hostname,
         port: url.port,
         path: url.pathname + url.search,
-        headers: { accept: 'text/event-stream' },
+        headers,
       },
       res => {
         if (res.statusCode !== 200) {

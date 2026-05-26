@@ -1,11 +1,16 @@
-// HTTP handlers for AI session lifecycle. All routes are project-scoped and
-// gated by the same auth middleware Overleaf uses for the editor itself.
+// HTTP handlers for AI session lifecycle. All user-facing routes are
+// project-scoped and gated by the same auth middleware Overleaf uses for
+// the editor itself. The /internal/* routes are basic-auth-protected and
+// take userId in the request body — they're called by the sync daemon.
 
 import OError from '@overleaf/o-error'
 import logger from '@overleaf/logger'
 import Settings from '@overleaf/settings'
 import AiSessionManager from './AiSessionManager.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
+import EditorController from '../Editor/EditorController.mjs'
+import ProjectGetter from '../Project/ProjectGetter.mjs'
+import FileStoreController from '../FileStore/FileStoreController.mjs'
 
 function _projectId(req) {
   return req.params.Project_id || req.params.projectId
@@ -81,9 +86,112 @@ function recordHeartbeat(req, res) {
   res.status(204).end()
 }
 
+// ---- Internal endpoints used by the sync daemon for structural sync ----
+//
+// These mirror the user-facing /project/:id/doc, /folder, etc. endpoints
+// but take userId in the body (basic-auth context, no user session). All
+// changes go through the same EditorController paths so collaborators see
+// them via the existing reciveNewDoc / removeEntity events.
+
+const SOURCE = 'claude-sync'
+
+async function internalAddDoc(req, res, next) {
+  try {
+    const projectId = req.params.Project_id
+    const { userId, name, parent_folder_id: parentFolderId, lines } = req.body
+    if (!userId || !name || !parentFolderId) {
+      return res.status(400).json({ error: 'userId, name, parent_folder_id required' })
+    }
+    const doc = await EditorController.promises.addDoc(
+      projectId,
+      parentFolderId,
+      name,
+      Array.isArray(lines) ? lines : [],
+      SOURCE,
+      userId
+    )
+    res.json(doc)
+  } catch (err) {
+    OError.tag(err, 'ai-sync internalAddDoc failed')
+    next(err)
+  }
+}
+
+async function internalAddFolder(req, res, next) {
+  try {
+    const projectId = req.params.Project_id
+    const { userId, name, parent_folder_id: parentFolderId } = req.body
+    if (!userId || !name || !parentFolderId) {
+      return res.status(400).json({ error: 'userId, name, parent_folder_id required' })
+    }
+    const folder = await EditorController.promises.addFolder(
+      projectId,
+      parentFolderId,
+      name,
+      SOURCE,
+      userId
+    )
+    res.json(folder)
+  } catch (err) {
+    OError.tag(err, 'ai-sync internalAddFolder failed')
+    next(err)
+  }
+}
+
+async function internalDeleteEntity(req, res, next) {
+  try {
+    const projectId = req.params.Project_id
+    const { entity_type: entityType, entity_id: entityId } = req.params
+    const { userId } = req.body || {}
+    if (!userId) return res.status(400).json({ error: 'userId required' })
+    if (!['doc', 'file', 'folder'].includes(entityType)) {
+      return res.status(400).json({ error: 'invalid entity_type' })
+    }
+    await EditorController.promises.deleteEntity(
+      projectId,
+      entityId,
+      entityType,
+      SOURCE,
+      userId
+    )
+    res.status(204).end()
+  } catch (err) {
+    OError.tag(err, 'ai-sync internalDeleteEntity failed')
+    next(err)
+  }
+}
+
+async function internalGetStructure(req, res, next) {
+  try {
+    const projectId = req.params.Project_id
+    const project = await ProjectGetter.promises.getProject(projectId, {
+      rootFolder: true,
+    })
+    if (!project) return res.status(404).json({ error: 'project not found' })
+    res.json({ rootFolder: project.rootFolder })
+  } catch (err) {
+    OError.tag(err, 'ai-sync internalGetStructure failed')
+    next(err)
+  }
+}
+
+// Reuses the public FileStoreController.getFile handler, which only reads
+// from req.params / req.query and writes a stream to res. Auth is enforced
+// at the route level (basic auth on privateApiRouter).
+function internalGetFile(req, res, next) {
+  // The controller expects req.logger.addFields; provide a no-op if missing.
+  if (!req.logger) req.logger = { addFields: () => {} }
+  return FileStoreController.getFile(req, res, next)
+}
+
 export default {
   startSession,
   stopSession,
   getStatus,
   recordHeartbeat,
+  internalAddDoc,
+  internalAddFolder,
+  internalDeleteEntity,
+  internalGetStructure,
+  internalGetFile,
 }

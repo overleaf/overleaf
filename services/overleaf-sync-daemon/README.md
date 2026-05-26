@@ -66,14 +66,48 @@ Runtime:
 | `WEB_API_PASSWORD`    | yes      | Basic-auth password (shared with web)        |
 | `WORKSPACE_DIR`       | yes      | e.g. `/workspace`                            |
 
-## Limitations (MVP)
+## Structural sync
 
-* Only text docs sync; binary files in the project are not materialized.
-* Doc creation / deletion / rename from either side is not yet handled
-  — only edits to docs that existed at bootstrap.
-* No backpressure on the SSE stream; very high-frequency edits may queue.
+Beyond OT text sync, the daemon also handles:
+
+| Workspace action            | Outbound API                                |
+| --------------------------- | ------------------------------------------- |
+| create text file            | `POST  /internal/ai-sync/.../doc`           |
+| create directory            | `POST  /internal/ai-sync/.../folder`        |
+| delete file or directory    | `DELETE /internal/ai-sync/.../entity/...`   |
+
+| Overleaf event           | Inbound action                                    |
+| ------------------------ | ------------------------------------------------- |
+| `reciveNewDoc`           | fetch via doc-updater, write to workspace         |
+| `reciveNewFile`          | fetch binary via internal file endpoint           |
+| `reciveNewFolder`        | `mkdir`                                           |
+| `reciveEntityRename`     | `rename` on disk                                  |
+| `reciveEntityMove`       | `rename` on disk                                  |
+| `removeEntity`           | `rm -rf` on disk                                  |
+
+Loop guards prevent re-applying our own structural changes (we tag them
+with `source = 'claude-sync'` and the inbound stream filters them out).
+
+## Binary files
+
+* Inbound: binary files (`fileRefs`) are downloaded at bootstrap and
+  whenever `reciveNewFile` arrives.
+* Outbound: new files Claude creates with non-text extensions are
+  **skipped** — the daemon logs a warning and the file stays in the
+  workspace but isn't pushed to Overleaf. Use git-bridge for binary
+  contributions.
+
+Text vs binary is determined by extension (see `TEXT_EXTENSIONS` in
+`lib/syncer.js`).
+
+## Limitations
+
 * Version tracking is optimistic — if `inject-op` is rejected (e.g.
   stale `v`) we re-fetch the doc and continue, losing the in-flight edit.
+* No backpressure on the SSE streams; very high-frequency edits may queue.
+* Renames inside the workspace appear to chokidar as `unlink` + `add`,
+  so on the Overleaf side they show up as delete + create rather than a
+  rename (loses link-file references).
 
 ## Tests
 

@@ -353,11 +353,15 @@ logger.debug('creating HTTP server'.yellow)
 const server = http.createServer(app)
 
 // AI assistant: bring up the per-(user, project) container orchestrator and
-// attach the WebSocket-upgrade proxy that fronts code-server.
+// attach the WebSocket-upgrade proxy that fronts code-server. Init is
+// awaited so that any containers left from a previous process are adopted
+// before we start serving requests.
 if (Settings.aiSession) {
-  AiSessionManager.initialize().catch(err => {
+  try {
+    await AiSessionManager.initialize()
+  } catch (err) {
     logger.error({ err }, 'AiSessionManager initialize failed')
-  })
+  }
   AiSessionProxy.attachUpgradeHandler(server, sessionMiddleware)
 }
 

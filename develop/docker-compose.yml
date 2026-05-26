@@ -156,6 +156,10 @@ services:
     volumes:
       - sharelatex-data:/var/lib/overleaf
       - web-data:/overleaf/services/web/data
+      # AiSessionManager talks to the host's Docker daemon to spawn per-user
+      # Claude Code containers. Comment this out (and unset AI_SESSION_IMAGE
+      # in dev.env) to disable the feature.
+      - ${DOCKER_SOCKET_PATH:-/var/run/docker.sock}:/var/run/docker.sock
     depends_on:
       - mongo
       - redis
@@ -169,6 +173,18 @@ services:
       - notifications
       - project-history
       - real-time
+
+  # Build-only service: produces the per-user Claude Code container image
+  # (overleaf/claude-ide:dev) that AiSessionManager spawns. Run once with
+  # `docker compose build claude-ide` after changes; the image isn't
+  # launched by compose itself.
+  claude-ide:
+    image: overleaf/claude-ide:dev
+    build:
+      context: ..
+      dockerfile: services/claude-ide-container/Dockerfile
+    profiles: ["build-only"]
+    command: ["true"]
 
   webpack:
     build:

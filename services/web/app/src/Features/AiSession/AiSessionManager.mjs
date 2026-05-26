@@ -73,6 +73,15 @@ async function ensureSession({ userId, projectId }) {
     }
   }
 
+  // Cross-process race: web restart may have left a labelled container
+  // running before adoption ran. Look it up directly before spawning a
+  // duplicate.
+  const orphan = await findLabelledContainer({ userId, projectId }, cfg)
+  if (orphan) {
+    const adopted = await adoptContainer(orphan, cfg)
+    if (adopted) return adopted
+  }
+
   const sessionId = crypto.randomBytes(12).toString('hex')
   const internalPort = cfg.containerPort || 8080
   const containerName = `overleaf-ai-${sessionId}`
@@ -172,39 +181,66 @@ async function stopSession(sessionId, reason) {
   sessionIndex.delete(indexKey(s.userId, s.projectId))
 }
 
-// On boot, look for orphaned ai-session containers (from a previous web
-// process) and adopt them. Cheap, optional.
-async function adoptOrphans() {
+// Look up a single labelled container for a given (user, project).
+async function findLabelledContainer({ userId, projectId }, cfg) {
   try {
     const containers = await docker.listContainers({
-      filters: { label: [`${LABEL_PREFIX}.session`] },
+      all: false,
+      filters: {
+        label: [
+          `${LABEL_USER}=${userId}`,
+          `${LABEL_PROJECT}=${projectId}`,
+        ],
+      },
+    })
+    return containers[0] || null
+  } catch (err) {
+    logger.warn({ err, projectId, userId }, 'docker listContainers failed')
+    return null
+  }
+}
+
+// Inspect a container record and register it in our in-memory state.
+// Returns the session, or null if it can't be used (no IP, missing labels).
+async function adoptContainer(c, cfg) {
+  const sessionId = c.Labels?.[LABEL_SESSION]
+  const projectId = c.Labels?.[LABEL_PROJECT]
+  const userId = c.Labels?.[LABEL_USER]
+  if (!sessionId || !projectId || !userId) return null
+  try {
+    const inspected = await docker.getContainer(c.Id).inspect()
+    const net = inspected.NetworkSettings?.Networks?.[cfg.network]
+    const ip = net?.IPAddress
+    if (!ip) return null
+    const internalPort = cfg.containerPort || 8080
+    const session = {
+      sessionId,
+      containerId: c.Id,
+      projectId,
+      userId,
+      internalUrl: `http://${ip}:${internalPort}`,
+      lastHeartbeat: Date.now(),
+      createdAt: Date.parse(inspected.State?.StartedAt) || Date.now(),
+    }
+    sessions.set(sessionId, session)
+    sessionIndex.set(indexKey(userId, projectId), sessionId)
+    logger.info({ sessionId, projectId, userId }, 'adopted ai-session')
+    return session
+  } catch (err) {
+    logger.warn({ err, containerId: c.Id }, 'failed to adopt')
+    return null
+  }
+}
+
+// On boot, scan for any labelled containers and adopt them. Awaited by
+// initialize() so requests served after startup see a populated index.
+async function adoptOrphans(cfg) {
+  try {
+    const containers = await docker.listContainers({
+      filters: { label: [`${LABEL_SESSION}`] },
     })
     for (const c of containers) {
-      const sessionId = c.Labels[LABEL_SESSION]
-      const projectId = c.Labels[LABEL_PROJECT]
-      const userId = c.Labels[LABEL_USER]
-      if (!sessionId || !projectId || !userId) continue
-      try {
-        const inspected = await docker.getContainer(c.Id).inspect()
-        const net =
-          inspected.NetworkSettings?.Networks?.[Settings.aiSession.network]
-        const ip = net?.IPAddress
-        if (!ip) continue
-        const internalPort = Settings.aiSession.containerPort || 8080
-        sessions.set(sessionId, {
-          sessionId,
-          containerId: c.Id,
-          projectId,
-          userId,
-          internalUrl: `http://${ip}:${internalPort}`,
-          lastHeartbeat: Date.now(),
-          createdAt: Date.parse(inspected.State?.StartedAt) || Date.now(),
-        })
-        sessionIndex.set(indexKey(userId, projectId), sessionId)
-        logger.info({ sessionId, projectId, userId }, 'adopted ai-session')
-      } catch (err) {
-        logger.warn({ err, containerId: c.Id }, 'failed to adopt')
-      }
+      await adoptContainer(c, cfg)
     }
   } catch (err) {
     logger.warn({ err }, 'orphan adoption skipped (docker unavailable?)')
@@ -219,7 +255,7 @@ async function initialize() {
     logger.info('ai-session disabled (no aiSession config)')
     return
   }
-  await adoptOrphans()
+  await adoptOrphans(Settings.aiSession)
   logger.info({ adopted: sessions.size }, 'AiSessionManager initialized')
 }
 
