@@ -198,6 +198,16 @@ app.delete(
 app.post('/project/:project_id/block', HttpController.blockProject)
 app.post('/project/:project_id/unblock', HttpController.unblockProject)
 
+// External sync agents (e.g. Claude Code sync daemon) — see InjectOpsManager.
+app.post(
+  '/project/:project_id/doc/:doc_id/inject-op',
+  HttpController.injectOp
+)
+app.get(
+  '/project/:project_id/applied-ops/stream',
+  HttpController.streamAppliedOps
+)
+
 app.get('/flush_queued_projects', HttpController.flushQueuedProjects)
 
 app.get('/total', (req, res, next) => {
