@@ -18,8 +18,10 @@
 //   * Every workspace write bumps a per-path ignoreFsWrites counter so the
 //     next chokidar callback for that path is swallowed.
 //
-// Binary file outbound is intentionally not implemented — non-text files
-// belong on git-bridge. Binary inbound is supported only at bootstrap.
+// Both directions handle binary files: bootstrap downloads them through
+// the filestore-backed internal endpoint, and outbound uploads them via
+// /internal/ai-sync/.../file (raw octet-stream). Works on Overleaf CE
+// without git-bridge.
 
 const fs = require('node:fs/promises')
 const path = require('node:path')
@@ -31,9 +33,10 @@ const { StructureIndex } = require('./structure')
 const DEBOUNCE_MS = 150
 const STRUCT_SOURCE = 'claude-sync'
 
-// Extensions we'll auto-create as docs (text). Other extensions Claude
-// produces are left in the workspace but not synced. Keep aligned with
-// settings.defaults.js#defaultTextExtensions where reasonable.
+// Extensions we treat as text (round-trip through doc-updater as OT ops).
+// Anything else is uploaded as a binary file (no OT — replaces on each
+// edit). Keep aligned with settings.defaults.js#defaultTextExtensions
+// where reasonable.
 const TEXT_EXTENSIONS = new Set([
   'tex', 'latex', 'sty', 'cls', 'bst', 'bib', 'bibtex', 'txt', 'tikz', 'mtx',
   'rtex', 'md', 'asy', 'lbx', 'bbx', 'cbx', 'm', 'lco', 'dtx', 'ins', 'ltx',
@@ -41,6 +44,11 @@ const TEXT_EXTENSIONS = new Set([
   'js', 'ts', 'tsx', 'jsx', 'py', 'sh', 'r', 'csv', 'tsv', 'xml', 'html',
   'css', 'svg',
 ])
+
+function isTextPath(pathname) {
+  const ext = path.extname(pathname).slice(1).toLowerCase()
+  return TEXT_EXTENSIONS.has(ext)
+}
 
 class Syncer {
   constructor({ client, workspace, userId, log }) {
@@ -370,8 +378,13 @@ class Syncer {
     const rel = this._relPath(absPath)
     if (this._consumeIgnore(rel)) return
     const entry = this.structure.lookupPath(rel)
-    if (!entry || entry.type !== 'doc') return
-    this._scheduleFlush(entry.id)
+    if (!entry) return
+    if (entry.type === 'doc') {
+      this._scheduleFlush(entry.id)
+    } else if (entry.type === 'file') {
+      // Binary content changed — re-upload (upsertFile replaces in place).
+      this._scheduleStruct(rel, () => this._uploadFile(rel))
+    }
   }
 
   _onFsAdd(absPath) {
@@ -379,18 +392,18 @@ class Syncer {
     if (this._consumeIgnore(rel)) return
     const entry = this.structure.lookupPath(rel)
     if (entry) {
-      // Already known — treat as change (e.g., editor re-saved).
+      // Already known — treat as change.
       if (entry.type === 'doc') this._scheduleFlush(entry.id)
+      else if (entry.type === 'file') {
+        this._scheduleStruct(rel, () => this._uploadFile(rel))
+      }
       return
     }
-    const ext = path.extname(rel).slice(1).toLowerCase()
-    if (!TEXT_EXTENSIONS.has(ext)) {
-      this.log('skipping non-text file (use git-bridge for binaries)', {
-        pathname: rel,
-      })
-      return
+    if (isTextPath(rel)) {
+      this._scheduleStruct(rel, () => this._createDoc(rel))
+    } else {
+      this._scheduleStruct(rel, () => this._uploadFile(rel))
     }
-    this._scheduleStruct(rel, () => this._createDoc(rel))
   }
 
   _onFsAddDir(absPath) {
@@ -441,6 +454,37 @@ class Syncer {
       this._resyncDoc(docId).catch(() => {})
     } catch (err) {
       this.log('addDoc failed', { pathname, err: err.message })
+    }
+  }
+
+  async _uploadFile(pathname) {
+    await this._ensureParentFolders(pathname)
+    const parentFolderId = this.structure.parentFolderIdOf(pathname)
+    if (!parentFolderId) {
+      this.log('uploadFile: no parent folder', { pathname })
+      return
+    }
+    let buffer
+    try {
+      buffer = await fs.readFile(path.join(this.workspace, pathname))
+    } catch (err) {
+      if (err.code === 'ENOENT') return
+      throw err
+    }
+    try {
+      const fileRef = await this.client.addFile({
+        userId: this.userId,
+        name: path.posix.basename(pathname),
+        parentFolderId,
+        buffer,
+      })
+      // upsertFile replaces in place: the old entry (if any) keeps the
+      // pathname but its id changes. Re-index with the new id.
+      const prev = this.structure.lookupPath(pathname)
+      if (prev) this.structure.removeByPath(pathname)
+      this.structure.add(pathname, 'file', fileRef._id)
+    } catch (err) {
+      this.log('addFile failed', { pathname, err: err.message })
     }
   }
 

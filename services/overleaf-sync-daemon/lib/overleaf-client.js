@@ -114,6 +114,61 @@ class OverleafClient {
     const url = `${this.webUrl}/internal/ai-sync/project/${this.projectId}/file/${fileId}`
     return requestRaw('GET', url, null, this.webAuth)
   }
+
+  // Upload a binary file (or replace one with the same name in the same
+  // folder). Returns the new fileRef as JSON.
+  async addFile({ userId, name, parentFolderId, buffer }) {
+    const q = new URLSearchParams({
+      userId,
+      name,
+      parent_folder_id: parentFolderId,
+    }).toString()
+    const url = `${this.webUrl}/internal/ai-sync/project/${this.projectId}/file?${q}`
+    const res = await requestBinary('POST', url, buffer, this.webAuth)
+    if (res.statusCode !== 200) {
+      throw new Error(`addFile failed: ${res.statusCode} ${res.body}`)
+    }
+    return JSON.parse(res.body)
+  }
+}
+
+// POST a Buffer body with content-type application/octet-stream and return
+// {statusCode, body: string} like the JSON request() does. Used for file
+// uploads — distinct from requestRaw which only handles GET-and-buffer.
+function requestBinary(method, urlStr, buffer, basicAuth) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(urlStr)
+    const lib = url.protocol === 'https:' ? https : http
+    const opts = {
+      method,
+      hostname: url.hostname,
+      port: url.port,
+      path: url.pathname + url.search,
+      headers: {
+        'content-type': 'application/octet-stream',
+        'content-length': buffer.length,
+      },
+    }
+    if (basicAuth) {
+      const token = Buffer.from(
+        `${basicAuth.user}:${basicAuth.password || ''}`
+      ).toString('base64')
+      opts.headers.authorization = `Basic ${token}`
+    }
+    const req = lib.request(opts, res => {
+      const chunks = []
+      res.on('data', c => chunks.push(c))
+      res.on('end', () =>
+        resolve({
+          statusCode: res.statusCode,
+          body: Buffer.concat(chunks).toString('utf8'),
+        })
+      )
+    })
+    req.on('error', reject)
+    req.write(buffer)
+    req.end()
+  })
 }
 
 function requestRaw(method, urlStr, body, basicAuth) {

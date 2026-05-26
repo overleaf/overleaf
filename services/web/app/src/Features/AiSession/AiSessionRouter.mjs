@@ -68,6 +68,13 @@ export default {
       requireApi,
       AiSessionController.internalGetFile
     )
+    // Raw binary upload — body is the file content. No body-parser
+    // middleware in the chain; internalAddFile streams req directly to disk.
+    privateApiRouter.post(
+      '/internal/ai-sync/project/:Project_id/file',
+      requireApi,
+      AiSessionController.internalAddFile
+    )
     // SSE feed of editor-events (reciveNewDoc, removeEntity, …) for one
     // project, so the daemon can mirror structural changes made in the Web
     // UI into the workspace.

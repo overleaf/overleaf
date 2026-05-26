@@ -90,15 +90,20 @@ with `source = 'claude-sync'` and the inbound stream filters them out).
 
 ## Binary files
 
-* Inbound: binary files (`fileRefs`) are downloaded at bootstrap and
-  whenever `reciveNewFile` arrives.
-* Outbound: new files Claude creates with non-text extensions are
-  **skipped** — the daemon logs a warning and the file stays in the
-  workspace but isn't pushed to Overleaf. Use git-bridge for binary
-  contributions.
+Fully supported on Overleaf CE (no git-bridge required).
 
-Text vs binary is determined by extension (see `TEXT_EXTENSIONS` in
-`lib/syncer.js`).
+* Inbound: binary files (`fileRefs`) are downloaded at bootstrap and
+  whenever `reciveNewFile` arrives, via the
+  `/internal/ai-sync/.../file/:File_id` endpoint (filestore-backed).
+* Outbound: when Claude creates or edits a file with a non-text
+  extension, the daemon POSTs the raw bytes to
+  `/internal/ai-sync/.../file?name=…&parent_folder_id=…`, which calls
+  `EditorController.upsertFile`. New files appear in the editor's file
+  tree immediately; replacements drop the old `fileRef` and create a
+  new one (same as the manual upload UI).
+
+Text vs binary is decided by extension (see `TEXT_EXTENSIONS` /
+`isTextPath` in `lib/syncer.js`).
 
 ## Limitations
 

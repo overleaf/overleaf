@@ -3,6 +3,12 @@
 // the editor itself. The /internal/* routes are basic-auth-protected and
 // take userId in the request body — they're called by the sync daemon.
 
+import fs from 'node:fs'
+import fsp from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
+import crypto from 'node:crypto'
+import { pipeline } from 'node:stream/promises'
 import OError from '@overleaf/o-error'
 import logger from '@overleaf/logger'
 import Settings from '@overleaf/settings'
@@ -184,6 +190,54 @@ function internalGetFile(req, res, next) {
   return FileStoreController.getFile(req, res, next)
 }
 
+// Upload a binary file (or replace one). Body is the raw file content;
+// query string carries name, parent_folder_id, userId. Used by the sync
+// daemon when Claude produces a non-text file in the workspace. Works on
+// Overleaf CE (no git-bridge required).
+async function internalAddFile(req, res, next) {
+  const projectId = req.params.Project_id
+  const {
+    userId,
+    name,
+    parent_folder_id: parentFolderId,
+  } = req.query
+  if (!userId || !name || !parentFolderId) {
+    return res
+      .status(400)
+      .json({ error: 'userId, name, parent_folder_id required (query)' })
+  }
+
+  // Stream the request body to a tempfile — upsertFile takes an fsPath.
+  const tmpPath = path.join(
+    os.tmpdir(),
+    `ai-sync-upload-${crypto.randomBytes(8).toString('hex')}`
+  )
+  try {
+    await pipeline(req, fs.createWriteStream(tmpPath))
+    const newFile = await EditorController.promises.upsertFile(
+      projectId,
+      parentFolderId,
+      name,
+      tmpPath,
+      null, // linkedFileData
+      SOURCE,
+      userId
+    )
+    res.json(newFile)
+  } catch (err) {
+    OError.tag(err, 'ai-sync internalAddFile failed', {
+      projectId,
+      name,
+      parentFolderId,
+    })
+    next(err)
+  } finally {
+    fsp.unlink(tmpPath).catch(() => {
+      /* ignore */
+    })
+  }
+}
+
 export default {
   startSession,
   stopSession,
@@ -194,4 +248,5 @@ export default {
   internalDeleteEntity,
   internalGetStructure,
   internalGetFile,
+  internalAddFile,
 }

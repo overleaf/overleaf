@@ -15,7 +15,8 @@ FROM codercom/code-server:4.104.1
 
 USER root
 
-# Node 22 for the daemon, plus git for git-bridge cloning (future use).
+# Node 22 for the daemon, plus git for users who want to version-control
+# their workspace from inside code-server (independent of Overleaf sync).
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl ca-certificates git tini \
     && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
