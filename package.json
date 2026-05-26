@@ -238,7 +238,6 @@
     "services/templates",
     "services/third-party-datastore",
     "services/third-party-references",
-    "services/tpdsworker",
     "services/web",
     "tools/dependency-management",
     "tools/npm-overrides-helper",

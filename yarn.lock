@@ -7159,35 +7159,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@overleaf/tpdsworker@workspace:services/tpdsworker":
-  version: 0.0.0-use.local
-  resolution: "@overleaf/tpdsworker@workspace:services/tpdsworker"
-  dependencies:
-    "@overleaf/fetch-utils": "workspace:*"
-    "@overleaf/logger": "workspace:*"
-    "@overleaf/metrics": "workspace:*"
-    "@overleaf/o-error": "workspace:*"
-    "@overleaf/redis-wrapper": "workspace:*"
-    "@overleaf/settings": "workspace:*"
-    body-parser: "npm:1.20.4"
-    bunyan: "npm:^1.8.15"
-    chai: "npm:^4.3.6"
-    chai-as-promised: "npm:^7.1.1"
-    chai-http: "npm:4.4.0"
-    dtrace-provider: "npm:^0.8.8"
-    express: "npm:4.22.1"
-    express-basic-auth: "npm:^1.2.0"
-    ioredis: "npm:^4.16.0"
-    lodash: "npm:^4.18.1"
-    mocha: "npm:^11.1.0"
-    mocha-junit-reporter: "npm:^2.2.1"
-    mocha-multi-reporters: "npm:^1.5.1"
-    redlock: "npm:^4.1.0"
-    request: "npm:2.88.2"
-    typescript: "npm:^5.0.4"
-  languageName: unknown
-  linkType: soft
-
 "@overleaf/validation-tools@workspace:*, @overleaf/validation-tools@workspace:libraries/validation-tools":
   version: 0.0.0-use.local
   resolution: "@overleaf/validation-tools@workspace:libraries/validation-tools"
@@ -16938,7 +16909,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dtrace-provider@npm:^0.8.8, dtrace-provider@npm:~0.8":
+"dtrace-provider@npm:~0.8":
   version: 0.8.8
   resolution: "dtrace-provider@npm:0.8.8"
   dependencies:
