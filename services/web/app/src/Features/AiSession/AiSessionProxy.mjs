@@ -9,12 +9,35 @@
 // hasn't been kicked out of the project.
 
 import http from 'node:http'
-import url from 'node:url'
 import logger from '@overleaf/logger'
 import AiSessionManager from './AiSessionManager.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
 
 const MOUNT = '/ai/session/'
+
+// One keep-alive agent per code-server container. Reusing TCP connections
+// across the ~50+ asset requests VS Code makes on first load cuts latency
+// significantly — without this each request pays a fresh TCP handshake.
+const agents = new Map() // internalUrl -> http.Agent
+
+function getAgent(internalUrl) {
+  if (!agents.has(internalUrl)) {
+    agents.set(
+      internalUrl,
+      new http.Agent({ keepAlive: true, maxSockets: 16 })
+    )
+  }
+  return agents.get(internalUrl)
+}
+
+// Called by AiSessionManager when a container is stopped so we don't leak.
+function destroyAgent(internalUrl) {
+  const agent = agents.get(internalUrl)
+  if (agent) {
+    agent.destroy()
+    agents.delete(internalUrl)
+  }
+}
 
 function parseMount(reqUrl) {
   if (!reqUrl.startsWith(MOUNT)) return null
@@ -67,6 +90,7 @@ function httpMiddleware(req, res, next) {
       method: req.method,
       path: target.pathname + target.search,
       headers,
+      agent: getAgent(session.internalUrl),
     },
     upRes => {
       res.writeHead(upRes.statusCode, upRes.headers)
@@ -114,6 +138,7 @@ function attachUpgradeHandler(server, sessionMiddleware) {
         method: 'GET',
         path: target.pathname + target.search,
         headers: { ...req.headers, host: target.host },
+        agent: getAgent(session.internalUrl),
       })
       upstream.on('upgrade', (upRes, upSocket, upHead) => {
         const handshake = [
