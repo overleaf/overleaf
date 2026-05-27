@@ -129,6 +129,7 @@ async function projectListPage(req, res, next) {
   let usersIndividualSubscription
   /** @type {any[]} */
   let usersGroupSubscriptions = []
+  /** @type {any[]} */
   let usersManagedGroupSubscriptions = []
   let survey
   let userIsMemberOfGroupSubscription = false
@@ -546,12 +547,23 @@ async function projectListPage(req, res, next) {
     user
   )
 
-  const groupRole = userIsMemberOfGroupSubscription
-    ? usersManagedGroupSubscriptions?.length > 0 ||
-      usersGroupSubscriptions.some(sub => sub.userIsGroupManager)
-      ? 'admin'
-      : 'member'
-    : undefined
+  let groupRole
+  if (userIsMemberOfGroupSubscription) {
+    const userIdStr = userId.toString()
+    const isGroupAdmin = usersManagedGroupSubscriptions?.some(
+      sub => sub.admin_id?._id?.toString() === userIdStr
+    )
+    const isGroupManager =
+      usersManagedGroupSubscriptions?.length > 0 ||
+      usersGroupSubscriptions?.some(sub => sub.userIsGroupManager)
+    if (isGroupAdmin) {
+      groupRole = 'admin'
+    } else if (isGroupManager) {
+      groupRole = 'manager'
+    } else {
+      groupRole = 'member'
+    }
+  }
 
   Modules.promises.hooks
     .fire('setUserProperties', userId, {

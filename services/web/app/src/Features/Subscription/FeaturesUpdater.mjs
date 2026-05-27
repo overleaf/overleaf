@@ -185,6 +185,7 @@ async function _updateCustomerIoSubscriptionProperties(user, features) {
     hasCommons,
     writefullData,
     aiBlockedByPolicyId,
+    userId,
   })
 
   await Modules.promises.hooks.fire('setUserProperties', userId, {

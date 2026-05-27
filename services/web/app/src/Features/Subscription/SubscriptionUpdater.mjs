@@ -15,6 +15,7 @@ import AccountMappingHelper from '../Analytics/AccountMappingHelper.mjs'
 import { SSOConfig } from '../../models/SSOConfig.mjs'
 import mongoose from '../../infrastructure/Mongoose.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
+import CustomerIoPlanHelpers from './CustomerIoPlanHelpers.mjs'
 
 /**
  * @typedef {import('../../../../types/subscription/dashboard/subscription').Subscription} Subscription
@@ -73,6 +74,13 @@ async function updateAdmin(subscription, adminId) {
     update.$set.manager_ids = [new ObjectId(adminId)]
   }
   await Subscription.updateOne(query, update).exec()
+  if (subscription.groupPlan) {
+    const previousAdminId = subscription.admin_id?.toString()
+    if (previousAdminId && previousAdminId !== adminId.toString()) {
+      await sendGroupRoleUserProperty(previousAdminId)
+    }
+    await sendGroupRoleUserProperty(adminId)
+  }
 }
 
 async function syncSubscription(
@@ -445,6 +453,30 @@ async function _sendUserGroupPlanCodeUserProperty(userId) {
   }
 }
 
+async function sendGroupRoleUserProperty(userId) {
+  try {
+    const [memberSubscriptions, managedSubscriptions] = await Promise.all([
+      SubscriptionLocator.promises.getMemberSubscriptions(userId),
+      SubscriptionLocator.promises.getManagedGroupSubscriptions(userId),
+    ])
+
+    const groupRole = CustomerIoPlanHelpers.getGroupRole(
+      memberSubscriptions,
+      managedSubscriptions,
+      userId
+    )
+
+    await Modules.promises.hooks.fire('setUserProperties', userId, {
+      group_role: groupRole,
+    })
+  } catch (error) {
+    logger.error(
+      { err: error, userId },
+      'Failed to update group_role user property in customer.io'
+    )
+  }
+}
+
 async function handleExpiredSubscription(subscription, requesterData) {
   const hasManagedUsersFeature =
     Features.hasFeature('saas') && subscription?.managedUsersEnabled
@@ -547,6 +579,13 @@ async function transferSubscriptionOwnership(
     update.$set.previousPaymentProvider = subscription.paymentProvider
   }
   await Subscription.updateOne(query, update).exec()
+  if (subscription.groupPlan) {
+    const previousAdminId = subscription.admin_id?.toString()
+    if (previousAdminId && previousAdminId !== adminId.toString()) {
+      await sendGroupRoleUserProperty(previousAdminId)
+    }
+    await sendGroupRoleUserProperty(adminId)
+  }
 }
 
 export default {
@@ -579,5 +618,6 @@ export default {
     scheduleRefreshFeatures,
     handleExpiredSubscription,
     transferSubscriptionOwnership,
+    sendGroupRoleUserProperty,
   },
 }

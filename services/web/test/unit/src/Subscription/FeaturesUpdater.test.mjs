@@ -839,6 +839,76 @@ describe('FeaturesUpdater', function () {
       })
     })
 
+    describe('group_role property', function () {
+      it("should set group_role to '' when the user is not in any group", async function (ctx) {
+        ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+          {
+            bestSubscription: { type: 'free' },
+            individualSubscription: null,
+            memberGroupSubscriptions: [],
+            managedGroupSubscriptions: [],
+          }
+        )
+        await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'setUserProperties',
+          ctx.user._id,
+          sinon.match({ group_role: '' })
+        )
+      })
+
+      it("should set group_role to 'member' when the user only belongs to a group as a member", async function (ctx) {
+        ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+          {
+            bestSubscription: { type: 'free' },
+            individualSubscription: null,
+            memberGroupSubscriptions: [{ _id: new ObjectId() }],
+            managedGroupSubscriptions: [],
+          }
+        )
+        await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'setUserProperties',
+          ctx.user._id,
+          sinon.match({ group_role: 'member' })
+        )
+      })
+
+      it("should set group_role to 'manager' when the user manages a group they don't own", async function (ctx) {
+        ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+          {
+            bestSubscription: { type: 'free' },
+            individualSubscription: null,
+            memberGroupSubscriptions: [],
+            managedGroupSubscriptions: [{ admin_id: { _id: new ObjectId() } }],
+          }
+        )
+        await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'setUserProperties',
+          ctx.user._id,
+          sinon.match({ group_role: 'manager' })
+        )
+      })
+
+      it("should set group_role to 'admin' when the user owns a group", async function (ctx) {
+        ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+          {
+            bestSubscription: { type: 'free' },
+            individualSubscription: null,
+            memberGroupSubscriptions: [],
+            managedGroupSubscriptions: [{ admin_id: { _id: ctx.user._id } }],
+          }
+        )
+        await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'setUserProperties',
+          ctx.user._id,
+          sinon.match({ group_role: 'admin' })
+        )
+      })
+    })
+
     describe('with a non-standard feature set', async function () {
       beforeEach(async function (ctx) {
         ctx.SubscriptionLocator.promises.getGroupSubscriptionsMemberOf

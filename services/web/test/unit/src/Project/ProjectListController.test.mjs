@@ -478,6 +478,7 @@ describe('ProjectListController', function () {
             {
               planCode: 'group_professional',
               membersLimit: 12,
+              admin_id: { _id: ctx.user._id },
             },
           ],
         }
@@ -491,6 +492,63 @@ describe('ProjectListController', function () {
         ctx.user._id,
         sinon.match({
           group_role: 'admin',
+        })
+      )
+    })
+
+    it('should send groupRole to customer.io for group managers', async function (ctx) {
+      ctx.Features.hasFeature.withArgs('saas').returns(true)
+      ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+        {
+          bestSubscription: { type: 'free' },
+          individualSubscription: null,
+          memberGroupSubscriptions: [],
+          managedGroupSubscriptions: [
+            {
+              planCode: 'group_professional',
+              membersLimit: 12,
+              admin_id: { _id: new ObjectId() },
+            },
+          ],
+        }
+      )
+      ctx.res.render = () => {}
+
+      await ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'setUserProperties',
+        ctx.user._id,
+        sinon.match({
+          group_role: 'manager',
+        })
+      )
+    })
+
+    it('should send groupRole to customer.io for group members', async function (ctx) {
+      ctx.Features.hasFeature.withArgs('saas').returns(true)
+      ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(
+        {
+          bestSubscription: { type: 'free' },
+          individualSubscription: null,
+          memberGroupSubscriptions: [
+            {
+              planCode: 'group_professional',
+              userIsGroupManager: false,
+            },
+          ],
+          managedGroupSubscriptions: [],
+        }
+      )
+      ctx.res.render = () => {}
+
+      await ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'setUserProperties',
+        ctx.user._id,
+        sinon.match({
+          group_role: 'member',
         })
       )
     })

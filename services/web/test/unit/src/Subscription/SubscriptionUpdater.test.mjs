@@ -91,6 +91,7 @@ describe('SubscriptionUpdater', function () {
         getUsersSubscription: sinon.stub(),
         getGroupSubscriptionMemberOf: sinon.stub(),
         getMemberSubscriptions: sinon.stub().resolves([]),
+        getManagedGroupSubscriptions: sinon.stub().resolves([]),
         getSubscription: sinon.stub(),
       },
     }
@@ -283,6 +284,44 @@ describe('SubscriptionUpdater', function () {
       ctx.SubscriptionModel.updateOne.should.have.been.calledWith(query, update)
     })
 
+    it("should fire setUserProperties for both old and new admin's group_role on group subscriptions", async function (ctx) {
+      ctx.subscription.groupPlan = true
+      ctx.SubscriptionLocator.promises.getManagedGroupSubscriptions
+        .withArgs(ctx.otherUserId)
+        .resolves([{ admin_id: { _id: ctx.otherUserId } }])
+      ctx.SubscriptionLocator.promises.getManagedGroupSubscriptions
+        .withArgs(ctx.adminUser._id)
+        .resolves([{ admin_id: { _id: ctx.otherUserId } }])
+
+      await ctx.SubscriptionUpdater.promises.updateAdmin(
+        ctx.subscription,
+        ctx.otherUserId
+      )
+
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'setUserProperties',
+        ctx.adminUser._id,
+        { group_role: 'manager' }
+      )
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'setUserProperties',
+        ctx.otherUserId,
+        { group_role: 'admin' }
+      )
+    })
+
+    it('should not fire setUserProperties for group_role on non-group subscriptions', async function (ctx) {
+      await ctx.SubscriptionUpdater.promises.updateAdmin(
+        ctx.subscription,
+        ctx.otherUserId
+      )
+      expect(ctx.Modules.promises.hooks.fire).to.not.have.been.calledWith(
+        'setUserProperties',
+        sinon.match.any,
+        sinon.match.has('group_role')
+      )
+    })
+
     it('should remove the manager for non-group subscriptions', async function (ctx) {
       await ctx.SubscriptionUpdater.promises.updateAdmin(
         ctx.subscription,
@@ -351,6 +390,46 @@ describe('SubscriptionUpdater', function () {
       }
       ctx.SubscriptionModel.updateOne.should.have.been.calledOnce
       ctx.SubscriptionModel.updateOne.should.have.been.calledWith(query, update)
+    })
+
+    it("should fire setUserProperties for both old and new admin's group_role on group subscriptions", async function (ctx) {
+      ctx.subscription.groupPlan = true
+      ctx.SubscriptionLocator.promises.getManagedGroupSubscriptions
+        .withArgs(ctx.otherUserId)
+        .resolves([{ admin_id: { _id: ctx.otherUserId } }])
+      ctx.SubscriptionLocator.promises.getManagedGroupSubscriptions
+        .withArgs(ctx.adminUser._id)
+        .resolves([{ admin_id: { _id: ctx.otherUserId } }])
+
+      await ctx.SubscriptionUpdater.promises.transferSubscriptionOwnership(
+        ctx.subscription,
+        ctx.otherUserId,
+        false
+      )
+
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'setUserProperties',
+        ctx.adminUser._id,
+        { group_role: 'manager' }
+      )
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'setUserProperties',
+        ctx.otherUserId,
+        { group_role: 'admin' }
+      )
+    })
+
+    it('should not fire setUserProperties for group_role on non-group subscriptions', async function (ctx) {
+      await ctx.SubscriptionUpdater.promises.transferSubscriptionOwnership(
+        ctx.subscription,
+        ctx.otherUserId,
+        false
+      )
+      expect(ctx.Modules.promises.hooks.fire).to.not.have.been.calledWith(
+        'setUserProperties',
+        sinon.match.any,
+        sinon.match.has('group_role')
+      )
     })
 
     it('should clear previousPaymentProvider when clearPreviousPaymentProvider is true', async function (ctx) {

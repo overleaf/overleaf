@@ -211,17 +211,24 @@ function getGroupRole(candidates, userId) {
     return ''
   }
 
-  const isGroupAdminOrManager = groupCandidates.some(candidate => {
-    const subscription = candidate.subscription
-    const adminId = subscription?.admin_id?.toString()
-    const managerIds = (subscription?.manager_ids || []).map(id =>
+  const isGroupAdmin = groupCandidates.some(
+    candidate => candidate.subscription?.admin_id?.toString() === userId
+  )
+  if (isGroupAdmin) {
+    return 'admin'
+  }
+
+  const isGroupManager = groupCandidates.some(candidate => {
+    const managerIds = (candidate.subscription?.manager_ids || []).map(id =>
       id?.toString()
     )
-
-    return adminId === userId || managerIds.includes(userId)
+    return managerIds.includes(userId)
   })
+  if (isGroupManager) {
+    return 'manager'
+  }
 
-  return isGroupAdminOrManager ? 'admin' : 'member'
+  return 'member'
 }
 
 function chooseBestCandidate(candidates) {

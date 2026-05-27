@@ -101,6 +101,12 @@ describe('UserMembershipHandler', function () {
       }),
     }
 
+    ctx.SubscriptionUpdater = {
+      promises: {
+        sendGroupRoleUserProperty: vi.fn().mockResolvedValue(),
+      },
+    }
+
     vi.doMock('mongodb-legacy', () => ({
       default: { ObjectId },
     }))
@@ -135,6 +141,13 @@ describe('UserMembershipHandler', function () {
     vi.doMock('../../../../app/src/infrastructure/Mongoose', () => ({
       default: ctx.mongoose,
     }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionUpdater',
+      () => ({
+        default: ctx.SubscriptionUpdater,
+      })
+    )
 
     ctx.UserMembershipHandler = (await import(modulePath)).default
   })
