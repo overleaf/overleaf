@@ -6,16 +6,25 @@ const settings = require('@overleaf/settings')
 // of object)
 class BackwardCompatibleError extends OError {
   /**
-   * @param {string | { message: string, info?: Object }} messageOrOptions
+   * @param {string | { message?: string, info?: Object, cause?: unknown }} messageOrOptions
+   * @param {Object} [info]
+   * @param {unknown} [cause]
    */
-  constructor(messageOrOptions) {
+  constructor(messageOrOptions, info, cause) {
     if (typeof messageOrOptions === 'string') {
-      super(messageOrOptions)
-    } else if (messageOrOptions) {
-      const { message, info } = messageOrOptions
-      super(message, info)
+      super(messageOrOptions, info, cause)
+    } else if (
+      typeof messageOrOptions === 'object' &&
+      messageOrOptions !== null
+    ) {
+      const {
+        message,
+        info: optionsInfo,
+        cause: optionsCause,
+      } = messageOrOptions
+      super(message, optionsInfo, optionsCause)
     } else {
-      super()
+      super(undefined, info, cause)
     }
   }
 }
