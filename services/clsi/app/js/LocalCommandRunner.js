@@ -20,6 +20,11 @@ let CommandRunner
 
 logger.debug('using standard command runner')
 
+// Track PIDs that have been intentionally killed so that the close handler
+// can detect termination even when the child exits with a numeric code instead
+// of being reported as killed by a signal (e.g. exit code 4 from latexmk).
+const killedPids = new Set()
+
 export default CommandRunner = {
   run(
     projectId,
@@ -67,6 +72,7 @@ export default CommandRunner = {
     proc.stdout.setEncoding('utf8').on('data', data => (stdout += data))
 
     proc.on('error', function (err) {
+      killedPids.delete(proc.pid)
       logger.err(
         { err, projectId, command, directory },
         'error running command'
@@ -77,8 +83,8 @@ export default CommandRunner = {
     proc.on('close', function (code, signal) {
       let err
       logger.debug({ code, signal, projectId }, 'command exited')
-      if (signal === 'SIGTERM') {
-        // signal from kill method below
+      const wasKilled = killedPids.delete(proc.pid)
+      if (signal === 'SIGTERM' || wasKilled) {
         err = new Error('terminated')
         err.terminated = true
         return callback(err)
@@ -100,8 +106,10 @@ export default CommandRunner = {
       callback = function () {}
     }
     try {
+      killedPids.add(pid)
       process.kill(-pid) // kill all processes in group
     } catch (err) {
+      killedPids.delete(pid)
       return callback(err)
     }
     return callback()

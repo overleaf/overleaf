@@ -98,7 +98,7 @@ describe('SandboxedCompiles', function () {
       stopCompile({ delay: 1000 })
       cy.findByRole('region', { name: 'PDF preview' })
         .invoke('text')
-        .should('match', /No PDF|PDF Rendering Error|Compilation cancelled/)
+        .should('match', /Compilation cancelled/)
       // Check that the previous compile is not running in the background by
       // disabling the infinite loop and recompiling
       cy.findByText('\\def').parent().click()
