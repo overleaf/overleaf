@@ -1,0 +1,83 @@
+import { expect } from 'vitest'
+import CustomerIoPlanHelpers from '../../../../app/src/Features/Subscription/CustomerIoPlanHelpers.mjs'
+
+describe('CustomerIoPlanHelpers', function () {
+  describe('getPlanProperties past_due', function () {
+    function buildArgs(individualSubscription) {
+      return {
+        bestSubscription: { type: 'individual' },
+        individualSubscription,
+        individualPaymentRecord: null,
+        memberGroupSubscriptions: [],
+        managedGroupSubscriptions: [],
+        userIsMemberOfGroupSubscription: false,
+        hasCommons: false,
+        writefullData: null,
+      }
+    }
+
+    it('is true when the Stripe subscription state is past_due', function () {
+      const properties = CustomerIoPlanHelpers.getPlanProperties(
+        buildArgs({
+          planCode: 'collaborator',
+          groupPlan: false,
+          paymentProvider: { service: 'stripe-us', state: 'past_due' },
+        })
+      )
+      expect(properties.past_due).to.equal(true)
+    })
+
+    it('is true when the Recurly subscription state is past_due', function () {
+      const properties = CustomerIoPlanHelpers.getPlanProperties(
+        buildArgs({
+          planCode: 'collaborator',
+          groupPlan: false,
+          recurlyStatus: { state: 'past_due' },
+        })
+      )
+      expect(properties.past_due).to.equal(true)
+    })
+
+    it("is true when a group admin's group subscription is past_due", function () {
+      const properties = CustomerIoPlanHelpers.getPlanProperties(
+        buildArgs({
+          planCode: 'group_collaborator',
+          groupPlan: true,
+          paymentProvider: { service: 'stripe-us', state: 'past_due' },
+        })
+      )
+      expect(properties.past_due).to.equal(true)
+    })
+
+    it('is false for an active Stripe subscription', function () {
+      const properties = CustomerIoPlanHelpers.getPlanProperties(
+        buildArgs({
+          planCode: 'collaborator',
+          groupPlan: false,
+          paymentProvider: { service: 'stripe-us', state: 'active' },
+        })
+      )
+      expect(properties.past_due).to.equal(false)
+    })
+
+    it('is false for cancelled, expired, paused, and trial states', function () {
+      for (const state of ['cancelled', 'expired', 'paused', 'trial']) {
+        const properties = CustomerIoPlanHelpers.getPlanProperties(
+          buildArgs({
+            planCode: 'collaborator',
+            groupPlan: false,
+            paymentProvider: { service: 'stripe-us', state },
+          })
+        )
+        expect(properties.past_due, `state=${state}`).to.equal(false)
+      }
+    })
+
+    it('is false when there is no individual subscription (free user / member-only)', function () {
+      const properties = CustomerIoPlanHelpers.getPlanProperties(
+        buildArgs(undefined)
+      )
+      expect(properties.past_due).to.equal(false)
+    })
+  })
+})

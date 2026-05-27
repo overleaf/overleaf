@@ -33,13 +33,13 @@ const INACTIVE_NEXT_RENEWAL_DATE_STATES = new Set([
 const PENDING_CANCELLATION_STATES = new Set(['canceled', 'cancelled'])
 
 /**
- * @param {MongoSubscription} subscription
+ * @param {Nullable<MongoSubscription>} [subscription]
  * @returns {string}
  */
 function getSubscriptionState(subscription) {
   return (
-    subscription.recurlyStatus?.state ||
-    subscription.paymentProvider?.state ||
+    subscription?.recurlyStatus?.state ||
+    subscription?.paymentProvider?.state ||
     ''
   )
 }
@@ -585,6 +585,7 @@ function getPlanProperties({
     individual_subscription: Boolean(
       individualSubscription && !individualSubscription.groupPlan
     ),
+    past_due: getSubscriptionState(individualSubscription) === 'past_due',
   }
 
   if (trialEndDate != null) properties.trial_end_date = trialEndDate
