@@ -1,4 +1,3 @@
-import classnames from 'classnames'
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
@@ -7,15 +6,12 @@ import {
   findCurrentSectionHeadingLevel,
   setSectionHeadingLevel,
 } from '../../extensions/toolbar/sections'
-import { useCallback, useMemo, useRef } from 'react'
-import OLOverlay from '@/shared/components/ol/ol-overlay'
-import OLPopover from '@/shared/components/ol/ol-popover'
-import useEventListener from '../../../../shared/hooks/use-event-listener'
-import useDropdown from '../../../../shared/hooks/use-dropdown'
+import { useMemo } from 'react'
 import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
-import OLTooltip from '@/shared/components/ol/ol-tooltip'
+import { ToolbarButtonMenu } from './button-menu'
+import OLListGroupItem from '@/shared/components/ol/ol-list-group-item'
 
 const levels = new Map([
   ['text', 'Normal text'],
@@ -33,107 +29,41 @@ export const SectionHeadingDropdown = () => {
   const view = useCodeMirrorViewContext()
   const { t } = useTranslation()
 
-  const { open: overflowOpen, onToggle: setOverflowOpen } = useDropdown()
-
-  useEventListener(
-    'resize',
-    useCallback(() => {
-      setOverflowOpen(false)
-    }, [setOverflowOpen])
-  )
-
-  const toggleButtonRef = useRef<HTMLButtonElement | null>(null)
-
   const currentLevel = useMemo(
     () => findCurrentSectionHeadingLevel(state),
     [state]
   )
 
-  const currentLabel = currentLevel
-    ? (levels.get(currentLevel.level) ?? currentLevel.level)
-    : '---'
-
   return (
-    <>
-      <OLTooltip
-        id="section-heading-dropdown-tooltip"
-        description={t('toolbar_select_style')}
-        overlayProps={{ placement: 'bottom' }}
-      >
-        <button
-          ref={toggleButtonRef}
-          type="button"
-          id="section-heading-menu-button"
-          aria-haspopup="true"
-          aria-controls="section-heading-menu"
-          aria-label={t('toolbar_choose_section_heading_level')}
-          className="ol-cm-toolbar-menu-toggle"
-          onMouseDown={event => event.preventDefault()}
-          onClick={() => setOverflowOpen(!overflowOpen)}
-        >
-          <span>{currentLabel}</span>
+    <ToolbarButtonMenu
+      id="section-heading-menu-button"
+      label={t('toolbar_section_heading_level')}
+      className="ol-cm-toolbar-button-wide"
+      icon={
+        <>
+          <MaterialIcon
+            type="text_fields"
+            style={{ transform: 'scaleX(-1)' }}
+          />
           <MaterialIcon type="expand_more" />
-        </button>
-      </OLTooltip>
-
-      {overflowOpen && (
-        <OLOverlay
-          show
-          onHide={() => setOverflowOpen(false)}
-          transition={false}
-          container={view.dom}
-          containerPadding={0}
-          placement="bottom"
-          rootClose
-          target={toggleButtonRef.current}
-          popperConfig={{
-            modifiers: [
-              {
-                name: 'offset',
-                options: {
-                  offset: [0, 1],
-                },
-              },
-            ],
+        </>
+      }
+    >
+      {levelsEntries.map(([level, label]) => (
+        <OLListGroupItem
+          role="menuitem"
+          key={level}
+          active={level === currentLevel?.level}
+          onClick={() => {
+            emitToolbarEvent(view, 'section-level-change')
+            setSectionHeadingLevel(view, level)
+            view.focus()
           }}
+          className={`ol-cm-section-heading-menu-item section-level-${level}`}
         >
-          <OLPopover
-            id="popover-toolbar-section-heading"
-            className="ol-cm-toolbar-menu-popover"
-          >
-            <div
-              className="ol-cm-toolbar-menu"
-              id="section-heading-menu"
-              role="menu"
-              aria-labelledby="section-heading-menu-button"
-            >
-              {levelsEntries.map(([level, label]) => (
-                <button
-                  type="button"
-                  role="menuitem"
-                  key={level}
-                  onClick={() => {
-                    emitToolbarEvent(view, 'section-level-change')
-                    setSectionHeadingLevel(view, level)
-                    view.focus()
-                    setOverflowOpen(false)
-                  }}
-                  className={classnames(
-                    'ol-cm-toolbar-menu-item',
-                    `section-level-${level}`,
-                    {
-                      'ol-cm-toolbar-menu-item-active':
-                        level === currentLevel?.level,
-                    }
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </OLPopover>
-        </OLOverlay>
-      )}
-    </>
+          {label}
+        </OLListGroupItem>
+      ))}
+    </ToolbarButtonMenu>
   )
 }

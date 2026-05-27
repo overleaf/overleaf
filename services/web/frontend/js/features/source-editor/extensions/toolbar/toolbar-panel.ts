@@ -102,8 +102,29 @@ const toolbarTheme = EditorView.theme({
       color: 'var(--toolbar-btn-color)',
       borderColor: 'var(--editor-toolbar-bg)',
       background: 'none',
+      '&.active': {
+        backgroundColor: 'rgba(125, 125, 125, 0.1)',
+        color: 'inherit',
+      },
       '&:hover, &:focus': {
         backgroundColor: 'rgba(125, 125, 125, 0.2)',
+        color: 'inherit',
+      },
+      '&.ol-cm-section-heading-menu-item': {
+        border: 'none',
+        padding: '4px 12px',
+        height: '40px',
+        fontSize: '14px',
+        fontWeight: 'bold',
+      },
+      '&.section-level-section': {
+        fontSize: '1.44em',
+      },
+      '&.section-level-subsection': {
+        fontSize: '1.2em',
+      },
+      '&.section-level-text': {
+        fontWeight: 'normal',
       },
     },
   },
@@ -174,6 +195,9 @@ const toolbarTheme = EditorView.theme({
       fontWeight: 700,
     },
   },
+  '.ol-cm-toolbar-button.ol-cm-toolbar-button-wide': {
+    width: 'auto',
+  },
   '&.overall-theme-dark .ol-cm-toolbar-button': {
     opacity: 0.8,
     '&:hover, &:focus, &:active, &.active': {
@@ -196,84 +220,6 @@ const toolbarTheme = EditorView.theme({
     display: 'none',
     '&.ol-cm-toolbar-overflow-toggle-visible': {
       display: 'flex',
-    },
-  },
-  '.ol-cm-toolbar-menu-toggle': {
-    background: 'transparent',
-    border: 'none',
-    color: 'inherit',
-    borderRadius: 'var(--border-radius-base)',
-    opacity: 0.8,
-    width: '120px',
-    fontSize: '13px',
-    fontWeight: '700',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '5px 6px',
-    '&:hover, &:focus, &.active': {
-      backgroundColor: 'rgba(125, 125, 125, 0.1)',
-      opacity: '1',
-      color: 'inherit',
-    },
-    '& .caret': {
-      marginTop: '0',
-    },
-  },
-  '.ol-cm-toolbar-menu-popover': {
-    border: 'none',
-    borderRadius: '0',
-    borderBottomLeftRadius: '4px',
-    borderBottomRightRadius: '4px',
-    boxShadow: '0 2px 5px rgb(0 0 0 / 20%)',
-    backgroundColor: 'var(--editor-toolbar-bg)',
-    color: 'var(--toolbar-btn-color)',
-    padding: '0',
-    '&.bottom': {
-      marginTop: '1px',
-    },
-    '&.top': {
-      marginBottom: '1px',
-    },
-    '& .arrow, & .popover-arrow': {
-      display: 'none',
-    },
-    '& .popover-content, & > .popover-body': {
-      padding: '0',
-      color: 'inherit',
-    },
-    '& .ol-cm-toolbar-menu': {
-      minWidth: '120px',
-      display: 'flex',
-      flexDirection: 'column',
-      boxSizing: 'border-box',
-      fontSize: '14px',
-    },
-    '& .ol-cm-toolbar-menu-item': {
-      border: 'none',
-      background: 'none',
-      padding: '4px 12px',
-      height: '40px',
-      display: 'flex',
-      alignItems: 'center',
-      fontWeight: 'bold',
-      color: 'inherit',
-      '&.ol-cm-toolbar-menu-item-active': {
-        backgroundColor: 'rgba(125, 125, 125, 0.1)',
-      },
-      '&:hover': {
-        backgroundColor: 'rgba(125, 125, 125, 0.2)',
-        color: 'inherit',
-      },
-      '&.section-level-section': {
-        fontSize: '1.44em',
-      },
-      '&.section-level-subsection': {
-        fontSize: '1.2em',
-      },
-      '&.section-level-body': {
-        fontWeight: 'normal',
-      },
     },
   },
   '&.overall-theme-dark .ol-cm-toolbar-table-grid': {

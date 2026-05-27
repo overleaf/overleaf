@@ -68,14 +68,14 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('hi')
     cy.get('.cm-content').should('have.text', 'hi')
 
-    clickToolbarButton('Choose section heading level')
+    clickToolbarButton('Section heading level')
     cy.findByRole('menu').within(() => {
       cy.findByText('Subsection').click()
     })
     cy.get('.cm-content').should('have.text', 'hi')
     cy.get('.ol-cm-command-subsection').should('have.length', 1)
 
-    clickToolbarButton('Choose section heading level')
+    clickToolbarButton('Section heading level')
     cy.findByRole('menu').within(() => {
       cy.findByText('Normal text').click()
     })
