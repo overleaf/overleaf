@@ -114,7 +114,13 @@ services:
         - USER_UID
         - USER_GID
     volumes:
-      - ../../:/overleaf
+      - .:/overleaf/services/web
+      - ../../node_modules:/overleaf/node_modules
+      - ../../libraries:/overleaf/libraries
+      - ../../package.json:/overleaf/package.json
+      - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
+      - ../../yarn.lock:/overleaf/yarn.lock
+      - ../../.yarn:/overleaf/.yarn
     working_dir: /overleaf/services/web
     environment:
       VERBOSE_LOGGING:

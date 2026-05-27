@@ -124,7 +124,7 @@ module.exports = {
             loader: 'babel-loader',
             options: {
               cacheDirectory: true,
-              configFile: path.join(__dirname, './babel.config.json'),
+              configFile: path.join(__dirname, './babel.config.cjs'),
             },
           },
           {
@@ -157,7 +157,7 @@ module.exports = {
               // Configure babel-loader to cache compiled output so that
               // subsequent compile runs are much faster
               cacheDirectory: true,
-              configFile: path.join(__dirname, './babel.config.json'),
+              configFile: path.join(__dirname, './babel.config.cjs'),
               plugins: [
                 process.env.REACT_REFRESH_ENABLED === 'true' &&
                   'react-refresh/babel',
