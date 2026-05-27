@@ -1561,7 +1561,31 @@ export async function compareAccountFields({
   const paymentMethodIsMissing =
     (!stripeDefaultPaymentMethod && expectedPaymentMethod) ||
     (stripeDefaultPaymentMethod && !expectedPaymentMethod)
-  if (
+
+  const bothArePaypal =
+    expectedPaymentMethod?.type === 'paypal' &&
+    stripeDefaultPaymentMethod?.type === 'paypal'
+
+  if (bothArePaypal) {
+    // Both are PayPal — the payment method itself matches, but flag if
+    // Recurly billing info was updated after the Stripe payment method was
+    // created.
+    if (recurlyPaymentMethodIsNewer) {
+      diffs.default_payment_method = {
+        recurly: {
+          type: 'paypal',
+          updatedAt: account.billingInfo?.updatedAt?.toISOString() || null,
+        },
+        stripe: {
+          type: 'paypal',
+          created: stripeDefaultPaymentMethod?.created
+            ? new Date(stripeDefaultPaymentMethod.created * 1000).toISOString()
+            : null,
+        },
+        bothPaypal: true,
+      }
+    }
+  } else if (
     paymentMethodIsMissing ||
     (!areStripeAndRecurlyCardDetailsEqual(
       stripeDefaultPaymentMethod,

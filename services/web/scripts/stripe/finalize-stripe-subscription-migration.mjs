@@ -57,7 +57,6 @@ import PlansLocator from '../../app/src/Features/Subscription/PlansLocator.mjs'
 import UserAnalyticsIdCache from '../../app/src/Features/Analytics/UserAnalyticsIdCache.mjs'
 import CustomerIoHandler from '../../modules/customer-io/app/src/CustomerIoHandler.mjs'
 import { ReportError, convertToMinorUnits } from './helpers.mjs'
-import isEqual from 'lodash/isEqual.js'
 import { compareAccountFields } from '../helpers/migrate_recurly_customers_to_stripe.helpers.mjs'
 import {
   createRateLimitedApiWrappers,
@@ -70,6 +69,9 @@ import {
 } from './RateLimiter.mjs'
 
 const preloadedProductMetadata = new Map()
+
+// Tolerance for comparing amounts (handles repeating decimals in per-seat prices)
+const AMOUNT_TOLERANCE = 1e-6
 
 // rate limiters - initialized in main()
 let rateLimiters
@@ -556,13 +558,26 @@ function detectSubscriptionChanges(
             ? productMetadata?.addOnCode
             : productMetadata?.planCode,
         quantity: item.quantity,
-        amount: item.price.unit_amount,
+        amount:
+          item.price.unit_amount != null
+            ? item.price.unit_amount
+            : parseFloat(item.price.unit_amount_decimal),
       }
     })
     .sort((a, b) => a.code.localeCompare(b.code))
 
-  // Compare items
-  if (!isEqual(recurlyItems, stripeItems)) {
+  // Compare items (use tolerance for amounts due to repeating decimals in per-seat prices)
+  const itemsMatch =
+    recurlyItems.length === stripeItems.length &&
+    recurlyItems.every((rItem, i) => {
+      const sItem = stripeItems[i]
+      return (
+        rItem.code === sItem.code &&
+        rItem.quantity === sItem.quantity &&
+        Math.abs(rItem.amount - sItem.amount) < AMOUNT_TOLERANCE
+      )
+    })
+  if (!itemsMatch) {
     changes.push(
       `Items: Recurly=[${formatItems(recurlyItems)}], Stripe=[${formatItems(stripeItems)}]`
     )
@@ -662,9 +677,15 @@ function formatDiffsAsChanges(diffs) {
         `Tax ID: Recurly={type:${diff.recurly.type}, value:${diff.recurly.value}}, Stripe=${stripeStr}`
       )
     } else if (field === 'default_payment_method') {
-      changes.push(
-        `Payment method: Recurly=${diff.recurly.type || diff.recurly.last4 || '(none)'}, Stripe=${diff.stripe.type || '(none)'}`
-      )
+      if (diff.bothPaypal) {
+        changes.push(
+          `Payment method: both PayPal, but Recurly billing info updatedAt (${diff.recurly.updatedAt}) is newer than Stripe payment method created (${diff.stripe.created})`
+        )
+      } else {
+        changes.push(
+          `Payment method: Recurly=${diff.recurly.type || diff.recurly.last4 || '(none)'}, Stripe=${diff.stripe.type || '(none)'}`
+        )
+      }
     } else if (field.startsWith('metadata.')) {
       const key = field.slice('metadata.'.length)
       changes.push(

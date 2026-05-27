@@ -1053,3 +1053,96 @@ test('compareAccountFields detects tax_exempt drift', async () => {
   assert.equal(diffs.tax_exempt.recurly, 'exempt')
   assert.equal(diffs.tax_exempt.stripe, 'none')
 })
+
+test('compareAccountFields reports bothPaypal diff when Recurly billingInfo.updatedAt is newer', async () => {
+  const recurlyUpdatedAt = new Date('2025-06-01T12:00:00Z')
+  const stripeCreatedEpoch = new Date('2025-05-01T12:00:00Z').getTime() / 1000
+
+  const account = {
+    email: 'user@example.com',
+    customFields: [],
+    billingInfo: {
+      updatedAt: recurlyUpdatedAt,
+      paymentMethod: { object: 'paypal_billing_agreement' },
+    },
+    address: { country: 'GB' },
+  }
+  const stripeCustomer = {
+    email: 'user@example.com',
+    metadata: {
+      recurlyAccountCode: '',
+      userId: 'user123',
+      taxInfoPending: '',
+    },
+    tax_exempt: 'none',
+    invoice_settings: {
+      default_payment_method: {
+        type: 'paypal',
+        created: stripeCreatedEpoch,
+      },
+    },
+  }
+
+  const diffs = await compareAccountFields({
+    account,
+    stripeCustomer,
+    overleafUserId: 'user123',
+    fetchCollectionMethod: async () => null,
+    stripePaymentMethods: [],
+    stripeServiceName: 'stripe-uk',
+  })
+
+  assert.ok(diffs.default_payment_method)
+  assert.equal(diffs.default_payment_method.bothPaypal, true)
+  assert.equal(diffs.default_payment_method.recurly.type, 'paypal')
+  assert.equal(
+    diffs.default_payment_method.recurly.updatedAt,
+    recurlyUpdatedAt.toISOString()
+  )
+  assert.equal(diffs.default_payment_method.stripe.type, 'paypal')
+  assert.equal(
+    diffs.default_payment_method.stripe.created,
+    new Date(stripeCreatedEpoch * 1000).toISOString()
+  )
+})
+
+test('compareAccountFields reports no diff when both are PayPal and Recurly is not newer', async () => {
+  const recurlyUpdatedAt = new Date('2025-04-01T12:00:00Z')
+  const stripeCreatedEpoch = new Date('2025-05-01T12:00:00Z').getTime() / 1000
+
+  const account = {
+    email: 'user@example.com',
+    customFields: [],
+    billingInfo: {
+      updatedAt: recurlyUpdatedAt,
+      paymentMethod: { object: 'paypal_billing_agreement' },
+    },
+    address: { country: 'GB' },
+  }
+  const stripeCustomer = {
+    email: 'user@example.com',
+    metadata: {
+      recurlyAccountCode: '',
+      userId: 'user123',
+      taxInfoPending: '',
+    },
+    tax_exempt: 'none',
+    invoice_settings: {
+      default_payment_method: {
+        type: 'paypal',
+        created: stripeCreatedEpoch,
+      },
+    },
+  }
+
+  const diffs = await compareAccountFields({
+    account,
+    stripeCustomer,
+    overleafUserId: 'user123',
+    fetchCollectionMethod: async () => null,
+    stripePaymentMethods: [],
+    stripeServiceName: 'stripe-uk',
+  })
+
+  assert.equal(diffs.default_payment_method, undefined)
+})
