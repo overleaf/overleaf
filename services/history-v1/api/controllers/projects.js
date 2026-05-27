@@ -290,7 +290,8 @@ async function getZip(req, res, next) {
 async function streamZip(snapshot, blobStore, res) {
   await withTmpDir('get-zip-', async tmpDir => {
     const tmpFilename = Path.join(tmpDir, 'project.zip')
-    const archive = new ProjectArchive(snapshot)
+    const zipTimeoutMs = parseInt(config.get('zipStore.zipTimeoutMs'), 10)
+    const archive = new ProjectArchive(snapshot, zipTimeoutMs)
     await archive.writeZip(blobStore, tmpFilename)
     res.set('Content-Type', 'application/octet-stream')
     res.set('Content-Disposition', 'attachment; filename=project.zip')

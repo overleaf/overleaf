@@ -62,7 +62,7 @@ describe('ProjectArchive', function () {
   it('archives a small snapshot with binary and text data', function () {
     return makeMixedTestSnapshot(1)
       .then(snapshot => {
-        const projectArchive = new ProjectArchive(snapshot)
+        const projectArchive = new ProjectArchive(snapshot, 25_000)
         return projectArchive.writeZip(blobStore, zipFilePath)
       })
       .then(() => {
@@ -83,7 +83,7 @@ describe('ProjectArchive', function () {
   it('archives a larger snapshot with binary and text data', function () {
     return makeMixedTestSnapshot(10)
       .then(snapshot => {
-        const projectArchive = new ProjectArchive(snapshot)
+        const projectArchive = new ProjectArchive(snapshot, 25_000)
         return projectArchive.writeZip(blobStore, zipFilePath)
       })
       .then(() => {
@@ -102,7 +102,7 @@ describe('ProjectArchive', function () {
     return blobStore
       .putString('')
       .then(() => {
-        const projectArchive = new ProjectArchive(snapshot)
+        const projectArchive = new ProjectArchive(snapshot, 25_000)
         return projectArchive.writeZip(blobStore, zipFilePath)
       })
       .then(() => {
@@ -134,7 +134,7 @@ describe('ProjectArchive', function () {
     it('rejects with the error', function () {
       return makeMixedTestSnapshot(1)
         .then(snapshot => {
-          const projectArchive = new ProjectArchive(snapshot)
+          const projectArchive = new ProjectArchive(snapshot, 25_000)
           return projectArchive.writeZip(blobStore, zipFilePath)
         })
         .then(() => {
@@ -169,7 +169,7 @@ describe('ProjectArchive', function () {
     it('rejects with the error', function () {
       return makeMixedTestSnapshot(1)
         .then(snapshot => {
-          const projectArchive = new ProjectArchive(snapshot)
+          const projectArchive = new ProjectArchive(snapshot, 25_000)
           return projectArchive.writeZip(blobStore, zipFilePath)
         })
         .then(() => {
