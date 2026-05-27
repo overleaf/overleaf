@@ -17,7 +17,11 @@ export const ProjectInviteSchema = new Schema(
     tokenHmac: String,
     sendingUserId: ObjectId,
     projectId: ObjectId,
-    privileges: String,
+    // privileges contains a PrivilegeLevels value, which may be Boolean `false` or a String
+    privileges: {
+      type: Schema.Types.Union,
+      of: [String, Boolean],
+    },
     createdAt: { type: Date, default: Date.now },
     expires: {
       type: Date,
