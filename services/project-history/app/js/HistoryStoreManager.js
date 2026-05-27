@@ -1,6 +1,5 @@
 import { promisify } from 'node:util'
 import fs from 'node:fs'
-import request from 'request'
 import stream from 'node:stream'
 import logger from '@overleaf/logger'
 import _ from 'lodash'
@@ -9,6 +8,7 @@ import OError from '@overleaf/o-error'
 import Settings from '@overleaf/settings'
 import {
   fetchStream,
+  fetchString,
   fetchNothing,
   RequestFailedError,
 } from '@overleaf/fetch-utils'
@@ -574,33 +574,6 @@ export function getBlobStore(projectId) {
   return new BlobStore(projectId)
 }
 
-function _requestOptions(options) {
-  const requestOptions = {
-    method: options.method || 'GET',
-    url: `${Settings.overleaf.history.host}/${options.path}`,
-    timeout: HTTP_REQUEST_TIMEOUT,
-    auth: {
-      user: Settings.overleaf.history.user,
-      pass: Settings.overleaf.history.pass,
-      sendImmediately: true,
-    },
-  }
-
-  if (options.json != null) {
-    requestOptions.json = options.json
-  }
-
-  if (options.body != null) {
-    requestOptions.body = options.body
-  }
-
-  if (options.qs != null) {
-    requestOptions.qs = options.qs
-  }
-
-  return requestOptions
-}
-
 /**
  * @return {RequestInit}
  */
@@ -614,25 +587,54 @@ function getHistoryFetchOptions() {
   }
 }
 
-function _requestHistoryService(options, callback) {
-  const requestOptions = _requestOptions(options)
-  request(requestOptions, (error, res, body) => {
-    if (error) {
-      return callback(OError.tag(error))
+function _buildUrl(options) {
+  const url = new URL(`${Settings.overleaf.history.host}/${options.path}`)
+  if (options.qs) {
+    for (const [key, value] of Object.entries(options.qs)) {
+      url.searchParams.set(key, String(value))
     }
+  }
+  return url.href
+}
 
-    if (res.statusCode >= 200 && res.statusCode < 300) {
-      callback(null, body)
-    } else {
-      const { method, url, qs } = requestOptions
-      error = new OError(
-        // Keep the status code in the message. It is used by the ErrorRecorder.
-        `history store a non-success status code: ${res.statusCode}`,
-        { method, url, qs, statusCode: res.statusCode }
-      )
-      callback(error)
+function _requestHistoryService(options, callback) {
+  const url = _buildUrl(options)
+  const method = options.method || 'GET'
+  const fetchOptions = {
+    method,
+    ...getHistoryFetchOptions(),
+  }
+
+  if (options.json != null && options.json !== true) {
+    fetchOptions.json = options.json
+  }
+
+  if (options.body != null) {
+    fetchOptions.body = options.body
+  }
+
+  const useJson = options.json != null
+
+  fetchString(url, fetchOptions).then(
+    body => {
+      if (useJson && body) {
+        callback(null, JSON.parse(body))
+      } else {
+        callback(null, body)
+      }
+    },
+    err => {
+      if (err instanceof RequestFailedError) {
+        const error = new OError(
+          // Keep the status code in the message. It is used by the ErrorRecorder.
+          `history store a non-success status code: ${err.response.status}`,
+          { method, url, qs: options.qs, statusCode: err.response.status }
+        )
+        return callback(error)
+      }
+      callback(OError.tag(err))
     }
-  })
+  )
 }
 
 export const cloneProject = callbackify(_cloneProject)

@@ -53,10 +53,8 @@ describe('HttpController', function () {
     }
     this.RetryManager = {}
     this.FlushManager = {}
-    this.request = {}
     this.pipeline = sinon.stub()
     this.HttpController = await esmock(MODULE_PATH, {
-      request: this.request,
       stream: { pipeline: this.pipeline },
       '../../../../app/js/UpdatesProcessor.js': this.UpdatesProcessor,
       '../../../../app/js/SummarizedUpdatesManager.js':

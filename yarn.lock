@@ -6886,7 +6886,6 @@ __metadata:
     nock: "npm:^13.5.3"
     overleaf-editor-core: "workspace:*"
     p-queue: "npm:^8.1.0"
-    request: "npm:2.88.2"
     sinon: "npm:~9.0.1"
     sinon-chai: "npm:^3.7.0"
     timekeeper: "npm:2.2.0"

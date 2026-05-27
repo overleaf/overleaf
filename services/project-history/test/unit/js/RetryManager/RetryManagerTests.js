@@ -89,7 +89,6 @@ describe('RetryManager', function () {
         },
       },
     }
-    this.request = {}
     this.RetryManager = await esmock(MODULE_PATH, {
       '../../../../app/js/WebApiManager.js': this.WebApiManager,
       '../../../../app/js/RedisManager.js': this.RedisManager,
@@ -97,7 +96,6 @@ describe('RetryManager', function () {
       '../../../../app/js/SyncManager.js': this.SyncManager,
       '../../../../app/js/UpdatesProcessor.js': this.UpdatesProcessor,
       '@overleaf/settings': this.settings,
-      request: this.request,
     })
   })
 
