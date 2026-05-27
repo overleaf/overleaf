@@ -34,6 +34,7 @@
   "resolutions": {
     "@xmldom/xmldom": "0.8.13",
     "argparse/underscore": "1.13.8",
+    "east/underscore": "1.13.8",
     "sandboxed-module": "patch:sandboxed-module@npm%3A2.0.4#~/.yarn/patches/sandboxed-module-npm-2.0.4-f8b45aacc9.patch",
     "request/tough-cookie": "5.1.2",
     "request/form-data": "2.5.5",
