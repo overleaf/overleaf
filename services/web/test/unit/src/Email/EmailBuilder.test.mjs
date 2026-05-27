@@ -275,13 +275,11 @@ describe('EmailBuilder', function () {
         describe('HTML email', function () {
           it('should include a CTA button and a fallback CTA link', function (ctx) {
             const dom = cheerio.load(ctx.email.html)
-            const buttonLink = dom('a:contains("Leave Feedback")')
+            const buttonLink = dom('a:contains("Leave feedback")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(ctx.expectedUrl)
-            const fallback = dom('.force-overleaf-style').last()
-            expect(fallback.length).to.equal(1)
-            const fallbackLink = fallback.html()
-            expect(fallbackLink).to.contain(ctx.expectedUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.expectedUrl)
           })
         })
 
@@ -317,10 +315,8 @@ describe('EmailBuilder', function () {
             const buttonLink = dom('a:contains("Leave feedback")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(ctx.expectedUrl)
-            const fallback = dom('.force-overleaf-style').last()
-            expect(fallback.length).to.equal(1)
-            const fallbackLink = fallback.html()
-            expect(fallbackLink).to.contain(ctx.expectedUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.expectedUrl)
           })
         })
 
@@ -354,10 +350,8 @@ describe('EmailBuilder', function () {
             const buttonLink = dom('a:contains("Confirm email")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(ctx.opts.confirmEmailUrl)
-            const fallback = dom('.force-overleaf-style').last()
-            expect(fallback.length).to.equal(1)
-            const fallbackLink = fallback.html()
-            expect(fallbackLink).to.contain(ctx.opts.confirmEmailUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.opts.confirmEmailUrl)
           })
         })
 
@@ -396,13 +390,11 @@ describe('EmailBuilder', function () {
         describe('HTML email', function () {
           it('should include a CTA button and a fallback CTA link', function (ctx) {
             const dom = cheerio.load(ctx.email.html)
-            const buttonLink = dom('td a')
-            expect(buttonLink).to.exist
+            const buttonLink = dom('a:contains("View project")')
+            expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(ctx.expectedUrl)
-            const fallback = dom('.force-overleaf-style').last()
-            expect(fallback).to.exist
-            const fallbackLink = fallback.html().replace(/&amp;/g, '&')
-            expect(fallbackLink).to.contain(ctx.expectedUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.expectedUrl)
           })
         })
 
@@ -438,13 +430,11 @@ describe('EmailBuilder', function () {
         describe('HTML email', function () {
           it('should include a CTA button and a fallback CTA link', function (ctx) {
             const dom = cheerio.load(ctx.email.html)
-            const buttonLink = dom('td a')
-            expect(buttonLink).to.exist
+            const buttonLink = dom('a:contains("Reset password")')
+            expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(ctx.opts.setNewPasswordUrl)
-            const fallback = dom('.force-overleaf-style').last()
-            expect(fallback).to.exist
-            const fallbackLink = fallback.html().replace(/&amp;/g, '&')
-            expect(fallbackLink).to.contain(ctx.opts.setNewPasswordUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.opts.setNewPasswordUrl)
           })
         })
 
@@ -475,13 +465,11 @@ describe('EmailBuilder', function () {
         describe('HTML email', function () {
           it('should include a CTA button and a fallback CTA link', function (ctx) {
             const dom = cheerio.load(ctx.email.html)
-            const buttonLink = dom('a:contains("Reconfirm Email")')
+            const buttonLink = dom('a:contains("Reconfirm email")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(ctx.opts.confirmEmailUrl)
-            const fallback = dom('.force-overleaf-style').last()
-            expect(fallback.length).to.equal(1)
-            const fallbackLink = fallback.html()
-            expect(fallbackLink).to.contain(ctx.opts.confirmEmailUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.opts.confirmEmailUrl)
           })
         })
 
@@ -521,10 +509,8 @@ describe('EmailBuilder', function () {
             const buttonLink = dom('a:contains("Join now")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(ctx.opts.acceptInviteUrl)
-            const fallback = dom('.force-overleaf-style').last()
-            expect(fallback.length).to.equal(1)
-            const fallbackLink = fallback.html()
-            expect(fallbackLink).to.contain(ctx.opts.acceptInviteUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.opts.acceptInviteUrl)
           })
         })
 
@@ -559,10 +545,8 @@ describe('EmailBuilder', function () {
             const buttonLink = dom('a:contains("View Subscription Dashboard")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(ctx.expectedUrl)
-            const fallback = dom('.force-overleaf-style').last()
-            expect(fallback.length).to.equal(1)
-            const fallbackLink = fallback.html()
-            expect(fallbackLink).to.contain(ctx.expectedUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.expectedUrl)
           })
         })
 
@@ -593,10 +577,8 @@ describe('EmailBuilder', function () {
             const buttonLink = dom(`a:contains("Open ${ctx.settings.appName}")`)
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(ctx.settings.siteUrl)
-            const fallback = dom('.force-overleaf-style').last()
-            expect(fallback.length).to.equal(1)
-            const fallbackLink = fallback.html()
-            expect(fallbackLink).to.contain(ctx.settings.siteUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.settings.siteUrl)
           })
         })
 
@@ -630,10 +612,8 @@ describe('EmailBuilder', function () {
             const buttonLink = dom('a:contains("Set password")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(ctx.opts.setNewPasswordUrl)
-            const fallback = dom('.force-overleaf-style').last()
-            expect(fallback.length).to.equal(1)
-            const fallbackLink = fallback.html().replace(/&amp;/, '&')
-            expect(fallbackLink).to.contain(ctx.opts.setNewPasswordUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.opts.setNewPasswordUrl)
           })
         })
 
@@ -676,10 +656,8 @@ describe('EmailBuilder', function () {
             const buttonLink = dom('a:contains("View project")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(ctx.opts.inviteUrl)
-            const fallback = dom('.force-overleaf-style').last()
-            expect(fallback.length).to.equal(1)
-            const fallbackLink = fallback.html().replace(/&amp;/g, '&')
-            expect(fallbackLink).to.contain(ctx.opts.inviteUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.opts.inviteUrl)
           })
         })
 
@@ -711,9 +689,8 @@ describe('EmailBuilder', function () {
             const buttonLink = ctx.dom('a:contains("Confirm email")')
             expect(buttonLink.length).to.equal(1)
             expect(buttonLink.attr('href')).to.equal(ctx.opts.confirmEmailUrl)
-            const fallback = ctx.dom('.force-overleaf-style').last()
-            expect(fallback.length).to.equal(1)
-            expect(fallback.html()).to.contain(ctx.opts.confirmEmailUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.opts.confirmEmailUrl)
           })
           it('should include help links', function (ctx) {
             const helpGuidesLink = ctx.dom('a:contains("Help Guides")')
@@ -761,11 +738,12 @@ describe('EmailBuilder', function () {
           expect(email.html).to.contain(
             'You can still log in to Overleaf using one of our other'
           )
-          const links = dom('a')
-          expect(links[0].attribs.href).to.equal(
+          const loginLink = dom('a:contains("login options")')
+          expect(loginLink.attr('href')).to.equal(
             `${ctx.settings.siteUrl}/login`
           )
-          expect(links[1].attribs.href).to.equal(setNewPasswordUrl)
+          const passwordLink = dom('a:contains("Set your new password")')
+          expect(passwordLink.attr('href')).to.equal(setNewPasswordUrl)
           expect(email.html).to.contain(
             "If you don't have a password, you can set one now."
           )
@@ -813,8 +791,8 @@ describe('EmailBuilder', function () {
           expect(email.html).to.contain(
             'You now need an email address and password to sign in to your Overleaf account.'
           )
-          const links = dom('a')
-          expect(links[0].attribs.href).to.equal(
+          const ctaLink = dom('a:contains("Set your new password")')
+          expect(ctaLink.attr('href')).to.equal(
             `${ctx.settings.siteUrl}/user/password/reset`
           )
 
@@ -1067,13 +1045,11 @@ describe('EmailBuilder', function () {
             expect(ctx.email.html).to.contain(
               'Remove inactive users to free up licenses'
             )
-            const buttonLink = dom('td a')
+            const buttonLink = dom('a:contains("Add licenses")')
             expect(buttonLink).to.exist
             expect(buttonLink.attr('href')).to.equal(ctx.expectedUrl)
-            const fallback = dom('.force-overleaf-style').last()
-            expect(fallback).to.exist
-            const fallbackLink = fallback.html().replace(/&amp;/g, '&')
-            expect(fallbackLink).to.contain(ctx.expectedUrl)
+            expect(ctx.email.html).to.contain('copy and paste this link')
+            expect(ctx.email.html).to.contain(ctx.expectedUrl)
           })
         })
 

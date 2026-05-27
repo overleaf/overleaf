@@ -4,9 +4,12 @@ import moment from 'moment'
 import EmailMessageHelper from './EmailMessageHelper.mjs'
 import StringHelper from '../Helpers/StringHelper.mjs'
 import BaseEmailLayout from './Layouts/BaseEmailLayout.mjs'
+import UpdatedBaseEmailLayout from './Layouts/UpdatedBaseEmailLayout.mjs'
 import SpamSafe from './SpamSafe.mjs'
 import ctaEmailBody from './Bodies/cta-email.mjs'
+import updatedCtaEmailBody from './Bodies/updated-cta-email.mjs'
 import NoCTAEmailBody from './Bodies/NoCTAEmailBody.mjs'
+import UpdatedNoCTAEmailBody from './Bodies/UpdatedNoCTAEmailBody.mjs'
 
 function _emailBodyPlainText(content, opts, ctaEmail) {
   let emailBody = `${content.greeting(opts, true)}`
@@ -75,7 +78,12 @@ function ctaTemplate(content) {
     subject(opts) {
       return content.subject(opts)
     },
-    layout: BaseEmailLayout,
+    layout(opts) {
+      const layoutFn = opts.useNewEmailDesign
+        ? UpdatedBaseEmailLayout
+        : BaseEmailLayout
+      return layoutFn(opts)
+    },
     footerMessage(opts) {
       return content.footerMessage(opts)
     },
@@ -83,7 +91,8 @@ function ctaTemplate(content) {
       return _emailBodyPlainText(content, opts, true)
     },
     compiledTemplate(opts) {
-      return ctaEmailBody({
+      const bodyFn = opts.useNewEmailDesign ? updatedCtaEmailBody : ctaEmailBody
+      return bodyFn({
         title: content.title(opts),
         greeting: content.greeting(opts),
         message: content.message(opts),
@@ -108,7 +117,12 @@ function NoCTAEmailTemplate(content) {
     subject(opts) {
       return content.subject(opts)
     },
-    layout: BaseEmailLayout,
+    layout(opts) {
+      const layoutFn = opts.useNewEmailDesign
+        ? UpdatedBaseEmailLayout
+        : BaseEmailLayout
+      return layoutFn(opts)
+    },
     plainTextTemplate(opts) {
       return `\
 ${content.greeting(opts)}
@@ -120,7 +134,10 @@ The ${settings.appName} Team - ${settings.siteUrl}\
       `
     },
     compiledTemplate(opts) {
-      return NoCTAEmailBody({
+      const bodyFn = opts.useNewEmailDesign
+        ? UpdatedNoCTAEmailBody
+        : NoCTAEmailBody
+      return bodyFn({
         title:
           typeof content.title === 'function' ? content.title(opts) : undefined,
         greeting: content.greeting(opts),
@@ -137,7 +154,6 @@ The ${settings.appName} Team - ${settings.siteUrl}\
 
 function buildEmail(templateName, opts) {
   const template = templates[templateName]
-  opts.siteUrl = settings.siteUrl
   opts.body = template.compiledTemplate(opts)
   opts.footerMessage = template.footerMessage
     ? template.footerMessage(opts)
@@ -189,7 +205,7 @@ templates.canceledSubscription = ctaTemplate({
     return ['Thank you in advance!']
   },
   ctaText() {
-    return 'Leave Feedback'
+    return 'Leave feedback'
   },
   ctaURL(opts) {
     return 'https://docs.google.com/forms/d/e/1FAIpQLSfa7z_s-cucRRXm70N4jEcSbFsZeb0yuKThHGQL8ySEaQzF0Q/viewform?usp=sf_link'
@@ -394,7 +410,7 @@ templates.reconfirmEmail = ctaTemplate({
     ]
   },
   ctaText() {
-    return 'Reconfirm Email'
+    return 'Reconfirm email'
   },
   ctaURL(opts) {
     return opts.confirmEmailUrl
@@ -894,7 +910,7 @@ templates.SAMLDataCleared = ctaTemplate({
     ]
   },
   ctaText(opts) {
-    return 'Update my Emails and affiliations'
+    return 'Update my emails and affiliations'
   },
   ctaURL(opts) {
     return `${settings.siteUrl}/user/settings`

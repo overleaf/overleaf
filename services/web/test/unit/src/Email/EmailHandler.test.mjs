@@ -39,6 +39,27 @@ describe('EmailHandler', function () {
       default: ctx.Queues,
     }))
 
+    ctx.SplitTestHandler = {
+      promises: {
+        getAssignmentForUser: sinon.stub().resolves({ variant: 'default' }),
+      },
+    }
+    vi.doMock(
+      '../../../../app/src/Features/SplitTests/SplitTestHandler',
+      () => ({
+        default: ctx.SplitTestHandler,
+      })
+    )
+
+    ctx.UserGetter = {
+      promises: {
+        getUserByAnyEmail: sinon.stub().resolves(null),
+      },
+    }
+    vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
+      default: ctx.UserGetter,
+    }))
+
     ctx.EmailHandler = (await import(MODULE_PATH)).default
   })
 
