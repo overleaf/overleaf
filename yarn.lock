@@ -6565,8 +6565,9 @@ __metadata:
   resolution: "@overleaf/eslint-plugin@workspace:libraries/eslint-plugin"
   dependencies:
     "@typescript-eslint/parser": "npm:^8.50.0"
-    eslint: "npm:^8.51.0"
     lodash: "npm:^4.18.1"
+  peerDependencies:
+    eslint: ^8.51.0
   languageName: unknown
   linkType: soft
 
@@ -17965,7 +17966,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^8.15.0, eslint@npm:^8.51.0, eslint@npm:^8.57.0":
+"eslint@npm:^8.15.0, eslint@npm:^8.57.0":
   version: 8.57.1
   resolution: "eslint@npm:8.57.1"
   dependencies:

@@ -25,6 +25,7 @@ ENV COREPACK_ENABLE_NETWORK=0
 # -------------------------
 RUN --mount=type=cache,target=/root/.cache \
     --mount=type=cache,target=/root/.yarn/berry/cache,id=server-ce-yarn-cache \
+    --mount=type=cache,target=/usr/local/share/.cache/yarn,id=server-ce-yarn-fallback-cache \
     --mount=type=tmpfs,target=/tmp node genScript install | bash
 
 # Add the actual source files
@@ -32,9 +33,10 @@ RUN --mount=type=cache,target=/root/.cache \
 COPY --parents libraries/ services/ tools/migrations/ /overleaf/
 RUN --mount=type=cache,target=/root/.cache \
     --mount=type=cache,target=/root/.yarn/berry/cache,id=server-ce-yarn-cache \
+    --mount=type=cache,target=/usr/local/share/.cache/yarn,id=server-ce-yarn-fallback-cache \
     --mount=type=cache,target=/overleaf/services/web/node_modules/.cache,id=server-ce-webpack-cache \
     --mount=type=tmpfs,target=/tmp \
-    YARN_CACHE_FOLDER=/tmp/.yarn-cache node genScript compile | bash
+    node genScript compile | bash
 
 # Copy runit service startup scripts to its location
 # --------------------------------------------------
