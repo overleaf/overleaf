@@ -1,6 +1,7 @@
 import '../utils/webpack-public-path' // configure dynamically loaded assets (via webpack) to be downloaded from CDN
 import '../infrastructure/error-reporter' // set up error reporting, including Sentry
 import '../infrastructure/hotjar' // set up Hotjar
+import '../infrastructure/mixpanel-autocapture' // set up mixpanel autocapture
 import { createRoot } from 'react-dom/client'
 import IdeRoot from '@/features/ide-react/components/ide-root'
 

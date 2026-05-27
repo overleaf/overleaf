@@ -1,6 +1,7 @@
 import './../utils/meta'
 import '../utils/webpack-public-path'
 import './../infrastructure/error-reporter'
+import './../infrastructure/mixpanel-autocapture'
 import '@/i18n'
 import '../features/event-tracking'
 import '../features/cookie-banner'

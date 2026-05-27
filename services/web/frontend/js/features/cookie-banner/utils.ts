@@ -34,7 +34,8 @@ export function cookieBannerRequired() {
     exposedSettings.gaToken ||
     exposedSettings.gaTokenV4 ||
     exposedSettings.propensityId ||
-    exposedSettings.hotjarId
+    exposedSettings.hotjarId ||
+    (exposedSettings.mixpanelLabsToken && exposedSettings.labsEnabled)
   )
 }
 
