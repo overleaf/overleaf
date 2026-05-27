@@ -7281,7 +7281,7 @@ __metadata:
     "@types/sanitize-html": "npm:^2.14.0"
     "@types/sinon-chai": "npm:^3.2.12"
     "@types/utf-8-validate": "npm:^5.0.2"
-    "@types/uuid": "npm:^9.0.8"
+    "@types/uuid": "npm:^10.0.0"
     "@uppy/core": "npm:^3.8.0"
     "@uppy/dashboard": "npm:3.7.1"
     "@uppy/drag-drop": "npm:3.0.3"
@@ -7506,7 +7506,7 @@ __metadata:
     unist-util-visit: "npm:^5.0.0"
     use-stick-to-bottom: "npm:^1.1.1"
     utf-8-validate: "npm:^5.0.2"
-    uuid: "npm:^9.0.1"
+    uuid: "npm:^11.0.0"
     valid-data-url: "npm:^2.0.0"
     valid-url: "npm:^1.0.9"
     vitest: "npm:4.1.5"
@@ -11459,6 +11459,13 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: 10c0/3544eddd326ee53184dd0972fdc172baa9f8c4b83f5936257eaf58b8d7e533db25435d5812037f9ffa916693afcae1ba8431d67810ce0722dbc0d94aa333c2b1
+  languageName: node
+  linkType: hard
+
+"@types/uuid@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "@types/uuid@npm:10.0.0"
+  checksum: 10c0/9a1404bf287164481cb9b97f6bb638f78f955be57c40c6513b7655160beb29df6f84c915aaf4089a1559c216557dc4d2f79b48d978742d3ae10b937420ddac60
   languageName: node
   linkType: hard
 
@@ -33614,6 +33621,15 @@ __metadata:
   bin:
     uuid: dist/bin/uuid
   checksum: 10c0/eab18c27fe4ab9fb9709a5d5f40119b45f2ec8314f8d4cf12ce27e4c6f4ffa4a6321dc7db6c515068fa373c075b49691ba969f0010bf37f44c37ca40cd6bf7fe
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^11.0.0":
+  version: 11.1.1
+  resolution: "uuid@npm:11.1.1"
+  bin:
+    uuid: dist/esm/bin/uuid
+  checksum: 10c0/9e3af58eba872ece5a5e76f4773a94fc78a0ef2c2444c38dbe6b42f41dadf76c01850fd783604f27986f6195e6286aef064d45987d401b2a33127b98ddf7c0c5
   languageName: node
   linkType: hard
 
