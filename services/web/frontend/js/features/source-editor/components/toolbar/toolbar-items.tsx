@@ -9,6 +9,7 @@ import getMeta from '../../../../utils/meta'
 import { InsertFigureDropdown } from './insert-figure-dropdown'
 import { useTranslation } from 'react-i18next'
 import { MathDropdown } from './math-dropdown'
+import { InsertListDropdown } from './insert-list-dropdown'
 import { TableDropdown } from './table-dropdown'
 import { LegacyTableDropdown } from './table-inserter-dropdown-legacy'
 import { withinFormattingCommand } from '@/features/source-editor/utils/tree-operations/formatting'
@@ -164,34 +165,26 @@ export const ToolbarItems: FC<{
               data-overflow="group-list"
               aria-label={t('toolbar_list_indentation')}
             >
-              <ToolbarButton
-                id="toolbar-bullet-list"
-                label={t('toolbar_bulleted_list')}
-                command={commands.toggleBulletList}
-                icon="format_list_bulleted"
-              />
-              <ToolbarButton
-                id="toolbar-numbered-list"
-                label={t('toolbar_numbered_list')}
-                command={commands.toggleNumberedList}
-                icon="format_list_numbered"
-              />
-              <ToolbarButton
-                id="toolbar-format-indent-decrease"
-                label={t('toolbar_decrease_indent')}
-                command={commands.indentDecrease}
-                icon="format_indent_decrease"
-                shortcut={visual ? (isMac ? '⌘[' : 'Ctrl+[') : undefined}
-                disabled={listDepth < 2}
-              />
-              <ToolbarButton
-                id="toolbar-format-indent-increase"
-                label={t('toolbar_increase_indent')}
-                command={commands.indentIncrease}
-                icon="format_indent_increase"
-                shortcut={visual ? (isMac ? '⌘]' : 'Ctrl+]') : undefined}
-                disabled={listDepth < 1}
-              />
+              <InsertListDropdown />
+              {listDepth >= 1 && (
+                <>
+                  <ToolbarButton
+                    id="toolbar-format-indent-decrease"
+                    label={t('toolbar_decrease_indent')}
+                    command={commands.indentDecrease}
+                    icon="format_indent_decrease"
+                    shortcut={visual ? (isMac ? '⌘[' : 'Ctrl+[') : undefined}
+                    disabled={listDepth < 2}
+                  />
+                  <ToolbarButton
+                    id="toolbar-format-indent-increase"
+                    label={t('toolbar_increase_indent')}
+                    command={commands.indentIncrease}
+                    icon="format_indent_increase"
+                    shortcut={visual ? (isMac ? '⌘]' : 'Ctrl+]') : undefined}
+                  />
+                </>
+              )}
             </div>
           )}
         </>

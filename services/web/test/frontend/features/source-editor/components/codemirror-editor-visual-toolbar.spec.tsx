@@ -19,6 +19,11 @@ const clickToolbarButton = (name: string) => {
   cy.findByRole('button', { name }).trigger('mouseout')
 }
 
+const clickListType = (type: string) => {
+  cy.findByRole('button', { name: 'Insert list' }).click()
+  cy.findByRole('button', { name: type }).click()
+}
+
 const mountEditor = (content: string) => {
   const scope = mockScope(content)
 
@@ -131,8 +136,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('test')
     selectAll()
 
-    clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Bulleted list')
+    clickListType('Bulleted list')
 
     cy.get('.cm-content').should('have.text', ' test')
 
@@ -144,8 +148,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('test')
     selectAll()
 
-    clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Numbered list')
+    clickListType('Numbered list')
 
     cy.get('.cm-content').should('have.text', ' test')
 
@@ -157,8 +160,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('test')
     selectAll()
 
-    clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Numbered list')
+    clickListType('Numbered list')
 
     // expose the markup
     cy.get('.cm-line').eq(0).type('{rightArrow}')
@@ -173,7 +175,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
       ].join('')
     )
 
-    clickToolbarButton('Bulleted list')
+    clickListType('Bulleted list')
 
     cy.get('.cm-content').should(
       'have.text',
@@ -190,8 +192,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('test')
     selectAll()
 
-    clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Numbered list')
+    clickListType('Numbered list')
 
     // expose the markup
     cy.get('.cm-line').eq(0).type('{rightArrow}')
@@ -206,7 +207,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
       ].join('')
     )
 
-    clickToolbarButton('Numbered list')
+    clickListType('Numbered list')
 
     cy.get('.cm-content').should('have.text', 'test')
   })
@@ -215,8 +216,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('test\ntest')
     selectAll()
 
-    clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Numbered list')
+    clickListType('Numbered list')
 
     // expose the markup
     cy.get('.cm-line').eq(1).type('{rightArrow}')
@@ -252,8 +252,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
 
     cy.get('.cm-line').eq(1).click()
 
-    clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Numbered list')
+    clickListType('Numbered list')
 
     cy.get('.cm-line').eq(0).type('{upArrow}')
 
@@ -273,8 +272,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('test\ntest')
     selectAll()
 
-    clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Numbered list')
+    clickListType('Numbered list')
 
     // expose the markup
     cy.get('.cm-line').eq(1).type('{rightArrow}')
@@ -310,8 +308,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
 
     cy.get('.cm-line').eq(0).click()
 
-    clickToolbarButton('More editor toolbar items')
-    clickToolbarButton('Numbered list')
+    clickListType('Numbered list')
 
     // expose the markup
     cy.get('.cm-line').eq(1).type('{rightArrow}')
@@ -338,5 +335,51 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     window.metaAttributesCache.set('ol-symbolPaletteAvailable', false)
     mountEditor('')
     cy.findByLabelText('Insert symbol').should('not.exist')
+  })
+
+  it('should show both list type options in the list type dropdown', function () {
+    mountEditor('test')
+
+    cy.findByRole('button', { name: 'Insert list' }).click()
+    cy.findByRole('button', { name: 'Bulleted list' }).should('exist')
+    cy.findByRole('button', { name: 'Numbered list' }).should('exist')
+  })
+
+  it('should hide indent buttons when cursor is not in a list', function () {
+    mountEditor('test')
+
+    cy.findByRole('button', { name: 'Increase indent' }).should('not.exist')
+    cy.findByRole('button', { name: 'Decrease indent' }).should('not.exist')
+  })
+
+  it('should show indent buttons when cursor is inside a list', function () {
+    mountEditor('test')
+    selectAll()
+
+    clickListType('Bulleted list')
+
+    cy.get('.cm-line').eq(0).click()
+
+    cy.findByRole('button', { name: 'Increase indent' }).should('exist')
+    cy.findByRole('button', { name: 'Decrease indent' }).should('exist')
+  })
+
+  it('should disable decrease indent when at the top level of a list', function () {
+    mountEditor('test')
+    selectAll()
+
+    clickListType('Bulleted list')
+
+    cy.get('.cm-line').eq(0).click()
+
+    cy.findByRole('button', { name: 'Decrease indent' }).should(
+      'have.attr',
+      'aria-disabled',
+      'true'
+    )
+    cy.findByRole('button', { name: 'Increase indent' }).should(
+      'not.have.attr',
+      'aria-disabled'
+    )
   })
 })

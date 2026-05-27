@@ -107,6 +107,11 @@ const toolbarTheme = EditorView.theme({
       },
     },
   },
+  '.ol-cm-toolbar-button-menu-popover-horizontal': {
+    '& .list-group': {
+      flexDirection: 'row',
+    },
+  },
   '.ol-cm-toolbar-button-group': {
     display: 'flex',
     alignItems: 'center',

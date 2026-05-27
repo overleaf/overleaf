@@ -7,12 +7,14 @@ import OLPopover from '@/shared/components/ol/ol-popover'
 import { EditorView } from '@codemirror/view'
 import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
 import { useCodeMirrorViewContext } from '../codemirror-context'
+import classNames from 'classnames'
 
 export const ToolbarButtonMenu: FC<
   React.PropsWithChildren<{
     id: string
     label: string
     icon: React.ReactNode
+    orientation?: 'vertical' | 'horizontal'
     disabled?: boolean
     disablePopover?: boolean
     altCommand?: (view: EditorView) => void
@@ -22,6 +24,7 @@ export const ToolbarButtonMenu: FC<
   icon,
   id,
   label,
+  orientation = 'vertical',
   altCommand,
   onToggle,
   disabled,
@@ -86,7 +89,10 @@ export const ToolbarButtonMenu: FC<
       <OLPopover
         id={`${id}-menu`}
         ref={ref}
-        className="ol-cm-toolbar-button-menu-popover"
+        className={classNames('ol-cm-toolbar-button-menu-popover', {
+          'ol-cm-toolbar-button-menu-popover-horizontal':
+            orientation === 'horizontal',
+        })}
       >
         <OLListGroup
           role="menu"
