@@ -34,6 +34,7 @@ import { useUserContext } from './user-context'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { useDetachContext } from '@/shared/context/detach-context'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
+import { useRootDoc } from '@/shared/hooks/use-root-doc'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
@@ -151,7 +152,8 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   const { features, alphaProgram } = useUserContext()
 
   const { fileTreeData } = useFileTreeData()
-  const { pathInFolder, findEntityByPath } = useFileTreePathContext()
+  const { findEntityByPath } = useFileTreePathContext()
+  const getRootDocInfo = useRootDoc()
 
   // whether a compile is in progress
   const [compiling, setCompiling] = useState(false)
@@ -332,22 +334,14 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       compilingRef,
       signal,
       openDocs,
+      getRootDocInfo,
     })
   })
 
-  // keep currentDoc in sync with the compiler
+  // keep the root doc lookup in sync with the compiler
   useEffect(() => {
-    compiler.currentDoc = currentDocument
-  }, [compiler, currentDocument])
-
-  // keep the project rootDocId in sync with the compiler
-  useEffect(() => {
-    compiler.projectRootDocId = rootDocId || null
-  }, [compiler, rootDocId])
-  // keep pathInFolder in sync with the compiler
-  useEffect(() => {
-    compiler.pathInFolder = pathInFolder
-  }, [compiler, pathInFolder])
+    compiler.getRootDocInfo = getRootDocInfo
+  }, [compiler, getRootDocInfo])
 
   // keep draft setting in sync with the compiler
   useEffect(() => {
@@ -399,9 +393,8 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       dataFromCache.rootDocId = findEntityByPath(
         dataFromCache.options?.rootResourcePath || ''
       )?.entity?._id
-      const rootDocOverride = compiler.getRootDocOverrideId() || rootDocId
       settingsUpToDate =
-        rootDocOverride === dataFromCache.rootDocId &&
+        getRootDocInfo().rootDocId === dataFromCache.rootDocId &&
         dataFromCache.options.draft === draft &&
         // Allow stopOnFirstError to be enabled in the compile from cache and disabled locally.
         // Compiles that passed with stopOnFirstError=true will also pass with stopOnFirstError=false. The inverse does not hold, and we need to recompile.
@@ -428,9 +421,8 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
     joinedOnce,
     currentDocument,
     compiledOnce,
-    rootDocId,
     findEntityByPath,
-    compiler,
+    getRootDocInfo,
     compilerName,
     imageName,
     stopOnFirstError,
@@ -552,7 +544,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
                   result.logEntries.all
                 ) as Record<string, number>
 
-                const rootDocId = data.rootDocId || compiler.projectRootDocId
+                const rootDocId = data.rootDocId
 
                 const previousRuleCounts = previousRuleCountsRef.current
                 previousRuleCountsRef.current = { ruleCounts, rootDocId }
@@ -654,7 +646,6 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
     setLogEntries,
     setLogEntryAnnotations,
     setPdfFile,
-    compiler,
   ])
 
   // switch to logs if there's an error
