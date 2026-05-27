@@ -198,29 +198,18 @@ public class Oauth2Filter implements Filter {
       throws IOException {
     Log.debug("[{}] Unauthorized, User '{}' ip={}", projectId, username, getClientIp(request));
     response.setHeader("WWW-Authenticate", "Basic realm=\"Git Bridge\"");
-    if (this.isUserPasswordEnabled) {
-      sendResponse(
-          response,
-          401,
-          Arrays.asList(
-              "Log in using the email address and password you use for Overleaf.",
-              "",
-              "*Note*: if you use a provider such as Google or Twitter to sign into",
-              "your Overleaf account, you will need to set a password.",
-              "",
-              "See our help page for more support:",
-              "https://www.overleaf.com/learn/how-to/Troubleshooting_git_bridge_problems"));
-    } else {
-      sendResponse(
-          response,
-          401,
-          Arrays.asList(
-              "Log in with the username 'git' and enter your Git authentication token",
-              "when prompted for a password.",
-              "",
-              "You can generate and manage your Git authentication tokens in",
-              "your Overleaf Account Settings."));
-    }
+    sendResponse(
+        response,
+        401,
+        Arrays.asList(
+            "Log in with the username 'git' and enter your Git authentication token",
+            "when prompted for a password.",
+            "",
+            "You can generate and manage your Git authentication tokens in",
+            "your Overleaf Account Settings.",
+            "",
+            "See our help page for more support:",
+            "https://www.overleaf.com/learn/how-to/Git_integration"));
   }
 
   private void handleBadAccessToken(
@@ -234,7 +223,10 @@ public class Oauth2Filter implements Filter {
             "Enter your Git authentication token when prompted for a password.",
             "",
             "You can generate and manage your Git authentication tokens in",
-            "your Overleaf Account Settings."));
+            "your Overleaf Account Settings.",
+            "",
+            "See our help page for more support:",
+            "https://www.overleaf.com/learn/how-to/Git_integration"));
   }
 
   private int checkAccessToken(String oauth2Server, String accessToken, String clientIp)
