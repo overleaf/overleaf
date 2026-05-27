@@ -6453,7 +6453,6 @@ __metadata:
     nyc: "npm:^17.1.0"
     overleaf-editor-core: "workspace:*"
     p-limit: "npm:^3.1.0"
-    request: "npm:2.88.2"
     send: "npm:^0.19.0"
     sinon: "npm:~9.0.1"
     sinon-chai: "npm:^3.7.0"
