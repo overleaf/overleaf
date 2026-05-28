@@ -31,7 +31,8 @@
   }
 }
 
-.managed-users-enabled {
+.managed-users-enabled,
+.domain-capture-enabled {
   color: var(--content-positive);
 
   .icon {
