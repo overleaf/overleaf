@@ -64,7 +64,6 @@ function CurrentPlanWidget() {
     currentPlan = (
       <CommonsPlan
         subscription={usersBestSubscription.subscription}
-        plan={usersBestSubscription.plan}
         featuresPageURL={featuresPageURL}
       />
     )

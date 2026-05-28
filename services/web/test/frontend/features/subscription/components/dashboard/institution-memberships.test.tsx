@@ -49,10 +49,10 @@ describe('<InstitutionMemberships />', function () {
     })
     expect(elements.length).to.equal(2)
     expect(elements[0].textContent).to.equal(
-      'You are on our Pro plan as a confirmed member of Test University'
+      'You are on our Commons plan as a confirmed member of Test University'
     )
     expect(elements[1].textContent).to.equal(
-      'You are on our Pro plan as a confirmed member of Example Institution'
+      'You are on our Commons plan as a confirmed member of Example Institution'
     )
   })
 

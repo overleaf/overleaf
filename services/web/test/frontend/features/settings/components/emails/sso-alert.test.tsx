@@ -24,12 +24,12 @@ describe('<SSOAlert/>', function () {
       screen.getByText('Overleaf University', { exact: false })
     })
 
-    it('when entitled, it should render access granted to "professional" features', function () {
+    it('when entitled, it should render access granted to "commons" features', function () {
       window.metaAttributesCache.get('ol-institutionLinked').hasEntitlement =
         true
       render(<SSOAlert />)
       screen.getByText('this grants you access', { exact: false })
-      screen.getByText('Professional')
+      screen.getByText('Commons')
     })
 
     it('when the email is not canonical it should also render a warning alert', function () {

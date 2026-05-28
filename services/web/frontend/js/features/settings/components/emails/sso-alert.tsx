@@ -72,7 +72,7 @@ export function SSOAlert() {
                   <Trans
                     i18nKey="this_grants_access_to_features_2"
                     components={[<strong />]} // eslint-disable-line react/jsx-key
-                    values={{ featureType: t('professional') }}
+                    values={{ featureType: t('commons') }}
                     shouldUnescape
                     tOptions={{ interpolation: { escapeValue: true } }}
                   />

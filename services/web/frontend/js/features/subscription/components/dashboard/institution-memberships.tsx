@@ -32,7 +32,7 @@ function InstitutionMemberships() {
           <Trans
             i18nKey="you_are_on_x_plan_as_a_confirmed_member_of_institution_y"
             values={{
-              planName: 'Pro',
+              planName: 'Commons',
               institutionName: institution.name || '',
             }}
             shouldUnescape

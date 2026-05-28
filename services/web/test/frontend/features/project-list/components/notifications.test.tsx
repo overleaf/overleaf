@@ -839,7 +839,7 @@ describe('<UserNotifications />', function () {
           'You are one step away from accessing Overleaf premium features'
         )
         expect(alert.textContent).to.contain(
-          `Overleaf has an Overleaf subscription. Click the confirmation link sent to ${email} to upgrade to Overleaf Pro`
+          `Overleaf has an Overleaf subscription. Click the confirmation link sent to ${email} to upgrade to Overleaf Commons`
         )
       })
     }

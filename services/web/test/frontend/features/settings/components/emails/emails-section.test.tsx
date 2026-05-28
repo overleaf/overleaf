@@ -111,14 +111,14 @@ describe('<EmailsSection />', function () {
     await screen.findByRole('button', { name: 'Send confirmation code' })
   })
 
-  it('renders professional label', async function () {
+  it('renders commons label', async function () {
     fetchMock.get('/user/emails?ensureAffiliation=true', [professionalUserData])
     renderEmailsSection()
 
     const node = await screen.findByText(professionalUserData.email, {
       exact: false,
     })
-    expect(within(node).getByText(/professional/i)).to.exist
+    expect(within(node).getByText(/commons/i)).to.exist
   })
 
   it('shows loader when resending email', async function () {

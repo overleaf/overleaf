@@ -289,7 +289,7 @@ describe('<CurrentPlanWidget />', function () {
 
         await screen.findByRole('tooltip', {
           name: new RegExp(
-            `on the ${subscription.plan.name} plan because of your affiliation with ${subscription.subscription.name}`,
+            `on the Commons plan provided by ${subscription.subscription.name}`,
             'i'
           ),
         })
