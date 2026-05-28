@@ -12980,16 +12980,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"argparse@npm:~ 0.1.11":
-  version: 0.1.16
-  resolution: "argparse@npm:0.1.16"
-  dependencies:
-    underscore: "npm:~1.7.0"
-    underscore.string: "npm:~2.4.0"
-  checksum: 10c0/fbd081b942546b481cfec863778baa09af2224eaea6b2af086fd1e39b9ca3159585ee50bf066c6feff17fe991baea16f45054d226430ec83f5d5aad6d8f2d781
-  languageName: node
-  linkType: hard
-
 "args-js@npm:0.10.12":
   version: 0.10.12
   resolution: "args-js@npm:0.10.12"
@@ -18077,16 +18067,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esprima@npm:~ 1.0.2":
-  version: 1.0.4
-  resolution: "esprima@npm:1.0.4"
-  bin:
-    esparse: ./bin/esparse.js
-    esvalidate: ./bin/esvalidate.js
-  checksum: 10c0/c07e43a78f4711aee4c9514d2672b66cf22a35b93eb7844bc99e511b506cac44d753d75a319c88b556d331adacad9065fcb958dad02faefd27833a7718f75bcd
-  languageName: node
-  linkType: hard
-
 "esquery@npm:^1.4.2, esquery@npm:^1.6.0":
   version: 1.7.0
   resolution: "esquery@npm:1.7.0"
@@ -22062,18 +22042,6 @@ __metadata:
   bin:
     js-yaml: bin/js-yaml.js
   checksum: 10c0/561c7d7088c40a9bb53cc75becbfb1df6ae49b34b5e6e5a81744b14ae8667ec564ad2527709d1a6e7d5e5fa6d483aa0f373a50ad98d42fde368ec4a190d4fae7
-  languageName: node
-  linkType: hard
-
-"js-yaml@npm:~2.1.0":
-  version: 2.1.3
-  resolution: "js-yaml@npm:2.1.3"
-  dependencies:
-    argparse: "npm:~ 0.1.11"
-    esprima: "npm:~ 1.0.2"
-  bin:
-    js-yaml: bin/js-yaml.js
-  checksum: 10c0/178709184752f47f703de3bc3ca779c6b4443f73acf1c5e5a7cfb37f04f24f7c1bd9b520cb30081cd2d73f054061a765c7bd35a4ce3718ae01608a7333dae036
   languageName: node
   linkType: hard
 
@@ -33230,13 +33198,6 @@ __metadata:
   version: 2.0.5
   resolution: "undefsafe@npm:2.0.5"
   checksum: 10c0/96c0466a5fbf395917974a921d5d4eee67bca4b30d3a31ce7e621e0228c479cf893e783a109af6e14329b52fe2f0cb4108665fad2b87b0018c0df6ac771261d5
-  languageName: node
-  linkType: hard
-
-"underscore.string@npm:~2.4.0":
-  version: 2.4.0
-  resolution: "underscore.string@npm:2.4.0"
-  checksum: 10c0/30a9d096eee6680c27c3bdcc5a81af8f1c8357b5bfdc1dc45e719e842b0db322c2705c61ebf5166d2b41f2cfcc6dbf44e026651d8042bab638a99de15c8ec078
   languageName: node
   linkType: hard
 
