@@ -18,7 +18,11 @@ describe('ConversionController', function () {
     ctx.documentStat = { size: 5678 }
     ctx.Settings = {
       enablePandocConversions: true,
-      path: { compilesDir: '/compiles', outputDir: '/output' },
+      path: {
+        compilesDir: '/compiles',
+        outputDir: '/output',
+        clsiCacheDir: '/cache',
+      },
     }
     ctx.OutputCacheManager = {
       CACHE_SUBDIR: 'generated-files',
@@ -43,6 +47,13 @@ describe('ConversionController', function () {
         syncResourcesToDisk: sinon.stub().resolves(),
       },
     }
+
+    ctx.HistoryResourceWriter = {
+      promises: {
+        syncResourcesToDisk: sinon.stub().resolves(),
+      },
+    }
+
     ctx.RequestParser = {
       promises: {
         parse: sinon.stub().resolves(ctx.parsedRequest),
@@ -86,6 +97,11 @@ describe('ConversionController', function () {
     vi.doMock('../../../app/js/ResourceWriter', () => ({
       default: ctx.ResourceWriter,
     }))
+
+    vi.doMock(
+      '../../../app/js/HistoryResourceWriter',
+      () => ctx.HistoryResourceWriter
+    )
 
     vi.doMock('../../../app/js/RequestParser', () => ({
       default: ctx.RequestParser,

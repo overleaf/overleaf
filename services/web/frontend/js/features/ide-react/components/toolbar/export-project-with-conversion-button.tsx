@@ -4,6 +4,8 @@ import { FC } from 'react'
 import useConvertProject from '../../hooks/use-convert-project'
 import { useCommandProvider } from '../../hooks/use-command-provider'
 import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import { useRootDoc } from '@/shared/hooks/use-root-doc'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 
 type ExportProjectWithConversionProps = {
   featureFlag?: string
@@ -20,7 +22,13 @@ export const ExportProjectWithConversionButton: FC<
   const enablePandocConversions =
     getMeta('ol-ExposedSettings')?.enablePandocConversions
   const anonymous = getMeta('ol-anonymous')
-  const downloadConversion = useConvertProject(conversionType)
+  const getRootDocInfo = useRootDoc()
+  const { openDocs } = useEditorManagerContext()
+  const downloadConversion = useConvertProject(
+    conversionType,
+    openDocs,
+    getRootDocInfo
+  )
 
   const showExportButton =
     splitTestEnabledIfNeeded && enablePandocConversions && !anonymous

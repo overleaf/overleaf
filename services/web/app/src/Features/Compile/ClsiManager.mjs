@@ -1174,19 +1174,14 @@ function _finaliseRequest(projectId, options, project, docs, files) {
   }
 }
 
-async function buildDocumentConversionRequest(projectId) {
-  const project = await ProjectGetter.promises.getProject(projectId, {
-    compiler: 1,
-    imageName: 1,
-    'overleaf.history.id': 1,
-    rootDoc_id: 1,
-    rootFolder: 1,
+async function buildDocumentConversionRequest(projectId, userId, options) {
+  return await _buildRequest(projectId, userId, {
+    ...options,
+    // Use the history snapshot as populated on clsi-cache.
+    populateClsiCache: true,
+    // Read from mongo directly, skip redis.
+    incrementalCompilesEnabled: false,
   })
-  if (project == null) {
-    throw new Errors.NotFoundError(`project does not exist: ${projectId}`)
-  }
-  const projectStateHash = ClsiStateManager.computeHash(project, {})
-  return _buildRequestFromMongo(projectId, {}, project, projectStateHash)
 }
 
 async function wordCount(projectId, userId, file, limits, clsiserverid) {

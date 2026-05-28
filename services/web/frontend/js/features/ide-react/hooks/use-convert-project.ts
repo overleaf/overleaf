@@ -9,13 +9,19 @@ import {
   showExportDocumentSuccess,
   showPreparingExportToast,
 } from '../components/toolbar/export-document-toasts'
+import { RootDocInfo } from '@/shared/hooks/use-root-doc'
+import { OpenDocuments } from '../editor/open-documents'
 
 const SLOW_CONVERSION_THRESHOLD = 2000
 
-export default function useConvertProject(type: 'docx' | 'markdown') {
+export default function useConvertProject(
+  type: 'docx' | 'markdown',
+  openDocs: OpenDocuments,
+  getRootDocInfo: () => RootDocInfo
+) {
   const { projectId } = useProjectContext()
   const location = useLocation()
-  const triggerConversion = useCallback(async () => {
+  return useCallback(async () => {
     let handle: string | undefined
     const toastTimer = setTimeout(() => {
       handle = showPreparingExportToast()
@@ -24,10 +30,14 @@ export default function useConvertProject(type: 'docx' | 'markdown') {
       clearTimeout(toastTimer)
       if (handle) hidePreparingExportToast(handle)
     }
+    const url = new URL(window.location.origin)
+    url.pathname = `/project/${projectId}/download/conversion/${type}`
+    url.searchParams.set('responseFormat', 'json')
+    const { rootResourcePath } = getRootDocInfo()
+    url.searchParams.set('rootResourcePath', rootResourcePath)
     try {
-      const response = await getJSON(
-        `/project/${projectId}/download/conversion/${type}?responseFormat=json`
-      )
+      await openDocs.awaitBufferedOps(AbortSignal.timeout(10_000))
+      const response = await getJSON(url.href)
       hidePreparingToast()
       const { downloadUrl } = response
       if (downloadUrl) {
@@ -42,7 +52,5 @@ export default function useConvertProject(type: 'docx' | 'markdown') {
       showExportDocumentError()
       debugConsole.error(error)
     }
-  }, [projectId, type, location])
-
-  return triggerConversion
+  }, [projectId, type, getRootDocInfo, openDocs, location])
 }

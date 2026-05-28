@@ -219,7 +219,8 @@ export default ProjectPersistenceManager = {
     logger.debug({ projectId, userId }, 'clearing project for user')
     return CompileManager.clearProject(projectId, userId, function (error) {
       if (error) return callback(error)
-      HistoryResourceWriter.clearCacheCb(projectId, userId, error => {
+      const cacheKey = userId ? `${projectId}-${userId}` : projectId
+      HistoryResourceWriter.clearCacheCb(projectId, userId, cacheKey, error => {
         if (error) return callback(error)
         ProjectPersistenceManager.clearProjectFromCache(
           projectId,

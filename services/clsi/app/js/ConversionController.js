@@ -3,6 +3,9 @@ import logger from '@overleaf/logger'
 import { expressify } from '@overleaf/promise-utils'
 import fs from 'node:fs/promises'
 import fsSync from 'node:fs'
+import Metrics from '@overleaf/metrics'
+import * as HistoryResourceWriter from './HistoryResourceWriter.js'
+import Errors from './Errors.js'
 import ConversionManager from './ConversionManager.js'
 import ConversionOutputCleaner from './ConversionOutputCleaner.js'
 import OutputCacheManager from './OutputCacheManager.js'
@@ -80,6 +83,7 @@ async function convertProjectToDocument(req, res) {
     return res.sendStatus(404)
   }
 
+  const { user_id: userId, project_id: projectId } = req.params
   const type = req.query.type
   if (!Object.hasOwn(CONVERSION_CONFIGS, type)) {
     return res.sendStatus(400)
@@ -87,27 +91,58 @@ async function convertProjectToDocument(req, res) {
   const config = CONVERSION_CONFIGS[type]
 
   const request = await RequestParser.promises.parse(req.body)
-  request.project_id = req.params.project_id
-  request.user_id = req.params.user_id
+  request.project_id = projectId
+  request.user_id = userId
   request.metricsOpts = {}
 
   const responseFormat = req.query.responseFormat === 'json' ? 'json' : 'stream'
 
   const conversionId = crypto.randomUUID()
   const conversionDir = Path.join(Settings.path.compilesDir, conversionId)
+  const conversionCacheDir = Path.join(Settings.path.clsiCacheDir, conversionId)
+  const projectCacheDir = Path.join(Settings.path.clsiCacheDir, projectId)
+  const cleanupDirs = [conversionCacheDir, conversionDir]
 
   logger.debug(
     {
-      projectId: request.project_id,
-      userId: request.user_id,
+      projectId,
+      userId,
       rootResourcePath: request.rootResourcePath,
       type,
     },
     'syncing resources for project-to-document conversion'
   )
+  Metrics.inc('convert_project_to_document', 1, {
+    compileFromHistory: request.isCompileFromHistory,
+    method: type,
+  })
 
   try {
-    await ResourceWriter.promises.syncResourcesToDisk(request, conversionDir)
+    if (await fs.mkdir(projectCacheDir, { recursive: true })) {
+      // Newly created. Cleanup behind us.
+      cleanupDirs.push(projectCacheDir)
+    }
+    if (request.isCompileFromHistory) {
+      await fs.mkdir(conversionDir)
+      try {
+        await HistoryResourceWriter.syncResourcesToDisk(
+          projectId,
+          userId,
+          request,
+          conversionDir,
+          {}
+        )
+      } catch (err) {
+        if (err instanceof Errors.MissingUpdatesError) {
+          return res.status(409).json({
+            baseHistoryVersion: err.info.baseHistoryVersion,
+          })
+        }
+        throw err
+      }
+    } else {
+      await ResourceWriter.promises.syncResourcesToDisk(request, conversionDir)
+    }
 
     const documentPath =
       await ConversionManager.promises.convertLaTeXToDocumentInDirWithLock(
@@ -160,7 +195,13 @@ async function convertProjectToDocument(req, res) {
       throw err
     }
   } finally {
-    await fs.rm(conversionDir, { recursive: true, force: true }).catch(() => {})
+    for (const dir of cleanupDirs) {
+      try {
+        await fs.rm(dir, { recursive: true, force: true })
+      } catch (err) {
+        logger.warn({ err, dir }, 'cleanup failed')
+      }
+    }
   }
 }
 

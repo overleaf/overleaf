@@ -78,6 +78,9 @@ describe('ProjectDownloadsController', function () {
       () => ({
         default: (ctx.SplitTestHandler = {
           featureFlagEnabled: sinon.stub().yields(null, false),
+          promises: {
+            featureFlagEnabled: sinon.stub().resolves(false),
+          },
         }),
       })
     )

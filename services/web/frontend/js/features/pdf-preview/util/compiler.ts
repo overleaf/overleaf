@@ -164,7 +164,10 @@ export default class DocumentCompiler {
       // unset the error before it's set again later, so that components are recreated and events are tracked
       this.setError(undefined)
 
-      data.options = options
+      data.options = {
+        ...options,
+        rootResourcePath,
+      }
       data.rootDocId = rootDocId
       if (data.clsiServerId) {
         this.clsiServerId = data.clsiServerId

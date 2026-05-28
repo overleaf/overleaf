@@ -162,6 +162,7 @@ function parse(body, callback) {
     // The snapshot and changes are validated when loading them in editor-core.
     response.rawSnapshot = compile.rawSnapshot
     response.rawChangeOperations = compile.rawChangeOperations
+    response.isCompileFromHistory = !!response.rawChangeOperations
 
     // v1 conversions / submissions
     if (compile.filestoreBlobPrefix) {
