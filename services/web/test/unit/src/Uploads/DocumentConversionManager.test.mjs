@@ -1,7 +1,10 @@
 import { describe, expect, vi, beforeEach } from 'vitest'
 import sinon from 'sinon'
 import FormData from 'form-data'
-import { FileTooLargeError } from '../../../../app/src/Features/Errors/Errors.js'
+import {
+  FileTooLargeError,
+  DocumentConversionError,
+} from '../../../../app/src/Features/Errors/Errors.js'
 
 const MODULE_PATH =
   '../../../../app/src/Features/Uploads/DocumentConversionManager.mjs'
@@ -246,6 +249,30 @@ describe('DocumentConversionManager', function () {
       })
     })
 
+    describe('when CLSI returns a 422 with a user-facing JSON body', function () {
+      it('should reject with a DocumentConversionError carrying the pandoc message', async function (ctx) {
+        const clsiError = new Error('Bad Request')
+        clsiError.response = { status: 422 }
+        clsiError.body = JSON.stringify({
+          error: 'parse error at line 5',
+          exitCode: 64,
+        })
+        ctx.fetchUtils.fetchStreamWithResponse.rejects(clsiError)
+
+        await expect(
+          ctx.DocumentConversionManager.promises.convertDocumentToLaTeXZipArchive(
+            '/path/to/input.docx',
+            'test-user-id',
+            'docx'
+          )
+        ).to.be.rejectedWith(
+          sinon.match
+            .instanceOf(DocumentConversionError)
+            .and(sinon.match.has('message', 'parse error at line 5'))
+        )
+      })
+    })
+
     describe('when the converted archive is too large', function () {
       beforeEach(async function (ctx) {
         ctx.path = '/path/to/input.docx'
@@ -326,7 +353,11 @@ describe('DocumentConversionManager', function () {
           await ctx.DocumentConversionManager.promises.convertProjectToDocument(
             ctx.projectId,
             ctx.userId,
-            ctx.type
+            ctx.type,
+            {
+              compileFromHistory: false,
+              rootDocPath: 'main.tex',
+            }
           )
       })
 
@@ -369,6 +400,51 @@ describe('DocumentConversionManager', function () {
           clsiServerId: 'mock-clsi-server',
           file: ctx.file,
         })
+      })
+    })
+
+    describe('when CLSI returns a 422 with a user-facing JSON body', function () {
+      it('should reject with a DocumentConversionError carrying the pandoc message', async function (ctx) {
+        const clsiError = new Error('Bad Request')
+        clsiError.response = { status: 422 }
+        clsiError.body = JSON.stringify({ error: 'parse error at line 5' })
+        ctx.fetchUtils.fetchJsonWithResponse.rejects(clsiError)
+
+        await expect(
+          ctx.DocumentConversionManager.promises.convertProjectToDocument(
+            'project-id',
+            'user-id',
+            'docx',
+            {
+              compileFromHistory: false,
+              rootDocPath: 'main.tex',
+            }
+          )
+        ).to.be.rejectedWith(
+          sinon.match
+            .instanceOf(DocumentConversionError)
+            .and(sinon.match.has('message', 'parse error at line 5'))
+        )
+      })
+    })
+
+    describe('when CLSI returns a non-422 error', function () {
+      it('should rethrow the original error', async function (ctx) {
+        const clsiError = new Error('boom')
+        clsiError.response = { status: 500 }
+        ctx.fetchUtils.fetchJsonWithResponse.rejects(clsiError)
+
+        await expect(
+          ctx.DocumentConversionManager.promises.convertProjectToDocument(
+            'project-id',
+            'user-id',
+            'docx',
+            {
+              compileFromHistory: false,
+              rootDocPath: 'main.tex',
+            }
+          )
+        ).to.be.rejectedWith('boom')
       })
     })
   })

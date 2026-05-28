@@ -12,6 +12,7 @@ import Validation from '../../infrastructure/Validation.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import { pipeline } from 'node:stream/promises'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import { DocumentConversionError } from '../Errors/Errors.js'
 
 const { z, zz, parseReq } = Validation
 
@@ -109,6 +110,11 @@ async function exportProjectConversion(req, res) {
       status: 'failure',
       operation: 'export',
     })
+    if (error instanceof DocumentConversionError) {
+      return res.status(422).json({
+        error: error.message,
+      })
+    }
     throw error
   }
   const { conversionId, buildId, clsiServerId, file } = conversionResult

@@ -9,6 +9,11 @@ import { vi } from 'vitest'
 import sinon from 'sinon'
 import MockRequest from '../helpers/MockRequest.mjs'
 import MockResponse from '../helpers/MockResponse.mjs'
+import { DocumentConversionError } from '../../../../app/src/Features/Errors/Errors.js'
+
+vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
+  vi.importActual('../../../../app/src/Features/Errors/Errors.js')
+)
 const modulePath =
   '../../../../app/src/Features/Downloads/ProjectDownloadsController.mjs'
 
@@ -533,6 +538,46 @@ describe('ProjectDownloadsController', function () {
 
       it('should stream the document to the response', function (ctx) {
         sinon.assert.calledWith(ctx.pipeline, ctx.exportStream, ctx.res)
+      })
+    })
+
+    describe('when conversion fails with a DocumentConversionError', function () {
+      beforeEach(async function (ctx) {
+        ctx.projectId = '5e9b1c2a3b4c5d6e7f8a9b0c'
+        ctx.userId = 'test-user-id'
+        ctx.req.params = { Project_id: ctx.projectId, type: 'docx' }
+        ctx.req.query = {}
+        ctx.req.session = { user: { _id: ctx.userId } }
+
+        ctx.res.json = sinon.stub().returns(ctx.res)
+
+        ctx.SessionManager.getLoggedInUserId.returns(ctx.userId)
+        ctx.DocumentConversionManager.promises.convertProjectToDocument.rejects(
+          new DocumentConversionError('parse error at line 5')
+        )
+
+        await ctx.ProjectDownloadsController.exportProjectConversion(
+          ctx.req,
+          ctx.res,
+          ctx.next
+        )
+      })
+
+      it('should respond with 422 and the pandoc message', function (ctx) {
+        expect(ctx.res.statusCode).to.equal(422)
+        sinon.assert.calledWith(ctx.res.json, {
+          error: 'parse error at line 5',
+        })
+      })
+
+      it('should not call next', function (ctx) {
+        sinon.assert.notCalled(ctx.next)
+      })
+
+      it('should not attempt to stream a document', function (ctx) {
+        sinon.assert.notCalled(
+          ctx.DocumentConversionManager.promises.streamConvertedProjectDocument
+        )
       })
     })
   })

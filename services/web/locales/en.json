@@ -814,6 +814,7 @@
   "equation_preview": "Equation preview",
   "error": "Error",
   "error_assist": "Error Assist",
+  "error_details": "Error details",
   "error_loading_references": "References couldn’t be loaded. Refresh the page to try again.",
   "error_opening_document": "Error opening document",
   "error_opening_document_detail": "Sorry, something went wrong opening this document. Please try again.",

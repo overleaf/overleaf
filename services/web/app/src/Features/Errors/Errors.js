@@ -60,6 +60,8 @@ class UnsupportedFileTypeError extends BackwardCompatibleError {}
 
 class FileTooLargeError extends BackwardCompatibleError {}
 
+class DocumentConversionError extends OError {}
+
 class UnsupportedExportRecordsError extends BackwardCompatibleError {}
 
 class V1HistoryNotSyncedError extends BackwardCompatibleError {}
@@ -399,6 +401,7 @@ module.exports = {
   InvalidNameError,
   UnsupportedFileTypeError,
   FileTooLargeError,
+  DocumentConversionError,
   UnsupportedExportRecordsError,
   V1HistoryNotSyncedError,
   ProjectHistoryDisabledError,

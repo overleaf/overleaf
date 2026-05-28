@@ -6,8 +6,11 @@ const PreparingExportToast = () => {
   return <span>{t('preparing_for_export')}</span>
 }
 
-const ExportDocumentErrorToast = () => {
+const ExportDocumentErrorToast = ({ data }: { data?: any }) => {
   const { t } = useTranslation()
+  const errorMessage =
+    typeof data?.errorMessage === 'string' ? data.errorMessage : null
+
   return (
     <>
       <p>
@@ -20,6 +23,16 @@ const ExportDocumentErrorToast = () => {
           <a href="/contact" target="_BLANK" rel="noopener noreferrer" />,
         ]}
       />
+      {errorMessage && (
+        <details>
+          <summary>{t('error_details')}</summary>
+          <pre
+            style={{ maxWidth: '800px', maxHeight: '300px', overflow: 'auto' }}
+          >
+            <code>{errorMessage}</code>
+          </pre>
+        </details>
+      )}
     </>
   )
 }
@@ -70,10 +83,11 @@ const ExportDocumentSuccessToast = ({ data }: { data?: any }) => {
 const generators: GlobalToastGeneratorEntry[] = [
   {
     key: 'export-document:error',
-    generator: () => ({
-      content: <ExportDocumentErrorToast />,
+    generator: (data: any) => ({
+      content: <ExportDocumentErrorToast data={data} />,
       type: 'error',
-      autoHide: true,
+      // Only auto-hide if we have no extra details
+      autoHide: !data?.errorMessage,
       delay: 5000,
       isDismissible: true,
     }),
@@ -101,10 +115,25 @@ const generators: GlobalToastGeneratorEntry[] = [
 
 export default generators
 
-export const showExportDocumentError = () => {
+// We only ever care about the latest error toast, so use a static handle.
+const EXPORT_DOCUMENT_ERROR_HANDLE = 'export-document-error'
+
+export const showExportDocumentError = (errorMessage?: string) => {
   window.dispatchEvent(
     new CustomEvent('ide:show-toast', {
-      detail: { key: 'export-document:error' },
+      detail: {
+        key: 'export-document:error',
+        handle: EXPORT_DOCUMENT_ERROR_HANDLE,
+        errorMessage,
+      },
+    })
+  )
+}
+
+export const hideExportDocumentError = () => {
+  window.dispatchEvent(
+    new CustomEvent('ide:dismiss-toast', {
+      detail: { handle: EXPORT_DOCUMENT_ERROR_HANDLE },
     })
   )
 }

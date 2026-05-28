@@ -1,9 +1,10 @@
-import { getJSON } from '@/infrastructure/fetch-json'
+import { FetchError, getJSON } from '@/infrastructure/fetch-json'
 import { useLocation } from '@/shared/hooks/use-location'
 import { debugConsole } from '@/utils/debugging'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useCallback } from 'react'
 import {
+  hideExportDocumentError,
   hidePreparingExportToast,
   showExportDocumentError,
   showExportDocumentSuccess,
@@ -35,6 +36,7 @@ export default function useConvertProject(
     url.searchParams.set('responseFormat', 'json')
     const { rootResourcePath } = getRootDocInfo()
     url.searchParams.set('rootResourcePath', rootResourcePath)
+    hideExportDocumentError()
     try {
       await openDocs.awaitBufferedOps(AbortSignal.timeout(10_000))
       const response = await getJSON(url.href)
@@ -49,7 +51,15 @@ export default function useConvertProject(
       }
     } catch (error) {
       hidePreparingToast()
-      showExportDocumentError()
+      let errorMessage
+      if (
+        error instanceof FetchError &&
+        error.response?.status === 422 &&
+        error.data?.error
+      ) {
+        errorMessage = error.data.error
+      }
+      showExportDocumentError(errorMessage)
       debugConsole.error(error)
     }
   }, [projectId, type, getRootDocInfo, openDocs, location])

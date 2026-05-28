@@ -10,7 +10,14 @@ import sinon from 'sinon'
 import MockRequest from '../helpers/MockRequest.mjs'
 import MockResponse from '../helpers/MockResponse.mjs'
 import ArchiveErrors from '../../../../app/src/Features/Uploads/ArchiveErrors.mjs'
-import { FileTooLargeError } from '../../../../app/src/Features/Errors/Errors.js'
+import {
+  FileTooLargeError,
+  DocumentConversionError,
+} from '../../../../app/src/Features/Errors/Errors.js'
+
+vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
+  vi.importActual('../../../../app/src/Features/Errors/Errors.js')
+)
 
 const modulePath =
   '../../../../app/src/Features/Uploads/ProjectUploadController.mjs'
@@ -690,6 +697,54 @@ describe('ProjectUploadController', function () {
             operation: 'import',
           }
         )
+      })
+    })
+
+    describe('when the conversion fails with a user-facing error', async function () {
+      beforeEach(async function (ctx) {
+        ctx.DocumentConversionManager.promises.convertDocumentToLaTeXZipArchive =
+          sinon
+            .stub()
+            .rejects(new DocumentConversionError('parse error at line 5'))
+
+        await new Promise(resolve => {
+          ctx.res.json = data => {
+            expect(data).to.deep.equal({
+              success: false,
+              error: 'parse error at line 5',
+            })
+            resolve()
+          }
+          ctx.ProjectUploadController.importDocument(ctx.req, ctx.res)
+        })
+      })
+
+      it('should return http 422', function (ctx) {
+        expect(ctx.res.statusCode).to.equal(422)
+      })
+
+      it('should unlink the uploaded file', function (ctx) {
+        expect(ctx.fsPromises.unlink).to.have.been.calledWith(ctx.req.file.path)
+      })
+    })
+
+    describe('when the conversion fails without a specific message', async function () {
+      beforeEach(async function (ctx) {
+        ctx.DocumentConversionManager.promises.convertDocumentToLaTeXZipArchive =
+          sinon.stub().rejects(new DocumentConversionError())
+
+        await new Promise(resolve => {
+          ctx.res.json = data => {
+            expect(data.success).to.equal(false)
+            expect(data.error).to.equal('upload_failed')
+            resolve()
+          }
+          ctx.ProjectUploadController.importDocument(ctx.req, ctx.res)
+        })
+      })
+
+      it('should return http 422', function (ctx) {
+        expect(ctx.res.statusCode).to.equal(422)
       })
     })
 

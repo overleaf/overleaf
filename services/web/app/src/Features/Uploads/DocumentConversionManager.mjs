@@ -14,7 +14,19 @@ import {
 import { pipeline } from 'node:stream/promises'
 import OError from '@overleaf/o-error'
 import FormData from 'form-data'
-import { FileTooLargeError } from '../Errors/Errors.js'
+import { FileTooLargeError, DocumentConversionError } from '../Errors/Errors.js'
+
+function extractClsiUserFacingError(error) {
+  try {
+    const parsed = JSON.parse(error.body)
+    if (typeof parsed?.error === 'string') {
+      return parsed.error
+    }
+  } catch {
+    // body wasn't JSON
+  }
+  return undefined
+}
 
 async function convertDocumentToLaTeXZipArchive(path, userId, conversionType) {
   const clsiUrl = new URL(Settings.apis.clsi.url)
@@ -74,6 +86,12 @@ async function convertDocumentToLaTeXZipArchive(path, userId, conversionType) {
 
     if (error instanceof FileTooLargeError) {
       throw error
+    }
+
+    if (error?.response?.status === 422) {
+      throw new DocumentConversionError(
+        extractClsiUserFacingError(error)
+      ).withCause(error)
     }
 
     throw new OError('document conversion failed').withCause(error)
@@ -148,10 +166,20 @@ async function convertProjectToDocumentOnce(
     'sending project to CLSI for document conversion'
   )
 
-  const { json, response } = await fetchJsonWithResponse(clsiUrl, {
-    method: 'POST',
-    json: clsiRequest,
-  })
+  let json, response
+  try {
+    ;({ json, response } = await fetchJsonWithResponse(clsiUrl, {
+      method: 'POST',
+      json: clsiRequest,
+    }))
+  } catch (error) {
+    if (error?.response?.status === 422) {
+      throw new DocumentConversionError(
+        extractClsiUserFacingError(error)
+      ).withCause(error)
+    }
+    throw error
+  }
   const { conversionId, buildId, file } = json
   const clsiServerId = ClsiManager.CLSI_COOKIES_ENABLED
     ? ClsiManager.getClsiServerIdFromResponse(response)

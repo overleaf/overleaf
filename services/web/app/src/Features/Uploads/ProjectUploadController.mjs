@@ -13,7 +13,11 @@ import { InvalidZipFileError } from './ArchiveErrors.mjs'
 import multer from 'multer'
 import lodash from 'lodash'
 import { expressify } from '@overleaf/promise-utils'
-import { DuplicateNameError, FileTooLargeError } from '../Errors/Errors.js'
+import {
+  DuplicateNameError,
+  FileTooLargeError,
+  DocumentConversionError,
+} from '../Errors/Errors.js'
 import DocumentConversionManager from './DocumentConversionManager.mjs'
 import ProjectOptionsHandler from '../Project/ProjectOptionsHandler.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
@@ -237,6 +241,12 @@ async function importDocument(req, res, next) {
       return res.status(422).json({
         success: false,
         error: 'file_too_large',
+      })
+    }
+    if (error instanceof DocumentConversionError) {
+      return res.status(422).json({
+        success: false,
+        error: error.message || req.i18n.translate('upload_failed'),
       })
     }
     res.status(500).json({
