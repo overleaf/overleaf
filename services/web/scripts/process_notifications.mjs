@@ -4,8 +4,12 @@ import { processNotifications } from '../modules/notifications/app/src/ProcessNo
 
 async function main() {
   logger.info({}, 'Processing notifications...')
-  await processNotifications()
-  logger.info({}, 'Notifications processed successfully.')
+  const { notificationsFound, notificationsReady, emailsSent } =
+    await processNotifications()
+  logger.info(
+    { notificationsFound, notificationsReady, emailsSent },
+    'Notifications processed successfully.'
+  )
 }
 
 try {
