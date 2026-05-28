@@ -79,7 +79,7 @@ async function convertDocumentToLaTeXZipArchive(path, userId, conversionType) {
     await pipeline(stream, outputStream)
     logger.debug({ outputPath }, 'received converted file from CLSI')
   } catch (error) {
-    logger.error({ err: error }, 'error during document conversion')
+    logger.debug({ err: error }, 'error during document conversion')
     outputStream?.destroy()
     // Make sure to clean up the output file if conversion didn't work
     await fsPromises.unlink(outputPath).catch(() => {})

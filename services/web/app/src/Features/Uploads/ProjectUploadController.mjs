@@ -227,7 +227,6 @@ async function importDocument(req, res, next) {
       })
     }
   } catch (error) {
-    logger.error({ error }, 'error importing document file')
     AnalyticsManager.recordEventForUserInBackground(userId, 'convert-format', {
       sourceFormat: conversionType,
       targetFormat: 'latex',
@@ -249,6 +248,7 @@ async function importDocument(req, res, next) {
         error: error.message || req.i18n.translate('upload_failed'),
       })
     }
+    logger.error({ error, userId }, 'unhandled error while importing document')
     res.status(500).json({
       success: false,
       error: req.i18n.translate('upload_failed'),
