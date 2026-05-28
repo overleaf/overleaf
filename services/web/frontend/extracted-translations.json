@@ -514,6 +514,7 @@
   "domain_verification_failed_no_token": "",
   "domain_verification_failed_wrong_token": "",
   "domain_verification_invalid_domain": "",
+  "domain_verification_pending_no_attempt_yet": "",
   "done": "",
   "dont_create_personal_projects_in_managed_account": "",
   "dont_forget_you_currently_have": "",
