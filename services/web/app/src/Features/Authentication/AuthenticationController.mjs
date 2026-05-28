@@ -84,6 +84,7 @@ const AuthenticationController = {
       analyticsId: user.analyticsId || user._id,
       alphaProgram: user.alphaProgram || undefined, // only store if set
       betaProgram: user.betaProgram || undefined, // only store if set
+      labsProgram: user.labsProgram || undefined, // only store if set
     }
     if (user.isAdmin) {
       lightUser.isAdmin = true
@@ -660,7 +661,12 @@ function _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser) {
       ? 'saml'
       : req.user_info?.auth_provider || 'email-password',
   })
-  Analytics.identifyUser(user._id, anonymousAnalyticsId, isNewUser)
+  Analytics.identifyUser(
+    user._id,
+    anonymousAnalyticsId,
+    isNewUser,
+    Boolean(user.labsProgram)
+  )
 
   logger.debug(
     { email: user.email, userId: user._id.toString() },

@@ -4,7 +4,7 @@ import UserHelper from './helpers/User.mjs'
 import redis from './helpers/redis.mjs'
 import Metrics from './helpers/metrics.mjs'
 import UserSessionsRedis from '../../../app/src/Features/User/UserSessionsRedis.mjs'
-import UserAnalyticsIdCache from '../../../app/src/Features/Analytics/UserAnalyticsIdCache.mjs'
+import UserAnalyticsDataCache from '../../../app/src/Features/Analytics/UserAnalyticsDataCache.mjs'
 import Features from '../../../app/src/infrastructure/Features.mjs'
 
 const rclient = UserSessionsRedis.client()
@@ -415,7 +415,7 @@ describe('Sessions', function () {
           },
         },
       })
-      await UserAnalyticsIdCache.reset()
+      await UserAnalyticsDataCache.reset()
       for (let i = 0; i < 5; i++) {
         await this.user1.doRequest('GET', '/project')
       }

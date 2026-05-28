@@ -65,10 +65,10 @@ describe('CompileManager', function () {
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/Analytics/UserAnalyticsIdCache',
+      '../../../../app/src/Features/Analytics/UserAnalyticsDataCache',
       () => ({
-        default: (ctx.UserAnalyticsIdCache = {
-          getWithMetrics: sinon.stub().resolves('abc'),
+        default: (ctx.UserAnalyticsDataCache = {
+          getAnalyticsId: sinon.stub().resolves('abc'),
         }),
       })
     )

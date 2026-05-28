@@ -7,7 +7,7 @@ import UserGetter from '../User/UserGetter.mjs'
 import ClsiManager from './ClsiManager.mjs'
 import Metrics from '@overleaf/metrics'
 import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
-import UserAnalyticsIdCache from '../Analytics/UserAnalyticsIdCache.mjs'
+import UserAnalyticsDataCache from '../Analytics/UserAnalyticsDataCache.mjs'
 import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
 let CompileManager
 const rclient = RedisWrapper.client('clsi_recently_compiled')
@@ -138,7 +138,7 @@ async function _getUserCompileLimits(userId) {
     ownerFeatures.compileGroup = 'alpha'
   }
 
-  const analyticsId = await UserAnalyticsIdCache.getWithMetrics(
+  const analyticsId = await UserAnalyticsDataCache.getAnalyticsId(
     owner._id,
     '_getUserCompileLimits'
   )

@@ -89,10 +89,13 @@ describe('AnalyticsManager', function () {
     }))
 
     vi.doMock(
-      '../../../../app/src/Features/Analytics/UserAnalyticsIdCache',
+      '../../../../app/src/Features/Analytics/UserAnalyticsDataCache',
       () => ({
-        default: (ctx.UserAnalyticsIdCache = {
-          getWithMetrics: sinon.stub().resolves(ctx.analyticsId),
+        default: (ctx.UserAnalyticsDataCache = {
+          getAnalyticsId: sinon.stub().resolves(ctx.analyticsId),
+          getAnalyticsData: sinon
+            .stub()
+            .resolves({ analyticsId: ctx.analyticsId, labsProgram: false }),
         }),
       })
     )
@@ -388,10 +391,13 @@ describe('AnalyticsManager', function () {
       }))
 
       vi.doMock(
-        '../../../../app/src/Features/Analytics/UserAnalyticsIdCache',
+        '../../../../app/src/Features/Analytics/UserAnalyticsDataCache',
         () => ({
-          default: (ctx.UserAnalyticsIdCache = {
-            getWithMetrics: sinon.stub().resolves(ctx.analyticsId),
+          default: (ctx.UserAnalyticsDataCache = {
+            getAnalyticsId: sinon.stub().resolves(ctx.analyticsId),
+            getAnalyticsData: sinon
+              .stub()
+              .resolves({ analyticsId: ctx.analyticsId, labsProgram: false }),
           }),
         })
       )
@@ -439,7 +445,7 @@ describe('AnalyticsManager', function () {
     })
 
     it('sets session.analyticsId with a legacy user session without an analyticsId', async function (ctx) {
-      ctx.UserAnalyticsIdCache.getWithMetrics.resolves(ctx.userId)
+      ctx.UserAnalyticsDataCache.getAnalyticsId.resolves(ctx.userId)
       ctx.req.session.user = {
         _id: ctx.userId,
         analyticsId: undefined,
@@ -450,7 +456,7 @@ describe('AnalyticsManager', function () {
     })
 
     it('updates session.analyticsId with a legacy user session without an analyticsId if different', async function (ctx) {
-      ctx.UserAnalyticsIdCache.getWithMetrics.resolves(ctx.userId)
+      ctx.UserAnalyticsDataCache.getAnalyticsId.resolves(ctx.userId)
       ctx.req.session.user = {
         _id: ctx.userId,
         analyticsId: undefined,
@@ -462,7 +468,7 @@ describe('AnalyticsManager', function () {
     })
 
     it('does not update session.analyticsId with a legacy user session without an analyticsId if same', async function (ctx) {
-      ctx.UserAnalyticsIdCache.getWithMetrics.resolves(ctx.userId)
+      ctx.UserAnalyticsDataCache.getAnalyticsId.resolves(ctx.userId)
       ctx.req.session.user = {
         _id: ctx.userId,
         analyticsId: undefined,

@@ -54,7 +54,7 @@ import { User } from '../../app/src/models/User.mjs'
 import AnalyticsManager from '../../app/src/Features/Analytics/AnalyticsManager.mjs'
 import AccountMappingHelper from '../../app/src/Features/Analytics/AccountMappingHelper.mjs'
 import PlansLocator from '../../app/src/Features/Subscription/PlansLocator.mjs'
-import UserAnalyticsIdCache from '../../app/src/Features/Analytics/UserAnalyticsIdCache.mjs'
+import UserAnalyticsDataCache from '../../app/src/Features/Analytics/UserAnalyticsDataCache.mjs'
 import CustomerIoHandler from '../../modules/customer-io/app/src/CustomerIoHandler.mjs'
 import { ReportError, convertToMinorUnits } from './helpers.mjs'
 import { compareAccountFields } from '../helpers/migrate_recurly_customers_to_stripe.helpers.mjs'
@@ -439,7 +439,7 @@ async function processMigration(input, commit) {
   }
 
   // 7. If commit mode, perform migration
-  const analyticsId = await UserAnalyticsIdCache.getWithMetrics(
+  const analyticsId = await UserAnalyticsDataCache.getAnalyticsId(
     overleafUserId,
     'script' // no-op, metrics are not collected from scripts.
   )
