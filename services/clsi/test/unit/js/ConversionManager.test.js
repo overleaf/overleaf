@@ -233,7 +233,7 @@ describe('ConversionManager', function () {
               ctx.inputPath,
               'docx'
             )
-          ).to.be.rejectedWith('pandoc conversion failed')
+          ).to.be.rejectedWith('Non-zero exit code from pandoc')
         })
 
         it('should remove the entire conversion directory', function (ctx) {

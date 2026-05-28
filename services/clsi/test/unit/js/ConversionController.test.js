@@ -2,6 +2,7 @@ import sinon from 'sinon'
 import { vi, describe, it, beforeEach, expect } from 'vitest'
 import Path from 'node:path'
 import { PassThrough } from 'node:stream'
+import * as Errors from '../../../app/js/Errors.js'
 
 const MODULE_PATH = Path.join(
   import.meta.dirname,
@@ -97,6 +98,8 @@ describe('ConversionController', function () {
     vi.doMock('../../../app/js/ConversionOutputCleaner', () => ({
       default: ctx.ConversionOutputCleaner,
     }))
+
+    vi.doMock('../../../app/js/Errors', () => Errors)
 
     ctx.res = new PassThrough()
     ctx.res.attachment = sinon.stub()
@@ -276,6 +279,73 @@ describe('ConversionController', function () {
           ).to.be.rejectedWith('mock stream error')
 
           sinon.assert.calledWith(ctx.fs.rm, ctx.conversionDir)
+        })
+      })
+
+      describe('on a user-facing ConversionError', function () {
+        beforeEach(async function (ctx) {
+          ctx.jsonStub = sinon.stub()
+          ctx.res.status = sinon.stub().returns({ json: ctx.jsonStub })
+          ctx.req = {
+            file: { path: '/path/to/uploaded/file.docx' },
+            query: { type: 'docx' },
+          }
+          ctx.ConversionManager.promises.convertToLaTeXWithLock.rejects(
+            new Errors.ConversionError('Non-zero exit code from pandoc', {
+              type: 'docx',
+              exitCode: 64,
+              stderr: 'parse error at line 5',
+            })
+          )
+
+          await ctx.ConversionController.convertDocumentToLaTeX(
+            ctx.req,
+            ctx.res
+          )
+        })
+
+        it('should return 422 with the pandoc stderr in the response body', function (ctx) {
+          sinon.assert.calledWith(ctx.res.status, 422)
+          sinon.assert.calledWith(ctx.jsonStub, {
+            error: 'parse error at line 5',
+            exitCode: 64,
+          })
+        })
+
+        it('should remove the uploaded file', function (ctx) {
+          sinon.assert.calledWith(ctx.fs.unlink, ctx.req.file.path)
+        })
+      })
+
+      describe('on a non-user-facing ConversionError', function () {
+        beforeEach(async function (ctx) {
+          ctx.jsonStub = sinon.stub()
+          ctx.res.status = sinon.stub().returns({ json: ctx.jsonStub })
+          ctx.req = {
+            file: { path: '/path/to/uploaded/file.docx' },
+            query: { type: 'docx' },
+          }
+          ctx.ConversionManager.promises.convertToLaTeXWithLock.rejects(
+            new Errors.ConversionError('Non-zero exit code from pandoc', {
+              type: 'docx',
+              exitCode: 62,
+              stderr: 'internal pandoc bug',
+            })
+          )
+
+          await ctx.ConversionController.convertDocumentToLaTeX(
+            ctx.req,
+            ctx.res
+          )
+        })
+
+        it('should return 422 without surfacing stderr', function (ctx) {
+          sinon.assert.calledWith(ctx.res.status, 422)
+          sinon.assert.calledWith(ctx.jsonStub, {})
+        })
+
+        it('should remove the uploaded file', function (ctx) {
+          sinon.assert.calledWith(ctx.fs.unlink, ctx.req.file.path)
         })
       })
     })
@@ -522,6 +592,89 @@ describe('ConversionController', function () {
       it('should pass the error to next', function (ctx) {
         sinon.assert.calledOnce(ctx.next)
         expect(ctx.next.firstCall.args[0]).to.be.instanceOf(Error)
+      })
+
+      it('should still clean up the conversion directory', function (ctx) {
+        sinon.assert.calledWith(ctx.fs.rm, sinon.match(uuidDirPattern), {
+          recursive: true,
+          force: true,
+        })
+      })
+    })
+
+    describe('when conversion fails with a user-facing ConversionError', function () {
+      beforeEach(async function (ctx) {
+        ctx.next = sinon.stub()
+        ctx.jsonStub = sinon.stub()
+        ctx.res.status = sinon.stub().returns({ json: ctx.jsonStub })
+        ctx.ConversionManager.promises.convertLaTeXToDocumentInDirWithLock.rejects(
+          new Errors.ConversionError(
+            'pandoc latex-to-document conversion failed',
+            {
+              type: 'docx',
+              exitCode: 64,
+              stderr: 'parse error at line 5',
+            }
+          )
+        )
+
+        await ctx.ConversionController.convertProjectToDocument(
+          ctx.req,
+          ctx.res,
+          ctx.next
+        )
+      })
+
+      it('should return 422 with the pandoc stderr in the response body', function (ctx) {
+        sinon.assert.calledWith(ctx.res.status, 422)
+        sinon.assert.calledWith(ctx.jsonStub, {
+          error: 'parse error at line 5',
+          exitCode: 64,
+        })
+      })
+
+      it('should not call next', function (ctx) {
+        sinon.assert.notCalled(ctx.next)
+      })
+
+      it('should still clean up the conversion directory', function (ctx) {
+        sinon.assert.calledWith(ctx.fs.rm, sinon.match(uuidDirPattern), {
+          recursive: true,
+          force: true,
+        })
+      })
+    })
+
+    describe('when conversion fails with a non-user-facing ConversionError', function () {
+      beforeEach(async function (ctx) {
+        ctx.next = sinon.stub()
+        ctx.jsonStub = sinon.stub()
+        ctx.res.status = sinon.stub().returns({ json: ctx.jsonStub })
+        ctx.ConversionManager.promises.convertLaTeXToDocumentInDirWithLock.rejects(
+          new Errors.ConversionError(
+            'pandoc latex-to-document conversion failed',
+            {
+              type: 'docx',
+              exitCode: 62,
+              stderr: 'internal pandoc bug',
+            }
+          )
+        )
+
+        await ctx.ConversionController.convertProjectToDocument(
+          ctx.req,
+          ctx.res,
+          ctx.next
+        )
+      })
+
+      it('should return 422 without surfacing stderr', function (ctx) {
+        sinon.assert.calledWith(ctx.res.status, 422)
+        sinon.assert.calledWith(ctx.jsonStub, {})
+      })
+
+      it('should not call next', function (ctx) {
+        sinon.assert.notCalled(ctx.next)
       })
 
       it('should still clean up the conversion directory', function (ctx) {

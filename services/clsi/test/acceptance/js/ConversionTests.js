@@ -28,7 +28,7 @@ describe('Conversions', function () {
       const outputStream = fs.createWriteStream(
         '/tmp/clsi_acceptance_tests_' + crypto.randomUUID() + '.zip'
       )
-      const stream = await Client.convertDocument(sourcePath, 'docx')
+      const { stream } = await Client.convertDocument(sourcePath, 'docx')
       await pipeline(stream, outputStream)
 
       await new Promise((resolve, reject) => {
@@ -75,13 +75,14 @@ describe('Conversions', function () {
       })
     })
 
-    it('should fail when file is not a docx', async function () {
+    it('should fail with 422 and surface pandoc stderr when file is not a docx', async function () {
       const sourcePath = Path.join(
         import.meta.dirname,
         '../fixtures/minimal.pdf'
       )
-      await expect(Client.convertDocument(sourcePath, 'docx')).to.eventually.be
-        .rejected
+      const { status, body } = await Client.convertDocument(sourcePath, 'docx')
+      expect(status).to.equal(422)
+      expect(body.error).to.include("couldn't unpack docx container")
     })
   })
 

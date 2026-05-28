@@ -33,10 +33,24 @@ function compile(projectId, data) {
 async function convertDocument(path, type) {
   const formData = new FormData()
   formData.append('qqfile', fs.createReadStream(path))
-  return await fetchStream(`${host}/convert/document-to-latex?type=${type}`, {
-    method: 'POST',
-    body: formData,
-  })
+  try {
+    const stream = await fetchStream(
+      `${host}/convert/document-to-latex?type=${type}`,
+      {
+        method: 'POST',
+        body: formData,
+      }
+    )
+    return { status: 200, stream, body: null }
+  } catch (err) {
+    if (!err.response) throw err
+    let body = err.body
+    const contentType = err.response.headers.get?.('content-type') ?? ''
+    if (contentType.includes('application/json')) {
+      body = JSON.parse(body)
+    }
+    return { status: err.response.status, stream: null, body }
+  }
 }
 
 async function convertProjectToDocument(

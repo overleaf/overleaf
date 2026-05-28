@@ -5,6 +5,7 @@ import Path from 'node:path'
 import CommandRunner from './CommandRunner.js'
 import LockManager from './LockManager.js'
 import OError from '@overleaf/o-error'
+import { ConversionError } from './Errors.js'
 
 const CONVERSION_CONFIGS = {
   docx: {
@@ -72,7 +73,8 @@ async function convertToLaTeX(
       null
     )
     if (exitCodePandoc !== 0) {
-      throw new OError('Non-zero exit code from pandoc', {
+      throw new ConversionError('Non-zero exit code from pandoc', {
+        type: conversionType,
         exitCode: exitCodePandoc,
         stderr: stderrPandoc,
       })
@@ -112,6 +114,9 @@ async function convertToLaTeX(
   } catch (error) {
     // Clean up the conversion directory on error to avoid leaving failed conversions around
     await fs.rm(conversionDir, { force: true, recursive: true }).catch(() => {})
+    if (error instanceof ConversionError) {
+      throw error
+    }
     throw new OError('pandoc conversion failed').withCause(error)
   }
 
@@ -204,10 +209,9 @@ async function convertLaTeXToDocumentInDir(
     )
 
     if (exitCode !== 0) {
-      throw new OError('pandoc latex-to-document conversion failed', {
+      throw new ConversionError('pandoc latex-to-document conversion failed', {
         type,
         exitCode,
-        stdout,
         stderr,
       })
     }
@@ -251,10 +255,9 @@ async function convertLaTeXToDocumentInDir(
   )
 
   if (exitCode !== 0) {
-    throw new OError('pandoc latex-to-document conversion failed', {
+    throw new ConversionError('pandoc latex-to-document conversion failed', {
       type,
       exitCode,
-      stdout,
       stderr,
     })
   }

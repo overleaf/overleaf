@@ -11,6 +11,7 @@ import RequestParser from './RequestParser.js'
 import { pipeline } from 'node:stream/promises'
 import Settings from '@overleaf/settings'
 import Path from 'node:path'
+import { ConversionError } from './Errors.js'
 
 const CONVERSION_CONFIGS = {
   docx: { extension: 'docx' },
@@ -37,6 +38,23 @@ async function convertDocumentToLaTeX(req, res) {
       path,
       conversionType
     )
+  } catch (err) {
+    if (err instanceof ConversionError) {
+      if (err.isUserFacing) {
+        return res.status(422).json({
+          error: err.stderr,
+          exitCode: err.exitCode,
+        })
+      } else {
+        logger.warn(
+          { err, conversionType, stderr: err.stderr },
+          'Conversion failed with non-user-facing error'
+        )
+        return res.status(422).json({})
+      }
+    } else {
+      throw err
+    }
   } finally {
     await fs.unlink(path).catch(() => {})
   }
@@ -123,6 +141,23 @@ async function convertProjectToDocument(req, res) {
       res.setHeader('X-Content-Type-Options', 'nosniff')
       const readStream = fsSync.createReadStream(documentPath)
       await pipeline(readStream, res)
+    }
+  } catch (err) {
+    if (err instanceof ConversionError) {
+      if (err.isUserFacing) {
+        return res.status(422).json({
+          error: err.stderr,
+          exitCode: err.exitCode,
+        })
+      } else {
+        logger.warn(
+          { err, type, stderr: err.stderr },
+          'Conversion failed with non-user-facing error'
+        )
+        return res.status(422).json({})
+      }
+    } else {
+      throw err
     }
   } finally {
     await fs.rm(conversionDir, { recursive: true, force: true }).catch(() => {})

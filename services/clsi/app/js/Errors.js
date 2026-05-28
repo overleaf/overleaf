@@ -35,6 +35,37 @@ export class TooManyCompileRequestsError extends OError {}
 export class InvalidParameter extends OError {}
 export class MissingUpdatesError extends OError {}
 
+export class ConversionError extends OError {
+  static USER_FACING_ERRORS = new Set([
+    1, // IO error
+    23, // Unsupported extension
+    24, // Citeproc error
+    25, // Other bibliography error
+    44, // Malformed XML error
+    63, // Generic error (e.g. malformed docx container)
+    64, // Parse error
+    91, // Macro loop
+    92, // UTF8 decoding error
+    94, // Unsupported char set
+    95, // Input not text
+    97, // Missing data file
+    98, // Missing metadata file
+    99, // Missing file
+  ])
+
+  isUserFacing
+  stderr
+  exitCode
+
+  constructor(message, { type, stderr, exitCode }) {
+    const isUserFacingError = ConversionError.USER_FACING_ERRORS.has(exitCode)
+    super(message, { exitCode, type })
+    this.isUserFacing = isUserFacingError
+    this.stderr = stderr
+    this.exitCode = exitCode
+  }
+}
+
 export default {
   QueueLimitReachedError,
   TimedOutError,
@@ -45,4 +76,5 @@ export default {
   TooManyCompileRequestsError,
   InvalidParameter,
   MissingUpdatesError,
+  ConversionError,
 }
