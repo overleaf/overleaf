@@ -22,6 +22,7 @@
   --editor-header-logo-background: url(../../../../public/img/ol-brand/overleaf-o-white.svg)
     center / contain no-repeat;
   --editor-toolbar-bg: var(--neutral-80);
+  --editor-toolbar-popover-border-color: var(--border-primary);
   --toolbar-dropdown-divider-color: var(--border-dark-divider);
 }
 
@@ -72,6 +73,7 @@
   --editor-header-logo-background: url(../../../../public/img/ol-brand/overleaf-o.svg)
     center / contain no-repeat;
   --editor-toolbar-bg: var(--white);
+  --editor-toolbar-popover-border-color: rgba(125 125 125 / 20%);
   --toolbar-dropdown-divider-color: var(--border-divider);
 
   .ide-redesign-main {

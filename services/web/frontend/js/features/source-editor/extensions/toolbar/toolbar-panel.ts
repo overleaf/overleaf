@@ -43,7 +43,7 @@ const toolbarTheme = EditorView.theme({
   },
   '#popover-toolbar-overflow': {
     padding: 0,
-    borderColor: 'rgba(125, 125, 125, 0.2)',
+    border: '1px solid var(--editor-toolbar-popover-border-color)',
     backgroundColor: 'var(--editor-toolbar-bg)',
     color: 'var(--toolbar-btn-color)',
     '& .popover-content, & .popover-body': {
@@ -53,10 +53,7 @@ const toolbarTheme = EditorView.theme({
       color: 'inherit',
     },
     '& .arrow, & .popover-arrow': {
-      borderBottomColor: 'rgba(125, 125, 125, 0.2)',
-      '&:after': {
-        borderBottomColor: 'var(--editor-toolbar-bg)',
-      },
+      display: 'none',
     },
   },
   '.ol-cm-toolbar-header': {
@@ -81,6 +78,7 @@ const toolbarTheme = EditorView.theme({
   },
   '.ol-cm-toolbar-button-menu-popover': {
     backgroundColor: 'initial',
+    border: '1px solid var(--editor-toolbar-popover-border-color)',
     '& > .popover-content, & > .popover-body': {
       padding: 0,
       color: 'initial',
