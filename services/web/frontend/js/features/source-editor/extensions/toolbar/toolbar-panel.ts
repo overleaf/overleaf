@@ -102,11 +102,9 @@ const toolbarTheme = EditorView.theme({
       background: 'none',
       '&.active': {
         backgroundColor: 'rgba(125, 125, 125, 0.1)',
-        color: 'inherit',
       },
       '&:hover, &:focus': {
         backgroundColor: 'rgba(125, 125, 125, 0.2)',
-        color: 'inherit',
       },
       '&.ol-cm-section-heading-menu-item': {
         border: 'none',
