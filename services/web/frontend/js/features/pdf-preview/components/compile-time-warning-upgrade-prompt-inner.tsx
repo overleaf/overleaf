@@ -21,7 +21,7 @@ export const CompileTimeWarningUpgradePromptInner: FC<{
             size: 'sm',
           }}
         >
-          {t('start_free_trial_without_exclamation')}
+          {t('start_free_trial')}
         </StartFreeTrialButton>
       }
       ariaLive="polite"

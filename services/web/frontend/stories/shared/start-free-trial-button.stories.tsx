@@ -80,6 +80,7 @@ const meta: Meta<Args> = {
     source: 'storybook',
     variant: 'secondary',
     size: undefined,
+    children: 'Start free trial',
   },
 }
 

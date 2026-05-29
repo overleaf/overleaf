@@ -486,6 +486,7 @@ const _ProjectController = {
       'export-markdown',
       'command-palette',
       'overleaf-library',
+      'compile-timeout-cta',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
