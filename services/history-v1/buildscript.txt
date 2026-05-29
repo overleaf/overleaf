@@ -1,5 +1,6 @@
 history-v1
 --dependencies=postgres,gcs,mongo,redis,s3
+--deploy-pipeline=history-v1
 --env-add=
 --env-pass-through=
 --esmock-loader=False

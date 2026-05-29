@@ -1,5 +1,6 @@
 project-history
 --dependencies=mongo,redis
+--deploy-pipeline=project-history
 --env-add=
 --env-pass-through=
 --esmock-loader=True

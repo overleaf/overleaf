@@ -6,6 +6,11 @@ ifeq ($(BRANCH_NAME),)
   export BRANCH_NAME := $(shell git rev-parse --abbrev-ref HEAD)
 endif
 BRANCH_NAME_TAG_SAFE := $(shell echo "$(BRANCH_NAME)" | sed 's/\//\-\-/g' | cut -c1-96)
+
+.PHONY: print-branch-tag-safe
+print-branch-tag-safe:
+	@echo $(BRANCH_NAME_TAG_SAFE)
+
 ifeq ($(COMMIT_SHA),)
   export COMMIT_SHA := $(shell git rev-parse HEAD)
 endif

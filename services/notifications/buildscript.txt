@@ -1,5 +1,6 @@
 notifications
 --dependencies=mongo
+--deploy-pipeline=notifications
 --env-add=
 --env-pass-through=
 --esmock-loader=False

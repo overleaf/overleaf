@@ -15,6 +15,10 @@ IMAGE_REPO_BRANCH ?= $(IMAGE_REPO):$(BRANCH_NAME_TAG_SAFE)
 IMAGE_REPO_MAIN ?= $(IMAGE_REPO):main
 IMAGE_REPO_FINAL ?= $(IMAGE_REPO_BRANCH)-$(BUILD_NUMBER)
 
+.PHONY: print-branch-tag-safe
+print-branch-tag-safe:
+	@echo $(BRANCH_NAME_TAG_SAFE)
+
 runtime-conf:
 	/opt/envsubst < conf/envsubst_template.json > conf/runtime.json
 

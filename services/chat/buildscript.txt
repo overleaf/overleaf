@@ -1,5 +1,6 @@
 chat
 --dependencies=mongo
+--deploy-pipeline=chat
 --env-add=
 --env-pass-through=
 --esmock-loader=False

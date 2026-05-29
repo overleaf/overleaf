@@ -58,6 +58,10 @@ COMPOSE_PROJECT_NAME_TEST_UNIT ?= test_unit_$(BUILD_DIR_NAME)
 DOCKER_COMPOSE_TEST_UNIT = \
 	COMPOSE_PROJECT_NAME=$(COMPOSE_PROJECT_NAME_TEST_UNIT) $(DOCKER_COMPOSE)
 
+.PHONY: print-branch-tag-safe
+print-branch-tag-safe:
+	@echo $(BRANCH_NAME_TAG_SAFE)
+
 clean:
 	-docker rmi $(IMAGE_CI)
 	-docker rmi $(IMAGE_REPO_FINAL)

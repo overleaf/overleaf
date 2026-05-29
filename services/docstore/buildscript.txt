@@ -1,5 +1,6 @@
 docstore
 --dependencies=mongo,gcs
+--deploy-pipeline=docstore
 --env-add=
 --env-pass-through=
 --esmock-loader=False
