@@ -8,7 +8,7 @@ https.globalAgent.keepAlive = false
 const Settings = {
   internal: {
     docstore: {
-      port: 3016,
+      port: process.env.DOCSTORE_PORT || 3016,
       host: process.env.LISTEN_ADDRESS || '127.0.0.1',
     },
   },

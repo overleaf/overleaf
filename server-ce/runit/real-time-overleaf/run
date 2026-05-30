@@ -2,5 +2,6 @@
 
 source /etc/overleaf/env.sh
 export LISTEN_ADDRESS=127.0.0.1
+export REALTIME_PORT=3026
 
 exec /sbin/setuser www-data /usr/bin/node /overleaf/services/real-time/app.js >> /var/log/overleaf/real-time.log 2>&1
