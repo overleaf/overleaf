@@ -25,6 +25,7 @@ import {
 } from 'overleaf-editor-core'
 import { rangesUpdatedEffect, setTrackChangesUserId } from './history-ot'
 import { trackedDeletesFromState } from '@/features/source-editor/utils/tracked-deletes'
+import { isComposing } from './composition'
 
 /*
  * Integrate CodeMirror 6 with the real-time system, via ShareJS.
@@ -67,7 +68,10 @@ export const realtime = (
 
     return {
       update(update) {
-        if (update.docChanged) {
+        // While an IME composition is active, pause forwarding to the OT layer.
+        // The composed text (which may include an emoji preview) is reconciled
+        // once when the composition ends (see `composition.ts`).
+        if (update.docChanged && !isComposing(update.state)) {
           editor.handleUpdateFromCM(update.transactions, currentDoc.ranges)
         }
       },

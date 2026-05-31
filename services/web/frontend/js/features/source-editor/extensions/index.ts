@@ -25,6 +25,7 @@ import { spelling } from './spelling'
 import { symbolPalette } from './symbol-palette'
 import { search } from './search'
 import { filterCharacters } from './filter-characters'
+import { compositionSync } from './composition'
 import { keybindings } from './keybindings'
 import { bracketMatching, bracketSelection } from './bracket-matching'
 import { verticalOverflow } from './vertical-overflow'
@@ -119,6 +120,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   }),
   keymaps,
   goToLinePanel(),
+  compositionSync(options.currentDoc.currentDocument),
   filterCharacters(),
 
   // NOTE: `autoComplete` needs to be before `keybindings` so that arrow key handling
