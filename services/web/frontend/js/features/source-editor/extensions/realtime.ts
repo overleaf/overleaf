@@ -113,6 +113,10 @@ type OTAdapter = {
 export class EditorFacade extends EventEmitter {
   private otAdapter: OTAdapter | null
   public events: EventEmitter
+  // Set by the OT adapters when a remote op arrives while an IME composition is
+  // active (its editor echo is buffered rather than applied). Read by the
+  // composition reconcile in `composition.ts` to decide it cannot safely merge.
+  public remoteOpDuringComposition = false
 
   constructor(public view: EditorView) {
     super()
@@ -215,11 +219,21 @@ class ShareLatexOTAdapter {
     }
 
     const onInsert = (pos: number, text: string) => {
+      if (isComposing(this.editor.view.state)) {
+        // Buffer the remote echo during composition so the IME isn't disrupted
+        // (see composition.ts). The OT snapshot has already advanced.
+        this.editor.remoteOpDuringComposition = true
+        return
+      }
       this.editor.cmInsert(pos, text, 'remote')
       check()
     }
 
     const onDelete = (pos: number, text: string) => {
+      if (isComposing(this.editor.view.state)) {
+        this.editor.remoteOpDuringComposition = true
+        return
+      }
       this.editor.cmDelete(pos, text, 'remote')
       check()
     }
@@ -355,6 +369,12 @@ class HistoryOTAdapter {
   }
 
   onRemoteOp(operations: EditOperation[]) {
+    if (isComposing(this.editor.view.state)) {
+      // Buffer the remote echo during composition so the IME isn't disrupted
+      // (see composition.ts). The OT snapshot has already advanced.
+      this.editor.remoteOpDuringComposition = true
+      return
+    }
     const trackedDeletes = trackedDeletesFromState(this.editor.view.state)
     const changes: ChangeSpec[] = []
     let trackedChangesUpdated = false
