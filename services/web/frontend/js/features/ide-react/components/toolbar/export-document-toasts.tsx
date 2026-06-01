@@ -17,15 +17,19 @@ const ExportDocumentErrorToast = ({ data }: { data?: any }) => {
         <b>{t('we_couldnt_export_this_document')}</b>
       </p>
       <Trans
-        i18nKey="the_document_contains_formatting_we_werent_able_to_convert_contact_support_if_you_need_help"
+        i18nKey="the_document_contains_formatting_we_werent_able_to_convert"
         components={[
           // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
-          <a href="/contact" target="_BLANK" rel="noopener noreferrer" />,
+          <a
+            href="https://docs.overleaf.com/managing-projects-and-files/importing-and-exporting-files#common-issues-and-how-to-address-them"
+            target="_BLANK"
+            rel="noopener noreferrer"
+          />,
         ]}
       />
       {errorMessage && (
         <details>
-          <summary>{t('error_details')}</summary>
+          <summary>{t('conversion_error_details')}</summary>
           <pre
             style={{ maxWidth: '800px', maxHeight: '300px', overflow: 'auto' }}
           >
