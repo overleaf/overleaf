@@ -2,7 +2,6 @@ import ReactDOM from 'react-dom'
 import { useCodeMirrorViewContext } from '../../source-editor/components/codemirror-context'
 import { memo } from 'react'
 import ReviewPanel from './review-panel'
-import ReviewModeSwitcher from './review-mode-switcher'
 import useReviewPanelLayout from '../hooks/use-review-panel-layout'
 
 function ReviewPanelContainer() {
@@ -14,10 +13,7 @@ function ReviewPanelContainer() {
   }
 
   return ReactDOM.createPortal(
-    <>
-      <ReviewModeSwitcher />
-      {showPanel && <ReviewPanel mini={mini} />}
-    </>,
+    <>{showPanel && <ReviewPanel mini={mini} />}</>,
     view.scrollDOM
   )
 }

@@ -33,86 +33,88 @@ function ReviewModeSwitcher() {
   const view = useCodeMirrorViewContext()
 
   return (
-    <div className="review-mode-switcher-container">
-      <Dropdown className="review-mode-switcher" align="end">
-        <DropdownToggle
-          as={ModeSwitcherToggleButton}
-          id="review-mode-switcher"
-        />
-        <DropdownMenu flip={false}>
-          <OLDropdownMenuItem
-            disabled={!write}
-            onClick={() => {
-              if (mode === 'edit') {
-                view.focus()
-                return
-              }
+    <Dropdown className="review-mode-switcher" align="end">
+      <DropdownToggle as={ModeSwitcherToggleButton} id="review-mode-switcher" />
+      <DropdownMenu
+        flip={false}
+        popperConfig={{ strategy: 'fixed' }}
+        // renderOnMount ensures the menu is in the DOM on mount so Popper.js
+        // can calculate its position correctly when using strategy: 'fixed'
+        // inside the toolbar's stacking context
+        renderOnMount
+      >
+        <OLDropdownMenuItem
+          disabled={!write}
+          onClick={() => {
+            if (mode === 'edit') {
+              view.focus()
+              return
+            }
+            sendMB('editing-mode-change', {
+              role: permissionsLevel,
+              previousMode: mode,
+              newMode: 'edit',
+            })
+            if (user?.id) {
+              saveTrackChangesForCurrentUser(false)
+            } else {
+              saveTrackChanges({ on_for_guests: false })
+            }
+            view.focus()
+          }}
+          description={t('edit_content_directly')}
+          leadingIcon="edit"
+          active={write && mode === 'edit'}
+        >
+          {t('editing')}
+        </OLDropdownMenuItem>
+        <OLDropdownMenuItem
+          disabled={permissionsLevel === 'readOnly'}
+          onClick={() => {
+            if (mode === 'review') {
+              view.focus()
+              return
+            }
+            if (!features.trackChanges) {
+              setUpgradeTrackChangesModal({
+                show: true,
+                location: 'review-switcher',
+              })
+            } else {
               sendMB('editing-mode-change', {
                 role: permissionsLevel,
                 previousMode: mode,
-                newMode: 'edit',
+                newMode: 'review',
               })
               if (user?.id) {
-                saveTrackChangesForCurrentUser(false)
+                saveTrackChangesForCurrentUser(true)
               } else {
-                saveTrackChanges({ on_for_guests: false })
+                saveTrackChanges({ on_for_guests: true })
               }
               view.focus()
-            }}
-            description={t('edit_content_directly')}
-            leadingIcon="edit"
-            active={write && mode === 'edit'}
-          >
-            {t('editing')}
-          </OLDropdownMenuItem>
-          <OLDropdownMenuItem
-            disabled={permissionsLevel === 'readOnly'}
-            onClick={() => {
-              if (mode === 'review') {
-                view.focus()
-                return
-              }
-              if (!features.trackChanges) {
-                setUpgradeTrackChangesModal({
-                  show: true,
-                  location: 'review-switcher',
-                })
-              } else {
-                sendMB('editing-mode-change', {
-                  role: permissionsLevel,
-                  previousMode: mode,
-                  newMode: 'review',
-                })
-                if (user?.id) {
-                  saveTrackChangesForCurrentUser(true)
-                } else {
-                  saveTrackChanges({ on_for_guests: true })
-                }
-                view.focus()
-              }
-            }}
-            description={
-              permissionsLevel === 'review' && !trackedWrite
-                ? t('comment_only')
-                : t('edits_become_suggestions')
             }
-            leadingIcon="rate_review"
-            active={trackedWrite && mode === 'review'}
+          }}
+          description={
+            permissionsLevel === 'review' && !trackedWrite
+              ? t('comment_only')
+              : t('edits_become_suggestions')
+          }
+          leadingIcon="rate_review"
+          active={trackedWrite && mode === 'review'}
+        >
+          {t('reviewing')}
+        </OLDropdownMenuItem>
+        {showViewOption && (
+          <OLDropdownMenuItem
+            description={t('can_view_content')}
+            leadingIcon="visibility"
+            active={mode === 'view'}
           >
-            {t('reviewing')}
+            {t('viewing')}
           </OLDropdownMenuItem>
-          {showViewOption && (
-            <OLDropdownMenuItem
-              description={t('can_view_content')}
-              leadingIcon="visibility"
-              active={mode === 'view'}
-            >
-              {t('viewing')}
-            </OLDropdownMenuItem>
-          )}
-        </DropdownMenu>
-      </Dropdown>
-    </div>
+        )}
+      </DropdownMenu>
+    </Dropdown>
   )
 }
 
