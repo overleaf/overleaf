@@ -885,11 +885,22 @@ async function previewSubscription(req, res, next) {
     }
   }
 
-  const subscriptionChange =
-    await SubscriptionHandler.promises.previewSubscriptionChange(
-      userId,
-      planCode
-    )
+  let subscriptionChange
+  try {
+    subscriptionChange =
+      await SubscriptionHandler.promises.previewSubscriptionChange(
+        userId,
+        planCode
+      )
+  } catch (err) {
+    if (
+      err instanceof Error &&
+      err.constructor.name === 'PaymentServiceResourceNotFoundError'
+    ) {
+      return res.redirect('/user/subscription/plans')
+    }
+    throw err
+  }
   /** @type {PaymentMethod[]} */
   const paymentMethod = await Modules.promises.hooks.fire(
     'getPaymentMethod',

@@ -3,6 +3,7 @@ import sinon from 'sinon'
 import MockRequest from '../helpers/MockRequest.mjs'
 import MockResponse from '../helpers/MockResponse.mjs'
 import SubscriptionErrors from '../../../../app/src/Features/Subscription/Errors.mjs'
+import { PaymentServiceResourceNotFoundError } from '../../../../modules/subscriptions/app/src/PaymentServiceErrors.mjs'
 import SubscriptionHelper from '../../../../app/src/Features/Subscription/SubscriptionHelper.mjs'
 import { AI_ADD_ON_CODE } from '../../../../app/src/Features/Subscription/AiHelper.mjs'
 
@@ -1768,6 +1769,20 @@ describe('SubscriptionController', function () {
         ctx.req,
         ctx.res,
         'Unknown plan: does-not-exist'
+      )
+      expect(ctx.res.render).not.to.have.been.called
+    })
+
+    it('redirects to the plans page when the user has no subscription to preview', async function (ctx) {
+      ctx.SubscriptionHandler.promises.previewSubscriptionChange = sinon
+        .stub()
+        .rejects(new PaymentServiceResourceNotFoundError('no subscription'))
+      ctx.res.redirect = sinon.stub()
+
+      await ctx.SubscriptionController.previewSubscription(ctx.req, ctx.res)
+
+      expect(ctx.res.redirect).to.have.been.calledWith(
+        '/user/subscription/plans'
       )
       expect(ctx.res.render).not.to.have.been.called
     })
