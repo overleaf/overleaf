@@ -295,12 +295,6 @@
   z-index: 10; // Prevent track changes showing over toolbar
 }
 
-// Isolate secondary toolbar rows so they paint below the main toolbar (z-index: 10)
-// and its dropdowns, which would otherwise be obscured due to DOM order.
-.ol-cm-toolbar-wrapper > .writefull {
-  isolation: isolate;
-}
-
 /**************************************
 	Toggle Switch
 ***************************************/

@@ -18,7 +18,6 @@ import useDropdown from '../../../shared/hooks/use-dropdown'
 import { getPanel } from '@codemirror/view'
 import { createToolbarPanel } from '../extensions/toolbar/toolbar-panel'
 import EditorSwitch from './editor-switch'
-import ReviewModeSwitcher from '@/features/review-panel/components/review-mode-switcher'
 import SwitchToPDFButton from './switch-to-pdf-button'
 import { DetacherSynctexControl } from '../../pdf-preview/components/detach-synctex-control'
 import DetachCompileButtonWrapper from '../../pdf-preview/components/detach-compile-button-wrapper'
@@ -34,7 +33,6 @@ import Breadcrumbs from '@/features/source-editor/extensions/breadcrumbs'
 import classNames from 'classnames'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
-import { useProjectContext } from '@/shared/context/project-context'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 
 const sourceEditorToolbarComponents = importOverleafModules(
@@ -64,7 +62,6 @@ const Toolbar = memo(function Toolbar() {
     userSettings: { breadcrumbs },
   } = useUserSettingsContext()
   const visualPreviewEnabled = useFeatureFlag('visual-preview')
-  const { features } = useProjectContext()
 
   const [overflowed, setOverflowed] = useState(false)
 
@@ -209,7 +206,6 @@ const Toolbar = memo(function Toolbar() {
             ref={handleButtons}
           >
             {!visualPreviewEnabled && <EditorSwitch />}
-            {features.trackChangesVisible && <ReviewModeSwitcher />}
             {sourceEditorToolbarEndButtons.map(
               ({ import: { default: Component }, path }) => (
                 <Component key={path} />

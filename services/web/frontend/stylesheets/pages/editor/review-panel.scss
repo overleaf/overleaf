@@ -20,9 +20,6 @@ $rp-type-blue: #6b7797;
   --review-panel-width: 230px;
   --review-panel-width-mini: 24px;
   --review-panel-color-scheme: light;
-  --review-mode-switcher-reviewing-bg: var(--yellow-10);
-  --review-mode-switcher-reviewing-hover-bg: var(--yellow-20);
-  --review-mode-switcher-reviewing-color: var(--yellow-60);
 
   @include theme('default') {
     .ide-redesign-main {
@@ -36,9 +33,6 @@ $rp-type-blue: #6b7797;
       --review-panel-button-hover-bg-color: var(--bg-dark-tertiary);
       --review-panel-border-color: var(--border-divider-dark);
       --review-panel-color-scheme: dark;
-      --review-mode-switcher-reviewing-bg: var(--yellow-70);
-      --review-mode-switcher-reviewing-hover-bg: var(--yellow-60);
-      --review-mode-switcher-reviewing-color: var(--yellow-10);
     }
   }
 }
@@ -718,21 +712,34 @@ del.review-panel-content-highlight {
   pointer-events: none; // this is to prevent mouseLeave event from firing when hovering over the tooltip
 }
 
+.review-mode-switcher-container {
+  position: sticky;
+  top: 0;
+  right: 0;
+}
+
 .review-mode-switcher {
+  position: absolute;
+  top: var(--spacing-03);
+  right: var(--spacing-03);
   font-family: var(--font-sans);
 
   &:hover,
   &:focus {
     .review-mode-switcher-toggle-button.editing {
-      background-color: var(--review-panel-button-hover-bg-color);
+      background-color: var(--bg-light-tertiary);
     }
 
     .review-mode-switcher-toggle-button.reviewing {
-      background-color: var(--review-mode-switcher-reviewing-hover-bg);
+      background-color: var(--yellow-20);
     }
 
     .review-mode-switcher-toggle-button.viewing {
       background-color: var(--blue-20);
+    }
+
+    .review-mode-switcher-toggle-label {
+      display: block;
     }
   }
 
@@ -748,16 +755,11 @@ del.review-panel-content-highlight {
   font-family: $font-family-base;
   display: flex;
   align-items: center;
-  border-radius: var(--border-radius-base);
+  border-radius: 14px;
   font-size: var(--font-size-02);
-  padding: var(--spacing-01) var(--spacing-02);
-  gap: var(--spacing-01);
-  cursor: pointer;
-
-  &:focus-visible {
-    outline: 2px solid var(--content-primary);
-    outline-offset: 2px;
-  }
+  padding: var(--spacing-02) var(--spacing-03);
+  gap: var(--spacing-02);
+  height: 20px;
 
   .material-symbols {
     font-size: 16px;
@@ -769,13 +771,13 @@ del.review-panel-content-highlight {
   }
 
   &.editing {
-    background-color: var(--toolbar-alt-bg-color);
-    color: var(--toolbar-btn-color);
+    background-color: var(--bg-light-secondary);
+    color: var(--content-primary);
   }
 
   &.reviewing {
-    background-color: var(--review-mode-switcher-reviewing-bg);
-    color: var(--review-mode-switcher-reviewing-color);
+    background-color: var(--yellow-10);
+    color: var(--yellow-60);
   }
 
   &.viewing {
