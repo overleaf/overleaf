@@ -191,9 +191,7 @@ export function CompileTimeoutPaywallModal({
                 <strong>{t('compile_timeout_modal_intro')}</strong>
               </p>
               <div className="compile-time-paywall-feature-list">
-                <ListItem>
-                  {t('collabs_per_proj', { collabcount: 10 })}
-                </ListItem>
+                <ListItem>{t('collabs_per_proj', { count: 10 })}</ListItem>
                 <ListItem>{t('track_changes')}</ListItem>
                 <ListItem>{t('github_integration')}</ListItem>
                 <ListItem>{t('and_much_more')}</ListItem>

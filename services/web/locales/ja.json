@@ -75,7 +75,7 @@
   "cn": "中国語（簡体字）",
   "collaboration": "コラボレーション",
   "collaborator": "共同編集者",
-  "collabs_per_proj": "プロジェクトあたりの __collabcount__ 共同編集者",
+  "collabs_per_proj": "プロジェクトあたりの __count__ 共同編集者",
   "comment": "コメント",
   "common": "共通",
   "compile_larger_projects": "大きなプロジェクトをコンパイル",

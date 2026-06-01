@@ -21,7 +21,7 @@ export default function LoadMore() {
             className="project-list-load-more-button"
             onClick={() => loadMoreProjects()}
           >
-            {t('show_x_more_projects', { x: loadMoreCount })}
+            {t('show_x_more_projects', { count: loadMoreCount })}
           </OLButton>
         </>
       ) : null}

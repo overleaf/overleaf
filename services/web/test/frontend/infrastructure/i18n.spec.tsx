@@ -144,4 +144,34 @@ describe('i18n', function () {
         .should('have.text', "<i>T</i>&<b>e</b>'s<code>t</code>ing")
     })
   })
+
+  describe('plurals', function () {
+    // See https://www.i18next.com/misc/json-format#i-18-next-json-v3
+    it('picks singular for count=1', function () {
+      const Test = () => {
+        const { t } = useTranslation()
+        return <div>{t('project_search_file_count', { count: 1 })}</div>
+      }
+      cy.mount(<Test />)
+      cy.findByText('in 1 file')
+    })
+
+    it('picks plural for count>1', function () {
+      const Test = () => {
+        const { t } = useTranslation()
+        return <div>{t('project_search_file_count', { count: 5 })}</div>
+      }
+      cy.mount(<Test />)
+      cy.findByText('in 5 files')
+    })
+
+    it('picks plural for count=0', function () {
+      const Test = () => {
+        const { t } = useTranslation()
+        return <div>{t('project_search_file_count', { count: 0 })}</div>
+      }
+      cy.mount(<Test />)
+      cy.findByText('in 0 files')
+    })
+  })
 })
