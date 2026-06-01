@@ -105,6 +105,10 @@
       }
     }
 
+    &.link-sm {
+      @include body-sm;
+    }
+
     &.btn:hover {
       text-decoration: none;
     }
