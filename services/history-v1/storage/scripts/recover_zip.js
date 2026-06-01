@@ -17,9 +17,10 @@ const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
 const util = require('node:util')
+const { pipeline } = require('node:stream/promises')
 
-// Something is registering 11 listeners, over the limit of 10, which generates
-// a lot of warning noise.
+// Something is registering 11 listeners, over the limit
+// of 10, which generates a lot of warning noise.
 require('node:events').EventEmitter.defaultMaxListeners = 11
 
 const config = require('config')
@@ -27,11 +28,23 @@ const config = require('config')
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { Storage } = require('@google-cloud/storage')
 const isValidUtf8 = require('utf-8-validate')
+// zip-stream@7 uses ESM default export
+const ZipStream = require('zip-stream').default
+
+function createStorage() {
+  const opts = {}
+  if (config.has('persistor.gcs.endpoint.apiEndpoint')) {
+    opts.apiEndpoint = config.get('persistor.gcs.endpoint.apiEndpoint')
+  }
+  if (config.has('persistor.gcs.endpoint.projectId')) {
+    opts.projectId = config.get('persistor.gcs.endpoint.projectId')
+  }
+  return new Storage(opts)
+}
 
 const core = require('overleaf-editor-core')
 const projectKey = require('@overleaf/object-persistor/src/ProjectKey.js')
 const streams = require('../lib/streams')
-const ProjectArchive = require('../lib/project_archive')
 
 const {
   values: { verbose: VERBOSE },
@@ -53,7 +66,7 @@ if (HISTORY_IDS.length === 0) {
 
 async function listDeletedChunks(historyId) {
   const bucketName = config.get('chunkStore.bucket')
-  const storage = new Storage()
+  const storage = createStorage()
   const [files] = await storage.bucket(bucketName).getFiles({
     prefix: projectKey.format(historyId),
     versions: true,
@@ -137,7 +150,7 @@ class RecoveryBlobStore {
     if (VERBOSE) console.log('fetching blob', hash)
 
     const bucketName = config.get('blobStore.projectBucket')
-    const storage = new Storage()
+    const storage = createStorage()
     const [files] = await storage.bucket(bucketName).getFiles({
       prefix: this.makeProjectBlobKey(hash),
       versions: true,
@@ -158,7 +171,7 @@ class RecoveryBlobStore {
 
   async fetchGlobalBlob(hash, destination) {
     const bucketName = config.get('blobStore.globalBucket')
-    const storage = new Storage()
+    const storage = createStorage()
     const file = storage.bucket(bucketName).file(this.makeGlobalBlobKey(hash))
     await file.download({ destination })
   }
@@ -203,9 +216,18 @@ class RecoveryBlobStore {
 async function uploadZip(historyId, zipPathname) {
   const bucketName = config.get('zipStore.bucket')
   const deadline = 24 * 3600 * 1000 // lifecycle limit on the zips bucket
-  const storage = new Storage()
+  const storage = createStorage()
   const destination = `${historyId}-recovered.zip`
-  await storage.bucket(bucketName).upload(zipPathname, { destination })
+  await storage.bucket(bucketName).upload(zipPathname, {
+    destination,
+    resumable: false,
+  })
+
+  if (config.has('persistor.gcs.endpoint.apiEndpoint')) {
+    // In emulator mode, signed URLs aren't available
+    const apiEndpoint = config.get('persistor.gcs.endpoint.apiEndpoint')
+    return `${apiEndpoint}/storage/v1/b/${bucketName}/o/${encodeURIComponent(destination)}?alt=media`
+  }
 
   const signedUrls = await storage
     .bucket(bucketName)
@@ -217,6 +239,23 @@ async function uploadZip(historyId, zipPathname) {
     })
 
   return signedUrls[0]
+}
+
+/**
+ * Promisified wrapper for ZipStream's entry method.
+ *
+ * @param {ZipStream} archive
+ * @param {Buffer|NodeJS.ReadableStream|string} source
+ * @param {{ name: string }} data
+ * @return {Promise<void>}
+ */
+function addEntry(archive, source, data) {
+  return new Promise((resolve, reject) => {
+    archive.entry(source, data, err => {
+      if (err) reject(err)
+      else resolve()
+    })
+  })
 }
 
 async function restoreProject(historyId) {
@@ -237,9 +276,40 @@ async function restoreProject(historyId) {
   if (VERBOSE) console.log('zipping', historyId)
 
   const zipPathname = path.join(tmp, `${historyId}.zip`)
-  const zipTimeoutMs = 60 * 1000
-  const archive = new ProjectArchive(snapshot, zipTimeoutMs)
-  await archive.writeZip(blobStore, zipPathname)
+  const outputFile = fs.createWriteStream(zipPathname)
+  const archive = new ZipStream()
+
+  const pipelinePromise = pipeline(archive, outputFile)
+
+  for (const pathname of snapshot.getFilePathnames()) {
+    const file = snapshot.getFile(pathname)
+    if (!file) continue
+
+    await file.load('eager', blobStore)
+    let content = file.getContent({
+      filterTrackedDeletes: true,
+    })
+
+    if (content === null) {
+      const hash = file.getHash()
+      content = await blobStore.getStream(hash)
+    }
+
+    if (content == null) continue
+
+    if (typeof content === 'string') {
+      content = Buffer.from(content)
+    }
+    await addEntry(archive, content, { name: pathname })
+    if (VERBOSE) console.log(`${pathname} added`)
+  }
+
+  archive.finalize()
+  await pipelinePromise
+
+  if (VERBOSE) {
+    console.log(`Wrote ${archive.getBytesWritten()} bytes`)
+  }
 
   if (VERBOSE) console.log('uploading', historyId)
 
@@ -252,4 +322,7 @@ async function main() {
     console.log(signedUrl)
   }
 }
-main().catch(console.error)
+main().catch(err => {
+  console.error(err)
+  process.exit(1)
+})

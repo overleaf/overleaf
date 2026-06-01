@@ -4,6 +4,7 @@ import commandLineArgs from 'command-line-args'
 import assert from '../lib/assert.js'
 import fs from 'node:fs'
 import { setTimeout } from 'node:timers/promises'
+import { pipeline } from 'node:stream/promises'
 import {
   archiveLatestChunk,
   archiveRawProject,
@@ -11,17 +12,13 @@ import {
 } from '../lib/backupArchiver.mjs'
 import knex from '../lib/knex.js'
 import { client } from '../lib/mongodb.js'
-import archiver from 'archiver'
-import Events from 'node:events'
+import ZipStream from 'zip-stream'
 import { Chunk } from 'overleaf-editor-core'
 import _ from 'lodash'
 
-// Silence warning.
-Events.setMaxListeners(20)
-
 const SUPPORTED_MODES = ['raw', 'latest']
 
-// Pads the mode name to a fixed length for better alignment in output.
+// Pads the mode name to a fixed length for alignment.
 const padModeName = _.partialRight(
   _.padEnd,
   Math.max(...SUPPORTED_MODES.map(mode => mode.length))
@@ -64,25 +61,6 @@ function usage() {
     )
   })
 }
-
-/**
- * @typedef {import('archiver').ZipArchive} ZipArchive
- */
-
-/**
- * @typedef {import('archiver').ProgressData} ProgressData
- */
-
-/**
- * @typedef {import('archiver').EntryData} EntryData
- */
-
-/**
- * @typedef {Object} ArchiverError
- * @property {string} message
- * @property {string} code
- * @property {Object} data
- */
 
 let historyId, help, mode, output, useBackupGlobalBlobs, verbose
 
@@ -136,80 +114,37 @@ await loadGlobalBlobs()
 
 outputFile = fs.createWriteStream(output)
 
-const archive = archiver.create('zip', {})
+const archive = new ZipStream()
 
-archive.on('close', function () {
-  console.log(archive.pointer() + ' total bytes')
-  console.log(`Wrote ${output}`)
-  shutdown().catch(e => console.error('Error shutting down', e))
+archive.on('error', function (e) {
+  console.error(`Error writing archive: ${e.message}`)
 })
-
-archive.on(
-  'error',
-  /**
-   *
-   * @param {ArchiverError} e
-   */
-  function (e) {
-    console.error(`Error writing archive: ${e.message}`)
-  }
-)
-
-archive.on('end', function () {
-  console.log(`Wrote ${archive.pointer()} total bytes to ${output}`)
-  shutdown().catch(e => console.error('Error shutting down', e))
-})
-
-archive.on(
-  'progress',
-  /**
-   *
-   * @param {ProgressData} progress
-   */
-  function (progress) {
-    if (verbose) {
-      console.log(
-        `${progress.entries.processed} processed out of ${progress.entries.total}`
-      )
-    }
-  }
-)
-
-archive.on(
-  'entry',
-  /**
-   *
-   * @param {EntryData} entry
-   */
-  function (entry) {
-    if (verbose) {
-      console.log(`${entry.name} added`)
-    }
-  }
-)
-
-archive.on(
-  'warning',
-  /**
-   *
-   * @param {ArchiverError} warning
-   */
-  function (warning) {
-    console.warn(`Warning encountered when writing archive: ${warning.message}`)
-  }
-)
 
 try {
+  // Pipe archive to the output file before adding entries.
+  // pipeline handles backpressure and will resolve when
+  // the archive stream ends.
+  const pipelinePromise = pipeline(archive, outputFile)
+
   switch (mode) {
     case 'latest':
-      await archiveLatestChunk(archive, historyId, useBackupGlobalBlobs)
+      await archiveLatestChunk(
+        archive,
+        historyId,
+        useBackupGlobalBlobs,
+        verbose
+      )
       break
     case 'raw':
     default:
-      await archiveRawProject(archive, historyId, useBackupGlobalBlobs)
+      await archiveRawProject(archive, historyId, useBackupGlobalBlobs, verbose)
       break
   }
-  archive.pipe(outputFile)
+
+  archive.finalize()
+  await pipelinePromise
+
+  console.log(`Wrote ${archive.getBytesWritten()} total bytes to ${output}`)
 } catch (error) {
   if (error instanceof BackupPersistorError) {
     console.error(error.message)
@@ -222,12 +157,7 @@ try {
   } else {
     console.error('Error encountered when writing archive')
   }
-} finally {
-  await Promise.race([
-    await archive.finalize(),
-    setTimeout(10000).then(() => {
-      console.error('Archive did not finalize in time')
-      return shutdown(1)
-    }),
-  ])
+  await shutdown(1)
 }
+
+await shutdown(0)

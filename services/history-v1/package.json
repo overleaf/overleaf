@@ -44,7 +44,8 @@
     "temp": "^0.8.3",
     "throng": "^4.0.0",
     "tsscmp": "^1.0.6",
-    "utf-8-validate": "^5.0.4"
+    "utf-8-validate": "^5.0.4",
+    "zip-stream": "^7.0.2"
   },
   "devDependencies": {
     "@overleaf/migrations": "workspace:*",
