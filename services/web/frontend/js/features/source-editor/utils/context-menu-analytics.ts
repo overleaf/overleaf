@@ -6,6 +6,7 @@ export type ContextMenuItemSegmentation =
   | 'paste'
   | 'paste-without-formatting'
   | 'paste-with-formatting'
+  | 'select-all'
   | 'give-feedback'
   | 'delete'
   | 'jump-to-location-in-pdf'

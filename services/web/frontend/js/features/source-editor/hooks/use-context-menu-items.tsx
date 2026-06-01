@@ -32,6 +32,7 @@ import {
   ContextMenuItemSegmentation,
 } from '../utils/context-menu-analytics'
 import { isCursorOnEmptyLine } from '../utils/is-cursor-on-empty-line'
+import { selectAll } from '@codemirror/commands'
 
 export const useContextMenuItems = () => {
   const view = useCodeMirrorViewContext()
@@ -144,6 +145,9 @@ export const useContextMenuItems = () => {
       return result
     }
   )
+  const handleSelectAll = wrapForContextMenu('select-all', () =>
+    selectAll(view)
+  )
   const handleDelete = wrapForContextMenu('delete', () =>
     commands.deleteSelection(view)
   )
@@ -222,6 +226,13 @@ export const useContextMenuItems = () => {
         disabled: false,
         show: canEdit,
         shortcut: inVisualMode ? getShortcut('paste-special') : undefined,
+      },
+      {
+        label: t('select_all'),
+        handler: handleSelectAll,
+        disabled: false,
+        show: true,
+        shortcut: getShortcut('select-all'),
       },
       {
         label: t('delete'),
