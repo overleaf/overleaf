@@ -12,7 +12,6 @@ import {
 import OLButton from '@/shared/components/ol/ol-button'
 import '@uppy/core/dist/style.css'
 import '@uppy/dashboard/dist/style.css'
-import BetaBadgeIcon from '@/shared/components/beta-badge-icon'
 
 function ImportDocumentModal({
   type,
@@ -59,12 +58,7 @@ function ImportDocumentModal({
     >
       {/* TODO: make necessary changes here for import document modal */}
       <OLModalHeader>
-        <OLModalTitle as="h3" className="import-document-modal-title">
-          {config.title}
-          <span className="beta-icon-wrapper">
-            <BetaBadgeIcon />
-          </span>
-        </OLModalTitle>
+        <OLModalTitle as="h3">{config.title}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>
         <p>{t('import_document_description')}</p>
