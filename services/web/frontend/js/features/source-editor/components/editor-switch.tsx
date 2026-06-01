@@ -57,7 +57,7 @@ function EditorSwitch() {
             onChange={handleChange}
           />
           <label htmlFor={inputId} className="toggle-switch-label">
-            <span>{t('code_editor')}</span>
+            <span>{t('code')}</span>
           </label>
 
           <RichTextToggle
@@ -92,7 +92,7 @@ const RichTextToggle: FC<{
         disabled={disabled}
       />
       <label htmlFor={inputId} className="toggle-switch-label">
-        <span>{t('visual_editor')}</span>
+        <span>{t('visual')}</span>
       </label>
     </span>
   )

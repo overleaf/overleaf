@@ -173,7 +173,6 @@ const Toolbar = memo(function Toolbar() {
           className="ol-cm-toolbar toolbar-editor"
           ref={elementRef}
         >
-          {!visualPreviewEnabled && <EditorSwitch />}
           {showActions && (
             <ToolbarItems
               state={state}
@@ -206,6 +205,7 @@ const Toolbar = memo(function Toolbar() {
             className="ol-cm-toolbar-button-group ol-cm-toolbar-end"
             ref={handleButtons}
           >
+            {!visualPreviewEnabled && <EditorSwitch />}
             {sourceEditorToolbarEndButtons.map(
               ({ import: { default: Component }, path }) => (
                 <Component key={path} />

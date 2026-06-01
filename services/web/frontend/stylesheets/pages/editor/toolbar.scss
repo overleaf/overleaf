@@ -375,8 +375,13 @@
   align-items: center;
   white-space: nowrap;
 
-  .toggle-switch {
-    margin-left: var(--spacing-03);
+  &::before {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 16px;
+    background-color: var(--toolbar-dropdown-divider-color);
+    margin-right: var(--spacing-02);
   }
 
   .toggle-switch-label span {

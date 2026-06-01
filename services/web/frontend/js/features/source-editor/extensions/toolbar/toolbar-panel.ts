@@ -143,9 +143,6 @@ const toolbarTheme = EditorView.theme({
     },
     '&.ol-cm-toolbar-stretch': {
       flex: 1,
-      '.editor-toggle-switch + &': {
-        borderLeft: 'none', // avoid a left border when no toolbar buttons are shown
-      },
     },
     '&.overflow-hidden': {
       borderLeft: 'none',
