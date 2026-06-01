@@ -31,6 +31,15 @@ function classifyErrorType(errorMessage: string): ExecutionErrorType {
   return 'generic'
 }
 
+function moduleNotFoundHelpMessage(): string {
+  return (
+    "Note: Only Pyodide's built-in packages are available in the browser. " +
+    'Packages installed via pip cannot be used here. ' +
+    'See https://pyodide.org/en/stable/usage/packages-in-pyodide.html ' +
+    'for the list of supported packages.'
+  )
+}
+
 function ensureDirectoryExists(fs: PyodideFS, filePath: string) {
   const directory = path.dirname(filePath)
   if (directory === '.' || directory === '/') {
@@ -221,7 +230,12 @@ async function handleRunCode(msg: RunCodeRequest) {
   if (runError) {
     const errorMessage =
       runError instanceof Error ? runError.message : String(runError)
-    postFailure('stderr', errorMessage, classifyErrorType(errorMessage))
+    const errorType = classifyErrorType(errorMessage)
+    const fullMessage =
+      errorType === 'ModuleNotFoundError'
+        ? `${errorMessage}\n${moduleNotFoundHelpMessage()}`
+        : errorMessage
+    postFailure('stderr', fullMessage, errorType)
     return
   }
 

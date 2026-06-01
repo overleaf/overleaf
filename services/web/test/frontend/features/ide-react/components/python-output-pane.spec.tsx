@@ -257,6 +257,9 @@ describe('<PythonOutputPane />', function () {
       'have.class',
       'ide-redesign-python-output-pane-line-stderr'
     )
+    cy.findByText("Only Pyodide's built-in packages", { exact: false }).should(
+      'not.exist'
+    )
   })
 
   it('renders the interrupt message as an info line', function () {
@@ -379,5 +382,44 @@ describe('<PythonOutputPane />', function () {
       'not.exist'
     )
     cy.findByText('hello from tomli').should('exist')
+  })
+
+  it('augments ModuleNotFoundError output with help text about supported Pyodide packages', function () {
+    const executablePythonFileContents =
+      'import this_module_does_not_exist_in_pyodide\n'
+    const projectFiles = {
+      [pythonExecutableScript.filename]: executablePythonFileContents,
+    }
+    const ProjectProvider = makeProjectProvider(projectFiles)
+
+    cy.mount(
+      <EditorProviders
+        scope={{
+          editor: {
+            sharejs_doc: {
+              doc_id: pythonExecutableScript.file_id,
+              getSnapshot: () => executablePythonFileContents,
+            },
+            currentDocumentId: pythonExecutableScript.file_id,
+            openDocName: pythonExecutableScript.filename,
+          },
+        }}
+        providers={{ FileTreePathProvider, ProjectProvider }}
+      >
+        <PythonExecutionProvider>
+          <PythonOutputPane />
+        </PythonExecutionProvider>
+      </EditorProviders>
+    )
+
+    cy.findByRole('button', { name: 'Run Python code' })
+      .should('not.be.disabled')
+      .click()
+
+    cy.findByText('ModuleNotFoundError', { exact: false }).should('exist')
+    cy.findByText("Only Pyodide's built-in packages", { exact: false }).should(
+      'have.class',
+      'ide-redesign-python-output-pane-line-stderr'
+    )
   })
 })
