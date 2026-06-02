@@ -25,14 +25,17 @@ export class MathWidget extends WidgetType {
         view.dispatch(placeSelectionInsideBlock(view, event as MouseEvent))
       })
     }
-    this.renderMath(element)
-      .catch(() => {
-        element.classList.add('ol-cm-math-error')
-      })
-      .finally(() => {
-        view.requestMeasure()
-      })
-
+    // in a timeout so the element can be rendered for metrics
+    window.setTimeout(() => {
+      this.renderMath(element)
+        .catch(() => {
+          element.classList.add('ol-cm-math-error')
+        })
+        .finally(() => {
+          view.requestMeasure()
+        })
+    })
+    // TODO: re-render on element resize
     return element
   }
 

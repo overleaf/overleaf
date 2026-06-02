@@ -4740,6 +4740,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mathjax/mathjax-newcm-font@npm:^4.1.2":
+  version: 4.1.2
+  resolution: "@mathjax/mathjax-newcm-font@npm:4.1.2"
+  checksum: 10c0/23867a672706a5cc1a9cfe835a188466202ff5502bd9f65a75343532638184cb53c6a11a76473c37a4e6231b38f6781b1a20a6eb3a3f1ba46144bf533bd25026
+  languageName: node
+  linkType: hard
+
 "@maxmind/geoip2-node@npm:^5.0.0":
   version: 5.0.0
   resolution: "@maxmind/geoip2-node@npm:5.0.0"
@@ -7381,7 +7388,7 @@ __metadata:
     lru-cache: "npm:^7.10.1"
     marked: "npm:^4.1.0"
     match-sorter: "npm:^6.2.0"
-    mathjax: "npm:^3.2.2"
+    mathjax: "npm:^4.1.2"
     mediatr-ts: "npm:^2.0.1"
     mensch: "npm:^0.3.4"
     method-override: "npm:^2.3.3"
@@ -23448,10 +23455,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mathjax@npm:^3.2.2":
-  version: 3.2.2
-  resolution: "mathjax@npm:3.2.2"
-  checksum: 10c0/26c8557f948d1ef76ce2b0bc1ad66128c9a78a7e4f3d96587f90b23dd25cfbf14c9b58a1c75a7d8d35f92b72bab054eab61873443babe646b7bfd6b40bb717e6
+"mathjax@npm:^4.1.2":
+  version: 4.1.2
+  resolution: "mathjax@npm:4.1.2"
+  dependencies:
+    "@mathjax/mathjax-newcm-font": "npm:^4.1.2"
+  checksum: 10c0/3d842708029c65bdcaaf621f80aed1248a2f29f180d4e5a42e6e48e935cdf891be1505575e323193ea44347112149b636a3b08b0a72ed2b203004c18044f5dc8
   languageName: node
   linkType: hard
 

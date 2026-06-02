@@ -22,7 +22,7 @@ export const loadMathJax = async (options?: {
         inlineMath.push(['$', '$'])
       }
 
-      // https://docs.mathjax.org/en/v3.2-latest/upgrading/v2.html
+      // https://docs.mathjax.org/en/stable/options/index.html
       window.MathJax = {
         // https://docs.mathjax.org/en/latest/options/input/tex.html#the-configuration-block
         tex: {
@@ -30,10 +30,6 @@ export const loadMathJax = async (options?: {
             // Implements support for the \bm command from the bm package. It bolds the argument in math mode.
             // https://github.com/mathjax/MathJax/issues/1219#issuecomment-341059843
             bm: ['\\boldsymbol{#1}', 1],
-            // MathJax 3 renders \coloneq as :- whereas the mathtools package
-            // renders it as :=. Here we override the \coloneq macro to produce
-            // the := symbol.
-            coloneq: '\\coloneqq',
           },
           inlineMath,
           displayMath: [
@@ -44,12 +40,15 @@ export const loadMathJax = async (options?: {
             '[-]': [
               'html', // avoid creating HTML elements/attributes
               'require', // prevent loading disabled packages
+              'textmacros', // text macros are loaded by default in v4, disable them
             ],
           },
           processEscapes: true,
           processEnvironments: true,
           useLabelIds: options.useLabelIds,
-          tags: options.numbering,
+        },
+        output: {
+          displayOverflow: 'linebreak',
         },
         loader: {
           load: [
@@ -62,14 +61,13 @@ export const loadMathJax = async (options?: {
         startup: {
           typeset: false,
           pageReady() {
-            // disable the "Math Renderer" option in the context menu,
-            // as only SVG is available
+            // disable the "Math Renderer" option in the context menu, as only SVG is available
             window.MathJax.startup.document.menu.menu
-              .findID('Renderer')
+              .findID('Settings', 'Renderer')
               .disable()
           },
-          ready() {
-            window.MathJax.startup.defaultReady()
+          async ready() {
+            await window.MathJax.startup.defaultReady()
 
             // remove anything from the "font-family" attribute after a semicolon
             // so it's not added to the style attribute
@@ -79,9 +77,29 @@ export const loadMathJax = async (options?: {
             safe.filterMethods.filterFontFamily = (
               _safe: any,
               family: string
-            ) => family.split(/;/)[0]
+            ) => {
+              return family.split(/;/)[0]
+            }
           },
         },
+      }
+
+      // "tags" set separately as tags: undefined throws an error
+      if (options.numbering) {
+        window.MathJax.tex.tags = options.numbering
+      }
+
+      // if the menu is disabled, disable all the accessibility features, for performance
+      // https://docs.mathjax.org/en/stable/options/accessibility.html#accessibility-extensions-options
+      if (!options.enableMenu) {
+        window.MathJax.options.menuOptions = {
+          settings: {
+            enrich: false,
+            speech: false,
+            braille: false,
+            assistiveMml: false,
+          },
+        }
       }
 
       const script = document.createElement('script')

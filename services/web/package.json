@@ -352,7 +352,7 @@
     "knip": "^5.64.1",
     "lottie-react": "^2.4.1",
     "match-sorter": "^6.2.0",
-    "mathjax": "^3.2.2",
+    "mathjax": "^4.1.2",
     "mediatr-ts": "^2.0.1",
     "mensch": "^0.3.4",
     "micromark": "^4.0.0",

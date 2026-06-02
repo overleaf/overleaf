@@ -363,37 +363,25 @@ module.exports = {
         // Copy the required files for loading MathJax from MathJax NPM package
         // https://www.npmjs.com/package/mathjax#user-content-hosting-your-own-copy-of-the-mathjax-components
         {
-          from: 'es5/tex-svg-full.js',
-          to: `js/libs/mathjax-${PackageVersions.version.mathjax}/es5`,
-          toType: 'dir',
-          context: mathjaxDir,
-        },
-        {
-          from: 'es5/input/tex/extensions/**/*.js',
+          from: 'tex-svg.js',
           to: `js/libs/mathjax-${PackageVersions.version.mathjax}`,
           toType: 'dir',
           context: mathjaxDir,
         },
         {
-          from: 'es5/ui/**/*',
+          from: 'input/tex/extensions/**/*.js',
           to: `js/libs/mathjax-${PackageVersions.version.mathjax}`,
           toType: 'dir',
           context: mathjaxDir,
         },
         {
-          from: 'es5/a11y/**/*',
+          from: 'ui/**/*',
           to: `js/libs/mathjax-${PackageVersions.version.mathjax}`,
           toType: 'dir',
           context: mathjaxDir,
         },
         {
-          from: 'es5/input/mml.js',
-          to: `js/libs/mathjax-${PackageVersions.version.mathjax}/es5/input`,
-          toType: 'dir',
-          context: mathjaxDir,
-        },
-        {
-          from: 'es5/sre/**/*',
+          from: 'sre/**/*',
           to: `js/libs/mathjax-${PackageVersions.version.mathjax}`,
           toType: 'dir',
           context: mathjaxDir,
