@@ -83,6 +83,15 @@ const grantClipboardPermissions = () => {
       },
     })
   )
+
+  cy.wrap(
+    Cypress.automation('remote:debugger:protocol', {
+      command: 'Emulation.setFocusEmulationEnabled',
+      params: {
+        enabled: true,
+      },
+    })
+  )
 }
 
 describe('editor context menu', { scrollBehavior: false }, function () {
