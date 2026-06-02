@@ -1,0 +1,700 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      argocd.argoproj.io/tracking-id: overleaf:/Pod:overleaf/busybox-sleep
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{"argocd.argoproj.io/tracking-id":"overleaf:/Pod:overleaf/busybox-sleep"},"name":"busybox-sleep","namespace":"overleaf"},"spec":{"containers":[{"args":["sleep","1000000"],"image":"busybox:1.28","name":"busybox"}]}}
+    creationTimestamp: "2026-05-31T21:33:22Z"
+    generation: 1
+    name: busybox-sleep
+    namespace: overleaf
+    resourceVersion: "7201"
+    uid: df2e32e8-99d5-4d14-9387-fe4ad6ba416e
+  spec:
+    containers:
+    - args:
+      - sleep
+      - "1000000"
+      image: busybox:1.28
+      imagePullPolicy: IfNotPresent
+      name: busybox
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-b5mjl
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: overleaf-control-plane
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: kube-api-access-b5mjl
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:37:30Z"
+      observedGeneration: 1
+      status: "True"
+      type: PodReadyToStartContainers
+    - lastProbeTime: null
+      lastTransitionTime: "2026-05-31T21:33:22Z"
+      observedGeneration: 1
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:37:30Z"
+      observedGeneration: 1
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:37:30Z"
+      observedGeneration: 1
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2026-05-31T21:33:22Z"
+      observedGeneration: 1
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: containerd://1142d00a3c5c7f63763ccfcc030b8a35b6eb6656017e3da1c42b24770b31410e
+      image: docker.io/library/busybox:1.28
+      imageID: docker.io/library/busybox@sha256:141c253bc4c3fd0a201d32dc1f493bcf3fff003b6df416dea4f41046e0f37d47
+      lastState:
+        terminated:
+          containerID: containerd://dede2119be82664c72d486cdcbaca7e557287ae3f3e04f40bea04c5e532d08fd
+          exitCode: 255
+          finishedAt: "2026-06-01T19:37:26Z"
+          reason: Unknown
+          startedAt: "2026-06-01T19:32:14Z"
+      name: busybox
+      ready: true
+      resources: {}
+      restartCount: 3
+      started: true
+      state:
+        running:
+          startedAt: "2026-06-01T19:37:30Z"
+      user:
+        linux:
+          gid: 0
+          supplementalGroups:
+          - 0
+          - 10
+          uid: 0
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-b5mjl
+        readOnly: true
+        recursiveReadOnly: Disabled
+    hostIP: 10.89.0.2
+    hostIPs:
+    - ip: 10.89.0.2
+    observedGeneration: 1
+    phase: Running
+    podIP: 10.244.0.2
+    podIPs:
+    - ip: 10.244.0.2
+    qosClass: BestEffort
+    startTime: "2026-05-31T21:33:22Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2026-06-01T19:25:07Z"
+    generateName: mongo-84b6dfc9b4-
+    generation: 1
+    labels:
+      app: mongo
+      pod-template-hash: 84b6dfc9b4
+    name: mongo-84b6dfc9b4-9k2j4
+    namespace: overleaf
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: mongo-84b6dfc9b4
+      uid: 865ace0d-2a98-4a8a-906d-e61e92138bf6
+    resourceVersion: "7486"
+    uid: 2b7a0ac0-aea4-4e78-8a12-f54b9c0df9af
+  spec:
+    containers:
+    - args:
+      - --replSet
+      - overleaf
+      - --bind_ip_all
+      command:
+      - mongod
+      env:
+      - name: MONGO_INITDB_DATABASE
+        value: overleaf
+      - name: GLIBC_TUNABLES
+        value: glibc.pthread.rseq=1
+      image: localhost:5001/overleaf/mongo:8.0
+      imagePullPolicy: IfNotPresent
+      lifecycle:
+        postStart:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - sleep 60; mongosh overleaf /docker-entrypoint-initdb.d/mongodb-init-replica-set.js
+              || true
+      livenessProbe:
+        exec:
+          command:
+          - /bin/sh
+          - -c
+          - echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
+        failureThreshold: 5
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 10
+      name: mongo
+      ports:
+      - containerPort: 27017
+        protocol: TCP
+      readinessProbe:
+        exec:
+          command:
+          - /bin/sh
+          - -c
+          - echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
+        failureThreshold: 3
+        initialDelaySeconds: 15
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 5
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /data/db
+        name: data
+      - mountPath: /docker-entrypoint-initdb.d/mongodb-init-replica-set.js
+        name: init-script
+        subPath: mongodb-init-replica-set.js
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-ftgfx
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    hostAliases:
+    - hostnames:
+      - mongo
+      ip: 127.0.0.1
+    nodeName: overleaf-control-plane
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: mongo-data
+    - configMap:
+        defaultMode: 420
+        name: mongo-init
+      name: init-script
+    - name: kube-api-access-ftgfx
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:38:31Z"
+      observedGeneration: 1
+      status: "True"
+      type: PodReadyToStartContainers
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:25:07Z"
+      observedGeneration: 1
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:38:32Z"
+      observedGeneration: 1
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:38:32Z"
+      observedGeneration: 1
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:25:07Z"
+      observedGeneration: 1
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: containerd://be4472221c035c897de260c14c164f0201ec0459dbfdafb035c6d622d158b775
+      image: localhost:5001/overleaf/mongo:8.0
+      imageID: localhost:5001/overleaf/mongo@sha256:99d4ee4cc1d64439847c5016d4ea12d0e05d900bd773bc75912f199c0bde785a
+      lastState:
+        terminated:
+          containerID: containerd://e9beeca4fe29ead2a3a824d5891d026b675b97e3fdc25ca0d9b971f25b0a93ad
+          exitCode: 255
+          finishedAt: "2026-06-01T19:37:26Z"
+          reason: Unknown
+          startedAt: "2026-06-01T19:32:14Z"
+      name: mongo
+      ready: true
+      resources: {}
+      restartCount: 2
+      started: true
+      state:
+        running:
+          startedAt: "2026-06-01T19:37:30Z"
+      user:
+        linux:
+          gid: 0
+          supplementalGroups:
+          - 0
+          uid: 0
+      volumeMounts:
+      - mountPath: /data/db
+        name: data
+      - mountPath: /docker-entrypoint-initdb.d/mongodb-init-replica-set.js
+        name: init-script
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-ftgfx
+        readOnly: true
+        recursiveReadOnly: Disabled
+    hostIP: 10.89.0.2
+    hostIPs:
+    - ip: 10.89.0.2
+    observedGeneration: 1
+    phase: Running
+    podIP: 10.244.0.12
+    podIPs:
+    - ip: 10.244.0.12
+    qosClass: BestEffort
+    startTime: "2026-06-01T19:25:07Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2026-06-01T19:27:18Z"
+    generateName: overleaf-7f5f6759cb-
+    generation: 1
+    labels:
+      app: overleaf
+      pod-template-hash: 7f5f6759cb
+    name: overleaf-7f5f6759cb-7f4qz
+    namespace: overleaf
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: overleaf-7f5f6759cb
+      uid: 064c6503-7625-4fd5-85e7-2a097d6d38f4
+    resourceVersion: "7517"
+    uid: 26f14019-67a2-4912-a711-140871cfa4d0
+  spec:
+    containers:
+    - env:
+      - name: DOCKER_RUNNER
+        value: "false"
+      - name: EMAIL_CONFIRMATION_DISABLED
+        value: "true"
+      - name: EXTERNAL_AUTH
+        value: none
+      - name: OVERLEAF_APP_NAME
+        value: Overleaf Community Edition
+      - name: OVERLEAF_MONGO_URL
+        value: mongodb://mongo.overleaf.svc.cluster.local/overleaf
+      - name: OVERLEAF_REDIS_HOST
+        value: redis
+      - name: REDIS_HOST
+        value: redis
+      - name: REDIS_PORT
+        value: tcp://redis:6379
+      - name: SANDBOXED_COMPILES
+        value: "false"
+      envFrom:
+      - configMapRef:
+          name: overleaf-variables
+      image: localhost:5001/overleaf/overleaf:latest
+      imagePullPolicy: Always
+      livenessProbe:
+        failureThreshold: 5
+        httpGet:
+          path: /login
+          port: 80
+          scheme: HTTP
+        initialDelaySeconds: 30
+        periodSeconds: 30
+        successThreshold: 1
+        timeoutSeconds: 10
+      name: overleaf
+      ports:
+      - containerPort: 80
+        protocol: TCP
+      readinessProbe:
+        failureThreshold: 6
+        httpGet:
+          path: /login
+          port: 80
+          scheme: HTTP
+        initialDelaySeconds: 30
+        periodSeconds: 30
+        successThreshold: 1
+        timeoutSeconds: 10
+      resources:
+        limits:
+          cpu: "2"
+          memory: 4Gi
+        requests:
+          cpu: "1"
+          memory: 1Gi
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/lib/overleaf
+        name: data
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-vhx2n
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: overleaf-control-plane
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 60
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: overleaf-data
+    - name: kube-api-access-vhx2n
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:37:30Z"
+      observedGeneration: 1
+      status: "True"
+      type: PodReadyToStartContainers
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:27:18Z"
+      observedGeneration: 1
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:38:52Z"
+      observedGeneration: 1
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:38:52Z"
+      observedGeneration: 1
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:27:18Z"
+      observedGeneration: 1
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - allocatedResources:
+        cpu: "1"
+        memory: 1Gi
+      containerID: containerd://78d118381c9dd21fff0a08345ed4195af47969a09db05d3fd2131c791a047131
+      image: localhost:5001/overleaf/overleaf:latest
+      imageID: localhost:5001/overleaf/overleaf@sha256:2542ee85e4ef3c4c8c9877c8d81c2631dbfe9906dbac6e76e9ce5be9e6986428
+      lastState:
+        terminated:
+          containerID: containerd://2599d05993c28514ac770e6e5b8508369d55b06b8ebe0b3219c0d356131c23d5
+          exitCode: 255
+          finishedAt: "2026-06-01T19:37:26Z"
+          reason: Unknown
+          startedAt: "2026-06-01T19:32:35Z"
+      name: overleaf
+      ready: true
+      resources:
+        limits:
+          cpu: "2"
+          memory: 4Gi
+        requests:
+          cpu: "1"
+          memory: 1Gi
+      restartCount: 2
+      started: true
+      state:
+        running:
+          startedAt: "2026-06-01T19:37:48Z"
+      user:
+        linux:
+          gid: 0
+          supplementalGroups:
+          - 0
+          uid: 0
+      volumeMounts:
+      - mountPath: /var/lib/overleaf
+        name: data
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-vhx2n
+        readOnly: true
+        recursiveReadOnly: Disabled
+    hostIP: 10.89.0.2
+    hostIPs:
+    - ip: 10.89.0.2
+    observedGeneration: 1
+    phase: Running
+    podIP: 10.244.0.14
+    podIPs:
+    - ip: 10.244.0.14
+    qosClass: Burstable
+    startTime: "2026-06-01T19:27:18Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2026-05-31T21:33:23Z"
+    generateName: redis-6466bbc86f-
+    generation: 1
+    labels:
+      app: redis
+      pod-template-hash: 6466bbc86f
+    name: redis-6466bbc86f-bq56t
+    namespace: overleaf
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: redis-6466bbc86f
+      uid: 9550c2a5-b898-459a-8b4b-e1cd566cabb4
+    resourceVersion: "7204"
+    uid: 18eaf288-7d92-4d1c-91e6-1326b71dff06
+  spec:
+    containers:
+    - args:
+      - --appendonly
+      - "yes"
+      command:
+      - redis-server
+      image: localhost:5001/overleaf/redis:6.2
+      imagePullPolicy: IfNotPresent
+      name: redis
+      ports:
+      - containerPort: 6379
+        protocol: TCP
+      resources: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /data
+        name: data
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-fzvmv
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: overleaf-control-plane
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: redis-data
+    - name: kube-api-access-fzvmv
+      projected:
+        defaultMode: 420
+        sources:
+        - serviceAccountToken:
+            expirationSeconds: 3607
+            path: token
+        - configMap:
+            items:
+            - key: ca.crt
+              path: ca.crt
+            name: kube-root-ca.crt
+        - downwardAPI:
+            items:
+            - fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+              path: namespace
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:37:30Z"
+      observedGeneration: 1
+      status: "True"
+      type: PodReadyToStartContainers
+    - lastProbeTime: null
+      lastTransitionTime: "2026-05-31T21:33:27Z"
+      observedGeneration: 1
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:37:30Z"
+      observedGeneration: 1
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2026-06-01T19:37:30Z"
+      observedGeneration: 1
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2026-05-31T21:33:27Z"
+      observedGeneration: 1
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: containerd://38ec171e2bdf64aefecdb098417f6dadaca60c4287f04cc13a4ead6b99f412d8
+      image: localhost:5001/overleaf/redis:6.2
+      imageID: localhost:5001/overleaf/redis@sha256:c30491f3143c61c179527cc66c8a942b9e1d1f8e75f6d879694bdb15c1553615
+      lastState:
+        terminated:
+          containerID: containerd://3e04166dd203fcbfa17741900610b719719bfe56d053cbcc55ce05fe2a447bbd
+          exitCode: 255
+          finishedAt: "2026-06-01T19:37:26Z"
+          reason: Unknown
+          startedAt: "2026-06-01T19:32:14Z"
+      name: redis
+      ready: true
+      resources: {}
+      restartCount: 3
+      started: true
+      state:
+        running:
+          startedAt: "2026-06-01T19:37:30Z"
+      user:
+        linux:
+          gid: 0
+          supplementalGroups:
+          - 0
+          uid: 0
+      volumeMounts:
+      - mountPath: /data
+        name: data
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: kube-api-access-fzvmv
+        readOnly: true
+        recursiveReadOnly: Disabled
+    hostIP: 10.89.0.2
+    hostIPs:
+    - ip: 10.89.0.2
+    observedGeneration: 1
+    phase: Running
+    podIP: 10.244.0.15
+    podIPs:
+    - ip: 10.244.0.15
+    qosClass: BestEffort
+    startTime: "2026-05-31T21:33:27Z"
+kind: List
+metadata:
+  resourceVersion: ""

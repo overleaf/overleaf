@@ -1,0 +1,335 @@
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      argocd.argoproj.io/tracking-id: overleaf:apps/Deployment:overleaf/mongo
+      deployment.kubernetes.io/revision: "1"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"argocd.argoproj.io/tracking-id":"overleaf:apps/Deployment:overleaf/mongo"},"labels":{"app":"mongo","app.kubernetes.io/managed-by":"Helm","helm.sh/chart":"overleaf-0.1.0"},"name":"mongo","namespace":"overleaf"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"mongo"}},"template":{"metadata":{"labels":{"app":"mongo"}},"spec":{"containers":[{"args":["--replSet","overleaf","--bind_ip_all"],"command":["mongod"],"env":[{"name":"MONGO_INITDB_DATABASE","value":"overleaf"},{"name":"GLIBC_TUNABLES","value":"glibc.pthread.rseq=1"}],"image":"localhost:5001/overleaf/mongo:8.0","imagePullPolicy":"IfNotPresent","lifecycle":{"postStart":{"exec":{"command":["/bin/sh","-c","sleep 60; mongosh overleaf /docker-entrypoint-initdb.d/mongodb-init-replica-set.js || true"]}}},"livenessProbe":{"exec":{"command":["/bin/sh","-c","echo 'db.stats().ok' | mongosh localhost:27017/test --quiet"]},"failureThreshold":5,"initialDelaySeconds":30,"periodSeconds":10,"timeoutSeconds":10},"name":"mongo","ports":[{"containerPort":27017}],"readinessProbe":{"exec":{"command":["/bin/sh","-c","echo 'db.stats().ok' | mongosh localhost:27017/test --quiet"]},"failureThreshold":3,"initialDelaySeconds":15,"periodSeconds":10,"timeoutSeconds":5},"volumeMounts":[{"mountPath":"/data/db","name":"data"},{"mountPath":"/docker-entrypoint-initdb.d/mongodb-init-replica-set.js","name":"init-script","subPath":"mongodb-init-replica-set.js"}]}],"hostAliases":[{"hostnames":["mongo"],"ip":"127.0.0.1"}],"restartPolicy":"Always","volumes":[{"name":"data","persistentVolumeClaim":{"claimName":"mongo-data"}},{"configMap":{"name":"mongo-init"},"name":"init-script"}]}}}}
+    creationTimestamp: "2026-06-01T19:25:07Z"
+    generation: 1
+    labels:
+      app: mongo
+      app.kubernetes.io/managed-by: Helm
+      helm.sh/chart: overleaf-0.1.0
+    name: mongo
+    namespace: overleaf
+    resourceVersion: "7490"
+    uid: c03f67d4-4e98-43e5-8a72-057fe615cf99
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: mongo
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        labels:
+          app: mongo
+      spec:
+        containers:
+        - args:
+          - --replSet
+          - overleaf
+          - --bind_ip_all
+          command:
+          - mongod
+          env:
+          - name: MONGO_INITDB_DATABASE
+            value: overleaf
+          - name: GLIBC_TUNABLES
+            value: glibc.pthread.rseq=1
+          image: localhost:5001/overleaf/mongo:8.0
+          imagePullPolicy: IfNotPresent
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                - /bin/sh
+                - -c
+                - sleep 60; mongosh overleaf /docker-entrypoint-initdb.d/mongodb-init-replica-set.js
+                  || true
+          livenessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
+            failureThreshold: 5
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          name: mongo
+          ports:
+          - containerPort: 27017
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - echo 'db.stats().ok' | mongosh localhost:27017/test --quiet
+            failureThreshold: 3
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /data/db
+            name: data
+          - mountPath: /docker-entrypoint-initdb.d/mongodb-init-replica-set.js
+            name: init-script
+            subPath: mongodb-init-replica-set.js
+        dnsPolicy: ClusterFirst
+        hostAliases:
+        - hostnames:
+          - mongo
+          ip: 127.0.0.1
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: mongo-data
+        - configMap:
+            defaultMode: 420
+            name: mongo-init
+          name: init-script
+  status:
+    availableReplicas: 1
+    conditions:
+    - lastTransitionTime: "2026-06-01T19:25:07Z"
+      lastUpdateTime: "2026-06-01T19:26:09Z"
+      message: ReplicaSet "mongo-84b6dfc9b4" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+    - lastTransitionTime: "2026-06-01T19:38:32Z"
+      lastUpdateTime: "2026-06-01T19:38:32Z"
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    terminatingReplicas: 0
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      argocd.argoproj.io/tracking-id: overleaf:apps/Deployment:overleaf/overleaf
+      deployment.kubernetes.io/revision: "1"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"argocd.argoproj.io/tracking-id":"overleaf:apps/Deployment:overleaf/overleaf"},"labels":{"app":"overleaf","app.kubernetes.io/managed-by":"Helm","helm.sh/chart":"overleaf-0.1.0"},"name":"overleaf","namespace":"overleaf"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"overleaf"}},"strategy":{"type":"Recreate"},"template":{"metadata":{"labels":{"app":"overleaf"}},"spec":{"containers":[{"env":[{"name":"DOCKER_RUNNER","value":"false"},{"name":"EMAIL_CONFIRMATION_DISABLED","value":"true"},{"name":"EXTERNAL_AUTH","value":"none"},{"name":"OVERLEAF_APP_NAME","value":"Overleaf Community Edition"},{"name":"OVERLEAF_MONGO_URL","value":"mongodb://mongo.overleaf.svc.cluster.local/overleaf"},{"name":"OVERLEAF_REDIS_HOST","value":"redis"},{"name":"REDIS_HOST","value":"redis"},{"name":"REDIS_PORT","value":"tcp://redis:6379"},{"name":"SANDBOXED_COMPILES","value":"false"}],"envFrom":[{"configMapRef":{"name":"overleaf-variables"}}],"image":"localhost:5001/overleaf/overleaf:latest","imagePullPolicy":"Always","livenessProbe":{"failureThreshold":5,"httpGet":{"path":"/login","port":80},"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":10},"name":"overleaf","ports":[{"containerPort":80}],"readinessProbe":{"failureThreshold":6,"httpGet":{"path":"/login","port":80},"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":10},"resources":{"limits":{"cpu":"2000m","memory":"4Gi"},"requests":{"cpu":1,"memory":"1Gi"}},"volumeMounts":[{"mountPath":"/var/lib/overleaf","name":"data"}]}],"restartPolicy":"Always","terminationGracePeriodSeconds":60,"volumes":[{"name":"data","persistentVolumeClaim":{"claimName":"overleaf-data"}}]}}}}
+    creationTimestamp: "2026-05-31T21:33:22Z"
+    generation: 1
+    labels:
+      app: overleaf
+      app.kubernetes.io/managed-by: Helm
+      helm.sh/chart: overleaf-0.1.0
+    name: overleaf
+    namespace: overleaf
+    resourceVersion: "7521"
+    uid: 0c7c1e73-54e4-4cc5-bd25-05ef108e20e9
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: overleaf
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: overleaf
+      spec:
+        containers:
+        - env:
+          - name: DOCKER_RUNNER
+            value: "false"
+          - name: EMAIL_CONFIRMATION_DISABLED
+            value: "true"
+          - name: EXTERNAL_AUTH
+            value: none
+          - name: OVERLEAF_APP_NAME
+            value: Overleaf Community Edition
+          - name: OVERLEAF_MONGO_URL
+            value: mongodb://mongo.overleaf.svc.cluster.local/overleaf
+          - name: OVERLEAF_REDIS_HOST
+            value: redis
+          - name: REDIS_HOST
+            value: redis
+          - name: REDIS_PORT
+            value: tcp://redis:6379
+          - name: SANDBOXED_COMPILES
+            value: "false"
+          envFrom:
+          - configMapRef:
+              name: overleaf-variables
+          image: localhost:5001/overleaf/overleaf:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /login
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 10
+          name: overleaf
+          ports:
+          - containerPort: 80
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /login
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources:
+            limits:
+              cpu: "2"
+              memory: 4Gi
+            requests:
+              cpu: "1"
+              memory: 1Gi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/lib/overleaf
+            name: data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 60
+        volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: overleaf-data
+  status:
+    availableReplicas: 1
+    conditions:
+    - lastTransitionTime: "2026-05-31T21:33:23Z"
+      lastUpdateTime: "2026-05-31T21:40:32Z"
+      message: ReplicaSet "overleaf-7f5f6759cb" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+    - lastTransitionTime: "2026-06-01T19:38:52Z"
+      lastUpdateTime: "2026-06-01T19:38:52Z"
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    terminatingReplicas: 0
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      argocd.argoproj.io/tracking-id: overleaf:apps/Deployment:overleaf/redis
+      deployment.kubernetes.io/revision: "1"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"argocd.argoproj.io/tracking-id":"overleaf:apps/Deployment:overleaf/redis"},"labels":{"app":"redis","app.kubernetes.io/managed-by":"Helm","helm.sh/chart":"overleaf-0.1.0"},"name":"redis","namespace":"overleaf"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"redis"}},"strategy":{"type":"Recreate"},"template":{"metadata":{"labels":{"app":"redis"}},"spec":{"containers":[{"args":["--appendonly","yes"],"command":["redis-server"],"image":"localhost:5001/overleaf/redis:6.2","imagePullPolicy":"IfNotPresent","name":"redis","ports":[{"containerPort":6379}],"volumeMounts":[{"mountPath":"/data","name":"data"}]}],"restartPolicy":"Always","volumes":[{"name":"data","persistentVolumeClaim":{"claimName":"redis-data"}}]}}}}
+    creationTimestamp: "2026-05-31T21:33:23Z"
+    generation: 1
+    labels:
+      app: redis
+      app.kubernetes.io/managed-by: Helm
+      helm.sh/chart: overleaf-0.1.0
+    name: redis
+    namespace: overleaf
+    resourceVersion: "1641"
+    uid: 75fc2e27-18e6-460b-bd21-2503d3aa7ba8
+  spec:
+    progressDeadlineSeconds: 600
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      matchLabels:
+        app: redis
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: redis
+      spec:
+        containers:
+        - args:
+          - --appendonly
+          - "yes"
+          command:
+          - redis-server
+          image: localhost:5001/overleaf/redis:6.2
+          imagePullPolicy: IfNotPresent
+          name: redis
+          ports:
+          - containerPort: 6379
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /data
+            name: data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: redis-data
+  status:
+    availableReplicas: 1
+    conditions:
+    - lastTransitionTime: "2026-05-31T21:39:08Z"
+      lastUpdateTime: "2026-05-31T21:39:08Z"
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    - lastTransitionTime: "2026-05-31T21:33:23Z"
+      lastUpdateTime: "2026-05-31T21:39:08Z"
+      message: ReplicaSet "redis-6466bbc86f" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    terminatingReplicas: 0
+    updatedReplicas: 1
+kind: List
+metadata:
+  resourceVersion: ""

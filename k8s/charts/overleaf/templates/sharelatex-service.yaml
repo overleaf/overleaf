@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: overleaf
+  labels:
+    app: overleaf
+    {{- include "overleaf.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: overleaf
+  type: {{ .Values.overleaf.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.overleaf.service.port }}
+      targetPort: 80
+      {{- if and (eq .Values.overleaf.service.type "NodePort") .Values.overleaf.service.nodePort }}
+      nodePort: {{ .Values.overleaf.service.nodePort }}
+      {{- end }}
