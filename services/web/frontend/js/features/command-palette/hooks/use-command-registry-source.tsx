@@ -18,6 +18,8 @@ const ENABLED_COMMANDS: string[] = [
   'compile',
   'stop-compile',
   'recompile-from-scratch',
+  'synctex-sync-to-pdf',
+  'synctex-sync-to-code',
 ]
 
 const useCommandRegistrySource = (): CommandPaletteSource => {
