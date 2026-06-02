@@ -205,6 +205,9 @@ describe('<ReviewPanel />', function () {
       </TestContainer>
     )
 
+    // Wait for the editor to be ready before interacting with it
+    cy.get('.cm-content').should('have.css', 'opacity', '1')
+
     // Open the review panel with keyboard shortcut
     cy.findByText('contentLine 0').type('{command}j', { scrollBehavior: false })
     cy.findByText('contentLine 1').type('{ctrl}j', { scrollBehavior: false })
@@ -726,7 +729,7 @@ describe('<ReviewPanel /> in mini mode', function () {
       },
     ])
 
-    cy.intercept('GET', '/project/*/threads', threads)
+    cy.intercept('GET', '/project/*/threads', threads).as('loadThreads')
 
     cy.intercept('POST', `/project/*/doc/${docId}/metadata`, {})
 
@@ -744,6 +747,10 @@ describe('<ReviewPanel /> in mini mode', function () {
     )
     // Wait for editor
     cy.get('.cm-content').should('have.css', 'opacity', '1')
+
+    // Wait for the threads to load, since mini mode renders conditionally on
+    // the threads/ranges data being present
+    cy.wait('@loadThreads')
 
     // Toggle the review panel twice to ensure data is loaded
     cy.findByText('contentLine 0').type('{command}jj', {
@@ -881,6 +888,9 @@ describe('<ReviewPanel /> for free users', function () {
         </EditorProviders>
       </TestContainer>
     )
+
+    // Wait for the editor to be ready before interacting with it
+    cy.get('.cm-content').should('have.css', 'opacity', '1')
 
     cy.findByLabelText('Editing').click()
     cy.findByRole('menu').within(() => {
