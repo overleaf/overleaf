@@ -109,7 +109,7 @@ services:
       - mongo:127.0.0.1
 
   postgres:
-    image: postgres:10
+    image: postgres:14
     environment:
       POSTGRES_USER: overleaf
       POSTGRES_PASSWORD: overleaf
