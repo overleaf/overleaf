@@ -9,6 +9,7 @@ import {
 import { visualHighlightStyle, visualTheme } from './visual-theme'
 import { atomicDecorations } from './atomic-decorations'
 import { markDecorations } from './mark-decorations'
+import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import { EditorView, ViewPlugin } from '@codemirror/view'
 import { visualKeymap } from './visual-keymap'
 import { mousedown, mouseDownEffect } from './selection'
@@ -26,6 +27,15 @@ type Options = {
   visual: boolean
   previewByPath: (path: string) => PreviewPath | null
 }
+
+// Language-specific visual editor extensions provided by modules (e.g. the
+// markdown visual editor). They live in the visual bundle so they are only
+// active in visual mode and react to switching editor modes.
+const visualEditorExtensions: Array<(options: Options) => Extension> =
+  importOverleafModules('sourceEditorVisualExtensions').map(
+    (item: { import: { extension: (options: Options) => Extension } }) =>
+      item.import.extension
+  )
 
 const visualConf = new Compartment()
 
@@ -171,6 +181,7 @@ const extension = (options: Options) => [
   mousedown,
   listItemMarker,
   atomicDecorations(options),
+  visualEditorExtensions.map(extension => extension(options)),
   markDecorations, // NOTE: must be after atomicDecorations, so that mark decorations wrap inline widgets
   visualKeymap,
   commandTooltip,

@@ -2,10 +2,34 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import { isValidTeXFile } from '../../../main/is-valid-tex-file'
 
 const visualEditorProviders = importOverleafModules('visualEditorProviders')
+const cmVisualEditorProviders = importOverleafModules(
+  'sourceEditorVisualExtensions'
+)
 
-export function isVisualEditorAvailable(filename: string): boolean {
-  // Core LaTeX visual editor
+/**
+ * This currently covers LaTeX and Markdown. Other file
+ * types (e.g. .bib) use module-provided visual editors that render their own
+ * component instead, so they must NOT enable the CodeMirror visual extensions.
+ */
+export function isCmVisualEditorAvailable(filename: string): boolean {
   if (isValidTeXFile(filename)) {
+    return true
+  }
+
+  for (const provider of cmVisualEditorProviders) {
+    if (provider.import.isCmVisualEditorFile?.(filename)) {
+      return true
+    }
+  }
+  return false
+}
+
+/**
+ * Whether any visual editor exists for the file, including module-provided
+ * ones. Drives the editor toggle UI and the default editor mode for a file.
+ */
+export function isVisualEditorAvailable(filename: string): boolean {
+  if (isCmVisualEditorAvailable(filename)) {
     return true
   }
 

@@ -2999,7 +2999,7 @@
   "viewing": "Viewing",
   "viewing_x": "Viewing <0>__endTime__</0>",
   "visual": "Visual",
-  "visual_editor_is_only_available_for_tex_files": "Visual Editor is only available for TeX files",
+  "visual_editor_does_not_support_this_file_type": "Visual Editor doesn’t support this file type",
   "want_access_to_overleaf_premium_features_through_your_university": "Want access to __appName__ premium features through your university?",
   "want_change_to_apply_before_plan_end": "If you wish this change to apply before the end of your current billing period, please contact us.",
   "warnings": "Warnings",
