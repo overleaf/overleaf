@@ -48,7 +48,7 @@
   --tab-text-color: var(--content-secondary-themed);
 
   border-right: 1px solid var(--editor-tab-divider-color);
-  border-left: 1px solid var(--bg-secondary-themed);
+  border-left: 1px solid transparent;
   padding: var(--spacing-01) var(--spacing-02) 0 var(--spacing-02);
 
   &:first-child {
@@ -59,8 +59,9 @@
     padding-right: 0;
   }
 
-  &:last-child.tab-selected {
-    border-right-color: var(--bg-secondary-themed);
+  &.tab-selected,
+  &:has(+ .tab-selected) {
+    border-right-color: transparent;
   }
 
   .editor-file-tab-content {
