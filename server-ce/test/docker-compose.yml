@@ -78,12 +78,12 @@ services:
     working_dir: $PWD
     volumes:
       - $PWD:$PWD
-      - $MONOREPO/libraries:$MONOREPO/libraries:ro
-      - $MONOREPO/node_modules:$MONOREPO/node_modules:ro
-      - $MONOREPO/.yarn:$MONOREPO/.yarn:ro
-      - $MONOREPO/.yarnrc.yml:$MONOREPO/.yarnrc.yml:ro
-      - $MONOREPO/package.json:$MONOREPO/package.json:ro
-      - $MONOREPO/yarn.lock:$MONOREPO/yarn.lock:ro
+      - $MONOREPO/libraries:$MONOREPO/libraries
+      - $MONOREPO/node_modules:$MONOREPO/node_modules
+      - $MONOREPO/.yarn:$MONOREPO/.yarn
+      - $MONOREPO/.yarnrc.yml:$MONOREPO/.yarnrc.yml
+      - $MONOREPO/package.json:$MONOREPO/package.json
+      - $MONOREPO/yarn.lock:$MONOREPO/yarn.lock
     environment:
       MONOREPO:
       CYPRESS_SHARD:
@@ -130,6 +130,7 @@ services:
       ALL_TEX_LIVE_DOCKER_IMAGES:
       IMAGE_TAG_CE:
       IMAGE_TAG_PRO:
+      IMAGE_TAG_GIT_BRIDGE:
     healthcheck:
       test: curl --fail http://localhost/status
       interval: 3s
