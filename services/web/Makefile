@@ -493,7 +493,7 @@ ci:
 
 # Run the linting commands in the scope of the monorepo.
 # Eslint and prettier (plus some configs) are on the root.
-RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/web/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/node_modules/.cache/:/overleaf/node_modules/.cache/ -w /overleaf $(IMAGE_CI) yarn run --silent
+RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/eslint.config.mjs:/overleaf/eslint.config.mjs --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/web/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/node_modules/.cache/:/overleaf/node_modules/.cache/ -w /overleaf $(IMAGE_CI) yarn run --silent
 RUN_LINTING = ../../bin/run -w /overleaf/services/$(PROJECT_NAME) monorepo yarn run --silent
 RUN_LINTING_MONOREPO = ../../bin/run monorepo yarn run --silent
 

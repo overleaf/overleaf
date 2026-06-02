@@ -493,10 +493,10 @@ describe('<ReviewPanel />', function () {
   })
 
   describe('aggregate change entries', function () {
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip('renders changed entries in current file mode', function () {})
 
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip('renders changed entries in overview mode', function () {})
   })
 
@@ -928,7 +928,7 @@ describe('<ReviewPanel /> for free users', function () {
     })
   })
 
-  // eslint-disable-next-line mocha/no-skipped-tests
+  // eslint-disable-next-line mocha/no-pending-tests
   it.skip('opens subscription page after clicking on `try it for free`', function () {})
 
   it('shows `ask project owner to upgrade` message', function () {

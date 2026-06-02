@@ -1,4 +1,10 @@
+const pkg = require('./package.json')
+
 module.exports = {
+  meta: {
+    name: pkg.name,
+    version: pkg.version,
+  },
   rules: {
     'no-unnecessary-trans': require('./no-unnecessary-trans'),
     'prefer-kebab-url': require('./prefer-kebab-url'),

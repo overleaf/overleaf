@@ -14,7 +14,7 @@ describe('<FileViewRefreshButton />', function () {
     fetchMock.removeRoutes().clearHistory()
   })
 
-  // eslint-disable-next-line mocha/no-skipped-tests
+  // eslint-disable-next-line mocha/no-pending-tests
   it.skip('Changes text when the file is refreshing', async function () {
     fetchMock.post(
       'express:/project/:project_id/linked_file/:file_id/refresh',

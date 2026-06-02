@@ -1,4 +1,5 @@
 const { RuleTester } = require('eslint')
+const tsParser = require('@typescript-eslint/parser')
 const noThrowInCallback = require('./no-throw-in-callback')
 const preferKebabUrl = require('./prefer-kebab-url')
 const noUnnecessaryTrans = require('./no-unnecessary-trans')
@@ -8,10 +9,10 @@ const viDoMockValidPath = require('./require-vi-doMock-valid-path')
 const requireCioSnakeCaseProperties = require('./require-cio-snake-case-properties')
 
 const ruleTester = new RuleTester({
-  parser: require.resolve('@typescript-eslint/parser'),
-  parserOptions: {
+  languageOptions: {
+    parser: tsParser,
     ecmaVersion: 'latest',
-    ecmaFeatures: { jsx: true },
+    parserOptions: { ecmaFeatures: { jsx: true } },
   },
 })
 
@@ -33,19 +34,27 @@ ruleTester.run('prefer-kebab-url', preferKebabUrl, {
   invalid: [
     {
       code: `app.get('/fooBar')`,
-      errors: [{ message: 'Route path should be in kebab-case.' }],
+      errors: [
+        { message: 'Route path should be in kebab-case.', suggestions: 1 },
+      ],
     },
     {
       code: `app.get('/fooBar/:id')`,
-      errors: [{ message: 'Route path should be in kebab-case.' }],
+      errors: [
+        { message: 'Route path should be in kebab-case.', suggestions: 1 },
+      ],
     },
     {
       code: `webRouter.get('/foo_bar/:id/FooBar/:name/fooBar')`,
-      errors: [{ message: 'Route path should be in kebab-case.' }],
+      errors: [
+        { message: 'Route path should be in kebab-case.', suggestions: 1 },
+      ],
     },
     {
       code: `router.get(/^\\/downLoad\\/pro-ject\\/([^/]*)\\/OutPut\\/out-put\\.pdf$/)`,
-      errors: [{ message: 'Route path should be in kebab-case.' }],
+      errors: [
+        { message: 'Route path should be in kebab-case.', suggestions: 1 },
+      ],
     },
   ],
 })
@@ -153,6 +162,7 @@ ruleTester.run('domock-require-valid-path', viDoMockValidPath, {
         {
           message:
             'The path "./require-vi-doMock-valid-path2" in vi.doMock() cannot be resolved relative to the current file.',
+          suggestions: [],
         },
       ],
     },
@@ -163,6 +173,7 @@ ruleTester.run('domock-require-valid-path', viDoMockValidPath, {
         {
           message:
             'The first argument of vi.doMock() must be (or resolve to) a string literal representing a path.',
+          suggestions: [],
         },
       ],
     },

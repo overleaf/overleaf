@@ -1,5 +1,3 @@
-/* eslint-env mongo */
-
 // add a TTL index to expire entries for completed resyncs in the
 // projectHistorySyncState collection.  The entries should only be expired if
 // resyncProjectStructure is false and resyncDocContents is a zero-length array.

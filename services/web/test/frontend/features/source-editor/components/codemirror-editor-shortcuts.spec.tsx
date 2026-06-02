@@ -96,7 +96,7 @@ describe('keyboard shortcuts', { scrollBehavior: false }, function () {
   it('lowercase selection with {ctrl+shift+u}', function () {
     if (navigator.platform.startsWith('Linux')) {
       // Skip test as {ctrl+shift+u} is bound elsewhere in some Linux systems
-      // eslint-disable-next-line mocha/no-skipped-tests
+      // eslint-disable-next-line mocha/no-pending-tests
       this.skip()
     }
 
