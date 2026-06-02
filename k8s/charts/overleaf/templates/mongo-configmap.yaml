@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-init
+  labels:
+    app: mongo
+    {{- include "overleaf.labels" . | nindent 4 }}
+data:
+  mongodb-init-replica-set.js: |
+    rs.initiate({ _id: '{{ .Values.mongo.replicaSetName }}', members: [{ _id: 0, host: 'mongo:27017' }] })

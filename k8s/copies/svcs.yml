@@ -1,0 +1,112 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      argocd.argoproj.io/tracking-id: overleaf:/Service:overleaf/mongo
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{"argocd.argoproj.io/tracking-id":"overleaf:/Service:overleaf/mongo"},"labels":{"app":"mongo","app.kubernetes.io/managed-by":"Helm","helm.sh/chart":"overleaf-0.1.0"},"name":"mongo","namespace":"overleaf"},"spec":{"ports":[{"name":"mongo","port":27017,"targetPort":27017}],"selector":{"app":"mongo"}}}
+    creationTimestamp: "2026-05-31T21:33:22Z"
+    labels:
+      app: mongo
+      app.kubernetes.io/managed-by: Helm
+      helm.sh/chart: overleaf-0.1.0
+    name: mongo
+    namespace: overleaf
+    resourceVersion: "857"
+    uid: 834cd8be-3d59-40ca-9cc8-b0eab00ec5f8
+  spec:
+    clusterIP: 10.96.234.168
+    clusterIPs:
+    - 10.96.234.168
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: mongo
+      port: 27017
+      protocol: TCP
+      targetPort: 27017
+    selector:
+      app: mongo
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      argocd.argoproj.io/tracking-id: overleaf:/Service:overleaf/overleaf
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{"argocd.argoproj.io/tracking-id":"overleaf:/Service:overleaf/overleaf"},"labels":{"app":"overleaf","app.kubernetes.io/managed-by":"Helm","helm.sh/chart":"overleaf-0.1.0"},"name":"overleaf","namespace":"overleaf"},"spec":{"externalTrafficPolicy":"Cluster","internalTrafficPolicy":"Cluster","ports":[{"name":"http","nodePort":30000,"port":80,"targetPort":80}],"selector":{"app":"overleaf"},"type":"NodePort"}}
+    creationTimestamp: "2026-05-31T21:33:22Z"
+    labels:
+      app: overleaf
+      app.kubernetes.io/managed-by: Helm
+      helm.sh/chart: overleaf-0.1.0
+    name: overleaf
+    namespace: overleaf
+    resourceVersion: "866"
+    uid: 25d13b4a-c530-4260-83be-d2896e85a6b7
+  spec:
+    clusterIP: 10.96.115.172
+    clusterIPs:
+    - 10.96.115.172
+    externalTrafficPolicy: Cluster
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: http
+      nodePort: 30000
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    selector:
+      app: overleaf
+    sessionAffinity: None
+    type: NodePort
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      argocd.argoproj.io/tracking-id: overleaf:/Service:overleaf/redis
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{"argocd.argoproj.io/tracking-id":"overleaf:/Service:overleaf/redis"},"labels":{"app":"redis","app.kubernetes.io/managed-by":"Helm","helm.sh/chart":"overleaf-0.1.0"},"name":"redis","namespace":"overleaf"},"spec":{"ports":[{"name":"redis","port":6379,"targetPort":6379}],"selector":{"app":"redis"}}}
+    creationTimestamp: "2026-05-31T21:33:22Z"
+    labels:
+      app: redis
+      app.kubernetes.io/managed-by: Helm
+      helm.sh/chart: overleaf-0.1.0
+    name: redis
+    namespace: overleaf
+    resourceVersion: "861"
+    uid: bad10e52-6e7a-44f8-9390-d9eef417bef7
+  spec:
+    clusterIP: 10.96.194.245
+    clusterIPs:
+    - 10.96.194.245
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: redis
+      port: 6379
+      protocol: TCP
+      targetPort: 6379
+    selector:
+      app: redis
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+kind: List
+metadata:
+  resourceVersion: ""

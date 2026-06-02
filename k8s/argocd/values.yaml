@@ -1,0 +1,9 @@
+server:
+  service:
+    type: NodePort
+    nodePortHttp: 30080
+
+configs:
+  params:
+    # Disable TLS on the ArgoCD API server so NodePort HTTP access works without cert errors
+    server.insecure: "true"

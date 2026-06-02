@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+  labels:
+    app: mongo
+    {{- include "overleaf.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: "{{ .Values.mongo.image.repository }}:{{ .Values.mongo.image.tag }}"
+          imagePullPolicy: {{ .Values.mongo.image.pullPolicy }}
+          command:
+          - mongod
+          args:
+            - --replSet
+            - {{ .Values.mongo.replicaSetName }}
+            - --bind_ip_all
+          env:
+            - name: MONGO_INITDB_DATABASE
+              value: overleaf
+            - name: GLIBC_TUNABLES
+              value: glibc.pthread.rseq=1
+          ports:
+            - containerPort: 27017
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                - /bin/sh
+                - -c
+                - sleep 60; mongosh overleaf /docker-entrypoint-initdb.d/mongodb-init-replica-set.js
+                  || true
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - "echo 'db.stats().ok' | mongosh localhost:27017/test --quiet"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - "echo 'db.stats().ok' | mongosh localhost:27017/test --quiet"
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d/mongodb-init-replica-set.js
+              subPath: mongodb-init-replica-set.js
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: mongo-data
+        - name: init-script
+          configMap:
+            name: mongo-init
+      hostAliases:
+      - hostnames:
+        - mongo
+        ip: 127.0.0.1
+      restartPolicy: Always
