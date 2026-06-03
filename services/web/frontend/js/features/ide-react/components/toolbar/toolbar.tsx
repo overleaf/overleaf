@@ -15,6 +15,7 @@ import importOverleafModules from '../../../../../macros/import-overleaf-module.
 import UpgradeButton from './upgrade-button'
 import getMeta from '@/utils/meta'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const [publishModalModules] = importOverleafModules('publishModal')
 const SubmitProjectButton = publishModalModules?.import.NewPublishToolbarButton
@@ -23,6 +24,10 @@ export const Toolbar = () => {
   const { view, restoreView } = useLayoutContext()
   const { cobranding, isRestrictedTokenMember } = useEditorContext()
   const { permissionsLevel } = useIdeReactContext()
+  const showUpgradePrompt = getMeta('ol-showUpgradePrompt')
+  const upgradeButtonRelocation = useFeatureFlag(
+    'editor-upgrade-button-relocation'
+  )
   const { t } = useTranslation()
   const shouldDisplaySubmitButton =
     (permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite') &&
@@ -50,6 +55,7 @@ export const Toolbar = () => {
       <div className="ide-redesign-toolbar-menu">
         <ToolbarLogos cobranding={cobranding} />
         <ToolbarMenuBar />
+        {showUpgradePrompt && upgradeButtonRelocation && <UpgradeButton />}
       </div>
       <ToolbarProjectTitle />
       <div className="ide-redesign-toolbar-actions">
@@ -60,7 +66,7 @@ export const Toolbar = () => {
           <SubmitProjectButton cobranding={cobranding} />
         )}
         <ShareProjectButton />
-        {getMeta('ol-showUpgradePrompt') && <UpgradeButton />}
+        {showUpgradePrompt && !upgradeButtonRelocation && <UpgradeButton />}
       </div>
     </nav>
   )

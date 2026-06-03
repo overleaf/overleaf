@@ -486,6 +486,7 @@ const _ProjectController = {
       'command-palette',
       'overleaf-library',
       'compile-timeout-cta',
+      'editor-upgrade-button-relocation',
       'markdown-visual',
     ].filter(Boolean)
 
