@@ -587,6 +587,103 @@ describe('PyodideWorkerClient', function () {
     })
   })
 
+  describe('output-line forwarding', function () {
+    function setupClientWithOutputTracking() {
+      const outputCalls: Parameters<OutputCallback>[] = []
+      const client = new PyodideWorkerClient({
+        baseAssetPath: BASE_ASSET_PATH,
+        createWorker,
+        onOutput: (...args) => {
+          outputCalls.push(args)
+        },
+        fileUploader: fileUploaderStub,
+      })
+      const worker = WorkerMock.instances[0]
+      worker.emitMessage({ type: 'listening' })
+      return { client, worker, outputCalls }
+    }
+
+    it('forwards stdout output-line events to the output callback', function () {
+      const { worker, outputCalls } = setupClientWithOutputTracking()
+
+      worker.emitMessage({
+        type: 'output-line',
+        stream: 'stdout',
+        line: 'hello!',
+        fileId: 'main.py',
+        executionId: 'exec-stdout',
+      })
+
+      expect(outputCalls).to.deep.equal([
+        ['stdout', 'hello!', 'main.py', 'exec-stdout'],
+      ])
+    })
+
+    it('forwards stderr output-line events to the output callback', function () {
+      const { worker, outputCalls } = setupClientWithOutputTracking()
+
+      worker.emitMessage({
+        type: 'output-line',
+        stream: 'stderr',
+        line: 'boom',
+        fileId: 'main.py',
+        executionId: 'exec-stderr',
+      })
+
+      expect(outputCalls).to.deep.equal([
+        ['stderr', 'boom', 'main.py', 'exec-stderr'],
+      ])
+    })
+
+    it('forwards info output-line events to the output callback', function () {
+      const { worker, outputCalls } = setupClientWithOutputTracking()
+
+      worker.emitMessage({
+        type: 'output-line',
+        stream: 'info',
+        line: 'Loading numpy from package index',
+        fileId: 'main.py',
+        executionId: 'exec-info',
+      })
+
+      expect(outputCalls).to.deep.equal([
+        ['info', 'Loading numpy from package index', 'main.py', 'exec-info'],
+      ])
+    })
+
+    it('preserves stream type when forwarding stdout, stderr, and info in sequence', function () {
+      const { worker, outputCalls } = setupClientWithOutputTracking()
+
+      worker.emitMessage({
+        type: 'output-line',
+        stream: 'info',
+        line: 'Loading package',
+        fileId: 'main.py',
+        executionId: 'exec-mixed',
+      })
+      worker.emitMessage({
+        type: 'output-line',
+        stream: 'stdout',
+        line: 'result',
+        fileId: 'main.py',
+        executionId: 'exec-mixed',
+      })
+      worker.emitMessage({
+        type: 'output-line',
+        stream: 'stderr',
+        line: 'warning',
+        fileId: 'main.py',
+        executionId: 'exec-mixed',
+      })
+
+      expect(outputCalls.map(call => call[0])).to.deep.equal([
+        'info',
+        'stdout',
+        'stderr',
+      ])
+    })
+  })
+
   describe('reset', function () {
     it('terminates the current worker and creates a new one', function () {
       const client = new PyodideWorkerClient({

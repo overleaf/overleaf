@@ -302,6 +302,62 @@ describe('<PythonOutputPane />', function () {
     )
   })
 
+  it('renders stdout, stderr, and info lines with visually distinct CSS classes', function () {
+    const executablePythonFileContents = [
+      'import sys',
+      "print('hello!')",
+      "sys.stderr.write('boom\\n')",
+      'while True:',
+      '    pass',
+    ].join('\n')
+    const projectFiles = {
+      [pythonExecutableScript.filename]: executablePythonFileContents,
+    }
+    const ProjectProvider = makeProjectProvider(projectFiles)
+
+    cy.mount(
+      <EditorProviders
+        scope={{
+          editor: {
+            sharejs_doc: {
+              doc_id: pythonExecutableScript.file_id,
+              getSnapshot: () => executablePythonFileContents,
+            },
+            currentDocumentId: pythonExecutableScript.file_id,
+            openDocName: pythonExecutableScript.filename,
+          },
+        }}
+        providers={{ FileTreePathProvider, ProjectProvider }}
+      >
+        <PythonExecutionProvider>
+          <PythonOutputPane />
+        </PythonExecutionProvider>
+      </EditorProviders>
+    )
+
+    cy.findByRole('button', { name: 'Run Python code' })
+      .should('not.be.disabled')
+      .click()
+
+    cy.findByText('hello!')
+      .should('have.class', 'ide-redesign-python-output-pane-line-stdout')
+      .and('not.have.class', 'ide-redesign-python-output-pane-line-stderr')
+      .and('not.have.class', 'ide-redesign-python-output-pane-line-info')
+    cy.findByText('boom')
+      .should('have.class', 'ide-redesign-python-output-pane-line-stderr')
+      .and('not.have.class', 'ide-redesign-python-output-pane-line-stdout')
+      .and('not.have.class', 'ide-redesign-python-output-pane-line-info')
+
+    cy.findByRole('button', { name: 'Stop Python execution' })
+      .should('not.be.disabled')
+      .click()
+
+    cy.findByText('Execution interrupted')
+      .should('have.class', 'ide-redesign-python-output-pane-line-info')
+      .and('not.have.class', 'ide-redesign-python-output-pane-line-stdout')
+      .and('not.have.class', 'ide-redesign-python-output-pane-line-stderr')
+  })
+
   it('can load common python data analysis packages on code execution', function () {
     const executablePythonFileContents = [
       'import tomli',
