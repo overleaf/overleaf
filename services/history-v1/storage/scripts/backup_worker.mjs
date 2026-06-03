@@ -19,7 +19,7 @@ const LAG_TIME_BUCKETS_HRS = [
 ] // hours
 
 // Configure backup settings to match worker concurrency
-configureBackup({ concurrency: UPLOAD_CONCURRENCY, useSecondary: true })
+configureBackup({ concurrency: UPLOAD_CONCURRENCY })
 
 let gracefulShutdownInitiated = false
 
