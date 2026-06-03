@@ -465,7 +465,6 @@ const _ProjectController = {
       'chat-edit-delete',
       'ai-workbench-release',
       'compile-timeout-target-plans',
-      'writefull-keywords-generator',
       'writefull-figure-generator',
       'wf-citations-checker',
       'wf-citations-checker-on-selection',
