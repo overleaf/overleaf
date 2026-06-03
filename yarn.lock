@@ -6827,14 +6827,12 @@ __metadata:
     "@overleaf/promise-utils": "workspace:*"
     "@overleaf/settings": "workspace:*"
     "@overleaf/validation-tools": "workspace:*"
-    "@types/method-override": "npm:^3.0.0"
     async: "npm:^3.2.5"
     body-parser: "npm:1.20.4"
     bunyan: "npm:^1.8.15"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
     express: "npm:4.22.1"
-    method-override: "npm:^3.0.0"
     mocha: "npm:^11.1.0"
     mongodb-legacy: "npm:6.1.3"
     typescript: "npm:^5.0.4"
@@ -7120,7 +7118,6 @@ __metadata:
     install: "npm:^0.13.0"
     lodash: "npm:^4.18.1"
     marked: "npm:^4.1.0"
-    method-override: "npm:^3.0.0"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
@@ -7464,7 +7461,6 @@ __metadata:
     mathjax: "npm:^4.1.2"
     mediatr-ts: "npm:^2.0.1"
     mensch: "npm:^0.3.4"
-    method-override: "npm:^2.3.3"
     micromark: "npm:^4.0.0"
     mini-css-extract-plugin: "npm:^2.7.6"
     minimatch: "npm:^10.2.2"
@@ -11001,15 +10997,6 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: 10c0/0c5214a73c9abb3d1bbf91d2890d38476961ae8aa387f71235519be65a537c654ca0380a468cf3ab49d3b9409c441580d081f16f14ed6aea3339144aee0f16fb
-  languageName: node
-  linkType: hard
-
-"@types/method-override@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "@types/method-override@npm:3.0.0"
-  peerDependencies:
-    "@types/express": "*"
-  checksum: 10c0/da5e67021d3e8106d37fa69c8c7410068f21ddf56305c510371b93e3829086eeaa262faab3007c21082aad4fcded4f211e323769bd7991bc7b3e01b164eacf7f
   languageName: node
   linkType: hard
 
@@ -16328,15 +16315,6 @@ __metadata:
   dependencies:
     ms: "npm:2.0.0"
   checksum: 10c0/121908fb839f7801180b69a7e218a40b5a0b718813b886b7d6bdb82001b931c938e2941d1e4450f33a1b1df1da653f5f7a0440c197f29fbf8a6e9d45ff6ef589
-  languageName: node
-  linkType: hard
-
-"debug@npm:3.1.0":
-  version: 3.1.0
-  resolution: "debug@npm:3.1.0"
-  dependencies:
-    ms: "npm:2.0.0"
-  checksum: 10c0/5bff34a352d7b2eaa31886eeaf2ee534b5461ec0548315b2f9f80bd1d2533cab7df1fa52e130ce27bc31c3945fbffb0fc72baacdceb274b95ce853db89254ea4
   languageName: node
   linkType: hard
 
@@ -22692,7 +22670,6 @@ __metadata:
     jquery: "npm:^3.7.1"
     jsdom: "npm:^28.1.0"
     jsonwebtoken: "npm:^9.0.3"
-    method-override: "npm:^2.3.10"
     mini-css-extract-plugin: "npm:^2.7.6"
     nodemon: "npm:^3.0.1"
     postcss: "npm:^8.4.31"
@@ -23881,30 +23858,6 @@ __metadata:
   version: 1.4.1
   resolution: "merge2@npm:1.4.1"
   checksum: 10c0/254a8a4605b58f450308fc474c82ac9a094848081bf4c06778200207820e5193726dc563a0d2c16468810516a5c97d9d3ea0ca6585d23c58ccfff2403e8dbbeb
-  languageName: node
-  linkType: hard
-
-"method-override@npm:^2.3.10, method-override@npm:^2.3.3":
-  version: 2.3.10
-  resolution: "method-override@npm:2.3.10"
-  dependencies:
-    debug: "npm:2.6.9"
-    methods: "npm:~1.1.2"
-    parseurl: "npm:~1.3.2"
-    vary: "npm:~1.1.2"
-  checksum: 10c0/3dc2575967e72b553dcf4b3e4fd9b5bca22d2450721e8c1394f4f3f8636894939d868517ea9f6e1c39aff8d5bf42e3225907221a8bab0bb0578e1f137e4177da
-  languageName: node
-  linkType: hard
-
-"method-override@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "method-override@npm:3.0.0"
-  dependencies:
-    debug: "npm:3.1.0"
-    methods: "npm:~1.1.2"
-    parseurl: "npm:~1.3.2"
-    vary: "npm:~1.1.2"
-  checksum: 10c0/0da9a25961b6dd909698e20fc4598f810ba1632e92928136558854296cdf6baa014f0f9170cf65d88aaec496c7c486fdf914964e24532dce0b15390b946ffabe
   languageName: node
   linkType: hard
 
@@ -26455,7 +26408,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parseurl@npm:~1.3.2, parseurl@npm:~1.3.3":
+"parseurl@npm:~1.3.3":
   version: 1.3.3
   resolution: "parseurl@npm:1.3.3"
   checksum: 10c0/90dd4760d6f6174adb9f20cf0965ae12e23879b5f5464f38e92fce8073354341e4b3b76fa3d878351efe7d01e617121955284cfd002ab087fba1a0726ec0b4f5
