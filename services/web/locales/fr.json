@@ -87,6 +87,7 @@
   "aggregate_changed": "Modification de",
   "aggregate_to": "en",
   "agree_with_the_terms": "J’accepte les conditions d’utilisation d’Overleaf",
+  "ai_assist_unavailable": "Les fonctionnalités d’IA sont désormais incluses dans les offres payantes. Consultez la <0>page des offres et prix</0> pour en savoir plus.",
   "ai_can_make_mistakes": "Une IA peut commettre des erreurs. Examinez les corrections avant de les appliquer.",
   "ai_feedback_tell_us_what_was_wrong_so_we_can_improve": "Dites-nous ce qui n’allait pas afin que nous puissions nous améliorer.",
   "ai_feedback_the_answer_was_too_long": "La réponse était trop longue",

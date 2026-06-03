@@ -154,7 +154,7 @@
   "ai_assist_in_overleaf_is_included_via_writefull_groups": "AI Assist in Overleaf is included as part of your group or organization’s Writefull subscription. To make changes you’ll need to speak to your subscription admin",
   "ai_assist_in_overleaf_is_included_via_writefull_individual": "AI Assist in Overleaf is included as part of your Writefull subscription. You can cancel or manage your access to AI Assist in your Writefull subscription settings.",
   "ai_assist_subscriber_can_now_write_smarter": "AI Assist subscribers can now write smarter, find citations, and generate LaTeX from prompts and images.",
-  "ai_assist_unavailable_due_to_subscription_type": "We’re sorry—it looks like AI Assist isn’t available to you just yet due to your current subscription type.",
+  "ai_assist_unavailable": "AI features are now included in every paid plan. See the <0>pricing page</0> for what each plan includes.",
   "ai_assistance": "AI assistance",
   "ai_assistant": "AI Assistant",
   "ai_assistant_explanation": "A LaTeX-fluent AI Assistant built into your editor.",

@@ -135,7 +135,7 @@
   "ai_assist_description": "AI Assist kombiniert KI-Tools von Overleaf und Writefull, damit du schneller, intelligenter und sicherer schreiben kannst.",
   "ai_assist_in_overleaf_is_included_via_writefull_groups": "AI Assist in Overleaf ist Teil des Writefull-Abonnements deiner Gruppe oder Organisation. Um Änderungen vorzunehmen, musst du dich an den Administrator deines Abonnements wenden.",
   "ai_assist_in_overleaf_is_included_via_writefull_individual": "AI Assist in Overleaf ist Teil deines Writefull-Abonnements. Du kannst deinen Zugriff auf AI Assist in deinen Writefull-Abonnementeinstellungen kündigen oder verwalten.",
-  "ai_assist_unavailable_due_to_subscription_type": "Es tut uns leid – anscheinend ist AI Assist aufgrund deines aktuellen Abonnementtyps noch nicht für dich verfügbar.",
+  "ai_assist_unavailable": "KI-Funktionen sind jetzt in jedem kostenpflichtigen Plan enthalten. Auf der <0>Preisseite</0> erfahren Sie, was die einzelnen Pläne beinhalten.",
   "ai_can_make_mistakes": "KI kann Fehler machen. Überprüfe Korrekturen, bevor du sie anwendest.",
   "ai_features": "KI-Funktionen",
   "ai_feedback_please_provide_more_detail": "Bitte gib mehr Details dazu an, was nicht gestimmt hat (optional)",

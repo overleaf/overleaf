@@ -598,7 +598,9 @@ async function previewAddonPurchase(req, res) {
       err instanceof Error &&
       err.constructor.name === 'PaymentServiceResourceNotFoundError'
     ) {
-      return res.redirect('/user/subscription/plans#ai-assist')
+      return res.redirect(
+        '/user/subscription?redirect-reason=ai-assist-unavailable'
+      )
     }
     throw err
   }
@@ -624,7 +626,9 @@ async function previewAddonPurchase(req, res) {
       err instanceof Error &&
       err.constructor.name === 'PaymentServiceResourceNotFoundError'
     ) {
-      return res.redirect('/user/subscription/plans#ai-assist')
+      return res.redirect(
+        '/user/subscription?redirect-reason=ai-assist-unavailable'
+      )
     }
     throw err
   }
