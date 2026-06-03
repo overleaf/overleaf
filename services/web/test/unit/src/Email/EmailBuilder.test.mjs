@@ -173,6 +173,50 @@ describe('EmailBuilder', function () {
     })
   })
 
+  describe('gitTokenExpiringSoon', function () {
+    beforeEach(function (ctx) {
+      ctx.opts = {
+        to: 'user@example.com',
+      }
+      ctx.email = ctx.EmailBuilder.buildEmail('gitTokenExpiringSoon', ctx.opts)
+    })
+
+    it('should render html, text, and subject without undefined', function (ctx) {
+      expect(ctx.email.html).to.not.be.undefined
+      expect(ctx.email.text).to.not.be.undefined
+      expect(ctx.email.subject).to.not.be.undefined
+      ctx.email.html.indexOf('undefined').should.equal(-1)
+      ctx.email.text.indexOf('undefined').should.equal(-1)
+      ctx.email.subject.indexOf('undefined').should.equal(-1)
+    })
+
+    it('should link the CTA to user settings', function (ctx) {
+      ctx.email.text.should.contain(`${ctx.settings.siteUrl}/user/settings`)
+    })
+  })
+
+  describe('gitTokenExpired', function () {
+    beforeEach(function (ctx) {
+      ctx.opts = {
+        to: 'user@example.com',
+      }
+      ctx.email = ctx.EmailBuilder.buildEmail('gitTokenExpired', ctx.opts)
+    })
+
+    it('should render html, text, and subject without undefined', function (ctx) {
+      expect(ctx.email.html).to.not.be.undefined
+      expect(ctx.email.text).to.not.be.undefined
+      expect(ctx.email.subject).to.not.be.undefined
+      ctx.email.html.indexOf('undefined').should.equal(-1)
+      ctx.email.text.indexOf('undefined').should.equal(-1)
+      ctx.email.subject.indexOf('undefined').should.equal(-1)
+    })
+
+    it('should link the CTA to user settings', function (ctx) {
+      ctx.email.text.should.contain(`${ctx.settings.siteUrl}/user/settings`)
+    })
+  })
+
   describe('ctaTemplate', function () {
     describe('missing required content', function () {
       const content = {

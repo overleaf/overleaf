@@ -426,6 +426,15 @@ module.exports = {
 
   // featuresEpoch: 'YYYY-MM-DD',
 
+  personalAccessTokens: {
+    expiry: {
+      warningWindowDays: intFromEnv(
+        'PERSONAL_ACCESS_TOKEN_WARNING_WINDOW_DAYS',
+        2
+      ),
+    },
+  },
+
   features: {
     personal: defaultFeatures,
   },

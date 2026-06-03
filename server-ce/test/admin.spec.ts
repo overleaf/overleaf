@@ -245,6 +245,7 @@ describe('admin panel', function () {
           'Deleted Projects',
           'Audit Log',
           'Sessions',
+          'Personal Access Tokens',
         ]
         cy.findAllByRole('tab').should('have.length', tabs.length)
         tabs.forEach(tabName => {

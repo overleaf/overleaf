@@ -889,6 +889,71 @@ templates.securityAlert = NoCTAEmailTemplate({
   },
 })
 
+const GIT_TOKEN_DOCS_URL =
+  'https://docs.overleaf.com/integrations-and-add-ons/git-integration-and-github-synchronization/git-integration/git-integration-authentication-tokens#how-to-generate-authentication-tokens'
+
+templates.gitTokenExpiringSoon = NoCTAEmailTemplate({
+  subject() {
+    return 'Your Overleaf token is about to expire'
+  },
+  title() {
+    return 'Your token is about to expire'
+  },
+  greeting(opts) {
+    return opts.firstName ? `Hi ${opts.firstName},` : 'Hi,'
+  },
+  message(opts, isPlainText) {
+    const settingsLink = EmailMessageHelper.displayLink(
+      'account settings',
+      `${settings.siteUrl}/user/settings`,
+      isPlainText
+    )
+    const docsLink = EmailMessageHelper.displayLink(
+      'our docs',
+      GIT_TOKEN_DOCS_URL,
+      isPlainText
+    )
+    return [
+      `One of your Git authentication tokens is about to expire. This means you won't be able to use your token to authenticate when performing git operations.`,
+      `If you haven't already, you'll need to generate a new token in your ${settingsLink}.`,
+      `Take a look at ${docsLink} if you need more help.`,
+      'All the best,',
+      'Team Overleaf',
+    ]
+  },
+})
+
+templates.gitTokenExpired = NoCTAEmailTemplate({
+  subject() {
+    return 'Your Overleaf token has expired'
+  },
+  title() {
+    return 'Token expired'
+  },
+  greeting(opts) {
+    return opts.firstName ? `Hi ${opts.firstName},` : 'Hi,'
+  },
+  message(opts, isPlainText) {
+    const settingsLink = EmailMessageHelper.displayLink(
+      'account settings',
+      `${settings.siteUrl}/user/settings`,
+      isPlainText
+    )
+    const docsLink = EmailMessageHelper.displayLink(
+      'our docs',
+      GIT_TOKEN_DOCS_URL,
+      isPlainText
+    )
+    return [
+      `One of your Git authentication tokens has expired. This means you won't be able to use it to authenticate when performing git operations.`,
+      `If you haven't already, you'll need to generate a new token in your ${settingsLink}.`,
+      `Take a look at ${docsLink} if you need more help.`,
+      'All the best,',
+      'Team Overleaf',
+    ]
+  },
+})
+
 templates.SAMLDataCleared = ctaTemplate({
   subject(opts) {
     return `Institutional Login No Longer Linked - ${settings.appName}`

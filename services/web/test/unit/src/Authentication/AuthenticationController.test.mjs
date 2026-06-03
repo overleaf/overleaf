@@ -730,6 +730,83 @@ describe('AuthenticationController', function () {
         ctx.next.should.have.not.been.calledOnce
       })
     })
+
+    describe('error_code classification', function () {
+      // The classifier reads err.name (RFC-standard snake_case from
+      // @node-oauth/oauth2-server) plus an overleafErrorCode marker we
+      // attach ourselves. No reliance on err.message — that keeps the
+      // classification immune to library description changes.
+      async function runMiddlewareWithError(ctx, err) {
+        await new Promise(resolve => {
+          ctx.res.json.callsFake(() => resolve())
+          ctx.Oauth2Server.server.authenticate.rejects(err)
+          ctx.middleware(ctx.req, ctx.res, ctx.next)
+        })
+      }
+
+      it('returns "token_expired" when Oauth2ServerModel marks the error', async function (ctx) {
+        await runMiddlewareWithError(ctx, {
+          code: 401,
+          name: 'invalid_token',
+          overleafErrorCode: 'token_expired',
+        })
+        ctx.res.json.should.have.been.calledWithMatch({
+          error_code: 'token_expired',
+        })
+      })
+
+      it('returns "token_invalid" for an invalid_token error without a marker', async function (ctx) {
+        await runMiddlewareWithError(ctx, {
+          code: 401,
+          name: 'invalid_token',
+        })
+        ctx.res.json.should.have.been.calledWithMatch({
+          error_code: 'token_invalid',
+        })
+      })
+
+      it('returns "token_malformed" for a malformed authorization header', async function (ctx) {
+        await runMiddlewareWithError(ctx, {
+          code: 400,
+          name: 'invalid_request',
+          message: 'Invalid request: malformed authorization header',
+        })
+        ctx.res.json.should.have.been.calledWithMatch({
+          error_code: 'token_malformed',
+        })
+      })
+
+      it('returns "invalid_request" for any other invalid_request error', async function (ctx) {
+        await runMiddlewareWithError(ctx, {
+          code: 400,
+          name: 'invalid_request',
+          message: 'Invalid request: something else',
+        })
+        ctx.res.json.should.have.been.calledWithMatch({
+          error_code: 'invalid_request',
+        })
+      })
+
+      it('returns "insufficient_scope" for an insufficient_scope error', async function (ctx) {
+        await runMiddlewareWithError(ctx, {
+          code: 403,
+          name: 'insufficient_scope',
+        })
+        ctx.res.json.should.have.been.calledWithMatch({
+          error_code: 'insufficient_scope',
+        })
+      })
+
+      it('returns "unauthorized_request" for an unauthorized_request error', async function (ctx) {
+        await runMiddlewareWithError(ctx, {
+          code: 401,
+          name: 'unauthorized_request',
+        })
+        ctx.res.json.should.have.been.calledWithMatch({
+          error_code: 'unauthorized_request',
+        })
+      })
+    })
   })
 
   describe('requireGlobalLogin', function () {

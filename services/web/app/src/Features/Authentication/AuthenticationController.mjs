@@ -63,6 +63,31 @@ function checkCredentials(userDetailsMap, user, password) {
   return isValid
 }
 
+// Map a thrown @node-oauth/oauth2-server error to a stable, machine-readable
+// code that callers (e.g. git-bridge) can switch on. err.name values come
+// from the library's error classes (snake_case OAuth standard names per
+// RFC 6749/6750). The token_expired distinction is driven by a marker we
+// set ourselves in Oauth2ServerModel.getAccessToken, so it survives library
+// upgrades that might change error_description text.
+function _classifyOauthError(err) {
+  switch (err?.name) {
+    case 'invalid_token':
+      return err.overleafErrorCode === 'token_expired'
+        ? 'token_expired'
+        : 'token_invalid'
+    case 'invalid_request':
+      return err.overleafErrorCode === 'token_malformed'
+        ? 'token_malformed'
+        : 'invalid_request'
+    case 'insufficient_scope':
+      return 'insufficient_scope'
+    case 'unauthorized_request':
+      return 'unauthorized_request'
+    default:
+      return 'unknown'
+  }
+}
+
 // TODO: Finish making these methods async
 const AuthenticationController = {
   serializeUser(user, callback) {
@@ -400,11 +425,14 @@ const AuthenticationController = {
           err.message === 'Invalid request: malformed authorization header'
         ) {
           err.code = 401
+          err.overleafErrorCode = 'token_malformed'
         }
         // send all other errors
-        res
-          .status(err.code)
-          .json({ error: err.name, error_description: err.message })
+        res.status(err.code).json({
+          error: err.name,
+          error_description: err.message,
+          error_code: _classifyOauthError(err),
+        })
       }
     }
     return expressify(middleware)
