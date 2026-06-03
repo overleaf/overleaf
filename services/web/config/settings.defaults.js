@@ -1027,7 +1027,7 @@ module.exports = {
     tprFileViewNotOriginalImporter: [],
     contactUsModal: [],
     sourceEditorExtensions: [],
-    sourceEditorVisualExtensions: [],
+    sourceEditorMarkdownExtensions: [],
     sourceEditorComponents: [],
     pdfLogEntryHeaderActionComponents: [],
     pdfLogEntryComponents: [],

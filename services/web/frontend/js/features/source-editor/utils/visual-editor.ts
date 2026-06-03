@@ -3,7 +3,7 @@ import { isValidTeXFile } from '../../../main/is-valid-tex-file'
 
 const visualEditorProviders = importOverleafModules('visualEditorProviders')
 const cmVisualEditorProviders = importOverleafModules(
-  'sourceEditorVisualExtensions'
+  'sourceEditorMarkdownExtensions'
 )
 
 /**

@@ -32,7 +32,7 @@ type Options = {
 // markdown visual editor). They live in the visual bundle so they are only
 // active in visual mode and react to switching editor modes.
 const visualEditorExtensions: Array<(options: Options) => Extension> =
-  importOverleafModules('sourceEditorVisualExtensions').map(
+  importOverleafModules('sourceEditorMarkdownExtensions').map(
     (item: { import: { extension: (options: Options) => Extension } }) =>
       item.import.extension
   )
