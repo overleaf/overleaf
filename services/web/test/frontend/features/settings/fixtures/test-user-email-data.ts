@@ -29,6 +29,7 @@ export const professionalUserData: UserEmailData & {
     department: 'Art History',
     institution: {
       commonsAccount: false,
+      enterpriseCommons: false,
       writefullCommonsAccount: false,
       confirmed: true,
       id: 1,
@@ -62,6 +63,7 @@ export const unconfirmedCommonsUserData: UserEmailData & {
     department: 'Art History',
     institution: {
       commonsAccount: true,
+      enterpriseCommons: false,
       writefullCommonsAccount: false,
       confirmed: true,
       id: 1,
@@ -92,6 +94,7 @@ export const ssoUserData: UserEmailData = {
     department: 'Art History',
     institution: {
       commonsAccount: true,
+      enterpriseCommons: false,
       writefullCommonsAccount: false,
       confirmed: true,
       id: 2,

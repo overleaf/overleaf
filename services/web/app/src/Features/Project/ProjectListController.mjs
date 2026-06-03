@@ -28,6 +28,7 @@ import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 import SplitTestSessionHandler from '../SplitTests/SplitTestSessionHandler.mjs'
 import TutorialHandler from '../Tutorial/TutorialHandler.mjs'
 import SubscriptionHelper from '../Subscription/SubscriptionHelper.mjs'
+import CustomerIoPlanHelpers from '../Subscription/CustomerIoPlanHelpers.mjs'
 import PermissionsManager from '../Authorization/PermissionsManager.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import { OnboardingDataCollection } from '../../models/OnboardingDataCollection.mjs'
@@ -585,6 +586,7 @@ async function projectListPage(req, res, next) {
       ...(usedLatex && { used_latex: usedLatex }),
       ...(countryCode && { country: countryCode }),
       ...(commonsInstitution && { commons_institution: commonsInstitution }),
+      ...CustomerIoPlanHelpers.getAffiliationProperties(userEmails),
       ...(groupRole && { group_role: groupRole }),
       is_managed_user: Boolean(user.enrollment?.managedBy),
       ...(user.email && { email: user.email }),
