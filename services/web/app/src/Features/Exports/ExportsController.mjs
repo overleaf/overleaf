@@ -4,6 +4,10 @@ import SessionManager from '../Authentication/SessionManager.mjs'
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
 import settings from '@overleaf/settings'
+import { fetchStreamWithResponse } from '@overleaf/fetch-utils'
+import { isTrustedConversionJobUrl } from '../V1/V1ConversionHelper.mjs'
+import { pipeline } from 'node:stream/promises'
+import { parseReq, z, zz } from '../../infrastructure/Validation.mjs'
 
 async function exportProject(req, res, next) {
   const { project_id: projectId, brand_variation_id: brandVariationId } =
@@ -105,9 +109,21 @@ async function exportStatus(req, res) {
   return res.json({ export_json: json })
 }
 
+const exportDownloadSchema = z.object({
+  params: z.object({
+    export_id: zz.submissionId(),
+    type: z.enum(['pdf', 'zip']),
+  }),
+  query: z.object({
+    token: z.string().optional(),
+  }),
+})
+
 async function exportDownload(req, res, next) {
-  const { type, export_id: exportId } = req.params
-  const { token } = req.query
+  const {
+    params: { type, export_id: exportId },
+    query: { token },
+  } = parseReq(req, exportDownloadSchema)
   if (!token && settings.exports?.requireToken) {
     return res.sendStatus(403)
   }
@@ -119,6 +135,25 @@ async function exportDownload(req, res, next) {
       type,
       token
     )
+    if (
+      settings.exports?.proxyDownload &&
+      // V1 always returns a valid URL here; throw if that assumption is violated.
+      isTrustedConversionJobUrl(new URL(exportFileUrl))
+    ) {
+      const { stream, response } = await fetchStreamWithResponse(exportFileUrl)
+
+      res.attachment(`${token}.${type}`)
+      res.setHeader('X-Content-Type-Options', 'nosniff')
+
+      if (response.headers.has('Content-Length')) {
+        res.setHeader('Content-Length', response.headers.get('Content-Length'))
+      }
+
+      // Disable buffering in nginx
+      res.setHeader('X-Accel-Buffering', 'no')
+      await pipeline(stream, res)
+      return
+    }
     return res.redirect(exportFileUrl)
   } catch (err) {
     const info = OError.getFullInfo(err)

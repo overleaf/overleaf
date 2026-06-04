@@ -306,7 +306,7 @@ describe('ExportsController', function () {
     beforeEach(function (ctx) {
       ctx.req.params = {
         project_id: projectId,
-        export_id: 897,
+        export_id: '897',
         type: 'zip',
       }
       ctx.handler.fetchDownload = sinon.stub().resolves('https://example.com')
@@ -328,7 +328,7 @@ describe('ExportsController', function () {
         ctx.req.query = { token: 'mock-token' }
         await ctx.controller.exportDownload(ctx.req, ctx.res)
         expect(ctx.handler.fetchDownload).to.have.been.calledWith(
-          897,
+          '897',
           'zip',
           'mock-token'
         )
@@ -341,7 +341,7 @@ describe('ExportsController', function () {
         ctx.req.query = {}
         await ctx.controller.exportDownload(ctx.req, ctx.res)
         expect(ctx.handler.fetchDownload).to.have.been.calledWith(
-          897,
+          '897',
           'zip',
           undefined
         )
@@ -359,7 +359,7 @@ describe('ExportsController', function () {
         )
         await ctx.controller.exportDownload(ctx.req, ctx.res, ctx.next)
         expect(ctx.handler.fetchDownload).to.have.been.calledWith(
-          897,
+          '897',
           'zip',
           'wrong-token'
         )
