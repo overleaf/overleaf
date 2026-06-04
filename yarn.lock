@@ -6484,6 +6484,7 @@ __metadata:
     "@overleaf/promise-utils": "workspace:*"
     "@overleaf/settings": "workspace:*"
     "@overleaf/stream-utils": "workspace:*"
+    "@overleaf/validation-tools": "workspace:*"
     archiver: "npm:5.3.2"
     async: "npm:^3.2.5"
     body-parser: "npm:1.20.4"

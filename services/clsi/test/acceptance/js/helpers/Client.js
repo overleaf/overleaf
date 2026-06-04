@@ -53,6 +53,16 @@ async function convertDocument(path, type) {
   }
 }
 
+async function convertPdfToJpeg(path, mode) {
+  const formData = new FormData()
+  formData.append('qqfile', await fsPromises.readFile(path), 'input.pdf')
+  return await fetch(`${host}/convert/pdf-to-jpeg?mode=${mode}`, {
+    method: 'POST',
+    headers: formData.getHeaders(),
+    body: formData.getBuffer(),
+  })
+}
+
 async function convertProjectToDocument(
   projectId,
   userId,
@@ -239,6 +249,7 @@ export default {
   compile,
   convertProjectToDocument,
   convertDocument,
+  convertPdfToJpeg,
   stopCompile,
   clearCache,
   getOutputFile,

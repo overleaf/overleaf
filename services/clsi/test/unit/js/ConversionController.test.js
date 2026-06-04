@@ -18,6 +18,7 @@ describe('ConversionController', function () {
     ctx.documentStat = { size: 5678 }
     ctx.Settings = {
       enablePandocConversions: true,
+      enablePdfConversions: true,
       path: {
         compilesDir: '/compiles',
         outputDir: '/output',

@@ -31,6 +31,9 @@ module.exports = {
     parseInt(process.env.CLSI_CONVERSION_TIMEOUT_SECONDS, 10) || 60,
   pandocImage: process.env.PANDOC_IMAGE || 'quay.io/sharelatex/pandoc:3.9',
   enablePandocConversions: process.env.ENABLE_PANDOC_CONVERSIONS === 'true',
+  pdftocairoImage:
+    process.env.PDFTOCAIRO_IMAGE || 'quay.io/sharelatex/pdftocairo:24.02',
+  enablePdfConversions: process.env.ENABLE_PDF_CONVERSIONS === 'true',
   maxUploadSize: 50 * 1024 * 1024,
 
   internal: {

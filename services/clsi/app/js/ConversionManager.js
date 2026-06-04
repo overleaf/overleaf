@@ -18,6 +18,18 @@ const CONVERSION_CONFIGS = {
   },
 }
 
+const PDF_TO_JPEG_CONFIGS = {
+  preview: { width: 794, quality: 90 },
+  thumbnail: { width: 190, quality: 50 },
+}
+
+const PDF_TO_JPEG_INPUT_FILENAME = 'input.pdf'
+const PDF_TO_JPEG_OUTPUT_FILENAME = 'output.jpg'
+const PDF_TO_JPEG_OUTPUT_BASENAME = Path.basename(
+  PDF_TO_JPEG_OUTPUT_FILENAME,
+  '.jpg'
+)
+
 async function convertToLaTeXWithLock(conversionId, inputPath, conversionType) {
   const conversionDir = Path.join(Settings.path.compilesDir, conversionId)
   const lock = LockManager.acquire(conversionDir)
@@ -298,9 +310,76 @@ async function convertLaTeXToDocumentInDir(
   return Path.join(compileDir, finalOutputName)
 }
 
+async function convertPDFToJPEGWithLock(conversionId, inputPath, mode) {
+  const conversionDir = Path.join(Settings.path.compilesDir, conversionId)
+  const lock = LockManager.acquire(conversionDir)
+  try {
+    return await convertPDFToJPEG(conversionId, conversionDir, inputPath, mode)
+  } finally {
+    lock.release()
+  }
+}
+
+async function convertPDFToJPEG(conversionId, conversionDir, inputPath, mode) {
+  const config = PDF_TO_JPEG_CONFIGS[mode]
+  await fs.mkdir(conversionDir, { recursive: true })
+  const newSourcePath = Path.join(conversionDir, PDF_TO_JPEG_INPUT_FILENAME)
+  await fs.copyFile(inputPath, newSourcePath)
+  const dstPath = Path.join(conversionDir, PDF_TO_JPEG_OUTPUT_FILENAME)
+
+  try {
+    const { stdout, stderr, exitCode } = await CommandRunner.promises.run(
+      conversionId,
+      [
+        'pdftocairo',
+        '-jpeg',
+        '-jpegopt',
+        `quality=${config.quality}`,
+        '-singlefile',
+        '-scale-to-x',
+        config.width.toString(),
+        '-scale-to-y',
+        '-1', // maintain aspect ratio
+        PDF_TO_JPEG_INPUT_FILENAME,
+        PDF_TO_JPEG_OUTPUT_BASENAME,
+      ],
+      conversionDir,
+      Settings.pdftocairoImage,
+      Settings.conversionTimeoutSeconds * 1000,
+      {},
+      'conversions',
+      null
+    )
+    if (exitCode !== 0) {
+      throw new OError('Non-zero exit code from pdftocairo', {
+        exitCode,
+        stderr,
+      })
+    }
+    logger.debug(
+      { stdout, stderr, exitCode },
+      'pdf-to-jpeg conversion completed'
+    )
+
+    const stat = await fs.lstat(dstPath)
+    if (!stat.isFile()) {
+      throw new OError('output.jpg is not a regular file', { stat })
+    }
+
+    // Clean up the source PDF to leave only the conversion result
+    await fs.unlink(newSourcePath).catch(() => {})
+  } catch (error) {
+    await fs.rm(conversionDir, { force: true, recursive: true }).catch(() => {})
+    throw new OError('pdf-to-jpeg conversion failed').withCause(error)
+  }
+
+  return dstPath
+}
+
 export default {
   promises: {
     convertToLaTeXWithLock,
     convertLaTeXToDocumentInDirWithLock,
+    convertPDFToJPEGWithLock,
   },
 }
