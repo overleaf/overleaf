@@ -19,6 +19,8 @@ import GiveFeedbackLink from '@/features/share-project-modal/components/give-fee
 import classNames from 'classnames'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useShareProjectContext } from '@/features/share-project-modal/components/share-project-modal'
+import { ErrorBoundaryFallback } from '@/shared/components/error-boundary-fallback'
+import withErrorBoundary from '@/infrastructure/error-boundary'
 
 const ReadOnlyTokenLink = lazy(() =>
   import('./link-sharing').then(({ ReadOnlyTokenLink }) => ({
@@ -46,6 +48,27 @@ export default function ShareProjectModalContent({
   error,
   projectName,
 }: ShareProjectModalContentProps) {
+  return (
+    <OLModal show={show} onHide={cancel} animation={animation}>
+      <ShareProjectModalContentInnerWithErrorBoundary
+        inFlight={inFlight}
+        error={error}
+        projectName={projectName}
+        cancel={cancel}
+      />
+    </OLModal>
+  )
+}
+
+function ShareProjectModalContentInner({
+  inFlight,
+  error,
+  projectName,
+  cancel,
+}: Pick<
+  ShareProjectModalContentProps,
+  'inFlight' | 'error' | 'projectName' | 'cancel'
+>) {
   const { t } = useTranslation()
   const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
   const [isInvitedPeopleScreen, setIsInvitedPeopleScreen] = useState(false)
@@ -53,7 +76,7 @@ export default function ShareProjectModalContent({
   const { isRestrictedTokenMember, isProjectOwner } = useEditorContext()
 
   return (
-    <OLModal show={show} onHide={cancel} animation={animation}>
+    <>
       <OLModalHeader>
         <div className="d-flex flex-grow-1 justify-content-between">
           {isSharingUpdatesEnabled && isInvitedPeopleScreen ? (
@@ -142,6 +165,25 @@ export default function ShareProjectModalContent({
           {t('close')}
         </ClickableElementEnhancer>
       </OLModalFooter>
-    </OLModal>
+    </>
   )
 }
+
+const ShareProjectModalContentInnerFallback = () => {
+  const { t } = useTranslation()
+  return (
+    <>
+      <OLModalHeader>
+        <OLModalTitle>{t('generic_something_went_wrong')}</OLModalTitle>
+      </OLModalHeader>
+      <OLModalBody>
+        <ErrorBoundaryFallback />
+      </OLModalBody>
+    </>
+  )
+}
+
+const ShareProjectModalContentInnerWithErrorBoundary = withErrorBoundary(
+  ShareProjectModalContentInner,
+  () => <ShareProjectModalContentInnerFallback />
+)
