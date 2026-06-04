@@ -26,9 +26,9 @@ export const getFormTextClass = (type?: TextType) =>
 function FormTextIcon({ type }: { type?: TextType }) {
   switch (type) {
     case 'success':
-      return <CheckCircle className="ciam-form-text-icon" />
+      return <CheckCircle className="ciam-form-text-icon flex-shrink-0" />
     case 'error':
-      return <WarningCircle className="ciam-form-text-icon" />
+      return <WarningCircle className="ciam-form-text-icon flex-shrink-0" />
     default:
       return null
   }

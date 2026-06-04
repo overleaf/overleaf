@@ -1652,7 +1652,6 @@
   "register_with_another_email": "使用另一个邮件地址<a href=\"__link__\">注册 __appName__</a>",
   "registered": "已注册",
   "registering": "正在注册",
-  "registration_error": "注册错误",
   "reject": "不要",
   "reject_change": "拒绝修改",
   "reject_selected_changes": "拒绝选定的更改",

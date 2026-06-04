@@ -899,7 +899,6 @@
   "register_with_another_email": "<a href=\"__link__\">Inscrivez-vous avec __appName__</a> en utilisant une autre adresse courriel.",
   "registered": "Inscrit·e",
   "registering": "Inscription en cours",
-  "registration_error": "Erreur d’inscription",
   "reject": "Rejeter",
   "related_tags": "Étiquettes associées",
   "reload_editor": "Actualiser l’éditeur",

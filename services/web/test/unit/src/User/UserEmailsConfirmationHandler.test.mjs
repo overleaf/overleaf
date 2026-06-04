@@ -30,12 +30,6 @@ describe('UserEmailsConfirmationHandler', function () {
     ctx.email = ctx.mockUser.email
     ctx.req = {}
 
-    vi.doMock('@overleaf/settings', () => ({
-      default: (ctx.settings = {
-        siteUrl: 'https://emails.example.com',
-      }),
-    }))
-
     vi.doMock(
       '../../../../app/src/Features/Security/OneTimeTokenHandler',
       () => ({
@@ -81,72 +75,6 @@ describe('UserEmailsConfirmationHandler', function () {
 
     ctx.UserEmailsConfirmationHandler = (await import(modulePath)).default
     return (ctx.callback = sinon.stub())
-  })
-
-  describe('sendConfirmationEmail', function () {
-    beforeEach(function (ctx) {
-      ctx.OneTimeTokenHandler.promises.getNewToken = sinon
-        .stub()
-        .resolves((ctx.token = 'new-token'))
-      return (ctx.EmailHandler.promises.sendEmail = sinon.stub().resolves())
-    })
-
-    describe('successfully', function () {
-      beforeEach(async function (ctx) {
-        await ctx.UserEmailsConfirmationHandler.promises.sendConfirmationEmail(
-          ctx.user_id,
-          ctx.email
-        )
-      })
-
-      it('should generate a token for the user which references their id and email', function (ctx) {
-        return ctx.OneTimeTokenHandler.promises.getNewToken
-          .calledWith(
-            'email_confirmation',
-            { user_id: ctx.user_id, email: ctx.email },
-            { expiresIn: 90 * 24 * 60 * 60 }
-          )
-          .should.equal(true)
-      })
-
-      it('should send an email to the user', function (ctx) {
-        return ctx.EmailHandler.promises.sendEmail
-          .calledWith('confirmEmail', {
-            to: ctx.email,
-            confirmEmailUrl:
-              'https://emails.example.com/user/emails/confirm?token=new-token',
-            sendingUser_id: ctx.user_id,
-          })
-          .should.equal(true)
-      })
-    })
-
-    describe('with invalid email', function () {
-      it('should reject with an error', async function (ctx) {
-        await expect(
-          ctx.UserEmailsConfirmationHandler.promises.sendConfirmationEmail(
-            ctx.user_id,
-            '!"£$%^&*()'
-          )
-        ).to.be.rejectedWith(Error)
-      })
-    })
-
-    describe('a custom template', function () {
-      beforeEach(async function (ctx) {
-        await ctx.UserEmailsConfirmationHandler.promises.sendConfirmationEmail(
-          ctx.user_id,
-          ctx.email,
-          'myCustomTemplate'
-        )
-      })
-
-      it('should send an email with the given template', function (ctx) {
-        return ctx.EmailHandler.promises.sendEmail
-          .calledWith('myCustomTemplate')
-          .should.equal(true)
-      })
-    })
   })
 
   describe('confirmEmailFromToken', function () {

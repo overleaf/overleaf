@@ -133,9 +133,7 @@ describe('UserEmailsController', function () {
       '../../../../app/src/Features/User/UserEmailsConfirmationHandler',
       () => ({
         default: (ctx.UserEmailsConfirmationHandler = {
-          promises: {
-            sendConfirmationEmail: vi.fn().mockResolvedValue(undefined),
-          },
+          promises: {},
         }),
       })
     )

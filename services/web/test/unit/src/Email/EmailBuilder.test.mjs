@@ -371,41 +371,6 @@ describe('EmailBuilder', function () {
         })
       })
 
-      describe('confirmEmail', function () {
-        beforeEach(function (ctx) {
-          ctx.emailAddress = 'example@overleaf.com'
-          ctx.userId = 'abc123'
-          ctx.opts = {
-            to: ctx.emailAddress,
-            confirmEmailUrl: `${ctx.settings.siteUrl}/user/emails/confirm?token=aToken123`,
-            sendingUser_id: ctx.userId,
-          }
-          ctx.email = ctx.EmailBuilder.buildEmail('confirmEmail', ctx.opts)
-        })
-
-        it('should build the email', function (ctx) {
-          expect(ctx.email.html).to.exist
-          expect(ctx.email.text).to.exist
-        })
-
-        describe('HTML email', function () {
-          it('should include a CTA button and a fallback CTA link', function (ctx) {
-            const dom = cheerio.load(ctx.email.html)
-            const buttonLink = dom('a:contains("Confirm email")')
-            expect(buttonLink.length).to.equal(1)
-            expect(buttonLink.attr('href')).to.equal(ctx.opts.confirmEmailUrl)
-            expect(ctx.email.html).to.contain('copy and paste this link')
-            expect(ctx.email.html).to.contain(ctx.opts.confirmEmailUrl)
-          })
-        })
-
-        describe('plain text email', function () {
-          it('should contain the CTA link', function (ctx) {
-            expect(ctx.email.text).to.contain(ctx.opts.confirmEmailUrl)
-          })
-        })
-      })
-
       describe('ownershipTransferConfirmationNewOwner', function () {
         beforeEach(function (ctx) {
           ctx.emailAddress = 'example@overleaf.com'
@@ -485,41 +450,6 @@ describe('EmailBuilder', function () {
         describe('plain text email', function () {
           it('should contain the CTA link', function (ctx) {
             expect(ctx.email.text).to.contain(ctx.opts.setNewPasswordUrl)
-          })
-        })
-      })
-
-      describe('reconfirmEmail', function () {
-        beforeEach(function (ctx) {
-          ctx.emailAddress = 'example@overleaf.com'
-          ctx.userId = 'abc123'
-          ctx.opts = {
-            to: ctx.emailAddress,
-            confirmEmailUrl: `${ctx.settings.siteUrl}/user/emails/confirm?token=aToken123`,
-            sendingUser_id: ctx.userId,
-          }
-          ctx.email = ctx.EmailBuilder.buildEmail('reconfirmEmail', ctx.opts)
-        })
-
-        it('should build the email', function (ctx) {
-          expect(ctx.email.html).to.exist
-          expect(ctx.email.text).to.exist
-        })
-
-        describe('HTML email', function () {
-          it('should include a CTA button and a fallback CTA link', function (ctx) {
-            const dom = cheerio.load(ctx.email.html)
-            const buttonLink = dom('a:contains("Reconfirm email")')
-            expect(buttonLink.length).to.equal(1)
-            expect(buttonLink.attr('href')).to.equal(ctx.opts.confirmEmailUrl)
-            expect(ctx.email.html).to.contain('copy and paste this link')
-            expect(ctx.email.html).to.contain(ctx.opts.confirmEmailUrl)
-          })
-        })
-
-        describe('plain text email', function () {
-          it('should contain the CTA link', function (ctx) {
-            expect(ctx.email.text).to.contain(ctx.opts.confirmEmailUrl)
           })
         })
       })
