@@ -636,7 +636,7 @@ describe('ProjectUploadController', function () {
           ctx.res.json = data => {
             expect(data).to.deep.equal({
               success: false,
-              error: 'invalid_type',
+              error: 'invalid_import_type',
             })
             resolve()
           }

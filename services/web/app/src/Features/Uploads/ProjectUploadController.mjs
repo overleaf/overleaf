@@ -188,7 +188,10 @@ async function importDocument(req, res, next) {
   const { path } = req.file
   const conversionType = req.query.type
   if (!['docx', 'markdown'].includes(conversionType)) {
-    return res.status(400).json({ success: false, error: 'invalid_type' })
+    return res.status(400).json({
+      success: false,
+      error: req.i18n.translate('invalid_import_type'),
+    })
   }
   const name = Path.basename(req.body.name, Path.extname(req.body.name))
   logger.debug({ path, userId, conversionType }, 'importing document file')
@@ -239,7 +242,7 @@ async function importDocument(req, res, next) {
     ) {
       return res.status(422).json({
         success: false,
-        error: 'file_too_large',
+        error: req.i18n.translate('file_too_large'),
       })
     }
     if (error instanceof DocumentConversionError) {

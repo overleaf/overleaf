@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import Uppy from '@uppy/core'
+import Uppy, { ErrorResponse } from '@uppy/core'
 import XHRUpload from '@uppy/xhr-upload'
 import getMeta from '@/utils/meta'
 
@@ -7,6 +7,9 @@ type UploaderConfig = {
   endpoint: string
   allowedFileTypes: string[]
   onSuccess: (projectId: string) => void
+  onError?: (response: ErrorResponse | undefined) => void
+  onFileAdded?: () => void
+  onFileRemoved?: () => void
 }
 
 type ImportResponse = {
@@ -17,6 +20,9 @@ export function useProjectUploader({
   endpoint,
   allowedFileTypes,
   onSuccess,
+  onError,
+  onFileAdded,
+  onFileRemoved,
 }: UploaderConfig) {
   const { maxUploadSize, projectUploadTimeout } = getMeta('ol-ExposedSettings')
   const [ableToUpload, setAbleToUpload] = useState(false)
@@ -47,9 +53,10 @@ export function useProjectUploader({
         // the rest of the files will appear on the 'restriction-failed' event callback
         setAbleToUpload(true)
       })
-      .on('upload-error', () => {
+      .on('upload-error', (_file, _err, response) => {
         // refresh state so they can try uploading a new file
         setAbleToUpload(false)
+        onError?.(response)
       })
       .on('upload-success', (_file, response) => {
         const { project_id: projectId }: ImportResponse = response.body
@@ -69,6 +76,12 @@ export function useProjectUploader({
 
         // reset state so they can try uploading a different file, etc
         setAbleToUpload(false)
+      })
+      .on('file-added', () => {
+        onFileAdded?.()
+      })
+      .on('file-removed', () => {
+        onFileRemoved?.()
       })
   })
 
