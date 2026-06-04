@@ -493,13 +493,13 @@ ci:
 
 # Run the linting commands in the scope of the monorepo.
 # Eslint and prettier (plus some configs) are on the root.
-RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/eslint.config.mjs:/overleaf/eslint.config.mjs --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/web/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/node_modules/.cache/:/overleaf/node_modules/.cache/ -w /overleaf $(IMAGE_CI) yarn run --silent
+RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/eslint.config.mjs:/overleaf/eslint.config.mjs --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/web/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/node_modules/.cache/:/overleaf/node_modules/.cache/ -w /overleaf $(IMAGE_CI) yarn run --silent
 RUN_LINTING = ../../bin/run -w /overleaf/services/$(PROJECT_NAME) monorepo yarn run --silent
 RUN_LINTING_MONOREPO = ../../bin/run monorepo yarn run --silent
 
 ORG_PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN_LINT_FORMAT ?= \
-	docker run --rm --env BRANCH_NAME --env CI --env COMMIT_SHA --env MONOREPO --env PATH=/overleaf/node_modules/.bin:$(ORG_PATH) --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume ${PWD}/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/node_modules/.cache/:/overleaf/node_modules/.cache/ ${IMAGE_CI}
+	docker run --rm --env BRANCH_NAME --env CI --env COMMIT_SHA --env MONOREPO --env PATH=/overleaf/node_modules/.bin:$(ORG_PATH) --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume ${PWD}/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/node_modules/.cache/:/overleaf/node_modules/.cache/ ${IMAGE_CI}
 
 NODE_MODULES_PATH := ${PATH}:${PWD}/node_modules/.bin:/overleaf/services/web/node_modules/.bin
 WITH_NODE_MODULES_PATH = \
