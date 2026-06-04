@@ -20,6 +20,16 @@ const ENABLED_COMMANDS: string[] = [
   'recompile-from-scratch',
   'synctex-sync-to-pdf',
   'synctex-sync-to-code',
+  'insert-inline-math',
+  'insert-display-math',
+  'insert-figure-from-computer',
+  'insert-figure-from-project-files',
+  'insert-figure-from-another-project',
+  'insert-figure-from-url',
+  'insert-table',
+  'insert-citation',
+  'insert-link',
+  'insert-cross-reference',
 ]
 
 const useCommandRegistrySource = (): CommandPaletteSource => {

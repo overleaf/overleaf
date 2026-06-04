@@ -122,7 +122,7 @@ const CommandDropdownChild = ({ item }: { item: Entry<TaggedCommand> }) => {
       <MenuBarOption
         eventKey={item.id}
         key={item.id}
-        title={item.label}
+        title={item.menuLabel ?? item.label}
         // eslint-disable-next-line react/jsx-handler-names
         onClick={onClickHandler}
         href={item.href}

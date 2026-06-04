@@ -180,7 +180,8 @@ export const RailLayout = () => {
         handler: () => {
           setLeftMenuShown(true)
         },
-        label: t('settings'),
+        menuLabel: t('settings'),
+        label: t('open_settings'),
       },
     ],
     [t, setLeftMenuShown]

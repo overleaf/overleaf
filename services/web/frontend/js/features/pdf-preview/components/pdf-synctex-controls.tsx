@@ -35,7 +35,7 @@ const GoToCodeButton = memo(function GoToCodeButton({
           syncToCode({ visualOffset: 72 })
         },
         disabled: syncToCodeInFlight,
-        label: t('go_to_pdf_location_in_code'),
+        label: t('go_to_pdf_location_in_code_action'),
       },
     ],
     [t, syncToCode, syncToCodeInFlight]
