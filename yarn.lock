@@ -22631,6 +22631,7 @@ __metadata:
   resolution: "latexqc@workspace:services/latexqc"
   dependencies:
     "@aws-sdk/client-s3": "npm:^3.994.0"
+    "@aws-sdk/lib-storage": "npm:^3.994.0"
     "@aws-sdk/s3-request-presigner": "npm:^3.994.0"
     "@babel/core": "npm:^7.25.2"
     "@babel/plugin-syntax-import-meta": "npm:^7.10.4"
