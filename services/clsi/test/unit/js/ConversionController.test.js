@@ -592,6 +592,37 @@ describe('ConversionController', function () {
       })
     })
 
+    describe('with conversionType=html', function () {
+      beforeEach(async function (ctx) {
+        ctx.req.query = { type: 'html' }
+        ctx.fs.stat.resolves(ctx.documentStat)
+
+        await ctx.ConversionController.convertProjectToDocument(
+          ctx.req,
+          ctx.res,
+          sinon.stub()
+        )
+      })
+
+      it('should call convertLaTeXToDocumentInDirWithLock with type=html', function (ctx) {
+        sinon.assert.calledWith(
+          ctx.ConversionManager.promises.convertLaTeXToDocumentInDirWithLock,
+          sinon.match(
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+          ),
+          sinon.match(
+            /^\/compiles\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+          ),
+          'main.tex',
+          'html'
+        )
+      })
+
+      it('should set the attachment filename with .zip extension', function (ctx) {
+        sinon.assert.calledWith(ctx.res.attachment, 'output.zip')
+      })
+    })
+
     describe('when conversion fails', function () {
       beforeEach(async function (ctx) {
         ctx.next = sinon.stub()

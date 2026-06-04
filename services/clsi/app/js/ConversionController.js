@@ -19,6 +19,7 @@ import { z } from '@overleaf/validation-tools'
 const CONVERSION_CONFIGS = {
   docx: { extension: 'docx' },
   markdown: { extension: 'zip' },
+  html: { extension: 'zip' },
 }
 
 async function convertDocumentToLaTeX(req, res) {

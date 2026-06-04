@@ -162,6 +162,19 @@ const LATEX_EXPORT_CONFIGS = {
       'markdown',
     ],
   },
+  html: {
+    fileExtension: 'html',
+    compressOutput: true,
+    getPandocArgs: ({ outputPath }) => [
+      '--output',
+      outputPath,
+      '--from',
+      'latex',
+      '--to',
+      'html',
+      '--standalone',
+    ],
+  },
 }
 
 async function convertLaTeXToDocumentInDirWithLock(

@@ -77,6 +77,24 @@ const LATEX_TO_DOCUMENT_CASES = [
       '--extract-media=.',
     ],
   },
+  {
+    type: 'html',
+    extension: 'html',
+    compressOutput: true,
+    pandocArgs: outputId => [
+      'pandoc',
+      Path.join('..', 'main.tex'),
+      '--output',
+      'main.html',
+      '--from',
+      'latex',
+      '--to',
+      'html',
+      '--standalone',
+      '--resource-path=..',
+      '--extract-media=.',
+    ],
+  },
 ]
 
 describe('ConversionManager', function () {
