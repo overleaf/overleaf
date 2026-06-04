@@ -20,11 +20,7 @@ export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
   const { hasSuggestionsLeft } = useEditorContext()
 
   const selectLogNewLogs = useCallback(
-    (
-      id: string,
-      suggestFix: boolean,
-      showPaywallIfOutOfSuggestions: boolean
-    ) => {
+    (id: string, suggestFix: boolean) => {
       window.setTimeout(() => {
         const logEntry = document.querySelector(
           `.log-entry[data-log-entry-id="${id}"]`
@@ -50,7 +46,7 @@ export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
                   'button[data-action="suggest-fix"]'
                 )
                 ?.click()
-            } else if (showPaywallIfOutOfSuggestions) {
+            } else {
               window.dispatchEvent(
                 new CustomEvent('aiAssist:showPaywall', {
                   detail: { origin: 'suggest-fix' },
@@ -74,21 +70,16 @@ export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
 
   const handleViewCompileLogEntryEvent = useCallback(
     (event: Event) => {
-      const { id, suggestFix, showPaywallIfOutOfSuggestions } = (
+      const { id, suggestFix } = (
         event as CustomEvent<{
           id: string
           suggestFix?: boolean
-          showPaywallIfOutOfSuggestions?: boolean
         }>
       ).detail
 
       openLogs()
 
-      selectLogNewLogs(
-        id,
-        Boolean(suggestFix),
-        Boolean(showPaywallIfOutOfSuggestions)
-      )
+      selectLogNewLogs(id, Boolean(suggestFix))
     },
     [openLogs, selectLogNewLogs]
   )
