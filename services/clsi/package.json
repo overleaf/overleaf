@@ -46,7 +46,6 @@
     "mocha": "^11.1.0",
     "mocha-junit-reporter": "^2.2.1",
     "mocha-multi-reporters": "^1.5.1",
-    "mock-fs": "^5.1.2",
     "node-fetch": "^2.7.0",
     "nyc": "^17.1.0",
     "sinon": "~9.0.1",

@@ -1,6 +1,6 @@
 const crypto = require('node:crypto')
+const os = require('node:os')
 const { expect } = require('chai')
-const mockFs = require('mock-fs')
 const fs = require('node:fs')
 const fsPromises = require('node:fs/promises')
 const Path = require('node:path')
@@ -10,21 +10,58 @@ const Errors = require('../../src/Errors')
 
 const MODULE_PATH = '../../src/FSPersistor.js'
 
+function createTree(base, tree) {
+  fs.mkdirSync(base, { recursive: true })
+  for (const [name, content] of Object.entries(tree)) {
+    const fullPath = Path.join(base, name)
+    if (Buffer.isBuffer(content) || typeof content === 'string') {
+      fs.writeFileSync(fullPath, content)
+    } else if (content && typeof content.symlink === 'string') {
+      fs.symlinkSync(content.symlink, fullPath)
+    } else {
+      createTree(fullPath, content)
+    }
+  }
+}
+
 describe('FSPersistorTests', function () {
-  const localFiles = {
-    '/uploads/info.txt': Buffer.from('This information is critical', {
+  const fileContents = {
+    'info.txt': Buffer.from('This information is critical', {
       encoding: 'utf-8',
     }),
-    '/uploads/other.txt': Buffer.from('Some other content', {
+    'other.txt': Buffer.from('Some other content', {
       encoding: 'utf-8',
     }),
   }
-  const location = '/bucket'
+  let tmpDir
+  let location
+  let notADirPath
   const files = {
     wombat: 'animals/wombat.tex',
     giraffe: 'animals/giraffe.tex',
     potato: 'vegetables/potato.tex',
   }
+
+  beforeEach(function () {
+    tmpDir = fs.mkdtempSync(Path.join(os.tmpdir(), 'fs-persistor-test-'))
+    createTree(tmpDir, {
+      uploads: {
+        'info.txt': fileContents['info.txt'],
+        'other.txt': fileContents['other.txt'],
+      },
+      'not-a-dir':
+        'This regular file is meant to prevent using this path as a directory',
+      directory: {
+        subdirectory: {},
+      },
+    })
+    notADirPath = Path.join(tmpDir, 'not-a-dir')
+    location = Path.join(tmpDir, 'bucket')
+  })
+
+  afterEach(function () {
+    fs.rmSync(tmpDir, { recursive: true })
+  })
 
   const scenarios = [
     {
@@ -54,31 +91,26 @@ describe('FSPersistorTests', function () {
         persistor = new FSPersistor(scenario.settings)
       })
 
-      beforeEach(function () {
-        mockFs({
-          ...localFiles,
-          '/not-a-dir':
-            'This regular file is meant to prevent using this path as a directory',
-          '/directory/subdirectory': {},
-        })
-      })
-
-      afterEach(function () {
-        mockFs.restore()
-      })
-
       describe('sendFile', function () {
         it('should copy the file', async function () {
-          await persistor.sendFile(location, files.wombat, '/uploads/info.txt')
+          await persistor.sendFile(
+            location,
+            files.wombat,
+            Path.join(tmpDir, 'uploads', 'info.txt')
+          )
           const contents = await fsPromises.readFile(
             scenario.fsPath(files.wombat)
           )
-          expect(contents.equals(localFiles['/uploads/info.txt'])).to.be.true
+          expect(contents.equals(fileContents['info.txt'])).to.be.true
         })
 
         it('should return an error if the file cannot be stored', async function () {
           await expect(
-            persistor.sendFile('/not-a-dir', files.wombat, '/uploads/info.txt')
+            persistor.sendFile(
+              notADirPath,
+              files.wombat,
+              Path.join(tmpDir, 'uploads', 'info.txt')
+            )
           ).to.be.rejectedWith(Errors.WriteError)
         })
       })
@@ -88,7 +120,9 @@ describe('FSPersistorTests', function () {
 
         describe("when the file doesn't exist", function () {
           beforeEach(function () {
-            stream = fs.createReadStream('/uploads/info.txt')
+            stream = fs.createReadStream(
+              Path.join(tmpDir, 'uploads', 'info.txt')
+            )
           })
 
           it('should write the stream to disk', async function () {
@@ -96,7 +130,7 @@ describe('FSPersistorTests', function () {
             const contents = await fsPromises.readFile(
               scenario.fsPath(files.wombat)
             )
-            expect(contents.equals(localFiles['/uploads/info.txt'])).to.be.true
+            expect(contents.equals(fileContents['info.txt'])).to.be.true
           })
 
           it('should delete the temporary file', async function () {
@@ -109,7 +143,7 @@ describe('FSPersistorTests', function () {
           describe('on error', function () {
             beforeEach(async function () {
               await expect(
-                persistor.sendStream('/not-a-dir', files.wombat, stream)
+                persistor.sendStream(notADirPath, files.wombat, stream)
               ).to.be.rejectedWith(Errors.WriteError)
             })
 
@@ -129,13 +163,12 @@ describe('FSPersistorTests', function () {
           describe('when the md5 hash matches', function () {
             it('should write the stream to disk', async function () {
               await persistor.sendStream(location, files.wombat, stream, {
-                sourceMd5: md5(localFiles['/uploads/info.txt']),
+                sourceMd5: md5(fileContents['info.txt']),
               })
               const contents = await fsPromises.readFile(
                 scenario.fsPath(files.wombat)
               )
-              expect(contents.equals(localFiles['/uploads/info.txt'])).to.be
-                .true
+              expect(contents.equals(fileContents['info.txt'])).to.be.true
             })
           })
 
@@ -169,9 +202,11 @@ describe('FSPersistorTests', function () {
             await persistor.sendFile(
               location,
               files.wombat,
-              '/uploads/info.txt'
+              Path.join(tmpDir, 'uploads', 'info.txt')
             )
-            stream = fs.createReadStream('/uploads/other.txt')
+            stream = fs.createReadStream(
+              Path.join(tmpDir, 'uploads', 'other.txt')
+            )
           })
 
           it('should write the stream to disk', async function () {
@@ -179,7 +214,7 @@ describe('FSPersistorTests', function () {
             const contents = await fsPromises.readFile(
               scenario.fsPath(files.wombat)
             )
-            expect(contents.equals(localFiles['/uploads/other.txt'])).to.be.true
+            expect(contents.equals(fileContents['other.txt'])).to.be.true
           })
 
           it('should delete the temporary file', async function () {
@@ -192,7 +227,7 @@ describe('FSPersistorTests', function () {
           describe('on error', function () {
             beforeEach(async function () {
               await expect(
-                persistor.sendStream('/not-a-dir', files.wombat, stream)
+                persistor.sendStream(notADirPath, files.wombat, stream)
               ).to.be.rejectedWith(Errors.WriteError)
             })
 
@@ -200,8 +235,7 @@ describe('FSPersistorTests', function () {
               const contents = await fsPromises.readFile(
                 scenario.fsPath(files.wombat)
               )
-              expect(contents.equals(localFiles['/uploads/info.txt'])).to.be
-                .true
+              expect(contents.equals(fileContents['info.txt'])).to.be.true
             })
 
             it('should delete the temporary file', async function () {
@@ -215,13 +249,12 @@ describe('FSPersistorTests', function () {
           describe('when the md5 hash matches', function () {
             it('should write the stream to disk', async function () {
               await persistor.sendStream(location, files.wombat, stream, {
-                sourceMd5: md5(localFiles['/uploads/other.txt']),
+                sourceMd5: md5(fileContents['other.txt']),
               })
               const contents = await fsPromises.readFile(
                 scenario.fsPath(files.wombat)
               )
-              expect(contents.equals(localFiles['/uploads/other.txt'])).to.be
-                .true
+              expect(contents.equals(fileContents['other.txt'])).to.be.true
             })
           })
 
@@ -238,8 +271,7 @@ describe('FSPersistorTests', function () {
               const contents = await fsPromises.readFile(
                 scenario.fsPath(files.wombat)
               )
-              expect(contents.equals(localFiles['/uploads/info.txt'])).to.be
-                .true
+              expect(contents.equals(fileContents['info.txt'])).to.be.true
             })
 
             it('should delete the temporary file', async function () {
@@ -254,13 +286,17 @@ describe('FSPersistorTests', function () {
 
       describe('getObjectStream', function () {
         beforeEach(async function () {
-          await persistor.sendFile(location, files.wombat, '/uploads/info.txt')
+          await persistor.sendFile(
+            location,
+            files.wombat,
+            Path.join(tmpDir, 'uploads', 'info.txt')
+          )
         })
 
         it('should return a string with the object contents', async function () {
           const stream = await persistor.getObjectStream(location, files.wombat)
           const contents = await streamToBuffer(stream)
-          expect(contents.equals(localFiles['/uploads/info.txt'])).to.be.true
+          expect(contents.equals(fileContents['info.txt'])).to.be.true
         })
 
         it('should support ranges', async function () {
@@ -274,8 +310,8 @@ describe('FSPersistorTests', function () {
           )
           const contents = await streamToBuffer(stream)
           // end is inclusive in ranges, but exclusive in slice()
-          expect(contents.equals(localFiles['/uploads/info.txt'].slice(5, 17)))
-            .to.be.true
+          expect(contents.equals(fileContents['info.txt'].slice(5, 17))).to.be
+            .true
         })
 
         it('should give a NotFoundError if the file does not exist', async function () {
@@ -287,13 +323,17 @@ describe('FSPersistorTests', function () {
 
       describe('getObjectSize', function () {
         beforeEach(async function () {
-          await persistor.sendFile(location, files.wombat, '/uploads/info.txt')
+          await persistor.sendFile(
+            location,
+            files.wombat,
+            Path.join(tmpDir, 'uploads', 'info.txt')
+          )
         })
 
         it('should return the file size', async function () {
           expect(
             await persistor.getObjectSize(location, files.wombat)
-          ).to.equal(localFiles['/uploads/info.txt'].length)
+          ).to.equal(fileContents['info.txt'].length)
         })
 
         it('should throw a NotFoundError if the file does not exist', async function () {
@@ -305,7 +345,11 @@ describe('FSPersistorTests', function () {
 
       describe('copyObject', function () {
         beforeEach(async function () {
-          await persistor.sendFile(location, files.wombat, '/uploads/info.txt')
+          await persistor.sendFile(
+            location,
+            files.wombat,
+            Path.join(tmpDir, 'uploads', 'info.txt')
+          )
         })
 
         it('Should copy the file to the new location', async function () {
@@ -313,13 +357,17 @@ describe('FSPersistorTests', function () {
           const contents = await fsPromises.readFile(
             scenario.fsPath(files.potato)
           )
-          expect(contents.equals(localFiles['/uploads/info.txt'])).to.be.true
+          expect(contents.equals(fileContents['info.txt'])).to.be.true
         })
       })
 
       describe('deleteObject', function () {
         beforeEach(async function () {
-          await persistor.sendFile(location, files.wombat, '/uploads/info.txt')
+          await persistor.sendFile(
+            location,
+            files.wombat,
+            Path.join(tmpDir, 'uploads', 'info.txt')
+          )
           await fsPromises.access(scenario.fsPath(files.wombat))
         })
 
@@ -337,7 +385,11 @@ describe('FSPersistorTests', function () {
       describe('deleteDirectory', function () {
         beforeEach(async function () {
           for (const file of Object.values(files)) {
-            await persistor.sendFile(location, file, '/uploads/info.txt')
+            await persistor.sendFile(
+              location,
+              file,
+              Path.join(tmpDir, 'uploads', 'info.txt')
+            )
             await fsPromises.access(scenario.fsPath(file))
           }
         })
@@ -365,7 +417,11 @@ describe('FSPersistorTests', function () {
 
       describe('checkIfObjectExists', function () {
         beforeEach(async function () {
-          await persistor.sendFile(location, files.wombat, '/uploads/info.txt')
+          await persistor.sendFile(
+            location,
+            files.wombat,
+            Path.join(tmpDir, 'uploads', 'info.txt')
+          )
         })
 
         it('should return true for existing files', async function () {
@@ -384,13 +440,17 @@ describe('FSPersistorTests', function () {
       describe('directorySize', function () {
         beforeEach(async function () {
           for (const file of Object.values(files)) {
-            await persistor.sendFile(location, file, '/uploads/info.txt')
+            await persistor.sendFile(
+              location,
+              file,
+              Path.join(tmpDir, 'uploads', 'info.txt')
+            )
           }
         })
 
         it('should sum directory files size', async function () {
           expect(await persistor.directorySize(location, 'animals')).to.equal(
-            2 * localFiles['/uploads/info.txt'].length
+            2 * fileContents['info.txt'].length
           )
         })
 
@@ -404,7 +464,11 @@ describe('FSPersistorTests', function () {
       describe('listDirectoryKeys', function () {
         beforeEach(async function () {
           for (const file of Object.values(files)) {
-            await persistor.sendFile(location, file, '/uploads/info.txt')
+            await persistor.sendFile(
+              location,
+              file,
+              Path.join(tmpDir, 'uploads', 'info.txt')
+            )
           }
         })
 
@@ -427,7 +491,11 @@ describe('FSPersistorTests', function () {
       describe('listDirectoryStats', function () {
         beforeEach(async function () {
           for (const file of Object.values(files)) {
-            await persistor.sendFile(location, file, '/uploads/info.txt')
+            await persistor.sendFile(
+              location,
+              file,
+              Path.join(tmpDir, 'uploads', 'info.txt')
+            )
           }
         })
 
@@ -438,7 +506,7 @@ describe('FSPersistorTests', function () {
           expect(keys).to.include(scenario.fsPath(files.wombat))
           expect(keys).to.include(scenario.fsPath(files.giraffe))
           for (const stat of stats) {
-            expect(stat.size).to.equal(localFiles['/uploads/info.txt'].length)
+            expect(stat.size).to.equal(fileContents['info.txt'].length)
           }
         })
 

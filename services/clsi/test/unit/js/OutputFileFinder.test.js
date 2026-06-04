@@ -1,6 +1,6 @@
-import sinon from 'sinon'
 import { expect, describe, beforeEach, afterEach, it } from 'vitest'
-import mockFs from 'mock-fs'
+import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 
 const modulePath = path.join(
@@ -8,30 +8,40 @@ const modulePath = path.join(
   '../../../app/js/OutputFileFinder'
 )
 
+function createTree(base, tree) {
+  fs.mkdirSync(base, { recursive: true })
+  for (const [name, content] of Object.entries(tree)) {
+    const fullPath = path.join(base, name)
+    if (Buffer.isBuffer(content) || typeof content === 'string') {
+      fs.writeFileSync(fullPath, content)
+    } else if (content && content.symlink) {
+      fs.symlinkSync(content.symlink, fullPath)
+    } else {
+      createTree(fullPath, content)
+    }
+  }
+}
+
 describe('OutputFileFinder', function () {
   beforeEach(async function (ctx) {
     ctx.OutputFileFinder = (await import(modulePath)).default
-    ctx.directory = '/test/dir'
-    ctx.callback = sinon.stub()
-
-    mockFs({
-      [ctx.directory]: {
-        resource: {
-          'path.tex': 'a source file',
-        },
-        'output.pdf': 'a generated pdf file',
-        extra: {
-          'file.tex': 'a generated tex file',
-        },
-        'sneaky-file': mockFs.symlink({
-          path: '../foo',
-        }),
+    ctx.directory = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'output-finder-test-')
+    )
+    createTree(ctx.directory, {
+      resource: {
+        'path.tex': 'a source file',
       },
+      'output.pdf': 'a generated pdf file',
+      extra: {
+        'file.tex': 'a generated tex file',
+      },
+      'sneaky-file': { symlink: '../foo' },
     })
   })
 
-  afterEach(function () {
-    mockFs.restore()
+  afterEach(function (ctx) {
+    fs.rmSync(ctx.directory, { recursive: true })
   })
 
   describe('findOutputFiles', function () {
