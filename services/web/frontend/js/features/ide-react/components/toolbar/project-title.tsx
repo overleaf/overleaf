@@ -89,6 +89,12 @@ export const ToolbarProjectTitle = () => {
           label={t('export_as_markdown')}
           menuBarId="export-as-markdown"
         />
+        <ExportProjectWithConversionButton
+          featureFlag="export-html"
+          conversionType="html"
+          label={t('export_as_html')}
+          menuBarId="export-as-html"
+        />
         <DropdownDivider />
         <DuplicateProject />
         <OLDropdownMenuItem

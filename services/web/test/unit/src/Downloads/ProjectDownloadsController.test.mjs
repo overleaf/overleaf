@@ -541,6 +541,81 @@ describe('ProjectDownloadsController', function () {
       })
     })
 
+    describe('with type=html', function () {
+      beforeEach(async function (ctx) {
+        ctx.projectId = '5e9b1c2a3b4c5d6e7f8a9b0c'
+        ctx.userId = 'test-user-id'
+        ctx.projectName = 'My Test Project'
+        ctx.exportStream = { pipe: sinon.stub() }
+        ctx.contentLength = 9876
+
+        ctx.req.params = { Project_id: ctx.projectId, type: 'html' }
+        ctx.req.session = { user: { _id: ctx.userId } }
+        ctx.req.query = {}
+        ctx.req.ip = '192.168.1.1'
+
+        ctx.res.attachment = sinon.stub().returns(ctx.res)
+
+        ctx.SessionManager.getLoggedInUserId.returns(ctx.userId)
+        ctx.ProjectGetter.promises.getProject.resolves({
+          name: ctx.projectName,
+        })
+        ctx.DocumentConversionManager.promises.convertProjectToDocument.resolves(
+          {
+            conversionId: '12345678-1234-4234-8234-123456789012',
+            buildId: '0123456789a-0123456789abcdef',
+            clsiServerId: 'clsi-server-1',
+            file: 'output.zip',
+          }
+        )
+        ctx.DocumentConversionManager.promises.streamConvertedProjectDocument.resolves(
+          {
+            stream: ctx.exportStream,
+            contentLength: ctx.contentLength,
+          }
+        )
+
+        await ctx.ProjectDownloadsController.exportProjectConversion(
+          ctx.req,
+          ctx.res,
+          ctx.next
+        )
+      })
+
+      it('should call convertProjectToDocument with the html type', function (ctx) {
+        sinon.assert.calledWith(
+          ctx.DocumentConversionManager.promises.convertProjectToDocument,
+          ctx.projectId,
+          ctx.userId,
+          'html'
+        )
+      })
+
+      it('should set the attachment filename with .zip extension', function (ctx) {
+        sinon.assert.calledWith(ctx.res.attachment, 'My_Test_Project.zip')
+      })
+
+      it('should add an audit log entry for html export', function (ctx) {
+        sinon.assert.calledWith(
+          ctx.ProjectAuditLogHandler.addEntryInBackground,
+          ctx.projectId,
+          'project-exported-html',
+          ctx.userId,
+          ctx.req.ip
+        )
+      })
+
+      it('should record the action via Metrics with html type', function (ctx) {
+        ctx.Metrics.inc
+          .calledWith('document-exports', 1, { type: 'html' })
+          .should.equal(true)
+      })
+
+      it('should stream the document to the response', function (ctx) {
+        sinon.assert.calledWith(ctx.pipeline, ctx.exportStream, ctx.res)
+      })
+    })
+
     describe('when conversion fails with a DocumentConversionError', function () {
       beforeEach(async function (ctx) {
         ctx.projectId = '5e9b1c2a3b4c5d6e7f8a9b0c'

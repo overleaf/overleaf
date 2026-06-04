@@ -19,6 +19,7 @@ const { z, zz, parseReq } = Validation
 const SUPPORTED_CONVERSION_TYPES = new Map([
   ['docx', 'docx'],
   ['markdown', 'zip'],
+  ['html', 'zip'],
 ])
 
 const exportProjectConversionSchema = z.object({

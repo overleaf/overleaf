@@ -96,6 +96,7 @@ export const ToolbarMenuBar = () => {
               'download-pdf',
               'export-as-docx',
               'export-as-markdown',
+              'export-as-html',
             ],
           },
         ],

@@ -483,6 +483,7 @@ const _ProjectController = {
       'export-docx',
       'sharing-updates',
       'export-markdown',
+      'export-html',
       'command-palette',
       'overleaf-library',
       'compile-timeout-cta',

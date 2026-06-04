@@ -71,6 +71,20 @@ const ExportDocumentSuccessToast = ({ data }: { data?: any }) => {
         ]}
       />
     )
+  } else if (type === 'html') {
+    return (
+      <Trans
+        i18nKey="html_export_feedback_message"
+        components={[
+          // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
+          <a
+            href="https://forms.gle/nBUVGqPYwLcWHSmt5"
+            target="_BLANK"
+            rel="noopener noreferrer"
+          />,
+        ]}
+      />
+    )
   } else {
     return (
       <Trans
@@ -160,7 +174,9 @@ export const hidePreparingExportToast = (handle: string) => {
   )
 }
 
-export const showExportDocumentSuccess = (type: 'docx' | 'markdown') => {
+export const showExportDocumentSuccess = (
+  type: 'docx' | 'markdown' | 'html'
+) => {
   window.dispatchEvent(
     new CustomEvent('ide:show-toast', {
       detail: { key: 'export-document:success', type },

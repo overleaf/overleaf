@@ -9,7 +9,7 @@ import { useEditorManagerContext } from '@/features/ide-react/context/editor-man
 
 type ExportProjectWithConversionProps = {
   featureFlag?: string
-  conversionType: 'docx' | 'markdown'
+  conversionType: 'docx' | 'markdown' | 'html'
   label: string
   menuBarId: string
 }
