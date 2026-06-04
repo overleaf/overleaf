@@ -1090,6 +1090,7 @@ module.exports = {
     integrationPanelComponents: [],
     referenceSearchSetting: [],
     settingsModalEditorTabSections: [],
+    settingsModalSpellcheckSections: [],
     errorLogsComponents: [],
     referenceIndices: [],
     railEntries: [],

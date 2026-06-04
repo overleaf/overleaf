@@ -24,11 +24,10 @@ const TAB_SETTINGS = {
     'Keybindings',
     'PDF Viewer',
     'Reference search',
-    'Spellcheck language',
-    'Dictionary',
     'Breadcrumbs',
     'Equation preview',
   ],
+  'Spelling and language': ['Spellcheck language', 'Dictionary'],
   Compiler: [
     'Main document',
     'Compiler',
@@ -154,6 +153,22 @@ describe('<SettingsModal />', function () {
       selectTab('Editor')
       await waitFor(() => expect(screen.getByText('AI assistance')).to.exist)
     })
+
+    it('shows the Language Suggestions section in the Spelling and language tab', async function () {
+      render(
+        <EditorProviders
+          rootFolder={[rootFolder as any]}
+          layoutContext={{ leftMenuShown: true }}
+        >
+          <SettingsModal />
+        </EditorProviders>
+      )
+
+      selectTab('Spelling and language')
+      await waitFor(
+        () => expect(screen.getByText('Language suggestions')).to.exist
+      )
+    })
   })
 
   describe('when a user does not have Writefull enabled', function () {
@@ -180,6 +195,25 @@ describe('<SettingsModal />', function () {
         () => expect(screen.getByLabelText('Auto-complete')).to.exist
       )
       expect(screen.queryByText('AI assistance')).to.be.null
+    })
+
+    it('does not show the Language Suggestions section when ol-writefullEnabled is false', async function () {
+      window.metaAttributesCache.set('ol-writefullEnabled', false)
+      window.metaAttributesCache.set('ol-showAiFeatures', true)
+      render(
+        <EditorProviders
+          rootFolder={[rootFolder as any]}
+          layoutContext={{ leftMenuShown: true }}
+        >
+          <SettingsModal />
+        </EditorProviders>
+      )
+
+      selectTab('Spelling and language')
+      await waitFor(
+        () => expect(screen.getByLabelText('Spellcheck language')).to.exist
+      )
+      expect(screen.queryByText('Language suggestions')).to.be.null
     })
 
     it('does not show the AI assistance section when ol-showAiFeatures is false', async function () {

@@ -17,3 +17,12 @@
 .select-highlighted {
   background-color: var(--select-background-highlighted);
 }
+
+.select-portal-popover {
+  z-index: calc(#{$zindex-modal} + 1);
+}
+
+.select-portal-menu {
+  position: static;
+  width: 100%;
+}

@@ -44,6 +44,7 @@ describe('editor', function () {
       cy.log(`change project language to '${lng}'`)
       cy.findByRole('button', { name: 'Settings' }).click()
       cy.findByRole('dialog').within(() => {
+        cy.findByRole('tab', { name: 'Spelling and language' }).click()
         cy.findByLabelText('Spellcheck language').select(lng)
       })
       cy.get('body').type('{esc}')
@@ -76,6 +77,7 @@ describe('editor', function () {
       cy.log('remove word from dictionary')
       cy.findByRole('button', { name: 'Settings' }).click()
       cy.findByRole('dialog').within(() => {
+        cy.findByRole('tab', { name: 'Spelling and language' }).click()
         cy.findByLabelText('Dictionary').click()
       })
       cy.findByTestId('dictionary-modal').within(() => {
