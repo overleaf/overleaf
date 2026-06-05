@@ -191,7 +191,7 @@ export default function ChangeLayoutOptions() {
               sendEvent('focus-mode-toggle', { focusMode: !focusMode })
             }}
             active={focusMode}
-            leadingIcon="self_improvement"
+            leadingIcon="crop_free"
             trailingIcon={
               <span className="d-flex align-items-center gap-2">
                 <SplitTestBadge

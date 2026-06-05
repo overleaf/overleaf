@@ -96,7 +96,7 @@ export const Toolbar = () => {
               overlayProps={{ delay: 0, placement: 'bottom' }}
             >
               <OLIconButton
-                icon="close"
+                icon="close_fullscreen"
                 className="ide-redesign-toolbar-button-subdued ide-redesign-toolbar-button-icon"
                 onClick={handleExitFocusMode}
                 accessibilityLabel={t('exit_focus_mode')}
