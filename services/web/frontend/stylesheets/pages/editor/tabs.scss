@@ -1,6 +1,7 @@
 :root {
   --editor-tab-max-path-length: 250px;
   --editor-tab-divider-color: var(--neutral-70);
+  --editor-tab-row-height: var(--review-panel-header-height, 36px);
 }
 
 @include theme('light') {
@@ -11,10 +12,14 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: var(--spacing-02);
   flex: 0 0 auto;
+  min-height: var(--editor-tab-row-height);
   background: var(--bg-secondary-themed);
   justify-content: space-between;
+
+  .review-panel-header-slot {
+    display: contents;
+  }
 
   .editor-tabs-labs-icon {
     flex: 0 0 auto;
@@ -29,6 +34,7 @@
 .editor-tabs-row {
   display: flex;
   flex-direction: row;
+  height: var(--editor-tab-row-height);
   list-style: none;
   padding: 0;
   margin: 0;
@@ -47,6 +53,7 @@
   --tab-bg-color: var(--bg-secondary-themed);
   --tab-text-color: var(--content-secondary-themed);
 
+  display: flex;
   border-right: 1px solid var(--editor-tab-divider-color);
   border-left: 1px solid transparent;
   padding: var(--spacing-01) var(--spacing-02) 0 var(--spacing-02);

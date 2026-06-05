@@ -58,6 +58,8 @@ const TabsContext = React.createContext<
       setContextMenuTarget: React.Dispatch<
         React.SetStateAction<TabsContextMenuTarget | null>
       >
+      headerSlot: HTMLElement | null
+      setHeaderSlot: React.Dispatch<React.SetStateAction<HTMLElement | null>>
     }
   | undefined
 >(undefined)
@@ -79,6 +81,8 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
 
   const [contextMenuTarget, setContextMenuTarget] =
     useState<TabsContextMenuTarget | null>(null)
+
+  const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null)
 
   const tabs = useMemo(() => {
     if (!tabsEnabled) {
@@ -297,6 +301,8 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
       contextMenuTarget,
       setContextMenuTarget,
       closeToRight,
+      headerSlot,
+      setHeaderSlot,
     }),
     [
       tabs,
@@ -308,6 +314,8 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
       contextMenuTarget,
       setContextMenuTarget,
       closeToRight,
+      headerSlot,
+      setHeaderSlot,
     ]
   )
 

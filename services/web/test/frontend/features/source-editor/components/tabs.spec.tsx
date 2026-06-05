@@ -18,6 +18,7 @@ import {
 import { EditorView } from '@codemirror/view'
 import { EditorState, Transaction } from '@codemirror/state'
 import { tabsListener } from '@/features/source-editor/extensions/tabs-listener'
+import ReviewPanelTabsHeaderPortal from '@/features/review-panel/components/review-panel-tabs-header-portal'
 
 const DOC_IDS = {
   main: 'doc-main-id',
@@ -247,6 +248,7 @@ describe('File Tabs', function () {
       >
         <FileSelectionDriver />
         <TabsContainer />
+        <ReviewPanelTabsHeaderPortal />
         <RemoteChangeButton />
       </EditorProviders>
     )
@@ -1155,6 +1157,41 @@ describe('File Tabs', function () {
 
       cy.findAllByRole('tab').should('have.length', 1)
       cy.findByRole('tab', { name: /appendix\.tex/ }).should('exist')
+    })
+  })
+
+  describe('Review panel header', function () {
+    function toggleReviewPanel() {
+      cy.window().then(win => {
+        win.dispatchEvent(new win.CustomEvent('ui.toggle-review-panel'))
+      })
+    }
+
+    it('does not render the review panel header when the review panel is closed', function () {
+      cy.then(() => selectDoc(DOC_IDS.main))
+
+      cy.findByRole('heading', { name: 'Review' }).should('not.exist')
+    })
+
+    it('renders the review panel header inside the tabs container when the review panel is open', function () {
+      cy.then(() => selectDoc(DOC_IDS.main))
+
+      toggleReviewPanel()
+
+      cy.get('.editor-tabs-container').within(() => {
+        cy.findByRole('heading', { name: 'Review' }).should('exist')
+      })
+    })
+
+    it('removes the review panel header when the review panel is closed again', function () {
+      cy.then(() => selectDoc(DOC_IDS.main))
+
+      toggleReviewPanel()
+      cy.findByRole('heading', { name: 'Review' }).should('exist')
+
+      toggleReviewPanel()
+
+      cy.findByRole('heading', { name: 'Review' }).should('not.exist')
     })
   })
 

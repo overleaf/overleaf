@@ -11,6 +11,7 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import { FigureModal } from './figure-modal/figure-modal'
 import { ReviewPanelProviders } from '@/features/review-panel/context/review-panel-providers'
 import { ReviewPanelRoot } from '@/features/review-panel/components/review-panel-root'
+import ReviewPanelTabsHeaderPortal from '@/features/review-panel/components/review-panel-tabs-header-portal'
 import ReviewTooltipMenu from '@/features/review-panel/components/review-tooltip-menu'
 import {
   CodeMirrorStateContext,
@@ -104,6 +105,7 @@ function CodeMirrorEditorComponents({
       <MathPreviewTooltip />
       <EditorContextMenu />
       {features.trackChangesVisible && <ReviewTooltipMenu />}
+      {features.trackChangesVisible && <ReviewPanelTabsHeaderPortal />}
       {features.trackChangesVisible && <ReviewPanelRoot />}
       {features.trackChangesVisible && <UpgradeTrackChangesModal />}
 

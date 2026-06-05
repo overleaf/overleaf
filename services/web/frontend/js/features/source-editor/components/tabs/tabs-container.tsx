@@ -19,6 +19,7 @@ export const TabsContainer = () => {
     moveTab,
     makeTabPermanent,
     setContextMenuTarget,
+    setHeaderSlot,
   } = useTabsContext()
   const { openEntity } = useFileTreeOpenContext()
   const [hovered, setHovered] = useState<boolean>(false)
@@ -87,6 +88,7 @@ export const TabsContainer = () => {
 
   return (
     <div className="editor-tabs-container">
+      <div className="review-panel-header-slot" ref={setHeaderSlot} />
       <div
         className={classNames('editor-tabs-row', {
           'editor-tabs-row-hovered': hovered,
