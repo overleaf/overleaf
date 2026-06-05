@@ -24,6 +24,10 @@ export default function useFocusOnSetting() {
 
       const settingToFocusElt: HTMLElement | null =
         settingElt?.querySelector('input, select, button') ?? settingElt
+      settingElt?.classList.add('ide-setting-highlighted')
+      setTimeout(() => {
+        settingElt?.classList.remove('ide-setting-highlighted')
+      }, 2000)
 
       setActiveTab(newActiveTab)
       setEltToScrollTo({ tab: newActiveTab, element: settingToFocusElt })

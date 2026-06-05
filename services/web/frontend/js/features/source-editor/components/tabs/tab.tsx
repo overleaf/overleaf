@@ -231,7 +231,7 @@ export const Tab = memo(function Tab({
           <button
             onClick={onCloseClick}
             className="editor-file-tab-close-action"
-            aria-label={t('close_tab')}
+            aria-label={t('close')}
           >
             <MaterialIcon type="close" />
           </button>

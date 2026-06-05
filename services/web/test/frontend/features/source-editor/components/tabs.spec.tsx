@@ -450,7 +450,7 @@ describe('File Tabs', function () {
 
       // Close intro
       cy.findByRole('tab', { name: /intro\.tex/ }).within(() => {
-        cy.findByRole('button', { name: 'Close tab' }).click()
+        cy.findByRole('button', { name: 'Close' }).click()
       })
 
       cy.findByRole('tab', { name: /intro\.tex/ }).should('not.exist')
@@ -463,7 +463,7 @@ describe('File Tabs', function () {
 
       // Attempt to close the only tab
       cy.findByRole('tab', { name: /main\.tex/ }).within(() => {
-        cy.findByRole('button', { name: 'Close tab' }).click()
+        cy.findByRole('button', { name: 'Close' }).click()
       })
 
       // Tab must still exist
@@ -481,7 +481,7 @@ describe('File Tabs', function () {
 
       // Close the currently selected tab (appendix — the last one selected)
       cy.findByRole('tab', { name: /appendix\.tex/ }).within(() => {
-        cy.findByRole('button', { name: 'Close tab' }).click()
+        cy.findByRole('button', { name: 'Close' }).click()
       })
 
       cy.findByRole('tab', { name: /appendix\.tex/ }).should('not.exist')
@@ -514,23 +514,27 @@ describe('File Tabs', function () {
       cy.findByRole('tab', { name: /intro\.tex/ }).rightclick()
 
       cy.findByRole('menu').should('exist')
-      cy.findByRole('menuitem', { name: 'Close tab' }).should('exist')
-      cy.findByRole('menuitem', { name: 'Close others' }).should('exist')
+      cy.findByRole('menuitem', { name: 'Close' }).should('exist')
+      cy.findByRole('menuitem', { name: 'Close other tabs' }).should('exist')
+      cy.findByRole('menuitem', { name: 'Close tabs to the right' }).should(
+        'exist'
+      )
+      cy.findByRole('menuitem', { name: 'Tab settings…' }).should('exist')
     })
 
-    it('closes the clicked tab via "Close tab"', function () {
+    it('closes the clicked tab via "Close"', function () {
       cy.then(() => selectDoc(DOC_IDS.main))
       cy.then(() => selectDoc(DOC_IDS.intro))
 
       cy.findByRole('tab', { name: /intro\.tex/ }).rightclick()
-      cy.findByRole('menuitem', { name: 'Close tab' }).click()
+      cy.findByRole('menuitem', { name: 'Close' }).click()
 
       cy.findByRole('tab', { name: /intro\.tex/ }).should('not.exist')
       cy.findByRole('tab', { name: /main\.tex/ }).should('exist')
       cy.findByRole('menu').should('not.exist')
     })
 
-    it('closes all other tabs via "Close others"', function () {
+    it('closes all other tabs via "Close other tabs"', function () {
       cy.then(() => selectDoc(DOC_IDS.main))
       cy.then(() => selectDoc(DOC_IDS.intro))
       cy.then(() => selectDoc(DOC_IDS.appendix))
@@ -538,7 +542,7 @@ describe('File Tabs', function () {
       cy.findAllByRole('tab').should('have.length', 3)
 
       cy.findByRole('tab', { name: /intro\.tex/ }).rightclick()
-      cy.findByRole('menuitem', { name: 'Close others' }).click()
+      cy.findByRole('menuitem', { name: 'Close other tabs' }).click()
 
       cy.findAllByRole('tab').should('have.length', 1)
       cy.findByRole('tab', { name: /intro\.tex/ }).should('exist')
@@ -551,26 +555,132 @@ describe('File Tabs', function () {
 
       // appendix is the currently active tab; close others from intro
       cy.findByRole('tab', { name: /intro\.tex/ }).rightclick()
-      cy.findByRole('menuitem', { name: 'Close others' }).click()
+      cy.findByRole('menuitem', { name: 'Close other tabs' }).click()
 
       cy.get('@openDocWithId').should('have.been.calledWith', DOC_IDS.intro)
     })
 
-    it('disables both items when only one tab is open', function () {
+    it('closes tabs to the right of the target via "Close tabs to the right"', function () {
+      cy.then(() => selectDoc(DOC_IDS.main))
+      cy.then(() => selectDoc(DOC_IDS.intro))
+      cy.then(() => selectDoc(DOC_IDS.appendix))
+
+      cy.findAllByRole('tab').should('have.length', 3)
+
+      cy.findByRole('tab', { name: /intro\.tex/ }).rightclick()
+      cy.findByRole('menuitem', { name: 'Close tabs to the right' }).click()
+
+      cy.findAllByRole('tab').should('have.length', 2)
+      cy.findByRole('tab', { name: /main\.tex/ }).should('exist')
+      cy.findByRole('tab', { name: /intro\.tex/ }).should('exist')
+      cy.findByRole('tab', { name: /appendix\.tex/ }).should('not.exist')
+    })
+
+    it('navigates to the target tab when the active tab is closed to the right', function () {
+      cy.then(() => selectDoc(DOC_IDS.main))
+      cy.then(() => selectDoc(DOC_IDS.intro))
+      cy.then(() => selectDoc(DOC_IDS.appendix))
+
+      // appendix is the active tab; closing to the right of intro removes it
+      cy.findByRole('tab', { name: /intro\.tex/ }).rightclick()
+      cy.findByRole('menuitem', { name: 'Close tabs to the right' }).click()
+
+      cy.get('@openDocWithId').should('have.been.calledWith', DOC_IDS.intro)
+    })
+
+    it('keeps the active tab selected when it is to the left of the target', function () {
+      cy.then(() => selectDoc(DOC_IDS.main))
+      cy.then(() => selectDoc(DOC_IDS.intro))
+      cy.then(() => selectDoc(DOC_IDS.appendix))
+
+      // Re-select main so it becomes the active tab again (still at index 0)
+      cy.then(() => selectDoc(DOC_IDS.main))
+
+      // Closing to the right of intro removes appendix but not the active tab
+      cy.findByRole('tab', { name: /intro\.tex/ }).rightclick()
+      cy.findByRole('menuitem', { name: 'Close tabs to the right' }).click()
+
+      cy.findAllByRole('tab').should('have.length', 2)
+      cy.findByRole('tab', { name: /appendix\.tex/ }).should('not.exist')
+      cy.findByRole('tab', { name: /main\.tex/ }).should(
+        'have.attr',
+        'aria-selected',
+        'true'
+      )
+    })
+
+    it('disables the close actions when only one tab is open', function () {
       cy.then(() => selectDoc(DOC_IDS.main))
 
       cy.findByRole('tab', { name: /main\.tex/ }).rightclick()
 
-      cy.findByRole('menuitem', { name: 'Close tab' }).should(
+      cy.findByRole('menuitem', { name: 'Close' }).should(
         'have.attr',
         'aria-disabled',
         'true'
       )
-      cy.findByRole('menuitem', { name: 'Close others' }).should(
+      cy.findByRole('menuitem', { name: 'Close other tabs' }).should(
         'have.attr',
         'aria-disabled',
         'true'
       )
+      cy.findByRole('menuitem', { name: 'Close tabs to the right' }).should(
+        'have.attr',
+        'aria-disabled',
+        'true'
+      )
+    })
+
+    it('disables "Close tabs to the right" when the target is the last tab', function () {
+      cy.then(() => selectDoc(DOC_IDS.main))
+      cy.then(() => selectDoc(DOC_IDS.intro))
+      cy.then(() => selectDoc(DOC_IDS.appendix))
+
+      // appendix is the rightmost tab, so there is nothing to close to its right
+      cy.findByRole('tab', { name: /appendix\.tex/ }).rightclick()
+
+      cy.findByRole('menuitem', { name: 'Close tabs to the right' }).should(
+        'have.attr',
+        'aria-disabled',
+        'true'
+      )
+      // The other actions remain enabled with more than one tab open
+      cy.findByRole('menuitem', { name: 'Close' }).should(
+        'not.have.attr',
+        'aria-disabled',
+        'true'
+      )
+      cy.findByRole('menuitem', { name: 'Close other tabs' }).should(
+        'not.have.attr',
+        'aria-disabled',
+        'true'
+      )
+    })
+
+    it('opens tab settings via "Tab settings…"', function () {
+      cy.then(() => selectDoc(DOC_IDS.main))
+      cy.then(() => selectDoc(DOC_IDS.intro))
+
+      cy.window().then(win => {
+        cy.spy(win, 'dispatchEvent').as('dispatchEvent')
+      })
+
+      cy.findByRole('tab', { name: /intro\.tex/ }).rightclick()
+      cy.findByRole('menuitem', { name: 'Tab settings…' }).click()
+
+      // opens the left settings menu...
+      cy.get('@dispatchEvent').should(
+        'have.been.calledWithMatch',
+        Cypress.sinon.match({ type: 'ui.toggle-left-menu', detail: true })
+      )
+      // ...and focuses the previewTabs setting
+      cy.get('@dispatchEvent').should(
+        'have.been.calledWithMatch',
+        Cypress.sinon.match({ type: 'ui.focus-setting', detail: 'previewTabs' })
+      )
+
+      // and the context menu closes
+      cy.findByRole('menu').should('not.exist')
     })
 
     it('closes the menu on Escape', function () {
@@ -631,7 +741,7 @@ describe('File Tabs', function () {
       cy.findByRole('tab', { name: /appendix\.tex/ }).rightclick({
         force: true,
       })
-      cy.findByRole('menuitem', { name: 'Close others' }).click()
+      cy.findByRole('menuitem', { name: 'Close other tabs' }).click()
 
       cy.findAllByRole('tab').should('have.length', 1)
       cy.findByRole('tab', { name: /appendix\.tex/ }).should('exist')
@@ -1040,7 +1150,7 @@ describe('File Tabs', function () {
       cy.findByRole('tab', { name: /appendix\.tex/ }).should('exist')
 
       cy.findByRole('tab', { name: /appendix\.tex/ }).within(() => {
-        cy.findByRole('button', { name: 'Close tab' }).click()
+        cy.findByRole('button', { name: 'Close' }).click()
       })
 
       cy.findAllByRole('tab').should('have.length', 1)

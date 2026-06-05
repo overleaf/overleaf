@@ -48,6 +48,7 @@ const TabsContext = React.createContext<
       closeTab: (id: string) => void
       closeOtherTabs: (id: string) => void
       makeTabPermanent: (id: string) => void
+      closeToRight: (id: string) => void
       moveTab: (
         sourceTabId: string,
         targetTabId: string,
@@ -174,6 +175,32 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
     [openEntity, openTab, setOpenTabs]
   )
 
+  const closeToRight = useCallback(
+    async (id: string) => {
+      const tabIndex = openTabs.findIndex(tab => tab.id === id)
+      if (tabIndex === -1) {
+        debugConsole.warn(
+          'Attempting to close to right on tab that is not open'
+        )
+        return
+      }
+      const openTabIndex = openTabs.findIndex(
+        tab => tab.id === openEntity?.entity._id
+      )
+      if (openTabIndex === -1 || openTabIndex > tabIndex) {
+        await openTab(id)
+      }
+      setOpenTabs(current => {
+        const currentIndex = current.findIndex(tab => tab.id === id)
+        if (currentIndex === -1) {
+          return current
+        }
+        return current.slice(0, currentIndex + 1)
+      })
+    },
+    [setOpenTabs, openTabs, openEntity, openTab]
+  )
+
   const moveTab = useCallback(
     (sourceTabId: string, targetTabId: string, position: 'left' | 'right') => {
       debugConsole.log({ sourceTabId, targetTabId, position })
@@ -269,6 +296,7 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
       makeTabPermanent,
       contextMenuTarget,
       setContextMenuTarget,
+      closeToRight,
     }),
     [
       tabs,
@@ -279,6 +307,7 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
       makeTabPermanent,
       contextMenuTarget,
       setContextMenuTarget,
+      closeToRight,
     ]
   )
 

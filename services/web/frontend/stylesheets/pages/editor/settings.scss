@@ -10,7 +10,7 @@
   max-height: 75%;
   height: 500px;
   width: 100%;
-  padding: 0 var(--spacing-06);
+  padding: 0 var(--spacing-04);
   overflow: auto;
 }
 
@@ -65,6 +65,7 @@
   line-height: var(--line-height-01);
   padding-bottom: var(--spacing-06);
   border-bottom: 1px solid var(--border-divider);
+  margin: 0 var(--spacing-04);
 }
 
 .ide-setting {
@@ -72,6 +73,9 @@
   justify-content: space-between;
   align-items: center;
   min-height: 48px;
+  padding: 0 var(--spacing-02);
+  margin: 0 var(--spacing-02);
+  border-radius: var(--border-radius-base);
 }
 
 .ide-dropdown-setting {
@@ -96,7 +100,7 @@
   min-width: 160px;
   display: flex;
   justify-content: flex-end;
-  margin-left: var(--spacing-06);
+  margin-left: var(--spacing-05);
 }
 
 .ide-radio-setting-options {
@@ -115,4 +119,8 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-05);
+}
+
+.ide-setting-highlighted {
+  box-shadow: 0 1px 10px 0 rgb(102 175 233 / 80%);
 }
