@@ -1,3 +1,4 @@
+import { useLayoutContext } from '@/shared/context/layout-context'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import OLButtonToolbar from '@/shared/components/ol/ol-button-toolbar'
@@ -34,6 +35,7 @@ function PdfPreviewHybridToolbar() {
 }
 
 function PdfPreviewHybridToolbarInner() {
+  const { focusMode } = useLayoutContext()
   return (
     <>
       <div className="toolbar-pdf-left">
@@ -43,7 +45,7 @@ function PdfPreviewHybridToolbarInner() {
       </div>
       <div className="toolbar-pdf-right">
         <div className="toolbar-pdf-controls" id="toolbar-pdf-controls" />
-        <SwitchToEditorButton />
+        {!focusMode && <SwitchToEditorButton />}
         <DetachedSynctexControl />
         {/* TODO: should we have code check? */}
       </div>

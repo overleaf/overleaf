@@ -1,6 +1,7 @@
 import { useRangesContext } from '../context/ranges-context'
 import { useThreadsContext } from '@/features/review-panel/context/threads-context'
 import { hasActiveRange } from '@/features/review-panel/utils/has-active-range'
+import { useLayoutContext } from '@/shared/context/layout-context'
 import { useRailContext } from '@/features/ide-react/context/rail-context'
 import { useCallback } from 'react'
 
@@ -19,6 +20,7 @@ export default function useReviewPanelLayout(): {
     openTab: openRailTab,
     setIsOpen: setRailIsOpen,
   } = useRailContext()
+  const { focusMode } = useLayoutContext()
 
   const reviewPanelOpen = selectedRailTab === 'review-panel' && railIsOpen
 
@@ -31,7 +33,7 @@ export default function useReviewPanelLayout(): {
   }, [setRailIsOpen])
 
   const hasCommentOrChange = hasActiveRange(ranges, threads)
-  const showPanel = reviewPanelOpen || !!hasCommentOrChange
+  const showPanel = focusMode ? false : reviewPanelOpen || !!hasCommentOrChange
   const mini = !reviewPanelOpen
   const showHeader = showPanel && !mini
 

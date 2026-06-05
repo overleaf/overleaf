@@ -24,6 +24,7 @@ import { useRailContext } from '@/features/ide-react/context/rail-context'
 import usePersistedState from '@/shared/hooks/use-persisted-state'
 import { repositionAllTooltips } from '@/features/source-editor/extensions/tooltips-reposition'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
+import { useFeatureFlag } from './split-test-context'
 
 export type IdeLayout = 'sideBySide' | 'flat'
 export type IdeView = 'editor' | 'file' | 'pdf' | 'history'
@@ -38,6 +39,7 @@ export type LayoutContextOwnStates = {
   pdfLayout: IdeLayout
   projectSearchIsOpen: boolean
   openFile: BinaryFile | null
+  focusMode: boolean
 }
 
 export type LayoutContextValue = LayoutContextOwnStates & {
@@ -66,6 +68,7 @@ export type LayoutContextValue = LayoutContextOwnStates & {
   restoreView: () => void
   handleChangeLayout: (newLayout: IdeLayout, newView?: IdeView) => void
   handleDetach: () => void
+  setFocusMode: Dispatch<SetStateAction<LayoutContextValue['focusMode']>>
 }
 
 const debugPdfDetach = getMeta('ol-debugPdfDetach')
@@ -154,6 +157,37 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
   // whether the project search is open
   const [projectSearchIsOpen, setProjectSearchIsOpen] = useState(false)
 
+  // whether to display the editor and preview side-by-side or full-width ("flat")
+  const [pdfLayout, setPdfLayout] = useState<IdeLayout>('sideBySide')
+
+  const [persistedFocusMode, setPersistedFocusMode] =
+    usePersistedState<boolean>('ui.focus-mode', false)
+
+  const focusModeEnabled = useFeatureFlag('focus-mode')
+
+  const focusMode = focusModeEnabled && persistedFocusMode
+  const setFocusMode = useCallback(
+    (value: SetStateAction<boolean>) => {
+      if (focusModeEnabled) {
+        const newValue = typeof value === 'function' ? value(focusMode) : value
+        setPersistedFocusMode(newValue)
+        sendEvent('project-layout-change', {
+          layout: pdfLayout,
+          view: view ?? undefined,
+          focusMode: newValue,
+        })
+      }
+    },
+    [
+      focusMode,
+      focusModeEnabled,
+      pdfLayout,
+      sendEvent,
+      setPersistedFocusMode,
+      view,
+    ]
+  )
+
   useEventListener(
     'ui.toggle-left-menu',
     useCallback(
@@ -172,14 +206,21 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
     }, [setReviewPanelOpen])
   )
 
-  // TODO ide-redesign-cleanup: remove this listener as we have an equivalent in rail-context
   useEventListener(
-    'keydown',
-    useCallback((event: KeyboardEvent) => {
+    'ui.toggle-focus-mode',
+    useCallback(() => {
+      setFocusMode(mode => !mode)
+    }, [setFocusMode])
+  )
+
+  // Global keyboard shortcut handlers
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Cmd/Ctrl+Shift+F for full project search
       if (
         (isMac ? event.metaKey : event.ctrlKey) &&
         event.shiftKey &&
-        event.code === 'KeyF'
+        event.key === 'F'
       ) {
         event.preventDefault()
         sendSearchEvent('search-open', {
@@ -188,11 +229,25 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
         })
         setProjectSearchIsOpen(true)
       }
-    }, [])
-  )
+      // Cmd/Ctrl+Shift+M for focus mode
+      if (
+        focusModeEnabled &&
+        (isMac ? event.metaKey : event.ctrlKey) &&
+        event.shiftKey &&
+        event.key === 'M'
+      ) {
+        event.preventDefault()
+        setFocusMode(mode => !mode)
+      }
+    }
 
-  // whether to display the editor and preview side-by-side or full-width ("flat")
-  const [pdfLayout, setPdfLayout] = useState<IdeLayout>('sideBySide')
+    // Use capture phase to ensure we get the event even if something else stops propagation
+    window.addEventListener('keydown', handleKeyDown, true)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true)
+    }
+  }, [focusModeEnabled, setFocusMode, setProjectSearchIsOpen])
 
   // whether stylesheet on theme is loading
   const [loadingStyleSheet, setLoadingStyleSheet] = useState(false)
@@ -282,9 +337,10 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
       sendEvent('project-layout-change', {
         layout: newLayout,
         view: newView,
+        focusMode,
       })
     },
-    [changeLayout, handleReattach, sendEvent]
+    [changeLayout, focusMode, handleReattach, sendEvent]
   )
 
   useEventListener(
@@ -353,6 +409,8 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
       restoreView,
       handleChangeLayout,
       handleDetach,
+      focusMode,
+      setFocusMode,
     }),
     [
       reattach,
@@ -382,6 +440,8 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
       restoreView,
       handleChangeLayout,
       handleDetach,
+      focusMode,
+      setFocusMode,
     ]
   )
 

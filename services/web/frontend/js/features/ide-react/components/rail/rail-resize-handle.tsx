@@ -6,15 +6,17 @@ import { useTranslation } from 'react-i18next'
 
 export default function RailResizeHandle({
   isReviewPanelOpen,
+  focusMode,
 }: {
   isReviewPanelOpen: boolean
+  focusMode: boolean
 }) {
   const { isOpen, setIsOpen, togglePane, setResizing } = useRailContext()
   const { t } = useTranslation()
 
   return (
     <HorizontalResizeHandle
-      className={classNames({ hidden: isReviewPanelOpen })}
+      className={classNames({ hidden: isReviewPanelOpen || focusMode })}
       resizable
       hitAreaMargins={{ coarse: 0, fine: 0 }}
       onDoubleClick={togglePane}
