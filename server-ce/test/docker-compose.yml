@@ -22,6 +22,7 @@ services:
       ENABLED_LINKED_FILE_TYPES: "project_file,project_output_file"
       ENABLE_CONVERSIONS: "true"
       EMAIL_CONFIRMATION_DISABLED: "true"
+      OVERLEAF_INVITE_TOKEN_SECRET: "invite-token-secret"
     healthcheck:
       test: curl --fail http://localhost:3000/status
       interval: 3s
