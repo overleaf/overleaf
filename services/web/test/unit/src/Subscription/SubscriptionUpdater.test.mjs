@@ -707,6 +707,48 @@ describe('SubscriptionUpdater', function () {
     })
   })
 
+  describe('handleExpiredSubscription', function () {
+    it("should set the admin's previous_plan_type in customer.io to the expired plan when the subscription is deleted", async function (ctx) {
+      await ctx.SubscriptionUpdater.promises.handleExpiredSubscription(
+        ctx.subscription,
+        {}
+      )
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'setUserProperties',
+        ctx.subscription.admin_id,
+        { previous_plan_type: 'student' }
+      )
+    })
+
+    it('should not set previous_plan_type when the subscription is not deleted (managed users)', async function (ctx) {
+      ctx.Features.hasFeature.withArgs('saas').returns(true)
+      ctx.subscription.managedUsersEnabled = true
+      await ctx.SubscriptionUpdater.promises.handleExpiredSubscription(
+        ctx.subscription,
+        {}
+      )
+      expect(ctx.Modules.promises.hooks.fire).to.not.have.been.calledWith(
+        'setUserProperties',
+        ctx.subscription.admin_id,
+        { previous_plan_type: 'student' }
+      )
+    })
+
+    it('should not set previous_plan_type when the subscription is not deleted (group SSO)', async function (ctx) {
+      ctx.Features.hasFeature.withArgs('saas').returns(true)
+      ctx.subscription.ssoConfig = new ObjectId('abc123abc123abc123abc123')
+      await ctx.SubscriptionUpdater.promises.handleExpiredSubscription(
+        ctx.subscription,
+        {}
+      )
+      expect(ctx.Modules.promises.hooks.fire).to.not.have.been.calledWith(
+        'setUserProperties',
+        ctx.subscription.admin_id,
+        { previous_plan_type: 'student' }
+      )
+    })
+  })
+
   describe('addUserToGroup', function () {
     it('should add the user ids to the group as a set', async function (ctx) {
       ctx.SubscriptionModel.findOne = sinon
