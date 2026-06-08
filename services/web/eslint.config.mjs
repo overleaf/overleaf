@@ -43,6 +43,12 @@ const reactFlatRecommended = {
 import _ from 'lodash'
 import confusingBrowserGlobals from 'confusing-browser-globals'
 
+// Type-aware linting is expensive: setting `parserOptions.project` makes
+// @typescript-eslint build a full TypeScript program from tsconfig.backend.json
+// on every ESLint invocation, even when linting a single file.
+// Set ESLINT_FAST=1 to skip type-aware checks; the full lint still runs in CI.
+const TYPE_AWARE = process.env.ESLINT_FAST !== '1'
+
 export default defineConfig([
   // Declare which file extensions ESLint should consider in this workspace.
   // Replaces the previous `--ext .js,.jsx,.mjs,.ts,.tsx` CLI flag, which is
@@ -302,10 +308,12 @@ export default defineConfig([
     files: ['**/app/src/**/*.{js,mjs}', 'app.{js,mjs}'],
 
     languageOptions: {
-      parserOptions: {
-        tsconfigRootDir: import.meta.dirname,
-        project: './tsconfig.backend.json',
-      },
+      parserOptions: TYPE_AWARE
+        ? {
+            tsconfigRootDir: import.meta.dirname,
+            project: './tsconfig.backend.json',
+          }
+        : {},
     },
 
     rules: {
@@ -357,12 +365,14 @@ export default defineConfig([
         },
       ],
 
-      '@typescript-eslint/no-floating-promises': [
-        'error',
-        {
-          checkThenables: true,
-        },
-      ],
+      '@typescript-eslint/no-floating-promises': TYPE_AWARE
+        ? [
+            'error',
+            {
+              checkThenables: true,
+            },
+          ]
+        : 'off',
     },
   },
   {
