@@ -106,6 +106,7 @@ export const TabsContainer = () => {
             tab={tab}
             openTab={openTab}
             closeTab={closeTab}
+            canCloseTab={tabs.length > 1}
             isSelected={openEntity?.entity._id === tab.id}
             onTabDrop={moveTab}
             makeTabPermanent={makeTabPermanent}

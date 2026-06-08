@@ -26,6 +26,7 @@ type TabProps = {
   tab: EditorFileTab
   openTab: (id: string) => void
   closeTab: (id: string) => void
+  canCloseTab: boolean
   makeTabPermanent: (id: string) => void
   openContextMenu: (
     coords: { top: number; left: number },
@@ -56,6 +57,7 @@ export const Tab = memo(function Tab({
   tab,
   openTab,
   closeTab,
+  canCloseTab,
   makeTabPermanent,
   openContextMenu,
   closeContextMenu,
@@ -233,6 +235,7 @@ export const Tab = memo(function Tab({
         <div className="editor-file-tab-action">
           <button
             onClick={onCloseClick}
+            disabled={!canCloseTab}
             className="editor-file-tab-close-action"
             aria-label={t('close')}
           >

@@ -177,9 +177,22 @@
     padding: 0;
     display: flex;
     align-items: center;
+    border-radius: 100%;
+    justify-content: center;
 
     &:hover {
+      background-color: var(--bg-secondary-themed);
       color: var(--content-primary-themed);
+    }
+
+    &:disabled {
+      cursor: default;
+      color: var(--content-disabled-themed);
+
+      &:hover {
+        background-color: transparent;
+        color: var(--content-disabled-themed);
+      }
     }
   }
 

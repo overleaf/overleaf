@@ -463,14 +463,9 @@ describe('File Tabs', function () {
       cy.then(() => selectDoc(DOC_IDS.main))
       cy.findAllByRole('tab').should('have.length', 1)
 
-      // Attempt to close the only tab
       cy.findByRole('tab', { name: /main\.tex/ }).within(() => {
-        cy.findByRole('button', { name: 'Close' }).click()
+        cy.findByRole('button', { name: 'Close' }).should('be.disabled')
       })
-
-      // Tab must still exist
-      cy.findByRole('tab', { name: /main\.tex/ }).should('exist')
-      cy.findAllByRole('tab').should('have.length', 1)
     })
 
     it('switches to an adjacent tab when closing the currently active tab', function () {
@@ -1152,11 +1147,8 @@ describe('File Tabs', function () {
       cy.findByRole('tab', { name: /appendix\.tex/ }).should('exist')
 
       cy.findByRole('tab', { name: /appendix\.tex/ }).within(() => {
-        cy.findByRole('button', { name: 'Close' }).click()
+        cy.findByRole('button', { name: 'Close' }).should('be.disabled')
       })
-
-      cy.findAllByRole('tab').should('have.length', 1)
-      cy.findByRole('tab', { name: /appendix\.tex/ }).should('exist')
     })
   })
 
