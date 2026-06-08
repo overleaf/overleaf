@@ -157,7 +157,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
     ? historyOT(options.currentDoc.currentDocument)
     : ranges(),
   trackDetachedComments(options.currentDoc),
-  visual(options.visual),
+  visual(options.docName, options.visual),
   mathPreview(options.settings.mathPreview),
   reviewTooltip(options.editorContextMenuEnabled),
   contextMenu(options.editorContextMenuEnabled),
