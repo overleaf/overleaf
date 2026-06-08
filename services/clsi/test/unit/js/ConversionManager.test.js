@@ -433,6 +433,12 @@ describe('ConversionManager', function () {
           )
         })
 
+        it('should run the conversion and set the TEXINPUTS environment variable', function (ctx) {
+          expect(
+            ctx.CommandRunner.promises.run.firstCall.args[5]
+          ).toMatchObject({ TEXINPUTS: '..:' })
+        })
+
         it('should run pandoc then zip the subdirectory and return the zip path', function (ctx) {
           expect(ctx.CommandRunner.promises.run.callCount).toBe(2)
           expect(ctx.CommandRunner.promises.run.secondCall.args[1]).toEqual([

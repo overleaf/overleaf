@@ -274,7 +274,12 @@ async function convertLaTeXToDocumentInDir(
     compileDir,
     Settings.pandocImage,
     timeoutMs,
-    {},
+    {
+      // By default pandoc uses cwd for resolving \input, \include, etc.
+      // Setting TEXINPUTS allows us to override that to look in the actual
+      // compileDir rather than the output directory.
+      TEXINPUTS: '..:',
+    },
     'conversions',
     outputId
   )
