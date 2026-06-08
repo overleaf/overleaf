@@ -15,6 +15,7 @@ import { useUserContext } from '@/shared/context/user-context'
 import ReviewPanelEntryUser from './review-panel-entry-user'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { PreventSelectingEntry } from './review-panel-prevent-selecting'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 export const ReviewPanelMessage: FC<{
   message: ReviewPanelCommentThreadMessage
@@ -41,6 +42,9 @@ export const ReviewPanelMessage: FC<{
   const [content, setContent] = useState(message.content)
   const user = useUserContext()
   const permissions = usePermissionsContext()
+  const mentionsEnabled =
+    isSplitTestEnabled('email-notifications') &&
+    isSplitTestEnabled('comment-mentions')
 
   const isCommentAuthor = Boolean(message.user && user.id === message.user.id)
   const canEdit = isCommentAuthor && permissions.comment
@@ -141,6 +145,7 @@ export const ReviewPanelMessage: FC<{
           checkNewLines
           content={message.content}
           translate="no"
+          displayMentions={mentionsEnabled}
         />
       )}
 

@@ -418,6 +418,10 @@ del.review-panel-content-highlight {
   }
 }
 
+.review-panel-mention {
+  color: var(--content-info-themed);
+}
+
 .review-panel-comment-input {
   width: 100%;
   font-size: var(--rp-base-font-size);
