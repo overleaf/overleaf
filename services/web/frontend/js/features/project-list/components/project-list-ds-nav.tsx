@@ -137,6 +137,7 @@ export function ProjectListDsNav() {
                         <NewProjectButton
                           id="new-project-button-projects-table"
                           showAddAffiliationWidget
+                          align="end"
                         />
                       </OLCol>
                     )}
