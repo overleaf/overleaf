@@ -3,9 +3,6 @@ import cheerio from 'cheerio'
 import path from 'node:path'
 
 import EmailMessageHelper from '../../../../app/src/Features/Email/EmailMessageHelper.mjs'
-import ctaEmailBody from '../../../../app/src/Features/Email/Bodies/cta-email.mjs'
-import NoCTAEmailBody from '../../../../app/src/Features/Email/Bodies/NoCTAEmailBody.mjs'
-import BaseEmailLayout from '../../../../app/src/Features/Email/Layouts/BaseEmailLayout.mjs'
 
 const MODULE_PATH = path.join(
   import.meta.dirname,
@@ -22,24 +19,6 @@ describe('EmailBuilder', function () {
     vi.doMock('../../../../app/src/Features/Email/EmailMessageHelper', () => ({
       default: EmailMessageHelper,
     }))
-
-    vi.doMock('../../../../app/src/Features/Email/Bodies/cta-email', () => ({
-      default: ctaEmailBody,
-    }))
-
-    vi.doMock(
-      '../../../../app/src/Features/Email/Bodies/NoCTAEmailBody',
-      () => ({
-        default: NoCTAEmailBody,
-      })
-    )
-
-    vi.doMock(
-      '../../../../app/src/Features/Email/Layouts/BaseEmailLayout',
-      () => ({
-        default: BaseEmailLayout,
-      })
-    )
 
     vi.doMock('@overleaf/settings', () => ({
       default: ctx.settings,

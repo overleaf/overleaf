@@ -4,7 +4,7 @@ import path from 'node:path'
 
 const LAYOUT_PATH = path.join(
   import.meta.dirname,
-  '../../../../app/src/Features/Email/Layouts/UpdatedBaseEmailLayout'
+  '../../../../app/src/Features/Email/Layouts/BaseEmailLayout'
 )
 
 async function buildLayoutWithEnv(env) {
@@ -20,7 +20,7 @@ async function buildLayoutWithEnv(env) {
   return layout({ body: 'Test body', footerMessage: '' })
 }
 
-describe('UpdatedBaseEmailLayout branding', function () {
+describe('BaseEmailLayout branding', function () {
   afterEach(function () {
     vi.restoreAllMocks()
     vi.resetModules()

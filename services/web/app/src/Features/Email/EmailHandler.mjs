@@ -4,8 +4,6 @@ import logger from '@overleaf/logger'
 import EmailBuilder from './EmailBuilder.mjs'
 import EmailSender from './EmailSender.mjs'
 import Queues from '../../infrastructure/Queues.mjs'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
-import UserGetter from '../User/UserGetter.mjs'
 
 const EMAIL_SETTINGS = Settings.email || {}
 
@@ -14,27 +12,6 @@ const EMAIL_SETTINGS = Settings.email || {}
  * @param {object} opts
  */
 async function sendEmail(emailType, opts) {
-  if (opts.to) {
-    try {
-      const user = await UserGetter.promises.getUserByAnyEmail(opts.to, {
-        _id: 1,
-      })
-      if (user) {
-        const { variant } =
-          await SplitTestHandler.promises.getAssignmentForUser(
-            user._id.toString(),
-            'new-email-design'
-          )
-        opts.useNewEmailDesign = variant === 'enabled'
-      }
-    } catch (err) {
-      logger.warn(
-        { err },
-        'failed to get new-email-design split test assignment'
-      )
-    }
-  }
-
   const email = EmailBuilder.buildEmail(emailType, opts)
   if (email.type === 'lifecycle' && !EMAIL_SETTINGS.lifecycle) {
     return
