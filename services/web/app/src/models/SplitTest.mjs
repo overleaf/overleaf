@@ -40,6 +40,24 @@ const BadgeInfoSchema = new Schema(
   { _id: false }
 )
 
+const LabsSuccessNotificationSchema = new Schema(
+  {
+    content: {
+      type: String,
+      required: false,
+    },
+    buttonLabel: {
+      type: String,
+      required: false,
+    },
+    buttonUrl: {
+      type: String,
+      required: false,
+    },
+  },
+  { _id: false }
+)
+
 const VariantSchema = new Schema(
   {
     name: {
@@ -185,6 +203,10 @@ export const SplitTestSchema = new Schema(
     },
     labsIcon: {
       type: String,
+      required: false,
+    },
+    labsSuccessNotification: {
+      type: LabsSuccessNotificationSchema,
       required: false,
     },
   },

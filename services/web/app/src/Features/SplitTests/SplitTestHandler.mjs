@@ -836,6 +836,11 @@ async function _loadSplitTestInfoInLocals(locals, splitTestName, session) {
         description: splitTest.labsDescription || '',
         icon: splitTest.labsIcon || '',
         surveyLink: splitTest.badgeInfo?.labs?.url || '',
+        successNotification: {
+          content: splitTest.labsSuccessNotification?.content || '',
+          buttonLabel: splitTest.labsSuccessNotification?.buttonLabel || '',
+          buttonUrl: splitTest.labsSuccessNotification?.buttonUrl || '',
+        },
         isFull: SplitTestUtils.isExperimentFull(variant),
         versionCreatedAt:
           currentVersion.createdAt instanceof Date

@@ -131,6 +131,7 @@ async function createSplitTest(
     labsTitle: labsInfo.title,
     labsDescription: labsInfo.description,
     labsIcon: labsInfo.icon,
+    labsSuccessNotification: labsInfo.successNotification,
     versions: [
       {
         versionNumber: 1,
@@ -205,6 +206,7 @@ async function updateSplitTestInfo(name, info, labsInfo) {
     splitTest.labsTitle = labsInfo.title
     splitTest.labsDescription = labsInfo.description
     splitTest.labsIcon = labsInfo.icon
+    splitTest.labsSuccessNotification = labsInfo.successNotification
   }
   return _saveSplitTest(splitTest)
 }
