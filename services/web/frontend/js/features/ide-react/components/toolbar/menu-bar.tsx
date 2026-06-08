@@ -25,6 +25,7 @@ import getMeta from '@/utils/meta'
 import EditorCloneProjectModalWrapper from '@/features/clone-project-modal/components/editor-clone-project-modal-wrapper'
 import useOpenProject from '@/shared/hooks/use-open-project'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const menubarExtraComponents = importOverleafModules(
   'menubarExtraComponents'
@@ -45,6 +46,8 @@ export const ToolbarMenuBar = () => {
   const anonymous = getMeta('ol-anonymous')
   const showSupport = getMeta('ol-showSupport')
   const showDocumentation = getMeta('ol-wikiEnabled')
+
+  const hasEditorTabs = useFeatureFlag('editor-tabs')
 
   useCommandProvider(
     () => [
@@ -204,8 +207,14 @@ export const ToolbarMenuBar = () => {
     [t]
   )
 
-  const { mathPreview, setMathPreview, breadcrumbs, setBreadcrumbs } =
-    useProjectSettingsContext()
+  const {
+    mathPreview,
+    setMathPreview,
+    breadcrumbs,
+    setBreadcrumbs,
+    editorTabs,
+    setEditorTabs,
+  } = useProjectSettingsContext()
 
   const toggleMathPreview = useCallback(() => {
     setMathPreview(!mathPreview)
@@ -214,6 +223,10 @@ export const ToolbarMenuBar = () => {
   const toggleBreadcrumbs = useCallback(() => {
     setBreadcrumbs(!breadcrumbs)
   }, [setBreadcrumbs, breadcrumbs])
+
+  const toggleEditorTabs = useCallback(() => {
+    setEditorTabs(!editorTabs)
+  }, [setEditorTabs, editorTabs])
 
   const { setActiveModal } = useRailContext()
   const openKeyboardShortcutsModal = useCallback(() => {
@@ -252,6 +265,16 @@ export const ToolbarMenuBar = () => {
             }
             onClick={toggleBreadcrumbs}
           />
+          {hasEditorTabs && (
+            <MenuBarOption
+              eventKey="show_editor_tabs"
+              title={t('show_editor_tabs')}
+              leadingIcon={
+                editorTabs ? 'check' : <DropdownItem.EmptyLeadingIcon />
+              }
+              onClick={toggleEditorTabs}
+            />
+          )}
           <MenuBarOption
             eventKey="show_equation_preview"
             title={t('show_equation_preview')}

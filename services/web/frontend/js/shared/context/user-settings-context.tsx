@@ -29,6 +29,7 @@ export const defaultSettings: UserSettings = {
   fontFamily: 'monaco',
   lineHeight: 'normal',
   mathPreview: true,
+  editorTabs: true,
   referencesSearchMode: 'advanced',
   breadcrumbs: true,
   nonBlinkingCursor: false,

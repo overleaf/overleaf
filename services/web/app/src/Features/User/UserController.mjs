@@ -425,6 +425,9 @@ async function updateUserSettings(req, res, next) {
   if (body.breadcrumbs != null) {
     user.ace.breadcrumbs = Boolean(body.breadcrumbs)
   }
+  if (body.editorTabs != null) {
+    user.ace.editorTabs = Boolean(body.editorTabs)
+  }
   if (body.nonBlinkingCursor != null) {
     user.ace.nonBlinkingCursor = Boolean(body.nonBlinkingCursor)
   }

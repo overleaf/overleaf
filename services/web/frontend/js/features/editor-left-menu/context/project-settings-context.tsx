@@ -33,6 +33,7 @@ type ProjectSettingsSetterContextValue = {
   setPdfViewer: (pdfViewer: UserSettings['pdfViewer']) => void
   setMathPreview: (mathPreview: UserSettings['mathPreview']) => void
   setBreadcrumbs: (breadcrumbs: UserSettings['breadcrumbs']) => void
+  setEditorTabs: (editorTabs: UserSettings['editorTabs']) => void
   setNonBlinkingCursor: (
     nonBlinkingCursor: UserSettings['nonBlinkingCursor']
   ) => void
@@ -95,6 +96,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
     setMathPreview,
     breadcrumbs,
     setBreadcrumbs,
+    editorTabs,
+    setEditorTabs,
     nonBlinkingCursor,
     setNonBlinkingCursor,
     darkModePdf,
@@ -149,6 +152,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setMathPreview,
       breadcrumbs,
       setBreadcrumbs,
+      editorTabs,
+      setEditorTabs,
       nonBlinkingCursor,
       setNonBlinkingCursor,
       darkModePdf,
@@ -199,6 +204,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setMathPreview,
       breadcrumbs,
       setBreadcrumbs,
+      editorTabs,
+      setEditorTabs,
       nonBlinkingCursor,
       setNonBlinkingCursor,
       darkModePdf,

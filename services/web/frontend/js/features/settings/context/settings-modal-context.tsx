@@ -36,6 +36,7 @@ import type {
   SettingsSection,
   SettingsSectionHook,
 } from '@/features/settings/context/types'
+import EditorTabsSetting from '../components/editor-settings/editor-tabs-setting'
 
 const [referenceSearchSettingModule] = importOverleafModules(
   'referenceSearchSetting'
@@ -110,6 +111,11 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
               {
                 key: 'syntaxValidation',
                 component: <CodeCheckSetting />,
+              },
+              {
+                key: 'editorTabs',
+                component: <EditorTabsSetting />,
+                hidden: !hasEditorTabs,
               },
               {
                 key: 'previewTabs',

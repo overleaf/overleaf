@@ -2,6 +2,8 @@
   --editor-tab-max-path-length: 250px;
   --editor-tab-divider-color: var(--neutral-70);
   --editor-tab-row-height: var(--review-panel-header-height, 36px);
+  --editor-tab-drop-indicator-width: 5px;
+  --editor-tab-divider-width: 1px;
 }
 
 @include theme('light') {
@@ -41,12 +43,7 @@
   flex: 1;
   background: var(--bg-secondary-themed);
   overflow-x: auto;
-
-  &.editor-tabs-row-hovered {
-    .editor-file-tab:last-child {
-      border-right-color: var(--border-primary-themed);
-    }
-  }
+  scrollbar-width: thin;
 }
 
 .editor-file-tab {
@@ -54,8 +51,9 @@
   --tab-text-color: var(--content-secondary-themed);
 
   display: flex;
-  border-right: 1px solid var(--editor-tab-divider-color);
-  border-left: 1px solid transparent;
+  position: relative;
+  border-right: var(--editor-tab-divider-width) solid
+    var(--editor-tab-divider-color);
   padding: var(--spacing-01) var(--spacing-02) 0 var(--spacing-02);
 
   &:first-child {
@@ -137,12 +135,27 @@
     font-size: var(--font-size-01);
   }
 
-  &.tab-drop-right {
-    border-right-color: var(--border-primary-themed);
+  &.tab-drop-left::after,
+  &.tab-drop-right::after,
+  .editor-tabs-row-hovered &:last-child::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: var(--editor-tab-drop-indicator-width);
+    background-color: var(--border-primary-themed);
   }
 
-  &.tab-drop-left {
-    border-left-color: var(--border-primary-themed);
+  &.tab-drop-right::after,
+  .editor-tabs-row-hovered &:last-child::after {
+    right: calc(
+      var(--editor-tab-drop-indicator-width) /
+        -2 - var(--editor-tab-divider-width)
+    );
+  }
+
+  &.tab-drop-left::after {
+    left: calc(var(--editor-tab-drop-indicator-width) / -2);
   }
 
   &.tab-temporary {

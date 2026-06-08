@@ -24,6 +24,7 @@ export default function useUserWideSettings() {
     pdfViewer,
     mathPreview,
     breadcrumbs,
+    editorTabs,
     nonBlinkingCursor,
     darkModePdf,
     zotero,
@@ -130,6 +131,13 @@ export default function useUserWideSettings() {
     [saveUserSettings]
   )
 
+  const setEditorTabs = useCallback(
+    (editorTabs: UserSettings['editorTabs']) => {
+      saveUserSettings('editorTabs', editorTabs)
+    },
+    [saveUserSettings]
+  )
+
   const setNonBlinkingCursor = useCallback(
     (nonBlinkingCursor: UserSettings['nonBlinkingCursor']) => {
       saveUserSettings('nonBlinkingCursor', nonBlinkingCursor)
@@ -196,6 +204,8 @@ export default function useUserWideSettings() {
     setMathPreview,
     breadcrumbs,
     setBreadcrumbs,
+    editorTabs,
+    setEditorTabs,
     nonBlinkingCursor,
     setNonBlinkingCursor,
     darkModePdf,

@@ -27,6 +27,7 @@ export type UserSettings = {
   mathPreview: boolean
   referencesSearchMode: 'advanced' | 'simple'
   breadcrumbs: boolean
+  editorTabs: boolean
   nonBlinkingCursor: boolean
   darkModePdf: boolean
   zotero: RefProviderSettings

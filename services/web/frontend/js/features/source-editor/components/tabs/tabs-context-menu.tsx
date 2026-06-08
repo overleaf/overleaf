@@ -123,7 +123,7 @@ export function TabsContextMenu() {
               // focus the tab setting
               window.dispatchEvent(
                 new CustomEvent('ui.focus-setting', {
-                  detail: 'previewTabs',
+                  detail: 'editorTabs',
                 })
               )
               close()

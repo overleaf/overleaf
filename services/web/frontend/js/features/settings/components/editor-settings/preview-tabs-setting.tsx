@@ -3,7 +3,8 @@ import ToggleSetting from '../toggle-setting'
 import { useTranslation } from 'react-i18next'
 
 export default function PreviewTabsSetting() {
-  const { previewTabs, setPreviewTabs } = useProjectSettingsContext()
+  const { previewTabs, setPreviewTabs, editorTabs } =
+    useProjectSettingsContext()
   const { t } = useTranslation()
 
   return (
@@ -13,6 +14,7 @@ export default function PreviewTabsSetting() {
       description={t('tabs_open_in_preview_mode_until_you_interact_with_them')}
       checked={previewTabs}
       onChange={setPreviewTabs}
+      disabled={!editorTabs}
     />
   )
 }

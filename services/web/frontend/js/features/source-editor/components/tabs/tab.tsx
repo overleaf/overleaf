@@ -98,6 +98,9 @@ export const Tab = memo(function Tab({
   const onDragLeave = useCallback(
     (e: React.DragEvent) => {
       e.stopPropagation()
+      if (e.currentTarget.contains(e.relatedTarget as Node | null)) {
+        return
+      }
       throttledOnDragOver.cancel()
       setDropTargetPosition(null)
     },

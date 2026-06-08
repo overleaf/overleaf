@@ -14,12 +14,12 @@ import { useFileTreeOpenContext } from './file-tree-open-context'
 import { useEditorManagerContext } from './editor-manager-context'
 import { debugConsole } from '@/utils/debugging'
 import { disambiguatePaths } from '../util/disambiguate-paths'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import {
   FileTreeFindResult,
   isFileRefResult,
 } from '@/features/ide-react/types/file-tree'
+import { useAreTabsEnabled } from '../hooks/use-are-tabs-enabled'
 
 type PersistedTabInfo = { id: string; lifetime: Lifetime }
 
@@ -70,7 +70,7 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
 
   const { openEntity } = useFileTreeOpenContext()
   const { openDocWithId, openFileWithId } = useEditorManagerContext()
-  const tabsEnabled = isSplitTestEnabled('editor-tabs')
+  const tabsEnabled = useAreTabsEnabled()
   const { userSettings } = useUserSettingsContext()
   const { previewTabs } = userSettings
 

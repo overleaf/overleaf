@@ -137,7 +137,7 @@ function makeEditorViewProvider() {
       const editorView = new EditorView({
         state: EditorState.create({
           extensions: [
-            tabsListener(),
+            tabsListener(true),
             EditorView.contentAttributes.of({
               'data-testid': 'mock-editor-view',
             }),
@@ -675,10 +675,10 @@ describe('File Tabs', function () {
         'have.been.calledWithMatch',
         Cypress.sinon.match({ type: 'ui.toggle-left-menu', detail: true })
       )
-      // ...and focuses the previewTabs setting
+      // ...and focuses the editorTabs setting
       cy.get('@dispatchEvent').should(
         'have.been.calledWithMatch',
-        Cypress.sinon.match({ type: 'ui.focus-setting', detail: 'previewTabs' })
+        Cypress.sinon.match({ type: 'ui.focus-setting', detail: 'editorTabs' })
       )
 
       // and the context menu closes

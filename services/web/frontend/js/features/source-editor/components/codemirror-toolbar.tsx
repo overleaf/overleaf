@@ -36,6 +36,7 @@ import { useFeatureFlag } from '@/shared/context/split-test-context'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import ReviewPanelHeaderBuffer from '@/features/review-panel/components/review-panel-header-buffer'
+import { useAreTabsEnabled } from '@/features/ide-react/hooks/use-are-tabs-enabled'
 
 const sourceEditorToolbarComponents = importOverleafModules(
   'sourceEditorToolbarComponents'
@@ -160,7 +161,7 @@ const Toolbar = memo(function Toolbar() {
   }, [buildOverflow, insideTable, resizeRef])
 
   const showActions = !state.readOnly && !insideTable
-  const tabsVisible = useFeatureFlag('editor-tabs')
+  const tabsVisible = useAreTabsEnabled()
 
   if (focusMode) {
     return null

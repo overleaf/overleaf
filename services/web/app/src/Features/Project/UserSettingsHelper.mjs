@@ -30,6 +30,7 @@ async function buildUserSettings(_req, _res, user) {
     overallTheme: getOverallTheme(user),
     mathPreview: user.ace.mathPreview,
     breadcrumbs: user.ace.breadcrumbs,
+    editorTabs: user.ace.editorTabs ?? true,
     nonBlinkingCursor: user.ace.nonBlinkingCursor ?? false,
     referencesSearchMode: user.ace.referencesSearchMode,
     darkModePdf: user.ace.darkModePdf ?? false,
