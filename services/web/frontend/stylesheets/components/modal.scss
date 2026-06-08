@@ -33,18 +33,6 @@
   }
 }
 
-// OLModal wraps children in a FocusTrap that renders a <div> between
-// .modal-content and .modal-header/.modal-body/.modal-footer, breaking
-// Bootstrap's flex chain for scrollable modals. Make it a flex column so
-// .modal-body inside it can grow and scroll correctly.
-.modal-dialog-scrollable .modal-content > div {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
-  flex: 1 1 auto;
-}
-
 .modal-content {
   @include shadow-lg;
 
