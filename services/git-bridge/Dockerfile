@@ -16,6 +16,17 @@ RUN chmod +x /opt/envsubst
 
 RUN useradd --create-home node
 
+ENV MAVEN_OPTS="-Dmaven.repo.local=/app/.m2/repository"
+
+# pre-resolve Maven dependencies and plugins into the base image to limit
+# downstream `mvn` invocations hitting Maven Central on every CI build.
+COPY pom.xml /tmp/pom.xml
+RUN mvn -B --no-transfer-progress -f /tmp/pom.xml \
+      dependency:go-offline \
+      dependency:resolve-plugins \
+ && chown -R node:node /app/.m2 \
+ && rm /tmp/pom.xml
+
 FROM base AS builder
 
 COPY . /app
