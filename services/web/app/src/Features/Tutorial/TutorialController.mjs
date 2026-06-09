@@ -30,6 +30,8 @@ const VALID_KEYS = [
   'new-editor-intro-2',
   'workbench-rail-popover',
   'themed-dashboard-intro',
+  'dimensions-consent',
+  'dimensions-rail-popover',
 ]
 
 async function completeTutorial(req, res, next) {

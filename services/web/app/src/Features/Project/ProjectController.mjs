@@ -447,6 +447,7 @@ const _ProjectController = {
     }
 
     const splitTests = [
+      'plugin-dimensions',
       'bibtex-visual-editor',
       'compile-log-events',
       'visual-preview',

@@ -23,6 +23,7 @@ export type RailTabKey =
   | 'review-panel'
   | 'chat'
   | 'full-project-search'
+  | 'dimensions'
   | 'workbench'
 
 export type RailModalKey =

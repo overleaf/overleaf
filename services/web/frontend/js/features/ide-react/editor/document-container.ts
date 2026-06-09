@@ -152,6 +152,7 @@ export class DocumentContainer extends EventEmitter {
       this.doc.attachToCM6(this.cm6)
     }
     this.cm6.on('change', this.checkConsistency)
+    this.trigger('cm6:attach')
   }
 
   detachFromCM6() {
