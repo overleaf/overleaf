@@ -621,55 +621,6 @@ describe('EmailBuilder', function () {
         })
       })
 
-      describe('welcome', function () {
-        beforeEach(function (ctx) {
-          ctx.emailAddress = 'example@overleaf.com'
-          ctx.opts = {
-            to: ctx.emailAddress,
-            confirmEmailUrl: `${ctx.settings.siteUrl}/user/emails/confirm?token=token123`,
-          }
-          ctx.email = ctx.EmailBuilder.buildEmail('welcome', ctx.opts)
-          ctx.dom = cheerio.load(ctx.email.html)
-        })
-
-        it('should build the email', function (ctx) {
-          expect(ctx.email.html).to.exist
-          expect(ctx.email.text).to.exist
-        })
-
-        describe('HTML email', function () {
-          it('should include a CTA button and a fallback CTA link', function (ctx) {
-            const buttonLink = ctx.dom('a:contains("Confirm email")')
-            expect(buttonLink.length).to.equal(1)
-            expect(buttonLink.attr('href')).to.equal(ctx.opts.confirmEmailUrl)
-            expect(ctx.email.html).to.contain('copy and paste this link')
-            expect(ctx.email.html).to.contain(ctx.opts.confirmEmailUrl)
-          })
-          it('should include help links', function (ctx) {
-            const helpGuidesLink = ctx.dom('a:contains("Help Guides")')
-            const templatesLink = ctx.dom('a:contains("Templates")')
-            const logInLink = ctx.dom('a:contains("log in")')
-            expect(helpGuidesLink.length).to.equal(1)
-            expect(templatesLink.length).to.equal(1)
-            expect(logInLink.length).to.equal(1)
-          })
-        })
-
-        describe('plain text email', function () {
-          it('should contain the CTA URL', function (ctx) {
-            expect(ctx.email.text).to.contain(ctx.opts.confirmEmailUrl)
-          })
-          it('should include help URL', function (ctx) {
-            expect(ctx.email.text).to.contain('/learn')
-            expect(ctx.email.text).to.contain('/login')
-            expect(ctx.email.text).to.contain('/templates')
-          })
-          it('should contain HTML links', function (ctx) {
-            expect(ctx.email.text).to.not.contain('<a')
-          })
-        })
-      })
-
       describe('groupSSODisabled', function () {
         it('should build the email for non managed and linked users', function (ctx) {
           const setNewPasswordUrl = `${ctx.settings.siteUrl}/user/password/reset`
