@@ -10,7 +10,6 @@ import {
   EditorManagerContext,
 } from '@/features/ide-react/context/editor-manager-context'
 import { TAB_TRANSFER_TYPE } from '@/features/ide-react/context/tabs-context'
-import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'
 import {
   EditorViewContext,
   useEditorViewContext,
@@ -19,6 +18,8 @@ import { EditorView } from '@codemirror/view'
 import { EditorState, Transaction } from '@codemirror/state'
 import { tabsListener } from '@/features/source-editor/extensions/tabs-listener'
 import ReviewPanelTabsHeaderPortal from '@/features/review-panel/components/review-panel-tabs-header-portal'
+import { FileTree } from '@/features/ide-react/components/file-tree'
+import { PROJECT_ID } from '../../../helpers/editor-providers'
 
 const DOC_IDS = {
   main: 'doc-main-id',
@@ -175,49 +176,21 @@ function RemoteChangeButton() {
   )
 }
 
-// Rendered inside the provider tree to call handleFileTreeSelect() when a
-// custom DOM event fires. Also triggers handleFileTreeInit() on mount.
-function FileSelectionDriver({
-  autoSelectEntity,
-}: {
-  autoSelectEntity?: FileTreeDocumentFindResult | FileTreeFileRefFindResult
-} = {}) {
-  const { handleFileTreeSelect, handleFileTreeInit } = useFileTreeOpenContext()
-  const initDone = useRef(false)
-
-  useEffect(() => {
-    if (!initDone.current) {
-      initDone.current = true
-      handleFileTreeInit()
-      if (autoSelectEntity) {
-        handleFileTreeSelect([autoSelectEntity])
-      }
-    }
-  }, [handleFileTreeInit, handleFileTreeSelect, autoSelectEntity])
-
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const { detail } = e as CustomEvent
-      handleFileTreeSelect([detail])
-    }
-    document.addEventListener('test:selectEntity', handler)
-    return () => {
-      document.removeEventListener('test:selectEntity', handler)
-    }
-  }, [handleFileTreeSelect])
-
-  return null
+function expandFolders(path: string[] = []) {
+  // path[0] is the root folder, so skip that one
+  path.slice(1).forEach(folderId => {
+    cy.get(`[data-file-id="${folderId}"] .file-tree-entity-button`).click()
+  })
 }
 
-// Dispatch a custom event to select an entity (simulates file-tree click).
-// Must be wrapped in cy.then() so it runs in the Cypress command queue.
+// Target rows by entity id rather than accessible name so that entities sharing
+// a name stay unambiguous.
 function selectEntity(
   entity: FileTreeDocumentFindResult | FileTreeFileRefFindResult
 ) {
-  document.dispatchEvent(
-    new CustomEvent('test:selectEntity', { detail: entity })
-  )
-  cy.findByRole('tab', { name: new RegExp(entity.entity.name) }).should('exist')
+  expandFolders(entity.path)
+  cy.get(`[data-file-id="${entity.entity._id}"]`).click()
+  cy.get(`[data-tab-id="${entity.entity._id}"]`).should('exist')
 }
 
 function selectDoc(id: string, path?: string[]) {
@@ -246,8 +219,8 @@ describe('File Tabs', function () {
           EditorViewProvider: makeEditorViewProvider(),
         }}
       >
-        <FileSelectionDriver />
         <TabsContainer />
+        <FileTree />
         <ReviewPanelTabsHeaderPortal />
         <RemoteChangeButton />
       </EditorProviders>
@@ -264,10 +237,17 @@ describe('File Tabs', function () {
     // Clear persisted tab state from localStorage
     cy.window().then(win => {
       Object.keys(win.localStorage).forEach(key => {
-        if (key.startsWith('open-tabs:')) {
+        if (key.startsWith('open-tabs:') || key.startsWith('folder.')) {
           win.localStorage.removeItem(key)
         }
       })
+
+      // Pointing doc.open_id at a non-existent entity stops the file tree
+      // auto-selecting
+      win.localStorage.setItem(
+        `doc.open_id.${PROJECT_ID}`,
+        JSON.stringify('no-open-doc')
+      )
     })
     cy.window().then(win => {
       win.metaAttributesCache.set('ol-user', { id: 'user1' })
@@ -280,26 +260,13 @@ describe('File Tabs', function () {
 
   describe('Initial file selection', function () {
     it('automatically creates a tab for the initially opened file', function () {
-      // Re-mount with auto-selection of the root doc to simulate
-      // the file tree opening the initial document on startup
-      cy.mount(
-        <EditorProviders
-          rootFolder={defaultRootFolder as any}
-          rootDocId={DOC_IDS.main}
-          providers={{
-            EditorManagerProvider: makeEditorManagerProvider(),
-            EditorViewProvider: makeEditorViewProvider(),
-          }}
-        >
-          <FileSelectionDriver
-            autoSelectEntity={makeDocEntity(
-              DOC_IDS.intro,
-              DOC_NAMES[DOC_IDS.intro]
-            )}
-          />
-          <TabsContainer />
-        </EditorProviders>
-      )
+      cy.window().then(win => {
+        win.localStorage.setItem(
+          `doc.open_id.${PROJECT_ID}`,
+          JSON.stringify(DOC_IDS.intro)
+        )
+      })
+      mountTabs()
 
       cy.findByRole('tab', { name: /intro\.tex/ }).should('exist')
     })
@@ -422,6 +389,21 @@ describe('File Tabs', function () {
       )
 
       cy.findByRole('tab', { name: /main\.tex/ }).dblclick()
+
+      cy.findByRole('tab', { name: /main\.tex/ }).should(
+        'not.have.class',
+        'tab-temporary'
+      )
+    })
+
+    it('makes a temporary tab permanent on double-clicking its file tree entry', function () {
+      cy.then(() => selectDoc(DOC_IDS.main))
+      cy.findByRole('tab', { name: /main\.tex/ }).should(
+        'have.class',
+        'tab-temporary'
+      )
+
+      cy.findByRole('treeitem', { name: 'main.tex' }).dblclick()
 
       cy.findByRole('tab', { name: /main\.tex/ }).should(
         'not.have.class',
