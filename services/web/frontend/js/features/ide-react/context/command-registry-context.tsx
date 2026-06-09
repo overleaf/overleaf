@@ -5,6 +5,7 @@ import {
   useContext,
   useMemo,
   useState,
+  ReactNode,
 } from 'react'
 
 type CommandInvocationContext = {
@@ -19,6 +20,7 @@ export type Command = {
   handler?: (context: CommandInvocationContext) => void
   href?: string
   disabled?: boolean
+  leadingIcon?: ReactNode
 }
 
 const CommandRegistryContext = createContext<CommandRegistry | undefined>(

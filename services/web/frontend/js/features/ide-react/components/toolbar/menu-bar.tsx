@@ -33,6 +33,10 @@ const menubarExtraComponents = importOverleafModules(
   import: { default: ElementType }
 }[]
 
+const insertMenuSections = importOverleafModules('insertMenuSections') as {
+  import: { default: MenuSectionStructure[] }
+}[]
+
 export const ToolbarMenuBar = () => {
   const { t } = useTranslation()
 
@@ -157,6 +161,9 @@ export const ToolbarMenuBar = () => {
         id: 'insert-comment',
         children: ['comment'],
       },
+      ...insertMenuSections.flatMap(
+        ({ import: { default: sections } }) => sections
+      ),
     ],
     [t]
   )

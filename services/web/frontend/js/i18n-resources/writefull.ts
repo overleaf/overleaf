@@ -216,6 +216,9 @@ const en = {
     'errors.error-hit-limit-freemium.body':
       'You’ve hit your daily AI limit. Upgrade now for unlimited language suggestions and LaTeX support, and early access to upcoming features like TikZ generation.',
     'toolbar.abstract-generator.name': 'Abstract generator',
+    'insert-menu.abstract-generator': 'Abstract',
+    'insert-menu.keywords-generator': 'Keywords',
+    'insert-menu.title-generator': 'Title',
     'toolbar.abstract-generator.disabled_non_english':
       'You need to be writing in English to generate an abstract',
     'toolbar.keywords-generator.name': 'Keywords generator',
@@ -750,6 +753,9 @@ const es = {
     'errors.error-hit-limit-freemium.body':
       'Has agotado tu cuota de Writefull. Actualiza ahora para obtener sugerencias de lenguaje ilimitadas y soporte en LaTeX, y acceso anticipado a las próximas funciones de generación como TikZ.',
     'toolbar.abstract-generator.name': 'Generar Abstract',
+    'insert-menu.abstract-generator': 'Abstract',
+    'insert-menu.keywords-generator': 'Palabras clave',
+    'insert-menu.title-generator': 'Título',
     'toolbar.abstract-generator.disabled_non_english':
       'Necesitas estar en un documento en inglés para generar un abstract',
     'toolbar.keywords-generator.name': 'Generar Palabras Clave',

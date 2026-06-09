@@ -127,6 +127,7 @@ const CommandDropdownChild = ({ item }: { item: Entry<TaggedCommand> }) => {
         onClick={onClickHandler}
         href={item.href}
         disabled={item.disabled}
+        leadingIcon={item.leadingIcon}
         trailingIcon={
           item.shortcuts && <span>{formatShortcut(item.shortcuts[0])}</span>
         }
