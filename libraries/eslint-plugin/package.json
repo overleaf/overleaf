@@ -8,6 +8,7 @@
     "lodash": "^4.18.1"
   },
   "devDependencies": {
+    "@eslint/json": "^2.0.0",
     "@typescript-eslint/parser": "^8.59.4"
   },
   "peerDependencies": {

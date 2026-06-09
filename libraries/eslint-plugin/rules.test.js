@@ -1,5 +1,6 @@
 const { RuleTester } = require('eslint')
 const tsParser = require('@typescript-eslint/parser')
+const json = require('@eslint/json').default
 const noThrowInCallback = require('./no-throw-in-callback')
 const preferKebabUrl = require('./prefer-kebab-url')
 const noUnnecessaryTrans = require('./no-unnecessary-trans')
@@ -7,6 +8,10 @@ const shouldUnescapeTrans = require('./should-unescape-trans')
 const noGeneratedEditorThemes = require('./no-generated-editor-themes')
 const viDoMockValidPath = require('./require-vi-doMock-valid-path')
 const requireCioSnakeCaseProperties = require('./require-cio-snake-case-properties')
+const noConsecutiveSpacesInLocales = require('./no-consecutive-spaces-in-locales')
+const noStraightApostrophesInLocales = require('./no-straight-apostrophes-in-locales')
+const frenchTypographyInLocales = require('./french-typography-in-locales')
+const sortedKeysInLocales = require('./sorted-keys-in-locales')
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -14,6 +19,11 @@ const ruleTester = new RuleTester({
     ecmaVersion: 'latest',
     parserOptions: { ecmaFeatures: { jsx: true } },
   },
+})
+
+const jsonRuleTester = new RuleTester({
+  plugins: { json },
+  language: 'json/json',
 })
 
 ruleTester.run('prefer-kebab-url', preferKebabUrl, {
@@ -326,6 +336,121 @@ ruleTester.run('no-throw-in-callback', noThrowInCallback, {
     {
       code: `function foo(cb) { bar(function(done) { throw new Error() }) }`,
       errors: [{ message: noThrowInCallbackMessage }],
+    },
+  ],
+})
+
+
+jsonRuleTester.run(
+  'no-consecutive-spaces-in-locales',
+  noConsecutiveSpacesInLocales,
+  {
+    valid: [
+      { code: '{ "key": "one space" }' },
+      { code: '{ "key": "no whitespace" }' },
+    ],
+    invalid: [
+      {
+        code: '{ "key": "two  spaces" }',
+        errors: [{ messageId: 'consecutiveSpaces' }],
+        output: '{ "key": "two spaces" }',
+      },
+      {
+        code: '{ "key": "three   spaces" }',
+        errors: [{ messageId: 'consecutiveSpaces' }],
+        output: '{ "key": "three spaces" }',
+      },
+      {
+        // \t then space → two consecutive whitespace chars
+        code: '{ "key": "tab\\t and" }',
+        errors: [{ messageId: 'consecutiveSpaces' }],
+        output: '{ "key": "tab and" }',
+      },
+    ],
+  }
+)
+
+jsonRuleTester.run(
+  'no-straight-apostrophes-in-locales',
+  noStraightApostrophesInLocales,
+  {
+    valid: [
+      { code: '{ "key": "no apostrophe" }' },
+      { code: '{ "key": "it’s curly" }' },
+    ],
+    invalid: [
+      {
+        code: `{ "key": "it's straight" }`,
+        errors: [{ messageId: 'straightApostrophe' }],
+        output: '{ "key": "it’s straight" }',
+      },
+    ],
+  }
+)
+
+jsonRuleTester.run('sorted-keys-in-locales', sortedKeysInLocales, {
+  valid: [
+    { code: '{\n  "a": "1",\n  "b": "2"\n}\n' },
+    { code: '{}' },
+    { code: '{ "only": "one" }' },
+  ],
+  invalid: [
+    {
+      code: '{\n  "b": "2",\n  "a": "1"\n}\n',
+      errors: [{ messageId: 'unsorted' }],
+      output: '{\n  "a": "1",\n  "b": "2"\n}\n',
+    },
+  ],
+})
+
+jsonRuleTester.run('french-typography-in-locales', frenchTypographyInLocales, {
+  valid: [
+    { code: '{ "key": "Bonjour ?" }' },
+    { code: '{ "key": "Liste :" }' },
+    { code: '{ "key": "« contenu »" }' },
+    { code: '{ "key": "abc 123" }' },
+    { code: '{ "key": "10 %" }' },
+  ],
+  invalid: [
+    {
+      code: '{ "key": "Bonjour?" }',
+      errors: 1,
+      output: '{ "key": "Bonjour ?" }',
+    },
+    {
+      code: '{ "key": "Bonjour ?" }',
+      errors: 1,
+      output: '{ "key": "Bonjour ?" }',
+    },
+    {
+      code: '{ "key": "Liste:" }',
+      errors: 1,
+      output: '{ "key": "Liste :" }',
+    },
+    {
+      code: '{ "key": "«contenu»" }',
+      errors: 2,
+      output: '{ "key": "« contenu »" }',
+    },
+    {
+      code: '{ "key": "10%" }',
+      errors: 1,
+      output: '{ "key": "10 %" }',
+    },
+    {
+      code: '{ "key": "sûr(e)" }',
+      errors: [
+        {
+          message:
+            'expected point médian "·" instead of "(e)" for inclusive writing',
+          suggestions: [
+            {
+              desc: 'Replace "(e)" with "·e"',
+              output: '{ "key": "sûr·e" }',
+            },
+          ],
+        },
+      ],
     },
   ],
 })

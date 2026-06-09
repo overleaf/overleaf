@@ -574,9 +574,6 @@ lint: check_extracted_translations
 check_extracted_translations:
 	bin/check_extracted_translations
 
-sort_locales:
-	 node scripts/translations/sort.js
-
 cleanup_unused_locales:
 	 node scripts/translations/cleanupUnusedLocales.js
 

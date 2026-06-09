@@ -432,7 +432,7 @@
   "save_or_cancel-or": "of",
   "save_or_cancel-save": "Sla op",
   "saving": "Aan het opslaan",
-  "saving_notification_with_seconds": "__docname__  aan het opslaan... (__seconds__ seconden aan niet-opgeslagen wijzigingen)",
+  "saving_notification_with_seconds": "__docname__ aan het opslaan... (__seconds__ seconden aan niet-opgeslagen wijzigingen)",
   "search_bib_files": "Zoek op auteur, titel, jaar",
   "search_projects": "Projecten zoeken",
   "search_references": "Doorzoek het .bib bestand in dit project",

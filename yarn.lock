@@ -3602,6 +3602,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@eslint/json@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@eslint/json@npm:2.0.0"
+  dependencies:
+    "@eslint/core": "npm:^1.2.1"
+    "@eslint/plugin-kit": "npm:^0.7.1"
+    "@humanwhocodes/momoa": "npm:^3.3.10"
+    natural-compare: "npm:^1.4.0"
+  checksum: 10c0/b4b6dcc06dcc981cbc0e582d6126890f238d115ba876f5dccf95e907cafc8c4952d20ea236249d831e79f94d208602253a131cfeabd5d30e0181581fa4fc643e
+  languageName: node
+  linkType: hard
+
 "@eslint/object-schema@npm:^3.0.5":
   version: 3.0.5
   resolution: "@eslint/object-schema@npm:3.0.5"
@@ -4104,6 +4116,13 @@ __metadata:
   version: 1.0.1
   resolution: "@humanwhocodes/module-importer@npm:1.0.1"
   checksum: 10c0/909b69c3b86d482c26b3359db16e46a32e0fb30bd306a3c176b8313b9e7313dba0f37f519de6aa8b0a1921349e505f259d19475e123182416a506d7f87e7f529
+  languageName: node
+  linkType: hard
+
+"@humanwhocodes/momoa@npm:^3.3.10":
+  version: 3.3.10
+  resolution: "@humanwhocodes/momoa@npm:3.3.10"
+  checksum: 10c0/b80a99f517195ca11d9c3c19431ec5b1b9f4cd21437ed463b2db7e5244a0cdde70148b419e4721baa689b86b8bef2adbb6d1b2c1d140938f1af4640682e3b6d6
   languageName: node
   linkType: hard
 
@@ -6613,6 +6632,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@overleaf/eslint-plugin@workspace:libraries/eslint-plugin"
   dependencies:
+    "@eslint/json": "npm:^2.0.0"
     "@typescript-eslint/parser": "npm:^8.59.4"
     lodash: "npm:^4.18.1"
   peerDependencies:
@@ -7248,6 +7268,7 @@ __metadata:
     "@customerio/cdp-analytics-node": "npm:^0.3.9"
     "@eslint/compat": "npm:^2.1.0"
     "@eslint/js": "npm:^10.0.1"
+    "@eslint/json": "npm:^2.0.0"
     "@floating-ui/react": "npm:^0.27.5"
     "@google-cloud/bigquery": "npm:^8.1.1"
     "@google-cloud/storage": "npm:^7.19.0"

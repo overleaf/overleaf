@@ -213,6 +213,7 @@
     "@codemirror/view": "6.38.6",
     "@eslint/compat": "^2.1.0",
     "@eslint/js": "^10.0.1",
+    "@eslint/json": "^2.0.0",
     "@floating-ui/react": "^0.27.5",
     "@istanbuljs/esm-loader-hook": "^0.3.0",
     "@juggle/resize-observer": "^3.3.1",

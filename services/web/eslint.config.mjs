@@ -23,6 +23,7 @@ import n from 'eslint-plugin-n'
 import promise from 'eslint-plugin-promise'
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
 import js from '@eslint/js'
+import json from '@eslint/json'
 import prettier from 'eslint-config-prettier/flat'
 import { fixupPluginRules } from '@eslint/compat'
 
@@ -57,6 +58,11 @@ export default defineConfig([
     files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
   },
   {
+    // Scope JS/TS-specific config to JS/TS files only so that built-in
+    // rules like `no-irregular-whitespace` aren't applied to JSON files
+    // linted via @eslint/json elsewhere in this config.
+    files: ['**/*.{js,jsx,mjs,cjs,ts,tsx}'],
+
     languageOptions: {
       parser: tsParser,
       // Default to node globals for all backend-style files; the
@@ -945,6 +951,27 @@ export default defineConfig([
   // preceding configs (eslint:recommended, @typescript-eslint, react,
   // jsx-a11y, ...).
   prettier,
+  {
+    // Lint locale JSON files for typographic and i18n conventions.
+    files: ['locales/*.json'],
+    language: 'json/json',
+    plugins: { json, '@overleaf': overleaf },
+    rules: {
+      '@overleaf/no-consecutive-spaces-in-locales': 'error',
+      '@overleaf/no-straight-apostrophes-in-locales': 'error',
+      '@overleaf/sorted-keys-in-locales': 'error',
+      '@overleaf/locale-variables-match-en': 'error',
+      '@overleaf/no-orphan-locale-keys': 'error',
+    },
+  },
+  {
+    files: ['locales/fr.json'],
+    language: 'json/json',
+    plugins: { json, '@overleaf': overleaf },
+    rules: {
+      '@overleaf/french-typography-in-locales': 'error',
+    },
+  },
   globalIgnores([
     '**/data/',
     'scripts/translations/.cache/',
