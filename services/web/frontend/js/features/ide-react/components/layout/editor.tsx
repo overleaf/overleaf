@@ -5,22 +5,22 @@ import classNames from 'classnames'
 import SourceEditor from '@/features/source-editor/components/source-editor'
 import { Panel, PanelGroup } from 'react-resizable-panels'
 import { VerticalResizeHandle } from '@/features/ide-react/components/resize/vertical-resize-handle'
-import { Suspense } from 'react'
+import { FC, Suspense } from 'react'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import SymbolPalettePane from '@/features/ide-react/components/editor/symbol-palette-pane'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
-import { PythonEditorSplit } from '@/features/ide-react/components/layout/python-editor-split'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
+
+const [pythonRunnerModule] = importOverleafModules('pythonRunner') as {
+  import: { PythonEditorSplit: FC }
+}[]
 
 export const Editor = () => {
   const { opening, errorState, showSymbolPalette } =
     useEditorPropertiesContext()
   const { selectedEntityCount, openEntity } = useFileTreeOpenContext()
   const { currentDocumentId, currentDocument } = useEditorOpenDocContext()
-  const isPythonDocument =
-    openEntity?.type === 'doc' &&
-    openEntity.entity.name.toLowerCase().endsWith('.py')
-  const pythonExecutionEnabled = isSplitTestEnabled('overleaf-code')
 
   if (!currentDocumentId) {
     return null
@@ -29,6 +29,10 @@ export const Editor = () => {
   const isLoading = Boolean(
     (!currentDocument || opening) && !errorState && currentDocumentId
   )
+
+  const isPythonDocument =
+    openEntity?.type === 'doc' &&
+    openEntity.entity.name.toLowerCase().endsWith('.py')
 
   return (
     <div
@@ -45,8 +49,10 @@ export const Editor = () => {
           order={1}
           className="ide-redesign-editor-panel"
         >
-          {isPythonDocument && pythonExecutionEnabled ? (
-            <PythonEditorSplit />
+          {pythonRunnerModule &&
+          isPythonDocument &&
+          isSplitTestEnabled('overleaf-code') ? (
+            <pythonRunnerModule.import.PythonEditorSplit />
           ) : (
             <SourceEditor />
           )}
