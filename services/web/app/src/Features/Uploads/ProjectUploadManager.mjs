@@ -91,11 +91,11 @@ async function createProjectFromZipArchiveWithName(
     try {
       const { fileEntries, docEntries } =
         await _initializeProjectWithZipContents(ownerId, project, contentsPath)
-      const rootDocId =
+      const result =
         await ProjectRootDocManager.promises.setRootDocAutomatically(
           project._id
         )
-      if (rootDocId) project.rootDoc_id = rootDocId
+      if (result) project.rootDoc_id = result.rootDocId
       return { fileEntries, docEntries, project }
     } catch (err) {
       // no need to wait for the cleanup here

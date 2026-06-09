@@ -48,7 +48,20 @@ async function compile(projectId, userId, options = {}) {
     return { status: 'autocompile-backoff', outputFiles: [] }
   }
 
-  await ProjectRootDocManager.promises.ensureRootDocumentIsSet(projectId)
+  if (!options.rootResourcePath) {
+    const result =
+      await ProjectRootDocManager.promises.ensureRootDocumentIsValid(projectId)
+    if (result) {
+      options.rootDoc_id = result.rootDocId
+      options.rootResourcePath = result.rootResourcePath.replace(/^\//, '')
+    } else {
+      return {
+        status: 'validation-problems',
+        validationProblems: { mainFile: 'no main file specified' },
+        outputFiles: [],
+      }
+    }
+  }
 
   const limits =
     await CompileManager.promises.getProjectCompileLimits(projectId)
