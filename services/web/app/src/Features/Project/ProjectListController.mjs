@@ -202,7 +202,14 @@ async function projectListPage(req, res, next) {
   let role
 
   if (isSaas) {
-    if (user.isAdmin) await _checkForOldDebugProjects(userId)
+    if (user.isAdmin) {
+      await _checkForOldDebugProjects(userId).catch(err => {
+        logger.warn(
+          { err, userId },
+          'failed to check old debug projects/managing notifications'
+        )
+      })
+    }
 
     await SplitTestSessionHandler.promises.sessionMaintenance(req, user)
 
