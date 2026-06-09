@@ -9,6 +9,32 @@ import { executeV2Captcha } from './captcha'
 import getMeta from '@/utils/meta'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 
+export type SharingLinkPrivileges =
+  | 'readAndWrite'
+  | 'review'
+  | 'readOnly'
+  | false
+
+export type SharingLinkData = {
+  _id: string
+  token: string
+  privileges: SharingLinkPrivileges
+  subscriptionId?: string
+}
+
+export function getSharingLink(projectId: string) {
+  return getJSON<SharingLinkData>(`/project/${projectId}/sharing-link`)
+}
+
+export function updateSharingLink(
+  projectId: string,
+  data: Pick<SharingLinkData, 'privileges' | 'subscriptionId'>
+) {
+  return postJSON<SharingLinkData>(`/project/${projectId}/sharing-link`, {
+    body: data,
+  })
+}
+
 export function sendInvite(
   projectId: string,
   email: string,

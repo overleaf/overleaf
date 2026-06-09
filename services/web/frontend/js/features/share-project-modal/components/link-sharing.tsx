@@ -67,7 +67,7 @@ export default function LinkSharing() {
   }
 
   if (isSharingUpdatesEnabled) {
-    if (projectAccess === 'linkSharing') {
+    if (projectAccess === 'legacyLinkSharing') {
       return <ReadAndWriteTokenLinks />
     }
     return null

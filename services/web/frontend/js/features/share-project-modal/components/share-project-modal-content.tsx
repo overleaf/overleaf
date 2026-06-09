@@ -33,6 +33,7 @@ const ShareModalBody = lazy(() => import('./share-modal-body'))
 
 type ShareProjectModalContentProps = {
   cancel: () => void
+  onShow: () => void
   show: boolean
   animation: boolean
   inFlight: boolean
@@ -42,6 +43,7 @@ type ShareProjectModalContentProps = {
 
 export default function ShareProjectModalContent({
   show,
+  onShow,
   cancel,
   animation,
   inFlight,
@@ -49,7 +51,7 @@ export default function ShareProjectModalContent({
   projectName,
 }: ShareProjectModalContentProps) {
   return (
-    <OLModal show={show} onHide={cancel} animation={animation}>
+    <OLModal show={show} onShow={onShow} onHide={cancel} animation={animation}>
       <ShareProjectModalContentInnerWithErrorBoundary
         inFlight={inFlight}
         error={error}

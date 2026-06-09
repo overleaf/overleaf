@@ -998,6 +998,70 @@ describe('<ShareProjectModal/>', function () {
     })
   })
 
+  describe('sharing-updates feature flag enabled', function () {
+    beforeEach(function () {
+      window.metaAttributesCache.set('ol-splitTestVariants', {
+        'sharing-updates': 'enabled',
+      })
+    })
+
+    it('sets "Via sharing links (legacy)" when `publicAccessLevel` is `tokenBased`', async function () {
+      fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
+
+      renderWithEditorContext(
+        <ShareProjectModal {...modalProps} />,
+        createContextProps({ publicAccessLevel: 'tokenBased' })
+      )
+
+      await screen.findByText('Via sharing links (legacy)')
+    })
+
+    it('sets "Only invited people" when sharing-link returns 404', async function () {
+      fetchMock.get(
+        `/project/${shareModalProjectDefaults._id}/sharing-link`,
+        404
+      )
+
+      renderWithEditorContext(
+        <ShareProjectModal {...modalProps} />,
+        createContextProps({ publicAccessLevel: 'private' })
+      )
+
+      await screen.findByText('Only invited people')
+    })
+
+    it('sets "Anyone with the link" when sharing-link returns a link without `subscriptionId`', async function () {
+      fetchMock.get(`/project/${shareModalProjectDefaults._id}/sharing-link`, {
+        _id: 'link-id',
+        token: 'abc123',
+        privileges: 'readOnly',
+      })
+
+      renderWithEditorContext(
+        <ShareProjectModal {...modalProps} />,
+        createContextProps({ publicAccessLevel: 'private' })
+      )
+
+      await screen.findByText('Anyone with the link')
+    })
+
+    it('sets "Anyone in your group with the link" when sharing-link returns a link with subscriptionId', async function () {
+      fetchMock.get(`/project/${shareModalProjectDefaults._id}/sharing-link`, {
+        _id: 'link-id',
+        token: 'abc123',
+        privileges: 'readOnly',
+        subscriptionId: 'sub-123',
+      })
+
+      renderWithEditorContext(
+        <ShareProjectModal {...modalProps} />,
+        createContextProps({ publicAccessLevel: 'private' })
+      )
+
+      await screen.findByText('Anyone in your group with the link')
+    })
+  })
+
   it('allows an email address to be selected, removed, then re-added', async function () {
     renderWithEditorContext(
       <ShareProjectModal {...modalProps} />,
