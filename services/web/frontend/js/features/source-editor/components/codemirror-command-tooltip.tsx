@@ -5,8 +5,10 @@ import {
 } from './codemirror-context'
 import {
   closeCommandTooltip,
+  commandTooltipHandlers,
   commandTooltipState,
 } from '../extensions/command-tooltip'
+import type { CommandTooltipHandler } from '../extensions/command-tooltip'
 import ReactDOM from 'react-dom'
 import { HrefTooltipContent } from './command-tooltip/href-tooltip'
 import { UrlTooltipContent } from './command-tooltip/url-tooltip'
@@ -68,14 +70,18 @@ export const CodeMirrorCommandTooltip = memo(function CodeMirrorLinkTooltip() {
   }
 
   return ReactDOM.createPortal(
-    <CodeMirrorCommandTooltipContent command={tooltipState.command} />,
+    <CodeMirrorCommandTooltipContent
+      command={tooltipState.command}
+      handlers={state.facet(commandTooltipHandlers)}
+    />,
     tooltipView.dom
   )
 })
 
 const CodeMirrorCommandTooltipContent = memo<{
   command: string
-}>(function CodeMirrorCommandTooltipContent({ command }) {
+  handlers: readonly CommandTooltipHandler[]
+}>(function CodeMirrorCommandTooltipContent({ command, handlers }) {
   switch (command) {
     case 'HrefCommand':
       return <HrefTooltipContent />
@@ -89,7 +95,10 @@ const CodeMirrorCommandTooltipContent = memo<{
       return <InputTooltipContent />
     case 'Subfile':
       return <SubfileTooltipContent />
-    default:
-      return null
+    default: {
+      // Tooltips contributed by modules via the `commandTooltipHandlers` facet
+      const handler = handlers.find(handler => handler.command === command)
+      return handler ? handler.render() : null
+    }
   }
 })

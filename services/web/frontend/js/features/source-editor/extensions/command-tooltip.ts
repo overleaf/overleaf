@@ -11,11 +11,13 @@ import {
 import {
   EditorSelection,
   EditorState,
+  Facet,
   Prec,
   SelectionRange,
   StateEffect,
   StateField,
 } from '@codemirror/state'
+import type { ReactNode } from 'react'
 import { ancestorOfNodeWithType } from '../utils/tree-query'
 import { ensureSyntaxTree, syntaxTree } from '@codemirror/language'
 import {
@@ -32,11 +34,29 @@ import {
 } from '@codemirror/autocomplete'
 import { SyntaxNode } from '@lezer/common'
 
-type ActiveTooltip = {
+export type ActiveTooltip = {
   range: SelectionRange
   tooltip: Tooltip
   command: string
 } | null
+
+export type CommandTooltipContext = {
+  state: EditorState
+  pos: number
+  value: ActiveTooltip
+  commandNode: SyntaxNode
+}
+
+// A command-tooltip handler lets a module add a tooltip for a syntax node type
+// that isn't part of the LaTeX `$CommandTooltipCommand` group (e.g. the
+// markdown `Link` node)
+export type CommandTooltipHandler = {
+  command: string
+  createTooltip: (context: CommandTooltipContext) => ActiveTooltip
+  render: () => ReactNode
+}
+
+export const commandTooltipHandlers = Facet.define<CommandTooltipHandler>()
 
 const createTooltipView = (
   update?: (update: ViewUpdate) => void
@@ -47,7 +67,7 @@ const createTooltipView = (
   return { dom, update }
 }
 
-const buildTooltip = (
+export const buildTooltip = (
   command: string,
   pos: number,
   value: ActiveTooltip,
@@ -89,7 +109,12 @@ const createTooltipState = (
   const { main } = state.selection
   const pos = main.head
   const node = syntaxTree(state).resolveInner(pos, 0)
-  const commandNode = ancestorOfNodeWithType(node, '$CommandTooltipCommand')
+  const moduleHandlers = state.facet(commandTooltipHandlers)
+  const commandNode = ancestorOfNodeWithType(
+    node,
+    '$CommandTooltipCommand',
+    ...moduleHandlers.map(handler => handler.command)
+  )
   if (!commandNode) {
     return null
   }
@@ -98,6 +123,15 @@ const createTooltipState = (
     return null
   }
   const commandName = commandNode.name
+
+  // Module-provided handlers (e.g. the markdown link tooltip) take priority
+  // over the built-in LaTeX commands below.
+  const handler = moduleHandlers.find(
+    handler => handler.command === commandName
+  )
+  if (handler) {
+    return handler.createTooltip({ state, pos, value, commandNode })
+  }
 
   switch (commandName) {
     // a hyperlink (\href)
@@ -317,7 +351,7 @@ export const commandTooltipState = (
   state: EditorState
 ): ActiveTooltip | undefined => state.field(commandTooltipStateField, false)
 
-const firstInteractiveElement = (
+export const firstInteractiveElement = (
   view: EditorView,
   tooltipState: NonNullable<ActiveTooltip>
 ) =>
