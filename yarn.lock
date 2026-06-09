@@ -7346,7 +7346,7 @@ __metadata:
     "@writefull/core": "npm:^1.27.27"
     "@writefull/ui": "npm:^1.27.27"
     "@writefull/utils": "npm:^1.27.27"
-    "@xmldom/xmldom": "npm:^0.7.13"
+    "@xmldom/xmldom": "npm:^0.8.13"
     abort-controller: "npm:^3.0.0"
     accepts: "npm:^1.3.7"
     acorn: "npm:^7.1.1"
