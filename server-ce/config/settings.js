@@ -305,6 +305,16 @@ const settings = {
   },
 }
 
+// This secret is used for encrypting sharing link tokens in the database
+if (process.env.OVERLEAF_INVITE_TOKEN_SECRET) {
+  module.exports.projectInviteEncryptorOptions = {
+    cipherLabel: '2026.3-v3',
+    cipherPasswords: {
+      '2026.3-v3': process.env.OVERLEAF_INVITE_TOKEN_SECRET,
+    },
+  }
+}
+
 // # OPTIONAL CONFIGURABLE SETTINGS
 
 if (process.env.OVERLEAF_LEFT_FOOTER != null) {

@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import Async from 'async'
 import User from './helpers/User.mjs'
+import Subscription from './helpers/Subscription.mjs'
 import settings from '@overleaf/settings'
 import CollaboratorsEmailHandler from '../../../app/src/Features/Collaborators/CollaboratorsEmailHandler.mjs'
 import CollaboratorsInviteHelper from '../../../app/src/Features/Collaborators/CollaboratorsInviteHelper.mjs'
@@ -150,6 +151,98 @@ const tryGetInviteList = (user, projectId, callback) => {
       {
         url: `/project/${projectId}/invites`,
         json: true,
+      },
+      callback
+    )
+  })
+}
+
+const updateSharingLink = (
+  sendingUser,
+  projectId,
+  privileges,
+  opts,
+  callback
+) => {
+  if (typeof opts === 'function') {
+    callback = opts
+    opts = {}
+  }
+  sendingUser.getCsrfToken(err => {
+    if (err) {
+      return callback(err)
+    }
+    sendingUser.request.post(
+      {
+        uri: `/project/${projectId}/sharing-link`,
+        json: {
+          privileges,
+          ...opts,
+        },
+      },
+      (err, response, body) => {
+        if (err) {
+          return callback(err)
+        }
+        expect(response.statusCode).to.equal(200)
+        expect(body).to.include.keys('_id', 'token', 'privileges')
+        callback(null, body)
+      }
+    )
+  })
+}
+
+const getSharingLink = (sendingUser, projectId, callback) => {
+  sendingUser.getCsrfToken(err => {
+    if (err) {
+      return callback(err)
+    }
+    sendingUser.request.get(
+      {
+        uri: `/project/${projectId}/sharing-link`,
+        json: true,
+      },
+      (err, response, body) => {
+        if (err) {
+          return callback(err)
+        }
+        callback(null, response, body)
+      }
+    )
+  })
+}
+
+const validateSharingLink = (user, projectId, token, callback) => {
+  user.getCsrfToken(err => {
+    if (err) {
+      return callback(err)
+    }
+    user.request.post(
+      {
+        uri: `/project/${projectId}/share/validate`,
+        json: { token },
+      },
+      (err, response, body) => {
+        if (err) {
+          return callback(err)
+        }
+        callback(null, response, body)
+      }
+    )
+  })
+}
+
+const acceptSharingLink = (user, projectId, token, callback) => {
+  user.getCsrfToken(err => {
+    if (err) {
+      return callback(err)
+    }
+    user.request.post(
+      {
+        uri: `/project/${projectId}/share`,
+        json: {
+          token,
+        },
       },
       callback
     )
@@ -850,6 +943,204 @@ describe('ProjectInviteTests', function () {
           )
         })
       })
+    })
+  })
+
+  describe('sharing link routes', function () {
+    beforeEach(function (done) {
+      this.projectName = `sharing-link-test-${Math.random()}`
+      createProject(this.sendingUser, this.projectName, (err, projectId) => {
+        if (err) {
+          return done(err)
+        }
+        this.projectId = projectId
+        done()
+      })
+    })
+
+    it('should create and fetch sharing link without listing reusable invite in invite list', function (done) {
+      Async.series(
+        [
+          cb => expectInviteListCount(this.sendingUser, this.projectId, 0, cb),
+          cb => {
+            updateSharingLink(
+              this.sendingUser,
+              this.projectId,
+              'readOnly',
+              (err, link) => {
+                if (err) {
+                  return cb(err)
+                }
+                this.sharingLink = link
+                expect(link.privileges).to.equal('readOnly')
+                cb()
+              }
+            )
+          },
+          cb => expectInviteListCount(this.sendingUser, this.projectId, 0, cb),
+          cb => {
+            getSharingLink(
+              this.sendingUser,
+              this.projectId,
+              (err, response, body) => {
+                if (err) {
+                  return cb(err)
+                }
+                expect(response.statusCode).to.equal(200)
+                expect(body.privileges).to.equal('readOnly')
+                expect(body.token).to.equal(this.sharingLink.token)
+                cb()
+              }
+            )
+          },
+        ],
+        done
+      )
+    })
+
+    it('should validate and accept sharing link via /share flow', function (done) {
+      Async.series(
+        [
+          cb => this.user.login(cb),
+          cb => {
+            updateSharingLink(
+              this.sendingUser,
+              this.projectId,
+              'readOnly',
+              (err, link) => {
+                if (err) {
+                  return cb(err)
+                }
+                this.sharingLink = link
+                cb()
+              }
+            )
+          },
+          cb => expectNoProjectAccess(this.user, this.projectId, cb),
+          cb => {
+            validateSharingLink(
+              this.user,
+              this.projectId,
+              this.sharingLink.token,
+              (err, response, body) => {
+                if (err) {
+                  return cb(err)
+                }
+                expect(response.statusCode).to.equal(200)
+                expect(body.valid).to.equal(true)
+                cb()
+              }
+            )
+          },
+          cb => {
+            acceptSharingLink(
+              this.user,
+              this.projectId,
+              this.sharingLink.token,
+              (err, response) => {
+                if (err) {
+                  return cb(err)
+                }
+                expect(response.statusCode).to.equal(302)
+                expect(response.headers.location).to.equal(
+                  `/project/${this.projectId}`
+                )
+                cb()
+              }
+            )
+          },
+          cb => expectProjectAccess(this.user, this.projectId, cb),
+        ],
+        done
+      )
+    })
+
+    it('should reject invalid sharing link token in validation', function (done) {
+      Async.series(
+        [
+          cb => this.user.login(cb),
+          cb => {
+            validateSharingLink(
+              this.user,
+              this.projectId,
+              'not-a-valid-token',
+              (err, response, body) => {
+                if (err) {
+                  return cb(err)
+                }
+                expect(response.statusCode).to.equal(200)
+                expect(body.valid).to.equal(false)
+                cb()
+              }
+            )
+          },
+        ],
+        done
+      )
+    })
+
+    it('should reject validation for user not in required subscription group', function (done) {
+      if (!Features.hasFeature('saas')) {
+        this.skip()
+      }
+      const subscription = new Subscription({
+        adminId: this.sendingUser._id,
+        memberIds: [this.sendingUser._id],
+      })
+      let sharingLink
+      Async.series(
+        [
+          cb => this.user.login(cb),
+          cb => subscription.ensureExists(cb),
+          cb => {
+            updateSharingLink(
+              this.sendingUser,
+              this.projectId,
+              'readOnly',
+              { subscriptionId: subscription._id.toString() },
+              (err, link) => {
+                if (err) {
+                  return cb(err)
+                }
+                sharingLink = link
+                cb()
+              }
+            )
+          },
+          cb => {
+            validateSharingLink(
+              this.user,
+              this.projectId,
+              sharingLink.token,
+              (err, response, body) => {
+                if (err) {
+                  return cb(err)
+                }
+                expect(response.statusCode).to.equal(200)
+                expect(body.valid).to.equal(false)
+                cb()
+              }
+            )
+          },
+          cb => subscription.addMember(this.user._id, cb),
+          cb => {
+            validateSharingLink(
+              this.user,
+              this.projectId,
+              sharingLink.token,
+              (err, response, body) => {
+                if (err) {
+                  return cb(err)
+                }
+                expect(response.statusCode).to.equal(200)
+                expect(body.valid).to.equal(true)
+                cb()
+              }
+            )
+          },
+        ],
+        done
+      )
     })
   })
 })

@@ -32,6 +32,10 @@ const rateLimiters = {
     points: 25, // just over view-project-invite
     duration: 60,
   }),
+  validateSharingLink: new RateLimiter('validate-sharing-link', {
+    points: 25, // just over view-project-invite
+    duration: 60,
+  }),
 }
 
 export default {
@@ -93,6 +97,20 @@ export default {
       CollaboratorsInviteController.getAllInvites
     )
 
+    webRouter.get(
+      '/project/:Project_id/sharing-link',
+      AuthenticationController.requireLogin(),
+      AuthorizationMiddleware.ensureUserCanAdminProject,
+      CollaboratorsInviteController.getSharingLink
+    )
+
+    webRouter.post(
+      '/project/:Project_id/sharing-link',
+      AuthenticationController.requireLogin(),
+      AuthorizationMiddleware.ensureUserCanAdminProject,
+      CollaboratorsInviteController.updateSharingLink
+    )
+
     webRouter.delete(
       '/project/:Project_id/invite/:invite_id',
       AuthenticationController.requireLogin(),
@@ -130,6 +148,42 @@ export default {
       AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(rateLimiters.acceptProjectInvite),
       CollaboratorsInviteController.acceptInvite,
+      AnalyticsRegistrationSourceMiddleware.clearSource()
+    )
+
+    webRouter.get(
+      '/project/:Project_id/share',
+      AnalyticsRegistrationSourceMiddleware.setSource(
+        'collaboration',
+        'project-invite'
+      ),
+      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(rateLimiters.viewProjectInvite),
+      CollaboratorsInviteController.viewSharingLink,
+      AnalyticsRegistrationSourceMiddleware.clearSource()
+    )
+
+    webRouter.post(
+      '/project/:Project_id/share',
+      AnalyticsRegistrationSourceMiddleware.setSource(
+        'collaboration',
+        'project-invite'
+      ),
+      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(rateLimiters.acceptProjectInvite),
+      CollaboratorsInviteController.acceptInvite,
+      AnalyticsRegistrationSourceMiddleware.clearSource()
+    )
+
+    webRouter.post(
+      '/project/:Project_id/share/validate',
+      AnalyticsRegistrationSourceMiddleware.setSource(
+        'collaboration',
+        'project-invite'
+      ),
+      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(rateLimiters.validateSharingLink),
+      CollaboratorsInviteController.validateSharingLink,
       AnalyticsRegistrationSourceMiddleware.clearSource()
     )
 

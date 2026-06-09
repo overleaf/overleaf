@@ -5,10 +5,13 @@ import CollaboratorsEmailHandler from './CollaboratorsEmailHandler.mjs'
 import CollaboratorsHandler from './CollaboratorsHandler.mjs'
 import CollaboratorsInviteGetter from './CollaboratorsInviteGetter.mjs'
 import CollaboratorsInviteHelper from './CollaboratorsInviteHelper.mjs'
+import CollaboratorsGetter from './CollaboratorsGetter.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import NotificationsBuilder from '../Notifications/NotificationsBuilder.mjs'
-import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
+import PrivilegeLevels, {
+  isPrivilegeUpgrade,
+} from '../Authorization/PrivilegeLevels.mjs'
 import LimitationsManager from '../Subscription/LimitationsManager.mjs'
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 import _ from 'lodash'
@@ -83,6 +86,7 @@ const CollaboratorsInviteHandler = {
       sendingUserId: sendingUser._id,
       projectId,
       privileges,
+      reusable: false,
     })
     invite = await invite.save()
     invite = invite.toObject()
@@ -200,18 +204,68 @@ const CollaboratorsInviteHandler = {
       opts
     )
 
-    // Remove invite
-    const inviteId = invite._id
-    logger.debug({ projectId, inviteId }, 'removing invite')
-    await ProjectInvite.deleteOne({ _id: inviteId }).exec()
-    CollaboratorsInviteHandler._tryCancelInviteNotification(inviteId).catch(
-      err => {
-        logger.error(
-          { err, projectId, inviteId },
-          'failed to cancel invite notification'
-        )
-      }
+    // Remove single-use invite
+    if (!invite.reusable) {
+      const inviteId = invite._id
+      logger.debug({ projectId, inviteId }, 'removing invite')
+      await ProjectInvite.deleteOne({ _id: inviteId }).exec()
+      CollaboratorsInviteHandler._tryCancelInviteNotification(inviteId).catch(
+        err => {
+          logger.error(
+            { err, projectId, inviteId },
+            'failed to cancel invite notification'
+          )
+        }
+      )
+    }
+  },
+
+  async upgradeUserPrivileges(invite, projectId, user) {
+    const currentPrivilegeLevel =
+      await CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
+        user._id,
+        projectId
+      )
+    const invitePrivilegeLevel = invite.privileges
+
+    if (isPrivilegeUpgrade(currentPrivilegeLevel, invitePrivilegeLevel)) {
+      logger.debug(
+        {
+          projectId,
+          userId: user._id,
+          currentPrivilegeLevel,
+          invitePrivilegeLevel,
+        },
+        'upgrading user privileges'
+      )
+      await CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
+        projectId,
+        user._id,
+        invitePrivilegeLevel
+      )
+    }
+  },
+
+  async createSharingLinkInvite(projectId, privileges, subscriptionId) {
+    logger.debug(
+      { projectId, privileges, subscriptionId },
+      'adding sharing link invite'
     )
+    const token = CollaboratorsInviteHelper.generateToken()
+    const encryptedToken = await CollaboratorsInviteHelper.encryptToken(token)
+    const tokenHmac = CollaboratorsInviteHelper.hashInviteToken(token)
+    let invite = new ProjectInvite({
+      encryptedToken,
+      tokenHmac,
+      projectId,
+      privileges,
+      subscriptionId,
+      reusable: true,
+      expires: null,
+    })
+    invite = await invite.save()
+
+    return invite
   },
 }
 

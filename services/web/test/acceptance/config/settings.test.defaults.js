@@ -294,6 +294,13 @@ module.exports = {
   devToolbar: {
     enabled: false,
   },
+
+  projectInviteEncryptorOptions: {
+    cipherLabel: '2026.3-v3',
+    cipherPasswords: {
+      '2026.3-v3': 'this-is-a-weak-secret-for-tests-web-2026.3-v3',
+    },
+  },
 }
 
 module.exports.mergeWith = function (overrides) {
