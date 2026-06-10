@@ -470,6 +470,7 @@ const _ProjectController = {
       'ai-workbench-release',
       'compile-timeout-target-plans',
       'writefull-figure-generator',
+      'writefull-toolbar-migration',
       'wf-citations-checker',
       'wf-citations-checker-on-selection',
       'writefull-asymetric-queue-size-per-model',
