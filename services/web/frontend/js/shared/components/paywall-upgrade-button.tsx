@@ -28,7 +28,7 @@ export default function PaywallUpgradeButton({
     <OLButton
       variant="premium"
       size="sm"
-      href={`/user/subscription/choose-your-plan?itm_referrer=${referrer}&itm_campaign=${paywallType}`}
+      href={`/user/subscription/choose-your-plan?itm_referrer=${referrer}&itm_campaign=${paywallType}&paywall-type=${paywallType}`}
       target="_blank"
       rel="noreferrer"
       className={className}

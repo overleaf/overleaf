@@ -27,7 +27,7 @@ export default function UpgradeButton({
         size="sm"
         href={
           plans2026
-            ? `/user/subscription/choose-your-plan?itm_referrer=${referrer}`
+            ? `/user/subscription/choose-your-plan?itm_referrer=${referrer}&paywall-type=${source}`
             : `/user/subscription/plans?itm_referrer=${referrer}`
         }
         target="_blank"

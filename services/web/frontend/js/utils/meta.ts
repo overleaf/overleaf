@@ -114,6 +114,7 @@ export interface Meta {
   'ol-csrfToken': string
   'ol-currentInstitutionsWithLicence': Institution[]
   'ol-currentManagedUserAdminEmail': string
+  'ol-currentPlanCode': string | null
   'ol-currentUrl': string
   'ol-customerIoEnabled': boolean
   'ol-debugPdfDetach': boolean

@@ -21,6 +21,7 @@ export function startFreeTrial(
   if (shouldNavigate) {
     const searchParams = new URLSearchParams({
       itm_campaign: source,
+      'paywall-type': source,
       ...extraSearchParams,
     })
 
