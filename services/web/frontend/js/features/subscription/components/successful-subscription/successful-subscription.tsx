@@ -178,9 +178,7 @@ function UpgradeSuccess({
                 components={[<strong />, <strong />]} // eslint-disable-line react/jsx-key
               />
             </p>
-            <p>
-              <i>* {t('subject_to_additional_vat')}</i>
-            </p>
+            <PriceExceptions subscription={subscription} />
             {benefitsText && <p>{benefitsText}</p>}
             <p>
               <Trans

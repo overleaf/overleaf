@@ -4,6 +4,7 @@ import SuccessfulSubscription from '../../../../../../frontend/js/features/subsc
 import { renderWithSubscriptionDashContext } from '../../helpers/render-with-subscription-dash-context'
 import {
   annualActiveSubscription,
+  annualActiveSubscriptionEuro,
   annualActiveSubscriptionPro,
 } from '../../fixtures/subscriptions'
 import { ExposedSettings } from '../../../../../../types/exposed-settings'
@@ -123,7 +124,7 @@ describe('successful subscription page', function () {
       ).to.equal(
         `The next payment of ${annualActiveSubscriptionPro.payment.displayPrice} will be collected on ${annualActiveSubscriptionPro.payment.nextPaymentDueAt}.`
       )
-      screen.getByText(/prices may be subject to additional vat/i)
+      screen.getByText(/taxes may be added, depending on your billing address/i)
 
       screen.getByText(/full access to every AI tool/i, { exact: false })
 
@@ -161,6 +162,28 @@ describe('successful subscription page', function () {
       )
 
       screen.getByRole('heading', { name: /thanks for subscribing/i })
+    })
+
+    it('hides tax disclaimer when tax is already included in the price', function () {
+      renderWithSubscriptionDashContext(
+        <UserProvider>
+          <SuccessfulSubscription />
+        </UserProvider>,
+        {
+          metaTags: [
+            {
+              name: 'ol-ExposedSettings',
+              value: {
+                adminEmail: 'foo@example.com',
+              } as ExposedSettings,
+            },
+            { name: 'ol-subscription', value: annualActiveSubscriptionEuro },
+            { name: 'ol-isUpgrade', value: true },
+          ],
+        }
+      )
+
+      expect(screen.queryByText(/taxes may be added/i)).to.be.null
     })
   })
 })
