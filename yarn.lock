@@ -6474,6 +6474,7 @@ __metadata:
   resolution: "@overleaf/clsi-lb@workspace:services/clsi-lb"
   dependencies:
     "@overleaf/logger": "workspace:*"
+    "@overleaf/o-error": "workspace:*"
     "@overleaf/settings": "workspace:*"
     "@overleaf/stream-utils": "workspace:*"
     chai-as-promised: "npm:^7.1.1"
