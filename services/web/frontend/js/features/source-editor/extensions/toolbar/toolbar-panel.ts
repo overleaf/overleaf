@@ -137,7 +137,9 @@ const toolbarTheme = EditorView.theme({
     padding: '0 4px',
     margin: '4px 0',
     lineHeight: '1',
-    borderLeft: '1px solid rgba(125, 125, 125, 0.3)',
+    '&:not(:first-child)': {
+      borderLeft: '1px solid rgba(125, 125, 125, 0.3)',
+    },
     '&.ol-cm-toolbar-end': {
       borderLeft: 'none',
     },
@@ -149,6 +151,9 @@ const toolbarTheme = EditorView.theme({
       width: 0,
       padding: 0,
     },
+  },
+  '.ol-cm-toolbar-wrapper-indented .ol-cm-toolbar-button-group:first-child': {
+    borderLeft: '1px solid rgba(125, 125, 125, 0.3)',
   },
   '.ol-cm-toolbar-button': {
     display: 'inline-flex',
