@@ -43,6 +43,8 @@ export const ToolbarItems: FC<{
   const isActive = withinFormattingCommand(state)
 
   const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
+  const showAiFeaturesDisabled = getMeta('ol-showAiFeaturesDisabled')
+
   const showGroup = (group: string) => !overflowed || overflowed.has(group)
 
   return (
@@ -156,7 +158,11 @@ export const ToolbarItems: FC<{
                 icon="book_5"
               />
               <InsertFigureDropdown />
-              {writefullInstance ? <TableDropdown /> : <LegacyTableDropdown />}
+              {writefullInstance || showAiFeaturesDisabled ? (
+                <TableDropdown />
+              ) : (
+                <LegacyTableDropdown />
+              )}
             </div>
           )}
           {showGroup('group-list') && (

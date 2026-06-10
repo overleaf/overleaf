@@ -13,11 +13,15 @@ import { memo } from 'react'
 import OLListGroupItem from '@/shared/components/ol/ol-list-group-item'
 import sparkleWhite from '@/shared/svgs/sparkle-small-white.svg'
 import sparkle from '@/shared/svgs/ai-sparkle-text.svg'
+import getMeta from '@/utils/meta'
 
 export const MathDropdown = memo(function MathDropdown() {
   const { t } = useTranslation()
   const view = useCodeMirrorViewContext()
   const { writefullInstance } = useEditorContext()
+  const showAiFeaturesDisabled = getMeta('ol-showAiFeaturesDisabled')
+
+  const renderAIButton = writefullInstance || showAiFeaturesDisabled
 
   return (
     <ToolbarButtonMenu
@@ -25,13 +29,15 @@ export const MathDropdown = memo(function MathDropdown() {
       label={t('toolbar_insert_math')}
       icon={<MaterialIcon type="calculate" />}
     >
-      {writefullInstance && (
+      {renderAIButton && (
         <>
           <DropdownHeader className="ol-cm-toolbar-header mx-2">
             {t('toolbar_insert_math_lowercase')}
           </DropdownHeader>
           <OLListGroupItem
             aria-label={t('toolbar_generate_math')}
+            disabled={showAiFeaturesDisabled}
+            disabledReason={t('ai_features_unavailable_on_this_project')}
             onClick={() => {
               writefullInstance?.openEquationGenerator()
             }}
@@ -48,7 +54,9 @@ export const MathDropdown = memo(function MathDropdown() {
               src={sparkleWhite}
               aria-hidden="true"
             />
-            <span>{t('generate_from_text_or_image')}</span>
+            <span className={showAiFeaturesDisabled ? 'opacity-50' : ''}>
+              {t('generate_from_text_or_image')}
+            </span>
           </OLListGroupItem>
         </>
       )}

@@ -250,6 +250,12 @@ describe('ProjectController', function () {
       }),
     }
 
+    ctx.PermissionsManager = {
+      promises: {
+        checkUserPermissions: sinon.stub().resolves(false),
+      },
+    }
+
     vi.doMock('mongodb-legacy', () => ({
       default: { ObjectId },
     }))
@@ -512,6 +518,13 @@ describe('ProjectController', function () {
       '../../../../app/src/infrastructure/rate-limiters/WorkbenchRateLimiter',
       () => ({
         default: ctx.WorkbenchRateLimiter,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Authorization/PermissionsManager',
+      () => ({
+        default: ctx.PermissionsManager,
       })
     )
 
@@ -1507,6 +1520,230 @@ describe('ProjectController', function () {
             resolve()
           }
           ctx.ProjectController.loadEditor(ctx.req, ctx.res)
+        })
+      })
+    })
+
+    describe('AI features availability', function () {
+      beforeEach(function (ctx) {
+        ctx.Features.hasFeature.withArgs('saas').returns(true)
+        ctx.Modules.promises.hooks.fire = sinon.stub().resolves([[true]])
+        ctx.settings.localizedAddOnsPricing = {
+          USD: {
+            assistant: {
+              annual: 60,
+              monthly: 5,
+              annualDividedByTwelve: 5,
+            },
+          },
+        }
+      })
+
+      it('should set showAiFeatures to true when the user has the use-ai permission', async function (ctx) {
+        ctx.PermissionsManager.promises.checkUserPermissions.resolves(true)
+        await new Promise((resolve, reject) => {
+          ctx.res.render = (pageName, opts) => {
+            expect(opts.showAiFeatures).to.equal(true)
+            resolve()
+          }
+          ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+            if (err) reject(err)
+          })
+        })
+      })
+
+      it('should set showAiFeatures to false when the user lacks the use-ai permission', async function (ctx) {
+        ctx.PermissionsManager.promises.checkUserPermissions.resolves(false)
+        await new Promise((resolve, reject) => {
+          ctx.res.render = (pageName, opts) => {
+            expect(opts.showAiFeatures).to.equal(false)
+            resolve()
+          }
+          ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+            if (err) reject(err)
+          })
+        })
+      })
+
+      it('should set showAiFeatures to false when the user has disabled ai features', async function (ctx) {
+        ctx.PermissionsManager.promises.checkUserPermissions.resolves(true)
+        ctx.user.aiFeatures = { enabled: false }
+        ctx.UserModel.findById.returns({
+          exec: sinon.stub().resolves(ctx.user),
+        })
+        await new Promise((resolve, reject) => {
+          ctx.res.render = (pageName, opts) => {
+            expect(opts.showAiFeatures).to.equal(false)
+            resolve()
+          }
+          ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+            if (err) reject(err)
+          })
+        })
+      })
+
+      it('should set showAiFeatures to false when the permission check throws', async function (ctx) {
+        ctx.PermissionsManager.promises.checkUserPermissions.rejects(
+          new Error('permission check failed')
+        )
+        await new Promise((resolve, reject) => {
+          ctx.res.render = (pageName, opts) => {
+            expect(opts.showAiFeatures).to.equal(false)
+            resolve()
+          }
+          ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+            if (err) reject(err)
+          })
+        })
+      })
+
+      it('should set showAiFeatures to false when the project owner permission check throws', async function (ctx) {
+        ctx.PermissionsManager.promises.checkUserPermissions.resolves(true)
+        ctx.PermissionsManager.promises.checkUserPermissions
+          .onSecondCall()
+          .rejects(new Error('permission check failed'))
+        await new Promise((resolve, reject) => {
+          ctx.res.render = (pageName, opts) => {
+            expect(opts.showAiFeatures).to.equal(false)
+            resolve()
+          }
+          ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+            if (err) reject(err)
+          })
+        })
+      })
+
+      it('should set showAiFeatures to false when the user can use ai but the project disallows it', async function (ctx) {
+        ctx.PermissionsManager.promises.checkUserPermissions.callsFake(
+          subject => Promise.resolve(typeof subject !== 'string')
+        )
+        await new Promise((resolve, reject) => {
+          ctx.res.render = (pageName, opts) => {
+            expect(opts.showAiFeatures).to.equal(false)
+            expect(opts.showAiFeaturesDisabled).to.equal(false)
+            resolve()
+          }
+          ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+            if (err) reject(err)
+          })
+        })
+      })
+
+      it('should set showAiFeaturesDisabled to false when the user can use ai and the project allows it', async function (ctx) {
+        ctx.PermissionsManager.promises.checkUserPermissions.resolves(true)
+        ctx.Modules.promises.hooks.fire = sinon.stub().resolves([true])
+        await new Promise((resolve, reject) => {
+          ctx.res.render = (pageName, opts) => {
+            expect(opts.showAiFeaturesDisabled).to.equal(false)
+            resolve()
+          }
+          ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+            if (err) reject(err)
+          })
+        })
+      })
+
+      it('should set showAiFeaturesDisabled to false when the user lacks the use-ai permission', async function (ctx) {
+        ctx.PermissionsManager.promises.checkUserPermissions.resolves(false)
+        ctx.Modules.promises.hooks.fire = sinon.stub().resolves([[false]])
+        await new Promise((resolve, reject) => {
+          ctx.res.render = (pageName, opts) => {
+            expect(opts.showAiFeaturesDisabled).to.equal(false)
+            resolve()
+          }
+          ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+            if (err) reject(err)
+          })
+        })
+      })
+
+      it('should set showAiFeaturesDisabled to false when the user has disabled ai features', async function (ctx) {
+        ctx.PermissionsManager.promises.checkUserPermissions.resolves(true)
+        ctx.Modules.promises.hooks.fire = sinon.stub().resolves([[false]])
+        ctx.user.aiFeatures = { enabled: false }
+        ctx.UserModel.findById.returns({
+          exec: sinon.stub().resolves(ctx.user),
+        })
+        await new Promise((resolve, reject) => {
+          ctx.res.render = (pageName, opts) => {
+            expect(opts.showAiFeaturesDisabled).to.equal(false)
+            resolve()
+          }
+          ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+            if (err) reject(err)
+          })
+        })
+      })
+
+      describe("when the 'ai-disabled-collaborators' variant is enabled", function () {
+        beforeEach(function (ctx) {
+          ctx.SplitTestHandler.promises.getAssignment
+            .withArgs(ctx.req, ctx.res, 'ai-disabled-collaborators')
+            .resolves({ variant: 'enabled' })
+        })
+
+        it('should set showAiFeatures to true and showAiFeaturesDisabled to true when the user can use ai but the project disallows it', async function (ctx) {
+          ctx.PermissionsManager.promises.checkUserPermissions.callsFake(
+            subject => Promise.resolve(typeof subject !== 'string')
+          )
+          await new Promise((resolve, reject) => {
+            ctx.res.render = (pageName, opts) => {
+              expect(opts.showAiFeatures).to.equal(true)
+              expect(opts.showAiFeaturesDisabled).to.equal(true)
+              resolve()
+            }
+            ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+              if (err) reject(err)
+            })
+          })
+        })
+
+        it('should set showAiFeatures to true and showAiFeaturesDisabled to false when the user can use ai and the project allows it', async function (ctx) {
+          ctx.PermissionsManager.promises.checkUserPermissions.resolves(true)
+          await new Promise((resolve, reject) => {
+            ctx.res.render = (pageName, opts) => {
+              expect(opts.showAiFeatures).to.equal(true)
+              expect(opts.showAiFeaturesDisabled).to.equal(false)
+              resolve()
+            }
+            ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+              if (err) reject(err)
+            })
+          })
+        })
+
+        it('should set showAiFeatures to false and showAiFeaturesDisabled to false when the user lacks the use-ai permission', async function (ctx) {
+          ctx.PermissionsManager.promises.checkUserPermissions.resolves(false)
+          await new Promise((resolve, reject) => {
+            ctx.res.render = (pageName, opts) => {
+              expect(opts.showAiFeatures).to.equal(false)
+              expect(opts.showAiFeaturesDisabled).to.equal(false)
+              resolve()
+            }
+            ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+              if (err) reject(err)
+            })
+          })
+        })
+
+        it('should set showAiFeatures to false and showAiFeaturesDisabled to false when the user has disabled ai features', async function (ctx) {
+          ctx.PermissionsManager.promises.checkUserPermissions.callsFake(
+            subject => Promise.resolve(typeof subject !== 'string')
+          )
+          ctx.user.aiFeatures = { enabled: false }
+          ctx.UserModel.findById.returns({
+            exec: sinon.stub().resolves(ctx.user),
+          })
+          await new Promise((resolve, reject) => {
+            ctx.res.render = (pageName, opts) => {
+              expect(opts.showAiFeatures).to.equal(false)
+              expect(opts.showAiFeaturesDisabled).to.equal(false)
+              resolve()
+            }
+            ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+              if (err) reject(err)
+            })
+          })
         })
       })
     })

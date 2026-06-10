@@ -56,7 +56,9 @@ import { formatCurrency } from '../../util/currency.js'
 import UserSettingsHelper from './UserSettingsHelper.mjs'
 import AiFeatureUsageRateLimiter from '../../infrastructure/rate-limiters/AiFeatureUsageRateLimiter.mjs'
 import WorkbenchRateLimiter from '../../infrastructure/rate-limiters/WorkbenchRateLimiter.mjs'
+import PermissionsManager from '../Authorization/PermissionsManager.mjs'
 
+const { checkUserPermissions } = PermissionsManager.promises
 const { isPaidSubscription } = SubscriptionHelper
 const { hasAdminAccess } = AdminAuthorizationHelper
 const { ObjectId } = mongodb
@@ -491,6 +493,7 @@ const _ProjectController = {
       'focus-mode',
       'editor-upgrade-button-relocation',
       'markdown-visual',
+      'ai-disabled-collaborators',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
@@ -786,32 +789,28 @@ const _ProjectController = {
         !userHasPremiumSub &&
         !userInNonIndividualSub
 
-      let aiFeaturesAllowed = false
+      let aiFeaturesAllowedForUser = false
+      let aiFeaturesAllowedForProject = false
       if (userId && Features.hasFeature('saas')) {
         try {
-          // exit early if the user couldnt use ai anyways, since permissions checks are expensive
+          aiFeaturesAllowedForUser = await checkUserPermissions(user, [
+            'use-ai',
+          ])
+
           const canUserWriteOrReviewProjectContent =
             privilegeLevel === PrivilegeLevels.READ_AND_WRITE ||
             privilegeLevel === PrivilegeLevels.OWNER ||
             privilegeLevel === PrivilegeLevels.REVIEW
-
           if (canUserWriteOrReviewProjectContent) {
-            // check permissions for user and project owner, to see if they allow AI on the project
-            const permissionsResults = await Modules.promises.hooks.fire(
-              'projectAllowsCapability',
-              project,
-              userId,
+            aiFeaturesAllowedForProject = await checkUserPermissions(
+              project.owner_ref,
               ['use-ai']
             )
-            const aiAllowed = permissionsResults.every(
-              result => result === true
-            )
-
-            aiFeaturesAllowed = aiAllowed
           }
         } catch (err) {
           // still allow users to access project if we cant get their permissions, but disable AI feature
-          aiFeaturesAllowed = false
+          aiFeaturesAllowedForUser = false
+          aiFeaturesAllowedForProject = false
         }
       }
 
@@ -828,7 +827,7 @@ const _ProjectController = {
         user,
         userValues,
         userId,
-        aiFeaturesAllowed,
+        aiFeaturesAllowedForUser && aiFeaturesAllowedForProject,
         userIsMemberOfGroupSubscription
       )
 
@@ -867,7 +866,16 @@ const _ProjectController = {
       const hasPaidSubscription = isPaidSubscription(subscription)
       const aiFeaturesDisabled = user.aiFeatures?.enabled === false
 
-      const showAiFeatures = aiFeaturesAllowed && !aiFeaturesDisabled
+      let showAiFeatures = aiFeaturesAllowedForUser && !aiFeaturesDisabled
+      let showAiFeaturesDisabled =
+        showAiFeatures && !aiFeaturesAllowedForProject
+      if (
+        splitTestAssignments['ai-disabled-collaborators']?.variant !== 'enabled'
+      ) {
+        showAiFeatures = showAiFeatures && !showAiFeaturesDisabled
+        showAiFeaturesDisabled = false
+      }
+
       // only add-on is ai based, so we only need its pricing info if ai features are usable
       const addonPrices =
         showAiFeatures && (await ProjectController._getAddonPrices(req, res))
@@ -985,6 +993,7 @@ const _ProjectController = {
         symbolPaletteAvailable: Features.hasFeature('symbol-palette'),
         userRestrictions: Array.from(req.userRestrictions || []),
         showAiFeatures,
+        showAiFeaturesDisabled,
         // default to free tier if they dont have a quota
         hasAiFreeTier:
           fullFeatureSet?.aiUsageQuota === Settings.aiFeatures?.freeQuota ||

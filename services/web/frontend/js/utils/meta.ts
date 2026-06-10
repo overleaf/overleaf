@@ -286,6 +286,7 @@ export interface Meta {
   'ol-shouldAllowEditingDetails': boolean
   'ol-shouldLoadHotjar': boolean
   'ol-showAiFeatures': boolean
+  'ol-showAiFeaturesDisabled': boolean
   'ol-showCouponField': boolean
   'ol-showGroupDiscount': boolean
   'ol-showGroupsAndEnterpriseBanner': boolean
