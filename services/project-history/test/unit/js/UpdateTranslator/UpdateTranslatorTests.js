@@ -672,6 +672,59 @@ describe('UpdateTranslator', function () {
         ])
       })
 
+      it('drops zero-length retains carrying tracking data', function () {
+        // A zero-length retain (e.g. an empty `r` string produced by the resync
+        // mechanism) must not be emitted as a zero-length tracked delete.
+        const updates = [
+          {
+            update: {
+              doc: this.doc_id,
+              op: [
+                {
+                  p: 3,
+                  r: '',
+                  tracking: { type: 'delete', userId: this.user_id, ts: 0 },
+                },
+              ],
+              v: this.version,
+              meta: {
+                user_id: this.user_id,
+                ts: new Date(this.timestamp).getTime(),
+                pathname: '/main.tex',
+                doc_length: 20,
+              },
+            },
+          },
+        ]
+
+        const changes = this.UpdateTranslator.convertToChanges(
+          this.project_id,
+          updates
+        ).map(change => change.toRaw())
+
+        // The empty tracked retain is dropped, leaving a plain retain of the
+        // whole document.
+        expect(changes).to.deep.equal([
+          {
+            authors: [],
+            operations: [
+              {
+                pathname: 'main.tex',
+                textOperation: [20],
+              },
+            ],
+            v2Authors: [this.user_id],
+            timestamp: this.timestamp,
+            v2DocVersions: {
+              '59bfd450e3028c4d40a1e9ab': {
+                pathname: 'main.tex',
+                v: 0,
+              },
+            },
+          },
+        ])
+      })
+
       it('can translate insertions at the start and end (with zero retained)', function () {
         const updates = [
           {

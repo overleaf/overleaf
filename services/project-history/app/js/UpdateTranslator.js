@@ -449,6 +449,10 @@ class OperationsBuilder {
    * @param {TrackingDirective} [opts.tracking]
    */
   retain(length, opts = {}) {
+    // A zero-length retain is a no-op, they are dropped in overleaf-editor-core.
+    if (length === 0) {
+      return
+    }
     if (opts.tracking) {
       this.textOperation.push({ r: length, ...opts })
     } else {
