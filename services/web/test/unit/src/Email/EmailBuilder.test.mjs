@@ -14,6 +14,7 @@ describe('EmailBuilder', function () {
     ctx.settings = {
       appName: 'testApp',
       siteUrl: 'https://www.overleaf.com',
+      adminEmail: 'admin@overleaf.test',
     }
 
     vi.doMock('../../../../app/src/Features/Email/EmailMessageHelper', () => ({
@@ -961,6 +962,50 @@ describe('EmailBuilder', function () {
           it('should contain the CTA link', function (ctx) {
             expect(ctx.email.text).to.contain(ctx.expectedUrl)
           })
+        })
+      })
+
+      describe('groupDomainCapturedByGroupChanged', function () {
+        it('should build active-domain-capture email', function (ctx) {
+          const email = ctx.EmailBuilder.buildEmail(
+            'groupDomainCapturedByGroupChanged',
+            {
+              to: 'admin@example.com',
+              groupId: 'group-123',
+              domainCapturedByGroup: true,
+              domain: 'example.com',
+            }
+          )
+
+          expect(email.subject).to.equal(
+            'Domain capture now active for example.com'
+          )
+          expect(email.html).to.contain(
+            'Domain capture is active for example.com'
+          )
+          expect(email.html).to.contain('/manage/groups/group-123/settings')
+          expect(email.text).to.contain('/manage/groups/group-123/settings')
+        })
+
+        it('should build inactive-domain-capture email including support contact', function (ctx) {
+          const email = ctx.EmailBuilder.buildEmail(
+            'groupDomainCapturedByGroupChanged',
+            {
+              to: 'admin@example.com',
+              groupId: 'group-123',
+              domainCapturedByGroup: false,
+              domain: 'example.com',
+            }
+          )
+
+          expect(email.subject).to.equal(
+            'Domain capture now inactive for example.com'
+          )
+          expect(email.html).to.contain(
+            'Domain capture is inactive for example.com'
+          )
+          expect(email.html).to.contain('admin@overleaf.test')
+          expect(email.text).to.contain('admin@overleaf.test')
         })
       })
     })

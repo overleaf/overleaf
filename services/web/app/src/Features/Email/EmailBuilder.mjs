@@ -1040,6 +1040,36 @@ templates.groupMemberLimitWarning = ctaTemplate({
   },
 })
 
+templates.groupDomainCapturedByGroupChanged = ctaTemplate({
+  subject(opts) {
+    return opts.domainCapturedByGroup
+      ? `Domain capture now active for ${opts.domain}`
+      : `Domain capture now inactive for ${opts.domain}`
+  },
+  title(opts) {
+    return opts.domainCapturedByGroup
+      ? `Domain capture is active for ${_.escape(opts.domain)}`
+      : `Domain capture is inactive for ${_.escape(opts.domain)}`
+  },
+  message(opts) {
+    if (opts.domainCapturedByGroup) {
+      return [
+        `Users with a <b>${_.escape(opts.domain)}</b> email address on their account will be able to join your group through domain capture.`,
+      ]
+    }
+    return [
+      `Users with a <b>${_.escape(opts.domain)}</b> email address on their account will no longer be able to join your group through domain capture. Anyone already in your group is unaffected.`,
+      `If you didn't expect this or want to re-enable it, please contact ${settings.adminEmail}.`,
+    ]
+  },
+  ctaText() {
+    return 'Manage domains'
+  },
+  ctaURL(opts) {
+    return `${settings.siteUrl}/manage/groups/${opts.groupId}/settings`
+  },
+})
+
 function _formatUserNameAndEmail(user, placeholder) {
   if (user.first_name && user.last_name) {
     const fullName = `${user.first_name} ${user.last_name}`
