@@ -6401,7 +6401,7 @@ __metadata:
     mongodb: "npm:6.12.0"
     p-limit: "npm:^2.3.0"
     pg: "npm:^8.7.1"
-    pg-copy-streams: "npm:^2.2.2"
+    pg-copy-streams: "npm:^7.0.0"
     promptly: "npm:^3.0.3"
     recurly: "npm:^4.0.1"
     sequelize: "npm:^6.37.7"
@@ -26730,10 +26730,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-copy-streams@npm:^2.2.2":
-  version: 2.2.2
-  resolution: "pg-copy-streams@npm:2.2.2"
-  checksum: 10c0/1a8f8ea6508f66faf8678575bbcba1666636af105e5027fa140b2be421dedae872271e6cdc346e6b400f11b94fd1e4c99dd9582d48ebafa4490ddf47d0deedec
+"pg-copy-streams@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "pg-copy-streams@npm:7.0.0"
+  checksum: 10c0/451d4919774c2a318529ed734e7f1cd33ee08f277379bfdd19cf625dd5cd5031b09bea41a07af8f42091a8642b2a5a541cee2aa234069e7e70e6a8765d1da3e6
   languageName: node
   linkType: hard
 
