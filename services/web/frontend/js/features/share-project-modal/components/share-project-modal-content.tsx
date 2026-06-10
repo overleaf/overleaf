@@ -14,6 +14,7 @@ import OLNotification from '@/shared/components/ol/ol-notification'
 import OLButton from '@/shared/components/ol/ol-button'
 import OLSpinner from '@/shared/components/ol/ol-spinner'
 import MaterialIcon from '@/shared/components/material-icon'
+import CopySharingLinkButton from '@/features/share-project-modal/components/copy-sharing-link-button'
 import ErrorMessage from '@/features/share-project-modal/components/error-message'
 import GiveFeedbackLink from '@/features/share-project-modal/components/give-feedback-link'
 import classNames from 'classnames'
@@ -74,7 +75,7 @@ function ShareProjectModalContentInner({
   const { t } = useTranslation()
   const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
   const [isInvitedPeopleScreen, setIsInvitedPeopleScreen] = useState(false)
-  const { successActionMessage } = useShareProjectContext()
+  const { successActionMessage, projectAccess } = useShareProjectContext()
   const { isRestrictedTokenMember, isProjectOwner } = useEditorContext()
 
   return (
@@ -135,6 +136,12 @@ function ShareProjectModalContentInner({
         <div className="d-flex flex-grow-1 flex-wrap gap-2">
           {isSharingUpdatesEnabled ? (
             <>
+              {!isInvitedPeopleScreen &&
+                (projectAccess === 'onlyInvitedPeople' ||
+                  projectAccess === 'anyoneInXyzWithTheLink' ||
+                  projectAccess === 'anyoneWithTheLink') && (
+                  <CopySharingLinkButton />
+                )}
               {successActionMessage && (
                 <div className="ms-auto px-3 align-self-center">
                   <div

@@ -92,7 +92,7 @@ function ProjectAccess({
 
       return data
     }).then(data => {
-      setSharingLinkData(newAccess === 'onlyInvitedPeople' ? null : data)
+      setSharingLinkData(data)
       setProjectAccess(newAccess)
       setSuccessActionMessage(t('access_updated'))
     })

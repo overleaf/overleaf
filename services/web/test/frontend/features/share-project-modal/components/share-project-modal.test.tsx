@@ -1005,6 +1005,10 @@ describe('<ShareProjectModal/>', function () {
       })
     })
 
+    afterEach(function () {
+      window.metaAttributesCache.delete('ol-splitTestVariants')
+    })
+
     it('sets "Via sharing links (legacy)" when `publicAccessLevel` is `tokenBased`', async function () {
       fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
 
@@ -1059,6 +1063,72 @@ describe('<ShareProjectModal/>', function () {
       )
 
       await screen.findByText('Anyone in your group with the link')
+    })
+
+    describe('copy link button', function () {
+      let clipboardWriteTextStub: sinon.SinonStub
+
+      beforeEach(function () {
+        clipboardWriteTextStub = sinon.stub().resolves()
+        Object.defineProperty(navigator, 'clipboard', {
+          value: { writeText: clipboardWriteTextStub },
+          configurable: true,
+          writable: true,
+        })
+      })
+
+      afterEach(function () {
+        window.metaAttributesCache.delete('ol-splitTestVariants')
+        delete (navigator as any).clipboard
+      })
+
+      it('shows a disabled copy sharing link button when access is "Only invited people"', async function () {
+        fetchMock.get('express:/project/:projectId/sharing-link', 404)
+
+        renderWithEditorContext(
+          <ShareProjectModal {...modalProps} />,
+          createContextProps()
+        )
+
+        const copyButton: HTMLButtonElement = await screen.findByRole(
+          'button',
+          {
+            name: /copy sharing link/i,
+          }
+        )
+        expect(copyButton.disabled).to.be.true
+      })
+
+      it('enables the copy sharing link button when access is "Anyone with the link" and copies the correct URL on click', async function () {
+        const sharingLinkToken = 'abc123token'
+        fetchMock.get('express:/project/:projectId/sharing-link', {
+          _id: 'invite-id',
+          token: sharingLinkToken,
+          privileges: 'readAndWrite',
+        })
+
+        renderWithEditorContext(
+          <ShareProjectModal {...modalProps} />,
+          createContextProps()
+        )
+
+        const copyButton: HTMLButtonElement = await screen.findByRole(
+          'button',
+          {
+            name: /copy sharing link/i,
+          }
+        )
+        expect(copyButton.disabled).to.be.false
+
+        await userEvent.click(copyButton)
+
+        expect(clipboardWriteTextStub.calledOnce).to.be.true
+        expect(clipboardWriteTextStub.firstCall.args[0]).to.equal(
+          `${window.location.origin}/project/${shareModalProjectDefaults._id}/share#${sharingLinkToken}`
+        )
+
+        await screen.findByText(/link copied/i)
+      })
     })
   })
 
