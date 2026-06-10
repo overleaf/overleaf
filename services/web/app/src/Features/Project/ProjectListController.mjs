@@ -501,8 +501,13 @@ async function projectListPage(req, res, next) {
   let showInrGeoBanner = false
   let showLATAMBanner = false
   let recommendedCurrency
-  const { countryCode, currencyCode } =
-    await GeoIpLookup.promises.getCurrencyCode(req.ip)
+  let countryCode
+  let currencyCode
+  if (isSaas) {
+    const currencyData = await GeoIpLookup.promises.getCurrencyCode(req.ip)
+    countryCode = currencyData.countryCode
+    currencyCode = currencyData.currencyCode
+  }
 
   if (
     usersBestSubscription?.type === 'free' ||

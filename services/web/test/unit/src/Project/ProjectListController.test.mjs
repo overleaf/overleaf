@@ -467,6 +467,20 @@ describe('ProjectListController', function () {
       await ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
     })
 
+    it('should look up geo IP in saas', async function (ctx) {
+      ctx.Features.hasFeature.withArgs('saas').returns(true)
+      ctx.res.render = () => {}
+      await ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+      expect(ctx.GeoIpLookup.promises.getCurrencyCode).to.have.been.calledOnce
+    })
+
+    it('should not look up geo IP in a non-saas environment', async function (ctx) {
+      ctx.Features.hasFeature.withArgs('saas').returns(false)
+      ctx.res.render = () => {}
+      await ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+      expect(ctx.GeoIpLookup.promises.getCurrencyCode).to.not.have.been.called
+    })
+
     it('should send groupRole to customer.io for group admins', async function (ctx) {
       ctx.Features.hasFeature.withArgs('saas').returns(true)
       ctx.SubscriptionViewModelBuilder.promises.getUsersSubscriptionDetails.resolves(

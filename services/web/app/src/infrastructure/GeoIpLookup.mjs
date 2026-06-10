@@ -91,6 +91,13 @@ async function getDetails(ip, callback) {
   if (!ip) {
     return callback(new Error('no ip passed'))
   }
+  if (!settings.apis.geoIpLookup?.url) {
+    logger.warn(
+      {},
+      'settings.apis.geoIpLookup.url is not configured, skipping lookup'
+    )
+    return
+  }
   ip = ip.trim().split(' ')[0]
   const url = new URL(settings.apis.geoIpLookup.url)
   url.pathname += ip
