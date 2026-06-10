@@ -340,7 +340,6 @@ ruleTester.run('no-throw-in-callback', noThrowInCallback, {
   ],
 })
 
-
 jsonRuleTester.run(
   'no-consecutive-spaces-in-locales',
   noConsecutiveSpacesInLocales,
