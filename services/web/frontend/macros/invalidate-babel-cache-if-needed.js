@@ -3,7 +3,7 @@ const Path = require('path')
 const Settings = require('@overleaf/settings')
 
 module.exports = function invalidateBabelCacheIfNeeded() {
-  const cacheDir = Path.join(__dirname, '../../node_modules/.cache')
+  const cacheDir = Path.join(__dirname, '../../.cache')
   const cachePath = Path.join(cacheDir, 'babel-loader')
   const statePath = Path.join(cacheDir, 'last-overleafModuleImports.json')
   let lastState = ''
