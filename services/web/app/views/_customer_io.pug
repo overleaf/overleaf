@@ -1,5 +1,5 @@
 if(customerIoEnabled && ExposedSettings.cioWriteKey && ExposedSettings.cioSiteId)
-	script(type="text/javascript", id="cio-loader", nonce=scriptNonce, data-cio-write-key=ExposedSettings.cioWriteKey, data-cio-site-id=ExposedSettings.cioSiteId, data-session-analytics-id=getSessionAnalyticsId(), data-user-id=((user && user._id) || ''), data-user-email=((user && user.email) || '')).
+	script(type="text/javascript", id="cio-loader", nonce=scriptNonce, data-cio-write-key=ExposedSettings.cioWriteKey, data-cio-site-id=ExposedSettings.cioSiteId, data-session-analytics-id=getSessionAnalyticsId(), data-user-id=((user && (user._id || user.id)) || ''), data-user-email=((user && user.email) || '')).
 		var cioSettings = document.querySelector('#cio-loader').dataset;
 		var analyticsId = cioSettings.sessionAnalyticsId;
 		var userId = cioSettings.userId;
@@ -19,6 +19,12 @@ if(customerIoEnabled && ExposedSettings.cioWriteKey && ExposedSettings.cioSiteId
 					}
 				}
 			);
+			analytics.addSourceMiddleware(function ({ payload, next }) {
+				var ctx = payload.obj.context
+				if (ctx && ctx.page) { ctx.page.title = undefined }
+				if (payload.obj.properties) { payload.obj.properties.title = undefined }
+				next(payload)
+			});
 			if (analyticsId) {
 				analytics.setAnonymousId(analyticsId);
 			}
