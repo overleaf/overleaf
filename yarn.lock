@@ -6469,6 +6469,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@overleaf/clsi-lb@workspace:services/clsi-lb":
+  version: 0.0.0-use.local
+  resolution: "@overleaf/clsi-lb@workspace:services/clsi-lb"
+  dependencies:
+    "@overleaf/logger": "workspace:*"
+    "@overleaf/settings": "workspace:*"
+    "@overleaf/stream-utils": "workspace:*"
+    chai-as-promised: "npm:^7.1.1"
+    gcp-metadata: "npm:^6.1.0"
+    googleapis: "npm:^144.0.0"
+    typescript: "npm:^5.0.4"
+    vitest: "npm:4.1.5"
+  languageName: unknown
+  linkType: soft
+
 "@overleaf/clsi-perf@workspace:services/clsi-perf":
   version: 0.0.0-use.local
   resolution: "@overleaf/clsi-perf@workspace:services/clsi-perf"
@@ -19409,7 +19424,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gaxios@npm:^6.0.0, gaxios@npm:^6.0.2, gaxios@npm:^6.1.1":
+"gaxios@npm:^6.0.0, gaxios@npm:^6.0.2, gaxios@npm:^6.0.3, gaxios@npm:^6.1.1":
   version: 6.7.1
   resolution: "gaxios@npm:6.7.1"
   dependencies:
@@ -19865,7 +19880,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"google-auth-library@npm:^9.0.0, google-auth-library@npm:^9.3.0, google-auth-library@npm:^9.6.3":
+"google-auth-library@npm:^9.0.0, google-auth-library@npm:^9.3.0, google-auth-library@npm:^9.6.3, google-auth-library@npm:^9.7.0":
   version: 9.15.1
   resolution: "google-auth-library@npm:9.15.1"
   dependencies:
@@ -19938,6 +19953,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"googleapis-common@npm:^7.0.0":
+  version: 7.2.0
+  resolution: "googleapis-common@npm:7.2.0"
+  dependencies:
+    extend: "npm:^3.0.2"
+    gaxios: "npm:^6.0.3"
+    google-auth-library: "npm:^9.7.0"
+    qs: "npm:^6.7.0"
+    url-template: "npm:^2.0.8"
+    uuid: "npm:^9.0.0"
+  checksum: 10c0/cbbce900582a66c28bb8ccde631bc08202c6fb2e591932b981a23b437b074150051b966d3ad67bcb4b06b4ff5bbbfd8524ac5ca6f7b77b8790f417924bec1f3c
+  languageName: node
+  linkType: hard
+
 "googleapis@npm:^118.0.0":
   version: 118.0.0
   resolution: "googleapis@npm:118.0.0"
@@ -19945,6 +19974,16 @@ __metadata:
     google-auth-library: "npm:^8.0.2"
     googleapis-common: "npm:^6.0.0"
   checksum: 10c0/a41635fcb760e7111e70fabb1b962ced0dbc89f4e8d56058ddd56be4ee2b2c458bbe0e217013e987e37fb2e951805bcfebeb1cb9b9445bc317fb5535ff6b93e7
+  languageName: node
+  linkType: hard
+
+"googleapis@npm:^144.0.0":
+  version: 144.0.0
+  resolution: "googleapis@npm:144.0.0"
+  dependencies:
+    google-auth-library: "npm:^9.0.0"
+    googleapis-common: "npm:^7.0.0"
+  checksum: 10c0/a5ad4c5be32817f7960fac2aa52b1bbc658242ed1874fb08ed84dbdf36b9fa401077e6e425928e453629d14b1f0d54ee31a1dc0959705465b489f31bd3f36f4a
   languageName: node
   linkType: hard
 

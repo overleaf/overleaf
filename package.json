@@ -202,6 +202,7 @@
     "services/chat",
     "services/clsi",
     "services/clsi-cache",
+    "services/clsi-lb",
     "services/clsi-perf",
     "services/docstore",
     "services/document-updater",
