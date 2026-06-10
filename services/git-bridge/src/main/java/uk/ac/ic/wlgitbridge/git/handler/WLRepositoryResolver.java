@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.git.handler;
 
 import com.google.api.client.auth.oauth2.Credential;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
@@ -102,8 +103,18 @@ public class WLRepositoryResolver implements RepositoryResolver<HttpServletReque
     } catch (ForbiddenException e) {
       throw new ServiceNotAuthorizedException();
     } catch (GitUserException e) {
+      /*
+       * Deliver the user-facing message as a git "ERR" pkt-line. ServiceMayNotContinueException
+       * defaults to a 403 status, but the git client only parses the pkt-line body (and so only
+       * displays the message) when the smart-HTTP advertisement is returned with a 200 status; on
+       * any other status it just prints "The requested URL returned error: <code>" and discards
+       * the body. So we explicitly use a 200 status here to surface messages such as the
+       * "project contains a '.git' entity" error to the user.
+       */
       throw new ServiceMayNotContinueException(
-          e.getMessage() + "\n" + String.join("\n", e.getDescriptionLines()), e);
+          e.getMessage() + "\n" + String.join("\n", e.getDescriptionLines()),
+          e,
+          HttpServletResponse.SC_OK);
     } catch (IOException e) {
       Log.warn("IOException when trying to open repo: " + projName, e);
       throw new ServiceMayNotContinueException("Internal server error.");
