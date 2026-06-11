@@ -449,6 +449,17 @@ public class WLGitBridgeIntegrationTest {
                           .build());
                 }
               });
+          put(
+              "masterBranchSurvivesSwap",
+              new HashMap<String, SnapshotAPIState>() {
+                {
+                  put(
+                      "state",
+                      new SnapshotAPIStateBuilder(
+                              getResourceAsStream("/masterBranchSurvivesSwap/state/state.json"))
+                          .build());
+                }
+              });
         }
       };
 
@@ -520,6 +531,13 @@ public class WLGitBridgeIntegrationTest {
 
   private void gitPull(File dir) throws IOException, InterruptedException {
     assertEquals(0, runtime.exec("git pull", null, dir).waitFor());
+  }
+
+  private String gitBranch(File dir) throws IOException, InterruptedException {
+    Process proc =
+        runtime.exec(new String[] {"git", "rev-parse", "--abbrev-ref", "HEAD"}, null, dir);
+    assertEquals(0, proc.waitFor());
+    return IOUtils.toString(proc.getInputStream(), StandardCharsets.UTF_8).trim();
   }
 
   @Test
@@ -807,7 +825,7 @@ public class WLGitBridgeIntegrationTest {
         "remote: hint: hello world.png (rename to: hello_world.png)",
         "remote: hint: an image.jpg (rename to: an_image.jpg)",
         "To " + gitRemoteUrl(port),
-        "! [remote rejected] master -> master (invalid files)",
+        "! [remote rejected] main -> main (invalid files)",
         "error: failed to push some refs to '" + gitRemoteUrl(port) + "'");
   }
 
@@ -835,7 +853,7 @@ public class WLGitBridgeIntegrationTest {
         "remote: hint: project: no main file",
         "remote: hint: The project would have no (editable) main .tex file.",
         "To " + gitRemoteUrl(port),
-        "! [remote rejected] master -> master (invalid project)",
+        "! [remote rejected] main -> main (invalid project)",
         "error: failed to push some refs to '" + gitRemoteUrl(port) + "'");
   }
 
@@ -864,7 +882,7 @@ public class WLGitBridgeIntegrationTest {
         "remote: hint: There was an internal error with the Overleaf server.",
         "remote: hint: Please contact Overleaf.",
         "To " + gitRemoteUrl(port),
-        "! [remote rejected] master -> master (Overleaf error)",
+        "! [remote rejected] main -> main (Overleaf error)",
         "error: failed to push some refs to '" + gitRemoteUrl(port) + "'");
   }
 
@@ -896,7 +914,7 @@ public class WLGitBridgeIntegrationTest {
         "remote: hint: You have 1 invalid files in your Overleaf project:",
         "remote: hint: file1.exe (invalid file extension)",
         "To " + gitRemoteUrl(port),
-        "! [remote rejected] master -> master (invalid files)",
+        "! [remote rejected] main -> main (invalid files)",
         "error: failed to push some refs to '" + gitRemoteUrl(port) + "'");
   }
 
@@ -1012,13 +1030,59 @@ public class WLGitBridgeIntegrationTest {
     assertFalse(testProj2ServerDir.exists());
   }
 
+  @Test
+  public void masterBranchSurvivesSwap() throws Exception {
+    int mockServerPort = 4010;
+    server =
+        new MockSnapshotServer(mockServerPort, getResource("/masterBranchSurvivesSwap").toFile());
+    server.start();
+    server.setState(states.get("masterBranchSurvivesSwap").get("state"));
+    wlgb =
+        new GitBridgeApp(
+            new String[] {
+              makeConfigFile(0, mockServerPort, new SwapJobConfig(1, 0, 0, 250, null, true))
+            });
+    wlgb.run();
+    File rootGitDir = new File(wlgb.config.getRootGitDirectory());
+    File proj1ServerDir = new File(rootGitDir, PROJECT_ID1);
+    File proj2ServerDir = new File(rootGitDir, PROJECT_ID2);
+
+    // Clone project 1 — created with default branch "main"
+    File proj1Dir = gitClone(PROJECT_ID1, wlgb.getPort(), dir);
+    assertEquals("main", gitBranch(proj1Dir));
+    assertTrue(proj1ServerDir.exists());
+
+    // Simulate a legacy repo: rewrite server-side HEAD to master
+    assertEquals(
+        0,
+        runtime
+            .exec(new String[] {"git", "branch", "-m", "main", "master"}, null, proj1ServerDir)
+            .waitFor());
+
+    // Clone project 2 — triggers eviction of project 1
+    gitClone(PROJECT_ID2, wlgb.getPort(), dir);
+    while (proj1ServerDir.exists())
+      ;
+    assertFalse(proj1ServerDir.exists());
+    assertTrue(proj2ServerDir.exists());
+
+    // Re-clone project 1 — triggers restore from swap
+    FileUtils.deleteDirectory(proj1Dir);
+    File proj1DirRestored = gitClone(PROJECT_ID1, wlgb.getPort(), dir);
+    while (proj2ServerDir.exists())
+      ;
+
+    // Verify the restored repo still uses "master"
+    assertEquals("master", gitBranch(proj1DirRestored));
+  }
+
   private static List<String> expectedPushSubmodule(int port) {
     return Arrays.asList(
         "remote: hint: Your Git repository contains a reference we cannot resolve.",
         "remote: hint: If your project contains a Git submodule,",
         "remote: hint: please remove it and try again.",
         "To " + gitRemoteUrl(port),
-        "! [remote rejected] master -> master (invalid git repo)",
+        "! [remote rejected] main -> main (invalid git repo)",
         "error: failed to push some refs to '" + gitRemoteUrl(port) + "'");
   }
 

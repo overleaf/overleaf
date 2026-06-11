@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Supplier;
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.lib.Constants;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -168,5 +169,29 @@ public class GitProjectRepoTest {
     FileUtils.copyDirectory(actual, expected);
     withoutIncoming.deleteIncomingPacks();
     assertTrue(FileUtil.directoryDeepEquals(actual, expected));
+  }
+
+  @Test
+  public void initRepoSetsDefaultBranchToMain() throws IOException {
+    FSGitRepoStore store =
+        new FSGitRepoStore(tmpFolder.newFolder("newrepos").getAbsolutePath(), Optional.empty());
+    GitProjectRepo newRepo = GitProjectRepo.fromName("testproject");
+    newRepo.initRepo(store);
+    assertEquals("refs/heads/main", newRepo.getJGitRepository().getFullBranch());
+  }
+
+  @Test
+  public void initRepoDoesNotRewriteExistingMasterRepoToMain() throws IOException {
+    FSGitRepoStore store =
+        new FSGitRepoStore(tmpFolder.newFolder("legacyrepos").getAbsolutePath(), Optional.empty());
+    GitProjectRepo newRepo = GitProjectRepo.fromName("testproject");
+    newRepo.initRepo(store);
+    newRepo.getJGitRepository().updateRef(Constants.HEAD).link("refs/heads/master");
+    assertEquals("refs/heads/master", newRepo.getJGitRepository().getFullBranch());
+
+    GitProjectRepo existingRepo = GitProjectRepo.fromName("testproject");
+    existingRepo.initRepo(store);
+
+    assertEquals("refs/heads/master", existingRepo.getJGitRepository().getFullBranch());
   }
 }
