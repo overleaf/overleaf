@@ -1,3 +1,4 @@
+import { SharingPermissions } from '../modules/sharing-permissions/app/src/types'
 import { Brand } from './helpers/brand'
 
 export type RefProviders = {
@@ -64,6 +65,11 @@ export type User = {
   isMemberOfGroupSubscription?: boolean
   isProfessionalGroupPlan?: boolean
   hasInstitutionLicence?: boolean
+  activeGroupSubscriptions?: {
+    _id: string
+    teamName?: string
+    sharingPermissions?: SharingPermissions
+  }[]
 }
 
 export type LoggedOutUser = {

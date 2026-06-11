@@ -9,10 +9,11 @@ import fetchMock from 'fetch-mock'
 import ChatPane from '../../../../../frontend/js/features/chat/components/chat-pane'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
 import { stubMathJax, tearDownMathJaxStubs } from './stubs'
+import { UserId } from '@ol-types/user'
 
 describe('<ChatPane />', function () {
   const user = {
-    id: 'fake_user',
+    id: 'fake_user' as UserId,
     first_name: 'fake_user_first_name',
     email: 'fake@example.com',
   }

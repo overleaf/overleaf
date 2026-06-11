@@ -28,6 +28,7 @@ import {
   useShareProjectContext,
 } from '@/features/share-project-modal/components/share-project-modal'
 import { ExcludeStrict } from '@ol-types/utils'
+import getMeta from '@/utils/meta'
 
 type ProjectAccessProps = {
   setIsInvitedPeopleScreen: React.Dispatch<React.SetStateAction<boolean>>
@@ -48,8 +49,7 @@ function ProjectAccess({
     null
   )
   const { isProjectOwner } = useEditorContext()
-  // TODO get the group name from backend
-  const groupName = 'your group'
+  const { activeGroupSubscriptions } = getMeta('ol-user')
 
   const {
     monitorRequest,
@@ -69,13 +69,11 @@ function ProjectAccess({
     let reqBody: Pick<SharingLinkData, 'privileges' | 'subscriptionId'>
     if (newAccess === 'onlyInvitedPeople') {
       reqBody = { privileges: false }
-    } else if (
-      newAccess === 'anyoneInXyzWithTheLink' &&
-      sharingLinkData?.subscriptionId
-    ) {
+    } else if (newAccess.startsWith('anyoneInXyzWithTheLink')) {
+      const newSubscriptionId = newAccess.split('.')[1]
       reqBody = {
         privileges: privileges || 'readOnly',
-        subscriptionId: sharingLinkData.subscriptionId,
+        subscriptionId: newSubscriptionId,
       }
     } else if (newAccess === 'anyoneWithTheLink') {
       reqBody = { privileges: privileges || 'readOnly' }
@@ -125,14 +123,34 @@ function ProjectAccess({
     })
   }
 
+  const getGroupLinkText = (id?: string) => {
+    if (
+      !id ||
+      !activeGroupSubscriptions ||
+      activeGroupSubscriptions.length === 0
+    ) {
+      return ''
+    }
+    const subscription = activeGroupSubscriptions.find(sub => sub._id === id)
+    if (subscription?.teamName) {
+      return t('anyone_in_x_with_the_link', {
+        groupName: subscription.teamName,
+      })
+    } else {
+      return t('anyone_in_your_group_with_the_link')
+    }
+  }
+
   const getProjectAccessDropdownToggleText = () => {
-    switch (projectAccess) {
+    if (!projectAccess) return ''
+    const [accessType, subscriptionId] = projectAccess.split('.')
+    switch (accessType) {
       case 'legacyLinkSharing':
         return t('via_sharing_links_legacy')
       case 'onlyInvitedPeople':
         return t('only_invited_people')
       case 'anyoneInXyzWithTheLink':
-        return t('anyone_in_x_with_the_link', { groupName })
+        return getGroupLinkText(subscriptionId)
       case 'anyoneWithTheLink':
         return t('anyone_with_the_link')
       default:
@@ -167,7 +185,7 @@ function ProjectAccess({
             {projectAccess === 'onlyInvitedPeople' && (
               <MaterialIcon type="lock" unfilled />
             )}
-            {projectAccess === 'anyoneInXyzWithTheLink' && (
+            {projectAccess.startsWith('anyoneInXyzWithTheLink') && (
               <MaterialIcon type="domain" unfilled />
             )}
             {projectAccess === 'anyoneWithTheLink' && (
@@ -217,23 +235,33 @@ function ProjectAccess({
                     {t('only_invited_people')}
                   </DropdownItem>
                 </DropdownListItem>
-                {sharingLinkData?.subscriptionId && (
-                  <DropdownListItem className="d-flex align-items-center">
-                    <DropdownItem
-                      as="button"
-                      eventKey="anyoneInXyzWithTheLink"
-                      leadingIcon={<MaterialIcon type="domain" unfilled />}
-                      trailingIcon={
-                        projectAccess === 'anyoneInXyzWithTheLink'
-                          ? 'check'
-                          : undefined
-                      }
-                      active={projectAccess === 'anyoneInXyzWithTheLink'}
+                {activeGroupSubscriptions &&
+                  activeGroupSubscriptions.map(subscription => (
+                    <DropdownListItem
+                      className="d-flex align-items-center"
+                      key={subscription._id}
                     >
-                      {t('anyone_in_x_with_the_link', { groupName })}
-                    </DropdownItem>
-                  </DropdownListItem>
-                )}
+                      <DropdownItem
+                        as="button"
+                        eventKey={`anyoneInXyzWithTheLink.${subscription._id}`}
+                        leadingIcon={<MaterialIcon type="domain" unfilled />}
+                        trailingIcon={
+                          projectAccess ===
+                          `anyoneInXyzWithTheLink.${subscription._id}`
+                            ? 'check'
+                            : undefined
+                        }
+                        active={
+                          projectAccess ===
+                          `anyoneInXyzWithTheLink.${subscription._id}`
+                        }
+                      >
+                        {t('anyone_in_x_with_the_link', {
+                          groupName: subscription.teamName || 'your group',
+                        })}
+                      </DropdownItem>
+                    </DropdownListItem>
+                  ))}
                 <DropdownListItem className="d-flex align-items-center gap-2">
                   <DropdownItem
                     as="button"

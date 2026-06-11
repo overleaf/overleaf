@@ -253,7 +253,7 @@ describe('<ShareProjectModal/>', function () {
     renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
       ...createContextProps({ publicAccessLevel: 'tokenBased', invites }),
       user: {
-        id: 'non-project-owner',
+        id: 'non-project-owner' as UserId,
         email: 'non-project-owner@example.com',
       },
     })
@@ -283,7 +283,7 @@ describe('<ShareProjectModal/>', function () {
     renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
       ...createContextProps({ publicAccessLevel: 'private', invites }),
       user: {
-        id: 'non-project-owner',
+        id: 'non-project-owner' as UserId,
         email: 'non-project-owner@example.com',
       },
     })
@@ -1057,10 +1057,14 @@ describe('<ShareProjectModal/>', function () {
         subscriptionId: 'sub-123',
       })
 
-      renderWithEditorContext(
-        <ShareProjectModal {...modalProps} />,
-        createContextProps({ publicAccessLevel: 'private' })
-      )
+      renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
+        ...createContextProps({ publicAccessLevel: 'private' }),
+        user: {
+          id: USER_ID,
+          email: USER_EMAIL,
+          activeGroupSubscriptions: [{ _id: 'sub-123' }],
+        },
+      })
 
       await screen.findByText('Anyone in your group with the link')
     })
@@ -1331,7 +1335,7 @@ describe('<ShareProjectModal/>', function () {
       renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
         ...createContextProps(),
         user: {
-          id: 'non-project-owner',
+          id: 'non-project-owner' as UserId,
           email: 'non-project-owner@example.com',
         },
       })

@@ -16,7 +16,7 @@ export default function CopySharingLinkButton() {
   const isCopyBtnEnabled =
     Boolean(navigator.clipboard?.writeText) &&
     Boolean(sharingLinkData?.token) &&
-    (projectAccess === 'anyoneInXyzWithTheLink' ||
+    (projectAccess?.startsWith('anyoneInXyzWithTheLink') ||
       projectAccess === 'anyoneWithTheLink')
 
   const handleCopyClick = () => {

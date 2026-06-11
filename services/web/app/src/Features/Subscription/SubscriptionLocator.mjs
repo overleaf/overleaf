@@ -180,6 +180,27 @@ const SubscriptionLocator = {
     }
   },
 
+  async getUserActiveGroupSubscriptions(userOrId, projection = {}) {
+    if (!Features.hasFeature('saas')) return []
+
+    const userId = SubscriptionLocator._getUserId(userOrId)
+    return await Subscription.find(
+      {
+        groupPlan: true,
+        $and: [
+          { $or: [{ admin_id: userId }, { member_ids: userId }] },
+          {
+            $or: [
+              { 'recurlyStatus.state': 'active' },
+              { 'paymentProvider.state': 'active' },
+            ],
+          },
+        ],
+      },
+      projection
+    ).exec()
+  },
+
   async getUserSubscriptionStatus(userId) {
     let usersSubscription = { personal: false, group: false }
 

@@ -20,7 +20,7 @@ import {
 export type ProjectAccessType =
   | 'legacyLinkSharing'
   | 'onlyInvitedPeople'
-  | 'anyoneInXyzWithTheLink'
+  | `anyoneInXyzWithTheLink.${string}`
   | 'anyoneWithTheLink'
 
 export type ShareProjectContextValue = {
@@ -161,7 +161,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
       if (!data.privileges) {
         setProjectAccess('onlyInvitedPeople')
       } else if (data.subscriptionId) {
-        setProjectAccess('anyoneInXyzWithTheLink')
+        setProjectAccess(`anyoneInXyzWithTheLink.${data.subscriptionId}`)
       } else {
         setProjectAccess('anyoneWithTheLink')
       }

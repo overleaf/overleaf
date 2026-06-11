@@ -572,9 +572,20 @@ const _ProjectController = {
                 )
               ).isMember)()
           : false,
+        activeGroupSubscriptions:
+          SubscriptionLocator.promises.getUserActiveGroupSubscriptions(userId, {
+            _id: 1,
+            teamName: 1,
+            sharingPermissions: 1,
+          }),
       })
 
-      const { project, userValues, userIsMemberOfGroupSubscription } = responses
+      const {
+        project,
+        userValues,
+        userIsMemberOfGroupSubscription,
+        activeGroupSubscriptions,
+      } = responses
 
       await Promise.all([
         InactiveProjectManager.promises.reactivateProjectIfRequired(project),
@@ -959,6 +970,7 @@ const _ProjectController = {
           ),
           isMemberOfGroupSubscription: userIsMemberOfGroupSubscription,
           hasInstitutionLicence: userHasInstitutionLicence,
+          activeGroupSubscriptions,
         },
         initialLoadingScreenTheme,
         userSettings,

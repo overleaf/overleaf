@@ -207,6 +207,7 @@
   "anyone": "Anyone",
   "anyone_in_x": "Anyone in __groupName__",
   "anyone_in_x_with_the_link": "Anyone in __groupName__ with the link",
+  "anyone_in_your_group_with_the_link": "Anyone in your group with the link",
   "anyone_with_link_can_edit": "Anyone with this link can edit this project",
   "anyone_with_link_can_view": "Anyone with this link can view this project",
   "anyone_with_the_link": "Anyone with the link",

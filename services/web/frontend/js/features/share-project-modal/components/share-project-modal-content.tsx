@@ -137,8 +137,9 @@ function ShareProjectModalContentInner({
           {isSharingUpdatesEnabled ? (
             <>
               {!isInvitedPeopleScreen &&
+                projectAccess &&
                 (projectAccess === 'onlyInvitedPeople' ||
-                  projectAccess === 'anyoneInXyzWithTheLink' ||
+                  projectAccess.startsWith('anyoneInXyzWithTheLink') ||
                   projectAccess === 'anyoneWithTheLink') && (
                   <CopySharingLinkButton />
                 )}

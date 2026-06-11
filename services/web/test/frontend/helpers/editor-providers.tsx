@@ -45,7 +45,7 @@ import {
   ProjectMetadata,
   ProjectUpdate,
 } from '@/shared/context/types/project-metadata'
-import { UserId } from '../../../types/user'
+import { User, UserId } from '../../../types/user'
 import { ProjectCompiler } from '../../../types/project-settings'
 import { ReferencesContext } from '@/features/ide-react/context/references-context'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
@@ -70,12 +70,14 @@ const defaultUserSettings = {
 } satisfies UserSettings
 
 export type EditorProvidersProps = {
-  user?: {
-    id: string
-    email: string
-    signUpDate?: string
-    isProfessionalGroupPlan?: boolean
-  }
+  user?: Pick<
+    User,
+    | 'id'
+    | 'email'
+    | 'signUpDate'
+    | 'activeGroupSubscriptions'
+    | 'isProfessionalGroupPlan'
+  >
   projectId?: string
   projectName?: string
   projectOwner?: ProjectMetadata['owner']
