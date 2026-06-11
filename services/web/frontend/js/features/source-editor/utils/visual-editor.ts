@@ -1,10 +1,11 @@
+import { Extension } from '@codemirror/state'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { isValidTeXFile } from '../../../main/is-valid-tex-file'
 import { getFileExtension } from './file'
 
 const visualEditorProviders = importOverleafModules('visualEditorProviders')
 const cmVisualEditorProviders: Array<{
-  import: { getExtensions: (ext: string) => unknown }
+  import: { getExtensions: (ext: string) => Extension }
 }> = importOverleafModules('sourceEditorVisualExtensions')
 
 /**
@@ -23,10 +24,9 @@ export function isCmVisualEditorAvailable(filename: string): boolean {
   }
 
   for (const provider of cmVisualEditorProviders) {
-    const extensions = provider.import.getExtensions(extension)
-    if (
-      Array.isArray(extensions) ? extensions.length > 0 : extensions != null
-    ) {
+    const result = provider.import.getExtensions(extension)
+    const extensions = Array.isArray(result) ? result : [result]
+    if (extensions.length > 0) {
       return true
     }
   }

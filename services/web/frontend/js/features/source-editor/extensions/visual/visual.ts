@@ -220,11 +220,11 @@ const visualModuleExtensions = (docName: string): Extension | null => {
   }
 
   for (const provider of moduleVisualExtensionProviders) {
-    const extensions = provider.import.getExtensions(fileExt)
-    if (Array.isArray(extensions) && extensions.length === 0) {
-      continue
+    const result = provider.import.getExtensions(fileExt)
+    const extensions = Array.isArray(result) ? result : [result]
+    if (extensions.length > 0) {
+      return extensions
     }
-    return extensions
   }
 
   return null
