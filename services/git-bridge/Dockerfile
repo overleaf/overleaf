@@ -16,6 +16,21 @@ RUN chmod +x /opt/envsubst
 
 RUN useradd --create-home node
 
+ENV MAVEN_OPTS="-Dmaven.repo.local=/home/node/repository"
+
+# Pre-resolve Maven dependencies and plugins into the base image to limit
+# downstream `mvn` invocations hitting Maven Central on every CI build.
+# Uses a stub source and test, since `dependency:go-offline` and `dependency:resolve-plugins`
+# miss lazy-loaded plugins (surefire, maven-assembly, etc.)
+COPY pom.xml /tmp/warmup/pom.xml
+RUN mkdir -p /tmp/warmup/src/main/java/stub /tmp/warmup/src/test/java/stub \
+ && echo 'package stub; public class Stub {}' > /tmp/warmup/src/main/java/stub/Stub.java \
+ && echo 'package stub; public class StubTest { @org.junit.Test public void noop() {} }' \
+      > /tmp/warmup/src/test/java/stub/StubTest.java \
+&& mvn -B --no-transfer-progress -f /tmp/warmup/pom.xml clean package \
+&& chown -R node:node /home/node/repository \
+&& rm -rf /tmp/warmup
+
 FROM base AS builder
 
 COPY . /app
