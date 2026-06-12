@@ -143,7 +143,7 @@
     Whitespace { $[ \t]+ }
     NewLine { "\n" }
     BlankLine { "\n" "\n"+ }
-    Normal { ![\\{}\[\]$&~#^_% \t\n] ![\\{}\[\]$&~#^_%\t\n]* }  // everything is normal text, except these characters
+    Normal { ![\\{}\[\]$&~#% \t\n] ![\\{}\[\]$&~#%\t\n]* }  // everything is normal text, except these characters
     @precedence { CtrlSeq, CtrlSym, BlankLine, NewLine, Whitespace, Normal }
 
     OpenBrace[closedBy=CloseBrace] { "{" }
@@ -528,7 +528,6 @@ LongArg {
     | Environment
     | BlankLine
     | "#" // macro character
-    | "_" | "^" // other math chars
     )*
 }
 
@@ -540,7 +539,6 @@ ShortArg {
     ( textWithBrackets
     | NonEmptyGroup<ShortArg>
     | "#" // macro character
-    | "_" | "^" // other math chars
     )*
 }
 
@@ -548,7 +546,6 @@ ShortOptionalArg {
     ( textBase
     | NonEmptyGroup<ShortOptionalArg>
     | "#" // macro character
-    | "_" // underscore is used in some parameter names
     )*
 }
 
@@ -556,7 +553,6 @@ TikzPictureContent {  /// same as Text but with added allowed characters
     ( textWithEnvironmentsAndBlankLines
     | NonEmptyGroup<TikzPictureContent>
     | "#" // macro character
-    | "_" | "^" // other math chars
     )+
 }
 
@@ -581,7 +577,6 @@ DefinitionFragment {
     | "#" // macro character
     | Ampersand // for tables
     | Tilde // unbreakable space
-    | "_" | "^" // other math chars
     | SectioningCommand<
         BookCtrlSeq |
         PartCtrlSeq |
