@@ -1,10 +1,23 @@
 {
   "extends": ["stylelint-config-standard-scss"],
+  "plugins": [
+    "./stylelint-rules/no-themed-vars-in-root.mjs",
+    "./stylelint-rules/themed-custom-property-suffix.mjs"
+  ],
   "rules": {
     "function-url-quotes": null,
     "no-descending-specificity": null,
     "scss/at-extend-no-missing-placeholder": null,
     "scss/operator-no-newline-after": null,
-    "property-no-vendor-prefix": [true, { "ignoreProperties": ["mask-image"] }]
-  }
+    "property-no-vendor-prefix": [true, { "ignoreProperties": ["mask-image"] }],
+    "overleaf/no-themed-vars-in-root": true
+  },
+  "overrides": [
+    {
+      "files": ["frontend/stylesheets/abstracts/themes-common-variables.scss"],
+      "rules": {
+        "overleaf/themed-custom-property-suffix": true
+      }
+    }
+  ]
 }
