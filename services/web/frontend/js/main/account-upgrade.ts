@@ -39,6 +39,10 @@ export function upgradePlan(source: string) {
   }
 
   if (openedWindow) {
-    openedWindow.location = '/user/subscription'
+    const searchParams = new URLSearchParams({
+      itm_campaign: source,
+    })
+
+    openedWindow.location = `/user/subscription/choose-your-plan?${searchParams.toString()}`
   }
 }
