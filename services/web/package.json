@@ -72,7 +72,7 @@
   "browserslist": [
     "defaults and supports woff2",
     "last 1 year",
-    "safari > 14"
+    "safari >= 15"
   ],
   "dependencies": {
     "@ai-sdk/google-vertex": "^4.0.113",

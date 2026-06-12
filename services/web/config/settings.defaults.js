@@ -1123,7 +1123,7 @@ module.exports = {
 
   unsupportedBrowsers: {
     ie: '<=11',
-    safari: '<=14',
+    safari: '<15',
     firefox: '<=78',
   },
 
