@@ -32,6 +32,18 @@ const overrides = {
       webhookUser: 'recurly',
       webhookPass: 'webhook',
     },
+    stripeUS: {
+      accountId: 'test_us_account',
+      publishableKey: 'test_us_publishable_key',
+      secretKey: 'sk_test_xxx',
+      webhookSignature: 'test_us_webhook_signature',
+    },
+    stripeUK: {
+      accountId: 'test_uk_account',
+      publishableKey: 'test_uk_publishable_key',
+      secretKey: 'sk_test_xxx',
+      webhookSignature: 'test_uk_webhook_signature',
+    },
 
     v1: {
       url: `http://127.0.0.1:25000`,
