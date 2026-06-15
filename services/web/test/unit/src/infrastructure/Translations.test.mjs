@@ -38,7 +38,7 @@ describe('Translations', function () {
       headers: {
         'accept-language': '',
       },
-      acceptsLanguage: express.request.acceptsLanguages,
+      acceptsLanguages: express.request.acceptsLanguages,
     }
     res = {
       locals: {},

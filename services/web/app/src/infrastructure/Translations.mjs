@@ -125,7 +125,7 @@ function setLangBasedOnDomainMiddleware(req, res, next) {
   // the Accept-Language header), then set flag which will show a banner
   // offering to switch to the appropriate library
   const detectedLanguageCode =
-    req.acceptsLanguage(availableLanguageCodes) || fallbackLanguageCode
+    req.acceptsLanguages(availableLanguageCodes) || fallbackLanguageCode
   if (req.language !== detectedLanguageCode) {
     res.locals.suggestedLanguageSubdomainConfig =
       subdomainConfigs.get(detectedLanguageCode)
