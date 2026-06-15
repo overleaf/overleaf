@@ -26,6 +26,7 @@ import EditorCloneProjectModalWrapper from '@/features/clone-project-modal/compo
 import useOpenProject from '@/shared/hooks/use-open-project'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import ReviewModeOptions from './review-mode-options'
 
 const menubarExtraComponents = importOverleafModules(
   'menubarExtraComponents'
@@ -205,10 +206,16 @@ export const ToolbarMenuBar = () => {
       id: 'pdf-controls',
       children: [
         'view-pdf-presentation-mode',
-        'view-pdf-zoom-in',
-        'view-pdf-zoom-out',
-        'view-pdf-fit-width',
-        'view-pdf-fit-height',
+        {
+          id: 'pdf-zoom-control-group',
+          title: t('pdf_zoom'),
+          children: [
+            'view-pdf-zoom-in',
+            'view-pdf-zoom-out',
+            'view-pdf-fit-width',
+            'view-pdf-fit-height',
+          ],
+        },
       ],
     }),
     [t]
@@ -262,8 +269,9 @@ export const ToolbarMenuBar = () => {
           className="ide-redesign-toolbar-dropdown-toggle-subdued ide-redesign-toolbar-button-subdued"
         >
           <ChangeLayoutOptions />
+          <ReviewModeOptions />
           <DropdownDivider />
-          <DropdownHeader>Editor settings</DropdownHeader>
+          <DropdownHeader>{t('editor_settings')}</DropdownHeader>
           <MenuBarOption
             eventKey="show_breadcrumbs"
             title={t('show_breadcrumbs')}

@@ -206,7 +206,7 @@ export function openProjectViaInviteNotification(
 function shareProjectByEmail(
   projectName: string,
   email: string,
-  level: 'Viewer' | 'Editor',
+  level: 'Viewer' | 'Editor' | 'Reviewer',
   newEditor: boolean = false
 ) {
   openProjectByName(projectName, newEditor)
@@ -231,7 +231,7 @@ function shareProjectByEmail(
 export function shareProjectByEmailAndAcceptInviteViaDash(
   projectName: string,
   email: string,
-  level: 'Viewer' | 'Editor',
+  level: 'Viewer' | 'Editor' | 'Reviewer',
   newEditor: boolean = false
 ) {
   shareProjectByEmail(projectName, email, level, newEditor)
