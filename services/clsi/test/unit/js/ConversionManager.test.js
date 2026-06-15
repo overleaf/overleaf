@@ -91,6 +91,7 @@ const LATEX_TO_DOCUMENT_CASES = [
       '--to',
       'html',
       '--standalone',
+      '--mathml',
       '--resource-path=..',
       '--extract-media=.',
     ],

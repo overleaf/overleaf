@@ -173,6 +173,7 @@ const LATEX_EXPORT_CONFIGS = {
       '--to',
       'html',
       '--standalone',
+      '--mathml',
     ],
   },
 }
