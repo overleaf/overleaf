@@ -181,6 +181,11 @@ const Toolbar = memo(function Toolbar() {
         id="ol-cm-toolbar-wrapper"
         className={classNames('ol-cm-toolbar-wrapper', {
           'ol-cm-toolbar-wrapper-indented': showReviewPanelHeader,
+          // The border is only needed when the header is flush with the
+          // toolbar, which is the case when tabs are disabled and the review
+          // panel is shown
+          'ol-cm-toolbar-wrapper-needs-border':
+            showReviewPanelHeader && !tabsVisible,
         })}
       >
         <div
