@@ -228,6 +228,7 @@ const _CompileController = {
       outputUrlPrefix,
       buildId,
       clsiCacheShard,
+      instanceType,
     } = await CompileManager.promises
       .compile(projectId, userId, options)
       .catch(error => {
@@ -261,8 +262,15 @@ const _CompileController = {
           status,
           compileTime: timings?.compileE2E,
           timeout: limits.timeout,
-          server: clsiServerId?.includes('-c4d-') ? 'faster' : 'normal',
+          server: instanceType
+            ? instanceType === 'c4d'
+              ? 'faster'
+              : 'normal'
+            : clsiServerId?.includes('-c4d-')
+              ? 'faster'
+              : 'normal',
           clsiServerId,
+          instanceType,
           isAutoCompile,
           isInitialCompile: stats?.isInitialCompile === 1,
           restoredClsiCache: stats?.restoredClsiCache === 1,

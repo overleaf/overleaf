@@ -98,6 +98,7 @@ async function compile(projectId, userId, options = {}) {
     buildId,
     clsiCacheShard,
     baseHistoryVersion,
+    instanceType,
   } = await ClsiManager.promises.sendRequest(projectId, compileAsUser, options)
 
   return {
@@ -112,6 +113,7 @@ async function compile(projectId, userId, options = {}) {
     buildId,
     clsiCacheShard,
     baseHistoryVersion,
+    instanceType,
   }
 }
 
@@ -243,6 +245,7 @@ export default CompileManager = {
     'outputUrlPrefix',
     'buildId',
     'clsiCacheShard',
+    'instanceType',
   ]),
 
   stopCompile: callbackify(stopCompile),

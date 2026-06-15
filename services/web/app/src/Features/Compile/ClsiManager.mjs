@@ -334,6 +334,7 @@ async function _sendBuiltRequest(projectId, userId, req, options) {
     outputUrlPrefix: compile.outputUrlPrefix,
     clsiCacheShard: compile.clsiCacheShard,
     baseHistoryVersion: compile.baseHistoryVersion,
+    instanceType: compile.instanceType,
   }
 }
 
@@ -1287,6 +1288,7 @@ export default {
     'outputUrlPrefix',
     'buildId',
     'clsiCacheShard',
+    'instanceType',
   ]),
   sendExternalRequest: callbackifyMultiResult(sendExternalRequest, [
     'status',

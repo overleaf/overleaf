@@ -2,7 +2,7 @@ const Path = require('node:path')
 const os = require('node:os')
 const fs = require('node:fs')
 
-const isPreEmptible = process.env.PREEMPTIBLE === 'TRUE'
+const isSpotInstance = process.env.PREEMPTIBLE === 'TRUE'
 const CLSI_SERVER_ID = os.hostname().replace('-ctr', '')
 
 module.exports = {
@@ -59,6 +59,9 @@ module.exports = {
       // External url prefix for output files, e.g. for requests via load-balancers.
       outputUrlPrefix: `${process.env.ZONE ? `/zone/${process.env.ZONE}` : ''}`,
       clsiServerId: process.env.CLSI_SERVER_ID || CLSI_SERVER_ID,
+      instanceType: process.env.INSTANCE_TYPE,
+      zone: process.env.ZONE,
+      isSpotInstance,
 
       downloadHost: process.env.DOWNLOAD_HOST || 'http://localhost:8080',
     },
@@ -104,7 +107,7 @@ module.exports = {
     parseInt(process.env.PDF_CACHING_WORKER_POOL_SIZE, 10) || 4,
   pdfCachingWorkerPoolBackLogLimit:
     parseInt(process.env.PDF_CACHING_WORKER_POOL_BACK_LOG_LIMIT, 10) || 40,
-  compileConcurrencyLimit: isPreEmptible ? 32 : 64,
+  compileConcurrencyLimit: isSpotInstance ? 32 : 64,
   performanceLogSamplingPercentage:
     parseFloat(process.env.CLSI_PERFORMANCE_LOG_SAMPLING, 10) || 0,
 }

@@ -157,6 +157,9 @@ function compile(req, res, next) {
                 timings,
                 buildId,
                 clsiCacheShard,
+                instanceType: Settings.apis.clsi.instanceType,
+                zone: Settings.apis.clsi.zone,
+                isSpotInstance: Settings.apis.clsi.isSpotInstance,
                 outputUrlPrefix: Settings.apis.clsi.outputUrlPrefix,
                 outputFiles: outputFiles.map(file => ({
                   url:

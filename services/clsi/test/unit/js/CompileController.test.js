@@ -25,6 +25,9 @@ describe('CompileController', () => {
           clsi: {
             url: 'http://clsi.example.com',
             outputUrlPrefix: '/zone/b',
+            instanceType: 'c4d',
+            zone: 'b',
+            isSpotInstance: true,
             downloadHost: 'http://localhost:3013',
           },
           clsiCache: {
@@ -149,6 +152,9 @@ describe('CompileController', () => {
               })),
               clsiCacheShard: undefined,
               baseHistoryVersion: undefined,
+              instanceType: 'c4d',
+              zone: 'b',
+              isSpotInstance: true,
             },
           })
           .should.equal(true)
@@ -178,6 +184,9 @@ describe('CompileController', () => {
               })),
               clsiCacheShard: undefined,
               baseHistoryVersion: undefined,
+              instanceType: 'c4d',
+              zone: 'b',
+              isSpotInstance: true,
             },
           })
           .should.equal(true)
@@ -227,6 +236,9 @@ describe('CompileController', () => {
             })),
             clsiCacheShard: undefined,
             baseHistoryVersion: undefined,
+            instanceType: 'c4d',
+            zone: 'b',
+            isSpotInstance: true,
           },
         })
       })
@@ -276,6 +288,9 @@ describe('CompileController', () => {
             })),
             clsiCacheShard: undefined,
             baseHistoryVersion: undefined,
+            instanceType: 'c4d',
+            zone: 'b',
+            isSpotInstance: true,
           },
         })
       })
@@ -309,6 +324,9 @@ describe('CompileController', () => {
               timings: ctx.timings,
               clsiCacheShard: undefined,
               baseHistoryVersion: undefined,
+              instanceType: 'c4d',
+              zone: 'b',
+              isSpotInstance: true,
             },
           })
           .should.equal(true)
@@ -345,6 +363,9 @@ describe('CompileController', () => {
               buildId: undefined,
               clsiCacheShard: undefined,
               baseHistoryVersion: undefined,
+              instanceType: 'c4d',
+              zone: 'b',
+              isSpotInstance: true,
             },
           })
           .should.equal(true)
@@ -380,6 +401,9 @@ describe('CompileController', () => {
               buildId: undefined,
               clsiCacheShard: undefined,
               baseHistoryVersion: undefined,
+              instanceType: 'c4d',
+              zone: 'b',
+              isSpotInstance: true,
             },
           })
           .should.equal(true)
@@ -413,6 +437,9 @@ describe('CompileController', () => {
               buildId: undefined,
               clsiCacheShard: undefined,
               baseHistoryVersion: undefined,
+              instanceType: 'c4d',
+              zone: 'b',
+              isSpotInstance: true,
             },
           })
           .should.equal(true)
