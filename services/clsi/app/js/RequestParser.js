@@ -65,6 +65,11 @@ function parse(body, callback) {
         type: 'number',
       }
     )
+    response.enableCheckpoint = _parseAttribute(
+      'enableCheckpoint',
+      compile.options.enableCheckpoint,
+      { default: false, type: 'boolean' }
+    )
     response.timeout = _parseAttribute('timeout', compile.options.timeout, {
       default: MAX_TIMEOUT,
       type: 'number',

@@ -192,6 +192,11 @@ async function doCompile(request, stats, timings) {
     }
   }
 
+  // Pass through checkpoint setting
+  if (request.enableCheckpoint) {
+    env.ENABLE_CHECKPOINT = '1'
+  }
+
   const compileStart = Date.now()
 
   const compileName = getCompileName(request.project_id, request.user_id)
