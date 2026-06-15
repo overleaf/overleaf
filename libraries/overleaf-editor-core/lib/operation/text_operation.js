@@ -9,7 +9,6 @@
  */
 
 'use strict'
-const containsNonBmpChars = require('../util').containsNonBmpChars
 const EditOperation = require('./edit_operation')
 const {
   RetainOp,
@@ -287,13 +286,6 @@ class TextOperation extends EditOperation {
   apply(file) {
     const str = file.getContent()
     const operation = this
-    if (containsNonBmpChars(str)) {
-      throw new TextOperation.ApplyError(
-        'The string contains non BMP characters.',
-        operation,
-        str
-      )
-    }
     if (str.length !== operation.baseLength) {
       throw new TextOperation.ApplyError(
         "The operation's base length must be equal to the string's length.",
@@ -317,9 +309,6 @@ class TextOperation extends EditOperation {
         result += str.slice(inputCursor, inputCursor + op.length)
         inputCursor += op.length
       } else if (op instanceof InsertOp) {
-        if (containsNonBmpChars(op.insertion)) {
-          throw new InvalidInsertionError(str, op.toJSON())
-        }
         file.comments.applyInsert(
           new Range(result.length, op.insertion.length),
           { commentIds: op.commentIds }

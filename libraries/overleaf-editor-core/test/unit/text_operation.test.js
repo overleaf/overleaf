@@ -193,17 +193,6 @@ describe('TextOperation', function () {
     )
   })
 
-  it('throws when base string contains non BMP chars', function () {
-    const operation = new TextOperation()
-    const str = '𝌆\n'
-    expect(() => {
-      operation.apply(new StringFileData(str))
-    }).to.throw(
-      TextOperation.UnprocessableError,
-      /string contains non BMP characters/
-    )
-  })
-
   it('throws at from JSON when it contains non BMP chars', function () {
     const operation = ['𝌆\n']
     expect(() => {
