@@ -3,10 +3,13 @@ import { expect } from 'chai'
 import { fetchNothing, fetchJsonWithResponse } from '@overleaf/fetch-utils'
 import assert from 'node:assert'
 import mongodb from 'mongodb-legacy'
+import RedisWrapper from '@overleaf/redis-wrapper'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
 import Settings from '@overleaf/settings'
 const { ObjectId } = mongodb
+const LockKey = Settings.redis.lock.key_schema
+const lockRClient = RedisWrapper.createClient(Settings.redis.lock)
 
 const MockHistoryStore = () => nock('http://127.0.0.1:3100')
 const MockWeb = () => nock('http://127.0.0.1:3000')
@@ -147,6 +150,22 @@ describe('Flushing old queues', function () {
           !this.flushCall.isDone(),
           'did not make calls to history service to store updates'
         )
+      })
+    })
+
+    describe('when the project lock is already held', function () {
+      it('returns 423', async function () {
+        const key = LockKey.projectHistoryLock({ project_id: this.projectId })
+        await lockRClient.set(key, 'taken')
+        try {
+          const { statusCode } = await ProjectHistoryClient.flushProject(
+            this.projectId,
+            { allowErrors: true }
+          )
+          expect(statusCode).to.equal(423)
+        } finally {
+          await lockRClient.del(key)
+        }
       })
     })
 
