@@ -29,7 +29,6 @@
     "async": "^3.2.5",
     "body-parser": "1.20.4",
     "bunyan": "^1.8.15",
-    "celebrate": "^15.0.3",
     "diff-match-patch": "overleaf/diff-match-patch#89805f9c671a77a263fc53461acd62aa7498f688",
     "express": "4.22.1",
     "lodash": "^4.18.1",

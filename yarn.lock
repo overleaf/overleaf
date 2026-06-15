@@ -6955,7 +6955,6 @@ __metadata:
     async: "npm:^3.2.5"
     body-parser: "npm:1.20.4"
     bunyan: "npm:^1.8.15"
-    celebrate: "npm:^15.0.3"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
     diff-match-patch: "overleaf/diff-match-patch#89805f9c671a77a263fc53461acd62aa7498f688"
