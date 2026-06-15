@@ -1,104 +1,31 @@
 :root {
-  --history-react-icon-color: var(--content-disabled);
-  --history-react-header-bg: var(--bg-dark-secondary);
-  --history-react-header-color: var(--content-primary-dark);
-  --history-react-separator-color: var(--border-divider-dark);
-  --history-change-list-bg: var(--bg-light-primary);
-  --history-change-entry-color: var(--content-primary);
-  --history-change-entry-metadata-color: var(--content-secondary);
-  --history-change-list-divider: var(--border-divider);
-  --history-change-entry-hover-bg: var(--bg-light-secondary);
-  --history-loading-bg: var(--bg-light-secondary);
-  --history-change-entry-dropdown-button-bg: rgb(var(--bg-dark-primary) 0.08);
-  --history-change-entry-border-color: var(--green-50);
-  --history-change-entry-within-selected-bg: var(--bg-light-secondary);
-  --history-change-entry-within-selected-hover-bg: rgb($neutral-90, 8%);
-  --history-change-list-gradient: linear-gradient(black 35%, transparent);
-  --history-change-entry-selected-bg: var(--bg-accent-03);
-  --history-change-entry-selected-hover-bg: rgb($green-70, 16%);
+  --history-change-entry-within-selected-bg: var(--neutral-80);
+  --history-change-entry-within-selected-hover-bg: color-mix(
+    in srgb,
+    var(--white) 8%,
+    transparent
+  );
+  --history-change-entry-selected-bg: var(--green-70);
+  --history-change-entry-selected-hover-bg: color-mix(
+    in srgb,
+    var(--green-60) 8%,
+    transparent
+  );
 }
 
 @include theme('light') {
-  --history-react-header-bg: var(--bg-light-primary);
-  --history-react-header-color: var(--content-primary);
-  --history-react-separator-color: var(--border-divider);
-
-  .ide-redesign-main {
-    --history-change-entry-within-selected-bg: var(--bg-light-secondary);
-    --history-change-entry-within-selected-hover-bg: rgb(var(--neutral-90) 8%);
-    --history-change-entry-selected-bg: var(--bg-accent-03);
-    --history-change-entry-selected-hover-bg: rgb(var(--green-70 0.16));
-  }
-}
-
-.ide-redesign-main {
-  --history-react-header-bg: var(--bg-primary-themed);
-  --history-react-header-color: var(--content-primary-themed);
-  --history-react-icon-color: var(--file-tree-item-color);
-  --history-loading-bg: var(--bg-secondary-themed);
-  --history-change-list-gradient: linear-gradient(black 35%, transparent);
-  --history-change-list-bg: var(--bg-primary-themed);
-  --history-change-list-divider: var(--border-divider-themed);
-  --history-change-entry-metadata-color: var(--content-secondary-themed);
-  --history-change-entry-color: var(--content-primary-themed);
-  --history-change-entry-hover-bg: var(--bg-secondary-themed);
-  --history-change-entry-border-color: var(--green-50);
-  --history-change-entry-dropdown-button-bg: rgb(var(--bg-dark-primary) 0.08);
-
-  // Dark mode specific variables
-  --history-change-entry-within-selected-bg: var(--neutral-80);
-  --history-change-entry-within-selected-hover-bg: rgb(var(--white) 0.08);
-  --history-change-entry-selected-bg: var(--green-70);
-  --history-change-entry-selected-hover-bg: rgb(var(--green-60) 0.08);
-
-  .history-file-tree {
-    ul.history-file-tree-list {
-      padding: var(--spacing-02);
-
-      .history-file-tree-item > ul,
-      ul[role='tree'] {
-        border-left: 1px solid
-          color-mix(in srgb, var(--border-primary-themed) 24%, transparent);
-        margin-left: 14px !important;
-        margin-top: 0;
-      }
-
-      li {
-        padding: var(--spacing-02);
-        padding-right: 0;
-        margin-left: 0;
-      }
-
-      .history-file-tree-item {
-        border-radius: var(--border-radius-base);
-
-        .history-file-tree-item-name-wrapper {
-          .history-file-tree-item-badge {
-            margin-right: var(--spacing-02);
-          }
-        }
-
-        &::before {
-          display: none;
-        }
-
-        .material-symbols {
-          &.file-tree-expand-icon {
-            margin-left: 0;
-            vertical-align: middle;
-          }
-
-          &.file-tree-icon {
-            margin-left: 0;
-          }
-        }
-      }
-    }
-  }
-
-  ul[role='tree'].history-file-tree-list-inner {
-    padding-left: 10px;
-  }
+  --history-change-entry-within-selected-bg: var(--bg-light-secondary);
+  --history-change-entry-within-selected-hover-bg: color-mix(
+    in srgb,
+    var(--neutral-90) 8%,
+    transparent
+  );
+  --history-change-entry-selected-bg: var(--bg-accent-03);
+  --history-change-entry-selected-hover-bg: color-mix(
+    in srgb,
+    var(--green-70) 16%,
+    transparent
+  );
 }
 
 history-root {
@@ -113,7 +40,11 @@ history-root {
 }
 
 .history-react {
+  --history-react-separator-color: var(--border-divider-themed);
+  --history-change-list-bg: var(--bg-primary-themed);
+  --history-change-entry-color: var(--content-primary-themed);
   --history-change-list-padding: var(--spacing-06);
+  --history-change-entry-border-color: var(--green-50);
 
   display: flex;
   justify-content: center;
@@ -124,8 +55,8 @@ history-root {
     @include body-sm;
 
     height: 40px;
-    background-color: var(--history-react-header-bg);
-    color: var(--history-react-header-color);
+    background-color: var(--bg-primary-themed);
+    color: var(--content-primary-themed);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -218,7 +149,7 @@ history-root {
       cursor: pointer;
 
       &:hover {
-        background-color: var(--history-change-entry-hover-bg);
+        background-color: var(--bg-secondary-themed);
       }
     }
 
@@ -322,7 +253,7 @@ history-root {
   .history-version-metadata-users,
   .history-version-origin,
   .history-version-saved-by {
-    color: var(--history-change-entry-metadata-color);
+    color: var(--content-secondary-themed);
   }
 
   .history-version-change-action {
@@ -341,7 +272,7 @@ history-root {
 
   .history-version-divider {
     margin: 0;
-    border-color: var(--history-change-list-divider);
+    border-color: var(--border-divider-themed);
   }
 
   .history-version-badge {
@@ -372,7 +303,7 @@ history-root {
     position: sticky;
     bottom: 0;
     padding: var(--spacing-05) 0;
-    background-color: var(--history-loading-bg);
+    background-color: var(--bg-secondary-themed);
     text-align: center;
   }
 
@@ -384,7 +315,11 @@ history-root {
 
   .dropdown.open {
     .history-version-dropdown-menu-btn {
-      background-color: var(--history-change-entry-dropdown-button-bg);
+      background-color: color-mix(
+        in srgb,
+        var(--bg-dark-primary) 8%,
+        transparent
+      );
       box-shadow: initial;
     }
   }
@@ -441,7 +376,7 @@ history-root {
   .history-version-faded .history-version-details {
     max-height: 6em;
 
-    @include mask-image(var(--history-change-list-gradient));
+    @include mask-image(linear-gradient(black 35%, transparent));
 
     overflow: hidden;
   }
@@ -528,10 +463,14 @@ history-root {
     font-size: var(--font-size-02);
     margin: 0;
     overflow: hidden auto;
+    padding: var(--spacing-02);
 
     .history-file-tree-item > ul,
     ul[role='tree'] {
-      margin-left: var(--spacing-08);
+      border-left: 1px solid
+        color-mix(in srgb, var(--border-primary-themed) 24%, transparent);
+      margin-left: 14px !important;
+      margin-top: 0;
     }
 
     &::after {
@@ -543,7 +482,9 @@ history-root {
     li {
       line-height: var(--file-tree-line-height);
       position: relative;
-      margin-left: var(--spacing-04);
+      padding: var(--spacing-02);
+      padding-right: 0;
+      margin-left: 0;
 
       .history-file-tree-item {
         color: var(--file-tree-item-color);
@@ -552,17 +493,10 @@ history-root {
         user-select: none;
         display: flex;
         align-items: center;
-
-        @include fake-full-width-bg(transparent);
+        border-radius: var(--border-radius-base);
 
         &:hover {
           background-color: var(--file-tree-item-hover-bg);
-
-          // When the entity is a subfolder, the DOM element is "indented" via margin-left. This makes the
-          // element not fill the entire file-tree width (as it's spaced from the left-hand side via margin)
-          // and, in consequence, the background gets clipped. The ::before pseudo-selector is used to fill
-          // the empty space.
-          @include fake-full-width-bg(var(--file-tree-item-hover-bg));
         }
 
         .history-file-tree-folder-button {
@@ -593,7 +527,7 @@ history-root {
           .history-file-tree-item-badge {
             text-transform: capitalize;
             font-weight: normal;
-            margin-right: var(--spacing-05);
+            margin-right: var(--spacing-02);
 
             &:hover {
               background-color: var(--neutral-20) !important;
@@ -603,16 +537,16 @@ history-root {
       }
 
       .material-symbols {
-        color: var(--history-react-icon-color);
+        color: var(--file-tree-item-color);
 
         &.file-tree-icon {
           margin-right: var(--spacing-02);
-          margin-left: var(--spacing-04);
+          margin-left: 0;
         }
 
         &.file-tree-expand-icon {
-          margin-left: var(--spacing-04);
-          vertical-align: sub;
+          margin-left: 0;
+          vertical-align: middle;
         }
       }
     }
@@ -628,10 +562,12 @@ history-root {
       .material-symbols {
         color: var(--file-tree-item-selected-color);
       }
-
-      @include fake-full-width-bg(var(--file-tree-item-selected-bg));
     }
   }
+}
+
+ul[role='tree'].history-file-tree-list-inner {
+  padding-left: 10px;
 }
 
 .history-error {
