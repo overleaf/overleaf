@@ -301,6 +301,35 @@ describe('RecurlyWrapper', function () {
       expect(ctx.recurlyAccount).to.exist
       ctx.recurlyAccount.account_code.should.equal('104')
     })
+
+    it('should tolerate a missing account', function (ctx) {
+      ctx.requestOptions.expect404.should.equal(true)
+    })
+  })
+
+  describe('updateAccountEmailAddress, when the account does not exist', function () {
+    beforeEach(function (ctx) {
+      ctx.apiRequest = sinon
+        .stub(ctx.RecurlyWrapper.promises, 'apiRequest')
+        .resolves({
+          err: null,
+          response: { status: 404 },
+          body: null,
+        })
+    })
+
+    afterEach(function (ctx) {
+      ctx.RecurlyWrapper.promises.apiRequest.restore()
+    })
+
+    it('should return null', async function (ctx) {
+      const recurlyAccount =
+        await ctx.RecurlyWrapper.promises.updateAccountEmailAddress(
+          'account-id-123',
+          'example@overleaf.com'
+        )
+      expect(recurlyAccount).to.be.null
+    })
   })
 
   describe('updateAccountEmailAddress, with invalid XML', function () {

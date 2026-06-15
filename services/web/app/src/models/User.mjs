@@ -245,6 +245,10 @@ export const UserSchema = new Schema(
     dsMobileApp: {
       subscribed: { type: Boolean },
     },
+    stripeCustomerIds: {
+      us: { type: String },
+      uk: { type: String },
+    },
   },
   { minimize: false }
 )

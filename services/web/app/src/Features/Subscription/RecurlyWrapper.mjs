@@ -31,11 +31,16 @@ async function updateAccountEmailAddress(userId, newAccountEmail) {
     })
   }
 
-  const { body } = await RecurlyWrapper.promises.apiRequest({
+  const { response, body } = await RecurlyWrapper.promises.apiRequest({
     url: `accounts/${userId}`,
     method: 'PUT',
     body: requestBody,
+    expect404: true,
   })
+  if (response.status === 404) {
+    // the user has no Recurly account
+    return null
+  }
   return await RecurlyWrapper.promises._parseAccountXml(body)
 }
 
