@@ -3,12 +3,26 @@
 import settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import { fetchJson } from '@overleaf/fetch-utils'
+import LRU from 'lru-cache'
 
 /**
  * @typedef {import('../../../types/subscription/currency').CurrencyCode} CurrencyCode
  */
 
 const DEFAULT_CURRENCY_CODE = /** @type {const} */ 'USD'
+const cache = new LRU({
+  max: settings.apis.geoIpLookup.cacheSize,
+})
+
+/**
+ * Cache details per /24 subnet, which is the smallest subnet routed on the public internet.
+ * IPv6 is not supported by GCP. We could cache by /48.
+ * @param {string} ip
+ */
+function networkCacheKey(ip) {
+  const octets = ip.split('.')
+  return octets.length === 4 ? octets.slice(0, 3).join('.') : ip
+}
 
 /** @type {Record<string, CurrencyCode>} */
 const currencyMappings = {
@@ -99,10 +113,17 @@ async function getDetails(ip, callback) {
     return
   }
   ip = ip.trim().split(' ')[0]
+  const cacheKey = networkCacheKey(ip)
+  const cached = cache.get(cacheKey)
+  if (cached) {
+    return cached
+  }
   const url = new URL(settings.apis.geoIpLookup.url)
   url.pathname += ip
   logger.debug({ ip, url }, 'getting geo ip details')
-  return await fetchJson(url, { signal: AbortSignal.timeout(1_000) })
+  const details = await fetchJson(url, { signal: AbortSignal.timeout(1_000) })
+  cache.set(cacheKey, details)
+  return details
 }
 
 /**

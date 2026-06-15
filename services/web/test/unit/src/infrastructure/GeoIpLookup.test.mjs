@@ -31,6 +31,7 @@ describe('GeoIpLookup', function () {
       apis: {
         geoIpLookup: {
           url: 'http://lookup.com/',
+          cacheSize: 10_000,
         },
       },
     }
@@ -86,6 +87,20 @@ describe('GeoIpLookup', function () {
         ctx.fetchUtils.fetchJson.should.have.been.calledWith(
           new URL(ctx.settings.apis.geoIpLookup.url + ctx.ipAddress)
         )
+      })
+
+      it('should cache lookups by /24 network', async function (ctx) {
+        const first = await ctx.GeoIpLookup.promises.getDetails('12.34.56.78')
+        const second = await ctx.GeoIpLookup.promises.getDetails('12.34.56.99')
+        ctx.fetchUtils.fetchJson.should.have.been.calledOnce
+        assert.equal(first, second)
+        assert.deepEqual(second, ctx.stubbedResponse)
+      })
+
+      it('should not share cache entries across different /24 networks', async function (ctx) {
+        await ctx.GeoIpLookup.promises.getDetails('12.34.56.78')
+        await ctx.GeoIpLookup.promises.getDetails('12.34.99.1')
+        ctx.fetchUtils.fetchJson.should.have.been.calledTwice
       })
     })
   })
