@@ -440,6 +440,97 @@ describe('applyOtUpdate', function () {
     })
   })
 
+  describe('when authorized with an edit update to a missing doc field', function () {
+    before(function (done) {
+      return async.series(
+        [
+          cb => {
+            return FixturesManager.setUpProject(
+              {
+                privilegeLevel: 'readAndWrite',
+              },
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
+                return cb(e)
+              }
+            )
+          },
+
+          cb => {
+            return FixturesManager.setUpDoc(
+              this.project_id,
+              { lines: this.lines, version: this.version, ops: this.ops },
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
+                return cb(e)
+              }
+            )
+          },
+
+          cb => {
+            this.client = RealTimeClient.connect(this.project_id, cb)
+          },
+
+          cb => {
+            return this.client.emit('joinDoc', this.doc_id, cb)
+          },
+
+          cb => {
+            return this.client.emit(
+              'applyOtUpdate',
+              this.doc_id,
+              this.update,
+              error => {
+                this.error = error
+                return cb()
+              }
+            )
+          },
+        ],
+        done
+      )
+    })
+
+    after(function (done) {
+      async.series(
+        [
+          cb => clearPendingUpdatesList(cb),
+          cb =>
+            rclient.del(
+              redisSettings.documentupdater.key_schema.pendingUpdates({
+                doc_id: this.doc_id,
+              }),
+              cb
+            ),
+        ],
+        done
+      )
+    })
+
+    it('should not return an error', function () {
+      expect(this.error).to.not.exist
+    })
+
+    it('should put the update in redis', function (done) {
+      rclient.lrange(
+        redisSettings.documentupdater.key_schema.pendingUpdates({
+          doc_id: this.doc_id,
+        }),
+        0,
+        -1,
+        (error, entries) => {
+          if (error) return done(error)
+          entries.length.should.equal(1)
+          const update = JSON.parse(entries[0])
+          update.should.include({ doc: this.doc_id })
+          return done()
+        }
+      )
+      return null
+    })
+  })
+
   describe('when authorized with an edit update to an invalid doc', function () {
     before(function (done) {
       return async.series(
@@ -504,6 +595,80 @@ describe('applyOtUpdate', function () {
     })
 
     return it('should not put the update in redis', function (done) {
+      rclient.llen(
+        redisSettings.documentupdater.key_schema.pendingUpdates({
+          doc_id: this.doc_id,
+        }),
+        (error, len) => {
+          if (error) return done(error)
+          len.should.equal(0)
+          return done()
+        }
+      )
+      return null
+    })
+  })
+
+  describe('when authorized with an edit update to a different doc', function () {
+    before(function (done) {
+      return async.series(
+        [
+          cb => {
+            return FixturesManager.setUpProject(
+              {
+                privilegeLevel: 'readAndWrite',
+              },
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
+                return cb(e)
+              }
+            )
+          },
+
+          cb => {
+            return FixturesManager.setUpDoc(
+              this.project_id,
+              { lines: this.lines, version: this.version, ops: this.ops },
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
+                return cb(e)
+              }
+            )
+          },
+
+          cb => {
+            this.client = RealTimeClient.connect(this.project_id, cb)
+          },
+
+          cb => {
+            return this.client.emit('joinDoc', this.doc_id, cb)
+          },
+
+          cb => {
+            return this.client.emit(
+              'applyOtUpdate',
+              this.doc_id,
+              { doc: 'other-doc' },
+              error => {
+                this.error = error
+                return cb()
+              }
+            )
+          },
+        ],
+        done
+      )
+    })
+
+    it('should return an error', function () {
+      expect(this.error).to.deep.equal({
+        message:
+          'update.doc must be identical to docId parameter in applyOtUpdate(docId, update)',
+      })
+    })
+
+    it('should not put the update in redis', function (done) {
       rclient.llen(
         redisSettings.documentupdater.key_schema.pendingUpdates({
           doc_id: this.doc_id,
