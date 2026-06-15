@@ -6531,6 +6531,7 @@ __metadata:
     express: "npm:4.22.1"
     form-data: "npm:^4.0.5"
     lodash: "npm:^4.18.1"
+    minimatch: "npm:^10.2.5"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
@@ -24476,7 +24477,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^10.1.1, minimatch@npm:^10.2.1, minimatch@npm:^10.2.2, minimatch@npm:^10.2.4":
+"minimatch@npm:^10.1.1, minimatch@npm:^10.2.1, minimatch@npm:^10.2.2, minimatch@npm:^10.2.4, minimatch@npm:^10.2.5":
   version: 10.2.5
   resolution: "minimatch@npm:10.2.5"
   dependencies:

@@ -23,8 +23,14 @@ import Metrics from '@overleaf/metrics'
 import logger from '@overleaf/logger'
 import settings from '@overleaf/settings'
 import ClsiMetrics from './Metrics.js'
+import { Minimatch } from 'minimatch'
 
 const { shouldSkipMetrics } = ClsiMetrics
+
+// Additional file patterns to keep between compiles
+const preciousFileMatcher = new Minimatch(settings.preciousFilePattern, {
+  dot: true,
+})
 
 let ResourceWriter
 
@@ -263,6 +269,10 @@ export default ResourceWriter = {
     }
     if (path.match(/-eps-converted-to\.pdf$/)) {
       // Epstopdf generated files
+      shouldDelete = false
+    }
+    // Keep additional precious files and directories
+    if (shouldDelete && preciousFileMatcher.match(path)) {
       shouldDelete = false
     }
     if (

@@ -31,6 +31,7 @@
     "dockerode": "^4.0.9",
     "express": "4.22.1",
     "lodash": "^4.18.1",
+    "minimatch": "^10.2.5",
     "multer": "2.1.1",
     "overleaf-editor-core": "workspace:*",
     "p-limit": "^3.1.0",

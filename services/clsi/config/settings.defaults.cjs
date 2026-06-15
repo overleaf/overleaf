@@ -35,6 +35,7 @@ module.exports = {
     process.env.PDFTOCAIRO_IMAGE || 'quay.io/sharelatex/pdftocairo:24.02',
   enablePdfConversions: process.env.ENABLE_PDF_CONVERSIONS === 'true',
   maxUploadSize: 50 * 1024 * 1024,
+  preciousFilePattern: process.env.PRECIOUS_FILE_PATTERN || '',
 
   internal: {
     clsi: {
