@@ -47,8 +47,8 @@ async function main() {
     {
       // run from services/web directory
       cwd: Path.join(__dirname, '../../'),
-      // 1GB
-      maxBuffer: 1024 * 1024 * 1024,
+      // 2GB
+      maxBuffer: 2 * 1024 * 1024 * 1024,
       // Docs: https://nodejs.org/docs/latest-v16.x/api/child_process.html#child_process_options_stdio
       // Entries are [stdin, stdout, stderr]
       stdio: ['ignore', 'pipe', 'inherit'],
