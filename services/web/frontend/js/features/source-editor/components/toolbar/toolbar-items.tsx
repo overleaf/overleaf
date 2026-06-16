@@ -136,47 +136,69 @@ export const ToolbarItems: FC<{
               )}
             </div>
           )}
-          {showGroup('group-misc') && (
-            <div
-              className="ol-cm-toolbar-button-group"
-              data-overflow="group-misc"
-              aria-label={t('toolbar_insert_misc')}
-            >
-              <ToolbarButton
-                id="toolbar-href"
-                label={t('toolbar_insert_link')}
-                command={commands.wrapInHref}
-                icon="add_link"
-              />
-              {features.trackChangesVisible && permissions.comment && (
+          <div
+            className="ol-cm-toolbar-button-group"
+            data-overflow="group-misc"
+            aria-label={t('toolbar_insert_misc')}
+          >
+            {showGroup('misc-href') && (
+              <div data-overflow="misc-href">
                 <ToolbarButton
-                  id="toolbar-add-comment"
-                  label={t('add_comment')}
-                  disabled={isCursorOnEmptyLine(state)}
-                  command={addCommentFromToolbar}
-                  icon="add_comment"
+                  id="toolbar-href"
+                  label={t('toolbar_insert_link')}
+                  command={commands.wrapInHref}
+                  icon="add_link"
                 />
+              </div>
+            )}
+            {features.trackChangesVisible &&
+              permissions.comment &&
+              showGroup('misc-comment') && (
+                <div data-overflow="misc-comment">
+                  <ToolbarButton
+                    id="toolbar-add-comment"
+                    label={t('add_comment')}
+                    disabled={isCursorOnEmptyLine(state)}
+                    command={addCommentFromToolbar}
+                    icon="add_comment"
+                  />
+                </div>
               )}
-              <ToolbarButton
-                id="toolbar-ref"
-                label={t('toolbar_insert_cross_reference')}
-                command={commands.insertRef}
-                icon="sell"
-              />
-              <ToolbarButton
-                id="toolbar-cite"
-                label={t('toolbar_insert_citation')}
-                command={commands.insertCite}
-                icon="book_5"
-              />
-              <InsertFigureDropdown />
-              {writefullInstance || showAiFeaturesDisabled ? (
-                <TableDropdown />
-              ) : (
-                <LegacyTableDropdown />
-              )}
-            </div>
-          )}
+            {showGroup('misc-ref') && (
+              <div data-overflow="misc-ref">
+                <ToolbarButton
+                  id="toolbar-ref"
+                  label={t('toolbar_insert_cross_reference')}
+                  command={commands.insertRef}
+                  icon="sell"
+                />
+              </div>
+            )}
+            {showGroup('misc-cite') && (
+              <div data-overflow="misc-cite">
+                <ToolbarButton
+                  id="toolbar-cite"
+                  label={t('toolbar_insert_citation')}
+                  command={commands.insertCite}
+                  icon="book_5"
+                />
+              </div>
+            )}
+            {showGroup('misc-figure') && (
+              <div data-overflow="misc-figure">
+                <InsertFigureDropdown />
+              </div>
+            )}
+            {showGroup('misc-table') && (
+              <div data-overflow="misc-table">
+                {writefullInstance || showAiFeaturesDisabled ? (
+                  <TableDropdown />
+                ) : (
+                  <LegacyTableDropdown />
+                )}
+              </div>
+            )}
+          </div>
           {showGroup('group-list') && (
             <div
               className="ol-cm-toolbar-button-group"
