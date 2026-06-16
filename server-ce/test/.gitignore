@@ -1,2 +1,3 @@
 data/
 docker-mailtrap/
+cypress/reporter/

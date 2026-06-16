@@ -10,13 +10,12 @@ WORKDIR /overleaf
 
 # Add required source files for yarn install
 # -------------------------------------------
-COPY --parents libraries/*/package.json .yarn/patches/ services/*/package.json tools/migrations/ package.json yarn.lock .yarnrc.yml /overleaf/
+COPY --parents libraries/*/package.json .yarn/patches/ services/*/package.json tools/migrations/ package.json yarn.lock .yarnrc.yml .pnp.register.mjs /overleaf/
 COPY server-ce/genScript.js server-ce/services.js /overleaf/
 
 # Pre-install yarn via corepack so it is available at runtime for all users
 # -------------------------------------------------------------------------
 # Corepack setup, shared between all the images.
-ENV PATH="/overleaf/node_modules/.bin:$PATH"
 ENV COREPACK_HOME=/opt/corepack
 RUN corepack enable && corepack install -g yarn@4.14.1
 ENV COREPACK_ENABLE_NETWORK=0
@@ -34,9 +33,13 @@ COPY --parents libraries/ services/ tools/migrations/ /overleaf/
 RUN --mount=type=cache,target=/root/.cache \
     --mount=type=cache,target=/root/.yarn/berry/cache,id=server-ce-yarn-cache \
     --mount=type=cache,target=/usr/local/share/.cache/yarn,id=server-ce-yarn-fallback-cache \
-    --mount=type=cache,target=/overleaf/services/web/node_modules/.cache,id=server-ce-webpack-cache \
+    --mount=type=cache,target=/overleaf/services/web/.cache,id=server-ce-webpack-cache \
     --mount=type=tmpfs,target=/tmp \
     node genScript compile | bash
+
+# Enable Yarn PnP resolution for all Node.js processes
+# -----------------------------------------------------
+ENV NODE_OPTIONS="--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs"
 
 # Copy runit service startup scripts to its location
 # --------------------------------------------------

@@ -33,10 +33,13 @@ if (process.env.CYPRESS_SHARD && !process.env.SPEC_PATTERN) {
 
 const specPattern = process.env.SPEC_PATTERN || './**/*.spec.ts'
 
+// Cypress's Electron process uses PackherdModuleLoader which doesn't go through
+// PnP hooks. Reporter packages are materialized into /tmp/cypress-reporter by
+// scripts/materialize-cypress-reporter.cjs at container startup.
 let reporterOptions = {}
 if (process.env.CI) {
   reporterOptions = {
-    reporter: `${process.env.MONOREPO}/node_modules/cypress-multi-reporters`,
+    reporter: '/tmp/cypress-reporter/node_modules/cypress-multi-reporters',
     reporterOptions: {
       configFile: 'cypress/cypress-multi-reporters.cjs',
     },

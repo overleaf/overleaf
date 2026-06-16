@@ -1,10 +1,13 @@
 import { defineConfig } from 'cypress'
 import { webpackConfig } from './cypress/support/webpack.cypress'
 
+// Cypress's Electron process uses PackherdModuleLoader which doesn't go through
+// PnP hooks. Reporter packages are materialized into /tmp/cypress-reporter by
+// scripts/materialize-cypress-reporter.js at container startup.
 let reporterOptions = {}
 if (process.env.CI) {
   reporterOptions = {
-    reporter: 'cypress-multi-reporters',
+    reporter: '/tmp/cypress-reporter/node_modules/cypress-multi-reporters',
     reporterOptions: {
       configFile: 'cypress/cypress-multi-reporters.json',
     },

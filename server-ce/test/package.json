@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "cypress:open": "cypress open --e2e --browser chrome",
-    "cypress:run": "cypress run --e2e --browser chrome",
+    "materialize-reporter": "node ../../scripts/materialize-cypress-reporter.cjs /tmp/cypress-reporter",
+    "cypress:open": "yarn run materialize-reporter && cypress open --e2e --browser chrome",
+    "cypress:run": "yarn run materialize-reporter && cypress run --e2e --browser chrome",
     "lint": "eslint --cache --cache-location ../../.cache/eslint/ --max-warnings 0 --format unix --ext .js,.jsx,.mjs,.ts,.tsx .",
     "lint:fix": "eslint --cache --cache-location ../../.cache/eslint/ --fix --ext .js,.jsx,.mjs,.ts,.tsx ."
   },
@@ -20,11 +21,15 @@
     "body-parser": "1.20.4",
     "cypress": "15.12.0",
     "cypress-multi-reporters": "^2.0.5",
+    "eslint": "^10.4.0",
+    "eslint-formatter-unix": "^8.40.0",
     "express": "4.22.1",
     "isomorphic-git": "^1.33.1",
     "js-yaml": "^4.1.1",
+    "mocha": "^11.7.5",
     "mocha-junit-reporter": "^2.2.1",
     "pdfjs-dist": "^5.1.91",
+    "typescript": "^5.0.4",
     "uuid": "^9.0.1",
     "zod-validation-error": "^4.0.1"
   }

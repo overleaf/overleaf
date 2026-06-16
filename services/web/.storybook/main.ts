@@ -127,6 +127,9 @@ export default defineMain({
             rootDir,
             'modules/writefull/frontend/js/integration/src/'
           ),
+          // Allow all packages to resolve core-js (injected by Babel's
+          // useBuiltIns: 'usage') even under Yarn PnP strict resolution.
+          'core-js': path.dirname(require.resolve('core-js/package.json')),
         },
       },
       module: {

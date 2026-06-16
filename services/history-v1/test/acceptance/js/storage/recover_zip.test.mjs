@@ -140,7 +140,7 @@ async function runRecoverZipScript(args) {
   try {
     result = await promisify(execFile)(
       'node',
-      ['storage/scripts/recover_zip.js', ...args],
+      ['--no-deprecation', 'storage/scripts/recover_zip.js', ...args],
       {
         encoding: 'utf-8',
         timeout: TIMEOUT,

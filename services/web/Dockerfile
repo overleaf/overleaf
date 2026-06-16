@@ -4,7 +4,6 @@
 FROM node:24.14.1 AS base
 
 # Corepack setup, shared between all the images.
-ENV PATH="/overleaf/node_modules/.bin:$PATH"
 ENV COREPACK_HOME=/opt/corepack
 RUN corepack enable && corepack install -g yarn@4.14.1
 ENV COREPACK_ENABLE_NETWORK=0

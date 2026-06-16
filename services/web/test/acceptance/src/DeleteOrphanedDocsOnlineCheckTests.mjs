@@ -119,7 +119,8 @@ describe('DeleteOrphanedDocsOnlineCheck', function () {
             // Hide verbose log messages `calling destroy for project in docstore`
             'LOG_LEVEL=error',
             // Hide deprecation warnings for calling `db.collection.count`
-            'NODE_OPTIONS=--no-deprecation',
+            // Preserve existing NODE_OPTIONS (e.g. PnP hooks) while adding --no-deprecation
+            `NODE_OPTIONS='${process.env.NODE_OPTIONS || ''} --no-deprecation'`,
           ])
           .concat(['node', 'scripts/delete_orphaned_docs_online_check.mjs'])
           .join(' ')

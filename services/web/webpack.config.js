@@ -50,13 +50,11 @@ globSync(
 })
 
 function getModuleDirectory(moduleName) {
-  const entrypointPath = require.resolve(moduleName)
-  const suffix = `node_modules/${moduleName}`
-  const idx = entrypointPath.indexOf(suffix)
-  if (idx === -1) {
-    throw new Error(`could not find Node module: ${moduleName}`)
+  try {
+    return path.dirname(require.resolve(`${moduleName}/package.json`))
+  } catch (err) {
+    throw new Error(`could not find Node module: ${moduleName}`, { cause: err })
   }
-  return entrypointPath.slice(0, idx + suffix.length)
 }
 
 const mathjaxDir = getModuleDirectory('mathjax')
@@ -312,6 +310,21 @@ module.exports = {
       // Ensure all packages use the same jQuery instance (prevents duplicate
       // copies from Yarn hoisting breaking jQuery plugins like daterangepicker)
       jquery: require.resolve('jquery'),
+      // Under Yarn PnP, babel-injected core-js polyfill imports cannot be
+      // resolved from third-party packages (e.g. @uppy, pdfjs-dist) because
+      // they don't declare core-js as a dependency. Alias to the web
+      // workspace's copy so all packages can resolve it.
+      'core-js': path.dirname(require.resolve('core-js/package.json')),
+      // writefull's tsconfig uses importHelpers: true, which emits tslib
+      // imports that must be resolvable from the web workspace.
+      tslib: path.dirname(require.resolve('tslib/package.json')),
+      // Under PnP, packages like cypress/react that import react/react-dom
+      // can't resolve them from their own scope. Alias to web's copies.
+      react: path.dirname(require.resolve('react/package.json')),
+      'react-dom': path.dirname(require.resolve('react-dom/package.json')),
+      // ai-sdk packages declare zod as a peer dep but PnP can't resolve it
+      // from their scope in the Docker build.
+      zod: path.dirname(require.resolve('zod/package.json')),
     },
     // symlinks: false, // enable this while using `npm link`
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs', '.json'],

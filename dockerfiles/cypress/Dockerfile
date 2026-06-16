@@ -3,7 +3,6 @@ ARG USER_UID=1000
 ARG USER_GID=1000
 
 # Corepack setup, shared between all the images.
-ENV PATH="/overleaf/node_modules/.bin:$PATH"
 ENV COREPACK_HOME=/opt/corepack
 RUN corepack enable && corepack install -g yarn@4.14.1
 ENV COREPACK_ENABLE_NETWORK=0

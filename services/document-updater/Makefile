@@ -72,9 +72,11 @@ clean:
 # Eslint and prettier (plus some configs) are on the root.
 RUN_LINTING = ../../bin/run -w /overleaf/services/$(PROJECT_NAME) monorepo yarn run --silent
 RUN_LINTING_MONOREPO = ../../bin/run monorepo yarn run --silent
+RUN_EXEC_MONOREPO = ../../bin/run monorepo yarn exec
 
 RUN_LINTING_CI = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/eslint.config.mjs:/overleaf/eslint.config.mjs --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/document-updater/reports:/overleaf/services/document-updater/reports --volume $(MONOREPO)/.cache:/overleaf/.cache $(IMAGE_CI) yarn run --silent
 RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/eslint.config.mjs:/overleaf/eslint.config.mjs --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/document-updater/reports:/overleaf/services/document-updater/reports --volume $(MONOREPO)/.cache:/overleaf/.cache -w /overleaf $(IMAGE_CI) yarn run --silent
+RUN_EXEC_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/eslint.config.mjs:/overleaf/eslint.config.mjs --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/document-updater/reports:/overleaf/services/document-updater/reports --volume $(MONOREPO)/.cache:/overleaf/.cache -w /overleaf $(IMAGE_CI) yarn exec
 
 SHELLCHECK_OPTS = \
 	--shell=bash \
@@ -122,14 +124,14 @@ format_fix:
 	$(RUN_LINTING_MONOREPO) format:fix services/document-updater
 
 lint:
-	$(RUN_LINTING) lint
+	$(RUN_EXEC_MONOREPO) eslint --cache --cache-location ./.cache/eslint/ --max-warnings 0 --format unix services/document-updater
 
 lint_ci:
-	-$(RUN_LINTING_CI) lint --format json --output-file reports/eslint.json
+	-$(RUN_EXEC_CI_MONOREPO) eslint --cache --cache-location ./.cache/eslint/ --max-warnings 0 --format json --output-file services/document-updater/reports/eslint.json services/document-updater
 	sed -i 's_"filePath":"/overleaf_"filePath":"$(MONOREPO)_g' reports/eslint.json
 
 lint_fix:
-	$(RUN_LINTING) lint:fix
+	$(RUN_EXEC_MONOREPO) eslint --cache --cache-location ./.cache/eslint/ --fix services/document-updater
 
 typecheck:
 	$(RUN_LINTING) types:check

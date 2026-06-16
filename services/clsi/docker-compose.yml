@@ -10,12 +10,14 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/clsi
-      - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
       - ../../yarn.lock:/overleaf/yarn.lock
       - ../../.yarn:/overleaf/.yarn
+      - ../../.pnp.cjs:/overleaf/.pnp.cjs
+      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
+      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
       - ../../tsconfig.backend.json:/overleaf/tsconfig.backend.json
     working_dir: /overleaf/services/clsi
     environment:
@@ -23,7 +25,7 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-}
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
     command: yarn run --silent test:unit
 
   test_acceptance:
@@ -33,12 +35,14 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/clsi
-      - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
       - ../../yarn.lock:/overleaf/yarn.lock
       - ../../.yarn:/overleaf/.yarn
+      - ../../.pnp.cjs:/overleaf/.pnp.cjs
+      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
+      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
       - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /overleaf/services/clsi
     environment:
@@ -48,7 +52,7 @@ services:
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
       DOWNLOAD_HOST: http://clsi-nginx:8080
       ALLOWED_COMPILE_GROUPS: clsi-perf simple-latex-file
       ENABLE_PDF_CACHING: true
