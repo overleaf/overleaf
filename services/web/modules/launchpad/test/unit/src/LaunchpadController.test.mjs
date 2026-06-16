@@ -71,6 +71,19 @@ describe('LaunchpadController', function () {
       })
     )
 
+    vi.doMock('crypto', () => ({
+      default: (ctx.crypto = {
+        randomUUID: sinon
+          .stub()
+          .returns('8055c676-bcc7-4e64-a66f-8069f9a0bd92'),
+        randomBytes: sinon.stub().returns({
+          toString: () => {
+            return (ctx.password = 'mock-password123')
+          },
+        }),
+      }),
+    }))
+
     ctx.LaunchpadController = (await import(modulePath)).default
 
     ctx.email = 'bob@smith.com'
@@ -344,7 +357,11 @@ describe('LaunchpadController', function () {
           1
         )
         ctx.UserRegistrationHandler.promises.registerNewUser
-          .calledWith({ email: ctx.email, password: ctx.password })
+          .calledWith({
+            email: ctx.email,
+            password: ctx.password,
+            analyticsId: '8055c676-bcc7-4e64-a66f-8069f9a0bd92',
+          })
           .should.equal(true)
       })
 
@@ -603,7 +620,11 @@ describe('LaunchpadController', function () {
           1
         )
         ctx.UserRegistrationHandler.promises.registerNewUser
-          .calledWith({ email: ctx.email, password: ctx.password })
+          .calledWith({
+            email: ctx.email,
+            password: ctx.password,
+            analyticsId: '8055c676-bcc7-4e64-a66f-8069f9a0bd92',
+          })
           .should.equal(true)
       })
 
@@ -649,7 +670,11 @@ describe('LaunchpadController', function () {
           1
         )
         ctx.UserRegistrationHandler.promises.registerNewUser
-          .calledWith({ email: ctx.email, password: ctx.password })
+          .calledWith({
+            email: ctx.email,
+            password: ctx.password,
+            analyticsId: '8055c676-bcc7-4e64-a66f-8069f9a0bd92',
+          })
           .should.equal(true)
       })
     })
@@ -693,7 +718,11 @@ describe('LaunchpadController', function () {
           1
         )
         ctx.UserRegistrationHandler.promises.registerNewUser
-          .calledWith({ email: ctx.email, password: ctx.password })
+          .calledWith({
+            email: ctx.email,
+            password: ctx.password,
+            analyticsId: '8055c676-bcc7-4e64-a66f-8069f9a0bd92',
+          })
           .should.equal(true)
       })
 

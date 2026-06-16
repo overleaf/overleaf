@@ -8,6 +8,7 @@ import UserUpdater from '../../../../app/src/Features/User/UserUpdater.mjs'
 import moment from 'moment'
 import fetch from 'node-fetch'
 import mongodb from 'mongodb-legacy'
+import Crypto from 'node:crypto'
 
 import { UserAuditLogEntry } from '../../../../app/src/models/UserAuditLogEntry.mjs'
 
@@ -246,6 +247,10 @@ class UserHelper {
       attributes.hashedPassword =
         await AuthenticationManager.promises.hashPassword(attributes.password)
       delete attributes.password
+    }
+
+    if (!attributes.analyticsId) {
+      attributes.analyticsId = Crypto.randomUUID()
     }
 
     userHelper.user = await UserCreator.promises.createNewUser(attributes)

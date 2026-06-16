@@ -14,6 +14,7 @@ import OError from '@overleaf/o-error'
 import fs from 'node:fs'
 import Path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import crypto from 'node:crypto'
 
 const MONOREPO = Path.dirname(
   Path.dirname(Path.dirname(Path.dirname(fileURLToPath(import.meta.url))))
@@ -42,6 +43,7 @@ async function createUser(
     const user = await UserRegistrationHandler.promises.registerNewUser({
       email,
       password: PASSWORD,
+      analyticsId: crypto.randomUUID(),
     })
     userId = user._id
   } catch (err) {

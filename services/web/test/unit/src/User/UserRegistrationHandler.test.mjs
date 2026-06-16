@@ -68,7 +68,11 @@ describe('UserRegistrationHandler', function () {
     }))
 
     vi.doMock('crypto', () => ({
-      default: (ctx.crypto = {}),
+      default: (ctx.crypto = {
+        randomUUID: sinon
+          .stub()
+          .returns('8055c676-bcc7-4e64-a66f-8069f9a0bd92'),
+      }),
     }))
 
     vi.doMock('../../../../app/src/Features/Email/EmailHandler', () => ({
@@ -287,6 +291,7 @@ describe('UserRegistrationHandler', function () {
         sinon.assert.calledWith(ctx.handler.promises.registerNewUser, {
           email: ctx.email,
           password: ctx.password,
+          analyticsId: '8055c676-bcc7-4e64-a66f-8069f9a0bd92',
         })
       })
 

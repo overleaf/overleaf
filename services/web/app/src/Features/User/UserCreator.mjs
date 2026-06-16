@@ -54,6 +54,9 @@ async function recordRegistrationEvent(user) {
 }
 
 async function createNewUser(attributes, options = {}) {
+  if (!attributes.analyticsId) {
+    throw new Error('bug: attributes.analyticsId is missing')
+  }
   let user = new User()
 
   if (attributes.first_name == null || attributes.first_name === '') {

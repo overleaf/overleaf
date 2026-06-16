@@ -20,6 +20,7 @@ import ProjectEntityMongoUpdateHandler from '../../../app/src/Features/Project/P
 import UserCreator from '../../../app/src/Features/User/UserCreator.mjs'
 import { expect } from 'chai'
 import _ from 'lodash'
+import crypto from 'node:crypto'
 
 // These tests are neither acceptance tests nor unit tests. It's difficult to
 // test/verify that our locking is doing what we hope.
@@ -46,6 +47,7 @@ describe('ProjectStructureMongoLock', function () {
       const userDetails = {
         holdingAccount: false,
         email: 'test@example.com',
+        analyticsId: crypto.randomUUID(),
       }
       UserCreator.createNewUser(userDetails, {}, (err, user) => {
         this.user = user
