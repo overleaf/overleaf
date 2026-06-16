@@ -1,0 +1,64 @@
+.editor-floating-menu {
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 4px 0 #1e253029;
+  background-color: var(--dropdown-background);
+  color: var(--dropdown-text-color);
+  border: 1px solid var(--border-divider);
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-02);
+  gap: var(--spacing-02);
+  transition: opacity 0.05s ease-in;
+  opacity: 0;
+}
+
+.editor-floating-menu-visible {
+  opacity: 1;
+}
+
+// Module actions self-gate and may render nothing, so hide the pill when it
+// has no buttons rather than showing an empty box.
+.editor-floating-menu:not(:has(button)) {
+  display: none;
+}
+
+.editor-floating-menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: inherit;
+  color: inherit;
+  border: none;
+  padding: var(--spacing-01);
+  border-radius: var(--border-radius-base);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--dropdown-background-hover);
+  }
+}
+
+.editor-floating-menu-divider {
+  height: 1px;
+  background-color: var(--dropdown-border-divider);
+
+  // Hide dividers at the menu edges, or with no following button (e.g. a module
+  // action rendered nothing). `~ * button` keeps it wrapper-agnostic.
+  &:first-child,
+  &:last-child,
+  &:not(:has(~ button, ~ * button)) {
+    display: none;
+  }
+}
+
+// Flatten AppWritefullContainer's `<div class="writefull">` wrapper so the button
+// is a direct flex item of the menu.
+.editor-floating-menu .writefull {
+  display: contents;
+}
+
+@include theme('default') {
+  .cm-tooltip .editor-floating-menu {
+    border-color: var(--border-primary);
+  }
+}
