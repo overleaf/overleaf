@@ -49,42 +49,44 @@ const EditorContextMenuContent: FC = memo(function EditorContextMenuContent() {
 
   return (
     <Dropdown show onToggle={onToggle}>
-      <DropdownMenu
-        ref={menuRef}
-        show
-        tabIndex={0}
-        className="dropdown-menu-unpositioned"
-        onKeyDown={event => {
-          switch (event.code) {
-            case 'Escape':
-            case 'Tab':
-              event.preventDefault()
-              closeMenu()
-              break
-          }
-        }}
-      >
-        {menuItems.map((menuItem, index) => (
-          <Fragment key={index}>
-            {menuItem.separatorAbove && <DropdownDivider />}
-            <DropdownListItem>
-              <DropdownItem
-                as="button"
-                onClick={() => menuItem.handler()}
-                disabled={menuItem.disabled}
-                trailingIcon={
-                  menuItem.shortcut ? (
-                    <span>{menuItem.shortcut}</span>
-                  ) : undefined
-                }
-              >
-                {menuItem.label}
-              </DropdownItem>
-            </DropdownListItem>
-          </Fragment>
-        ))}
-        <EditorContextMenuFeedback />
-      </DropdownMenu>
+      <div onContextMenu={event => event.preventDefault()}>
+        <DropdownMenu
+          ref={menuRef}
+          show
+          tabIndex={0}
+          className="dropdown-menu-unpositioned"
+          onKeyDown={event => {
+            switch (event.code) {
+              case 'Escape':
+              case 'Tab':
+                event.preventDefault()
+                closeMenu()
+                break
+            }
+          }}
+        >
+          {menuItems.map((menuItem, index) => (
+            <Fragment key={index}>
+              {menuItem.separatorAbove && <DropdownDivider />}
+              <DropdownListItem>
+                <DropdownItem
+                  as="button"
+                  onClick={() => menuItem.handler()}
+                  disabled={menuItem.disabled}
+                  trailingIcon={
+                    menuItem.shortcut ? (
+                      <span>{menuItem.shortcut}</span>
+                    ) : undefined
+                  }
+                >
+                  {menuItem.label}
+                </DropdownItem>
+              </DropdownListItem>
+            </Fragment>
+          ))}
+          <EditorContextMenuFeedback />
+        </DropdownMenu>
+      </div>
     </Dropdown>
   )
 })

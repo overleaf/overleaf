@@ -1288,4 +1288,40 @@ describe('editor context menu', { scrollBehavior: false }, function () {
       cy.findByRole('menu').should('not.exist')
     })
   })
+
+  describe('when right-clicking inside the open menu', function () {
+    it('should suppress the native menu and stay open', function () {
+      const scope = mockScope()
+
+      cy.mount(
+        <TestContainer>
+          <EditorProviders scope={scope}>
+            <CodeMirrorEditor />
+          </EditorProviders>
+        </TestContainer>
+      )
+
+      cy.get('.cm-line').eq(10).rightclick()
+      cy.findByRole('menu').should('be.visible')
+
+      cy.findByRole('menu').within(() => {
+        cy.findAllByRole('menuitem')
+          .first()
+          .then($item => {
+            const event = new MouseEvent('contextmenu', {
+              bubbles: true,
+              cancelable: true,
+            })
+            // dispatchEvent returns false when preventDefault was called
+            const notPrevented = $item[0].dispatchEvent(event)
+            expect(notPrevented, 'native context menu prevented').to.equal(
+              false
+            )
+          })
+      })
+
+      // The second contextmenu event keeps the custom menu open
+      cy.findByRole('menu').should('be.visible')
+    })
+  })
 })
