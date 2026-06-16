@@ -14,10 +14,8 @@
   "author": "Overleaf (https://www.overleaf.com)",
   "license": "AGPL-3.0-only",
   "devDependencies": {
-    "@types/node": "^24.5.2",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
-    "eslint": "^10.4.0",
     "mocha": "^11.1.0",
     "mocha-junit-reporter": "^2.2.1",
     "mocha-multi-reporters": "^1.5.1",

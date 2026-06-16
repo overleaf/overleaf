@@ -485,7 +485,7 @@ describe('back_fill_file_hash script', function () {
    * @param {Array<string>} args
    * @return {Promise<{result: { stdout: string, stderr: string, status: number }, stats: any}>}
    */
-  async function rawRunScript(args = [], env = {}) {
+  async function rawRunScript(args = []) {
     let result
     try {
       result = await promisify(execFile)(
@@ -502,7 +502,6 @@ describe('back_fill_file_hash script', function () {
             ...process.env,
             AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE: '1',
             LOG_LEVEL: 'warn', // Override LOG_LEVEL of acceptance tests
-            ...env,
           },
         }
       )
@@ -1121,7 +1120,7 @@ describe('back_fill_file_hash script', function () {
     let output
     before('prepare environment', prepareEnvironment)
     before('run script', async function () {
-      output = await rawRunScript(['--report'], { LOG_LEVEL: 'error' })
+      output = await rawRunScript(['--report'])
     })
     it('should print the report', () => {
       expect(output.status).to.equal(0)

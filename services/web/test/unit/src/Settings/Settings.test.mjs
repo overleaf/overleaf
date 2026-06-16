@@ -10,9 +10,7 @@ function clearSettingsCache() {
   const settingsDeps = Object.keys(require.cache).filter(
     x =>
       x.includes('/@overleaf/settings') ||
-      x.includes('/@overleaf-settings-virtual') ||
       x.includes(`${monorepoPath}/libraries/settings`) ||
-      x.includes('/libraries/settings/') ||
       x.includes(`${monorepoPath}/services/web/config`)
   )
   settingsDeps.forEach(dep => delete require.cache[dep])

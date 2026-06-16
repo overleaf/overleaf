@@ -10,14 +10,12 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/project-history
+      - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
       - ../../yarn.lock:/overleaf/yarn.lock
       - ../../.yarn:/overleaf/.yarn
-      - ../../.pnp.cjs:/overleaf/.pnp.cjs
-      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
-      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
       - ../../tools/migrations:/overleaf/tools/migrations
     working_dir: /overleaf/services/project-history
@@ -26,7 +24,7 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-}
       MONGO_CONNECTION_STRING: mongodb://mongo/test-overleaf
       NODE_ENV: test
-      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
+      NODE_OPTIONS: "--unhandled-rejections=strict"
       REDIS_HOST: redis_test
       HISTORY_REDIS_HOST: redis_test
       QUEUES_REDIS_HOST: redis_test
@@ -48,14 +46,12 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/project-history
+      - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
       - ../../yarn.lock:/overleaf/yarn.lock
       - ../../.yarn:/overleaf/.yarn
-      - ../../.pnp.cjs:/overleaf/.pnp.cjs
-      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
-      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
       - ../../tools/migrations:/overleaf/tools/migrations
     working_dir: /overleaf/services/project-history
@@ -71,7 +67,7 @@ services:
       MOCHA_GREP: ${MOCHA_GREP}
       LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
-      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
+      NODE_OPTIONS: "--unhandled-rejections=strict"
     user: node
     depends_on:
       mongo:

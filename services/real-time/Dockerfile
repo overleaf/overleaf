@@ -5,6 +5,7 @@
 FROM node:24.14.1 AS base
 
 # Corepack setup, shared between all the images.
+ENV PATH="/overleaf/node_modules/.bin:$PATH"
 ENV COREPACK_HOME=/opt/corepack
 RUN corepack enable && corepack install -g yarn@4.14.1
 ENV COREPACK_ENABLE_NETWORK=0
@@ -17,7 +18,7 @@ RUN mkdir /home/node/.config && chown node:node /home/node/.config
 
 FROM base AS app
 
-COPY package.json yarn.lock .yarnrc.yml .pnp.register.mjs /overleaf/
+COPY package.json yarn.lock .yarnrc.yml /overleaf/
 COPY libraries/eslint-plugin/package.json /overleaf/libraries/eslint-plugin/package.json
 COPY libraries/fetch-utils/package.json /overleaf/libraries/fetch-utils/package.json
 COPY libraries/logger/package.json /overleaf/libraries/logger/package.json
@@ -41,8 +42,6 @@ COPY libraries/redis-wrapper/ /overleaf/libraries/redis-wrapper/
 COPY libraries/settings/ /overleaf/libraries/settings/
 COPY libraries/validation-tools/ /overleaf/libraries/validation-tools/
 COPY services/real-time/ /overleaf/services/real-time/
-
-ENV NODE_OPTIONS="--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs"
 
 FROM app
 USER node

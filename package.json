@@ -26,7 +26,6 @@
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-unicorn": "^56.0.0",
     "globals": "^17.6.0",
-    "js-yaml": "^4.1.1",
     "prettier": "3.7.4",
     "prettier-plugin-groovy": "0.2.1",
     "typescript": "^5.9.3"
@@ -132,7 +131,6 @@
     "cache-flow": "1.9.0",
     "focus-trap-react": "11.0.4",
     "jose": "4.15.5",
-    "js-yaml": "^4.1.1",
     "nodemailer": "8.0.5",
     "on-headers": "1.0.2",
     "pug": "3.0.3",
@@ -198,7 +196,6 @@
   },
   "workspaces": [
     "jobs/mirror-documentation",
-    "jobs/wiki-algolia",
     "libraries/*",
     "server-ce/test",
     "services/analytics",
@@ -215,7 +212,6 @@
     "services/history-v1",
     "services/idp",
     "services/latexqc",
-    "services/linked-url-proxy",
     "services/notifications",
     "services/project-history",
     "services/real-time",
@@ -227,13 +223,5 @@
     "tools/npm-overrides-helper",
     "tools/saas-e2e",
     "tools/migrations"
-  ],
-  "dependenciesMeta": {
-    "cypress-multi-reporters@2.0.5": {
-      "unplugged": true
-    },
-    "esmock@2.7.3": {
-      "unplugged": true
-    }
-  }
+  ]
 }

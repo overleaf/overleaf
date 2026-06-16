@@ -204,10 +204,7 @@ async function scanNodes(nodes, batchSize = 1000) {
       }
     }
 
-    logger.info(
-      { scanned, server: /** @type {any} */ (node).serverInfo.role },
-      'Scanned node'
-    )
+    logger.info({ scanned, server: node.serverInfo.role }, 'Scanned node')
   }
 }
 

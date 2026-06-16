@@ -3,10 +3,6 @@
   "version": "0.0.1",
   "description": "utilities to help working with mongo",
   "main": "index.js",
-  "exports": {
-    ".": "./index.js",
-    "./*": "./*"
-  },
   "scripts": {
     "test": "yarn run lint && yarn run types:check && yarn run test:unit",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
@@ -22,9 +18,7 @@
     "mongodb-legacy": "6.1.3"
   },
   "devDependencies": {
-    "@types/node": "^24.5.2",
     "chai": "^4.3.6",
-    "eslint": "^10.4.0",
     "mocha": "^11.1.0",
     "mocha-junit-reporter": "^2.2.1",
     "mocha-multi-reporters": "^1.5.1",

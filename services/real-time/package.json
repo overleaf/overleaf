@@ -36,15 +36,12 @@
     "proxy-addr": "^2.0.7",
     "socket.io": "github:overleaf/socket.io#0.9.19-overleaf-12",
     "socket.io-client": "github:overleaf/socket.io-client#0.9.17-overleaf-5",
-    "zod": "^3.24.0",
     "zod-validation-error": "^4.0.1"
   },
   "devDependencies": {
-    "@types/node": "^24.5.2",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "cookie-signature": "^1.1.0",
-    "eslint": "^10.4.0",
     "mocha": "^11.1.0",
     "mocha-junit-reporter": "^2.2.1",
     "mocha-multi-reporters": "^1.5.1",

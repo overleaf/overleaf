@@ -4,6 +4,7 @@
 FROM node:24.14.1 AS base
 
 # Corepack setup, shared between all the images.
+ENV PATH="/overleaf/node_modules/.bin:$PATH"
 ENV COREPACK_HOME=/opt/corepack
 RUN corepack enable && corepack install -g yarn@4.14.1
 ENV COREPACK_ENABLE_NETWORK=0
@@ -35,7 +36,7 @@ FROM base AS deps-prod
 COPY services/web/scripts/fetch-pyodide-packages.mjs /overleaf/services/web/scripts/fetch-pyodide-packages.mjs
 RUN cd /overleaf/services/web && node scripts/fetch-pyodide-packages.mjs
 
-COPY package.json yarn.lock .yarnrc.yml .pnp.register.mjs /overleaf/
+COPY package.json yarn.lock .yarnrc.yml /overleaf/
 COPY libraries/access-token-encryptor/package.json /overleaf/libraries/access-token-encryptor/package.json
 COPY libraries/eslint-plugin/package.json /overleaf/libraries/eslint-plugin/package.json
 COPY libraries/fetch-utils/package.json /overleaf/libraries/fetch-utils/package.json
@@ -132,7 +133,6 @@ COPY tools/migrations/ /overleaf/tools/migrations/
 RUN rm /overleaf/services/web/modules/server-ce-scripts -rf
 RUN OVERLEAF_CONFIG=/overleaf/services/web/config/settings.overrides.saas.js nice yarn run precompile-pug
 
-ENV NODE_OPTIONS="--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs"
 
 # the web image with only production dependencies but no webpack production build, for development
 FROM pug AS app-only

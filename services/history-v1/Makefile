@@ -74,11 +74,9 @@ clean:
 # Eslint and prettier (plus some configs) are on the root.
 RUN_LINTING = ../../bin/run -w /overleaf/services/$(PROJECT_NAME) monorepo yarn run --silent
 RUN_LINTING_MONOREPO = ../../bin/run monorepo yarn run --silent
-RUN_EXEC_MONOREPO = ../../bin/run monorepo yarn exec
 
 RUN_LINTING_CI = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/eslint.config.mjs:/overleaf/eslint.config.mjs --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/history-v1/reports:/overleaf/services/history-v1/reports --volume $(MONOREPO)/.cache:/overleaf/.cache $(IMAGE_CI) yarn run --silent
 RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/eslint.config.mjs:/overleaf/eslint.config.mjs --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/history-v1/reports:/overleaf/services/history-v1/reports --volume $(MONOREPO)/.cache:/overleaf/.cache -w /overleaf $(IMAGE_CI) yarn run --silent
-RUN_EXEC_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/eslint.config.mjs:/overleaf/eslint.config.mjs --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/history-v1/reports:/overleaf/services/history-v1/reports --volume $(MONOREPO)/.cache:/overleaf/.cache -w /overleaf $(IMAGE_CI) yarn exec
 
 SHELLCHECK_OPTS = \
 	--shell=bash \
@@ -126,14 +124,14 @@ format_fix:
 	$(RUN_LINTING_MONOREPO) format:fix services/history-v1
 
 lint:
-	$(RUN_EXEC_MONOREPO) eslint --cache --cache-location ./.cache/eslint/ --max-warnings 0 --format unix services/history-v1
+	$(RUN_LINTING) lint
 
 lint_ci:
-	-$(RUN_EXEC_CI_MONOREPO) eslint --cache --cache-location ./.cache/eslint/ --max-warnings 0 --format json --output-file services/history-v1/reports/eslint.json services/history-v1
+	-$(RUN_LINTING_CI) lint --format json --output-file reports/eslint.json
 	sed -i 's_"filePath":"/overleaf_"filePath":"$(MONOREPO)_g' reports/eslint.json
 
 lint_fix:
-	$(RUN_EXEC_MONOREPO) eslint --cache --cache-location ./.cache/eslint/ --fix services/history-v1
+	$(RUN_LINTING) lint:fix
 
 typecheck:
 	$(RUN_LINTING) types:check

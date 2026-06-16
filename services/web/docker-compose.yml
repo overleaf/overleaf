@@ -9,9 +9,7 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/web
-      - ../../.pnp.cjs:/overleaf/.pnp.cjs
-      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
-      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
+      - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
       - ../../tools/migrations:/overleaf/tools/migrations
@@ -32,7 +30,7 @@ services:
       MOCHA_GREP: ${MOCHA_GREP:-}
       LOG_LEVEL: ${LOG_LEVEL:-}
       NODE_ENV: test
-      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
+      NODE_OPTIONS: "--unhandled-rejections=strict"
       REDIS_HOST: redis_test
       MONOREPO:
     entrypoint: /overleaf/bin/shared/wait_for_it mongo:27017 --timeout=60 --
@@ -49,9 +47,7 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/web
-      - ../../.pnp.cjs:/overleaf/.pnp.cjs
-      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
-      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
+      - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../bin/shared/wait_for_it:/overleaf/bin/shared/wait_for_it
       - ../../tools/migrations:/overleaf/tools/migrations
@@ -73,7 +69,6 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-}
       MONGO_SERVER_SELECTION_TIMEOUT: 600000
       MONGO_SOCKET_TIMEOUT: 300000
-      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
       REDIS_HOST: redis_test
       MONOREPO:
       RETRIES:
@@ -96,9 +91,7 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/web
-      - ../../.pnp.cjs:/overleaf/.pnp.cjs
-      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
-      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
+      - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
@@ -109,7 +102,7 @@ services:
       CI:
       JUNIT_ROOT_SUITE_NAME:
       MOCHA_GREP: ${MOCHA_GREP}
-      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
+      NODE_OPTIONS: "--unhandled-rejections=strict"
       VERBOSE_LOGGING:
     command: yarn run --silent test:frontend
     user: node
@@ -122,10 +115,7 @@ services:
         - USER_GID
     volumes:
       - .:/overleaf/services/web
-      - ../../scripts:/overleaf/scripts:ro
-      - ../../.pnp.cjs:/overleaf/.pnp.cjs
-      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
-      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
+      - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
@@ -138,8 +128,7 @@ services:
       JUNIT_ROOT_SUITE_NAME:
       CYPRESS_SPEC_PATTERN: ${CYPRESS_SPEC_PATTERN:-}
       CYPRESS_EXCLUDE_SPEC_PATTERN: ${CYPRESS_EXCLUDE_SPEC_PATTERN:-}
-      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs"
-    entrypoint: yarn
+    entrypoint: npm
     command:
       - "run"
       - "cypress:run-ct"
@@ -151,9 +140,7 @@ services:
       target: base
     volumes:
       - .:/overleaf/services/web
-      - ../../.pnp.cjs:/overleaf/.pnp.cjs
-      - ../../.pnp.loader.mjs:/overleaf/.pnp.loader.mjs
-      - ../../.pnp.register.mjs:/overleaf/.pnp.register.mjs
+      - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
       - ../../package.json:/overleaf/package.json
       - ../../.yarnrc.yml:/overleaf/.yarnrc.yml
@@ -163,7 +150,7 @@ services:
     environment:
       CI:
       JUNIT_ROOT_SUITE_NAME:
-      NODE_OPTIONS: "--require /overleaf/.pnp.cjs --import /overleaf/.pnp.register.mjs --unhandled-rejections=strict"
+      NODE_OPTIONS: "--unhandled-rejections=strict"
       VERBOSE_LOGGING:
     command: yarn run --silent test:writefull
     user: node

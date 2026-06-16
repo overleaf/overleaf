@@ -15,7 +15,6 @@
       "@overleaf/logger": ["./libraries/logger"],
       "@overleaf/metrics": ["./libraries/metrics"],
       "@overleaf/mongo-utils": ["./libraries/mongo-utils"],
-      "@overleaf/mongo-utils/*": ["./libraries/mongo-utils/*"],
       "@overleaf/object-persistor": ["./libraries/object-persistor"],
       "@overleaf/o-error": ["./libraries/o-error"],
       "overleaf-editor-core": ["./libraries/overleaf-editor-core"],

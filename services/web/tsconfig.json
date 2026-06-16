@@ -20,9 +20,6 @@
       "@modules/*": ["./modules/*"],
       "@overleaf/o-error": ["../../libraries/o-error"],
       "@overleaf/ranges-tracker": ["../../libraries/ranges-tracker"],
-      "@overleaf/validation-tools": ["../../libraries/validation-tools"],
-      "overleaf-editor-core": ["../../libraries/overleaf-editor-core"],
-      "overleaf-editor-core/*": ["../../libraries/overleaf-editor-core/*"],
 
       "@ol-types/*": ["./types/*"],
       "@ol-storybook/*": ["./.storybook/*"],

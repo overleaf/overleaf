@@ -499,9 +499,9 @@ RUN_LINTING_MONOREPO = ../../bin/run monorepo yarn run --silent
 
 ORG_PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN_LINT_FORMAT ?= \
-	docker run --rm --env BRANCH_NAME --env CI --env COMMIT_SHA --env MONOREPO --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume ${PWD}/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/.cache/:/overleaf/.cache/ ${IMAGE_CI}
+	docker run --rm --env BRANCH_NAME --env CI --env COMMIT_SHA --env MONOREPO --env PATH=/overleaf/node_modules/.bin:$(ORG_PATH) --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume ${PWD}/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/.cache/:/overleaf/.cache/ ${IMAGE_CI}
 
-NODE_MODULES_PATH := ${PATH}
+NODE_MODULES_PATH := ${PATH}:${PWD}/node_modules/.bin:/overleaf/services/web/node_modules/.bin
 WITH_NODE_MODULES_PATH = \
 	format_backend \
 	format_frontend \
@@ -583,7 +583,7 @@ lint_flag_res_send_usage:
 
 lint: lint_overleafModuleImports
 lint_overleafModuleImports:
-	yarn node scripts/check_overleafModuleImports.mjs
+	node scripts/check_overleafModuleImports.mjs
 
 lint: typecheck_frontend
 typecheck_frontend:
@@ -668,7 +668,6 @@ IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/package.json \
 	$(MONOREPO)/yarn.lock \
 	$(MONOREPO)/libraries/access-token-encryptor/package.json \
-	$(MONOREPO)/libraries/eslint-config/package.json \
   $(MONOREPO)/libraries/eslint-plugin/package.json \
   $(MONOREPO)/libraries/fetch-utils/package.json \
   $(MONOREPO)/libraries/logger/package.json \
