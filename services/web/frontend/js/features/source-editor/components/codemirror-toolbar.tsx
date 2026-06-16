@@ -38,6 +38,10 @@ import { useLayoutContext } from '@/shared/context/layout-context'
 import ReviewPanelHeaderBuffer from '@/features/review-panel/components/review-panel-header-buffer'
 import { useAreTabsEnabled } from '@/features/ide-react/hooks/use-are-tabs-enabled'
 
+const sourceEditorToolbarStartButtons = importOverleafModules(
+  'sourceEditorToolbarStartButtons'
+) as { import: { default: ElementType }; path: string }[]
+
 const sourceEditorToolbarComponents = importOverleafModules(
   'sourceEditorToolbarComponents'
 ) as { import: { default: ElementType }; path: string }[]
@@ -194,6 +198,12 @@ const Toolbar = memo(function Toolbar() {
           className="ol-cm-toolbar toolbar-editor"
           ref={handleToolbar}
         >
+          {showActions &&
+            sourceEditorToolbarStartButtons.map(
+              ({ import: { default: Component }, path }) => (
+                <Component key={path} />
+              )
+            )}
           {showActions && (
             <ToolbarItems
               state={state}
