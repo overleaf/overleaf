@@ -21,8 +21,8 @@ import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry
 
 describe('Project Sharing', function () {
   if (isExcludedBySharding('PRO_CUSTOM_4')) return
+  startWith({ withDataDir: true, pro: true, resetData: true })
   ensureUserExists({ email: 'user@example.com' })
-  startWith({ withDataDir: true, pro: true })
 
   let projectName: string
   let recompile: () => void
