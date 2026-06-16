@@ -5,6 +5,17 @@ import HealthChecker from './HealthChecker.js'
 import Errors from './Errors.js'
 import Settings from '@overleaf/settings'
 import { expressify } from '@overleaf/promise-utils'
+import { parseReq, z } from '@overleaf/validation-tools'
+
+const patchDocSchema = z.object({
+  body: z
+    .object({
+      deleted: z.literal(true),
+      deletedAt: z.coerce.date(),
+      name: z.string(),
+    })
+    .strict(),
+})
 
 async function getDoc(req, res) {
   const { doc_id: docId, project_id: projectId } = req.params
@@ -182,18 +193,9 @@ async function updateDoc(req, res) {
 }
 
 async function patchDoc(req, res) {
+  const { body: meta } = parseReq(req, patchDocSchema)
   const { doc_id: docId, project_id: projectId } = req.params
   logger.debug({ projectId, docId }, 'patching doc')
-
-  const allowedFields = ['deleted', 'deletedAt', 'name']
-  const meta = {}
-  Object.entries(req.body).forEach(([field, value]) => {
-    if (allowedFields.includes(field)) {
-      meta[field] = value
-    } else {
-      logger.fatal({ field }, 'joi validation for pathDoc is broken')
-    }
-  })
   await DocManager.patchDoc(projectId, docId, meta)
   res.sendStatus(204)
 }

@@ -26,6 +26,7 @@ IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/libraries/promise-utils/package.json \
 	$(MONOREPO)/libraries/settings/package.json \
 	$(MONOREPO)/libraries/stream-utils/package.json \
+	$(MONOREPO)/libraries/validation-tools/package.json \
 	$(MONOREPO)/services/docstore/package.json \
 	$(MONOREPO)/tools/migrations/package.json \
 	$(MONOREPO)/.yarn/patches/* \

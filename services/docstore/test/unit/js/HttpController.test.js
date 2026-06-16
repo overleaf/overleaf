@@ -486,7 +486,11 @@ describe('HttpController', () => {
         project_id: ctx.projectId,
         doc_id: ctx.docId,
       }
-      ctx.req.body = { name: 'foo.tex' }
+      ctx.req.body = {
+        deleted: true,
+        deletedAt: '2026-06-15T00:00:00Z',
+        name: 'foo.tex',
+      }
       ctx.DocManager.patchDoc = sinon.stub().resolves()
       await ctx.HttpController.patchDoc(ctx.req, ctx.res, ctx.next)
     })
@@ -494,7 +498,12 @@ describe('HttpController', () => {
     it('should delete the document', ctx => {
       expect(ctx.DocManager.patchDoc).to.have.been.calledWith(
         ctx.projectId,
-        ctx.docId
+        ctx.docId,
+        {
+          deleted: true,
+          deletedAt: new Date('2026-06-15T00:00:00Z'),
+          name: 'foo.tex',
+        }
       )
     })
 
@@ -510,19 +519,13 @@ describe('HttpController', () => {
         await ctx.HttpController.patchDoc(ctx.req, ctx.res, ctx.next)
       })
 
-      it('should log a message', ctx => {
-        expect(ctx.logger.fatal).to.have.been.calledWith(
-          { field: 'cannot' },
-          'joi validation for pathDoc is broken'
-        )
+      it('should pass a validation error to next', ctx => {
+        expect(ctx.next).to.have.been.calledOnce
+        expect(ctx.next.firstCall.args[0].name).to.equal('InvalidRequestError')
       })
 
-      it('should not pass the invalid field along', ctx => {
-        expect(ctx.DocManager.patchDoc).to.have.been.calledWith(
-          ctx.projectId,
-          ctx.docId,
-          {}
-        )
+      it('should not patch the document', ctx => {
+        expect(ctx.DocManager.patchDoc).not.to.have.been.called
       })
     })
   })

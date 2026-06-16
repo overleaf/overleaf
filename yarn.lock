@@ -6585,10 +6585,10 @@ __metadata:
     "@overleaf/promise-utils": "workspace:*"
     "@overleaf/settings": "workspace:*"
     "@overleaf/stream-utils": "npm:^0.1.0"
+    "@overleaf/validation-tools": "workspace:*"
     async: "npm:^3.2.5"
     body-parser: "npm:1.20.4"
     bunyan: "npm:^1.8.15"
-    celebrate: "npm:^15.0.3"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
     express: "npm:4.22.1"
@@ -14578,17 +14578,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"celebrate@npm:^15.0.3":
-  version: 15.0.3
-  resolution: "celebrate@npm:15.0.3"
-  dependencies:
-    escape-html: "npm:1.0.3"
-    joi: "npm:17.x.x"
-    lodash: "npm:4.17.x"
-  checksum: 10c0/f1fdbb3b4eb84d9caef64345763809ece8b3bdf2ade752b91eee3bfba0a174377c0843d52db686b4d8f426eea51c55bc0a9ee2f8f989a9a2898158a1d63595c9
-  languageName: node
-  linkType: hard
-
 "chai-as-promised@npm:^7.1.1":
   version: 7.1.2
   resolution: "chai-as-promised@npm:7.1.2"
@@ -17664,7 +17653,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"escape-html@npm:1.0.3, escape-html@npm:^1.0.3, escape-html@npm:~1.0.3":
+"escape-html@npm:^1.0.3, escape-html@npm:~1.0.3":
   version: 1.0.3
   resolution: "escape-html@npm:1.0.3"
   checksum: 10c0/524c739d776b36c3d29fa08a22e03e8824e3b2fd57500e5e44ecf3cc4707c34c60f9ca0781c0e33d191f2991161504c295e98f68c78fe7baa6e57081ec6ac0a3
@@ -22028,7 +22017,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"joi@npm:17.x.x, joi@npm:^17.6.4":
+"joi@npm:^17.6.4":
   version: 17.13.3
   resolution: "joi@npm:17.13.3"
   dependencies:
