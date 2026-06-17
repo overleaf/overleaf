@@ -713,7 +713,7 @@ describe('<ShareProjectModal/>', function () {
     expect(viewerOption?.classList.contains('disabled')).to.be.false
 
     screen.getByText(
-      /Upgrade to add more collaborators and access collaboration features like track changes and full project history/
+      /Upgrade to add more collaborators and access higher AI allowance, track changes, and full project history/
     )
   })
 
@@ -751,7 +751,7 @@ describe('<ShareProjectModal/>', function () {
     expect(viewerOption?.classList.contains('disabled')).to.be.false
 
     screen.getByText(
-      /Upgrade to add more collaborators and access collaboration features like track changes and full project history/
+      /Upgrade to add more collaborators and access higher AI allowance, track changes, and full project history/
     )
   })
 

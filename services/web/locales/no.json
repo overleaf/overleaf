@@ -134,7 +134,6 @@
   "github_is_premium": "Synkronisering med GitHub er en premium funksjonalitet",
   "github_public_description": "Hvem som helst kan se dette repositoriet. Du velger hvem som kan gjøre commits.",
   "github_successfully_linked_description": "Takk, kobling av GitHub-kontoen din til __appName__ var vellykket. Du kan nå eksportere __appName__-prosjektene dine til GitHub, eller importere prosjekter fra GitHub-repositoriene dine.",
-  "github_sync": "GitHub Synk.",
   "github_sync_description": "Med GitHub-Sync kan du koble dine prosjekter i __appName__ til GitHub-repositories. Lag nye commits fra __appName__, og merge med commits gjort offline eller i GitHub.",
   "github_sync_error": "Beklager, det oppstod en feil da vi forsøkte å snakke med vår GitHub-service. Prøv igjen om ett øyeblikk",
   "github_validation_check": "Vennligst sjekk at navnet til repositoriet er gyldig, og at du har tilgang til å lage repositoriet.",

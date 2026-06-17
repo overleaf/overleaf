@@ -162,7 +162,6 @@
   "github_is_premium": "GitHub統合はプレミアム機能です",
   "github_public_description": "このリポジトリは全員が閲覧できます。コミットできる人を選択します。",
   "github_successfully_linked_description": "ありがとうございます。GitHubアカウントと __appName__ のリンクが完了しました。これからは __appName__ プロジェクトをGitHubにエクスポート、あるいはGitHubリポジトリからプロジェクトのインポートをすることができます。",
-  "github_sync": "GitHub同期",
   "github_sync_description": "GitHub Syncがあれば、__appName__ プロジェクトとGitHubリポジトリを接続することができます。__appName__ から新しいコミットを作成して、オフラインあるいはGitHubで作成したコミットと統合できます。",
   "github_sync_error": "申し訳ありません。GitHubサービスとの接続に問題が発生しました。しばらく時間を置いて再度お試しください。",
   "github_validation_check": "リポジトリ名が有効か、リポジトリを作成する権限があるか確認してください。",

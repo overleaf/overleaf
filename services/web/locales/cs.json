@@ -112,7 +112,6 @@
   "github_no_master_branch_error": "Tento repozitář nemůže být importován, protože nemá master branch. Prosím zajistěte, aby projekt měl master branch.",
   "github_public_description": "Tento repozitář může vidět kdokoliv. Vy určíte kdo do něj může commitovat,",
   "github_successfully_linked_description": "Děkujeme, úspěšně jsem připojili váš GitHub účet k __appName__u. Nyní můžete exportovat své projekty v __appName__u do GitHubu, nebo importovat projekty z GitHub repozitáře.",
-  "github_sync": "Synchronizace s GitHubem",
   "github_sync_description": "Můžete spojit vaše projekty v __appName__u s GitHub repozitářem. Můžete vytvářet nové commity z __appName__u a mergovat s commity vytvořenými offline, nebo na GitHubu.",
   "github_sync_error": "Omlouváme se, ale při komunikaci s naší GitHub službou nastala chyba. Zkuste to za moment znovu.",
   "github_validation_check": "Zkontrolujte prosím, jestli máte správné jméno repozitáře a jestli máte práva k jeho vytvoření.",

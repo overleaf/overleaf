@@ -130,7 +130,6 @@
   "github_is_premium": "La sincronizzazione GitHub è una funzionalità premium",
   "github_public_description": "Chiunque può visualizzare il repository. Puoi scegliere chi può eseguire commit.",
   "github_successfully_linked_description": "Grazie, abbiamo collegato con successo il tuo account GitHub a __appName__ . Adesso puoi esportare i progetti __appName__ in GitHub, o importarli dai tuoi repository GitHub.",
-  "github_sync": "Sincronizzazione GitHub",
   "github_sync_description": "Con GitHub Sync puoi collegare i tuoi progetti __appName__ a repository GitHub. Crea nuovi commit da __appName__ e unisci con commit fatti offline o su GitHub.",
   "github_sync_error": "Spiacenti, c’è stato un errore con la comunicazione con GitHub. Si prega di riprovare fra poco.",
   "github_validation_check": "Per favore, controlla che il nome del repository sia valido, e che tu abbia i permessi per crearlo.",

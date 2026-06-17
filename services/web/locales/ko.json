@@ -188,7 +188,6 @@
   "github_is_premium": "GitHub 동기화는 프리미엄 기능입니다",
   "github_public_description": "모두가 이 저장소를 볼 수 있습니다. 커밋할 수 있는 분을 선택하실 수 있습니다.",
   "github_successfully_linked_description": "감사합니다, __appName__로 GitHub 계정을 성공적으로 연결하였습니다. __appName__ 프로젝트를 GitHub으로 전송하시거나 GitHub 저장소의 프로젝트를 불러올 수 있습니다.",
-  "github_sync": "GitHub 동기화",
   "github_sync_description": "GitHub 동기화로, __appName__ 프로젝트를 GitHub 저장소로 연결하실 수 있습니다. __appName__의 새로운 커밋을 만들고, 오프라인이나 GitHub에서 만들어진 커밋과 합치세요.",
   "github_sync_error": "죄송합니다, GitHub 서비스에 대한 에러가 있었습니다. 잠시 후 다시 시도해주시기 바랍니다.",
   "github_validation_check": "저장소 이름이 유효한지 확인하시기 바랍니다, 그리고 저장소를 만들기위해 허가를 가지셔야 합니다.",

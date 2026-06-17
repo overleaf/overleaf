@@ -115,7 +115,6 @@
   "github_is_premium": "GitHub-synkronointi on premium-ominaisuus",
   "github_public_description": "Kuka tahansa voi nähdä tämän repositoryn. Voit valita kuka voi tehdä muutoksia.",
   "github_successfully_linked_description": "Kiitos, olemme linkittäneet GitHub-tilisi sovellukseen __appName__ onnistuneesti. Voit nyt viedä __appName__-projektejasi GitHubiin tai tuoda projekteja omista GitHub-repositoryistasi.",
-  "github_sync": "GitHub Synkronointi",
   "github_sync_description": "Voit linkittää __appName__-projektisi GitHub-repositoryihin GitHub Syncin avulla. Tee uusia muutoksia sovelluksesta __appName__ ja yhdistä GitHubissa tai offline-tilassa tehtyihin muutoksiin.",
   "github_sync_error": "Tapahtui virhe puhuessa GitHub-palvelullemme. Yritä uudelleen pienen hetken päästä.",
   "github_validation_check": "Tarkista, että repositoryn nimi on kelvollinen ja että sinulla on oikeudet luoda repository.",

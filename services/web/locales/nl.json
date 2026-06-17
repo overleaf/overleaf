@@ -191,7 +191,6 @@
   "github_is_premium": "GitHubsnychronisatie is een premium functie",
   "github_public_description": "Iedereen kan deze repository zien. Jij kiest wie eraan kan bijdragen.",
   "github_successfully_linked_description": "Bedankt, we hebben je GitHub-account kunnen koppelen aan __appName__. Je kunt nu je __appName__-projecten exporteren naar GitHub, of je projecten vanuit je GitHub repositories importeren.",
-  "github_sync": "GitHub-synchonisatie",
   "github_sync_description": "Met GitHub Sync kun je je __appName__-projecten koppelen aan GitHub repositories. Maak nieuwe toevoegingen vanuit __appName__ en voeg deze samen met toevoegingen die offline of in GitHub gemaakt zijn.",
   "github_sync_error": "Sorry, er trad een fout op tijdens het communiceren met onze GitHub-dienst. Probeer het opnieuw over een ogenblik.",
   "github_validation_check": "Controleer of de naam van de repository geldig is en of je toestemming heb om de repository te maken.",

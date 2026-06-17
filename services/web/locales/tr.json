@@ -131,7 +131,6 @@
   "github_is_premium": "GitHub senkronizasyonu premium bir özelliktir",
   "github_public_description": "Herkes bu depoyu görüntüleyebilir. Kimlerin işlem yapabileceğini siz seçersiniz.",
   "github_successfully_linked_description": "Teşekkürler, GitHub hesabınız ile __appName__ arasındaki bağlantı, başarıyla oluşturuldu. Artık __appName__ projelerinizi GitHub üzerine yükleyebilir ya da GitHub depolarınızı __appName__’e yükleyebilirsiniz.",
-  "github_sync": "GitHub Senkronizasyonu",
   "github_sync_description": "GitHub senkronizasyonu sayesinde __appName__ projeleriniz ile GitHub depolarınız arasında bağlantı kurabilirsiniz. Bu sayede __appName__ üzerinden çevrimdışı olarak işlem yapabilir ya da bu işlemleri GitHub üzerine işleyebilirsiniz.",
   "github_sync_error": "Üzgünüz, GitHub servisine bağlanırken bir sorunla karşılaştık. Lütfen, birkaç dakika sonra tekrar deneyin.",
   "github_validation_check": "Lütfen, depo adının doğru yazıldığından ve yeni bir depo oluşturma yetkinizin olduğundan emin olunuz.",

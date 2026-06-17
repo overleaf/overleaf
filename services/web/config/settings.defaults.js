@@ -1099,7 +1099,6 @@ module.exports = {
     settingsModalEditorTabSections: [],
     settingsModalSpellcheckSections: [],
     editorFloatingMenuActions: [],
-    errorLogsComponents: [],
     referenceIndices: [],
     railEntries: [],
     railPopovers: [],

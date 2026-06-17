@@ -504,7 +504,6 @@
   "github_repository_diverged": "La branche master du dépôt lié a été poussée de force. La récupération des modifications faites sur GitHub après un poussage forcé peut causer la désynchronisation d’Overleaf et GitHub. Vous pourriez avoir besoin de pousser les modifications après leur récupération pour restaurer la synchronisation.",
   "github_successfully_linked_description": "Merci, nous avons lié votre compte GitHub avec __appName__. Vous pouvez maintenant exporter vos projets __appName__ dans GitHub ou importer des projets depuis vos dépôts GitHub.",
   "github_symlink_error": "Votre dépôt GitHub contient des liens symboliques qui ne sont pas encore supportés par Overleaf. Veuillez les retirer et réessayer.",
-  "github_sync": "Synchronisation GitHub",
   "github_sync_description": "Avec la synchronisation GitHub, vous pouvez lier vos projets __appName__ à des dépôts GitHub. Créez de nouveaux commits depuis __appName__, et fusionnez avec les commits réalisés hors ligne ou dans GitHub.",
   "github_sync_error": "Désolé, une erreur s’est produite lors de la communication avec le service GitHub. Veuillez essayer à nouveau dans quelques instants.",
   "github_sync_repository_not_found_description": "Le dépôt lié a été supprimé ou bien vous avez perdu accès à celui-ci. Vous pouvez configurer la synchronisation avec un nouveau dépôt en clonant le projet puis en accédant à l’option « GitHub » du menu. Vous pouvez également supprimer le lien entre ce projet et le dépôt.",
