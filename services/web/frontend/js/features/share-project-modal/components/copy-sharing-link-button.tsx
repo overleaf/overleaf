@@ -5,6 +5,7 @@ import { useProjectContext } from '@/shared/context/project-context'
 import { useUserContext } from '@/shared/context/user-context'
 import { debugConsole } from '@/utils/debugging'
 import getMeta from '@/utils/meta'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 export default function CopySharingLinkButton() {
   const { t } = useTranslation()
@@ -31,7 +32,12 @@ export default function CopySharingLinkButton() {
 
     navigator.clipboard
       .writeText(link)
-      .then(() => setSuccessActionMessage(t('link_copied')))
+      .then(() => {
+        setSuccessActionMessage(t('link_copied'))
+        sendMB('sharing-link-copied', {
+          project_id: projectId,
+        })
+      })
       .catch(debugConsole.error)
   }
 

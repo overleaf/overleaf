@@ -30,6 +30,7 @@ import {
 import { ExcludeStrict } from '@ol-types/utils'
 import getMeta from '@/utils/meta'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 type ProjectAccessProps = {
   setIsInvitedPeopleScreen: React.Dispatch<React.SetStateAction<boolean>>
@@ -95,6 +96,11 @@ function ProjectAccess({
       setSharingLinkData(data)
       setProjectAccess(newAccess)
       setSuccessActionMessage(t('access_updated'))
+      sendMB('sharing-link-set-permissions', {
+        project_id: projectId,
+        access_level: newAccess.split('.')[0],
+        ...reqBody,
+      })
     })
   }
 
@@ -122,6 +128,12 @@ function ProjectAccess({
     ).then(data => {
       setSharingLinkData(data)
       setSuccessActionMessage(t('access_updated'))
+      sendMB('sharing-link-set-permissions', {
+        project_id: projectId,
+        access_level: projectAccess?.split('.')[0],
+        privileges: eventKey,
+        subscriptionId: data.subscriptionId,
+      })
     })
   }
 
