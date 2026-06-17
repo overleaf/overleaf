@@ -510,6 +510,8 @@
   "domain_verification_failed_internal_error": "",
   "domain_verification_failed_no_token": "",
   "domain_verification_failed_wrong_token": "",
+  "domain_verification_grace_period_never_reverified": "",
+  "domain_verification_grace_period_overdue": "",
   "domain_verification_grace_period_warning": "",
   "domain_verification_grace_period_warning_plural": "",
   "domain_verification_invalid_domain": "",

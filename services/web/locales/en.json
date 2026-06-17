@@ -674,6 +674,8 @@
   "domain_verification_failed_internal_error": "Domain verification failed due to an internal error. Please try again in a few moments. If the problem continues please <0>contact us</0>.",
   "domain_verification_failed_no_token": "No TXT record found in your DNS settings. If you’ve just updated them, it can take up to 24 hours for changes to take effect. Try again later.",
   "domain_verification_failed_wrong_token": "The TXT record in your DNS settings doesn’t match the token. Check both and try again.",
+  "domain_verification_grace_period_never_reverified": "This domain has never been successfully verified. Update your DNS records and retry, or capture may stop for this domain.",
+  "domain_verification_grace_period_overdue": "The __days__-day grace period has ended. Update your DNS records and retry verification, or capture will stop for this domain.",
   "domain_verification_grace_period_warning": "This domain will be uncaptured in <0>__count__ day</0> if verification doesn’t succeed. Update your DNS records and retry.",
   "domain_verification_grace_period_warning_plural": "This domain will be uncaptured in <0>__count__ days</0> if verification doesn’t succeed. Update your DNS records and retry.",
   "domain_verification_invalid_domain": "The domain you entered is not valid. Please check the format and try again.",
