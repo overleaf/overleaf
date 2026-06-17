@@ -23,6 +23,7 @@ async function getEditInviteCount(projectId) {
   const count = await ProjectInvite.countDocuments({
     projectId,
     privileges: { $ne: PrivilegeLevels.READ_ONLY },
+    reusable: { $ne: true },
   }).exec()
   return count
 }

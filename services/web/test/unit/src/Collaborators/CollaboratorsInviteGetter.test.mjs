@@ -88,6 +88,7 @@ describe('CollaboratorsInviteGetter', function () {
       expect(ctx.ProjectInvite.countDocuments).to.be.calledWith({
         projectId: ctx.projectId,
         privileges: { $ne: 'readOnly' },
+        reusable: { $ne: true },
       })
       expect(count).to.equal(2)
     })
