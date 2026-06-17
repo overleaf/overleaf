@@ -2,6 +2,7 @@ import { markdown as markdownLanguage } from '@codemirror/lang-markdown'
 import { shortcuts } from './shortcuts'
 import { languages } from '../index'
 import { Strikethrough, Table } from '@lezer/markdown'
+import { Math } from './math'
 import {
   HighlightStyle,
   LanguageSupport,
@@ -12,7 +13,7 @@ import { tags } from '@lezer/highlight'
 export const markdown = () => {
   const { language, support } = markdownLanguage({
     codeLanguages: languages,
-    extensions: [Strikethrough, Table],
+    extensions: [Strikethrough, Table, Math],
   })
 
   return new LanguageSupport(language, [
