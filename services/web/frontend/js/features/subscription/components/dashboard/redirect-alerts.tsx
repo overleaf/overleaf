@@ -1,5 +1,6 @@
 import { Trans, useTranslation } from 'react-i18next'
 import OLNotification from '@/shared/components/ol/ol-notification'
+import OLButton from '@/shared/components/ol/ol-button'
 
 function RedirectAlerts() {
   const queryParams = new URLSearchParams(window.location.search)
@@ -11,6 +12,7 @@ function RedirectAlerts() {
   }
 
   let warning
+  let action
   if (redirectReason === 'writefull-entitled') {
     warning = t('good_news_you_are_already_receiving_this_add_on_via_writefull')
   } else if (redirectReason === 'double-buy') {
@@ -27,10 +29,19 @@ function RedirectAlerts() {
     )
   } else if (redirectReason === 'subscription-paused') {
     warning = t('no_add_on_purchase_while_paused')
+  } else if (redirectReason === 'no-active-subscription') {
+    warning = t('your_subscription_has_expired')
+    action = (
+      <OLButton href="/user/subscription/payment/invoices" variant="secondary">
+        {t('view_your_invoices')}
+      </OLButton>
+    )
   } else {
     return null
   }
 
-  return <OLNotification type="warning" content={<>{warning}</>} />
+  return (
+    <OLNotification type="warning" content={<>{warning}</>} action={action} />
+  )
 }
 export default RedirectAlerts
