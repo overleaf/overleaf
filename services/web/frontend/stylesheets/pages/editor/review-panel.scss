@@ -11,6 +11,27 @@ $rp-type-blue: #6b7797;
   --review-panel-width: 230px;
   --review-panel-width-mini: 24px;
   --review-panel-color-scheme: dark;
+  --review-mode-switcher-reviewing-bg: var(--yellow-10);
+  --review-mode-switcher-reviewing-hover-bg: var(--yellow-20);
+  --review-mode-switcher-reviewing-color: var(--yellow-60);
+
+  @include theme('default') {
+    .ide-redesign-main {
+      --review-panel-bg-color: var(--bg-dark-secondary);
+      --review-panel-color: var(--content-primary-dark);
+      --review-panel-color-secondary: var(--content-secondary-dark);
+      --review-panel-header-bg-color: var(--bg-dark-primary);
+      --review-panel-footer-bg-color: var(--bg-dark-primary);
+      --review-panel-entry-bg-color: var(--bg-dark-primary);
+      --review-panel-empty-state-bg-color: var(--bg-dark-primary);
+      --review-panel-button-hover-bg-color: var(--bg-dark-tertiary);
+      --review-panel-border-color: var(--border-divider-dark);
+      --review-panel-color-scheme: dark;
+      --review-mode-switcher-reviewing-bg: var(--yellow-70);
+      --review-mode-switcher-reviewing-hover-bg: var(--yellow-60);
+      --review-mode-switcher-reviewing-color: var(--yellow-10);
+    }
+  }
 }
 
 @include theme('light') {
@@ -749,6 +770,56 @@ del.review-panel-content-highlight {
   &.review-mode-switcher-toggle-button-expanded {
     .review-mode-switcher-toggle-label {
       display: block;
+    }
+  }
+}
+
+.ol-cm-toolbar {
+  .review-mode-switcher {
+    // In the toolbar the component is in normal flex flow — no absolute positioning.
+    position: static;
+
+    &:hover,
+    &:focus-within {
+      .review-mode-switcher-toggle-button.editing {
+        background-color: var(--review-panel-button-hover-bg-color);
+      }
+
+      .review-mode-switcher-toggle-button.reviewing {
+        background-color: var(--review-mode-switcher-reviewing-hover-bg);
+      }
+
+      .review-mode-switcher-toggle-button.viewing {
+        background-color: var(--blue-20);
+      }
+
+      // In the toolbar the label text does not expand on hover (would shift other buttons)
+      .review-mode-switcher-toggle-label {
+        display: none;
+      }
+    }
+  }
+
+  .review-mode-switcher-toggle-button {
+    border-radius: var(--border-radius-base);
+    padding: var(--spacing-01) var(--spacing-02);
+    gap: var(--spacing-01);
+    height: auto;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid var(--content-primary);
+      outline-offset: 2px;
+    }
+
+    &.editing {
+      background-color: var(--toolbar-alt-bg-color);
+      color: var(--toolbar-btn-color);
+    }
+
+    &.reviewing {
+      background-color: var(--review-mode-switcher-reviewing-bg);
+      color: var(--review-mode-switcher-reviewing-color);
     }
   }
 }

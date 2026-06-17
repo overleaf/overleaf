@@ -5,11 +5,13 @@ import ReviewPanel from './review-panel'
 import ReviewModeSwitcher from './review-mode-switcher'
 import useReviewPanelLayout from '../hooks/use-review-panel-layout'
 import { useLayoutContext } from '@/shared/context/layout-context'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function ReviewPanelContainer() {
   const view = useCodeMirrorViewContext()
   const { showPanel, mini } = useReviewPanelLayout()
   const { focusMode } = useLayoutContext()
+  const isToolbarMigration = useFeatureFlag('writefull-toolbar-migration')
 
   if (!view) {
     return null
@@ -17,7 +19,7 @@ function ReviewPanelContainer() {
 
   return ReactDOM.createPortal(
     <>
-      {!focusMode && <ReviewModeSwitcher />}
+      {!focusMode && !isToolbarMigration && <ReviewModeSwitcher />}
       {showPanel && <ReviewPanel mini={mini} />}
     </>,
     view.scrollDOM
