@@ -154,13 +154,13 @@ const TokenAccessHandler = {
     throw new Error('invalid token type')
   },
 
-  async addReadOnlyUserToProject(userId, projectId, ownerId) {
+  async addReadOnlyUserToProject(userId, projectId, ownerId, session) {
     if (!Features.hasFeature('link-sharing')) {
       throw new Error('link sharing is disabled')
     }
     userId = new ObjectId(userId.toString())
     projectId = new ObjectId(projectId.toString())
-    Analytics.recordEventForUserInBackground(userId, 'project-joined', {
+    Analytics.recordEventForSession(session, 'project-joined', {
       role: PrivilegeLevels.READ_ONLY,
       projectId: projectId.toString(),
       source: 'link-sharing',

@@ -98,14 +98,14 @@ async function exportProjectConversion(req, res) {
         type,
         { compileFromHistory, rootResourcePath }
       )
-    AnalyticsManager.recordEventForUserInBackground(userId, 'convert-format', {
+    AnalyticsManager.recordEventForSession(req.session, 'convert-format', {
       sourceFormat: 'latex',
       targetFormat: type,
       status: 'success',
       operation: 'export',
     })
   } catch (error) {
-    AnalyticsManager.recordEventForUserInBackground(userId, 'convert-format', {
+    AnalyticsManager.recordEventForSession(req.session, 'convert-format', {
       sourceFormat: 'latex',
       targetFormat: type,
       status: 'failure',

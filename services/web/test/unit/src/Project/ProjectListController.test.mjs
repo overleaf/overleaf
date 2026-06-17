@@ -13,6 +13,7 @@ vi.mock('../../../../app/src/Features/Analytics/AnalyticsManager.mjs', () => {
   return {
     default: {
       setUserPropertyForUserInBackground: () => {},
+      setUserPropertyForSessionInBackground: () => {},
     },
   }
 })

@@ -34,11 +34,12 @@ describe('BetaProgramHandler', function () {
       '../../../../app/src/Features/Analytics/AnalyticsManager',
       () => ({
         default: (ctx.AnalyticsManager = {
-          setUserPropertyForUserInBackground: sinon.stub(),
+          setUserPropertyForSessionInBackground: sinon.stub(),
         }),
       })
     )
 
+    ctx.session = {}
     ctx.handler = (await import(modulePath)).default
   })
 
@@ -46,7 +47,7 @@ describe('BetaProgramHandler', function () {
     beforeEach(function (ctx) {
       ctx.user.betaProgram = false
       ctx.call = callback => {
-        ctx.handler.optIn(ctx.user_id, callback)
+        ctx.handler.optIn(ctx.session, ctx.user_id, callback)
       }
     })
 
@@ -65,8 +66,8 @@ describe('BetaProgramHandler', function () {
         ctx.call(err => {
           expect(err).to.not.exist
           sinon.assert.calledWith(
-            ctx.AnalyticsManager.setUserPropertyForUserInBackground,
-            ctx.user_id,
+            ctx.AnalyticsManager.setUserPropertyForSessionInBackground,
+            ctx.session,
             'beta-program',
             true
           )
@@ -105,7 +106,7 @@ describe('BetaProgramHandler', function () {
     beforeEach(function (ctx) {
       ctx.user.betaProgram = true
       ctx.call = callback => {
-        ctx.handler.optOut(ctx.user_id, callback)
+        ctx.handler.optOut(ctx.session, ctx.user_id, callback)
       }
     })
 
@@ -124,8 +125,8 @@ describe('BetaProgramHandler', function () {
         ctx.call(err => {
           expect(err).to.not.exist
           sinon.assert.calledWith(
-            ctx.AnalyticsManager.setUserPropertyForUserInBackground,
-            ctx.user_id,
+            ctx.AnalyticsManager.setUserPropertyForSessionInBackground,
+            ctx.session,
             'beta-program',
             false
           )

@@ -273,8 +273,8 @@ async function projectListPage(req, res, next) {
 
     customerIoEnabled = true
 
-    AnalyticsManager.setUserPropertyForUserInBackground(
-      userId,
+    AnalyticsManager.setUserPropertyForSessionInBackground(
+      req.session,
       'customer-io-integration',
       true
     )

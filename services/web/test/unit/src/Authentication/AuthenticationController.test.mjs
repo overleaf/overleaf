@@ -144,7 +144,7 @@ describe('AuthenticationController', function () {
       '../../../../app/src/Features/Analytics/AnalyticsManager',
       () => ({
         default: (ctx.AnalyticsManager = {
-          recordEventForUserInBackground: sinon.stub(),
+          recordEventForMongoUserInBackground: sinon.stub(),
           identifyUser: sinon.stub(),
           getIdsFromSession: sinon.stub().returns({ userId: ctx.user._id }),
         }),
@@ -1646,8 +1646,8 @@ describe('AuthenticationController', function () {
 
       it('should track the login event', function (ctx) {
         sinon.assert.calledWith(
-          ctx.AnalyticsManager.recordEventForUserInBackground,
-          ctx.user._id,
+          ctx.AnalyticsManager.recordEventForMongoUserInBackground,
+          ctx.user,
           'user-logged-in'
         )
       })

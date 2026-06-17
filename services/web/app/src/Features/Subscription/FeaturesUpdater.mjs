@@ -39,10 +39,14 @@ function featuresEpochIsCurrent(user) {
 
 /**
  * Refresh features for the given user
+ * @param {string} userId
+ * @param {string} reason
  */
 async function refreshFeatures(userId, reason) {
   const user = await UserGetter.promises.getUser(userId, {
     _id: 1,
+    analyticsId: 1,
+    labsProgram: 1,
     features: 1,
     email: 1,
   })
@@ -51,8 +55,8 @@ async function refreshFeatures(userId, reason) {
   logger.debug({ userId, features, reason }, 'updating user features')
 
   const matchedFeatureSet = FeaturesHelper.getMatchedFeatureSet(features)
-  AnalyticsManager.setUserPropertyForUserInBackground(
-    userId,
+  AnalyticsManager.setUserPropertyForMongoUserInBackground(
+    user,
     'feature-set',
     matchedFeatureSet
   )

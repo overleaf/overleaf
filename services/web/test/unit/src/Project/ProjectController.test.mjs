@@ -439,8 +439,10 @@ describe('ProjectController', function () {
       '../../../../app/src/Features/Analytics/AnalyticsManager',
       () => ({
         default: {
+          recordEventForSession: () => {},
           recordEventForUserInBackground: () => {},
           setUserPropertyForUserInBackground: () => {},
+          setUserPropertyForSessionInBackground: () => {},
         },
       })
     )

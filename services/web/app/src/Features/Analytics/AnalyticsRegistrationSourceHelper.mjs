@@ -25,32 +25,32 @@ function clearInbound(session) {
   }
 }
 
-function addUserProperties(userId, session) {
+function addUserProperties(user, session) {
   if (!session) {
     return
   }
 
   if (session.required_login_from_product_medium) {
-    AnalyticsManager.setUserPropertyForUserInBackground(
-      userId,
+    AnalyticsManager.setUserPropertyForMongoUserInBackground(
+      user,
       `registered-from-product-medium`,
       session.required_login_from_product_medium
     )
     if (session.required_login_from_product_source) {
-      AnalyticsManager.setUserPropertyForUserInBackground(
-        userId,
+      AnalyticsManager.setUserPropertyForMongoUserInBackground(
+        user,
         `registered-from-product-source`,
         session.required_login_from_product_source
       )
     }
   } else if (session.referal_id) {
-    AnalyticsManager.setUserPropertyForUserInBackground(
-      userId,
+    AnalyticsManager.setUserPropertyForMongoUserInBackground(
+      user,
       `registered-from-bonus-scheme`,
       true
     )
-    AnalyticsManager.setUserPropertyForUserInBackground(
-      userId,
+    AnalyticsManager.setUserPropertyForMongoUserInBackground(
+      user,
       `registered-from-product-medium`,
       'bonus-scheme'
     )
@@ -58,16 +58,16 @@ function addUserProperties(userId, session) {
 
   if (session.inbound) {
     if (session.inbound.referrer && session.inbound.referrer.medium) {
-      AnalyticsManager.setUserPropertyForUserInBackground(
-        userId,
+      AnalyticsManager.setUserPropertyForMongoUserInBackground(
+        user,
         `registered-from-referrer-medium`,
         `${session.inbound.referrer.medium
           .charAt(0)
           .toUpperCase()}${session.inbound.referrer.medium.slice(1)}`
       )
       if (session.inbound.referrer.source) {
-        AnalyticsManager.setUserPropertyForUserInBackground(
-          userId,
+        AnalyticsManager.setUserPropertyForMongoUserInBackground(
+          user,
           `registered-from-referrer-source`,
           session.inbound.referrer.source
         )
@@ -77,8 +77,8 @@ function addUserProperties(userId, session) {
     if (session.inbound.utm) {
       for (const utmKey of RequestHelper.REGISTRATION_UTM_KEYS) {
         if (session.inbound.utm[utmKey]) {
-          AnalyticsManager.setUserPropertyForUserInBackground(
-            userId,
+          AnalyticsManager.setUserPropertyForMongoUserInBackground(
+            user,
             `registered-from-${utmKey.replace('_', '-')}`,
             session.inbound.utm[utmKey]
           )

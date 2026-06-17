@@ -1,7 +1,7 @@
 import { db } from './lib/mongodb.mjs'
 import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 
-const tags = ['saas', 'server-ce', 'server-pro', 'nonblocking']
+const tags = ['saas', 'server-ce', 'server-pro']
 
 const migrate = async () => {
   await batchedUpdate(db.users, { analyticsId: { $exists: false } }, [

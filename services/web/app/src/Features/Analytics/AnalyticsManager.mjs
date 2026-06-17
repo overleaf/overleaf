@@ -82,7 +82,7 @@ async function recordEventForUser(userId, event, segmentation) {
       userId,
       event,
       segmentation,
-      isLabsUser: Boolean(labsProgram),
+      isLabsUser: labsProgram,
       isLoggedIn: true,
     })
   }
@@ -90,6 +90,31 @@ async function recordEventForUser(userId, event, segmentation) {
 
 function recordEventForUserInBackground(userId, event, segmentation) {
   recordEventForUser(userId, event, segmentation).catch(err => {
+    logger.warn(
+      { err, userId, event, segmentation },
+      'failed to record event for user'
+    )
+  })
+}
+
+async function recordEventForMongoUser(user, event, segmentation) {
+  const { userId, analyticsId, labsProgram } = _getIdsFromMongoUser(user)
+  if (_isAnalyticsDisabled() || _isSmokeTestUser(userId)) {
+    return
+  }
+  _recordEvent({
+    analyticsId,
+    userId,
+    event,
+    segmentation,
+    isLabsUser: labsProgram,
+    isLoggedIn: true,
+  })
+}
+
+function recordEventForMongoUserInBackground(user, event, segmentation) {
+  const { userId } = _getIdsFromMongoUser(user) // throw before going into the background.
+  recordEventForMongoUser(user, event, segmentation).catch(err => {
     logger.warn(
       { err, userId, event, segmentation },
       'failed to record event for user'
@@ -142,7 +167,7 @@ async function setUserPropertyForUser(userId, propertyName, propertyValue) {
   if (analyticsId) {
     await _setUserProperty({
       analyticsId,
-      isLabsUser: Boolean(labsProgram),
+      isLabsUser: labsProgram,
       propertyName,
       propertyValue,
     })
@@ -151,6 +176,41 @@ async function setUserPropertyForUser(userId, propertyName, propertyValue) {
 
 function setUserPropertyForUserInBackground(userId, property, value) {
   setUserPropertyForUser(userId, property, value).catch(err => {
+    logger.warn(
+      { err, userId, property, value },
+      'failed to set user property for user'
+    )
+  })
+}
+
+/**
+ * @param {{_id: ObjectId, analyticsId: string, labsProgram: boolean}} user
+ * @param {string} propertyName
+ * @param {any} propertyValue
+ * @return {Promise<void>}
+ */
+async function setUserPropertyForMongoUser(user, propertyName, propertyValue) {
+  const { userId, analyticsId, labsProgram } = _getIdsFromMongoUser(user)
+  if (_isAnalyticsDisabled() || _isSmokeTestUser(userId)) {
+    return
+  }
+  _checkPropertyValue(propertyValue)
+  await _setUserProperty({
+    analyticsId,
+    isLabsUser: labsProgram,
+    propertyName,
+    propertyValue,
+  })
+}
+
+/**
+ * @param {{_id: ObjectId, analyticsId: string, labsProgram: boolean}} user
+ * @param {string} property
+ * @param {any} value
+ */
+function setUserPropertyForMongoUserInBackground(user, property, value) {
+  const { userId } = _getIdsFromMongoUser(user) // throw before going into the background.
+  setUserPropertyForMongoUser(user, property, value).catch(err => {
     logger.warn(
       { err, userId, property, value },
       'failed to set user property for user'
@@ -192,8 +252,8 @@ async function setUserPropertyForSession(session, propertyName, propertyValue) {
 }
 
 function setUserPropertyForSessionInBackground(session, property, value) {
+  const { analyticsId, userId } = getIdsFromSession(session) // throw before going into the background.
   setUserPropertyForSession(session, property, value).catch(err => {
-    const { analyticsId, userId } = getIdsFromSession(session)
     logger.warn(
       { err, analyticsId, userId, property, value },
       'failed to set user property for session'
@@ -452,6 +512,26 @@ function _isAnalyticsDisabled() {
   return !(Settings.analytics && Settings.analytics.enabled)
 }
 
+/**
+ * @param {{_id: ObjectId, analyticsId: string, labsProgram: boolean}} user
+ * @return {{userId: string, analyticsId: string, labsProgram: boolean}}
+ */
+function _getIdsFromMongoUser(user) {
+  const userId = user?._id?.toString()
+  if (!userId) {
+    throw new Error('bug: include db.users._id in projection')
+  }
+  const analyticsId = user?.analyticsId
+  if (!analyticsId) {
+    throw new Error('bug: include db.users.analyticsId in projection')
+  }
+  const labsProgram = user?.labsProgram
+  if (typeof labsProgram !== 'boolean') {
+    throw new Error('bug: include db.users.labsProgram in projection')
+  }
+  return { userId, analyticsId, labsProgram }
+}
+
 function _checkPropertyValue(propertyValue) {
   if (propertyValue === undefined) {
     throw new Error(
@@ -498,13 +578,15 @@ async function analyticsIdMiddleware(req, res, next) {
   if (sessionUser) {
     // For old sessions, session.analyticsId is the anon id immediately after login. Do not use it!
     session.analyticsId = sessionUser.analyticsId
-    if (!session.analyticsId) {
-      session.analyticsId = sessionUser.analyticsId =
-        await UserAnalyticsDataCache.getAnalyticsId(
+    if (!session.analyticsId || typeof sessionUser.labsProgram !== 'boolean') {
+      const { analyticsId, labsProgram } =
+        await UserAnalyticsDataCache.getAnalyticsData(
           sessionUser._id,
           // Do not drill down further, this middleware is on all endpoints.
           'analyticsIdMiddleware'
         )
+      session.analyticsId = sessionUser.analyticsId = analyticsId
+      sessionUser.labsProgram = labsProgram
     }
   } else if (!session.analyticsId) {
     // generate an `analyticsId` if needed
@@ -521,9 +603,13 @@ export default {
   recordEventForSession,
   recordEventForUser,
   recordEventForUserInBackground,
+  recordEventForMongoUser,
+  recordEventForMongoUserInBackground,
   emitPackageUsage,
   setUserPropertyForUser,
   setUserPropertyForUserInBackground,
+  setUserPropertyForMongoUser,
+  setUserPropertyForMongoUserInBackground,
   setUserPropertyForSession,
   setUserPropertyForSessionInBackground,
   setUserPropertyForAnalyticsId,

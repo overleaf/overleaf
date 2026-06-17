@@ -8,7 +8,7 @@ import { expressify } from '@overleaf/promise-utils'
 
 async function optIn(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
-  await BetaProgramHandler.promises.optIn(userId)
+  await BetaProgramHandler.promises.optIn(req.session, userId)
   try {
     await SplitTestSessionHandler.promises.sessionMaintenance(req, null)
   } catch (error) {
@@ -22,7 +22,7 @@ async function optIn(req, res) {
 
 async function optOut(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
-  await BetaProgramHandler.promises.optOut(userId)
+  await BetaProgramHandler.promises.optOut(req.session, userId)
   try {
     await SplitTestSessionHandler.promises.sessionMaintenance(req, null)
   } catch (error) {

@@ -493,17 +493,13 @@ async function acceptInvite(req, res) {
   } else if (invite.privileges === PrivilegeLevels.READ_ONLY) {
     editMode = 'view'
   }
-  AnalyticsManager.recordEventForUserInBackground(
-    currentUser._id,
-    'project-joined',
-    {
-      projectId,
-      ownerId: invite.sendingUserId, // only owner can invite others
-      mode: editMode,
-      role: invite.privileges,
-      source: urlToken ? 'email-invite' : 'sharing-link',
-    }
-  )
+  AnalyticsManager.recordEventForSession(req.session, 'project-joined', {
+    projectId,
+    ownerId: invite.sendingUserId, // only owner can invite others
+    mode: editMode,
+    role: invite.privileges,
+    source: urlToken ? 'email-invite' : 'sharing-link',
+  })
 
   if (req.xhr) {
     res.sendStatus(204) //  Done async via project page notification

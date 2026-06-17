@@ -756,8 +756,8 @@ const _ProjectController = {
           planLimit,
           exceedAtLimit,
         }
-        AnalyticsManager.recordEventForUserInBackground(
-          userId,
+        AnalyticsManager.recordEventForSession(
+          req.session,
           'project-opened',
           projectOpenedSegmentation
         )
@@ -843,8 +843,8 @@ const _ProjectController = {
         userIsMemberOfGroupSubscription
       )
 
-      AnalyticsManager.setUserPropertyForUserInBackground(
-        userId,
+      AnalyticsManager.setUserPropertyForSessionInBackground(
+        req.session,
         'customer-io-integration',
         true
       )

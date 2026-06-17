@@ -6,7 +6,7 @@ const modulePath = '../../../../app/src/Features/User/UserCreator.mjs'
 describe('UserCreator', function () {
   beforeEach(async function (ctx) {
     const self = ctx
-    ctx.user = { _id: '12390i', ace: {} }
+    ctx.user = { _id: '12390i', ace: {}, analyticsId: 'uuid' }
     ctx.user.save = sinon.stub().resolves(self.user)
     ctx.UserModel = class Project {
       constructor() {
@@ -64,8 +64,9 @@ describe('UserCreator', function () {
       '../../../../app/src/Features/Analytics/AnalyticsManager',
       () => ({
         default: (ctx.Analytics = {
+          recordEventForMongoUserInBackground: sinon.stub(),
           recordEventForUserInBackground: sinon.stub(),
-          setUserPropertyForUser: sinon.stub(),
+          setUserPropertyForMongoUser: sinon.stub(),
         }),
       })
     )
@@ -320,13 +321,13 @@ describe('UserCreator', function () {
         )
         assert.equal(user.email, ctx.email)
         sinon.assert.calledWith(
-          ctx.Analytics.recordEventForUserInBackground,
-          user._id,
+          ctx.Analytics.recordEventForMongoUserInBackground,
+          user,
           'user-registered'
         )
         sinon.assert.calledWith(
-          ctx.Analytics.setUserPropertyForUser,
-          user._id,
+          ctx.Analytics.setUserPropertyForMongoUser,
+          user,
           'created-at'
         )
       })

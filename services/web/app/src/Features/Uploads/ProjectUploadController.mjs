@@ -210,16 +210,12 @@ async function importDocument(req, res, next) {
           archivePath
         )
       await ProjectOptionsHandler.promises.setCompiler(project._id, 'lualatex')
-      AnalyticsManager.recordEventForUserInBackground(
-        userId,
-        'convert-format',
-        {
-          sourceFormat: conversionType,
-          targetFormat: 'latex',
-          status: 'success',
-          operation: 'import',
-        }
-      )
+      AnalyticsManager.recordEventForSession(req.session, 'convert-format', {
+        sourceFormat: conversionType,
+        targetFormat: 'latex',
+        status: 'success',
+        operation: 'import',
+      })
       res.json({ success: true, project_id: project._id })
     } finally {
       await fsPromises.unlink(archivePath).catch(unlinkErr => {
@@ -230,7 +226,7 @@ async function importDocument(req, res, next) {
       })
     }
   } catch (error) {
-    AnalyticsManager.recordEventForUserInBackground(userId, 'convert-format', {
+    AnalyticsManager.recordEventForSession(req.session, 'convert-format', {
       sourceFormat: conversionType,
       targetFormat: 'latex',
       status: 'failure',

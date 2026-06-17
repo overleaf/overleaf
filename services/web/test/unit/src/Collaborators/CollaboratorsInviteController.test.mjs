@@ -51,7 +51,7 @@ describe('CollaboratorsInviteController', function () {
       getSessionUser: sinon.stub().returns(ctx.currentUser),
     }
 
-    ctx.AnalyticsManger = { recordEventForUserInBackground: sinon.stub() }
+    ctx.AnalyticsManger = { recordEventForSession: sinon.stub() }
 
     ctx.rateLimiter = {
       consume: sinon.stub().resolves(),
@@ -1756,8 +1756,8 @@ describe('CollaboratorsInviteController', function () {
           )
         })
 
-        ctx.AnalyticsManger.recordEventForUserInBackground.should.have.been.calledWith(
-          ctx.currentUser._id,
+        ctx.AnalyticsManger.recordEventForSession.should.have.been.calledWith(
+          ctx.req.session,
           'project-joined',
           sinon.match({ source: 'sharing-link' })
         )

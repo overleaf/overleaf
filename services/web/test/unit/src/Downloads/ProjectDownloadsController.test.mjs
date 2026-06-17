@@ -104,6 +104,7 @@ describe('ProjectDownloadsController', function () {
       '../../../../app/src/Features/Analytics/AnalyticsManager.mjs',
       () => ({
         default: (ctx.AnalyticsManager = {
+          recordEventForSession: sinon.stub(),
           recordEventForUserInBackground: sinon.stub(),
         }),
       })
@@ -369,8 +370,8 @@ describe('ProjectDownloadsController', function () {
 
       it('should record a successful convert-format analytics event', function (ctx) {
         sinon.assert.calledWith(
-          ctx.AnalyticsManager.recordEventForUserInBackground,
-          ctx.userId,
+          ctx.AnalyticsManager.recordEventForSession,
+          ctx.req.session,
           'convert-format',
           {
             sourceFormat: 'latex',

@@ -130,7 +130,7 @@ describe('FeaturesUpdater', function () {
       .resolves(ctx.user)
 
     ctx.AnalyticsManager = {
-      setUserPropertyForUserInBackground: sinon.stub(),
+      setUserPropertyForMongoUserInBackground: sinon.stub(),
     }
     ctx.Modules = {
       promises: { hooks: { fire: sinon.stub().resolves([]) } },
@@ -443,8 +443,8 @@ describe('FeaturesUpdater', function () {
 
       it('should send the corresponding feature set user property', function (ctx) {
         expect(
-          ctx.AnalyticsManager.setUserPropertyForUserInBackground
-        ).to.have.been.calledWith(ctx.user._id, 'feature-set', 'all')
+          ctx.AnalyticsManager.setUserPropertyForMongoUserInBackground
+        ).to.have.been.calledWith(ctx.user, 'feature-set', 'all')
       })
 
       it('should sync subscription properties to customer.io', function (ctx) {
@@ -919,8 +919,8 @@ describe('FeaturesUpdater', function () {
 
       it('should send mixed feature set user property', function (ctx) {
         sinon.assert.calledWith(
-          ctx.AnalyticsManager.setUserPropertyForUserInBackground,
-          ctx.user._id,
+          ctx.AnalyticsManager.setUserPropertyForMongoUserInBackground,
+          ctx.user,
           'feature-set',
           'mixed'
         )

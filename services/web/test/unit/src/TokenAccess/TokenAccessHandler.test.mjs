@@ -59,7 +59,7 @@ describe('TokenAccessHandler', function () {
       '../../../../app/src/Features/Analytics/AnalyticsManager',
       () => ({
         default: (ctx.Analytics = {
-          recordEventForUserInBackground: sinon.stub(),
+          recordEventForSession: sinon.stub(),
         }),
       })
     )
@@ -153,7 +153,8 @@ describe('TokenAccessHandler', function () {
         await ctx.TokenAccessHandler.promises.addReadOnlyUserToProject(
           ctx.userId,
           ctx.projectId,
-          ctx.project.owner_ref
+          ctx.project.owner_ref,
+          ctx.req.session
         )
         expect(ctx.Project.updateOne.callCount).to.equal(1)
         expect(
@@ -165,8 +166,8 @@ describe('TokenAccessHandler', function () {
           'tokenAccessReadOnly_refs'
         )
         sinon.assert.calledWith(
-          ctx.Analytics.recordEventForUserInBackground,
-          ctx.userId,
+          ctx.Analytics.recordEventForSession,
+          ctx.req.session,
           'project-joined',
           {
             mode: 'view',
@@ -516,7 +517,8 @@ describe('TokenAccessHandler', function () {
           ctx.TokenAccessHandler.promises.addReadOnlyUserToProject(
             ctx.userId,
             ctx.projectId,
-            ctx.project.owner_ref
+            ctx.project.owner_ref,
+            ctx.req.session
           )
         ).to.be.rejectedWith('link sharing is disabled')
         expect(ctx.Project.updateOne.callCount).to.equal(0)

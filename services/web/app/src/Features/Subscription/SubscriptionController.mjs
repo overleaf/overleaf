@@ -427,8 +427,8 @@ async function pauseSubscription(req, res, next) {
     const { subscription } =
       await LimitationsManager.promises.userHasSubscription(user)
 
-    AnalyticsManager.recordEventForUserInBackground(
-      user._id,
+    AnalyticsManager.recordEventForSession(
+      req.session,
       'subscription-pause-scheduled',
       {
         pause_length: pauseCycles,

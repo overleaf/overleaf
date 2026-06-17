@@ -684,7 +684,7 @@ function _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser) {
   LoginRateLimiter.recordSuccessfulLogin(user.email, () => {})
   AuthenticationController._recordSuccessfulLogin(user._id, () => {})
   AuthenticationController.ipMatchCheck(req, user)
-  Analytics.recordEventForUserInBackground(user._id, 'user-logged-in', {
+  Analytics.recordEventForMongoUserInBackground(user, 'user-logged-in', {
     source: req.session.saml
       ? 'saml'
       : req.user_info?.auth_provider || 'email-password',
