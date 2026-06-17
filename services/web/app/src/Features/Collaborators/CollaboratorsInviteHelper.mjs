@@ -43,7 +43,6 @@ async function encryptToken(token) {
   if (!accessTokenEncryptor) {
     throw new Error('Token encryption not configured, could not encrypt token')
   }
-  logger.debug({ settings: Settings.projectInviteEncryptorOptions })
   return accessTokenEncryptor.promises.encryptJson(token)
 }
 
@@ -51,7 +50,6 @@ async function decryptToken(encryptedToken) {
   if (!accessTokenEncryptor) {
     throw new Error('Token encryption not configured, could not encrypt token')
   }
-  logger.debug({ settings: Settings.projectInviteEncryptorOptions })
   return accessTokenEncryptor.promises.decryptToJson(encryptedToken)
 }
 

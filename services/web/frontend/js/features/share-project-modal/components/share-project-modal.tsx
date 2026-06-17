@@ -7,7 +7,10 @@ import React, {
 } from 'react'
 import ShareProjectModalContent from './share-project-modal-content'
 import { useProjectContext } from '@/shared/context/project-context'
-import { useSplitTestContext } from '@/shared/context/split-test-context'
+import {
+  useFeatureFlag,
+  useSplitTestContext,
+} from '@/shared/context/split-test-context'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useEditorContext } from '@/shared/context/editor-context'
 import customLocalStorage from '@/infrastructure/local-storage'
@@ -93,6 +96,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
   const { publicAccessLevel } = project || {}
 
   const { splitTestVariants } = useSplitTestContext()
+  const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
 
   // show the new share modal if project owner
   // is over collaborator limit or has pending editors (once every 24 hours)
@@ -147,6 +151,10 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
   }, [show])
 
   const handleShow = useCallback(async () => {
+    if (!isSharingUpdatesEnabled || !isProjectOwner) {
+      return
+    }
+
     if (publicAccessLevel === 'tokenBased') {
       setSharingLinkData(null)
       setProjectAccess('legacyLinkSharing')
@@ -179,7 +187,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
           'generic_something_went_wrong'
       )
     }
-  }, [publicAccessLevel, projectId])
+  }, [publicAccessLevel, projectId, isSharingUpdatesEnabled, isProjectOwner])
 
   // close the modal if not in flight
   const cancel = useCallback(() => {

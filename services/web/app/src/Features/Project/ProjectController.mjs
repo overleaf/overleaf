@@ -495,6 +495,7 @@ const _ProjectController = {
       'editor-upgrade-button-relocation',
       'markdown-visual',
       'ai-disabled-collaborators',
+      'group-link-sharing',
     ].filter(Boolean)
 
     const getUserValues = async userId =>

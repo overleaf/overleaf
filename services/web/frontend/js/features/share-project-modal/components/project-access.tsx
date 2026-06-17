@@ -29,6 +29,7 @@ import {
 } from '@/features/share-project-modal/components/share-project-modal'
 import { ExcludeStrict } from '@ol-types/utils'
 import getMeta from '@/utils/meta'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type ProjectAccessProps = {
   setIsInvitedPeopleScreen: React.Dispatch<React.SetStateAction<boolean>>
@@ -50,6 +51,7 @@ function ProjectAccess({
   )
   const { isProjectOwner } = useEditorContext()
   const { activeGroupSubscriptions } = getMeta('ol-user')
+  const groupSharingEnabled = useFeatureFlag('group-link-sharing')
 
   const {
     monitorRequest,
@@ -235,7 +237,8 @@ function ProjectAccess({
                     {t('only_invited_people')}
                   </DropdownItem>
                 </DropdownListItem>
-                {activeGroupSubscriptions &&
+                {groupSharingEnabled &&
+                  activeGroupSubscriptions &&
                   activeGroupSubscriptions.map(subscription => (
                     <DropdownListItem
                       className="d-flex align-items-center"
