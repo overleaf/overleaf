@@ -7,77 +7,24 @@ $rp-type-blue: #6b7797;
   --rp-base-font-size: var(--font-size-01);
   --rp-border-grey: #{$rp-border-grey};
   --rp-type-blue: #{$rp-type-blue};
-  --review-panel-bg-color: var(--bg-light-secondary);
-  --review-panel-color: var(--content-primary);
-  --review-panel-color-secondary: var(--content-secondary);
-  --review-panel-header-bg-color: var(--bg-light-primary);
-  --review-panel-footer-bg-color: var(--bg-light-primary);
-  --review-panel-entry-bg-color: var(--bg-light-primary);
-  --review-panel-empty-state-bg-color: var(--bg-light-primary);
-  --review-panel-button-hover-bg-color: var(--bg-light-tertiary);
-  --review-panel-border-color: var(--border-divider);
   --review-panel-header-height: 36px;
   --review-panel-width: 230px;
   --review-panel-width-mini: 24px;
-  --review-panel-color-scheme: light;
-
-  @include theme('default') {
-    .ide-redesign-main {
-      --review-panel-bg-color: var(--bg-dark-secondary);
-      --review-panel-color: var(--content-primary-dark);
-      --review-panel-color-secondary: var(--content-secondary-dark);
-      --review-panel-header-bg-color: var(--bg-dark-primary);
-      --review-panel-footer-bg-color: var(--bg-dark-primary);
-      --review-panel-entry-bg-color: var(--bg-dark-primary);
-      --review-panel-empty-state-bg-color: var(--bg-dark-primary);
-      --review-panel-button-hover-bg-color: var(--bg-dark-tertiary);
-      --review-panel-border-color: var(--border-divider-dark);
-      --review-panel-color-scheme: dark;
-    }
-  }
+  --review-panel-color-scheme: dark;
 }
 
-.ide-redesign-main {
-  .review-panel-container {
-    order: -1;
-  }
-
-  .review-panel-inner {
-    border-left: none;
-    border-right: 1px solid var(--border-divider-themed);
-  }
-
-  .review-panel-header {
-    border-bottom: none;
-    flex: 0 0 var(--review-panel-width);
-  }
-
-  .review-panel-more-comments-button-container {
-    &.upwards {
-      top: calc(var(--review-panel-top) + 16px);
-    }
-  }
-
-  .review-panel-mini {
-    // This needs to have a higher z-index than the gutter
-    // so that the comment/change hover previews appear in
-    // front of the gutter
-    z-index: 201;
-
-    .review-panel-entry-hover {
-      .review-panel-entry-content {
-        left: auto;
-        right: -200px;
-      }
-    }
-  }
-
-  .review-panel-overview {
-    top: 0;
-  }
+@include theme('light') {
+  --review-panel-color-scheme: light;
 }
 
 .review-panel-container {
+  --review-panel-color: var(--content-primary-themed);
+  --review-panel-color-secondary: var(--content-secondary-themed);
+  --review-panel-entry-bg-color: var(--bg-primary-themed);
+  --review-panel-button-hover-bg-color: var(--bg-tertiary-themed);
+  --review-panel-border-color: var(--border-divider-themed);
+
+  order: -1;
   color-scheme: var(--review-panel-color-scheme);
   height: 100%;
   flex-shrink: 0;
@@ -87,8 +34,9 @@ $rp-type-blue: #6b7797;
 .review-panel-inner {
   z-index: 6;
   flex-shrink: 0;
-  background-color: var(--review-panel-bg-color);
-  border-left: 1px solid var(--review-panel-border-color);
+  background-color: var(--bg-secondary-themed);
+  border-left: none;
+  border-right: 1px solid var(--review-panel-border-color);
   color: var(--review-panel-color);
   font-family: $font-family-base;
   line-height: $line-height-base;
@@ -251,10 +199,11 @@ del.review-panel-content-highlight {
   width: var(--review-panel-width);
   height: var(--review-panel-header-height);
   display: flex;
+  flex: 0 0 var(--review-panel-width);
   flex-direction: column;
   justify-content: center;
-  border-bottom: 1px solid var(--review-panel-border-color);
-  background-color: var(--review-panel-header-bg-color);
+  border-bottom: none;
+  background-color: var(--bg-primary-themed);
   z-index: 4;
 }
 
@@ -475,7 +424,7 @@ del.review-panel-content-highlight {
 .review-panel-empty-state-comment-icon {
   width: 80px;
   height: 80px;
-  background-color: var(--review-panel-empty-state-bg-color);
+  background-color: var(--bg-primary-themed);
   border-radius: 100%;
   display: flex;
   align-items: center;
@@ -490,7 +439,7 @@ del.review-panel-content-highlight {
 .review-panel-overview {
   padding: var(--spacing-02);
   position: absolute;
-  top: var(--review-panel-header-height);
+  top: 0;
   bottom: 59px;
   width: 100%;
   overflow: auto;
@@ -522,7 +471,7 @@ del.review-panel-content-highlight {
   bottom: 0;
   width: var(--review-panel-width);
   z-index: 2;
-  background-color: var(--review-panel-footer-bg-color);
+  background-color: var(--bg-primary-themed);
   border-top: 1px solid var(--review-panel-border-color);
   display: flex;
 
@@ -596,9 +545,7 @@ del.review-panel-content-highlight {
   }
 
   &.upwards {
-    top: calc(
-      var(--review-panel-top) + var(--review-panel-header-height) + 16px
-    );
+    top: calc(var(--review-panel-top) + 16px);
   }
 }
 
@@ -618,6 +565,11 @@ del.review-panel-content-highlight {
 
 .review-panel-mini {
   overflow: visible !important;
+
+  // This needs to have a higher z-index than the gutter
+  // so that the comment/change hover previews appear in
+  // front of the gutter
+  z-index: 201;
 
   .review-panel-entry-header .review-panel-entry-user {
     width: 130px;
@@ -656,7 +608,8 @@ del.review-panel-content-highlight {
     .review-panel-entry-content {
       display: flex;
       position: absolute;
-      left: -200px;
+      left: auto;
+      right: -200px;
       top: 0;
       padding: var(--spacing-04);
     }
