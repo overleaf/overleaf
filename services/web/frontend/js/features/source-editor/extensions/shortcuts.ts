@@ -119,7 +119,12 @@ export const shortcuts = Prec.high(
       run: toggleReviewPanel,
     },
     {
-      key: 'Mod-Shift-c',
+      key: 'Ctrl-Shift-c',
+      preventDefault: true,
+      run: addNewCommentFromKbdShortcut,
+    },
+    {
+      key: 'Cmd-Shift-c',
       preventDefault: true,
       run: addNewCommentFromKbdShortcut,
     },
