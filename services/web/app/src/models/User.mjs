@@ -110,6 +110,7 @@ export const UserSchema = new Schema(
       nonBlinkingCursor: { type: Boolean, default: false },
       referencesSearchMode: { type: String, default: 'advanced' }, // 'advanced' or 'simple'
       darkModePdf: { type: Boolean, default: false },
+      floatingMenu: { type: Boolean, default: true },
       zotero: refProviderSettingsSchema,
       mendeley: refProviderSettingsSchema,
       papers: refProviderSettingsSchema,

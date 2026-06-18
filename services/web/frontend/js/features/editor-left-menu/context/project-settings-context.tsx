@@ -38,6 +38,7 @@ type ProjectSettingsSetterContextValue = {
     nonBlinkingCursor: UserSettings['nonBlinkingCursor']
   ) => void
   setDarkModePdf: (darkModePdf: UserSettings['darkModePdf']) => void
+  setFloatingMenu: (floatingMenu: UserSettings['floatingMenu']) => void
   setZotero: (zotero: UserSettings['zotero']) => void
   setMendeley: (mendeley: UserSettings['mendeley']) => void
   setPapers: (papers: UserSettings['papers']) => void
@@ -102,6 +103,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
     setNonBlinkingCursor,
     darkModePdf,
     setDarkModePdf,
+    floatingMenu,
+    setFloatingMenu,
     zotero,
     setZotero,
     mendeley,
@@ -158,6 +161,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setNonBlinkingCursor,
       darkModePdf,
       setDarkModePdf,
+      floatingMenu,
+      setFloatingMenu,
       zotero,
       setZotero,
       mendeley,
@@ -210,6 +215,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setNonBlinkingCursor,
       darkModePdf,
       setDarkModePdf,
+      floatingMenu,
+      setFloatingMenu,
       zotero,
       setZotero,
       mendeley,

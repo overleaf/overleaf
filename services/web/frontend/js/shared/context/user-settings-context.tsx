@@ -34,6 +34,7 @@ export const defaultSettings: UserSettings = {
   breadcrumbs: true,
   nonBlinkingCursor: false,
   darkModePdf: false,
+  floatingMenu: true,
   zotero: {
     enabled: true,
     groups: [],

@@ -2392,6 +2392,7 @@
   "show_local_file_contents": "Show Local File Contents",
   "show_more": "show more",
   "show_outline": "Show File outline",
+  "show_quick_actions_on_text_selection": "Show quick actions on text selection",
   "show_version_history": "Show version history",
   "show_x_more_projects": "Show __count__ more project",
   "show_x_more_projects_plural": "Show __count__ more projects",

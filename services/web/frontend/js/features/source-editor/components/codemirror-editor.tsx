@@ -28,6 +28,7 @@ import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
 import UpgradeTrackChangesModal from '@/features/review-panel/components/upgrade-track-changes-modal'
+import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 
 // TODO: remove this when definitely no longer used
 export * from './codemirror-context'
@@ -95,6 +96,9 @@ function CodeMirrorEditorComponents({
 }: CodeMirrorEditorComponentsProps) {
   useToolbarMenuBarEditorCommands()
   const { features } = useProjectContext()
+  const {
+    userSettings: { floatingMenu },
+  } = useUserSettingsContext()
   const writefullToolbarMigrationEnabled = useFeatureFlag(
     'writefull-toolbar-migration'
   )
@@ -109,7 +113,8 @@ function CodeMirrorEditorComponents({
 
       <MathPreviewTooltip />
       <EditorContextMenu />
-      {features.trackChangesVisible &&
+      {floatingMenu &&
+        features.trackChangesVisible &&
         (writefullToolbarMigrationEnabled ? (
           <>
             <AddCommentCommand />

@@ -34,6 +34,7 @@ async function buildUserSettings(_req, _res, user) {
     nonBlinkingCursor: user.ace.nonBlinkingCursor ?? false,
     referencesSearchMode: user.ace.referencesSearchMode,
     darkModePdf: user.ace.darkModePdf ?? false,
+    floatingMenu: user.ace.floatingMenu ?? true,
     zotero: user.ace.zotero,
     mendeley: user.ace.mendeley,
     papers: user.ace.papers,

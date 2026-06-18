@@ -65,6 +65,7 @@ import { useActiveEditorTheme } from '@/shared/hooks/use-active-editor-theme'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { isCmVisualEditorAvailable } from '../utils/visual-editor'
 import { setEditorTabs } from '../extensions/tabs-listener'
+import { setReviewTooltip } from '../extensions/review-tooltip'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -93,6 +94,7 @@ function useCodeMirrorScope(view: EditorView) {
     editorTabs,
     nonBlinkingCursor,
     referencesSearchMode,
+    floatingMenu,
   } = userSettings
   const activeOverallTheme = useActiveOverallTheme()
   const editorTheme = useActiveEditorTheme()
@@ -165,6 +167,7 @@ function useCodeMirrorScope(view: EditorView) {
     editorTabs,
     nonBlinkingCursor,
     referencesSearchMode,
+    floatingMenu,
   })
 
   const currentDocRef = useRef({
@@ -480,6 +483,15 @@ function useCodeMirrorScope(view: EditorView) {
       view.dispatch(setEditorTabs(editorTabs))
     })
   }, [view, editorTabs])
+
+  useEffect(() => {
+    settingsRef.current.floatingMenu = floatingMenu
+    window.setTimeout(() => {
+      view.dispatch(
+        setReviewTooltip(floatingMenu, editorContextMenuEnabledRef.current)
+      )
+    })
+  }, [view, floatingMenu])
 
   useEffect(() => {
     settingsRef.current.nonBlinkingCursor = nonBlinkingCursor

@@ -30,6 +30,7 @@ export type UserSettings = {
   editorTabs: boolean
   nonBlinkingCursor: boolean
   darkModePdf: boolean
+  floatingMenu: boolean
   zotero: RefProviderSettings
   mendeley: RefProviderSettings
   papers: RefProviderSettings

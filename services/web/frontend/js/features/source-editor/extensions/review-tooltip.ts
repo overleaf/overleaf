@@ -14,6 +14,8 @@ import {
   SelectionRange,
   EditorState,
   Transaction,
+  Compartment,
+  TransactionSpec,
 } from '@codemirror/state'
 import { v4 as uuid } from 'uuid'
 import { isContextMenuMouseEvent } from '../utils/context-menu-mouse-event'
@@ -52,7 +54,29 @@ export const buildAddNewCommentRangeEffect = (range: SelectionRange) => {
   )
 }
 
-export const reviewTooltip = (editorContextMenuEnabled = false): Extension => {
+const reviewTooltipCompartment = new Compartment()
+
+export const reviewTooltip = (
+  enabled: boolean,
+  editorContextMenuEnabled: boolean = false
+): Extension => {
+  return reviewTooltipCompartment.of(
+    enabled ? reviewTooltipEnabled(editorContextMenuEnabled) : []
+  )
+}
+
+export const setReviewTooltip = (
+  enabled: boolean,
+  editorContextMenuEnabled: boolean
+): TransactionSpec => ({
+  effects: reviewTooltipCompartment.reconfigure(
+    enabled ? reviewTooltipEnabled(editorContextMenuEnabled) : []
+  ),
+})
+
+export const reviewTooltipEnabled = (
+  editorContextMenuEnabled = false
+): Extension => {
   let mouseUpListener: null | (() => void) = null
   const disableMouseUpListener = () => {
     if (mouseUpListener) {

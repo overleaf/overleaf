@@ -3,14 +3,35 @@ import { EditorProviders, USER_ID } from '../../helpers/editor-providers'
 import { mockScope } from '../source-editor/helpers/mock-scope'
 import { TestContainer } from '../source-editor/helpers/test-container'
 import { docId } from '../source-editor/helpers/mock-doc'
+import { useUserSettingsContext } from '@/shared/context/user-settings-context'
+
+function FloatingMenuToggle() {
+  const { setUserSettings } = useUserSettingsContext()
+  return (
+    <button
+      onClick={() =>
+        setUserSettings(settings => ({
+          ...settings,
+          floatingMenu: !settings.floatingMenu,
+        }))
+      }
+    >
+      Toggle floating menu
+    </button>
+  )
+}
 
 describe('<EditorFloatingMenu />', function () {
   function mountEditor({
     migrationEnabled,
     trackChangesVisible = true,
+    floatingMenu = true,
+    withSettingsToggle = false,
   }: {
     migrationEnabled: boolean
     trackChangesVisible?: boolean
+    floatingMenu?: boolean
+    withSettingsToggle?: boolean
   }) {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     window.metaAttributesCache.set('ol-splitTestVariants', {
@@ -23,8 +44,13 @@ describe('<EditorFloatingMenu />', function () {
 
     cy.mount(
       <TestContainer>
-        <EditorProviders scope={scope} features={{ trackChangesVisible }}>
+        <EditorProviders
+          scope={scope}
+          features={{ trackChangesVisible }}
+          userSettings={{ floatingMenu }}
+        >
           <CodeMirrorEditor />
+          {withSettingsToggle && <FloatingMenuToggle />}
         </EditorProviders>
       </TestContainer>
     )
@@ -126,6 +152,64 @@ describe('<EditorFloatingMenu />', function () {
 
       cy.get('.review-tooltip-menu').should('exist')
       cy.get('.editor-floating-menu').should('not.exist')
+    })
+  })
+
+  describe('floating menu setting', function () {
+    it('does not show the unified floating menu when the migration split test is enabled', function () {
+      mountEditor({ migrationEnabled: true, floatingMenu: false })
+
+      cy.get('.editor-floating-menu').should('not.exist')
+    })
+
+    it('does not show the legacy review tooltip when the migration split test is disabled', function () {
+      mountEditor({ migrationEnabled: false, floatingMenu: false })
+
+      cy.get('.review-tooltip-menu').should('not.exist')
+    })
+
+    it('removes the menu and its tooltip when the setting is turned off', function () {
+      mountEditor({
+        migrationEnabled: true,
+        floatingMenu: true,
+        withSettingsToggle: true,
+      })
+
+      cy.get('.review-tooltip-menu-container').should('exist')
+      cy.get('.editor-floating-menu').should('exist')
+
+      // force: the visible menu can overlap this test-only toggle button
+      cy.findByRole('button', { name: 'Toggle floating menu' }).click({
+        scrollBehavior: false,
+        force: true,
+      })
+
+      cy.get('.editor-floating-menu').should('not.exist')
+      cy.get('.review-tooltip-menu-container').should('not.exist')
+    })
+
+    it('restores the menu when the setting is turned back on', function () {
+      mountEditor({
+        migrationEnabled: true,
+        floatingMenu: false,
+        withSettingsToggle: true,
+      })
+
+      cy.get('.editor-floating-menu').should('not.exist')
+
+      cy.findByRole('button', { name: 'Toggle floating menu' }).click({
+        scrollBehavior: false,
+        force: true,
+      })
+
+      // delay: the extension reconfigures on a deferred dispatch, so spaced-out
+      // keystrokes ensure a selection event lands after it to rebuild the menu
+      cy.findByText('contentLine 12').type(
+        '{home}{shift}' + '{rightArrow}'.repeat(6),
+        { scrollBehavior: false, delay: 20 }
+      )
+
+      cy.get('.editor-floating-menu').should('exist')
     })
   })
 

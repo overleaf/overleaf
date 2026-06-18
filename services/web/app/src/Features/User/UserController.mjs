@@ -438,6 +438,9 @@ async function updateUserSettings(req, res, next) {
   if (body.darkModePdf != null) {
     user.ace.darkModePdf = Boolean(body.darkModePdf)
   }
+  if (body.floatingMenu != null) {
+    user.ace.floatingMenu = Boolean(body.floatingMenu)
+  }
   if (body.zotero != null) {
     user.ace.zotero = { ...user.ace.zotero, ...body.zotero }
   }
