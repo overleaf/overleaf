@@ -2,17 +2,13 @@
 import minimist from 'minimist'
 import logger from '@overleaf/logger'
 import { db } from '../app/src/infrastructure/mongodb.mjs'
-import {
-  buildSearchTokens,
-  docSchema,
-} from '../modules/library/app/src/LibraryReferenceRepository.mts'
-import { tokenize } from '../modules/library/app/src/bibtex-search-tokens.mts'
+import { buildSearchFields } from '../modules/library/app/src/LibraryReferenceRepository.mts'
 import { scriptRunner } from './lib/ScriptRunner.mjs'
 
 /** @typedef {import('mongodb').AnyBulkWriteOperation} AnyBulkWriteOperation */
 
 const argv = minimist(process.argv.slice(2), {
-  boolean: ['commit', 'all', 'help'],
+  boolean: ['commit', 'rollback', 'all', 'help'],
   default: { 'batch-size': 1000 },
 })
 
@@ -21,15 +17,16 @@ function usage() {
     {},
     `Usage: node backfill_library_references_search.mjs [options]
 
-Populates searchKey and searchTokens on libraryReferences so the
-account-level library search can index them. Also unsets the obsolete
-fields.$[].searchValue. Safe to rerun; picks up only un-indexed rows
-by default.
+Populates searchKey and fields.searchValue on libraryReferences so the
+account-level library search can index them. Safe to rerun; picks up only
+un-indexed rows by default.
 
 Options:
   --commit          Apply changes. Without this, runs as a dry run.
-  --all             Re-index every row, not just rows where searchTokens
-                    is null. Use when the tokenization format has changed.
+  --rollback        Unset searchKey and fields.searchValue on all rows that
+                    have them. Mirrors the original migration's rollback.
+  --all             Re-index every row, not just rows where searchKey is null.
+                    Use when the tokenization format has changed.
   --batch-size <n>  bulkWrite batch size (default 1000).
 `
   )
@@ -44,10 +41,11 @@ const BATCH_SIZE = Number(argv['batch-size'])
 
 /** @param {(message: string) => Promise<void>} trackProgress */
 async function backfill(trackProgress) {
-  const filter = argv.all ? {} : { searchTokens: null }
+  const filter = argv.all ? {} : { searchKey: null }
   const cursor = db.libraryReferences
     .find(filter)
-    .project({ key: 1, type: 1, fields: 1, updatedAt: 1 })
+    .hint({ userId: 1, searchKey: 1 })
+    .project({ key: 1, fields: 1 })
 
   let processed = 0
   /** @type {AnyBulkWriteOperation[]} */
@@ -66,20 +64,19 @@ async function backfill(trackProgress) {
   }
 
   for await (const doc of cursor) {
-    const entry = docSchema.parse({
-      ...doc,
-      type: doc.type ?? 'misc',
-      updatedAt: doc.updatedAt ?? new Date(0),
+    const { searchKey, fields } = buildSearchFields({
+      key: doc.key,
+      fields: (doc.fields ?? []).map(
+        (/** @type {{ name: string; editableValue?: string }} */ f) => ({
+          name: f.name,
+          editableValue: f.editableValue ?? '',
+        })
+      ),
     })
-    const searchKey = tokenize(doc.key)
-    const searchTokens = buildSearchTokens(entry)
     ops.push({
       updateOne: {
         filter: { _id: doc._id },
-        update: {
-          $set: { searchKey, searchTokens },
-          $unset: { 'fields.$[].searchValue': 1 },
-        },
+        update: { $set: { searchKey, fields } },
       },
     })
     if (ops.length >= BATCH_SIZE) {
@@ -91,16 +88,38 @@ async function backfill(trackProgress) {
 }
 
 /** @param {(message: string) => Promise<void>} trackProgress */
+async function rollback(trackProgress) {
+  if (!argv.commit) {
+    const count = await db.libraryReferences.countDocuments({
+      searchKey: { $ne: null },
+    })
+    await trackProgress(`[dry-run] would unset search fields on ${count} docs`)
+    return
+  }
+  const result = await db.libraryReferences.updateMany(
+    { searchKey: { $ne: null } },
+    { $unset: { searchKey: 1, 'fields.$[].searchValue': 1 } },
+    { hint: { userId: 1, searchKey: 1 } }
+  )
+  await trackProgress(`unset search fields on ${result.modifiedCount} docs`)
+}
+
+/** @param {(message: string) => Promise<void>} trackProgress */
 async function main(trackProgress) {
   if (!argv.commit) {
     await trackProgress('DRY RUN. Pass --commit to apply changes.')
   }
-  await backfill(trackProgress)
+  if (argv.rollback) {
+    await rollback(trackProgress)
+  } else {
+    await backfill(trackProgress)
+  }
 }
 
 try {
   await scriptRunner(main, {
     commit: Boolean(argv.commit),
+    rollback: Boolean(argv.rollback),
     all: Boolean(argv.all),
     batchSize: BATCH_SIZE,
   })

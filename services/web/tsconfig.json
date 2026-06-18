@@ -14,7 +14,6 @@
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "rewriteRelativeImportExtensions": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./frontend/js/*"],
@@ -39,7 +38,6 @@
   "include": [
     "frontend/js/**/*.*",
     "modules/**/frontend/js/**/*.*",
-    "modules/*/shared/**/*.*",
     "test/frontend/**/*.*",
     "modules/**/test/frontend/**/*.*",
     "frontend/stories/**/*.*",
