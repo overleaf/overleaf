@@ -121,6 +121,7 @@ export default defineMain({
           ...storybookConfig.resolve?.alias,
           // custom prefixes for import paths
           '@': path.join(rootDir, 'frontend/js/'),
+          '@modules': path.join(rootDir, 'modules/'),
           '@ol-types': path.join(rootDir, 'types/'),
           '@ol-storybook': path.join(rootDir, '.storybook/'),
           '@wf': path.join(
