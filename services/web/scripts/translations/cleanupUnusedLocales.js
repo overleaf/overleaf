@@ -42,6 +42,8 @@ async function main() {
       -not -path '*/node_modules/*' \
       -not -path '*/scripts/*' \
       -not -path '*/tests/*' \
+      -not -path './.cache/*' \
+      -not -path './.yarn/.cache/*' \
       -exec cat {} +
     `,
     {
