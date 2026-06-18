@@ -7,7 +7,6 @@ export type RefProviderSettings = {
   enabled: boolean
   disablePersonalLibrary: boolean
   groups: { id: string }[]
-  migrated?: boolean
 }
 
 export type UserSettings = {

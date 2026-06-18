@@ -338,7 +338,6 @@ const refProviderSettingsSchema = z
     enabled: z.boolean().optional(),
     groups: z.array(z.object({ id: z.string() })).optional(),
     disablePersonalLibrary: z.boolean().optional(),
-    migrated: z.boolean().optional(),
   })
   .optional()
 

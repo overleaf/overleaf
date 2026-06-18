@@ -18,7 +18,6 @@ const refProviderSettingsSchema = {
     default: [],
   },
   disablePersonalLibrary: { type: Boolean, default: false },
-  migrated: { type: Boolean, default: false },
 }
 
 export const UserSchema = new Schema(
