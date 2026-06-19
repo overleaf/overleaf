@@ -405,6 +405,49 @@ describe('TextOperation', function () {
       })
     )
 
+    it(
+      'compose associativity (randomised)',
+      random.test(numTrials, () => {
+        const str = random.string(20)
+        const comments = random.comments(6)
+
+        const a = randomOperation(str, comments.ids)
+        const afterA = new StringFileData(str, comments.comments)
+        a.apply(afterA)
+
+        const b = randomOperation(afterA.getContent(), comments.ids)
+        const afterB = new StringFileData(
+          afterA.getContent(),
+          comments.comments
+        )
+        b.apply(afterB)
+
+        const c = randomOperation(afterB.getContent(), comments.ids)
+
+        const ab = a.compose(b)
+        const ab_c = ab.compose(c)
+
+        const bc = b.compose(c)
+        const a_bc = a.compose(bc)
+
+        const ab_c_file = new StringFileData(str, comments.comments)
+        ab_c.apply(ab_c_file)
+
+        const a_bc_file = new StringFileData(str, comments.comments)
+        a_bc.apply(a_bc_file)
+
+        const fuzzingError = fuzzingErrorMessage({
+          str,
+          comments,
+          a: a.toJSON(),
+          b: b.toJSON(),
+          c: c.toJSON(),
+        })
+
+        expect(ab_c_file.toRaw()).to.deep.equal(a_bc_file.toRaw(), fuzzingError)
+      })
+    )
+
     it('composes two operations with comments', function () {
       expect(
         compose(
@@ -625,10 +668,53 @@ describe('TextOperation', function () {
           a: a.toJSON(),
           b: b.toJSON(),
         })
-        expect(abPrime.equals(baPrime)).to.be.equal(true, fuzzingError)
+        // The composition of ab' and ba' is not guaranteed to be equal, but
+        // should converge to the same file contents + ranges.
         expect(abFile.toRaw()).to.deep.equal(baFile.toRaw(), fuzzingError)
       })
     )
+
+    it('chooses lower tracked change timestamp', function () {
+      const ts1 = '2024-01-01T01:00:00.000Z'
+      const ts2 = '2024-01-01T02:00:00.000Z'
+      const str = 'abcde'
+      const comments = []
+
+      const a = new TextOperation()
+        .retain(2, {
+          tracking: TrackingProps.fromRaw({
+            ts: ts1,
+            type: 'insert',
+            userId: 'user1',
+          }),
+        })
+        .retain(1)
+        .retain(2, {
+          tracking: TrackingProps.fromRaw({
+            ts: ts2,
+            type: 'insert',
+            userId: 'user1',
+          }),
+        })
+
+      const b = new TextOperation().retain(1).remove(3).retain(1)
+
+      const [aPrime, bPrime] = TextOperation.transform(a, b)
+      const aComposeBPrime = a.compose(bPrime)
+      const bComposeAPrime = b.compose(aPrime)
+
+      const aBPFile = new StringFileData(str, comments)
+      aComposeBPrime.apply(aBPFile)
+
+      const bAPFile = new StringFileData(str, comments)
+      bComposeAPrime.apply(bAPFile)
+
+      expect(aBPFile.toRaw()).to.deep.equal(bAPFile.toRaw())
+      expect(aBPFile.trackedChanges.length).to.equal(1)
+      expect(
+        aBPFile.trackedChanges.asSorted()[0].tracking.ts.toISOString()
+      ).to.equal(ts1)
+    })
 
     it('adds a tracked change from operation 1', function () {
       expect(

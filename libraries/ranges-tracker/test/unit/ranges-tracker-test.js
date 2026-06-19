@@ -222,4 +222,114 @@ describe('RangesTracker', function () {
       )
     })
   })
+
+  describe('merging tracked inserts from the same user', function () {
+    beforeEach(function () {
+      this.comments = []
+    })
+
+    it('keeps the earlier timestamp when the existing insert is older', function () {
+      this.rangesTracker = new RangesTracker(
+        [
+          {
+            id: 'id1',
+            op: { p: 10, i: 'foo' },
+            metadata: { user_id: 'user-1', ts: '2024-01-01T00:00:00.000Z' },
+          },
+        ],
+        this.comments
+      )
+      this.rangesTracker.track_changes = true
+      this.rangesTracker.applyOp(
+        { p: 13, i: 'bar' },
+        { user_id: 'user-1', ts: new Date('2024-06-01T00:00:00.000Z') }
+      )
+      expect(this.rangesTracker.changes).to.have.length(1)
+      const [change] = this.rangesTracker.changes
+      expect(change.op).to.deep.equal({ p: 10, i: 'foobar' })
+      expect(change.metadata.user_id).to.equal('user-1')
+      expect(new Date(change.metadata.ts).toISOString()).to.equal(
+        '2024-01-01T00:00:00.000Z'
+      )
+    })
+
+    it('keeps the earlier timestamp when the incoming insert is older', function () {
+      this.rangesTracker = new RangesTracker(
+        [
+          {
+            id: 'id1',
+            op: { p: 10, i: 'foo' },
+            metadata: { user_id: 'user-1', ts: '2024-06-01T00:00:00.000Z' },
+          },
+        ],
+        this.comments
+      )
+      this.rangesTracker.track_changes = true
+      this.rangesTracker.applyOp(
+        { p: 13, i: 'bar' },
+        { user_id: 'user-1', ts: new Date('2024-01-01T00:00:00.000Z') }
+      )
+      expect(this.rangesTracker.changes).to.have.length(1)
+      const [change] = this.rangesTracker.changes
+      expect(change.op).to.deep.equal({ p: 10, i: 'foobar' })
+      expect(change.metadata.user_id).to.equal('user-1')
+      expect(new Date(change.metadata.ts).toISOString()).to.equal(
+        '2024-01-01T00:00:00.000Z'
+      )
+    })
+
+    it('uses the defined timestamp when the existing insert has a null timestamp', function () {
+      this.rangesTracker = new RangesTracker(
+        [
+          {
+            id: 'id1',
+            op: { p: 10, i: 'foo' },
+            metadata: { user_id: 'user-1', ts: null },
+          },
+        ],
+        this.comments
+      )
+      this.rangesTracker.track_changes = true
+      this.rangesTracker.applyOp(
+        { p: 13, i: 'bar' },
+        { user_id: 'user-1', ts: new Date('2024-01-01T00:00:00.000Z') }
+      )
+      expect(this.rangesTracker.changes).to.have.length(1)
+      const [change] = this.rangesTracker.changes
+      expect(new Date(change.metadata.ts).toISOString()).to.equal(
+        '2024-01-01T00:00:00.000Z'
+      )
+    })
+
+    it('keeps the earlier timestamp when re-merging inserts after a deletion', function () {
+      this.rangesTracker = new RangesTracker(
+        [
+          {
+            id: 'id1',
+            op: { p: 10, i: 'aaa' },
+            metadata: { user_id: 'user-1', ts: '2024-03-01T00:00:00.000Z' },
+          },
+          {
+            id: 'id2',
+            op: { p: 13, i: 'bb' },
+            metadata: { user_id: 'user-2', ts: '2024-02-01T00:00:00.000Z' },
+          },
+          {
+            id: 'id3',
+            op: { p: 15, i: 'ccc' },
+            metadata: { user_id: 'user-1', ts: '2024-01-01T00:00:00.000Z' },
+          },
+        ],
+        this.comments
+      )
+      this.rangesTracker.applyOp({ p: 13, d: 'bb' })
+      expect(this.rangesTracker.changes).to.have.length(1)
+      const [change] = this.rangesTracker.changes
+      expect(change.op).to.deep.equal({ p: 10, i: 'aaaccc' })
+      expect(change.metadata.user_id).to.equal('user-1')
+      expect(new Date(change.metadata.ts).toISOString()).to.equal(
+        '2024-01-01T00:00:00.000Z'
+      )
+    })
+  })
 })

@@ -56,8 +56,7 @@ class TrackedChange {
       return false
     }
     return (
-      this.tracking.type === other.tracking.type &&
-      this.tracking.userId === other.tracking.userId &&
+      this.tracking.canMergeWith(other.tracking) &&
       this.range.touches(other.range) &&
       this.range.canMerge(other.range)
     )
@@ -75,13 +74,7 @@ class TrackedChange {
     }
     return new TrackedChange(
       this.range.merge(other.range),
-      new TrackingProps(
-        this.tracking.type,
-        this.tracking.userId,
-        this.tracking.ts.getTime() > other.tracking.ts.getTime()
-          ? this.tracking.ts
-          : other.tracking.ts
-      )
+      this.tracking.mergeWith(other.tracking)
     )
   }
 

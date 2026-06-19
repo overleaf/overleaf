@@ -420,7 +420,7 @@ class RangesTracker {
           offset = opStart - changeStart
           change.op.i =
             change.op.i.slice(0, offset) + op.i + change.op.i.slice(offset)
-          change.metadata.ts = metadata.ts
+          change.metadata.ts = pickTimestamp(change.metadata, metadata)
           alreadyMerged = true
           movedChanges.push(change)
         } else if (opStart <= changeStart) {
@@ -728,6 +728,10 @@ class RangesTracker {
         ) {
           removeChanges.push(change)
           previousChange.op.i += change.op.i
+          previousChange.metadata.ts = pickTimestamp(
+            previousChange.metadata,
+            change.metadata
+          )
           movedChanges.push(previousChange)
         }
       } else if (
@@ -788,6 +792,17 @@ class RangesTracker {
     }
     return clone
   }
+}
+
+function pickTimestamp(oldMetadata, newMetadata) {
+  // Make sure null values don't get treated as 1970-01-01 dates in the
+  // comparison below.
+  if (oldMetadata.ts == null) return newMetadata.ts
+  if (newMetadata.ts == null) return oldMetadata.ts
+
+  return new Date(oldMetadata.ts) < new Date(newMetadata.ts)
+    ? oldMetadata.ts
+    : newMetadata.ts
 }
 
 module.exports = RangesTracker
