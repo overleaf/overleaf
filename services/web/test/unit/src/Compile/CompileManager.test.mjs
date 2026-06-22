@@ -19,7 +19,11 @@ describe('CompileManager', function () {
     vi.doMock('@overleaf/settings', () => ({
       default: (ctx.settings = {
         apis: {
-          clsi: { submissionBackendClass: 'c3d' },
+          clsi: {
+            submissionCompileBackendClass: 'free',
+            standardCompileBackendClass: 'free',
+            priorityCompileBackendClass: 'premium',
+          },
         },
         redis: { web: { host: '127.0.0.1', port: 42 } },
         rateLimit: { autoCompile: {} },
@@ -292,7 +296,7 @@ describe('CompileManager', function () {
         .calledWith(null, {
           timeout: ctx.timeout,
           compileGroup: ctx.group,
-          compileBackendClass: 'c4d',
+          compileBackendClass: 'premium',
           ownerAnalyticsId: 'abc',
         })
         .should.equal(true)
@@ -322,7 +326,7 @@ describe('CompileManager', function () {
           await ctx.CompileManager.promises.getProjectCompileLimits(
             ctx.project_id
           )
-        expect(compileBackendClass).to.equal('c4d')
+        expect(compileBackendClass).to.equal('premium')
       })
     })
   })

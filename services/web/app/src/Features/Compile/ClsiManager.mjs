@@ -87,16 +87,14 @@ function getDoubleCompilePercentile(projectId) {
 }
 
 function getNewCompileBackendClass(projectId, compileBackendClass) {
+  const clsi = Settings.apis.clsi
   let cfg
-  switch (compileBackendClass) {
-    case 'c3d':
-      cfg = Settings.apis.clsi_new.doubleCompileFree
-      break
-    case 'c4d':
-      cfg = Settings.apis.clsi_new.doubleCompilePremium
-      break
-    default:
-      throw new Error('unknown ?compileBackendClass')
+  if (compileBackendClass === clsi.standardCompileBackendClass) {
+    cfg = Settings.apis.clsi_new.doubleCompileFree
+  } else if (compileBackendClass === clsi.priorityCompileBackendClass) {
+    cfg = Settings.apis.clsi_new.doubleCompilePremium
+  } else {
+    throw new Error('unknown ?compileBackendClass')
   }
   if (!cfg.backendClass || !cfg.sample) return null
   if (getDoubleCompilePercentile(projectId) >= cfg.sample) return null

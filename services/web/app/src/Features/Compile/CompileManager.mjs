@@ -164,7 +164,10 @@ async function _getUserCompileLimits(userId) {
     timeout:
       ownerFeatures.compileTimeout || Settings.defaultFeatures.compileTimeout,
     compileGroup,
-    compileBackendClass: compileGroup === 'standard' ? 'c3d' : 'c4d',
+    compileBackendClass:
+      compileGroup === 'standard'
+        ? Settings.apis.clsi.standardCompileBackendClass
+        : Settings.apis.clsi.priorityCompileBackendClass,
     ownerAnalyticsId: analyticsId,
   }
 

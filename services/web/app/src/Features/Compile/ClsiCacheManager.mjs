@@ -249,7 +249,7 @@ async function createTemplateClsiCache({
   docEntries,
 }) {
   const compileGroup = Settings.defaultFeatures.compileGroup
-  const compileBackendClass = Settings.apis.clsi.submissionBackendClass
+  const compileBackendClass = Settings.apis.clsi.submissionCompileBackendClass
   const submissionId = new ObjectId().toString()
   const editorId = Crypto.randomUUID()
   const historyId = project.overleaf.history.id

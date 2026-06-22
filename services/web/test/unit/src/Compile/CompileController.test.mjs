@@ -27,7 +27,7 @@ describe('CompileController', function () {
       promises: {
         compile: sinon.stub(),
         getProjectCompileLimits: sinon.stub().resolves({
-          compileBackendClass: 'c3d',
+          compileBackendClass: 'free',
           compileGroup: 'standard',
         }),
         syncTeX: sinon.stub(),
@@ -48,7 +48,7 @@ describe('CompileController', function () {
         clsi: {
           url: 'http://clsi.example.com:3013',
           downloadHost: 'http://clsi.example.com:8080',
-          submissionBackendClass: 'c3d',
+          submissionCompileBackendClass: 'free',
         },
         clsi_priority: {
           url: 'http://clsi-priority.example.com',
@@ -481,7 +481,7 @@ describe('CompileController', function () {
         ctx.ClsiManager.promises.sendExternalRequest.should.have.been.calledWith(
           ctx.submission_id,
           { compileGroup: 'special', timeout: 600 },
-          { compileGroup: 'special', compileBackendClass: 'c3d', timeout: 600 }
+          { compileGroup: 'special', compileBackendClass: 'free', timeout: 600 }
         )
       })
     })
@@ -512,7 +512,7 @@ describe('CompileController', function () {
             draft: true,
             check: 'validate',
             compileGroup: 'standard',
-            compileBackendClass: 'c3d',
+            compileBackendClass: 'free',
             timeout: 60,
           }
         )
@@ -646,7 +646,7 @@ describe('CompileController', function () {
 
       it('should proxy the PDF from the CLSI', function (ctx) {
         ctx.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
-          `${ctx.settings.apis.clsi.url}/project/${ctx.projectId}/user/${ctx.user_id}/build/${ctx.build_id}/output/output.zip?compileBackendClass=c3d&clsiserverid=${ctx.clsiServerId}`
+          `${ctx.settings.apis.clsi.url}/project/${ctx.projectId}/user/${ctx.user_id}/build/${ctx.build_id}/output/output.zip?compileBackendClass=free&clsiserverid=${ctx.clsiServerId}`
         )
       })
     })
@@ -657,7 +657,7 @@ describe('CompileController', function () {
           .stub()
           .resolves({
             compileGroup: 'priority',
-            compileBackendClass: 'c4d',
+            compileBackendClass: 'premium',
           })
         await ctx.CompileController.getOutputZipFromClsi(
           ctx.req,
@@ -668,7 +668,7 @@ describe('CompileController', function () {
 
       it('should proxy the PDF from the CLSI', function (ctx) {
         ctx.fetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
-          `${ctx.settings.apis.clsi.url}/project/${ctx.projectId}/user/${ctx.user_id}/build/${ctx.build_id}/output/output.zip?compileBackendClass=c4d&clsiserverid=${ctx.clsiServerId}`
+          `${ctx.settings.apis.clsi.url}/project/${ctx.projectId}/user/${ctx.user_id}/build/${ctx.build_id}/output/output.zip?compileBackendClass=premium&clsiserverid=${ctx.clsiServerId}`
         )
       })
     })

@@ -252,8 +252,12 @@ module.exports = {
           ? `http://${process.env.CLSI_LB_IP || process.env.CLSI_LB_HOST}:80`
           : `http://${process.env.DOWNLOAD_HOST || '127.0.0.1'}:8080`,
       backendGroupName: undefined,
-      submissionBackendClass:
-        process.env.CLSI_SUBMISSION_BACKEND_CLASS || 'c3d',
+      submissionCompileBackendClass:
+        process.env.CLSI_SUBMISSION_COMPILE_BACKEND_CLASS || 'free',
+      standardCompileBackendClass:
+        process.env.CLSI_STANDARD_COMPILE_BACKEND_CLASS || 'free',
+      priorityCompileBackendClass:
+        process.env.CLSI_PRIORITY_COMPILE_BACKEND_CLASS || 'premium',
     },
     clsiCache: {
       instances: JSON.parse(process.env.CLSI_CACHE_INSTANCES || '[]'),

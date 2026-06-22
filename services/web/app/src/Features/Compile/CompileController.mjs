@@ -338,7 +338,8 @@ const _CompileController = {
     }
     options.compileGroup =
       req.body?.compileGroup || Settings.defaultFeatures.compileGroup
-    options.compileBackendClass = Settings.apis.clsi.submissionBackendClass
+    options.compileBackendClass =
+      Settings.apis.clsi.submissionCompileBackendClass
     options.timeout =
       req.body?.timeout || Settings.defaultFeatures.compileTimeout
     const { status, outputFiles, clsiServerId, validationProblems } =
