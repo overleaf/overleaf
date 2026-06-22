@@ -142,7 +142,7 @@ module.exports = {
       {
         // Pass application JS/TS files through babel-loader,
         // transpiling to targets defined in browserslist
-        test: /\.([jt]sx?|[cm]js)$/,
+        test: /\.([jt]sx?|[cm][jt]s)$/,
         // Only compile application files and specific dependencies
         // (other npm and vendored dependencies must be in ES5 already)
         exclude: [
