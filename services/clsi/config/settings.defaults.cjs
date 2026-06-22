@@ -203,6 +203,16 @@ if ((process.env.DOCKER_RUNNER || process.env.SANDBOXED_COMPILES) === 'true') {
     }
   }
 
+  if (process.env.NEW_APPARMOR_PROFILE) {
+    try {
+      module.exports.clsi.docker.new_apparmor_profile =
+        process.env.NEW_APPARMOR_PROFILE
+    } catch (error) {
+      console.error(error, 'could not apply new apparmor profile setting')
+      process.exit(1)
+    }
+  }
+
   if (process.env.ALLOWED_IMAGES) {
     try {
       module.exports.clsi.docker.allowedImages =
