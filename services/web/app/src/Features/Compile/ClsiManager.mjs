@@ -618,7 +618,7 @@ async function _makeNewBackendRequest(
     response,
     body: json,
     newCompileBackendClass,
-    newClsiServerId: clsiServerId || newClsiServerId,
+    newClsiServerId: newClsiServerId || clsiServerId,
   }
 }
 

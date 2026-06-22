@@ -86,9 +86,20 @@ describe('ClsiManager', function () {
       ok: true,
       status: 200,
       headers: {
-        raw: sinon.stub().returns({
-          'set-cookie': [`${ctx.clsiCookieKey}=${ctx.newClsiServerId}`],
-        }),
+        raw: sinon
+          .stub()
+          .onFirstCall()
+          .returns({
+            'set-cookie': [`${ctx.clsiCookieKey}=${ctx.newClsiServerId}1`],
+          })
+          .onSecondCall()
+          .returns({
+            'set-cookie': [`${ctx.clsiCookieKey}=${ctx.newClsiServerId}2`],
+          })
+          .onThirdCall()
+          .returns({
+            'set-cookie': [`${ctx.clsiCookieKey}=${ctx.newClsiServerId}3`],
+          }),
       },
     }
 
@@ -417,7 +428,7 @@ describe('ClsiManager', function () {
           ctx.user_id,
           'standard',
           'c3d',
-          ctx.newClsiServerId
+          `${ctx.newClsiServerId}1`
         )
       })
     })
@@ -566,7 +577,7 @@ describe('ClsiManager', function () {
           ctx.user_id,
           'standard',
           'c3d',
-          ctx.newClsiServerId
+          `${ctx.newClsiServerId}1`
         )
       })
     })
@@ -614,7 +625,7 @@ describe('ClsiManager', function () {
 
       it('should emit the caching details and stats/timings', function (ctx) {
         expect(ctx.result.status).to.equal('success')
-        expect(ctx.result.clsiServerId).to.equal(ctx.newClsiServerId)
+        expect(ctx.result.clsiServerId).to.equal(`${ctx.newClsiServerId}1`)
         expect(ctx.result.validationError).to.be.undefined
         expect(ctx.result.stats).to.deep.equal(ctx.stats)
         expect(ctx.result.timings).to.deep.equal(ctx.timings)
@@ -1087,8 +1098,8 @@ describe('ClsiManager', function () {
           status: 'success',
           compileTime: 1337,
           newCompileTime: 1337,
-          clsiServerId: 'newserver',
-          newClsiServerId: 'clsi-server-id',
+          clsiServerId: `${ctx.newClsiServerId}1`,
+          newClsiServerId: `${ctx.newClsiServerId}2`,
           pdfSize: 42,
           newPdfSize: 42,
         })
@@ -1171,8 +1182,8 @@ describe('ClsiManager', function () {
           status: 'success',
           compileTime: 1337,
           newCompileTime: 1337,
-          clsiServerId: 'newserver',
-          newClsiServerId: 'clsi-server-id',
+          clsiServerId: `${ctx.newClsiServerId}1`,
+          newClsiServerId: `${ctx.newClsiServerId}2`,
           pdfSize: 42,
           newPdfSize: 42,
         })
