@@ -1161,6 +1161,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         enablePdfCaching:
           (Settings.enablePdfCaching && options.enablePdfCaching) || false,
         pdfCachingMinChunkSize: options.pdfCachingMinChunkSize,
+        enableCheckpoint: Boolean(options.enableCheckpoint),
         flags,
         metricsMethod: options.compileGroup,
         metricsPath: options.metricsPath,

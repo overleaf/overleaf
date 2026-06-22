@@ -153,13 +153,11 @@ describe('CompileController', function () {
       '../../../../app/src/Features/SplitTests/SplitTestHandler',
       () => ({
         default: {
-          getAssignment: (ctx.getAssignment = sinon.stub().yields(null, {
-            variant: 'default',
-          })),
+          featureFlagEnabled: (ctx.featureFlagEnabled = sinon
+            .stub()
+            .yields(null, false)),
           promises: {
-            getAssignment: sinon.stub().resolves({
-              variant: 'default',
-            }),
+            featureFlagEnabled: sinon.stub().resolves(false),
           },
         },
       })
