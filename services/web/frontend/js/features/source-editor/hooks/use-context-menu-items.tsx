@@ -33,6 +33,7 @@ import {
 } from '../utils/context-menu-analytics'
 import { isCursorOnEmptyLine } from '../utils/is-cursor-on-empty-line'
 import { selectAll } from '@codemirror/commands'
+import { useTrackedChangesActions } from '@/features/review-panel/hooks/use-tracked-changes-actions'
 
 export const useContextMenuItems = () => {
   const view = useCodeMirrorViewContext()
@@ -55,6 +56,8 @@ export const useContextMenuItems = () => {
   const { setUpgradeTrackChangesModal } = useEditorContext()
   const trackingChangesMode = useTrackingChangesMode()
   const isReview = trackingChangesMode === 'review'
+  const { changesInSelection, acceptChangesHandler, rejectChangesHandler } =
+    useTrackedChangesActions()
 
   const closeMenu = useCallback(() => {
     view.dispatch({ effects: closeContextMenuEffect.of(null) })
@@ -173,6 +176,16 @@ export const useContextMenuItems = () => {
     return true
   })
 
+  const handleAcceptChanges = wrapForContextMenu('accept-changes', () => {
+    acceptChangesHandler()
+    return true
+  })
+
+  const handleRejectChanges = wrapForContextMenu('reject-changes', () => {
+    rejectChangesHandler()
+    return true
+  })
+
   // Sync-to-PDF is special: it needs to wait for async completion before closing
   const handleSyncToPdf = useCallback(() => {
     // Switch to split view only when in editor-only mode with non-detached PDF
@@ -263,6 +276,20 @@ export const useContextMenuItems = () => {
         disabled: isCursorOnEmptyLine(state),
         show: permissions.comment,
         shortcut: getShortcut('insert-comment'),
+      },
+      {
+        label: t('accept_selected_changes'),
+        handler: handleAcceptChanges,
+        disabled: false,
+        show: permissions.comment && changesInSelection.length > 0,
+        shortcut: undefined,
+      },
+      {
+        label: t('reject_selected_changes'),
+        handler: handleRejectChanges,
+        disabled: false,
+        show: permissions.comment && changesInSelection.length > 0,
+        shortcut: undefined,
       },
     ].filter(item => item.show),
   }

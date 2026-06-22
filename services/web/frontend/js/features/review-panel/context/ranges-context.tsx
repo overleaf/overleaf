@@ -101,7 +101,9 @@ const buildRangesFromHistoryOT = (currentDocument: DocumentContainer) => {
   )
 }
 
-const RangesActionsContext = createContext<RangesActions | undefined>(undefined)
+export const RangesActionsContext = createContext<RangesActions | undefined>(
+  undefined
+)
 
 export const RangesProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const view = useCodeMirrorViewContext()

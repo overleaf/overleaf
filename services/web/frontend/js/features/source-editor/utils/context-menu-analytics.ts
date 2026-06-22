@@ -13,6 +13,8 @@ export type ContextMenuItemSegmentation =
   | 'suggest-edits'
   | 'back-to-editing'
   | 'comment'
+  | 'accept-changes'
+  | 'reject-changes'
 
 export type ContextMenuAnalyticsEvents = {
   'menu-expand': {

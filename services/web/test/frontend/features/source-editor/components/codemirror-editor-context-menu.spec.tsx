@@ -3,9 +3,11 @@ import {
   EditorProviders,
   makeEditorPropertiesProvider,
   makeProjectProvider,
+  USER_ID,
 } from '../../../helpers/editor-providers'
 import CodeMirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { TestContainer } from '../helpers/test-container'
+import { docId } from '../helpers/mock-doc'
 import { FC } from 'react'
 import { PermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { Permissions } from '@/features/ide-react/types/permissions'
@@ -1322,6 +1324,139 @@ describe('editor context menu', { scrollBehavior: false }, function () {
 
       // The second contextmenu event keeps the custom menu open
       cy.findByRole('menu').should('be.visible')
+    })
+  })
+
+  describe('tracked-change actions', function () {
+    function mountEditorWithChanges() {
+      cy.intercept('POST', `/project/*/doc/${docId}/changes/accept`, {}).as(
+        'acceptChange'
+      )
+
+      const changes = [
+        {
+          metadata: {
+            user_id: USER_ID,
+            ts: new Date('2025-01-01T00:00:00.000Z'),
+          },
+          id: 'inserted-op-id',
+          op: { p: 166, t: 'inserted-op-id', i: 'introduction' },
+        },
+        {
+          metadata: {
+            user_id: USER_ID,
+            ts: new Date('2025-01-01T01:00:00.000Z'),
+          },
+          id: 'deleted-op-id',
+          op: { p: 110, t: 'deleted-op-id', d: 'beautiful ' },
+        },
+      ]
+      const getChanges = cy.stub().as('getChanges').returns([])
+      const removeChangeIds = cy.stub().as('removeChangeIds')
+
+      const scope = mockScope(undefined, {
+        docOptions: {
+          rangesOptions: { changes, getChanges, removeChangeIds },
+        },
+      })
+
+      cy.mount(
+        <TestContainer>
+          <EditorProviders
+            scope={scope}
+            features={{ trackChangesVisible: true }}
+          >
+            <CodeMirrorEditor />
+          </EditorProviders>
+        </TestContainer>
+      )
+    }
+
+    // Select a deletion and an insertion so the bulk-action items appear, then
+    // right-click inside the selection (which preserves it).
+    function openMenuOverChanges() {
+      cy.findByText('\\maketitle').type(
+        '{home}{shift}' + '{downArrow}'.repeat(10),
+        { scrollBehavior: false }
+      )
+      cy.findByText('\\maketitle').rightclick({ scrollBehavior: false })
+    }
+
+    it('shows accept and reject items when the selection covers changes', function () {
+      mountEditorWithChanges()
+      openMenuOverChanges()
+
+      cy.findByRole('menu').within(() => {
+        cy.findByRole('menuitem', { name: 'Accept selected changes' }).should(
+          'be.visible'
+        )
+        cy.findByRole('menuitem', { name: 'Reject selected changes' }).should(
+          'be.visible'
+        )
+      })
+    })
+
+    it('hides accept and reject items when the selection covers no changes', function () {
+      mountEditorWithChanges()
+
+      cy.get('.cm-line').eq(2).rightclick({ scrollBehavior: false })
+
+      cy.findByRole('menu').should('be.visible')
+      cy.findByRole('menu').within(() => {
+        cy.findByRole('menuitem', { name: 'Accept selected changes' }).should(
+          'not.exist'
+        )
+        cy.findByRole('menuitem', { name: 'Reject selected changes' }).should(
+          'not.exist'
+        )
+      })
+    })
+
+    it('accepts the selected changes', function () {
+      mountEditorWithChanges()
+      openMenuOverChanges()
+
+      cy.findByRole('menu').within(() => {
+        cy.findByRole('menuitem', { name: 'Accept selected changes' }).click({
+          scrollBehavior: false,
+        })
+      })
+
+      cy.findByRole('dialog').within(() => {
+        cy.findByText(
+          'Are you sure you want to accept the selected 2 changes?'
+        ).should('exist')
+        cy.findByRole('button', { name: 'OK' }).click({ scrollBehavior: false })
+      })
+
+      cy.wait('@acceptChange')
+      cy.get('@removeChangeIds').should('have.been.calledWith', [
+        'inserted-op-id',
+        'deleted-op-id',
+      ])
+    })
+
+    it('rejects the selected changes', function () {
+      mountEditorWithChanges()
+      openMenuOverChanges()
+
+      cy.findByRole('menu').within(() => {
+        cy.findByRole('menuitem', { name: 'Reject selected changes' }).click({
+          scrollBehavior: false,
+        })
+      })
+
+      cy.findByRole('dialog').within(() => {
+        cy.findByText(
+          'Are you sure you want to reject the selected 2 changes?'
+        ).should('exist')
+        cy.findByRole('button', { name: 'OK' }).click({ scrollBehavior: false })
+      })
+
+      cy.get('@getChanges').should('have.been.calledWith', [
+        'inserted-op-id',
+        'deleted-op-id',
+      ])
     })
   })
 })
