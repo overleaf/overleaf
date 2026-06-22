@@ -3,6 +3,7 @@ import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import OLButtonToolbar from '@/shared/components/ol/ol-button-toolbar'
 import PdfCompileButton from '@/features/pdf-preview/components/pdf-compile-button'
+import PdfCompileTime from '@/features/pdf-preview/components/pdf-compile-time'
 import PdfHybridDownloadButton from '@/features/pdf-preview/components/pdf-hybrid-download-button'
 import { DetachedSynctexControl } from '@/features/pdf-preview/components/detach-synctex-control'
 import SwitchToEditorButton from '@/features/pdf-preview/components/switch-to-editor-button'
@@ -10,6 +11,7 @@ import PdfHybridLogsButton from '@/features/pdf-preview/components/pdf-hybrid-lo
 import PdfPreviewHybridToolbarOrphanRefreshInner from './pdf-preview-hybrid-toolbar-orphan-refresh-inner'
 import PdfPreviewHybridToolbarConnectingInner from './pdf-preview-hybrid-toolbar-connecting-inner'
 import useDetachedOrphanDetection from '../hooks/use-detached-orphan-detection'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function PdfPreviewHybridToolbar() {
   const { t } = useTranslation()
@@ -36,12 +38,15 @@ function PdfPreviewHybridToolbar() {
 
 function PdfPreviewHybridToolbarInner() {
   const { focusMode } = useLayoutContext()
+  const showCompileTimer = useFeatureFlag('compile-with-checkpoint')
+
   return (
     <>
       <div className="toolbar-pdf-left">
         <PdfCompileButton />
         <PdfHybridLogsButton />
         <PdfHybridDownloadButton />
+        {showCompileTimer && <PdfCompileTime />}
       </div>
       <div className="toolbar-pdf-right">
         <div className="toolbar-pdf-controls" id="toolbar-pdf-controls" />

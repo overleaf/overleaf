@@ -376,6 +376,16 @@
   }
 }
 
+.toolbar-pdf-compile-time {
+  color: var(--toolbar-btn-color);
+  font-size: var(--font-size-02);
+  padding: 0 var(--spacing-04);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-02);
+  white-space: nowrap;
+}
+
 .pdfjs-page-number-input {
   color: var(--toolbar-btn-color);
   font-size: var(--font-size-02);

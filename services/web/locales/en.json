@@ -1370,6 +1370,7 @@
   "larger_discounts_for_groups_of_20_plus": "Larger discounts for groups of 20+",
   "last_active": "Last Active",
   "last_active_description": "Last time a project was opened.",
+  "last_compile_duration": "Last compile = __seconds__ s",
   "last_edit": "Last edit",
   "last_logged_in": "Last logged in",
   "last_modified": "Last modified",
