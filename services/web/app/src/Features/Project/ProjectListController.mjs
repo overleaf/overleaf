@@ -539,7 +539,7 @@ async function projectListPage(req, res, next) {
   const aiBlocked =
     Features.hasFeature('saas') && !(await _canUseAIAssist(user))
   const hasAiAssist =
-    Features.hasFeature('saas') && (await _userHasAIAssist(user))
+    Features.hasFeature('saas') && (await _userHasAIAssist(req, res, user))
 
   const splitTests = [
     // Split tests that will be made available to the frontend
@@ -949,16 +949,18 @@ function _hasActiveFilter(filters) {
 }
 
 /**
+ * @param {any} req
+ * @param {any} res
  * @param {any} user
  */
 // todo: quota clean-up: rename function and vars
-async function _userHasAIAssist(user) {
+async function _userHasAIAssist(req, res, user) {
   let hasPremiumAiFeatures
-  const inQuotaSplitTest =
-    await SplitTestHandler.promises.featureFlagEnabledForUser(
-      user._id,
-      'plans-2026-phase-1'
-    )
+  const inQuotaSplitTest = await SplitTestHandler.promises.featureFlagEnabled(
+    req,
+    res,
+    'plans-2026-phase-1'
+  )
   if (inQuotaSplitTest) {
     hasPremiumAiFeatures =
       user.features?.aiUsageQuota === Settings.aiFeatures.unlimitedQuota

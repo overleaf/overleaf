@@ -62,7 +62,7 @@ describe('WorkbenchRateLimiter', function () {
     ctx.SplitTestHandler = {
       promises: {
         getAssignmentForUser: sinon.stub(),
-        featureFlagEnabledForUser: sinon.stub().resolves(true),
+        featureFlagEnabledForMongoUser: sinon.stub().resolves(true),
       },
     }
     ctx.SplitTestHandler.promises.getAssignmentForUser

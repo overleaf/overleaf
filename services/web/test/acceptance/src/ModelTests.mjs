@@ -6,15 +6,16 @@ import Features from '../../../app/src/infrastructure/Features.mjs'
 describe('mongoose', function () {
   describe('User', function () {
     const email = 'wombat@potato.net'
+    const defaultArgs = { analyticsId: '8055c676-bcc7-4e64-a66f-8069f9a0bd92' }
 
     it('allows the creation of a user', async function () {
-      await expect(User.create({ email })).to.be.fulfilled
+      await expect(User.create({ email, ...defaultArgs })).to.be.fulfilled
       await expect(User.findOne({ email }, { _id: 1 })).to.eventually.exist
     })
 
     it('does not allow the creation of multiple users with the same email', async function () {
-      await expect(User.create({ email })).to.be.fulfilled
-      await expect(User.create({ email })).to.be.rejected
+      await expect(User.create({ email, ...defaultArgs })).to.be.fulfilled
+      await expect(User.create({ email, ...defaultArgs })).to.be.rejected
       await expect(User.countDocuments({ email })).to.eventually.equal(1)
     })
 
@@ -38,6 +39,7 @@ describe('mongoose', function () {
               },
             ],
           },
+          ...defaultArgs,
         })
       ).to.be.fulfilled
 
@@ -55,7 +57,10 @@ describe('mongoose', function () {
         this.skip()
       }
 
-      user = await User.create({ email: 'wombat@potato.net' })
+      user = await User.create({
+        email: 'wombat@potato.net',
+        analyticsId: '8055c676-bcc7-4e64-a66f-8069f9a0bd92',
+      })
     })
 
     it('allows the creation of a subscription', async function () {

@@ -17,6 +17,7 @@ import _ from 'lodash'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 import TpdsUpdateSender from '../ThirdPartyDataStore/TpdsUpdateSender.mjs'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import SplitTestUserGetter from '../SplitTests/SplitTestUserGetter.mjs'
 import ClsiCacheManager from '../Compile/ClsiCacheManager.mjs'
 import crypto from 'node:crypto'
 
@@ -271,11 +272,12 @@ async function _createBlankProject(
   const user = await User.findById(ownerId, {
     'ace.spellCheckLanguage': 1,
     _id: 1,
+    ...SplitTestUserGetter.getProjection('history-ranges-support'),
   })
   project.spellCheckLanguage = user.ace.spellCheckLanguage
   const historyRangesSupportAssignment =
-    await SplitTestHandler.promises.getAssignmentForUser(
-      user._id,
+    await SplitTestHandler.promises.getAssignmentForMongoUser(
+      user,
       'history-ranges-support'
     )
   if (historyRangesSupportAssignment.variant === 'enabled') {

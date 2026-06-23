@@ -648,7 +648,11 @@ const _ProjectController = {
         req,
         projectId
       )
-      const imageNames = await ProjectHelper.getAllowedImagesForUser(user)
+      const imageNames = await ProjectHelper.getAllowedImagesForUser(
+        req,
+        res,
+        user
+      )
 
       const privilegeLevel =
         await AuthorizationManager.promises.getPrivilegeLevelForProject(

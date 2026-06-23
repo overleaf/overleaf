@@ -163,7 +163,7 @@ describe('FeaturesUpdater', function () {
 
     ctx.SplitTestHandler = {
       promises: {
-        featureFlagEnabledForUser: sinon.stub().resolves(false),
+        featureFlagEnabledForMongoUser: sinon.stub().resolves(false),
       },
     }
 

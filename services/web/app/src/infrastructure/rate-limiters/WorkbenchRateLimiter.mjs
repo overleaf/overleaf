@@ -1,5 +1,6 @@
 // @ts-check
 import SplitTestHandler from '../../Features/SplitTests/SplitTestHandler.mjs'
+import SplitTestUserGetter from '../../Features/SplitTests/SplitTestUserGetter.mjs'
 import UserGetter from '../../Features/User/UserGetter.mjs'
 import TokenUsageRateLimiter from './TokenUsageRateLimiter.mjs'
 /** @typedef {{usage?: number | null, periodStart?: Date | null}} FeatureUsage */
@@ -29,7 +30,7 @@ class WorkbenchRateLimiter extends TokenUsageRateLimiter {
     const user = await UserGetter.promises.getUser(userId, {
       features: 1,
       writefull: 1,
-      alphaProgram: 1,
+      ...SplitTestUserGetter.getProjection('plans-2026-phase-1'),
     })
 
     if (user?.alphaProgram) {
@@ -39,8 +40,8 @@ class WorkbenchRateLimiter extends TokenUsageRateLimiter {
     // todo: quota clean-up: remove split test
     let hasAddOn
     const inQuotaSplitTest =
-      await SplitTestHandler.promises.featureFlagEnabledForUser(
-        userId,
+      await SplitTestHandler.promises.featureFlagEnabledForMongoUser(
+        user,
         'plans-2026-phase-1'
       )
     if (inQuotaSplitTest) {
