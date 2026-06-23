@@ -4,6 +4,7 @@ import { mockScope } from '../source-editor/helpers/mock-scope'
 import { TestContainer } from '../source-editor/helpers/test-container'
 import { docId } from '../source-editor/helpers/mock-doc'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
+import type { PermissionsLevel } from '@/features/ide-react/types/permissions'
 
 function FloatingMenuToggle() {
   const { setUserSettings } = useUserSettingsContext()
@@ -64,7 +65,9 @@ describe('<EditorFloatingMenu />', function () {
     )
   }
 
-  function mountEditorWithChanges() {
+  function mountEditorWithChanges({
+    permissionsLevel,
+  }: { permissionsLevel?: PermissionsLevel } = {}) {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     window.metaAttributesCache.set('ol-splitTestVariants', {
       'writefull-toolbar-migration': 'enabled',
@@ -100,6 +103,7 @@ describe('<EditorFloatingMenu />', function () {
       docOptions: {
         rangesOptions: { changes, getChanges, removeChangeIds },
       },
+      permissionsLevel,
     })
 
     cy.mount(
@@ -267,6 +271,18 @@ describe('<EditorFloatingMenu />', function () {
         })
       })
       cy.get('.editor-floating-menu').should('exist')
+    })
+  })
+
+  describe('bulk tracked-change actions without write permission', function () {
+    it('hides the accept and reject controls for a reviewer', function () {
+      mountEditorWithChanges({ permissionsLevel: 'review' })
+
+      cy.get('.editor-floating-menu').within(() => {
+        cy.findByLabelText('Add comment').should('exist')
+      })
+      cy.findByLabelText('Accept selected changes').should('not.exist')
+      cy.findByLabelText('Reject selected changes').should('not.exist')
     })
   })
 })

@@ -684,6 +684,69 @@ describe('<ReviewPanel />', function () {
   })
 })
 
+describe('<ReviewPanel /> review tooltip without write permission', function () {
+  beforeEach(function () {
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
+    cy.interceptEvents()
+    cy.intercept('GET', '/project/*/changes/users', [])
+    cy.intercept('GET', '/project/*/threads', {})
+
+    const changes = [
+      {
+        metadata: {
+          user_id: USER_ID,
+          ts: new Date('2025-01-01T00:00:00.000Z'),
+        },
+        id: 'inserted-op-id',
+        op: { p: 166, t: 'inserted-op-id', i: 'introduction' },
+      },
+      {
+        metadata: {
+          user_id: USER_ID,
+          ts: new Date('2025-01-01T01:00:00.000Z'),
+        },
+        id: 'deleted-op-id',
+        op: { p: 110, t: 'deleted-op-id', d: 'beautiful ' },
+      },
+    ]
+
+    const scope = mockScope(undefined, {
+      docOptions: { rangesOptions: { changes } },
+      permissionsLevel: 'review',
+    })
+    const project = mockProject({
+      projectOwner: { _id: USER_ID },
+      projectFeatures: { trackChanges: true, trackChangesVisible: true },
+    })
+
+    cy.mount(
+      <TestContainer className="rp-size-expanded">
+        <EditorProviders
+          scope={scope}
+          providers={{ ProjectProvider: makeProjectProvider(project) }}
+        >
+          <CodeMirrorEditor />
+        </EditorProviders>
+      </TestContainer>
+    )
+
+    cy.get('.cm-content').should('have.css', 'opacity', '1')
+
+    // Select a deletion and an insertion so the tooltip's bulk actions would appear
+    cy.findByText('\\maketitle').type(
+      '{home}{shift}' + '{downArrow}'.repeat(10),
+      { scrollBehavior: false }
+    )
+  })
+
+  it('shows the comment action but hides accept and reject for a reviewer', function () {
+    cy.get('.review-tooltip-menu').should('exist')
+    cy.get('.review-tooltip-add-comment-button').should('exist')
+    cy.findByLabelText('Accept selected changes').should('not.exist')
+    cy.findByLabelText('Reject selected changes').should('not.exist')
+  })
+})
+
 describe('<ReviewPanel /> in mini mode', function () {
   function render({ comments = [], changes = [], threads = {} }: any) {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)

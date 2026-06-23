@@ -4,7 +4,7 @@ import { sleep } from '../../../helpers/sleep'
 export const rootFolderId = '012345678901234567890123'
 export const mockScope = (
   content?: string,
-  { docOptions = {}, permissions = {} }: any = {}
+  { docOptions = {}, permissions = {}, permissionsLevel = 'owner' }: any = {}
 ) => {
   return {
     editor: {
@@ -26,6 +26,6 @@ export const mockScope = (
     toggleTrackChangesForEveryone: cy.stub(),
     refreshResolvedCommentsDropdown: cy.stub(() => sleep(1000)),
     onlineUserCursorHighlights: {},
-    permissionsLevel: 'owner',
+    permissionsLevel,
   }
 }

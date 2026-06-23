@@ -138,6 +138,7 @@ const ReviewTooltipMenuContent = memo<{ onAddComment: () => void }>(
     const view = useCodeMirrorViewContext()
     const state = useCodeMirrorStateContext()
     const { reviewPanelOpen } = useLayoutContext()
+    const permissions = usePermissionsContext()
     const ranges = useRangesContext()
     const { acceptChanges, rejectChanges } = useRangesActionsContext()
     const { showGenericConfirmModal } = useModalsContext()
@@ -208,7 +209,8 @@ const ReviewTooltipMenuContent = memo<{ onAddComment: () => void }>(
       changesInSelection,
     ])
 
-    const showChangesButtons = changesInSelection.length > 0
+    const showChangesButtons =
+      permissions.write && changesInSelection.length > 0
 
     useEffect(() => {
       view.requestMeasure({

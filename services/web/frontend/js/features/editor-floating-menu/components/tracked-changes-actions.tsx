@@ -11,7 +11,7 @@ const TrackedChangesActions: FC = () => {
   const { changesInSelection, acceptChangesHandler, rejectChangesHandler } =
     useTrackedChangesActions()
 
-  if (!permissions.comment || changesInSelection.length === 0) {
+  if (!permissions.write || changesInSelection.length === 0) {
     return null
   }
 
