@@ -26152,6 +26152,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "outdated-dependencies@workspace:tools/dependency-management"
   dependencies:
+    "@overleaf/validation-tools": "workspace:*"
     "@types/is-core-module": "npm:^2.2.2"
     "@types/minimist": "npm:^1.2.5"
     "@types/node": "npm:^24.5.2"
