@@ -152,6 +152,7 @@ const TabHeader = ({ tab, active }: { tab: ErrorLogTab; active: boolean }) => {
       eventKey={tab.key}
       className="error-logs-tab-header"
       active={active}
+      as="button"
     >
       {tab.label}
       <div className="error-logs-tab-count">

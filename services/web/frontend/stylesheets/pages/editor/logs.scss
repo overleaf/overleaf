@@ -33,6 +33,11 @@
   font-size: var(--font-size-02);
   border-bottom: 3px solid transparent;
 
+  &:hover,
+  &:focus {
+    color: var(--content-primary-themed);
+  }
+
   &[aria-selected='true'] {
     color: var(--content-primary-themed);
     border-bottom: 3px solid var(--bg-accent-01);
