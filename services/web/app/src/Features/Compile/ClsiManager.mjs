@@ -150,25 +150,22 @@ function collectMetricsOnBlgFiles(outputFiles) {
   Metrics.count('blg_output_file', nested, 1, { path: 'nested' })
 }
 
-async function sendRequest(projectId, userId, options) {
-  if (options == null) {
-    options = {}
-  }
-  let result = await sendRequestOnce(projectId, userId, options)
+async function sendRequest(project, projectId, userId, options) {
+  let result = await sendRequestOnce(project, projectId, userId, options)
   if (result.status === 'missing-updates') {
     // try again with updated baseline
-    result = await sendRequestOnce(projectId, userId, {
+    result = await sendRequestOnce(project, projectId, userId, {
       ...options,
       baseHistoryVersion: result.baseHistoryVersion,
     })
   } else if (result.status === 'conflict') {
     // Try again, with a full compile
-    result = await sendRequestOnce(projectId, userId, {
+    result = await sendRequestOnce(null, projectId, userId, {
       ...options,
       syncType: 'full',
     })
   } else if (result.status === 'unavailable') {
-    result = await sendRequestOnce(projectId, userId, {
+    result = await sendRequestOnce(null, projectId, userId, {
       ...options,
       syncType: 'full',
       forceNewClsiServer: true,
@@ -177,10 +174,10 @@ async function sendRequest(projectId, userId, options) {
   return result
 }
 
-async function sendRequestOnce(projectId, userId, options) {
+async function sendRequestOnce(project, projectId, userId, options) {
   let req
   try {
-    req = await _buildRequest(projectId, userId, options)
+    req = await _buildRequest(project, projectId, userId, options)
   } catch (err) {
     if (err.message === 'no main file specified') {
       return {
@@ -735,13 +732,15 @@ function _parseOutputFiles(projectId, rawOutputFiles = []) {
   return outputFiles
 }
 
-async function _buildRequest(projectId, userId, options) {
-  const project = await ProjectGetter.promises.getProject(projectId, {
-    compiler: 1,
-    imageName: 1,
-    'overleaf.history.id': 1,
-    ...(options.compileFromHistory ? {} : { rootDoc_id: 1, rootFolder: 1 }),
-  })
+async function _buildRequest(project, projectId, userId, options) {
+  if (project === null) {
+    project = await ProjectGetter.promises.getProject(projectId, {
+      compiler: 1,
+      imageName: 1,
+      'overleaf.history.id': 1,
+      ...(options.compileFromHistory ? {} : { rootDoc_id: 1, rootFolder: 1 }),
+    })
+  }
   if (project == null) {
     throw new Errors.NotFoundError(`project does not exist: ${projectId}`)
   }
@@ -770,7 +769,7 @@ async function _buildRequest(projectId, userId, options) {
         'failed to compose history-full request'
       )
       // fall back to old compile mode
-      return await _buildRequest(projectId, userId, {
+      return await _buildRequest(null, projectId, userId, {
         ...options,
         compileFromHistory: false,
       })
@@ -791,7 +790,7 @@ async function _buildRequest(projectId, userId, options) {
         'failed to compose history-incremental request'
       )
       // fall back to old compile mode
-      return await _buildRequest(projectId, userId, {
+      return await _buildRequest(null, projectId, userId, {
         ...options,
         compileFromHistory: false,
       })
@@ -1175,7 +1174,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
 }
 
 async function buildDocumentConversionRequest(projectId, userId, options) {
-  return await _buildRequest(projectId, userId, {
+  return await _buildRequest(null, projectId, userId, {
     ...options,
     // Use the history snapshot as populated on clsi-cache.
     populateClsiCache: true,
@@ -1186,7 +1185,7 @@ async function buildDocumentConversionRequest(projectId, userId, options) {
 
 async function wordCount(projectId, userId, file, limits, clsiserverid) {
   const { compileBackendClass, compileGroup } = limits
-  const req = await _buildRequest(projectId, userId, limits)
+  const req = await _buildRequest(null, projectId, userId, limits)
   const filename = file || req.compile.rootResourcePath
   const url = _getCompilerUrl(
     compileBackendClass,

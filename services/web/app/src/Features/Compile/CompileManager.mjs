@@ -7,8 +7,8 @@ import UserGetter from '../User/UserGetter.mjs'
 import ClsiManager from './ClsiManager.mjs'
 import Metrics from '@overleaf/metrics'
 import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
-import UserAnalyticsDataCache from '../Analytics/UserAnalyticsDataCache.mjs'
 import { callbackify, callbackifyMultiResult } from '@overleaf/promise-utils'
+import Errors from '../Errors/Errors.js'
 let CompileManager
 const rclient = RedisWrapper.client('clsi_recently_compiled')
 
@@ -63,8 +63,23 @@ async function compile(projectId, userId, options = {}) {
     }
   }
 
-  const limits =
-    await CompileManager.promises.getProjectCompileLimits(projectId)
+  // Generate the buildId ahead of fetching the project content from redis/mongo so that the buildId's timestamp is before any lastUpdated date.
+  options.buildId = generateBuildId()
+
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    // _getProjectCompileLimits
+    owner_ref: 1,
+    fromV1TemplateId: 1,
+    // _build_request
+    compiler: 1,
+    imageName: 1,
+    'overleaf.history.id': 1,
+    ...(options.compileFromHistory ? {} : { rootDoc_id: 1, rootFolder: 1 }),
+  })
+  if (project == null) {
+    throw new Errors.NotFoundError(`project does not exist: ${projectId}`)
+  }
+  const limits = await _getProjectCompileLimits(project)
   for (const key in limits) {
     const value = limits[key]
     options[key] = value
@@ -82,9 +97,6 @@ async function compile(projectId, userId, options = {}) {
     return { message: 'autocompile-backoff', outputFiles: [] }
   }
 
-  // Generate the buildId ahead of fetching the project content from redis/mongo so that the buildId's timestamp is before any lastUpdated date.
-  options.buildId = generateBuildId()
-
   // only pass userId down to clsi if this is a per-user compile
   const compileAsUser = Settings.disablePerUserCompiles ? undefined : userId
   const {
@@ -99,7 +111,12 @@ async function compile(projectId, userId, options = {}) {
     clsiCacheShard,
     baseHistoryVersion,
     instanceType,
-  } = await ClsiManager.promises.sendRequest(projectId, compileAsUser, options)
+  } = await ClsiManager.promises.sendRequest(
+    project,
+    projectId,
+    compileAsUser,
+    options
+  )
 
   return {
     status,
@@ -153,11 +170,6 @@ async function _getUserCompileLimits(userId) {
     ownerFeatures.compileGroup = 'alpha'
   }
 
-  const analyticsId = await UserAnalyticsDataCache.getAnalyticsId(
-    owner._id,
-    '_getUserCompileLimits'
-  )
-
   const compileGroup =
     ownerFeatures.compileGroup || Settings.defaultFeatures.compileGroup
   const limits = {
@@ -168,7 +180,7 @@ async function _getUserCompileLimits(userId) {
       compileGroup === 'standard'
         ? Settings.apis.clsi.standardCompileBackendClass
         : Settings.apis.clsi.priorityCompileBackendClass,
-    ownerAnalyticsId: analyticsId,
+    ownerAnalyticsId: owner.analyticsId,
   }
 
   return limits

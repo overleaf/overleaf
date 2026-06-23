@@ -332,6 +332,7 @@ describe('ClsiManager', function () {
         ctx.responseBody.compile.buildId = buildId
         ctx.timeout = 100
         ctx.result = await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           {
@@ -435,6 +436,87 @@ describe('ClsiManager', function () {
       })
     })
 
+    describe('with the project prefetched', function () {
+      const buildId = '18fbe9e7564-30dcb2f71250c690'
+
+      beforeEach(async function (ctx) {
+        ctx.outputFiles = [
+          {
+            url: `/project/${ctx.project_id}/user/${ctx.user_id}/build/${buildId}/output/output.pdf`,
+            path: 'output.pdf',
+            type: 'pdf',
+            build: buildId,
+          },
+          {
+            url: `/project/${ctx.project_id}/user/${ctx.user_id}/build/${buildId}/output/output.log`,
+            path: 'output.log',
+            type: 'log',
+            build: buildId,
+          },
+        ]
+        ctx.responseBody.compile.outputFiles = ctx.outputFiles.map(
+          outputFile => ({
+            ...outputFile,
+            url: `http://${CLSI_HOST}${outputFile.url}`,
+          })
+        )
+        ctx.responseBody.compile.buildId = buildId
+        ctx.timeout = 100
+        ctx.result = await ctx.ClsiManager.promises.sendRequest(
+          ctx.project,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            compileBackendClass: 'free',
+            compileGroup: 'standard',
+            timeout: ctx.timeout,
+          }
+        )
+      })
+
+      it('should send the request to the CLSI', function (ctx) {
+        ctx.FetchUtils.fetchStringWithResponse.should.have.been.calledWith(
+          sinon.match(
+            url =>
+              url.host === CLSI_HOST &&
+              url.pathname ===
+                `/project/${ctx.project._id}/user/${ctx.user_id}/compile` &&
+              url.searchParams.get('compileBackendClass') === 'free' &&
+              url.searchParams.get('compileGroup') === 'standard'
+          ),
+          {
+            method: 'POST',
+            json: sinon.match({
+              compile: {
+                options: {
+                  compiler: ctx.project.compiler,
+                  imageName: ctx.project.imageName,
+                  timeout: ctx.timeout,
+                  draft: false,
+                  compileGroup: 'standard',
+                  metricsMethod: 'standard',
+                  stopOnFirstError: false,
+                  syncType: undefined,
+                },
+                rootResourcePath: 'main.tex',
+                resources: _makeResources(ctx.project, ctx.docs, ctx.files),
+              },
+            }),
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+              Cookie: `${ctx.clsiCookieKey}=${ctx.clsiServerId}`,
+            },
+            signal: sinon.match.instanceOf(AbortSignal),
+          }
+        )
+      })
+
+      it('should get the project with the required fields', function (ctx) {
+        ctx.ProjectGetter.promises.getProject.should.not.have.been.called
+      })
+    })
+
     describe('with compile from history fallback to incremental', function () {
       const buildId = '18fbe9e7564-30dcb2f71250c690'
 
@@ -470,6 +552,7 @@ describe('ClsiManager', function () {
           'mock-doc-id-1': 'main.tex',
         })
         ctx.result = await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           {
@@ -619,6 +702,7 @@ describe('ClsiManager', function () {
         ctx.responseBody.compile.stats = ctx.stats
         ctx.responseBody.compile.timings = ctx.timings
         ctx.result = await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           { compileBackendClass: 'free', compileGroup: 'standard' }
@@ -651,6 +735,7 @@ describe('ClsiManager', function () {
           'mock-doc-id-1': 'main.tex',
         })
         ctx.result = await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           {
@@ -762,6 +847,7 @@ describe('ClsiManager', function () {
           'mock-doc-id-2': '/chapters/chapter1.tex',
         })
         await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           {
@@ -785,6 +871,7 @@ describe('ClsiManager', function () {
     describe('when root doc override is valid', function () {
       beforeEach(async function (ctx) {
         await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           { rootDoc_id: 'mock-doc-id-2' }
@@ -804,6 +891,7 @@ describe('ClsiManager', function () {
     describe('when root doc override is invalid', function () {
       beforeEach(async function (ctx) {
         await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           { rootDoc_id: 'invalid-id' }
@@ -824,6 +912,7 @@ describe('ClsiManager', function () {
       beforeEach(async function (ctx) {
         ctx.project.compiler = 'context'
         await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           {}
@@ -844,6 +933,7 @@ describe('ClsiManager', function () {
       beforeEach(async function (ctx) {
         ctx.project.rootDoc_id = 'not-valid'
         await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           {}
@@ -877,6 +967,7 @@ describe('ClsiManager', function () {
         }
         ctx.ProjectEntityHandler.promises.getAllDocs.resolves(ctx.docs)
         ctx.result = await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           {}
@@ -900,6 +991,7 @@ describe('ClsiManager', function () {
         }
         ctx.ProjectEntityHandler.promises.getAllDocs.resolves(ctx.docs)
         await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           {}
@@ -919,6 +1011,7 @@ describe('ClsiManager', function () {
     describe('with the draft option', function () {
       beforeEach(async function (ctx) {
         await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           {
@@ -942,6 +1035,7 @@ describe('ClsiManager', function () {
       beforeEach(async function (ctx) {
         ctx.responseBody.compile.status = 'failure'
         ctx.result = await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           {}
@@ -970,6 +1064,7 @@ describe('ClsiManager', function () {
             response: ctx.response,
           })
         ctx.result = await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           {}
@@ -1006,6 +1101,7 @@ describe('ClsiManager', function () {
           response: ctx.response,
         })
         ctx.result = await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           { compileBackendClass: 'free' }
@@ -1050,7 +1146,12 @@ describe('ClsiManager', function () {
 
       it('should throw an error', async function (ctx) {
         await expect(
-          ctx.ClsiManager.promises.sendRequest(ctx.project._id, ctx.user_id, {})
+          ctx.ClsiManager.promises.sendRequest(
+            null,
+            ctx.project._id,
+            ctx.user_id,
+            {}
+          )
         ).to.be.rejected
       })
     })
@@ -1059,6 +1160,7 @@ describe('ClsiManager', function () {
       beforeEach(async function (ctx) {
         ctx.Settings.apis.clsi_new.url = 'https://compiles.somewhere.test'
         await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           {
@@ -1113,6 +1215,7 @@ describe('ClsiManager', function () {
         ctx.Settings.apis.clsi_new.url = 'https://compiles.somewhere.test'
         ctx.Settings.apis.clsi_new.doubleCompileFree.sample = 0
         await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           {
@@ -1143,6 +1246,7 @@ describe('ClsiManager', function () {
       beforeEach(async function (ctx) {
         ctx.Settings.apis.clsi_new.url = 'https://compiles.somewhere.test'
         await ctx.ClsiManager.promises.sendRequest(
+          null,
           ctx.project._id,
           ctx.user_id,
           {

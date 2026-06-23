@@ -1,5 +1,6 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
+import _ from 'lodash'
 
 const MODULE_PATH = '../../../../app/src/Features/Compile/CompileManager.mjs'
 
@@ -14,6 +15,45 @@ describe('CompileManager', function () {
     ctx.Metrics = {
       Timer: sinon.stub().returns(ctx.timer),
       inc: sinon.stub(),
+    }
+
+    ctx.project = {
+      _id: 'project-id',
+      owner_ref: 'owner-id',
+      compiler: 'latex',
+      rootDoc_id: 'mock-doc-id-1',
+      imageName: 'mock-image-name',
+      overleaf: { history: { id: 42 } },
+      fromV1TemplateId: 1337,
+      rootFolder: [
+        {
+          docs: [],
+          files: [],
+          folders: [],
+        },
+      ],
+    }
+
+    ctx.user = {
+      _id: 'owner-id',
+      features: { compileTimeout: 42, compileGroup: 'standard' },
+      analyticsId: 'abc',
+    }
+
+    ctx.ProjectGetter = {
+      promises: {
+        getProject: sinon.stub().callsFake((projectId, projection) => {
+          const result = { _id: ctx.project._id }
+          for (const [field, v] of Object.entries(projection)) {
+            if (v) {
+              _.set(result, field, _.get(ctx.project, field))
+            } else {
+              _.unset(result, field)
+            }
+          }
+          return result
+        }),
+      },
     }
 
     vi.doMock('@overleaf/settings', () => ({
@@ -49,11 +89,15 @@ describe('CompileManager', function () {
     )
 
     vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
-      default: (ctx.ProjectGetter = { promises: {} }),
+      default: ctx.ProjectGetter,
     }))
 
     vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
-      default: (ctx.UserGetter = { promises: {} }),
+      default: (ctx.UserGetter = {
+        promises: {
+          getUser: sinon.stub().resolves(ctx.user),
+        },
+      }),
     }))
 
     vi.doMock('../../../../app/src/Features/Compile/ClsiManager', () => ({
@@ -105,9 +149,6 @@ describe('CompileManager', function () {
           rootDocId: 'mock-root-doc-id-123',
           rootResourcePath: '/main.tex',
         })
-      ctx.CompileManager.promises.getProjectCompileLimits = sinon
-        .stub()
-        .resolves(ctx.limits)
       ctx.ClsiManager.promises.sendRequest = sinon.stub().resolves({
         status: (ctx.status = 'mock-status'),
         outputFiles: (ctx.outputFiles = []),
@@ -122,17 +163,6 @@ describe('CompileManager', function () {
           isAutoCompile,
           compileGroup
         ) => true
-        ctx.ProjectGetter.promises.getProject = sinon
-          .stub()
-          .resolves(
-            (ctx.project = { owner_ref: (ctx.owner_id = 'owner-id-123') })
-          )
-        ctx.UserGetter.promises.getUser = sinon.stub().resolves(
-          (ctx.user = {
-            features: { compileTimeout: '20s', compileGroup: 'standard' },
-            analyticsId: 'abc',
-          })
-        )
         result = await ctx.CompileManager.promises.compile(
           ctx.project_id,
           ctx.user_id,
@@ -153,13 +183,23 @@ describe('CompileManager', function () {
       })
 
       it('should get the project compile limits', function (ctx) {
-        ctx.CompileManager.promises.getProjectCompileLimits
-          .calledWith(ctx.project_id)
+        ctx.UserGetter.promises.getUser
+          .calledWith(ctx.project.owner_ref)
           .should.equal(true)
       })
 
       it('should run the compile with the compile limits', function (ctx) {
         ctx.ClsiManager.promises.sendRequest.should.have.been.calledWith(
+          {
+            _id: 'project-id',
+            compiler: 'latex',
+            fromV1TemplateId: 1337,
+            imageName: 'mock-image-name',
+            overleaf: { history: { id: 42 } },
+            owner_ref: 'owner-id',
+            rootDoc_id: 'mock-doc-id-1',
+            rootFolder: [{ docs: [], files: [], folders: [] }],
+          },
           ctx.project_id,
           ctx.user_id,
           {
@@ -168,6 +208,8 @@ describe('CompileManager', function () {
             buildId: sinon.match(/[a-f0-9]+-[a-f0-9]+/),
             rootResourcePath: 'main.tex',
             rootDoc_id: 'mock-root-doc-id-123',
+            compileBackendClass: 'free',
+            ownerAnalyticsId: 'abc',
           }
         )
       })
