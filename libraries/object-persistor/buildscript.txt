@@ -5,7 +5,6 @@ object-persistor
 --esmock-loader=False
 --is-library=True
 --node-version=24.14.1
---package-name=@overleaf/object-persistor
 --pipeline-owner=32
 --public-repo=False
 --tsconfig-no-implicit-any=True

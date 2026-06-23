@@ -196,6 +196,7 @@
   },
   "workspaces": [
     "jobs/mirror-documentation",
+    "jobs/wiki-algolia",
     "libraries/*",
     "server-ce/test",
     "services/analytics",

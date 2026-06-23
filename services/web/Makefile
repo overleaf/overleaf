@@ -550,6 +550,10 @@ else
 	$(RUN_LINTING) lint
 endif
 
+lint_fix: lint_eslint_fix
+lint_eslint_fix:
+	$(RUN_LINTING) lint:fix
+
 lint: lint_stylelint
 lint_stylelint:
 ifeq ($(CI),true)
@@ -559,6 +563,7 @@ else
 	$(RUN_LINTING) lint:styles
 endif
 
+lint_fix: lint_stylelint_fix
 lint_stylelint_fix:
 	$(RUN_LINTING) lint:styles:fix
 
