@@ -107,6 +107,7 @@
     "http-status": "1.5.0",
     "knex": "2.4.0",
     "utf-8-validate": "5.0.8",
+    "ws@npm:^8": "8.21.0",
     "samlp": "7.0.2",
     "compression": "1.7.4",
     "cookie-parser": "1.4.6",
