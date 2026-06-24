@@ -2116,7 +2116,7 @@
   "remove": "Remove",
   "remove_access": "Remove access",
   "remove_domain": "Remove domain",
-  "remove_domain_success": "Domain removed.",
+  "remove_domain_success": "Domain __domain__ removed.",
   "remove_domain_verification": "Remove __domain__?",
   "remove_domain_verification_explanation": "Removing this domain means users with an email address at this domain will no longer be prompted to join your group. To re-enable it, you’ll need to verify the domain again and contact our support team.",
   "remove_domain_verification_type_to_confirm": "Type <bold>__domain__</bold> to confirm",
