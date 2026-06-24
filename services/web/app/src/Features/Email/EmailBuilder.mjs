@@ -1008,6 +1008,51 @@ templates.taxExemptCertificateRequired = NoCTAEmailTemplate({
   },
 })
 
+function taxIdInvalidTemplate({ noun, descriptor }) {
+  return ctaTemplate({
+    subject() {
+      return `Action required: Update your ${noun} on ${settings.appName}`
+    },
+    title() {
+      return `Action required: Update your ${noun}`
+    },
+    greeting() {
+      return 'Hi,'
+    },
+    message() {
+      return [
+        `We're writing to let you know that the ${descriptor} you entered did not validate successfully.`,
+        `Please update your ${noun} on your billing information page:`,
+      ]
+    },
+    secondaryMessage() {
+      return [
+        `If you do not update your ${noun}, your next invoice may be subject to additional taxes.`,
+        'If you require a new invoice, please let us know by replying to this email.',
+      ]
+    },
+    ctaText() {
+      return `Update ${noun}`
+    },
+    ctaURL() {
+      return `${settings.siteUrl}/user/subscription`
+    },
+    footerMessage(opts) {
+      return `Our reference: ${opts.stripeCustomerId}`
+    },
+  })
+}
+
+templates.taxIdInvalidVat = taxIdInvalidTemplate({
+  noun: 'VAT number',
+  descriptor: 'VAT number',
+})
+
+templates.taxIdInvalidNonVat = taxIdInvalidTemplate({
+  noun: 'tax ID',
+  descriptor: 'tax identifier',
+})
+
 templates.groupMemberLimitWarning = ctaTemplate({
   subject(opts) {
     return `Action needed: Your Overleaf group is nearly out of licenses`

@@ -145,6 +145,18 @@ export interface CustomerUpdatedWebhookEvent extends Stripe.EventBase {
   }
 }
 
+export interface CustomerTaxIdUpdatedWebhookEvent extends Stripe.EventBase {
+  type: 'customer.tax_id.updated'
+  data: {
+    object: Stripe.TaxId
+    previous_attributes?: {
+      verification?: {
+        status?: Stripe.TaxId.Verification.Status
+      }
+    }
+  }
+}
+
 export type MandateUpdatedWebhookEvent = Stripe.MandateUpdatedEvent
 
 export type CustomerSubscriptionWebhookEvent =
@@ -162,4 +174,5 @@ export type WebhookEvent =
   | InvoiceOverdueWebhookEvent
   | CustomerCreatedWebhookEvent
   | CustomerUpdatedWebhookEvent
+  | CustomerTaxIdUpdatedWebhookEvent
   | MandateUpdatedWebhookEvent

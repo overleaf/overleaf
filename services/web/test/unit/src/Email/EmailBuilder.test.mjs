@@ -900,6 +900,91 @@ describe('EmailBuilder', function () {
         })
       })
 
+      describe('taxIdInvalidVat', function () {
+        beforeEach(function (ctx) {
+          ctx.emailAddress = 'customer@example.com'
+          ctx.opts = {
+            to: ctx.emailAddress,
+            stripeCustomerId: 'cus_123456789',
+          }
+          ctx.email = ctx.EmailBuilder.buildEmail('taxIdInvalidVat', ctx.opts)
+          ctx.dom = cheerio.load(ctx.email.html)
+        })
+
+        it('should build the email', function (ctx) {
+          expect(ctx.email.html).to.exist
+          expect(ctx.email.text).to.exist
+        })
+
+        describe('HTML email', function () {
+          it('should include the Stripe customer ID', function (ctx) {
+            expect(ctx.email.html).to.contain(ctx.opts.stripeCustomerId)
+          })
+
+          it('should refer to the VAT number', function (ctx) {
+            expect(ctx.email.html).to.contain('VAT number')
+          })
+
+          it('should link to the subscription page', function (ctx) {
+            expect(ctx.dom('a').attr('href')).to.contain('/user/subscription')
+          })
+        })
+
+        describe('plain text email', function () {
+          it('should include the Stripe customer ID', function (ctx) {
+            expect(ctx.email.text).to.contain(ctx.opts.stripeCustomerId)
+          })
+
+          it('should refer to the VAT number', function (ctx) {
+            expect(ctx.email.text).to.contain('VAT number')
+          })
+        })
+      })
+
+      describe('taxIdInvalidNonVat', function () {
+        beforeEach(function (ctx) {
+          ctx.emailAddress = 'customer@example.com'
+          ctx.opts = {
+            to: ctx.emailAddress,
+            stripeCustomerId: 'cus_123456789',
+          }
+          ctx.email = ctx.EmailBuilder.buildEmail(
+            'taxIdInvalidNonVat',
+            ctx.opts
+          )
+          ctx.dom = cheerio.load(ctx.email.html)
+        })
+
+        it('should build the email', function (ctx) {
+          expect(ctx.email.html).to.exist
+          expect(ctx.email.text).to.exist
+        })
+
+        describe('HTML email', function () {
+          it('should include the Stripe customer ID', function (ctx) {
+            expect(ctx.email.html).to.contain(ctx.opts.stripeCustomerId)
+          })
+
+          it('should refer to the tax ID', function (ctx) {
+            expect(ctx.email.html).to.contain('tax ID')
+          })
+
+          it('should link to the subscription page', function (ctx) {
+            expect(ctx.dom('a').attr('href')).to.contain('/user/subscription')
+          })
+        })
+
+        describe('plain text email', function () {
+          it('should include the Stripe customer ID', function (ctx) {
+            expect(ctx.email.text).to.contain(ctx.opts.stripeCustomerId)
+          })
+
+          it('should refer to the tax ID', function (ctx) {
+            expect(ctx.email.text).to.contain('tax ID')
+          })
+        })
+      })
+
       describe('groupMemberLimitWarning', function () {
         beforeEach(function (ctx) {
           ctx.emailAddress = 'example@overleaf.com'
