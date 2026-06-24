@@ -122,8 +122,6 @@ function AddCollaboratorsSelect({
         continue
       }
 
-      hasInvited = true
-
       let data
 
       try {
@@ -196,17 +194,31 @@ function AddCollaboratorsSelect({
           setInFlight(false)
         }
       } else if (data.invite) {
+        hasInvited = true
         updateProject({
           invites: invites?.concat(data.invite) || [data.invite],
         })
       } else if (data.users) {
+        hasInvited = true
         updateProject({
           members: members?.concat(data.users) || data.users,
         })
       } else if (data.user) {
+        hasInvited = true
         updateProject({
           members: members?.concat(data.user) || [data.user],
         })
+      } else if (!('invite' in data)) {
+        // a successful resend returns an empty body (no `invite` field)
+        hasInvited = true
+      } else {
+        hasError = true
+        setError('generic_something_went_wrong')
+        if (isSharingUpdatesEnabled) {
+          setIsSubmitting(false)
+        } else {
+          setInFlight(false)
+        }
       }
 
       // wait for a short time, so canAddCollaborators has time to update with new collaborator information

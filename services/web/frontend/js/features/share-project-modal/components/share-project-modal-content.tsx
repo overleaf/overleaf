@@ -146,7 +146,7 @@ function ShareProjectModalContentInner({
               {successActionMessage && (
                 <div className="ms-auto px-3 align-self-center">
                   <div
-                    className="d-flex gap-3 align-items-center"
+                    className="d-flex gap-2 align-items-center"
                     role="status"
                     aria-live="polite"
                   >
