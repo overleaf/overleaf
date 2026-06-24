@@ -25,7 +25,7 @@
   align-items: flex-start;
   flex-direction: row;
   gap: var(--spacing-02);
-  color: var(--neutral-90);
+  color: var(--content-primary);
   padding: var(--spacing-02);
   border-radius: var(--border-radius-base);
   font-size: var(--font-size-02);
@@ -33,7 +33,19 @@
   text-decoration: none;
 
   &:visited {
-    color: var(--neutral-90);
+    color: var(--content-primary);
+  }
+
+  &.ide-settings-tab-link-button:hover:not(.active),
+  &.ide-settings-tab-link-button:focus:not(.active) {
+    background-color: var(--bg-light-secondary);
+    color: var(--content-primary);
+  }
+
+  &.ide-settings-tab-link-anchor:hover,
+  &.ide-settings-tab-link-anchor:focus {
+    color: var(--link-ui-hover);
+    background-color: var(--bg-light-secondary);
   }
 
   &.active {
