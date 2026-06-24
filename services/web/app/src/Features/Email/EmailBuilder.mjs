@@ -1115,6 +1115,35 @@ templates.groupDomainCapturedByGroupChanged = ctaTemplate({
   },
 })
 
+templates.domainVerifiedForGroup = NoCTAEmailTemplate({
+  subject(opts) {
+    if (opts.capturedByGroup) {
+      return `Your domain is verified`
+    } else {
+      return 'Your domain is verified — ready to capture?'
+    }
+  },
+  message(opts, isPlainText) {
+    const message = [
+      `We've verified <b>${_.escape(opts.domain)}</b> for your Overleaf group.`,
+    ]
+
+    if (opts.capturedByGroup) {
+      message.push(`Your group will continue capturing users with this domain.`)
+    } else {
+      message.push(
+        `To complete the capture, reply to this email and we'll take it from there.`,
+        `Once captured, existing Overleaf users with a <b>${_.escape(opts.domain)}</b> address will be invited to join your group. Until they accept, they won't be able to access Overleaf. New users who sign up with <b>${_.escape(opts.domain)}</b> will be added to your group automatically.`,
+        `You'll receive a confirmation email once the capture is active.`
+      )
+    }
+
+    return message.map(m => {
+      return EmailMessageHelper.cleanHTML(m, isPlainText)
+    })
+  },
+})
+
 function _formatUserNameAndEmail(user, placeholder) {
   if (user.first_name && user.last_name) {
     const fullName = `${user.first_name} ${user.last_name}`
