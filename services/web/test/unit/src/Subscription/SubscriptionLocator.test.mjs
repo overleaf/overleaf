@@ -48,6 +48,12 @@ describe('Subscription Locator Tests', function () {
       SSOConfig: ctx.SSOConfig,
     }))
 
+    ctx.isProfessionalGroupPlan = sinon.stub()
+    vi.doMock('../../../../app/src/Features/Subscription/PlansHelper', () => ({
+      isProfessionalGroupPlan: subscription =>
+        ctx.isProfessionalGroupPlan(subscription),
+    }))
+
     ctx.SubscriptionLocator = (await import(modulePath)).default
   })
 
@@ -191,6 +197,60 @@ describe('Subscription Locator Tests', function () {
           ctx.user._id
         )
       expect(subscriptionStatus).to.deep.equal({ personal: true, group: true })
+    })
+  })
+
+  describe('getUserActiveProfessionalGroupSubscriptions', function () {
+    beforeEach(function (ctx) {
+      ctx.standardSubscription = {
+        _id: 'standard-sub',
+        groupPlan: true,
+        planCode: 'group_standard',
+      }
+      ctx.professionalSubscription = {
+        _id: 'professional-sub',
+        groupPlan: true,
+        planCode: 'group_professional',
+      }
+      ctx.Subscription.find.returns({
+        exec: sinon
+          .stub()
+          .resolves([ctx.standardSubscription, ctx.professionalSubscription]),
+      })
+      ctx.isProfessionalGroupPlan.callsFake(
+        subscription => subscription === ctx.professionalSubscription
+      )
+    })
+
+    it('returns only the professional group subscriptions', async function (ctx) {
+      const result =
+        await ctx.SubscriptionLocator.promises.getUserActiveProfessionalGroupSubscriptions(
+          ctx.user._id
+        )
+      expect(result).to.deep.equal([ctx.professionalSubscription])
+    })
+
+    it('always requests `planCode` and `groupPlan` so professional status can be determined', async function (ctx) {
+      await ctx.SubscriptionLocator.promises.getUserActiveProfessionalGroupSubscriptions(
+        ctx.user._id,
+        { _id: 1, teamName: 1 }
+      )
+      const projection = ctx.Subscription.find.lastCall.args[1]
+      expect(projection).to.include({
+        _id: 1,
+        teamName: 1,
+        planCode: 1,
+        groupPlan: 1,
+      })
+    })
+
+    it('returns an empty list without querying when no userId is provided', async function (ctx) {
+      const result =
+        await ctx.SubscriptionLocator.promises.getUserActiveProfessionalGroupSubscriptions(
+          undefined
+        )
+      expect(result).to.deep.equal([])
+      expect(ctx.Subscription.find.called).to.equal(false)
     })
   })
 })

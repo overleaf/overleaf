@@ -1102,7 +1102,7 @@ describe('<ShareProjectModal/>', function () {
         user: {
           id: USER_ID,
           email: USER_EMAIL,
-          activeGroupSubscriptions: [{ _id: 'sub-123' }],
+          activeProfessionalGroupSubscriptions: [{ _id: 'sub-123' }],
         },
       })
 

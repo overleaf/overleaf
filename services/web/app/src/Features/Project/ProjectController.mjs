@@ -574,19 +574,22 @@ const _ProjectController = {
                 )
               ).isMember)()
           : false,
-        activeGroupSubscriptions:
-          SubscriptionLocator.promises.getUserActiveGroupSubscriptions(userId, {
-            _id: 1,
-            teamName: 1,
-            sharingPermissions: 1,
-          }),
+        activeProfessionalGroupSubscriptions:
+          SubscriptionLocator.promises.getUserActiveProfessionalGroupSubscriptions(
+            userId,
+            {
+              _id: 1,
+              teamName: 1,
+              sharingPermissions: 1,
+            }
+          ),
       })
 
       const {
         project,
         userValues,
         userIsMemberOfGroupSubscription,
-        activeGroupSubscriptions,
+        activeProfessionalGroupSubscriptions,
       } = responses
 
       await Promise.all([
@@ -976,7 +979,7 @@ const _ProjectController = {
           ),
           isMemberOfGroupSubscription: userIsMemberOfGroupSubscription,
           hasInstitutionLicence: userHasInstitutionLicence,
-          activeGroupSubscriptions,
+          activeProfessionalGroupSubscriptions,
         },
         initialLoadingScreenTheme,
         userSettings,

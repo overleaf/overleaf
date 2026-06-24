@@ -71,7 +71,7 @@ describe('ProjectController', function () {
     ctx.SubscriptionLocator = {
       promises: {
         getUsersSubscription: sinon.stub().resolves(),
-        getUserActiveGroupSubscriptions: sinon.stub().resolves(),
+        getUserActiveProfessionalGroupSubscriptions: sinon.stub().resolves(),
       },
     }
     ctx.SubscriptionController = {

@@ -203,21 +203,18 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
     setSuccessActionMessage(undefined)
     setInFlight(true)
 
-    const promise = request()
-
-    promise.catch((error: { data?: Record<string, string> }) => {
-      setError(
-        error.data?.errorReason ||
-          error.data?.error ||
-          'generic_something_went_wrong'
-      )
-    })
-
-    promise.finally(() => {
-      setInFlight(false)
-    })
-
-    return promise
+    return request()
+      .catch((error: { data?: Record<string, string> }) => {
+        setError(
+          error.data?.errorReason ||
+            error.data?.error ||
+            'generic_something_went_wrong'
+        )
+        throw error
+      })
+      .finally(() => {
+        setInFlight(false)
+      })
   }, [])
 
   if (!project) {

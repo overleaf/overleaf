@@ -149,6 +149,12 @@ describe('CollaboratorsInviteController', function () {
       },
     }
 
+    ctx.SubscriptionLocator = {
+      promises: {
+        getUserActiveProfessionalGroupSubscriptions: sinon.stub().resolves([]),
+      },
+    }
+
     ctx.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
@@ -254,6 +260,13 @@ describe('CollaboratorsInviteController', function () {
       '../../../../app/src/Features/Subscription/SubscriptionGroupHandler.mjs',
       () => ({
         default: ctx.SubscriptionGroupHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionLocator.mjs',
+      () => ({
+        default: ctx.SubscriptionLocator,
       })
     )
 
@@ -1915,6 +1928,53 @@ describe('CollaboratorsInviteController', function () {
 
       expect(ctx.invite.save).to.have.been.calledOnce
       expect(ctx.res.json).toHaveBeenCalledTimes(1)
+    })
+
+    describe('with a subscriptionId', function () {
+      beforeEach(function (ctx) {
+        ctx.subscriptionId = new ObjectId()
+        ctx.req.body.subscriptionId = ctx.subscriptionId.toString()
+      })
+
+      it('creates the invite when the user is in a matching professional group subscription', async function (ctx) {
+        await new Promise(resolve => {
+          ctx.SubscriptionLocator.promises.getUserActiveProfessionalGroupSubscriptions.resolves(
+            [{ _id: ctx.subscriptionId }]
+          )
+          ctx.CollaboratorsInviteGetter.promises.getSharingLinkInvite.resolves(
+            null
+          )
+          ctx.CollaboratorsInviteHandler.promises.createSharingLinkInvite.resolves(
+            ctx.invite
+          )
+          ctx.res.callback = () => resolve()
+          ctx.CollaboratorsInviteController.updateSharingLink(ctx.req, ctx.res)
+        })
+
+        ctx.CollaboratorsInviteHandler.promises.createSharingLinkInvite.should.have.been.calledWith(
+          ctx.projectId,
+          'readOnly',
+          ctx.subscriptionId.toString()
+        )
+      })
+
+      it('responds with a 403 JSON error when the subscription is not a professional group the user belongs to', async function (ctx) {
+        await new Promise(resolve => {
+          ctx.SubscriptionLocator.promises.getUserActiveProfessionalGroupSubscriptions.resolves(
+            []
+          )
+          ctx.res.callback = () => resolve()
+          ctx.CollaboratorsInviteController.updateSharingLink(ctx.req, ctx.res)
+        })
+
+        expect(ctx.res.statusCode).to.equal(403)
+        expect(ctx.res.json).toHaveBeenCalledWith({
+          errorReason: 'subscription_not_eligible',
+        })
+        ctx.CollaboratorsInviteHandler.promises.createSharingLinkInvite.called.should.equal(
+          false
+        )
+      })
     })
   })
 

@@ -22,6 +22,7 @@ import PrivilegeLevels, {
 } from '../Authorization/PrivilegeLevels.mjs'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 import SubscriptionGroupHandler from '../Subscription/SubscriptionGroupHandler.mjs'
+import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
 
 // This rate limiter allows a different number of requests depending on the
 // number of callaborators a user is allowed. This is implemented by providing
@@ -554,10 +555,30 @@ async function updateSharingLink(req, res) {
   const privileges = body.privileges
   const subscriptionId = body.subscriptionId
 
+  const currentUser = SessionManager.getSessionUser(req.session)
+
+  if (subscriptionId) {
+    const subscriptions =
+      await SubscriptionLocator.promises.getUserActiveProfessionalGroupSubscriptions(
+        currentUser._id,
+        { _id: 1 }
+      )
+    const canShareWithSubscription = subscriptions.some(
+      subscription => subscription._id.toString() === subscriptionId.toString()
+    )
+
+    if (!canShareWithSubscription) {
+      logger.debug(
+        { projectId, subscriptionId, userId: currentUser._id },
+        'cannot create a group sharing link for a non-professional or non-member subscription'
+      )
+      return res.status(403).json({ errorReason: 'subscription_not_eligible' })
+    }
+  }
+
   let invite =
     await CollaboratorsInviteGetter.promises.getSharingLinkInvite(projectId)
 
-  const currentUser = SessionManager.getSessionUser(req.session)
   if (invite === null) {
     invite = await CollaboratorsInviteHandler.promises.createSharingLinkInvite(
       projectId,

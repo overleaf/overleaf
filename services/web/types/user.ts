@@ -65,7 +65,7 @@ export type User = {
   isMemberOfGroupSubscription?: boolean
   isProfessionalGroupPlan?: boolean
   hasInstitutionLicence?: boolean
-  activeGroupSubscriptions?: {
+  activeProfessionalGroupSubscriptions?: {
     _id: string
     teamName?: string
     sharingPermissions?: SharingPermissions

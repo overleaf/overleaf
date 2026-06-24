@@ -75,7 +75,7 @@ export type EditorProvidersProps = {
     | 'id'
     | 'email'
     | 'signUpDate'
-    | 'activeGroupSubscriptions'
+    | 'activeProfessionalGroupSubscriptions'
     | 'isProfessionalGroupPlan'
   >
   projectId?: string

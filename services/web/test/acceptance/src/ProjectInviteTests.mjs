@@ -1086,6 +1086,9 @@ describe('ProjectInviteTests', function () {
       const subscription = new Subscription({
         adminId: this.sendingUser._id,
         memberIds: [this.sendingUser._id],
+        groupPlan: true,
+        planCode: 'group_professional',
+        paymentProvider: { state: 'active' },
       })
       let sharingLink
       Async.series(
