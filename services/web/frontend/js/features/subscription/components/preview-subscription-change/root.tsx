@@ -360,6 +360,10 @@ function PreviewSubscriptionChange() {
 }
 
 async function payNow(preview: SubscriptionChangePreview) {
+  const successPath =
+    preview.change.type === 'premium-subscription'
+      ? '/user/subscription/thank-you?upgrade=true'
+      : '/user/subscription/thank-you'
   try {
     if (preview.change.type === 'add-on-purchase') {
       await postJSON(
@@ -375,7 +379,9 @@ async function payNow(preview: SubscriptionChangePreview) {
       )
     }
   } catch (e) {
-    const { handled } = await handleStripePaymentAction(e as FetchError)
+    const { handled } = await handleStripePaymentAction(e as FetchError, {
+      successPath,
+    })
     if (!handled) {
       throw e
     }
