@@ -14,11 +14,13 @@ import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-
 import { useUserContext } from '@/shared/context/user-context'
 import { postJSON } from '@/infrastructure/fetch-json'
 import useEventListener from '@/shared/hooks/use-event-listener'
-import { ProjectMetadata } from '@/shared/context/types/project-metadata'
+import {
+  ProjectMetadata,
+  TrackChangesStateData,
+} from '@/shared/context/types/project-metadata'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 
 export type TrackChangesState = {
-  onForEveryone: boolean
   onForGuests: boolean
   onForMembers: Record<UserId, boolean | undefined>
 }
@@ -28,7 +30,6 @@ export const TrackChangesStateContext = createContext<
 >(undefined)
 
 type SaveTrackChangesRequestBody = {
-  on?: boolean
   on_for?: Record<UserId, boolean | undefined>
   on_for_guests?: boolean
 }
@@ -51,8 +52,13 @@ export const TrackChangesStateProvider: FC<React.PropsWithChildren> = ({
   const user = useUserContext()
   const { setWantTrackChanges } = useEditorPropertiesContext()
 
-  const trackChangesValue: ProjectMetadata['trackChangesState'] =
-    project?.trackChangesState ?? false
+  const trackChangesValue = useMemo<TrackChangesStateData>(() => {
+    if (typeof project?.trackChangesState === 'object') {
+      return project.trackChangesState
+    } else {
+      return {}
+    }
+  }, [project?.trackChangesState])
 
   useSocketListener(
     socket,
@@ -66,31 +72,19 @@ export const TrackChangesStateProvider: FC<React.PropsWithChildren> = ({
   )
 
   useEffect(() => {
-    setWantTrackChanges(
-      trackChangesValue === true ||
-        (trackChangesValue !== false &&
-          trackChangesValue[user.id ?? '__guests__'])
-    )
+    setWantTrackChanges(Boolean(trackChangesValue[user.id ?? '__guests__']))
   }, [setWantTrackChanges, trackChangesValue, user.id])
-
-  const trackChangesIsObject =
-    trackChangesValue !== true && trackChangesValue !== false
-  const onForEveryone = trackChangesValue === true
-  const onForGuests =
-    onForEveryone ||
-    (trackChangesIsObject && trackChangesValue.__guests__ === true)
+  const onForGuests = trackChangesValue.__guests__ === true
 
   const onForMembers = useMemo(() => {
     const onForMembers: Record<UserId, boolean | undefined> = {}
-    if (trackChangesIsObject) {
-      for (const key of Object.keys(trackChangesValue)) {
-        if (key !== '__guests__') {
-          onForMembers[key as UserId] = trackChangesValue[key as UserId]
-        }
+    for (const key of Object.keys(trackChangesValue)) {
+      if (key !== '__guests__') {
+        onForMembers[key as UserId] = trackChangesValue[key as UserId]
       }
     }
     return onForMembers
-  }, [trackChangesIsObject, trackChangesValue])
+  }, [trackChangesValue])
 
   const saveTrackChanges = useCallback(
     async (trackChangesBody: SaveTrackChangesRequestBody) => {
@@ -126,12 +120,7 @@ export const TrackChangesStateProvider: FC<React.PropsWithChildren> = ({
   useEventListener(
     'toggle-track-changes',
     useCallback(() => {
-      if (
-        user.id &&
-        features.trackChanges &&
-        permissions.write &&
-        !onForEveryone
-      ) {
+      if (user.id && features.trackChanges && permissions.write) {
         const value = onForMembers[user.id]
         actions.saveTrackChanges({
           on_for: {
@@ -143,7 +132,6 @@ export const TrackChangesStateProvider: FC<React.PropsWithChildren> = ({
     }, [
       actions,
       onForMembers,
-      onForEveryone,
       permissions.write,
       features.trackChanges,
       user.id,
@@ -151,8 +139,8 @@ export const TrackChangesStateProvider: FC<React.PropsWithChildren> = ({
   )
 
   const value = useMemo(
-    () => ({ onForEveryone, onForGuests, onForMembers }),
-    [onForEveryone, onForGuests, onForMembers]
+    () => ({ onForGuests, onForMembers }),
+    [onForGuests, onForMembers]
   )
 
   return (

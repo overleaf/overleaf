@@ -15,10 +15,9 @@ export const useTrackingChangesMode = (): Mode => {
     return 'review'
   }
 
-  const trackChangesForCurrentUser =
-    trackChanges?.onForEveryone ||
-    (user?.id && trackChanges?.onForMembers[user.id]) ||
-    (!user?.id && trackChanges?.onForGuests)
+  const trackChangesForCurrentUser = user?.id
+    ? trackChanges?.onForMembers[user.id]
+    : trackChanges?.onForGuests
 
   if (trackChangesForCurrentUser) {
     return 'review'

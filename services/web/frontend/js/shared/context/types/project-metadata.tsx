@@ -41,7 +41,14 @@ export interface ProjectMetadata extends ProjectSettings {
     signUpDate: string
   }
   rootFolder?: Folder[]
-  trackChangesState: boolean | Record<UserId | '__guests__', boolean>
+  trackChangesState?: false | TrackChangesStateData
 }
+
+// The explicit per-user track changes format, keyed by user id. The
+// `__guests__` key toggles track changes for link-sharing guests (it is still
+// used by some Server Pro organisations)
+export type TrackChangesStateData = Partial<
+  Record<UserId | '__guests__', boolean>
+>
 
 export type ProjectUpdate = Partial<ProjectMetadata>

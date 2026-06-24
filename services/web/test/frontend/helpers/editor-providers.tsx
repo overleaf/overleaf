@@ -44,6 +44,7 @@ import type { DocumentContainer } from '@/features/ide-react/editor/document-con
 import {
   ProjectMetadata,
   ProjectUpdate,
+  TrackChangesStateData,
 } from '@/shared/context/types/project-metadata'
 import { User, UserId } from '../../../types/user'
 import { ProjectCompiler } from '../../../types/project-settings'
@@ -132,7 +133,7 @@ export const projectDefaults: ProjectMetadata = {
   compiler: 'pdflatex' as ProjectCompiler,
   members: [],
   invites: [],
-  trackChangesState: {} as Record<UserId | '__guests__', boolean>,
+  trackChangesState: {} as TrackChangesStateData,
   spellCheckLanguage: 'en',
 }
 
@@ -233,7 +234,7 @@ export function EditorProviders({
     compiler,
     members: [],
     invites: [],
-    trackChangesState: false,
+    trackChangesState: {} as TrackChangesStateData,
     spellCheckLanguage: 'en',
   }
 

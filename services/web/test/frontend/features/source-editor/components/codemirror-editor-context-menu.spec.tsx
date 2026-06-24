@@ -566,7 +566,7 @@ describe('editor context menu', { scrollBehavior: false }, function () {
               ProjectProvider: makeProjectProvider(
                 mockProject({
                   // Re-assigns `withTrackChanges` value in the `track-changes-state-context` useEffect hook
-                  trackChangesState: true,
+                  trackChangesState: { [USER_ID]: true },
                   projectFeatures: {
                     trackChanges: true,
                     trackChangesVisible: true,
