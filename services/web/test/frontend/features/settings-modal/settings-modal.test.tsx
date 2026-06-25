@@ -117,7 +117,7 @@ describe('<SettingsModal />', function () {
     render(
       <EditorProviders
         rootFolder={[rootFolder as any]}
-        layoutContext={{ leftMenuShown: true }}
+        layoutContext={{ settingsShown: true }}
       >
         <SettingsModal />
       </EditorProviders>
@@ -144,7 +144,7 @@ describe('<SettingsModal />', function () {
       render(
         <EditorProviders
           rootFolder={[rootFolder as any]}
-          layoutContext={{ leftMenuShown: true }}
+          layoutContext={{ settingsShown: true }}
         >
           <SettingsModal />
         </EditorProviders>
@@ -158,7 +158,7 @@ describe('<SettingsModal />', function () {
       render(
         <EditorProviders
           rootFolder={[rootFolder as any]}
-          layoutContext={{ leftMenuShown: true }}
+          layoutContext={{ settingsShown: true }}
         >
           <SettingsModal />
         </EditorProviders>
@@ -184,7 +184,7 @@ describe('<SettingsModal />', function () {
       render(
         <EditorProviders
           rootFolder={[rootFolder as any]}
-          layoutContext={{ leftMenuShown: true }}
+          layoutContext={{ settingsShown: true }}
         >
           <SettingsModal />
         </EditorProviders>
@@ -203,7 +203,7 @@ describe('<SettingsModal />', function () {
       render(
         <EditorProviders
           rootFolder={[rootFolder as any]}
-          layoutContext={{ leftMenuShown: true }}
+          layoutContext={{ settingsShown: true }}
         >
           <SettingsModal />
         </EditorProviders>
@@ -222,7 +222,7 @@ describe('<SettingsModal />', function () {
       render(
         <EditorProviders
           rootFolder={[rootFolder as any]}
-          layoutContext={{ leftMenuShown: true }}
+          layoutContext={{ settingsShown: true }}
         >
           <SettingsModal />
         </EditorProviders>
@@ -242,7 +242,7 @@ describe('<SettingsModal />', function () {
       render(
         <EditorProviders
           rootFolder={[rootFolder as any]}
-          layoutContext={{ leftMenuShown: true }}
+          layoutContext={{ settingsShown: true }}
         >
           <SettingsModal />
         </EditorProviders>

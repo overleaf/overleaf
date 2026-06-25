@@ -11,9 +11,9 @@ export const SpellingSuggestionsLanguage = memo<{
   const { t } = useTranslation()
 
   const handleClick = useCallback(() => {
-    // open the left menu
+    // open settings
     window.dispatchEvent(
-      new CustomEvent('ui.toggle-left-menu', { detail: true })
+      new CustomEvent('ui.toggle-settings', { detail: true })
     )
     // focus the spell check setting
     window.dispatchEvent(

@@ -73,7 +73,7 @@ export const RailLayout = () => {
   const gitBridgeEnabled = getMeta('ol-gitBridgeEnabled')
   const { isOverleaf } = getMeta('ol-ExposedSettings')
 
-  const { view, setLeftMenuShown, focusMode } = useLayoutContext()
+  const { view, setSettingsShown, focusMode } = useLayoutContext()
 
   const { markMessagesAsRead } = useChatContext()
 
@@ -166,11 +166,11 @@ export const RailLayout = () => {
         title: t('settings'),
         action: () => {
           sendEvent('rail-click', { tab: 'settings' })
-          setLeftMenuShown(true)
+          setSettingsShown(true)
         },
       },
     ],
-    [setLeftMenuShown, t, sendEvent]
+    [setSettingsShown, t, sendEvent]
   )
 
   useCommandProvider(
@@ -178,13 +178,13 @@ export const RailLayout = () => {
       {
         id: 'open-settings',
         handler: () => {
-          setLeftMenuShown(true)
+          setSettingsShown(true)
         },
         menuLabel: t('settings'),
         label: t('open_settings'),
       },
     ],
-    [t, setLeftMenuShown]
+    [t, setSettingsShown]
   )
 
   const onTabSelect = useCallback(

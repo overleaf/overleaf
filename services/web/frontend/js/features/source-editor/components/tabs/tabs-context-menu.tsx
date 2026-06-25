@@ -118,7 +118,7 @@ export function TabsContextMenu() {
             as="button"
             onClick={() => {
               window.dispatchEvent(
-                new CustomEvent('ui.toggle-left-menu', { detail: true })
+                new CustomEvent('ui.toggle-settings', { detail: true })
               )
               // focus the tab setting
               window.dispatchEvent(

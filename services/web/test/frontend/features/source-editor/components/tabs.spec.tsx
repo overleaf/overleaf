@@ -647,10 +647,10 @@ describe('File Tabs', function () {
       cy.findByRole('tab', { name: /intro\.tex/ }).rightclick()
       cy.findByRole('menuitem', { name: 'Tab settings…' }).click()
 
-      // opens the left settings menu...
+      // opens the settings modal...
       cy.get('@dispatchEvent').should(
         'have.been.calledWithMatch',
-        Cypress.sinon.match({ type: 'ui.toggle-left-menu', detail: true })
+        Cypress.sinon.match({ type: 'ui.toggle-settings', detail: true })
       )
       // ...and focuses the editorTabs setting
       cy.get('@dispatchEvent').should(

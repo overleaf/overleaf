@@ -146,7 +146,7 @@ const layoutContextDefault = {
   chatIsOpen: true, // false in the application, true in tests
   reviewPanelOpen: false,
   miniReviewPanelVisible: false,
-  leftMenuShown: false,
+  settingsShown: false,
   projectSearchIsOpen: false,
   pdfLayout: 'sideBySide',
   loadingStyleSheet: false,
@@ -487,7 +487,7 @@ const makeLayoutProvider = (
     const [miniReviewPanelVisible, setMiniReviewPanelVisible] = useState(
       layout.miniReviewPanelVisible
     )
-    const [leftMenuShown, setLeftMenuShown] = useState(layout.leftMenuShown)
+    const [settingsShown, setSettingsShown] = useState(layout.settingsShown)
     const [projectSearchIsOpen, setProjectSearchIsOpen] = useState(
       layout.projectSearchIsOpen
     )
@@ -558,7 +558,7 @@ const makeLayoutProvider = (
         detachRole,
         changeLayout,
         chatIsOpen,
-        leftMenuShown,
+        settingsShown,
         openFile,
         pdfLayout,
         pdfPreviewOpen,
@@ -568,7 +568,7 @@ const makeLayoutProvider = (
         miniReviewPanelVisible,
         loadingStyleSheet,
         setChatIsOpen,
-        setLeftMenuShown,
+        setSettingsShown,
         setOpenFile,
         setPdfLayout,
         setReviewPanelOpen,
@@ -589,7 +589,7 @@ const makeLayoutProvider = (
         detachRole,
         changeLayout,
         chatIsOpen,
-        leftMenuShown,
+        settingsShown,
         openFile,
         pdfLayout,
         pdfPreviewOpen,
@@ -599,7 +599,7 @@ const makeLayoutProvider = (
         miniReviewPanelVisible,
         loadingStyleSheet,
         setChatIsOpen,
-        setLeftMenuShown,
+        setSettingsShown,
         setOpenFile,
         setPdfLayout,
         setReviewPanelOpen,

@@ -1,4 +1,3 @@
-import { useEditorLeftMenuContext } from '@/features/editor-left-menu/components/editor-left-menu-context'
 import { useEffect, useState } from 'react'
 import { useSettingsModalContext } from '../context/settings-modal-context'
 
@@ -6,8 +5,8 @@ import { useSettingsModalContext } from '../context/settings-modal-context'
  *  A hook to scroll to and focus on a specific setting in the settings modal
  */
 export default function useFocusOnSetting() {
-  const { activeTab, setActiveTab, settingToTabMap } = useSettingsModalContext()
-  const { settingToFocus } = useEditorLeftMenuContext()
+  const { activeTab, setActiveTab, settingToTabMap, settingToFocus } =
+    useSettingsModalContext()
 
   const [eltToScrollTo, setEltToScrollTo] = useState<{
     tab: string | undefined

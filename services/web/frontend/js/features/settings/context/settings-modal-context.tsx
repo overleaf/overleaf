@@ -1,4 +1,11 @@
-import { createContext, FC, useContext, useMemo, useState } from 'react'
+import {
+  createContext,
+  FC,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import AutoCloseBracketsSetting from '@/features/settings/components/editor-settings/auto-close-brackets-setting'
 import AutoCompleteSetting from '@/features/settings/components/editor-settings/auto-complete-setting'
@@ -24,7 +31,6 @@ import EditorThemeSetting from '@/features/settings/components/appearance-settin
 import FontSizeSetting from '@/features/settings/components/appearance-settings/font-size-setting'
 import LineHeightSetting from '@/features/settings/components/appearance-settings/line-height-setting'
 import FontFamilySetting from '@/features/settings/components/appearance-settings/font-family-setting'
-import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/editor-left-menu-context'
 import DarkModePdfSetting from '@/features/settings/components/appearance-settings/dark-mode-pdf-setting'
 
 import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
@@ -38,6 +44,7 @@ import type {
 } from '@/features/settings/context/types'
 import EditorTabsSetting from '../components/editor-settings/editor-tabs-setting'
 import FloatingMenuSetting from '../components/editor-settings/floating-menu-setting'
+import useEventListener from '@/shared/hooks/use-event-listener'
 
 const [referenceSearchSettingModule] = importOverleafModules(
   'referenceSearchSetting'
@@ -65,6 +72,7 @@ type SettingsModalState = {
   setActiveTab: (tab: string | null | undefined) => void
   settingsTabs: SettingsEntry[]
   settingToTabMap: Map<string, string>
+  settingToFocus?: string
 }
 
 export const SettingsModalContext = createContext<
@@ -77,9 +85,18 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
   const { t } = useTranslation()
   const { isOverleaf } = getMeta('ol-ExposedSettings')
   const { overallTheme, floatingMenu } = useProjectSettingsContext()
+  const [settingToFocus, setSettingToFocus] = useState<string | undefined>(
+    undefined
+  )
 
-  // TODO ide-redesign-cleanup: Rename this field and move it directly into this context
-  const { leftMenuShown, setLeftMenuShown } = useLayoutContext()
+  useEventListener(
+    'ui.focus-setting',
+    useCallback((event: CustomEvent<string | undefined>) => {
+      setSettingToFocus(event.detail)
+    }, [])
+  )
+
+  const { settingsShown, setSettingsShown } = useLayoutContext()
 
   const hasEmailNotifications = useFeatureFlag('email-notifications')
   const hasEditorTabs = useFeatureFlag('editor-tabs')
@@ -327,30 +344,29 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
 
   const value = useMemo(
     () => ({
-      show: leftMenuShown,
-      setShow: setLeftMenuShown,
+      show: settingsShown,
+      setShow: setSettingsShown,
       activeTab,
       setActiveTab,
       settingsTabs,
       settingToTabMap,
+      settingToFocus,
     }),
     [
-      leftMenuShown,
-      setLeftMenuShown,
+      settingsShown,
+      setSettingsShown,
       activeTab,
       setActiveTab,
       settingsTabs,
       settingToTabMap,
+      settingToFocus,
     ]
   )
 
   return (
-    // TODO ide-redesign-cleanup: Merge <EditorLeftMenuProvider> into <SettingsModalProvider>
-    <EditorLeftMenuProvider>
-      <SettingsModalContext.Provider value={value}>
-        {children}
-      </SettingsModalContext.Provider>
-    </EditorLeftMenuProvider>
+    <SettingsModalContext.Provider value={value}>
+      {children}
+    </SettingsModalContext.Provider>
   )
 }
 

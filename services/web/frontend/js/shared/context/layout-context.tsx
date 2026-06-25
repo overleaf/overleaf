@@ -34,7 +34,7 @@ export type LayoutContextOwnStates = {
   chatIsOpen: boolean
   reviewPanelOpen: boolean
   miniReviewPanelVisible: boolean
-  leftMenuShown: boolean
+  settingsShown: boolean
   loadingStyleSheet: boolean
   pdfLayout: IdeLayout
   projectSearchIsOpen: boolean
@@ -56,8 +56,8 @@ export type LayoutContextValue = LayoutContextOwnStates & {
   setMiniReviewPanelVisible: Dispatch<
     SetStateAction<LayoutContextValue['miniReviewPanelVisible']>
   >
-  setLeftMenuShown: Dispatch<
-    SetStateAction<LayoutContextValue['leftMenuShown']>
+  setSettingsShown: Dispatch<
+    SetStateAction<LayoutContextValue['settingsShown']>
   >
   setLoadingStyleSheet: Dispatch<
     SetStateAction<LayoutContextValue['loadingStyleSheet']>
@@ -151,8 +151,8 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const [miniReviewPanelVisible, setMiniReviewPanelVisible] =
     useState<boolean>(false)
 
-  // whether the menu pane is open
-  const [leftMenuShown, setLeftMenuShown] = useState<boolean>(false)
+  // whether the settings modal is open
+  const [settingsShown, setSettingsShown] = useState<boolean>(false)
 
   // whether the project search is open
   const [projectSearchIsOpen, setProjectSearchIsOpen] = useState(false)
@@ -189,12 +189,12 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
   )
 
   useEventListener(
-    'ui.toggle-left-menu',
+    'ui.toggle-settings',
     useCallback(
       (event: CustomEvent<boolean>) => {
-        setLeftMenuShown(event.detail)
+        setSettingsShown(event.detail)
       },
-      [setLeftMenuShown]
+      [setSettingsShown]
     )
   )
 
@@ -388,7 +388,7 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
       detachRole,
       changeLayout,
       chatIsOpen,
-      leftMenuShown,
+      settingsShown,
       openFile,
       pdfLayout,
       pdfPreviewOpen,
@@ -398,7 +398,7 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
       miniReviewPanelVisible,
       loadingStyleSheet,
       setChatIsOpen,
-      setLeftMenuShown,
+      setSettingsShown,
       setOpenFile,
       setPdfLayout,
       setReviewPanelOpen,
@@ -419,7 +419,7 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
       detachRole,
       changeLayout,
       chatIsOpen,
-      leftMenuShown,
+      settingsShown,
       openFile,
       pdfLayout,
       pdfPreviewOpen,
@@ -429,7 +429,7 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
       miniReviewPanelVisible,
       loadingStyleSheet,
       setChatIsOpen,
-      setLeftMenuShown,
+      setSettingsShown,
       setOpenFile,
       setPdfLayout,
       setReviewPanelOpen,

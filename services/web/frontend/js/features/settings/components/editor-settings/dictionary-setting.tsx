@@ -8,14 +8,12 @@ export default function DictionarySetting() {
   const { t } = useTranslation()
   const { setActiveModal } = useRailContext()
 
-  // TODO ide-redesign-cleanup: leftMenu is a misnomer, in the
-  // redesign it refers to the settings modal
-  const { setLeftMenuShown } = useLayoutContext()
+  const { setSettingsShown } = useLayoutContext()
 
   const onClick = useCallback(() => {
     setActiveModal('dictionary')
-    setLeftMenuShown(false)
-  }, [setLeftMenuShown, setActiveModal])
+    setSettingsShown(false)
+  }, [setSettingsShown, setActiveModal])
 
   return (
     <ButtonSetting
