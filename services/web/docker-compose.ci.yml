@@ -6,7 +6,7 @@ services:
     build:
       context: ../..
       dockerfile: services/web/Dockerfile
-    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: ci/$PROJECT_NAME:$BRANCH_NAME_TAG_SAFE-$BUILD_NUMBER
     logging:
       driver: local
     user: node
@@ -39,7 +39,7 @@ services:
     build:
       context: ../..
       dockerfile: services/web/Dockerfile
-    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: ci/$PROJECT_NAME:$BRANCH_NAME_TAG_SAFE-$BUILD_NUMBER
     logging:
       driver: local
     working_dir: /overleaf/services/web
@@ -75,7 +75,7 @@ services:
     build:
       context: ../..
       dockerfile: services/web/Dockerfile
-    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: ci/$PROJECT_NAME:$BRANCH_NAME_TAG_SAFE-$BUILD_NUMBER
     volumes:
       - ./data/reports:/overleaf/services/web/data/reports
     logging:
@@ -119,7 +119,7 @@ services:
     build:
       context: ../..
       dockerfile: services/web/Dockerfile
-    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: ci/$PROJECT_NAME:$BRANCH_NAME_TAG_SAFE-$BUILD_NUMBER
     logging:
       driver: local
     user: node
@@ -134,7 +134,7 @@ services:
       NO_COLOR: true
 
   tar:
-    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER-webpack
+    image: ci/$PROJECT_NAME:$BRANCH_NAME_TAG_SAFE-$BUILD_NUMBER-webpack
     volumes:
       - ./:/tmp/build/
     command: tar -cf /tmp/build/build.tar public/

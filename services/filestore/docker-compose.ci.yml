@@ -7,7 +7,7 @@ volumes:
 
 services:
   test_unit:
-    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: ci/$PROJECT_NAME:$BRANCH_NAME_TAG_SAFE-$BUILD_NUMBER
     user: node
     volumes:
       - ./reports:/overleaf/services/filestore/reports
@@ -21,7 +21,7 @@ services:
       VITEST_NO_CACHE: true
 
   test_acceptance:
-    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: ci/$PROJECT_NAME:$BRANCH_NAME_TAG_SAFE-$BUILD_NUMBER
     environment:
       CI:
       RETRIES:
@@ -65,7 +65,7 @@ services:
 
   tar:
     build: .
-    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: ci/$PROJECT_NAME:$BRANCH_NAME_TAG_SAFE-$BUILD_NUMBER
     volumes:
       - ./:/tmp/build/
     command: tar -czf /tmp/build/build.tar.gz --exclude=build.tar.gz --exclude-vcs .

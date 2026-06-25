@@ -2,10 +2,10 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/overleaf/internal/
 
-BUILD_NUMBER ?= local
-BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
-BRANCH_NAME_TAG_SAFE = $(shell echo $(BRANCH_NAME) | sed 's/\//\-\-/g' | cut -c1-96)
-PROJECT_NAME = filestore
+export BUILD_NUMBER ?= local
+export BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
+export BRANCH_NAME_TAG_SAFE = $(shell echo $(BRANCH_NAME) | sed 's/\//\-\-/g' | cut -c1-96)
+export PROJECT_NAME = filestore
 BUILD_DIR_NAME = $(shell pwd | xargs basename | tr -cd '[a-zA-Z0-9_.\-]')
 HERE=$(shell pwd)
 export MONOREPO ?= $(shell cd ../../ && pwd)
@@ -27,13 +27,10 @@ IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/services/filestore/package.json \
 	$(MONOREPO)/.yarn/patches/* \
 | sha256sum | cut -d '-' -f1)
+export MOCHA_GREP ?=
 
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
-DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
-	BRANCH_NAME=$(BRANCH_NAME_TAG_SAFE) \
-	PROJECT_NAME=$(PROJECT_NAME) \
-	MOCHA_GREP=${MOCHA_GREP} \
-	docker compose ${DOCKER_COMPOSE_FLAGS}
+DOCKER_COMPOSE := docker compose ${DOCKER_COMPOSE_FLAGS}
 
 # Common flags for docker compose run.
 # --rm           Tear down test runner container
