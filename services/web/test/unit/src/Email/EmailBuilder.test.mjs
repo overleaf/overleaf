@@ -1128,6 +1128,95 @@ describe('EmailBuilder', function () {
           )
         })
       })
+
+      describe('domainReverificationFailed', function () {
+        beforeEach(function (ctx) {
+          ctx.opts = {
+            to: 'admin@example.com',
+            domain: 'example.com',
+            domainSettingsUrl:
+              'https://www.overleaf.com/manage/groups/abc/settings',
+          }
+        })
+
+        describe('when the domain is captured by the group', function () {
+          beforeEach(function (ctx) {
+            ctx.opts.capturedByGroup = true
+            // local-time date so moment's local formatting is timezone-safe
+            ctx.opts.gracePeriodEndDate = new Date(2026, 5, 30)
+            ctx.email = ctx.EmailBuilder.buildEmail(
+              'domainReverificationFailed',
+              ctx.opts
+            )
+          })
+
+          it('builds html and text without undefined', function (ctx) {
+            expect(ctx.email.html).to.exist
+            expect(ctx.email.text).to.exist
+            expect(ctx.email.html.indexOf('undefined')).to.equal(-1)
+            expect(ctx.email.subject.indexOf('undefined')).to.equal(-1)
+          })
+
+          it('leads with action needed and the domain in the subject', function (ctx) {
+            expect(ctx.email.subject).to.equal(
+              'Action needed: re-verify example.com to keep adding users automatically'
+            )
+          })
+
+          it('includes the grace period deadline', function (ctx) {
+            expect(ctx.email.html).to.contain('June 30, 2026')
+            expect(ctx.email.html).to.contain("we'll stop adding them")
+          })
+
+          it('links to the domain settings page', function (ctx) {
+            expect(ctx.email.html).to.contain(ctx.opts.domainSettingsUrl)
+            expect(ctx.email.text).to.contain(ctx.opts.domainSettingsUrl)
+          })
+        })
+
+        describe('when the domain is not captured by the group', function () {
+          beforeEach(function (ctx) {
+            ctx.opts.capturedByGroup = false
+            ctx.email = ctx.EmailBuilder.buildEmail(
+              'domainReverificationFailed',
+              ctx.opts
+            )
+          })
+
+          it('uses the lower-stakes subject', function (ctx) {
+            expect(ctx.email.subject).to.equal('example.com needs re-verifying')
+          })
+
+          it('does not mention a deadline or capture', function (ctx) {
+            expect(ctx.email.html).to.not.contain("we'll stop adding them")
+            expect(ctx.email.html.indexOf('undefined')).to.equal(-1)
+          })
+
+          it('still links to the domain settings page', function (ctx) {
+            expect(ctx.email.html).to.contain(ctx.opts.domainSettingsUrl)
+          })
+        })
+
+        // The cta-email title and body are lodash templates, where <%= %>
+        // interpolates without escaping (the opposite of EJS), so the domain must
+        // be escaped in both title() and message(). The domain regex makes such
+        // input impossible in practice, but this guards the escaping against being
+        // applied zero or two times. (a&b.example.com appears in both the title and
+        // the body, so we expect two single-escaped occurrences and none
+        // double-escaped.)
+        it('escapes the domain exactly once in the title and body', function (ctx) {
+          ctx.opts.capturedByGroup = false
+          ctx.opts.domain = 'a&b.example.com'
+          ctx.email = ctx.EmailBuilder.buildEmail(
+            'domainReverificationFailed',
+            ctx.opts
+          )
+          expect(ctx.email.html.split('a&amp;b.example.com')).to.have.lengthOf(
+            3
+          )
+          expect(ctx.email.html).to.not.contain('a&amp;amp;b.example.com')
+        })
+      })
     })
   })
 })

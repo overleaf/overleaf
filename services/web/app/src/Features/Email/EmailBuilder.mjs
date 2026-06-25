@@ -648,6 +648,43 @@ templates.surrenderAccountForManagedUsers = ctaTemplate({
   },
 })
 
+templates.domainReverificationFailed = ctaTemplate({
+  subject(opts) {
+    if (opts.capturedByGroup) {
+      return `Action needed: re-verify ${opts.domain} to keep adding users automatically`
+    }
+    return `${opts.domain} needs re-verifying`
+  },
+  title(opts) {
+    const domain = _.escape(opts.domain)
+    if (opts.capturedByGroup) {
+      return `Action needed: re-verify ${domain}`
+    }
+    return `${domain} needs re-verifying`
+  },
+  message(opts) {
+    const domain = _.escape(opts.domain)
+    if (opts.capturedByGroup) {
+      const date = moment(opts.gracePeriodEndDate).format('MMMM D, YYYY')
+      return [
+        `We weren't able to verify your domain ${domain} during our latest check, so its verification has lapsed.`,
+        `Right now, anyone with an email address at ${domain} is added to your group automatically. If the domain isn't re-verified by ${date}, we'll stop adding them. Existing members aren't affected.`,
+        `To fix this, check that your DNS TXT record still matches the one shown in your group settings. Once it's in place, we'll re-verify the domain automatically.`,
+      ]
+    }
+    return [
+      `We weren't able to verify your domain ${domain} during our latest check, so it's no longer verified.`,
+      `To re-verify it, check that your DNS TXT record still matches the one shown in your group settings. Once it's in place, we'll verify it automatically.`,
+    ]
+  },
+  ctaURL(opts) {
+    return opts.domainSettingsUrl
+  },
+  ctaText() {
+    return 'Go to group settings'
+  },
+})
+
 templates.testEmail = ctaTemplate({
   subject() {
     return `A Test Email from ${settings.appName}`
