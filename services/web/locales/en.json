@@ -183,6 +183,7 @@
   "allows_to_search_by_author_title_etc_possible_to_pull_results_directly_from_your_reference_manager_if_connected": "Allows to search by author, title, etc. Possible to pull results directly from your reference manager (if connected).",
   "already_have_an_account": "Already have an account?",
   "already_have_sl_account": "Already have an __appName__ account?",
+  "already_in_your_library": "Already in your library",
   "also": "Also",
   "alternatively_create_new_institution_account": "Alternatively, you can create a <b>new account</b> with your institution email (<b>__email__</b>) by clicking <b>__clickText__</b>.",
   "an_email_has_already_been_sent_to": "An email has already been sent to <0>__email__</0>. Please wait and try again later.",

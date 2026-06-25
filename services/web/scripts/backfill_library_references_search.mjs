@@ -4,6 +4,7 @@ import logger from '@overleaf/logger'
 import { db } from '../app/src/infrastructure/mongodb.mjs'
 import {
   buildSearchTokens,
+  buildMatchTokens,
   docSchema,
 } from '../modules/library/app/src/LibraryReferenceRepository.mts'
 import { tokenize } from '../modules/library/app/src/bibtex-search-tokens.mts'
@@ -21,10 +22,10 @@ function usage() {
     {},
     `Usage: node backfill_library_references_search.mjs [options]
 
-Populates searchKey and searchTokens on libraryReferences so the
-account-level library search can index them. Also unsets the obsolete
-fields.$[].searchValue. Safe to rerun; picks up only un-indexed rows
-by default.
+Populates searchKey, searchTokens and matchTokens on libraryReferences so
+the account-level library search and import duplicate-detection can index
+them. Also unsets the obsolete fields.$[].searchValue. Safe to rerun; picks
+up only un-indexed rows by default.
 
 Options:
   --commit          Apply changes. Without this, runs as a dry run.
@@ -73,11 +74,12 @@ async function backfill(trackProgress) {
     })
     const searchKey = tokenize(doc.key)
     const searchTokens = buildSearchTokens(entry)
+    const matchTokens = buildMatchTokens(entry)
     ops.push({
       updateOne: {
         filter: { _id: doc._id },
         update: {
-          $set: { searchKey, searchTokens },
+          $set: { searchKey, searchTokens, matchTokens },
           $unset: { 'fields.$[].searchValue': 1 },
         },
       },
