@@ -55,7 +55,7 @@ import { captureException } from '@/infrastructure/error-reporter'
 import OError from '@overleaf/o-error'
 import getMeta from '@/utils/meta'
 import type { Annotation } from '../../../../types/annotation'
-import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
+import { useProjectSettingsContext } from '@/features/ide-settings/context/project-settings-context'
 import {
   ActiveOverallTheme,
   useActiveOverallTheme,

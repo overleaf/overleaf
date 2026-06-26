@@ -13,7 +13,7 @@ import { useStatusFavicon } from '@/features/ide-react/hooks/use-status-favicon'
 import useThemedPage from '@/shared/hooks/use-themed-page'
 
 import MainLayout from '@/features/ide-react/components/layout/main-layout'
-import SettingsModalNew from '@/features/settings/components/settings-modal'
+import SettingsModal from '@/features/ide-settings/components/settings-modal'
 import CommandPalette from '@/features/command-palette/components/command-palette'
 
 export default function IdePage() {
@@ -32,7 +32,7 @@ export default function IdePage() {
     <GlobalAlertsProvider>
       <Alerts />
       <Modals />
-      <SettingsModalNew />
+      <SettingsModal />
       <MainLayout />
       <GlobalToasts />
       {showCommandPalette && <CommandPalette />}

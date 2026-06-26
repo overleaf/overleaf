@@ -1,4 +1,4 @@
-import useSetOverallTheme from '@/features/editor-left-menu/hooks/use-set-overall-theme'
+import useSetOverallTheme from '@/features/ide-settings/hooks/use-set-overall-theme'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'

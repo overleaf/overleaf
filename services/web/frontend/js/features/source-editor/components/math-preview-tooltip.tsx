@@ -1,4 +1,4 @@
-import { useProjectSettingsContext } from '@/features/editor-left-menu/context/project-settings-context'
+import { useProjectSettingsContext } from '@/features/ide-settings/context/project-settings-context'
 import {
   Dropdown,
   DropdownMenu,

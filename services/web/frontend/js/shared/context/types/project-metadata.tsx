@@ -1,6 +1,6 @@
 import { UserId } from '../../../../../types/user'
 import { PublicAccessLevel } from '../../../../../types/public-access-level'
-import { ProjectSettings } from '@/features/editor-left-menu/utils/api'
+import { ProjectSettings } from '@/features/ide-settings/utils/api'
 import { Folder } from '../../../../../types/folder'
 
 export type ProjectMember = {
