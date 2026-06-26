@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: overleaf
+  labels:
+    app: overleaf
+    {{- include "overleaf.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: overleaf
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: overleaf
+    spec:
+      containers:
+        - name: overleaf
+          image: "{{ .Values.overleaf.image.repository }}:{{ .Values.overleaf.image.tag }}"
+          imagePullPolicy: {{ .Values.overleaf.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+          env:
+            {{- range $key, $val := .Values.overleaf.env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.overleaf.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/overleaf
+          readinessProbe:
+            httpGet:
+              path: /login
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /login
+              port: 80
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: overleaf-data
+      terminationGracePeriodSeconds: 60
+      restartPolicy: Always

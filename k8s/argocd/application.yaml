@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: overleaf
+  namespace: argocd
+spec:
+  project: default
+  source:
+    # Update repoURL to your fork or a local Gitea instance for true air-gap operation
+    repoURL: https://github.com/tommybobbins/overleaf.git
+    targetRevision: HEAD
+    path: k8s/charts/overleaf
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: overleaf
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
