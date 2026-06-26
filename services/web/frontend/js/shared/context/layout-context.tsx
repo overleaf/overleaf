@@ -220,7 +220,7 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
       if (
         (isMac ? event.metaKey : event.ctrlKey) &&
         event.shiftKey &&
-        event.key === 'F'
+        event.key.toUpperCase() === 'F'
       ) {
         event.preventDefault()
         sendSearchEvent('search-open', {
@@ -234,7 +234,7 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
         focusModeEnabled &&
         (isMac ? event.metaKey : event.ctrlKey) &&
         event.shiftKey &&
-        event.key === 'M'
+        event.key.toUpperCase() === 'M'
       ) {
         event.preventDefault()
         setFocusMode(mode => !mode)
