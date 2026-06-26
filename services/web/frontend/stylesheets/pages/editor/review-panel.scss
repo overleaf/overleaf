@@ -11,31 +11,16 @@ $rp-type-blue: #6b7797;
   --review-panel-width: 230px;
   --review-panel-width-mini: 24px;
   --review-panel-color-scheme: dark;
-  --review-mode-switcher-reviewing-bg: var(--yellow-10);
-  --review-mode-switcher-reviewing-hover-bg: var(--yellow-20);
-  --review-mode-switcher-reviewing-color: var(--yellow-60);
-
-  @include theme('default') {
-    .ide-redesign-main {
-      --review-panel-bg-color: var(--bg-dark-secondary);
-      --review-panel-color: var(--content-primary-dark);
-      --review-panel-color-secondary: var(--content-secondary-dark);
-      --review-panel-header-bg-color: var(--bg-dark-primary);
-      --review-panel-footer-bg-color: var(--bg-dark-primary);
-      --review-panel-entry-bg-color: var(--bg-dark-primary);
-      --review-panel-empty-state-bg-color: var(--bg-dark-primary);
-      --review-panel-button-hover-bg-color: var(--bg-dark-tertiary);
-      --review-panel-border-color: var(--border-divider-dark);
-      --review-panel-color-scheme: dark;
-      --review-mode-switcher-reviewing-bg: var(--yellow-70);
-      --review-mode-switcher-reviewing-hover-bg: var(--yellow-60);
-      --review-mode-switcher-reviewing-color: var(--yellow-10);
-    }
-  }
+  --review-mode-switcher-reviewing-bg: var(--yellow-70);
+  --review-mode-switcher-reviewing-hover-bg: var(--yellow-60);
+  --review-mode-switcher-reviewing-color: var(--yellow-10);
 }
 
 @include theme('light') {
   --review-panel-color-scheme: light;
+  --review-mode-switcher-reviewing-bg: var(--yellow-10);
+  --review-mode-switcher-reviewing-hover-bg: var(--yellow-20);
+  --review-mode-switcher-reviewing-color: var(--yellow-60);
 }
 
 .review-panel-container {
@@ -782,7 +767,7 @@ del.review-panel-content-highlight {
     &:hover,
     &:focus-within {
       .review-mode-switcher-toggle-button.editing {
-        background-color: var(--review-panel-button-hover-bg-color);
+        background-color: var(--bg-tertiary-themed);
       }
 
       .review-mode-switcher-toggle-button.reviewing {
