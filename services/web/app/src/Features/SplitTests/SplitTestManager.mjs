@@ -15,7 +15,6 @@ async function getSplitTests() {
     return await SplitTest.find({})
       .populate('archivedBy', ['email', 'first_name', 'last_name'])
       .populate('versions.author', ['email', 'first_name', 'last_name'])
-      .limit(300)
       .exec()
   } catch (error) {
     throw OError.tag(error, 'Failed to get split tests list')
