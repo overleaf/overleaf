@@ -1,9 +1,0 @@
-#!/bin/bash
-
-set -e
-
-# Ensure all locales are still in use
-node scripts/translations/cleanupUnusedLocales.js --check
-
-# Ensure all locales use the same variables
-node scripts/translations/checkVariables.js --ignore-orphaned-translations

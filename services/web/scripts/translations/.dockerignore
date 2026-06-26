@@ -1,6 +1,0 @@
-node_modules/
-
-# Limit code access with minimal docker image.
-cloudbuild.yaml
-docker-compose.yml
-Dockerfile

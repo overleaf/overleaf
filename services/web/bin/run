@@ -1,8 +1,0 @@
-#!/bin/bash
-
-pushd ..
-bin/run "$*"
-RV=$?
-popd || exit 1
-
-exit $RV
