@@ -22,7 +22,7 @@ export default {
       this.timeout(60_000)
 
       await promisify(exec)(
-        `cd ../../tools/migrations && npm run migrations -- migrate -t ${Settings.env || DEFAULT_ENV}`
+        `cd ../../tools/migrations && yarn run migrations migrate -t '${Settings.env || DEFAULT_ENV} & !nonblocking'`
       )
     })
 

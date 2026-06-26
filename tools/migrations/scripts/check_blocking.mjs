@@ -8,10 +8,7 @@
 //   1  one or more blocking pending migrations - rollout must not proceed
 //   2  the check itself failed (e.g. Mongo unreachable) - fail closed
 //
-// A migration is non-blocking when either:
-//   - it is tagged "nonblocking" (preferred; safe to set on an already-applied migration), or
-//   - its filename ends with "_nonBlocking" before the extension,
-//     e.g. 20260101000000_backfill_thing_nonBlocking.mjs.
+// A migration is non-blocking when it is tagged "nonblocking".
 
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -19,7 +16,6 @@ import east from 'east'
 
 const { MigrationManager } = east
 
-const NON_BLOCKING_SUFFIX = '_nonBlocking'
 const NON_BLOCKING_TAG = 'nonblocking'
 const TAG = process.env.MIGRATION_TAG || 'saas'
 
@@ -46,20 +42,14 @@ async function findBlockingMigrations() {
 
   try {
     const pending = await manager.getMigrationNames({ status: 'new' })
-    const candidates = pending.filter(
-      name => !name.endsWith(NON_BLOCKING_SUFFIX)
-    )
-    const nonBlocking = pending.filter(name =>
-      name.endsWith(NON_BLOCKING_SUFFIX)
-    )
-    const blocking = candidates.length
+    const blocking = pending.length
       ? await manager.getMigrationNames({
-          migrations: candidates,
+          migrations: pending,
           tag: `${TAG} & !${NON_BLOCKING_TAG}`,
         })
       : []
 
-    return { pending, nonBlocking, blocking }
+    return { pending, blocking }
   } finally {
     await manager.disconnect()
   }
@@ -74,14 +64,7 @@ async function main() {
     return 0
   }
 
-  const { pending, nonBlocking, blocking } = await findBlockingMigrations()
-
-  if (nonBlocking.length) {
-    console.log(
-      `Ignoring ${nonBlocking.length} non-blocking pending migration(s):\n` +
-        nonBlocking.map(name => `  - ${name}`).join('\n')
-    )
-  }
+  const { pending, blocking } = await findBlockingMigrations()
 
   if (blocking.length === 0) {
     console.log(
@@ -96,8 +79,7 @@ async function main() {
     `${blocking.length} blocking pending "${TAG}" migration(s) must be applied before deploying:\n` +
       blocking.map(name => `  - ${name}`).join('\n') +
       `\n\nApply them, then retry the rollout. To intentionally ship a non-blocking ` +
-      `migration, add the "${NON_BLOCKING_TAG}" tag (preferred — safe on already-applied ` +
-      `migrations) or rename the file with the "${NON_BLOCKING_SUFFIX}" suffix.`
+      `migration, add the "${NON_BLOCKING_TAG}" tag.`
   )
   return 1
 }

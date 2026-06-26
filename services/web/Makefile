@@ -175,7 +175,7 @@ test_unit_module: mongo_migrations_for_tests
 	$(MAKE) modules/$(MODULE_NAME)/test_unit
 
 mongo_migrations_for_tests:
-	$(DOCKER_COMPOSE) run $(DC_RUN_FLAGS) --workdir /overleaf/tools/migrations test_unit yarn run migrations migrate -t saas
+	$(DOCKER_COMPOSE) run $(DC_RUN_FLAGS) --workdir /overleaf/tools/migrations test_unit yarn run migrations migrate -t 'saas & !nonblocking'
 
 #
 # Frontend tests
