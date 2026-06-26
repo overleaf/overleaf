@@ -10,47 +10,9 @@ const LABS_PHASE = 'labs'
 const BETA_PHASE = 'beta'
 const RELEASE_PHASE = 'release'
 
-async function getSplitTests({ name, phase, type, active, archived }) {
-  const filters = {}
-  if (name && name !== '') {
-    filters.name = { $regex: _.escapeRegExp(name) }
-  }
-  if (active) {
-    filters.$where = 'this.versions[this.versions.length - 1].active === true'
-  }
-  if (type === 'split-test') {
-    const query =
-      'this.versions[this.versions.length - 1].analyticsEnabled === true'
-    if (filters.$where) {
-      filters.$where += `&& ${query}`
-    } else {
-      filters.$where = query
-    }
-  }
-  if (type === 'gradual-rollout') {
-    const query =
-      'this.versions[this.versions.length - 1].analyticsEnabled === false'
-    if (filters.$where) {
-      filters.$where += `&& ${query}`
-    } else {
-      filters.$where = query
-    }
-  }
-  if (['alpha', 'labs', 'beta', 'release'].includes(phase)) {
-    const query = `this.versions[this.versions.length - 1].phase === "${phase}"`
-    if (filters.$where) {
-      filters.$where += `&& ${query}`
-    } else {
-      filters.$where = query
-    }
-  }
-  if (archived === true) {
-    filters.archived = true
-  } else if (archived === false) {
-    filters.archived = { $ne: true }
-  }
+async function getSplitTests() {
   try {
-    return await SplitTest.find(filters)
+    return await SplitTest.find({})
       .populate('archivedBy', ['email', 'first_name', 'last_name'])
       .populate('versions.author', ['email', 'first_name', 'last_name'])
       .limit(300)
