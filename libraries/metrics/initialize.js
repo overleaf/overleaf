@@ -34,14 +34,15 @@ function initializeOpenTelemetryInstrumentation() {
   const {
     getNodeAutoInstrumentations,
   } = require('@opentelemetry/auto-instrumentations-node')
-  const { Resource } = require('@opentelemetry/resources')
+  const { resourceFromAttributes } = require('@opentelemetry/resources')
   const {
-    SemanticResourceAttributes,
+    ATTR_SERVICE_NAME,
+    ATTR_SERVICE_NAMESPACE,
   } = require('@opentelemetry/semantic-conventions')
 
-  const resource = new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: APP_NAME,
-    [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'Overleaf',
+  const resource = resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: APP_NAME,
+    [ATTR_SERVICE_NAMESPACE]: 'Overleaf',
     'host.type': 'VM',
   })
 
