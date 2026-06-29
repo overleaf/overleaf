@@ -6,7 +6,6 @@ import Metrics from '@overleaf/metrics'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import express from 'express'
-import bodyParser from 'body-parser'
 import { handleValidationError } from '@overleaf/validation-tools'
 import mongodb from './app/js/mongodb.js'
 import Errors from './app/js/Errors.js'
@@ -69,12 +68,12 @@ app.get('/project/:project_id/doc/:doc_id/peek', HttpController.peekDoc)
 // Add 64kb overhead for the JSON encoding, and double the size to allow for ranges in the json payload
 app.post(
   '/project/:project_id/doc/:doc_id',
-  bodyParser.json({ limit: Settings.maxJsonRequestSize }),
+  express.json({ limit: Settings.maxJsonRequestSize }),
   HttpController.updateDoc
 )
 app.patch(
   '/project/:project_id/doc/:doc_id',
-  bodyParser.json(),
+  express.json(),
   HttpController.patchDoc
 )
 app.delete('/project/:project_id/doc/:doc_id', (req, res) => {

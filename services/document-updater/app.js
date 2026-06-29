@@ -17,13 +17,11 @@ const HttpController = require('./app/js/HttpController')
 const mongodb = require('./app/js/mongodb')
 const async = require('async')
 
-const bodyParser = require('body-parser')
-
 Metrics.event_loop.monitor(logger, 100)
 Metrics.open_sockets.monitor()
 
 const app = express()
-app.use(bodyParser.json({ limit: Settings.maxJsonRequestSize }))
+app.use(express.json({ limit: Settings.maxJsonRequestSize }))
 Metrics.injectMetricsRoute(app)
 
 DispatchManager.createAndStartDispatchers(Settings.dispatcherCount)

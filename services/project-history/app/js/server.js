@@ -2,7 +2,6 @@ import Metrics from '@overleaf/metrics'
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
 import express from 'express'
-import bodyParser from 'body-parser'
 import * as Errors from './Errors.js'
 import * as Router from './Router.js'
 import { handleValidationError } from '@overleaf/validation-tools'
@@ -40,8 +39,8 @@ HistoryLogger.addSerializers({
 })
 
 export const app = express()
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 app.use(Metrics.http.monitor(logger))
 Router.initialize(app)
 Metrics.injectMetricsRoute(app)

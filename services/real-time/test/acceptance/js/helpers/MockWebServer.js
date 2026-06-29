@@ -11,7 +11,6 @@
  */
 import sinon from 'sinon'
 import express from 'express'
-import bodyParser from 'body-parser'
 
 let MockWebServer
 
@@ -90,7 +89,7 @@ export default MockWebServer = {
       return callback()
     }
     const app = express()
-    app.use(bodyParser.json())
+    app.use(express.json())
     app.post('/project/:project_id/join', MockWebServer.joinProjectRequest)
     return app
       .listen(3000, error => {

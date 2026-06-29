@@ -68,7 +68,7 @@
     "react-dom": "18.3.1",
     "i18next-scanner/i18next": "23.16.8",
     "downshift": "9.0.9",
-    "body-parser@npm:1.20.4": "patch:body-parser@npm%3A1.20.4#~/.yarn/patches/body-parser-npm-1.20.4.patch",
+    "body-parser": "patch:body-parser@npm%3A1.20.4#~/.yarn/patches/body-parser-npm-1.20.4.patch",
     "cypress-multi-reporters": "patch:cypress-multi-reporters@npm%3A2.0.5#~/.yarn/patches/cypress-multi-reporters-npm-2.0.5.patch",
     "forwarded@npm:0.2.0": "patch:forwarded@npm%3A0.2.0#~/.yarn/patches/forwarded-npm-0.2.0.patch",
     "multer@npm:2.1.1": "patch:multer@npm%3A2.1.1#~/.yarn/patches/multer-npm-2.1.1.patch",

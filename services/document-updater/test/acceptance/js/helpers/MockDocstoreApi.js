@@ -1,5 +1,4 @@
 const express = require('express')
-const bodyParser = require('body-parser')
 const { expressify } = require('@overleaf/promise-utils')
 const app = express()
 const MAX_REQUEST_SIZE = 2 * (2 * 1024 * 1024 + 64 * 1024)
@@ -79,7 +78,7 @@ const MockDocstoreApi = {
 
     app.patch(
       '/project/:project_id/doc/:doc_id',
-      bodyParser.json({ limit: MAX_REQUEST_SIZE }),
+      express.json({ limit: MAX_REQUEST_SIZE }),
       expressify(async (req, res) => {
         try {
           await MockDocstoreApi.patchDocument(

@@ -12,7 +12,6 @@ const helmet = require('helmet')
 const HTTPStatus = require('http-status')
 const logger = require('@overleaf/logger')
 const Metrics = require('@overleaf/metrics')
-const bodyParser = require('body-parser')
 const security = require('./api/middleware/security')
 const healthChecks = require('./api/controllers/health_checks')
 const { mongodb, loadGlobalBlobs } = require('./storage')
@@ -37,9 +36,9 @@ Metrics.leaked_sockets.monitor(logger)
 // We may have fairly large JSON bodies when receiving large Changes. Clients
 // may have to handle 413 status codes and try creating files instead of sending
 // text content in changes.
-app.use(bodyParser.json({ limit: '12MB' }))
+app.use(express.json({ limit: '12MB' }))
 app.use(
-  bodyParser.urlencoded({
+  express.urlencoded({
     extended: false,
   })
 )

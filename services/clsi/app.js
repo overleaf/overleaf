@@ -15,7 +15,6 @@ import ProjectPersistenceManager from './app/js/ProjectPersistenceManager.js'
 import OutputCacheManager from './app/js/OutputCacheManager.js'
 
 import express from 'express'
-import bodyParser from 'body-parser'
 
 import net from 'node:net'
 import os from 'node:os'
@@ -73,7 +72,7 @@ app.param('build_id', function (req, res, next, buildId) {
 
 app.post(
   '/project/:project_id/compile',
-  bodyParser.json({ limit: Settings.compileSizeLimit }),
+  express.json({ limit: Settings.compileSizeLimit }),
   CompileController.compile
 )
 app.post('/project/:project_id/compile/stop', CompileController.stopCompile)
@@ -88,7 +87,7 @@ app.post('/project/:project_id/status', CompileController.status)
 // Per-user containers
 app.post(
   '/project/:project_id/user/:user_id/compile',
-  bodyParser.json({ limit: Settings.compileSizeLimit }),
+  express.json({ limit: Settings.compileSizeLimit }),
   CompileController.compile
 )
 app.post(
@@ -113,14 +112,14 @@ app.get(
 // This needs to be before GET /project/:project_id/build/:build_id/output/*
 app.get(
   '/project/:project_id/build/:build_id/output/output.zip',
-  bodyParser.json(),
+  express.json(),
   OutputController.createOutputZip
 )
 
 // This needs to be before GET /project/:project_id/user/:user_id/build/:build_id/output/*
 app.get(
   '/project/:project_id/user/:user_id/build/:build_id/output/output.zip',
-  bodyParser.json(),
+  express.json(),
   OutputController.createOutputZip
 )
 
@@ -142,7 +141,7 @@ app.post(
 )
 app.post(
   '/project/:project_id/user/:user_id/download/project-to-document',
-  bodyParser.json({ limit: Settings.compileSizeLimit }),
+  express.json({ limit: Settings.compileSizeLimit }),
   ConversionController.convertProjectToDocument
 )
 app.post(

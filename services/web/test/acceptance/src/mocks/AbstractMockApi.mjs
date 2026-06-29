@@ -1,6 +1,5 @@
 import OError from '@overleaf/o-error'
 import express from 'express'
-import bodyParser from 'body-parser'
 
 /**
  * Abstract class for running a mock API via Express. Handles setting up of
@@ -49,8 +48,8 @@ class AbstractMockApi {
     this.debug = debug
     this.port = port
     this.app = express()
-    this.app.use(bodyParser.json())
-    this.app.use(bodyParser.urlencoded({ extended: true }))
+    this.app.use(express.json())
+    this.app.use(express.urlencoded({ extended: true }))
   }
 
   /**

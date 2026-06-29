@@ -1,11 +1,11 @@
 import metrics from '@overleaf/metrics'
 import logger from '@overleaf/logger'
 import settings from '@overleaf/settings'
+import express from 'express'
 import WebsocketController from './WebsocketController.js'
 import HttpController from './HttpController.js'
 import HttpApiController from './HttpApiController.js'
 import WebsocketAddressManager from './WebsocketAddressManager.js'
-import bodyParser from 'body-parser'
 import base64id from 'base64id'
 import Errors from './Errors.js'
 import { z, zz } from '@overleaf/validation-tools'
@@ -157,7 +157,7 @@ export default Router = {
 
     app.post(
       '/project/:project_id/message/:message',
-      bodyParser.json({ limit: '5mb' }),
+      express.json({ limit: '5mb' }),
       HttpApiController.sendMessage
     )
     app.get(

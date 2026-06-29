@@ -1,5 +1,4 @@
 const express = require('express')
-const bodyParser = require('body-parser')
 const { EventEmitter } = require('node:events')
 const http = require('node:http')
 const https = require('node:https')
@@ -10,7 +9,7 @@ class TestServer {
     this.app = express()
     this.events = new EventEmitter()
 
-    this.app.use(bodyParser.json())
+    this.app.use(express.json())
     this.app.use((req, res, next) => {
       this.events.emit('request-received')
       this.lastReq = req

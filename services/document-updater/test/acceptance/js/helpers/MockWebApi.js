@@ -2,7 +2,6 @@ let MockWebApi
 const basicAuth = require('basic-auth')
 const tsscmp = require('tsscmp')
 const express = require('express')
-const bodyParser = require('body-parser')
 const { expressify } = require('@overleaf/promise-utils')
 const Settings = require('@overleaf/settings')
 const app = express()
@@ -113,7 +112,7 @@ module.exports = MockWebApi = {
 
     app.post(
       '/project/:project_id/doc/:doc_id',
-      bodyParser.json({ limit: MAX_REQUEST_SIZE }),
+      express.json({ limit: MAX_REQUEST_SIZE }),
       expressify(async (req, res, next) => {
         await this.setDocumentController(req, res, next)
       })
