@@ -55,6 +55,7 @@ describe('applyOtUpdate', function () {
   before(function () {
     return (this.update = {
       op: [{ i: 'foo', p: 42 }],
+      v: 42,
     })
   })
   describe('when authorized', function () {
@@ -164,10 +165,13 @@ describe('applyOtUpdate', function () {
   describe('when authorized with a huge edit update', function () {
     before(function (done) {
       this.update = {
-        op: {
-          p: 12,
-          t: 'update is too large'.repeat(1024 * 400), // >7MB
-        },
+        op: [
+          {
+            p: 12,
+            i: 'update is too large'.repeat(1024 * 400), // >7MB
+          },
+        ],
+        v: 42,
       }
       return async.series(
         [
@@ -337,6 +341,7 @@ describe('applyOtUpdate', function () {
     before(function (done) {
       this.comment_update = {
         op: [{ c: 'foo', p: 42 }],
+        v: 42,
       }
       return async.series(
         [
@@ -649,7 +654,7 @@ describe('applyOtUpdate', function () {
             return this.client.emit(
               'applyOtUpdate',
               this.doc_id,
-              { doc: 'other-doc' },
+              { ...this.update, doc: 'aaaaaaaaaaaaaaaaaaaaaaaa' },
               error => {
                 this.error = error
                 return cb()

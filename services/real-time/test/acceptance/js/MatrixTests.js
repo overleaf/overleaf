@@ -431,7 +431,7 @@ describe('MatrixTests', function () {
                     // disconnected clients cannot emit messages
                     return this.skip()
                   }
-                  const userUpdate = Object.assign({}, update, {
+                  const userUpdate = Object.assign({}, update.op, {
                     hash: 'user',
                   })
 
@@ -447,7 +447,7 @@ describe('MatrixTests', function () {
                 })
 
                 beforeEach(function sendAsPrivateUserForReferenceOp(done) {
-                  const privateUpdate = Object.assign({}, update, {
+                  const privateUpdate = Object.assign({}, update.op, {
                     hash: 'private',
                   })
 
