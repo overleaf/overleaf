@@ -12,6 +12,7 @@ import {
 } from '../context/settings-modal-context'
 import useFocusOnSetting from '../hooks/use-focus-on-setting'
 import useOpenSettingsViaQueryParam from '../hooks/use-open-settings-via-query-param'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const SettingsModalWrapper = () => {
   return (
@@ -25,6 +26,7 @@ const SettingsModal = () => {
   const { t } = useTranslation()
   const { show, setShow, settingsTabs, activeTab, setActiveTab } =
     useSettingsModalContext()
+  const themed = useFeatureFlag('themed-modals')
 
   useFocusOnSetting()
   useOpenSettingsViaQueryParam()
@@ -39,6 +41,7 @@ const SettingsModal = () => {
           ? 'ide-settings-modal-transparent-backdrop'
           : undefined
       }
+      themed={themed}
     >
       <OLModalHeader>
         <OLModalTitle>{t('settings')}</OLModalTitle>

@@ -497,6 +497,7 @@ const _ProjectController = {
       'ai-disabled-collaborators',
       'group-link-sharing',
       'compile-with-checkpoint',
+      'themed-modals',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
