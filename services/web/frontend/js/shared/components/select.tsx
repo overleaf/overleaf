@@ -10,7 +10,7 @@ import {
 import classNames from 'classnames'
 import { useSelect } from 'downshift'
 import { useTranslation } from 'react-i18next'
-import { Form } from 'react-bootstrap'
+import { Form, OverlayProps } from 'react-bootstrap'
 import FormControl from '@/shared/components/form/form-control'
 import MaterialIcon from '@/shared/components/material-icon'
 import { CaretUp, CaretDown, Check } from '@phosphor-icons/react'
@@ -25,11 +25,13 @@ import { DropdownItemProps } from '@/shared/components/types/dropdown-menu-props
 function SelectMenuPopover({
   show,
   target,
+  container,
   onHide,
   children,
 }: {
   show: boolean
   target: HTMLElement | null
+  container?: OverlayProps['container']
   onHide: () => void
   children: ReactNode
 }) {
@@ -38,6 +40,7 @@ function SelectMenuPopover({
     <OLOverlay
       show={show}
       target={target}
+      container={container}
       placement="bottom-start"
       rootClose
       onHide={onHide}
@@ -101,6 +104,9 @@ export type SelectProps<T> = {
   size?: React.ComponentProps<typeof FormControl>['size']
   // Renders the menu in a portal so it escapes overflow-clipping ancestors.
   portal?: boolean
+  // Element the portaled menu is rendered into (only used with `portal`).
+  // Defaults to the document body.
+  menuContainer?: OverlayProps['container']
   // Optional id for the toggle button element. When provided, enables association
   // with an external <label htmlFor="...">
   id?: string
@@ -127,6 +133,7 @@ export const Select = <T,>({
   isCiam,
   size,
   portal = false,
+  menuContainer,
   id,
 }: SelectProps<T>) => {
   const toggleButtonId = id ? { id } : {}
@@ -257,6 +264,7 @@ export const Select = <T,>({
     <SelectMenuPopover
       show={isOpen}
       target={rootRef.current}
+      container={menuContainer}
       onHide={closeMenu}
     >
       {menu}
