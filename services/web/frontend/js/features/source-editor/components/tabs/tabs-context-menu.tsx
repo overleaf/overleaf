@@ -73,8 +73,7 @@ export function TabsContextMenu() {
     <div
       ref={menuRef}
       style={{ top: contextMenuTarget.top, left: contextMenuTarget.left }}
-      // TODO ide-redesign-cleanup: remove 'ide-redesign-main' class when old editor is removed
-      className="context-menu ide-redesign-main"
+      className="context-menu"
     >
       <Dropdown
         show

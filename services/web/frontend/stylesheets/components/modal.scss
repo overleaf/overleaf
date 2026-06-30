@@ -2,13 +2,22 @@
   --bs-heading-color: var(--content-primary);
 }
 
-.modal {
-  // Until we add a dark modal version, all core components in modals should use light theme
-  @include light-dropdown-menu;
-  @include form-check-light;
-  @include light-notification;
-  @include light-input;
-  @include light-buttons;
+@include theme('default') {
+  .modal {
+    // Until we add a dark modal version, all core components in modals should use light theme
+    @include light-dropdown-menu;
+    @include light-notification;
+    @include form-check-light;
+
+    .form-control,
+    .form-control-wrapper {
+      @include light-input;
+    }
+
+    .btn {
+      @include light-buttons;
+    }
+  }
 }
 
 @include media-breakpoint-up(sm) {

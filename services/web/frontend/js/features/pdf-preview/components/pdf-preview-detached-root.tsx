@@ -28,15 +28,7 @@ function PdfPreviewDetachedRootContent() {
       activeOverallTheme === 'dark' ? 'default' : 'light'
   }, [activeOverallTheme])
 
-  return (
-    <EditorRedesignWrapper>
-      <PdfPreview />
-    </EditorRedesignWrapper>
-  )
-}
-function EditorRedesignWrapper({ children }: { children: React.ReactNode }) {
-  // TODO ide-redesign-cleanup: this wrapper should not be required
-  return <div className="ide-redesign-main">{children}</div>
+  return <PdfPreview />
 }
 
 export default PdfPreviewDetachedRoot // for testing

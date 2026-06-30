@@ -29,13 +29,7 @@ const Layout: FC<{ layout: IdeLayout; view?: IdeView }> = ({
 }
 
 const PdfViewer = ({ children }: { children: ReactElement }) => {
-  return (
-    // TODO: ide-redesign-cleanup: Remove the .ide-redesign-main wrapper when
-    // the styles are no longer nested in that.
-    <div className="ide-redesign-main">
-      <div className="pdf-viewer">{children}</div>
-    </div>
-  )
+  return <div className="pdf-viewer">{children}</div>
 }
 
 describe('<PdfPreview/>', function () {

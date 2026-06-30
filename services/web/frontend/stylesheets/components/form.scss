@@ -118,14 +118,11 @@
 }
 
 @include theme('default') {
-  .ide-redesign-main,
-  .project-ds-nav-page {
-    @include form-check-dark;
+  @include form-check-dark;
 
-    .form-control,
-    .form-control-wrapper {
-      @include dark-input;
-    }
+  .form-control,
+  .form-control-wrapper {
+    @include dark-input;
   }
 }
 

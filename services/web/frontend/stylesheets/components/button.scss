@@ -94,11 +94,8 @@
   }
 
   @include theme('default') {
-    .ide-redesign-main,
-    .project-ds-nav-page {
-      .btn {
-        @include dark-buttons;
-      }
+    .btn {
+      @include dark-buttons;
     }
   }
 }
