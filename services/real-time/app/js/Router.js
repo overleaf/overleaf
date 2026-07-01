@@ -33,7 +33,7 @@ const applyOtUpdateSchema = z.object({
     lastV: z.number().optional(),
     meta: z
       .strictObject({
-        tc: z.string(),
+        tc: z.string().optional(),
       })
       .optional(),
     op: z
