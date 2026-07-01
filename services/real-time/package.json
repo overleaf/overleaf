@@ -34,7 +34,7 @@
     "lodash": "^4.18.1",
     "proxy-addr": "^2.0.7",
     "socket.io": "github:overleaf/socket.io#0.9.19-overleaf-12",
-    "socket.io-client": "github:overleaf/socket.io-client#0.9.17-overleaf-5",
+    "socket.io-client": "https://github.com/overleaf/socket.io-client/archive/refs/tags/0.9.17-overleaf-6.tar.gz",
     "zod-validation-error": "^4.0.1"
   },
   "devDependencies": {
@@ -49,6 +49,7 @@
     "timekeeper": "0.0.4",
     "typescript": "^5.0.4",
     "uid-safe": "^2.1.5",
-    "vitest": "4.1.5"
+    "vitest": "4.1.5",
+    "ws": "^8.21.0"
   }
 }
