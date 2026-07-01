@@ -17,6 +17,12 @@ export const shortcuts = () => {
         preventDefault: true,
         run: toggleWrapRanges('_', '_', 'Emphasis'),
       },
+      {
+        key: 'Ctrl-Shift-x',
+        mac: 'Mod-Shift-x',
+        preventDefault: true,
+        run: toggleWrapRanges('~~', '~~', 'Strikethrough', 'StrikethroughMark'),
+      },
     ])
   )
 }
