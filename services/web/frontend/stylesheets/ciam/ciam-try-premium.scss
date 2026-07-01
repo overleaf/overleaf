@@ -10,3 +10,40 @@
   width: 36px;
   height: 36px;
 }
+
+.ciam-try-premium-plan-selector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-spacing-400);
+}
+
+.ciam-try-premium-plan-name {
+  @include ds-heading-xs-semibold;
+
+  margin: 0;
+}
+
+.ciam-try-premium-freemium {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-spacing-400);
+  padding: 0 0 var(--ds-spacing-400) 0;
+}
+
+.ciam-try-premium-paid-plan {
+  background-color: var(--ds-color-green-100);
+  border-radius: var(--ds-border-radius-200);
+  padding: var(--ds-spacing-600);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-spacing-400);
+
+  .ciam-try-premium-logo-container {
+    justify-content: flex-start;
+    gap: var(--ds-spacing-400);
+  }
+
+  .ciam-list-style-check-green li::before {
+    background-color: var(--ds-color-green-600);
+  }
+}
