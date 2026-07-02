@@ -6,7 +6,7 @@
 const thirdPartyIcons = [
   { file: 'git.svg', label: 'Git' },
   { file: 'github.svg', label: 'GitHub' },
-  { file: 'dropbox.svg', label: 'Dropbox' },
+  { file: 'dropbox-transparent.svg', label: 'Dropbox' },
   { file: 'zotero_64x64x32.png', label: 'Zotero' },
   { file: 'mendeley.svg', label: 'Mendeley' },
   { file: 'papers.svg', label: 'Papers' },
