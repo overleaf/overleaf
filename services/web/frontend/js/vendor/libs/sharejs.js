@@ -1,3 +1,16 @@
+/**
+ * ShareJS client v0.5.0
+ * https://github.com/josephg/ShareJS
+ *
+ * Copyright (c) 2011-2014 Joseph Gentle
+ * Licensed under the MIT License
+ * SPDX-License-Identifier: MIT
+ *
+ * This file was transpiled from CoffeeScript and adapted for the
+ * Overleaf frontend. See https://github.com/overleaf/internal/issues/25227
+ * for provenance details.
+ */
+
 import { generateSHA1Hash } from '../../shared/utils/sha1'
 import { debugging, debugConsole } from '@/utils/debugging'
 import getMeta from '@/utils/meta'

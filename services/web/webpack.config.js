@@ -23,6 +23,7 @@ const entryPoints = {
   'main-style': './frontend/stylesheets/main-style.scss',
   tracking: './frontend/js/infrastructure/tracking.ts',
   'linkedin-insight': './frontend/js/infrastructure/linkedin-insight.ts',
+  highlight: './frontend/js/highlight.js',
 }
 
 // Add entrypoints for each "page"
@@ -63,6 +64,7 @@ const mathjaxDir = getModuleDirectory('mathjax')
 const pdfjsDir = getModuleDirectory('pdfjs-dist')
 const dictionariesDir = getModuleDirectory('@overleaf/dictionaries')
 const pyodideDir = getModuleDirectory('pyodide')
+const highlightJsDir = getModuleDirectory('highlight.js')
 
 const vendorDir = path.join(__dirname, 'frontend/js/vendor')
 
@@ -424,6 +426,13 @@ module.exports = {
           to: 'js/libs/pyodide',
           toType: 'dir',
           context: pyodideDir,
+        },
+        // Copy highlight.js stylesheet for the Open in Overleaf documentation page
+        {
+          from: 'styles/github.min.css',
+          to: 'js/libs/highlight.js/github.min.css',
+          toType: 'file',
+          context: highlightJsDir,
         },
         // Copy CMap files (used to provide support for non-Latin characters),
         // wasm, ICC profiles, fonts and images from pdfjs-dist package to build output.

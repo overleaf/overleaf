@@ -139,6 +139,7 @@
     "form-data": "^4.0.5",
     "globby": "^5.0.0",
     "helmet": "^6.0.1",
+    "highlight.js": "11.11.1",
     "https-proxy-agent": "^7.0.6",
     "i18next": "^23.10.0",
     "jose": "^4.3.8",

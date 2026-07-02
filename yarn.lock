@@ -7644,6 +7644,7 @@ __metadata:
     handlebars: "npm:^4.7.9"
     handlebars-loader: "npm:^1.7.3"
     helmet: "npm:^6.0.1"
+    highlight.js: "npm:11.11.1"
     html-webpack-plugin: "npm:^5.6.7"
     https-proxy-agent: "npm:^7.0.6"
     i18next: "npm:^23.10.0"
@@ -20686,6 +20687,13 @@ __metadata:
   version: 1.1.0
   resolution: "hide-powered-by@npm:1.1.0"
   checksum: 10c0/0a7a51b260586211e92f6508df1f7eb7e12a6a8b99b37f612bbb9943349ed0a7d3debb4115c69fa5b1e99869dcea4f49020817b5d347631c978fc7c74647d3c6
+  languageName: node
+  linkType: hard
+
+"highlight.js@npm:11.11.1":
+  version: 11.11.1
+  resolution: "highlight.js@npm:11.11.1"
+  checksum: 10c0/40f53ac19dac079891fcefd5bd8a21cf2e8931fd47da5bd1dca73b7e4375c1defed0636fc39120c639b9c44119b7d110f7f0c15aa899557a5a1c8910f3c0144c
   languageName: node
   linkType: hard
 
