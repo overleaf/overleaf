@@ -775,4 +775,150 @@ describe('ProjectUploadController', function () {
       })
     })
   })
+
+  describe('multerMiddleware', function () {
+    beforeEach(async function (ctx) {
+      vi.resetModules()
+
+      ctx.uploadSingleMiddleware = sinon.stub()
+
+      class MulterError extends Error {
+        constructor(code) {
+          super(code)
+          this.code = code
+        }
+      }
+      ctx.MulterError = MulterError
+
+      const multerFn = sinon.stub().returns({
+        single: sinon.stub().returns(ctx.uploadSingleMiddleware),
+      })
+      multerFn.MulterError = MulterError
+
+      vi.doMock('multer', () => ({ default: multerFn }))
+      vi.doMock('@overleaf/settings', () => ({ default: { path: {} } }))
+      vi.doMock('@overleaf/metrics', () => ({ default: ctx.metrics }))
+      vi.doMock(
+        '../../../../app/src/Features/Authentication/SessionManager',
+        () => ({ default: ctx.SessionManager })
+      )
+      vi.doMock(
+        '../../../../app/src/Features/Uploads/ProjectUploadManager',
+        () => ({ default: (ctx.ProjectUploadManager = { promises: {} }) })
+      )
+      vi.doMock(
+        '../../../../app/src/Features/Uploads/FileSystemImportManager',
+        () => ({ default: (ctx.FileSystemImportManager = {}) })
+      )
+      vi.doMock(
+        '../../../../app/src/Features/Uploads/ArchiveErrors',
+        () => ArchiveErrors
+      )
+      vi.doMock('../../../../app/src/Features/Project/ProjectLocator', () => ({
+        default: ctx.ProjectLocator,
+      }))
+      vi.doMock('../../../../app/src/Features/Editor/EditorController', () => ({
+        default: ctx.EditorController,
+      }))
+      vi.doMock(
+        '../../../../app/src/Features/Project/ProjectOptionsHandler',
+        () => ({ default: ctx.ProjectOptionsHandler })
+      )
+      vi.doMock(
+        '../../../../app/src/Features/Uploads/DocumentConversionManager.mjs',
+        () => ({ default: ctx.DocumentConversionManager })
+      )
+      vi.doMock('node:fs', () => ({ default: (ctx.fs = {}) }))
+      vi.doMock('node:fs/promises', () => ({
+        default: (ctx.fsPromises = {}),
+      }))
+
+      ctx.ProjectUploadController = (await import(modulePath)).default
+    })
+
+    describe('when the request is aborted', function () {
+      describe('without a file on disk', function () {
+        beforeEach(function (ctx) {
+          ctx.req.destroyed = true
+          ctx.uploadSingleMiddleware.callsFake((req, res, cb) => {
+            cb(new Error('Request aborted'))
+          })
+          ctx.next = sinon.stub()
+          ctx.fs.unlink = sinon.stub()
+          ctx.ProjectUploadController.multerMiddleware(
+            ctx.req,
+            ctx.res,
+            ctx.next
+          )
+        })
+
+        it('should not call next with the error', function (ctx) {
+          expect(ctx.next).not.to.have.been.called
+        })
+
+        it('should not attempt to unlink when no file exists', function (ctx) {
+          expect(ctx.fs.unlink).not.to.have.been.called
+        })
+      })
+
+      describe('with a file already written to disk', function () {
+        beforeEach(function (ctx) {
+          const filePath = '/tmp/uploaded-file'
+          ctx.req.destroyed = true
+          ctx.req.file = { path: filePath }
+          ctx.uploadSingleMiddleware.callsFake((req, res, cb) => {
+            cb(new Error('Request aborted'))
+          })
+          ctx.next = sinon.stub()
+          ctx.fs.unlink = sinon.stub()
+          ctx.ProjectUploadController.multerMiddleware(
+            ctx.req,
+            ctx.res,
+            ctx.next
+          )
+        })
+
+        it('should not call next with the error', function (ctx) {
+          expect(ctx.next).not.to.have.been.called
+        })
+
+        it('should unlink the uploaded file to prevent disk space leak', function (ctx) {
+          expect(ctx.fs.unlink).to.have.been.calledWith(ctx.req.file.path)
+        })
+      })
+    })
+
+    describe('when a generic multer error occurs', function () {
+      beforeEach(function (ctx) {
+        ctx.error = new Error('some other error')
+        ctx.uploadSingleMiddleware.callsFake((req, res, cb) => {
+          cb(ctx.error)
+        })
+        ctx.next = sinon.stub()
+        ctx.ProjectUploadController.multerMiddleware(ctx.req, ctx.res, ctx.next)
+      })
+
+      it('should call next with the error', function (ctx) {
+        expect(ctx.next).to.have.been.calledWith(ctx.error)
+      })
+    })
+
+    describe('when the file is too large', function () {
+      beforeEach(function (ctx) {
+        ctx.uploadSingleMiddleware.callsFake((req, res, cb) => {
+          cb(new ctx.MulterError('LIMIT_FILE_SIZE'))
+        })
+        ctx.next = sinon.stub()
+        ctx.ProjectUploadController.multerMiddleware(ctx.req, ctx.res, ctx.next)
+      })
+
+      it('should return a 422 response', function (ctx) {
+        expect(ctx.res.statusCode).to.equal(422)
+      })
+
+      it('should not call next', function (ctx) {
+        expect(ctx.next).not.to.have.been.called
+      })
+    })
+  })
 })

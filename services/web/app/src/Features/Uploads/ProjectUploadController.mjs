@@ -282,7 +282,17 @@ function multerMiddleware(req, res, next) {
           .status(422)
           .json({ success: false, error: req.i18n.translate('file_too_large') })
       }
-      if (err) return next(err)
+      if (err) {
+        if (req.destroyed) {
+          // Client disconnected during upload, nothing to do — but clean up
+          // any file that multer may have written to disk already
+          if (req.file?.path) {
+            fs.unlink(req.file.path, function () {})
+          }
+          return
+        }
+        return next(err)
+      }
       if (!req.file?.path) {
         logger.info({ req }, 'missing req.file.path on upload')
         return res
