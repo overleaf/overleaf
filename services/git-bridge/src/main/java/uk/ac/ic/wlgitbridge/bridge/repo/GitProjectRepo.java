@@ -14,9 +14,11 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
@@ -84,6 +86,10 @@ public class GitProjectRepo implements ProjectRepo {
       return;
     }
     repo.create();
+    StoredConfig config = repo.getConfig();
+    config.setBoolean(
+        ConfigConstants.CONFIG_CORE_SECTION, null, ConfigConstants.CONFIG_KEY_SYMLINKS, false);
+    config.save();
     // Set default branch to "main" for new projects
     repo.updateRef(Constants.HEAD).link("refs/heads/main");
   }

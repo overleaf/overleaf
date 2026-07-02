@@ -109,7 +109,8 @@ public class Util {
       if (files != null) {
         for (File file : files) {
           if (!excluded.contains(file.getName())) {
-            if (file.isDirectory()) {
+            if (java.nio.file.Files.isDirectory(
+                file.toPath(), java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
               deleteInDirectory(file);
             }
             file.delete();
