@@ -410,7 +410,6 @@
   "expand": "Déplier",
   "expires": "Expire",
   "expiry": "Date d’expiration",
-  "explore_plans": "Découvrir les offres",
   "export_csv": "Exporter en CSV",
   "export_project_to_github": "Exporter le projet vers GitHub",
   "faq_how_does_free_trial_works_answer": "Vous obtenez un accès complet à l’offre __appName__ de votre choix pendant votre essai gratuit de __len__ jours. Il n’y a aucun engagement à poursuivre au delà de l’essai gratuit. Votre carte sera débitée à la fin de votre essai de __len__ jours à moins que vous n’annuliez votre essai auparavant. Vous pouvez annuler depuis les paramètres de votre abonnement.",

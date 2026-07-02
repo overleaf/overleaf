@@ -261,7 +261,6 @@
   "existing_plan_active_until_term_end": "Din befintliga plan och dess funktioner förblir aktiva fram till slutet av den aktuella faktureringsperioden.",
   "expand": "Expandera",
   "expiry": "Utgångsdatum",
-  "explore_plans": "Utforska planer",
   "export_csv": "Exportera CSV",
   "export_project_to_github": "Exportera Projekt till GitHub",
   "faq_how_does_free_trial_works_answer": "Du får full tillgång till din valda __appName__-plan under din __len__-dagars gratis provperiod. Det finns inget krav på att fortsätta efter provperioden. Ditt kort kommer att debiteras i slutet av din __len__-dagars provperiod om du inte avbryter innan dess. Du kan avbryta via dina prenumerationsinställningar.",

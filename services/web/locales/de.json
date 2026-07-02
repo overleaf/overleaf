@@ -531,7 +531,6 @@
   "expired_confirmation_code": "Dein Bestätigungscode ist abgelaufen. Klicke auf <0>Bestätigungscode erneut senden</0>, um einen neuen zu erhalten.",
   "expires": "Läuft ab",
   "expiry": "Ablaufdatum",
-  "explore_plans": "Produkte entdecken",
   "export_csv": "CSV-Datei exportieren",
   "export_project_to_github": "Projekt nach GitHub exportieren",
   "failed_to_send_managed_user_invite_to_email": "Der Versand der Einladung für Verwaltete Benutzer an <0>__email__</0> hat nicht funktioniert. Bitte versuche es später noch einmal.",

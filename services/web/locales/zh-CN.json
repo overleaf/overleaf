@@ -632,7 +632,6 @@
   "expires_on": "过期日期：__date__",
   "expiry": "过期日期",
   "explore_all_plans": "探索所有订阅计划",
-  "explore_plans": "浏览方案",
   "export_csv": "导出CSV",
   "export_project_to_github": "将项目导出到GitHub",
   "failed_to_send_group_invite_to_email": "未能向<0>__email__</0>发送团队邀请。请稍后再试。",

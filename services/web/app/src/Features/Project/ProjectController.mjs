@@ -490,7 +490,6 @@ const _ProjectController = {
       'export-html',
       'command-palette',
       'overleaf-library',
-      'compile-timeout-cta',
       'focus-mode',
       'editor-upgrade-button-relocation',
       'markdown-visual',

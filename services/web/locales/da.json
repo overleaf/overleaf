@@ -544,7 +544,6 @@
   "expires_on": "Udløber: __date__",
   "expiry": "Udløbsdato",
   "explore_all_plans": "Udforsk alle abonnementer",
-  "explore_plans": "Udforsk abonnementer",
   "export_csv": "Eksportér CSV",
   "export_project_to_github": "Eksporter projekt til GitHub",
   "failed_to_send_group_invite_to_email": "En fejl opstod under udsendelse af gruppeinvitation til <0>__email__</0>. Prøv venligst igen senere.",

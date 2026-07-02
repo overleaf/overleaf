@@ -8,7 +8,7 @@ import getMeta from '@/utils/meta'
 import { populateEditorRedesignSegmentation } from '@/shared/hooks/use-editor-analytics'
 import CompileTimeoutPaywallModal from '@/features/pdf-preview/components/compile-timeout-paywall-modal'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
-import { useSplitTest } from '@/shared/context/split-test-context'
+import { useUserContext } from '@/shared/context/user-context'
 
 function TimeoutUpgradePromptNew() {
   const { isProjectOwner } = useDetachCompileContext()
@@ -61,27 +61,12 @@ const CompileTimeout = memo(function CompileTimeout({
   isCompileTimeoutTargetPlansEnabled,
 }: CompileTimeoutProps) {
   const { t } = useTranslation()
-  const { variant } = useSplitTest('compile-timeout-cta')
+  const user = useUserContext()
 
-  let ctaLabel = ''
+  let ctaLabel = user.allowedFreeTrial
+    ? t('start_free_trial')
+    : t('subscribe_now')
 
-  switch (variant) {
-    case 'explore-plans':
-      ctaLabel = t('explore_plans')
-      break
-    case 'get-more-compile-time':
-      ctaLabel = t('get_more_compile_time')
-      break
-    case 'upgrade-now':
-      ctaLabel = t('upgrade_now')
-      break
-    case 'subscribe-now':
-      ctaLabel = t('subscribe_now')
-      break
-    default:
-      ctaLabel = t('start_free_trial')
-      break
-  }
   const extraSearchParams = useMemo(() => {
     return {
       itm_content: 'new-editor',
