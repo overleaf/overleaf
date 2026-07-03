@@ -6665,10 +6665,12 @@ __metadata:
   resolution: "@overleaf/clsi-lb@workspace:services/clsi-lb"
   dependencies:
     "@overleaf/logger": "workspace:*"
+    "@overleaf/metrics": "workspace:*"
     "@overleaf/o-error": "workspace:*"
     "@overleaf/settings": "workspace:*"
     "@overleaf/stream-utils": "workspace:*"
     chai-as-promised: "npm:^7.1.1"
+    express: "npm:4.22.1"
     gcp-metadata: "npm:^6.1.0"
     googleapis: "npm:^144.0.0"
     typescript: "npm:^5.0.4"
