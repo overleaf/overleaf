@@ -27,17 +27,18 @@ export default function RadioButtonSetting<T extends string = string>({
   return (
     <div className="ide-radio-setting-options">
       {options.map(option => (
-        <OLFormCheckbox
-          key={`${id}-${option.value}`}
-          type="radio"
-          id={`${id}-${option.value}`}
-          name={id}
-          value={option.value}
-          checked={value === option.value}
-          onChange={handleChange}
-          label={option.label}
-          description={option.description}
-        />
+        <div key={`${id}-${option.value}`} className="ide-setting">
+          <OLFormCheckbox
+            type="radio"
+            id={`${id}-${option.value}`}
+            name={id}
+            value={option.value}
+            checked={value === option.value}
+            onChange={handleChange}
+            label={option.label}
+            description={option.description}
+          />
+        </div>
       ))}
     </div>
   )
