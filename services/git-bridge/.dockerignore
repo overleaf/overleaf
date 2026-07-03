@@ -6,6 +6,7 @@
 !/lib
 !/src/main
 !/pom.xml
+!/.mvn
 !/Makefile
 !/LICENSE
 !/vendor
