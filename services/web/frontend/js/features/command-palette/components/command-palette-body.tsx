@@ -88,6 +88,7 @@ const CommandPaletteBody: FC<CommandPaletteBodyProps> = ({ show, onHide }) => {
       animation={false}
       backdrop={false}
       clickOutsideDeactivates
+      themed
     >
       <OLModalBody>
         <input
