@@ -237,6 +237,16 @@
   }
 }
 
+// Show a not-allowed cursor on natively disabled buttons. Bootstrap sets
+// pointer-events: none, which hides the cursor, so re-enable it; clicks are
+// still blocked by the native disabled attribute. Excludes .btn.disabled on
+// anchors, which rely on pointer-events: none for multi-click protection.
+button.btn:disabled,
+fieldset:disabled button.btn {
+  pointer-events: auto;
+  cursor: not-allowed;
+}
+
 // Link buttons
 // -------------------------
 
