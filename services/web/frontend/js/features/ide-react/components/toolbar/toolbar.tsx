@@ -20,8 +20,8 @@ import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import SplitTestBadge from '@/shared/components/split-test-badge'
 
-const [publishModalModules] = importOverleafModules('publishModal')
-const SubmitProjectButton = publishModalModules?.import.NewPublishToolbarButton
+const [publishModalModules] = importOverleafModules('publishModalToolbarButton')
+const SubmitProjectButton = publishModalModules?.import.default
 
 export const Toolbar = () => {
   const { view, restoreView, focusMode, setFocusMode, pdfLayout, setView } =

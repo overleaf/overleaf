@@ -17,8 +17,10 @@ import EditableLabel from './editable-label'
 import { DuplicateProject } from './duplicate-project'
 import { ExportProjectWithConversionButton } from './export-project-with-conversion-button'
 
-const [publishModalModules] = importOverleafModules('publishModal')
-const SubmitProjectButton = publishModalModules?.import.NewPublishDropdownButton
+const [publishModalModules] = importOverleafModules(
+  'publishModalDropdownButton'
+)
+const SubmitProjectButton = publishModalModules?.import.default
 
 export const ToolbarProjectTitle = () => {
   const { cobranding } = useEditorContext()
