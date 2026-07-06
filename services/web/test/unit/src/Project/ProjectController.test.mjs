@@ -1628,6 +1628,22 @@ describe('ProjectController', function () {
         })
       })
 
+      it('should set showAiFeatures to false when the user has read-only access', async function (ctx) {
+        ctx.PermissionsManager.promises.checkUserPermissions.resolves(true)
+        ctx.AuthorizationManager.promises.getPrivilegeLevelForProject.resolves(
+          'readOnly'
+        )
+        await new Promise((resolve, reject) => {
+          ctx.res.render = (pageName, opts) => {
+            expect(opts.showAiFeatures).to.equal(false)
+            resolve()
+          }
+          ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+            if (err) reject(err)
+          })
+        })
+      })
+
       it('should set showAiFeatures to false when the user can use ai but the project disallows it', async function (ctx) {
         ctx.PermissionsManager.promises.checkUserPermissions.callsFake(
           subject => Promise.resolve(typeof subject !== 'string')
@@ -1749,6 +1765,23 @@ describe('ProjectController', function () {
           ctx.UserModel.findById.returns({
             exec: sinon.stub().resolves(ctx.user),
           })
+          await new Promise((resolve, reject) => {
+            ctx.res.render = (pageName, opts) => {
+              expect(opts.showAiFeatures).to.equal(false)
+              expect(opts.showAiFeaturesDisabled).to.equal(false)
+              resolve()
+            }
+            ctx.ProjectController.loadEditor(ctx.req, ctx.res, err => {
+              if (err) reject(err)
+            })
+          })
+        })
+
+        it('should set showAiFeatures to false and showAiFeaturesDisabled to false when the user has read-only access', async function (ctx) {
+          ctx.PermissionsManager.promises.checkUserPermissions.resolves(true)
+          ctx.AuthorizationManager.promises.getPrivilegeLevelForProject.resolves(
+            'readOnly'
+          )
           await new Promise((resolve, reject) => {
             ctx.res.render = (pageName, opts) => {
               expect(opts.showAiFeatures).to.equal(false)

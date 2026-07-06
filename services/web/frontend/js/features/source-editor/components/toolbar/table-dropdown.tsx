@@ -47,6 +47,7 @@ export const TableDropdown = memo(function TableDropdown() {
             {t('toolbar_table_insert_table_lowercase')}
           </DropdownHeader>
           <OLListGroupItem
+            className={showAiFeaturesDisabled ? 'opacity-50' : ''}
             aria-label={t('toolbar_generate_table')}
             disabled={showAiFeaturesDisabled}
             disabledReason={t('ai_features_unavailable_on_this_project')}
@@ -66,9 +67,7 @@ export const TableDropdown = memo(function TableDropdown() {
               src={sparkleWhite}
               aria-hidden="true"
             />
-            <span className={showAiFeaturesDisabled ? 'opacity-50' : ''}>
-              {t('generate_from_text_or_image')}
-            </span>
+            <span>{t('generate_from_text_or_image')}</span>
           </OLListGroupItem>
           <div className="ol-cm-toolbar-dropdown-divider mx-2 my-0" />
           <OLListGroupItem

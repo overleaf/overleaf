@@ -813,22 +813,25 @@ const _ProjectController = {
 
       let aiFeaturesAllowedForUser = false
       let aiFeaturesAllowedForProject = false
-      if (userId && Features.hasFeature('saas')) {
+
+      const canUserWriteOrReviewProjectContent =
+        privilegeLevel === PrivilegeLevels.READ_AND_WRITE ||
+        privilegeLevel === PrivilegeLevels.OWNER ||
+        privilegeLevel === PrivilegeLevels.REVIEW
+
+      if (
+        userId &&
+        canUserWriteOrReviewProjectContent &&
+        Features.hasFeature('saas')
+      ) {
         try {
           aiFeaturesAllowedForUser = await checkUserPermissions(user, [
             'use-ai',
           ])
-
-          const canUserWriteOrReviewProjectContent =
-            privilegeLevel === PrivilegeLevels.READ_AND_WRITE ||
-            privilegeLevel === PrivilegeLevels.OWNER ||
-            privilegeLevel === PrivilegeLevels.REVIEW
-          if (canUserWriteOrReviewProjectContent) {
-            aiFeaturesAllowedForProject = await checkUserPermissions(
-              project.owner_ref,
-              ['use-ai']
-            )
-          }
+          aiFeaturesAllowedForProject = await checkUserPermissions(
+            project.owner_ref,
+            ['use-ai']
+          )
         } catch (err) {
           // still allow users to access project if we cant get their permissions, but disable AI feature
           aiFeaturesAllowedForUser = false

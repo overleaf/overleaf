@@ -35,6 +35,7 @@ export const MathDropdown = memo(function MathDropdown() {
             {t('toolbar_insert_math_lowercase')}
           </DropdownHeader>
           <OLListGroupItem
+            className={showAiFeaturesDisabled ? 'opacity-50' : ''}
             aria-label={t('toolbar_generate_math')}
             disabled={showAiFeaturesDisabled}
             disabledReason={t('ai_features_unavailable_on_this_project')}
@@ -54,9 +55,7 @@ export const MathDropdown = memo(function MathDropdown() {
               src={sparkleWhite}
               aria-hidden="true"
             />
-            <span className={showAiFeaturesDisabled ? 'opacity-50' : ''}>
-              {t('generate_from_text_or_image')}
-            </span>
+            <span>{t('generate_from_text_or_image')}</span>
           </OLListGroupItem>
         </>
       )}
