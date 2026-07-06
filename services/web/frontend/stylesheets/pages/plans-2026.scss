@@ -537,6 +537,7 @@
 
   .plans-feature-table {
     border: 1px solid var(--border-divider);
+    position: relative;
 
     // separate + spacing 0 is required for position: sticky on header cells
     border-collapse: separate;
