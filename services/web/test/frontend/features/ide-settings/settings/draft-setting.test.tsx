@@ -8,18 +8,12 @@ import {
 import userEvent from '@testing-library/user-event'
 import DraftSetting from '@/features/ide-settings/components/compiler-settings/draft-setting'
 
-const OPTIONS = [
-  {
-    label: 'Normal',
-    value: false,
-  },
-  {
-    label: 'Fast [draft]',
-    value: true,
-  },
-]
-
 describe('<DraftSetting />', function () {
+  afterEach(function () {
+    window.metaAttributesCache.delete('ol-splitTestVariants')
+    localStorage.clear()
+  })
+
   it('each option is shown and can be selected', async function () {
     render(
       <EditorProviders>
@@ -31,15 +25,45 @@ describe('<DraftSetting />', function () {
 
     const select = screen.getByLabelText('Compile mode')
 
-    for (const option of OPTIONS) {
+    const options = [
+      { label: 'Normal', value: 'normal', draft: false },
+      { label: 'Fast [draft]', value: 'fast_draft', draft: true },
+    ]
+    for (const option of options) {
       const optionElement = within(select).getByText(option.label)
-      expect(optionElement.getAttribute('value')).to.equal(
-        option.value.toString()
-      )
+      expect(optionElement.getAttribute('value')).to.equal(option.value)
       await userEvent.selectOptions(select, [optionElement])
       expect(!!localStorage.getItem(`draft:${projectDefaults._id}`)).to.equal(
-        option.value
+        option.draft
+      )
+      expect(!!localStorage.getItem(`png2pdf:${projectDefaults._id}`)).to.equal(
+        false
       )
     }
+  })
+
+  it('offers the optimize-images option behind the png2pdf split test', async function () {
+    window.metaAttributesCache.set('ol-splitTestVariants', {
+      png2pdf: 'enabled',
+    })
+    render(
+      <EditorProviders>
+        <SettingsModalProvider>
+          <DraftSetting />
+        </SettingsModalProvider>
+      </EditorProviders>
+    )
+
+    const select = screen.getByLabelText('Compile mode')
+    const optionElement = within(select).getByText('Fast [optimize images]')
+    expect(optionElement.getAttribute('value')).to.equal('png2pdf')
+
+    await userEvent.selectOptions(select, [optionElement])
+    expect(!!localStorage.getItem(`png2pdf:${projectDefaults._id}`)).to.equal(
+      true
+    )
+    expect(!!localStorage.getItem(`draft:${projectDefaults._id}`)).to.equal(
+      false
+    )
   })
 })

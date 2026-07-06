@@ -202,6 +202,9 @@ const _CompileController = {
     if (req.body.draft) {
       options.draft = req.body.draft
     }
+    if (req.body.png2pdf) {
+      options.png2pdf = req.body.png2pdf
+    }
     if (['validate', 'error', 'silent'].includes(req.body.check)) {
       options.check = req.body.check
     }
@@ -288,6 +291,7 @@ const _CompileController = {
           restoredClsiCache: stats?.restoredClsiCache === 1,
           stopOnFirstError,
           isDraftMode: !!options.draft,
+          isPng2pdf: !!options.png2pdf,
         }
       )
     }

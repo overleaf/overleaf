@@ -18,6 +18,7 @@ import OLButton from '@/shared/components/ol/ol-button'
 import OLButtonGroup from '@/shared/components/ol/ol-button-group'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'
 
@@ -39,9 +40,11 @@ function PdfCompileButton() {
     autoCompile,
     compiling,
     draft,
+    png2pdf,
     hasChanges,
     setAutoCompile,
     setDraft,
+    setPng2pdf,
     setStopOnValidationError,
     stopOnFirstError,
     stopOnValidationError,
@@ -53,6 +56,22 @@ function PdfCompileButton() {
     useStopOnFirstError({ eventSource: 'dropdown' })
 
   const { t } = useTranslation()
+
+  const png2pdfEnabled = useFeatureFlag('png2pdf')
+
+  // The three compile modes (Normal / Fast [optimize images] / Fast [draft]) are
+  // mutually exclusive, so each selection sets both underlying flags.
+  const setCompileMode = useCallback(
+    (mode: 'normal' | 'png2pdf' | 'draft') => {
+      eventTracking.sendMB('recompile-setting-changed', {
+        setting: 'compile-mode',
+        settingVal: mode,
+      })
+      setDraft(mode === 'draft')
+      setPng2pdf(mode === 'png2pdf')
+    },
+    [setDraft, setPng2pdf]
+  )
 
   const { detachRole } = useLayoutContext()
 
@@ -174,16 +193,28 @@ function PdfCompileButton() {
         <li role="none">
           <DropdownItem
             as="button"
-            onClick={() => sendEventAndSet(false, setDraft, 'compile-mode')}
-            trailingIcon={!draft ? 'check' : null}
+            onClick={() => setCompileMode('normal')}
+            trailingIcon={!draft && !png2pdf ? 'check' : null}
           >
             {t('normal')}
           </DropdownItem>
         </li>
+        {png2pdfEnabled && (
+          <li role="none">
+            <DropdownItem
+              as="button"
+              onClick={() => setCompileMode('png2pdf')}
+              trailingIcon={png2pdf ? 'check' : null}
+            >
+              {t('fast')}&nbsp;
+              <span className="subdued">[optimize images]</span>
+            </DropdownItem>
+          </li>
+        )}
         <li role="none">
           <DropdownItem
             as="button"
-            onClick={() => sendEventAndSet(true, setDraft, 'compile-mode')}
+            onClick={() => setCompileMode('draft')}
             trailingIcon={draft ? 'check' : null}
           >
             {t('fast')}&nbsp;<span className="subdued">[draft]</span>

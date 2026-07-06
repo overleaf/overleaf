@@ -140,6 +140,9 @@ async function convertProjectToDocument(req, res) {
   request.project_id = projectId
   request.user_id = userId
   request.metricsOpts = {}
+  // Document conversions reuse the history writer but must never run png2pdf:
+  // the converted PDF bytes would be fed to pandoc instead of the original png.
+  request.png2pdf = false
 
   const responseFormat = req.query.responseFormat === 'json' ? 'json' : 'stream'
 
@@ -176,7 +179,8 @@ async function convertProjectToDocument(req, res) {
           userId,
           request,
           conversionDir,
-          {}
+          {}, // timings
+          {} // stats
         )
       } catch (err) {
         if (err instanceof Errors.MissingUpdatesError) {

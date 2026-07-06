@@ -25,9 +25,18 @@ import { promiseMapSettledWithLimit } from '@overleaf/promise-utils'
 import Metrics from '@overleaf/metrics'
 import TikzManager from './TikzManager.js'
 import DraftModeManager from './DraftModeManager.js'
+import Png2Pdf from './Png2Pdf.js'
 
 const gzip = promisify(zlib.gzip)
 const gunzip = promisify(zlib.gunzip)
+
+/**
+ * @param {string} path
+ * @return {boolean}
+ */
+function isPng(path) {
+  return Path.extname(path).toLowerCase() === '.png'
+}
 
 export const clearCacheCb = callbackify(clearCache)
 
@@ -76,7 +85,7 @@ function isENOENT(err) {
  * @param {string} cacheKey
  * @param {number} remoteBaseVersion
  * @param {boolean} populateClsiCache
- * @return {Promise<{rawSnapshot: import('overleaf-editor-core/lib/types.js').RawSnapshot, globalBlobs: string[], fullSync: boolean,localBaseVersion: number, dirty: string[]}>}
+ * @return {Promise<{rawSnapshot: import('overleaf-editor-core/lib/types.js').RawSnapshot, globalBlobs: string[], fullSync: boolean,localBaseVersion: number, dirty: string[], png2pdf: boolean}>}
  */
 async function loadSnapshot(
   projectId,
@@ -137,7 +146,7 @@ async function loadSnapshot(
  * @param {string} userId
  * @param {string} cacheKey
  * @param {number} remoteBaseVersion
- * @return {Promise<{rawSnapshot: import('overleaf-editor-core/lib/types.js').RawSnapshot, globalBlobs: string[], fullSync: boolean,localBaseVersion: number, dirty: string[]}>}
+ * @return {Promise<{rawSnapshot: import('overleaf-editor-core/lib/types.js').RawSnapshot, globalBlobs: string[], fullSync: boolean,localBaseVersion: number, dirty: string[], png2pdf: boolean}>}
  */
 async function loadSnapshotFromClsiCache(
   projectId,
@@ -168,7 +177,7 @@ async function loadSnapshotFromClsiCache(
  * @param {string} path
  * @param {number} remoteBaseVersion
  * @param {boolean} fullSync
- * @return {Promise<{rawSnapshot: import('overleaf-editor-core/lib/types.js').RawSnapshot, globalBlobs: string[], localBaseVersion: number, fullSync: boolean, dirty: string[]}>}
+ * @return {Promise<{rawSnapshot: import('overleaf-editor-core/lib/types.js').RawSnapshot, globalBlobs: string[], localBaseVersion: number, fullSync: boolean, dirty: string[], png2pdf: boolean}>}
  */
 async function loadSnapshotFromFile(path, remoteBaseVersion, fullSync) {
   let blob = await fs.promises.readFile(path)
@@ -178,13 +187,21 @@ async function loadSnapshotFromFile(path, remoteBaseVersion, fullSync) {
     globalBlobs,
     localBaseVersion,
     dirty = [], // added later, provide a default value.
+    png2pdf = false, // the png2pdf mode used for the last sync, added later.
   } = JSON.parse(blob.toString('utf-8'))
   if (localBaseVersion < remoteBaseVersion) {
     throw new Errors.MissingUpdatesError('missing updates', {
       baseHistoryVersion: localBaseVersion,
     })
   }
-  return { rawSnapshot, globalBlobs, localBaseVersion, fullSync, dirty }
+  return {
+    rawSnapshot,
+    globalBlobs,
+    localBaseVersion,
+    fullSync,
+    dirty,
+    png2pdf,
+  }
 }
 
 /**
@@ -193,6 +210,7 @@ async function loadSnapshotFromFile(path, remoteBaseVersion, fullSync) {
  * @param {number} localBaseVersion
  * @param {string[]} globalBlobs
  * @param {string[]} dirty
+ * @param {boolean} png2pdf the png2pdf mode used for this sync
  * @return {Promise<void>}
  */
 async function saveSnapshot(
@@ -200,7 +218,8 @@ async function saveSnapshot(
   snapshot,
   localBaseVersion,
   globalBlobs,
-  dirty
+  dirty,
+  png2pdf
 ) {
   const { dir, path } = snapshotPath(cacheKey)
   await fs.promises.mkdir(dir, { recursive: true })
@@ -213,6 +232,7 @@ async function saveSnapshot(
         localBaseVersion,
         rawSnapshot: snapshot.toRaw(),
         dirty,
+        png2pdf,
       }),
       // use cheapest gzip compression level
       { level: 1 }
@@ -363,6 +383,7 @@ function changesFromRawChangeOperations(raw) {
  * @param {Object} request
  * @param {string} compileDir
  * @param {Record<string, number>} timings
+ * @param {Record<string, number>} stats
  * @return {Promise<{baseHistoryVersion: number, resourceList: {path: string}[]}>}
  */
 export async function syncResourcesToDisk(
@@ -370,23 +391,36 @@ export async function syncResourcesToDisk(
   userId,
   request,
   compileDir,
-  timings
+  timings,
+  stats
 ) {
   // - logged in user: <project-id>-<user-id>
   // - anonymous user: <project-id>
   // - conversion job: <uuid>
   const cacheKey = Path.basename(compileDir)
   const remoteBaseVersion = request.baseHistoryVersion
-  let rawSnapshot, globalBlobs, localBaseVersion, source, dirty, fullSync
+  let rawSnapshot,
+    globalBlobs,
+    localBaseVersion,
+    source,
+    dirty,
+    fullSync,
+    lastPng2pdf
   try {
-    ;({ rawSnapshot, globalBlobs, fullSync, localBaseVersion, dirty } =
-      await loadSnapshot(
-        projectId,
-        userId,
-        cacheKey,
-        remoteBaseVersion,
-        request.populateClsiCache
-      ))
+    ;({
+      rawSnapshot,
+      globalBlobs,
+      fullSync,
+      localBaseVersion,
+      dirty,
+      png2pdf: lastPng2pdf,
+    } = await loadSnapshot(
+      projectId,
+      userId,
+      cacheKey,
+      remoteBaseVersion,
+      request.populateClsiCache
+    ))
     source = fullSync ? 'clsi-cache' : 'local'
     logger.debug(
       { projectId, userId, cacheKey, localBaseVersion, remoteBaseVersion },
@@ -431,6 +465,8 @@ export async function syncResourcesToDisk(
   const entriesDepthFirst = await discoverExistingEntries(compileDir)
   await removeExtraneousEntries(compileDir, snapshot, entriesDepthFirst)
 
+  const pngModeChanged = lastPng2pdf !== request.png2pdf
+
   const changedPaths = []
   if (fullSync) {
     changedPaths.push(...snapshot.getFilePathnames())
@@ -442,6 +478,12 @@ export async function syncResourcesToDisk(
     const dedupe = new Set(dirty)
     if (request.draft) {
       dedupe.add(request.rootResourcePath)
+    }
+    if (pngModeChanged) {
+      // When the png2pdf mode changed since the last sync, the on-disk images are in the wrong variant (optimized vs original). Re-sync them so they are converted (served from the <cachePath>.opt cache) or restored to the original png.
+      for (const path of snapshot.getFilePathnames()) {
+        if (isPng(path)) dedupe.add(path)
+      }
     }
     for (const change of changes) {
       for (const operation of change.getOperations()) {
@@ -490,6 +532,8 @@ export async function syncResourcesToDisk(
   const wasDirty = dirty.length > 0
   dirty = []
   let createCacheFolder
+  const pngFilesToConvert = []
+
   // Use Promise.allSettled to ensure that all writes have stopped when we exit.
   const allDone = await promiseMapSettledWithLimit(
     Settings.parallelFileDownloads,
@@ -526,16 +570,33 @@ export async function syncResourcesToDisk(
         }
         await createCacheFolder
         const url = blobStore.getBlobURL(hash).href
+        const destPath = Path.join(compileDir, path)
         try {
           const fallbackURL = null // no fallback
           const lastModified = new Date(0) // content is static
-          await UrlCache.promises.downloadUrlToFile(
-            projectId,
-            url,
-            fallbackURL,
-            Path.join(compileDir, path),
-            lastModified
-          )
+          if (request.png2pdf && Png2Pdf.isEnabled() && isPng(path)) {
+            // PNG files go through a batch conversion process first.
+            const toConvert = await UrlCache.promises.downloadUrlToFile(
+              projectId,
+              url,
+              fallbackURL,
+              destPath,
+              lastModified,
+              // Avoid sharing the conversion file between two users.
+              cacheKey
+            )
+            if (toConvert) {
+              pngFilesToConvert.push(toConvert)
+            }
+          } else {
+            await UrlCache.promises.downloadUrlToFile(
+              projectId,
+              url,
+              fallbackURL,
+              destPath,
+              lastModified
+            )
+          }
         } catch (err) {
           logger.err(
             { err, projectId, path, resourceUrl: url },
@@ -551,14 +612,54 @@ export async function syncResourcesToDisk(
     const path = changedPaths[idx]
     throw OError.tag(result.reason, 'write failed', { path })
   }
+
+  if (pngFilesToConvert.length) {
+    const cacheDir = UrlCache.getProjectCacheDir(projectId)
+    try {
+      await Png2Pdf.convertPngFilesInCacheDir(
+        projectId,
+        cacheDir,
+        pngFilesToConvert.map(f => Path.relative(cacheDir, f.conversionPath)),
+        stats,
+        timings
+      )
+    } catch (err) {
+      logger.warn(
+        { err, projectId, userId, count: pngFilesToConvert.length },
+        'png2pdf conversion failed, using original png(s)'
+      )
+    }
+    for (const f of pngFilesToConvert) {
+      try {
+        await UrlCache.promises.commitConversion(
+          f.conversionPath,
+          f.cachePath,
+          f.destPath
+        )
+      } catch (err) {
+        logger.err(
+          { err, projectId, userId, path: f.destPath },
+          'error copying file for resources'
+        )
+        Metrics.inc('download-failed')
+      }
+    }
+  }
   const baseHistoryVersion = localBaseVersion + changes.length
-  if (fullSync || changes.length || wasDirty || dirty.length) {
+  if (
+    fullSync ||
+    changes.length ||
+    wasDirty ||
+    dirty.length ||
+    pngModeChanged
+  ) {
     await saveSnapshot(
       cacheKey,
       snapshot,
       baseHistoryVersion,
       globalBlobs,
-      dirty
+      dirty,
+      request.png2pdf
     )
   }
   if (fullSync) {

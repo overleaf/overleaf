@@ -114,7 +114,8 @@ async function doCompile(request, stats, timings) {
           userId,
           request,
           compileDir,
-          timings
+          timings,
+          stats
         ))
     } else {
       // NOTE: resourceList is insecure, it should only be used to exclude files from the output list

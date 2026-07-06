@@ -1031,6 +1031,29 @@ describe('ClsiManager', function () {
       })
     })
 
+    describe('with the png2pdf option', function () {
+      beforeEach(async function (ctx) {
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            png2pdf: true,
+          }
+        )
+      })
+
+      it('should add the png2pdf option into the request', function (ctx) {
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: { compile: { options: { png2pdf: true } } },
+          })
+        )
+      })
+    })
+
     describe('with a failed compile', function () {
       beforeEach(async function (ctx) {
         ctx.responseBody.compile.status = 'failure'

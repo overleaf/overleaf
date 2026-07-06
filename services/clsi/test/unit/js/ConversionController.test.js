@@ -49,10 +49,10 @@ describe('ConversionController', function () {
       },
     }
 
+    // HistoryResourceWriter is consumed via a namespace import, so the named
+    // export lives at the top level (not under `.promises`).
     ctx.HistoryResourceWriter = {
-      promises: {
-        syncResourcesToDisk: sinon.stub().resolves(),
-      },
+      syncResourcesToDisk: sinon.stub().resolves(),
     }
 
     ctx.RequestParser = {
@@ -428,6 +428,33 @@ describe('ConversionController', function () {
 
     const uuidDirPattern =
       /^\/compiles\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+
+    describe('when compiling from history', function () {
+      beforeEach(async function (ctx) {
+        ctx.parsedRequest.isCompileFromHistory = true
+        // Even if the request asked for png2pdf, conversions must disable it.
+        ctx.parsedRequest.png2pdf = true
+
+        await ctx.ConversionController.convertProjectToDocument(
+          ctx.req,
+          ctx.res,
+          sinon.stub()
+        )
+      })
+
+      it('should sync resources via the history writer with png2pdf disabled', function (ctx) {
+        sinon.assert.calledWith(
+          ctx.HistoryResourceWriter.syncResourcesToDisk,
+          'test-project-id',
+          'test-user-id',
+          sinon.match({ png2pdf: false }),
+          sinon.match(uuidDirPattern),
+          sinon.match.object, // timings
+          sinon.match.object // stats
+        )
+        sinon.assert.notCalled(ctx.ResourceWriter.promises.syncResourcesToDisk)
+      })
+    })
 
     describe('successfully (default streaming response)', function () {
       beforeEach(async function (ctx) {

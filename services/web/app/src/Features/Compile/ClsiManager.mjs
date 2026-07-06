@@ -1142,6 +1142,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         timeout: options.timeout,
         imageName: project.imageName,
         draft: Boolean(options.draft),
+        png2pdf: Boolean(options.png2pdf),
         stopOnFirstError: Boolean(options.stopOnFirstError),
         check: options.check,
         syncType: options.syncType,

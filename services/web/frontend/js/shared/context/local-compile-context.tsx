@@ -71,6 +71,7 @@ export type CompileContext = {
   compiling: boolean
   deliveryLatencies: Record<string, any>
   draft: boolean
+  png2pdf: boolean
   error?: string
   fileList?: PdfFileDataList
   hasChanges: boolean
@@ -93,6 +94,7 @@ export type CompileContext = {
   rawLog?: string
   setAutoCompile: (value: boolean) => void
   setDraft: (value: any) => void
+  setPng2pdf: (value: any) => void
   setError: (value: any) => void
   setHasLintingError: (value: boolean) => void // only for storybook
   setHighlights: (value: any) => void
@@ -271,6 +273,15 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
     listen: true,
   })
 
+  // whether the compile should optimize images (png2pdf conversion)
+  const [png2pdf, setPng2pdf] = usePersistedState(
+    `png2pdf:${projectId}`,
+    false,
+    {
+      listen: true,
+    }
+  )
+
   // whether compiling should stop on first error
   const [stopOnFirstError, setStopOnFirstError] = usePersistedState(
     `stop_on_first_error:${projectId}`,
@@ -348,6 +359,11 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
     compiler.setOption('draft', draft)
   }, [compiler, draft])
 
+  // keep png2pdf (optimize images) setting in sync with the compiler
+  useEffect(() => {
+    compiler.setOption('png2pdf', png2pdf)
+  }, [compiler, png2pdf])
+
   // keep stop on first error setting in sync with the compiler
   useEffect(() => {
     compiler.setOption('stopOnFirstError', stopOnFirstError)
@@ -396,6 +412,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       settingsUpToDate =
         getRootDocInfo().rootDocId === dataFromCache.rootDocId &&
         dataFromCache.options.draft === draft &&
+        Boolean(dataFromCache.options.png2pdf) === png2pdf &&
         // Allow stopOnFirstError to be enabled in the compile from cache and disabled locally.
         // Compiles that passed with stopOnFirstError=true will also pass with stopOnFirstError=false. The inverse does not hold, and we need to recompile.
         !!dataFromCache.options.stopOnFirstError >= stopOnFirstError
@@ -427,6 +444,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
     imageName,
     stopOnFirstError,
     draft,
+    png2pdf,
   ])
 
   // always compile the PDF once after opening the project, after the doc has loaded
@@ -755,6 +773,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       compiling,
       deliveryLatencies,
       draft,
+      png2pdf,
       editedSinceCompileStarted,
       error,
       fileList,
@@ -776,6 +795,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       setAutoCompile,
       setCompiling,
       setDraft,
+      setPng2pdf,
       setError,
       setHasLintingError, // only for stories
       setHighlights,
@@ -813,6 +833,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       compiling,
       deliveryLatencies,
       draft,
+      png2pdf,
       editedSinceCompileStarted,
       error,
       fileList,
@@ -831,6 +852,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       setAnimateCompileDropdownArrow,
       setAutoCompile,
       setDraft,
+      setPng2pdf,
       setError,
       setHasLintingError, // only for stories
       setHighlights,
