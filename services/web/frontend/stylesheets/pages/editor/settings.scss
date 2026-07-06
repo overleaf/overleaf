@@ -1,22 +1,10 @@
 :root {
-  --ide-settings-text-color: var(--content-primary);
-  --ide-settings-section-title-color: var(--content-secondary);
-  --ide-settings-description-color: var(--content-secondary);
-  --ide-settings-section-title-border-color: var(--border-divider);
-  --ide-settings-link-hover-color: var(--link-ui-hover);
-  --ide-settings-link-hover-bg-color: var(--bg-light-secondary);
   --ide-settings-link-active-color: var(--green-70);
   --ide-settings-link-active-bg-color: var(--bg-accent-03);
 }
 
 @include theme('default') {
   .modal-themed {
-    --ide-settings-text-color: var(--content-primary-dark);
-    --ide-settings-section-title-color: var(--content-secondary-dark);
-    --ide-settings-description-color: var(--content-secondary-dark);
-    --ide-settings-section-title-border-color: var(--border-divider-dark);
-    --ide-settings-link-hover-color: var(--link-ui-hover-dark);
-    --ide-settings-link-hover-bg-color: var(--bg-dark-secondary);
     --ide-settings-link-active-color: var(--green-10);
     --ide-settings-link-active-bg-color: var(--green-70);
   }
@@ -49,7 +37,7 @@
   align-items: flex-start;
   flex-direction: row;
   gap: var(--spacing-02);
-  color: var(--ide-settings-text-color);
+  color: var(--content-primary-themed);
   padding: var(--spacing-02);
   border-radius: var(--border-radius-base);
   font-size: var(--font-size-02);
@@ -57,19 +45,19 @@
   text-decoration: none;
 
   &:visited {
-    color: var(--ide-settings-text-color);
+    color: var(--content-primary-themed);
   }
 
   &.ide-settings-tab-link-button:hover:not(.active),
   &.ide-settings-tab-link-button:focus:not(.active) {
-    background-color: var(--ide-settings-link-hover-bg-color);
-    color: var(--ide-settings-text-color);
+    background-color: var(--bg-secondary-themed);
+    color: var(--content-primary-themed);
   }
 
   &.ide-settings-tab-link-anchor:hover,
   &.ide-settings-tab-link-anchor:focus {
-    color: var(--ide-settings-link-hover-color);
-    background-color: var(--ide-settings-link-hover-bg-color);
+    color: var(--link-ui-hover-themed);
+    background-color: var(--bg-secondary-themed);
   }
 
   &.active {
@@ -96,11 +84,11 @@
 }
 
 .ide-settings-section-title {
-  color: var(--ide-settings-section-title-color);
+  color: var(--content-secondary-themed);
   font-size: var(--font-size-01);
   line-height: var(--line-height-01);
   padding-bottom: var(--spacing-06);
-  border-bottom: 1px solid var(--ide-settings-section-title-border-color);
+  border-bottom: 1px solid var(--border-divider-themed);
   margin: 0 var(--spacing-04);
 }
 
@@ -123,12 +111,12 @@
 }
 
 .ide-setting-title {
-  color: var(--ide-settings-text-color);
+  color: var(--content-primary-themed);
   font-size: var(--font-size-02);
 }
 
 .ide-setting-description {
-  color: var(--ide-settings-description-color);
+  color: var(--content-secondary-themed);
   font-size: var(--font-size-02);
 }
 
@@ -149,11 +137,11 @@
   }
 
   & .form-check-label {
-    color: var(--ide-settings-text-color);
+    color: var(--content-primary-themed);
   }
 
   & .form-check-label-description {
-    color: var(--ide-settings-description-color);
+    color: var(--content-secondary-themed);
   }
 
   & .form-check-label,
