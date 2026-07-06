@@ -68,6 +68,8 @@ class V1HistoryNotSyncedError extends BackwardCompatibleError {}
 
 class ProjectHistoryDisabledError extends BackwardCompatibleError {}
 
+class HistoryResyncPendingError extends OError {}
+
 class V1ConnectionError extends BackwardCompatibleError {}
 
 class UnconfirmedEmailError extends BackwardCompatibleError {}
@@ -405,6 +407,7 @@ module.exports = {
   UnsupportedExportRecordsError,
   V1HistoryNotSyncedError,
   ProjectHistoryDisabledError,
+  HistoryResyncPendingError,
   V1ConnectionError,
   UnconfirmedEmailError,
   EmailExistsError,

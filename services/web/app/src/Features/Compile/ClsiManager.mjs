@@ -43,6 +43,10 @@ const CLSI_COOKIES_ENABLED = (Settings.clsiCookie?.key ?? '') !== ''
 // The timeout in services/clsi/app.js is 10 minutes, so we'll be on the safe side with 12 minutes
 const COMPILE_REQUEST_TIMEOUT_MS = 12 * 60 * 1000
 
+// Number of times to attempt each project-history operation (flush, chunk
+// fetch) when compiling from history before giving up.
+const HISTORY_MAX_ATTEMPTS = 3
+
 // Enable clsi-cache for all compiles for 20min when detecting low capacity.
 const ENABLE_COMPILE_FROM_CACHE_ON_503_MS = 20 * 60 * 1000
 let enableCompileFromCacheUntil = 0
@@ -924,13 +928,57 @@ function collectGlobalBlobsFromRawSnapshot(rawSnapshot, globalBlobs) {
   }
 }
 
+/**
+ * Run an async project-history operation.
+ *
+ * Try at most HISTORY_MAX_ATTEMPTS times before throwing an error.
+ *
+ * @template T
+ * @param {() => Promise<T>} fn
+ * @param {string} metricName
+ * @param {string} msg
+ * @param {object} info
+ * @return {Promise<T>}
+ */
+async function withRetries(fn, metricName, msg, info) {
+  let lastErr
+  for (let attempt = 1; attempt <= HISTORY_MAX_ATTEMPTS; attempt++) {
+    if (lastErr) {
+      Metrics.inc(metricName)
+      logger.warn({ err: lastErr, attempt, ...info }, `${msg}, retrying`)
+    }
+    try {
+      return await fn()
+    } catch (err) {
+      lastErr = err
+    }
+  }
+  throw OError.tag(lastErr, msg, info)
+}
+
+/**
+ * Flush pending updates to project-history before compiling from history,
+ * retrying on any error.
+ *
+ * @param {string} projectId
+ * @param {string} historyId
+ */
+async function _flushHistoryForCompile(projectId, historyId) {
+  await withRetries(
+    () => HistoryManager.promises.flushProject(projectId),
+    'compile-from-history-flush-retry',
+    'failed to flush project for compile-from-history',
+    { projectId, historyId }
+  )
+}
+
 async function _buildRequestFromHistoryFull(
   projectId,
   historyId,
   options,
   project
 ) {
-  await HistoryManager.promises.flushProject(projectId)
+  await _flushHistoryForCompile(projectId, historyId)
   const [
     {
       chunk: {
@@ -940,7 +988,12 @@ async function _buildRequestFromHistoryFull(
     },
     /* ensureNoResyncPending throws */
   ] = await Promise.all([
-    HistoryManager.promises.getLatestHistoryWithHistoryId(historyId),
+    withRetries(
+      () => HistoryManager.promises.getLatestHistoryWithHistoryId(historyId),
+      'compile-from-history-chunk-retry',
+      'failed to get history chunk',
+      { projectId, historyId }
+    ),
     HistoryManager.promises.ensureNoResyncPending(projectId),
   ])
   const rawChangeOperations = _rawChangeOperationsFromChanges(rawChanges)
@@ -965,7 +1018,7 @@ async function _buildRequestFromHistoryIncremental(
   project,
   baseHistoryVersion
 ) {
-  await HistoryManager.promises.flushProject(projectId)
+  await _flushHistoryForCompile(projectId, historyId)
   const rawChangeOperations = []
   let hasMore = true
   let since = baseHistoryVersion
@@ -973,7 +1026,13 @@ async function _buildRequestFromHistoryIncremental(
   while (hasMore) {
     let changes
     ;[{ changes, hasMore } /* resyncPending throws */] = await Promise.all([
-      HistoryManager.promises.getChangesWithHistoryId(historyId, { since }),
+      withRetries(
+        () =>
+          HistoryManager.promises.getChangesWithHistoryId(historyId, { since }),
+        'compile-from-history-changes-retry',
+        'failed to get history changes',
+        { projectId, historyId, since }
+      ),
       HistoryManager.promises.ensureNoResyncPending(projectId),
     ])
     since += changes.length

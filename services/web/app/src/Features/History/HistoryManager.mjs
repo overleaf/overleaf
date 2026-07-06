@@ -14,7 +14,7 @@ import ProjectGetter from '../Project/ProjectGetter.mjs'
 import HistoryBackupDeletionHandler from './HistoryBackupDeletionHandler.mjs'
 import { db, waitForDb } from '../../infrastructure/mongodb.mjs'
 import Metrics from '@overleaf/metrics'
-import { NotFoundError } from '../Errors/Errors.js'
+import { NotFoundError, HistoryResyncPendingError } from '../Errors/Errors.js'
 
 const HISTORY_V1_URL = settings.apis.v1_history.url
 const HISTORY_V1_BASIC_AUTH = {
@@ -323,7 +323,11 @@ async function ensureNoResyncPending(projectId) {
   const { resyncPending } = await fetchJson(
     `${settings.apis.project_history.url}/project/${projectId}/resync-pending`
   )
-  if (resyncPending) throw new OError('broken history with pending resync')
+  if (resyncPending) {
+    throw new HistoryResyncPendingError('broken history with pending resync', {
+      projectId,
+    })
+  }
 }
 
 async function getDebugInfo(projectId) {
