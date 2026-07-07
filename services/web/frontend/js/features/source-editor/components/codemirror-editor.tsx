@@ -76,12 +76,10 @@ function CodeMirrorEditor() {
   return (
     <CodeMirrorStateContext.Provider value={state}>
       <CodeMirrorViewContext.Provider value={viewRef.current}>
-        <CodeMirrorEditorComponents hidden={VisualEditor != null} />
-        {VisualEditor && (
-          <Suspense fallback={null}>
-            <VisualEditor />
-          </Suspense>
-        )}
+        <CodeMirrorEditorComponents
+          hidden={VisualEditor != null}
+          VisualEditor={VisualEditor}
+        />
       </CodeMirrorViewContext.Provider>
     </CodeMirrorStateContext.Provider>
   )
@@ -89,10 +87,12 @@ function CodeMirrorEditor() {
 
 type CodeMirrorEditorComponentsProps = {
   hidden: boolean
+  VisualEditor: ElementType | null
 }
 
 function CodeMirrorEditorComponents({
   hidden = false,
+  VisualEditor,
 }: CodeMirrorEditorComponentsProps) {
   useToolbarMenuBarEditorCommands()
   const { features } = useProjectContext()
@@ -131,6 +131,11 @@ function CodeMirrorEditorComponents({
         ({ import: { default: Component }, path }) => (
           <Component key={path} />
         )
+      )}
+      {VisualEditor && (
+        <Suspense fallback={null}>
+          <VisualEditor />
+        </Suspense>
       )}
     </ReviewPanelProviders>
   )
