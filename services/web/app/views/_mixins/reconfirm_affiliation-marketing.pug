@@ -29,7 +29,11 @@ mixin reconfirmAffiliationNotification-marketing(userEmail, location)
 		| !{translate("please_reconfirm_institutional_email_2")}
 
 	| &nbsp;
-	a(href='/learn/how-to/Institutional_Email_Reconfirmation' target='_blank') #{translate("learn_more_about_email_reconfirmation")}
+	a(
+		href='https://docs.overleaf.com/accounts-and-security/email-address-and-login-options/logging-in-with-institutional-sso/institutional-email-reconfirmation'
+		target='_blank'
+		rel='noopener noreferrer'
+	) #{translate("learn_more_about_email_reconfirmation")}
 
 mixin reconfirmedAffiliationNotification-marketing(userEmail)
 	| !{translate("your_affiliation_is_confirmed", {institutionName: userEmail.affiliation.institution.name}, ['strong'])}

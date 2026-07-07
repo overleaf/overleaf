@@ -19,7 +19,7 @@ function PremiumFeaturesLink({
           i18nKey="get_most_subscription_by_checking_ai_writefull"
           components={[
             // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
-            <a href="/learn/latex/Error_Assist" />,
+            <a href="https://docs.overleaf.com/integrations-and-add-ons/ai-features/error-assist" />,
             // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
             <a
               href="https://help.writefull.com/writefull-for-overleaf--user-guide"
@@ -39,9 +39,9 @@ function PremiumFeaturesLink({
           i18nKey="get_most_subscription_by_checking_overleaf_ai_writefull"
           components={[
             // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
-            <a href="/learn/how-to/Overleaf_premium_features" />,
+            <a href="https://docs.overleaf.com/getting-started/free-and-premium-plans/premium-features" />,
             // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
-            <a href="/learn/latex/Error_Assist" />,
+            <a href="https://docs.overleaf.com/integrations-and-add-ons/ai-features/error-assist" />,
             // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
             <a
               href="https://help.writefull.com/writefull-for-overleaf--user-guide"
@@ -60,7 +60,7 @@ function PremiumFeaturesLink({
         i18nKey="get_most_subscription_by_checking_overleaf"
         components={[
           // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
-          <a href="/learn/how-to/Overleaf_premium_features" />,
+          <a href="https://docs.overleaf.com/getting-started/free-and-premium-plans/premium-features" />,
         ]}
       />
     </p>

@@ -34,8 +34,9 @@ function ReconfirmationInfoPromptText({
         }
       />{' '}
       <a
-        href="/learn/how-to/Institutional_Email_Reconfirmation"
+        href="https://docs.overleaf.com/accounts-and-security/email-address-and-login-options/logging-in-with-institutional-sso/institutional-email-reconfirmation"
         target="_blank"
+        rel="noopener noreferrer"
       >
         {t('learn_more_about_email_reconfirmation')}
       </a>

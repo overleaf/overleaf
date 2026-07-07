@@ -13,6 +13,7 @@ module.exports = {
     'require-script-runner': require('./require-script-runner'),
     'require-vi-doMock-valid-path': require('./require-vi-doMock-valid-path'),
     'require-loading-label': require('./require-loading-label'),
+    'require-rel-for-docs-links': require('./require-rel-for-docs-links'),
     'require-cio-snake-case-properties': require('./require-cio-snake-case-properties'),
     'no-throw-in-callback': require('./no-throw-in-callback'),
     'no-consecutive-spaces-in-locales': require('./no-consecutive-spaces-in-locales'),

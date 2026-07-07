@@ -71,7 +71,7 @@ function PreviewLogsPaneMaxEntriesContent({
               // eslint-disable-next-line jsx-a11y/anchor-has-content
               <a
                 key="learn-more"
-                href="https://www.overleaf.com/learn/latex/Questions/Tips_and_Tricks_for_Troubleshooting_LaTeX"
+                href="https://docs.overleaf.com/troubleshooting-and-support/fixing-latex-errors"
               />,
             ]}
           />{' '}

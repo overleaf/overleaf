@@ -8,6 +8,7 @@ const shouldUnescapeTrans = require('./should-unescape-trans')
 const noGeneratedEditorThemes = require('./no-generated-editor-themes')
 const viDoMockValidPath = require('./require-vi-doMock-valid-path')
 const requireCioSnakeCaseProperties = require('./require-cio-snake-case-properties')
+const requireRelForDocsLinks = require('./require-rel-for-docs-links')
 const noConsecutiveSpacesInLocales = require('./no-consecutive-spaces-in-locales')
 const noStraightApostrophesInLocales = require('./no-straight-apostrophes-in-locales')
 const frenchTypographyInLocales = require('./french-typography-in-locales')
@@ -336,6 +337,87 @@ ruleTester.run('no-throw-in-callback', noThrowInCallback, {
     {
       code: `function foo(cb) { bar(function(done) { throw new Error() }) }`,
       errors: [{ message: noThrowInCallbackMessage }],
+    },
+  ],
+})
+
+ruleTester.run('require-rel-for-docs-links', requireRelForDocsLinks, {
+  valid: [
+    {
+      code: `<a href="https://docs.overleaf.com/foo" target="_blank" rel="noopener noreferrer">x</a>`,
+    },
+    {
+      code: `<a href="https://docs.overleaf.com/foo" target="_blank" rel="noreferrer noopener">x</a>`,
+    },
+    { code: `<a href="/learn/foo" target="_blank">x</a>` },
+    { code: `<a href="https://docs.overleaf.com/foo">x</a>` },
+    { code: `<a href="https://docs.overleaf.com/foo" target="_self">x</a>` },
+    {
+      code: `<OLButton href="https://docs.overleaf.com/foo" target="_blank" rel="noopener noreferrer">x</OLButton>`,
+    },
+    { code: `<OLButton href="https://docs.overleaf.com/foo">x</OLButton>` },
+  ],
+  invalid: [
+    {
+      code: `<a href="https://docs.overleaf.com/foo" target="_blank">x</a>`,
+      errors: [
+        {
+          message:
+            'Links to docs.overleaf.com with target="_blank" must have rel="noopener noreferrer" to prevent reverse-tabnabbing.',
+        },
+      ],
+      output: `<a href="https://docs.overleaf.com/foo" target="_blank" rel="noopener noreferrer">x</a>`,
+    },
+    {
+      code: `<a href="https://docs.overleaf.com/foo" target="_BLANK">x</a>`,
+      errors: [
+        {
+          message:
+            'Links to docs.overleaf.com with target="_blank" must have rel="noopener noreferrer" to prevent reverse-tabnabbing.',
+        },
+      ],
+      output: `<a href="https://docs.overleaf.com/foo" target="_BLANK" rel="noopener noreferrer">x</a>`,
+    },
+    {
+      code: `<a href="https://docs.overleaf.com/foo" target="_blank" rel="noopener">x</a>`,
+      errors: [
+        {
+          message:
+            'Links to docs.overleaf.com with target="_blank" must have rel="noopener noreferrer" to prevent reverse-tabnabbing.',
+        },
+      ],
+      output: `<a href="https://docs.overleaf.com/foo" target="_blank" rel="noopener noreferrer">x</a>`,
+    },
+    {
+      code: `<a href="https://docs.overleaf.com/foo" target="_blank" rel="noreferrer">x</a>`,
+      errors: [
+        {
+          message:
+            'Links to docs.overleaf.com with target="_blank" must have rel="noopener noreferrer" to prevent reverse-tabnabbing.',
+        },
+      ],
+      output: `<a href="https://docs.overleaf.com/foo" target="_blank" rel="noreferrer noopener">x</a>`,
+    },
+    {
+      code: `<OLButton href="https://docs.overleaf.com/foo" target="_blank">x</OLButton>`,
+      errors: [
+        {
+          message:
+            'Links to docs.overleaf.com with target="_blank" must have rel="noopener noreferrer" to prevent reverse-tabnabbing.',
+        },
+      ],
+      output: `<OLButton href="https://docs.overleaf.com/foo" target="_blank" rel="noopener noreferrer">x</OLButton>`,
+    },
+    {
+      // Boolean attribute (no value) - relAttr.value is null, must not crash the fixer.
+      code: `<a href="https://docs.overleaf.com/foo" target="_blank" rel />`,
+      errors: [
+        {
+          message:
+            'Links to docs.overleaf.com with target="_blank" must have rel="noopener noreferrer" to prevent reverse-tabnabbing.',
+        },
+      ],
+      output: `<a href="https://docs.overleaf.com/foo" target="_blank" rel="noopener noreferrer" />`,
     },
   ],
 })

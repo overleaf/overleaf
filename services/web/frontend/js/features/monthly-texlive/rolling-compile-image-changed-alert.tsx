@@ -31,7 +31,7 @@ const RollingCompileImageChangedAlert = () => {
           href="https://docs.overleaf.com/troubleshooting-and-support/tex-live#How_do_I_change_a_project%E2%80%99s_TeX_Live_version"
           target="_blank"
           key="getting-started-link"
-          rel="noopener"
+          rel="noopener noreferrer"
         />,
       ]}
     />

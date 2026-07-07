@@ -80,7 +80,7 @@ describe('successful subscription page', function () {
       name: /Overleaf’s features/i,
     })
     expect(helpLink.getAttribute('href')).to.equal(
-      '/learn/how-to/Overleaf_premium_features'
+      'https://docs.overleaf.com/getting-started/free-and-premium-plans/premium-features'
     )
 
     const backToYourProjectsLink = screen.getByRole('link', {

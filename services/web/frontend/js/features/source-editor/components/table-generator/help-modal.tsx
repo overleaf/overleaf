@@ -74,9 +74,9 @@ export const TableGeneratorHelpModal = () => {
               <code />,
               // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
               <a
-                href="https://www.overleaf.com/learn/latex/Inserting_Images#Labels_and_cross-references"
+                href="https://docs.overleaf.com/writing-and-editing/inserting-images/captioning-and-referencing-figures#labels-and-cross-references"
                 target="_blank"
-                rel="noopener"
+                rel="noopener noreferrer"
               />,
             ]}
           />

@@ -73,7 +73,7 @@ export function IntegrationLinkingWidget({
         </div>
         <p className="small">
           {description}{' '}
-          <a href={helpPath} target="_blank" rel="noreferrer">
+          <a href={helpPath} target="_blank" rel="noopener noreferrer">
             {t('learn_more_about', { appName: title })}
           </a>
         </p>
