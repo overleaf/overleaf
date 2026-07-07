@@ -6843,6 +6843,8 @@ __metadata:
     "@eslint/json": "npm:^2.0.0"
     "@typescript-eslint/parser": "npm:^8.59.4"
     lodash: "npm:^4.18.1"
+    typescript: "npm:^5.0.4"
+    vitest: "npm:4.1.5"
   peerDependencies:
     eslint: ^10.4.0
   languageName: unknown

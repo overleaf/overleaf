@@ -1,18 +1,21 @@
-const { RuleTester } = require('eslint')
-const tsParser = require('@typescript-eslint/parser')
-const json = require('@eslint/json').default
-const noThrowInCallback = require('./no-throw-in-callback')
-const preferKebabUrl = require('./prefer-kebab-url')
-const noUnnecessaryTrans = require('./no-unnecessary-trans')
-const shouldUnescapeTrans = require('./should-unescape-trans')
-const noGeneratedEditorThemes = require('./no-generated-editor-themes')
-const viDoMockValidPath = require('./require-vi-doMock-valid-path')
-const requireCioSnakeCaseProperties = require('./require-cio-snake-case-properties')
-const requireRelForDocsLinks = require('./require-rel-for-docs-links')
-const noConsecutiveSpacesInLocales = require('./no-consecutive-spaces-in-locales')
-const noStraightApostrophesInLocales = require('./no-straight-apostrophes-in-locales')
-const frenchTypographyInLocales = require('./french-typography-in-locales')
-const sortedKeysInLocales = require('./sorted-keys-in-locales')
+import { fileURLToPath } from 'node:url'
+import { RuleTester } from 'eslint'
+import tsParser from '@typescript-eslint/parser'
+import json from '@eslint/json'
+import noThrowInCallback from '../../no-throw-in-callback.js'
+import preferKebabUrl from '../../prefer-kebab-url.js'
+import noUnnecessaryTrans from '../../no-unnecessary-trans.js'
+import shouldUnescapeTrans from '../../should-unescape-trans.js'
+import noGeneratedEditorThemes from '../../no-generated-editor-themes.js'
+import viDoMockValidPath from '../../require-vi-doMock-valid-path.js'
+import requireCioSnakeCaseProperties from '../../require-cio-snake-case-properties.js'
+import requireRelForDocsLinks from '../../require-rel-for-docs-links.js'
+import noConsecutiveSpacesInLocales from '../../no-consecutive-spaces-in-locales.js'
+import noStraightApostrophesInLocales from '../../no-straight-apostrophes-in-locales.js'
+import frenchTypographyInLocales from '../../french-typography-in-locales.js'
+import sortedKeysInLocales from '../../sorted-keys-in-locales.js'
+
+const __filename = fileURLToPath(import.meta.url)
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -64,7 +67,15 @@ ruleTester.run('prefer-kebab-url', preferKebabUrl, {
     {
       code: `router.get(/^\\/downLoad\\/pro-ject\\/([^/]*)\\/OutPut\\/out-put\\.pdf$/)`,
       errors: [
-        { message: 'Route path should be in kebab-case.', suggestions: 1 },
+        {
+          message: 'Route path should be in kebab-case.',
+          suggestions: [
+            {
+              desc: 'Change to kebab-case: /^\\/down-load\\/pro-ject\\/([^/]*)\\/out-put\\/out-put\\.pdf$/',
+              output: `router.get(/^\\/down-load\\/pro-ject\\/([^/]*)\\/out-put\\/out-put\\.pdf$/)`,
+            },
+          ],
+        },
       ],
     },
   ],
@@ -157,28 +168,28 @@ ruleTester.run('no-generated-editor-themes', noGeneratedEditorThemes, {
 ruleTester.run('domock-require-valid-path', viDoMockValidPath, {
   valid: [
     {
-      code: 'vi.doMock("./require-vi-doMock-valid-path.js")',
+      code: 'vi.doMock("../../require-vi-doMock-valid-path.js")',
       filename: __filename,
     },
     {
-      code: 'const filename = "./require-vi-doMock-valid-path.js"; vi.doMock(filename);',
+      code: 'const filename = "../../require-vi-doMock-valid-path.js"; vi.doMock(filename);',
       filename: __filename,
     },
   ],
   invalid: [
     {
-      code: "vi.doMock('./require-vi-doMock-valid-path2')",
+      code: "vi.doMock('../../require-vi-doMock-valid-path2')",
       filename: __filename,
       errors: [
         {
           message:
-            'The path "./require-vi-doMock-valid-path2" in vi.doMock() cannot be resolved relative to the current file.',
+            'The path "../../require-vi-doMock-valid-path2" in vi.doMock() cannot be resolved relative to the current file.',
           suggestions: [],
         },
       ],
     },
     {
-      code: 'const filename = "./require-vi-doMock-valid-path2.js"; vi.doMock(filename);',
+      code: 'const filename = "../../require-vi-doMock-valid-path2.js"; vi.doMock(filename);',
       filename: __filename,
       errors: [
         {
