@@ -2,9 +2,11 @@ import getMeta from '../../utils/meta'
 
 let mathJaxPromise: Promise<typeof window.MathJax>
 
+const TAGS_NONE_REMOVED = 'none-removed'
+
 export const loadMathJax = async (options?: {
   enableMenu?: boolean
-  numbering?: string
+  numbering?: 'none-removed' | 'none' | 'ams'
   singleDollar?: boolean
   useLabelIds?: boolean
 }) => {
@@ -12,6 +14,7 @@ export const loadMathJax = async (options?: {
     mathJaxPromise = new Promise((resolve, reject) => {
       options = {
         enableMenu: false,
+        numbering: TAGS_NONE_REMOVED,
         singleDollar: true,
         useLabelIds: false,
         ...options,
@@ -67,6 +70,25 @@ export const loadMathJax = async (options?: {
               .disable()
           },
           async ready() {
+            // use a custom tags factory to avoid a "\multiple label" error
+            // in align environments when labels have no tags
+            // https://github.com/mathjax/MathJax/issues/3572#issuecomment-4771577206
+            if (options?.numbering === TAGS_NONE_REMOVED) {
+              const { AbstractTags, TagsFactory } =
+                window.MathJax._.input.tex.Tags
+
+              class NoLabelTags extends AbstractTags {
+                autoTag() {}
+                getTag() {
+                  const tag = this.currentTag.tag ? super.getTag() : null
+                  this.label = ''
+                  return tag
+                }
+              }
+
+              TagsFactory.add(TAGS_NONE_REMOVED, NoLabelTags)
+            }
+
             await window.MathJax.startup.defaultReady()
 
             // remove anything from the "font-family" attribute after a semicolon
