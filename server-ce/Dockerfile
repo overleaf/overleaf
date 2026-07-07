@@ -18,14 +18,22 @@ COPY server-ce/genScript.js server-ce/services.js /overleaf/
 # Corepack setup, shared between all the images.
 ENV PATH="/overleaf/node_modules/.bin:$PATH"
 ENV COREPACK_HOME=/opt/corepack
-RUN corepack enable && corepack install -g yarn@4.14.1
+RUN corepack enable  &&  corepack prepare yarn@4.14.1 --activate
+#RUN corepack enable  &&  corepack prepare yarn --activate
 ENV COREPACK_ENABLE_NETWORK=0
+
+# RUN npm install node-fetch
+# RUN yarn add node-fetch
+# RUN yarn install
+#RUN --mount=type=cache,target=/root/.cache \
+#    --mount=type=cache,target=/root/.yarn/berry/cache,id=server-ce-yarn-cache \
+#    --mount=type=tmpfs,target=/tmp yarn install | bash
+
 
 # Install yarn dependencies
 # -------------------------
 RUN --mount=type=cache,target=/root/.cache \
     --mount=type=cache,target=/root/.yarn/berry/cache,id=server-ce-yarn-cache \
-    --mount=type=cache,target=/usr/local/share/.cache/yarn,id=server-ce-yarn-fallback-cache \
     --mount=type=tmpfs,target=/tmp node genScript install | bash
 
 # Add the actual source files
@@ -33,10 +41,9 @@ RUN --mount=type=cache,target=/root/.cache \
 COPY --parents libraries/ services/ tools/migrations/ /overleaf/
 RUN --mount=type=cache,target=/root/.cache \
     --mount=type=cache,target=/root/.yarn/berry/cache,id=server-ce-yarn-cache \
-    --mount=type=cache,target=/usr/local/share/.cache/yarn,id=server-ce-yarn-fallback-cache \
     --mount=type=cache,target=/overleaf/services/web/node_modules/.cache,id=server-ce-webpack-cache \
     --mount=type=tmpfs,target=/tmp \
-    node genScript compile | bash
+    YARN_CACHE_FOLDER=/tmp/.yarn-cache node genScript compile | bash
 
 # Copy runit service startup scripts to its location
 # --------------------------------------------------

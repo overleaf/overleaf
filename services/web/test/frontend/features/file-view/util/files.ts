@@ -31,6 +31,21 @@ export const imageFile: BinaryFile<'project_file'> = {
   selected: true,
 }
 
+export const svgFile: BinaryFile<'project_file'> = {
+  _id: '60097ca20454610027c442a9',
+  id: '60097ca20454610027c442a9',
+  name: 'file.svg',
+  linkedFileData: {
+    source_project_id: 'source-project-id',
+    source_entity_path: '/source-entity-path',
+    provider: 'project_file',
+  },
+  hash: '012345678901234567890123',
+  created: new Date(2021, 1, 17, 3, 24).toISOString(),
+  type: 'file',
+  selected: true,
+}
+
 export const urlFile: BinaryFile<'url'> = {
   _id: 'url-file',
   id: 'url-file',

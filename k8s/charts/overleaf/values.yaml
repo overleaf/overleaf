@@ -1,0 +1,54 @@
+overleaf:
+  image:
+    repository: localhost:5001/overleaf/overleaf
+    tag: local
+    pullPolicy: Always
+  persistence:
+    size: 10Gi
+  service:
+    type: NodePort
+    port: 80
+    nodePort: 30000
+  env:
+    OVERLEAF_APP_NAME: "Overleaf Community Edition"
+    OVERLEAF_MONGO_URL: "mongodb://mongo/overleaf"
+    OVERLEAF_REDIS_HOST: redis
+    REDIS_HOST: redis
+    ENABLED_LINKED_FILE_TYPES: "project_file,project_output_file"
+    ENABLE_CONVERSIONS: "true"
+    EMAIL_CONFIRMATION_DISABLED: "true"
+    # Sandboxed compiles require Docker sibling containers — not supported in k8s without DinD
+    SANDBOXED_COMPILES: "false"
+    DOCKER_RUNNER: "false"
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 4Gi
+      cpu: 2000m
+
+mongo:
+  image:
+    repository: localhost:5001/overleaf/mongo
+    tag: "8.0"
+    pullPolicy: IfNotPresent
+  persistence:
+    size: 10Gi
+  replicaSetName: overleaf
+
+redis:
+  image:
+    repository: localhost:5001/overleaf/redis
+    tag: "6.2"
+    pullPolicy: IfNotPresent
+  persistence:
+    size: 1Gi
+  persistence:
+    size: 1Gi
+
+ingress:
+  enabled: false
+  className: nginx
+  host: overleaf.local
+  annotations: {}
