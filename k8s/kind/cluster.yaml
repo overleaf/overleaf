@@ -1,0 +1,40 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+#featureGates:
+#  ValidatingAdmissionPolicy: true
+#runtimeConfig:
+#  admissionregistration.k8s.io/v1beta1: true
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    extraPortMappings:
+      # Harbor HTTP NodePort
+      - containerPort: 30002
+        hostPort: 30002
+        protocol: TCP
+      # ArgoCD UI NodePort
+      - containerPort: 30080
+        hostPort: 30080
+        protocol: TCP
+      # Overleaf HTTP NodePort
+      - containerPort: 30000
+        hostPort: 30000
+        protocol: TCP
+# Tell containerd to resolve localhost:5001 via the NodePort bound on the node itself.
+# kube-proxy binds NodePorts to 0.0.0.0 on the node, so localhost:5001 reaches localhost
+# from inside the node without needing cluster DNS.
+containerdConfigPatches:
+  - |-
+    [plugins."io.containerd.grpc.v1.cri".registry]
+      config_path = "/etc/containerd/certs.d"
+#containerdConfigPatches:
+#  - |-
+#    [plugins."io.containerd.grpc.v1.cri".registry]
+#      [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+#        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5001"]
+#          endpoint = ["http://localhost:30002"]
+#      [plugins."io.containerd.grpc.v1.cri".registry.configs]
+#        [plugins."io.containerd.grpc.v1.cri".registry.configs."localhost:5001".tls]
+#          insecure_skip_verify = true
+#        [plugins."io.containerd.grpc.v1.cri".registry.configs."localhost:5001".tls]
+#          insecure_skip_verify = true

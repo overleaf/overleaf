@@ -1,6 +1,6 @@
 version: "2.2"
 services:
-  sharelatex:
+  overleaf:
     ports:
       - 30000:30000
       - 30150:30150
