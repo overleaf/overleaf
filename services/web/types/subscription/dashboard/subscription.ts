@@ -103,6 +103,8 @@ export type ManagedGroupSubscription = {
     groupSSO: boolean | null
     managedUsers: boolean | null
   }
+  managedUsersEnabled: boolean
+  groupPolicy?: GroupPolicy
   teamName?: string
 }
 

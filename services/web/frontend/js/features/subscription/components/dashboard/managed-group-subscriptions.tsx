@@ -111,6 +111,16 @@ export default function ManagedGroupSubscriptions() {
       {managedGroupSubscriptions.map(subscription => {
         const isAdmin = usersEmail === subscription.admin_id.email
 
+        // Feature controls are currently rendered only for managed groups, where the admin can
+        // toggle AI Feature on/off. For non-managed groups, the section only displays notifications
+        // for features that have been disabled by Overleaf Support.
+        // This flag will be deleted once AI Features toggling is available to all groups.
+        const shouldDisplayFeatureControls =
+          subscription.managedUsersEnabled ||
+          subscription.groupPolicy?.userCannotUseAIFeatures ||
+          subscription.groupPolicy?.userCannotUseChat ||
+          subscription.groupPolicy?.userCannotUseDropbox
+
         return (
           <div key={`managed-group-${subscription._id}`}>
             <h2 className="h3 fw-bold">{t('group_management')}</h2>
@@ -159,6 +169,14 @@ export default function ManagedGroupSubscriptions() {
                         icon="share"
                       />
                     )}
+                  {shouldDisplayFeatureControls && (
+                    <RowLink
+                      href={`/manage/groups/${subscription._id}/feature-settings`}
+                      heading={t('feature_controls')}
+                      subtext={t('feature_settings_subtext')}
+                      icon="toggle_off"
+                    />
+                  )}
                   <RowLink
                     href={`/manage/groups/${subscription._id}/audit-logs`}
                     heading={t('audit_logs')}

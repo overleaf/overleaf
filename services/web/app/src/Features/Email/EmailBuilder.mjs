@@ -1122,6 +1122,42 @@ templates.groupMemberLimitWarning = ctaTemplate({
   },
 })
 
+templates.groupAiFeaturesDisabled = NoCTAEmailTemplate({
+  subject() {
+    return `AI features have been disabled for your ${settings.appName} group`
+  },
+  title() {
+    return `AI features disabled`
+  },
+  greeting(opts) {
+    return opts.firstName ? `Hi ${opts.firstName},` : 'Hi there,'
+  },
+  message() {
+    return [
+      `Your organization has disabled AI features for your ${settings.appName} group. This means you won't see AI Assistant or other ${settings.appName} AI tools in the editor.`,
+      `If you have questions about this change, please contact your group administrator.`,
+    ]
+  },
+})
+
+templates.groupAiFeaturesEnabled = NoCTAEmailTemplate({
+  subject() {
+    return `AI features have been enabled for your ${settings.appName} group`
+  },
+  title() {
+    return `AI features enabled`
+  },
+  greeting(opts) {
+    return opts.firstName ? `Hi ${opts.firstName},` : 'Hi there,'
+  },
+  message() {
+    return [
+      `Your organization has enabled AI features for your ${settings.appName} group. You now have access to AI Assistant and other ${settings.appName} AI tools in the editor.`,
+      `If you have questions about this change, please contact your group administrator.`,
+    ]
+  },
+})
+
 templates.groupDomainCapturedByGroupChanged = ctaTemplate({
   subject(opts) {
     return opts.domainCapturedByGroup

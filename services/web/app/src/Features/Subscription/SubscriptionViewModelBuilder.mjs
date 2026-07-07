@@ -82,7 +82,11 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
       SubscriptionLocator.getMemberSubscriptions(user, cb)
     },
     managedGroupSubscriptions(cb) {
-      SubscriptionLocator.getManagedGroupSubscriptions(user, cb)
+      SubscriptionLocator.getManagedGroupSubscriptions(
+        user,
+        ['groupPolicy'],
+        cb
+      )
     },
     currentInstitutionsWithLicence(cb) {
       InstitutionsGetter.getCurrentInstitutionsWithLicence(
@@ -139,6 +143,14 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
         id => id.toString() === user._id.toString()
       )
 
+      const groupPolicy = group.groupPolicy
+        ? {
+            userCannotUseChat: group.groupPolicy.userCannotUseChat,
+            userCannotUseDropbox: group.groupPolicy.userCannotUseDropbox,
+            userCannotUseAIFeatures: group.groupPolicy.userCannotUseAIFeatures,
+          }
+        : undefined
+
       const groupDataForView = {
         _id: group._id,
         planCode: group.planCode,
@@ -146,6 +158,8 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
         teamName: group.teamName,
         admin_id: { _id: group.admin_id._id, email: group.admin_id.email },
         features: group.features,
+        managedUsersEnabled: !!group.managedUsersEnabled,
+        groupPolicy,
         userIsGroupMember,
       }
 

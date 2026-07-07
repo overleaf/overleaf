@@ -22,6 +22,7 @@ function getManagedGroupSubscriptions(
       groupSSO,
       managedUsers,
     },
+    managedUsersEnabled: false,
     teamName: 'GAS',
   }
 
@@ -36,6 +37,7 @@ function getManagedGroupSubscriptions(
       groupSSO,
       managedUsers,
     },
+    managedUsersEnabled: false,
     teamName: 'GASWPLC',
   }
 
@@ -50,6 +52,7 @@ function getManagedGroupSubscriptions(
       groupSSO,
       managedUsers,
     },
+    managedUsersEnabled: false,
     teamName: 'Testing',
   }
 
@@ -64,6 +67,7 @@ function getManagedGroupSubscriptions(
       groupSSO,
       managedUsers,
     },
+    managedUsersEnabled: false,
     teamName: 'Testing Another',
   }
 
@@ -305,5 +309,114 @@ describe('<ManagedGroupSubscriptions />', function () {
     expect(screen.queryByText('Turn on Managed Users')).to.not.exist
     expect(screen.queryByText('Configure and manage SSO and Managed Users')).to
       .not.exist
+  })
+
+  describe('Feature controls row', function () {
+    const adminEmail = 'admin@example.com'
+
+    function makeSubscription(
+      overrides: Partial<ManagedGroupSubscription>
+    ): ManagedGroupSubscription[] {
+      return [
+        {
+          _id: 'sub123',
+          userIsGroupMember: false,
+          planLevelName: 'Pro',
+          admin_id: { email: adminEmail },
+          features: { groupSSO: false, managedUsers: false },
+          managedUsersEnabled: false,
+          teamName: 'Test Group',
+          ...overrides,
+        },
+      ]
+    }
+
+    describe('when managedUsersEnabled === true', function () {
+      it('renders the feature controls row when the user is admin', async function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({ managedUsersEnabled: true }),
+            },
+            { name: 'ol-usersEmail', value: adminEmail },
+          ],
+        })
+        await screen.findByText('Feature controls')
+      })
+
+      it('does not render the feature controls row when the user is not the group admin', function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({ managedUsersEnabled: true }),
+            },
+            { name: 'ol-usersEmail', value: 'other@example.com' },
+          ],
+        })
+        expect(screen.queryByText('Feature controls')).to.be.null
+      })
+    })
+
+    describe('when managedUsersEnabled === false', function () {
+      it('renders the feature controls row when ai features are disabled', async function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({
+                groupPolicy: { userCannotUseAIFeatures: true },
+              }),
+            },
+            { name: 'ol-usersEmail', value: adminEmail },
+          ],
+        })
+        await screen.findByText('Feature controls')
+      })
+
+      it('renders the feature controls row when chat is disabled', async function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({
+                groupPolicy: { userCannotUseChat: true },
+              }),
+            },
+            { name: 'ol-usersEmail', value: adminEmail },
+          ],
+        })
+        await screen.findByText('Feature controls')
+      })
+
+      it('renders the feature controls row when dropbox is disabled', async function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({
+                groupPolicy: { userCannotUseDropbox: true },
+              }),
+            },
+            { name: 'ol-usersEmail', value: adminEmail },
+          ],
+        })
+        await screen.findByText('Feature controls')
+      })
+
+      it('does not render the feature controls row when no group policies are set', function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({ managedUsersEnabled: false }),
+            },
+            { name: 'ol-usersEmail', value: adminEmail },
+          ],
+        })
+        expect(screen.queryByText('Feature controls')).to.be.null
+      })
+    })
   })
 })
