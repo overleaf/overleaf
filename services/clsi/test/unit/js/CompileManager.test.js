@@ -135,6 +135,7 @@ describe('CompileManager', () => {
       stat: sinon.stub(),
       readFile: sinon.stub(),
       mkdir: sinon.stub().resolves(),
+      writeFile: sinon.stub().resolves(),
       rm: sinon.stub().resolves(),
       unlink: sinon.stub().resolves(),
       rmdir: sinon.stub().resolves(),
@@ -743,7 +744,13 @@ describe('CompileManager', () => {
 
     it('should run the texcount command', ctx => {
       ctx.filePath = `$COMPILE_DIR/${ctx.filename}`
-      ctx.command = ['texcount', '-nocol', '-inc', ctx.filePath]
+      ctx.command = [
+        'texcount',
+        '-nocol',
+        '-inc',
+        '-opt=$COMPILE_DIR/.overleaf-texcount-options',
+        ctx.filePath,
+      ]
 
       expect(ctx.CommandRunner.promises.run).to.have.been.calledWith(
         `${ctx.projectId}-${ctx.userId}`,
@@ -752,6 +759,13 @@ describe('CompileManager', () => {
         ctx.image,
         ctx.timeout,
         {}
+      )
+    })
+
+    it('should write texcount options for known preamble macros', ctx => {
+      expect(ctx.fsPromises.writeFile).to.have.been.calledWith(
+        Path.join(ctx.compileDir, '.overleaf-texcount-options'),
+        '%preambleinclude \\newcolumntype [ignore,xxx]\n'
       )
     })
 
