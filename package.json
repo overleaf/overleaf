@@ -71,7 +71,7 @@
     "body-parser": "patch:body-parser@npm%3A1.20.4#~/.yarn/patches/body-parser-npm-1.20.4.patch",
     "cypress-multi-reporters": "patch:cypress-multi-reporters@npm%3A2.0.5#~/.yarn/patches/cypress-multi-reporters-npm-2.0.5.patch",
     "forwarded@npm:0.2.0": "patch:forwarded@npm%3A0.2.0#~/.yarn/patches/forwarded-npm-0.2.0.patch",
-    "multer@npm:2.1.1": "patch:multer@npm%3A2.1.1#~/.yarn/patches/multer-npm-2.1.1.patch",
+    "multer@npm:2.2.0": "patch:multer@npm%3A2.2.0#~/.yarn/patches/multer-npm-2.2.0-4ed181c78f.patch",
     "node-fetch": "patch:node-fetch@npm%3A2.7.0#~/.yarn/patches/node-fetch-npm-2.7.0.patch",
     "passport-oauth2": "patch:passport-oauth2@npm%3A1.6.1#~/.yarn/patches/passport-oauth2-npm-1.6.1.patch",
     "send": "patch:send@npm%3A0.19.0#~/.yarn/patches/send-npm-0.19.0.patch",
