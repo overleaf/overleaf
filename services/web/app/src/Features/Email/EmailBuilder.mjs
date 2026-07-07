@@ -1141,7 +1141,7 @@ templates.groupDomainCapturedByGroupChanged = ctaTemplate({
     }
     return [
       `Users with a <b>${_.escape(opts.domain)}</b> email address on their account will no longer be able to join your group through domain capture. Anyone already in your group is unaffected.`,
-      `If you didn't expect this or want to re-enable it, please contact ${settings.adminEmail}.`,
+      `If you didn't expect this or want to re-enable domain capture, please contact ${settings.adminEmail}.`,
     ]
   },
   ctaText() {
