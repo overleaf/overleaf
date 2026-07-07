@@ -1,5 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import OLButton from '@/shared/components/ol/ol-button'
 
 function RedirectAlerts() {
@@ -41,7 +41,9 @@ function RedirectAlerts() {
   }
 
   return (
-    <OLNotification type="warning" content={<>{warning}</>} action={action} />
+    <div className="notification-list">
+      <Notification type="warning" content={<>{warning}</>} action={action} />
+    </div>
   )
 }
 export default RedirectAlerts

@@ -21,7 +21,7 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from '@/shared/components/dropdown/dropdown-menu'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import classnames from 'classnames'
 
@@ -268,7 +268,7 @@ export default function EditMember({
             </DropdownToggle>
           </div>
           <DropdownMenu>
-            <OLDropdownMenuItem
+            <DropdownMenuItem
               as="button"
               eventKey="owner"
               leadingIcon={<MaterialIcon type="person_edit" unfilled />}
@@ -276,8 +276,8 @@ export default function EditMember({
               trailingIcon={privileges === 'owner' ? 'check' : undefined}
             >
               {t('make_owner')}
-            </OLDropdownMenuItem>
-            <OLDropdownMenuItem
+            </DropdownMenuItem>
+            <DropdownMenuItem
               as="button"
               eventKey="readAndWrite"
               leadingIcon={<MaterialIcon type="edit" unfilled />}
@@ -287,9 +287,9 @@ export default function EditMember({
               description={getPrivilegeSubtitle('readAndWrite')}
             >
               {t('editor')}
-            </OLDropdownMenuItem>
+            </DropdownMenuItem>
             {features.trackChangesVisible && (
-              <OLDropdownMenuItem
+              <DropdownMenuItem
                 as="button"
                 eventKey="review"
                 leadingIcon={<MaterialIcon type="mode_comment" unfilled />}
@@ -299,9 +299,9 @@ export default function EditMember({
                 description={getPrivilegeSubtitle('review')}
               >
                 {t('reviewer')}
-              </OLDropdownMenuItem>
+              </DropdownMenuItem>
             )}
-            <OLDropdownMenuItem
+            <DropdownMenuItem
               as="button"
               eventKey="readOnly"
               leadingIcon={<MaterialIcon type="visibility" unfilled />}
@@ -309,8 +309,8 @@ export default function EditMember({
               trailingIcon={privileges === 'readOnly' ? 'check' : undefined}
             >
               {t('viewer')}
-            </OLDropdownMenuItem>
-            <OLDropdownMenuItem
+            </DropdownMenuItem>
+            <DropdownMenuItem
               as="button"
               eventKey="removeAccess"
               variant="danger"
@@ -319,7 +319,7 @@ export default function EditMember({
               trailingIcon={privileges === 'removeAccess' ? 'check' : undefined}
             >
               {t('remove_access')}
-            </OLDropdownMenuItem>
+            </DropdownMenuItem>
           </DropdownMenu>
         </Dropdown>
         {confirmRemoval && (

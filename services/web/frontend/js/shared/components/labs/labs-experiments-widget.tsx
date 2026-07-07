@@ -4,7 +4,7 @@ import OLBadge from '@/shared/components/ol/ol-badge'
 import { postJSON } from '@/infrastructure/fetch-json'
 import OLButton from '@/shared/components/ol/ol-button'
 import getMeta from '@/utils/meta'
-import Notification from '../notification'
+import Notification from '@/shared/components/notification'
 import { LabsEnableButton } from '@/shared/components/labs/labs-enable-button'
 
 export type LabsExperimentWidgetProps = {

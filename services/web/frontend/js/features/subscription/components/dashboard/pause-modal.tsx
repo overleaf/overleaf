@@ -10,7 +10,7 @@ import {
 } from '@/shared/components/ol/ol-modal'
 import { Select } from '@/shared/components/select'
 import OLFormGroup from '@/shared/components/ol/ol-form-group'
-import Button from '@/shared/components/button/button'
+import OLButton from '@/shared/components/ol/ol-button'
 import { Stack } from 'react-bootstrap'
 import { debugConsole } from '@/utils/debugging'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
@@ -119,19 +119,19 @@ export default function PauseSubscriptionModal() {
           />
         </OLFormGroup>
         <Stack gap={2}>
-          <Button
+          <OLButton
             onClick={handleConfirmPauseSubscriptionClick}
             disabled={inflight}
           >
             {t('pause_subscription')}
-          </Button>
-          <Button
+          </OLButton>
+          <OLButton
             onClick={handleCancelSubscriptionClick}
             disabled={inflight}
             variant="danger-ghost"
           >
             {t('cancel_subscription')}
-          </Button>
+          </OLButton>
         </Stack>
       </OLModalBody>
     </OLModal>

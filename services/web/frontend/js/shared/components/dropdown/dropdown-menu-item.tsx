@@ -3,7 +3,7 @@ import { DropdownItemProps } from '@/shared/components/types/dropdown-menu-props
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
 
 // This represents a menu item. It wraps the item within an <li> element.
-function OLDropdownMenuItem(props: DropdownItemProps) {
+function DropdownMenuItem(props: DropdownItemProps) {
   return (
     <DropdownListItem>
       <DropdownItem {...props} />
@@ -11,4 +11,4 @@ function OLDropdownMenuItem(props: DropdownItemProps) {
   )
 }
 
-export default OLDropdownMenuItem
+export default DropdownMenuItem

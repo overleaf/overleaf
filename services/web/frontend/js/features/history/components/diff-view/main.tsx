@@ -3,7 +3,7 @@ import { Diff } from '../../services/types/doc'
 import DocumentDiffViewer from './document-diff-viewer'
 import LoadingSpinner from '../../../../shared/components/loading-spinner'
 import { useTranslation } from 'react-i18next'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 type MainProps = {
   diff: Nullable<Diff>
@@ -24,7 +24,9 @@ function Main({ diff, isLoading }: MainProps) {
   if (diff.binary) {
     return (
       <div className="history-content">
-        <OLNotification content={t('binary_history_error')} type="info" />
+        <div className="notification-list">
+          <Notification content={t('binary_history_error')} type="info" />
+        </div>
       </div>
     )
   }

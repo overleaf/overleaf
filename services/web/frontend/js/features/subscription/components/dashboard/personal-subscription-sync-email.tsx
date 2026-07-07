@@ -3,7 +3,7 @@ import { useSubscriptionDashboardContext } from '../../context/subscription-dash
 import getMeta from '../../../../utils/meta'
 import useAsync from '../../../../shared/hooks/use-async'
 import { postJSON } from '../../../../infrastructure/fetch-json'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import OLButton from '@/shared/components/ol/ol-button'
 import OLFormGroup from '@/shared/components/ol/ol-form-group'
 
@@ -29,10 +29,12 @@ function PersonalSubscriptionSyncEmail() {
       <form onSubmit={handleSubmit}>
         <OLFormGroup>
           {isSuccess ? (
-            <OLNotification
-              type="success"
-              content={t('recurly_email_updated')}
-            />
+            <div className="notification-list">
+              <Notification
+                type="success"
+                content={t('recurly_email_updated')}
+              />
+            </div>
           ) : (
             <>
               <p>

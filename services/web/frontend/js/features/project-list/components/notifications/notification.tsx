@@ -1,8 +1,8 @@
 import classnames from 'classnames'
-import NewNotification from '@/shared/components/notification'
+import BaseNotification from '@/shared/components/notification'
 
 type NotificationProps = Pick<
-  React.ComponentProps<typeof NewNotification>,
+  React.ComponentProps<typeof BaseNotification>,
   | 'type'
   | 'action'
   | 'content'
@@ -15,7 +15,7 @@ type NotificationProps = Pick<
 
 function Notification({ className, ...props }: NotificationProps) {
   const notificationComponent = (
-    <NewNotification isDismissible={props.onDismiss != null} {...props} />
+    <BaseNotification isDismissible={props.onDismiss != null} {...props} />
   )
 
   return notificationComponent ? (

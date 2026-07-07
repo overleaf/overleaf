@@ -9,7 +9,7 @@ import {
 import OLFormGroup from '@/shared/components/ol/ol-form-group'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 /**
  * A form component that renders a text input with label,
@@ -57,7 +57,6 @@ export default function FileTreeCreateNameInput({
   return (
     <OLFormGroup controlId="new-doc-name" className={classes.formGroup}>
       <OLFormLabel>{label || t('file_name')}</OLFormLabel>
-
       <OLFormControl
         type="text"
         placeholder={placeholder || t('file_name')}
@@ -67,15 +66,15 @@ export default function FileTreeCreateNameInput({
         ref={inputRef}
         disabled={inFlight}
       />
-
       {touchedName && !validName && (
-        <OLNotification
-          type="error"
-          className="row-spaced-small"
-          content={t('files_cannot_include_invalid_characters')}
-        />
+        <div className="notification-list">
+          <Notification
+            type="error"
+            className="row-spaced-small"
+            content={t('files_cannot_include_invalid_characters')}
+          />
+        </div>
       )}
-
       {error && <ErrorMessage error={error} />}
     </OLFormGroup>
   )
@@ -91,29 +90,35 @@ function ErrorMessage({ error }: { error: string | Record<string, any> }) {
   switch (error.constructor) {
     case DuplicateFilenameError:
       return (
-        <OLNotification
-          type="error"
-          className="row-spaced-small"
-          content={t('file_already_exists')}
-        />
+        <div className="notification-list">
+          <Notification
+            type="error"
+            className="row-spaced-small"
+            content={t('file_already_exists')}
+          />
+        </div>
       )
 
     case InvalidFilenameError:
       return (
-        <OLNotification
-          type="error"
-          className="row-spaced-small"
-          content={t('files_cannot_include_invalid_characters')}
-        />
+        <div className="notification-list">
+          <Notification
+            type="error"
+            className="row-spaced-small"
+            content={t('files_cannot_include_invalid_characters')}
+          />
+        </div>
       )
 
     case BlockedFilenameError:
       return (
-        <OLNotification
-          type="error"
-          className="row-spaced-small"
-          content={t('blocked_filename')}
-        />
+        <div className="notification-list">
+          <Notification
+            type="error"
+            className="row-spaced-small"
+            content={t('blocked_filename')}
+          />
+        </div>
       )
 
     default:

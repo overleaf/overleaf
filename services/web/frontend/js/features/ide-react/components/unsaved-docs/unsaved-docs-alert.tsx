@@ -1,7 +1,7 @@
 import { FC, useEffect, useMemo, useRef } from 'react'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useTranslation } from 'react-i18next'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 
@@ -50,12 +50,14 @@ const UnsavedDocAlert: FC<{ docId: string; seconds: number }> = ({
   }
 
   return (
-    <OLNotification
-      type="warning"
-      content={t('saving_notification_with_seconds', {
-        docname: doc.entity.name,
-        seconds,
-      })}
-    />
+    <div className="notification-list">
+      <Notification
+        type="warning"
+        content={t('saving_notification_with_seconds', {
+          docname: doc.entity.name,
+          seconds,
+        })}
+      />
+    </div>
   )
 }

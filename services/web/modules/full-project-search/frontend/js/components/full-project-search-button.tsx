@@ -4,7 +4,7 @@ import classnames from 'classnames'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useTranslation } from 'react-i18next'
-import { TooltipProps } from '@/shared/components/tooltip'
+import { OLTooltipProps as TooltipProps } from '@/shared/components/ol/ol-tooltip'
 import { isMac } from '@/shared/utils/os'
 import { sendSearchEvent } from '@/features/event-tracking/search-events'
 

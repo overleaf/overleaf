@@ -8,7 +8,7 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from '@/shared/components/dropdown/dropdown-menu'
-import FormControl from '@/shared/components/form/form-control'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
 import { isMac } from '@/shared/utils/os'
 import { Shortcut } from '@/shared/components/shortcut'
 
@@ -87,7 +87,7 @@ function PdfZoomDropdown({
             className="pdfjs-custom-zoom-menu-item"
             eventKey="custom-zoom"
           >
-            <FormControl
+            <OLFormControl
               onFocus={event => event.target.select()}
               value={customZoomValue}
               type="text"

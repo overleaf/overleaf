@@ -11,7 +11,7 @@ import { useMemo } from 'react'
 import RecaptchaConditions from '@/shared/components/recaptcha-conditions'
 import getMeta from '@/utils/meta'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import ErrorMessage from '@/features/share-project-modal/components/error-message'
 import ProjectAccess from '@/features/share-project-modal/components/project-access'
 import InvitedPeople from '@/features/share-project-modal/components/invited-people'
@@ -124,14 +124,15 @@ export default function ShareModalBody({
       ) : (
         <SendInvitesNotice />
       )}
-
       {isSharingUpdatesEnabled ? (
         <>
           {error && (
-            <OLNotification
-              type="error"
-              content={<ErrorMessage error={error} />}
-            />
+            <div className="notification-list">
+              <Notification
+                type="error"
+                content={<ErrorMessage error={error} />}
+              />
+            </div>
           )}
           {isInvitedPeopleScreen || !isProjectOwner ? (
             <InvitedPeople
@@ -185,7 +186,6 @@ export default function ShareModalBody({
           ))}
         </>
       )}
-
       {!getMeta('ol-ExposedSettings').recaptchaDisabled?.invite && (
         <RecaptchaConditions />
       )}

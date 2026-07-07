@@ -21,7 +21,7 @@ import { FormatTimeBasedOnYear } from '@/shared/components/format-time-based-on-
 import { useEditorContext } from '@/shared/context/editor-context'
 import OLTag from '@/shared/components/ol/ol-tag'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLTagIcon from '@/shared/components/ol/ol-tag-icon'
+import TagIcon from '@/shared/components/tag-icon'
 
 type TagProps = {
   label: LoadedLabel
@@ -79,7 +79,7 @@ const ChangeTag = forwardRef<HTMLElement, TagProps>(
       <>
         <OLTag
           ref={ref}
-          prepend={<OLTagIcon />}
+          prepend={<TagIcon />}
           closeBtnProps={
             showCloseButton
               ? { 'aria-label': t('delete'), onClick: showConfirmationModal }
@@ -169,7 +169,7 @@ function TagTooltip({ label, currentUserId, showTooltip }: LabelBadgesProps) {
               className="history-version-label-tooltip-row-comment"
               translate="no"
             >
-              <OLTagIcon />
+              <TagIcon />
               &nbsp;
               {label.comment}
             </b>

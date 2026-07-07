@@ -12,7 +12,7 @@ import {
 import OLButton from '@/shared/components/ol/ol-button'
 import '@uppy/core/dist/style.css'
 import '@uppy/dashboard/dist/style.css'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 function ImportDocumentModal({
   type,
@@ -104,31 +104,33 @@ function ImportDocumentModal({
 const ErrorNotification = ({ message }: { message: string }) => {
   const { t } = useTranslation()
   return (
-    <OLNotification
-      type="error"
-      className="import-error-notification"
-      content={
-        <div>
-          <Trans
-            i18nKey="your_document_couldnt_be_imported_check_our_guidance_or_expand_conversion_error_details"
-            components={[
-              // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
-              <a
-                href="https://docs.overleaf.com/managing-projects-and-files/importing-and-exporting-files#common-issues-and-how-to-address-them"
-                target="_BLANK"
-                rel="noopener noreferrer"
-              />,
-            ]}
-          />
-          {message && (
-            <details style={{ maxHeight: '200px', overflow: 'auto' }}>
-              <summary>{t('conversion_error_details')}</summary>
-              <code style={{ wordBreak: 'break-all' }}>{message}</code>
-            </details>
-          )}
-        </div>
-      }
-    />
+    <div className="notification-list">
+      <Notification
+        type="error"
+        className="import-error-notification"
+        content={
+          <div>
+            <Trans
+              i18nKey="your_document_couldnt_be_imported_check_our_guidance_or_expand_conversion_error_details"
+              components={[
+                // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
+                <a
+                  href="https://docs.overleaf.com/managing-projects-and-files/importing-and-exporting-files#common-issues-and-how-to-address-them"
+                  target="_BLANK"
+                  rel="noopener noreferrer"
+                />,
+              ]}
+            />
+            {message && (
+              <details style={{ maxHeight: '200px', overflow: 'auto' }}>
+                <summary>{t('conversion_error_details')}</summary>
+                <code style={{ wordBreak: 'break-all' }}>{message}</code>
+              </details>
+            )}
+          </div>
+        }
+      />
+    </div>
   )
 }
 

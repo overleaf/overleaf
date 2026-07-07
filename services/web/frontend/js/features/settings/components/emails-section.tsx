@@ -8,7 +8,7 @@ import {
 import EmailsHeader from './emails/header'
 import EmailsRow from './emails/row'
 import AddEmail from './emails/add-email'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import LoadingSpinner from '@/shared/components/loading-spinner'
 
 function EmailsSectionContent() {
@@ -78,10 +78,12 @@ function EmailsSectionContent() {
         )}
         {isInitializingSuccess && !hideAddSecondaryEmail && <AddEmail />}
         {isInitializingError && (
-          <OLNotification
-            type="error"
-            content={t('error_performing_request')}
-          />
+          <div className="notification-list">
+            <Notification
+              type="error"
+              content={t('error_performing_request')}
+            />
+          </div>
         )}
       </>
     </>

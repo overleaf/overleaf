@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 export type APIError = {
   message?: string
@@ -18,14 +18,18 @@ export default function ErrorAlert({ error }: ErrorAlertProps) {
 
   if (error.message) {
     return (
-      <OLNotification
-        type="error"
-        content={`${t('error')}: ${error.message}`}
-      />
+      <div className="notification-list">
+        <Notification
+          type="error"
+          content={`${t('error')}: ${error.message}`}
+        />
+      </div>
     )
   }
 
   return (
-    <OLNotification type="error" content={t('generic_something_went_wrong')} />
+    <div className="notification-list">
+      <Notification type="error" content={t('generic_something_went_wrong')} />
+    </div>
   )
 }

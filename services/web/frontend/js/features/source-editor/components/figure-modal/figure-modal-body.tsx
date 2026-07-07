@@ -11,7 +11,7 @@ import { FigureModalCurrentProjectSource } from './file-sources/figure-modal-pro
 import { FigureModalUploadFileSource } from './file-sources/figure-modal-upload-source'
 import { FigureModalUrlSource } from './file-sources/figure-modal-url-source'
 import { useCallback } from 'react'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 const sourceModes = new Map([
   [FigureModalSource.FILE_TREE, FigureModalCurrentProjectSource],
@@ -44,7 +44,9 @@ export default function FigureModalBody() {
   return (
     <>
       {error && (
-        <OLNotification type="error" onDismiss={onDismiss} content={error} />
+        <div className="notification-list">
+          <Notification type="error" onDismiss={onDismiss} content={error} />
+        </div>
       )}
       <Body />
       <FigureModalFigureOptions />

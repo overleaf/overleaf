@@ -13,7 +13,7 @@ import PremiumFeaturesLink from './premium-features-link'
 import OLPageContentCard from '@/shared/components/ol/ol-page-content-card'
 import OLRow from '@/shared/components/ol/ol-row'
 import OLCol from '@/shared/components/ol/ol-col'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import WritefullManagedBundleAddOn from './states/active/change-plan/modals/writefull-bundle-management-modal'
 import RedirectAlerts from './redirect-alerts'
 import { PaidSubscription } from '@ol-types/subscription/dashboard/subscription'
@@ -49,52 +49,58 @@ function SubscriptionDashboard() {
       <OLRow>
         <OLCol lg={{ span: 8, offset: 2 }}>
           {hasPendingPlan && (
-            <OLNotification
-              className="mb-4"
-              aria-live="polite"
-              content={
-                <div>
-                  <Trans
-                    i18nKey="pending_subscription_message"
-                    values={{
-                      planName: personalSubscription?.pendingPlan?.name,
-                      activationDate: nextPaymentDueDate,
-                    }}
-                    shouldUnescape
-                    tOptions={{ interpolation: { escapeValue: true } }}
-                    components={[
-                      // eslint-disable-next-line react/jsx-key
-                      <strong />,
-                    ]}
-                  />
-                </div>
-              }
-              type="success"
-            />
+            <div className="notification-list">
+              <Notification
+                className="mb-4"
+                aria-live="polite"
+                content={
+                  <div>
+                    <Trans
+                      i18nKey="pending_subscription_message"
+                      values={{
+                        planName: personalSubscription?.pendingPlan?.name,
+                        activationDate: nextPaymentDueDate,
+                      }}
+                      shouldUnescape
+                      tOptions={{ interpolation: { escapeValue: true } }}
+                      components={[
+                        // eslint-disable-next-line react/jsx-key
+                        <strong />,
+                      ]}
+                    />
+                  </div>
+                }
+                type="success"
+              />
+            </div>
           )}
           {fromPlansPage && (
-            <OLNotification
-              className="mb-4"
-              aria-live="polite"
-              content={t('you_already_have_a_subscription')}
-              type="warning"
-            />
+            <div className="notification-list">
+              <Notification
+                className="mb-4"
+                aria-live="polite"
+                content={t('you_already_have_a_subscription')}
+                type="warning"
+              />
+            </div>
           )}
           {hasRedirectedPaymentError && (
-            <OLNotification
-              className="mb-4"
-              aria-live="polite"
-              content={
-                <Trans
-                  i18nKey="payment_error_generic"
-                  components={[
-                    /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
-                    <a href="/contact" target="_blank" />,
-                  ]}
-                />
-              }
-              type="error"
-            />
+            <div className="notification-list">
+              <Notification
+                className="mb-4"
+                aria-live="polite"
+                content={
+                  <Trans
+                    i18nKey="payment_error_generic"
+                    components={[
+                      /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
+                      <a href="/contact" target="_blank" />,
+                    ]}
+                  />
+                }
+                type="error"
+              />
+            </div>
           )}
           <RedirectAlerts />
           <OLPageContentCard>

@@ -23,7 +23,7 @@ import {
 import { mathPreviewStateField } from '../extensions/math-preview'
 import { getTooltip } from '@codemirror/view'
 import ReactDOM from 'react-dom'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 
 const MathPreviewTooltipContainer: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -94,7 +94,7 @@ const MathPreviewTooltipMenu: FC = () => {
           />
         </DropdownToggle>
         <DropdownMenu flip={false}>
-          <OLDropdownMenuItem
+          <DropdownMenuItem
             onClick={onHide}
             description={t('temporarily_hides_the_preview')}
             trailingIcon={
@@ -104,13 +104,13 @@ const MathPreviewTooltipMenu: FC = () => {
             }
           >
             {t('hide')}
-          </OLDropdownMenuItem>
-          <OLDropdownMenuItem
+          </DropdownMenuItem>
+          <DropdownMenuItem
             onClick={openDisableModal}
             description={t('permanently_disables_the_preview')}
           >
             {t('disable')}
-          </OLDropdownMenuItem>
+          </DropdownMenuItem>
         </DropdownMenu>
       </Dropdown>
 

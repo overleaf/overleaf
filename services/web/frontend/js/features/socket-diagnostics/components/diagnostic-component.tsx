@@ -2,7 +2,7 @@ import React from 'react'
 import classnames from 'classnames'
 import type { ConnectionStatus } from './types'
 import { Badge, Button } from 'react-bootstrap'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import MaterialIcon from '@/shared/components/material-icon'
 
 const variants = {
@@ -44,7 +44,11 @@ export const DiagnosticItem = ({
 )
 
 export function ErrorAlert({ message }: { message: string }) {
-  return <OLNotification type="error" content={message} className="mt-3" />
+  return (
+    <div className="notification-list">
+      <Notification type="error" content={message} className="mt-3" />
+    </div>
+  )
 }
 
 export function ActionButton({

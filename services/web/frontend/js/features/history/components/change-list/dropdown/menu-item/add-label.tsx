@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
-import OLTagIcon from '@/shared/components/ol/ol-tag-icon'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
+import TagIcon from '@/shared/components/tag-icon'
 import AddLabelModal from '../../add-label-modal'
 
 type AddLabelProps = {
@@ -20,15 +20,15 @@ function AddLabel({ version, closeDropdown, ...props }: AddLabelProps) {
 
   return (
     <>
-      <OLDropdownMenuItem
+      <DropdownMenuItem
         onClick={handleClick}
-        leadingIcon={<OLTagIcon />}
+        leadingIcon={<TagIcon />}
         as="button"
         className="dropdown-item-material-icon-small"
         {...props}
       >
         {t('history_label_this_version')}
-      </OLDropdownMenuItem>
+      </DropdownMenuItem>
       <AddLabelModal
         show={showModal}
         setShow={setShowModal}

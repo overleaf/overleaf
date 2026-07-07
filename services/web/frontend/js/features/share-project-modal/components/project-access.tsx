@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import ShareProjectModalRow from '@/features/share-project-modal/components/share-project-modal-row'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import {
   Dropdown,
   DropdownDivider,
@@ -321,7 +321,7 @@ function ProjectAccess({
                 <MaterialIcon type="keyboard_arrow_down" />
               </DropdownToggle>
               <DropdownMenu>
-                <OLDropdownMenuItem
+                <DropdownMenuItem
                   as="button"
                   eventKey="readAndWrite"
                   leadingIcon={<MaterialIcon type="edit" unfilled />}
@@ -331,8 +331,8 @@ function ProjectAccess({
                   }
                 >
                   {t('editor')}
-                </OLDropdownMenuItem>
-                <OLDropdownMenuItem
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   as="button"
                   eventKey="review"
                   leadingIcon={<MaterialIcon type="mode_comment" unfilled />}
@@ -340,8 +340,8 @@ function ProjectAccess({
                   trailingIcon={privileges === 'review' ? 'check' : undefined}
                 >
                   {t('reviewer')}
-                </OLDropdownMenuItem>
-                <OLDropdownMenuItem
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   as="button"
                   eventKey="readOnly"
                   leadingIcon={<MaterialIcon type="visibility" unfilled />}
@@ -349,7 +349,7 @@ function ProjectAccess({
                   trailingIcon={privileges === 'readOnly' ? 'check' : undefined}
                 >
                   {t('viewer')}
-                </OLDropdownMenuItem>
+                </DropdownMenuItem>
               </DropdownMenu>
             </Dropdown>
           )}

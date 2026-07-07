@@ -1,7 +1,7 @@
 import { UseAsyncReturnType } from '../../../../../shared/hooks/use-async'
 import { getUserFacingMessage } from '../../../../../infrastructure/fetch-json'
 import OLRow from '@/shared/components/ol/ol-row'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 type LayoutProps = {
   children: React.ReactNode
@@ -14,10 +14,12 @@ function Layout({ isError, error, children }: LayoutProps) {
     <div className="affiliations-table-row-highlighted">
       <OLRow>{children}</OLRow>
       {isError && (
-        <OLNotification
-          type="error"
-          content={getUserFacingMessage(error) ?? ''}
-        />
+        <div className="notification-list">
+          <Notification
+            type="error"
+            content={getUserFacingMessage(error) ?? ''}
+          />
+        </div>
       )}
     </div>
   )

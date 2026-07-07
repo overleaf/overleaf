@@ -4,7 +4,7 @@ import getMeta from '@/utils/meta'
 import { Dropdown, DropdownMenu, DropdownToggle } from 'react-bootstrap'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import OLSpinner from '@/shared/components/ol/ol-spinner'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useLocation } from '@/shared/hooks/use-location'
@@ -119,22 +119,22 @@ function AddOn({
             </DropdownToggle>
             <DropdownMenu flip={false}>
               {pendingCancellation ? (
-                <OLDropdownMenuItem
+                <DropdownMenuItem
                   onClick={() => handleReactivateClick(addOnCode)}
                   as="button"
                   tabIndex={-1}
                 >
                   {t('reactivate')}
-                </OLDropdownMenuItem>
+                </DropdownMenuItem>
               ) : (
-                <OLDropdownMenuItem
+                <DropdownMenuItem
                   onClick={() => handleCancelClick(addOnCode)}
                   as="button"
                   tabIndex={-1}
                   variant="danger"
                 >
                   {t('cancel')}
-                </OLDropdownMenuItem>
+                </DropdownMenuItem>
               )}
             </DropdownMenu>
           </Dropdown>

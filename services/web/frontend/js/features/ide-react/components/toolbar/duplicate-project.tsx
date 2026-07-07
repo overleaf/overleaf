@@ -1,5 +1,5 @@
 import EditorCloneProjectModalWrapper from '@/features/clone-project-modal/components/editor-clone-project-modal-wrapper'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import useOpenProject from '@/shared/hooks/use-open-project'
 import getMeta from '@/utils/meta'
@@ -24,9 +24,9 @@ export const DuplicateProject = () => {
 
   return (
     <>
-      <OLDropdownMenuItem onClick={handleShowModal}>
+      <DropdownMenuItem onClick={handleShowModal}>
         {t('make_a_copy')}
-      </OLDropdownMenuItem>
+      </DropdownMenuItem>
       <EditorCloneProjectModalWrapper
         show={showModal}
         handleHide={() => setShowModal(false)}

@@ -1,7 +1,7 @@
 import { Trans } from 'react-i18next'
 import { Institution } from '../../../../../../types/institution'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 function InstitutionMemberships() {
   const { institutionMemberships } = useSubscriptionDashboardContext()
@@ -10,16 +10,18 @@ function InstitutionMemberships() {
 
   if (!institutionMemberships) {
     return (
-      <OLNotification
-        type="warning"
-        content={
-          <p>
-            Sorry, something went wrong. Subscription information related to
-            institutional affiliations may not be displayed. Please try again
-            later.
-          </p>
-        }
-      />
+      <div className="notification-list">
+        <Notification
+          type="warning"
+          content={
+            <p>
+              Sorry, something went wrong. Subscription information related to
+              institutional affiliations may not be displayed. Please try again
+              later.
+            </p>
+          }
+        />
+      </div>
     )
   }
 

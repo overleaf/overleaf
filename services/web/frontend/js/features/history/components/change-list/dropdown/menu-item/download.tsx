@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import MaterialIcon from '@/shared/components/material-icon'
 
 type DownloadProps = {
@@ -17,7 +17,7 @@ function Download({
   const { t } = useTranslation()
 
   return (
-    <OLDropdownMenuItem
+    <DropdownMenuItem
       href={`/project/${projectId}/version/${version}/zip`}
       download={`${projectId}_v${version}.zip`}
       rel="noreferrer"
@@ -26,7 +26,7 @@ function Download({
       {...props}
     >
       {t('history_download_this_version')}
-    </OLDropdownMenuItem>
+    </DropdownMenuItem>
   )
 }
 

@@ -2,8 +2,8 @@ import getMeta from '@/utils/meta'
 import { FetchError, postJSON } from '@/infrastructure/fetch-json'
 import { useTranslation, Trans } from 'react-i18next'
 import { Card, Row, Col } from 'react-bootstrap'
-import IconButton from '@/shared/components/button/icon-button'
-import Button from '@/shared/components/button/button'
+import OLIconButton from '@/shared/components/ol/ol-icon-button'
+import OLButton from '@/shared/components/ol/ol-button'
 import UpgradeSubscriptionPlanDetails from './upgrade-subscription-plan-details'
 import RequestStatus from '../request-status'
 import UpgradeSummary, {
@@ -90,7 +90,7 @@ function UpgradeSubscription() {
       <Row>
         <Col xl={{ span: 8, offset: 2 }}>
           <div className="group-heading" data-testid="group-heading">
-            <IconButton
+            <OLIconButton
               variant="ghost"
               href="/user/subscription"
               size="lg"
@@ -135,7 +135,7 @@ function UpgradeSubscription() {
                 >
                   {t('add_more_licenses_to_my_plan')}
                 </a>
-                <Button
+                <OLButton
                   href="/user/subscription"
                   variant="secondary"
                   disabled={isLoading}
@@ -146,14 +146,15 @@ function UpgradeSubscription() {
                   }}
                 >
                   {t('cancel')}
-                </Button>
-                <Button
+                </OLButton>
+                <OLButton
                   variant="primary"
                   onClick={onSubmit}
                   isLoading={isLoading}
+                  loadingLabel={t('loading')}
                 >
                   {t('upgrade')}
-                </Button>
+                </OLButton>
               </div>
             </Card.Body>
           </Card>

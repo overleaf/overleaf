@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { screen, render } from '@testing-library/react'
-import Notification from '../../../../frontend/js/shared/components/notification'
+import Notification from '@/shared/components/notification'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import sinon from 'sinon'
 

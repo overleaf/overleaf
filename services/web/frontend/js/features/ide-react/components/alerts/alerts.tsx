@@ -5,7 +5,7 @@ import { debugging } from '@/utils/debugging'
 import { ElementType } from 'react'
 import { createPortal } from 'react-dom'
 import { useGlobalAlertsContainer } from '@/features/ide-react/context/global-alerts-context'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 
 const rollingBuildsUpdatedAlert: Array<{
@@ -39,10 +39,12 @@ export function Alerts() {
       {connectionState.forceDisconnected &&
       // hide "disconnected" banner when displaying out of sync modal
       connectionState.error !== 'out-of-sync' ? (
-        <OLNotification
-          type="error"
-          content={<strong>{t('disconnected')}</strong>}
-        />
+        <div className="notification-list">
+          <Notification
+            type="error"
+            content={<strong>{t('disconnected')}</strong>}
+          />
+        </div>
       ) : null}
 
       {connectionState.reconnectAt ? (
@@ -53,10 +55,12 @@ export function Alerts() {
       ) : null}
 
       {isStillReconnecting ? (
-        <OLNotification
-          type="warning"
-          content={<strong>{t('reconnecting')}…</strong>}
-        />
+        <div className="notification-list">
+          <Notification
+            type="warning"
+            content={<strong>{t('reconnecting')}…</strong>}
+          />
+        </div>
       ) : null}
 
       {connectionState.inactiveDisconnect ||
@@ -64,19 +68,23 @@ export function Alerts() {
         (connectionState.error === 'rate-limited' ||
           connectionState.error === 'unable-to-connect') &&
         !secondsUntilReconnect()) ? (
-        <OLNotification
-          type="warning"
-          content={
-            <strong>{t('editor_disconected_click_to_reconnect')}</strong>
-          }
-        />
+        <div className="notification-list">
+          <Notification
+            type="warning"
+            content={
+              <strong>{t('editor_disconected_click_to_reconnect')}</strong>
+            }
+          />
+        </div>
       ) : null}
 
       {debugging ? (
-        <OLNotification
-          type="warning"
-          content={<strong>Connected: {isConnected.toString()}</strong>}
-        />
+        <div className="notification-list">
+          <Notification
+            type="warning"
+            content={<strong>Connected: {isConnected.toString()}</strong>}
+          />
+        </div>
       ) : null}
     </>,
     globalAlertsContainer

@@ -20,7 +20,7 @@ import { debugConsole } from '@/utils/debugging'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { Col, Form, Row } from 'react-bootstrap'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
-import Button from '@/shared/components/button/button'
+import OLButton from '@/shared/components/ol/ol-button'
 import Notification from '@/shared/components/notification'
 import '../../stylesheets/full-project-search.scss'
 import { userStyles } from '@/shared/utils/styles'
@@ -217,9 +217,9 @@ const FullProjectSearchUI: FC = () => {
               />
             </Col>
             <Col className="col-auto">
-              <Button type="submit" className="btn btn-primary" size="sm">
+              <OLButton type="submit" className="btn btn-primary" size="sm">
                 {t('search')}
-              </Button>
+              </OLButton>
             </Col>
           </Row>
 

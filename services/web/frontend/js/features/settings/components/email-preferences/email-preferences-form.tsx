@@ -3,7 +3,7 @@ import { useTranslation, Trans } from 'react-i18next'
 import { postJSON, getUserFacingMessage } from '@/infrastructure/fetch-json'
 import useAsync from '@/shared/hooks/use-async'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import getMeta from '@/utils/meta'
 
 function EmailPreferencesForm() {
@@ -25,20 +25,23 @@ function EmailPreferencesForm() {
   return (
     <>
       {isError && (
-        <OLNotification
-          type="error"
-          content={getUserFacingMessage(error)}
-          className="mb-3"
-        />
+        <div className="notification-list">
+          <Notification
+            type="error"
+            content={getUserFacingMessage(error)}
+            className="mb-3"
+          />
+        </div>
       )}
       {isSuccess && (
-        <OLNotification
-          type="success"
-          content={t('thanks_settings_updated')}
-          className="mb-3"
-        />
+        <div className="notification-list">
+          <Notification
+            type="success"
+            content={t('thanks_settings_updated')}
+            className="mb-3"
+          />
+        </div>
       )}
-
       <p>
         {subscribed ? (
           <Trans
@@ -52,7 +55,6 @@ function EmailPreferencesForm() {
           />
         )}
       </p>
-
       <p className="text-center">
         {subscribed ? (
           <OLButton
@@ -76,7 +78,6 @@ function EmailPreferencesForm() {
           </OLButton>
         )}
       </p>
-
       {subscribed && <p>{t('newsletter_info_note')}</p>}
     </>
   )

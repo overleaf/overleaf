@@ -14,7 +14,7 @@ import {
 } from '@/shared/components/ol/ol-modal'
 import OLFormGroup from '@/shared/components/ol/ol-form-group'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import { sendMB } from '@/infrastructure/event-tracking'
@@ -117,7 +117,9 @@ export default function RemoveManagedUserModal({
             />
           </OLFormGroup>
           {error && (
-            <OLNotification type="error" content={error} className="mb-0" />
+            <div className="notification-list">
+              <Notification type="error" content={error} className="mb-0" />
+            </div>
           )}
         </OLModalBody>
         <OLModalFooter>

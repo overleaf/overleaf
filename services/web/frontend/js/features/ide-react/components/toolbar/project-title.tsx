@@ -12,7 +12,7 @@ import { useEditorContext } from '@/shared/context/editor-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { DownloadProjectPDF, DownloadProjectZip } from './download-project'
 import { useCallback, useState } from 'react'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import EditableLabel from './editable-label'
 import { DuplicateProject } from './duplicate-project'
 import { ExportProjectWithConversionButton } from './export-project-with-conversion-button'
@@ -99,14 +99,14 @@ export const ToolbarProjectTitle = () => {
         />
         <DropdownDivider />
         <DuplicateProject />
-        <OLDropdownMenuItem
+        <DropdownMenuItem
           onClick={() => {
             setIsRenaming(true)
           }}
           disabled={!hasRenamePermissions}
         >
           {t('rename')}
-        </OLDropdownMenuItem>
+        </DropdownMenuItem>
       </DropdownMenu>
     </Dropdown>
   )

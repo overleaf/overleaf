@@ -3,7 +3,7 @@
 import classNames from 'classnames'
 import React, { ReactElement, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import MaterialIcon from './material-icon'
+import MaterialIcon from '@/shared/components/material-icon'
 
 export type NotificationType =
   | 'info'
@@ -62,7 +62,7 @@ export function NotificationIcon({
   )
 }
 
-function Notification({
+export default function Notification({
   action,
   ariaLive,
   className = '',
@@ -140,5 +140,3 @@ function Notification({
     </div>
   )
 }
-
-export default Notification

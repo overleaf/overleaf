@@ -3,7 +3,7 @@ import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { FC } from 'react'
 import useConvertProject from '../../hooks/use-convert-project'
 import { useCommandProvider } from '../../hooks/use-command-provider'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import { useRootDoc } from '@/shared/hooks/use-root-doc'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 
@@ -52,8 +52,6 @@ export const ExportProjectWithConversionButton: FC<
   }
 
   return (
-    <OLDropdownMenuItem onClick={downloadConversion}>
-      {label}
-    </OLDropdownMenuItem>
+    <DropdownMenuItem onClick={downloadConversion}>{label}</DropdownMenuItem>
   )
 }

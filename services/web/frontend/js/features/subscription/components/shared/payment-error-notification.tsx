@@ -1,6 +1,6 @@
 import { FetchError } from '@/infrastructure/fetch-json'
 import { Trans } from 'react-i18next'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import { billingPortalUrl } from '../../data/subscription-url'
 
 type Props = {
@@ -62,5 +62,9 @@ export default function PaymentErrorNotification({ error }: Props) {
       }
   }
 
-  return <OLNotification type="error" aria-live="polite" content={message} />
+  return (
+    <div className="notification-list">
+      <Notification type="error" aria-live="polite" content={message} />
+    </div>
+  )
 }

@@ -5,7 +5,7 @@ import { useCurrentProjectFolders } from '@/features/source-editor/hooks/use-cur
 import OLFormControl from '@/shared/components/ol/ol-form-control'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLFormGroup from '@/shared/components/ol/ol-form-group'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 type FileNameInputProps = Omit<
   React.ComponentProps<typeof OLFormControl>,
@@ -85,13 +85,15 @@ export const FileNameInput = ({
         <OLFormLabel>{label}</OLFormLabel>
         <OLFormControl onFocus={onFocus} {...props} />
         {overlap && (
-          <OLNotification
-            type="warning"
-            content={t(
-              'a_file_with_that_name_already_exists_and_will_be_overriden'
-            )}
-            className="mt-1 mb-0"
-          />
+          <div className="notification-list">
+            <Notification
+              type="warning"
+              content={t(
+                'a_file_with_that_name_already_exists_and_will_be_overriden'
+              )}
+              className="mt-1 mb-0"
+            />
+          </div>
         )}
       </OLFormGroup>
     </>

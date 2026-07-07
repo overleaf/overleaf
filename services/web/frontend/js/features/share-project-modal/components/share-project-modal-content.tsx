@@ -10,7 +10,7 @@ import {
   OLModalHeader,
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import OLButton from '@/shared/components/ol/ol-button'
 import OLSpinner from '@/shared/components/ol/ol-spinner'
 import MaterialIcon from '@/shared/components/material-icon'
@@ -100,7 +100,6 @@ function ShareProjectModalContentInner({
           {isSharingUpdatesEnabled && isProjectOwner && <GiveFeedbackLink />}
         </div>
       </OLModalHeader>
-
       <OLModalBody
         className={classNames('modal-body-share modal-link-share', {
           'modal-redesign': isSharingUpdatesEnabled,
@@ -123,15 +122,16 @@ function ShareProjectModalContentInner({
             )}
           </Suspense>
           {!isSharingUpdatesEnabled && error && (
-            <OLNotification
-              type="error"
-              content={<ErrorMessage error={error} />}
-              className="mb-0 mt-3"
-            />
+            <div className="notification-list">
+              <Notification
+                type="error"
+                content={<ErrorMessage error={error} />}
+                className="mb-0 mt-3"
+              />
+            </div>
           )}
         </div>
       </OLModalBody>
-
       <OLModalFooter>
         <div className="d-flex flex-grow-1 flex-wrap gap-2">
           {isSharingUpdatesEnabled ? (

@@ -1,14 +1,14 @@
 import { FC } from 'react'
 import { Tag as TagType } from '../../../../../app/src/Features/Tags/types'
 import { getTagColor } from '@/features/project-list/util/tag'
-import Tag from '@/shared/components/tag'
+import OLTag from '@/shared/components/ol/ol-tag'
 
 export const CloneProjectTag: FC<{
   tag: TagType
   removeTag: (tag: TagType) => void
 }> = ({ tag, removeTag }) => {
   return (
-    <Tag
+    <OLTag
       prepend={
         <i
           className="badge-tag-circle"
@@ -21,6 +21,6 @@ export const CloneProjectTag: FC<{
       className="ms-2 mb-2"
     >
       {tag.name}
-    </Tag>
+    </OLTag>
   )
 }

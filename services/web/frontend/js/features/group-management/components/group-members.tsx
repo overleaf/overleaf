@@ -13,7 +13,7 @@ import OLCard from '@/shared/components/ol/ol-card'
 import OLButton from '@/shared/components/ol/ol-button'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
 import OLFormText from '@/shared/components/ol/ol-form-text'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 
 export default function GroupMembers() {
@@ -144,11 +144,13 @@ export default function GroupMembers() {
                 data-testid="add-more-members-form"
               >
                 {memberAdded && (
-                  <OLNotification
-                    content={t('members_added')}
-                    type="success"
-                    className="mt-2 mb-3"
-                  />
+                  <div className="notification-list">
+                    <Notification
+                      content={t('members_added')}
+                      type="success"
+                      className="mt-2 mb-3"
+                    />
+                  </div>
                 )}
                 <ErrorAlert error={inviteError} />
                 <form onSubmit={onAddMembersSubmit}>

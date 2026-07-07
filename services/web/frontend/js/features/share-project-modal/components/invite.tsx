@@ -10,7 +10,7 @@ import OLCol from '@/shared/components/ol/ol-col'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import OLButton from '@/shared/components/ol/ol-button'
 import OLBadge from '@/shared/components/ol/ol-badge'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import {
   Dropdown,
   DropdownMenu,
@@ -120,14 +120,14 @@ function ResendInvite({ invite }: { invite: ProjectMember }) {
   )
 
   return isSharingUpdatesEnabled ? (
-    <OLDropdownMenuItem
+    <DropdownMenuItem
       as="button"
       leadingIcon={<MaterialIcon type="mail" unfilled />}
       onClick={handleClick}
       disabled={inFlight}
     >
       {t('resend_invite')}
-    </OLDropdownMenuItem>
+    </DropdownMenuItem>
   ) : (
     <OLButton
       variant="link"
@@ -167,14 +167,14 @@ function RevokeInvite({ invite }: { invite: ProjectMember }) {
   }
 
   return isSharingUpdatesEnabled ? (
-    <OLDropdownMenuItem
+    <DropdownMenuItem
       as="button"
       leadingIcon={<MaterialIcon type="block" unfilled />}
       variant="danger"
       onClick={handleClick}
     >
       {t('revoke_invite')}
-    </OLDropdownMenuItem>
+    </DropdownMenuItem>
   ) : (
     <OLTooltip
       id="revoke-invite"

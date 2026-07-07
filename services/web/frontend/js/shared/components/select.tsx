@@ -11,7 +11,7 @@ import classNames from 'classnames'
 import { useSelect } from 'downshift'
 import { useTranslation } from 'react-i18next'
 import { Form, OverlayProps } from 'react-bootstrap'
-import FormControl from '@/shared/components/form/form-control'
+import OLFormControl from '@/shared/components/ol/ol-form-control'
 import MaterialIcon from '@/shared/components/material-icon'
 import { CaretUp, CaretDown, Check } from '@phosphor-icons/react'
 import { DropdownItem } from '@/shared/components/dropdown/dropdown-menu'
@@ -101,7 +101,7 @@ export type SelectProps<T> = {
   dataTestId?: string
   // CIAM-specific layout
   isCiam?: boolean
-  size?: React.ComponentProps<typeof FormControl>['size']
+  size?: React.ComponentProps<typeof OLFormControl>['size']
   // Renders the menu in a portal so it escapes overflow-clipping ancestors.
   portal?: boolean
   // Element the portaled menu is rendered into (only used with `portal`).
@@ -312,7 +312,7 @@ export const Select = <T,>({
           {loading && <OLSpinner size="sm" />}
         </Form.Label>
       ) : null}
-      <FormControl
+      <OLFormControl
         data-testid={dataTestId}
         {...getToggleButtonProps({
           disabled,

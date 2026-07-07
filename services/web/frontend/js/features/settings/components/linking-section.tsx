@@ -5,7 +5,7 @@ import { useSSOContext, SSOSubscription } from '../context/sso-context'
 import { SSOLinkingWidget } from './linking/sso-widget'
 import getMeta from '../../../utils/meta'
 import { useBroadcastUser } from '@/shared/hooks/user-channel/use-broadcast-user'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 const availableIntegrationLinkingWidgets = importOverleafModules(
   'integrationLinkingWidgets'
@@ -104,10 +104,12 @@ function LinkingSection() {
         <>
           <h3 id="project-sync">{t('project_synchronisation')}</h3>
           {projectSyncSuccessMessage ? (
-            <OLNotification
-              type="success"
-              content={projectSyncSuccessMessage}
-            />
+            <div className="notification-list">
+              <Notification
+                type="success"
+                content={projectSyncSuccessMessage}
+              />
+            </div>
           ) : null}
           <div className="settings-widgets-container">
             {allIntegrationLinkingWidgets.map(
@@ -144,10 +146,12 @@ function LinkingSection() {
         <>
           <h3 id="linked-accounts">{t('linked_accounts')}</h3>
           {ssoErrorMessage ? (
-            <OLNotification
-              type="error"
-              content={`${t('sso_link_error')}: ${ssoErrorMessage}`}
-            />
+            <div className="notification-list">
+              <Notification
+                type="error"
+                content={`${t('sso_link_error')}: ${ssoErrorMessage}`}
+              />
+            </div>
           ) : null}
           <div className="settings-widgets-container">
             {Object.values(subscriptions).map(

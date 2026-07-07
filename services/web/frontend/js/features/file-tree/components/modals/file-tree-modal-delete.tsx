@@ -9,7 +9,7 @@ import {
   OLModalTitle,
 } from '@/shared/components/ol/ol-modal'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLNotification from '@/shared/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 import { useFileTreeSelectable } from '../../contexts/file-tree-selectable'
 
 function FileTreeModalDelete() {
@@ -42,7 +42,6 @@ function FileTreeModalDelete() {
       <OLModalHeader>
         <OLModalTitle>{t('delete')}</OLModalTitle>
       </OLModalHeader>
-
       <OLModalBody>
         <p>{t('sure_you_want_to_delete')}</p>
         <ul>
@@ -51,13 +50,14 @@ function FileTreeModalDelete() {
           ))}
         </ul>
         {error && (
-          <OLNotification
-            type="error"
-            content={t('generic_something_went_wrong')}
-          />
+          <div className="notification-list">
+            <Notification
+              type="error"
+              content={t('generic_something_went_wrong')}
+            />
+          </div>
         )}
       </OLModalBody>
-
       <OLModalFooter>
         {inFlight ? (
           <OLButton

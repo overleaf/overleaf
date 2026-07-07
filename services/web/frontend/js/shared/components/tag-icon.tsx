@@ -1,5 +1,5 @@
 import MaterialIcon from '@/shared/components/material-icon'
 
-export default function OLTagIcon() {
+export default function TagIcon() {
   return <MaterialIcon type="sell" />
 }

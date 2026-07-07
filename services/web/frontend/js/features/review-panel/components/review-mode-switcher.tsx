@@ -4,7 +4,7 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from '@/shared/components/dropdown/dropdown-menu'
-import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
+import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import MaterialIcon from '@/shared/components/material-icon'
 import classNames from 'classnames'
 import { useTrackChangesStateActionsContext } from '../context/track-changes-state-context'
@@ -35,7 +35,7 @@ function ReviewModeDropdownItems() {
 
   return (
     <>
-      <OLDropdownMenuItem
+      <DropdownMenuItem
         disabled={!write}
         onClick={() => {
           if (mode === 'edit') {
@@ -59,8 +59,8 @@ function ReviewModeDropdownItems() {
         active={write && mode === 'edit'}
       >
         {t('editing')}
-      </OLDropdownMenuItem>
-      <OLDropdownMenuItem
+      </DropdownMenuItem>
+      <DropdownMenuItem
         disabled={permissionsLevel === 'readOnly'}
         onClick={() => {
           if (mode === 'review') {
@@ -95,15 +95,15 @@ function ReviewModeDropdownItems() {
         active={trackedWrite && mode === 'review'}
       >
         {t('reviewing')}
-      </OLDropdownMenuItem>
+      </DropdownMenuItem>
       {showViewOption && (
-        <OLDropdownMenuItem
+        <DropdownMenuItem
           description={t('can_view_content')}
           leadingIcon="visibility"
           active={mode === 'view'}
         >
           {t('viewing')}
-        </OLDropdownMenuItem>
+        </DropdownMenuItem>
       )}
     </>
   )

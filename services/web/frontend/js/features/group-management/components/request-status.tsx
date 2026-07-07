@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { Card, CardBody, Row, Col } from 'react-bootstrap'
-import Button from '@/shared/components/button/button'
+import OLButton from '@/shared/components/ol/ol-button'
 import MaterialIcon from '@/shared/components/material-icon'
 import getMeta from '@/utils/meta'
-import IconButton from '@/shared/components/button/icon-button'
+import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import classnames from 'classnames'
 
 type RequestStatusProps = {
@@ -22,7 +22,7 @@ function RequestStatus({ icon, title, content, variant }: RequestStatusProps) {
       <Row>
         <Col xxl={5} xl={6} lg={7} md={9} className="mx-auto">
           <div className="group-heading" data-testid="group-heading">
-            <IconButton
+            <OLIconButton
               variant="ghost"
               href="/user/subscription"
               size="lg"
@@ -49,9 +49,9 @@ function RequestStatus({ icon, title, content, variant }: RequestStatusProps) {
                 )}
               </div>
               <div className="text-center">
-                <Button variant="secondary" href="/user/subscription">
+                <OLButton variant="secondary" href="/user/subscription">
                   {t('go_to_subscriptions')}
-                </Button>
+                </OLButton>
               </div>
             </CardBody>
           </Card>
