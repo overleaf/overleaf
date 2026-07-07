@@ -1,3 +1,4 @@
+import { describe, it } from 'vitest'
 import { expect } from 'chai'
 import InstitutionsHelper from '../../../../app/src/Features/Institutions/InstitutionsHelper.mjs'
 

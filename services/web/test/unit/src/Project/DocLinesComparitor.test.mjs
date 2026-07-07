@@ -1,3 +1,4 @@
+import { beforeEach, describe, it } from 'vitest'
 const modulePath = '../../../../app/src/Features/Project/DocLinesComparitor.mjs'
 
 describe('doc lines comparitor', function () {

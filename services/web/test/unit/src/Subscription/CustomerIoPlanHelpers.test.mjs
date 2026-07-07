@@ -1,4 +1,4 @@
-import { expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import CustomerIoPlanHelpers from '../../../../app/src/Features/Subscription/CustomerIoPlanHelpers.mjs'
 
 describe('CustomerIoPlanHelpers', function () {

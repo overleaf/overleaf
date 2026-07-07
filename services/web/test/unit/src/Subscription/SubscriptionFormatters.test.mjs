@@ -1,4 +1,4 @@
-import { expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import SubscriptionFormatters from '../../../../app/src/Features/Subscription/SubscriptionFormatters.mjs'
 
 describe('SubscriptionFormatters', function () {

@@ -10,7 +10,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import { assert, expect } from 'vitest'
+import { assert, beforeEach, describe, expect, it } from 'vitest'
 
 import sinon from 'sinon'
 const modulePath = '../../../../app/src/Features/Project/SafePath'

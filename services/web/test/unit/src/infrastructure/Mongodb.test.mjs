@@ -1,5 +1,5 @@
 import mongodb from 'mongodb-legacy'
-import { expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import sinon from 'sinon'
 
 const { ObjectId } = mongodb

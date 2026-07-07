@@ -11,7 +11,7 @@
  */
 import sinon from 'sinon'
 import path from 'node:path'
-import { vi } from 'vitest'
+import { beforeEach, describe, it, vi } from 'vitest'
 const modulePath = path.join(
   import.meta.dirname,
   '../../../../../app/src/infrastructure/LockManager.mjs'

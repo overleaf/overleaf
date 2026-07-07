@@ -1,3 +1,4 @@
+import { beforeEach, describe, it } from 'vitest'
 const modulePath = new URL(
   '../../../../app/src/Features/Referal/ReferalConnect.mjs',
   import.meta.url

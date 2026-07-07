@@ -1,4 +1,4 @@
-import { assert } from 'vitest'
+import { assert, describe, it } from 'vitest'
 import RequestHelper from '../../../../app/src/Features/Analytics/RequestHelper.mjs'
 
 describe('RequestHelper', function () {

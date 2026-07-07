@@ -1,5 +1,5 @@
 import SpamSafe from '../../../../app/src/Features/Email/SpamSafe.mjs'
-import { expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 describe('SpamSafe', function () {
   it('should reject spammy names', function () {

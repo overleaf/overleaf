@@ -1,5 +1,5 @@
 import sinon from 'sinon'
-import { expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import CollaboratorsInviteHelper from '../../../../app/src/Features/Collaborators/CollaboratorsInviteHelper.mjs'
 import Crypto from 'node:crypto'
 

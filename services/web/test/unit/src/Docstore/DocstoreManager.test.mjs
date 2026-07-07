@@ -1,4 +1,13 @@
-import { assert, beforeAll, beforeEach, describe, it, vi, expect } from 'vitest'
+import {
+  afterAll,
+  assert,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import tk from 'timekeeper'
 import { RequestFailedError } from '@overleaf/fetch-utils'

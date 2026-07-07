@@ -1,4 +1,4 @@
-import { expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import SplitTestUtils from '../../../../app/src/Features/SplitTests/SplitTestUtils.mjs'
 
 describe('SplitTestUtils', function () {

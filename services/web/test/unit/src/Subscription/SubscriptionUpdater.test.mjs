@@ -1,4 +1,4 @@
-import { beforeEach, describe, it, vi, assert, expect } from 'vitest'
+import { afterEach, assert, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
 const modulePath =

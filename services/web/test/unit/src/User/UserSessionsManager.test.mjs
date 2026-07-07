@@ -1,4 +1,4 @@
-import { vi, expect } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 
 const modulePath = '../../../../app/src/Features/User/UserSessionsManager.mjs'

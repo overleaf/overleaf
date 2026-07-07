@@ -1,4 +1,4 @@
-import { expect, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import HttpPermissionsPolicyMiddleware from '../../../../app/src/infrastructure/HttpPermissionsPolicy.mjs'
 import MockRequest from '../helpers/MockRequest.mjs'

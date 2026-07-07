@@ -1,4 +1,4 @@
-import { expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { stringSimilarity } from '../../../../app/src/Features/Helpers/DiffHelper.mjs'
 
 describe('DiffHelper', function () {

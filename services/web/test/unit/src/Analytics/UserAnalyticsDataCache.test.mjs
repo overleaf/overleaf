@@ -1,4 +1,4 @@
-import { vi } from 'vitest'
+import { beforeEach, describe, it, vi } from 'vitest'
 import sinon from 'sinon'
 import path from 'node:path'
 
