@@ -7782,7 +7782,7 @@ __metadata:
     xml-crypto: "npm:^2.1.6"
     xml2js: "npm:^0.6.2"
     xregexp: "npm:^4.3.0"
-    yauzl: "npm:^3.3.0"
+    yauzl: "npm:^3.4.0"
     yup: "npm:^0.32.11"
     zod: "npm:^4.0.17"
     zod-validation-error: "npm:^4.0.1"
@@ -26236,7 +26236,7 @@ __metadata:
     tsscmp: "npm:^1.0.6"
     typescript: "npm:^5.0.4"
     utf-8-validate: "npm:^5.0.4"
-    yauzl: "npm:^2.9.1"
+    yauzl: "npm:^3.4.0"
     zip-stream: "npm:^7.0.2"
   languageName: unknown
   linkType: soft
@@ -35205,7 +35205,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yauzl@npm:^2.10.0, yauzl@npm:^2.9.1":
+"yauzl@npm:^2.10.0":
   version: 2.10.0
   resolution: "yauzl@npm:2.10.0"
   dependencies:
@@ -35215,13 +35215,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yauzl@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "yauzl@npm:3.3.0"
+"yauzl@npm:^3.4.0":
+  version: 3.4.0
+  resolution: "yauzl@npm:3.4.0"
   dependencies:
-    buffer-crc32: "npm:~0.2.3"
     pend: "npm:~1.2.0"
-  checksum: 10c0/935e32054171104bdf8a4091180f61b5698d8b90ee64552bb643c2176f815d4215d0764e3f41e0d9a1e4525b37602bf145ec5fd39dd014f0be7290851ce3acce
+  checksum: 10c0/17a98c42c0065e8af429eb8a61f7a0e4562181ed54080366b838f34f741b6829f167f804787c86b7646bb042707f35871739f053de0548285e405a2eae4da025
   languageName: node
   linkType: hard
 

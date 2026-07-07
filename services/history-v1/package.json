@@ -58,7 +58,7 @@
     "node-fetch": "^2.7.0",
     "sinon": "^9.0.2",
     "typescript": "^5.0.4",
-    "yauzl": "^2.9.1"
+    "yauzl": "^3.4.0"
   },
   "scripts": {
     "start": "node app.js",
