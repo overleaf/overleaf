@@ -6,17 +6,11 @@ import { useUserFeaturesContext } from '@/shared/context/user-features-context'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import { useTranslation } from 'react-i18next'
 import { formatSecondsToHoursAndMinutes } from '@/shared/utils/time'
-
 import getMeta from '@/utils/meta'
+import { AiFeatureLocations } from './types/ai'
+import { paywallTypeByLocation } from '../utils/ai-features'
+
 const hasUnlimitedAi = getMeta('ol-hasUnlimitedAi')
-
-type AiFeatureLocations = 'errorAssist' | 'workbench'
-type PaywallType = 'assistant' | 'workbench'
-
-const paywallTypeByLocation: Record<AiFeatureLocations, PaywallType> = {
-  workbench: 'workbench',
-  errorAssist: 'assistant',
-}
 
 function AiPaywallNotification({
   isActionBelowContent = false,

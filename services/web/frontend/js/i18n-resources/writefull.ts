@@ -160,6 +160,7 @@ const en = {
     'ai-context-menu.abstract-generator': 'Abstract Generator',
     'ai-context-menu.keywords-generator': 'Keywords Generator',
     'ai-context-menu.context-options': 'Context Options',
+    'ai-context-menu.check-citations': 'Check citations',
     'ai-context-menu.select-text-tooltip':
       'Select text to access these options',
     'ai-context-menu.paraphrase': 'Paraphrase',
@@ -696,6 +697,7 @@ const es = {
     'ai-context-menu.abstract-generator': 'Generar Abstract',
     'ai-context-menu.keywords-generator': 'Generar palabras clave',
     'ai-context-menu.context-options': 'Opciones de contexto',
+    'ai-context-menu.check-citations': 'Comprobar citas',
     'ai-context-menu.select-text-tooltip':
       'Seleccione texto para acceder a estas opciones',
     'ai-context-menu.paraphrase': 'Parafrasear',
