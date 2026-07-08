@@ -17900,13 +17900,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-formatter-unix@npm:^8.40.0":
-  version: 8.40.0
-  resolution: "eslint-formatter-unix@npm:8.40.0"
-  checksum: 10c0/d059e598e1f38ec20af622eacc1980b71a5e1399725d2b67f58a6819f7787067812424a8c00bf8230cc2e963e1bfa8bd928addcc8dffcc34692910bbf73fe6aa
-  languageName: node
-  linkType: hard
-
 "eslint-import-resolver-node@npm:^0.3.9":
   version: 0.3.10
   resolution: "eslint-import-resolver-node@npm:0.3.10"
@@ -26205,7 +26198,6 @@ __metadata:
     "@vitest/eslint-plugin": "npm:^1.5.0"
     eslint: "npm:^10.4.0"
     eslint-config-prettier: "npm:^10.0.1"
-    eslint-formatter-unix: "npm:^8.40.0"
     eslint-plugin-chai-expect: "npm:^4.0.0"
     eslint-plugin-chai-friendly: "npm:^1.1.0"
     eslint-plugin-cypress: "npm:^4.1.0"

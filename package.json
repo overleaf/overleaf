@@ -16,7 +16,6 @@
     "@vitest/eslint-plugin": "^1.5.0",
     "eslint": "^10.4.0",
     "eslint-config-prettier": "^10.0.1",
-    "eslint-formatter-unix": "^8.40.0",
     "eslint-plugin-chai-expect": "^4.0.0",
     "eslint-plugin-chai-friendly": "^1.1.0",
     "eslint-plugin-cypress": "^4.1.0",
@@ -194,7 +193,7 @@
     "format:jenkins:fix": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --write --check '**/Jenkinsfile'",
     "format:monorepo-check": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --check '**/Jenkinsfile' '**/*.md' '**/docker-compose.yml' '**/docker-compose.*.yml' '.agents/**/*.js' '.agents/**/*.md'",
     "format:monorepo-check:fix": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --write --check '**/Jenkinsfile' '**/*.md' '**/docker-compose.yml' '**/docker-compose.*.yml' '.agents/**/*.js' '.agents/**/*.md'",
-    "lint": "eslint --cache --cache-location ./.cache/eslint/ --max-warnings 0 --format unix",
+    "lint": "eslint --cache --cache-location ./.cache/eslint/ --max-warnings 0",
     "lint:fix": "eslint --cache --cache-location ./.cache/eslint/ --fix"
   },
   "workspaces": [

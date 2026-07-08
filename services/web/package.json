@@ -28,7 +28,7 @@
     "webpack:production": "webpack --config webpack.config.prod.js",
     "pyodide:fetch": "node scripts/fetch-pyodide-packages.mjs",
     "webpack:profile": "webpack --config webpack.config.prod.js --profile --json > stats.json",
-    "lint": "eslint --cache --cache-location ../../.cache/eslint/ --max-warnings 0 --format unix .",
+    "lint": "eslint --cache --cache-location ../../.cache/eslint/ --max-warnings 0 .",
     "lint:fix": "eslint --cache --cache-location ../../.cache/eslint/ --fix .",
     "lint:styles": "stylelint --cache --cache-location ../../.cache/stylelint/ '**/*.scss'",
     "lint:styles:fix": "stylelint --cache --cache-location ../../.cache/stylelint/ '**/*.scss' --fix",

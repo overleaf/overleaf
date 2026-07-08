@@ -10,7 +10,7 @@
     "test:acceptance": "yarn run test:acceptance:_run",
     "test:unit:_run": "vitest --config ./vitest.config.unit.cjs",
     "test:unit": "yarn run test:unit:_run",
-    "lint": "eslint --cache --cache-location ../../.cache/eslint/ --max-warnings 0 --format unix .",
+    "lint": "eslint --cache --cache-location ../../.cache/eslint/ --max-warnings 0 .",
     "lint:fix": "eslint --cache --cache-location ../../.cache/eslint/ --fix .",
     "types:check": "tsc --noEmit",
     "nodemon": "node --watch app.ts"
