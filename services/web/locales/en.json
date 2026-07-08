@@ -1711,6 +1711,8 @@
   "no_preview_available": "Sorry, no preview is available.",
   "no_project_notifications_description": "You won’t be notified about this project.",
   "no_projects": "No projects",
+  "no_references_found": "No references found",
+  "no_references_found_in_this_file": "No references found in this file",
   "no_resolved_comments": "No resolved comments",
   "no_results_for_query": "No results for ‘__query__’",
   "no_results_found": "No results found",
