@@ -2044,6 +2044,7 @@
   "projects_count": "Projects count",
   "projects_list": "Projects list",
   "provide_details_of_your_sso_configuration": "Add, edit, or delete your Identity Provider’s SAML metadata.",
+  "provider_rate_limited": "Your reference provider is temporarily rate limited. Please try again later.",
   "pt": "Portuguese",
   "public": "Public",
   "publish": "Publish",

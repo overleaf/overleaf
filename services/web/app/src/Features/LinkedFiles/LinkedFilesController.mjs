@@ -251,6 +251,8 @@ export default LinkedFilesController = {
     } else if (error instanceof RemoteServiceError) {
       if (error.info?.statusCode === 403) {
         res.status(400).json({ relink: true })
+      } else if (error.info?.statusCode === 429) {
+        res.status(429).json({ message: 'rate_limited' })
       } else {
         res.status(502)
         plainTextResponse(res, 'The remote service produced an error')
