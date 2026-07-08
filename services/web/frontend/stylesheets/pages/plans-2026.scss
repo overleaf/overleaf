@@ -517,10 +517,7 @@
 
   .plans-feature-table-scroll-wrapper {
     padding-top: var(--spacing-04);
-
-    @include media-breakpoint-down(lg) {
-      overflow-x: auto;
-    }
+    overflow-x: auto;
   }
 
   // Below xl the plan cards already show prices and CTAs — the table
@@ -543,7 +540,11 @@
     border-collapse: separate;
     border-radius: var(--border-radius-medium);
     border-spacing: 0;
-    min-width: 768px;
+
+    // Set min-width to allow enough width for each plan column and prevent
+    // truncation of the column header (e.g. "Organizations") while ensuring
+    // that the table doesn't scroll above the large breakpoint (992px)
+    min-width: 968px;
     table-layout: fixed;
     width: 100%;
 
