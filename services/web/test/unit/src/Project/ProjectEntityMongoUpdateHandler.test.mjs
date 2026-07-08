@@ -73,7 +73,6 @@ describe('ProjectEntityMongoUpdateHandler', function () {
     }
 
     ctx.Settings = { maxEntitiesPerProject: 100 }
-    ctx.CooldownManager = {}
     ctx.LockManager = {
       promises: {
         runWithLock: sinon.spy((namespace, id, runner) => runner()),
@@ -199,10 +198,6 @@ describe('ProjectEntityMongoUpdateHandler', function () {
 
     vi.doMock('@overleaf/settings', () => ({
       default: ctx.Settings,
-    }))
-
-    vi.doMock('../../../../app/src/Features/Cooldown/CooldownManager', () => ({
-      default: ctx.CooldownManager,
     }))
 
     vi.doMock('../../../../app/src/models/Folder', () => ({

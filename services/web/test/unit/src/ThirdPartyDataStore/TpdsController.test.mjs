@@ -59,6 +59,10 @@ describe('TpdsController', function () {
       },
     }
 
+    vi.doMock('../../../../app/src/Features/Errors/Errors.js', () => ({
+      default: Errors,
+    }))
+
     vi.doMock(
       '../../../../app/src/Features/ThirdPartyDataStore/TpdsUpdateHandler',
       () => ({
@@ -249,37 +253,16 @@ describe('TpdsController', function () {
       })
     })
 
-    it('should return a 400 error when the project is too big', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.TpdsUpdateHandler.promises.newUpdate.rejects({
-          message: 'project_has_too_many_files',
-        })
-        const res = {
-          sendStatus: status => {
-            expect(status).to.equal(400)
-            ctx.NotificationsBuilder.promises.tpdsFileLimit.should.have.been.calledWith(
-              ctx.user_id
-            )
-            resolve()
-          },
-        }
-        ctx.TpdsController.mergeUpdate(ctx.req, res)
-      })
-    })
-
-    it('should return a 429 error when the update receiver fails due to too many requests error', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.TpdsUpdateHandler.promises.newUpdate.rejects(
-          new Errors.TooManyRequestsError('project on cooldown')
-        )
-        const res = {
-          sendStatus: status => {
-            expect(status).to.equal(429)
-            resolve()
-          },
-        }
-        ctx.TpdsController.mergeUpdate(ctx.req, res)
-      })
+    it('should notify and rethrow when the project is too big', async function (ctx) {
+      const err = new Errors.TooManyFilesError('project has too many files')
+      ctx.TpdsUpdateHandler.promises.newUpdate.rejects(err)
+      const res = { json: sinon.stub() }
+      const next = sinon.stub()
+      await ctx.TpdsController.mergeUpdate(ctx.req, res, next)
+      expect(next).to.have.been.calledWith(err)
+      ctx.NotificationsBuilder.promises.tpdsFileLimit.should.have.been.calledWith(
+        ctx.user_id
+      )
     })
   })
 

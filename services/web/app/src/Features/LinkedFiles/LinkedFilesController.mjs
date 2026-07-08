@@ -19,6 +19,7 @@ import LinkedFilesErrors from './LinkedFilesErrors.mjs'
 import {
   OutputFileFetchFailedError,
   FileTooLargeError,
+  TooManyFilesError,
 } from '../Errors/Errors.js'
 import Modules from '../../infrastructure/Modules.mjs'
 import { plainTextResponse } from '../../infrastructure/Response.mjs'
@@ -257,7 +258,7 @@ export default LinkedFilesController = {
     } else if (error instanceof FileCannotRefreshError) {
       res.status(400)
       plainTextResponse(res, 'This file cannot be refreshed')
-    } else if (error.message === 'project_has_too_many_files') {
+    } else if (error instanceof TooManyFilesError) {
       res.status(400)
       plainTextResponse(res, 'too many files')
     } else if (/\bECONNREFUSED\b/.test(error.message)) {

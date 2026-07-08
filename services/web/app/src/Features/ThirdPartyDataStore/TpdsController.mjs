@@ -51,13 +51,7 @@ async function mergeUpdate(req, res) {
       source
     )
   } catch (err) {
-    if (err.name === 'TooManyRequestsError') {
-      logger.warn(
-        { err, userId, filePath },
-        'tpds update failed to be processed, too many requests'
-      )
-      return res.sendStatus(429)
-    } else if (err.message === 'project_has_too_many_files') {
+    if (err instanceof Errors.TooManyFilesError) {
       logger.warn(
         { err, userId, filePath },
         'tpds trying to append to project over file limit'
@@ -65,10 +59,8 @@ async function mergeUpdate(req, res) {
       await NotificationsBuilder.promises
         .tpdsFileLimit(userId)
         .create(projectName, projectId)
-      return res.sendStatus(400)
-    } else {
-      throw err
     }
+    throw err
   }
 
   if (metadata == null) {

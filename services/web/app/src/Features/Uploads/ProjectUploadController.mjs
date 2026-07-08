@@ -17,6 +17,7 @@ import {
   DuplicateNameError,
   FileTooLargeError,
   DocumentConversionError,
+  TooManyFilesError,
 } from '../Errors/Errors.js'
 import DocumentConversionManager from './DocumentConversionManager.mjs'
 import ProjectOptionsHandler from '../Project/ProjectOptionsHandler.mjs'
@@ -143,7 +144,7 @@ async function uploadFile(req, res, next) {
             success: false,
             error: 'duplicate_file_name',
           })
-        } else if (error.message === 'project_has_too_many_files') {
+        } else if (error instanceof TooManyFilesError) {
           return res.status(422).json({
             success: false,
             error: 'project_has_too_many_files',

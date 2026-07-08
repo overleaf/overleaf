@@ -13,6 +13,7 @@ import ArchiveErrors from '../../../../app/src/Features/Uploads/ArchiveErrors.mj
 import {
   FileTooLargeError,
   DocumentConversionError,
+  TooManyFilesError,
 } from '../../../../app/src/Features/Errors/Errors.js'
 
 vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
@@ -422,7 +423,7 @@ describe('ProjectUploadController', function () {
       beforeEach(function (ctx) {
         ctx.FileSystemImportManager.addEntity = sinon
           .stub()
-          .callsArgWith(6, new Error('project_has_too_many_files'))
+          .callsArgWith(6, new TooManyFilesError('project_has_too_many_files'))
         ctx.ProjectUploadController.uploadFile(ctx.req, ctx.res)
       })
 

@@ -150,7 +150,7 @@ async function addDoc(req, res, next) {
     )
     res.json(doc)
   } catch (err) {
-    if (err.message === 'project_has_too_many_files') {
+    if (err instanceof Errors.TooManyFilesError) {
       res.status(400).json(
         req.i18n.translate('project_has_too_many_files_limit', {
           limit: Settings.maxEntitiesPerProject,
@@ -180,7 +180,7 @@ async function addFolder(req, res, next) {
     )
     res.json(doc)
   } catch (err) {
-    if (err.message === 'project_has_too_many_files') {
+    if (err instanceof Errors.TooManyFilesError) {
       res.status(400).json(
         req.i18n.translate('project_has_too_many_files_limit', {
           limit: Settings.maxEntitiesPerProject,

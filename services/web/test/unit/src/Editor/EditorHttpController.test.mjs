@@ -519,7 +519,7 @@ describe('EditorHttpController', function () {
 
       it('handle too many files', async function (ctx) {
         ctx.EditorController.promises.addDoc.rejects(
-          new Error('project_has_too_many_files')
+          new Errors.TooManyFilesError('project_has_too_many_files')
         )
         await new Promise(resolve => {
           ctx.res.callback = () => {
@@ -580,7 +580,7 @@ describe('EditorHttpController', function () {
       it('handle too many files', async function (ctx) {
         await new Promise(resolve => {
           ctx.EditorController.promises.addFolder.rejects(
-            new Error('project_has_too_many_files')
+            new Errors.TooManyFilesError('project_has_too_many_files')
           )
           ctx.res.callback = () => {
             expect(ctx.res.body).to.equal('"project_has_too_many_files_limit"')

@@ -1,16 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
-import Errors from '../../../../app/src/Features/Errors/Errors.js'
 
 const ObjectId = mongodb.ObjectId
 
 const MODULE_PATH =
   '../../../../app/src/Features/ThirdPartyDataStore/TpdsUpdateHandler.mjs'
-
-vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
-  vi.importActual('../../../../app/src/Features/Errors/Errors.js')
-)
 
 describe('TpdsUpdateHandler', function () {
   beforeEach(async function (ctx) {
@@ -44,9 +39,6 @@ describe('TpdsUpdateHandler', function () {
       parentFolder_id: new ObjectId(),
     }
 
-    ctx.CooldownManager = {
-      isProjectOnCooldown: sinon.stub().resolves(false),
-    }
     ctx.FileTypeManager = {
       shouldIgnore: sinon.stub().returns(false),
     }
@@ -104,10 +96,6 @@ describe('TpdsUpdateHandler', function () {
         createFolder: sinon.stub().resolves(ctx.folder),
       },
     }
-
-    vi.doMock('../../../../app/src/Features/Cooldown/CooldownManager', () => ({
-      default: ctx.CooldownManager,
-    }))
 
     vi.doMock('../../../../app/src/Features/Uploads/FileTypeManager', () => ({
       default: ctx.FileTypeManager,
@@ -254,24 +242,6 @@ describe('TpdsUpdateHandler', function () {
       expectProjectNotCreated()
       expectUpdateNotProcessed()
       expectDropboxNotUnlinked()
-    })
-
-    describe('update to a project on cooldown', async function () {
-      setupMatchingProjects(['active1'])
-      setupProjectOnCooldown()
-      beforeEach(async function (ctx) {
-        await expect(
-          ctx.TpdsUpdateHandler.promises.newUpdate(
-            ctx.userId,
-            '', // projectId
-            ctx.projectName,
-            ctx.path,
-            ctx.update,
-            ctx.source
-          )
-        ).to.be.rejectedWith(Errors.TooManyRequestsError)
-      })
-      expectUpdateNotProcessed()
     })
   })
 
@@ -453,22 +423,6 @@ describe('TpdsUpdateHandler', function () {
       expectFolderUpdateNotProcessed()
       expectDropboxUnlinked()
     })
-
-    describe('update to a project on cooldown', async function () {
-      setupMatchingProjects(['active1'])
-      setupProjectOnCooldown()
-      beforeEach(async function (ctx) {
-        await expect(
-          ctx.TpdsUpdateHandler.promises.createFolder(
-            ctx.userId,
-            ctx.projectId,
-            ctx.projectName,
-            ctx.path
-          )
-        ).to.be.rejectedWith(Errors.TooManyRequestsError)
-      })
-      expectFolderUpdateNotProcessed()
-    })
   })
 })
 
@@ -480,14 +434,6 @@ function setupMatchingProjects(projectKeys) {
     ctx.ProjectGetter.promises.findUsersProjectsByName
       .withArgs(ctx.userId, ctx.projectName)
       .resolves(projects)
-  })
-}
-
-function setupProjectOnCooldown() {
-  beforeEach(function (ctx) {
-    ctx.CooldownManager.isProjectOnCooldown
-      .withArgs(ctx.projects.active1._id)
-      .resolves(true)
   })
 }
 

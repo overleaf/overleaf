@@ -8,8 +8,6 @@ import ProjectGetter from '../Project/ProjectGetter.mjs'
 import ProjectHelper from '../Project/ProjectHelper.mjs'
 import ProjectRootDocManager from '../Project/ProjectRootDocManager.mjs'
 import FileTypeManager from '../Uploads/FileTypeManager.mjs'
-import CooldownManager from '../Cooldown/CooldownManager.mjs'
-import Errors from '../Errors/Errors.js'
 import Modules from '../../infrastructure/Modules.mjs'
 
 async function newUpdate(
@@ -23,13 +21,6 @@ async function newUpdate(
   const project = await getOrCreateProject(userId, projectId, projectName)
   if (project == null) {
     return null
-  }
-
-  const projectIsOnCooldown = await CooldownManager.isProjectOnCooldown(
-    project._id
-  )
-  if (projectIsOnCooldown) {
-    throw new Errors.TooManyRequestsError('project on cooldown')
   }
 
   const shouldIgnore = FileTypeManager.shouldIgnore(path)
@@ -172,13 +163,6 @@ async function createFolder(userId, projectId, projectName, path) {
   const project = await getOrCreateProject(userId, projectId, projectName)
   if (project == null) {
     return null
-  }
-
-  const projectIsOnCooldown = await CooldownManager.isProjectOnCooldown(
-    project._id
-  )
-  if (projectIsOnCooldown) {
-    throw new Errors.TooManyRequestsError('project on cooldown')
   }
 
   const shouldIgnore = FileTypeManager.shouldIgnore(path)
