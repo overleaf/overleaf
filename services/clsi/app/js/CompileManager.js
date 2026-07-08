@@ -829,6 +829,7 @@ function _emitMetrics(request, status, stats, timings) {
     stop_on_first_error: request.stopOnFirstError ? 'true' : 'false',
     passes,
     type: request.syncType,
+    png2pdf: request.png2pdf ? 'true' : 'false',
   })
 
   if (timings.sync != null) {

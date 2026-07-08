@@ -1,3 +1,5 @@
+import Path from 'node:path'
+
 /**
  * Converts a time string in seconds to an integer number of milliseconds.
  *
@@ -128,8 +130,11 @@ const LATEX_MK_METRICS_STDERR = [
         let type = match[1]
         const timeMs = parseInt(match[2], 10)
         const filename = match[3]
+        const extension = Path.extname(filename).toLowerCase()
 
-        if (type === 'PNG') {
+        if (type === 'PDF' && extension === '.png') {
+          type = `PNG-png2pdf`
+        } else if (type === 'PNG') {
           const pngCategory = pngCategoriesByFile.get(filename)
           if (pngCategory != null) {
             type = `PNG-${pngCategory}`
