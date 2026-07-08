@@ -1,9 +1,69 @@
+@mixin light-select {
+  --select-bg-highlighted: var(--bg-light-secondary);
+  --select-bg: var(--bg-light-primary);
+  --select-color: var(--content-primary);
+  --select-bg-disabled: var(--bg-light-disabled);
+  --select-border: var(--border-primary);
+  --select-color-disabled: var(--content-disabled);
+  --select-border-disabled: var(--border-disabled);
+}
+
+@mixin dark-select {
+  --select-bg-highlighted: var(--bg-dark-secondary);
+  --select-bg: var(--bg-dark-primary);
+  --select-color: var(--content-primary-dark);
+
+  // Intentional use of a light bg
+  --select-bg-disabled: var(--bg-light-disabled);
+  --select-color-disabled: var(--content-disabled-dark);
+  --select-border: var(--border-primary-dark);
+  --select-border-disabled: var(--border-disabled);
+}
+
 :root {
-  --select-background-highlighted: var(--bg-light-secondary);
+  @include light-select;
+}
+
+@include theme('default') {
+  @include dark-select;
 }
 
 .select-wrapper {
   position: relative;
+
+  .form-control {
+    background: var(--select-bg);
+    color: var(--select-color);
+    border-color: var(--select-border);
+    user-select: none;
+
+    &:disabled {
+      color: var(--select-color-disabled);
+      background-color: var(--select-bg-disabled);
+      border-color: var(--select-border-disabled);
+
+      .form-control-end-icon {
+        color: var(--select-color-disabled);
+      }
+    }
+
+    &:focus,
+    &:invalid:focus,
+    &.is-invalid:focus,
+    &:focus-visible,
+    &:invalid:focus-visible,
+    &.is-invalid:focus-visible {
+      background: var(--select-bg);
+      color: var(--select-color);
+      border-color: var(--select-border);
+      outline: 0;
+      box-shadow: $input-focus-box-shadow;
+    }
+  }
+
+  .form-control-end-icon {
+    color: var(--select-color);
+  }
 }
 
 .select-trigger {
@@ -15,7 +75,7 @@
 }
 
 .select-highlighted {
-  background-color: var(--select-background-highlighted);
+  background-color: var(--select-bg-highlighted);
 }
 
 .select-portal-popover {

@@ -5,10 +5,12 @@
 @include theme('default') {
   .modal:not(.modal-themed) {
     // Until we add a dark modal version, all core components in modals should use light theme
+    @include light-themed-variables;
     @include light-dropdown-menu;
     @include light-notification;
+    @include light-select;
     @include form-check-light;
-    @include light-themed-variables;
+    @include form-select-light;
 
     .form-control,
     .form-control-wrapper {
