@@ -137,6 +137,7 @@ function compile(req, res, next) {
                 options: {
                   compiler: request.compiler,
                   draft: request.draft,
+                  png2pdf: request.png2pdf,
                   imageName: request.imageName
                     ? Path.basename(request.imageName)
                     : undefined,
