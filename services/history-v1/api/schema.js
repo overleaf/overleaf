@@ -143,6 +143,7 @@ const schemas = {
     }),
     query: z.object({
       copyFrom: z.string(),
+      sizeLimit: z.coerce.number().optional(),
     }),
     body: z.any().optional(),
   }),

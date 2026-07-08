@@ -3,7 +3,14 @@ import { beforeEach, describe, it, vi, expect } from 'vitest'
 import path from 'node:path'
 import sinon from 'sinon'
 import mongodb from 'mongodb-legacy'
+import { FileTooLargeError } from '../../../../app/src/Features/Errors/Errors.js'
 const { ObjectId } = mongodb
+
+// Ensure the module under test and this test file share the same
+// FileTooLargeError class, so `instanceof` checks in the controller line up.
+vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
+  vi.importActual('../../../../app/src/Features/Errors/Errors.js')
+)
 
 const MODULE_PATH = path.join(
   import.meta.dirname,
@@ -767,6 +774,53 @@ describe('ProjectController', function () {
           resolve()
         }
         ctx.ProjectController.cloneProject(ctx.req, ctx.res)
+      })
+    })
+
+    it('should respond with a 413 when a file is too large to copy', async function (ctx) {
+      const err = new FileTooLargeError('file too large', {
+        path: 'huge.pdf',
+        size: 123456789,
+      })
+      ctx.ProjectDuplicator.promises.duplicate = sinon.stub().rejects(err)
+      await new Promise(resolve => {
+        ctx.res.status = sinon.stub().returns(ctx.res)
+        ctx.res.json = json => {
+          ctx.res.status.should.have.been.calledWith(413)
+          expect(json).to.deep.equal({
+            message: {
+              text: 'file too large to copy',
+              key: 'file_too_large_to_copy',
+              info: { path: 'huge.pdf', size: 123456789 },
+            },
+          })
+          resolve()
+        }
+        ctx.ProjectController.cloneProject(ctx.req, ctx.res)
+      })
+    })
+
+    it('should forward a FileTooLargeError without a path to next (e.g. project too large)', async function (ctx) {
+      const err = new FileTooLargeError('Project is too large')
+      ctx.ProjectDuplicator.promises.duplicate = sinon.stub().rejects(err)
+      await new Promise(resolve => {
+        const next = forwardedErr => {
+          expect(forwardedErr).to.equal(err)
+          resolve()
+        }
+        ctx.ProjectController.cloneProject(ctx.req, ctx.res, next)
+      })
+    })
+
+    it('should forward other errors to next', async function (ctx) {
+      const err = new Error('boom')
+      ctx.ProjectDuplicator.promises.duplicate = sinon.stub().rejects(err)
+      await new Promise(resolve => {
+        const next = forwardedErr => {
+          expect(forwardedErr).to.equal(err)
+          resolve()
+        }
+        ctx.ProjectController.cloneProject(ctx.req, ctx.res, next)
       })
     })
   })

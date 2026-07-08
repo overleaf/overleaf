@@ -904,6 +904,7 @@
   "file_outline": "File outline",
   "file_size": "File size",
   "file_too_large": "File too large",
+  "file_too_large_to_copy": "File <0>__path__</0> (__size__MiB) exceeds the maximum file size of __limit__MiB.",
   "file_tree": "File tree",
   "files_cannot_include_invalid_characters": "File name is empty or contains invalid characters",
   "files_selected": "files selected.",

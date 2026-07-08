@@ -57,6 +57,7 @@ import UserSettingsHelper from './UserSettingsHelper.mjs'
 import AiFeatureUsageRateLimiter from '../../infrastructure/rate-limiters/AiFeatureUsageRateLimiter.mjs'
 import WorkbenchRateLimiter from '../../infrastructure/rate-limiters/WorkbenchRateLimiter.mjs'
 import PermissionsManager from '../Authorization/PermissionsManager.mjs'
+import { FileTooLargeError } from '../Errors/Errors.js'
 
 const { checkUserPermissions } = PermissionsManager.promises
 const { isPaidSubscription } = SubscriptionHelper
@@ -309,6 +310,17 @@ const _ProjectController = {
         projectId,
         userId: currentUser._id,
       })
+      const { path, size } = OError.getFullInfo(err)
+      if (err instanceof FileTooLargeError && path) {
+        res.status(413).json({
+          message: {
+            text: 'file too large to copy',
+            key: 'file_too_large_to_copy',
+            info: { path, size },
+          },
+        })
+        return
+      }
       return next(err)
     }
   },

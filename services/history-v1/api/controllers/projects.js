@@ -492,6 +492,11 @@ async function copyProjectBlob(req, res, next) {
     )
     return render.notFound(res)
   }
+  if (query.sizeLimit > 0 && sourceBlob.getByteLength() > query.sizeLimit) {
+    return res.status(HTTPStatus.REQUEST_ENTITY_TOO_LARGE).json({
+      size: sourceBlob.getByteLength(),
+    })
+  }
   // Exit early if the blob exists in the target project.
   // This will also catch global blobs, which always exist.
   if (targetBlob) {

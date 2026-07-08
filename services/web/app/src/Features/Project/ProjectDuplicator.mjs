@@ -1,6 +1,7 @@
 import { callbackify } from 'node:util'
 import Path from 'node:path'
 import logger from '@overleaf/logger'
+import Settings from '@overleaf/settings'
 import OError from '@overleaf/o-error'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
 import { Doc } from '../../models/Doc.mjs'
@@ -332,11 +333,13 @@ async function _copyFiles(
         await HistoryManager.promises.copyBlob(
           sourceHistoryId,
           targetHistoryId,
-          file.hash
+          file.hash,
+          Settings.maxUploadSize
         )
         return { createdBlob: true, file, path }
       } catch (err) {
         throw OError.tag(err, 'unexpected error copying blob', {
+          path: path.replace(/^\//, ''),
           sourceProjectId: sourceProject._id,
           targetProjectId: targetProject._id,
           sourceFile,

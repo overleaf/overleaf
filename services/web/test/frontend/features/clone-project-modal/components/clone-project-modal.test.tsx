@@ -199,4 +199,50 @@ describe('<EditorCloneProjectModalWrapper />', function () {
     expect(button.disabled).to.be.false
     expect(cancelButton.disabled).to.be.false
   })
+
+  it('handles a file too large error response', async function () {
+    const matcher = 'express:/project/:projectId/clone'
+
+    // default test maxUploadSize is 5 MiB (see reset-meta helper)
+    fetchMock.postOnce(matcher, {
+      status: 413,
+      body: {
+        message: {
+          text: 'file too large to copy',
+          key: 'file_too_large_to_copy',
+          info: { path: 'huge.pdf', size: 8 * 1024 * 1024 },
+        },
+      },
+    })
+
+    const handleHide = sinon.stub()
+    const openProject = sinon.stub()
+
+    renderWithEditorContext(
+      <EditorCloneProjectModalWrapper
+        handleHide={handleHide}
+        openProject={openProject}
+        show
+      />,
+      contextProps
+    )
+
+    const button: HTMLButtonElement = await screen.findByRole('button', {
+      name: 'Copy',
+    })
+
+    fireEvent.click(button)
+    await fetchMock.callHistory.flush(true)
+
+    expect(fetchMock.callHistory.done(matcher)).to.be.true
+    expect(openProject).not.to.be.called
+
+    // the path is rendered inside a <code> element, interpolated with the
+    // file size and the configured upload limit
+    const code = await screen.findByText('huge.pdf')
+    expect(code.tagName).to.equal('CODE')
+    expect(code.parentElement?.textContent).to.equal(
+      'File huge.pdf (8.0MiB) exceeds the maximum file size of 5MiB.'
+    )
+  })
 })
