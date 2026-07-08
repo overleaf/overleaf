@@ -513,7 +513,7 @@
   "unlimited_projects": "무제한 프로젝트",
   "unlink": "연결해제",
   "unlink_github_warning": "GitHub로 동기화한 모든 프로젝트는 연결이 끊길 것이며 GitHub과 더이상 동기화되지 않을 것 입니다. GitHub 계정 연결을 정말로 해지하시겠습니까?",
-  "unlink_reference": "레퍼렌스 제공자 연결 해제",
+  "unlink_reference": "레퍼런스 제공자 연결 해제",
   "unlink_warning_reference": "경고: 이 공급자로부터의 계정을 해제하면 레퍼런스를 프로젝트로 가져올 수 없습니다.",
   "unpublish": "비공개",
   "unpublishing": "비공개",
