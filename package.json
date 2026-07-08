@@ -194,8 +194,8 @@
     "format:jenkins:fix": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --write --check '**/Jenkinsfile'",
     "format:monorepo-check": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --check '**/Jenkinsfile' '**/*.md' '**/docker-compose.yml' '**/docker-compose.*.yml' '.agents/**/*.js' '.agents/**/*.md'",
     "format:monorepo-check:fix": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --write --check '**/Jenkinsfile' '**/*.md' '**/docker-compose.yml' '**/docker-compose.*.yml' '.agents/**/*.js' '.agents/**/*.md'",
-    "lint": "eslint --cache --cache-location ./.cache/eslint/ --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --cache --cache-location ./.cache/eslint/ --fix ."
+    "lint": "eslint --cache --cache-location ./.cache/eslint/ --max-warnings 0 --format unix",
+    "lint:fix": "eslint --cache --cache-location ./.cache/eslint/ --fix"
   },
   "workspaces": [
     "jobs/mirror-documentation",
