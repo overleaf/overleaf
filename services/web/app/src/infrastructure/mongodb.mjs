@@ -54,6 +54,7 @@ export const db = {
   groupAuditLogEntries: internalDb.collection('groupAuditLogEntries'),
   institutions: internalDb.collection('institutions'),
   libraryReferences: internalDb.collection('libraryReferences'),
+  librarySizes: internalDb.collection('librarySizes'),
   librarySyncStates: internalDb.collection('librarySyncStates'),
   messages: internalDb.collection('messages'),
   migrations: internalDb.collection('migrations'),
