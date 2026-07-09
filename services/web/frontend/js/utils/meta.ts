@@ -138,7 +138,7 @@ export interface Meta {
   'ol-galleryTagName': string
   'ol-gitBridgeEnabled': boolean
   'ol-gitBridgePublicBaseUrl': string
-  'ol-github': { enabled: boolean; error: boolean }
+  'ol-github': { enabled: boolean; error: boolean; expired?: boolean }
   'ol-groupAuditLogs': []
   'ol-groupDomains': []
   'ol-groupId': string
@@ -259,6 +259,7 @@ export interface Meta {
   'ol-projectEntityCounts': { files: number; docs: number }
   'ol-projectHistoryFailures': FullHistoryFailure[]
   'ol-projectName': string
+  'ol-projectSyncErrorMessage': string
   'ol-projectSyncSuccessMessage': string
   'ol-projectTags': Tag[]
   'ol-project_id': string

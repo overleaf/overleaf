@@ -428,6 +428,38 @@ describe('UserPagesController', function () {
       })
     })
 
+    it("should set and clear 'projectSyncErrorMessage'", async function (ctx) {
+      ctx.req.session.projectSyncErrorMessage = 'Some Sync Error'
+      await new Promise((resolve, reject) => {
+        ctx.res.callback = () => {
+          ctx.res.renderedVariables.projectSyncErrorMessage.should.equal(
+            'Some Sync Error'
+          )
+          expect(ctx.req.session.projectSyncErrorMessage).to.not.exist
+          resolve()
+        }
+        ctx.UserPagesController.settingsPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
+      })
+    })
+
+    it("should leave 'projectSyncErrorMessage' undefined when not set on the session", async function (ctx) {
+      await new Promise((resolve, reject) => {
+        ctx.res.callback = () => {
+          expect(ctx.res.renderedVariables.projectSyncErrorMessage).to.not.exist
+          resolve()
+        }
+        ctx.UserPagesController.settingsPage(
+          ctx.req,
+          ctx.res,
+          ctx.rejectOnError(reject)
+        )
+      })
+    })
+
     it('should cast refProviders to booleans', async function (ctx) {
       await new Promise((resolve, reject) => {
         ctx.res.callback = () => {

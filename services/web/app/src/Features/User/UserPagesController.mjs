@@ -12,22 +12,28 @@ import Features from '../../infrastructure/Features.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 
+function popSessionValue(session, key) {
+  const value = session[key]
+  if (value) {
+    delete session[key]
+  }
+  return value
+}
+
 async function settingsPage(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const reconfirmationRemoveEmail = req.query.remove
   // SSO
-  const ssoError = req.session.ssoError
-  if (ssoError) {
-    delete req.session.ssoError
-  }
-  const ssoErrorMessage = req.session.ssoErrorMessage
-  if (ssoErrorMessage) {
-    delete req.session.ssoErrorMessage
-  }
-  const projectSyncSuccessMessage = req.session.projectSyncSuccessMessage
-  if (projectSyncSuccessMessage) {
-    delete req.session.projectSyncSuccessMessage
-  }
+  delete req.session.ssoError
+  const ssoErrorMessage = popSessionValue(req.session, 'ssoErrorMessage')
+  const projectSyncSuccessMessage = popSessionValue(
+    req.session,
+    'projectSyncSuccessMessage'
+  )
+  const projectSyncErrorMessage = popSessionValue(
+    req.session,
+    'projectSyncErrorMessage'
+  )
   // Institution SSO
   let institutionLinked = _.get(req.session, ['saml', 'linked'])
   if (institutionLinked) {
@@ -168,6 +174,7 @@ async function settingsPage(req, res) {
     ssoErrorMessage,
     thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
     projectSyncSuccessMessage,
+    projectSyncErrorMessage,
     personalAccessTokens,
     emailAddressLimit: Settings.emailAddressLimit,
     isManagedAccount: !!req.managedBy,

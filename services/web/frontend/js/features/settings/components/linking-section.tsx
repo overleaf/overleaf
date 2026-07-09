@@ -24,6 +24,7 @@ function LinkingSection() {
   const ssoErrorMessage = getMeta('ol-ssoErrorMessage')
   const cannotUseAi = getMeta('ol-cannot-use-ai')
   const projectSyncSuccessMessage = getMeta('ol-projectSyncSuccessMessage')
+  const projectSyncErrorMessage = getMeta('ol-projectSyncErrorMessage')
 
   // hide linking widgets in CI
   const integrationLinkingWidgets = getMeta('ol-hideLinkingWidgets')
@@ -110,6 +111,9 @@ function LinkingSection() {
                 content={projectSyncSuccessMessage}
               />
             </div>
+          ) : null}
+          {projectSyncErrorMessage ? (
+            <OLNotification type="error" content={projectSyncErrorMessage} />
           ) : null}
           <div className="settings-widgets-container">
             {allIntegrationLinkingWidgets.map(
