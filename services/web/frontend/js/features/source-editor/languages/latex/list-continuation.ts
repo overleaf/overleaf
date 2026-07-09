@@ -7,7 +7,6 @@ import {
   VerbatimEnvironment,
 } from '../../lezer-latex/latex.terms.mjs'
 import { ancestorOfNodeWithType } from '../../utils/tree-operations/ancestors'
-import { getListType } from '../../utils/tree-operations/lists'
 import { createListItem } from '../../extensions/visual/utils/list-item'
 
 const countWhitespaceAfterPosition = (
@@ -54,27 +53,34 @@ export const listItemContinuation = () =>
               if (context && context.type.is(ListEnvironment)) {
                 const listNode = context
 
+                const precedingText = state.sliceDoc(listNode.from, from)
+
                 // only continue when an \item precedes the cursor (skip empty lists)
-                if (/\\item(\[|\s|$)/.test(state.sliceDoc(listNode.from, from))) {
+                if (/\\item(\[|\s|$)/.test(precedingText)) {
                   let insert = '\n' + createListItem(state, from)
                   let pos: number
 
-                  if (getListType(state, listNode) === 'description') {
+                  // mirror the \item[] optional argument when the item being
+                  // continued uses one
+                  const currentItem = precedingText.slice(
+                    precedingText.lastIndexOf('\\item')
+                  )
+                  if (/^\\item\s*\[/.test(currentItem)) {
                     insert = insert.replace(/\\item $/, '\\item[] ')
                     // position the cursor inside the square brackets
                     pos = from + insert.length - 2
                   } else {
-                    // move the cursor past any whitespace on the new line
-                    pos =
-                      from +
-                      insert.length +
-                      countWhitespaceAfterPosition(state, from)
+                    pos = from + insert.length
                   }
 
                   handled = true
 
+                  // consume any whitespace after the cursor rather than
+                  // carrying it onto the new item as stray indentation
+                  const to = from + countWhitespaceAfterPosition(state, from)
+
                   return {
-                    changes: { from, insert },
+                    changes: { from, to, insert },
                     range: EditorSelection.cursor(pos, -1),
                   }
                 }

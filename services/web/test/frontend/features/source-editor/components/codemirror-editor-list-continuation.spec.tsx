@@ -46,9 +46,11 @@ describe('<CodeMirrorEditor/> list continuation in source mode', function () {
     cy.get('.cm-line').eq(2).should('have.text', '  \\item second')
   })
 
-  it('inserts \\item[] for a description list', function () {
+  it('mirrors the \\item[] optional argument on the next item', function () {
     mountEditor(
-      ['\\begin{description}', '\\item first', '\\end{description}'].join('\n')
+      ['\\begin{description}', '\\item[first] desc', '\\end{description}'].join(
+        '\n'
+      )
     )
 
     cy.get('.cm-line').eq(1).click()
@@ -56,6 +58,18 @@ describe('<CodeMirrorEditor/> list continuation in source mode', function () {
 
     // the cursor lands inside the brackets
     cy.get('.cm-line').eq(2).should('contain.text', '\\item[Label]')
+  })
+
+  it('does not carry trailing whitespace onto the new item', function () {
+    // an \item followed by a stray space, cursor before the space
+    mountEditor(
+      ['\\begin{itemize}', '\\item ', '\\end{itemize}'].join('\n')
+    )
+
+    cy.get('.cm-line').eq(1).click()
+    cy.get('.cm-line').eq(1).type('{end}{leftArrow}{enter}second')
+
+    cy.get('.cm-line').eq(2).should('have.text', '\\item second')
   })
 
   it('inserts another item (does not exit) on Enter at an empty item', function () {
