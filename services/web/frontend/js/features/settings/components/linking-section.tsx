@@ -113,7 +113,7 @@ function LinkingSection() {
             </div>
           ) : null}
           {projectSyncErrorMessage ? (
-            <OLNotification type="error" content={projectSyncErrorMessage} />
+            <Notification type="error" content={projectSyncErrorMessage} />
           ) : null}
           <div className="settings-widgets-container">
             {allIntegrationLinkingWidgets.map(
