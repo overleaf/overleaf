@@ -1,23 +1,26 @@
 import { ChangeSpec, EditorState, Transaction } from '@codemirror/state'
-
-const BAD_CHARS_REGEXP = /[\0\uD800-\uDFFF]/g
-const BAD_CHARS_REPLACEMENT_CHAR = '\uFFFD'
+import { isComposing, scrubBadChars } from './composition'
 
 /**
  * A custom extension that replaces input characters in a Unicode range with a replacement character.
+ *
+ * Skipped while an IME composition is active: rewriting the composed range
+ * mid-composition breaks the browser IME. Composed text is scrubbed once when
+ * the composition ends (see `composition.ts`).
  */
 export const filterCharacters = () => {
   return EditorState.transactionFilter.of(tr => {
-    if (tr.docChanged && !tr.annotation(Transaction.remote)) {
+    if (
+      tr.docChanged &&
+      !tr.annotation(Transaction.remote) &&
+      !isComposing(tr.startState)
+    ) {
       const changes: ChangeSpec[] = []
 
       tr.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
         const text = inserted.toString()
 
-        const newText = text.replaceAll(
-          BAD_CHARS_REGEXP,
-          BAD_CHARS_REPLACEMENT_CHAR
-        )
+        const newText = scrubBadChars(text)
 
         if (newText !== text) {
           changes.push({

@@ -22,6 +22,7 @@ import {
   TrackedDeletes,
   trackedDeletesFromState,
 } from '@/features/source-editor/utils/tracked-deletes'
+import { isComposing } from './composition'
 
 export const historyOT = (currentDoc: DocumentContainer) => {
   const trackedChanges =
@@ -244,7 +245,15 @@ const trackChangesUserIdState = StateField.define<string | null>({
 })
 
 const updateSender = EditorState.transactionExtender.of(tr => {
-  if (!tr.docChanged || tr.annotation(Transaction.remote)) {
+  // While an IME composition is active, pause submitting ops to the OT layer.
+  // The composed text (which may include a non-BMP emoji that the OT core
+  // cannot represent) is reconciled once when the composition ends (see
+  // `composition.ts`).
+  if (
+    !tr.docChanged ||
+    tr.annotation(Transaction.remote) ||
+    isComposing(tr.startState)
+  ) {
     return {}
   }
 

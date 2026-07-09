@@ -1221,6 +1221,8 @@
   "initiator": "Initiator",
   "inline": "Inline",
   "inline_math": "Inline math",
+  "input_discarded_due_to_simultaneous_edit": "A collaborator edited the same location while you were typing, so your in-progress input was discarded. Please type it again.",
+  "input_not_applied": "Input not applied",
   "inr_discount_modal_info": "Get document history, track changes, additional collaborators, and more at Purchasing Power Parity prices.",
   "inr_discount_modal_title": "70% off all Overleaf premium plans for users in India",
   "inr_discount_offer_plans_page_banner": "__flag__ <b>Great news!</b> We’ve applied a <b>70% discount</b> to premium plans for our users in India. Check out the new lower prices below.",
