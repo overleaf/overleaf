@@ -5,9 +5,8 @@ import {
   postJSON,
   putJSON,
 } from '../../../infrastructure/fetch-json'
-import { executeV2Captcha } from './captcha'
-import getMeta from '@/utils/meta'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
+import { useFetchWithRecaptcha } from '@/shared/hooks/fetch-with-recaptcha/fetch-with-recaptcha'
 
 export type SharingLinkPrivileges =
   | 'readAndWrite'
@@ -35,22 +34,24 @@ export function updateSharingLink(
   })
 }
 
-export function sendInvite(
+export function sendInviteParams(
   projectId: string,
   email: string,
   privileges: PermissionsLevel
 ) {
-  return executeV2Captcha(
-    getMeta('ol-ExposedSettings').recaptchaDisabled?.invite
-  ).then(grecaptchaResponse => {
-    return postJSON(`/project/${projectId}/invite`, {
+  return [
+    `/project/${projectId}/invite`,
+    {
       body: {
         email, // TODO: normalisedEmail?
         privileges,
-        'g-recaptcha-response': grecaptchaResponse,
       },
-    })
-  })
+    },
+  ] as const
+}
+
+export function useSendInvite() {
+  return useFetchWithRecaptcha(postJSON, { action: 'invite' })
 }
 
 export function resendInvite(projectId: string, invite: ProjectMember) {

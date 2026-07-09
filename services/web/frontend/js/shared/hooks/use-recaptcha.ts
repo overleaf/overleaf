@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import ReCAPTCHA from 'react-google-recaptcha'
+import type ReCAPTCHA from 'react-google-recaptcha'
 
 export const useRecaptcha = () => {
   const ref = useRef<ReCAPTCHA | null>(null)

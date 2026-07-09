@@ -387,6 +387,7 @@ export default async function (webRouter, privateApiRouter, publicApiRouter) {
       projectUploadTimeout: Settings.projectUploadTimeout,
       recaptchaSiteKey: Settings.recaptcha?.siteKey,
       recaptchaSiteKeyV3: Settings.recaptcha?.siteKeyV3,
+      recaptchaEnterpriseSiteKey: Settings.recaptcha?.enterpriseSiteKey,
       recaptchaDisabled: Settings.recaptcha?.disabled,
       textExtensions: Settings.textExtensions,
       editableFilenames: Settings.editableFilenames,

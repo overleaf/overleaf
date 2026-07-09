@@ -4,7 +4,6 @@ import AuthorizationMiddleware from '../Authorization/AuthorizationMiddleware.mj
 import CollaboratorsInviteController from './CollaboratorsInviteController.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'
-import CaptchaMiddleware from '../Captcha/CaptchaMiddleware.mjs'
 import AnalyticsRegistrationSourceMiddleware from '../Analytics/AnalyticsRegistrationSourceMiddleware.mjs'
 
 const rateLimiters = {
@@ -84,7 +83,6 @@ export default {
       RateLimiterMiddleware.rateLimit(rateLimiters.inviteToProjectByIp, {
         ipOnly: true,
       }),
-      CaptchaMiddleware.validateCaptcha('invite'),
       AuthenticationController.requireLogin(),
       AuthorizationMiddleware.ensureUserCanAdminProject,
       CollaboratorsInviteController.inviteToProject

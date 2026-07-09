@@ -37,6 +37,7 @@ export type ExposedSettings = {
   }
   recaptchaSiteKeyV3?: string
   recaptchaSiteKey?: string
+  recaptchaEnterpriseSiteKey?: string
   samlInitPath?: string
   sentryAllowedOriginRegex: string
   sentryDsn?: string
