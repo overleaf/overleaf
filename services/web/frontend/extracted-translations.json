@@ -2594,6 +2594,8 @@
   "zotero_sync_lost_access": "",
   "zotero_sync_multiple_collections": "",
   "zotero_sync_no_collection": "",
+  "zotero_sync_removed": "",
+  "zotero_sync_removed_plural": "",
   "zotero_sync_success": "",
   "zotero_sync_success_plural": "",
   "zotero_sync_up_to_date": "",

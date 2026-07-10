@@ -3266,8 +3266,10 @@
   "zotero_sync_lost_access": "We’ve lost access to your Zotero library. <0>Reconnect your account</0> to keep syncing your references.",
   "zotero_sync_multiple_collections": "We found more than one collection called “Overleaf” in your Zotero library. Sync requires exactly one.",
   "zotero_sync_no_collection": "We couldn’t find a collection called “Overleaf” in your Zotero library.",
-  "zotero_sync_success": "Synced __count__ reference from Zotero",
-  "zotero_sync_success_plural": "Synced __count__ references from Zotero",
+  "zotero_sync_removed": "Removed __count__ reference no longer in your Zotero collection.",
+  "zotero_sync_removed_plural": "Removed __count__ references no longer in your Zotero collection.",
+  "zotero_sync_success": "Synced __count__ reference from Zotero.",
+  "zotero_sync_success_plural": "Synced __count__ references from Zotero.",
   "zotero_sync_up_to_date": "Your Zotero references are already up to date.",
   "zotero_upgrade_prompt_content": "Link your Zotero account to search and add your references from Zotero directly in your project—they’ll automatically be added to your .bib file. Or import them as a file into your __appName__ projects.",
   "zotero_upgrade_prompt_title": "Cite from Zotero"
