@@ -33,6 +33,7 @@ import { EditorSelectionProvider } from '@/shared/context/editor-selection-conte
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { TutorialProvider } from '@/shared/context/tutorial-context'
 import { TabsProvider } from './tabs-context'
+import { UnsavedDocsProvider } from '@/features/ide-react/context/unsaved-docs-context'
 
 const rootContextProviders = importOverleafModules('rootContextProviders') as {
   import: { default: ElementType }
@@ -78,6 +79,7 @@ export const ReactContextRoot: FC<
     EditorSelectionProvider,
     TutorialProvider,
     TabsProvider,
+    UnsavedDocsProvider,
     ...providers,
   }
 
@@ -116,31 +118,33 @@ export const ReactContextRoot: FC<
                                           <Providers.LayoutProvider>
                                             <Providers.ProjectSettingsProvider>
                                               <Providers.EditorManagerProvider>
-                                                <Providers.ReferencesProvider>
-                                                  <Providers.LocalCompileProvider>
-                                                    <Providers.DetachCompileProvider>
-                                                      <Providers.ChatProvider>
-                                                        <Providers.FileTreeOpenProvider>
-                                                          <Providers.TabsProvider>
-                                                            <Providers.OnlineUsersProvider>
-                                                              <Providers.MetadataProvider>
-                                                                <Providers.OutlineProvider>
-                                                                  <Providers.CommandRegistryProvider>
-                                                                    <Providers.EditorSelectionProvider>
-                                                                      {
-                                                                        childrenWrappedWithDynamicProviders
-                                                                      }
-                                                                    </Providers.EditorSelectionProvider>
-                                                                  </Providers.CommandRegistryProvider>
-                                                                </Providers.OutlineProvider>
-                                                              </Providers.MetadataProvider>
-                                                            </Providers.OnlineUsersProvider>
-                                                          </Providers.TabsProvider>
-                                                        </Providers.FileTreeOpenProvider>
-                                                      </Providers.ChatProvider>
-                                                    </Providers.DetachCompileProvider>
-                                                  </Providers.LocalCompileProvider>
-                                                </Providers.ReferencesProvider>
+                                                <Providers.UnsavedDocsProvider>
+                                                  <Providers.ReferencesProvider>
+                                                    <Providers.LocalCompileProvider>
+                                                      <Providers.DetachCompileProvider>
+                                                        <Providers.ChatProvider>
+                                                          <Providers.FileTreeOpenProvider>
+                                                            <Providers.TabsProvider>
+                                                              <Providers.OnlineUsersProvider>
+                                                                <Providers.MetadataProvider>
+                                                                  <Providers.OutlineProvider>
+                                                                    <Providers.CommandRegistryProvider>
+                                                                      <Providers.EditorSelectionProvider>
+                                                                        {
+                                                                          childrenWrappedWithDynamicProviders
+                                                                        }
+                                                                      </Providers.EditorSelectionProvider>
+                                                                    </Providers.CommandRegistryProvider>
+                                                                  </Providers.OutlineProvider>
+                                                                </Providers.MetadataProvider>
+                                                              </Providers.OnlineUsersProvider>
+                                                            </Providers.TabsProvider>
+                                                          </Providers.FileTreeOpenProvider>
+                                                        </Providers.ChatProvider>
+                                                      </Providers.DetachCompileProvider>
+                                                    </Providers.LocalCompileProvider>
+                                                  </Providers.ReferencesProvider>
+                                                </Providers.UnsavedDocsProvider>
                                               </Providers.EditorManagerProvider>
                                             </Providers.ProjectSettingsProvider>
                                           </Providers.LayoutProvider>

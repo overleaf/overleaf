@@ -112,7 +112,15 @@ function makeEditorManagerProvider() {
       setIgnoringExternalUpdates: () => {},
       openDocWithId: cy.stub().as('openDocWithId').resolves(),
       openDoc: cy.stub().as('openDoc').resolves(),
-      openDocs: { awaitBufferedOps: cy.stub().resolves() } as any,
+      openDocs: {
+        awaitBufferedOps: cy.stub().resolves(),
+        unsavedDocs: () => [],
+        hasUnsavedChanges: () => false,
+        getUnsavedOpsSize: () => ({
+          pendingOpsLength: 0,
+          inflightOpsLength: 0,
+        }),
+      } as any,
       openFileWithId: cy.stub().as('openFileWithId'),
       openInitialDoc: cy.stub().resolves(),
       isLoading: false,
