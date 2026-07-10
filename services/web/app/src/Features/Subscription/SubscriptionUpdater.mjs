@@ -573,6 +573,37 @@ async function _sendSubscriptionEventForAllMembers(subscriptionId, event) {
 }
 
 /**
+ * Fire an analytics event for the group admin and all group members when the
+ * AI feature is enabled or disabled by a group admin.
+ * @param {string} subscriptionId
+ * @param {string} adminId - the user id of the admin who changed the setting
+ * @param {boolean} enabled - true if AI features were enabled, false if disabled
+ */
+async function sendGroupAiFeatureToggledEvent(subscriptionId, adminId, enabled) {
+  const subscription = await Subscription.findOne(
+    { _id: subscriptionId },
+    {
+      recurlySubscription_id: 1,
+      member_ids: 1,
+    }
+  )
+  if (!subscription) {
+    return
+  }
+  const segmentation = {
+    enabled,
+    groupId: subscription._id.toString(),
+    subscriptionId: subscription.recurlySubscription_id,
+  }
+  const event = 'group-ai-feature-toggled'
+  AnalyticsManager.recordEventForUserInBackground(adminId, event, segmentation)
+  const userIds = (subscription.member_ids || []).filter(Boolean)
+  for (const userId of userIds) {
+    AnalyticsManager.recordEventForUserInBackground(userId, event, segmentation)
+  }
+}
+
+/**
  * Change the ownershiop of the given subscription.
  * @param {MongoSubscription} subscription
  * @param {string} adminId
@@ -642,5 +673,6 @@ export default {
     handleExpiredSubscription,
     transferSubscriptionOwnership,
     sendGroupRoleUserProperty,
+    sendGroupAiFeatureToggledEvent,
   },
 }

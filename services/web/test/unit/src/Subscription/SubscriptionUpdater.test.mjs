@@ -1126,6 +1126,82 @@ describe('SubscriptionUpdater', function () {
     })
   })
 
+  describe('sendGroupAiFeatureToggledEvent', function () {
+    beforeEach(function (ctx) {
+      ctx.SubscriptionModel.findOne.resolves(ctx.groupSubscription)
+    })
+
+    it('should fire an event for the admin when AI is enabled', async function (ctx) {
+      await ctx.SubscriptionUpdater.promises.sendGroupAiFeatureToggledEvent(
+        ctx.groupSubscription._id,
+        ctx.adminUser._id,
+        true
+      )
+      sinon.assert.calledWith(
+        ctx.AnalyticsManager.recordEventForUserInBackground,
+        ctx.adminUser._id,
+        'group-ai-feature-toggled',
+        {
+          enabled: true,
+          groupId: ctx.groupSubscription._id,
+          subscriptionId: ctx.groupSubscription.recurlySubscription_id,
+        }
+      )
+    })
+
+    it('should fire an event for each group member when AI is enabled', async function (ctx) {
+      await ctx.SubscriptionUpdater.promises.sendGroupAiFeatureToggledEvent(
+        ctx.groupSubscription._id,
+        ctx.adminUser._id,
+        true
+      )
+      for (const userId of ctx.allUserIds) {
+        sinon.assert.calledWith(
+          ctx.AnalyticsManager.recordEventForUserInBackground,
+          userId,
+          'group-ai-feature-toggled',
+          {
+            enabled: true,
+            groupId: ctx.groupSubscription._id,
+            subscriptionId: ctx.groupSubscription.recurlySubscription_id,
+          }
+        )
+      }
+    })
+
+    it('should fire an event for the admin when AI is disabled', async function (ctx) {
+      await ctx.SubscriptionUpdater.promises.sendGroupAiFeatureToggledEvent(
+        ctx.groupSubscription._id,
+        ctx.adminUser._id,
+        false
+      )
+      sinon.assert.calledWith(
+        ctx.AnalyticsManager.recordEventForUserInBackground,
+        ctx.adminUser._id,
+        'group-ai-feature-toggled',
+        {
+          enabled: false,
+          groupId: ctx.groupSubscription._id,
+          subscriptionId: ctx.groupSubscription.recurlySubscription_id,
+        }
+      )
+    })
+
+    it('should not throw when the subscription is not found', async function (ctx) {
+      ctx.SubscriptionModel.findOne.resolves(null)
+      await expect(
+        ctx.SubscriptionUpdater.promises.sendGroupAiFeatureToggledEvent(
+          ctx.groupSubscription._id,
+          ctx.adminUser._id,
+          true
+        )
+      ).to.be.fulfilled
+      sinon.assert.notCalled(
+        ctx.AnalyticsManager.recordEventForUserInBackground
+      )
+    })
+  })
+
   describe('scheduleRefreshFeatures', function () {
     it('should call upgrades feature for personal subscription from admin_id', async function (ctx) {
       ctx.subscription = {
