@@ -510,6 +510,7 @@ const _ProjectController = {
       'group-link-sharing',
       'compile-with-checkpoint',
       'themed-modals',
+      'intermittent-connection-improvements',
     ].filter(Boolean)
 
     const getUserValues = async userId =>

@@ -12,8 +12,14 @@ import { useEditorManagerContext } from '@/features/ide-react/context/editor-man
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 import useEventListener from '@/shared/hooks/use-event-listener'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
-const MAX_UNSAVED_SECONDS = 30 // lock the editor after this time if unsaved
+const intermittentConnectionImprovementsEnabled = isSplitTestEnabled(
+  'intermittent-connection-improvements'
+)
+
+// lock the editor after this time if unsaved
+const MAX_UNSAVED_SECONDS = intermittentConnectionImprovementsEnabled ? 600 : 30
 
 type UnsavedDocsContextValue = {
   unsavedDocs: Map<string, number>

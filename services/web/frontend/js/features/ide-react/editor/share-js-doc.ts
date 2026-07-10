@@ -29,13 +29,22 @@ import {
   RawEditOperation,
 } from 'overleaf-editor-core/lib/types'
 import { HistoryOTShareDoc } from '../../../../../types/share-doc'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+
+const intermittentConnectionImprovementsEnabled = isSplitTestEnabled(
+  'intermittent-connection-improvements'
+)
 
 // All times below are in milliseconds
 const SINGLE_USER_FLUSH_DELAY = 2000
 const MULTI_USER_FLUSH_DELAY = 500
 const INFLIGHT_OP_TIMEOUT = 5000 // Retry sending ops after 5 seconds without an ack
 const WAIT_FOR_CONNECTION_TIMEOUT = 500
-const FATAL_OP_TIMEOUT = 45000
+const FATAL_OP_TIMEOUT = intermittentConnectionImprovementsEnabled
+  ? // 10 minutes
+    600_000
+  : // 45 seconds
+    45_000
 const RECENT_ACK_LIMIT = 2 * SINGLE_USER_FLUSH_DELAY
 
 type Update = Record<string, any>
