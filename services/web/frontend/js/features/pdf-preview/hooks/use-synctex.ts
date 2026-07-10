@@ -8,7 +8,6 @@ import useDetachState from '../../../shared/hooks/use-detach-state'
 import useDetachAction from '../../../shared/hooks/use-detach-action'
 import localStorage from '../../../infrastructure/local-storage'
 import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
-import useScopeEventListener from '../../../shared/hooks/use-scope-event-listener'
 import { debugConsole } from '@/utils/debugging'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
@@ -165,7 +164,7 @@ export default function useSynctex(): {
     }
   }, [getCurrentFilePath, goToPdfLocation])
 
-  useScopeEventListener(
+  useEventListener(
     'cursor:editor:syncToPdf',
     useCallback(() => {
       syncToPdf()

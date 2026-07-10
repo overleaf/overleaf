@@ -16,7 +16,6 @@ import {
 import { JoinProjectPayload } from '@/features/ide-react/connection/join-project-payload'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import { postJSON } from '@/infrastructure/fetch-json'
-import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import getMeta from '@/utils/meta'
 import { type PermissionsLevel } from '@/features/ide-react/types/permissions'
 import { useProjectContext } from '@/shared/context/project-context'
@@ -48,9 +47,6 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
   const [permissionsLevel, setPermissionsLevel] =
     useState<PermissionsLevel>('readOnly')
   const [outOfSync, setOutOfSync] = useState(false)
-  const [scopeEventEmitter] = useState(
-    () => new ReactScopeEventEmitter(eventEmitter)
-  )
   const [unstableStore] = useState(() => {
     const store = new ReactScopeValueStore()
     // Add dummy editor.ready key for Writefull, that relies on this calling
@@ -165,11 +161,7 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
 
   return (
     <IdeReactContext.Provider value={value}>
-      <IdeProvider
-        ide={ide}
-        scopeEventEmitter={scopeEventEmitter}
-        unstableStore={unstableStore}
-      >
+      <IdeProvider ide={ide} unstableStore={unstableStore}>
         {children}
       </IdeProvider>
     </IdeReactContext.Provider>

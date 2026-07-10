@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { EditorState } from '@codemirror/state'
-import useScopeEventEmitter from '../../../shared/hooks/use-scope-event-emitter'
 import useEventListener from '../../../shared/hooks/use-event-listener'
-import useScopeEventListener from '../../../shared/hooks/use-scope-event-listener'
 import { createExtensions } from '../extensions'
 import { setEditorTheme, setOptionsTheme } from '../extensions/theme'
 import {
@@ -504,13 +502,16 @@ function useCodeMirrorScope(view: EditorView) {
     settingsRef.current.referencesSearchMode = referencesSearchMode
   }, [referencesSearchMode])
 
-  const emitSyncToPdf = useScopeEventEmitter('cursor:editor:syncToPdf')
+  const emitSyncToPdf = useCallback(() => {
+    window.dispatchEvent(new CustomEvent('cursor:editor:syncToPdf'))
+  }, [])
 
   // select and scroll to position on editor:gotoLine event (from synctex)
-  useScopeEventListener(
+  useEventListener(
     'editor:gotoLine',
     useCallback(
-      (_event: any, options: GotoLineOptions) => {
+      (event: CustomEvent<GotoLineOptions>) => {
+        const options = event.detail
         setCursorLineAndScroll(
           view,
           options.gotoLine,
@@ -526,41 +527,15 @@ function useCodeMirrorScope(view: EditorView) {
   )
 
   // select and scroll to position on editor:gotoOffset event (from review panel)
-  useScopeEventListener(
+  useEventListener(
     'editor:gotoOffset',
     useCallback(
-      (_event: any, options: GotoOffsetOptions) => {
-        setCursorPositionAndScroll(view, options.gotoOffset)
+      (event: CustomEvent<GotoOffsetOptions>) => {
+        setCursorPositionAndScroll(view, event.detail.gotoOffset)
       },
       [view]
     )
   )
-
-  // dispatch 'cursor:editor:update' to Angular scope (for synctex and realtime)
-  const dispatchCursorUpdate = useScopeEventEmitter('cursor:editor:update')
-
-  const handleCursorUpdate = useCallback(
-    (event: CustomEvent) => {
-      dispatchCursorUpdate(event.detail)
-    },
-    [dispatchCursorUpdate]
-  )
-
-  // listen for 'cursor:editor:update' events from CodeMirror, and dispatch them to Angular
-  useEventListener('cursor:editor:update', handleCursorUpdate)
-
-  // dispatch 'cursor:editor:update' to Angular scope (for outline)
-  const dispatchScrollUpdate = useScopeEventEmitter('scroll:editor:update')
-
-  const handleScrollUpdate = useCallback(
-    (event: CustomEvent) => {
-      dispatchScrollUpdate(event.detail)
-    },
-    [dispatchScrollUpdate]
-  )
-
-  // listen for 'cursor:editor:update' events from CodeMirror, and dispatch them to Angular
-  useEventListener('scroll:editor:update', handleScrollUpdate)
 
   // enable the compile log linter a) when "Code Check" is off, b) when the project hasn't changed and isn't compiling.
   // the project "changed at" date is reset at the start of the compile, i.e. "the project hasn't changed",

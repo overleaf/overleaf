@@ -1,7 +1,6 @@
-import { FC, memo } from 'react'
+import { FC, memo, useCallback } from 'react'
 import OutlinePane from '@/features/outline/components/outline-pane'
 import { useOutlineContext } from '@/features/ide-react/context/outline-context'
-import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import useNestedOutline from '../hooks/use-nested-outline'
 
 export const OutlineContainer: FC = memo(() => {
@@ -13,7 +12,9 @@ export const OutlineContainer: FC = memo(() => {
     toggleOutlineExpanded,
   } = useOutlineContext()
 
-  const outlineToggledEmitter = useScopeEventEmitter('outline-toggled')
+  const handleToggle = useCallback((isOpen: boolean) => {
+    window.dispatchEvent(new CustomEvent('outline-toggled', { detail: isOpen }))
+  }, [])
 
   const outline = useNestedOutline()
 
@@ -21,7 +22,7 @@ export const OutlineContainer: FC = memo(() => {
     <div className="outline-container">
       <OutlinePane
         outline={outline.items}
-        onToggle={outlineToggledEmitter}
+        onToggle={handleToggle}
         isTexFile={canShowOutline}
         jumpToLine={jumpToLine}
         highlightedLine={highlightedLine}

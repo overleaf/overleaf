@@ -15,8 +15,8 @@ import { Doc } from '../../../../../types/doc'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { findDocEntityById } from '@/features/ide-react/util/find-doc-entity-by-id'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
+import useEventListener from '@/shared/hooks/use-event-listener'
 import { debugConsole } from '@/utils/debugging'
-import { IdeEvents } from '@/features/ide-react/create-ide-event-emitter'
 import { getHueForUserId } from '@/shared/utils/colors'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 
@@ -199,21 +199,15 @@ export const OnlineUsersProvider: FC<React.PropsWithChildren> = ({
   }, [eventEmitter, setAllValues, setOnlineUsers, socket])
 
   // Track the position of the main cursor
-  useEffect(() => {
-    const handleCursorUpdate = ({
-      detail: [position],
-    }: CustomEvent<IdeEvents['cursor:editor:update']>) => {
+  useEventListener(
+    'cursor:editor:update',
+    useCallback((event: CustomEvent<CursorPosition>) => {
+      const position = event.detail
       if (position) {
         setCurrentPosition(position)
       }
-    }
-
-    eventEmitter.on('cursor:editor:update', handleCursorUpdate)
-
-    return () => {
-      eventEmitter.off('cursor:editor:update', handleCursorUpdate)
-    }
-  }, [cursorUpdateInterval, eventEmitter])
+    }, [])
+  )
 
   // Send the latest position to other clients when currentPosition changes
   useEffect(() => {

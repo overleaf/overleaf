@@ -14,7 +14,6 @@ import React, {
 import { IdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
 import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
-import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import { ConnectionContext } from '@/features/ide-react/context/connection-context'
 import {
   EditorOpenDocContext,
@@ -398,14 +397,10 @@ const makeIdeReactProvider = (
     }))
 
     const [ideContextValue] = useState(() => {
-      const scopeEventEmitter = new ReactScopeEventEmitter(
-        new IdeEventEmitter()
-      )
       const unstableStore = new ReactScopeValueStore()
 
       return {
         socket,
-        scopeEventEmitter,
         unstableStore,
       }
     })

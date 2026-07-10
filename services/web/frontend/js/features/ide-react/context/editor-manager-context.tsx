@@ -24,7 +24,6 @@ import {
   findDocEntityById,
   findFileRefEntityById,
 } from '@/features/ide-react/util/find-doc-entity-by-id'
-import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { useTranslation } from 'react-i18next'
 import customLocalStorage from '@/infrastructure/local-storage'
@@ -111,8 +110,6 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
     wantTrackChangesRef.current = wantTrackChanges
   }, [wantTrackChanges])
 
-  const goToLineEmitter = useScopeEventEmitter('editor:gotoLine')
-
   const { fileTreeData } = useFileTreeData()
 
   const [ignoringExternalUpdates, setIgnoringExternalUpdates] = useState(false)
@@ -197,12 +194,11 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
     [currentDocumentId]
   )
 
-  const jumpToLine = useCallback(
-    (options: GotoLineOptions) => {
-      goToLineEmitter(options)
-    },
-    [goToLineEmitter]
-  )
+  const jumpToLine = useCallback((options: GotoLineOptions) => {
+    window.dispatchEvent(
+      new CustomEvent('editor:gotoLine', { detail: options })
+    )
+  }, [])
 
   const attachErrorHandlerToDocument = useCallback(
     (doc: Doc, document: DocumentContainer) => {
@@ -417,7 +413,9 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
           }
         } else if (hasGotoOffset(options)) {
           const jump = () => {
-            eventEmitter.emit('editor:gotoOffset', options)
+            window.dispatchEvent(
+              new CustomEvent('editor:gotoOffset', { detail: options })
+            )
           }
 
           if (isNewDoc) {
