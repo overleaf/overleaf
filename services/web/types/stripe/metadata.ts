@@ -18,4 +18,5 @@ export type SubscriptionMetadata = Stripe.Metadata & {
   itm_content?: string
   itm_referrer?: string
   checkoutSource?: 'hosted-checkout' | 'elements-checkout'
+  ip_address_country?: string
 }
