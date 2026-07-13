@@ -90,82 +90,93 @@ const projectNotificationQueue = new Queue(QUEUE_NAME, {
 })
 
 async function main() {
-  console.time('total')
-
-  if (dryRun) {
-    console.log('[DRY RUN MODE] - No changes will be made')
-  }
-
-  console.log('Scanning for projects that need to be notified...')
-  const { projects, stats } = await getProjectsToNotify()
-  console.log(
-    `Scan complete: scanned=${stats.scanned}, matched=${stats.matched}, skippedNoCollaborators=${stats.skippedNoCollaborators}, skippedNoTimestamp=${stats.skippedNoTimestamp}, skippedInvalidTimestamp=${stats.skippedInvalidTimestamp}, skippedNoProjectId=${stats.skippedNoProjectId}`
-  )
-  console.log(
-    `Collaborator lookups: cacheHitWithCollaborators=${stats.collaboratorCacheHitWithCollaborators}, cacheHitNoCollaborators=${stats.collaboratorCacheHitNoCollaborators}, cacheMissWithCollaborators=${stats.collaboratorCacheMissWithCollaborators}, cacheMissNoCollaborators=${stats.collaboratorCacheMissNoCollaborators}, mongoQueries=${stats.collaboratorMongoQueries}`
-  )
-
-  if (dryRun) {
-    console.log('\n[DRY RUN] Projects that would be queued:')
-    for (const { projectId, timestamp } of projects) {
-      const date = new Date(parseInt(timestamp, 10))
-      console.log(
-        `  ${projectId}: ${timestamp} (${date.toISOString()}) - would be queued`
-      )
+  const totalStart = performance.now()
+  try {
+    if (dryRun) {
+      console.log('[DRY RUN MODE] - No changes will be made')
     }
-    console.timeEnd('total')
-    return
-  }
 
-  console.log('Waiting for queue to be ready...')
-  await projectNotificationQueue.isReady()
-  console.log('Queue is ready.')
+    console.log('Scanning for projects that need to be notified...')
+    const { projects, stats } = await getProjectsToNotify()
+    console.log(
+      `Scan complete: scanned=${stats.scanned}, matched=${stats.matched}, skippedNoCollaborators=${stats.skippedNoCollaborators}, skippedNoTimestamp=${stats.skippedNoTimestamp}, skippedInvalidTimestamp=${stats.skippedInvalidTimestamp}, skippedNoProjectId=${stats.skippedNoProjectId}`
+    )
+    console.log(
+      `Collaborator lookups: cacheHitWithCollaborators=${stats.collaboratorCacheHitWithCollaborators}, cacheHitNoCollaborators=${stats.collaboratorCacheHitNoCollaborators}, cacheMissWithCollaborators=${stats.collaboratorCacheMissWithCollaborators}, cacheMissNoCollaborators=${stats.collaboratorCacheMissNoCollaborators}, mongoQueries=${stats.collaboratorMongoQueries}`
+    )
 
-  let queued = 0
-  let failed = 0
-  let deleteMismatches = 0
-  let lastProgressLog = Date.now()
+    if (dryRun) {
+      console.log('\n[DRY RUN] Projects that would be queued:')
+      for (const { projectId, timestamp } of projects) {
+        const date = new Date(parseInt(timestamp, 10))
+        console.log(
+          `  ${projectId}: ${timestamp} (${date.toISOString()}) - would be queued`
+        )
+      }
+      return
+    }
 
-  for (const { projectId, timestamp } of projects) {
-    const numericTimestamp = parseInt(timestamp, 10)
-    try {
-      await projectNotificationQueue.add(
-        { projectId, timestamp: numericTimestamp },
-        {
-          jobId: projectId,
-          delay: 1000,
+    console.log('Waiting for queue to be ready...')
+    await projectNotificationQueue.isReady()
+    console.log('Queue is ready.')
+
+    let queued = 0
+    let failed = 0
+    let deleteMismatches = 0
+    let lastProgressLog = Date.now()
+
+    for (const { projectId, timestamp } of projects) {
+      const numericTimestamp = parseInt(timestamp, 10)
+      try {
+        await projectNotificationQueue.add(
+          { projectId, timestamp: numericTimestamp },
+          {
+            jobId: projectId,
+            delay: 1000,
+          }
+        )
+
+        const deleted = await deleteProjectNotificationTimestamp(
+          projectId,
+          timestamp
+        )
+        if (!deleted) {
+          deleteMismatches++
         }
-      )
 
-      const deleted = await deleteProjectNotificationTimestamp(
-        projectId,
-        timestamp
-      )
-      if (!deleted) {
-        deleteMismatches++
+        queued++
+      } catch (err) {
+        failed++
+        console.error(
+          `Error scheduling notification for project ${projectId}:`,
+          err
+        )
       }
 
-      queued++
-    } catch (err) {
-      failed++
-      console.error(
-        `Error scheduling notification for project ${projectId}:`,
-        err
-      )
+      if (Date.now() - lastProgressLog >= PROGRESS_LOG_INTERVAL_MS) {
+        console.log(
+          `Queue progress: queued=${queued}, failed=${failed} of ${projects.length}`
+        )
+        lastProgressLog = Date.now()
+      }
     }
 
-    if (Date.now() - lastProgressLog >= PROGRESS_LOG_INTERVAL_MS) {
-      console.log(
-        `Queue progress: queued=${queued}, failed=${failed} of ${projects.length}`
-      )
-      lastProgressLog = Date.now()
-    }
+    console.log(
+      `Queue complete: queued=${queued}, failed=${failed}, deleteMismatches=${deleteMismatches}`
+    )
+  } finally {
+    const totalElapsed = Math.round(performance.now() - totalStart)
+    console.log(
+      `total: ${formatDuration(totalElapsed)} total_ms=${totalElapsed}`
+    )
   }
+}
 
-  console.log(
-    `Queue complete: queued=${queued}, failed=${failed}, deleteMismatches=${deleteMismatches}`
-  )
-  console.timeEnd('total')
+function formatDuration(ms: number): string {
+  const m = Math.floor(ms / 60000)
+  const s = Math.floor((ms % 60000) / 1000)
+  const millis = ms % 1000
+  return `${m}:${String(s).padStart(2, '0')}.${String(millis).padStart(3, '0')}`
 }
 
 /**
@@ -309,7 +320,7 @@ async function getProjectsToNotify(): Promise<{
   }
   let lastProgressLog = Date.now()
 
-  console.time('redis-scan')
+  const redisScanStart = performance.now()
   try {
     for (const node of nodes) {
       const stream = node.scanStream({
@@ -379,7 +390,10 @@ async function getProjectsToNotify(): Promise<{
       }
     }
   } finally {
-    console.timeEnd('redis-scan')
+    const redisScanElapsed = Math.round(performance.now() - redisScanStart)
+    console.log(
+      `redis-scan: ${formatDuration(redisScanElapsed)} redis_scan_ms=${redisScanElapsed}`
+    )
   }
 
   return { projects, stats }
@@ -408,8 +422,7 @@ main()
     process.exit(0)
   })
   .catch(error => {
-    console.error('Error scanning for project notifications:', error)
-    console.timeEnd('total')
+    console.error('project-notifications job failed:', error)
     process.exit(1)
   })
   .finally(async () => {
