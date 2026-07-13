@@ -19,6 +19,7 @@ import { useFeatureFlag } from '@/shared/context/split-test-context'
 import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import SplitTestBadge from '@/shared/components/split-test-badge'
+import OfflineIndicator from './offline-indicator'
 
 const [publishModalModules] = importOverleafModules('publishModalToolbarButton')
 const SubmitProjectButton = publishModalModules?.import.default
@@ -128,15 +129,18 @@ export const Toolbar = () => {
         {showUpgradePrompt && upgradeButtonRelocation && <UpgradeButton />}
       </div>
       <ToolbarProjectTitle />
-      <div className="ide-redesign-toolbar-actions">
-        <OnlineUsers />
-        {!isRestrictedTokenMember && <ShowHistoryButton />}
-        <ChangeLayoutButton />
-        {shouldDisplaySubmitButton && cobranding && (
-          <SubmitProjectButton cobranding={cobranding} />
-        )}
-        <ShareProjectButton />
-        {showUpgradePrompt && !upgradeButtonRelocation && <UpgradeButton />}
+      <div className="ide-redesign-toolbar-actions-wrapper">
+        <OfflineIndicator />
+        <div className="ide-redesign-toolbar-actions">
+          <OnlineUsers />
+          {!isRestrictedTokenMember && <ShowHistoryButton />}
+          <ChangeLayoutButton />
+          {shouldDisplaySubmitButton && cobranding && (
+            <SubmitProjectButton cobranding={cobranding} />
+          )}
+          <ShareProjectButton />
+          {showUpgradePrompt && !upgradeButtonRelocation && <UpgradeButton />}
+        </div>
       </div>
     </nav>
   )

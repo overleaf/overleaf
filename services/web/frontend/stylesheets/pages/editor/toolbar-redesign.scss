@@ -44,7 +44,7 @@
   }
 
   .ide-redesign-toolbar-menu,
-  .ide-redesign-toolbar-actions {
+  .ide-redesign-toolbar-actions-wrapper {
     flex: 0 0 auto;
   }
 
@@ -187,16 +187,38 @@
   gap: var(--spacing-05);
 }
 
+.ide-redesign-toolbar-actions-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-06);
+  padding-left: var(--spacing-05);
+}
+
 .ide-redesign-toolbar-actions {
   display: flex;
   gap: var(--spacing-04);
-  padding-left: var(--spacing-05);
 }
 
 .ide-redesign-toolbar-button-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.ide-redesign-toolbar-offline-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-03);
+  color: var(--content-secondary-themed);
+  font-size: var(--font-size-02);
+  line-height: var(--line-height-02);
+  cursor: default;
+
+  .material-symbols {
+    font-size: 16px;
+    line-height: 16px;
+    font-weight: 400;
+  }
 }
 
 .ide-redesign-online-users {

@@ -26,9 +26,9 @@ type UnsavedDocsContextValue = {
   isLocked: boolean
 }
 
-const UnsavedDocsContext = createContext<UnsavedDocsContextValue | undefined>(
-  undefined
-)
+export const UnsavedDocsContext = createContext<
+  UnsavedDocsContextValue | undefined
+>(undefined)
 
 export const UnsavedDocsProvider: FC<React.PropsWithChildren> = ({
   children,
