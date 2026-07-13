@@ -9,6 +9,7 @@ import React, {
 import ReactDOM from 'react-dom'
 import classNames from 'classnames'
 import { getTooltip } from '@codemirror/view'
+import { EditorState } from '@codemirror/state'
 import importOverleafModules from '../../../macros/import-overleaf-module.macro'
 import {
   useCodeMirrorStateContext,
@@ -22,6 +23,15 @@ import AddCommentAction from './components/add-comment-action'
 import TrackedChangesActions from './components/tracked-changes-actions'
 
 const TOOLTIP_SHOW_DELAY = 120
+
+// The document position on the visual bottom line of the selection, so the menu
+// anchors to the last line regardless of drag direction. If the selection ends
+// at column 0 of a multi-line selection, the bottom line is the previous one.
+function selectionBottomLinePos(state: EditorState) {
+  const { from, to } = state.selection.main
+  const lineAtTo = state.doc.lineAt(to)
+  return lineAtTo.from === to && to > from ? to - 1 : to
+}
 
 // Each default-exports a self-gating component.
 const editorFloatingMenuActions = importOverleafModules(
@@ -87,8 +97,10 @@ const EditorFloatingMenuContent = memo(function EditorFloatingMenuContent() {
       view.requestMeasure({
         key: 'editor-floating-menu-position',
         read(view) {
-          const cursorCoords = view.coordsAtPos(view.state.selection.main.head)
-          if (!cursorCoords) {
+          const lineCoords = view.coordsAtPos(
+            selectionBottomLinePos(view.state)
+          )
+          if (!lineCoords) {
             return
           }
 
@@ -96,21 +108,19 @@ const EditorFloatingMenuContent = memo(function EditorFloatingMenuContent() {
             menuRef.current?.getBoundingClientRect().height ?? 0
           const scrollDomRect = view.scrollDOM.getBoundingClientRect()
           const contentDomRect = view.contentDOM.getBoundingClientRect()
-          const cursorCenterY = (cursorCoords.top + cursorCoords.bottom) / 2
+          const lineCenterY = (lineCoords.top + lineCoords.bottom) / 2
 
-          if (
-            // Cursor scrolls out of view at the top
-            cursorCoords.top < scrollDomRect.top ||
-            // Cursor scrolls out of view at the bottom
-            cursorCoords.top > scrollDomRect.bottom
-          ) {
-            return { visibility: 'hidden' as const }
-          }
+          // Centre on the line, but keep the menu pinned inside the editor
+          // viewport so it never scrolls out of view: when the anchored line
+          // leaves the top or bottom edge the menu rides that edge instead.
+          const top = Math.min(
+            Math.max(lineCenterY - menuHeight / 2, scrollDomRect.top),
+            scrollDomRect.bottom - menuHeight
+          )
 
           return {
             position: 'fixed' as const,
-            // Align centrally
-            top: cursorCenterY - menuHeight / 2,
+            top,
             right: window.innerWidth - contentDomRect.left,
           }
         },
@@ -119,15 +129,9 @@ const EditorFloatingMenuContent = memo(function EditorFloatingMenuContent() {
         write(res) {
           const el = menuRef.current
           if (!el || !res) return
-          // Only toggle visibility when off-screen
-          if (res.visibility === 'hidden') {
-            el.style.visibility = 'hidden'
-          } else {
-            el.style.visibility = ''
-            el.style.position = res.position
-            el.style.top = `${res.top}px`
-            el.style.right = `${res.right}px`
-          }
+          el.style.position = res.position
+          el.style.top = `${res.top}px`
+          el.style.right = `${res.right}px`
         },
       })
     }
