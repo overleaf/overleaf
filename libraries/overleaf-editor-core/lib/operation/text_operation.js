@@ -222,7 +222,9 @@ class TextOperation extends EditOperation {
   isNoop() {
     return (
       this.ops.length === 0 ||
-      (this.ops.length === 1 && this.ops[0] instanceof RetainOp)
+      (this.ops.length === 1 &&
+        this.ops[0] instanceof RetainOp &&
+        !this.ops[0].tracking)
     )
   }
 

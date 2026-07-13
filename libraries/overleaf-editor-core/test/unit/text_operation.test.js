@@ -109,6 +109,29 @@ describe('TextOperation', function () {
     expect(o.isNoop()).to.be.false
   })
 
+  it('does not treat a tracked-change retain as a no-op when composing for undo', function () {
+    // A single retain with a tracking directive changes the file's tracked
+    // changes when applied, so isNoop() reports false and
+    // canBeComposedWithForUndo() does not group it with other operations.
+    const trackedDelete = new TextOperation().retain(5, {
+      tracking: new TrackingProps(
+        'delete',
+        'user-1',
+        new Date('2026-07-10T00:00:00.000Z')
+      ),
+    })
+
+    const file = new StringFileData('lorem')
+    file.edit(trackedDelete)
+    expect(file.getTrackedChanges().asSorted()).to.have.length(1)
+
+    expect(trackedDelete.isNoop()).to.be.false
+
+    const unrelatedInsert = new TextOperation().retain(5).insert('x')
+    expect(trackedDelete.canBeComposedWithForUndo(unrelatedInsert)).to.be.false
+    expect(unrelatedInsert.canBeComposedWithForUndo(trackedDelete)).to.be.false
+  })
+
   it('converts to string', function () {
     const o = new TextOperation()
     o.retain(2)
