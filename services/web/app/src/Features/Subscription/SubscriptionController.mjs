@@ -22,27 +22,15 @@ import AuthorizationManager from '../Authorization/AuthorizationManager.mjs'
 import Modules from '../../infrastructure/Modules.mjs'
 import async from 'async'
 import HttpErrorHandler from '../Errors/HttpErrorHandler.mjs'
-import {
-  AI_ADD_ON_CODE,
-  subscriptionChangeIsAiAssistUpgrade,
-} from './AiHelper.mjs'
+import { AI_ADD_ON_CODE } from './AiHelper.mjs'
 import PlansLocator from './PlansLocator.mjs'
 import { User } from '../../models/User.mjs'
 import UserGetter from '../User/UserGetter.mjs'
-import PermissionsManager from '../Authorization/PermissionsManager.mjs'
 import { sanitizeSessionUserForFrontEnd } from '../../infrastructure/FrontEndUser.mjs'
 import { z, parseReq } from '../../infrastructure/Validation.mjs'
-import SubscriptionLocator from './SubscriptionLocator.mjs'
 import { PaymentProviderSubscriptionChange } from './PaymentProviderEntities.mjs'
 
-const {
-  DuplicateAddOnError,
-  AddOnNotPresentError,
-  PaymentActionRequiredError,
-  PaymentFailedError,
-  MissingBillingInfoError,
-  MultiplePendingChangesError,
-} = Errors
+const { AddOnNotPresentError, MultiplePendingChangesError } = Errors
 
 const SUBSCRIPTION_PAUSED_REDIRECT_PATH =
   '/user/subscription?redirect-reason=subscription-paused'
@@ -99,23 +87,6 @@ async function _checkRecurlySubscriptionPauseStatus(subscription) {
   return !!(
     recurlySubscription.remaining_pause_cycles &&
     recurlySubscription.remaining_pause_cycles > 0
-  )
-}
-
-/** Check if a user's subscription is manual or custom
- * @param {Record<string, any>} user - The user object
- * @returns {Promise<boolean>}
- */
-async function _isManualOrCustomSubscription(user) {
-  const subscription = await SubscriptionLocator.promises.getUsersSubscription(
-    user._id
-  )
-  if (!subscription) {
-    return false
-  }
-
-  return (
-    subscription.customAccount || subscription.collectionMethod === 'manual'
   )
 }
 
@@ -190,7 +161,6 @@ async function userSubscriptionPage(req, res) {
     res,
     'combined-user-management'
   )
-  await SplitTestHandler.promises.getAssignment(req, res, 'plans-2026-phase-1')
   const groupPricingDiscount = await SplitTestHandler.promises.getAssignment(
     req,
     res,
@@ -531,138 +501,16 @@ function cancelV1Subscription(req, res, next) {
  * @param {any} res
  */
 async function previewAddonPurchase(req, res) {
-  const user = SessionManager.getSessionUser(req.session)
-  const userId = user._id
   const addOnCode = req.params.addOnCode
-  const purchaseReferrer = req.query.purchaseReferrer
-  const redirectedPaymentErrorCode = req.query.errorCode
 
   if (addOnCode !== AI_ADD_ON_CODE) {
     return HttpErrorHandler.notFound(req, res, `Unknown add-on: ${addOnCode}`)
   }
 
-  const { variant: plans2026Phase1Variant } =
-    await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'plans-2026-phase-1'
-    )
-  if (plans2026Phase1Variant === 'enabled') {
-    return res.redirect(
-      '/user/subscription?redirect-reason=ai-assist-unavailable'
-    )
-  }
-
-  const canUseAi = await PermissionsManager.promises.checkUserPermissions(
-    user,
-    ['use-ai']
+  return res.redirect(
+    '/user/subscription?redirect-reason=ai-assist-unavailable'
   )
-  if (!canUseAi) {
-    return res.redirect(
-      '/user/subscription?redirect-reason=ai-assist-unavailable'
-    )
-  }
-
-  const isManualOrCustom = await _isManualOrCustomSubscription(user)
-  if (isManualOrCustom) {
-    return res.redirect(
-      '/user/subscription?redirect-reason=ai-assist-unavailable'
-    )
-  }
-
-  const { isPaused, redirectPath } = await checkSubscriptionPauseStatus(user)
-  if (isPaused) {
-    return res.redirect(redirectPath)
-  }
-
-  let paymentMethod
-  try {
-    /** @type {PaymentMethod[]} */
-    paymentMethod = await Modules.promises.hooks.fire(
-      'getPaymentMethod',
-      userId
-    )
-  } catch (err) {
-    if (err instanceof MissingBillingInfoError) {
-      // We will get MissingBillingInfoError if a manual subscription doesn't have billing info
-      // but doesn't marked as manual on the Overleaf side
-      logger.error(
-        { err },
-        'User has no billing info, cannot preview add-on purchase'
-      )
-      return res.redirect(
-        '/user/subscription?redirect-reason=ai-assist-unavailable'
-      )
-    }
-    if (
-      err instanceof Error &&
-      err.constructor.name === 'PaymentServiceResourceNotFoundError'
-    ) {
-      return res.redirect(
-        '/user/subscription?redirect-reason=ai-assist-unavailable'
-      )
-    }
-    throw err
-  }
-
-  let subscriptionChange
-  try {
-    subscriptionChange =
-      await SubscriptionHandler.promises.previewAddonPurchase(userId, addOnCode)
-
-    const { isPremium: hasAiAssistViaWritefull } =
-      await UserGetter.promises.getWritefullData(userId)
-    const isAiUpgrade = subscriptionChangeIsAiAssistUpgrade(subscriptionChange)
-    if (hasAiAssistViaWritefull && isAiUpgrade) {
-      return res.redirect(
-        '/user/subscription?redirect-reason=writefull-entitled'
-      )
-    }
-  } catch (err) {
-    if (err instanceof DuplicateAddOnError) {
-      return res.redirect('/user/subscription?redirect-reason=double-buy')
-    }
-    if (
-      err instanceof Error &&
-      err.constructor.name === 'PaymentServiceResourceNotFoundError'
-    ) {
-      return res.redirect(
-        '/user/subscription?redirect-reason=ai-assist-unavailable'
-      )
-    }
-    throw err
-  }
-
-  const addOn = PlansLocator.findLocalPlanInSettings(addOnCode)
-  if (!addOn) {
-    return HttpErrorHandler.notFound(req, res, `Unknown add-on: ${addOnCode}`)
-  }
-
-  /** @type {SubscriptionChangePreview} */
-  const changePreview = makeChangePreview(
-    {
-      type: 'add-on-purchase',
-      addOn: {
-        code: addOn.planCode,
-        name: addOn.name,
-      },
-    },
-    subscriptionChange,
-    paymentMethod[0]
-  )
-
-  res.render('subscriptions/preview-change', {
-    changePreview,
-    purchaseReferrer,
-    redirectedPaymentErrorCode,
-  })
 }
-
-const purchaseAddonSchema = z.object({
-  params: z.object({
-    addOnCode: z.string(),
-  }),
-})
 
 /**
  * @param {any} req
@@ -670,102 +518,7 @@ const purchaseAddonSchema = z.object({
  * @param {any} next
  */
 async function purchaseAddon(req, res, next) {
-  const user = SessionManager.getSessionUser(req.session)
-  const { params } = parseReq(req, purchaseAddonSchema)
-  const addOnCode = params.addOnCode
-  // currently we only support having a quantity of 1
-  const quantity = 1
-  // currently we only support one add-on, the Ai add-on
-  if (addOnCode !== AI_ADD_ON_CODE) {
-    return res.sendStatus(404)
-  }
-
-  const { variant: plans2026Phase1Variant } =
-    await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'plans-2026-phase-1'
-    )
-  if (plans2026Phase1Variant === 'enabled') {
-    return res.sendStatus(404)
-  }
-
-  const { isPaused } = await checkSubscriptionPauseStatus(user)
-  if (isPaused) {
-    return HttpErrorHandler.badRequest(
-      req,
-      res,
-      'Cannot purchase add-ons while subscription is paused.'
-    )
-  }
-
-  logger.debug({ userId: user._id, addOnCode }, 'purchasing add-ons')
-  try {
-    await SubscriptionHandler.promises.purchaseAddon(
-      user._id,
-      addOnCode,
-      quantity
-    )
-  } catch (err) {
-    if (err instanceof DuplicateAddOnError) {
-      HttpErrorHandler.badRequest(
-        req,
-        res,
-        'Your subscription already includes this add-on',
-        { addon: addOnCode }
-      )
-    } else if (err instanceof PaymentActionRequiredError) {
-      logger.debug(
-        { userId: user._id },
-        'Customer needs to perform payment action to complete transaction'
-      )
-      return res.status(402).json({
-        message: 'Payment action required',
-        clientSecret: /** @type {any} */ (err).info.clientSecret,
-        publicKey: /** @type {any} */ (err).info.publicKey,
-      })
-    } else if (err instanceof PaymentFailedError) {
-      logger.debug(
-        {
-          userId: user._id,
-          reason: /** @type {any} */ (err).info.reason,
-          adviceCode: /** @type {any} */ (err).info.adviceCode,
-        },
-        'Payment failed for transaction'
-      )
-      return res.status(402).json({
-        message: 'Payment failed',
-        reason: /** @type {any} */ (err).info.reason,
-        adviceCode: /** @type {any} */ (err).info.adviceCode,
-      })
-    } else if (err instanceof MultiplePendingChangesError) {
-      logger.warn(
-        { userId: user._id, err, addOnCode },
-        'Cannot purchase add-on: multiple pending changes'
-      )
-      return res.status(422).json({
-        code: 'multiple_pending_changes',
-        message:
-          'Cannot complete purchase while there are multiple pending subscription changes. Please contact support.',
-      })
-    } else {
-      if (err instanceof Error) {
-        OError.tag(err, 'something went wrong purchasing add-ons', {
-          user_id: user._id,
-          addOnCode,
-        })
-      }
-      return next(err)
-    }
-  }
-
-  try {
-    await FeaturesUpdater.promises.refreshFeatures(user._id, 'add-on-purchase')
-  } catch (err) {
-    logger.error({ err }, 'Failed to refresh features after add-on purchase')
-  }
-
-  return res.sendStatus(200)
+  return res.sendStatus(404)
 }
 
 const removeAddonSchema = z.object({

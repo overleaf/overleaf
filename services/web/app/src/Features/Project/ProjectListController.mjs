@@ -539,7 +539,7 @@ async function projectListPage(req, res, next) {
   const aiBlocked =
     Features.hasFeature('saas') && !(await _canUseAIAssist(user))
   const hasAiAssist =
-    Features.hasFeature('saas') && (await _userHasAIAssist(req, res, user))
+    Features.hasFeature('saas') && (await _userHasAIAssist(user))
 
   const splitTests = [
     // Split tests that will be made available to the frontend
@@ -949,24 +949,11 @@ function _hasActiveFilter(filters) {
 }
 
 /**
- * @param {any} req
- * @param {any} res
  * @param {any} user
  */
-// todo: quota clean-up: rename function and vars
-async function _userHasAIAssist(req, res, user) {
-  let hasPremiumAiFeatures
-  const inQuotaSplitTest = await SplitTestHandler.promises.featureFlagEnabled(
-    req,
-    res,
-    'plans-2026-phase-1'
-  )
-  if (inQuotaSplitTest) {
-    hasPremiumAiFeatures =
-      user.features?.aiUsageQuota === Settings.aiFeatures.unlimitedQuota
-  } else {
-    hasPremiumAiFeatures = user.features?.aiErrorAssistant === true
-  }
+async function _userHasAIAssist(user) {
+  const hasPremiumAiFeatures =
+    user.features?.aiUsageQuota === Settings.aiFeatures.unlimitedQuota
   // Check if the user has a non free trial version of our AI features
   if (hasPremiumAiFeatures) {
     return true

@@ -3,8 +3,6 @@
 import UserGetter from '../../Features/User/UserGetter.mjs'
 import FeatureUsageRateLimiter from './FeatureUsageRateLimiter.mjs'
 import Settings from '@overleaf/settings'
-import SplitTestHandler from '../../Features/SplitTests/SplitTestHandler.mjs'
-import SplitTestUserGetter from '../../Features/SplitTests/SplitTestUserGetter.mjs'
 import FeaturesHelper from '../../Features/Subscription/FeaturesHelper.mjs'
 
 class AiFeatureUsageRateLimiter extends FeatureUsageRateLimiter {
@@ -20,31 +18,16 @@ class AiFeatureUsageRateLimiter extends FeatureUsageRateLimiter {
     const user = await UserGetter.promises.getUser(userId, {
       features: 1,
       writefull: 1,
-      ...SplitTestUserGetter.getProjection('plans-2026-phase-1'),
     })
-    // todo: quota clean-up: remove aiErrorAssistant checking, and split test
-    const inQuotaSplitTest =
-      await SplitTestHandler.promises.featureFlagEnabledForMongoUser(
-        user,
-        'plans-2026-phase-1'
-      )
 
-    if (inQuotaSplitTest) {
-      const wfQuota = user.writefull?.isPremium
-        ? Settings.writefull.quotaTierGranted
-        : Settings.aiFeatures.freeQuota
-      const mergedFeatures = FeaturesHelper.mergeFeatures(user.features, {
-        aiUsageQuota: wfQuota,
-      })
-      const quotaTier = mergedFeatures.aiUsageQuota
-      return _quotaTierToAllowance(quotaTier)
-    } else {
-      const DEFAULT_ALLOWANCE = 1
-      const ADD_ON_ALLOWANCE = 200
-      const hasAddOn =
-        user?.features?.aiErrorAssistant || user?.writefull?.isPremium
-      return hasAddOn ? ADD_ON_ALLOWANCE : DEFAULT_ALLOWANCE
-    }
+    const wfQuota = user?.writefull?.isPremium
+      ? Settings.writefull.quotaTierGranted
+      : Settings.aiFeatures.freeQuota
+    const mergedFeatures = FeaturesHelper.mergeFeatures(user?.features, {
+      aiUsageQuota: wfQuota,
+    })
+    const quotaTier = mergedFeatures.aiUsageQuota
+    return _quotaTierToAllowance(quotaTier)
   }
 }
 
@@ -57,7 +40,7 @@ class AiFeatureUsageRateLimiter extends FeatureUsageRateLimiter {
  */
 function _quotaTierToAllowance(quotaTier) {
   const quota = Settings.quotaGrants.ai[quotaTier]
-  if (!quota || typeof quota !== 'number') {
+  if (typeof quota !== 'number') {
     throw new Error(`Quota tier "${quotaTier}" is not initialized in settings`)
   }
   return Math.floor(quota)

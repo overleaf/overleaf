@@ -7,6 +7,16 @@ const { ObjectId } = mongodb
 
 const MODULE_PATH = '../../../../app/src/Features/Subscription/FeaturesUpdater'
 
+// helper awaiting _updateCustomerIoSubscriptionProperties called by refreshFeatures,
+// which is otherwise fire-and-forget.
+async function waitForCustomerIoSync(ctx) {
+  await vi.waitFor(() => {
+    expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+      'setUserProperties'
+    )
+  })
+}
+
 describe('FeaturesUpdater', function () {
   beforeEach(async function (ctx) {
     ctx.renewalDate = new Date('2099-04-01T00:00:00Z')
@@ -426,6 +436,7 @@ describe('FeaturesUpdater', function () {
     it('should return features and featuresChanged', async function (ctx) {
       const { features, featuresChanged } =
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+      await waitForCustomerIoSync(ctx)
       expect(features).to.exist
       expect(featuresChanged).to.exist
     })
@@ -433,6 +444,7 @@ describe('FeaturesUpdater', function () {
     describe('normally', function () {
       beforeEach(async function (ctx) {
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
       })
 
       it('should update the user with the merged features', function (ctx) {
@@ -504,6 +516,7 @@ describe('FeaturesUpdater', function () {
             },
           ])
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
       })
 
       it('should sync trial_end_date to customer.io', function (ctx) {
@@ -542,6 +555,7 @@ describe('FeaturesUpdater', function () {
             },
           ])
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
       })
 
       it('should report stripe as the payment_provider', function (ctx) {
@@ -568,6 +582,7 @@ describe('FeaturesUpdater', function () {
           }
         )
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
       })
 
       it('should sync commons=true to customer.io', function (ctx) {
@@ -609,6 +624,7 @@ describe('FeaturesUpdater', function () {
             },
           ])
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
       })
 
       it('should set commons, individual_subscription, and ai-assist-add-on together', function (ctx) {
@@ -636,6 +652,7 @@ describe('FeaturesUpdater', function () {
           }
         )
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
       })
 
       it('should sync false subscription flags and no payment_provider', function (ctx) {
@@ -682,6 +699,7 @@ describe('FeaturesUpdater', function () {
           ])
 
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
       })
 
       it('should sync expiry_date and blank next_renewal_date in customer.io', function (ctx) {
@@ -727,6 +745,7 @@ describe('FeaturesUpdater', function () {
           }
         )
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
       })
 
       it('should sync groupSize to customer.io', function (ctx) {
@@ -785,6 +804,7 @@ describe('FeaturesUpdater', function () {
             .resolves([{ _id: policyId, userCannotUseAIFeatures: true }]),
         })
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
       })
 
       it('should set group_ai_enabled to false', function (ctx) {
@@ -824,6 +844,7 @@ describe('FeaturesUpdater', function () {
           }
         )
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
       })
 
       it('should derive payment_provider from the group subscription', function (ctx) {
@@ -850,6 +871,7 @@ describe('FeaturesUpdater', function () {
           }
         )
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
         expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
           'setUserProperties',
           ctx.user._id,
@@ -867,6 +889,7 @@ describe('FeaturesUpdater', function () {
           }
         )
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
         expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
           'setUserProperties',
           ctx.user._id,
@@ -884,6 +907,7 @@ describe('FeaturesUpdater', function () {
           }
         )
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
         expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
           'setUserProperties',
           ctx.user._id,
@@ -901,6 +925,7 @@ describe('FeaturesUpdater', function () {
           }
         )
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
         expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
           'setUserProperties',
           ctx.user._id,
@@ -915,6 +940,7 @@ describe('FeaturesUpdater', function () {
           .withArgs(ctx.user._id)
           .resolves(null)
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
       })
 
       it('should send mixed feature set user property', function (ctx) {
@@ -934,6 +960,7 @@ describe('FeaturesUpdater', function () {
           .withArgs(ctx.user._id)
           .resolves(ctx.subscriptions.noDropbox)
         await ctx.FeaturesUpdater.promises.refreshFeatures(ctx.user._id, 'test')
+        await waitForCustomerIoSync(ctx)
       })
 
       it('should fire module hook to unlink dropbox', function (ctx) {

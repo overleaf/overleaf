@@ -20,8 +20,6 @@ import CustomerIoPlanHelpers from './CustomerIoPlanHelpers.mjs'
 import { GroupPolicy } from '../../models/GroupPolicy.mjs'
 import { AI_ADD_ON_CODE } from './AiHelper.mjs'
 import { fetchNothing } from '@overleaf/fetch-utils'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
-import SplitTestUserGetter from '../SplitTests/SplitTestUserGetter.mjs'
 
 /**
  * Enqueue a job for refreshing features for the given user
@@ -48,8 +46,8 @@ async function refreshFeatures(userId, reason) {
     _id: 1,
     features: 1,
     email: 1,
-    // analyticsId + labsProgram (analytics) and the split test fields below
-    ...SplitTestUserGetter.getProjection('plans-2026-phase-1'),
+    analyticsId: 1,
+    labsProgram: 1,
   })
   const oldFeatures = _.clone(user.features)
   const features = await computeFeatures(userId)
@@ -94,19 +92,8 @@ async function refreshFeatures(userId, reason) {
   //  skip if they are the reason we are refreshing features (they'd already be up to date)
   if (featuresChanged && reason !== 'writefullEntitlementSynced') {
     try {
-      // todo: quota clean-up: simplify once split test isnt needed
-      let hasPremiumAiFeatures
-      const inQuotaSplitTest =
-        await SplitTestHandler.promises.featureFlagEnabledForMongoUser(
-          user,
-          'plans-2026-phase-1'
-        )
-      if (inQuotaSplitTest) {
-        hasPremiumAiFeatures =
-          newFeatures.aiUsageQuota === Settings.aiFeatures.unlimitedQuota
-      } else {
-        hasPremiumAiFeatures = Boolean(newFeatures.aiErrorAssistant)
-      }
+      const hasPremiumAiFeatures =
+        newFeatures.aiUsageQuota === Settings.aiFeatures.unlimitedQuota
       // update WF with the current feature set for the user
       await fetchNothing(
         `${Settings.writefull.overleafApiUrl}/api/user/status/update-overleaf-status`,
