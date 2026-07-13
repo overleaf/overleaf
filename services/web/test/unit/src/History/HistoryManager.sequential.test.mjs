@@ -484,7 +484,7 @@ describe('HistoryManager', function () {
     it('should call the project-history service', async function (ctx) {
       expect(ctx.FetchUtils.fetchNothing).to.have.been.calledWith(
         `${ctx.projectHistoryUrl}/project/${projectId}`,
-        { method: 'DELETE' }
+        { method: 'DELETE', signal: sinon.match.instanceOf(AbortSignal) }
       )
     })
 
@@ -497,6 +497,7 @@ describe('HistoryManager', function () {
             user: ctx.v1HistoryUser,
             password: ctx.v1HistoryPassword,
           },
+          signal: sinon.match.instanceOf(AbortSignal),
         }
       )
     })

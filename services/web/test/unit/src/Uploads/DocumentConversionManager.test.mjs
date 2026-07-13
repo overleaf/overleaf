@@ -479,14 +479,15 @@ describe('DocumentConversionManager', function () {
           )
       })
 
-      it('should GET the file from clsi-nginx with the clsiserverid query param', function (ctx) {
+      it('should GET the file from clsi-nginx with the a timeout and the clsiserverid query param', function (ctx) {
         const expectedUrl = new URL(ctx.Settings.apis.clsi.downloadHost)
         expectedUrl.pathname = `/project/${ctx.conversionId}/build/${ctx.buildId}/output/${ctx.file}`
         expectedUrl.searchParams.set('clsiserverid', ctx.clsiServerId)
 
         sinon.assert.calledWith(
           ctx.fetchUtils.fetchStreamWithResponse,
-          sinon.match(url => url.toString() === expectedUrl.toString())
+          sinon.match(url => url.toString() === expectedUrl.toString()),
+          { signal: sinon.match.instanceOf(AbortSignal) }
         )
       })
 

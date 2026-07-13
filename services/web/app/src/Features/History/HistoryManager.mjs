@@ -79,7 +79,7 @@ async function flushProject(projectId) {
   try {
     await fetchNothing(
       `${settings.apis.project_history.url}/project/${projectId}/flush`,
-      { method: 'POST' }
+      { method: 'POST', signal: AbortSignal.timeout(60_000) }
     )
   } catch (err) {
     throw OError.tag(err, 'failed to flush project to project history', {
@@ -142,7 +142,7 @@ async function _deleteProjectInProjectHistory(projectId) {
   try {
     await fetchNothing(
       `${settings.apis.project_history.url}/project/${projectId}`,
-      { method: 'DELETE' }
+      { method: 'DELETE', signal: AbortSignal.timeout(5 * 60_000) }
     )
   } catch (err) {
     throw OError.tag(
@@ -158,6 +158,7 @@ async function _deleteProjectInFullProjectHistory(historyId) {
     await fetchNothing(`${HISTORY_V1_URL}/projects/${historyId}`, {
       method: 'DELETE',
       basicAuth: HISTORY_V1_BASIC_AUTH,
+      signal: AbortSignal.timeout(5 * 60_000),
     })
   } catch (err) {
     throw OError.tag(err, 'failed to clear project history', { historyId })
