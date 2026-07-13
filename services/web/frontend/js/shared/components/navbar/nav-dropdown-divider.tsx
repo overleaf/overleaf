@@ -1,5 +1,5 @@
-import { DropdownDivider } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownDivider } from '@/shared/components/ol/ol-dropdown-menu'
 
 export default function NavDropdownDivider() {
-  return <DropdownDivider className="d-none d-lg-block" />
+  return <OLDropdownDivider className="d-none d-lg-block" />
 }

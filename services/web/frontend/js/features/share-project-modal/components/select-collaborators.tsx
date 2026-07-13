@@ -5,7 +5,7 @@ import { useCombobox, UseMultipleSelectionReturnValue } from 'downshift'
 import classnames from 'classnames'
 
 import MaterialIcon from '@/shared/components/material-icon'
-import { DropdownItem } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownItem } from '@/shared/components/ol/ol-dropdown-menu'
 import { Contact } from '../utils/types'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import OLSpinner from '@/shared/components/ol/ol-spinner'
@@ -446,7 +446,7 @@ function Option({
   const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
   return (
     <li {...getItemProps({ item, index })}>
-      <DropdownItem
+      <OLDropdownItem
         as="span"
         role={undefined}
         leadingIcon={
@@ -461,7 +461,7 @@ function Option({
         })}
       >
         {item.display}
-      </DropdownItem>
+      </OLDropdownItem>
     </li>
   )
 }

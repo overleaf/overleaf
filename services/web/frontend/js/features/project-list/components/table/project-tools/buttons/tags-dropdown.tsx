@@ -7,13 +7,13 @@ import useTag from '../../../../hooks/use-tag'
 import { addProjectsToTag, removeProjectsFromTag } from '../../../../util/api'
 import { getTagColor } from '../../../../util/tag'
 import {
-  Dropdown,
-  DropdownDivider,
-  DropdownHeader,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownDivider,
+  OLDropdownHeader,
+  OLDropdownItem,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import { Tag } from '../../../../../../../../app/src/Features/Tags/types'
 
 function TagsDropdown() {
@@ -78,22 +78,22 @@ function TagsDropdown() {
 
   return (
     <>
-      <Dropdown align="end" autoClose="outside">
-        <DropdownToggle
+      <OLDropdown align="end" autoClose="outside">
+        <OLDropdownToggle
           id="project-tools-more-dropdown"
           variant="secondary"
           aria-label={t('tags')}
         >
           <MaterialIcon type="label" className="align-text-top" />
-        </DropdownToggle>
-        <DropdownMenu
+        </OLDropdownToggle>
+        <OLDropdownMenu
           flip={false}
           data-testid="project-tools-more-dropdown-menu"
         >
-          <DropdownHeader>{t('add_to_tag')}</DropdownHeader>
+          <OLDropdownHeader>{t('add_to_tag')}</OLDropdownHeader>
           {sortBy(tags, tag => tag.name?.toLowerCase()).map(tag => (
             <li role="none" key={tag._id}>
-              <DropdownItem
+              <OLDropdownItem
                 onClick={e =>
                   containsAllSelectedProjects(tag)
                     ? handleRemoveTagFromSelectedProjects(e, tag._id)
@@ -108,7 +108,7 @@ function TagsDropdown() {
                   containsAllSelectedProjects(tag) ? (
                     'check'
                   ) : (
-                    <DropdownItem.EmptyLeadingIcon />
+                    <OLDropdownItem.EmptyLeadingIcon />
                   )
                 }
                 translate="no"
@@ -122,21 +122,21 @@ function TagsDropdown() {
                   </span>
                   <span className="text-truncate">{tag.name}</span>
                 </div>
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           ))}
-          <DropdownDivider />
+          <OLDropdownDivider />
           <li role="none">
-            <DropdownItem
+            <OLDropdownItem
               onClick={handleOpenCreateTagModal}
               as="button"
               tabIndex={-1}
             >
               {t('create_new_tag')}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
-        </DropdownMenu>
-      </Dropdown>
+        </OLDropdownMenu>
+      </OLDropdown>
       <CreateTagModal id="toolbar-create-tag-modal" />
     </>
   )

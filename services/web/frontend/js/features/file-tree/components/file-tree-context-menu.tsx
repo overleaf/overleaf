@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import {
-  Dropdown,
-  DropdownMenu,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownMenu,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { useFileTreeMainContext } from '../contexts/file-tree-main'
 
@@ -96,13 +96,13 @@ function FileTreeContextMenu() {
 
   return ReactDOM.createPortal(
     <div style={contextMenuCoords} className="context-menu">
-      <Dropdown
+      <OLDropdown
         show
         drop={dropDirection}
         onKeyDown={handleClose}
         onToggle={handleToggle}
       >
-        <DropdownMenu
+        <OLDropdownMenu
           className={classNames('dropdown-menu-sm-width', {
             // We have to manually add a class to handle upwards context menu styling
             // due to the way that this dropdown is positioned with absolute coordinates and
@@ -112,8 +112,8 @@ function FileTreeContextMenu() {
           id="dropdown-file-tree-context-menu"
         >
           <FileTreeItemMenuItems />
-        </DropdownMenu>
-      </Dropdown>
+        </OLDropdownMenu>
+      </OLDropdown>
     </div>,
     document.body
   )

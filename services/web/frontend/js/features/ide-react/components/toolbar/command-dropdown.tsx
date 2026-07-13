@@ -5,9 +5,9 @@ import {
   useCommandRegistry,
 } from '@/features/ide-react/context/command-registry-context'
 import {
-  DropdownDivider,
-  DropdownHeader,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdownDivider,
+  OLDropdownHeader,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import {
   MenuBarDropdown,
   NestedMenuBarDropdown,
@@ -101,8 +101,8 @@ function CommandSectionContent({
   }
   return (
     <>
-      {includeDivider && <DropdownDivider />}
-      {section.title && <DropdownHeader>{section.title}</DropdownHeader>}
+      {includeDivider && <OLDropdownDivider />}
+      {section.title && <OLDropdownHeader>{section.title}</OLDropdownHeader>}
       {section.children.map(child => (
         <CommandDropdownChild item={child} key={child.id} />
       ))}

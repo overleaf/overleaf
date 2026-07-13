@@ -1,7 +1,7 @@
 import { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
-import { Dropdown } from 'react-bootstrap'
+import { OLDropdownItem } from '@/shared/components/ol/ol-dropdown-menu'
 import MaterialIcon from '@/shared/components/material-icon'
 
 export const SpellingSuggestionsLanguage = memo<{
@@ -29,13 +29,13 @@ export const SpellingSuggestionsLanguage = memo<{
       overlayProps={{ placement: 'right', delay: 100 }}
     >
       <span>
-        <Dropdown.Item
+        <OLDropdownItem
           className="d-flex gap-2 align-items-center"
           onClick={handleClick}
         >
           <MaterialIcon type="settings" />
           <span>{language.name}</span>
-        </Dropdown.Item>
+        </OLDropdownItem>
       </span>
     </OLTooltip>
   )

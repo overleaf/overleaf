@@ -5,12 +5,12 @@ import MaterialIcon from '@/shared/components/material-icon'
 import OLButton from '@/shared/components/ol/ol-button'
 import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import {
-  Dropdown,
-  DropdownDivider,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownDivider,
+  OLDropdownItem,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
 import LinkSharing from '@/features/share-project-modal/components/link-sharing'
 import { useEditorContext } from '@/shared/context/editor-context'
@@ -214,19 +214,19 @@ function ProjectAccess({
             {projectAccess === 'anyoneWithTheLink' && (
               <MaterialIcon type="globe" unfilled />
             )}
-            <Dropdown onSelect={onAccessSelect}>
-              <DropdownToggle
+            <OLDropdown onSelect={onAccessSelect}>
+              <OLDropdownToggle
                 variant="ghost"
                 className="d-flex align-items-center gap-2 no-default-caret"
               >
                 {getProjectAccessDropdownToggleText()}
                 <MaterialIcon type="keyboard_arrow_down" />
-              </DropdownToggle>
-              <DropdownMenu>
+              </OLDropdownToggle>
+              <OLDropdownMenu>
                 {projectAccess === 'legacyLinkSharing' && (
                   <>
                     <DropdownListItem className="d-flex align-items-center">
-                      <DropdownItem
+                      <OLDropdownItem
                         as="button"
                         eventKey="legacyLinkSharing"
                         leadingIcon={<MaterialIcon type="link" />}
@@ -238,13 +238,13 @@ function ProjectAccess({
                         active={projectAccess === 'legacyLinkSharing'}
                       >
                         {t('via_sharing_links_legacy')}
-                      </DropdownItem>
+                      </OLDropdownItem>
                     </DropdownListItem>
-                    <DropdownDivider />
+                    <OLDropdownDivider />
                   </>
                 )}
                 <DropdownListItem className="d-flex align-items-center">
-                  <DropdownItem
+                  <OLDropdownItem
                     as="button"
                     eventKey="onlyInvitedPeople"
                     leadingIcon={<MaterialIcon type="lock" unfilled />}
@@ -256,7 +256,7 @@ function ProjectAccess({
                     active={projectAccess === 'onlyInvitedPeople'}
                   >
                     {t('only_invited_people')}
-                  </DropdownItem>
+                  </OLDropdownItem>
                 </DropdownListItem>
                 {groupSharingEnabled &&
                   activeProfessionalGroupSubscriptions &&
@@ -265,7 +265,7 @@ function ProjectAccess({
                       className="d-flex align-items-center"
                       key={subscription._id}
                     >
-                      <DropdownItem
+                      <OLDropdownItem
                         as="button"
                         eventKey={`anyoneInXyzWithTheLink.${subscription._id}`}
                         leadingIcon={<MaterialIcon type="domain" unfilled />}
@@ -283,11 +283,11 @@ function ProjectAccess({
                         {t('anyone_in_x_with_the_link', {
                           groupName: subscription.teamName || 'your group',
                         })}
-                      </DropdownItem>
+                      </OLDropdownItem>
                     </DropdownListItem>
                   ))}
                 <DropdownListItem className="d-flex align-items-center gap-2">
-                  <DropdownItem
+                  <OLDropdownItem
                     as="button"
                     eventKey="anyoneWithTheLink"
                     leadingIcon={<MaterialIcon type="globe" unfilled />}
@@ -299,10 +299,10 @@ function ProjectAccess({
                     active={projectAccess === 'anyoneWithTheLink'}
                   >
                     {t('anyone_with_the_link')}
-                  </DropdownItem>
+                  </OLDropdownItem>
                 </DropdownListItem>
-              </DropdownMenu>
-            </Dropdown>
+              </OLDropdownMenu>
+            </OLDropdown>
             {pendingAccess && (
               <RemoveSharingLinksModal
                 pendingAccess={pendingAccess}
@@ -312,15 +312,15 @@ function ProjectAccess({
             )}
           </div>
           {projectAccess !== 'legacyLinkSharing' && privileges && (
-            <Dropdown align="end" onSelect={onPrivilegesChange}>
-              <DropdownToggle
+            <OLDropdown align="end" onSelect={onPrivilegesChange}>
+              <OLDropdownToggle
                 variant="ghost"
                 className="d-flex align-items-center gap-2 no-default-caret"
               >
                 <MemberPrivileges privileges={privileges} />
                 <MaterialIcon type="keyboard_arrow_down" />
-              </DropdownToggle>
-              <DropdownMenu>
+              </OLDropdownToggle>
+              <OLDropdownMenu>
                 <DropdownMenuItem
                   as="button"
                   eventKey="readAndWrite"
@@ -350,8 +350,8 @@ function ProjectAccess({
                 >
                   {t('viewer')}
                 </DropdownMenuItem>
-              </DropdownMenu>
-            </Dropdown>
+              </OLDropdownMenu>
+            </OLDropdown>
           )}
         </ShareProjectModalRow>
       )}

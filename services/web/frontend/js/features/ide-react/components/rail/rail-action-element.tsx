@@ -3,11 +3,11 @@ import MaterialIcon, {
 } from '@/shared/components/material-icon'
 import { forwardRef, ReactElement, useCallback } from 'react'
 import {
-  Dropdown,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
-import { DropdownToggle as BS5DropdownToggle } from 'react-bootstrap'
+import { DropdownToggle } from 'react-bootstrap'
 
 type RailActionButton = {
   key: string
@@ -45,15 +45,15 @@ const RailActionElement = forwardRef<HTMLButtonElement, { action: RailAction }>(
 
     if ('dropdown' in action) {
       return (
-        <Dropdown align="end" drop="end">
+        <OLDropdown align="end" drop="end">
           <OLTooltip
             id={`rail-dropdown-tooltip-${action.key}`}
             description={action.title}
             overlayProps={{ delay: 0, placement: 'right' }}
           >
             <span>
-              <DropdownToggle
-                ref={ref as React.ForwardedRef<typeof BS5DropdownToggle>}
+              <OLDropdownToggle
+                ref={ref as React.ForwardedRef<typeof DropdownToggle>}
                 id={`rail-dropdown-btn-${action.key}`}
                 className="ide-rail-tab-link ide-rail-tab-button ide-rail-tab-dropdown"
                 as="button"
@@ -63,11 +63,11 @@ const RailActionElement = forwardRef<HTMLButtonElement, { action: RailAction }>(
                   type={action.icon}
                   indicator={action.indicator}
                 />
-              </DropdownToggle>
+              </OLDropdownToggle>
             </span>
           </OLTooltip>
           {action.dropdown}
-        </Dropdown>
+        </OLDropdown>
       )
     } else {
       return (

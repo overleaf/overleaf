@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import {
-  Dropdown,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import ChangeLayoutOptions from './change-layout-options'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
@@ -19,26 +19,26 @@ export default function ChangeLayoutButton() {
 
   return (
     <div className="ide-redesign-toolbar-button-container">
-      <Dropdown className="toolbar-item layout-dropdown" align="end">
+      <OLDropdown className="toolbar-item layout-dropdown" align="end">
         <OLTooltip
           id="tooltip-open-layout-options"
           description={t('layout_options')}
           overlayProps={{ delay: 0, placement: 'bottom' }}
         >
           <span>
-            <DropdownToggle
+            <OLDropdownToggle
               id="layout-dropdown-btn"
               className={toggleButtonClassName}
               aria-label={t('layout_options')}
             >
               <MaterialIcon type="space_dashboard" unfilled />
-            </DropdownToggle>
+            </OLDropdownToggle>
           </span>
         </OLTooltip>
-        <DropdownMenu>
+        <OLDropdownMenu>
           <ChangeLayoutOptions />
-        </DropdownMenu>
-      </Dropdown>
+        </OLDropdownMenu>
+      </OLDropdown>
     </div>
   )
 }

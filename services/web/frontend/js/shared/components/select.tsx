@@ -14,13 +14,13 @@ import { Form, OverlayProps } from 'react-bootstrap'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
 import MaterialIcon from '@/shared/components/material-icon'
 import { CaretUp, CaretDown, Check } from '@phosphor-icons/react'
-import { DropdownItem } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownItem } from '@/shared/components/ol/ol-dropdown-menu'
 import OLOverlay from '@/shared/components/ol/ol-overlay'
 import OLSpinner from './ol/ol-spinner'
 import DSFormLabel from '@/shared/components/ds/ds-form-label'
 import DSFormGroup from '@/shared/components/ds/ds-form-group'
 import DSFormControl from '@/shared/components/ds/ds-form-control'
-import { DropdownItemProps } from '@/shared/components/types/dropdown-menu-props'
+import { OLDropdownItemProps } from '@/shared/components/types/dropdown-menu-props'
 
 function SelectMenuPopover({
   show,
@@ -82,7 +82,7 @@ export type SelectProps<T> = {
   // Maps an item to a leading icon.
   itemToLeadingIcon?: (
     item: T | null | undefined
-  ) => DropdownItemProps['leadingIcon']
+  ) => OLDropdownItemProps['leadingIcon']
   // Callback invoked after the selected item is updated.
   onSelectedItemChanged?: (item: T | null | undefined) => void
   // Optionally directly control the selected item.
@@ -235,7 +235,7 @@ export const Select = <T,>({
           })
           return (
             <li role="none" key={itemToKey(item)}>
-              <DropdownItem
+              <OLDropdownItem
                 as="button"
                 type="button"
                 className={classNames({
@@ -253,7 +253,7 @@ export const Select = <T,>({
                 disabled={disabled}
               >
                 {itemToString(item)}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           )
         })}

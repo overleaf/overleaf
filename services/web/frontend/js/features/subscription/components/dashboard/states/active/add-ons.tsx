@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import getMeta from '@/utils/meta'
-import { Dropdown, DropdownMenu, DropdownToggle } from 'react-bootstrap'
+import {
+  OLDropdown,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
 import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
@@ -106,8 +110,8 @@ function AddOn({
       </div>
       {reactivateState !== 'reactivating' && (
         <div className="ms-auto">
-          <Dropdown align="end">
-            <DropdownToggle
+          <OLDropdown align="end">
+            <OLDropdownToggle
               id="add-on-dropdown-toggle"
               className="add-on-options-toggle"
               variant="secondary"
@@ -116,8 +120,8 @@ function AddOn({
                 type="more_vert"
                 accessibilityLabel={t('more_options')}
               />
-            </DropdownToggle>
-            <DropdownMenu flip={false}>
+            </OLDropdownToggle>
+            <OLDropdownMenu flip={false}>
               {pendingCancellation ? (
                 <DropdownMenuItem
                   onClick={() => handleReactivateClick(addOnCode)}
@@ -136,8 +140,8 @@ function AddOn({
                   {t('cancel')}
                 </DropdownMenuItem>
               )}
-            </DropdownMenu>
-          </Dropdown>
+            </OLDropdownMenu>
+          </OLDropdown>
         </div>
       )}
     </div>

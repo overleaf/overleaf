@@ -1,4 +1,4 @@
-import { DropdownHeader } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownHeader } from '@/shared/components/ol/ol-dropdown-menu'
 import { ToolbarButtonMenu } from './button-menu'
 import MaterialIcon from '../../../../shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
@@ -43,9 +43,9 @@ export const TableDropdown = memo(function TableDropdown() {
           disablePopover={selectSizeDropdown.open}
           icon={<MaterialIcon type="table_chart" />}
         >
-          <DropdownHeader className="ol-cm-toolbar-header mx-2">
+          <OLDropdownHeader className="ol-cm-toolbar-header mx-2">
             {t('toolbar_table_insert_table_lowercase')}
-          </DropdownHeader>
+          </OLDropdownHeader>
           <OLListGroupItem
             className={showAiFeaturesDisabled ? 'opacity-50' : ''}
             aria-label={t('toolbar_generate_table')}

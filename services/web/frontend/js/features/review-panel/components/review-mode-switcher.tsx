@@ -1,9 +1,9 @@
 import { forwardRef, memo, MouseEventHandler } from 'react'
 import {
-  Dropdown,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import MaterialIcon from '@/shared/components/material-icon'
 import classNames from 'classnames'
@@ -114,12 +114,12 @@ function ReviewModeSwitcher() {
 
   if (isToolbarMigration) {
     return (
-      <Dropdown className="review-mode-switcher" align="end">
-        <DropdownToggle
+      <OLDropdown className="review-mode-switcher" align="end">
+        <OLDropdownToggle
           as={ModeSwitcherToggleButton}
           id="review-mode-switcher"
         />
-        <DropdownMenu
+        <OLDropdownMenu
           flip={false}
           popperConfig={{ strategy: 'fixed' }}
           // renderOnMount ensures the menu is in the DOM on mount so Popper.js
@@ -128,8 +128,8 @@ function ReviewModeSwitcher() {
           renderOnMount
         >
           <ReviewModeDropdownItems />
-        </DropdownMenu>
-      </Dropdown>
+        </OLDropdownMenu>
+      </OLDropdown>
     )
   }
 
@@ -137,15 +137,15 @@ function ReviewModeSwitcher() {
   // over the editor at top-right of the scroll area.
   return (
     <div className="review-mode-switcher-container">
-      <Dropdown className="review-mode-switcher" align="end">
-        <DropdownToggle
+      <OLDropdown className="review-mode-switcher" align="end">
+        <OLDropdownToggle
           as={ModeSwitcherToggleButton}
           id="review-mode-switcher"
         />
-        <DropdownMenu flip={false}>
+        <OLDropdownMenu flip={false}>
           <ReviewModeDropdownItems />
-        </DropdownMenu>
-      </Dropdown>
+        </OLDropdownMenu>
+      </OLDropdown>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { DropdownItem } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownItem } from '@/shared/components/ol/ol-dropdown-menu'
 
 type Props = {
   activePage: 'library' | 'projects'
@@ -12,13 +12,13 @@ function MobilePageSwitcherItems({ activePage, onProjectsClick }: Props) {
   return (
     <>
       <li role="none">
-        <DropdownItem href="/library" active={activePage === 'library'}>
+        <OLDropdownItem href="/library" active={activePage === 'library'}>
           {t('library')}
-        </DropdownItem>
+        </OLDropdownItem>
       </li>
       <li role="none">
         {onProjectsClick ? (
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             tabIndex={-1}
             trailingIcon="chevron_right"
@@ -28,11 +28,11 @@ function MobilePageSwitcherItems({ activePage, onProjectsClick }: Props) {
             }}
           >
             {t('projects')}
-          </DropdownItem>
+          </OLDropdownItem>
         ) : (
-          <DropdownItem href="/project" active={activePage === 'projects'}>
+          <OLDropdownItem href="/project" active={activePage === 'projects'}>
             {t('projects')}
-          </DropdownItem>
+          </OLDropdownItem>
         )}
       </li>
     </>

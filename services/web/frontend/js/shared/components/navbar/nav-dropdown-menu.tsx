@@ -1,5 +1,9 @@
 import { type ReactNode, useState } from 'react'
-import { Dropdown } from 'react-bootstrap'
+import {
+  OLDropdown,
+  OLDropdownToggle,
+  OLDropdownMenu,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import { CaretUp, CaretDown } from '@phosphor-icons/react'
 import { useDsNavStyle } from '@/features/project-list/components/use-is-ds-nav'
 
@@ -20,22 +24,21 @@ export default function NavDropdownMenu({
   // a <ul> element using NavDropdown
   const Caret = show ? CaretUp : CaretDown
   return (
-    <Dropdown
+    <OLDropdown
       as="li"
       role="none"
+      align="end"
       className={className}
       onToggle={nextShow => {
         setShow(nextShow)
         onToggle?.(nextShow)
       }}
     >
-      <Dropdown.Toggle role="menuitem">
+      <OLDropdownToggle role="menuitem">
         {title}
         {dsNavStyle && <Caret weight="bold" className="ms-2" />}
-      </Dropdown.Toggle>
-      <Dropdown.Menu as="ul" role="menu" align="end">
-        {children}
-      </Dropdown.Menu>
-    </Dropdown>
+      </OLDropdownToggle>
+      <OLDropdownMenu>{children}</OLDropdownMenu>
+    </OLDropdown>
   )
 }

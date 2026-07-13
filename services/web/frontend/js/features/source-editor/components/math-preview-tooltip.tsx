@@ -1,9 +1,9 @@
 import { useProjectSettingsContext } from '@/features/ide-settings/context/project-settings-context'
 import {
-  Dropdown,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import OLButton from '@/shared/components/ol/ol-button'
 import {
   OLModal,
@@ -81,8 +81,8 @@ const MathPreviewTooltipMenu: FC = () => {
 
   return (
     <>
-      <Dropdown align="end">
-        <DropdownToggle
+      <OLDropdown align="end">
+        <OLDropdownToggle
           id="some-id"
           className="math-tooltip-options-toggle"
           variant="secondary"
@@ -92,8 +92,8 @@ const MathPreviewTooltipMenu: FC = () => {
             type="more_vert"
             accessibilityLabel={t('more_options')}
           />
-        </DropdownToggle>
-        <DropdownMenu flip={false}>
+        </OLDropdownToggle>
+        <OLDropdownMenu flip={false}>
           <DropdownMenuItem
             onClick={onHide}
             description={t('temporarily_hides_the_preview')}
@@ -111,8 +111,8 @@ const MathPreviewTooltipMenu: FC = () => {
           >
             {t('disable')}
           </DropdownMenuItem>
-        </DropdownMenu>
-      </Dropdown>
+        </OLDropdownMenu>
+      </OLDropdown>
 
       {showDisableModal && (
         <OLModal show onHide={closeDisableModal}>

@@ -10,14 +10,14 @@ import { Nullable } from '../../../../../types/utils'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import {
-  Dropdown,
-  DropdownDivider,
-  DropdownHeader,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
-import type { DropdownProps } from '@/shared/components/types/dropdown-menu-props'
+  OLDropdown,
+  OLDropdownDivider,
+  OLDropdownHeader,
+  OLDropdownItem,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
+import type { OLDropdownProps } from '@/shared/components/types/dropdown-menu-props'
 import { useSendProjectListMB } from '@/features/project-list/components/project-list-events'
 import type { PortalTemplate } from '../../../../../types/portal-template'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
@@ -46,7 +46,7 @@ type NewProjectButtonProps = {
   className?: string
   trackingKey?: string
   showAddAffiliationWidget?: boolean
-  align?: DropdownProps['align']
+  align?: OLDropdownProps['align']
 }
 
 function NewProjectButton({
@@ -176,7 +176,7 @@ function NewProjectButton({
 
   return (
     <>
-      <Dropdown
+      <OLDropdown
         align={align}
         className={classnames('new-project-dropdown', className)}
         onSelect={handleMainButtonClick}
@@ -184,16 +184,16 @@ function NewProjectButton({
           if (nextShow) sendProjectListMB('new-project-expand', undefined)
         }}
       >
-        <DropdownToggle
+        <OLDropdownToggle
           id={id}
           className="new-project-button"
           variant="primary"
         >
           {buttonText || t('new_project')}
-        </DropdownToggle>
-        <DropdownMenu>
+        </OLDropdownToggle>
+        <OLDropdownMenu>
           <li role="none">
-            <DropdownItem
+            <OLDropdownItem
               onClick={e =>
                 handleModalMenuClick(e, {
                   modalVariant: 'blank_project',
@@ -202,10 +202,10 @@ function NewProjectButton({
               }
             >
               {t('blank_project')}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
           <li role="none">
-            <DropdownItem
+            <OLDropdownItem
               onClick={e =>
                 handleModalMenuClick(e, {
                   modalVariant: 'example_project',
@@ -214,10 +214,10 @@ function NewProjectButton({
               }
             >
               {t('example_project')}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
           <li role="none">
-            <DropdownItem
+            <OLDropdownItem
               onClick={e =>
                 handleModalMenuClick(e, {
                   modalVariant: 'upload_project',
@@ -226,11 +226,11 @@ function NewProjectButton({
               }
             >
               {t('upload_project')}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
           {docxImportEnabled && (
             <li role="none">
-              <DropdownItem
+              <OLDropdownItem
                 onClick={e =>
                   handleModalMenuClick(e, {
                     modalVariant: 'import_docx',
@@ -240,12 +240,12 @@ function NewProjectButton({
                 trailingIcon={<MaterialIcon type="fiber_new" />}
               >
                 {t('import_word_document')}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           )}
           {markdownImportEnabled && (
             <li role="none">
-              <DropdownItem
+              <OLDropdownItem
                 onClick={e =>
                   handleModalMenuClick(e, {
                     modalVariant: 'import_markdown',
@@ -255,7 +255,7 @@ function NewProjectButton({
                 trailingIcon={<MaterialIcon type="fiber_new" />}
               >
                 {t('import_markdown_file')}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           )}
           <li role="none">
@@ -272,20 +272,20 @@ function NewProjectButton({
           </li>
           {portalTemplates.length > 0 ? (
             <>
-              <DropdownDivider />
-              <DropdownHeader aria-hidden="true">
+              <OLDropdownDivider />
+              <OLDropdownHeader aria-hidden="true">
                 {`${t('institution')} ${t('templates')}`}
-              </DropdownHeader>
+              </OLDropdownHeader>
               {portalTemplates.map((portalTemplate, index) => (
                 <li role="none" key={`portal-template-${index}`}>
-                  <DropdownItem
+                  <OLDropdownItem
                     key={`portal-template-${index}`}
                     href={`${portalTemplate.url}#templates`}
                     onClick={e => handlePortalTemplateClick(e, portalTemplate)}
                     aria-label={`${portalTemplate.name} ${t('template')}`}
                   >
                     {portalTemplate.name}
-                  </DropdownItem>
+                  </OLDropdownItem>
                 </li>
               ))}
             </>
@@ -293,15 +293,15 @@ function NewProjectButton({
 
           {templateLinks && templateLinks.length > 0 && (
             <>
-              <DropdownDivider />
-              <DropdownHeader aria-hidden="true">
+              <OLDropdownDivider />
+              <OLDropdownHeader aria-hidden="true">
                 {t('templates')}
-              </DropdownHeader>
+              </OLDropdownHeader>
             </>
           )}
           {templateLinks?.map((templateLink, index) => (
             <li role="none" key={`new-project-button-template-${index}`}>
-              <DropdownItem
+              <OLDropdownItem
                 href={templateLink.url}
                 onClick={e => handleStaticTemplateClick(e, templateLink)}
                 aria-label={`${templateLink.name} ${t('template')}`}
@@ -309,19 +309,19 @@ function NewProjectButton({
                 {templateLink.name === 'view_all'
                   ? t('view_all')
                   : templateLink.name}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
           ))}
           {showAddAffiliationWidget && enableAddAffiliationWidget ? (
             <>
-              <DropdownDivider />
+              <OLDropdownDivider />
               <li className="add-affiliation-mobile-wrapper">
                 <AddAffiliation className="is-mobile" />
               </li>
             </>
           ) : null}
-        </DropdownMenu>
-      </Dropdown>
+        </OLDropdownMenu>
+      </OLDropdown>
       <NewProjectButtonModal
         modal={modal}
         onHide={() => setModal(null)}

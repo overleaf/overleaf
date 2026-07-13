@@ -7,9 +7,9 @@ import OLButton from '@/shared/components/ol/ol-button'
 import OLFormControl from '@/shared/components/ol/ol-form-control'
 import OLFormLabel from '@/shared/components/ol/ol-form-label'
 import {
-  DropdownHeader,
-  DropdownItem,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdownHeader,
+  OLDropdownItem,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import MaterialIcon from '@/shared/components/material-icon'
 
 const FUZZY_SEARCH_THRESHOLD = 0.5
@@ -289,7 +289,9 @@ function OLAutocompleteInternal({
                   )}
                   {hasGroupHeader && (
                     <li>
-                      <DropdownHeader as="span">{item.group}</DropdownHeader>
+                      <OLDropdownHeader as="span">
+                        {item.group}
+                      </OLDropdownHeader>
                     </li>
                   )}
                   <li
@@ -302,7 +304,7 @@ function OLAutocompleteInternal({
                       index: displayIndex,
                     })}
                   >
-                    <DropdownItem
+                    <OLDropdownItem
                       as="span"
                       role={undefined}
                       className={classnames({
@@ -311,7 +313,7 @@ function OLAutocompleteInternal({
                       })}
                     >
                       {item.label}
-                    </DropdownItem>
+                    </OLDropdownItem>
                   </li>
                 </Fragment>
               )
@@ -335,7 +337,7 @@ function OLAutocompleteInternal({
                 key={`${item.value}${index}`}
                 {...getItemProps({ item, index })}
               >
-                <DropdownItem
+                <OLDropdownItem
                   as="span"
                   role={undefined}
                   className={classnames({
@@ -343,7 +345,7 @@ function OLAutocompleteInternal({
                   })}
                 >
                   {item.label}
-                </DropdownItem>
+                </OLDropdownItem>
               </li>
             )
           })

@@ -12,10 +12,10 @@ import OLButton from '@/shared/components/ol/ol-button'
 import OLBadge from '@/shared/components/ol/ol-badge'
 import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import {
-  Dropdown,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import ShareProjectModalRow from '@/features/share-project-modal/components/share-project-modal-row'
 import MaterialIcon from '@/shared/components/material-icon'
 import { ProjectMember } from '@/shared/context/types/project-metadata'
@@ -41,19 +41,19 @@ export default function Invite({
         </OLBadge>
       </div>
       {isProjectOwner ? (
-        <Dropdown align="end" onSelect={() => {}}>
-          <DropdownToggle
+        <OLDropdown align="end" onSelect={() => {}}>
+          <OLDropdownToggle
             variant="ghost"
             className="d-flex align-items-center gap-2 no-default-caret"
           >
             <MemberPrivileges privileges={invite.privileges} />
             <MaterialIcon type="keyboard_arrow_down" />
-          </DropdownToggle>
-          <DropdownMenu>
+          </OLDropdownToggle>
+          <OLDropdownMenu>
             <ResendInvite invite={invite} />
             <RevokeInvite invite={invite} />
-          </DropdownMenu>
-        </Dropdown>
+          </OLDropdownMenu>
+        </OLDropdown>
       ) : (
         <div className="h5 m-0 px-4 fw-semibold">
           <div className="form-control-plaintext border-0">

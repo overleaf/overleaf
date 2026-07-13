@@ -2,11 +2,11 @@ import { FC, Fragment, memo, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { getTooltip } from '@codemirror/view'
 import {
-  Dropdown,
-  DropdownMenu,
-  DropdownItem,
-  DropdownDivider,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownMenu,
+  OLDropdownItem,
+  OLDropdownDivider,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
@@ -48,9 +48,9 @@ const EditorContextMenuContent: FC = memo(function EditorContextMenuContent() {
   }, [])
 
   return (
-    <Dropdown show onToggle={onToggle}>
+    <OLDropdown show onToggle={onToggle}>
       <div onContextMenu={event => event.preventDefault()}>
-        <DropdownMenu
+        <OLDropdownMenu
           ref={menuRef}
           show
           tabIndex={0}
@@ -67,9 +67,9 @@ const EditorContextMenuContent: FC = memo(function EditorContextMenuContent() {
         >
           {menuItems.map((menuItem, index) => (
             <Fragment key={index}>
-              {menuItem.separatorAbove && <DropdownDivider />}
+              {menuItem.separatorAbove && <OLDropdownDivider />}
               <DropdownListItem>
-                <DropdownItem
+                <OLDropdownItem
                   as="button"
                   onClick={() => menuItem.handler()}
                   disabled={menuItem.disabled}
@@ -80,14 +80,14 @@ const EditorContextMenuContent: FC = memo(function EditorContextMenuContent() {
                   }
                 >
                   {menuItem.label}
-                </DropdownItem>
+                </OLDropdownItem>
               </DropdownListItem>
             </Fragment>
           ))}
           <EditorContextMenuFeedback />
-        </DropdownMenu>
+        </OLDropdownMenu>
       </div>
-    </Dropdown>
+    </OLDropdown>
   )
 })
 

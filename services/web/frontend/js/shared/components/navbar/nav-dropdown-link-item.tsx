@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
-import { DropdownItem } from 'react-bootstrap'
-import { DropdownItemProps } from 'react-bootstrap/DropdownItem'
+import { OLDropdownItem } from '@/shared/components/ol/ol-dropdown-menu'
+import { OLDropdownItemProps } from '@/shared/components/types/dropdown-menu-props'
 
 export default function NavDropdownLinkItem({
   href,
@@ -10,7 +10,7 @@ export default function NavDropdownLinkItem({
   children,
 }: {
   href: string
-  onClick?: DropdownItemProps['onClick']
+  onClick?: OLDropdownItemProps['onClick']
   openInNewWindow?: boolean
   children: ReactNode
 }) {
@@ -19,14 +19,14 @@ export default function NavDropdownLinkItem({
     : {}
   return (
     <DropdownListItem>
-      <DropdownItem
+      <OLDropdownItem
         href={href}
         role="menuitem"
         onClick={onClick}
         {...newWindowAttrs}
       >
         {children}
-      </DropdownItem>
+      </OLDropdownItem>
     </DropdownListItem>
   )
 }

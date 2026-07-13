@@ -1,4 +1,4 @@
-import { DropdownDivider } from '@/shared/components/dropdown/dropdown-menu'
+import { OLDropdownDivider } from '@/shared/components/ol/ol-dropdown-menu'
 import { useTranslation } from 'react-i18next'
 import { useEditorPropertiesContext } from '../../context/editor-properties-context'
 import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
@@ -41,7 +41,7 @@ const ReviewModeOptions: React.FC = () => {
 
   return (
     <>
-      <DropdownDivider />
+      <OLDropdownDivider />
       <NestedMenuBarDropdown id="editing-mode-group" title={t('editing_mode')}>
         <DropdownMenuItem
           as="button"

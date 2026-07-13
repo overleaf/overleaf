@@ -1,8 +1,8 @@
 import {
-  DropdownDivider,
-  DropdownHeader,
-  DropdownItem,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdownDivider,
+  OLDropdownHeader,
+  OLDropdownItem,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import { MenuBar } from '@/shared/components/menu-bar/menu-bar'
 import { MenuBarDropdown } from '@/shared/components/menu-bar/menu-bar-dropdown'
 import { MenuBarOption } from '@/shared/components/menu-bar/menu-bar-option'
@@ -270,13 +270,13 @@ export const ToolbarMenuBar = () => {
         >
           <ChangeLayoutOptions />
           <ReviewModeOptions />
-          <DropdownDivider />
-          <DropdownHeader>{t('editor_settings')}</DropdownHeader>
+          <OLDropdownDivider />
+          <OLDropdownHeader>{t('editor_settings')}</OLDropdownHeader>
           <MenuBarOption
             eventKey="show_breadcrumbs"
             title={t('show_breadcrumbs')}
             leadingIcon={
-              breadcrumbs ? 'check' : <DropdownItem.EmptyLeadingIcon />
+              breadcrumbs ? 'check' : <OLDropdownItem.EmptyLeadingIcon />
             }
             onClick={toggleBreadcrumbs}
           />
@@ -285,7 +285,7 @@ export const ToolbarMenuBar = () => {
               eventKey="show_editor_tabs"
               title={t('show_editor_tabs')}
               leadingIcon={
-                editorTabs ? 'check' : <DropdownItem.EmptyLeadingIcon />
+                editorTabs ? 'check' : <OLDropdownItem.EmptyLeadingIcon />
               }
               onClick={toggleEditorTabs}
             />
@@ -294,7 +294,7 @@ export const ToolbarMenuBar = () => {
             eventKey="show_equation_preview"
             title={t('show_equation_preview')}
             leadingIcon={
-              mathPreview ? 'check' : <DropdownItem.EmptyLeadingIcon />
+              mathPreview ? 'check' : <OLDropdownItem.EmptyLeadingIcon />
             }
             onClick={toggleMathPreview}
           />
@@ -329,7 +329,7 @@ export const ToolbarMenuBar = () => {
           )}
           {showSupport && (
             <>
-              <DropdownDivider />
+              <OLDropdownDivider />
               <MenuBarOption
                 eventKey="contact_us"
                 title={t('contact_us')}

@@ -2,11 +2,11 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { FC, memo, forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownItem,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import classnames from 'classnames'
 
 const ReviewPanelCommentDropdownToggleButton = forwardRef<
@@ -32,8 +32,8 @@ const ReviewPanelCommentOptions: FC<{
   }
 
   return (
-    <Dropdown align="end">
-      <DropdownToggle
+    <OLDropdown align="end">
+      <OLDropdownToggle
         tabIndex={0}
         as={ReviewPanelCommentDropdownToggleButton}
         id={`review-panel-comment-options-btn-${id}`}
@@ -43,24 +43,24 @@ const ReviewPanelCommentOptions: FC<{
           className="review-panel-entry-actions-icon"
           accessibilityLabel={t('more_options')}
         />
-      </DropdownToggle>
-      <DropdownMenu flip={false}>
+      </OLDropdownToggle>
+      <OLDropdownMenu flip={false}>
         {canEdit && (
           <li role="none">
-            <DropdownItem as="button" onClick={onEdit}>
+            <OLDropdownItem as="button" onClick={onEdit}>
               {t('edit')}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
         )}
         {canDelete && (
           <li role="none">
-            <DropdownItem as="button" onClick={onDelete}>
+            <OLDropdownItem as="button" onClick={onDelete}>
               {t('delete')}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
         )}
-      </DropdownMenu>
-    </Dropdown>
+      </OLDropdownMenu>
+    </OLDropdown>
   )
 }
 

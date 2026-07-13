@@ -1,11 +1,11 @@
 import { OnlineUser } from '@/features/ide-react/context/online-users-context'
 import {
-  Dropdown,
-  DropdownHeader,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownHeader,
+  OLDropdownItem,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import {
   getBackgroundColorForUserId,
@@ -116,8 +116,8 @@ const OnlineUserOverflow = ({
 }) => {
   const { t } = useTranslation()
   return (
-    <Dropdown align="end">
-      <DropdownToggle className="online-users-row-button online-user-overflow-toggle">
+    <OLDropdown align="end">
+      <OLDropdownToggle className="online-users-row-button online-user-overflow-toggle">
         <OLTooltip
           id="connected-users"
           description={t('n_more_collaborators', { count: users.length })}
@@ -125,23 +125,23 @@ const OnlineUserOverflow = ({
         >
           <span className="online-user-circle">+{users.length}</span>
         </OLTooltip>
-      </DropdownToggle>
-      <DropdownMenu className="online-user-overflow-dropdown">
-        <DropdownHeader aria-hidden="true">
+      </OLDropdownToggle>
+      <OLDropdownMenu className="online-user-overflow-dropdown">
+        <OLDropdownHeader aria-hidden="true">
           {t('connected_users')}
-        </DropdownHeader>
+        </OLDropdownHeader>
         {users.map((user, index) => (
           <li role="none" key={`${user.user_id}_${index}`}>
-            <DropdownItem
+            <OLDropdownItem
               as="button"
               tabIndex={-1}
               onClick={() => goToUser(user)}
             >
               <OnlineUserCircle user={user} /> {user.name}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
         ))}
-      </DropdownMenu>
-    </Dropdown>
+      </OLDropdownMenu>
+    </OLDropdown>
   )
 }

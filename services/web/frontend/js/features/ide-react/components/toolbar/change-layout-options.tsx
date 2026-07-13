@@ -1,8 +1,8 @@
 import {
-  DropdownItem,
-  DropdownHeader,
-  DropdownDivider,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdownItem,
+  OLDropdownHeader,
+  OLDropdownDivider,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import {
   IdeLayout,
   IdeView,
@@ -81,7 +81,7 @@ const LayoutDropdownItem = ({
   }
 
   return (
-    <DropdownItem
+    <OLDropdownItem
       active={active}
       aria-current={active}
       disabled={disabled}
@@ -91,7 +91,7 @@ const LayoutDropdownItem = ({
       className={classNames({ 'dropdown-item-wide': isMac })}
     >
       {children}
-    </DropdownItem>
+    </OLDropdownItem>
   )
 }
 
@@ -139,7 +139,7 @@ export default function ChangeLayoutOptions() {
 
   return (
     <>
-      <DropdownHeader>{t('layout_options')}</DropdownHeader>
+      <OLDropdownHeader>{t('layout_options')}</OLDropdownHeader>
       <LayoutDropdownItem
         onClick={() => handleChangeLayout('sideBySide')}
         active={activeLayoutOption === 'sideBySide'}
@@ -184,7 +184,7 @@ export default function ChangeLayoutOptions() {
       </LayoutDropdownItem>
       {focusModeEnabled && (
         <>
-          <DropdownDivider />
+          <OLDropdownDivider />
           <LayoutDropdownItem
             onClick={() => {
               setFocusMode(!focusMode)

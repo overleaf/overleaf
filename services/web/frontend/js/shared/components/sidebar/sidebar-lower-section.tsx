@@ -1,7 +1,11 @@
 import { type Ref, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Question, User } from '@phosphor-icons/react'
-import { Dropdown } from 'react-bootstrap'
+import {
+  OLDropdown,
+  OLDropdownToggle,
+  OLDropdownMenu,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import getMeta from '@/utils/meta'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { NavDropdownMenuItems } from '@/shared/components/navbar/nav-dropdown-from-data'
@@ -42,8 +46,9 @@ export function SidebarLowerSection({
         aria-label={t('account_help')}
       >
         {helpItem && (
-          <Dropdown
+          <OLDropdown
             className="ds-nav-icon-dropdown"
+            align="end"
             onToggle={show => {
               setShowHelpDropdown(show)
               if (show) {
@@ -52,7 +57,7 @@ export function SidebarLowerSection({
             }}
             role="menu"
           >
-            <Dropdown.Toggle role="menuitem" aria-label={t('help')}>
+            <OLDropdownToggle role="menuitem" aria-label={t('help')}>
               <OLTooltip
                 description={t('help')}
                 id="help-icon"
@@ -65,11 +70,8 @@ export function SidebarLowerSection({
                   <Question size={24} />
                 </div>
               </OLTooltip>
-            </Dropdown.Toggle>
-            <Dropdown.Menu
-              as="ul"
-              role="menu"
-              align="end"
+            </OLDropdownToggle>
+            <OLDropdownMenu
               popperConfig={{
                 modifiers: [{ name: 'offset', options: { offset: [0, 5] } }],
               }}
@@ -79,12 +81,13 @@ export function SidebarLowerSection({
                 showContactUsModal={showContactUsModal}
                 location="sidebar"
               />
-            </Dropdown.Menu>
-          </Dropdown>
+            </OLDropdownMenu>
+          </OLDropdown>
         )}
         {sessionUser && (
-          <Dropdown
+          <OLDropdown
             className="ds-nav-icon-dropdown"
+            align="end"
             onToggle={show => {
               setShowAccountDropdown(show)
               if (show) {
@@ -97,7 +100,7 @@ export function SidebarLowerSection({
             }}
             role="menu"
           >
-            <Dropdown.Toggle role="menuitem" aria-label={t('Account')}>
+            <OLDropdownToggle role="menuitem" aria-label={t('Account')}>
               <OLTooltip
                 description={t('Account')}
                 id="open-account"
@@ -110,11 +113,8 @@ export function SidebarLowerSection({
                   <User size={24} />
                 </div>
               </OLTooltip>
-            </Dropdown.Toggle>
-            <Dropdown.Menu
-              as="ul"
-              role="menu"
-              align="end"
+            </OLDropdownToggle>
+            <OLDropdownMenu
               popperConfig={{
                 modifiers: [{ name: 'offset', options: { offset: [-50, 5] } }],
               }}
@@ -124,8 +124,8 @@ export function SidebarLowerSection({
                 showSubscriptionLink={showSubscriptionLink}
                 showThemeToggle={showThemeToggle}
               />
-            </Dropdown.Menu>
-          </Dropdown>
+            </OLDropdownMenu>
+          </OLDropdown>
         )}
       </nav>
       <div className="ds-nav-ds-name" translate="no">

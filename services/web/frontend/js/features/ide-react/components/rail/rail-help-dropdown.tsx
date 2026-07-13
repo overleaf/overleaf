@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next'
 import { useRailContext } from '@/features/ide-react/context/rail-context'
 import { useCallback } from 'react'
 import {
-  DropdownDivider,
-  DropdownItem,
-  DropdownMenu,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdownDivider,
+  OLDropdownItem,
+  OLDropdownMenu,
+} from '@/shared/components/ol/ol-dropdown-menu'
 
 export default function RailHelpDropdown() {
   const showSupport = getMeta('ol-showSupport')
@@ -21,28 +21,28 @@ export default function RailHelpDropdown() {
   }, [setActiveModal])
 
   return (
-    <DropdownMenu>
-      <DropdownItem onClick={openKeyboardShortcutsModal}>
+    <OLDropdownMenu>
+      <OLDropdownItem onClick={openKeyboardShortcutsModal}>
         {t('keyboard_shortcuts')}
-      </DropdownItem>
+      </OLDropdownItem>
       {showDocumentation && (
-        <DropdownItem
+        <OLDropdownItem
           href="/learn"
           role="menuitem"
           target="_blank"
           rel="noopener noreferrer"
         >
           {t('documentation')}
-        </DropdownItem>
+        </OLDropdownItem>
       )}
       {showSupport && (
         <>
-          <DropdownDivider />
-          <DropdownItem onClick={openContactUsModal}>
+          <OLDropdownDivider />
+          <OLDropdownItem onClick={openContactUsModal}>
             {t('contact_us')}
-          </DropdownItem>
+          </OLDropdownItem>
         </>
       )}
-    </DropdownMenu>
+    </OLDropdownMenu>
   )
 }

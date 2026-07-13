@@ -8,28 +8,28 @@ import React, {
   useState,
 } from 'react'
 import {
-  Dropdown as BS5Dropdown,
-  DropdownToggle as BS5DropdownToggle,
-  DropdownMenu as BS5DropdownMenu,
-  DropdownItem as BS5DropdownItem,
-  DropdownDivider as BS5DropdownDivider,
-  DropdownHeader as BS5DropdownHeader,
-  Button as BS5Button,
+  Dropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+  DropdownDivider,
+  DropdownHeader,
+  Button,
 } from 'react-bootstrap'
 import type {
-  DropdownProps,
-  DropdownItemProps,
-  DropdownToggleProps,
-  DropdownMenuProps,
-  DropdownDividerProps,
-  DropdownHeaderProps,
+  OLDropdownProps,
+  OLDropdownItemProps,
+  OLDropdownToggleProps,
+  OLDropdownMenuProps,
+  OLDropdownDividerProps,
+  OLDropdownHeaderProps,
 } from '@/shared/components/types/dropdown-menu-props'
 import MaterialIcon from '@/shared/components/material-icon'
 import { fixedForwardRef } from '@/utils/react'
 import classnames from 'classnames'
 
-// Lets DropdownToggle register its presence with the parent Dropdown so that
-// DropdownMenu can know whether a toggle exists (and therefore whether Popper
+// Lets OLDropdownToggle register its presence with the parent OLDropdown so that
+// OLDropdownMenu can know whether a toggle exists (and therefore whether Popper
 // will run to position the menu).
 type DropdownInternalContextValue = {
   registerToggle: () => () => void
@@ -38,7 +38,7 @@ type DropdownInternalContextValue = {
 const DropdownInternalContext =
   createContext<DropdownInternalContextValue | null>(null)
 
-export function Dropdown({ children, ...props }: DropdownProps) {
+export function OLDropdown({ children, ...props }: OLDropdownProps) {
   const [toggleCount, setToggleCount] = useState(0)
 
   const registerToggle = useCallback(() => {
@@ -53,12 +53,12 @@ export function Dropdown({ children, ...props }: DropdownProps) {
 
   return (
     <DropdownInternalContext.Provider value={value}>
-      <BS5Dropdown {...props}>{children}</BS5Dropdown>
+      <Dropdown {...props}>{children}</Dropdown>
     </DropdownInternalContext.Provider>
   )
 }
 
-function DropdownItem(
+function OLDropdownItem(
   {
     active,
     children,
@@ -67,8 +67,8 @@ function DropdownItem(
     leadingIcon,
     trailingIcon,
     ...props
-  }: DropdownItemProps,
-  ref: React.ForwardedRef<typeof BS5DropdownItem>
+  }: OLDropdownItemProps,
+  ref: React.ForwardedRef<typeof DropdownItem>
 ) {
   let leadingIconComponent = null
   if (leadingIcon) {
@@ -109,7 +109,7 @@ function DropdownItem(
   }
 
   return (
-    <BS5DropdownItem
+    <DropdownItem
       active={active}
       className={className}
       role="menuitem"
@@ -126,7 +126,7 @@ function DropdownItem(
         children
       )}
       {trailingIconComponent}
-    </BS5DropdownItem>
+    </DropdownItem>
   )
 }
 
@@ -134,47 +134,47 @@ function EmptyLeadingIcon() {
   return <span className="dropdown-item-leading-icon-empty" />
 }
 
-const ForwardReferredDropdownItem = fixedForwardRef(DropdownItem, {
+const ForwardReferredOLDropdownItem = fixedForwardRef(OLDropdownItem, {
   EmptyLeadingIcon,
 })
 
-export { ForwardReferredDropdownItem as DropdownItem }
+export { ForwardReferredOLDropdownItem as OLDropdownItem }
 
-export const DropdownToggleCustom = forwardRef<
+export const OLDropdownToggleCustom = forwardRef<
   HTMLButtonElement,
-  React.ComponentProps<typeof BS5Button>
+  React.ComponentProps<typeof Button>
 >(({ children, className, ...props }, ref) => (
-  <BS5Button
+  <Button
     ref={ref}
     className={classnames('custom-toggle', className)}
     {...props}
   >
     {children}
     <MaterialIcon type="expand_more" />
-  </BS5Button>
+  </Button>
 ))
-DropdownToggleCustom.displayName = 'DropdownToggleCustom'
+OLDropdownToggleCustom.displayName = 'OLDropdownToggleCustom'
 
-export const DropdownToggle = forwardRef<
-  typeof BS5DropdownToggle,
-  DropdownToggleProps
+export const OLDropdownToggle = forwardRef<
+  typeof DropdownToggle,
+  OLDropdownToggleProps
 >((props, ref) => {
   const registerToggle = useContext(DropdownInternalContext)?.registerToggle
 
   useLayoutEffect(() => registerToggle?.(), [registerToggle])
 
-  return <BS5DropdownToggle {...props} ref={ref} />
+  return <DropdownToggle {...props} ref={ref} />
 })
-DropdownToggle.displayName = 'DropdownToggle'
+OLDropdownToggle.displayName = 'OLDropdownToggle'
 
-export const DropdownMenu = forwardRef<
-  typeof BS5DropdownMenu,
-  DropdownMenuProps
+export const OLDropdownMenu = forwardRef<
+  typeof DropdownMenu,
+  OLDropdownMenuProps
 >(({ as = 'ul', className, ...props }, ref) => {
   const context = useContext(DropdownInternalContext)
 
   return (
-    <BS5DropdownMenu
+    <DropdownMenu
       as={as}
       role="menu"
       className={classnames(className, {
@@ -185,12 +185,18 @@ export const DropdownMenu = forwardRef<
     />
   )
 })
-DropdownMenu.displayName = 'DropdownMenu'
+OLDropdownMenu.displayName = 'OLDropdownMenu'
 
-export function DropdownDivider({ as = 'li', ...props }: DropdownDividerProps) {
-  return <BS5DropdownDivider as={as} {...props} />
+export function OLDropdownDivider({
+  as = 'li',
+  ...props
+}: OLDropdownDividerProps) {
+  return <DropdownDivider as={as} {...props} />
 }
 
-export function DropdownHeader({ as = 'li', ...props }: DropdownHeaderProps) {
-  return <BS5DropdownHeader as={as} {...props} />
+export function OLDropdownHeader({
+  as = 'li',
+  ...props
+}: OLDropdownHeaderProps) {
+  return <DropdownHeader as={as} {...props} />
 }

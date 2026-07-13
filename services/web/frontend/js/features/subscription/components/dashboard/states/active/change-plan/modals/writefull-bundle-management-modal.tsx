@@ -10,7 +10,11 @@ import {
 } from '@/shared/components/ol/ol-modal'
 import OLButton from '@/shared/components/ol/ol-button'
 import sparkle from '@/shared/svgs/sparkle.svg'
-import { Dropdown, DropdownMenu, DropdownToggle } from 'react-bootstrap'
+import {
+  OLDropdown,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import MaterialIcon from '@/shared/components/material-icon'
 import { ADD_ON_NAME } from '@/features/subscription/data/add-on-codes'
@@ -90,8 +94,8 @@ function WritefullGrantedAddOn({
       </div>
 
       <div className="ms-auto">
-        <Dropdown align="end">
-          <DropdownToggle
+        <OLDropdown align="end">
+          <OLDropdownToggle
             id="add-on-dropdown-toggle"
             className="add-on-options-toggle"
             variant="secondary"
@@ -100,13 +104,13 @@ function WritefullGrantedAddOn({
               type="more_vert"
               accessibilityLabel={t('more_options')}
             />
-          </DropdownToggle>
-          <DropdownMenu flip={false}>
+          </OLDropdownToggle>
+          <OLDropdownMenu flip={false}>
             <DropdownMenuItem tabIndex={-1} onClick={handleManageOnWritefull}>
               {t('manage_subscription')}
             </DropdownMenuItem>
-          </DropdownMenu>
-        </Dropdown>
+          </OLDropdownMenu>
+        </OLDropdown>
       </div>
     </div>
   )

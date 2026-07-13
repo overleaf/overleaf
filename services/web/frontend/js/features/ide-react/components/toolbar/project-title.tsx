@@ -1,9 +1,9 @@
 import {
-  Dropdown,
-  DropdownDivider,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownDivider,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useTranslation } from 'react-i18next'
@@ -59,8 +59,8 @@ export const ToolbarProjectTitle = () => {
   }
 
   return (
-    <Dropdown align="end" className="ide-redesign-toolbar-project-dropdown">
-      <DropdownToggle
+    <OLDropdown align="end" className="ide-redesign-toolbar-project-dropdown">
+      <OLDropdownToggle
         id="project-title-options"
         aria-label={t('project_title_options')}
         className="ide-redesign-toolbar-project-dropdown-toggle ide-redesign-toolbar-dropdown-toggle-subdued fw-bold ide-redesign-toolbar-button-subdued"
@@ -69,12 +69,12 @@ export const ToolbarProjectTitle = () => {
           {name}
         </span>
         <MaterialIcon type="keyboard_arrow_down" />
-      </DropdownToggle>
-      <DropdownMenu renderOnMount>
+      </OLDropdownToggle>
+      <OLDropdownMenu renderOnMount>
         {shouldDisplaySubmitButton && !cobranding && (
           <>
             <SubmitProjectButton />
-            <DropdownDivider />
+            <OLDropdownDivider />
           </>
         )}
         <DownloadProjectPDF />
@@ -97,7 +97,7 @@ export const ToolbarProjectTitle = () => {
           label={t('export_as_html')}
           menuBarId="export-as-html"
         />
-        <DropdownDivider />
+        <OLDropdownDivider />
         <DuplicateProject />
         <DropdownMenuItem
           onClick={() => {
@@ -107,7 +107,7 @@ export const ToolbarProjectTitle = () => {
         >
           {t('rename')}
         </DropdownMenuItem>
-      </DropdownMenu>
-    </Dropdown>
+      </OLDropdownMenu>
+    </OLDropdown>
   )
 }

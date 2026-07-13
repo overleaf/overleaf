@@ -1,9 +1,9 @@
 import { FC, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  DropdownItem,
-  DropdownDivider,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdownItem,
+  OLDropdownDivider,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
 import SplitTestBadge from '@/shared/components/split-test-badge'
 import { sendContextMenuEvent } from '../utils/context-menu-analytics'
@@ -24,9 +24,9 @@ export const EditorContextMenuFeedback: FC = memo(
 
     return (
       <>
-        <DropdownDivider />
+        <OLDropdownDivider />
         <DropdownListItem>
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             onClick={handleClick}
             leadingIcon={
@@ -37,7 +37,7 @@ export const EditorContextMenuFeedback: FC = memo(
             }
           >
             {t('give_feedback')}
-          </DropdownItem>
+          </OLDropdownItem>
         </DropdownListItem>
       </>
     )

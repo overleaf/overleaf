@@ -1,15 +1,15 @@
 import {
-  Dropdown,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import { FC, forwardRef, useCallback } from 'react'
 import classNames from 'classnames'
 import { useNestableDropdown } from '@/shared/hooks/use-nestable-dropdown'
 import { NestableDropdownContextProvider } from '@/shared/context/nestable-dropdown-context'
 import { AnchorProps } from 'react-bootstrap'
 import MaterialIcon from '../material-icon'
-import { DropdownMenuProps } from '@/shared/components/types/dropdown-menu-props'
+import { OLDropdownMenuProps } from '@/shared/components/types/dropdown-menu-props'
 
 type MenuBarDropdownProps = {
   title: string
@@ -41,33 +41,33 @@ export const MenuBarDropdown: FC<
 
   const active = selected === id
   return (
-    <Dropdown show={active} align={align} onToggle={onToggle} autoClose>
-      <DropdownToggle
+    <OLDropdown show={active} align={align} onToggle={onToggle} autoClose>
+      <OLDropdownToggle
         id={`${menuId}-${id}`}
         variant="secondary"
         className={classNames(className, 'menu-bar-toggle')}
         onMouseEnter={onHover}
       >
         {title}
-      </DropdownToggle>
+      </OLDropdownToggle>
       {active && (
         <NestableDropdownMenu renderOnMount id={`${menuId}-${id}`}>
           {children}
         </NestableDropdownMenu>
       )}
-    </Dropdown>
+    </OLDropdown>
   )
 }
 
 const NestableDropdownMenu: FC<
-  React.PropsWithChildren<DropdownMenuProps & { id: string }>
+  React.PropsWithChildren<OLDropdownMenuProps & { id: string }>
 > = ({ children, id, ...props }) => {
   return (
-    <DropdownMenu {...props}>
+    <OLDropdownMenu {...props}>
       <NestableDropdownContextProvider id={id}>
         {children}
       </NestableDropdownContextProvider>
-    </DropdownMenu>
+    </OLDropdownMenu>
   )
 }
 
@@ -118,7 +118,7 @@ export const NestedMenuBarDropdown: FC<
   )
   const active = selected === id
   return (
-    <Dropdown
+    <OLDropdown
       align="start"
       drop="end"
       show={active}
@@ -127,19 +127,19 @@ export const NestedMenuBarDropdown: FC<
       as="li"
       role="none"
     >
-      <DropdownToggle
+      <OLDropdownToggle
         id={`${menuId}-${id}`}
         onMouseEnter={select}
         className={classNames({ 'nested-dropdown-toggle-shown': active })}
         as={NestedDropdownToggle}
       >
         {title}
-      </DropdownToggle>
+      </OLDropdownToggle>
       {active && (
         <NestableDropdownMenu renderOnMount id={`${menuId}-${id}`}>
           {children}
         </NestableDropdownMenu>
       )}
-    </Dropdown>
+    </OLDropdown>
   )
 }

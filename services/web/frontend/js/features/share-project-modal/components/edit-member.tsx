@@ -17,10 +17,10 @@ import { useUserContext } from '@/shared/context/user-context'
 import { upgradePlan } from '@/main/account-upgrade'
 import ShareProjectModalRow from '@/features/share-project-modal/components/share-project-modal-row'
 import {
-  Dropdown,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import DropdownMenuItem from '@/shared/components/dropdown/dropdown-menu-item'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import classnames from 'classnames'
@@ -247,7 +247,7 @@ export default function EditMember({
         </div>
       </div>
       <div className="text-end">
-        <Dropdown
+        <OLDropdown
           align="end"
           onSelect={(eventKey: PermissionsOption) => {
             if (eventKey) {
@@ -259,15 +259,15 @@ export default function EditMember({
             {hasBeenDowngraded && !confirmRemoval && (
               <MaterialIcon type="warning" unfilled className="text-warning" />
             )}
-            <DropdownToggle
+            <OLDropdownToggle
               variant="ghost"
               className="d-flex align-items-center gap-2 no-default-caret"
             >
               {getDropdownLabel()}
               <MaterialIcon type="keyboard_arrow_down" />
-            </DropdownToggle>
+            </OLDropdownToggle>
           </div>
-          <DropdownMenu>
+          <OLDropdownMenu>
             <DropdownMenuItem
               as="button"
               eventKey="owner"
@@ -320,8 +320,8 @@ export default function EditMember({
             >
               {t('remove_access')}
             </DropdownMenuItem>
-          </DropdownMenu>
-        </Dropdown>
+          </OLDropdownMenu>
+        </OLDropdown>
         {confirmRemoval && (
           <form
             onSubmit={e => {

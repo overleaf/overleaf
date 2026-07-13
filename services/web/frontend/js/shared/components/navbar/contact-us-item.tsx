@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { DropdownItem } from 'react-bootstrap'
+import { OLDropdownItem } from '@/shared/components/ol/ol-dropdown-menu'
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
 import {
   type ExtraSegmentations,
@@ -18,7 +18,7 @@ export default function ContactUsItem({
 
   return (
     <DropdownListItem>
-      <DropdownItem
+      <OLDropdownItem
         as="button"
         role="menuitem"
         onClick={() => {
@@ -27,7 +27,7 @@ export default function ContactUsItem({
         }}
       >
         {t('contact_us')}
-      </DropdownItem>
+      </OLDropdownItem>
     </DropdownListItem>
   )
 }

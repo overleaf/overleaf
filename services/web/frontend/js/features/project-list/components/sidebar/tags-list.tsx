@@ -8,11 +8,11 @@ import {
 import useTag from '../../hooks/use-tag'
 import { getTagColor } from '../../util/tag'
 import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownItem,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 
 export default function TagsList() {
   const { t } = useTranslation()
@@ -77,31 +77,31 @@ export default function TagsList() {
               </span>
             </button>
 
-            <Dropdown align="end" className="tag-menu">
-              <DropdownToggle
+            <OLDropdown align="end" className="tag-menu">
+              <OLDropdownToggle
                 aria-label={t('open_action_menu', { name: tag.name })}
                 id={`${tag._id}-dropdown-toggle`}
                 data-testid="tag-dropdown-toggle"
               >
                 <DotsThreeVertical weight="bold" />
-              </DropdownToggle>
-              <DropdownMenu className="dropdown-menu-sm-width">
-                <DropdownItem
+              </OLDropdownToggle>
+              <OLDropdownMenu className="dropdown-menu-sm-width">
+                <OLDropdownItem
                   as="li"
                   className="tag-action"
                   onClick={e => handleEditTag(e, tag._id)}
                 >
                   {t('edit')}
-                </DropdownItem>
-                <DropdownItem
+                </OLDropdownItem>
+                <OLDropdownItem
                   as="li"
                   className="tag-action"
                   onClick={e => handleDeleteTag(e, tag._id)}
                 >
                   {t('delete')}
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
+                </OLDropdownItem>
+              </OLDropdownMenu>
+            </OLDropdown>
           </li>
         )
       })}

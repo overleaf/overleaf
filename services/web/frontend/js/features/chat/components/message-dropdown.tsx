@@ -1,9 +1,9 @@
 import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownItem,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
@@ -32,11 +32,11 @@ export default function MessageDropdown({ message }: { message: Message }) {
   }, [message.id, startedEditingMessage])
 
   return (
-    <Dropdown align="end" className="message-dropdown float-end">
-      <DropdownToggle bsPrefix="message-dropdown-menu-btn">
+    <OLDropdown align="end" className="message-dropdown float-end">
+      <OLDropdownToggle bsPrefix="message-dropdown-menu-btn">
         <MaterialIcon type="more_vert" accessibilityLabel={t('actions')} />
-      </DropdownToggle>
-      <DropdownMenu
+      </OLDropdownToggle>
+      <OLDropdownMenu
         className="message-dropdown-menu"
         // Make the dropdown appear overlap with the button slightly so that the
         // menu stays visible when the user moves their cursor into the menu
@@ -46,14 +46,14 @@ export default function MessageDropdown({ message }: { message: Message }) {
         }}
       >
         <DropdownListItem>
-          <DropdownItem as="button" onClick={editButtonHandler}>
+          <OLDropdownItem as="button" onClick={editButtonHandler}>
             {t('edit')}
-          </DropdownItem>
-          <DropdownItem as="button" onClick={deleteButtonHandler}>
+          </OLDropdownItem>
+          <OLDropdownItem as="button" onClick={deleteButtonHandler}>
             {t('delete')}
-          </DropdownItem>
+          </OLDropdownItem>
         </DropdownListItem>
-      </DropdownMenu>
-    </Dropdown>
+      </OLDropdownMenu>
+    </OLDropdown>
   )
 }

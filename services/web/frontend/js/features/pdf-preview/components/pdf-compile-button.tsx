@@ -6,14 +6,14 @@ import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-err
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import {
-  DropdownToggleCustom,
-  Dropdown,
-  DropdownDivider,
-  DropdownHeader,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdownToggleCustom,
+  OLDropdown,
+  OLDropdownDivider,
+  OLDropdownHeader,
+  OLDropdownItem,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import OLButton from '@/shared/components/ol/ol-button'
 import OLButtonGroup from '@/shared/components/ol/ol-button-group'
 import { useLayoutContext } from '@/shared/context/layout-context'
@@ -132,7 +132,7 @@ function PdfCompileButton() {
   )
 
   return (
-    <Dropdown as={OLButtonGroup} className="compile-button-group">
+    <OLDropdown as={OLButtonGroup} className="compile-button-group">
       <OLTooltip
         description={tooltipElement}
         id="compile"
@@ -154,8 +154,8 @@ function PdfCompileButton() {
         </OLButton>
       </OLTooltip>
 
-      <DropdownToggle
-        as={DropdownToggleCustom}
+      <OLDropdownToggle
+        as={OLDropdownToggleCustom}
         split
         variant="primary"
         id="pdf-recompile-dropdown"
@@ -164,10 +164,10 @@ function PdfCompileButton() {
         className={dropdownToggleClassName}
       />
 
-      <DropdownMenu>
-        <DropdownHeader>{t('auto_compile')}</DropdownHeader>
+      <OLDropdownMenu>
+        <OLDropdownHeader>{t('auto_compile')}</OLDropdownHeader>
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             onClick={() =>
               sendEventAndSet(true, setAutoCompile, 'auto-compile')
@@ -175,10 +175,10 @@ function PdfCompileButton() {
             trailingIcon={autoCompile ? 'check' : null}
           >
             {t('on')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             onClick={() =>
               sendEventAndSet(false, setAutoCompile, 'auto-compile')
@@ -186,44 +186,44 @@ function PdfCompileButton() {
             trailingIcon={!autoCompile ? 'check' : null}
           >
             {t('off')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
-        <DropdownDivider />
-        <DropdownHeader>{t('compile_mode')}</DropdownHeader>
+        <OLDropdownDivider />
+        <OLDropdownHeader>{t('compile_mode')}</OLDropdownHeader>
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             onClick={() => setCompileMode('normal')}
             trailingIcon={!draft && !png2pdf ? 'check' : null}
           >
             {t('normal')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
         {png2pdfEnabled && (
           <li role="none">
-            <DropdownItem
+            <OLDropdownItem
               as="button"
               onClick={() => setCompileMode('png2pdf')}
               trailingIcon={png2pdf ? 'check' : null}
             >
               {t('fast')}&nbsp;
               <span className="subdued">[optimize images]</span>
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
         )}
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             onClick={() => setCompileMode('draft')}
             trailingIcon={draft ? 'check' : null}
           >
             {t('fast')}&nbsp;<span className="subdued">[draft]</span>
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
-        <DropdownDivider />
-        <DropdownHeader>{t('syntax_checks')}</DropdownHeader>
+        <OLDropdownDivider />
+        <OLDropdownHeader>{t('syntax_checks')}</OLDropdownHeader>
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             onClick={() =>
               sendEventAndSet(true, setStopOnValidationError, 'syntax-check')
@@ -231,10 +231,10 @@ function PdfCompileButton() {
             trailingIcon={stopOnValidationError ? 'check' : null}
           >
             {t('stop_on_validation_error')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             onClick={() =>
               sendEventAndSet(false, setStopOnValidationError, 'syntax-check')
@@ -242,51 +242,51 @@ function PdfCompileButton() {
             trailingIcon={!stopOnValidationError ? 'check' : null}
           >
             {t('ignore_validation_errors')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
-        <DropdownDivider />
-        <DropdownHeader>{t('compile_error_handling')}</DropdownHeader>
+        <OLDropdownDivider />
+        <OLDropdownHeader>{t('compile_error_handling')}</OLDropdownHeader>
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             onClick={enableStopOnFirstError}
             trailingIcon={stopOnFirstError ? 'check' : null}
           >
             {t('stop_on_first_error')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             onClick={disableStopOnFirstError}
             trailingIcon={!stopOnFirstError ? 'check' : null}
           >
             {t('try_to_compile_despite_errors')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
-        <DropdownDivider />
+        <OLDropdownDivider />
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             onClick={() => stopCompile()}
             disabled={!compiling}
             aria-disabled={!compiling}
           >
             {t('stop_compile')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             as="button"
             onClick={fromScratchWithEvent}
             disabled={compiling}
             aria-disabled={compiling}
           >
             {t('recompile_from_scratch')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
-      </DropdownMenu>
-    </Dropdown>
+      </OLDropdownMenu>
+    </OLDropdown>
   )
 }
 

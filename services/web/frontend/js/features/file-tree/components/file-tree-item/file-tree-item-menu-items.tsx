@@ -4,9 +4,9 @@ import * as eventTracking from '../../../../infrastructure/event-tracking'
 import { useProjectContext } from '@/shared/context/project-context'
 
 import {
-  DropdownDivider,
-  DropdownItem,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdownDivider,
+  OLDropdownItem,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 
 function FileTreeItemMenuItems() {
@@ -51,55 +51,57 @@ function FileTreeItemMenuItems() {
     <>
       {canRename ? (
         <li role="none">
-          <DropdownItem onClick={startRenaming}>{t('rename')}</DropdownItem>
+          <OLDropdownItem onClick={startRenaming}>{t('rename')}</OLDropdownItem>
         </li>
       ) : null}
       {downloadPath ? (
         <li role="none">
-          <DropdownItem
+          <OLDropdownItem
             href={downloadPath}
             onClick={downloadWithAnalytics}
             download={selectedFileName ?? undefined}
           >
             {t('download')}
-          </DropdownItem>
+          </OLDropdownItem>
         </li>
       ) : null}
       {canSetRootDocId ? (
         <>
-          <DropdownDivider />
+          <OLDropdownDivider />
           <li role="none">
-            <DropdownItem onClick={setRootDocId}>
+            <OLDropdownItem onClick={setRootDocId}>
               {t('set_as_main_document')}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
         </>
       ) : null}
       {canDelete ? (
         <>
-          <DropdownDivider />
+          <OLDropdownDivider />
           <li role="none">
-            <DropdownItem onClick={startDeleting}>{t('delete')}</DropdownItem>
+            <OLDropdownItem onClick={startDeleting}>
+              {t('delete')}
+            </OLDropdownItem>
           </li>
         </>
       ) : null}
       {canCreate ? (
         <>
-          <DropdownDivider />
+          <OLDropdownDivider />
           <li role="none">
-            <DropdownItem onClick={createWithAnalytics}>
+            <OLDropdownItem onClick={createWithAnalytics}>
               {t('new_file')}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
           <li role="none">
-            <DropdownItem onClick={startCreatingFolder}>
+            <OLDropdownItem onClick={startCreatingFolder}>
               {t('new_folder')}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
           <li role="none">
-            <DropdownItem onClick={uploadWithAnalytics}>
+            <OLDropdownItem onClick={uploadWithAnalytics}>
               {t('upload')}
-            </DropdownItem>
+            </OLDropdownItem>
           </li>
         </>
       ) : null}

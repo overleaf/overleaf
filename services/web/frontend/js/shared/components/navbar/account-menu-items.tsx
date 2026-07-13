@@ -1,4 +1,4 @@
-import { Dropdown } from 'react-bootstrap'
+import { OLDropdownItem } from '@/shared/components/ol/ol-dropdown-menu'
 import { useTranslation } from 'react-i18next'
 import getMeta from '@/utils/meta'
 import type { NavbarSessionUser } from '@/shared/components/types/navbar'
@@ -25,9 +25,9 @@ export function AccountMenuItems({
 
   return (
     <>
-      <Dropdown.Item as="li" disabled role="menuitem">
+      <OLDropdownItem as="li" disabled role="menuitem">
         {sessionUser.email}
-      </Dropdown.Item>
+      </OLDropdownItem>
       <NavDropdownDivider />
       <NavDropdownLinkItem href="/user/settings">
         {t('account_settings')}
@@ -51,7 +51,7 @@ export function AccountMenuItems({
           // inside the form, screen readers will not count it in the total
           // number of menu items
         }
-        <Dropdown.Item
+        <OLDropdownItem
           as="button"
           type="submit"
           form={logOutFormId}
@@ -60,7 +60,7 @@ export function AccountMenuItems({
         >
           <span>{t('log_out')}</span>
           {dsNavStyle && <SignOut size={16} />}
-        </Dropdown.Item>
+        </OLDropdownItem>
         <form id={logOutFormId} method="POST" action="/logout">
           <input type="hidden" name="_csrf" value={getMeta('ol-csrfToken')} />
         </form>

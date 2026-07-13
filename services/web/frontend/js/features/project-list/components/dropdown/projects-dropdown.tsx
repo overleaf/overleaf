@@ -6,12 +6,12 @@ import {
   useProjectListContext,
 } from '../../context/project-list-context'
 import {
-  Dropdown,
-  DropdownHeader,
-  DropdownItem,
-  DropdownMenu,
-  DropdownToggle,
-} from '@/shared/components/dropdown/dropdown-menu'
+  OLDropdown,
+  OLDropdownHeader,
+  OLDropdownItem,
+  OLDropdownMenu,
+  OLDropdownToggle,
+} from '@/shared/components/ol/ol-dropdown-menu'
 import MaterialIcon from '@/shared/components/material-icon'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import ProjectsFilterMenu from '../projects-filter-menu'
@@ -34,7 +34,7 @@ export function Item({ filter, text, onClick }: ItemProps) {
   return (
     <ProjectsFilterMenu filter={filter}>
       {isActive => (
-        <DropdownItem
+        <OLDropdownItem
           as="button"
           tabIndex={-1}
           onClick={handleClick}
@@ -42,7 +42,7 @@ export function Item({ filter, text, onClick }: ItemProps) {
           active={isActive}
         >
           {text}
-        </DropdownItem>
+        </OLDropdownItem>
       )}
     </ProjectsFilterMenu>
   )
@@ -95,13 +95,15 @@ function ProjectsDropdown() {
       <li role="none">
         <Item filter="trashed" text={t('trashed_projects')} />
       </li>
-      <DropdownHeader className="text-uppercase">{t('tags')}:</DropdownHeader>
+      <OLDropdownHeader className="text-uppercase">
+        {t('tags')}:
+      </OLDropdownHeader>
       <TagsList />
     </>
   )
 
   return (
-    <Dropdown
+    <OLDropdown
       onToggle={
         isLibraryEnabled
           ? show => {
@@ -112,7 +114,7 @@ function ProjectsDropdown() {
           : undefined
       }
     >
-      <DropdownToggle
+      <OLDropdownToggle
         id="projects-types-dropdown-toggle-btn"
         className="ps-0 mb-0 btn-transparent h3"
         size="lg"
@@ -121,13 +123,13 @@ function ProjectsDropdown() {
         <span className="text-truncate" aria-hidden>
           {title}
         </span>
-      </DropdownToggle>
-      <DropdownMenu flip={false}>
+      </OLDropdownToggle>
+      <OLDropdownMenu flip={false}>
         {!isLibraryEnabled && submenuItems}
         {isLibraryEnabled && view === 'submenu' && (
           <>
             <li role="none">
-              <DropdownItem
+              <OLDropdownItem
                 as="button"
                 tabIndex={-1}
                 leadingIcon={<MaterialIcon type="chevron_left" />}
@@ -138,7 +140,7 @@ function ProjectsDropdown() {
                 }}
               >
                 {t('projects')}
-              </DropdownItem>
+              </OLDropdownItem>
             </li>
             {submenuItems}
           </>
@@ -149,8 +151,8 @@ function ProjectsDropdown() {
             onProjectsClick={() => setView('submenu')}
           />
         )}
-      </DropdownMenu>
-    </Dropdown>
+      </OLDropdownMenu>
+    </OLDropdown>
   )
 }
 
