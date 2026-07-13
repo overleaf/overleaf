@@ -3,10 +3,16 @@ import AbstractMockApi from './AbstractMockApi.mjs'
 class MockAnalyticsApi extends AbstractMockApi {
   reset() {
     this.updates = {}
+    this.lastGraphRequest = null
+  }
+
+  getLastGraphRequest() {
+    return this.lastGraphRequest
   }
 
   applyRoutes() {
     this.app.get('/graphs/:graph', (req, res) => {
+      this.lastGraphRequest = { path: req.path, query: req.query }
       return res.json({})
     })
 
