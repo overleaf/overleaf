@@ -525,15 +525,30 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     ProjectController.projectEntitiesJson
   )
 
-  webRouter.get(
-    '/project',
-    AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimit(rateLimiters.openDashboard),
-    AsyncLocalStorage.middleware,
-    await Modules.middleware('domainCaptureTestSession'),
-    PermissionsController.useCapabilities(),
-    ProjectListController.projectListPage
+  // All project dashboard navigation states render the same page. The active
+  // navigation item is derived from the URL on the frontend.
+  const domainCaptureTestSessionMiddleware = await Modules.middleware(
+    'domainCaptureTestSession'
   )
+  for (const projectDashboardRoute of [
+    '/project',
+    '/project/owned',
+    '/project/shared',
+    '/project/archived',
+    '/project/trashed',
+    '/project/untagged',
+    '/project/tags/:tag',
+  ]) {
+    webRouter.get(
+      projectDashboardRoute,
+      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(rateLimiters.openDashboard),
+      AsyncLocalStorage.middleware,
+      domainCaptureTestSessionMiddleware,
+      PermissionsController.useCapabilities(),
+      ProjectListController.projectListPage
+    )
+  }
   webRouter.post(
     '/project/new',
     AuthenticationController.requireLogin(),

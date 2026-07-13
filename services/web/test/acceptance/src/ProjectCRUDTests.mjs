@@ -94,6 +94,26 @@ describe('Project CRUD', function () {
     })
   })
 
+  describe('dashboard navigation-state routes', function () {
+    const dashboardRoutes = [
+      '/project',
+      '/project/owned',
+      '/project/shared',
+      '/project/archived',
+      '/project/trashed',
+      '/project/untagged',
+      '/project/tags/aaaaaaaaaaaaaaaaaaaaaaaa',
+    ]
+
+    for (const route of dashboardRoutes) {
+      it(`should render the project dashboard for ${route}`, async function () {
+        const { response, body } = await this.user.doRequest('GET', route)
+        expect(response.statusCode).to.equal(200)
+        expect(body).to.include('name="ol-prefetchedProjectsBlob"')
+      })
+    }
+  })
+
   describe("when project doesn't exist", function () {
     it('should return 404', async function () {
       const { response } = await this.user.doRequest(

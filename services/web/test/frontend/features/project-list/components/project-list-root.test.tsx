@@ -881,7 +881,7 @@ describe('<ProjectListRoot />', function () {
               'project-list-page-interaction',
               {
                 action: 'rename',
-                page: '/',
+                page: '/project',
                 projectId: copyableProject.id,
                 isSmallDevice: true,
               }
@@ -1022,7 +1022,7 @@ describe('<ProjectListRoot />', function () {
               'project-list-page-interaction',
               {
                 action: 'clone',
-                page: '/',
+                page: '/project',
                 projectId: archiveableProject.id,
                 isSmallDevice: true,
               }
@@ -1187,7 +1187,7 @@ describe('<ProjectListRoot />', function () {
           'project-list-page-interaction',
           {
             action: 'clone',
-            page: '/',
+            page: '/project/shared',
             projectId: archiveableProject.id,
             isSmallDevice: true,
           }

@@ -122,3 +122,13 @@ Object.defineProperty(navigator, 'onLine', {
   configurable: true,
   get: () => true,
 })
+
+// Reset the URL after each test. Some features (e.g. the project dashboard)
+// push navigation state into the URL via history.pushState; because the jsdom
+// window is shared across the whole run, a dirty path would otherwise leak into
+// the next test's initial state and into the `page` field of analytics events.
+exports.mochaHooks = {
+  afterEach() {
+    window.history.replaceState(null, '', '/')
+  },
+}

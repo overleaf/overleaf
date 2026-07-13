@@ -25,11 +25,16 @@ import {
   Project,
   Sort,
 } from '../../../../../types/project/dashboard/api'
-import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import getMeta from '../../../utils/meta'
 import useAsync from '../../../shared/hooks/use-async'
 import { getProjects } from '../util/api'
 import sortProjects from '../util/sort-projects'
+import {
+  getInitialNavigationState,
+  getNavigationState,
+  getNavigationUrl,
+  migrateLegacyNavigationState,
+} from '../util/navigation-state'
 import {
   isArchivedOrTrashed,
   isDeletableProject,
@@ -135,14 +140,18 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     by: 'lastUpdated',
     order: 'desc',
   })
-  const [filter, setFilter] = usePersistedState<Filter>(
-    'project-list-filter',
-    'all'
+  const [initialNavigationState] = useState(getInitialNavigationState)
+  const [filter, setFilter] = useState<Filter>(
+    initialNavigationState.type === 'filter'
+      ? initialNavigationState.filter
+      : 'all'
   )
   const prevSortRef = useRef<Sort>(sort)
-  const [selectedTagId, setSelectedTagId] = usePersistedState<
-    string | undefined
-  >('project-list-selected-tag-id', undefined)
+  const [selectedTagId, setSelectedTagId] = useState<string | undefined>(
+    initialNavigationState.type === 'tag'
+      ? initialNavigationState.tag
+      : undefined
+  )
   const [showCustomPicker, setShowCustomPicker] = useState(false)
 
   const olTags = getMeta('ol-tags') || []
@@ -255,6 +264,28 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     prevSortRef.current = sort
   }, [sort])
 
+  useEffect(() => {
+    const handlePopState = () => {
+      const navigationState = getNavigationState(window.location.pathname)
+      if (navigationState.type === 'tag') {
+        setFilter('all')
+        setSelectedTagId(navigationState.tag)
+      } else {
+        setFilter(navigationState.filter)
+        setSelectedTagId(undefined)
+      }
+      setSelectedProjectIds(new Set<string>())
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  // Temporary: migrate the legacy local-storage navigation state to the URL on
+  // first load. Safe to remove around September 2026 (see navigation-state.ts).
+  useEffect(() => {
+    migrateLegacyNavigationState()
+  }, [])
+
   const showAllProjects = useCallback(() => {
     setLoadMoreCount(0)
     setHiddenProjectsCount(0)
@@ -334,6 +365,11 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       setSelectedTagId(undefined)
       const selected = false
       selectOrUnselectAllProjects(selected)
+      window.history.pushState(
+        null,
+        '',
+        getNavigationUrl({ type: 'filter', filter })
+      )
     },
     [selectOrUnselectAllProjects, setFilter, setSelectedTagId]
   )
@@ -342,6 +378,11 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     (tagId: string) => {
       setFilter('all')
       setSelectedTagId(tagId)
+      window.history.pushState(
+        null,
+        '',
+        getNavigationUrl({ type: 'tag', tag: tagId })
+      )
     },
     [setSelectedTagId, setFilter]
   )
