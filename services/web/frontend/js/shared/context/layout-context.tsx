@@ -345,7 +345,7 @@ export const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {
           !event.shiftKey &&
           !event.altKey
         ) {
-          switch (event.code) {
+          switch (event.key) {
             case 'ArrowLeft': // Editor only
               event.preventDefault()
               handleChangeLayout('flat', 'editor')

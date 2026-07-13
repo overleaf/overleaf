@@ -145,7 +145,7 @@ export const RailProvider: FC<React.PropsWithChildren> = ({ children }) => {
         if (
           (isMac ? event.metaKey : event.ctrlKey) &&
           event.shiftKey &&
-          event.code === 'KeyF'
+          event.key.toLowerCase() === 'f'
         ) {
           event.preventDefault()
           sendSearchEvent('search-open', {

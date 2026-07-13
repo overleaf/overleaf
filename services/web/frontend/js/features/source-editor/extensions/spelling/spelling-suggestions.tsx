@@ -133,7 +133,7 @@ const B5SpellingSuggestions: FC<SpellingSuggestionsInnerProps> = ({
         show={!waiting}
         tabIndex={0}
         onKeyDown={event => {
-          switch (event.code) {
+          switch (event.key) {
             case 'Escape':
             case 'Tab':
               event.preventDefault()

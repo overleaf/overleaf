@@ -144,7 +144,7 @@ const FullProjectSearchUI: FC = () => {
       if (
         (isMac ? event.metaKey : event.ctrlKey) &&
         event.shiftKey &&
-        event.code === 'KeyF'
+        event.key.toLowerCase() === 'f'
       ) {
         searchInputRef.current?.focus()
       }

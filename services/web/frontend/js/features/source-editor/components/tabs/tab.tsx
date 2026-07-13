@@ -144,7 +144,7 @@ export const Tab = memo(function Tab({
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.code === 'Enter') {
+      if (e.key === 'Enter') {
         openTab(tab.id)
       }
     },

@@ -6,7 +6,7 @@ const useCommandPaletteTriggers = (show: Dispatch<SetStateAction<boolean>>) => {
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
       const modifierKey = isMac ? event.metaKey : event.ctrlKey
-      if (modifierKey && event.code === 'KeyP') {
+      if (modifierKey && event.key.toLowerCase() === 'p') {
         event.preventDefault()
         show(prev => !prev)
       }

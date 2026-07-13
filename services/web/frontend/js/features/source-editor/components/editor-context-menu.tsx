@@ -56,7 +56,7 @@ const EditorContextMenuContent: FC = memo(function EditorContextMenuContent() {
           tabIndex={0}
           className="dropdown-menu-unpositioned"
           onKeyDown={event => {
-            switch (event.code) {
+            switch (event.key) {
               case 'Escape':
               case 'Tab':
                 event.preventDefault()
