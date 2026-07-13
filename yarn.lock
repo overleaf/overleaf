@@ -6841,12 +6841,10 @@ __metadata:
     chai-as-promised: "npm:^7.1.1"
     express: "npm:4.22.1"
     lodash: "npm:^4.18.1"
-    mocha: "npm:^11.1.0"
-    mocha-junit-reporter: "npm:^2.2.1"
-    mocha-multi-reporters: "npm:^1.5.1"
     node-fetch: "npm:^2.7.0"
     selfsigned: "npm:^5.5.0"
     typescript: "npm:^5.0.4"
+    vitest: "npm:4.1.5"
   languageName: unknown
   linkType: soft
 

@@ -1,13 +1,15 @@
-const { expect } = require('chai')
-const fs = require('node:fs')
-const events = require('node:events')
-const { FetchError, AbortError } = require('node-fetch')
-const { Readable } = require('node:stream')
-const { pipeline } = require('node:stream/promises')
-const { once } = require('node:events')
-const { TestServer } = require('./helpers/TestServer')
-const selfsigned = require('selfsigned')
-const {
+import { expect } from 'chai'
+import dns from 'node:dns'
+import { once } from 'node:events'
+import events from 'node:events'
+import fs from 'node:fs'
+import { pipeline } from 'node:stream/promises'
+import { Readable } from 'node:stream'
+import { describe, beforeAll, beforeEach, afterAll, it } from 'vitest'
+import { AbortError, FetchError } from 'node-fetch'
+import selfsigned from 'selfsigned'
+import { TestServer } from './helpers/TestServer.js'
+import {
   fetchJson,
   fetchStream,
   fetchNothing,
@@ -16,12 +18,14 @@ const {
   RequestFailedError,
   CustomHttpAgent,
   CustomHttpsAgent,
-} = require('../..')
+} from '../../index.ts'
 
 const HTTP_PORT = 30001
 const HTTPS_PORT = 30002
 
-const dns = require('node:dns')
+const url = pathname => `http://example.com:${HTTP_PORT}${pathname}`
+const httpsUrl = pathname => `https://example.com:${HTTPS_PORT}${pathname}`
+
 const _originalLookup = dns.lookup
 // Custom DNS resolver function
 dns.lookup = (hostname, options, callback) => {
@@ -39,39 +43,38 @@ dns.lookup = (hostname, options, callback) => {
 }
 
 describe('fetch-utils', function () {
+  let server
   let PUBLIC_CERT
 
-  before(async function () {
-    this.server = new TestServer()
+  beforeAll(async function () {
+    server = new TestServer()
     const attrs = [{ name: 'commonName', value: 'example.com' }]
     const pems = await selfsigned.generate(attrs, { days: 365, keySize: 2048 })
 
     const PRIVATE_KEY = pems.private
     PUBLIC_CERT = pems.cert
-    await this.server.start(HTTP_PORT, HTTPS_PORT, {
+    await server.start(HTTP_PORT, HTTPS_PORT, {
       key: PRIVATE_KEY,
       cert: PUBLIC_CERT,
     })
-    this.url = path => `http://example.com:${HTTP_PORT}${path}`
-    this.httpsUrl = path => `https://example.com:${HTTPS_PORT}${path}`
   })
 
   beforeEach(function () {
-    this.server.lastReq = undefined
+    server.lastReq = undefined
   })
 
-  after(async function () {
-    await this.server.stop()
+  afterAll(async function () {
+    await server.stop()
   })
 
   describe('fetchJson', function () {
     it('parses a JSON response', async function () {
-      const json = await fetchJson(this.url('/json/hello'))
+      const json = await fetchJson(url('/json/hello'))
       expect(json).to.deep.equal({ msg: 'hello' })
     })
 
     it('parses JSON in the request', async function () {
-      const json = await fetchJson(this.url('/json/add'), {
+      const json = await fetchJson(url('/json/add'), {
         method: 'POST',
         json: { a: 2, b: 3 },
       })
@@ -79,7 +82,7 @@ describe('fetch-utils', function () {
     })
 
     it('accepts stringified JSON as body', async function () {
-      const json = await fetchJson(this.url('/json/add'), {
+      const json = await fetchJson(url('/json/add'), {
         method: 'POST',
         body: JSON.stringify({ a: 2, b: 3 }),
         headers: { 'Content-Type': 'application/json' },
@@ -88,40 +91,37 @@ describe('fetch-utils', function () {
     })
 
     it('throws a FetchError when the payload is not JSON', async function () {
-      await expect(fetchJson(this.url('/hello'))).to.be.rejectedWith(FetchError)
+      await expect(fetchJson(url('/hello'))).to.be.rejectedWith(FetchError)
     })
 
     it('aborts the request if JSON parsing fails', async function () {
-      await expect(fetchJson(this.url('/large'))).to.be.rejectedWith(FetchError)
-      await expectRequestAborted(this.server.lastReq)
+      await expect(fetchJson(url('/large'))).to.be.rejectedWith(FetchError)
+      await expectRequestAborted(server.lastReq)
     })
 
     it('handles errors when the payload is JSON', async function () {
-      await expect(fetchJson(this.url('/json/500'))).to.be.rejectedWith(
+      await expect(fetchJson(url('/json/500'))).to.be.rejectedWith(
         RequestFailedError
       )
-      await expectRequestAborted(this.server.lastReq)
+      await expectRequestAborted(server.lastReq)
     })
 
     it('handles errors when the payload is not JSON', async function () {
-      await expect(fetchJson(this.url('/500'))).to.be.rejectedWith(
+      await expect(fetchJson(url('/500'))).to.be.rejectedWith(
         RequestFailedError
       )
-      await expectRequestAborted(this.server.lastReq)
+      await expectRequestAborted(server.lastReq)
     })
 
     it('supports abort signals', async function () {
       await expect(
-        abortOnceReceived(
-          signal => fetchJson(this.url('/hang'), { signal }),
-          this.server
-        )
+        abortOnceReceived(signal => fetchJson(url('/hang'), { signal }), server)
       ).to.be.rejectedWith(AbortError)
-      await expectRequestAborted(this.server.lastReq)
+      await expectRequestAborted(server.lastReq)
     })
 
     it('supports basic auth', async function () {
-      const json = await fetchJson(this.url('/json/basic-auth'), {
+      const json = await fetchJson(url('/json/basic-auth'), {
         basicAuth: { user: 'user', password: 'pass' },
       })
       expect(json).to.deep.equal({ key: 'verysecret' })
@@ -129,7 +129,7 @@ describe('fetch-utils', function () {
 
     it("destroys the request body if it doesn't get consumed", async function () {
       const stream = Readable.from(infiniteIterator())
-      await fetchJson(this.url('/json/ignore-request'), {
+      await fetchJson(url('/json/ignore-request'), {
         method: 'POST',
         body: stream,
       })
@@ -139,57 +139,57 @@ describe('fetch-utils', function () {
 
   describe('fetchStream', function () {
     it('returns a stream', async function () {
-      const stream = await fetchStream(this.url('/large'))
+      const stream = await fetchStream(url('/large'))
       const text = await streamToString(stream)
-      expect(text).to.equal(this.server.largePayload)
+      expect(text).to.equal(server.largePayload)
     })
 
     it('aborts the request when the stream is destroyed', async function () {
-      const stream = await fetchStream(this.url('/large'))
+      const stream = await fetchStream(url('/large'))
       stream.destroy()
-      await expectRequestAborted(this.server.lastReq)
+      await expectRequestAborted(server.lastReq)
     })
 
     it('aborts the request when the request body is destroyed before transfer', async function () {
       const stream = Readable.from(infiniteIterator())
-      const promise = fetchStream(this.url('/hang'), {
+      const promise = fetchStream(url('/hang'), {
         method: 'POST',
         body: stream,
       })
       stream.destroy()
       await expect(promise).to.be.rejectedWith(AbortError)
       await wait(80)
-      expect(this.server.lastReq).to.be.undefined
+      expect(server.lastReq).to.be.undefined
     })
 
     it('aborts the request when the request body is destroyed during transfer', async function () {
       const stream = Readable.from(infiniteIterator())
       // Note: this test won't work on `/hang`
-      const promise = fetchStream(this.url('/sink'), {
+      const promise = fetchStream(url('/sink'), {
         method: 'POST',
         body: stream,
       })
-      await once(this.server.events, 'request-received')
+      await once(server.events, 'request-received')
       stream.destroy()
       await expect(promise).to.be.rejectedWith(AbortError)
-      await expectRequestAborted(this.server.lastReq)
+      await expectRequestAborted(server.lastReq)
     })
 
     it('handles errors', async function () {
-      await expect(fetchStream(this.url('/500'))).to.be.rejectedWith(
+      await expect(fetchStream(url('/500'))).to.be.rejectedWith(
         RequestFailedError
       )
-      await expectRequestAborted(this.server.lastReq)
+      await expectRequestAborted(server.lastReq)
     })
 
     it('supports abort signals', async function () {
       await expect(
         abortOnceReceived(
-          signal => fetchStream(this.url('/hang'), { signal }),
-          this.server
+          signal => fetchStream(url('/hang'), { signal }),
+          server
         )
       ).to.be.rejectedWith(AbortError)
-      await expectRequestAborted(this.server.lastReq)
+      await expectRequestAborted(server.lastReq)
     })
 
     it('destroys the request body when an error occurs', async function () {
@@ -197,12 +197,12 @@ describe('fetch-utils', function () {
       await expect(
         abortOnceReceived(
           signal =>
-            fetchStream(this.url('/hang'), {
+            fetchStream(url('/hang'), {
               method: 'POST',
               body: stream,
               signal,
             }),
-          this.server
+          server
         )
       ).to.be.rejectedWith(AbortError)
       expect(stream.destroyed).to.be.true
@@ -211,7 +211,7 @@ describe('fetch-utils', function () {
     it('detaches from signal on success', async function () {
       const signal = AbortSignal.timeout(10_000)
       for (let i = 0; i < 20; i++) {
-        const s = await fetchStream(this.url('/hello'), { signal })
+        const s = await fetchStream(url('/hello'), { signal })
         expect(events.getEventListeners(signal, 'abort')).to.have.length(1)
         await pipeline(s, fs.createWriteStream('/dev/null'))
         expect(events.getEventListeners(signal, 'abort')).to.have.length(0)
@@ -222,7 +222,7 @@ describe('fetch-utils', function () {
       const signal = AbortSignal.timeout(10_000)
       for (let i = 0; i < 20; i++) {
         try {
-          await fetchStream(this.url('/500'), { signal })
+          await fetchStream(url('/500'), { signal })
         } catch (err) {
           if (err instanceof RequestFailedError && err.response.status === 500)
             continue
@@ -236,55 +236,55 @@ describe('fetch-utils', function () {
 
   describe('fetchNothing', function () {
     it('closes the connection', async function () {
-      await fetchNothing(this.url('/large'))
-      await expectRequestAborted(this.server.lastReq)
+      await fetchNothing(url('/large'))
+      await expectRequestAborted(server.lastReq)
     })
 
     it('aborts the request when the request body is destroyed before transfer', async function () {
       const stream = Readable.from(infiniteIterator())
-      const promise = fetchNothing(this.url('/hang'), {
+      const promise = fetchNothing(url('/hang'), {
         method: 'POST',
         body: stream,
       })
       stream.destroy()
       await expect(promise).to.be.rejectedWith(AbortError)
-      expect(this.server.lastReq).to.be.undefined
+      expect(server.lastReq).to.be.undefined
     })
 
     it('aborts the request when the request body is destroyed during transfer', async function () {
       const stream = Readable.from(infiniteIterator())
       // Note: this test won't work on `/hang`
-      const promise = fetchNothing(this.url('/sink'), {
+      const promise = fetchNothing(url('/sink'), {
         method: 'POST',
         body: stream,
       })
-      await once(this.server.events, 'request-received')
+      await once(server.events, 'request-received')
       stream.destroy()
       await expect(promise).to.be.rejectedWith(AbortError)
       await wait(80)
-      await expectRequestAborted(this.server.lastReq)
+      await expectRequestAborted(server.lastReq)
     })
 
     it("doesn't abort the request if the request body ends normally", async function () {
       const stream = Readable.from('hello there')
-      await fetchNothing(this.url('/sink'), { method: 'POST', body: stream })
+      await fetchNothing(url('/sink'), { method: 'POST', body: stream })
     })
 
     it('handles errors', async function () {
-      await expect(fetchNothing(this.url('/500'))).to.be.rejectedWith(
+      await expect(fetchNothing(url('/500'))).to.be.rejectedWith(
         RequestFailedError
       )
-      await expectRequestAborted(this.server.lastReq)
+      await expectRequestAborted(server.lastReq)
     })
 
     it('supports abort signals', async function () {
       await expect(
         abortOnceReceived(
-          signal => fetchNothing(this.url('/hang'), { signal }),
-          this.server
+          signal => fetchNothing(url('/hang'), { signal }),
+          server
         )
       ).to.be.rejectedWith(AbortError)
-      await expectRequestAborted(this.server.lastReq)
+      await expectRequestAborted(server.lastReq)
     })
 
     it('destroys the request body when an error occurs', async function () {
@@ -292,12 +292,12 @@ describe('fetch-utils', function () {
       await expect(
         abortOnceReceived(
           signal =>
-            fetchNothing(this.url('/hang'), {
+            fetchNothing(url('/hang'), {
               method: 'POST',
               body: stream,
               signal,
             }),
-          this.server
+          server
         )
       ).to.be.rejectedWith(AbortError)
       expect(stream.destroyed).to.be.true
@@ -306,52 +306,52 @@ describe('fetch-utils', function () {
 
   describe('fetchString', function () {
     it('returns a string', async function () {
-      const body = await fetchString(this.url('/hello'))
+      const body = await fetchString(url('/hello'))
       expect(body).to.equal('hello')
     })
 
     it('handles errors', async function () {
-      await expect(fetchString(this.url('/500'))).to.be.rejectedWith(
+      await expect(fetchString(url('/500'))).to.be.rejectedWith(
         RequestFailedError
       )
-      await expectRequestAborted(this.server.lastReq)
+      await expectRequestAborted(server.lastReq)
     })
   })
 
   describe('fetchRedirect', function () {
     it('returns the immediate redirect', async function () {
-      const body = await fetchRedirect(this.url('/redirect/1'))
-      expect(body).to.equal(this.url('/redirect/2'))
+      const body = await fetchRedirect(url('/redirect/1'))
+      expect(body).to.equal(url('/redirect/2'))
     })
 
     it('rejects status 200', async function () {
-      await expect(fetchRedirect(this.url('/hello'))).to.be.rejectedWith(
+      await expect(fetchRedirect(url('/hello'))).to.be.rejectedWith(
         RequestFailedError
       )
-      await expectRequestAborted(this.server.lastReq)
+      await expectRequestAborted(server.lastReq)
     })
 
     it('rejects empty redirect', async function () {
-      await expect(fetchRedirect(this.url('/redirect/empty-location')))
+      await expect(fetchRedirect(url('/redirect/empty-location')))
         .to.be.rejectedWith(RequestFailedError)
         .and.eventually.have.property('cause')
         .and.to.have.property('message')
         .to.equal('missing Location response header on 3xx response')
-      await expectRequestAborted(this.server.lastReq)
+      await expectRequestAborted(server.lastReq)
     })
 
     it('handles errors', async function () {
-      await expect(fetchRedirect(this.url('/500'))).to.be.rejectedWith(
+      await expect(fetchRedirect(url('/500'))).to.be.rejectedWith(
         RequestFailedError
       )
-      await expectRequestAborted(this.server.lastReq)
+      await expectRequestAborted(server.lastReq)
     })
   })
 
   describe('CustomHttpAgent', function () {
     it('makes an http request successfully', async function () {
       const agent = new CustomHttpAgent({ connectTimeout: 100 })
-      const body = await fetchString(this.url('/hello'), { agent })
+      const body = await fetchString(url('/hello'), { agent })
       expect(body).to.equal('hello')
     })
 
@@ -372,7 +372,7 @@ describe('fetch-utils', function () {
         connectTimeout: 100,
         ca: PUBLIC_CERT,
       })
-      const body = await fetchString(this.httpsUrl('/hello'), { agent })
+      const body = await fetchString(httpsUrl('/hello'), { agent })
       expect(body).to.equal('hello')
     })
 
@@ -380,7 +380,7 @@ describe('fetch-utils', function () {
       const agent = new CustomHttpsAgent({
         connectTimeout: 100,
       })
-      await expect(fetchString(this.httpsUrl('/hello'), { agent }))
+      await expect(fetchString(httpsUrl('/hello'), { agent }))
         .to.be.rejectedWith(FetchError)
         .and.eventually.have.property('code')
         .and.to.equal('DEPTH_ZERO_SELF_SIGNED_CERT')

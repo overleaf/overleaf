@@ -1,8 +1,8 @@
-const express = require('express')
-const { EventEmitter } = require('node:events')
-const http = require('node:http')
-const https = require('node:https')
-const { promisify } = require('node:util')
+import express from 'express'
+import { EventEmitter } from 'node:events'
+import http from 'node:http'
+import https from 'node:https'
+import { promisify } from 'node:util'
 
 class TestServer {
   constructor() {
@@ -135,4 +135,4 @@ class TestServer {
   }
 }
 
-module.exports = { TestServer }
+export { TestServer }

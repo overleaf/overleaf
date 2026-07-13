@@ -16,6 +16,12 @@ const { expect } = require('chai')
 describe('index', function () {
   beforeEach(function () {
     let Cluster, IoRedis, ioredisConstructor
+    const loggerMock = {
+      error() {},
+      warn() {},
+      info() {},
+      debug() {},
+    }
     this.settings = {}
     this.ioredisConstructor = ioredisConstructor = sinon.stub()
 
@@ -51,6 +57,7 @@ describe('index', function () {
     this.redis = SandboxedModule.require(modulePath, {
       requires: {
         ioredis: this.ioredis,
+        '@overleaf/logger': loggerMock,
       },
       globals: {
         process,
@@ -64,6 +71,7 @@ describe('index', function () {
         '@overleaf/metrics': {
           inc() {},
         },
+        '@overleaf/logger': loggerMock,
       },
       globals: {
         process,

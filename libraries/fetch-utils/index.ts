@@ -1,34 +1,28 @@
-const _ = require('lodash')
-const { Readable } = require('node:stream')
-const OError = require('@overleaf/o-error')
-const fetch = require('node-fetch')
-const http = require('node:http')
-const https = require('node:https')
+import _ from 'lodash'
+import { Readable } from 'node:stream'
+import OError from '@overleaf/o-error'
+import fetch from 'node-fetch'
+import type { Response } from 'node-fetch'
+import http from 'node:http'
+import https from 'node:https'
 
-let logger
+let logger: { warn: (...args: any[]) => void } | undefined
 
-function setLogger(loggerInstance) {
+function setLogger(loggerInstance: { warn: (...args: any[]) => void }) {
   logger = loggerInstance
 }
 
 /**
- * @import { Response } from 'node-fetch'
- */
-
-/**
  * Make a request and return the parsed JSON response.
  *
- * @param {string | URL} url - request URL
- * @param {any} [opts] - fetch options
- * @return {Promise<any>} the parsed JSON response
  * @throws {RequestFailedError} if the response has a failure status code
  */
-async function fetchJson(url, opts = {}) {
+async function fetchJson(url: string | URL, opts: any = {}) {
   const { json } = await fetchJsonWithResponse(url, opts)
   return json
 }
 
-async function fetchJsonWithResponse(url, opts = {}) {
+async function fetchJsonWithResponse(url: string | URL, opts: any = {}) {
   const { fetchOpts, detachSignal } = parseOpts(opts, url)
   fetchOpts.headers = fetchOpts.headers ?? {}
   fetchOpts.headers.Accept = fetchOpts.headers.Accept ?? 'application/json'
@@ -48,17 +42,14 @@ async function fetchJsonWithResponse(url, opts = {}) {
  *
  * If the response body is destroyed, the request is aborted.
  *
- * @param {string | URL} url - request URL
- * @param {any} [opts] - fetch options
- * @return {Promise<Readable>}
  * @throws {RequestFailedError} if the response has a failure status code
  */
-async function fetchStream(url, opts = {}) {
+async function fetchStream(url: string | URL, opts: any = {}) {
   const { stream } = await fetchStreamWithResponse(url, opts)
   return stream
 }
 
-async function fetchStreamWithResponse(url, opts = {}) {
+async function fetchStreamWithResponse(url: string | URL, opts: any = {}) {
   const { fetchOpts, abortController, detachSignal } = parseOpts(opts, url)
   const response = await performRequest(url, fetchOpts, detachSignal)
 
@@ -76,12 +67,9 @@ async function fetchStreamWithResponse(url, opts = {}) {
 /**
  * Make a request and discard the response.
  *
- * @param {string | URL} url - request URL
- * @param {any} [opts] - fetch options
- * @return {Promise<Response>}
  * @throws {RequestFailedError} if the response has a failure status code
  */
-async function fetchNothing(url, opts = {}) {
+async function fetchNothing(url: string | URL, opts: any = {}) {
   const { fetchOpts, detachSignal } = parseOpts(opts, url)
   const response = await performRequest(url, fetchOpts, detachSignal)
   if (!response.ok) {
@@ -95,12 +83,9 @@ async function fetchNothing(url, opts = {}) {
 /**
  * Make a request and extract the redirect from the response.
  *
- * @param {string | URL} url - request URL
- * @param {any} [opts] - fetch options
- * @return {Promise<string>}
  * @throws {RequestFailedError} if the response has a non redirect status code or missing Location header
  */
-async function fetchRedirect(url, opts = {}) {
+async function fetchRedirect(url: string | URL, opts: any = {}) {
   const { location } = await fetchRedirectWithResponse(url, opts)
   return location
 }
@@ -108,12 +93,9 @@ async function fetchRedirect(url, opts = {}) {
 /**
  * Make a request and extract the redirect from the response.
  *
- * @param {string | URL} url - request URL
- * @param {object} opts - fetch options
- * @return {Promise<{location: string, response: Response}>}
  * @throws {RequestFailedError} if the response has a non redirect status code or missing Location header
  */
-async function fetchRedirectWithResponse(url, opts = {}) {
+async function fetchRedirectWithResponse(url: string | URL, opts: any = {}) {
   const { fetchOpts, detachSignal } = parseOpts(opts, url)
   fetchOpts.redirect = 'manual'
   const response = await performRequest(url, fetchOpts, detachSignal)
@@ -137,17 +119,14 @@ async function fetchRedirectWithResponse(url, opts = {}) {
 /**
  * Make a request and return a string.
  *
- * @param {string | URL} url - request URL
- * @param {any} [opts] - fetch options
- * @return {Promise<string>}
  * @throws {RequestFailedError} if the response has a failure status code
  */
-async function fetchString(url, opts = {}) {
+async function fetchString(url: string | URL, opts: any = {}) {
   const { body } = await fetchStringWithResponse(url, opts)
   return body
 }
 
-async function fetchStringWithResponse(url, opts = {}) {
+async function fetchStringWithResponse(url: string | URL, opts: any = {}) {
   const { fetchOpts, detachSignal } = parseOpts(opts, url)
   const response = await performRequest(url, fetchOpts, detachSignal)
   if (!response.ok) {
@@ -159,7 +138,15 @@ async function fetchStringWithResponse(url, opts = {}) {
 }
 
 class RequestFailedError extends OError {
-  constructor(url, opts, response, body) {
+  response: Response
+  body?: string
+
+  constructor(
+    url: string | URL,
+    opts: any,
+    response: Response,
+    body: string | null
+  ) {
     super('request failed', {
       url,
       method: opts.method ?? 'GET',
@@ -173,7 +160,7 @@ class RequestFailedError extends OError {
   }
 }
 
-function parseOpts(opts, url) {
+function parseOpts(opts: any, url: string | URL) {
   const fetchOpts = _.omit(opts, ['json', 'signal', 'basicAuth'])
   if (opts.json) {
     setupJsonBody(fetchOpts, opts.json)
@@ -188,7 +175,7 @@ function parseOpts(opts, url) {
   if (opts.signal) {
     detachSignal = abortOnSignal(abortController, opts.signal)
   } else {
-    let overTimeoutStart
+    let overTimeoutStart: bigint | undefined
     const stack = new Error().stack
     const timeout = setTimeout(() => {
       overTimeoutStart = process.hrtime.bigint()
@@ -215,20 +202,20 @@ function parseOpts(opts, url) {
   return { fetchOpts, abortController, detachSignal }
 }
 
-function setupJsonBody(fetchOpts, json) {
+function setupJsonBody(fetchOpts: any, json: any) {
   fetchOpts.body = JSON.stringify(json)
   fetchOpts.headers = fetchOpts.headers ?? {}
   fetchOpts.headers['Content-Type'] = 'application/json'
 }
 
-function setupBasicAuth(fetchOpts, basicAuth) {
+function setupBasicAuth(fetchOpts: any, basicAuth: any) {
   fetchOpts.headers = fetchOpts.headers ?? {}
   fetchOpts.headers.Authorization =
     'Basic ' +
     Buffer.from(`${basicAuth.user}:${basicAuth.password}`).toString('base64')
 }
 
-function abortOnSignal(abortController, signal) {
+function abortOnSignal(abortController: AbortController, signal: AbortSignal) {
   const listener = () => {
     abortController.abort(signal.reason)
   }
@@ -241,7 +228,10 @@ function abortOnSignal(abortController, signal) {
   }
 }
 
-function abortOnDestroyedRequest(abortController, stream) {
+function abortOnDestroyedRequest(
+  abortController: AbortController,
+  stream: any
+) {
   stream.on('close', () => {
     if (!stream.readableEnded) {
       abortController.abort()
@@ -249,7 +239,10 @@ function abortOnDestroyedRequest(abortController, stream) {
   })
 }
 
-function abortOnDestroyedResponse(abortController, response) {
+function abortOnDestroyedResponse(
+  abortController: AbortController,
+  response: Response
+) {
   response.body.on('close', () => {
     if (!response.bodyUsed) {
       abortController.abort()
@@ -257,11 +250,15 @@ function abortOnDestroyedResponse(abortController, response) {
   })
 }
 
-async function performRequest(url, fetchOpts, detachSignal) {
+async function performRequest(
+  url: string | URL,
+  fetchOpts: any,
+  detachSignal: () => void
+) {
   let response
   try {
     response = await fetch(url, fetchOpts)
-  } catch (err) {
+  } catch (err: any) {
     detachSignal()
     if (fetchOpts.body instanceof Readable) {
       fetchOpts.body.destroy()
@@ -282,17 +279,14 @@ async function performRequest(url, fetchOpts, detachSignal) {
   return response
 }
 
-async function discardResponseBody(response) {
+async function discardResponseBody(response: Response) {
   // eslint-disable-next-line no-unused-vars
   for await (const chunk of response.body) {
     // discard the body
   }
 }
 
-/**
- * @param {Response} response
- */
-async function maybeGetResponseBody(response) {
+async function maybeGetResponseBody(response: Response) {
   try {
     return await response.text()
   } catch (err) {
@@ -303,18 +297,18 @@ async function maybeGetResponseBody(response) {
 // Define custom http and https agents with support for connect timeouts
 
 class ConnectTimeoutError extends OError {
-  constructor(options) {
+  constructor(options: any) {
     super('connect timeout', options)
   }
 }
 
-function withTimeout(createConnection, options, callback) {
+function withTimeout(createConnection: any, options: any, callback: any) {
   if (options.connectTimeout) {
     // Wrap createConnection in a timeout
     const timer = setTimeout(() => {
       socket.destroy(new ConnectTimeoutError(options))
     }, options.connectTimeout)
-    const socket = createConnection(options, (err, stream) => {
+    const socket = createConnection(options, (err: any, stream: any) => {
       clearTimeout(timer)
       callback(err, stream)
     })
@@ -326,17 +320,17 @@ function withTimeout(createConnection, options, callback) {
 }
 
 class CustomHttpAgent extends http.Agent {
-  createConnection(options, callback) {
+  createConnection(options: any, callback: any) {
     return withTimeout(super.createConnection.bind(this), options, callback)
   }
 }
 class CustomHttpsAgent extends https.Agent {
-  createConnection(options, callback) {
+  createConnection(options: any, callback: any) {
     return withTimeout(super.createConnection.bind(this), options, callback)
   }
 }
 
-module.exports = {
+export {
   fetchJson,
   fetchJsonWithResponse,
   fetchStream,
