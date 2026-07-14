@@ -100,6 +100,7 @@ describe('<UnsavedDocs />', function () {
     const lockedContextValue = {
       unsavedDocs: new Map<string, number>(),
       isLocked: true,
+      isSavingStalled: false,
     }
 
     it('shows the locked alert and reports the error when flag is disabled', function () {
