@@ -2,6 +2,7 @@
 
 const { callbackifyAll } = require('@overleaf/promise-utils')
 const LockManager = require('./LockManager')
+const ProjectLockManager = require('./ProjectLockManager')
 const RedisManager = require('./RedisManager')
 const ProjectHistoryRedisManager = require('./ProjectHistoryRedisManager')
 const RealTimeRedisManager = require('./RealTimeRedisManager')
@@ -40,18 +41,30 @@ const UpdateManager = {
       doc_id: docId,
     })
 
-    const lockValue = await LockManager.promises.tryLock(docId)
-    if (lockValue == null) {
-      return
-    }
-    profile.log('tryLock')
+    // Always take the project lock before the per-doc lock to avoid deadlocks.
+    // Wait for the project lock rather than bailing out: another action
+    // holding it (e.g. for a different doc) will not process this doc's queue.
+    const projectLockValue =
+      await ProjectLockManager.promises.getLock(projectId)
+    profile.log('getProjectLock')
 
     try {
-      await UpdateManager.processOutstandingUpdates(projectId, docId)
-      profile.log('processOutstandingUpdates')
+      const lockValue = await LockManager.promises.tryLock(docId)
+      if (lockValue == null) {
+        return
+      }
+      profile.log('tryLock')
+
+      try {
+        await UpdateManager.processOutstandingUpdates(projectId, docId)
+        profile.log('processOutstandingUpdates')
+      } finally {
+        await LockManager.promises.releaseLock(docId, lockValue)
+        profile.log('releaseLock')
+      }
     } finally {
-      await LockManager.promises.releaseLock(docId, lockValue)
-      profile.log('releaseLock').end()
+      await ProjectLockManager.promises.releaseLock(projectId, projectLockValue)
+      profile.log('releaseProjectLock').end()
     }
 
     await UpdateManager.continueProcessingUpdatesWithLock(projectId, docId)
@@ -279,19 +292,29 @@ const UpdateManager = {
       doc_id: docId,
     })
 
-    const lockValue = await LockManager.promises.getLock(docId)
-    profile.log('getLock')
+    // Always take the project lock before the per-doc lock to avoid deadlocks.
+    const projectLockValue =
+      await ProjectLockManager.promises.getLock(projectId)
+    profile.log('getProjectLock')
 
     let result
     try {
-      await UpdateManager.processOutstandingUpdates(projectId, docId)
-      profile.log('processOutstandingUpdates')
+      const lockValue = await LockManager.promises.getLock(docId)
+      profile.log('getLock')
 
-      result = await method(projectId, docId, ...args)
-      profile.log('method')
+      try {
+        await UpdateManager.processOutstandingUpdates(projectId, docId)
+        profile.log('processOutstandingUpdates')
+
+        result = await method(projectId, docId, ...args)
+        profile.log('method')
+      } finally {
+        await LockManager.promises.releaseLock(docId, lockValue)
+        profile.log('releaseLock')
+      }
     } finally {
-      await LockManager.promises.releaseLock(docId, lockValue)
-      profile.log('releaseLock').end()
+      await ProjectLockManager.promises.releaseLock(projectId, projectLockValue)
+      profile.log('releaseProjectLock').end()
     }
 
     // We held the lock for a while so updates might have queued up

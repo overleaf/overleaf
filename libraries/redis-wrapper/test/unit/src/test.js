@@ -116,6 +116,38 @@ describe('index', function () {
     })
   })
 
+  describe('extendLock', function () {
+    beforeEach(function () {
+      this.rclient = { eval: sinon.stub() }
+      this.locker = new this.RedisLocker({
+        rclient: this.rclient,
+        getKey: id => `lock:${id}`,
+        wrapTimeoutError: (err, id) => err,
+        metricsPrefix: 'test',
+        lockTTLSeconds: 30,
+      })
+    })
+
+    it('should extend the lock TTL when we still own it', function (done) {
+      this.rclient.eval.yields(null, 1)
+      this.locker.extendLock('id-1', 'lock-value', err => {
+        expect(err).to.not.exist
+        this.rclient.eval
+          .calledWith(sinon.match.string, 1, 'lock:id-1', 'lock-value', 30)
+          .should.equal(true)
+        done()
+      })
+    })
+
+    it('should error when we no longer hold the lock', function (done) {
+      this.rclient.eval.yields(null, 0)
+      this.locker.extendLock('id-1', 'lock-value', err => {
+        expect(err).to.exist
+        done()
+      })
+    })
+  })
+
   describe('redis-sentinel', function () {
     it('should throw an error when creating a client', function () {
       const redisSentinelOptions = {

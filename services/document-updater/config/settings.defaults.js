@@ -80,6 +80,9 @@ module.exports = {
         blockingKey({ doc_id: docId }) {
           return `Blocking:{${docId}}`
         },
+        projectBlockingKey({ project_id: projectId }) {
+          return `BlockingProject:{${projectId}}`
+        },
       },
     },
 

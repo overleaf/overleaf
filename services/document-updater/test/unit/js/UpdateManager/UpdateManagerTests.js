@@ -11,6 +11,7 @@ describe('UpdateManager', function () {
     this.projectHistoryId = 'history-id-123'
     this.doc_id = 'document-id-123'
     this.lockValue = 'mock-lock-value'
+    this.projectLockValue = 'mock-project-lock-value'
     this.pathname = '/a/b/c.tex'
 
     this.Metrics = {
@@ -27,6 +28,14 @@ describe('UpdateManager', function () {
       promises: {
         tryLock: sinon.stub().resolves(this.lockValue),
         getLock: sinon.stub().resolves(this.lockValue),
+        releaseLock: sinon.stub().resolves(),
+      },
+    }
+
+    this.ProjectLockManager = {
+      promises: {
+        tryLock: sinon.stub().resolves(this.projectLockValue),
+        getLock: sinon.stub().resolves(this.projectLockValue),
         releaseLock: sinon.stub().resolves(),
       },
     }
@@ -92,6 +101,7 @@ describe('UpdateManager', function () {
     this.UpdateManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './LockManager': this.LockManager,
+        './ProjectLockManager': this.ProjectLockManager,
         './RedisManager': this.RedisManager,
         './RealTimeRedisManager': this.RealTimeRedisManager,
         './ShareJsUpdateManager': this.ShareJsUpdateManager,
@@ -147,6 +157,15 @@ describe('UpdateManager', function () {
           )
         })
 
+        it('should acquire the project lock before the doc lock', function () {
+          this.ProjectLockManager.promises.getLock
+            .calledWith(this.project_id)
+            .should.equal(true)
+          this.LockManager.promises.tryLock
+            .calledAfter(this.ProjectLockManager.promises.getLock)
+            .should.equal(true)
+        })
+
         it('should acquire the lock', function () {
           this.LockManager.promises.tryLock
             .calledWith(this.doc_id)
@@ -156,6 +175,12 @@ describe('UpdateManager', function () {
         it('should free the lock', function () {
           this.LockManager.promises.releaseLock
             .calledWith(this.doc_id, this.lockValue)
+            .should.equal(true)
+        })
+
+        it('should free the project lock', function () {
+          this.ProjectLockManager.promises.releaseLock
+            .calledWith(this.project_id, this.projectLockValue)
             .should.equal(true)
         })
 
@@ -200,6 +225,12 @@ describe('UpdateManager', function () {
             .calledWith(this.doc_id, this.lockValue)
             .should.equal(true)
         })
+
+        it('should free the project lock', function () {
+          this.ProjectLockManager.promises.releaseLock
+            .calledWith(this.project_id, this.projectLockValue)
+            .should.equal(true)
+        })
       })
     })
 
@@ -219,6 +250,12 @@ describe('UpdateManager', function () {
         this.UpdateManager.promises.processOutstandingUpdates.called.should.equal(
           false
         )
+      })
+
+      it('should free the project lock', function () {
+        this.ProjectLockManager.promises.releaseLock
+          .calledWith(this.project_id, this.projectLockValue)
+          .should.equal(true)
       })
     })
   })
@@ -876,9 +913,15 @@ describe('UpdateManager', function () {
         )
       })
 
-      it('should lock the doc', function () {
+      it('should lock the project then the doc', function () {
+        this.ProjectLockManager.promises.getLock
+          .calledWith(this.project_id)
+          .should.equal(true)
         this.LockManager.promises.getLock
           .calledWith(this.doc_id)
+          .should.equal(true)
+        this.LockManager.promises.getLock
+          .calledAfter(this.ProjectLockManager.promises.getLock)
           .should.equal(true)
       })
 
@@ -899,9 +942,12 @@ describe('UpdateManager', function () {
         expect(this.response).to.equal(this.methodResult)
       })
 
-      it('should release the lock', function () {
+      it('should release both locks', function () {
         this.LockManager.promises.releaseLock
           .calledWith(this.doc_id, this.lockValue)
+          .should.equal(true)
+        this.ProjectLockManager.promises.releaseLock
+          .calledWith(this.project_id, this.projectLockValue)
           .should.equal(true)
       })
 
@@ -928,9 +974,12 @@ describe('UpdateManager', function () {
         ).to.be.rejectedWith(this.error)
       })
 
-      it('should free the lock', function () {
+      it('should free both locks', function () {
         this.LockManager.promises.releaseLock
           .calledWith(this.doc_id, this.lockValue)
+          .should.equal(true)
+        this.ProjectLockManager.promises.releaseLock
+          .calledWith(this.project_id, this.projectLockValue)
           .should.equal(true)
       })
     })
@@ -952,9 +1001,12 @@ describe('UpdateManager', function () {
         ).to.be.rejectedWith(this.error)
       })
 
-      it('should free the lock', function () {
+      it('should free both locks', function () {
         this.LockManager.promises.releaseLock
           .calledWith(this.doc_id, this.lockValue)
+          .should.equal(true)
+        this.ProjectLockManager.promises.releaseLock
+          .calledWith(this.project_id, this.projectLockValue)
           .should.equal(true)
       })
     })

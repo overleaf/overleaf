@@ -13,6 +13,10 @@ const MAX_REDIS_REQUEST_LENGTH = 5000 // 5 seconds
 
 const UNLOCK_SCRIPT =
   'if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end'
+// Extend (bump) the TTL of a lock we still own, so a long-running critical
+// section does not let the lock expire from under us.
+const EXTEND_SCRIPT =
+  'if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("expire", KEYS[1], ARGV[2]) else return 0 end'
 
 module.exports = class RedisLocker {
   /**
@@ -69,6 +73,7 @@ module.exports = class RedisLocker {
     this.promises = {
       checkLock: promisify(this.checkLock.bind(this)),
       getLock: promisify(this.getLock.bind(this)),
+      extendLock: promisify(this.extendLock.bind(this)),
       releaseLock: promisify(this.releaseLock.bind(this)),
 
       // tryLock returns two values: gotLock and lockValue. We need to merge
@@ -196,6 +201,46 @@ module.exports = class RedisLocker {
         return callback(null, true)
       }
     })
+  }
+
+  /**
+   * Extend (bump) the TTL of a lock we still hold back to the full lock TTL.
+   * Useful for long critical sections (e.g. draining a whole project) that
+   * would otherwise outlive the lock and let a second worker in.
+   *
+   * @param {string} id
+   * @param {string} lockValue
+   * @param {function(Error): void} callback
+   */
+  extendLock(id, lockValue, callback) {
+    if (callback == null) {
+      callback = function () {}
+    }
+    const key = this.getKey(id)
+    this.rclient.eval(
+      EXTEND_SCRIPT,
+      1,
+      key,
+      lockValue,
+      this.LOCK_TTL,
+      (err, result) => {
+        if (err != null) {
+          return callback(err)
+        } else if (result != null && result !== 1) {
+          // A successful extension updates the expiration time on exactly one key.
+          // Anything else means we no longer hold the lock (it expired or was taken).
+          logger.error(
+            { id, key, lockValue, redis_err: err, redis_result: result },
+            'extending lock error'
+          )
+          metrics.inc(this.metricsPrefix + '-extend-error')
+          return callback(new Error('tried to extend a lock we no longer hold'))
+        } else {
+          metrics.inc(this.metricsPrefix + '-extend-success')
+          return callback(null)
+        }
+      }
+    )
   }
 
   /**
