@@ -3,9 +3,41 @@ import UserGetter from '../User/UserGetter.mjs'
 import UserMembershipsHandler from '../UserMembership/UserMembershipsHandler.mjs'
 import UserMembershipEntityConfigs from '../UserMembership/UserMembershipEntityConfigs.mjs'
 
+// The affiliation getters below all derive from UserGetter.getUserFullEmails
+// and differ only in filter strictness. Terms used in their names:
+//   - "confirmed": email confirmed AND its institution's domain confirmed.
+//   - "current": confirmed AND not past the reconfirmation deadline.
+//   - "entitled": current AND the user holds an institution licence for that
+//     email. Being current is not sufficient: some commons subscriptions only
+//     entitle specific SSO users. Use the entitled getter for licence-gated
+//     benefits so unentitled users don't receive them.
+
+/**
+ * See "entitled" above. Use for licence-gated benefits (e.g. the institution
+ * plan, the AI assist add-on bundle). Same selection as
+ * getCurrentInstitutionsWithLicence, but returns one affiliation object per
+ * matching email (not deduplicated by institution).
+ * @param {string} userId
+ * @returns {Promise<object[]>} affiliation objects
+ */
+async function getCurrentEntitledAffiliations(userId) {
+  const fullEmails = await UserGetter.promises.getUserFullEmails(userId)
+  // emailHasInstitutionLicence already implies a confirmed email at a confirmed
+  // institution that is not past reconfirmation (see InstitutionsHelper), so no
+  // further filtering is needed.
+  return fullEmails
+    .filter(emailData => emailData.emailHasInstitutionLicence)
+    .map(emailData => emailData.affiliation)
+}
+
+/**
+ * Does not check entitlement, so may include affiliations the user holds no
+ * licence for; use getCurrentEntitledAffiliations for licence-gated benefits.
+ * @param {string} userId
+ * @returns {Promise<object[]>} affiliation objects
+ */
 async function getCurrentAffiliations(userId) {
   const fullEmails = await UserGetter.promises.getUserFullEmails(userId)
-  // current are those confirmed and not with lapsed reconfirmations
   return fullEmails
     .filter(
       emailData =>
@@ -18,22 +50,26 @@ async function getCurrentAffiliations(userId) {
     .map(emailData => emailData.affiliation)
 }
 
+/**
+ * @param {string} userId
+ * @returns {Promise<Array<string|number>>} deduplicated institution ids
+ */
 async function getCurrentAndPastAffiliationIds(userId) {
   let fullEmails = await UserGetter.promises.getUserFullEmails(userId)
-  // current are those confirmed and not with lapsed reconfirmations
   fullEmails = fullEmails
     .filter(
       emailData =>
         emailData.confirmedAt && emailData.affiliation?.institution?.confirmed
     )
     .map(emailData => emailData.affiliation.institution.id)
-  // remove dupes
   return [...new Set(fullEmails)]
 }
 
+/**
+ * @param {string} userId
+ * @returns {Promise<Array<string|number>>} deduplicated institution ids
+ */
 async function getCurrentInstitutionIds(userId) {
-  // current are those confirmed and not with lapsed reconfirmations
-  // only 1 record returned per current institutionId
   const institutionIds = new Set()
   const currentAffiliations = await getCurrentAffiliations(userId)
   currentAffiliations.forEach(affiliation => {
@@ -42,9 +78,15 @@ async function getCurrentInstitutionIds(userId) {
   return [...institutionIds]
 }
 
+/**
+ * A non-free affiliation licence is exactly what "entitled" means (see above),
+ * so this selects the same set as getCurrentEntitledAffiliations. The
+ * difference is the return value: institution objects deduplicated per
+ * institution, rather than one affiliation object per matching email.
+ * @param {string} userId
+ * @returns {Promise<object[]>} institution objects, deduplicated
+ */
 async function getCurrentInstitutionsWithLicence(userId) {
-  // current are those confirmed and not with lapsed reconfirmations
-  // only 1 record returned per current institution
   const institutions = {}
   const currentAffiliations = await getCurrentAffiliations(userId)
   currentAffiliations.forEach(affiliation => {
@@ -55,6 +97,11 @@ async function getCurrentInstitutionsWithLicence(userId) {
   return Object.values(institutions)
 }
 
+/**
+ * Loosest getter: no reconfirmation or entitlement filtering (see above).
+ * @param {string} userId
+ * @returns {Promise<object[]>} affiliation objects
+ */
 async function getConfirmedAffiliations(userId) {
   const emailsData = await UserGetter.promises.getUserFullEmails(userId)
 
@@ -71,6 +118,12 @@ async function getConfirmedAffiliations(userId) {
   return confirmedAffiliations
 }
 
+/**
+ * Institutions the user administers (via user memberships), not their email
+ * affiliations.
+ * @param {string} userId
+ * @returns {Promise<object[]>} managed institution entities
+ */
 async function getManagedInstitutions(userId) {
   return await UserMembershipsHandler.promises.getEntitiesByUser(
     UserMembershipEntityConfigs.institution,
@@ -89,6 +142,7 @@ const InstitutionsGetter = {
 
 InstitutionsGetter.promises = {
   getCurrentAffiliations,
+  getCurrentEntitledAffiliations,
   getCurrentInstitutionIds,
   getCurrentInstitutionsWithLicence,
   getCurrentAndPastAffiliationIds,

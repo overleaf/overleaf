@@ -9,9 +9,10 @@ import Features from '../../infrastructure/Features.mjs'
 async function _getInstitutionsAddons(userId) {
   if (!Features.hasFeature('saas')) return {}
   const affiliates =
-    await InstitutionsGetter.promises.getCurrentAffiliations(userId)
+    await InstitutionsGetter.promises.getCurrentEntitledAffiliations(userId)
   // currently only addOn available to institutions is assist/WF bundle,
   //  which is denoted by the presence of writefullCommonsAccount on the institution
+
   const hasAssistBundle = affiliates.some(
     affiliate => affiliate?.institution?.writefullCommonsAccount === true
   )

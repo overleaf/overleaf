@@ -252,6 +252,8 @@ class MockV1Api extends AbstractMockApi {
             id: institutionId,
             name: institutionData.name,
             commonsAccount: institutionData.commonsAccount,
+            writefullCommonsAccount:
+              institutionData.writefullCommonsAccount || false,
             isUniversity: !institutionData.institution,
             ssoBeta: institutionData.sso_beta || false,
             ssoEnabled: institutionData.sso_enabled || false,
