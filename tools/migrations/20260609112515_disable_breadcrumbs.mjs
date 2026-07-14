@@ -1,6 +1,6 @@
 import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 
-const tags = ['saas', 'nonblocking']
+const tags = ['saas']
 
 const migrate = async client => {
   const { db } = client
