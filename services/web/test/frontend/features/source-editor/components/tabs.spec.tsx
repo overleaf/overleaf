@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useRef, useState } from 'react'
 import { EditorProviders } from '../../../helpers/editor-providers'
+import { makeEditorManagerProviderWithStaleDocs } from '../../ide-react/helpers/editor-manager-provider-with-stale-docs'
 import { TabsContainer } from '../../../../../frontend/js/features/source-editor/components/tabs/tabs-container'
 import {
   FileTreeDocumentFindResult,
@@ -1174,6 +1175,79 @@ describe('File Tabs', function () {
       toggleReviewPanel()
 
       cy.findByRole('heading', { name: 'Review' }).should('not.exist')
+    })
+  })
+
+  describe('Network stall', function () {
+    function mountWithStaleDocs() {
+      cy.then(() => {
+        const now = performance.now()
+        const openDocWithId = cy.stub().as('openDocWithId').resolves()
+        const openDoc = cy.stub().as('openDoc').resolves()
+        const openFileWithId = cy.stub().as('openFileWithId')
+        cy.mount(
+          <EditorProviders
+            rootFolder={defaultRootFolder as any}
+            rootDocId={DOC_IDS.main}
+            providers={{
+              EditorManagerProvider: makeEditorManagerProviderWithStaleDocs(
+                now - 11_000,
+                { openDocWithId, openDoc, openFileWithId }
+              ),
+              EditorViewProvider: makeEditorViewProvider(),
+            }}
+          >
+            <FileTree />
+            <TabsContainer />
+          </EditorProviders>
+        )
+      })
+    }
+
+    beforeEach(function () {
+      cy.clock()
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-splitTestVariants', {
+          'editor-tabs': 'enabled',
+          'intermittent-connection-improvements': 'enabled',
+        })
+      })
+      mountWithStaleDocs()
+    })
+
+    it('disables tabs when saving is stalled', function () {
+      cy.then(() => selectDoc(DOC_IDS.main))
+      cy.tick(1000)
+      cy.findByRole('tab', { name: /main\.tex/ }).should(
+        'have.attr',
+        'aria-disabled',
+        'true'
+      )
+    })
+
+    it('does not switch the active tab when clicking a disabled tab', function () {
+      cy.then(() => selectDoc(DOC_IDS.main))
+      cy.then(() => selectDoc(DOC_IDS.intro))
+      cy.tick(1000)
+      cy.get('@openDocWithId').invoke('resetHistory')
+      cy.findByRole('tab', { name: /main\.tex/ }).click()
+      cy.get('@openDocWithId').should('not.have.been.called')
+    })
+
+    it('does not disable tabs when the feature flag is off', function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-splitTestVariants', {
+          'editor-tabs': 'enabled',
+        })
+      })
+      mountWithStaleDocs()
+      cy.then(() => selectDoc(DOC_IDS.main))
+      cy.tick(1000)
+      cy.findByRole('tab', { name: /main\.tex/ }).should(
+        'not.have.attr',
+        'aria-disabled',
+        'true'
+      )
     })
   })
 

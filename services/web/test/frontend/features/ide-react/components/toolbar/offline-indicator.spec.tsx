@@ -20,6 +20,7 @@ const defaultIdeReactContextValue = {
 const defaultUnsavedDocsContextValue = {
   unsavedDocs: new Map<string, number>(),
   isLocked: false,
+  isSavingStalled: false,
 }
 
 const mount = ({

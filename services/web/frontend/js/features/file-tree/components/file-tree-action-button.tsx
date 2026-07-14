@@ -9,11 +9,13 @@ export default function FileTreeActionButton({
   description,
   onClick,
   iconType,
+  disabled,
 }: {
   id: string
   description: string
   onClick: () => void
   iconType: AvailableUnfilledIcon
+  disabled?: boolean
 }) {
   return (
     <OLTooltip
@@ -21,7 +23,11 @@ export default function FileTreeActionButton({
       description={description}
       overlayProps={{ placement: 'bottom' }}
     >
-      <button className="btn file-tree-toolbar-action-button" onClick={onClick}>
+      <button
+        className="btn file-tree-toolbar-action-button"
+        onClick={onClick}
+        disabled={disabled}
+      >
         <MaterialIcon
           unfilled
           type={iconType}

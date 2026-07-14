@@ -393,6 +393,7 @@ const makeIdeReactProvider = (
       projectJoined: true,
       permissionsLevel: scope.permissionsLevel as PermissionsLevel,
       setPermissionsLevel: () => {},
+      outOfSync: false,
       setOutOfSync: () => {},
     }))
 

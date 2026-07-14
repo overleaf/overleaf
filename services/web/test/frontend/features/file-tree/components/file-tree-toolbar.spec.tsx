@@ -1,5 +1,6 @@
 import FileTreeToolbar from '../../../../../frontend/js/features/file-tree/components/file-tree-toolbar'
 import { EditorProviders } from '../../../helpers/editor-providers'
+import { makeEditorManagerProviderWithStaleDocs } from '../../ide-react/helpers/editor-manager-provider-with-stale-docs'
 import { FileTreeProvider } from '../helpers/file-tree-provider'
 
 describe('<FileTreeToolbar/>', function () {
@@ -54,5 +55,40 @@ describe('<FileTreeToolbar/>', function () {
     cy.findAllByRole('button', { name: 'New folder' })
     cy.findAllByRole('button', { name: 'Upload' })
     cy.findAllByRole('button', { name: 'Close' })
+  })
+
+  describe('Network stall', function () {
+    beforeEach(function () {
+      cy.clock()
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-splitTestVariants', {
+          'intermittent-connection-improvements': 'enabled',
+        })
+      })
+      cy.then(() => {
+        const now = performance.now()
+        cy.mount(
+          <EditorProviders
+            rootDocId=""
+            providers={{
+              EditorManagerProvider: makeEditorManagerProviderWithStaleDocs(
+                now - 11_000
+              ),
+            }}
+          >
+            <FileTreeProvider>
+              <FileTreeToolbar />
+            </FileTreeProvider>
+          </EditorProviders>
+        )
+      })
+    })
+
+    it('disables action buttons when saving is stalled', function () {
+      cy.tick(1000)
+      cy.findByRole('button', { name: 'New file' }).should('be.disabled')
+      cy.findByRole('button', { name: 'New folder' }).should('be.disabled')
+      cy.findByRole('button', { name: 'Upload' }).should('be.disabled')
+    })
   })
 })

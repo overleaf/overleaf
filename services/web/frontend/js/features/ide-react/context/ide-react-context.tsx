@@ -34,6 +34,7 @@ type IdeReactContextValue = {
   projectJoined: boolean
   permissionsLevel: PermissionsLevel
   setPermissionsLevel: (permissionsLevel: PermissionsLevel) => void
+  outOfSync: boolean
   setOutOfSync: (value: boolean) => void
 }
 
@@ -143,6 +144,7 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
       setStartedFreeTrial,
       permissionsLevel: outOfSync ? 'readOnly' : permissionsLevel,
       setPermissionsLevel,
+      outOfSync,
       setOutOfSync,
       projectId,
       reportError,

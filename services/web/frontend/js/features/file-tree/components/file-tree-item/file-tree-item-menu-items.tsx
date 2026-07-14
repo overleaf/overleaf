@@ -8,6 +8,7 @@ import {
   OLDropdownItem,
 } from '@/shared/components/ol/ol-dropdown-menu'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 
 function FileTreeItemMenuItems() {
   const { t } = useTranslation()
@@ -47,11 +48,18 @@ function FileTreeItemMenuItems() {
     startUploadingDocOrFile()
   }, [startUploadingDocOrFile])
 
+  const isDisabledDueToNetworkStall = useIsNetworkStalled()
+
   return (
     <>
       {canRename ? (
         <li role="none">
-          <OLDropdownItem onClick={startRenaming}>{t('rename')}</OLDropdownItem>
+          <OLDropdownItem
+            onClick={startRenaming}
+            disabled={isDisabledDueToNetworkStall}
+          >
+            {t('rename')}
+          </OLDropdownItem>
         </li>
       ) : null}
       {downloadPath ? (
@@ -60,6 +68,7 @@ function FileTreeItemMenuItems() {
             href={downloadPath}
             onClick={downloadWithAnalytics}
             download={selectedFileName ?? undefined}
+            disabled={isDisabledDueToNetworkStall}
           >
             {t('download')}
           </OLDropdownItem>
@@ -69,7 +78,10 @@ function FileTreeItemMenuItems() {
         <>
           <OLDropdownDivider />
           <li role="none">
-            <OLDropdownItem onClick={setRootDocId}>
+            <OLDropdownItem
+              onClick={setRootDocId}
+              disabled={isDisabledDueToNetworkStall}
+            >
               {t('set_as_main_document')}
             </OLDropdownItem>
           </li>
@@ -79,7 +91,10 @@ function FileTreeItemMenuItems() {
         <>
           <OLDropdownDivider />
           <li role="none">
-            <OLDropdownItem onClick={startDeleting}>
+            <OLDropdownItem
+              onClick={startDeleting}
+              disabled={isDisabledDueToNetworkStall}
+            >
               {t('delete')}
             </OLDropdownItem>
           </li>
@@ -89,17 +104,26 @@ function FileTreeItemMenuItems() {
         <>
           <OLDropdownDivider />
           <li role="none">
-            <OLDropdownItem onClick={createWithAnalytics}>
+            <OLDropdownItem
+              onClick={createWithAnalytics}
+              disabled={isDisabledDueToNetworkStall}
+            >
               {t('new_file')}
             </OLDropdownItem>
           </li>
           <li role="none">
-            <OLDropdownItem onClick={startCreatingFolder}>
+            <OLDropdownItem
+              onClick={startCreatingFolder}
+              disabled={isDisabledDueToNetworkStall}
+            >
               {t('new_folder')}
             </OLDropdownItem>
           </li>
           <li role="none">
-            <OLDropdownItem onClick={uploadWithAnalytics}>
+            <OLDropdownItem
+              onClick={uploadWithAnalytics}
+              disabled={isDisabledDueToNetworkStall}
+            >
               {t('upload')}
             </OLDropdownItem>
           </li>

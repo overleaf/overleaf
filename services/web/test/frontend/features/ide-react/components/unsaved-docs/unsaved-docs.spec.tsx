@@ -8,6 +8,7 @@ import { SplitTestProvider } from '@/shared/context/split-test-context'
 const defaultUnsavedDocsContextValue = {
   unsavedDocs: new Map<string, number>([['doc1', 16]]),
   isLocked: false,
+  isSavingStalled: false,
 }
 
 const mockSocket = {

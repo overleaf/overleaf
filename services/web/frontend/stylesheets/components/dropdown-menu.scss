@@ -160,6 +160,12 @@ $dropdown-item-min-height: 36px;
     color: var(--dropdown-text-active);
   }
 
+  &.disabled,
+  &[aria-disabled='true'] {
+    color: var(--content-disabled);
+    pointer-events: none;
+  }
+
   &.btn-link {
     text-decoration: none;
 

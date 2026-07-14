@@ -17,6 +17,7 @@ import CommandDropdown, {
   MenuStructure,
 } from './command-dropdown'
 import { useRailContext } from '../../context/rail-context'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 import WordCountModal from '@/features/word-count-modal/components/word-count-modal'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
@@ -44,6 +45,7 @@ export const ToolbarMenuBar = () => {
   const { setView, view } = useLayoutContext()
   const { pdfUrl } = useCompileContext()
   const wordCountEnabled = pdfUrl || isSplitTestEnabled('word-count-client')
+  const isDisabledDueToNetworkStall = useIsNetworkStalled()
   const [showWordCountModal, setShowWordCountModal] = useState(false)
   const [showCloneProjectModal, setShowCloneProjectModal] = useState(false)
   const openProject = useOpenProject()
@@ -59,6 +61,7 @@ export const ToolbarMenuBar = () => {
       {
         type: 'command',
         label: t('show_version_history'),
+        disabled: isDisabledDueToNetworkStall,
         handler: () => {
           setView(view === 'history' ? 'editor' : 'history')
         },
@@ -76,14 +79,14 @@ export const ToolbarMenuBar = () => {
       {
         type: 'command',
         label: t('make_a_copy'),
-        disabled: anonymous,
+        disabled: anonymous || isDisabledDueToNetworkStall,
         handler: () => {
           setShowCloneProjectModal(true)
         },
         id: 'copy_project',
       },
     ],
-    [t, setView, view, wordCountEnabled, anonymous]
+    [t, setView, view, wordCountEnabled, anonymous, isDisabledDueToNetworkStall]
   )
   const fileMenuStructure: MenuStructure = useMemo(
     () => [

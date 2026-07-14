@@ -18,11 +18,14 @@ const intermittentConnectionImprovementsEnabled = isSplitTestEnabled(
   'intermittent-connection-improvements'
 )
 
+const STALL_AFTER_SECONDS = 10 // treat saving as stalled after this time
+
 // lock the editor after this time if unsaved
 const MAX_UNSAVED_SECONDS = intermittentConnectionImprovementsEnabled ? 600 : 30
 
 type UnsavedDocsContextValue = {
   unsavedDocs: Map<string, number>
+  isSavingStalled: boolean
   isLocked: boolean
 }
 
@@ -94,6 +97,7 @@ export const UnsavedDocsProvider: FC<React.PropsWithChildren> = ({
   }, [openDocs, debugTimers])
 
   const maxUnsavedSeconds = Math.max(0, ...unsavedDocs.values())
+  const isSavingStalled = maxUnsavedSeconds > STALL_AFTER_SECONDS
 
   // lock the editor if at least one doc has been unsaved for too long
   useEffect(() => {
@@ -123,8 +127,8 @@ export const UnsavedDocsProvider: FC<React.PropsWithChildren> = ({
   }, [unsavedDocs])
 
   const value = useMemo(
-    () => ({ unsavedDocs, isLocked }),
-    [unsavedDocs, isLocked]
+    () => ({ unsavedDocs, isSavingStalled, isLocked }),
+    [unsavedDocs, isSavingStalled, isLocked]
   )
 
   return (

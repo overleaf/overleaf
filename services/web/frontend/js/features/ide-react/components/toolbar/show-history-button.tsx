@@ -4,11 +4,13 @@ import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useCallback } from 'react'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 
 export default function ShowHistoryButton() {
   const { t } = useTranslation()
   const { view, setView, restoreView } = useLayoutContext()
   const { sendEvent } = useEditorAnalytics()
+  const isDisabledDueToNetworkStall = useIsNetworkStalled()
 
   const toggleHistoryOpen = useCallback(() => {
     const action = view === 'history' ? 'close' : 'open'
@@ -32,6 +34,7 @@ export default function ShowHistoryButton() {
           className="ide-redesign-toolbar-button-subdued ide-redesign-toolbar-button-icon"
           onClick={toggleHistoryOpen}
           accessibilityLabel={t('history')}
+          disabled={isDisabledDueToNetworkStall}
         />
       </OLTooltip>
     </div>

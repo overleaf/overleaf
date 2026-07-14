@@ -26,6 +26,7 @@ import { Folder } from '../../../../../types/folder'
 import { FileTreeEntity } from '../../../../../types/file-tree-entity'
 import { isMac } from '@/shared/utils/os'
 import useEventListener from '@/shared/hooks/use-event-listener'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 
 const FileTreeSelectableContext = createContext<
   | {
@@ -253,6 +254,7 @@ export function useSelectableEntity(id: string, type: string) {
   const { view, setView } = useLayoutContext()
   const { setContextMenuCoords } = useFileTreeMainContext()
   const { fileTreeData } = useFileTreeData()
+  const isDisabledDueToNetworkStall = useIsNetworkStalled()
   const {
     selectedEntityIds,
     selectOrMultiSelectEntity,
@@ -261,6 +263,11 @@ export function useSelectableEntity(id: string, type: string) {
   } = useFileTreeSelectable()
 
   const isSelected = selectedEntityIds.has(id)
+
+  // block opening a different doc/file while saving is stalled. Folders only
+  // expand or keep the current view, so they stay interactive.
+  const isDisabled =
+    isDisabledDueToNetworkStall && (type === 'doc' || type === 'file')
 
   const buildSelectedRange = useCallback(
     (id: string) => {
@@ -352,44 +359,63 @@ export function useSelectableEntity(id: string, type: string) {
 
   const handleClick = useCallback(
     (ev: any) => {
+      if (isDisabled) {
+        return
+      }
       handleEvent(ev)
       if (!ev.ctrlKey && !ev.metaKey) {
         setContextMenuCoords(null)
       }
     },
-    [handleEvent, setContextMenuCoords]
+    [isDisabled, handleEvent, setContextMenuCoords]
   )
 
   const handleKeyPress = useCallback(
     (ev: any) => {
+      if (isDisabled) {
+        return
+      }
       if (ev.key === 'Enter' || ev.key === ' ') {
         handleEvent(ev)
       }
     },
-    [handleEvent]
+    [isDisabled, handleEvent]
   )
 
   const handleContextMenu = useCallback(
     (ev: any) => {
       // make sure the right-clicked entity gets selected
+      if (isDisabled) {
+        return
+      }
       if (!selectedEntityIds.has(id)) {
         handleEvent(ev)
       }
     },
-    [id, handleEvent, selectedEntityIds]
+    [id, handleEvent, selectedEntityIds, isDisabled]
   )
 
   const isVisuallySelected =
     !isRootFolderSelected && isSelected && view !== 'pdf'
   const props = useMemo(
     () => ({
-      className: classNames({ selected: isVisuallySelected }),
+      className: classNames({
+        selected: isVisuallySelected,
+        'entity-disabled': isDisabled,
+      }),
       'aria-selected': isVisuallySelected,
+      'aria-disabled': isDisabled || undefined,
       onClick: handleClick,
       onContextMenu: handleContextMenu,
       onKeyPress: handleKeyPress,
     }),
-    [handleClick, handleContextMenu, handleKeyPress, isVisuallySelected]
+    [
+      handleClick,
+      handleContextMenu,
+      handleKeyPress,
+      isVisuallySelected,
+      isDisabled,
+    ]
   )
 
   return { isSelected, props }

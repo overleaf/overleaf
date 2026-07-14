@@ -162,6 +162,14 @@
     font-style: italic;
   }
 
+  &.tab-disabled {
+    .editor-file-tab-content,
+    .editor-file-tab-icon .file-tree-icon,
+    .editor-file-tab-icon .linked-file-highlight {
+      color: var(--content-disabled-themed);
+    }
+  }
+
   .editor-file-tab-action {
     display: flex;
     align-items: center;

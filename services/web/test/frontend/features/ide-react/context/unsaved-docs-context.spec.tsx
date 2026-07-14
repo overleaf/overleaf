@@ -48,6 +48,7 @@ function mount(
       projectJoined: true,
       permissionsLevel: 'owner' as PermissionsLevel,
       setPermissionsLevel: onSetPermissionsLevel,
+      outOfSync: false,
       setOutOfSync: () => {},
     }))
 

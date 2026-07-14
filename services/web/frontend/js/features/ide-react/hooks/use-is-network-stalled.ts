@@ -1,0 +1,10 @@
+import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { useUnsavedDocsContext } from '@/features/ide-react/context/unsaved-docs-context'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
+
+export default function useIsNetworkStalled(): boolean {
+  const enabled = useFeatureFlag('intermittent-connection-improvements')
+  const { isSavingStalled } = useUnsavedDocsContext()
+  const { outOfSync } = useIdeReactContext()
+  return enabled && (isSavingStalled || outOfSync)
+}

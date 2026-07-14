@@ -7,6 +7,7 @@ import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provi
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import FileTreeActionButton from './file-tree-action-button'
 import { useRailContext } from '../../ide-react/context/rail-context'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 
 export default function FileTreeActionButtons({
   fileTreeExpanded,
@@ -17,6 +18,7 @@ export default function FileTreeActionButtons({
   const { fileTreeReadOnly } = useFileTreeData()
   const { write } = usePermissionsContext()
   const { handlePaneCollapse } = useRailContext()
+  const isDisabledDueToNetworkStall = useIsNetworkStalled()
 
   const {
     canCreate,
@@ -37,11 +39,13 @@ export default function FileTreeActionButtons({
           eventTracking.sendMB('new-file-click', { location })
           startCreatingDocOrFile()
         },
+        disabled: isDisabledDueToNetworkStall,
       },
       {
         label: t('new_folder'),
         id: 'new_folder',
         handler: startCreatingFolder,
+        disabled: isDisabledDueToNetworkStall,
       },
       {
         label: t('upload_file'),
@@ -50,6 +54,7 @@ export default function FileTreeActionButtons({
           eventTracking.sendMB('upload-click', { location })
           startUploadingDocOrFile()
         },
+        disabled: isDisabledDueToNetworkStall,
       },
     ]
   }, [
@@ -60,6 +65,7 @@ export default function FileTreeActionButtons({
     startCreatingFolder,
     startUploadingDocOrFile,
     write,
+    isDisabledDueToNetworkStall,
   ])
 
   if (fileTreeReadOnly) return null
@@ -84,6 +90,7 @@ export default function FileTreeActionButtons({
               description={t('new_file')}
               onClick={createWithAnalytics}
               iconType="note_add"
+              disabled={isDisabledDueToNetworkStall}
             />
           )}
           {canCreate && (
@@ -92,6 +99,7 @@ export default function FileTreeActionButtons({
               description={t('new_folder')}
               onClick={startCreatingFolder}
               iconType="create_new_folder"
+              disabled={isDisabledDueToNetworkStall}
             />
           )}
           {canCreate && (
@@ -100,6 +108,7 @@ export default function FileTreeActionButtons({
               description={t('upload')}
               onClick={uploadWithAnalytics}
               iconType="upload"
+              disabled={isDisabledDueToNetworkStall}
             />
           )}
           {canBulkDelete && (
