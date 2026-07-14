@@ -104,6 +104,9 @@ async function main() {
     console.log(
       `Collaborator lookups: cacheHitWithCollaborators=${stats.collaboratorCacheHitWithCollaborators}, cacheHitNoCollaborators=${stats.collaboratorCacheHitNoCollaborators}, cacheMissWithCollaborators=${stats.collaboratorCacheMissWithCollaborators}, cacheMissNoCollaborators=${stats.collaboratorCacheMissNoCollaborators}, mongoQueries=${stats.collaboratorMongoQueries}`
     )
+    console.log(
+      `mongo-queries: ${formatDuration(stats.collaboratorMongoQueriesMs)} mongo_queries_ms=${stats.collaboratorMongoQueriesMs}`
+    )
 
     if (dryRun) {
       console.log('\n[DRY RUN] Projects that would be queued:')
@@ -234,6 +237,7 @@ async function getProjectsWithCollaborators(
     batches.push(projectsNeedingMongoLookup.slice(i, i + MONGO_IN_BATCH_SIZE))
   }
 
+  const mongoQueriesStart = performance.now()
   const batchResults = await promiseMapWithLimit(
     MONGO_BATCH_CONCURRENCY,
     batches,
@@ -255,6 +259,9 @@ async function getProjectsWithCollaborators(
         )
         .toArray()
     }
+  )
+  stats.collaboratorMongoQueriesMs += Math.round(
+    performance.now() - mongoQueriesStart
   )
 
   const positives = new Set(
@@ -294,6 +301,7 @@ type NotificationStats = {
   collaboratorCacheMissWithCollaborators: number
   collaboratorCacheMissNoCollaborators: number
   collaboratorMongoQueries: number
+  collaboratorMongoQueriesMs: number
 }
 
 async function getProjectsToNotify(): Promise<{
@@ -317,6 +325,7 @@ async function getProjectsToNotify(): Promise<{
     collaboratorCacheMissWithCollaborators: 0,
     collaboratorCacheMissNoCollaborators: 0,
     collaboratorMongoQueries: 0,
+    collaboratorMongoQueriesMs: 0,
   }
   let lastProgressLog = Date.now()
 
