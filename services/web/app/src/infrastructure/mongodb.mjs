@@ -254,6 +254,18 @@ export async function getCollectionInternal(name) {
   return internalDb.collection(name)
 }
 
+/**
+ * Direct access to a collection on the auxiliary Mongo cluster, bypassing
+ * the dual-write mirror in `db`. For use by data-migration scripts that need
+ * to write to the auxiliary cluster without also writing to the primary one.
+ */
+export async function getAuxCollectionInternal(name) {
+  if (!auxInternalDb) {
+    throw new OError('no auxiliary Mongo cluster configured')
+  }
+  return auxInternalDb.collection(name)
+}
+
 export async function waitForDb() {
   await connectionPromise
   await auxConnectionPromise
