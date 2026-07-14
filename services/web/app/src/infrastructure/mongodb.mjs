@@ -157,6 +157,16 @@ export async function waitForDb() {
   await auxConnectionPromise
 }
 
+/**
+ * Starts a client session for use with multi-document transactions
+ * (session.withTransaction(...)). Requires Mongo to be running as a replica
+ * set, which is enforced at startup for every deployment
+ */
+export async function startSession() {
+  const client = await connectionPromise
+  return client.startSession()
+}
+
 export default {
   db,
   ObjectId,
@@ -166,6 +176,7 @@ export default {
   getCollectionInternal,
   cleanupTestDatabase,
   dropTestDatabase,
+  startSession,
   READ_PREFERENCE_PRIMARY,
   READ_PREFERENCE_SECONDARY,
 }
