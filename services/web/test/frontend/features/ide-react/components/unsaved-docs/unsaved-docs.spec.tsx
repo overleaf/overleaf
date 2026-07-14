@@ -4,6 +4,8 @@ import { GlobalAlertsProvider } from '@/features/ide-react/context/global-alerts
 import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { ConnectionContext } from '@/features/ide-react/context/connection-context'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
+import { EditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { IdeReactContext } from '@/features/ide-react/context/ide-react-context'
 
 const defaultUnsavedDocsContextValue = {
   unsavedDocs: new Map<string, number>([['doc1', 16]]),
@@ -37,16 +39,37 @@ const mockFileTreePathContextValue = {
   previewByPath: () => null,
 }
 
-const mount = () => {
+const mockEditorManagerContextValue = {
+  openDocs: {
+    getUnsavedOpsSize: () => ({ pendingOpsLength: 2, inflightOpsLength: 1 }),
+  },
+} as any
+
+const mount = ({
+  unsavedDocsContextValue = defaultUnsavedDocsContextValue,
+  reportError = cy.stub(),
+}: {
+  unsavedDocsContextValue?: typeof defaultUnsavedDocsContextValue
+  reportError?: any
+} = {}) => {
+  const ideReactContextValue = { reportError } as any
   cy.mount(
     <SplitTestProvider>
       <GlobalAlertsProvider>
         <ConnectionContext.Provider value={mockConnectionContextValue}>
-          <FileTreePathContext.Provider value={mockFileTreePathContextValue}>
-            <UnsavedDocsContext.Provider value={defaultUnsavedDocsContextValue}>
-              <UnsavedDocs />
-            </UnsavedDocsContext.Provider>
-          </FileTreePathContext.Provider>
+          <IdeReactContext.Provider value={ideReactContextValue}>
+            <EditorManagerContext.Provider
+              value={mockEditorManagerContextValue}
+            >
+              <FileTreePathContext.Provider
+                value={mockFileTreePathContextValue}
+              >
+                <UnsavedDocsContext.Provider value={unsavedDocsContextValue}>
+                  <UnsavedDocs />
+                </UnsavedDocsContext.Provider>
+              </FileTreePathContext.Provider>
+            </EditorManagerContext.Provider>
+          </IdeReactContext.Provider>
         </ConnectionContext.Provider>
       </GlobalAlertsProvider>
     </SplitTestProvider>
@@ -71,5 +94,35 @@ describe('<UnsavedDocs />', function () {
     enableFlag()
     mount()
     cy.findByRole('alert').should('not.exist')
+  })
+
+  describe('when locked', function () {
+    const lockedContextValue = {
+      unsavedDocs: new Map<string, number>(),
+      isLocked: true,
+    }
+
+    it('shows the locked alert and reports the error when flag is disabled', function () {
+      const reportError = cy.stub().as('reportError')
+      mount({ unsavedDocsContextValue: lockedContextValue, reportError })
+      cy.findByRole('alert').should('exist')
+      cy.get('@reportError').should(
+        'have.been.calledOnceWith',
+        'connection-lost-with-unsaved-changes',
+        { pendingOpsLength: 2, inflightOpsLength: 1 }
+      )
+    })
+
+    it('hides the locked alert but still reports the error when flag is enabled', function () {
+      const reportError = cy.stub().as('reportError')
+      enableFlag()
+      mount({ unsavedDocsContextValue: lockedContextValue, reportError })
+      cy.findByRole('alert').should('not.exist')
+      cy.get('@reportError').should(
+        'have.been.calledOnceWith',
+        'connection-lost-with-unsaved-changes',
+        { pendingOpsLength: 2, inflightOpsLength: 1 }
+      )
+    })
   })
 })
