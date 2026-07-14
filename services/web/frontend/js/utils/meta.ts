@@ -279,6 +279,14 @@ export interface Meta {
     | undefined
   'ol-recurlyApiKey': string
   'ol-recurlySubdomain': string
+  'ol-refSyncState': {
+    synced: boolean
+    accessOk: boolean
+    lastSyncProblem:
+      | 'zotero_no_collection'
+      | 'zotero_multiple_collections'
+      | null
+  }
   'ol-ro-mirror-on-client-no-local-storage': boolean
   'ol-samlError': SAMLError | undefined
   'ol-script-log': ScriptLogType

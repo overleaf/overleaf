@@ -3255,6 +3255,7 @@
   "zotero_reference_loading_error_expired": "Zotero token expired, please re-link your account",
   "zotero_reference_loading_error_forbidden": "Could not load references from Zotero, please re-link your account and try again",
   "zotero_sync_description": "With the Zotero integration you can import your references from Zotero into your __appName__ projects.",
+  "zotero_sync_lost_access": "We’ve lost access to your Zotero library. <0>Reconnect your account</0> to keep syncing your references.",
   "zotero_sync_multiple_collections": "We found more than one collection called “Overleaf” in your Zotero library. Sync requires exactly one.",
   "zotero_sync_no_collection": "We couldn’t find a collection called “Overleaf” in your Zotero library.",
   "zotero_sync_success": "Synced __count__ reference from Zotero",
