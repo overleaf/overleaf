@@ -4,6 +4,11 @@ import {
   makeEditorProvider,
 } from '../../../helpers/editor-providers'
 import { Cobranding } from '@ol-types/cobranding'
+import {
+  OnlineUsersContext,
+  type OnlineUser,
+} from '@/features/ide-react/context/online-users-context'
+import { UnsavedDocsContext } from '@/features/ide-react/context/unsaved-docs-context'
 import partnerLogoUrl from './cobranding-logo.png'
 
 describe('<Toolbar />', function () {
@@ -244,5 +249,67 @@ describe('<Toolbar />', function () {
     })
 
     // TODO: Test all the dynamic items
+  })
+
+  describe('offline gating', function () {
+    const onlineUser: OnlineUser = {
+      id: 'client-1',
+      user_id: 'user-1',
+      email: 'alice@example.com',
+      name: 'alice',
+      initial: 'a',
+    }
+
+    const mountToolbar = ({ offline }: { offline: boolean }) => {
+      const unsavedDocs = offline ? new Map([['doc-1', 20]]) : new Map()
+      cy.mount(
+        <EditorProviders>
+          <OnlineUsersContext.Provider
+            value={{
+              onlineUsers: {},
+              onlineUserCursorHighlights: {},
+              onlineUsersArray: [onlineUser],
+              onlineUsersCount: 1,
+            }}
+          >
+            <UnsavedDocsContext.Provider
+              value={{ unsavedDocs, isLocked: false, isSavingStalled: offline }}
+            >
+              <Toolbar />
+            </UnsavedDocsContext.Provider>
+          </OnlineUsersContext.Provider>
+        </EditorProviders>
+      )
+    }
+
+    describe('with intermittent-connection-improvements enabled', function () {
+      beforeEach(function () {
+        cy.window().then(win => {
+          win.metaAttributesCache.set('ol-splitTestVariants', {
+            'intermittent-connection-improvements': 'enabled',
+          })
+        })
+      })
+
+      it('shows online users and no offline indicator when online', function () {
+        mountToolbar({ offline: false })
+        cy.get('.ide-redesign-online-users').should('exist')
+        cy.findByText('You’re offline').should('not.exist')
+      })
+
+      it('hides online users and shows the offline indicator when offline', function () {
+        mountToolbar({ offline: true })
+        cy.get('.ide-redesign-online-users').should('not.exist')
+        cy.findAllByText('You’re offline').first().should('be.visible')
+      })
+    })
+
+    describe('with intermittent-connection-improvements disabled', function () {
+      it('always shows online users and never the offline indicator', function () {
+        mountToolbar({ offline: true })
+        cy.get('.ide-redesign-online-users').should('exist')
+        cy.findByText('You’re offline').should('not.exist')
+      })
+    })
   })
 })

@@ -16,6 +16,7 @@ import UpgradeButton from './upgrade-button'
 import getMeta from '@/utils/meta'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import SplitTestBadge from '@/shared/components/split-test-badge'
@@ -33,7 +34,12 @@ export const Toolbar = () => {
   const upgradeButtonRelocation = useFeatureFlag(
     'editor-upgrade-button-relocation'
   )
+  const improvedFlakyConnections = useFeatureFlag(
+    'intermittent-connection-improvements'
+  )
   const { t } = useTranslation()
+
+  const isOfflineDueToNetworkStall = useIsNetworkStalled()
   const shouldDisplaySubmitButton =
     (permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite') &&
     SubmitProjectButton
@@ -130,9 +136,11 @@ export const Toolbar = () => {
       </div>
       <ToolbarProjectTitle />
       <div className="ide-redesign-toolbar-actions-wrapper">
-        <OfflineIndicator />
+        {improvedFlakyConnections && (
+          <OfflineIndicator isOffline={isOfflineDueToNetworkStall} />
+        )}
         <div className="ide-redesign-toolbar-actions">
-          <OnlineUsers />
+          {!isOfflineDueToNetworkStall && <OnlineUsers />}
           {!isRestrictedTokenMember && <ShowHistoryButton />}
           <ChangeLayoutButton />
           {shouldDisplaySubmitButton && cobranding && (
