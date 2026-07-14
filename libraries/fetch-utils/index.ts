@@ -1,10 +1,12 @@
 import _ from 'lodash'
-import { Readable } from 'node:stream'
+import { Readable, Duplex } from 'node:stream'
 import OError from '@overleaf/o-error'
 import fetch from 'node-fetch'
 import type { Response } from 'node-fetch'
 import http from 'node:http'
 import https from 'node:https'
+import net from 'node:net'
+import tls from 'node:tls'
 
 let logger: { warn: (...args: any[]) => void } | undefined
 
@@ -160,6 +162,13 @@ class RequestFailedError extends OError {
   }
 }
 
+function setupDefaultAgent(fetchOps: any) {
+  // Provide a function to get the agent for each request as there may be
+  // multiple requests with different protocols due to redirects.
+  fetchOps.agent = (url: URL) =>
+    url.protocol === 'https:' ? httpsAgent : httpAgent
+}
+
 function parseOpts(opts: any, url: string | URL) {
   const fetchOpts = _.omit(opts, ['json', 'signal', 'basicAuth'])
   if (opts.json) {
@@ -167,6 +176,9 @@ function parseOpts(opts: any, url: string | URL) {
   }
   if (opts.basicAuth) {
     setupBasicAuth(fetchOpts, opts.basicAuth)
+  }
+  if (!fetchOpts.agent) {
+    setupDefaultAgent(fetchOpts)
   }
 
   const abortController = new AbortController()
@@ -302,33 +314,88 @@ class ConnectTimeoutError extends OError {
   }
 }
 
-function withTimeout(createConnection: any, options: any, callback: any) {
-  if (options.connectTimeout) {
-    // Wrap createConnection in a timeout
-    const timer = setTimeout(() => {
-      socket.destroy(new ConnectTimeoutError(options))
-    }, options.connectTimeout)
-    const socket = createConnection(options, (err: any, stream: any) => {
-      clearTimeout(timer)
-      callback(err, stream)
-    })
-    return socket
-  } else {
-    // Fallback to default createConnection
-    return createConnection(options, callback)
+function tryToCreateConnection(
+  createConnection: (options: any) => Duplex,
+  options: any,
+  callback: (err: any, socket: any) => void
+) {
+  let socket: Duplex
+  try {
+    socket = createConnection(options)
+  } catch (err) {
+    callback(err, null)
+    return
   }
+  const timer = setTimeout(() => {
+    socket.destroy(new ConnectTimeoutError(options))
+  }, options.connectTimeout)
+  const onConnect = () => {
+    clearTimeout(timer)
+    socket.off('error', onError)
+    callback(null, socket)
+  }
+  const onError = (err: any) => {
+    clearTimeout(timer)
+    socket.off('connect', onConnect)
+    callback(err, null)
+  }
+  socket.once('connect', onConnect)
+  socket.once('error', onError)
+}
+
+function withTimeout(
+  createConnection: (options: any) => Duplex,
+  options: any,
+  callback: (err: any, socket: any) => void
+) {
+  const attempt = (remainingAttempts: number) => {
+    remainingAttempts--
+    tryToCreateConnection(createConnection, options, (err, socket) => {
+      if (err && remainingAttempts > 0) {
+        setTimeout(() => {
+          attempt(remainingAttempts)
+        }, options.connectRetryInterval ?? 100)
+        return
+      }
+      callback(err, socket)
+    })
+  }
+  attempt(3)
 }
 
 class CustomHttpAgent extends http.Agent {
+  constructor(options: any) {
+    if (!(options.connectTimeout > 0)) {
+      throw new Error(
+        'CustomHttpAgent must be called with positive connectTimeout'
+      )
+    }
+    super(options)
+  }
   createConnection(options: any, callback: any) {
-    return withTimeout(super.createConnection.bind(this), options, callback)
+    withTimeout(net.createConnection, options, callback)
+    return undefined
   }
 }
+
 class CustomHttpsAgent extends https.Agent {
+  constructor(options: any) {
+    if (!(options.connectTimeout > 0)) {
+      throw new Error(
+        'CustomHttpsAgent must be called with positive connectTimeout'
+      )
+    }
+    super(options)
+  }
   createConnection(options: any, callback: any) {
-    return withTimeout(super.createConnection.bind(this), options, callback)
+    withTimeout(tls.connect, options, callback)
+    return undefined
   }
 }
+
+const MAX_CONNECT_TIME = 1000
+const httpAgent = new CustomHttpAgent({ connectTimeout: MAX_CONNECT_TIME })
+const httpsAgent = new CustomHttpsAgent({ connectTimeout: MAX_CONNECT_TIME })
 
 export {
   fetchJson,

@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import dns from 'node:dns'
+import http from 'node:http'
 import { once } from 'node:events'
 import events from 'node:events'
 import fs from 'node:fs'
@@ -363,6 +364,66 @@ describe('fetch-utils', function () {
         .and.to.equal(
           'request to http://10.255.255.255/ failed, reason: connect timeout'
         )
+    })
+
+    it('retries after a delay', { timeout: 5_000 }, async function () {
+      // The test should finish after 1.5s.
+      // t   0ms: first connect fails with ECONNREFUSED
+      // t 500ms: listen on port
+      // t1000ms: retry to connect again, works
+      // t1500ms: respond to request
+      const agent = new CustomHttpAgent({
+        connectTimeout: 100,
+        connectRetryInterval: 1_000,
+      })
+      const server = http.createServer((req, res) => {
+        setTimeout(() => {
+          res.write('hello')
+          res.end()
+          server.close()
+        }, 500)
+      })
+      // Grab a dynamic port, then close again so that the first connect
+      // attempt is refused before the server starts listening for real.
+      await once(server.listen(0), 'listening')
+      const { port } = server.address()
+      await new Promise(resolve => server.close(resolve))
+      const t0 = performance.now()
+      setTimeout(() => {
+        server.listen(port)
+      }, 500)
+      const body = await fetchString(`http://127.0.0.1:${port}`, { agent })
+      expect(body).to.equal('hello')
+      const t1 = performance.now()
+      expect(t1 - t0).to.be.at.least(1_500)
+    })
+
+    it('does not open a stray connection when the socket errors after connect', async function () {
+      const agent = new CustomHttpAgent({
+        connectTimeout: 100,
+        connectRetryInterval: 10,
+      })
+      const connections = []
+      const server = http.createServer(req => {
+        // Reset the established connection before responding. Doing this in
+        // the request handler guarantees the client finished the connect
+        // phase, so the ECONNRESET arrives after 'connect' has fired.
+        req.socket.resetAndDestroy()
+      })
+      server.on('connection', socket => connections.push(socket))
+      await once(server.listen(0), 'listening')
+      const { port } = server.address()
+      try {
+        await expect(
+          fetchString(`http://127.0.0.1:${port}/`, { agent })
+        ).to.be.rejectedWith(FetchError)
+        // Leave time for a buggy connect retry to open a stray connection.
+        await wait(200)
+        expect(connections).to.have.length(1)
+      } finally {
+        for (const socket of connections) socket.destroy()
+        server.close()
+      }
     })
   })
 

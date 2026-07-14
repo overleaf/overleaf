@@ -1,19 +1,10 @@
 import fs from 'node:fs'
 import logger from '@overleaf/logger'
 import Settings from '@overleaf/settings'
-import {
-  CustomHttpAgent,
-  CustomHttpsAgent,
-  fetchStream,
-  RequestFailedError,
-} from '@overleaf/fetch-utils'
+import { fetchStream, RequestFailedError } from '@overleaf/fetch-utils'
 import { URL } from 'node:url'
 import { pipeline } from 'node:stream/promises'
 import Metrics from '@overleaf/metrics'
-
-const MAX_CONNECT_TIME = 1000
-const httpAgent = new CustomHttpAgent({ connectTimeout: MAX_CONNECT_TIME })
-const httpsAgent = new CustomHttpsAgent({ connectTimeout: MAX_CONNECT_TIME })
 
 async function pipeUrlToFileWithRetry(url, fallbackURL, filePath) {
   let remainingAttempts = 3
@@ -60,10 +51,6 @@ async function pipeUrlToFile(url, fallbackURL, filePath) {
   try {
     stream = await fetchStream(url, {
       signal: AbortSignal.timeout(60 * 1000),
-      // provide a function to get the agent for each request
-      // as there may be multiple requests with different protocols
-      // due to redirects.
-      agent: _url => (_url.protocol === 'https:' ? httpsAgent : httpAgent),
     })
   } catch (err) {
     if (
@@ -73,10 +60,6 @@ async function pipeUrlToFile(url, fallbackURL, filePath) {
     ) {
       stream = await fetchStream(fallbackURL, {
         signal: AbortSignal.timeout(60 * 1000),
-        // provide a function to get the agent for each request
-        // as there may be multiple requests with different protocols
-        // due to redirects.
-        agent: _url => (_url.protocol === 'https:' ? httpsAgent : httpAgent),
       })
       url = fallbackURL
     } else {
