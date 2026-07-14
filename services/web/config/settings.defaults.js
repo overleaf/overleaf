@@ -148,6 +148,7 @@ module.exports = {
       process.env.MONGO_URL ||
       `mongodb://${process.env.MONGO_HOST || '127.0.0.1'}/sharelatex`,
     hasSecondaries: process.env.MONGO_HAS_SECONDARIES === 'true',
+    auxUrl: process.env.MONGO_AUX_CONNECTION_STRING,
   },
 
   redis: {

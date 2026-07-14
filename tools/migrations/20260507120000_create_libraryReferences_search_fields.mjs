@@ -1,6 +1,6 @@
 import Helpers from './lib/helpers.mjs'
 
-const tags = ['saas']
+const tags = ['saas', 'auxiliary']
 
 const indexes = [
   {
