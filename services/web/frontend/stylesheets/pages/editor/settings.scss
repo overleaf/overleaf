@@ -151,7 +151,8 @@
 }
 
 .global-notifications-link {
-  font-size: var(--font-size-01);
+  @include body-sm;
+
   padding: 0 var(--spacing-02);
   margin: 0 var(--spacing-02);
 }
