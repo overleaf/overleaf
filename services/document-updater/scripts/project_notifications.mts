@@ -384,6 +384,9 @@ async function getProjectsToNotify(): Promise<{
         for (const c of candidates) {
           if (!projectsWithCollaborators.has(c.projectId)) {
             stats.skippedNoCollaborators++
+            if (!dryRun) {
+              await deleteProjectNotificationTimestamp(c.projectId, c.timestamp)
+            }
             continue
           }
           stats.matched++
