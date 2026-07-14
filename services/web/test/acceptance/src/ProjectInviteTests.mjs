@@ -1145,5 +1145,162 @@ describe('ProjectInviteTests', function () {
         done
       )
     })
+
+    describe('anonymous (logged-out) access', function () {
+      beforeEach(function (done) {
+        this.anonymousUser = new User()
+        this.anonymousUser.getCsrfToken(done)
+      })
+
+      it('grants read-only access via a public sharing link, regardless of the link privilege', function (done) {
+        Async.series(
+          [
+            cb => {
+              // An "anyone with the link" editor link should still only grant
+              // anonymous users read-only access.
+              updateSharingLink(
+                this.sendingUser,
+                this.projectId,
+                'readAndWrite',
+                (err, link) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  this.sharingLink = link
+                  cb()
+                }
+              )
+            },
+            cb => expectNoProjectAccess(this.anonymousUser, this.projectId, cb),
+            cb => {
+              validateSharingLink(
+                this.anonymousUser,
+                this.projectId,
+                this.sharingLink.token,
+                (err, response, body) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  expect(response.statusCode).to.equal(200)
+                  expect(body.valid).to.equal(true)
+                  expect(body.redirect).to.equal(true)
+                  cb()
+                }
+              )
+            },
+            cb => expectProjectAccess(this.anonymousUser, this.projectId, cb),
+          ],
+          done
+        )
+      })
+
+      it('renders the invite page for a public sharing link', function (done) {
+        Async.series(
+          [
+            cb => {
+              updateSharingLink(
+                this.sendingUser,
+                this.projectId,
+                'readOnly',
+                (err, link) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  this.sharingLink = link
+                  cb()
+                }
+              )
+            },
+            cb =>
+              expectInvitePage(
+                this.anonymousUser,
+                `${settings.siteUrl}/project/${this.projectId}/share`,
+                cb
+              ),
+          ],
+          done
+        )
+      })
+
+      it('redirects to register when there is no public sharing link', function (done) {
+        tryFollowInviteLink(
+          this.anonymousUser,
+          `${settings.siteUrl}/project/${this.projectId}/share`,
+          (err, response) => {
+            if (err) {
+              return done(err)
+            }
+            expect(response.statusCode).to.equal(302)
+            expect(response.headers.location).to.match(/^\/register/)
+            done()
+          }
+        )
+      })
+
+      it('does not grant access via a group-restricted sharing link', function (done) {
+        if (!Features.hasFeature('saas')) {
+          this.skip()
+        }
+        const subscription = new Subscription({
+          adminId: this.sendingUser._id,
+          memberIds: [this.sendingUser._id],
+          groupPlan: true,
+          planCode: 'group_professional',
+          paymentProvider: { state: 'active' },
+        })
+        Async.series(
+          [
+            cb => subscription.ensureExists(cb),
+            cb => {
+              updateSharingLink(
+                this.sendingUser,
+                this.projectId,
+                'readOnly',
+                { subscriptionId: subscription._id.toString() },
+                (err, link) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  this.sharingLink = link
+                  cb()
+                }
+              )
+            },
+            cb => {
+              validateSharingLink(
+                this.anonymousUser,
+                this.projectId,
+                this.sharingLink.token,
+                (err, response, body) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  expect(response.statusCode).to.equal(200)
+                  expect(body.valid).to.equal(false)
+                  cb()
+                }
+              )
+            },
+            cb => expectNoProjectAccess(this.anonymousUser, this.projectId, cb),
+            cb => {
+              // Group-restricted links send logged-out users to register.
+              tryFollowInviteLink(
+                this.anonymousUser,
+                `${settings.siteUrl}/project/${this.projectId}/share`,
+                (err, response) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  expect(response.statusCode).to.equal(302)
+                  expect(response.headers.location).to.match(/^\/register/)
+                  cb()
+                }
+              )
+            },
+          ],
+          done
+        )
+      })
+    })
   })
 })

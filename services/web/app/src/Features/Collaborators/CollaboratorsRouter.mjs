@@ -155,7 +155,6 @@ export default {
         'collaboration',
         'project-invite'
       ),
-      AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(rateLimiters.viewProjectInvite),
       CollaboratorsInviteController.viewSharingLink,
       AnalyticsRegistrationSourceMiddleware.clearSource()
@@ -179,7 +178,6 @@ export default {
         'collaboration',
         'project-invite'
       ),
-      AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(rateLimiters.validateSharingLink),
       CollaboratorsInviteController.validateSharingLink,
       AnalyticsRegistrationSourceMiddleware.clearSource()

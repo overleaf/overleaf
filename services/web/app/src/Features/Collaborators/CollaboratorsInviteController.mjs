@@ -23,6 +23,7 @@ import PrivilegeLevels, {
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 import SubscriptionGroupHandler from '../Subscription/SubscriptionGroupHandler.mjs'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
+import TokenAccessHandler from '../TokenAccess/TokenAccessHandler.mjs'
 
 // This rate limiter allows a different number of requests depending on the
 // number of callaborators a user is allowed. This is implemented by providing
@@ -374,8 +375,17 @@ async function viewSharingLink(req, res) {
 
   const currentUser = SessionManager.getSessionUser(req.session)
   if (!currentUser) {
-    AuthenticationController.setRedirectInSession(req)
-    return res.redirect('/register')
+    const invite =
+      await CollaboratorsInviteGetter.promises.getSharingLinkInvite(projectId)
+    const isPublicSharingLink =
+      invite != null &&
+      invite.privileges !== PrivilegeLevels.NONE &&
+      !invite.subscriptionId
+
+    if (!isPublicSharingLink) {
+      AuthenticationController.setRedirectInSession(req)
+      return res.redirect('/register')
+    }
   }
 
   // cleanup if set for register page
@@ -645,7 +655,19 @@ async function validateSharingLink(req, res) {
 
   const currentUser = SessionManager.getSessionUser(req.session)
 
-  if (invite == null || !currentUser) {
+  if (invite == null) {
+    return res.json({ valid: false })
+  }
+
+  if (!currentUser) {
+    if (
+      invite.reusable &&
+      invite.privileges !== PrivilegeLevels.NONE &&
+      !invite.subscriptionId
+    ) {
+      TokenAccessHandler.grantSessionTokenAccess(req, projectId, token)
+      return res.json({ valid: true, redirect: true })
+    }
     return res.json({ valid: false })
   }
 
