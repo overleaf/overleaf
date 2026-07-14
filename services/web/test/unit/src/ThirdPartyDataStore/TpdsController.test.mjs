@@ -4,6 +4,7 @@ import sinon from 'sinon'
 import Errors from '../../../../app/src/Features/Errors/Errors.js'
 import MockResponse from '../helpers/MockResponse.mjs'
 import MockRequest from '../helpers/MockRequest.mjs'
+import { asZodError } from '@overleaf/validation-tools/testUtils.js'
 
 const ObjectId = mongodb.ObjectId
 
@@ -19,11 +20,16 @@ describe('TpdsController', function () {
       entityType: 'doc',
       rev: 2,
     }
+    ctx.resolvedProject = {
+      _id: new ObjectId(),
+      overleaf: { history: { id: 42, otMigrationStage: 1 } },
+    }
     ctx.TpdsUpdateHandler = {
       promises: {
         newUpdate: sinon.stub().resolves(ctx.metadata),
         deleteUpdate: sinon.stub().resolves(ctx.metadata.entityId),
         createFolder: sinon.stub().resolves(),
+        getOrCreateProject: sinon.stub().resolves(ctx.resolvedProject),
       },
     }
     ctx.UpdateMerger = {
@@ -118,7 +124,7 @@ describe('TpdsController', function () {
 
     ctx.TpdsController = (await import(MODULE_PATH)).default
 
-    ctx.user_id = 'dsad29jlkjas'
+    ctx.user_id = new ObjectId().toString()
   })
 
   describe('creating a project', function () {
@@ -147,6 +153,129 @@ describe('TpdsController', function () {
           resolve()
         }
         ctx.TpdsController.createProject(req, res)
+      })
+    })
+  })
+
+  describe('resolving a project', function () {
+    beforeEach(function (ctx) {
+      ctx.req = {
+        params: { user_id: ctx.user_id },
+        body: {},
+      }
+    })
+
+    it('should throw without any input', async function (ctx) {
+      const next = sinon.stub()
+      await ctx.TpdsController.resolveProject(ctx.req, {}, next)
+      expect(next).to.have.been.calledWithMatch({
+        name: 'InvalidRequestError',
+        zodError: asZodError({
+          code: 'invalid_union',
+          errors: [
+            [
+              {
+                expected: 'string',
+                code: 'invalid_type',
+                path: ['projectId'],
+                message: 'Invalid input: expected string, received undefined',
+              },
+            ],
+            [
+              {
+                expected: 'string',
+                code: 'invalid_type',
+                path: ['projectName'],
+                message: 'Invalid input: expected string, received undefined',
+              },
+            ],
+          ],
+          path: ['body'],
+          message: 'Invalid input',
+        }),
+      })
+    })
+
+    it('should resolve by name', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.req.body = { projectName: 'projectName' }
+        const res = {
+          json: payload => {
+            expect(payload).to.deep.equal({
+              status: 'success',
+              projectId: ctx.resolvedProject._id.toString(),
+              historyId: 42,
+              otMigrationStage: 1,
+            })
+            ctx.TpdsUpdateHandler.promises.getOrCreateProject.should.have.been.calledWith(
+              ctx.user_id,
+              undefined,
+              'projectName'
+            )
+            resolve()
+          },
+        }
+        ctx.TpdsController.resolveProject(ctx.req, res)
+      })
+    })
+
+    it('should resolve by id', async function (ctx) {
+      await new Promise(resolve => {
+        const projectId = ctx.resolvedProject._id.toString()
+        ctx.req.body = { projectId }
+        const res = {
+          json: payload => {
+            expect(payload).to.deep.equal({
+              status: 'success',
+              projectId: ctx.resolvedProject._id.toString(),
+              historyId: 42,
+              otMigrationStage: 1,
+            })
+            ctx.TpdsUpdateHandler.promises.getOrCreateProject.should.have.been.calledWith(
+              ctx.user_id,
+              projectId,
+              undefined
+            )
+            resolve()
+          },
+        }
+        ctx.TpdsController.resolveProject(ctx.req, res)
+      })
+    })
+
+    it('should default the otMigrationStage to zero when unset', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.TpdsUpdateHandler.promises.getOrCreateProject.resolves({
+          _id: ctx.resolvedProject._id,
+          overleaf: { history: { id: 1337 } },
+        })
+        ctx.req.body = { projectName: 'projectName' }
+        const res = {
+          json: payload => {
+            expect(payload).to.deep.equal({
+              status: 'success',
+              projectId: ctx.resolvedProject._id.toString(),
+              historyId: 1337,
+              otMigrationStage: 0,
+            })
+            resolve()
+          },
+        }
+        ctx.TpdsController.resolveProject(ctx.req, res)
+      })
+    })
+
+    it('should indicate in the response when the project could not be resolved', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.TpdsUpdateHandler.promises.getOrCreateProject.resolves(null)
+        ctx.req.body = { projectName: 'projectName' }
+        const res = {
+          json: payload => {
+            expect(payload).to.deep.equal({ status: 'rejected' })
+            resolve()
+          },
+        }
+        ctx.TpdsController.resolveProject(ctx.req, res)
       })
     })
   })

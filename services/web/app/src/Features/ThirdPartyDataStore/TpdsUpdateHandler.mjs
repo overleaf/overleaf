@@ -94,7 +94,7 @@ async function getOrCreateProject(userId, projectId, projectName) {
 async function findProjectByIdWithRWAccess(userId, projectId) {
   const allProjects = await ProjectGetter.promises.findAllUsersProjects(
     userId,
-    'name archived trashed'
+    'name archived trashed overleaf'
   )
   for (const projects of [allProjects.owned, allProjects.readAndWrite]) {
     for (const project of projects) {
@@ -191,5 +191,6 @@ export default {
     newUpdate,
     deleteUpdate,
     createFolder,
+    getOrCreateProject,
   },
 }

@@ -146,7 +146,7 @@ const ProjectGetter = {
   async findUsersProjectsByName(userId, projectName) {
     const allProjects = await ProjectGetter.findAllUsersProjects(
       userId,
-      'name archived trashed'
+      'name archived trashed overleaf'
     )
 
     const { owned, readAndWrite } = allProjects

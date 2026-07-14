@@ -11,6 +11,7 @@ import ProjectCreationHandler from '../Project/ProjectCreationHandler.mjs'
 import ProjectDetailsHandler from '../Project/ProjectDetailsHandler.mjs'
 import HttpErrorHandler from '../Errors/HttpErrorHandler.mjs'
 import TpdsQueueManager from './TpdsQueueManager.mjs'
+import { parseReq, z, zz } from '@overleaf/validation-tools'
 
 async function createProject(req, res) {
   const { user_id: userId } = req.params
@@ -27,6 +28,46 @@ async function createProject(req, res) {
   )
   res.json({
     projectId: project._id.toString(),
+  })
+}
+
+const resolveProjectSchema = z.object({
+  params: z.object({
+    user_id: zz.objectId(),
+  }),
+  body: z
+    .object({
+      projectId: zz.objectId(),
+    })
+    .or(
+      z.object({
+        projectName: z.string().min(1),
+      })
+    ),
+})
+
+// Resolve a project name (or id) to a project id, using the same
+// get-or-create semantics as mergeUpdate: a blank project is created when no
+// project matches the name, and duplicate names trigger the duplicate-name
+// handling before rejecting the request.
+async function resolveProject(req, res) {
+  const {
+    params: { user_id: userId },
+    body: { projectId, projectName },
+  } = parseReq(req, resolveProjectSchema)
+  const project = await TpdsUpdateHandler.promises.getOrCreateProject(
+    userId,
+    projectId,
+    projectName
+  )
+  if (project == null) {
+    return res.json({ status: 'rejected' })
+  }
+  res.json({
+    status: 'success',
+    projectId: project._id.toString(),
+    historyId: project.overleaf?.history?.id,
+    otMigrationStage: project.overleaf?.history?.otMigrationStage ?? 0,
   })
 }
 
@@ -207,6 +248,7 @@ function splitPath(projectId, path) {
 
 export default {
   createProject: expressify(createProject),
+  resolveProject: expressify(resolveProject),
   mergeUpdate: expressify(mergeUpdate),
   deleteUpdate: expressify(deleteUpdate),
   updateFolder: expressify(updateFolder),

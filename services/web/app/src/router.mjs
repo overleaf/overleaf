@@ -981,6 +981,11 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     TpdsController.createProject
   )
   privateApiRouter.post(
+    '/user/:user_id/project/resolve',
+    AuthenticationController.requirePrivateApiAuth(),
+    TpdsController.resolveProject
+  )
+  privateApiRouter.post(
     '/tpds/folder-update',
     AuthenticationController.requirePrivateApiAuth(),
     TpdsController.updateFolder

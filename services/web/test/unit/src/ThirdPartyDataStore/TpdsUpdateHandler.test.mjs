@@ -424,6 +424,84 @@ describe('TpdsUpdateHandler', function () {
       expectDropboxUnlinked()
     })
   })
+
+  describe('getting or creating a project', function () {
+    describe('byId', function () {
+      describe('with no matching project', function () {
+        beforeEach(function (ctx) {
+          ctx.projectId = new ObjectId().toString()
+        })
+        resolveProjectById()
+        expectProjectNotCreated()
+        expectNoProjectResolved()
+      })
+
+      describe('with one matching active project', function () {
+        beforeEach(function (ctx) {
+          ctx.projectId = ctx.projects.active1._id.toString()
+        })
+        resolveProjectById()
+        expectProjectNotCreated()
+        expectProjectResolved()
+      })
+
+      describe('with one matching archived project', function () {
+        beforeEach(function (ctx) {
+          ctx.projectId = ctx.projects.archived1._id.toString()
+        })
+        resolveProjectById()
+        expectProjectNotCreated()
+        expectNoProjectResolved()
+      })
+
+      describe('with one matching trashed project', function () {
+        beforeEach(function (ctx) {
+          ctx.projectId = ctx.projects.trashed._id.toString()
+        })
+        resolveProjectById()
+        expectProjectNotCreated()
+        expectNoProjectResolved()
+      })
+    })
+
+    describe('with no matching project', function () {
+      setupMatchingProjects([])
+      resolveProjectByName()
+      expectProjectCreated()
+      expectProjectResolved()
+    })
+
+    describe('with one matching active project', function () {
+      setupMatchingProjects(['active1'])
+      resolveProjectByName()
+      expectProjectNotCreated()
+      expectProjectResolved()
+    })
+
+    describe('with one matching archived project', function () {
+      setupMatchingProjects(['archived1'])
+      resolveProjectByName()
+      expectProjectNotCreated()
+      expectNoProjectResolved()
+      expectDropboxNotUnlinked()
+    })
+
+    describe('with two matching active projects', function () {
+      setupMatchingProjects(['active1', 'active2'])
+      resolveProjectByName()
+      expectProjectNotCreated()
+      expectNoProjectResolved()
+      expectDropboxUnlinked()
+    })
+
+    describe('with one matching active and one matching archived project', function () {
+      setupMatchingProjects(['active1', 'archived1'])
+      resolveProjectByName()
+      expectProjectNotCreated()
+      expectNoProjectResolved()
+      expectDropboxUnlinked()
+    })
+  })
 })
 
 /* Setup helpers */
@@ -509,6 +587,28 @@ function receiveFolderUpdate() {
       ctx.projectName,
       ctx.folderPath
     )
+  })
+}
+
+function resolveProjectByName() {
+  beforeEach(async function (ctx) {
+    ctx.resolvedProject =
+      await ctx.TpdsUpdateHandler.promises.getOrCreateProject(
+        ctx.userId,
+        null, // projectId
+        ctx.projectName
+      )
+  })
+}
+
+function resolveProjectById() {
+  beforeEach(async function (ctx) {
+    ctx.resolvedProject =
+      await ctx.TpdsUpdateHandler.promises.getOrCreateProject(
+        ctx.userId,
+        ctx.projectId,
+        '' // projectName
+      )
   })
 }
 
@@ -616,6 +716,18 @@ function expectDeleteProcessed() {
 function expectDeleteNotProcessed() {
   it('does not process the delete', function (ctx) {
     expect(ctx.UpdateMerger.promises.deleteUpdate).not.to.have.been.called
+  })
+}
+
+function expectProjectResolved() {
+  it('resolves the project', function (ctx) {
+    expect(ctx.resolvedProject._id).to.equal(ctx.projects.active1._id)
+  })
+}
+
+function expectNoProjectResolved() {
+  it('does not resolve a project', function (ctx) {
+    expect(ctx.resolvedProject).to.not.exist
   })
 }
 
