@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useFileTreeCreateName } from '../../contexts/file-tree-create-name'
 import {
@@ -36,6 +36,7 @@ export default function FileTreeCreateNameInput({
 
   // the value is stored in a context provider, so it's available elsewhere in the form
   const { name, setName, touchedName, validName } = useFileTreeCreateName()
+  const nameFocusedOnce = useRef(false)
 
   // focus the first part of the filename if needed
   const inputRef = useRef<HTMLInputElement>(null)
@@ -45,13 +46,22 @@ export default function FileTreeCreateNameInput({
       window.requestAnimationFrame(() => {
         if (inputRef.current) {
           inputRef.current.focus()
-          inputRef.current.setSelectionRange(
-            0,
-            inputRef.current.value.lastIndexOf('.')
-          )
         }
       })
     }
+  }, [focusName])
+
+  const onFocus = useCallback(() => {
+    if (nameFocusedOnce.current) return
+    if (!focusName) return
+    window.requestAnimationFrame(() => {
+      if (!inputRef.current) return
+      nameFocusedOnce.current = true
+      inputRef.current.setSelectionRange(
+        0,
+        inputRef.current.value.lastIndexOf('.')
+      )
+    })
   }, [focusName])
 
   return (
@@ -65,6 +75,7 @@ export default function FileTreeCreateNameInput({
         onChange={event => setName(event.target.value)}
         ref={inputRef}
         disabled={inFlight}
+        onFocus={onFocus}
       />
       {touchedName && !validName && (
         <div className="notification-list">

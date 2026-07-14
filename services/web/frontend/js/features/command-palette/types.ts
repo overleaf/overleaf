@@ -9,4 +9,6 @@ export type CommandPaletteSource = {
   id: string
   search(query: string): CommandPaletteSearchResult[]
   defaults?(): CommandPaletteSearchResult[]
+  prefix?: string
+  prefixRequired?: boolean
 }

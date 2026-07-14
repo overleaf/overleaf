@@ -111,17 +111,17 @@ const CommandPaletteBody: FC<CommandPaletteBodyProps> = ({ show, onHide }) => {
             >
               <button
                 role="menuitem"
-                onMouseEnter={() => setSelectedIndex(index)}
+                onMouseMove={() => setSelectedIndex(index)}
                 onClick={() => runResult(result)}
               >
                 <div className="command-palette-result-title">
                   {result.title}
+                  {result.description && (
+                    <span className="command-palette-result-description">
+                      {result.description}
+                    </span>
+                  )}
                 </div>
-                {result.description && (
-                  <div className="command-palette-result-description">
-                    {result.description}
-                  </div>
-                )}
               </button>
             </li>
           ))}

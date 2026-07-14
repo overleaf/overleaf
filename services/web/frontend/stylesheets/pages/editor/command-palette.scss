@@ -83,22 +83,19 @@
       background-color: var(--command-palette-selected-bg);
       color: var(--command-palette-selected-color);
     }
-
-    &.command-palette-result-selected .command-palette-result-description {
-      color: var(--command-palette-selected-color);
-    }
   }
 
   .command-palette-result-title {
     color: var(--content-primary-themed);
-    font-size: var(--font-size-03);
+    font-size: var(--font-size-02);
     font-weight: 500;
     line-height: 1.2;
   }
 
   .command-palette-result-description {
     font-size: var(--font-size-02);
-    color: var(--content-secondary-themed);
+    margin-left: var(--spacing-02);
+    color: var(--content-placeholder-themed);
     line-height: 1.2;
   }
 }
