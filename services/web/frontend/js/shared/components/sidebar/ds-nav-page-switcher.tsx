@@ -56,7 +56,9 @@ export function DsNavPageSwitcher({
             }
           >
             <BookBookmark size={24} />
-            <span>{t('library')}</span>
+            <span className="ds-nav-page-switcher-item-label">
+              {t('library')}
+            </span>
           </a>
         </li>
         <li>
@@ -74,7 +76,9 @@ export function DsNavPageSwitcher({
             }
           >
             <Folder size={24} />
-            <span>{t('projects')}</span>
+            <span className="ds-nav-page-switcher-item-label">
+              {t('projects')}
+            </span>
           </a>
         </li>
       </ul>

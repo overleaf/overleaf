@@ -223,6 +223,14 @@ body {
         font-size: var(--font-size-03);
         text-decoration: none;
 
+        .ds-nav-page-switcher-item-label {
+          flex: 1 1 auto;
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
         &:hover {
           background-color: var(--ds-nav-hover-bg);
           color: var(--ds-nav-color);
@@ -236,8 +244,16 @@ body {
         }
       }
 
+      .ds-nav-dropdown-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-02);
+        padding: 0;
+        margin: 0;
+      }
+
       .ds-nav-sidebar-lower {
-        padding: var(--spacing-05) var(--spacing-08) 0 var(--spacing-05);
+        padding: var(--spacing-05) var(--spacing-05) 0 var(--spacing-05);
         border-top: solid 1px transparent;
 
         &.show-shadow {
@@ -411,14 +427,13 @@ body {
     }
   }
 
-  .ds-nav-icon-dropdown {
+  .ds-nav-dropdown {
     .dropdown-toggle {
-      color: var(--ds-nav-color);
+      width: 100%;
+      border: none;
       background: none;
-      height: 44px;
-      width: 44px;
-      padding: 0;
-      overflow: hidden;
+      font-weight: normal;
+      text-align: left;
 
       &:hover {
         background-color: var(--ds-nav-hover-bg);
@@ -431,17 +446,6 @@ body {
 
       &::after {
         display: none;
-      }
-
-      > div {
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .material-symbols {
-        vertical-align: middle;
       }
     }
   }

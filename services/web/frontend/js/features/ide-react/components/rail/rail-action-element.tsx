@@ -7,7 +7,6 @@ import {
   OLDropdownToggle,
 } from '@/shared/components/ol/ol-dropdown-menu'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
-import { DropdownToggle } from 'react-bootstrap'
 
 type RailActionButton = {
   key: string
@@ -53,7 +52,7 @@ const RailActionElement = forwardRef<HTMLButtonElement, { action: RailAction }>(
           >
             <span>
               <OLDropdownToggle
-                ref={ref as React.ForwardedRef<typeof DropdownToggle>}
+                ref={ref}
                 id={`rail-dropdown-btn-${action.key}`}
                 className="ide-rail-tab-link ide-rail-tab-button ide-rail-tab-dropdown"
                 as="button"

@@ -156,7 +156,7 @@ export const OLDropdownToggleCustom = forwardRef<
 OLDropdownToggleCustom.displayName = 'OLDropdownToggleCustom'
 
 export const OLDropdownToggle = forwardRef<
-  typeof DropdownToggle,
+  HTMLButtonElement,
   OLDropdownToggleProps
 >((props, ref) => {
   const registerToggle = useContext(DropdownInternalContext)?.registerToggle
