@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Trash } from '@phosphor-icons/react'
 import {
   Filter,
   UNCATEGORIZED_KEY,
@@ -21,10 +22,11 @@ import MobilePageSwitcherItems from './mobile-page-switcher-items'
 type ItemProps = {
   filter: Filter
   text: string
+  leadingIcon?: React.ReactNode
   onClick?: () => void
 }
 
-export function Item({ filter, text, onClick }: ItemProps) {
+export function Item({ filter, text, leadingIcon, onClick }: ItemProps) {
   const { selectFilter } = useProjectListContext()
   const handleClick = () => {
     selectFilter(filter)
@@ -38,6 +40,7 @@ export function Item({ filter, text, onClick }: ItemProps) {
           as="button"
           tabIndex={-1}
           onClick={handleClick}
+          leadingIcon={leadingIcon}
           trailingIcon={isActive ? 'check' : undefined}
           active={isActive}
         >
@@ -92,9 +95,11 @@ function ProjectsDropdown() {
       <li role="none">
         <Item filter="archived" text={t('archived_projects')} />
       </li>
-      <li role="none">
-        <Item filter="trashed" text={t('trashed_projects')} />
-      </li>
+      {!isLibraryEnabled && (
+        <li role="none">
+          <Item filter="trashed" text={t('trashed_projects')} />
+        </li>
+      )}
       <OLDropdownHeader className="text-uppercase">
         {t('tags')}:
       </OLDropdownHeader>
@@ -143,6 +148,13 @@ function ProjectsDropdown() {
               </OLDropdownItem>
             </li>
             {submenuItems}
+            <li role="none">
+              <Item
+                filter="trashed"
+                text={t('trash')}
+                leadingIcon={<Trash size={20} />}
+              />
+            </li>
           </>
         )}
         {isLibraryEnabled && view === 'top' && (

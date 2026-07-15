@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import classnames from 'classnames'
+import { Trash } from '@phosphor-icons/react'
 import NewProjectButton from '../new-project-button'
 import SidebarFilters from './sidebar-filters'
 import AddAffiliation, { useAddAffiliation } from '../add-affiliation'
@@ -15,7 +16,8 @@ function SidebarDsNav() {
   const { t } = useTranslation()
   const { show: showAddAffiliationWidget } = useAddAffiliation()
   const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
-  const { selectFilter } = useProjectListContext()
+  const { filter, selectedTagId, selectFilter } = useProjectListContext()
+  const isTrashActive = selectedTagId === undefined && filter === 'trashed'
   const { mousePos, getHandleProps, getTargetProps } = usePersistedResize({
     name: 'project-sidebar',
   })
@@ -33,7 +35,7 @@ function SidebarDsNav() {
       {isLibraryEnabled && (
         <>
           <DsNavPageSwitcher
-            activePage="projects"
+            activePage={isTrashActive ? undefined : 'projects'}
             showLogo={false}
             onProjectsClick={() => selectFilter('all')}
           />
@@ -67,6 +69,19 @@ function SidebarDsNav() {
         )}
       >
         <SidebarLowerSection showThemeToggle>
+          {isLibraryEnabled && (
+            <button
+              type="button"
+              className={classnames('ds-nav-page-switcher-item', {
+                active: isTrashActive,
+              })}
+              aria-current={isTrashActive ? 'page' : undefined}
+              onClick={() => selectFilter('trashed')}
+            >
+              <Trash size={24} />
+              <span>{t('trash')}</span>
+            </button>
+          )}
           <div className="project-list-sidebar-survey-wrapper">
             <SurveyWidgetDsNav />
           </div>

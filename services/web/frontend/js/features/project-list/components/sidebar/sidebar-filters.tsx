@@ -5,6 +5,7 @@ import {
 } from '../../context/project-list-context'
 import TagsList from './tags-list'
 import ProjectsFilterMenu from '../projects-filter-menu'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 type SidebarFilterProps = {
   filter: Filter
@@ -29,13 +30,16 @@ export function SidebarFilter({ filter, text }: SidebarFilterProps) {
 
 export default function SidebarFilters() {
   const { t } = useTranslation()
+  const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
   return (
     <ul className="list-unstyled project-list-filters">
       <SidebarFilter filter="all" text={t('all_projects')} />
       <SidebarFilter filter="owned" text={t('your_projects')} />
       <SidebarFilter filter="shared" text={t('shared_with_you')} />
       <SidebarFilter filter="archived" text={t('archived_projects')} />
-      <SidebarFilter filter="trashed" text={t('trashed_projects')} />
+      {!isLibraryEnabled && (
+        <SidebarFilter filter="trashed" text={t('trashed_projects')} />
+      )}
       <li aria-hidden="true">
         <hr />
       </li>

@@ -13,7 +13,7 @@ export function DsNavPageSwitcher({
   onLibraryClick,
   onProjectsClick,
 }: {
-  activePage: ActivePage
+  activePage: ActivePage | undefined
   showLogo?: boolean
   onLibraryClick?: React.MouseEventHandler
   onProjectsClick?: React.MouseEventHandler
