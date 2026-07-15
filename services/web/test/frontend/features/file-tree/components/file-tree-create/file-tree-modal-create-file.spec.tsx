@@ -23,6 +23,13 @@ describe('<FileTreeModalCreateFile/>', function () {
     cy.get('@submit').should('not.be.disabled')
     cy.findByRole('alert').should('not.exist')
 
+    // Wait for auto-selection of name
+    cy.get('@input').should($input => {
+      const elem = $input[0] as HTMLInputElement
+      expect(elem.selectionStart).to.equal(0)
+      expect(elem.selectionEnd).to.equal('name.tex'.lastIndexOf('.'))
+    })
+
     cy.get('@input').clear()
     cy.get('@submit').should('be.disabled')
     cy.findByRole('alert').should('contain.text', 'File name is empty')
@@ -178,7 +185,14 @@ describe('<FileTreeModalCreateFile/>', function () {
       </EditorProviders>
     )
 
-    cy.findByLabelText('File Name').type('test')
+    // Wait for auto-selection of name
+    cy.findByLabelText('File Name').as('input')
+    cy.get('@input').should($input => {
+      const elem = $input[0] as HTMLInputElement
+      expect(elem.selectionStart).to.equal(0)
+      expect(elem.selectionEnd).to.equal('name.tex'.lastIndexOf('.'))
+    })
+    cy.get('@input').type('test')
     cy.findByRole('button', { name: 'Create' }).click()
 
     cy.wait('@createDoc')
