@@ -5,21 +5,9 @@ import MongoUtils from '@overleaf/mongo-utils'
 import Mongoose from './Mongoose.mjs'
 import { addConnectionDrainer } from './GracefulShutdown.mjs'
 import Metrics from '@overleaf/metrics'
-import logger from '@overleaf/logger'
 
 /**
- * @import {
- *   AnyBulkWriteOperation,
- *   BulkWriteOptions,
- *   Collection,
- *   Document,
- *   Filter,
- *   FindOneAndDeleteOptions,
- *   FindOneAndUpdateOptions,
- *   OptionalUnlessRequiredId,
- *   UpdateFilter,
- *   UpdateOptions,
- * } from 'mongodb-legacy'
+ * @import { Collection, Document } from 'mongodb-legacy'
  */
 
 // Ensure Mongoose is using the same mongodb instance as the mongodb module,
@@ -71,109 +59,15 @@ if (auxMongoClient) {
 }
 
 /**
- * @typedef {Pick<
- *   Collection<Document>,
- *   | 'find'
- *   | 'findOne'
- *   | 'aggregate'
- *   | 'countDocuments'
- *   | 'insertMany'
- *   | 'bulkWrite'
- *   | 'updateOne'
- *   | 'findOneAndUpdate'
- *   | 'findOneAndDelete'
- *   | 'deleteMany'
- * >} DualWriteCollection
- */
-
-/**
- * Wraps a collection so that reads and the authoritative write happen
- * against the auxiliary Mongo cluster, while writes are additionally
- * mirrored to the main cluster (best-effort), so that reads could be
- * switched back to the main cluster if needed. Falls back to the plain
- * main-cluster collection when no auxiliary client is configured.
+ * Returns the collection to use for the library collections, which live on
+ * the auxiliary Mongo cluster. Falls back to the main cluster when no
+ * auxiliary client is configured.
  *
  * @param {string} name
- * @returns {DualWriteCollection}
+ * @returns {Collection<Document>}
  */
-function dualWriteCollection(name) {
-  const main = internalDb.collection(name)
-  if (!auxInternalDb) {
-    return main
-  }
-  const auxiliary = auxInternalDb.collection(name)
-
-  const mirror = op =>
-    Promise.resolve()
-      .then(op)
-      .catch(err =>
-        logger.warn(
-          { err, collection: name },
-          'main cluster mongo write failed'
-        )
-      )
-
-  return {
-    find: (...args) => auxiliary.find(...args),
-    findOne: (...args) => auxiliary.findOne(...args),
-    aggregate: (...args) => auxiliary.aggregate(...args),
-    countDocuments: (...args) => auxiliary.countDocuments(...args),
-    /**
-     * @param {OptionalUnlessRequiredId<Document>[]} docs
-     * @param {BulkWriteOptions} [opts]
-     */
-    async insertMany(docs, opts) {
-      const result = await auxiliary.insertMany(docs, opts)
-      void mirror(() => main.insertMany(docs, opts))
-      return result
-    },
-    /**
-     * @param {AnyBulkWriteOperation[]} ops
-     * @param {BulkWriteOptions} [opts]
-     */
-    async bulkWrite(ops, opts) {
-      const result = await auxiliary.bulkWrite(ops, opts)
-      void mirror(() => main.bulkWrite(ops, opts))
-      return result
-    },
-    /**
-     * @param {Filter<Document>} filter
-     * @param {UpdateFilter<Document>} update
-     * @param {UpdateOptions} [opts]
-     */
-    async updateOne(filter, update, opts) {
-      const result = await auxiliary.updateOne(filter, update, opts)
-      void mirror(() => main.updateOne(filter, update, opts))
-      return result
-    },
-    /**
-     * @param {Filter<Document>} filter
-     * @param {UpdateFilter<Document>} update
-     * @param {FindOneAndUpdateOptions} [opts]
-     */
-    async findOneAndUpdate(filter, update, opts) {
-      const result = await auxiliary.findOneAndUpdate(filter, update, opts)
-      void mirror(() => main.findOneAndUpdate(filter, update, opts))
-      return result
-    },
-    /**
-     * @param {Filter<Document>} filter
-     * @param {FindOneAndDeleteOptions} [opts]
-     */
-    async findOneAndDelete(filter, opts) {
-      const result = await auxiliary.findOneAndDelete(filter, opts)
-      void mirror(() => main.findOneAndDelete(filter, opts))
-      return result
-    },
-    /**
-     * @param {Filter<Document>} filter
-     */
-    async deleteMany(filter) {
-      const result = await auxiliary.deleteMany(filter)
-      void mirror(() => main.deleteMany(filter))
-      return result
-    },
-  }
+function libraryCollection(name) {
+  return (auxInternalDb || internalDb).collection(name)
 }
 
 export const db = {
@@ -194,9 +88,9 @@ export const db = {
   grouppolicies: internalDb.collection('grouppolicies'),
   groupAuditLogEntries: internalDb.collection('groupAuditLogEntries'),
   institutions: internalDb.collection('institutions'),
-  libraryReferences: dualWriteCollection('libraryReferences'),
-  librarySizes: dualWriteCollection('librarySizes'),
-  librarySyncStates: dualWriteCollection('librarySyncStates'),
+  libraryReferences: libraryCollection('libraryReferences'),
+  librarySizes: libraryCollection('librarySizes'),
+  librarySyncStates: libraryCollection('librarySyncStates'),
   messages: internalDb.collection('messages'),
   migrations: internalDb.collection('migrations'),
   notifications: internalDb.collection('notifications'),
@@ -256,18 +150,6 @@ export async function dropTestDatabase() {
 export async function getCollectionInternal(name) {
   const internalDb = mongoClient.db()
   return internalDb.collection(name)
-}
-
-/**
- * Direct access to a collection on the auxiliary Mongo cluster, bypassing
- * the dual-write mirror in `db`. For use by data-migration scripts that need
- * to write to the auxiliary cluster without also writing to the primary one.
- */
-export async function getAuxCollectionInternal(name) {
-  if (!auxInternalDb) {
-    throw new OError('no auxiliary Mongo cluster configured')
-  }
-  return auxInternalDb.collection(name)
 }
 
 export async function waitForDb() {
