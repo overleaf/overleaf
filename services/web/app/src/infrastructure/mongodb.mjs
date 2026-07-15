@@ -87,18 +87,19 @@ if (auxMongoClient) {
  */
 
 /**
- * Wraps a collection so that writes are mirrored to the auxiliary Mongo
- * cluster (best-effort) while the primary cluster remains the source of
- * truth. Falls back to the plain primary collection when no auxiliary
- * client is configured.
+ * Wraps a collection so that reads and the authoritative write happen
+ * against the auxiliary Mongo cluster, while writes are additionally
+ * mirrored to the main cluster (best-effort), so that reads could be
+ * switched back to the main cluster if needed. Falls back to the plain
+ * main-cluster collection when no auxiliary client is configured.
  *
  * @param {string} name
  * @returns {DualWriteCollection}
  */
 function dualWriteCollection(name) {
-  const primary = internalDb.collection(name)
+  const main = internalDb.collection(name)
   if (!auxInternalDb) {
-    return primary
+    return main
   }
   const auxiliary = auxInternalDb.collection(name)
 
@@ -106,21 +107,24 @@ function dualWriteCollection(name) {
     Promise.resolve()
       .then(op)
       .catch(err =>
-        logger.warn({ err, collection: name }, 'auxiliary mongo write failed')
+        logger.warn(
+          { err, collection: name },
+          'main cluster mongo write failed'
+        )
       )
 
   return {
-    find: (...args) => primary.find(...args),
-    findOne: (...args) => primary.findOne(...args),
-    aggregate: (...args) => primary.aggregate(...args),
-    countDocuments: (...args) => primary.countDocuments(...args),
+    find: (...args) => auxiliary.find(...args),
+    findOne: (...args) => auxiliary.findOne(...args),
+    aggregate: (...args) => auxiliary.aggregate(...args),
+    countDocuments: (...args) => auxiliary.countDocuments(...args),
     /**
      * @param {OptionalUnlessRequiredId<Document>[]} docs
      * @param {BulkWriteOptions} [opts]
      */
     async insertMany(docs, opts) {
-      const result = await primary.insertMany(docs, opts)
-      void mirror(() => auxiliary.insertMany(docs, opts))
+      const result = await auxiliary.insertMany(docs, opts)
+      void mirror(() => main.insertMany(docs, opts))
       return result
     },
     /**
@@ -128,8 +132,8 @@ function dualWriteCollection(name) {
      * @param {BulkWriteOptions} [opts]
      */
     async bulkWrite(ops, opts) {
-      const result = await primary.bulkWrite(ops, opts)
-      void mirror(() => auxiliary.bulkWrite(ops, opts))
+      const result = await auxiliary.bulkWrite(ops, opts)
+      void mirror(() => main.bulkWrite(ops, opts))
       return result
     },
     /**
@@ -138,8 +142,8 @@ function dualWriteCollection(name) {
      * @param {UpdateOptions} [opts]
      */
     async updateOne(filter, update, opts) {
-      const result = await primary.updateOne(filter, update, opts)
-      void mirror(() => auxiliary.updateOne(filter, update, opts))
+      const result = await auxiliary.updateOne(filter, update, opts)
+      void mirror(() => main.updateOne(filter, update, opts))
       return result
     },
     /**
@@ -148,8 +152,8 @@ function dualWriteCollection(name) {
      * @param {FindOneAndUpdateOptions} [opts]
      */
     async findOneAndUpdate(filter, update, opts) {
-      const result = await primary.findOneAndUpdate(filter, update, opts)
-      void mirror(() => auxiliary.findOneAndUpdate(filter, update, opts))
+      const result = await auxiliary.findOneAndUpdate(filter, update, opts)
+      void mirror(() => main.findOneAndUpdate(filter, update, opts))
       return result
     },
     /**
@@ -157,16 +161,16 @@ function dualWriteCollection(name) {
      * @param {FindOneAndDeleteOptions} [opts]
      */
     async findOneAndDelete(filter, opts) {
-      const result = await primary.findOneAndDelete(filter, opts)
-      void mirror(() => auxiliary.findOneAndDelete(filter, opts))
+      const result = await auxiliary.findOneAndDelete(filter, opts)
+      void mirror(() => main.findOneAndDelete(filter, opts))
       return result
     },
     /**
      * @param {Filter<Document>} filter
      */
     async deleteMany(filter) {
-      const result = await primary.deleteMany(filter)
-      void mirror(() => auxiliary.deleteMany(filter))
+      const result = await auxiliary.deleteMany(filter)
+      void mirror(() => main.deleteMany(filter))
       return result
     },
   }

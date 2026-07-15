@@ -6,7 +6,7 @@ import logger from '@overleaf/logger'
 const { ObjectId } = mongodb
 
 const MODULE_PATH = '../../../../app/src/infrastructure/mongodb.mjs'
-const PRIMARY_URL = 'mongodb://primary'
+const MAIN_URL = 'mongodb://main'
 const AUX_URL = 'mongodb://aux'
 
 function makeFakeCollection() {
@@ -14,11 +14,11 @@ function makeFakeCollection() {
     find: sinon.stub(),
     findOne: sinon.stub(),
     aggregate: sinon.stub(),
-    insertMany: sinon.stub().resolves({ from: 'primary' }),
-    bulkWrite: sinon.stub().resolves({ from: 'primary' }),
-    updateOne: sinon.stub().resolves({ from: 'primary' }),
-    findOneAndUpdate: sinon.stub().resolves({ from: 'primary' }),
-    findOneAndDelete: sinon.stub().resolves({ from: 'primary' }),
+    insertMany: sinon.stub().resolves({ ok: true }),
+    bulkWrite: sinon.stub().resolves({ ok: true }),
+    updateOne: sinon.stub().resolves({ ok: true }),
+    findOneAndUpdate: sinon.stub().resolves({ ok: true }),
+    findOneAndDelete: sinon.stub().resolves({ ok: true }),
   }
 }
 
@@ -176,7 +176,7 @@ describe('auxiliary cluster support', function () {
 
   beforeEach(function () {
     collectionsByUrl = {
-      [PRIMARY_URL]: new Map(),
+      [MAIN_URL]: new Map(),
       [AUX_URL]: new Map(),
     }
     clients = []
@@ -218,7 +218,7 @@ describe('auxiliary cluster support', function () {
     vi.doMock('@overleaf/settings', () => ({
       default: {
         mongo: {
-          url: PRIMARY_URL,
+          url: MAIN_URL,
           auxUrl,
           options: {},
           hasSecondaries: false,
@@ -229,20 +229,19 @@ describe('auxiliary cluster support', function () {
   }
 
   describe('when no auxiliary cluster is configured', function () {
-    it('only creates a client for the primary cluster', async function () {
+    it('only creates a client for the main cluster', async function () {
       await loadModule(undefined)
       expect(clients).to.have.lengthOf(1)
-      expect(clients[0].url).to.equal(PRIMARY_URL)
+      expect(clients[0].url).to.equal(MAIN_URL)
     })
 
-    it('exposes the plain primary collection, unwrapped', async function () {
+    it('exposes the plain main-cluster collection, unwrapped', async function () {
       const { db } = await loadModule(undefined)
-      const primaryCollection =
-        collectionsByUrl[PRIMARY_URL].get('libraryReferences')
-      expect(db.libraryReferences).to.equal(primaryCollection)
+      const mainCollection = collectionsByUrl[MAIN_URL].get('libraryReferences')
+      expect(db.libraryReferences).to.equal(mainCollection)
     })
 
-    it('waits for the primary connection only', async function () {
+    it('waits for the main cluster connection only', async function () {
       const { waitForDb } = await loadModule(undefined)
       await expect(waitForDb()).to.eventually.be.fulfilled
       expect(clients[0].connect).to.have.been.called
@@ -253,58 +252,68 @@ describe('auxiliary cluster support', function () {
     it('creates a client for both clusters', async function () {
       await loadModule(AUX_URL)
       expect(clients).to.have.lengthOf(2)
-      expect(clients.map(c => c.url)).to.include.members([PRIMARY_URL, AUX_URL])
+      expect(clients.map(c => c.url)).to.include.members([MAIN_URL, AUX_URL])
     })
 
-    it('mirrors writes to the auxiliary collection and returns the primary result', async function () {
+    it('writes authoritatively to the auxiliary collection, mirrors to the main collection, and returns the auxiliary result', async function () {
       const { db } = await loadModule(AUX_URL)
+      const mainCollection = collectionsByUrl[MAIN_URL].get('libraryReferences')
+      const auxCollection = collectionsByUrl[AUX_URL].get('libraryReferences')
+      mainCollection.insertMany.resolves({ from: 'main' })
+      auxCollection.insertMany.resolves({ from: 'aux' })
+
       const result = await db.libraryReferences.insertMany([{ _id: 1 }], {
         ordered: false,
       })
 
-      expect(result).to.deep.equal({ from: 'primary' })
-      const primaryCollection =
-        collectionsByUrl[PRIMARY_URL].get('libraryReferences')
-      const auxCollection = collectionsByUrl[AUX_URL].get('libraryReferences')
-      expect(primaryCollection.insertMany).to.have.been.calledWith(
-        [{ _id: 1 }],
-        { ordered: false }
-      )
+      expect(result).to.deep.equal({ from: 'aux' })
       expect(auxCollection.insertMany).to.have.been.calledWith([{ _id: 1 }], {
+        ordered: false,
+      })
+      expect(mainCollection.insertMany).to.have.been.calledWith([{ _id: 1 }], {
         ordered: false,
       })
     })
 
-    it('only reads from the primary collection', async function () {
+    it('only reads from the auxiliary collection', async function () {
       const { db } = await loadModule(AUX_URL)
       await db.libraryReferences.find({ userId: 'abc' })
 
-      const primaryCollection =
-        collectionsByUrl[PRIMARY_URL].get('libraryReferences')
+      const mainCollection = collectionsByUrl[MAIN_URL].get('libraryReferences')
       const auxCollection = collectionsByUrl[AUX_URL].get('libraryReferences')
-      expect(primaryCollection.find).to.have.been.calledWith({
+      expect(auxCollection.find).to.have.been.calledWith({
         userId: 'abc',
       })
-      expect(auxCollection.find).to.not.have.been.called
+      expect(mainCollection.find).to.not.have.been.called
     })
 
-    it('swallows auxiliary write failures without affecting the primary result', async function () {
+    it('swallows main cluster write failures without affecting the auxiliary result', async function () {
       const { db } = await loadModule(AUX_URL)
-      const auxCollection = collectionsByUrl[AUX_URL].get('librarySizes')
-      auxCollection.updateOne.rejects(new Error('aux write failed'))
+      const mainCollection = collectionsByUrl[MAIN_URL].get('librarySizes')
+      mainCollection.updateOne.rejects(new Error('main cluster write failed'))
 
       const result = await db.librarySizes.updateOne(
         { _id: 'user1' },
         { $set: { size: 1 } }
       )
 
-      expect(result).to.deep.equal({ from: 'primary' })
+      expect(result).to.deep.equal({ ok: true })
       await vi.waitFor(() => {
         expect(logger.warn).toHaveBeenCalled()
       })
     })
 
-    it('waits for both the primary and auxiliary connections', async function () {
+    it('does not swallow auxiliary write failures, since it is the authoritative write', async function () {
+      const { db } = await loadModule(AUX_URL)
+      const auxCollection = collectionsByUrl[AUX_URL].get('librarySizes')
+      auxCollection.updateOne.rejects(new Error('auxiliary write failed'))
+
+      await expect(
+        db.librarySizes.updateOne({ _id: 'user1' }, { $set: { size: 1 } })
+      ).to.eventually.be.rejectedWith('auxiliary write failed')
+    })
+
+    it('waits for both the main and auxiliary connections', async function () {
       const { waitForDb } = await loadModule(AUX_URL)
       await expect(waitForDb()).to.eventually.be.fulfilled
       expect(clients[0].connect).to.have.been.called
