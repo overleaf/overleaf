@@ -25,6 +25,9 @@ function Email({ userEmailData }: EmailProps) {
     userEmailData.confirmedAt &&
     userEmailData.affiliation?.institution.confirmed &&
     userEmailData.affiliation.licence !== 'free'
+  const hasCommonsAI =
+    hasInstitutionalSubscription &&
+    userEmailData.affiliation?.institution.writefullCommonsAccount === true
   const hasBadges = isPrimary || hasInstitutionalSubscription
 
   return (
@@ -53,7 +56,9 @@ function Email({ userEmailData }: EmailProps) {
             </>
           )}
           {hasInstitutionalSubscription && (
-            <OLBadge bg="primary">{t('commons')}</OLBadge>
+            <OLBadge bg="primary">
+              {hasCommonsAI ? t('commons_ai') : t('commons')}
+            </OLBadge>
           )}
         </div>
       )}

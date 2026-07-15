@@ -310,7 +310,7 @@
   "comment_only_upgrade_for_track_changes": "仅评论。升级可跟踪更改。",
   "comment_only_upgrade_to_enable_track_changes": "仅评论。<0>升级</0>以启用跟踪更改。",
   "common": "通用",
-  "commons_plan_tooltip": "由于您与 __institution__ 的隶属关系，您加入了 Commons 计划。 单击以了解如何充分利用 Overleaf 高级功能。",
+  "commons_plan_tooltip": "由于您与 __institution__ 的隶属关系，您加入了 __plan__ 计划。 单击以了解如何充分利用 Overleaf 高级功能。",
   "community_articles": "社区文章",
   "community_articles_lowercase": "社区文章",
   "compact": "紧凑的",

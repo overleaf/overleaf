@@ -56,7 +56,9 @@ export function ActiveSubscription({
   if (onStandalonePlan) {
     planName = 'Overleaf Free'
     if (institutionMemberships && institutionMemberships.length > 0) {
-      planName = 'Overleaf Commons'
+      planName = institutionMemberships.some(m => m.writefullCommonsAccount)
+        ? `Overleaf ${t('commons_ai')}`
+        : `Overleaf ${t('commons')}`
     }
     if (memberGroupSubscriptions.length > 0) {
       if (memberGroupSubscriptions.some(s => s.planLevelName === 'Pro')) {

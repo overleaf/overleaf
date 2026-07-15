@@ -22,6 +22,9 @@ function CommonsPlan({ featuresPageURL, subscription }: CommonsPlanProps) {
       <span className="current-plan-label d-md-none">{currentPlanLabel}</span>
       <OLTooltip
         description={t('commons_plan_tooltip', {
+          plan: subscription.writefullCommonsAccount
+            ? t('commons_ai')
+            : t('commons'),
           institution: subscription.name,
         })}
         id="commons-plan"

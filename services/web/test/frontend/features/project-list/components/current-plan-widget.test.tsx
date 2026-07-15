@@ -295,6 +295,38 @@ describe('<CurrentPlanWidget />', function () {
         })
         await screen.findByRole('tooltip', { name: paidPlanTooltipMessage })
       })
+
+      it('shows the Commons AI label when institution has writefull commons', async function () {
+        const subscription = {
+          type: 'commons',
+          plan: {
+            name: 'Abc',
+          },
+          subscription: {
+            name: 'Example Name',
+            writefullCommonsAccount: true,
+          },
+        } as DeepReadonly<CommonsPlanSubscription>
+
+        window.metaAttributesCache.set('ol-usersBestSubscription', {
+          ...subscription,
+        })
+
+        render(<CurrentPlanWidget />)
+
+        const link = screen.getByRole('link', {
+          name: /you’re using overleaf premium/i,
+        })
+        fireEvent.mouseOver(link)
+
+        await screen.findByRole('tooltip', {
+          name: new RegExp(
+            `on the Commons AI plan provided by ${subscription.subscription.name}`,
+            'i'
+          ),
+        })
+        await screen.findByRole('tooltip', { name: paidPlanTooltipMessage })
+      })
     })
   })
 

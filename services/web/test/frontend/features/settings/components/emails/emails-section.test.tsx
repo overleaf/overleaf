@@ -118,7 +118,27 @@ describe('<EmailsSection />', function () {
     const node = await screen.findByText(professionalUserData.email, {
       exact: false,
     })
-    expect(within(node).getByText(/commons/i)).to.exist
+    expect(within(node).getByText('Commons')).to.exist
+  })
+
+  it('renders commons AI label when institution has writefull commons', async function () {
+    const commonsAIUserData = {
+      ...professionalUserData,
+      affiliation: {
+        ...professionalUserData.affiliation,
+        institution: {
+          ...professionalUserData.affiliation.institution,
+          writefullCommonsAccount: true,
+        },
+      },
+    }
+    fetchMock.get('/user/emails?ensureAffiliation=true', [commonsAIUserData])
+    renderEmailsSection()
+
+    const node = await screen.findByText(commonsAIUserData.email, {
+      exact: false,
+    })
+    expect(within(node).getByText('Commons AI')).to.exist
   })
 
   it('shows loader when resending email', async function () {

@@ -306,7 +306,7 @@
   "comment": "Kommentar",
   "comment_only": "Nur Kommentare",
   "common": "Häufige",
-  "commons_plan_tooltip": "Du hast Zugriff auf ein Commons Abonnement über deine Angehörigkeit bei __institution__. Klicke hier um herauszufinden was die Overleaf Premiumfunktionen Dir ermöglichen.",
+  "commons_plan_tooltip": "Du hast Zugriff auf ein __plan__ Abonnement über deine Angehörigkeit bei __institution__. Klicke hier um herauszufinden was die Overleaf Premiumfunktionen Dir ermöglichen.",
   "compact": "Kompakt",
   "company_name": "Firmenname",
   "compare": "Vergleichen",

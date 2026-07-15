@@ -58,6 +58,25 @@ describe('<InstitutionMemberships />', function () {
     )
   })
 
+  it('renders the Commons AI label when the institution has writefull commons', function () {
+    const commonsAIMemberships: Institution[] = [
+      { ...memberships[0], writefullCommonsAccount: true },
+    ]
+    renderWithSubscriptionDashContext(<InstitutionMemberships />, {
+      metaTags: [
+        {
+          name: 'ol-currentInstitutionsWithLicence',
+          value: commonsAIMemberships,
+        },
+      ],
+    })
+
+    const element = screen.getByText('You are on our', { exact: false })
+    expect(element.textContent).to.equal(
+      'You are on our Commons AI plan as a confirmed member of Test University'
+    )
+  })
+
   it('renders error message when failed to check commons licenses', function () {
     renderWithSubscriptionDashContext(<InstitutionMemberships />)
     screen.getByText(
