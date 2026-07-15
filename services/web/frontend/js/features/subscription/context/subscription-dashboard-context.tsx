@@ -137,7 +137,9 @@ export function SubscriptionDashboardProvider({
   )
 
   const hasValidActiveSubscription = Boolean(
-    ['active', 'canceled'].includes(personalSubscription?.payment?.state) ||
+    ['active', 'canceled', 'past_due'].includes(
+      personalSubscription?.payment?.state
+    ) ||
     institutionMemberships?.length > 0 ||
     memberGroupSubscriptions?.length > 0
   )

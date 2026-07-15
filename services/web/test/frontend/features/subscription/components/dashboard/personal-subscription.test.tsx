@@ -11,6 +11,7 @@ import {
   annualActiveSubscription,
   canceledSubscription,
   customSubscription,
+  pastDueActiveSubscription,
   pastDueExpiredSubscription,
 } from '../../fixtures/subscriptions'
 import {
@@ -154,6 +155,17 @@ describe('<PersonalSubscription />', function () {
       screen.getByRole('button', { name: 'Reactivate your subscription' })
     })
 
+    it('renders the active dash for a past-due Stripe subscription', function () {
+      renderWithSubscriptionDashContext(<PersonalSubscription />, {
+        metaTags: [
+          { name: 'ol-subscription', value: pastDueActiveSubscription },
+        ],
+      })
+
+      screen.getByRole('heading', { name: /billing/i })
+      screen.getByRole('button', { name: 'Cancel your subscription' })
+    })
+
     it('renders the expired dash', function () {
       renderWithSubscriptionDashContext(<PersonalSubscription />, {
         metaTags: [
@@ -194,6 +206,17 @@ describe('<PersonalSubscription />', function () {
         exact: false,
       })
       expect(invoiceLinks.length).to.equal(2)
+    })
+
+    it('renders subscription details alongside the alert for a past-due Stripe subscription', function () {
+      renderWithSubscriptionDashContext(<PersonalSubscription />, {
+        metaTags: [
+          { name: 'ol-subscription', value: pastDueActiveSubscription },
+        ],
+      })
+      screen.getByRole('alert')
+      screen.getByRole('heading', { name: /billing/i })
+      screen.getByRole('button', { name: 'Cancel your subscription' })
     })
   })
 

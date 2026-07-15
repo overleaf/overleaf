@@ -43,8 +43,12 @@ function PersonalSubscriptionStates({
   const { t } = useTranslation()
   const state = subscription?.payment.state
 
-  if (state === 'active') {
-    // This version handles subscriptions with and without addons
+  if (state === 'active' || state === 'past_due') {
+    // This version handles subscriptions with and without addons.
+    // Stripe subscriptions in dunning have state 'past_due'; Recurly has
+    // no equivalent subscription-level state and stays 'active' during
+    // dunning, so both are rendered the same way here. The past-due banner
+    // rendered above already covers the difference.
     return <ActiveSubscription subscription={subscription} />
   } else if (state === 'canceled') {
     return <CanceledSubscription subscription={subscription} />
