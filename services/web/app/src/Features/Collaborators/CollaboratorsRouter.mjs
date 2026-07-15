@@ -5,6 +5,7 @@ import CollaboratorsInviteController from './CollaboratorsInviteController.mjs'
 import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.mjs'
 import AnalyticsRegistrationSourceMiddleware from '../Analytics/AnalyticsRegistrationSourceMiddleware.mjs'
+import SplitTestMiddleware from '../SplitTests/SplitTestMiddleware.mjs'
 
 const rateLimiters = {
   inviteToProjectByProjectId: new RateLimiter(
@@ -98,6 +99,9 @@ export default {
     webRouter.get(
       '/project/:Project_id/sharing-link',
       AuthenticationController.requireLogin(),
+      SplitTestMiddleware.ensureSplitTestEnabledForUser(
+        'sharing-updates-new-link'
+      ),
       AuthorizationMiddleware.ensureUserCanAdminProject,
       CollaboratorsInviteController.getSharingLink
     )
@@ -105,6 +109,9 @@ export default {
     webRouter.post(
       '/project/:Project_id/sharing-link',
       AuthenticationController.requireLogin(),
+      SplitTestMiddleware.ensureSplitTestEnabledForUser(
+        'sharing-updates-new-link'
+      ),
       AuthorizationMiddleware.ensureUserCanAdminProject,
       CollaboratorsInviteController.updateSharingLink
     )
@@ -155,6 +162,9 @@ export default {
         'collaboration',
         'project-invite'
       ),
+      SplitTestMiddleware.ensureSplitTestEnabledForUser(
+        'sharing-updates-new-link'
+      ),
       RateLimiterMiddleware.rateLimit(rateLimiters.viewProjectInvite),
       CollaboratorsInviteController.viewSharingLink,
       AnalyticsRegistrationSourceMiddleware.clearSource()
@@ -167,6 +177,9 @@ export default {
         'project-invite'
       ),
       AuthenticationController.requireLogin(),
+      SplitTestMiddleware.ensureSplitTestEnabledForUser(
+        'sharing-updates-new-link'
+      ),
       RateLimiterMiddleware.rateLimit(rateLimiters.acceptProjectInvite),
       CollaboratorsInviteController.acceptInvite,
       AnalyticsRegistrationSourceMiddleware.clearSource()
@@ -177,6 +190,9 @@ export default {
       AnalyticsRegistrationSourceMiddleware.setSource(
         'collaboration',
         'project-invite'
+      ),
+      SplitTestMiddleware.ensureSplitTestEnabledForUser(
+        'sharing-updates-new-link'
       ),
       RateLimiterMiddleware.rateLimit(rateLimiters.validateSharingLink),
       CollaboratorsInviteController.validateSharingLink,

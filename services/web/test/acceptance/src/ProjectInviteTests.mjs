@@ -6,9 +6,43 @@ import settings from '@overleaf/settings'
 import CollaboratorsEmailHandler from '../../../app/src/Features/Collaborators/CollaboratorsEmailHandler.mjs'
 import CollaboratorsInviteHelper from '../../../app/src/Features/Collaborators/CollaboratorsInviteHelper.mjs'
 import Features from '../../../app/src/infrastructure/Features.mjs'
+import { db } from '../../../app/src/infrastructure/mongodb.mjs'
+import { CacheFlow } from 'cache-flow'
 import sinon from 'sinon'
 
 let generateTokenSpy
+
+// The reusable sharing-link routes are gated behind the `sharing-updates-new-link`
+// split test. In saas, assignments come from the database, so seed a fully
+// rolled-out "enabled" version. In non-saas, splitTestOverrides in the test
+// settings handle it (see settings.test.defaults.js).
+const enableNewLinkSplitTest = async () => {
+  await db.splittests.updateOne(
+    { name: 'sharing-updates-new-link' },
+    {
+      $set: {
+        versions: [
+          {
+            versionNumber: 1,
+            createdAt: new Date(),
+            active: true,
+            analyticsEnabled: false,
+            phase: 'release',
+            variants: [
+              {
+                name: 'enabled',
+                rolloutPercent: 100,
+                rolloutStripes: [{ start: 0, end: 100 }],
+              },
+            ],
+          },
+        ],
+      },
+    },
+    { upsert: true }
+  )
+  await CacheFlow.reset('split-test')
+}
 
 const createInvite = (sendingUser, projectId, email, callback) => {
   sendingUser.getCsrfToken(err => {
@@ -947,6 +981,15 @@ describe('ProjectInviteTests', function () {
   })
 
   describe('sharing link routes', function () {
+    beforeEach(async function () {
+      // In saas, split-test assignments come from the database. In non-saas the
+      // splitTestOverrides in the test settings handle it, and the splittests
+      // collection has no index on `name` (so a seed write hits notablescan).
+      if (Features.hasFeature('saas')) {
+        await enableNewLinkSplitTest()
+      }
+    })
+
     beforeEach(function (done) {
       this.projectName = `sharing-link-test-${Math.random()}`
       createProject(this.sendingUser, this.projectName, (err, projectId) => {

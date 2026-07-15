@@ -1042,6 +1042,7 @@ describe('<ShareProjectModal/>', function () {
     beforeEach(function () {
       window.metaAttributesCache.set('ol-splitTestVariants', {
         'sharing-updates': 'enabled',
+        'sharing-updates-new-link': 'enabled',
       })
     })
 
@@ -1286,10 +1287,70 @@ describe('<ShareProjectModal/>', function () {
     expect(screen.queryByRole('link', { name: 'Give feedback' })).to.be.null
   })
 
+  describe('sharing-updates enabled, new sharing links disabled', function () {
+    // The new reusable-link functionality is gated behind
+    // `sharing-updates-new-link`. With only `sharing-updates` on, the modal
+    // shows the new UI wired to legacy token-based link sharing: two options
+    // ("Only invited people" / "Via sharing links") driven by publicAccessLevel.
+    beforeEach(function () {
+      window.metaAttributesCache.set('ol-splitTestVariants', {
+        'sharing-updates': 'enabled',
+      })
+    })
+
+    afterEach(function () {
+      window.metaAttributesCache.delete('ol-splitTestVariants')
+    })
+
+    it('shows "Via sharing links" without the legacy label when `publicAccessLevel` is `tokenBased`', async function () {
+      fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
+
+      renderWithEditorContext(
+        <ShareProjectModal {...modalProps} />,
+        createContextProps({ publicAccessLevel: 'tokenBased' })
+      )
+
+      await screen.findByText('Via sharing links')
+      expect(screen.queryByText('Via sharing links (legacy)')).to.be.null
+    })
+
+    it('shows "Only invited people" when `publicAccessLevel` is `private`, without calling the sharing-link endpoint', async function () {
+      // Deliberately not mocking /sharing-link: it must not be requested when
+      // the new-link flag is off (fetch-mock throws on unmatched routes).
+      renderWithEditorContext(
+        <ShareProjectModal {...modalProps} />,
+        createContextProps({ publicAccessLevel: 'private' })
+      )
+
+      await screen.findByText('Only invited people')
+      // The copy-sharing-link button is for the new reusable links only.
+      expect(screen.queryByRole('button', { name: 'Copy sharing link' })).to.be
+        .null
+    })
+
+    it('offers only the two legacy access options, not "Anyone with the link"', async function () {
+      fetchMock.get(`/project/${shareModalProjectDefaults._id}/tokens`, {})
+
+      renderWithEditorContext(
+        <ShareProjectModal {...modalProps} />,
+        createContextProps({ publicAccessLevel: 'tokenBased' })
+      )
+
+      const toggle = await screen.findByRole('button', {
+        name: 'Via sharing links',
+      })
+      await userEvent.click(toggle)
+
+      await screen.findByText('Only invited people')
+      expect(screen.queryByText('Anyone with the link')).to.be.null
+    })
+  })
+
   describe('with "sharing-updates" feature flag', function () {
     beforeEach(function () {
       window.metaAttributesCache.set('ol-splitTestVariants', {
         'sharing-updates': 'enabled',
+        'sharing-updates-new-link': 'enabled',
       })
     })
 

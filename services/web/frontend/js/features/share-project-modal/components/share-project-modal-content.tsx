@@ -74,6 +74,10 @@ function ShareProjectModalContentInner({
 >) {
   const { t } = useTranslation()
   const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
+  // The copy-sharing-link button only applies to the new reusable links; legacy
+  // token links are copied from their own inputs, so hide it when the new-link
+  // feature is off.
+  const isNewLinkEnabled = useFeatureFlag('sharing-updates-new-link')
   const [isInvitedPeopleScreen, setIsInvitedPeopleScreen] = useState(false)
   const { successActionMessage, projectAccess } = useShareProjectContext()
   const { isRestrictedTokenMember, isProjectOwner } = useEditorContext()
@@ -136,7 +140,8 @@ function ShareProjectModalContentInner({
         <div className="d-flex flex-grow-1 flex-wrap gap-2">
           {isSharingUpdatesEnabled ? (
             <>
-              {!isInvitedPeopleScreen &&
+              {isNewLinkEnabled &&
+                !isInvitedPeopleScreen &&
                 projectAccess &&
                 (projectAccess === 'onlyInvitedPeople' ||
                   projectAccess.startsWith('anyoneInXyzWithTheLink') ||

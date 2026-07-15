@@ -498,6 +498,7 @@ const _ProjectController = {
       'overleaf-code',
       'export-docx',
       'sharing-updates',
+      'sharing-updates-new-link',
       'export-markdown',
       'export-html',
       'command-palette',

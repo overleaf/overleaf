@@ -97,6 +97,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
 
   const { splitTestVariants } = useSplitTestContext()
   const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
+  const isNewLinkEnabled = useFeatureFlag('sharing-updates-new-link')
 
   // show the new share modal if project owner
   // is over collaborator limit or has pending editors (once every 24 hours)
@@ -155,6 +156,19 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
       return
     }
 
+    // When the new reusable-link feature is off, derive access purely from the
+    // project's publicAccessLevel (legacy token-based sharing) and avoid the
+    // reusable sharing-link endpoint, which is gated behind the same flag.
+    if (!isNewLinkEnabled) {
+      setSharingLinkData(null)
+      setProjectAccess(
+        publicAccessLevel === 'tokenBased'
+          ? 'legacyLinkSharing'
+          : 'onlyInvitedPeople'
+      )
+      return
+    }
+
     if (publicAccessLevel === 'tokenBased') {
       setSharingLinkData(null)
       setProjectAccess('legacyLinkSharing')
@@ -187,7 +201,13 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
           'generic_something_went_wrong'
       )
     }
-  }, [publicAccessLevel, projectId, isSharingUpdatesEnabled, isProjectOwner])
+  }, [
+    publicAccessLevel,
+    projectId,
+    isSharingUpdatesEnabled,
+    isNewLinkEnabled,
+    isProjectOwner,
+  ])
 
   // close the modal if not in flight
   const cancel = useCallback(() => {
