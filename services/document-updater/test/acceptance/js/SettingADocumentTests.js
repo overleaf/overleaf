@@ -546,7 +546,7 @@ describe('Setting a document', function () {
         this.doc_id,
         this.historyOTUpdate
       )
-      await DocUpdaterClient.waitForPendingUpdates(this.doc_id)
+      await DocUpdaterClient.waitForPendingUpdates(this.project_id, this.doc_id)
     })
 
     afterEach(function () {

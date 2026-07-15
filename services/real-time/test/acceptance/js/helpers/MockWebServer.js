@@ -74,6 +74,8 @@ export default MockWebServer = {
             isRestrictedUser: !!userMetadata?.isRestrictedUser,
             isTokenMember: !!userMetadata?.isTokenMember,
             isInvitedMember: !!userMetadata?.isInvitedMember,
+            usePerProjectPendingUpdates:
+              !!userMetadata?.usePerProjectPendingUpdates,
           })
         }
       )

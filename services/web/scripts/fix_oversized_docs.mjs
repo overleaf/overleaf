@@ -152,7 +152,12 @@ async function deleteDocFromRedis(projectId, docId) {
     `lastUpdatedAt:{${docId}}`,
     `lastUpdatedBy:{${docId}}`
   )
-  await redis.srem(`DocsIn:{${projectId}}`, projectId)
+  // NOTE: once the update-queue migration reaches phase >= 2, a doc's pending
+  // updates live in the shared `PendingProjectUpdates:{projectId}` list (on the
+  // document-updater redis) rather than `PendingUpdates:{docId}`. That list is
+  // per-project, so it cannot be cleared here without dropping other docs'
+  // updates - flush/drain the project before running this script.
+  await redis.srem(`DocsIn:{${projectId}}`, docId)
 }
 
 try {

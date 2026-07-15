@@ -22,6 +22,15 @@ const {
 const rclient = RedisWrapper.createClient(settings.redis.documentupdater)
 const Keys = settings.redis.documentupdater.key_schema
 
+/**
+ * Fetch a doc's lines, version, ranges and recent ops from the
+ * document-updater.
+ *
+ * @param {string} projectId
+ * @param {string} docId
+ * @param {number} fromVersion - return ops from this version onwards (-1 for
+ *        no ops)
+ */
 async function getDocument(projectId, docId, fromVersion) {
   const timer = new metrics.Timer('get-document')
   const url = `${settings.apis.documentupdater.url}/project/${projectId}/doc/${docId}?fromVersion=${fromVersion}&historyOTSupport=true`
@@ -67,11 +76,23 @@ async function getDocument(projectId, docId, fromVersion) {
   }
 }
 
+/**
+ * Check that a doc is loadable from the document-updater.
+ *
+ * @param {string} projectId
+ * @param {string} docId
+ */
 async function checkDocument(projectId, docId) {
   // in this call fromVersion = -1 means get document without docOps
   return await getDocument(projectId, docId, -1)
 }
 
+/**
+ * Ask the document-updater to flush a project to mongo and remove it from
+ * redis.
+ *
+ * @param {string} projectId
+ */
 async function flushProjectToMongoAndDelete(projectId) {
   // this method is called when the last connected user leaves the project
   logger.debug({ projectId }, 'deleting project from document updater')
@@ -98,6 +119,11 @@ async function flushProjectToMongoAndDelete(projectId) {
   }
 }
 
+/**
+ * Pick a random shard of the document-updater dispatch list.
+ *
+ * @return {string}
+ */
 function _getPendingUpdateListKey() {
   const shard = _.random(0, settings.pendingUpdateListShardCount - 1)
   if (shard === 0) {
@@ -107,7 +133,22 @@ function _getPendingUpdateListKey() {
   }
 }
 
-async function queueChange(projectId, docId, change) {
+/**
+ * Queue an update for processing by the document-updater.
+ *
+ * @param {string} projectId
+ * @param {string} docId
+ * @param {Object} change
+ * @param {boolean} usePerProjectPendingUpdates - feature flag assigned on
+ *        joinProject; in migration phase 2 it selects the per-project queue
+ *        over the legacy per-doc queue
+ */
+async function queueChange(
+  projectId,
+  docId,
+  change,
+  usePerProjectPendingUpdates
+) {
   const allowedKeys = ['doc', 'op', 'v', 'dupIfSource', 'meta', 'lastV', 'hash']
   change = _.pick(change, allowedKeys)
   const jsonChange = JSON.stringify(change)
@@ -121,8 +162,44 @@ async function queueChange(projectId, docId, change) {
     throw new UpdateTooLargeError(updateSize)
   }
 
+  switch (settings.pendingUpdatesMigrationPhase) {
+    case 1:
+      await _queueChangeOnDocQueue(projectId, docId, jsonChange)
+      break
+    case 2:
+      // the consumer drains both queues in phase 2, so the feature flag can
+      // safely pick the queue per client
+      if (usePerProjectPendingUpdates) {
+        await _queueChangeOnProjectQueue(projectId, jsonChange)
+      } else {
+        await _queueChangeOnDocQueue(projectId, docId, jsonChange)
+      }
+      break
+    case 3:
+      await _queueChangeOnProjectQueue(projectId, jsonChange)
+      break
+    default:
+      throw new OError('invalid pendingUpdatesMigrationPhase', {
+        pendingUpdatesMigrationPhase: settings.pendingUpdatesMigrationPhase,
+      })
+  }
+}
+
+/**
+ * Queue an update on the legacy per-doc queue (phase 1): push the payload
+ * onto the doc queue, then put a `project_id:doc_id` marker onto
+ * pending-updates-list.
+ *
+ * @param {string} projectId
+ * @param {string} docId
+ * @param {string} jsonChange - the serialized change
+ */
+async function _queueChangeOnDocQueue(projectId, docId, jsonChange) {
   // record metric for each update added to queue
-  metrics.summary('redis.pendingUpdates', updateSize, { status: 'push' })
+  metrics.summary('redis.pendingUpdates', jsonChange.length, {
+    status: 'push',
+    path: 'doc',
+  })
 
   const docKey = `${projectId}:${docId}`
   // Push onto pendingUpdates for doc_id first, because once the doc updater
@@ -138,6 +215,40 @@ async function queueChange(projectId, docId, change) {
     await rclient.rpush(queueKey, docKey)
   } catch (error) {
     throw new OError('error pushing doc_id into redis')
+      .withInfo({ queueKey })
+      .withCause(error)
+  }
+}
+
+/**
+ * Queue an update on the per-project queue (phases 2 & 3): push the payload
+ * (tagged with its doc id) onto the project queue, then put a bare
+ * `project_id` marker onto pending-updates-list.
+ *
+ * @param {string} projectId
+ * @param {string} jsonChange
+ */
+async function _queueChangeOnProjectQueue(projectId, jsonChange) {
+  // record metric for each update added to queue
+  metrics.summary('redis.pendingUpdates', jsonChange.length, {
+    status: 'push',
+    path: 'project',
+  })
+
+  try {
+    await rclient.rpush(
+      Keys.pendingProjectUpdates({ project_id: projectId }),
+      jsonChange
+    )
+  } catch (error) {
+    throw new OError('error pushing project update into redis').withCause(error)
+  }
+
+  const queueKey = _getPendingUpdateListKey()
+  try {
+    await rclient.rpush(queueKey, projectId)
+  } catch (error) {
+    throw new OError('error pushing project_id into redis')
       .withInfo({ queueKey })
       .withCause(error)
   }

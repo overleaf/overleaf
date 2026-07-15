@@ -64,6 +64,9 @@ const settings = {
         pendingUpdates({ doc_id }) {
           return `PendingUpdates:{${doc_id}}`
         },
+        pendingProjectUpdates({ project_id }) {
+          return `PendingProjectUpdates:{${project_id}}`
+        },
       },
       maxRetriesPerRequest: parseInt(
         process.env.DOC_UPDATER_REDIS_MAX_RETRIES_PER_REQUEST ||
@@ -128,6 +131,20 @@ const settings = {
   // should be set to the same same as dispatcherCount in document updater
   pendingUpdateListShardCount: parseInt(
     process.env.PENDING_UPDATE_LIST_SHARD_COUNT || 10,
+    10
+  ),
+
+  // Migration of the document-updater update queue from a per-doc queue to a
+  // per-project queue. Must be kept in step with document-updater.
+  //   phase 1: write the legacy per-doc queue (`PendingUpdates:{doc_id}` +
+  //            `<project_id>:<doc_id>` marker)
+  //   phase 2: write the per-project queue (`PendingProjectUpdates:{project_id}`
+  //            + bare `<project_id>` marker) for clients with the
+  //            per-project-pending-updates feature flag (assigned by web on
+  //            joinProject), the legacy per-doc queue otherwise
+  //   phase 3: write the per-project queue for all clients
+  pendingUpdatesMigrationPhase: parseInt(
+    process.env.PENDING_UPDATES_MIGRATION_PHASE || '1',
     10
   ),
 

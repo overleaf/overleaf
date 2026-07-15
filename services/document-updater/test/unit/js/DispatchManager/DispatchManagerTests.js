@@ -139,6 +139,28 @@ describe('DispatchManager', function () {
         })
       })
 
+      describe('with a bare project-id marker (per-project queue)', function () {
+        beforeEach(function () {
+          this.client.blpop = sinon
+            .stub()
+            .callsArgWith(2, null, ['pending-updates-list', this.project_id])
+          this.UpdateManager.processOutstandingUpdatesWithLock = sinon
+            .stub()
+            .callsArg(2)
+          return this.worker._waitForUpdateThenDispatchWorker(this.callback)
+        })
+
+        it('should call processOutstandingUpdatesWithLock with no doc hint', function () {
+          this.UpdateManager.processOutstandingUpdatesWithLock
+            .calledWith(this.project_id, undefined)
+            .should.equal(true)
+        })
+
+        it('should call the callback', function () {
+          return this.callback.called.should.equal(true)
+        })
+      })
+
       describe('pending updates list with shard key', function () {
         beforeEach(function (done) {
           this.client = {

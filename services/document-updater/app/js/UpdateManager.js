@@ -1,5 +1,6 @@
 // @ts-check
 
+const Settings = require('@overleaf/settings')
 const { callbackifyAll } = require('@overleaf/promise-utils')
 const LockManager = require('./LockManager')
 const ProjectLockManager = require('./ProjectLockManager')
@@ -24,6 +25,13 @@ const HistoryOTUpdateManager = require('./HistoryOTUpdateManager')
  */
 
 const UpdateManager = {
+  /**
+   * Process the pending updates on a single doc's legacy per-doc queue. The
+   * caller must hold the doc lock.
+   *
+   * @param {string} projectId
+   * @param {string} docId
+   */
   async processOutstandingUpdates(projectId, docId) {
     const timer = new Metrics.Timer('updateManager.processOutstandingUpdates')
     try {
@@ -35,10 +43,17 @@ const UpdateManager = {
     }
   },
 
-  async processOutstandingUpdatesWithLock(projectId, docId) {
+  /**
+   * Process the pending updates for a project under the project lock, then
+   * keep going for as long as more updates are queued up.
+   *
+   * @param {string} projectId
+   * @param {string} [docIdHint] - doc id from a legacy dispatch marker, if any
+   */
+  async processOutstandingUpdatesWithLock(projectId, docIdHint) {
     const profile = new Profiler('processOutstandingUpdatesWithLock', {
       project_id: projectId,
-      doc_id: docId,
+      doc_id: docIdHint,
     })
 
     // Always take the project lock before the per-doc lock to avoid deadlocks.
@@ -49,34 +64,247 @@ const UpdateManager = {
     profile.log('getProjectLock')
 
     try {
-      const lockValue = await LockManager.promises.tryLock(docId)
-      if (lockValue == null) {
-        return
-      }
-      profile.log('tryLock')
-
-      try {
-        await UpdateManager.processOutstandingUpdates(projectId, docId)
-        profile.log('processOutstandingUpdates')
-      } finally {
-        await LockManager.promises.releaseLock(docId, lockValue)
-        profile.log('releaseLock')
-      }
+      await UpdateManager.processOutstandingProjectUpdates(
+        projectId,
+        docIdHint,
+        projectLockValue,
+        profile
+      )
+      profile.log('processOutstandingProjectUpdates')
     } finally {
       await ProjectLockManager.promises.releaseLock(projectId, projectLockValue)
       profile.log('releaseProjectLock').end()
     }
 
-    await UpdateManager.continueProcessingUpdatesWithLock(projectId, docId)
+    await UpdateManager.continueProcessingUpdatesWithLock(projectId, docIdHint)
   },
 
-  async continueProcessingUpdatesWithLock(projectId, docId) {
-    const length = await RealTimeRedisManager.promises.getUpdatesLength(docId)
-    if (length > 0) {
-      await UpdateManager.processOutstandingUpdatesWithLock(projectId, docId)
+  /**
+   * Process the pending updates for a project while holding the project lock.
+   *
+   * In phases 1 & 2 this drains the legacy per-doc queues (taking the per-doc
+   * lock for each doc) as well as the shared per-project queue; in phase 3
+   * only the per-project queue is processed.
+   *
+   * @param {string} projectId
+   * @param {string | undefined} docIdHint - doc id from a legacy dispatch
+   *        marker, if any
+   * @param {string} projectLockValue - lock value of the held project lock
+   * @param {Profiler} profile - profile started by the caller
+   */
+  async processOutstandingProjectUpdates(
+    projectId,
+    docIdHint,
+    projectLockValue,
+    profile
+  ) {
+    switch (Settings.pendingUpdatesMigrationPhase) {
+      case 1:
+      case 2:
+        await UpdateManager.processOutstandingDocUpdates(
+          projectId,
+          docIdHint,
+          projectLockValue,
+          profile
+        )
+      // Phases 1 & 2 drain the per-project queue as well, as a safety net in
+      // case a producer writes it ahead of the phase switch.
+      // falls through
+      case 3:
+        await UpdateManager.fetchAndApplyProjectUpdates(projectId, profile)
+        break
+      default:
+        throw new Error(
+          `invalid pendingUpdatesMigrationPhase: ${Settings.pendingUpdatesMigrationPhase}`
+        )
     }
   },
 
+  /**
+   * Drain the legacy per-doc queues of all the docs in the project, plus the
+   * hinted doc, while holding the project lock.
+   *
+   * @param {string} projectId
+   * @param {string | undefined} docIdHint - doc id from a legacy dispatch
+   *        marker, if any
+   * @param {string} projectLockValue - lock value of the held project lock
+   * @param {Profiler} profile - profile started by the caller
+   */
+  async processOutstandingDocUpdates(
+    projectId,
+    docIdHint,
+    projectLockValue,
+    profile
+  ) {
+    const docIds = new Set(
+      await RedisManager.promises.getDocIdsInProject(projectId)
+    )
+    profile.log('getDocIdsInProject')
+    if (docIdHint) {
+      docIds.add(docIdHint)
+    }
+    // Listing the docs above may have taken a while, so bump before we start
+    // processing and again after each doc. The final bump also covers draining
+    // the per-project queue afterwards.
+    await ProjectLockManager.promises.extendLock(projectId, projectLockValue)
+    profile.log('extendProjectLock')
+    for (const docId of docIds) {
+      await UpdateManager.fetchAndApplyDocUpdatesUnderDocLock(
+        projectId,
+        docId,
+        profile
+      )
+      await ProjectLockManager.promises.extendLock(projectId, projectLockValue)
+      profile.log('extendProjectLock')
+    }
+  },
+
+  /**
+   * Drain (one batch of) a single doc's legacy per-doc queue, taking the
+   * per-doc lock so that an old document-updater instance - which only takes
+   * the per-doc lock - cannot process the same doc concurrently during a
+   * rolling deploy. tryLock and skip on contention; the doc is revisited by
+   * the continuation check or a later dispatch.
+   *
+   * @param {string} projectId
+   * @param {string} docId
+   * @param {Profiler} profile - profile started by the caller
+   */
+  async fetchAndApplyDocUpdatesUnderDocLock(projectId, docId, profile) {
+    const length = await RealTimeRedisManager.promises.getUpdatesLength(docId)
+    profile.log('getUpdatesLength')
+    if (length === 0) {
+      return
+    }
+    const lockValue = await LockManager.promises.tryLock(docId)
+    if (lockValue == null) {
+      return
+    }
+    profile.log('tryLock')
+
+    try {
+      await UpdateManager.processOutstandingUpdates(projectId, docId)
+      profile.log('processOutstandingUpdates')
+    } finally {
+      await LockManager.promises.releaseLock(docId, lockValue)
+      profile.log('releaseLock')
+    }
+  },
+
+  /**
+   * Apply one batch of updates from the shared per-project queue. We already
+   * hold the project lock, so no per-doc lock is required: the project lock
+   * serialises all processing for the project. Each update carries its `doc`
+   * id - real-time forces `update.doc = docId` before queueing it.
+   *
+   * @param {string} projectId
+   * @param {Profiler} profile - profile started by the caller
+   */
+  async fetchAndApplyProjectUpdates(projectId, profile) {
+    const updates =
+      await RealTimeRedisManager.promises.getPendingProjectUpdates(projectId)
+    profile.log('getPendingProjectUpdates')
+    if (updates.length === 0) {
+      return
+    }
+    for (const update of updates) {
+      const docId = update.doc
+      if (HistoryOTUpdateManager.isHistoryOTEditOperationUpdate(update)) {
+        await HistoryOTUpdateManager.applyUpdate(projectId, docId, update)
+      } else {
+        await UpdateManager.applyUpdate(projectId, docId, update)
+      }
+      profile.log('applyProjectUpdate')
+    }
+  },
+
+  /**
+   * Total pending updates for a project: the per-project queue plus (in phases
+   * 1 & 2) the loaded docs' legacy per-doc queues. Used to decide whether to
+   * keep processing after releasing the lock - other workers' markers may have
+   * been consumed (and dropped on a failed tryLock) while we held it.
+   *
+   * @param {string} projectId
+   * @param {string} [docIdHint] - doc id from a legacy dispatch marker, if any
+   * @return {Promise<number>}
+   */
+  async getProjectPendingUpdatesLength(projectId, docIdHint) {
+    switch (Settings.pendingUpdatesMigrationPhase) {
+      case 1:
+      case 2: {
+        const length =
+          await RealTimeRedisManager.promises.getProjectUpdatesLength(projectId)
+        if (length > 0) {
+          return length
+        }
+        return await UpdateManager.getDocPendingUpdatesLength(
+          projectId,
+          docIdHint
+        )
+      }
+      case 3:
+        return await RealTimeRedisManager.promises.getProjectUpdatesLength(
+          projectId
+        )
+      default:
+        throw new Error(
+          `invalid pendingUpdatesMigrationPhase: ${Settings.pendingUpdatesMigrationPhase}`
+        )
+    }
+  },
+
+  /**
+   * Pending updates across the legacy per-doc queues of the docs in the
+   * project, plus the hinted doc. Returns early with the first non-empty
+   * queue's length.
+   *
+   * @param {string} projectId
+   * @param {string} [docIdHint] - doc id from a legacy dispatch marker, if any
+   * @return {Promise<number>}
+   */
+  async getDocPendingUpdatesLength(projectId, docIdHint) {
+    const docIds = new Set(
+      await RedisManager.promises.getDocIdsInProject(projectId)
+    )
+    if (docIdHint) {
+      docIds.add(docIdHint)
+    }
+    for (const docId of docIds) {
+      const length = await RealTimeRedisManager.promises.getUpdatesLength(docId)
+      if (length > 0) {
+        return length
+      }
+    }
+    return 0
+  },
+
+  /**
+   * Process the project's pending updates under the project lock if any are
+   * queued up.
+   *
+   * @param {string} projectId
+   * @param {string} [docIdHint] - doc id from a legacy dispatch marker, if any
+   */
+  async continueProcessingUpdatesWithLock(projectId, docIdHint) {
+    const length = await UpdateManager.getProjectPendingUpdatesLength(
+      projectId,
+      docIdHint
+    )
+    if (length > 0) {
+      await UpdateManager.processOutstandingUpdatesWithLock(
+        projectId,
+        docIdHint
+      )
+    }
+  },
+
+  /**
+   * Apply one batch of updates from a doc's legacy per-doc queue. The caller
+   * must hold the doc lock.
+   *
+   * @param {string} projectId
+   * @param {string} docId
+   */
   async fetchAndApplyUpdates(projectId, docId) {
     const profile = new Profiler('fetchAndApplyUpdates', {
       project_id: projectId,
@@ -286,26 +514,43 @@ const UpdateManager = {
     }
   },
 
+  /**
+   * Process the project's pending updates, then run the given method on the
+   * doc, all under the project and doc locks.
+   *
+   * @param {Function} method - called with (projectId, docId, ...args)
+   * @param {string} projectId
+   * @param {string} docId
+   * @param {...any} args
+   * @return {Promise<any>} the return value of `method`
+   */
   async lockUpdatesAndDo(method, projectId, docId, ...args) {
     const profile = new Profiler('lockUpdatesAndDo', {
       project_id: projectId,
       doc_id: docId,
     })
 
-    // Always take the project lock before the per-doc lock to avoid deadlocks.
+    // Project lock first (always before the per-doc lock, to avoid deadlocks)
+    // so we can safely drain the shared per-project queue, then the per-doc
+    // lock for the operation itself.
     const projectLockValue =
       await ProjectLockManager.promises.getLock(projectId)
     profile.log('getProjectLock')
 
     let result
     try {
+      await UpdateManager.processOutstandingProjectUpdates(
+        projectId,
+        docId,
+        projectLockValue,
+        profile
+      )
+      profile.log('processOutstandingProjectUpdates')
+
       const lockValue = await LockManager.promises.getLock(docId)
       profile.log('getLock')
 
       try {
-        await UpdateManager.processOutstandingUpdates(projectId, docId)
-        profile.log('processOutstandingUpdates')
-
         result = await method(projectId, docId, ...args)
         profile.log('method')
       } finally {
@@ -334,6 +579,12 @@ const UpdateManager = {
     return result
   },
 
+  /**
+   * Replace unpaired surrogate characters in the update's inserts.
+   *
+   * @param {Update} update
+   * @return {Update}
+   */
   _sanitizeUpdate(update) {
     // In Javascript, characters are 16-bits wide. It does not understand surrogates as characters.
     //
@@ -347,7 +598,7 @@ const UpdateManager = {
     // Something must be going on client side that is screwing up the encoding and splitting the
     // two 16-bit characters so that \uD835 is standalone.
     for (const op of update.op || []) {
-      if (op.i != null) {
+      if (isInsert(op)) {
         // Replace high and low surrogate characters with 'replacement character' (\uFFFD)
         op.i = op.i.replace(/[\uD800-\uDFFF]/g, '\uFFFD')
       }

@@ -97,12 +97,14 @@ describe('WebsocketController', function () {
         ctx.isRestrictedUser = true
         ctx.isTokenMember = true
         ctx.isInvitedMember = true
+        ctx.usePerProjectPendingUpdates = true
         ctx.WebApiManager.joinProject = sinon
           .stub()
           .callsArgWith(2, null, ctx.project, ctx.privilegeLevel, {
             isRestrictedUser: ctx.isRestrictedUser,
             isTokenMember: ctx.isTokenMember,
             isInvitedMember: ctx.isInvitedMember,
+            usePerProjectPendingUpdates: ctx.usePerProjectPendingUpdates,
           })
         ctx.RoomManager.joinProject = sinon.stub().callsArg(2)
         return ctx.WebsocketController.joinProject(
@@ -176,6 +178,11 @@ describe('WebsocketController', function () {
           ctx.isInvitedMember
         )
       })
+      it('should set the use_per_project_pending_updates flag on the client', function (ctx) {
+        ctx.client.ol_context.use_per_project_pending_updates.should.equal(
+          ctx.usePerProjectPendingUpdates
+        )
+      })
       it('should call the callback with the project, privilegeLevel and protocolVersion', function (ctx) {
         return ctx.callback
           .calledWith(
@@ -240,12 +247,14 @@ describe('WebsocketController', function () {
         ctx.isRestrictedUser = true
         ctx.isTokenMember = true
         ctx.isInvitedMember = true
+        ctx.usePerProjectPendingUpdates = true
         ctx.WebApiManager.joinProject = sinon
           .stub()
           .callsArgWith(2, null, ctx.project, ctx.privilegeLevel, {
             isRestrictedUser: ctx.isRestrictedUser,
             isTokenMember: ctx.isTokenMember,
             isInvitedMember: ctx.isInvitedMember,
+            usePerProjectPendingUpdates: ctx.usePerProjectPendingUpdates,
           })
         ctx.RoomManager.joinProject = sinon
           .stub()
@@ -1466,10 +1475,11 @@ describe('WebsocketController', function () {
       ctx.update = { op: { p: 12, t: 'foo' } }
       ctx.client.ol_context.user_id = ctx.user_id
       ctx.client.ol_context.project_id = ctx.project_id
+      ctx.client.ol_context.use_per_project_pending_updates = true
       ctx.WebsocketController._assertClientCanApplyUpdate = sinon
         .stub()
         .yields()
-      ctx.DocumentUpdaterManager.queueChange = sinon.stub().callsArg(3)
+      ctx.DocumentUpdaterManager.queueChange = sinon.stub().callsArg(4)
     })
 
     describe('succesfully', function () {
@@ -1490,9 +1500,9 @@ describe('WebsocketController', function () {
         ctx.update.meta.user_id.should.equal(ctx.user_id)
       })
 
-      it('should queue the update', function (ctx) {
+      it('should queue the update with the per-project queue flag', function (ctx) {
         ctx.DocumentUpdaterManager.queueChange
-          .calledWith(ctx.project_id, ctx.doc_id, ctx.update)
+          .calledWith(ctx.project_id, ctx.doc_id, ctx.update, true)
           .should.equal(true)
       })
 
@@ -1510,7 +1520,7 @@ describe('WebsocketController', function () {
         ctx.client.disconnect = sinon.stub()
         ctx.DocumentUpdaterManager.queueChange = sinon
           .stub()
-          .callsArgWith(3, (ctx.error = new Error('Something went wrong')))
+          .callsArgWith(4, (ctx.error = new Error('Something went wrong')))
         ctx.WebsocketController.applyOtUpdate(
           ctx.client,
           ctx.doc_id,
@@ -1570,7 +1580,7 @@ describe('WebsocketController', function () {
           const error = new UpdateTooLargeError(7372835)
           ctx.DocumentUpdaterManager.queueChange = sinon
             .stub()
-            .callsArgWith(3, error)
+            .callsArgWith(4, error)
           ctx.WebsocketController.applyOtUpdate(
             ctx.client,
             ctx.doc_id,

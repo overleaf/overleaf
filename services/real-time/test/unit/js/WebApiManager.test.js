@@ -42,6 +42,7 @@ describe('WebApiManager', function () {
           isRestrictedUser: true,
           isTokenMember: true,
           isInvitedMember: true,
+          usePerProjectPendingUpdates: true,
         }
         ctx.fetchUtils.fetchJson.resolves(ctx.response)
         ctx.WebApiManager.joinProject(ctx.project_id, ctx.user, ctx.callback)
@@ -70,6 +71,8 @@ describe('WebApiManager', function () {
             isRestrictedUser: ctx.response.isRestrictedUser,
             isTokenMember: ctx.response.isTokenMember,
             isInvitedMember: ctx.response.isInvitedMember,
+            usePerProjectPendingUpdates:
+              ctx.response.usePerProjectPendingUpdates,
           })
           .should.equal(true)
       })
@@ -89,6 +92,7 @@ describe('WebApiManager', function () {
           isRestrictedUser: true,
           isTokenMember: false,
           isInvitedMember: false,
+          usePerProjectPendingUpdates: false,
         }
         ctx.fetchUtils.fetchJson.resolves(ctx.response)
         ctx.WebApiManager.joinProject(ctx.project_id, ctx.user, ctx.callback)
@@ -120,6 +124,8 @@ describe('WebApiManager', function () {
             isRestrictedUser: ctx.response.isRestrictedUser,
             isTokenMember: ctx.response.isTokenMember,
             isInvitedMember: ctx.response.isInvitedMember,
+            usePerProjectPendingUpdates:
+              ctx.response.usePerProjectPendingUpdates,
           }
         )
       })

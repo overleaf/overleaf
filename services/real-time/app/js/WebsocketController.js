@@ -100,6 +100,8 @@ export default WebsocketController = {
         client.ol_context.is_restricted_user = !!userMetadata.isRestrictedUser
         client.ol_context.is_token_member = !!userMetadata.isTokenMember
         client.ol_context.is_invited_member = !!userMetadata.isInvitedMember
+        client.ol_context.use_per_project_pending_updates =
+          !!userMetadata.usePerProjectPendingUpdates
 
         RoomManager.joinProject(client, projectId, function (err) {
           if (err) {
@@ -557,7 +559,11 @@ export default WebsocketController = {
 
   applyOtUpdate(client, docId, update, callback) {
     // client may have disconnected, but we can submit their update to doc-updater anyways.
-    const { user_id: userId, project_id: projectId } = client.ol_context
+    const {
+      user_id: userId,
+      project_id: projectId,
+      use_per_project_pending_updates: usePerProjectPendingUpdates,
+    } = client.ol_context
     if (!projectId) {
       return callback(new NotJoinedError())
     }
@@ -607,6 +613,7 @@ export default WebsocketController = {
           projectId,
           docId,
           update,
+          usePerProjectPendingUpdates,
           function (error) {
             if ((error && error.message) === 'update is too large') {
               metrics.inc('update_too_large')

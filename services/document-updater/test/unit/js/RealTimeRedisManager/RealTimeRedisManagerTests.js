@@ -35,6 +35,9 @@ describe('RealTimeRedisManager', function () {
                 pendingUpdates({ doc_id: docId }) {
                   return `PendingUpdates:${docId}`
                 },
+                pendingProjectUpdates({ project_id: projectId }) {
+                  return `PendingProjectUpdates:${projectId}`
+                },
               },
             }),
             pubsub: {
@@ -132,6 +135,85 @@ describe('RealTimeRedisManager', function () {
     it('should look up the length', function () {
       return this.rclient.llen
         .calledWith(`PendingUpdates:${this.doc_id}`)
+        .should.equal(true)
+    })
+
+    return it('should return the length', function () {
+      return this.callback.calledWith(null, this.length).should.equal(true)
+    })
+  })
+
+  describe('getPendingProjectUpdates', function () {
+    beforeEach(function () {
+      this.rclient.llen = sinon.stub()
+      this.rclient.lrange = sinon.stub()
+      this.rclient.ltrim = sinon.stub()
+    })
+
+    describe('successfully', function () {
+      beforeEach(function () {
+        this.updates = [
+          { doc: 'doc-1', op: [{ i: 'foo', p: 4 }] },
+          { doc: 'doc-2', op: [{ i: 'bar', p: 6 }] },
+        ]
+        this.jsonUpdates = this.updates.map(update => JSON.stringify(update))
+        this.rclient.exec = sinon.stub().yields(null, [2, this.jsonUpdates])
+        return this.RealTimeRedisManager.getPendingProjectUpdates(
+          this.project_id,
+          this.callback
+        )
+      })
+
+      it('should get the pending updates from the per-project queue', function () {
+        return this.rclient.lrange
+          .calledWith(`PendingProjectUpdates:${this.project_id}`, 0, 7)
+          .should.equal(true)
+      })
+
+      it('should delete the pending updates', function () {
+        return this.rclient.ltrim
+          .calledWith(`PendingProjectUpdates:${this.project_id}`, 8, -1)
+          .should.equal(true)
+      })
+
+      return it('should call the callback with the updates', function () {
+        return this.callback.calledWith(null, this.updates).should.equal(true)
+      })
+    })
+
+    return describe("when the JSON doesn't parse", function () {
+      beforeEach(function () {
+        this.jsonUpdates = [
+          JSON.stringify({ doc: 'doc-1', op: [{ i: 'foo', p: 4 }] }),
+          'broken json',
+        ]
+        this.rclient.exec = sinon.stub().yields(null, [2, this.jsonUpdates])
+        return this.RealTimeRedisManager.getPendingProjectUpdates(
+          this.project_id,
+          this.callback
+        )
+      })
+
+      return it('should return an error to the callback', function () {
+        return this.callback
+          .calledWith(sinon.match.has('name', 'SyntaxError'))
+          .should.equal(true)
+      })
+    })
+  })
+
+  describe('getProjectUpdatesLength', function () {
+    beforeEach(function () {
+      this.rclient.llen = sinon.stub().yields(null, (this.length = 4))
+      return this.RealTimeRedisManager.getProjectUpdatesLength(
+        this.project_id,
+        this.callback
+      )
+    })
+
+    it('should look up the length of the per-project queue', function () {
+      return this.rclient.llen
+        .calledWith(`PendingProjectUpdates:${this.project_id}`)
         .should.equal(true)
     })
 
