@@ -15,7 +15,7 @@ import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
 } from '@/features/source-editor/components/codemirror-context'
-import { reviewTooltipStateField } from '@/features/source-editor/extensions/review-tooltip'
+import { reviewTooltipField } from '@/features/source-editor/extensions/review-tooltip'
 import usePreviousValue from '@/shared/hooks/use-previous-value'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
@@ -42,7 +42,7 @@ const EditorFloatingMenu: FC = () => {
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
   const [show, setShow] = useState(true)
-  const tooltipState = state.field(reviewTooltipStateField, false)?.tooltip
+  const tooltipState = state.field(reviewTooltipField, false)
   const previousTooltipState = usePreviousValue(tooltipState)
 
   useEffect(() => {

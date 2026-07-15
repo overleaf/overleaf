@@ -6,7 +6,7 @@ import {
 import { EditorSelection } from '@codemirror/state'
 import { useTranslation } from 'react-i18next'
 import { useThreadsActionsContext } from '../context/threads-context'
-import { removeNewCommentRangeEffect } from '@/features/source-editor/extensions/review-tooltip'
+import { removeNewCommentRangeEffect } from '@/features/source-editor/extensions/add-comment'
 import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
 import { ReviewPanelEntry } from './review-panel-entry'
 import { ThreadId } from '../../../../../types/review-panel/review-panel'

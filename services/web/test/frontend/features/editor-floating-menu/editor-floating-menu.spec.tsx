@@ -217,6 +217,38 @@ describe('<EditorFloatingMenu />', function () {
     })
   })
 
+  describe('adding a comment with the floating menu disabled', function () {
+    describe('when migrationEnabled is true', function () {
+      it('still creates a pending comment via the command', function () {
+        mountEditor({ migrationEnabled: true, floatingMenu: false })
+
+        // The quick-actions popup stays hidden...
+        cy.get('.editor-floating-menu').should('not.exist')
+
+        // The toolbar / menu / shortcut path (all dispatch this event) works.
+        cy.window().then(win => {
+          win.dispatchEvent(new Event('add-new-review-comment'))
+        })
+
+        cy.get('.ol-cm-change-c').should('exist')
+      })
+    })
+
+    describe('when migrationEnabled is false', function () {
+      it('still creates a pending comment via the command (legacy tooltip)', function () {
+        mountEditor({ migrationEnabled: false, floatingMenu: false })
+
+        cy.get('.review-tooltip-menu').should('not.exist')
+
+        cy.window().then(win => {
+          win.dispatchEvent(new Event('add-new-review-comment'))
+        })
+
+        cy.get('.ol-cm-change-c').should('exist')
+      })
+    })
+  })
+
   describe('bulk tracked-change actions', function () {
     beforeEach(function () {
       mountEditorWithChanges()

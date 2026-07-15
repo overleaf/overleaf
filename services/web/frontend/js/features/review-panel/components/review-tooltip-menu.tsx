@@ -14,10 +14,8 @@ import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
 } from '@/features/source-editor/components/codemirror-context'
-import {
-  buildAddNewCommentRangeEffect,
-  reviewTooltipStateField,
-} from '@/features/source-editor/extensions/review-tooltip'
+import { reviewTooltipField } from '@/features/source-editor/extensions/review-tooltip'
+import { buildAddNewCommentRangeEffect } from '@/features/source-editor/extensions/add-comment'
 import { selectHighlightedOrNearestToken } from '@/features/source-editor/utils/select-highlighted-or-nearest-token'
 import { EditorSelection } from '@codemirror/state'
 import { EditorView, getTooltip } from '@codemirror/view'
@@ -52,7 +50,7 @@ const ReviewTooltipMenu: FC = () => {
   const [show, setShow] = useState(true)
   const { setView } = useReviewPanelViewActionsContext()
   const { openReviewPanel } = useReviewPanelLayout()
-  const tooltipState = state.field(reviewTooltipStateField, false)?.tooltip
+  const tooltipState = state.field(reviewTooltipField, false)
   const previousTooltipState = usePreviousValue(tooltipState)
 
   useEffect(() => {
