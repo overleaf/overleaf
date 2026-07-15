@@ -139,6 +139,25 @@ body {
     }
   }
 
+  &.library-page {
+    // The sidebar shows the logo and account/help menus from md upwards, so
+    // the top navbar is only needed on mobile.
+    .navbar-default {
+      @include media-breakpoint-up(md) {
+        display: none;
+      }
+    }
+
+    .project-list-wrapper
+      .project-ds-nav-content-and-messages
+      .project-ds-nav-content {
+      @include media-breakpoint-up(md) {
+        border-top-left-radius: 0;
+        border-top: none;
+      }
+    }
+  }
+
   .navbar-nav > li > .dropdown-toggle::after {
     display: none;
   }
