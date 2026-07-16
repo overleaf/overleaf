@@ -102,7 +102,40 @@ const LATEX_MK_METRICS_STDOUT = [
   ],
 ]
 
+/**
+ * Normalise a filename from latexmk stderr to a project-relative path so it can
+ * be matched against history snapshot pathnames. Strips a leading `/compile/`
+ * (see parseFdbContent) and a leading `./`.
+ *
+ * @param {string} filename
+ * @returns {string}
+ */
+function normalizeImageFilename(filename) {
+  return filename.replace(/^\/compile\//, '').replace(/^\.\//, '')
+}
+
+// A PNG that could not be fast-copied, and the reason it was included the slow
+// way. Group 1 is the category, group 2 is the filename.
+const PNG_COPY_SKIPPED_RE =
+  /^PNG copy skipped \((alpha|gamma|palette|interlaced|other)\): (.*)$/gm
+
 const LATEX_MK_METRICS_STDERR = [
+  // The project-relative paths of PNGs that could not be fast-copied and were
+  // therefore included the slow way (transparency/alpha/gamma/palette/interlaced).
+  // These are exactly the PNGs that benefit from png2pdf conversion.
+  [
+    'latexmk-png-slow',
+    s => {
+      // Only the filename (group 2) matters here; the category is ignored.
+      const normalizedFiles = Array.from(
+        s.matchAll(PNG_COPY_SKIPPED_RE),
+        match => normalizeImageFilename(match[2])
+      )
+      // deduplicate
+      const files = [...new Set(normalizedFiles)]
+      return files.length > 0 ? files : null
+    },
+  ],
   [
     'latexmk-img-times',
     s => {
@@ -113,9 +146,7 @@ const LATEX_MK_METRICS_STDERR = [
         pngCategoriesByFile.set(filename, 'fast-copy')
       }
 
-      const pngCopySkipMatches = s.matchAll(
-        /^PNG copy skipped \((alpha|gamma|palette|interlaced)\): (.*)$/gm
-      )
+      const pngCopySkipMatches = s.matchAll(PNG_COPY_SKIPPED_RE)
       for (const match of pngCopySkipMatches) {
         const category = match[1]
         const filename = match[2]

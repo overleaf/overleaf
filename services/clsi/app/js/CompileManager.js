@@ -23,6 +23,7 @@ import SafeReader from './SafeReader.js'
 import LatexMetrics from './LatexMetrics.js'
 import { callbackifyMultiResult } from '@overleaf/promise-utils'
 import * as HistoryResourceWriter from './HistoryResourceWriter.js'
+import Png2Pdf from './Png2Pdf.js'
 
 const { downloadLatestCompileCache, downloadOutputDotSynctexFromCompileCache } =
   CLSICacheHandler
@@ -279,6 +280,23 @@ async function doCompile(request, stats, timings) {
   }
 
   timings.compile = Date.now() - compileStart
+
+  // Record the PNGs this compile flagged as "slow" so the next sync can convert
+  // them to PDFs (see HistoryResourceWriter).
+  if (request.isCompileFromHistory && request.png2pdf && Png2Pdf.isEnabled()) {
+    try {
+      const slowPngs = stats.latexmk?.['latexmk-png-slow'] || []
+      await HistoryResourceWriter.saveSlowPngList(
+        Path.basename(compileDir),
+        slowPngs
+      )
+    } catch (err) {
+      logger.warn(
+        { err, projectId, userId },
+        'failed to save png2pdf slow-png list'
+      )
+    }
+  }
 
   logger.debug(
     {

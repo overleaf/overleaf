@@ -13,6 +13,7 @@
 import UrlFetcher from './UrlFetcher.js'
 
 import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
 import fs from 'node:fs'
 import Path from 'node:path'
 import { callbackify } from 'node:util'
@@ -185,6 +186,32 @@ async function commitConversion(conversionPath, cachePath, destPath) {
   timer.done()
 }
 
+/**
+ * Whether an optimised (png2pdf-converted) variant of a url is already cached.
+ * The `.opt` entry is written by commitConversion even when the conversion
+ * failed (holding the original bytes), so its presence means a conversion has
+ * already been attempted for this content and should not be attempted again.
+ *
+ * @param {string} projectId
+ * @param {string} url
+ * @param {Date} lastModified
+ * @return {Promise<boolean>}
+ */
+async function isConversionCached(projectId, url, lastModified) {
+  const cachePath = getCachePath(projectId, url, lastModified) + '.opt'
+  try {
+    await fs.promises.access(cachePath)
+    return true
+  } catch (err) {
+    if (err.code === 'ENOENT') return false
+    logger.warn(
+      { err, projectId, url, cachePath },
+      'failure checking cache for converted file'
+    )
+    return false
+  }
+}
+
 export default {
   clearProject: callbackify(clearProject),
   createProjectDir: callbackify(createProjectDir),
@@ -195,5 +222,6 @@ export default {
     createProjectDir,
     downloadUrlToFile,
     commitConversion,
+    isConversionCached,
   },
 }

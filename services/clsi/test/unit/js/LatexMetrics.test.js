@@ -221,5 +221,45 @@ describe('LatexMetrics', function () {
         ])
       })
     })
+
+    describe('latexmk-png-slow', function () {
+      it('should list files that were PNG copy skipped', function (ctx) {
+        const output = {
+          stderr:
+            'PNG copy: fast.png\n' +
+            'PNG copy skipped (alpha): images/alpha.png\n' +
+            'PNG copy skipped (palette): palette.png\n' +
+            'PNG copy skipped (other): other.png\n',
+        }
+        addLatexMkMetrics(output, ctx.stats)
+
+        expect(ctx.stats.latexmk['latexmk-png-slow']).to.deep.equal([
+          'images/alpha.png',
+          'palette.png',
+          'other.png',
+        ])
+      })
+
+      it('should not include fast PNG copy lines', function (ctx) {
+        const output = { stderr: 'PNG copy: fast.png\n' }
+        addLatexMkMetrics(output, ctx.stats)
+
+        expect(ctx.stats.latexmk).to.not.have.property('latexmk-png-slow')
+      })
+
+      it('should normalize a leading /compile/ and ./', function (ctx) {
+        const output = {
+          stderr:
+            'PNG copy skipped (gamma): /compile/deep/img.png\n' +
+            'PNG copy skipped (interlaced): ./local.png\n',
+        }
+        addLatexMkMetrics(output, ctx.stats)
+
+        expect(ctx.stats.latexmk['latexmk-png-slow']).to.deep.equal([
+          'deep/img.png',
+          'local.png',
+        ])
+      })
+    })
   })
 })

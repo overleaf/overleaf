@@ -71,14 +71,56 @@ export async function clearCache(projectId, userId, cacheKey) {
 
 /**
  * @param {string} cacheKey
- * @return {{ dir: string, path: string, resyncPath: string }}
+ * @return {{ dir: string, path: string, resyncPath: string, slowPngPath: string }}
  */
 function snapshotPath(cacheKey) {
   const dir = Path.join(Settings.path.clsiCacheDir, cacheKey)
 
   const path = Path.join(dir, 'history.json.gz')
   const resyncPath = Path.join(dir, 'history-resync.json.gz')
-  return { dir, path, resyncPath }
+  // The set of PNGs the last compile flagged as slow (needing png2pdf). Written
+  // after the compile (the info is only available then), read on the next sync.
+  const slowPngPath = Path.join(dir, 'png2pdf-slow.json')
+  return { dir, path, resyncPath, slowPngPath }
+}
+
+/**
+ * Persist the list of "slow" PNG paths (those that could not be fast-copied and
+ * would benefit from png2pdf conversion) learned from the compile that just ran,
+ * so the next sync can convert only those files. Best-effort: a failure here just
+ * means the next sync falls back to the previous list (or converts nothing new).
+ *
+ * @param {string} cacheKey
+ * @param {string[]} slowPngs
+ * @return {Promise<void>}
+ */
+export async function saveSlowPngList(cacheKey, slowPngs) {
+  const { dir, slowPngPath } = snapshotPath(cacheKey)
+  const tmp = slowPngPath + '~'
+  await fs.promises.mkdir(dir, { recursive: true })
+  await fs.promises.writeFile(tmp, JSON.stringify(slowPngs))
+  await fs.promises.rename(tmp, slowPngPath)
+}
+
+/**
+ * @param {string} cacheKey
+ * @return {Promise<string[]>}
+ */
+async function loadSlowPngList(cacheKey) {
+  const { slowPngPath } = snapshotPath(cacheKey)
+  try {
+    const blob = await fs.promises.readFile(slowPngPath, 'utf-8')
+    const list = JSON.parse(blob)
+    return Array.isArray(list) ? list : []
+  } catch (err) {
+    if (!isENOENT(err)) {
+      logger.warn(
+        { err, cacheKey },
+        'compile from cache: cannot read slow-png list'
+      )
+    }
+    return []
+  }
 }
 
 /**
@@ -477,6 +519,55 @@ export async function syncResourcesToDisk(
 
   const pngModeChanged = lastPng2pdf !== request.png2pdf
 
+  const blobStore = new BlobStore(
+    request.historyId,
+    request.filestoreBlobPrefix,
+    request.clsiPerfVariant,
+    globalBlobs
+  )
+
+  // Decide which PNGs to convert. A PNG is converted when a previous compile
+  // flagged it as "slow" and it is large enough to be worth converting; keeping
+  // that decision here means the sync loop below just checks membership.
+  const png2pdfActive = request.png2pdf && Png2Pdf.isEnabled()
+  const slowPngs = new Set(png2pdfActive ? await loadSlowPngList(cacheKey) : [])
+  const shouldConvert = new Set()
+  for (const path of snapshot.getFilePathnames()) {
+    if (!isPng(path) || !slowPngs.has(path)) continue
+    // Avoid doing unnecessary work converting small PNGs.
+    const fileSize = snapshot.getFile(path)?.getByteLength() || 0
+    if (pngBelowSizeThreshold(fileSize)) {
+      Metrics.inc('png2pdf-skipped-small')
+      continue
+    }
+    shouldConvert.add(path)
+  }
+  // On a png2pdf mode switch, also re-serve PNGs that a previous compile already
+  // optimised. Once converted, a PNG is no longer flagged slow (it is included
+  // as a PDF), so it drops off the slow-list; without this it would revert to
+  // the original when toggling png2pdf off and back on. The optimised variant is
+  // served from the <cachePath>.opt cache, so this is a cheap local cache stat.
+  if (png2pdfActive && pngModeChanged) {
+    const candidates = snapshot
+      .getFilePathnames()
+      .filter(path => isPng(path) && !shouldConvert.has(path))
+    await promiseMapSettledWithLimit(
+      Settings.parallelFileDownloads,
+      candidates,
+      async path => {
+        const hash = snapshot.getFile(path)?.getHash()
+        if (!hash) return
+        const url = blobStore.getBlobURL(hash).href
+        const cached = await UrlCache.promises.isConversionCached(
+          projectId,
+          url,
+          new Date(0)
+        )
+        if (cached) shouldConvert.add(path)
+      }
+    )
+  }
+
   const changedPaths = []
   if (fullSync) {
     changedPaths.push(...snapshot.getFilePathnames())
@@ -511,6 +602,23 @@ export async function syncResourcesToDisk(
     for (const path of snapshot.getFilePathnames()) {
       if (!entriesDepthFirst.has(path)) dedupe.add(path)
     }
+    // Include PNGs known to be slow for png2pdf conversion. The presence of
+    // an optimised (.opt) cache entry means the conversion was already
+    // attempted (success or failure), so we skip those and never retry.
+    // The .opt cache is keyed by content hash, so a new PNG at the same path
+    // has no entry and is attempted.
+    for (const path of shouldConvert) {
+      if (dedupe.has(path)) continue
+      const hash = snapshot.getFile(path)?.getHash()
+      if (!hash) continue
+      const url = blobStore.getBlobURL(hash).href
+      const attempted = await UrlCache.promises.isConversionCached(
+        projectId,
+        url,
+        new Date(0)
+      )
+      if (!attempted) dedupe.add(path)
+    }
     changedPaths.push(...dedupe)
     logger.debug(
       { projectId, userId, cacheKey, changedPaths },
@@ -518,12 +626,6 @@ export async function syncResourcesToDisk(
     )
   }
 
-  const blobStore = new BlobStore(
-    request.historyId,
-    request.filestoreBlobPrefix,
-    request.clsiPerfVariant,
-    globalBlobs
-  )
   const loadEagerStart = performance.now()
   await snapshot.loadFiles('eager', blobStore)
   timings.snapshotLoadEager = Math.ceil(performance.now() - loadEagerStart)
@@ -571,7 +673,6 @@ export async function syncResourcesToDisk(
           'utf-8'
         )
       } else {
-        const fileSize = file.getByteLength() || 0
         const hash = file.getHash()
         if (!hash) {
           throw new OError('unexpected file without content and hash', { path })
@@ -585,17 +686,9 @@ export async function syncResourcesToDisk(
         try {
           const fallbackURL = null // no fallback
           const lastModified = new Date(0) // content is static
-          const isConvertiblePng =
-            request.png2pdf && Png2Pdf.isEnabled() && isPng(path)
-          // Avoid doing unnecessary work converting small PNGs
-          const skipConversion =
-            isConvertiblePng && pngBelowSizeThreshold(fileSize)
-          if (skipConversion) {
-            Metrics.inc('png2pdf-skipped-small')
-          }
-          // Take the conversion path for PNGs to be optimised
-          if (isConvertiblePng && !skipConversion) {
-            // PNG files go through a batch conversion process first.
+          // PNGs selected for conversion go through a batch conversion process
+          // first (see shouldConvert above).
+          if (shouldConvert.has(path)) {
             const toConvert = await UrlCache.promises.downloadUrlToFile(
               projectId,
               url,

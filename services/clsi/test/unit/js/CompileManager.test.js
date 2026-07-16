@@ -150,6 +150,18 @@ describe('CompileManager', () => {
       downloadOutputDotSynctexFromCompileCache: sinon.stub().resolves(),
     }
 
+    ctx.HistoryResourceWriter = {
+      syncResourcesToDisk: sinon.stub().resolves({
+        resourceList: ctx.resources,
+        baseHistoryVersion: undefined,
+      }),
+      saveSlowPngList: sinon.stub().resolves(),
+    }
+
+    ctx.Png2Pdf = {
+      isEnabled: sinon.stub().returns(true),
+    }
+
     ctx.LatexMetrics = { enableLatexMkMetrics: sinon.stub() }
 
     ctx.StatsManager = { sampleRequest: sinon.stub().returns(false) }
@@ -213,6 +225,15 @@ describe('CompileManager', () => {
 
     vi.doMock('../../../app/js/CLSICacheHandler', () => ({
       default: ctx.CLSICacheHandler,
+    }))
+
+    vi.doMock(
+      '../../../app/js/HistoryResourceWriter',
+      () => ctx.HistoryResourceWriter
+    )
+
+    vi.doMock('../../../app/js/Png2Pdf', () => ({
+      default: ctx.Png2Pdf,
     }))
 
     vi.doMock('../../../app/js/LatexMetrics', () => ({
@@ -470,6 +491,48 @@ describe('CompileManager', () => {
           ctx.compileDir + '/main.tex'
         )
         expect(ctx.fsPromises.rmdir).to.have.been.calledWith(ctx.compileDir)
+      })
+    })
+
+    describe('with slow pngs from latexmk metrics', () => {
+      beforeEach(ctx => {
+        ctx.request.isCompileFromHistory = true
+        ctx.request.png2pdf = true
+      })
+
+      it('should save the slow png list for the next compile', async ctx => {
+        const stats = {
+          latexmk: {
+            'latexmk-png-slow': ['images/alpha.png', 'images/palette.png'],
+          },
+        }
+
+        await ctx.CompileManager.promises.doCompileWithLock(
+          ctx.request,
+          stats,
+          {}
+        )
+
+        expect(
+          ctx.HistoryResourceWriter.saveSlowPngList
+        ).to.have.been.calledWith(`${ctx.projectId}-${ctx.userId}`, [
+          'images/alpha.png',
+          'images/palette.png',
+        ])
+      })
+
+      it('should not fail compile when saving the slow png list fails', async ctx => {
+        ctx.HistoryResourceWriter.saveSlowPngList.rejects(
+          new Error('save failed')
+        )
+
+        await expect(
+          ctx.CompileManager.promises.doCompileWithLock(
+            ctx.request,
+            { latexmk: { 'latexmk-png-slow': ['images/alpha.png'] } },
+            {}
+          )
+        ).to.be.fulfilled
       })
     })
   })
