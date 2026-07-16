@@ -60,6 +60,7 @@
   margin-left: auto;
   display: flex;
   align-items: center;
+  gap: var(--spacing-03);
 
   .ol-cm-toolbar-button {
     display: inline-flex;
@@ -69,6 +70,14 @@
     margin: 0 1px;
     width: 24px;
     height: 24px;
+  }
+
+  &::before {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 16px;
+    background-color: var(--toolbar-dropdown-divider-color);
   }
 }
 

@@ -12,6 +12,8 @@ import { ToggleSearchButton } from './toggle-search-button'
 import SwitchToPDFButton from '../switch-to-pdf-button'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
+import DownloadFileButton from './download-file-button'
 
 type ToolbarLayoutProps = {
   children: ReactNode
@@ -81,8 +83,10 @@ function Right({
   const visualPreviewEnabled = useFeatureFlag('visual-preview')
   const isToolbarMigration = useFeatureFlag('writefull-toolbar-migration')
   const { features } = useProjectContext()
+  const networkIsStalled = useIsNetworkStalled()
   return (
     <div className="ol-toolbar-layout-right">
+      {networkIsStalled && <DownloadFileButton />}
       {!visualPreviewEnabled && <EditorSwitch />}
       {/* trackChangesVisible controls provider/UI availability; trackChanges
           (checked inside the switcher) controls the actual feature entitlement.
