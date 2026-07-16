@@ -35,6 +35,7 @@ import { useDebugDiffTracker } from '../hooks/use-debug-diff-tracker'
 import { convertFileRefToBinaryFile } from '@/features/ide-react/util/file-view'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export interface GotoOffsetOptions {
   gotoOffset: number
@@ -117,6 +118,9 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
   const { createDebugDiff, debugTimers } = useDebugDiffTracker(
     projectId,
     currentDocument
+  )
+  const improvedFlakyConnections = useFeatureFlag(
+    'intermittent-connection-improvements'
   )
 
   const [globalEditorWatchdogManager] = useState(
@@ -573,7 +577,9 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
         // Ensure that the editor is locked
         setOutOfSync(true)
         // Display the "out of sync" modal
-        showOutOfSyncModal(editorContent || '')
+        if (!improvedFlakyConnections) {
+          showOutOfSyncModal(editorContent || '')
+        }
 
         // Do not forceReopen the document.
         return
@@ -601,6 +607,7 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
     showOutOfSyncModal,
     setOutOfSync,
     t,
+    improvedFlakyConnections,
   ])
 
   useEventListener(

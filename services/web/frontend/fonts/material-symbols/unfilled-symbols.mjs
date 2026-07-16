@@ -53,6 +53,7 @@ export default /** @type {const} */ ([
   'notifications',
   'open_in_new',
   'password',
+  'pause_circle',
   'person',
   'person_edit',
   'picture_as_pdf',
