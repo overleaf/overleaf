@@ -13,6 +13,15 @@ export type ProjectMember = {
   pendingReviewer?: boolean
 }
 
+export type ProjectOwner = {
+  _id: UserId
+  email: string
+  first_name: string
+  last_name: string
+  privileges: string
+  signUpDate: string
+}
+
 export interface ProjectMetadata extends ProjectSettings {
   _id: string
   mainBibliographyDocId?: string
@@ -32,14 +41,7 @@ export interface ProjectMetadata extends ProjectSettings {
     github?: boolean
   }
   publicAccessLevel?: PublicAccessLevel
-  owner: {
-    _id: UserId
-    email: string
-    first_name: string
-    last_name: string
-    privileges: string
-    signUpDate: string
-  }
+  owner: ProjectOwner
   rootFolder?: Folder[]
   trackChangesState?: false | TrackChangesStateData
 }

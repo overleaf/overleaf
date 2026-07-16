@@ -3,12 +3,12 @@ import OLButton from '@/shared/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import { PreventSelectingEntry } from './review-panel-prevent-selecting'
-import { MentionBadge } from './mention-badge'
+import { MentionBadge } from '@/shared/components/mention-badge'
 import {
   MentionSegment,
   parseMentions,
   sliceMentionSegments,
-} from '../utils/parse-mentions'
+} from '@/shared/utils/parse-mentions'
 
 export const ExpandableContent = memo<{
   className?: string

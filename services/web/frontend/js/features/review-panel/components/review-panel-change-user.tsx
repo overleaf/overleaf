@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react'
-import { useChangesUsersContext } from '../context/changes-users-context'
+import { useChangesUsersContext } from '@/shared/context/changes-users-context'
 import { Change } from '../../../../../types/change'
 import ReviewPanelEntryUser from './review-panel-entry-user'
 

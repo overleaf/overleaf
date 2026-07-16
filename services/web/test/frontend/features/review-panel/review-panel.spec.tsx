@@ -517,13 +517,13 @@ describe('<ReviewPanel />', function () {
     it('can add comment', function () {
       cy.get('@add-comment-button').click({ scrollBehavior: false })
       cy.get('@review-panel').within(() => {
-        // TODO: Fix selector
-        cy.get('.review-panel-add-comment-textarea').type(
-          'a new comment{enter}',
-          {
-            scrollBehavior: false,
-          }
-        )
+        // The add-comment editor is the CM6 input that is not a reply/edit
+        // input (those also carry the review-panel-comment-input class).
+        cy.get(
+          '.review-panel-add-comment-editor:not(.review-panel-comment-input) .cm-content'
+        ).type('a new comment{enter}', {
+          scrollBehavior: false,
+        })
       })
       cy.wait('@addNewComment')
       // TODO : Figure out a way to plumb the websocket response back through
@@ -565,7 +565,9 @@ describe('<ReviewPanel />', function () {
         scrollBehavior: false,
       })
       cy.get('@review-panel').within(() => {
-        cy.get('.review-panel-add-comment-textarea').should('exist')
+        cy.get(
+          '.review-panel-add-comment-editor:not(.review-panel-comment-input)'
+        ).should('exist')
       })
     })
   })

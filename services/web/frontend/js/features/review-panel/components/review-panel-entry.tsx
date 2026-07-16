@@ -60,13 +60,22 @@ export const ReviewPanelEntry: FC<
     (event: React.FocusEvent | React.MouseEvent) => {
       setFocused(true)
 
-      if (event.target instanceof HTMLTextAreaElement) {
+      // The add-comment input is a CodeMirror editor (contenteditable div)
+      // rather than a textarea, so also treat focus landing inside it as a
+      // text-input focus.
+      const target = event.target
+      const isTextInput =
+        target instanceof HTMLTextAreaElement ||
+        (target instanceof HTMLElement &&
+          target.closest('.review-panel-add-comment-editor') !== null)
+
+      if (isTextInput) {
         const entryBottom =
           (entryRef.current?.offsetTop || 0) +
           (entryRef.current?.offsetHeight || 0)
 
         if (entryBottom > OFFSET_FOR_ENTRIES_ABOVE) {
-          // if the entry textarea is visible, no need to select the entry
+          // if the entry input is visible, no need to select the entry
           // so that it doesn't scroll out of view as user types
           setTextareaFocused(true)
           return

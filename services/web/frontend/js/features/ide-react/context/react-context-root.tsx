@@ -1,5 +1,6 @@
 import React, { ElementType, FC, PropsWithChildren } from 'react'
 import { ChatProvider } from '@/features/chat/context/chat-context'
+import { ChangesUsersProvider } from '@/shared/context/changes-users-context'
 import { ConnectionProvider } from './connection-context'
 import { DetachCompileProvider } from '@/shared/context/detach-compile-context'
 import { DetachProvider } from '@/shared/context/detach-context'
@@ -47,6 +48,7 @@ export const ReactContextRoot: FC<
 > = ({ children, providers = {} }) => {
   const Providers = {
     ChatProvider,
+    ChangesUsersProvider,
     ConnectionProvider,
     DetachCompileProvider,
     DetachProvider,
@@ -130,9 +132,11 @@ export const ReactContextRoot: FC<
                                                                   <Providers.OutlineProvider>
                                                                     <Providers.CommandRegistryProvider>
                                                                       <Providers.EditorSelectionProvider>
-                                                                        {
-                                                                          childrenWrappedWithDynamicProviders
-                                                                        }
+                                                                        <Providers.ChangesUsersProvider>
+                                                                          {
+                                                                            childrenWrappedWithDynamicProviders
+                                                                          }
+                                                                        </Providers.ChangesUsersProvider>
                                                                       </Providers.EditorSelectionProvider>
                                                                     </Providers.CommandRegistryProvider>
                                                                   </Providers.OutlineProvider>

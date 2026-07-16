@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import {
   parseMentions,
   sliceMentionSegments,
-} from '@/features/review-panel/utils/parse-mentions'
+} from '@/shared/utils/parse-mentions'
 import { UserId } from '@ol-types/user'
 
 describe('parseMentions', function () {

@@ -1,8 +1,8 @@
 import { useId, type FC } from 'react'
 import { useTranslation } from 'react-i18next'
-import { UserId } from '../../../../../types/user'
-import { useChangesUsersContext } from '../context/changes-users-context'
-import { buildName } from '../utils/build-name'
+import { UserId } from '@ol-types/user'
+import { useChangesUsersContext } from '@/shared/context/changes-users-context'
+import { buildName } from '@/shared/utils/build-name'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
 
 export const MentionBadge: FC<{ userId: UserId }> = ({ userId }) => {
@@ -12,7 +12,7 @@ export const MentionBadge: FC<{ userId: UserId }> = ({ userId }) => {
   const user = changesUsers?.get(userId)
 
   if (!user) {
-    return <span className="review-panel-mention">@{t('unknown')}</span>
+    return <span className="mention-badge">@{t('unknown')}</span>
   }
 
   return (
@@ -22,7 +22,7 @@ export const MentionBadge: FC<{ userId: UserId }> = ({ userId }) => {
       overlayProps={{ placement: 'bottom' }}
       tooltipProps={{ className: 'review-panel-tooltip' }}
     >
-      <span className="review-panel-mention">@{buildName(user)}</span>
+      <span className="mention-badge">@{buildName(user)}</span>
     </OLTooltip>
   )
 }

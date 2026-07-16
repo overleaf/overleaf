@@ -1,10 +1,10 @@
-import { UserId } from '../../../../../types/user'
+import { UserId } from '@ol-types/user'
 
 export type MentionSegment =
   | { type: 'text'; value: string }
   | { type: 'mention'; userId: UserId }
 
-const MENTION_REGEX = /@\[([a-f0-9]{24})\]/g
+export const MENTION_REGEX = /@\[([a-f0-9]{24})\]/g
 
 export function parseMentions(content: string): MentionSegment[] {
   const segments: MentionSegment[] = []

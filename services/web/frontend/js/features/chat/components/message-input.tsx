@@ -1,4 +1,9 @@
 import { useTranslation } from 'react-i18next'
+import { useCallback, useRef } from 'react'
+import {
+  MentionsInput,
+  MentionsInputHandle,
+} from '@/shared/components/mentions-input'
 
 type MessageInputProps = {
   resetUnreadMessages: () => void
@@ -7,33 +12,25 @@ type MessageInputProps = {
 
 function MessageInput({ resetUnreadMessages, sendMessage }: MessageInputProps) {
   const { t } = useTranslation()
+  const inputRef = useRef<MentionsInputHandle | null>(null)
 
-  function handleKeyDown(event: React.KeyboardEvent) {
-    const selectingCharacter = event.nativeEvent.isComposing
-    if (event.key === 'Enter' && !selectingCharacter) {
-      event.preventDefault()
-      const target = event.target as HTMLInputElement
-      sendMessage(target.value)
-      // wrap the form reset in setTimeout so input sources have time to finish
-      // https://github.com/overleaf/internal/pull/9206
-      window.setTimeout(() => {
-        target.blur()
-        target.closest('form')?.reset()
-        target.focus()
-      }, 0)
-    }
-  }
+  const handleSubmit = useCallback(
+    (message: string) => {
+      sendMessage(message)
+      inputRef.current?.clear()
+    },
+    [sendMessage]
+  )
 
   return (
     <form className="new-message">
-      <label htmlFor="chat-input" className="visually-hidden">
-        {`${t('your_message_to_collaborators')}…`}
-      </label>
-      <textarea
-        id="chat-input"
+      <MentionsInput
+        ref={inputRef}
+        className="chat-message-input"
+        label={`${t('your_message_to_collaborators')}…`}
         placeholder={`${t('your_message_to_collaborators')}…`}
-        onKeyDown={handleKeyDown}
-        onClick={resetUnreadMessages}
+        onSubmit={handleSubmit}
+        onFocus={resetUnreadMessages}
       />
     </form>
   )

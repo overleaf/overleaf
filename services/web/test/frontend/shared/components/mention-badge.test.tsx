@@ -1,10 +1,10 @@
 import { expect } from 'chai'
 import { render, screen } from '@testing-library/react'
-import { MentionBadge } from '@/features/review-panel/components/mention-badge'
+import { MentionBadge } from '@/shared/components/mention-badge'
 import {
   ChangesUsersContext,
   ChangesUsers,
-} from '@/features/review-panel/context/changes-users-context'
+} from '@/shared/context/changes-users-context'
 import { UserId } from '@ol-types/user'
 
 const userId = 'aabbccddeeff00112233aabb' as UserId
@@ -73,6 +73,6 @@ describe('<MentionBadge />', function () {
     renderMentionBadge(users)
     const badge = screen.getByText('@Jane Doe')
     expect(badge.tagName).to.equal('SPAN')
-    expect(badge.classList.contains('review-panel-mention')).to.be.true
+    expect(badge.classList.contains('mention-badge')).to.be.true
   })
 })

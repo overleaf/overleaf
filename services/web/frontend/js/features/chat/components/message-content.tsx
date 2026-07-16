@@ -6,7 +6,10 @@ import { debugConsole } from '@/utils/debugging'
 import { Message, useChatContext } from '@/features/chat/context/chat-context'
 import OLButton from '@/shared/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
-import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
+import { mentionsFeatureEnabled } from '@/shared/utils/mentions'
+import { MentionsInput } from '@/shared/components/mentions-input'
+import { parseMentions } from '@/shared/utils/parse-mentions'
+import { MentionBadge } from '@/shared/components/mention-badge'
 
 const MessageContent: FC<{
   content: Message['content']
@@ -47,64 +50,51 @@ const MessageContent: FC<{
     }
   }, [content, mounted])
 
-  const completeEdit = useCallback(() => {
-    editMessage(messageId, editedContent)
-  }, [editMessage, editedContent, messageId])
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        e.preventDefault()
-        completeEdit()
-      } else if (e.key === 'Escape') {
-        e.preventDefault()
-        cancelMessageEdit()
-        setEditedContent(content)
-      }
+  const completeEdit = useCallback(
+    (value: string) => {
+      editMessage(messageId, value)
     },
-    [cancelMessageEdit, completeEdit, content]
+    [editMessage, messageId]
   )
 
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setEditedContent(e.target.value)
-    },
-    []
-  )
+  const handleCancel = useCallback(() => {
+    cancelMessageEdit()
+    setEditedContent(content)
+  }, [cancelMessageEdit, content])
 
-  const handleAutoFocus = useCallback(
-    (textarea: HTMLTextAreaElement) => textarea.select(),
-    []
-  )
+  const mentionsEnabled = mentionsFeatureEnabled()
 
   return editing ? (
     <>
-      <AutoExpandingTextArea
-        value={editedContent}
-        style={{ width: '100%' }}
-        onKeyDown={handleKeyDown}
-        onChange={handleChange}
+      <MentionsInput
+        className="chat-message-edit-input"
+        label={t('edit_message')}
+        initialValue={content}
+        onChange={setEditedContent}
+        onSubmit={completeEdit}
+        onCancel={handleCancel}
         autoFocus // eslint-disable-line jsx-a11y/no-autofocus
-        onAutoFocus={handleAutoFocus}
+        selectOnFocus
       />
       <br />
+      <OLButton size="sm" variant="secondary" onClick={handleCancel}>
+        {t('cancel')}
+      </OLButton>
       <OLButton
         size="sm"
         variant="secondary"
-        onClick={() => {
-          cancelMessageEdit()
-          setEditedContent(content)
-        }}
+        onClick={() => completeEdit(editedContent)}
       >
-        {t('cancel')}
-      </OLButton>
-      <OLButton size="sm" variant="secondary" onClick={() => completeEdit()}>
         {t('save')}
       </OLButton>
     </>
   ) : (
     <p ref={root} translate="no">
-      <Linkify>{content}</Linkify>
+      {mentionsEnabled ? (
+        renderMentionedContent(content)
+      ) : (
+        <Linkify>{content}</Linkify>
+      )}
       {edited ? (
         <>
           {' '}
@@ -112,6 +102,16 @@ const MessageContent: FC<{
         </>
       ) : null}
     </p>
+  )
+}
+
+function renderMentionedContent(content: string) {
+  return parseMentions(content).map((segment, index) =>
+    segment.type === 'mention' ? (
+      <MentionBadge key={index} userId={segment.userId} />
+    ) : (
+      <Linkify key={index}>{segment.value}</Linkify>
+    )
   )
 }
 

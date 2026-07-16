@@ -8,7 +8,7 @@ import {
 } from 'react'
 import { getJSON } from '@/infrastructure/fetch-json'
 import { useProjectContext } from '@/shared/context/project-context'
-import { UserId } from '../../../../../types/user'
+import { UserId } from '@ol-types/user'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { debugConsole } from '@/utils/debugging'
 import { captureException } from '@/infrastructure/error-reporter'
