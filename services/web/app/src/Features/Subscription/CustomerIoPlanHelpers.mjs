@@ -545,7 +545,7 @@ function getGroupRole(
  * Customer.io properties derived from a user's institutional affiliations.
  *
  * @param {UserEmailData[]} userEmails - email data from UserGetter.getUserFullEmails
- * @returns {{ enterprise_commons: boolean, domain_capture: boolean }}
+ * @returns {{ enterprise_commons: boolean, commons_ai: boolean, domain_capture: boolean }}
  */
 function getAffiliationProperties(userEmails) {
   const enterpriseCommons = userEmails.some(
@@ -554,11 +554,17 @@ function getAffiliationProperties(userEmails) {
       emailData.affiliation?.institution?.commonsAccount &&
       emailData.affiliation?.institution?.enterpriseCommons
   )
+  const commonsAi = userEmails.some(
+    emailData =>
+      emailData.emailHasInstitutionLicence &&
+      emailData.affiliation?.institution?.writefullCommonsAccount === true
+  )
   const domainCapture = userEmails.some(
     emailData => emailData.affiliation?.group?.domainCaptureEnabled
   )
   return {
     enterprise_commons: enterpriseCommons,
+    commons_ai: commonsAi,
     domain_capture: domainCapture,
   }
 }
