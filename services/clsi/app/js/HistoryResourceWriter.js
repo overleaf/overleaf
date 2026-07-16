@@ -38,6 +38,16 @@ function isPng(path) {
   return Path.extname(path).toLowerCase() === '.png'
 }
 
+/**
+ * Returns true if the PNG file size (bytes) is below the conversion threshold
+ * @param {number} fileSize
+ * @returns {boolean}
+ */
+
+function pngBelowSizeThreshold(fileSize) {
+  return fileSize < Settings.png2pdfMinFileSizeBytes
+}
+
 export const clearCacheCb = callbackify(clearCache)
 
 /**
@@ -561,6 +571,7 @@ export async function syncResourcesToDisk(
           'utf-8'
         )
       } else {
+        const fileSize = file.getByteLength() || 0
         const hash = file.getHash()
         if (!hash) {
           throw new OError('unexpected file without content and hash', { path })
@@ -574,7 +585,16 @@ export async function syncResourcesToDisk(
         try {
           const fallbackURL = null // no fallback
           const lastModified = new Date(0) // content is static
-          if (request.png2pdf && Png2Pdf.isEnabled() && isPng(path)) {
+          const isConvertiblePng =
+            request.png2pdf && Png2Pdf.isEnabled() && isPng(path)
+          // Avoid doing unnecessary work converting small PNGs
+          const skipConversion =
+            isConvertiblePng && pngBelowSizeThreshold(fileSize)
+          if (skipConversion) {
+            Metrics.inc('png2pdf-skipped-small')
+          }
+          // Take the conversion path for PNGs to be optimised
+          if (isConvertiblePng && !skipConversion) {
             // PNG files go through a batch conversion process first.
             const toConvert = await UrlCache.promises.downloadUrlToFile(
               projectId,

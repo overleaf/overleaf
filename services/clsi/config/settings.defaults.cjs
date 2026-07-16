@@ -37,6 +37,8 @@ module.exports = {
   png2pdfImage:
     process.env.PNG2PDF_IMAGE || 'quay.io/sharelatex/png2pdf:2026-06-24',
   enablePng2pdfConversions: process.env.ENABLE_PNG2PDF_CONVERSIONS === 'true',
+  png2pdfMinFileSizeBytes:
+    parseInt(process.env.PNG2PDF_MIN_FILE_SIZE_BYTES, 10) || 1024 * 1024,
   maxUploadSize: 50 * 1024 * 1024,
   preciousFilePattern: process.env.PRECIOUS_FILE_PATTERN || '',
 
