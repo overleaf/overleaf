@@ -51,6 +51,7 @@ function PdfCompileButton() {
     startCompile,
     stopCompile,
     recompileFromScratch,
+    isNetworkStalled,
   } = useCompileContext()
   const { enableStopOnFirstError, disableStopOnFirstError } =
     useStopOnFirstError({ eventSource: 'dropdown' })
@@ -93,6 +94,7 @@ function PdfCompileButton() {
     {
       'detach-compile-button-animate': animateCompileDropdownArrow,
       'btn-striped-animated': hasChanges,
+      'compile-button-network-stalled': isNetworkStalled,
     },
     'no-left-border',
     'dropdown-button-toggle',
@@ -104,6 +106,7 @@ function PdfCompileButton() {
     'compile-button',
     {
       'btn-striped-animated': hasChanges,
+      'compile-button-network-stalled': isNetworkStalled,
     }
   )
 
@@ -113,7 +116,7 @@ function PdfCompileButton() {
         id: 'compile',
         handler: () => startCompile(),
         label: t('recompile'),
-        disabled: compiling,
+        disabled: compiling || isNetworkStalled,
       },
       {
         id: 'stop-compile',
@@ -125,10 +128,17 @@ function PdfCompileButton() {
         id: 'recompile-from-scratch',
         handler: fromScratchWithEvent,
         label: t('recompile_from_scratch'),
-        disabled: compiling,
+        disabled: compiling || isNetworkStalled,
       },
     ],
-    [startCompile, t, compiling, stopCompile, fromScratchWithEvent]
+    [
+      startCompile,
+      t,
+      compiling,
+      stopCompile,
+      fromScratchWithEvent,
+      isNetworkStalled,
+    ]
   )
 
   return (
@@ -144,7 +154,7 @@ function PdfCompileButton() {
       >
         <OLButton
           variant="primary"
-          disabled={compiling}
+          disabled={compiling || isNetworkStalled}
           isLoading={compiling}
           onClick={() => startCompile()}
           className={buttonClassName}
@@ -161,6 +171,7 @@ function PdfCompileButton() {
         id="pdf-recompile-dropdown"
         size="sm"
         aria-label={t('toggle_compile_options_menu')}
+        disabled={isNetworkStalled}
         className={dropdownToggleClassName}
       />
 
@@ -279,8 +290,8 @@ function PdfCompileButton() {
           <OLDropdownItem
             as="button"
             onClick={fromScratchWithEvent}
-            disabled={compiling}
-            aria-disabled={compiling}
+            disabled={compiling || isNetworkStalled}
+            aria-disabled={compiling || isNetworkStalled}
           >
             {t('recompile_from_scratch')}
           </OLDropdownItem>

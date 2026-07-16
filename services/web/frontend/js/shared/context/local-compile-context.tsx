@@ -60,6 +60,7 @@ import {
   ActiveOverallTheme,
   useActiveOverallTheme,
 } from '../hooks/use-active-overall-theme'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 
 type PdfFile = Record<string, any>
 
@@ -132,6 +133,7 @@ export type CompileContext = {
   darkModePdf: boolean | undefined
   setDarkModePdf: (value: boolean) => void
   activeOverallTheme: ActiveOverallTheme
+  isNetworkStalled: boolean
 }
 
 export const LocalCompileContext = createContext<CompileContext | undefined>(
@@ -156,6 +158,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   const { fileTreeData } = useFileTreeData()
   const { findEntityByPath } = useFileTreePathContext()
   const getRootDocInfo = useRootDoc()
+  const isNetworkStalled = useIsNetworkStalled()
 
   // whether a compile is in progress
   const [compiling, setCompiling] = useState(false)
@@ -822,6 +825,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       darkModePdf,
       setDarkModePdf,
       activeOverallTheme,
+      isNetworkStalled,
     }),
     [
       animateCompileDropdownArrow,
@@ -879,6 +883,7 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
       darkModePdf,
       setDarkModePdf,
       activeOverallTheme,
+      isNetworkStalled,
     ]
   )
 

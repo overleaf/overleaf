@@ -34,16 +34,19 @@ export const startCompileKeypress = (
 
 export default function useCompileTriggers(
   startCompile: (...args: any[]) => Promise<void>,
-  setChangedAt: (...args: any[]) => void
+  setChangedAt: (...args: any[]) => void,
+  networkStalled: boolean
 ) {
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (startCompileKeypress(event)) {
         event.preventDefault()
-        startCompile()
+        if (!networkStalled) {
+          startCompile()
+        }
       }
     },
-    [startCompile]
+    [startCompile, networkStalled]
   )
 
   const handleStartCompile = useCallback(() => {

@@ -76,6 +76,7 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
     darkModePdf: _darkModePdf,
     setDarkModePdf: _setDarkModePdf,
     activeOverallTheme: _activeOverallTheme,
+    isNetworkStalled: _isNetworkStalled,
   } = localCompileContext
 
   const [animateCompileDropdownArrow] = useDetachStateWatcher(
@@ -410,7 +411,14 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
     'detached'
   )
 
-  useCompileTriggers(startCompile, setChangedAt)
+  const [isNetworkStalled] = useDetachStateWatcher(
+    'isNetworkStalled',
+    _isNetworkStalled,
+    'detacher',
+    'detached'
+  )
+
+  useCompileTriggers(startCompile, setChangedAt, isNetworkStalled)
   useLogEvents(setShowLogs)
 
   const value = useMemo(
@@ -473,6 +481,7 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
       darkModePdf,
       setDarkModePdf,
       activeOverallTheme,
+      isNetworkStalled,
     }),
     [
       animateCompileDropdownArrow,
@@ -531,6 +540,7 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
       darkModePdf,
       setDarkModePdf,
       activeOverallTheme,
+      isNetworkStalled,
     ]
   )
 

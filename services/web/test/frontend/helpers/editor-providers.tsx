@@ -753,6 +753,7 @@ const BASE_COMPILE_CONTEXT_MOCK = {
   darkModePdf: false,
   setDarkModePdf: () => {},
   activeOverallTheme: 'light',
+  isNetworkStalled: false,
 } as const
 
 const makeDetachCompileProvider = (mockCompileOnLoad: boolean = false) => {
