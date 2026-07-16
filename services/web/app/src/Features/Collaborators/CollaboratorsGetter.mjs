@@ -40,6 +40,19 @@ const { ObjectId } = mongodb
 
 // Wrapper for determining multiple dimensions of project access.
 class ProjectAccess {
+  // Projection for the project fields the constructor needs.
+  static PROJECTION = {
+    owner_ref: 1,
+    collaberator_refs: 1,
+    readOnly_refs: 1,
+    tokenAccessReadOnly_refs: 1,
+    tokenAccessReadAndWrite_refs: 1,
+    publicAccesLevel: 1,
+    pendingEditor_refs: 1,
+    reviewer_refs: 1,
+    pendingReviewer_refs: 1,
+  }
+
   /** @type {ProjectMember[]} */
   #members
 
@@ -205,6 +218,15 @@ class ProjectAccess {
    * @param {string | ObjectId} userId
    * @return {boolean}
    */
+  isOwner(userId) {
+    if (!userId) return false
+    return this.#ownerId.toString() === userId.toString()
+  }
+
+  /**
+   * @param {string | ObjectId} userId
+   * @return {boolean}
+   */
   isUserInvitedMember(userId) {
     if (!userId) return false
     for (const member of this.#members) {
@@ -283,17 +305,10 @@ async function getProjectAccess(projectId) {
   let projectAccess = _getCachedProjectAccess(projectId, 'full')
   if (projectAccess) return projectAccess
 
-  const project = await ProjectGetter.promises.getProject(projectId, {
-    owner_ref: 1,
-    collaberator_refs: 1,
-    readOnly_refs: 1,
-    tokenAccessReadOnly_refs: 1,
-    tokenAccessReadAndWrite_refs: 1,
-    publicAccesLevel: 1,
-    pendingEditor_refs: 1,
-    reviewer_refs: 1,
-    pendingReviewer_refs: 1,
-  })
+  const project = await ProjectGetter.promises.getProject(
+    projectId,
+    ProjectAccess.PROJECTION
+  )
   if (!project) {
     throw new Errors.NotFoundError(`no project found with id ${projectId}`)
   }

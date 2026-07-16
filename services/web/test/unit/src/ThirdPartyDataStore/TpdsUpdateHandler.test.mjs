@@ -65,13 +65,12 @@ describe('TpdsUpdateHandler', function () {
         markAsDeletedByExternalSource: sinon.stub().resolves(),
       },
     }
+    ctx.CollaboratorsGetter = {
+      ProjectAccess: class {},
+    }
     ctx.ProjectGetter = {
       promises: {
         findUsersProjectsByName: sinon.stub(),
-        findAllUsersProjects: sinon.stub().resolves({
-          owned: Object.values(ctx.projects),
-          readAndWrite: [],
-        }),
       },
     }
     ctx.ProjectHelper = {
@@ -104,6 +103,13 @@ describe('TpdsUpdateHandler', function () {
     vi.doMock('../../../../app/src/infrastructure/Modules', () => ({
       default: ctx.Modules,
     }))
+
+    vi.doMock(
+      '../../../../app/src/Features/Collaborators/CollaboratorsGetter',
+      () => ({
+        default: ctx.CollaboratorsGetter,
+      })
+    )
 
     vi.doMock(
       '../../../../app/src/Features/Notifications/NotificationsBuilder',
@@ -148,45 +154,10 @@ describe('TpdsUpdateHandler', function () {
     ctx.TpdsUpdateHandler = (await import(MODULE_PATH)).default
   })
 
+  // Updates, deletes and resolves by project id are covered by the
+  // TpdsUpdateTests acceptance tests.
+
   describe('getting an update', function () {
-    describe('byId', function () {
-      describe('with no matching project', function () {
-        beforeEach(function (ctx) {
-          ctx.projectId = new ObjectId().toString()
-        })
-        receiveUpdateById()
-        expectProjectNotCreated()
-        expectUpdateNotProcessed()
-      })
-
-      describe('with one matching active project', function () {
-        beforeEach(function (ctx) {
-          ctx.projectId = ctx.projects.active1._id.toString()
-        })
-        receiveUpdateById()
-        expectProjectNotCreated()
-        expectUpdateProcessed()
-      })
-
-      describe('with one matching archived project', function () {
-        beforeEach(function (ctx) {
-          ctx.projectId = ctx.projects.archived1._id.toString()
-        })
-        receiveUpdateById()
-        expectProjectNotCreated()
-        expectUpdateNotProcessed()
-      })
-
-      describe('with one matching trashed project', function () {
-        beforeEach(function (ctx) {
-          ctx.projectId = ctx.projects.trashed._id.toString()
-        })
-        receiveUpdateById()
-        expectProjectNotCreated()
-        expectUpdateNotProcessed()
-      })
-    })
-
     describe('with no matching project', function () {
       setupMatchingProjects([])
       receiveUpdate()
@@ -246,44 +217,6 @@ describe('TpdsUpdateHandler', function () {
   })
 
   describe('getting a file delete', function () {
-    describe('byId', function () {
-      describe('with no matching project', function () {
-        beforeEach(function (ctx) {
-          ctx.projectId = new ObjectId().toString()
-        })
-        receiveFileDeleteById()
-        expectDeleteNotProcessed()
-        expectProjectNotDeleted()
-      })
-
-      describe('with one matching active project', function () {
-        beforeEach(function (ctx) {
-          ctx.projectId = ctx.projects.active1._id.toString()
-        })
-        receiveFileDeleteById()
-        expectDeleteProcessed()
-        expectProjectNotDeleted()
-      })
-
-      describe('with one matching archived project', function () {
-        beforeEach(function (ctx) {
-          ctx.projectId = ctx.projects.archived1._id.toString()
-        })
-        receiveFileDeleteById()
-        expectDeleteNotProcessed()
-        expectProjectNotDeleted()
-      })
-
-      describe('with one matching trashed project', function () {
-        beforeEach(function (ctx) {
-          ctx.projectId = ctx.projects.trashed._id.toString()
-        })
-        receiveFileDeleteById()
-        expectDeleteNotProcessed()
-        expectProjectNotDeleted()
-      })
-    })
-
     describe('with no matching project', function () {
       setupMatchingProjects([])
       receiveFileDelete()
@@ -426,44 +359,6 @@ describe('TpdsUpdateHandler', function () {
   })
 
   describe('getting or creating a project', function () {
-    describe('byId', function () {
-      describe('with no matching project', function () {
-        beforeEach(function (ctx) {
-          ctx.projectId = new ObjectId().toString()
-        })
-        resolveProjectById()
-        expectProjectNotCreated()
-        expectNoProjectResolved()
-      })
-
-      describe('with one matching active project', function () {
-        beforeEach(function (ctx) {
-          ctx.projectId = ctx.projects.active1._id.toString()
-        })
-        resolveProjectById()
-        expectProjectNotCreated()
-        expectProjectResolved()
-      })
-
-      describe('with one matching archived project', function () {
-        beforeEach(function (ctx) {
-          ctx.projectId = ctx.projects.archived1._id.toString()
-        })
-        resolveProjectById()
-        expectProjectNotCreated()
-        expectNoProjectResolved()
-      })
-
-      describe('with one matching trashed project', function () {
-        beforeEach(function (ctx) {
-          ctx.projectId = ctx.projects.trashed._id.toString()
-        })
-        resolveProjectById()
-        expectProjectNotCreated()
-        expectNoProjectResolved()
-      })
-    })
-
     describe('with no matching project', function () {
       setupMatchingProjects([])
       resolveProjectByName()
@@ -530,37 +425,12 @@ function receiveUpdate() {
   })
 }
 
-function receiveUpdateById() {
-  beforeEach(async function (ctx) {
-    await ctx.TpdsUpdateHandler.promises.newUpdate(
-      ctx.userId,
-      ctx.projectId,
-      '', // projectName
-      ctx.path,
-      ctx.update,
-      ctx.source
-    )
-  })
-}
-
 function receiveFileDelete() {
   beforeEach(async function (ctx) {
     await ctx.TpdsUpdateHandler.promises.deleteUpdate(
       ctx.userId,
       '', // projectId
       ctx.projectName,
-      ctx.path,
-      ctx.source
-    )
-  })
-}
-
-function receiveFileDeleteById() {
-  beforeEach(async function (ctx) {
-    await ctx.TpdsUpdateHandler.promises.deleteUpdate(
-      ctx.userId,
-      ctx.projectId,
-      '', // projectName
       ctx.path,
       ctx.source
     )
@@ -597,17 +467,6 @@ function resolveProjectByName() {
         ctx.userId,
         null, // projectId
         ctx.projectName
-      )
-  })
-}
-
-function resolveProjectById() {
-  beforeEach(async function (ctx) {
-    ctx.resolvedProject =
-      await ctx.TpdsUpdateHandler.promises.getOrCreateProject(
-        ctx.userId,
-        ctx.projectId,
-        '' // projectName
       )
   })
 }

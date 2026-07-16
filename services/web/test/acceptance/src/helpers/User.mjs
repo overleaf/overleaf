@@ -976,22 +976,26 @@ class User {
   }
 
   addUserToProject(projectId, user, privileges, callback) {
+    // NOTE: user._id is a string; convert it to an ObjectId so that the
+    // stored refs match production data and reverse queries (e.g.
+    // { collaberator_refs: userId }) find the project.
+    const userId = new ObjectId(user._id)
     let updateOp
     if (privileges === 'readAndWrite') {
-      updateOp = { $addToSet: { collaberator_refs: user._id } }
+      updateOp = { $addToSet: { collaberator_refs: userId } }
     } else if (privileges === 'readOnly') {
-      updateOp = { $addToSet: { readOnly_refs: user._id } }
+      updateOp = { $addToSet: { readOnly_refs: userId } }
     } else if (privileges === 'pendingEditor') {
       updateOp = {
-        $addToSet: { readOnly_refs: user._id, pendingEditor_refs: user._id },
+        $addToSet: { readOnly_refs: userId, pendingEditor_refs: userId },
       }
     } else if (privileges === 'pendingReviewer') {
       updateOp = {
-        $addToSet: { readOnly_refs: user._id, pendingReviewer_refs: user._id },
+        $addToSet: { readOnly_refs: userId, pendingReviewer_refs: userId },
       }
     } else if (privileges === 'review') {
       updateOp = {
-        $addToSet: { reviewer_refs: user._id },
+        $addToSet: { reviewer_refs: userId },
       }
     }
     db.projects.updateOne({ _id: new ObjectId(projectId) }, updateOp, callback)
