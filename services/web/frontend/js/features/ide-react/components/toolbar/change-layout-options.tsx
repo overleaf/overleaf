@@ -17,7 +17,6 @@ import { Shortcut } from '@/shared/components/shortcut'
 import classNames from 'classnames'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
-import SplitTestBadge from '@/shared/components/split-test-badge'
 
 type LayoutOption =
   | 'sideBySide'
@@ -193,13 +192,7 @@ export default function ChangeLayoutOptions() {
             active={focusMode}
             leadingIcon="crop_free"
             trailingIcon={
-              <span className="d-flex align-items-center gap-2">
-                <SplitTestBadge
-                  splitTestName="focus-mode"
-                  displayOnVariants={['enabled']}
-                />
-                {shortcuts.focusMode && <Shortcut keys={shortcuts.focusMode} />}
-              </span>
+              shortcuts.focusMode && <Shortcut keys={shortcuts.focusMode} />
             }
           >
             {t('focus_mode')}

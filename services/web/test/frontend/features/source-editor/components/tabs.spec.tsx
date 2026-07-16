@@ -1250,26 +1250,4 @@ describe('File Tabs', function () {
       )
     })
   })
-
-  describe('SplitTestBadge', function () {
-    it('renders the labs badge icon in the tabs container', function () {
-      cy.window().then(win => {
-        win.metaAttributesCache.set('ol-splitTestInfo', {
-          'editor-tabs': {
-            phase: 'beta',
-            badgeInfo: {
-              url: '/beta/editor-tabs',
-              tooltipText: 'Editor tabs are in beta',
-            },
-          },
-        })
-      })
-
-      mountTabs()
-
-      cy.then(() => selectDoc(DOC_IDS.main))
-
-      cy.get('.editor-tabs-labs-icon').should('exist')
-    })
-  })
 })

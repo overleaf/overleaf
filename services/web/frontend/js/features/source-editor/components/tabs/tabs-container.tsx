@@ -5,7 +5,6 @@ import {
 } from '@/features/ide-react/context/tabs-context'
 import { Tab } from './tab'
 import { TabsContextMenu } from './tabs-context-menu'
-import SplitTestBadge from '@/shared/components/split-test-badge'
 import { useCallback, useMemo, useState } from 'react'
 import { throttle } from 'lodash'
 import { debugConsole } from '@/utils/debugging'
@@ -144,12 +143,6 @@ export const TabsContainer = () => {
             closeContextMenu={closeContextMenu}
           />
         ))}
-      </div>
-      <div className="editor-tabs-labs-icon">
-        <SplitTestBadge
-          splitTestName="editor-tabs"
-          displayOnVariants={['enabled']}
-        />
       </div>
       <TabsContextMenu />
     </div>

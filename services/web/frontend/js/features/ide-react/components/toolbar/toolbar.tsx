@@ -19,7 +19,6 @@ import { useFeatureFlag } from '@/shared/context/split-test-context'
 import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 import OLIconButton from '@/shared/components/ol/ol-icon-button'
 import OLTooltip from '@/shared/components/ol/ol-tooltip'
-import SplitTestBadge from '@/shared/components/split-test-badge'
 import OfflineIndicator from './offline-indicator'
 
 const [publishModalModules] = importOverleafModules('publishModalToolbarButton')
@@ -73,12 +72,6 @@ export const Toolbar = () => {
         </div>
         <ToolbarProjectTitle />
         <div className="ide-redesign-toolbar-actions">
-          <div className="ide-redesign-toolbar-button-container">
-            <SplitTestBadge
-              splitTestName="focus-mode"
-              displayOnVariants={['enabled']}
-            />
-          </div>
           {showViewSwitcher && (
             <div className="ide-redesign-toolbar-button-container">
               <OLTooltip
