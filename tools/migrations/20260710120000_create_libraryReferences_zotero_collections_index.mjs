@@ -1,6 +1,6 @@
 import Helpers from './lib/helpers.mjs'
 
-const tags = ['saas']
+const tags = ['saas', 'auxiliary']
 
 // Supports the moved-out-of-collection diff: for a synced collection, find
 // every locally-recorded item whose cached membership includes that
