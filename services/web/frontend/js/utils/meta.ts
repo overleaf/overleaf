@@ -311,9 +311,8 @@ export interface Meta {
   'ol-ssoErrorMessage': string
   'ol-ssoInitPath': string
   'ol-standardPlanPricing': {
-    monthly?: string
-    annual?: string
-    monthlyTimesTwelve?: string
+    monthly?: number
+    annual?: number
   }
   'ol-stripeCustomerData': Array<{
     customerId: string

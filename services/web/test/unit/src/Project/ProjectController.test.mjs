@@ -44,7 +44,6 @@ describe('ProjectController', function () {
             monthly: 15,
             annual: 180,
             annualDividedByTwelve: 15,
-            monthlyTimesTwelve: 180,
           },
         },
       },

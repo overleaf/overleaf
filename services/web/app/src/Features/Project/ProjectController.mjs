@@ -1059,7 +1059,6 @@ const _ProjectController = {
   },
 
   async _getPlanPricing(req, res, plan = 'collaborator') {
-    const locale = req.i18n.language
     const { currency } = await SubscriptionController.getRecommendedCurrency(
       req,
       res
@@ -1076,14 +1075,8 @@ const _ProjectController = {
     }
 
     return {
-      monthly: formatCurrency(planPricing.monthly, currency, locale, true),
-      annual: formatCurrency(planPricing.annual, currency, locale, true),
-      monthlyTimesTwelve: formatCurrency(
-        planPricing.monthlyTimesTwelve,
-        currency,
-        locale,
-        true
-      ),
+      monthly: planPricing.monthly,
+      annual: planPricing.annual,
     }
   },
 
