@@ -160,9 +160,19 @@ export async function waitForDb() {
 /**
  * Starts a client session for use with multi-document transactions
  * (session.withTransaction(...)). Requires Mongo to be running as a replica
- * set, which is enforced at startup for every deployment
+ * set, which is enforced at startup for every deployment.
+ *
+ * The session must be started on the same MongoClient as the collections it
+ * operates on, otherwise Mongo throws "ClientSession must be from the same
+ * MongoClient".
+ *
+ * @param {{ aux?: boolean }} [options]
  */
-export async function startSession() {
+export async function startSession({ aux = false } = {}) {
+  if (aux && auxMongoClient) {
+    await auxConnectionPromise
+    return auxMongoClient.startSession()
+  }
   const client = await connectionPromise
   return client.startSession()
 }
