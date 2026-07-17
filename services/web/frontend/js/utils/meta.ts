@@ -73,10 +73,6 @@ import { FullHistoryFailure } from '@ol-types/history/projectHistory'
 
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
-  'ol-addonPrices': Record<
-    string,
-    { annual: string; monthly: string; annualDividedByTwelve: string }
-  >
   'ol-adminCapabilities': AdminCapability[]
   'ol-adminSubscription': AdminSubscription
   'ol-adminUserExists': boolean

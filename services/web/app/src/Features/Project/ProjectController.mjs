@@ -914,10 +914,6 @@ const _ProjectController = {
         showAiFeaturesDisabled = false
       }
 
-      // only add-on is ai based, so we only need its pricing info if ai features are usable
-      const addonPrices =
-        showAiFeatures && (await ProjectController._getAddonPrices(req, res))
-
       let standardPlanPricing
       let recommendedCurrency
       if (Features.hasFeature('saas')) {
@@ -1049,7 +1045,6 @@ const _ProjectController = {
         isSaas: Features.hasFeature('saas'),
         shouldLoadHotjar,
         customerIoEnabled: true,
-        addonPrices,
         compileSettings: {
           compileTimeout: ownerFeatures?.compileTimeout,
         },
@@ -1090,37 +1085,6 @@ const _ProjectController = {
         true
       ),
     }
-  },
-
-  // todo: quota clean-up: these can be removed potentially?
-  async _getAddonPrices(req, res, addonPlans = ['assistant']) {
-    const plansData = {}
-
-    const locale = req.i18n.language
-    const { currency } = await SubscriptionController.getRecommendedCurrency(
-      req,
-      res
-    )
-
-    addonPlans.forEach(plan => {
-      const annualPrice = Settings.localizedAddOnsPricing[currency][plan].annual
-      const monthlyPrice =
-        Settings.localizedAddOnsPricing[currency][plan].monthly
-      const annualDividedByTwelve =
-        Settings.localizedAddOnsPricing[currency][plan].annualDividedByTwelve
-
-      plansData[plan] = {
-        annual: formatCurrency(annualPrice, currency, locale, true),
-        annualDividedByTwelve: formatCurrency(
-          annualDividedByTwelve,
-          currency,
-          locale,
-          true
-        ),
-        monthly: formatCurrency(monthlyPrice, currency, locale, true),
-      }
-    })
-    return plansData
   },
 
   async _refreshFeatures(req, user) {
@@ -1490,7 +1454,6 @@ const ProjectController = {
   _isInPercentageRollout: _ProjectController._isInPercentageRollout,
   _refreshFeatures: _ProjectController._refreshFeatures,
   _getPlanPricing: _ProjectController._getPlanPricing,
-  _getAddonPrices: _ProjectController._getAddonPrices,
   _setWritefullTrialState: _ProjectController._setWritefullTrialState,
 }
 
