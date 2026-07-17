@@ -190,6 +190,10 @@
   right: var(--spacing-09);
   width: initial;
   background-color: transparent;
+
+  .projects-dropdown-menu-library & {
+    right: 0;
+  }
 }
 
 .project-menu-item-tag-name {

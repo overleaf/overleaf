@@ -54,7 +54,7 @@ export function Item({ filter, text, leadingIcon, onClick }: ItemProps) {
 function ProjectsDropdown() {
   const { t } = useTranslation()
   const [title, setTitle] = useState(() => t('all_projects'))
-  const [view, setView] = useState<'top' | 'submenu'>('submenu')
+  const [view, setView] = useState<'top' | 'submenu' | 'tags'>('submenu')
   const { filter, selectedTagId, tags } = useProjectListContext()
   const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
   const filterTranslations = useRef<Record<Filter, string>>({
@@ -81,7 +81,7 @@ function ProjectsDropdown() {
     }
   }, [filter, tags, selectedTagId, t])
 
-  const submenuItems = (
+  const filterItems = (
     <>
       <li role="none">
         <Item filter="all" text={t('all_projects')} />
@@ -100,6 +100,12 @@ function ProjectsDropdown() {
           <Item filter="trashed" text={t('trashed_projects')} />
         </li>
       )}
+    </>
+  )
+
+  const submenuItems = (
+    <>
+      {filterItems}
       <OLDropdownHeader className="text-uppercase">
         {t('tags')}:
       </OLDropdownHeader>
@@ -112,7 +118,9 @@ function ProjectsDropdown() {
       onToggle={
         isLibraryEnabled
           ? show => {
-              if (!show) {
+              if (show) {
+                setView(selectedTagId !== undefined ? 'tags' : 'submenu')
+              } else {
                 setView('submenu')
               }
             }
@@ -129,7 +137,12 @@ function ProjectsDropdown() {
           {title}
         </span>
       </OLDropdownToggle>
-      <OLDropdownMenu flip={false}>
+      <OLDropdownMenu
+        flip={false}
+        className={
+          isLibraryEnabled ? 'projects-dropdown-menu-library' : undefined
+        }
+      >
         {!isLibraryEnabled && submenuItems}
         {isLibraryEnabled && view === 'submenu' && (
           <>
@@ -147,7 +160,20 @@ function ProjectsDropdown() {
                 {t('projects')}
               </OLDropdownItem>
             </li>
-            {submenuItems}
+            {filterItems}
+            <li role="none">
+              <OLDropdownItem
+                as="button"
+                tabIndex={-1}
+                trailingIcon="chevron_right"
+                onClick={e => {
+                  e.stopPropagation()
+                  setView('tags')
+                }}
+              >
+                {t('tags')}
+              </OLDropdownItem>
+            </li>
             <li role="none">
               <Item
                 filter="trashed"
@@ -155,6 +181,25 @@ function ProjectsDropdown() {
                 leadingIcon={<Trash size={20} />}
               />
             </li>
+          </>
+        )}
+        {isLibraryEnabled && view === 'tags' && (
+          <>
+            <li role="none">
+              <OLDropdownItem
+                as="button"
+                tabIndex={-1}
+                leadingIcon={<MaterialIcon type="chevron_left" />}
+                aria-label={t('back')}
+                onClick={e => {
+                  e.stopPropagation()
+                  setView('submenu')
+                }}
+              >
+                {t('tags')}
+              </OLDropdownItem>
+            </li>
+            <TagsList />
           </>
         )}
         {isLibraryEnabled && view === 'top' && (
