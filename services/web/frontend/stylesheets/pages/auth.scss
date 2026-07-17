@@ -9,8 +9,8 @@
 }
 
 .auth-aux-container {
-  padding-top: calc($header-height + $spacing-11);
-  max-width: 320px;
+  padding: calc($header-height + $spacing-11) var(--spacing-04) 0;
+  max-width: 400px;
   min-height: 100vh;
   margin-left: auto;
   margin-right: auto;
