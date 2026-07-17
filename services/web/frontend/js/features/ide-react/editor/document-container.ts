@@ -29,6 +29,7 @@ import {
 import { ThreadId } from '../../../../../types/review-panel/review-panel'
 import getMeta from '@/utils/meta'
 import OError from '@overleaf/o-error'
+import { OfflineDocBackup } from '@/features/ide-react/editor/offline-doc-backup'
 import {
   HistoryOTShareDoc,
   ShareLatexOTShareDoc,
@@ -104,6 +105,7 @@ export class DocumentContainer extends EventEmitter {
   doc?: ShareJsDoc
   cm6?: EditorFacade
   oldInflightOp?: ShareJsOperation
+  private offlineBackup?: OfflineDocBackup
 
   ranges?: _RangesTracker | RangesTrackerWithResolvedThreadIds
 
@@ -607,6 +609,8 @@ export class DocumentContainer extends EventEmitter {
 
     this.detachDoc(this.doc_id, this)
 
+    this.offlineBackup?.destroy()
+
     this.unBindFromEditorEvents()
     this.unBindFromSocketEvents()
   }
@@ -615,6 +619,11 @@ export class DocumentContainer extends EventEmitter {
     if (!this.doc) {
       return
     }
+
+    this.offlineBackup = new OfflineDocBackup(
+      this.doc,
+      getMeta('ol-project_id')
+    )
 
     this.doc.on('error', (error: Error, meta: ErrorMetadata) =>
       this.onError(error, meta)

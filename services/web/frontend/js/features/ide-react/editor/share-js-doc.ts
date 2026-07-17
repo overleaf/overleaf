@@ -372,6 +372,10 @@ export class ShareJsDoc extends EventEmitter {
     return this._doc.pendingOp
   }
 
+  getInflightSubmittedIds(): Iterable<string> {
+    return this._doc.inflightSubmittedIds
+  }
+
   getRecentAck() {
     // check if we have received an ack recently (within a factor of two of the single user flush delay)
     return (

@@ -8,6 +8,7 @@ import NavDropdownLinkItem from './nav-dropdown-link-item'
 import { useDsNavStyle } from '@/features/project-list/components/use-is-ds-nav'
 import { SignOut } from '@phosphor-icons/react'
 import ThemeToggle from '@/features/project-list/components/sidebar/theme-toggle'
+import { OfflineDocBackup } from '@/features/ide-react/editor/offline-doc-backup'
 
 export function AccountMenuItems({
   sessionUser,
@@ -61,7 +62,12 @@ export function AccountMenuItems({
           <span>{t('log_out')}</span>
           {dsNavStyle && <SignOut size={16} />}
         </OLDropdownItem>
-        <form id={logOutFormId} method="POST" action="/logout">
+        <form
+          id={logOutFormId}
+          method="POST"
+          action="/logout"
+          onSubmit={() => OfflineDocBackup.clearAll()}
+        >
           <input type="hidden" name="_csrf" value={getMeta('ol-csrfToken')} />
         </form>
       </DropdownListItem>
