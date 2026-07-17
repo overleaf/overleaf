@@ -266,6 +266,7 @@
   "reconnecting": "Yeniden bağlanıyor",
   "reconnecting_in_x_secs": "__seconds__ saniye içinde tekrar bağlanılmaya çalışılacak",
   "refresh_page_after_starting_free_trial": "Ücretsiz denemenize başladıktan sonra lütfen sayfayı yenileyin",
+  "refresh_page_after_subscribing": "Abone olduktan sonra lütfen sayfayı yenileyin.",
   "regards": "Saygılarımızla",
   "register": "Kayıt ol",
   "register_to_edit_template": "__templateName__ şablonunu düzenlemek için lütfen kayıt olunuz",

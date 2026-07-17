@@ -3,12 +3,14 @@ import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { useTranslation } from 'react-i18next'
 import { FC } from 'react'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export const CompileTimeWarningUpgradePromptInner: FC<{
   handleDismissWarning: () => void
   segmentation: eventTracking.Segmentation
 }> = ({ handleDismissWarning, segmentation }) => {
   const { t } = useTranslation()
+  const showSubscribeNow = useFeatureFlag('paywall-cta-trial-ineligible')
 
   return (
     <Notification
@@ -21,7 +23,7 @@ export const CompileTimeWarningUpgradePromptInner: FC<{
             size: 'sm',
           }}
         >
-          {t('start_free_trial')}
+          {showSubscribeNow ? t('subscribe_now') : t('start_free_trial')}
         </StartFreeTrialButton>
       }
       ariaLive="polite"

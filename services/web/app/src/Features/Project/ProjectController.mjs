@@ -518,7 +518,7 @@ const _ProjectController = {
           user: (async () => {
             const user = await User.findById(
               userId,
-              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram labsExperiments completedTutorials writefull aiFeatures'
+              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram labsExperiments completedTutorials writefull aiFeatures lastTrial'
             ).exec()
             // Handle case of deleted user
             if (!user) {
@@ -627,19 +627,26 @@ const _ProjectController = {
           inEnterpriseCommons || affiliation.institution?.enterpriseCommons
       }
 
-      const getSplitTestAssignment = async splitTest => {
-        return await SplitTestHandler.promises.getAssignment(
-          req,
-          res,
-          splitTest
-        )
+      const allowedFreeTrial =
+        subscription == null ||
+        isStandaloneAiAddOnPlanCode(subscription.planCode)
+
+      // The test's audience: free users who've spent their trial and can't start
+      // another, yet still see a misleading "free trial" CTA.
+      const trialIneligible =
+        !anonymous && allowedFreeTrial && Boolean(user?.lastTrial)
+
+      if (trialIneligible) {
+        splitTests.push('paywall-cta-trial-ineligible')
       }
-      const splitTestAssignments = {}
-      await Promise.all(
-        splitTests.map(async splitTest => {
-          splitTestAssignments[splitTest] =
-            await getSplitTestAssignment(splitTest)
-        })
+
+      const splitTestAssignments = Object.fromEntries(
+        await Promise.all(
+          splitTests.map(async splitTest => [
+            splitTest,
+            await SplitTestHandler.promises.getAssignment(req, res, splitTest),
+          ])
+        )
       )
 
       // PDF caching, these tests are archived but we are keeping the frontend code unchanged for now
@@ -704,10 +711,6 @@ const _ProjectController = {
       if (privilegeLevel == null || privilegeLevel === PrivilegeLevels.NONE) {
         return res.sendStatus(401)
       }
-
-      const allowedFreeTrial =
-        subscription == null ||
-        isStandaloneAiAddOnPlanCode(subscription.planCode)
 
       let wsUrl = Settings.wsUrl
       let metricName = 'load-editor-ws'

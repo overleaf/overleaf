@@ -265,6 +265,7 @@
   "reconnecting": "Riconnessione",
   "reconnecting_in_x_secs": "Riconnessione fra __seconds__ secondi",
   "refresh_page_after_starting_free_trial": "Per favore aggiorna questa pagina dopo l’inizio del tuo trial gratuito.",
+  "refresh_page_after_subscribing": "Per favore aggiorna questa pagina dopo l’abbonamento.",
   "regards": "Saluti",
   "register": "Registrati",
   "register_to_edit_template": "Per favore registrati per modificare il modello __templateName__",

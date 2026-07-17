@@ -239,6 +239,7 @@
   "reconnecting": "Yhdistetään uudelleen",
   "reconnecting_in_x_secs": "Yhteys muodostetaan uudestaan __seconds__ sekunnin kuluttua",
   "refresh_page_after_starting_free_trial": "Ole hyvä ja päivitä tämä sivu aloitettuasi ilmaisen kokeilusi.",
+  "refresh_page_after_subscribing": "Ole hyvä ja päivitä tämä sivu tilattuasi.",
   "regards": "Kiittäen",
   "register": "Rekisteröidy",
   "register_to_edit_template": "Ole hyvä ja rekisteröidy muokataksesi mallia __templateName__",
