@@ -43,6 +43,14 @@ describe('DrainManager', function () {
         resolve()
       })
     })
+
+    it('should set a fractional drain rate when clients do not divide evenly', function (ctx) {
+      ctx.clients.push({ id: 5400, emit: sinon.stub() })
+      ctx.DrainManager.startDrainTimeWindow(ctx.io, 9)
+      ctx.DrainManager.startDrain
+        .calledWith(ctx.io, 10.001851851851852)
+        .should.equal(true)
+    })
   })
 
   describe('reconnectNClients', function () {
@@ -118,6 +126,93 @@ describe('DrainManager', function () {
             ctx.logger.info
               .calledWith('All clients have been told to reconnectGracefully')
               .should.equal(true)
+          })
+        })
+      })
+    })
+
+    describe('with a fractional rate', function () {
+      describe('after first pass', function () {
+        beforeEach(function (ctx) {
+          ctx.requestedAllClientsToReconnect =
+            ctx.DrainManager.reconnectNClients(ctx.io, 3.5)
+        })
+
+        it('should reconnect the first 4 clients', function (ctx) {
+          ;[0, 1, 2, 3].map(i =>
+            ctx.clients[i].emit
+              .calledWith('reconnectGracefully')
+              .should.equal(true)
+          )
+        })
+
+        it('should not reconnect any more clients', function (ctx) {
+          ;[4, 5, 6, 7, 8, 9].map(i =>
+            ctx.clients[i].emit
+              .calledWith('reconnectGracefully')
+              .should.equal(false)
+          )
+        })
+
+        it('should not report that all clients have been told to reconnect', function (ctx) {
+          ctx.requestedAllClientsToReconnect.should.equal(false)
+        })
+
+        describe('after second pass', function () {
+          beforeEach(function (ctx) {
+            ctx.requestedAllClientsToReconnect =
+              ctx.DrainManager.reconnectNClients(ctx.io, 3.5)
+          })
+
+          it('should reconnect the next 4 clients', function (ctx) {
+            ;[4, 5, 6, 7].map(i =>
+              ctx.clients[i].emit
+                .calledWith('reconnectGracefully')
+                .should.equal(true)
+            )
+          })
+
+          it('should not reconnect any more clients', function (ctx) {
+            ;[8, 9].map(i =>
+              ctx.clients[i].emit
+                .calledWith('reconnectGracefully')
+                .should.equal(false)
+            )
+          })
+
+          it('should not reconnect the first 4 clients again', function (ctx) {
+            ;[0, 1, 2, 3].map(i =>
+              ctx.clients[i].emit.calledOnce.should.equal(true)
+            )
+          })
+
+          it('should not report that all clients have been told to reconnect', function (ctx) {
+            ctx.requestedAllClientsToReconnect.should.equal(false)
+          })
+
+          describe('after third pass', function () {
+            beforeEach(function (ctx) {
+              ctx.requestedAllClientsToReconnect =
+                ctx.DrainManager.reconnectNClients(ctx.io, 3.5)
+            })
+
+            it('should reconnect the last 2 clients', function (ctx) {
+              ;[8, 9].map(i =>
+                ctx.clients[i].emit
+                  .calledWith('reconnectGracefully')
+                  .should.equal(true)
+              )
+            })
+
+            it('should not reconnect the first 8 clients again', function (ctx) {
+              ;[0, 1, 2, 3, 4, 5, 6, 7].map(i =>
+                ctx.clients[i].emit.calledOnce.should.equal(true)
+              )
+            })
+
+            it('should report that all clients have been told to reconnect', function (ctx) {
+              ctx.requestedAllClientsToReconnect.should.equal(true)
+            })
           })
         })
       })
