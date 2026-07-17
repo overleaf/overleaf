@@ -21,6 +21,7 @@ const { setTimeout } = require('node:timers/promises')
 const minimist = require('minimist')
 const Settings = require('@overleaf/settings')
 const { rclient } = require('./../app/js/RedisManager')
+const logger = require('@overleaf/logger')
 
 // Window size when walking a dispatch list tail -> head.
 const LIST_CHUNK_SIZE = 1000
@@ -76,6 +77,7 @@ async function checkPerDocQueues() {
   let totalOps = 0
   for await (const key of scanKeys('PendingUpdates:{*}')) {
     const length = await rclient.llen(key)
+    logger.info({ key, length }, 'found legacy per-doc queue')
     if (length > 0) {
       nonEmptyDocs++
       totalOps += length
@@ -114,6 +116,7 @@ async function checkDispatchListsForLegacyMarkers() {
       for (const marker of entries) {
         inspectedEntries++
         if (marker.includes(':')) {
+          logger.info({ marker }, 'found legacy per-doc queue marker')
           legacyMarkers++
         }
       }
