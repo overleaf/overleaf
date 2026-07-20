@@ -28,5 +28,6 @@ export type Subscription = {
     | StripeAdminClientPaymentProvider
   features: {
     domainCapture?: boolean
+    aiToggling?: boolean
   }
 }

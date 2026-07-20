@@ -153,6 +153,7 @@
   "ai_can_make_mistakes": "AI can make mistakes. Review fixes before you apply them.",
   "ai_features": "AI features",
   "ai_features_couldnt_be_toggled": "AI features couldn’t be toggled. Try again, or contact Overleaf support if the problem continues.",
+  "ai_features_currently_enabled": "AI features are currently <0>enabled</0> for your group.",
   "ai_features_managed_by_overleaf_support": "AI features are managed by Overleaf support.",
   "ai_features_off": "AI features off",
   "ai_features_on": "AI features on",
