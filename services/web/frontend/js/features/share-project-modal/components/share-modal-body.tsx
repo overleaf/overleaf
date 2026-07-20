@@ -145,10 +145,7 @@ export default function ShareModalBody({
           ) : (
             <ProjectAccess
               setIsInvitedPeopleScreen={setIsInvitedPeopleScreen}
-              // adding +1 for the project owner
-              invitedPeopleCount={
-                sortedMembers.length + (invites || []).length + 1
-              }
+              invitedPeopleCount={sortedMembers.length + (invites || []).length}
             />
           )}
         </>

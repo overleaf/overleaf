@@ -1128,7 +1128,7 @@ describe('<ShareProjectModal/>', function () {
         expect(screen.queryByText('1 person invited')).to.be.null
       })
 
-      it('shows the invited people count, including the owner, when there are collaborators', async function () {
+      it('shows the invited people count, excluding the owner, when there are collaborators', async function () {
         const members: ProjectMember[] = [
           {
             _id: 'member-author' as UserId,
@@ -1151,7 +1151,27 @@ describe('<ShareProjectModal/>', function () {
           createContextProps({ publicAccessLevel: 'private', members })
         )
 
-        await screen.findByText('3 people invited')
+        await screen.findByText('2 people invited')
+        expect(screen.queryByText('No one invited yet')).to.be.null
+      })
+
+      it('shows "1 person invited" when there is a single collaborator', async function () {
+        const members: ProjectMember[] = [
+          {
+            _id: 'member-author' as UserId,
+            email: 'member-author@example.com',
+            privileges: 'readAndWrite',
+            first_name: 'Member',
+            last_name: 'Author',
+          },
+        ]
+
+        renderWithEditorContext(
+          <ShareProjectModal {...modalProps} />,
+          createContextProps({ publicAccessLevel: 'private', members })
+        )
+
+        await screen.findByText('1 person invited')
         expect(screen.queryByText('No one invited yet')).to.be.null
       })
     })

@@ -216,7 +216,7 @@ function ProjectAccess({
         <div className="d-inline-flex align-items-center h5 m-0 gap-2">
           <MaterialIcon type="group" unfilled />
           <div className="px-2 fw-normal">
-            {invitedPeopleCount > 1
+            {invitedPeopleCount > 0
               ? t('x_people_invited', { count: invitedPeopleCount })
               : t('no_one_invited_yet')}
           </div>
