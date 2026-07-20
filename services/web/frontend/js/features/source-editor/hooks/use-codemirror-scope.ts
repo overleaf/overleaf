@@ -150,10 +150,20 @@ function useCodeMirrorScope(view: EditorView) {
         activeOverallTheme,
       })
     )
-
+    // The editor theme is loaded asynchronously, so if we have another update
+    // fire before it finishes loading, there's a race of which one to apply.
+    // For example the print dialog will quickly change the theme to light,
+    // then back to dark which can result in the late-resolving light theme to
+    // be applied regardless of current active overall theme.
+    let stale = false
     setEditorTheme(editorTheme).then(spec => {
-      view.dispatch(spec)
+      if (!stale) {
+        view.dispatch(spec)
+      }
     })
+    return () => {
+      stale = true
+    }
   }, [view, fontFamily, fontSize, lineHeight, activeOverallTheme, editorTheme])
 
   const settingsRef = useRef({
