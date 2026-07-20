@@ -140,9 +140,6 @@ module.exports = {
         projectBlock({ project_id: projectId }) {
           return `ProjectBlock:{${projectId}}`
         },
-        pendingUpdates({ doc_id: docId }) {
-          return `PendingUpdates:{${docId}}`
-        },
         pendingProjectUpdates({ project_id: projectId }) {
           return `PendingProjectUpdates:{${projectId}}`
         },
@@ -173,17 +170,6 @@ module.exports = {
     parseInt(process.env.MAX_JSON_REQUEST_SIZE, 10) || 8 * 1024 * 1024,
 
   dispatcherCount: parseInt(process.env.DISPATCHER_COUNT || 10, 10),
-
-  // Migration of the real-time -> document-updater update queue from a per-doc
-  // queue to a per-project queue. See
-  // services/document-updater/scripts/check_migration_phase_switch.js
-  //   phase 1: legacy per-doc queue only
-  //   phase 2: producer writes the per-project queue; consumer drains both
-  //   phase 3: per-project queue only
-  pendingUpdatesMigrationPhase: parseInt(
-    process.env.PENDING_UPDATES_MIGRATION_PHASE || '1',
-    10
-  ),
 
   redisLockTTLSeconds: 30,
 

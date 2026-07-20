@@ -54,7 +54,6 @@ async function joinProject(projectId, user) {
     isRestrictedUser: data.isRestrictedUser,
     isTokenMember: data.isTokenMember,
     isInvitedMember: data.isInvitedMember,
-    usePerProjectPendingUpdates: data.usePerProjectPendingUpdates,
   }
   return {
     project: data.project,

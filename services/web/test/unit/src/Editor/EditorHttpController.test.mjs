@@ -305,7 +305,6 @@ describe('EditorHttpController', function () {
           isRestrictedUser: false,
           isTokenMember: false,
           isInvitedMember: true,
-          usePerProjectPendingUpdates: false,
         })
       })
 
@@ -363,7 +362,6 @@ describe('EditorHttpController', function () {
           isRestrictedUser: true,
           isTokenMember: false,
           isInvitedMember: false,
-          usePerProjectPendingUpdates: false,
         })
       })
     })
@@ -420,13 +418,7 @@ describe('EditorHttpController', function () {
           isRestrictedUser: true,
           isTokenMember: false,
           isInvitedMember: false,
-          usePerProjectPendingUpdates: false,
         })
-      })
-
-      it('should not fetch a split test assignment', function (ctx) {
-        expect(ctx.SplitTestHandler.promises.featureFlagEnabledForUser).not.to
-          .have.been.called
       })
     })
 
@@ -460,33 +452,7 @@ describe('EditorHttpController', function () {
           isRestrictedUser: false,
           isTokenMember: true,
           isInvitedMember: false,
-          usePerProjectPendingUpdates: false,
         })
-      })
-    })
-
-    describe('with the per-project-pending-updates flag enabled', function () {
-      beforeEach(async function (ctx) {
-        ctx.SplitTestHandler.promises.featureFlagEnabledForUser.resolves(true)
-        await new Promise(resolve => {
-          ctx.res.callback = resolve
-          ctx.EditorHttpController.joinProject(ctx.req, ctx.res)
-        })
-      })
-
-      it('should fetch the assignment for the joining user', function (ctx) {
-        expect(
-          ctx.SplitTestHandler.promises.featureFlagEnabledForUser
-        ).to.have.been.calledWith(
-          ctx.user._id.toString(),
-          'per-project-pending-updates'
-        )
-      })
-
-      it('should return usePerProjectPendingUpdates=true', function (ctx) {
-        expect(ctx.res.json).toHaveBeenCalledWith(
-          expect.objectContaining({ usePerProjectPendingUpdates: true })
-        )
       })
     })
 

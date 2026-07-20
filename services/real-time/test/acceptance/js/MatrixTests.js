@@ -57,11 +57,16 @@ import redis from '@overleaf/redis-wrapper'
 const Keys = settings.redis.documentupdater.key_schema
 const rclient = redis.createClient(settings.redis.pubsub)
 
-function getPendingUpdates(docId, cb) {
-  rclient.lrange(Keys.pendingUpdates({ doc_id: docId }), 0, 10, cb)
+function getPendingUpdates(projectId, cb) {
+  rclient.lrange(
+    Keys.pendingProjectUpdates({ project_id: projectId }),
+    0,
+    10,
+    cb
+  )
 }
-function cleanupPreviousUpdates(docId, cb) {
-  rclient.del(Keys.pendingUpdates({ doc_id: docId }), cb)
+function cleanupPreviousUpdates(projectId, cb) {
+  rclient.del(Keys.pendingProjectUpdates({ project_id: projectId }), cb)
 }
 
 describe('MatrixTests', function () {
@@ -411,7 +416,7 @@ describe('MatrixTests', function () {
                 let receivedArgs, submittedUpdates, update
 
                 beforeEach(function cleanup(done) {
-                  cleanupPreviousUpdates(privateDocId, done)
+                  cleanupPreviousUpdates(privateProjectId, done)
                 })
 
                 beforeEach(function setupUpdateFields() {
@@ -460,7 +465,7 @@ describe('MatrixTests', function () {
                 })
 
                 beforeEach(function fetchPendingOps(done) {
-                  getPendingUpdates(privateDocId, (err, updates) => {
+                  getPendingUpdates(privateProjectId, (err, updates) => {
                     submittedUpdates = updates
                     done(err)
                   })

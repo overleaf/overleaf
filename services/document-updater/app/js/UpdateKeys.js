@@ -2,7 +2,7 @@
 // Fix any style issues and re-enable lint.
 module.exports = {
   /**
-   * Build a legacy `project_id:doc_id` dispatch marker.
+   * Build the `project_id:doc_id` key ShareJS uses to identify a doc.
    *
    * @param {string} projectId
    * @param {string} docId
@@ -13,13 +13,11 @@ module.exports = {
   },
 
   /**
-   * Split a dispatch marker into project id and doc id. A marker is either
-   * the legacy `project_id:doc_id` or, after the queue migration, a bare
-   * `project_id`. Project and doc ids never contain a colon, so splitting is
-   * unambiguous; for the bare form docId is undefined.
+   * Split a `project_id:doc_id` ShareJS doc key into project id and doc id.
+   * Project and doc ids never contain a colon, so splitting is unambiguous.
    *
    * @param {string} projectAndDocId
-   * @return {[string, string | undefined]}
+   * @return {[string, string]}
    */
   splitProjectIdAndDocId(projectAndDocId) {
     const [projectId, docId] = projectAndDocId.split(':')

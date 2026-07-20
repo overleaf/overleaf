@@ -22,11 +22,7 @@ describe('DocumentUpdaterController', function () {
       default: (ctx.settings = {
         redis: {
           documentupdater: {
-            key_schema: {
-              pendingUpdates({ doc_id: docId }) {
-                return `PendingUpdates:${docId}`
-              },
-            },
+            key_schema: {},
           },
           pubsub: null,
         },

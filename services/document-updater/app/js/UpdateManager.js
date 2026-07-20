@@ -1,6 +1,5 @@
 // @ts-check
 
-const Settings = require('@overleaf/settings')
 const { callbackifyAll } = require('@overleaf/promise-utils')
 const LockManager = require('./LockManager')
 const ProjectLockManager = require('./ProjectLockManager')
@@ -26,34 +25,14 @@ const HistoryOTUpdateManager = require('./HistoryOTUpdateManager')
 
 const UpdateManager = {
   /**
-   * Process the pending updates on a single doc's legacy per-doc queue. The
-   * caller must hold the doc lock.
-   *
-   * @param {string} projectId
-   * @param {string} docId
-   */
-  async processOutstandingUpdates(projectId, docId) {
-    const timer = new Metrics.Timer('updateManager.processOutstandingUpdates')
-    try {
-      await UpdateManager.fetchAndApplyUpdates(projectId, docId)
-      timer.done({ status: 'success' })
-    } catch (err) {
-      timer.done({ status: 'error' })
-      throw err
-    }
-  },
-
-  /**
    * Process the pending updates for a project under the project lock, then
    * keep going for as long as more updates are queued up.
    *
    * @param {string} projectId
-   * @param {string} [docIdHint] - doc id from a legacy dispatch marker, if any
    */
-  async processOutstandingUpdatesWithLock(projectId, docIdHint) {
+  async processOutstandingUpdatesWithLock(projectId) {
     const profile = new Profiler('processOutstandingUpdatesWithLock', {
       project_id: projectId,
-      doc_id: docIdHint,
     })
 
     // Always take the project lock before the per-doc lock to avoid deadlocks.
@@ -64,131 +43,14 @@ const UpdateManager = {
     profile.log('getProjectLock')
 
     try {
-      await UpdateManager.processOutstandingProjectUpdates(
-        projectId,
-        docIdHint,
-        projectLockValue,
-        profile
-      )
-      profile.log('processOutstandingProjectUpdates')
+      await UpdateManager.fetchAndApplyProjectUpdates(projectId, profile)
+      profile.log('fetchAndApplyProjectUpdates')
     } finally {
       await ProjectLockManager.promises.releaseLock(projectId, projectLockValue)
       profile.log('releaseProjectLock').end()
     }
 
-    await UpdateManager.continueProcessingUpdatesWithLock(projectId, docIdHint)
-  },
-
-  /**
-   * Process the pending updates for a project while holding the project lock.
-   *
-   * In phases 1 & 2 this drains the legacy per-doc queues (taking the per-doc
-   * lock for each doc) as well as the shared per-project queue; in phase 3
-   * only the per-project queue is processed.
-   *
-   * @param {string} projectId
-   * @param {string | undefined} docIdHint - doc id from a legacy dispatch
-   *        marker, if any
-   * @param {string} projectLockValue - lock value of the held project lock
-   * @param {Profiler} profile - profile started by the caller
-   */
-  async processOutstandingProjectUpdates(
-    projectId,
-    docIdHint,
-    projectLockValue,
-    profile
-  ) {
-    switch (Settings.pendingUpdatesMigrationPhase) {
-      case 1:
-      case 2:
-        await UpdateManager.processOutstandingDocUpdates(
-          projectId,
-          docIdHint,
-          projectLockValue,
-          profile
-        )
-      // Phases 1 & 2 drain the per-project queue as well, as a safety net in
-      // case a producer writes it ahead of the phase switch.
-      // falls through
-      case 3:
-        await UpdateManager.fetchAndApplyProjectUpdates(projectId, profile)
-        break
-      default:
-        throw new Error(
-          `invalid pendingUpdatesMigrationPhase: ${Settings.pendingUpdatesMigrationPhase}`
-        )
-    }
-  },
-
-  /**
-   * Drain the legacy per-doc queues of all the docs in the project, plus the
-   * hinted doc, while holding the project lock.
-   *
-   * @param {string} projectId
-   * @param {string | undefined} docIdHint - doc id from a legacy dispatch
-   *        marker, if any
-   * @param {string} projectLockValue - lock value of the held project lock
-   * @param {Profiler} profile - profile started by the caller
-   */
-  async processOutstandingDocUpdates(
-    projectId,
-    docIdHint,
-    projectLockValue,
-    profile
-  ) {
-    const docIds = new Set(
-      await RedisManager.promises.getDocIdsInProject(projectId)
-    )
-    profile.log('getDocIdsInProject')
-    if (docIdHint) {
-      docIds.add(docIdHint)
-    }
-    // Listing the docs above may have taken a while, so bump before we start
-    // processing and again after each doc. The final bump also covers draining
-    // the per-project queue afterwards.
-    await ProjectLockManager.promises.extendLock(projectId, projectLockValue)
-    profile.log('extendProjectLock')
-    for (const docId of docIds) {
-      await UpdateManager.fetchAndApplyDocUpdatesUnderDocLock(
-        projectId,
-        docId,
-        profile
-      )
-      await ProjectLockManager.promises.extendLock(projectId, projectLockValue)
-      profile.log('extendProjectLock')
-    }
-  },
-
-  /**
-   * Drain (one batch of) a single doc's legacy per-doc queue, taking the
-   * per-doc lock so that an old document-updater instance - which only takes
-   * the per-doc lock - cannot process the same doc concurrently during a
-   * rolling deploy. tryLock and skip on contention; the doc is revisited by
-   * the continuation check or a later dispatch.
-   *
-   * @param {string} projectId
-   * @param {string} docId
-   * @param {Profiler} profile - profile started by the caller
-   */
-  async fetchAndApplyDocUpdatesUnderDocLock(projectId, docId, profile) {
-    const length = await RealTimeRedisManager.promises.getUpdatesLength(docId)
-    profile.log('getUpdatesLength')
-    if (length === 0) {
-      return
-    }
-    const lockValue = await LockManager.promises.tryLock(docId)
-    if (lockValue == null) {
-      return
-    }
-    profile.log('tryLock')
-
-    try {
-      await UpdateManager.processOutstandingUpdates(projectId, docId)
-      profile.log('processOutstandingUpdates')
-    } finally {
-      await LockManager.promises.releaseLock(docId, lockValue)
-      profile.log('releaseLock')
-    }
+    await UpdateManager.continueProcessingUpdatesWithLock(projectId)
   },
 
   /**
@@ -219,118 +81,17 @@ const UpdateManager = {
   },
 
   /**
-   * Total pending updates for a project: the per-project queue plus (in phases
-   * 1 & 2) the loaded docs' legacy per-doc queues. Used to decide whether to
-   * keep processing after releasing the lock - other workers' markers may have
-   * been consumed (and dropped on a failed tryLock) while we held it.
-   *
-   * @param {string} projectId
-   * @param {string} [docIdHint] - doc id from a legacy dispatch marker, if any
-   * @return {Promise<number>}
-   */
-  async getProjectPendingUpdatesLength(projectId, docIdHint) {
-    switch (Settings.pendingUpdatesMigrationPhase) {
-      case 1:
-      case 2: {
-        const length =
-          await RealTimeRedisManager.promises.getProjectUpdatesLength(projectId)
-        if (length > 0) {
-          return length
-        }
-        return await UpdateManager.getDocPendingUpdatesLength(
-          projectId,
-          docIdHint
-        )
-      }
-      case 3:
-        return await RealTimeRedisManager.promises.getProjectUpdatesLength(
-          projectId
-        )
-      default:
-        throw new Error(
-          `invalid pendingUpdatesMigrationPhase: ${Settings.pendingUpdatesMigrationPhase}`
-        )
-    }
-  },
-
-  /**
-   * Pending updates across the legacy per-doc queues of the docs in the
-   * project, plus the hinted doc. Returns early with the first non-empty
-   * queue's length.
-   *
-   * @param {string} projectId
-   * @param {string} [docIdHint] - doc id from a legacy dispatch marker, if any
-   * @return {Promise<number>}
-   */
-  async getDocPendingUpdatesLength(projectId, docIdHint) {
-    const docIds = new Set(
-      await RedisManager.promises.getDocIdsInProject(projectId)
-    )
-    if (docIdHint) {
-      docIds.add(docIdHint)
-    }
-    for (const docId of docIds) {
-      const length = await RealTimeRedisManager.promises.getUpdatesLength(docId)
-      if (length > 0) {
-        return length
-      }
-    }
-    return 0
-  },
-
-  /**
    * Process the project's pending updates under the project lock if any are
    * queued up.
    *
    * @param {string} projectId
-   * @param {string} [docIdHint] - doc id from a legacy dispatch marker, if any
    */
-  async continueProcessingUpdatesWithLock(projectId, docIdHint) {
-    const length = await UpdateManager.getProjectPendingUpdatesLength(
-      projectId,
-      docIdHint
-    )
+  async continueProcessingUpdatesWithLock(projectId) {
+    const length =
+      await RealTimeRedisManager.promises.getProjectUpdatesLength(projectId)
     if (length > 0) {
-      await UpdateManager.processOutstandingUpdatesWithLock(
-        projectId,
-        docIdHint
-      )
+      await UpdateManager.processOutstandingUpdatesWithLock(projectId)
     }
-  },
-
-  /**
-   * Apply one batch of updates from a doc's legacy per-doc queue. The caller
-   * must hold the doc lock.
-   *
-   * @param {string} projectId
-   * @param {string} docId
-   */
-  async fetchAndApplyUpdates(projectId, docId) {
-    const profile = new Profiler('fetchAndApplyUpdates', {
-      project_id: projectId,
-      doc_id: docId,
-    })
-
-    const updates =
-      await RealTimeRedisManager.promises.getPendingUpdatesForDoc(docId)
-    logger.debug(
-      { projectId, docId, count: updates.length },
-      'processing updates'
-    )
-    if (updates.length === 0) {
-      return
-    }
-    profile.log('getPendingUpdatesForDoc')
-
-    for (const update of updates) {
-      if (HistoryOTUpdateManager.isHistoryOTEditOperationUpdate(update)) {
-        await HistoryOTUpdateManager.applyUpdate(projectId, docId, update)
-      } else {
-        await UpdateManager.applyUpdate(projectId, docId, update)
-      }
-      profile.log('applyUpdate')
-    }
-    profile.log('async done').end()
   },
 
   /**
@@ -539,13 +300,8 @@ const UpdateManager = {
 
     let result
     try {
-      await UpdateManager.processOutstandingProjectUpdates(
-        projectId,
-        docId,
-        projectLockValue,
-        profile
-      )
-      profile.log('processOutstandingProjectUpdates')
+      await UpdateManager.fetchAndApplyProjectUpdates(projectId, profile)
+      profile.log('fetchAndApplyProjectUpdates')
 
       const lockValue = await LockManager.promises.getLock(docId)
       profile.log('getLock')
@@ -563,18 +319,16 @@ const UpdateManager = {
     }
 
     // We held the lock for a while so updates might have queued up
-    UpdateManager.continueProcessingUpdatesWithLock(projectId, docId).catch(
-      err => {
-        // The processing may fail for invalid user updates.
-        // This can be very noisy, put them on level DEBUG
-        //  and record a metric.
-        Metrics.inc('background-processing-updates-error')
-        logger.debug(
-          { err, projectId, docId },
-          'error processing updates in background'
-        )
-      }
-    )
+    UpdateManager.continueProcessingUpdatesWithLock(projectId).catch(err => {
+      // The processing may fail for invalid user updates.
+      // This can be very noisy, put them on level DEBUG
+      //  and record a metric.
+      Metrics.inc('background-processing-updates-error')
+      logger.debug(
+        { err, projectId, docId },
+        'error processing updates in background'
+      )
+    })
 
     return result
   },

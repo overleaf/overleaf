@@ -36,52 +36,35 @@ module.exports = DocUpdaterClient = {
     rclientSub.on('message', messageHandler)
   },
 
-  // Enqueue an update for the doc-updater. By default the queue format follows
-  // the configured migration phase, but tests can force a format with
-  // options.toProjectQueue to exercise the migration explicitly:
-  //   phase 1 / toProjectQueue=false: legacy per-doc queue + "<proj>:<doc>" marker
-  //   phase >= 2 / toProjectQueue=true: per-project queue + bare "<proj>" marker
-  async sendUpdate(projectId, docId, update, options = {}) {
-    const toProjectQueue =
-      options.toProjectQueue ?? Settings.pendingUpdatesMigrationPhase >= 2
-    if (toProjectQueue) {
-      await rclient.rpush(
-        keys.pendingProjectUpdates({ project_id: projectId }),
-        JSON.stringify({ ...update, doc: docId })
-      )
-      await rclient.rpush(getPendingUpdateListKey(), projectId)
-    } else {
-      await rclient.rpush(
-        keys.pendingUpdates({ doc_id: docId }),
-        JSON.stringify(update)
-      )
-      await rclient.rpush(getPendingUpdateListKey(), `${projectId}:${docId}`)
-    }
+  // Enqueue an update for the doc-updater: push the payload (tagged with its
+  // doc id) onto the per-project queue, then a bare "<proj>" marker onto the
+  // dispatch list.
+  async sendUpdate(projectId, docId, update) {
+    await rclient.rpush(
+      keys.pendingProjectUpdates({ project_id: projectId }),
+      JSON.stringify({ ...update, doc: docId })
+    )
+    await rclient.rpush(getPendingUpdateListKey(), projectId)
   },
 
-  async sendUpdates(projectId, docId, updates, options = {}) {
+  async sendUpdates(projectId, docId, updates) {
     await DocUpdaterClient.preloadDoc(projectId, docId)
     for (const update of updates) {
-      await DocUpdaterClient.sendUpdate(projectId, docId, update, options)
+      await DocUpdaterClient.sendUpdate(projectId, docId, update)
     }
     await DocUpdaterClient.waitForPendingUpdates(projectId, docId)
   },
 
-  // Wait until both the legacy per-doc queue and the per-project queue are
-  // drained, so the helper works regardless of the migration phase in use.
   async waitForPendingUpdates(projectId, docId) {
     const maxRetries = 30
     const retryInterval = 100
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
-      const docLength = await rclient.llen(
-        keys.pendingUpdates({ doc_id: docId })
-      )
       const projectLength = await rclient.llen(
         keys.pendingProjectUpdates({ project_id: projectId })
       )
 
-      if (docLength === 0 && projectLength === 0) {
+      if (projectLength === 0) {
         return // Success - no pending updates
       }
 

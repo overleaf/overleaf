@@ -31,19 +31,16 @@ let COUNT = 0
 const MAX_OPS_PER_ITERATION = 8 // process a limited number of ops for safety
 
 /**
- * Shared implementation for draining a batch of updates from a
- * pending-updates list. Used for both the per-doc and per-project queues;
- * `path` ('doc' | 'project') differentiates the two in metrics.
+ * Drain a batch of updates from a pending-updates list.
  *
  * The MULTI only operates on the single passed key (which has an id in curly
  * braces), so all of its operations run on the same node in a cluster
  * environment.
  *
  * @param {string} key - the redis key of the queue
- * @param {'doc' | 'project'} path - metrics label
  * @param {function(Error, Array<Object>=): void} callback
  */
-function getPendingUpdatesFromQueue(key, path, callback) {
+function getPendingUpdatesFromQueue(key, callback) {
   const multi = rclient.multi()
   multi.llen(key)
   multi.lrange(key, 0, MAX_OPS_PER_ITERATION - 1)
@@ -57,13 +54,13 @@ function getPendingUpdatesFromQueue(key, path, callback) {
       'redis.pendingUpdates.llen',
       llen,
       [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 50, 75, 100],
-      { path }
+      { path: 'project' }
     )
     for (const jsonUpdate of jsonUpdates) {
       // record metric for each update removed from queue
       metrics.summary('redis.pendingUpdates', jsonUpdate.length, {
         status: 'pop',
-        path,
+        path: 'project',
       })
     }
     const updates = []
@@ -82,30 +79,6 @@ function getPendingUpdatesFromQueue(key, path, callback) {
 
 const RealTimeRedisManager = {
   /**
-   * Drain a batch of updates from a doc's legacy per-doc queue.
-   *
-   * @param {string} docId
-   * @param {function(Error, Array<Object>=): void} callback
-   */
-  getPendingUpdatesForDoc(docId, callback) {
-    getPendingUpdatesFromQueue(
-      Keys.pendingUpdates({ doc_id: docId }),
-      'doc',
-      callback
-    )
-  },
-
-  /**
-   * Get the length of a doc's legacy per-doc queue.
-   *
-   * @param {string} docId
-   * @param {function(Error, number=): void} callback
-   */
-  getUpdatesLength(docId, callback) {
-    rclient.llen(Keys.pendingUpdates({ doc_id: docId }), callback)
-  },
-
-  /**
    * Drain a batch of updates from a project's per-project queue. Each update
    * on the per-project queue carries its own `doc` id so the caller knows
    * which doc to apply it to.
@@ -116,7 +89,6 @@ const RealTimeRedisManager = {
   getPendingProjectUpdates(projectId, callback) {
     getPendingUpdatesFromQueue(
       Keys.pendingProjectUpdates({ project_id: projectId }),
-      'project',
       callback
     )
   },

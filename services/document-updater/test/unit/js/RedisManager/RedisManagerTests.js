@@ -37,9 +37,6 @@ describe('RedisManager', function () {
                 projectKey({ doc_id: docId }) {
                   return `ProjectId:${docId}`
                 },
-                pendingUpdates({ doc_id: docId }) {
-                  return `PendingUpdates:${docId}`
-                },
                 docsInProject({ project_id: projectId }) {
                   return `DocsIn:${projectId}`
                 },

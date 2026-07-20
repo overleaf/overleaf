@@ -7,7 +7,6 @@ import Metrics from '@overleaf/metrics'
 import CollaboratorsInviteGetter from '../Collaborators/CollaboratorsInviteGetter.mjs'
 import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
 import SessionManager from '../Authentication/SessionManager.mjs'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 import Errors from '../Errors/Errors.js'
 import { expressify } from '@overleaf/promise-utils'
 import Settings from '@overleaf/settings'
@@ -68,22 +67,12 @@ async function joinProject(req, res, next) {
     )
   }
 
-  let usePerProjectPendingUpdates = false
-  if (userId) {
-    usePerProjectPendingUpdates =
-      await SplitTestHandler.promises.featureFlagEnabledForUser(
-        userId,
-        'per-project-pending-updates'
-      )
-  }
-
   res.json({
     project,
     privilegeLevel,
     isRestrictedUser,
     isTokenMember,
     isInvitedMember,
-    usePerProjectPendingUpdates,
   })
 }
 

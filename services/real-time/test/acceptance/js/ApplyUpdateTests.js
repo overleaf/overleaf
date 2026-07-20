@@ -107,11 +107,11 @@ describe('applyOtUpdate', function () {
       )
     })
 
-    it('should push the doc into the pending updates list', function (done) {
+    it('should push the project into the pending updates list', function (done) {
       getPendingUpdatesList((error, ...rest) => {
         if (error) return done(error)
-        const [docId] = Array.from(rest[0])
-        docId.should.equal(`${this.project_id}:${this.doc_id}`)
+        const [projectId] = Array.from(rest[0])
+        projectId.should.equal(this.project_id)
         return done()
       })
       return null
@@ -119,8 +119,8 @@ describe('applyOtUpdate', function () {
 
     it('should push the update into redis', function (done) {
       rclient.lrange(
-        redisSettings.documentupdater.key_schema.pendingUpdates({
-          doc_id: this.doc_id,
+        redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+          project_id: this.project_id,
         }),
         0,
         -1,
@@ -151,9 +151,9 @@ describe('applyOtUpdate', function () {
             ),
           cb =>
             rclient.del(
-              redisSettings.documentupdater.key_schema.pendingUpdates(
-                this.doc_id
-              ),
+              redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+                project_id: this.project_id,
+              }),
               cb
             ),
         ],
@@ -246,8 +246,8 @@ describe('applyOtUpdate', function () {
 
     return it('should not put the update in redis', function (done) {
       rclient.llen(
-        redisSettings.documentupdater.key_schema.pendingUpdates({
-          doc_id: this.doc_id,
+        redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+          project_id: this.project_id,
         }),
         (error, len) => {
           if (error) return done(error)
@@ -324,8 +324,8 @@ describe('applyOtUpdate', function () {
 
     return it('should not put the update in redis', function (done) {
       rclient.llen(
-        redisSettings.documentupdater.key_schema.pendingUpdates({
-          doc_id: this.doc_id,
+        redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+          project_id: this.project_id,
         }),
         (error, len) => {
           if (error) return done(error)
@@ -390,11 +390,11 @@ describe('applyOtUpdate', function () {
       )
     })
 
-    it('should push the doc into the pending updates list', function (done) {
+    it('should push the project into the pending updates list', function (done) {
       getPendingUpdatesList((error, ...rest) => {
         if (error) return done(error)
-        const [docId] = Array.from(rest[0])
-        docId.should.equal(`${this.project_id}:${this.doc_id}`)
+        const [projectId] = Array.from(rest[0])
+        projectId.should.equal(this.project_id)
         return done()
       })
       return null
@@ -402,8 +402,8 @@ describe('applyOtUpdate', function () {
 
     it('should push the update into redis', function (done) {
       rclient.lrange(
-        redisSettings.documentupdater.key_schema.pendingUpdates({
-          doc_id: this.doc_id,
+        redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+          project_id: this.project_id,
         }),
         0,
         -1,
@@ -434,8 +434,8 @@ describe('applyOtUpdate', function () {
             ),
           cb =>
             rclient.del(
-              redisSettings.documentupdater.key_schema.pendingUpdates({
-                doc_id: this.doc_id,
+              redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+                project_id: this.project_id,
               }),
               cb
             ),
@@ -503,8 +503,8 @@ describe('applyOtUpdate', function () {
           cb => clearPendingUpdatesList(cb),
           cb =>
             rclient.del(
-              redisSettings.documentupdater.key_schema.pendingUpdates({
-                doc_id: this.doc_id,
+              redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+                project_id: this.project_id,
               }),
               cb
             ),
@@ -519,8 +519,8 @@ describe('applyOtUpdate', function () {
 
     it('should put the update in redis', function (done) {
       rclient.lrange(
-        redisSettings.documentupdater.key_schema.pendingUpdates({
-          doc_id: this.doc_id,
+        redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+          project_id: this.project_id,
         }),
         0,
         -1,
@@ -601,8 +601,8 @@ describe('applyOtUpdate', function () {
 
     return it('should not put the update in redis', function (done) {
       rclient.llen(
-        redisSettings.documentupdater.key_schema.pendingUpdates({
-          doc_id: this.doc_id,
+        redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+          project_id: this.project_id,
         }),
         (error, len) => {
           if (error) return done(error)
@@ -675,8 +675,8 @@ describe('applyOtUpdate', function () {
 
     it('should not put the update in redis', function (done) {
       rclient.llen(
-        redisSettings.documentupdater.key_schema.pendingUpdates({
-          doc_id: this.doc_id,
+        redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+          project_id: this.project_id,
         }),
         (error, len) => {
           if (error) return done(error)
@@ -753,8 +753,8 @@ describe('applyOtUpdate', function () {
 
     return it('should not put the update in redis', function (done) {
       rclient.llen(
-        redisSettings.documentupdater.key_schema.pendingUpdates({
-          doc_id: this.doc_id,
+        redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+          project_id: this.project_id,
         }),
         (error, len) => {
           if (error) return done(error)
@@ -835,8 +835,8 @@ describe('applyOtUpdate', function () {
 
     return it('should not put the update in redis', function (done) {
       rclient.llen(
-        redisSettings.documentupdater.key_schema.pendingUpdates({
-          doc_id: this.doc_id,
+        redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+          project_id: this.project_id,
         }),
         (error, len) => {
           if (error) return done(error)
@@ -917,8 +917,8 @@ describe('applyOtUpdate', function () {
 
     return it('should not put the update in redis', function (done) {
       rclient.llen(
-        redisSettings.documentupdater.key_schema.pendingUpdates({
-          doc_id: this.doc_id,
+        redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+          project_id: this.project_id,
         }),
         (error, len) => {
           if (error) return done(error)
@@ -999,8 +999,8 @@ describe('applyOtUpdate', function () {
 
     return it('should not put the update in redis', function (done) {
       rclient.llen(
-        redisSettings.documentupdater.key_schema.pendingUpdates({
-          doc_id: this.doc_id,
+        redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+          project_id: this.project_id,
         }),
         (error, len) => {
           if (error) return done(error)
