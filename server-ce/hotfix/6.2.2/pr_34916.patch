@@ -1,0 +1,114 @@
+diff --git a/.yarn/patches/multer-npm-2.1.1.patch b/.yarn/patches/multer-npm-2.2.0-4ed181c78f.patch
+similarity index 77%
+rename from .yarn/patches/multer-npm-2.1.1.patch
+rename to .yarn/patches/multer-npm-2.2.0-4ed181c78f.patch
+index c74230a10835..10e08cf24327 100644
+--- a/.yarn/patches/multer-npm-2.1.1.patch
++++ b/.yarn/patches/multer-npm-2.2.0-4ed181c78f.patch
+@@ -1,8 +1,8 @@
+ diff --git a/lib/make-middleware.js b/lib/make-middleware.js
+-index ee50988..de77364 100644
++index 2c15f248d4f4d221bd9e2b2e1092b8d5c46d2bdd..f2bceb4479c94e321d4882ca1fe09c3ad280cca7 100644
+ --- a/lib/make-middleware.js
+ +++ b/lib/make-middleware.js
+-@@ -164,7 +164,7 @@ function makeMiddleware (setup) {
++@@ -174,7 +174,7 @@ function makeMiddleware (setup) {
+        if (fieldname == null) return abortWithCode('MISSING_FIELD_NAME')
+
+        // don't attach to the files object, if there is no file
+diff --git a/package.json b/package.json
+index 2e77c8097eeb..7d7230d92ffd 100644
+--- a/package.json
++++ b/package.json
+@@ -71,7 +71,7 @@
+     "body-parser@npm:1.20.4": "patch:body-parser@npm%3A1.20.4#~/.yarn/patches/body-parser-npm-1.20.4.patch",
+     "cypress-multi-reporters": "patch:cypress-multi-reporters@npm%3A2.0.5#~/.yarn/patches/cypress-multi-reporters-npm-2.0.5.patch",
+     "forwarded@npm:0.2.0": "patch:forwarded@npm%3A0.2.0#~/.yarn/patches/forwarded-npm-0.2.0.patch",
+-    "multer@npm:2.1.1": "patch:multer@npm%3A2.1.1#~/.yarn/patches/multer-npm-2.1.1.patch",
++    "multer@npm:2.2.0": "patch:multer@npm%3A2.2.0#~/.yarn/patches/multer-npm-2.2.0-4ed181c78f.patch",
+     "node-fetch": "patch:node-fetch@npm%3A2.7.0#~/.yarn/patches/node-fetch-npm-2.7.0.patch",
+     "passport-oauth2": "patch:passport-oauth2@npm%3A1.6.1#~/.yarn/patches/passport-oauth2-npm-1.6.1.patch",
+     "send": "patch:send@npm%3A0.19.0#~/.yarn/patches/send-npm-0.19.0.patch",
+diff --git a/services/clsi/package.json b/services/clsi/package.json
+index e2bcc927ed6b..edb8d65bc96d 100644
+--- a/services/clsi/package.json
++++ b/services/clsi/package.json
+@@ -32,6 +32,6 @@
+     "express": "4.22.1",
+     "lodash": "^4.18.1",
+-    "multer": "2.1.1",
++    "multer": "2.2.0",
+     "overleaf-editor-core": "workspace:*",
+     "p-limit": "^3.1.0",
+     "send": "^0.19.0",
+diff --git a/services/web/package.json b/services/web/package.json
+index 1e3dd2acc41c..4ad8b3593c75 100644
+--- a/services/web/package.json
++++ b/services/web/package.json
+@@ -154,7 +154,7 @@
+     "moment": "^2.29.4",
+     "mongodb-legacy": "6.1.3",
+     "mongoose": "8.22.1",
+-    "multer": "2.1.1",
++    "multer": "2.2.0",
+     "nocache": "^2.1.0",
+     "node-fetch": "^2.7.0",
+     "nodemailer": "^8.0.5",
+diff --git a/yarn.lock b/yarn.lock
+index 371bfa1a9363..d60a273925b4 100644
+--- a/yarn.lock
++++ b/yarn.lock
+@@ -6705,7 +6705,7 @@ __metadata:
+     mocha: "npm:^11.1.0"
+     mocha-junit-reporter: "npm:^2.2.1"
+     mocha-multi-reporters: "npm:^1.5.1"
+-    multer: "npm:2.1.1"
++    multer: "npm:2.2.0"
+     node-fetch: "npm:^2.7.0"
+     nyc: "npm:^17.1.0"
+     overleaf-editor-core: "workspace:*"
+@@ -7679,7 +7679,7 @@ __metadata:
+     moment: "npm:^2.29.4"
+     mongodb-legacy: "npm:6.1.3"
+     mongoose: "npm:8.22.1"
+-    multer: "npm:2.1.1"
++    multer: "npm:2.2.0"
+     nocache: "npm:^2.1.0"
+     nock: "npm:^13.5.6"
+     node-fetch: "npm:^2.7.0"
+@@ -25279,27 +25279,27 @@ __metadata:
+   languageName: node
+   linkType: hard
+
+-"multer@npm:2.1.1":
+-  version: 2.1.1
+-  resolution: "multer@npm:2.1.1"
++"multer@npm:2.2.0":
++  version: 2.2.0
++  resolution: "multer@npm:2.2.0"
+   dependencies:
+     append-field: "npm:^1.0.0"
+     busboy: "npm:^1.6.0"
+     concat-stream: "npm:^2.0.0"
+     type-is: "npm:^1.6.18"
+-  checksum: 10c0/2ec4e02833b20f403cfb879d4b64d2a9070d902b9deae7aef18a6faadb707d7665385456cf540aa8a6dadfe3d4c5fc8e0e7b0675b94e1077048b1125426deee6
++  checksum: 10c0/7aa366d89042427347b6ab8e4a203405d7fe942e4a3095648a14526fcf3691d98ffc2da62abf85d8aca0a341f828168eb197b33cfdcfcce29d6ef593a5625591
+   languageName: node
+   linkType: hard
+
+-"multer@patch:multer@npm%3A2.1.1#~/.yarn/patches/multer-npm-2.1.1.patch":
+-  version: 2.1.1
+-  resolution: "multer@patch:multer@npm%3A2.1.1#~/.yarn/patches/multer-npm-2.1.1.patch::version=2.1.1&hash=0a6fed"
++"multer@patch:multer@npm%3A2.2.0#~/.yarn/patches/multer-npm-2.2.0-4ed181c78f.patch":
++  version: 2.2.0
++  resolution: "multer@patch:multer@npm%3A2.2.0#~/.yarn/patches/multer-npm-2.2.0-4ed181c78f.patch::version=2.2.0&hash=cf9e1c"
+   dependencies:
+     append-field: "npm:^1.0.0"
+     busboy: "npm:^1.6.0"
+     concat-stream: "npm:^2.0.0"
+     type-is: "npm:^1.6.18"
+-  checksum: 10c0/647285a1c53531143d44d54ce923d3fca2037f368e581c9eecfa8b40aa5a8ef706fb1ed2a5635228002c38e31861d6209ab33a07d194c8768e7ae113b7a67976
++  checksum: 10c0/9aa266ba976e6ee0d292d4b838d7e957086bcfb53fa170b62ca26d8737cc5eb2fc066fba0045895cbce6981a467adc0f801685b5528e8d1d09e00ca1544163dc
+   languageName: node
+   linkType: hard
+
