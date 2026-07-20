@@ -96,6 +96,7 @@ async function flushAllProjects(options) {
 }
 
 module.exports = {
+  _getKeys,
   _extractIds,
   promises: {
     flushAllProjects,
