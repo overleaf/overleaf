@@ -27243,6 +27243,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"prettier@patch:prettier@npm%3A3.7.4#~/.yarn/patches/prettier-npm-3.7.4.patch":
+  version: 3.7.4
+  resolution: "prettier@patch:prettier@npm%3A3.7.4#~/.yarn/patches/prettier-npm-3.7.4.patch::version=3.7.4&hash=0ce00c"
+  bin:
+    prettier: bin/prettier.cjs
+  checksum: 10c0/5a83fc7bf8ec838d1d9989110412df73cf5c0c367bc54994cde2bb45a18de15cc496270b249eb6d01923495295a1978ca00712c9c5acc2586c56cf161c7b452d
+  languageName: node
+  linkType: hard
+
 "pretty-bytes@npm:^5.6.0":
   version: 5.6.0
   resolution: "pretty-bytes@npm:5.6.0"

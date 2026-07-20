@@ -1,0 +1,14 @@
+diff --git a/internal/legacy-cli.mjs b/internal/legacy-cli.mjs
+index a76a536..f4d95ad 100644
+--- a/internal/legacy-cli.mjs
++++ b/internal/legacy-cli.mjs
+@@ -5832,6 +5832,9 @@ async function formatFiles(context) {
+       }
+       output = result.formatted;
+     } catch (error2) {
++      // invalidate cache on format error
++      formatResultsCache?.removeFormatResultsCache(filename);
++
+       const errorIsIgnored = handleError(
+         context,
+         fileNameToDisplay,
