@@ -24,7 +24,7 @@ import {
   EditOperationBuilder,
   CommentList,
 } from 'overleaf-editor-core'
-import {
+import type {
   StringFileRawData,
   RawEditOperation,
 } from 'overleaf-editor-core/lib/types'

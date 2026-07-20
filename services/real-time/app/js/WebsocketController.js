@@ -8,6 +8,7 @@ import ConnectedUsersManager from './ConnectedUsersManager.js'
 import WebsocketLoadBalancer from './WebsocketLoadBalancer.js'
 import RoomManager from './RoomManager.js'
 import Errors from './Errors.js'
+import { EditOperationBuilder } from 'overleaf-editor-core'
 
 const {
   CodedError,
@@ -658,14 +659,42 @@ export default WebsocketController = {
     )
   },
 
+  _isHistoryOTUpdate(update) {
+    for (const op of update.op) {
+      if (!EditOperationBuilder.isValid(op)) {
+        return false
+      }
+    }
+
+    return true
+  },
+
   _assertClientCanApplyUpdate(client, docId, update, callback) {
-    if (WebsocketController._isCommentUpdate(update)) {
+    if (WebsocketController._isHistoryOTUpdate(update)) {
+      return WebsocketController._assertClientCanApplyHistoryUpdate(
+        client,
+        docId,
+        update,
+        callback
+      )
+    } else {
+      return WebsocketController._assertClientCanApplyShareJsUpdate(
+        client,
+        docId,
+        update,
+        callback
+      )
+    }
+  },
+
+  _assertClientCanApplyShareJsUpdate(client, docId, update, callback) {
+    if (WebsocketController._isShareJsCommentUpdate(update)) {
       return AuthorizationManager.assertClientCanViewProjectAndDoc(
         client,
         docId,
         callback
       )
-    } else if (update.meta?.tc) {
+    } else if (WebsocketController._isShareJsTrackedChangesUpdate(update)) {
       return AuthorizationManager.assertClientCanReviewProjectAndDoc(
         client,
         docId,
@@ -680,15 +709,81 @@ export default WebsocketController = {
     }
   },
 
-  _isCommentUpdate(update) {
-    if (!(update && update.op instanceof Array)) {
-      return false
-    }
+  _isShareJsCommentUpdate(update) {
     for (const op of update.op) {
       if (!op.c) {
         return false
       }
     }
+    return true
+  },
+
+  _isShareJsTrackedChangesUpdate(update) {
+    return Boolean(update.meta?.tc)
+  },
+
+  _assertClientCanApplyHistoryUpdate(client, docId, update, callback) {
+    if (WebsocketController._isHistoryOTCommentUpdate(update)) {
+      return AuthorizationManager.assertClientCanViewProjectAndDoc(
+        client,
+        docId,
+        callback
+      )
+    } else if (WebsocketController._isHistoryOTTrackedChangesUpdate(update)) {
+      return AuthorizationManager.assertClientCanReviewProjectAndDoc(
+        client,
+        docId,
+        callback
+      )
+    } else {
+      return AuthorizationManager.assertClientCanEditProjectAndDoc(
+        client,
+        docId,
+        callback
+      )
+    }
+  },
+
+  _isHistoryOTCommentUpdate(update) {
+    for (const op of update.op) {
+      if (!WebsocketController._isHistoryOTAddCommentOperation(op)) {
+        return false
+      }
+    }
+    return true
+  },
+
+  _isHistoryOTAddCommentOperation(op) {
+    return typeof op === 'object' && 'commentId' in op && 'ranges' in op
+  },
+
+  _isHistoryOTTrackedChangesUpdate(update) {
+    for (const op of update.op) {
+      if (!('textOperation' in op)) {
+        return false
+      }
+      for (const scanOp of op.textOperation) {
+        // Plain retains
+        if (typeof scanOp === 'number' && scanOp > 0) {
+          continue
+        }
+        // Plain insertions
+        if (typeof scanOp !== 'object') {
+          return false
+        }
+        // Tracked insertions
+        if ('i' in scanOp && 'tracking' in scanOp) {
+          continue
+        }
+        // Tracked ranges (we don't accepting by clearing tracking)
+        if ('r' in scanOp && scanOp.tracking?.type !== 'none') {
+          continue
+        }
+
+        return false
+      }
+    }
+
     return true
   },
 }

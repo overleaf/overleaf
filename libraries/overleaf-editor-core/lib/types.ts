@@ -1,6 +1,8 @@
-import Blob from './blob'
-import TrackingProps from './file_data/tracking_props'
-import ClearTrackingProps from './file_data/clear_tracking_props'
+import type Blob from './blob'
+import type TrackingProps from './file_data/tracking_props'
+import type ClearTrackingProps from './file_data/clear_tracking_props'
+import type { z } from '@overleaf/validation-tools'
+import type * as schemas from './schemas'
 
 export type BlobStore = {
   getBlob(hash: string): Promise<Blob | null>
@@ -17,10 +19,7 @@ export type RangesBlob = {
   trackedChanges: TrackedChangeRawData[]
 }
 
-export type RawRange = {
-  pos: number
-  length: number
-}
+export type RawRange = z.infer<typeof schemas.rawRange>
 
 export type CommentRawData = {
   id: string
@@ -33,15 +32,11 @@ export type TrackedChangeRawData = {
   tracking: TrackingPropsRawData
 }
 
-export type TrackingPropsRawData = {
-  type: 'insert' | 'delete'
-  userId: string
-  ts: string
-}
+export type TrackingPropsRawData = z.infer<typeof schemas.rawTrackingProps>
 
-export type ClearTrackingPropsRawData = {
-  type: 'none'
-}
+export type ClearTrackingPropsRawData = z.infer<
+  typeof schemas.rawClearTrackingProps
+>
 
 export type TrackingDirective = TrackingProps | ClearTrackingProps
 
@@ -112,55 +107,32 @@ export type RawHollowStringFileData = { stringLength: number }
 
 export type RawV2DocVersions = Record<string, { pathname: string; v: number }>
 
-export type RawInsertOp =
-  | {
-      i: string
-      commentIds?: string[]
-      tracking?: TrackingPropsRawData
-    }
-  | string
+export type RawInsertOp = z.infer<typeof schemas.rawInsertOp>
 
-export type RawRemoveOp = number
-export type RawRetainOp =
-  | {
-      r: number
-      commentIds?: string[]
-      tracking?: TrackingPropsRawData | ClearTrackingPropsRawData
-    }
-  | number
+export type RawRemoveOp = z.infer<typeof schemas.rawRemoveOp>
+export type RawRetainOp = z.infer<typeof schemas.rawRetainOp>
 
-export type RawScanOp = RawInsertOp | RawRemoveOp | RawRetainOp
+export type RawScanOp = z.infer<typeof schemas.rawScanOp>
 
-export type RawTextOperation = {
-  textOperation: RawScanOp[]
-  contentHash?: string
-}
+export type RawTextOperation = z.infer<typeof schemas.rawTextOperation>
 
-export type RawAddCommentOperation = {
-  commentId: string
-  ranges: RawRange[]
-  resolved?: boolean
-}
+export type RawAddCommentOperation = z.infer<
+  typeof schemas.rawAddCommentOperation
+>
 
-export type RawDeleteCommentOperation = { deleteComment: string }
+export type RawDeleteCommentOperation = z.infer<
+  typeof schemas.rawDeleteCommentOperation
+>
 
-export type RawSetCommentStateOperation = {
-  commentId: string
-  resolved: boolean
-}
+export type RawSetCommentStateOperation = z.infer<
+  typeof schemas.rawSetCommentStateOperation
+>
 
-export type RawEditNoOperation = {
-  noOp: true
-}
+export type RawEditNoOperation = z.infer<typeof schemas.rawEditNoOperation>
 
 export type RawEditFileOperation = RawEditOperation & { pathname: string }
 
-export type RawEditOperation =
-  | RawTextOperation
-  | RawAddCommentOperation
-  | RawDeleteCommentOperation
-  | RawSetCommentStateOperation
-  | RawEditNoOperation
+export type RawEditOperation = z.infer<typeof schemas.rawEditOperation>
 
 export type LinkedFileData = {
   importedAt: string

@@ -32,6 +32,7 @@
     "express": "4.22.1",
     "express-session": "^1.17.1",
     "lodash": "^4.18.1",
+    "overleaf-editor-core": "workspace:*",
     "proxy-addr": "^2.0.7",
     "socket.io": "github:overleaf/socket.io#0.9.19-overleaf-12",
     "socket.io-client": "https://github.com/overleaf/socket.io-client/archive/refs/tags/0.9.17-overleaf-6.tar.gz",

@@ -11,6 +11,7 @@ import Errors from './Errors.js'
 import { z, zz } from '@overleaf/validation-tools'
 import { isZodErrorLike } from 'zod-validation-error'
 import os from 'node:os'
+import schemas from 'overleaf-editor-core/lib/schemas.js'
 
 const { UnexpectedArgumentsError } = Errors
 
@@ -60,7 +61,8 @@ const applyOtUpdateSchema = z.object({
             })
           )
       )
-      .min(1),
+      .min(1)
+      .or(z.array(schemas.rawEditOperation).min(1)),
     v: z.number().int().min(0),
   }),
 })

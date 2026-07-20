@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@overleaf/o-error": "workspace:*",
+    "@overleaf/validation-tools": "workspace:*",
     "check-types": "^5.1.0",
     "lodash": "^4.18.1",
     "p-map": "^4.0.0",

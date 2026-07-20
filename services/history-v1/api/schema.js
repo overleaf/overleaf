@@ -39,6 +39,8 @@ const operationSchema = z
         hash: z.string(),
       })
       .optional(),
+    // TODO: Use rawEditOperation from overleaf-editor-core/lib/schemas.js
+    // instead
     textOperation: z.array(z.any()).optional(),
     file: fileSchema.optional(),
     contentHash: z.string().optional(),

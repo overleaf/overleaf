@@ -1788,5 +1788,107 @@ describe('WebsocketController', function () {
         })
       })
     })
+
+    describe('with a history-OT client', function () {
+      const tracking = {
+        insert: { type: 'insert', userId: 'user-id-123', ts: '2026-07-15' },
+        delete: { type: 'delete', userId: 'user-id-123', ts: '2026-07-15' },
+        none: { type: 'none' },
+      }
+
+      function expectRoutedTo(ctx, target, update) {
+        return new Promise(resolve => {
+          for (const name of [
+            'assertClientCanViewProjectAndDoc',
+            'assertClientCanReviewProjectAndDoc',
+            'assertClientCanEditProjectAndDoc',
+          ]) {
+            ctx.AuthorizationManager[name].yields(new Error('not authorized'))
+          }
+          ctx.AuthorizationManager[target].yields(null)
+          ctx.WebsocketController._assertClientCanApplyUpdate(
+            ctx.client,
+            ctx.doc_id,
+            update,
+            error => {
+              expect(error).to.be.null
+              expect(ctx.AuthorizationManager[target].calledOnce).to.be.true
+              resolve()
+            }
+          )
+        })
+      }
+
+      it('should route an add-comment op to view access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanViewProjectAndDoc', {
+          op: [{ commentId: 'comment-id', ranges: [{ pos: 0, length: 3 }] }],
+        })
+      })
+
+      it('should route a tracked insertion to review access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanReviewProjectAndDoc', {
+          op: [{ textOperation: [5, { i: 'x', tracking: tracking.insert }] }],
+        })
+      })
+
+      it('should route a tracked deletion to review access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanReviewProjectAndDoc', {
+          op: [{ textOperation: [{ r: 3, tracking: tracking.delete }] }],
+        })
+      })
+
+      it('should route accepting a tracked change (clearing tracking) to edit access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanEditProjectAndDoc', {
+          op: [{ textOperation: [{ r: 3, tracking: tracking.none }] }],
+        })
+      })
+
+      it('should route an untracked insertion to edit access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanEditProjectAndDoc', {
+          op: [{ textOperation: ['plain'] }],
+        })
+      })
+
+      it('should route an untracked deletion to edit access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanEditProjectAndDoc', {
+          op: [{ textOperation: [-3] }],
+        })
+      })
+
+      it('should route a mix of tracked and untracked ops to edit access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanEditProjectAndDoc', {
+          op: [
+            { textOperation: [{ i: 'x', tracking: tracking.insert }] },
+            { textOperation: ['plain'] },
+          ],
+        })
+      })
+
+      it('should route a resolve-comment op to edit access', async function (ctx) {
+        // Only add-comment ops (commentId + ranges) are recognised as comment
+        // updates; resolving a comment currently requires edit access.
+        await expectRoutedTo(ctx, 'assertClientCanEditProjectAndDoc', {
+          op: [{ commentId: 'comment-id', resolved: true }],
+        })
+      })
+
+      it('should route a permanent history-OT insertion carrying meta.tc to edit access', async function (ctx) {
+        // meta.tc is a legacy (sharejs) tracked-changes id seed and is
+        // meaningless for history-OT, where tracking is carried by the op.
+        // A review-only client must not be able to make a permanent edit by
+        // attaching it.
+        await expectRoutedTo(ctx, 'assertClientCanEditProjectAndDoc', {
+          op: [{ textOperation: ['permanent untracked text'] }],
+          meta: { tc: 'tracked-change-id' },
+        })
+      })
+
+      it('should route a permanent history-OT deletion carrying meta.tc to edit access', async function (ctx) {
+        await expectRoutedTo(ctx, 'assertClientCanEditProjectAndDoc', {
+          op: [{ textOperation: [-3] }],
+          meta: { tc: 'tracked-change-id' },
+        })
+      })
+    })
   })
 })
