@@ -83,7 +83,12 @@ public class GitBridgeServer {
     String normalizedLogLevel =
         "WARNING".equalsIgnoreCase(configuredLogLevel) ? "WARN" : configuredLogLevel;
     Level defaultLogLevel = Level.toLevel(normalizedLogLevel, Level.INFO);
-    logLevelChecker = new GceMetadataLogLevelChecker(config.getServiceName(), defaultLogLevel);
+    boolean gceMetadataEnabled =
+        "true".equalsIgnoreCase(System.getenv("GCE_METADATA_LOG_LEVEL_ENABLED"));
+    logLevelChecker =
+        gceMetadataEnabled
+            ? new GceMetadataLogLevelChecker(config.getServiceName(), defaultLogLevel)
+            : null;
   }
 
   /*
@@ -102,7 +107,7 @@ public class GitBridgeServer {
         Util.setPostbackURL(postbackURL);
       }
       bridge.startBackgroundJobs();
-      logLevelChecker.start();
+      if (logLevelChecker != null) logLevelChecker.start();
       Log.info(Util.getServiceName() + "-Git Bridge server started");
       Log.info("Listening on port: " + getPort());
       Log.info("Bridged to: " + apiBaseURL);
@@ -120,7 +125,7 @@ public class GitBridgeServer {
   }
 
   public void stop() {
-    logLevelChecker.stop();
+    if (logLevelChecker != null) logLevelChecker.stop();
     try {
       jettyServer.stop();
     } catch (Exception e) {
