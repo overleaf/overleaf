@@ -38,6 +38,8 @@
  * @param {array} allowedKeys optimization: do not output key/value pairs that are not on this allowlist
  * @constructor
  */
+const MAX_FIELD_VALUE_LENGTH = 1000 * 20
+
 function BibtexParser(arg0, allowedKeys) {
   // Determine how this function is to be used
   if (typeof arg0 === 'string') {
@@ -479,6 +481,11 @@ BibtexParser.prototype.processCharacter_ = function (c) {
           this.SKIPCOMMENT_ = true
           this.STATE_ = this.STATES_.KV_VALUE
           this.PARSETMP_.Value = []
+          // Tail tracks the last 2 raw characters independently of Value, so
+          // escape detection below stays correct even once Value stops
+          // growing at MAX_FIELD_VALUE_LENGTH (see the push site further
+          // down for why storage and escape state can't share one array).
+          this.PARSETMP_.Tail = []
           this.VALBRACES_ = { '"': [], '{': [] }
         }
         break
@@ -487,9 +494,10 @@ BibtexParser.prototype.processCharacter_ = function (c) {
       // -- Populate this.PARSETMP_.Value
       case this.STATES_.KV_VALUE:
         const delim = this.VALBRACES_
-        // valueCharsArray is the list of characters that make up the
-        // current value
-        const valueCharsArray = this.PARSETMP_.Value
+        // tail is the last 2 raw characters consumed for the current value -
+        // see the push site below for why this is tracked separately from
+        // Value once Value is capped.
+        const tail = this.PARSETMP_.Tail
         let doneParsingValue = false
 
         // Test for special characters
@@ -526,8 +534,7 @@ BibtexParser.prototype.processCharacter_ = function (c) {
             if (
               delim['"'].length == 1 &&
               delim['{'].length == 0 &&
-              (valueCharsArray.length == 0 ||
-                valueCharsArray[valueCharsArray.length - 1] != '\\')
+              (tail.length == 0 || tail[tail.length - 1] != '\\')
             ) {
               // closing delimiter
               doneParsingValue = true
@@ -539,10 +546,7 @@ BibtexParser.prototype.processCharacter_ = function (c) {
             // This brace can mean:
             // (1) opening delimiter
             // (2) stacked verbatim delimiter
-            if (
-              valueCharsArray.length == 0 ||
-              valueCharsArray[valueCharsArray.length - 1] != '\\'
-            ) {
+            if (tail.length == 0 || tail[tail.length - 1] != '\\') {
               delim['{'].push(this.CHAR_)
               this.SKIPWS_ = false
               this.SKIPCOMMENT_ = false
@@ -572,17 +576,17 @@ BibtexParser.prototype.processCharacter_ = function (c) {
               //  which would otherwise break the parsing. we watch for these occurences of
               //  1+ backslashes in an empty bracket pair to gracefully handle the malformed bib file
               const doubleSlash =
-                valueCharsArray.length >= 2 &&
-                valueCharsArray[valueCharsArray.length - 1] === '\\' && // for \\}
-                valueCharsArray[valueCharsArray.length - 2] === '\\'
+                tail.length >= 2 &&
+                tail[tail.length - 1] === '\\' && // for \\}
+                tail[tail.length - 2] === '\\'
               const singleSlash =
-                valueCharsArray.length >= 2 &&
-                valueCharsArray[valueCharsArray.length - 1] === '\\' && // for {\}
-                valueCharsArray[valueCharsArray.length - 2] === '{'
+                tail.length >= 2 &&
+                tail[tail.length - 1] === '\\' && // for {\}
+                tail[tail.length - 2] === '{'
 
               if (
-                valueCharsArray.length == 0 ||
-                valueCharsArray[valueCharsArray.length - 1] != '\\' || // for }
+                tail.length == 0 ||
+                tail[tail.length - 1] != '\\' || // for }
                 doubleSlash ||
                 singleSlash
               ) {
@@ -618,14 +622,17 @@ BibtexParser.prototype.processCharacter_ = function (c) {
           this.PARSETMP_ = { Key: '' }
           this.VALBRACES_ = null
         } else {
-          this.PARSETMP_.Value.push(c)
-          if (this.PARSETMP_.Value.length >= 1000 * 20) {
-            this.PARSETMP_.Value = []
-            this.STATE_ = this.STATES_.ENTRY_OR_JUNK
-            this.DATA_ = { ObjectType: '' }
-            this.BRACETYPE_ = null
-            this.SKIPWS_ = true
-            this.SKIPCOMMENT_ = true
+          // Track the last 2 raw characters regardless of the storage cap
+          // below, so the escape checks above stay correct past the cap
+          // instead of freezing on whatever was last actually stored.
+          this.PARSETMP_.Tail.push(c)
+          if (this.PARSETMP_.Tail.length > 2) {
+            this.PARSETMP_.Tail.shift()
+          }
+          // Cap storage so a single huge field (e.g. thousands of authors)
+          // can't drive unbounded memory use while parsing.
+          if (this.PARSETMP_.Value.length < MAX_FIELD_VALUE_LENGTH) {
+            this.PARSETMP_.Value.push(c)
           }
         }
         break
