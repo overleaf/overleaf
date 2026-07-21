@@ -185,16 +185,6 @@ module.exports = {
   publishOnIndividualChannels:
     process.env.PUBLISH_ON_INDIVIDUAL_CHANNELS === 'true',
 
-  // Migration of the applied-ops pub/sub (document-updater -> real-time) from
-  // the per-doc applied-ops channel to the per-project editor-events channel.
-  // See docs/per-project-applied-ops-pubsub-migration.md. Requires all
-  // real-time instances to handle applied-ops on editor-events before being
-  // enabled. Composes with publishOnIndividualChannels, which picks between
-  // the base channel and the per-doc/per-project channel of the family
-  // selected here.
-  publishAppliedOpsOnEditorEvents:
-    process.env.PUBLISH_APPLIED_OPS_ON_EDITOR_EVENTS === 'true',
-
   continuousBackgroundFlush: process.env.CONTINUOUS_BACKGROUND_FLUSH === 'true',
 
   smoothingOffset: process.env.SMOOTHING_OFFSET || 1000, // milliseconds

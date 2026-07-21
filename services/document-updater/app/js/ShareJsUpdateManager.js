@@ -133,11 +133,6 @@ const ShareJsUpdateManager = {
       doc_id: docId,
       op,
     })
-    RealTimeRedisManager.sendCanaryAppliedOp({
-      projectId,
-      docId,
-      op,
-    })
   },
 
   _computeHash(content) {

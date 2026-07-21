@@ -33,9 +33,7 @@ describe('ShareJsUpdateManager', function () {
             return (this.rclient = { auth() {} })
           },
         },
-        './RealTimeRedisManager': (this.RealTimeRedisManager = {
-          sendCanaryAppliedOp: sinon.stub(),
-        }),
+        './RealTimeRedisManager': (this.RealTimeRedisManager = {}),
         './Metrics': (this.metrics = { inc: sinon.stub() }),
       },
       globals: {

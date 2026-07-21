@@ -649,7 +649,7 @@ describe('Applying updates to a doc', function () {
     it('should send a message with an error', function () {
       this.messageCallback.called.should.equal(true)
       const [channel, message] = this.messageCallback.args[0]
-      channel.should.equal('applied-ops')
+      channel.should.equal('editor-events')
       JSON.parse(message).should.deep.include({
         project_id: this.project_id,
         doc_id: this.doc_id,
@@ -658,82 +658,36 @@ describe('Applying updates to a doc', function () {
     })
   })
 
-  describe('with publishAppliedOpsOnEditorEvents enabled', function () {
-    beforeEach(function () {
-      Settings.publishAppliedOpsOnEditorEvents = true
+  describe('with an applied update', function () {
+    beforeEach(async function () {
+      MockWebApi.insertDoc(this.project_id, this.doc_id, {
+        lines: this.lines,
+        version: this.version,
+      })
+
+      DocUpdaterClient.subscribeToAppliedOps(
+        (this.messageCallback = sinon.stub())
+      )
+
+      await sendUpdateAndWait(this.project_id, this.doc_id, this.update)
     })
 
-    afterEach(function () {
-      Settings.publishAppliedOpsOnEditorEvents = false
+    it('should update the doc', async function () {
+      const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc_id)
+      doc.lines.should.deep.equal(this.result)
     })
 
-    describe('with an applied update', function () {
-      beforeEach(async function () {
-        MockWebApi.insertDoc(this.project_id, this.doc_id, {
-          lines: this.lines,
-          version: this.version,
-        })
-
-        DocUpdaterClient.subscribeToAppliedOps(
-          (this.messageCallback = sinon.stub())
-        )
-
-        await sendUpdateAndWait(this.project_id, this.doc_id, this.update)
+    it('should publish the applied op on the editor-events channel', function () {
+      this.messageCallback.called.should.equal(true)
+      const [channel, message] = this.messageCallback.args[0]
+      channel.should.equal('editor-events')
+      const parsedMessage = JSON.parse(message)
+      parsedMessage.should.deep.include({
+        project_id: this.project_id,
+        doc_id: this.doc_id,
+        message: 'otUpdateApplied',
       })
-
-      it('should update the doc', async function () {
-        const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc_id)
-        doc.lines.should.deep.equal(this.result)
-      })
-
-      it('should publish the applied op on the editor-events channel', function () {
-        this.messageCallback.called.should.equal(true)
-        const [channel, message] = this.messageCallback.args[0]
-        channel.should.equal('editor-events')
-        const parsedMessage = JSON.parse(message)
-        parsedMessage.should.deep.include({
-          project_id: this.project_id,
-          doc_id: this.doc_id,
-          message: 'otUpdateApplied',
-        })
-        parsedMessage.op.v.should.equal(this.version)
-      })
-    })
-
-    describe('with a broken update', function () {
-      beforeEach(async function () {
-        this.broken_update = {
-          doc: this.doc_id,
-          v: this.version,
-          op: [{ d: 'not the correct content', p: 0 }],
-        }
-        MockWebApi.insertDoc(this.project_id, this.doc_id, {
-          lines: this.lines,
-          version: this.version,
-        })
-
-        DocUpdaterClient.subscribeToAppliedOps(
-          (this.messageCallback = sinon.stub())
-        )
-
-        await sendUpdateAndWait(
-          this.project_id,
-          this.doc_id,
-          this.broken_update
-        )
-      })
-
-      it('should publish the error on the editor-events channel', function () {
-        this.messageCallback.called.should.equal(true)
-        const [channel, message] = this.messageCallback.args[0]
-        channel.should.equal('editor-events')
-        JSON.parse(message).should.deep.include({
-          project_id: this.project_id,
-          doc_id: this.doc_id,
-          message: 'otUpdateError',
-          error: 'Delete component does not match',
-        })
-      })
+      parsedMessage.op.v.should.equal(this.version)
     })
   })
 
@@ -766,7 +720,7 @@ describe('Applying updates to a doc', function () {
     it('should send a message with an error', function () {
       this.messageCallback.called.should.equal(true)
       const [channel, message] = this.messageCallback.args[0]
-      channel.should.equal('applied-ops')
+      channel.should.equal('editor-events')
       JSON.parse(message).should.deep.include({
         project_id: this.project_id,
         doc_id: this.doc_id,
@@ -803,7 +757,7 @@ describe('Applying updates to a doc', function () {
     it('should send a message with an error', function () {
       this.messageCallback.called.should.equal(true)
       const [channel, message] = this.messageCallback.args[0]
-      channel.should.equal('applied-ops')
+      channel.should.equal('editor-events')
       JSON.parse(message).should.deep.include({
         project_id: this.project_id,
         doc_id: this.doc_id,
@@ -835,7 +789,7 @@ describe('Applying updates to a doc', function () {
     it('should send a message with an error', function () {
       this.messageCallback.called.should.equal(true)
       const [channel, message] = this.messageCallback.args[0]
-      channel.should.equal('applied-ops')
+      channel.should.equal('editor-events')
       JSON.parse(message).should.deep.include({
         project_id: this.project_id,
         doc_id: this.doc_id,
@@ -913,9 +867,9 @@ describe('Applying updates to a doc', function () {
 
     it('should return a message about duplicate ops', function () {
       this.messageCallback.calledTwice.should.equal(true)
-      this.messageCallback.args[0][0].should.equal('applied-ops')
+      this.messageCallback.args[0][0].should.equal('editor-events')
       expect(JSON.parse(this.messageCallback.args[0][1]).op.dup).to.be.undefined
-      this.messageCallback.args[1][0].should.equal('applied-ops')
+      this.messageCallback.args[1][0].should.equal('editor-events')
       expect(JSON.parse(this.messageCallback.args[1][1]).op.dup).to.equal(true)
     })
   })
@@ -964,9 +918,9 @@ describe('Applying updates to a doc', function () {
 
     it('should return a message about duplicate ops', function () {
       this.messageCallback.calledTwice.should.equal(true)
-      this.messageCallback.args[0][0].should.equal('applied-ops')
+      this.messageCallback.args[0][0].should.equal('editor-events')
       expect(JSON.parse(this.messageCallback.args[0][1]).op.dup).to.be.undefined
-      this.messageCallback.args[1][0].should.equal('applied-ops')
+      this.messageCallback.args[1][0].should.equal('editor-events')
       expect(JSON.parse(this.messageCallback.args[1][1]).op.dup).to.equal(true)
     })
   })
@@ -995,7 +949,7 @@ describe('Applying updates to a doc', function () {
     it('should send a message with an error', function () {
       this.messageCallback.called.should.equal(true)
       const [channel, message] = this.messageCallback.args[0]
-      channel.should.equal('applied-ops')
+      channel.should.equal('editor-events')
       JSON.parse(message).should.deep.include({
         project_id: this.project_id,
         doc_id: this.doc_id,

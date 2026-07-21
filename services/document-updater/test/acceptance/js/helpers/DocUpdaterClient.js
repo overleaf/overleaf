@@ -11,9 +11,7 @@ const { setTimeout } = require('node:timers/promises')
 const rclientSub = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.pubsub
 )
-rclientSub.subscribe('applied-ops')
-// applied ops are published on the editor-events channel instead when
-// publishAppliedOpsOnEditorEvents is enabled
+// applied ops (and errors) are published on the editor-events channel
 rclientSub.subscribe('editor-events')
 rclientSub.setMaxListeners(0)
 
@@ -36,12 +34,7 @@ module.exports = DocUpdaterClient = {
   },
 
   subscribeToAppliedOps(messageHandler) {
-    rclientSub.on('message', (channel, message) => {
-      // every applied op also publishes a bandwidth-estimation canary on the
-      // editor-events channel; drop those so tests only see the applied ops
-      if (message.includes('"canary-applied-op"')) return
-      messageHandler(channel, message)
-    })
+    rclientSub.on('message', messageHandler)
   },
 
   // Enqueue an update for the doc-updater: push the payload (tagged with its

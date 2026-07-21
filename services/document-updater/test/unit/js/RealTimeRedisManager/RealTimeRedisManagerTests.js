@@ -148,50 +148,15 @@ describe('RealTimeRedisManager', function () {
         doc_id: this.doc_id,
         op: 'thisop',
       }
-      this.blob = JSON.stringify({ ...this.data, _id: this.message_id })
-    })
-
-    describe('on the base applied-ops channel', function () {
-      beforeEach(function () {
-        this.RealTimeRedisManager.sendData(this.data)
-      })
-
-      it('should send the op with a message id', function () {
-        return this.pubsubClient.publish
-          .calledWith('applied-ops', this.blob)
-          .should.equal(true)
-      })
-
-      it('should track the payload size', function () {
-        return this.metrics.summary
-          .calledWith('redis.publish.applied-ops', this.blob.length, {
-            path: 'applied-ops',
-          })
-          .should.equal(true)
-      })
-    })
-
-    describe('on the per-doc applied-ops channel', function () {
-      beforeEach(function () {
-        this.Settings.publishOnIndividualChannels = true
-        this.RealTimeRedisManager.sendData(this.data)
-      })
-
-      it('should send the op on the per-doc channel', function () {
-        return this.pubsubClient.publish
-          .calledWith(`applied-ops:${this.doc_id}`, this.blob)
-          .should.equal(true)
+      this.blob = JSON.stringify({
+        ...this.data,
+        _id: this.message_id,
+        message: 'otUpdateApplied',
       })
     })
 
     describe('on the base editor-events channel', function () {
       beforeEach(function () {
-        this.Settings.publishAppliedOpsOnEditorEvents = true
-        this.blob = JSON.stringify({
-          ...this.data,
-          _id: this.message_id,
-          message: 'otUpdateApplied',
-        })
         this.RealTimeRedisManager.sendData(this.data)
       })
 
@@ -212,13 +177,7 @@ describe('RealTimeRedisManager', function () {
 
     describe('on the per-project editor-events channel', function () {
       beforeEach(function () {
-        this.Settings.publishAppliedOpsOnEditorEvents = true
         this.Settings.publishOnIndividualChannels = true
-        this.blob = JSON.stringify({
-          ...this.data,
-          _id: this.message_id,
-          message: 'otUpdateApplied',
-        })
         this.RealTimeRedisManager.sendData(this.data)
       })
 
@@ -229,9 +188,8 @@ describe('RealTimeRedisManager', function () {
       })
     })
 
-    describe('with an error on the editor-events channel', function () {
+    describe('with an error', function () {
       beforeEach(function () {
-        this.Settings.publishAppliedOpsOnEditorEvents = true
         this.data = {
           project_id: this.project_id,
           doc_id: this.doc_id,

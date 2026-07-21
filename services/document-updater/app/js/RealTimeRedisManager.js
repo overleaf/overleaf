@@ -107,47 +107,16 @@ const RealTimeRedisManager = {
   },
 
   /**
-   * Publish a canary message on the project's editor-events channel with the
-   * sizes of the applied op's ack and broadcast payloads.
-   *
-   * @param {{projectId: string, docId: string, op: Object}} args
-   */
-  sendCanaryAppliedOp({ projectId, docId, op }) {
-    const ack = JSON.stringify({ v: op.v, doc: docId }).length
-    // Updates with op.dup===true will not get sent to other clients, they only get acked.
-    const broadcast = op.dup ? 0 : JSON.stringify(op).length
-
-    const payload = JSON.stringify({
-      message: 'canary-applied-op',
-      payload: {
-        ack,
-        broadcast,
-        docId,
-        projectId,
-        source: op.meta.source,
-      },
-    })
-
-    // Publish on the editor-events channel of the project as real-time already listens to that before completing the connection startup.
-
-    // publish on separate channels for individual projects and docs when
-    // configured (needs realtime to be configured for this too).
-    if (Settings.publishOnIndividualChannels) {
-      return pubsubClient.publish(`editor-events:${projectId}`, payload)
-    } else {
-      return pubsubClient.publish('editor-events', payload)
-    }
-  },
-
-  /**
    * Publish an applied op or an error for a doc back to real-time.
+   *
+   * The message is published on the project's editor-events channel, which
+   * real-time subscribes to for the lifetime of every connected project. It is
+   * broadcast to the project room in real-time; clients filter by doc id.
    *
    * @param {Object} data
    * @param {string} data.project_id - routes the message to the project's
-   *        editor-events channel (when publishAppliedOpsOnEditorEvents is
-   *        enabled) and to the project room in real-time
-   * @param {string} data.doc_id - routes the message to the doc's applied-ops
-   *        channel (legacy path) and identifies the doc for clients
+   *        editor-events channel and to the project room in real-time
+   * @param {string} data.doc_id - identifies the doc for clients
    * @param {Object} [data.op] - the applied op
    * @param {string} [data.error] - the error message when applying failed
    */
@@ -156,39 +125,26 @@ const RealTimeRedisManager = {
     const messageId = `doc:${HOST}:${RND}-${COUNT++}`
     data._id = messageId
 
-    // Send applied ops on the per-project editor-events channel, which
-    // real-time subscribes to for the lifetime of every connected project,
-    // instead of the legacy per-doc applied-ops channel.
-    const path = Settings.publishAppliedOpsOnEditorEvents
-      ? 'editor-events'
-      : 'applied-ops'
-    if (path === 'editor-events') {
-      // the message name routes the message to the applied-ops handling in
-      // real-time's editor-events processing
-      data.message = data.op ? 'otUpdateApplied' : 'otUpdateError'
-    }
+    // the message name routes the message to the applied-ops handling in
+    // real-time's editor-events processing
+    data.message = data.op ? 'otUpdateApplied' : 'otUpdateError'
 
     const blob = JSON.stringify(data)
-    metrics.summary('redis.publish.applied-ops', blob.length, { path })
+    metrics.summary('redis.publish.applied-ops', blob.length, {
+      path: 'editor-events',
+    })
 
-    // publish on separate channels for individual projects and docs when
-    // configured (needs realtime to be configured for this too).
-    if (path === 'editor-events') {
-      if (Settings.publishOnIndividualChannels) {
-        return pubsubClient.publish(`editor-events:${data.project_id}`, blob)
-      } else {
-        return pubsubClient.publish('editor-events', blob)
-      }
-    }
+    // publish on a per-project channel when configured (needs realtime to be
+    // configured for this too), otherwise on the base editor-events channel.
     if (Settings.publishOnIndividualChannels) {
-      return pubsubClient.publish(`applied-ops:${data.doc_id}`, blob)
+      return pubsubClient.publish(`editor-events:${data.project_id}`, blob)
     } else {
-      return pubsubClient.publish('applied-ops', blob)
+      return pubsubClient.publish('editor-events', blob)
     }
   },
 }
 
 module.exports = RealTimeRedisManager
 module.exports.promises = promisifyAll(RealTimeRedisManager, {
-  without: ['sendCanaryAppliedOp', 'sendData'],
+  without: ['sendData'],
 })
