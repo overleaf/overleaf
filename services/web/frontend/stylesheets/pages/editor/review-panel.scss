@@ -533,8 +533,12 @@ del.review-panel-content-highlight {
   }
 
   .cm-content {
-    padding: var(--spacing-01) var(--spacing-03);
     min-height: 44px;
+  }
+
+  // extra specificity to override visual mode's .cm-content rules
+  &.review-panel-add-comment-editor .cm-content.cm-content {
+    padding: var(--spacing-01) var(--spacing-03);
   }
 
   .cm-cursor,

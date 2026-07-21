@@ -50,6 +50,11 @@ type MentionsInputProps = {
 
 // Shared editor styling for the mentions input.
 const mentionsInputTheme = EditorView.theme({
+  // reset variables to override visual mode's .cm-content rules
+  '&.cm-editor': {
+    '--visual-font-family': 'var(--bs-body-font-family)',
+    '--visual-font-size': 'var(--font-size)',
+  },
   // double the specificity to override the base font family used by theme.ts regardless of extension load order
   '.cm-content.cm-content': {
     fontFamily: 'var(--bs-body-font-family)',
