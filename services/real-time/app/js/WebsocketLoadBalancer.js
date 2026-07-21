@@ -8,6 +8,7 @@ import HealthCheckManager from './HealthCheckManager.js'
 import RoomManager from './RoomManager.js'
 import ChannelManager from './ChannelManager.js'
 import ConnectedUsersManager from './ConnectedUsersManager.js'
+import DocumentUpdaterController from './DocumentUpdaterController.js'
 
 const RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
   'otUpdateApplied',
@@ -171,6 +172,28 @@ export default WebsocketLoadBalancer = {
 
         estimateBandwidth(projectId, 'per-project')
         estimateBandwidth(docId, 'per-doc')
+      } else if (
+        message.message === 'otUpdateApplied' ||
+        message.message === 'otUpdateError'
+      ) {
+        // An applied op (or error) from document-updater, published on the
+        // per-project editor-events channel instead of the legacy per-doc
+        // applied-ops channel. Forward it for broadcasting to the project
+        // room.
+        const status = message.message === 'otUpdateApplied' ? 'op' : 'error'
+        Metrics.inc('applied-ops-via-editor-events', 1, { status })
+        if (!message.project_id) {
+          logger.error(
+            { channel, message },
+            'applied-ops message without project_id'
+          )
+        } else {
+          DocumentUpdaterController.handleAppliedOpMessage(
+            io,
+            message,
+            message.project_id
+          )
+        }
       } else if (message.room_id) {
         if (message._id && Settings.checkEventOrder) {
           const status = EventLogger.checkEventOrder(

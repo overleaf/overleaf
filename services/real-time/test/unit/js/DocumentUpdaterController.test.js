@@ -138,9 +138,9 @@ describe('DocumentUpdaterController', function () {
         )
       })
 
-      it('should apply the update', function (ctx) {
+      it('should apply the update to the doc room', function (ctx) {
         ctx.EditorUpdatesController._applyUpdateFromDocumentUpdater
-          .calledWith(ctx.io, ctx.doc_id, ctx.message.op)
+          .calledWith(ctx.io, ctx.doc_id, ctx.doc_id, ctx.message.op)
           .should.equal(true)
       })
     })
@@ -160,9 +160,89 @@ describe('DocumentUpdaterController', function () {
         )
       })
 
-      it('should process the error', function (ctx) {
+      it('should process the error in the doc room', function (ctx) {
         ctx.EditorUpdatesController._processErrorFromDocumentUpdater
-          .calledWith(ctx.io, ctx.doc_id, ctx.message.error)
+          .calledWith(ctx.io, ctx.doc_id, ctx.doc_id, ctx.message.error)
+          .should.equal(true)
+      })
+    })
+  })
+
+  describe('handleAppliedOpMessage', function () {
+    describe('with an update forwarded from the editor-events channel', function () {
+      beforeEach(function (ctx) {
+        ctx.message = {
+          project_id: ctx.project_id,
+          doc_id: ctx.doc_id,
+          op: { t: 'foo', p: 12 },
+        }
+        ctx.EditorUpdatesController._applyUpdateFromDocumentUpdater =
+          sinon.stub()
+        ctx.EditorUpdatesController.handleAppliedOpMessage(
+          ctx.io,
+          ctx.message,
+          ctx.project_id
+        )
+      })
+
+      it('should apply the update to the project room', function (ctx) {
+        ctx.EditorUpdatesController._applyUpdateFromDocumentUpdater
+          .calledWith(ctx.io, ctx.project_id, ctx.doc_id, ctx.message.op)
+          .should.equal(true)
+      })
+    })
+
+    describe('with a duplicate update', function () {
+      beforeEach(function (ctx) {
+        ctx.settings.checkEventOrder = true
+        ctx.message = {
+          project_id: ctx.project_id,
+          doc_id: ctx.doc_id,
+          op: { t: 'foo', p: 12 },
+          _id: 'doc:host:rnd-1',
+        }
+        ctx.EventLogger.checkEventOrder.returns('duplicate')
+        ctx.EditorUpdatesController._applyUpdateFromDocumentUpdater =
+          sinon.stub()
+        ctx.EditorUpdatesController.handleAppliedOpMessage(
+          ctx.io,
+          ctx.message,
+          ctx.project_id
+        )
+      })
+
+      it('should check the event order on the applied-ops channel', function (ctx) {
+        ctx.EventLogger.checkEventOrder
+          .calledWith('applied-ops', ctx.message._id, ctx.message)
+          .should.equal(true)
+      })
+
+      it('should skip the update', function (ctx) {
+        ctx.EditorUpdatesController._applyUpdateFromDocumentUpdater.called.should.equal(
+          false
+        )
+      })
+    })
+
+    describe('with an error forwarded from the editor-events channel', function () {
+      beforeEach(function (ctx) {
+        ctx.message = {
+          project_id: ctx.project_id,
+          doc_id: ctx.doc_id,
+          error: 'Something went wrong',
+        }
+        ctx.EditorUpdatesController._processErrorFromDocumentUpdater =
+          sinon.stub()
+        ctx.EditorUpdatesController.handleAppliedOpMessage(
+          ctx.io,
+          ctx.message,
+          ctx.project_id
+        )
+      })
+
+      it('should process the error in the project room', function (ctx) {
+        ctx.EditorUpdatesController._processErrorFromDocumentUpdater
+          .calledWith(ctx.io, ctx.project_id, ctx.doc_id, ctx.message.error)
           .should.equal(true)
       })
     })
@@ -194,6 +274,7 @@ describe('DocumentUpdaterController', function () {
         ctx.EditorUpdatesController._applyUpdateFromDocumentUpdater(
           ctx.io,
           ctx.doc_id,
+          ctx.doc_id,
           ctx.update
         )
       })
@@ -224,6 +305,7 @@ describe('DocumentUpdaterController', function () {
         ctx.EditorUpdatesController._applyUpdateFromDocumentUpdater(
           ctx.io,
           ctx.doc_id,
+          ctx.doc_id,
           ctx.update
         )
       })
@@ -240,28 +322,95 @@ describe('DocumentUpdaterController', function () {
         )
       })
     })
+
+    describe('when broadcasting to the project room', function () {
+      beforeEach(function (ctx) {
+        ctx.EditorUpdatesController._applyUpdateFromDocumentUpdater(
+          ctx.io,
+          ctx.project_id,
+          ctx.doc_id,
+          ctx.update
+        )
+      })
+
+      it('should get the clients connected to the project', function (ctx) {
+        ctx.io.sockets.clients.calledWith(ctx.project_id).should.equal(true)
+      })
+
+      it('should send a version bump to the source client', function (ctx) {
+        ctx.sourceClient.emit
+          .calledWith('otUpdateApplied', { v: ctx.version, doc: ctx.doc_id })
+          .should.equal(true)
+        ctx.sourceClient.emit.calledOnce.should.equal(true)
+      })
+
+      it('should send the full update to the other clients', function (ctx) {
+        Array.from(ctx.otherClients).map(client =>
+          client.emit
+            .calledWith('otUpdateApplied', ctx.update)
+            .should.equal(true)
+        )
+      })
+    })
   })
 
   describe('_processErrorFromDocumentUpdater', function () {
     beforeEach(function (ctx) {
       ctx.clients = [new MockClient(), new MockClient()]
-      ctx.io.sockets = { clients: sinon.stub().returns(ctx.clients) }
-      ctx.EditorUpdatesController._processErrorFromDocumentUpdater(
-        ctx.io,
-        ctx.doc_id,
-        'Something went wrong'
-      )
+      for (const client of ctx.clients) {
+        client.ol_context[`doc:${ctx.doc_id}`] = 'allowed'
+      }
     })
 
-    it('should log a warning', function (ctx) {
-      ctx.logger.warn.called.should.equal(true)
+    describe('in the doc room', function () {
+      beforeEach(function (ctx) {
+        ctx.io.sockets = { clients: sinon.stub().returns(ctx.clients) }
+        ctx.EditorUpdatesController._processErrorFromDocumentUpdater(
+          ctx.io,
+          ctx.doc_id,
+          ctx.doc_id,
+          'Something went wrong'
+        )
+      })
+
+      it('should log a warning', function (ctx) {
+        ctx.logger.warn.called.should.equal(true)
+      })
+
+      it('should disconnect all clients in that document', function (ctx) {
+        ctx.io.sockets.clients.calledWith(ctx.doc_id).should.equal(true)
+        Array.from(ctx.clients).map(client =>
+          client.disconnect.called.should.equal(true)
+        )
+      })
     })
 
-    it('should disconnect all clients in that document', function (ctx) {
-      ctx.io.sockets.clients.calledWith(ctx.doc_id).should.equal(true)
-      Array.from(ctx.clients).map(client =>
-        client.disconnect.called.should.equal(true)
-      )
+    describe('in the project room', function () {
+      beforeEach(function (ctx) {
+        ctx.otherDocClient = new MockClient()
+        ctx.otherDocClient.ol_context['doc:other-doc-id'] = 'allowed'
+        ctx.io.sockets = {
+          clients: sinon.stub().returns([...ctx.clients, ctx.otherDocClient]),
+        }
+        ctx.EditorUpdatesController._processErrorFromDocumentUpdater(
+          ctx.io,
+          ctx.project_id,
+          ctx.doc_id,
+          'Something went wrong'
+        )
+      })
+
+      it('should disconnect the clients that joined the doc', function (ctx) {
+        ctx.io.sockets.clients.calledWith(ctx.project_id).should.equal(true)
+        Array.from(ctx.clients).map(client =>
+          client.disconnect.called.should.equal(true)
+        )
+      })
+
+      it('should not disconnect clients that did not join the doc', function (ctx) {
+        ctx.otherDocClient.emit.called.should.equal(false)
+        ctx.otherDocClient.disconnect.called.should.equal(false)
+      })
     })
   })
 })

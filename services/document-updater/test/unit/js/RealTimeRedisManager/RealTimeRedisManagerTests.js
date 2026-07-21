@@ -28,7 +28,7 @@ describe('RealTimeRedisManager', function () {
           createClient: config =>
             config.name === 'pubsub' ? this.pubsubClient : this.rclient,
         },
-        '@overleaf/settings': {
+        '@overleaf/settings': (this.Settings = {
           redis: {
             documentupdater: (this.settings = {
               key_schema: {
@@ -41,7 +41,7 @@ describe('RealTimeRedisManager', function () {
               name: 'pubsub',
             },
           },
-        },
+        }),
         crypto: (this.crypto = {
           randomBytes: sinon
             .stub()
@@ -143,25 +143,113 @@ describe('RealTimeRedisManager', function () {
   return describe('sendData', function () {
     beforeEach(function () {
       this.message_id = 'doc:somehost:01020304-0'
-      return this.RealTimeRedisManager.sendData({ op: 'thisop' })
+      this.data = {
+        project_id: this.project_id,
+        doc_id: this.doc_id,
+        op: 'thisop',
+      }
+      this.blob = JSON.stringify({ ...this.data, _id: this.message_id })
     })
 
-    it('should send the op with a message id', function () {
-      return this.pubsubClient.publish
-        .calledWith(
-          'applied-ops',
-          JSON.stringify({ op: 'thisop', _id: this.message_id })
-        )
-        .should.equal(true)
+    describe('on the base applied-ops channel', function () {
+      beforeEach(function () {
+        this.RealTimeRedisManager.sendData(this.data)
+      })
+
+      it('should send the op with a message id', function () {
+        return this.pubsubClient.publish
+          .calledWith('applied-ops', this.blob)
+          .should.equal(true)
+      })
+
+      it('should track the payload size', function () {
+        return this.metrics.summary
+          .calledWith('redis.publish.applied-ops', this.blob.length, {
+            path: 'applied-ops',
+          })
+          .should.equal(true)
+      })
     })
 
-    return it('should track the payload size', function () {
-      return this.metrics.summary
-        .calledWith(
-          'redis.publish.applied-ops',
-          JSON.stringify({ op: 'thisop', _id: this.message_id }).length
-        )
-        .should.equal(true)
+    describe('on the per-doc applied-ops channel', function () {
+      beforeEach(function () {
+        this.Settings.publishOnIndividualChannels = true
+        this.RealTimeRedisManager.sendData(this.data)
+      })
+
+      it('should send the op on the per-doc channel', function () {
+        return this.pubsubClient.publish
+          .calledWith(`applied-ops:${this.doc_id}`, this.blob)
+          .should.equal(true)
+      })
+    })
+
+    describe('on the base editor-events channel', function () {
+      beforeEach(function () {
+        this.Settings.publishAppliedOpsOnEditorEvents = true
+        this.blob = JSON.stringify({
+          ...this.data,
+          _id: this.message_id,
+          message: 'otUpdateApplied',
+        })
+        this.RealTimeRedisManager.sendData(this.data)
+      })
+
+      it('should send the op with a message id and message name', function () {
+        return this.pubsubClient.publish
+          .calledWith('editor-events', this.blob)
+          .should.equal(true)
+      })
+
+      it('should track the payload size', function () {
+        return this.metrics.summary
+          .calledWith('redis.publish.applied-ops', this.blob.length, {
+            path: 'editor-events',
+          })
+          .should.equal(true)
+      })
+    })
+
+    describe('on the per-project editor-events channel', function () {
+      beforeEach(function () {
+        this.Settings.publishAppliedOpsOnEditorEvents = true
+        this.Settings.publishOnIndividualChannels = true
+        this.blob = JSON.stringify({
+          ...this.data,
+          _id: this.message_id,
+          message: 'otUpdateApplied',
+        })
+        this.RealTimeRedisManager.sendData(this.data)
+      })
+
+      it('should send the op on the per-project channel', function () {
+        return this.pubsubClient.publish
+          .calledWith(`editor-events:${this.project_id}`, this.blob)
+          .should.equal(true)
+      })
+    })
+
+    describe('with an error on the editor-events channel', function () {
+      beforeEach(function () {
+        this.Settings.publishAppliedOpsOnEditorEvents = true
+        this.data = {
+          project_id: this.project_id,
+          doc_id: this.doc_id,
+          error: 'something went wrong',
+        }
+        this.blob = JSON.stringify({
+          ...this.data,
+          _id: this.message_id,
+          message: 'otUpdateError',
+        })
+        this.RealTimeRedisManager.sendData(this.data)
+      })
+
+      it('should send the error with the otUpdateError message name', function () {
+        return this.pubsubClient.publish
+          .calledWith('editor-events', this.blob)
+          .should.equal(true)
+      })
     })
   })
 })

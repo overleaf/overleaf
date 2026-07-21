@@ -66,42 +66,61 @@ export default DocumentUpdaterController = {
         logger.error({ err: error, channel }, 'error parsing JSON')
         return
       }
-      if (message.op) {
-        if (message._id && settings.checkEventOrder) {
-          const status = EventLogger.checkEventOrder(
-            'applied-ops',
-            message._id,
-            message
-          )
-          if (status === 'duplicate') {
-            return // skip duplicate events
-          }
-        }
-        DocumentUpdaterController._applyUpdateFromDocumentUpdater(
-          io,
-          message.doc_id,
-          message.op
-        )
-      } else if (message.error) {
-        DocumentUpdaterController._processErrorFromDocumentUpdater(
-          io,
-          message.doc_id,
-          message.error,
-          message
-        )
-      } else if (message.health_check) {
+      if (message.health_check) {
         logger.debug(
           { message },
           'got health check message in applied ops channel'
         )
         HealthCheckManager.check(channel, message.key)
+        return
       }
+      // Messages on the legacy applied-ops channel are broadcast to the doc
+      // room, matching the per-doc channel granularity.
+      DocumentUpdaterController.handleAppliedOpMessage(
+        io,
+        message,
+        message.doc_id
+      )
     })
   },
 
-  _applyUpdateFromDocumentUpdater(io, docId, update) {
+  // Handle an already-parsed message from document-updater (an applied op
+  // or an error) and broadcast it to the given room: the doc room for
+  // messages from the legacy per-doc applied-ops channel, the project room
+  // for messages forwarded from the editor-events channel by the
+  // WebsocketLoadBalancer.
+  handleAppliedOpMessage(io, message, roomId) {
+    if (message.op) {
+      if (message._id && settings.checkEventOrder) {
+        const status = EventLogger.checkEventOrder(
+          'applied-ops',
+          message._id,
+          message
+        )
+        if (status === 'duplicate') {
+          return // skip duplicate events
+        }
+      }
+      DocumentUpdaterController._applyUpdateFromDocumentUpdater(
+        io,
+        roomId,
+        message.doc_id,
+        message.op
+      )
+    } else if (message.error) {
+      DocumentUpdaterController._processErrorFromDocumentUpdater(
+        io,
+        roomId,
+        message.doc_id,
+        message.error,
+        message
+      )
+    }
+  },
+
+  _applyUpdateFromDocumentUpdater(io, roomId, docId, update) {
     let client
-    const clientList = io.sockets.clients(docId)
+    const clientList = io.sockets.clients(roomId)
     // avoid unnecessary work if no clients are connected
     if (clientList.length === 0) {
       return
@@ -172,8 +191,14 @@ export default DocumentUpdaterController = {
     }
   },
 
-  _processErrorFromDocumentUpdater(io, docId, error, message) {
-    for (const client of io.sockets.clients(docId)) {
+  _processErrorFromDocumentUpdater(io, roomId, docId, error, message) {
+    for (const client of io.sockets.clients(roomId)) {
+      // When broadcasting via the project room, only clients that have
+      // joined the doc are affected by the error. (Always true for clients
+      // in the doc room.)
+      if (client.ol_context?.[`doc:${docId}`] !== 'allowed') {
+        continue
+      }
       logger.warn(
         { err: error, docId, clientId: client.id },
         'error from document updater, disconnecting client'

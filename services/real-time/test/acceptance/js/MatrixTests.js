@@ -389,6 +389,34 @@ describe('MatrixTests', function () {
                 })
               })
 
+              describe('receive updates via editor-events', function () {
+                const receivedMessages = []
+                beforeEach(function publishAnUpdateInRedis(done) {
+                  const update = {
+                    project_id: privateProjectId,
+                    doc_id: privateDocId,
+                    message: 'otUpdateApplied',
+                    op: {
+                      meta: { source: privateClient.publicId },
+                      v: 42,
+                      doc: privateDocId,
+                      op: [{ i: 'foo', p: 50 }],
+                    },
+                  }
+                  client.on('otUpdateApplied', update => {
+                    receivedMessages.push(update)
+                  })
+                  privateClient.once('otUpdateApplied', () => {
+                    setTimeout(done, 10)
+                  })
+                  rclient.publish('editor-events', JSON.stringify(update))
+                })
+
+                it('should send nothing to client', function () {
+                  expect(receivedMessages).to.have.length(0)
+                })
+              })
+
               describe('receive messages from web', function () {
                 const receivedMessages = []
                 beforeEach(function publishAMessageInRedis(done) {

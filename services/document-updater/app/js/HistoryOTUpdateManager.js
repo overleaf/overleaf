@@ -151,7 +151,7 @@ async function applyUpdate(projectId, docId, update) {
     RealTimeRedisManager.sendData({
       project_id: projectId,
       doc_id: docId,
-      error: error instanceof Error ? error.message : error,
+      error: error instanceof Error ? error.message : String(error),
     })
     profiler.log('sendData')
     throw error

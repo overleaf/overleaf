@@ -266,7 +266,7 @@ const UpdateManager = {
       RealTimeRedisManager.sendData({
         project_id: projectId,
         doc_id: docId,
-        error: error instanceof Error ? error.message : error,
+        error: error instanceof Error ? error.message : String(error),
       })
       profile.log('sendData')
       throw error
