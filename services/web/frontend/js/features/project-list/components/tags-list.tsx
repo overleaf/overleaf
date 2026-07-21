@@ -84,7 +84,10 @@ function TagsList({ onTagClick }: TagsListProps) {
           <OLDropdownItem
             as="button"
             tabIndex={-1}
-            onClick={openCreateTagModal}
+            onClick={e => {
+              e.stopPropagation()
+              openCreateTagModal()
+            }}
             leadingIcon="add"
           >
             {t('new_tag')}
