@@ -7232,9 +7232,8 @@ __metadata:
     "@cypress/grep": "npm:^6.0.2"
     "@isomorphic-git/lightning-fs": "npm:^4.6.0"
     "@testing-library/cypress": "npm:^10.1.0"
-    "@types/adm-zip": "npm:^0.5.7"
     "@types/uuid": "npm:^9.0.8"
-    adm-zip: "npm:^0.5.12"
+    adm-zip: "npm:^0.6.0"
     cypress: "npm:15.12.0"
     cypress-multi-reporters: "npm:^2.0.5"
     isomorphic-git: "npm:^1.33.1"
@@ -7255,9 +7254,8 @@ __metadata:
     "@overleaf/promise-utils": "workspace:*"
     "@overleaf/validation-tools": "workspace:*"
     "@testing-library/cypress": "npm:10.1.0"
-    "@types/adm-zip": "npm:^0.5.7"
     "@types/uuid": "npm:^9.0.8"
-    adm-zip: "npm:^0.5.12"
+    adm-zip: "npm:^0.6.0"
     cypress: "npm:15.12.0"
     cypress-multi-reporters: "npm:^2.0.5"
     express: "npm:4.22.1"
@@ -9975,15 +9973,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/adm-zip@npm:^0.5.7":
-  version: 0.5.8
-  resolution: "@types/adm-zip@npm:0.5.8"
-  dependencies:
-    "@types/node": "npm:*"
-  checksum: 10c0/64d0f3a3e8c1546a7a6685726b3342100a4329e530e643b06107919668688b21db717aa35bf0df11454dce6f63968b6f412482de8a4dd2466664b19289f660f7
-  languageName: node
-  linkType: hard
-
 "@types/algoliasearch@npm:^3.34.11":
   version: 3.34.11
   resolution: "@types/algoliasearch@npm:3.34.11"
@@ -12182,10 +12171,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"adm-zip@npm:^0.5.12":
-  version: 0.5.17
-  resolution: "adm-zip@npm:0.5.17"
-  checksum: 10c0/29b8f2a1070fc540ad9a45b13d0ceffd141d78e5a4501f102e978f0256f8290326009ccd3411213e90f3a810c830b39453548638879b3295ddc3814c20a8307b
+"adm-zip@npm:^0.6.0":
+  version: 0.6.0
+  resolution: "adm-zip@npm:0.6.0"
+  checksum: 10c0/440f37590c62255226f1db4cb1a5a618879347f5106ad5b9a24c67c20f9a54bd5b4efcd2b35af858e39c7885d05f4bd35f4c2f42378c98d13f779be380bc9ae4
   languageName: node
   linkType: hard
 
