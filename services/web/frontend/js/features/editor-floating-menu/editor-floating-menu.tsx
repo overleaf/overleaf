@@ -97,22 +97,22 @@ const EditorFloatingMenuContent = memo(function EditorFloatingMenuContent() {
       view.requestMeasure({
         key: 'editor-floating-menu-position',
         read(view) {
-          const lineCoords = view.coordsAtPos(
-            selectionBottomLinePos(view.state)
-          )
-          if (!lineCoords) {
-            return
-          }
+          // lineBlockAt returns a position even when the line isn't rendered on screen.
+          // documentTop shifts it to viewport coordinates.
+          const block = view.lineBlockAt(selectionBottomLinePos(view.state))
+          // Anchor to the line's last visual row so a wrapped line pins to its
+          // bottom, not its middle so that menus do not cover content.
+          const lineBottomY = view.documentTop + block.bottom
+          const lineCenterY = lineBottomY - view.defaultLineHeight / 2
 
           const menuHeight =
             menuRef.current?.getBoundingClientRect().height ?? 0
           const scrollDomRect = view.scrollDOM.getBoundingClientRect()
           const contentDomRect = view.contentDOM.getBoundingClientRect()
-          const lineCenterY = (lineCoords.top + lineCoords.bottom) / 2
 
-          // Centre on the line, but keep the menu pinned inside the editor
-          // viewport so it never scrolls out of view: when the anchored line
-          // leaves the top or bottom edge the menu rides that edge instead.
+          // Centre on the bottom row, but keep the menu pinned inside the
+          // editor viewport so it never scrolls out of view: when the anchored
+          // line leaves the top or bottom edge the menu rides that edge instead.
           const top = Math.min(
             Math.max(lineCenterY - menuHeight / 2, scrollDomRect.top),
             scrollDomRect.bottom - menuHeight
