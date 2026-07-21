@@ -3,6 +3,9 @@ package uk.ac.ic.wlgitbridge.bridge;
 import com.google.api.client.auth.oauth2.Credential;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -244,9 +247,28 @@ public class Bridge {
   public boolean healthCheck() {
     try {
       dbStore.getNumProjects();
-      File rootDirectory = new File("/");
-      if (!rootDirectory.exists()) {
-        throw new Exception("bad filesystem state, root directory does not exist");
+      // Check the repo store volume (the PVC mounted at the repo store root), not the
+      // container root filesystem. A read-only or detached volume must fail the check.
+      File rootDirectory = repoStore.getRootDirectory();
+      if (rootDirectory == null || !rootDirectory.isDirectory()) {
+        throw new Exception("repo store root directory does not exist: " + rootDirectory);
+      }
+      // Write and read back a small probe file to confirm the volume is mounted read-write.
+      // Use the .wlgb directory (excluded from project purging) so we never touch project
+      // storage. A single fixed-name file is overwritten on each probe (never deleted), so we
+      // avoid churning through unique files and can't leave orphaned temp files behind. Both
+      // liveness and readiness probes write identical content, so this is safe under concurrent
+      // probes.
+      File wlgbDirectory = new File(rootDirectory, ".wlgb");
+      if (!wlgbDirectory.isDirectory()) {
+        throw new Exception("repo store .wlgb directory does not exist: " + wlgbDirectory);
+      }
+      Path probeFile = new File(wlgbDirectory, ".health_check").toPath();
+      byte[] payload = "ok".getBytes(StandardCharsets.UTF_8);
+      Files.write(probeFile, payload);
+      byte[] readBack = Files.readAllBytes(probeFile);
+      if (!Arrays.equals(payload, readBack)) {
+        throw new Exception("repo store health check file content mismatch: " + probeFile);
       }
       Log.debug("[HealthCheck] passed");
       return true;

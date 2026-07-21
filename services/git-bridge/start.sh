@@ -5,7 +5,7 @@
 VERSION=$(date +%y%m%d%H%M%S)
 
 if [ -z "$GIT_BRIDGE_JVM_ARGS" ]; then
-  GIT_BRIDGE_JVM_ARGS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0"
+  GIT_BRIDGE_JVM_ARGS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0 -XX:+ExitOnOutOfMemoryError"
 fi
 
 if [ "$ENABLE_PROFILE_AGENT" = "true" ]; then
