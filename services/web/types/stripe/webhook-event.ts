@@ -123,13 +123,6 @@ export interface InvoiceCreatedWebhookEvent extends Stripe.EventBase {
   }
 }
 
-export interface CustomerCreatedWebhookEvent extends Stripe.EventBase {
-  type: 'customer.created'
-  data: {
-    object: Stripe.Customer
-  }
-}
-
 export interface CustomerUpdatedWebhookEvent extends Stripe.EventBase {
   type: 'customer.updated'
   data: {
@@ -172,7 +165,6 @@ export type WebhookEvent =
   | PaymentIntentPaymentFailedWebhookEvent
   | SetupIntentSetupFailedWebhookEvent
   | InvoiceOverdueWebhookEvent
-  | CustomerCreatedWebhookEvent
   | CustomerUpdatedWebhookEvent
   | CustomerTaxIdUpdatedWebhookEvent
   | MandateUpdatedWebhookEvent
