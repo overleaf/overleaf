@@ -768,6 +768,7 @@ describe('<EmailsSection />', function () {
               enabled: true,
             },
           },
+          capturedByGroup: true,
         }
 
         fetchMock.get('express:/institutions/domains', [institution])
@@ -811,6 +812,7 @@ describe('<EmailsSection />', function () {
               enabled: true,
             },
           },
+          capturedByGroup: true,
         }
 
         fetchMock.get('express:/institutions/domains', [institution])
@@ -903,6 +905,7 @@ describe('<EmailsSection />', function () {
               enabled: true,
             },
           },
+          capturedByGroup: true,
         }
 
         fetchMock.get('express:/institutions/domains', [institution])
@@ -936,17 +939,7 @@ describe('<EmailsSection />', function () {
       })
     })
 
-    describe('when the domain-captured-by-group feature flag is enabled', function () {
-      beforeEach(function () {
-        window.metaAttributesCache.set('ol-splitTestVariants', {
-          'domain-captured-by-group': 'enabled',
-        })
-      })
-
-      afterEach(function () {
-        window.metaAttributesCache.set('ol-splitTestVariants', {})
-      })
-
+    describe('domain capturedByGroup', function () {
       describe('and capturedByGroup is true with managedUsersEnabled', function () {
         beforeEach(async function () {
           await fetchMock.callHistory.flush(true)

@@ -8,7 +8,6 @@ import Actions from './actions'
 import { institutionAlreadyLinked } from '../../utils/selectors'
 import { useUserEmailsContext } from '../../context/user-email-context'
 import getMeta from '../../../../utils/meta'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { ssoAvailableForInstitution } from '../../utils/sso'
 import ReconfirmationInfo from './reconfirmation-info'
 import { useLocation } from '../../../../shared/hooks/use-location'
@@ -71,10 +70,6 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
 
   const [linkAccountsButtonDisabled, setLinkAccountsButtonDisabled] =
     useState(false)
-
-  const domainCapturedByGroupRolloutFlagEnabled = useFeatureFlag(
-    'domain-captured-by-group'
-  )
 
   function handleLinkAccountsButtonClick() {
     setLinkAccountsButtonDisabled(true)
@@ -145,10 +140,8 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
   }
 
   const domainAlsoForGroupWithDomainCapture =
-    domainCapturedByGroupRolloutFlagEnabled
-      ? userEmailData?.affiliation?.domainCapturedByGroup &&
-        userEmailData?.affiliation?.group?.domainCaptureEnabled
-      : userEmailData?.affiliation?.group?.domainCaptureEnabled
+    userEmailData?.affiliation?.domainCapturedByGroup &&
+    userEmailData?.affiliation?.group?.domainCaptureEnabled
 
   if (domainAlsoForGroupWithDomainCapture) {
     // user is not linked via Commons and should link via groups

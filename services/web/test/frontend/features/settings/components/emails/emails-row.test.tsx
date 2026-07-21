@@ -150,6 +150,7 @@ describe('<EmailsRow/>', function () {
       })
 
       it('does not prompt the user to link to their institutional account', function () {
+        affiliatedEmailWithDomainCaptureAndCommons.affiliation.domainCapturedByGroup = true
         renderEmailsRow(affiliatedEmailWithDomainCaptureAndCommons)
         expect(() =>
           getByTextContent(
@@ -170,16 +171,13 @@ describe('<EmailsRow/>', function () {
           .null
       })
 
-      it('uses `domainCapturedByGroup` when the feature flag is enabled', function () {
+      it('uses `domainCapturedByGroup`', function () {
         affiliatedEmailWithDomainCaptureAndCommons.affiliation.group = {
           _id: 'grou123',
           domainCaptureEnabled: true,
           managedUsersEnabled: true,
         }
         affiliatedEmailWithDomainCaptureAndCommons.affiliation.domainCapturedByGroup = true
-        window.metaAttributesCache.set('ol-splitTestVariants', {
-          'domain-captured-by-group': 'enabled',
-        })
 
         renderEmailsRow(affiliatedEmailWithDomainCaptureAndCommons)
 
@@ -187,17 +185,16 @@ describe('<EmailsRow/>', function () {
           .null
       })
 
-      it('ignores group domain capture when the feature flag is enabled and the domain is not captured', function () {
+      it('still prompts to link Commons SSO when domainCaptureEnabled but domain not captured by group', function () {
+        affiliatedEmailWithDomainCaptureAndCommons.affiliation.group = {
+          _id: 'grou123',
+          domainCaptureEnabled: true,
+          managedUsersEnabled: true,
+        }
         affiliatedEmailWithDomainCaptureAndCommons.affiliation.domainCapturedByGroup = false
-        window.metaAttributesCache.set('ol-splitTestVariants', {
-          'domain-captured-by-group': 'enabled',
-        })
 
         renderEmailsRow(affiliatedEmailWithDomainCaptureAndCommons)
 
-        getByTextContent(
-          'You can now link your Overleaf account to your Overleaf institutional account.'
-        )
         screen.getByRole('button', { name: 'Link accounts' })
       })
     })
