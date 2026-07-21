@@ -9,6 +9,7 @@
 
 /* Neutral */
 $white: #fff;
+$neutral-05: #fafafb;
 $neutral-10: #f4f5f6;
 $neutral-20: #e7e9ee;
 $neutral-30: #d0d5dd;
@@ -17,15 +18,18 @@ $neutral-50: #8d96a5;
 $neutral-60: #677283;
 $neutral-70: #495365;
 $neutral-80: #2f3a4c;
+$neutral-85: #252e3c;
 $neutral-90: #1b222c;
 
 /* Green */
 $green-10: #eaf6ef;
+$green-15: #daede2;
 $green-20: #b8dbc8;
 $green-30: #86caa5;
 $green-40: #53b57f;
 $green-50: #098842;
 $green-60: #1e6b41;
+$green-65: #1c623b;
 $green-70: #195936;
 
 /* Blue */
@@ -121,6 +125,7 @@ $link-ui-visited-dark: $blue-40;
 :root {
   /* Neutral */
   --white: #{$white};
+  --neutral-05: #{$neutral-05};
   --neutral-10: #{$neutral-10};
   --neutral-20: #{$neutral-20};
   --neutral-30: #{$neutral-30};
@@ -129,15 +134,18 @@ $link-ui-visited-dark: $blue-40;
   --neutral-60: #{$neutral-60};
   --neutral-70: #{$neutral-70};
   --neutral-80: #{$neutral-80};
+  --neutral-85: #{$neutral-85};
   --neutral-90: #{$neutral-90};
 
   /* Green */
   --green-10: #{$green-10};
+  --green-15: #{$green-15};
   --green-20: #{$green-20};
   --green-30: #{$green-30};
   --green-40: #{$green-40};
   --green-50: #{$green-50};
   --green-60: #{$green-60};
+  --green-65: #{$green-65};
   --green-70: #{$green-70};
 
   /* Blue */
