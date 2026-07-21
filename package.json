@@ -108,7 +108,6 @@
     "http-status": "1.5.0",
     "knex": "2.4.0",
     "utf-8-validate": "5.0.8",
-    "ws@npm:^8": "8.21.0",
     "samlp": "7.0.2",
     "compression": "1.7.4",
     "cookie-parser": "1.4.6",
@@ -125,8 +124,6 @@
     "postcss-reporter": "7.0.5",
     "zod": "4.1.11",
     "zod-validation-error": "4.0.1",
-    "simple-oauth2": "5.0.0",
-    "@types/simple-oauth2": "5.0.7",
     "@phosphor-icons/react": "2.1.7",
     "@slack/webhook": "7.0.2",
     "@stripe/react-stripe-js": "3.9.0",
@@ -134,7 +131,6 @@
     "cache-flow": "1.9.0",
     "focus-trap-react": "11.0.4",
     "jose": "4.15.5",
-    "nodemailer": "8.0.5",
     "on-headers": "1.0.2",
     "pug": "3.0.3",
     "rate-limiter-flexible": "2.4.1",
@@ -152,7 +148,6 @@
     "autoprefixer": "10.4.16",
     "babel-plugin-module-resolver": "5.0.2",
     "backbone": "1.6.0",
-    "dompurify": "3.4.0",
     "eventsource-client": "1.1.4",
     "fake-indexeddb": "6.0.0",
     "formik": "2.2.9",
@@ -180,8 +175,7 @@
     "@babel/plugin-transform-modules-systemjs": "7.29.4",
     "fast-xml-builder": "1.1.7",
     "fast-xml-parser": "5.7.3",
-    "ip-address": "10.1.1",
-    "systeminformation": "5.31.6"
+    "ip-address": "10.1.1"
   },
   "scripts": {
     "format": "prettier --cache --cache-location ./.cache/prettier/.prettier-cache --check",

@@ -16402,15 +16402,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dompurify@npm:3.4.0":
-  version: 3.4.0
-  resolution: "dompurify@npm:3.4.0"
+"dompurify@npm:^3.3.2":
+  version: 3.4.12
+  resolution: "dompurify@npm:3.4.12"
   dependencies:
     "@types/trusted-types": "npm:^2.0.7"
   dependenciesMeta:
     "@types/trusted-types":
       optional: true
-  checksum: 10c0/5593ac44ee20b9aa521c2120884effc98927fb9128c548183c75e79e0a04357c62ee913a049a267c8f396cb8c9d520ecf72562826c5524c46d4fe03c12063638
+  checksum: 10c0/127a13817353d4e20e75a991a9022a04c3af12af7479f68e2b8bee6dbc7330a96edfb8f4ebff96f4f0f24cd43e8dbba46214131f510c3aa87a843bd8b610d0ab
   languageName: node
   linkType: hard
 
@@ -24763,10 +24763,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer@npm:8.0.5":
-  version: 8.0.5
-  resolution: "nodemailer@npm:8.0.5"
-  checksum: 10c0/5e8450499bd059c56d74ba96fa5f9928de2ecdae0d53c083dba5661d797114c1f9524d30f992d0263cc5a7dcf5a54b9c1d92dc1f766da150c9d0bde7d3798431
+"nodemailer@npm:^8.0.5":
+  version: 8.0.11
+  resolution: "nodemailer@npm:8.0.11"
+  checksum: 10c0/19229216c63a32eae59d7b39f3dffeba20be317f2335d08d86fb70bd01845a1bf108fecd019c0e90ef186e3d9177cf478192b333cf38620ad0f8c7a6e1e5ae05
   languageName: node
   linkType: hard
 
@@ -31187,12 +31187,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"systeminformation@npm:5.31.6":
-  version: 5.31.6
-  resolution: "systeminformation@npm:5.31.6"
+"systeminformation@npm:^5.31.1, systeminformation@npm:^5.31.6":
+  version: 5.31.17
+  resolution: "systeminformation@npm:5.31.17"
   bin:
     systeminformation: lib/cli.js
-  checksum: 10c0/fb0c9dae20e47277d26f3dd374f14c846567adba15a2bf9715e0a871f912424d31b75f6c27e0c8b819abc3fcd285ae8c1f6468acd8a161f18a1a39b632a01923
+  checksum: 10c0/02da446c6125f07c2b22f37668adbbf589c9e29e99c91fd804b41badc22d5f13286d4a3728b7cf2aaf36346545f90a7180ff8fd64ddf9a57a066f3307c52e3ec
   conditions: (os=darwin | os=linux | os=win32 | os=freebsd | os=openbsd | os=netbsd | os=sunos | os=android)
   languageName: node
   linkType: hard
