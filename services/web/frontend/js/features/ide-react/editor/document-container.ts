@@ -40,6 +40,11 @@ const MAX_PENDING_OP_SIZE = 64
 type JoinCallback = (error?: Error) => void
 type LeaveCallback = JoinCallback
 
+// Trailing options bag on the joinDoc response
+type JoinDocResponseOptions = {
+  canSkipLeaveDoc?: boolean
+}
+
 type Update =
   | {
       v: number
@@ -101,6 +106,11 @@ export class DocumentContainer extends EventEmitter {
 
   private joinCallbacks: JoinCallback[] = []
   private leaveCallbacks: LeaveCallback[] = []
+
+  // Set from the joinDoc response. When true, the server signalled that its
+  // leaveDoc handler is a no-op (doc rooms retired), so we can skip the
+  // leaveDoc RPC and just clean up locally.
+  private canSkipLeaveDoc = false
 
   doc?: ShareJsDoc
   cm6?: EditorFacade
@@ -491,13 +501,15 @@ export class DocumentContainer extends EventEmitter {
           version,
           updates,
           ranges,
-          type = 'sharejs-text-ot'
+          type = 'sharejs-text-ot',
+          options: JoinDocResponseOptions = {}
         ) => {
           if (error) {
             callback?.(error)
             return
           }
           this.joined = true
+          this.canSkipLeaveDoc = options.canSkipLeaveDoc ?? false
           this.doc?.catchUp(updates)
           if (this.doc?.getType() !== type) {
             // TODO(24596): page reload after checking for pending ops?
@@ -527,13 +539,15 @@ export class DocumentContainer extends EventEmitter {
           version,
           updates,
           ranges,
-          type: OTType = 'sharejs-text-ot'
+          type: OTType = 'sharejs-text-ot',
+          options: JoinDocResponseOptions = {}
         ) => {
           if (error) {
             callback?.(error)
             return
           }
           this.joined = true
+          this.canSkipLeaveDoc = options.canSkipLeaveDoc ?? false
           this.doc = new ShareJsDoc(
             this.doc_id,
             docLines,
@@ -582,20 +596,30 @@ export class DocumentContainer extends EventEmitter {
   }
 
   private leaveDoc(callback?: LeaveCallback) {
+    if (this.canSkipLeaveDoc) {
+      debugConsole.log('[leaveDoc] Leaving doc (server round-trip skipped)')
+      this.finishLeaveDoc()
+      callback?.()
+      return
+    }
     debugConsole.log('[leaveDoc] Sending leaveDoc request')
     this.socket.emit('leaveDoc', this.doc_id, error => {
       if (error) {
         callback?.(error)
         return
       }
-      this.joined = false
-      for (const leaveCallback of this.leaveCallbacks) {
-        debugConsole.log('[_leaveDoc] Calling buffered callback', leaveCallback)
-        leaveCallback(error)
-      }
-      this.leaveCallbacks = []
+      this.finishLeaveDoc()
       callback?.()
     })
+  }
+
+  private finishLeaveDoc() {
+    this.joined = false
+    for (const leaveCallback of this.leaveCallbacks) {
+      debugConsole.log('[_leaveDoc] Calling buffered callback', leaveCallback)
+      leaveCallback()
+    }
+    this.leaveCallbacks = []
   }
 
   cleanUp() {

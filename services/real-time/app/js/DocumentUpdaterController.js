@@ -1,94 +1,18 @@
 import logger from '@overleaf/logger'
 import settings from '@overleaf/settings'
-import RedisClientManager from './RedisClientManager.js'
-import SafeJsonParse from './SafeJsonParse.js'
 import EventLogger from './EventLogger.js'
-import HealthCheckManager from './HealthCheckManager.js'
-import RoomManager from './RoomManager.js'
-import ChannelManager from './ChannelManager.js'
 import metrics from '@overleaf/metrics'
 
 let DocumentUpdaterController
 
 export default DocumentUpdaterController = {
-  // DocumentUpdaterController is responsible for updates that come via Redis
-  // Pub/Sub from the document updater.
-  rclientList: RedisClientManager.createClientList(settings.redis.pubsub),
-
-  listenForUpdatesFromDocumentUpdater(io) {
-    logger.debug(
-      { rclients: this.rclientList.length },
-      'listening for applied-ops events'
-    )
-    for (const rclient of this.rclientList) {
-      rclient.subscribe('applied-ops')
-      rclient.on('message', function (channel, message) {
-        metrics.inc('rclient', 0.001) // global event rate metric
-        if (settings.debugEvents > 0) {
-          EventLogger.debugEvent(channel, message)
-        }
-        DocumentUpdaterController._processMessageFromDocumentUpdater(
-          io,
-          channel,
-          message
-        )
-      })
-    }
-    // create metrics for each redis instance only when we have multiple redis clients
-    if (this.rclientList.length > 1) {
-      this.rclientList.forEach((rclient, i) => {
-        // per client event rate metric
-        const metricName = `rclient-${i}`
-        rclient.on('message', () => metrics.inc(metricName, 0.001))
-      })
-    }
-    this.handleRoomUpdates(this.rclientList)
-  },
-
-  handleRoomUpdates(rclientSubList) {
-    const roomEvents = RoomManager.eventSource()
-    roomEvents.on('doc-active', function (docId) {
-      const subscribePromises = rclientSubList.map(rclient =>
-        ChannelManager.subscribe(rclient, 'applied-ops', docId)
-      )
-      RoomManager.emitOnCompletion(subscribePromises, `doc-subscribed-${docId}`)
-    })
-    roomEvents.on('doc-empty', docId =>
-      rclientSubList.map(rclient =>
-        ChannelManager.unsubscribe(rclient, 'applied-ops', docId)
-      )
-    )
-  },
-
-  _processMessageFromDocumentUpdater(io, channel, message) {
-    SafeJsonParse.parse(message, function (error, message) {
-      if (error) {
-        logger.error({ err: error, channel }, 'error parsing JSON')
-        return
-      }
-      if (message.health_check) {
-        logger.debug(
-          { message },
-          'got health check message in applied ops channel'
-        )
-        HealthCheckManager.check(channel, message.key)
-        return
-      }
-      // Messages on the legacy applied-ops channel are broadcast to the doc
-      // room, matching the per-doc channel granularity.
-      DocumentUpdaterController.handleAppliedOpMessage(
-        io,
-        message,
-        message.doc_id
-      )
-    })
-  },
+  // DocumentUpdaterController broadcasts applied ops (and errors) from
+  // document-updater to socket.io clients. The messages arrive on the
+  // per-project editor-events channel and are forwarded here by the
+  // WebsocketLoadBalancer.
 
   // Handle an already-parsed message from document-updater (an applied op
-  // or an error) and broadcast it to the given room: the doc room for
-  // messages from the legacy per-doc applied-ops channel, the project room
-  // for messages forwarded from the editor-events channel by the
-  // WebsocketLoadBalancer.
+  // or an error) and broadcast it to the project room (roomId = project_id).
   handleAppliedOpMessage(io, message, roomId) {
     if (message.op) {
       if (message._id && settings.checkEventOrder) {

@@ -349,44 +349,6 @@ describe('MatrixTests', function () {
                     }
                   )
                 })
-
-                it('should not add the user into the privateDoc room', function (done) {
-                  RealTimeClient.getConnectedClient(
-                    client.socket.sessionid,
-                    (error, client) => {
-                      if (error?.message === 'not found') return done() // disconnected
-                      if (error) return done(error)
-                      expect(client.rooms).to.not.include(privateDocId)
-                      done()
-                    }
-                  )
-                })
-              })
-
-              describe('receive updates', function () {
-                const receivedMessages = []
-                beforeEach(function publishAnUpdateInRedis(done) {
-                  const update = {
-                    doc_id: privateDocId,
-                    op: {
-                      meta: { source: privateClient.publicId },
-                      v: 42,
-                      doc: privateDocId,
-                      op: [{ i: 'foo', p: 50 }],
-                    },
-                  }
-                  client.on('otUpdateApplied', update => {
-                    receivedMessages.push(update)
-                  })
-                  privateClient.once('otUpdateApplied', () => {
-                    setTimeout(done, 10)
-                  })
-                  rclient.publish('applied-ops', JSON.stringify(update))
-                })
-
-                it('should send nothing to client', function () {
-                  expect(receivedMessages).to.have.length(0)
-                })
               })
 
               describe('receive updates via editor-events', function () {

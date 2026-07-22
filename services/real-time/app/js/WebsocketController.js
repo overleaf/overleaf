@@ -12,7 +12,6 @@ import { EditOperationBuilder } from 'overleaf-editor-core'
 
 const {
   CodedError,
-  JoinLeaveEpochMismatchError,
   NotAuthorizedError,
   NotJoinedError,
   ClientRequestedMissingOpsError,
@@ -205,7 +204,6 @@ export default WebsocketController = {
       return callback()
     }
 
-    const joinLeaveEpoch = ++client.joinLeaveEpoch
     metrics.inc('editor.join-doc', 1, { status: client.transport })
     const {
       project_id: projectId,
@@ -252,185 +250,126 @@ export default WebsocketController = {
       )
     }
 
-    WebsocketController._assertClientAuthorization(
-      client,
-      docId,
-      function (error) {
-        if (error) {
-          return callback(error)
-        }
-        if (client.disconnected) {
-          metrics.inc('editor.join-doc.disconnected', 1, {
-            status: 'after-client-auth-check',
-          })
-          // the client will not read the response anyways
-          return callback()
-        }
-        if (joinLeaveEpoch !== client.joinLeaveEpoch) {
-          // another joinDoc or leaveDoc rpc overtook us
-          return callback(new JoinLeaveEpochMismatchError())
-        }
-        // ensure the per-doc applied-ops channel is subscribed before sending the
-        // doc to the client, so that no events are missed.
-        RoomManager.joinDoc(client, docId, function (error) {
+    AuthorizationManager.assertClientCanViewProject(client, function (error) {
+      if (error) {
+        return callback(error)
+      }
+      if (client.disconnected) {
+        metrics.inc('editor.join-doc.disconnected', 1, {
+          status: 'after-client-auth-check',
+        })
+        // the client will not read the response anyways
+        return callback()
+      }
+
+      DocumentUpdaterManager.getDocument(
+        projectId,
+        docId,
+        fromVersion,
+        function (error, result) {
           if (error) {
+            if (error instanceof ClientRequestedMissingOpsError) {
+              emitJoinDocCatchUpMetrics('missing', error.info)
+            }
             return callback(error)
           }
+          const { lines, version, ranges, ops, ttlInS, type } = result
+          emitJoinDocCatchUpMetrics('success', { version, ttlInS })
           if (client.disconnected) {
             metrics.inc('editor.join-doc.disconnected', 1, {
-              status: 'after-joining-room',
+              status: 'after-doc-updater-call',
             })
             // the client will not read the response anyways
             return callback()
           }
 
-          DocumentUpdaterManager.getDocument(
-            projectId,
-            docId,
-            fromVersion,
-            function (error, result) {
-              if (error) {
-                if (error instanceof ClientRequestedMissingOpsError) {
-                  emitJoinDocCatchUpMetrics('missing', error.info)
-                }
-                return callback(error)
-              }
-              const { lines, version, ranges, ops, ttlInS, type } = result
-              emitJoinDocCatchUpMetrics('success', { version, ttlInS })
-              if (client.disconnected) {
-                metrics.inc('editor.join-doc.disconnected', 1, {
-                  status: 'after-doc-updater-call',
-                })
-                // the client will not read the response anyways
-                return callback()
-              }
+          if (isRestrictedUser && ranges && ranges.comments) {
+            ranges.comments = []
+          }
 
-              if (isRestrictedUser && ranges && ranges.comments) {
-                ranges.comments = []
-              }
-
-              // Encode any binary bits of data so it can go via WebSockets
-              // See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
-              const encodeForWebsockets = text =>
-                unescape(encodeURIComponent(text))
-              metrics.inc('client_supports_history_v1_ot', 1, {
-                status: options.supportsHistoryOT ? 'success' : 'failure',
-              })
-              let escapedLines
-              if (type === 'history-ot') {
-                if (!options.supportsHistoryOT) {
-                  RoomManager.leaveDoc(client, docId)
-                  // TODO(24596): ask the user to reload the editor page (via out-of-sync modal when there are pending ops).
-                  return callback(
-                    new CodedError('client does not support history-ot')
-                  )
-                }
-                escapedLines = lines
-              } else {
-                escapedLines = []
-                for (let line of lines) {
-                  try {
-                    line = encodeForWebsockets(line)
-                  } catch (err) {
-                    OError.tag(err, 'error encoding line uri component', {
-                      line,
-                    })
-                    return callback(err)
-                  }
-                  escapedLines.push(line)
-                }
-                if (options.encodeRanges) {
-                  try {
-                    for (const comment of (ranges && ranges.comments) || []) {
-                      if (comment.op.c) {
-                        comment.op.c = encodeForWebsockets(comment.op.c)
-                      }
-                    }
-                    for (const change of (ranges && ranges.changes) || []) {
-                      if (change.op.i) {
-                        change.op.i = encodeForWebsockets(change.op.i)
-                      }
-                      if (change.op.d) {
-                        change.op.d = encodeForWebsockets(change.op.d)
-                      }
-                    }
-                  } catch (err) {
-                    OError.tag(err, 'error encoding range uri component', {
-                      ranges,
-                    })
-                    return callback(err)
-                  }
-                }
-              }
-
-              AuthorizationManager.addAccessToDoc(client, docId, () => {})
-              logger.debug(
-                {
-                  userId,
-                  projectId,
-                  docId,
-                  fromVersion,
-                  clientId: client.id,
-                },
-                'client joined doc'
+          // Encode any binary bits of data so it can go via WebSockets
+          // See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
+          const encodeForWebsockets = text => unescape(encodeURIComponent(text))
+          metrics.inc('client_supports_history_v1_ot', 1, {
+            status: options.supportsHistoryOT ? 'success' : 'failure',
+          })
+          let escapedLines
+          if (type === 'history-ot') {
+            if (!options.supportsHistoryOT) {
+              // TODO(24596): ask the user to reload the editor page (via out-of-sync modal when there are pending ops).
+              return callback(
+                new CodedError('client does not support history-ot')
               )
-              callback(null, escapedLines, version, ops, ranges, type)
             }
-          )
-        })
-      }
-    )
-  },
+            escapedLines = lines
+          } else {
+            escapedLines = []
+            for (let line of lines) {
+              try {
+                line = encodeForWebsockets(line)
+              } catch (err) {
+                OError.tag(err, 'error encoding line uri component', {
+                  line,
+                })
+                return callback(err)
+              }
+              escapedLines.push(line)
+            }
+            if (options.encodeRanges) {
+              try {
+                for (const comment of (ranges && ranges.comments) || []) {
+                  if (comment.op.c) {
+                    comment.op.c = encodeForWebsockets(comment.op.c)
+                  }
+                }
+                for (const change of (ranges && ranges.changes) || []) {
+                  if (change.op.i) {
+                    change.op.i = encodeForWebsockets(change.op.i)
+                  }
+                  if (change.op.d) {
+                    change.op.d = encodeForWebsockets(change.op.d)
+                  }
+                }
+              } catch (err) {
+                OError.tag(err, 'error encoding range uri component', {
+                  ranges,
+                })
+                return callback(err)
+              }
+            }
+          }
 
-  _assertClientAuthorization(client, docId, callback) {
-    // Check for project-level access first
-    AuthorizationManager.assertClientCanViewProject(client, function (error) {
-      if (error) {
-        return callback(error)
-      }
-      // Check for doc-level access next
-      AuthorizationManager.assertClientCanViewProjectAndDoc(
-        client,
-        docId,
-        function (error) {
-          if (error) {
-            // No cached access, check docupdater
-            const { project_id: projectId } = client.ol_context
-            DocumentUpdaterManager.checkDocument(
+          AuthorizationManager.addAccessToDoc(client, docId, () => {})
+          logger.debug(
+            {
+              userId,
               projectId,
               docId,
-              function (error) {
-                if (error) {
-                  return callback(error)
-                } else {
-                  // Success
-                  AuthorizationManager.addAccessToDoc(client, docId, callback)
-                }
-              }
-            )
-          } else {
-            // Access already cached
-            callback()
-          }
+              fromVersion,
+              clientId: client.id,
+            },
+            'client joined doc'
+          )
+          // The trailing options bag carries capability flags for the client.
+          // canSkipLeaveDoc tells the client it may skip the leaveDoc RPC,
+          // because this real-time's leaveDoc is a no-op (doc rooms have been
+          // retired; see leaveDoc below). Older clients ignore the extra
+          // argument and keep calling leaveDoc, which is harmless.
+          callback(null, escapedLines, version, ops, ranges, type, {
+            canSkipLeaveDoc: true,
+          })
         }
       )
     })
   },
 
   leaveDoc(client, docId, callback) {
-    // client may have disconnected, but we have to cleanup internal state.
-    client.joinLeaveEpoch++
+    // No-op: real-time no longer tracks per-doc room membership (applied ops
+    // are broadcast to the project room and filtered by doc id client-side).
+    // The RPC is kept so older/in-flight clients still receive an ack; the
+    // frontend no longer emits leaveDoc. Doc access is intentionally not
+    // removed here (the connection is per-project and already authorised).
     metrics.inc('editor.leave-doc', 1, { status: client.transport })
-    const { project_id: projectId, user_id: userId } = client.ol_context
-    logger.debug(
-      { userId, projectId, docId, clientId: client.id },
-      'client leaving doc'
-    )
-    RoomManager.leaveDoc(client, docId)
-    // we could remove permission when user leaves a doc, but because
-    // the connection is per-project, we continue to allow access
-    // after the initial joinDoc since we know they are already authorised.
-    // # AuthorizationManager.removeAccessToDoc client, doc_id
     callback()
   },
   updateClientPosition(client, cursorData, callback) {

@@ -162,106 +162,6 @@ describe('receiveUpdate', function () {
     return this.clientD != null ? this.clientD.disconnect() : undefined
   })
 
-  describe('with an update from clientA', function () {
-    beforeEach(function (done) {
-      this.update = {
-        doc_id: this.doc_id,
-        op: {
-          meta: {
-            source: this.clientA.publicId,
-          },
-          v: this.version,
-          doc: this.doc_id,
-          op: [{ i: 'foo', p: 50 }],
-        },
-      }
-      rclient.publish('applied-ops', JSON.stringify(this.update))
-      return setTimeout(done, 200)
-    }) // Give clients time to get message
-
-    it('should send the full op to clientB', function () {
-      return this.clientBUpdates.should.deep.equal([this.update.op])
-    })
-
-    it('should send an ack to clientA', function () {
-      return this.clientAUpdates.should.deep.equal([
-        {
-          v: this.version,
-          doc: this.doc_id,
-        },
-      ])
-    })
-
-    return it('should send nothing to clientC', function () {
-      return this.clientCUpdates.should.deep.equal([])
-    })
-  })
-
-  describe('with an update from clientC', function () {
-    beforeEach(function (done) {
-      this.update = {
-        doc_id: this.doc_id_second,
-        op: {
-          meta: {
-            source: this.clientC.publicId,
-          },
-          v: this.version,
-          doc: this.doc_id_second,
-          op: [{ i: 'update from clientC', p: 50 }],
-        },
-      }
-      rclient.publish('applied-ops', JSON.stringify(this.update))
-      return setTimeout(done, 200)
-    }) // Give clients time to get message
-
-    it('should send nothing to clientA', function () {
-      return this.clientAUpdates.should.deep.equal([])
-    })
-
-    it('should send nothing to clientB', function () {
-      return this.clientBUpdates.should.deep.equal([])
-    })
-
-    return it('should send an ack to clientC', function () {
-      return this.clientCUpdates.should.deep.equal([
-        {
-          v: this.version,
-          doc: this.doc_id_second,
-        },
-      ])
-    })
-  })
-
-  describe('with an update from a remote client for project 1', function () {
-    beforeEach(function (done) {
-      this.update = {
-        doc_id: this.doc_id,
-        op: {
-          meta: {
-            source: 'this-is-a-remote-client-id',
-          },
-          v: this.version,
-          doc: this.doc_id,
-          op: [{ i: 'foo', p: 50 }],
-        },
-      }
-      rclient.publish('applied-ops', JSON.stringify(this.update))
-      return setTimeout(done, 200)
-    }) // Give clients time to get message
-
-    it('should send the full op to clientA', function () {
-      return this.clientAUpdates.should.deep.equal([this.update.op])
-    })
-
-    it('should send the full op to clientB', function () {
-      return this.clientBUpdates.should.deep.equal([this.update.op])
-    })
-
-    return it('should send nothing to clientC', function () {
-      return this.clientCUpdates.should.deep.equal([])
-    })
-  })
-
   describe('with an update from clientA published on the editor-events channel', function () {
     beforeEach(function (done) {
       this.update = {
@@ -373,65 +273,69 @@ describe('receiveUpdate', function () {
     })
   })
 
-  describe('with an error for the first project', function () {
+  describe('with an update for the second project on the editor-events channel', function () {
     beforeEach(function (done) {
+      this.update = {
+        project_id: this.project_id_second,
+        doc_id: this.doc_id_second,
+        message: 'otUpdateApplied',
+        op: {
+          meta: {
+            source: this.clientC.publicId,
+          },
+          v: this.version,
+          doc: this.doc_id_second,
+          op: [{ i: 'bar', p: 50 }],
+        },
+      }
       rclient.publish(
-        'applied-ops',
-        JSON.stringify({
-          doc_id: this.doc_id,
-          error: (this.error = 'something went wrong'),
-        })
+        `editor-events:${this.project_id_second}`,
+        JSON.stringify(this.update)
       )
-      return setTimeout(done, 200)
+      setTimeout(done, 200)
     }) // Give clients time to get message
 
-    it('should send the error to the clients in the first project', function () {
-      this.clientAErrors.should.deep.equal([this.error])
-      return this.clientBErrors.should.deep.equal([this.error])
+    it('should send an ack to clientC', function () {
+      this.clientCUpdates.should.deep.equal([
+        {
+          v: this.version,
+          doc: this.doc_id_second,
+        },
+      ])
     })
 
-    it('should not send any errors to the client in the second project', function () {
-      return this.clientCErrors.should.deep.equal([])
-    })
-
-    it('should disconnect the clients of the first project', function () {
-      this.clientA.socket.connected.should.equal(false)
-      return this.clientB.socket.connected.should.equal(false)
-    })
-
-    return it('should not disconnect the client in the second project', function () {
-      return this.clientC.socket.connected.should.equal(true)
+    it('should send nothing to the clients in the first project', function () {
+      this.clientAUpdates.should.deep.equal([])
+      this.clientBUpdates.should.deep.equal([])
+      this.clientDUpdates.should.deep.equal([])
     })
   })
 
-  return describe('with an error for the second project', function () {
+  describe('with an error for the second project on the editor-events channel', function () {
     beforeEach(function (done) {
       rclient.publish(
-        'applied-ops',
+        `editor-events:${this.project_id_second}`,
         JSON.stringify({
+          project_id: this.project_id_second,
           doc_id: this.doc_id_second,
+          message: 'otUpdateError',
           error: (this.error = 'something went wrong'),
         })
       )
-      return setTimeout(done, 200)
+      setTimeout(done, 200)
     }) // Give clients time to get message
+
+    it('should send the error to the client in the second project', function () {
+      this.clientCErrors.should.deep.equal([this.error])
+      this.clientC.socket.connected.should.equal(false)
+    })
 
     it('should not send any errors to the clients in the first project', function () {
       this.clientAErrors.should.deep.equal([])
-      return this.clientBErrors.should.deep.equal([])
-    })
-
-    it('should send the error to the client in the second project', function () {
-      return this.clientCErrors.should.deep.equal([this.error])
-    })
-
-    it('should not disconnect the clients of the first project', function () {
+      this.clientBErrors.should.deep.equal([])
+      this.clientDErrors.should.deep.equal([])
       this.clientA.socket.connected.should.equal(true)
-      return this.clientB.socket.connected.should.equal(true)
-    })
-
-    return it('should disconnect the client in the second project', function () {
-      return this.clientC.socket.connected.should.equal(false)
+      this.clientB.socket.connected.should.equal(true)
     })
   })
 })

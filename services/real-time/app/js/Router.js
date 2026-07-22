@@ -109,7 +109,6 @@ export default Router = {
     } else if (
       [
         'not authorized',
-        'joinLeaveEpoch mismatch',
         'doc updater could not load requested ops',
         'no project_id found on client',
         'cannot join multiple projects',
@@ -177,8 +176,6 @@ export default Router = {
       // init client context, we may access it in Router._handleError before
       //  setting any values
       client.ol_context = {}
-      // bail out from joinDoc when a parallel joinDoc or leaveDoc is running
-      client.joinLeaveEpoch = 0
 
       if (client) {
         client.on('error', function (err) {

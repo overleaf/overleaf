@@ -83,7 +83,7 @@ describe('HttpControllerTests', function () {
         last_name: 'Bloggs',
         project_id: this.project_id,
         user_id: this.user_id,
-        rooms: [this.project_id, this.doc_id],
+        rooms: [this.project_id],
       })
     })
   })

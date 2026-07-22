@@ -77,17 +77,6 @@ async function getDocument(projectId, docId, fromVersion) {
 }
 
 /**
- * Check that a doc is loadable from the document-updater.
- *
- * @param {string} projectId
- * @param {string} docId
- */
-async function checkDocument(projectId, docId) {
-  // in this call fromVersion = -1 means get document without docOps
-  return await getDocument(projectId, docId, -1)
-}
-
-/**
  * Ask the document-updater to flush a project to mongo and remove it from
  * redis.
  *
@@ -185,13 +174,11 @@ async function queueChange(projectId, docId, change) {
 
 export default {
   getDocument: callbackify(getDocument),
-  checkDocument: callbackify(checkDocument),
   flushProjectToMongoAndDelete: callbackify(flushProjectToMongoAndDelete),
   _getPendingUpdateListKey,
   queueChange: callbackify(queueChange),
   promises: {
     getDocument,
-    checkDocument,
     flushProjectToMongoAndDelete,
     queueChange,
   },

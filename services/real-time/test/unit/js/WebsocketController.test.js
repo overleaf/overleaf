@@ -37,7 +37,6 @@ describe('WebsocketController', function () {
       id: (ctx.client_id = 'mock-client-id-123'),
       publicId: `other-id-${Math.random()}`,
       ol_context: {},
-      joinLeaveEpoch: 0,
       join: sinon.stub(),
       leave: sinon.stub(),
     }
@@ -545,9 +544,6 @@ describe('WebsocketController', function () {
       ctx.AuthorizationManager.assertClientCanViewProject = sinon
         .stub()
         .callsArgWith(1, null)
-      ctx.AuthorizationManager.assertClientCanViewProjectAndDoc = sinon
-        .stub()
-        .callsArgWith(2, null)
       ctx.DocumentUpdaterManager.getDocument = sinon
         .stub()
         .callsArgWith(3, null, {
@@ -556,7 +552,6 @@ describe('WebsocketController', function () {
           ranges: ctx.ranges,
           ops: ctx.ops,
         })
-      ctx.RoomManager.joinDoc = sinon.stub().callsArg(2)
     })
 
     describe('works', function () {
@@ -568,10 +563,6 @@ describe('WebsocketController', function () {
           ctx.options,
           ctx.callback
         )
-      })
-
-      it('should inc the joinLeaveEpoch', function (ctx) {
-        expect(ctx.client.joinLeaveEpoch).to.equal(1)
       })
 
       it('should check that the client is authorized to view the project', function (ctx) {
@@ -588,12 +579,6 @@ describe('WebsocketController', function () {
 
       it('should add permissions for the client to access the doc', function (ctx) {
         ctx.AuthorizationManager.addAccessToDoc
-          .calledWith(ctx.client, ctx.doc_id)
-          .should.equal(true)
-      })
-
-      it('should join the client to room for the doc_id', function (ctx) {
-        ctx.RoomManager.joinDoc
           .calledWith(ctx.client, ctx.doc_id)
           .should.equal(true)
       })
@@ -801,10 +786,10 @@ describe('WebsocketController', function () {
     describe('when the client disconnects while auth checks are running', function () {
       beforeEach(async function (ctx) {
         await new Promise((resolve, reject) => {
-          ctx.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(
-            new Error()
-          )
-          ctx.DocumentUpdaterManager.checkDocument = (projectId, docId, cb) => {
+          ctx.AuthorizationManager.assertClientCanViewProject = (
+            client,
+            cb
+          ) => {
             ctx.client.disconnected = true
             cb()
           }
@@ -831,121 +816,6 @@ describe('WebsocketController', function () {
         expect(
           ctx.metrics.inc.calledWith('editor.join-doc.disconnected', 1, {
             status: 'after-client-auth-check',
-          })
-        ).to.equal(true)
-      })
-
-      it('should not get the document', function (ctx) {
-        expect(ctx.DocumentUpdaterManager.getDocument.called).to.equal(false)
-      })
-    })
-
-    describe('when the client starts a parallel joinDoc request', function () {
-      beforeEach(async function (ctx) {
-        await new Promise((resolve, reject) => {
-          ctx.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(
-            new Error()
-          )
-          ctx.DocumentUpdaterManager.checkDocument = (projectId, docId, cb) => {
-            ctx.DocumentUpdaterManager.checkDocument = sinon.stub().yields()
-            ctx.WebsocketController.joinDoc(
-              ctx.client,
-              ctx.doc_id,
-              -1,
-              {},
-              () => {}
-            )
-            cb()
-          }
-
-          ctx.WebsocketController.joinDoc(
-            ctx.client,
-            ctx.doc_id,
-            -1,
-            ctx.options,
-            (...args) => {
-              ctx.callback(...args)
-              // make sure the other joinDoc request completed
-              setTimeout(resolve, 5)
-            }
-          )
-        })
-      })
-
-      it('should call the callback with an error', function (ctx) {
-        expect(ctx.callback.called).to.equal(true)
-        expect(ctx.callback.args[0][0].message).to.equal(
-          'joinLeaveEpoch mismatch'
-        )
-      })
-
-      it('should get the document once (the parallel request wins)', function (ctx) {
-        expect(ctx.DocumentUpdaterManager.getDocument.callCount).to.equal(1)
-      })
-    })
-
-    describe('when the client starts a parallel leaveDoc request', function () {
-      beforeEach(async function (ctx) {
-        await new Promise((resolve, reject) => {
-          ctx.RoomManager.leaveDoc = sinon.stub()
-
-          ctx.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(
-            new Error()
-          )
-          ctx.DocumentUpdaterManager.checkDocument = (projectId, docId, cb) => {
-            ctx.WebsocketController.leaveDoc(ctx.client, ctx.doc_id, () => {})
-            cb()
-          }
-
-          ctx.WebsocketController.joinDoc(
-            ctx.client,
-            ctx.doc_id,
-            -1,
-            ctx.options,
-            (...args) => {
-              ctx.callback(...args)
-              resolve()
-            }
-          )
-        })
-      })
-
-      it('should call the callback with an error', function (ctx) {
-        expect(ctx.callback.called).to.equal(true)
-        expect(ctx.callback.args[0][0].message).to.equal(
-          'joinLeaveEpoch mismatch'
-        )
-      })
-
-      it('should not get the document', function (ctx) {
-        expect(ctx.DocumentUpdaterManager.getDocument.called).to.equal(false)
-      })
-    })
-
-    describe('when the client disconnects while RoomManager.joinDoc is running', function () {
-      beforeEach(function (ctx) {
-        ctx.RoomManager.joinDoc = (client, docId, cb) => {
-          ctx.client.disconnected = true
-          cb()
-        }
-
-        ctx.WebsocketController.joinDoc(
-          ctx.client,
-          ctx.doc_id,
-          -1,
-          ctx.options,
-          ctx.callback
-        )
-      })
-
-      it('should call the callback with no details', function (ctx) {
-        expect(ctx.callback.args[0]).to.deep.equal([])
-      })
-
-      it('should increment the editor.join-doc.disconnected metric with a status', function (ctx) {
-        expect(
-          ctx.metrics.inc.calledWith('editor.join-doc.disconnected', 1, {
-            status: 'after-joining-room',
           })
         ).to.equal(true)
       })
@@ -999,26 +869,11 @@ describe('WebsocketController', function () {
     beforeEach(function (ctx) {
       ctx.doc_id = 'doc-id-123'
       ctx.client.ol_context.project_id = ctx.project_id
-      ctx.RoomManager.leaveDoc = sinon.stub()
       ctx.WebsocketController.leaveDoc(ctx.client, ctx.doc_id, ctx.callback)
-    })
-
-    it('should inc the joinLeaveEpoch', function (ctx) {
-      expect(ctx.client.joinLeaveEpoch).to.equal(1)
-    })
-
-    it('should remove the client from the doc_id room', function (ctx) {
-      ctx.RoomManager.leaveDoc
-        .calledWith(ctx.client, ctx.doc_id)
-        .should.equal(true)
     })
 
     it('should call the callback', function (ctx) {
       ctx.callback.called.should.equal(true)
-    })
-
-    it('should increment the leave-doc metric', function (ctx) {
-      ctx.metrics.inc.calledWith('editor.leave-doc').should.equal(true)
     })
   })
 

@@ -20,7 +20,6 @@ import socketIOClient from 'socket.io-client'
 import http from 'node:http'
 import Router from './app/js/Router.js'
 import WebsocketLoadBalancer from './app/js/WebsocketLoadBalancer.js'
-import DocumentUpdaterController from './app/js/DocumentUpdaterController.js'
 
 logger.initialize('real-time')
 Metrics.event_loop.monitor(logger)
@@ -196,8 +195,6 @@ Router.configure(app, io, sessionSockets)
 
 WebsocketLoadBalancer.listenForEditorEvents(io)
 
-DocumentUpdaterController.listenForUpdatesFromDocumentUpdater(io)
-
 const { port } = Settings.internal.realTime
 const { host } = Settings.internal.realTime
 
@@ -346,7 +343,7 @@ if (Settings.continualPubsubTraffic) {
   }
 
   const runPubSubTraffic = () =>
-    async.map(['applied-ops', 'editor-events'], publishJob, () =>
+    async.map(['editor-events'], publishJob, () =>
       setTimeout(runPubSubTraffic, 1000 * 20)
     )
 
