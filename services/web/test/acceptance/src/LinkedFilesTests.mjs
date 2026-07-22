@@ -222,7 +222,7 @@ describe('LinkedFiles', function () {
           v1_source_doc_id: 9999999, // We won't find this id in the database
           source_entity_path: 'example.jpeg',
         },
-        _id: 'abcd',
+        _id: '000000000000000000000abc',
         rev: 0,
         created: new Date(),
         name: 'example.jpeg',
@@ -232,7 +232,7 @@ describe('LinkedFiles', function () {
 
     it('should refuse to refresh', async function () {
       const { response, body } = await owner.doRequest('post', {
-        url: `/project/${projectOneId}/linked_file/abcd/refresh`,
+        url: `/project/${projectOneId}/linked_file/000000000000000000000abc/refresh`,
         json: true,
       })
       expect(response.statusCode).to.equal(409)
@@ -505,7 +505,7 @@ describe('LinkedFiles', function () {
           v1_source_doc_id: 9999999, // We won't find this id in the database
           source_output_file_path: 'output.pdf',
         },
-        _id: 'abcdef',
+        _id: '000000000000000000abcdef',
         rev: 0,
         created: new Date(),
         name: 'whatever.pdf',
@@ -515,7 +515,7 @@ describe('LinkedFiles', function () {
 
     it('should refuse to refresh', async function () {
       const { response, body } = await owner.doRequest('post', {
-        url: `/project/${projectOneId}/linked_file/abcdef/refresh`,
+        url: `/project/${projectOneId}/linked_file/000000000000000000abcdef/refresh`,
         json: true,
       })
       expect(response.statusCode).to.equal(409)

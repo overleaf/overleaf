@@ -21,7 +21,10 @@ describe('LinkedFilesController', function () {
         refreshLinkedFile: sinon.stub().resolves(),
       },
     }
-    ctx.projectId = 'projectId'
+    // project_id, parent_folder_id and file_id are validated as Mongo
+    // ObjectIds, so use well-formed values throughout.
+    ctx.projectId = '507f1f77bcf86cd799439011'
+    ctx.parentFolderId = '507f191e810c19729de860eb'
     ctx.provider = 'provider'
     ctx.fileName = 'linked-file-name'
     ctx.data = { customAgentData: 'foo' }
@@ -119,21 +122,30 @@ describe('LinkedFilesController', function () {
           name: ctx.fileName,
           provider: ctx.provider,
           data: ctx.data,
+          parent_folder_id: ctx.parentFolderId,
         },
       }
       ctx.next = sinon.stub()
     })
 
     it('sets importedAt timestamp on linkedFileData', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.next = sinon.stub().callsFake(() => resolve('unexpected error'))
+      await new Promise((resolve, reject) => {
+        ctx.next = sinon
+          .stub()
+          .callsFake(err =>
+            reject(err || new Error('next called unexpectedly'))
+          )
         ctx.res = {
           json: () => {
             expect(ctx.Agent.promises.createLinkedFile).to.have.been.calledWith(
               ctx.projectId,
-              { ...ctx.data, importedAt: ctx.fakeTime.toISOString() },
+              {
+                customAgentData: 'foo',
+                provider: ctx.provider,
+                importedAt: ctx.fakeTime.toISOString(),
+              },
               ctx.fileName,
-              undefined,
+              ctx.parentFolderId,
               ctx.userId
             )
             resolve()
@@ -145,6 +157,7 @@ describe('LinkedFilesController', function () {
   })
   describe('refreshLinkedFiles', function () {
     beforeEach(function (ctx) {
+      ctx.fileId = '507f191e810c19729de860ea'
       ctx.data.provider = ctx.provider
       ctx.file = {
         name: ctx.fileName,
@@ -154,7 +167,7 @@ describe('LinkedFilesController', function () {
         },
       }
       ctx.LinkedFilesHandler.promises.getFileById
-        .withArgs(ctx.projectId, 'file-id')
+        .withArgs(ctx.projectId, ctx.fileId)
         .resolves({
           file: ctx.file,
           path: 'fake-path',
@@ -163,15 +176,19 @@ describe('LinkedFilesController', function () {
           },
         })
       ctx.req = {
-        params: { project_id: ctx.projectId, file_id: 'file-id' },
+        params: { project_id: ctx.projectId, file_id: ctx.fileId },
         body: {},
       }
       ctx.next = sinon.stub()
     })
 
     it('resets importedAt timestamp on linkedFileData', async function (ctx) {
-      await new Promise(resolve => {
-        ctx.next = sinon.stub().callsFake(() => resolve('unexpected error'))
+      await new Promise((resolve, reject) => {
+        ctx.next = sinon
+          .stub()
+          .callsFake(err =>
+            reject(err || new Error('next called unexpectedly'))
+          )
         ctx.res = {
           json: () => {
             expect(
@@ -182,7 +199,7 @@ describe('LinkedFilesController', function () {
                 ...ctx.data,
                 importedAt: ctx.fakeTime.toISOString(),
               },
-              ctx.name,
+              ctx.fileName,
               'parent-folder-id',
               ctx.userId
             )
@@ -193,6 +210,21 @@ describe('LinkedFilesController', function () {
       })
     })
 
+    it('rejects invalid params without calling the agent', async function (ctx) {
+      ctx.req.params.file_id = 'not-an-object-id'
+      await new Promise(resolve => {
+        ctx.next = sinon.stub().callsFake(() => resolve())
+        ctx.res = {
+          json: () => resolve(),
+          sendStatus: () => resolve(),
+        }
+        ctx.LinkedFilesController.refreshLinkedFile(ctx.req, ctx.res, ctx.next)
+      })
+      expect(ctx.next).to.have.been.calledOnce
+      expect(ctx.next.firstCall.args[0]?.name).to.equal('InvalidParamsError')
+      expect(ctx.Agent.promises.refreshLinkedFile).to.not.have.been.called
+    })
+
     describe('when bib file re-indexing is required', function () {
       const clientId = 'client-id'
       beforeEach(function (ctx) {
@@ -201,8 +233,12 @@ describe('LinkedFilesController', function () {
       })
 
       it('informs clients to re-index bib references', async function (ctx) {
-        await new Promise(resolve => {
-          ctx.next = sinon.stub().callsFake(() => resolve('unexpected error'))
+        await new Promise((resolve, reject) => {
+          ctx.next = sinon
+            .stub()
+            .callsFake(err =>
+              reject(err || new Error('next called unexpectedly'))
+            )
           ctx.res = {
             json: () => {
               expect(

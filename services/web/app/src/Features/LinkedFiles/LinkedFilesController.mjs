@@ -60,6 +60,17 @@ const createLinkedFileSchema = z.object({
   }),
 })
 
+const refreshLinkedFileSchema = z.object({
+  params: z.object({
+    project_id: zz.objectId(),
+    file_id: zz.objectId(),
+  }),
+  body: z.object({
+    clientId: z.string().optional(),
+    shouldReindexReferences: z.boolean().optional(),
+  }),
+})
+
 async function createLinkedFile(req, res, next) {
   const { params, body } = parseReq(req, createLinkedFileSchema)
   const { project_id: projectId } = params
@@ -94,8 +105,9 @@ async function createLinkedFile(req, res, next) {
 }
 
 async function refreshLinkedFile(req, res, next) {
-  const { project_id: projectId, file_id: fileId } = req.params
-  const { clientId } = req.body
+  const { params, body } = parseReq(req, refreshLinkedFileSchema)
+  const { project_id: projectId, file_id: fileId } = params
+  const { clientId, shouldReindexReferences } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
 
   const { file, parentFolder } = await LinkedFilesHandler.promises.getFileById(
@@ -136,7 +148,7 @@ async function refreshLinkedFile(req, res, next) {
     return LinkedFilesController.handleError(err, req, res, next)
   }
 
-  if (req.body.shouldReindexReferences) {
+  if (shouldReindexReferences) {
     // Signal to clients that they should re-index references
     EditorRealTimeController.emitToRoom(
       projectId,

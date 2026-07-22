@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import mongodb from 'mongodb-legacy'
 import FileWriter from '../../infrastructure/FileWriter.mjs'
 import EditorController from '../Editor/EditorController.mjs'
 import ProjectLocator from '../Project/ProjectLocator.mjs'
@@ -6,6 +7,8 @@ import { Project } from '../../models/Project.mjs'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import LinkedFilesErrors from './LinkedFilesErrors.mjs'
 import { callbackifyAll } from '@overleaf/promise-utils'
+
+const { ObjectId } = mongodb
 
 const { ProjectNotFoundError, V1ProjectNotFoundError, BadDataError } =
   LinkedFilesErrors
@@ -25,6 +28,13 @@ const LinkedFilesHandler = {
   async getSourceProject(data) {
     const projection = { _id: 1, name: 1, overleaf: 1 } // include the historyId for future use
     if (data.v1_source_doc_id != null) {
+      // v1_source_doc_id must be a string or a number.
+      if (
+        typeof data.v1_source_doc_id !== 'string' &&
+        typeof data.v1_source_doc_id !== 'number'
+      ) {
+        throw new BadDataError('invalid v1_source_doc_id')
+      }
       const project = await Project.findOne(
         { 'overleaf.id': data.v1_source_doc_id },
         projection
@@ -36,6 +46,13 @@ const LinkedFilesHandler = {
 
       return project
     } else if (data.source_project_id != null) {
+      // source_project_id must be a plain ObjectId string.
+      if (
+        typeof data.source_project_id !== 'string' ||
+        !ObjectId.isValid(data.source_project_id)
+      ) {
+        throw new BadDataError('invalid source_project_id')
+      }
       const project = await ProjectGetter.promises.getProject(
         data.source_project_id,
         projection
