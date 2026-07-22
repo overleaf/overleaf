@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useFileTreeCreateName } from '../../contexts/file-tree-create-name'
 import {
@@ -36,32 +36,36 @@ export default function FileTreeCreateNameInput({
 
   // the value is stored in a context provider, so it's available elsewhere in the form
   const { name, setName, touchedName, validName } = useFileTreeCreateName()
-  const nameFocusedOnce = useRef(false)
+  const touchedNameRef = useRef(touchedName)
+  touchedNameRef.current = touchedName
 
   // focus the first part of the filename if needed
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (inputRef.current && focusName) {
+    const input = inputRef.current
+    if (input && focusName) {
+      const { selectionStart, selectionEnd } = input
+      // Defer the focus so it is not overridden while the modal is opening.
       window.requestAnimationFrame(() => {
-        if (inputRef.current) {
-          inputRef.current.focus()
+        const input = inputRef.current
+        if (!input) {
+          return // The input has been unmounted before the focus could be applied.
         }
+        if (touchedNameRef.current) {
+          return // The name has been edited already; focusing and selecting the initial name now would clobber that edit.
+        }
+        if (
+          input.selectionStart !== selectionStart ||
+          input.selectionEnd !== selectionEnd
+        ) {
+          return // The selection has been changed already (e.g. a select-all ahead of deleting the name); selecting the initial name now would clobber that change.
+        }
+        input.focus()
+        // Select the name part so that typing keeps the extension.
+        input.setSelectionRange(0, input.value.lastIndexOf('.'))
       })
     }
-  }, [focusName])
-
-  const onFocus = useCallback(() => {
-    if (nameFocusedOnce.current) return
-    if (!focusName) return
-    window.requestAnimationFrame(() => {
-      if (!inputRef.current) return
-      nameFocusedOnce.current = true
-      inputRef.current.setSelectionRange(
-        0,
-        inputRef.current.value.lastIndexOf('.')
-      )
-    })
   }, [focusName])
 
   return (
@@ -75,7 +79,6 @@ export default function FileTreeCreateNameInput({
         onChange={event => setName(event.target.value)}
         ref={inputRef}
         disabled={inFlight}
-        onFocus={onFocus}
       />
       {touchedName && !validName && (
         <div className="notification-list">
