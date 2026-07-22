@@ -2,20 +2,30 @@ import path from 'node:path'
 import SessionManager from '../Authentication/SessionManager.mjs'
 import TemplatesManager from './TemplatesManager.mjs'
 import ProjectHelper from '../Project/ProjectHelper.mjs'
-import logger from '@overleaf/logger'
 import { expressify } from '@overleaf/promise-utils'
+import { parseReq, z } from '../../infrastructure/Validation.mjs'
+
+// numeric v1 ids (template id / template version id)
+const numericId = z.string().regex(/^[0-9]+$/)
+
+const getV1TemplateSchema = z.object({
+  params: z.object({ Template_version_id: numericId }),
+  query: z.object({ id: numericId }),
+})
+
+const createProjectFromV1TemplateSchema = z.object({
+  body: z.object({
+    templateId: numericId,
+    templateVersionId: numericId,
+  }),
+})
 
 const TemplatesController = {
   async getV1Template(req, res) {
-    const templateVersionId = req.params.Template_version_id
-    const templateId = req.query.id
-    if (!/^[0-9]+$/.test(templateVersionId) || !/^[0-9]+$/.test(templateId)) {
-      logger.err(
-        { templateVersionId, templateId },
-        'invalid template id or version'
-      )
-      return res.sendStatus(400)
-    }
+    const {
+      params: { Template_version_id: templateVersionId },
+      query: { id: templateId },
+    } = parseReq(req, getV1TemplateSchema)
     const data = {
       templateVersionId,
       templateId,
@@ -35,14 +45,17 @@ const TemplatesController = {
   },
 
   async createProjectFromV1Template(req, res) {
+    const {
+      body: { templateId, templateVersionId },
+    } = parseReq(req, createProjectFromV1TemplateSchema)
     const userId = SessionManager.getLoggedInUserId(req.session)
     const project = await TemplatesManager.promises.createProjectFromV1Template(
       req.body.brandVariationId,
       req.body.compiler,
       req.body.mainFile,
-      req.body.templateId,
+      templateId,
       req.body.templateName,
-      req.body.templateVersionId,
+      templateVersionId,
       userId,
       req.body.imageName
     )

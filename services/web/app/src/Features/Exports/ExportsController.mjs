@@ -74,9 +74,20 @@ async function exportProject(req, res, next) {
   }
 }
 
+const exportStatusSchema = z.object({
+  params: z.object({
+    export_id: zz.submissionId(),
+  }),
+  query: z.object({
+    token: z.string().optional(),
+  }),
+})
+
 async function exportStatus(req, res) {
-  const { export_id: exportId } = req.params
-  const { token } = req.query
+  const {
+    params: { export_id: exportId },
+    query: { token },
+  } = parseReq(req, exportStatusSchema)
   if (!token && settings.exports?.requireToken) {
     return res.status(403).json({
       export_json: {

@@ -203,10 +203,10 @@ describe('ExportsController', function () {
       json: sinon.stub(),
     }
 
-    ctx.req.params = { project_id: projectId, export_id: 897 }
+    ctx.req.params = { project_id: projectId, export_id: '897' }
     ctx.req.query = { token: 'mock-token' }
     await ctx.controller.exportStatus(ctx.req, res)
-    expect(ctx.handler.fetchExport).to.have.been.calledWith(897, 'mock-token')
+    expect(ctx.handler.fetchExport).to.have.been.calledWith('897', 'mock-token')
     expect(res.json.args[0][0]).to.deep.equal({
       export_json: {
         status_summary: 'completed',
@@ -223,7 +223,7 @@ describe('ExportsController', function () {
 
   describe('exportStatus token validation', function () {
     beforeEach(function (ctx) {
-      ctx.req.params = { project_id: projectId, export_id: 897 }
+      ctx.req.params = { project_id: projectId, export_id: '897' }
       ctx.handler.fetchExport = sinon.stub().resolves(
         `{
   "id":897,
@@ -264,7 +264,7 @@ describe('ExportsController', function () {
         }
         await ctx.controller.exportStatus(ctx.req, res)
         expect(ctx.handler.fetchExport).to.have.been.calledWith(
-          897,
+          '897',
           'mock-token'
         )
       })
@@ -277,7 +277,10 @@ describe('ExportsController', function () {
           json: sinon.stub(),
         }
         await ctx.controller.exportStatus(ctx.req, res)
-        expect(ctx.handler.fetchExport).to.have.been.calledWith(897, undefined)
+        expect(ctx.handler.fetchExport).to.have.been.calledWith(
+          '897',
+          undefined
+        )
       })
     })
 
@@ -289,7 +292,7 @@ describe('ExportsController', function () {
           .rejects(new Error('Request failed: 404'))
         await ctx.controller.exportStatus(ctx.req, ctx.res)
         expect(ctx.handler.fetchExport).to.have.been.calledWith(
-          897,
+          '897',
           'wrong-token'
         )
         expect(ctx.res.json.args[0][0]).to.deep.equal({
@@ -299,6 +302,46 @@ describe('ExportsController', function () {
           },
         })
       })
+    })
+  })
+
+  describe('exportStatus export_id validation', function () {
+    beforeEach(function (ctx) {
+      ctx.handler.fetchExport = sinon.stub().resolves('{}')
+      ctx.req.query = { token: 'mock-token' }
+    })
+
+    it('should reject an invalid encoded export_id without calling v1', async function (ctx) {
+      ctx.req.params = {
+        project_id: projectId,
+        export_id: '..%2f..%2f..%2fv2%2fusers',
+      }
+      await ctx.controller.exportStatus(ctx.req, ctx.res, ctx.next)
+      expect(ctx.next).to.have.been.calledWith(sinon.match.instanceOf(Error))
+      expect(ctx.handler.fetchExport).not.to.have.been.called
+    })
+
+    it('should reject an export_id with invalid characters without calling v1', async function (ctx) {
+      ctx.req.params = {
+        project_id: projectId,
+        export_id: '../../../etc/passwd',
+      }
+      await ctx.controller.exportStatus(ctx.req, ctx.res, ctx.next)
+      expect(ctx.next).to.have.been.calledWith(sinon.match.instanceOf(Error))
+      expect(ctx.handler.fetchExport).not.to.have.been.called
+    })
+
+    it('should accept a well-formed export_id', async function (ctx) {
+      ctx.req.params = {
+        project_id: projectId,
+        export_id: 'abc-123_DEF',
+      }
+      await ctx.controller.exportStatus(ctx.req, ctx.res, ctx.next)
+      expect(ctx.next).not.to.have.been.called
+      expect(ctx.handler.fetchExport).to.have.been.calledWith(
+        'abc-123_DEF',
+        'mock-token'
+      )
     })
   })
 
