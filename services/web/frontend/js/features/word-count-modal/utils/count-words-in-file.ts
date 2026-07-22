@@ -1,10 +1,14 @@
-import { LaTeXLanguage } from '@/features/source-editor/languages/latex/latex-language'
 import { WordCountData } from '@/features/word-count-modal/components/word-count-data'
 import { NodeType, SyntaxNodeRef } from '@lezer/common'
 import { debugConsole } from '@/utils/debugging'
 import { findPreambleExtent } from '@/features/word-count-modal/utils/find-preamble-extent'
 import { Segmenters } from './segmenters'
-import { ProjectSnapshot } from '@/infrastructure/project-snapshot'
+import {
+  IncludedFile,
+  IncludedFileSnapshot,
+  readIncludedFilePath,
+  walkIncludedFiles,
+} from '@/features/source-editor/utils/walk-included-files'
 
 // const whiteSpaceRe = /^\s$/
 
@@ -109,27 +113,23 @@ type TextNode = {
 
 export const countWordsInFile = (
   data: WordCountData,
-  projectSnapshot: ProjectSnapshot,
+  projectSnapshot: IncludedFileSnapshot,
   relativePath: string,
   basePath: string,
   segmenters: Segmenters
 ) => {
-  const docPath = projectSnapshot.locateFile(relativePath, basePath)
-  if (!docPath) {
-    debugConsole.warn(`Couldn't find ${relativePath} from ${basePath}`)
-    return
-  }
+  walkIncludedFiles(projectSnapshot, relativePath, basePath, (file, recurse) =>
+    countWordsInParsedFile(data, file, recurse, segmenters)
+  )
+}
 
-  const content = projectSnapshot.getDocContents(docPath)
-  if (!content) {
-    debugConsole.warn(`No doc content in ${docPath}`)
-    return
-  }
-
+const countWordsInParsedFile = (
+  data: WordCountData,
+  { docPath, content, tree }: IncludedFile,
+  recurse: (includePath: string) => void,
+  segmenters: Segmenters
+) => {
   debugConsole.log(`Counting words in ${docPath}`)
-
-  // TODO: language from file extension
-  const tree = LaTeXLanguage.parser.parse(content)
 
   let currentContext: Context = 'text'
 
@@ -255,10 +255,10 @@ export const countWordsInFile = (
       return false
     },
     'IncludeArgument InputArgument SubfileArgument'(nodeRef) {
-      const path = content.substring(nodeRef.from + 1, nodeRef.to - 1)
-      debugConsole.log(path)
-      if (path) {
-        countWordsInFile(data, projectSnapshot, path, docPath, segmenters)
+      const includedPath = readIncludedFilePath(content, nodeRef)
+      debugConsole.log(includedPath)
+      if (includedPath) {
+        recurse(includedPath)
       }
     },
     'BlankLine LineBreak'(nodeRef) {
