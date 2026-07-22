@@ -139,12 +139,22 @@ function setBlobCacheHeaders(res, etag) {
   res.set('ETag', etag)
 }
 
+const proxyToHistoryApiSchema = z.object({
+  // both project_id and Project_id are accepted for backwards compatibility
+  params: z.object({
+    Project_id: zz.objectId().optional(),
+    project_id: zz.objectId().optional(),
+    doc_id: zz.objectId().optional(),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  * @param {any} next
  */
 async function proxyToHistoryApi(req, res, next) {
+  parseReq(req, proxyToHistoryApiSchema)
   const userId = SessionManager.getLoggedInUserId(req.session)
   const url = settings.apis.project_history.url + req.url
 
@@ -173,12 +183,19 @@ async function proxyToHistoryApi(req, res, next) {
   }
 }
 
+const proxyToHistoryApiAndInjectUserDetailsSchema = z.object({
+  params: z.object({
+    Project_id: zz.objectId(),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  * @param {any} next
  */
 async function proxyToHistoryApiAndInjectUserDetails(req, res, next) {
+  parseReq(req, proxyToHistoryApiAndInjectUserDetailsSchema)
   const userId = SessionManager.getLoggedInUserId(req.session)
   const url = settings.apis.project_history.url + req.url
   const body = await fetchJson(url, {
@@ -189,6 +206,16 @@ async function proxyToHistoryApiAndInjectUserDetails(req, res, next) {
   res.json(data)
 }
 
+const resyncProjectHistorySchema = z.object({
+  params: z.object({
+    Project_id: zz.objectId(),
+  }),
+  body: z.object({
+    historyRangesMigration: z.enum(['forwards', 'backwards']).optional(),
+    resyncProjectStructureOnly: z.boolean().default(false),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
@@ -197,14 +224,11 @@ async function proxyToHistoryApiAndInjectUserDetails(req, res, next) {
 async function resyncProjectHistory(req, res, next) {
   // increase timeout to 6 minutes
   res.setTimeout(6 * 60 * 1000)
-  const projectId = req.params.Project_id
-  const opts = {}
-  const historyRangesMigration = req.body.historyRangesMigration
-  if (historyRangesMigration) {
-    opts.historyRangesMigration = historyRangesMigration
-  }
-  if (req.body.resyncProjectStructureOnly) {
-    opts.resyncProjectStructureOnly = req.body.resyncProjectStructureOnly
+  const { params, body } = parseReq(req, resyncProjectHistorySchema)
+  const projectId = params.Project_id
+  const opts = {
+    historyRangesMigration: body.historyRangesMigration,
+    resyncProjectStructureOnly: body.resyncProjectStructureOnly,
   }
 
   try {
@@ -223,14 +247,25 @@ async function resyncProjectHistory(req, res, next) {
   res.sendStatus(204)
 }
 
+const restoreFileFromV2Schema = z.object({
+  params: z.object({
+    project_id: zz.objectId(),
+  }),
+  body: z.object({
+    version: z.number().int().min(0),
+    pathname: zz.filepath(),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  * @param {any} next
  */
 async function restoreFileFromV2(req, res, next) {
-  const { project_id: projectId } = req.params
-  const { version, pathname } = req.body
+  const { params, body } = parseReq(req, restoreFileFromV2Schema)
+  const { project_id: projectId } = params
+  const { version, pathname } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
 
   const entity = await RestoreManager.promises.restoreFileFromV2(
@@ -259,14 +294,25 @@ async function restoreFileFromV2(req, res, next) {
   })
 }
 
+const revertFileSchema = z.object({
+  params: z.object({
+    project_id: zz.objectId(),
+  }),
+  body: z.object({
+    version: z.number().int().min(0),
+    pathname: zz.filepath(),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  * @param {any} next
  */
 async function revertFile(req, res, next) {
-  const { project_id: projectId } = req.params
-  const { version, pathname } = req.body
+  const { params, body } = parseReq(req, revertFileSchema)
+  const { project_id: projectId } = params
+  const { version, pathname } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
 
   const entity = await RestoreManager.promises.revertFile(
@@ -296,14 +342,24 @@ async function revertFile(req, res, next) {
   })
 }
 
+const revertProjectSchema = z.object({
+  params: z.object({
+    project_id: zz.objectId(),
+  }),
+  body: z.object({
+    version: z.number().int().min(0),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  * @param {any} next
  */
 async function revertProject(req, res, next) {
-  const { project_id: projectId } = req.params
-  const { version } = req.body
+  const { params, body } = parseReq(req, revertProjectSchema)
+  const { project_id: projectId } = params
+  const { version } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
 
   const reverted = await RestoreManager.promises.revertProject(
@@ -327,13 +383,20 @@ async function revertProject(req, res, next) {
   res.json(reverted)
 }
 
+const getLabelsSchema = z.object({
+  params: z.object({
+    Project_id: zz.objectId(),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  * @param {any} next
  */
 async function getLabels(req, res, next) {
-  const projectId = req.params.Project_id
+  const { params } = parseReq(req, getLabelsSchema)
+  const projectId = params.Project_id
 
   let labels = await fetchJson(
     `${settings.apis.project_history.url}/project/${projectId}/labels`
@@ -343,14 +406,25 @@ async function getLabels(req, res, next) {
   res.json(labels)
 }
 
+const createLabelSchema = z.object({
+  params: z.object({
+    Project_id: zz.objectId(),
+  }),
+  body: z.object({
+    comment: z.string(),
+    version: z.number().int().min(0),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  * @param {any} next
  */
 async function createLabel(req, res, next) {
-  const projectId = req.params.Project_id
-  const { comment, version } = req.body
+  const { params, body } = parseReq(req, createLabelSchema)
+  const projectId = params.Project_id
+  const { comment, version } = body
   const userId = SessionManager.getLoggedInUserId(req.session)
 
   let label = await fetchJson(
@@ -444,13 +518,21 @@ function _displayNameForUser(user) {
   return name
 }
 
+const deleteLabelSchema = z.object({
+  params: z.object({
+    Project_id: zz.objectId(),
+    label_id: zz.objectId(),
+  }),
+})
+
 /**
  * @param {any} req
  * @param {any} res
  * @param {any} next
  */
 async function deleteLabel(req, res, next) {
-  const { Project_id: projectId, label_id: labelId } = req.params
+  const { params } = parseReq(req, deleteLabelSchema)
+  const { Project_id: projectId, label_id: labelId } = params
   const userId = SessionManager.getLoggedInUserId(req.session)
 
   const project = await ProjectGetter.promises.getProject(projectId, {
