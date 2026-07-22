@@ -26,6 +26,7 @@ function levelToPreferences(
         commentOnInvitedProject: true,
         repliesOnAuthoredThread: true,
         repliesOnParticipatingThread: true,
+        mentionsInThread: true,
         commentResolvedOnAuthoredThread: true,
         commentResolvedOnParticipatingThread: true,
         commentReopenedOnAuthoredThread: true,
@@ -41,6 +42,7 @@ function levelToPreferences(
         commentOnInvitedProject: false,
         repliesOnAuthoredThread: true,
         repliesOnParticipatingThread: true,
+        mentionsInThread: true,
         commentResolvedOnAuthoredThread: true,
         commentResolvedOnParticipatingThread: true,
         commentReopenedOnAuthoredThread: true,
@@ -56,6 +58,7 @@ function levelToPreferences(
         commentOnInvitedProject: false,
         repliesOnAuthoredThread: false,
         repliesOnParticipatingThread: false,
+        mentionsInThread: false,
         commentResolvedOnAuthoredThread: false,
         commentResolvedOnParticipatingThread: false,
         commentReopenedOnAuthoredThread: false,
@@ -93,6 +96,7 @@ function preferencesToLevel(
   const anyParticipantNotifications =
     preferences.repliesOnAuthoredThread ||
     preferences.repliesOnParticipatingThread ||
+    preferences.mentionsInThread ||
     preferences.trackChangesAcceptedOnAuthoredChange ||
     preferences.trackChangesRejectedOnAuthoredChange ||
     preferences.commentResolvedOnAuthoredThread ||
