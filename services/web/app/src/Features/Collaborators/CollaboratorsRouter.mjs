@@ -36,6 +36,10 @@ const rateLimiters = {
     points: 25, // just over view-project-invite
     duration: 60,
   }),
+  requestAccess: new RateLimiter('request-access', {
+    points: 10,
+    duration: 60 * 10,
+  }),
 }
 
 export default {
@@ -66,6 +70,37 @@ export default {
       AuthorizationMiddleware.blockRestrictedUserFromProject,
       AuthorizationMiddleware.ensureUserCanReadProject,
       CollaboratorsController.getAllMembers
+    )
+
+    webRouter.post(
+      '/project/:Project_id/request-access',
+      AuthenticationController.requireLogin(),
+      AuthorizationMiddleware.ensureUserCanReadProject,
+      RateLimiterMiddleware.rateLimit(rateLimiters.requestAccess, {
+        params: ['Project_id'],
+      }),
+      CollaboratorsController.requestAccess
+    )
+
+    webRouter.get(
+      '/project/:Project_id/access-requests',
+      AuthenticationController.requireLogin(),
+      AuthorizationMiddleware.ensureUserCanAdminProject,
+      CollaboratorsController.getAccessRequests
+    )
+
+    webRouter.delete(
+      '/project/:Project_id/access-requests/:user_id',
+      AuthenticationController.requireLogin(),
+      AuthorizationMiddleware.ensureUserCanAdminProject,
+      CollaboratorsController.declineAccessRequest
+    )
+
+    webRouter.post(
+      '/project/:Project_id/access-requests/:user_id/grant',
+      AuthenticationController.requireLogin(),
+      AuthorizationMiddleware.ensureUserCanAdminProject,
+      CollaboratorsController.grantAccessRequest
     )
 
     webRouter.post(

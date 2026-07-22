@@ -1,4 +1,7 @@
-import { ProjectMember } from '@/shared/context/types/project-metadata'
+import {
+  ProjectMember,
+  RequestedPrivilegeLevel,
+} from '@/shared/context/types/project-metadata'
 import {
   deleteJSON,
   getJSON,
@@ -79,6 +82,36 @@ export function removeMemberFromProject(
   return deleteJSON(`/project/${projectId}/users/${member._id}`)
 }
 
+export function requestAccess(
+  projectId: string,
+  privilegeLevel: RequestedPrivilegeLevel
+) {
+  return postJSON(`/project/${projectId}/request-access`, {
+    body: { privilegeLevel },
+  })
+}
+
+export function declineAccessRequest(
+  projectId: string,
+  userId: string,
+  notify: boolean
+) {
+  return deleteJSON(`/project/${projectId}/access-requests/${userId}`, {
+    body: { notify },
+  })
+}
+
+export function grantAccessRequest(
+  projectId: string,
+  userId: string,
+  privilegeLevel: RequestedPrivilegeLevel,
+  notify: boolean
+) {
+  return postJSON(`/project/${projectId}/access-requests/${userId}/grant`, {
+    body: { privilegeLevel, notify },
+  })
+}
+
 export function transferProjectOwnership(
   projectId: string,
   member: ProjectMember
@@ -101,6 +134,10 @@ export function setPublicAccessLevel(
 
 export function listProjectMembers(projectId: string) {
   return getJSON(`/project/${projectId}/members`)
+}
+
+export function listProjectAccessRequests(projectId: string) {
+  return getJSON(`/project/${projectId}/access-requests`)
 }
 
 export function listProjectInvites(projectId: string) {

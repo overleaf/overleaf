@@ -237,6 +237,7 @@ export interface Meta {
   'ol-odcData': OnboardingFormData
   'ol-otMigrationStage': number
   'ol-overallThemes': OverallThemeMeta[]
+  'ol-ownerHasSharingUpdates': boolean
   'ol-ownerIsManaged': boolean
   'ol-pages': number
   'ol-passwordStrengthOptions': PasswordStrengthOptions

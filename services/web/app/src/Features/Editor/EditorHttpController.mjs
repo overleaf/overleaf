@@ -111,13 +111,23 @@ async function _buildJoinProjectView(req, projectId, userId) {
       await projectAccess.loadOwnerAndInvitedMembers())
     invites = await CollaboratorsInviteGetter.promises.getAllInvites(projectId)
   }
+  const accessRequestData = {}
+  if (privilegeLevel === PrivilegeLevels.OWNER) {
+    accessRequestData.editAccessRequests =
+      await projectAccess.loadAccessRequestsView()
+  } else if (userId) {
+    // Caller's own request only, so safe for restricted (link-share) viewers.
+    accessRequestData.myAccessRequest =
+      projectAccess.getAccessRequestForUser(userId)
+  }
   return {
     project: ProjectEditorHandler.buildProjectModelView(
       project,
       ownerMember,
       members,
       invites,
-      isRestrictedUser
+      isRestrictedUser,
+      accessRequestData
     ),
     privilegeLevel,
     isTokenMember,

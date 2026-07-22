@@ -68,6 +68,7 @@ describe('EditorHttpController', function () {
     }
     const members = ctx.members
     const ownerMember = ctx.ownerMember
+    const ownerId = ctx.ownerId
     ctx.CollaboratorsGetter = {
       ProjectAccess: class {
         loadOwnerAndInvitedMembers() {
@@ -84,6 +85,22 @@ describe('EditorHttpController', function () {
 
         isUserInvitedMember() {
           return false
+        }
+
+        getOwnerId() {
+          return ownerId
+        }
+
+        loadAccessRequestsView() {
+          return []
+        }
+
+        getAccessRequestForUser() {
+          return null
+        }
+
+        privilegeLevelForUser() {
+          return 'readOnly'
         }
       },
       promises: {
@@ -362,6 +379,40 @@ describe('EditorHttpController', function () {
           isRestrictedUser: true,
           isTokenMember: false,
           isInvitedMember: false,
+        })
+      })
+    })
+
+    describe('with a restricted user who has a pending access request', function () {
+      beforeEach(async function (ctx) {
+        ctx.accessRequest = {
+          privilegeLevel: 'readAndWrite',
+          requestedAt: new Date(),
+        }
+        sinon
+          .stub(
+            ctx.CollaboratorsGetter.ProjectAccess.prototype,
+            'getAccessRequestForUser'
+          )
+          .returns(ctx.accessRequest)
+        ctx.ProjectEditorHandler.buildProjectModelView.returns(
+          ctx.reducedProjectView
+        )
+        ctx.AuthorizationManager.isRestrictedUser.returns(true)
+        ctx.AuthorizationManager.promises.getPrivilegeLevelForProjectWithProjectAccess.resolves(
+          'readOnly'
+        )
+        await new Promise(resolve => {
+          ctx.res.callback = resolve
+          ctx.EditorHttpController.joinProject(ctx.req, ctx.res)
+        })
+      })
+
+      it('surfaces the caller’s own access request in the project view', function (ctx) {
+        expect(
+          ctx.ProjectEditorHandler.buildProjectModelView
+        ).to.have.been.calledWith(ctx.project, ctx.ownerMember, [], [], true, {
+          myAccessRequest: ctx.accessRequest,
         })
       })
     })

@@ -13,8 +13,10 @@ import {
 } from '@/shared/components/ol/ol-dropdown-menu'
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
 import LinkSharing from '@/features/share-project-modal/components/link-sharing'
+import Notification from '@/shared/components/notification'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { useProjectContext } from '@/shared/context/project-context'
+import type { ShareModalScreen } from '@/features/share-project-modal/components/share-project-modal-content'
 import {
   SharingLinkData,
   SharingLinkPrivileges,
@@ -34,7 +36,7 @@ import { sendMB } from '@/infrastructure/event-tracking'
 import { debugConsole } from '@/utils/debugging'
 
 type ProjectAccessProps = {
-  setIsInvitedPeopleScreen: React.Dispatch<React.SetStateAction<boolean>>
+  setScreen: React.Dispatch<React.SetStateAction<ShareModalScreen>>
   invitedPeopleCount: number
 }
 
@@ -43,10 +45,7 @@ export type PendingAccessType = ExcludeStrict<
   'legacyLinkSharing'
 >
 
-function ProjectAccess({
-  setIsInvitedPeopleScreen,
-  invitedPeopleCount,
-}: ProjectAccessProps) {
+function ProjectAccess({ setScreen, invitedPeopleCount }: ProjectAccessProps) {
   const { t } = useTranslation()
   const [pendingAccess, setPendingAccess] = useState<PendingAccessType | null>(
     null
@@ -67,7 +66,10 @@ function ProjectAccess({
     sharingLinkData,
     setSharingLinkData,
   } = useShareProjectContext()
-  const { projectId } = useProjectContext()
+  const { projectId, project } = useProjectContext()
+  const accessRequestCount = isProjectOwner
+    ? (project?.editAccessRequests?.length ?? 0)
+    : 0
 
   const privileges = sharingLinkData?.privileges
 
@@ -211,6 +213,24 @@ function ProjectAccess({
 
   return (
     <>
+      {accessRequestCount > 0 && (
+        <Notification
+          type="info"
+          className="mt-3"
+          content={t('n_people_requested_access', {
+            count: accessRequestCount,
+          })}
+          action={
+            <OLButton
+              variant="secondary"
+              size="sm"
+              onClick={() => setScreen('access-requests')}
+            >
+              {t('review')}
+            </OLButton>
+          }
+        />
+      )}
       <h3 className="h4 fw-normal mt-3 mb-2 pt-1">{t('project_access')}</h3>
       <ShareProjectModalRow>
         <div className="d-inline-flex align-items-center h5 m-0 gap-2">
@@ -224,7 +244,7 @@ function ProjectAccess({
         <OLButton
           variant="ghost"
           trailingIcon="chevron_right"
-          onClick={() => setIsInvitedPeopleScreen(true)}
+          onClick={() => setScreen('invited-people')}
         >
           {t('manage_access')}
         </OLButton>

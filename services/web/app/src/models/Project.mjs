@@ -32,6 +32,13 @@ export const ProjectSchema = new Schema(
     readOnly_refs: [{ type: ObjectId, ref: 'User' }],
     pendingEditor_refs: [{ type: ObjectId, ref: 'User' }],
     pendingReviewer_refs: [{ type: ObjectId, ref: 'User' }],
+    editAccessRequests: [
+      {
+        userId: { type: ObjectId, ref: 'User' },
+        privilegeLevel: { type: String },
+        requestedAt: { type: Date, default: () => new Date() },
+      },
+    ],
     rootDoc_id: { type: ObjectId },
     rootFolder: [FolderSchema],
     mainBibliographyDoc_id: { type: ObjectId },

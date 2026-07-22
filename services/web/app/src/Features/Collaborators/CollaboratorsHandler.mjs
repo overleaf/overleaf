@@ -1,4 +1,5 @@
 import { callbackify } from 'node:util'
+import mongodb from 'mongodb-legacy'
 import OError from '@overleaf/o-error'
 import { Project } from '../../models/Project.mjs'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
@@ -14,6 +15,8 @@ import EditorRealTimeController from '../Editor/EditorRealTimeController.mjs'
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 import AsyncLocalStorage from '../../infrastructure/AsyncLocalStorage.mjs'
 
+const { ObjectId } = mongodb
+
 export default {
   userIsTokenMember: callbackify(userIsTokenMember),
   removeUserFromProject: callbackify(removeUserFromProject),
@@ -27,6 +30,8 @@ export default {
     addUserIdToProject,
     transferProjects,
     setCollaboratorPrivilegeLevel,
+    requestAccess,
+    declineAccessRequest,
     convertTrackChangesToExplicitFormat,
   },
 }
@@ -43,6 +48,7 @@ async function removeUserFromProject(projectId, userId) {
           reviewer_refs: userId,
           pendingEditor_refs: userId,
           pendingReviewer_refs: userId,
+          editAccessRequests: { userId },
           tokenAccessReadOnly_refs: userId,
           tokenAccessReadAndWrite_refs: userId,
           archived: userId,
@@ -263,6 +269,15 @@ async function transferProjects(fromUserId, toUserId) {
     }
   ).exec()
 
+  // Edit access requests are ephemeral signals; drop them on the source user
+  // rather than migrating them to the destination user.
+  await Project.updateMany(
+    { 'editAccessRequests.userId': fromUserId },
+    {
+      $pull: { editAccessRequests: { userId: fromUserId } },
+    }
+  ).exec()
+
   // Flush in background, no need to block on this
   _flushProjects(projectIds).catch(err => {
     logger.err(
@@ -280,14 +295,18 @@ async function setCollaboratorPrivilegeLevel(
   auditInfo = {}
 ) {
   AsyncLocalStorage.removeItem(`projectAccess:${projectId}`)
-  // Make sure we're only updating the project if the user is already a
-  // collaborator
+  // Make sure we're only updating the project if the user holds some form
+  // of access already — invited collaborator OR token-share viewer.
+  // Token-share entries can show up here when the owner promotes a
+  // pending access requester who reached the project via the link.
   const query = {
     _id: projectId,
     $or: [
       { collaberator_refs: userId },
       { readOnly_refs: userId },
       { reviewer_refs: userId },
+      { tokenAccessReadOnly_refs: userId },
+      { tokenAccessReadAndWrite_refs: userId },
     ],
   }
   let update
@@ -300,6 +319,9 @@ async function setCollaboratorPrivilegeLevel(
           pendingEditor_refs: userId,
           reviewer_refs: userId,
           pendingReviewer_refs: userId,
+          editAccessRequests: { userId },
+          tokenAccessReadOnly_refs: userId,
+          tokenAccessReadAndWrite_refs: userId,
         },
         $addToSet: { collaberator_refs: userId },
       }
@@ -312,6 +334,9 @@ async function setCollaboratorPrivilegeLevel(
           pendingEditor_refs: userId,
           collaberator_refs: userId,
           pendingReviewer_refs: userId,
+          editAccessRequests: { userId },
+          tokenAccessReadOnly_refs: userId,
+          tokenAccessReadAndWrite_refs: userId,
         },
         $addToSet: { reviewer_refs: userId },
       }
@@ -335,7 +360,13 @@ async function setCollaboratorPrivilegeLevel(
     }
     case PrivilegeLevels.READ_ONLY: {
       update = {
-        $pull: { collaberator_refs: userId, reviewer_refs: userId },
+        $pull: {
+          collaberator_refs: userId,
+          reviewer_refs: userId,
+          editAccessRequests: { userId },
+          tokenAccessReadOnly_refs: userId,
+          tokenAccessReadAndWrite_refs: userId,
+        },
         $addToSet: { readOnly_refs: userId },
       }
 
@@ -379,6 +410,85 @@ async function setCollaboratorPrivilegeLevel(
       'toggle-track-changes',
       update.$set.track_changes
     )
+  }
+}
+
+// Records a viewer (invited or token-share) or reviewer asking the owner for
+// a higher privilege level. Authorization (the caller can read the project)
+// is enforced by the `ensureUserCanReadProject` route middleware, and the
+// controller checks that the requested level is one they may ask for.
+// `isNew` is true only when this is the first request for that user —
+// re-submissions (e.g. changing the requested level) return isNew=false so
+// emails/analytics fire exactly once per request.
+async function requestAccess(projectId, userId, privilegeLevel) {
+  if (
+    privilegeLevel !== PrivilegeLevels.READ_AND_WRITE &&
+    privilegeLevel !== PrivilegeLevels.REVIEW
+  ) {
+    throw new OError(`invalid requested privilege level: ${privilegeLevel}`)
+  }
+  AsyncLocalStorage.removeItem(`projectAccess:${projectId}`)
+  // Aggregation-pipeline updates are not cast by Mongoose, so normalise the
+  // id to an ObjectId ourselves — otherwise a session-string userId would be
+  // stored as a string and later `$pull`s (which use ObjectIds) wouldn't
+  // match, leaving the request behind after a grant/decline.
+  const userIdObjectId = new ObjectId(userId)
+  // Rebuild the array in a single atomic pipeline update: drop any existing
+  // entry for this user and append the new one. This can't race into a
+  // duplicate entry (it's one write) and doubles as the "update in place"
+  // path for re-submissions. `returnDocument: 'before'` lets us tell whether
+  // the user already had a request, so emails/analytics fire once.
+  const before = await Project.findOneAndUpdate(
+    { _id: projectId },
+    [
+      {
+        $set: {
+          editAccessRequests: {
+            $concatArrays: [
+              {
+                $filter: {
+                  input: { $ifNull: ['$editAccessRequests', []] },
+                  cond: { $ne: ['$$this.userId', userIdObjectId] },
+                },
+              },
+              [
+                {
+                  userId: userIdObjectId,
+                  privilegeLevel,
+                  requestedAt: new Date(),
+                },
+              ],
+            ],
+          },
+        },
+      },
+    ],
+    { projection: { editAccessRequests: 1 }, returnDocument: 'before' }
+  ).exec()
+  if (!before) {
+    return { isNew: false }
+  }
+  const isNew = !before.editAccessRequests?.some(
+    request => request.userId.toString() === userId.toString()
+  )
+  return { isNew }
+}
+
+async function declineAccessRequest(projectId, userId) {
+  AsyncLocalStorage.removeItem(`projectAccess:${projectId}`)
+  // Pull the entry and report back the level that was requested (from the
+  // pre-image) so the caller can record it / notify the requester.
+  const before = await Project.findOneAndUpdate(
+    { _id: projectId },
+    { $pull: { editAccessRequests: { userId } } },
+    { projection: { editAccessRequests: 1 }, returnDocument: 'before' }
+  ).exec()
+  const removedRequest = before?.editAccessRequests?.find(
+    request => request.userId.toString() === userId.toString()
+  )
+  return {
+    removed: Boolean(removedRequest),
+    privilegeLevel: removedRequest?.privilegeLevel,
   }
 }
 

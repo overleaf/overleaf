@@ -956,6 +956,16 @@ const _ProjectController = {
         await Modules.promises.hooks.fire('assignLabsSplitTests', req, res)
       }
 
+      // "Request edit access" is gated on the project owner's
+      // `sharing-updates` bucket so a viewer outside the experiment can
+      // still ask whenever the owner can act on it inside the new
+      // share modal.
+      const ownerHasSharingUpdates =
+        await SplitTestHandler.promises.featureFlagEnabledForUser(
+          project.owner_ref.toString(),
+          'sharing-updates'
+        )
+
       res.render(template, {
         title: project.name,
         priority_title: true,
@@ -1052,6 +1062,7 @@ const _ProjectController = {
         },
         standardPlanPricing,
         recommendedCurrency,
+        ownerHasSharingUpdates,
       })
       timer.done()
     } catch (err) {

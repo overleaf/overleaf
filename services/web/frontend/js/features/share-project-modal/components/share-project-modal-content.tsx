@@ -32,6 +32,11 @@ const ReadOnlyTokenLink = lazy(() =>
 
 const ShareModalBody = lazy(() => import('./share-modal-body'))
 
+export type ShareModalScreen =
+  | 'project-access'
+  | 'invited-people'
+  | 'access-requests'
+
 type ShareProjectModalContentProps = {
   cancel: () => void
   onShow: () => void
@@ -78,18 +83,19 @@ function ShareProjectModalContentInner({
   // token links are copied from their own inputs, so hide it when the new-link
   // feature is off.
   const isNewLinkEnabled = useFeatureFlag('sharing-updates-new-link')
-  const [isInvitedPeopleScreen, setIsInvitedPeopleScreen] = useState(false)
   const { successActionMessage, projectAccess } = useShareProjectContext()
+  const [screen, setScreen] = useState<ShareModalScreen>('project-access')
   const { isRestrictedTokenMember, isProjectOwner } = useEditorContext()
+  const isSubScreen = screen !== 'project-access'
 
   return (
     <>
       <OLModalHeader>
         <div className="d-flex flex-grow-1 justify-content-between">
-          {isSharingUpdatesEnabled && isInvitedPeopleScreen ? (
+          {isSharingUpdatesEnabled && isSubScreen ? (
             <OLButton
               variant="ghost"
-              onClick={() => setIsInvitedPeopleScreen(false)}
+              onClick={() => setScreen('project-access')}
               leadingIcon="arrow_back_ios_new"
             >
               {t('back')}
@@ -119,8 +125,8 @@ function ShareProjectModalContentInner({
               <ReadOnlyTokenLink />
             ) : (
               <ShareModalBody
-                isInvitedPeopleScreen={isInvitedPeopleScreen}
-                setIsInvitedPeopleScreen={setIsInvitedPeopleScreen}
+                screen={screen}
+                setScreen={setScreen}
                 error={error}
               />
             )}
@@ -141,7 +147,7 @@ function ShareProjectModalContentInner({
           {isSharingUpdatesEnabled ? (
             <>
               {isNewLinkEnabled &&
-                !isInvitedPeopleScreen &&
+                !isSubScreen &&
                 projectAccess &&
                 (projectAccess === 'onlyInvitedPeople' ||
                   projectAccess.startsWith('anyoneInXyzWithTheLink') ||

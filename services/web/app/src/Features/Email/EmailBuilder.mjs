@@ -768,6 +768,106 @@ templates.ownershipTransferConfirmationNewOwner = ctaTemplate({
   },
 })
 
+templates.accessRequest = ctaTemplate({
+  subject(opts) {
+    const requester = _.escape(
+      _formatUserNameAndEmail(opts.requester, 'A collaborator')
+    )
+    const role = opts.privilegeLevel === 'review' ? 'reviewer' : 'editor'
+    const projectName = _.escape(
+      SpamSafe.safeProjectName(opts.project.name, 'your project')
+    )
+    return `${requester} requested ${role} access to ${projectName} - ${settings.appName}`
+  },
+  title(opts) {
+    const projectName = _.escape(
+      SpamSafe.safeProjectName(opts.project.name, 'Your project')
+    )
+    return `${projectName} - Access request`
+  },
+  message(opts, isPlainText) {
+    const requester = _.escape(
+      _formatUserNameAndEmail(opts.requester, 'A collaborator')
+    )
+    const role = opts.privilegeLevel === 'review' ? 'reviewer' : 'editor'
+    const projectName = _.escape(
+      SpamSafe.safeProjectName(opts.project.name, 'your project')
+    )
+    const projectNameDisplay = isPlainText
+      ? projectName
+      : `<b>${projectName}</b>`
+    return [
+      `${requester} has requested ${role} access to ${projectNameDisplay}.`,
+      `Open the share settings to grant access, or dismiss the request if you don’t want to share.`,
+    ]
+  },
+  ctaText(opts) {
+    return 'Manage sharing'
+  },
+  ctaURL(opts) {
+    return `${settings.siteUrl}/project/${opts.project._id.toString()}?share=1`
+  },
+})
+
+templates.accessRequestGranted = ctaTemplate({
+  subject(opts) {
+    const projectName = _.escape(
+      SpamSafe.safeProjectName(opts.project.name, 'a project')
+    )
+    return `Your access request to ${projectName} was granted - ${settings.appName}`
+  },
+  title(opts) {
+    const projectName = _.escape(
+      SpamSafe.safeProjectName(opts.project.name, 'A project')
+    )
+    return `${projectName} - Access granted`
+  },
+  message(opts, isPlainText) {
+    const role = opts.privilegeLevel === 'review' ? 'reviewer' : 'editor'
+    const projectName = _.escape(
+      SpamSafe.safeProjectName(opts.project.name, 'a project')
+    )
+    const projectNameDisplay = isPlainText
+      ? projectName
+      : `<b>${projectName}</b>`
+    return [
+      `Your access request to ${projectNameDisplay} was granted. You now have ${role} access.`,
+    ]
+  },
+  ctaText(opts) {
+    return 'Open project'
+  },
+  ctaURL(opts) {
+    return `${settings.siteUrl}/project/${opts.project._id.toString()}`
+  },
+})
+
+templates.accessRequestDeclined = NoCTAEmailTemplate({
+  subject(opts) {
+    const projectName = _.escape(
+      SpamSafe.safeProjectName(opts.project.name, 'a project')
+    )
+    return `Your access request to ${projectName} was declined - ${settings.appName}`
+  },
+  title(opts) {
+    const projectName = _.escape(
+      SpamSafe.safeProjectName(opts.project.name, 'A project')
+    )
+    return `${projectName} - Access request declined`
+  },
+  message(opts, isPlainText) {
+    const projectName = _.escape(
+      SpamSafe.safeProjectName(opts.project.name, 'a project')
+    )
+    const projectNameDisplay = isPlainText
+      ? projectName
+      : `<b>${projectName}</b>`
+    return [
+      `Your request for additional access to ${projectNameDisplay} was declined by the project owner. You still have your current access.`,
+    ]
+  },
+})
+
 templates.userOnboardingEmail = NoCTAEmailTemplate({
   subject(opts) {
     return `Getting more out of ${settings.appName}`

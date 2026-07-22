@@ -1219,4 +1219,112 @@ describe('EmailBuilder', function () {
       })
     })
   })
+
+  describe('accessRequest', function () {
+    beforeEach(function (ctx) {
+      ctx.opts = {
+        to: 'owner@example.com',
+        project: { _id: 'abc123', name: 'My Project' },
+        owner: {
+          email: 'owner@example.com',
+          first_name: 'O',
+          last_name: 'wner',
+        },
+        requester: {
+          email: 'req@example.com',
+          first_name: 'Re',
+          last_name: 'Quester',
+        },
+        privilegeLevel: 'readAndWrite',
+      }
+    })
+
+    it('names the requester and project in the subject', function (ctx) {
+      const email = ctx.EmailBuilder.buildEmail('accessRequest', ctx.opts)
+      expect(email.subject).to.contain('req@example.com')
+      expect(email.subject).to.contain('My Project')
+      expect(email.subject).to.contain('editor')
+    })
+
+    it('says "reviewer" in the subject when the review level was requested', function (ctx) {
+      ctx.opts.privilegeLevel = 'review'
+      const email = ctx.EmailBuilder.buildEmail('accessRequest', ctx.opts)
+      expect(email.subject).to.contain('reviewer')
+      expect(email.subject).to.not.contain('editor access')
+    })
+
+    it('deep-links the CTA back to the share modal via ?share=1', function (ctx) {
+      const email = ctx.EmailBuilder.buildEmail('accessRequest', ctx.opts)
+      expect(email.text).to.contain(
+        'https://www.overleaf.com/project/abc123?share=1'
+      )
+    })
+
+    it('does not leave any "undefined" placeholders', function (ctx) {
+      const email = ctx.EmailBuilder.buildEmail('accessRequest', ctx.opts)
+      expect(email.subject).to.not.contain('undefined')
+      expect(email.html).to.not.contain('undefined')
+      expect(email.text).to.not.contain('undefined')
+    })
+  })
+
+  describe('accessRequestGranted', function () {
+    beforeEach(function (ctx) {
+      ctx.opts = {
+        to: 'req@example.com',
+        project: { _id: 'abc123', name: 'My Project' },
+        requester: {
+          email: 'req@example.com',
+          first_name: 'Re',
+          last_name: 'Quester',
+        },
+        privilegeLevel: 'readAndWrite',
+      }
+    })
+
+    it('mentions the granted role in the message', function (ctx) {
+      const email = ctx.EmailBuilder.buildEmail(
+        'accessRequestGranted',
+        ctx.opts
+      )
+      expect(email.text).to.contain('editor')
+      expect(email.text).to.contain('My Project')
+    })
+
+    it('switches to reviewer wording when the granted level was review', function (ctx) {
+      ctx.opts.privilegeLevel = 'review'
+      const email = ctx.EmailBuilder.buildEmail(
+        'accessRequestGranted',
+        ctx.opts
+      )
+      expect(email.text).to.contain('reviewer')
+    })
+
+    it('points the CTA at the project (no ?share=1, owner does not need it)', function (ctx) {
+      const email = ctx.EmailBuilder.buildEmail(
+        'accessRequestGranted',
+        ctx.opts
+      )
+      expect(email.text).to.contain('https://www.overleaf.com/project/abc123')
+      expect(email.text).to.not.contain('share=1')
+    })
+  })
+
+  describe('accessRequestDeclined', function () {
+    it('is a NoCTA email mentioning the project name', function (ctx) {
+      const email = ctx.EmailBuilder.buildEmail('accessRequestDeclined', {
+        to: 'req@example.com',
+        project: { _id: 'abc123', name: 'My Project' },
+        requester: {
+          email: 'req@example.com',
+          first_name: 'Re',
+          last_name: 'Quester',
+        },
+      })
+      expect(email.subject).to.contain('My Project')
+      expect(email.subject).to.contain('declined')
+      expect(email.text).to.contain('My Project')
+      expect(email.text).to.contain('declined')
+    })
+  })
 })

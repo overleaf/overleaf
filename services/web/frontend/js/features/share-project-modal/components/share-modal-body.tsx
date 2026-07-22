@@ -15,16 +15,19 @@ import Notification from '@/shared/components/notification'
 import ErrorMessage from '@/features/share-project-modal/components/error-message'
 import ProjectAccess from '@/features/share-project-modal/components/project-access'
 import InvitedPeople from '@/features/share-project-modal/components/invited-people'
+import AccessRequests from '@/features/share-project-modal/components/access-requests'
+import type { ProjectMember } from '@/shared/context/types/project-metadata'
+import type { ShareModalScreen } from './share-project-modal-content'
 
 type ShareModalBodyProps = {
-  isInvitedPeopleScreen: boolean
-  setIsInvitedPeopleScreen: React.Dispatch<React.SetStateAction<boolean>>
+  screen: ShareModalScreen
+  setScreen: React.Dispatch<React.SetStateAction<ShareModalScreen>>
   error?: string
 }
 
 export default function ShareModalBody({
-  isInvitedPeopleScreen,
-  setIsInvitedPeopleScreen,
+  screen,
+  setScreen,
   error,
 }: ShareModalBodyProps) {
   const { project, features } = useProjectContext()
@@ -134,20 +137,16 @@ export default function ShareModalBody({
               />
             </div>
           )}
-          {isInvitedPeopleScreen || !isProjectOwner ? (
-            <InvitedPeople
-              sortedMembers={sortedMembers}
-              invites={invites}
-              hasExceededCollaboratorLimit={hasExceededCollaboratorLimit}
-              hasTrackChangesFeature={Boolean(features.trackChanges)}
-              canAddCollaborators={canAddCollaborators}
-            />
-          ) : (
-            <ProjectAccess
-              setIsInvitedPeopleScreen={setIsInvitedPeopleScreen}
-              invitedPeopleCount={sortedMembers.length + (invites || []).length}
-            />
-          )}
+          <ShareModalScreenContent
+            screen={screen}
+            setScreen={setScreen}
+            isProjectOwner={isProjectOwner}
+            sortedMembers={sortedMembers}
+            invites={invites}
+            canAddCollaborators={canAddCollaborators}
+            hasExceededCollaboratorLimit={hasExceededCollaboratorLimit}
+            hasTrackChangesFeature={Boolean(features.trackChanges)}
+          />
         </>
       ) : (
         <>
@@ -187,5 +186,59 @@ export default function ShareModalBody({
         <RecaptchaConditions />
       )}
     </>
+  )
+}
+
+type ShareModalScreenContentProps = {
+  screen: ShareModalScreen
+  setScreen: React.Dispatch<React.SetStateAction<ShareModalScreen>>
+  isProjectOwner: boolean
+  sortedMembers: ProjectMember[]
+  invites?: ProjectMember[]
+  canAddCollaborators: boolean
+  hasExceededCollaboratorLimit: boolean
+  hasTrackChangesFeature: boolean
+}
+
+// Picks the screen to render inside the new share modal. Non-owners only ever
+// see the "invited people" view.
+function ShareModalScreenContent({
+  screen,
+  setScreen,
+  isProjectOwner,
+  sortedMembers,
+  invites,
+  canAddCollaborators,
+  hasExceededCollaboratorLimit,
+  hasTrackChangesFeature,
+}: ShareModalScreenContentProps) {
+  const effectiveScreen = isProjectOwner ? screen : 'invited-people'
+
+  if (effectiveScreen === 'access-requests') {
+    return (
+      <AccessRequests
+        setScreen={setScreen}
+        canAddCollaborators={canAddCollaborators}
+      />
+    )
+  }
+
+  if (effectiveScreen === 'invited-people') {
+    return (
+      <InvitedPeople
+        sortedMembers={sortedMembers}
+        invites={invites}
+        hasExceededCollaboratorLimit={hasExceededCollaboratorLimit}
+        hasTrackChangesFeature={hasTrackChangesFeature}
+        canAddCollaborators={canAddCollaborators}
+      />
+    )
+  }
+
+  return (
+    <ProjectAccess
+      setScreen={setScreen}
+      invitedPeopleCount={sortedMembers.length + (invites || []).length}
+    />
   )
 }

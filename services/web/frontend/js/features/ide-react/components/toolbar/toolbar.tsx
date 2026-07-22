@@ -5,6 +5,7 @@ import { OnlineUsers } from './online-users'
 import ShareProjectButton from './share-project-button'
 import ChangeLayoutButton from './change-layout-button'
 import ShowHistoryButton from './show-history-button'
+import RequestAccessButton from './request-access-button'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import BackToEditorButton from '@/features/editor-navigation-toolbar/components/back-to-editor-button'
 import { useCallback } from 'react'
@@ -134,6 +135,7 @@ export const Toolbar = () => {
         )}
         <div className="ide-redesign-toolbar-actions">
           {!isOfflineDueToNetworkStall && <OnlineUsers />}
+          <RequestAccessButton />
           {!isRestrictedTokenMember && <ShowHistoryButton />}
           <ChangeLayoutButton />
           {shouldDisplaySubmitButton && cobranding && (
