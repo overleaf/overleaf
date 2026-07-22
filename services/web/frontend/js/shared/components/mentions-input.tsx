@@ -123,7 +123,8 @@ export const MentionsInput = forwardRef<
     () => ({
       focus: () => {
         if (viewRef.current) {
-          viewRef.current.focus()
+          // Ensure that the input can be scrolled into view
+          viewRef.current.contentDOM.focus({ preventScroll: false })
           return true
         }
         return false
