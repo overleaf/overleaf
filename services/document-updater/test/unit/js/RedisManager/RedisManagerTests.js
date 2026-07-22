@@ -19,9 +19,6 @@ describe('RedisManager', function () {
           redis: {
             documentupdater: {
               key_schema: {
-                blockingKey({ doc_id: docId }) {
-                  return `Blocking:${docId}`
-                },
                 docLines({ doc_id: docId }) {
                   return `doclines:${docId}`
                 },

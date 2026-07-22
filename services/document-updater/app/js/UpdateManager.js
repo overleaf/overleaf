@@ -1,7 +1,6 @@
 // @ts-check
 
 const { callbackifyAll } = require('@overleaf/promise-utils')
-const LockManager = require('./LockManager')
 const ProjectLockManager = require('./ProjectLockManager')
 const RedisManager = require('./RedisManager')
 const ProjectHistoryRedisManager = require('./ProjectHistoryRedisManager')
@@ -220,7 +219,7 @@ const UpdateManager = {
           .map(change => change.metadata.user_id)
 
         // Fire-and-forget without awaiting because
-        // we hold the doc lock here, and the result of the
+        // we hold the project lock here, and the result of the
         // notification doesn't affect the update
         WebApiManager.promises
           .notifyTrackChangesRejected(
@@ -252,7 +251,7 @@ const UpdateManager = {
         )
 
         // Do this last, since it's a mongo call, and so potentially longest running
-        // If it overruns the lock, it's ok, since all of our redis work is done
+        // If it overruns the project lock, it's ok, since all of our redis work is done
         await SnapshotManager.promises.recordSnapshot(
           projectId,
           docId,
@@ -277,7 +276,7 @@ const UpdateManager = {
 
   /**
    * Process the project's pending updates, then run the given method on the
-   * doc, all under the project and doc locks.
+   * doc, all under the project lock.
    *
    * @param {Function} method - called with (projectId, docId, ...args)
    * @param {string} projectId
@@ -291,9 +290,8 @@ const UpdateManager = {
       doc_id: docId,
     })
 
-    // Project lock first (always before the per-doc lock, to avoid deadlocks)
-    // so we can safely drain the shared per-project queue, then the per-doc
-    // lock for the operation itself.
+    // Take the project lock so we can safely drain the shared per-project queue
+    // and then run the operation itself.
     const projectLockValue =
       await ProjectLockManager.promises.getLock(projectId)
     profile.log('getProjectLock')
@@ -303,16 +301,11 @@ const UpdateManager = {
       await UpdateManager.fetchAndApplyProjectUpdates(projectId, profile)
       profile.log('fetchAndApplyProjectUpdates')
 
-      const lockValue = await LockManager.promises.getLock(docId)
-      profile.log('getLock')
+      await ProjectLockManager.promises.extendLock(projectId, projectLockValue)
+      profile.log('extendProjectLock')
 
-      try {
-        result = await method(projectId, docId, ...args)
-        profile.log('method')
-      } finally {
-        await LockManager.promises.releaseLock(docId, lockValue)
-        profile.log('releaseLock')
-      }
+      result = await method(projectId, docId, ...args)
+      profile.log('method')
     } finally {
       await ProjectLockManager.promises.releaseLock(projectId, projectLockValue)
       profile.log('releaseProjectLock').end()

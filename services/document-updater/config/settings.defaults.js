@@ -77,9 +77,6 @@ module.exports = {
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
       key_schema: {
-        blockingKey({ doc_id: docId }) {
-          return `Blocking:{${docId}}`
-        },
         projectBlockingKey({ project_id: projectId }) {
           return `BlockingProject:{${projectId}}`
         },
@@ -101,9 +98,6 @@ module.exports = {
         process.env.REDIS_MAX_RETRIES_PER_REQUEST || '20'
       ),
       key_schema: {
-        blockingKey({ doc_id: docId }) {
-          return `Blocking:{${docId}}`
-        },
         docLines({ doc_id: docId }) {
           return `doclines:{${docId}}`
         },
