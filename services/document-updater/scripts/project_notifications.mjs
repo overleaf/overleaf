@@ -22,7 +22,7 @@ const argv = minimist(process.argv.slice(2), {
 
 if (argv.help) {
   console.log(`
-project_notifications.mts - Queue project update notifications
+project_notifications.mjs - Queue project update notifications
 
 This script scans Redis for projects that have pending notification timestamps and queues
 them for notification. It's used to notify project collaborators when changes have been
@@ -36,10 +36,10 @@ Options:
 
 Examples:
   # Dry run to see what would be notified
-  node scripts/project_notifications.mts --dry-run
+  node scripts/project_notifications.mjs --dry-run
 
   # Actually queue the notifications
-  node scripts/project_notifications.mts
+  node scripts/project_notifications.mjs
 `)
   process.exit(0)
 }
@@ -175,7 +175,7 @@ async function main() {
   }
 }
 
-function formatDuration(ms: number): string {
+function formatDuration(ms) {
   const m = Math.floor(ms / 60000)
   const s = Math.floor((ms % 60000) / 1000)
   const millis = ms % 1000
@@ -186,16 +186,11 @@ function formatDuration(ms: number): string {
  * Extract project ID from a ProjectNotificationTimestamp key
  * Key format: ProjectNotificationTimestamp:{project_id}
  */
-function extractProjectId(key: string): string | undefined {
+function extractProjectId(key) {
   const matches = key.match(/ProjectNotificationTimestamp:\{(.*?)\}/)
   if (matches) {
     return matches[1]
   }
-}
-
-type ProjectNotification = {
-  projectId: string
-  timestamp: string
 }
 
 /**
@@ -204,17 +199,14 @@ type ProjectNotification = {
  * Performs a single mget for cache hits, a single $in find for cache misses,
  * and a single pipelined setex to write back the results.
  */
-async function getProjectsWithCollaborators(
-  projectIds: string[],
-  stats: NotificationStats
-): Promise<Set<string>> {
-  const projectsWithCollaborators = new Set<string>()
+async function getProjectsWithCollaborators(projectIds, stats) {
+  const projectsWithCollaborators = new Set()
   if (projectIds.length === 0) return projectsWithCollaborators
 
   const cacheKeys = projectIds.map(id => `ProjectHasCollaborators:{${id}}`)
   const cached = await redisClient.mget(cacheKeys)
 
-  const projectsNeedingMongoLookup: string[] = []
+  const projectsNeedingMongoLookup = []
   for (const [i, id] of projectIds.entries()) {
     if (cached[i] === '1') {
       stats.collaboratorCacheHitWithCollaborators++
@@ -228,7 +220,7 @@ async function getProjectsWithCollaborators(
 
   if (projectsNeedingMongoLookup.length === 0) return projectsWithCollaborators
 
-  const batches: string[][] = []
+  const batches = []
   for (
     let i = 0;
     i < projectsNeedingMongoLookup.length;
@@ -241,7 +233,7 @@ async function getProjectsWithCollaborators(
   const batchResults = await promiseMapWithLimit(
     MONGO_BATCH_CONCURRENCY,
     batches,
-    async (batch: string[]) => {
+    async batch => {
       stats.collaboratorMongoQueries++
       return await db.projects
         .find(
@@ -286,34 +278,13 @@ async function getProjectsWithCollaborators(
   return projectsWithCollaborators
 }
 
-/**
- * Scan Redis for all projectNotificationTimestamp keys and return list of projects with timestamps
- */
-type NotificationStats = {
-  scanned: number
-  matched: number
-  skippedNoCollaborators: number
-  skippedNoTimestamp: number
-  skippedInvalidTimestamp: number
-  skippedNoProjectId: number
-  collaboratorCacheHitWithCollaborators: number
-  collaboratorCacheHitNoCollaborators: number
-  collaboratorCacheMissWithCollaborators: number
-  collaboratorCacheMissNoCollaborators: number
-  collaboratorMongoQueries: number
-  collaboratorMongoQueriesMs: number
-}
-
-async function getProjectsToNotify(): Promise<{
-  projects: ProjectNotification[]
-  stats: NotificationStats
-}> {
+async function getProjectsToNotify() {
   const nodes = (typeof redisClient.nodes === 'function'
     ? redisClient.nodes('master')
     : undefined) || [redisClient]
 
-  const projects: ProjectNotification[] = []
-  const stats: NotificationStats = {
+  const projects = []
+  const stats = {
     scanned: 0,
     matched: 0,
     skippedNoCollaborators: 0,
@@ -345,10 +316,10 @@ async function getProjectsToNotify(): Promise<{
         const timestamps = await redisClient.mget(keys)
 
         // Extract valid (projectId, timestamp) pairs from this batch
-        const candidates: ProjectNotification[] = []
+        const candidates = []
         for (const [index, key] of keys.entries()) {
           stats.scanned++
-          const projectId = extractProjectId(key as string)
+          const projectId = extractProjectId(key)
           const timestamp = timestamps[index]
 
           if (!projectId) {
@@ -416,9 +387,9 @@ async function getProjectsToNotify(): Promise<{
  * Only deletes if the timestamp matches the expected value to avoid race conditions
  */
 async function deleteProjectNotificationTimestamp(
-  projectId: string,
-  expectedTimestamp: string
-): Promise<boolean> {
+  projectId,
+  expectedTimestamp
+) {
   const key = docUpdaterKeys.projectNotificationTimestamp({
     project_id: projectId,
   })
