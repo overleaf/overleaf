@@ -115,7 +115,7 @@ html(
 				defer=deferScripts
 			)
 
-		if typeof suppressSkipToContent == 'undefined'
+		if suppressSkipToContent === false || (typeof suppressSkipToContent == 'undefined' && typeof suppressNavbar == 'undefined')
 			a(class='skip-to-content' href='#main-content') #{translate('skip_to_content')}
 
 		block body
