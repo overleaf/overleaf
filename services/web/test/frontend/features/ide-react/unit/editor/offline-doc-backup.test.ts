@@ -101,7 +101,7 @@ describe('OfflineDocBackup', function () {
     doc.trigger('change')
     clock.tick(FLUSH_DELAY)
     expect(readRecord()).to.be.null
-    backup.destroy()
+    backup.disconnect()
   })
 
   it('does not write while online', function () {
@@ -255,7 +255,7 @@ describe('OfflineDocBackup', function () {
     expect(record?.snapshot).to.equal('server text updated')
   })
 
-  it('destroy() removes listeners but preserves the stored record', function () {
+  it('disconnect() removes listeners but preserves the stored record', function () {
     const backup = create()
     goOffline()
     doc.pendingOp = [{ i: 'x', p: 0 }]
@@ -265,10 +265,10 @@ describe('OfflineDocBackup', function () {
 
     // Teardown on the error/timeout path must not delete the backup: it is what
     // recovery reads on reload.
-    backup.destroy()
+    backup.disconnect()
     expect(readRecord()).to.not.be.null
 
-    // No further writes after destroy.
+    // No further writes after disconnect.
     doc.pendingOp = [{ i: 'xy', p: 0 }]
     doc.trigger('change')
     clock.tick(FLUSH_DELAY)
@@ -286,7 +286,7 @@ describe('OfflineDocBackup', function () {
     // Mirror onError(): buffered ops are cleared before teardown runs.
     doc.pendingOp = null
     doc.inflightOp = null
-    backup.destroy()
+    backup.disconnect()
 
     expect(readRecord()).to.not.be.null
   })
@@ -303,6 +303,19 @@ describe('OfflineDocBackup', function () {
     expect(OfflineDocBackup.read(PROJECT_ID, DOC_ID)?.pendingOp).to.deep.equal([
       { i: 'x', p: 0 },
     ])
+  })
+
+  it('static remove deletes the stored record for the given doc', function () {
+    create()
+    goOffline()
+    doc.pendingOp = [{ i: 'x', p: 0 }]
+    doc.trigger('change')
+    clock.tick(FLUSH_DELAY)
+    expect(readRecord()).to.not.be.null
+
+    OfflineDocBackup.remove(PROJECT_ID, DOC_ID)
+
+    expect(readRecord()).to.be.null
   })
 
   it('clearAll removes every backup key but leaves unrelated keys', function () {

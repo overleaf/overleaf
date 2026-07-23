@@ -29,7 +29,11 @@ import {
 import { ThreadId } from '../../../../../types/review-panel/review-panel'
 import getMeta from '@/utils/meta'
 import OError from '@overleaf/o-error'
-import { OfflineDocBackup } from '@/features/ide-react/editor/offline-doc-backup'
+import {
+  OfflineDocBackup,
+  OfflineDocBackupRecord,
+} from '@/features/ide-react/editor/offline-doc-backup'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import {
   HistoryOTShareDoc,
   ShareLatexOTShareDoc,
@@ -526,46 +530,149 @@ export class DocumentContainer extends EventEmitter {
         }
       )
     } else {
-      this.socket.emit(
-        'joinDoc',
+      const record = this.getOfflineBackupForRecovery()
+      if (record) {
+        this.recoverAtBaseline(record, callback)
+      } else {
+        this.joinFreshDoc(callback)
+      }
+    }
+  }
+
+  private joinFreshDoc(callback?: JoinCallback) {
+    this.socket.emit(
+      'joinDoc',
+      this.doc_id,
+      { encodeRanges: true, supportsHistoryOT: true },
+      (error, docLines, version, updates, ranges, type, options) => {
+        if (error) {
+          callback?.(error)
+          return
+        }
+        this.createJoinedDoc(docLines, version, ranges, type, options)
+        callback?.()
+      }
+    )
+  }
+
+  private createJoinedDoc(
+    docLines: string[],
+    version: number,
+    ranges: RangesTracker,
+    type: OTType = 'sharejs-text-ot',
+    options: JoinDocResponseOptions = {}
+  ) {
+    this.joined = true
+    this.canSkipLeaveDoc = options.canSkipLeaveDoc ?? false
+    this.doc = new ShareJsDoc(
+      this.doc_id,
+      docLines,
+      version,
+      this.socket,
+      this.globalEditorWatchdogManager,
+      this.ideEventEmitter,
+      type
+    )
+    if (type === 'sharejs-text-ot') {
+      this.decodeRanges(ranges)
+    }
+    this.ranges = new RangesTracker(ranges?.changes, ranges?.comments)
+    this.bindToShareJsDocEvents()
+  }
+
+  private getOfflineBackupForRecovery(): OfflineDocBackupRecord | null {
+    if (!isSplitTestEnabled('intermittent-connection-improvements')) {
+      return null
+    }
+    const record = OfflineDocBackup.read(getMeta('ol-project_id'), this.doc_id)
+    // TODO(35594): tracked-change edits need their track-changes state (user id
+    // + seeds) wired up during recovery to replay as tracked; skip them for now
+    // rather than silently recovering them as untracked edits.
+    if (!record || record.trackChanges) {
+      return null
+    }
+    return record
+  }
+
+  // Recover a doc from its offline backup: rebuild it at the backed-up baseline
+  // with the buffered edits restored, then re-join from that version so the
+  // server streams the ops that landed while we were away. catchUp transforms
+  // and dedupes the buffered edits onto the current version, which we then
+  // send. Any failure falls back to a normal join, so a bad backup can never
+  // block opening the doc.
+  private recoverAtBaseline(
+    record: OfflineDocBackupRecord,
+    callback?: JoinCallback
+  ) {
+    const loadWithoutRecovery = (error: unknown) => {
+      // TODO(35594): surface the "changes can't be restored" modal.
+      debugConsole.error('[recovery] failed, loading without recovery', error)
+      OfflineDocBackup.remove(getMeta('ol-project_id'), record.docId)
+      this.doc?.clearInflightAndPendingOps()
+      this.doc = undefined
+      this.joinFreshDoc(callback)
+    }
+
+    try {
+      this.doc = new ShareJsDoc(
         this.doc_id,
-        {
-          encodeRanges: true,
-          supportsHistoryOT: true,
-        },
-        (
-          error,
-          docLines,
-          version,
-          updates,
-          ranges,
-          type: OTType = 'sharejs-text-ot',
-          options: JoinDocResponseOptions = {}
-        ) => {
-          if (error) {
-            callback?.(error)
-            return
-          }
+        [],
+        record.version,
+        this.socket,
+        this.globalEditorWatchdogManager,
+        this.ideEventEmitter,
+        'sharejs-text-ot'
+      )
+
+      this.doc.restoreFromOfflineBackup(record)
+      this.ranges = new RangesTracker()
+      this.bindToShareJsDocEvents()
+    } catch (error) {
+      loadWithoutRecovery(error)
+      return
+    }
+
+    this.socket.emit(
+      'joinDoc',
+      this.doc_id,
+      record.version,
+      { encodeRanges: true, supportsHistoryOT: true },
+      (
+        error,
+        docLines,
+        version,
+        updates,
+        ranges,
+        type = 'sharejs-text-ot',
+        options: JoinDocResponseOptions = {}
+      ) => {
+        // Versioned join failed (e.g. the baseline aged out of the server's op
+        // window); we can't catch up, so load normally.
+        if (error) {
+          loadWithoutRecovery(error)
+          return
+        }
+        // The backup only holds sharejs-text-ot state; if the doc has since
+        // migrated (e.g. to history-ot) we can't replay onto it.
+        if (type !== 'sharejs-text-ot') {
+          loadWithoutRecovery(new Error(`unexpected doc type: ${type}`))
+          return
+        }
+        try {
           this.joined = true
           this.canSkipLeaveDoc = options.canSkipLeaveDoc ?? false
-          this.doc = new ShareJsDoc(
-            this.doc_id,
-            docLines,
-            version,
-            this.socket,
-            this.globalEditorWatchdogManager,
-            this.ideEventEmitter,
-            type
-          )
-          if (type === 'sharejs-text-ot') {
-            this.decodeRanges(ranges)
-          }
-          this.ranges = new RangesTracker(ranges?.changes, ranges?.comments)
-          this.bindToShareJsDocEvents()
-          callback?.()
+          // rethrow errors to catch them here and revert to fresh load
+          this.doc!.catchUp(updates, { rethrow: true })
+          this.decodeRanges(ranges)
+          this.catchUpRanges(ranges?.changes, ranges?.comments)
+          this.doc!.sendRecoveredOps()
+        } catch (err) {
+          loadWithoutRecovery(err)
+          return
         }
-      )
-    }
+        callback?.()
+      }
+    )
   }
 
   private decodeRanges(ranges: RangesTracker) {
@@ -633,7 +740,7 @@ export class DocumentContainer extends EventEmitter {
 
     this.detachDoc(this.doc_id, this)
 
-    this.offlineBackup?.destroy()
+    this.offlineBackup?.disconnect()
 
     this.unBindFromEditorEvents()
     this.unBindFromSocketEvents()

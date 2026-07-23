@@ -30,6 +30,7 @@ import type {
 } from 'overleaf-editor-core/lib/types'
 import { HistoryOTShareDoc } from '../../../../../types/share-doc'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import { OfflineDocBackupRecord } from './offline-doc-backup'
 
 const intermittentConnectionImprovementsEnabled = isSplitTestEnabled(
   'intermittent-connection-improvements'
@@ -275,7 +276,7 @@ export class ShareJsDoc extends EventEmitter {
 
   // FIXME: This is the original method. Switch back to this when redis
   // issues are resolved.
-  processUpdateFromServer(message: Message) {
+  processUpdateFromServer(message: Message, { rethrow = false } = {}) {
     try {
       if (this.type === 'history-ot' && message.op != null) {
         const shareDoc = this._doc as HistoryOTShareDoc
@@ -304,6 +305,9 @@ export class ShareJsDoc extends EventEmitter {
     } catch (error) {
       // Version mismatches are thrown as errors
       debugConsole.log(error)
+      if (rethrow) {
+        throw error
+      }
       this.handleError(error)
       return error // return the error for queue handling
     }
@@ -313,11 +317,11 @@ export class ShareJsDoc extends EventEmitter {
     }
   }
 
-  catchUp(updates: Message[]) {
+  catchUp(updates: Message[], { rethrow = false } = {}) {
     return updates.map(update => {
       update.v = this._doc.version
       update.doc = this.doc_id
-      return this.processUpdateFromServer(update)
+      return this.processUpdateFromServer(update, { rethrow })
     })
   }
 
@@ -349,6 +353,50 @@ export class ShareJsDoc extends EventEmitter {
     // This will flush any ops that are pending.
     // If there is an inflight op it will do nothing.
     return this._doc.flush()
+  }
+
+  // Rebuild the client state captured in an offline backup: the server-acked
+  // baseline snapshot plus the ops that were buffered on top of it. Recovery
+  // constructs a doc at the baseline version, restores this, then catches the
+  // doc up to the current server version.
+  restoreFromOfflineBackup(backup: OfflineDocBackupRecord) {
+    // The snapshot must be the local view (baseline with the buffered ops
+    // applied), matching ShareJS's invariant that snapshot = acked version +
+    // inflight + pending. Seeding only the baseline would show the server text
+    // without the recovered edits.
+    let snapshot = backup.snapshot
+    if (backup.inflightOp) {
+      snapshot = sharejs.types.text.apply(snapshot, backup.inflightOp)
+    }
+    if (backup.pendingOp) {
+      snapshot = sharejs.types.text.apply(snapshot, backup.pendingOp)
+    }
+    this._doc.snapshot = snapshot
+    this._doc.inflightOp = backup.inflightOp
+    this._doc.pendingOp = backup.pendingOp
+    this._doc.inflightSubmittedIds = [...backup.inflightSubmittedIds]
+  }
+
+  // Push the buffered ops of a recovered doc to the server. A doc rebuilt from
+  // a backup never went through submitOp, so no retry timer was armed: resend a
+  // surviving inflight op explicitly (deduped server-side via
+  // inflightSubmittedIds, and re-arming the timer via connection.send); a lone
+  // pending op just needs a flush.
+  sendRecoveredOps() {
+    if (this._doc.inflightOp?.length === 0) {
+      this._doc.inflightOp = null
+      this._doc.inflightSubmittedIds = []
+    }
+    if (this._doc.inflightOp) {
+      this.connection.send({
+        doc: this.doc_id,
+        op: this._doc.inflightOp,
+        v: this._doc.version,
+        dupIfSource: [...this._doc.inflightSubmittedIds],
+      })
+    } else {
+      this.flushPendingOps()
+    }
   }
 
   updateConnectionState(state: ShareJsConnectionState) {

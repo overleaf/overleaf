@@ -46,6 +46,10 @@ export class OfflineDocBackup {
     )
   }
 
+  static remove(projectId: string, docId: string): void {
+    customSessionStorage.removeItem(OfflineDocBackup.buildKey(projectId, docId))
+  }
+
   // Sweep every user's records. sessionStorage is per-tab and can't be reached
   // from the tab that handles logout for any other tab, so we clear the whole
   // prefix here rather than scoping to the current user.
@@ -152,7 +156,7 @@ export class OfflineDocBackup {
     customSessionStorage.removeItem(this.key)
   }
 
-  destroy() {
+  disconnect() {
     if (!this.enabled) {
       return
     }
