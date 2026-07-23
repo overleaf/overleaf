@@ -25,6 +25,7 @@
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-unicorn": "^56.0.0",
     "globals": "^17.6.0",
+    "js-yaml": "^4.1.1",
     "prettier": "3.7.4",
     "prettier-plugin-groovy": "0.2.1",
     "typescript": "^5.9.3"
@@ -210,6 +211,7 @@
     "services/history-v1",
     "services/idp",
     "services/latexqc",
+    "services/linked-url-proxy",
     "services/notifications",
     "services/project-history",
     "services/real-time",
@@ -221,5 +223,184 @@
     "tools/npm-overrides-helper",
     "tools/saas-e2e",
     "tools/migrations"
-  ]
+  ],
+  "dependenciesMeta": {
+    "@babel/helper-string-parser@7.27.1": {
+      "unplugged": true
+    },
+    "@babel/helper-validator-identifier@7.28.5": {
+      "unplugged": true
+    },
+    "@babel/parser@7.29.2": {
+      "unplugged": true
+    },
+    "@babel/types@7.29.0": {
+      "unplugged": true
+    },
+    "@prettier/plugin-pug@3.4.2": {
+      "unplugged": true
+    },
+    "acorn@7.4.1": {
+      "unplugged": true
+    },
+    "asap@2.0.6": {
+      "unplugged": true
+    },
+    "assert-never@1.4.0": {
+      "unplugged": true
+    },
+    "async-function@1.0.0": {
+      "unplugged": true
+    },
+    "async-generator-function@1.0.0": {
+      "unplugged": true
+    },
+    "babel-walk@3.0.0-canary-5": {
+      "unplugged": true
+    },
+    "call-bind-apply-helpers@1.0.2": {
+      "unplugged": true
+    },
+    "call-bound@1.0.4": {
+      "unplugged": true
+    },
+    "character-parser@2.2.0": {
+      "unplugged": true
+    },
+    "constantinople@4.0.1": {
+      "unplugged": true
+    },
+    "cypress-multi-reporters@2.0.5": {
+      "unplugged": true
+    },
+    "doctypes@1.1.0": {
+      "unplugged": true
+    },
+    "dunder-proto@1.0.1": {
+      "unplugged": true
+    },
+    "es-define-property@1.0.1": {
+      "unplugged": true
+    },
+    "es-errors@1.3.0": {
+      "unplugged": true
+    },
+    "es-object-atoms@1.1.1": {
+      "unplugged": true
+    },
+    "esmock@2.7.3": {
+      "unplugged": true
+    },
+    "function-bind@1.1.2": {
+      "unplugged": true
+    },
+    "generator-function@2.0.1": {
+      "unplugged": true
+    },
+    "get-intrinsic@1.3.1": {
+      "unplugged": true
+    },
+    "get-proto@1.0.1": {
+      "unplugged": true
+    },
+    "gopd@1.2.0": {
+      "unplugged": true
+    },
+    "has-symbols@1.1.0": {
+      "unplugged": true
+    },
+    "has-tostringtag@1.0.2": {
+      "unplugged": true
+    },
+    "hasown@2.0.2": {
+      "unplugged": true
+    },
+    "is-core-module@2.16.1": {
+      "unplugged": true
+    },
+    "is-expression@4.0.0": {
+      "unplugged": true
+    },
+    "is-promise@2.2.2": {
+      "unplugged": true
+    },
+    "is-regex@1.2.1": {
+      "unplugged": true
+    },
+    "js-stringify@1.0.2": {
+      "unplugged": true
+    },
+    "jstransformer@1.0.0": {
+      "unplugged": true
+    },
+    "math-intrinsics@1.1.0": {
+      "unplugged": true
+    },
+    "object-assign@4.1.1": {
+      "unplugged": true
+    },
+    "path-parse@1.0.7": {
+      "unplugged": true
+    },
+    "prettier@3.7.4": {
+      "unplugged": true
+    },
+    "prettier-plugin-groovy@0.2.1": {
+      "unplugged": true
+    },
+    "promise@7.3.1": {
+      "unplugged": true
+    },
+    "pug@3.0.3": {
+      "unplugged": true
+    },
+    "pug-attrs@3.0.0": {
+      "unplugged": true
+    },
+    "pug-code-gen@3.0.4": {
+      "unplugged": true
+    },
+    "pug-error@2.1.0": {
+      "unplugged": true
+    },
+    "pug-filters@4.0.0": {
+      "unplugged": true
+    },
+    "pug-lexer@5.0.1": {
+      "unplugged": true
+    },
+    "pug-linker@4.0.0": {
+      "unplugged": true
+    },
+    "pug-load@3.0.0": {
+      "unplugged": true
+    },
+    "pug-parser@6.0.0": {
+      "unplugged": true
+    },
+    "pug-runtime@3.0.1": {
+      "unplugged": true
+    },
+    "pug-strip-comments@2.0.0": {
+      "unplugged": true
+    },
+    "pug-walk@2.0.0": {
+      "unplugged": true
+    },
+    "resolve@1.22.12": {
+      "unplugged": true
+    },
+    "supports-preserve-symlinks-flag@1.0.0": {
+      "unplugged": true
+    },
+    "token-stream@1.0.0": {
+      "unplugged": true
+    },
+    "void-elements@3.1.0": {
+      "unplugged": true
+    },
+    "with@7.0.2": {
+      "unplugged": true
+    }
+  }
 }

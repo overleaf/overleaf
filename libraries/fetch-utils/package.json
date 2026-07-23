@@ -20,9 +20,12 @@
   "author": "Overleaf (https://www.overleaf.com)",
   "license": "AGPL-3.0-only",
   "devDependencies": {
+    "@types/lodash": "^4.17.24",
+    "@types/node": "^24.5.2",
     "@types/node-fetch": "^2.6.13",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
+    "eslint": "^10.4.0",
     "express": "4.22.1",
     "selfsigned": "^5.5.0",
     "typescript": "^5.0.4",

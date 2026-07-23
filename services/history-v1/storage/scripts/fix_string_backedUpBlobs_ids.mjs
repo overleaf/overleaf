@@ -1,8 +1,10 @@
 // @ts-check
 import { backedUpBlobs } from '../lib/mongodb.js'
-import { mongoId } from '../lib/assert.js'
+import assert from '../lib/assert.js'
 import { ObjectId } from 'mongodb'
 import commandLineArgs from 'command-line-args'
+
+const { mongoId } = assert
 
 const STATS = {
   total: 0,

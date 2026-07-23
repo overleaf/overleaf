@@ -1350,6 +1350,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/code-frame@npm:^7.29.7":
+  version: 7.29.7
+  resolution: "@babel/code-frame@npm:7.29.7"
+  dependencies:
+    "@babel/helper-validator-identifier": "npm:^7.29.7"
+    js-tokens: "npm:^4.0.0"
+    picocolors: "npm:^1.1.1"
+  checksum: 10c0/169fc2080169a40c1760155eaaaf739bcb882df0bec76a83adbda5493645bc17270a3434b8848c494b1933e96fe1d147370001e3cda09a39f43ae30f08ef2069
+  languageName: node
+  linkType: hard
+
 "@babel/compat-data@npm:^7.28.5, @babel/compat-data@npm:^7.28.6":
   version: 7.29.0
   resolution: "@babel/compat-data@npm:7.29.0"
@@ -1393,12 +1404,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/generator@npm:^7.29.7":
+  version: 7.29.7
+  resolution: "@babel/generator@npm:7.29.7"
+  dependencies:
+    "@babel/parser": "npm:^7.29.7"
+    "@babel/types": "npm:^7.29.7"
+    "@jridgewell/gen-mapping": "npm:^0.3.12"
+    "@jridgewell/trace-mapping": "npm:^0.3.28"
+    jsesc: "npm:^3.0.2"
+  checksum: 10c0/9bf72b01b5bd0ea5b1288a0e37dbd360bff2f2b1ce73342c0d40fb3db2ec3dc004ada5ffa925c5e12939a416eed59e600d562b8ecd938ce0d27dfd0eb6c6c2b7
+  languageName: node
+  linkType: hard
+
 "@babel/helper-annotate-as-pure@npm:^7.27.1, @babel/helper-annotate-as-pure@npm:^7.27.3":
   version: 7.27.3
   resolution: "@babel/helper-annotate-as-pure@npm:7.27.3"
   dependencies:
     "@babel/types": "npm:^7.27.3"
   checksum: 10c0/94996ce0a05b7229f956033e6dcd69393db2b0886d0db6aff41e704390402b8cdcca11f61449cb4f86cfd9e61b5ad3a73e4fa661eeed7846b125bd1c33dbc633
+  languageName: node
+  linkType: hard
+
+"@babel/helper-annotate-as-pure@npm:^7.29.7":
+  version: 7.29.7
+  resolution: "@babel/helper-annotate-as-pure@npm:7.29.7"
+  dependencies:
+    "@babel/types": "npm:^7.29.7"
+  checksum: 10c0/c56536b52d17632d89d49db2063ed6102f0e3bbadf6a0ccb74e6599d6a77173b644c7fe8c3ef17c7a162709d55b75ee5145ef6db917d16ba7f375fbffcf2e942
   languageName: node
   linkType: hard
 
@@ -1442,6 +1475,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/helper-create-class-features-plugin@npm:^7.29.7":
+  version: 7.29.7
+  resolution: "@babel/helper-create-class-features-plugin@npm:7.29.7"
+  dependencies:
+    "@babel/helper-annotate-as-pure": "npm:^7.29.7"
+    "@babel/helper-member-expression-to-functions": "npm:^7.29.7"
+    "@babel/helper-optimise-call-expression": "npm:^7.29.7"
+    "@babel/helper-replace-supers": "npm:^7.29.7"
+    "@babel/helper-skip-transparent-expression-wrappers": "npm:^7.29.7"
+    "@babel/traverse": "npm:^7.29.7"
+    semver: "npm:^6.3.1"
+  peerDependencies:
+    "@babel/core": ^7.0.0
+  checksum: 10c0/75f34905b5e708b473f1e9b33e07b2fcc8f4c60676df8bc74541bb91c77f387c32a948dd04d5071e469ba454d72d0a872e3ace40fbb1d1e7aaa8569efcf09ed4
+  languageName: node
+  linkType: hard
+
 "@babel/helper-create-regexp-features-plugin@npm:^7.18.6, @babel/helper-create-regexp-features-plugin@npm:^7.27.1, @babel/helper-create-regexp-features-plugin@npm:^7.28.5":
   version: 7.28.5
   resolution: "@babel/helper-create-regexp-features-plugin@npm:7.28.5"
@@ -1477,6 +1527,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/helper-globals@npm:^7.29.7":
+  version: 7.29.7
+  resolution: "@babel/helper-globals@npm:7.29.7"
+  checksum: 10c0/f38417c40b1129a1b2b519ca961b9040c8827d1444fd74068702286b91b77089431dc76b6b9d5c1496e5da2a4f3ad329c6946e688ba3fa0d1d0b3d2b4f34f36a
+  languageName: node
+  linkType: hard
+
 "@babel/helper-member-expression-to-functions@npm:^7.28.5":
   version: 7.28.5
   resolution: "@babel/helper-member-expression-to-functions@npm:7.28.5"
@@ -1484,6 +1541,16 @@ __metadata:
     "@babel/traverse": "npm:^7.28.5"
     "@babel/types": "npm:^7.28.5"
   checksum: 10c0/4e6e05fbf4dffd0bc3e55e28fcaab008850be6de5a7013994ce874ec2beb90619cda4744b11607a60f8aae0227694502908add6188ceb1b5223596e765b44814
+  languageName: node
+  linkType: hard
+
+"@babel/helper-member-expression-to-functions@npm:^7.29.7":
+  version: 7.29.7
+  resolution: "@babel/helper-member-expression-to-functions@npm:7.29.7"
+  dependencies:
+    "@babel/traverse": "npm:^7.29.7"
+    "@babel/types": "npm:^7.29.7"
+  checksum: 10c0/eef7940ce0797208854a5af1049a98fee9abbffb5c619640c69ff5a555f8e3552295bb18756490b02bc6af7df8c1babcb83f12203aac2deb9dfecfc78846e12d
   languageName: node
   linkType: hard
 
@@ -1519,10 +1586,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/helper-optimise-call-expression@npm:^7.29.7":
+  version: 7.29.7
+  resolution: "@babel/helper-optimise-call-expression@npm:7.29.7"
+  dependencies:
+    "@babel/types": "npm:^7.29.7"
+  checksum: 10c0/fd0244b9bfbb487db02d59aa2703c6991d654ea5f3f39d912682842bdca2e87b5ae8643b0ce8069bf5fbee39d1aa9db7abefeb5e6ba1aa650dca12777cf5b7e2
+  languageName: node
+  linkType: hard
+
 "@babel/helper-plugin-utils@npm:^7.0.0, @babel/helper-plugin-utils@npm:^7.10.4, @babel/helper-plugin-utils@npm:^7.18.6, @babel/helper-plugin-utils@npm:^7.27.1, @babel/helper-plugin-utils@npm:^7.28.6":
   version: 7.28.6
   resolution: "@babel/helper-plugin-utils@npm:7.28.6"
   checksum: 10c0/3f5f8acc152fdbb69a84b8624145ff4f9b9f6e776cb989f9f968f8606eb7185c5c3cfcf3ba08534e37e1e0e1c118ac67080610333f56baa4f7376c99b5f1143d
+  languageName: node
+  linkType: hard
+
+"@babel/helper-plugin-utils@npm:^7.29.7":
+  version: 7.29.7
+  resolution: "@babel/helper-plugin-utils@npm:7.29.7"
+  checksum: 10c0/380477a06133274a2759f9355929cb60a95e8b8fee624a1ae1fa349e1d1645b89daca456f72833f6d1062bffa12ee4271c5bf0cc5a61c0166cdc24c7591e2408
   languageName: node
   linkType: hard
 
@@ -1552,6 +1635,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/helper-replace-supers@npm:^7.29.7":
+  version: 7.29.7
+  resolution: "@babel/helper-replace-supers@npm:7.29.7"
+  dependencies:
+    "@babel/helper-member-expression-to-functions": "npm:^7.29.7"
+    "@babel/helper-optimise-call-expression": "npm:^7.29.7"
+    "@babel/traverse": "npm:^7.29.7"
+  peerDependencies:
+    "@babel/core": ^7.0.0
+  checksum: 10c0/1c7ae37797f226e965ab85f6affa53d25a10c169c604a4daeb36f9df09e673471e6522f631c13761cf9fbafeca2ea14c241dea8d723a51039d561beb01d86ac4
+  languageName: node
+  linkType: hard
+
 "@babel/helper-skip-transparent-expression-wrappers@npm:^7.27.1":
   version: 7.27.1
   resolution: "@babel/helper-skip-transparent-expression-wrappers@npm:7.27.1"
@@ -1559,6 +1655,16 @@ __metadata:
     "@babel/traverse": "npm:^7.27.1"
     "@babel/types": "npm:^7.27.1"
   checksum: 10c0/f625013bcdea422c470223a2614e90d2c1cc9d832e97f32ca1b4f82b34bb4aa67c3904cb4b116375d3b5b753acfb3951ed50835a1e832e7225295c7b0c24dff7
+  languageName: node
+  linkType: hard
+
+"@babel/helper-skip-transparent-expression-wrappers@npm:^7.29.7":
+  version: 7.29.7
+  resolution: "@babel/helper-skip-transparent-expression-wrappers@npm:7.29.7"
+  dependencies:
+    "@babel/traverse": "npm:^7.29.7"
+    "@babel/types": "npm:^7.29.7"
+  checksum: 10c0/8c59493621487fc491f27adfc200af82a6aca3b9a5511e4e6050f8716593b4b243472cb56c8d2016e828b7ae12d605a819205aa8600ca08ee291dcd58d65c832
   languageName: node
   linkType: hard
 
@@ -1629,7 +1735,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/parser@npm:^7.27.2":
+"@babel/parser@npm:^7.27.2, @babel/parser@npm:^7.29.7":
   version: 7.29.7
   resolution: "@babel/parser@npm:7.29.7"
   dependencies:
@@ -1806,6 +1912,17 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.0.0-0
   checksum: 10c0/b0c392a35624883ac480277401ac7d92d8646b66e33639f5d350de7a6723924265985ae11ab9ebd551740ded261c443eaa9a87ea19def9763ca1e0d78c97dea8
+  languageName: node
+  linkType: hard
+
+"@babel/plugin-syntax-typescript@npm:^7.29.7":
+  version: 7.29.7
+  resolution: "@babel/plugin-syntax-typescript@npm:7.29.7"
+  dependencies:
+    "@babel/helper-plugin-utils": "npm:^7.29.7"
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+  checksum: 10c0/c49883b0327e8683b770dc823205af5c697da216e590dcf5bf53f3f031e7e381de450b164f8f99853f0837a3de5cb793298e2be6697a0f6e452bb9dd34b5165e
   languageName: node
   linkType: hard
 
@@ -2492,6 +2609,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/plugin-transform-typescript@npm:^7.28.0":
+  version: 7.29.7
+  resolution: "@babel/plugin-transform-typescript@npm:7.29.7"
+  dependencies:
+    "@babel/helper-annotate-as-pure": "npm:^7.29.7"
+    "@babel/helper-create-class-features-plugin": "npm:^7.29.7"
+    "@babel/helper-plugin-utils": "npm:^7.29.7"
+    "@babel/helper-skip-transparent-expression-wrappers": "npm:^7.29.7"
+    "@babel/plugin-syntax-typescript": "npm:^7.29.7"
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+  checksum: 10c0/8bf6a89c6827af6f11d4b189f1f97a64b8d754cc4caa5cbae16a6a8b113294d7f310dd40efd82e87ebcff2a1c683584b872d6d8960abe88d48f441d42f94c4d1
+  languageName: node
+  linkType: hard
+
 "@babel/plugin-transform-typescript@npm:^7.28.5":
   version: 7.28.6
   resolution: "@babel/plugin-transform-typescript@npm:7.28.6"
@@ -2733,6 +2865,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/template@npm:^7.29.7":
+  version: 7.29.7
+  resolution: "@babel/template@npm:7.29.7"
+  dependencies:
+    "@babel/code-frame": "npm:^7.29.7"
+    "@babel/parser": "npm:^7.29.7"
+    "@babel/types": "npm:^7.29.7"
+  checksum: 10c0/8bb7f900dcab0e9e1c5ffbc33ca10e0d26b7b2e2ca804becb73ee771b9c4ed6e2908a4ae4a14c08560febb45d2b6b9a173955e42ad404d05f8b04840a14d9c58
+  languageName: node
+  linkType: hard
+
 "@babel/traverse@npm:^7.18.9, @babel/traverse@npm:^7.27.1, @babel/traverse@npm:^7.28.0, @babel/traverse@npm:^7.28.5, @babel/traverse@npm:^7.28.6, @babel/traverse@npm:^7.29.0":
   version: 7.29.0
   resolution: "@babel/traverse@npm:7.29.0"
@@ -2745,6 +2888,21 @@ __metadata:
     "@babel/types": "npm:^7.29.0"
     debug: "npm:^4.3.1"
   checksum: 10c0/f63ef6e58d02a9fbf3c0e2e5f1c877da3e0bc57f91a19d2223d53e356a76859cbaf51171c9211c71816d94a0e69efa2732fd27ffc0e1bbc84b636e60932333eb
+  languageName: node
+  linkType: hard
+
+"@babel/traverse@npm:^7.29.7":
+  version: 7.29.7
+  resolution: "@babel/traverse@npm:7.29.7"
+  dependencies:
+    "@babel/code-frame": "npm:^7.29.7"
+    "@babel/generator": "npm:^7.29.7"
+    "@babel/helper-globals": "npm:^7.29.7"
+    "@babel/parser": "npm:^7.29.7"
+    "@babel/template": "npm:^7.29.7"
+    "@babel/types": "npm:^7.29.7"
+    debug: "npm:^4.3.1"
+  checksum: 10c0/e256a1fbdb956555b76f3c285b1e453f6bedec8b3afb61751d99d933efd11c7d79caf5ddf2493570058a9f7deaa1b48324380d7c1aa1443fd9508becbf56331a
   languageName: node
   linkType: hard
 
@@ -6693,8 +6851,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@overleaf/access-token-encryptor@workspace:libraries/access-token-encryptor"
   dependencies:
+    "@types/node": "npm:^24.5.2"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
+    eslint: "npm:^10.4.0"
     lodash: "npm:^4.18.1"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
@@ -6724,6 +6884,7 @@ __metadata:
     "@pollyjs/adapter-node-http": "npm:^6.0.6"
     "@pollyjs/core": "npm:^6.0.6"
     "@pollyjs/persister-fs": "npm:^6.0.6"
+    "@types/node": "npm:^24.5.2"
     bluebird: "npm:^3.7.2"
     bull: "npm:^3.18.0"
     camelcase-keys: "npm:^4.2.0"
@@ -6731,6 +6892,7 @@ __metadata:
     chai-as-promised: "npm:^7.1.1"
     csv: "npm:^5.4.0"
     east: "npm:^2.0.3"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     json2csv: "npm:^4.5.4"
     lodash: "npm:^4.18.1"
@@ -6766,11 +6928,13 @@ __metadata:
     "@overleaf/mongo-utils": "npm:*"
     "@overleaf/promise-utils": "npm:*"
     "@overleaf/settings": "npm:*"
+    "@types/node": "npm:^24.5.2"
     acorn: "npm:^7.1.1"
     ajv: "npm:^6.12.0"
     async: "npm:^3.2.5"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
+    eslint: "npm:^10.4.0"
     exegesis-express: "npm:4.0.0"
     express: "npm:4.22.1"
     mocha: "npm:^11.1.0"
@@ -6797,15 +6961,18 @@ __metadata:
     "@overleaf/settings": "workspace:*"
     "@overleaf/stream-utils": "workspace:*"
     "@overleaf/validation-tools": "workspace:*"
+    "@types/node": "npm:^24.5.2"
     bunyan: "npm:^1.8.15"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
+    eslint: "npm:^10.4.0"
     express: "npm:^4.22.1"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
     p-limit: "npm:^3.1.0"
     tar-fs: "npm:^3.1.1"
+    typescript: "npm:^5.0.4"
   languageName: unknown
   linkType: soft
 
@@ -6818,7 +6985,9 @@ __metadata:
     "@overleaf/o-error": "workspace:*"
     "@overleaf/settings": "workspace:*"
     "@overleaf/stream-utils": "workspace:*"
+    "@types/node": "npm:^24.5.2"
     chai-as-promised: "npm:^7.1.1"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     gcp-metadata: "npm:^6.1.0"
     googleapis: "npm:^144.0.0"
@@ -6836,10 +7005,12 @@ __metadata:
     "@overleaf/logger": "workspace:*"
     "@overleaf/o-error": "workspace:*"
     "@overleaf/settings": "workspace:*"
+    "@types/node": "npm:^24.5.2"
     bunyan: "npm:^1.8.15"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
     cookie: "npm:^0.4.1"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     glob: "npm:^12.0.0"
     mocha: "npm:^11.1.0"
@@ -6863,12 +7034,14 @@ __metadata:
     "@overleaf/settings": "workspace:*"
     "@overleaf/stream-utils": "workspace:*"
     "@overleaf/validation-tools": "workspace:*"
+    "@types/node": "npm:^24.5.2"
     archiver: "npm:5.3.2"
     async: "npm:^3.2.5"
     bunyan: "npm:^1.8.15"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
     dockerode: "npm:^4.0.9"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     form-data: "npm:^4.0.5"
     lodash: "npm:^4.18.1"
@@ -6927,15 +7100,18 @@ __metadata:
     "@overleaf/settings": "workspace:*"
     "@overleaf/stream-utils": "npm:^0.1.0"
     "@overleaf/validation-tools": "workspace:*"
+    "@types/node": "npm:^24.5.2"
     async: "npm:^3.2.5"
     bunyan: "npm:^1.8.15"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     lodash: "npm:^4.18.1"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
+    mongodb: "npm:6.12.0"
     mongodb-legacy: "npm:6.1.3"
     p-map: "npm:^4.0.0"
     sinon: "npm:~9.0.2"
@@ -6960,6 +7136,9 @@ __metadata:
     "@overleaf/redis-wrapper": "workspace:*"
     "@overleaf/settings": "workspace:*"
     "@types/chai-as-promised": "npm:^7.1.8"
+    "@types/ioredis": "npm:^4.28.10"
+    "@types/mocha": "npm:^10.0.6"
+    "@types/node": "npm:^24.5.2"
     async: "npm:^3.2.5"
     basic-auth: "npm:^2.0.1"
     bull: "npm:^3.18.0"
@@ -6968,12 +7147,14 @@ __metadata:
     chai-as-promised: "npm:^7.1.1"
     cluster-key-slot: "npm:^1.0.5"
     diff-match-patch: "overleaf/diff-match-patch#89805f9c671a77a263fc53461acd62aa7498f688"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     lodash: "npm:^4.18.1"
     minimist: "npm:^1.2.8"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
+    mongodb: "npm:6.12.0"
     mongodb-legacy: "npm:6.1.3"
     overleaf-editor-core: "workspace:*"
     sandboxed-module: "npm:^2.0.4"
@@ -6990,12 +7171,12 @@ __metadata:
   resolution: "@overleaf/eslint-plugin@workspace:libraries/eslint-plugin"
   dependencies:
     "@eslint/json": "npm:^2.0.0"
+    "@types/node": "npm:^24.5.2"
     "@typescript-eslint/parser": "npm:^8.59.4"
+    eslint: "npm:^10.4.0"
     lodash: "npm:^4.18.1"
     typescript: "npm:^5.0.4"
     vitest: "npm:4.1.5"
-  peerDependencies:
-    eslint: ^10.4.0
   languageName: unknown
   linkType: soft
 
@@ -7004,9 +7185,12 @@ __metadata:
   resolution: "@overleaf/fetch-utils@workspace:libraries/fetch-utils"
   dependencies:
     "@overleaf/o-error": "workspace:*"
+    "@types/lodash": "npm:^4.17.24"
+    "@types/node": "npm:^24.5.2"
     "@types/node-fetch": "npm:^2.6.13"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     lodash: "npm:^4.18.1"
     node-fetch: "npm:^2.7.0"
@@ -7028,9 +7212,11 @@ __metadata:
     "@overleaf/object-persistor": "workspace:*"
     "@overleaf/settings": "workspace:*"
     "@overleaf/stream-utils": "npm:^0.1.0"
+    "@types/node": "npm:^24.5.2"
     bunyan: "npm:^1.8.15"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     glob: "npm:^12.0.0"
     lodash.once: "npm:^4.1.1"
@@ -7054,6 +7240,7 @@ __metadata:
   resolution: "@overleaf/github-sync@workspace:services/github-sync"
   dependencies:
     "@octokit/request": "npm:^9.2.2"
+    "@octokit/request-error": "npm:^6.1.7"
     "@overleaf/access-token-encryptor": "workspace:*"
     "@overleaf/fetch-utils": "workspace:*"
     "@overleaf/logger": "workspace:*"
@@ -7064,14 +7251,21 @@ __metadata:
     "@overleaf/promise-utils": "workspace:*"
     "@overleaf/settings": "workspace:*"
     "@overleaf/stream-utils": "workspace:*"
+    "@pollyjs/adapter-node-http": "npm:^6.0.6"
+    "@pollyjs/core": "npm:^6.0.6"
+    "@pollyjs/persister-fs": "npm:^6.0.6"
+    "@types/node": "npm:^24.5.2"
     base64-stream: "npm:^0.1.2"
     bunyan: "npm:^1.8.15"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
+    lodash: "npm:^4.18.1"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
+    mongodb: "npm:6.12.0"
     mongodb-legacy: "npm:6.1.3"
     nock: "npm:^14.0.0"
     randomstring: "npm:^1.1.5"
@@ -7088,15 +7282,35 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@overleaf/idp@workspace:services/idp"
   dependencies:
+    "@types/node": "npm:^24.5.2"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
     ejs: "npm:^3.1.10"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
     samlp: "npm:^7.0.2"
     typescript: "npm:^5.0.4"
+  languageName: unknown
+  linkType: soft
+
+"@overleaf/linked-url-proxy@workspace:services/linked-url-proxy":
+  version: 0.0.0-use.local
+  resolution: "@overleaf/linked-url-proxy@workspace:services/linked-url-proxy"
+  dependencies:
+    "@types/node": "npm:^24.5.2"
+    chai-as-promised: "npm:^7.1.1"
+    eslint: "npm:^10.4.0"
+    express: "npm:^4.22.1"
+    ipaddr.js: "npm:^2.2.0"
+    node-fetch: "npm:^2.7.0"
+    sinon: "npm:^14.0.0"
+    sinon-chai: "npm:^3.7.0"
+    tsscmp: "npm:^1.0.6"
+    typescript: "npm:^5.0.4"
+    vitest: "npm:4.1.5"
   languageName: unknown
   linkType: soft
 
@@ -7107,8 +7321,10 @@ __metadata:
     "@google-cloud/logging-bunyan": "npm:^5.1.0"
     "@overleaf/fetch-utils": "workspace:*"
     "@overleaf/o-error": "workspace:*"
+    "@types/node": "npm:^24.5.2"
     bunyan: "npm:^1.8.14"
     chai: "npm:^4.3.6"
+    eslint: "npm:^10.4.0"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
@@ -7133,9 +7349,12 @@ __metadata:
     "@opentelemetry/resources": "npm:^2.8.0"
     "@opentelemetry/sdk-node": "npm:^0.219.0"
     "@opentelemetry/semantic-conventions": "npm:^1.41.1"
+    "@overleaf/logger": "workspace:*"
+    "@types/node": "npm:^24.5.2"
     bunyan: "npm:^1.0.0"
     chai: "npm:^4.3.6"
     compression: "npm:^1.7.4"
+    eslint: "npm:^10.4.0"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
@@ -7160,6 +7379,7 @@ __metadata:
     "@overleaf/settings": "workspace:*"
     bcrypt: "npm:^6.0.0"
     east: "npm:2.0.3"
+    eslint: "npm:^10.4.0"
     mongodb: "npm:6.12.0"
   languageName: unknown
   linkType: soft
@@ -7168,7 +7388,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@overleaf/mongo-utils@workspace:libraries/mongo-utils"
   dependencies:
+    "@types/node": "npm:^24.5.2"
     chai: "npm:^4.3.6"
+    eslint: "npm:^10.4.0"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
@@ -7194,12 +7416,15 @@ __metadata:
     "@overleaf/promise-utils": "workspace:*"
     "@overleaf/settings": "workspace:*"
     "@overleaf/validation-tools": "workspace:*"
+    "@types/node": "npm:^24.5.2"
     async: "npm:^3.2.5"
     bunyan: "npm:^1.8.15"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     mocha: "npm:^11.1.0"
+    mongodb: "npm:6.12.0"
     mongodb-legacy: "npm:6.1.3"
     typescript: "npm:^5.0.4"
     vitest: "npm:4.1.5"
@@ -7215,6 +7440,7 @@ __metadata:
     "@types/chai": "npm:^4.3.0"
     "@types/node": "npm:^24.5.2"
     chai: "npm:^4.3.6"
+    eslint: "npm:^10.4.0"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
@@ -7235,8 +7461,11 @@ __metadata:
     "@overleaf/metrics": "workspace:*"
     "@overleaf/o-error": "workspace:*"
     "@overleaf/stream-utils": "workspace:*"
+    "@types/lodash": "npm:^4.17.24"
+    "@types/node": "npm:^24.5.2"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
+    eslint: "npm:^10.4.0"
     fast-crc32c: "overleaf/node-fast-crc32c#aae6b2a4c7a7a159395df9cc6c38dfde702d6f51"
     glob: "npm:^12.0.0"
     mocha: "npm:^11.1.0"
@@ -7257,7 +7486,9 @@ __metadata:
   resolution: "@overleaf/piece-table@workspace:libraries/piece-table"
   dependencies:
     "@overleaf/o-error": "workspace:*"
+    "@types/node": "npm:^24.5.2"
     chai: "npm:^4.3.6"
+    eslint: "npm:^10.4.0"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
@@ -7280,18 +7511,21 @@ __metadata:
     "@overleaf/settings": "workspace:*"
     "@overleaf/stream-utils": "workspace:*"
     "@overleaf/validation-tools": "workspace:*"
+    "@types/node": "npm:^24.5.2"
     async: "npm:^3.2.5"
     bunyan: "npm:^1.8.15"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
     diff-match-patch: "overleaf/diff-match-patch#89805f9c671a77a263fc53461acd62aa7498f688"
-    esmock: "npm:^2.7.3"
+    eslint: "npm:^10.4.0"
+    esmock: "patch:esmock@npm%3A2.7.3#~/.yarn/patches/esmock-npm-2.7.3-83624b28f6.patch"
     express: "npm:4.22.1"
     lodash: "npm:^4.18.1"
     minimist: "npm:^1.2.8"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
+    mongodb: "npm:6.12.0"
     mongodb-legacy: "npm:6.1.3"
     nock: "npm:^13.5.3"
     overleaf-editor-core: "workspace:*"
@@ -7307,8 +7541,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@overleaf/promise-utils@workspace:libraries/promise-utils"
   dependencies:
+    "@types/node": "npm:^24.5.2"
     chai: "npm:^4.3.10"
     chai-as-promised: "npm:^7.1.1"
+    eslint: "npm:^10.4.0"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
@@ -7321,7 +7557,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@overleaf/ranges-tracker@workspace:libraries/ranges-tracker"
   dependencies:
+    "@types/node": "npm:^24.5.2"
     chai: "npm:^4.3.6"
+    core-js: "npm:~3.46.0"
+    eslint: "npm:^10.4.0"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
@@ -7341,6 +7580,7 @@ __metadata:
     "@overleaf/redis-wrapper": "workspace:*"
     "@overleaf/settings": "workspace:*"
     "@overleaf/validation-tools": "workspace:*"
+    "@types/node": "npm:^24.5.2"
     async: "npm:^3.2.5"
     base64id: "npm:0.1.0"
     bunyan: "npm:^1.8.15"
@@ -7349,6 +7589,7 @@ __metadata:
     connect-redis: "npm:^6.1.3"
     cookie-parser: "npm:^1.4.6"
     cookie-signature: "npm:^1.1.0"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     express-session: "npm:^1.17.1"
     lodash: "npm:^4.18.1"
@@ -7366,6 +7607,7 @@ __metadata:
     uid-safe: "npm:^2.1.5"
     vitest: "npm:4.1.5"
     ws: "npm:^8.21.0"
+    zod: "npm:^4.0.0"
     zod-validation-error: "npm:^4.0.1"
   languageName: unknown
   linkType: soft
@@ -7376,8 +7618,10 @@ __metadata:
   dependencies:
     "@overleaf/logger": "workspace:*"
     "@overleaf/o-error": "workspace:*"
+    "@types/node": "npm:^24.5.2"
     async: "npm:^3.2.5"
     chai: "npm:^4.3.6"
+    eslint: "npm:^10.4.0"
     ioredis: "npm:~4.27.1"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
@@ -7404,6 +7648,7 @@ __metadata:
     adm-zip: "npm:^0.6.0"
     cypress: "npm:15.12.0"
     cypress-multi-reporters: "npm:^2.0.5"
+    eslint: "npm:^10.4.0"
     isomorphic-git: "npm:^1.33.1"
     mailtrap: "npm:^4.3.0"
     mocha: "npm:^11.7.5"
@@ -7426,11 +7671,14 @@ __metadata:
     adm-zip: "npm:^0.6.0"
     cypress: "npm:15.12.0"
     cypress-multi-reporters: "npm:^2.0.5"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     isomorphic-git: "npm:^1.33.1"
     js-yaml: "npm:^4.1.1"
+    mocha: "npm:^11.7.5"
     mocha-junit-reporter: "npm:^2.2.1"
     pdfjs-dist: "npm:^5.1.91"
+    typescript: "npm:^5.0.4"
     uuid: "npm:^9.0.1"
     zod-validation-error: "npm:^4.0.1"
   languageName: unknown
@@ -7440,6 +7688,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@overleaf/settings@workspace:libraries/settings"
   dependencies:
+    "@types/node": "npm:^24.5.2"
+    eslint: "npm:^10.4.0"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
@@ -7451,8 +7701,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@overleaf/stream-utils@workspace:libraries/stream-utils"
   dependencies:
+    "@types/node": "npm:^24.5.2"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
+    eslint: "npm:^10.4.0"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
@@ -7470,11 +7722,13 @@ __metadata:
     "@overleaf/migrations": "workspace:*"
     "@overleaf/promise-utils": "workspace:*"
     "@overleaf/settings": "workspace:*"
+    "@types/node": "npm:^24.5.2"
     args-js: "npm:0.10.12"
     async: "npm:^3.2.5"
     bunyan: "npm:^1.8.15"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     install: "npm:^0.13.0"
     lodash: "npm:^4.18.1"
@@ -7503,12 +7757,14 @@ __metadata:
     "@overleaf/o-error": "workspace:*"
     "@overleaf/promise-utils": "workspace:*"
     "@overleaf/settings": "workspace:*"
+    "@types/node": "npm:^24.5.2"
     async: "npm:^3.2.5"
     bunyan: "npm:^1.8.15"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
     chai-http: "npm:4.4.0"
     dropbox: "npm:^10.34.0"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     express-basic-auth: "npm:^1.2.0"
     ioredis: "npm:^4.16.0"
@@ -7516,6 +7772,7 @@ __metadata:
     lru-cache: "npm:^4.1.5"
     minimatch: "npm:^10.2.2"
     minimist: "npm:^1.2.8"
+    mongodb: "npm:6.12.0"
     mongodb-legacy: "npm:6.1.3"
     node-fetch: "npm:^2.7.0"
     p-limit: "npm:^2.3.0"
@@ -7539,17 +7796,21 @@ __metadata:
     "@overleaf/o-error": "workspace:*"
     "@overleaf/promise-utils": "workspace:*"
     "@overleaf/settings": "workspace:*"
+    "@types/mocha": "npm:^10.0.6"
+    "@types/node": "npm:^24.5.2"
     async: "npm:^3.2.5"
     bunyan: "npm:^1.8.15"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
-    esmock: "npm:^2.7.3"
+    eslint: "npm:^10.4.0"
+    esmock: "patch:esmock@npm%3A2.7.3#~/.yarn/patches/esmock-npm-2.7.3-83624b28f6.patch"
     express: "npm:4.22.1"
     lodash: "npm:^4.18.1"
     lru-cache: "npm:^5.1.1"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
+    mongodb: "npm:6.12.0"
     mongodb-legacy: "npm:6.1.3"
     oauth: "npm:0.9.15"
     request: "npm:2.88.2"
@@ -7564,6 +7825,9 @@ __metadata:
   resolution: "@overleaf/validation-tools@workspace:libraries/validation-tools"
   dependencies:
     "@overleaf/o-error": "workspace:*"
+    "@types/express": "npm:4.17.23"
+    "@types/node": "npm:^24.5.2"
+    eslint: "npm:^10.4.0"
     mongodb: "npm:^6.12.0"
     typescript: "npm:^5.0.4"
     vitest: "npm:4.1.5"
@@ -7583,6 +7847,7 @@ __metadata:
     "@aws-sdk/client-sesv2": "npm:^3.994.0"
     "@babel/core": "npm:^7.28.5"
     "@babel/plugin-proposal-decorators": "npm:^7.28.0"
+    "@babel/plugin-transform-typescript": "npm:^7.28.0"
     "@babel/preset-env": "npm:^7.28.5"
     "@babel/preset-react": "npm:^7.28.5"
     "@babel/preset-typescript": "npm:^7.28.5"
@@ -7641,6 +7906,7 @@ __metadata:
     "@replit/codemirror-indentation-markers": "overleaf/codemirror-indentation-markers#371ce3b56f453a392eb0d3b85ab019c185c68e1f"
     "@replit/codemirror-vim": "overleaf/codemirror-vim#1bef138382d948018f3f9b8a4d7a70ab61774e4b"
     "@sentry/browser": "npm:7.46.0"
+    "@sentry/types": "npm:7.46.0"
     "@slack/webhook": "npm:^7.0.2"
     "@storybook/addon-a11y": "npm:10.3.5"
     "@storybook/addon-designs": "npm:^11.1.3"
@@ -7665,15 +7931,19 @@ __metadata:
     "@types/async": "npm:^3.2.25"
     "@types/bootstrap": "npm:^5.2.10"
     "@types/chai": "npm:^4.3.0"
+    "@types/chai-as-promised": "npm:^8.0.2"
     "@types/dateformat": "npm:^5.0.3"
     "@types/diff": "npm:^5.2.3"
     "@types/dom-speech-recognition": "npm:^0.0.7"
     "@types/events": "npm:^3.0.3"
     "@types/express": "npm:^4.17.23"
+    "@types/lodash": "npm:^4.17.24"
+    "@types/mdast": "npm:^4.0.4"
     "@types/minimist": "npm:^1.2.5"
     "@types/mocha": "npm:^9.1.0"
     "@types/mocha-each": "npm:^2.0.4"
     "@types/node": "npm:^24.5.2"
+    "@types/path-browserify": "npm:^1.0.3"
     "@types/react": "npm:^18.3.20"
     "@types/react-color": "npm:^3.0.13"
     "@types/react-dom": "npm:^18.3.6"
@@ -7682,15 +7952,19 @@ __metadata:
     "@types/react-syntax-highlighter": "npm:^15.5.11"
     "@types/recurly__recurly-js": "npm:^4.38.0"
     "@types/sanitize-html": "npm:^2.14.0"
+    "@types/sinon": "npm:^21.0.1"
     "@types/sinon-chai": "npm:^3.2.12"
     "@types/utf-8-validate": "npm:^5.0.2"
     "@types/uuid": "npm:^10.0.0"
+    "@typescript-eslint/eslint-plugin": "npm:^8.59.4"
+    "@typescript-eslint/parser": "npm:^8.59.4"
     "@uppy/core": "npm:^3.8.0"
     "@uppy/dashboard": "npm:3.7.1"
     "@uppy/drag-drop": "npm:3.0.3"
     "@uppy/file-input": "npm:3.0.4"
     "@uppy/progress-bar": "npm:3.0.4"
     "@uppy/react": "npm:3.2.1"
+    "@uppy/status-bar": "npm:^3.2.5"
     "@uppy/utils": "npm:^5.7.0"
     "@uppy/xhr-upload": "npm:3.6.0"
     "@vitest/coverage-istanbul": "npm:^4.0.17"
@@ -7746,6 +8020,8 @@ __metadata:
     css-minimizer-webpack-plugin: "npm:^8.0.0"
     csurf: "npm:^1.11.0"
     csv: "npm:^6.2.5"
+    csv-parse: "npm:^6.2.1"
+    csv-stringify: "npm:^6.7.0"
     cypress: "npm:15.12.0"
     cypress-multi-reporters: "npm:^2.0.5"
     cypress-plugin-tab: "npm:^1.0.5"
@@ -7759,9 +8035,11 @@ __metadata:
     email-addresses: "npm:^5.0.0"
     es6-promise: "npm:^4.2.8"
     escodegen: "npm:^2.0.0"
+    eslint: "npm:^10.4.0"
     eslint-config-prettier: "npm:^10.1.8"
     eslint-plugin-chai-expect: "npm:^4.1.0"
     eslint-plugin-chai-friendly: "npm:^1.2.0"
+    eslint-plugin-cypress: "npm:^4.1.0"
     eslint-plugin-import: "npm:^2.32.0"
     eslint-plugin-jsx-a11y: "npm:^6.10.2"
     eslint-plugin-mocha: "npm:^11.3.0"
@@ -7783,6 +8061,7 @@ __metadata:
     fast-fuzzy: "npm:^1.12.0"
     fetch-mock: "npm:^12.6.0"
     file-type: "npm:^21.3.4"
+    focus-trap: "npm:^8.2.1"
     focus-trap-react: "npm:^11.0.4"
     form-data: "npm:^4.0.5"
     formik: "npm:^2.2.9"
@@ -7827,6 +8106,7 @@ __metadata:
     mocha-junit-reporter: "npm:^2.2.1"
     mocha-multi-reporters: "npm:^1.5.1"
     moment: "npm:^2.29.4"
+    mongodb: "npm:6.12.0"
     mongodb-legacy: "npm:6.1.3"
     mongoose: "npm:8.22.1"
     multer: "npm:2.2.0"
@@ -7905,9 +8185,10 @@ __metadata:
     to-string-loader: "npm:^1.2.0"
     tough-cookie: "npm:^4.0.0"
     ts-loader: "npm:^9.5.7"
+    tslib: "npm:^2.8.1"
     tsscmp: "npm:^1.0.6"
     tty-browserify: "npm:^0.0.1"
-    typescript: "npm:^5.9.3"
+    typescript: "npm:^5.0.4"
     uid-safe: "npm:^2.1.5"
     unified: "npm:^11.0.5"
     unist-util-visit: "npm:^5.0.0"
@@ -8381,7 +8662,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@popperjs/core@npm:^2.11.8, @popperjs/core@npm:^2.9.2":
+"@popperjs/core@npm:*, @popperjs/core@npm:^2.11.8, @popperjs/core@npm:^2.9.2":
   version: 2.11.8
   resolution: "@popperjs/core@npm:2.11.8"
   checksum: 10c0/4681e682abc006d25eb380d0cf3efc7557043f53b6aea7a5057d0d1e7df849a00e281cd8ea79c902a35a414d7919621fc2ba293ecec05f413598e0b23d5a1e63
@@ -8870,12 +9151,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sinonjs/commons@npm:^3.0.1":
+"@sinonjs/commons@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@sinonjs/commons@npm:2.0.0"
+  dependencies:
+    type-detect: "npm:4.0.8"
+  checksum: 10c0/babe3fdfc7dfb810f6918f2ae055032a1c7c18910595f1c6bfda87bb1737c1a57268d4ca78c3d8ad2fa4aae99ff79796fad76be735a5a38ab763c0b3cfad1ae7
+  languageName: node
+  linkType: hard
+
+"@sinonjs/commons@npm:^3.0.0, @sinonjs/commons@npm:^3.0.1":
   version: 3.0.1
   resolution: "@sinonjs/commons@npm:3.0.1"
   dependencies:
     type-detect: "npm:4.0.8"
   checksum: 10c0/1227a7b5bd6c6f9584274db996d7f8cee2c8c350534b9d0141fc662eaf1f292ea0ae3ed19e5e5271c8fd390d27e492ca2803acd31a1978be2cdc6be0da711403
+  languageName: node
+  linkType: hard
+
+"@sinonjs/fake-timers@npm:^11.2.2":
+  version: 11.3.1
+  resolution: "@sinonjs/fake-timers@npm:11.3.1"
+  dependencies:
+    "@sinonjs/commons": "npm:^3.0.1"
+  checksum: 10c0/c4f96ea7c3ab0e1a5fc1e2e1201e984a9302841a9fb10059120ce3b6789dae0f851c8827cf16b052a6f87db9a098cdd36f7067246e7a9b71da1d5a2c3d3a9f3d
   languageName: node
   linkType: hard
 
@@ -8894,6 +9193,15 @@ __metadata:
   dependencies:
     "@sinonjs/commons": "npm:^1.7.0"
   checksum: 10c0/a77bead4d71b40d6f7f9a3ad66a00269aa2c078260f43f594b8aed4676c6c4e7c2b642d4b8e34df314e1c971589455f7b4267ab831bf44ffdccc0bda599850ad
+  languageName: node
+  linkType: hard
+
+"@sinonjs/fake-timers@npm:^9.1.2":
+  version: 9.1.2
+  resolution: "@sinonjs/fake-timers@npm:9.1.2"
+  dependencies:
+    "@sinonjs/commons": "npm:^1.7.0"
+  checksum: 10c0/d9187f9130f03272562ff9845867299c6f7cf15157bbb3e6aca4a1f06d885b0eef54259d0ad41e2f8043dc530b4db730b6c9415b169033e7ba8fed0ad449ceec
   languageName: node
   linkType: hard
 
@@ -8949,7 +9257,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sinonjs/text-encoding@npm:^0.7.1":
+"@sinonjs/samsam@npm:^7.0.1":
+  version: 7.0.1
+  resolution: "@sinonjs/samsam@npm:7.0.1"
+  dependencies:
+    "@sinonjs/commons": "npm:^2.0.0"
+    lodash.get: "npm:^4.4.2"
+    type-detect: "npm:^4.0.8"
+  checksum: 10c0/cc5e61e102dfa837ea3dd0102c924636de8a43e39d3e5ea009b57095be15fad807535feb8b2a3e90686f022451ab2dfa49c99167d68c661e7fab19a07227d467
+  languageName: node
+  linkType: hard
+
+"@sinonjs/text-encoding@npm:^0.7.1, @sinonjs/text-encoding@npm:^0.7.2":
   version: 0.7.3
   resolution: "@sinonjs/text-encoding@npm:0.7.3"
   checksum: 10c0/b112d1e97af7f99fbdc63c7dbcd35d6a60764dfec85cfcfff532e55cce8ecd8453f9fa2139e70aea47142c940fd90cd201d19f370b9a0141700d8a6de3116815
@@ -10326,6 +10645,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/chai-as-promised@npm:^8.0.2":
+  version: 8.0.2
+  resolution: "@types/chai-as-promised@npm:8.0.2"
+  dependencies:
+    "@types/chai": "npm:*"
+  checksum: 10c0/94492694121ba3c8b16e61be5f3d91bf1996c37e7b5f85363f30e160344b32d42b7ad9606198e57a3b3c06eb3b36e345ac0494e7556fc406433d8e13f1b83a77
+  languageName: node
+  linkType: hard
+
 "@types/chai@npm:*, @types/chai@npm:^5.2.2":
   version: 5.2.3
   resolution: "@types/chai@npm:5.2.3"
@@ -10602,6 +10930,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/ioredis@npm:^4.28.10":
+  version: 4.28.10
+  resolution: "@types/ioredis@npm:4.28.10"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/ff680fef6750721c465ee9d6060d3229e49e5b217d68503c4972c4b869b8f84b91cbd9b7d5195a40fb0bff6ab9a4f5e24a2cc17a368ddb0bfe2dfd4eb5fc1872
+  languageName: node
+  linkType: hard
+
 "@types/is-core-module@npm:^2.2.2":
   version: 2.2.2
   resolution: "@types/is-core-module@npm:2.2.2"
@@ -10664,7 +11001,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4.14.175":
+"@types/lodash@npm:^4.14.175, @types/lodash@npm:^4.17.24":
   version: 4.17.24
   resolution: "@types/lodash@npm:4.17.24"
   checksum: 10c0/b72f60d4daacdad1fa643edb3faba204c02a01eb1ac00a83ff73496a6d236fc55e459c06106e8ced42277dba932d087d8fc090f8de4ef590d3f91e6d6f7ce85a
@@ -10678,7 +11015,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mdast@npm:^4.0.0":
+"@types/mdast@npm:^4.0.0, @types/mdast@npm:^4.0.4":
   version: 4.0.4
   resolution: "@types/mdast@npm:4.0.4"
   dependencies:
@@ -11098,7 +11435,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/sinon@npm:*":
+"@types/sinon@npm:*, @types/sinon@npm:^21.0.1":
   version: 21.0.1
   resolution: "@types/sinon@npm:21.0.1"
   dependencies:
@@ -16392,7 +16729,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"diff@npm:^5.1.0":
+"diff@npm:^5.0.0, diff@npm:^5.1.0":
   version: 5.2.2
   resolution: "diff@npm:5.2.2"
   checksum: 10c0/52da594c54e9033423da26984b1449ae6accd782d5afc4431c9a192a8507ddc83120fe8f925d7220b9da5b5963c7b6f5e46add3660a00cb36df7a13420a09d4b
@@ -17754,10 +18091,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esmock@npm:^2.7.3":
+"esmock@npm:2.7.3":
   version: 2.7.3
   resolution: "esmock@npm:2.7.3"
   checksum: 10c0/71aebd7b82ad11bab56b9ff3897e105c0fc51eef9e9268c9406c3ca14401eddc8a69f2f381ae82e24d039452de5fc7f32ec694fdf3b1c6d724af22cf69e5f9dd
+  languageName: node
+  linkType: hard
+
+"esmock@patch:esmock@npm%3A2.7.3#~/.yarn/patches/esmock-npm-2.7.3-83624b28f6.patch":
+  version: 2.7.3
+  resolution: "esmock@patch:esmock@npm%3A2.7.3#~/.yarn/patches/esmock-npm-2.7.3-83624b28f6.patch::version=2.7.3&hash=acc414"
+  checksum: 10c0/67532f6510599549060545aabd4b64e080a30d98f1ec91f697058e343a14bd1845a4cdf452a38335f44aad827a5dee0e86d6e0e16853aad0b65235dcd0c55e18
   languageName: node
   linkType: hard
 
@@ -18749,6 +19093,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"focus-trap@npm:^8.2.1":
+  version: 8.2.2
+  resolution: "focus-trap@npm:8.2.2"
+  dependencies:
+    tabbable: "npm:^6.5.0"
+  checksum: 10c0/8f5e15aebbf447b394f4978f46339fd8f2f746d535ff957ab7045442bf6631d3d34be8b603d4402e57721fe2e74e3ea837f57f9c8553bb5e55b20e3f2609e191
+  languageName: node
+  linkType: hard
+
 "follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.16.0":
   version: 1.16.0
   resolution: "follow-redirects@npm:1.16.0"
@@ -18935,8 +19288,10 @@ __metadata:
     "@overleaf/fetch-utils": "workspace:*"
     "@overleaf/logger": "workspace:*"
     "@overleaf/metrics": "workspace:*"
+    "@types/node": "npm:^24.5.2"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     is-valid-hostname: "npm:^1.0.2"
     mocha: "npm:^11.1.0"
@@ -20798,6 +21153,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ipaddr.js@npm:^2.2.0":
+  version: 2.4.0
+  resolution: "ipaddr.js@npm:2.4.0"
+  checksum: 10c0/47c2f17677b40054ca50a09e1228cf818c0d02d4474c2e0e29232c6668b3c4d51a3cfc19d1e17897d7baf4d933b3111d6bdf5cfbe55ab184165469a75f2bf177
+  languageName: node
+  linkType: hard
+
 "is-absolute-url@npm:^3.0.3":
   version: 3.0.3
   resolution: "is-absolute-url@npm:3.0.3"
@@ -21664,7 +22026,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jquery@npm:^3.7.1":
+"jquery@npm:^3, jquery@npm:^3.7.1":
   version: 3.7.1
   resolution: "jquery@npm:3.7.1"
   checksum: 10c0/808cfbfb758438560224bf26e17fcd5afc7419170230c810dd11f5c1792e2263e2970cca8d659eb84fcd9acc301edb6d310096e450277d54be4f57071b0c82d9
@@ -22112,6 +22474,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"just-extend@npm:^6.2.0":
+  version: 6.2.0
+  resolution: "just-extend@npm:6.2.0"
+  checksum: 10c0/d41cbdb6d85b986d4deaf2144d81d4f7266cd408fc95189d046d63f610c2dc486b141aeb6ef319c2d76fe904d45a6bb31f19b098ff0427c35688e0c383fc0511
+  languageName: node
+  linkType: hard
+
 "just-once@npm:1.1.0":
   version: 1.1.0
   resolution: "just-once@npm:1.1.0"
@@ -22298,7 +22667,9 @@ __metadata:
     "@overleaf/fetch-utils": "workspace:*"
     "@overleaf/o-error": "workspace:*"
     "@popperjs/core": "npm:^2.11.8"
+    "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/react": "npm:^16.3.2"
+    "@types/react": "npm:^18.3.1"
     "@vitejs/plugin-react": "npm:^4.3.4"
     babel-loader: "npm:^10.1.1"
     babel-plugin-react-transform: "npm:^3.0.0"
@@ -22350,6 +22721,7 @@ __metadata:
     style-loader: "npm:^4.0.0"
     throng: "npm:^4.0.0"
     url-loader: "npm:^4.1.1"
+    vite: "npm:^6.0.0"
     vitest: "npm:4.1.5"
     webpack: "npm:^5.106.2"
     webpack-cli: "npm:^7.0.2"
@@ -24792,6 +25164,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nise@npm:^5.1.2":
+  version: 5.1.9
+  resolution: "nise@npm:5.1.9"
+  dependencies:
+    "@sinonjs/commons": "npm:^3.0.0"
+    "@sinonjs/fake-timers": "npm:^11.2.2"
+    "@sinonjs/text-encoding": "npm:^0.7.2"
+    just-extend: "npm:^6.2.0"
+    path-to-regexp: "npm:^6.2.1"
+  checksum: 10c0/a44318e6de738b34a1f51b4b478f97f5b40a5a27175be4bf13f6e5b8e67aa70d0b3f51c77a966d6617fccdc3b436c675a89be57424833e6d8a290367faa66b28
+  languageName: node
+  linkType: hard
+
 "no-case@npm:^3.0.4":
   version: 3.0.4
   resolution: "no-case@npm:3.0.4"
@@ -25071,6 +25456,8 @@ __metadata:
 "npm-overrides-helper@workspace:tools/npm-overrides-helper":
   version: 0.0.0-use.local
   resolution: "npm-overrides-helper@workspace:tools/npm-overrides-helper"
+  dependencies:
+    eslint: "npm:^10.4.0"
   languageName: unknown
   linkType: soft
 
@@ -25437,6 +25824,7 @@ __metadata:
     "@types/is-core-module": "npm:^2.2.2"
     "@types/minimist": "npm:^1.2.5"
     "@types/node": "npm:^24.5.2"
+    eslint: "npm:^10.4.0"
     is-core-module: "npm:^2.16.1"
     minimist: "npm:^1.2.8"
     npm-check-updates: "npm:^18.1.1"
@@ -25458,9 +25846,13 @@ __metadata:
     "@overleaf/o-error": "workspace:*"
     "@overleaf/validation-tools": "workspace:*"
     "@types/check-types": "npm:^7.3.7"
+    "@types/lodash": "npm:^4.17.24"
+    "@types/mocha": "npm:^10.0.6"
+    "@types/node": "npm:^24.5.2"
     "@types/path-browserify": "npm:^1.0.3"
     chai: "npm:^3.3.0"
     check-types: "npm:^5.1.0"
+    eslint: "npm:^10.4.0"
     lodash: "npm:^4.18.1"
     mocha: "npm:^11.1.0"
     mocha-junit-reporter: "npm:^2.2.1"
@@ -25476,7 +25868,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "overleaf-editor@workspace:services/history-v1"
   dependencies:
+    "@aws-sdk/client-s3": "npm:^3.994.0"
     "@google-cloud/secret-manager": "npm:^5.6.0"
+    "@google-cloud/storage": "npm:^7.19.0"
     "@overleaf/fetch-utils": "workspace:*"
     "@overleaf/logger": "workspace:*"
     "@overleaf/metrics": "workspace:*"
@@ -25489,6 +25883,9 @@ __metadata:
     "@overleaf/settings": "workspace:*"
     "@overleaf/stream-utils": "npm:^0.1.0"
     "@overleaf/validation-tools": "workspace:*"
+    "@types/chai-as-promised": "npm:^7.1.8"
+    "@types/mocha": "npm:^10.0.6"
+    "@types/node": "npm:^24.5.2"
     archiver: "npm:^5.3.0"
     basic-auth: "npm:^2.0.1"
     benny: "npm:^3.7.1"
@@ -25501,6 +25898,7 @@ __metadata:
     check-types: "npm:^11.1.2"
     command-line-args: "npm:^3.0.3"
     config: "npm:^3.3.12"
+    eslint: "npm:^10.4.0"
     express: "npm:4.22.1"
     fs-extra: "npm:^9.0.1"
     generic-pool: "npm:^2.1.1"
@@ -25556,9 +25954,129 @@ __metadata:
     eslint-plugin-promise: "npm:^7.2.1"
     eslint-plugin-unicorn: "npm:^56.0.0"
     globals: "npm:^17.6.0"
+    js-yaml: "npm:^4.1.1"
     prettier: "npm:3.7.4"
     prettier-plugin-groovy: "npm:0.2.1"
     typescript: "npm:^5.9.3"
+  dependenciesMeta:
+    "@babel/helper-string-parser@7.27.1":
+      unplugged: true
+    "@babel/helper-validator-identifier@7.28.5":
+      unplugged: true
+    "@babel/parser@7.29.2":
+      unplugged: true
+    "@babel/types@7.29.0":
+      unplugged: true
+    "@prettier/plugin-pug@3.4.2":
+      unplugged: true
+    acorn@7.4.1:
+      unplugged: true
+    asap@2.0.6:
+      unplugged: true
+    assert-never@1.4.0:
+      unplugged: true
+    async-function@1.0.0:
+      unplugged: true
+    async-generator-function@1.0.0:
+      unplugged: true
+    babel-walk@3.0.0-canary-5:
+      unplugged: true
+    call-bind-apply-helpers@1.0.2:
+      unplugged: true
+    call-bound@1.0.4:
+      unplugged: true
+    character-parser@2.2.0:
+      unplugged: true
+    constantinople@4.0.1:
+      unplugged: true
+    cypress-multi-reporters@2.0.5:
+      unplugged: true
+    doctypes@1.1.0:
+      unplugged: true
+    dunder-proto@1.0.1:
+      unplugged: true
+    es-define-property@1.0.1:
+      unplugged: true
+    es-errors@1.3.0:
+      unplugged: true
+    es-object-atoms@1.1.1:
+      unplugged: true
+    esmock@2.7.3:
+      unplugged: true
+    function-bind@1.1.2:
+      unplugged: true
+    generator-function@2.0.1:
+      unplugged: true
+    get-intrinsic@1.3.1:
+      unplugged: true
+    get-proto@1.0.1:
+      unplugged: true
+    gopd@1.2.0:
+      unplugged: true
+    has-symbols@1.1.0:
+      unplugged: true
+    has-tostringtag@1.0.2:
+      unplugged: true
+    hasown@2.0.2:
+      unplugged: true
+    is-core-module@2.16.1:
+      unplugged: true
+    is-expression@4.0.0:
+      unplugged: true
+    is-promise@2.2.2:
+      unplugged: true
+    is-regex@1.2.1:
+      unplugged: true
+    js-stringify@1.0.2:
+      unplugged: true
+    jstransformer@1.0.0:
+      unplugged: true
+    math-intrinsics@1.1.0:
+      unplugged: true
+    object-assign@4.1.1:
+      unplugged: true
+    path-parse@1.0.7:
+      unplugged: true
+    prettier-plugin-groovy@0.2.1:
+      unplugged: true
+    prettier@3.7.4:
+      unplugged: true
+    promise@7.3.1:
+      unplugged: true
+    pug-attrs@3.0.0:
+      unplugged: true
+    pug-code-gen@3.0.4:
+      unplugged: true
+    pug-error@2.1.0:
+      unplugged: true
+    pug-filters@4.0.0:
+      unplugged: true
+    pug-lexer@5.0.1:
+      unplugged: true
+    pug-linker@4.0.0:
+      unplugged: true
+    pug-load@3.0.0:
+      unplugged: true
+    pug-parser@6.0.0:
+      unplugged: true
+    pug-runtime@3.0.1:
+      unplugged: true
+    pug-strip-comments@2.0.0:
+      unplugged: true
+    pug-walk@2.0.0:
+      unplugged: true
+    pug@3.0.3:
+      unplugged: true
+    resolve@1.22.12:
+      unplugged: true
+    supports-preserve-symlinks-flag@1.0.0:
+      unplugged: true
+    token-stream@1.0.0:
+      unplugged: true
+    void-elements@3.1.0:
+      unplugged: true
+    with@7.0.2:
+      unplugged: true
   languageName: unknown
   linkType: soft
 
@@ -26162,6 +26680,13 @@ __metadata:
   dependencies:
     isarray: "npm:0.0.1"
   checksum: 10c0/de9ddb01b84d9c2c8e2bed18630d8d039e2d6f60a6538595750fa08c7a6482512257464c8da50616f266ab2cdd2428387e85f3b089e4c3f25d0c537e898a0751
+  languageName: node
+  linkType: hard
+
+"path-to-regexp@npm:^6.2.1":
+  version: 6.3.0
+  resolution: "path-to-regexp@npm:6.3.0"
+  checksum: 10c0/73b67f4638b41cde56254e6354e46ae3a2ebc08279583f6af3d96fe4664fc75788f74ed0d18ca44fa4a98491b69434f9eee73b97bb5314bd1b5adb700f5c18d6
   languageName: node
   linkType: hard
 
@@ -27763,7 +28288,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pug-filters@npm:^4.0.0":
+"pug-filters@npm:*, pug-filters@npm:^4.0.0":
   version: 4.0.0
   resolution: "pug-filters@npm:4.0.0"
   dependencies:
@@ -27787,7 +28312,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pug-linker@npm:^4.0.0":
+"pug-linker@npm:*, pug-linker@npm:^4.0.0":
   version: 4.0.0
   resolution: "pug-linker@npm:4.0.0"
   dependencies:
@@ -27797,7 +28322,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pug-load@npm:^3.0.0":
+"pug-load@npm:*, pug-load@npm:^3.0.0":
   version: 3.0.0
   resolution: "pug-load@npm:3.0.0"
   dependencies:
@@ -27807,7 +28332,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pug-parser@npm:^6.0.0":
+"pug-parser@npm:*, pug-parser@npm:^6.0.0":
   version: 6.0.0
   resolution: "pug-parser@npm:6.0.0"
   dependencies:
@@ -27817,14 +28342,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pug-runtime@npm:^3.0.0, pug-runtime@npm:^3.0.1":
+"pug-runtime@npm:*, pug-runtime@npm:^3.0.0, pug-runtime@npm:^3.0.1":
   version: 3.0.1
   resolution: "pug-runtime@npm:3.0.1"
   checksum: 10c0/0db8166d2e17695a6941d1de81dcb21c8a52921299b1e03bf6a0a3d2b0036b51cf98101b3937b731c745e8d3e0268cb0b728c02f61a80a25fcfaa15c594fb1be
   languageName: node
   linkType: hard
 
-"pug-strip-comments@npm:^2.0.0":
+"pug-strip-comments@npm:*, pug-strip-comments@npm:^2.0.0":
   version: 2.0.0
   resolution: "pug-strip-comments@npm:2.0.0"
   dependencies:
@@ -27833,7 +28358,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pug-walk@npm:^2.0.0":
+"pug-walk@npm:*, pug-walk@npm:^2.0.0":
   version: 2.0.0
   resolution: "pug-walk@npm:2.0.0"
   checksum: 10c0/005d63177bcf057f5a618b182f6d4600afb039200b07a381a0d89288a2b3126e763a0a6c40b758eab0731c8e63cad1bbcb46d96803b9ae9cfc879f6ef5a0f8f4
@@ -28772,7 +29297,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"reflect-metadata@npm:^0.2.2":
+"reflect-metadata@npm:*, reflect-metadata@npm:^0.2.2":
   version: 0.2.2
   resolution: "reflect-metadata@npm:0.2.2"
   checksum: 10c0/1cd93a15ea291e420204955544637c264c216e7aac527470e393d54b4bb075f10a17e60d8168ec96600c7e0b9fcc0cb0bb6e91c3fbf5b0d8c9056f04e6ac1ec2
@@ -30239,6 +30764,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sinon@npm:^14.0.0":
+  version: 14.0.2
+  resolution: "sinon@npm:14.0.2"
+  dependencies:
+    "@sinonjs/commons": "npm:^2.0.0"
+    "@sinonjs/fake-timers": "npm:^9.1.2"
+    "@sinonjs/samsam": "npm:^7.0.1"
+    diff: "npm:^5.0.0"
+    nise: "npm:^5.1.2"
+    supports-color: "npm:^7.2.0"
+  checksum: 10c0/cef92d9a018e08c22812f04038eb33972e5386253f897c3efc4ff26d80e354d17a1d8123aed443c03ba94d85c4c3eb0660c6d3f6f8460d7d0af4d6bd3e058ae0
+  languageName: node
+  linkType: hard
+
 "sinon@npm:^21.1.0":
   version: 21.1.2
   resolution: "sinon@npm:21.1.2"
@@ -31309,7 +31848,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"supports-color@npm:^7.0.0, supports-color@npm:^7.1.0":
+"supports-color@npm:^7.0.0, supports-color@npm:^7.1.0, supports-color@npm:^7.2.0":
   version: 7.2.0
   resolution: "supports-color@npm:7.2.0"
   dependencies:
@@ -31401,6 +31940,13 @@ __metadata:
   version: 6.4.0
   resolution: "tabbable@npm:6.4.0"
   checksum: 10c0/d931427f4a96b801fd8801ba296a702119e06f70ad262fed8abc5271225c9f1ca51b89fdec4fb2f22e1d35acb3d2881db0a17cedc758272e9ecb540d00299d76
+  languageName: node
+  linkType: hard
+
+"tabbable@npm:^6.5.0":
+  version: 6.5.0
+  resolution: "tabbable@npm:6.5.0"
+  checksum: 10c0/7d778af05a3093800265831198cad9d0024f3d65cdd4405007490f7430b42ff4e80060b4679f45281fb96ddbddc5fb895e8ea36e3ebdc811051e14acc9c7c02c
   languageName: node
   linkType: hard
 
@@ -31528,15 +32074,15 @@ __metadata:
   linkType: hard
 
 "tar@npm:^7.5.4":
-  version: 7.5.16
-  resolution: "tar@npm:7.5.16"
+  version: 7.5.19
+  resolution: "tar@npm:7.5.19"
   dependencies:
     "@isaacs/fs-minipass": "npm:^4.0.0"
     chownr: "npm:^3.0.0"
     minipass: "npm:^7.1.2"
     minizlib: "npm:^3.1.0"
     yallist: "npm:^5.0.0"
-  checksum: 10c0/4f37f3c4bd2ca2755fd736a5df1d573c1a868ec1b1e893346aeafa95ac510f9e2fd1469420bd866cc7904799e5bd4ac62b5d4f03fe27747d6e1e373b44505c5c
+  checksum: 10c0/7022e8cb04a8ceccc0689f2c731743fa2aab2e3c3f559f7dbc37b65ef7d5913049b427284eded2ec0765c5db5ff72dd7939fe2ae15785ff422cef2116c95d798
   languageName: node
   linkType: hard
 
@@ -33893,8 +34439,10 @@ __metadata:
   dependencies:
     algoliasearch: "npm:4.19.1"
     chai-as-promised: "npm:^8.0.2"
+    eslint: "npm:^10.4.0"
     lodash: "npm:^4.18.1"
     sanitize-html: "npm:^2.17.4"
+    typescript: "npm:^5.0.4"
     vitest: "npm:^4.0.0"
   languageName: unknown
   linkType: soft
@@ -34035,7 +34583,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:^8.18.0, ws@npm:^8.18.3, ws@npm:^8.21.0, ws@npm:^8.5.0":
+"ws@npm:*, ws@npm:^8.18.0, ws@npm:^8.18.3, ws@npm:^8.21.0, ws@npm:^8.5.0":
   version: 8.21.0
   resolution: "ws@npm:8.21.0"
   peerDependencies:

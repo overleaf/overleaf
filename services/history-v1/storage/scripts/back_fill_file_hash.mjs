@@ -316,8 +316,9 @@ if (OUTPUT_FILE !== '-') {
 logger.initialize('file-migration', {
   streams: [
     {
-      stream:
-        OUTPUT_FILE === '-'
+      stream: DISPLAY_REPORT
+        ? process.stderr
+        : OUTPUT_FILE === '-'
           ? process.stdout
           : fs.createWriteStream(OUTPUT_FILE, { flags: 'a' }),
     },

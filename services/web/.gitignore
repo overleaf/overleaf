@@ -22,6 +22,7 @@ cypress/screenshots/
 cypress/videos/
 cypress/downloads/
 cypress/results/
+cypress/reporter/
 
 # Ace themes for conversion
 frontend/js/features/source-editor/themes/ace/

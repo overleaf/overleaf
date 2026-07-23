@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 const fs = require('node:fs')
 const Path = require('node:path')
+const { createRequire } = require('node:module')
 const { merge } = require('./merge')
 
 const CWD = process.cwd()
@@ -16,6 +17,15 @@ if (SHARELATEX_CONFIG && SHARELATEX_CONFIG !== OVERLEAF_CONFIG) {
   )
 }
 
+// Under Yarn PnP, require() resolves dependencies based on the issuer package.
+// Config files live in the consuming service (e.g. web), not in @overleaf/settings,
+// so we create a require function anchored at each config file's location to ensure
+// dependencies resolve from the service's PnP scope rather than this library's.
+function requireFromFile(filePath) {
+  const absPath = Path.resolve(filePath)
+  return createRequire(absPath)(absPath)
+}
+
 let settings
 let settingsExist = false
 const defaultsPath =
@@ -25,7 +35,7 @@ const defaultsPath =
   pathIfExists(Path.join(ENTRY_POINT_DIR, 'config/settings.defaults.js'))
 if (defaultsPath) {
   console.log(`Using default settings from ${defaultsPath}`)
-  settings = require(defaultsPath)
+  settings = requireFromFile(defaultsPath)
   settingsExist = true
 } else {
   settings = {}
@@ -37,7 +47,7 @@ const overridesPath =
   pathIfExists(Path.join(CWD, `config/settings.${NODE_ENV}.js`))
 if (overridesPath) {
   console.log(`Using settings from ${overridesPath}`)
-  settings = merge(require(overridesPath), settings)
+  settings = merge(requireFromFile(overridesPath), settings)
   settingsExist = true
 }
 
