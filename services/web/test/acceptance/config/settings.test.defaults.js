@@ -8,6 +8,8 @@ const httpAuthUsers = {}
 httpAuthUsers[httpAuthUser] = httpAuthPass
 
 module.exports = {
+  adminRolesEnabled: false,
+
   catchErrors: false,
   clsiCookie: undefined,
 
