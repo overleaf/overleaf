@@ -43,7 +43,6 @@ describe('ProjectController', function () {
           collaborator: {
             monthly: 15,
             annual: 180,
-            annualDividedByTwelve: 15,
           },
         },
       },
@@ -1602,7 +1601,6 @@ describe('ProjectController', function () {
             assistant: {
               annual: 60,
               monthly: 5,
-              annualDividedByTwelve: 5,
             },
           },
         }
