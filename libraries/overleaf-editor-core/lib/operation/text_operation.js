@@ -45,9 +45,13 @@ class TextOperation extends EditOperation {
   /**
    * Length of the longest file that we'll attempt to edit, in characters.
    *
+   * Backend OT/history processing limit. Incoming uploads/edits are separately
+   * capped at 2MB via `max_doc_length`; this higher ceiling lets legacy updates
+   * with larger OT results flow through history instead of throwing TooLongError.
+   *
    * @type {number}
    */
-  static MAX_STRING_LENGTH = 2 * Math.pow(1024, 2)
+  static MAX_STRING_LENGTH = 3 * Math.pow(1024, 2)
   static UnprocessableError = UnprocessableError
   static ApplyError = ApplyError
   static InvalidInsertionError = InvalidInsertionError

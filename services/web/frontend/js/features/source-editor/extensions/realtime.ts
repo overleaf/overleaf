@@ -332,6 +332,11 @@ class HistoryOTAdapter {
 
   handleUpdateFromCM(transactions: readonly Transaction[]) {
     for (const transaction of transactions) {
+      // TODO: unlike the sharejs adapter above, this only checks visible
+      // length. When history-ot is enabled, add the retained tracked-deletes
+      // length here too (as #20052 did for sharejs) — otherwise total stored
+      // content (visible + tracked deletes) can exceed the backend cap
+      // (TextOperation.MAX_STRING_LENGTH) and fail with a 422.
       if (
         this.maxDocLength &&
         transaction.changes.newLength >= this.maxDocLength
