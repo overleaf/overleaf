@@ -3,7 +3,7 @@ import logger from '@overleaf/logger'
 import metrics from '@overleaf/metrics'
 import Settings from '@overleaf/settings'
 import nodemailer from 'nodemailer'
-import * as aws from '@aws-sdk/client-ses'
+import { SESv2Client, SendEmailCommand } from '@aws-sdk/client-sesv2'
 import OError from '@overleaf/o-error'
 import { RateLimiter } from '../../infrastructure/RateLimiter.mjs'
 import _ from 'lodash'
@@ -30,15 +30,16 @@ function getClient() {
     const emailParameters = EMAIL_SETTINGS.parameters
     if (emailParameters.AWSAccessKeyID || EMAIL_SETTINGS.driver === 'ses') {
       logger.debug('using aws ses for email')
-      const ses = new aws.SESClient({
-        apiVersion: '2010-12-01',
+      const sesClient = new SESv2Client({
         region: emailParameters.region,
         credentials: {
           accessKeyId: emailParameters.AWSAccessKeyID,
           secretAccessKey: emailParameters.AWSSecretKey,
         },
       })
-      client = nodemailer.createTransport({ SES: { ses, aws } })
+      client = nodemailer.createTransport({
+        SES: { sesClient, SendEmailCommand },
+      })
     } else if (emailParameters.sendgridApiKey) {
       throw new OError(
         'sendgridApiKey configuration option is deprecated, use SMTP instead'

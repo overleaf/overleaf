@@ -32,14 +32,16 @@ describe('EmailSender', function () {
 
     ctx.ses = { createTransport: () => ctx.sesClient }
 
-    ctx.SESClient = sinon.stub()
+    ctx.SESv2Client = sinon.stub()
+    ctx.SendEmailCommand = sinon.stub()
 
     vi.doMock('nodemailer', () => ({
       default: ctx.ses,
     }))
 
-    vi.doMock('@aws-sdk/client-ses', () => ({
-      SESClient: ctx.SESClient,
+    vi.doMock('@aws-sdk/client-sesv2', () => ({
+      SESv2Client: ctx.SESv2Client,
+      SendEmailCommand: ctx.SendEmailCommand,
     }))
 
     vi.doMock('@overleaf/settings', () => ({
