@@ -21,7 +21,6 @@ import type { OLDropdownProps } from '@/shared/components/types/dropdown-menu-pr
 import { useSendProjectListMB } from '@/features/project-list/components/project-list-events'
 import type { PortalTemplate } from '../../../../../types/portal-template'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
-import MaterialIcon from '@/shared/components/material-icon'
 import { useProjectListContext } from '@/features/project-list/context/project-list-context'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
@@ -237,7 +236,6 @@ function NewProjectButton({
                     dropdownMenuEvent: 'import-docx',
                   })
                 }
-                trailingIcon={<MaterialIcon type="fiber_new" />}
               >
                 {t('import_word_document')}
               </OLDropdownItem>
@@ -252,7 +250,6 @@ function NewProjectButton({
                     dropdownMenuEvent: 'import-markdown',
                   })
                 }
-                trailingIcon={<MaterialIcon type="fiber_new" />}
               >
                 {t('import_markdown_file')}
               </OLDropdownItem>

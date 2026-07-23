@@ -426,7 +426,6 @@
   "do_you_want_to_change_your_primary_email_address_to": "Willst Du deine primäre E-Mail-Adresse in <b>__email__</b> ändern?",
   "do_you_want_to_overwrite_them": "Willst Du sie überschreiben?",
   "documentation": "Dokumentation",
-  "docx_import_feedback_message": "Das Importieren von Word-Dokumenten ist eine neue Funktion. <0>Sag uns, was du davon hältst</0>",
   "does_not_contain_or_significantly_match_your_email": "nicht mit Teilen deiner E-Mail-Adresse übereinstimmt",
   "doesnt_match": "Stimmt nicht überein",
   "doing_this_allow_log_in_through_institution": "Dadurch kannst du dich über dein institutionelles Portal bei <b>__appName__</b> anmelden und deine institutionelle E-Mail-Adresse bestätigen.",

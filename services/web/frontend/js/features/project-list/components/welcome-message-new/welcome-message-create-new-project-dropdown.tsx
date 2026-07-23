@@ -13,7 +13,6 @@ import {
 } from '@/shared/components/ol/ol-dropdown-menu'
 import createNewProjectImage from '../../images/create-a-new-project.svg'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
-import MaterialIcon from '@/shared/components/material-icon'
 
 const CustomDropdownToggle = forwardRef<
   HTMLButtonElement,
@@ -150,7 +149,6 @@ function WelcomeMessageCreateNewProjectDropdown({
                 handleDropdownItemClick(e, 'import_docx', 'import-docx')
               }
               tabIndex={-1}
-              trailingIcon={<MaterialIcon type="fiber_new" />}
             >
               {t('import_word_document')}
             </OLDropdownItem>
@@ -164,7 +162,6 @@ function WelcomeMessageCreateNewProjectDropdown({
                 handleDropdownItemClick(e, 'import_markdown', 'import-markdown')
               }
               tabIndex={-1}
-              trailingIcon={<MaterialIcon type="fiber_new" />}
             >
               {t('import_markdown_file')}
             </OLDropdownItem>

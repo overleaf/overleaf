@@ -7,7 +7,6 @@ import {
   hideExportDocumentError,
   hidePreparingExportToast,
   showExportDocumentError,
-  showExportDocumentSuccess,
   showPreparingExportToast,
 } from '../components/toolbar/export-document-toasts'
 import { RootDocInfo } from '@/shared/hooks/use-root-doc'
@@ -45,7 +44,6 @@ export default function useConvertProject(
       if (downloadUrl) {
         const url = new URL(downloadUrl, window.location.origin)
         location.assign(url.toString())
-        showExportDocumentSuccess(type)
       } else {
         showExportDocumentError()
       }

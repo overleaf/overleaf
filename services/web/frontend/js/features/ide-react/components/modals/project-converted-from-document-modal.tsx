@@ -8,7 +8,6 @@ import {
 } from '@/shared/components/ol/ol-modal'
 import OLButton from '@/shared/components/ol/ol-button'
 import { useEffect, useState } from 'react'
-import { showImportDocumentFeedbackToast } from '@/features/project-list/components/new-project-button/import-document-feedback-toast'
 
 function ProjectConvertedFromDocumentModal() {
   const [convertedFrom, setConvertedFrom] = useState<string | null>(null)
@@ -34,9 +33,6 @@ function ProjectConvertedFromDocumentModal() {
         <ProjectConvertedFromImportModalContent
           onHide={() => {
             setConvertedFrom(null)
-            if (convertedFrom === 'docx' || convertedFrom === 'markdown') {
-              showImportDocumentFeedbackToast(convertedFrom)
-            }
           }}
         />
       )}

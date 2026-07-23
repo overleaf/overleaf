@@ -425,7 +425,6 @@
   "document_updated_externally": "Dokument opdateret eksternt",
   "document_updated_externally_detail": "Dette dokument er blevet opdateret eksternt. Ændringer du måtte have lavet kan være blevet overskrevet. For at se tidligere versioner, kig venligst i historikken.",
   "documentation": "Dokumentation",
-  "docx_import_feedback_message": "Import af Word-dokumenter er en ny funktion. <0>Fortæl os hvad du synes</0>",
   "does_not_contain_or_significantly_match_your_email": "indeholder ikke, og ligner ikke i betydelig grad, din e-mailadresse",
   "doesnt_match": "Matcher ikke",
   "doing_this_allow_log_in_through_institution": "Dermed får du mulghed for at logge ind i <b>__appName__</b> igennem din institution, og vil genbekræfte din institutionelle e-mailadresse.",
