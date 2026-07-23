@@ -55,17 +55,13 @@ async function _getSplitTestOptions(req, res) {
 
   const pdfDownloadDomain = Settings.pdfDownloadDomain
   const enablePdfCaching = Settings.enablePdfCaching
-
-  if (!enablePdfCaching || !req.query.enable_pdf_caching) {
-    // The frontend does not want to do pdf caching.
-    return {
-      compileFromHistory,
-      pdfDownloadDomain,
-      enablePdfCaching: false,
-    }
-  }
-
   const pdfCachingMinChunkSize = Settings.pdfCachingMinChunkSize
+
+  const pdfCachingOptions =
+    !enablePdfCaching || !req.query.enable_pdf_caching
+      ? // The frontend does not want to do pdf caching.
+        { enablePdfCaching: false }
+      : { enablePdfCaching, pdfCachingMinChunkSize }
 
   const enableCheckpoint = await SplitTestHandler.promises.featureFlagEnabled(
     req,
@@ -74,12 +70,24 @@ async function _getSplitTestOptions(req, res) {
     { includeReferer: true }
   )
 
+  const enablePng2Pdf = await SplitTestHandler.promises.featureFlagEnabled(
+    req,
+    res,
+    'png2pdf',
+    { includeReferer: true }
+  )
+
+  const png2PdfOptions =
+    !enablePng2Pdf || !req.body.png2pdf
+      ? { enablePng2Pdf: false }
+      : { enablePng2Pdf }
+
   return {
     compileFromHistory,
     pdfDownloadDomain,
-    enablePdfCaching,
-    pdfCachingMinChunkSize,
+    ...pdfCachingOptions,
     enableCheckpoint,
+    ...png2PdfOptions,
   }
 }
 
@@ -202,9 +210,6 @@ const _CompileController = {
     if (req.body.draft) {
       options.draft = req.body.draft
     }
-    if (req.body.png2pdf) {
-      options.png2pdf = req.body.png2pdf
-    }
     if (['validate', 'error', 'silent'].includes(req.body.check)) {
       options.check = req.body.check
     }
@@ -218,6 +223,7 @@ const _CompileController = {
       pdfDownloadDomain,
       compileFromHistory,
       enableCheckpoint,
+      enablePng2Pdf,
     } = await _getSplitTestOptions(req, res)
     if (Features.hasFeature('saas')) {
       options.compileFromClsiCache = true
@@ -225,6 +231,9 @@ const _CompileController = {
       options.compileFromHistory = compileFromHistory
       if (enableCheckpoint) {
         options.enableCheckpoint = enableCheckpoint
+      }
+      if (enablePng2Pdf) {
+        options.png2pdf = enablePng2Pdf
       }
     }
     options.enablePdfCaching = enablePdfCaching

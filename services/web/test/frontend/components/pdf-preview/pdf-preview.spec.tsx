@@ -55,6 +55,7 @@ describe('<PdfPreview/>', function () {
     window.metaAttributesCache.set('ol-compileSettings', {
       compileTimeout: 240,
     })
+    window.metaAttributesCache.set('ol-splitTestVariants', {})
     cy.interceptEvents()
   })
 
@@ -218,6 +219,15 @@ describe('<PdfPreview/>', function () {
         setup: () => {
           cy.window().then(w =>
             w.localStorage.setItem(`stop_on_first_error:${projectId}`, 'true')
+          )
+        },
+        props: {},
+      },
+      'ignores the compile from cache when png2pdf is available by default': {
+        cached: false,
+        setup: () => {
+          cy.window().then(w =>
+            w.metaAttributesCache.set('ol-canUsePng2Pdf', true)
           )
         },
         props: {},

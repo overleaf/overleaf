@@ -8,6 +8,7 @@ import { UserSettings } from '../../../../../types/user-settings'
 type ProjectSettingsSetterContextValue = {
   setCompiler: (compiler: ProjectSettings['compiler']) => Promise<void>
   setImageName: (imageName: ProjectSettings['imageName']) => Promise<void>
+  setPng2pdf: (png2pdf: ProjectSettings['png2pdf']) => Promise<void>
   setRootDocId: (rootDocId: ProjectSettings['rootDocId']) => void
   setSpellCheckLanguage: (
     spellCheckLanguage: ProjectSettings['spellCheckLanguage']
@@ -60,6 +61,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
     setCompiler,
     imageName,
     setImageName,
+    png2pdf,
+    setPng2pdf,
     rootDocId,
     setRootDocId,
     spellCheckLanguage,
@@ -121,6 +124,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setCompiler,
       imageName,
       setImageName,
+      png2pdf,
+      setPng2pdf,
       rootDocId,
       setRootDocId,
       spellCheckLanguage,
@@ -175,6 +180,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setCompiler,
       imageName,
       setImageName,
+      png2pdf,
+      setPng2pdf,
       rootDocId,
       setRootDocId,
       spellCheckLanguage,

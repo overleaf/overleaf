@@ -276,14 +276,26 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
     listen: true,
   })
 
+  // ol-canUsePng2Pdf is the single source of truth from the backend: it already
+  // accounts for both the split-test rollout and the premium entitlement.
+  const canUsePng2pdf = Boolean(getMeta('ol-canUsePng2Pdf'))
+  const png2pdfDefault = canUsePng2pdf && !draft
+
   // whether the compile should optimize images (png2pdf conversion)
-  const [png2pdf, setPng2pdf] = usePersistedState(
+  const [png2pdfSetting, setPng2pdf] = usePersistedState(
     `png2pdf:${projectId}`,
-    false,
+    png2pdfDefault,
     {
       listen: true,
     }
   )
+
+  // The compile modes (Normal / optimize-images / draft) are mutually
+  // exclusive. Draft takes precedence, so png2pdf is never sent alongside draft
+  // even when a stale local or server-persisted setting has it enabled (e.g. a
+  // socket update applying project.png2pdf=true while the user is in local draft
+  // mode, or a setting left over after a downgrade).
+  const png2pdf = canUsePng2pdf && png2pdfSetting && !draft
 
   // whether compiling should stop on first error
   const [stopOnFirstError, setStopOnFirstError] = usePersistedState(
@@ -366,6 +378,15 @@ export const LocalCompileProvider: FC<React.PropsWithChildren> = ({
   useEffect(() => {
     compiler.setOption('png2pdf', png2pdf)
   }, [compiler, png2pdf])
+
+  // Apply the server-persisted png2pdf setting when the project has one. When
+  // it is unset, leave the locally-derived default (which accounts for draft
+  // mode) in place rather than forcing it on.
+  useEffect(() => {
+    if (project?.png2pdf !== undefined) {
+      setPng2pdf(project.png2pdf)
+    }
+  }, [project?.png2pdf, setPng2pdf])
 
   // keep stop on first error setting in sync with the compiler
   useEffect(() => {

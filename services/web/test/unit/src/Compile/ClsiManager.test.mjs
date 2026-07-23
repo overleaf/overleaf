@@ -1096,6 +1096,7 @@ describe('ClsiManager', function () {
           ctx.user_id,
           {
             timeout: 100,
+            compileGroup: 'priority',
             png2pdf: true,
           }
         )
@@ -1106,6 +1107,37 @@ describe('ClsiManager', function () {
           sinon.match.any,
           sinon.match({
             json: { compile: { options: { png2pdf: true } } },
+          })
+        )
+      })
+    })
+
+    describe('with the png2pdf option and standard compileGroup', function () {
+      beforeEach(async function (ctx) {
+        await ctx.ClsiManager.promises.sendRequest(
+          null,
+          ctx.project._id,
+          ctx.user_id,
+          {
+            timeout: 100,
+            compileGroup: 'standard',
+            png2pdf: true,
+          }
+        )
+      })
+
+      it('should force the png2pdf option to false in the request', function (ctx) {
+        expect(ctx.FetchUtils.fetchStringWithResponse).to.have.been.calledWith(
+          sinon.match.any,
+          sinon.match({
+            json: {
+              compile: {
+                options: {
+                  compileGroup: 'standard',
+                  png2pdf: false,
+                },
+              },
+            },
           })
         )
       })

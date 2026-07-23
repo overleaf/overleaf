@@ -1190,6 +1190,9 @@ function _finaliseRequest(projectId, options, project, docs, files) {
   if (options.fileLineErrors) {
     flags = ['-file-line-error']
   }
+  const hasPremiumCompiles = ['alpha', 'priority'].includes(
+    options.compileGroup
+  )
 
   return {
     compile: {
@@ -1201,7 +1204,8 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         timeout: options.timeout,
         imageName: project.imageName,
         draft: Boolean(options.draft),
-        png2pdf: Boolean(options.png2pdf),
+        // enable for premium compiles only
+        png2pdf: Boolean(options.png2pdf) && hasPremiumCompiles,
         stopOnFirstError: Boolean(options.stopOnFirstError),
         check: options.check,
         syncType: options.syncType,
@@ -1210,7 +1214,7 @@ function _finaliseRequest(projectId, options, project, docs, files) {
         // Overleaf alpha/staff users get compileGroup=alpha (via getProjectCompileLimits in CompileManager), enroll them into the premium rollout of clsi-cache.
         compileFromClsiCache:
           // enable for premium compiles
-          (['alpha', 'priority'].includes(options.compileGroup) ||
+          (hasPremiumCompiles ||
             // enable for free for short period when we saw low capacity
             enableCompileFromCacheUntil > Date.now()) &&
           options.compileFromClsiCache,

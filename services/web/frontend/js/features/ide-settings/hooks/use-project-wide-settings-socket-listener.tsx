@@ -26,6 +26,15 @@ export default function useProjectWideSettingsSocketListener() {
     [project, updateProject]
   )
 
+  const setPng2pdf = useCallback(
+    (png2pdf: ProjectSettings['png2pdf']) => {
+      if (project) {
+        updateProject({ png2pdf })
+      }
+    },
+    [project, updateProject]
+  )
+
   const setSpellCheckLanguage = useCallback(
     (spellCheckLanguage: ProjectSettings['spellCheckLanguage']) => {
       if (project) {
@@ -42,15 +51,24 @@ export default function useProjectWideSettingsSocketListener() {
     if (dataAvailable && socket) {
       socket.on('compilerUpdated', setCompiler)
       socket.on('imageNameUpdated', setImageName)
+      socket.on('png2pdfUpdated', setPng2pdf)
       socket.on('spellCheckLanguageUpdated', setSpellCheckLanguage)
       return () => {
         socket.removeListener('compilerUpdated', setCompiler)
         socket.removeListener('imageNameUpdated', setImageName)
+        socket.removeListener('png2pdfUpdated', setPng2pdf)
         socket.removeListener(
           'spellCheckLanguageUpdated',
           setSpellCheckLanguage
         )
       }
     }
-  }, [socket, project, setCompiler, setImageName, setSpellCheckLanguage])
+  }, [
+    socket,
+    project,
+    setCompiler,
+    setImageName,
+    setPng2pdf,
+    setSpellCheckLanguage,
+  ])
 }

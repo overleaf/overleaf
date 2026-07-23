@@ -1,3 +1,4 @@
+import getMeta from '../../../utils/meta'
 import { useTranslation } from 'react-i18next'
 import { memo, useCallback } from 'react'
 import classNames from 'classnames'
@@ -18,7 +19,6 @@ import OLButton from '@/shared/components/ol/ol-button'
 import OLButtonGroup from '@/shared/components/ol/ol-button-group'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'
 
@@ -58,7 +58,7 @@ function PdfCompileButton() {
 
   const { t } = useTranslation()
 
-  const png2pdfEnabled = useFeatureFlag('png2pdf')
+  const png2pdfEnabled = getMeta('ol-canUsePng2Pdf')
 
   // The three compile modes (Normal / Fast [optimize images] / Fast [draft]) are
   // mutually exclusive, so each selection sets both underlying flags.

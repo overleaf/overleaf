@@ -52,6 +52,7 @@ export const ProjectSchema = new Schema(
     trashed: [{ type: ObjectId, ref: 'User' }],
     deletedDocs: [DeletedDocSchema],
     imageName: { type: String },
+    png2pdf: { type: Boolean },
     brandVariationId: { type: String },
     track_changes: { type: Object },
     tokens: {

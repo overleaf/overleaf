@@ -87,6 +87,7 @@ export interface Meta {
   'ol-canUseAddSeatsFeature': boolean
   'ol-canUseClsiCache': boolean
   'ol-canUseFlexibleLicensing': boolean
+  'ol-canUsePng2Pdf': boolean
 
   // dynamic keys based on permissions
   'ol-cannot-add-secondary-email': boolean

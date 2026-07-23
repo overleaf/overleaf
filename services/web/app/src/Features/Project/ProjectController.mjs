@@ -87,6 +87,7 @@ const updateProjectSettingsSchema = z.object({
   body: z.object({
     compiler: z.string().optional(),
     imageName: z.string().optional(),
+    png2pdf: z.boolean().optional(),
     mainBibliographyDocId: zz.objectId().optional(),
     name: z.string().optional(),
     rootDocId: zz.objectId().optional(),
@@ -115,6 +116,10 @@ const _ProjectController = {
 
     if (body.imageName != null) {
       await EditorController.promises.setImageName(projectId, body.imageName)
+    }
+
+    if (body.png2pdf != null) {
+      await EditorController.promises.setPng2pdf(projectId, body.png2pdf)
     }
 
     if (body.name != null) {
@@ -576,6 +581,7 @@ const _ProjectController = {
           track_changes: 1,
           owner_ref: 1,
           brandVariationId: 1,
+          png2pdf: 1,
           overleaf: 1,
           tokens: 1,
         }),
@@ -975,6 +981,10 @@ const _ProjectController = {
         canUseClsiCache:
           Features.hasFeature('saas') &&
           ownerFeatures?.compileGroup === 'priority',
+        canUsePng2Pdf:
+          Features.hasFeature('saas') &&
+          ownerFeatures?.compileGroup === 'priority' &&
+          splitTestAssignments['png2pdf']?.variant === 'enabled',
         user: {
           id: userId,
           email: user.email,

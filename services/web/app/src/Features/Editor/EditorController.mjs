@@ -576,6 +576,16 @@ const EditorController = {
     })
   },
 
+  setPng2pdf(projectId, png2pdf, callback) {
+    ProjectOptionsHandler.setPng2pdf(projectId, png2pdf, function (err) {
+      if (err) {
+        return callback(err)
+      }
+      EditorRealTimeController.emitToRoom(projectId, 'png2pdfUpdated', png2pdf)
+      callback()
+    })
+  },
+
   setSpellCheckLanguage(projectId, languageCode, callback) {
     ProjectOptionsHandler.setSpellCheckLanguage(
       projectId,
@@ -717,6 +727,7 @@ EditorController.promises = {
   renameProject: promisify(EditorController.renameProject),
   setCompiler: promisify(EditorController.setCompiler),
   setImageName: promisify(EditorController.setImageName),
+  setPng2pdf: promisify(EditorController.setPng2pdf),
   setSpellCheckLanguage: promisify(EditorController.setSpellCheckLanguage),
   setPublicAccessLevel: promisify(EditorController.setPublicAccessLevel),
   setRootDoc: promisify(EditorController.setRootDoc),

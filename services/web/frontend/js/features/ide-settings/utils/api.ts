@@ -7,6 +7,9 @@ import { UserSettings } from '../../../../../types/user-settings'
 export interface ProjectSettings {
   compiler: ProjectCompiler
   imageName: string
+  // Optional: a project that has never set png2pdf sends no value, which the
+  // compile context treats as "no preference, use the local default".
+  png2pdf?: boolean
   rootDocId: string
   spellCheckLanguage: string
   name: string

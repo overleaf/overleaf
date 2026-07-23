@@ -12,6 +12,7 @@ describe('ProjectEditorHandler', function () {
       rootDoc_id: 'file-id',
       publicAccesLevel: 'private',
       deletedByExternalDataSource: false,
+      png2pdf: true,
       rootFolder: [
         {
           _id: 'root-folder-id',
@@ -124,6 +125,10 @@ describe('ProjectEditorHandler', function () {
       it('should include the public access level', function (ctx) {
         expect(ctx.result.publicAccesLevel).to.exist
         ctx.result.publicAccesLevel.should.equal('private')
+      })
+
+      it('should include the png2pdf setting', function (ctx) {
+        ctx.result.png2pdf.should.equal(true)
       })
 
       it('should include the owner', function (ctx) {

@@ -59,6 +59,12 @@ const ProjectOptionsHandler = {
     return Project.updateOne(conditions, update, {})
   },
 
+  async setPng2pdf(projectId, png2pdf) {
+    const conditions = { _id: projectId }
+    const update = { png2pdf: Boolean(png2pdf) }
+    return Project.updateOne(conditions, update, {})
+  },
+
   async setSpellCheckLanguage(projectId, languageCode) {
     if (!Array.isArray(settings.languages)) {
       return
@@ -118,6 +124,7 @@ const ProjectOptionsHandler = {
 export default {
   setCompiler: callbackify(ProjectOptionsHandler.setCompiler),
   setImageName: callbackify(ProjectOptionsHandler.setImageName),
+  setPng2pdf: callbackify(ProjectOptionsHandler.setPng2pdf),
   setSpellCheckLanguage: callbackify(
     ProjectOptionsHandler.setSpellCheckLanguage
   ),
