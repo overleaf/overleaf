@@ -6,7 +6,7 @@ import {
   drawSelection,
   placeholder as placeholderExt,
 } from '@codemirror/view'
-import { Compartment, EditorSelection } from '@codemirror/state'
+import { Compartment } from '@codemirror/state'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import { autocompletion, completionStatus } from '@codemirror/autocomplete'
 import classNames from 'classnames'
@@ -27,7 +27,7 @@ export type MentionsInputHandle = {
   // Returns true if the editor was focused, false if the view isn't ready yet.
   focus: () => boolean
   // Empties the editor. Used by inputs that stay mounted between submissions
-  // (the chat composer and the review-panel reply box).
+  // (the review-panel reply box).
   clear: () => void
 }
 
@@ -35,16 +35,11 @@ type MentionsInputProps = {
   onSubmit: (value: string) => void
   onChange?: (value: string) => void
   onBlur?: (value: string) => void
-  // Called on Escape (when the autocomplete popup is not open). Used by the
-  // edit flows to cancel without saving.
-  onCancel?: () => void
-  onFocus?: () => void
   placeholder?: string
   label?: string
   disabled?: boolean
   initialValue?: string
   autoFocus?: boolean
-  selectOnFocus?: boolean
   className?: string
 }
 
@@ -73,8 +68,8 @@ const mentionsInputTheme = EditorView.theme({
 })
 
 // A small CodeMirror 6 input that supports `@mention` autocompletion. Shared by
-// the chat composer/edit field and the review panel's add-comment, reply, and
-// edit fields so all of them get the same mention behaviour.
+// the review panel's add-comment, reply, and edit fields so all of them get the
+// same mention behaviour.
 export const MentionsInput = forwardRef<
   MentionsInputHandle,
   MentionsInputProps
@@ -83,14 +78,11 @@ export const MentionsInput = forwardRef<
     onChange,
     onSubmit,
     onBlur,
-    onCancel,
-    onFocus,
     placeholder = '',
     label,
     disabled = false,
     initialValue = '',
     autoFocus = false,
-    selectOnFocus = false,
     className,
   },
   ref
@@ -108,14 +100,10 @@ export const MentionsInput = forwardRef<
   const onChangeRef = useRef(onChange)
   const onSubmitRef = useRef(onSubmit)
   const onBlurRef = useRef(onBlur)
-  const onCancelRef = useRef(onCancel)
-  const onFocusRef = useRef(onFocus)
   const disabledRef = useRef(disabled)
   onChangeRef.current = onChange
   onSubmitRef.current = onSubmit
   onBlurRef.current = onBlur
-  onCancelRef.current = onCancel
-  onFocusRef.current = onFocus
   disabledRef.current = disabled
 
   useImperativeHandle(
@@ -182,10 +170,6 @@ export const MentionsInput = forwardRef<
           }
         }),
         EditorView.domEventHandlers({
-          focus: () => {
-            onFocusRef.current?.()
-            return false
-          },
           blur: (_event, view) => {
             if (completionStatus(view.state) === 'active') {
               return false
@@ -205,20 +189,6 @@ export const MentionsInput = forwardRef<
               return true
             },
           },
-          {
-            key: 'Escape',
-            run: view => {
-              // Let the autocomplete popup handle Escape when it's open.
-              if (completionStatus(view.state) === 'active') {
-                return false
-              }
-              if (onCancelRef.current) {
-                onCancelRef.current()
-                return true
-              }
-              return false
-            },
-          },
           ...defaultKeymap,
           ...historyKeymap,
         ]),
@@ -228,11 +198,6 @@ export const MentionsInput = forwardRef<
     viewRef.current = view
     if (autoFocus) {
       view.focus()
-      if (selectOnFocus) {
-        view.dispatch({
-          selection: EditorSelection.range(0, view.state.doc.length),
-        })
-      }
     }
 
     return () => {

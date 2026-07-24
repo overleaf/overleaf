@@ -90,35 +90,6 @@
       padding: calc(var(--line-height-03) / 4);
       background-color: var(--chat-new-message-textarea-bg);
     }
-
-    .chat-message-input {
-      height: 100%;
-      width: 100%;
-
-      .cm-editor {
-        height: 100%;
-        border-radius: var(--border-radius-base);
-        border: 1px solid var(--border-divider-themed);
-        background-color: var(--chat-new-message-textarea-bg);
-
-        &.cm-focused {
-          // suppress CM6's default focus outline; the border conveys focus
-          outline: none;
-        }
-      }
-
-      .cm-content {
-        color: var(--chat-new-message-textarea-color);
-        font-size: var(--font-size-02);
-        line-height: var(--line-height-02);
-        padding: calc(var(--line-height-03) / 4);
-      }
-
-      .cm-cursor,
-      .cm-cursor-primary {
-        border-left-color: var(--chat-new-message-textarea-color);
-      }
-    }
   }
 }
 
@@ -249,36 +220,6 @@
       @include body-xs;
 
       font-weight: normal;
-    }
-
-    .mention-badge {
-      color: var(--content-info);
-    }
-
-    .chat-message-edit-input {
-      width: 100%;
-
-      .cm-editor {
-        border-radius: var(--border-radius-base);
-        border: 1px solid var(--border-divider-themed);
-        background-color: var(--chat-new-message-textarea-bg);
-
-        &.cm-focused {
-          outline: none;
-        }
-      }
-
-      .cm-content {
-        color: var(--chat-new-message-textarea-color);
-        font-size: var(--font-size-02);
-        line-height: var(--line-height-02);
-        padding: calc(var(--line-height-03) / 4);
-      }
-
-      .cm-cursor,
-      .cm-cursor-primary {
-        border-left-color: var(--chat-new-message-textarea-color);
-      }
     }
   }
 

@@ -12,8 +12,6 @@ import { UserProvider } from '@/shared/context/user-context'
 import { ModalsContextProvider } from '@/features/ide-react/context/modals-context'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 
-import { EditorProviders } from '../../../helpers/editor-providers'
-
 describe('<MessageGroup />', function () {
   function ChatProviders({
     children,
@@ -29,17 +27,15 @@ describe('<MessageGroup />', function () {
     }
 
     return (
-      <EditorProviders>
-        <UserProvider>
-          <ModalsContextProvider>
-            <SplitTestProvider>
-              <ChatContext.Provider value={mockContextValue as any}>
-                {children}
-              </ChatContext.Provider>
-            </SplitTestProvider>
-          </ModalsContextProvider>
-        </UserProvider>
-      </EditorProviders>
+      <UserProvider>
+        <ModalsContextProvider>
+          <SplitTestProvider>
+            <ChatContext.Provider value={mockContextValue as any}>
+              {children}
+            </ChatContext.Provider>
+          </SplitTestProvider>
+        </ModalsContextProvider>
+      </UserProvider>
     )
   }
 
@@ -156,7 +152,7 @@ describe('<MessageGroup />', function () {
     expect(screen.queryByText('(edited)')).to.not.exist
   })
 
-  it('renders message being edited with a CodeMirror input and action buttons', function () {
+  it('renders message being edited with textarea and action buttons', function () {
     const messageBeingEdited: MessageType = {
       content: 'original message content',
       user: currentUser,
@@ -170,8 +166,8 @@ describe('<MessageGroup />', function () {
       </ChatProviders>
     )
 
-    const editor = screen.getByRole('textbox', { name: 'Edit message' })
-    expect(editor.textContent).to.contain('original message content')
+    const textarea = screen.getByDisplayValue('original message content')
+    expect(textarea.tagName.toLowerCase()).to.equal('textarea')
 
     screen.getByRole('button', { name: 'Cancel' })
     screen.getByRole('button', { name: 'Save' })
