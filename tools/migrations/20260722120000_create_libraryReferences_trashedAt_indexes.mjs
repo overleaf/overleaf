@@ -5,7 +5,7 @@ const tags = ['auxiliary']
 // Two partial indexes (docs without trashedAt are not indexed) supporting the
 // soft-delete (trash) feature
 //   - userId_1_trashedAt_1__id_1 serves the per-user trash listing/search,
-//   - trashedAt_1 serves the daily expiry cron's cross-user
+//   - trashedAt_1 serves the daily expiry cron's cross-user scan.
 const newIndexes = [
   {
     key: { userId: 1, trashedAt: 1, _id: 1 },
