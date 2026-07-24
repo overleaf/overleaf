@@ -12,6 +12,9 @@ import GenericMessageModal, {
 import OutOfSyncModal, {
   OutOfSyncModalProps,
 } from '@/features/ide-react/components/modals/out-of-sync-modal'
+import UnableToSyncModal, {
+  UnableToSyncModalProps,
+} from '@/features/ide-react/components/modals/unable-to-sync-modal'
 import GenericConfirmModal, {
   GenericConfirmModalOwnProps,
 } from '../components/modals/generic-confirm-modal'
@@ -25,6 +28,10 @@ type ModalsContextValue = {
   ) => void
   showOutOfSyncModal: (
     editorContent: OutOfSyncModalProps['editorContent']
+  ) => void
+  showUnableToSyncModal: (
+    editorContent: UnableToSyncModalProps['editorContent'],
+    docName: UnableToSyncModalProps['docName']
   ) => void
 }
 
@@ -48,6 +55,16 @@ export const ModalsContextProvider: FC<React.PropsWithChildren> = ({
     useState(false)
   const [outOfSyncModalData, setOutOfSyncModalData] = useState({
     editorContent: '',
+  })
+
+  const [shouldShowUnableToSyncModal, setShouldShowUnableToSyncModal] =
+    useState(false)
+  const [unableToSyncModalData, setUnableToSyncModalData] = useState<{
+    editorContent: string
+    docName: string | null
+  }>({
+    editorContent: '',
+    docName: null,
   })
 
   const handleHideGenericModal = useCallback(() => {
@@ -91,18 +108,32 @@ export const ModalsContextProvider: FC<React.PropsWithChildren> = ({
     setShouldShowOutOfSyncModal(true)
   }, [])
 
+  const handleHideUnableToSyncModal = useCallback(() => {
+    setShouldShowUnableToSyncModal(false)
+  }, [])
+
+  const showUnableToSyncModal = useCallback(
+    (editorContent: string, docName: string | null) => {
+      setUnableToSyncModalData({ editorContent, docName })
+      setShouldShowUnableToSyncModal(true)
+    },
+    []
+  )
+
   const value = useMemo<ModalsContextValue>(
     () => ({
       showGenericMessageModal,
       showGenericConfirmModal,
       genericModalVisible: showGenericModal,
       showOutOfSyncModal,
+      showUnableToSyncModal,
     }),
     [
       showGenericMessageModal,
       showGenericConfirmModal,
       showGenericModal,
       showOutOfSyncModal,
+      showUnableToSyncModal,
     ]
   )
 
@@ -124,6 +155,11 @@ export const ModalsContextProvider: FC<React.PropsWithChildren> = ({
         {...outOfSyncModalData}
         show={shouldShowOutOfSyncModal}
         onHide={handleHideOutOfSyncModal}
+      />
+      <UnableToSyncModal
+        {...unableToSyncModalData}
+        show={shouldShowUnableToSyncModal}
+        onHide={handleHideUnableToSyncModal}
       />
     </ModalsContext.Provider>
   )
