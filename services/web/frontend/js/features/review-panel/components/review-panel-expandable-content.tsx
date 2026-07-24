@@ -18,7 +18,6 @@ export const ExpandableContent = memo<{
   checkNewLines?: boolean
   inline?: boolean
   translate?: 'yes' | 'no'
-  displayMentions?: boolean
 }>(function ExpandableContent({
   content,
   className,
@@ -27,7 +26,6 @@ export const ExpandableContent = memo<{
   checkNewLines = true,
   inline = false,
   translate,
-  displayMentions = false,
 }) {
   const { t } = useTranslation()
   const contentRef = useRef<HTMLDivElement>(null)
@@ -41,10 +39,7 @@ export const ExpandableContent = memo<{
 
   const isOverflowing = content.length > limit
 
-  const segments = useMemo(
-    () => (displayMentions ? parseMentions(content) : null),
-    [content, displayMentions]
-  )
+  const segments = useMemo(() => parseMentions(content), [content])
 
   const renderedContent = segments
     ? renderSegments(

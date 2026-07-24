@@ -15,7 +15,6 @@ import { useUserContext } from '@/shared/context/user-context'
 import ReviewPanelEntryUser from './review-panel-entry-user'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { PreventSelectingEntry } from './review-panel-prevent-selecting'
-import { mentionsFeatureEnabled } from '@/shared/utils/mentions'
 
 export const ReviewPanelMessage: FC<{
   message: ReviewPanelCommentThreadMessage
@@ -44,7 +43,6 @@ export const ReviewPanelMessage: FC<{
   const hasSubmittedRef = useRef(false)
   const user = useUserContext()
   const permissions = usePermissionsContext()
-  const mentionsEnabled = mentionsFeatureEnabled()
 
   const isCommentAuthor = Boolean(message.user && user.id === message.user.id)
   const canEdit = isCommentAuthor && permissions.comment
@@ -147,7 +145,6 @@ export const ReviewPanelMessage: FC<{
           checkNewLines
           content={message.content}
           translate="no"
-          displayMentions={mentionsEnabled}
         />
       )}
 
