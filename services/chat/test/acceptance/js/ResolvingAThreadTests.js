@@ -1,5 +1,6 @@
 import { ObjectId } from '../../../app/js/mongodb.js'
 import { expect } from 'chai'
+import { expectValidationErrorRaw } from '@overleaf/validation-tools/testUtils.js'
 
 import * as ChatClient from './helpers/ChatClient.js'
 import * as ChatApp from './helpers/ChatApp.js'
@@ -109,6 +110,45 @@ describe('Resolving a thread', async function () {
         await ChatClient.getResolvedThreadIds(projectId)
       expect(response.statusCode).to.equal(200)
       expect(body.resolvedThreadIds).not.to.include(threadId)
+    })
+  })
+
+  describe('with a malformed threadId', function () {
+    it('should return a not found error when resolving', async function () {
+      const { response } = await ChatClient.resolveThread(
+        projectId,
+        'malformed-thread-id',
+        userId
+      )
+      expectValidationErrorRaw(response, 404, 'threadId')
+    })
+
+    it('should return a not found error when reopening', async function () {
+      const { response } = await ChatClient.reopenThread(
+        projectId,
+        'malformed-thread-id'
+      )
+      expectValidationErrorRaw(response, 404, 'threadId')
+    })
+  })
+
+  describe('with a malformed userId when resolving', function () {
+    it('should return a graceful error', async function () {
+      const threadId = new ObjectId().toString()
+      const { response } = await ChatClient.resolveThread(
+        projectId,
+        threadId,
+        'malformed-user'
+      )
+      expectValidationErrorRaw(response, 400, 'user_id')
+    })
+  })
+
+  describe('with a malformed projectId', function () {
+    it('should return a not found error for resolved-thread-ids', async function () {
+      const { response } =
+        await ChatClient.getResolvedThreadIds('malformed-project')
+      expectValidationErrorRaw(response, 404, 'projectId')
     })
   })
 })

@@ -21,8 +21,8 @@
     "@overleaf/mongo-utils": "*",
     "@overleaf/promise-utils": "*",
     "@overleaf/settings": "*",
+    "@overleaf/validation-tools": "workspace:*",
     "async": "^3.2.5",
-    "exegesis-express": "4.0.0",
     "express": "4.22.1",
     "mongodb": "6.12.0"
   },
@@ -30,7 +30,6 @@
     "@overleaf/migrations": "workspace:*",
     "@types/node": "^24.5.2",
     "acorn": "^7.1.1",
-    "ajv": "^6.12.0",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "eslint": "^10.4.0",

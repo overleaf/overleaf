@@ -1,5 +1,6 @@
 import { ObjectId } from '../../../app/js/mongodb.js'
 import { expect } from 'chai'
+import { expectValidationErrorRaw } from '@overleaf/validation-tools/testUtils.js'
 
 import * as ChatClient from './helpers/ChatClient.js'
 import * as ChatApp from './helpers/ChatApp.js'
@@ -61,6 +62,13 @@ describe('Destroying a project', async function () {
       expect(threadMessage).to.be.null
       const globalThreadMessage = await getMessage(this.globalThreadMessageId)
       expect(globalThreadMessage).to.be.null
+    })
+  })
+
+  describe('with a malformed projectId', function () {
+    it('should return a not found error', async function () {
+      const { response } = await ChatClient.destroyProject('malformed-project')
+      expectValidationErrorRaw(response, 404, 'projectId')
     })
   })
 })

@@ -1,8 +1,10 @@
 import { ObjectId } from '../../../app/js/mongodb.js'
 import { expect } from 'chai'
+import { expectValidationErrorRaw } from '@overleaf/validation-tools/testUtils.js'
 
 import * as ChatClient from './helpers/ChatClient.js'
 import * as ChatApp from './helpers/ChatApp.js'
+import { MAX_MESSAGE_LENGTH } from '../../../app/js/Features/Messages/MessageHttpSchemas.js'
 
 describe('Sending a message', async function () {
   before(async function () {
@@ -80,63 +82,113 @@ describe('Sending a message', async function () {
           'malformed-user',
           'content'
         )
-        expect(response.statusCode).to.equal(400)
-        expect(body).to.equal('Invalid userId')
+        expectValidationErrorRaw(response, 400, 'user_id')
+        expect(body.error).to.include('Invalid Mongo ObjectId')
       })
     })
 
     describe('with a malformed projectId', async function () {
-      it('should return a graceful error', async function () {
-        const { response, body } = await ChatClient.sendMessage(
+      it('should return a not found error', async function () {
+        const { response } = await ChatClient.sendMessage(
           'malformed-project',
           threadId,
           userId,
           'content'
         )
-        expect(response.statusCode).to.equal(400)
-        expect(body).to.equal('Invalid projectId')
+        expectValidationErrorRaw(response, 404, 'projectId')
       })
     })
 
     describe('with a malformed threadId', async function () {
-      it('should return a graceful error', async function () {
-        const { response, body } = await ChatClient.sendMessage(
+      it('should return a not found error', async function () {
+        const { response } = await ChatClient.sendMessage(
           projectId,
           'malformed-thread-id',
           userId,
           'content'
         )
-        expect(response.statusCode).to.equal(400)
-        expect(body).to.equal('Invalid threadId')
+        expectValidationErrorRaw(response, 404, 'threadId')
       })
     })
 
     describe('with no content', async function () {
       it('should return a graceful error', async function () {
-        const { response, body } = await ChatClient.sendMessage(
+        const { response } = await ChatClient.sendMessage(
           projectId,
           threadId,
           userId,
           null
         )
-        expect(response.statusCode).to.equal(400)
-        // Exegesis is responding with validation errors. I can´t find a way to choose the validation error yet.
-        // expect(body).to.equal('No content provided')
-        expect(body.message).to.equal('Validation errors')
+        expectValidationErrorRaw(response, 400, 'No content provided')
       })
     })
 
     describe('with very long content', async function () {
       it('should return a graceful error', async function () {
-        const content = '-'.repeat(10 * 1024 + 1)
-        const { response, body } = await ChatClient.sendMessage(
+        const content = '-'.repeat(MAX_MESSAGE_LENGTH + 1)
+        const { response } = await ChatClient.sendMessage(
           projectId,
           threadId,
           userId,
           content
         )
-        expect(response.statusCode).to.equal(400)
-        expect(body).to.equal('Content too long (> 10240 bytes)')
+        expectValidationErrorRaw(
+          response,
+          400,
+          `Content too long (> ${MAX_MESSAGE_LENGTH} bytes)`
+        )
+      })
+    })
+
+    describe('with an unknown field in the body', async function () {
+      it('should return a graceful error', async function () {
+        const { response } = await ChatClient.asyncRequest({
+          method: 'post',
+          url: `/project/${projectId}/thread/${threadId}/messages`,
+          json: {
+            user_id: userId,
+            content: 'content',
+            unknownField: 'x',
+          },
+        })
+        expectValidationErrorRaw(response, 400, 'unknownField')
+      })
+    })
+
+    describe('with a malformed limit', async function () {
+      it('should return a graceful error', async function () {
+        const { response } = await ChatClient.asyncRequest({
+          method: 'get',
+          url: `/project/${projectId}/messages?limit=nope`,
+          json: true,
+        })
+        expectValidationErrorRaw(response, 400, 'limit')
+      })
+    })
+  })
+
+  describe('globally: failure cases', async function () {
+    const projectId = new ObjectId().toString()
+
+    describe('with a malformed userId', async function () {
+      it('should return a graceful error', async function () {
+        const { response } = await ChatClient.sendGlobalMessage(
+          projectId,
+          'malformed-user',
+          'content'
+        )
+        expectValidationErrorRaw(response, 400, 'user_id')
+      })
+    })
+
+    describe('with a malformed projectId', async function () {
+      it('should return a not found error', async function () {
+        const { response } = await ChatClient.sendGlobalMessage(
+          'malformed-project',
+          new ObjectId().toString(),
+          'content'
+        )
+        expectValidationErrorRaw(response, 404, 'projectId')
       })
     })
   })

@@ -4,7 +4,7 @@ const request = Request.defaults({
   baseUrl: 'http://127.0.0.1:3010',
 })
 
-async function asyncRequest(options) {
+export async function asyncRequest(options) {
   return await new Promise((resolve, reject) => {
     request(options, (err, response, body) => {
       if (err) {
@@ -35,6 +35,47 @@ export async function getGlobalMessages(projectId) {
   })
 }
 
+export async function getGlobalMessage(projectId, messageId) {
+  return await asyncRequest({
+    method: 'get',
+    url: `/project/${projectId}/messages/${messageId}`,
+    json: true,
+  })
+}
+
+export async function deleteGlobalMessage(projectId, messageId) {
+  return await asyncRequest({
+    method: 'delete',
+    url: `/project/${projectId}/messages/${messageId}`,
+  })
+}
+
+export async function editGlobalMessage(projectId, messageId, content) {
+  return await asyncRequest({
+    method: 'post',
+    url: `/project/${projectId}/messages/${messageId}/edit`,
+    json: {
+      content,
+    },
+  })
+}
+
+export async function editGlobalMessageWithUser(
+  projectId,
+  messageId,
+  userId,
+  content
+) {
+  return await asyncRequest({
+    method: 'post',
+    url: `/project/${projectId}/messages/${messageId}/edit`,
+    json: {
+      content,
+      userId,
+    },
+  })
+}
+
 export async function sendMessage(projectId, threadId, userId, content) {
   return await asyncRequest({
     method: 'post',
@@ -50,6 +91,14 @@ export async function getThread(projectId, threadId) {
   return await asyncRequest({
     method: 'get',
     url: `/project/${projectId}/thread/${threadId}`,
+    json: true,
+  })
+}
+
+export async function getThreadMessage(projectId, threadId, messageId) {
+  return await asyncRequest({
+    method: 'get',
+    url: `/project/${projectId}/thread/${threadId}/messages/${messageId}`,
     json: true,
   })
 }
@@ -146,6 +195,18 @@ export async function deleteMessage(projectId, threadId, messageId) {
   })
 }
 
+export async function deleteUserMessage(
+  projectId,
+  threadId,
+  userId,
+  messageId
+) {
+  return await asyncRequest({
+    method: 'delete',
+    url: `/project/${projectId}/thread/${threadId}/user/${userId}/messages/${messageId}`,
+  })
+}
+
 export async function destroyProject(projectId) {
   return await asyncRequest({
     method: 'delete',
@@ -169,6 +230,16 @@ export async function generateThreadData(projectId, threads) {
     url: `/project/${projectId}/generate-thread-data`,
     json: {
       threads,
+    },
+  })
+}
+
+export async function cloneCommentThreads(sourceProjectId, targetProjectId) {
+  return await asyncRequest({
+    method: 'post',
+    url: `/project/${sourceProjectId}/clone-comment-threads`,
+    json: {
+      targetProjectId,
     },
   })
 }
