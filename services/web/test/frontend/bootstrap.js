@@ -69,6 +69,23 @@ globalThis.ResizeObserver =
   window.ResizeObserver =
     require('@juggle/resize-observer').ResizeObserver
 
+// add stub for matchMedia (used by react-bootstrap's Offcanvas, among others)
+globalThis.matchMedia =
+  global.matchMedia =
+  window.matchMedia =
+    query => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener() {},
+      removeListener() {},
+      addEventListener() {},
+      removeEventListener() {},
+      dispatchEvent() {
+        return false
+      },
+    })
+
 // add stub for BroadcastChannel (unused in these tests)
 globalThis.BroadcastChannel =
   global.BroadcastChannel =
