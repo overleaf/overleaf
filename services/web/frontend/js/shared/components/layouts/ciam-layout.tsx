@@ -53,14 +53,14 @@ const CiamLayout: FC<Props> = ({ children }: Props) => (
                 />,
                 // eslint-disable-next-line jsx-a11y/anchor-has-content,react/jsx-key
                 <a
-                  href="https://www.papersapp.com/"
+                  href="https://www.readcube.com/"
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() =>
                     eventTracking.sendMB('unified-access-footer-click', {
                       product: 'overleaf',
                       item: 'papers',
-                      destinationUrl: 'https://www.papersapp.com/',
+                      destinationUrl: 'https://www.readcube.com/',
                     })
                   }
                 />,

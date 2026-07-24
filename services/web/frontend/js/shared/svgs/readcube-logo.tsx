@@ -1,4 +1,4 @@
-function PapersLogo({ size = 40 }: { size?: number }) {
+function ReadcubeLogo({ size = 40 }: { size?: number }) {
   return (
     <svg
       width={size * (47 / 48)}
@@ -55,4 +55,4 @@ function PapersLogo({ size = 40 }: { size?: number }) {
   )
 }
 
-export default PapersLogo
+export default ReadcubeLogo

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import BibtexParser from '../../../../app/src/util/bib2json.js'
 
 describe('bib2json', function () {
-  // Server-side parser used by Write & Cite / Zotero / Papers sync
+  // Server-side parser used by Write & Cite / Zotero / ReadCube sync
   // (services/web/modules/tpr-webmodule). overleaf/internal#24246: an
   // oversized field is now truncated instead of dropping the whole entry.
   const MAX_FIELD_VALUE_LENGTH = 1000 * 20

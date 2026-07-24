@@ -9,7 +9,7 @@ const thirdPartyIcons = [
   { file: 'dropbox-transparent.svg', label: 'Dropbox' },
   { file: 'zotero_64x64x32.png', label: 'Zotero' },
   { file: 'mendeley.svg', label: 'Mendeley' },
-  { file: 'papers.svg', label: 'Papers' },
+  { file: 'papers.svg', label: 'ReadCube' },
 ]
 
 export default thirdPartyIcons
