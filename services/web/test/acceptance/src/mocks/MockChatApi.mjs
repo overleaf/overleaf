@@ -85,6 +85,25 @@ class MockChatApi extends AbstractMockApi {
         )
       }
     )
+    this.app.post(
+      '/project/:project_id/thread/:thread_id/messages/:message_id/edit',
+      (req, res) => {
+        const {
+          project_id: projectId,
+          thread_id: threadId,
+          message_id: messageId,
+        } = req.params
+        const { content, userId } = req.body
+        const thread = this.getThread(projectId, threadId)
+        const message = thread.find(msg => msg.id === messageId)
+        if (!message || (userId && message.user_id !== userId)) {
+          return res.sendStatus(404)
+        }
+        message.content = content
+        message.edited_at = Date.now()
+        res.sendStatus(204)
+      }
+    )
     this.app.delete('/project/:project_id', (req, res) => {
       const projectId = req.params.project_id
       this.destroyProject(projectId)

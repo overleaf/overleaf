@@ -21,6 +21,7 @@ export type CommentAddedEvent = {
   userId: string
   threadId: string
   messageId: string
+  content: string
 }
 
 export type CommentResolvedEvent = {
@@ -40,6 +41,7 @@ export type CommentEditedEvent = {
   userId: string
   threadId: string
   messageId: string
+  content: string
 }
 
 export type CommentDeletedEvent = {
