@@ -24,6 +24,7 @@ export default ProjectEditorHandler = {
       compiler: project.compiler,
       description: project.description,
       spellCheckLanguage: project.spellCheckLanguage,
+      referenceFormat: project.referenceFormat,
       png2pdf: project.png2pdf,
       deletedByExternalDataSource: project.deletedByExternalDataSource || false,
       imageName:

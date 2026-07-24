@@ -13,6 +13,8 @@ export interface ProjectSettings {
   rootDocId: string
   spellCheckLanguage: string
   name: string
+  mainBibliographyDocId?: string
+  referenceFormat?: 'bibtex' | 'biblatex'
 }
 
 type SaveUserSettings = Partial<

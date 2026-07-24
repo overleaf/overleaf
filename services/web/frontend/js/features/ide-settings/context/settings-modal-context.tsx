@@ -32,6 +32,8 @@ import FontSizeSetting from '@/features/ide-settings/components/appearance-setti
 import LineHeightSetting from '@/features/ide-settings/components/appearance-settings/line-height-setting'
 import FontFamilySetting from '@/features/ide-settings/components/appearance-settings/font-family-setting'
 import DarkModePdfSetting from '@/features/ide-settings/components/appearance-settings/dark-mode-pdf-setting'
+import RootBibDocumentSetting from '../components/reference-settings/root-bib-document-setting'
+import ReferenceFormatSetting from '../components/reference-settings/reference-format-setting'
 
 import { useProjectSettingsContext } from '@/features/ide-settings/context/project-settings-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
@@ -150,11 +152,6 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
                 component: <PDFViewerSetting />,
               },
               {
-                key: 'write-and-cite-settings',
-                component: <ReferenceSearchSetting />,
-                hidden: !ReferenceSearchSetting,
-              },
-              {
                 key: 'floating-menu',
                 component: <FloatingMenuSetting />,
                 hidden: !hasToolbarMigration && floatingMenu,
@@ -231,6 +228,31 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
               {
                 key: 'autoCompile',
                 component: <AutoCompileSetting />,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        key: 'references',
+        title: t('references'),
+        icon: 'book_5',
+        sections: [
+          {
+            key: 'general',
+            settings: [
+              {
+                key: 'mainBibliographyDocId',
+                component: <RootBibDocumentSetting />,
+              },
+              {
+                key: 'referenceFormat',
+                component: <ReferenceFormatSetting />,
+              },
+              {
+                key: 'write-and-cite-settings',
+                component: <ReferenceSearchSetting />,
+                hidden: !ReferenceSearchSetting,
               },
             ],
           },

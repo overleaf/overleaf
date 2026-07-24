@@ -119,6 +119,15 @@ const ProjectOptionsHandler = {
     const { otMigrationStage } = project.overleaf.history
     return { otMigrationStage }
   },
+
+  async setReferenceFormat(projectId, newReferenceFormat) {
+    if (!newReferenceFormat) {
+      return
+    }
+    const conditions = { _id: projectId }
+    const update = { referenceFormat: newReferenceFormat }
+    return Project.updateOne(conditions, update, {})
+  },
 }
 
 export default {
@@ -135,5 +144,6 @@ export default {
   setHistoryRangesSupport: callbackify(
     ProjectOptionsHandler.setHistoryRangesSupport
   ),
+  setReferenceFormat: callbackify(ProjectOptionsHandler.setReferenceFormat),
   promises: ProjectOptionsHandler,
 }

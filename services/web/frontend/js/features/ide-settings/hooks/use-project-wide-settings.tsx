@@ -31,6 +31,15 @@ export default function useProjectWideSettings() {
     [saveProjectSettings]
   )
 
+  const setReferenceFormat = useCallback(
+    async (newReferenceFormat: ProjectSettings['referenceFormat']) => {
+      await saveProjectSettings('referenceFormat', newReferenceFormat).catch(
+        debugConsole.error
+      )
+    },
+    [saveProjectSettings]
+  )
+
   const setPng2pdf = useCallback(
     async (newPng2pdf: ProjectSettings['png2pdf']) => {
       await saveProjectSettings('png2pdf', newPng2pdf).catch(debugConsole.error)
@@ -46,6 +55,8 @@ export default function useProjectWideSettings() {
     setCompiler,
     imageName: project?.imageName,
     setImageName,
+    referenceFormat: project?.referenceFormat,
+    setReferenceFormat,
     png2pdf: project?.png2pdf ?? png2pdfEnabled,
     setPng2pdf,
     rootDocId,

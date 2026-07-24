@@ -44,6 +44,15 @@ export default function useProjectWideSettingsSocketListener() {
     [project, updateProject]
   )
 
+  const setReferenceFormat = useCallback(
+    (referenceFormat: ProjectSettings['referenceFormat']) => {
+      if (project) {
+        updateProject({ referenceFormat })
+      }
+    },
+    [project, updateProject]
+  )
+
   useEffect(() => {
     // data is not available on initial mounting
     const dataAvailable = !!project
@@ -53,6 +62,7 @@ export default function useProjectWideSettingsSocketListener() {
       socket.on('imageNameUpdated', setImageName)
       socket.on('png2pdfUpdated', setPng2pdf)
       socket.on('spellCheckLanguageUpdated', setSpellCheckLanguage)
+      socket.on('referenceFormatUpdated', setReferenceFormat)
       return () => {
         socket.removeListener('compilerUpdated', setCompiler)
         socket.removeListener('imageNameUpdated', setImageName)
@@ -61,6 +71,7 @@ export default function useProjectWideSettingsSocketListener() {
           'spellCheckLanguageUpdated',
           setSpellCheckLanguage
         )
+        socket.removeListener('referenceFormatUpdated', setReferenceFormat)
       }
     }
   }, [
@@ -68,6 +79,7 @@ export default function useProjectWideSettingsSocketListener() {
     project,
     setCompiler,
     setImageName,
+    setReferenceFormat,
     setPng2pdf,
     setSpellCheckLanguage,
   ])

@@ -1782,7 +1782,6 @@
   "select_all_projects": "全选",
   "select_an_output_file": "选择输出文件",
   "select_an_output_file_figure_modal": "选择一个输出文件",
-  "select_bib_file": "选择 .bib 文件",
   "select_cells_in_a_single_row_to_merge": "在一行中选择单元格合并",
   "select_color": "选择颜色 __name__",
   "select_folder_from_project": "从项目中选择文件夹",

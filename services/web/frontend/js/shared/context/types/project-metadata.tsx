@@ -50,7 +50,6 @@ export type MyAccessRequest = Pick<
 
 export interface ProjectMetadata extends ProjectSettings {
   _id: string
-  mainBibliographyDocId?: string
   members: ProjectMember[]
   invites: ProjectMember[]
   editAccessRequests?: EditAccessRequest[]

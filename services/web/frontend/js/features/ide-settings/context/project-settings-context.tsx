@@ -13,6 +13,9 @@ type ProjectSettingsSetterContextValue = {
   setSpellCheckLanguage: (
     spellCheckLanguage: ProjectSettings['spellCheckLanguage']
   ) => void
+  setReferenceFormat: (
+    referenceFormat: ProjectSettings['referenceFormat']
+  ) => Promise<void>
   setAutoComplete: (autoComplete: UserSettings['autoComplete']) => void
   setAutoPairDelimiters: (
     autoPairDelimiters: UserSettings['autoPairDelimiters']
@@ -67,6 +70,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
     setRootDocId,
     spellCheckLanguage,
     setSpellCheckLanguage,
+    referenceFormat,
+    setReferenceFormat,
   } = useProjectWideSettings()
 
   const {
@@ -174,6 +179,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setMendeley,
       papers,
       setPapers,
+      referenceFormat,
+      setReferenceFormat,
     }),
     [
       compiler,
@@ -230,6 +237,8 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setMendeley,
       papers,
       setPapers,
+      referenceFormat,
+      setReferenceFormat,
     ]
   )
 

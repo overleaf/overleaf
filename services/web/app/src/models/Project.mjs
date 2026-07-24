@@ -115,6 +115,7 @@ export const ProjectSchema = new Schema(
       },
     ],
     deferredTpdsFlushCounter: { type: Number },
+    referenceFormat: { type: String },
   },
   { minimize: false }
 )

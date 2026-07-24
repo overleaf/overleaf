@@ -103,12 +103,18 @@ export const IdeReactProvider: FC<React.PropsWithChildren> = ({ children }) => {
     function handleJoinProjectResponse({
       project: {
         rootDoc_id: rootDocId,
+        mainBibliographyDoc_id: mainBibliographyDocId,
         publicAccesLevel: publicAccessLevel,
         ..._project
       },
       permissionsLevel,
     }: JoinProjectPayload) {
-      const project = { ..._project, rootDocId, publicAccessLevel }
+      const project = {
+        ..._project,
+        rootDocId,
+        mainBibliographyDocId,
+        publicAccessLevel,
+      }
 
       // Cast the project from the payload as ProjectMetadata to ensure it has
       // the correct type for the context. It must be close enough because the

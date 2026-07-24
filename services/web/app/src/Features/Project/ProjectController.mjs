@@ -92,6 +92,7 @@ const updateProjectSettingsSchema = z.object({
     name: z.string().optional(),
     rootDocId: zz.objectId().optional(),
     spellCheckLanguage: z.string().optional(),
+    referenceFormat: z.enum(['bibtex', 'biblatex']).optional(),
   }),
 })
 
@@ -141,6 +142,13 @@ const _ProjectController = {
       await EditorController.promises.setMainBibliographyDoc(
         projectId,
         body.mainBibliographyDocId
+      )
+    }
+
+    if (body.referenceFormat != null) {
+      await EditorController.promises.setReferenceFormat(
+        projectId,
+        body.referenceFormat
       )
     }
 

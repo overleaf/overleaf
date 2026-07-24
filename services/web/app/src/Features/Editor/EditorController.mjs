@@ -669,6 +669,24 @@ const EditorController = {
     )
   },
 
+  setReferenceFormat(projectId, newReferenceFormat, callback) {
+    ProjectOptionsHandler.setReferenceFormat(
+      projectId,
+      newReferenceFormat,
+      function (err) {
+        if (err) {
+          return callback(err)
+        }
+        EditorRealTimeController.emitToRoom(
+          projectId,
+          'referenceFormatUpdated',
+          newReferenceFormat
+        )
+        callback()
+      }
+    )
+  },
+
   _notifyProjectUsersOfNewFolders(projectId, folders, callback) {
     async.eachSeries(
       folders,
@@ -732,5 +750,6 @@ EditorController.promises = {
   setPublicAccessLevel: promisify(EditorController.setPublicAccessLevel),
   setRootDoc: promisify(EditorController.setRootDoc),
   setMainBibliographyDoc: promisify(EditorController.setMainBibliographyDoc),
+  setReferenceFormat: promisify(EditorController.setReferenceFormat),
 }
 export default EditorController
