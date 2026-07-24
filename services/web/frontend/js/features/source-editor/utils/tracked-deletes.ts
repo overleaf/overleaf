@@ -13,6 +13,12 @@ export class TrackedDeletes {
     toSnapshot: OffsetTable
   }
 
+  /**
+   * Total length of tracked deletes, i.e. the difference between the snapshot
+   * length and the visible CodeMirror length.
+   */
+  readonly totalLength: number
+
   constructor(trackedChanges: TrackedChangeList) {
     this.offsets = {
       toCM6: [{ pos: 0, map: pos => pos }],
@@ -42,12 +48,20 @@ export class TrackedDeletes {
         offset = newOffset
       }
     }
+    this.totalLength = offset
   }
 
   toCodeMirror(snapshotPos: number) {
     return this.mapPos(snapshotPos, this.offsets.toCM6)
   }
 
+  /**
+   * Map a CodeMirror position to a snapshot position, for placing an edit. At a
+   * tracked-delete boundary this deliberately maps to *before* the delete (so
+   * typing lands before the struck-through text), which means it under-counts
+   * for a delete at the end of the document. Use `totalLength` for the
+   * whole-document length, not `toSnapshot(docLength)`.
+   */
   toSnapshot(cm6Pos: number) {
     return this.mapPos(cm6Pos, this.offsets.toSnapshot)
   }

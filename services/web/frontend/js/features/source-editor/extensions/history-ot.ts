@@ -251,8 +251,11 @@ const updateSender = EditorState.transactionExtender.of(tr => {
   const trackingUserId = tr.startState.field(trackChangesUserIdState)
   const trackedDeletes = trackedDeletesFromState(tr.startState)
   const startDoc = tr.startState.doc
+  // Seed the builder with the full snapshot length (visible length plus all
+  // tracked deletes). Mapping the CM length through toSnapshot under-counts
+  // when a tracked delete sits at the end of the document.
   const opBuilder = new OperationBuilder(
-    trackedDeletes.toSnapshot(startDoc.length)
+    startDoc.length + trackedDeletes.totalLength
   )
 
   if (trackingUserId == null) {
