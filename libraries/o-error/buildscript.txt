@@ -5,6 +5,5 @@ o-error
 --esmock-loader=False
 --is-library=True
 --node-version=24.14.1
---package-name=@overleaf/o-error
 --pipeline-owner=32
 --public-repo=False

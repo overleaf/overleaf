@@ -120,6 +120,7 @@ describe('ProjectUploadController', function () {
     )
 
     ctx.AnalyticsManager = {
+      recordEventForSession: sinon.stub(),
       recordEventForUserInBackground: sinon.stub(),
     }
     vi.doMock(
@@ -545,8 +546,8 @@ describe('ProjectUploadController', function () {
 
         it('should record a successful convert-format analytics event', function (ctx) {
           sinon.assert.calledWith(
-            ctx.AnalyticsManager.recordEventForUserInBackground,
-            ctx.user_id,
+            ctx.AnalyticsManager.recordEventForSession,
+            ctx.req.session,
             'convert-format',
             {
               sourceFormat: 'docx',
@@ -615,8 +616,8 @@ describe('ProjectUploadController', function () {
 
       it('should record a successful convert-format analytics event', function (ctx) {
         sinon.assert.calledWith(
-          ctx.AnalyticsManager.recordEventForUserInBackground,
-          ctx.user_id,
+          ctx.AnalyticsManager.recordEventForSession,
+          ctx.req.session,
           'convert-format',
           {
             sourceFormat: 'markdown',
@@ -636,7 +637,7 @@ describe('ProjectUploadController', function () {
           ctx.res.json = data => {
             expect(data).to.deep.equal({
               success: false,
-              error: 'invalid_type',
+              error: 'invalid_import_type',
             })
             resolve()
           }
@@ -687,8 +688,8 @@ describe('ProjectUploadController', function () {
 
       it('should record a failed convert-format analytics event', function (ctx) {
         sinon.assert.calledWith(
-          ctx.AnalyticsManager.recordEventForUserInBackground,
-          ctx.user_id,
+          ctx.AnalyticsManager.recordEventForSession,
+          ctx.req.session,
           'convert-format',
           {
             sourceFormat: 'docx',

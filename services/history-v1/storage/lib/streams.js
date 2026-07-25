@@ -6,19 +6,19 @@
  */
 'use strict'
 
-const Stream = require('node:stream')
+const { pipeline } = require('node:stream/promises')
 const zlib = require('node:zlib')
 const { WritableBuffer } = require('@overleaf/stream-utils')
 
 /**
  * Create a promise for the result of reading a stream to a buffer.
  *
- * @param {Stream.Readable} readStream
+ * @param {import('node:stream').Readable} readStream
  * @return {Promise<Buffer>}
  */
 async function readStreamToBuffer(readStream) {
   const bufferStream = new WritableBuffer()
-  await Stream.promises.pipeline(readStream, bufferStream)
+  await pipeline(readStream, bufferStream)
   return bufferStream.contents()
 }
 
@@ -33,7 +33,7 @@ exports.readStreamToBuffer = readStreamToBuffer
 async function gunzipStreamToBuffer(readStream) {
   const gunzip = zlib.createGunzip()
   const bufferStream = new WritableBuffer()
-  await Stream.promises.pipeline(readStream, gunzip, bufferStream)
+  await pipeline(readStream, gunzip, bufferStream)
   return bufferStream.contents()
 }
 

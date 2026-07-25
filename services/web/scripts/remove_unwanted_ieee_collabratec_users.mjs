@@ -58,6 +58,8 @@ async function getIEEEUsers() {
           _id: 1,
           teamName: 1,
           'member_details._id': 1,
+          'member_details.analyticsId': 1,
+          'member_details.labsProgram': 1,
           'member_details.email': 1,
           'member_details.emails.email': 1,
         },
@@ -122,8 +124,8 @@ async function main() {
     index = index + 1
 
     if (COMMIT) {
-      await AnalyticsManager.setUserPropertyForUser(
-        userDetails._id.toString(),
+      await AnalyticsManager.setUserPropertyForMongoUser(
+        userDetails,
         'ieee-retirement',
         true
       )

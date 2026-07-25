@@ -10,12 +10,12 @@
   "dependencies": {
     "@google-cloud/opentelemetry-cloud-trace-exporter": "^3.0.0",
     "@google-cloud/profiler": "^6.0.4",
-    "@opentelemetry/api": "1.9.0",
-    "@opentelemetry/auto-instrumentations-node": "^0.72.0",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.214.0",
-    "@opentelemetry/resources": "^2.6.0",
-    "@opentelemetry/sdk-node": "^0.214.0",
-    "@opentelemetry/semantic-conventions": "^1.39.0",
+    "@opentelemetry/api": "^1.9.1",
+    "@opentelemetry/auto-instrumentations-node": "^0.76.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.218.0",
+    "@opentelemetry/resources": "^2.7.1",
+    "@opentelemetry/sdk-node": "^0.218.0",
+    "@opentelemetry/semantic-conventions": "^1.41.1",
     "compression": "^1.7.4",
     "prom-client": "^14.1.1",
     "yn": "^3.1.1"
@@ -31,8 +31,8 @@
     "typescript": "^5.0.4"
   },
   "scripts": {
-    "lint": "eslint --cache --cache-location ../../node_modules/.cache/eslint/ --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --cache --cache-location ../../node_modules/.cache/eslint/ --fix --ext .cjs,.js,.jsx,.mjs,.ts .",
+    "lint": "eslint --cache --cache-location ../../.cache/eslint/ --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --cache --cache-location ../../.cache/eslint/ --fix --ext .cjs,.js,.jsx,.mjs,.ts .",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
     "test:acceptance": "mocha --recursive --exit --grep=${MOCHA_GREP:-} test/acceptance",
     "test": "yarn run lint && yarn run types:check && yarn run test:unit",

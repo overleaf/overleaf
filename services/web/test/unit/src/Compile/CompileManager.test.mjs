@@ -1,5 +1,6 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
+import _ from 'lodash'
 
 const MODULE_PATH = '../../../../app/src/Features/Compile/CompileManager.mjs'
 
@@ -16,10 +17,53 @@ describe('CompileManager', function () {
       inc: sinon.stub(),
     }
 
+    ctx.project = {
+      _id: 'project-id',
+      owner_ref: 'owner-id',
+      compiler: 'latex',
+      rootDoc_id: 'mock-doc-id-1',
+      imageName: 'mock-image-name',
+      overleaf: { history: { id: 42 } },
+      fromV1TemplateId: 1337,
+      rootFolder: [
+        {
+          docs: [],
+          files: [],
+          folders: [],
+        },
+      ],
+    }
+
+    ctx.user = {
+      _id: 'owner-id',
+      features: { compileTimeout: 42, compileGroup: 'standard' },
+      analyticsId: 'abc',
+    }
+
+    ctx.ProjectGetter = {
+      promises: {
+        getProject: sinon.stub().callsFake((projectId, projection) => {
+          const result = { _id: ctx.project._id }
+          for (const [field, v] of Object.entries(projection)) {
+            if (v) {
+              _.set(result, field, _.get(ctx.project, field))
+            } else {
+              _.unset(result, field)
+            }
+          }
+          return result
+        }),
+      },
+    }
+
     vi.doMock('@overleaf/settings', () => ({
       default: (ctx.settings = {
         apis: {
-          clsi: { submissionBackendClass: 'c3d' },
+          clsi: {
+            submissionCompileBackendClass: 'free',
+            standardCompileBackendClass: 'free',
+            priorityCompileBackendClass: 'premium',
+          },
         },
         redis: { web: { host: '127.0.0.1', port: 42 } },
         rateLimit: { autoCompile: {} },
@@ -45,11 +89,15 @@ describe('CompileManager', function () {
     )
 
     vi.doMock('../../../../app/src/Features/Project/ProjectGetter', () => ({
-      default: (ctx.ProjectGetter = { promises: {} }),
+      default: ctx.ProjectGetter,
     }))
 
     vi.doMock('../../../../app/src/Features/User/UserGetter', () => ({
-      default: (ctx.UserGetter = { promises: {} }),
+      default: (ctx.UserGetter = {
+        promises: {
+          getUser: sinon.stub().resolves(ctx.user),
+        },
+      }),
     }))
 
     vi.doMock('../../../../app/src/Features/Compile/ClsiManager', () => ({
@@ -95,12 +143,12 @@ describe('CompileManager', function () {
   describe('compile', function () {
     beforeEach(function (ctx) {
       ctx.CompileManager._checkIfRecentlyCompiled = sinon.stub().resolves(false)
-      ctx.ProjectRootDocManager.promises.ensureRootDocumentIsSet = sinon
+      ctx.ProjectRootDocManager.promises.ensureRootDocumentIsValid = sinon
         .stub()
-        .resolves()
-      ctx.CompileManager.promises.getProjectCompileLimits = sinon
-        .stub()
-        .resolves(ctx.limits)
+        .resolves({
+          rootDocId: 'mock-root-doc-id-123',
+          rootResourcePath: '/main.tex',
+        })
       ctx.ClsiManager.promises.sendRequest = sinon.stub().resolves({
         status: (ctx.status = 'mock-status'),
         outputFiles: (ctx.outputFiles = []),
@@ -108,24 +156,13 @@ describe('CompileManager', function () {
       })
     })
 
-    describe('succesfully', function () {
+    describe('successfully', function () {
       let result
       beforeEach(async function (ctx) {
         ctx.CompileManager._checkIfAutoCompileLimitHasBeenHit = async (
           isAutoCompile,
           compileGroup
         ) => true
-        ctx.ProjectGetter.promises.getProject = sinon
-          .stub()
-          .resolves(
-            (ctx.project = { owner_ref: (ctx.owner_id = 'owner-id-123') })
-          )
-        ctx.UserGetter.promises.getUser = sinon.stub().resolves(
-          (ctx.user = {
-            features: { compileTimeout: '20s', compileGroup: 'standard' },
-            analyticsId: 'abc',
-          })
-        )
         result = await ctx.CompileManager.promises.compile(
           ctx.project_id,
           ctx.user_id,
@@ -140,25 +177,41 @@ describe('CompileManager', function () {
       })
 
       it('should ensure that the root document is set', function (ctx) {
-        ctx.ProjectRootDocManager.promises.ensureRootDocumentIsSet
+        ctx.ProjectRootDocManager.promises.ensureRootDocumentIsValid
           .calledWith(ctx.project_id)
           .should.equal(true)
       })
 
       it('should get the project compile limits', function (ctx) {
-        ctx.CompileManager.promises.getProjectCompileLimits
-          .calledWith(ctx.project_id)
+        ctx.UserGetter.promises.getUser
+          .calledWith(ctx.project.owner_ref)
           .should.equal(true)
       })
 
       it('should run the compile with the compile limits', function (ctx) {
-        ctx.ClsiManager.promises.sendRequest
-          .calledWith(ctx.project_id, ctx.user_id, {
+        ctx.ClsiManager.promises.sendRequest.should.have.been.calledWith(
+          {
+            _id: 'project-id',
+            compiler: 'latex',
+            fromV1TemplateId: 1337,
+            imageName: 'mock-image-name',
+            overleaf: { history: { id: 42 } },
+            owner_ref: 'owner-id',
+            rootDoc_id: 'mock-doc-id-1',
+            rootFolder: [{ docs: [], files: [], folders: [] }],
+          },
+          ctx.project_id,
+          ctx.user_id,
+          {
             timeout: ctx.limits.timeout,
             compileGroup: 'standard',
             buildId: sinon.match(/[a-f0-9]+-[a-f0-9]+/),
-          })
-          .should.equal(true)
+            rootResourcePath: 'main.tex',
+            rootDoc_id: 'mock-root-doc-id-123',
+            compileBackendClass: 'free',
+            ownerAnalyticsId: 'abc',
+          }
+        )
       })
 
       it('should resolve with the output', function (ctx) {
@@ -169,6 +222,37 @@ describe('CompileManager', function () {
 
       it('should time the compile', function (ctx) {
         ctx.timer.done.called.should.equal(true)
+      })
+    })
+
+    describe('with rootResourcePath given', function () {
+      it('should not check the root doc', async function (ctx) {
+        const { status } = await ctx.CompileManager.promises.compile(
+          ctx.project_id,
+          ctx.user_id,
+          { rootResourcePath: 'main.tex' }
+        )
+        ctx.ClsiManager.promises.sendRequest.should.have.been.called
+        status.should.equal('mock-status')
+
+        ctx.ProjectRootDocManager.promises.ensureRootDocumentIsValid.should.not
+          .have.been.called
+      })
+    })
+
+    describe('without a root doc', function () {
+      it('should return early', async function (ctx) {
+        ctx.ProjectRootDocManager.promises.ensureRootDocumentIsValid.resolves()
+        const { status, validationProblems } =
+          await ctx.CompileManager.promises.compile(
+            ctx.project_id,
+            ctx.user_id,
+            {}
+          )
+        status.should.equal('validation-problems')
+        validationProblems.should.deep.equal({
+          mainFile: 'no main file specified',
+        })
       })
     })
 
@@ -254,7 +338,7 @@ describe('CompileManager', function () {
         .calledWith(null, {
           timeout: ctx.timeout,
           compileGroup: ctx.group,
-          compileBackendClass: 'c4d',
+          compileBackendClass: 'premium',
           ownerAnalyticsId: 'abc',
         })
         .should.equal(true)
@@ -284,7 +368,7 @@ describe('CompileManager', function () {
           await ctx.CompileManager.promises.getProjectCompileLimits(
             ctx.project_id
           )
-        expect(compileBackendClass).to.equal('c4d')
+        expect(compileBackendClass).to.equal('premium')
       })
     })
   })

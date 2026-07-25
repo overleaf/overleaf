@@ -8,6 +8,7 @@ import { TestContainer } from '../helpers/test-container'
 import { FC } from 'react'
 import { MetadataContext } from '@/features/ide-react/context/metadata-context'
 import { ReferencesContext } from '@/features/ide-react/context/references-context'
+import { UserId } from '@ol-types/user'
 
 describe('autocomplete', { scrollBehavior: false }, function () {
   beforeEach(function () {
@@ -764,7 +765,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
 
     window.metaAttributesCache.set('ol-showSymbolPalette', true)
     const user = {
-      id: '123abd',
+      id: '123abd' as UserId,
       email: 'testuser@example.com',
     }
     cy.mount(
@@ -794,7 +795,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
 
     window.metaAttributesCache.set('ol-showSymbolPalette', false)
     const user = {
-      id: '123abd',
+      id: '123abd' as UserId,
       email: 'testuser@example.com',
     }
     cy.mount(

@@ -7,15 +7,23 @@ import React, {
 } from 'react'
 import ShareProjectModalContent from './share-project-modal-content'
 import { useProjectContext } from '@/shared/context/project-context'
-import { useSplitTestContext } from '@/shared/context/split-test-context'
+import {
+  useFeatureFlag,
+  useSplitTestContext,
+} from '@/shared/context/split-test-context'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useEditorContext } from '@/shared/context/editor-context'
 import customLocalStorage from '@/infrastructure/local-storage'
+import { FetchError } from '@/infrastructure/fetch-json'
+import {
+  getSharingLink,
+  SharingLinkData,
+} from '@/features/share-project-modal/utils/api'
 
 export type ProjectAccessType =
-  | 'linkSharing'
+  | 'legacyLinkSharing'
   | 'onlyInvitedPeople'
-  | 'anyoneInXyzWithTheLink'
+  | `anyoneInXyzWithTheLink.${string}`
   | 'anyoneWithTheLink'
 
 export type ShareProjectContextValue = {
@@ -36,6 +44,8 @@ export type ShareProjectContextValue = {
   setProjectAccess: React.Dispatch<
     React.SetStateAction<ProjectAccessType | undefined>
   >
+  sharingLinkData: SharingLinkData | null
+  setSharingLinkData: (data: SharingLinkData | null) => void
 }
 
 const SHOW_MODAL_COOLDOWN_PERIOD = 24 * 60 * 60 * 1000 // 24 hours
@@ -72,6 +82,8 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
   const [inFlight, setInFlight] =
     useState<ShareProjectContextValue['inFlight']>(false)
   const [error, setError] = useState<ShareProjectContextValue['error']>()
+  const [sharingLinkData, setSharingLinkData] =
+    useState<SharingLinkData | null>(null)
   const [projectAccess, setProjectAccess] = useState<
     ProjectAccessType | undefined
   >()
@@ -83,19 +95,8 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
   const { isProjectOwner } = useEditorContext()
   const { publicAccessLevel } = project || {}
 
-  // TODO: handle initial state for projectAccess
-  useEffect(() => {
-    if (!projectAccess) {
-      if (publicAccessLevel === 'tokenBased') {
-        // consider a legacy link sharing is enabled
-        setProjectAccess('linkSharing')
-      } else {
-        setProjectAccess('onlyInvitedPeople')
-      }
-    }
-  }, [projectAccess, publicAccessLevel])
-
   const { splitTestVariants } = useSplitTestContext()
+  const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
 
   // show the new share modal if project owner
   // is over collaborator limit or has pending editors (once every 24 hours)
@@ -149,6 +150,45 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
     }
   }, [show])
 
+  const handleShow = useCallback(async () => {
+    if (!isSharingUpdatesEnabled || !isProjectOwner) {
+      return
+    }
+
+    if (publicAccessLevel === 'tokenBased') {
+      setSharingLinkData(null)
+      setProjectAccess('legacyLinkSharing')
+      return
+    }
+
+    try {
+      const data = await getSharingLink(projectId)
+
+      setSharingLinkData(data)
+
+      if (!data.privileges) {
+        setProjectAccess('onlyInvitedPeople')
+      } else if (data.subscriptionId) {
+        setProjectAccess(`anyoneInXyzWithTheLink.${data.subscriptionId}`)
+      } else {
+        setProjectAccess('anyoneWithTheLink')
+      }
+    } catch (error) {
+      if (error instanceof FetchError && error.response?.status === 404) {
+        setSharingLinkData(null)
+        setProjectAccess('onlyInvitedPeople')
+        return
+      }
+
+      const errorData = (error as { data?: Record<string, string> })?.data
+      setError(
+        errorData?.errorReason ||
+          errorData?.error ||
+          'generic_something_went_wrong'
+      )
+    }
+  }, [publicAccessLevel, projectId, isSharingUpdatesEnabled, isProjectOwner])
+
   // close the modal if not in flight
   const cancel = useCallback(() => {
     if (!inFlight) {
@@ -163,21 +203,18 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
     setSuccessActionMessage(undefined)
     setInFlight(true)
 
-    const promise = request()
-
-    promise.catch((error: { data?: Record<string, string> }) => {
-      setError(
-        error.data?.errorReason ||
-          error.data?.error ||
-          'generic_something_went_wrong'
-      )
-    })
-
-    promise.finally(() => {
-      setInFlight(false)
-    })
-
-    return promise
+    return request()
+      .catch((error: { data?: Record<string, string> }) => {
+        setError(
+          error.data?.errorReason ||
+            error.data?.error ||
+            'generic_something_went_wrong'
+        )
+        throw error
+      })
+      .finally(() => {
+        setInFlight(false)
+      })
   }, [])
 
   if (!project) {
@@ -196,10 +233,13 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
         setSuccessActionMessage,
         projectAccess,
         setProjectAccess,
+        sharingLinkData,
+        setSharingLinkData,
       }}
     >
       <ShareProjectModalContent
         animation={animation}
+        onShow={handleShow}
         cancel={cancel}
         error={error}
         inFlight={inFlight}

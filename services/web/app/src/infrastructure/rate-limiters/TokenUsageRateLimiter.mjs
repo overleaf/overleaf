@@ -166,10 +166,11 @@ export default class TokenUsageRateLimiter {
   /**
    *
    * @param {string} userId
+   * @param {import('express').Request} req
    * @param {import('express').Response} res
    * @param {{ auditLogTool?: string }} [options] - if `auditLogTool` is set, an `ai-quota-breach` audit log entry is written with `{ tool }` in the info payload when the request is blocked
    */
-  async checkUsage(userId, res, options = {}) {
+  async checkUsage(userId, req, res, options = {}) {
     const allowance = await this._getAllowance(userId)
     const currentUsage = await this.getCurrentUsage(userId)
     const periodStart = currentUsage.periodStart ?? new Date()
@@ -190,8 +191,8 @@ export default class TokenUsageRateLimiter {
         )
       }
 
-      await AnalyticsManager.recordEventForUser(
-        userId,
+      AnalyticsManager.recordEventForSession(
+        req.session,
         'ai-token-usage-limit-exceeded'
       )
 

@@ -112,7 +112,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
   private void handleReceiveCommand(
       Optional<Credential> oauth2, Repository repository, ReceiveCommand receiveCommand)
       throws IOException, GitUserException, CannotAcquireLockException {
-    checkBranch(receiveCommand);
+    checkBranch(receiveCommand, repository);
     checkForcedPush(receiveCommand);
     bridge.push(
         oauth2,
@@ -122,9 +122,16 @@ public class WriteLatexPutHook implements PreReceiveHook {
         hostname);
   }
 
-  private void checkBranch(ReceiveCommand receiveCommand) throws WrongBranchException {
-    if (!receiveCommand.getRefName().equals("refs/heads/master")) {
-      throw new WrongBranchException();
+  private void checkBranch(ReceiveCommand receiveCommand, Repository repository)
+      throws WrongBranchException, IOException {
+    String expectedRef = repository.getFullBranch();
+    if (expectedRef == null) {
+      throw new IllegalStateException(
+          "Cannot determine expected branch: repository HEAD is unresolved"
+              + " (detached or unborn ref)");
+    }
+    if (!receiveCommand.getRefName().equals(expectedRef)) {
+      throw new WrongBranchException(expectedRef);
     }
   }
 

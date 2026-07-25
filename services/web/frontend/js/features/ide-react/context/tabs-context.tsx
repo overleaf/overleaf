@@ -14,12 +14,12 @@ import { useFileTreeOpenContext } from './file-tree-open-context'
 import { useEditorManagerContext } from './editor-manager-context'
 import { debugConsole } from '@/utils/debugging'
 import { disambiguatePaths } from '../util/disambiguate-paths'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import {
   FileTreeFindResult,
   isFileRefResult,
 } from '@/features/ide-react/types/file-tree'
+import { useAreTabsEnabled } from '../hooks/use-are-tabs-enabled'
 
 type PersistedTabInfo = { id: string; lifetime: Lifetime }
 
@@ -48,6 +48,7 @@ const TabsContext = React.createContext<
       closeTab: (id: string) => void
       closeOtherTabs: (id: string) => void
       makeTabPermanent: (id: string) => void
+      closeToRight: (id: string) => void
       moveTab: (
         sourceTabId: string,
         targetTabId: string,
@@ -57,6 +58,8 @@ const TabsContext = React.createContext<
       setContextMenuTarget: React.Dispatch<
         React.SetStateAction<TabsContextMenuTarget | null>
       >
+      headerSlot: HTMLElement | null
+      setHeaderSlot: React.Dispatch<React.SetStateAction<HTMLElement | null>>
     }
   | undefined
 >(undefined)
@@ -67,7 +70,7 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
 
   const { openEntity } = useFileTreeOpenContext()
   const { openDocWithId, openFileWithId } = useEditorManagerContext()
-  const tabsEnabled = isSplitTestEnabled('editor-tabs')
+  const tabsEnabled = useAreTabsEnabled()
   const { userSettings } = useUserSettingsContext()
   const { previewTabs } = userSettings
 
@@ -78,6 +81,8 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
 
   const [contextMenuTarget, setContextMenuTarget] =
     useState<TabsContextMenuTarget | null>(null)
+
+  const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null)
 
   const tabs = useMemo(() => {
     if (!tabsEnabled) {
@@ -172,6 +177,32 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
       setOpenTabs(current => current.filter(tab => tab.id === id))
     },
     [openEntity, openTab, setOpenTabs]
+  )
+
+  const closeToRight = useCallback(
+    async (id: string) => {
+      const tabIndex = openTabs.findIndex(tab => tab.id === id)
+      if (tabIndex === -1) {
+        debugConsole.warn(
+          'Attempting to close to right on tab that is not open'
+        )
+        return
+      }
+      const openTabIndex = openTabs.findIndex(
+        tab => tab.id === openEntity?.entity._id
+      )
+      if (openTabIndex === -1 || openTabIndex > tabIndex) {
+        await openTab(id)
+      }
+      setOpenTabs(current => {
+        const currentIndex = current.findIndex(tab => tab.id === id)
+        if (currentIndex === -1) {
+          return current
+        }
+        return current.slice(0, currentIndex + 1)
+      })
+    },
+    [setOpenTabs, openTabs, openEntity, openTab]
   )
 
   const moveTab = useCallback(
@@ -269,6 +300,9 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
       makeTabPermanent,
       contextMenuTarget,
       setContextMenuTarget,
+      closeToRight,
+      headerSlot,
+      setHeaderSlot,
     }),
     [
       tabs,
@@ -279,6 +313,9 @@ export const TabsProvider: FC<React.PropsWithChildren> = ({ children }) => {
       makeTabPermanent,
       contextMenuTarget,
       setContextMenuTarget,
+      closeToRight,
+      headerSlot,
+      setHeaderSlot,
     ]
   )
 

@@ -14,10 +14,12 @@ import useDropdown from '../../../../shared/hooks/use-dropdown'
 import * as commands from '../../extensions/toolbar/commands'
 import { useCodeMirrorViewContext } from '../codemirror-context'
 import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
+import getMeta from '@/utils/meta'
 
 export const TableDropdown = memo(function TableDropdown() {
   const { t } = useTranslation()
   const { writefullInstance } = useEditorContext()
+  const showAiFeaturesDisabled = getMeta('ol-showAiFeaturesDisabled')
   const selectSizeDropdown = useDropdown()
   const target = useRef<any>(null)
   const view = useCodeMirrorViewContext()
@@ -46,6 +48,8 @@ export const TableDropdown = memo(function TableDropdown() {
           </DropdownHeader>
           <OLListGroupItem
             aria-label={t('toolbar_generate_table')}
+            disabled={showAiFeaturesDisabled}
+            disabledReason={t('ai_features_unavailable_on_this_project')}
             onClick={() => {
               writefullInstance?.openTableGenerator()
             }}
@@ -62,7 +66,9 @@ export const TableDropdown = memo(function TableDropdown() {
               src={sparkleWhite}
               aria-hidden="true"
             />
-            <span>{t('generate_from_text_or_image')}</span>
+            <span className={showAiFeaturesDisabled ? 'opacity-50' : ''}>
+              {t('generate_from_text_or_image')}
+            </span>
           </OLListGroupItem>
           <div className="ol-cm-toolbar-dropdown-divider mx-2 my-0" />
           <OLListGroupItem

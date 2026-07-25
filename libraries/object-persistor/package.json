@@ -6,8 +6,8 @@
   "scripts": {
     "test": "yarn run lint && yarn run types:check && yarn run test:unit",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
-    "lint": "eslint --cache --cache-location ../../node_modules/.cache/eslint/ --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --cache --cache-location ../../node_modules/.cache/eslint/ --fix --ext .cjs,.js,.jsx,.mjs,.ts .",
+    "lint": "eslint --cache --cache-location ../../.cache/eslint/ --ext .cjs,.js,.jsx,.mjs,.ts --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --cache --cache-location ../../.cache/eslint/ --fix --ext .cjs,.js,.jsx,.mjs,.ts .",
     "test:ci": "yarn run test:unit",
     "types:check": "tsc --noEmit"
   },
@@ -38,7 +38,6 @@
     "mocha": "^11.1.0",
     "mocha-junit-reporter": "^2.2.1",
     "mocha-multi-reporters": "^1.5.1",
-    "mock-fs": "^5.2.0",
     "mongodb": "6.12.0",
     "sandboxed-module": "^2.0.4",
     "sinon": "^9.2.4",

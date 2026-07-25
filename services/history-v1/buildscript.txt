@@ -1,10 +1,10 @@
 history-v1
 --dependencies=postgres,gcs,mongo,redis,s3
+--deploy-pipeline=history-v1
 --env-add=
 --env-pass-through=
 --esmock-loader=False
 --node-version=24.14.1
---package-name=overleaf-editor
 --pipeline-owner=44
 --public-repo=False
 --tsconfig-extra-includes=backup-deletion-app.mjs,backup-verifier-app.mjs,backup-worker-app.mjs,api/**/*,migrations/**/*,storage/**/*

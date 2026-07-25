@@ -333,7 +333,7 @@ describe('SandboxedCompiles', function () {
   })
 
   // https://github.com/overleaf/internal/issues/20216
-  // eslint-disable-next-line mocha/no-skipped-tests
+  // eslint-disable-next-line mocha/no-pending-tests
   describe.skip('unavailable in CE', function () {
     if (isExcludedBySharding('CE_CUSTOM_1')) return
     startWith({ pro: false, vars: enabledVars, resetData: true })

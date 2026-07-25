@@ -82,7 +82,7 @@ function ProjectListPageContent() {
     useProjectListContext()
 
   useEffect(() => {
-    eventTracking.sendMB('loads_v2_dash', {})
+    eventTracking.sendMB('loads_v2_dash', { page: 'projects' })
   }, [])
 
   const { t } = useTranslation()

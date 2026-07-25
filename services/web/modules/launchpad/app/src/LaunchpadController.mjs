@@ -128,6 +128,7 @@ function registerExternalAuthAdmin(authMethod) {
       password: crypto.randomBytes(32).toString('hex'),
       first_name: email,
       last_name: '',
+      analyticsId: crypto.randomUUID(),
     }
     logger.debug(
       { email, authMethod },
@@ -212,7 +213,7 @@ async function registerAdmin(req, res) {
       .json({ message: { type: 'error', text: invalidPassword.message } })
   }
 
-  const body = { email, password }
+  const body = { email, password, analyticsId: crypto.randomUUID() }
 
   const user = await UserRegistrationHandler.promises.registerNewUser(body)
 

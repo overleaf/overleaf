@@ -78,7 +78,7 @@ function FatFooter() {
           label: t('for_groups_and_organizations'),
         },
         {
-          href: '/user/subscription/plans?itm_referrer=footer-for-students#student-annual',
+          href: '/user/subscription/plans?plan=student&period=annual&itm_referrer=footer-for-students',
           label: t('for_students'),
         },
       ],

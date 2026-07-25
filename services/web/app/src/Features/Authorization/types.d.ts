@@ -12,7 +12,7 @@ export const PrivilegeLevelsType = {
   NONE: false,
   READ_ONLY: 'readOnly',
   READ_AND_WRITE: 'readAndWrite',
-  REVIEW: 'reviewer',
+  REVIEW: 'review',
   OWNER: 'owner',
 } as const
 
@@ -26,3 +26,8 @@ export const PublicAccessLevelsType = {
 } as const
 
 export type PublicAccessLevel = ValueOf<typeof PublicAccessLevelsType>
+
+export function isPrivilegeUpgrade(
+  currentLevel: PrivilegeLevel,
+  newLevel: PrivilegeLevel
+): boolean

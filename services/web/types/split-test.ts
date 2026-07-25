@@ -22,4 +22,9 @@ export type LabsDetails = {
   description: string
   icon: string
   surveyLink: string
+  successNotification?: {
+    content?: string
+    buttonLabel?: string
+    buttonUrl?: string
+  }
 }

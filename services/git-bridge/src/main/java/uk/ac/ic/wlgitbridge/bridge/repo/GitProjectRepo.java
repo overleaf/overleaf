@@ -14,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -83,6 +84,8 @@ public class GitProjectRepo implements ProjectRepo {
       return;
     }
     repo.create();
+    // Set default branch to "main" for new projects
+    repo.updateRef(Constants.HEAD).link("refs/heads/main");
   }
 
   @Override

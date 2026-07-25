@@ -1,10 +1,10 @@
 docstore
 --dependencies=mongo,gcs
+--deploy-pipeline=docstore
 --env-add=
 --env-pass-through=
 --esmock-loader=False
 --node-version=24.14.1
---package-name=@overleaf/docstore
 --pipeline-owner=32
 --public-repo=True
 --test-unit-vitest=True

@@ -17,8 +17,12 @@ import { expressify } from '@overleaf/promise-utils'
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 import Errors from '../Errors/Errors.js'
 import AuthenticationController from '../Authentication/AuthenticationController.mjs'
-import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
+import PrivilegeLevels, {
+  isPrivilegeUpgrade,
+} from '../Authorization/PrivilegeLevels.mjs'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import SubscriptionGroupHandler from '../Subscription/SubscriptionGroupHandler.mjs'
+import SubscriptionLocator from '../Subscription/SubscriptionLocator.mjs'
 
 // This rate limiter allows a different number of requests depending on the
 // number of callaborators a user is allowed. This is implemented by providing
@@ -260,23 +264,22 @@ async function generateNewInvite(req, res) {
   }
 }
 
+const _renderInvalidPage = function (res, projectId, sharingUpdates) {
+  res.status(404)
+  logger.debug({ projectId }, 'invite not valid, rendering not-valid page')
+  if (sharingUpdates === 'enabled') {
+    res.render('project/invite/not-valid', { title: 'Invalid Invite' })
+  } else {
+    res.render('project/invite/not-valid-legacy', { title: 'Invalid Invite' })
+  }
+}
+
 async function viewInvite(req, res) {
   const projectId = req.params.Project_id
   const { token } = req.params
 
   const { variant: sharingUpdates } =
     await SplitTestHandler.promises.getAssignment(req, res, 'sharing-updates')
-
-  const _renderInvalidPage = function () {
-    res.status(404)
-    logger.debug({ projectId }, 'invite not valid, rendering not-valid page')
-
-    if (sharingUpdates === 'enabled') {
-      res.render('project/invite/not-valid', { title: 'Invalid Invite' })
-    } else {
-      res.render('project/invite/not-valid-legacy', { title: 'Invalid Invite' })
-    }
-  }
 
   // check if the user is already a member of the project
   const currentUser = SessionManager.getSessionUser(req.session)
@@ -304,7 +307,7 @@ async function viewInvite(req, res) {
   // check if invite is gone, or otherwise non-existent
   if (invite == null) {
     logger.debug({ projectId }, 'no invite found for this token')
-    return _renderInvalidPage()
+    return _renderInvalidPage(res, projectId, sharingUpdates)
   }
 
   // check the user who sent the invite exists
@@ -314,7 +317,7 @@ async function viewInvite(req, res) {
   )
   if (owner == null) {
     logger.debug({ projectId }, 'no project owner found')
-    return _renderInvalidPage()
+    return _renderInvalidPage(res, projectId, sharingUpdates)
   }
 
   // fetch the project name
@@ -323,7 +326,7 @@ async function viewInvite(req, res) {
   })
   if (project == null) {
     logger.debug({ projectId }, 'no project found')
-    return _renderInvalidPage()
+    return _renderInvalidPage(res, projectId, sharingUpdates)
   }
 
   if (!currentUser) {
@@ -357,13 +360,43 @@ async function viewInvite(req, res) {
   }
 }
 
+async function viewSharingLink(req, res) {
+  const projectId = req.params.Project_id
+
+  // ensure the project exists
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    name: 1,
+  })
+  if (project == null) {
+    logger.debug({ projectId }, 'no project found')
+    return _renderInvalidPage(res, projectId, 'enabled')
+  }
+
+  const currentUser = SessionManager.getSessionUser(req.session)
+  if (!currentUser) {
+    AuthenticationController.setRedirectInSession(req)
+    return res.redirect('/register')
+  }
+
+  // cleanup if set for register page
+  delete req.session.sharedProjectData
+
+  res.render('project/invite/show', {
+    projectId,
+    title: 'Project Invite',
+  })
+}
+
 async function acceptInvite(req, res) {
-  const { Project_id: projectId, token } = req.params
+  const { Project_id: projectId, token: urlToken } = req.params
+  const { token: bodyToken } = req.body
   const currentUser = SessionManager.getSessionUser(req.session)
   logger.debug(
     { projectId, userId: currentUser._id },
     'got request to accept invite'
   )
+
+  const token = urlToken || bodyToken
 
   const invite = await CollaboratorsInviteGetter.promises.getInviteByToken(
     projectId,
@@ -372,6 +405,54 @@ async function acceptInvite(req, res) {
 
   if (invite == null) {
     throw new Errors.NotFoundError('no matching invite found')
+  }
+
+  if (invite.subscriptionId) {
+    const isGroupMember =
+      await SubscriptionGroupHandler.promises.isUserPartOfGroup(
+        currentUser._id,
+        invite.subscriptionId
+      )
+    if (!isGroupMember) {
+      throw new Errors.ForbiddenError(
+        'user is not part of subscription group required to accept invite'
+      )
+    }
+  }
+
+  // check if the user is already a member of the project and upgrade privileges if possible
+  if (currentUser) {
+    const currentPrivilegeLevel =
+      await CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
+        currentUser._id,
+        projectId
+      )
+
+    if (currentPrivilegeLevel !== PrivilegeLevels.NONE) {
+      if (isPrivilegeUpgrade(currentPrivilegeLevel, invite.privileges)) {
+        logger.debug(
+          {
+            projectId,
+            userId: currentUser._id,
+            currentPrivilegeLevel,
+            invitePrivilegeLevel: invite.privileges,
+          },
+          'existing member of project can be upgraded'
+        )
+        await CollaboratorsInviteHandler.promises.upgradeUserPrivileges(
+          invite,
+          projectId,
+          currentUser
+        )
+      }
+      return res.redirect(`/project/${projectId}`)
+    }
+  }
+
+  if (invite.privileges === PrivilegeLevels.NONE) {
+    throw new Errors.NotFoundError(
+      'invite has been disabled and user is not an existing member of the project'
+    )
   }
 
   await ProjectAuditLogHandler.promises.addEntry(
@@ -392,6 +473,15 @@ async function acceptInvite(req, res) {
     currentUser
   )
 
+  // remove any other pending invites for user
+  const userEmails = await UserGetter.promises.getUserConfirmedEmails(
+    currentUser._id
+  )
+  await CollaboratorsInviteHandler.promises.revokeInviteForUser(
+    projectId,
+    userEmails
+  )
+
   await EditorRealTimeController.emitToRoom(
     projectId,
     'project:membership:changed',
@@ -404,23 +494,220 @@ async function acceptInvite(req, res) {
   } else if (invite.privileges === PrivilegeLevels.READ_ONLY) {
     editMode = 'view'
   }
-  AnalyticsManager.recordEventForUserInBackground(
-    currentUser._id,
-    'project-joined',
-    {
-      projectId,
-      ownerId: invite.sendingUserId, // only owner can invite others
-      mode: editMode,
-      role: invite.privileges,
-      source: 'email-invite',
-    }
-  )
+  AnalyticsManager.recordEventForSession(req.session, 'project-joined', {
+    projectId,
+    ownerId: invite.sendingUserId, // only owner can invite others
+    mode: editMode,
+    role: invite.privileges,
+    source: urlToken ? 'email-invite' : 'sharing-link',
+  })
 
   if (req.xhr) {
     res.sendStatus(204) //  Done async via project page notification
   } else {
     res.redirect(`/project/${projectId}`)
   }
+}
+
+async function getSharingLink(req, res) {
+  const { Project_id: projectId } = req.params
+
+  const invite =
+    await CollaboratorsInviteGetter.promises.getSharingLinkInvite(projectId)
+
+  if (invite === null || !invite.encryptedToken) {
+    res.sendStatus(404)
+  } else {
+    const token = await CollaboratorsInviteHelper.decryptToken(
+      invite.encryptedToken
+    )
+    res.json({
+      _id: invite._id,
+      token,
+      privileges: invite.privileges,
+      subscriptionId: invite.subscriptionId,
+    })
+  }
+}
+
+const updateSharingLinkSchema = z.object({
+  params: z.object({
+    Project_id: zz.objectId(),
+  }),
+  body: z.object({
+    // We have to use a union here, as Zod enums must be strings,
+    // but NONE is defined as boolean false
+    privileges: z.union([
+      z.literal(PrivilegeLevels.NONE),
+      z.enum([
+        PrivilegeLevels.READ_ONLY,
+        PrivilegeLevels.READ_AND_WRITE,
+        PrivilegeLevels.REVIEW,
+      ]),
+    ]),
+    subscriptionId: zz.objectId().optional(),
+  }),
+})
+
+async function updateSharingLink(req, res) {
+  const { params, body } = parseReq(req, updateSharingLinkSchema)
+  const projectId = params.Project_id
+  const privileges = body.privileges
+  const subscriptionId = body.subscriptionId
+
+  const currentUser = SessionManager.getSessionUser(req.session)
+
+  if (subscriptionId) {
+    const subscriptions =
+      await SubscriptionLocator.promises.getUserActiveProfessionalGroupSubscriptions(
+        currentUser._id,
+        { _id: 1 }
+      )
+    const canShareWithSubscription = subscriptions.some(
+      subscription => subscription._id.toString() === subscriptionId.toString()
+    )
+
+    if (!canShareWithSubscription) {
+      logger.debug(
+        { projectId, subscriptionId, userId: currentUser._id },
+        'cannot create a group sharing link for a non-professional or non-member subscription'
+      )
+      return res.status(403).json({ errorReason: 'subscription_not_eligible' })
+    }
+  }
+
+  let invite =
+    await CollaboratorsInviteGetter.promises.getSharingLinkInvite(projectId)
+
+  if (invite === null) {
+    invite = await CollaboratorsInviteHandler.promises.createSharingLinkInvite(
+      projectId,
+      privileges,
+      subscriptionId
+    )
+    await ProjectAuditLogHandler.promises.addEntry(
+      projectId,
+      'sharing-link-created',
+      currentUser._id,
+      req.ip,
+      {
+        inviteId: invite._id,
+        privileges: invite.privileges,
+        subscriptionId: invite.subscriptionId,
+      }
+    )
+  } else {
+    invite.privileges = privileges
+    invite.subscriptionId = subscriptionId
+    await invite.save()
+    await ProjectAuditLogHandler.promises.addEntry(
+      projectId,
+      'sharing-link-updated',
+      currentUser._id,
+      req.ip,
+      {
+        inviteId: invite._id,
+        privileges: invite.privileges,
+        subscriptionId: invite.subscriptionId,
+      }
+    )
+  }
+
+  const token = await CollaboratorsInviteHelper.decryptToken(
+    invite.encryptedToken
+  )
+  res.json({
+    _id: invite._id,
+    token,
+    privileges: invite.privileges,
+    subscriptionId: invite.subscriptionId,
+  })
+}
+
+const validateSharingLinkSchema = z.object({
+  params: z.object({
+    Project_id: zz.objectId(),
+  }),
+  body: z.object({
+    token: z.string(),
+  }),
+})
+
+async function validateSharingLink(req, res) {
+  const { params, body } = parseReq(req, validateSharingLinkSchema)
+  const projectId = params.Project_id
+  const { token } = body
+
+  const invite = await CollaboratorsInviteGetter.promises.getInviteByToken(
+    projectId,
+    token
+  )
+
+  const currentUser = SessionManager.getSessionUser(req.session)
+
+  if (invite == null || !currentUser) {
+    return res.json({ valid: false })
+  }
+
+  const currentPrivilegeLevel =
+    await CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
+      currentUser._id,
+      projectId
+    )
+
+  // fetch the project name
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    name: 1,
+  })
+
+  // If the user is already a member, check if they should be redirected to the project page
+  // or shown the sharing link page based on whether the invite would upgrade their privileges
+  if (currentPrivilegeLevel !== PrivilegeLevels.NONE) {
+    if (
+      // User can't be upgraded any further
+      [PrivilegeLevels.OWNER, PrivilegeLevels.READ_AND_WRITE].includes(
+        currentPrivilegeLevel
+      ) ||
+      // Invite is either disabled or read-only, so can't be an upgrade
+      [PrivilegeLevels.READ_ONLY, PrivilegeLevels.NONE].includes(
+        invite.privileges
+      ) ||
+      // User already has the privileges of the invite
+      currentPrivilegeLevel === invite.privileges
+    ) {
+      return res.json({ valid: true, redirect: true })
+    } else {
+      return res.json({
+        valid: true,
+        projectName: project.name,
+        redirect: false,
+      })
+    }
+  }
+
+  if (invite.privileges === PrivilegeLevels.NONE) {
+    return res.json({ valid: false })
+  }
+
+  if (invite.subscriptionId) {
+    const isGroupMember =
+      await SubscriptionGroupHandler.promises.isUserPartOfGroup(
+        currentUser._id,
+        invite.subscriptionId
+      )
+    if (!isGroupMember) {
+      logger.debug(
+        {
+          projectId,
+          userId: currentUser._id,
+          subscriptionId: invite.subscriptionId,
+        },
+        'user is not part of subscription group required to use sharing link'
+      )
+      return res.json({ valid: false })
+    }
+  }
+  return res.json({ valid: true, projectName: project.name })
 }
 
 const CollaboratorsInviteController = {
@@ -430,6 +717,10 @@ const CollaboratorsInviteController = {
   generateNewInvite: expressify(generateNewInvite),
   viewInvite: expressify(viewInvite),
   acceptInvite: expressify(acceptInvite),
+  viewSharingLink: expressify(viewSharingLink),
+  getSharingLink: expressify(getSharingLink),
+  updateSharingLink: expressify(updateSharingLink),
+  validateSharingLink: expressify(validateSharingLink),
   _checkShouldInviteEmail,
   _checkRateLimit,
 }

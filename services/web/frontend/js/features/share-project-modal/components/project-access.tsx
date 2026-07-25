@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import ShareProjectModalRow from '@/features/share-project-modal/components/share-project-modal-row'
 import MaterialIcon from '@/shared/components/material-icon'
 import OLButton from '@/shared/components/ol/ol-button'
-import OLTooltip from '@/shared/components/ol/ol-tooltip'
 import OLDropdownMenuItem from '@/shared/components/ol/ol-dropdown-menu-item'
 import {
   Dropdown,
@@ -15,20 +14,34 @@ import {
 import DropdownListItem from '@/shared/components/dropdown/dropdown-list-item'
 import LinkSharing from '@/features/share-project-modal/components/link-sharing'
 import { useEditorContext } from '@/shared/context/editor-context'
-import { PermissionsLevel } from '@/features/ide-react/types/permissions'
+import { useProjectContext } from '@/shared/context/project-context'
+import {
+  SharingLinkData,
+  SharingLinkPrivileges,
+  setPublicAccessLevel,
+  updateSharingLink,
+} from '../utils/api'
 import MemberPrivileges from '@/features/share-project-modal/components/member-privileges'
 import RemoveSharingLinksModal from '@/features/share-project-modal/components/remove-sharing-links-modal'
 import {
   ProjectAccessType,
   useShareProjectContext,
 } from '@/features/share-project-modal/components/share-project-modal'
+import { ExcludeStrict } from '@ol-types/utils'
+import getMeta from '@/utils/meta'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { sendMB } from '@/infrastructure/event-tracking'
+import { debugConsole } from '@/utils/debugging'
 
 type ProjectAccessProps = {
   setIsInvitedPeopleScreen: React.Dispatch<React.SetStateAction<boolean>>
   invitedPeopleCount: number
 }
 
-export type PendingAccessType = Exclude<ProjectAccessType, 'linkSharing'>
+export type PendingAccessType = ExcludeStrict<
+  ProjectAccessType,
+  'legacyLinkSharing'
+>
 
 function ProjectAccess({
   setIsInvitedPeopleScreen,
@@ -38,35 +51,67 @@ function ProjectAccess({
   const [pendingAccess, setPendingAccess] = useState<PendingAccessType | null>(
     null
   )
-  // TODO set initial state
-  const [privileges, setPrivileges] =
-    useState<Exclude<PermissionsLevel, 'owner'>>('readOnly')
   const { isProjectOwner } = useEditorContext()
-  // TODO set company name
-  const companyName = 'XYZ'
+  const { activeProfessionalGroupSubscriptions } = getMeta('ol-user')
+  const groupSharingEnabled = useFeatureFlag('group-link-sharing')
 
   const {
     monitorRequest,
     setSuccessActionMessage,
     projectAccess,
     setProjectAccess,
+    sharingLinkData,
+    setSharingLinkData,
   } = useShareProjectContext()
+  const { projectId } = useProjectContext()
+
+  const privileges = sharingLinkData?.privileges
 
   const handleAccessChange = (newAccess: PendingAccessType) => {
     setPendingAccess(null)
 
-    monitorRequest(
-      () =>
-        // TODO: replace with real API call
-        new Promise(resolve => setTimeout(resolve, 1000))
-    ).then(() => {
-      setProjectAccess(newAccess)
-      setSuccessActionMessage(t('access_updated'))
+    let reqBody: Pick<SharingLinkData, 'privileges' | 'subscriptionId'>
+    if (newAccess === 'onlyInvitedPeople') {
+      reqBody = { privileges: false }
+    } else if (newAccess.startsWith('anyoneInXyzWithTheLink')) {
+      const newSubscriptionId = newAccess.split('.')[1]
+      reqBody = {
+        privileges: privileges || 'readOnly',
+        subscriptionId: newSubscriptionId,
+      }
+    } else if (newAccess === 'anyoneWithTheLink') {
+      reqBody = { privileges: privileges || 'readOnly' }
+    } else {
+      return
+    }
+
+    monitorRequest(async () => {
+      const data = await updateSharingLink(projectId, reqBody)
+
+      if (projectAccess === 'legacyLinkSharing') {
+        await setPublicAccessLevel(projectId, 'private')
+      }
+
+      return data
     })
+      .then(data => {
+        setSharingLinkData(data)
+        setProjectAccess(newAccess)
+        setSuccessActionMessage(t('access_updated'))
+        sendMB('sharing-link-set-permissions', {
+          project_id: projectId,
+          access_level: newAccess.split('.')[0],
+          ...reqBody,
+        })
+      })
+      .catch(debugConsole.error)
   }
 
   const onAccessSelect = (eventKey: ProjectAccessType) => {
-    if (projectAccess === 'linkSharing' && eventKey !== 'linkSharing') {
+    if (
+      projectAccess === 'legacyLinkSharing' &&
+      eventKey !== 'legacyLinkSharing'
+    ) {
       // Legacy link sharing: show confirmation first
       setPendingAccess(eventKey as PendingAccessType)
     } else {
@@ -75,25 +120,58 @@ function ProjectAccess({
     }
   }
 
-  const onPrivilegesChange = (eventKey: Exclude<PermissionsLevel, 'owner'>) => {
-    monitorRequest(
-      () =>
-        // TODO: replace with real API call
-        new Promise(resolve => setTimeout(resolve, 1000))
-    ).then(() => {
-      setPrivileges(eventKey)
-      setSuccessActionMessage(t('access_updated'))
-    })
+  const onPrivilegesChange = (
+    eventKey: ExcludeStrict<SharingLinkPrivileges, false>
+  ) => {
+    monitorRequest(() =>
+      updateSharingLink(projectId, {
+        privileges: eventKey,
+        subscriptionId: sharingLinkData?.subscriptionId,
+      })
+    )
+      .then(data => {
+        setSharingLinkData(data)
+        setSuccessActionMessage(t('access_updated'))
+        sendMB('sharing-link-set-permissions', {
+          project_id: projectId,
+          access_level: projectAccess?.split('.')[0],
+          privileges: eventKey,
+          subscriptionId: data.subscriptionId,
+        })
+      })
+      .catch(debugConsole.error)
+  }
+
+  const getGroupLinkText = (id?: string) => {
+    if (
+      !id ||
+      !activeProfessionalGroupSubscriptions ||
+      activeProfessionalGroupSubscriptions.length === 0
+    ) {
+      return ''
+    }
+    const subscription = activeProfessionalGroupSubscriptions.find(
+      sub => sub._id === id
+    )
+    if (subscription?.teamName) {
+      return t('anyone_in_x_with_the_link', {
+        groupName: subscription.teamName,
+      })
+    } else {
+      return t('anyone_in_your_group_with_the_link')
+    }
   }
 
   const getProjectAccessDropdownToggleText = () => {
-    switch (projectAccess) {
-      case 'linkSharing':
+    if (!projectAccess) return ''
+    const [accessType, subscriptionId] = projectAccess.split('.')
+    switch (accessType) {
+      case 'legacyLinkSharing':
         return t('via_sharing_links_legacy')
       case 'onlyInvitedPeople':
         return t('only_invited_people')
       case 'anyoneInXyzWithTheLink':
-        return t('anyone_in_x_with_the_link', { companyName })
+        return getGroupLinkText(subscriptionId)
       case 'anyoneWithTheLink':
         return t('anyone_with_the_link')
       default:
@@ -108,7 +186,9 @@ function ProjectAccess({
         <div className="d-inline-flex align-items-center h5 m-0 gap-2">
           <MaterialIcon type="group" unfilled />
           <div className="px-2 fw-normal">
-            {t('x_people_invited', { count: invitedPeopleCount })}
+            {invitedPeopleCount > 1
+              ? t('x_people_invited', { count: invitedPeopleCount })
+              : t('no_one_invited_yet')}
           </div>
         </div>
         <OLButton
@@ -122,11 +202,13 @@ function ProjectAccess({
       {projectAccess && (
         <ShareProjectModalRow>
           <div className="d-inline-flex align-items-center h5 m-0">
-            {projectAccess === 'linkSharing' && <MaterialIcon type="link" />}
+            {projectAccess === 'legacyLinkSharing' && (
+              <MaterialIcon type="link" />
+            )}
             {projectAccess === 'onlyInvitedPeople' && (
               <MaterialIcon type="lock" unfilled />
             )}
-            {projectAccess === 'anyoneInXyzWithTheLink' && (
+            {projectAccess.startsWith('anyoneInXyzWithTheLink') && (
               <MaterialIcon type="domain" unfilled />
             )}
             {projectAccess === 'anyoneWithTheLink' && (
@@ -141,17 +223,19 @@ function ProjectAccess({
                 <MaterialIcon type="keyboard_arrow_down" />
               </DropdownToggle>
               <DropdownMenu>
-                {projectAccess === 'linkSharing' && (
+                {projectAccess === 'legacyLinkSharing' && (
                   <>
                     <DropdownListItem className="d-flex align-items-center">
                       <DropdownItem
                         as="button"
-                        eventKey="linkSharing"
+                        eventKey="legacyLinkSharing"
                         leadingIcon={<MaterialIcon type="link" />}
                         trailingIcon={
-                          projectAccess === 'linkSharing' ? 'check' : undefined
+                          projectAccess === 'legacyLinkSharing'
+                            ? 'check'
+                            : undefined
                         }
-                        active={projectAccess === 'linkSharing'}
+                        active={projectAccess === 'legacyLinkSharing'}
                       >
                         {t('via_sharing_links_legacy')}
                       </DropdownItem>
@@ -174,21 +258,34 @@ function ProjectAccess({
                     {t('only_invited_people')}
                   </DropdownItem>
                 </DropdownListItem>
-                <DropdownListItem className="d-flex align-items-center">
-                  <DropdownItem
-                    as="button"
-                    eventKey="anyoneInXyzWithTheLink"
-                    leadingIcon={<MaterialIcon type="domain" unfilled />}
-                    trailingIcon={
-                      projectAccess === 'anyoneInXyzWithTheLink'
-                        ? 'check'
-                        : undefined
-                    }
-                    active={projectAccess === 'anyoneInXyzWithTheLink'}
-                  >
-                    {t('anyone_in_x_with_the_link', { companyName })}
-                  </DropdownItem>
-                </DropdownListItem>
+                {groupSharingEnabled &&
+                  activeProfessionalGroupSubscriptions &&
+                  activeProfessionalGroupSubscriptions.map(subscription => (
+                    <DropdownListItem
+                      className="d-flex align-items-center"
+                      key={subscription._id}
+                    >
+                      <DropdownItem
+                        as="button"
+                        eventKey={`anyoneInXyzWithTheLink.${subscription._id}`}
+                        leadingIcon={<MaterialIcon type="domain" unfilled />}
+                        trailingIcon={
+                          projectAccess ===
+                          `anyoneInXyzWithTheLink.${subscription._id}`
+                            ? 'check'
+                            : undefined
+                        }
+                        active={
+                          projectAccess ===
+                          `anyoneInXyzWithTheLink.${subscription._id}`
+                        }
+                      >
+                        {t('anyone_in_x_with_the_link', {
+                          groupName: subscription.teamName || 'your group',
+                        })}
+                      </DropdownItem>
+                    </DropdownListItem>
+                  ))}
                 <DropdownListItem className="d-flex align-items-center gap-2">
                   <DropdownItem
                     as="button"
@@ -203,19 +300,6 @@ function ProjectAccess({
                   >
                     {t('anyone_with_the_link')}
                   </DropdownItem>
-                  <OLTooltip
-                    id="tooltip-anyone-with-link"
-                    description={t('not_permitted_by_your_organization')}
-                    overlayProps={{ placement: 'left' }}
-                  >
-                    <span style={{ cursor: 'default' }}>
-                      <MaterialIcon
-                        type="info"
-                        unfilled
-                        className="align-middle px-2"
-                      />
-                    </span>
-                  </OLTooltip>
                 </DropdownListItem>
               </DropdownMenu>
             </Dropdown>
@@ -227,7 +311,7 @@ function ProjectAccess({
               />
             )}
           </div>
-          {projectAccess !== 'linkSharing' && (
+          {projectAccess !== 'legacyLinkSharing' && privileges && (
             <Dropdown align="end" onSelect={onPrivilegesChange}>
               <DropdownToggle
                 variant="ghost"

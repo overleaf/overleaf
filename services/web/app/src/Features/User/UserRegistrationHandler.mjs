@@ -100,6 +100,7 @@ const UserRegistrationHandler = {
       user = await UserRegistrationHandler.registerNewUser({
         email,
         password: crypto.randomBytes(32).toString('hex'),
+        analyticsId: crypto.randomUUID(),
       })
     } catch (error) {
       if (error.message === 'EmailAlreadyRegistered') {

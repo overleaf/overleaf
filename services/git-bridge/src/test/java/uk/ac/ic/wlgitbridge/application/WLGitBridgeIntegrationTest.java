@@ -449,6 +449,17 @@ public class WLGitBridgeIntegrationTest {
                           .build());
                 }
               });
+          put(
+              "masterBranchSurvivesSwap",
+              new HashMap<String, SnapshotAPIState>() {
+                {
+                  put(
+                      "state",
+                      new SnapshotAPIStateBuilder(
+                              getResourceAsStream("/masterBranchSurvivesSwap/state/state.json"))
+                          .build());
+                }
+              });
         }
       };
 
@@ -522,14 +533,21 @@ public class WLGitBridgeIntegrationTest {
     assertEquals(0, runtime.exec("git pull", null, dir).waitFor());
   }
 
+  private String gitBranch(File dir) throws IOException, InterruptedException {
+    Process proc =
+        runtime.exec(new String[] {"git", "rev-parse", "--abbrev-ref", "HEAD"}, null, dir);
+    assertEquals(0, proc.waitFor());
+    return IOUtils.toString(proc.getInputStream(), StandardCharsets.UTF_8).trim();
+  }
+
   @Test
   public void canCloneARepository() throws IOException, GitAPIException, InterruptedException {
     server = new MockSnapshotServer(3857, getResource("/canCloneARepository").toFile());
     server.start();
     server.setState(states.get("canCloneARepository").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33857, 3857)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3857)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 33857, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/canCloneARepository/state/" + PROJECT_ID), testprojDir.toPath()));
@@ -541,10 +559,10 @@ public class WLGitBridgeIntegrationTest {
     server = new MockSnapshotServer(3858, getResource("/canCloneMultipleRepositories").toFile());
     server.start();
     server.setState(states.get("canCloneMultipleRepositories").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33858, 3858)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3858)});
     wlgb.run();
-    File testproj1Dir = gitClone(PROJECT_ID1, 33858, dir);
-    File testproj2Dir = gitClone(PROJECT_ID2, 33858, dir);
+    File testproj1Dir = gitClone(PROJECT_ID1, wlgb.getPort(), dir);
+    File testproj2Dir = gitClone(PROJECT_ID2, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/canCloneMultipleRepositories/state/" + PROJECT_ID1),
@@ -560,9 +578,9 @@ public class WLGitBridgeIntegrationTest {
     server = new MockSnapshotServer(3859, getResource("/canPullAModifiedTexFile").toFile());
     server.start();
     server.setState(states.get("canPullAModifiedTexFile").get("base"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33859, 3859)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3859)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 33859, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/canPullAModifiedTexFile/base/" + PROJECT_ID), testprojDir.toPath()));
@@ -579,9 +597,9 @@ public class WLGitBridgeIntegrationTest {
     server = new MockSnapshotServer(3860, getResource("/canPullADeletedTexFile").toFile());
     server.start();
     server.setState(states.get("canPullADeletedTexFile").get("base"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33860, 3860)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3860)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 33860, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/canPullADeletedTexFile/base/" + PROJECT_ID), testprojDir.toPath()));
@@ -599,9 +617,9 @@ public class WLGitBridgeIntegrationTest {
     server = new MockSnapshotServer(3862, getResource("/canPullAModifiedBinaryFile").toFile());
     server.start();
     server.setState(states.get("canPullAModifiedBinaryFile").get("base"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33862, 3862)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3862)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 33862, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/canPullAModifiedBinaryFile/base/" + PROJECT_ID), testprojDir.toPath()));
@@ -619,9 +637,9 @@ public class WLGitBridgeIntegrationTest {
     server = new MockSnapshotServer(3863, getResource("/canPullADeletedBinaryFile").toFile());
     server.start();
     server.setState(states.get("canPullADeletedBinaryFile").get("base"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33863, 3863)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3863)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 33863, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/canPullADeletedBinaryFile/base/" + PROJECT_ID), testprojDir.toPath()));
@@ -639,9 +657,9 @@ public class WLGitBridgeIntegrationTest {
     server = new MockSnapshotServer(4001, getResource("/canPullADuplicateBinaryFile").toFile());
     server.start();
     server.setState(states.get("canPullADuplicateBinaryFile").get("base"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(44001, 4001)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 4001)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 44001, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/canPullADuplicateBinaryFile/base/" + PROJECT_ID), testprojDir.toPath()));
@@ -659,9 +677,9 @@ public class WLGitBridgeIntegrationTest {
     server = new MockSnapshotServer(4002, getResource("/canCloneDuplicateBinaryFiles").toFile());
     server.start();
     server.setState(states.get("canCloneDuplicateBinaryFiles").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(44002, 4002)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 4002)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 44002, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/canCloneDuplicateBinaryFiles/state/" + PROJECT_ID),
@@ -674,9 +692,9 @@ public class WLGitBridgeIntegrationTest {
     server = new MockSnapshotServer(4003, getResource("/canPullUpdatedBinaryFiles").toFile());
     server.start();
     server.setState(states.get("canPullUpdatedBinaryFiles").get("base"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(44003, 4003)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 4003)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 44003, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/canPullUpdatedBinaryFiles/base/" + PROJECT_ID), testprojDir.toPath()));
@@ -694,9 +712,9 @@ public class WLGitBridgeIntegrationTest {
     server = new MockSnapshotServer(3864, getResource("/canPullAModifiedNestedFile").toFile());
     server.start();
     server.setState(states.get("canPullAModifiedNestedFile").get("base"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33864, 3864)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3864)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 33864, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/canPullAModifiedNestedFile/base/" + PROJECT_ID), testprojDir.toPath()));
@@ -714,9 +732,9 @@ public class WLGitBridgeIntegrationTest {
     server = new MockSnapshotServer(3865, getResource("/canPullDeletedNestedFiles").toFile());
     server.start();
     server.setState(states.get("canPullDeletedNestedFiles").get("base"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33865, 3865)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3865)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 33865, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/canPullDeletedNestedFiles/base/" + PROJECT_ID), testprojDir.toPath()));
@@ -732,10 +750,10 @@ public class WLGitBridgeIntegrationTest {
   public void canPushFilesSuccessfully() throws IOException, GitAPIException, InterruptedException {
     server = new MockSnapshotServer(3866, getResource("/canPushFilesSuccessfully").toFile());
     server.start();
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33866, 3866)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3866)});
     wlgb.run();
     server.setState(states.get("canPushFilesSuccessfully").get("state"));
-    File testprojDir = gitClone(PROJECT_ID, 33866, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/canPushFilesSuccessfully/state/" + PROJECT_ID), testprojDir.toPath()));
@@ -745,14 +763,19 @@ public class WLGitBridgeIntegrationTest {
     gitPush(testprojDir);
   }
 
-  private static final String EXPECTED_OUT_PUSH_OUT_OF_DATE_FIRST =
-      "error: failed to push some refs to 'http://127.0.0.1:33867/"
-          + PROJECT_ID
-          + "'\n"
-          + "hint: Updates were rejected because the tip of your current branch is behind\n"
-          + "hint: its remote counterpart. If you want to integrate the remote changes,\n"
-          + "hint: use 'git pull' before pushing again.\n"
-          + "hint: See the 'Note about fast-forwards' in 'git push --help' for details.\n";
+  private static String gitRemoteUrl(int port) {
+    return "http://127.0.0.1:" + port + "/" + PROJECT_ID;
+  }
+
+  private static String expectedPushOutOfDate(int port) {
+    return "error: failed to push some refs to '"
+        + gitRemoteUrl(port)
+        + "'\n"
+        + "hint: Updates were rejected because the tip of your current branch is behind\n"
+        + "hint: its remote counterpart. If you want to integrate the remote changes,\n"
+        + "hint: use 'git pull' before pushing again.\n"
+        + "hint: See the 'Note about fast-forwards' in 'git push --help' for details.\n";
+  }
 
   @Test
   public void pushFailsOnFirstStageOutOfDate()
@@ -760,9 +783,9 @@ public class WLGitBridgeIntegrationTest {
     server = new MockSnapshotServer(3867, getResource("/pushFailsOnFirstStageOutOfDate").toFile());
     server.start();
     server.setState(states.get("pushFailsOnFirstStageOutOfDate").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33867, 3867)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3867)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 33867, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/pushFailsOnFirstStageOutOfDate/state/" + PROJECT_ID),
@@ -771,17 +794,8 @@ public class WLGitBridgeIntegrationTest {
     gitAdd(testprojDir);
     gitCommit(testprojDir, "push");
     Process push = gitPush(testprojDir, 1);
-    assertEquals(EXPECTED_OUT_PUSH_OUT_OF_DATE_FIRST, Util.fromStream(push.getErrorStream(), 2));
+    assertEquals(expectedPushOutOfDate(wlgb.getPort()), Util.fromStream(push.getErrorStream(), 2));
   }
-
-  private static final String EXPECTED_OUT_PUSH_OUT_OF_DATE_SECOND =
-      "error: failed to push some refs to 'http://127.0.0.1:33868/"
-          + PROJECT_ID
-          + "'\n"
-          + "hint: Updates were rejected because the tip of your current branch is behind\n"
-          + "hint: its remote counterpart. If you want to integrate the remote changes,\n"
-          + "hint: use 'git pull' before pushing again.\n"
-          + "hint: See the 'Note about fast-forwards' in 'git push --help' for details.\n";
 
   @Test
   public void pushFailsOnSecondStageOutOfDate()
@@ -789,9 +803,9 @@ public class WLGitBridgeIntegrationTest {
     server = new MockSnapshotServer(3868, getResource("/pushFailsOnSecondStageOutOfDate").toFile());
     server.start();
     server.setState(states.get("pushFailsOnSecondStageOutOfDate").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33868, 3868)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3868)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 33868, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/pushFailsOnSecondStageOutOfDate/state/" + PROJECT_ID),
@@ -800,28 +814,29 @@ public class WLGitBridgeIntegrationTest {
     gitAdd(testprojDir);
     gitCommit(testprojDir, "push");
     Process push = gitPush(testprojDir, 1);
-    assertEquals(EXPECTED_OUT_PUSH_OUT_OF_DATE_SECOND, Util.fromStream(push.getErrorStream(), 2));
+    assertEquals(expectedPushOutOfDate(wlgb.getPort()), Util.fromStream(push.getErrorStream(), 2));
   }
 
-  private static final List<String> EXPECTED_OUT_PUSH_INVALID_FILES =
-      Arrays.asList(
-          "remote: hint: You have 4 invalid files in your Overleaf project:",
-          "remote: hint: file1.invalid (error)",
-          "remote: hint: file2.exe (invalid file extension)",
-          "remote: hint: hello world.png (rename to: hello_world.png)",
-          "remote: hint: an image.jpg (rename to: an_image.jpg)",
-          "To http://127.0.0.1:33869/" + PROJECT_ID,
-          "! [remote rejected] master -> master (invalid files)",
-          "error: failed to push some refs to 'http://127.0.0.1:33869/" + PROJECT_ID + "'");
+  private static List<String> expectedPushInvalidFiles(int port) {
+    return Arrays.asList(
+        "remote: hint: You have 4 invalid files in your Overleaf project:",
+        "remote: hint: file1.invalid (error)",
+        "remote: hint: file2.exe (invalid file extension)",
+        "remote: hint: hello world.png (rename to: hello_world.png)",
+        "remote: hint: an image.jpg (rename to: an_image.jpg)",
+        "To " + gitRemoteUrl(port),
+        "! [remote rejected] main -> main (invalid files)",
+        "error: failed to push some refs to '" + gitRemoteUrl(port) + "'");
+  }
 
   @Test
   public void pushFailsOnInvalidFiles() throws IOException, GitAPIException, InterruptedException {
     server = new MockSnapshotServer(3869, getResource("/pushFailsOnInvalidFiles").toFile());
     server.start();
     server.setState(states.get("pushFailsOnInvalidFiles").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33869, 3869)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3869)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 33869, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/pushFailsOnInvalidFiles/state/" + PROJECT_ID), testprojDir.toPath()));
@@ -830,16 +845,17 @@ public class WLGitBridgeIntegrationTest {
     gitCommit(testprojDir, "push");
     Process push = gitPush(testprojDir, 1);
     List<String> actual = Util.linesFromStream(push.getErrorStream(), 2, "[K");
-    assertEquals(EXPECTED_OUT_PUSH_INVALID_FILES, actual);
+    assertEquals(expectedPushInvalidFiles(wlgb.getPort()), actual);
   }
 
-  private static final List<String> EXPECTED_OUT_PUSH_INVALID_PROJECT =
-      Arrays.asList(
-          "remote: hint: project: no main file",
-          "remote: hint: The project would have no (editable) main .tex file.",
-          "To http://127.0.0.1:33870/" + PROJECT_ID,
-          "! [remote rejected] master -> master (invalid project)",
-          "error: failed to push some refs to 'http://127.0.0.1:33870/" + PROJECT_ID + "'");
+  private static List<String> expectedPushInvalidProject(int port) {
+    return Arrays.asList(
+        "remote: hint: project: no main file",
+        "remote: hint: The project would have no (editable) main .tex file.",
+        "To " + gitRemoteUrl(port),
+        "! [remote rejected] main -> main (invalid project)",
+        "error: failed to push some refs to '" + gitRemoteUrl(port) + "'");
+  }
 
   @Test
   public void pushFailsOnInvalidProject()
@@ -847,9 +863,9 @@ public class WLGitBridgeIntegrationTest {
     server = new MockSnapshotServer(3870, getResource("/pushFailsOnInvalidProject").toFile());
     server.start();
     server.setState(states.get("pushFailsOnInvalidProject").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33870, 3870)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3870)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 33870, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/pushFailsOnInvalidProject/state/" + PROJECT_ID), testprojDir.toPath()));
@@ -858,16 +874,17 @@ public class WLGitBridgeIntegrationTest {
     gitCommit(testprojDir, "push");
     Process push = gitPush(testprojDir, 1);
     List<String> actual = Util.linesFromStream(push.getErrorStream(), 2, "[K");
-    assertEquals(EXPECTED_OUT_PUSH_INVALID_PROJECT, actual);
+    assertEquals(expectedPushInvalidProject(wlgb.getPort()), actual);
   }
 
-  private static final List<String> EXPECTED_OUT_PUSH_UNEXPECTED_ERROR =
-      Arrays.asList(
-          "remote: hint: There was an internal error with the Overleaf server.",
-          "remote: hint: Please contact Overleaf.",
-          "To http://127.0.0.1:33871/" + PROJECT_ID,
-          "! [remote rejected] master -> master (Overleaf error)",
-          "error: failed to push some refs to 'http://127.0.0.1:33871/" + PROJECT_ID + "'");
+  private static List<String> expectedPushUnexpectedError(int port) {
+    return Arrays.asList(
+        "remote: hint: There was an internal error with the Overleaf server.",
+        "remote: hint: Please contact Overleaf.",
+        "To " + gitRemoteUrl(port),
+        "! [remote rejected] main -> main (Overleaf error)",
+        "error: failed to push some refs to '" + gitRemoteUrl(port) + "'");
+  }
 
   /* this one prints a stack trace */
   @Test
@@ -876,9 +893,9 @@ public class WLGitBridgeIntegrationTest {
     server = new MockSnapshotServer(3871, getResource("/pushFailsOnUnexpectedError").toFile());
     server.start();
     server.setState(states.get("pushFailsOnUnexpectedError").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33871, 3871)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3871)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 33871, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/pushFailsOnUnexpectedError/state/" + PROJECT_ID), testprojDir.toPath()));
@@ -887,18 +904,19 @@ public class WLGitBridgeIntegrationTest {
     gitCommit(testprojDir, "push");
     Process push = gitPush(testprojDir, 1);
     List<String> actual = Util.linesFromStream(push.getErrorStream(), 2, "[K");
-    assertEquals(EXPECTED_OUT_PUSH_UNEXPECTED_ERROR, actual);
+    assertEquals(expectedPushUnexpectedError(wlgb.getPort()), actual);
   }
 
-  private static final List<String> EXPECTED_OUT_PUSH_INVALID_EXE_FILE =
-      Arrays.asList(
-          "remote: error: invalid files",
-          "remote:",
-          "remote: hint: You have 1 invalid files in your Overleaf project:",
-          "remote: hint: file1.exe (invalid file extension)",
-          "To http://127.0.0.1:33872/" + PROJECT_ID,
-          "! [remote rejected] master -> master (invalid files)",
-          "error: failed to push some refs to 'http://127.0.0.1:33872/" + PROJECT_ID + "'");
+  private static List<String> expectedPushInvalidExeFile(int port) {
+    return Arrays.asList(
+        "remote: error: invalid files",
+        "remote:",
+        "remote: hint: You have 1 invalid files in your Overleaf project:",
+        "remote: hint: file1.exe (invalid file extension)",
+        "To " + gitRemoteUrl(port),
+        "! [remote rejected] main -> main (invalid files)",
+        "error: failed to push some refs to '" + gitRemoteUrl(port) + "'");
+  }
 
   @Test
   public void pushSucceedsAfterRemovingInvalidFiles()
@@ -908,9 +926,9 @@ public class WLGitBridgeIntegrationTest {
             3872, getResource("/pushSucceedsAfterRemovingInvalidFiles").toFile());
     server.start();
     server.setState(states.get("pushSucceedsAfterRemovingInvalidFiles").get("invalidState"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33872, 3872)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3872)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 33872, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
 
     // try to push invalid file; it should fail
     assertTrue(
@@ -922,7 +940,7 @@ public class WLGitBridgeIntegrationTest {
     gitCommit(testprojDir, "push");
     Process push = gitPush(testprojDir, 1);
     List<String> actual = Util.linesFromStream(push.getErrorStream(), 0, "[K");
-    assertEquals(EXPECTED_OUT_PUSH_INVALID_EXE_FILE, actual);
+    assertEquals(expectedPushInvalidExeFile(wlgb.getPort()), actual);
 
     // remove invalid file and push again; it should succeed this time
     assertEquals(0, runtime.exec("git rm file1.exe", null, testprojDir).waitFor());
@@ -945,17 +963,16 @@ public class WLGitBridgeIntegrationTest {
     // us to fetch any more. We can however test the access and error conditions, which comprise
     // most of the logic.
     //
-    int gitBridgePort = 33873;
     int mockServerPort = 3873;
 
     server = new MockSnapshotServer(mockServerPort, getResource("/canServePushedFiles").toFile());
     server.start();
     server.setState(states.get("canServePushedFiles").get("state"));
 
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
     wlgb.run();
 
-    File testprojDir = gitClone(PROJECT_ID, gitBridgePort, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/canServePushedFiles/state/" + PROJECT_ID), testprojDir.toPath()));
@@ -965,22 +982,22 @@ public class WLGitBridgeIntegrationTest {
     gitPush(testprojDir);
 
     // With no key, we should get a 404.
-    String url = "http://127.0.0.1:" + gitBridgePort + "/api/testproj/push.tex";
+    String url = "http://127.0.0.1:" + wlgb.getPort() + "/api/testproj/push.tex";
     Response response = asyncHttpClient().prepareGet(url).execute().get();
     assertEquals(404, response.getStatusCode());
 
     // With an invalid project and no key, we should get a 404.
-    url = "http://127.0.0.1:" + gitBridgePort + "/api/notavalidproject/push.tex";
+    url = "http://127.0.0.1:" + wlgb.getPort() + "/api/notavalidproject/push.tex";
     response = asyncHttpClient().prepareGet(url).execute().get();
     assertEquals(404, response.getStatusCode());
 
     // With a bad key for a valid project, we should get a 404.
-    url = "http://127.0.0.1:" + gitBridgePort + "/api/testproj/push.tex?key=notavalidkey";
+    url = "http://127.0.0.1:" + wlgb.getPort() + "/api/testproj/push.tex?key=notavalidkey";
     response = asyncHttpClient().prepareGet(url).execute().get();
     assertEquals(404, response.getStatusCode());
 
     // With a bad key for an invalid project, we should get a 404.
-    url = "http://127.0.0.1:" + gitBridgePort + "/api/notavalidproject/push.tex?key=notavalidkey";
+    url = "http://127.0.0.1:" + wlgb.getPort() + "/api/notavalidproject/push.tex?key=notavalidkey";
     response = asyncHttpClient().prepareGet(url).execute().get();
     assertEquals(404, response.getStatusCode());
   }
@@ -992,37 +1009,82 @@ public class WLGitBridgeIntegrationTest {
     server.setState(states.get("wlgbCanSwapProjects").get("state"));
     wlgb =
         new GitBridgeApp(
-            new String[] {
-              makeConfigFile(33874, 3874, new SwapJobConfig(1, 0, 0, 250, null, true))
-            });
+            new String[] {makeConfigFile(0, 3874, new SwapJobConfig(1, 0, 0, 250, null, true))});
     wlgb.run();
     File rootGitDir = new File(wlgb.config.getRootGitDirectory());
     File testProj1ServerDir = new File(rootGitDir, PROJECT_ID1);
     File testProj2ServerDir = new File(rootGitDir, PROJECT_ID2);
-    File testProj1Dir = gitClone(PROJECT_ID1, 33874, dir);
+    File testProj1Dir = gitClone(PROJECT_ID1, wlgb.getPort(), dir);
     assertTrue(testProj1ServerDir.exists());
     assertFalse(testProj2ServerDir.exists());
-    gitClone(PROJECT_ID2, 33874, dir);
+    gitClone(PROJECT_ID2, wlgb.getPort(), dir);
     while (testProj1ServerDir.exists())
       ;
     assertFalse(testProj1ServerDir.exists());
     assertTrue(testProj2ServerDir.exists());
     FileUtils.deleteDirectory(testProj1Dir);
-    gitClone(PROJECT_ID1, 33874, dir);
+    gitClone(PROJECT_ID1, wlgb.getPort(), dir);
     while (testProj2ServerDir.exists())
       ;
     assertTrue(testProj1ServerDir.exists());
     assertFalse(testProj2ServerDir.exists());
   }
 
-  private static final List<String> EXPECTED_OUT_PUSH_SUBMODULE =
-      Arrays.asList(
-          "remote: hint: Your Git repository contains a reference we cannot resolve.",
-          "remote: hint: If your project contains a Git submodule,",
-          "remote: hint: please remove it and try again.",
-          "To http://127.0.0.1:33875/" + PROJECT_ID,
-          "! [remote rejected] master -> master (invalid git repo)",
-          "error: failed to push some refs to 'http://127.0.0.1:33875/" + PROJECT_ID + "'");
+  @Test
+  public void masterBranchSurvivesSwap() throws Exception {
+    int mockServerPort = 4010;
+    server =
+        new MockSnapshotServer(mockServerPort, getResource("/masterBranchSurvivesSwap").toFile());
+    server.start();
+    server.setState(states.get("masterBranchSurvivesSwap").get("state"));
+    wlgb =
+        new GitBridgeApp(
+            new String[] {
+              makeConfigFile(0, mockServerPort, new SwapJobConfig(1, 0, 0, 250, null, true))
+            });
+    wlgb.run();
+    File rootGitDir = new File(wlgb.config.getRootGitDirectory());
+    File proj1ServerDir = new File(rootGitDir, PROJECT_ID1);
+    File proj2ServerDir = new File(rootGitDir, PROJECT_ID2);
+
+    // Clone project 1 — created with default branch "main"
+    File proj1Dir = gitClone(PROJECT_ID1, wlgb.getPort(), dir);
+    assertEquals("main", gitBranch(proj1Dir));
+    assertTrue(proj1ServerDir.exists());
+
+    // Simulate a legacy repo: rewrite server-side HEAD to master
+    assertEquals(
+        0,
+        runtime
+            .exec(new String[] {"git", "branch", "-m", "main", "master"}, null, proj1ServerDir)
+            .waitFor());
+
+    // Clone project 2 — triggers eviction of project 1
+    gitClone(PROJECT_ID2, wlgb.getPort(), dir);
+    while (proj1ServerDir.exists())
+      ;
+    assertFalse(proj1ServerDir.exists());
+    assertTrue(proj2ServerDir.exists());
+
+    // Re-clone project 1 — triggers restore from swap
+    FileUtils.deleteDirectory(proj1Dir);
+    File proj1DirRestored = gitClone(PROJECT_ID1, wlgb.getPort(), dir);
+    while (proj2ServerDir.exists())
+      ;
+
+    // Verify the restored repo still uses "master"
+    assertEquals("master", gitBranch(proj1DirRestored));
+  }
+
+  private static List<String> expectedPushSubmodule(int port) {
+    return Arrays.asList(
+        "remote: hint: Your Git repository contains a reference we cannot resolve.",
+        "remote: hint: If your project contains a Git submodule,",
+        "remote: hint: please remove it and try again.",
+        "To " + gitRemoteUrl(port),
+        "! [remote rejected] main -> main (invalid git repo)",
+        "error: failed to push some refs to '" + gitRemoteUrl(port) + "'");
+  }
 
   @Test
   public void pushSubmoduleFailsWithInvalidGitRepo()
@@ -1031,9 +1093,9 @@ public class WLGitBridgeIntegrationTest {
         new MockSnapshotServer(3875, getResource("/pushSubmoduleFailsWithInvalidGitRepo").toFile());
     server.start();
     server.setState(states.get("pushSubmoduleFailsWithInvalidGitRepo").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(33875, 3875)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, 3875)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, 33875, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     runtime.exec("mkdir sub", null, testprojDir).waitFor();
     File sub = new File(testprojDir, "sub");
     runtime.exec("touch sub.txt", null, sub).waitFor();
@@ -1044,26 +1106,25 @@ public class WLGitBridgeIntegrationTest {
     gitCommit(testprojDir, "push");
     Process push = gitPush(testprojDir, 1);
     List<String> actual = Util.linesFromStream(push.getErrorStream(), 2, "[K");
-    assertEquals(EXPECTED_OUT_PUSH_SUBMODULE, actual);
+    assertEquals(expectedPushSubmodule(wlgb.getPort()), actual);
   }
 
   @Test
   public void usesCustomErrorHandler()
       throws IOException, ExecutionException, InterruptedException {
 
-    int gitBridgePort = 33873;
     int mockServerPort = 3873;
 
     server = new MockSnapshotServer(mockServerPort, getResource("/canServePushedFiles").toFile());
     server.start();
     server.setState(states.get("canServePushedFiles").get("state"));
 
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
     wlgb.run();
 
     // With an invalid project and no key, we should get a 404,
     // which is rendered by our custom error handler.
-    String url = "http://127.0.0.1:" + gitBridgePort + "/api/notavalidproject/main.tex";
+    String url = "http://127.0.0.1:" + wlgb.getPort() + "/api/notavalidproject/main.tex";
     Response response = asyncHttpClient().prepareGet(url).execute().get();
     assertEquals(404, response.getStatusCode());
     assertEquals("{\"message\":\"HTTP error 404\"}", response.getResponseBody());
@@ -1071,7 +1132,7 @@ public class WLGitBridgeIntegrationTest {
     // With an unsupported URL outside the api, the request is assumed to
     // be from a git client and we should get a 401 because the request
     // does not include basic auth credentials.
-    url = "http://127.0.0.1:" + gitBridgePort + "/foo";
+    url = "http://127.0.0.1:" + wlgb.getPort() + "/foo";
     response = asyncHttpClient().prepareGet(url).execute().get();
     assertEquals(401, response.getStatusCode());
   }
@@ -1079,7 +1140,6 @@ public class WLGitBridgeIntegrationTest {
   @Test
   public void cannotCloneAProtectedProjectWithoutAuthentication()
       throws IOException, GitAPIException, InterruptedException {
-    int gitBridgePort = 33883;
     int mockServerPort = 3883;
 
     server =
@@ -1088,12 +1148,12 @@ public class WLGitBridgeIntegrationTest {
             getResource("/cannotCloneAProtectedProjectWithoutAuthentication").toFile());
     server.start();
     server.setState(states.get("cannotCloneAProtectedProjectWithoutAuthentication").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
 
     wlgb.run();
     Process gitProcess =
         runtime.exec(
-            "git clone http://git:password@127.0.0.1:" + gitBridgePort + "/" + PROJECT_ID,
+            "git clone http://git:password@127.0.0.1:" + wlgb.getPort() + "/" + PROJECT_ID,
             null,
             dir);
     assertNotEquals(0, gitProcess.waitFor());
@@ -1101,19 +1161,18 @@ public class WLGitBridgeIntegrationTest {
 
   @Test
   public void cannotCloneA4xxProject() throws IOException, GitAPIException, InterruptedException {
-    int gitBridgePort = 33879;
     int mockServerPort = 3879;
 
     server =
         new MockSnapshotServer(mockServerPort, getResource("/cannotCloneA4xxProject").toFile());
     server.start();
     server.setState(states.get("cannotCloneA4xxProject").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
 
     wlgb.run();
     Process gitProcess =
         runtime.exec(
-            "git clone http://git:password@127.0.0.1:" + gitBridgePort + "/" + PROJECT_ID,
+            "git clone http://git:password@127.0.0.1:" + wlgb.getPort() + "/" + PROJECT_ID,
             null,
             dir);
     assertNotEquals(0, gitProcess.waitFor());
@@ -1122,19 +1181,18 @@ public class WLGitBridgeIntegrationTest {
   @Test
   public void cannotCloneAMissingProject()
       throws IOException, GitAPIException, InterruptedException {
-    int gitBridgePort = 33880;
     int mockServerPort = 3880;
 
     server =
         new MockSnapshotServer(mockServerPort, getResource("/cannotCloneAMissingProject").toFile());
     server.start();
     server.setState(states.get("cannotCloneAMissingProject").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
 
     wlgb.run();
     Process gitProcess =
         runtime.exec(
-            "git clone http://git:password@127.0.0.1:" + gitBridgePort + "/" + PROJECT_ID,
+            "git clone http://git:password@127.0.0.1:" + wlgb.getPort() + "/" + PROJECT_ID,
             null,
             dir);
     assertNotEquals(0, gitProcess.waitFor());
@@ -1142,15 +1200,14 @@ public class WLGitBridgeIntegrationTest {
 
   @Test
   public void canMigrateRepository() throws IOException, GitAPIException, InterruptedException {
-    int gitBridgePort = 33881;
     int mockServerPort = 3881;
     server = new MockSnapshotServer(mockServerPort, getResource("/canMigrateRepository").toFile());
     server.start();
     server.setState(states.get("canMigrateRepository").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, gitBridgePort, dir);
-    File testprojDir2 = gitClone(PROJECT_ID2, gitBridgePort, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
+    File testprojDir2 = gitClone(PROJECT_ID2, wlgb.getPort(), dir);
     // Second project content is equal to content of the first
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
@@ -1160,17 +1217,16 @@ public class WLGitBridgeIntegrationTest {
   @Test
   public void skipMigrationWhenMigratedFromMissing()
       throws IOException, GitAPIException, InterruptedException {
-    int gitBridgePort = 33882;
     int mockServerPort = 3882;
     server =
         new MockSnapshotServer(
             mockServerPort, getResource("/skipMigrationWhenMigratedFromMissing").toFile());
     server.start();
     server.setState(states.get("skipMigrationWhenMigratedFromMissing").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
     wlgb.run();
     // don't clone the source project first
-    File testprojDir2 = gitClone(PROJECT_ID2, gitBridgePort, dir);
+    File testprojDir2 = gitClone(PROJECT_ID2, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/skipMigrationWhenMigratedFromMissing/state/" + PROJECT_ID2),
@@ -1180,16 +1236,15 @@ public class WLGitBridgeIntegrationTest {
   @Test
   public void canCloneAMigratedRepositoryWithoutChanges()
       throws IOException, GitAPIException, InterruptedException {
-    int gitBridgePort = 33883;
     int mockServerPort = 3883;
     server =
         new MockSnapshotServer(
             mockServerPort, getResource("/canCloneAMigratedRepositoryWithoutChanges").toFile());
     server.start();
     server.setState(states.get("canCloneAMigratedRepositoryWithoutChanges").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
     wlgb.run();
-    File testprojDir = gitClone(PROJECT_ID, gitBridgePort, dir);
+    File testprojDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     assertTrue(
         FileUtil.gitDirectoriesAreEqual(
             getResource("/canCloneAMigratedRepositoryWithoutChanges/state/" + PROJECT_ID),
@@ -1198,16 +1253,15 @@ public class WLGitBridgeIntegrationTest {
 
   @Test
   public void rejectV1Repository() throws IOException, GitAPIException, InterruptedException {
-    int gitBridgePort = 33884;
     int mockServerPort = 3884;
     server = new MockSnapshotServer(mockServerPort, getResource("/rejectV1Repository").toFile());
     server.start();
     server.setState(states.get("rejectV1Repository").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
     wlgb.run();
     Process gitProcess =
         runtime.exec(
-            "git clone http://git:password@127.0.0.1:" + gitBridgePort + "/1234bbccddff.git",
+            "git clone http://git:password@127.0.0.1:" + wlgb.getPort() + "/1234bbccddff.git",
             null,
             dir);
     assertNotEquals(0, gitProcess.waitFor());
@@ -1216,7 +1270,6 @@ public class WLGitBridgeIntegrationTest {
   @Test
   public void cannotCloneAHasDotGitProject()
       throws IOException, GitAPIException, InterruptedException {
-    int gitBridgePort = 33885;
     int mockServerPort = 3885;
 
     server =
@@ -1224,12 +1277,12 @@ public class WLGitBridgeIntegrationTest {
             mockServerPort, getResource("/cannotCloneAHasDotGitProject").toFile());
     server.start();
     server.setState(states.get("cannotCloneAHasDotGitProject").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
 
     wlgb.run();
     Process gitProcess =
         runtime.exec(
-            "git clone http://git:password@127.0.0.1:" + gitBridgePort + "/conflict.git",
+            "git clone http://git:password@127.0.0.1:" + wlgb.getPort() + "/conflict.git",
             null,
             dir);
     assertNotEquals(0, gitProcess.waitFor());
@@ -1239,18 +1292,17 @@ public class WLGitBridgeIntegrationTest {
   @Test
   public void cannotCloneProjectWithSlash()
       throws IOException, GitAPIException, InterruptedException {
-    int gitBridgePort = 33886;
     int mockServerPort = 3886;
 
     server = new MockSnapshotServer(mockServerPort, getResource("/canCloneARepository").toFile());
     server.start();
     server.setState(states.get("canCloneARepository").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
 
     wlgb.run();
     Process gitProcess =
         runtime.exec(
-            "git clone http://git:password@127.0.0.1:" + gitBridgePort + "/project/1234abcd",
+            "git clone http://git:password@127.0.0.1:" + wlgb.getPort() + "/project/1234abcd",
             null,
             dir);
     assertNotEquals(0, gitProcess.waitFor());
@@ -1260,7 +1312,9 @@ public class WLGitBridgeIntegrationTest {
         Arrays.asList(
             "Cloning into '1234abcd'...",
             "remote: Invalid Project ID (must not have a '/project' prefix)",
-            "fatal: repository 'http://127.0.0.1:33886/project/1234abcd/' not found"),
+            "fatal: repository 'http://127.0.0.1:"
+                + wlgb.getPort()
+                + "/project/1234abcd/' not found"),
         actual);
 
     wlgb.stop();
@@ -1268,15 +1322,14 @@ public class WLGitBridgeIntegrationTest {
 
   @Test
   public void testStatusAndHealthCheckEndpoints() throws ClientProtocolException, IOException {
-    int gitBridgePort = 33887;
     int mockServerPort = 3887;
     server = new MockSnapshotServer(mockServerPort, getResource("/canCloneARepository").toFile());
     server.start();
     server.setState(states.get("canCloneARepository").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
     wlgb.run();
     HttpClient client = HttpClients.createDefault();
-    String urlBase = "http://127.0.0.1:" + gitBridgePort;
+    String urlBase = "http://127.0.0.1:" + wlgb.getPort();
     // Status
     HttpGet statusRequest = new HttpGet(urlBase + "/status");
     HttpResponse statusResponse = client.execute(statusRequest);
@@ -1290,15 +1343,14 @@ public class WLGitBridgeIntegrationTest {
   @Test
   public void testStatusAndHealthCheckEndpointsWithTrailingSlash()
       throws ClientProtocolException, IOException {
-    int gitBridgePort = 33888;
     int mockServerPort = 3888;
     server = new MockSnapshotServer(mockServerPort, getResource("/canCloneARepository").toFile());
     server.start();
     server.setState(states.get("canCloneARepository").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
     wlgb.run();
     HttpClient client = HttpClients.createDefault();
-    String urlBase = "http://127.0.0.1:" + gitBridgePort;
+    String urlBase = "http://127.0.0.1:" + wlgb.getPort();
     // Status
     HttpGet statusRequest = new HttpGet(urlBase + "/status/");
     HttpResponse statusResponse = client.execute(statusRequest);
@@ -1312,15 +1364,14 @@ public class WLGitBridgeIntegrationTest {
   @Test
   public void testStatusAndHealthCheckEndpointsWithHead()
       throws ClientProtocolException, IOException {
-    int gitBridgePort = 33889;
     int mockServerPort = 3889;
     server = new MockSnapshotServer(mockServerPort, getResource("/canCloneARepository").toFile());
     server.start();
     server.setState(states.get("canCloneARepository").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
     wlgb.run();
     HttpClient client = HttpClients.createDefault();
-    String urlBase = "http://127.0.0.1:" + gitBridgePort;
+    String urlBase = "http://127.0.0.1:" + wlgb.getPort();
     // Status
     HttpHead statusRequest = new HttpHead(urlBase + "/status");
     HttpResponse statusResponse = client.execute(statusRequest);
@@ -1333,15 +1384,14 @@ public class WLGitBridgeIntegrationTest {
 
   @Test
   public void gitLfsBatchEndpoint() throws ClientProtocolException, IOException, ParseException {
-    int gitBridgePort = 33890;
     int mockServerPort = 3890;
     server = new MockSnapshotServer(mockServerPort, getResource("/canCloneARepository").toFile());
     server.start();
     server.setState(states.get("canCloneARepository").get("state"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
     wlgb.run();
     HttpClient client = HttpClients.createDefault();
-    String urlBase = "http://git:password@127.0.0.1:" + gitBridgePort;
+    String urlBase = "http://git:password@127.0.0.1:" + wlgb.getPort();
     HttpPost gitLfsRequest =
         new HttpPost(urlBase + "/5f2419407929eb0026641967.git/info/lfs/objects/batch");
     HttpResponse gitLfsResponse = client.execute(gitLfsRequest);
@@ -1353,16 +1403,15 @@ public class WLGitBridgeIntegrationTest {
 
   @Test
   public void canPullIgnoredForceAddedFile() throws IOException, InterruptedException {
-    int gitBridgePort = 33891;
     int mockServerPort = 3891;
     server =
         new MockSnapshotServer(
             mockServerPort, getResource("/canPullIgnoredForceAddedFile").toFile());
     server.start();
     server.setState(states.get("canPullIgnoredForceAddedFile").get("base"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
     wlgb.run();
-    File testProjDir = gitClone(PROJECT_ID, gitBridgePort, dir);
+    File testProjDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     File one = new File(testProjDir, "sub/one.txt");
     one.createNewFile();
     FileWriter fw = new FileWriter(one.getPath());
@@ -1379,16 +1428,15 @@ public class WLGitBridgeIntegrationTest {
 
   @Test
   public void canPullIgnoredFileFromOverleaf() throws IOException, InterruptedException {
-    int gitBridgePort = 33892;
     int mockServerPort = 3892;
     server =
         new MockSnapshotServer(
             mockServerPort, getResource("/canPullIgnoredForceAddedFile").toFile());
     server.start();
     server.setState(states.get("canPullIgnoredForceAddedFile").get("base"));
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
     wlgb.run();
-    File testProjDir = gitClone(PROJECT_ID, gitBridgePort, dir);
+    File testProjDir = gitClone(PROJECT_ID, wlgb.getPort(), dir);
     server.setState(states.get("canPullIgnoredForceAddedFile").get("withUpdatedMainFile"));
     gitPull(testProjDir);
     File f = new File(testProjDir.getPath() + "/sub/one.txt");
@@ -1398,17 +1446,16 @@ public class WLGitBridgeIntegrationTest {
   @Test
   public void noCors() throws IOException, ExecutionException, InterruptedException {
 
-    int gitBridgePort = 33893;
     int mockServerPort = 3893;
 
     server = new MockSnapshotServer(mockServerPort, getResource("/canServePushedFiles").toFile());
     server.start();
     server.setState(states.get("canServePushedFiles").get("state"));
 
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
     wlgb.run();
 
-    String url = "http://127.0.0.1:" + gitBridgePort + "/status";
+    String url = "http://127.0.0.1:" + wlgb.getPort() + "/status";
     Response response = asyncHttpClient().prepareGet(url).execute().get();
     assertEquals(200, response.getStatusCode());
     assertEquals("ok\n", response.getResponseBody());
@@ -1418,17 +1465,16 @@ public class WLGitBridgeIntegrationTest {
   @Test
   public void cors() throws IOException, ExecutionException, InterruptedException {
 
-    int gitBridgePort = 33894;
     int mockServerPort = 3894;
 
     server = new MockSnapshotServer(mockServerPort, getResource("/canServePushedFiles").toFile());
     server.start();
     server.setState(states.get("canServePushedFiles").get("state"));
 
-    wlgb = new GitBridgeApp(new String[] {makeConfigFile(gitBridgePort, mockServerPort)});
+    wlgb = new GitBridgeApp(new String[] {makeConfigFile(0, mockServerPort)});
     wlgb.run();
 
-    String url = "http://127.0.0.1:" + gitBridgePort + "/status";
+    String url = "http://127.0.0.1:" + wlgb.getPort() + "/status";
 
     // Success
     Response response =

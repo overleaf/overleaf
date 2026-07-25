@@ -82,13 +82,9 @@ describe('SubscriptionHandler', function () {
       promises: {
         getSubscription: sinon.stub().resolves(ctx.activeRecurlySubscription),
         redeemCoupon: sinon.stub().resolves(),
-        createSubscription: sinon
-          .stub()
-          .resolves(ctx.activeRecurlySubscription),
         getBillingInfo: sinon.stub().resolves(),
         getAccountPastDueInvoices: sinon.stub().resolves(),
         attemptInvoiceCollection: sinon.stub().resolves(),
-        listAccountActiveSubscriptions: sinon.stub().resolves([]),
       },
     }
     ctx.RecurlyClient = {
@@ -131,12 +127,6 @@ describe('SubscriptionHandler', function () {
     ctx.EmailHandler = {
       sendEmail: sinon.stub(),
       sendDeferredEmail: sinon.stub(),
-    }
-
-    ctx.UserUpdater = {
-      promises: {
-        updateUser: sinon.stub().resolves(),
-      },
     }
 
     ctx.SplitTestHandler = {
@@ -214,10 +204,6 @@ describe('SubscriptionHandler', function () {
       })
     )
 
-    vi.doMock('../../../../app/src/Features/User/UserUpdater', () => ({
-      default: ctx.UserUpdater,
-    }))
-
     vi.doMock(
       '../../../../app/src/Features/SplitTests/SplitTestHandler',
       () => ({
@@ -250,94 +236,6 @@ describe('SubscriptionHandler', function () {
     )
 
     ctx.SubscriptionHandler = (await import(MODULE_PATH)).default
-  })
-
-  describe('createSubscription', function () {
-    beforeEach(function (ctx) {
-      ctx.subscriptionDetails = {
-        cvv: '123',
-        number: '12345',
-      }
-      ctx.recurlyTokenIds = { billing: '45555666' }
-    })
-
-    describe('successfully', function () {
-      beforeEach(async function (ctx) {
-        await ctx.SubscriptionHandler.promises.createSubscription(
-          ctx.user,
-          ctx.subscriptionDetails,
-          ctx.recurlyTokenIds
-        )
-      })
-
-      it('should create the subscription with the wrapper', function (ctx) {
-        ctx.RecurlyWrapper.promises.createSubscription
-          .calledWith(ctx.user, ctx.subscriptionDetails, ctx.recurlyTokenIds)
-          .should.equal(true)
-      })
-
-      it('should sync the subscription to the user', function (ctx) {
-        ctx.SubscriptionUpdater.promises.syncSubscription.calledOnce.should.equal(
-          true
-        )
-        ctx.SubscriptionUpdater.promises.syncSubscription.args[0][0].should.deep.equal(
-          ctx.activeRecurlySubscription
-        )
-        ctx.SubscriptionUpdater.promises.syncSubscription.args[0][1].should.deep.equal(
-          ctx.user._id
-        )
-      })
-
-      it('should not set last trial date if not a trial/the trial_started_at is not set', function (ctx) {
-        ctx.UserUpdater.promises.updateUser.should.not.have.been.called
-      })
-    })
-
-    describe('when the subscription is a trial and has a trial_started_at date', function () {
-      beforeEach(async function (ctx) {
-        ctx.activeRecurlySubscription.trial_started_at =
-          '2024-01-01T09:58:35.531+00:00'
-        await ctx.SubscriptionHandler.promises.createSubscription(
-          ctx.user,
-          ctx.subscriptionDetails,
-          ctx.recurlyTokenIds
-        )
-      })
-      it('should set the users lastTrial date', function (ctx) {
-        ctx.UserUpdater.promises.updateUser.should.have.been.calledOnce
-        expect(ctx.UserUpdater.promises.updateUser.args[0][0]).to.deep.equal({
-          _id: ctx.user_id,
-          lastTrial: {
-            $not: {
-              $gt: new Date(ctx.activeRecurlySubscription.trial_started_at),
-            },
-          },
-        })
-        expect(ctx.UserUpdater.promises.updateUser.args[0][1]).to.deep.equal({
-          $set: {
-            lastTrial: new Date(ctx.activeRecurlySubscription.trial_started_at),
-          },
-        })
-      })
-    })
-
-    describe('when there is already a subscription in Recurly', function () {
-      beforeEach(function (ctx) {
-        ctx.RecurlyWrapper.promises.listAccountActiveSubscriptions.resolves([
-          ctx.subscription,
-        ])
-      })
-
-      it('should an error', function (ctx) {
-        expect(
-          ctx.SubscriptionHandler.promises.createSubscription(
-            ctx.user,
-            ctx.subscriptionDetails,
-            ctx.recurlyTokenIds
-          )
-        ).to.be.rejectedWith('user already has subscription in recurly')
-      })
-    })
   })
 
   describe('updateSubscription', function () {
@@ -1050,55 +948,6 @@ describe('SubscriptionHandler', function () {
           ctx.RecurlyWrapper.promises.attemptInvoiceCollection,
           'mock-invoice-number'
         )
-      })
-    })
-  })
-
-  describe('validateNoSubscriptionInRecurly', function () {
-    describe('with a subscription in recurly', function () {
-      beforeEach(async function (ctx) {
-        ctx.RecurlyWrapper.promises.listAccountActiveSubscriptions.resolves([
-          ctx.subscription,
-        ])
-        ctx.isValid =
-          await ctx.SubscriptionHandler.promises.validateNoSubscriptionInRecurly(
-            ctx.user_id
-          )
-      })
-
-      it('should call RecurlyWrapper.promises.listAccountActiveSubscriptions with the user id', function (ctx) {
-        ctx.RecurlyWrapper.promises.listAccountActiveSubscriptions
-          .calledWith(ctx.user_id)
-          .should.equal(true)
-      })
-
-      it('should sync the subscription', function (ctx) {
-        ctx.SubscriptionUpdater.promises.syncSubscription
-          .calledWith(ctx.subscription, ctx.user_id)
-          .should.equal(true)
-      })
-
-      it('should return false', function (ctx) {
-        expect(ctx.isValid).to.equal(false)
-      })
-    })
-
-    describe('with no subscription in recurly', function () {
-      beforeEach(async function (ctx) {
-        ctx.isValid =
-          await ctx.SubscriptionHandler.promises.validateNoSubscriptionInRecurly(
-            ctx.user_id
-          )
-      })
-
-      it('should be rejected and not sync the subscription', function (ctx) {
-        ctx.SubscriptionUpdater.promises.syncSubscription.called.should.equal(
-          false
-        )
-      })
-
-      it('should return true', function (ctx) {
-        expect(ctx.isValid).to.equal(true)
       })
     })
   })

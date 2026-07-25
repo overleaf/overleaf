@@ -201,27 +201,27 @@ async function updateDocLines(
   return { rev, modified }
 }
 
-async function setRootDoc(projectId, newRootDocID) {
-  logger.debug({ projectId, rootDocId: newRootDocID }, 'setting root doc')
-  if (projectId == null || newRootDocID == null) {
+async function setRootDoc(projectId, rootDocId) {
+  logger.debug({ projectId, rootDocId }, 'setting root doc')
+  if (projectId == null || rootDocId == null) {
     throw new Errors.InvalidError('missing arguments (project or doc)')
   }
-  const docPath =
+  const rootResourcePath =
     await ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId(
       projectId,
-      newRootDocID
+      rootDocId
     )
-  if (ProjectEntityUpdateHandler.isPathValidForRootDoc(docPath)) {
+  if (ProjectEntityUpdateHandler.isPathValidForRootDoc(rootResourcePath)) {
     await Project.updateOne(
       { _id: projectId },
-      { rootDoc_id: newRootDocID }
+      { rootDoc_id: rootDocId }
     ).exec()
   } else {
     throw new Errors.UnsupportedFileTypeError(
       'invalid file extension for root doc'
     )
   }
-  return newRootDocID
+  return { rootDocId, rootResourcePath }
 }
 
 async function unsetRootDoc(projectId) {

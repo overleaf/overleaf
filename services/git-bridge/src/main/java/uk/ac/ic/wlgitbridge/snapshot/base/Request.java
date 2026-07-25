@@ -88,14 +88,8 @@ public abstract class Request<T extends Result> {
             if ("projectHasDotGit".equals(code)) {
               throw new MissingRepositoryException(
                   Arrays.asList(
-                      "This project contains a '.git' entity at the top level, indicating that it is",
-                      "already a git repository. The Overleaf git-bridge cannot work with this project",
-                      "due to a known problem with handling these '.git' folders.",
-                      "",
-                      "We recommend removing the .git folder before trying again.",
-                      "",
-                      "If this is unexpected, please contact us at support@overleaf.com, or",
-                      "see https://www.overleaf.com/learn/how-to/Git_integration for more information."));
+                      "Git access won't work when a project contains a folder named '.git'.",
+                      "Please remove any folder named '.git' from your project in Overleaf and try again."));
             } else {
               throw new MissingRepositoryException(Arrays.asList("Conflict: 409"));
             }

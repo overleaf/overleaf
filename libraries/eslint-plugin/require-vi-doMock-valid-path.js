@@ -22,7 +22,7 @@ module.exports = {
     },
   },
   create(context) {
-    const currentFilePath = context.getFilename()
+    const currentFilePath = context.filename
     // ESLint can sometimes pass <text> or <input> for snippets not in a file
     if (currentFilePath === '<text>' || currentFilePath === '<input>') {
       return {}
@@ -81,9 +81,10 @@ module.exports = {
             typeof firstArg.value !== 'string'
           ) {
             if (firstArg.type === 'Identifier') {
-              const variable = context
-                .getScope()
-                .variables.find(v => v.name === firstArg.name)
+              const scope = context.sourceCode.getScope(node)
+              const variable = scope.variables.find(
+                v => v.name === firstArg.name
+              )
               if (
                 variable &&
                 variable.defs.length > 0 &&

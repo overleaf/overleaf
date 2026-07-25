@@ -44,6 +44,7 @@ const EDIT_MODE_SWITCH_WIDGET_HEIGHT = 40
 const CM_LINE_RIGHT_PADDING = 8
 const TOOLTIP_SHOW_DELAY = 120
 
+// TODO remove when `writefull-toolbar-migration` fully rolled out
 const ReviewTooltipMenu: FC = () => {
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
@@ -137,6 +138,7 @@ const ReviewTooltipMenuContent = memo<{ onAddComment: () => void }>(
     const view = useCodeMirrorViewContext()
     const state = useCodeMirrorStateContext()
     const { reviewPanelOpen } = useLayoutContext()
+    const permissions = usePermissionsContext()
     const ranges = useRangesContext()
     const { acceptChanges, rejectChanges } = useRangesActionsContext()
     const { showGenericConfirmModal } = useModalsContext()
@@ -207,7 +209,8 @@ const ReviewTooltipMenuContent = memo<{ onAddComment: () => void }>(
       changesInSelection,
     ])
 
-    const showChangesButtons = changesInSelection.length > 0
+    const showChangesButtons =
+      permissions.write && changesInSelection.length > 0
 
     useEffect(() => {
       view.requestMeasure({

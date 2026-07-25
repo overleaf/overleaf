@@ -66,7 +66,7 @@ describe('EmailHandler', function () {
   describe('send email', function () {
     it('should use the correct options', async function (ctx) {
       const opts = { to: 'bob@bob.com' }
-      await ctx.EmailHandler.promises.sendEmail('welcome', opts)
+      await ctx.EmailHandler.promises.sendEmail('welcomeWithoutCTA', opts)
       expect(ctx.EmailSender.promises.sendEmail).to.have.been.calledWithMatch({
         html: ctx.html,
       })
@@ -78,14 +78,15 @@ describe('EmailHandler', function () {
         to: 'bob@bob.com',
         subject: 'hello bob',
       }
-      await expect(ctx.EmailHandler.promises.sendEmail('welcome', opts)).to.be
-        .rejected
+      await expect(
+        ctx.EmailHandler.promises.sendEmail('welcomeWithoutCTA', opts)
+      ).to.be.rejected
     })
 
     it('should not send an email if lifecycle is not enabled', async function (ctx) {
       ctx.Settings.email.lifecycle = false
       ctx.EmailBuilder.buildEmail.returns({ type: 'lifecycle' })
-      await ctx.EmailHandler.promises.sendEmail('welcome', {})
+      await ctx.EmailHandler.promises.sendEmail('welcomeWithoutCTA', {})
       expect(ctx.EmailSender.promises.sendEmail).not.to.have.been.called
     })
 
@@ -93,7 +94,7 @@ describe('EmailHandler', function () {
       ctx.Settings.email.lifecycle = false
       ctx.EmailBuilder.buildEmail.returns({ type: 'notification' })
       const opts = { to: 'bob@bob.com' }
-      await ctx.EmailHandler.promises.sendEmail('welcome', opts)
+      await ctx.EmailHandler.promises.sendEmail('welcomeWithoutCTA', opts)
       expect(ctx.EmailSender.promises.sendEmail).to.have.been.called
     })
 
@@ -101,7 +102,7 @@ describe('EmailHandler', function () {
       ctx.Settings.email.lifecycle = true
       ctx.EmailBuilder.buildEmail.returns({ type: 'lifecycle' })
       const opts = { to: 'bob@bob.com' }
-      await ctx.EmailHandler.promises.sendEmail('welcome', opts)
+      await ctx.EmailHandler.promises.sendEmail('welcomeWithoutCTA', opts)
       expect(ctx.EmailSender.promises.sendEmail).to.have.been.called
     })
 
@@ -116,7 +117,7 @@ describe('EmailHandler', function () {
           text: ctx.text,
         })
         const opts = { to: 'bob@bob.com' }
-        await ctx.EmailHandler.promises.sendEmail('welcome', opts)
+        await ctx.EmailHandler.promises.sendEmail('welcomeWithoutCTA', opts)
         expect(ctx.EmailSender.promises.sendEmail).to.have.been.calledWithMatch(
           {
             html: ctx.html,

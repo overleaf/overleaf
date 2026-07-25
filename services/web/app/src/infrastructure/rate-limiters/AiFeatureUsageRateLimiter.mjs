@@ -4,6 +4,7 @@ import UserGetter from '../../Features/User/UserGetter.mjs'
 import FeatureUsageRateLimiter from './FeatureUsageRateLimiter.mjs'
 import Settings from '@overleaf/settings'
 import SplitTestHandler from '../../Features/SplitTests/SplitTestHandler.mjs'
+import SplitTestUserGetter from '../../Features/SplitTests/SplitTestUserGetter.mjs'
 import FeaturesHelper from '../../Features/Subscription/FeaturesHelper.mjs'
 
 class AiFeatureUsageRateLimiter extends FeatureUsageRateLimiter {
@@ -19,11 +20,12 @@ class AiFeatureUsageRateLimiter extends FeatureUsageRateLimiter {
     const user = await UserGetter.promises.getUser(userId, {
       features: 1,
       writefull: 1,
+      ...SplitTestUserGetter.getProjection('plans-2026-phase-1'),
     })
     // todo: quota clean-up: remove aiErrorAssistant checking, and split test
     const inQuotaSplitTest =
-      await SplitTestHandler.promises.featureFlagEnabledForUser(
-        userId,
+      await SplitTestHandler.promises.featureFlagEnabledForMongoUser(
+        user,
         'plans-2026-phase-1'
       )
 

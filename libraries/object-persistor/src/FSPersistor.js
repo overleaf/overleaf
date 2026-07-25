@@ -3,8 +3,11 @@ const fs = require('node:fs')
 const fsPromises = require('node:fs/promises')
 const { glob } = require('glob')
 const Path = require('node:path')
+const { promisify } = require('node:util')
 const { PassThrough } = require('node:stream')
 const { pipeline } = require('node:stream/promises')
+
+const openCb = promisify(fs.open)
 
 const AbstractPersistor = require('./AbstractPersistor')
 const { ReadError, WriteError, NotImplementedError } = require('./Errors')
@@ -85,8 +88,9 @@ module.exports = class FSPersistor extends AbstractPersistor {
     })
     const fsPath = this._getFsPath(location, name, opts.useSubdirectories)
 
+    let fd
     try {
-      opts.fd = await fsPromises.open(fsPath, 'r')
+      fd = await openCb(fsPath, 'r')
     } catch (err) {
       throw PersistorHelper.wrapError(
         err,
@@ -96,7 +100,7 @@ module.exports = class FSPersistor extends AbstractPersistor {
       )
     }
 
-    const stream = fs.createReadStream(null, opts)
+    const stream = fs.createReadStream(null, { ...opts, fd })
     // Return a PassThrough stream with a minimal interface. It will buffer until the caller starts reading. It will emit errors from the source stream (Stream.pipeline passes errors along).
     const pass = new PassThrough()
     pipeline(stream, observer, pass).catch(() => {})

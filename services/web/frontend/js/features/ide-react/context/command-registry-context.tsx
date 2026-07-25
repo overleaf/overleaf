@@ -5,6 +5,7 @@ import {
   useContext,
   useMemo,
   useState,
+  ReactNode,
 } from 'react'
 
 type CommandInvocationContext = {
@@ -13,10 +14,13 @@ type CommandInvocationContext = {
 
 export type Command = {
   label: string
+  // Optional label for the command when it appears in a menu. If not provided, `label` will be used.
+  menuLabel?: string
   id: string
   handler?: (context: CommandInvocationContext) => void
   href?: string
   disabled?: boolean
+  leadingIcon?: ReactNode
 }
 
 const CommandRegistryContext = createContext<CommandRegistry | undefined>(

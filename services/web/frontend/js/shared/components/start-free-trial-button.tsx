@@ -1,15 +1,13 @@
 import { useCallback, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
 import { startFreeTrial } from '@/main/account-upgrade'
 import * as eventTracking from '../../infrastructure/event-tracking'
 import OLButton from '@/shared/components/ol/ol-button'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type StartFreeTrialButtonProps = {
   source: string
+  children: React.ReactNode
   variant?: string
   buttonProps?: React.ComponentProps<typeof OLButton>
-  children?: React.ReactNode
   handleClick?: React.ComponentProps<typeof OLButton>['onClick']
   segmentation?: eventTracking.Segmentation
   extraSearchParams?: Record<string, string>
@@ -26,9 +24,6 @@ export default function StartFreeTrialButton({
   segmentation,
   extraSearchParams,
 }: StartFreeTrialButtonProps) {
-  const { t } = useTranslation()
-  const plans2026 = useFeatureFlag('plans-2026-phase-1')
-
   useEffect(() => {
     const eventSegmentation: { [key: string]: unknown } = {
       'paywall-type': source,
@@ -66,10 +61,7 @@ export default function StartFreeTrialButton({
 
   return (
     <OLButton {...buttonProps} onClick={onClick}>
-      {children ||
-        (plans2026
-          ? t('start_free_trial_without_exclamation')
-          : t('start_free_trial'))}
+      {children}
     </OLButton>
   )
 }

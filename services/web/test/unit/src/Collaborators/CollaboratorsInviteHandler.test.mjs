@@ -37,6 +37,7 @@ describe('CollaboratorsInviteHandler', function () {
     ctx.CollaboratorsHandler = {
       promises: {
         addUserIdToProject: sinon.stub(),
+        setCollaboratorPrivilegeLevel: sinon.stub().resolves(),
       },
     }
     ctx.UserGetter = { promises: { getUser: sinon.stub() } }
@@ -46,11 +47,18 @@ describe('CollaboratorsInviteHandler', function () {
     ctx.CollaboratorsInviteHelper = {
       generateToken: sinon.stub().returns(ctx.Crypto.randomBytes(24)),
       hashInviteToken: sinon.stub().returns(ctx.tokenHmac),
+      encryptToken: sinon.stub().resolves('encrypted-token'),
     }
 
     ctx.CollaboratorsInviteGetter = {
       promises: {
         getAllInvites: sinon.stub(),
+      },
+    }
+
+    ctx.CollaboratorsGetter = {
+      promises: {
+        getMemberIdPrivilegeLevel: sinon.stub().resolves('readOnly'),
       },
     }
 
@@ -76,6 +84,7 @@ describe('CollaboratorsInviteHandler', function () {
       debug: sinon.stub(),
       warn: sinon.stub(),
       err: sinon.stub(),
+      error: sinon.stub(),
     }
 
     vi.doMock('@overleaf/settings', () => ({
@@ -127,9 +136,16 @@ describe('CollaboratorsInviteHandler', function () {
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Collaborators/CollaboratorsInviteGetter',
+      '../../../../app/src/Features/Collaborators/CollaboratorsInviteGetter.mjs',
       () => ({
         default: ctx.CollaboratorsInviteGetter,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Collaborators/CollaboratorsGetter.mjs',
+      () => ({
+        default: ctx.CollaboratorsGetter,
       })
     )
 
@@ -153,10 +169,6 @@ describe('CollaboratorsInviteHandler', function () {
         default: ctx.ProjectAuditLogHandler,
       })
     )
-
-    vi.doMock('crypto', () => ({
-      default: ctx.CryptogetAssignmentForUser,
-    }))
 
     ctx.CollaboratorsInviteHandler = (await import(MODULE_PATH)).default
 
@@ -600,6 +612,12 @@ describe('CollaboratorsInviteHandler', function () {
           )
           .should.equal(true)
       })
+
+      it('does not remove reusable invites after accept', async function (ctx) {
+        ctx.fakeInvite.reusable = true
+        await ctx.call()
+        ctx.ProjectInvite.deleteOne.callCount.should.equal(0)
+      })
     })
 
     describe('when the project has no more edit collaborator slots', function () {
@@ -689,6 +707,70 @@ describe('CollaboratorsInviteHandler', function () {
         await expect(ctx.call()).to.be.rejected
         ctx.ProjectInvite.deleteOne.callCount.should.equal(1)
       })
+    })
+  })
+
+  describe('upgradeUserPrivileges', function () {
+    beforeEach(function (ctx) {
+      ctx.call = async () => {
+        await ctx.CollaboratorsInviteHandler.promises.upgradeUserPrivileges(
+          ctx.fakeInvite,
+          ctx.projectId,
+          ctx.user
+        )
+      }
+      ctx.fakeInvite.privileges = 'readAndWrite'
+    })
+
+    it('upgrades the user when invite privileges are higher', async function (ctx) {
+      ctx.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel.resolves(
+        'readOnly'
+      )
+      await ctx.call()
+      ctx.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel.should.have.been.calledWith(
+        ctx.projectId,
+        ctx.user._id,
+        'readAndWrite'
+      )
+    })
+
+    it('does not update when invite is readOnly', async function (ctx) {
+      ctx.fakeInvite.privileges = 'readOnly'
+      await ctx.call()
+      expect(ctx.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel).to
+        .not.have.been.called
+    })
+
+    it('does not downgrade when invite is disabled (none)', async function (ctx) {
+      ctx.fakeInvite.privileges = false
+      ctx.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel.resolves(
+        'readOnly'
+      )
+      await ctx.call()
+      expect(ctx.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel).to
+        .not.have.been.called
+    })
+  })
+
+  describe('createSharingLinkInvite', function () {
+    beforeEach(function (ctx) {
+      ctx.ProjectInvite.prototype.save.callsFake(async function () {
+        return this
+      })
+      ctx.call = async () => {
+        return await ctx.CollaboratorsInviteHandler.promises.createSharingLinkInvite(
+          ctx.projectId,
+          'readOnly',
+          undefined
+        )
+      }
+    })
+
+    it('creates reusable invite with encrypted token', async function (ctx) {
+      const invite = await ctx.call()
+      expect(ctx.CollaboratorsInviteHelper.encryptToken).to.have.been.calledOnce
+      expect(invite.reusable).to.equal(true)
+      expect(invite.encryptedToken).to.equal('encrypted-token')
     })
   })
 

@@ -58,7 +58,6 @@ import { tooltipsReposition } from './tooltips-reposition'
 import { selectionListener } from '@/features/source-editor/extensions/selection-listener'
 import { contextMenu } from './context-menu'
 import { tabsListener } from './tabs-listener'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 const moduleExtensions: Array<(options: Record<string, any>) => Extension> =
   importOverleafModules('sourceEditorExtensions').map(
@@ -158,9 +157,12 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
     ? historyOT(options.currentDoc.currentDocument)
     : ranges(),
   trackDetachedComments(options.currentDoc),
-  visual(options.visual),
+  visual(options.docName, options.visual),
   mathPreview(options.settings.mathPreview),
-  reviewTooltip(options.editorContextMenuEnabled),
+  reviewTooltip(
+    options.settings.floatingMenu,
+    options.editorContextMenuEnabled
+  ),
   contextMenu(options.editorContextMenuEnabled),
   toolbarPanel(),
   breadcrumbPanel(),
@@ -180,5 +182,5 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   fileTreeItemDrop(),
   tooltipsReposition(),
   selectionListener(options.setEditorSelection),
-  isSplitTestEnabled('editor-tabs') ? tabsListener() : [],
+  tabsListener(options.settings.editorTabs),
 ]

@@ -82,9 +82,17 @@ describe('<ActiveSubscription />', function () {
 
     screen.getByRole('heading', { name: subscription.plan.name, level: 3 })
 
-    screen.getByText(
-      '* Prices may be subject to additional VAT, depending on your country.'
-    )
+    if (subscription.payment.taxRate > 0) {
+      expect(
+        screen.queryByText(
+          '* Taxes may be added, depending on your billing address.'
+        )
+      ).to.be.null
+    } else {
+      screen.getByText(
+        '* Taxes may be added, depending on your billing address.'
+      )
+    }
 
     screen.getByRole('link', { name: 'View invoices' })
 

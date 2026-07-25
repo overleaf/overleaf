@@ -27,12 +27,6 @@ describe('ExportsHandler', function () {
 
     vi.doMock('@overleaf/fetch-utils', () => ctx.fetchUtils)
 
-    vi.doMock('../../../../app/src/Features/Project/ProjectLocator', () => ({
-      default: (ctx.ProjectLocator = {
-        promises: {},
-      }),
-    }))
-
     vi.doMock(
       '../../../../app/src/Features/Project/ProjectRootDocManager',
       () => ({
@@ -174,12 +168,9 @@ describe('ExportsHandler', function () {
       ctx.ProjectHistoryHandler.promises.ensureHistoryExistsForProject = sinon
         .stub()
         .resolves()
-      ctx.ProjectLocator.promises.findRootDoc = sinon
-        .stub()
-        .resolves({ element: null, path: { fileSystem: 'main.tex' } })
       ctx.ProjectRootDocManager.promises.ensureRootDocumentIsValid = sinon
         .stub()
-        .resolves()
+        .resolves({ rootResourcePath: 'main.tex' })
       ctx.UserGetter.promises.getUser = sinon.stub().resolves(ctx.user)
       ctx.ExportsHandler._requestVersion = sinon
         .stub()
@@ -305,9 +296,9 @@ describe('ExportsHandler', function () {
         let exportData
         beforeEach(async function (ctx) {
           ctx.project.rootDoc_id = null
-          ctx.ProjectLocator.promises.findRootDoc = sinon
+          ctx.ProjectRootDocManager.promises.ensureRootDocumentIsValid = sinon
             .stub()
-            .resolves({ path: { fileSystem: 'other.tex' } })
+            .resolves({ rootResourcePath: 'other.tex' })
           exportData = await ctx.ExportsHandler._buildExport(ctx.export_params)
         })
 
@@ -361,9 +352,9 @@ describe('ExportsHandler', function () {
         beforeEach(async function (ctx) {
           ctx.fakeDoc_id = '1a2b3c4d5e6f'
           ctx.project.rootDoc_id = ctx.fakeDoc_id
-          ctx.ProjectLocator.promises.findRootDoc = sinon
+          ctx.ProjectRootDocManager.promises.ensureRootDocumentIsValid = sinon
             .stub()
-            .resolves({ path: { fileSystem: 'other.tex' } })
+            .resolves({ rootResourcePath: 'other.tex' })
           exportData = await ctx.ExportsHandler._buildExport(ctx.export_params)
         })
 
@@ -412,9 +403,9 @@ describe('ExportsHandler', function () {
 
       describe('when no root doc can be identified', function () {
         beforeEach(function (ctx) {
-          ctx.ProjectLocator.promises.findRootDoc = sinon
+          ctx.ProjectRootDocManager.promises.ensureRootDocumentIsValid = sinon
             .stub()
-            .resolves({ element: null, path: null })
+            .resolves()
         })
 
         it('should return an error', async function (ctx) {

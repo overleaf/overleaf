@@ -9,7 +9,6 @@ import express, {
   type ErrorRequestHandler,
   type NextFunction,
 } from 'express'
-import methodOverride from 'method-override'
 import { mongoClient } from './app/js/mongodb.js'
 import NotificationsController from './app/js/NotificationsController.ts'
 import HealthCheckController from './app/js/HealthCheckController.ts'
@@ -25,7 +24,6 @@ logger.initialize('notifications')
 metrics.memory.monitor(logger)
 metrics.open_sockets.monitor()
 
-app.use(methodOverride())
 app.use(express.json())
 app.use(metrics.http.monitor(logger))
 

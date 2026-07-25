@@ -18,6 +18,7 @@ import useDropdown from '../../../shared/hooks/use-dropdown'
 import { getPanel } from '@codemirror/view'
 import { createToolbarPanel } from '../extensions/toolbar/toolbar-panel'
 import EditorSwitch from './editor-switch'
+import ReviewModeSwitcher from '@/features/review-panel/components/review-mode-switcher'
 import SwitchToPDFButton from './switch-to-pdf-button'
 import { DetacherSynctexControl } from '../../pdf-preview/components/detach-synctex-control'
 import DetachCompileButtonWrapper from '../../pdf-preview/components/detach-compile-button-wrapper'
@@ -33,7 +34,15 @@ import Breadcrumbs from '@/features/source-editor/extensions/breadcrumbs'
 import classNames from 'classnames'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { useProjectContext } from '@/shared/context/project-context'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+import { useLayoutContext } from '@/shared/context/layout-context'
+import ReviewPanelHeaderBuffer from '@/features/review-panel/components/review-panel-header-buffer'
+import { useAreTabsEnabled } from '@/features/ide-react/hooks/use-are-tabs-enabled'
+
+const sourceEditorToolbarStartButtons = importOverleafModules(
+  'sourceEditorToolbarStartButtons'
+) as { import: { default: ElementType }; path: string }[]
 
 const sourceEditorToolbarComponents = importOverleafModules(
   'sourceEditorToolbarComponents'
@@ -62,6 +71,9 @@ const Toolbar = memo(function Toolbar() {
     userSettings: { breadcrumbs },
   } = useUserSettingsContext()
   const visualPreviewEnabled = useFeatureFlag('visual-preview')
+  const isToolbarMigration = useFeatureFlag('writefull-toolbar-migration')
+  const { features } = useProjectContext()
+  const { focusMode } = useLayoutContext()
 
   const [overflowed, setOverflowed] = useState(false)
 
@@ -121,12 +133,20 @@ const Toolbar = memo(function Toolbar() {
     if (resizeRef.current) {
       buildOverflow(resizeRef.current.element)
     }
-  }, [buildOverflow, languageName, resizeRef, visual])
+  }, [buildOverflow, languageName, listDepth, resizeRef, visual])
 
-  // calculate overflow when buttons change
+  // calculate overflow when toolbar content changes
   const observerRef = useRef<MutationObserver | null>(null)
-  const handleButtons = useCallback(
+  const handleToolbar = useCallback(
     (node: HTMLDivElement) => {
+      // register the resize observer on the toolbar node
+      elementRef(node)
+
+      if (observerRef.current) {
+        observerRef.current.disconnect()
+        observerRef.current = null
+      }
+
       if (!('MutationObserver' in window)) {
         return
       }
@@ -138,12 +158,10 @@ const Toolbar = memo(function Toolbar() {
           }
         })
 
-        observerRef.current.observe(node, { childList: true })
-      } else if (observerRef.current) {
-        observerRef.current.disconnect()
+        observerRef.current.observe(node, { childList: true, subtree: true })
       }
     },
-    [buildOverflow, resizeRef]
+    [buildOverflow, elementRef, resizeRef]
   )
 
   // calculate overflow when active element changes to/from inside a table
@@ -157,23 +175,39 @@ const Toolbar = memo(function Toolbar() {
   }, [buildOverflow, insideTable, resizeRef])
 
   const showActions = !state.readOnly && !insideTable
+  const tabsVisible = useAreTabsEnabled()
+
+  if (focusMode) {
+    return null
+  }
 
   return (
     <>
-      {showReviewPanelHeader && <ReviewPanelHeader />}
+      {showReviewPanelHeader &&
+        (tabsVisible ? <ReviewPanelHeaderBuffer /> : <ReviewPanelHeader />)}
       <div
         id="ol-cm-toolbar-wrapper"
         className={classNames('ol-cm-toolbar-wrapper', {
           'ol-cm-toolbar-wrapper-indented': showReviewPanelHeader,
+          // The border is only needed when the header is flush with the
+          // toolbar, which is the case when tabs are disabled and the review
+          // panel is shown
+          'ol-cm-toolbar-wrapper-needs-border':
+            showReviewPanelHeader && !tabsVisible,
         })}
       >
         <div
           role="toolbar"
           aria-label={t('toolbar_editor')}
           className="ol-cm-toolbar toolbar-editor"
-          ref={elementRef}
+          ref={handleToolbar}
         >
-          {!visualPreviewEnabled && <EditorSwitch />}
+          {showActions &&
+            sourceEditorToolbarStartButtons.map(
+              ({ import: { default: Component }, path }) => (
+                <Component key={path} />
+              )
+            )}
           {showActions && (
             <ToolbarItems
               state={state}
@@ -202,10 +236,15 @@ const Toolbar = memo(function Toolbar() {
             )}
           </div>
 
-          <div
-            className="ol-cm-toolbar-button-group ol-cm-toolbar-end"
-            ref={handleButtons}
-          >
+          <div className="ol-cm-toolbar-button-group ol-cm-toolbar-end">
+            {!visualPreviewEnabled && <EditorSwitch />}
+            {/* trackChangesVisible controls provider/UI availability; trackChanges
+                (checked inside the switcher) controls the actual feature entitlement.
+                Users with trackChangesVisible:true but trackChanges:false see the
+                switcher and get an upgrade modal when clicking "Reviewing". */}
+            {isToolbarMigration && features.trackChangesVisible && (
+              <ReviewModeSwitcher />
+            )}
             {sourceEditorToolbarEndButtons.map(
               ({ import: { default: Component }, path }) => (
                 <Component key={path} />

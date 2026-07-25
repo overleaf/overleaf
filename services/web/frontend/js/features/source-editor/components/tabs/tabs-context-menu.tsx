@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import {
   Dropdown,
+  DropdownDivider,
   DropdownItem,
   DropdownMenu,
 } from '@/shared/components/dropdown/dropdown-menu'
@@ -14,6 +15,7 @@ export function TabsContextMenu() {
     tabs,
     closeTab,
     closeOtherTabs,
+    closeToRight,
     contextMenuTarget,
     setContextMenuTarget,
   } = useTabsContext()
@@ -89,7 +91,7 @@ export function TabsContextMenu() {
               close()
             }}
           >
-            {t('close_tab')}
+            {t('close')}
           </DropdownItem>
           <DropdownItem
             disabled={tabs.length <= 1}
@@ -99,7 +101,36 @@ export function TabsContextMenu() {
               close()
             }}
           >
-            {t('close_others')}
+            {t('close_other_tabs')}
+          </DropdownItem>
+          <DropdownItem
+            disabled={tabs[tabs.length - 1]?.id === contextMenuTarget.tabId}
+            as="button"
+            onClick={() => {
+              closeToRight(contextMenuTarget.tabId)
+              close()
+            }}
+          >
+            {t('close_tabs_to_the_right')}
+          </DropdownItem>
+          <DropdownDivider />
+          <DropdownItem
+            as="button"
+            onClick={() => {
+              window.dispatchEvent(
+                new CustomEvent('ui.toggle-settings', { detail: true })
+              )
+              // focus the tab setting
+              window.dispatchEvent(
+                new CustomEvent('ui.focus-setting', {
+                  detail: 'editorTabs',
+                })
+              )
+              close()
+            }}
+            leadingIcon="settings"
+          >
+            {t('tab_settings')}
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>

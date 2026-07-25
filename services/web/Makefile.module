@@ -1,8 +1,13 @@
 BUILD_DIR_NAME ?= web
+ifeq ($(BRANCH_NAME),)
+  export BRANCH_NAME := $(shell git rev-parse --abbrev-ref HEAD)
+endif
+export BRANCH_NAME_TAG_SAFE := $(shell echo "$(BRANCH_NAME)" | sed 's/\//\-\-/g' | cut -c1-96)
 export MODULE_NAME := $(notdir $(shell pwd))
-MODULE_DIR := modules/$(MODULE_NAME)
-PROJECT_NAME = web
+export MODULE_DIR := modules/$(MODULE_NAME)
+export PROJECT_NAME = web
 export RETRIES ?= $(if $(CI),3,0)
+export MOCHA_GREP ?=
 
 export OVERLEAF_CONFIG = /overleaf/services/web/$(MODULE_DIR)/test/acceptance/config/settings.test.js
 export BASE_CONFIG ?= /overleaf/services/web/test/acceptance/config/settings.test.saas.js
@@ -12,13 +17,7 @@ CFG_SERVER_CE=/overleaf/services/web/test/acceptance/config/settings.test.server
 CFG_SERVER_PRO=/overleaf/services/web/test/acceptance/config/settings.test.server-pro.js
 
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
-DOCKER_COMPOSE := cd ../../ && \
-	MODULE_DIR=$(MODULE_DIR) \
-	BUILD_NUMBER=$(BUILD_NUMBER) \
-	BRANCH_NAME=$(BRANCH_NAME) \
-	PROJECT_NAME=$(PROJECT_NAME) \
-	MOCHA_GREP=${MOCHA_GREP} \
-	docker compose ${DOCKER_COMPOSE_FLAGS}
+DOCKER_COMPOSE := cd ../../ && docker compose ${DOCKER_COMPOSE_FLAGS}
 
 ifeq (,$(wildcard test/unit))
 test_unit:
@@ -26,7 +25,7 @@ test_unit:
 else
 test_unit: export COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME)_$(MODULE_NAME)
 test_unit:
-	${DOCKER_COMPOSE} run --rm test_unit yarn test:unit:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/unit/src
+	${DOCKER_COMPOSE} run --rm test_unit yarn test:unit:run_dir ${MOCHA_ARGS} $(MODULE_DIR)/test/unit/src
 	${DOCKER_COMPOSE} down
 
 endif

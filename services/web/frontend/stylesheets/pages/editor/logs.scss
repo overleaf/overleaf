@@ -1,208 +1,56 @@
-:root {
-  --logs-pane-bg: var(--bg-dark-secondary);
+.error-logs {
+  overflow-y: auto;
+  background-color: var(--bg-secondary-themed);
+  color: var(--content-primary-themed);
+  flex: 1;
+
+  @include themed-links;
+
+  .icon-button,
+  .icon-button-small {
+    @include ol-button-variant(
+      var(--content-secondary-themed),
+      transparent,
+      transparent,
+      var(--bg-secondary-themed),
+      transparent,
+      true
+    );
+  }
 }
 
-@include theme('light') {
-  --logs-pane-bg: var(--bg-light-secondary);
+.error-logs-tabs {
+  display: flex;
+  background-color: var(--bg-primary-themed);
 }
 
-.ide-redesign-main {
-  --logs-pane-bg: var(--bg-primary-themed);
+.error-logs-tab-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-04);
+  color: var(--content-secondary-themed);
+  padding: var(--spacing-03) var(--spacing-04);
+  font-size: var(--font-size-02);
+  border-bottom: 3px solid transparent;
 
-  // TODO $ide-redesign-cleanup: Unnest everything from inside .error-logs
-  //  when we remove the styles for the old pane
-  .error-logs {
-    --logs-pane-bg: var(--bg-secondary-themed);
-
-    overflow-y: auto;
-    background-color: var(--logs-pane-bg);
+  &:hover,
+  &:focus {
     color: var(--content-primary-themed);
-    flex: 1;
-
-    @include themed-links;
-
-    .logs-pane-content {
-      display: flex;
-      flex-direction: column;
-      padding: var(--spacing-02);
-      gap: var(--spacing-02);
-    }
-
-    .icon-button,
-    .icon-button-small {
-      @include ol-button-variant(
-        var(--content-secondary-themed),
-        transparent,
-        transparent,
-        var(--bg-secondary-themed),
-        transparent,
-        true
-      );
-    }
-
-    .log-entry-content {
-      --bs-code-color: var(--content-secondary-themed);
-
-      color: var(--content-primary-themed);
-      background-color: var(--bg-primary-themed);
-      padding: 0;
-    }
-
-    .log-entry-content-raw {
-      color: var(--content-primary-themed);
-      background-color: var(--bg-secondary-themed);
-    }
-
-    .log-entry-content-raw-container {
-      background-color: var(--bg-secondary-themed);
-    }
-
-    .log-entry {
-      background-color: var(--bg-primary-themed);
-      width: 100%;
-      border-radius: var(--border-radius-base);
-      padding: var(--spacing-04);
-
-      .horizontal-divider {
-        margin: var(--spacing-04) 0;
-        border-top: 1px solid var(--border-divider-themed);
-      }
-    }
-
-    .log-entry-header-card {
-      background-color: var(--bg-primary-themed);
-      width: 100%;
-      display: flex;
-      align-items: center;
-      border: none;
-      flex-wrap: wrap;
-      container-type: inline-size;
-      column-gap: var(--spacing-03);
-    }
-
-    .log-entry-header-button {
-      all: unset;
-      display: flex;
-      gap: var(--spacing-03);
-      align-items: center;
-      flex: 1;
-      border-radius: var(--border-radius-base);
-      padding: var(--spacing-02) 0;
-      overflow: hidden;
-
-      &:hover {
-        cursor: pointer;
-      }
-
-      &:hover,
-      &:focus-visible,
-      &:active {
-        background-color: var(--bg-secondary-themed);
-      }
-
-      .log-entry-expand-icon {
-        user-select: none;
-      }
-    }
-
-    .log-entry-header-content {
-      display: flex;
-      flex-direction: column;
-      text-align: left;
-      gap: var(--spacing-02);
-      flex: 1;
-      overflow: hidden;
-      font-weight: normal;
-    }
-
-    .log-entry-header-text {
-      font-weight: 600;
-      font-size: var(--font-size-02);
-      line-height: var(--line-height-02);
-      margin-bottom: 0;
-    }
-
-    .log-entry-header-text-error {
-      color: var(--content-danger-themed);
-    }
-
-    .log-entry-header-text-warning {
-      color: var(--content-warning-themed);
-    }
-
-    .log-entry-header-text-info {
-      color: var(--content-info-themed);
-    }
-
-    .log-entry-header-text-success {
-      color: var(--content-positive-themed);
-    }
-
-    .log-entry-header-text-raw {
-      color: var(--content-primary-themed);
-    }
-
-    .log-entry-location {
-      white-space: nowrap;
-      direction: rtl;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      font-size: var(--font-size-01);
-      line-height: var(--line-height-01);
-      color: var(--content-secondary-themed);
-    }
-
-    .log-entry-header-actions {
-      display: flex;
-    }
-
-    @container (width <= 250px) {
-      .log-entry-header-actions {
-        padding-left: var(--spacing-06);
-      }
-
-      .log-entry-header-button {
-        min-width: 100%;
-      }
-    }
-
-    .log-entry-content-button-container {
-      background-image: linear-gradient(
-        0deg,
-        var(--bg-secondary-themed) 0%,
-        transparent 100%
-      );
-    }
   }
 
-  .error-logs-tabs {
-    display: flex;
-    background-color: var(--bg-primary-themed);
+  &[aria-selected='true'] {
+    color: var(--content-primary-themed);
+    border-bottom: 3px solid var(--bg-accent-01);
   }
+}
 
-  .error-logs-tab-header {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-04);
-    color: var(--content-secondary-themed);
-    padding: var(--spacing-03) var(--spacing-04);
-    font-size: var(--font-size-02);
-    border-bottom: 3px solid transparent;
-
-    &[aria-selected='true'] {
-      color: var(--content-primary-themed);
-      border-bottom: 3px solid var(--bg-accent-01);
-    }
-  }
-
-  .error-logs-tab-count {
-    background-color: var(--bg-secondary-themed);
-    border-radius: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 var(--spacing-02);
-  }
+.error-logs-tab-count {
+  background-color: var(--bg-secondary-themed);
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--spacing-02);
 }
 
 .new-logs-pane {
@@ -213,65 +61,6 @@
   background-color: var(--bg-secondary-themed);
   display: flex;
   flex-direction: column;
-
-  .logs-pane-content {
-    min-height: 100%;
-  }
-}
-
-.logs-pane {
-  position: absolute;
-  inset: 0;
-  overflow-y: auto;
-  background-color: var(--logs-pane-bg);
-  z-index: 11; // above the PDF viewer + controls
-  top: var(--toolbar-small-height);
-
-  .logs-pane-content {
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    gap: 10px;
-    min-height: 100%;
-  }
-
-  .log-entry {
-    border-radius: var(--border-radius-base);
-    overflow: hidden;
-  }
-
-  .log-entry-header {
-    padding: var(--spacing-02) var(--spacing-04);
-    display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-04);
-    border-radius: var(--border-radius-base) var(--border-radius-base) 0 0;
-    color: var(--content-primary-dark);
-
-    .material-symbols {
-      @include body-base;
-    }
-  }
-
-  .log-entry-header-link {
-    color: var(--content-primary-dark);
-    border-width: 0;
-    max-width: 33%;
-    flex-shrink: 0;
-    text-decoration: none; // needed for the "close button"
-    padding: 0 var(--spacing-03);
-
-    .button-content {
-      min-width: 0; // needed to display the ellipsis on overflow
-    }
-  }
-
-  .log-entry-header-link-location {
-    white-space: nowrap;
-    direction: rtl;
-    text-overflow: ellipsis;
-    overflow: hidden;
-  }
 }
 
 .logs-pane-actions {
@@ -284,20 +73,140 @@
   gap: var(--spacing-04);
 }
 
+.logs-pane-content {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-02);
+  gap: var(--spacing-02);
+  min-height: 100%;
+}
+
+.log-entry {
+  background-color: var(--bg-primary-themed);
+  width: 100%;
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-04);
+
+  .horizontal-divider {
+    margin: var(--spacing-04) 0;
+    border-top: 1px solid var(--border-divider-themed);
+  }
+}
+
+.log-entry-header-card {
+  background-color: var(--bg-primary-themed);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  border: none;
+  flex-wrap: wrap;
+  container-type: inline-size;
+  column-gap: var(--spacing-03);
+}
+
+.log-entry-header-button {
+  all: unset;
+  display: flex;
+  gap: var(--spacing-03);
+  align-items: center;
+  flex: 1;
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-02) 0;
+  overflow: hidden;
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  &:hover,
+  &:focus-visible,
+  &:active {
+    background-color: var(--bg-secondary-themed);
+  }
+
+  .log-entry-expand-icon {
+    user-select: none;
+  }
+}
+
+.log-entry-header-content {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: var(--spacing-02);
+  flex: 1;
+  overflow: hidden;
+  font-weight: normal;
+}
+
+.log-entry-header-text {
+  font-weight: 600;
+  font-size: var(--font-size-02);
+  line-height: var(--line-height-02);
+  margin-bottom: 0;
+}
+
+.log-entry-header-text-error {
+  color: var(--content-danger-themed);
+}
+
+.log-entry-header-text-warning {
+  color: var(--content-warning-themed);
+}
+
+.log-entry-header-text-info {
+  color: var(--content-info-themed);
+}
+
+.log-entry-header-text-success {
+  color: var(--content-positive-themed);
+}
+
+.log-entry-header-text-raw {
+  color: var(--content-primary-themed);
+}
+
+.log-entry-location {
+  white-space: nowrap;
+  direction: rtl;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  font-size: var(--font-size-01);
+  line-height: var(--line-height-01);
+  color: var(--content-secondary-themed);
+}
+
+.log-entry-header-actions {
+  display: flex;
+}
+
+@container (width <= 250px) {
+  .log-entry-header-actions {
+    padding-left: var(--spacing-06);
+  }
+
+  .log-entry-header-button {
+    min-width: 100%;
+  }
+}
+
 .log-entry-content {
+  --bs-code-color: var(--content-secondary-themed);
+
   &:empty {
     display: none;
   }
 
-  background-color: var(--bg-light-primary);
-  color: var(--content-primary);
-  padding: var(--spacing-04);
+  color: var(--content-primary-themed);
+  background-color: var(--bg-primary-themed);
+  padding: 0;
 }
 
 .log-entry-content-raw {
   @include body-xs;
 
-  color: var(--content-secondary);
+  color: var(--content-primary-themed);
+  background-color: var(--bg-secondary-themed);
   padding: var(--spacing-03);
   margin: 0;
   white-space: pre-wrap;
@@ -314,7 +223,7 @@
   text-align: center;
   background-image: linear-gradient(
     0deg,
-    var(--bg-light-tertiary) 0%,
+    var(--bg-secondary-themed) 0%,
     transparent 100%
   );
   border-radius: 0 0 var(--border-radius-base) var(--border-radius-base);
@@ -325,7 +234,7 @@
 }
 
 .log-entry-content-raw-container {
-  background-color: var(--bg-light-tertiary);
+  background-color: var(--bg-secondary-themed);
   border-radius: var(--border-radius-base);
   overflow: hidden;
   margin-top: var(--spacing-03);
@@ -347,56 +256,5 @@
   & > .tooltip-inner {
     max-width: 450px;
     text-align: left;
-  }
-}
-
-// As part of compile time paywall redesign, we are only migrating the necessary classes needed for the split test
-// Other classes should be migrated too as a part of website redesign project later on.
-
-.timeout-upgrade-paywall-prompt {
-  display: flex;
-  flex-direction: column;
-  gap: 10px; // adding this value to match existing spacing in logs pane, there is no variable for 10px
-}
-
-.website-redesign {
-  .log-entry-header {
-    @include heading-sm;
-
-    font-weight: 600;
-    padding: var(--spacing-05) var(--spacing-06);
-  }
-
-  .compile-timeout-message {
-    p {
-      margin-bottom: 0;
-    }
-  }
-
-  .log-entry-content {
-    padding: 0;
-  }
-
-  .log-bold-text {
-    font-weight: 600;
-    color: var(--neutral-90);
-  }
-
-  .log-entry-formatted-content {
-    @include body-sm;
-
-    padding: var(--spacing-06);
-    color: var(--neutral-70);
-
-    a,
-    .btn-inline-link {
-      color: var(--blue-50);
-    }
-  }
-
-  .log-entry-cta-container {
-    padding-top: var(--spacing-06);
-    display: flex;
-    justify-content: flex-end;
   }
 }

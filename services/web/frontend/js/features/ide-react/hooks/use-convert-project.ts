@@ -16,7 +16,7 @@ import { OpenDocuments } from '../editor/open-documents'
 const SLOW_CONVERSION_THRESHOLD = 2000
 
 export default function useConvertProject(
-  type: 'docx' | 'markdown',
+  type: 'docx' | 'markdown' | 'html',
   openDocs: OpenDocuments,
   getRootDocInfo: () => RootDocInfo
 ) {

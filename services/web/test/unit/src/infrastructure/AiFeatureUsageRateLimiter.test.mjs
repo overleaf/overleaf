@@ -78,7 +78,7 @@ describe('AiFeatureUsageRateLimiter', function () {
 
     ctx.SplitTestHandler = {
       promises: {
-        featureFlagEnabledForUser: sinon.stub().resolves(true),
+        featureFlagEnabledForMongoUser: sinon.stub().resolves(true),
       },
     }
 

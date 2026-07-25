@@ -85,6 +85,13 @@ describe('OwnershipTransferHandler', function () {
         canAddXEditCollaborators: sinon.stub().resolves(true),
       },
     }
+    ctx.Modules = {
+      promises: {
+        hooks: {
+          fire: sinon.stub().resolves(),
+        },
+      },
+    }
 
     vi.mock('../../../../app/src/Features/Errors/Errors.js', () =>
       vi.importActual('../../../../app/src/Features/Errors/Errors.js')
@@ -147,6 +154,10 @@ describe('OwnershipTransferHandler', function () {
         default: ctx.LimitationsManager,
       })
     )
+
+    vi.doMock('../../../../app/src/infrastructure/Modules.mjs', () => ({
+      default: ctx.Modules,
+    }))
 
     ctx.handler = (await import(MODULE_PATH)).default
   })
@@ -507,6 +518,19 @@ describe('OwnershipTransferHandler', function () {
           previousOwnerId: ctx.user._id,
           newOwnerId: ctx.collaborator._id,
         }
+      )
+    })
+
+    it('should fire the ownershipTransferred hook', async function (ctx) {
+      await ctx.handler.promises.transferOwnership(
+        ctx.project._id,
+        ctx.collaborator._id
+      )
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'projectOwnershipTransferred',
+        ctx.project._id,
+        ctx.user._id,
+        ctx.collaborator._id
       )
     })
 

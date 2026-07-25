@@ -338,7 +338,6 @@ const refProviderSettingsSchema = z
     enabled: z.boolean().optional(),
     groups: z.array(z.object({ id: z.string() })).optional(),
     disablePersonalLibrary: z.boolean().optional(),
-    migrated: z.boolean().optional(),
   })
   .optional()
 
@@ -425,6 +424,9 @@ async function updateUserSettings(req, res, next) {
   if (body.breadcrumbs != null) {
     user.ace.breadcrumbs = Boolean(body.breadcrumbs)
   }
+  if (body.editorTabs != null) {
+    user.ace.editorTabs = Boolean(body.editorTabs)
+  }
   if (body.nonBlinkingCursor != null) {
     user.ace.nonBlinkingCursor = Boolean(body.nonBlinkingCursor)
   }
@@ -434,6 +436,9 @@ async function updateUserSettings(req, res, next) {
   }
   if (body.darkModePdf != null) {
     user.ace.darkModePdf = Boolean(body.darkModePdf)
+  }
+  if (body.floatingMenu != null) {
+    user.ace.floatingMenu = Boolean(body.floatingMenu)
   }
   if (body.zotero != null) {
     user.ace.zotero = { ...user.ace.zotero, ...body.zotero }

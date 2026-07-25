@@ -256,7 +256,12 @@ describe('filestore migration', function () {
     })
   } else {
     // 5.x
-    startWith({ version: '5.5.5', pro: true, withDataDir: true })
+    startWith({
+      version: '5.5.5',
+      pro: true,
+      withDataDir: true,
+      resetData: true,
+    })
     defaultImage = 'frog.jpg'
     ensureUserExists({ email })
     before(function () {

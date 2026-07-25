@@ -1,6 +1,7 @@
 import {
   DropdownItem,
   DropdownHeader,
+  DropdownDivider,
 } from '@/shared/components/dropdown/dropdown-menu'
 import {
   IdeLayout,
@@ -14,8 +15,16 @@ import OLSpinner from '@/shared/components/ol/ol-spinner'
 import { isMac } from '@/shared/utils/os'
 import { Shortcut } from '@/shared/components/shortcut'
 import classNames from 'classnames'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
+import SplitTestBadge from '@/shared/components/split-test-badge'
 
-type LayoutOption = 'sideBySide' | 'editorOnly' | 'pdfOnly' | 'detachedPdf'
+type LayoutOption =
+  | 'sideBySide'
+  | 'editorOnly'
+  | 'pdfOnly'
+  | 'detachedPdf'
+  | 'focusMode'
 
 const getActiveLayoutOption = ({
   pdfLayout,
@@ -45,7 +54,6 @@ const getActiveLayoutOption = ({
   if (pdfLayout === 'sideBySide') {
     return 'sideBySide'
   }
-
   return null
 }
 
@@ -93,12 +101,14 @@ const shortcuts: Record<LayoutOption, string[] | null> = isMac
       pdfOnly: ['⌃', '⌘', '→'],
       sideBySide: ['⌃', '⌘', '↓'],
       detachedPdf: ['⌃', '⌘', '↑'],
+      focusMode: ['⌘', '⇧', 'M'],
     }
   : {
       editorOnly: null,
       pdfOnly: null,
       sideBySide: null,
       detachedPdf: null,
+      focusMode: ['⌃', '⇧', 'M'],
     }
 
 export default function ChangeLayoutOptions() {
@@ -109,9 +119,13 @@ export default function ChangeLayoutOptions() {
     pdfLayout,
     handleChangeLayout,
     handleDetach,
+    focusMode,
+    setFocusMode,
   } = useLayoutContext()
 
   const { t } = useTranslation()
+  const { sendEvent } = useEditorAnalytics()
+  const focusModeEnabled = useFeatureFlag('focus-mode')
 
   const detachable = 'BroadcastChannel' in window
 
@@ -168,6 +182,30 @@ export default function ChangeLayoutOptions() {
       >
         {t('open_pdf_in_separate_tab')}
       </LayoutDropdownItem>
+      {focusModeEnabled && (
+        <>
+          <DropdownDivider />
+          <LayoutDropdownItem
+            onClick={() => {
+              setFocusMode(!focusMode)
+              sendEvent('focus-mode-toggle', { focusMode: !focusMode })
+            }}
+            active={focusMode}
+            leadingIcon="crop_free"
+            trailingIcon={
+              <span className="d-flex align-items-center gap-2">
+                <SplitTestBadge
+                  splitTestName="focus-mode"
+                  displayOnVariants={['enabled']}
+                />
+                {shortcuts.focusMode && <Shortcut keys={shortcuts.focusMode} />}
+              </span>
+            }
+          >
+            {t('focus_mode')}
+          </LayoutDropdownItem>
+        </>
+      )}
     </>
   )
 }

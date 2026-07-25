@@ -65,6 +65,10 @@ public class GitBridgeApp implements Runnable {
     server.stop();
   }
 
+  public int getPort() {
+    return server.getPort();
+  }
+
   /* Helper methods */
 
   private void parseArguments(String[] args) throws ArgsException {

@@ -48,12 +48,16 @@ public class GitBridgeServer {
 
   private final GceMetadataLogLevelChecker logLevelChecker;
 
+  private ServerConnector connector;
+
   private final int port;
+  private final String bindIp;
   private String rootGitDirectoryPath;
   private String apiBaseURL;
 
   public GitBridgeServer(Config config) throws ServletException {
     this.port = config.getPort();
+    this.bindIp = config.getBindIp();
     this.rootGitDirectoryPath = config.getRootGitDirectory();
     RepoStore repoStore =
         new FSGitRepoStore(
@@ -89,10 +93,18 @@ public class GitBridgeServer {
     try {
       bridge.checkDB();
       jettyServer.start();
+      // Only the integration tests configure port 0, which lets the OS assign a free
+      // port at bind time. Production always configures an explicit non-zero port, so
+      // this branch never runs there.
+      if (port == 0) {
+        int actualPort = connector.getLocalPort();
+        String postbackURL = "http://" + bindIp + ":" + actualPort + "/";
+        Util.setPostbackURL(postbackURL);
+      }
       bridge.startBackgroundJobs();
       logLevelChecker.start();
       Log.info(Util.getServiceName() + "-Git Bridge server started");
-      Log.info("Listening on port: " + port);
+      Log.info("Listening on port: " + getPort());
       Log.info("Bridged to: " + apiBaseURL);
       Log.info("Postback base URL: " + Util.getPostbackURL());
       Log.info("Root git directory path: " + rootGitDirectoryPath);
@@ -101,6 +113,10 @@ public class GitBridgeServer {
     } catch (Exception e) {
       Log.error("Failed to start Jetty", e);
     }
+  }
+
+  public int getPort() {
+    return connector.getLocalPort();
   }
 
   public void stop() {
@@ -114,7 +130,7 @@ public class GitBridgeServer {
 
   private void configureJettyServer(Config config, RepoStore repoStore, SnapshotApi snapshotApi)
       throws ServletException {
-    ServerConnector connector = new ServerConnector(this.jettyServer);
+    this.connector = new ServerConnector(this.jettyServer);
     connector.setPort(config.getPort());
     connector.setHost(config.getBindIp());
     connector.setIdleTimeout(config.getIdleTimeout());

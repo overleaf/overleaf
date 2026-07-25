@@ -116,11 +116,11 @@ const TemplatesManager = {
     if (mainFile == null) {
       return
     }
-    const rootDocId = await ProjectRootDocManager.setRootDocFromName(
+    const result = await ProjectRootDocManager.setRootDocFromName(
       project._id,
       mainFile
     )
-    if (rootDocId) project.rootDoc_id = rootDocId
+    if (result) project.rootDoc_id = result.rootDocId
   },
 
   async fetchFromV1(templateId) {

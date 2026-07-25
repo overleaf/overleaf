@@ -6,7 +6,7 @@ const modulePath = '../../../../app/src/Features/User/UserCreator.mjs'
 describe('UserCreator', function () {
   beforeEach(async function (ctx) {
     const self = ctx
-    ctx.user = { _id: '12390i', ace: {} }
+    ctx.user = { _id: '12390i', ace: {}, analyticsId: 'uuid' }
     ctx.user.save = sinon.stub().resolves(self.user)
     ctx.UserModel = class Project {
       constructor() {
@@ -64,8 +64,9 @@ describe('UserCreator', function () {
       '../../../../app/src/Features/Analytics/AnalyticsManager',
       () => ({
         default: (ctx.Analytics = {
+          recordEventForMongoUserInBackground: sinon.stub(),
           recordEventForUserInBackground: sinon.stub(),
-          setUserPropertyForUser: sinon.stub(),
+          setUserPropertyForMongoUser: sinon.stub(),
         }),
       })
     )
@@ -102,13 +103,17 @@ describe('UserCreator', function () {
     ctx.UserCreator = (await import(modulePath)).default
 
     ctx.email = 'bob.oswald@gmail.com'
+    ctx.attributes = {
+      email: ctx.email,
+      analyticsId: '8055c676-bcc7-4e64-a66f-8069f9a0bd92',
+    }
   })
 
   describe('createNewUser', function () {
     describe('with callbacks', function () {
       it('should take the opts and put them in the model', async function (ctx) {
         const user = await ctx.UserCreator.promises.createNewUser({
-          email: ctx.email,
+          ...ctx.attributes,
           holdingAccount: true,
         })
         assert.equal(user.email, ctx.email)
@@ -118,7 +123,7 @@ describe('UserCreator', function () {
 
       it('should use the start of the email if the first name is empty string', async function (ctx) {
         const user = await ctx.UserCreator.promises.createNewUser({
-          email: ctx.email,
+          ...ctx.attributes,
           holdingAccount: true,
           first_name: '',
         })
@@ -129,7 +134,7 @@ describe('UserCreator', function () {
 
       it('should use the first name if passed', async function (ctx) {
         const user = await ctx.UserCreator.promises.createNewUser({
-          email: ctx.email,
+          ...ctx.attributes,
           holdingAccount: true,
           first_name: 'fiiirstname',
         })
@@ -140,7 +145,7 @@ describe('UserCreator', function () {
 
       it('should use the last name if passed', async function (ctx) {
         const user = await ctx.UserCreator.promises.createNewUser({
-          email: ctx.email,
+          ...ctx.attributes,
           holdingAccount: true,
           last_name: 'lastNammmmeee',
         })
@@ -150,9 +155,9 @@ describe('UserCreator', function () {
       })
 
       it('should set emails attribute', async function (ctx) {
-        const user = await ctx.UserCreator.promises.createNewUser({
-          email: ctx.email,
-        })
+        const user = await ctx.UserCreator.promises.createNewUser(
+          ctx.attributes
+        )
         user.email.should.equal(ctx.email)
         user.emails.length.should.equal(1)
         user.emails[0].email.should.equal(ctx.email)
@@ -161,9 +166,8 @@ describe('UserCreator', function () {
       })
 
       describe('with affiliations feature', function () {
-        let attributes, user
+        let user
         beforeEach(function (ctx) {
-          attributes = { email: ctx.email }
           ctx.Features.hasFeature = sinon
             .stub()
             .withArgs('affiliations')
@@ -172,7 +176,7 @@ describe('UserCreator', function () {
 
         describe('when v1 affiliations API does not return an error', function () {
           beforeEach(async function (ctx) {
-            user = await ctx.UserCreator.promises.createNewUser(attributes)
+            user = await ctx.UserCreator.promises.createNewUser(ctx.attributes)
           })
 
           it('should flag that affiliation is unchecked', function () {
@@ -198,7 +202,7 @@ describe('UserCreator', function () {
         describe('when v1 affiliations API does return an error', function () {
           beforeEach(async function (ctx) {
             ctx.UserUpdater.promises.addAffiliationForNewUser.rejects()
-            user = await ctx.UserCreator.promises.createNewUser(attributes)
+            user = await ctx.UserCreator.promises.createNewUser(ctx.attributes)
           })
 
           it('should flag that affiliation is unchecked', function () {
@@ -228,7 +232,7 @@ describe('UserCreator', function () {
         describe('when v1 affiliations API returns an error and requireAffiliation=true', function () {
           beforeEach(async function (ctx) {
             ctx.UserUpdater.promises.addAffiliationForNewUser.rejects()
-            user = await ctx.UserCreator.promises.createNewUser(attributes)
+            user = await ctx.UserCreator.promises.createNewUser(ctx.attributes)
           })
 
           it('should flag that affiliation is unchecked', function () {
@@ -257,8 +261,7 @@ describe('UserCreator', function () {
       })
 
       it('should not add affiliation when without affiliation feature', async function (ctx) {
-        const attributes = { email: ctx.email }
-        await ctx.UserCreator.promises.createNewUser(attributes)
+        await ctx.UserCreator.promises.createNewUser(ctx.attributes)
         sinon.assert.notCalled(
           ctx.UserUpdater.promises.addAffiliationForNewUser
         )
@@ -268,7 +271,7 @@ describe('UserCreator', function () {
     describe('with promises', function () {
       it('should take the opts and put them in the model', async function (ctx) {
         const opts = {
-          email: ctx.email,
+          ...ctx.attributes,
           holdingAccount: true,
         }
         const user = await ctx.UserCreator.promises.createNewUser(opts)
@@ -282,8 +285,9 @@ describe('UserCreator', function () {
           .stub()
           .withArgs('affiliations')
           .returns(true)
-        const attributes = { email: ctx.email }
-        const user = await ctx.UserCreator.promises.createNewUser(attributes)
+        const user = await ctx.UserCreator.promises.createNewUser(
+          ctx.attributes
+        )
         sinon.assert.calledOnce(
           ctx.UserUpdater.promises.addAffiliationForNewUser
         )
@@ -296,8 +300,7 @@ describe('UserCreator', function () {
 
       it('should not add affiliation when without affiliation feature', async function (ctx) {
         ctx.Features.hasFeature = sinon.stub().returns(false)
-        const attributes = { email: ctx.email }
-        await ctx.UserCreator.promises.createNewUser(attributes)
+        await ctx.UserCreator.promises.createNewUser(ctx.attributes)
         sinon.assert.notCalled(
           ctx.UserUpdater.promises.addAffiliationForNewUser
         )
@@ -305,7 +308,7 @@ describe('UserCreator', function () {
 
       it('should include SAML provider ID with email', async function (ctx) {
         const attributes = {
-          email: ctx.email,
+          ...ctx.attributes,
           samlIdentifiers: [{ email: ctx.email, providerId: '1' }],
         }
         const user = await ctx.UserCreator.promises.createNewUser(attributes)
@@ -313,27 +316,27 @@ describe('UserCreator', function () {
       })
 
       it('should fire an analytics event and user property on registration', async function (ctx) {
-        const user = await ctx.UserCreator.promises.createNewUser({
-          email: ctx.email,
-        })
+        const user = await ctx.UserCreator.promises.createNewUser(
+          ctx.attributes
+        )
         assert.equal(user.email, ctx.email)
         sinon.assert.calledWith(
-          ctx.Analytics.recordEventForUserInBackground,
-          user._id,
+          ctx.Analytics.recordEventForMongoUserInBackground,
+          user,
           'user-registered'
         )
         sinon.assert.calledWith(
-          ctx.Analytics.setUserPropertyForUser,
-          user._id,
+          ctx.Analytics.setUserPropertyForMongoUser,
+          user,
           'created-at'
         )
       })
 
       it('should schedule post registration jobs on registration with saas feature', async function (ctx) {
         ctx.Features.hasFeature = sinon.stub().withArgs('saas').returns(true)
-        const user = await ctx.UserCreator.promises.createNewUser({
-          email: ctx.email,
-        })
+        const user = await ctx.UserCreator.promises.createNewUser(
+          ctx.attributes
+        )
         assert.equal(user.email, ctx.email)
         sinon.assert.calledWith(
           ctx.UserOnboardingEmailManager.scheduleOnboardingEmail,
@@ -347,14 +350,21 @@ describe('UserCreator', function () {
       })
 
       it('should not schedule post registration checks when without saas feature', async function (ctx) {
-        const attributes = { email: ctx.email }
-        await ctx.UserCreator.promises.createNewUser(attributes)
+        await ctx.UserCreator.promises.createNewUser(ctx.attributes)
         sinon.assert.notCalled(
           ctx.UserOnboardingEmailManager.scheduleOnboardingEmail
         )
         sinon.assert.notCalled(
           ctx.UserPostRegistrationAnalyticsManager
             .schedulePostRegistrationAnalytics
+        )
+      })
+
+      it('should throw without analyticsId', async function (ctx) {
+        await expect(
+          ctx.UserCreator.promises.createNewUser({ email: ctx.email })
+        ).to.eventually.be.rejectedWith(
+          /bug: attributes.analyticsId is missing/
         )
       })
     })

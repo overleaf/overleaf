@@ -427,8 +427,8 @@ async function pauseSubscription(req, res, next) {
     const { subscription } =
       await LimitationsManager.promises.userHasSubscription(user)
 
-    AnalyticsManager.recordEventForUserInBackground(
-      user._id,
+    AnalyticsManager.recordEventForSession(
+      req.session,
       'subscription-pause-scheduled',
       {
         pause_length: pauseCycles,
@@ -598,7 +598,9 @@ async function previewAddonPurchase(req, res) {
       err instanceof Error &&
       err.constructor.name === 'PaymentServiceResourceNotFoundError'
     ) {
-      return res.redirect('/user/subscription/plans#ai-assist')
+      return res.redirect(
+        '/user/subscription?redirect-reason=ai-assist-unavailable'
+      )
     }
     throw err
   }
@@ -624,7 +626,9 @@ async function previewAddonPurchase(req, res) {
       err instanceof Error &&
       err.constructor.name === 'PaymentServiceResourceNotFoundError'
     ) {
-      return res.redirect('/user/subscription/plans#ai-assist')
+      return res.redirect(
+        '/user/subscription?redirect-reason=ai-assist-unavailable'
+      )
     }
     throw err
   }
@@ -885,11 +889,22 @@ async function previewSubscription(req, res, next) {
     }
   }
 
-  const subscriptionChange =
-    await SubscriptionHandler.promises.previewSubscriptionChange(
-      userId,
-      planCode
-    )
+  let subscriptionChange
+  try {
+    subscriptionChange =
+      await SubscriptionHandler.promises.previewSubscriptionChange(
+        userId,
+        planCode
+      )
+  } catch (err) {
+    if (
+      err instanceof Error &&
+      err.constructor.name === 'PaymentServiceResourceNotFoundError'
+    ) {
+      return res.redirect('/user/subscription/plans')
+    }
+    throw err
+  }
   /** @type {PaymentMethod[]} */
   const paymentMethod = await Modules.promises.hooks.fire(
     'getPaymentMethod',

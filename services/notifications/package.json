@@ -10,8 +10,8 @@
     "test:acceptance": "yarn run test:acceptance:_run",
     "test:unit:_run": "vitest --config ./vitest.config.unit.cjs",
     "test:unit": "yarn run test:unit:_run",
-    "lint": "eslint --cache --cache-location ../../node_modules/.cache/eslint/ --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --cache --cache-location ../../node_modules/.cache/eslint/ --fix .",
+    "lint": "eslint --cache --cache-location ../../.cache/eslint/ --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --cache --cache-location ../../.cache/eslint/ --fix .",
     "types:check": "tsc --noEmit",
     "nodemon": "node --watch app.ts"
   },
@@ -30,14 +30,12 @@
     "body-parser": "1.20.4",
     "bunyan": "^1.8.15",
     "express": "4.22.1",
-    "method-override": "^3.0.0",
     "mongodb-legacy": "6.1.3",
     "zod": "^4.1.7",
     "zod-validation-error": "^4.0.1"
   },
   "devDependencies": {
     "@overleaf/migrations": "workspace:*",
-    "@types/method-override": "^3.0.0",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "mocha": "^11.1.0",

@@ -149,14 +149,12 @@ function _addNumericSuffixToProjectName(name, allProjectNames, maxLength) {
   return null
 }
 
-async function _monthlyExperimentalImageAllowed(user) {
-  const userId = user?._id?.toString()
-  if (!userId) return false
-  const { variant } = await SplitTestHandler.promises.getAssignmentForUser(
-    userId,
+async function _monthlyExperimentalImageAllowed(req, res) {
+  return await SplitTestHandler.promises.featureFlagEnabled(
+    req,
+    res,
     'monthly-texlive'
   )
-  return variant === 'enabled'
 }
 
 function _imageAllowed(
@@ -173,12 +171,12 @@ function _imageAllowed(
   return true
 }
 
-async function getAllowedImagesForUser(user) {
+async function getAllowedImagesForUser(req, res, user) {
   let images = Settings.allowedImageNames || []
 
   const alphaImagesAllowed = Boolean(user?.alphaProgram)
   const monthlyExperimentalImagesAllowed =
-    await _monthlyExperimentalImageAllowed(user)
+    await _monthlyExperimentalImageAllowed(req, res)
 
   images = images.map(image => {
     return {

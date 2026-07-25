@@ -1,7 +1,8 @@
 import { vi, expect, describe, beforeEach, afterEach, it } from 'vitest'
 import Path from 'node:path'
+import fs from 'node:fs'
 import fsPromises from 'node:fs/promises'
-import mockFs from 'mock-fs'
+import os from 'node:os'
 
 const MODULE_PATH = Path.join(
   import.meta.dirname,
@@ -15,20 +16,19 @@ describe('DraftModeManager', () => {
     }))
 
     ctx.DraftModeManager = (await import(MODULE_PATH)).default
-    ctx.filename = '/mock/filename.tex'
+    ctx.tmpDir = fs.mkdtempSync(Path.join(os.tmpdir(), 'draft-mode-test-'))
+    ctx.filename = Path.join(ctx.tmpDir, 'filename.tex')
     ctx.contents = `\
 \\documentclass{article}
 \\begin{document}
 Hello world
 \\end{document}\
 `
-    mockFs({
-      [ctx.filename]: ctx.contents,
-    })
+    fs.writeFileSync(ctx.filename, ctx.contents)
   })
 
-  afterEach(() => {
-    mockFs.restore()
+  afterEach(ctx => {
+    fs.rmSync(ctx.tmpDir, { recursive: true })
   })
 
   describe('injectDraftMode', () => {

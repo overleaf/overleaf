@@ -1,5 +1,5 @@
 diff --git a/lib/sandboxed_module.js b/lib/sandboxed_module.js
-index 1cd6743fe221cbe91ea92fea3707ed07a8a2ded3..46889217d96d5534a206549ae7bd97100e41c3e4 100644
+index 1cd6743..4718b97 100644
 --- a/lib/sandboxed_module.js
 +++ b/lib/sandboxed_module.js
 @@ -4,7 +4,7 @@ var Module = require('module');
@@ -11,3 +11,47 @@ index 1cd6743fe221cbe91ea92fea3707ed07a8a2ded3..46889217d96d5534a206549ae7bd9710
  var parent = module.parent;
  var globalOptions = {};
  var registeredBuiltInSourceTransformers = ['coffee'];
+@@ -157,12 +157,20 @@ SandboxedModule.prototype._createRecursiveRequireProxy = function() {
+   var cache = Object.create(null);
+   var required = this._getRequires();
+   for (var key in required) {
+-    var injectedFilename = requireLike(this.filename).resolve(key);
+-    cache[injectedFilename] = required[key];
++    // Under Yarn PnP, resolution from a transitive dependency's context may fail
++    // for packages not declared in that dependency's package.json. Silently skip
++    // cache pre-population on failure; the mock will still be injected via the
++    // inject map in requireInterceptor or resolved via RecursiveRequireProxy fallback.
++    try {
++      var injectedFilename = requireLike(this.filename).resolve(key);
++      cache[injectedFilename] = required[key];
++    } catch (e) {}
+   }
+   cache[this.filename] = this.exports;
+   var globals = this.globals;
+ 
++  // Store the top-level module's filename for PnP fallback resolution
++  var topLevelFilename = this.filename;
+   var options;
+   if(!this._options.sourceTransformersSingleOnly && this._options.sourceTransformers){
+     options = {
+@@ -208,8 +216,18 @@ SandboxedModule.prototype._createRecursiveRequireProxy = function() {
+       if (request in cache) return cache[request];
+       return require(request);
+     }
+-    // cached modules
+-    var requestedFilename = requireLike(this.filename).resolve(request);
++    // Resolve the requested module filename.
++    // Under Yarn PnP, packages can only resolve their declared dependencies.
++    // When sandboxed-module loads a transitive dependency, the resolution context
++    // may not have access to all needed packages. Fall back to resolving from
++    // the top-level module's context (the module under test).
++    var requestedFilename;
++    try {
++      requestedFilename = requireLike(this.filename).resolve(request);
++    } catch (e) {
++      if (this.filename === topLevelFilename) throw e;
++      requestedFilename = requireLike(topLevelFilename).resolve(request);
++    }
+     if (requestedFilename in cache) return cache[requestedFilename];
+     var sandboxedModule = createInnerSandboxedModule(requestedFilename)
+     return sandboxedModule.exports;

@@ -21,6 +21,7 @@ import { GroupPolicy } from '../../models/GroupPolicy.mjs'
 import { AI_ADD_ON_CODE } from './AiHelper.mjs'
 import { fetchNothing } from '@overleaf/fetch-utils'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
+import SplitTestUserGetter from '../SplitTests/SplitTestUserGetter.mjs'
 
 /**
  * Enqueue a job for refreshing features for the given user
@@ -39,20 +40,24 @@ function featuresEpochIsCurrent(user) {
 
 /**
  * Refresh features for the given user
+ * @param {string} userId
+ * @param {string} reason
  */
 async function refreshFeatures(userId, reason) {
   const user = await UserGetter.promises.getUser(userId, {
     _id: 1,
     features: 1,
     email: 1,
+    // analyticsId + labsProgram (analytics) and the split test fields below
+    ...SplitTestUserGetter.getProjection('plans-2026-phase-1'),
   })
   const oldFeatures = _.clone(user.features)
   const features = await computeFeatures(userId)
   logger.debug({ userId, features, reason }, 'updating user features')
 
   const matchedFeatureSet = FeaturesHelper.getMatchedFeatureSet(features)
-  AnalyticsManager.setUserPropertyForUserInBackground(
-    userId,
+  AnalyticsManager.setUserPropertyForMongoUserInBackground(
+    user,
     'feature-set',
     matchedFeatureSet
   )
@@ -92,8 +97,8 @@ async function refreshFeatures(userId, reason) {
       // todo: quota clean-up: simplify once split test isnt needed
       let hasPremiumAiFeatures
       const inQuotaSplitTest =
-        await SplitTestHandler.promises.featureFlagEnabledForUser(
-          userId,
+        await SplitTestHandler.promises.featureFlagEnabledForMongoUser(
+          user,
           'plans-2026-phase-1'
         )
       if (inQuotaSplitTest) {

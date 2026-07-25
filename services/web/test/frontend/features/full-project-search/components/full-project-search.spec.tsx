@@ -85,8 +85,8 @@ const createInitialValue = () =>
     setReviewPanelOpen: cy.stub(),
     miniReviewPanelVisible: false,
     setMiniReviewPanelVisible: cy.stub(),
-    leftMenuShown: false,
-    setLeftMenuShown: cy.stub(),
+    settingsShown: false,
+    setSettingsShown: cy.stub(),
     loadingStyleSheet: false,
     setLoadingStyleSheet: cy.stub(),
     pdfLayout: 'flat',
@@ -98,6 +98,8 @@ const createInitialValue = () =>
     restoreView: cy.stub(),
     handleChangeLayout: cy.stub(),
     handleDetach: cy.stub(),
+    focusMode: false,
+    setFocusMode: cy.stub(),
   }) satisfies LayoutContextValue
 
 const LayoutProvider: FC<React.PropsWithChildren> = ({ children }) => {

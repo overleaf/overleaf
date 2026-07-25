@@ -7,6 +7,7 @@ import FeaturesHelper from './FeaturesHelper.mjs'
  * @typedef {InstanceType<typeof import('../../models/Subscription.mjs').Subscription>} MongoSubscription
  * @typedef {import('../../../../types/subscription/plan').Plan} Plan
  * @typedef {import('../../../../modules/subscriptions/app/src/PaymentService.mjs').PaymentRecord} PaymentRecord
+ * @typedef {import('../../../../types/user-email').UserEmailData} UserEmailData
  */
 
 /**
@@ -541,6 +542,28 @@ function getGroupRole(
 }
 
 /**
+ * Customer.io properties derived from a user's institutional affiliations.
+ *
+ * @param {UserEmailData[]} userEmails - email data from UserGetter.getUserFullEmails
+ * @returns {{ enterprise_commons: boolean, domain_capture: boolean }}
+ */
+function getAffiliationProperties(userEmails) {
+  const enterpriseCommons = userEmails.some(
+    emailData =>
+      emailData.emailHasInstitutionLicence &&
+      emailData.affiliation?.institution?.commonsAccount &&
+      emailData.affiliation?.institution?.enterpriseCommons
+  )
+  const domainCapture = userEmails.some(
+    emailData => emailData.affiliation?.group?.domainCaptureEnabled
+  )
+  return {
+    enterprise_commons: enterpriseCommons,
+    domain_capture: domainCapture,
+  }
+}
+
+/**
  * Compute plan-related user properties for sending to customer.io.
  *
  * @param {object} options
@@ -657,4 +680,5 @@ export default {
   shouldUseCommonsBestSubscription,
   getGroupRole,
   getPlanProperties,
+  getAffiliationProperties,
 }

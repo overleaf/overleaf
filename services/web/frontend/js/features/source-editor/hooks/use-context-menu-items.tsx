@@ -32,6 +32,8 @@ import {
   ContextMenuItemSegmentation,
 } from '../utils/context-menu-analytics'
 import { isCursorOnEmptyLine } from '../utils/is-cursor-on-empty-line'
+import { selectAll } from '@codemirror/commands'
+import { useTrackedChangesActions } from '@/features/review-panel/hooks/use-tracked-changes-actions'
 
 export const useContextMenuItems = () => {
   const view = useCodeMirrorViewContext()
@@ -54,6 +56,8 @@ export const useContextMenuItems = () => {
   const { setUpgradeTrackChangesModal } = useEditorContext()
   const trackingChangesMode = useTrackingChangesMode()
   const isReview = trackingChangesMode === 'review'
+  const { changesInSelection, acceptChangesHandler, rejectChangesHandler } =
+    useTrackedChangesActions()
 
   const closeMenu = useCallback(() => {
     view.dispatch({ effects: closeContextMenuEffect.of(null) })
@@ -144,6 +148,9 @@ export const useContextMenuItems = () => {
       return result
     }
   )
+  const handleSelectAll = wrapForContextMenu('select-all', () =>
+    selectAll(view)
+  )
   const handleDelete = wrapForContextMenu('delete', () =>
     commands.deleteSelection(view)
   )
@@ -166,6 +173,16 @@ export const useContextMenuItems = () => {
 
   const handleComment = wrapForContextMenu('comment', () => {
     commands.addComment('editor-context-menu')
+    return true
+  })
+
+  const handleAcceptChanges = wrapForContextMenu('accept-changes', () => {
+    acceptChangesHandler()
+    return true
+  })
+
+  const handleRejectChanges = wrapForContextMenu('reject-changes', () => {
+    rejectChangesHandler()
     return true
   })
 
@@ -224,6 +241,13 @@ export const useContextMenuItems = () => {
         shortcut: inVisualMode ? getShortcut('paste-special') : undefined,
       },
       {
+        label: t('select_all'),
+        handler: handleSelectAll,
+        disabled: false,
+        show: true,
+        shortcut: getShortcut('select-all'),
+      },
+      {
         label: t('delete'),
         handler: handleDelete,
         disabled: !hasSelection,
@@ -252,6 +276,20 @@ export const useContextMenuItems = () => {
         disabled: isCursorOnEmptyLine(state),
         show: permissions.comment,
         shortcut: getShortcut('insert-comment'),
+      },
+      {
+        label: t('accept_selected_changes'),
+        handler: handleAcceptChanges,
+        disabled: false,
+        show: permissions.write && changesInSelection.length > 0,
+        shortcut: undefined,
+      },
+      {
+        label: t('reject_selected_changes'),
+        handler: handleRejectChanges,
+        disabled: false,
+        show: permissions.write && changesInSelection.length > 0,
+        shortcut: undefined,
       },
     ].filter(item => item.show),
   }

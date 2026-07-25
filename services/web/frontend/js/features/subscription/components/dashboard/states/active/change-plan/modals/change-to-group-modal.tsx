@@ -38,13 +38,7 @@ function GroupPlanCollaboratorCount({ planCode }: { planCode: string }) {
   const { t } = useTranslation()
 
   if (planCode === 'collaborator') {
-    return (
-      <>
-        {t('collabs_per_proj', {
-          collabcount: 10,
-        })}
-      </>
-    )
+    return <>{t('collabs_per_proj', { count: 10 })}</>
   } else if (planCode === 'professional') {
     return <>{t('unlimited_collabs')}</>
   }

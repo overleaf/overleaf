@@ -75,6 +75,20 @@ describe('keyboard shortcuts', { scrollBehavior: false }, function () {
     })
   })
 
+  it('dispatches add comment with {ctrl+shift+c}', function () {
+    cy.window().then(win => {
+      win.addEventListener('add-new-review-comment', cy.stub().as('addComment'))
+    })
+
+    cy.get('@editor').trigger('keydown', {
+      key: 'c',
+      ctrlKey: true,
+      shiftKey: true,
+    })
+
+    cy.get('@addComment').should('have.been.calledOnce')
+  })
+
   it('indent line with {tab}', function () {
     cy.get('@line').trigger('keydown', { key: 'Tab' })
     cy.get('@line').should('have.text', '    ')
@@ -96,7 +110,7 @@ describe('keyboard shortcuts', { scrollBehavior: false }, function () {
   it('lowercase selection with {ctrl+shift+u}', function () {
     if (navigator.platform.startsWith('Linux')) {
       // Skip test as {ctrl+shift+u} is bound elsewhere in some Linux systems
-      // eslint-disable-next-line mocha/no-skipped-tests
+      // eslint-disable-next-line mocha/no-pending-tests
       this.skip()
     }
 

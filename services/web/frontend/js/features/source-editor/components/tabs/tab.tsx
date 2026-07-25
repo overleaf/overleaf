@@ -26,6 +26,7 @@ type TabProps = {
   tab: EditorFileTab
   openTab: (id: string) => void
   closeTab: (id: string) => void
+  canCloseTab: boolean
   makeTabPermanent: (id: string) => void
   openContextMenu: (
     coords: { top: number; left: number },
@@ -56,6 +57,7 @@ export const Tab = memo(function Tab({
   tab,
   openTab,
   closeTab,
+  canCloseTab,
   makeTabPermanent,
   openContextMenu,
   closeContextMenu,
@@ -98,6 +100,9 @@ export const Tab = memo(function Tab({
   const onDragLeave = useCallback(
     (e: React.DragEvent) => {
       e.stopPropagation()
+      if (e.currentTarget.contains(e.relatedTarget as Node | null)) {
+        return
+      }
       throttledOnDragOver.cancel()
       setDropTargetPosition(null)
     },
@@ -222,18 +227,21 @@ export const Tab = memo(function Tab({
         'tab-temporary': tab.lifetime === 'temporary',
       })}
     >
-      <span className="editor-file-tab-icon">
-        <FileTreeIcon isLinkedFile={tab.isLinkedFile} name={tab.name} />
-      </span>
-      <div className="editor-file-tab-path">&lrm;{tab.displayPath}</div>
-      <div className="editor-file-tab-action">
-        <button
-          onClick={onCloseClick}
-          className="editor-file-tab-close-action"
-          aria-label={t('close_tab')}
-        >
-          <MaterialIcon type="close" />
-        </button>
+      <div className="editor-file-tab-content">
+        <span className="editor-file-tab-icon">
+          <FileTreeIcon isLinkedFile={tab.isLinkedFile} name={tab.name} />
+        </span>
+        <div className="editor-file-tab-path">&lrm;{tab.displayPath}</div>
+        <div className="editor-file-tab-action">
+          <button
+            onClick={onCloseClick}
+            disabled={!canCloseTab}
+            className="editor-file-tab-close-action"
+            aria-label={t('close')}
+          >
+            <MaterialIcon type="close" />
+          </button>
+        </div>
       </div>
     </div>
   )

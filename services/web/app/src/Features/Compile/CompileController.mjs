@@ -46,13 +46,12 @@ function getOutputFilesArchiveSpecification(projectId, userId, buildId) {
 }
 
 async function _getSplitTestOptions(req, res) {
-  const { variant } = await SplitTestHandler.promises.getAssignment(
+  const compileFromHistory = await SplitTestHandler.promises.featureFlagEnabled(
     req,
     res,
     'compile-from-history',
     { includeReferer: true }
   )
-  const compileFromHistory = variant === 'enabled'
 
   const pdfDownloadDomain = Settings.pdfDownloadDomain
   const enablePdfCaching = Settings.enablePdfCaching
@@ -67,11 +66,20 @@ async function _getSplitTestOptions(req, res) {
   }
 
   const pdfCachingMinChunkSize = Settings.pdfCachingMinChunkSize
+
+  const enableCheckpoint = await SplitTestHandler.promises.featureFlagEnabled(
+    req,
+    res,
+    'compile-with-checkpoint',
+    { includeReferer: true }
+  )
+
   return {
     compileFromHistory,
     pdfDownloadDomain,
     enablePdfCaching,
     pdfCachingMinChunkSize,
+    enableCheckpoint,
   }
 }
 
@@ -206,33 +214,19 @@ const _CompileController = {
       pdfCachingMinChunkSize,
       pdfDownloadDomain,
       compileFromHistory,
+      enableCheckpoint,
     } = await _getSplitTestOptions(req, res)
     if (Features.hasFeature('saas')) {
       options.compileFromClsiCache = true
       options.populateClsiCache = true
       options.compileFromHistory = compileFromHistory
+      if (enableCheckpoint) {
+        options.enableCheckpoint = enableCheckpoint
+      }
     }
     options.enablePdfCaching = enablePdfCaching
     if (enablePdfCaching) {
       options.pdfCachingMinChunkSize = pdfCachingMinChunkSize
-    }
-
-    if (!options.rootResourcePath) {
-      const agent = (req.headers['user-agent'] || '').toLowerCase()
-      const isKnownOtherFrontend = agent.includes('node-fetch')
-      logger.warn(
-        { isKnownOtherFrontend, req, projectId, userId, options },
-        'rootResourcePath is missing in request body'
-      )
-      if (isKnownOtherFrontend) {
-        // Reject malformed compile request from "known" other frontend.
-        res.status(400).json({
-          error: 'rootResourcePath is missing in request body',
-        })
-        return
-      }
-      // All others: Log for now and fall back to old compile mode.
-      options.compileFromHistory = false
     }
 
     const {
@@ -246,6 +240,7 @@ const _CompileController = {
       outputUrlPrefix,
       buildId,
       clsiCacheShard,
+      instanceType,
     } = await CompileManager.promises
       .compile(projectId, userId, options)
       .catch(error => {
@@ -279,8 +274,15 @@ const _CompileController = {
           status,
           compileTime: timings?.compileE2E,
           timeout: limits.timeout,
-          server: clsiServerId?.includes('-c4d-') ? 'faster' : 'normal',
+          server: instanceType
+            ? instanceType === 'c4d'
+              ? 'faster'
+              : 'normal'
+            : clsiServerId?.includes('-c4d-')
+              ? 'faster'
+              : 'normal',
           clsiServerId,
+          instanceType,
           isAutoCompile,
           isInitialCompile: stats?.isInitialCompile === 1,
           restoredClsiCache: stats?.restoredClsiCache === 1,
@@ -336,7 +338,8 @@ const _CompileController = {
     }
     options.compileGroup =
       req.body?.compileGroup || Settings.defaultFeatures.compileGroup
-    options.compileBackendClass = Settings.apis.clsi.submissionBackendClass
+    options.compileBackendClass =
+      Settings.apis.clsi.submissionCompileBackendClass
     options.timeout =
       req.body?.timeout || Settings.defaultFeatures.compileTimeout
     const { status, outputFiles, clsiServerId, validationProblems } =

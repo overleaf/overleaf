@@ -7,6 +7,7 @@ import logger from '@overleaf/logger'
 import { AI_ADD_ON_CODE, isStandaloneAiAddOnPlanCode } from './AiHelper.mjs'
 import './GroupPlansData.mjs' // make sure dynamic group plans are loaded
 import Features from '../../infrastructure/Features.mjs'
+import { isProfessionalGroupPlan } from './PlansHelper.mjs'
 
 const SubscriptionLocator = {
   async getUsersSubscription(userOrId) {
@@ -178,6 +179,38 @@ const SubscriptionLocator = {
     } else if (userOrId) {
       return userOrId
     }
+  },
+
+  async getUserActiveProfessionalGroupSubscriptions(userOrId, projection = {}) {
+    if (!Features.hasFeature('saas')) return []
+
+    const userId = SubscriptionLocator._getUserId(userOrId)
+
+    if (!userId) return []
+
+    const activeGroupSubscriptions = await Subscription.find(
+      {
+        groupPlan: true,
+        $and: [
+          { $or: [{ admin_id: userId }, { member_ids: userId }] },
+          {
+            $or: [
+              { 'recurlyStatus.state': 'active' },
+              { 'paymentProvider.state': 'active' },
+            ],
+          },
+        ],
+      },
+      {
+        ...projection,
+        groupPlan: 1,
+        planCode: 1,
+      }
+    ).exec()
+
+    return activeGroupSubscriptions.filter(subscription =>
+      isProfessionalGroupPlan(subscription)
+    )
   },
 
   async getUserSubscriptionStatus(userId) {

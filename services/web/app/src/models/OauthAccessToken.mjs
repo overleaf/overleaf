@@ -17,6 +17,14 @@ export const OauthAccessTokenSchema = new Schema(
     createdAt: { type: Date },
     expiresAt: Date,
     lastUsedAt: Date,
+    lastNotifiedAt: {
+      type: {
+        warning: Date,
+        expired: Date,
+      },
+      _id: false,
+    },
+    notificationsSuppressedAt: Date,
   },
   {
     collection: 'oauthAccessTokens',

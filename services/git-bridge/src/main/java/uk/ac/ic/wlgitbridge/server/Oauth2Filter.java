@@ -5,6 +5,10 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -107,15 +111,18 @@ public class Oauth2Filter implements Filter {
       // fail later (for example, in the unlikely event that the token
       // expired between the two requests). In that case, JGit will
       // return a 401 without a custom error message.
-      int statusCode = checkAccessToken(this.oauth2Server, password, getClientIp(request));
-      if (statusCode == 429) {
+      AccessTokenCheck check = checkAccessToken(this.oauth2Server, password, getClientIp(request));
+      if (check.statusCode == 429) {
         handleRateLimit(projectId, username, request, response);
         return;
-      } else if (statusCode == 401) {
+      } else if (check.statusCode == 401 && "token_expired".equals(check.errorCode)) {
+        handleExpiredAccessToken(projectId, request, response);
+        return;
+      } else if (check.statusCode == 401) {
         handleBadAccessToken(projectId, request, response);
         return;
-      } else if (statusCode >= 400) {
-        handleUnknownOauthServerError(projectId, statusCode, request, response);
+      } else if (check.statusCode >= 400) {
+        handleUnknownOauthServerError(projectId, check.statusCode, request, response);
         return;
       }
       cred.setAccessToken(password);
@@ -229,8 +236,52 @@ public class Oauth2Filter implements Filter {
             "https://www.overleaf.com/learn/how-to/Git_integration"));
   }
 
-  private int checkAccessToken(String oauth2Server, String accessToken, String clientIp)
+  private void handleExpiredAccessToken(
+      String projectId, HttpServletRequest request, HttpServletResponse response)
       throws IOException {
+    Log.debug("[{}] Expired access token, ip={}", projectId, getClientIp(request));
+    sendResponse(
+        response,
+        401,
+        Arrays.asList(
+            "Your Overleaf Git authentication token has expired.",
+            "",
+            "Generate a new authentication token in your Overleaf Account Settings,",
+            "then run the git command again."));
+  }
+
+  static class AccessTokenCheck {
+    final int statusCode;
+    final String errorCode;
+
+    AccessTokenCheck(int statusCode, String errorCode) {
+      this.statusCode = statusCode;
+      this.errorCode = errorCode;
+    }
+  }
+
+  static String parseErrorCode(String body) {
+    if (body == null || body.isEmpty()) {
+      return null;
+    }
+    try {
+      JsonElement element = new Gson().fromJson(body, JsonElement.class);
+      if (element == null || !element.isJsonObject()) {
+        return null;
+      }
+      JsonObject obj = element.getAsJsonObject();
+      JsonElement codeElement = obj.get("error_code");
+      if (codeElement == null || codeElement.isJsonNull()) {
+        return null;
+      }
+      return codeElement.getAsString();
+    } catch (JsonSyntaxException | UnsupportedOperationException e) {
+      return null;
+    }
+  }
+
+  private AccessTokenCheck checkAccessToken(
+      String oauth2Server, String accessToken, String clientIp) throws IOException {
     GenericUrl url = new GenericUrl(oauth2Server + "/oauth/token/info?client_ip=" + clientIp);
     HttpRequest request = Instance.httpRequestFactory.buildGetRequest(url);
     HttpHeaders headers = new HttpHeaders();
@@ -239,8 +290,12 @@ public class Oauth2Filter implements Filter {
     request.setThrowExceptionOnExecuteError(false);
     HttpResponse response = request.execute();
     int statusCode = response.getStatusCode();
+    String errorCode = null;
+    if (statusCode >= 400 && statusCode < 500) {
+      errorCode = parseErrorCode(response.parseAsString());
+    }
     response.disconnect();
-    return statusCode;
+    return new AccessTokenCheck(statusCode, errorCode);
   }
 
   private void handleUnknownOauthServerError(

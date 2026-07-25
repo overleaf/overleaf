@@ -3,23 +3,23 @@ import metrics from '@overleaf/metrics'
 import UserUpdater from '../User/UserUpdater.mjs'
 import AnalyticsManager from '../Analytics/AnalyticsManager.mjs'
 
-async function optIn(userId) {
+async function optIn(session, userId) {
   await UserUpdater.promises.updateUser(userId, { $set: { betaProgram: true } })
   metrics.inc('beta-program.opt-in')
-  AnalyticsManager.setUserPropertyForUserInBackground(
-    userId,
+  AnalyticsManager.setUserPropertyForSessionInBackground(
+    session,
     'beta-program',
     true
   )
 }
 
-async function optOut(userId) {
+async function optOut(session, userId) {
   await UserUpdater.promises.updateUser(userId, {
     $set: { betaProgram: false },
   })
   metrics.inc('beta-program.opt-out')
-  AnalyticsManager.setUserPropertyForUserInBackground(
-    userId,
+  AnalyticsManager.setUserPropertyForSessionInBackground(
+    session,
     'beta-program',
     false
   )

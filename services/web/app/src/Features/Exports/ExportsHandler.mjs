@@ -1,7 +1,6 @@
 import OError from '@overleaf/o-error'
 import ProjectGetter from '../Project/ProjectGetter.mjs'
 import ProjectHistoryHandler from '../Project/ProjectHistoryHandler.mjs'
-import ProjectLocator from '../Project/ProjectLocator.mjs'
 import ProjectRootDocManager from '../Project/ProjectRootDocManager.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import logger from '@overleaf/logger'
@@ -37,17 +36,25 @@ export default ExportsHandler = {
       show_source: showSource,
     } = exportParams
 
-    let project, rootDoc, user, historyVersion
+    let project, rootResourcePath, user, historyVersion
 
     try {
-      project = await ProjectGetter.promises.getProject(projectId)
-
-      await ProjectRootDocManager.promises.ensureRootDocumentIsValid(projectId)
-
-      rootDoc = await ProjectLocator.promises.findRootDoc({
-        project,
-        project_id: projectId,
+      project = await ProjectGetter.promises.getProject(projectId, {
+        overleaf: 1,
+        compiler: 1,
+        imageName: 1,
       })
+
+      const result =
+        await ProjectRootDocManager.promises.ensureRootDocumentIsValid(
+          projectId
+        )
+      if (!result) {
+        throw new OError('cannot export project without root doc', {
+          project_id: projectId,
+        })
+      }
+      rootResourcePath = result.rootResourcePath
 
       user = await UserGetter.promises.getUser(userId, {
         first_name: 1,
@@ -67,12 +74,6 @@ export default ExportsHandler = {
       })
     }
 
-    if (!rootDoc || !rootDoc.path) {
-      throw new OError('cannot export project without root doc', {
-        project_id: projectId,
-      })
-    }
-
     if (exportParams.first_name && exportParams.last_name) {
       user.first_name = exportParams.first_name
       user.last_name = exportParams.last_name
@@ -81,7 +82,7 @@ export default ExportsHandler = {
     return {
       project: {
         id: projectId,
-        rootDocPath: rootDoc.path ? rootDoc.path.fileSystem : undefined,
+        rootDocPath: rootResourcePath,
         historyId: project.overleaf?.history?.id,
         historyVersion,
         v1ProjectId: project.overleaf != null ? project.overleaf.id : undefined,

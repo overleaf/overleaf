@@ -188,7 +188,10 @@ async function importDocument(req, res, next) {
   const { path } = req.file
   const conversionType = req.query.type
   if (!['docx', 'markdown'].includes(conversionType)) {
-    return res.status(400).json({ success: false, error: 'invalid_type' })
+    return res.status(400).json({
+      success: false,
+      error: req.i18n.translate('invalid_import_type'),
+    })
   }
   const name = Path.basename(req.body.name, Path.extname(req.body.name))
   logger.debug({ path, userId, conversionType }, 'importing document file')
@@ -207,16 +210,12 @@ async function importDocument(req, res, next) {
           archivePath
         )
       await ProjectOptionsHandler.promises.setCompiler(project._id, 'lualatex')
-      AnalyticsManager.recordEventForUserInBackground(
-        userId,
-        'convert-format',
-        {
-          sourceFormat: conversionType,
-          targetFormat: 'latex',
-          status: 'success',
-          operation: 'import',
-        }
-      )
+      AnalyticsManager.recordEventForSession(req.session, 'convert-format', {
+        sourceFormat: conversionType,
+        targetFormat: 'latex',
+        status: 'success',
+        operation: 'import',
+      })
       res.json({ success: true, project_id: project._id })
     } finally {
       await fsPromises.unlink(archivePath).catch(unlinkErr => {
@@ -227,7 +226,7 @@ async function importDocument(req, res, next) {
       })
     }
   } catch (error) {
-    AnalyticsManager.recordEventForUserInBackground(userId, 'convert-format', {
+    AnalyticsManager.recordEventForSession(req.session, 'convert-format', {
       sourceFormat: conversionType,
       targetFormat: 'latex',
       status: 'failure',
@@ -239,7 +238,7 @@ async function importDocument(req, res, next) {
     ) {
       return res.status(422).json({
         success: false,
-        error: 'file_too_large',
+        error: req.i18n.translate('file_too_large'),
       })
     }
     if (error instanceof DocumentConversionError) {

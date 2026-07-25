@@ -3,7 +3,8 @@ import getMeta from '@/utils/meta'
 import { loadStripe } from '@stripe/stripe-js/pure'
 
 export default async function handleStripePaymentAction(
-  error: FetchError
+  error: FetchError,
+  options?: { successPath?: string }
 ): Promise<{ handled: boolean }> {
   const clientSecret = error?.data?.clientSecret
   const publicKey = error?.data?.publicKey
@@ -11,14 +12,15 @@ export default async function handleStripePaymentAction(
   if (clientSecret && publicKey) {
     const stripe = await loadStripe(publicKey)
     if (stripe) {
-      const currentPath = window.location.pathname
+      const currentPath = window.location.pathname + window.location.search
       const returnUrl = new URL(
         '/user/subscription/offsite',
         getMeta('ol-ExposedSettings').siteUrl
       )
-      const returnParams = new URLSearchParams({
-        path: currentPath,
-      })
+      const returnParams = new URLSearchParams({ path: currentPath })
+      if (options?.successPath) {
+        returnParams.set('successPath', options.successPath)
+      }
       returnUrl.search = returnParams.toString()
 
       const manualConfirmationFlow = await stripe.confirmPayment({

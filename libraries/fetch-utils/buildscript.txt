@@ -5,6 +5,5 @@ fetch-utils
 --esmock-loader=False
 --is-library=True
 --node-version=24.14.1
---package-name=@overleaf/fetch-utils
 --pipeline-owner=32
 --public-repo=False

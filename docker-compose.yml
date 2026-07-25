@@ -30,6 +30,9 @@ services:
       OVERLEAF_REDIS_HOST: redis
       REDIS_HOST: redis
 
+      # IMPORTANT: Required for invite token generation
+      # OVERLEAF_INVITE_TOKEN_SECRET: generate with `openssl rand -base64 32`
+
       ENABLED_LINKED_FILE_TYPES: "project_file,project_output_file"
 
       # Enables Thumbnail generation using ImageMagick

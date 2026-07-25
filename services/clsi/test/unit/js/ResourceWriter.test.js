@@ -19,6 +19,12 @@ describe('ResourceWriter', () => {
       }),
     }))
 
+    vi.doMock('@overleaf/settings', () => ({
+      default: (ctx.settings = {
+        preciousFilePattern: '{keepdir/**,.other/keepdir/**}',
+      }),
+    }))
+
     vi.doMock('../../../app/js/ResourceStateManager', () => ({
       default: (ctx.ResourceStateManager = {}),
     }))
@@ -246,6 +252,12 @@ describe('ResourceWriter', () => {
         {
           path: 'output.stderr',
         },
+        {
+          path: 'keepdir/file',
+        },
+        {
+          path: '.other/keepdir/.subdir/file',
+        },
       ]
       ctx.resources = 'mock-resources'
       ctx.request = {
@@ -295,6 +307,18 @@ describe('ResourceWriter', () => {
       return ctx.ResourceWriter._deleteFileIfNotDirectory
         .calledWith(path.join(ctx.basePath, 'extra/file.tex'))
         .should.equal(true)
+    })
+
+    it('should not delete additionally specified files', ctx => {
+      return ctx.ResourceWriter._deleteFileIfNotDirectory
+        .calledWith(path.join(ctx.basePath, 'keepdir/file'))
+        .should.equal(false)
+    })
+
+    it('should not delete additionally specified hidden files', ctx => {
+      return ctx.ResourceWriter._deleteFileIfNotDirectory
+        .calledWith(path.join(ctx.basePath, '.other/keepdir/.subdir/file'))
+        .should.equal(false)
     })
 
     it('should not delete the extra aux files', ctx => {

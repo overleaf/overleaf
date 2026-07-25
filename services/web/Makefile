@@ -1,15 +1,20 @@
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
 export RETRIES ?= $(if $(CI),3,0)
 
-BUILD_NUMBER ?= local
+export BUILD_NUMBER ?= local
 ifeq ($(BRANCH_NAME),)
   export BRANCH_NAME := $(shell git rev-parse --abbrev-ref HEAD)
 endif
-BRANCH_NAME_TAG_SAFE := $(shell echo "$(BRANCH_NAME)" | sed 's/\//\-\-/g' | cut -c1-96)
+export BRANCH_NAME_TAG_SAFE := $(shell echo "$(BRANCH_NAME)" | sed 's/\//\-\-/g' | cut -c1-96)
+
+.PHONY: print-branch-tag-safe
+print-branch-tag-safe:
+	@echo $(BRANCH_NAME_TAG_SAFE)
+
 ifeq ($(COMMIT_SHA),)
   export COMMIT_SHA := $(shell git rev-parse HEAD)
 endif
-PROJECT_NAME = web
+export PROJECT_NAME = web
 BUILD_DIR_NAME := web
 PWD := $(shell pwd)
 ifeq ($(MONOREPO),)
@@ -23,11 +28,8 @@ CFG_SAAS=/overleaf/services/web/test/acceptance/config/settings.test.saas.js
 CFG_SERVER_CE=/overleaf/services/web/test/acceptance/config/settings.test.server-ce.js
 CFG_SERVER_PRO=/overleaf/services/web/test/acceptance/config/settings.test.server-pro.js
 
-DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
-	BRANCH_NAME=$(BRANCH_NAME_TAG_SAFE) \
-	PROJECT_NAME=$(PROJECT_NAME) \
-	MOCHA_GREP=${MOCHA_GREP} \
-	docker compose ${DOCKER_COMPOSE_FLAGS}
+export MOCHA_GREP ?=
+DOCKER_COMPOSE := docker compose ${DOCKER_COMPOSE_FLAGS}
 
 # Common flags for docker compose run.
 # --rm           Tear down test runner container
@@ -149,7 +151,7 @@ MOCHA_CMD_LINE = \
 	mocha \
 		--exit \
 		--file test/unit/bootstrap.js \
-		--grep=${MOCHA_GREP} \
+		--grep="${MOCHA_GREP}" \
 		--reporter spec \
 		--timeout 25000 \
 
@@ -173,7 +175,7 @@ test_unit_module: mongo_migrations_for_tests
 	$(MAKE) modules/$(MODULE_NAME)/test_unit
 
 mongo_migrations_for_tests:
-	$(DOCKER_COMPOSE) run $(DC_RUN_FLAGS) --workdir /overleaf/tools/migrations test_unit yarn run migrations migrate -t saas
+	$(DOCKER_COMPOSE) run $(DC_RUN_FLAGS) --workdir /overleaf/tools/migrations test_unit yarn run migrations migrate -t 'saas & !nonblocking'
 
 #
 # Frontend tests
@@ -222,7 +224,7 @@ test_writefull:
 # Note: The below cypress targets are for CI only
 build_test_frontend_ct:
 	$(DOCKER_COMPOSE) build test_frontend_ct
-	docker run --rm --volume /dev/shm:/dev/shm --user root $(IMAGE_CI) bash -ec 'for path in /overleaf/services/web/cypress/results /overleaf/services/web/cypress/support /overleaf/services/web/node_modules/.cache; do mkdir -p $$path; chown -R node:node $$path; done && tar -cC / overleaf | tar -xC /dev/shm'
+	docker run --rm --volume /dev/shm:/dev/shm --user root $(IMAGE_CI) bash -ec 'for path in /overleaf/services/web/cypress/results /overleaf/services/web/cypress/support /overleaf/services/web/.cache; do mkdir -p $$path; chown -R node:node $$path; done && tar -cC / overleaf | tar -xC /dev/shm'
 
 test_frontend_ct_core_other: export CYPRESS_DOWNLOADS=./cypress/downloads/core
 test_frontend_ct_core_other: export CYPRESS_RESULTS=./cypress/results/core
@@ -488,13 +490,13 @@ ci:
 
 # Run the linting commands in the scope of the monorepo.
 # Eslint and prettier (plus some configs) are on the root.
-RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/web/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/node_modules/.cache/:/overleaf/node_modules/.cache/ -w /overleaf $(IMAGE_CI) yarn run --silent
+RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/eslint.config.mjs:/overleaf/eslint.config.mjs --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/web/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/.cache/:/overleaf/.cache/ -w /overleaf $(IMAGE_CI) yarn run --silent
 RUN_LINTING = ../../bin/run -w /overleaf/services/$(PROJECT_NAME) monorepo yarn run --silent
 RUN_LINTING_MONOREPO = ../../bin/run monorepo yarn run --silent
 
 ORG_PATH = /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN_LINT_FORMAT ?= \
-	docker run --rm --env BRANCH_NAME --env CI --env COMMIT_SHA --env MONOREPO --env PATH=/overleaf/node_modules/.bin:$(ORG_PATH) --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume ${PWD}/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/node_modules/.cache/:/overleaf/node_modules/.cache/ ${IMAGE_CI}
+	docker run --rm --env BRANCH_NAME --env CI --env COMMIT_SHA --env MONOREPO --env PATH=/overleaf/node_modules/.bin:$(ORG_PATH) --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume ${PWD}/data/reports:/overleaf/services/web/data/reports --volume $(MONOREPO)/.cache/:/overleaf/.cache/ ${IMAGE_CI}
 
 NODE_MODULES_PATH := ${PATH}:${PWD}/node_modules/.bin:/overleaf/services/web/node_modules/.bin
 WITH_NODE_MODULES_PATH = \
@@ -524,16 +526,16 @@ WITH_CACHE_FOLDER = \
 	format_jenkins_fix \
 	format_in_docker \
 
-$(WITH_CACHE_FOLDER): ../../node_modules/.cache/prettier/
-../../node_modules/.cache/prettier/:
+$(WITH_CACHE_FOLDER): ../../.cache/prettier/
+../../.cache/prettier/:
 	mkdir -p $@
 
-$(WITH_CACHE_FOLDER): ../../node_modules/.cache/eslint/
-../../node_modules/.cache/eslint/:
+$(WITH_CACHE_FOLDER): ../../.cache/eslint/
+../../.cache/eslint/:
 	mkdir -p $@
 
-$(WITH_CACHE_FOLDER): ../../node_modules/.cache/stylelint/
-../../node_modules/.cache/stylelint/:
+$(WITH_CACHE_FOLDER): ../../.cache/stylelint/
+../../.cache/stylelint/:
 	mkdir -p $@
 
 lint: lint_eslint
@@ -545,6 +547,10 @@ else
 	$(RUN_LINTING) lint
 endif
 
+lint_fix: lint_eslint_fix
+lint_eslint_fix:
+	$(RUN_LINTING) lint:fix
+
 lint: lint_stylelint
 lint_stylelint:
 ifeq ($(CI),true)
@@ -554,6 +560,7 @@ else
 	$(RUN_LINTING) lint:styles
 endif
 
+lint_fix: lint_stylelint_fix
 lint_stylelint_fix:
 	$(RUN_LINTING) lint:styles:fix
 
@@ -568,9 +575,6 @@ lint_locales:
 lint: check_extracted_translations
 check_extracted_translations:
 	bin/check_extracted_translations
-
-sort_locales:
-	 node scripts/translations/sort.js
 
 cleanup_unused_locales:
 	 node scripts/translations/cleanupUnusedLocales.js

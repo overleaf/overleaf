@@ -629,7 +629,7 @@ describe('CollaboratorsGetter', function () {
         expect(privilegeLevel).to.equal('readOnly')
       })
 
-      it('should return none for non-members', function (ctx) {
+      it('should return false for non-members', function (ctx) {
         const projectAccess = new ctx.CollaboratorsGetter.ProjectAccess(
           ctx.project
         )

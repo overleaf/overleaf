@@ -123,7 +123,7 @@ module.exports = {
           {
             loader: 'babel-loader',
             options: {
-              cacheDirectory: true,
+              cacheDirectory: path.join(__dirname, '.cache/babel-loader'),
               configFile: path.join(__dirname, './babel.config.cjs'),
             },
           },
@@ -142,7 +142,7 @@ module.exports = {
       {
         // Pass application JS/TS files through babel-loader,
         // transpiling to targets defined in browserslist
-        test: /\.([jt]sx?|[cm]js)$/,
+        test: /\.([jt]sx?|[cm][jt]s)$/,
         // Only compile application files and specific dependencies
         // (other npm and vendored dependencies must be in ES5 already)
         exclude: [
@@ -156,7 +156,7 @@ module.exports = {
             options: {
               // Configure babel-loader to cache compiled output so that
               // subsequent compile runs are much faster
-              cacheDirectory: true,
+              cacheDirectory: path.join(__dirname, '.cache/babel-loader'),
               configFile: path.join(__dirname, './babel.config.cjs'),
               plugins: [
                 process.env.REACT_REFRESH_ENABLED === 'true' &&
@@ -363,37 +363,25 @@ module.exports = {
         // Copy the required files for loading MathJax from MathJax NPM package
         // https://www.npmjs.com/package/mathjax#user-content-hosting-your-own-copy-of-the-mathjax-components
         {
-          from: 'es5/tex-svg-full.js',
-          to: `js/libs/mathjax-${PackageVersions.version.mathjax}/es5`,
-          toType: 'dir',
-          context: mathjaxDir,
-        },
-        {
-          from: 'es5/input/tex/extensions/**/*.js',
+          from: 'tex-svg.js',
           to: `js/libs/mathjax-${PackageVersions.version.mathjax}`,
           toType: 'dir',
           context: mathjaxDir,
         },
         {
-          from: 'es5/ui/**/*',
+          from: 'input/tex/extensions/**/*.js',
           to: `js/libs/mathjax-${PackageVersions.version.mathjax}`,
           toType: 'dir',
           context: mathjaxDir,
         },
         {
-          from: 'es5/a11y/**/*',
+          from: 'ui/**/*',
           to: `js/libs/mathjax-${PackageVersions.version.mathjax}`,
           toType: 'dir',
           context: mathjaxDir,
         },
         {
-          from: 'es5/input/mml.js',
-          to: `js/libs/mathjax-${PackageVersions.version.mathjax}/es5/input`,
-          toType: 'dir',
-          context: mathjaxDir,
-        },
-        {
-          from: 'es5/sre/**/*',
+          from: 'sre/**/*',
           to: `js/libs/mathjax-${PackageVersions.version.mathjax}`,
           toType: 'dir',
           context: mathjaxDir,

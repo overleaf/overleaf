@@ -1,7 +1,6 @@
 /* ====== Semantic CSS color variables that adjust depending on the current theme ====== */
 
 :root {
-  --editor-border-color: var(--neutral-80);
   --bg-primary-themed: var(--bg-dark-primary);
   --bg-secondary-themed: var(--bg-dark-secondary);
   --bg-tertiary-themed: var(--bg-dark-tertiary);
@@ -30,7 +29,6 @@
 }
 
 @include theme('light') {
-  --editor-border-color: var(--neutral-20);
   --bg-primary-themed: var(--bg-light-primary);
   --bg-secondary-themed: var(--bg-light-secondary);
   --bg-tertiary-themed: var(--bg-light-tertiary);

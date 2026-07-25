@@ -15,16 +15,17 @@ describe('UserPostRegistrationAnalyticsManager', function () {
         getUser: sinon.stub().resolves(),
       },
     }
+    ctx.fakeUser = { _id: ctx.fakeUserId, analyticsId: 'uuid' }
     ctx.UserGetter.promises.getUser
       .withArgs({ _id: ctx.fakeUserId })
-      .resolves({ _id: ctx.fakeUserId })
+      .resolves(ctx.fakeUser)
     ctx.InstitutionsAPI = {
       promises: {
         getUserAffiliations: sinon.stub().resolves([]),
       },
     }
     ctx.AnalyticsManager = {
-      setUserPropertyForUser: sinon.stub().resolves(),
+      setUserPropertyForMongoUser: sinon.stub().resolves(),
     }
 
     vi.doMock('../../../../app/src/infrastructure/Queues', () => ({
@@ -77,7 +78,7 @@ describe('UserPostRegistrationAnalyticsManager', function () {
       )
       expect(ctx.InstitutionsAPI.promises.getUserAffiliations).not.to.have.been
         .called
-      expect(ctx.AnalyticsManager.setUserPropertyForUser).not.to.have.been
+      expect(ctx.AnalyticsManager.setUserPropertyForMongoUser).not.to.have.been
         .called
     })
 
@@ -99,9 +100,9 @@ describe('UserPostRegistrationAnalyticsManager', function () {
         ctx.fakeUserId
       )
       expect(
-        ctx.AnalyticsManager.setUserPropertyForUser
+        ctx.AnalyticsManager.setUserPropertyForMongoUser
       ).to.have.been.calledWith(
-        ctx.fakeUserId,
+        ctx.fakeUser,
         'registered-from-commons-account',
         true
       )
@@ -118,7 +119,7 @@ describe('UserPostRegistrationAnalyticsManager', function () {
       await ctx.UserPostRegistrationAnalyticsManager.postRegistrationAnalytics(
         ctx.fakeUserId
       )
-      expect(ctx.AnalyticsManager.setUserPropertyForUser).not.to.have.been
+      expect(ctx.AnalyticsManager.setUserPropertyForMongoUser).not.to.have.been
         .called
     })
   })

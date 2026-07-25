@@ -11,7 +11,7 @@ describe('<FreePlan />', function () {
     )
 
     screen.getByText(
-      'You are on the Overleaf Free plan. Upgrade to access these',
+      'You’re using our free plan. Upgrade to get the best Overleaf experience',
       {
         exact: false,
       }

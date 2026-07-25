@@ -347,7 +347,15 @@ h4.group-settings-title {
     font-size: var(--font-size-02);
 
     td {
-      padding-top: 0;
+      padding: 0;
+    }
+
+    .notification-list {
+      margin-top: var(--spacing-07);
+    }
+
+    .collapse {
+      margin-bottom: var(--spacing-06);
     }
   }
 

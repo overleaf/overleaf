@@ -1,9 +1,9 @@
 document-updater
 --dependencies=mongo,redis
+--deploy-pipeline=document-updater
 --env-add=
 --env-pass-through=
 --esmock-loader=False
 --node-version=24.14.1
---package-name=@overleaf/document-updater
 --pipeline-owner=44
 --public-repo=True

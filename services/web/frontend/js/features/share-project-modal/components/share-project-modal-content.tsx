@@ -14,11 +14,14 @@ import OLNotification from '@/shared/components/ol/ol-notification'
 import OLButton from '@/shared/components/ol/ol-button'
 import OLSpinner from '@/shared/components/ol/ol-spinner'
 import MaterialIcon from '@/shared/components/material-icon'
+import CopySharingLinkButton from '@/features/share-project-modal/components/copy-sharing-link-button'
 import ErrorMessage from '@/features/share-project-modal/components/error-message'
 import GiveFeedbackLink from '@/features/share-project-modal/components/give-feedback-link'
 import classNames from 'classnames'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useShareProjectContext } from '@/features/share-project-modal/components/share-project-modal'
+import { ErrorBoundaryFallback } from '@/shared/components/error-boundary-fallback'
+import withErrorBoundary from '@/infrastructure/error-boundary'
 
 const ReadOnlyTokenLink = lazy(() =>
   import('./link-sharing').then(({ ReadOnlyTokenLink }) => ({
@@ -31,6 +34,7 @@ const ShareModalBody = lazy(() => import('./share-modal-body'))
 
 type ShareProjectModalContentProps = {
   cancel: () => void
+  onShow: () => void
   show: boolean
   animation: boolean
   inFlight: boolean
@@ -40,20 +44,42 @@ type ShareProjectModalContentProps = {
 
 export default function ShareProjectModalContent({
   show,
+  onShow,
   cancel,
   animation,
   inFlight,
   error,
   projectName,
 }: ShareProjectModalContentProps) {
+  return (
+    <OLModal show={show} onShow={onShow} onHide={cancel} animation={animation}>
+      <ShareProjectModalContentInnerWithErrorBoundary
+        inFlight={inFlight}
+        error={error}
+        projectName={projectName}
+        cancel={cancel}
+      />
+    </OLModal>
+  )
+}
+
+function ShareProjectModalContentInner({
+  inFlight,
+  error,
+  projectName,
+  cancel,
+}: Pick<
+  ShareProjectModalContentProps,
+  'inFlight' | 'error' | 'projectName' | 'cancel'
+>) {
   const { t } = useTranslation()
   const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
   const [isInvitedPeopleScreen, setIsInvitedPeopleScreen] = useState(false)
-  const { successActionMessage } = useShareProjectContext()
+  const { successActionMessage, projectAccess } = useShareProjectContext()
   const { isRestrictedTokenMember, isProjectOwner } = useEditorContext()
 
   return (
-    <OLModal show={show} onHide={cancel} animation={animation}>
+    <>
       <OLModalHeader>
         <div className="d-flex flex-grow-1 justify-content-between">
           {isSharingUpdatesEnabled && isInvitedPeopleScreen ? (
@@ -110,10 +136,17 @@ export default function ShareProjectModalContent({
         <div className="d-flex flex-grow-1 flex-wrap gap-2">
           {isSharingUpdatesEnabled ? (
             <>
+              {!isInvitedPeopleScreen &&
+                projectAccess &&
+                (projectAccess === 'onlyInvitedPeople' ||
+                  projectAccess.startsWith('anyoneInXyzWithTheLink') ||
+                  projectAccess === 'anyoneWithTheLink') && (
+                  <CopySharingLinkButton />
+                )}
               {successActionMessage && (
                 <div className="ms-auto px-3 align-self-center">
                   <div
-                    className="d-flex gap-3 align-items-center"
+                    className="d-flex gap-2 align-items-center"
                     role="status"
                     aria-live="polite"
                   >
@@ -142,6 +175,25 @@ export default function ShareProjectModalContent({
           {t('close')}
         </ClickableElementEnhancer>
       </OLModalFooter>
-    </OLModal>
+    </>
   )
 }
+
+const ShareProjectModalContentInnerFallback = () => {
+  const { t } = useTranslation()
+  return (
+    <>
+      <OLModalHeader>
+        <OLModalTitle>{t('generic_something_went_wrong')}</OLModalTitle>
+      </OLModalHeader>
+      <OLModalBody>
+        <ErrorBoundaryFallback />
+      </OLModalBody>
+    </>
+  )
+}
+
+const ShareProjectModalContentInnerWithErrorBoundary = withErrorBoundary(
+  ShareProjectModalContentInner,
+  () => <ShareProjectModalContentInnerFallback />
+)

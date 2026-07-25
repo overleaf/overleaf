@@ -507,7 +507,7 @@ describe('project controller', function () {
     })
   })
 
-  // eslint-disable-next-line mocha/no-skipped-tests
+  // eslint-disable-next-line mocha/no-pending-tests
   describe.skip('getLatestContent', function () {
     // TODO: remove this endpoint entirely, see
     // https://github.com/overleaf/write_latex/pull/5120#discussion_r244291862

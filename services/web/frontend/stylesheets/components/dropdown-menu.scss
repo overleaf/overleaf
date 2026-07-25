@@ -41,7 +41,8 @@
   .project-ds-nav-page,
   // Codemirror tooltips are rendered outside of the main app container
   .cm-tooltip .dropdown-menu,
-  .cm-tooltip .dropdown {
+  .cm-tooltip .dropdown,
+  .cm-tooltip .editor-floating-menu {
     @include dark-dropdown-menu;
   }
 }
@@ -132,6 +133,10 @@ $dropdown-item-min-height: 36px;
 
   &:focus {
     background: none;
+
+    // Bootstrap sets the hover text colour on plain :focus too; reset it so a
+    // mouse-focused (not :focus-visible), non-hovered item stays readable.
+    color: var(--dropdown-text-color);
   }
 
   &:focus-visible {

@@ -62,7 +62,7 @@ describe('WorkbenchRateLimiter', function () {
     ctx.SplitTestHandler = {
       promises: {
         getAssignmentForUser: sinon.stub(),
-        featureFlagEnabledForUser: sinon.stub().resolves(true),
+        featureFlagEnabledForMongoUser: sinon.stub().resolves(true),
       },
     }
     ctx.SplitTestHandler.promises.getAssignmentForUser
@@ -90,7 +90,7 @@ describe('WorkbenchRateLimiter', function () {
       '../../../../app/src/Features/Analytics/AnalyticsManager',
       () => ({
         default: {
-          recordEventForUser: sinon.stub(),
+          recordEventForSession: sinon.stub(),
         },
       })
     )
@@ -164,6 +164,7 @@ describe('WorkbenchRateLimiter', function () {
     describe('with no data', function () {
       beforeEach(async function (ctx) {
         await UserFeatureUsage.deleteMany({}).exec()
+        ctx.req = { session: {} }
         ctx.res = {
           set: sinon.stub(),
           headersSent: false,
@@ -172,12 +173,16 @@ describe('WorkbenchRateLimiter', function () {
 
       it('should not throw', async function (ctx) {
         await expect(
-          ctx.WorkbenchRateLimiter.checkUsage(ctx.alphaUserId, ctx.res)
+          ctx.WorkbenchRateLimiter.checkUsage(ctx.alphaUserId, ctx.req, ctx.res)
         ).to.eventually.be.fulfilled
       })
 
       it('sets rate limit headers', async function (ctx) {
-        await ctx.WorkbenchRateLimiter.checkUsage(ctx.alphaUserId, ctx.res)
+        await ctx.WorkbenchRateLimiter.checkUsage(
+          ctx.alphaUserId,
+          ctx.req,
+          ctx.res
+        )
         expect(ctx.res.set).to.have.been.calledWith(
           'Token-RateLimit-Limit',
           '8000000'
@@ -197,6 +202,7 @@ describe('WorkbenchRateLimiter', function () {
     describe('with existing usage', function () {
       beforeEach(async function (ctx) {
         await UserFeatureUsage.deleteMany({}).exec()
+        ctx.req = { session: {} }
         ctx.res = {
           set: sinon.stub(),
           headersSent: false,
@@ -215,12 +221,16 @@ describe('WorkbenchRateLimiter', function () {
 
       it('should not throw if under limit', async function (ctx) {
         await expect(
-          ctx.WorkbenchRateLimiter.checkUsage(ctx.alphaUserId, ctx.res)
+          ctx.WorkbenchRateLimiter.checkUsage(ctx.alphaUserId, ctx.req, ctx.res)
         ).to.eventually.be.fulfilled
       })
 
       it('sets rate limit headers', async function (ctx) {
-        await ctx.WorkbenchRateLimiter.checkUsage(ctx.alphaUserId, ctx.res)
+        await ctx.WorkbenchRateLimiter.checkUsage(
+          ctx.alphaUserId,
+          ctx.req,
+          ctx.res
+        )
         expect(ctx.res.set).to.have.been.calledWith(
           'Token-RateLimit-Limit',
           '8000000'
@@ -243,7 +253,7 @@ describe('WorkbenchRateLimiter', function () {
         await usageRecord.save()
 
         await expect(
-          ctx.WorkbenchRateLimiter.checkUsage(ctx.alphaUserId, ctx.res)
+          ctx.WorkbenchRateLimiter.checkUsage(ctx.alphaUserId, ctx.req, ctx.res)
         ).to.eventually.be.rejectedWith(/rate limit exceeded/i)
       })
     })
@@ -269,12 +279,16 @@ describe('WorkbenchRateLimiter', function () {
 
       it('should not throw', async function (ctx) {
         await expect(
-          ctx.WorkbenchRateLimiter.checkUsage(ctx.alphaUserId, ctx.res)
+          ctx.WorkbenchRateLimiter.checkUsage(ctx.alphaUserId, ctx.req, ctx.res)
         ).to.eventually.be.fulfilled
       })
 
       it('sets rate limit headers', async function (ctx) {
-        await ctx.WorkbenchRateLimiter.checkUsage(ctx.alphaUserId, ctx.res)
+        await ctx.WorkbenchRateLimiter.checkUsage(
+          ctx.alphaUserId,
+          ctx.req,
+          ctx.res
+        )
         expect(ctx.res.set).to.have.been.calledWith(
           'Token-RateLimit-Limit',
           '8000000'

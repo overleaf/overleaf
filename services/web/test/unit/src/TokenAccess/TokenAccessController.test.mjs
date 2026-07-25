@@ -329,8 +329,8 @@ describe('TokenAccessController', function () {
 
       it('records a project-joined event for the user', function (ctx) {
         expect(
-          ctx.AnalyticsManager.recordEventForUserInBackground
-        ).to.have.been.calledWith(ctx.user._id, 'project-joined', {
+          ctx.AnalyticsManager.recordEventForSession
+        ).to.have.been.calledWith(ctx.req.session, 'project-joined', {
           mode: 'edit',
           projectId: ctx.project._id.toString(),
           ownerId: ctx.project.owner_ref.toString(),
@@ -406,8 +406,8 @@ describe('TokenAccessController', function () {
 
       it('records a project-joined event for the user', function (ctx) {
         expect(
-          ctx.AnalyticsManager.recordEventForUserInBackground
-        ).to.have.been.calledWith(ctx.user._id, 'project-joined', {
+          ctx.AnalyticsManager.recordEventForSession
+        ).to.have.been.calledWith(ctx.req.session, 'project-joined', {
           mode: 'view',
           projectId: ctx.project._id.toString(),
           pendingEditor: true,
@@ -863,7 +863,8 @@ describe('TokenAccessController', function () {
         ).to.have.been.calledWith(
           ctx.user._id,
           ctx.project._id,
-          ctx.project.owner_ref
+          ctx.project.owner_ref,
+          ctx.req.session
         )
       })
 

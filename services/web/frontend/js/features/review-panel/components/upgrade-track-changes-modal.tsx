@@ -18,13 +18,11 @@ import OLRow from '@/shared/components/ol/ol-row'
 import OLCol from '@/shared/components/ol/ol-col'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useEditorContext } from '@/shared/context/editor-context'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function UpgradeTrackChangesModal() {
   const { t } = useTranslation()
   const { project } = useProjectContext()
   const user = useUserContext()
-  const plans2026 = useFeatureFlag('plans-2026-phase-1')
   const {
     upgradeTrackChangesModal: { show, location = 'unknown' },
     setUpgradeTrackChangesModal,
@@ -74,9 +72,7 @@ function UpgradeTrackChangesModal() {
               {[
                 t('see_suggestions_from_collaborators'),
                 t('accept_or_reject_individual_edits'),
-                plans2026
-                  ? t('access_all_premium_features_ai')
-                  : t('access_all_premium_features'),
+                t('access_all_premium_features'),
               ].map(translation => (
                 <li key={translation}>
                   <MaterialIcon type="check" className="check-icon" />
@@ -98,7 +94,7 @@ function UpgradeTrackChangesModal() {
                     })
                   }
                 >
-                  {plans2026 ? t('try_for_free') : t('try_it_for_free')}
+                  {t('try_for_free')}
                 </OLButton>
               ) : (
                 <OLButton

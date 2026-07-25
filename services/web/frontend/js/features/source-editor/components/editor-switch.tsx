@@ -57,7 +57,7 @@ function EditorSwitch() {
             onChange={handleChange}
           />
           <label htmlFor={inputId} className="toggle-switch-label">
-            <span>{t('code_editor')}</span>
+            <span>{t('code')}</span>
           </label>
 
           <RichTextToggle
@@ -92,7 +92,7 @@ const RichTextToggle: FC<{
         disabled={disabled}
       />
       <label htmlFor={inputId} className="toggle-switch-label">
-        <span>{t('visual_editor')}</span>
+        <span>{t('visual')}</span>
       </label>
     </span>
   )
@@ -100,7 +100,7 @@ const RichTextToggle: FC<{
   if (disabled) {
     return (
       <OLTooltip
-        description={t('visual_editor_is_only_available_for_tex_files')}
+        description={t('visual_editor_does_not_support_this_file_type')}
         id="rich-text-toggle-tooltip"
         overlayProps={{ placement: 'bottom' }}
         tooltipProps={{ className: 'tooltip-wide' }}

@@ -36,6 +36,7 @@ describe('CollaboratorsInviteGetter', function () {
     ctx.CollaboratorsInviteHelper = {
       generateToken: sinon.stub().returns(ctx.Crypto.randomBytes(24)),
       hashInviteToken: sinon.stub().returns(ctx.tokenHmac),
+      decryptToken: sinon.stub().resolves(ctx.token),
     }
 
     vi.doMock('../../../../app/src/models/ProjectInvite', () => ({
@@ -87,6 +88,7 @@ describe('CollaboratorsInviteGetter', function () {
       expect(ctx.ProjectInvite.countDocuments).to.be.calledWith({
         projectId: ctx.projectId,
         privileges: { $ne: 'readOnly' },
+        reusable: { $ne: true },
       })
       expect(count).to.equal(2)
     })
@@ -134,7 +136,7 @@ describe('CollaboratorsInviteGetter', function () {
         await ctx.call()
         ctx.ProjectInvite.find.callCount.should.equal(1)
         ctx.ProjectInvite.find
-          .calledWith({ projectId: ctx.projectId })
+          .calledWith({ projectId: ctx.projectId, reusable: { $ne: true } })
           .should.equal(true)
       })
     })
@@ -203,6 +205,45 @@ describe('CollaboratorsInviteGetter', function () {
       it('should not produce an invite object', async function (ctx) {
         const invite = await ctx.call()
         expect(invite).to.be.oneOf([null, undefined])
+      })
+    })
+  })
+
+  describe('getSharingLinkInvite', function () {
+    beforeEach(function (ctx) {
+      ctx.ProjectInvite.findOne.returns({
+        exec: sinon.stub().resolves(ctx.fakeInvite),
+      })
+      ctx.call = async () => {
+        return await ctx.CollaboratorsInviteGetter.promises.getSharingLinkInvite(
+          ctx.projectId
+        )
+      }
+    })
+
+    it('returns the sharing link invite', async function (ctx) {
+      const invite = await ctx.call()
+      expect(invite).to.deep.equal(ctx.fakeInvite)
+    })
+
+    it('queries reusable invite records', async function (ctx) {
+      await ctx.call()
+      ctx.ProjectInvite.findOne.should.have.been.calledWith({
+        projectId: ctx.projectId,
+        reusable: true,
+      })
+    })
+
+    describe('when no reusable invite exists', function () {
+      beforeEach(function (ctx) {
+        ctx.ProjectInvite.findOne.returns({
+          exec: sinon.stub().resolves(null),
+        })
+      })
+
+      it('returns null', async function (ctx) {
+        const invite = await ctx.call()
+        expect(invite).to.be.null
       })
     })
   })

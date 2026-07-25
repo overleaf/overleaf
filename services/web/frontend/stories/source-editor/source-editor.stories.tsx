@@ -263,7 +263,7 @@ export const Visual: Story = {
       })
 
       useMeta({
-        'ol-mathJaxPath': 'https://unpkg.com/mathjax@3.2.2/es5/tex-svg-full.js',
+        'ol-mathJaxPath': 'https://unpkg.com/mathjax@4.1.2/tex-svg.js',
         'ol-project_id': '63e21c07946dd8c76505f85a',
       })
 

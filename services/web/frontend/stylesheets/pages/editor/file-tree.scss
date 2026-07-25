@@ -1,200 +1,135 @@
 :root {
   --file-tree-item-hover-bg: var(--bg-dark-secondary);
-  --file-tree-item-selected-bg: var(--bg-accent-01);
-  --file-tree-item-color: var(--content-primary-dark);
-  --file-tree-bg: var(--bg-dark-tertiary);
-  --file-tree-item-selected-color: var(--content-primary-dark);
-  --file-tree-item-dragging-bg: #{rgb($bg-dark-secondary, 0.9)};
-  --file-tree-item-dragging-color: var(--content-primary-dark);
-  --file-tree-item-icon-dragging-color: var(--content-disabled);
-  --file-tree-item-dragging-preview-bg: #{rgb($bg-accent-01, 0.6)};
-  --file-tree-item-dragging-preview-colour: var(--content-primary-dark);
-  --file-tree-line-height: 2.05;
-  --file-tree-icon-colour: var(--content-disabled);
-}
-
-@include theme('light') {
-  --file-tree-item-hover-bg: var(--bg-light-tertiary);
-  --file-tree-item-color: var(--content-secondary);
-  --file-tree-bg: var(--bg-light-primary);
-  --file-tree-item-selected-color: var(--bg-light-primary);
-  --file-tree-item-dragging-bg: #{rgb($bg-light-tertiary, 0.9)};
-  --file-tree-item-dragging-color: var(--content-secondary);
-  --file-tree-item-dragging-preview-colour: var(--bg-light-primary);
-
-  .ide-redesign-main {
-    --file-tree-item-hover-bg: var(--bg-light-secondary);
-    --file-tree-item-selected-bg: var(--bg-accent-03);
-    --file-tree-item-selected-color: var(--green-70);
-    --file-tree-item-color: var(--content-primary);
-    --file-tree-bg: var(--white);
-    --file-tree-icon-colour: var(--content-primary);
-    --file-tree-item-dragging-bg: var(--green-60);
-    --file-tree-item-dragging-color: var(--white);
-    --file-tree-item-icon-dragging-color: var(--file-tree-item-dragging-color);
-    --file-tree-item-dragging-preview-bg: #{rgb($bg-light-secondary, 0.6)};
-    --file-tree-item-dragging-preview-colour: #{rgb($content-primary, 0.6)};
-    --file-tree-expand-button-color: var(--content-primary);
-  }
-}
-
-// TODO ide-redesign-cleanup: Replace the existing styling with these overrides.
-.ide-redesign-main {
-  --file-tree-item-hover-bg: var(--bg-dark-secondary);
   --file-tree-item-selected-bg: var(--green-70);
-  --file-tree-item-selected-color: var(--green-10);
   --file-tree-item-color: var(--content-primary-dark);
   --file-tree-bg: var(--bg-dark-primary);
-  --file-tree-icon-colour: var(--content-primary-dark);
+  --file-tree-item-selected-color: var(--green-10);
   --file-tree-item-dragging-bg: var(--green-40);
   --file-tree-item-dragging-color: var(--content-primary-dark);
   --file-tree-item-icon-dragging-color: var(--file-tree-item-dragging-color);
   --file-tree-item-dragging-preview-bg: #{rgb($bg-dark-secondary, 0.6)};
   --file-tree-item-dragging-preview-colour: #{rgb($content-primary-dark, 0.6)};
+  --file-tree-line-height: 2.05;
+  --file-tree-icon-colour: var(--content-primary-dark);
   --file-tree-expand-button-color: var(--content-primary-dark);
+}
 
-  .file-tree-outline-panel-group {
-    background-color: var(--file-tree-bg);
+@include theme('light') {
+  --file-tree-item-hover-bg: var(--bg-light-secondary);
+  --file-tree-item-selected-bg: var(--bg-accent-03);
+  --file-tree-item-color: var(--content-primary);
+  --file-tree-bg: var(--white);
+  --file-tree-item-selected-color: var(--green-70);
+  --file-tree-item-dragging-bg: var(--green-60);
+  --file-tree-item-dragging-color: var(--white);
+  --file-tree-item-icon-dragging-color: var(--file-tree-item-dragging-color);
+  --file-tree-item-dragging-preview-bg: #{rgb($bg-light-secondary, 0.6)};
+  --file-tree-item-dragging-preview-colour: #{rgb($content-primary, 0.6)};
+  --file-tree-icon-colour: var(--content-primary);
+  --file-tree-expand-button-color: var(--content-primary);
+}
+
+.file-tree-outline-panel-group {
+  background-color: var(--file-tree-bg);
+}
+
+.file-tree-toolbar {
+  display: flex;
+  justify-content: space-between;
+  height: 28px;
+  margin: var(--spacing-02);
+}
+
+.file-tree-panel {
+  min-height: 36px;
+}
+
+.file-tree-panel-collapsed {
+  max-height: 36px;
+}
+
+.file-tree-expand-collapse-button {
+  border-radius: var(--border-radius-base);
+  color: var(--file-tree-expand-button-color);
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  border: 0;
+  padding: 0 var(--spacing-02);
+  flex-grow: 1;
+  overflow: hidden;
+
+  &:hover {
+    background-color: var(--file-tree-item-hover-bg);
   }
 
-  .file-tree-toolbar {
-    display: flex;
-    justify-content: space-between;
-    height: 28px;
-    margin: var(--spacing-02);
-  }
-
-  .file-tree-panel {
-    min-height: 36px;
-  }
-
-  .file-tree-panel-collapsed {
-    max-height: 36px;
-  }
-
-  .file-tree-expand-collapse-button {
-    border-radius: var(--border-radius-base);
+  h4 {
     color: var(--file-tree-expand-button-color);
-    display: flex;
-    align-items: center;
-    background-color: transparent;
-    border: 0;
-    padding: 0 var(--spacing-02);
-    flex-grow: 1;
+    font-size: var(--font-size-02);
+    line-height: var(--line-height-02);
+    margin: 0;
+    font-weight: bold;
     overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
 
-    &:hover {
-      background-color: var(--file-tree-item-hover-bg);
-    }
+.file-tree-toolbar-action-buttons {
+  display: flex;
+}
 
-    h4 {
-      color: var(--file-tree-expand-button-color);
-      font-size: var(--font-size-02);
-      line-height: var(--line-height-02);
-      margin: 0;
-      font-weight: bold;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+.file-tree-toolbar-action-button {
+  color: var(--file-tree-expand-button-color);
+  padding: var(--spacing-02);
+  border-radius: var(--border-radius-full);
+
+  &:hover {
+    background-color: var(--file-tree-item-hover-bg);
   }
 
-  .file-tree-toolbar-action-buttons {
-    display: flex;
-  }
-
-  .file-tree-toolbar-action-button {
+  &:active {
     color: var(--file-tree-expand-button-color);
-    padding: var(--spacing-02);
-    border-radius: var(--border-radius-full);
-
-    &:hover {
-      background-color: var(--file-tree-item-hover-bg);
-    }
-
-    &:active {
-      color: var(--file-tree-expand-button-color);
-    }
   }
+}
 
-  .file-tree {
-    background-color: var(--file-tree-bg);
-  }
+.file-tree-folder-list {
+  border-left: 1px solid
+    color-mix(in srgb, var(--border-primary) 24%, transparent);
+  margin-left: 14px !important;
+  margin-top: 0;
 
-  .file-tree ul.file-tree-list {
-    margin: var(--spacing-02);
-  }
+  &.file-tree-list {
+    border-left: none;
+    margin-left: var(--spacing-02) !important;
 
-  .file-tree-folder-list {
-    border-left: 1px solid
-      color-mix(in srgb, var(--border-primary) 24%, transparent);
-    margin-left: 14px !important;
-    margin-top: 0;
-
-    &.file-tree-list {
-      border-left: none;
-      margin-left: var(--spacing-02) !important;
-
-      > .file-tree-folder-list-inner {
-        margin-left: 0;
-      }
+    > .file-tree-folder-list-inner {
+      margin-left: 0;
     }
   }
+}
 
-  .file-tree-folder-list-inner {
-    margin-left: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-02);
-  }
+.file-tree-folder-list-inner {
+  margin-left: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-02);
+}
 
-  .item-name,
-  .folder-expand-collapse-button {
-    display: flex;
-    align-items: center;
-    height: 20px !important;
-  }
+.item-name,
+.folder-expand-collapse-button {
+  display: flex;
+  align-items: center;
+  height: 20px !important;
+}
 
-  .file-tree ul.file-tree-list li .material-symbols.file-tree-expand-icon {
-    margin-left: 0;
-  }
+.item-name {
+  margin-left: var(--spacing-02);
+  overflow: hidden;
 
-  .file-tree ul.file-tree-list li .material-symbols.file-tree-icon {
-    margin-left: 0;
-    margin-right: 0;
-  }
-
-  // TODO ide-redesign-cleanup: Remove the !important overrides once
-  // we have replaced the default styling
-  .linked-file-highlight {
-    background-color: var(--file-tree-bg) !important;
-    color: var(--file-tree-icon-colour) !important;
-    left: 14px !important;
-  }
-
-  .entity-name {
-    color: var(--file-tree-item-color);
-    border-radius: var(--border-radius-base);
-
-    // TODO ide-redesign-cleanup: This is here to override the fake-full-width-bg
-    // mixin. We can just remove that mixin when we clean this up.
-    &::before {
-      content: none !important;
-    }
-  }
-
-  .item-name {
-    margin-left: var(--spacing-02);
+  span {
     overflow: hidden;
-
-    span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-
-  .dnd-draggable-preview-item {
-    border-radius: var(--border-radius-base);
+    text-overflow: ellipsis;
   }
 }
 
@@ -222,16 +157,6 @@
   background-color: var(--file-tree-bg);
   display: flex;
   flex-direction: column;
-}
-
-@mixin fake-full-width-bg($bg-color) {
-  &::before {
-    content: '\00a0';
-    position: absolute;
-    width: 9999px;
-    left: -9999px;
-    background-color: $bg-color;
-  }
 }
 
 @include theme('default') {
@@ -263,6 +188,7 @@
   display: flex !important; // To work around jQuery layout's inline styles
   flex-direction: column;
   height: 100%;
+  background-color: var(--file-tree-bg);
 
   .file-tree-inner {
     position: relative;
@@ -318,7 +244,7 @@
   }
 
   ul.file-tree-list {
-    margin: 0;
+    margin: var(--spacing-02);
     overflow: hidden auto;
     height: 100%;
     flex-grow: 1;
@@ -350,7 +276,6 @@
         & > button {
           background-color: transparent;
           border: 0;
-          padding: 0;
 
           &.item-name {
             color: inherit;
@@ -366,6 +291,7 @@
 
       .entity-name {
         color: var(--file-tree-item-color);
+        border-radius: var(--border-radius-base);
         cursor: pointer;
         white-space: nowrap;
         overflow: hidden;
@@ -377,16 +303,8 @@
 
         background-color: transparent;
 
-        @include fake-full-width-bg(transparent);
-
         &:hover {
           background-color: var(--file-tree-item-hover-bg);
-
-          // When the entity is a subfolder, the DOM element is "indented" via margin-left. This makes the
-          // element not fill the entire file-tree width (as it's spaced from the left-hand side via margin)
-          // and, in consequence, the background gets clipped. The ::before pseudo-selector is used to fill
-          // the empty space.
-          @include fake-full-width-bg(var(--file-tree-item-hover-bg));
         }
 
         input {
@@ -403,8 +321,8 @@
         color: var(--file-tree-icon-colour);
 
         &.file-tree-icon {
-          margin-right: var(--spacing-02);
-          margin-left: var(--spacing-04);
+          margin-right: 0;
+          margin-left: 0;
           vertical-align: sub;
 
           &.linked-file-icon {
@@ -412,11 +330,11 @@
             left: -2px;
 
             + .linked-file-highlight {
-              color: var(--file-tree-bg);
-              background-color: var(--content-disabled);
+              color: var(--file-tree-icon-colour);
+              background-color: var(--file-tree-bg);
               position: absolute;
               top: 14px;
-              left: 20px;
+              left: 14px;
               font-size: var(--font-size-01);
               border-radius: var(--spacing-01);
             }
@@ -424,7 +342,7 @@
         }
 
         &.file-tree-expand-icon {
-          margin-left: var(--spacing-04);
+          margin-left: 0;
           vertical-align: sub;
         }
       }
@@ -470,16 +388,12 @@
               background-color: var(--bg-info-01);
             }
 
-            @include fake-full-width-bg(var(--bg-info-01));
-
             color: var(--content-primary-dark);
             font-weight: bold;
             background-color: var(--bg-info-01);
 
             &:hover {
               background-color: var(--bg-info-02);
-
-              @include fake-full-width-bg(var(--bg-info-02));
             }
           }
         }
@@ -572,8 +486,6 @@
             background-color: var(--bg-info-01);
           }
 
-          @include fake-full-width-bg(var(--file-tree-item-selected-bg));
-
           font-weight: bold;
           padding-right: var(--spacing-09);
 
@@ -595,8 +507,6 @@
 
   // while dragging, the previously selected item gets no highlight
   ul.file-tree-list.file-tree-dragging li.selected .entity .entity-name {
-    @include fake-full-width-bg(transparent);
-
     font-weight: normal;
     background-color: transparent;
     color: var(--file-tree-item-color);
@@ -612,9 +522,6 @@
     .entity.file-tree-entity-dragging
     .entity-name {
     background-color: var(--file-tree-item-dragging-bg);
-
-    @include fake-full-width-bg(var(--file-tree-item-dragging-bg));
-
     color: var(--file-tree-item-dragging-color);
 
     .material-symbols {
@@ -628,9 +535,6 @@
     .entity
     .entity-name {
     background-color: var(--file-tree-item-selected-bg);
-
-    @include fake-full-width-bg(var(--file-tree-item-selected-bg));
-
     color: var(--file-tree-item-selected-color);
 
     .material-symbols {
@@ -654,6 +558,7 @@
   .dnd-draggable-preview-item {
     color: var(--file-tree-item-dragging-preview-colour);
     background-color: var(--file-tree-item-dragging-preview-bg);
+    border-radius: var(--border-radius-base);
     width: 75%;
     padding-left: var(--spacing-08);
     line-height: 2.05;
@@ -772,9 +677,7 @@
   display: flex;
   width: 100%;
   color: inherit;
-
-  // TODO ide-redesign-cleanup: Remove !important when we clean up the old file tree
-  padding: var(--spacing-02) !important;
+  padding: var(--spacing-02);
   text-overflow: ellipsis;
   overflow: hidden;
 }

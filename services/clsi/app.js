@@ -145,6 +145,11 @@ app.post(
   bodyParser.json({ limit: Settings.compileSizeLimit }),
   ConversionController.convertProjectToDocument
 )
+app.post(
+  '/convert/pdf-to-jpeg',
+  FileUploadMiddleware.multerMiddleware,
+  ConversionController.convertPDFToJPEG
+)
 
 if (process.env.NODE_ENV === 'development' && global.__coverage__) {
   app.get('/coverage', (req, res) => {

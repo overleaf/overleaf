@@ -2,10 +2,10 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/overleaf/internal/
 
-BUILD_NUMBER ?= local
-BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
-BRANCH_NAME_TAG_SAFE = $(shell echo $(BRANCH_NAME) | sed 's/\//\-\-/g' | cut -c1-96)
-PROJECT_NAME = clsi
+export BUILD_NUMBER ?= local
+export BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
+export BRANCH_NAME_TAG_SAFE = $(shell echo $(BRANCH_NAME) | sed 's/\//\-\-/g' | cut -c1-96)
+export PROJECT_NAME = clsi
 BUILD_DIR_NAME = $(shell pwd | xargs basename | tr -cd '[a-zA-Z0-9_.\-]')
 HERE=$(shell pwd)
 export MONOREPO ?= $(shell cd ../../ && pwd)
@@ -25,16 +25,14 @@ IMAGE_CACHE ?= $(IMAGE_REPO):cache-$(shell cat \
 	$(MONOREPO)/libraries/promise-utils/package.json \
 	$(MONOREPO)/libraries/settings/package.json \
 	$(MONOREPO)/libraries/stream-utils/package.json \
+	$(MONOREPO)/libraries/validation-tools/package.json \
 	$(MONOREPO)/services/clsi/package.json \
 	$(MONOREPO)/.yarn/patches/* \
 | sha256sum | cut -d '-' -f1)
+export MOCHA_GREP ?=
 
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
-DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
-	BRANCH_NAME=$(BRANCH_NAME_TAG_SAFE) \
-	PROJECT_NAME=$(PROJECT_NAME) \
-	MOCHA_GREP=${MOCHA_GREP} \
-	docker compose ${DOCKER_COMPOSE_FLAGS}
+DOCKER_COMPOSE := docker compose ${DOCKER_COMPOSE_FLAGS}
 
 # Common flags for docker compose run.
 # --rm           Tear down test runner container
@@ -54,6 +52,10 @@ COMPOSE_PROJECT_NAME_TEST_UNIT ?= test_unit_$(BUILD_DIR_NAME)
 DOCKER_COMPOSE_TEST_UNIT = \
 	COMPOSE_PROJECT_NAME=$(COMPOSE_PROJECT_NAME_TEST_UNIT) $(DOCKER_COMPOSE)
 
+.PHONY: print-branch-tag-safe
+print-branch-tag-safe:
+	@echo $(BRANCH_NAME_TAG_SAFE)
+
 clean:
 	-docker rmi $(IMAGE_CI)
 	-docker rmi $(IMAGE_REPO_FINAL)
@@ -67,8 +69,8 @@ clean:
 RUN_LINTING = ../../bin/run -w /overleaf/services/$(PROJECT_NAME) monorepo yarn run --silent
 RUN_LINTING_MONOREPO = ../../bin/run monorepo yarn run --silent
 
-RUN_LINTING_CI = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/clsi/reports:/overleaf/services/clsi/reports --volume $(MONOREPO)/node_modules/.cache:/overleaf/node_modules/.cache $(IMAGE_CI) yarn run --silent
-RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/.eslintignore:/overleaf/.eslintignore --volume $(MONOREPO)/.eslintrc:/overleaf/.eslintrc --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc:/overleaf/.prettierrc --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/clsi/reports:/overleaf/services/clsi/reports --volume $(MONOREPO)/node_modules/.cache:/overleaf/node_modules/.cache -w /overleaf $(IMAGE_CI) yarn run --silent
+RUN_LINTING_CI = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/eslint.config.mjs:/overleaf/eslint.config.mjs --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/clsi/reports:/overleaf/services/clsi/reports --volume $(MONOREPO)/.cache:/overleaf/.cache $(IMAGE_CI) yarn run --silent
+RUN_LINTING_CI_MONOREPO = docker run --rm --volume $(MONOREPO)/.editorconfig:/overleaf/.editorconfig --volume $(MONOREPO)/eslint.config.mjs:/overleaf/eslint.config.mjs --volume $(MONOREPO)/.prettierignore:/overleaf/.prettierignore --volume $(MONOREPO)/.prettierrc.cjs:/overleaf/.prettierrc.cjs --volume $(MONOREPO)/tsconfig.backend.json:/overleaf/tsconfig.backend.json --volume $(MONOREPO)/services/clsi/reports:/overleaf/services/clsi/reports --volume $(MONOREPO)/.cache:/overleaf/.cache -w /overleaf $(IMAGE_CI) yarn run --silent
 
 SHELLCHECK_OPTS = \
 	--shell=bash \
@@ -98,12 +100,12 @@ WITH_CACHE_FOLDER = \
 	typecheck \
 	typecheck_ci \
 
-$(WITH_CACHE_FOLDER): ../../node_modules/.cache/prettier/
-../../node_modules/.cache/prettier/:
+$(WITH_CACHE_FOLDER): ../../.cache/prettier/
+../../.cache/prettier/:
 	mkdir -p $@
 
-$(WITH_CACHE_FOLDER): ../../node_modules/.cache/eslint/
-../../node_modules/.cache/eslint/:
+$(WITH_CACHE_FOLDER): ../../.cache/eslint/
+../../.cache/eslint/:
 	mkdir -p $@
 
 format:
@@ -165,8 +167,9 @@ test_acceptance_clean:
 	$(DOCKER_COMPOSE_TEST_ACCEPTANCE) down -v -t 0
 
 test_acceptance_pre_run:
-	docker pull us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pandoc:3.9
-	docker pull us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pandoc-staging:3.9
+	-docker pull us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pandoc:3.9
+	-docker pull us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pandoc-staging:3.9
+	-cd ../../ && docker build -t us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pdftocairo:24.02 dockerfiles/pdftocairo
 ifneq (,$(wildcard test/acceptance/js/scripts/pre-run))
 	$(DOCKER_COMPOSE_TEST_ACCEPTANCE) run $(DC_RUN_FLAGS) test_acceptance test/acceptance/js/scripts/pre-run
 endif

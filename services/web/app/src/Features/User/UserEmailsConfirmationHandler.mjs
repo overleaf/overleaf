@@ -1,7 +1,6 @@
 import EmailHelper from '../Helpers/EmailHelper.mjs'
 import EmailHandler from '../Email/EmailHandler.mjs'
 import OneTimeTokenHandler from '../Security/OneTimeTokenHandler.mjs'
-import settings from '@overleaf/settings'
 import Errors from '../Errors/Errors.js'
 import UserUpdater from './UserUpdater.mjs'
 import UserGetter from './UserGetter.mjs'
@@ -10,32 +9,8 @@ import crypto from 'node:crypto'
 import SessionManager from '../Authentication/SessionManager.mjs'
 
 // Reject email confirmation tokens after 90 days
-const TOKEN_EXPIRY_IN_S = 90 * 24 * 60 * 60
 const TOKEN_USE = 'email_confirmation'
 const CONFIRMATION_CODE_EXPIRY_IN_S = 10 * 60
-
-async function sendConfirmationEmail(
-  userId,
-  email,
-  emailTemplate = 'confirmEmail'
-) {
-  email = EmailHelper.parseEmail(email)
-  if (!email) {
-    throw new Error('invalid email')
-  }
-  const data = { user_id: userId, email }
-  const token = await OneTimeTokenHandler.promises.getNewToken(
-    TOKEN_USE,
-    data,
-    { expiresIn: TOKEN_EXPIRY_IN_S }
-  )
-  const emailOptions = {
-    to: email,
-    confirmEmailUrl: `${settings.siteUrl}/user/emails/confirm?token=${token}`,
-    sendingUser_id: userId,
-  }
-  await EmailHandler.promises.sendEmail(emailTemplate, emailOptions)
-}
 
 async function sendConfirmationCode(email, welcomeUser) {
   if (!EmailHelper.parseEmail(email)) {
@@ -95,11 +70,9 @@ async function confirmEmailFromToken(req, token) {
 
 const UserEmailsConfirmationHandler = {
   confirmEmailFromToken: callbackify(confirmEmailFromToken),
-  sendConfirmationEmail: callbackify(sendConfirmationEmail),
 }
 
 UserEmailsConfirmationHandler.promises = {
-  sendConfirmationEmail,
   confirmEmailFromToken,
   sendConfirmationCode,
 }

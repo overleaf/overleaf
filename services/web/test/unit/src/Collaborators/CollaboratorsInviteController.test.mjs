@@ -51,7 +51,7 @@ describe('CollaboratorsInviteController', function () {
       getSessionUser: sinon.stub().returns(ctx.currentUser),
     }
 
-    ctx.AnalyticsManger = { recordEventForUserInBackground: sinon.stub() }
+    ctx.AnalyticsManger = { recordEventForSession: sinon.stub() }
 
     ctx.rateLimiter = {
       consume: sinon.stub().resolves(),
@@ -71,18 +71,22 @@ describe('CollaboratorsInviteController', function () {
       promises: {
         getUserByAnyEmail: sinon.stub(),
         getUser: sinon.stub().resolves(ctx.currentUser),
+        getUserConfirmedEmails: sinon
+          .stub()
+          .resolves([{ email: ctx.currentUser.email }]),
       },
     }
 
     ctx.ProjectGetter = {
       promises: {
-        getProject: sinon.stub(),
+        getProject: sinon.stub().resolves(ctx.project),
       },
     }
 
     ctx.CollaboratorsGetter = {
       promises: {
         isUserInvitedMemberOfProject: sinon.stub(),
+        getMemberIdPrivilegeLevel: sinon.stub().resolves(false),
       },
     }
 
@@ -92,6 +96,9 @@ describe('CollaboratorsInviteController', function () {
         generateNewInvite: sinon.stub().resolves(ctx.invite),
         revokeInvite: sinon.stub().resolves(ctx.invite),
         acceptInvite: sinon.stub(),
+        upgradeUserPrivileges: sinon.stub().resolves(),
+        createSharingLinkInvite: sinon.stub().resolves(ctx.invite),
+        revokeInviteForUser: sinon.stub().resolves(),
       },
     }
 
@@ -99,7 +106,24 @@ describe('CollaboratorsInviteController', function () {
       promises: {
         getAllInvites: sinon.stub(),
         getInviteByToken: sinon.stub().resolves(ctx.invite),
+        getSharingLinkInvite: sinon.stub().resolves(ctx.invite),
       },
+    }
+
+    ctx.CollaboratorsInviteHelper = {
+      decryptToken: sinon.stub().resolves(ctx.token),
+      privilegeLevelToRole: sinon.stub().callsFake(privilege => {
+        if (privilege === 'readOnly') {
+          return 'Viewer'
+        }
+        if (privilege === 'readAndWrite') {
+          return 'Editor'
+        }
+        if (privilege === 'review') {
+          return 'Reviewer'
+        }
+        return privilege
+      }),
     }
 
     ctx.EditorRealTimeController = {
@@ -117,6 +141,18 @@ describe('CollaboratorsInviteController', function () {
 
     ctx.AuthenticationController = {
       setRedirectInSession: sinon.stub(),
+    }
+
+    ctx.SubscriptionGroupHandler = {
+      promises: {
+        isUserPartOfGroup: sinon.stub().resolves(true),
+      },
+    }
+
+    ctx.SubscriptionLocator = {
+      promises: {
+        getUserActiveProfessionalGroupSubscriptions: sinon.stub().resolves([]),
+      },
     }
 
     ctx.SplitTestHandler = {
@@ -170,6 +206,13 @@ describe('CollaboratorsInviteController', function () {
     )
 
     vi.doMock(
+      '../../../../app/src/Features/Collaborators/CollaboratorsInviteHelper.mjs',
+      () => ({
+        default: ctx.CollaboratorsInviteHelper,
+      })
+    )
+
+    vi.doMock(
       '../../../../app/src/Features/Editor/EditorRealTimeController.mjs',
       () => ({
         default: ctx.EditorRealTimeController,
@@ -200,16 +243,30 @@ describe('CollaboratorsInviteController', function () {
     )
 
     vi.doMock(
-      '../../../../app/src/Features/Authentication/AuthenticationController',
+      '../../../../app/src/Features/Authentication/AuthenticationController.mjs',
       () => ({
         default: ctx.AuthenticationController,
       })
     )
 
     vi.doMock(
-      '../../../../app/src/Features/SplitTests/SplitTestHandler',
+      '../../../../app/src/Features/SplitTests/SplitTestHandler.mjs',
       () => ({
         default: ctx.SplitTestHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionGroupHandler.mjs',
+      () => ({
+        default: ctx.SubscriptionGroupHandler,
+      })
+    )
+
+    vi.doMock(
+      '../../../../app/src/Features/Subscription/SubscriptionLocator.mjs',
+      () => ({
+        default: ctx.SubscriptionLocator,
       })
     )
 
@@ -1645,6 +1702,10 @@ describe('CollaboratorsInviteController', function () {
         Project_id: ctx.projectId,
         token: ctx.token,
       }
+      ctx.req.body = {}
+      ctx.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
+        false
+      )
     })
 
     describe('when acceptInvite does not produce an error', function () {
@@ -1693,6 +1754,25 @@ describe('CollaboratorsInviteController', function () {
             collaboratorEmail: ctx.invite.email,
             privileges: ctx.privileges,
           }
+        )
+      })
+
+      it('records sharing-link source when token comes from request body', async function (ctx) {
+        await new Promise(resolve => {
+          ctx.req.params.token = undefined
+          ctx.req.body = { token: ctx.token }
+          ctx.res.callback = () => resolve()
+          ctx.CollaboratorsInviteController.acceptInvite(
+            ctx.req,
+            ctx.res,
+            ctx.next
+          )
+        })
+
+        ctx.AnalyticsManger.recordEventForSession.should.have.been.calledWith(
+          ctx.req.session,
+          'project-joined',
+          sinon.match({ source: 'sharing-link' })
         )
       })
     })
@@ -1767,6 +1847,176 @@ describe('CollaboratorsInviteController', function () {
         ctx.CollaboratorsInviteHandler.promises.acceptInvite.should.not.have
           .been.called
       })
+    })
+  })
+
+  describe('getSharingLink', function () {
+    beforeEach(function (ctx) {
+      ctx.req.params = { Project_id: ctx.projectId }
+      ctx.invite.encryptedToken = 'encrypted-token'
+      ctx.CollaboratorsInviteGetter.promises.getSharingLinkInvite.resolves(
+        ctx.invite
+      )
+      ctx.CollaboratorsInviteHelper.decryptToken.resolves(ctx.token)
+    })
+
+    it('returns sharing link payload when reusable invite exists', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.res.callback = () => resolve()
+        ctx.CollaboratorsInviteController.getSharingLink(ctx.req, ctx.res)
+      })
+
+      expect(ctx.res.json).toHaveBeenCalledWith({
+        _id: ctx.invite._id,
+        token: ctx.token,
+        privileges: ctx.invite.privileges,
+        subscriptionId: ctx.invite.subscriptionId,
+      })
+    })
+
+    it('returns 404 when sharing link does not exist', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.CollaboratorsInviteGetter.promises.getSharingLinkInvite.resolves(
+          null
+        )
+        ctx.res.callback = () => resolve()
+        ctx.CollaboratorsInviteController.getSharingLink(ctx.req, ctx.res)
+      })
+
+      expect(ctx.res.sendStatus).toHaveBeenCalledWith(404)
+    })
+  })
+
+  describe('updateSharingLink', function () {
+    beforeEach(function (ctx) {
+      ctx.req.params = { Project_id: ctx.projectId }
+      ctx.req.body = {
+        privileges: 'readOnly',
+      }
+      ctx.invite.encryptedToken = 'encrypted-token'
+      ctx.invite.save = sinon.stub().resolves(ctx.invite)
+      ctx.CollaboratorsInviteHelper.decryptToken.resolves(ctx.token)
+    })
+
+    it('creates sharing link invite when none exists', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.CollaboratorsInviteGetter.promises.getSharingLinkInvite.resolves(
+          null
+        )
+        ctx.CollaboratorsInviteHandler.promises.createSharingLinkInvite.resolves(
+          ctx.invite
+        )
+        ctx.res.callback = () => resolve()
+        ctx.CollaboratorsInviteController.updateSharingLink(ctx.req, ctx.res)
+      })
+
+      ctx.CollaboratorsInviteHandler.promises.createSharingLinkInvite.should.have.been.calledWith(
+        ctx.projectId,
+        'readOnly',
+        undefined
+      )
+    })
+
+    it('updates existing sharing link invite', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.CollaboratorsInviteGetter.promises.getSharingLinkInvite.resolves(
+          ctx.invite
+        )
+        ctx.res.callback = () => resolve()
+        ctx.CollaboratorsInviteController.updateSharingLink(ctx.req, ctx.res)
+      })
+
+      expect(ctx.invite.save).to.have.been.calledOnce
+      expect(ctx.res.json).toHaveBeenCalledTimes(1)
+    })
+
+    describe('with a subscriptionId', function () {
+      beforeEach(function (ctx) {
+        ctx.subscriptionId = new ObjectId()
+        ctx.req.body.subscriptionId = ctx.subscriptionId.toString()
+      })
+
+      it('creates the invite when the user is in a matching professional group subscription', async function (ctx) {
+        await new Promise(resolve => {
+          ctx.SubscriptionLocator.promises.getUserActiveProfessionalGroupSubscriptions.resolves(
+            [{ _id: ctx.subscriptionId }]
+          )
+          ctx.CollaboratorsInviteGetter.promises.getSharingLinkInvite.resolves(
+            null
+          )
+          ctx.CollaboratorsInviteHandler.promises.createSharingLinkInvite.resolves(
+            ctx.invite
+          )
+          ctx.res.callback = () => resolve()
+          ctx.CollaboratorsInviteController.updateSharingLink(ctx.req, ctx.res)
+        })
+
+        ctx.CollaboratorsInviteHandler.promises.createSharingLinkInvite.should.have.been.calledWith(
+          ctx.projectId,
+          'readOnly',
+          ctx.subscriptionId.toString()
+        )
+      })
+
+      it('responds with a 403 JSON error when the subscription is not a professional group the user belongs to', async function (ctx) {
+        await new Promise(resolve => {
+          ctx.SubscriptionLocator.promises.getUserActiveProfessionalGroupSubscriptions.resolves(
+            []
+          )
+          ctx.res.callback = () => resolve()
+          ctx.CollaboratorsInviteController.updateSharingLink(ctx.req, ctx.res)
+        })
+
+        expect(ctx.res.statusCode).to.equal(403)
+        expect(ctx.res.json).toHaveBeenCalledWith({
+          errorReason: 'subscription_not_eligible',
+        })
+        ctx.CollaboratorsInviteHandler.promises.createSharingLinkInvite.called.should.equal(
+          false
+        )
+      })
+    })
+  })
+
+  describe('validateSharingLink', function () {
+    beforeEach(function (ctx) {
+      ctx.req.params = { Project_id: ctx.projectId }
+      ctx.req.body = { token: ctx.token }
+    })
+
+    it('returns valid false when invite not found', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.CollaboratorsInviteGetter.promises.getInviteByToken.resolves(null)
+        ctx.res.callback = () => resolve()
+        ctx.CollaboratorsInviteController.validateSharingLink(ctx.req, ctx.res)
+      })
+      expect(ctx.res.json).toHaveBeenCalledWith({ valid: false })
+    })
+
+    it('returns valid true for logged in user without subscription restriction', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.CollaboratorsInviteGetter.promises.getInviteByToken.resolves(
+          ctx.invite
+        )
+        ctx.res.callback = () => resolve()
+        ctx.CollaboratorsInviteController.validateSharingLink(ctx.req, ctx.res)
+      })
+      expect(ctx.res.json).toHaveBeenCalledWith({
+        valid: true,
+      })
+    })
+
+    it('returns valid false when subscription group check fails', async function (ctx) {
+      await new Promise(resolve => {
+        ctx.invite.subscriptionId = new ObjectId().toString()
+        ctx.SubscriptionGroupHandler.promises.isUserPartOfGroup.resolves(false)
+        ctx.CollaboratorsInviteGetter.promises.getInviteByToken.resolves(
+          ctx.invite
+        )
+        ctx.res.callback = () => resolve()
+        ctx.CollaboratorsInviteController.validateSharingLink(ctx.req, ctx.res)
+      })
+      expect(ctx.res.json).toHaveBeenCalledWith({ valid: false })
     })
   })
 

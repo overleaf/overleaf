@@ -5,7 +5,7 @@ MVN_TARGET := target/writelatex-git-bridge-1.0-SNAPSHOT-jar-with-dependencies.ja
 
 export BUILD_NUMBER ?= local
 export BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
-BRANCH_NAME_TAG_SAFE = $(shell echo $(BRANCH_NAME) | sed 's/\//\-\-/g' | cut -c1-96)
+export BRANCH_NAME_TAG_SAFE = $(shell echo $(BRANCH_NAME) | sed 's/\//\-\-/g' | cut -c1-96)
 export COMMIT_SHA ?= $(shell git rev-parse HEAD)
 PROJECT_NAME = git-bridge
 
@@ -14,6 +14,10 @@ IMAGE_REPO ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME)
 IMAGE_REPO_BRANCH ?= $(IMAGE_REPO):$(BRANCH_NAME_TAG_SAFE)
 IMAGE_REPO_MAIN ?= $(IMAGE_REPO):main
 IMAGE_REPO_FINAL ?= $(IMAGE_REPO_BRANCH)-$(BUILD_NUMBER)
+
+.PHONY: print-branch-tag-safe
+print-branch-tag-safe:
+	@echo $(BRANCH_NAME_TAG_SAFE)
 
 runtime-conf:
 	/opt/envsubst < conf/envsubst_template.json > conf/runtime.json

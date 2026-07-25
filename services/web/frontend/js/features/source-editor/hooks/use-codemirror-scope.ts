@@ -63,7 +63,9 @@ import { useActiveOverallTheme } from '@/shared/hooks/use-active-overall-theme'
 import { useEditorSelectionContext } from '@/shared/context/editor-selection-context'
 import { useActiveEditorTheme } from '@/shared/hooks/use-active-editor-theme'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
-import { isValidTeXFile } from '@/main/is-valid-tex-file'
+import { isCmVisualEditorAvailable } from '../utils/visual-editor'
+import { setEditorTabs } from '../extensions/tabs-listener'
+import { setReviewTooltip } from '../extensions/review-tooltip'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -89,8 +91,10 @@ function useCodeMirrorScope(view: EditorView) {
     mode,
     syntaxValidation,
     mathPreview,
+    editorTabs,
     nonBlinkingCursor,
     referencesSearchMode,
+    floatingMenu,
   } = userSettings
   const activeOverallTheme = useActiveOverallTheme()
   const editorTheme = useActiveEditorTheme()
@@ -160,8 +164,10 @@ function useCodeMirrorScope(view: EditorView) {
     mode,
     syntaxValidation,
     mathPreview,
+    editorTabs,
     nonBlinkingCursor,
     referencesSearchMode,
+    floatingMenu,
   })
 
   const currentDocRef = useRef({
@@ -277,7 +283,8 @@ function useCodeMirrorScope(view: EditorView) {
 
   const { previewByPath } = useFileTreePathContext()
 
-  const showVisual = visual && !!openDocName && isValidTeXFile(openDocName)
+  const showVisual =
+    visual && !!openDocName && isCmVisualEditorAvailable(openDocName)
 
   const visualRef = useRef({
     previewByPath,
@@ -469,6 +476,22 @@ function useCodeMirrorScope(view: EditorView) {
       view.dispatch(setMathPreview(mathPreview))
     })
   }, [view, mathPreview])
+
+  useEffect(() => {
+    settingsRef.current.editorTabs = editorTabs
+    window.setTimeout(() => {
+      view.dispatch(setEditorTabs(editorTabs))
+    })
+  }, [view, editorTabs])
+
+  useEffect(() => {
+    settingsRef.current.floatingMenu = floatingMenu
+    window.setTimeout(() => {
+      view.dispatch(
+        setReviewTooltip(floatingMenu, editorContextMenuEnabledRef.current)
+      )
+    })
+  }, [view, floatingMenu])
 
   useEffect(() => {
     settingsRef.current.nonBlinkingCursor = nonBlinkingCursor

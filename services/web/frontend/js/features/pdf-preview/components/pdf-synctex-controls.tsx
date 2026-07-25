@@ -11,6 +11,7 @@ import useSynctex from '../hooks/use-synctex'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import OLSpinner from '@/shared/components/ol/ol-spinner'
 import { sendMB } from '@/infrastructure/event-tracking'
+import { useCommandProvider } from '@/features/ide-react/hooks/use-command-provider'
 
 const GoToCodeButton = memo(function GoToCodeButton({
   syncToCode,
@@ -22,6 +23,24 @@ const GoToCodeButton = memo(function GoToCodeButton({
   isDetachLayout?: boolean
 }) {
   const { t } = useTranslation()
+  useCommandProvider(
+    () => [
+      {
+        id: 'synctex-sync-to-code',
+        handler: () => {
+          sendMB('jump-to-location', {
+            method: 'command',
+            direction: 'pdf-location-in-code',
+          })
+          syncToCode({ visualOffset: 72 })
+        },
+        disabled: syncToCodeInFlight,
+        label: t('go_to_pdf_location_in_code_action'),
+      },
+    ],
+    [t, syncToCode, syncToCodeInFlight]
+  )
+
   const buttonClasses = classNames('synctex-control', {
     'detach-synctex-control': !!isDetachLayout,
   })
@@ -97,6 +116,24 @@ const GoToPdfButton = memo(function GoToPdfButton({
     })
     syncToPdf()
   }, [syncToPdf])
+
+  useCommandProvider(
+    () => [
+      {
+        id: 'synctex-sync-to-pdf',
+        handler: () => {
+          sendMB('jump-to-location', {
+            method: 'command',
+            direction: 'code-location-in-pdf',
+          })
+          syncToPdf()
+        },
+        label: t('go_to_code_location_in_pdf'),
+        disabled: syncToPdfInFlight || !canSyncToPdf,
+      },
+    ],
+    [t, syncToPdf, syncToPdfInFlight, canSyncToPdf]
+  )
 
   let buttonIcon = null
   if (syncToPdfInFlight) {

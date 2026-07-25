@@ -14,24 +14,28 @@ async function schedulePostRegistrationAnalytics(user) {
 }
 
 async function postRegistrationAnalytics(userId) {
-  const user = await UserGetter.promises.getUser({ _id: userId }, { email: 1 })
+  const user = await UserGetter.promises.getUser(
+    { _id: userId },
+    { email: 1, _id: 1, analyticsId: 1, labsProgram: 1 }
+  )
   if (!user) {
     return
   }
-  await checkAffiliations(userId)
+  await checkAffiliations(user)
 }
 
-async function checkAffiliations(userId) {
-  const affiliationsData =
-    await InstitutionsAPI.promises.getUserAffiliations(userId)
+async function checkAffiliations(user) {
+  const affiliationsData = await InstitutionsAPI.promises.getUserAffiliations(
+    user._id.toString()
+  )
   const hasCommonsAccountAffiliation = affiliationsData.some(
     affiliationData =>
       affiliationData.institution && affiliationData.institution.commonsAccount
   )
 
   if (hasCommonsAccountAffiliation) {
-    await AnalyticsManager.setUserPropertyForUser(
-      userId,
+    await AnalyticsManager.setUserPropertyForMongoUser(
+      user,
       'registered-from-commons-account',
       true
     )

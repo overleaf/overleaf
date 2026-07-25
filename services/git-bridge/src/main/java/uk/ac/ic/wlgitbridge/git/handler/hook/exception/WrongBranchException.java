@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.git.handler.hook.exception;
 import com.google.gson.JsonElement;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 
 /*
@@ -10,9 +11,12 @@ import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
  */
 public class WrongBranchException extends SnapshotPostException {
 
-  private static final String[] DESCRIPTION_LINES = {
-    "You can't push any new branches.", "Please use the master branch."
-  };
+  private final String branchName;
+
+  public WrongBranchException(String expectedRef) {
+    Objects.requireNonNull(expectedRef, "expectedRef must not be null");
+    this.branchName = expectedRef.substring(expectedRef.lastIndexOf('/') + 1);
+  }
 
   @Override
   public String getMessage() {
@@ -21,7 +25,8 @@ public class WrongBranchException extends SnapshotPostException {
 
   @Override
   public List<String> getDescriptionLines() {
-    return Arrays.asList(DESCRIPTION_LINES);
+    return Arrays.asList(
+        "You can't push any new branches.", "Please use the " + branchName + " branch.");
   }
 
   @Override

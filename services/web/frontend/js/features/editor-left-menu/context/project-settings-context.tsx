@@ -33,10 +33,12 @@ type ProjectSettingsSetterContextValue = {
   setPdfViewer: (pdfViewer: UserSettings['pdfViewer']) => void
   setMathPreview: (mathPreview: UserSettings['mathPreview']) => void
   setBreadcrumbs: (breadcrumbs: UserSettings['breadcrumbs']) => void
+  setEditorTabs: (editorTabs: UserSettings['editorTabs']) => void
   setNonBlinkingCursor: (
     nonBlinkingCursor: UserSettings['nonBlinkingCursor']
   ) => void
   setDarkModePdf: (darkModePdf: UserSettings['darkModePdf']) => void
+  setFloatingMenu: (floatingMenu: UserSettings['floatingMenu']) => void
   setZotero: (zotero: UserSettings['zotero']) => void
   setMendeley: (mendeley: UserSettings['mendeley']) => void
   setPapers: (papers: UserSettings['papers']) => void
@@ -95,10 +97,14 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
     setMathPreview,
     breadcrumbs,
     setBreadcrumbs,
+    editorTabs,
+    setEditorTabs,
     nonBlinkingCursor,
     setNonBlinkingCursor,
     darkModePdf,
     setDarkModePdf,
+    floatingMenu,
+    setFloatingMenu,
     zotero,
     setZotero,
     mendeley,
@@ -149,10 +155,14 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setMathPreview,
       breadcrumbs,
       setBreadcrumbs,
+      editorTabs,
+      setEditorTabs,
       nonBlinkingCursor,
       setNonBlinkingCursor,
       darkModePdf,
       setDarkModePdf,
+      floatingMenu,
+      setFloatingMenu,
       zotero,
       setZotero,
       mendeley,
@@ -199,10 +209,14 @@ export const ProjectSettingsProvider: FC<React.PropsWithChildren> = ({
       setMathPreview,
       breadcrumbs,
       setBreadcrumbs,
+      editorTabs,
+      setEditorTabs,
       nonBlinkingCursor,
       setNonBlinkingCursor,
       darkModePdf,
       setDarkModePdf,
+      floatingMenu,
+      setFloatingMenu,
       zotero,
       setZotero,
       mendeley,

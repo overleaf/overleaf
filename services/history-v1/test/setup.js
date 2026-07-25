@@ -22,7 +22,7 @@ async function setupMongoDatabase() {
   this.timeout(60_000)
   await promisify(exec)(
     // Run saas migrations for backup indexes
-    `cd ../../tools/migrations && npm run migrations -- migrate -t saas`
+    `cd ../../tools/migrations && yarn run migrations migrate -t 'saas & !nonblocking'`
   )
 }
 

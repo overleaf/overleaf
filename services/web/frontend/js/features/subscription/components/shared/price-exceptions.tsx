@@ -7,13 +7,15 @@ type PriceExceptionsProps = {
 
 export function PriceExceptions({ subscription }: PriceExceptionsProps) {
   const { t } = useTranslation()
-  const { activeCoupons } = subscription.payment
+  const { activeCoupons, taxRate } = subscription.payment
 
   return (
     <>
-      <p>
-        <i>* {t('subject_to_additional_vat')}</i>
-      </p>
+      {!(taxRate > 0) && (
+        <p>
+          <i>* {t('taxes_may_be_added')}</i>
+        </p>
+      )}
       {activeCoupons.length > 0 && (
         <>
           <i>* {t('coupons_not_included')}:</i>

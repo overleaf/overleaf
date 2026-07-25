@@ -1,6 +1,8 @@
 import { vi, expect } from 'vitest'
 import sinon from 'sinon'
-import mockFs from 'mock-fs'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
 import mongodb from 'mongodb-legacy'
 import Settings from '@overleaf/settings'
 
@@ -8,6 +10,20 @@ const { ObjectId } = mongodb
 
 const MODULE_PATH =
   '../../../../app/src/Features/Uploads/FileSystemImportManager.mjs'
+
+function createTree(base, tree) {
+  fs.mkdirSync(base, { recursive: true })
+  for (const [name, content] of Object.entries(tree)) {
+    const fullPath = path.join(base, name)
+    if (Buffer.isBuffer(content) || typeof content === 'string') {
+      fs.writeFileSync(fullPath, content)
+    } else if (content && typeof content.symlink === 'string') {
+      fs.symlinkSync(content.symlink, fullPath)
+    } else {
+      createTree(fullPath, content)
+    }
+  }
+}
 
 describe('FileSystemImportManager', function () {
   beforeEach(async function (ctx) {
@@ -48,14 +64,16 @@ describe('FileSystemImportManager', function () {
 
   describe('importDir', function () {
     beforeEach(async function (ctx) {
-      mockFs({
+      ctx.tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'import-test-'))
+      ctx.importPath = path.join(ctx.tmpDir, 'import-test')
+      createTree(ctx.tmpDir, {
         'import-test': {
           'main.tex': 'My thesis',
-          'link-to-main.tex': mockFs.symlink({ path: 'import-test/main.tex' }),
-          '.DS_Store': 'Should be ignored',
-          images: {
-            'cat.jpg': Buffer.from([1, 2, 3, 4]),
+          'link-to-main.tex': {
+            symlink: path.join(ctx.tmpDir, 'import-test', 'main.tex'),
           },
+          '.DS_Store': 'Should be ignored',
+          images: { 'cat.jpg': Buffer.from([1, 2, 3, 4]) },
           'line-endings': {
             'unix.txt': 'one\ntwo\nthree',
             'mac.txt': 'uno\rdos\rtres',
@@ -67,15 +85,16 @@ describe('FileSystemImportManager', function () {
             'latin1.txt': Buffer.from('tétanisant!', 'latin1'),
           },
         },
-        symlink: mockFs.symlink({ path: 'import-test' }),
+        symlink: { symlink: path.join(ctx.tmpDir, 'import-test') },
       })
-      ctx.entries =
-        await ctx.FileSystemImportManager.promises.importDir('import-test')
+      ctx.entries = await ctx.FileSystemImportManager.promises.importDir(
+        ctx.importPath
+      )
       ctx.projectPaths = ctx.entries.map(x => x.projectPath)
     })
 
-    afterEach(function () {
-      mockFs.restore()
+    afterEach(function (ctx) {
+      fs.rmSync(ctx.tmpDir, { recursive: true, force: true })
     })
 
     it('should import regular docs', function (ctx) {
@@ -98,7 +117,7 @@ describe('FileSystemImportManager', function () {
       expect(ctx.entries).to.deep.include({
         type: 'file',
         projectPath: '/images/cat.jpg',
-        fsPath: 'import-test/images/cat.jpg',
+        fsPath: path.join(ctx.importPath, 'images', 'cat.jpg'),
       })
     })
 
@@ -142,15 +161,20 @@ describe('FileSystemImportManager', function () {
     })
 
     it('should error when the root folder is a symlink', async function (ctx) {
-      await expect(ctx.FileSystemImportManager.promises.importDir('symlink')).to
-        .be.rejected
+      await expect(
+        ctx.FileSystemImportManager.promises.importDir(
+          path.join(ctx.tmpDir, 'symlink')
+        )
+      ).to.be.rejected
     })
   })
 
   describe('addEntity', function () {
     describe('with directory', function () {
       beforeEach(async function (ctx) {
-        mockFs({
+        ctx.tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'addentity-dir-'))
+        ctx.fsPath = path.join(ctx.tmpDir, 'path', 'to', 'folder')
+        createTree(ctx.tmpDir, {
           path: {
             to: {
               folder: {
@@ -160,19 +184,18 @@ describe('FileSystemImportManager', function () {
             },
           },
         })
-
         await ctx.FileSystemImportManager.promises.addEntity(
           ctx.userId,
           ctx.projectId,
           ctx.folderId,
           'folder',
-          'path/to/folder',
+          ctx.fsPath,
           false
         )
       })
 
-      afterEach(function () {
-        mockFs.restore()
+      afterEach(function (ctx) {
+        fs.rmSync(ctx.tmpDir, { recursive: true, force: true })
       })
 
       it('should add a folder to the project', function (ctx) {
@@ -197,7 +220,7 @@ describe('FileSystemImportManager', function () {
           ctx.projectId,
           ctx.newFolderId,
           'image.jpg',
-          'path/to/folder/image.jpg',
+          path.join(ctx.fsPath, 'image.jpg'),
           null,
           'upload',
           ctx.userId
@@ -206,12 +229,16 @@ describe('FileSystemImportManager', function () {
     })
 
     describe('with binary file', function () {
-      beforeEach(function () {
-        mockFs({ 'uploaded-file': Buffer.from([1, 2, 3, 4]) })
+      beforeEach(function (ctx) {
+        ctx.tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'addentity-bin-'))
+        ctx.fsPath = path.join(ctx.tmpDir, 'uploaded-file')
+        createTree(ctx.tmpDir, {
+          'uploaded-file': Buffer.from([1, 2, 3, 4]),
+        })
       })
 
-      afterEach(function () {
-        mockFs.restore()
+      afterEach(function (ctx) {
+        fs.rmSync(ctx.tmpDir, { recursive: true, force: true })
       })
 
       describe('with replace set to false', function () {
@@ -221,7 +248,7 @@ describe('FileSystemImportManager', function () {
             ctx.projectId,
             ctx.folderId,
             'image.jpg',
-            'uploaded-file',
+            ctx.fsPath,
             false
           )
         })
@@ -231,7 +258,7 @@ describe('FileSystemImportManager', function () {
             ctx.projectId,
             ctx.folderId,
             'image.jpg',
-            'uploaded-file',
+            ctx.fsPath,
             null,
             'upload',
             ctx.userId
@@ -246,7 +273,7 @@ describe('FileSystemImportManager', function () {
             ctx.projectId,
             ctx.folderId,
             'image.jpg',
-            'uploaded-file',
+            ctx.fsPath,
             true
           )
         })
@@ -256,7 +283,7 @@ describe('FileSystemImportManager', function () {
             ctx.projectId,
             ctx.folderId,
             'image.jpg',
-            'uploaded-file',
+            ctx.fsPath,
             null,
             'upload',
             ctx.userId
@@ -271,16 +298,20 @@ describe('FileSystemImportManager', function () {
       ['Windows', '\r\n'],
     ]) {
       describe(`with text file (${lineEndingDescription} line endings)`, function () {
-        beforeEach(function () {
-          mockFs({
+        beforeEach(function (ctx) {
+          ctx.tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'addentity-txt-'))
+          ctx.fsPath = path.join(ctx.tmpDir, 'path', 'to', 'uploaded-file')
+          createTree(ctx.tmpDir, {
             path: {
-              to: { 'uploaded-file': `one${lineEnding}two${lineEnding}three` },
+              to: {
+                'uploaded-file': `one${lineEnding}two${lineEnding}three`,
+              },
             },
           })
         })
 
-        afterEach(function () {
-          mockFs.restore()
+        afterEach(function (ctx) {
+          fs.rmSync(ctx.tmpDir, { recursive: true, force: true })
         })
 
         describe('with replace set to false', function () {
@@ -290,7 +321,7 @@ describe('FileSystemImportManager', function () {
               ctx.projectId,
               ctx.folderId,
               'doc.tex',
-              'path/to/uploaded-file',
+              ctx.fsPath,
               false
             )
           })
@@ -314,7 +345,7 @@ describe('FileSystemImportManager', function () {
               ctx.projectId,
               ctx.folderId,
               'doc.tex',
-              'path/to/uploaded-file',
+              ctx.fsPath,
               true
             )
           })
@@ -334,14 +365,20 @@ describe('FileSystemImportManager', function () {
     }
 
     describe('with symlink', function () {
-      beforeEach(function () {
-        mockFs({
-          path: { to: { symlink: mockFs.symlink({ path: '/etc/passwd' }) } },
+      beforeEach(function (ctx) {
+        ctx.tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'addentity-sym-'))
+        ctx.fsPath = path.join(ctx.tmpDir, 'path', 'to', 'symlink')
+        createTree(ctx.tmpDir, {
+          path: {
+            to: {
+              symlink: { symlink: '/etc/passwd' },
+            },
+          },
         })
       })
 
-      afterEach(function () {
-        mockFs.restore()
+      afterEach(function (ctx) {
+        fs.rmSync(ctx.tmpDir, { recursive: true, force: true })
       })
 
       it('should stop with an error', async function (ctx) {
@@ -351,7 +388,7 @@ describe('FileSystemImportManager', function () {
             ctx.projectId,
             ctx.folderId,
             'main.tex',
-            'path/to/symlink',
+            ctx.fsPath,
             false
           )
         ).to.be.rejectedWith('path is symlink')

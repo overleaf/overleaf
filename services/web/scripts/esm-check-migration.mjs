@@ -20,7 +20,6 @@ const converted = new Set([
   'scripts/translations/insertHTMLFragments.js',
   'scripts/translations/replaceLinkFragments.js',
   'scripts/translations/sanitize.js',
-  'scripts/translations/sort.js',
   'scripts/translations/transformLocales.js',
   'scripts/translations/translateLocales.js',
   'scripts/translations/upload.js',

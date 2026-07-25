@@ -10,7 +10,7 @@ ENV TEXMFVAR=/var/lib/overleaf/tmp/texmf-var
 
 # Update to ensure dependencies are updated
 # ------------------------------------------
-ENV REBUILT_AFTER="2026-05-21"
+ENV REBUILT_AFTER="2026-06-05"
 
 # Install dependencies
 # --------------------

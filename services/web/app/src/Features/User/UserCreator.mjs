@@ -43,8 +43,8 @@ async function recordRegistrationEvent(user) {
     if (user.thirdPartyIdentifiers && user.thirdPartyIdentifiers.length > 0) {
       segmentation.provider = user.thirdPartyIdentifiers[0].providerId
     }
-    Analytics.recordEventForUserInBackground(
-      user._id,
+    Analytics.recordEventForMongoUserInBackground(
+      user,
       'user-registered',
       segmentation
     )
@@ -54,6 +54,9 @@ async function recordRegistrationEvent(user) {
 }
 
 async function createNewUser(attributes, options = {}) {
+  if (!attributes.analyticsId) {
+    throw new Error('bug: attributes.analyticsId is missing')
+  }
   let user = new User()
 
   if (attributes.first_name == null || attributes.first_name === '') {
@@ -107,11 +110,11 @@ async function createNewUser(attributes, options = {}) {
   }
 
   await recordRegistrationEvent(user)
-  await Analytics.setUserPropertyForUser(user._id, 'created-at', new Date())
-  await Analytics.setUserPropertyForUser(user._id, 'user-id', user._id)
+  await Analytics.setUserPropertyForMongoUser(user, 'created-at', new Date())
+  await Analytics.setUserPropertyForMongoUser(user, 'user-id', user._id)
   if (attributes.analyticsId) {
-    await Analytics.setUserPropertyForUser(
-      user._id,
+    await Analytics.setUserPropertyForMongoUser(
+      user,
       'analytics-id',
       attributes.analyticsId
     )

@@ -64,6 +64,7 @@ export default /** @type {const} */ ([
   'shuffle',
   'smart_toy',
   'space_dashboard',
+  'spellcheck',
   'star',
   'strikethrough_s',
   'table_chart',

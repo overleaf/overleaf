@@ -16,6 +16,7 @@ import OLTag from '@/shared/components/ol/ol-tag'
 import AddCollaboratorsSelect from '@/features/share-project-modal/components/add-collaborators-select'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { isValidEmail } from '@/shared/utils/email'
+import { useShareProjectContext } from '@/features/share-project-modal/components/share-project-modal'
 
 export type ContactItem = {
   email: string
@@ -57,6 +58,7 @@ export default function SelectCollaborators({
 }) {
   const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
   const { t } = useTranslation()
+  const { setSuccessActionMessage } = useShareProjectContext()
   const {
     getSelectedItemProps,
     getDropdownProps,
@@ -118,15 +120,6 @@ export default function SelectCollaborators({
     return true
   }, [inputValue, selectedItems])
 
-  function stateReducer(_: unknown, actionAndChanges: any) {
-    const { type, changes } = actionAndChanges
-    // force selected item to be null so that adding, removing, then re-adding the same collaborator is recognised as a selection change
-    if (type === useCombobox.stateChangeTypes.InputChange) {
-      return { ...changes, selectedItem: null }
-    }
-    return changes
-  }
-
   const {
     isOpen,
     getLabelProps,
@@ -137,10 +130,12 @@ export default function SelectCollaborators({
     reset,
   } = useCombobox({
     inputValue,
+    // Pinning `selectedItem` to null means every selection is treated as a change
+    // by downshift, so re-selecting the same option reliably fires `onStateChange`.
+    selectedItem: null,
     defaultHighlightedIndex: 0,
     items: filteredOptions,
     itemToString: item => (item && item.name) || '',
-    stateReducer,
     onStateChange: ({ type, selectedItem }) => {
       switch (type) {
         // add a selected item on Enter (keypress), click or blur
@@ -239,6 +234,10 @@ export default function SelectCollaborators({
     setInputErrors(prev => prev.filter(e => selectedEmails.includes(e.email)))
   }, [selectedEmails])
 
+  useEffect(() => {
+    setInviteSent(false)
+  }, [selectedItems])
+
   return (
     <div className="tags-input tags-new">
       {isSharingUpdatesEnabled ? (
@@ -327,7 +326,7 @@ export default function SelectCollaborators({
                           break
 
                         case ',':
-                          // comma: try to create a new item using inputValue
+                        case ' ':
                           event.preventDefault()
                           addNewItem(inputValue)
                           break
@@ -395,7 +394,10 @@ export default function SelectCollaborators({
                 multipleSelectionProps={multipleSelectionProps}
                 currentMemberEmails={currentMemberEmails}
                 inputValue={inputValue}
-                onInviteSuccess={() => setInviteSent(true)}
+                onInviteSuccess={() => {
+                  setInviteSent(true)
+                  setSuccessActionMessage(undefined)
+                }}
                 hasErrors={inputErrors.length > 0}
               />
             </div>

@@ -8,7 +8,7 @@ const { expect } = require('chai')
 describe('TrackedChangeList', function () {
   describe('applyInsert', function () {
     describe('with same author', function () {
-      it('should merge consecutive tracked changes and use the latest timestamp', function () {
+      it('should merge consecutive tracked changes and use the earliest timestamp', function () {
         const trackedChanges = TrackedChangeList.fromRaw([
           {
             range: { pos: 0, length: 3 },
@@ -33,7 +33,7 @@ describe('TrackedChangeList', function () {
             tracking: {
               type: 'insert',
               userId: 'user1',
-              ts: '2024-01-01T00:00:00.000Z',
+              ts: '2023-01-01T00:00:00.000Z',
             },
           },
         ])
@@ -699,7 +699,7 @@ describe('TrackedChangeList', function () {
           tracking: {
             type: 'insert',
             userId: 'user1',
-            ts: '2024-01-01T00:00:00.000Z',
+            ts: '2023-01-01T00:00:00.000Z',
           },
         },
       ])

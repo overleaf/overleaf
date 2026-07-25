@@ -101,7 +101,8 @@ export const useToolbarMenuBarEditorCommands = () => {
        ************************************/
       {
         id: 'insert-inline-math',
-        label: t('inline_math'),
+        menuLabel: t('inline_math'),
+        label: t('insert_inline_math'),
         handler: () => {
           commands.wrapInInlineMath(view)
           view.focus()
@@ -109,21 +110,24 @@ export const useToolbarMenuBarEditorCommands = () => {
       },
       {
         id: 'insert-display-math',
-        label: t('display_math'),
+        menuLabel: t('display_math'),
+        label: t('insert_display_math'),
         handler: () => {
           commands.wrapInDisplayMath(view)
           view.focus()
         },
       },
       {
-        label: t('upload_from_computer'),
+        menuLabel: t('upload_from_computer'),
+        label: t('insert_figure_from_computer'),
         id: 'insert-figure-from-computer',
         handler: () => {
           openFigureModal(FigureModalSource.FILE_UPLOAD)
         },
       },
       {
-        label: t('from_project_files'),
+        menuLabel: t('from_project_files'),
+        label: t('insert_figure_from_project_files'),
         id: 'insert-figure-from-project-files',
         handler: () => {
           openFigureModal(FigureModalSource.FILE_TREE)
@@ -144,7 +148,8 @@ export const useToolbarMenuBarEditorCommands = () => {
     }
     return [
       {
-        label: t('from_another_project'),
+        menuLabel: t('from_another_project'),
+        label: t('insert_figure_from_another_project'),
         id: 'insert-figure-from-another-project',
         handler: () => {
           openFigureModal(FigureModalSource.OTHER_PROJECT)
@@ -173,7 +178,8 @@ export const useToolbarMenuBarEditorCommands = () => {
     }
     return [
       {
-        label: t('from_url'),
+        menuLabel: t('from_url'),
+        label: t('insert_figure_from_url'),
         id: 'insert-figure-from-url',
         handler: () => {
           openFigureModal(FigureModalSource.FROM_URL)
@@ -200,7 +206,8 @@ export const useToolbarMenuBarEditorCommands = () => {
     return [
       {
         id: 'insert-table',
-        label: t('table'),
+        menuLabel: t('table'),
+        label: t('insert_table'),
         handler: () => {
           commands.insertTable(view, 3, 3)
           view.focus()
@@ -208,7 +215,8 @@ export const useToolbarMenuBarEditorCommands = () => {
       },
       {
         id: 'insert-citation',
-        label: t('citation'),
+        menuLabel: t('citation'),
+        label: t('insert_citation'),
         handler: () => {
           commands.insertCite(view)
           view.focus()
@@ -216,7 +224,8 @@ export const useToolbarMenuBarEditorCommands = () => {
       },
       {
         id: 'insert-link',
-        label: t('link'),
+        menuLabel: t('link'),
+        label: t('insert_link'),
         handler: () => {
           commands.wrapInHref(view)
           view.focus()
@@ -224,7 +233,8 @@ export const useToolbarMenuBarEditorCommands = () => {
       },
       {
         id: 'insert-cross-reference',
-        label: t('cross_reference'),
+        menuLabel: t('cross_reference'),
+        label: t('insert_cross_reference'),
         handler: () => {
           commands.insertRef(view)
           view.focus()
@@ -232,7 +242,8 @@ export const useToolbarMenuBarEditorCommands = () => {
       },
       {
         id: 'comment',
-        label: t('comment'),
+        menuLabel: t('comment'),
+        label: t('add_comment'),
         handler: () => {
           commands.addComment('toolbar')
         },

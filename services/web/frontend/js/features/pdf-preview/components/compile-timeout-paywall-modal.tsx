@@ -52,6 +52,7 @@ export function CompileTimeoutPaywallModal({
       const countryCode = getMeta('ol-countryCode')
 
       sendMB('paywall-plans-page-view', {
+        'paywall-type': 'compile-timeout',
         currency,
         countryCode,
         version: 'compile-timeout',
@@ -87,6 +88,7 @@ export function CompileTimeoutPaywallModal({
 
   const handleUpgrade = useCallback(() => {
     sendMB('paywall-plans-page-click', {
+      'paywall-type': 'compile-timeout',
       plan: 'collaborator',
       'billing-period': billingPeriod,
       currency,
@@ -98,6 +100,7 @@ export function CompileTimeoutPaywallModal({
 
   const viewAllPlansHref = useMemo(() => {
     const params = new URLSearchParams({
+      'paywall-type': 'compile-timeout',
       itm_campaign: 'compile-timeout',
     })
     return `/user/subscription/choose-your-plan?${params.toString()}`
@@ -105,6 +108,7 @@ export function CompileTimeoutPaywallModal({
 
   const handleViewAllPlans = useCallback(() => {
     sendMB('paywall-plans-page-click', {
+      'paywall-type': 'compile-timeout',
       button: 'plans',
       'billing-period': billingPeriod,
       currency,
@@ -191,9 +195,7 @@ export function CompileTimeoutPaywallModal({
                 <strong>{t('compile_timeout_modal_intro')}</strong>
               </p>
               <div className="compile-time-paywall-feature-list">
-                <ListItem>
-                  {t('collabs_per_proj', { collabcount: 10 })}
-                </ListItem>
+                <ListItem>{t('collabs_per_proj', { count: 10 })}</ListItem>
                 <ListItem>{t('track_changes')}</ListItem>
                 <ListItem>{t('github_integration')}</ListItem>
                 <ListItem>{t('and_much_more')}</ListItem>

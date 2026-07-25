@@ -752,7 +752,7 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
   })
 
   // FIXME: need to assert on source code
-  // eslint-disable-next-line mocha/no-skipped-tests
+  // eslint-disable-next-line mocha/no-pending-tests
   it.skip('tidies whitespace in pasted tables', function () {
     mountEditor()
 

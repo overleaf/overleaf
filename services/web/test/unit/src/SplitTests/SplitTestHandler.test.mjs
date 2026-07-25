@@ -139,6 +139,7 @@ describe('SplitTestHandler', function () {
     beforeEach(async function (ctx) {
       ctx.user = {
         _id: new ObjectId(),
+        analyticsId: 'analytics-id',
         splitTests: {
           'active-test': [
             {
@@ -256,9 +257,101 @@ describe('SplitTestHandler', function () {
     })
   })
 
+  describe('mongo user variants', function () {
+    beforeEach(function (ctx) {
+      ctx.mongoUser = {
+        _id: new ObjectId(),
+        analyticsId: 'analytics-id',
+        splitTests: {},
+      }
+      // a feature flag whose enabled variant covers 100% of users
+      ctx.cachedSplitTests.set('my-flag', {
+        name: 'my-flag',
+        versions: [
+          {
+            active: true,
+            analyticsEnabled: true,
+            phase: 'release',
+            versionNumber: 1,
+            variants: [
+              {
+                name: 'enabled',
+                rolloutPercent: 100,
+                rolloutStripes: [{ start: 0, end: 100 }],
+              },
+            ],
+          },
+        ],
+      })
+    })
+
+    describe('getActiveAssignmentsForMongoUser', function () {
+      it('returns the assignments without re-fetching the user', async function (ctx) {
+        const assignments =
+          await ctx.SplitTestHandler.promises.getActiveAssignmentsForMongoUser(
+            ctx.mongoUser
+          )
+        expect(assignments['active-test']).to.deep.equal({
+          variantName: 'variant-1',
+          phase: 'release',
+          versionNumber: 2,
+        })
+        expect(ctx.SplitTestUserGetter.promises.getUser).to.not.have.been.called
+      })
+
+      it('throws when _id is missing from the projection', async function (ctx) {
+        await expect(
+          ctx.SplitTestHandler.promises.getActiveAssignmentsForMongoUser({
+            analyticsId: 'analytics-id',
+          })
+        ).to.be.rejectedWith('bug: include db.users._id in projection')
+      })
+
+      it('throws when analyticsId is missing from the projection', async function (ctx) {
+        await expect(
+          ctx.SplitTestHandler.promises.getActiveAssignmentsForMongoUser({
+            _id: new ObjectId(),
+          })
+        ).to.be.rejectedWith('bug: include db.users.analyticsId in projection')
+      })
+    })
+
+    describe('getAssignmentForMongoUser', function () {
+      it('returns the assignment without re-fetching the user', async function (ctx) {
+        const assignment =
+          await ctx.SplitTestHandler.promises.getAssignmentForMongoUser(
+            ctx.mongoUser,
+            'my-flag'
+          )
+        expect(assignment.variant).to.equal('enabled')
+        expect(ctx.SplitTestUserGetter.promises.getUser).to.not.have.been.called
+      })
+    })
+
+    describe('featureFlagEnabledForMongoUser', function () {
+      it('returns true when the assigned variant is enabled', async function (ctx) {
+        const enabled =
+          await ctx.SplitTestHandler.promises.featureFlagEnabledForMongoUser(
+            ctx.mongoUser,
+            'my-flag'
+          )
+        expect(enabled).to.be.true
+      })
+
+      it('returns false when the assigned variant is not enabled', async function (ctx) {
+        const enabled =
+          await ctx.SplitTestHandler.promises.featureFlagEnabledForMongoUser(
+            ctx.mongoUser,
+            'active-test'
+          )
+        expect(enabled).to.be.false
+      })
+    })
+  })
+
   describe('with a user without assignments', function () {
     beforeEach(async function (ctx) {
-      ctx.user = { _id: new ObjectId() }
+      ctx.user = { _id: new ObjectId(), analyticsId: 'analytics-id' }
       ctx.SplitTestUserGetter.promises.getUser.resolves(ctx.user)
       ctx.assignments =
         await ctx.SplitTestHandler.promises.getActiveAssignmentsForUser(
@@ -418,6 +511,35 @@ describe('SplitTestHandler', function () {
         'active-test',
         'default'
       )
+    })
+  })
+
+  describe('getAssignment query overrides', function () {
+    beforeEach(function (ctx) {
+      ctx.AnalyticsManager.getIdsFromSession.returns({
+        userId: 'abc123abc123',
+      })
+      // 'active-test' would compute to 'variant-1'; override it to 'default'
+      ctx.req.query = { 'active-test': 'default' }
+    })
+
+    it('applies a query-string override by default', async function (ctx) {
+      const { variant } = await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
+        'active-test'
+      )
+      expect(variant).to.equal('default')
+    })
+
+    it('ignores query-string overrides when ignoreOverrides is set', async function (ctx) {
+      const { variant } = await ctx.SplitTestHandler.promises.getAssignment(
+        ctx.req,
+        ctx.res,
+        'active-test',
+        { ignoreOverrides: true }
+      )
+      expect(variant).to.equal('variant-1')
     })
   })
 

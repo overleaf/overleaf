@@ -2,7 +2,13 @@ import sinon from 'sinon'
 import { expect } from 'chai'
 import mongodb from 'mongodb-legacy'
 import tk from 'timekeeper'
-import { File, Comment, TrackedChange, Range } from 'overleaf-editor-core'
+import {
+  File,
+  Comment,
+  TrackedChange,
+  Range,
+  TrackingProps,
+} from 'overleaf-editor-core'
 import { UnprocessableError } from 'overleaf-editor-core/lib/errors.js'
 import { strict as esmock } from 'esmock'
 import { FileContentEmptyError } from '../../../../app/js/Errors.js'
@@ -2013,32 +2019,44 @@ describe('SyncManager', function () {
     describe('syncing tracked changes', function () {
       beforeEach(function () {
         this.loadedSnapshotDoc.getTrackedChanges().add(
-          new TrackedChange(new Range(4, 6), {
-            type: 'delete',
-            userId: USER_ID,
-            ts: new Date(TIMESTAMP),
-          })
+          new TrackedChange(
+            new Range(4, 6),
+            TrackingProps.fromRaw({
+              type: 'delete',
+              userId: USER_ID,
+              ts: new Date(TIMESTAMP).toISOString(),
+            })
+          )
         )
         this.loadedSnapshotDoc.getTrackedChanges().add(
-          new TrackedChange(new Range(10, 6), {
-            type: 'insert',
-            userId: USER_ID,
-            ts: new Date(TIMESTAMP),
-          })
+          new TrackedChange(
+            new Range(10, 6),
+            TrackingProps.fromRaw({
+              type: 'insert',
+              userId: USER_ID,
+              ts: new Date(TIMESTAMP).toISOString(),
+            })
+          )
         )
         this.loadedSnapshotDoc.getTrackedChanges().add(
-          new TrackedChange(new Range(20, 6), {
-            type: 'delete',
-            userId: USER_ID,
-            ts: new Date(TIMESTAMP),
-          })
+          new TrackedChange(
+            new Range(20, 6),
+            TrackingProps.fromRaw({
+              type: 'delete',
+              userId: USER_ID,
+              ts: new Date(TIMESTAMP).toISOString(),
+            })
+          )
         )
         this.loadedSnapshotDoc.getTrackedChanges().add(
-          new TrackedChange(new Range(40, 3), {
-            type: 'insert',
-            userId: USER_ID,
-            ts: new Date(TIMESTAMP),
-          })
+          new TrackedChange(
+            new Range(40, 3),
+            TrackingProps.fromRaw({
+              type: 'insert',
+              userId: USER_ID,
+              ts: new Date(TIMESTAMP).toISOString(),
+            })
+          )
         )
         this.changes = [
           makeTrackedChange('td1', { p: 4, d: 'quick ' }),

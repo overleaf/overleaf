@@ -45,7 +45,7 @@ import {
   ProjectMetadata,
   ProjectUpdate,
 } from '@/shared/context/types/project-metadata'
-import { UserId } from '../../../types/user'
+import { User, UserId } from '../../../types/user'
 import { ProjectCompiler } from '../../../types/project-settings'
 import { ReferencesContext } from '@/features/ide-react/context/references-context'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
@@ -70,12 +70,14 @@ const defaultUserSettings = {
 } satisfies UserSettings
 
 export type EditorProvidersProps = {
-  user?: {
-    id: string
-    email: string
-    signUpDate?: string
-    isProfessionalGroupPlan?: boolean
-  }
+  user?: Pick<
+    User,
+    | 'id'
+    | 'email'
+    | 'signUpDate'
+    | 'activeProfessionalGroupSubscriptions'
+    | 'isProfessionalGroupPlan'
+  >
   projectId?: string
   projectName?: string
   projectOwner?: ProjectMetadata['owner']
@@ -144,7 +146,7 @@ const layoutContextDefault = {
   chatIsOpen: true, // false in the application, true in tests
   reviewPanelOpen: false,
   miniReviewPanelVisible: false,
-  leftMenuShown: false,
+  settingsShown: false,
   projectSearchIsOpen: false,
   pdfLayout: 'sideBySide',
   loadingStyleSheet: false,
@@ -485,7 +487,7 @@ const makeLayoutProvider = (
     const [miniReviewPanelVisible, setMiniReviewPanelVisible] = useState(
       layout.miniReviewPanelVisible
     )
-    const [leftMenuShown, setLeftMenuShown] = useState(layout.leftMenuShown)
+    const [settingsShown, setSettingsShown] = useState(layout.settingsShown)
     const [projectSearchIsOpen, setProjectSearchIsOpen] = useState(
       layout.projectSearchIsOpen
     )
@@ -556,7 +558,7 @@ const makeLayoutProvider = (
         detachRole,
         changeLayout,
         chatIsOpen,
-        leftMenuShown,
+        settingsShown,
         openFile,
         pdfLayout,
         pdfPreviewOpen,
@@ -566,7 +568,7 @@ const makeLayoutProvider = (
         miniReviewPanelVisible,
         loadingStyleSheet,
         setChatIsOpen,
-        setLeftMenuShown,
+        setSettingsShown,
         setOpenFile,
         setPdfLayout,
         setReviewPanelOpen,
@@ -577,6 +579,8 @@ const makeLayoutProvider = (
         restoreView,
         handleChangeLayout,
         handleDetach,
+        focusMode: layout.focusMode ?? false,
+        setFocusMode: layout.setFocusMode ?? (() => {}),
       }),
       [
         reattach,
@@ -585,7 +589,7 @@ const makeLayoutProvider = (
         detachRole,
         changeLayout,
         chatIsOpen,
-        leftMenuShown,
+        settingsShown,
         openFile,
         pdfLayout,
         pdfPreviewOpen,
@@ -595,7 +599,7 @@ const makeLayoutProvider = (
         miniReviewPanelVisible,
         loadingStyleSheet,
         setChatIsOpen,
-        setLeftMenuShown,
+        setSettingsShown,
         setOpenFile,
         setPdfLayout,
         setReviewPanelOpen,

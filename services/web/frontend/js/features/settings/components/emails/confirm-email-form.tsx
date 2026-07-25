@@ -144,7 +144,6 @@ export function ConfirmEmailForm({
 
     postJSON(resendEndpoint)
       .then(data => {
-        setIsResending(false)
         if (data?.message?.key) {
           setFeedback({
             type: 'alert',
@@ -334,7 +333,7 @@ function Title({
     return outerErrorDisplay ? (
       <div className="mt-4" />
     ) : (
-      <h3 className="h5">{outerErrorDisplay ? null : t('we_sent_code')}</h3>
+      <h3 className="h5">{t('we_sent_code')}</h3>
     )
   if (interstitial)
     return <h1 className="h3 interstitial-header">{t('confirm_your_email')}</h1>
@@ -415,6 +414,9 @@ function ErrorMessage({ error }: { error: string }) {
 
     case 'please_enter_confirmation_code':
       return <span>{t('please_enter_confirmation_code')}</span>
+
+    case 'email_already_registered_sso':
+      return <span>{t('email_already_registered_sso')}</span>
 
     default:
       return <span>{t('generic_something_went_wrong')}</span>

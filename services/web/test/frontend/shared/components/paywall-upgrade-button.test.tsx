@@ -22,7 +22,7 @@ describe('<PaywallUpgradeButton />', function () {
 
     const upgradeLink = screen.getByRole('link', { name: 'Upgrade' })
     expect(upgradeLink.getAttribute('href')).to.equal(
-      '/user/subscription/choose-your-plan?itm_referrer=ai&itm_campaign=assistant'
+      '/user/subscription/choose-your-plan?itm_referrer=ai&itm_campaign=assistant&paywall-type=assistant'
     )
     expect(upgradeLink.getAttribute('target')).to.equal('_blank')
     expect(upgradeLink.getAttribute('rel')).to.equal('noreferrer')

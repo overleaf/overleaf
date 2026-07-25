@@ -5,6 +5,5 @@ overleaf-editor-core
 --esmock-loader=False
 --is-library=True
 --node-version=24.14.1
---package-name=overleaf-editor-core
 --pipeline-owner=44
 --public-repo=False

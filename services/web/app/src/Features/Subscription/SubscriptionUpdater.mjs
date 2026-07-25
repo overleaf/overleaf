@@ -508,8 +508,31 @@ async function handleExpiredSubscription(subscription, requesterData) {
       )
     } else {
       await deleteSubscription(subscription, requesterData)
+      _setPreviousPlanTypeOnExpiry(subscription)
     }
   }
+}
+
+function _setPreviousPlanTypeOnExpiry(subscription) {
+  const previousPlanType = CustomerIoPlanHelpers.normalizePlanType({
+    plan: {
+      planCode: subscription.planCode,
+      groupPlan: subscription.groupPlan,
+    },
+  })
+  if (!previousPlanType) {
+    return
+  }
+  Modules.promises.hooks
+    .fire('setUserProperties', subscription.admin_id, {
+      previous_plan_type: previousPlanType,
+    })
+    .catch(err => {
+      logger.warn(
+        { err, userId: subscription.admin_id },
+        'Failed to set previous_plan_type in customer.io'
+      )
+    })
 }
 
 async function _sendSubscriptionEvent(userId, subscriptionId, event) {

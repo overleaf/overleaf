@@ -14,10 +14,12 @@ import RequestParser from './RequestParser.js'
 import { pipeline } from 'node:stream/promises'
 import Settings from '@overleaf/settings'
 import Path from 'node:path'
+import { z } from '@overleaf/validation-tools'
 
 const CONVERSION_CONFIGS = {
   docx: { extension: 'docx' },
   markdown: { extension: 'zip' },
+  html: { extension: 'zip' },
 }
 
 async function convertDocumentToLaTeX(req, res) {
@@ -73,6 +75,51 @@ async function convertDocumentToLaTeX(req, res) {
   } finally {
     await fs
       .rm(Path.dirname(zipPath), { recursive: true, force: true })
+      .catch(() => {})
+  }
+}
+
+const PDFToJPEGQuerySchema = z.object({
+  mode: z.enum(['preview', 'thumbnail']),
+})
+
+async function convertPDFToJPEG(req, res) {
+  const { path } = req.file
+  if (!Settings.enablePdfConversions) {
+    await fs.unlink(path).catch(() => {})
+    return res.sendStatus(404)
+  }
+  const parsed = PDFToJPEGQuerySchema.safeParse(req.query)
+  if (!parsed.success) {
+    await fs.unlink(path).catch(() => {})
+    return res.sendStatus(400)
+  }
+  const { mode } = parsed.data
+  logger.debug({ path, mode }, 'received pdf for conversion to jpeg')
+  const conversionId = crypto.randomUUID()
+  let jpegPath
+  try {
+    jpegPath = await ConversionManager.promises.convertPDFToJPEGWithLock(
+      conversionId,
+      path,
+      mode
+    )
+  } finally {
+    await fs.unlink(path).catch(() => {})
+  }
+
+  try {
+    const jpegStat = await fs.stat(jpegPath)
+
+    res.setHeader('Content-Length', jpegStat.size)
+    res.attachment('output.jpg')
+    res.setHeader('X-Content-Type-Options', 'nosniff')
+
+    const readStream = fsSync.createReadStream(jpegPath)
+    await pipeline(readStream, res)
+  } finally {
+    await fs
+      .rm(Path.dirname(jpegPath), { recursive: true, force: true })
       .catch(() => {})
   }
 }
@@ -207,4 +254,5 @@ async function convertProjectToDocument(req, res) {
 export default {
   convertDocumentToLaTeX: expressify(convertDocumentToLaTeX),
   convertProjectToDocument: expressify(convertProjectToDocument),
+  convertPDFToJPEG: expressify(convertPDFToJPEG),
 }

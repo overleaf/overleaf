@@ -247,15 +247,11 @@ const _checkConfirmationCode =
 
       delete req.session[sessionKey]
 
-      AnalyticsManager.recordEventForUserInBackground(
-        user._id,
-        'email-verified',
-        {
-          provider: 'email',
-          verification_type: 'token',
-          isPrimary: user.email === emailToCheck,
-        }
-      )
+      AnalyticsManager.recordEventForSession(req.session, 'email-verified', {
+        provider: 'email',
+        verification_type: 'token',
+        isPrimary: user.email === emailToCheck,
+      })
 
       const redirectUrl =
         AuthenticationController.getRedirectFromSession(req) || '/project'
@@ -391,16 +387,14 @@ const resendExistingSecondaryEmailConfirmationCode = _resendConfirmationCode(
 )
 
 async function confirmSecondaryEmailPage(req, res) {
-  const userId = SessionManager.getLoggedInUserId(req.session)
-
   if (!req.session.pendingSecondaryEmail) {
     const redirectURL =
       AuthenticationController.getRedirectFromSession(req) || '/project'
     return res.redirect(redirectURL)
   }
 
-  AnalyticsManager.recordEventForUserInBackground(
-    userId,
+  AnalyticsManager.recordEventForSession(
+    req.session,
     'confirm-secondary-email-page-displayed'
   )
 
@@ -421,8 +415,8 @@ async function addSecondaryEmailPage(req, res) {
     return res.redirect(redirectURL)
   }
 
-  AnalyticsManager.recordEventForUserInBackground(
-    userId,
+  AnalyticsManager.recordEventForSession(
+    req.session,
     'add-secondary-email-page-displayed'
   )
 
@@ -442,8 +436,8 @@ async function primaryEmailCheckPage(req, res) {
     return res.redirect('/project')
   }
 
-  AnalyticsManager.recordEventForUserInBackground(
-    userId,
+  AnalyticsManager.recordEventForSession(
+    req.session,
     'primary-email-check-page-displayed'
   )
 
@@ -456,8 +450,8 @@ async function primaryEmailCheck(req, res) {
     $set: { lastPrimaryEmailCheck: new Date() },
   })
 
-  AnalyticsManager.recordEventForUserInBackground(
-    userId,
+  AnalyticsManager.recordEventForSession(
+    req.session,
     'primary-email-check-done'
   )
 
@@ -687,7 +681,7 @@ const UserEmailsController = {
               }
               UserGetter.getUser(
                 userData.userId,
-                { email: 1 },
+                { _id: 1, email: 1, analyticsId: 1, labsProgram: 1 },
                 function (error, user) {
                   if (error) {
                     logger.error(
@@ -696,8 +690,8 @@ const UserEmailsController = {
                     )
                   }
                   const isPrimary = user?.email === userData.email
-                  AnalyticsManager.recordEventForUserInBackground(
-                    userData.userId,
+                  AnalyticsManager.recordEventForMongoUserInBackground(
+                    user,
                     'email-verified',
                     {
                       provider: 'email',

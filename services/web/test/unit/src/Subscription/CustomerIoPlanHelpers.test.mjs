@@ -80,4 +80,66 @@ describe('CustomerIoPlanHelpers', function () {
       expect(properties.past_due).to.equal(false)
     })
   })
+
+  describe('getAffiliationProperties', function () {
+    it('sets enterprise_commons=true when the user has active commons access at an enterprise_commons institution', function () {
+      const properties = CustomerIoPlanHelpers.getAffiliationProperties([
+        {
+          emailHasInstitutionLicence: true,
+          affiliation: {
+            institution: { commonsAccount: true, enterpriseCommons: true },
+          },
+        },
+      ])
+      expect(properties.enterprise_commons).to.equal(true)
+    })
+
+    it('sets enterprise_commons=false when affiliated with an enterprise_commons institution but without active commons access', function () {
+      const properties = CustomerIoPlanHelpers.getAffiliationProperties([
+        {
+          emailHasInstitutionLicence: false,
+          affiliation: {
+            institution: { commonsAccount: true, enterpriseCommons: true },
+          },
+        },
+      ])
+      expect(properties.enterprise_commons).to.equal(false)
+    })
+
+    it('sets enterprise_commons=false when active access is not at an enterprise_commons institution', function () {
+      const properties = CustomerIoPlanHelpers.getAffiliationProperties([
+        {
+          emailHasInstitutionLicence: true,
+          affiliation: {
+            institution: { commonsAccount: true, enterpriseCommons: false },
+          },
+        },
+      ])
+      expect(properties.enterprise_commons).to.equal(false)
+    })
+
+    it('sets enterprise_commons=false when there are no emails', function () {
+      const properties = CustomerIoPlanHelpers.getAffiliationProperties([])
+      expect(properties.enterprise_commons).to.equal(false)
+    })
+
+    it('sets domain_capture=true when an affiliation has domain capture enabled', function () {
+      const properties = CustomerIoPlanHelpers.getAffiliationProperties([
+        {
+          affiliation: {
+            institution: {},
+            group: { domainCaptureEnabled: true },
+          },
+        },
+      ])
+      expect(properties.domain_capture).to.equal(true)
+    })
+
+    it('sets domain_capture=false when no affiliation has domain capture enabled', function () {
+      const properties = CustomerIoPlanHelpers.getAffiliationProperties([
+        { affiliation: { institution: {} } },
+      ])
+      expect(properties.domain_capture).to.equal(false)
+    })
+  })
 })

@@ -65,7 +65,8 @@ describe('UserEmailsController', function () {
     }
     ctx.HttpErrorHandler = { conflict: vi.fn() }
     ctx.AnalyticsManager = {
-      recordEventForUserInBackground: vi.fn(),
+      recordEventForSession: vi.fn(),
+      recordEventForMongoUserInBackground: vi.fn(),
     }
     ctx.UserAuditLogHandler = {
       addEntry: vi.fn((userId, op, initiatorId, ip, info, callback) =>
@@ -133,9 +134,7 @@ describe('UserEmailsController', function () {
       '../../../../app/src/Features/User/UserEmailsConfirmationHandler',
       () => ({
         default: (ctx.UserEmailsConfirmationHandler = {
-          promises: {
-            sendConfirmationEmail: vi.fn().mockResolvedValue(undefined),
-          },
+          promises: {},
         }),
       })
     )
@@ -812,13 +811,15 @@ describe('UserEmailsController', function () {
           ctx.req,
           { json: vi.fn() }
         )
-        expect(
-          ctx.AnalyticsManager.recordEventForUserInBackground
-        ).toHaveBeenCalledWith(ctx.user._id, 'email-verified', {
-          provider: 'email',
-          verification_type: 'token',
-          isPrimary: ctx.user.email === ctx.email,
-        })
+        expect(ctx.AnalyticsManager.recordEventForSession).toHaveBeenCalledWith(
+          ctx.req.session,
+          'email-verified',
+          {
+            provider: 'email',
+            verification_type: 'token',
+            isPrimary: ctx.user.email === ctx.email,
+          }
+        )
       })
 
       it('removes pendingExistingEmail from session', async function (ctx) {

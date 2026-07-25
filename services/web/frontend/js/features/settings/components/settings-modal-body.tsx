@@ -53,7 +53,7 @@ const SettingsNavLink = ({ entry }: { entry: SettingsEntry }) => {
         href={entry.href}
         target="_blank"
         rel="noopener"
-        className="ide-settings-tab-link"
+        className="ide-settings-tab-link ide-settings-tab-link-anchor"
       >
         <MaterialIcon
           className="ide-settings-tab-link-icon"
@@ -73,8 +73,9 @@ const SettingsNavLink = ({ entry }: { entry: SettingsEntry }) => {
       <>
         <NavLink
           eventKey={entry.key}
-          className="ide-settings-tab-link"
+          className="ide-settings-tab-link ide-settings-tab-link-button"
           key={entry.key}
+          as="button"
         >
           <MaterialIcon
             className="ide-settings-tab-link-icon"

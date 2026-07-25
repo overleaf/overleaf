@@ -32,11 +32,12 @@ const PATHS = {
 const IMAGES = {
   CE: process.env.IMAGE_TAG_CE.replace(/:.+/, ''),
   PRO: process.env.IMAGE_TAG_PRO.replace(/:.+/, ''),
+  GIT_BRIDGE: process.env.IMAGE_TAG_GIT_BRIDGE.replace(/:.+/, ''),
 }
 const LATEST = {
   CE: process.env.IMAGE_TAG_CE.replace(/.+:/, '') || 'latest',
   PRO: process.env.IMAGE_TAG_PRO.replace(/.+:/, '') || 'latest',
-  GIT_BRIDGE: 'latest', // TODO, build in CI?
+  GIT_BRIDGE: process.env.IMAGE_TAG_GIT_BRIDGE.replace(/.+:/, '') || 'latest',
 }
 
 function defaultDockerComposeOverride() {
@@ -242,7 +243,7 @@ function setVarsDockerCompose({
 
   cfg.services.sharelatex.image = `${pro ? IMAGES.PRO : IMAGES.CE}:${version === 'latest' ? (pro ? LATEST.PRO : LATEST.CE) : version}`
   cfg.services['git-bridge'].image =
-    `quay.io/sharelatex/git-bridge:${version === 'latest' ? LATEST.GIT_BRIDGE : version}`
+    `${IMAGES.GIT_BRIDGE}:${version === 'latest' ? LATEST.GIT_BRIDGE : version}`
 
   cfg.services.sharelatex.environment = vars
 

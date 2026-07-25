@@ -1,13 +1,3 @@
-:root {
-  --collapsible-file-header-bg-color: var(--bg-light-tertiary);
-
-  @include theme('default') {
-    .ide-redesign-main {
-      --collapsible-file-header-bg-color: var(--bg-dark-tertiary);
-    }
-  }
-}
-
 .collapsible-file-header {
   all: unset;
   padding: var(--spacing-03) var(--spacing-04);
@@ -21,7 +11,8 @@
 }
 
 .collapsible-file-header-count {
-  background-color: var(--collapsible-file-header-bg-color);
+  background-color: var(--bg-tertiary-themed);
+  color: var(--content-primary-themed);
   padding: var(--spacing-01) var(--spacing-02);
   margin-left: auto;
   border-radius: var(--border-radius-base);

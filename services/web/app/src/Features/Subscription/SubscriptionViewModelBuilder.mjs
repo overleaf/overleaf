@@ -517,38 +517,18 @@ function buildPlansList(currentPlan, isInTrial) {
     )
   }
 
-  result.studentAccounts = _.filter(
-    plans,
-    plan => plan.planCode.indexOf('student') !== -1
-  )
-
-  result.groupMonthlyPlans = _.filter(
-    plans,
-    plan => plan.groupPlan && !plan.annual
-  )
-
-  result.groupAnnualPlans = _.filter(
-    plans,
-    plan => plan.groupPlan && plan.annual
-  )
-
-  result.individualMonthlyPlans = _.filter(
-    plans,
-    plan =>
-      !plan.groupPlan &&
-      !plan.annual &&
-      plan.planCode !== 'personal' && // Prevent the personal plan from appearing on the change-plans page
-      plan.planCode.indexOf('student') === -1
-  )
-
-  result.individualAnnualPlans = _.filter(
-    plans,
-    plan =>
-      !plan.groupPlan && plan.annual && plan.planCode.indexOf('student') === -1
-  )
-
   return result
 }
+
+// Plan codes shown in the subscription dashboard "Change plan" modal,
+const CHANGE_PLAN_MODAL_PLAN_CODES = [
+  'student',
+  'student-annual',
+  'collaborator',
+  'collaborator-annual',
+  'professional',
+  'professional-annual',
+]
 
 function _isPlanEqualOrBetter(planA, planB) {
   return FeaturesHelper.isFeatureSetBetter(
@@ -596,28 +576,15 @@ function buildGroupSubscriptionForView(groupSubscription) {
 }
 
 function buildPlansListForSubscriptionDash(currentPlan, isInTrial) {
-  const allPlansData = buildPlansList(currentPlan, isInTrial)
-  const plans = []
-  // only list individual and visible plans for "change plans" UI
-  if (allPlansData.studentAccounts) {
-    plans.push(
-      ...allPlansData.studentAccounts.filter(plan => !plan.hideFromUsers)
-    )
-  }
-  if (allPlansData.individualMonthlyPlans) {
-    plans.push(
-      ...allPlansData.individualMonthlyPlans.filter(plan => !plan.hideFromUsers)
-    )
-  }
-  if (allPlansData.individualAnnualPlans) {
-    plans.push(
-      ...allPlansData.individualAnnualPlans.filter(plan => !plan.hideFromUsers)
-    )
-  }
-
+  const { allPlans, planCodesChangingAtTermEnd } = buildPlansList(
+    currentPlan,
+    isInTrial
+  )
   return {
-    plans,
-    planCodesChangingAtTermEnd: allPlansData.planCodesChangingAtTermEnd,
+    plans: CHANGE_PLAN_MODAL_PLAN_CODES.map(code => allPlans[code]).filter(
+      Boolean
+    ),
+    planCodesChangingAtTermEnd,
   }
 }
 

@@ -1,3 +1,7 @@
+// Prime the writefull IoC container before other imports to avoid a circular
+// dependency TDZ error (command.ts → ioc.ts → handler.ts → command.ts).
+import '@wf/infrastructure/ioc'
+
 import 'cypress-plugin-tab'
 import { resetMeta } from './ct/window' // needs to be before i18n
 import localesPromise from '@/i18n'

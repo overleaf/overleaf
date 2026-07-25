@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Dashboard } from '@uppy/react'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { useProjectUploader } from '../../hooks/use-project-uploader'
 import {
   OLModal,
@@ -12,7 +12,7 @@ import {
 import OLButton from '@/shared/components/ol/ol-button'
 import '@uppy/core/dist/style.css'
 import '@uppy/dashboard/dist/style.css'
-import BetaBadgeIcon from '@/shared/components/beta-badge-icon'
+import OLNotification from '@/shared/components/ol/ol-notification'
 
 function ImportDocumentModal({
   type,
@@ -24,6 +24,7 @@ function ImportDocumentModal({
   openProject: (id: string, convertedFrom?: string) => void
 }) {
   const { t } = useTranslation()
+  const [error, setError] = useState<string | null>(null)
   const IMPORT_CONFIGS = useMemo(
     () => ({
       docx: {
@@ -47,6 +48,18 @@ function ImportDocumentModal({
     endpoint: `/project/new/import-document?type=${type}`,
     allowedFileTypes: config.allowedFileTypes,
     onSuccess: (projectId: string) => openProject(projectId, type),
+    onError: response => {
+      const message = response?.body?.error
+      if (message) {
+        setError(message)
+      }
+    },
+    onFileAdded: () => {
+      setError(null)
+    },
+    onFileRemoved: () => {
+      setError(null)
+    },
   })
 
   return (
@@ -57,16 +70,11 @@ function ImportDocumentModal({
       id="upload-project-modal"
       backdrop="static"
     >
-      {/* TODO: make necessary changes here for import document modal */}
       <OLModalHeader>
-        <OLModalTitle as="h3" className="import-document-modal-title">
-          {config.title}
-          <span className="beta-icon-wrapper">
-            <BetaBadgeIcon />
-          </span>
-        </OLModalTitle>
+        <OLModalTitle as="h3">{config.title}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>
+        {error && <ErrorNotification message={error} />}
         <p>{t('import_document_description')}</p>
         <Dashboard
           uppy={uppy}
@@ -90,6 +98,37 @@ function ImportDocumentModal({
         </OLButton>
       </OLModalFooter>
     </OLModal>
+  )
+}
+
+const ErrorNotification = ({ message }: { message: string }) => {
+  const { t } = useTranslation()
+  return (
+    <OLNotification
+      type="error"
+      className="import-error-notification"
+      content={
+        <div>
+          <Trans
+            i18nKey="your_document_couldnt_be_imported_check_our_guidance_or_expand_conversion_error_details"
+            components={[
+              // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
+              <a
+                href="https://docs.overleaf.com/managing-projects-and-files/importing-and-exporting-files#common-issues-and-how-to-address-them"
+                target="_BLANK"
+                rel="noopener noreferrer"
+              />,
+            ]}
+          />
+          {message && (
+            <details style={{ maxHeight: '200px', overflow: 'auto' }}>
+              <summary>{t('conversion_error_details')}</summary>
+              <code style={{ wordBreak: 'break-all' }}>{message}</code>
+            </details>
+          )}
+        </div>
+      }
+    />
   )
 }
 

@@ -107,7 +107,7 @@ export function UpgradePrompt({
                   {t('24x_more_compile_time')}
                 </IconListItem>
                 <IconListItem icon="group_add">
-                  {t('collabs_per_proj', { collabcount: 10 })}
+                  {t('collabs_per_proj', { count: 10 })}
                 </IconListItem>
                 <IconListItem icon="history">
                   {t('unlimited_document_history')}
@@ -145,7 +145,7 @@ export function UpgradePrompt({
                   {t('basic_compile_time')}
                 </IconListItem>
                 <IconListItem icon="person">
-                  {t('collabs_per_proj_single', { collabcount: 1 })}
+                  {t('collabs_per_proj', { count: 1 })}
                 </IconListItem>
                 <IconListItem icon="history_off">
                   {t('limited_document_history')}

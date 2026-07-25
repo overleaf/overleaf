@@ -1,159 +1,41 @@
-@use 'sass:color';
-
-.ide-redesign-main {
-  .full-project-search {
-    --full-project-search-bg-color: var(--white);
-    --full-project-search-color: var(--content-primary);
-    --full-project-search-results-bg-color: var(--bg-light-primary);
-    --full-project-search-selected-hit-bg-color: var(--bg-accent-03);
-    --full-project-search-selected-hit-color: var(--green-70);
-    --matched-hit-highlight-color: var(--yellow-10);
-    --matched-hit-selected-highlight-color: var(--bg-accent-02);
-    --matched-hit-selected-unfocused-highlight-color: var(--bg-accent-02);
-    --collapsible-file-header-count-color: var(--content-primary);
-    --collapsible-file-header-count-bg-color: var(--bg-light-tertiary);
-    --search-modifier-checked-bg: var(--bg-accent-03);
-    --search-modifier-hover-color: var(--bg-light-secondary);
-
-    // Redesign additions
-    --full-project-search-border-color: var(--border-divider);
-    --collapsible-file-header-hover-bg: var(--bg-light-secondary);
-    --matched-hit-highlight-text-color: var(--content-primary);
-    --matched-file-hit-hover-bg: var(--bg-light-secondary);
-    --search-modifier-checked-color: var(--green-70);
-    --search-modifier-color: var(--content-primary);
-
-    &[data-bs-theme='dark'] {
-      --full-project-search-bg-color: var(--bg-dark-primary);
-      --full-project-search-color: var(--content-secondary-dark);
-      --full-project-search-results-bg-color: var(--bg-dark-primary);
-      --full-project-search-selected-hit-bg-color: var(--green-70);
-      --full-project-search-selected-hit-color: var(--green-10);
-      --matched-hit-highlight-color: var(--yellow-70);
-      --matched-hit-selected-highlight-color: var(--green-70);
-      --matched-hit-selected-unfocused-highlight-color: var(--content-primary);
-      --collapsible-file-header-count-color: var(--content-primary);
-      --collapsible-file-header-count-bg-color: var(--bg-light-tertiary);
-      --search-modifier-checked-bg: var(--green-70);
-      --search-modifier-hover-color: var(--bg-dark-secondary);
-
-      // Redesign additions
-      --full-project-search-border-color: var(--border-divider-dark);
-      --collapsible-file-header-hover-bg: var(--bg-dark-secondary);
-      --matched-hit-highlight-text-color: var(--green-10);
-      --matched-file-hit-hover-bg: var(--bg-dark-secondary);
-      --search-modifier-checked-color: var(--green-10);
-      --search-modifier-color: var(--content-primary-dark);
-
-      input[type='search']::selection {
-        background-color: #b4d1ff;
-      }
-    }
-
-    .full-project-search-modifiers {
-      input:checked ~ .form-check-label {
-        color: var(--search-modifier-checked-color);
-      }
-
-      .form-check-label {
-        color: var(--search-modifier-color);
-      }
-    }
-
-    .full-project-search-form {
-      border-bottom: 1px solid var(--full-project-search-border-color);
-    }
-
-    .match-counts {
-      padding: var(--spacing-03) var(--spacing-04);
-      font-size: var(--font-size-01);
-    }
-
-    .matched-files {
-      padding: 0 var(--spacing-02);
-    }
-
-    .matched-hit-highlight {
-      color: var(--matched-hit-highlight-text-color);
-    }
-
-    .matched-file-hits {
-      width: unset;
-      overflow: unset;
-      margin-left: var(--spacing-08);
-      position: relative;
-
-      &::before {
-        content: '';
-        position: absolute;
-        left: calc(var(--spacing-04) * -1);
-        top: 0;
-        width: 1px;
-        height: 100%;
-        background-color: var(--full-project-search-border-color);
-        border-radius: 0;
-      }
-    }
-
-    .matched-file-hit {
-      border-radius: var(--border-radius-base);
-
-      &:hover {
-        background-color: var(--matched-file-hit-hover-bg);
-      }
-
-      &.matched-file-hit-selected:hover {
-        background-color: var(--full-project-search-selected-hit-bg-color);
-        color: var(--full-project-search-selected-hit-color);
-      }
-    }
-
-    .collapsible-file-header {
-      border-radius: var(--border-radius-base);
-
-      &:hover {
-        background-color: var(--collapsible-file-header-hover-bg);
-      }
-    }
-  }
-}
-
 .full-project-search {
-  --full-project-search-bg-color: var(--bg-light-secondary);
-  --full-project-search-color: var(--content-secondary);
+  --full-project-search-bg-color: var(--white);
+  --full-project-search-color: var(--content-primary);
   --full-project-search-results-bg-color: var(--bg-light-primary);
-  --full-project-search-selected-hit-bg-color: var(--bg-light-tertiary);
-  --full-project-search-selected-hit-color: var(--content-primary-light);
-  --matched-hit-highlight-color: var(--bg-light-tertiary);
-  --matched-hit-selected-highlight-color: var(--bg-accent-02);
-  --matched-hit-selected-unfocused-highlight-color: var(--bg-accent-02);
-  --collapsible-file-header-count-color: var(--bs-body-color);
-  --collapsible-file-header-count-bg-color: var(--bg-light-secondary);
-  --search-modifier-checked-bg: var(--neutral-30);
-  --search-modifier-hover-color: var(--neutral-20);
+  --full-project-search-selected-hit-bg-color: var(--bg-accent-03);
+  --full-project-search-selected-hit-color: var(--green-70);
+  --matched-hit-highlight-color: var(--yellow-10);
+  --collapsible-file-header-count-color: var(--content-primary);
+  --collapsible-file-header-count-bg-color: var(--bg-light-tertiary);
+  --search-modifier-checked-bg: var(--bg-accent-03);
+  --search-modifier-hover-color: var(--bg-light-secondary);
+  --full-project-search-border-color: var(--border-divider);
+  --collapsible-file-header-hover-bg: var(--bg-light-secondary);
+  --matched-hit-highlight-text-color: var(--content-primary);
+  --matched-file-hit-hover-bg: var(--bg-light-secondary);
+  --search-modifier-checked-color: var(--green-70);
+  --search-modifier-color: var(--content-primary);
 
   &[data-bs-theme='dark'] {
-    --full-project-search-bg-color: var(--bg-dark-secondary);
+    --full-project-search-bg-color: var(--bg-dark-primary);
     --full-project-search-color: var(--content-secondary-dark);
-    --full-project-search-results-bg-color: var(--bg-dark-tertiary);
-    --full-project-search-selected-hit-bg-color: var(--bg-dark-secondary);
-    --full-project-search-selected-hit-color: var(--content-primary-dark);
-    --matched-hit-highlight-color: var(--bg-dark-secondary);
-    --matched-hit-selected-highlight-color: var(--bg-accent-02);
-    --matched-hit-selected-unfocused-highlight-color: var(--bg-dark-primary);
-    --collapsible-file-header-count-color: var(--bs-body-color);
-    --collapsible-file-header-count-bg-color: var(--bg-dark-secondary);
-    --search-modifier-checked-bg: var(--neutral-90);
-    --search-modifier-hover-color: var(--neutral-70);
+    --full-project-search-results-bg-color: var(--bg-dark-primary);
+    --full-project-search-selected-hit-bg-color: var(--green-70);
+    --full-project-search-selected-hit-color: var(--green-10);
+    --matched-hit-highlight-color: var(--yellow-70);
+    --collapsible-file-header-count-color: var(--content-primary);
+    --collapsible-file-header-count-bg-color: var(--bg-light-tertiary);
+    --search-modifier-checked-bg: var(--green-70);
+    --search-modifier-hover-color: var(--bg-dark-secondary);
+    --full-project-search-border-color: var(--border-divider-dark);
+    --collapsible-file-header-hover-bg: var(--bg-dark-secondary);
+    --matched-hit-highlight-text-color: var(--green-10);
+    --matched-file-hit-hover-bg: var(--bg-dark-secondary);
+    --search-modifier-checked-color: var(--green-10);
+    --search-modifier-color: var(--content-primary-dark);
 
     input[type='search']::selection {
       background-color: #b4d1ff;
-    }
-
-    .full-project-search-modifiers {
-      .form-check-label {
-        color: inherit;
-      }
     }
   }
 
@@ -177,6 +59,7 @@
   .full-project-search-form {
     padding: 8px;
     flex-shrink: 0;
+    border-bottom: 1px solid var(--full-project-search-border-color);
   }
 
   .form-check {
@@ -209,6 +92,7 @@
       align-items: center;
       justify-content: center;
       font-size: 90%;
+      color: var(--search-modifier-color);
 
       &:hover,
       &:focus {
@@ -222,12 +106,13 @@
 
     input:checked ~ .form-check-label {
       background-color: var(--search-modifier-checked-bg);
+      color: var(--search-modifier-checked-color);
     }
   }
 
   .match-counts {
-    font-size: 80%;
-    padding: 0 var(--spacing-04) var(--spacing-04);
+    font-size: var(--font-size-01);
+    padding: var(--spacing-03) var(--spacing-04);
   }
 
   .matched-files {
@@ -235,6 +120,7 @@
     overflow: auto;
     font-size: 14px;
     background-color: var(--full-project-search-results-bg-color);
+    padding: 0 var(--spacing-02);
   }
 
   .matched-file {
@@ -251,6 +137,11 @@
     z-index: 1;
     background-color: var(--full-project-search-results-bg-color);
     color: inherit;
+    border-radius: var(--border-radius-base);
+
+    &:hover {
+      background-color: var(--collapsible-file-header-hover-bg);
+    }
   }
 
   .collapsible-file-header-count {
@@ -259,9 +150,22 @@
   }
 
   .matched-file-hits {
-    width: 100%;
-    overflow: hidden;
+    width: unset;
+    overflow: unset;
     border-radius: 0;
+    margin-left: var(--spacing-08);
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: calc(var(--spacing-04) * -1);
+      top: 0;
+      width: 1px;
+      height: 100%;
+      background-color: var(--full-project-search-border-color);
+      border-radius: 0;
+    }
   }
 
   .matched-line-number {
@@ -281,15 +185,20 @@
     font-family: var(--font-family);
     font-size: var(--font-size);
     min-height: fit-content;
-    border-radius: 0;
+    border-radius: var(--border-radius-base);
     background-color: var(--full-project-search-results-bg-color);
 
     &:hover {
-      background-color: var(--full-project-search-bg-color);
+      background-color: var(--matched-file-hit-hover-bg);
     }
 
     &.matched-file-hit-highlighted {
       background-color: var(--full-project-search-bg-color);
+    }
+
+    &.matched-file-hit-selected:hover {
+      background-color: var(--full-project-search-selected-hit-bg-color);
+      color: var(--full-project-search-selected-hit-color);
     }
   }
 
@@ -317,6 +226,7 @@
     background-color: var(--matched-hit-highlight-color);
     border-radius: 4px;
     overflow-wrap: normal;
+    color: var(--matched-hit-highlight-text-color);
   }
 
   .matched-file-hit-selected {
@@ -324,18 +234,7 @@
     color: var(--full-project-search-selected-hit-color);
 
     .matched-hit-highlight {
-      background-color: var(--matched-hit-unfocused-highlight-color);
+      background-color: var(--matched-hit-highlight-color);
     }
   }
-
-  /* &:focus-within {
-    .matched-file-hit-selected {
-      background-color: var(--bg-accent-01);
-      color: var(--bg-light-primary);
-
-      .matched-hit-highlight {
-        background-color: var(--matched-hit-selected-highlight-color);
-      }
-    }
-  } */
 }

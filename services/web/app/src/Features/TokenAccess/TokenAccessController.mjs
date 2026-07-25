@@ -6,7 +6,9 @@ import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
 import { expressify } from '@overleaf/promise-utils'
 import AuthorizationManager from '../Authorization/AuthorizationManager.mjs'
-import PrivilegeLevels from '../Authorization/PrivilegeLevels.mjs'
+import PrivilegeLevels, {
+  isPrivilegeUpgrade,
+} from '../Authorization/PrivilegeLevels.mjs'
 import ProjectAuditLogHandler from '../Project/ProjectAuditLogHandler.mjs'
 import CollaboratorsInviteHandler from '../Collaborators/CollaboratorsInviteHandler.mjs'
 import CollaboratorsHandler from '../Collaborators/CollaboratorsHandler.mjs'
@@ -24,13 +26,6 @@ import SplitTestHandler from '../SplitTests/SplitTestHandler.mjs'
 
 const { getSafeAdminDomainRedirect } = UrlHelper
 const { canRedirectToAdminDomain } = AdminAuthorizationHelper
-const orderedPrivilegeLevels = [
-  PrivilegeLevels.NONE,
-  PrivilegeLevels.READ_ONLY,
-  PrivilegeLevels.REVIEW,
-  PrivilegeLevels.READ_AND_WRITE,
-  PrivilegeLevels.OWNER,
-]
 
 async function _userAlreadyHasHigherPrivilege(userId, projectId, tokenType) {
   if (!Object.values(TokenAccessHandler.TOKEN_TYPES).includes(tokenType)) {
@@ -44,10 +39,7 @@ async function _userAlreadyHasHigherPrivilege(userId, projectId, tokenType) {
       userId,
       projectId
     )
-  return (
-    orderedPrivilegeLevels.indexOf(privilegeLevel) >=
-    orderedPrivilegeLevels.indexOf(tokenType)
-  )
+  return !isPrivilegeUpgrade(privilegeLevel, tokenType)
 }
 
 const makePostUrl = token => {
@@ -240,6 +232,7 @@ async function checkAndGetProjectOrResponseAction(
     projectId,
     tokenType
   )
+  logger.debug({ userHasPrivilege }, 'checking user privilege')
   if (userHasPrivilege) {
     return [
       null,
@@ -349,7 +342,7 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
         ...(pendingEditor && { pendingEditor: true }),
       }
     )
-    AnalyticsManager.recordEventForUserInBackground(userId, 'project-joined', {
+    AnalyticsManager.recordEventForSession(req.session, 'project-joined', {
       role: pendingEditor
         ? PrivilegeLevels.READ_ONLY
         : PrivilegeLevels.READ_AND_WRITE,
@@ -459,7 +452,8 @@ async function grantTokenAccessReadOnly(req, res, next) {
     await TokenAccessHandler.promises.addReadOnlyUserToProject(
       userId,
       project._id,
-      project.owner_ref
+      project.owner_ref,
+      req.session
     )
 
     return res.json({

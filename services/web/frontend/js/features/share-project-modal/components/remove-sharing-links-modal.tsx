@@ -28,7 +28,7 @@ function RemoveSharingLinksModal({
       'this_change_will_permanently_remove_your_original_links_you_can_still_share_new_link'
     )
   } else if (
-    pendingAccess === 'anyoneInXyzWithTheLink' ||
+    pendingAccess.startsWith('anyoneInXyzWithTheLink') ||
     pendingAccess === 'anyoneWithTheLink'
   ) {
     confirmationModalBodyText = t(

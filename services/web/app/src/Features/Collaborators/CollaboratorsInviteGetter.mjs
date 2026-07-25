@@ -5,7 +5,10 @@ import CollaboratorsInviteHelper from './CollaboratorsInviteHelper.mjs'
 
 async function getAllInvites(projectId) {
   logger.debug({ projectId }, 'fetching invites for project')
-  const invites = await ProjectInvite.find({ projectId })
+  const invites = await ProjectInvite.find({
+    projectId,
+    reusable: { $ne: true },
+  })
     .select('_id email privileges')
     .exec()
   logger.debug(
@@ -20,6 +23,7 @@ async function getEditInviteCount(projectId) {
   const count = await ProjectInvite.countDocuments({
     projectId,
     privileges: { $ne: PrivilegeLevels.READ_ONLY },
+    reusable: { $ne: true },
   }).exec()
   return count
 }
@@ -39,10 +43,26 @@ async function getInviteByToken(projectId, tokenString) {
   return invite
 }
 
+async function getSharingLinkInvite(projectId) {
+  logger.debug({ projectId }, 'getting sharing link invite for project')
+  const invite = await ProjectInvite.findOne({
+    projectId,
+    reusable: true,
+  }).exec()
+
+  if (invite === null) {
+    logger.debug({ projectId }, 'no sharing link invite found for project')
+  } else {
+    logger.debug({ projectId }, 'found sharing link invite for project')
+  }
+  return invite
+}
+
 export default {
   promises: {
     getAllInvites,
     getEditInviteCount,
     getInviteByToken,
+    getSharingLinkInvite,
   },
 }

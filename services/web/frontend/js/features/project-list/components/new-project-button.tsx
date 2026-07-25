@@ -17,6 +17,7 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from '@/shared/components/dropdown/dropdown-menu'
+import type { DropdownProps } from '@/shared/components/types/dropdown-menu-props'
 import { useSendProjectListMB } from '@/features/project-list/components/project-list-events'
 import type { PortalTemplate } from '../../../../../types/portal-template'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
@@ -45,6 +46,7 @@ type NewProjectButtonProps = {
   className?: string
   trackingKey?: string
   showAddAffiliationWidget?: boolean
+  align?: DropdownProps['align']
 }
 
 function NewProjectButton({
@@ -53,6 +55,7 @@ function NewProjectButton({
   className,
   trackingKey,
   showAddAffiliationWidget,
+  align,
 }: NewProjectButtonProps) {
   const { t } = useTranslation()
   const { templateLinks } = getMeta('ol-ExposedSettings')
@@ -174,6 +177,7 @@ function NewProjectButton({
   return (
     <>
       <Dropdown
+        align={align}
         className={classnames('new-project-dropdown', className)}
         onSelect={handleMainButtonClick}
         onToggle={nextShow => {

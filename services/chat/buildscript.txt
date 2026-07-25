@@ -1,9 +1,9 @@
 chat
 --dependencies=mongo
+--deploy-pipeline=chat
 --env-add=
 --env-pass-through=
 --esmock-loader=False
 --node-version=24.14.1
---package-name=@overleaf/chat
 --pipeline-owner=44
 --public-repo=False

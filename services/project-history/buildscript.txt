@@ -1,9 +1,9 @@
 project-history
 --dependencies=mongo,redis
+--deploy-pipeline=project-history
 --env-add=
 --env-pass-through=
 --esmock-loader=True
 --node-version=24.14.1
---package-name=@overleaf/project-history
 --pipeline-owner=44
 --public-repo=False

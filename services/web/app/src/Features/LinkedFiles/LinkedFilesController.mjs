@@ -82,13 +82,9 @@ async function createLinkedFile(req, res, next) {
       userId
     )
     if (name.endsWith('.bib')) {
-      AnalyticsManager.recordEventForUserInBackground(
-        userId,
-        'linked-bib-file',
-        {
-          integration: provider,
-        }
-      )
+      AnalyticsManager.recordEventForSession(req.session, 'linked-bib-file', {
+        integration: provider,
+      })
     }
     return res.json({ new_file_id: newFileId })
   } catch (err) {

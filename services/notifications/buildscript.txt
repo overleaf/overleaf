@@ -1,10 +1,10 @@
 notifications
 --dependencies=mongo
+--deploy-pipeline=notifications
 --env-add=
 --env-pass-through=
 --esmock-loader=False
 --node-version=24.14.1
---package-name=@overleaf/notifications
 --pipeline-owner=32
 --public-repo=True
 --test-acceptance-vitest=True
