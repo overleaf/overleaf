@@ -8,7 +8,7 @@ module.exports = {
   internal: {
     documentupdater: {
       host: process.env.LISTEN_ADDRESS || '127.0.0.1',
-      port: 3003,
+      port: process.env.DOCUMENT_UPDATER_PORT || 3003,
     },
   },
 
@@ -21,7 +21,9 @@ module.exports = {
       pass: process.env.WEB_API_PASSWORD || 'password',
     },
     project_history: {
-      url: `http://${process.env.PROJECT_HISTORY_HOST || '127.0.0.1'}:3054`,
+      url: `http://${process.env.PROJECT_HISTORY_HOST || '127.0.0.1'}:${
+        process.env.PROJECT_HISTORY_PORT || 3054
+      }`,
     },
   },
 

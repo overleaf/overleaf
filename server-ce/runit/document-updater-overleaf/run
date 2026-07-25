@@ -8,5 +8,6 @@ fi
 
 source /etc/overleaf/env.sh
 export LISTEN_ADDRESS=127.0.0.1
+export DOCUMENT_UPDATER_PORT=3003
 
 exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/document-updater/app.js >> /var/log/overleaf/document-updater.log 2>&1

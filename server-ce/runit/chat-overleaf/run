@@ -8,5 +8,6 @@ fi
 
 source /etc/overleaf/env.sh
 export LISTEN_ADDRESS=127.0.0.1
+export CHAT_PORT=3010
 
 exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/chat/app.js >> /var/log/overleaf/chat.log 2>&1

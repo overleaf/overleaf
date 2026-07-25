@@ -1,7 +1,7 @@
 module.exports = {
   internal: {
     notifications: {
-      port: 3042,
+      port: process.env.NOTIFICATIONS_PORT || 3042,
       host: process.env.LISTEN_ADDRESS || '127.0.0.1',
     },
   },

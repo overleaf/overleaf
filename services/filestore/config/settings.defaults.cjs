@@ -27,7 +27,7 @@ if (process.env.BACKEND == null) {
 const settings = {
   internal: {
     filestore: {
-      port: 3009,
+      port: process.env.FILESTORE_PORT || 3009,
       host: process.env.LISTEN_ADDRESS || '127.0.0.1',
     },
   },

@@ -90,7 +90,7 @@ const settings = {
 
   internal: {
     realTime: {
-      port: 3026,
+      port: process.env.REALTIME_PORT || 3026,
       host: process.env.LISTEN_ADDRESS || '127.0.0.1',
     },
   },
@@ -107,8 +107,9 @@ const settings = {
       url: `http://${
         process.env.DOCUMENT_UPDATER_HOST ||
         process.env.DOCUPDATER_HOST ||
-        '127.0.0.1'
-      }:3003`,
+        '127.0.0.1'}:${
+          process.env.DOCUMENT_UPDATER_PORT || 3003
+        }`,
     },
   },
 

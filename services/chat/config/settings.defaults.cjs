@@ -8,7 +8,7 @@ module.exports = {
   internal: {
     chat: {
       host: process.env.LISTEN_ADDRESS || '127.0.0.1',
-      port: 3010,
+      port: process.env.CHAT_PORT || 3010,
     },
   },
 
