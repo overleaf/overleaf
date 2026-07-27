@@ -339,10 +339,14 @@ describe('<ReviewPanel />', function () {
             cy.findByRole('menu').within(() => {
               cy.findByText('Edit').click({ scrollBehavior: false })
             })
-            cy.findByRole('textbox').type(
-              '{selectAll}edited comment text{enter}',
-              { scrollBehavior: false }
-            )
+            // The edit input is mounted in a shadow root, so pierce it to
+            // reach the CodeMirror content.
+            cy.get('.review-panel-comment-edit')
+              .shadow()
+              .find('.cm-content')
+              .type('{selectAll}edited comment text{enter}', {
+                scrollBehavior: false,
+              })
             cy.wait('@editComment')
             // TODO: Figure out a way to plumb the websocket response back through
             // to the test so we can verify the comment is resolved
@@ -422,9 +426,14 @@ describe('<ReviewPanel />', function () {
 
     it('adds new comment (replies) to a thread', function () {
       cy.get('@review-panel').within(() => {
-        cy.findByRole('textbox').type('a new reply{enter}', {
-          scrollBehavior: false,
-        })
+        // The reply input is mounted in a shadow root, so pierce it to reach
+        // the CodeMirror content.
+        cy.get('.review-panel-add-comment-editor.review-panel-comment-input')
+          .shadow()
+          .find('.cm-content')
+          .type('a new reply{enter}', {
+            scrollBehavior: false,
+          })
       })
       cy.wait('@addReply')
     })
@@ -518,12 +527,16 @@ describe('<ReviewPanel />', function () {
       cy.get('@add-comment-button').click({ scrollBehavior: false })
       cy.get('@review-panel').within(() => {
         // The add-comment editor is the CM6 input that is not a reply/edit
-        // input (those also carry the review-panel-comment-input class).
+        // input (those also carry the review-panel-comment-input class). It is
+        // mounted in a shadow root, so pierce it to reach the content.
         cy.get(
-          '.review-panel-add-comment-editor:not(.review-panel-comment-input) .cm-content'
-        ).type('a new comment{enter}', {
-          scrollBehavior: false,
-        })
+          '.review-panel-add-comment-editor:not(.review-panel-comment-input)'
+        )
+          .shadow()
+          .find('.cm-content')
+          .type('a new comment{enter}', {
+            scrollBehavior: false,
+          })
       })
       cy.wait('@addNewComment')
       // TODO : Figure out a way to plumb the websocket response back through

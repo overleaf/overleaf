@@ -68,91 +68,12 @@ export function mentionCompletions(context: CompletionContext) {
 
 // Marker class added to the mentions autocomplete tooltip (via the
 // `tooltipClass` option in mentions-input.tsx). The tooltip is parented to
-// `document.body`, so the source editor's global autocomplete base theme
-// (auto-complete.ts) also lands on it. Scoping every rule under this class
-// both isolates the mentions styling from the LaTeX autocomplete and raises
-// specificity enough to win over those global `li[role="option"]` /
-// `.cm-completionDetail` rules. The `li[role="option"]` selector is used for
-// the same reason.
+// `document.body`, so it lives in the light DOM even when the editor is mounted
+// in a shadow root. Its styling therefore lives in document-level SCSS
+// (stylesheets/pages/editor/mentions-autocomplete.scss), scoped under this
+// class so it can reach the body-parented tooltip regardless of where the
+// editor is mounted.
 export const MENTIONS_TOOLTIP_CLASS = 'ol-cm-mentions-autocomplete'
-
-export const mentionAutocompleteTheme = EditorView.baseTheme({
-  '.cm-tooltip.cm-tooltip-autocomplete.ol-cm-mentions-autocomplete': {
-    marginLeft: '0',
-    border: 'none',
-    background: 'transparent',
-    borderRadius: 'var(--border-radius-large)',
-  },
-  '.cm-tooltip.cm-tooltip-autocomplete.ol-cm-mentions-autocomplete > ul': {
-    maxWidth: 'min(360px, 90vw)',
-    whiteSpace: 'normal',
-    padding: 'var(--spacing-02)',
-    border: '1px solid var(--border-divider)',
-    borderRadius: 'var(--border-radius-large)',
-    background: 'var(--bg-light-primary)',
-    // Matches the `shadow-md` elevation mixin (tooltips/dropdowns).
-    boxShadow: '0 4px 12px 0 rgb(30 37 48 / 12%), 0 2px 4px rgb(30 37 48 / 8%)',
-    fontFamily: 'var(--font-sans)',
-  },
-  '.cm-tooltip.cm-tooltip-autocomplete.ol-cm-mentions-autocomplete > ul > li[role="option"]':
-    {
-      display: 'grid',
-      gridTemplateColumns: 'auto 1fr',
-      gridTemplateRows: 'auto auto',
-      alignItems: 'center',
-      columnGap: 'var(--spacing-04)',
-      padding: 'var(--spacing-03) var(--spacing-04)',
-      overflowWrap: 'anywhere',
-      borderRadius: 'var(--border-radius-medium)',
-      lineHeight: '1.3',
-    },
-  '.cm-tooltip.cm-tooltip-autocomplete.ol-cm-mentions-autocomplete > ul > li[role="option"][aria-selected]':
-    {
-      background: 'var(--bg-light-secondary)',
-    },
-
-  '.cm-tooltip.cm-tooltip-autocomplete.ol-cm-mentions-autocomplete .ol-cm-mention-avatar':
-    {
-      gridColumn: '1',
-      gridRow: '1 / span 2',
-      alignSelf: 'center',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '32px',
-      height: '32px',
-      borderRadius: 'var(--border-radius-full)',
-      color: 'var(--white)',
-      fontSize: 'var(--font-size-02)',
-      fontWeight: '600',
-      textTransform: 'uppercase',
-      boxSizing: 'border-box',
-    },
-  '.cm-tooltip.cm-tooltip-autocomplete.ol-cm-mentions-autocomplete .cm-completionLabel':
-    {
-      gridColumn: '2',
-      gridRow: '1',
-      fontSize: 'var(--font-size-03)',
-      color: 'var(--content-primary)',
-    },
-  // The portion of the label matching what the user has typed.
-  '.cm-tooltip.cm-tooltip-autocomplete.ol-cm-mentions-autocomplete .cm-completionMatchedText':
-    {
-      fontWeight: '700',
-      textDecoration: 'none',
-    },
-  // details
-  '.cm-tooltip.cm-tooltip-autocomplete.ol-cm-mentions-autocomplete .cm-completionDetail':
-    {
-      gridColumn: '2',
-      gridRow: '2',
-      margin: '0',
-      fontFamily: 'var(--font-sans)',
-      fontSize: 'var(--font-size-02)',
-      fontStyle: 'normal',
-      color: 'var(--content-secondary)',
-    },
-})
 
 // Renders a project member's avatar circle for the autocomplete option. The
 // background uses the same per-user hue as the rest of the editor's

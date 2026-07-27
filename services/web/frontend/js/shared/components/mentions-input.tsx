@@ -12,7 +12,6 @@ import { autocompletion, completionStatus } from '@codemirror/autocomplete'
 import classNames from 'classnames'
 import mentions, {
   mentionCompletions,
-  mentionAutocompleteTheme,
   renderMentionAvatar,
   MENTIONS_TOOLTIP_CLASS,
 } from '@/features/source-editor/extensions/mentions'
@@ -43,16 +42,20 @@ type MentionsInputProps = {
   className?: string
 }
 
-// Shared editor styling for the mentions input.
+// Styling for the mentions input's own CodeMirror instance. Mounted in a shadow
+// root, so the document editor's selector-based CSS cannot reach it; only
+// inherited custom properties cross the boundary. These rules override CM's
+// built-in base theme, injected into the shadow root alongside the view.
 const mentionsInputTheme = EditorView.theme({
-  // reset variables to override visual mode's .cm-content rules
-  '&.cm-editor': {
-    '--visual-font-family': 'var(--bs-body-font-family)',
-    '--visual-font-size': 'var(--font-size)',
-  },
-  // double the specificity to override the base font family used by theme.ts regardless of extension load order
-  '.cm-content.cm-content': {
+  // Match the surrounding UI's body font rather than CM6's inherited defaults.
+  '&.cm-editor .cm-content': {
     fontFamily: 'var(--bs-body-font-family)',
+    fontSize: 'inherit',
+    lineHeight: 'inherit',
+  },
+  // suppress CM6's default focus outline; the consumer's border/parent conveys focus
+  '&.cm-editor.cm-focused': {
+    outline: 'none',
   },
   // when range in editor is focused and selected
   '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground': {
@@ -64,6 +67,43 @@ const mentionsInputTheme = EditorView.theme({
   // when range in editor is exists but focus is outside editor, so ::selection is not applied
   '.cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground': {
     backgroundColor: 'color-mix(in srgb, var(--bg-info-01) 24%, transparent)',
+  },
+})
+
+// Appearance for the review-panel inputs. These are mounted in a shadow root,
+// so the light-DOM SCSS in review-panel.scss that used to style
+// the inner CodeMirror via descendant selectors can no longer reach it. That
+// styling lives here instead. The host <div> still gets its box styling
+// (background/border/padding) from review-panel.scss, and CSS custom properties
+// (e.g. --review-panel-color, --rp-input-min-height) cross the shadow boundary,
+// so those rules resolve against the review-panel context as before.
+const reviewPanelInputTheme = EditorView.theme({
+  '&.cm-editor': {
+    background: 'transparent',
+    color: 'inherit',
+    maxHeight: '200px',
+  },
+  '.cm-scroller': {
+    lineHeight: 'var(--line-height-02)',
+    // Hide scrollbars so they don't consume layout width on systems that use
+    // non-overlay scrollbars (e.g. macOS "always show scrollbars"), which would
+    // otherwise trigger extra remeasure cycles. Scrolling still works via
+    // trackpad/keyboard.
+    scrollbarWidth: 'none',
+    '&::-webkit-scrollbar': {
+      display: 'none',
+    },
+  },
+  '.cm-content': {
+    // --rp-input-min-height is set per-variant on the host in review-panel.scss.
+    minHeight: 'var(--rp-input-min-height, 44px)',
+    padding: 'var(--spacing-01) var(--spacing-03)',
+  },
+  '.cm-cursor, .cm-cursor-primary': {
+    borderLeftColor: 'var(--review-panel-color)',
+  },
+  '.cm-placeholder': {
+    color: 'var(--content-placeholder-themed)',
   },
 })
 
@@ -137,14 +177,23 @@ export const MentionsInput = forwardRef<
       return
     }
 
+    // Review-panel inputs are portaled inside the document editor's DOM, so
+    // mount inside a shadow root to keep the editor's selector-based CSS out.
+    // attachShadow throws if a root already exists (e.g. StrictMode remount),
+    // so reuse the existing one.
+    const parent =
+      containerRef.current.shadowRoot ??
+      containerRef.current.attachShadow({ mode: 'open' })
+
     const view = new EditorView({
       doc: initialValue,
-      parent: containerRef.current,
+      parent,
       extensions: [
         projectMembersInfo,
         EditorView.lineWrapping,
         drawSelection(),
         mentionsInputTheme,
+        reviewPanelInputTheme,
         placeholderExt(placeholder),
         ...(mentionsEnabled
           ? [
@@ -157,7 +206,6 @@ export const MentionsInput = forwardRef<
                 icons: false,
                 addToOptions: [{ render: renderMentionAvatar, position: 20 }],
               }),
-              mentionAutocompleteTheme,
             ]
           : []),
         editableConf.current.of(EditorView.editable.of(!disabled)),

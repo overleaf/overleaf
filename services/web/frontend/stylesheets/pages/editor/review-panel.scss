@@ -488,7 +488,15 @@ del.review-panel-content-highlight {
   }
 }
 
+// Host box for the review-panel comment inputs. The inner CodeMirror is mounted
+// in a shadow root, so its styling lives in an
+// in-shadow CM theme (reviewPanelInputTheme in mentions-input.tsx), not here.
+// Only host-box rules and CSS custom properties (which cross the shadow
+// boundary) belong in this block. --rp-input-min-height feeds the inner
+// .cm-content min-height inside the shadow.
 .review-panel-add-comment-editor {
+  --rp-input-min-height: 44px;
+
   background: var(--review-panel-entry-bg-color);
   color: var(--review-panel-color);
   border: 1px solid var(--border-primary-themed);
@@ -497,57 +505,13 @@ del.review-panel-content-highlight {
   cursor: text;
 
   &.review-panel-comment-input {
+    // Default to two lines tall so long @mentions wrap into view
+    --rp-input-min-height: calc(
+      (2 * var(--line-height-02)) + (2 * var(--spacing-01))
+    );
+
     font-size: var(--rp-base-font-size);
     color: var(--review-panel-color-secondary);
-
-    .cm-content {
-      // Default to two lines tall so long @mentions wrap into view
-      min-height: calc((2 * var(--line-height-02)) + (2 * var(--spacing-01)));
-    }
-  }
-
-  .cm-editor {
-    background: transparent;
-    color: inherit;
-    max-height: 200px;
-
-    &.cm-focused {
-      outline: none;
-    }
-  }
-
-  .cm-scroller {
-    font-family: inherit;
-    line-height: var(--line-height-02);
-
-    // Hide scrollbars so they don't consume layout width on systems that use
-    // non-overlay scrollbars (e.g. macOS "always show scrollbars"). A visible
-    // scrollbar causes a width change mid-init that fires CM's ResizeObserver,
-    // which triggers extra remeasure/reposition cycles — visible as a "dance".
-    // Scrolling still works via trackpad/keyboard.
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
-
-  .cm-content {
-    min-height: 44px;
-  }
-
-  // extra specificity to override visual mode's .cm-content rules
-  &.review-panel-add-comment-editor .cm-content.cm-content {
-    padding: var(--spacing-01) var(--spacing-03);
-  }
-
-  .cm-cursor,
-  .cm-cursor-primary {
-    border-left-color: var(--review-panel-color);
-  }
-
-  .cm-placeholder {
-    color: var(--content-placeholder-themed);
   }
 }
 
