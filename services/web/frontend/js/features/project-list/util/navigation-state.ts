@@ -3,6 +3,8 @@ import customLocalStorage from '../../../infrastructure/local-storage'
 
 export const DASHBOARD_PATH = '/project'
 
+export type ActivePage = 'library' | 'projects'
+
 export type NavigationState =
   | { type: 'filter'; filter: Filter }
   | { type: 'tag'; tag: string }

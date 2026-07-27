@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { OLDropdownItem } from '@/shared/components/ol/ol-dropdown-menu'
+import { ActivePage } from '../../util/navigation-state'
 
 type Props = {
-  activePage: 'library' | 'projects'
+  activePage: ActivePage
   onProjectsClick?: () => void
 }
 

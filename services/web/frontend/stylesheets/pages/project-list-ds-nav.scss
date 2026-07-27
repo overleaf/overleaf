@@ -114,18 +114,26 @@ body {
     .project-list-wrapper .project-list-sidebar-wrapper-react {
       padding-top: calc(var(--spacing-08) - 1px);
 
-      .ds-nav-page-switcher-divider {
-        margin: var(--spacing-05) 0;
-      }
-
       .project-list-sidebar-scroll {
         padding-top: 0;
         padding-right: var(--spacing-05);
       }
 
       ul.project-list-filters {
-        > li > button {
+        margin-top: var(--spacing-05);
+
+        .sidebar-filter-button {
+          display: flex;
+          align-items: center;
           padding-left: calc(var(--spacing-05) + 24px + var(--spacing-05));
+        }
+
+        .sidebar-filter-button-with-icon {
+          padding-left: var(--spacing-05);
+
+          svg {
+            margin-right: var(--spacing-05);
+          }
         }
 
         .dropdown-header {
@@ -212,23 +220,11 @@ body {
       }
 
       .ds-nav-page-switcher-logo {
-        padding: 0 var(--spacing-08) var(--spacing-07);
+        padding: 0 var(--spacing-08) var(--spacing-04);
 
         img {
           width: 130px;
           height: auto;
-        }
-      }
-
-      .ds-nav-page-switcher-items {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-02);
-        padding: 0 var(--spacing-05);
-        margin: 0;
-
-        &--no-logo {
-          padding-top: var(--spacing-05);
         }
       }
 
@@ -237,7 +233,7 @@ body {
         align-items: center;
         width: 100%;
         gap: var(--spacing-05);
-        padding: var(--spacing-05);
+        padding: var(--spacing-04) var(--spacing-05);
         border: none;
         border-radius: var(--border-radius-medium);
         background: none;

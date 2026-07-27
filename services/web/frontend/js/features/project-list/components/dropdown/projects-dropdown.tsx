@@ -34,7 +34,7 @@ export function Item({ filter, text, leadingIcon, onClick }: ItemProps) {
   }
 
   return (
-    <ProjectsFilterMenu filter={filter}>
+    <ProjectsFilterMenu filter={filter} activePage="projects">
       {isActive => (
         <OLDropdownItem
           as="button"

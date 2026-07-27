@@ -95,7 +95,7 @@ export function ProjectListDsNav() {
         showCloseIcon
       />
       <div className="project-list-wrapper">
-        <SidebarDsNav />
+        <SidebarDsNav activePage="projects" />
         <div className="project-ds-nav-content-and-messages">
           <div className="project-ds-nav-content">
             <div className="project-ds-nav-main">

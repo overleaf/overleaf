@@ -34,6 +34,7 @@ import {
   getNavigationState,
   getNavigationUrl,
   migrateLegacyNavigationState,
+  NavigationState,
 } from '../util/navigation-state'
 import {
   isArchivedOrTrashed,
@@ -41,6 +42,7 @@ import {
   isLeavableProject,
 } from '../util/project'
 import { debugConsole } from '@/utils/debugging'
+import { useLocation } from '@/shared/hooks/use-location'
 
 const MAX_PROJECT_PER_PAGE = 20
 
@@ -116,11 +118,18 @@ export const ProjectListContext = createContext<
   ProjectListContextValue | undefined
 >(undefined)
 
+export type NavigationMode = 'filter-projects' | 'redirect-to-filtered-projects'
+
 type ProjectListProviderProps = {
   children: ReactNode
+  navigationMode?: NavigationMode
 }
 
-export function ProjectListProvider({ children }: ProjectListProviderProps) {
+export function ProjectListProvider({
+  children,
+  navigationMode = 'filter-projects',
+}: ProjectListProviderProps) {
+  const location = useLocation()
   const prefetchedProjectsBlob = getMeta('ol-prefetchedProjectsBlob')
   const [loadedProjects, setLoadedProjects] = useState<Project[]>(
     prefetchedProjectsBlob?.projects ?? []
@@ -140,7 +149,12 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     by: 'lastUpdated',
     order: 'desc',
   })
-  const [initialNavigationState] = useState(getInitialNavigationState)
+  const [initialNavigationState] = useState<NavigationState>(() => {
+    if (navigationMode !== 'filter-projects') {
+      return { type: 'filter', filter: 'all' }
+    }
+    return getInitialNavigationState()
+  })
   const [filter, setFilter] = useState<Filter>(
     initialNavigationState.type === 'filter'
       ? initialNavigationState.filter
@@ -265,6 +279,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
   }, [sort])
 
   useEffect(() => {
+    if (navigationMode !== 'filter-projects') return
     const handlePopState = () => {
       const navigationState = getNavigationState(window.location.pathname)
       if (navigationState.type === 'tag') {
@@ -278,13 +293,17 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     }
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
+  }, [navigationMode])
 
   // Temporary: migrate the legacy local-storage navigation state to the URL on
   // first load. Safe to remove around September 2026 (see navigation-state.ts).
+  // Only in 'filter-projects' mode: migrateLegacyNavigationState() clears the
+  // stored state unconditionally, so running it on the library page would wipe
+  // the dashboard's remembered filter before the migration could apply it.
   useEffect(() => {
+    if (navigationMode !== 'filter-projects') return
     migrateLegacyNavigationState()
-  }, [])
+  }, [navigationMode])
 
   const showAllProjects = useCallback(() => {
     setLoadMoreCount(0)
@@ -361,30 +380,38 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
 
   const selectFilter = useCallback(
     (filter: Filter) => {
+      const url = getNavigationUrl({ type: 'filter', filter })
+      if (navigationMode === 'redirect-to-filtered-projects') {
+        location.assign(url)
+        return
+      }
       setFilter(filter)
       setSelectedTagId(undefined)
       const selected = false
       selectOrUnselectAllProjects(selected)
-      window.history.pushState(
-        null,
-        '',
-        getNavigationUrl({ type: 'filter', filter })
-      )
+      window.history.pushState(null, '', url)
     },
-    [selectOrUnselectAllProjects, setFilter, setSelectedTagId]
+    [
+      navigationMode,
+      location,
+      selectOrUnselectAllProjects,
+      setFilter,
+      setSelectedTagId,
+    ]
   )
 
   const selectTag = useCallback(
     (tagId: string) => {
+      const url = getNavigationUrl({ type: 'tag', tag: tagId })
+      if (navigationMode === 'redirect-to-filtered-projects') {
+        location.assign(url)
+        return
+      }
       setFilter('all')
       setSelectedTagId(tagId)
-      window.history.pushState(
-        null,
-        '',
-        getNavigationUrl({ type: 'tag', tag: tagId })
-      )
+      window.history.pushState(null, '', url)
     },
-    [setSelectedTagId, setFilter]
+    [navigationMode, location, setSelectedTagId, setFilter]
   )
 
   const addTag = useCallback((tag: Tag) => {

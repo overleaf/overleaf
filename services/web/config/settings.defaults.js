@@ -1027,6 +1027,7 @@ module.exports = {
     //
     createFileModes: [],
     devToolbar: [],
+    dsNavLibraryLink: [],
     gitBridge: [],
     publishModalDropdownButton: [],
     publishModalToolbarButton: [],
