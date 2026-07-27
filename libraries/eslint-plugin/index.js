@@ -22,5 +22,6 @@ module.exports = {
     'sorted-keys-in-locales': require('./sorted-keys-in-locales'),
     'locale-variables-match-en': require('./locale-variables-match-en'),
     'no-orphan-locale-keys': require('./no-orphan-locale-keys'),
+    'no-mocha-before': require('./no-mocha-before'),
   },
 }

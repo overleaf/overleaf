@@ -14,6 +14,7 @@ import noConsecutiveSpacesInLocales from '../../no-consecutive-spaces-in-locales
 import noStraightApostrophesInLocales from '../../no-straight-apostrophes-in-locales.js'
 import frenchTypographyInLocales from '../../french-typography-in-locales.js'
 import sortedKeysInLocales from '../../sorted-keys-in-locales.js'
+import noMochaBefore from '../../no-mocha-before.js'
 
 const __filename = fileURLToPath(import.meta.url)
 
@@ -543,6 +544,84 @@ jsonRuleTester.run('french-typography-in-locales', frenchTypographyInLocales, {
           ],
         },
       ],
+    },
+  ],
+})
+
+const noMochaBeforeOptions = [
+  { helperPath: 'server-ce/test/helpers/beforeWithReRunOnTestRetry' },
+]
+
+ruleTester.run('no-mocha-before', noMochaBefore, {
+  valid: [
+    {
+      code: `beforeEach(function () { setup() })`,
+      options: noMochaBeforeOptions,
+    },
+    {
+      code: `import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
+beforeWithReRunOnTestRetry(function () { setup() })`,
+      options: noMochaBeforeOptions,
+    },
+    {
+      // locally defined `before` is not the mocha hook
+      code: `function before(fn) { fn() }
+before(function () { setup() })`,
+      options: noMochaBeforeOptions,
+    },
+  ],
+  invalid: [
+    {
+      // rename + import added after the last existing import
+      filename: 'server-ce/test/foo.spec.ts',
+      code: `import { login } from './helpers/login'
+before(async function () { this.timeout(1000) })`,
+      options: noMochaBeforeOptions,
+      errors: 1,
+      output: `import { login } from './helpers/login'
+import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
+beforeWithReRunOnTestRetry(async function () { this.timeout(1000) })`,
+    },
+    {
+      // no imports yet: import inserted at the top
+      filename: 'server-ce/test/foo.spec.ts',
+      code: `before(function () { setup() })`,
+      options: noMochaBeforeOptions,
+      errors: 1,
+      output: `import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
+beforeWithReRunOnTestRetry(function () { setup() })`,
+    },
+    {
+      // helper already imported: rename only
+      filename: 'server-ce/test/foo.spec.ts',
+      code: `import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
+before(function () { setup() })`,
+      options: noMochaBeforeOptions,
+      errors: 1,
+      output: `import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
+beforeWithReRunOnTestRetry(function () { setup() })`,
+    },
+    {
+      // file inside helpers/: relative path has no directory prefix
+      filename: 'server-ce/test/helpers/config.ts',
+      code: `before(function () { setup() })`,
+      options: noMochaBeforeOptions,
+      errors: 1,
+      output: `import { beforeWithReRunOnTestRetry } from './beforeWithReRunOnTestRetry'
+beforeWithReRunOnTestRetry(function () { setup() })`,
+    },
+    {
+      // two-argument mocha form: report without autofix
+      filename: 'server-ce/test/foo.spec.ts',
+      code: `before('named hook', function () { setup() })`,
+      options: noMochaBeforeOptions,
+      errors: 1,
+    },
+    {
+      // no helperPath configured: report without autofix
+      filename: 'server-ce/test/foo.spec.ts',
+      code: `before(function () { setup() })`,
+      errors: 1,
     },
   ],
 })
