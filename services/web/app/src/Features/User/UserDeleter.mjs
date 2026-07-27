@@ -139,6 +139,13 @@ async function expireDeletedUsersAfterDuration() {
       await expireDeletedUser(deletedUserId)
       logger.info({ deletedUserId }, 'removing deleted user audit log entries')
       await UserAuditLogEntry.deleteMany({ userId: deletedUserId }).exec()
+      if (Settings.shuttingDown) {
+        logger.warn(
+          { userCount: deletedUsers.length, processedCount: i + 1 },
+          'graceful shutdown in progress, stopping batch of deleted users early'
+        )
+        return
+      }
     }
     logger.info(
       { deletedUsers: deletedUsers.length },
