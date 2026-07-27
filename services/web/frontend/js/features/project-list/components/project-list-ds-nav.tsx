@@ -5,7 +5,7 @@ import NewProjectButton from './new-project-button'
 import ProjectListTable from './table/project-list-table'
 import UserNotifications from './notifications/user-notifications'
 import SearchForm from './search-form'
-import ProjectsDropdown from './dropdown/projects-dropdown'
+import NavigationDropdown from './dropdown/navigation-dropdown'
 import SortByDropdown from './dropdown/sort-by-dropdown'
 import ProjectTools from './table/project-tools/project-tools'
 import ProjectListTitle from './title/project-list-title'
@@ -151,7 +151,7 @@ export function ProjectListDsNav() {
                       className="projects-toolbar"
                       aria-label={t('projects')}
                     >
-                      <ProjectsDropdown />
+                      <NavigationDropdown activePage="projects" />
                       <SortByDropdown />
                     </div>
                   </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash } from '@phosphor-icons/react'
+import { BookBookmark, Trash, Folder } from '@phosphor-icons/react'
 import {
   Filter,
   UNCATEGORIZED_KEY,
@@ -8,6 +8,7 @@ import {
 } from '../../context/project-list-context'
 import {
   OLDropdown,
+  OLDropdownDivider,
   OLDropdownHeader,
   OLDropdownItem,
   OLDropdownMenu,
@@ -17,16 +18,23 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import ProjectsFilterMenu from '../projects-filter-menu'
 import TagsList from '../tags-list'
-import MobilePageSwitcherItems from './mobile-page-switcher-items'
+import { ActivePage } from '../../util/navigation-state'
 
 type ItemProps = {
   filter: Filter
   text: string
+  activePage: ActivePage
   leadingIcon?: React.ReactNode
   onClick?: () => void
 }
 
-export function Item({ filter, text, leadingIcon, onClick }: ItemProps) {
+export function Item({
+  filter,
+  text,
+  leadingIcon,
+  onClick,
+  activePage,
+}: ItemProps) {
   const { selectFilter } = useProjectListContext()
   const handleClick = () => {
     selectFilter(filter)
@@ -34,7 +42,7 @@ export function Item({ filter, text, leadingIcon, onClick }: ItemProps) {
   }
 
   return (
-    <ProjectsFilterMenu filter={filter} activePage="projects">
+    <ProjectsFilterMenu filter={filter} activePage={activePage}>
       {isActive => (
         <OLDropdownItem
           as="button"
@@ -51,10 +59,12 @@ export function Item({ filter, text, leadingIcon, onClick }: ItemProps) {
   )
 }
 
-function ProjectsDropdown() {
+function NavigationDropdown({ activePage }: { activePage: ActivePage }) {
   const { t } = useTranslation()
-  const [title, setTitle] = useState(() => t('all_projects'))
-  const [view, setView] = useState<'top' | 'submenu' | 'tags'>('submenu')
+  const [title, setTitle] = useState(() =>
+    activePage === 'library' ? t('library') : t('all_projects')
+  )
+  const [view, setView] = useState<'top' | 'tags'>('top')
   const { filter, selectedTagId, tags } = useProjectListContext()
   const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
   const filterTranslations = useRef<Record<Filter, string>>({
@@ -66,6 +76,11 @@ function ProjectsDropdown() {
   })
 
   useEffect(() => {
+    if (activePage === 'library') {
+      setTitle(t('library'))
+      return
+    }
+
     if (selectedTagId === undefined) {
       setTitle(filterTranslations.current[filter])
     }
@@ -79,25 +94,49 @@ function ProjectsDropdown() {
         setTitle(tag.name ?? '')
       }
     }
-  }, [filter, tags, selectedTagId, t])
+  }, [filter, tags, selectedTagId, t, activePage])
 
   const filterItems = (
     <>
       <li role="none">
-        <Item filter="all" text={t('all_projects')} />
+        <Item
+          filter="all"
+          text={t('all_projects')}
+          activePage={activePage}
+          leadingIcon={isLibraryEnabled && <Folder size={20} />}
+        />
       </li>
       <li role="none">
-        <Item filter="owned" text={t('your_projects')} />
+        <Item
+          filter="owned"
+          text={t('your_projects')}
+          activePage={activePage}
+          leadingIcon={isLibraryEnabled && <OLDropdownItem.EmptyLeadingIcon />}
+        />
       </li>
       <li role="none">
-        <Item filter="shared" text={t('shared_with_you')} />
+        <Item
+          filter="shared"
+          text={t('shared_with_you')}
+          activePage={activePage}
+          leadingIcon={isLibraryEnabled && <OLDropdownItem.EmptyLeadingIcon />}
+        />
       </li>
       <li role="none">
-        <Item filter="archived" text={t('archived_projects')} />
+        <Item
+          filter="archived"
+          text={t('archived_projects')}
+          activePage={activePage}
+          leadingIcon={isLibraryEnabled && <OLDropdownItem.EmptyLeadingIcon />}
+        />
       </li>
       {!isLibraryEnabled && (
         <li role="none">
-          <Item filter="trashed" text={t('trashed_projects')} />
+          <Item
+            filter="trashed"
+            text={t('trashed_projects')}
+            activePage={activePage}
+          />
         </li>
       )}
     </>
@@ -119,9 +158,9 @@ function ProjectsDropdown() {
         isLibraryEnabled
           ? show => {
               if (show) {
-                setView(selectedTagId !== undefined ? 'tags' : 'submenu')
+                setView(selectedTagId !== undefined ? 'tags' : 'top')
               } else {
-                setView('submenu')
+                setView('top')
               }
             }
           : undefined
@@ -131,7 +170,9 @@ function ProjectsDropdown() {
         id="projects-types-dropdown-toggle-btn"
         className="ps-0 mb-0 btn-transparent h3"
         size="lg"
-        aria-label={t('filter_projects')}
+        aria-label={
+          isLibraryEnabled ? t('navigation_menu') : t('filter_projects')
+        }
       >
         <span className="text-truncate" aria-hidden>
           {title}
@@ -144,28 +185,15 @@ function ProjectsDropdown() {
         }
       >
         {!isLibraryEnabled && submenuItems}
-        {isLibraryEnabled && view === 'submenu' && (
+        {isLibraryEnabled && view === 'top' && (
           <>
-            <li role="none">
-              <OLDropdownItem
-                as="button"
-                tabIndex={-1}
-                leadingIcon={<MaterialIcon type="chevron_left" />}
-                aria-label={t('back')}
-                onClick={e => {
-                  e.stopPropagation()
-                  setView('top')
-                }}
-              >
-                {t('projects')}
-              </OLDropdownItem>
-            </li>
             {filterItems}
             <li role="none">
               <OLDropdownItem
                 as="button"
                 tabIndex={-1}
                 trailingIcon="chevron_right"
+                leadingIcon={<OLDropdownItem.EmptyLeadingIcon />}
                 onClick={e => {
                   e.stopPropagation()
                   setView('tags')
@@ -174,12 +202,23 @@ function ProjectsDropdown() {
                 {t('tags')}
               </OLDropdownItem>
             </li>
+            <OLDropdownDivider />
             <li role="none">
               <Item
                 filter="trashed"
                 text={t('trash')}
                 leadingIcon={<Trash size={20} />}
+                activePage={activePage}
               />
+            </li>
+            <li role="none">
+              <OLDropdownItem
+                active={activePage === 'library'}
+                href="/library"
+                leadingIcon={<BookBookmark size={20} />}
+              >
+                {t('library')}
+              </OLDropdownItem>
             </li>
           </>
         )}
@@ -193,7 +232,7 @@ function ProjectsDropdown() {
                 aria-label={t('back')}
                 onClick={e => {
                   e.stopPropagation()
-                  setView('submenu')
+                  setView('top')
                 }}
               >
                 {t('tags')}
@@ -202,15 +241,9 @@ function ProjectsDropdown() {
             <TagsList />
           </>
         )}
-        {isLibraryEnabled && view === 'top' && (
-          <MobilePageSwitcherItems
-            activePage="projects"
-            onProjectsClick={() => setView('submenu')}
-          />
-        )}
       </OLDropdownMenu>
     </OLDropdown>
   )
 }
 
-export default ProjectsDropdown
+export default NavigationDropdown
