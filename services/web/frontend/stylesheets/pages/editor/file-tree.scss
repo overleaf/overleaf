@@ -406,7 +406,7 @@
         }
       }
 
-      .file-tree-bib-badge {
+      .file-tree-beta-badge {
         position: absolute;
         right: var(--spacing-09);
         top: 0;
@@ -418,6 +418,7 @@
           font-size: var(--font-size-03);
 
           &.labs-badge {
+            padding: var(--spacing-01);
             color: var(--white);
           }
 
@@ -427,7 +428,7 @@
         }
       }
 
-      .file-tree-has-bib-badge .item-name {
+      .file-tree-has-beta-badge .item-name {
         padding-right: var(--spacing-09);
       }
 
