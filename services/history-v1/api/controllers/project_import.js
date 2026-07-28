@@ -12,10 +12,12 @@ const Change = core.Change
 const Chunk = core.Chunk
 const File = core.File
 const FileMap = core.FileMap
+const Origin = core.Origin
 const Snapshot = core.Snapshot
 const TextOperation = core.TextOperation
 
 const logger = require('@overleaf/logger')
+const OError = require('@overleaf/o-error')
 
 const storage = require('../../storage')
 const BatchBlobStore = storage.BatchBlobStore
@@ -24,6 +26,7 @@ const chunkStore = storage.chunkStore
 const HashCheckBlobStore = storage.HashCheckBlobStore
 const commitChanges = storage.commitChanges
 const persistBuffer = storage.persistBuffer
+const buildSetContentChange = storage.buildSetContentChange
 const InvalidChangeError = storage.InvalidChangeError
 
 const render = require('./render')
@@ -81,6 +84,17 @@ async function importSnapshot(req, res) {
   res.status(HTTPStatus.OK).json({ projectId: historyId })
 }
 
+// Limits that force us to persist all of the changes.
+function getPersistLimits() {
+  const farFuture = new Date()
+  farFuture.setTime(farFuture.getTime() + 7 * 24 * 3600 * 1000)
+  return {
+    maxChanges: 0,
+    minChangeTimestamp: farFuture,
+    maxChangeTimestamp: farFuture,
+  }
+}
+
 async function importChanges(req, res, next) {
   const { params, query, body } = parseReq(req, schemas.importChanges)
   const projectId = params.project_id
@@ -97,14 +111,7 @@ async function importChanges(req, res, next) {
     return render.unprocessableEntity(res)
   }
 
-  // Set limits to force us to persist all of the changes.
-  const farFuture = new Date()
-  farFuture.setTime(farFuture.getTime() + 7 * 24 * 3600 * 1000)
-  const limits = {
-    maxChanges: 0,
-    minChangeTimestamp: farFuture,
-    maxChangeTimestamp: farFuture,
-  }
+  const limits = getPersistLimits()
 
   const blobStore = new BlobStore(projectId)
   const batchBlobStore = new BatchBlobStore(blobStore)
@@ -176,16 +183,64 @@ async function importChanges(req, res, next) {
   }
 }
 
+async function setContent(req, res) {
+  const { params, body } = parseReq(req, schemas.setContent)
+  const projectId = params.project_id
+  const { pathname, source, userId, timestamp, metadata, trackChanges } = body
+  const content = 'content' in body ? body.content : undefined
+  const blobHash = 'blobHash' in body ? body.blobHash : undefined
+  if (timestamp == null) {
+    // The schema requires a timestamp; this narrows the type for the checker.
+    return render.unprocessableEntity(res)
+  }
+
+  let result
+  try {
+    result = await buildSetContentChange(projectId, pathname, {
+      content,
+      blobHash,
+      metadata,
+      userId,
+      timestamp,
+      origin: new Origin(source),
+      trackChanges,
+    })
+  } catch (err) {
+    if (err instanceof storage.ContentTooLargeError) {
+      return render.requestEntityTooLarge(res)
+    } else if (err instanceof Chunk.NotFoundError) {
+      logger.warn({ err, projectId }, 'chunk not found')
+      return render.notFound(res)
+    } else if (
+      err instanceof storage.BlobNotFoundError ||
+      err instanceof TextOperation.UnprocessableError ||
+      err instanceof File.NotEditableError ||
+      err instanceof FileMap.PathnameError ||
+      err instanceof Snapshot.EditMissingFileError ||
+      err instanceof InvalidChangeError ||
+      (err instanceof OError &&
+        err.message.startsWith('StringFileData.trackedChanges out of sync'))
+    ) {
+      logger.warn({ err, projectId, pathname }, 'set content rejected')
+      return render.unprocessableEntity(res)
+    } else {
+      throw err
+    }
+  }
+
+  const { change, baseVersion } = result
+  res.status(HTTPStatus.OK).json({
+    baseVersion,
+    change: change ? change.toRaw() : null,
+  })
+}
+
 async function flushChanges(req, res, next) {
   const { params } = parseReq(req, schemas.flushChanges)
   const projectId = params.project_id
   // Use the same limits importChanges, since these are passed to persistChanges
-  const farFuture = new Date()
-  farFuture.setTime(farFuture.getTime() + 7 * 24 * 3600 * 1000)
   const limits = {
-    maxChanges: 0,
-    minChangeTimestamp: farFuture,
-    maxChangeTimestamp: farFuture,
+    ...getPersistLimits(),
     autoResync: true,
   }
   try {
@@ -209,5 +264,6 @@ async function expireProject(req, res, next) {
 
 exports.importSnapshot = expressify(importSnapshot)
 exports.importChanges = expressify(importChanges)
+exports.setContent = expressify(setContent)
 exports.flushChanges = expressify(flushChanges)
 exports.expireProject = expressify(expireProject)

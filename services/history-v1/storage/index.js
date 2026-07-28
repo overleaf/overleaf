@@ -24,5 +24,14 @@ exports.loadGlobalBlobs = loadGlobalBlobs
 const { InvalidChangeError } = require('./lib/errors')
 exports.InvalidChangeError = InvalidChangeError
 
+const {
+  buildSetContentChange,
+  ContentTooLargeError,
+  BlobNotFoundError,
+} = require('./lib/build_set_content_change')
+exports.buildSetContentChange = buildSetContentChange
+exports.ContentTooLargeError = ContentTooLargeError
+exports.BlobNotFoundError = BlobNotFoundError
+
 const { ChunkVersionConflictError } = require('./lib/chunk_store/errors')
 exports.ChunkVersionConflictError = ChunkVersionConflictError

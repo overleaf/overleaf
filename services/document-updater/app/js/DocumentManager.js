@@ -12,6 +12,9 @@ const { extractOriginOrSource } = require('./Utils')
 const { getTotalSizeOfLines } = require('./Limits')
 const Settings = require('@overleaf/settings')
 const { StringFileData } = require('overleaf-editor-core')
+const {
+  diffAsTextOperation,
+} = require('overleaf-editor-core/lib/diff_as_text_operation')
 
 const MAX_UNFLUSHED_AGE = Settings.maxUnflushedAgeMs // document should be flushed to mongo this time after a change
 
@@ -194,10 +197,7 @@ const DocumentManager = {
     let op
     if (type === 'history-ot') {
       const file = StringFileData.fromRaw(oldLines)
-      const operation = DiffCodec.diffAsHistoryOTEditOperation(
-        file,
-        newLines.join('\n')
-      )
+      const operation = diffAsTextOperation(file, newLines.join('\n'))
       if (operation.isNoop()) {
         op = []
       } else {

@@ -65,6 +65,15 @@ const changeSchema = z
   })
   .passthrough()
 
+const setContentBodyBase = z.object({
+  pathname: z.string().min(1),
+  source: z.string(),
+  userId: zz.objectId().optional(),
+  timestamp: zz.datetime(),
+  metadata: z.object({}).passthrough().optional(),
+  trackChanges: z.boolean().optional(),
+})
+
 const schemas = {
   projectId: z.object({
     params: z
@@ -250,6 +259,31 @@ const schemas = {
       return_snapshot: z.enum(['hashed', 'none']).optional(),
     }),
     body: z.array(changeSchema),
+  }),
+
+  setContent: z.object({
+    params: z.object({
+      project_id: z.string(),
+    }),
+    // strict() rejects unknown keys, so a mixed payload with both content and
+    // blobHash fails both union members and is rejected.
+    body: z
+      .union([
+        setContentBodyBase.extend({ content: z.string() }).strict(),
+        setContentBodyBase
+          .extend({ blobHash: z.string().regex(hexHashPattern) })
+          .strict(),
+      ])
+      .refine(
+        body => {
+          if (body.trackChanges && !body.userId) return false
+          return true
+        },
+        {
+          message: '"userId" is required when trackChanges is set',
+          path: ['userId'],
+        }
+      ),
   }),
 
   flushChanges: z.object({
