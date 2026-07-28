@@ -204,16 +204,6 @@ module.exports = DocUpdaterClient = {
     )
   },
 
-  async rejectChanges(projectId, docId, changeIds, userId) {
-    return await fetchJson(
-      `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/change/reject`,
-      {
-        method: 'POST',
-        json: { change_ids: changeIds, user_id: userId },
-      }
-    )
-  },
-
   async getComment(projectId, docId, commentId) {
     return await fetchJson(
       `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/comment/${commentId}`

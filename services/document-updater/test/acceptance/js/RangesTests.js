@@ -11,6 +11,7 @@ const projectHistoryRedis = require('@overleaf/redis-wrapper').createClient(
 )
 const ProjectHistoryKeys = Settings.redis.project_history.key_schema
 
+const { RequestFailedError } = require('@overleaf/fetch-utils')
 const { db, ObjectId } = require('../../../app/js/mongodb')
 const MockWebApi = require('./helpers/MockWebApi')
 const DocUpdaterClient = require('./helpers/DocUpdaterClient')
@@ -450,6 +451,60 @@ describe('Ranges', function () {
         },
         op: [{ p: 6, d: 'ddd' }],
       })
+    })
+  })
+
+  describe('accepting changes in a history-ot doc', function () {
+    beforeEach(async function () {
+      this.project_id = DocUpdaterClient.randomId()
+      this.user_id = DocUpdaterClient.randomId()
+      this.doc = {
+        id: DocUpdaterClient.randomId(),
+        lines: ['one', 'one and a half', 'two', 'three'],
+      }
+      this.update = {
+        doc: this.doc.id,
+        op: [
+          {
+            textOperation: [
+              4,
+              {
+                r: 'one and a half\n'.length,
+                tracking: {
+                  type: 'delete',
+                  userId: this.user_id,
+                  ts: new Date().toISOString(),
+                },
+              },
+              9,
+            ],
+          },
+        ],
+        v: 0,
+        meta: { source: 'random-publicId' },
+      }
+      MockWebApi.insertDoc(this.project_id, this.doc.id, {
+        lines: this.doc.lines,
+        version: 0,
+        otMigrationStage: 1,
+      })
+      await DocUpdaterClient.preloadDoc(this.project_id, this.doc.id)
+      await DocUpdaterClient.sendUpdate(
+        this.project_id,
+        this.doc.id,
+        this.update
+      )
+      await DocUpdaterClient.waitForPendingUpdates(this.project_id, this.doc.id)
+    })
+
+    it('should refuse to accept changes with a 422', async function () {
+      const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc.id)
+      const changeIds = doc.ranges.changes.map(change => change.id)
+      await expect(
+        DocUpdaterClient.acceptChanges(this.project_id, this.doc.id, changeIds)
+      )
+        .to.be.rejectedWith(RequestFailedError)
+        .and.eventually.have.nested.property('response.status', 422)
     })
   })
 

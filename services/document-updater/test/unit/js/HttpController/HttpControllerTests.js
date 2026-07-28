@@ -149,7 +149,6 @@ describe('HttpController', function () {
             {
               docId: this.doc_id,
               projectId: this.project_id,
-              historyRanges: false,
             },
             'getting doc via http'
           )
@@ -203,69 +202,6 @@ describe('HttpController', function () {
             {
               docId: this.doc_id,
               projectId: this.project_id,
-              historyRanges: false,
-            },
-            'getting doc via http'
-          )
-          .should.equal(true)
-      })
-
-      it('should time the request', function () {
-        this.Metrics.Timer.prototype.done.called.should.equal(true)
-      })
-    })
-
-    describe('when historyRanges query param is true', function () {
-      beforeEach(async function () {
-        this.DocumentManager.promises.getDocAndRecentOpsWithLock.resolves({
-          lines: this.lines,
-          version: this.version,
-          ops: [],
-          ranges: this.ranges,
-          pathname: this.pathname,
-          projectHistoryId: this.projectHistoryId,
-          type: 'sharejs-text-ot',
-        })
-        this.req.query = { historyRanges: 'true' }
-        await this.HttpController.getDoc(this.req, this.res, this.next)
-      })
-
-      it('should get the doc', function () {
-        this.DocumentManager.promises.getDocAndRecentOpsWithLock.should.have.been.calledWith(
-          this.project_id,
-          this.doc_id,
-          -1
-        )
-      })
-
-      it('should return the doc as JSON with history ranges processing', function () {
-        this.res.json.should.have.been.calledWith({
-          id: this.doc_id,
-          lines: this.lines,
-          version: this.version,
-          ops: [],
-          ranges: this.ranges,
-          pathname: this.pathname,
-          ttlInS: 42,
-          type: 'sharejs-text-ot',
-        })
-      })
-
-      it('should call addTrackedDeletesToContent for history ranges processing', function () {
-        this.Utils.addTrackedDeletesToContent.called.should.equal(true)
-      })
-
-      it('should call toHistoryRanges for range conversion', function () {
-        this.HistoryConversions.toHistoryRanges.called.should.equal(true)
-      })
-
-      it('should log the request with historyRanges: true', function () {
-        this.logger.debug
-          .calledWith(
-            {
-              docId: this.doc_id,
-              projectId: this.project_id,
-              historyRanges: true,
             },
             'getting doc via http'
           )

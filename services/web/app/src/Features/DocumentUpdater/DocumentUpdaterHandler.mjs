@@ -101,19 +101,6 @@ async function getDocument(projectId, docId, fromVersion) {
   }
 }
 
-/**
- * Get a document with its history ranges
- * @param {string} projectId
- * @param {string} docId
- */
-async function getDocumentWithHistoryRanges(projectId, docId) {
-  const doc = await fetchJson(
-    `${BASE_URL}/project/${projectId}/doc/${docId}?historyRanges=true`,
-    { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) }
-  )
-  return doc
-}
-
 async function setDocument(
   projectId,
   docId,
@@ -236,23 +223,6 @@ async function acceptChanges(projectId, docId, changeIds, userId) {
     userId,
     changeContributors
   )
-}
-
-/**
- * @param {string} projectId
- * @param {string} docId
- * @param {string[]} changeIds
- */
-async function rejectChanges(projectId, docId, changeIds, userId) {
-  const { rejectedChangeIds } = await fetchJson(
-    `${BASE_URL}/project/${projectId}/doc/${docId}/change/reject`,
-    {
-      method: 'POST',
-      json: { change_ids: changeIds, user_id: userId },
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    }
-  )
-  return { rejectedChangeIds }
 }
 
 /**
@@ -554,7 +524,6 @@ const DocumentUpdaterHandler = {
   getProjectDocsIfMatch,
   clearProjectState,
   acceptChanges,
-  rejectChanges,
   resolveThread,
   reopenThread,
   deleteThread,
@@ -562,7 +531,6 @@ const DocumentUpdaterHandler = {
   blockProject,
   unblockProject,
   updateProjectStructure,
-  getDocumentWithHistoryRanges,
 }
 
 export default {

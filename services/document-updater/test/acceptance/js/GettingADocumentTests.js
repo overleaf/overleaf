@@ -128,6 +128,70 @@ describe('Getting a document', function () {
     })
   })
 
+  describe('when the document is a history-ot doc with tracked changes and comments', function () {
+    before(async function () {
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
+      this.user_id = DocUpdaterClient.randomId()
+      this.thread_id = DocUpdaterClient.randomId()
+      this.ts = new Date().toISOString()
+
+      MockWebApi.insertDoc(this.project_id, this.doc_id, {
+        lines: this.lines,
+        version: this.version,
+        otMigrationStage: 1,
+        ranges: {
+          changes: [
+            {
+              id: DocUpdaterClient.randomId(),
+              op: { p: 4, d: 'one and a half\n' },
+              metadata: { user_id: this.user_id, ts: this.ts },
+            },
+          ],
+          comments: [
+            {
+              id: this.thread_id,
+              op: { p: 0, c: 'one', t: this.thread_id },
+            },
+          ],
+        },
+      })
+
+      this.returnedDoc = await DocUpdaterClient.getDoc(
+        this.project_id,
+        this.doc_id
+      )
+    })
+
+    it('should return the doc as a history-ot doc', function () {
+      this.returnedDoc.type.should.equal('history-ot')
+    })
+
+    it('should return the document lines without tracked deletes', function () {
+      this.returnedDoc.lines.should.deep.equal(this.lines)
+    })
+
+    it('should return the tracked changes in editor format with fresh ids', function () {
+      expect(this.returnedDoc.ranges.changes).to.have.length(1)
+      const [change] = this.returnedDoc.ranges.changes
+      expect(change.id).to.match(/^[0-9a-f]{24}$/)
+      expect(change.op).to.deep.equal({ p: 4, d: 'one and a half\n' })
+      expect(change.metadata).to.deep.equal({
+        user_id: this.user_id,
+        ts: this.ts,
+      })
+    })
+
+    it('should return the comments in editor format', function () {
+      expect(this.returnedDoc.ranges.comments).to.deep.equal([
+        {
+          id: this.thread_id,
+          op: { p: 0, c: 'one', t: this.thread_id, resolved: false },
+        },
+      ])
+    })
+  })
+
   describe('when the request asks for some recent ops', function () {
     before(async function () {
       this.project_id = DocUpdaterClient.randomId()

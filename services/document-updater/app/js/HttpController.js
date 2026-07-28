@@ -10,16 +10,14 @@ const Metrics = require('./Metrics')
 const DeleteQueueManager = require('./DeleteQueueManager')
 const { getTotalSizeOfLines } = require('./Limits')
 const { StringFileData } = require('overleaf-editor-core')
-const { addTrackedDeletesToContent } = require('./Utils')
 const HistoryConversions = require('./HistoryConversions')
 
 async function getDoc(req, res) {
   let fromVersion
   const docId = req.params.doc_id
   const projectId = req.params.project_id
-  const historyRanges = req.query.historyRanges === 'true'
 
-  logger.debug({ projectId, docId, historyRanges }, 'getting doc via http')
+  logger.debug({ projectId, docId }, 'getting doc via http')
   const timer = new Metrics.Timer('http.getDoc')
 
   if (req.query.fromVersion != null) {
@@ -35,48 +33,26 @@ async function getDoc(req, res) {
       fromVersion
     )
   timer.done()
-  logger.debug({ projectId, docId, historyRanges }, 'got doc via http')
+  logger.debug({ projectId, docId }, 'got doc via http')
 
   if (lines == null || version == null) {
     throw new Errors.NotFoundError('document not found')
   }
 
   if (!Array.isArray(lines) && req.query.historyOTSupport !== 'true') {
-    const file = StringFileData.fromRaw(lines)
-    // TODO(24596): tc support for history-ot
-    lines = file.getLines()
+    ;({ lines, ranges } = HistoryConversions.fromHistoryOT(lines))
   }
 
-  if (historyRanges) {
-    const docContentWithTrackedDeletes = addTrackedDeletesToContent(
-      lines.join('\n'),
-      ranges?.changes ?? []
-    )
-    const docLinesWithTrackedDeletes = docContentWithTrackedDeletes.split('\n')
-    const rangesWithTrackedDeletes = HistoryConversions.toHistoryRanges(ranges)
-
-    res.json({
-      id: docId,
-      lines: docLinesWithTrackedDeletes,
-      version,
-      ops,
-      ranges: rangesWithTrackedDeletes,
-      pathname,
-      ttlInS: RedisManager.DOC_OPS_TTL,
-      type,
-    })
-  } else {
-    res.json({
-      id: docId,
-      lines,
-      version,
-      ops,
-      ranges,
-      pathname,
-      ttlInS: RedisManager.DOC_OPS_TTL,
-      type,
-    })
-  }
+  res.json({
+    id: docId,
+    lines,
+    version,
+    ops,
+    ranges,
+    pathname,
+    ttlInS: RedisManager.DOC_OPS_TTL,
+    type,
+  })
 }
 
 async function getComment(req, res) {
@@ -378,28 +354,6 @@ async function acceptChanges(req, res) {
   res.status(200).json({ changeContributors })
 }
 
-async function rejectChanges(req, res) {
-  const { project_id: projectId, doc_id: docId } = req.params
-  const changeIds = req.body.change_ids
-  const userId = req.body.user_id
-
-  logger.debug(
-    { projectId, docId },
-    `rejecting ${changeIds.length} changes via http`
-  )
-  const response = await DocumentManager.promises.rejectChangesWithLock(
-    projectId,
-    docId,
-    changeIds,
-    userId
-  )
-  logger.debug(
-    { projectId, docId, changeIds, response },
-    `rejected ${changeIds.length} changes via http`
-  )
-  res.json(response)
-}
-
 async function resolveComment(req, res) {
   const {
     project_id: projectId,
@@ -567,7 +521,6 @@ module.exports = {
   deleteProject: expressify(deleteProject),
   deleteMultipleProjects: expressify(deleteMultipleProjects),
   acceptChanges: expressify(acceptChanges),
-  rejectChanges: expressify(rejectChanges),
   resolveComment: expressify(resolveComment),
   reopenComment: expressify(reopenComment),
   deleteComment: expressify(deleteComment),

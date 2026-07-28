@@ -359,12 +359,15 @@ const DocumentManager = {
       pathname,
       projectHistoryId,
       historyRangesSupport,
+      type,
     } = await DocumentManager.getDoc(projectId, docId)
     if (lines == null || version == null) {
       throw new Errors.NotFoundError(`document not found: ${docId}`)
     }
+    if (type === 'history-ot') {
+      throw new Errors.OTTypeMismatchError('sharejs-text-ot', 'history-ot')
+    }
 
-    // TODO(24596): tc support for history-ot
     const newRanges = RangesManager.acceptChanges(
       projectId,
       docId,
@@ -407,64 +410,6 @@ const DocumentManager = {
       .map(change => change?.metadata?.user_id)
       .filter(userId => userId)
     return changeContributors
-  },
-
-  async rejectChanges(projectId, docId, changeIds, userId) {
-    const UpdateManager = require('./UpdateManager')
-    const HistoryOTUpdateManager = require('./HistoryOTUpdateManager')
-
-    const { lines, version, ranges } = await DocumentManager.getDoc(
-      projectId,
-      docId
-    )
-    if (lines == null || version == null) {
-      throw new Errors.NotFoundError(`document not found: ${docId}`)
-    }
-
-    const changesToReject = ranges.changes
-      ? ranges.changes.filter(change => changeIds.includes(change.id))
-      : []
-
-    // Apply inverted operations for rejected changes (based on reject-changes.ts logic)
-    // Sort changes in reverse order by position to avoid conflicts
-    changesToReject.sort((a, b) => b.op.p - a.op.p)
-
-    const ops = []
-    for (const change of changesToReject) {
-      if (change.op.i) {
-        const deleteOp = {
-          p: change.op.p,
-          d: change.op.i,
-          u: true,
-        }
-        ops.push(deleteOp)
-      } else if (change.op.d) {
-        const insertOp = {
-          p: change.op.p,
-          i: change.op.d,
-          u: true,
-        }
-        ops.push(insertOp)
-      }
-    }
-
-    const update = {
-      doc: docId,
-      op: ops,
-      v: version,
-      meta: {
-        user_id: userId,
-        ts: new Date().toISOString(),
-      },
-    }
-
-    if (HistoryOTUpdateManager.isHistoryOTEditOperationUpdate(update)) {
-      await HistoryOTUpdateManager.applyUpdate(projectId, docId, update)
-    } else {
-      await UpdateManager.promises.applyUpdate(projectId, docId, update)
-    }
-
-    return { rejectedChangeIds: changesToReject.map(c => c.id) }
   },
 
   async updateCommentState(projectId, docId, commentId, userId, resolved) {
@@ -778,17 +723,6 @@ const DocumentManager = {
       changeIds
     )
     return changeContributors
-  },
-
-  async rejectChangesWithLock(projectId, docId, changeIds, userId) {
-    const UpdateManager = require('./UpdateManager')
-    return await UpdateManager.promises.lockUpdatesAndDo(
-      DocumentManager.rejectChanges,
-      projectId,
-      docId,
-      changeIds,
-      userId
-    )
   },
 
   async updateCommentStateWithLock(

@@ -587,6 +587,15 @@ describe('Setting a document', function () {
       expect(doc.lines).to.deep.equal(this.newLines)
     })
 
+    it('should provide the tracked changes in editor format when getting the doc', async function () {
+      const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc_id)
+      expect(doc.ranges.changes).to.have.length(1)
+      const [change] = doc.ranges.changes
+      expect(change.id).to.match(/^[0-9a-f]{24}$/)
+      expect(change.op).to.deep.equal({ p: 4, d: 'one and a half\n' })
+      expect(change.metadata).to.deep.equal({ user_id: userId, ts })
+    })
+
     const cases = [
       {
         name: 'when resetting the content',
@@ -846,6 +855,17 @@ describe('Setting a document', function () {
           )
           expect(doc.lines).to.deep.equal(['one', 'two'])
         })
+
+        it('should provide the tracked deletes in editor format when getting the doc', async function () {
+          const doc = await DocUpdaterClient.getDoc(
+            this.project_id,
+            this.doc_id
+          )
+          expect(doc.ranges.changes.map(change => change.op)).to.deep.equal([
+            { p: 4, d: 'one and a half\n' },
+            { p: 7, d: '\nthree' },
+          ])
+        })
       })
 
       describe('when appending content', function () {
@@ -886,6 +906,17 @@ describe('Setting a document', function () {
             this.doc_id
           )
           expect(doc.lines).to.deep.equal(['one', 'two', 'three', 'four'])
+        })
+
+        it('should provide the tracked insert in editor format when getting the doc', async function () {
+          const doc = await DocUpdaterClient.getDoc(
+            this.project_id,
+            this.doc_id
+          )
+          expect(doc.ranges.changes.map(change => change.op)).to.deep.equal([
+            { p: 4, d: 'one and a half\n' },
+            { p: 13, i: '\nfour' },
+          ])
         })
       })
     })

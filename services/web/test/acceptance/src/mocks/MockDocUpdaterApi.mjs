@@ -5,10 +5,17 @@ class MockDocUpdaterApi extends AbstractMockApi {
     this.updates = {}
     this.docsByProject = new Map()
     this.receivedSetDocRequests = []
+    this.receivedGetDocRequests = []
   }
 
   getReceivedSetDocRequests(projectId) {
     return this.receivedSetDocRequests.filter(
+      request => request.projectId === projectId
+    )
+  }
+
+  getReceivedGetDocRequests(projectId) {
+    return this.receivedGetDocRequests.filter(
       request => request.projectId === projectId
     )
   }
@@ -30,13 +37,13 @@ class MockDocUpdaterApi extends AbstractMockApi {
     this.updates[projectId].version = version
   }
 
-  setDoc(projectId, docId, lines, ranges) {
+  setDoc(projectId, docId, lines, ranges, version = 0) {
     let docsById = this.docsByProject.get(projectId)
     if (docsById == null) {
       docsById = new Map()
       this.docsByProject.set(projectId, docsById)
     }
-    docsById.set(docId, { id: docId, lines, ranges })
+    docsById.set(docId, { id: docId, lines, ranges, version })
   }
 
   applyRoutes() {
@@ -61,13 +68,21 @@ class MockDocUpdaterApi extends AbstractMockApi {
       }
     )
 
-    this.app.post(
-      '/project/:projectId/doc/:docId/change/reject',
-      (req, res) => {
-        const { change_ids: changeIds } = req.body
-        res.json({ rejectedChangeIds: changeIds })
+    this.app.get('/project/:projectId/doc/:docId', (req, res) => {
+      const { projectId, docId } = req.params
+      this.receivedGetDocRequests.push({ projectId, docId, query: req.query })
+      const doc = this.docsByProject.get(projectId)?.get(docId)
+      if (doc == null) {
+        return res.sendStatus(404)
       }
-    )
+      res.json({
+        id: doc.id,
+        lines: doc.lines,
+        version: doc.version,
+        ranges: doc.ranges,
+        ops: [],
+      })
+    })
 
     this.app.post('/project/:projectId/doc/:doc_id', (req, res) => {
       const { projectId, doc_id: docId } = req.params
