@@ -114,7 +114,14 @@ async function getDocumentWithHistoryRanges(projectId, docId) {
   return doc
 }
 
-async function setDocument(projectId, docId, userId, docLines, source) {
+async function setDocument(
+  projectId,
+  docId,
+  userId,
+  docLines,
+  source,
+  trackChanges = false
+) {
   const maybeJson = await fetchString(
     `${BASE_URL}/project/${projectId}/doc/${docId}`,
     {
@@ -123,6 +130,7 @@ async function setDocument(projectId, docId, userId, docLines, source) {
         lines: docLines,
         source,
         user_id: userId,
+        trackChanges,
       },
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     }
@@ -138,7 +146,14 @@ async function setDocument(projectId, docId, userId, docLines, source) {
   }
 }
 
-async function appendToDocument(projectId, docId, userId, lines, source) {
+async function appendToDocument(
+  projectId,
+  docId,
+  userId,
+  lines,
+  source,
+  trackChanges = false
+) {
   const maybeJson = await fetchString(
     `${BASE_URL}/project/${projectId}/doc/${docId}/append`,
     {
@@ -147,6 +162,7 @@ async function appendToDocument(projectId, docId, userId, lines, source) {
         lines,
         source,
         user_id: userId,
+        trackChanges,
       },
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     }

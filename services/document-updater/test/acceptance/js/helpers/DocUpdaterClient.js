@@ -111,7 +111,15 @@ module.exports = DocUpdaterClient = {
     )
   },
 
-  async setDocLines(projectId, docId, lines, source, userId, undoing) {
+  async setDocLines(
+    projectId,
+    docId,
+    lines,
+    source,
+    userId,
+    undoing,
+    trackChanges
+  ) {
     return await fetchJson(
       `http://127.0.0.1:3003/project/${projectId}/doc/${docId}`,
       {
@@ -121,6 +129,22 @@ module.exports = DocUpdaterClient = {
           source,
           user_id: userId,
           undoing,
+          trackChanges,
+        },
+      }
+    )
+  },
+
+  async appendToDoc(projectId, docId, lines, source, userId, trackChanges) {
+    return await fetchJson(
+      `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/append`,
+      {
+        method: 'POST',
+        json: {
+          lines,
+          source,
+          user_id: userId,
+          trackChanges,
         },
       }
     )

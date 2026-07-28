@@ -11,6 +11,7 @@ const RangesManager = require('./RangesManager')
 const { extractOriginOrSource } = require('./Utils')
 const { getTotalSizeOfLines } = require('./Limits')
 const Settings = require('@overleaf/settings')
+const RangesTracker = require('@overleaf/ranges-tracker')
 const { StringFileData } = require('overleaf-editor-core')
 const {
   diffAsTextOperation,
@@ -134,14 +135,20 @@ const DocumentManager = {
     }
   },
 
-  async appendToDoc(projectId, docId, linesToAppend, originOrSource, userId) {
+  async appendToDoc(
+    projectId,
+    docId,
+    linesToAppend,
+    originOrSource,
+    userId,
+    trackChanges
+  ) {
     let { lines: currentLines, type } = await DocumentManager.getDoc(
       projectId,
       docId
     )
     if (type === 'history-ot') {
       const file = StringFileData.fromRaw(currentLines)
-      // TODO(24596): tc support for history-ot
       currentLines = file.getLines()
     }
     const currentLineSize = getTotalSizeOfLines(currentLines)
@@ -161,7 +168,8 @@ const DocumentManager = {
       originOrSource,
       userId,
       false,
-      false
+      false,
+      trackChanges
     )
   },
 
@@ -172,7 +180,8 @@ const DocumentManager = {
     originOrSource,
     userId,
     undoing,
-    external
+    external,
+    trackChanges
   ) {
     if (newLines == null) {
       throw new Error('No lines were provided to setDoc')
@@ -197,7 +206,11 @@ const DocumentManager = {
     let op
     if (type === 'history-ot') {
       const file = StringFileData.fromRaw(oldLines)
-      const operation = diffAsTextOperation(file, newLines.join('\n'))
+      const operation = diffAsTextOperation(
+        file,
+        newLines.join('\n'),
+        trackChanges ? { tracking: { userId, ts: new Date() } } : {}
+      )
       if (operation.isNoop()) {
         op = []
       } else {
@@ -221,6 +234,9 @@ const DocumentManager = {
       meta: {
         user_id: userId,
       },
+    }
+    if (type !== 'history-ot' && trackChanges) {
+      update.meta.tc = RangesTracker.generateIdSeed()
     }
     if (external) {
       update.meta.type = 'external'
@@ -666,7 +682,8 @@ const DocumentManager = {
     source,
     userId,
     undoing,
-    external
+    external,
+    trackChanges
   ) {
     const UpdateManager = require('./UpdateManager')
     return await UpdateManager.promises.lockUpdatesAndDo(
@@ -677,11 +694,19 @@ const DocumentManager = {
       source,
       userId,
       undoing,
-      external
+      external,
+      trackChanges
     )
   },
 
-  async appendToDocWithLock(projectId, docId, lines, source, userId) {
+  async appendToDocWithLock(
+    projectId,
+    docId,
+    lines,
+    source,
+    userId,
+    trackChanges
+  ) {
     const UpdateManager = require('./UpdateManager')
     return await UpdateManager.promises.lockUpdatesAndDo(
       DocumentManager.appendToDoc,
@@ -689,7 +714,8 @@ const DocumentManager = {
       docId,
       lines,
       source,
-      userId
+      userId,
+      trackChanges
     )
   },
 

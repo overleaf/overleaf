@@ -23,6 +23,7 @@ export default {
   isArchived,
   isTrashed,
   isArchivedOrTrashed,
+  isTrackChangesEnabledForUser,
   getAllowedImagesForUser,
   ensureNameIsUnique,
 }
@@ -60,6 +61,22 @@ function isTrashed(project, rawUserId) {
  */
 function isArchivedOrTrashed(project, userId) {
   return isArchived(project, userId) || isTrashed(project, userId)
+}
+
+/**
+ * Whether track changes is enabled for the given user, from the project's
+ * track_changes state: `true` means on for everyone (legacy format),
+ * otherwise it is an object keyed by user id.
+ *
+ * @param {boolean | Record<string, boolean> | undefined} trackChangesState
+ * @param {string | ObjectId | null} userId
+ * @returns {boolean}
+ */
+function isTrackChangesEnabledForUser(trackChangesState, userId) {
+  return (
+    trackChangesState === true ||
+    (userId != null && trackChangesState?.[userId.toString()] === true)
+  )
 }
 
 /**

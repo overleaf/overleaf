@@ -199,7 +199,10 @@ async function clearProjectState(req, res) {
 async function setDoc(req, res) {
   const docId = req.params.doc_id
   const projectId = req.params.project_id
-  const { lines, source, user_id: userId, undoing } = req.body
+  const { lines, source, user_id: userId, undoing, trackChanges } = req.body
+  if (trackChanges && !userId) {
+    return res.status(400).send('track changes requires a user id')
+  }
   const lineSize = getTotalSizeOfLines(lines)
 
   if (lineSize > Settings.max_doc_length) {
@@ -222,7 +225,8 @@ async function setDoc(req, res) {
     source,
     userId,
     undoing,
-    true
+    true,
+    trackChanges
   )
   timer.done()
   logger.debug({ projectId, docId }, 'set doc via http')
@@ -236,7 +240,10 @@ async function setDoc(req, res) {
 async function appendToDoc(req, res) {
   const docId = req.params.doc_id
   const projectId = req.params.project_id
-  const { lines, source, user_id: userId } = req.body
+  const { lines, source, user_id: userId, trackChanges } = req.body
+  if (trackChanges && !userId) {
+    return res.status(400).send('track changes requires a user id')
+  }
   const timer = new Metrics.Timer('http.appendToDoc')
 
   let result
@@ -246,7 +253,8 @@ async function appendToDoc(req, res) {
       docId,
       lines,
       source,
-      userId
+      userId,
+      trackChanges
     )
   } catch (error) {
     if (error instanceof Errors.FileTooLargeError) {

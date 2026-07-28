@@ -585,6 +585,39 @@ describe('DocumentManager', function () {
         })
       })
 
+      describe('with track changes enabled', function () {
+        beforeEach(async function () {
+          await this.DocumentManager.promises.setDoc(
+            this.project_id,
+            this.doc_id,
+            this.afterLines,
+            this.source,
+            this.user_id,
+            false,
+            true,
+            true
+          )
+        })
+
+        it('should apply the diff with a track changes id seed', function () {
+          this.UpdateManager.promises.applyUpdate.should.have.been.calledWith(
+            this.project_id,
+            this.doc_id,
+            sinon.match({
+              doc: this.doc_id,
+              v: this.version,
+              op: this.ops,
+              meta: sinon.match({
+                type: 'external',
+                source: this.source,
+                user_id: this.user_id,
+                tc: sinon.match(/^[0-9a-f]{18}$/),
+              }),
+            })
+          )
+        })
+      })
+
       describe('when not already loaded', function () {
         beforeEach(async function () {
           this.DocumentManager.promises.getDoc = sinon.stub().resolves({

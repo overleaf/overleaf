@@ -1,11 +1,19 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
+import { Project } from '../../../app/src/models/Project.mjs'
 import ProjectGetter from '../../../app/src/Features/Project/ProjectGetter.mjs'
 import ProjectOptionsHandler from '../../../app/src/Features/Project/ProjectOptionsHandler.mjs'
 import ProjectRootDocManager from '../../../app/src/Features/Project/ProjectRootDocManager.mjs'
+import MockDocUpdaterApiClass from './mocks/MockDocUpdaterApi.mjs'
 import request from './helpers/request.js'
 import User from './helpers/User.mjs'
 import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.mjs'
+
+let MockDocUpdaterApi
+
+before(function () {
+  MockDocUpdaterApi = MockDocUpdaterApiClass.instance()
+})
 
 describe('TpdsUpdateTests', function () {
   beforeEach(function () {
@@ -75,6 +83,170 @@ describe('TpdsUpdateTests', function () {
         expect(file).to.exist
         done()
       })
+    })
+  })
+
+  describe('updating an existing file as a user', function () {
+    function updateMainTex(userId, done) {
+      request(
+        {
+          method: 'POST',
+          url: `/user/${userId}/update/test-project/main.tex`,
+          auth: {
+            username: 'overleaf',
+            password: 'password',
+            sendImmediately: true,
+          },
+          body: 'test one two',
+        },
+        (error, response, body) => {
+          if (error) {
+            throw error
+          }
+          expect(response.statusCode).to.equal(200)
+          expect(JSON.parse(response.body).status).to.equal('applied')
+          done()
+        }
+      )
+    }
+
+    describe('with track changes disabled', function () {
+      beforeEach(function (done) {
+        updateMainTex(this.owner._id, done)
+      })
+
+      it('should send the update to document-updater without track changes', function () {
+        const requests = MockDocUpdaterApi.getReceivedSetDocRequests(
+          this.projectId
+        )
+        expect(requests).to.have.length(1)
+        expect(requests[0].body.lines).to.deep.equal(['test one two'])
+        expect(requests[0].body.user_id).to.equal(this.owner._id.toString())
+        expect(requests[0].body.trackChanges).to.equal(false)
+      })
+    })
+
+    describe('with track changes enabled for the user', function () {
+      beforeEach(function (done) {
+        Project.updateOne(
+          { _id: this.projectId },
+          { track_changes: { [this.owner._id.toString()]: true } }
+        )
+          .then(() => updateMainTex(this.owner._id, done))
+          .catch(done)
+      })
+
+      it('should ask document-updater to record the update as tracked changes', function () {
+        const requests = MockDocUpdaterApi.getReceivedSetDocRequests(
+          this.projectId
+        )
+        expect(requests).to.have.length(1)
+        expect(requests[0].body.user_id).to.equal(this.owner._id.toString())
+        expect(requests[0].body.trackChanges).to.equal(true)
+      })
+    })
+
+    describe('with track changes enabled for another user', function () {
+      beforeEach(function (done) {
+        Project.updateOne(
+          { _id: this.projectId },
+          { track_changes: { '5c41deb2b4ca500153340809': true } }
+        )
+          .then(() => updateMainTex(this.owner._id, done))
+          .catch(done)
+      })
+
+      it('should not ask document-updater to record the update as tracked changes', function () {
+        const requests = MockDocUpdaterApi.getReceivedSetDocRequests(
+          this.projectId
+        )
+        expect(requests).to.have.length(1)
+        expect(requests[0].body.trackChanges).to.equal(false)
+      })
+    })
+  })
+
+  describe('updating an existing file as a user by project id', function () {
+    beforeEach(function (done) {
+      Project.updateOne(
+        { _id: this.projectId },
+        { track_changes: { [this.owner._id.toString()]: true } }
+      )
+        .then(() => {
+          request(
+            {
+              method: 'POST',
+              url: `/project/${this.projectId}/user/${this.owner._id}/update/main.tex`,
+              auth: {
+                username: 'overleaf',
+                password: 'password',
+                sendImmediately: true,
+              },
+              body: 'test one two',
+            },
+            (error, response, body) => {
+              if (error) {
+                throw error
+              }
+              expect(response.statusCode).to.equal(200)
+              expect(JSON.parse(response.body).status).to.equal('applied')
+              done()
+            }
+          )
+        })
+        .catch(done)
+    })
+
+    it('should ask document-updater to record the update as tracked changes', function () {
+      const requests = MockDocUpdaterApi.getReceivedSetDocRequests(
+        this.projectId
+      )
+      expect(requests).to.have.length(1)
+      expect(requests[0].body.user_id).to.equal(this.owner._id.toString())
+      expect(requests[0].body.trackChanges).to.equal(true)
+    })
+  })
+
+  describe('updating an existing file via the project contents route', function () {
+    // Updates via the project contents route (used by github-sync) carry no
+    // user id: the synced commits can come from any GitHub user, so they are
+    // never recorded as tracked changes.
+    beforeEach(function (done) {
+      Project.updateOne(
+        { _id: this.projectId },
+        { track_changes: { [this.owner._id.toString()]: true } }
+      )
+        .then(() => {
+          request(
+            {
+              method: 'POST',
+              url: `/project/${this.projectId}/contents/main.tex`,
+              auth: {
+                username: 'overleaf',
+                password: 'password',
+                sendImmediately: true,
+              },
+              body: 'test one two',
+            },
+            (error, response, body) => {
+              if (error) {
+                throw error
+              }
+              expect(response.statusCode).to.equal(200)
+              done()
+            }
+          )
+        })
+        .catch(done)
+    })
+
+    it('should send the update to document-updater without track changes', function () {
+      const requests = MockDocUpdaterApi.getReceivedSetDocRequests(
+        this.projectId
+      )
+      expect(requests).to.have.length(1)
+      expect(requests[0].body.user_id).to.equal(null)
+      expect(requests[0].body.trackChanges).to.equal(false)
     })
   })
 

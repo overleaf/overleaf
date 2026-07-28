@@ -4,6 +4,13 @@ class MockDocUpdaterApi extends AbstractMockApi {
   reset() {
     this.updates = {}
     this.docsByProject = new Map()
+    this.receivedSetDocRequests = []
+  }
+
+  getReceivedSetDocRequests(projectId) {
+    return this.receivedSetDocRequests.filter(
+      request => request.projectId === projectId
+    )
   }
 
   getProjectStructureUpdates(projectId) {
@@ -63,6 +70,8 @@ class MockDocUpdaterApi extends AbstractMockApi {
     )
 
     this.app.post('/project/:projectId/doc/:doc_id', (req, res) => {
+      const { projectId, doc_id: docId } = req.params
+      this.receivedSetDocRequests.push({ projectId, docId, body: req.body })
       res.sendStatus(204)
     })
 

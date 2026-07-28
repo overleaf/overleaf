@@ -282,6 +282,7 @@ describe('DocumentUpdaterHandler', function () {
             lines: ctx.lines,
             source: ctx.source,
             user_id: ctx.user_id,
+            trackChanges: false,
           })
           .reply(204)
       })
@@ -298,6 +299,31 @@ describe('DocumentUpdaterHandler', function () {
       })
     })
 
+    describe('with track changes enabled', function () {
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}`, {
+            lines: ctx.lines,
+            source: ctx.source,
+            user_id: ctx.user_id,
+            trackChanges: true,
+          })
+          .reply(204)
+      })
+
+      it('should forward the trackChanges flag', async function (ctx) {
+        await ctx.handler.promises.setDocument(
+          ctx.project_id,
+          ctx.doc_id,
+          ctx.user_id,
+          ctx.lines,
+          ctx.source,
+          true
+        )
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
+      })
+    })
+
     describe('when the document updater API returns an error', function () {
       beforeEach(function (ctx) {
         ctx.docUpdaterMock
@@ -305,6 +331,7 @@ describe('DocumentUpdaterHandler', function () {
             lines: ctx.lines,
             source: ctx.source,
             user_id: ctx.user_id,
+            trackChanges: false,
           })
           .replyWithError('boom')
       })
@@ -329,6 +356,7 @@ describe('DocumentUpdaterHandler', function () {
             lines: ctx.lines,
             source: ctx.source,
             user_id: ctx.user_id,
+            trackChanges: false,
           })
           .reply(500)
       })
@@ -1603,6 +1631,7 @@ describe('DocumentUpdaterHandler', function () {
             lines: ctx.lines,
             source: ctx.source,
             user_id: ctx.user_id,
+            trackChanges: false,
           })
           .reply(200)
       })
@@ -1614,6 +1643,31 @@ describe('DocumentUpdaterHandler', function () {
           ctx.user_id,
           ctx.lines,
           ctx.source
+        )
+        expect(ctx.docUpdaterMock.isDone()).to.be.true
+      })
+    })
+
+    describe('with track changes enabled', function () {
+      beforeEach(function (ctx) {
+        ctx.docUpdaterMock
+          .post(`/project/${ctx.project_id}/doc/${ctx.doc_id}/append`, {
+            lines: ctx.lines,
+            source: ctx.source,
+            user_id: ctx.user_id,
+            trackChanges: true,
+          })
+          .reply(200)
+      })
+
+      it('should forward the trackChanges flag', async function (ctx) {
+        await ctx.handler.promises.appendToDocument(
+          ctx.project_id,
+          ctx.doc_id,
+          ctx.user_id,
+          ctx.lines,
+          ctx.source,
+          true
         )
         expect(ctx.docUpdaterMock.isDone()).to.be.true
       })
