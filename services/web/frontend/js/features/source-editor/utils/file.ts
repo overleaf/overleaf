@@ -48,6 +48,9 @@ export const filterFolders = filterByType('folder')
 
 const IMAGE_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'pdf', 'eps', 'svg']
 
+// File extensions handled by the markdown visual editor.
+export const MARKDOWN_FILE_EXTENSIONS = ['md', 'markdown']
+
 export const getFileExtension = (filename: string): string | null => {
   const parts = filename.split('.')
   if (parts.length < 2) {
@@ -63,6 +66,11 @@ export const hasImageExtension = (filename: string) => {
 
 export const isSvgFile = (filename: string): boolean => {
   return getFileExtension(filename) === 'svg'
+}
+
+export const isMarkdownFile = (filename: string): boolean => {
+  const extension = getFileExtension(filename)
+  return extension !== null && MARKDOWN_FILE_EXTENSIONS.includes(extension)
 }
 
 export function isImageFile(file: File) {
