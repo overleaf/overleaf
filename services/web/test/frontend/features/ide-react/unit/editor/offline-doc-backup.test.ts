@@ -7,15 +7,18 @@ import {
 } from '@/features/ide-react/editor/offline-doc-backup'
 import { ShareJsOperation } from '@/features/ide-react/editor/types/document'
 import { OTType, ShareJsDoc } from '@/features/ide-react/editor/share-js-doc'
+import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
 
 const DOC_ID = 'doc-123'
+const OTHER_DOC_ID = 'doc-999'
 const PROJECT_ID = 'project-456'
 const USER_ID = 'user-789'
 const KEY = `doc.offline-backup.${USER_ID}.${PROJECT_ID}.${DOC_ID}`
 const FLUSH_DELAY = 2000
+const SYNCED_EVENT = 'ide:offlineChangesSynced'
 
 class FakeShareJsDoc extends EventEmitter {
-  doc_id = DOC_ID
+  doc_id: string
   connection = {
     state: 'ok' as 'ok' | 'disconnected' | 'stopped',
     id: 'client-1',
@@ -27,6 +30,11 @@ class FakeShareJsDoc extends EventEmitter {
   track_changes = false
   otType: OTType = 'sharejs-text-ot'
   _doc = { inflightSubmittedIds: new Set<string>() }
+
+  constructor(docId = DOC_ID) {
+    super()
+    this.doc_id = docId
+  }
 
   getVersion() {
     return this.version
@@ -65,6 +73,8 @@ function readRecord(): OfflineDocBackupRecord | null {
 describe('OfflineDocBackup', function () {
   let clock: sinon.SinonFakeTimers
   let doc: FakeShareJsDoc
+  let eventEmitter: IdeEventEmitter
+  let syncedEvents: { docId: string }[]
 
   const enableFlag = (enabled = true) => {
     window.metaAttributesCache.set('ol-splitTestVariants', {
@@ -72,8 +82,12 @@ describe('OfflineDocBackup', function () {
     })
   }
 
-  const create = () =>
-    new OfflineDocBackup(doc as unknown as ShareJsDoc, PROJECT_ID)
+  const create = (target: FakeShareJsDoc = doc) =>
+    new OfflineDocBackup(
+      target as unknown as ShareJsDoc,
+      PROJECT_ID,
+      eventEmitter
+    )
 
   beforeEach(function () {
     window.metaAttributesCache = new Map()
@@ -81,6 +95,11 @@ describe('OfflineDocBackup', function () {
     window.sessionStorage.clear()
     clock = sinon.useFakeTimers()
     doc = new FakeShareJsDoc()
+    eventEmitter = new IdeEventEmitter()
+    syncedEvents = []
+    eventEmitter.on(SYNCED_EVENT, event => {
+      syncedEvents.push(event.detail[0])
+    })
     enableFlag()
   })
 
@@ -89,8 +108,20 @@ describe('OfflineDocBackup', function () {
     window.sessionStorage.clear()
   })
 
-  const goOffline = () => {
-    doc.connection.state = 'disconnected'
+  const goOffline = (target: FakeShareJsDoc = doc) => {
+    target.connection.state = 'disconnected'
+  }
+
+  // Drives one offline outage on the given doc: buffer an edit, let the
+  // throttled write land, then have the server acknowledge it.
+  const editOfflineThenSave = (target: FakeShareJsDoc) => {
+    goOffline(target)
+    target.pendingOp = [{ i: 'x', p: 0 }]
+    target.trigger('change')
+    clock.tick(FLUSH_DELAY)
+    target.connection.state = 'ok'
+    target.pendingOp = null
+    target.trigger('saved')
   }
 
   it('does nothing when the split test is disabled', function () {
@@ -253,6 +284,46 @@ describe('OfflineDocBackup', function () {
     const record = readRecord()
     expect(record?.version).to.equal(6)
     expect(record?.snapshot).to.equal('server text updated')
+  })
+
+  it('emits offlineChangesSynced when the server acknowledges offline edits', function () {
+    create()
+    editOfflineThenSave(doc)
+
+    expect(syncedEvents).to.deep.equal([{ docId: DOC_ID }])
+  })
+
+  it('does not emit offlineChangesSynced when saved with no stored record', function () {
+    create()
+    doc.trigger('saved')
+
+    expect(syncedEvents).to.be.empty
+  })
+
+  it('emits offlineChangesSynced for each doc that syncs after one outage', function () {
+    const otherDoc = new FakeShareJsDoc(OTHER_DOC_ID)
+    create()
+    create(otherDoc)
+
+    goOffline()
+    goOffline(otherDoc)
+    doc.pendingOp = [{ i: 'x', p: 0 }]
+    otherDoc.pendingOp = [{ i: 'y', p: 0 }]
+    doc.trigger('change')
+    otherDoc.trigger('change')
+    clock.tick(FLUSH_DELAY)
+
+    doc.connection.state = 'ok'
+    otherDoc.connection.state = 'ok'
+    doc.pendingOp = null
+    otherDoc.pendingOp = null
+    doc.trigger('saved')
+    otherDoc.trigger('saved')
+
+    expect(syncedEvents).to.deep.equal([
+      { docId: DOC_ID },
+      { docId: OTHER_DOC_ID },
+    ])
   })
 
   it('disconnect() removes listeners but preserves the stored record', function () {

@@ -3,6 +3,7 @@ import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import getMeta from '@/utils/meta'
 import { ShareJsDoc } from './share-js-doc'
 import { ShareJsOperation } from './types/document'
+import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
 
 const EVENT_NAMESPACE = 'offlineBackup'
 const OFFLINE_BACKUP_INTERVAL_MS = 2000
@@ -46,6 +47,26 @@ export class OfflineDocBackup {
     )
   }
 
+  // Whether a stored record is eligible to be replayed onto the live doc. The
+  // unable-to-sync modal is only correct for docs we actually tried to recover,
+  // so read-side callers must agree with the recovery path on eligibility.
+  static readRecoverable(
+    projectId: string,
+    docId: string
+  ): OfflineDocBackupRecord | null {
+    if (!isSplitTestEnabled('intermittent-connection-improvements')) {
+      return null
+    }
+    const record = OfflineDocBackup.read(projectId, docId)
+    // TODO(35594): tracked-change edits need their track-changes state (user id
+    // + seeds) wired up during recovery to replay as tracked; skip them for now
+    // rather than silently recovering them as untracked edits.
+    if (!record || record.trackChanges) {
+      return null
+    }
+    return record
+  }
+
   static remove(projectId: string, docId: string): void {
     customSessionStorage.removeItem(OfflineDocBackup.buildKey(projectId, docId))
   }
@@ -59,7 +80,8 @@ export class OfflineDocBackup {
 
   constructor(
     private readonly doc: ShareJsDoc,
-    private readonly projectId: string
+    private readonly projectId: string,
+    private readonly ideEventEmitter: IdeEventEmitter
   ) {
     this.enabled = isSplitTestEnabled('intermittent-connection-improvements')
     this.key = OfflineDocBackup.buildKey(projectId, doc.doc_id)
@@ -106,9 +128,22 @@ export class OfflineDocBackup {
     return this.doc.getSnapshot()
   }
 
+  // A stored record means this doc carried edits made while offline, so the
+  // server acknowledging them here is the point at which the sync succeeded.
+  // This covers both reconnecting with the doc still open and recovering the
+  // backup after a reload.
   private onSaved() {
+    const hadOfflineEdits =
+      OfflineDocBackup.read(this.projectId, this.doc.doc_id) !== null
     this.refreshBaseline()
     this.clear()
+
+    if (!hadOfflineEdits) {
+      return
+    }
+    this.ideEventEmitter.emit('ide:offlineChangesSynced', {
+      docId: this.doc.doc_id,
+    })
   }
 
   private onDocChange() {

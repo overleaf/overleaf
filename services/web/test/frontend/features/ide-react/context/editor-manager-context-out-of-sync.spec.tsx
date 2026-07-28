@@ -1,0 +1,311 @@
+import { FC, useEffect } from 'react'
+import EventEmitter from '@/utils/EventEmitter'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
+import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
+import { OfflineDocBackup } from '@/features/ide-react/editor/offline-doc-backup'
+import { GlobalToasts } from '@/features/ide-react/components/global-toasts'
+import {
+  EditorProviders,
+  makeEditorOpenDocProvider,
+  PROJECT_ID,
+  USER_ID,
+} from '../../../helpers/editor-providers'
+
+const CURRENT_DOC_ID = 'current-doc'
+const NEW_DOC_ID = 'new-doc'
+
+class FakeDocumentContainer extends EventEmitter {
+  doc_id = CURRENT_DOC_ID
+  docName = 'main.tex'
+  doc = { clearInflightAndPendingOps: cy.stub() }
+
+  getSnapshot() {
+    return 'server snapshot'
+  }
+  hasBufferedOps() {
+    return false
+  }
+  leaveAndCleanUp() {}
+  leaveAndCleanUpPromise() {
+    return Promise.resolve()
+  }
+}
+
+const OpenNewDocOnMount: FC = () => {
+  const editorManager = useEditorManagerContext()
+  useEffect(() => {
+    // Triggers openNewDocument → attaches the error handler onto the
+    // current fake DocumentContainer synchronously, before awaiting leave.
+    editorManager.openDoc({ _id: NEW_DOC_ID } as any).catch(() => {})
+  }, [editorManager])
+  return null
+}
+
+const CaptureEventEmitter: FC<{
+  onReady: (emitter: IdeEventEmitter) => void
+}> = ({ onReady }) => {
+  const { eventEmitter } = useIdeReactContext()
+  useEffect(() => {
+    onReady(eventEmitter)
+  }, [eventEmitter, onReady])
+  return null
+}
+
+function plantBackup(docId: string, { trackChanges = false } = {}) {
+  const key = OfflineDocBackup.buildKey(PROJECT_ID, docId)
+  window.sessionStorage.setItem(
+    key,
+    JSON.stringify({
+      docId,
+      projectId: PROJECT_ID,
+      version: 1,
+      snapshot: 'backup snapshot',
+      inflightOp: null,
+      pendingOp: null,
+      trackChanges,
+      updatedAt: Date.now(),
+      inflightSubmittedIds: [],
+    })
+  )
+  return key
+}
+
+function setSplitTest(enabled: boolean) {
+  window.metaAttributesCache.set('ol-splitTestVariants', {
+    'intermittent-connection-improvements': enabled ? 'enabled' : 'default',
+  })
+}
+
+describe('EditorManagerProvider docError sync modals', function () {
+  let currentDoc: FakeDocumentContainer
+
+  beforeEach(function () {
+    window.sessionStorage.clear()
+    currentDoc = new FakeDocumentContainer()
+    cy.then(() => {
+      window.metaAttributesCache.set('ol-user_id', USER_ID)
+    })
+  })
+
+  afterEach(function () {
+    window.sessionStorage.clear()
+  })
+
+  const mount = () => {
+    cy.mount(
+      <EditorProviders
+        projectId={PROJECT_ID}
+        providers={{
+          EditorOpenDocProvider: makeEditorOpenDocProvider({
+            currentDocumentId: CURRENT_DOC_ID as any,
+            openDocName: currentDoc.docName,
+            currentDocument: currentDoc as any,
+          }),
+        }}
+      >
+        <OpenNewDocOnMount />
+      </EditorProviders>
+    )
+  }
+
+  it('shows UnableToSyncModal when the split test is on and a backup exists', function () {
+    let key: string
+    cy.then(() => {
+      setSplitTest(true)
+      key = plantBackup(CURRENT_DOC_ID)
+    })
+
+    mount()
+
+    cy.then(() => {
+      currentDoc.trigger(
+        'error',
+        new Error('forced'),
+        {},
+        'offline edits content'
+      )
+    })
+
+    cy.findByRole('dialog').within(() => {
+      cy.findByText('Your offline edits couldn’t be synced').should('exist')
+      cy.findByRole('button', { name: 'Download local version' }).should(
+        'exist'
+      )
+    })
+
+    cy.then(() => {
+      expect(window.sessionStorage.getItem(key!)).to.equal(null)
+    })
+  })
+
+  it('passes editorContent and docName through to the download button', function () {
+    cy.then(() => {
+      setSplitTest(true)
+      plantBackup(CURRENT_DOC_ID)
+    })
+
+    const captured: { blob: Blob | null; filename: string | null } = {
+      blob: null,
+      filename: null,
+    }
+
+    cy.window().then(win => {
+      cy.stub(win.URL, 'createObjectURL').callsFake((blob: Blob) => {
+        captured.blob = blob
+        return 'blob:mock'
+      })
+      cy.stub(win.URL, 'revokeObjectURL')
+      cy.stub(win.HTMLAnchorElement.prototype, 'click').callsFake(function (
+        this: HTMLAnchorElement
+      ) {
+        captured.filename = this.download
+      })
+    })
+
+    mount()
+
+    cy.then(() => {
+      currentDoc.trigger(
+        'error',
+        new Error('forced'),
+        {},
+        'the exact offline content'
+      )
+    })
+
+    cy.findByRole('button', { name: 'Download local version' }).click()
+
+    cy.then(() => {
+      expect(captured.filename).to.equal(currentDoc.docName)
+      return captured.blob!.text()
+    }).should('equal', 'the exact offline content')
+  })
+
+  it('falls back to OutOfSyncModal when no backup exists', function () {
+    cy.then(() => {
+      setSplitTest(true)
+    })
+    // no backup planted
+
+    mount()
+
+    cy.then(() => {
+      currentDoc.trigger('error', new Error('forced'), {}, 'content')
+    })
+
+    cy.findByRole('dialog').should('exist')
+    cy.findByText('Your offline edits couldn’t be synced').should('not.exist')
+  })
+
+  it('falls back to OutOfSyncModal when the backup holds tracked changes', function () {
+    let key: string
+    cy.then(() => {
+      setSplitTest(true)
+      key = plantBackup(CURRENT_DOC_ID, { trackChanges: true })
+    })
+
+    mount()
+
+    cy.then(() => {
+      currentDoc.trigger('error', new Error('forced'), {}, 'content')
+    })
+
+    cy.findByRole('dialog').should('exist')
+    cy.findByText('Your offline edits couldn’t be synced').should('not.exist')
+
+    // Tracked-change backups are not recovered, so they are left alone.
+    cy.then(() => {
+      expect(window.sessionStorage.getItem(key!)).to.not.equal(null)
+    })
+  })
+
+  it('shows UnableToSyncModal on the ide:unableToSyncOfflineChanges recovery event', function () {
+    let capturedEmitter: IdeEventEmitter | null = null
+
+    cy.mount(
+      <EditorProviders
+        projectId={PROJECT_ID}
+        providers={{
+          EditorOpenDocProvider: makeEditorOpenDocProvider({
+            currentDocumentId: CURRENT_DOC_ID as any,
+            openDocName: currentDoc.docName,
+            currentDocument: currentDoc as any,
+          }),
+        }}
+      >
+        <CaptureEventEmitter
+          onReady={emitter => {
+            capturedEmitter = emitter
+          }}
+        />
+      </EditorProviders>
+    )
+
+    cy.then(() => {
+      capturedEmitter!.emit('ide:unableToSyncOfflineChanges', {
+        docId: CURRENT_DOC_ID,
+        editorContent: 'recovered content',
+        docName: 'recovered.tex',
+      })
+    })
+
+    cy.findByRole('dialog').within(() => {
+      cy.findByText('Your offline edits couldn’t be synced').should('exist')
+    })
+  })
+
+  it('shows the success toast on the ide:offlineChangesSynced event', function () {
+    let capturedEmitter: IdeEventEmitter | null = null
+
+    cy.mount(
+      <EditorProviders
+        projectId={PROJECT_ID}
+        providers={{
+          EditorOpenDocProvider: makeEditorOpenDocProvider({
+            currentDocumentId: CURRENT_DOC_ID as any,
+            openDocName: currentDoc.docName,
+            currentDocument: currentDoc as any,
+          }),
+        }}
+      >
+        <CaptureEventEmitter
+          onReady={emitter => {
+            capturedEmitter = emitter
+          }}
+        />
+        <GlobalToasts />
+      </EditorProviders>
+    )
+
+    cy.then(() => {
+      capturedEmitter!.emit('ide:offlineChangesSynced', {
+        docId: CURRENT_DOC_ID,
+      })
+    })
+
+    cy.findByText('You’re back online.').should('exist')
+  })
+
+  it('falls back to OutOfSyncModal when the split test is off even if a backup exists', function () {
+    let key: string
+    cy.then(() => {
+      setSplitTest(false)
+      key = plantBackup(CURRENT_DOC_ID)
+    })
+
+    mount()
+
+    cy.then(() => {
+      currentDoc.trigger('error', new Error('forced'), {}, 'content')
+    })
+
+    cy.findByRole('dialog').should('exist')
+    cy.findByText('Your offline edits couldn’t be synced').should('not.exist')
+
+    // The disabled branch does not touch the backup.
+    cy.then(() => {
+      expect(window.sessionStorage.getItem(key!)).to.not.equal(null)
+    })
+  })
+})

@@ -3245,6 +3245,7 @@
   "youre_about_to_enable_single_sign_on_sso_only": "You’re about to enable single sign-on (SSO). Before you do this, you should ensure you’re confident the SSO configuration is correct.",
   "youre_adding_x_licenses_to_your_plan_giving_you_a_total_of_y_licenses": "You’re adding <0>__adding__</0> licenses to your plan giving you a total of <1>__total__</1> licenses.",
   "youre_already_setup_for_sso": "You’re already set up for SSO",
+  "youre_back_online": "You’re back online.",
   "youre_creating_account_for_x_it_will_be_managed_by_y": "You’re creating an account for __email__. It will be managed by __companyName__.",
   "youre_joining": "You’re joining",
   "youre_joining_x_as_y": "You’re joining __projectName__ as __email__",

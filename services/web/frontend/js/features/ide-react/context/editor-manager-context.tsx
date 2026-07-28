@@ -25,6 +25,8 @@ import {
   findFileRefEntityById,
 } from '@/features/ide-react/util/find-doc-entity-by-id'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
+import { IdeEvents } from '@/features/ide-react/create-ide-event-emitter'
+import { OfflineDocBackup } from '@/features/ide-react/editor/offline-doc-backup'
 import { useTranslation } from 'react-i18next'
 import customLocalStorage from '@/infrastructure/local-storage'
 import useEventListener from '@/shared/hooks/use-event-listener'
@@ -35,7 +37,7 @@ import { useDebugDiffTracker } from '../hooks/use-debug-diff-tracker'
 import { convertFileRefToBinaryFile } from '@/features/ide-react/util/file-view'
 import { useEditorOpenDocContext } from '@/features/ide-react/context/editor-open-doc-context'
 import { useEditorPropertiesContext } from '@/features/ide-react/context/editor-properties-context'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { showConnectionRestoredToast } from '@/features/ide-react/components/connection-restored-toast'
 
 export interface GotoOffsetOptions {
   gotoOffset: number
@@ -86,8 +88,12 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
     useIdeReactContext()
   const { socket, closeConnection, connectionState } = useConnectionContext()
   const { view, setView, setOpenFile } = useLayoutContext()
-  const { showGenericMessageModal, genericModalVisible, showOutOfSyncModal } =
-    useModalsContext()
+  const {
+    showGenericMessageModal,
+    genericModalVisible,
+    showOutOfSyncModal,
+    showUnableToSyncModal,
+  } = useModalsContext()
   const { id: userId } = useUserContext()
   const {
     showVisual,
@@ -118,9 +124,6 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
   const { createDebugDiff, debugTimers } = useDebugDiffTracker(
     projectId,
     currentDocument
-  )
-  const improvedFlakyConnections = useFeatureFlag(
-    'intermittent-connection-improvements'
   )
 
   const [globalEditorWatchdogManager] = useState(
@@ -576,8 +579,21 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
         setErrorState(true)
         // Ensure that the editor is locked
         setOutOfSync(true)
-        // Display the "out of sync" modal
-        if (!improvedFlakyConnections) {
+        // A failure while there are recoverable offline edits is a failed sync,
+        // so report it through the same event as the recovery path and let the
+        // listener show the modal. Otherwise fall back to the out of sync modal.
+        const hasOfflineBackup = !!OfflineDocBackup.readRecoverable(
+          projectId,
+          document.doc_id
+        )
+        if (hasOfflineBackup) {
+          eventEmitter.emit('ide:unableToSyncOfflineChanges', {
+            docId: document.doc_id,
+            editorContent: editorContent || '',
+            docName: document.docName,
+          })
+          OfflineDocBackup.remove(projectId, document.doc_id)
+        } else {
           showOutOfSyncModal(editorContent || '')
         }
 
@@ -607,8 +623,34 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
     showOutOfSyncModal,
     setOutOfSync,
     t,
-    improvedFlakyConnections,
+    projectId,
   ])
+
+  useEffect(() => {
+    const handleUnableToSync = ({
+      detail: [{ editorContent, docName }],
+    }: CustomEvent<IdeEvents['ide:unableToSyncOfflineChanges']>) => {
+      showUnableToSyncModal(editorContent, docName)
+    }
+
+    eventEmitter.on('ide:unableToSyncOfflineChanges', handleUnableToSync)
+
+    return () => {
+      eventEmitter.off('ide:unableToSyncOfflineChanges', handleUnableToSync)
+    }
+  }, [eventEmitter, showUnableToSyncModal])
+
+  useEffect(() => {
+    const handleOfflineChangesSynced = () => {
+      showConnectionRestoredToast()
+    }
+
+    eventEmitter.on('ide:offlineChangesSynced', handleOfflineChangesSynced)
+
+    return () => {
+      eventEmitter.off('ide:offlineChangesSynced', handleOfflineChangesSynced)
+    }
+  }, [eventEmitter])
 
   useEventListener(
     'editor:insert-symbol',

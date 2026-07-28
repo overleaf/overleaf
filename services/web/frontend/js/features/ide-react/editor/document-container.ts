@@ -33,7 +33,6 @@ import {
   OfflineDocBackup,
   OfflineDocBackupRecord,
 } from '@/features/ide-react/editor/offline-doc-backup'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import {
   HistoryOTShareDoc,
   ShareLatexOTShareDoc,
@@ -530,7 +529,10 @@ export class DocumentContainer extends EventEmitter {
         }
       )
     } else {
-      const record = this.getOfflineBackupForRecovery()
+      const record = OfflineDocBackup.readRecoverable(
+        getMeta('ol-project_id'),
+        this.doc_id
+      )
       if (record) {
         this.recoverAtBaseline(record, callback)
       } else {
@@ -580,20 +582,6 @@ export class DocumentContainer extends EventEmitter {
     this.bindToShareJsDocEvents()
   }
 
-  private getOfflineBackupForRecovery(): OfflineDocBackupRecord | null {
-    if (!isSplitTestEnabled('intermittent-connection-improvements')) {
-      return null
-    }
-    const record = OfflineDocBackup.read(getMeta('ol-project_id'), this.doc_id)
-    // TODO(35594): tracked-change edits need their track-changes state (user id
-    // + seeds) wired up during recovery to replay as tracked; skip them for now
-    // rather than silently recovering them as untracked edits.
-    if (!record || record.trackChanges) {
-      return null
-    }
-    return record
-  }
-
   // Recover a doc from its offline backup: rebuild it at the backed-up baseline
   // with the buffered edits restored, then re-join from that version so the
   // server streams the ops that landed while we were away. catchUp transforms
@@ -605,9 +593,14 @@ export class DocumentContainer extends EventEmitter {
     callback?: JoinCallback
   ) {
     const loadWithoutRecovery = (error: unknown) => {
-      // TODO(35594): surface the "changes can't be restored" modal.
       debugConsole.error('[recovery] failed, loading without recovery', error)
-      OfflineDocBackup.remove(getMeta('ol-project_id'), record.docId)
+      const editorContent = this.doc?.getSnapshot() || record.snapshot
+      this.ideEventEmitter.emit('ide:unableToSyncOfflineChanges', {
+        docId: record.docId,
+        editorContent,
+        docName: this.docName,
+      })
+      OfflineDocBackup.remove(record.projectId, record.docId)
       this.doc?.clearInflightAndPendingOps()
       this.doc = undefined
       this.joinFreshDoc(callback)
@@ -753,7 +746,8 @@ export class DocumentContainer extends EventEmitter {
 
     this.offlineBackup = new OfflineDocBackup(
       this.doc,
-      getMeta('ol-project_id')
+      getMeta('ol-project_id'),
+      this.ideEventEmitter
     )
 
     this.doc.on('error', (error: Error, meta: ErrorMetadata) =>
