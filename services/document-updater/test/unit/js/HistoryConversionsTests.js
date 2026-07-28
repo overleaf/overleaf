@@ -67,6 +67,112 @@ describe('HistoryConversions', function () {
       ])
     })
   })
+
+  describe('toHistoryOT', function () {
+    it('handles empty ranges', function () {
+      expect(HistoryConversions.toHistoryOT(['one two'], {}, [])).to.deep.equal(
+        {
+          content: 'one two',
+        }
+      )
+    })
+
+    it('converts tracked changes and comments', function () {
+      const metadata = makeMetadata()
+      const ranges = {
+        changes: [
+          { id: 'change0', op: { p: 4, d: 'two ' }, metadata },
+          { id: 'change1', op: { p: 4, i: 'three' }, metadata },
+        ],
+        comments: [
+          { id: 'comment0', op: { p: 4, c: 'three', t: 'comment0' } },
+          { id: 'comment1', op: { p: 0, c: '', t: 'comment1' } },
+        ],
+      }
+      const raw = HistoryConversions.toHistoryOT(['one three'], ranges, [
+        'comment0',
+      ])
+      expect(raw).to.deep.equal({
+        content: 'one two three',
+        comments: [
+          {
+            id: 'comment1', // detached comment, sorted first by position
+            ranges: [],
+          },
+          {
+            id: 'comment0',
+            ranges: [{ pos: 8, length: 5 }],
+            resolved: true,
+          },
+        ],
+        trackedChanges: [
+          {
+            range: { pos: 4, length: 4 },
+            tracking: { type: 'delete', userId: 'user-id', ts: metadata.ts },
+          },
+          {
+            range: { pos: 8, length: 5 },
+            tracking: { type: 'insert', userId: 'user-id', ts: metadata.ts },
+          },
+        ],
+      })
+    })
+  })
+
+  describe('fromHistoryOT', function () {
+    it('handles a doc without ranges', function () {
+      expect(
+        HistoryConversions.fromHistoryOT({ content: 'one two' })
+      ).to.deep.equal({
+        lines: ['one two'],
+        ranges: {},
+      })
+    })
+
+    it('converts tracked changes and comments', function () {
+      const ts = new Date().toISOString()
+      const raw = {
+        content: 'one two three',
+        trackedChanges: [
+          {
+            range: { pos: 4, length: 4 },
+            tracking: { type: 'delete', userId: 'user-id', ts },
+          },
+          {
+            range: { pos: 8, length: 5 },
+            tracking: { type: 'insert', userId: 'user-id', ts },
+          },
+        ],
+        comments: [
+          { id: 'comment0', ranges: [{ pos: 8, length: 5 }], resolved: true },
+          { id: 'comment1', ranges: [] },
+        ],
+      }
+      const { lines, ranges } = HistoryConversions.fromHistoryOT(raw)
+      expect(lines).to.deep.equal(['one three'])
+
+      for (const change of ranges.changes) {
+        expect(change.id).to.be.a('string').and.to.have.length.above(0)
+      }
+      expect(
+        ranges.changes.map(({ op, metadata }) => ({ op, metadata }))
+      ).to.deep.equal([
+        { op: { p: 4, d: 'two ' }, metadata: { user_id: 'user-id', ts } },
+        { op: { p: 4, i: 'three' }, metadata: { user_id: 'user-id', ts } },
+      ])
+
+      expect(ranges.comments).to.deep.equal([
+        {
+          id: 'comment0',
+          op: { p: 4, c: 'three', t: 'comment0', resolved: true },
+        },
+        {
+          id: 'comment1',
+          op: { p: 0, c: '', t: 'comment1', resolved: false },
+        },
+      ])
+    })
+  })
 })
 
 function makeComment(id, pos, length) {

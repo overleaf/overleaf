@@ -8,6 +8,7 @@ const Metrics = require('./Metrics')
 const HistoryManager = require('./HistoryManager')
 const Errors = require('./Errors')
 const RangesManager = require('./RangesManager')
+const HistoryConversions = require('./HistoryConversions')
 const { extractOriginOrSource } = require('./Utils')
 const { getTotalSizeOfLines } = require('./Limits')
 const Settings = require('@overleaf/settings')
@@ -307,9 +308,7 @@ const DocumentManager = {
     logger.debug({ projectId, docId, version }, 'flushing doc')
     Metrics.inc('flush-doc-if-loaded', 1, { status: 'modified' })
     if (!Array.isArray(lines)) {
-      const file = StringFileData.fromRaw(lines)
-      // TODO(24596): tc support for history-ot
-      lines = file.getLines()
+      ;({ lines, ranges } = HistoryConversions.fromHistoryOT(lines))
     }
     const result = await PersistenceManager.promises.setDoc(
       projectId,
