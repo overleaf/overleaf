@@ -204,14 +204,6 @@ function NavigationDropdown({ activePage }: { activePage: ActivePage }) {
             </li>
             <OLDropdownDivider />
             <li role="none">
-              <Item
-                filter="trashed"
-                text={t('trash')}
-                leadingIcon={<Trash size={20} />}
-                activePage={activePage}
-              />
-            </li>
-            <li role="none">
               <OLDropdownItem
                 active={activePage === 'library'}
                 href="/library"
@@ -219,6 +211,14 @@ function NavigationDropdown({ activePage }: { activePage: ActivePage }) {
               >
                 {t('library')}
               </OLDropdownItem>
+            </li>
+            <li role="none">
+              <Item
+                filter="trashed"
+                text={t('trash')}
+                leadingIcon={<Trash size={20} />}
+                activePage={activePage}
+              />
             </li>
           </>
         )}
