@@ -763,7 +763,7 @@ describe('Ranges', function () {
               op: {
                 c: 'a',
                 p: 5,
-                tid: (this.tid = DocUpdaterClient.randomId()),
+                t: (this.tid = DocUpdaterClient.randomId()),
               },
               metadata: {
                 user_id: this.user_id,
@@ -809,7 +809,7 @@ describe('Ranges', function () {
       expect(docSnapshots[0].ranges.comments[0].op).to.deep.equal({
         c: 'a',
         p: 1,
-        tid: this.tid,
+        t: new ObjectId(this.tid),
       })
     })
   })
