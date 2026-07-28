@@ -970,6 +970,54 @@ describe('DocumentManager', function () {
         ).to.be.rejectedWith(Errors.NotFoundError)
       })
     })
+
+    describe('when the doc uses history-ot', function () {
+      beforeEach(function () {
+        this.lines = {
+          content: 'the quick brown fox',
+          comments: [
+            {
+              id: 'mock-comment-id-1',
+              ranges: [{ pos: 4, length: 5 }],
+              resolved: true,
+            },
+          ],
+        }
+        this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+          lines: this.lines,
+          version: this.version,
+          ranges: {},
+          type: 'history-ot',
+        })
+      })
+
+      describe('when comment exists', function () {
+        it('should return the comment in doc-updater format', async function () {
+          await expect(
+            this.DocumentManager.promises.getComment(
+              this.project_id,
+              this.doc_id,
+              'mock-comment-id-1'
+            )
+          ).to.eventually.deep.equal({
+            id: 'mock-comment-id-1',
+            op: { p: 4, c: 'quick', t: 'mock-comment-id-1', resolved: true },
+          })
+        })
+      })
+
+      describe('when comment doesnt exists', function () {
+        it('should throw a NotFoundError', async function () {
+          await expect(
+            this.DocumentManager.promises.getComment(
+              this.project_id,
+              this.doc_id,
+              'mock-comment-id-x'
+            )
+          ).to.be.rejectedWith(Errors.NotFoundError)
+        })
+      })
+    })
   })
 
   describe('deleteComment', function () {
@@ -1054,6 +1102,51 @@ describe('DocumentManager', function () {
       })
     })
 
+    describe('when the doc uses history-ot', function () {
+      beforeEach(async function () {
+        this.lines = {
+          content: 'the quick brown fox',
+          comments: [{ id: this.comment_id, ranges: [{ pos: 4, length: 5 }] }],
+        }
+        this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+          lines: this.lines,
+          version: this.version,
+          ranges: {},
+          pathname: this.pathname,
+          historyRangesSupport: true,
+          type: 'history-ot',
+        })
+        await this.DocumentManager.promises.deleteComment(
+          this.project_id,
+          this.doc_id,
+          this.comment_id,
+          this.user_id
+        )
+      })
+
+      it('should apply a deleteComment operation', function () {
+        this.HistoryOTUpdateManager.applyUpdate.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          {
+            doc: this.doc_id,
+            op: [{ deleteComment: this.comment_id }],
+            v: this.version,
+            meta: { user_id: this.user_id },
+          }
+        )
+      })
+
+      it('should not update the document in redis directly', function () {
+        this.RangesManager.deleteComment.called.should.equal(false)
+        this.RedisManager.promises.updateDocument.called.should.equal(false)
+        this.RedisManager.promises.updateCommentState.called.should.equal(false)
+        this.ProjectHistoryRedisManager.promises.queueOps.called.should.equal(
+          false
+        )
+      })
+    })
+
     describe('when the doc is not found', function () {
       beforeEach(async function () {
         this.DocumentManager.promises.getDoc = sinon
@@ -1070,6 +1163,124 @@ describe('DocumentManager', function () {
 
       it('should not save anything', function () {
         this.RedisManager.promises.updateDocument.called.should.equal(false)
+      })
+    })
+  })
+
+  describe('updateCommentState', function () {
+    beforeEach(function () {
+      this.comment_id = 'mock-comment-id'
+      this.version = 34
+    })
+
+    describe('with sharejs-text-ot and history ranges support', function () {
+      beforeEach(async function () {
+        this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          historyRangesSupport: true,
+          type: 'sharejs-text-ot',
+        })
+        await this.DocumentManager.promises.updateCommentState(
+          this.project_id,
+          this.doc_id,
+          this.comment_id,
+          this.user_id,
+          true
+        )
+      })
+
+      it('should update the comment state in redis', function () {
+        this.RedisManager.promises.updateCommentState.should.have.been.calledWith(
+          this.doc_id,
+          this.comment_id,
+          true
+        )
+      })
+
+      it('should queue the comment state operation', function () {
+        this.ProjectHistoryRedisManager.promises.queueOps.should.have.been.calledWith(
+          this.project_id,
+          JSON.stringify({
+            pathname: this.pathname,
+            commentId: this.comment_id,
+            resolved: true,
+            meta: {
+              ts: new Date(),
+              user_id: this.user_id,
+            },
+          })
+        )
+      })
+    })
+
+    describe('when the doc uses history-ot', function () {
+      beforeEach(async function () {
+        this.lines = {
+          content: 'the quick brown fox',
+          comments: [{ id: this.comment_id, ranges: [{ pos: 4, length: 5 }] }],
+        }
+        this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+          lines: this.lines,
+          version: this.version,
+          ranges: {},
+          pathname: this.pathname,
+          historyRangesSupport: true,
+          type: 'history-ot',
+        })
+        await this.DocumentManager.promises.updateCommentState(
+          this.project_id,
+          this.doc_id,
+          this.comment_id,
+          this.user_id,
+          true
+        )
+      })
+
+      it('should apply a commentState operation', function () {
+        this.HistoryOTUpdateManager.applyUpdate.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
+          {
+            doc: this.doc_id,
+            op: [{ resolved: true, commentId: this.comment_id }],
+            v: this.version,
+            meta: { user_id: this.user_id },
+          }
+        )
+      })
+
+      it('should not update the comment state in redis directly', function () {
+        this.RedisManager.promises.updateCommentState.called.should.equal(false)
+        this.ProjectHistoryRedisManager.promises.queueOps.called.should.equal(
+          false
+        )
+      })
+    })
+
+    describe('when the doc is not found', function () {
+      beforeEach(async function () {
+        this.DocumentManager.promises.getDoc = sinon
+          .stub()
+          .resolves({ lines: null, version: null, ranges: null })
+        await expect(
+          this.DocumentManager.promises.updateCommentState(
+            this.project_id,
+            this.doc_id,
+            this.comment_id,
+            this.user_id,
+            true
+          )
+        ).to.be.rejectedWith(Errors.NotFoundError)
+      })
+
+      it('should not update anything', function () {
+        this.RedisManager.promises.updateCommentState.called.should.equal(false)
+        this.ProjectHistoryRedisManager.promises.queueOps.called.should.equal(
+          false
+        )
       })
     })
   })

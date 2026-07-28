@@ -214,10 +214,30 @@ module.exports = DocUpdaterClient = {
     )
   },
 
-  async removeComment(projectId, docId, comment) {
+  async getComment(projectId, docId, commentId) {
+    return await fetchJson(
+      `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/comment/${commentId}`
+    )
+  },
+
+  async resolveComment(projectId, docId, commentId, userId) {
     await fetchNothing(
-      `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/comment/${comment}`,
-      { method: 'DELETE' }
+      `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/comment/${commentId}/resolve`,
+      { method: 'POST', json: { user_id: userId } }
+    )
+  },
+
+  async reopenComment(projectId, docId, commentId, userId) {
+    await fetchNothing(
+      `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/comment/${commentId}/reopen`,
+      { method: 'POST', json: { user_id: userId } }
+    )
+  },
+
+  async removeComment(projectId, docId, commentId, userId) {
+    await fetchNothing(
+      `http://127.0.0.1:3003/project/${projectId}/doc/${docId}/comment/${commentId}`,
+      { method: 'DELETE', json: { user_id: userId } }
     )
   },
 

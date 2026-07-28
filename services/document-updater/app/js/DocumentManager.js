@@ -13,7 +13,11 @@ const { extractOriginOrSource } = require('./Utils')
 const { getTotalSizeOfLines } = require('./Limits')
 const Settings = require('@overleaf/settings')
 const RangesTracker = require('@overleaf/ranges-tracker')
-const { StringFileData } = require('overleaf-editor-core')
+const {
+  StringFileData,
+  SetCommentStateOperation,
+  DeleteCommentOperation,
+} = require('overleaf-editor-core')
 const {
   diffAsTextOperation,
 } = require('overleaf-editor-core/lib/diff_as_text_operation')
@@ -464,14 +468,26 @@ const DocumentManager = {
   },
 
   async updateCommentState(projectId, docId, commentId, userId, resolved) {
-    const { lines, version, pathname, historyRangesSupport } =
+    const { lines, version, pathname, historyRangesSupport, type } =
       await DocumentManager.getDoc(projectId, docId)
 
     if (lines == null || version == null) {
       throw new Errors.NotFoundError(`document not found: ${docId}`)
     }
 
-    if (historyRangesSupport) {
+    if (type === 'history-ot') {
+      // Circular dependencies. Import at runtime.
+      const HistoryOTUpdateManager = require('./HistoryOTUpdateManager')
+
+      const op = new SetCommentStateOperation(commentId, resolved)
+      const update = {
+        doc: docId,
+        op: [op.toJSON()],
+        v: version,
+        meta: { user_id: userId },
+      }
+      await HistoryOTUpdateManager.applyUpdate(projectId, docId, update)
+    } else if (historyRangesSupport) {
       await RedisManager.promises.updateCommentState(docId, commentId, resolved)
 
       await ProjectHistoryRedisManager.promises.queueOps(
@@ -490,8 +506,11 @@ const DocumentManager = {
   },
 
   async getComment(projectId, docId, commentId) {
-    // TODO(24596): tc support for history-ot
-    const { ranges } = await DocumentManager.getDoc(projectId, docId)
+    let { lines, ranges, type } = await DocumentManager.getDoc(projectId, docId)
+
+    if (type === 'history-ot') {
+      ;({ ranges } = HistoryConversions.fromHistoryOT(lines))
+    }
 
     const comment = ranges?.comments?.find(comment => comment.id === commentId)
 
@@ -506,38 +525,51 @@ const DocumentManager = {
   },
 
   async deleteComment(projectId, docId, commentId, userId) {
-    const { lines, version, ranges, pathname, historyRangesSupport } =
+    const { lines, version, ranges, pathname, historyRangesSupport, type } =
       await DocumentManager.getDoc(projectId, docId)
     if (lines == null || version == null) {
       throw new Errors.NotFoundError(`document not found: ${docId}`)
     }
 
-    // TODO(24596): tc support for history-ot
-    const newRanges = RangesManager.deleteComment(commentId, ranges)
+    if (type === 'history-ot') {
+      // Circular dependencies. Import at runtime.
+      const HistoryOTUpdateManager = require('./HistoryOTUpdateManager')
 
-    await RedisManager.promises.updateDocument(
-      projectId,
-      docId,
-      lines,
-      version,
-      [],
-      newRanges,
-      {}
-    )
+      const op = new DeleteCommentOperation(commentId)
+      const update = {
+        doc: docId,
+        op: [op.toJSON()],
+        v: version,
+        meta: { user_id: userId },
+      }
+      await HistoryOTUpdateManager.applyUpdate(projectId, docId, update)
+    } else {
+      const newRanges = RangesManager.deleteComment(commentId, ranges)
 
-    if (historyRangesSupport) {
-      await RedisManager.promises.updateCommentState(docId, commentId, false)
-      await ProjectHistoryRedisManager.promises.queueOps(
+      await RedisManager.promises.updateDocument(
         projectId,
-        JSON.stringify({
-          pathname,
-          deleteComment: commentId,
-          meta: {
-            ts: new Date(),
-            user_id: userId,
-          },
-        })
+        docId,
+        lines,
+        version,
+        [],
+        newRanges,
+        {}
       )
+
+      if (historyRangesSupport) {
+        await RedisManager.promises.updateCommentState(docId, commentId, false)
+        await ProjectHistoryRedisManager.promises.queueOps(
+          projectId,
+          JSON.stringify({
+            pathname,
+            deleteComment: commentId,
+            meta: {
+              ts: new Date(),
+              user_id: userId,
+            },
+          })
+        )
+      }
     }
   },
 
