@@ -97,6 +97,9 @@ export default function ManagedGroupSubscriptions() {
   const combinedUserManagement = useFeatureFlag('combined-user-management')
 
   const isSharingUpdatesEnabled = useFeatureFlag('sharing-updates')
+  const isSharingPermissionsEnabled = useFeatureFlag(
+    'sharing-updates-sharing-permissions'
+  )
 
   if (!managedGroupSubscriptions) {
     return null
@@ -161,6 +164,7 @@ export default function ManagedGroupSubscriptions() {
               {isAdmin && (
                 <>
                   {isSharingUpdatesEnabled &&
+                    isSharingPermissionsEnabled &&
                     subscription.planLevelName === 'Pro' && (
                       <RowLink
                         href={`/manage/groups/${subscription._id}/sharing-permissions`}

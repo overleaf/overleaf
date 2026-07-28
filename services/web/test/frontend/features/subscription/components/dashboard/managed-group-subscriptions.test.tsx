@@ -245,13 +245,36 @@ describe('<ManagedGroupSubscriptions />', function () {
         { name: 'ol-usersEmail', value: 'you@example.com' },
         {
           name: 'ol-splitTestVariants',
-          value: { 'sharing-updates': 'enabled' },
+          value: {
+            'sharing-updates': 'enabled',
+            'sharing-updates-sharing-permissions': 'enabled',
+          },
         },
       ],
     })
 
     await screen.findAllByText(/sharing permissions/i)
     await screen.findAllByText(/manage how group members share projects/i)
+  })
+
+  it('does not render the Sharing Permissions settings row when the "sharing-updates-sharing-permissions" feature flag is disabled', function () {
+    renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+      metaTags: [
+        {
+          name: 'ol-managedGroupSubscriptions',
+          value: managedGroupSubscriptions,
+        },
+        { name: 'ol-usersEmail', value: 'you@example.com' },
+        {
+          name: 'ol-splitTestVariants',
+          value: { 'sharing-updates': 'enabled' },
+        },
+      ],
+    })
+
+    expect(screen.queryByText(/sharing permissions/i)).to.be.null
+    expect(screen.queryByText(/manage how group members share projects/i)).to.be
+      .null
   })
 
   it('renders Managed Group / Group SSO settings row when both features are turned on', async function () {
