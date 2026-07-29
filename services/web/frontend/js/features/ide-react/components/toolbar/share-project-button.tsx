@@ -7,12 +7,14 @@ import { useTranslation } from 'react-i18next'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { useProjectContext } from '@/shared/context/project-context'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 
 export default function ShareProjectButton() {
   const { t } = useTranslation()
   const { sendEventOnce } = useEditorAnalytics()
   const { isProjectOwner } = useEditorContext()
   const { project } = useProjectContext()
+  const isDisabledDueToNetworkStall = useIsNetworkStalled()
 
   const [showShareModal, setShowShareModal] = useState(false)
 
@@ -53,6 +55,7 @@ export default function ShareProjectButton() {
           variant="primary"
           leadingIcon={<MaterialIcon type="person_add" />}
           onClick={handleOpenShareModal}
+          disabled={isDisabledDueToNetworkStall}
         >
           {t('share')}
           {accessRequestCount > 0 && (

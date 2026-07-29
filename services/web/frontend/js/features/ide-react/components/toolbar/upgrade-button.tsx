@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import OLButton from '@/shared/components/ol/ol-button'
+import classNames from 'classnames'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 
 export default function UpgradeButton({
   className = '',
@@ -12,6 +14,7 @@ export default function UpgradeButton({
   source?: string
 }) {
   const { t } = useTranslation()
+  const isDisabledDueToNetworkStall = useIsNetworkStalled()
 
   function handleClick() {
     eventTracking.send('subscription-funnel', source, 'upgrade')
@@ -23,11 +26,18 @@ export default function UpgradeButton({
       <OLButton
         variant="premium"
         size="sm"
-        href={`/user/subscription/choose-your-plan?itm_referrer=${referrer}&paywall-type=${source}`}
+        href={
+          isDisabledDueToNetworkStall
+            ? undefined
+            : `/user/subscription/choose-your-plan?itm_referrer=${referrer}&paywall-type=${source}`
+        }
         target="_blank"
         rel="noreferrer"
         onClick={handleClick}
-        className={className}
+        disabled={isDisabledDueToNetworkStall}
+        className={classNames(className, {
+          disabled: isDisabledDueToNetworkStall,
+        })}
       >
         {t('upgrade')}
       </OLButton>

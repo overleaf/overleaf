@@ -195,6 +195,11 @@
     &:hover {
       background: var(--btn-premium-hover-background);
     }
+
+    &:disabled,
+    &.disabled {
+      background: var(--bs-btn-disabled-bg);
+    }
   }
 
   &.btn-premium-secondary {
