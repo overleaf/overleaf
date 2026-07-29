@@ -1,13 +1,21 @@
 package uk.ac.ic.wlgitbridge.bridge;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -98,6 +106,39 @@ public class BridgeTest {
     File rootDirectory = tempFolder.newFolder("repostore");
     when(repoStore.getRootDirectory()).thenReturn(rootDirectory);
     assertFalse(bridge.healthCheck());
+  }
+
+  @Test
+  public void healthCheckLeavesOnlyTheFixedProbeFile() throws IOException {
+    File rootDirectory = tempFolder.newFolder("repostore");
+    File wlgbDirectory = new File(rootDirectory, ".wlgb");
+    wlgbDirectory.mkdir();
+    when(repoStore.getRootDirectory()).thenReturn(rootDirectory);
+    assertTrue(bridge.healthCheck());
+    assertTrue(bridge.healthCheck());
+    String[] probeFiles = wlgbDirectory.list();
+    assertNotNull(probeFiles);
+    assertEquals(1, probeFiles.length);
+    assertEquals(".health_check", probeFiles[0]);
+  }
+
+  @Test
+  public void concurrentHealthChecksAllPass() throws Exception {
+    File rootDirectory = tempFolder.newFolder("repostore");
+    new File(rootDirectory, ".wlgb").mkdir();
+    when(repoStore.getRootDirectory()).thenReturn(rootDirectory);
+    ExecutorService executor = Executors.newFixedThreadPool(8);
+    try {
+      List<Future<Boolean>> results = new ArrayList<>();
+      for (int i = 0; i < 200; i++) {
+        results.add(executor.submit(bridge::healthCheck));
+      }
+      for (Future<Boolean> result : results) {
+        assertTrue(result.get(30, TimeUnit.SECONDS));
+      }
+    } finally {
+      executor.shutdownNow();
+    }
   }
 
   @Test

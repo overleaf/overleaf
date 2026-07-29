@@ -244,7 +244,9 @@ public class Bridge {
     gcJob.start();
   }
 
-  public boolean healthCheck() {
+  // synchronized so concurrent health checks (e.g. liveness and readiness
+  // probes) don't race on the shared probe file and observe partial writes
+  public synchronized boolean healthCheck() {
     try {
       dbStore.getNumProjects();
       // Check the repo store volume, not the container root filesystem, so a
