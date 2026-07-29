@@ -121,7 +121,7 @@
     "cssnano": "7.1.4",
     "mini-css-extract-plugin": "2.7.6",
     "nodemon": "3.0.1",
-    "postcss": "8.5.8",
+    "postcss": "8.5.20",
     "postcss-reporter": "7.0.5",
     "zod": "4.1.11",
     "zod-validation-error": "4.0.1",
