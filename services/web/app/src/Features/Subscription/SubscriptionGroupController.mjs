@@ -86,10 +86,13 @@ async function _removeUserFromGroup(
 ) {
   const subscriptionId = subscription._id
 
-  const groupSSOActive = (
-    await Modules.promises.hooks.fire('hasGroupSSOEnabled', subscription)
-  )?.[0]
-  if (groupSSOActive) {
+  const userToRemove = await UserGetter.promises.getUser(userToRemoveId, {
+    enrollment: 1,
+  })
+  const isLinkedToGroupSSO = userToRemove?.enrollment?.sso?.some(
+    ssoLink => String(ssoLink.groupId) === String(subscriptionId)
+  )
+  if (isLinkedToGroupSSO) {
     await Modules.promises.hooks.fire(
       'unlinkUserFromGroupSSO',
       userToRemoveId,

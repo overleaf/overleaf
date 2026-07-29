@@ -110,6 +110,10 @@ describe('SubscriptionGroupController', function () {
     ctx.UserGetter = {
       promises: {
         getUserEmail: sinon.stub().resolves(ctx.user.email),
+        getUser: sinon.stub().resolves({
+          _id: ctx.user._id,
+          enrollment: { sso: [{ groupId: ctx.subscriptionId }] },
+        }),
       },
     }
 
@@ -275,20 +279,18 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should call the group SSO hooks with group SSO enabled', async function (ctx) {
+    it('should unlink the user from group SSO when they are linked, even if SSO is disabled', async function (ctx) {
       await new Promise(resolve => {
         const userIdToRemove = '31231'
         ctx.req.params = { user_id: userIdToRemove }
         ctx.req.entity = ctx.subscription
-        ctx.Modules.promises.hooks.fire
-          .withArgs('hasGroupSSOEnabled', ctx.subscription)
-          .resolves([true])
+        ctx.UserGetter.promises.getUser.resolves({
+          _id: userIdToRemove,
+          enrollment: { sso: [{ groupId: ctx.subscriptionId }] },
+        })
 
         const res = {
           sendStatus: () => {
-            ctx.Modules.promises.hooks.fire
-              .calledWith('hasGroupSSOEnabled', ctx.subscription)
-              .should.equal(true)
             ctx.Modules.promises.hooks.fire
               .calledWith(
                 'unlinkUserFromGroupSSO',
@@ -296,7 +298,6 @@ describe('SubscriptionGroupController', function () {
                 ctx.subscriptionId
               )
               .should.equal(true)
-            sinon.assert.calledTwice(ctx.Modules.promises.hooks.fire)
             resolve()
           },
         }
@@ -304,21 +305,21 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should call the group SSO hooks with group SSO disabled', async function (ctx) {
+    it('should not unlink the user when they have no group SSO link', async function (ctx) {
       await new Promise(resolve => {
         const userIdToRemove = '31231'
         ctx.req.params = { user_id: userIdToRemove }
         ctx.req.entity = ctx.subscription
-        ctx.Modules.promises.hooks.fire
-          .withArgs('hasGroupSSOEnabled', ctx.subscription)
-          .resolves([false])
+        ctx.UserGetter.promises.getUser.resolves({
+          _id: userIdToRemove,
+          enrollment: { sso: [] },
+        })
 
         const res = {
           sendStatus: () => {
             ctx.Modules.promises.hooks.fire
-              .calledWith('hasGroupSSOEnabled', ctx.subscription)
-              .should.equal(true)
-            sinon.assert.calledOnce(ctx.Modules.promises.hooks.fire)
+              .calledWith('unlinkUserFromGroupSSO')
+              .should.equal(false)
             resolve()
           },
         }
@@ -379,21 +380,18 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should call the group SSO hooks with group SSO enabled', async function (ctx) {
+    it('should unlink the user from group SSO when they are linked, even if SSO is disabled', async function (ctx) {
       await new Promise(resolve => {
         ctx.req.query = { subscriptionId: ctx.subscriptionId }
         const memberUserIdToremove = '123456789'
         ctx.req.session.user._id = memberUserIdToremove
-
-        ctx.Modules.promises.hooks.fire
-          .withArgs('hasGroupSSOEnabled', ctx.subscription)
-          .resolves([true])
+        ctx.UserGetter.promises.getUser.resolves({
+          _id: memberUserIdToremove,
+          enrollment: { sso: [{ groupId: ctx.subscriptionId }] },
+        })
 
         const res = {
           sendStatus: () => {
-            ctx.Modules.promises.hooks.fire
-              .calledWith('hasGroupSSOEnabled', ctx.subscription)
-              .should.equal(true)
             ctx.Modules.promises.hooks.fire
               .calledWith(
                 'unlinkUserFromGroupSSO',
@@ -401,7 +399,6 @@ describe('SubscriptionGroupController', function () {
                 ctx.subscriptionId
               )
               .should.equal(true)
-            sinon.assert.calledTwice(ctx.Modules.promises.hooks.fire)
             resolve()
           },
         }
@@ -409,22 +406,21 @@ describe('SubscriptionGroupController', function () {
       })
     })
 
-    it('should call the group SSO hooks with group SSO disabled', async function (ctx) {
+    it('should not unlink the user when they have no group SSO link', async function (ctx) {
       await new Promise(resolve => {
-        const userIdToRemove = '31231'
-        ctx.req.session.user._id = userIdToRemove
-        ctx.req.params = { user_id: userIdToRemove }
-        ctx.req.entity = ctx.subscription
-        ctx.Modules.promises.hooks.fire
-          .withArgs('hasGroupSSOEnabled', ctx.subscription)
-          .resolves([false])
+        ctx.req.query = { subscriptionId: ctx.subscriptionId }
+        const memberUserIdToremove = '123456789'
+        ctx.req.session.user._id = memberUserIdToremove
+        ctx.UserGetter.promises.getUser.resolves({
+          _id: memberUserIdToremove,
+          enrollment: { sso: [] },
+        })
 
         const res = {
           sendStatus: () => {
             ctx.Modules.promises.hooks.fire
-              .calledWith('hasGroupSSOEnabled', ctx.subscription)
-              .should.equal(true)
-            sinon.assert.calledOnce(ctx.Modules.promises.hooks.fire)
+              .calledWith('unlinkUserFromGroupSSO')
+              .should.equal(false)
             resolve()
           },
         }
