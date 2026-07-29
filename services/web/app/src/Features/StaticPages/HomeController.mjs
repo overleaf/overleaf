@@ -16,11 +16,7 @@ const homepageExists = fs.existsSync(
 
 async function index(req, res) {
   if (SessionManager.isUserLoggedIn(req.session)) {
-    if (req.query.scribtex_path != null) {
-      res.redirect(`/project?scribtex_path=${req.query.scribtex_path}`)
-    } else {
-      res.redirect('/project')
-    }
+    res.redirect('/project')
   } else {
     await home(req, res)
   }
