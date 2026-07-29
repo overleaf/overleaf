@@ -64,6 +64,7 @@ export const SubscriptionSchema = new Schema(
       groupSSO: { type: Boolean, default: true },
       domainCapture: { type: Boolean, default: false },
       aiToggling: { type: Boolean, default: true },
+      sharedWorkspace: { type: Boolean, default: true },
     },
     userFeaturesDisabled: Boolean,
     addOns: Schema.Types.Mixed,

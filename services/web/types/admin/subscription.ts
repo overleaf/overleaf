@@ -29,5 +29,6 @@ export type Subscription = {
   features: {
     domainCapture?: boolean
     aiToggling?: boolean
+    sharedWorkspace?: boolean
   }
 }
