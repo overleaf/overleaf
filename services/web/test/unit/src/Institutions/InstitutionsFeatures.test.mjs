@@ -72,14 +72,12 @@ describe('InstitutionsFeatures', function () {
       features: {
         institution: 'all',
         aiUsageQuota: 'unlimited',
-        aiErrorAssistant: true,
       },
     }
     ctx.testFeaturesWithNoAddon = {
       features: {
         institution: 'all',
         aiUsageQuota: 'basic',
-        aiErrorAssistant: false,
       },
     }
   })

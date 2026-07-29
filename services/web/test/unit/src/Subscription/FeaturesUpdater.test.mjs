@@ -388,7 +388,6 @@ describe('FeaturesUpdater', function () {
         expect(features).to.deep.equal({
           default: 'features',
           individual: 'features',
-          aiErrorAssistant: true,
           aiUsageQuota: 'unlimited',
         })
       })
@@ -407,7 +406,6 @@ describe('FeaturesUpdater', function () {
         )
         expect(features).to.deep.equal({
           default: 'features',
-          aiErrorAssistant: true,
           aiUsageQuota: 'unlimited',
         })
       })

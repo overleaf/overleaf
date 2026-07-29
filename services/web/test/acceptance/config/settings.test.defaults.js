@@ -116,7 +116,6 @@ module.exports = {
       trackChanges: false,
       symbolPalette: false,
       aiUsageQuota: 'basic',
-      aiErrorAssistant: false,
     },
     personal: {
       collaborators: 1,
@@ -134,7 +133,6 @@ module.exports = {
       trackChanges: false,
       symbolPalette: false,
       aiUsageQuota: 'basic',
-      aiErrorAssistant: false,
     },
     collaborator: {
       collaborators: 10,
@@ -152,7 +150,6 @@ module.exports = {
       trackChanges: true,
       symbolPalette: true,
       aiUsageQuota: 'basic',
-      aiErrorAssistant: false,
     },
     professional: {
       collaborators: -1,
@@ -170,7 +167,6 @@ module.exports = {
       trackChanges: true,
       symbolPalette: true,
       aiUsageQuota: 'basic',
-      aiErrorAssistant: false,
     },
   }),
 

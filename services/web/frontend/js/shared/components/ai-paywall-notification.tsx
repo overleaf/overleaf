@@ -2,15 +2,12 @@ import { useEffect } from 'react'
 import Notification from '@/shared/components/notification'
 import PaywallUpgradeButton from '@/shared/components/paywall-upgrade-button'
 import { useEditorContext } from '@/shared/context/editor-context'
-import { useUserFeaturesContext } from '@/shared/context/user-features-context'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import { useTranslation } from 'react-i18next'
 import { formatSecondsToHoursAndMinutes } from '@/shared/utils/time'
 import getMeta from '@/utils/meta'
 import { AiFeatureLocations } from './types/ai'
 import { paywallTypeByLocation } from '../utils/ai-features'
-
-const hasUnlimitedAi = getMeta('ol-hasUnlimitedAi')
 
 function AiPaywallNotification({
   isActionBelowContent = false,
@@ -26,7 +23,6 @@ function AiPaywallNotification({
     premiumSuggestionResetDate,
   } = useEditorContext()
 
-  const features = useUserFeaturesContext()
   const user = getMeta('ol-user')
 
   const isCommons = user.hasInstitutionLicence
@@ -36,8 +32,7 @@ function AiPaywallNotification({
     return null
   }
 
-  // todo: quota clean-up: remove once we are transitioned off aiErrorAssistant naming and replace with just hasUnlimitedAi, also remove null FF check
-  const hasAddOn = hasUnlimitedAi || Boolean(features?.aiErrorAssistant)
+  const hasAddOn = getMeta('ol-hasUnlimitedAi')
 
   // error assist only needs usage quota
   const canUseErrorAssist = hasSuggestionsLeft

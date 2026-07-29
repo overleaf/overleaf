@@ -87,8 +87,8 @@ export type EditorProvidersProps = {
   socket?: Socket
   isRestrictedTokenMember?: boolean
   scope?: Record<string, any>
-  features?: Record<string, boolean>
-  projectFeatures?: Record<string, boolean>
+  features?: Record<string, boolean | string>
+  projectFeatures?: Record<string, boolean | string>
   permissionsLevel?: PermissionsLevel
   children?: React.ReactNode
   rootFolder?: Folder[]

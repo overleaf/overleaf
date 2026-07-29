@@ -365,10 +365,7 @@ function hasPlanAiEnabled(plan) {
     return false
   }
 
-  return (
-    plan.features.aiUsageQuota === Settings.aiFeatures.unlimitedQuota ||
-    plan.features.aiErrorAssistant === true
-  )
+  return plan.features.aiUsageQuota === Settings.aiFeatures.unlimitedQuota
 }
 
 /**

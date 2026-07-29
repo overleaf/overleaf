@@ -20,6 +20,7 @@ import CustomerIoPlanHelpers from './CustomerIoPlanHelpers.mjs'
 import { GroupPolicy } from '../../models/GroupPolicy.mjs'
 import { AI_ADD_ON_CODE } from './AiHelper.mjs'
 import { fetchNothing } from '@overleaf/fetch-utils'
+import SplitTestUserGetter from '../SplitTests/SplitTestUserGetter.mjs'
 
 /**
  * Enqueue a job for refreshing features for the given user
@@ -46,8 +47,7 @@ async function refreshFeatures(userId, reason) {
     _id: 1,
     features: 1,
     email: 1,
-    analyticsId: 1,
-    labsProgram: 1,
+    ...SplitTestUserGetter.getProjection(),
   })
   const oldFeatures = _.clone(user.features)
   const features = await computeFeatures(userId)
@@ -104,6 +104,7 @@ async function refreshFeatures(userId, reason) {
           json: {
             userOverleafId: userId,
             // todo: quota clean-up: collab with writefull to rename this, and check if still needed
+            // AiAssist is legacy naming for our old one tier AI subscription, which is now our "Unlimited" quota tier
             hasAiAssist: hasPremiumAiFeatures,
             aiUsageQuota: newFeatures.aiUsageQuota,
           },
@@ -271,7 +272,7 @@ async function _getIndividualFeatures(userId) {
     featureSets.push(_subscriptionToFeatures(subscription))
   }
 
-  // todo: quota clean-up - remove
+  // todo: quota clean-up - remove once we finish transitioning all users to other plans
   // if they are in the quota split test, we no longer look at the add-on, since every plan will now have the same quota
   // standalone plan will receive correct state since their plan will provide the correct quota
   featureSets.push(_aiAddOnFeatures(subscription))
@@ -323,8 +324,6 @@ function _subscriptionToFeatures(subscription) {
 function _aiAddOnFeatures(subscription) {
   if (subscription?.addOns?.some(addOn => addOn.addOnCode === AI_ADD_ON_CODE)) {
     return {
-      // allow both naming systems to work
-      aiErrorAssistant: true,
       aiUsageQuota: Settings.aiFeatures.unlimitedQuota,
     }
   } else {

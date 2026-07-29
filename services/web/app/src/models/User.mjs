@@ -153,10 +153,6 @@ export const UserSchema = new Schema(
         type: Boolean,
         default: Settings.defaultFeatures.symbolPalette,
       },
-      aiErrorAssistant: {
-        type: Boolean,
-        default: false,
-      },
       aiUsageQuota: { type: String, default: 'basic' },
     },
     featuresOverrides: [
@@ -170,8 +166,6 @@ export const UserSchema = new Schema(
         expiresAt: { type: Date },
         note: { type: String },
         features: {
-          // todo: quota clean-up: remove aiErrorAssistant
-          aiErrorAssistant: { type: Boolean },
           aiUsageQuota: { type: String },
           collaborators: { type: Number },
           versioning: { type: Boolean },

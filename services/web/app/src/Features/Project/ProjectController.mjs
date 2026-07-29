@@ -492,7 +492,6 @@ const _ProjectController = {
       'editor-popup-ux-survey-03-2026',
       'chat-edit-delete',
       'comment-mentions',
-      'ai-workbench-release',
       'compile-timeout-target-plans',
       'writefull-figure-generator',
       'writefull-toolbar-migration',

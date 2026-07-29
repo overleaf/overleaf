@@ -65,9 +65,6 @@ describe('WorkbenchRateLimiter', function () {
         featureFlagEnabledForMongoUser: sinon.stub().resolves(true),
       },
     }
-    ctx.SplitTestHandler.promises.getAssignmentForUser
-      .withArgs(ctx.alphaUserId, 'ai-workbench-release')
-      .resolves({ variant: 'enabled' })
 
     vi.doMock('../../../../app/src/infrastructure/mongodb', () => ({
       ObjectId,

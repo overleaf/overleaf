@@ -9,8 +9,6 @@ import UserAuditLogHandler from '../../Features/User/UserAuditLogHandler.mjs'
 const PERIOD = 24 // hours
 const PERIOD_IN_MILLISECONDS = PERIOD * 60 * 60 * 1000
 
-// todo: quota clean-up: extend this off base RateLimitController and unify behaviour where possible.
-
 export default class TokenUsageRateLimiter {
   /**
    * @param {string} featureName

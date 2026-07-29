@@ -181,7 +181,7 @@ async function projectListPage(req, res, next) {
     userId,
     `email isAdmin emails features alphaProgram betaProgram lastPrimaryEmailCheck lastActive signUpDate ace refProviders${
       isSaas
-        ? ' enrollment writefull completedTutorials aiFeatures aiErrorAssistant labsProgram'
+        ? ' enrollment writefull completedTutorials aiFeatures labsProgram'
         : ''
     }`
   )
@@ -538,8 +538,8 @@ async function projectListPage(req, res, next) {
 
   const aiBlocked =
     Features.hasFeature('saas') && !(await _canUseAIAssist(user))
-  const hasAiAssist =
-    Features.hasFeature('saas') && (await _userHasAIAssist(user))
+  const hasUnlimitedAi =
+    Features.hasFeature('saas') && (await _userHasUnlimitedAiTier(user))
 
   const splitTests = [
     // Split tests that will be made available to the frontend
@@ -591,7 +591,7 @@ async function projectListPage(req, res, next) {
         best_subscription_type: usersBestSubscription.type,
       }),
       ai_blocked: aiBlocked,
-      has_ai_assist: hasAiAssist,
+      has_ai_assist: hasUnlimitedAi,
       ...(subjectArea && { subject_area: subjectArea }),
       ...(role && { role }),
       ...(primaryOccupation && { primary_occupation: primaryOccupation }),
@@ -951,18 +951,19 @@ function _hasActiveFilter(filters) {
 /**
  * @param {any} user
  */
-async function _userHasAIAssist(user) {
+async function _userHasUnlimitedAiTier(user) {
   const hasPremiumAiFeatures =
     user.features?.aiUsageQuota === Settings.aiFeatures.unlimitedQuota
-  // Check if the user has a non free trial version of our AI features
+
+  // Check if the user has highest tier version of our AI features
   if (hasPremiumAiFeatures) {
     return true
   }
 
-  // Check if the user has AI Assist enabled via Writefull
-  const { isPremium: hasAiAssistViaWritefull } =
+  // Check if the user has Unlimited AI quota via Writefull
+  const { isPremium: hasUnlimitedAiViaWritefull } =
     await UserGetter.promises.getWritefullData(user._id)
-  if (hasAiAssistViaWritefull) {
+  if (hasUnlimitedAiViaWritefull) {
     return true
   }
   return false
