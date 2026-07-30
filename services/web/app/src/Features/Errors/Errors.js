@@ -84,6 +84,8 @@ class EmailExistsError extends OErrorV2CompatibleError {
 
 class InvalidError extends BackwardCompatibleError {}
 
+class NotifyGroupAdminError extends OError {}
+
 class NotInV2Error extends BackwardCompatibleError {}
 
 class SLInV2Error extends BackwardCompatibleError {}
@@ -415,6 +417,7 @@ module.exports = {
   UnconfirmedEmailError,
   EmailExistsError,
   InvalidError,
+  NotifyGroupAdminError,
   NotInV2Error,
   OutputFileFetchFailedError,
   SAMLAssertionAudienceMismatch,

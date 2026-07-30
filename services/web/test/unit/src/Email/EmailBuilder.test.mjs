@@ -1140,6 +1140,7 @@ describe('EmailBuilder', function () {
           expect(email.html).to.contain(
             'Domain capture is active for example.com'
           )
+          expect(email.text).to.contain('Hi,')
           expect(email.html).to.contain('/manage/groups/group-123/settings')
           expect(email.text).to.contain('/manage/groups/group-123/settings')
         })
@@ -1164,6 +1165,22 @@ describe('EmailBuilder', function () {
           expect(email.html).to.contain('admin@overleaf.test')
           expect(email.text).to.contain('admin@overleaf.test')
         })
+
+        it('should use firstName in greeting when provided', function (ctx) {
+          const email = ctx.EmailBuilder.buildEmail(
+            'groupDomainCapturedByGroupChanged',
+            {
+              to: 'admin@example.com',
+              groupId: 'group-123',
+              domainCapturedByGroup: true,
+              domain: 'example.com',
+              firstName: 'Ada',
+            }
+          )
+
+          expect(email.text).to.contain('Hi Ada,')
+          expect(email.html).to.contain('Hi Ada,')
+        })
       })
 
       describe('domainVerifiedForGroup', function () {
@@ -1175,6 +1192,7 @@ describe('EmailBuilder', function () {
           })
 
           expect(email.subject).to.equal('Your domain is verified')
+          expect(email.text).to.contain('Hi,')
           expect(email.html).to.contain("We've verified")
           expect(email.html).to.contain('<b>example.com</b>')
           expect(email.html).to.contain(
@@ -1198,6 +1216,18 @@ describe('EmailBuilder', function () {
           expect(email.html).to.contain(
             "You'll receive a confirmation email once the capture is active."
           )
+        })
+
+        it('should use firstName in greeting when provided', function (ctx) {
+          const email = ctx.EmailBuilder.buildEmail('domainVerifiedForGroup', {
+            to: 'admin@example.com',
+            domain: 'example.com',
+            capturedByGroup: true,
+            firstName: 'Ada',
+          })
+
+          expect(email.text).to.contain('Hi Ada,')
+          expect(email.html).to.contain('Hi Ada,')
         })
       })
 
@@ -1243,6 +1273,23 @@ describe('EmailBuilder', function () {
           it('links to the domain settings page', function (ctx) {
             expect(ctx.email.html).to.contain(ctx.opts.domainSettingsUrl)
             expect(ctx.email.text).to.contain(ctx.opts.domainSettingsUrl)
+          })
+
+          it('uses the default greeting when firstName is not provided', function (ctx) {
+            expect(ctx.email.text).to.contain('Hi,')
+          })
+
+          it('uses firstName in the greeting when provided', function (ctx) {
+            const email = ctx.EmailBuilder.buildEmail(
+              'domainReverificationFailed',
+              {
+                ...ctx.opts,
+                firstName: 'Ada',
+              }
+            )
+
+            expect(email.text).to.contain('Hi Ada,')
+            expect(email.html).to.contain('Hi Ada,')
           })
         })
 

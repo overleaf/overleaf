@@ -662,6 +662,10 @@ templates.domainReverificationFailed = ctaTemplate({
     }
     return `${domain} needs re-verifying`
   },
+  greeting(opts, isPlainText) {
+    const greeting = opts.firstName ? `Hi ${opts.firstName},` : 'Hi,'
+    return EmailMessageHelper.cleanHTML(greeting, isPlainText)
+  },
   message(opts) {
     const domain = _.escape(opts.domain)
     if (opts.capturedByGroup) {
@@ -1307,6 +1311,10 @@ templates.groupDomainCapturedByGroupChanged = ctaTemplate({
       ? `Domain capture is active for ${_.escape(opts.domain)}`
       : `Domain capture is inactive for ${_.escape(opts.domain)}`
   },
+  greeting(opts, isPlainText) {
+    const greeting = opts.firstName ? `Hi ${opts.firstName},` : 'Hi,'
+    return EmailMessageHelper.cleanHTML(greeting, isPlainText)
+  },
   message(opts) {
     if (opts.domainCapturedByGroup) {
       return [
@@ -1333,6 +1341,10 @@ templates.domainVerifiedForGroup = NoCTAEmailTemplate({
     } else {
       return 'Your domain is verified — ready to capture?'
     }
+  },
+  greeting(opts, isPlainText) {
+    const greeting = opts.firstName ? `Hi ${opts.firstName},` : 'Hi,'
+    return EmailMessageHelper.cleanHTML(greeting, isPlainText)
   },
   message(opts, isPlainText) {
     const message = [
