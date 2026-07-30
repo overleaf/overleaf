@@ -398,6 +398,7 @@
   "clear_filters": "Clear filters",
   "clear_search": "clear search",
   "clear_search_button": "Clear search",
+  "clear_selection": "Clear selection",
   "clear_sessions": "Clear sessions",
   "clear_sessions_description": "This is a list of other sessions (logins) which are active on your account, not including your current session. Click the \"Clear sessions\" button below to log them out.",
   "clear_sessions_success": "Sessions cleared",
