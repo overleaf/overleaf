@@ -1,7 +1,11 @@
-import { FC, useEffect } from 'react'
+import { FC, PropsWithChildren, useEffect, useState } from 'react'
 import EventEmitter from '@/utils/EventEmitter'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { ConnectionContext } from '@/features/ide-react/context/connection-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
+import { SocketIOMock } from '@/ide/connection/SocketIoShim'
+import type { Socket } from '@/features/ide-react/connection/types/socket'
+import type { SocketDebuggingInfo } from '@/features/ide-react/connection/types/connection-state'
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
 import { OfflineDocBackup } from '@/features/ide-react/editor/offline-doc-backup'
 import { GlobalToasts } from '@/features/ide-react/components/global-toasts'
@@ -71,6 +75,38 @@ function plantBackup(docId: string, { trackChanges = false } = {}) {
   return key
 }
 
+// The default harness reports a healthy connection, which stands in for the
+// post-reconnect sync failure. This one stands in for the fatal op timeout
+// firing while the outage is still ongoing.
+const OfflineConnectionProvider: FC<PropsWithChildren> = ({ children }) => {
+  const [value] = useState(() => ({
+    socket: new SocketIOMock() as any as Socket,
+    connectionState: {
+      readyState: WebSocket.CLOSED,
+      forceDisconnected: false,
+      inactiveDisconnect: false,
+      reconnectAt: null,
+      forcedDisconnectDelay: 0,
+      lastConnectionAttempt: 0,
+      error: '' as const,
+    },
+    isConnected: false,
+    isStillReconnecting: false,
+    secondsUntilReconnect: () => 0,
+    tryReconnectNow: () => {},
+    registerUserActivity: () => {},
+    disconnect: () => {},
+    closeConnection: () => {},
+    getSocketDebuggingInfo: () => ({}) as SocketDebuggingInfo,
+  }))
+
+  return (
+    <ConnectionContext.Provider value={value}>
+      {children}
+    </ConnectionContext.Provider>
+  )
+}
+
 function setSplitTest(enabled: boolean) {
   window.metaAttributesCache.set('ol-splitTestVariants', {
     'intermittent-connection-improvements': enabled ? 'enabled' : 'default',
@@ -92,7 +128,9 @@ describe('EditorManagerProvider docError sync modals', function () {
     window.sessionStorage.clear()
   })
 
-  const mount = () => {
+  const mount = (
+    extraProviders: Record<string, FC<PropsWithChildren>> = {}
+  ) => {
     cy.mount(
       <EditorProviders
         projectId={PROJECT_ID}
@@ -102,6 +140,7 @@ describe('EditorManagerProvider docError sync modals', function () {
             openDocName: currentDoc.docName,
             currentDocument: currentDoc as any,
           }),
+          ...extraProviders,
         }}
       >
         <OpenNewDocOnMount />
@@ -136,6 +175,32 @@ describe('EditorManagerProvider docError sync modals', function () {
 
     cy.then(() => {
       expect(window.sessionStorage.getItem(key!)).to.equal(null)
+    })
+  })
+
+  it('shows nothing and keeps the backup when the failure happens while offline', function () {
+    let key: string
+    cy.then(() => {
+      setSplitTest(true)
+      key = plantBackup(CURRENT_DOC_ID)
+    })
+
+    mount({ ConnectionProvider: OfflineConnectionProvider })
+
+    cy.then(() => {
+      currentDoc.trigger(
+        'error',
+        new Error('forced'),
+        {},
+        'offline edits content'
+      )
+    })
+
+    cy.findByRole('dialog').should('not.exist')
+
+    // The outcome is still undetermined, so recovery on the next load decides.
+    cy.then(() => {
+      expect(window.sessionStorage.getItem(key!)).to.not.equal(null)
     })
   })
 

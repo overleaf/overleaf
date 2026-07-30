@@ -86,7 +86,8 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
   const { t } = useTranslation()
   const { reportError, eventEmitter, projectId, setOutOfSync } =
     useIdeReactContext()
-  const { socket, closeConnection, connectionState } = useConnectionContext()
+  const { socket, closeConnection, connectionState, isConnected } =
+    useConnectionContext()
   const { view, setView, setOpenFile } = useLayoutContext()
   const {
     showGenericMessageModal,
@@ -587,6 +588,13 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
           document.doc_id
         )
         if (hasOfflineBackup) {
+          if (!isConnected) {
+            // Still offline, so nothing has been rejected yet: this is the
+            // fatal op timeout running out while the outage is ongoing. Keep
+            // the backup and let recovery on the next load report the outcome,
+            // rather than declaring a failed sync mid-outage.
+            return
+          }
           eventEmitter.emit('ide:unableToSyncOfflineChanges', {
             docId: document.doc_id,
             editorContent: editorContent || '',
@@ -624,6 +632,7 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
     setOutOfSync,
     t,
     projectId,
+    isConnected,
   ])
 
   useEffect(() => {
