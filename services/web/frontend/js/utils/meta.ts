@@ -120,6 +120,7 @@ export interface Meta {
   'ol-detachRole': 'detached' | 'detacher' | ''
   'ol-dictionariesRoot': 'string'
   'ol-domainCaptureEnabled': boolean | undefined
+  'ol-domainCapturePrereqsMet': boolean | undefined
   'ol-domainCaptureTestURL': string | undefined
   'ol-domainVerificationGracePeriodDays': number
   'ol-domainVerificationUIEnabled': boolean
