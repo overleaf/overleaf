@@ -52,9 +52,16 @@ function parseReferrer(referrer, url) {
 
 const REGISTRATION_UTM_KEYS = UTM_KEYS.filter(k => k !== 'utm_id')
 
+function stripUTMKeys(query) {
+  return Object.fromEntries(
+    Object.entries(query).filter(([key]) => !UTM_KEYS.includes(key))
+  )
+}
+
 export default {
   UTM_KEYS,
   REGISTRATION_UTM_KEYS,
   parseUtm,
   parseReferrer,
+  stripUTMKeys,
 }
