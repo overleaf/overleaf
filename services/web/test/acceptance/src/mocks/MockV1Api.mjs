@@ -69,6 +69,7 @@ class MockV1Api extends AbstractMockApi {
     if (options && options.hostname) {
       this.addInstitutionDomain(id, options.hostname, {
         confirmed: options.confirmed,
+        captured_by_group: options.captured_by_group,
       })
     }
     return id
