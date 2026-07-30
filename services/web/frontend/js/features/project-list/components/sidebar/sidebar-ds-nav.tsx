@@ -15,12 +15,26 @@ import { useProjectListContext } from '@/features/project-list/context/project-l
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import { ActivePage } from '../../util/navigation-state'
 
-function SidebarDsNav({ activePage }: { activePage: ActivePage }) {
+function SidebarDsNav({
+  activePage,
+  trashActive = false,
+}: {
+  activePage: ActivePage
+
+  /**
+   * Whether the trash is active. This is only relevant when the active page is
+   * "library" as which project page is active is determined by the selected filter.
+   */
+  trashActive?: boolean
+}) {
   const { t } = useTranslation()
   const { show: showAddAffiliationWidget } = useAddAffiliation()
   const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
   const { filter, selectedTagId, selectFilter } = useProjectListContext()
-  const isTrashActive = selectedTagId === undefined && filter === 'trashed'
+  const isTrashActive =
+    activePage === 'library'
+      ? trashActive
+      : selectedTagId === undefined && filter === 'trashed'
   const [dsNavLibraryLinkModule] = importOverleafModules('dsNavLibraryLink')
   const DsNavLibraryLink: JSXElementConstructor<{ active?: boolean }> =
     dsNavLibraryLinkModule?.import.default
@@ -69,7 +83,9 @@ function SidebarDsNav({ activePage }: { activePage: ActivePage }) {
           {isLibraryEnabled && (
             <>
               {DsNavLibraryLink && (
-                <DsNavLibraryLink active={activePage === 'library'} />
+                <DsNavLibraryLink
+                  active={activePage === 'library' && !trashActive}
+                />
               )}
               <button
                 type="button"

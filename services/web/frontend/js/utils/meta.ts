@@ -211,6 +211,7 @@ export interface Meta {
   'ol-languages': SpellCheckLanguage[]
   'ol-learnedWords': string[]
   'ol-legacyEditorThemes': { name: string; dark: boolean }[]
+  'ol-libraryView': 'library' | 'trashed'
   'ol-licenseQuantity'?: number
   'ol-loadingText': string
   'ol-localIndividualPlans': LocalIndividualPlans
