@@ -58,6 +58,7 @@ export const SubscriptionSchema = new Schema(
     managedUsersEnabled: { type: Boolean, default: false },
     membersLimit: { type: Number, default: 0 },
     membersLimitNotificationSent: { type: Boolean, default: false },
+    membersLimitReachedNotificationSent: { type: Boolean, default: false },
     customAccount: Boolean,
     features: {
       managedUsers: { type: Boolean, default: true },

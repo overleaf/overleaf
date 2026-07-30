@@ -1192,10 +1192,10 @@ templates.taxIdInvalidNonVat = taxIdInvalidTemplate({
 
 templates.groupMemberLimitWarning = ctaTemplate({
   subject(opts) {
-    return `Action needed: Your Overleaf group is nearly out of licenses`
+    return `Action needed: your Overleaf group is nearly out of licenses`
   },
   title(opts) {
-    return `Action needed: Your Overleaf group is nearly out of licenses`
+    return `Action needed: your Overleaf group is nearly out of licenses`
   },
   greeting(opts) {
     return opts.firstName ? `Hi ${opts.firstName},` : 'Hi there,'
@@ -1209,16 +1209,54 @@ templates.groupMemberLimitWarning = ctaTemplate({
         '<b>Once all licenses are used, new users won’t be able to join.</b>',
       '<b>What you can do now:</b>',
       '<ul>' +
-        '<li>Add more licenses, or</li>' +
+        (opts.canUseFlexibleLicensing
+          ? '<li>Add more licenses, or</li>'
+          : '<li>Contact us to add more licenses, or</li>') +
         '<li>Remove inactive users to free up licenses</li>' +
         '</ul>',
     ]
   },
-  ctaText() {
-    return 'Add licenses'
+  ctaText(opts) {
+    return opts.canUseFlexibleLicensing ? 'Add licenses' : 'Contact us'
   },
-  ctaURL() {
-    return `${settings.siteUrl}/user/subscription/group/add-users`
+  ctaURL(opts) {
+    return opts.canUseFlexibleLicensing
+      ? `${settings.siteUrl}/user/subscription/group/add-users`
+      : `${settings.siteUrl}/contact`
+  },
+})
+
+templates.groupMemberLimitReached = ctaTemplate({
+  subject(opts) {
+    return `Action needed: your Overleaf group is out of licenses`
+  },
+  title(opts) {
+    return `Action needed: your Overleaf group is out of licenses`
+  },
+  greeting(opts) {
+    return opts.firstName ? `Hi ${opts.firstName},` : 'Hi there,'
+  },
+  message(opts) {
+    return [
+      `Your Overleaf group <b>${opts.groupName}</b> has used all ${opts.membersLimit} of its licenses.`,
+      'Because domain capture is enabled, new users from your domain can no longer ' +
+        'join automatically.',
+      '<b>What you can do now:</b>',
+      '<ul>' +
+        (opts.canUseFlexibleLicensing
+          ? '<li>Add more licenses, or</li>'
+          : '<li>Contact us to add more licenses, or</li>') +
+        '<li>Remove inactive users to free up licenses</li>' +
+        '</ul>',
+    ]
+  },
+  ctaText(opts) {
+    return opts.canUseFlexibleLicensing ? 'Add licenses' : 'Contact us'
+  },
+  ctaURL(opts) {
+    return opts.canUseFlexibleLicensing
+      ? `${settings.siteUrl}/user/subscription/group/add-users`
+      : `${settings.siteUrl}/contact`
   },
 })
 

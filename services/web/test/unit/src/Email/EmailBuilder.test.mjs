@@ -995,6 +995,7 @@ describe('EmailBuilder', function () {
             currentMembers: 9,
             membersLimit: 10,
             remainingSeats: 1,
+            canUseFlexibleLicensing: true,
           }
           ctx.email = ctx.EmailBuilder.buildEmail(
             'groupMemberLimitWarning',
@@ -1013,7 +1014,7 @@ describe('EmailBuilder', function () {
             const dom = cheerio.load(ctx.email.html)
             const plainText = dom.text()
             expect(ctx.email.subject).to.equal(
-              'Action needed: Your Overleaf group is nearly out of licenses'
+              'Action needed: your Overleaf group is nearly out of licenses'
             )
             expect(ctx.email.html).to.exist
             expect(ctx.email.html).to.contain(
@@ -1046,6 +1047,77 @@ describe('EmailBuilder', function () {
         describe('plain text email', function () {
           it('should contain the CTA link', function (ctx) {
             expect(ctx.email.text).to.contain(ctx.expectedUrl)
+          })
+        })
+
+        describe('without flexible licensing', function () {
+          it('should point the CTA at support instead of add-users', function (ctx) {
+            ctx.opts.canUseFlexibleLicensing = false
+            ctx.email = ctx.EmailBuilder.buildEmail(
+              'groupMemberLimitWarning',
+              ctx.opts
+            )
+            const dom = cheerio.load(ctx.email.html)
+            const buttonLink = dom('a:contains("Contact us")')
+            expect(buttonLink.attr('href')).to.equal(
+              `${ctx.settings.siteUrl}/contact`
+            )
+            expect(ctx.email.html).to.not.contain(ctx.expectedUrl)
+          })
+        })
+      })
+
+      describe('groupMemberLimitReached', function () {
+        beforeEach(function (ctx) {
+          ctx.opts = {
+            to: 'example@overleaf.com',
+            groupName: 'Example Group',
+            firstName: 'Joe',
+            membersLimit: 10,
+            canUseFlexibleLicensing: true,
+          }
+          ctx.email = ctx.EmailBuilder.buildEmail(
+            'groupMemberLimitReached',
+            ctx.opts
+          )
+          ctx.expectedUrl = `${ctx.settings.siteUrl}/user/subscription/group/add-users`
+        })
+
+        it('should build the email', function (ctx) {
+          expect(ctx.email.html).to.exist
+          expect(ctx.email.text).to.exist
+        })
+
+        it('should describe the at-capacity state and CTA', function (ctx) {
+          const dom = cheerio.load(ctx.email.html)
+          expect(ctx.email.subject).to.equal(
+            'Action needed: your Overleaf group is out of licenses'
+          )
+          expect(ctx.email.html).to.contain(
+            `Your Overleaf group <b>${ctx.opts.groupName}</b> has used all ${ctx.opts.membersLimit} of its licenses.`
+          )
+          expect(ctx.email.html).to.contain(
+            'new users from your domain can no longer'
+          )
+          expect(ctx.email.html).to.contain('What you can do now:')
+          const buttonLink = dom('a:contains("Add licenses")')
+          expect(buttonLink.attr('href')).to.equal(ctx.expectedUrl)
+          expect(ctx.email.text).to.contain(ctx.expectedUrl)
+        })
+
+        describe('without flexible licensing', function () {
+          it('should point the CTA at support instead of add-users', function (ctx) {
+            ctx.opts.canUseFlexibleLicensing = false
+            ctx.email = ctx.EmailBuilder.buildEmail(
+              'groupMemberLimitReached',
+              ctx.opts
+            )
+            const dom = cheerio.load(ctx.email.html)
+            const buttonLink = dom('a:contains("Contact us")')
+            expect(buttonLink.attr('href')).to.equal(
+              `${ctx.settings.siteUrl}/contact`
+            )
+            expect(ctx.email.html).to.not.contain(ctx.expectedUrl)
           })
         })
       })
