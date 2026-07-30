@@ -31,6 +31,7 @@ export type AdminCapability =
   | 'view-session'
   | 'view-split-test'
   | 'view-user-additional-info'
+  | 'view-user-library'
   | 'create-stripe-account'
 
 export type AdminRole =
