@@ -450,57 +450,7 @@ describe('<OLAutocomplete />', function () {
 
   describe('form integration', function () {
     it('works within a form context', function () {
-      const FormWithAutocomplete = ({
-        onSubmit,
-      }: {
-        onSubmit: (formData: object) => void
-      }) => {
-        const changeHandler = cy.stub().as('formChangeHandler')
-
-        function handleSubmit(event: FormEvent<HTMLFormElement>) {
-          event.preventDefault()
-          const formData = new FormData(event.target as HTMLFormElement)
-          onSubmit(Object.fromEntries(formData.entries()))
-        }
-
-        return (
-          <OLForm onSubmit={handleSubmit}>
-            <input
-              type="hidden"
-              name="autocomplete_value"
-              value=""
-              ref={ref => {
-                if (ref) {
-                  // Update hidden input when autocomplete changes
-                  const observer = new MutationObserver(() => {
-                    const autocompleteInput = ref.form?.querySelector(
-                      'input[type="text"]'
-                    ) as HTMLInputElement
-                    if (autocompleteInput) {
-                      ref.value = autocompleteInput.value
-                    }
-                  })
-                  if (ref.form) {
-                    observer.observe(ref.form, {
-                      subtree: true,
-                      attributes: true,
-                    })
-                  }
-                }
-              }}
-            />
-            <OLAutocomplete
-              items={testItems}
-              onChange={changeHandler}
-              placeholder="Search..."
-              label="Select item"
-            />
-            <OLButton type="submit">submit</OLButton>
-          </OLForm>
-        )
-      }
-
-      const submitHandler = cy.stub().as('submitHandler')
+      const changeHandler = cy.stub().as('formChangeHandler')
       cy.mount(
         <div
           style={{
@@ -510,7 +460,15 @@ describe('<OLAutocomplete />', function () {
             height: '100vh',
           }}
         >
-          <FormWithAutocomplete onSubmit={submitHandler} />
+          <OLForm>
+            <OLAutocomplete
+              items={testItems}
+              onChange={changeHandler}
+              placeholder="Search..."
+              label="Select item"
+            />
+            <OLButton type="submit">submit</OLButton>
+          </OLForm>
         </div>
       )
 

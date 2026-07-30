@@ -216,7 +216,9 @@ function OLAutocompleteInternal({
             'dropdown-item-highlighted': highlightedIndex === index,
           })}
         >
-          <span className="text-muted">{createOptionPrefix} </span>
+          <span className="ol-autocomplete-create-prefix">
+            {createOptionPrefix}{' '}
+          </span>
           <strong>'{internalInputValue}'</strong>
         </OLButton>
       </li>
@@ -245,6 +247,7 @@ function OLAutocompleteInternal({
           {...getInputProps({
             ref: inputRef,
           })}
+          type="text"
           placeholder={placeholder}
           disabled={disabled}
         />
