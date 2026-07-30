@@ -263,28 +263,6 @@ describe('EditorManagerProvider docError sync modals', function () {
     cy.findByText('Your offline edits couldn’t be synced').should('not.exist')
   })
 
-  it('falls back to OutOfSyncModal when the backup holds tracked changes', function () {
-    let key: string
-    cy.then(() => {
-      setSplitTest(true)
-      key = plantBackup(CURRENT_DOC_ID, { trackChanges: true })
-    })
-
-    mount()
-
-    cy.then(() => {
-      currentDoc.trigger('error', new Error('forced'), {}, 'content')
-    })
-
-    cy.findByRole('dialog').should('exist')
-    cy.findByText('Your offline edits couldn’t be synced').should('not.exist')
-
-    // Tracked-change backups are not recovered, so they are left alone.
-    cy.then(() => {
-      expect(window.sessionStorage.getItem(key!)).to.not.equal(null)
-    })
-  })
-
   it('shows UnableToSyncModal on the ide:unableToSyncOfflineChanges recovery event', function () {
     let capturedEmitter: IdeEventEmitter | null = null
 

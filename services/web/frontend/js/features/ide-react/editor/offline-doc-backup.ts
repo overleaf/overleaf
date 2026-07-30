@@ -57,14 +57,7 @@ export class OfflineDocBackup {
     if (!isSplitTestEnabled('intermittent-connection-improvements')) {
       return null
     }
-    const record = OfflineDocBackup.read(projectId, docId)
-    // TODO(35594): tracked-change edits need their track-changes state (user id
-    // + seeds) wired up during recovery to replay as tracked; skip them for now
-    // rather than silently recovering them as untracked edits.
-    if (!record || record.trackChanges) {
-      return null
-    }
-    return record
+    return OfflineDocBackup.read(projectId, docId)
   }
 
   static remove(projectId: string, docId: string): void {
@@ -180,6 +173,9 @@ export class OfflineDocBackup {
       snapshot: this.baseline.snapshot,
       inflightOp: this.doc.getInflightOp(),
       pendingOp: this.doc.getPendingOp(),
+      // A toggle can't take effect while we are offline: syncTrackChangesState
+      // defers it until the buffer has drained, so this is still the state every
+      // buffered op was made under.
       trackChanges: this.doc.track_changes,
       updatedAt: Date.now(),
       inflightSubmittedIds: Array.from(this.doc.getInflightSubmittedIds()),

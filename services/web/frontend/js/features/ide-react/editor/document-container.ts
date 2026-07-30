@@ -107,6 +107,19 @@ export class DocumentContainer extends EventEmitter {
   private chaosMonkeyTimer: number | null = null
   public track_changes_as: string | null = null
 
+  // Recovered offline edits replay as if they had reached the server before we
+  // went offline, so their tracking state comes from the backup record rather
+  // than the project's current track-changes setting, which may have changed
+  // while we were away. Pinned until the server has the ops, because a
+  // setTrackChangesUserId call arriving from React in between would otherwise
+  // strip meta.tc off the send and the edits would land untracked.
+  private trackChangesPinnedForRecovery = false
+  private deferredTrackChangesUserId: string | null = null
+
+  // Set when a recovery replays tracked edits, cleared once the refetch below
+  // has been kicked off.
+  private needsRangesRefetchAfterRecovery = false
+
   private joinCallbacks: JoinCallback[] = []
   private leaveCallbacks: LeaveCallback[] = []
 
@@ -238,6 +251,14 @@ export class DocumentContainer extends EventEmitter {
   }
 
   setTrackChangesUserId(userId: string | null) {
+    if (this.trackChangesPinnedForRecovery) {
+      this.deferredTrackChangesUserId = userId
+      // Hold the editor at the pinned state too, so anything typed during the
+      // window is marked up locally the same way it will be stored server-side:
+      // the whole batch carries meta.tc, whatever the toggle now says.
+      this.cm6?.setTrackChangesUserId(this.track_changes_as)
+      return
+    }
     this.track_changes_as = userId
     if (this.doc) {
       this.doc.setTrackChangesUserId(userId)
@@ -245,6 +266,27 @@ export class DocumentContainer extends EventEmitter {
     if (this.cm6) {
       this.cm6.setTrackChangesUserId(userId)
     }
+  }
+
+  private pinTrackChangesForRecovery(record: OfflineDocBackupRecord) {
+    if (!record.trackChanges) {
+      return
+    }
+    this.deferredTrackChangesUserId = this.track_changes_as
+    this.trackChangesPinnedForRecovery = true
+    this.track_changes_as = getMeta('ol-user_id') ?? 'anonymous'
+    this.doc?.setTrackChangesUserId(this.track_changes_as)
+    this.cm6?.setTrackChangesUserId(this.track_changes_as)
+  }
+
+  private releaseTrackChangesPin() {
+    if (!this.trackChangesPinnedForRecovery) {
+      return
+    }
+    this.trackChangesPinnedForRecovery = false
+    const userId = this.deferredTrackChangesUserId
+    this.deferredTrackChangesUserId = null
+    this.setTrackChangesUserId(userId)
   }
 
   getTrackingChanges() {
@@ -594,6 +636,8 @@ export class DocumentContainer extends EventEmitter {
   ) {
     const loadWithoutRecovery = (error: unknown) => {
       debugConsole.error('[recovery] failed, loading without recovery', error)
+      this.releaseTrackChangesPin()
+      this.needsRangesRefetchAfterRecovery = false
       const editorContent = this.doc?.getSnapshot() || record.snapshot
       this.ideEventEmitter.emit('ide:unableToSyncOfflineChanges', {
         docId: record.docId,
@@ -620,6 +664,8 @@ export class DocumentContainer extends EventEmitter {
       this.doc.restoreFromOfflineBackup(record)
       this.ranges = new RangesTracker()
       this.bindToShareJsDocEvents()
+      this.pinTrackChangesForRecovery(record)
+      this.needsRangesRefetchAfterRecovery = record.trackChanges
     } catch (error) {
       loadWithoutRecovery(error)
       return
@@ -733,6 +779,7 @@ export class DocumentContainer extends EventEmitter {
 
     this.detachDoc(this.doc_id, this)
 
+    this.releaseTrackChangesPin()
     this.offlineBackup?.disconnect()
 
     this.unBindFromEditorEvents()
@@ -801,11 +848,17 @@ export class DocumentContainer extends EventEmitter {
     )
 
     this.doc.on('flipped_pending_to_inflight', () => {
+      this.rotateTrackChangesIdSeeds()
       return this.trigger('flipped_pending_to_inflight')
     })
 
     let docSavedTimeout: number | null
     this.doc.on('saved', () => {
+      this.releaseTrackChangesPin()
+      if (this.needsRangesRefetchAfterRecovery) {
+        this.needsRangesRefetchAfterRecovery = false
+        this.refetchRangesAfterRecovery()
+      }
       if (docSavedTimeout) {
         window.clearTimeout(docSavedTimeout)
       }
@@ -816,6 +869,69 @@ export class DocumentContainer extends EventEmitter {
         this.ideEventEmitter.emit('doc:saved', { doc_id: this.doc_id })
       }, 50)
     })
+
+    this.rotateTrackChangesIdSeeds()
+  }
+
+  // Recovered tracked edits mint their change ids client-side, while the server
+  // mints its own for the same edits, and nothing makes the two agree: the ids
+  // depend on the range state each side had when it applied the ops, and ours is
+  // frozen at the baseline while the server's has moved on. A change whose id we
+  // guessed wrong can't be accepted (the server matches on id and finds
+  // nothing), so once it has our ops we take its ranges as authoritative rather
+  // than trusting the guess. Until this lands, recovered edits may show as plain
+  // text; the text itself is correct throughout.
+  private refetchRangesAfterRecovery() {
+    if (!this.doc) {
+      return
+    }
+    const version = this.doc.getVersion()
+    this.socket.emit(
+      'joinDoc',
+      this.doc_id,
+      version,
+      { encodeRanges: true, supportsHistoryOT: true },
+      (
+        error,
+        docLines,
+        serverVersion,
+        updates,
+        ranges,
+        type = 'sharejs-text-ot'
+      ) => {
+        if (error || type !== 'sharejs-text-ot') {
+          return
+        }
+        // The ranges describe the doc at serverVersion, so they can only be
+        // applied to a doc sitting at that version with nothing outstanding.
+        // Otherwise leave the ids we guessed alone: they may be wrong, but they
+        // are at least positioned against the text we have.
+        if (
+          !this.doc ||
+          this.doc.getVersion() !== serverVersion ||
+          this.doc.hasBufferedOps()
+        ) {
+          return
+        }
+        this.decodeRanges(ranges)
+        this.catchUpRanges(ranges?.changes, ranges?.comments)
+      }
+    )
+  }
+
+  // Tracked-change ids are minted client-side from a seed, and the seed travels
+  // with the batch of ops it belongs to, so the inflight and pending batches
+  // need separate seeds. When the pending batch flips to inflight, the seed our
+  // local edits have been minting from becomes the inflight seed and new edits
+  // start minting from a fresh pending seed.
+  private rotateTrackChangesIdSeeds() {
+    if (!this.doc || !this.ranges) {
+      return
+    }
+    const inflight = this.ranges.getIdSeed()
+    const pending = RangesTracker.generateIdSeed()
+    this.ranges.setIdSeed(pending)
+    this.setTrackChangesIdSeeds({ pending, inflight })
   }
 
   private onError(

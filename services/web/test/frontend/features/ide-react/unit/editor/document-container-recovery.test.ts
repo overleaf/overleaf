@@ -132,9 +132,9 @@ describe('DocumentContainer offline recovery', function () {
     expect(container.getSnapshot()).to.equal('hello')
   })
 
-  it('skips recovery for tracked-change records', function () {
+  it('replays tracked offline edits as tracked', function () {
     writeRecord({ trackChanges: true })
-    const { container, socket, sent } = makeContainer((fromVersion, cb) => {
+    const { container, sent } = makeContainer((fromVersion, cb) => {
       cb(
         null,
         ['hello'],
@@ -147,10 +147,55 @@ describe('DocumentContainer offline recovery', function () {
 
     container.join()
 
-    const calls = joinDocCalls(socket)
-    expect(calls).to.have.length(1)
-    expect(isVersioned(calls[0])).to.equal(false)
-    expect(sent).to.have.length(0)
+    expect(sent).to.have.length(1)
+    // meta.tc is the id seed the server mints its own change ids from, and is
+    // only attached when the batch is tracked.
+    expect(sent[0].meta.tc).to.be.a('string')
+    expect(container.ranges!.changes).to.have.length(1)
+  })
+
+  it('adopts the server ranges once the recovered tracked edits are acked', function () {
+    writeRecord({ trackChanges: true })
+    const serverChange = {
+      id: 'server-minted-id',
+      op: { i: '!', p: 5 },
+      metadata: { user_id: USER_ID },
+    }
+    let joins = 0
+    const { container } = makeContainer((fromVersion, cb) => {
+      joins++
+      if (joins === 1) {
+        cb(
+          null,
+          ['hello'],
+          5,
+          [],
+          { changes: [], comments: [] },
+          'sharejs-text-ot'
+        )
+      } else {
+        cb(
+          null,
+          ['hello!'],
+          5,
+          [],
+          { changes: [serverChange], comments: [] },
+          'sharejs-text-ot'
+        )
+      }
+    })
+
+    container.join()
+    const guessedId = container.ranges!.changes[0].id
+    expect(guessedId).to.not.equal(serverChange.id)
+
+    // the server has stored our op under its own change id
+    container.doc!.clearInflightAndPendingOps()
+    container.doc!.trigger('saved')
+
+    expect(container.ranges!.changes.map(change => change.id)).to.deep.equal([
+      serverChange.id,
+    ])
   })
 
   it('falls back to a normal load when the server cannot catch us up', function () {
