@@ -285,6 +285,8 @@ class MockV1Api extends AbstractMockApi {
             affiliation.past_reconfirm_date = lastDayToReconfirm.isBefore()
           }
 
+          affiliation.domainCapturedByGroup = domainData.captured_by_group
+
           return affiliation
         }
       )
