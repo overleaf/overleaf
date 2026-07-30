@@ -142,7 +142,7 @@
   min-height: 36px;
 
   .project-list-title {
-    @include heading-sm;
+    @include heading-md;
 
     color: var(--content-secondary-themed);
     font-weight: bold;

@@ -1,3 +1,4 @@
+import classNames from 'classnames'
 import { useProjectListContext } from '../context/project-list-context'
 import { useTranslation } from 'react-i18next'
 import CurrentPlanWidget from './current-plan-widget/current-plan-widget'
@@ -9,6 +10,7 @@ import NavigationDropdown from './dropdown/navigation-dropdown'
 import SortByDropdown from './dropdown/sort-by-dropdown'
 import ProjectTools from './table/project-tools/project-tools'
 import ProjectListTitle from './title/project-list-title'
+import TrashPageTabs from './trash/trash-page-tabs'
 import LoadMore from './load-more'
 import OLCol from '@/shared/components/ol/ol-col'
 import OLRow from '@/shared/components/ol/ol-row'
@@ -42,6 +44,7 @@ export function ProjectListDsNav() {
   const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
 
   const selectedTag = tags.find(tag => tag._id === selectedTagId)
+  const showTrashHeader = isLibraryEnabled && filter === 'trashed'
   const showNewProjectButton =
     !isLibraryEnabled ||
     (filter !== 'shared' && filter !== 'archived' && filter !== 'trashed')
@@ -84,7 +87,10 @@ export function ProjectListDsNav() {
 
   return (
     <div
-      className={`project-ds-nav-page website-redesign${isLibraryEnabled ? ' library-enabled' : ''}`}
+      className={classNames('project-ds-nav-page', 'website-redesign', {
+        'library-enabled': isLibraryEnabled,
+        'ds-nav-hides-top-navbar': showTrashHeader,
+      })}
     >
       <SystemMessages />
       <DefaultNavbar
@@ -103,25 +109,38 @@ export function ProjectListDsNav() {
               <UserNotifications />
               <main aria-labelledby="main-content">
                 <div className="project-list-header-row">
-                  <ProjectListTitle
-                    filter={filter}
-                    selectedTag={selectedTag}
-                    selectedTagId={selectedTagId}
-                    className="text-truncate d-none d-md-block"
-                  />
+                  {showTrashHeader ? (
+                    <h1
+                      id="main-content"
+                      tabIndex={-1}
+                      className="project-list-title text-truncate d-none d-md-block mb-0"
+                    >
+                      {t('trash')}
+                    </h1>
+                  ) : (
+                    <ProjectListTitle
+                      filter={filter}
+                      selectedTag={selectedTag}
+                      selectedTagId={selectedTagId}
+                      className="text-truncate d-none d-md-block"
+                    />
+                  )}
                   <div className="project-tools">
                     <div className="d-none d-md-block">
                       {selectedProjects.length === 0 ? (
-                        <CurrentPlanWidget />
+                        showTrashHeader ? null : (
+                          <CurrentPlanWidget />
+                        )
                       ) : (
                         <ProjectTools />
                       )}
                     </div>
                     <div className="d-md-none">
-                      <CurrentPlanWidget />
+                      {!showTrashHeader && <CurrentPlanWidget />}
                     </div>
                   </div>
                 </div>
+                {showTrashHeader && <TrashPageTabs activeTab="projects" />}
                 <div className="project-ds-nav-project-list">
                   <OLRow className="d-none d-md-flex align-items-center">
                     <OLCol md={isLibraryEnabled ? 8 : undefined} lg={7}>

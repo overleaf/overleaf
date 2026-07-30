@@ -59,14 +59,32 @@ export function Item({
   )
 }
 
-function NavigationDropdown({ activePage }: { activePage: ActivePage }) {
+function NavigationDropdown({
+  activePage,
+  trashActive = false,
+}: {
+  activePage: ActivePage
+
+  /**
+   * Whether the trash is active. This is only relevant when the active page is
+   * "library" as which project page is active is determined by the selected
+   * filter.
+   */
+  trashActive?: boolean
+}) {
   const { t } = useTranslation()
   const [title, setTitle] = useState(() =>
     activePage === 'library' ? t('library') : t('all_projects')
   )
-  const [view, setView] = useState<'top' | 'tags'>('top')
+  const [view, setView] = useState<'top' | 'tags' | 'trash'>('top')
   const { filter, selectedTagId, tags } = useProjectListContext()
   const isLibraryEnabled = isSplitTestEnabled('overleaf-library')
+  const projectsTrashActive =
+    activePage === 'projects' &&
+    selectedTagId === undefined &&
+    filter === 'trashed'
+  const referencesTrashActive = activePage === 'library' && trashActive
+  const isTrashActive = projectsTrashActive || referencesTrashActive
   const filterTranslations = useRef<Record<Filter, string>>({
     all: t('all_projects'),
     owned: t('your_projects'),
@@ -76,6 +94,11 @@ function NavigationDropdown({ activePage }: { activePage: ActivePage }) {
   })
 
   useEffect(() => {
+    if (isTrashActive) {
+      setTitle(t('trash'))
+      return
+    }
+
     if (activePage === 'library') {
       setTitle(t('library'))
       return
@@ -94,7 +117,7 @@ function NavigationDropdown({ activePage }: { activePage: ActivePage }) {
         setTitle(tag.name ?? '')
       }
     }
-  }, [filter, tags, selectedTagId, t, activePage])
+  }, [filter, tags, selectedTagId, t, activePage, isTrashActive])
 
   const filterItems = (
     <>
@@ -158,7 +181,13 @@ function NavigationDropdown({ activePage }: { activePage: ActivePage }) {
         isLibraryEnabled
           ? show => {
               if (show) {
-                setView(selectedTagId !== undefined ? 'tags' : 'top')
+                if (selectedTagId !== undefined) {
+                  setView('tags')
+                } else if (isTrashActive) {
+                  setView('trash')
+                } else {
+                  setView('top')
+                }
               } else {
                 setView('top')
               }
@@ -205,7 +234,7 @@ function NavigationDropdown({ activePage }: { activePage: ActivePage }) {
             <OLDropdownDivider />
             <li role="none">
               <OLDropdownItem
-                active={activePage === 'library'}
+                active={activePage === 'library' && !trashActive}
                 href="/library"
                 leadingIcon={<BookBookmark size={20} />}
               >
@@ -213,12 +242,18 @@ function NavigationDropdown({ activePage }: { activePage: ActivePage }) {
               </OLDropdownItem>
             </li>
             <li role="none">
-              <Item
-                filter="trashed"
-                text={t('trash')}
+              <OLDropdownItem
+                as="button"
+                tabIndex={-1}
+                trailingIcon="chevron_right"
                 leadingIcon={<Trash size={20} />}
-                activePage={activePage}
-              />
+                onClick={e => {
+                  e.stopPropagation()
+                  setView('trash')
+                }}
+              >
+                {t('trash')}
+              </OLDropdownItem>
             </li>
           </>
         )}
@@ -239,6 +274,44 @@ function NavigationDropdown({ activePage }: { activePage: ActivePage }) {
               </OLDropdownItem>
             </li>
             <TagsList />
+          </>
+        )}
+        {isLibraryEnabled && view === 'trash' && (
+          <>
+            <li role="none">
+              <OLDropdownItem
+                as="button"
+                tabIndex={-1}
+                leadingIcon={<MaterialIcon type="chevron_left" />}
+                aria-label={t('back')}
+                onClick={e => {
+                  e.stopPropagation()
+                  setView('top')
+                }}
+              >
+                {t('trash')}
+              </OLDropdownItem>
+            </li>
+            <li role="none">
+              <OLDropdownItem
+                href="/project/trashed"
+                active={projectsTrashActive}
+                trailingIcon={projectsTrashActive ? 'check' : undefined}
+                leadingIcon={<Folder size={20} />}
+              >
+                {t('projects')}
+              </OLDropdownItem>
+            </li>
+            <li role="none">
+              <OLDropdownItem
+                href="/library/trashed"
+                active={referencesTrashActive}
+                trailingIcon={referencesTrashActive ? 'check' : undefined}
+                leadingIcon={<BookBookmark size={20} />}
+              >
+                {t('references')}
+              </OLDropdownItem>
+            </li>
           </>
         )}
       </OLDropdownMenu>

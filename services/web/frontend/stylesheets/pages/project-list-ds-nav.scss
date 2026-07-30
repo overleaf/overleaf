@@ -147,7 +147,7 @@ body {
     }
   }
 
-  &.library-page {
+  &.ds-nav-hides-top-navbar {
     // The sidebar shows the logo and account/help menus from md upwards, so
     // the top navbar is only needed on mobile.
     .navbar-default {
@@ -162,6 +162,19 @@ body {
       @include media-breakpoint-up(md) {
         border-top-left-radius: 0;
         border-top: none;
+      }
+    }
+
+    .project-list-header-row {
+      @include media-breakpoint-up(md) {
+        margin-top: var(--spacing-08);
+      }
+
+      // On mobile the trash page has no heading or plan widget in this row
+      // (both are desktop-only), so collapse it to avoid an empty gap above
+      // the navigation dropdown.
+      @include media-breakpoint-down(md) {
+        display: none;
       }
     }
   }
@@ -556,6 +569,39 @@ body {
 
     &:hover {
       color: var(--themed-dashboard-popover-link-visited-color);
+    }
+  }
+}
+
+.trash-page-tabs {
+  display: flex;
+  gap: var(--spacing-06);
+  margin-bottom: var(--spacing-06);
+  border-bottom: 1px solid var(--border-divider-themed);
+
+  // On mobile the Projects/References switch lives in the navigation dropdown
+  // submenu instead of these tabs.
+  @include media-breakpoint-down(md) {
+    display: none;
+  }
+
+  .trash-page-tab {
+    padding: var(--spacing-03) var(--spacing-02);
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    color: var(--content-secondary-themed);
+    font-size: var(--font-size-03);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--content-primary-themed);
+      text-decoration: none;
+    }
+
+    &.active {
+      border-bottom-color: var(--green-50);
+      color: var(--content-primary-themed);
+      font-weight: 600;
     }
   }
 }
