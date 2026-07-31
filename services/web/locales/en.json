@@ -2313,6 +2313,7 @@
   "search": "Search",
   "search_all_project_files": "Search all project files",
   "search_bib_files": "Search by author, title, year",
+  "search_bib_files_and_library_by_citekey": "Search .bib files and Library, by citekey.",
   "search_by_author_journal_title_and_more_link_to_zotero_mendeley_readcube": "Search by author, journal, title, and more. Link to Zotero, Mendeley, or ReadCube to search and add references from your libraries directly in your project.",
   "search_by_citation_key_author_journal_title_year_and_date": "Search by citation key, author, journal, title, year, and date.",
   "search_by_citekey_author_year_title": "Search by citation key, author, title, year",
