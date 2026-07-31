@@ -2222,6 +2222,7 @@
   "request_sent_thank_you": "Message sent! Our team will review it and reply by email.",
   "requesting_password_reset": "Requesting password reset",
   "required": "Required",
+  "required_fields_missing": "Required fields missing",
   "resend": "Resend",
   "resend_confirmation_code": "Resend confirmation code",
   "resend_group_invite": "Resend group invite",
