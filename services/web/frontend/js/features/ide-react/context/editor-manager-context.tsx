@@ -119,6 +119,10 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
   }, [wantTrackChanges])
 
   const { fileTreeData } = useFileTreeData()
+  const fileTreeDataRef = useRef(fileTreeData)
+  useEffect(() => {
+    fileTreeDataRef.current = fileTreeData
+  }, [fileTreeData])
 
   const [ignoringExternalUpdates, setIgnoringExternalUpdates] = useState(false)
 
@@ -583,11 +587,11 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
         // A failure while there are recoverable offline edits is a failed sync,
         // so report it through the same event as the recovery path and let the
         // listener show the modal. Otherwise fall back to the out of sync modal.
-        const hasOfflineBackup = !!OfflineDocBackup.readRecoverable(
+        const backupRecord = OfflineDocBackup.readRecoverable(
           projectId,
           document.doc_id
         )
-        if (hasOfflineBackup) {
+        if (backupRecord) {
           if (!isConnected) {
             // Still offline, so nothing has been rejected yet: this is the
             // fatal op timeout running out while the outage is ongoing. Keep
@@ -598,6 +602,7 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
           eventEmitter.emit('ide:unableToSyncOfflineChanges', {
             docId: document.doc_id,
             editorContent: editorContent || '',
+            baseContent: backupRecord.snapshot,
             docName: document.docName,
           })
           OfflineDocBackup.remove(projectId, document.doc_id)
@@ -637,9 +642,14 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
 
   useEffect(() => {
     const handleUnableToSync = ({
-      detail: [{ editorContent, docName }],
+      detail: [{ editorContent, baseContent, docName }],
     }: CustomEvent<IdeEvents['ide:unableToSyncOfflineChanges']>) => {
-      showUnableToSyncModal(editorContent, docName)
+      showUnableToSyncModal({
+        baseContent,
+        targetContent: editorContent,
+        docName,
+        rootFolderId: fileTreeDataRef.current?._id,
+      })
     }
 
     eventEmitter.on('ide:unableToSyncOfflineChanges', handleUnableToSync)

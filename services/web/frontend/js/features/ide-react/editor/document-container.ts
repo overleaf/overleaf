@@ -2,7 +2,7 @@
 // Migrated from services/web/frontend/js/ide/editor/Document.js
 
 import RangesTracker from '@overleaf/ranges-tracker'
-import { OTType, ShareJsDoc } from './share-js-doc'
+import { OTType, ShareJsDoc, applyOpsToSnapshot } from './share-js-doc'
 import { debugConsole } from '@/utils/debugging'
 import { Socket } from '@/features/ide-react/connection/types/socket'
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
@@ -638,10 +638,22 @@ export class DocumentContainer extends EventEmitter {
       debugConsole.error('[recovery] failed, loading without recovery', error)
       this.releaseTrackChangesPin()
       this.needsRangesRefetchAfterRecovery = false
-      const editorContent = this.doc?.getSnapshot() || record.snapshot
+      // Compute the user's local version so the unable-to-sync modal can
+      // show a diff of offline changes. If the ops can't be applied (e.g.
+      // corrupt backup), fall back to the raw snapshot.
+      let targetContent = record.snapshot
+      try {
+        targetContent = applyOpsToSnapshot(record)
+      } catch (err) {
+        debugConsole.warn(
+          '[recovery] failed to apply ops to snapshot for diff',
+          err
+        )
+      }
       this.ideEventEmitter.emit('ide:unableToSyncOfflineChanges', {
         docId: record.docId,
-        editorContent,
+        editorContent: targetContent,
+        baseContent: record.snapshot,
         docName: this.docName,
       })
       OfflineDocBackup.remove(record.projectId, record.docId)

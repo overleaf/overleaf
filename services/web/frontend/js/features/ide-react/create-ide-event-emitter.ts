@@ -23,7 +23,12 @@ export type IdeEvents = {
   'history:toggle': []
   'entity:deleted': [entity: FileTreeFindResult]
   'ide:unableToSyncOfflineChanges': [
-    { docId: string; editorContent: string; docName: string },
+    {
+      docId: string
+      editorContent: string
+      baseContent: string
+      docName: string
+    },
   ]
   'ide:offlineChangesSynced': [{ docId: string }]
 }

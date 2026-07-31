@@ -36,6 +36,20 @@ const intermittentConnectionImprovementsEnabled = isSplitTestEnabled(
   'intermittent-connection-improvements'
 )
 
+// Apply buffered ops (inflight + pending) to a backup snapshot to reconstruct
+// the user's local document state. Used by both the recovery path and the
+// unable-to-sync modal diff.
+export function applyOpsToSnapshot(backup: OfflineDocBackupRecord): string {
+  let snapshot = backup.snapshot
+  if (backup.inflightOp) {
+    snapshot = sharejs.types.text.apply(snapshot, backup.inflightOp)
+  }
+  if (backup.pendingOp) {
+    snapshot = sharejs.types.text.apply(snapshot, backup.pendingOp)
+  }
+  return snapshot
+}
+
 // All times below are in milliseconds
 const SINGLE_USER_FLUSH_DELAY = 2000
 const MULTI_USER_FLUSH_DELAY = 500
@@ -360,18 +374,9 @@ export class ShareJsDoc extends EventEmitter {
   // constructs a doc at the baseline version, restores this, then catches the
   // doc up to the current server version.
   restoreFromOfflineBackup(backup: OfflineDocBackupRecord) {
-    // The snapshot must be the local view (baseline with the buffered ops
-    // applied), matching ShareJS's invariant that snapshot = acked version +
-    // inflight + pending. Seeding only the baseline would show the server text
-    // without the recovered edits.
-    let snapshot = backup.snapshot
-    if (backup.inflightOp) {
-      snapshot = sharejs.types.text.apply(snapshot, backup.inflightOp)
-    }
-    if (backup.pendingOp) {
-      snapshot = sharejs.types.text.apply(snapshot, backup.pendingOp)
-    }
-    this._doc.snapshot = snapshot
+    // The snapshot must be the local view (baseline + buffered ops),
+    // matching ShareJS's invariant: snapshot = acked version + inflight + pending.
+    this._doc.snapshot = applyOpsToSnapshot(backup)
     this._doc.inflightOp = backup.inflightOp
     this._doc.pendingOp = backup.pendingOp
     this._doc.inflightSubmittedIds = [...backup.inflightSubmittedIds]

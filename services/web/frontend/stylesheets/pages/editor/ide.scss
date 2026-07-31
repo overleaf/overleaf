@@ -182,6 +182,34 @@ $editor-toggler-bg-dark-color: color.adjust(
   }
 }
 
+.unable-to-sync-modal {
+  .diff-container {
+    @include body-sm;
+    @include font-mono;
+
+    max-height: 400px;
+    width: 100%;
+    background-color: var(--bg-info-03);
+    overflow-y: auto;
+    border: 1px solid var(--border-divider);
+    border-radius: var(--border-radius-base);
+    padding: var(--spacing-04) var(--spacing-05);
+    text-align: left;
+    white-space: pre-wrap;
+
+    ins {
+      background-color: var(--green-10);
+      color: var(--green-70);
+      text-decoration: none;
+    }
+
+    del {
+      color: var(--red-50);
+      text-decoration: line-through;
+    }
+  }
+}
+
 .horizontal-resize-handle {
   width: 7px !important;
   height: 100%;

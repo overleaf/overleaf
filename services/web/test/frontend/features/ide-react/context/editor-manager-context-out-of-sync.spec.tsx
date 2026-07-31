@@ -168,9 +168,8 @@ describe('EditorManagerProvider docError sync modals', function () {
 
     cy.findByRole('dialog').within(() => {
       cy.findByText('Your offline edits couldn’t be synced').should('exist')
-      cy.findByRole('button', { name: 'Download local version' }).should(
-        'exist'
-      )
+      cy.findByRole('button', { name: 'Save as new file' }).should('exist')
+      cy.findByRole('button', { name: 'Discard changes' }).should('exist')
     })
 
     cy.then(() => {
@@ -204,28 +203,10 @@ describe('EditorManagerProvider docError sync modals', function () {
     })
   })
 
-  it('passes editorContent and docName through to the download button', function () {
+  it('passes editorContent and docName through to the modal', function () {
     cy.then(() => {
       setSplitTest(true)
       plantBackup(CURRENT_DOC_ID)
-    })
-
-    const captured: { blob: Blob | null; filename: string | null } = {
-      blob: null,
-      filename: null,
-    }
-
-    cy.window().then(win => {
-      cy.stub(win.URL, 'createObjectURL').callsFake((blob: Blob) => {
-        captured.blob = blob
-        return 'blob:mock'
-      })
-      cy.stub(win.URL, 'revokeObjectURL')
-      cy.stub(win.HTMLAnchorElement.prototype, 'click').callsFake(function (
-        this: HTMLAnchorElement
-      ) {
-        captured.filename = this.download
-      })
     })
 
     mount()
@@ -239,12 +220,11 @@ describe('EditorManagerProvider docError sync modals', function () {
       )
     })
 
-    cy.findByRole('button', { name: 'Download local version' }).click()
-
-    cy.then(() => {
-      expect(captured.filename).to.equal(currentDoc.docName)
-      return captured.blob!.text()
-    }).should('equal', 'the exact offline content')
+    cy.findByRole('dialog').within(() => {
+      cy.findByText('Your offline edits couldn’t be synced').should('exist')
+      cy.findByRole('button', { name: 'Save as new file' }).should('exist')
+      cy.findByRole('button', { name: 'Discard changes' }).should('exist')
+    })
   })
 
   it('falls back to OutOfSyncModal when no backup exists', function () {
@@ -289,6 +269,7 @@ describe('EditorManagerProvider docError sync modals', function () {
       capturedEmitter!.emit('ide:unableToSyncOfflineChanges', {
         docId: CURRENT_DOC_ID,
         editorContent: 'recovered content',
+        baseContent: 'original content',
         docName: 'recovered.tex',
       })
     })

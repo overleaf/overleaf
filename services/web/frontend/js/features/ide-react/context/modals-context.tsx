@@ -30,8 +30,10 @@ type ModalsContextValue = {
     editorContent: OutOfSyncModalProps['editorContent']
   ) => void
   showUnableToSyncModal: (
-    editorContent: UnableToSyncModalProps['editorContent'],
-    docName: UnableToSyncModalProps['docName']
+    data: Pick<
+      UnableToSyncModalProps,
+      'baseContent' | 'targetContent' | 'docName' | 'rootFolderId'
+    >
   ) => void
 }
 
@@ -59,12 +61,16 @@ export const ModalsContextProvider: FC<React.PropsWithChildren> = ({
 
   const [shouldShowUnableToSyncModal, setShouldShowUnableToSyncModal] =
     useState(false)
-  const [unableToSyncModalData, setUnableToSyncModalData] = useState<{
-    editorContent: string
-    docName: string | null
-  }>({
-    editorContent: '',
+  const [unableToSyncModalData, setUnableToSyncModalData] = useState<
+    Pick<
+      UnableToSyncModalProps,
+      'baseContent' | 'targetContent' | 'docName' | 'rootFolderId'
+    >
+  >({
+    baseContent: '',
+    targetContent: '',
     docName: null,
+    rootFolderId: undefined,
   })
 
   const handleHideGenericModal = useCallback(() => {
@@ -113,8 +119,13 @@ export const ModalsContextProvider: FC<React.PropsWithChildren> = ({
   }, [])
 
   const showUnableToSyncModal = useCallback(
-    (editorContent: string, docName: string | null) => {
-      setUnableToSyncModalData({ editorContent, docName })
+    (
+      data: Pick<
+        UnableToSyncModalProps,
+        'baseContent' | 'targetContent' | 'docName' | 'rootFolderId'
+      >
+    ) => {
+      setUnableToSyncModalData(data)
       setShouldShowUnableToSyncModal(true)
     },
     []
