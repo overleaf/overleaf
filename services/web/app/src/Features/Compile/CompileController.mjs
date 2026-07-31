@@ -305,6 +305,29 @@ const _CompileController = {
       )
     }
 
+    // Report image-inclusion timings for compiles that either used optimised
+    // PNGs or contained PNGs the optimisation would have targeted.
+    // Projects the optimisation would never have touched are excluded,
+    // so they cannot dilute the comparison.
+    const optimisedPngCount = stats?.['include-image-optimised'] || 0
+    const projectHasUnconvertedPngs = Boolean(stats?.projectHasUnconvertedPngs)
+    if (optimisedPngCount > 0 || projectHasUnconvertedPngs) {
+      AnalyticsManager.recordEventForUserInBackground(
+        userId,
+        'compile-with-optimizable-pngs',
+        {
+          projectId,
+          optimizedPngCount: optimisedPngCount,
+          optimizedImageInclusionTime:
+            timings?.['include-image-optimised'] || 0,
+          totalImages: stats?.['include-image-all'] || 0,
+          totalImageInclusionTime: timings?.['include-image-all'] || 0,
+          isPng2pdf: !!options.png2pdf,
+          compiler: options.compiler,
+        }
+      )
+    }
+
     const outputFilesArchive = buildId
       ? getOutputFilesArchiveSpecification(projectId, userId, buildId)
       : null

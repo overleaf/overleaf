@@ -283,7 +283,8 @@ async function doCompile(request, stats, timings) {
 
   // Record the PNGs this compile flagged as "slow" so the next sync can convert
   // them to PDFs (see HistoryResourceWriter).
-  if (request.isCompileFromHistory && request.png2pdf && Png2Pdf.isEnabled()) {
+  // todo: generated for every project for analytics, filter to only  request.png2pdf once rollout completes
+  if (request.isCompileFromHistory && Png2Pdf.isEnabled()) {
     try {
       const slowPngs = stats.latexmk?.['latexmk-png-slow'] || []
       await HistoryResourceWriter.saveSlowPngList(
@@ -361,7 +362,6 @@ async function doCompile(request, stats, timings) {
       'sampled performance log'
     )
   }
-
   return { outputFiles, buildId, baseHistoryVersion }
 }
 

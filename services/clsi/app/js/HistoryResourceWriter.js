@@ -530,8 +530,11 @@ export async function syncResourcesToDisk(
   // flagged it as "slow" and it is large enough to be worth converting; keeping
   // that decision here means the sync loop below just checks membership.
   const png2pdfActive = request.png2pdf && Png2Pdf.isEnabled()
-  const slowPngs = new Set(png2pdfActive ? await loadSlowPngList(cacheKey) : [])
-  const shouldConvert = new Set()
+  // todo: generated for every project for analytics, filter to only  request.png2pdf && Png2Pdf.isEnabled() once rollout completes
+  const slowPngs = new Set(await loadSlowPngList(cacheKey))
+
+  // for analytics purposes, we want to generate candidate list for all projects, regardless if they are in fastPNG mode
+  let shouldConvert = new Set()
   for (const path of snapshot.getFilePathnames()) {
     if (!isPng(path) || !slowPngs.has(path)) continue
     // Avoid doing unnecessary work converting small PNGs.
@@ -542,6 +545,17 @@ export async function syncResourcesToDisk(
     }
     shouldConvert.add(path)
   }
+
+  // for analytics to determine if a project could have converted PNG's, even if they arent in the rollout
+  if (shouldConvert.size > 0) {
+    stats.projectHasUnconvertedPngs = 1
+  }
+
+  // only actually convert if png2pdf was enabled and user compile is eligible
+  if (!png2pdfActive) {
+    shouldConvert = new Set()
+  }
+
   // On a png2pdf mode switch, also re-serve PNGs that a previous compile already
   // optimised. Once converted, a PNG is no longer flagged slow (it is included
   // as a PDF), so it drops off the slow-list; without this it would revert to

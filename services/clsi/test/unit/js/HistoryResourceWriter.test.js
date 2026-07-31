@@ -136,15 +136,18 @@ describe('HistoryResourceWriter', function () {
       compileGroup: 'standard',
       ...overrides,
     })
-    ctx.sync = (overrides = {}) =>
-      ctx.HistoryResourceWriter.syncResourcesToDisk(
+    ctx.sync = async (overrides = {}) => {
+      const stats = {}
+      const result = await ctx.HistoryResourceWriter.syncResourcesToDisk(
         ctx.projectId,
         ctx.userId,
         ctx.makeRequest(overrides),
         ctx.compileDir,
         {},
-        {}
+        stats
       )
+      return { ...result, stats }
+    }
   })
 
   afterEach(function (ctx) {
@@ -238,6 +241,48 @@ describe('HistoryResourceWriter', function () {
       await ctx.sync({ png2pdf: true })
       expect(ctx.downloadUrlToFile.calledOnce).to.equal(true)
       expect(ctx.downloadUrlToFile.getCall(0).args[5]).to.equal(ctx.cacheKey)
+      expect(ctx.convertPng.called).to.equal(false)
+    })
+  })
+
+  describe('projectHasUnconvertedPngs (analytics flag)', function () {
+    it('reports false and converts nothing when no PNG is on the slow-list', async function (ctx) {
+      // No slow-list saved: fig.png is large enough to convert but was never
+      // flagged slow, so it is not a conversion candidate.
+      const { stats } = await ctx.sync()
+      expect(stats.projectHasUnconvertedPngs).to.equal(undefined)
+      expect(ctx.convertPng.called).to.equal(false)
+    })
+
+    it('reports true without converting when the project has a slow PNG but png2pdf is off', async function (ctx) {
+      // The headline analytics case: a project in the default (non-png2pdf)
+      // group that WOULD have had a PNG converted is still flagged, so the two
+      // rollout groups can be compared like-for-like - but no conversion runs.
+      await ctx.HistoryResourceWriter.saveSlowPngList(ctx.cacheKey, ['fig.png'])
+      const { stats } = await ctx.sync({ png2pdf: false })
+      expect(stats.projectHasUnconvertedPngs).to.equal(1)
+      expect(ctx.convertPng.called).to.equal(false)
+    })
+
+    it('reports true and converts when the project has a slow PNG and png2pdf is on', async function (ctx) {
+      // The rollout group: the same convertible PNG is both flagged and
+      // actually converted. The flag is independent of mode; conversion tracks
+      // mode.
+      await ctx.HistoryResourceWriter.saveSlowPngList(ctx.cacheKey, ['fig.png'])
+      const { stats } = await ctx.sync({ png2pdf: true })
+      expect(stats.projectHasUnconvertedPngs).to.equal(1)
+      expect(ctx.convertPng.calledOnce).to.equal(true)
+    })
+
+    it('reports false for a slow PNG below the conversion size threshold', async function (ctx) {
+      // A slow-listed PNG that is too small to be worth converting is not a
+      // conversion candidate, so it must not be counted as convertible either -
+      // the analytics flag uses the same size-filtered set as conversion, so
+      // the optimised and default groups stay comparable.
+      ctx.rawSnapshot.files['fig.png'].byteLength = 512 * 1024
+      await ctx.HistoryResourceWriter.saveSlowPngList(ctx.cacheKey, ['fig.png'])
+      const { stats } = await ctx.sync({ png2pdf: true })
+      expect(stats.projectHasUnconvertedPngs).to.equal(undefined)
       expect(ctx.convertPng.called).to.equal(false)
     })
   })

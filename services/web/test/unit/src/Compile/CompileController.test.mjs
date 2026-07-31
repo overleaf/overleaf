@@ -166,9 +166,10 @@ describe('CompileController', function () {
     vi.doMock(
       '../../../../app/src/Features/Analytics/AnalyticsManager',
       () => ({
-        default: {
+        default: (ctx.AnalyticsManager = {
           recordEventForSession: sinon.stub(),
-        },
+          recordEventForUserInBackground: sinon.stub(),
+        }),
       })
     )
 
@@ -433,6 +434,83 @@ describe('CompileController', function () {
             rootResourcePath: 'foo.tex',
           }
         )
+      })
+    })
+
+    describe('compile-with-optimizable-pngs analytics event', function () {
+      it('records the event when the project has an unconverted png', async function (ctx) {
+        ctx.CompileManager.promises.compile.resolves({
+          status: 'success',
+          outputFiles: [],
+          stats: {
+            'include-image-all': 3,
+            projectHasUnconvertedPngs: 1,
+          },
+          timings: { 'include-image-all': 123 },
+        })
+        await ctx.CompileController.compile(ctx.req, ctx.res, ctx.next)
+        expect(
+          ctx.AnalyticsManager.recordEventForUserInBackground
+        ).to.have.been.calledWith(
+          ctx.user_id,
+          'compile-with-optimizable-pngs',
+          {
+            projectId: ctx.projectId,
+            optimizedPngCount: 0,
+            optimizedImageInclusionTime: 0,
+            totalImages: 3,
+            totalImageInclusionTime: 123,
+            isPng2pdf: false,
+            compiler: undefined,
+          }
+        )
+      })
+
+      it('records the event when the compile included optimised pngs', async function (ctx) {
+        ctx.CompileManager.promises.compile.resolves({
+          status: 'success',
+          outputFiles: [],
+          stats: {
+            'include-image-optimised': 2,
+            'include-image-all': 5,
+            projectHasUnconvertedPngs: 0,
+          },
+          timings: { 'include-image-optimised': 12, 'include-image-all': 34 },
+        })
+        await ctx.CompileController.compile(ctx.req, ctx.res, ctx.next)
+        expect(
+          ctx.AnalyticsManager.recordEventForUserInBackground
+        ).to.have.been.calledWith(
+          ctx.user_id,
+          'compile-with-optimizable-pngs',
+          {
+            projectId: ctx.projectId,
+            optimizedPngCount: 2,
+            optimizedImageInclusionTime: 12,
+            totalImages: 5,
+            totalImageInclusionTime: 34,
+            isPng2pdf: false,
+            compiler: undefined,
+          }
+        )
+      })
+
+      it('does not record the event when there are no optimizable pngs', async function (ctx) {
+        ctx.CompileManager.promises.compile.resolves({
+          status: 'success',
+          outputFiles: [],
+          stats: { 'include-image-all': 3, projectHasUnconvertedPngs: 0 },
+          timings: {},
+        })
+        await ctx.CompileController.compile(ctx.req, ctx.res, ctx.next)
+        expect(ctx.AnalyticsManager.recordEventForUserInBackground).to.not.have
+          .been.called
+      })
+
+      it('does not record the event when stats are absent', async function (ctx) {
+        await ctx.CompileController.compile(ctx.req, ctx.res, ctx.next)
+        expect(ctx.AnalyticsManager.recordEventForUserInBackground).to.not.have
+          .been.called
       })
     })
   })
