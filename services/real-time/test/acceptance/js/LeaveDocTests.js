@@ -83,8 +83,8 @@ describe('leaveDoc', function () {
         })
       })
 
-      return it('should return an error', function () {
-        return expect(this.error).to.exist
+      return it('should return an invalid id error', function () {
+        return this.error.message.should.equal('invalid Mongo ObjectId')
       })
     })
   })

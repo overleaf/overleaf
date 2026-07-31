@@ -11,13 +11,21 @@ describe('File', function () {
     let file = File.fromString('foo')
     expect(file.getMetadata()).to.eql({})
 
-    // metadata passed in at construction time
+    // metadata passed in at construction time (the main-file marker written
+    // by the v1 history import)
     file = File.fromString('foo', { main: true })
     expect(file.getMetadata()).to.eql({ main: true })
 
     // metadata set at runtime
-    file.setMetadata({ main: false })
-    expect(file.getMetadata()).to.eql({ main: false })
+    /** @type {import('../../lib/types').FileMetadata} */
+    const linkedFileMetadata = {
+      provider: 'project_file',
+      source_project_id: '507f1f77bcf86cd799439011',
+      source_entity_path: '/foo.bib',
+      importedAt: '2024-08-05T11:53:34.532Z',
+    }
+    file.setMetadata(linkedFileMetadata)
+    expect(file.getMetadata()).to.eql(linkedFileMetadata)
   })
 
   describe('toRaw', function () {
@@ -29,12 +37,17 @@ describe('File', function () {
         metadata,
       })
 
-      delete file.getMetadata().main
+      file.setMetadata({})
       expect(file.toRaw()).to.eql({ hash: File.EMPTY_FILE_HASH })
     })
 
     it('returns a deep clone of metadata', function () {
-      const metadata = { externalFile: { id: 123 } }
+      /** @type {import('../../lib/types').FileMetadata} */
+      const metadata = {
+        provider: 'url',
+        url: 'https://example.com/foo.bib',
+        importedAt: '2024-08-05T11:53:34.532Z',
+      }
       const file = File.fromHash(File.EMPTY_FILE_HASH, undefined, metadata)
       const raw = file.toRaw()
       const fileMetadata = file.getMetadata()

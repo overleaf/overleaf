@@ -810,7 +810,7 @@ class SyncUpdateExpander {
         shouldUpdate = Object.entries(file.metadata).some(
           ([k, v]) => metaData[k] !== v
         )
-      } else if (metaData.provider) {
+      } else if ('provider' in metaData && metaData.provider) {
         // overwritten by non-linked-file with same hash
         // or overwritten by doc
         shouldUpdate = true

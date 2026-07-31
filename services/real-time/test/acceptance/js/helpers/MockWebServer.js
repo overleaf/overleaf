@@ -11,8 +11,21 @@
  */
 import sinon from 'sinon'
 import express from 'express'
+import { z, zz, parseReq } from '@overleaf/validation-tools'
 
 let MockWebServer
+
+// Mirrors the request shape of web's real POST /project/:project_id/join route (see WebApiManager.joinProject).
+const joinProjectRequestSchema = z.object({
+  params: z.strictObject({
+    project_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    // 'anonymous-user' is a valid sentinel, not always a real user id
+    userId: zz.objectId().or(z.literal('anonymous-user')),
+    anonymousAccessToken: z.string().optional(),
+  }),
+})
 
 export default MockWebServer = {
   projects: {},
@@ -43,8 +56,9 @@ export default MockWebServer = {
   },
 
   joinProjectRequest(req, res, next) {
-    const { project_id: projectId } = req.params
-    const { anonymousAccessToken, userId } = req.body
+    const { params, body } = parseReq(req, joinProjectRequestSchema)
+    const { project_id: projectId } = params
+    const { anonymousAccessToken, userId } = body
     if (projectId === '404404404404404404404404') {
       // not-found
       return res.status(404).send()

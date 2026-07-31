@@ -20,6 +20,7 @@ import socketIOClient from 'socket.io-client'
 import http from 'node:http'
 import Router from './app/js/Router.js'
 import WebsocketLoadBalancer from './app/js/WebsocketLoadBalancer.js'
+import { z, parseReq, handleValidationError } from '@overleaf/validation-tools'
 
 logger.initialize('real-time')
 Metrics.event_loop.monitor(logger)
@@ -153,8 +154,17 @@ app.get('/status', function (req, res) {
   }
 })
 
+const debugEventsSchema = z.object({
+  query: z.strictObject({
+    count: z.coerce.number().int().optional(),
+  }),
+})
+
 app.get('/debug/events', function (req, res) {
-  Settings.debugEvents = parseInt(req.query.count, 10) || 20
+  const {
+    query: { count },
+  } = parseReq(req, debugEventsSchema)
+  Settings.debugEvents = count || 20
   logger.info({ count: Settings.debugEvents }, 'starting debug mode')
   res.send(`debug mode will log next ${Settings.debugEvents} events`)
 })
@@ -192,6 +202,8 @@ app.get('/health_check/redis', healthCheck)
 app.use(Metrics.http.monitor(logger))
 
 Router.configure(app, io, sessionSockets)
+
+app.use(handleValidationError)
 
 WebsocketLoadBalancer.listenForEditorEvents(io)
 

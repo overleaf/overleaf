@@ -1,0 +1,156 @@
+const { expect } = require('chai')
+const { rawLinkedFileData, rawFileMetadata } = require('../../lib/schemas')
+
+describe('schemas', function () {
+  describe('rawLinkedFileData', function () {
+    it('rejects an empty object', function () {
+      const result = rawLinkedFileData.safeParse({})
+      expect(result.success).to.equal(false)
+    })
+
+    it('rejects an unrecognized provider', function () {
+      const result = rawLinkedFileData.safeParse({
+        provider: 'not-a-provider',
+      })
+      expect(result.success).to.equal(false)
+    })
+
+    it('rejects a project_file provider with an unrecognized extra key', function () {
+      const result = rawLinkedFileData.safeParse({
+        provider: 'project_file',
+        source_entity_path: '/main.tex',
+        extraUnrecognizedKey: 'abcd',
+      })
+      expect(result.success).to.equal(false)
+    })
+
+    it('accepts a project_file provider with a valid source_project_id', function () {
+      const result = rawLinkedFileData.safeParse({
+        provider: 'project_file',
+        source_project_id: '507f1f77bcf86cd799439011',
+        source_entity_path: '/main.tex',
+      })
+      expect(result.success).to.equal(true)
+    })
+
+    it('accepts a project_file provider with a missing source_project_id', function () {
+      const result = rawLinkedFileData.safeParse({
+        provider: 'project_file',
+        source_entity_path: '/main.tex',
+      })
+      expect(result.success).to.equal(true)
+    })
+
+    it('rejects a project_file provider with a malformed source_project_id', function () {
+      const result = rawLinkedFileData.safeParse({
+        provider: 'project_file',
+        source_project_id: 'not-an-object-id',
+        source_entity_path: '/main.tex',
+      })
+      expect(result.success).to.equal(false)
+    })
+
+    it('accepts a project_output_file provider with a valid source_project_id', function () {
+      const result = rawLinkedFileData.safeParse({
+        provider: 'project_output_file',
+        source_project_id: '507f1f77bcf86cd799439011',
+        source_output_file_path: 'output.pdf',
+      })
+      expect(result.success).to.equal(true)
+    })
+
+    it('rejects a project_output_file provider with a malformed source_project_id', function () {
+      const result = rawLinkedFileData.safeParse({
+        provider: 'project_output_file',
+        source_project_id: 'not-an-object-id',
+        source_output_file_path: 'output.pdf',
+      })
+      expect(result.success).to.equal(false)
+    })
+
+    it('accepts a project_output_file provider with a valid build_id', function () {
+      const result = rawLinkedFileData.safeParse({
+        provider: 'project_output_file',
+        source_output_file_path: 'output.pdf',
+        build_id: '1234-abcd',
+      })
+      expect(result.success).to.equal(true)
+    })
+
+    it('rejects a project_output_file provider with a malformed build_id', function () {
+      const result = rawLinkedFileData.safeParse({
+        provider: 'project_output_file',
+        source_output_file_path: 'output.pdf',
+        build_id: 'not-a-valid-build-id',
+      })
+      expect(result.success).to.equal(false)
+    })
+
+    for (const provider of ['mendeley', 'zotero', 'papers']) {
+      it(`accepts a ${provider} provider with an opaque group_id`, function () {
+        const result = rawLinkedFileData.safeParse({
+          provider,
+          group_id: 'abcd',
+        })
+        expect(result.success).to.equal(true)
+      })
+
+      it(`accepts a ${provider} provider with a missing group_id`, function () {
+        const result = rawLinkedFileData.safeParse({ provider })
+        expect(result.success).to.equal(true)
+      })
+
+      it(`rejects a ${provider} provider with a group_id containing a path separator`, function () {
+        const result = rawLinkedFileData.safeParse({
+          provider,
+          group_id: 'abcd/../../etc/passwd',
+        })
+        expect(result.success).to.equal(false)
+      })
+
+      it(`rejects a ${provider} provider with a group_id of ".."`, function () {
+        const result = rawLinkedFileData.safeParse({
+          provider,
+          group_id: '..',
+        })
+        expect(result.success).to.equal(false)
+      })
+    }
+  })
+
+  describe('rawFileMetadata', function () {
+    it('accepts a legacy v1 main flag', function () {
+      const result = rawFileMetadata.safeParse({
+        main: true,
+      })
+      expect(result.success).to.equal(true)
+    })
+
+    it('accepts a legacy v1 main flag with an importedAt timestamp', function () {
+      const result = rawFileMetadata.safeParse({
+        main: true,
+        importedAt: '2024-01-01T00:00:00.000Z',
+      })
+      expect(result.success).to.equal(true)
+    })
+
+    it('accepts an importedAt timestamp with no provider', function () {
+      const result = rawFileMetadata.safeParse({
+        importedAt: '2024-01-01T00:00:00.000Z',
+      })
+      expect(result.success).to.equal(true)
+    })
+
+    it('rejects a malformed importedAt timestamp with no provider', function () {
+      const result = rawFileMetadata.safeParse({
+        importedAt: 'not-a-date',
+      })
+      expect(result.success).to.equal(false)
+    })
+
+    it('accepts an empty object', function () {
+      const result = rawFileMetadata.safeParse({})
+      expect(result.success).to.equal(true)
+    })
+  })
+})

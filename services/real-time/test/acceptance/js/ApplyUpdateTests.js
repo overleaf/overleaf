@@ -1011,4 +1011,87 @@ describe('applyOtUpdate', function () {
       return null
     })
   })
+
+  describe('when authorized with an invalid hash', function () {
+    before(function (done) {
+      this.update = {
+        op: [{ i: 'foo', p: 42 }],
+        v: 42,
+        hash: 'not-a-valid-hash',
+      }
+      return async.series(
+        [
+          cb => {
+            return FixturesManager.setUpProject(
+              {
+                privilegeLevel: 'readAndWrite',
+              },
+              (e, { project_id: projectId, user_id: userId }) => {
+                this.project_id = projectId
+                this.user_id = userId
+                return cb(e)
+              }
+            )
+          },
+
+          cb => {
+            return FixturesManager.setUpDoc(
+              this.project_id,
+              { lines: this.lines, version: this.version, ops: this.ops },
+              (e, { doc_id: docId }) => {
+                this.doc_id = docId
+                return cb(e)
+              }
+            )
+          },
+
+          cb => {
+            this.client = RealTimeClient.connect(this.project_id, cb)
+          },
+
+          cb => {
+            return this.client.emit('joinDoc', this.doc_id, cb)
+          },
+
+          cb => {
+            return this.client.emit(
+              'applyOtUpdate',
+              this.doc_id,
+              this.update,
+              error => {
+                this.error = error
+                return cb()
+              }
+            )
+          },
+        ],
+        done
+      )
+    })
+
+    it('should return an error', function () {
+      return expect(this.error).to.exist
+    })
+
+    it('should disconnect the client', function (done) {
+      return setTimeout(() => {
+        this.client.socket.connected.should.equal(false)
+        return done()
+      }, 300)
+    })
+
+    return it('should not put the update in redis', function (done) {
+      rclient.llen(
+        redisSettings.documentupdater.key_schema.pendingProjectUpdates({
+          project_id: this.project_id,
+        }),
+        (error, len) => {
+          if (error) return done(error)
+          len.should.equal(0)
+          return done()
+        }
+      )
+      return null
+    })
+  })
 })

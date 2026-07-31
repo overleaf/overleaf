@@ -403,6 +403,11 @@ describe('MatrixTests', function () {
               })
 
               describe('send updates', function () {
+                // Fake blob hashes, distinguishable from each other, standing in for
+                // whichever client sent the update.
+                const USER_HASH = '1111111111111111111111111111111111111111'
+                const PRIVATE_HASH = '2222222222222222222222222222222222222222'
+
                 let receivedArgs, submittedUpdates, update
 
                 beforeEach(function cleanup(done) {
@@ -427,7 +432,7 @@ describe('MatrixTests', function () {
                     return this.skip()
                   }
                   const userUpdate = Object.assign({}, update.op, {
-                    hash: 'user',
+                    hash: USER_HASH,
                   })
 
                   client.emit(
@@ -443,7 +448,7 @@ describe('MatrixTests', function () {
 
                 beforeEach(function sendAsPrivateUserForReferenceOp(done) {
                   const privateUpdate = Object.assign({}, update.op, {
-                    hash: 'private',
+                    hash: PRIVATE_HASH,
                   })
 
                   privateClient.emit(
@@ -477,7 +482,7 @@ describe('MatrixTests', function () {
                 it('should submit the private users message only', function () {
                   expect(submittedUpdates).to.have.length(1)
                   const update = JSON.parse(submittedUpdates[0])
-                  expect(update.hash).to.equal('private')
+                  expect(update.hash).to.equal(PRIVATE_HASH)
                 })
               })
             })

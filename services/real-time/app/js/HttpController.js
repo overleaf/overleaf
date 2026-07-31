@@ -1,4 +1,13 @@
+import { z, parseReq } from '@overleaf/validation-tools'
+import { clientIdSchema } from './schemas.js'
+
 let HttpController
+
+const getConnectedClientSchema = z.object({
+  params: z.strictObject({
+    client_id: clientIdSchema,
+  }),
+})
 
 export default HttpController = {
   // The code in this controller is hard to unit test because of a lot of
@@ -42,7 +51,9 @@ export default HttpController = {
   },
 
   getConnectedClient(req, res) {
-    const { client_id: clientId } = req.params
+    const {
+      params: { client_id: clientId },
+    } = parseReq(req, getConnectedClientSchema, { logOnly: true })
     const io = req.app.get('io')
     const ioClient = io.sockets.sockets[clientId]
     if (!ioClient) {

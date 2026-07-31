@@ -11,7 +11,7 @@ const StringFileData = require('./file_data/string_file_data')
 
 /**
  * @import Blob from "./blob"
- * @import { BlobStore, ReadonlyBlobStore, RawFileData, RawFile } from "./types"
+ * @import { BlobStore, ReadonlyBlobStore, RawFileData, RawFile, FileMetadata } from "./types"
  * @import { StringFileRawData, CommentRawData } from "./types"
  * @import CommentList from "./file_data/comment_list"
  * @import TextOperation from "./operation/text_operation"
@@ -55,12 +55,13 @@ class File {
 
   /**
    * @param {FileData} data
-   * @param {Object} [metadata]
+   * @param {FileMetadata} [metadata]
    */
   constructor(data, metadata) {
     assert.instance(data, FileData, 'File: bad data')
 
     this.data = data
+    /** @type {FileMetadata} */
     this.metadata = {}
     this.setMetadata(metadata || {})
   }
@@ -77,7 +78,7 @@ class File {
   /**
    * @param  {string} hash
    * @param  {string} [rangesHash]
-   * @param  {Object} [metadata]
+   * @param  {FileMetadata} [metadata]
    * @return {File}
    */
   static fromHash(hash, rangesHash, metadata) {
@@ -86,7 +87,7 @@ class File {
 
   /**
    * @param  {string} string
-   * @param  {Object} [metadata]
+   * @param  {FileMetadata} [metadata]
    * @return {File}
    */
   static fromString(string, metadata) {
@@ -96,7 +97,7 @@ class File {
   /**
    * @param  {number} byteLength
    * @param  {number} [stringLength]
-   * @param  {Object} [metadata]
+   * @param  {FileMetadata} [metadata]
    * @return {File}
    */
   static createHollow(byteLength, stringLength, metadata) {
@@ -106,7 +107,7 @@ class File {
   /**
    * @param {Blob} blob
    * @param {Blob} [rangesBlob]
-   * @param {Object} [metadata]
+   * @param {FileMetadata} [metadata]
    * @return {File}
    */
   static createLazyFromBlobs(blob, rangesBlob, metadata) {
@@ -197,7 +198,7 @@ class File {
   /**
    * Return the metadata object for this file.
    *
-   * @return {Object}
+   * @return {FileMetadata}
    */
   getMetadata() {
     return this.metadata
@@ -206,7 +207,7 @@ class File {
   /**
    * Set the metadata object for this file.
    *
-   * @param {Object} metadata
+   * @param {FileMetadata} metadata
    */
   setMetadata(metadata) {
     assert.object(metadata, 'File: bad metadata')
@@ -281,7 +282,7 @@ class File {
 }
 
 /**
- * @param {Object} metadata
+ * @param {FileMetadata} metadata
  * @param {RawFile} raw
  */
 function storeRawMetadata(metadata, raw) {
