@@ -12,16 +12,10 @@ import { useEditorManagerContext } from '@/features/ide-react/context/editor-man
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 import useEventListener from '@/shared/hooks/use-event-listener'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
-
-const intermittentConnectionImprovementsEnabled = isSplitTestEnabled(
-  'intermittent-connection-improvements'
-)
+import getMeta from '@/utils/meta'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const STALL_AFTER_SECONDS = 10 // treat saving as stalled after this time
-
-// lock the editor after this time if unsaved
-const MAX_UNSAVED_SECONDS = intermittentConnectionImprovementsEnabled ? 600 : 30
 
 type UnsavedDocsContextValue = {
   unsavedDocs: Map<string, number>
@@ -40,7 +34,21 @@ export const UnsavedDocsProvider: FC<React.PropsWithChildren> = ({
   const { permissionsLevel, setPermissionsLevel } = useIdeReactContext()
   const [isLocked, setIsLocked] = useState(false)
   const [unsavedDocs, setUnsavedDocs] = useState(new Map<string, number>())
+  const isPremiumUser = Boolean(getMeta('ol-user')?.features?.versioning)
+  const intermittentConnectionImprovementsEnabled = useFeatureFlag(
+    'intermittent-connection-improvements'
+  )
+  // lock the editor after this time if unsaved
+  const MAX_UNSAVED_SECONDS_FREE = intermittentConnectionImprovementsEnabled
+    ? 120
+    : 30
+  const MAX_UNSAVED_SECONDS_PREMIUM = intermittentConnectionImprovementsEnabled
+    ? 600
+    : 30
 
+  const maxUnsavedSecondsLimit = isPremiumUser
+    ? MAX_UNSAVED_SECONDS_PREMIUM
+    : MAX_UNSAVED_SECONDS_FREE
   // always contains the latest value
   const previousUnsavedDocsRef = useRef(unsavedDocs)
 
@@ -101,8 +109,8 @@ export const UnsavedDocsProvider: FC<React.PropsWithChildren> = ({
 
   // lock the editor if at least one doc has been unsaved for too long
   useEffect(() => {
-    setIsLocked(maxUnsavedSeconds > MAX_UNSAVED_SECONDS)
-  }, [maxUnsavedSeconds])
+    setIsLocked(maxUnsavedSeconds > maxUnsavedSecondsLimit)
+  }, [maxUnsavedSeconds, maxUnsavedSecondsLimit])
 
   // display a modal and set the permissions level to readOnly if docs have been unsaved for too long
   const originalPermissionsLevelRef = useRef<PermissionsLevel | null>(null)
