@@ -19306,6 +19306,8 @@ __metadata:
     "@overleaf/fetch-utils": "workspace:*"
     "@overleaf/logger": "workspace:*"
     "@overleaf/metrics": "workspace:*"
+    "@overleaf/promise-utils": "workspace:*"
+    "@overleaf/validation-tools": "workspace:*"
     "@types/node": "npm:^24.5.2"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
