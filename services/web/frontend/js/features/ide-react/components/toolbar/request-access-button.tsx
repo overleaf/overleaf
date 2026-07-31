@@ -5,6 +5,7 @@ import { useIdeReactContext } from '@/features/ide-react/context/ide-react-conte
 import { useProjectContext } from '@/shared/context/project-context'
 import { useUserContext } from '@/shared/context/user-context'
 import getMeta from '@/utils/meta'
+import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
 import RequestAccessModal from './request-access-modal'
 
 export default function RequestAccessButton() {
@@ -18,6 +19,7 @@ export default function RequestAccessButton() {
   const { permissionsLevel } = useIdeReactContext()
   const { project } = useProjectContext()
   const { id: userId } = useUserContext()
+  const isNetworkStalled = useIsNetworkStalled()
   const [showModal, setShowModal] = useState(false)
   const [locallyRequested, setLocallyRequested] = useState(false)
 
@@ -32,6 +34,11 @@ export default function RequestAccessButton() {
   if (permissionsLevel !== 'readOnly' && permissionsLevel !== 'review')
     return null
   if (!userId) return null
+  // Hide the button while the network is stalled: permissionsLevel can read as
+  // readOnly during an out-of-sync/offline lock even though the user really has
+  // write access, so prompting them to "request access" would be misleading.
+  // Temporary fix for issue #35882
+  if (isNetworkStalled) return null
 
   // Once the owner grants *editor* access the requester becomes a named
   // collaborator with nothing left to request, so hide the button as soon as
