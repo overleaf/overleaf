@@ -15,6 +15,7 @@ const PROJECT_ID = 'project-456'
 const USER_ID = 'user-789'
 const KEY = `doc.offline-backup.${USER_ID}.${PROJECT_ID}.${DOC_ID}`
 const FLUSH_DELAY = 2000
+const STALL_AFTER_MS = 10000
 const SYNCED_EVENT = 'ide:offlineChangesSynced'
 
 class FakeShareJsDoc extends EventEmitter {
@@ -27,6 +28,8 @@ class FakeShareJsDoc extends EventEmitter {
   snapshot = 'server text'
   inflightOp: ShareJsOperation | null = null
   pendingOp: ShareJsOperation | null = null
+  inflightOpCreatedAt: number | null = null
+  pendingOpCreatedAt: number | null = null
   track_changes = false
   otType: OTType = 'sharejs-text-ot'
   _doc = { inflightSubmittedIds: new Set<string>() }
@@ -58,6 +61,14 @@ class FakeShareJsDoc extends EventEmitter {
 
   getPendingOp() {
     return this.pendingOp
+  }
+
+  getInflightOpCreatedAt() {
+    return this.inflightOpCreatedAt
+  }
+
+  getPendingOpCreatedAt() {
+    return this.pendingOpCreatedAt
   }
 
   getInflightSubmittedIds() {
@@ -149,6 +160,41 @@ describe('OfflineDocBackup', function () {
     doc.trigger('change')
     clock.tick(FLUSH_DELAY)
     expect(readRecord()).to.be.null
+  })
+
+  it('backs up while still connected once saving stalls past the threshold', function () {
+    create()
+    doc.pendingOp = [{ i: 'x', p: 0 }]
+    doc.pendingOpCreatedAt = performance.now() - (STALL_AFTER_MS + 1000)
+    doc.trigger('change')
+    clock.tick(FLUSH_DELAY)
+
+    expect(doc.connection.state).to.equal('ok')
+    expect(readRecord()?.pendingOp).to.deep.equal([{ i: 'x', p: 0 }])
+  })
+
+  it('does not back up while connected and within the stall threshold', function () {
+    create()
+    doc.pendingOp = [{ i: 'x', p: 0 }]
+    doc.pendingOpCreatedAt = performance.now() - (STALL_AFTER_MS - 5000)
+    doc.trigger('change')
+    clock.tick(FLUSH_DELAY)
+
+    expect(readRecord()).to.be.null
+  })
+
+  it('uses the inflight op age (the oldest) to detect a stall', function () {
+    create()
+    doc.inflightOp = [{ i: 'sent', p: 0 }]
+    doc.inflightOpCreatedAt = performance.now() - (STALL_AFTER_MS + 1000)
+    doc.pendingOp = [{ i: 'queued', p: 5 }]
+    doc.pendingOpCreatedAt = performance.now()
+    doc.trigger('change')
+    clock.tick(FLUSH_DELAY)
+
+    const record = readRecord()
+    expect(record?.inflightOp).to.deep.equal([{ i: 'sent', p: 0 }])
+    expect(record?.pendingOp).to.deep.equal([{ i: 'queued', p: 5 }])
   })
 
   it('writes the baseline plus live ops when offline with buffered ops', function () {

@@ -8,6 +8,7 @@ import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
 const EVENT_NAMESPACE = 'offlineBackup'
 const OFFLINE_BACKUP_INTERVAL_MS = 2000
 const KEY_PREFIX = 'doc.offline-backup.'
+const STALL_AFTER_SECONDS = 10
 
 type Baseline = {
   version: number
@@ -101,6 +102,20 @@ export class OfflineDocBackup {
     return this.doc.connection.state !== 'ok'
   }
 
+  private isSavingStalled() {
+    const oldestOpCreatedAt =
+      this.doc.getInflightOpCreatedAt() ?? this.doc.getPendingOpCreatedAt()
+    if (!oldestOpCreatedAt) {
+      return false
+    }
+    const unsavedSeconds = (performance.now() - oldestOpCreatedAt) / 1000
+    return unsavedSeconds > STALL_AFTER_SECONDS
+  }
+
+  private shouldBackup() {
+    return this.isOffline() || this.isSavingStalled()
+  }
+
   private refreshBaseline() {
     // baseline is the clean server state, buffered ops would
     // bake local edits into V_start and corrupt recovery
@@ -144,7 +159,7 @@ export class OfflineDocBackup {
     // reflects remote ops applied before we go offline. refreshBaseline no-ops
     // once there are buffered ops, freezing the baseline at the point we start
     // diverging offline.
-    if (!this.isOffline()) {
+    if (!this.shouldBackup()) {
       this.refreshBaseline()
       return
     }
@@ -156,7 +171,7 @@ export class OfflineDocBackup {
     }
     this.throttleTimer = window.setTimeout(() => {
       this.throttleTimer = null
-      if (this.isOffline() && this.doc.hasBufferedOps()) {
+      if (this.shouldBackup() && this.doc.hasBufferedOps()) {
         this.write()
       }
     }, OFFLINE_BACKUP_INTERVAL_MS)
