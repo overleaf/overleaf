@@ -4,7 +4,6 @@ import {
   SettableNotificationLevel,
   useProjectNotificationPreferences,
 } from '../../hooks/use-project-notification-preferences'
-import BetaBadgeIcon from '@/shared/components/beta-badge-icon'
 import LoadingSpinner from '@/shared/components/loading-spinner'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 
@@ -70,22 +69,6 @@ export default function ProjectNotificationsSetting() {
             >
               {t('manage_overleaf_email_preferences')}
             </a>
-          </div>
-          <div className="project-notifications-beta-note">
-            <BetaBadgeIcon />
-            <div>
-              <span className="ide-setting-description">
-                {t('email_notifications_are_currently_in_beta')}{' '}
-                {t('these_settings_might_change_in_the_future')}{' '}
-              </span>
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://forms.gle/unCNQedYXChTn2Qo6"
-              >
-                {t('give_feedback')}
-              </a>
-            </div>
           </div>
         </>
       )}
