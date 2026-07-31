@@ -46,10 +46,14 @@ describe('LoggingManager', function () {
     this.fetchUtils = {
       setLogger: sinon.stub(),
     }
+    this.validationTools = {
+      setLogger: sinon.stub(),
+    }
     this.LoggingManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         bunyan: this.Bunyan,
         '@overleaf/fetch-utils': this.fetchUtils,
+        '@overleaf/validation-tools': this.validationTools,
         './log-level-checker': this.LogLevelChecker,
       },
     })

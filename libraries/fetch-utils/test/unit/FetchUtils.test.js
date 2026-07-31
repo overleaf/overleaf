@@ -305,6 +305,34 @@ describe('fetch-utils', function () {
     })
   })
 
+  describe('RequestFailedError', function () {
+    it('includes the response body in OError.info for a 400', async function () {
+      const err = await getRejection(fetchNothing(url('/400')))
+      expect(err.info).to.have.property('body', 'boom-400')
+    })
+
+    it('includes the response body in OError.info for a 409', async function () {
+      const err = await getRejection(fetchNothing(url('/409')))
+      expect(err.info).to.have.property('body', 'boom-409')
+    })
+
+    it('includes the response body in OError.info for a 413', async function () {
+      const err = await getRejection(fetchNothing(url('/413')))
+      expect(err.info).to.have.property('body', 'boom-413')
+    })
+
+    it('includes the response body in OError.info for a 422', async function () {
+      const err = await getRejection(fetchNothing(url('/422')))
+      expect(err.info).to.have.property('body', 'boom-422')
+    })
+
+    it('omits the response body from OError.info for a 500', async function () {
+      const err = await getRejection(fetchNothing(url('/500')))
+      expect(err.body).to.equal('Internal Server Error')
+      expect(err.info).to.not.have.property('body')
+    })
+  })
+
   describe('fetchString', function () {
     it('returns a string', async function () {
       const body = await fetchString(url('/hello'))
@@ -509,3 +537,12 @@ async function expectRequestAborted(req) {
 }
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+async function getRejection(promise) {
+  try {
+    await promise
+  } catch (err) {
+    return err
+  }
+  expect.fail('expected promise to reject')
+}

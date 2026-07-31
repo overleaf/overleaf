@@ -16,6 +16,7 @@ module.exports = {
     'require-rel-for-docs-links': require('./require-rel-for-docs-links'),
     'require-cio-snake-case-properties': require('./require-cio-snake-case-properties'),
     'no-throw-in-callback': require('./no-throw-in-callback'),
+    'no-raw-req-access': require('./no-raw-req-access'),
     'no-consecutive-spaces-in-locales': require('./no-consecutive-spaces-in-locales'),
     'no-straight-apostrophes-in-locales': require('./no-straight-apostrophes-in-locales'),
     'french-typography-in-locales': require('./french-typography-in-locales'),

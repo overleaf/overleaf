@@ -1,0 +1,407 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { z } from 'zod'
+import type { Request } from 'express'
+import {
+  parseReq,
+  setLogger,
+  setReqValidationModeForTests,
+  resetReqValidationLoggingForTests,
+} from '../../../parseReq'
+import { zz } from '../../../zodHelpers'
+
+const RAW_BODY = Symbol.for('overleaf.lockdown.rawBody')
+const RAW_QUERY = Symbol.for('overleaf.lockdown.rawQuery')
+const RAW_PARAMS = Symbol.for('overleaf.lockdown.rawParams')
+const INSTALLED = Symbol.for('overleaf.lockdown.installed')
+
+// Replicates what the patched express does to a request in warn/throw mode
+// (see lockdown.test.ts): parsed input lives in symbol-keyed fields, the
+// public properties throw.
+function lockedRequest({
+  params = {},
+  query = {},
+  body = undefined,
+  ...rest
+}: {
+  params?: object
+  query?: object
+  body?: unknown
+  [key: string]: unknown
+}): Request {
+  const req: Record<PropertyKey, unknown> = { ...rest }
+  req[INSTALLED] = true
+  req[RAW_PARAMS] = params
+  req[RAW_QUERY] = query
+  req[RAW_BODY] = body
+  for (const field of ['params', 'query', 'body']) {
+    Object.defineProperty(req, field, {
+      configurable: true,
+      enumerable: false,
+      get() {
+        throw new Error(`raw request input is forbidden (req.${field})`)
+      },
+      set(value) {
+        this[
+          field === 'params'
+            ? RAW_PARAMS
+            : field === 'query'
+              ? RAW_QUERY
+              : RAW_BODY
+        ] = value
+      },
+    })
+  }
+  return req as unknown as Request
+}
+
+type WarnCall = [Record<string, any>, string]
+
+describe('parseReq log-only rollout', () => {
+  // This block intentionally runs before anything else in the file calls
+  // setLogger(), so the module-level logger is still unset here.
+  describe('without an injected logger', () => {
+    beforeEach(() => {
+      resetReqValidationLoggingForTests()
+      setReqValidationModeForTests('log')
+    })
+
+    afterEach(() => {
+      setReqValidationModeForTests(null)
+    })
+
+    it('is a no-op: a logOnly failure still returns the raw input without throwing', () => {
+      const req = { body: { name: 1234 } } as Request
+      const schema = z.object({ body: z.object({ name: z.string() }) })
+
+      let result: unknown
+      expect(() => {
+        result = parseReq(req, schema, { logOnly: true })
+      }).not.toThrow()
+      expect(result).toEqual({ body: { name: 1234 } })
+    })
+  })
+
+  describe('with an injected logger', () => {
+    let warnMock: ReturnType<typeof vi.fn<(ctx: any, msg: string) => void>>
+
+    beforeEach(() => {
+      warnMock = vi.fn<(ctx: any, msg: string) => void>()
+      setLogger({ warn: warnMock })
+      resetReqValidationLoggingForTests()
+    })
+
+    afterEach(() => {
+      setReqValidationModeForTests(null)
+    })
+
+    describe('enforce mode', () => {
+      beforeEach(() => {
+        setReqValidationModeForTests('enforce')
+      })
+
+      it('throws even when opts is fully populated -- opts are inert in enforce mode', () => {
+        const req = { body: { name: 1234 } } as Request
+        const schema = z.object({ body: z.object({ name: z.string() }) })
+
+        expect(() =>
+          parseReq(req, schema, { logOnly: true, fallbackSchema: z.any() })
+        ).toThrowError(expect.objectContaining({ name: 'InvalidRequestError' }))
+        expect(warnMock).not.toHaveBeenCalled()
+      })
+
+      it('still classifies params failures as InvalidParamsError with opts set', () => {
+        const req = { params: { id: 'nope' } } as Request<{ id: string }>
+        const schema = z.object({
+          params: z.object({ id: z.string().regex(/^[0-9]+$/) }),
+        })
+
+        expect(() =>
+          parseReq(req, schema, { logOnly: true, fallbackSchema: z.any() })
+        ).toThrowError(expect.objectContaining({ name: 'InvalidParamsError' }))
+        expect(warnMock).not.toHaveBeenCalled()
+      })
+    })
+
+    // NOTE: the task description's spec text says "Default (unset OR any
+    // invalid value) is 'log'" for REQ_VALIDATION_MODE (repeated for
+    // setReqValidationModeForTests: "coerced the same way the real getter
+    // would"), which is also the only reading consistent with the rollout's
+    // safety goal (fail open to logging, not enforcing, when a service
+    // hasn't configured the var). We test that documented behavior here.
+    describe('an invalid REQ_VALIDATION_MODE value', () => {
+      beforeEach(() => {
+        setReqValidationModeForTests('bogus')
+      })
+
+      it('behaves as log mode (the documented default for unset/invalid values)', () => {
+        const req = { body: { name: 1234 } } as Request
+        const schema = z.object({ body: z.object({ name: z.string() }) })
+
+        const result = parseReq(req, schema, { logOnly: true })
+        expect(result).toEqual({ body: { name: 1234 } })
+        expect(warnMock).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    describe('log mode', () => {
+      beforeEach(() => {
+        setReqValidationModeForTests('log')
+      })
+
+      it('still throws when no opts are passed, and logs nothing', () => {
+        const req = { body: { name: 1234 } } as Request
+        const schema = z.object({ body: z.object({ name: z.string() }) })
+
+        expect(() => parseReq(req, schema)).toThrowError(
+          expect.objectContaining({ name: 'InvalidRequestError' })
+        )
+        expect(warnMock).not.toHaveBeenCalled()
+      })
+
+      describe('logOnly', () => {
+        it('returns the raw, un-coerced request input on failure', () => {
+          const req = { body: { name: 1234 } } as Request
+          const schema = z.object({ body: z.object({ name: z.string() }) })
+
+          const result = parseReq(req, schema, { logOnly: true })
+          expect(result).toBe(req)
+          expect(result).toEqual({ body: { name: 1234 } })
+        })
+
+        it('logs exactly once for a repeated identical failure against the same schema', () => {
+          const schema = z.strictObject({
+            body: z.strictObject({ name: z.string() }),
+          })
+          const req = { body: { name: 1234 } } as Request
+
+          parseReq(req, schema, { logOnly: true })
+          parseReq(req, schema, { logOnly: true })
+
+          expect(warnMock).toHaveBeenCalledTimes(1)
+        })
+
+        it('logs again when the issues differ, against the same schema', () => {
+          const schema = z.strictObject({
+            body: z.strictObject({ name: z.string() }),
+          })
+          const req1 = { body: { name: 1234 } } as Request
+          const req2 = { body: { name: 'ok', extra: true } } as Request
+
+          parseReq(req1, schema, { logOnly: true })
+          parseReq(req2, schema, { logOnly: true })
+
+          expect(warnMock).toHaveBeenCalledTimes(2)
+        })
+
+        it('logs again for a different schema object, even with identical issues (per-schema dedup)', () => {
+          const schemaA = z.strictObject({
+            body: z.strictObject({ name: z.string() }),
+          })
+          const schemaB = z.strictObject({
+            body: z.strictObject({ name: z.string() }),
+          })
+          const req = { body: { name: 1234 } } as Request
+
+          parseReq(req, schemaA, { logOnly: true })
+          parseReq(req, schemaB, { logOnly: true })
+
+          expect(warnMock).toHaveBeenCalledTimes(2)
+        })
+      })
+
+      describe('with the request-input lockdown installed', () => {
+        it('returns the raw, unwrapped params/query/body on a logOnly failure', () => {
+          const req = lockedRequest({ params: { id: 'not-an-object-id' } })
+          const schema = z.object({
+            params: z.strictObject({ id: zz.objectId() }),
+          })
+
+          const result = parseReq(req, schema, {
+            logOnly: true,
+          }) as unknown as Request
+
+          expect(() => result.params).not.toThrow()
+          expect(result.params).toEqual({ id: 'not-an-object-id' })
+        })
+      })
+
+      describe('with a fallbackSchema', () => {
+        it('returns the fallback output and logs the primary issues (fallback-passed) when the fallback passes', () => {
+          const req = { body: { count: '5' } } as Request
+          const primary = z.object({ body: z.object({ count: z.number() }) })
+          const fallback = z.object({
+            body: z.object({ count: z.coerce.number().default(0) }),
+          })
+
+          const result = parseReq(req, primary, { fallbackSchema: fallback })
+
+          expect(result).toEqual({ body: { count: 5 } })
+          expect(warnMock).toHaveBeenCalledTimes(1)
+          const [ctx] = warnMock.mock.calls[0] as WarnCall
+          expect(ctx.kind).toBe('fallback-passed')
+          expect(ctx.issues).toEqual(
+            expect.arrayContaining([
+              expect.objectContaining({ path: 'body.count' }),
+            ])
+          )
+        })
+
+        it('throws classified from the fallback error when both schemas fail and logOnly is not set', () => {
+          const req = {
+            params: { id: 'not-a-number' },
+            body: { name: 'ok' },
+          } as Request<{ id: string }, any, { name: string }>
+          // Fails on body (name is a string, not a number).
+          const primary = z.object({
+            params: z.object({ id: z.string() }),
+            body: z.object({ name: z.number() }),
+          })
+          // Fails on params (id is a string, not a number).
+          const fallback = z.object({
+            params: z.object({ id: z.number() }),
+            body: z.object({ name: z.string() }),
+          })
+
+          expect(() =>
+            parseReq(req, primary, { fallbackSchema: fallback })
+          ).toThrowError(
+            expect.objectContaining({ name: 'InvalidParamsError' })
+          )
+          expect(warnMock).not.toHaveBeenCalled()
+        })
+
+        it('returns raw input and logs once (log-only) when both schemas fail and logOnly is set', () => {
+          const req = { body: { name: 1234 } } as Request
+          const primary = z.object({ body: z.object({ name: z.string() }) })
+          const fallback = z.object({
+            body: z.object({ name: z.string().min(10) }),
+          })
+
+          const result = parseReq(req, primary, {
+            fallbackSchema: fallback,
+            logOnly: true,
+          })
+
+          expect(result).toEqual({ body: { name: 1234 } })
+          expect(warnMock).toHaveBeenCalledTimes(1)
+          const [ctx] = warnMock.mock.calls[0] as WarnCall
+          expect(ctx.kind).toBe('log-only')
+        })
+      })
+
+      describe('issue sanitization', () => {
+        it('never leaks a sentinel value present in the request', () => {
+          const req = { body: { name: 'SECRET_VALUE_123' } } as Request
+          const schema = z.object({ body: z.object({ name: z.number() }) })
+
+          parseReq(req, schema, { logOnly: true })
+
+          expect(JSON.stringify(warnMock.mock.calls)).not.toContain(
+            'SECRET_VALUE_123'
+          )
+        })
+
+        it('includes an unrecognized key NAME but never its value', () => {
+          const req = {
+            body: { name: 'ok', extraSecretField: 'TOP_SECRET_VALUE' },
+          } as Request
+          const schema = z.strictObject({
+            body: z.strictObject({ name: z.string() }),
+          })
+
+          parseReq(req, schema, { logOnly: true })
+
+          const logged = JSON.stringify(warnMock.mock.calls)
+          expect(logged).toContain('extraSecretField')
+          expect(logged).not.toContain('TOP_SECRET_VALUE')
+        })
+
+        it('truncates a >64-char path segment to exactly 64 chars', () => {
+          const longKey = 'x'.repeat(65)
+          const req = { body: { [longKey]: 'irrelevant' } } as Request
+          const schema = z.object({
+            body: z.object({ [longKey]: z.number() }),
+          })
+
+          parseReq(req, schema, { logOnly: true })
+
+          const logged = JSON.stringify(warnMock.mock.calls)
+          expect(logged).toContain(longKey.slice(0, 64))
+          expect(logged).not.toContain(longKey)
+        })
+
+        it('truncates a >200-char message to exactly 200 chars', () => {
+          const longMessage = 'y'.repeat(250)
+          const req = { body: { name: 'short' } } as Request
+          const schema = z.object({
+            body: z.object({
+              name: z.string().refine(() => false, { message: longMessage }),
+            }),
+          })
+
+          parseReq(req, schema, { logOnly: true })
+
+          const logged = JSON.stringify(warnMock.mock.calls)
+          expect(logged).toContain(longMessage.slice(0, 200))
+          expect(logged).not.toContain(longMessage)
+        })
+      })
+
+      describe('invalid_union sanitization', () => {
+        it('recursively sanitizes nested union member issues without leaking sentinel values', () => {
+          const req = {
+            body: { value: { secret: 'UNION_SECRET_VALUE' } },
+          } as Request
+          const schema = z.object({
+            body: z.object({ value: z.union([z.string(), z.number()]) }),
+          })
+
+          parseReq(req, schema, { logOnly: true })
+
+          expect(warnMock).toHaveBeenCalledTimes(1)
+          const [ctx] = warnMock.mock.calls[0] as WarnCall
+          const unionIssue = ctx.issues.find(
+            (issue: any) => issue.code === 'invalid_union'
+          )
+          expect(unionIssue).toBeDefined()
+          expect(Array.isArray(unionIssue.errors)).toBe(true)
+          expect(unionIssue.errors.length).toBeGreaterThan(0)
+
+          expect(JSON.stringify(warnMock.mock.calls)).not.toContain(
+            'UNION_SECRET_VALUE'
+          )
+        })
+      })
+    })
+
+    describe('success path', () => {
+      it('enforce mode: returns the parsed data and logs nothing, even with opts set', () => {
+        setReqValidationModeForTests('enforce')
+        const req = { body: { name: 'ok' } } as Request
+        const schema = z.object({ body: z.object({ name: z.string() }) })
+
+        const result = parseReq(req, schema, {
+          logOnly: true,
+          fallbackSchema: z.any(),
+        })
+
+        expect(result).toEqual({ body: { name: 'ok' } })
+        expect(warnMock).not.toHaveBeenCalled()
+      })
+
+      it('log mode: returns the parsed data and logs nothing, even with opts set', () => {
+        setReqValidationModeForTests('log')
+        const req = { body: { name: 'ok' } } as Request
+        const schema = z.object({ body: z.object({ name: z.string() }) })
+
+        const result = parseReq(req, schema, {
+          logOnly: true,
+          fallbackSchema: z.any(),
+        })
+
+        expect(result).toEqual({ body: { name: 'ok' } })
+        expect(warnMock).not.toHaveBeenCalled()
+      })
+    })
+  })
+})

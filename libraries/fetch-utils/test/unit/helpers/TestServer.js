@@ -39,6 +39,22 @@ class TestServer {
       res.sendStatus(500)
     })
 
+    this.app.get('/400', (req, res) => {
+      res.status(400).send('boom-400')
+    })
+
+    this.app.get('/409', (req, res) => {
+      res.status(409).send('boom-409')
+    })
+
+    this.app.get('/413', (req, res) => {
+      res.status(413).send('boom-413')
+    })
+
+    this.app.get('/422', (req, res) => {
+      res.status(422).send('boom-422')
+    })
+
     this.app.post('/sink', (req, res) => {
       req.on('data', () => {})
       req.on('end', () => {

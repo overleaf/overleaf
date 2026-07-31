@@ -153,6 +153,7 @@ class RequestFailedError extends OError {
       url,
       method: opts.method ?? 'GET',
       status: response.status,
+      ...([400, 409, 413, 422].includes(response.status) ? { body } : {}),
     })
 
     this.response = response

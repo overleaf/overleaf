@@ -7358,6 +7358,7 @@ __metadata:
     "@google-cloud/logging-bunyan": "npm:^5.1.0"
     "@overleaf/fetch-utils": "workspace:*"
     "@overleaf/o-error": "workspace:*"
+    "@overleaf/validation-tools": "workspace:*"
     "@types/node": "npm:^24.5.2"
     bunyan: "npm:^1.8.14"
     chai: "npm:^4.3.6"
@@ -14097,9 +14098,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"body-parser@patch:body-parser@npm%3A1.20.4#~/.yarn/patches/body-parser-npm-1.20.4.patch":
+"body-parser@patch:body-parser@npm%3A1.20.4#~/.yarn/patches/body-parser-npm-1.20.4-805a6a51d0.patch":
   version: 1.20.4
-  resolution: "body-parser@patch:body-parser@npm%3A1.20.4#~/.yarn/patches/body-parser-npm-1.20.4.patch::version=1.20.4&hash=83d8bd"
+  resolution: "body-parser@patch:body-parser@npm%3A1.20.4#~/.yarn/patches/body-parser-npm-1.20.4-805a6a51d0.patch::version=1.20.4&hash=b5edbe"
   dependencies:
     bytes: "npm:~3.1.2"
     content-type: "npm:~1.0.5"
@@ -14113,7 +14114,7 @@ __metadata:
     raw-body: "npm:~2.5.3"
     type-is: "npm:~1.6.18"
     unpipe: "npm:~1.0.0"
-  checksum: 10c0/b1c96b5ad2facd9b5d125aff21b7cacdcd763d7ffd31852fbd94c96a944e0ccb86089091813170fa7f4217f06f34b58e8cabefcf402b95c980ab9d004625982d
+  checksum: 10c0/f9b40b232c187a3dc3c30056655384f3ecf483a486b914c60f70f19671234024ad07b794637c1a2c8f658cde7e834916a671cdf3fe251c9b11e7865f04279aff
   languageName: node
   linkType: hard
 
@@ -18438,7 +18439,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:4.22.1, express@npm:^4.17.1, express@npm:^4.22.1":
+"express@npm:4.22.1":
   version: 4.22.1
   resolution: "express@npm:4.22.1"
   dependencies:
@@ -18474,6 +18475,45 @@ __metadata:
     utils-merge: "npm:1.0.1"
     vary: "npm:~1.1.2"
   checksum: 10c0/ea57f512ab1e05e26b53a14fd432f65a10ec735ece342b37d0b63a7bcb8d337ffbb830ecb8ca15bcdfe423fbff88cea09786277baff200e8cde3ab40faa665cd
+  languageName: node
+  linkType: hard
+
+"express@patch:express@npm%3A4.22.1#~/.yarn/patches/express-npm-4.22.1-0ea5210390.patch":
+  version: 4.22.1
+  resolution: "express@patch:express@npm%3A4.22.1#~/.yarn/patches/express-npm-4.22.1-0ea5210390.patch::version=4.22.1&hash=1a79ae"
+  dependencies:
+    accepts: "npm:~1.3.8"
+    array-flatten: "npm:1.1.1"
+    body-parser: "npm:~1.20.3"
+    content-disposition: "npm:~0.5.4"
+    content-type: "npm:~1.0.4"
+    cookie: "npm:~0.7.1"
+    cookie-signature: "npm:~1.0.6"
+    debug: "npm:2.6.9"
+    depd: "npm:2.0.0"
+    encodeurl: "npm:~2.0.0"
+    escape-html: "npm:~1.0.3"
+    etag: "npm:~1.8.1"
+    finalhandler: "npm:~1.3.1"
+    fresh: "npm:~0.5.2"
+    http-errors: "npm:~2.0.0"
+    merge-descriptors: "npm:1.0.3"
+    methods: "npm:~1.1.2"
+    on-finished: "npm:~2.4.1"
+    parseurl: "npm:~1.3.3"
+    path-to-regexp: "npm:~0.1.12"
+    proxy-addr: "npm:~2.0.7"
+    qs: "npm:~6.14.0"
+    range-parser: "npm:~1.2.1"
+    safe-buffer: "npm:5.2.1"
+    send: "npm:~0.19.0"
+    serve-static: "npm:~1.16.2"
+    setprototypeof: "npm:1.2.0"
+    statuses: "npm:~2.0.1"
+    type-is: "npm:~1.6.18"
+    utils-merge: "npm:1.0.1"
+    vary: "npm:~1.1.2"
+  checksum: 10c0/92c800c627cd0fdcff980dc7111ced6621f622d18ea117739ee79213a70a020eeab359c9f650ae7b71ee0ee3233ee4dd003589e2ce52831a551f4b7ef4fb5f54
   languageName: node
   linkType: hard
 
@@ -24972,13 +25012,13 @@ __metadata:
 
 "multer@patch:multer@npm%3A2.2.0#~/.yarn/patches/multer-npm-2.2.0-4ed181c78f.patch":
   version: 2.2.0
-  resolution: "multer@patch:multer@npm%3A2.2.0#~/.yarn/patches/multer-npm-2.2.0-4ed181c78f.patch::version=2.2.0&hash=cf9e1c"
+  resolution: "multer@patch:multer@npm%3A2.2.0#~/.yarn/patches/multer-npm-2.2.0-4ed181c78f.patch::version=2.2.0&hash=f480e2"
   dependencies:
     append-field: "npm:^1.0.0"
     busboy: "npm:^1.6.0"
     concat-stream: "npm:^2.0.0"
     type-is: "npm:^1.6.18"
-  checksum: 10c0/9aa266ba976e6ee0d292d4b838d7e957086bcfb53fa170b62ca26d8737cc5eb2fc066fba0045895cbce6981a467adc0f801685b5528e8d1d09e00ca1544163dc
+  checksum: 10c0/c704a7c804e026efa6b9f6902febded9d9df64a061d0dc86f8fb014df07666240f39685f36a35bb620388bf3a4717a78af558bb5a25c1e2aefe548c13724e829
   languageName: node
   linkType: hard
 

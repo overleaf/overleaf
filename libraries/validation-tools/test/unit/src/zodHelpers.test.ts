@@ -334,4 +334,569 @@ describe('zodHelpers', () => {
       expect(parsed.data).toBe('foo/output.pdf')
     })
   })
+
+  describe('routeSegment', () => {
+    it('fails to parse with empty input', () => {
+      const parsed = zz.routeSegment().safeParse('')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toHaveLength(1)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'route segment is empty',
+        }),
+      ])
+    })
+
+    it('fails to parse a segment containing a path separator', () => {
+      const parsed = zz.routeSegment().safeParse('foo/bar')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'route segment contains a path, query or fragment separator',
+        }),
+      ])
+    })
+
+    it('fails to parse a segment containing a backslash', () => {
+      const parsed = zz.routeSegment().safeParse('foo\\bar')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'route segment contains a path, query or fragment separator',
+        }),
+      ])
+    })
+
+    it('fails to parse a segment containing a query separator', () => {
+      const parsed = zz.routeSegment().safeParse('foo?bar=1')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'route segment contains a path, query or fragment separator',
+        }),
+      ])
+    })
+
+    it('fails to parse a segment containing a fragment separator', () => {
+      const parsed = zz.routeSegment().safeParse('foo#bar')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'route segment contains a path, query or fragment separator',
+        }),
+      ])
+    })
+
+    it('fails to parse a relative path component', () => {
+      const parsed = zz.routeSegment().safeParse('..')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'route segment is a relative path component',
+        }),
+      ])
+    })
+
+    it('fails to parse a single dot', () => {
+      const parsed = zz.routeSegment().safeParse('.')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'route segment is a relative path component',
+        }),
+      ])
+    })
+
+    it('parses successfully when provided a plain segment', () => {
+      const parsed = zz.routeSegment().safeParse('conversion')
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe('conversion')
+    })
+
+    it('parses successfully when provided a mongo ObjectId-shaped segment', () => {
+      const parsed = zz.routeSegment().safeParse('507f1f77bcf86cd799439011')
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe('507f1f77bcf86cd799439011')
+    })
+  })
+
+  describe('safePath', () => {
+    it('fails to parse with empty input', () => {
+      const parsed = zz.safePath().safeParse('')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path is empty',
+        }),
+      ])
+    })
+
+    it('parses successfully with an absolute (root-relative) path', () => {
+      // unlike filepath(), a leading "/" is allowed -- project doc/file
+      // paths are root-relative in production (see web's
+      // ProjectEntityHandler.getAllEntitiesFromProject).
+      const parsed = zz.safePath().safeParse('/output.pdf')
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe('/output.pdf')
+    })
+
+    it('fails to parse a path ending in a slash (a folder, not a file)', () => {
+      const parsed = zz.safePath().safeParse('foo/')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path is a folder, not a file',
+        }),
+      ])
+    })
+
+    it('fails to parse when provided with path traversal', () => {
+      const parsed = zz.safePath().safeParse('../output.pdf')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path traversal detected',
+        }),
+      ])
+    })
+
+    it('fails to parse a path that is exactly "."', () => {
+      // matches SafePath.mjs's BADFILE_RX (^\.$), not just "..": a lone "."
+      // component is also rejected there, cross-checked against
+      // SafePath.test.mjs's isCleanFilename/isCleanPath cases.
+      const parsed = zz.safePath().safeParse('.')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path segment is "." or has leading/trailing whitespace',
+        }),
+      ])
+    })
+
+    it('fails to parse a path segment with leading whitespace', () => {
+      const parsed = zz.safePath().safeParse(' foobar.tex')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path segment is "." or has leading/trailing whitespace',
+        }),
+      ])
+    })
+
+    it('fails to parse a path segment with trailing whitespace', () => {
+      const parsed = zz.safePath().safeParse('foobar.tex ')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path segment is "." or has leading/trailing whitespace',
+        }),
+      ])
+    })
+
+    it('fails to parse a path containing a null byte', () => {
+      const parsed = zz
+        .safePath()
+        .safeParse('foo' + String.fromCharCode(0) + '.tex')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path contains a disallowed character',
+        }),
+      ])
+    })
+
+    it('fails to parse a path containing a C1 control character', () => {
+      // \x80-\x9F, per SafePath.mjs's BADCHAR_RX
+      const parsed = zz
+        .safePath()
+        .safeParse('foo' + String.fromCharCode(0x90) + '.tex')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path contains a disallowed character',
+        }),
+      ])
+    })
+
+    it('fails to parse a path containing a lone surrogate', () => {
+      // \uD800-\uDFFF, per SafePath.mjs's BADCHAR_RX
+      const parsed = zz.safePath().safeParse('foo\uD800.tex')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path contains a disallowed character',
+        }),
+      ])
+    })
+
+    it('fails to parse a path containing an asterisk', () => {
+      const parsed = zz.safePath().safeParse('foo*.tex')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path contains a disallowed character',
+        }),
+      ])
+    })
+
+    it('fails to parse a path containing a backslash', () => {
+      const parsed = zz.safePath().safeParse('foo\\bar.tex')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path contains a disallowed character',
+        }),
+      ])
+    })
+
+    it('fails to parse a path with a __proto__ segment', () => {
+      const parsed = zz.safePath().safeParse('__proto__/output.pdf')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path segment is an unsafe property name',
+        }),
+      ])
+    })
+
+    it('fails to parse a path that is exactly "constructor"', () => {
+      const parsed = zz.safePath().safeParse('constructor')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path segment is an unsafe property name',
+        }),
+      ])
+    })
+
+    it('fails to parse a nested segment matching a built-in Object.prototype method name', () => {
+      // full BLOCKEDFILE_RX parity, not just the prototype-pollution subset
+      // (__proto__/constructor/prototype) -- and checked per segment, not
+      // only the top-level path as SafePath.mjs's isCleanPath does.
+      const parsed = zz.safePath().safeParse('foo/toString')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path segment is an unsafe property name',
+        }),
+      ])
+    })
+
+    it('fails to parse a path that is exactly "hasOwnProperty"', () => {
+      const parsed = zz.safePath().safeParse('hasOwnProperty')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path segment is an unsafe property name',
+        }),
+      ])
+    })
+
+    it('parses successfully when provided a valid nested path', () => {
+      const parsed = zz.safePath().safeParse('foo/output.pdf')
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe('foo/output.pdf')
+    })
+  })
+
+  describe('projectHistoryId', () => {
+    it('fails to parse an invalid id', () => {
+      const parsed = zz.projectHistoryId().safeParse('not-an-id')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'invalid project history id',
+        }),
+      ])
+    })
+
+    it('fails to parse a path-traversal payload', () => {
+      const parsed = zz.projectHistoryId().safeParse('a/../../../../../etc')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'invalid project history id',
+        }),
+      ])
+    })
+
+    it('parses successfully when provided a valid Mongo ObjectId', () => {
+      const parsed = zz.projectHistoryId().safeParse('507f1f77bcf86cd799439011')
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe('507f1f77bcf86cd799439011')
+    })
+
+    it('parses successfully when provided a valid Postgres id', () => {
+      const parsed = zz.projectHistoryId().safeParse('12345')
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe('12345')
+    })
+
+    it('fails to parse a Postgres id with a leading zero', () => {
+      const parsed = zz.projectHistoryId().safeParse('0123')
+      expect(parsed.success).toBe(false)
+    })
+  })
+
+  describe('chunkId', () => {
+    it('fails to parse an invalid id', () => {
+      const parsed = zz.chunkId().safeParse('not-an-id')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'invalid chunk id',
+        }),
+      ])
+    })
+
+    it('fails to parse a path-traversal payload', () => {
+      const parsed = zz.chunkId().safeParse('a/../../../../../etc')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'invalid chunk id',
+        }),
+      ])
+    })
+
+    it('parses successfully when provided a valid Mongo ObjectId', () => {
+      const parsed = zz.chunkId().safeParse('507f1f77bcf86cd799439011')
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe('507f1f77bcf86cd799439011')
+    })
+
+    it('parses successfully when provided a valid Postgres id', () => {
+      const parsed = zz.chunkId().safeParse('12345')
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe('12345')
+    })
+
+    it('fails to parse a Postgres id with a leading zero', () => {
+      const parsed = zz.chunkId().safeParse('0123')
+      expect(parsed.success).toBe(false)
+    })
+  })
+
+  describe('splitTestName', () => {
+    it('fails to parse a non-kebab-case name', () => {
+      const parsed = zz.splitTestName().safeParse('Not_Valid')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'split test name must be kebab-case',
+        }),
+      ])
+    })
+
+    it('fails to parse a name shorter than 3 characters', () => {
+      const parsed = zz.splitTestName().safeParse('ab')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'split test name must be at least 3 characters long',
+        }),
+      ])
+    })
+
+    it('fails to parse a path-traversal-shaped payload', () => {
+      const parsed = zz.splitTestName().safeParse('../../etc/passwd')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'split test name must be kebab-case',
+        }),
+      ])
+    })
+
+    it('parses successfully when provided a valid kebab-case name', () => {
+      const parsed = zz.splitTestName().safeParse('my-split-test')
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe('my-split-test')
+    })
+  })
+
+  describe('variantName', () => {
+    it('fails to parse a non-kebab-case name', () => {
+      const parsed = zz.variantName().safeParse('Not_Valid')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'variant name must be kebab-case',
+        }),
+      ])
+    })
+
+    it('fails to parse a name shorter than 3 characters', () => {
+      const parsed = zz.variantName().safeParse('ab')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'variant name must be at least 3 characters long',
+        }),
+      ])
+    })
+
+    it('fails to parse a path-traversal-shaped payload', () => {
+      const parsed = zz.variantName().safeParse('../../etc/passwd')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'variant name must be kebab-case',
+        }),
+      ])
+    })
+
+    it('parses successfully when provided a valid kebab-case name', () => {
+      const parsed = zz.variantName().safeParse('variant-1')
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe('variant-1')
+    })
+  })
+
+  describe('eventName', () => {
+    it('fails to parse a name containing a disallowed character', () => {
+      const parsed = zz.eventName().safeParse('bad event!')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'invalid event name',
+        }),
+      ])
+    })
+
+    it('fails to parse an empty string', () => {
+      // both the explicit .min(1) and the regex reject an empty string, so
+      // two issues are reported, each with the same message
+      const parsed = zz.eventName().safeParse('')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues.length).toBeGreaterThan(0)
+      for (const issue of parsed.error?.issues ?? []) {
+        expect(issue).toMatchObject({ message: 'invalid event name' })
+      }
+    })
+
+    it('parses successfully when provided a name with letters, digits and hyphens/underscores', () => {
+      const parsed = zz.eventName().safeParse('editor-click_something-2')
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe('editor-click_something-2')
+    })
+
+    it('fails to parse a name containing an uppercase letter or dots, colons, semicolons, commas and slashes', () => {
+      const parsed = zz.eventName().safeParse('I.did:something,here/now;too')
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'invalid event name',
+        }),
+      ])
+    })
+
+    it('parses successfully when provided a name that is exactly 240 characters long', () => {
+      const name = 'a'.repeat(240)
+      const parsed = zz.eventName().safeParse(name)
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe(name)
+    })
+
+    it('fails to parse a name that is 241 characters long', () => {
+      const name = 'a'.repeat(241)
+      const parsed = zz.eventName().safeParse(name)
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'event name is too long',
+        }),
+      ])
+    })
+  })
+
+  describe('streamedBody', () => {
+    it('parses undefined (no body parser mounted) to undefined', () => {
+      const parsed = zz.streamedBody().safeParse(undefined)
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe(undefined)
+    })
+
+    it('parses the empty object left by a skipping body parser to undefined', () => {
+      const parsed = zz.streamedBody().safeParse({})
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe(undefined)
+    })
+
+    it('fails to parse a parsed JSON body', () => {
+      const parsed = zz.streamedBody().safeParse({ some: 'payload' })
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'unexpected parsed request body on streamed endpoint',
+        }),
+      ])
+    })
+
+    it('fails to parse a raw buffer body', () => {
+      const parsed = zz.streamedBody().safeParse(Buffer.alloc(0))
+      expect(parsed.success).toBe(false)
+    })
+
+    it('fails to parse a string body', () => {
+      const parsed = zz.streamedBody().safeParse('text body')
+      expect(parsed.success).toBe(false)
+    })
+  })
+
+  describe('uploadedFile', () => {
+    const validFile = {
+      fieldname: 'qqfile',
+      originalname: 'paper.tex',
+      encoding: '7bit',
+      mimetype: 'application/x-tex',
+      size: 1234,
+      destination: '/tmp/uploads',
+      filename: 'a1b2c3d4e5f6',
+      path: '/tmp/uploads/a1b2c3d4e5f6',
+    }
+
+    it('parses a multer disk-storage file object', () => {
+      const parsed = zz.uploadedFile().safeParse(validFile)
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toEqual(validFile)
+    })
+
+    it('parses a file object without the deprecated encoding field', () => {
+      const { encoding, ...rest } = validFile
+      const parsed = zz.uploadedFile().safeParse(rest)
+      expect(parsed.success).toBe(true)
+    })
+
+    it('fails to parse an originalname with path traversal', () => {
+      const parsed = zz
+        .uploadedFile()
+        .safeParse({ ...validFile, originalname: '../../etc/passwd' })
+      expect(parsed.success).toBe(false)
+      expect(parsed.error?.issues).toMatchObject([
+        expect.objectContaining({
+          message: 'path traversal detected',
+        }),
+      ])
+    })
+
+    it('fails to parse an absolute originalname', () => {
+      const parsed = zz
+        .uploadedFile()
+        .safeParse({ ...validFile, originalname: '/etc/passwd' })
+      expect(parsed.success).toBe(false)
+    })
+
+    it('rejects unknown keys such as a memory-storage buffer', () => {
+      const parsed = zz
+        .uploadedFile()
+        .safeParse({ ...validFile, buffer: Buffer.alloc(1) })
+      expect(parsed.success).toBe(false)
+    })
+
+    it('fails to parse a negative size', () => {
+      const parsed = zz.uploadedFile().safeParse({ ...validFile, size: -1 })
+      expect(parsed.success).toBe(false)
+    })
+  })
 })

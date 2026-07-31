@@ -25,6 +25,7 @@
     "@google-cloud/logging-bunyan": "^5.1.0",
     "@overleaf/fetch-utils": "workspace:*",
     "@overleaf/o-error": "workspace:*",
+    "@overleaf/validation-tools": "workspace:*",
     "bunyan": "^1.8.14"
   },
   "devDependencies": {

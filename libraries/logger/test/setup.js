@@ -7,6 +7,11 @@ chai.should()
 chai.use(sinonChai)
 
 SandboxedModule.configure({
+  requires: {
+    // pulls in mongodb (via zod ObjectId helpers), which does not compile in
+    // the sandbox (missing TextEncoder)
+    '@overleaf/validation-tools': require('@overleaf/validation-tools'),
+  },
   globals: { Buffer, JSON, console, process },
   sourceTransformers: {
     removeNodePrefix: function (source) {

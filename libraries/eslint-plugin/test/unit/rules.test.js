@@ -3,6 +3,7 @@ import { RuleTester } from 'eslint'
 import tsParser from '@typescript-eslint/parser'
 import json from '@eslint/json'
 import noThrowInCallback from '../../no-throw-in-callback.js'
+import noRawReqAccess from '../../no-raw-req-access.js'
 import preferKebabUrl from '../../prefer-kebab-url.js'
 import noUnnecessaryTrans from '../../no-unnecessary-trans.js'
 import shouldUnescapeTrans from '../../should-unescape-trans.js'
@@ -349,6 +350,65 @@ ruleTester.run('no-throw-in-callback', noThrowInCallback, {
     {
       code: `function foo(cb) { bar(function(done) { throw new Error() }) }`,
       errors: [{ message: noThrowInCallbackMessage }],
+    },
+  ],
+})
+
+ruleTester.run('no-raw-req-access', noRawReqAccess, {
+  valid: [
+    // validated access goes through parseReq
+    { code: `const { params, body } = parseReq(req, schema)` },
+    // allowlisted middleware reads raw input explicitly
+    { code: `const { query } = getRawReqInput(req)` },
+    // writes stay allowed: body parsers and middleware assign req.body
+    { code: `req.body = {}` },
+    { code: `req.query = parsed` },
+    // other request fields are not locked
+    { code: `const ua = req.headers['user-agent']` },
+    { code: `const s = req.session` },
+    // other objects with the same field names are fine
+    { code: `const b = options.body` },
+    { code: `const { body } = response` },
+  ],
+  invalid: [
+    {
+      code: `const id = req.params.project_id`,
+      errors: [{ messageId: 'noRawReqAccess', data: { field: 'params' } }],
+    },
+    {
+      code: `if (req.query.force) { doIt() }`,
+      errors: [{ messageId: 'noRawReqAccess', data: { field: 'query' } }],
+    },
+    {
+      code: `send(req.body)`,
+      errors: [{ messageId: 'noRawReqAccess', data: { field: 'body' } }],
+    },
+    // computed string access
+    {
+      code: `const b = req['body']`,
+      errors: [{ messageId: 'noRawReqAccess', data: { field: 'body' } }],
+    },
+    // destructuring reads
+    {
+      code: `const { body } = req`,
+      errors: [{ messageId: 'noRawReqAccess', data: { field: 'body' } }],
+    },
+    {
+      code: `const { params, query } = req`,
+      errors: [
+        { messageId: 'noRawReqAccess', data: { field: 'params' } },
+        { messageId: 'noRawReqAccess', data: { field: 'query' } },
+      ],
+    },
+    // compound assignment reads before writing
+    {
+      code: `req.body ||= {}`,
+      errors: [{ messageId: 'noRawReqAccess', data: { field: 'body' } }],
+    },
+    // optional chaining
+    {
+      code: `const q = req?.query`,
+      errors: [{ messageId: 'noRawReqAccess', data: { field: 'query' } }],
     },
   ],
 })
