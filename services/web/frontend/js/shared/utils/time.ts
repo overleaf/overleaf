@@ -4,8 +4,10 @@ export function formatSecondsToHoursAndMinutes(
   t: TFunction,
   seconds: number
 ): string {
-  const hrs = Math.floor(seconds / 3600)
-  const mins = Math.floor((seconds % 3600) / 60)
+  // round up: the caller tells the user how long to wait, so never understate
+  const totalMinutes = Math.ceil(seconds / 60)
+  const hrs = Math.floor(totalMinutes / 60)
+  const mins = totalMinutes % 60
 
   const parts = []
 
