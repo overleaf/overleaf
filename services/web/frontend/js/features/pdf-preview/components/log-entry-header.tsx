@@ -21,7 +21,7 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import MaterialIcon from '@/shared/components/material-icon'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'
-import useIsNetworkStalled from '@/features/ide-react/hooks/use-is-network-stalled'
+import { useDetachCompileContext as useCompileContext } from '@/shared/context/detach-compile-context'
 
 const actionComponents = importOverleafModules(
   'pdfLogEntryHeaderActionComponents'
@@ -62,7 +62,7 @@ function LogEntryHeader({
   const [locationSpanOverflown, setLocationSpanOverflown] = useState(false)
   const { findEntityByPath } = useFileTreePathContext()
   const { openEntity } = useFileTreeOpenContext()
-  const isDisabledDueToNetworkStall = useIsNetworkStalled()
+  const { isNetworkStalled } = useCompileContext()
 
   useResizeObserver(
     logLocationSpanRef,
@@ -172,7 +172,7 @@ function LogEntryHeader({
               description={t('go_to_code_location')}
               overlayProps={{ placement: 'bottom' }}
             >
-              {isDisabledDueToNetworkStall ? (
+              {isNetworkStalled ? (
                 <span className="d-inline-block">
                   <OLIconButton
                     onClick={onSourceLocationClick}
