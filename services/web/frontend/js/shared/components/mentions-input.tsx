@@ -8,7 +8,11 @@ import {
 } from '@codemirror/view'
 import { Compartment } from '@codemirror/state'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
-import { autocompletion, completionStatus } from '@codemirror/autocomplete'
+import {
+  acceptCompletion,
+  autocompletion,
+  completionStatus,
+} from '@codemirror/autocomplete'
 import classNames from 'classnames'
 import mentions, {
   mentionCompletions,
@@ -237,6 +241,8 @@ export const MentionsInput = forwardRef<
               return true
             },
           },
+          // Accept the highlighted suggestion on Tab, as in the main editor's autocomplete.
+          { key: 'Tab', run: acceptCompletion },
           ...defaultKeymap,
           ...historyKeymap,
         ]),
