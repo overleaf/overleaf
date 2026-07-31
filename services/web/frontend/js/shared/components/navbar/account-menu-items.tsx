@@ -9,6 +9,7 @@ import { useDsNavStyle } from '@/features/project-list/components/use-is-ds-nav'
 import { SignOut } from '@phosphor-icons/react'
 import ThemeToggle from '@/features/project-list/components/sidebar/theme-toggle'
 import { OfflineDocBackup } from '@/features/ide-react/editor/offline-doc-backup'
+import { ConnectionOutageTracker } from '@/features/ide-react/editor/connection-outage-tracker'
 
 export function AccountMenuItems({
   sessionUser,
@@ -66,7 +67,10 @@ export function AccountMenuItems({
           id={logOutFormId}
           method="POST"
           action="/logout"
-          onSubmit={() => OfflineDocBackup.clearAll()}
+          onSubmit={() => {
+            OfflineDocBackup.clearAll()
+            ConnectionOutageTracker.clearAll()
+          }}
         >
           <input type="hidden" name="_csrf" value={getMeta('ol-csrfToken')} />
         </form>

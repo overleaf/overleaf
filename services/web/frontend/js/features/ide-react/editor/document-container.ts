@@ -86,7 +86,7 @@ function getOpSize(op: AnyOperation) {
   return 0
 }
 
-function getShareJsOpSize(shareJsOp: ShareJsOperation) {
+export function getShareJsOpSize(shareJsOp: ShareJsOperation) {
   return shareJsOp.reduce((total, op) => total + getOpSize(op), 0)
 }
 

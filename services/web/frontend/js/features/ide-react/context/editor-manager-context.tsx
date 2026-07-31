@@ -27,6 +27,7 @@ import {
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { IdeEvents } from '@/features/ide-react/create-ide-event-emitter'
 import { OfflineDocBackup } from '@/features/ide-react/editor/offline-doc-backup'
+import { ConnectionOutageTracker } from '@/features/ide-react/editor/connection-outage-tracker'
 import { useTranslation } from 'react-i18next'
 import customLocalStorage from '@/infrastructure/local-storage'
 import useEventListener from '@/shared/hooks/use-event-listener'
@@ -591,6 +592,7 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
           projectId,
           document.doc_id
         )
+        ConnectionOutageTracker.recordTeardown(projectId)
         if (backupRecord) {
           if (!isConnected) {
             // Still offline, so nothing has been rejected yet: this is the
