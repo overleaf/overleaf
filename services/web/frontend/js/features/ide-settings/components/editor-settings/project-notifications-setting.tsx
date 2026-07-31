@@ -6,9 +6,11 @@ import {
 } from '../../hooks/use-project-notification-preferences'
 import BetaBadgeIcon from '@/shared/components/beta-badge-icon'
 import LoadingSpinner from '@/shared/components/loading-spinner'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export default function ProjectNotificationsSetting() {
   const { t } = useTranslation()
+  const commentMentionsEnabled = useFeatureFlag('comment-mentions')
   const { notificationLevel, setNotificationLevel, isLoading } =
     useProjectNotificationPreferences()
 
@@ -24,8 +26,12 @@ export default function ProjectNotificationsSetting() {
     },
     {
       value: 'replies',
-      label: t('replies_to_your_activity_only'),
-      description: t('replies_to_your_activity_only_description'),
+      label: commentMentionsEnabled
+        ? t('mentions_and_replies_only')
+        : t('replies_to_your_activity_only'),
+      description: commentMentionsEnabled
+        ? t('mentions_and_replies_only_description')
+        : t('replies_to_your_activity_only_description'),
     },
     {
       value: 'off',

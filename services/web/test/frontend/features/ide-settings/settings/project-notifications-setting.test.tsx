@@ -100,6 +100,7 @@ function renderComponent(props: { permissionsLevel?: string } = {}) {
 describe('<ProjectNotificationsSetting />', function () {
   afterEach(function () {
     fetchMock.removeRoutes().clearHistory()
+    window.metaAttributesCache.delete('ol-splitTestVariants')
   })
 
   it('shows loading indicator while preferences are loading', async function () {
@@ -166,6 +167,28 @@ describe('<ProjectNotificationsSetting />', function () {
       (screen.getByLabelText('Off', { exact: false }) as HTMLInputElement)
         .checked
     ).to.be.false
+  })
+
+  it('shows mentions copy when comment-mentions is enabled', async function () {
+    window.metaAttributesCache.set('ol-splitTestVariants', {
+      'comment-mentions': 'enabled',
+    })
+    fetchMock.get(preferencesUrl, repliesOnlyPreferences)
+
+    renderComponent()
+
+    await waitFor(
+      () =>
+        expect(
+          screen.getByLabelText('Mentions and replies only', { exact: false })
+        ).to.exist
+    )
+    expect(
+      screen.getByText(
+        'You’ll be notified about @mentions, replies and activity on your track changes.',
+        { exact: false }
+      )
+    ).to.exist
   })
 
   it('selects "Off" when all notifications are off', async function () {

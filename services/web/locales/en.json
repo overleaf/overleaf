@@ -1618,6 +1618,8 @@
   "mendeley_sync_description": "With the Mendeley integration you can import your references from Mendeley into your __appName__ projects.",
   "mendeley_upgrade_prompt_content": "Link your Mendeley account to search and add your references from Mendeley directly in your project—they’ll automatically be added to your .bib file. Or import them as a file into your __appName__ projects.",
   "mendeley_upgrade_prompt_title": "Cite from Mendeley",
+  "mentions_and_replies_only": "Mentions and replies only",
+  "mentions_and_replies_only_description": "You’ll be notified about @mentions, replies and activity on your track changes.",
   "menu": "Menu",
   "merge": "Merge",
   "merge_cells": "Merge cells",
