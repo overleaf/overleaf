@@ -522,6 +522,14 @@ export class ShareJsDoc extends EventEmitter {
   }
 
   private startFatalTimeoutTimer(update: Update) {
+    if (
+      intermittentConnectionImprovementsEnabled &&
+      this.type === 'sharejs-text-ot'
+    ) {
+      // We're storing ops locally as a backup, so no need to panic if they
+      // don't reach the server this time.
+      return
+    }
     // If an op doesn't get acked within FATAL_OP_TIMEOUT, something has
     // gone unrecoverably wrong (the op will have been retried multiple times)
     if (this._timeoutTimer != null) {
