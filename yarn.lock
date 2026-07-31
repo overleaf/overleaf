@@ -7760,6 +7760,7 @@ __metadata:
     "@overleaf/migrations": "workspace:*"
     "@overleaf/promise-utils": "workspace:*"
     "@overleaf/settings": "workspace:*"
+    "@overleaf/validation-tools": "workspace:*"
     "@types/node": "npm:^24.5.2"
     args-js: "npm:0.10.12"
     async: "npm:^3.2.5"
