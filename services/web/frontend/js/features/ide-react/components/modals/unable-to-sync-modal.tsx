@@ -14,6 +14,7 @@ import { uploadBatch } from '@/infrastructure/batch-file-uploader'
 import { debugConsole } from '@/utils/debugging'
 import Notification from '@/shared/components/notification'
 import { downloadFileContent } from '@/utils/download-file'
+import { useLocation } from '@/shared/hooks/use-location'
 
 export type UnableToSyncModalProps = {
   baseContent: string
@@ -22,6 +23,7 @@ export type UnableToSyncModalProps = {
   rootFolderId: string | undefined
   show: boolean
   onHide: () => void
+  reloadAfterClose?: boolean
 }
 
 // Generates the offline copy filename with a timestamp to avoid duplicates.
@@ -52,11 +54,20 @@ function UnableToSyncModal({
   docName,
   rootFolderId,
   show,
-  onHide,
+  onHide: onHideProp,
+  reloadAfterClose = false,
 }: UnableToSyncModalProps) {
   const { t } = useTranslation()
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(false)
+  const location = useLocation()
+
+  const onHide = useCallback(() => {
+    onHideProp()
+    if (reloadAfterClose) {
+      location.reload()
+    }
+  }, [onHideProp, reloadAfterClose, location])
 
   const handleDownload = useCallback(() => {
     downloadFileContent(targetContent, docName ?? 'document.txt')

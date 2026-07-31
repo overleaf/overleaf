@@ -9,6 +9,7 @@ import type { SocketDebuggingInfo } from '@/features/ide-react/connection/types/
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
 import { OfflineDocBackup } from '@/features/ide-react/editor/offline-doc-backup'
 import { GlobalToasts } from '@/features/ide-react/components/global-toasts'
+import { location } from '@/shared/components/location'
 import {
   EditorProviders,
   makeEditorOpenDocProvider,
@@ -177,6 +178,31 @@ describe('EditorManagerProvider docError sync modals', function () {
     })
   })
 
+  it('reloads the page when the backup-path modal is closed', function () {
+    cy.then(() => {
+      setSplitTest(true)
+      plantBackup(CURRENT_DOC_ID)
+      cy.stub(location, 'reload').as('reload')
+    })
+
+    mount()
+
+    cy.then(() => {
+      currentDoc.trigger(
+        'error',
+        new Error('forced'),
+        {},
+        'offline edits content'
+      )
+    })
+
+    cy.findByRole('dialog').within(() => {
+      cy.findByRole('button', { name: 'Discard changes' }).click()
+    })
+
+    cy.get('@reload').should('have.been.calledOnce')
+  })
+
   it('shows nothing and keeps the backup when the failure happens while offline', function () {
     let key: string
     cy.then(() => {
@@ -277,6 +303,91 @@ describe('EditorManagerProvider docError sync modals', function () {
     cy.findByRole('dialog').within(() => {
       cy.findByText('Your offline edits couldn’t be synced').should('exist')
     })
+  })
+
+  it('does not reload when the recovery event omits reloadAfterClose', function () {
+    let capturedEmitter: IdeEventEmitter | null = null
+
+    cy.then(() => {
+      cy.stub(location, 'reload').as('reload')
+    })
+
+    cy.mount(
+      <EditorProviders
+        projectId={PROJECT_ID}
+        providers={{
+          EditorOpenDocProvider: makeEditorOpenDocProvider({
+            currentDocumentId: CURRENT_DOC_ID as any,
+            openDocName: currentDoc.docName,
+            currentDocument: currentDoc as any,
+          }),
+        }}
+      >
+        <CaptureEventEmitter
+          onReady={emitter => {
+            capturedEmitter = emitter
+          }}
+        />
+      </EditorProviders>
+    )
+
+    cy.then(() => {
+      capturedEmitter!.emit('ide:unableToSyncOfflineChanges', {
+        docId: CURRENT_DOC_ID,
+        editorContent: 'recovered content',
+        baseContent: 'original content',
+        docName: 'recovered.tex',
+      })
+    })
+
+    cy.findByRole('dialog').within(() => {
+      cy.findByRole('button', { name: 'Discard changes' }).click()
+    })
+
+    cy.get('@reload').should('not.have.been.called')
+  })
+
+  it('reloads when the recovery event sets reloadAfterClose', function () {
+    let capturedEmitter: IdeEventEmitter | null = null
+
+    cy.then(() => {
+      cy.stub(location, 'reload').as('reload')
+    })
+
+    cy.mount(
+      <EditorProviders
+        projectId={PROJECT_ID}
+        providers={{
+          EditorOpenDocProvider: makeEditorOpenDocProvider({
+            currentDocumentId: CURRENT_DOC_ID as any,
+            openDocName: currentDoc.docName,
+            currentDocument: currentDoc as any,
+          }),
+        }}
+      >
+        <CaptureEventEmitter
+          onReady={emitter => {
+            capturedEmitter = emitter
+          }}
+        />
+      </EditorProviders>
+    )
+
+    cy.then(() => {
+      capturedEmitter!.emit('ide:unableToSyncOfflineChanges', {
+        docId: CURRENT_DOC_ID,
+        editorContent: 'recovered content',
+        baseContent: 'original content',
+        docName: 'recovered.tex',
+        reloadAfterClose: true,
+      })
+    })
+
+    cy.findByRole('dialog').within(() => {
+      cy.findByRole('button', { name: 'Discard changes' }).click()
+    })
+
+    cy.get('@reload').should('have.been.calledOnce')
   })
 
   it('shows the success toast on the ide:offlineChangesSynced event', function () {

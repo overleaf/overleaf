@@ -28,6 +28,7 @@ export type IdeEvents = {
       editorContent: string
       baseContent: string
       docName: string
+      reloadAfterClose?: boolean
     },
   ]
   'ide:offlineChangesSynced': [{ docId: string }]

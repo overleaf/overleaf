@@ -606,6 +606,7 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
             editorContent: editorContent || '',
             baseContent: backupRecord.snapshot,
             docName: document.docName,
+            reloadAfterClose: true,
           })
           OfflineDocBackup.remove(projectId, document.doc_id)
         } else {
@@ -644,13 +645,14 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
 
   useEffect(() => {
     const handleUnableToSync = ({
-      detail: [{ editorContent, baseContent, docName }],
+      detail: [{ editorContent, baseContent, docName, reloadAfterClose }],
     }: CustomEvent<IdeEvents['ide:unableToSyncOfflineChanges']>) => {
       showUnableToSyncModal({
         baseContent,
         targetContent: editorContent,
         docName,
         rootFolderId: fileTreeDataRef.current?._id,
+        reloadAfterClose,
       })
     }
 

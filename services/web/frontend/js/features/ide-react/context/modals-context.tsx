@@ -32,7 +32,11 @@ type ModalsContextValue = {
   showUnableToSyncModal: (
     data: Pick<
       UnableToSyncModalProps,
-      'baseContent' | 'targetContent' | 'docName' | 'rootFolderId'
+      | 'baseContent'
+      | 'targetContent'
+      | 'docName'
+      | 'rootFolderId'
+      | 'reloadAfterClose'
     >
   ) => void
 }
@@ -64,13 +68,18 @@ export const ModalsContextProvider: FC<React.PropsWithChildren> = ({
   const [unableToSyncModalData, setUnableToSyncModalData] = useState<
     Pick<
       UnableToSyncModalProps,
-      'baseContent' | 'targetContent' | 'docName' | 'rootFolderId'
+      | 'baseContent'
+      | 'targetContent'
+      | 'docName'
+      | 'rootFolderId'
+      | 'reloadAfterClose'
     >
   >({
     baseContent: '',
     targetContent: '',
     docName: null,
     rootFolderId: undefined,
+    reloadAfterClose: undefined,
   })
 
   const handleHideGenericModal = useCallback(() => {
@@ -122,7 +131,11 @@ export const ModalsContextProvider: FC<React.PropsWithChildren> = ({
     (
       data: Pick<
         UnableToSyncModalProps,
-        'baseContent' | 'targetContent' | 'docName' | 'rootFolderId'
+        | 'baseContent'
+        | 'targetContent'
+        | 'docName'
+        | 'rootFolderId'
+        | 'reloadAfterClose'
       >
     ) => {
       setUnableToSyncModalData(data)
