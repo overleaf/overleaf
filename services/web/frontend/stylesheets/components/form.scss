@@ -530,7 +530,8 @@ input[type='range'] {
 }
 
 input.form-control[type='text'],
-input.form-control[type='search'] {
+input.form-control[type='search'],
+textarea.form-control {
   color: var(--input-field-color);
   background-color: var(--input-field-bg);
   border-color: var(--input-field-border-color);
