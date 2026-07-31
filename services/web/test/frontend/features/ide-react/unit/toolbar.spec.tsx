@@ -252,6 +252,8 @@ describe('<Toolbar />', function () {
   })
 
   describe('offline gating', function () {
+    const offlineIndicatorText = 'You’re offline'
+
     const onlineUser: OnlineUser = {
       id: 'client-1',
       user_id: 'user-1',
@@ -260,10 +262,16 @@ describe('<Toolbar />', function () {
       initial: 'a',
     }
 
-    const mountToolbar = ({ offline }: { offline: boolean }) => {
+    const mountToolbar = ({
+      offline,
+      focusMode = false,
+    }: {
+      offline: boolean
+      focusMode?: boolean
+    }) => {
       const unsavedDocs = offline ? new Map([['doc-1', 20]]) : new Map()
       cy.mount(
-        <EditorProviders>
+        <EditorProviders layoutContext={{ focusMode }}>
           <OnlineUsersContext.Provider
             value={{
               onlineUsers: {},
@@ -294,13 +302,26 @@ describe('<Toolbar />', function () {
       it('shows online users and no offline indicator when online', function () {
         mountToolbar({ offline: false })
         cy.get('.ide-redesign-online-users').should('exist')
-        cy.findByText('You’re offline').should('not.exist')
+        cy.findByText(offlineIndicatorText).should('not.exist')
       })
 
       it('hides online users and shows the offline indicator when offline', function () {
         mountToolbar({ offline: true })
         cy.get('.ide-redesign-online-users').should('not.exist')
-        cy.findAllByText('You’re offline').first().should('be.visible')
+        cy.findAllByText(offlineIndicatorText).first().should('be.visible')
+      })
+
+      it('shows the offline indicator in focus mode', function () {
+        mountToolbar({ offline: true, focusMode: true })
+        cy.findAllByText(offlineIndicatorText).first().should('be.visible')
+        cy.findByRole('button', { name: 'Exit focus mode' }).should(
+          'be.visible'
+        )
+      })
+
+      it('shows no offline indicator in focus mode when online', function () {
+        mountToolbar({ offline: false, focusMode: true })
+        cy.findByText(offlineIndicatorText).should('not.exist')
       })
     })
 
@@ -308,7 +329,15 @@ describe('<Toolbar />', function () {
       it('always shows online users and never the offline indicator', function () {
         mountToolbar({ offline: true })
         cy.get('.ide-redesign-online-users').should('exist')
-        cy.findByText('You’re offline').should('not.exist')
+        cy.findByText(offlineIndicatorText).should('not.exist')
+      })
+
+      it('shows no offline indicator in focus mode', function () {
+        mountToolbar({ offline: true, focusMode: true })
+        cy.findByText(offlineIndicatorText).should('not.exist')
+        cy.findByRole('button', { name: 'Exit focus mode' }).should(
+          'be.visible'
+        )
       })
     })
   })

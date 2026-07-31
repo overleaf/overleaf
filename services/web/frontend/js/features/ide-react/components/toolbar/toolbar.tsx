@@ -72,37 +72,42 @@ export const Toolbar = () => {
           <ToolbarLogos cobranding={cobranding} />
         </div>
         <ToolbarProjectTitle />
-        <div className="ide-redesign-toolbar-actions">
-          {showViewSwitcher && (
+        <div className="ide-redesign-toolbar-actions-wrapper">
+          {improvedFlakyConnections && (
+            <OfflineIndicator isOffline={isOfflineDueToNetworkStall} />
+          )}
+          <div className="ide-redesign-toolbar-actions">
+            {showViewSwitcher && (
+              <div className="ide-redesign-toolbar-button-container">
+                <OLTooltip
+                  id="tooltip-switch-view"
+                  description={switchTooltip}
+                  overlayProps={{ delay: 0, placement: 'bottom' }}
+                >
+                  <OLIconButton
+                    icon={switchIcon}
+                    className="ide-redesign-toolbar-button-subdued ide-redesign-toolbar-button-icon"
+                    onClick={handleSwitchView}
+                    accessibilityLabel={switchTooltip}
+                  />
+                </OLTooltip>
+              </div>
+            )}
+            <ChangeLayoutButton />
             <div className="ide-redesign-toolbar-button-container">
               <OLTooltip
-                id="tooltip-switch-view"
-                description={switchTooltip}
+                id="tooltip-exit-focus-mode"
+                description={t('exit_focus_mode')}
                 overlayProps={{ delay: 0, placement: 'bottom' }}
               >
                 <OLIconButton
-                  icon={switchIcon}
+                  icon="close_fullscreen"
                   className="ide-redesign-toolbar-button-subdued ide-redesign-toolbar-button-icon"
-                  onClick={handleSwitchView}
-                  accessibilityLabel={switchTooltip}
+                  onClick={handleExitFocusMode}
+                  accessibilityLabel={t('exit_focus_mode')}
                 />
               </OLTooltip>
             </div>
-          )}
-          <ChangeLayoutButton />
-          <div className="ide-redesign-toolbar-button-container">
-            <OLTooltip
-              id="tooltip-exit-focus-mode"
-              description={t('exit_focus_mode')}
-              overlayProps={{ delay: 0, placement: 'bottom' }}
-            >
-              <OLIconButton
-                icon="close_fullscreen"
-                className="ide-redesign-toolbar-button-subdued ide-redesign-toolbar-button-icon"
-                onClick={handleExitFocusMode}
-                accessibilityLabel={t('exit_focus_mode')}
-              />
-            </OLTooltip>
           </div>
         </div>
       </nav>
