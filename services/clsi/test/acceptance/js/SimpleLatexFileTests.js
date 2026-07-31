@@ -134,6 +134,8 @@ Hello world
         const expectedRuns = scenario.expectedRuns ?? 1
         // Note: chai's all.keys assertion rejects extra keys
         stats.should.have.all.keys(
+          'include-image-all',
+          'include-image-optimised',
           'isInitialCompile',
           'latexmk-errors',
           'latex-runs',
@@ -148,6 +150,8 @@ Hello world
           'compile',
           'output',
           'compileE2E',
+          'include-image-all',
+          'include-image-optimised',
           ...pdfCachingTimings
         )
       })

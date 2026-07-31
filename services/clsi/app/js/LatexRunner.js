@@ -81,7 +81,7 @@ function runLatex(projectId, options, callback) {
       }
       if (stats.latexmk) {
         try {
-          addLatexMkMetrics(output, stats)
+          addLatexMkMetrics(output, stats, timings)
         } catch (err) {
           logger.error({ err, projectId }, 'error adding latexmk metrics')
         }

@@ -138,6 +138,10 @@ const LATEX_MK_METRICS_STDERR = [
   ],
   [
     'latexmk-img-times',
+    /**
+     * @param {string} s
+     * @returns {Array<{type: string, count: number, time_ms: number}>}
+     */
     s => {
       const pngCategoriesByFile = new Map()
       const pngCopyMatches = s.matchAll(/^PNG copy: (.*)$/gm)
@@ -157,6 +161,7 @@ const LATEX_MK_METRICS_STDERR = [
         /^Image written \((PNG|JPG|JBIG2|PDF), (\d+) ms\): (.*)$/gm
       )
       const timingsByType = new Map()
+      const countByType = new Map()
       for (const match of timingMatches) {
         let type = match[1]
         const timeMs = parseInt(match[2], 10)
@@ -174,9 +179,12 @@ const LATEX_MK_METRICS_STDERR = [
 
         const accumulatedTime = timingsByType.get(type) ?? 0
         timingsByType.set(type, accumulatedTime + timeMs)
+        const accumulatedCount = countByType.get(type) ?? 0
+        countByType.set(type, accumulatedCount + 1)
       }
       return Array.from(timingsByType.entries()).map(([type, timeMs]) => ({
         type,
+        count: countByType.get(type) || 0,
         time_ms: timeMs,
       }))
     },
@@ -190,9 +198,10 @@ const LATEX_MK_METRICS_STDERR = [
  * `stats.latexmk` object.
  *
  * @param {{stdout?: string, stderr?: string}} output - The output from the latexmk process.
- * @param {{latexmk: object}} stats - The statistics object to update. This object is mutated.
+ * @param {object} stats - The statistics object to update. This object is mutated.
+ * @param {object} [timings] - The timings object to update. This object is mutated.
  */
-function addLatexMkMetrics(output, stats) {
+function addLatexMkMetrics(output, stats, timings) {
   for (const [stat, matcher] of LATEX_MK_METRICS_STDOUT) {
     const match = matcher(output?.stdout || '', stats.latexmk)
     if (match) {
@@ -203,6 +212,27 @@ function addLatexMkMetrics(output, stats) {
     const match = matcher(output?.stderr || '', stats.latexmk)
     if (match) {
       stats.latexmk[stat] = match
+    }
+  }
+  const imgTimings = stats.latexmk['latexmk-img-times']
+  if (imgTimings) {
+    let totalImageIncludeTime = 0
+    let optimisedImageIncludeTime = 0
+    let totalImageIncludeCount = 0
+    let optimisedImageIncludeCount = 0
+    for (const { type, count, time_ms } of imgTimings) {
+      totalImageIncludeCount += count
+      totalImageIncludeTime += time_ms
+      if (type === 'PNG-png2pdf') {
+        optimisedImageIncludeCount += count
+        optimisedImageIncludeTime += time_ms
+      }
+    }
+    stats['include-image-all'] = totalImageIncludeCount
+    stats['include-image-optimised'] = optimisedImageIncludeCount
+    if (timings) {
+      timings['include-image-optimised'] = optimisedImageIncludeTime
+      timings['include-image-all'] = totalImageIncludeTime
     }
   }
 }
