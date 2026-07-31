@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { memo, useCallback, useState } from 'react'
 import OLButton from '@/shared/components/ol/ol-button'
 import {
@@ -12,6 +12,8 @@ import DiffViewer from './diff-viewer'
 import getMeta from '@/utils/meta'
 import { uploadBatch } from '@/infrastructure/batch-file-uploader'
 import { debugConsole } from '@/utils/debugging'
+import Notification from '@/shared/components/notification'
+import { downloadFileContent } from '@/utils/download-file'
 
 export type UnableToSyncModalProps = {
   baseContent: string
@@ -54,12 +56,18 @@ function UnableToSyncModal({
 }: UnableToSyncModalProps) {
   const { t } = useTranslation()
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(false)
+
+  const handleDownload = useCallback(() => {
+    downloadFileContent(targetContent, docName ?? 'document.txt')
+  }, [targetContent, docName])
 
   const handleSaveAsNewFile = useCallback(async () => {
     const projectId = getMeta('ol-project_id')
     const filename = buildOfflineFilename(docName)
 
     setSaving(true)
+    setSaveError(false)
     try {
       if (!rootFolderId) {
         throw new Error('rootFolderId not available')
@@ -79,6 +87,7 @@ function UnableToSyncModal({
       onHide()
     } catch (error) {
       debugConsole.error('Failed to save offline changes as new file', error)
+      setSaveError(true)
     } finally {
       setSaving(false)
     }
@@ -100,6 +109,26 @@ function UnableToSyncModal({
         <p>{t('offline_edits_couldnt_combine')}</p>
         <DiffViewer baseContent={baseContent} targetContent={targetContent} />
         <p className="mt-2">{t('offline_save_explanation')}</p>
+        {saveError && (
+          <Notification
+            type="error"
+            content={
+              <Trans
+                i18nKey="unable_to_save_check_connection_or_download"
+                components={[
+                  // eslint-disable-next-line jsx-a11y/anchor-has-content,jsx-a11y/anchor-is-valid,react/jsx-key
+                  <a
+                    href="#"
+                    onClick={e => {
+                      e.preventDefault()
+                      handleDownload()
+                    }}
+                  />,
+                ]}
+              />
+            }
+          />
+        )}
       </OLModalBody>
       <OLModalFooter>
         <OLButton variant="danger-ghost" onClick={onHide}>
