@@ -17,6 +17,18 @@ describe('AddCommentOperation', function () {
     expect(op.resolved).to.be.true
   })
 
+  it('constructs a collapsed AddCommentOperation fromJSON', function () {
+    const op = AddCommentOperation.fromJSON({
+      commentId: '123',
+      resolved: true,
+      ranges: [],
+    })
+    expect(op).to.be.instanceOf(AddCommentOperation)
+    expect(op.commentId).to.equal('123')
+    expect(op.ranges).to.be.deep.equal([])
+    expect(op.resolved).to.be.true
+  })
+
   it('should convert to JSON', function () {
     const op = new AddCommentOperation('123', [new Range(0, 1)])
     expect(op.toJSON()).to.eql({

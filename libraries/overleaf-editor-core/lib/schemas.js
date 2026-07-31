@@ -47,7 +47,7 @@ const rawRange = z.strictObject({
 
 const rawAddCommentOperation = z.strictObject({
   commentId: zz.objectId(),
-  ranges: z.array(rawRange).min(1),
+  ranges: z.array(rawRange),
   resolved: z.boolean().optional(),
 })
 
