@@ -268,7 +268,7 @@ export function sendChanges(
           endVersion,
           errorCode: error.code,
           statusCode: error.statusCode,
-          body: error.body,
+          errorBody: error.body,
         })
         return callback(error)
       }
@@ -625,10 +625,13 @@ function _requestHistoryService(options, callback) {
     },
     err => {
       if (err instanceof RequestFailedError) {
+        const body = [400, 409, 413, 422].includes(err.response.status)
+          ? err.body
+          : null
         const error = new OError(
           // Keep the status code in the message. It is used by the ErrorRecorder.
           `history store a non-success status code: ${err.response.status}`,
-          { method, url, qs: options.qs, statusCode: err.response.status }
+          { method, url, qs: options.qs, statusCode: err.response.status, body }
         )
         return callback(error)
       }

@@ -88,7 +88,7 @@ describe('HttpController', function () {
 
   describe('getProjectBlob', function () {
     beforeEach(function () {
-      this.blobHash = 'abcd'
+      this.blobHash = 'a'.repeat(40)
       this.stream = {}
       this.historyId = new ObjectId().toString()
       this.HistoryStoreManager.getProjectBlobStream.yields(null, this.stream)
@@ -414,7 +414,7 @@ describe('HttpController', function () {
         body: {
           version: (this.version = 1),
           comment: (this.comment = 'a comment'),
-          created_at: (this.created_at = Date.now().toString()),
+          created_at: (this.created_at = new Date()),
           validate_exists: true,
           user_id: this.userId,
         },
