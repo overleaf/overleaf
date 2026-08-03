@@ -248,6 +248,7 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
               {
                 key: 'referenceFormat',
                 component: <ReferenceFormatSetting />,
+                hidden: true, // Hide this setting for now, as it is not yet implemented its usage
               },
               {
                 key: 'write-and-cite-settings',
