@@ -109,7 +109,7 @@
     "http-status": "1.5.0",
     "knex": "2.4.0",
     "utf-8-validate": "5.0.8",
-    "samlp": "7.0.2",
+    "samlp": "patch:samlp@npm%3A7.0.2#~/.yarn/patches/samlp-npm-7.0.2-8295b3cf85.patch",
     "compression": "1.7.4",
     "cookie-parser": "1.4.6",
     "react-cookie": "7.2.0",

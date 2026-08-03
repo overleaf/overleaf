@@ -7319,6 +7319,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@overleaf/idp@workspace:services/idp"
   dependencies:
+    "@overleaf/validation-tools": "workspace:*"
     "@types/node": "npm:^24.5.2"
     chai: "npm:^4.3.6"
     chai-as-promised: "npm:^7.1.1"
@@ -30185,6 +30186,24 @@ __metadata:
     xpath: "npm:0.0.5"
     xtend: "npm:^1.0.3"
   checksum: 10c0/ba18d311cef1df8d7c93a84f02d65419be8d6ffe52306a1d90944630fef1b2dbcddd16810227cf2195f35c3fb1b0b45efe05f1f57f1a62b4bb38022ec929b173
+  languageName: node
+  linkType: hard
+
+"samlp@patch:samlp@npm%3A7.0.2#~/.yarn/patches/samlp-npm-7.0.2-8295b3cf85.patch":
+  version: 7.0.2
+  resolution: "samlp@patch:samlp@npm%3A7.0.2#~/.yarn/patches/samlp-npm-7.0.2-8295b3cf85.patch::version=7.0.2&hash=d6c3e2"
+  dependencies:
+    "@auth0/thumbprint": "npm:0.0.6"
+    "@auth0/xmldom": "npm:0.1.21"
+    auth0-id-generator: "npm:^0.2.0"
+    ejs: "npm:^3.1.8"
+    flowstate: "npm:^0.4.0"
+    querystring: "npm:^0.2.0"
+    saml: "npm:^3.0.1"
+    xml-crypto: "npm:^2.0.0"
+    xpath: "npm:0.0.5"
+    xtend: "npm:^1.0.3"
+  checksum: 10c0/400079ee2871372847142e3d02500303b894e64d2c471f7861d674ebd0c672ef4e11399c2b1522755d0cf475109e61bb06cff0c23474aae673ebc5ba477a1cc8
   languageName: node
   linkType: hard
 
