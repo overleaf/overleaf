@@ -119,8 +119,13 @@ export default class PDFJSWrapper {
         const transition = container.startViewTransition(setDocument)
 
         transition.ready.catch(err => {
-          // ignore InvalidStateError, it just means the document was hidden
-          if (err?.name !== 'InvalidStateError') {
+          const ignored = [
+            'InvalidStateError', // the document was hidden, or the viewport was resized
+            'AbortError', // another transition started
+            'TimeoutError', // setDocument blocked for too long
+          ]
+
+          if (!ignored.includes(err?.name)) {
             captureException(err, {
               tags: { handler: 'pdf-preview' },
             })
