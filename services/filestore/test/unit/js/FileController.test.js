@@ -99,7 +99,8 @@ describe('FileController', () => {
     })
 
     it('should send a 200 if the cacheWarm param is true', async () => {
-      req.query.cacheWarm = true
+      // real query values always arrive as strings
+      req.query = { cacheWarm: 'true' }
       await new Promise(resolve => {
         res.sendStatus = statusCode => {
           expect(statusCode).to.equal(200)

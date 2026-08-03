@@ -9,6 +9,7 @@ import express from 'express'
 import fileController from './app/js/FileController.js'
 import keyBuilder from './app/js/KeyBuilder.js'
 import RequestLogger from './app/js/RequestLogger.js'
+import { handleValidationError } from '@overleaf/validation-tools'
 
 logger.initialize(process.env.METRICS_APP_NAME || 'filestore')
 
@@ -68,6 +69,11 @@ if (settings.filestore.stores.template_files) {
   )
 }
 
+// Not a named `:key(.*)` param: Express 4.22.1's bundled path-to-regexp has a
+// bug where combining a named param with a custom (.*) regex both duplicates
+// the match under a numeric key AND corrupts the captured value (off-by-one
+// substring). The anonymous `*` wildcard doesn't have this bug, so keep it
+// and validate the numeric params[0] key directly (see schemas.js).
 app.get(
   '/bucket/:bucket/key/*',
   keyBuilder.bucketFileKeyMiddleware,
@@ -97,6 +103,7 @@ app.get('/health_check', (req, res) => {
   res.sendStatus(200)
 })
 
+app.use(handleValidationError)
 app.use(RequestLogger.errorHandler)
 
 const port = settings.internal.filestore.port || 3009

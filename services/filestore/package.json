@@ -25,11 +25,13 @@
     "@overleaf/object-persistor": "workspace:*",
     "@overleaf/settings": "workspace:*",
     "@overleaf/stream-utils": "^0.1.0",
+    "@overleaf/validation-tools": "workspace:*",
     "bunyan": "^1.8.15",
     "express": "4.22.1",
     "glob": "^12.0.0",
     "lodash.once": "^4.1.1",
     "node-fetch": "^2.7.0",
+    "overleaf-editor-core": "workspace:*",
     "range-parser": "^1.2.1",
     "tiny-async-pool": "^1.1.0"
   },
