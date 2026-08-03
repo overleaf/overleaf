@@ -24,9 +24,11 @@ async function makeNotification(notificationKey: string, userId: string) {
     method: 'POST',
     json: {
       key: notificationKey,
-      messageOpts: '',
+      // must be an object: addNotification's schema models messageOpts as
+      // an arbitrary key/value map (see NotificationsController.ts), not a
+      // bare string
+      messageOpts: {},
       templateKey: 'f4g5',
-      user_id: userId,
     },
     signal: AbortSignal.timeout(5000),
   }
@@ -38,7 +40,7 @@ const getUserNotificationsResponseSchema = z
   .object({
     _id: zz.objectId(),
     key: z.string(),
-    messageOpts: z.string().optional(),
+    messageOpts: z.record(z.string(), z.unknown()).optional(),
     templateKey: z.string().optional(),
     user_id: zz.objectId(),
   })

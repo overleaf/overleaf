@@ -6,13 +6,22 @@ import { parseReq, z, zz } from '@overleaf/validation-tools'
 import type { Request, Response } from 'express'
 
 const getUserNotificationsSchema = z.object({
+  params: z.strictObject({
+    user_id: zz.objectId(),
+  }),
+})
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const getUserNotificationsFallbackSchema = z.object({
   params: z.object({
     user_id: zz.objectId(),
   }),
 })
 
 async function getUserNotifications(req: Request, res: Response) {
-  const { params } = parseReq(req, getUserNotificationsSchema)
+  const { params } = parseReq(req, getUserNotificationsSchema, {
+    fallbackSchema: getUserNotificationsFallbackSchema,
+  })
   logger.debug({ userId: params.user_id }, 'getting user unread notifications')
   metrics.inc('getUserNotifications')
   const notifications = await Notifications.getUserNotifications(params.user_id)
@@ -20,6 +29,28 @@ async function getUserNotifications(req: Request, res: Response) {
 }
 
 const addNotificationSchema = z.object({
+  params: z.strictObject({
+    user_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    key: z.string(),
+    templateKey: z.string(),
+    // Arbitrary per-template render params: different notification types
+    // populate completely different keys here (see web's
+    // NotificationsBuilder.mjs, the only real production caller), so this is
+    // a genuinely open map rather than an approximated shape.
+    messageOpts: z.record(z.string(), z.unknown()).optional(),
+    // web's NotificationsHandler.createNotification always sends this (it
+    // defaults to `true` client-side before serializing), but
+    // Notifications.js already tolerates a missing value as falsy (skip
+    // overwriting an existing notification), so keep it optional here too.
+    forceCreate: z.boolean().optional(),
+    expires: z.iso.datetime().optional(),
+  }),
+})
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const addNotificationFallbackSchema = z.object({
   params: z.object({
     user_id: zz.objectId(),
   }),
@@ -27,7 +58,9 @@ const addNotificationSchema = z.object({
 })
 
 async function addNotification(req: Request, res: Response) {
-  const { params, body } = parseReq(req, addNotificationSchema)
+  const { params, body } = parseReq(req, addNotificationSchema, {
+    fallbackSchema: addNotificationFallbackSchema,
+  })
   logger.debug(
     { userId: params.user_id, notification: body },
     'adding notification'
@@ -42,6 +75,14 @@ async function addNotification(req: Request, res: Response) {
 }
 
 const removeNotificationIdSchema = z.object({
+  params: z.strictObject({
+    user_id: zz.objectId(),
+    notification_id: zz.objectId(),
+  }),
+})
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const removeNotificationIdFallbackSchema = z.object({
   params: z.object({
     user_id: zz.objectId(),
     notification_id: zz.objectId(),
@@ -49,11 +90,13 @@ const removeNotificationIdSchema = z.object({
 })
 
 async function removeNotificationId(req: Request, res: Response) {
-  const { params } = parseReq(req, removeNotificationIdSchema)
+  const { params } = parseReq(req, removeNotificationIdSchema, {
+    fallbackSchema: removeNotificationIdFallbackSchema,
+  })
   logger.debug(
     {
-      userId: req.params.user_id,
-      notificationId: req.params.notification_id,
+      userId: params.user_id,
+      notificationId: params.notification_id,
     },
     'mark id notification as read'
   )
@@ -66,6 +109,16 @@ async function removeNotificationId(req: Request, res: Response) {
 }
 
 const removeNotificationKeySchema = z.object({
+  params: z.strictObject({
+    user_id: zz.objectId(),
+  }),
+  body: z.strictObject({
+    key: z.string(),
+  }),
+})
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const removeNotificationKeyFallbackSchema = z.object({
   params: z.object({
     user_id: zz.objectId(),
   }),
@@ -75,9 +128,11 @@ const removeNotificationKeySchema = z.object({
 })
 
 async function removeNotificationKey(req: Request, res: Response) {
-  const { params, body } = parseReq(req, removeNotificationKeySchema)
+  const { params, body } = parseReq(req, removeNotificationKeySchema, {
+    fallbackSchema: removeNotificationKeyFallbackSchema,
+  })
   logger.debug(
-    { userId: req.params.user_id, notificationKey: body.key },
+    { userId: params.user_id, notificationKey: body.key },
     'mark key notification as read'
   )
   metrics.inc('removeNotificationKey')
@@ -87,13 +142,22 @@ async function removeNotificationKey(req: Request, res: Response) {
 }
 
 const removeNotificationByKeyOnlySchema = z.object({
+  params: z.strictObject({
+    key: z.string(),
+  }),
+})
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const removeNotificationByKeyOnlyFallbackSchema = z.object({
   params: z.object({
     key: z.string(),
   }),
 })
 
 async function removeNotificationByKeyOnly(req: Request, res: Response) {
-  const { params } = parseReq(req, removeNotificationByKeyOnlySchema)
+  const { params } = parseReq(req, removeNotificationByKeyOnlySchema, {
+    fallbackSchema: removeNotificationByKeyOnlyFallbackSchema,
+  })
   const notificationKey = params.key
   logger.debug({ notificationKey }, 'mark notification as read by key only')
   metrics.inc('removeNotificationKey')
@@ -102,13 +166,22 @@ async function removeNotificationByKeyOnly(req: Request, res: Response) {
 }
 
 const countNotificationsByKeyOnlySchema = z.object({
+  params: z.strictObject({
+    key: z.string(),
+  }),
+})
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const countNotificationsByKeyOnlyFallbackSchema = z.object({
   params: z.object({
     key: z.string(),
   }),
 })
 
 async function countNotificationsByKeyOnly(req: Request, res: Response) {
-  const { params } = parseReq(req, countNotificationsByKeyOnlySchema)
+  const { params } = parseReq(req, countNotificationsByKeyOnlySchema, {
+    fallbackSchema: countNotificationsByKeyOnlyFallbackSchema,
+  })
   const notificationKey = params.key
   try {
     const count =
@@ -121,6 +194,13 @@ async function countNotificationsByKeyOnly(req: Request, res: Response) {
 }
 
 const deleteUnreadNotificationsByKeyOnlyBulkSchema = z.object({
+  params: z.strictObject({
+    key: z.string(),
+  }),
+})
+// Rollout-temporary fallback (pre-refinement schema from main); delete
+// when this route's REQ_VALIDATION_MODE instrumentation is removed.
+const deleteUnreadNotificationsByKeyOnlyBulkFallbackSchema = z.object({
   params: z.object({
     key: z.string(),
   }),
@@ -130,7 +210,11 @@ async function deleteUnreadNotificationsByKeyOnlyBulk(
   req: Request,
   res: Response
 ) {
-  const { params } = parseReq(req, deleteUnreadNotificationsByKeyOnlyBulkSchema)
+  const { params } = parseReq(
+    req,
+    deleteUnreadNotificationsByKeyOnlyBulkSchema,
+    { fallbackSchema: deleteUnreadNotificationsByKeyOnlyBulkFallbackSchema }
+  )
   const notificationKey = params.key
   try {
     const count =
