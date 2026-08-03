@@ -5,8 +5,8 @@
   "main": "app.js",
   "type": "module",
   "scripts": {
-    "test:acceptance": "yarn run test:acceptance:_run -- --grep=$MOCHA_GREP",
-    "test:unit": "yarn run test:unit:_run -- --grep=$MOCHA_GREP",
+    "test:acceptance": "yarn run test:acceptance:_run -- --grep=$TEST_NAME_PATTERN",
+    "test:unit": "yarn run test:unit:_run -- --grep=$TEST_NAME_PATTERN",
     "start": "node app.js",
     "nodemon": "node --watch app.js",
     "test:acceptance:_run": "mocha --loader=esmock --recursive --timeout 15000 --exit --retries=$RETRIES $@ test/acceptance/js",

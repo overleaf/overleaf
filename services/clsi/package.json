@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node app.js",
     "test:acceptance:_run": "mocha --recursive --timeout 15000 --exit --retries=$RETRIES $@ test/acceptance/js",
-    "test:acceptance": "yarn run test:acceptance:_run -- --grep=$MOCHA_GREP",
+    "test:acceptance": "yarn run test:acceptance:_run -- --grep=$TEST_NAME_PATTERN",
     "test:unit:_run": "vitest --config ./vitest.config.unit.cjs",
     "test:unit": "yarn run test:unit:_run",
     "nodemon": "node --watch app.js",

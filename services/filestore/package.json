@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test:acceptance:run": "mocha --recursive --timeout 15000  $@ test/acceptance/js",
-    "test:acceptance": "yarn run test:acceptance:_run -- --grep=$MOCHA_GREP",
+    "test:acceptance": "yarn run test:acceptance:_run -- --grep=$TEST_NAME_PATTERN",
     "test:unit:run": "mocha --recursive $@ test/unit/js",
     "test:unit": "yarn run test:unit:_run",
     "start": "node app.js",

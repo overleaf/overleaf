@@ -25,6 +25,7 @@ module.exports = defineConfig({
     globals: false,
     isolate: false,
     passWithNoTests: true, // in case there are no tests from one project or other in a module
+    testNamePattern: process.env.TEST_NAME_PATTERN || undefined,
     projects: [
       {
         extends: true,

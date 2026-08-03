@@ -54,7 +54,7 @@ Unit tests for the parser live in `web/test/unit/src/LezerLatex`. There are thre
 These tests run as part of `test_frontend`. You can run these tests alone by invoking:
 
 ```sh
-make test_unit MOCHA_GREP='lezer-latex'
+make test_unit TEST_NAME_PATTERN='lezer-latex'
 ```
 
 ## Trying the parser

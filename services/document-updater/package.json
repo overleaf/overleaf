@@ -6,9 +6,9 @@
   "scripts": {
     "start": "node app.js",
     "test:acceptance:_run": "mocha --recursive --timeout 15000 --exit --retries=$RETRIES $@ test/acceptance/js",
-    "test:acceptance": "yarn run test:acceptance:_run -- --grep=$MOCHA_GREP",
+    "test:acceptance": "yarn run test:acceptance:_run -- --grep=$TEST_NAME_PATTERN",
     "test:unit:_run": "mocha --recursive --exit $@ test/unit/js",
-    "test:unit": "yarn run test:unit:_run -- --grep=$MOCHA_GREP",
+    "test:unit": "yarn run test:unit:_run -- --grep=$TEST_NAME_PATTERN",
     "nodemon": "node --watch app.js",
     "benchmark:apply": "node benchmarks/apply",
     "lint": "eslint --cache --cache-location ../../.cache/eslint/ --max-warnings 0 .",
