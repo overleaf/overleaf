@@ -237,10 +237,10 @@ module.exports = DocUpdaterClient = {
     )
   },
 
-  async sendProjectUpdate(projectId, userId, updates, version) {
+  async sendProjectUpdate(projectId, userId, updates, version, source) {
     await fetchNothing(`http://127.0.0.1:3003/project/${projectId}`, {
       method: 'POST',
-      json: { userId, updates, version },
+      json: { userId, updates, version, source },
     })
   },
 }

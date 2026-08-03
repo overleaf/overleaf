@@ -34,7 +34,7 @@ describe('Setting a document', function () {
     this.result = ['one', 'one and a half', 'two', 'three']
     this.newLines = ['these', 'are', 'the', 'new', 'lines']
     this.source = 'dropbox'
-    this.user_id = 'user-id-123'
+    this.user_id = DocUpdaterClient.randomId()
 
     sinon.spy(MockProjectHistoryApi, 'flushProject')
     sinon.spy(MockWebApi, 'setDocument')
@@ -83,7 +83,15 @@ describe('Setting a document', function () {
 
     it('should send the updated doc lines and version to the web api', function () {
       MockWebApi.setDocument
-        .calledWith(this.project_id, this.doc_id, this.newLines)
+        .calledWith(
+          this.project_id,
+          this.doc_id,
+          this.newLines,
+          this.version + 2,
+          {},
+          sinon.match.string,
+          this.user_id
+        )
         .should.equal(true)
     })
 
@@ -292,6 +300,83 @@ describe('Setting a document', function () {
             throw error
           }
           expect(lines).to.not.exist
+          done()
+        }
+      )
+    })
+
+    it('should return the mongo rev in the json response', function () {
+      this.body.should.deep.equal({ rev: '123' })
+    })
+  })
+
+  describe('with a null user id', function () {
+    before(async function () {
+      numberOfReceivedUpdates = 0
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
+      MockWebApi.insertDoc(this.project_id, this.doc_id, {
+        lines: this.lines,
+        version: this.version,
+      })
+      await DocUpdaterClient.preloadDoc(this.project_id, this.doc_id)
+      await DocUpdaterClient.sendUpdate(
+        this.project_id,
+        this.doc_id,
+        this.update
+      )
+      await setTimeout(200)
+      this.body = await DocUpdaterClient.setDocLines(
+        this.project_id,
+        this.doc_id,
+        this.newLines,
+        this.source,
+        null,
+        false
+      )
+    })
+
+    after(function () {
+      MockProjectHistoryApi.flushProject.resetHistory()
+      MockWebApi.setDocument.resetHistory()
+    })
+
+    it('should emit two updates (from sendUpdate and setDocLines)', function () {
+      expect(numberOfReceivedUpdates).to.equal(2)
+    })
+
+    it('should send the updated doc lines and version to the web api', function () {
+      MockWebApi.setDocument
+        .calledWith(
+          this.project_id,
+          this.doc_id,
+          this.newLines,
+          this.version + 2,
+          {},
+          sinon.match.string,
+          null
+        )
+        .should.equal(true)
+    })
+
+    it('should update the lines in the doc updater', async function () {
+      const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc_id)
+      doc.lines.should.deep.equal(this.newLines)
+    })
+
+    it('should bump the version in the doc updater', async function () {
+      const doc = await DocUpdaterClient.getDoc(this.project_id, this.doc_id)
+      doc.version.should.equal(this.version + 2)
+    })
+
+    it('should leave the document in redis', function (done) {
+      docUpdaterRedis.get(
+        Keys.docLines({ doc_id: this.doc_id }),
+        (error, lines) => {
+          if (error) {
+            throw error
+          }
+          expect(JSON.parse(lines)).to.deep.equal(this.newLines)
           done()
         }
       )

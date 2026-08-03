@@ -5,9 +5,10 @@ const Errors = require('../../../../app/js/Errors.js')
 
 describe('HttpController', function () {
   beforeEach(function () {
-    this.project_id = 'project-id-123'
+    this.project_id = 'aaaaaaaaaaaaaaaaaaaaaaaa'
     this.projectHistoryId = '123'
-    this.doc_id = 'doc-id-123'
+    this.doc_id = 'bbbbbbbbbbbbbbbbbbbbbbbb'
+    this.comment_id = 'cccccccccccccccccccccccc'
     this.source = 'editor'
     this.next = sinon.stub()
     this.res = {
@@ -308,7 +309,7 @@ describe('HttpController', function () {
     beforeEach(function () {
       this.lines = ['one', 'two', 'three']
       this.source = 'dropbox'
-      this.user_id = 'user-id-123'
+      this.user_id = 'dddddddddddddddddddddddd'
       this.req = {
         headers: {},
         params: {
@@ -650,7 +651,7 @@ describe('HttpController', function () {
 
     describe('with the background=true option from realtime', function () {
       beforeEach(async function () {
-        this.req.query = { background: true, shutdown: true }
+        this.req.query = { background: 'true', shutdown: 'true' }
         await this.HttpController.deleteProject(this.req, this.res, this.next)
       })
 
@@ -681,7 +682,7 @@ describe('HttpController', function () {
         params: {
           project_id: this.project_id,
           doc_id: this.doc_id,
-          change_id: (this.change_id = 'mock-change-od-1'),
+          change_id: (this.change_id = 'ddddddddddddddddddddddd1'),
         },
         query: {},
         body: {},
@@ -729,10 +730,10 @@ describe('HttpController', function () {
     describe('succesfully with with multiple changes', function () {
       beforeEach(async function () {
         this.change_ids = [
-          'mock-change-od-1',
-          'mock-change-od-2',
-          'mock-change-od-3',
-          'mock-change-od-4',
+          'ddddddddddddddddddddddd1',
+          'ddddddddddddddddddddddd2',
+          'ddddddddddddddddddddddd3',
+          'ddddddddddddddddddddddd4',
         ]
         this.req.body = { change_ids: this.change_ids }
         await this.HttpController.acceptChanges(this.req, this.res, this.next)
@@ -772,12 +773,12 @@ describe('HttpController', function () {
 
   describe('resolveComment', function () {
     beforeEach(function () {
-      this.user_id = 'user-id-123'
+      this.user_id = 'dddddddddddddddddddddddd'
       this.req = {
         params: {
           project_id: this.project_id,
           doc_id: this.doc_id,
-          comment_id: (this.comment_id = 'mock-comment-id'),
+          comment_id: (this.comment_id = 'cccccccccccccccccccccccc'),
         },
         query: {},
         body: {
@@ -836,12 +837,12 @@ describe('HttpController', function () {
 
   describe('reopenComment', function () {
     beforeEach(function () {
-      this.user_id = 'user-id-123'
+      this.user_id = 'dddddddddddddddddddddddd'
       this.req = {
         params: {
           project_id: this.project_id,
           doc_id: this.doc_id,
-          comment_id: (this.comment_id = 'mock-comment-id'),
+          comment_id: (this.comment_id = 'cccccccccccccccccccccccc'),
         },
         query: {},
         body: {
@@ -900,12 +901,12 @@ describe('HttpController', function () {
 
   describe('deleteComment', function () {
     beforeEach(function () {
-      this.user_id = 'user-id-123'
+      this.user_id = 'dddddddddddddddddddddddd'
       this.req = {
         params: {
           project_id: this.project_id,
           doc_id: this.doc_id,
-          comment_id: (this.comment_id = 'mock-comment-id'),
+          comment_id: (this.comment_id = 'cccccccccccccccccccccccc'),
         },
         query: {},
         body: {
@@ -997,8 +998,7 @@ describe('HttpController', function () {
       it('should get docs from the project manager', function () {
         this.ProjectManager.promises.getProjectDocsAndFlushIfOld.should.have.been.calledWith(
           this.project_id,
-          this.state,
-          {}
+          this.state
         )
       })
 
@@ -1008,10 +1008,7 @@ describe('HttpController', function () {
 
       it('should log the request', function () {
         this.logger.debug
-          .calledWith(
-            { projectId: this.project_id, exclude: [] },
-            'getting docs via http'
-          )
+          .calledWith({ projectId: this.project_id }, 'getting docs via http')
           .should.equal(true)
       })
 
@@ -1066,23 +1063,33 @@ describe('HttpController', function () {
 
   describe('updateProject', function () {
     beforeEach(function () {
-      this.projectHistoryId = 'history-id-123'
-      this.userId = 'user-id-123'
+      this.projectHistoryId = 'ffffffffffffffffffffffff'
+      this.userId = 'dddddddddddddddddddddddd'
       this.updates = [
         {
           type: 'rename-doc',
-          id: 1,
+          id: 'aaaaaaaaaaaaaaaaaaaaaaa1',
           pathname: 'thesis.tex',
           newPathname: 'book.tex',
         },
-        { type: 'add-doc', id: 2, pathname: 'article.tex', docLines: 'hello' },
+        {
+          type: 'add-doc',
+          id: 'aaaaaaaaaaaaaaaaaaaaaaa2',
+          pathname: 'article.tex',
+          docLines: 'hello',
+        },
         {
           type: 'rename-file',
-          id: 3,
+          id: 'aaaaaaaaaaaaaaaaaaaaaaa3',
           pathname: 'apple.png',
           newPathname: 'banana.png',
         },
-        { type: 'add-file', id: 4, url: 'filestore.example.com/4' },
+        {
+          type: 'add-file',
+          id: 'aaaaaaaaaaaaaaaaaaaaaaa4',
+          pathname: 'banana.png',
+          url: 'filestore.example.com/4',
+        },
       ]
       this.version = 1234567
       this.req = {
@@ -1137,14 +1144,54 @@ describe('HttpController', function () {
         this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
     })
+
+    describe('when projectHistoryId is malformed', function () {
+      beforeEach(async function () {
+        this.req.body.projectHistoryId = '../../../../etc/passwd'
+        await this.HttpController.updateProject(this.req, this.res, this.next)
+      })
+
+      it('should call next with the error', function () {
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
+      })
+
+      it('should not update the project', function () {
+        this.ProjectManager.promises.updateProjectWithLocks.called.should.equal(
+          false
+        )
+      })
+    })
+
+    describe('when an add-file update has a malformed hash', function () {
+      beforeEach(async function () {
+        this.req.body.updates[3].hash = 'not-a-valid-hash'
+        await this.HttpController.updateProject(this.req, this.res, this.next)
+      })
+
+      it('should call next with the error', function () {
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
+      })
+
+      it('should not update the project', function () {
+        this.ProjectManager.promises.updateProjectWithLocks.called.should.equal(
+          false
+        )
+      })
+    })
   })
 
   describe('resyncProjectHistory', function () {
     beforeEach(function () {
-      this.projectHistoryId = 'history-id-123'
-      this.docs = sinon.stub()
-      this.files = sinon.stub()
-      this.fileUpdates = sinon.stub()
+      this.projectHistoryId = 'ffffffffffffffffffffffff'
+      this.docs = [{ doc: 'bbbbbbbbbbbbbbbbbbbbbbbb', path: 'main.tex' }]
+      this.files = [
+        {
+          file: 'eeeeeeeeeeeeeeeeeeeeeeee',
+          path: 'universe.png',
+          _hash: 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+          createdBlob: true,
+        },
+      ]
       this.req = {
         query: {},
         body: {
@@ -1198,13 +1245,55 @@ describe('HttpController', function () {
         this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
       })
     })
+
+    describe('when projectHistoryId is malformed', function () {
+      beforeEach(async function () {
+        this.req.body.projectHistoryId = '../../../../etc/passwd'
+        await this.HttpController.resyncProjectHistory(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+
+      it('should call next with the error', function () {
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
+      })
+
+      it('should not resync the project history', function () {
+        this.HistoryManager.promises.resyncProjectHistory.called.should.equal(
+          false
+        )
+      })
+    })
+
+    describe('when a file _hash is malformed', function () {
+      beforeEach(async function () {
+        this.req.body.files[0]._hash = 'not-a-valid-hash'
+        await this.HttpController.resyncProjectHistory(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+
+      it('should call next with the error', function () {
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
+      })
+
+      it('should not resync the project history', function () {
+        this.HistoryManager.promises.resyncProjectHistory.called.should.equal(
+          false
+        )
+      })
+    })
   })
 
   describe('appendToDoc', function () {
     beforeEach(function () {
       this.lines = ['one', 'two', 'three']
       this.source = 'dropbox'
-      this.user_id = 'user-id-123'
+      this.user_id = 'dddddddddddddddddddddddd'
       this.req = {
         headers: {},
         params: {
@@ -1216,7 +1305,6 @@ describe('HttpController', function () {
           lines: this.lines,
           source: this.source,
           user_id: this.user_id,
-          undoing: (this.undoing = true),
         },
       }
     })

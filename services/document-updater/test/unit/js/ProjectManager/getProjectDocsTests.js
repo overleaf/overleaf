@@ -78,8 +78,7 @@ describe('ProjectManager - getProjectDocsAndFlushIfOld', function () {
       this.result =
         await this.ProjectManager.promises.getProjectDocsAndFlushIfOld(
           this.project_id,
-          this.projectStateHash,
-          this.excludeVersions
+          this.projectStateHash
         )
     })
 
@@ -112,8 +111,7 @@ describe('ProjectManager - getProjectDocsAndFlushIfOld', function () {
       await expect(
         this.ProjectManager.promises.getProjectDocsAndFlushIfOld(
           this.project_id,
-          this.projectStateHash,
-          this.excludeVersions
+          this.projectStateHash
         )
       ).to.be.rejectedWith(Errors.ProjectStateChangedError)
     })
@@ -147,8 +145,7 @@ describe('ProjectManager - getProjectDocsAndFlushIfOld', function () {
       await expect(
         this.ProjectManager.promises.getProjectDocsAndFlushIfOld(
           this.project_id,
-          this.projectStateHash,
-          this.excludeVersions
+          this.projectStateHash
         )
       ).to.be.rejected
     })

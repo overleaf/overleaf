@@ -13,6 +13,7 @@ const RedisManager = require('./app/js/RedisManager')
 const DispatchManager = require('./app/js/DispatchManager')
 const DeleteQueueManager = require('./app/js/DeleteQueueManager')
 const Errors = require('./app/js/Errors')
+const { handleValidationError } = require('@overleaf/validation-tools')
 const HttpController = require('./app/js/HttpController')
 const mongodb = require('./app/js/mongodb')
 const async = require('async')
@@ -103,22 +104,6 @@ app.get('/health_check', (req, res, next) => {
 // record http metrics for the routes below this point
 app.use(Metrics.http.monitor(logger))
 
-app.param('project_id', (req, res, next, projectId) => {
-  if (projectId != null && projectId.match(/^[0-9a-f]{24}$/)) {
-    return next()
-  } else {
-    return next(new Error('invalid project id'))
-  }
-})
-
-app.param('doc_id', (req, res, next, docId) => {
-  if (docId != null && docId.match(/^[0-9a-f]{24}$/)) {
-    return next()
-  } else {
-    return next(new Error('invalid doc id'))
-  }
-})
-
 // Record requests that come in after we've started shutting down - for investigation.
 app.use((req, res, next) => {
   if (Settings.shuttingDown) {
@@ -204,6 +189,8 @@ app.get('/total', (req, res, next) => {
     res.send({ total: count })
   })
 })
+
+app.use(handleValidationError)
 
 app.use((error, req, res, next) => {
   if (error instanceof Errors.NotFoundError) {

@@ -3,6 +3,8 @@ import {
   ClearTrackingPropsRawData,
   RawEditOperation,
 } from 'overleaf-editor-core/lib/types'
+import type { z } from '@overleaf/validation-tools'
+import type * as schemas from './schemas'
 
 export type OTType = 'sharejs-text-ot' | 'history-ot'
 
@@ -30,57 +32,25 @@ export type HistoryOTEditOperationUpdate = Omit<Update, 'op'> & {
 
 export type Op = InsertOp | DeleteOp | CommentOp | RetainOp
 
-export type InsertOp = {
-  i: string
-  p: number
-  u?: boolean
-}
+export type InsertOp = z.infer<typeof schemas.insertOp>
 
 export type RetainOp = {
   r: string
   p: number
 }
 
-export type DeleteOp = {
-  d: string
-  p: number
-  u?: boolean
-}
+export type DeleteOp = z.infer<typeof schemas.deleteOp>
 
-export type CommentOp = {
-  c: string
-  p: number
-  t: string
-  u?: boolean
-  // Used by project-history when restoring CommentSnapshots
-  resolved?: boolean
-}
+export type CommentOp = z.infer<typeof schemas.commentOp>
 
 /**
  * Ranges record on a document
  */
-export type Ranges = {
-  comments?: Comment[]
-  changes?: TrackedChange[]
-}
+export type Ranges = z.infer<typeof schemas.ranges>
 
-export type Comment = {
-  id: string
-  op: CommentOp
-  metadata?: {
-    user_id: string
-    ts: string
-  }
-}
+export type Comment = z.infer<typeof schemas.comment>
 
-export type TrackedChange = {
-  id: string
-  op: InsertOp | DeleteOp
-  metadata: {
-    user_id: string
-    ts: string
-  }
-}
+export type TrackedChange = z.infer<typeof schemas.trackedChange>
 
 /**
  * Updates sent to project-history

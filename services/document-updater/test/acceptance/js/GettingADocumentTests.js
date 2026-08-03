@@ -5,6 +5,10 @@ const MockWebApi = require('./helpers/MockWebApi')
 const DocUpdaterClient = require('./helpers/DocUpdaterClient')
 const DocUpdaterApp = require('./helpers/DocUpdaterApp')
 const { RequestFailedError } = require('@overleaf/fetch-utils')
+const { getRawReqInput } = require('@overleaf/validation-tools')
+const {
+  expectValidationError,
+} = require('@overleaf/validation-tools/testUtils')
 const PersistenceManager = require('../../../app/js/PersistenceManager')
 
 describe('Getting a document', function () {
@@ -57,7 +61,7 @@ describe('Getting a document', function () {
       sinon
         .stub(MockWebApi, 'getDocumentController')
         .callsFake((req, res, next) => {
-          expect(req.query.peek).to.equal('true')
+          expect(getRawReqInput(req).query.peek).to.equal('true')
           return origGetDocumentController(req, res, next)
         })
       this.project_id = DocUpdaterClient.randomId()
@@ -254,6 +258,41 @@ describe('Getting a document', function () {
       await expect(DocUpdaterClient.getDoc(projectId, docId))
         .to.be.rejectedWith(RequestFailedError)
         .and.eventually.have.nested.property('response.status', 404)
+    })
+  })
+
+  describe('when the doc id is malformed', function () {
+    it('should return 404', async function () {
+      const projectId = DocUpdaterClient.randomId()
+      let err
+      try {
+        await DocUpdaterClient.getDoc(projectId, 'not-an-object-id')
+        expect.fail('should have thrown')
+      } catch (error) {
+        err = error
+      }
+      expectValidationError(err, 404, 'doc_id')
+    })
+  })
+
+  describe('when the project id is malformed', function () {
+    it('should return 404', async function () {
+      const docId = DocUpdaterClient.randomId()
+      let err
+      try {
+        // encodeURIComponent so the traversal payload arrives as a literal
+        // path segment (the value of params.project_id) instead of being
+        // collapsed by fetch()/URL's dot-segment normalization before the
+        // request reaches the wire.
+        await DocUpdaterClient.getDoc(
+          encodeURIComponent('../../etc/passwd'),
+          docId
+        )
+        expect.fail('should have thrown')
+      } catch (error) {
+        err = error
+      }
+      expectValidationError(err, 404, 'project_id')
     })
   })
 

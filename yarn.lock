@@ -7172,6 +7172,7 @@ __metadata:
     "@overleaf/ranges-tracker": "workspace:*"
     "@overleaf/redis-wrapper": "workspace:*"
     "@overleaf/settings": "workspace:*"
+    "@overleaf/validation-tools": "workspace:*"
     "@types/chai-as-promised": "npm:^7.1.8"
     "@types/ioredis": "npm:^4.28.10"
     "@types/mocha": "npm:^10.0.6"

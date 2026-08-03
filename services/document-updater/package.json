@@ -25,6 +25,7 @@
     "@overleaf/ranges-tracker": "workspace:*",
     "@overleaf/redis-wrapper": "workspace:*",
     "@overleaf/settings": "workspace:*",
+    "@overleaf/validation-tools": "workspace:*",
     "@types/chai-as-promised": "^7.1.8",
     "async": "^3.2.5",
     "bull": "^3.18.0",

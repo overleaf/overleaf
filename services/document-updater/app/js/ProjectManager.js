@@ -83,11 +83,7 @@ async function getProjectDocsTimestamps(projectId, callback) {
   return timestamps
 }
 
-async function getProjectDocsAndFlushIfOld(
-  projectId,
-  projectStateHash,
-  excludeVersions
-) {
+async function getProjectDocsAndFlushIfOld(projectId, projectStateHash) {
   const timer = new Metrics.Timer('projectManager.getProjectDocsAndFlushIfOld')
 
   const projectStateChanged =
