@@ -176,6 +176,17 @@ export class BibtexNameList {
   }
 
   /**
+   * All known authors, comma-joined (no "et al." truncation). Comma-only on
+   * purpose: the result is fed through HighlightedText, so a fabricated "and"
+   * would get <mark>ed for queries like "a"/"an" — never synthesise words.
+   */
+  joinPlain(
+    format: (name: BibtexName) => string = n => n.toFirstLast()
+  ): string {
+    return this.names.map(format).join(', ')
+  }
+
+  /**
    * Returns a short author string using family names only. For 3+ names or
    * when `hasOthers` is true, returns the first surname followed by "et al.".
    * For exactly 2 names, joins their surnames with " & ".
