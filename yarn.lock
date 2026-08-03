@@ -7836,6 +7836,7 @@ __metadata:
     "@overleaf/o-error": "workspace:*"
     "@overleaf/promise-utils": "workspace:*"
     "@overleaf/settings": "workspace:*"
+    "@overleaf/validation-tools": "workspace:*"
     "@types/mocha": "npm:^10.0.6"
     "@types/node": "npm:^24.5.2"
     async: "npm:^3.2.5"
