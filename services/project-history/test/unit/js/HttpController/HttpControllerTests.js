@@ -9,6 +9,7 @@ describe('HttpController', function () {
   beforeEach(async function () {
     this.UpdatesProcessor = {
       processUpdatesForProject: sinon.stub().yields(),
+      flushResyncUpdates: sinon.stub().yields(),
     }
     this.SummarizedUpdatesManager = {
       getSummarizedProjectUpdates: sinon.stub(),
@@ -298,7 +299,7 @@ describe('HttpController', function () {
     })
 
     it('should flush the queue', function () {
-      this.UpdatesProcessor.processUpdatesForProject
+      this.UpdatesProcessor.flushResyncUpdates
         .calledWith(this.projectId)
         .should.equal(true)
     })

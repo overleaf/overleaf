@@ -17,6 +17,7 @@ import {
   NeedFullProjectStructureResyncError,
   SYNC_ONGOING_ERROR_MESSAGE,
   SyncError,
+  SyncOngoingError,
 } from './Errors.js'
 import { db, ObjectId } from './mongodb.js'
 import * as SnapshotManager from './SnapshotManager.js'
@@ -104,11 +105,11 @@ async function startResyncWithoutLock(projectId, options) {
 
   const syncState = await getResyncState(projectId)
   if (syncState.isSyncOngoing()) {
-    if (syncState.isSyncStuck()) {
-      const stuckDocPaths = Array.from(syncState.resyncDocContents)
-      const stuckClearCount = syncState.stuckClearCount
+    const stuckDocPaths = Array.from(syncState.resyncDocContents)
+    const stuckClearCount = syncState.stuckClearCount
 
-      if (stuckClearCount >= MAX_STUCK_CLEAR_ATTEMPTS) {
+    if (syncState.isSyncStuck()) {
+      if (syncState.isSyncPermanentlyStuck()) {
         await _recordStuckClearInSyncState(projectId, stuckDocPaths)
         Metrics.inc('project_history_sync_stuck_permanent')
         // Log error only on first permanent-stuck detection to avoid spam
@@ -138,7 +139,12 @@ async function startResyncWithoutLock(projectId, options) {
       Metrics.inc('project_history_sync_stuck_cleared')
       await _recordStuckClearInSyncState(projectId, stuckDocPaths)
     } else {
-      throw new OError(SYNC_ONGOING_ERROR_MESSAGE)
+      throw new SyncOngoingError(SYNC_ONGOING_ERROR_MESSAGE, {
+        projectId,
+        stuckClearCount: stuckClearCount + 1,
+        stuckDocPaths,
+        resyncPendingSince: syncState.resyncPendingSince,
+      })
     }
   }
   syncState.setOrigin(options.origin || { kind: 'history-resync' })
@@ -572,6 +578,10 @@ class SyncState {
     return (
       Date.now() - this.resyncPendingSince.getTime() > SYNC_STUCK_TIMEOUT_MS
     )
+  }
+
+  isSyncPermanentlyStuck() {
+    return this.stuckClearCount >= MAX_STUCK_CLEAR_ATTEMPTS
   }
 }
 

@@ -200,27 +200,6 @@ describe('HistoryManager', function () {
     })
   })
 
-  describe('ensureNoResyncPending', function () {
-    const projectId = 'project-123'
-
-    it('should resolve when no resync is pending', async function (ctx) {
-      ctx.FetchUtils.fetchJson.resolves({ resyncPending: false })
-      await ctx.HistoryManager.promises.ensureNoResyncPending(projectId)
-      ctx.FetchUtils.fetchJson.should.have.been.calledWithMatch(
-        `${ctx.settings.apis.project_history.url}/project/${projectId}/resync-pending`
-      )
-    })
-
-    it('should throw a HistoryResyncPendingError when a resync is pending', async function (ctx) {
-      ctx.FetchUtils.fetchJson.resolves({ resyncPending: true })
-      const error = await ctx.HistoryManager.promises
-        .ensureNoResyncPending(projectId)
-        .catch(err => err)
-      expect(error).to.be.an('error')
-      expect(error.name).to.equal('HistoryResyncPendingError')
-    })
-  })
-
   describe('injectUserDetails', function () {
     beforeEach(function (ctx) {
       ctx.user1 = {

@@ -59,7 +59,7 @@ describe('RetryManager', function () {
           },
           {
             project_id: this.projectId6,
-            error: 'OError: sync ongoing',
+            error: 'SyncOngoingError: sync ongoing',
             attempts: 10,
             resyncAttempts: 2,
           },

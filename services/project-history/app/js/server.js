@@ -52,6 +52,9 @@ app.use(function (error, req, res, next) {
     res.sendStatus(400)
   } else if (error instanceof Errors.InconsistentChunkError) {
     res.sendStatus(422)
+  } else if (error instanceof Errors.SyncOngoingError) {
+    logger.error({ err: error, req }, error.message)
+    res.sendStatus(409)
   } else if (error instanceof Errors.TooManyRequestsError) {
     res.status(429).set('Retry-After', 300).end()
   } else if (

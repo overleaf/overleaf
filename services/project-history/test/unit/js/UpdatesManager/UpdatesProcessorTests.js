@@ -5,9 +5,19 @@ import * as Errors from '../../../../app/js/Errors.js'
 
 const MODULE_PATH = '../../../../app/js/UpdatesProcessor.js'
 
+function makeSyncState({ ongoing = false } = {}) {
+  return {
+    stuckClearCount: 0,
+    resyncDocContents: new Set(ongoing ? ['/main.tex'] : []),
+    resyncProjectStructure: false,
+    resyncPendingSince: new Date(),
+    isSyncOngoing: () => ongoing,
+  }
+}
+
 describe('UpdatesProcessor', function () {
   beforeEach(async function () {
-    this.extendLock = sinon.stub()
+    this.extendLock = sinon.stub().yields()
     this.BlobManager = {
       createBlobsForUpdates: sinon.stub(),
     }
@@ -20,7 +30,10 @@ describe('UpdatesProcessor', function () {
         runner(this.extendLock, callback)
       ),
     }
-    this.RedisManager = {}
+    this.RedisManager = {
+      clearDanglingFirstOpTimestamp: sinon.stub().yields(),
+      countUnprocessedUpdates: sinon.stub(),
+    }
     this.UpdateCompressor = {
       compressRawUpdatesWithMetricsCb: sinon.stub(),
     }
@@ -36,10 +49,14 @@ describe('UpdatesProcessor', function () {
       expandSyncUpdates: sinon.stub(),
       setResyncState: sinon.stub().yields(),
       skipUpdatesDuringSync: sinon.stub(),
+      promises: {
+        getResyncState: sinon.stub().resolves(makeSyncState()),
+      },
     }
     this.ErrorRecorder = {
       getLastFailure: sinon.stub(),
       record: sinon.stub().yields(null, { attempts: 1 }),
+      clearError: sinon.stub().yields(),
     }
     this.RetryManager = {
       isFirstFailure: sinon.stub().returns(true),
@@ -131,6 +148,140 @@ describe('UpdatesProcessor', function () {
         this.ErrorRecorder.record
           .calledWith(this.project_id, this.queueSize, this.error)
           .should.equal(true)
+      })
+
+      it('does not check the resync state', function () {
+        this.SyncManager.promises.getResyncState.should.not.have.been.called
+      })
+    })
+  })
+
+  describe('_countAndProcessUpdates', function () {
+    describe('when the queue is empty', function () {
+      beforeEach(function (done) {
+        this.RedisManager.countUnprocessedUpdates.yields(null, 0)
+        this.UpdatesProcessor._mocks._countAndProcessUpdates(
+          this.project_id,
+          this.extendLock,
+          1,
+          (error, result) => {
+            this.error = error
+            this.result = result
+            done()
+          }
+        )
+      })
+
+      it('reports the flush result as an object', function () {
+        expect(this.error).to.not.exist
+        expect(this.result).to.deep.equal({ queueSize: 0, resyncNeeded: false })
+      })
+    })
+  })
+
+  describe('processUpdatesForProjectUsingBisect', function () {
+    describe('when the queue is empty', function () {
+      beforeEach(function (done) {
+        this.RedisManager.countUnprocessedUpdates.yields(null, 0)
+        this.UpdatesProcessor.processUpdatesForProjectUsingBisect(
+          this.project_id,
+          this.UpdatesProcessor.REDIS_READ_BATCH_SIZE,
+          done
+        )
+      })
+
+      it('stops instead of processing the empty queue again', function () {
+        expect(this.RedisManager.countUnprocessedUpdates.callCount).to.equal(1)
+      })
+    })
+  })
+
+  describe('checking the resync state after a flush', function () {
+    beforeEach(function () {
+      // the resync state is keyed by ObjectId, so this needs a real project id
+      this.project_id = '507f1f77bcf86cd799439011'
+      this.queueSize = 3
+      this.ErrorRecorder.getLastFailure.yields()
+      this.countAndProcessUpdates = sinon
+        .stub()
+        .callsArgWith(3, null, { queueSize: this.queueSize })
+      this.UpdatesProcessor._mocks._countAndProcessUpdates =
+        this.countAndProcessUpdates
+      this.flush = projectId =>
+        new Promise(resolve => {
+          this.UpdatesProcessor.processUpdatesForProject(projectId, resolve)
+        })
+    })
+
+    describe('when no resync is pending', function () {
+      beforeEach(async function () {
+        this.err = await this.flush(this.project_id)
+      })
+
+      it('succeeds', function () {
+        expect(this.err).to.not.exist
+        expect(this.countAndProcessUpdates.callCount).to.equal(1)
+      })
+    })
+
+    describe('when a resync is still pending', function () {
+      beforeEach(async function () {
+        this.SyncManager.promises.getResyncState.resolves(
+          makeSyncState({ ongoing: true })
+        )
+        this.err = await this.flush(this.project_id)
+      })
+
+      it('fails the flush with a sync ongoing error', function () {
+        expect(this.err).to.be.instanceof(Errors.SyncOngoingError)
+        expect(this.err.info).to.include({
+          projectId: this.project_id,
+          stuckClearCount: 0,
+        })
+      })
+
+      it('records the error with the queue size', function () {
+        this.ErrorRecorder.record.should.have.been.calledWith(
+          this.project_id,
+          this.queueSize
+        )
+      })
+    })
+
+    describe('when reading the resync state fails', function () {
+      beforeEach(async function () {
+        this.SyncManager.promises.getResyncState.rejects(
+          new Error('mongo is down')
+        )
+        this.err = await this.flush(this.project_id)
+      })
+
+      it('fails the flush with that error', function () {
+        expect(this.err.message).to.equal('mongo is down')
+      })
+
+      it('still records the error with the queue size', function () {
+        this.ErrorRecorder.record.should.have.been.calledWith(
+          this.project_id,
+          this.queueSize
+        )
+      })
+    })
+
+    describe('flushResyncUpdates', function () {
+      beforeEach(function (done) {
+        this.SyncManager.promises.getResyncState.resolves(
+          makeSyncState({ ongoing: true })
+        )
+        this.UpdatesProcessor.flushResyncUpdates(this.project_id, err => {
+          this.err = err
+          done()
+        })
+      })
+
+      it('does not check the resync state', function () {
+        expect(this.err).to.not.exist
+        this.SyncManager.promises.getResyncState.should.not.have.been.called
       })
     })
   })

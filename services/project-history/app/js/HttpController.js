@@ -234,7 +234,7 @@ export function initializeProject(req, res, next) {
 
 const flushProjectSchema = z.object({
   params: z.strictObject({
-    project_id: historyIdSchema,
+    project_id: zz.objectId(),
   }),
   query: z.strictObject({
     debug: z.stringbool().default(false),
@@ -252,7 +252,7 @@ const flushProjectSchema = z.object({
 // when this route's REQ_VALIDATION_MODE instrumentation is removed.
 const flushProjectFallbackSchema = z.object({
   params: z.object({
-    project_id: historyIdSchema,
+    project_id: zz.objectId(),
   }),
   query: z.object({
     debug: z.stringbool().default(false),
@@ -429,7 +429,7 @@ export function getDiff(req, res, next) {
 
 const getFileTreeDiffSchema = z.object({
   params: z.strictObject({
-    project_id: historyIdSchema,
+    project_id: zz.objectId(),
   }),
   query: z.strictObject({
     from: z.coerce.number().int(),
@@ -441,7 +441,7 @@ const getFileTreeDiffSchema = z.object({
 // when this route's REQ_VALIDATION_MODE instrumentation is removed.
 const getFileTreeDiffFallbackSchema = z.object({
   params: z.object({
-    project_id: historyIdSchema,
+    project_id: zz.objectId(),
   }),
   query: z.object({
     from: z.coerce.number().int(),
@@ -466,7 +466,7 @@ export function getFileTreeDiff(req, res, next) {
 
 const getUpdatesSchema = z.object({
   params: z.strictObject({
-    project_id: historyIdSchema,
+    project_id: zz.objectId(),
   }),
   query: z.strictObject({
     before: z.coerce.number().int().optional(),
@@ -478,7 +478,7 @@ const getUpdatesSchema = z.object({
 // when this route's REQ_VALIDATION_MODE instrumentation is removed.
 const getUpdatesFallbackSchema = z.object({
   params: z.object({
-    project_id: historyIdSchema,
+    project_id: zz.objectId(),
   }),
   query: z.object({
     before: z.coerce.number().int().optional(),
@@ -587,7 +587,7 @@ export function getDebugInfo(req, res, next) {
 
 const latestVersionSchema = z.object({
   params: z.strictObject({
-    project_id: historyIdSchema,
+    project_id: zz.objectId(),
   }),
 })
 
@@ -595,7 +595,7 @@ const latestVersionSchema = z.object({
 // when this route's REQ_VALIDATION_MODE instrumentation is removed.
 const latestVersionFallbackSchema = z.object({
   params: z.object({
-    project_id: historyIdSchema,
+    project_id: zz.objectId(),
   }),
 })
 
@@ -970,7 +970,7 @@ export function resyncProject(req, res, next) {
         return next(error)
       }
       // flush the sync operations
-      UpdatesProcessor.processUpdatesForProject(projectId, error => {
+      UpdatesProcessor.flushResyncUpdates(projectId, error => {
         if (error != null) {
           return next(error)
         }
@@ -983,7 +983,7 @@ export function resyncProject(req, res, next) {
         return next(error)
       }
       // flush the sync operations
-      UpdatesProcessor.processUpdatesForProject(projectId, error => {
+      UpdatesProcessor.flushResyncUpdates(projectId, error => {
         if (error != null) {
           return next(error)
         }
@@ -1100,7 +1100,7 @@ export function getLabels(req, res, next) {
 
 const createLabelSchema = z.object({
   params: z.strictObject({
-    project_id: historyIdSchema,
+    project_id: zz.objectId(),
     // vestigial: no route mounts createLabel with a :user_id param, so this
     // is always undefined; kept only to preserve the params/body dual-read
     // rollout behaviour below (see the comment at its use site)
@@ -1119,7 +1119,7 @@ const createLabelSchema = z.object({
 // when this route's REQ_VALIDATION_MODE instrumentation is removed.
 const createLabelFallbackSchema = z.object({
   params: z.object({
-    project_id: historyIdSchema,
+    project_id: zz.objectId(),
     user_id: zz.objectId().optional(),
   }),
   body: z.object({

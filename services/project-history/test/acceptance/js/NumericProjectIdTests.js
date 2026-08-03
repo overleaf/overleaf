@@ -1,8 +1,12 @@
 import { expect } from 'chai'
+import assert from 'node:assert'
 import nock from 'nock'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
-import { fetchStringWithResponse } from '@overleaf/fetch-utils'
+import {
+  fetchStringWithResponse,
+  RequestFailedError,
+} from '@overleaf/fetch-utils'
 
 const MockHistoryStore = () => nock('http://127.0.0.1:3100')
 const MockWeb = () => nock('http://127.0.0.1:3000')
@@ -67,44 +71,56 @@ describe('NumericProjectId', function () {
     })
   }
 
-  it('should accept numeric project_id for flush', async function () {
-    const { response } = await makeRequest({
+  // Endpoints that flush need the resync state, which is keyed by ObjectId, so
+  // they only accept a mongo project id. An invalid path param is reported as a
+  // 404, see handleValidationError.
+  async function expectRejected(options) {
+    try {
+      await makeRequest(options)
+      assert.fail('request should have failed')
+    } catch (error) {
+      if (error instanceof RequestFailedError) {
+        expect(error.response.status).to.equal(404)
+      } else {
+        throw error
+      }
+    }
+  }
+
+  it('should reject numeric project_id for flush', async function () {
+    await expectRejected({
       method: 'POST',
       url: `http://127.0.0.1:3054/project/${this.numericProjectId}/flush`,
     })
-    expect(response.status).to.equal(204)
+  })
+
+  it('should reject numeric project_id for filetree diff', async function () {
+    await expectRejected({
+      method: 'GET',
+      url: `http://127.0.0.1:3054/project/${this.numericProjectId}/filetree/diff`,
+      qs: { from: 7, to: 8 },
+    })
+  })
+
+  it('should reject numeric project_id for updates', async function () {
+    await expectRejected({
+      method: 'GET',
+      url: `http://127.0.0.1:3054/project/${this.numericProjectId}/updates`,
+      qs: { min_count: 1 },
+    })
+  })
+
+  it('should reject numeric project_id for version', async function () {
+    await expectRejected({
+      method: 'GET',
+      url: `http://127.0.0.1:3054/project/${this.numericProjectId}/version`,
+    })
   })
 
   it('should accept numeric project_id for dump', async function () {
     const { response } = await makeRequest({
       method: 'GET',
       url: `http://127.0.0.1:3054/project/${this.numericProjectId}/dump`,
-    })
-    expect(response.status).to.equal(200)
-  })
-
-  it('should accept numeric project_id for filetree diff', async function () {
-    const { response } = await makeRequest({
-      method: 'GET',
-      url: `http://127.0.0.1:3054/project/${this.numericProjectId}/filetree/diff`,
-      qs: { from: 7, to: 8 },
-    })
-    expect(response.status).to.equal(200)
-  })
-
-  it('should accept numeric project_id for updates', async function () {
-    const { response } = await makeRequest({
-      method: 'GET',
-      url: `http://127.0.0.1:3054/project/${this.numericProjectId}/updates`,
-      qs: { min_count: 1 },
-    })
-    expect(response.status).to.equal(200)
-  })
-
-  it('should accept numeric project_id for version', async function () {
-    const { response } = await makeRequest({
-      method: 'GET',
-      url: `http://127.0.0.1:3054/project/${this.numericProjectId}/version`,
     })
     expect(response.status).to.equal(200)
   })
@@ -125,8 +141,8 @@ describe('NumericProjectId', function () {
     expect(response.status).to.equal(200)
   })
 
-  it('should accept numeric project_id for createLabel', async function () {
-    const { response } = await makeRequest({
+  it('should reject numeric project_id for createLabel', async function () {
+    await expectRejected({
       method: 'POST',
       url: `http://127.0.0.1:3054/project/${this.numericProjectId}/labels`,
       json: {
@@ -135,7 +151,6 @@ describe('NumericProjectId', function () {
         user_id: '507f1f77bcf86cd799439011',
       },
     })
-    expect(response.status).to.equal(200)
   })
 
   it('should accept numeric history_id for getProjectBlob', async function () {

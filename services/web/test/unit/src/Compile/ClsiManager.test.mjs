@@ -214,7 +214,6 @@ describe('ClsiManager', function () {
         getChangesWithHistoryId: sinon
           .stub()
           .resolves({ changes: [], hasMore: false }),
-        ensureNoResyncPending: sinon.stub().resolves(),
       },
       getFilestoreBlobURL: sinon.stub().callsFake((historyId, hash) => {
         if (hash === GLOBAL_BLOB_HASH) {
@@ -546,6 +545,14 @@ describe('ClsiManager', function () {
         )
       }
 
+      function makeResyncPendingError() {
+        return new RequestFailedError(
+          'http://project-history/project/x/flush',
+          { method: 'POST' },
+          { status: 422 }
+        )
+      }
+
       function sendHistoryRequest(ctx, options = {}) {
         return ctx.ClsiManager.promises.sendRequest(
           null,
@@ -692,14 +699,36 @@ describe('ClsiManager', function () {
         })
       })
 
-      describe('when a resync is pending', function () {
+      describe('when the flush reports a pending resync then succeeds', function () {
         beforeEach(async function (ctx) {
-          ctx.HistoryManager.promises.ensureNoResyncPending.rejects(
-            new Errors.HistoryResyncPendingError(
-              'broken history with pending resync'
-            )
+          ctx.HistoryManager.promises.flushProject
+            .onFirstCall()
+            .rejects(makeResyncPendingError())
+            .onSecondCall()
+            .resolves()
+          ctx.result = await sendHistoryRequest(ctx, { baseHistoryVersion: -1 })
+        })
+
+        it('should compile from history without downgrading', function (ctx) {
+          expect(ctx.HistoryManager.promises.flushProject.callCount).to.equal(2)
+          expect(ctx.HistoryManager.promises.getLatestHistoryWithHistoryId).to
+            .have.been.called
+          expect(ctx.DocumentUpdaterHandler.promises.getProjectDocsIfMatch).to
+            .not.have.been.called
+          expect(ctx.result.status).to.equal('success')
+        })
+      })
+
+      describe('when the flush reports a pending resync', function () {
+        beforeEach(async function (ctx) {
+          ctx.HistoryManager.promises.flushProject.rejects(
+            makeResyncPendingError()
           )
           ctx.result = await sendHistoryRequest(ctx, { baseHistoryVersion: -1 })
+        })
+
+        it('should retry the flush, the resync updates may arrive', function (ctx) {
+          expect(ctx.HistoryManager.promises.flushProject.callCount).to.equal(3)
         })
 
         it('should fall back to a legacy compile', function (ctx) {

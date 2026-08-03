@@ -30,11 +30,12 @@ export async function initializeProject(historyId) {
 }
 
 export async function flushProject(projectId, options = {}) {
+  const url = new URL(`http://127.0.0.1:3054/project/${projectId}/flush`)
+  if (options.bisect) {
+    url.searchParams.set('bisect', 'true')
+  }
   try {
-    const response = await fetchNothing(
-      `http://127.0.0.1:3054/project/${projectId}/flush`,
-      { method: 'POST' }
-    )
+    const response = await fetchNothing(url.toString(), { method: 'POST' })
     if (!options.allowErrors) {
       expect(response.status).to.equal(204)
     }

@@ -979,23 +979,17 @@ async function _buildRequestFromHistoryFull(
   project
 ) {
   await _flushHistoryForCompile(projectId, historyId)
-  const [
-    {
-      chunk: {
-        history: { snapshot: rawSnapshot, changes: rawChanges },
-        startVersion,
-      },
+  const {
+    chunk: {
+      history: { snapshot: rawSnapshot, changes: rawChanges },
+      startVersion,
     },
-    /* ensureNoResyncPending throws */
-  ] = await Promise.all([
-    withRetries(
-      () => HistoryManager.promises.getLatestHistoryWithHistoryId(historyId),
-      'compile-from-history-chunk-retry',
-      'failed to get history chunk',
-      { projectId, historyId }
-    ),
-    HistoryManager.promises.ensureNoResyncPending(projectId),
-  ])
+  } = await withRetries(
+    () => HistoryManager.promises.getLatestHistoryWithHistoryId(historyId),
+    'compile-from-history-chunk-retry',
+    'failed to get history chunk',
+    { projectId, historyId }
+  )
   const rawChangeOperations = _rawChangeOperationsFromChanges(rawChanges)
   const globalBlobs = _collectGlobalBlobs(rawChangeOperations)
   collectGlobalBlobsFromRawSnapshot(rawSnapshot, globalBlobs)
@@ -1025,16 +1019,13 @@ async function _buildRequestFromHistoryIncremental(
   let size = 0
   while (hasMore) {
     let changes
-    ;[{ changes, hasMore } /* resyncPending throws */] = await Promise.all([
-      withRetries(
-        () =>
-          HistoryManager.promises.getChangesWithHistoryId(historyId, { since }),
-        'compile-from-history-changes-retry',
-        'failed to get history changes',
-        { projectId, historyId, since }
-      ),
-      HistoryManager.promises.ensureNoResyncPending(projectId),
-    ])
+    ;({ changes, hasMore } = await withRetries(
+      () =>
+        HistoryManager.promises.getChangesWithHistoryId(historyId, { since }),
+      'compile-from-history-changes-retry',
+      'failed to get history changes',
+      { projectId, historyId, since }
+    ))
     since += changes.length
     const newRawChangeOperations = _rawChangeOperationsFromChanges(changes)
     size += Buffer.from(JSON.stringify(newRawChangeOperations)).byteLength
