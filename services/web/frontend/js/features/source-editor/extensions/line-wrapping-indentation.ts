@@ -48,7 +48,8 @@ export const lineWrappingIndentation = (visual: boolean) => {
                 )
               },
               write(value: number, view: EditorView) {
-                if (view.state.field(field) !== value) {
+                const stateValue = view.state.field(field, false)
+                if (stateValue !== undefined && stateValue !== value) {
                   window.setTimeout(() => {
                     view.dispatch({
                       effects: setMaxIndentEffect.of(value),
