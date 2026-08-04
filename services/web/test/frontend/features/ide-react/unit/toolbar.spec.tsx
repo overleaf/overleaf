@@ -251,6 +251,42 @@ describe('<Toolbar />', function () {
     // TODO: Test all the dynamic items
   })
 
+  describe('upgrade button', function () {
+    afterEach(function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.delete('ol-showUpgradePrompt')
+      })
+    })
+
+    const mountWithUpgradePrompt = (showUpgradePrompt: boolean) => {
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-showUpgradePrompt', showUpgradePrompt)
+      })
+      cy.mount(
+        <EditorProviders>
+          <Toolbar />
+        </EditorProviders>
+      )
+    }
+
+    it('shows the upgrade button in the menu bar when the upgrade prompt is enabled', function () {
+      mountWithUpgradePrompt(true)
+      // Shown in the left-hand menu bar (the shipped position)...
+      cy.get('.ide-redesign-toolbar-menu').within(() => {
+        cy.findByRole('link', { name: 'Upgrade' }).should('be.visible')
+      })
+      // ...and no longer in the top-right actions area
+      cy.get('.ide-redesign-toolbar-actions').within(() => {
+        cy.findByRole('link', { name: 'Upgrade' }).should('not.exist')
+      })
+    })
+
+    it('does not show the upgrade button when the upgrade prompt is disabled', function () {
+      mountWithUpgradePrompt(false)
+      cy.findByRole('link', { name: 'Upgrade' }).should('not.exist')
+    })
+  })
+
   describe('offline gating', function () {
     const offlineIndicatorText = 'You’re offline'
 

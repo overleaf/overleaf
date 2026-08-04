@@ -31,9 +31,6 @@ export const Toolbar = () => {
   const { cobranding, isRestrictedTokenMember } = useEditorContext()
   const { permissionsLevel } = useIdeReactContext()
   const showUpgradePrompt = getMeta('ol-showUpgradePrompt')
-  const upgradeButtonRelocation = useFeatureFlag(
-    'editor-upgrade-button-relocation'
-  )
   const improvedFlakyConnections = useFeatureFlag(
     'intermittent-connection-improvements'
   )
@@ -131,7 +128,7 @@ export const Toolbar = () => {
       <div className="ide-redesign-toolbar-menu">
         <ToolbarLogos cobranding={cobranding} />
         <ToolbarMenuBar />
-        {showUpgradePrompt && upgradeButtonRelocation && <UpgradeButton />}
+        {showUpgradePrompt && <UpgradeButton />}
       </div>
       <ToolbarProjectTitle />
       <div className="ide-redesign-toolbar-actions-wrapper">
@@ -147,7 +144,6 @@ export const Toolbar = () => {
             <SubmitProjectButton cobranding={cobranding} />
           )}
           <ShareProjectButton />
-          {showUpgradePrompt && !upgradeButtonRelocation && <UpgradeButton />}
         </div>
       </div>
     </nav>

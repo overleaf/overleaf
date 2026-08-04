@@ -515,7 +515,6 @@ const _ProjectController = {
       'command-palette',
       'overleaf-library',
       'focus-mode',
-      'editor-upgrade-button-relocation',
       'markdown-visual',
       'ai-disabled-collaborators',
       'group-link-sharing',
