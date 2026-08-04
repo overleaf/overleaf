@@ -6989,6 +6989,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@overleaf/clsi-cache@workspace:services/clsi-cache"
   dependencies:
+    "@google-cloud/storage": "npm:^7.19.0"
     "@overleaf/fetch-utils": "workspace:*"
     "@overleaf/logger": "workspace:*"
     "@overleaf/metrics": "workspace:*"
