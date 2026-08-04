@@ -28,7 +28,9 @@ const rawRetainOp = z.union([
   z.strictObject({
     r: z.number().int().min(1),
     commentIds: z.array(zz.objectId()).optional(),
-    tracking: rawTrackingProps.or(rawClearTrackingProps).optional(),
+    tracking: z
+      .discriminatedUnion('type', [rawTrackingProps, rawClearTrackingProps])
+      .optional(),
   }),
   z.number().int().min(1),
 ])
@@ -101,14 +103,14 @@ const rawLinkedFileData = z.discriminatedUnion('provider', [
   z.strictObject({
     provider: z.literal('project_file'),
     source_project_id: zz.objectId().optional(),
-    v1_source_doc_id: z.string().optional(),
+    v1_source_doc_id: z.number().optional(),
     source_entity_path: z.string(),
     importedAt: z.iso.datetime().optional(),
   }),
   z.strictObject({
     provider: z.literal('project_output_file'),
     source_project_id: zz.objectId().optional(),
-    v1_source_doc_id: z.string().optional(),
+    v1_source_doc_id: z.number().optional(),
     source_output_file_path: z.string(),
     build_id: zz.buildId().optional(),
     clsiServerId: z.string().optional(),
@@ -116,7 +118,12 @@ const rawLinkedFileData = z.discriminatedUnion('provider', [
   }),
   z.strictObject({
     provider: z.literal('mendeley'),
-    group_id: zz.routeSegment().optional(),
+    // null, not just absent, for an import from a personal library: the web
+    // agents always build the data object with a group_id key, so no group
+    // means `group_id: undefined`, and mongoose keeps that key when $set-ing
+    // the Mixed linkedFileData (upserting over an existing file), where the
+    // driver serializes it as null. Same for the zotero/papers branches.
+    group_id: zz.routeSegment().nullish(),
     importer_id: z.string().optional(),
     v1_importer_id: z.number().optional(),
     importedAt: z.iso.datetime().optional(),
@@ -126,14 +133,14 @@ const rawLinkedFileData = z.discriminatedUnion('provider', [
     // absent on files imported before the `format` field existed; agents
     // default this to 'bibtex' (ZoteroAgent `_getFormat`)
     format: z.enum(['bibtex', 'biblatex']).optional(),
-    group_id: zz.routeSegment().optional(),
+    group_id: zz.routeSegment().nullish(),
     importer_id: z.string().optional(),
     v1_importer_id: z.number().optional(),
     importedAt: z.iso.datetime().optional(),
   }),
   z.strictObject({
     provider: z.literal('papers'),
-    group_id: zz.routeSegment().optional(),
+    group_id: zz.routeSegment().nullish(),
     importer_id: z.string().optional(),
     v1_importer_id: z.number().optional(),
     importedAt: z.iso.datetime().optional(),

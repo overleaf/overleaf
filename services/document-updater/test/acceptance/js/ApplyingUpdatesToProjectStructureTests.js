@@ -533,6 +533,54 @@ describe("Applying updates to a project's structure", function () {
       })
     })
 
+    describe('with linked-file metadata for a personal reference library', function () {
+      before(async function () {
+        this.project_id = DocUpdaterClient.randomId()
+        this.metadata = {
+          provider: 'zotero',
+          format: 'bibtex',
+          // web persists the absent group as null, see the rawLinkedFileData
+          // comment in overleaf-editor-core
+          group_id: null,
+          importer_id: this.user_id,
+          importedAt: new Date().toISOString(),
+        }
+        this.fileUpdate = {
+          type: 'add-file',
+          id: DocUpdaterClient.randomId(),
+          pathname: '/references.bib',
+          url: 'filestore.example.com',
+          metadata: this.metadata,
+        }
+        this.updates = [this.fileUpdate]
+        await sendProjectUpdateAndWait(
+          this.project_id,
+          this.user_id,
+          this.updates,
+          this.version
+        )
+      })
+
+      it('should push the file addition to the project history api with the metadata', function (done) {
+        rclientProjectHistory.lrange(
+          ProjectHistoryKeys.projectHistoryOps({ project_id: this.project_id }),
+          0,
+          -1,
+          (error, updates) => {
+            if (error) {
+              return done(error)
+            }
+
+            const update = JSON.parse(updates[0])
+            update.file.should.equal(this.fileUpdate.id)
+            expect(update.metadata).to.deep.equal(this.metadata)
+
+            done()
+          }
+        )
+      })
+    })
+
     describe('with invalid metadata', function () {
       before(async function () {
         this.project_id = DocUpdaterClient.randomId()

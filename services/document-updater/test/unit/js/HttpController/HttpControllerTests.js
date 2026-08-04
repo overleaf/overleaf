@@ -1162,6 +1162,47 @@ describe('HttpController', function () {
       })
     })
 
+    describe('when an add-file update has linked-file metadata with a null group_id', function () {
+      beforeEach(async function () {
+        this.req.body.updates[3].metadata = {
+          provider: 'zotero',
+          format: 'bibtex',
+          group_id: null,
+          importer_id: this.userId,
+          importedAt: '2024-01-01T00:00:00.000Z',
+        }
+        await this.HttpController.updateProject(this.req, this.res, this.next)
+      })
+
+      it('should accept the change', function () {
+        this.ProjectManager.promises.updateProjectWithLocks.should.have.been.calledWith(
+          this.project_id,
+          this.projectHistoryId,
+          this.userId,
+          this.updates,
+          this.version,
+          this.source
+        )
+      })
+    })
+
+    describe('when an update has an unrecognized type', function () {
+      beforeEach(async function () {
+        this.req.body.updates[3].type = 'add-folder'
+        await this.HttpController.updateProject(this.req, this.res, this.next)
+      })
+
+      it('should call next with the error', function () {
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
+      })
+
+      it('should not update the project', function () {
+        this.ProjectManager.promises.updateProjectWithLocks.called.should.equal(
+          false
+        )
+      })
+    })
+
     describe('when an add-file update has a malformed hash', function () {
       beforeEach(async function () {
         this.req.body.updates[3].hash = 'not-a-valid-hash'

@@ -651,7 +651,11 @@ const updateProjectSchema = z.object({
   body: z.strictObject({
     projectHistoryId: z.union([z.number(), zz.projectHistoryId()]).optional(),
     userId: zz.objectId().nullish(),
-    updates: z.array(renameUpdateSchema.or(addUpdateSchema)).default([]),
+    updates: z
+      .array(
+        z.discriminatedUnion('type', [renameUpdateSchema, addUpdateSchema])
+      )
+      .default([]),
     version: z.union([z.number(), z.string()]),
     // `source` is polymorphic (see Utils.extractOriginOrSource): either a
     // plain descriptive string (e.g. 'editor' for live user edits) or the
@@ -680,7 +684,12 @@ const updateProjectFallbackSchema = z.object({
     projectHistoryId: z.union([z.number(), z.string()]).optional(),
     userId: z.string().nullish(),
     updates: z
-      .array(renameUpdateFallbackSchema.or(addUpdateFallbackSchema))
+      .array(
+        z.discriminatedUnion('type', [
+          renameUpdateFallbackSchema,
+          addUpdateFallbackSchema,
+        ])
+      )
       .default([]),
     version: z.union([z.number(), z.string()]),
     // loosened equivalent of editorCoreSchemas.rawOrigin -- see the same
