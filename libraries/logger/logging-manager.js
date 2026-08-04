@@ -1,4 +1,5 @@
 const Stream = require('node:stream')
+const { setTimeout } = require('node:timers/promises')
 const bunyan = require('bunyan')
 const GCPManager = require('./gcp-manager')
 const Serializers = require('./serializers')
@@ -10,6 +11,9 @@ const { setLogger } = require('@overleaf/fetch-utils')
 const {
   setLogger: setValidationToolsLogger,
 } = require('@overleaf/validation-tools')
+
+// Delay (ms) before exiting to allow final logs to be flushed.
+const EXIT_DELAY = 500
 
 const LoggingManager = {
   /**
@@ -98,6 +102,16 @@ const LoggingManager = {
    */
   fatal(attributes, message) {
     this.logger.fatal(attributes, message)
+  },
+
+  /**
+   * Exit after a delay to ensure that log messages are flushed
+   * @param {number} code
+   */
+
+  async exit(code) {
+    await setTimeout(EXIT_DELAY)
+    process.exit(code)
   },
 
   _getOutputStreamConfig() {
