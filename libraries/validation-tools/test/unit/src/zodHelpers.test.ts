@@ -781,7 +781,13 @@ describe('zodHelpers', () => {
       expect(parsed.data).toBe('editor-click_something-2')
     })
 
-    it('fails to parse a name containing an uppercase letter or dots, colons, semicolons, commas and slashes', () => {
+    it('parses successfully when provided a name with upper case letter', () => {
+      const parsed = zz.eventName().safeParse('For-Pages')
+      expect(parsed.success).toBe(true)
+      expect(parsed.data).toBe('For-Pages')
+    })
+
+    it('fails to parse a name containing dots, colons, semicolons, commas and slashes', () => {
       const parsed = zz.eventName().safeParse('I.did:something,here/now;too')
       expect(parsed.success).toBe(false)
       expect(parsed.error?.issues).toMatchObject([

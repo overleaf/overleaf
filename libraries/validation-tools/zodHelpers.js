@@ -194,7 +194,7 @@ const zz = {
    * call site of recordEventForSession/recordEventForUser/
    * recordEventForMongoUser in web's app/, modules/ and scripts/ -- is
    * already kebab-case or snake_case, i.e. already matches
-   * `^[a-z0-9-_]+$`. Capped at 240 characters, well above the longest of
+   * `/^[a-z0-9-_]+$/i`. Capped at 240 characters, well above the longest of
    * those literals. AnalyticsManager's own _isAttributeValid applies a
    * wider regex, but that's a separate, looser backend-only guard for call
    * sites that don't go through one of these schemas -- not evidence that a
@@ -204,7 +204,7 @@ const zz = {
     z
       .string()
       .min(1, { message: 'invalid event name' })
-      .regex(/^[a-z0-9-_]+$/, { message: 'invalid event name' })
+      .regex(/^[a-zA-Z0-9-_]+$/, { message: 'invalid event name' })
       .max(240, { message: 'event name is too long' }),
   /**
    * For endpoints that consume the request as a raw stream (e.g. blob
