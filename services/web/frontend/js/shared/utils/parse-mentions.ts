@@ -29,6 +29,16 @@ export function parseMentions(content: string): MentionSegment[] {
   return segments
 }
 
+export function countMentionedUsers(content: string): number {
+  const userIds = new Set<string>()
+
+  for (const match of content.matchAll(MENTION_REGEX)) {
+    userIds.add(match[1])
+  }
+
+  return userIds.size
+}
+
 const MENTION_RAW_LENGTH = 27 // @[ + 24 hex chars + ]
 
 export function sliceMentionSegments(

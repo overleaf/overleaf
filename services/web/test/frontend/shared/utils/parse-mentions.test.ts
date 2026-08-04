@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import {
+  countMentionedUsers,
   parseMentions,
   sliceMentionSegments,
 } from '@/shared/utils/parse-mentions'
@@ -73,6 +74,33 @@ describe('parseMentions', function () {
     expect(parseMentions('@[aabbccddeeff001122')).to.deep.equal([
       { type: 'text', value: '@[aabbccddeeff001122' },
     ])
+  })
+})
+
+describe('countMentionedUsers', function () {
+  const userId1 = 'aabbccddeeff00112233aabb' as UserId
+  const userId2 = '112233445566778899aabbcc' as UserId
+
+  it('should return 0 for content without mentions', function () {
+    expect(countMentionedUsers('hello world')).to.equal(0)
+  })
+
+  it('should count a single mention', function () {
+    expect(countMentionedUsers(`hey @[${userId1}]`)).to.equal(1)
+  })
+
+  it('should count distinct mentioned users', function () {
+    expect(countMentionedUsers(`@[${userId1}] and @[${userId2}]`)).to.equal(2)
+  })
+
+  it('should count a repeated user only once', function () {
+    expect(countMentionedUsers(`@[${userId1}] @[${userId1}]`)).to.equal(1)
+  })
+
+  it('should ignore malformed mentions', function () {
+    expect(countMentionedUsers('@[aabbcc] @aabbccddeeff00112233aabb')).to.equal(
+      0
+    )
   })
 })
 

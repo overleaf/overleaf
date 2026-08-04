@@ -35,6 +35,7 @@ import { useCodeMirrorViewContext } from '@/features/source-editor/components/co
 import { rangesUpdatedEffect } from '@/features/source-editor/extensions/history-ot'
 import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 import { useReviewPanelViewContext } from './review-panel-view-context'
+import { countMentionedUsers } from '@/shared/utils/parse-mentions'
 
 export type Threads = Record<ThreadId, ReviewPanelCommentThread>
 
@@ -279,7 +280,10 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
           body: { content },
         })
 
-        sendEvent('rp-new-comment', { size: content.length })
+        sendEvent('rp-new-comment', {
+          size: content.length,
+          'mentions-count': countMentionedUsers(content),
+        })
 
         const op: CommentOperation = {
           c: text,
@@ -317,6 +321,7 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
           view: reviewPanelView,
           size: content.length,
           thread: threadId,
+          'mentions-count': countMentionedUsers(content),
         })
       },
       async editMessage(
@@ -351,7 +356,10 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
             body: { content },
           })
 
-          sendEvent('rp-new-comment', { size: content.length })
+          sendEvent('rp-new-comment', {
+            size: content.length,
+            'mentions-count': countMentionedUsers(content),
+          })
 
           const trackedDeletes = trackedDeletesFromState(view.state)
           pos = trackedDeletes.toSnapshot(pos)
