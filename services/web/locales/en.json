@@ -1370,6 +1370,7 @@
   "joined_team": "You have joined the group subscription managed by __inviterName__",
   "joining": "Joining",
   "july": "July",
+  "jump_to_command_definition": "Jump to command definition",
   "jump_to_line_x": "Jump to line __line__",
   "jump_to_line_x_column_y": "Jump to line __line__, column __column__",
   "jump_to_location_in_pdf": "Jump to location in PDF",

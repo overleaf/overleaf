@@ -16,6 +16,9 @@ import {
   useCommandRegistry,
 } from '@/features/ide-react/context/command-registry-context'
 import { closeContextMenuEffect } from '../extensions/context-menu'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
+import { useContextMenuCommandDefinition } from './use-command-definitions'
 import * as commands from '../extensions/toolbar/commands'
 import {
   cutSelection,
@@ -58,6 +61,9 @@ export const useContextMenuItems = () => {
   const isReview = trackingChangesMode === 'review'
   const { changesInSelection, acceptChangesHandler, rejectChangesHandler } =
     useTrackedChangesActions()
+  const { openDocWithId } = useEditorManagerContext()
+  const { findEntityByPath } = useFileTreePathContext()
+  const { commandName, commandDefinition } = useContextMenuCommandDefinition()
 
   const closeMenu = useCallback(() => {
     view.dispatch({ effects: closeContextMenuEffect.of(null) })
@@ -186,6 +192,20 @@ export const useContextMenuItems = () => {
     return true
   })
 
+  const handleJumpToDefinition = wrapForContextMenu(
+    'jump-to-definition',
+    () => {
+      if (!commandDefinition) {
+        return true
+      }
+      const result = findEntityByPath(commandDefinition.path)
+      if (result?.type === 'doc') {
+        openDocWithId(result.entity._id, { gotoOffset: commandDefinition.pos })
+      }
+      return true
+    }
+  )
+
   // Sync-to-PDF is special: it needs to wait for async completion before closing
   const handleSyncToPdf = useCallback(() => {
     // Switch to split view only when in editor-only mode with non-detached PDF
@@ -260,6 +280,14 @@ export const useContextMenuItems = () => {
         disabled: syncToPdfInFlight,
         separatorAbove: true,
         show: jumpToLocationInPdfEnabled,
+        shortcut: undefined,
+      },
+      {
+        label: t('jump_to_command_definition'),
+        handler: handleJumpToDefinition,
+        disabled: !commandDefinition,
+        separatorAbove: !jumpToLocationInPdfEnabled,
+        show: Boolean(commandName),
         shortcut: undefined,
       },
       {
