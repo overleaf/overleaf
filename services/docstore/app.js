@@ -28,22 +28,6 @@ app.use(Metrics.http.monitor(logger))
 
 Metrics.injectMetricsRoute(app)
 
-app.param('project_id', function (req, res, next, projectId) {
-  if (projectId?.match(/^[0-9a-f]{24}$/)) {
-    next()
-  } else {
-    next(new Error('invalid project id'))
-  }
-})
-
-app.param('doc_id', function (req, res, next, docId) {
-  if (docId?.match(/^[0-9a-f]{24}$/)) {
-    next()
-  } else {
-    next(new Error('invalid doc id'))
-  }
-})
-
 app.get('/project/:project_id/doc-deleted', HttpController.getAllDeletedDocs)
 app.get('/project/:project_id/doc', HttpController.getAllDocs)
 app.get(

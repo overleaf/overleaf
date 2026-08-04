@@ -1,4 +1,5 @@
 import mongodb from 'mongodb-legacy'
+import { expectValidationError } from '@overleaf/validation-tools/testUtils.js'
 import DocstoreApp from './helpers/DocstoreApp.js'
 import DocstoreClient from './helpers/DocstoreClient.js'
 
@@ -15,9 +16,9 @@ describe('Applying updates to a doc', function () {
         {
           id: new ObjectId().toString(),
           op: { i: '$foo', p: 3 },
-          meta: {
+          metadata: {
             user_id: new ObjectId().toString(),
-            ts: new Date().toString(),
+            ts: new Date().toISOString(),
           },
         },
       ],
@@ -27,9 +28,9 @@ describe('Applying updates to a doc', function () {
         {
           id: new ObjectId().toString(),
           op: { i: '$bar', p: 6 },
-          meta: {
+          metadata: {
             user_id: new ObjectId().toString(),
-            ts: new Date().toString(),
+            ts: new Date().toISOString(),
           },
         },
       ],
@@ -259,6 +260,43 @@ describe('Applying updates to a doc', function () {
     })
   })
 
+  describe('when an unknown ranges field is provided', function () {
+    let err
+    beforeEach(async function () {
+      try {
+        this.body = await DocstoreClient.updateDoc(
+          this.project_id,
+          this.doc_id,
+          this.newLines,
+          this.version + 1,
+          { ...this.originalRanges, unknownField: 'x' }
+        )
+      } catch (error) {
+        err = error
+      }
+    })
+
+    it('should return 400', function () {
+      err.info.status.should.equal(400)
+    })
+
+    // handleValidationError() (@overleaf/validation-tools) composes the body
+    // as { error: fromError(zodError).toString(), statusCode }; fromError()
+    // renders the literal unrecognized-key name for a strictObject
+    // rejection. Asserting on the body (not just the status code) confirms
+    // the *intended* field is what rejected the request, not some unrelated
+    // bug that happens to also return the same status.
+    it('should return a body naming the unknown field', function () {
+      expectValidationError(err, 400, 'unknownField')
+    })
+
+    it('should not update the doc in the API', async function () {
+      const doc = await DocstoreClient.getDoc(this.project_id, this.doc_id)
+      doc.lines.should.deep.equal(this.originalLines)
+      doc.version.should.equal(this.version)
+    })
+  })
+
   describe('when no version is provided', function () {
     let statusCode
     beforeEach(async function () {
@@ -313,9 +351,13 @@ describe('Applying updates to a doc', function () {
     beforeEach(async function () {
       const line = new Array(1025).join('x') // 1kb
       this.largeLines = Array.apply(null, Array(1024)).map(() => line) // 1kb
-      this.originalRanges.padding = Array.apply(null, Array(2049)).map(
-        () => line
-      ) // 2mb + 1kb
+      // bloat the ranges payload beyond max_doc_length (2mb + 1kb)
+      this.originalRanges.comments = [
+        {
+          id: new ObjectId().toString(),
+          op: { c: line.repeat(2049), p: 0, t: new ObjectId().toString() },
+        },
+      ]
       this.body = await DocstoreClient.updateDoc(
         this.project_id,
         this.doc_id,
@@ -372,7 +414,13 @@ describe('Applying updates to a doc', function () {
     beforeEach(async function () {
       const line = new Array(1024).join('x') // 1 KB
       this.largeLines = new Array(8192).fill(line) // 8 MB
-      this.originalRanges.padding = new Array(6144).fill(line) // 6 MB
+      // bloat the ranges payload by 6 MB
+      this.originalRanges.comments = [
+        {
+          id: new ObjectId().toString(),
+          op: { c: line.repeat(6144), p: 0, t: new ObjectId().toString() },
+        },
+      ]
 
       try {
         this.body = await DocstoreClient.updateDoc(
