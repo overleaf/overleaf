@@ -21,6 +21,14 @@ require('jsdom-global')(undefined, {
   url: 'https://www.test-overleaf.com/',
 })
 
+// JSDOM doesn't define devicePixelRatio, which @juggle/resize-observer's
+// polyfill (used by virtualized lists) reads as a bare global on every
+// observation tick
+if (typeof global.devicePixelRatio === 'undefined') {
+  global.devicePixelRatio = 1
+  window.devicePixelRatio = 1
+}
+
 const path = require('path')
 process.env.OVERLEAF_CONFIG = path.resolve(
   __dirname,
