@@ -1,4 +1,3 @@
-import getMeta from '../../../utils/meta'
 import { useTranslation } from 'react-i18next'
 import { memo, useCallback } from 'react'
 import classNames from 'classnames'
@@ -40,11 +39,9 @@ function PdfCompileButton() {
     autoCompile,
     compiling,
     draft,
-    png2pdf,
     hasChanges,
     setAutoCompile,
     setDraft,
-    setPng2pdf,
     setStopOnValidationError,
     stopOnFirstError,
     stopOnValidationError,
@@ -58,20 +55,16 @@ function PdfCompileButton() {
 
   const { t } = useTranslation()
 
-  const png2pdfEnabled = getMeta('ol-canUsePng2Pdf')
-
-  // The three compile modes (Normal / Fast [optimize images] / Fast [draft]) are
-  // mutually exclusive, so each selection sets both underlying flags.
+  // The two compile modes (Normal / Fast [draft]) are mutually exclusive.
   const setCompileMode = useCallback(
-    (mode: 'normal' | 'png2pdf' | 'draft') => {
+    (mode: 'normal' | 'draft') => {
       eventTracking.sendMB('recompile-setting-changed', {
         setting: 'compile-mode',
         settingVal: mode,
       })
       setDraft(mode === 'draft')
-      setPng2pdf(mode === 'png2pdf')
     },
-    [setDraft, setPng2pdf]
+    [setDraft]
   )
 
   const { detachRole } = useLayoutContext()
@@ -205,23 +198,11 @@ function PdfCompileButton() {
           <OLDropdownItem
             as="button"
             onClick={() => setCompileMode('normal')}
-            trailingIcon={!draft && !png2pdf ? 'check' : null}
+            trailingIcon={!draft ? 'check' : null}
           >
             {t('normal')}
           </OLDropdownItem>
         </li>
-        {png2pdfEnabled && (
-          <li role="none">
-            <OLDropdownItem
-              as="button"
-              onClick={() => setCompileMode('png2pdf')}
-              trailingIcon={png2pdf ? 'check' : null}
-            >
-              {t('fast')}&nbsp;
-              <span className="subdued">[optimize images]</span>
-            </OLDropdownItem>
-          </li>
-        )}
         <li role="none">
           <OLDropdownItem
             as="button"

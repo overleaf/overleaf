@@ -39,111 +39,12 @@ describe('<DraftSetting />', function () {
       expect(!!localStorage.getItem(`draft:${projectDefaults._id}`)).to.equal(
         option.draft
       )
-      expect(!!localStorage.getItem(`png2pdf:${projectDefaults._id}`)).to.equal(
-        false
-      )
     }
   })
 
-  it('offers the optimize-images option when png2pdf is available', async function () {
-    window.metaAttributesCache.set('ol-canUsePng2Pdf', true)
-    render(
-      <EditorProviders>
-        <SettingsModalProvider>
-          <DraftSetting />
-        </SettingsModalProvider>
-      </EditorProviders>
-    )
-
-    const select = screen.getByLabelText('Compile mode')
-    const optionElement = within(select).getByText('Fast [optimize images]')
-    expect(optionElement.getAttribute('value')).to.equal('png2pdf')
-
-    await userEvent.selectOptions(select, [optionElement])
-    expect((select as HTMLSelectElement).value).to.equal('png2pdf')
-    expect(localStorage.getItem(`png2pdf:${projectDefaults._id}`)).to.equal(
-      null
-    )
-    expect(!!localStorage.getItem(`draft:${projectDefaults._id}`)).to.equal(
-      false
-    )
-  })
-
-  it('defaults to optimize-images mode when png2pdf is available', function () {
-    window.metaAttributesCache.set('ol-canUsePng2Pdf', true)
-
-    render(
-      <EditorProviders>
-        <SettingsModalProvider>
-          <DraftSetting />
-        </SettingsModalProvider>
-      </EditorProviders>
-    )
-
-    const select = screen.getByLabelText('Compile mode') as HTMLSelectElement
-    expect(select.value).to.equal('png2pdf')
-    expect(localStorage.getItem(`png2pdf:${projectDefaults._id}`)).to.equal(
-      null
-    )
-    expect(localStorage.getItem(`draft:${projectDefaults._id}`)).to.equal(null)
-  })
-
-  it('respects a previous draft setting over the png2pdf default', function () {
-    window.metaAttributesCache.set('ol-canUsePng2Pdf', true)
-    localStorage.setItem(`draft:${projectDefaults._id}`, 'true')
-
-    render(
-      <EditorProviders>
-        <SettingsModalProvider>
-          <DraftSetting />
-        </SettingsModalProvider>
-      </EditorProviders>
-    )
-
-    const select = screen.getByLabelText('Compile mode') as HTMLSelectElement
-    expect(select.value).to.equal('fast_draft')
-  })
-
-  it('persists the png2pdf setting to the server when changed', async function () {
-    window.metaAttributesCache.set('ol-canUsePng2Pdf', true)
-    render(
-      <EditorProviders>
-        <SettingsModalProvider>
-          <DraftSetting />
-        </SettingsModalProvider>
-      </EditorProviders>
-    )
-
-    const saveSettingsMock = fetchMock.post(
-      `express:/project/:projectId/settings`,
-      { status: 200 },
-      { delay: 0 }
-    )
-
-    const select = screen.getByLabelText('Compile mode')
-
-    await userEvent.selectOptions(select, [
-      within(select).getByText('Fast [optimize images]'),
-    ])
-    expect(
-      saveSettingsMock.callHistory.called(
-        `/project/${projectDefaults._id}/settings`,
-        { body: { png2pdf: true } }
-      )
-    ).to.be.true
-
-    await userEvent.selectOptions(select, [within(select).getByText('Normal')])
-    expect(
-      saveSettingsMock.callHistory.called(
-        `/project/${projectDefaults._id}/settings`,
-        { body: { png2pdf: false } }
-      )
-    ).to.be.true
-  })
-
-  it('does not persist png2pdf when switching to draft mode', async function () {
-    // Draft is a local-only setting; toggling it must not overwrite the shared
-    // project-wide png2pdf preference.
+  it('does not persist a project setting when switching to draft mode', async function () {
+    // Draft is a local-only setting; toggling it must not touch the shared
+    // project-wide Optimise images (recommended) preference.
     window.metaAttributesCache.set('ol-canUsePng2Pdf', true)
     render(
       <EditorProviders>

@@ -46,7 +46,6 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
     setAnimateCompileDropdownArrow: _setAnimateCompileDropdownArrow,
     setAutoCompile: _setAutoCompile,
     setDraft: _setDraft,
-    setPng2pdf: _setPng2pdf,
     setError: _setError,
     setHasLintingError: _setHasLintingError,
     setHighlights: _setHighlights,
@@ -268,12 +267,6 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
     'detached',
     'detacher'
   )
-  const setPng2pdf = useDetachAction(
-    'setPng2pdf',
-    _setPng2pdf,
-    'detached',
-    'detacher'
-  )
   const setError = useDetachAction(
     'setError',
     _setError,
@@ -454,7 +447,6 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
       setAutoCompile,
       setCompiling,
       setDraft,
-      setPng2pdf,
       setError,
       setHasLintingError,
       setHighlights,
@@ -513,7 +505,6 @@ export const DetachCompileProvider: FC<React.PropsWithChildren> = ({
       setAutoCompile,
       setCompiling,
       setDraft,
-      setPng2pdf,
       setError,
       setHasLintingError,
       setHighlights,

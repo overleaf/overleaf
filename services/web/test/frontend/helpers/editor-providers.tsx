@@ -84,6 +84,7 @@ export type EditorProvidersProps = {
   rootDocId?: string
   imageName?: string
   compiler?: ProjectCompiler
+  png2pdf?: boolean
   socket?: Socket
   isRestrictedTokenMember?: boolean
   scope?: Record<string, any>
@@ -164,6 +165,8 @@ export function EditorProviders({
   rootDocId = projectDefaults.rootDocId,
   imageName = projectDefaults.imageName,
   compiler = projectDefaults.compiler,
+  // left unset by default so the "never chosen" path is the one under test
+  png2pdf,
   socket = new SocketIOMock() as any as Socket,
   isRestrictedTokenMember = false,
   scope: defaultScope = {},
@@ -231,6 +234,7 @@ export function EditorProviders({
     rootFolder,
     imageName,
     compiler,
+    png2pdf,
     members: [],
     invites: [],
     trackChangesState: {} as TrackChangesStateData,
@@ -730,7 +734,6 @@ const BASE_COMPILE_CONTEXT_MOCK = {
   rawLog: undefined,
   recompileFromScratch: () => {},
   setAnimateCompileDropdownArrow: () => {},
-  setPng2pdf: () => {},
   setHasLintingError: () => {},
   setHighlights: () => {},
   setPosition: () => {},

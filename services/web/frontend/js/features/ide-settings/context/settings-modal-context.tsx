@@ -47,6 +47,7 @@ import type {
 import EditorTabsSetting from '../components/editor-settings/editor-tabs-setting'
 import FloatingMenuSetting from '../components/editor-settings/floating-menu-setting'
 import useEventListener from '@/shared/hooks/use-event-listener'
+import OptimizeCompileSetting from '../components/compiler-settings/optimize-compile-setting'
 
 const [referenceSearchSettingModule] = importOverleafModules(
   'referenceSearchSetting'
@@ -228,6 +229,10 @@ export const SettingsModalProvider: FC<React.PropsWithChildren> = ({
               {
                 key: 'autoCompile',
                 component: <AutoCompileSetting />,
+              },
+              {
+                key: 'optimizeCompiles',
+                component: <OptimizeCompileSetting />,
               },
             ],
           },
