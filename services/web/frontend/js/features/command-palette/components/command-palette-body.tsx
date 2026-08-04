@@ -13,6 +13,8 @@ import classNames from 'classnames'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import useCommandPaletteResults from '../hooks/use-command-palette-results'
 import { debugConsole } from '@/utils/debugging'
+import SplitTestBadge from '@/shared/components/split-test-badge'
+import { useTranslation } from 'react-i18next'
 
 type CommandPaletteBodyProps = {
   show: boolean
@@ -24,6 +26,7 @@ const CommandPaletteBody: FC<CommandPaletteBodyProps> = ({ show, onHide }) => {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const resultsRef = useRef<HTMLUListElement>(null)
   const results = useCommandPaletteResults(query)
+  const { t } = useTranslation()
 
   useEffect(() => {
     setSelectedIndex(0)
@@ -91,15 +94,20 @@ const CommandPaletteBody: FC<CommandPaletteBodyProps> = ({ show, onHide }) => {
       themed
     >
       <OLModalBody>
-        <input
-          type="text"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          onKeyDown={onKeyDown}
-          placeholder="Type a command..."
-          aria-label="Command palette search"
-          className="command-palette-input"
-        />
+        <div className="command-palette-input">
+          <input
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={onKeyDown}
+            placeholder={t('type_a_command')}
+            aria-label={t('command_palette_search')}
+          />
+          <SplitTestBadge
+            displayOnVariants={['enabled']}
+            splitTestName="command-palette"
+          />
+        </div>
         <ul ref={resultsRef} className="command-palette-results">
           {results.map((result, index) => (
             <li

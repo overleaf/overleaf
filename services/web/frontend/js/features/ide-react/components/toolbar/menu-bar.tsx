@@ -224,6 +224,14 @@ export const ToolbarMenuBar = () => {
     [t]
   )
 
+  const commandPaletteMenuSectionStructure: MenuSectionStructure = useMemo(
+    () => ({
+      id: 'command-palette-group',
+      children: ['command-palette'],
+    }),
+    []
+  )
+
   const {
     mathPreview,
     setMathPreview,
@@ -300,6 +308,10 @@ export const ToolbarMenuBar = () => {
               mathPreview ? 'check' : <OLDropdownItem.EmptyLeadingIcon />
             }
             onClick={toggleMathPreview}
+          />
+          <CommandSection
+            section={commandPaletteMenuSectionStructure}
+            includeDivider
           />
           <CommandSection
             section={pdfControlsMenuSectionStructure}

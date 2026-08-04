@@ -30,18 +30,27 @@
   }
 
   .command-palette-input {
-    width: 100%;
-    padding: var(--spacing-05);
-    border: 0;
-    border-bottom: 1px solid var(--border-divider-themed);
-    background: transparent;
-    color: var(--content-primary-themed);
-    font-size: var(--font-size-04);
-    outline: none;
+    input {
+      flex: 1;
+      background: transparent;
+      color: var(--content-primary-themed);
+      font-size: var(--font-size-04);
+      border: 0;
+      outline: none;
+      border-radius: var(--border-radius-base);
+      padding: var(--spacing-02);
 
-    &::placeholder {
-      color: var(--content-placeholder-themed);
+      &::placeholder {
+        color: var(--content-placeholder-themed);
+      }
     }
+
+    border-bottom: 1px solid var(--border-divider-themed);
+    padding: var(--spacing-03);
+    gap: var(--spacing-02);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .command-palette-results {
