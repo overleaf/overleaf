@@ -100,6 +100,7 @@ export default function ManagedGroupSubscriptions() {
   const isSharingPermissionsEnabled = useFeatureFlag(
     'sharing-updates-sharing-permissions'
   )
+  const aiTogglingSplitTestEnabled = useFeatureFlag('ai-toggling')
 
   if (!managedGroupSubscriptions) {
     return null
@@ -116,9 +117,11 @@ export default function ManagedGroupSubscriptions() {
 
         // Feature controls are currently rendered only for managed groups, where the admin can
         // toggle AI Feature on/off. For non-managed groups, the section only displays notifications
-        // for features that have been disabled by Overleaf Support.
+        // for features that have been disabled by Overleaf Support. When the `ai-toggling` split
+        // test is enabled, it's always displayed for non-managed groups that have the feature on.
         // This flag will be deleted once AI Features toggling is available to all groups.
         const shouldDisplayFeatureControls =
+          (subscription.features?.aiToggling && aiTogglingSplitTestEnabled) ||
           subscription.managedUsersEnabled ||
           subscription.groupPolicy?.userCannotUseAIFeatures ||
           subscription.groupPolicy?.userCannotUseChat ||

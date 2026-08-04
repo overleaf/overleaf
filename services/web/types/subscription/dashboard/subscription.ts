@@ -102,6 +102,7 @@ export type ManagedGroupSubscription = {
   features: {
     groupSSO: boolean | null
     managedUsers: boolean | null
+    aiToggling?: boolean | null
   }
   managedUsersEnabled: boolean
   groupPolicy?: GroupPolicy

@@ -441,5 +441,95 @@ describe('<ManagedGroupSubscriptions />', function () {
         expect(screen.queryByText('Feature controls')).to.be.null
       })
     })
+
+    describe('AI toggling', function () {
+      it('renders the feature controls row when the "ai-toggling" split test is enabled and the group has the aiToggling feature', async function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({
+                features: {
+                  groupSSO: false,
+                  managedUsers: false,
+                  aiToggling: true,
+                },
+              }),
+            },
+            { name: 'ol-usersEmail', value: adminEmail },
+            {
+              name: 'ol-splitTestVariants',
+              value: { 'ai-toggling': 'enabled' },
+            },
+          ],
+        })
+        await screen.findByText('Feature controls')
+      })
+
+      it('does not render the feature controls row when the "ai-toggling" split test is enabled but the group lacks the aiToggling feature', function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({
+                features: {
+                  groupSSO: false,
+                  managedUsers: false,
+                  aiToggling: false,
+                },
+              }),
+            },
+            { name: 'ol-usersEmail', value: adminEmail },
+            {
+              name: 'ol-splitTestVariants',
+              value: { 'ai-toggling': 'enabled' },
+            },
+          ],
+        })
+        expect(screen.queryByText('Feature controls')).to.be.null
+      })
+
+      it('does not render the feature controls row when the group has the aiToggling feature but the "ai-toggling" split test is disabled', function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({
+                features: {
+                  groupSSO: false,
+                  managedUsers: false,
+                  aiToggling: true,
+                },
+              }),
+            },
+            { name: 'ol-usersEmail', value: adminEmail },
+          ],
+        })
+        expect(screen.queryByText('Feature controls')).to.be.null
+      })
+
+      it('does not render the feature controls row when the user is not the group admin', function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: makeSubscription({
+                features: {
+                  groupSSO: false,
+                  managedUsers: false,
+                  aiToggling: true,
+                },
+              }),
+            },
+            { name: 'ol-usersEmail', value: 'other@example.com' },
+            {
+              name: 'ol-splitTestVariants',
+              value: { 'ai-toggling': 'enabled' },
+            },
+          ],
+        })
+        expect(screen.queryByText('Feature controls')).to.be.null
+      })
+    })
   })
 })

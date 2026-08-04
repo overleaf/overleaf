@@ -171,6 +171,7 @@ async function userSubscriptionPage(req, res) {
     res,
     'group-discount-10'
   )
+  await SplitTestHandler.promises.getAssignment(req, res, 'ai-toggling')
 
   const showGroupDiscount = groupPricingDiscount.variant === 'enabled'
 
