@@ -109,6 +109,13 @@ const CommandPaletteBody: FC<CommandPaletteBodyProps> = ({ show, onHide }) => {
           />
         </div>
         <ul ref={resultsRef} className="command-palette-results">
+          {results.length === 0 && (
+            <li role="none" className="command-palette-result">
+              <div className="command-palette-result-title command-palette-no-matches">
+                {t('no_matches')}
+              </div>
+            </li>
+          )}
           {results.map((result, index) => (
             <li
               role="none"

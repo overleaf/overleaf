@@ -34,7 +34,7 @@
       flex: 1;
       background: transparent;
       color: var(--content-primary-themed);
-      font-size: var(--font-size-04);
+      font-size: var(--font-size-03);
       border: 0;
       outline: none;
       border-radius: var(--border-radius-base);
@@ -91,14 +91,24 @@
     &.command-palette-result-selected button {
       background-color: var(--command-palette-selected-bg);
       color: var(--command-palette-selected-color);
+
+      .command-palette-result-title,
+      .command-palette-result-description {
+        color: var(--command-palette-selected-color);
+      }
     }
   }
 
   .command-palette-result-title {
     color: var(--content-primary-themed);
     font-size: var(--font-size-02);
-    font-weight: 500;
+    font-weight: 400;
     line-height: 1.2;
+  }
+
+  .command-palette-no-matches {
+    color: var(--content-placeholder-themed);
+    padding: var(--spacing-03) var(--spacing-04);
   }
 
   .command-palette-result-description {
