@@ -1,7 +1,8 @@
 import { Trans, useTranslation } from 'react-i18next'
-import { memo, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { useLocation } from '@/shared/hooks/use-location'
 import OLButton from '@/shared/components/ol/ol-button'
+import { sendMB } from '@/infrastructure/event-tracking'
 import {
   OLModal,
   OLModalBody,
@@ -21,6 +22,12 @@ function OutOfSyncModal({ editorContent, show, onHide }: OutOfSyncModalProps) {
   const location = useLocation()
   const [editorContentShown, setEditorContentShown] = useState(false)
   const editorContentRows = (editorContent.match(/\n/g)?.length || 0) + 1
+
+  useEffect(() => {
+    if (show) {
+      sendMB('out-of-sync-modal-shown')
+    }
+  }, [show])
 
   // Reload the page to avoid staying in an inconsistent state.
   // https://github.com/overleaf/issues/issues/3694

@@ -1,5 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next'
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
 import OLButton from '@/shared/components/ol/ol-button'
 import {
   OLModal,
@@ -15,6 +15,7 @@ import { debugConsole } from '@/utils/debugging'
 import Notification from '@/shared/components/notification'
 import { downloadFileContent } from '@/utils/download-file'
 import { useLocation } from '@/shared/hooks/use-location'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 export type UnableToSyncModalProps = {
   baseContent: string
@@ -62,6 +63,12 @@ function UnableToSyncModal({
   const [saveError, setSaveError] = useState(false)
   const location = useLocation()
 
+  useEffect(() => {
+    if (show) {
+      sendMB('unable-to-sync-modal-shown')
+    }
+  }, [show])
+
   const onHide = useCallback(() => {
     onHideProp()
     if (reloadAfterClose) {
@@ -69,11 +76,18 @@ function UnableToSyncModal({
     }
   }, [onHideProp, reloadAfterClose, location])
 
+  const handleDiscardChanges = useCallback(() => {
+    sendMB('unable-to-sync-modal-click', { action: 'discard-changes' })
+    onHide()
+  }, [onHide])
+
   const handleDownload = useCallback(() => {
+    sendMB('unable-to-sync-modal-click', { action: 'download' })
     downloadFileContent(targetContent, docName ?? 'document.txt')
   }, [targetContent, docName])
 
   const handleSaveAsNewFile = useCallback(async () => {
+    sendMB('unable-to-sync-modal-click', { action: 'save-new-file' })
     const projectId = getMeta('ol-project_id')
     const filename = buildOfflineFilename(docName)
 
@@ -98,6 +112,7 @@ function UnableToSyncModal({
       onHide()
     } catch (error) {
       debugConsole.error('Failed to save offline changes as new file', error)
+      sendMB('unable-to-sync-modal-error-shown')
       setSaveError(true)
     } finally {
       setSaving(false)
@@ -142,7 +157,7 @@ function UnableToSyncModal({
         )}
       </OLModalBody>
       <OLModalFooter>
-        <OLButton variant="danger-ghost" onClick={onHide}>
+        <OLButton variant="danger-ghost" onClick={handleDiscardChanges}>
           {t('discard_changes')}
         </OLButton>
         <OLButton
