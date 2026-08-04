@@ -2,6 +2,7 @@
   --command-palette-color-scheme: dark;
   --command-palette-selected-bg: var(--green-70);
   --command-palette-selected-color: var(--green-10);
+  --command-palette-description-selected-color: var(--green-20);
   --command-palette-border-color: var(--border-primary);
 }
 
@@ -9,6 +10,7 @@
   --command-palette-color-scheme: light;
   --command-palette-selected-bg: var(--bg-accent-03);
   --command-palette-selected-color: var(--green-70);
+  --command-palette-description-selected-color: var(--green-60);
   --command-palette-border-color: var(--border-divider);
 }
 
@@ -92,9 +94,12 @@
       background-color: var(--command-palette-selected-bg);
       color: var(--command-palette-selected-color);
 
-      .command-palette-result-title,
-      .command-palette-result-description {
+      .command-palette-result-title {
         color: var(--command-palette-selected-color);
+      }
+
+      .command-palette-result-description {
+        color: var(--command-palette-description-selected-color);
       }
     }
   }
@@ -112,9 +117,8 @@
   }
 
   .command-palette-result-description {
-    font-size: var(--font-size-02);
-    margin-left: var(--spacing-02);
+    font-size: var(--font-size-01);
+    margin-left: var(--spacing-04);
     color: var(--content-placeholder-themed);
-    line-height: 1.2;
   }
 }
