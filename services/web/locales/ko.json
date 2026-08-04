@@ -109,6 +109,8 @@
   "contact_message_label": "문의 사항",
   "contact_us": "문의하기",
   "continue_github_merge": "수동으로 합병했습니다. 계속하기",
+  "cookie_banner": "쿠키 배너",
+  "cookie_banner_info": "당사는 사이트에서의 사용자 경험 개선, 분석, 마케팅 지원을 위해 쿠키를 사용하며, 이 과정에서 데이터가 공유될 수 있습니다. 자세한 내용은 <0>쿠키 정책</0>에서 확인하실 수 있습니다.",
   "copy": "복사하기",
   "copy_project": "프로젝트 복사",
   "copying": "복사중",

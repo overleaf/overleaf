@@ -93,6 +93,8 @@
   "contact_message_label": "メッセージ",
   "contact_us": "お問い合わせ",
   "continue_github_merge": "手動で統合。続行",
+  "cookie_banner": "Cookie バナー",
+  "cookie_banner_info": "当サイトでの利便性の向上、分析、マーケティングのために Cookie を使用しており、これにはデータの共有が含まれる場合があります。詳しくは<0>Cookie ポリシー</0>をご覧ください。",
   "copy": "コピーする",
   "copy_project": "プロジェクトのコピー",
   "copying": "コピー中",
