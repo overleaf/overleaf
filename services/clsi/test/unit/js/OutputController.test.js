@@ -38,8 +38,8 @@ describe('OutputController', () => {
           ctx.req = {
             params: {
               project_id: 'project-id-123',
-              user_id: 'user-id-123',
-              build_id: 'build-id-123',
+              user_id: '012345678901234567890123',
+              build_id: '1234-5678',
             },
             query: {
               files: ['output.tex'],
@@ -86,8 +86,8 @@ describe('OutputController', () => {
           ctx.req = {
             params: {
               project_id: 'project-id-123',
-              user_id: 'user-id-123',
-              build_id: 'build-id-123',
+              user_id: '012345678901234567890123',
+              build_id: '1234-5678',
             },
             query: {
               files: ['output.tex'],

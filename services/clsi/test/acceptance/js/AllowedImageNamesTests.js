@@ -121,7 +121,7 @@ Hello world
         expect(
           Client.syncFromPdfWithImage(
             this.project_id,
-            'main.tex',
+            1,
             100,
             200,
             'something/evil:1337'

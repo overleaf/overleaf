@@ -8,6 +8,8 @@ import ProjectPersistenceManager from './ProjectPersistenceManager.js'
 import logger from '@overleaf/logger'
 import Errors from './Errors.js'
 import CLSICacheHandler from './CLSICacheHandler.js'
+import { parseReq, z, zz } from '@overleaf/validation-tools'
+import { compileRequestBodySchema } from './schemas.js'
 
 const { notifyCLSICacheAboutBuild } = CLSICacheHandler
 
@@ -17,16 +19,43 @@ function timeSinceLastSuccessfulCompile() {
   return Date.now() - lastSuccessfulCompileTimestamp
 }
 
+// project_id is a Mongo ObjectId in the common case, but this service is also
+// hit directly by clsi-perf and by v1 submission/export flows using a bare
+// alphanumeric submission id (see zz.objectId().or(zz.submissionId()) in
+// web's ClsiURLHelpers.mjs, which this mirrors); user_id, when present, is
+// always a Mongo ObjectId.
+const projectOrUserParamsSchema = z.strictObject({
+  project_id: zz.objectId().or(zz.submissionId()),
+  user_id: zz.objectId().optional(),
+})
+
+// web's ClsiManager.mjs (_getCompilerUrl / _makeRequestWithClsiServerId)
+// appends these to every GET it makes against this service, for backend
+// routing and metrics; none of them are read by the handlers below. Spread
+// into each affected route's strictObject query schema so genuine requests
+// aren't rejected.
+const clsiRoutingQueryFields = {
+  compileBackendClass: zz.compileBackendClass().optional(),
+  compileGroup: zz.compileGroup().optional(),
+  clsiserverid: zz.clsiServerId().optional(),
+}
+
+const compileSchema = z.object({
+  params: projectOrUserParamsSchema,
+  body: compileRequestBodySchema,
+})
+
 function compile(req, res, next) {
+  const { params, body } = parseReq(req, compileSchema, { logOnly: true })
   const timer = new Metrics.Timer('compile-request')
-  RequestParser.parse(req.body, function (error, request) {
+  RequestParser.parse(body, function (error, request) {
     if (error) {
       return next(error)
     }
     timer.opts = request.metricsOpts
-    request.project_id = req.params.project_id
-    if (req.params.user_id != null) {
-      request.user_id = req.params.user_id
+    request.project_id = params.project_id
+    if (params.user_id != null) {
+      request.user_id = params.user_id
     }
     ProjectPersistenceManager.markProjectAsJustAccessed(
       request.project_id,
@@ -180,8 +209,15 @@ function compile(req, res, next) {
   })
 }
 
+const projectOrUserOnlyParamsSchema = z.object({
+  params: projectOrUserParamsSchema,
+})
+
 function stopCompile(req, res, next) {
-  const { project_id: projectId, user_id: userId } = req.params
+  const { params } = parseReq(req, projectOrUserOnlyParamsSchema, {
+    logOnly: true,
+  })
+  const { project_id: projectId, user_id: userId } = params
   CompileManager.stopCompile(projectId, userId, function (error) {
     if (error) {
       return next(error)
@@ -191,7 +227,10 @@ function stopCompile(req, res, next) {
 }
 
 function clearCache(req, res, next) {
-  const { project_id: projectId, user_id: userId } = req.params
+  const { params } = parseReq(req, projectOrUserOnlyParamsSchema, {
+    logOnly: true,
+  })
+  const { project_id: projectId, user_id: userId } = params
   CompileManager.stopCompile(projectId, userId, error => {
     if (error) return next(OError.tag(error, 'stop compile'))
     ProjectPersistenceManager.clearProject(projectId, userId, error => {
@@ -201,14 +240,51 @@ function clearCache(req, res, next) {
   })
 }
 
+// imageName is validated against the allowlist enforced by
+// CompileManager._runSynctex (Errors.InvalidParameter -> 400), same as
+// before, since (like compile.options.imageName) it has no fixed vocabulary
+// independent of deployment settings.
+const syncFromCodeSchema = z.object({
+  params: projectOrUserParamsSchema,
+  query: z.strictObject({
+    file: zz.filepath(),
+    line: z.coerce.number().int(),
+    column: z.coerce.number().int(),
+    imageName: z.string().optional(),
+    editorId: z.uuid().optional(),
+    buildId: zz.buildId().optional(),
+    compileFromClsiCache: z.stringbool().default(false),
+    ...clsiRoutingQueryFields,
+  }),
+})
+
+// Rollout-temporary fallback (loosened primary schema; no zod validation
+// existed for this route on main); delete when this route's
+// REQ_VALIDATION_MODE instrumentation is removed.
+const syncFromCodeFallbackSchema = z.object({
+  params: z.object({
+    project_id: z.string(),
+    user_id: z.string().optional(),
+  }),
+  query: z.object({
+    file: z.string(),
+    line: z.coerce.number(),
+    column: z.coerce.number(),
+    imageName: z.string().optional(),
+    editorId: z.string().optional(),
+    buildId: z.string().optional(),
+    compileFromClsiCache: z.stringbool().default(false),
+  }),
+})
+
 function syncFromCode(req, res, next) {
-  const { file, editorId, buildId } = req.query
-  const compileFromClsiCache = req.query.compileFromClsiCache === 'true'
-  const line = parseInt(req.query.line, 10)
-  const column = parseInt(req.query.column, 10)
-  const { imageName } = req.query
-  const projectId = req.params.project_id
-  const userId = req.params.user_id
+  const { params, query } = parseReq(req, syncFromCodeSchema, {
+    logOnly: true,
+    fallbackSchema: syncFromCodeFallbackSchema,
+  })
+  const { file, editorId, buildId, compileFromClsiCache, line, column } = query
+  const { imageName } = query
+  const { project_id: projectId, user_id: userId } = params
   CompileManager.syncFromCode(
     projectId,
     userId,
@@ -228,14 +304,47 @@ function syncFromCode(req, res, next) {
   )
 }
 
+const syncFromPdfSchema = z.object({
+  params: projectOrUserParamsSchema,
+  query: z.strictObject({
+    page: z.coerce.number().int(),
+    h: z.coerce.number(),
+    v: z.coerce.number(),
+    imageName: z.string().optional(),
+    editorId: z.uuid().optional(),
+    buildId: zz.buildId().optional(),
+    compileFromClsiCache: z.stringbool().default(false),
+    ...clsiRoutingQueryFields,
+  }),
+})
+
+// Rollout-temporary fallback (loosened primary schema; no zod validation
+// existed for this route on main); delete when this route's
+// REQ_VALIDATION_MODE instrumentation is removed.
+const syncFromPdfFallbackSchema = z.object({
+  params: z.object({
+    project_id: z.string(),
+    user_id: z.string().optional(),
+  }),
+  query: z.object({
+    page: z.coerce.number(),
+    h: z.coerce.number(),
+    v: z.coerce.number(),
+    imageName: z.string().optional(),
+    editorId: z.string().optional(),
+    buildId: z.string().optional(),
+    compileFromClsiCache: z.stringbool().default(false),
+  }),
+})
+
 function syncFromPdf(req, res, next) {
-  const page = parseInt(req.query.page, 10)
-  const h = parseFloat(req.query.h)
-  const v = parseFloat(req.query.v)
-  const { imageName, editorId, buildId } = req.query
-  const compileFromClsiCache = req.query.compileFromClsiCache === 'true'
-  const projectId = req.params.project_id
-  const userId = req.params.user_id
+  const { params, query } = parseReq(req, syncFromPdfSchema, {
+    logOnly: true,
+    fallbackSchema: syncFromPdfFallbackSchema,
+  })
+  const { page, h, v, editorId, buildId, compileFromClsiCache } = query
+  const { imageName } = query
+  const { project_id: projectId, user_id: userId } = params
   CompileManager.syncFromPdf(
     projectId,
     userId,
@@ -255,11 +364,36 @@ function syncFromPdf(req, res, next) {
   )
 }
 
+const wordcountSchema = z.object({
+  params: projectOrUserParamsSchema,
+  query: z.strictObject({
+    file: zz.filepath().default('main.tex'),
+    image: z.string().optional(),
+    ...clsiRoutingQueryFields,
+  }),
+})
+
+// Rollout-temporary fallback (loosened primary schema; no zod validation
+// existed for this route on main); delete when this route's
+// REQ_VALIDATION_MODE instrumentation is removed.
+const wordcountFallbackSchema = z.object({
+  params: z.object({
+    project_id: z.string(),
+    user_id: z.string().optional(),
+  }),
+  query: z.object({
+    file: z.string().default('main.tex'),
+    image: z.string().optional(),
+  }),
+})
+
 function wordcount(req, res, next) {
-  const file = req.query.file || 'main.tex'
-  const projectId = req.params.project_id
-  const userId = req.params.user_id
-  const { image } = req.query
+  const { params, query } = parseReq(req, wordcountSchema, {
+    logOnly: true,
+    fallbackSchema: wordcountFallbackSchema,
+  })
+  const { file, image } = query
+  const { project_id: projectId, user_id: userId } = params
   logger.debug({ image, file, projectId }, 'word count request')
 
   CompileManager.wordcount(

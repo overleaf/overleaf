@@ -18,9 +18,9 @@ import express from 'express'
 
 import net from 'node:net'
 import os from 'node:os'
-import OError from '@overleaf/o-error'
 import ConversionController from './app/js/ConversionController.js'
 import FileUploadMiddleware from './app/js/FileUploadMiddleware.js'
+import { handleValidationError } from '@overleaf/validation-tools'
 logger.initialize('clsi')
 logger.logger.serializers.clsiRequest = LoggerSerializers.clsiRequest
 
@@ -44,30 +44,6 @@ app.use(function (req, res, next) {
   res.setTimeout(TIMEOUT)
   res.removeHeader('X-Powered-By')
   next()
-})
-
-app.param('project_id', function (req, res, next, projectId) {
-  if (projectId?.match(/^[a-zA-Z0-9_-]+$/)) {
-    next()
-  } else {
-    next(new Error('invalid project id'))
-  }
-})
-
-app.param('user_id', function (req, res, next, userId) {
-  if (userId?.match(/^[0-9a-f]{24}$/)) {
-    next()
-  } else {
-    next(new Error('invalid user id'))
-  }
-})
-
-app.param('build_id', function (req, res, next, buildId) {
-  if (buildId?.match(OutputCacheManager.BUILD_REGEX)) {
-    next()
-  } else {
-    next(new OError('invalid build id', { buildId }))
-  }
 })
 
 app.post(
@@ -124,15 +100,14 @@ app.get(
 )
 
 // Conversion endpoints
-// Keep old route for backwards compatibility during CLSI/web deploy transition
+// Keep old route for backwards compatibility during CLSI/web deploy transition.
+// conversionType is threaded in directly (rather than via a query.type-setting
+// middleware) so the shared handler never needs to distinguish "the client
+// sent type=docx" from "this route only ever means docx".
 app.post(
   '/convert/docx-to-latex',
   FileUploadMiddleware.multerMiddleware,
-  (req, res, next) => {
-    req.query.type = 'docx'
-    next()
-  },
-  ConversionController.convertDocumentToLaTeX
+  ConversionController.convertDocxToLaTeX
 )
 app.post(
   '/convert/document-to-latex',
@@ -215,6 +190,8 @@ app.get(
   '/smoke_test_force',
   async (req, res, next) => await smokeTest.sendNewResult(res).catch(next)
 )
+
+app.use(handleValidationError)
 
 app.use(function (error, req, res, next) {
   if (error instanceof Errors.NotFoundError) {

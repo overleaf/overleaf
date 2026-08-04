@@ -33,14 +33,18 @@ function compile(projectId, data) {
 async function convertDocument(path, type) {
   const formData = new FormData()
   formData.append('qqfile', fs.createReadStream(path))
+  // web's DocumentConversionManager.mjs always appends these two alongside
+  // type, for clsi-lb backend routing -- sent here too so acceptance tests
+  // exercise the same query shape real traffic uses.
+  const url = new URL(`${host}/convert/document-to-latex`)
+  url.searchParams.set('type', type)
+  url.searchParams.set('compileBackendClass', 'e2e-tests')
+  url.searchParams.set('compileGroup', 'standard')
   try {
-    const stream = await fetchStream(
-      `${host}/convert/document-to-latex?type=${type}`,
-      {
-        method: 'POST',
-        body: formData,
-      }
-    )
+    const stream = await fetchStream(url.href, {
+      method: 'POST',
+      body: formData,
+    })
     return { status: 200, stream, body: null }
   } catch (err) {
     if (!err.response) throw err
@@ -53,10 +57,15 @@ async function convertDocument(path, type) {
   }
 }
 
-async function convertPdfToJpeg(path, mode) {
+async function convertPdfToJpeg(path, mode, compileBackendClass) {
   const formData = new FormData()
   formData.append('qqfile', await fsPromises.readFile(path), 'input.pdf')
-  return await fetch(`${host}/convert/pdf-to-jpeg?mode=${mode}`, {
+  const url = new URL(`${host}/convert/pdf-to-jpeg`)
+  url.searchParams.set('mode', mode)
+  if (compileBackendClass) {
+    url.searchParams.set('compileBackendClass', compileBackendClass)
+  }
+  return await fetch(url, {
     method: 'POST',
     headers: formData.getHeaders(),
     body: formData.getBuffer(),
@@ -77,6 +86,11 @@ async function convertProjectToDocument(
   if (responseFormat) {
     url.searchParams.set('responseFormat', responseFormat)
   }
+  // web's DocumentConversionManager.mjs always appends these two alongside
+  // type/responseFormat, for clsi-lb backend routing -- sent here too so
+  // acceptance tests exercise the same query shape real traffic uses.
+  url.searchParams.set('compileBackendClass', 'e2e-tests')
+  url.searchParams.set('compileGroup', 'standard')
   const opts = { method: 'POST', json: { compile: request } }
   if (responseFormat === 'json') {
     return await fetchJson(url.href, opts)
@@ -215,7 +229,7 @@ async function compileDirectory(projectId, baseDirectory, directory) {
         resources.push({
           path: entity,
           url: `http://filestore/${directory}/${entity}`,
-          modified: stat.mtime,
+          modified: stat.mtime.getTime(),
         })
       }
     }

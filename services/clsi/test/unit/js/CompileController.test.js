@@ -70,7 +70,7 @@ describe('CompileController', () => {
   describe('compile', () => {
     beforeEach(ctx => {
       ctx.req.body = {
-        compile: 'mock-body',
+        compile: {},
       }
       ctx.req.params = { project_id: (ctx.project_id = 'project-id-123') }
       ctx.request = {
