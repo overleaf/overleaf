@@ -645,12 +645,19 @@ export const EditorManagerProvider: FC<React.PropsWithChildren> = ({
 
   useEffect(() => {
     const handleUnableToSync = ({
-      detail: [{ editorContent, baseContent, docName, reloadAfterClose }],
+      detail: [
+        { docId, editorContent, baseContent, docName, reloadAfterClose },
+      ],
     }: CustomEvent<IdeEvents['ide:unableToSyncOfflineChanges']>) => {
+      const resolvedDocName =
+        docName ||
+        (fileTreeDataRef.current &&
+          findDocEntityById(fileTreeDataRef.current, docId)?.name) ||
+        null
       showUnableToSyncModal({
         baseContent,
         targetContent: editorContent,
-        docName,
+        docName: resolvedDocName,
         rootFolderId: fileTreeDataRef.current?._id,
         reloadAfterClose,
       })

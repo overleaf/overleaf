@@ -83,7 +83,7 @@ function UnableToSyncModal({
 
   const handleDownload = useCallback(() => {
     sendMB('unable-to-sync-modal-click', { action: 'download' })
-    downloadFileContent(targetContent, docName ?? 'document.txt')
+    downloadFileContent(targetContent, docName || 'document.txt')
   }, [targetContent, docName])
 
   const handleSaveAsNewFile = useCallback(async () => {
