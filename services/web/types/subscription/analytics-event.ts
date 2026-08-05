@@ -3,7 +3,7 @@ import {
   PaymentProvider,
   StripePaymentProviderService,
 } from './dashboard/subscription'
-import { PaymentMethod } from './payment-method'
+import { AnalyticsPaymentMethod, PaymentMethod } from './payment-method'
 import { RecurlyPlanCode } from './plan'
 
 type PaymentPageFormSubmitEventBaseSegmentation = {
@@ -48,7 +48,7 @@ type PaymentPageFormSuccessEventStripeSegmentation =
     payment_provider: StripePaymentProviderService
     stripe_price_id: string
     stripe_price_lookup_key: string
-    paymentMethod: PaymentMethod
+    paymentMethod: AnalyticsPaymentMethod
   }
 
 type PaymentPageFormSuccessEventRecurlySegmentation =

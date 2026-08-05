@@ -99,7 +99,6 @@ const httpPermissionsPolicy = {
     'magnetometer',
     'midi',
     'otp-credentials',
-    'payment',
     'picture-in-picture',
     'screen-wake-lock',
     'serial',
@@ -112,6 +111,8 @@ const httpPermissionsPolicy = {
     autoplay: 'self "https://videos.ctfassets.net"',
     fullscreen: 'self',
     'on-device-speech-recognition': 'self',
+    // required for Apple Pay / Google Pay
+    payment: 'self "https://js.stripe.com"',
   },
 }
 
