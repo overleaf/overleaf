@@ -18,11 +18,12 @@ import { isValidTeXFile } from '@/main/is-valid-tex-file'
 import { PdfScrollPosition } from '@/shared/hooks/use-pdf-scroll-position'
 import {
   showFileErrorToast,
+  showSynctexNoFileToast,
   showSynctexRequestErrorToast,
 } from '@/features/pdf-preview/components/synctex-toasts'
 
 export default function useSynctex(): {
-  syncToPdf: () => void
+  syncToPdf: () => boolean
   syncToCode: ({ visualOffset }: { visualOffset?: number }) => void
   syncToPdfInFlight: boolean
   syncToCodeInFlight: boolean
@@ -150,18 +151,25 @@ export default function useSynctex(): {
 
   const syncToPdf = useCallback(() => {
     const file = getCurrentFilePath()
+    if (!file) {
+      showSynctexNoFileToast()
+      return false
+    }
 
     if (cursorPositionRef.current) {
       const { row, column } = cursorPositionRef.current
 
       const params = new URLSearchParams({
-        file: file ?? '',
+        file,
         line: String(row + 1),
         column: String(column),
       }).toString()
 
       goToPdfLocation(params)
+      return true
     }
+
+    return false
   }, [getCurrentFilePath, goToPdfLocation])
 
   useEventListener(

@@ -583,7 +583,7 @@ const _CompileController = {
 
   async proxySyncCode(req, res) {
     const { file, line, column } = req.query
-    if (file == null) {
+    if (!file) {
       throw new Error('missing file parameter')
     }
     // Check that we are dealing with a simple file path (this is not

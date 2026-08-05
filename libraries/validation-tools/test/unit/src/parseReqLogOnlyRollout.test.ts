@@ -8,6 +8,7 @@ import {
   resetReqValidationLoggingForTests,
 } from '../../../parseReq'
 import { zz } from '../../../zodHelpers'
+import serializers from '@overleaf/logger/serializers'
 
 const RAW_BODY = Symbol.for('overleaf.lockdown.rawBody')
 const RAW_QUERY = Symbol.for('overleaf.lockdown.rawQuery')
@@ -55,6 +56,28 @@ function lockedRequest({
 }
 
 type WarnCall = [Record<string, any>, string]
+
+// Mirrors what a real bunyan logger does to each field before writing a log
+// line -- warnMock only records the raw ctx, so assertions on the logged
+// output must run it through the same serializers to see what would actually
+// reach the log (e.g. the req serializer drops req.body).
+function serializedLogOutput(calls: WarnCall[]) {
+  return JSON.stringify(
+    calls.map(([ctx, msg]) => [
+      Object.fromEntries(
+        Object.entries(ctx).map(([key, value]) => [
+          key,
+          key in serializers
+            ? (serializers as Record<string, (v: unknown) => unknown>)[key](
+                value
+              )
+            : value,
+        ])
+      ),
+      msg,
+    ])
+  )
+}
 
 describe('parseReq log-only rollout', () => {
   // This block intentionally runs before anything else in the file calls
@@ -296,7 +319,7 @@ describe('parseReq log-only rollout', () => {
 
           parseReq(req, schema, { logOnly: true })
 
-          expect(JSON.stringify(warnMock.mock.calls)).not.toContain(
+          expect(serializedLogOutput(warnMock.mock.calls)).not.toContain(
             'SECRET_VALUE_123'
           )
         })
@@ -311,7 +334,7 @@ describe('parseReq log-only rollout', () => {
 
           parseReq(req, schema, { logOnly: true })
 
-          const logged = JSON.stringify(warnMock.mock.calls)
+          const logged = serializedLogOutput(warnMock.mock.calls)
           expect(logged).toContain('extraSecretField')
           expect(logged).not.toContain('TOP_SECRET_VALUE')
         })
@@ -325,7 +348,7 @@ describe('parseReq log-only rollout', () => {
 
           parseReq(req, schema, { logOnly: true })
 
-          const logged = JSON.stringify(warnMock.mock.calls)
+          const logged = serializedLogOutput(warnMock.mock.calls)
           expect(logged).toContain(longKey.slice(0, 64))
           expect(logged).not.toContain(longKey)
         })
@@ -367,9 +390,49 @@ describe('parseReq log-only rollout', () => {
           expect(Array.isArray(unionIssue.errors)).toBe(true)
           expect(unionIssue.errors.length).toBeGreaterThan(0)
 
-          expect(JSON.stringify(warnMock.mock.calls)).not.toContain(
+          expect(serializedLogOutput(warnMock.mock.calls)).not.toContain(
             'UNION_SECRET_VALUE'
           )
+        })
+
+        it('expands a union nested 3 levels deep inside other unions', () => {
+          // Mirrors overleaf-editor-core's rawOperation -> rawFile ->
+          // rawFileMetadata shape: a union of objects, one of whose fields is
+          // itself a union of objects, one of whose fields is itself a union.
+          const level3 = z.union([
+            z.strictObject({ a: z.literal('a') }),
+            z.strictObject({ b: z.literal('b') }),
+          ])
+          const level2 = z.union([
+            z.strictObject({ inner: level3 }),
+            z.strictObject({ other: z.string() }),
+          ])
+          const level1 = z.union([
+            z.strictObject({ mid: level2 }),
+            z.strictObject({ different: z.string() }),
+          ])
+          const req = {
+            body: { value: { mid: { inner: { c: 'nope' } } } },
+          } as Request
+          const schema = z.object({ body: z.object({ value: level1 }) })
+
+          parseReq(req, schema, { logOnly: true })
+
+          const [ctx] = warnMock.mock.calls[0] as WarnCall
+          // Walk down: top union (value) -> level1 branch (mid) -> level2
+          // union (inner) -> level3 union, whose own branch errors (unknown
+          // keys "a"/"b" not satisfied by "c") must have survived.
+          const top = ctx.issues.find((i: any) => i.code === 'invalid_union')
+          const level1Errors = top.errors[0] // the "mid" branch
+          const level2Issue = level1Errors.find(
+            (i: any) => i.code === 'invalid_union'
+          )
+          const level2Errors = level2Issue.errors[0] // the "inner" branch
+          const level3Issue = level2Errors.find(
+            (i: any) => i.code === 'invalid_union'
+          )
+          expect(level3Issue.errors).toBeDefined()
+          expect(level3Issue.errors.length).toBeGreaterThan(0)
         })
       })
     })

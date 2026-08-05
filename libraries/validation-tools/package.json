@@ -24,6 +24,7 @@
     "zod-validation-error": "^4.0.1"
   },
   "devDependencies": {
+    "@overleaf/logger": "workspace:*",
     "@types/express": "4.17.23",
     "@types/node": "^24.5.2",
     "eslint": "^10.4.0",

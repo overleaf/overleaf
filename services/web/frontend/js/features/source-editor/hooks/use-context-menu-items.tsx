@@ -221,10 +221,14 @@ export const useContextMenuItems = () => {
       method: 'editor-context-menu',
       direction: 'code-location-in-pdf',
     })
-    requestedPdfSyncRef.current = true
-    syncToPdf()
-    view.focus()
-  }, [syncToPdf, view, changeLayout, isEditorOnly])
+
+    if (syncToPdf()) {
+      requestedPdfSyncRef.current = true
+      view.focus()
+    } else {
+      closeMenu()
+    }
+  }, [syncToPdf, view, changeLayout, isEditorOnly, closeMenu])
 
   return {
     closeMenu,

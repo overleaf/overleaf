@@ -179,7 +179,12 @@ function sanitizeIssues(issues, depth = 0) {
       path: issue.path.map(seg => String(seg).slice(0, 64)).join('.'),
       message: String(issue.message).slice(0, 200),
     }
-    if (issue.code === 'invalid_union' && depth < 2) {
+    // Bounded by schema shape, not user input: each level corresponds to one
+    // more union nested inside a union member (e.g. rawOperation -> rawFile
+    // -> rawFileMetadata -> the linked-file provider discriminatedUnion), so
+    // raising this cannot be exploited to grow log volume from adversarial
+    // input the way an unbounded path/array traversal could.
+    if (issue.code === 'invalid_union' && depth < 5) {
       sanitized.errors = issue.errors.map(nested =>
         sanitizeIssues(nested, depth + 1)
       )
@@ -222,7 +227,7 @@ function logSchemaFailure(req, schema, kind, issues) {
     .join('\n')
 
   logger.warn(
-    { location, kind, issues: sanitizedIssues, caller },
+    { location, kind, issues: sanitizedIssues, caller, req },
     'req-validation: request failed schema in log-only rollout'
   )
 }

@@ -1,4 +1,5 @@
 import PdfSynctexControls from '../../../../frontend/js/features/pdf-preview/components/pdf-synctex-controls'
+import { GlobalToasts } from '../../../../frontend/js/features/ide-react/components/global-toasts'
 import { cloneDeep } from 'lodash'
 import { useDetachCompileContext as useCompileContext } from '../../../../frontend/js/shared/context/detach-compile-context'
 import { useFileTreeData } from '../../../../frontend/js/shared/context/file-tree-data-context'
@@ -76,11 +77,11 @@ const WithSelectedEntities = ({
   return null
 }
 
-function mockProviders() {
+function mockProviders(currentDocumentId: string | null = '_root_doc_id') {
   return {
     EditorOpenDocProvider: makeEditorOpenDocProvider({
       openDocName: 'main.tex',
-      currentDocumentId: null,
+      currentDocumentId: currentDocumentId as any,
       currentDocument: {
         doc_id: 'test-doc',
         getSnapshot: () => 'some doc content',
@@ -160,6 +161,50 @@ describe('<PdfSynctexControls/>', function () {
         cy.wait('@sync-pdf')
       }
     )
+  })
+
+  it('shows an error toast and does not sync when there is no resolvable file path', function () {
+    cy.interceptCompile()
+
+    const scope = mockScope()
+    const providers = mockProviders(null)
+
+    cy.intercept(
+      { pathname: '/project/*/sync/code' },
+      cy.spy().as('syncCodeRequest')
+    )
+
+    cy.mount(
+      <EditorProviders scope={scope} providers={providers}>
+        <WithPosition mockPosition={mockPosition} />
+        <WithSelectedEntities mockSelectedEntities={mockSelectedEntities} />
+        <PdfSynctexControls />
+        <GlobalToasts />
+      </EditorProviders>
+    )
+
+    cy.waitForCompile()
+
+    // mock editor cursor position update
+    cy.window().then(win => {
+      win.dispatchEvent(
+        new CustomEvent('cursor:editor:update', {
+          detail: { row: 100, column: 10 },
+        })
+      )
+    })
+
+    cy.findByRole('button', { name: 'Go to code location in PDF' }).click()
+
+    cy.findByText(
+      'That didn’t work. Try switching files and try again.'
+    ).should('exist')
+
+    cy.findByRole('button', { name: 'Go to code location in PDF' }).should(
+      'not.be.disabled'
+    )
+
+    cy.get('@syncCodeRequest').should('not.have.been.called')
   })
 
   it('disables button when multiple entities are selected', function () {

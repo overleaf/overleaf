@@ -35,7 +35,8 @@ class Operation {
     if (
       'textOperation' in raw ||
       'commentId' in raw ||
-      'deleteComment' in raw
+      'deleteComment' in raw ||
+      'noOp' in raw
     ) {
       return EditFileOperation.fromRaw(raw)
     }

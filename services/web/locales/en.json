@@ -2651,6 +2651,7 @@
   "syncing": "Syncing",
   "synctex_error_recompile_and_try_again": "That didn’t work. Recompile and try again.",
   "synctex_failed": "Couldn’t find the corresponding source file",
+  "synctex_switch_files_and_try_again": "That didn’t work. Try switching files and try again.",
   "syntax_checks": "Syntax checks",
   "syntax_validation": "Code check",
   "tab_connecting": "Connecting with the editor",

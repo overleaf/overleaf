@@ -78,4 +78,18 @@ describe('EditFileOperation', function () {
       expect(editFileOperation1).to.deep.equal(edit('foo.tex', ['x']))
     })
   })
+
+  describe('fromRaw / toRaw', function () {
+    it('round-trips an edit no-op', function () {
+      const editFileOperation = Operation.editFile(
+        'foo.tex',
+        EditOperationBuilder.fromJSON({ noOp: true })
+      )
+      const raw = editFileOperation.toRaw()
+      expect(raw).to.eql({ pathname: 'foo.tex', noOp: true })
+
+      const roundTripped = Operation.fromRaw(raw)
+      expect(roundTripped).to.deep.equal(editFileOperation)
+    })
+  })
 })

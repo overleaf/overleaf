@@ -7870,6 +7870,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@overleaf/validation-tools@workspace:libraries/validation-tools"
   dependencies:
+    "@overleaf/logger": "workspace:*"
     "@overleaf/o-error": "workspace:*"
     "@types/express": "npm:4.17.23"
     "@types/node": "npm:^24.5.2"

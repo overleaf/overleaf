@@ -65,6 +65,34 @@ const MockFileTreeDataProvider: FC<React.PropsWithChildren> = ({
     value={
       {
         selectedEntities: [{ type: 'doc', id: '_root_doc_id' } as any],
+        fileTreeData: {
+          _id: 'root-folder-id',
+          name: 'rootFolder',
+          docs: [{ _id: docId, name: 'test.tex' }],
+          folders: [],
+          fileRefs: [],
+        },
+      } as any
+    }
+  >
+    {children}
+  </FileTreeDataContext.Provider>
+)
+
+const MockEmptyFileTreeDataProvider: FC<React.PropsWithChildren> = ({
+  children,
+}) => (
+  <FileTreeDataContext.Provider
+    value={
+      {
+        selectedEntities: [{ type: 'doc', id: '_root_doc_id' } as any],
+        fileTreeData: {
+          _id: 'root-folder-id',
+          name: 'rootFolder',
+          docs: [],
+          folders: [],
+          fileRefs: [],
+        },
       } as any
     }
   >
@@ -1006,6 +1034,46 @@ describe('editor context menu', { scrollBehavior: false }, function () {
         expect(interception.response?.statusCode).to.equal(200)
         expect(interception.response?.body).to.deep.equal({ pdf: [] })
       })
+    })
+
+    it('should close the menu and show an error toast when there is no resolvable file path', function () {
+      const scope = mockScope()
+
+      cy.intercept(
+        'GET',
+        '/project/*/sync/code*',
+        cy.spy().as('syncToPdfRequest')
+      )
+
+      cy.mount(
+        <TestContainer>
+          <EditorProviders
+            scope={scope}
+            providers={{
+              DetachCompileProvider: MockDetachCompileProvider,
+              FileTreeDataProvider: MockEmptyFileTreeDataProvider,
+            }}
+          >
+            <GlobalToasts />
+            <CodeMirrorEditor />
+          </EditorProviders>
+        </TestContainer>
+      )
+
+      cy.get('.cm-line').eq(10).rightclick()
+
+      cy.findByRole('menu').within(() => {
+        cy.findByRole('menuitem', { name: /jump to location in pdf/i }).click()
+      })
+
+      cy.findByRole('menu').should('not.exist')
+
+      cy.get('.global-toasts').should(
+        'contain.text',
+        'That didn’t work. Try switching files and try again.'
+      )
+
+      cy.get('@syncToPdfRequest').should('not.have.been.called')
     })
 
     it('should hide button when visual preview is enabled', function () {
