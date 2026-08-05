@@ -301,7 +301,8 @@ $dropdown-item-min-height: 36px;
 }
 
 .nested-dropdown-toggle {
-  &::after {
+  &::after,
+  &::before {
     content: none !important;
   }
 

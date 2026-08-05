@@ -138,7 +138,7 @@ function WelcomeMessageCreateNewProjectDropdown({
             }
             tabIndex={-1}
           >
-            {t('upload_project')}
+            {t('existing_project_zip')}
           </OLDropdownItem>
         </li>
         {docxImportEnabled && (

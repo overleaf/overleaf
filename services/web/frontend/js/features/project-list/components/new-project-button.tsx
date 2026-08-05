@@ -23,6 +23,8 @@ import type { PortalTemplate } from '../../../../../types/portal-template'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useProjectListContext } from '@/features/project-list/context/project-list-context'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import { NestableDropdownContextProvider } from '@/shared/context/nestable-dropdown-context'
+import { NestedMenuBarDropdown } from '@/shared/components/menu-bar/menu-bar-dropdown'
 
 type SendTrackingEvent = {
   dropdownMenu: string
@@ -54,7 +56,7 @@ function NewProjectButton({
   className,
   trackingKey,
   showAddAffiliationWidget,
-  align,
+  align = 'start',
 }: NewProjectButtonProps) {
   const { t } = useTranslation()
   const { templateLinks } = getMeta('ol-ExposedSettings')
@@ -191,132 +193,132 @@ function NewProjectButton({
           {buttonText || t('new_project')}
         </OLDropdownToggle>
         <OLDropdownMenu>
-          <li role="none">
-            <OLDropdownItem
-              onClick={e =>
-                handleModalMenuClick(e, {
-                  modalVariant: 'blank_project',
-                  dropdownMenuEvent: 'blank-project',
-                })
-              }
-            >
-              {t('blank_project')}
-            </OLDropdownItem>
-          </li>
-          <li role="none">
-            <OLDropdownItem
-              onClick={e =>
-                handleModalMenuClick(e, {
-                  modalVariant: 'example_project',
-                  dropdownMenuEvent: 'example-project',
-                })
-              }
-            >
-              {t('example_project')}
-            </OLDropdownItem>
-          </li>
-          <li role="none">
-            <OLDropdownItem
-              onClick={e =>
-                handleModalMenuClick(e, {
-                  modalVariant: 'upload_project',
-                  dropdownMenuEvent: 'upload-project',
-                })
-              }
-            >
-              {t('upload_project')}
-            </OLDropdownItem>
-          </li>
-          {docxImportEnabled && (
+          <NestableDropdownContextProvider id={id}>
             <li role="none">
               <OLDropdownItem
                 onClick={e =>
                   handleModalMenuClick(e, {
-                    modalVariant: 'import_docx',
-                    dropdownMenuEvent: 'import-docx',
+                    modalVariant: 'blank_project',
+                    dropdownMenuEvent: 'blank-project',
                   })
                 }
               >
-                {t('import_word_document')}
+                {t('blank_project')}
               </OLDropdownItem>
             </li>
-          )}
-          {markdownImportEnabled && (
+            <OLDropdownDivider />
+            <OLDropdownHeader aria-hidden="true">
+              {t('import')}
+            </OLDropdownHeader>
             <li role="none">
               <OLDropdownItem
                 onClick={e =>
                   handleModalMenuClick(e, {
-                    modalVariant: 'import_markdown',
-                    dropdownMenuEvent: 'import-markdown',
+                    modalVariant: 'upload_project',
+                    dropdownMenuEvent: 'upload-project',
                   })
                 }
               >
-                {t('import_markdown_file')}
+                {t('existing_project_zip')}
               </OLDropdownItem>
             </li>
-          )}
-          <li role="none">
-            {ImportProjectFromGithubMenu && (
-              <ImportProjectFromGithubMenu
-                onClick={e =>
-                  handleModalMenuClick(e, {
-                    modalVariant: 'import_from_github',
-                    dropdownMenuEvent: 'import-from-github',
-                  })
-                }
-              />
-            )}
-          </li>
-          {portalTemplates.length > 0 ? (
-            <>
-              <OLDropdownDivider />
-              <OLDropdownHeader aria-hidden="true">
-                {`${t('institution')} ${t('templates')}`}
-              </OLDropdownHeader>
-              {portalTemplates.map((portalTemplate, index) => (
-                <li role="none" key={`portal-template-${index}`}>
-                  <OLDropdownItem
-                    key={`portal-template-${index}`}
-                    href={`${portalTemplate.url}#templates`}
-                    onClick={e => handlePortalTemplateClick(e, portalTemplate)}
-                    aria-label={`${portalTemplate.name} ${t('template')}`}
-                  >
-                    {portalTemplate.name}
-                  </OLDropdownItem>
-                </li>
-              ))}
-            </>
-          ) : null}
-
-          {templateLinks && templateLinks.length > 0 && (
-            <>
-              <OLDropdownDivider />
-              <OLDropdownHeader aria-hidden="true">
-                {t('templates')}
-              </OLDropdownHeader>
-            </>
-          )}
-          {templateLinks?.map((templateLink, index) => (
-            <li role="none" key={`new-project-button-template-${index}`}>
-              <OLDropdownItem
-                href={templateLink.url}
-                onClick={e => handleStaticTemplateClick(e, templateLink)}
-                aria-label={`${templateLink.name} ${t('template')}`}
-              >
-                {templateLink.name === 'view_all'
-                  ? t('view_all')
-                  : templateLink.name}
-              </OLDropdownItem>
-            </li>
-          ))}
-          {showAddAffiliationWidget && enableAddAffiliationWidget ? (
-            <>
-              <OLDropdownDivider />
-              <li className="add-affiliation-mobile-wrapper">
-                <AddAffiliation className="is-mobile" />
+            {docxImportEnabled && (
+              <li role="none">
+                <OLDropdownItem
+                  onClick={e =>
+                    handleModalMenuClick(e, {
+                      modalVariant: 'import_docx',
+                      dropdownMenuEvent: 'import-docx',
+                    })
+                  }
+                >
+                  {t('word_document')}
+                </OLDropdownItem>
               </li>
-            </>
-          ) : null}
+            )}
+            {markdownImportEnabled && (
+              <li role="none">
+                <OLDropdownItem
+                  onClick={e =>
+                    handleModalMenuClick(e, {
+                      modalVariant: 'import_markdown',
+                      dropdownMenuEvent: 'import-markdown',
+                    })
+                  }
+                >
+                  {t('markdown_document')}
+                </OLDropdownItem>
+              </li>
+            )}
+            {ImportProjectFromGithubMenu && (
+              <li role="none">
+                <ImportProjectFromGithubMenu
+                  onClick={e =>
+                    handleModalMenuClick(e, {
+                      modalVariant: 'import_from_github',
+                      dropdownMenuEvent: 'import-from-github',
+                    })
+                  }
+                />
+              </li>
+            )}
+            <OLDropdownDivider />
+            <OLDropdownHeader aria-hidden="true">
+              {t('templates')}
+            </OLDropdownHeader>
+            <li role="none">
+              <OLDropdownItem
+                onClick={e =>
+                  handleModalMenuClick(e, {
+                    modalVariant: 'example_project',
+                    dropdownMenuEvent: 'example-project',
+                  })
+                }
+              >
+                {t('example_project')}
+              </OLDropdownItem>
+            </li>
+            {portalTemplates.map((portalTemplate, index) => (
+              <li role="none" key={`portal-template-${index}`}>
+                <OLDropdownItem
+                  href={`${portalTemplate.url}#templates`}
+                  onClick={e => handlePortalTemplateClick(e, portalTemplate)}
+                  aria-label={`${portalTemplate.name} ${t('template')}`}
+                >
+                  {portalTemplate.name}
+                </OLDropdownItem>
+              </li>
+            ))}
+            {templateLinks && templateLinks.length > 0 && (
+              <NestedMenuBarDropdown
+                id="more-templates"
+                title={t('more_templates')}
+                drop={align === 'end' ? 'start' : 'end'}
+              >
+                {templateLinks.map((template, i) => (
+                  <li role="none" key={`more-template-${i}`}>
+                    <OLDropdownItem
+                      href={template.url}
+                      onClick={e => handleStaticTemplateClick(e, template)}
+                      aria-label={`${template.name === 'view_all' ? t('view_all') : template.name} ${t('template')}`}
+                    >
+                      {template.name === 'view_all'
+                        ? t('view_all')
+                        : template.name}
+                    </OLDropdownItem>
+                  </li>
+                ))}
+              </NestedMenuBarDropdown>
+            )}
+            {showAddAffiliationWidget && enableAddAffiliationWidget ? (
+              <>
+                <OLDropdownDivider />
+                <li className="add-affiliation-mobile-wrapper">
+                  <AddAffiliation className="is-mobile" />
+                </li>
+              </>
+            ) : null}
+          </NestableDropdownContextProvider>
         </OLDropdownMenu>
       </OLDropdown>
       <NewProjectButtonModal
