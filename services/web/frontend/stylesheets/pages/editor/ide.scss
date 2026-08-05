@@ -207,6 +207,13 @@ $editor-toggler-bg-dark-color: color.adjust(
       color: var(--red-50);
       text-decoration: line-through;
     }
+
+    .diff-separator {
+      text-align: center;
+      color: var(--content-secondary);
+      padding: var(--spacing-01) 0;
+      user-select: none;
+    }
   }
 }
 
