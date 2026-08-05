@@ -1,5 +1,14 @@
 import AbstractMockApi from './AbstractMockApi.mjs'
 import { plainTextResponse } from '../../../../app/src/infrastructure/Response.mjs'
+import { parseReq, z } from '@overleaf/validation-tools'
+
+// HaveIBeenPwned.mjs sends the first 5 hex characters of an uppercase sha1
+// digest (k-anonymity range query).
+const rangeSchema = z.object({
+  params: z.strictObject({
+    prefix: z.string().regex(/^[0-9A-F]{5}$/),
+  }),
+})
 
 class MockHaveIBeenPwnedApi extends AbstractMockApi {
   reset() {
@@ -30,7 +39,8 @@ class MockHaveIBeenPwnedApi extends AbstractMockApi {
 
   applyRoutes() {
     this.app.get('/range/:prefix', (req, res) => {
-      const { prefix } = req.params
+      const { params } = parseReq(req, rangeSchema)
+      const { prefix } = params
       if (prefix === 'C8893') {
         plainTextResponse(res, '74D74EFD7B158D2ADD283D67FF3E53B55D7:broken')
       } else {

@@ -1,7 +1,10 @@
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
 import express from 'express'
-import { handleValidationError } from '@overleaf/validation-tools'
+import {
+  getRawReqInput,
+  handleValidationError,
+} from '@overleaf/validation-tools'
 
 /**
  * Abstract class for running a mock API via Express. Handles setting up of
@@ -60,7 +63,11 @@ class AbstractMockApi {
   applyDebugRoutes() {
     if (!this.debug) return
     this.app.use((req, res, next) => {
-      const { method, path, query, params, body } = req
+      const { method, path } = req
+      // Debug-only wire dump: this prints exactly what was sent on the
+      // wire for troubleshooting acceptance test failures (case 3: raw
+      // test assertions), not a functional read of a named field.
+      const { query, params, body } = getRawReqInput(req)
       // eslint-disable-next-line no-console
       console.log(`${this.constructor.name} REQUEST`, {
         method,

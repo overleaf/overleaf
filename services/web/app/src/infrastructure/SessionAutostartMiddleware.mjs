@@ -1,5 +1,6 @@
 import Settings from '@overleaf/settings'
 import OError from '@overleaf/o-error'
+import { getRawReqInput } from './Validation.mjs'
 
 const botUserAgents = [
   'kube-probe',
@@ -79,7 +80,8 @@ class SessionAutostartMiddleware {
   middleware(req, _res, next) {
     if (
       !req.signedCookies[this._cookieName] &&
-      req.query?.autostartSession !== 'true'
+      // session bootstrap runs before validation; raw access is allowlisted
+      getRawReqInput(req).query?.autostartSession !== 'true'
     ) {
       const callback = this.autostartCallbackForRequest(req)
       if (callback) {
@@ -117,11 +119,12 @@ class SessionAutostartMiddleware {
       )
     }
 
-    if (req.body.viaGateway) {
+    const { body } = getRawReqInput(req)
+    if (body.viaGateway) {
       return next()
     }
 
-    res.render('general/post-gateway', { form_data: req.body })
+    res.render('general/post-gateway', { form_data: body })
   }
 }
 

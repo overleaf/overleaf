@@ -1,0 +1,99 @@
+diff --git a/lib/strategy.js b/lib/strategy.js
+index 4de162f7e92a20b1ccd4d34dd9bcc0916f4c8c43..c67bb4e0b0287d615eac4c01b84c83d2bac91446 100644
+--- a/lib/strategy.js
++++ b/lib/strategy.js
+@@ -5,6 +5,29 @@ const passport_strategy_1 = require("passport-strategy");
+ const assert_1 = require("assert");
+ const url = require("url");
+ const node_saml_1 = require("@node-saml/node-saml");
++// --- Overleaf patch: request-input lockdown compatibility ---
++// This library reads req.query/req.body directly to parse the SAML protocol
++// fields (SAMLResponse, SAMLRequest, RelayState) it's built around, which is
++// otherwise indistinguishable from unvalidated application code reading raw
++// request input under Overleaf's request-input lockdown (see
++// libraries/validation-tools and the patched express in
++// .yarn/patches/express-npm-*.patch). The lockdown captures the original
++// parsed values in symbol-keyed fields, registered in the global symbol
++// registry (the same ones @overleaf/validation-tools' lockdown.js reads), and
++// only turns the *public* req.query/req.body properties into throwing
++// accessors -- reading through these raw fields instead sidesteps that, and
++// is identical to plain req.query/req.body when the lockdown isn't installed
++// (i.e. for every consumer of this package outside this monorepo).
++const __overleafLockdownInstalled = Symbol.for("overleaf.lockdown.installed");
++const __overleafLockdownRawQuery = Symbol.for("overleaf.lockdown.rawQuery");
++const __overleafLockdownRawBody = Symbol.for("overleaf.lockdown.rawBody");
++function __overleafRawQuery(req) {
++    return req[__overleafLockdownInstalled] ? req[__overleafLockdownRawQuery] : req.query;
++}
++function __overleafRawBody(req) {
++    return req[__overleafLockdownInstalled] ? req[__overleafLockdownRawBody] : req.body;
++}
++// --- end Overleaf patch ---
+ class AbstractStrategy extends passport_strategy_1.Strategy {
+     constructor(options, signonVerify, logoutVerify) {
+         super();
+@@ -52,7 +75,7 @@ class AbstractStrategy extends passport_strategy_1.Strategy {
+                         catch (_c) {
+                             userMatch = false;
+                         }
+-                        const RelayState = ((_a = req.query) === null || _a === void 0 ? void 0 : _a.RelayState) || ((_b = req.body) === null || _b === void 0 ? void 0 : _b.RelayState);
++                        const RelayState = ((_a = __overleafRawQuery(req)) === null || _a === void 0 ? void 0 : _a.RelayState) || ((_b = __overleafRawBody(req)) === null || _b === void 0 ? void 0 : _b.RelayState);
+                         if (this._saml == null) {
+                             return this.error(new Error("Can't get logout response URL without a SAML provider defined."));
+                         }
+@@ -125,22 +148,22 @@ class AbstractStrategy extends passport_strategy_1.Strategy {
+                 this.redirect(url);
+             }
+         };
+-        if (((_a = req.query) === null || _a === void 0 ? void 0 : _a.SAMLResponse) || ((_b = req.query) === null || _b === void 0 ? void 0 : _b.SAMLRequest)) {
++        if (((_a = __overleafRawQuery(req)) === null || _a === void 0 ? void 0 : _a.SAMLResponse) || ((_b = __overleafRawQuery(req)) === null || _b === void 0 ? void 0 : _b.SAMLRequest)) {
+             const originalQuery = (_c = url.parse(req.url).query) !== null && _c !== void 0 ? _c : "";
+             this._saml
+-                .validateRedirectAsync(req.query, originalQuery)
++                .validateRedirectAsync(__overleafRawQuery(req), originalQuery)
+                 .then(validateCallback)
+                 .catch((err) => this.error(err));
+         }
+-        else if ((_d = req.body) === null || _d === void 0 ? void 0 : _d.SAMLResponse) {
++        else if ((_d = __overleafRawBody(req)) === null || _d === void 0 ? void 0 : _d.SAMLResponse) {
+             this._saml
+-                .validatePostResponseAsync(req.body)
++                .validatePostResponseAsync(__overleafRawBody(req))
+                 .then(validateCallback)
+                 .catch((err) => this.error(err));
+         }
+-        else if ((_e = req.body) === null || _e === void 0 ? void 0 : _e.SAMLRequest) {
++        else if ((_e = __overleafRawBody(req)) === null || _e === void 0 ? void 0 : _e.SAMLRequest) {
+             this._saml
+-                .validatePostRequestAsync(req.body)
++                .validatePostRequestAsync(__overleafRawBody(req))
+                 .then(validateCallback)
+                 .catch((err) => this.error(err));
+         }
+@@ -151,7 +174,7 @@ class AbstractStrategy extends passport_strategy_1.Strategy {
+                         if (this._saml == null) {
+                             throw new Error("Can't process login request without a SAML provider defined.");
+                         }
+-                        const RelayState = (req.query && req.query.RelayState) || (req.body && req.body.RelayState);
++                        const RelayState = (__overleafRawQuery(req) && __overleafRawQuery(req).RelayState) || (__overleafRawBody(req) && __overleafRawBody(req).RelayState);
+                         const host = req.headers && req.headers.host;
+                         if (this._saml.options.authnRequestBinding === "HTTP-POST") {
+                             const data = await this._saml.getAuthorizeFormAsync(RelayState, host);
+@@ -172,7 +195,7 @@ class AbstractStrategy extends passport_strategy_1.Strategy {
+                         throw new Error("Can't process logout request without a SAML provider defined.");
+                     }
+                     try {
+-                        const RelayState = (req.query && req.query.RelayState) || (req.body && req.body.RelayState);
++                        const RelayState = (__overleafRawQuery(req) && __overleafRawQuery(req).RelayState) || (__overleafRawBody(req) && __overleafRawBody(req).RelayState);
+                         // Defaults to HTTP-Redirect
+                         this.redirect(await this._saml.getLogoutUrlAsync(req.user, RelayState, options));
+                     }
+@@ -188,7 +211,7 @@ class AbstractStrategy extends passport_strategy_1.Strategy {
+         if (this._saml == null) {
+             throw new Error("Can't logout without a SAML provider defined.");
+         }
+-        const RelayState = (req.query && req.query.RelayState) || (req.body && req.body.RelayState);
++        const RelayState = (__overleafRawQuery(req) && __overleafRawQuery(req).RelayState) || (__overleafRawBody(req) && __overleafRawBody(req).RelayState);
+         this._saml
+             .getLogoutUrlAsync(req.user, RelayState, {})
+             .then((url) => callback(null, url))

@@ -7,6 +7,30 @@ import DeviceHistory from './DeviceHistory.mjs'
 import AuthenticationController from '../Authentication/AuthenticationController.mjs'
 import { expressify } from '@overleaf/promise-utils'
 import EmailsHelper from '../Helpers/EmailHelper.mjs'
+import {
+  z,
+  parseReq,
+  getRawReqInput,
+} from '../../infrastructure/Validation.mjs'
+
+// Non-strict: this middleware only reads the two fields it needs off bodies
+// whose full shape is owned by each route's own controller (login,
+// passwordReset, addEmail, register) -- rejecting/stripping other fields
+// here isn't this middleware's job.
+const captchaBodySchema = z.object({
+  body: z.object({
+    email: z.string().optional(),
+    // Google reCAPTCHA verification token: an opaque, third-party-defined
+    // string (its format is a Google implementation detail, not documented
+    // or guaranteed stable), so this stays a bare string rather than a
+    // tighter pattern. The frontend's ReCaptcha2 component (recaptcha-2.tsx)
+    // sends an explicit `null` -- not an omitted field -- whenever it never
+    // mounted the widget (no sitekey configured, the action's captcha is
+    // disabled, or `window.Cypress` in dev E2E runs), so this must accept
+    // null, not just a missing key.
+    'g-recaptcha-response': z.string().nullish(),
+  }),
+})
 
 function respondInvalidCaptcha(req, res) {
   res.status(400).json({
@@ -27,24 +51,39 @@ async function initializeDeviceHistory(req) {
 }
 
 async function canSkipCaptcha(req, res) {
+  const { body: reqBody } = parseReq(req, captchaBodySchema, {
+    logOnly: true,
+  })
   const trustedUser =
-    req.body?.email &&
-    (Settings.recaptcha.trustedUsers.includes(req.body.email) ||
-      Settings.recaptcha.trustedUsersRegex?.test(req.body.email))
+    reqBody.email &&
+    (Settings.recaptcha.trustedUsers.includes(reqBody.email) ||
+      Settings.recaptcha.trustedUsersRegex?.test(reqBody.email))
   if (trustedUser) {
     return res.json(true)
   }
   await initializeDeviceHistory(req)
-  const canSkip = req.deviceHistory.has(req.body?.email)
+  const canSkip = req.deviceHistory.has(reqBody.email)
   Metrics.inc('captcha_pre_flight', 1, {
     status: canSkip ? 'skipped' : 'missing',
   })
   res.json(canSkip)
 }
 
+function stripRecaptchaField(req) {
+  const { body } = getRawReqInput(req)
+  if (body && 'g-recaptcha-response' in body) {
+    const { 'g-recaptcha-response': _x, ...rest } = body
+    req.body = rest
+  }
+}
+
 function validateCaptcha(action) {
   return expressify(async function (req, res, next) {
-    const email = EmailsHelper.parseEmail(req.body?.email)
+    const { body: reqBody } = parseReq(req, captchaBodySchema, {
+      logOnly: true,
+    })
+    stripRecaptchaField(req)
+    const email = EmailsHelper.parseEmail(reqBody.email)
     const trustedUser =
       email &&
       (Settings.recaptcha.trustedUsers.includes(email) ||
@@ -63,7 +102,7 @@ function validateCaptcha(action) {
       Metrics.inc('captcha', 1, { path: action, status: 'trusted' })
       return next()
     }
-    const reCaptchaResponse = req.body['g-recaptcha-response']
+    const reCaptchaResponse = reqBody['g-recaptcha-response']
     if (action === 'login') {
       await initializeDeviceHistory(req)
       const fromKnownDevice = req.deviceHistory.has(email)

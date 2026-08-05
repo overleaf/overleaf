@@ -1,4 +1,17 @@
 import AbstractMockApi from './AbstractMockApi.mjs'
+import { parseReq, z } from '@overleaf/validation-tools'
+
+// Token exchange body as built by passport-oauth2/the `oauth` library's
+// OAuth2#getOAuthAccessToken (standard authorization_code grant).
+const tokenSchema = z.object({
+  body: z.strictObject({
+    code: z.string(),
+    client_id: z.string(),
+    client_secret: z.string(),
+    grant_type: z.literal('authorization_code'),
+    redirect_uri: z.string(),
+  }),
+})
 
 class MockOrcidApi extends AbstractMockApi {
   reset() {
@@ -14,7 +27,8 @@ class MockOrcidApi extends AbstractMockApi {
 
   applyRoutes() {
     this.app.post('/oauth/token', (req, res) => {
-      const token = this.tokens[req.body.code]
+      const { body } = parseReq(req, tokenSchema)
+      const token = this.tokens[body.code]
       if (!token) {
         return res.sendStatus(400)
       }

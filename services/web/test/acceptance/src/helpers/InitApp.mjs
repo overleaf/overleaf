@@ -11,8 +11,28 @@ import SplitTestHandler from '../../../../app/src/Features/SplitTests/SplitTestH
 import SplitTestSessionHandler from '../../../../app/src/Features/SplitTests/SplitTestSessionHandler.mjs'
 import Modules from '../../../../app/src/infrastructure/Modules.mjs'
 import testLogRecorder from '@overleaf/logger/test-log-recorder.js'
+import { parseReq, z } from '@overleaf/validation-tools'
 
 const app = Server.app
+
+const devSessionSchema = z.object({
+  // dev-only test route: the whole point is to copy arbitrary
+  // caller-supplied query keys onto the session, so this is a
+  // genuinely open map, not an escape hatch.
+  query: z.record(z.string(), z.unknown()),
+})
+
+const devSetInSessionSchema = z.object({
+  // dev-only test route: same genuinely-open-map shape as above, for body.
+  body: z.record(z.string(), z.unknown()),
+})
+
+const devGetAssignmentSchema = z.object({
+  query: z.object({
+    splitTestName: z.string(),
+    includeReferer: z.string().optional(),
+  }),
+})
 
 MongoHelper.initialize()
 RedisHelper.initialize()
@@ -29,8 +49,9 @@ before('start main app', function (done) {
       router.get('/dev/session', (req, res) => {
         // allow changing the session directly for testing, assign any
         // properties in the query string to req.session
-        if (req.query && Object.keys(req.query).length > 0) {
-          Object.assign(req.session, req.query)
+        const { query } = parseReq(req, devSessionSchema)
+        if (Object.keys(query).length > 0) {
+          Object.assign(req.session, query)
         }
         return res.json(req.session)
       })
@@ -41,7 +62,8 @@ before('start main app', function (done) {
     route => route.path && route.path === '/dev/csrf',
     router => {
       router.post('/dev/set_in_session', (req, res) => {
-        for (const [key, value] of Object.entries(req.body)) {
+        const { body } = parseReq(req, devSetInSessionSchema)
+        for (const [key, value] of Object.entries(body)) {
           req.session[key] = value
         }
         return res.sendStatus(200)
@@ -53,11 +75,11 @@ before('start main app', function (done) {
     route => route.path && route.path === '/dev/csrf',
     router => {
       router.get('/dev/split_test/get_assignment', (req, res) => {
-        const { splitTestName, includeReferer } = req.query
+        const { query } = parseReq(req, devGetAssignmentSchema)
         SplitTestHandler.promises
-          .getAssignment(req, res, splitTestName, {
+          .getAssignment(req, res, query.splitTestName, {
             sync: true,
-            includeReferer: includeReferer === 'true',
+            includeReferer: query.includeReferer === 'true',
           })
           .then(assignment => res.json(assignment))
           .catch(error => {

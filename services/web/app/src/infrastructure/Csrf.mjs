@@ -2,8 +2,26 @@ import csurf from 'csurf'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import { callbackify } from '@overleaf/promise-utils'
+import { getRawReqInput } from './Validation.mjs'
 
 const csrf = csurf()
+
+// Native HTML form submissions (and hydrate-form.ts's async-form helper,
+// which packs all FormData into its JSON body) carry the token as a hidden
+// `_csrf` field alongside the request's real payload. Strip it once it has
+// served its purpose so route schemas never need to declare a field they
+// don't otherwise care about.
+function stripCsrfField(req) {
+  const { body, query } = getRawReqInput(req)
+  if (body && '_csrf' in body) {
+    const { _csrf, ...rest } = body
+    req.body = rest
+  }
+  if (query && '_csrf' in query) {
+    const { _csrf, ...rest } = query
+    req.query = rest
+  }
+}
 
 function blockCrossOriginRequests() {
   return function (req, res, next) {
@@ -79,6 +97,10 @@ export class Csrf {
     // check whether the request method is excluded for the specified route
     if (this.excluded_routes[req.path]?.[req.method] === 1) {
       // ignore the error if it's due to a bad csrf token, and continue
+      // without stripping `_csrf`: excluded routes still see their own
+      // separate enforcement further down their middleware stack (see
+      // OpenInOverleafMiddleware.postMiddleware), which needs the field
+      // to still be there
       csrf(req, res, err => {
         if (err && err.code !== 'EBADCSRFTOKEN') {
           next(err)
@@ -87,7 +109,14 @@ export class Csrf {
         }
       })
     } else {
-      csrf(req, res, next)
+      csrf(req, res, err => {
+        if (err) {
+          next(err)
+        } else {
+          stripCsrfField(req)
+          next()
+        }
+      })
     }
   }
 }

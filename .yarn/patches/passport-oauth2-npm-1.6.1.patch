@@ -1,10 +1,82 @@
+diff --git a/lib/strategy.js b/lib/strategy.js
+index b05aacce9a16fd32743a989b68f179bb35b20545..de1293a75c82452089eea37ab1031d4bbe42849c 100644
+--- a/lib/strategy.js
++++ b/lib/strategy.js
+@@ -14,6 +14,25 @@ var passport = require('passport-strategy')
+   , AuthorizationError = require('./errors/authorizationerror')
+   , TokenError = require('./errors/tokenerror')
+   , InternalOAuthError = require('./errors/internaloautherror');
++// --- Overleaf patch: request-input lockdown compatibility ---
++// This strategy reads req.query directly to parse the OAuth2 protocol
++// fields (error/error_description/error_uri, code, state) it's built
++// around, which is otherwise indistinguishable from unvalidated application
++// code reading raw request input under Overleaf's request-input lockdown
++// (see libraries/validation-tools and the patched express in
++// .yarn/patches/express-npm-*.patch). The lockdown captures the original
++// parsed values in symbol-keyed fields, registered in the global symbol
++// registry (the same ones @overleaf/validation-tools' lockdown.js reads),
++// and only turns the *public* req.query property into a throwing accessor
++// -- reading through this raw field instead sidesteps that, and is
++// identical to plain req.query when the lockdown isn't installed (i.e. for
++// every consumer of this package outside this monorepo).
++var __overleafLockdownInstalled = Symbol.for('overleaf.lockdown.installed');
++var __overleafLockdownRawQuery = Symbol.for('overleaf.lockdown.rawQuery');
++function __overleafRawQuery(req) {
++  return req[__overleafLockdownInstalled] ? req[__overleafLockdownRawQuery] : req.query;
++}
++// --- end Overleaf patch ---
+
+
+ /**
+@@ -131,11 +150,11 @@ OAuth2Strategy.prototype.authenticate = function(req, options) {
+   options = options || {};
+   var self = this;
+
+-  if (req.query && req.query.error) {
+-    if (req.query.error == 'access_denied') {
+-      return this.fail({ message: req.query.error_description });
++  if (__overleafRawQuery(req) && __overleafRawQuery(req).error) {
++    if (__overleafRawQuery(req).error == 'access_denied') {
++      return this.fail({ message: __overleafRawQuery(req).error_description });
+     } else {
+-      return this.error(new AuthorizationError(req.query.error_description, req.query.error, req.query.error_uri));
++      return this.error(new AuthorizationError(__overleafRawQuery(req).error_description, __overleafRawQuery(req).error, __overleafRawQuery(req).error_uri));
+     }
+   }
+
+@@ -156,14 +175,14 @@ OAuth2Strategy.prototype.authenticate = function(req, options) {
+     callbackURL: callbackURL
+   }
+
+-  if (req.query && req.query.code) {
++  if (__overleafRawQuery(req) && __overleafRawQuery(req).code) {
+     function loaded(err, ok, state) {
+       if (err) { return self.error(err); }
+       if (!ok) {
+         return self.fail(state, 403);
+       }
+
+-      var code = req.query.code;
++      var code = __overleafRawQuery(req).code;
+
+       var params = self.tokenParams(options);
+       params.grant_type = 'authorization_code';
+@@ -213,7 +232,7 @@ OAuth2Strategy.prototype.authenticate = function(req, options) {
+       );
+     }
+
+-    var state = req.query.state;
++    var state = __overleafRawQuery(req).state;
+     try {
+       var arity = this._stateStore.verify.length;
+       if (arity == 4) {
 diff --git a/lib/utils.js b/lib/utils.js
 index 486f9e1..4584507 100644
 --- a/lib/utils.js
 +++ b/lib/utils.js
 @@ -24,7 +24,7 @@ exports.originalURL = function(req, options) {
    var trustProxy = options.proxy;
-   
+
    var proto = (req.headers['x-forwarded-proto'] || '').toLowerCase()
 -    , tls = req.connection.encrypted || (trustProxy && 'https' == proto.split(/\s*,\s*/)[0])
 +    , tls = (req.connection && req.connection.encrypted) || (trustProxy && 'https' == proto.split(/\s*,\s*/)[0])

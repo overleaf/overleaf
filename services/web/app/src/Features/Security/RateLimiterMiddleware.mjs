@@ -2,6 +2,7 @@ import logger from '@overleaf/logger'
 import SessionManager from '../Authentication/SessionManager.mjs'
 import LoginRateLimiter from './LoginRateLimiter.mjs'
 import settings from '@overleaf/settings'
+import { getRawReqInput } from '../../infrastructure/Validation.mjs'
 
 /**
  * Return a rate limiting middleware
@@ -36,7 +37,9 @@ function rateLimit(rateLimiter, opts = {}) {
 
     let key = clientId
     if (!opts.ipOnly) {
-      const params = (opts.params || []).map(p => req.params[p])
+      // rate limiting runs before validation; raw access is allowlisted
+      const rawParams = getRawReqInput(req).params
+      const params = (opts.params || []).map(p => rawParams[p])
       params.push(clientId)
       key = params.join(':')
     }
@@ -58,7 +61,7 @@ function rateLimit(rateLimiter, opts = {}) {
 
 function loginRateLimitEmail(emailField = 'email') {
   return function (req, res, next) {
-    const email = req.body[emailField]
+    const email = getRawReqInput(req).body[emailField]
     if (!email) {
       return next()
     }

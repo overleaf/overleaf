@@ -5497,7 +5497,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@node-oauth/oauth2-server@npm:^5.3.0":
+"@node-oauth/oauth2-server@npm:5.3.0":
   version: 5.3.0
   resolution: "@node-oauth/oauth2-server@npm:5.3.0"
   dependencies:
@@ -5505,6 +5505,17 @@ __metadata:
     basic-auth: "npm:2.0.1"
     type-is: "npm:2.0.1"
   checksum: 10c0/bb136a5569f71b2086686972680849f8fde90d861c20775ea59966a54a7473d2d61b1b9531a3585399e6a028c7078e7e32eaf1c0c475b4f6c7766db65a6a78b6
+  languageName: node
+  linkType: hard
+
+"@node-oauth/oauth2-server@patch:@node-oauth/oauth2-server@npm%3A5.3.0#~/.yarn/patches/@node-oauth-oauth2-server-npm-5.3.0-9d66d9183c.patch":
+  version: 5.3.0
+  resolution: "@node-oauth/oauth2-server@patch:@node-oauth/oauth2-server@npm%3A5.3.0#~/.yarn/patches/@node-oauth-oauth2-server-npm-5.3.0-9d66d9183c.patch::version=5.3.0&hash=acb1f1"
+  dependencies:
+    "@node-oauth/formats": "npm:1.0.0"
+    basic-auth: "npm:2.0.1"
+    type-is: "npm:2.0.1"
+  checksum: 10c0/e3b5c0303b9c13049ae65c93779b8e06bc63fae9ef554e37d2bd8cb0d1afb7fab279fe6d007267b50ab36570c1f692a61c8791cd148196623f276b9b0804a65e
   languageName: node
   linkType: hard
 
@@ -5546,7 +5557,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@node-saml/passport-saml@npm:^5.1.0":
+"@node-saml/passport-saml@npm:5.1.0":
   version: 5.1.0
   resolution: "@node-saml/passport-saml@npm:5.1.0"
   dependencies:
@@ -5557,6 +5568,20 @@ __metadata:
     passport: "npm:^0.7.0"
     passport-strategy: "npm:^1.0.0"
   checksum: 10c0/a0962b8f80e4867342984deb007a5ce3a95014e594d88652e5d34d33f62d5db8559d98a4f2c668a145bdb0212c5fdac19284bd60591537061998b46404d4acd6
+  languageName: node
+  linkType: hard
+
+"@node-saml/passport-saml@patch:@node-saml/passport-saml@npm%3A5.1.0#~/.yarn/patches/@node-saml-passport-saml-npm-5.1.0-5d7df575fa.patch":
+  version: 5.1.0
+  resolution: "@node-saml/passport-saml@patch:@node-saml/passport-saml@npm%3A5.1.0#~/.yarn/patches/@node-saml-passport-saml-npm-5.1.0-5d7df575fa.patch::version=5.1.0&hash=efcef3"
+  dependencies:
+    "@node-saml/node-saml": "npm:^5.1.0"
+    "@types/express": "npm:^4.17.23"
+    "@types/passport": "npm:^1.0.17"
+    "@types/passport-strategy": "npm:^0.2.38"
+    passport: "npm:^0.7.0"
+    passport-strategy: "npm:^1.0.0"
+  checksum: 10c0/0c26d6e048386dcd7edc5d9d8031246b2a2600bd9d3d03749973247c70d8cd261a8d29364ec26c75dbded32922cf4a2f192c2fc17d7611cb71a890435aa0e905
   languageName: node
   linkType: hard
 
@@ -7924,8 +7949,8 @@ __metadata:
     "@lezer/highlight": "npm:1.2.3"
     "@lezer/lr": "npm:1.4.7"
     "@lezer/markdown": "npm:1.6.3"
-    "@node-oauth/oauth2-server": "npm:^5.3.0"
-    "@node-saml/passport-saml": "npm:^5.1.0"
+    "@node-oauth/oauth2-server": "patch:@node-oauth/oauth2-server@npm%3A5.3.0#~/.yarn/patches/@node-oauth-oauth2-server-npm-5.3.0-9d66d9183c.patch"
+    "@node-saml/passport-saml": "patch:@node-saml/passport-saml@npm%3A5.1.0#~/.yarn/patches/@node-saml-passport-saml-npm-5.1.0-5d7df575fa.patch"
     "@overleaf/access-token-encryptor": "workspace:*"
     "@overleaf/codemirror-tree-view": "npm:^0.1.3"
     "@overleaf/dictionaries": "https://github.com/overleaf/dictionaries/archive/refs/tags/v0.0.3.tar.gz"
@@ -8065,7 +8090,7 @@ __metadata:
     crc-32: "npm:^1.2.2"
     css-loader: "npm:^7.1.4"
     css-minimizer-webpack-plugin: "npm:^8.0.0"
-    csurf: "npm:^1.11.0"
+    csurf: "patch:csurf@npm%3A1.11.0#~/.yarn/patches/csurf-npm-1.11.0-c1b9cbb35b.patch"
     csv: "npm:^6.2.5"
     csv-parse: "npm:^6.2.1"
     csv-stringify: "npm:^6.7.0"
@@ -8101,7 +8126,7 @@ __metadata:
     eventsource-client: "npm:^1.1.4"
     eventsource-parser: "npm:^1.1.2"
     express: "npm:4.22.1"
-    express-bearer-token: "npm:^2.4.0"
+    express-bearer-token: "patch:express-bearer-token@npm%3A2.4.0#~/.yarn/patches/express-bearer-token-npm-2.4.0-731c8c5c99.patch"
     express-http-proxy: "npm:^1.6.0"
     express-session: "npm:^1.17.1"
     fake-indexeddb: "npm:^6.0.0"
@@ -8175,7 +8200,7 @@ __metadata:
     passport-google-oauth20: "npm:^2.0.0"
     passport-ldapauth: "npm:^2.1.4"
     passport-local: "npm:^1.0.0"
-    passport-oauth2: "npm:^1.5.0"
+    passport-oauth2: "patch:passport-oauth2@npm%3A1.6.1#~/.yarn/patches/passport-oauth2-npm-1.6.1.patch"
     passport-orcid: "npm:0.0.4"
     path-browserify: "npm:^1.0.1"
     pdfjs-dist: "npm:5.1.91"
@@ -16123,7 +16148,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"csurf@npm:^1.11.0":
+"csurf@npm:1.11.0":
   version: 1.11.0
   resolution: "csurf@npm:1.11.0"
   dependencies:
@@ -16132,6 +16157,18 @@ __metadata:
     csrf: "npm:3.1.0"
     http-errors: "npm:~1.7.3"
   checksum: 10c0/6e575d73e803d86c862e2357a65f1caeba7dc2e9e02f424fadb8dd886199e4153432e7bcc8ac7b555ac263d7d0f54427ab3608f6e62342bd4e29893e73197826
+  languageName: node
+  linkType: hard
+
+"csurf@patch:csurf@npm%3A1.11.0#~/.yarn/patches/csurf-npm-1.11.0-c1b9cbb35b.patch":
+  version: 1.11.0
+  resolution: "csurf@patch:csurf@npm%3A1.11.0#~/.yarn/patches/csurf-npm-1.11.0-c1b9cbb35b.patch::version=1.11.0&hash=21d28e"
+  dependencies:
+    cookie: "npm:0.4.0"
+    cookie-signature: "npm:1.0.6"
+    csrf: "npm:3.1.0"
+    http-errors: "npm:~1.7.3"
+  checksum: 10c0/4485c22cea896eb41398c8a1b5b00904c5e1bb817737dbd3af1f3c177ddaa86787379a93d4c5af224937a277dc63afbb7f362b61677d21c58432671e2256bcf6
   languageName: node
   linkType: hard
 
@@ -18393,13 +18430,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express-bearer-token@npm:^2.4.0":
+"express-bearer-token@npm:2.4.0":
   version: 2.4.0
   resolution: "express-bearer-token@npm:2.4.0"
   dependencies:
     cookie: "npm:^0.3.1"
     cookie-parser: "npm:^1.4.4"
   checksum: 10c0/99aefe80c2033215cbd6750860e9e22cb48657ec97bedd3562c1ab9015aa488885ff464596ee15bf0458a080c9bf49bc9a505d6fc0c0c080b056ac2ebe45af42
+  languageName: node
+  linkType: hard
+
+"express-bearer-token@patch:express-bearer-token@npm%3A2.4.0#~/.yarn/patches/express-bearer-token-npm-2.4.0-731c8c5c99.patch":
+  version: 2.4.0
+  resolution: "express-bearer-token@patch:express-bearer-token@npm%3A2.4.0#~/.yarn/patches/express-bearer-token-npm-2.4.0-731c8c5c99.patch::version=2.4.0&hash=77675f"
+  dependencies:
+    cookie: "npm:^0.3.1"
+    cookie-parser: "npm:^1.4.4"
+  checksum: 10c0/340caa2940aa6c3b38923995c1d3e77210c0c4284bba6e4a67b9df77693184603eed4ed0f2df17584b2315f3e0f1da00c2f2e1c48cc4465b3330d5149e0703b8
   languageName: node
   linkType: hard
 
@@ -26569,14 +26616,14 @@ __metadata:
 
 "passport-oauth2@patch:passport-oauth2@npm%3A1.6.1#~/.yarn/patches/passport-oauth2-npm-1.6.1.patch":
   version: 1.6.1
-  resolution: "passport-oauth2@patch:passport-oauth2@npm%3A1.6.1#~/.yarn/patches/passport-oauth2-npm-1.6.1.patch::version=1.6.1&hash=94a003"
+  resolution: "passport-oauth2@patch:passport-oauth2@npm%3A1.6.1#~/.yarn/patches/passport-oauth2-npm-1.6.1.patch::version=1.6.1&hash=fc4394"
   dependencies:
     base64url: "npm:3.x.x"
     oauth: "npm:0.9.x"
     passport-strategy: "npm:1.x.x"
     uid2: "npm:0.0.x"
     utils-merge: "npm:1.x.x"
-  checksum: 10c0/f35a6c83ace4ad9543ebaf2b3681720305679cb794ac44e7623cd88c9a19cecdcdb66cb17a4ea3092de48e6bc8d3869176d56cfc3a57a14cacc5d376f2300892
+  checksum: 10c0/37aed993f924369a29bac3b40c748e8c4094f97acd8b102a78bd1ee6d7c8f5004a9cfac13e424d7355878382cf7f86d0f5f2b18c9150af387c0718a633b8e428
   languageName: node
   linkType: hard
 

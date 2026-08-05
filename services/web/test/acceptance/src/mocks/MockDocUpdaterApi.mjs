@@ -1,4 +1,111 @@
 import AbstractMockApi from './AbstractMockApi.mjs'
+import { parseReq, z, zz } from '@overleaf/validation-tools'
+import editorCoreSchemas from 'overleaf-editor-core/lib/schemas.js'
+
+const docParamsSchema = z.strictObject({
+  projectId: zz.objectId(),
+  docId: zz.objectId(),
+})
+
+const getDocSchema = z.object({
+  params: docParamsSchema,
+  query: z.object({
+    historyOTSupport: z.stringbool().default(false),
+    fromVersion: z.coerce.number().int().default(-1),
+  }),
+})
+
+const setDocSchema = z.object({
+  params: docParamsSchema,
+  body: z.strictObject({
+    lines: z.array(z.string()),
+    source: z.string(),
+    user_id: zz.objectId().nullish(),
+    undoing: z.boolean().optional(),
+    trackChanges: z.boolean().optional(),
+  }),
+})
+
+// Ranges data as document-updater persists it (RangesTracker format) --
+// mirrors services/document-updater/app/js/schemas.js's `ranges` export
+// (this mock stands in for document-updater's own API in web's acceptance
+// tests).
+const insertOp = z.strictObject({
+  i: z.string(),
+  p: z.number().int().min(0),
+  u: z.boolean().optional(),
+})
+const deleteOp = z.strictObject({
+  d: z.string(),
+  p: z.number().int().min(0),
+  u: z.boolean().optional(),
+})
+const commentOp = z.strictObject({
+  c: z.string(),
+  p: z.number().int().min(0),
+  t: zz.objectId().optional(),
+  u: z.boolean().optional(),
+  resolved: z.boolean().optional(),
+})
+const rangeMetadata = z.strictObject({
+  user_id: z.string(),
+  ts: z.string(),
+})
+const comment = z.strictObject({
+  id: zz.objectId().optional(),
+  op: commentOp,
+  metadata: rangeMetadata.optional(),
+})
+const trackedChange = z.strictObject({
+  id: z.string().optional(),
+  op: insertOp.or(deleteOp),
+  metadata: rangeMetadata,
+})
+const rangesSchema = z.strictObject({
+  comments: z.array(comment).optional(),
+  changes: z.array(trackedChange).optional(),
+})
+
+// Mirrors services/document-updater/app/js/HttpController.js's
+// updateProjectSchema (renameUpdateSchema/addUpdateSchema) -- this mock's
+// own routes use :projectId/:docId casing rather than document-updater's
+// :project_id/:doc_id.
+const renameUpdateSchema = z.strictObject({
+  type: z.enum(['rename-doc', 'rename-file']),
+  id: zz.objectId(),
+  pathname: zz.safePath(),
+  // deletes are renames to an empty newPathname
+  newPathname: zz.safePath().or(z.literal('')),
+})
+
+const addUpdateSchema = z.strictObject({
+  type: z.enum(['add-doc', 'add-file']),
+  id: zz.objectId(),
+  pathname: zz.safePath(),
+  docLines: z.string().optional(),
+  ranges: rangesSchema.optional(),
+  historyRangesSupport: z.boolean().optional(),
+  // legacy filestore url for files without a created blob
+  url: z.string().nullish(),
+  hash: z.string().optional(),
+  metadata: editorCoreSchemas.rawFileMetadata.optional(),
+  createdBlob: z.boolean().optional(),
+})
+
+const projectParamsSchema = z.object({
+  params: z.strictObject({ projectId: zz.objectId() }),
+})
+
+const updateProjectSchema = z.object({
+  params: z.strictObject({ projectId: zz.objectId() }),
+  body: z.strictObject({
+    projectHistoryId: z.union([z.number(), z.string()]).optional(),
+    userId: zz.objectId().nullish(),
+    updates: z.array(renameUpdateSchema.or(addUpdateSchema)).default([]),
+    version: z.union([z.number(), z.string()]),
+    source: editorCoreSchemas.rawOrigin.or(z.string()).nullish(),
+  }),
+})
 
 class MockDocUpdaterApi extends AbstractMockApi {
   reset() {
@@ -47,13 +154,21 @@ class MockDocUpdaterApi extends AbstractMockApi {
   }
 
   applyRoutes() {
+    this.app.get('/project/:projectId/last_updated_at', (req, res) => {
+      // no project in this mock has ever been touched via document-updater,
+      // matching the real service's response for a project it has no
+      // knowledge of (see DocumentUpdaterHandler.getProjectLastUpdatedAt)
+      res.json({ lastUpdatedAt: null })
+    })
+
     this.app.post('/project/:projectId/flush', (req, res) => {
       res.sendStatus(204)
     })
 
     this.app.post('/project/:projectId', (req, res) => {
-      const { projectId } = req.params
-      const { userId, updates, version } = req.body
+      const { params, body } = parseReq(req, updateProjectSchema)
+      const { projectId } = params
+      const { userId, updates, version } = body
       this.addProjectStructureUpdates(projectId, userId, updates, version)
       res.sendStatus(200)
     })
@@ -69,8 +184,11 @@ class MockDocUpdaterApi extends AbstractMockApi {
     )
 
     this.app.get('/project/:projectId/doc/:docId', (req, res) => {
-      const { projectId, docId } = req.params
-      this.receivedGetDocRequests.push({ projectId, docId, query: req.query })
+      const {
+        query,
+        params: { projectId, docId },
+      } = parseReq(req, getDocSchema)
+      this.receivedGetDocRequests.push({ projectId, docId, query })
       const doc = this.docsByProject.get(projectId)?.get(docId)
       if (doc == null) {
         return res.sendStatus(404)
@@ -84,9 +202,12 @@ class MockDocUpdaterApi extends AbstractMockApi {
       })
     })
 
-    this.app.post('/project/:projectId/doc/:doc_id', (req, res) => {
-      const { projectId, doc_id: docId } = req.params
-      this.receivedSetDocRequests.push({ projectId, docId, body: req.body })
+    this.app.post('/project/:projectId/doc/:docId', (req, res) => {
+      const {
+        params: { projectId, docId },
+        body,
+      } = parseReq(req, setDocSchema)
+      this.receivedSetDocRequests.push({ projectId, docId, body })
       res.sendStatus(204)
     })
 
@@ -107,7 +228,8 @@ class MockDocUpdaterApi extends AbstractMockApi {
     })
 
     this.app.get('/project/:projectId/ranges', (req, res) => {
-      const docsById = this.docsByProject.get(req.params.projectId)
+      const { params } = parseReq(req, projectParamsSchema)
+      const docsById = this.docsByProject.get(params.projectId)
       const docs = docsById == null ? [] : Array.from(docsById.values())
       res.json({
         docs: docs.map(doc => ({
