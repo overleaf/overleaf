@@ -7317,6 +7317,7 @@ __metadata:
     "@overleaf/promise-utils": "workspace:*"
     "@overleaf/settings": "workspace:*"
     "@overleaf/stream-utils": "workspace:*"
+    "@overleaf/validation-tools": "workspace:*"
     "@pollyjs/adapter-node-http": "npm:^6.0.6"
     "@pollyjs/core": "npm:^6.0.6"
     "@pollyjs/persister-fs": "npm:^6.0.6"
