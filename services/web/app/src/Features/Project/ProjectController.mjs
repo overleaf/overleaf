@@ -475,7 +475,6 @@ const _ProjectController = {
     const splitTests = [
       'png2pdf',
       'plugin-dimensions',
-      'bibtex-visual-editor',
       'compile-log-events',
       'visual-preview',
       'external-socket-heartbeat',
