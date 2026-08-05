@@ -16,6 +16,7 @@ export async function cloneThreads(sourceProjectId, targetProjectId) {
     .find({ project_id: sourceProjectId, thread_id: { $exists: true } })
     .toArray()
   const mapping = []
+  if (rooms.length === 0) return mapping
   await db.rooms.insertMany(
     rooms.map(room => {
       const from = room._id

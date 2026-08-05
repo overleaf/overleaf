@@ -122,6 +122,32 @@ describe('Cloning comment threads', async function () {
       expectValidationErrorRaw(response, 404, 'projectId')
     })
   })
+
+  describe('with a thread whose room has no messages', async function () {
+    before(async function () {
+      this.emptyThreadId = new ObjectId().toString()
+      const { response: deleteResponse } = await ChatClient.deleteMessage(
+        projectId,
+        this.emptyThreadId,
+        new ObjectId().toString()
+      )
+      expect(deleteResponse.statusCode).to.equal(204)
+
+      const {
+        response: { body: result, statusCode },
+      } = await ChatClient.duplicateCommentThreads(projectId, [
+        this.emptyThreadId,
+      ])
+      this.result = result
+      expect(statusCode).to.equal(200)
+    })
+
+    it('should duplicate the thread', function () {
+      expect(this.result.newThreads[this.emptyThreadId]).to.have.property(
+        'duplicateId'
+      )
+    })
+  })
 })
 
 describe('Cloning comment threads to another project', async function () {
@@ -187,6 +213,23 @@ describe('Cloning comment threads to another project', async function () {
         'malformed-target-project'
       )
       expectValidationErrorRaw(response, 400, 'targetProjectId')
+    })
+  })
+
+  describe('with a source project that has no comment threads', function () {
+    it('should clone no threads into the target project', async function () {
+      const emptySourceProjectId = new ObjectId().toString()
+      const freshTargetProjectId = new ObjectId().toString()
+      const { response } = await ChatClient.cloneCommentThreads(
+        emptySourceProjectId,
+        freshTargetProjectId
+      )
+      expect(response.statusCode).to.equal(204)
+
+      const { response: getResponse, body: threads } =
+        await ChatClient.getThreads(freshTargetProjectId)
+      expect(getResponse.statusCode).to.equal(200)
+      expect(threads).to.deep.equal({})
     })
   })
 })
