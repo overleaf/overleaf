@@ -22735,6 +22735,7 @@ __metadata:
     "@overleaf/eslint-plugin": "workspace:*"
     "@overleaf/fetch-utils": "workspace:*"
     "@overleaf/o-error": "workspace:*"
+    "@overleaf/validation-tools": "workspace:*"
     "@popperjs/core": "npm:^2.11.8"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/react": "npm:^16.3.2"
