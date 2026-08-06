@@ -310,6 +310,8 @@ const _CompileController = {
     // Projects the optimisation would never have touched are excluded,
     // so they cannot dilute the comparison.
     const optimisedPngCount = stats?.['include-image-optimised'] || 0
+    const optimisablePngCount =
+      stats?.['optimisable-png-count'] || stats?.['include-image-optimised']
     const projectHasUnconvertedPngs = Boolean(stats?.projectHasUnconvertedPngs)
     if (optimisedPngCount > 0 || projectHasUnconvertedPngs) {
       AnalyticsManager.recordEventForUserInBackground(
@@ -317,6 +319,7 @@ const _CompileController = {
         'compile-with-optimizable-pngs',
         {
           projectId,
+          optimizablePngCount: optimisablePngCount,
           optimizedPngCount: optimisedPngCount,
           optimizedImageInclusionTime:
             timings?.['include-image-optimised'] || 0,
@@ -324,6 +327,9 @@ const _CompileController = {
           totalImageInclusionTime: timings?.['include-image-all'] || 0,
           isPng2pdf: !!options.png2pdf,
           compiler: options.compiler,
+          compileTime: timings?.compileE2E,
+          isDraftMode: !!options.draft,
+          status,
         }
       )
     }

@@ -443,10 +443,13 @@ describe('CompileController', function () {
           status: 'success',
           outputFiles: [],
           stats: {
+            // clsi always sets 'optimisable-png-count' alongside
+            // projectHasUnconvertedPngs (see HistoryResourceWriter.js).
+            'optimisable-png-count': 1,
             'include-image-all': 3,
             projectHasUnconvertedPngs: 1,
           },
-          timings: { 'include-image-all': 123 },
+          timings: { 'include-image-all': 123, compileE2E: 200 },
         })
         await ctx.CompileController.compile(ctx.req, ctx.res, ctx.next)
         expect(
@@ -456,12 +459,16 @@ describe('CompileController', function () {
           'compile-with-optimizable-pngs',
           {
             projectId: ctx.projectId,
+            optimizablePngCount: 1,
             optimizedPngCount: 0,
             optimizedImageInclusionTime: 0,
             totalImages: 3,
             totalImageInclusionTime: 123,
             isPng2pdf: false,
             compiler: undefined,
+            compileTime: 200,
+            isDraftMode: false,
+            status: 'success',
           }
         )
       })
@@ -475,7 +482,11 @@ describe('CompileController', function () {
             'include-image-all': 5,
             projectHasUnconvertedPngs: 0,
           },
-          timings: { 'include-image-optimised': 12, 'include-image-all': 34 },
+          timings: {
+            'include-image-optimised': 12,
+            'include-image-all': 34,
+            compileE2E: 300,
+          },
         })
         await ctx.CompileController.compile(ctx.req, ctx.res, ctx.next)
         expect(
@@ -485,12 +496,90 @@ describe('CompileController', function () {
           'compile-with-optimizable-pngs',
           {
             projectId: ctx.projectId,
+            // Falls back to the optimised-image count when 'optimisable-png-count'
+            // is absent from stats (e.g. an older clsi that predates the field).
+            optimizablePngCount: 2,
             optimizedPngCount: 2,
             optimizedImageInclusionTime: 12,
             totalImages: 5,
             totalImageInclusionTime: 34,
             isPng2pdf: false,
             compiler: undefined,
+            compileTime: 300,
+            isDraftMode: false,
+            status: 'success',
+          }
+        )
+      })
+
+      it('prefers the optimisable-png-count stat over the optimised-image count when both are present', async function (ctx) {
+        ctx.CompileManager.promises.compile.resolves({
+          status: 'success',
+          outputFiles: [],
+          stats: {
+            'optimisable-png-count': 5,
+            'include-image-optimised': 2,
+            'include-image-all': 5,
+            projectHasUnconvertedPngs: 1,
+          },
+          timings: {
+            'include-image-optimised': 12,
+            'include-image-all': 34,
+            compileE2E: 400,
+          },
+        })
+        await ctx.CompileController.compile(ctx.req, ctx.res, ctx.next)
+        expect(
+          ctx.AnalyticsManager.recordEventForUserInBackground
+        ).to.have.been.calledWith(
+          ctx.user_id,
+          'compile-with-optimizable-pngs',
+          {
+            projectId: ctx.projectId,
+            optimizablePngCount: 5,
+            optimizedPngCount: 2,
+            optimizedImageInclusionTime: 12,
+            totalImages: 5,
+            totalImageInclusionTime: 34,
+            isPng2pdf: false,
+            compiler: undefined,
+            compileTime: 400,
+            isDraftMode: false,
+            status: 'success',
+          }
+        )
+      })
+
+      it('includes the compile status, compile time, and draft mode', async function (ctx) {
+        ctx.req.body = { draft: true }
+        ctx.CompileManager.promises.compile.resolves({
+          status: 'failure',
+          outputFiles: [],
+          stats: {
+            'optimisable-png-count': 1,
+            'include-image-all': 3,
+            projectHasUnconvertedPngs: 1,
+          },
+          timings: { 'include-image-all': 123, compileE2E: 456 },
+        })
+        await ctx.CompileController.compile(ctx.req, ctx.res, ctx.next)
+        expect(
+          ctx.AnalyticsManager.recordEventForUserInBackground
+        ).to.have.been.calledWith(
+          ctx.user_id,
+          'compile-with-optimizable-pngs',
+          {
+            projectId: ctx.projectId,
+            optimizablePngCount: 1,
+            optimizedPngCount: 0,
+            optimizedImageInclusionTime: 0,
+            totalImages: 3,
+            totalImageInclusionTime: 123,
+            isPng2pdf: false,
+            compiler: undefined,
+            compileTime: 456,
+            isDraftMode: true,
+            status: 'failure',
           }
         )
       })

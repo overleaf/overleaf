@@ -548,6 +548,7 @@ export async function syncResourcesToDisk(
 
   // for analytics to determine if a project could have converted PNG's, even if they arent in the rollout
   if (shouldConvert.size > 0) {
+    stats['optimisable-png-count'] = shouldConvert.size
     stats.projectHasUnconvertedPngs = 1
   }
 

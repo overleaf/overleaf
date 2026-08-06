@@ -251,6 +251,7 @@ describe('HistoryResourceWriter', function () {
       // flagged slow, so it is not a conversion candidate.
       const { stats } = await ctx.sync()
       expect(stats.projectHasUnconvertedPngs).to.equal(undefined)
+      expect(stats['optimisable-png-count']).to.equal(undefined)
       expect(ctx.convertPng.called).to.equal(false)
     })
 
@@ -261,6 +262,7 @@ describe('HistoryResourceWriter', function () {
       await ctx.HistoryResourceWriter.saveSlowPngList(ctx.cacheKey, ['fig.png'])
       const { stats } = await ctx.sync({ png2pdf: false })
       expect(stats.projectHasUnconvertedPngs).to.equal(1)
+      expect(stats['optimisable-png-count']).to.equal(1)
       expect(ctx.convertPng.called).to.equal(false)
     })
 
@@ -271,6 +273,7 @@ describe('HistoryResourceWriter', function () {
       await ctx.HistoryResourceWriter.saveSlowPngList(ctx.cacheKey, ['fig.png'])
       const { stats } = await ctx.sync({ png2pdf: true })
       expect(stats.projectHasUnconvertedPngs).to.equal(1)
+      expect(stats['optimisable-png-count']).to.equal(1)
       expect(ctx.convertPng.calledOnce).to.equal(true)
     })
 
@@ -283,7 +286,42 @@ describe('HistoryResourceWriter', function () {
       await ctx.HistoryResourceWriter.saveSlowPngList(ctx.cacheKey, ['fig.png'])
       const { stats } = await ctx.sync({ png2pdf: true })
       expect(stats.projectHasUnconvertedPngs).to.equal(undefined)
+      expect(stats['optimisable-png-count']).to.equal(undefined)
       expect(ctx.convertPng.called).to.equal(false)
+    })
+
+    it('counts each convertible PNG separately when multiple are slow', async function (ctx) {
+      // With a single PNG, the count can never be more than 1 and so is
+      // indistinguishable from the boolean flag - add a second qualifying PNG
+      // to prove this field is an actual count.
+      ctx.rawSnapshot.files['fig2.png'] = {
+        hash: '1123456789012345678901234567890123456789',
+        byteLength: 2 * 1024 * 1024,
+      }
+      await ctx.HistoryResourceWriter.saveSlowPngList(ctx.cacheKey, [
+        'fig.png',
+        'fig2.png',
+      ])
+      const { stats } = await ctx.sync({ png2pdf: true })
+      expect(stats.projectHasUnconvertedPngs).to.equal(1)
+      expect(stats['optimisable-png-count']).to.equal(2)
+    })
+
+    it('only counts the PNGs above the size threshold when slow PNGs are mixed', async function (ctx) {
+      // One slow PNG qualifies by size and one does not - the count must
+      // reflect only the size-filtered set, not the raw slow-list size.
+      ctx.rawSnapshot.files['fig.png'].byteLength = 512 * 1024 // below threshold
+      ctx.rawSnapshot.files['fig2.png'] = {
+        hash: '1123456789012345678901234567890123456789',
+        byteLength: 2 * 1024 * 1024, // above threshold
+      }
+      await ctx.HistoryResourceWriter.saveSlowPngList(ctx.cacheKey, [
+        'fig.png',
+        'fig2.png',
+      ])
+      const { stats } = await ctx.sync({ png2pdf: true })
+      expect(stats.projectHasUnconvertedPngs).to.equal(1)
+      expect(stats['optimisable-png-count']).to.equal(1)
     })
   })
 })
