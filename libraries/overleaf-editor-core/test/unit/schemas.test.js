@@ -3,9 +3,19 @@ const {
   rawLinkedFileData,
   rawFileMetadata,
   rawRetainOp,
+  rawTextOperation,
 } = require('../../lib/schemas')
 
 describe('schemas', function () {
+  describe('rawTextOperation', function () {
+    it('accepts a no-op TextOperation', function () {
+      const result = rawTextOperation.safeParse({
+        textOperation: [],
+      })
+      expect(result.success).to.equal(true)
+    })
+  })
+
   describe('rawRetainOp', function () {
     it('accepts a bare retain length', function () {
       const result = rawRetainOp.safeParse(5)
@@ -199,6 +209,14 @@ describe('schemas', function () {
     it('accepts a legacy v1 main flag', function () {
       const result = rawFileMetadata.safeParse({
         main: true,
+      })
+      expect(result.success).to.equal(true)
+    })
+
+    it('accepts a legacy v1 url import', function () {
+      const result = rawFileMetadata.safeParse({
+        agent: 'url',
+        agentDataId: 42,
       })
       expect(result.success).to.equal(true)
     })

@@ -38,7 +38,7 @@ const rawRetainOp = z.union([
 const rawScanOp = z.union([rawInsertOp, rawRemoveOp, rawRetainOp])
 
 const rawTextOperation = z.strictObject({
-  textOperation: z.array(rawScanOp).min(1),
+  textOperation: z.array(rawScanOp),
   contentHash: z.string().optional(),
 })
 
@@ -151,19 +151,27 @@ const rawBlobHash = z.string().regex(/^[0-9a-f]{40}$/, {
   message: 'invalid blob hash',
 })
 
-// file metadata is the linked-file metadata written by web, the main-file
-// marker written by the v1 history import, regular file with importedAt,
-// or an empty object (metadata cleared)
 const rawFileMetadata = z.union([
+  // doc/clear metadata
+  z.strictObject({}),
+  // regular file v2
+  z.strictObject({
+    importedAt: z.iso.datetime(),
+  }),
+  // linked-file v2
   rawLinkedFileData,
+
+  // main-file v1
   z.strictObject({
     main: z.boolean(),
     importedAt: z.iso.datetime().optional(),
   }),
+  // url import v1
   z.strictObject({
-    importedAt: z.iso.datetime(),
+    agent: z.literal('url'),
+    agentDataId: z.number(),
+    importedAt: z.iso.datetime().optional(),
   }),
-  z.strictObject({}),
 ])
 
 const rawHashFileData = z.strictObject({
