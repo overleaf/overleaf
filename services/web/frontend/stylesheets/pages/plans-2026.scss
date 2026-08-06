@@ -169,7 +169,8 @@
 
     &[data-ol-student-mode='true'] {
       .plans-new-group-member-picker,
-      .plans-educational-discount {
+      .plans-educational-discount,
+      .hide-for-plan-type-student {
         display: none;
       }
 

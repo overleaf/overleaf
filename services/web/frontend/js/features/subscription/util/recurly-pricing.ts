@@ -28,12 +28,12 @@ function queryRecurlyPlanPrice(planCode: string, currency: CurrencyCode) {
 }
 
 export function formatPriceForDisplayData(
-  price: string,
+  price: string | number,
   taxRate: number,
   currencyCode: CurrencyCode,
   locale: string
 ): PriceForDisplayData {
-  const totalPriceExTax = parseFloat(price)
+  const totalPriceExTax = typeof price === 'number' ? price : parseFloat(price)
   let taxAmount = totalPriceExTax * taxRate
   if (isNaN(taxAmount)) {
     taxAmount = 0

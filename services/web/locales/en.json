@@ -2780,6 +2780,7 @@
   "this_will_remove_primary_email": "Note that this will also remove the email address <b>__email__</b> from the account because it’s an unconfirmed email. If you want to keep it, please confirm it first.",
   "this_will_reset_in": "This will reset in __time__.",
   "three_free_collab": "Three free collaborators",
+  "three_plus_months_free": "3+ months free",
   "time_and": "and",
   "time_hour": "__count__ hour",
   "time_hour_plural": "__count__ hours",

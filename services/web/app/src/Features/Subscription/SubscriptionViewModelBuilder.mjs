@@ -2,6 +2,7 @@
 import Settings from '@overleaf/settings'
 
 import PlansLocator from './PlansLocator.mjs'
+import { getLocalizedPlanPricing } from './PriceVersions.mjs'
 import { isStandaloneAiAddOnPlanCode } from './AiHelper.mjs'
 import PaymentProviderEntities from './PaymentProviderEntities.mjs'
 import SubscriptionFormatters from './SubscriptionFormatters.mjs'
@@ -308,6 +309,7 @@ async function buildUsersSubscriptionViewModel(user, locale = 'en') {
         paymentRecord.subscription.periodEnd
       ),
       currency: paymentRecord.subscription.currency,
+      planPrice: paymentRecord.subscription.planPrice,
       state: paymentRecord.subscription.state,
       trialEndsAtFormatted: SubscriptionFormatters.formatDateTime(
         paymentRecord.subscription.trialPeriodEnd
@@ -544,6 +546,22 @@ const CHANGE_PLAN_MODAL_PLAN_CODES = [
   'professional-annual',
 ]
 
+/**
+ * The list price of a "Change plan" modal plan, in the given currency and at the
+ * given price version.
+ *
+ * @param {string} planCode
+ * @param {string} currency
+ * @param {import('../../../../types/subscription/plan').StripeLookupKeyVersion} priceVersion
+ * @returns {number|undefined} the price excluding tax
+ */
+function _getListPriceForPlanChange(planCode, currency, priceVersion) {
+  const isAnnual = planCode.endsWith('-annual')
+  const pricingKey = isAnnual ? planCode.replace(/-annual$/, '') : planCode
+  const pricing = getLocalizedPlanPricing(priceVersion)
+  return pricing[currency]?.[pricingKey]?.[isAnnual ? 'annual' : 'monthly']
+}
+
 function _isPlanEqualOrBetter(planA, planB) {
   return FeaturesHelper.isFeatureSetBetter(
     planA?.features || {},
@@ -589,15 +607,42 @@ function buildGroupSubscriptionForView(groupSubscription) {
   }
 }
 
-function buildPlansListForSubscriptionDash(currentPlan, isInTrial) {
+/**
+ * @param {any} currentPlan
+ * @param {boolean} isInTrial
+ * @param {object} [options]
+ * @param {string} [options.currency] - the subscription's currency
+ * @param {import('../../../../types/subscription/plan').StripeLookupKeyVersion} [options.priceVersion]
+ * @param {string} [options.subscriptionPlanCode] - the plan code of the user's
+ * current subscription
+ * @param {number} [options.subscriptionPlanPrice] - the plan price the user's
+ * subscription is actually charged at, which may differ from the price at
+ * `priceVersion` (e.g. a subscription predating the version's split test)
+ */
+function buildPlansListForSubscriptionDash(
+  currentPlan,
+  isInTrial,
+  { currency, priceVersion, subscriptionPlanCode, subscriptionPlanPrice } = {}
+) {
   const { allPlans, planCodesChangingAtTermEnd } = buildPlansList(
     currentPlan,
     isInTrial
   )
+  const currentPlanCode = subscriptionPlanCode?.split('_')[0]
+  const plans = CHANGE_PLAN_MODAL_PLAN_CODES.map(code => allPlans[code])
+    .filter(Boolean)
+    // shallow copy: these are the shared Settings.plans objects
+    .map(plan => ({
+      ...plan,
+      listPrice:
+        plan.planCode === currentPlanCode && subscriptionPlanPrice != null
+          ? subscriptionPlanPrice
+          : currency && priceVersion
+            ? _getListPriceForPlanChange(plan.planCode, currency, priceVersion)
+            : undefined,
+    }))
   return {
-    plans: CHANGE_PLAN_MODAL_PLAN_CODES.map(code => allPlans[code]).filter(
-      Boolean
-    ),
+    plans,
     planCodesChangingAtTermEnd,
   }
 }

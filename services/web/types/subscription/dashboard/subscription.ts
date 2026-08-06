@@ -40,6 +40,7 @@ type PaymentProviderRecord = {
   nextPaymentDueAt: string
   nextPaymentDueDate: string
   currency: CurrencyCode
+  planPrice: number
   state?: SubscriptionState
   trialEndsAtFormatted: Nullable<string>
   trialEndsAt: Nullable<string>

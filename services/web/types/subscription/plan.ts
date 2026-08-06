@@ -53,6 +53,9 @@ export type PendingPaymentProviderPlan = {
 export type Plan = {
   annual?: boolean
   displayPrice?: string
+  // list price excluding tax, in the subscription's currency, resolved from the
+  // user's assigned price version. Only set for the change plan modal.
+  listPrice?: number
   featureDescription?: Record<string, unknown>[]
   addOns?: AddOn[]
   features?: Features
@@ -109,8 +112,10 @@ export type StripeBaseLookupKey =
   | 'group_standard_educational'
   | 'group_professional_educational'
 
-// Keep in sync with LATEST_STRIPE_LOOKUP_KEY_VERSION in PlansLocator.mjs
-export type StripeLookupKeyVersion = 'feb2026'
+// A version of prices we start subscriptions at: PlansLocator's
+// DEFAULT_STRIPE_LOOKUP_KEY_VERSION, or any additional versions
+// defined in settings
+export type StripeLookupKeyVersion = 'feb2026' | (string & {})
 
 export type StripeLookupKey =
   `${StripeBaseLookupKey}_${StripeLookupKeyVersion}_${StripeCurrencyCode}`

@@ -15,20 +15,38 @@ export function isProfessionalGroupPlan(subscription) {
   return subscription.groupPlan && isProfessional
 }
 
+// How coarsely the per-month price of an annually billed plan is rounded for
+// display, unless a price version overrides it.
+export const DEFAULT_ROUNDING_INCREMENT = 0.05
+
 /**
  * The per-month price shown when a plan or add-on is billed annually: the
- * annual price divided by twelve, rounded up to the nearest 0.05 for a tidy
- * display value.
+ * annual price divided by twelve, rounded up to the nearest increment for a
+ * tidy display value.
  *
+ * @param {number} annual
+ * @param {number} [increment]
+ * @returns {number}
+ */
+export function roundedTwelfth(annual, increment = DEFAULT_ROUNDING_INCREMENT) {
+  return Math.round(Math.ceil(annual / 12 / increment) * increment * 100) / 100
+}
+
+/**
+ * The saving from billing annually rather than monthly, as a fraction of what a
+ * year of monthly billing would cost.
+ *
+ * @param {number} monthly
  * @param {number} annual
  * @returns {number}
  */
-export function roundedTwelfth(annual) {
-  return Math.round(Math.ceil(annual / 12 / 0.05) * 5) / 100
+export function annualSavings(monthly, annual) {
+  return 1 - annual / (monthly * 12)
 }
 
 export default {
   isProfessionalPlan,
   isProfessionalGroupPlan,
   roundedTwelfth,
+  annualSavings,
 }

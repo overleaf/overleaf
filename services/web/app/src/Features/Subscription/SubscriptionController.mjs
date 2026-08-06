@@ -24,6 +24,7 @@ import async from 'async'
 import HttpErrorHandler from '../Errors/HttpErrorHandler.mjs'
 import { AI_ADD_ON_CODE } from './AiHelper.mjs'
 import PlansLocator from './PlansLocator.mjs'
+import { DEFAULT_PRICE_VERSION } from './PriceVersions.mjs'
 import { User } from '../../models/User.mjs'
 import UserGetter from '../User/UserGetter.mjs'
 import { sanitizeSessionUserForFrontEnd } from '../../infrastructure/FrontEndUser.mjs'
@@ -198,10 +199,22 @@ async function userSubscriptionPage(req, res) {
   const isInTrial = SubscriptionHelper.isInTrial(
     personalSubscription?.payment?.trialEndsAt
   )
+  // The change plan modal must quote prices from the same price version that the
+  // plan change itself will be charged at, except for the user's current plan, which is shown at their current price
+  const priceVersion =
+    (
+      await Modules.promises.hooks.fire('getPriceVersionForUser', user._id)
+    )?.[0] ?? DEFAULT_PRICE_VERSION
   const plansData =
     SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash(
       personalSubscription?.plan,
-      isInTrial
+      isInTrial,
+      {
+        currency: personalSubscription?.payment?.currency,
+        priceVersion,
+        subscriptionPlanCode: personalSubscription?.planCode,
+        subscriptionPlanPrice: personalSubscription?.payment?.planPrice,
+      }
     )
 
   const host = req.headers.host

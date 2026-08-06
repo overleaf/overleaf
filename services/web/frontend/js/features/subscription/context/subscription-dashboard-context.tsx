@@ -21,6 +21,7 @@ import {
 import { Institution } from '../../../../../types/institution'
 import getMeta from '../../../utils/meta'
 import {
+  formatPriceForDisplayData,
   loadDisplayPriceWithTaxPromise,
   loadGroupDisplayPriceWithTaxForRecurlyPromise,
   loadGroupDisplayPriceWithTaxForStripePromise,
@@ -173,15 +174,25 @@ export function SubscriptionDashboardProvider({
       personalSubscription?.payment
     ) {
       const { currency, taxRate } = personalSubscription.payment
+      // Only Stripe subscriptions can be derived from the price version. Recurly only has one version of each price.
+      const isStripe = Boolean(personalSubscription.service?.includes('stripe'))
       const fetchPlansDisplayPrices = async () => {
         for (const plan of plansWithoutDisplayPrice) {
           try {
-            const priceData = await loadDisplayPriceWithTaxPromise(
-              plan.planCode,
-              currency,
-              taxRate,
-              i18n.language
-            )
+            const priceData =
+              isStripe && plan.listPrice !== undefined
+                ? formatPriceForDisplayData(
+                    plan.listPrice,
+                    taxRate,
+                    currency,
+                    i18n.language
+                  )
+                : await loadDisplayPriceWithTaxPromise(
+                    plan.planCode,
+                    currency,
+                    taxRate,
+                    i18n.language
+                  )
             if (priceData?.totalAsNumber !== undefined) {
               plan.displayPrice = formatCurrency(
                 priceData.totalAsNumber,

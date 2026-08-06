@@ -161,6 +161,7 @@ describe('SubscriptionController', function () {
     ctx.SplitTestV2Hander = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
+        getAssignmentForUser: sinon.stub().resolves({ variant: 'default' }),
       },
     }
     ctx.Features = {
@@ -482,6 +483,25 @@ describe('SubscriptionController', function () {
 
     it('should load the plans', function (ctx) {
       expect(ctx.data.plans).to.deep.equal(ctx.plans)
+    })
+
+    // The prices quoted in the change plan modal have to come from the same
+    // price version the plan change will be charged at
+    it('should resolve the price version for the plan list by user, not by request', function (ctx) {
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'getPriceVersionForUser',
+        ctx.user._id
+      )
+      expect(ctx.Modules.promises.hooks.fire).to.not.have.been.calledWith(
+        'getPriceVersion',
+        sinon.match.any,
+        sinon.match.any
+      )
+      expect(
+        ctx.SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash
+      ).to.have.been.calledWithMatch(sinon.match.any, sinon.match.any, {
+        priceVersion: 'feb2026',
+      })
     })
 
     it('should load an empty list of groups with settings available', function (ctx) {
