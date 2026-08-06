@@ -34,6 +34,7 @@ export const useJumpToLineCommandSource = (): CommandPaletteSource => {
                     line,
                   }),
             score: 1,
+            eventSegmentation: { source: 'jump-to-line' },
           },
         ]
       },

@@ -15,6 +15,7 @@ import useCommandPaletteResults from '../hooks/use-command-palette-results'
 import { debugConsole } from '@/utils/debugging'
 import SplitTestBadge from '@/shared/components/split-test-badge'
 import { useTranslation } from 'react-i18next'
+import { useEditorAnalytics } from '@/shared/hooks/use-editor-analytics'
 
 type CommandPaletteBodyProps = {
   show: boolean
@@ -27,6 +28,17 @@ const CommandPaletteBody: FC<CommandPaletteBodyProps> = ({ show, onHide }) => {
   const resultsRef = useRef<HTMLUListElement>(null)
   const results = useCommandPaletteResults(query)
   const { t } = useTranslation()
+  const { sendEvent } = useEditorAnalytics()
+  const selectedResultRef = useRef(false)
+
+  useEffect(() => {
+    sendEvent('command-palette-opened')
+    return () => {
+      if (!selectedResultRef.current) {
+        sendEvent('command-palette-dismissed')
+      }
+    }
+  }, [sendEvent])
 
   useEffect(() => {
     setSelectedIndex(0)
@@ -40,6 +52,8 @@ const CommandPaletteBody: FC<CommandPaletteBodyProps> = ({ show, onHide }) => {
   }, [selectedIndex])
 
   const runResult = (result: CommandPaletteSearchResult) => {
+    selectedResultRef.current = true
+    sendEvent('command-palette-select', result.eventSegmentation)
     try {
       const res = result.onSelect(result)
       if (res instanceof Promise) {

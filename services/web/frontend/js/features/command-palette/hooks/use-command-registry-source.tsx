@@ -90,6 +90,7 @@ const useCommandRegistrySource = (): CommandPaletteSource => {
       title: command.label,
       onSelect: () => command.handler!({ location: 'command-palette' }),
       score: 1,
+      eventSegmentation: { source: 'command-registry', item: command.id },
     }))
   }, [commands])
 
@@ -120,6 +121,7 @@ const useCommandRegistrySource = (): CommandPaletteSource => {
               title: label,
               onSelect: () => command.handler!({ location: 'command-palette' }),
               score,
+              eventSegmentation: { source: 'command-registry', item: id },
             },
           ]
         })

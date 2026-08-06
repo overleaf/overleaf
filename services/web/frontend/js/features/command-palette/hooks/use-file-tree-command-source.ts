@@ -63,6 +63,7 @@ const useFileTreeCommandSource = (): CommandPaletteSource => {
           path === name ? undefined : path.split('/').slice(0, -1).join('/'),
         onSelect: () => onSelect(id, undefined, undefined),
         score: 1,
+        eventSegmentation: { source: 'file' },
       }))
 
     return files
@@ -97,6 +98,7 @@ const useFileTreeCommandSource = (): CommandPaletteSource => {
             path === name ? undefined : path.split('/').slice(0, -1).join('/'),
           onSelect: () => onSelect(id, line, column),
           score,
+          eventSegmentation: { source: 'file' },
         }))
       },
       defaults,
