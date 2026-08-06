@@ -3,7 +3,7 @@ import { z, zz } from '@overleaf/validation-tools'
 export const MAX_MESSAGE_LENGTH = 10 * 1024 // 10kb, about 1,500 words
 const DEFAULT_MESSAGE_LIMIT = 50
 
-const projectParams = z.object({ projectId: zz.objectId() })
+const projectParams = z.strictObject({ projectId: zz.objectId() })
 const threadParams = projectParams.extend({ threadId: zz.objectId() })
 const messageParams = projectParams.extend({ messageId: zz.objectId() })
 const threadMessageParams = threadParams.extend({ messageId: zz.objectId() })
