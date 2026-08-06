@@ -72,8 +72,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 26px;
+    height: 26px;
     border-radius: var(--border-radius-full);
     color: var(--white);
     font-size: var(--font-size-02);
@@ -84,9 +84,10 @@
 
   /* stylelint-disable selector-class-pattern -- CodeMirror completion classes */
   .cm-completionLabel {
+    @include body-sm;
+
     grid-column: 2;
     grid-row: 1;
-    font-size: var(--font-size-03);
     color: var(--content-primary);
   }
 
@@ -97,11 +98,12 @@
   }
 
   .cm-completionDetail {
+    @include body-xs;
+
     grid-column: 2;
     grid-row: 2;
     margin: 0;
     font-family: var(--font-sans);
-    font-size: var(--font-size-02);
     font-style: normal;
     color: var(--content-secondary);
   }
