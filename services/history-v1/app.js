@@ -17,7 +17,10 @@ const healthChecks = require('./api/controllers/health_checks')
 const { mongodb, loadGlobalBlobs } = require('./storage')
 const projectsRoutes = require('./api/routes/projects')
 const projectImportRoutes = require('./api/routes/project_import')
-const { createHandleValidationError } = require('@overleaf/validation-tools')
+const {
+  createHandleValidationError,
+  getRawReqInput,
+} = require('@overleaf/validation-tools')
 
 Events.setMaxListeners(20)
 const app = express()
@@ -73,7 +76,10 @@ function setupErrorHandling() {
   app.use(handleValidationError)
 
   app.use(function (err, req, res, next) {
-    const projectId = req.params?.project_id || req.body?.projectId
+    // terminal error handler must not throw while extracting log context
+    // (case 2: final error-handler logging)
+    const { params, body } = getRawReqInput(req)
+    const projectId = params?.project_id || body?.projectId
     logger.error({ err, projectId }, err.message)
 
     if (res.headersSent) {

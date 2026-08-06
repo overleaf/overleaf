@@ -432,4 +432,39 @@ describe('Project blobs API', function () {
       expect(response.status).to.equal(HTTPStatus.NO_CONTENT)
     })
   })
+
+  describe('validation', function () {
+    it('rejects a project_id that is not a Mongo ObjectId or Postgres id', async function () {
+      const badProjectId = 'a/../../../../../etc'
+      const badToken = testServer.createTokenForProject(badProjectId)
+      const response = await fetch(
+        testServer.url(
+          `/api/projects/${encodeURIComponent(badProjectId)}/blobs/${testFiles.HELLO_TXT_HASH}`
+        ),
+        { headers: { Authorization: `Bearer ${badToken}` } }
+      )
+      expect(response.status).to.equal(HTTPStatus.NOT_FOUND)
+      const body = await response.json()
+      expect(body.error).to.include('project_id')
+    })
+
+    it('rejects a copyFrom that is not a Mongo ObjectId or Postgres id', async function () {
+      const targetProjectId = '456'
+      const targetToken = testServer.createTokenForProject(targetProjectId)
+      const url = new URL(
+        testServer.url(
+          `/api/projects/${targetProjectId}/blobs/${testFiles.HELLO_TXT_HASH}`
+        )
+      )
+      url.searchParams.append('copyFrom', 'a/../../../../../etc')
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${targetToken}` },
+      })
+      expect(response.status).to.equal(HTTPStatus.UNPROCESSABLE_ENTITY)
+      const body = await response.json()
+      expect(body.error).to.include('copyFrom')
+    })
+  })
 })

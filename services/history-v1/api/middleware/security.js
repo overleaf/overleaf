@@ -5,8 +5,14 @@ const config = require('config')
 const HTTPStatus = require('http-status')
 const jwt = require('jsonwebtoken')
 const tsscmp = require('tsscmp')
-const { parseReq } = require('@overleaf/validation-tools')
+const { parseReq, z } = require('@overleaf/validation-tools')
 const schemas = require('../schema')
+
+// middleware schema is non-strict: it validates only the field this
+// middleware consumes; the route schema stays responsible for strictness
+const tokenQuerySchema = z.object({
+  query: z.object({ token: z.string().optional() }),
+})
 
 function hasValidBasicAuthCredentials(req) {
   const credentials = basicAuth(req)
@@ -68,8 +74,11 @@ function configureJWTAuth(mode = 'jwt') {
     }
 
     let token
-    if ((mode === 'either' || mode === 'token') && req.query.token) {
-      token = req.query.token
+    // Rollout-temporary: reading req.query.token directly on main; log-only
+    // while REQ_VALIDATION_MODE=log rolls this new call site out.
+    const { query } = parseReq(req, tokenQuerySchema, { logOnly: true })
+    if ((mode === 'either' || mode === 'token') && query.token) {
+      token = query.token
     } else if (
       (mode === 'either' || mode === 'jwt') &&
       req.headers.authorization &&
@@ -103,7 +112,9 @@ function configureJWTAuth(mode = 'jwt') {
       throw error
     }
 
-    const { params } = parseReq(req, schemas.projectId)
+    const { params } = parseReq(req, schemas.projectId, {
+      fallbackSchema: schemas.projectIdFallbackSchema,
+    })
     if (decoded.project_id.toString() !== params.project_id.toString()) {
       const err = new Error('Wrong project_id')
       err.statusCode = HTTPStatus.FORBIDDEN

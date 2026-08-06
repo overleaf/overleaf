@@ -38,32 +38,15 @@ const redisBackend = require('../../storage/lib/chunk_store/redis')
 const rollout = new Rollout(config)
 rollout.report(logger) // display the rollout configuration in the logs
 
-function getParam(req, name, location = 'path') {
-  switch (location) {
-    case 'path':
-      return req.params?.[name]
-    case 'query':
-      return req.query?.[name]
-    case 'body':
-      if (name === 'body') {
-        return req.body
-      }
-      if (req.body?.[name] !== undefined) {
-        return req.body[name]
-      }
-      return undefined
-    default:
-      return undefined
-  }
-}
 async function importSnapshot(req, res) {
-  const { params, body } = parseReq(req, schemas.importSnapshot)
+  const { params, body } = parseReq(req, schemas.importSnapshot, {
+    fallbackSchema: schemas.importSnapshotFallbackSchema,
+  })
   const projectId = params.project_id
-  const rawSnapshot = getParam({ body }, 'snapshot', 'body') ?? body
   let snapshot
 
   try {
-    snapshot = Snapshot.fromRaw(rawSnapshot)
+    snapshot = Snapshot.fromRaw(body)
   } catch (err) {
     logger.warn({ err, projectId }, 'failed to import snapshot')
     return render.unprocessableEntity(res)
@@ -96,16 +79,17 @@ function getPersistLimits() {
 }
 
 async function importChanges(req, res, next) {
-  const { params, query, body } = parseReq(req, schemas.importChanges)
+  const { params, query, body } = parseReq(req, schemas.importChanges, {
+    fallbackSchema: schemas.importChangesFallbackSchema,
+  })
   const projectId = params.project_id
-  const rawChanges = getParam({ body }, 'changes', 'body') ?? body
   const endVersion = query.end_version
   const returnSnapshot = query.return_snapshot ?? 'none'
 
   let changes
 
   try {
-    changes = rawChanges.map(Change.fromRaw)
+    changes = body.map(rawChange => Change.mustFromRaw(rawChange))
   } catch (err) {
     logger.warn({ err, projectId }, 'failed to parse changes')
     return render.unprocessableEntity(res)
@@ -236,7 +220,9 @@ async function setContent(req, res) {
 }
 
 async function flushChanges(req, res, next) {
-  const { params } = parseReq(req, schemas.flushChanges)
+  const { params } = parseReq(req, schemas.flushChanges, {
+    fallbackSchema: schemas.flushChangesFallbackSchema,
+  })
   const projectId = params.project_id
   // Use the same limits importChanges, since these are passed to persistChanges
   const limits = {
@@ -256,7 +242,9 @@ async function flushChanges(req, res, next) {
 }
 
 async function expireProject(req, res, next) {
-  const { params } = parseReq(req, schemas.expireProject)
+  const { params } = parseReq(req, schemas.expireProject, {
+    fallbackSchema: schemas.expireProjectFallbackSchema,
+  })
   const projectId = params.project_id
   await redisBackend.expireProject(projectId)
   res.status(HTTPStatus.OK).end()

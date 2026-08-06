@@ -597,8 +597,7 @@ const renameUpdateSchema = z.strictObject({
   id: zz.objectId(),
   // forwarded (via project-history) into history-v1's archive/zip builder
   // (project_archive.js `archive.append(content, { name: pathname })`), so a
-  // traversal payload here is a zip-slip risk, not just a display string --
-  // see zod-string-field-hardening.md, category C.
+  // traversal payload here is a zip-slip risk, not just a display string.
   pathname: zz.safePath(),
   // deletes are renames to an empty newPathname (see the file comment
   // above), so the empty string is a legitimate sentinel here, not a

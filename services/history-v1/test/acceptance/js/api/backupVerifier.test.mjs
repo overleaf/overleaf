@@ -470,5 +470,22 @@ describe('backupVerifier', function () {
       const response = await verifyBlobHTTP(historyIdMongo, blobHashMongo)
       expect(response.status).to.equal(200)
     })
+
+    it('rejects a historyId that is not a Mongo ObjectId or Postgres id', async function () {
+      const response = await verifyBlobHTTP(
+        'a%2F..%2F..%2F..%2F..%2F..%2Fetc',
+        'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+      )
+      expect(response.status).to.equal(404)
+      const body = await response.json()
+      expect(body.error).to.include('historyId')
+    })
+
+    it('rejects a hash that is not a 40-character hex blob hash', async function () {
+      const response = await verifyBlobHTTP(historyIdPostgres, 'not-a-hash')
+      expect(response.status).to.equal(404)
+      const body = await response.json()
+      expect(body.error).to.include('hash')
+    })
   })
 })

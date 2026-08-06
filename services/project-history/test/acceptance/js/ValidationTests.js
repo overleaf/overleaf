@@ -71,10 +71,6 @@ describe('Validation', function () {
   })
 
   it('should return 400 for a non-datetime created_at in the label body', async function () {
-    // created_at previously accepted a bare string (e.g. an epoch-ms
-    // string), so an invalid value would silently become an Invalid Date
-    // downstream instead of being rejected at the schema boundary -- see
-    // zod-string-field-hardening.md's housekeeping note.
     const projectId = new ObjectId().toString()
     let err
     try {

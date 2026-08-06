@@ -15,7 +15,14 @@ import {
 } from './storage/lib/backupVerifier.mjs'
 import { mongodb } from './storage/index.js'
 import { expressify } from '@overleaf/promise-utils'
+import {
+  handleValidationError,
+  parseReq,
+  z,
+  zz,
+} from '@overleaf/validation-tools'
 import { Blob } from 'overleaf-editor-core'
+import editorCoreSchemas from 'overleaf-editor-core/lib/schemas.js'
 import { loadGlobalBlobs } from './storage/lib/blob_store/index.js'
 import { EventEmitter } from 'node:events'
 import {
@@ -33,10 +40,22 @@ Metrics.leaked_sockets.monitor(logger)
 Metrics.event_loop.monitor(logger)
 Metrics.memory.monitor(logger)
 
+const verifyBlobSchema = z.object({
+  params: z.strictObject({
+    historyId: zz.projectHistoryId(),
+    hash: editorCoreSchemas.rawBlobHash,
+  }),
+})
+
 app.get(
   '/history/:historyId/blob/:hash/verify',
   expressify(async (req, res) => {
-    const { historyId, hash } = req.params
+    // Rollout-temporary: main read req.params directly here; log-only while
+    // REQ_VALIDATION_MODE=log rolls this new call site out. No transforms in
+    // verifyBlobSchema, so a raw passthrough on failure needs no fallback.
+    const { historyId, hash } = parseReq(req, verifyBlobSchema, {
+      logOnly: true,
+    }).params
     try {
       await verifyBlob(historyId, hash)
       res.sendStatus(200)
@@ -64,6 +83,8 @@ app.get(
     res.sendStatus(200)
   })
 )
+
+app.use(handleValidationError)
 
 app.use((err, req, res, next) => {
   req.logger.addFields({ err })

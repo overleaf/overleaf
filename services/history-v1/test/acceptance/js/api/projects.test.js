@@ -439,7 +439,7 @@ describe('project controller', function () {
               blobHashes: ['non-existent-hash'],
             },
           }),
-          HTTPStatus.INTERNAL_SERVER_ERROR
+          HTTPStatus.UNPROCESSABLE_ENTITY
         )
       })
 

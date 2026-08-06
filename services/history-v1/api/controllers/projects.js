@@ -37,7 +37,9 @@ const { IncrementalResponse } = require('@overleaf/stream-utils')
 const pipeline = promisify(Stream.pipeline)
 
 async function initializeProject(req, res, next) {
-  const { body } = parseReq(req, schemas.initializeProject)
+  const { body } = parseReq(req, schemas.initializeProject, {
+    fallbackSchema: schemas.initializeProjectFallbackSchema,
+  })
   let projectId = body?.projectId
   try {
     projectId = await chunkStore.initializeProject(projectId)
@@ -56,7 +58,9 @@ async function cloneProject(req, res) {
   const {
     body: { targetProjectId },
     params: { project_id: sourceProjectId },
-  } = parseReq(req, schemas.cloneProject)
+  } = parseReq(req, schemas.cloneProject, {
+    fallbackSchema: schemas.cloneProjectFallbackSchema,
+  })
 
   const incrResp = new IncrementalResponse({
     res,
@@ -109,7 +113,9 @@ async function cloneProject(req, res) {
 }
 
 async function getLatestContent(req, res, next) {
-  const { params } = parseReq(req, schemas.getLatestContent)
+  const { params } = parseReq(req, schemas.getLatestContent, {
+    fallbackSchema: schemas.getLatestContentFallbackSchema,
+  })
   const projectId = params.project_id
   const blobStore = new BlobStore(projectId)
   const chunk = await chunkStore.loadLatest(projectId)
@@ -120,7 +126,9 @@ async function getLatestContent(req, res, next) {
 }
 
 async function getContentAtVersion(req, res, next) {
-  const { params } = parseReq(req, schemas.getContentAtVersion)
+  const { params } = parseReq(req, schemas.getContentAtVersion, {
+    fallbackSchema: schemas.getContentAtVersionFallbackSchema,
+  })
   const projectId = params.project_id
   const version = params.version
   const blobStore = new BlobStore(projectId)
@@ -130,7 +138,9 @@ async function getContentAtVersion(req, res, next) {
 }
 
 async function getLatestHashedContent(req, res, next) {
-  const { params } = parseReq(req, schemas.getLatestHashedContent)
+  const { params } = parseReq(req, schemas.getLatestHashedContent, {
+    fallbackSchema: schemas.getLatestHashedContentFallbackSchema,
+  })
   const projectId = params.project_id
   const blobStore = new HashCheckBlobStore(new BlobStore(projectId))
   const chunk = await chunkStore.loadLatest(projectId)
@@ -142,7 +152,9 @@ async function getLatestHashedContent(req, res, next) {
 }
 
 async function getLatestHistory(req, res, next) {
-  const { params } = parseReq(req, schemas.getLatestHistory)
+  const { params } = parseReq(req, schemas.getLatestHistory, {
+    fallbackSchema: schemas.getLatestHistoryFallbackSchema,
+  })
   const projectId = params.project_id
   try {
     const chunk = await chunkStore.loadLatest(projectId)
@@ -158,7 +170,9 @@ async function getLatestHistory(req, res, next) {
 }
 
 async function getLatestHistoryRaw(req, res, next) {
-  const { params, query } = parseReq(req, schemas.getLatestHistoryRaw)
+  const { params, query } = parseReq(req, schemas.getLatestHistoryRaw, {
+    fallbackSchema: schemas.getLatestHistoryRawFallbackSchema,
+  })
   const projectId = params.project_id
   const readOnly = query.readOnly
   try {
@@ -179,7 +193,9 @@ async function getLatestHistoryRaw(req, res, next) {
 }
 
 async function getHistory(req, res, next) {
-  const { params } = parseReq(req, schemas.getHistory)
+  const { params } = parseReq(req, schemas.getHistory, {
+    fallbackSchema: schemas.getHistoryFallbackSchema,
+  })
   const projectId = params.project_id
   const version = params.version
   try {
@@ -196,7 +212,9 @@ async function getHistory(req, res, next) {
 }
 
 async function getHistoryBefore(req, res, next) {
-  const { params } = parseReq(req, schemas.getHistoryBefore)
+  const { params } = parseReq(req, schemas.getHistoryBefore, {
+    fallbackSchema: schemas.getHistoryBeforeFallbackSchema,
+  })
   const projectId = params.project_id
   const timestamp = params.timestamp
   try {
@@ -216,7 +234,9 @@ async function getHistoryBefore(req, res, next) {
  * Get all changes since the beginning of history or since a given version
  */
 async function getChanges(req, res, next) {
-  const { params, query } = parseReq(req, schemas.getChanges)
+  const { params, query } = parseReq(req, schemas.getChanges, {
+    fallbackSchema: schemas.getChangesFallbackSchema,
+  })
   const projectId = params.project_id
   const sinceParam = query.since
   const since = sinceParam == null ? 0 : sinceParam
@@ -245,7 +265,9 @@ async function getChanges(req, res, next) {
 }
 
 async function getLatestZip(req, res, next) {
-  const { params } = parseReq(req, schemas.getLatestZip)
+  const { params } = parseReq(req, schemas.getLatestZip, {
+    fallbackSchema: schemas.getLatestZipFallbackSchema,
+  })
   const projectId = params.project_id
   const blobStore = new BlobStore(projectId)
 
@@ -268,7 +290,9 @@ async function getLatestZip(req, res, next) {
 }
 
 async function getZip(req, res, next) {
-  const { params } = parseReq(req, schemas.getZip)
+  const { params } = parseReq(req, schemas.getZip, {
+    fallbackSchema: schemas.getZipFallbackSchema,
+  })
   const projectId = params.project_id
   const version = params.version
   const blobStore = new BlobStore(projectId)
@@ -301,7 +325,9 @@ async function streamZip(snapshot, blobStore, res) {
 }
 
 async function createZip(req, res, next) {
-  const { params } = parseReq(req, schemas.createZip)
+  const { params } = parseReq(req, schemas.createZip, {
+    fallbackSchema: schemas.createZipFallbackSchema,
+  })
   const projectId = params.project_id
   const version = params.version
   try {
@@ -322,7 +348,9 @@ async function createZip(req, res, next) {
 }
 
 async function deleteProject(req, res, next) {
-  const { params } = parseReq(req, schemas.deleteProject)
+  const { params } = parseReq(req, schemas.deleteProject, {
+    fallbackSchema: schemas.deleteProjectFallbackSchema,
+  })
   const projectId = params.project_id
   const blobStore = new BlobStore(projectId)
 
@@ -335,7 +363,9 @@ async function deleteProject(req, res, next) {
 }
 
 async function createProjectBlob(req, res, next) {
-  const { params } = parseReq(req, schemas.createProjectBlob)
+  const { params } = parseReq(req, schemas.createProjectBlob, {
+    fallbackSchema: schemas.createProjectBlobFallbackSchema,
+  })
   const projectId = params.project_id
   const expectedHash = params.hash
   const maxUploadSize = parseInt(config.get('maxFileUploadSize'), 10)
@@ -373,7 +403,9 @@ async function createProjectBlob(req, res, next) {
 }
 
 async function headProjectBlob(req, res) {
-  const { params } = parseReq(req, schemas.headProjectBlob)
+  const { params } = parseReq(req, schemas.headProjectBlob, {
+    fallbackSchema: schemas.headProjectBlobFallbackSchema,
+  })
   const projectId = params.project_id
   const hash = params.hash
 
@@ -406,7 +438,9 @@ function _getRangeOpts(header) {
 }
 
 async function getProjectBlob(req, res, next) {
-  const { params, headers } = parseReq(req, schemas.getProjectBlob)
+  const { params, headers } = parseReq(req, schemas.getProjectBlob, {
+    fallbackSchema: schemas.getProjectBlobFallbackSchema,
+  })
   const projectId = params.project_id
   const hash = params.hash
   const rangeHeader = headers.range || ''
@@ -474,7 +508,9 @@ async function getProjectBlob(req, res, next) {
 }
 
 async function copyProjectBlob(req, res, next) {
-  const { params, query } = parseReq(req, schemas.copyProjectBlob)
+  const { params, query } = parseReq(req, schemas.copyProjectBlob, {
+    fallbackSchema: schemas.copyProjectBlobFallbackSchema,
+  })
   const sourceProjectId = query.copyFrom
   const targetProjectId = params.project_id
   const blobHash = params.hash
@@ -544,7 +580,9 @@ function sumUpByteLength(blobs) {
 }
 
 async function getBlobStats(req, res) {
-  const { params, body } = parseReq(req, schemas.getBlobStats)
+  const { params, body } = parseReq(req, schemas.getBlobStats, {
+    fallbackSchema: schemas.getBlobStatsFallbackSchema,
+  })
   const projectId = params.project_id
   const blobHashes = body.blobHashes || []
   for (const hash of blobHashes) {
@@ -569,7 +607,9 @@ async function getBlobStats(req, res) {
 }
 
 async function getProjectBlobsStats(req, res) {
-  const { body } = parseReq(req, schemas.getProjectBlobsStats)
+  const { body } = parseReq(req, schemas.getProjectBlobsStats, {
+    fallbackSchema: schemas.getProjectBlobsStatsFallbackSchema,
+  })
   const projectIds = body.projectIds
   const { blobs } = await getProjectBlobsBatch(
     projectIds.map(id => {

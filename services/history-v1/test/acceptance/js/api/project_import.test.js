@@ -54,4 +54,83 @@ describe('project import', function () {
     expect(importResponse.status).to.equal(HTTPStatus.CREATED)
     expect(importResponse.obj).to.deep.equal({ resyncNeeded: false })
   })
+
+  it('accepts an add-file operation with importedAt-only file metadata', async function () {
+    const basicAuthClient = testServer.basicAuthClient
+    const projectId = await testProjects.createEmptyProject()
+
+    // upload an empty file
+    const response = await fetch(
+      testServer.url(
+        `/api/projects/${projectId}/blobs/${File.EMPTY_FILE_HASH}`,
+        { qs: { pathname: 'main.tex' } }
+      ),
+      {
+        method: 'PUT',
+        body: fs.createReadStream(testFiles.path('empty.tex')),
+        headers: {
+          Authorization: testServer.basicAuthHeader,
+        },
+      }
+    )
+    expect(response.ok).to.be.true
+
+    const testFile = File.fromHash(File.EMPTY_FILE_HASH, undefined, {
+      importedAt: new Date().toISOString(),
+    })
+    const testChange = new Change(
+      [Operation.addFile('main.tex', testFile)],
+      new Date()
+    )
+
+    const importResponse =
+      await basicAuthClient.apis.ProjectImport.importChanges1({
+        project_id: projectId,
+        end_version: 0,
+        changes: [testChange.toRaw()],
+      })
+
+    expect(importResponse.status).to.equal(HTTPStatus.CREATED)
+    expect(importResponse.obj).to.deep.equal({ resyncNeeded: false })
+  })
+
+  it('accepts an add-file operation with main-flag and importedAt file metadata', async function () {
+    const basicAuthClient = testServer.basicAuthClient
+    const projectId = await testProjects.createEmptyProject()
+
+    // upload an empty file
+    const response = await fetch(
+      testServer.url(
+        `/api/projects/${projectId}/blobs/${File.EMPTY_FILE_HASH}`,
+        { qs: { pathname: 'main.tex' } }
+      ),
+      {
+        method: 'PUT',
+        body: fs.createReadStream(testFiles.path('empty.tex')),
+        headers: {
+          Authorization: testServer.basicAuthHeader,
+        },
+      }
+    )
+    expect(response.ok).to.be.true
+
+    const testFile = File.fromHash(File.EMPTY_FILE_HASH, undefined, {
+      main: true,
+      importedAt: new Date().toISOString(),
+    })
+    const testChange = new Change(
+      [Operation.addFile('main.tex', testFile)],
+      new Date()
+    )
+
+    const importResponse =
+      await basicAuthClient.apis.ProjectImport.importChanges1({
+        project_id: projectId,
+        end_version: 0,
+        changes: [testChange.toRaw()],
+      })
+
+    expect(importResponse.status).to.equal(HTTPStatus.CREATED)
+    expect(importResponse.obj).to.deep.equal({ resyncNeeded: false })
+  })
 })
