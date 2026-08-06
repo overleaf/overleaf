@@ -448,6 +448,7 @@ describe('CompileController', function () {
             'optimisable-png-count': 1,
             'include-image-all': 3,
             projectHasUnconvertedPngs: 1,
+            'latex-runs': 1,
           },
           timings: { 'include-image-all': 123, compileE2E: 200 },
         })
@@ -469,6 +470,7 @@ describe('CompileController', function () {
             compileTime: 200,
             isDraftMode: false,
             status: 'success',
+            latexRuns: 1,
           }
         )
       })
@@ -481,6 +483,7 @@ describe('CompileController', function () {
             'include-image-optimised': 2,
             'include-image-all': 5,
             projectHasUnconvertedPngs: 0,
+            'latex-runs': 1,
           },
           timings: {
             'include-image-optimised': 12,
@@ -508,6 +511,48 @@ describe('CompileController', function () {
             compileTime: 300,
             isDraftMode: false,
             status: 'success',
+            latexRuns: 1,
+          }
+        )
+      })
+
+      it('normalises the included image count for multiple runs', async function (ctx) {
+        ctx.CompileManager.promises.compile.resolves({
+          status: 'success',
+          outputFiles: [],
+          stats: {
+            'include-image-optimised': 6,
+            'include-image-all': 15,
+            projectHasUnconvertedPngs: 0,
+            'latex-runs': 3,
+          },
+          timings: {
+            'include-image-optimised': 12,
+            'include-image-all': 34,
+            compileE2E: 300,
+          },
+        })
+        await ctx.CompileController.compile(ctx.req, ctx.res, ctx.next)
+        expect(
+          ctx.AnalyticsManager.recordEventForUserInBackground
+        ).to.have.been.calledWith(
+          ctx.user_id,
+          'compile-with-optimizable-pngs',
+          {
+            projectId: ctx.projectId,
+            // Falls back to the optimised-image count when 'optimisable-png-count'
+            // is absent from stats (e.g. an older clsi that predates the field).
+            optimizablePngCount: 2,
+            optimizedPngCount: 2,
+            optimizedImageInclusionTime: 12,
+            totalImages: 5,
+            totalImageInclusionTime: 34,
+            isPng2pdf: false,
+            compiler: undefined,
+            compileTime: 300,
+            isDraftMode: false,
+            status: 'success',
+            latexRuns: 3,
           }
         )
       })
@@ -521,6 +566,7 @@ describe('CompileController', function () {
             'include-image-optimised': 2,
             'include-image-all': 5,
             projectHasUnconvertedPngs: 1,
+            'latex-runs': 1,
           },
           timings: {
             'include-image-optimised': 12,
@@ -546,6 +592,7 @@ describe('CompileController', function () {
             compileTime: 400,
             isDraftMode: false,
             status: 'success',
+            latexRuns: 1,
           }
         )
       })
@@ -559,6 +606,7 @@ describe('CompileController', function () {
             'optimisable-png-count': 1,
             'include-image-all': 3,
             projectHasUnconvertedPngs: 1,
+            'latex-runs': 1,
           },
           timings: { 'include-image-all': 123, compileE2E: 456 },
         })
@@ -580,6 +628,7 @@ describe('CompileController', function () {
             compileTime: 456,
             isDraftMode: true,
             status: 'failure',
+            latexRuns: 1,
           }
         )
       })
@@ -588,7 +637,11 @@ describe('CompileController', function () {
         ctx.CompileManager.promises.compile.resolves({
           status: 'success',
           outputFiles: [],
-          stats: { 'include-image-all': 3, projectHasUnconvertedPngs: 0 },
+          stats: {
+            'include-image-all': 3,
+            projectHasUnconvertedPngs: 0,
+            'latex-runs': 1,
+          },
           timings: {},
         })
         await ctx.CompileController.compile(ctx.req, ctx.res, ctx.next)

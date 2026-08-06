@@ -309,27 +309,35 @@ const _CompileController = {
     // PNGs or contained PNGs the optimisation would have targeted.
     // Projects the optimisation would never have touched are excluded,
     // so they cannot dilute the comparison.
+    const latexRuns = stats?.['latex-runs']
     const optimisedPngCount = stats?.['include-image-optimised'] || 0
-    const optimisablePngCount =
-      stats?.['optimisable-png-count'] || stats?.['include-image-optimised']
+    const optimisablePngCount = stats?.['optimisable-png-count']
     const projectHasUnconvertedPngs = Boolean(stats?.projectHasUnconvertedPngs)
-    if (optimisedPngCount > 0 || projectHasUnconvertedPngs) {
+    if (latexRuns > 0 && (optimisedPngCount > 0 || projectHasUnconvertedPngs)) {
+      // included images are counted on every run, normalise them to get the number
+      // of images in the project - this is then comparable to optimisablePngCount which
+      // is computed from the project itself and does not vary with the number of runs
+      const normalisedOptPngCount = Math.round(optimisedPngCount / latexRuns)
+      const normalisedTotalImageCount = Math.round(
+        (stats?.['include-image-all'] || 0) / latexRuns
+      )
       AnalyticsManager.recordEventForUserInBackground(
         userId,
         'compile-with-optimizable-pngs',
         {
           projectId,
-          optimizablePngCount: optimisablePngCount,
-          optimizedPngCount: optimisedPngCount,
+          optimizablePngCount: optimisablePngCount || normalisedOptPngCount,
+          optimizedPngCount: normalisedOptPngCount,
           optimizedImageInclusionTime:
             timings?.['include-image-optimised'] || 0,
-          totalImages: stats?.['include-image-all'] || 0,
+          totalImages: normalisedTotalImageCount,
           totalImageInclusionTime: timings?.['include-image-all'] || 0,
           isPng2pdf: !!options.png2pdf,
           compiler: options.compiler,
           compileTime: timings?.compileE2E,
           isDraftMode: !!options.draft,
           status,
+          latexRuns,
         }
       )
     }
