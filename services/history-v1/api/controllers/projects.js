@@ -320,7 +320,18 @@ async function streamZip(snapshot, blobStore, res) {
     res.set('Content-Type', 'application/octet-stream')
     res.set('Content-Disposition', 'attachment; filename=project.zip')
     const stream = fs.createReadStream(tmpFilename)
-    await pipeline(stream, res)
+    try {
+      await pipeline(stream, res)
+    } catch (err) {
+      if (
+        err?.code === 'ERR_STREAM_PREMATURE_CLOSE' ||
+        err?.code === 'ERR_STREAM_UNABLE_TO_PIPE'
+      ) {
+        res.end()
+      } else {
+        throw err
+      }
+    }
   })
 }
 
