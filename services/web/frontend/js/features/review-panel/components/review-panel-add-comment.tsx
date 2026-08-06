@@ -16,6 +16,7 @@ import {
   MentionsInput,
   MentionsInputHandle,
 } from '@/shared/components/mentions-input'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export const ReviewPanelAddComment = memo<{
   docId: string
@@ -25,6 +26,7 @@ export const ReviewPanelAddComment = memo<{
   top: number | undefined
 }>(function ReviewPanelAddComment({ from, to, threadId, top, docId }) {
   const { t } = useTranslation()
+  const commentMentionsEnabled = useFeatureFlag('comment-mentions')
   const view = useCodeMirrorViewContext()
   const state = useCodeMirrorStateContext()
   const { addComment } = useThreadsActionsContext()
@@ -154,7 +156,11 @@ export const ReviewPanelAddComment = memo<{
           className="review-panel-add-comment-editor"
           onChange={setContent}
           onSubmit={submitForm}
-          placeholder={t('add_your_comment_here')}
+          placeholder={
+            commentMentionsEnabled
+              ? t('comment_or_mention_someone')
+              : t('add_your_comment_here')
+          }
           disabled={submitting}
         />
         <div className="review-panel-add-comment-buttons">
