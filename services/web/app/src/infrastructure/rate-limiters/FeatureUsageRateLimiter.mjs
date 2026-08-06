@@ -174,12 +174,17 @@ export default class FeatureUsageRateLimiter {
       ] ?? {}
     const periodStart = featureUsage.periodStart ?? new Date()
     const usage = featureUsage.usage ?? 0
-    const usesLeft = allowance - usage
     const refreshEpoch = periodStart.getTime() + PERIOD_IN_MILLISECONDS
+    const periodExpired = refreshEpoch <= Date.now()
+    const remainingUsage = periodExpired ? allowance : allowance - usage
+    // This date isn't exactly correct when computed before an actual feature usage
+    const resetDate = new Date(
+      periodExpired ? Date.now() + PERIOD_IN_MILLISECONDS : refreshEpoch
+    ).toString()
     return {
       [this.featureName]: {
-        remainingUsage: Date.now() > refreshEpoch ? allowance : usesLeft,
-        resetDate: new Date(refreshEpoch).toString(),
+        remainingUsage: Math.max(remainingUsage, 0),
+        resetDate,
       },
     }
   }

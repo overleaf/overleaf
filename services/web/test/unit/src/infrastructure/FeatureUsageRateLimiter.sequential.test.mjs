@@ -170,6 +170,68 @@ describe('FeatureUsageRateLimiter', function () {
         const usages =
           await ctx.FeatureUsageRateLimiter.getRemainingFeatureUses(ctx.userId)
         expect(usages[MOCKED_FEATURE_NAME].remainingUsage).to.equal(70)
+        expect(
+          new Date(usages[MOCKED_FEATURE_NAME].resetDate).getTime()
+        ).to.be.greaterThan(Date.now())
+      })
+    })
+
+    describe('at the period boundary', function () {
+      const PERIOD_MS = 24 * 60 * 60 * 1000
+
+      it('just inside the period returns usesLeft and future resetDate', async function (ctx) {
+        // whole second: `resetDate` round-trips through Date.toString()
+        const periodStart = new Date(
+          Math.floor((Date.now() - PERIOD_MS + 60 * 1000) / 1000) * 1000
+        )
+        await UserFeatureUsage.create({
+          _id: ctx.userId,
+          features: {
+            [MOCKED_FEATURE_NAME]: { usage: 40, periodStart },
+          },
+        })
+        const usages =
+          await ctx.FeatureUsageRateLimiter.getRemainingFeatureUses(ctx.userId)
+        expect(usages[MOCKED_FEATURE_NAME].remainingUsage).to.equal(60)
+        expect(
+          new Date(usages[MOCKED_FEATURE_NAME].resetDate).getTime()
+        ).to.equal(periodStart.getTime() + PERIOD_MS)
+      })
+
+      it('once the period has lapsed reports the full allowance and a fresh resetDate', async function (ctx) {
+        // whole second: `resetDate` round-trips through Date.toString()
+        const periodStart = new Date(
+          Math.floor((Date.now() - PERIOD_MS - 60 * 1000) / 1000) * 1000
+        )
+        await UserFeatureUsage.create({
+          _id: ctx.userId,
+          features: {
+            [MOCKED_FEATURE_NAME]: { usage: 40, periodStart },
+          },
+        })
+        const usages =
+          await ctx.FeatureUsageRateLimiter.getRemainingFeatureUses(ctx.userId)
+        expect(usages[MOCKED_FEATURE_NAME].remainingUsage).to.equal(100)
+        expect(
+          new Date(usages[MOCKED_FEATURE_NAME].resetDate).getTime()
+        ).to.be.approximately(Date.now() + PERIOD_MS, 5000)
+      })
+    })
+
+    describe('when usage exceeds allowance', function () {
+      beforeEach(async function (ctx) {
+        await UserFeatureUsage.create({
+          _id: ctx.userId,
+          features: {
+            [MOCKED_FEATURE_NAME]: { usage: 150, periodStart: new Date() },
+          },
+        })
+      })
+
+      it('should clamp remainingUsage to 0 rather than leak a negative', async function (ctx) {
+        const usages =
+          await ctx.FeatureUsageRateLimiter.getRemainingFeatureUses(ctx.userId)
+        expect(usages[MOCKED_FEATURE_NAME].remainingUsage).to.equal(0)
       })
     })
   })
