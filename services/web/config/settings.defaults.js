@@ -333,6 +333,10 @@ module.exports = {
   },
 
   splitTests: [],
+  splitTest: {
+    enableSplitTestCalculator:
+      process.env.ENABLE_SPLIT_TEST_CALCULATOR === 'true',
+  },
 
   // Where your instance of Overleaf Community Edition/Server Pro can be found publicly. Used in emails
   // that are sent out, generated links, etc.

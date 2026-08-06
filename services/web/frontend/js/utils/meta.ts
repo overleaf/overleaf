@@ -128,6 +128,7 @@ export interface Meta {
   'ol-editorThemes': { name: string; dark: boolean }[]
   'ol-email': string
   'ol-emailAddressLimit': number
+  'ol-enableSplitTestCalculator': boolean
   'ol-error': { name: string } | undefined
   'ol-errorType': string | undefined
   'ol-expired': boolean
