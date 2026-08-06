@@ -7368,6 +7368,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@overleaf/linked-url-proxy@workspace:services/linked-url-proxy"
   dependencies:
+    "@overleaf/validation-tools": "workspace:*"
     "@types/node": "npm:^24.5.2"
     chai-as-promised: "npm:^7.1.1"
     eslint: "npm:^10.4.0"
