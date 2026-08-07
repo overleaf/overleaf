@@ -568,6 +568,53 @@ describe('ProjectListController', function () {
       )
     })
 
+    it('should send packed split test assignments to customer.io', async function (ctx) {
+      ctx.Features.hasFeature.withArgs('saas').returns(true)
+      ctx.Modules.promises.hooks.fire
+        .withArgs('getSplitTestUserProperties', ctx.user._id)
+        .resolves([{ split_test_assignments: { 'test-a': 'variant-1' } }])
+      ctx.res.render = () => {}
+
+      await ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+
+      expect(ctx.Modules.promises.hooks.fire).to.have.been.calledWith(
+        'setUserProperties',
+        ctx.user._id,
+        sinon.match({
+          split_test_assignments: { 'test-a': 'variant-1' },
+        })
+      )
+    })
+
+    it('should not request split test user properties in a non-saas environment', async function (ctx) {
+      ctx.Features.hasFeature.withArgs('saas').returns(false)
+      ctx.res.render = () => {}
+
+      await ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+
+      expect(ctx.Modules.promises.hooks.fire).to.not.have.been.calledWith(
+        'getSplitTestUserProperties',
+        sinon.match.any
+      )
+    })
+
+    it('should still send other user properties when building split test assignments fails', async function (ctx) {
+      ctx.Features.hasFeature.withArgs('saas').returns(true)
+      ctx.Modules.promises.hooks.fire
+        .withArgs('getSplitTestUserProperties', ctx.user._id)
+        .rejects(new Error('boom'))
+      ctx.res.render = () => {}
+
+      await ctx.ProjectListController.projectListPage(ctx.req, ctx.res)
+
+      const call = ctx.Modules.promises.hooks.fire
+        .getCalls()
+        .find(call => call.args[0] === 'setUserProperties')
+      expect(call).to.exist
+      expect(call.args[2]).to.not.have.property('split_test_assignments')
+      expect(call.args[2]).to.have.property('overleaf_id', ctx.user._id)
+    })
+
     it('should send enterprise_commons=true when user has commons from an enterprise_commons institution', async function (ctx) {
       ctx.Features.hasFeature.withArgs('saas').returns(true)
       ctx.UserGetter.promises.getUserFullEmails.resolves([
