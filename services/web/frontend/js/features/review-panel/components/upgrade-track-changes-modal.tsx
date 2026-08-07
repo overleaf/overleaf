@@ -18,13 +18,11 @@ import OLRow from '@/shared/components/ol/ol-row'
 import OLCol from '@/shared/components/ol/ol-col'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useEditorContext } from '@/shared/context/editor-context'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function UpgradeTrackChangesModal() {
   const { t } = useTranslation()
   const { project } = useProjectContext()
   const user = useUserContext()
-  const showSubscribeNow = useFeatureFlag('paywall-cta-trial-ineligible')
   const {
     upgradeTrackChangesModal: { show, location = 'unknown' },
     setUpgradeTrackChangesModal,
@@ -96,7 +94,7 @@ function UpgradeTrackChangesModal() {
                     })
                   }
                 >
-                  {showSubscribeNow ? t('subscribe_now') : t('try_for_free')}
+                  {t('try_for_free')}
                 </OLButton>
               ) : (
                 <OLButton

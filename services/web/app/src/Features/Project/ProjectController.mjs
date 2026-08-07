@@ -528,7 +528,7 @@ const _ProjectController = {
           user: (async () => {
             const user = await User.findById(
               userId,
-              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram labsExperiments completedTutorials writefull aiFeatures lastTrial'
+              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram labsExperiments completedTutorials writefull aiFeatures'
             ).exec()
             // Handle case of deleted user
             if (!user) {
@@ -641,15 +641,6 @@ const _ProjectController = {
       const allowedFreeTrial =
         subscription == null ||
         isStandaloneAiAddOnPlanCode(subscription.planCode)
-
-      // The test's audience: free users who've spent their trial and can't start
-      // another, yet still see a misleading "free trial" CTA.
-      const trialIneligible =
-        !anonymous && allowedFreeTrial && Boolean(user?.lastTrial)
-
-      if (trialIneligible) {
-        splitTests.push('paywall-cta-trial-ineligible')
-      }
 
       const splitTestAssignments = Object.fromEntries(
         await Promise.all(

@@ -346,7 +346,6 @@
   "reconnecting_in_x_secs": "__seconds__秒後に再接続",
   "reference_error_relink_hint": "エラーが継続して発生する場合は、こちらでアカウントを再リンク付けしてください：",
   "refresh_page_after_starting_free_trial": "無料トライアルを開始したらこのページの再読み込みを行ってください。",
-  "refresh_page_after_subscribing": "ご登録後、このページの再読み込みを行ってください。",
   "regards": "よろしくお願いいたします",
   "register": "登録する",
   "register_to_edit_template": "__templateName__ テンプレートを編集するには登録してください",

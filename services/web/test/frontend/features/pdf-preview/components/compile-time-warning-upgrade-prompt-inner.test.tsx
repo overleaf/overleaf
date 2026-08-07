@@ -23,12 +23,4 @@ describe('<CompileTimeWarningUpgradePromptInner/>', function () {
     renderPrompt()
     screen.getByRole('button', { name: 'Start free trial' })
   })
-
-  it('shows the "Subscribe now" CTA when paywall-cta-trial-ineligible is enabled', function () {
-    window.metaAttributesCache.set('ol-splitTestVariants', {
-      'paywall-cta-trial-ineligible': 'enabled',
-    })
-    renderPrompt()
-    screen.getByRole('button', { name: 'Subscribe now' })
-  })
 })

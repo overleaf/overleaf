@@ -30,13 +30,4 @@ describe('<OwnerPaywallPrompt/>', function () {
     fireEvent.click(screen.getByRole('button', { name: 'Start free trial' }))
     screen.getByText('Please refresh this page after starting your free trial.')
   })
-
-  it('shows the "Subscribe now" CTA and subscribe refresh message when paywall-cta-trial-ineligible is enabled', function () {
-    window.metaAttributesCache.set('ol-splitTestVariants', {
-      'paywall-cta-trial-ineligible': 'enabled',
-    })
-    renderPrompt()
-    fireEvent.click(screen.getByRole('button', { name: 'Subscribe now' }))
-    screen.getByText('Please refresh this page after subscribing.')
-  })
 })
