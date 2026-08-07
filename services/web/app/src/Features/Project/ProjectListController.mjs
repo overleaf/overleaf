@@ -578,21 +578,6 @@ async function projectListPage(req, res, next) {
     }
   }
 
-  let splitTestUserProperties
-  if (isSaas) {
-    try {
-      ;[splitTestUserProperties] = await Modules.promises.hooks.fire(
-        'getSplitTestUserProperties',
-        userId
-      )
-    } catch (err) {
-      logger.error(
-        { err, userId },
-        'Failed to build split test user properties for customer.io'
-      )
-    }
-  }
-
   Modules.promises.hooks
     .fire('setUserProperties', userId, {
       overleaf_id: userId,
@@ -617,7 +602,6 @@ async function projectListPage(req, res, next) {
       ...(groupRole && { group_role: groupRole }),
       is_managed_user: Boolean(user.enrollment?.managedBy),
       ...(user.email && { email: user.email }),
-      ...splitTestUserProperties,
     })
     .catch(err => {
       logger.error({ err }, 'Failed to set user properties for customer.io')

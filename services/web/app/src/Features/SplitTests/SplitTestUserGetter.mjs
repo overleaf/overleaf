@@ -45,7 +45,7 @@ function getProjection(splitTestName) {
 
 /**
  * @param id
- * @param {string} [splitTestName] test to get; omit to fetch all assignments.
+ * @param {string} splitTestName
  * @param {string} path
  * @return {Promise<SplitTestUser>}
  */
