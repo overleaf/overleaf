@@ -17,7 +17,7 @@ COPY server-ce/genScript.js server-ce/services.js /overleaf/
 # -------------------------------------------------------------------------
 # Corepack setup, shared between all the images.
 ENV COREPACK_HOME=/opt/corepack
-RUN corepack enable && corepack install -g yarn@4.14.1
+RUN corepack enable && corepack install -g yarn@4.18.0
 ENV COREPACK_ENABLE_NETWORK=0
 
 # Install yarn dependencies
