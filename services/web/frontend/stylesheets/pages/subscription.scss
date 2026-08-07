@@ -164,7 +164,7 @@
   }
 
   .payment-review-panel {
-    width: 339px;
+    width: 400px;
     height: 100%;
 
     @include media-breakpoint-down(lg) {
@@ -236,6 +236,10 @@
             justify-content: flex-start;
             margin-bottom: var(--spacing-04);
             gap: var(--spacing-05);
+
+            // Translations longer than the panel wrap onto two even lines
+            // rather than leaving a single word on its own
+            text-wrap: balance;
 
             @include body-sm;
           }
