@@ -289,7 +289,7 @@
   "biblatex": "BibLaTeX",
   "bibliographies": "Bibliographies",
   "bibtex": "BibTeX",
-  "bibtex_duplicates_keys": "The file __fileName__ contains more than one entry with the citation key __key__. Only the first occurrence is shown in this list.",
+  "bibtex_duplicates_keys": "This citation key is used by another entry. Duplicate keys cause citation errors — rename this key or delete one of the entries.",
   "billed_annually_at": "Billed annually at <0>__price__</0> <1>(includes plan and any add-ons)</1>",
   "billed_monthly_at": "Billed monthly at <0>__price__</0> <1>(includes plan and any add-ons)</1>",
   "billed_yearly": "billed yearly",

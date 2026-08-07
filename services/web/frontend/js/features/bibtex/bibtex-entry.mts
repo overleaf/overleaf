@@ -9,6 +9,7 @@ type BibtexEntryOptions = {
   key?: string
   fields?: Fields
   id?: string
+  occurrenceIndex?: number
   updatedAt?: Date
 }
 
@@ -41,11 +42,22 @@ export class BibtexEntry {
   private readonly _id: string
 
   /**
-   * Stable identifier. Defaults to the citation key for in-project entries;
-   * set to the database record ID for library entries.
+   * Position of this entry among entries that share its citation key, in
+   * document order (0-based). In-project entries can share a citation key, so
+   * this disambiguates them. It is positional metadata (not content), assigned
+   * by `useBibtexEntries` once the full, ordered entry list is known.
+   */
+  occurrenceIndex: number
+
+  /**
+   * Stable identifier.
+   * - Library entries: the database record ID.
+   * - In-project entries: `${key}#${occurrenceIndex}`, so duplicate keys still
+   *   get distinct ids and can be located unambiguously in the document.
    */
   get id(): string {
-    return this._id || this.key
+    if (this._id) return this._id
+    return `${this.key}#${this.occurrenceIndex}`
   }
 
   constructor({
@@ -53,12 +65,14 @@ export class BibtexEntry {
     key = '',
     fields = new Map(),
     id = '',
+    occurrenceIndex = 0,
     updatedAt,
   }: BibtexEntryOptions = {}) {
     this.type = type
     this.key = key
     this.fields = fields
     this._id = id
+    this.occurrenceIndex = occurrenceIndex
     this.updatedAt = updatedAt
   }
 
