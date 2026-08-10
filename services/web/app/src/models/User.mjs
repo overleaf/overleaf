@@ -154,6 +154,10 @@ export const UserSchema = new Schema(
         default: Settings.defaultFeatures.symbolPalette,
       },
       aiUsageQuota: { type: String, default: 'basic' },
+      offlineMode: {
+        type: Boolean,
+        default: Settings.defaultFeatures.offlineMode,
+      },
     },
     featuresOverrides: [
       {
@@ -181,6 +185,7 @@ export const UserSchema = new Schema(
           zotero: { type: Boolean },
           referencesSearch: { type: Boolean },
           symbolPalette: { type: Boolean },
+          offlineMode: { type: Boolean },
         },
       },
     ],

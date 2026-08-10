@@ -435,6 +435,7 @@ module.exports = {
     compileGroup: 'standard',
     references: true,
     trackChanges: true,
+    offlineMode: false,
   }),
 
   // featuresEpoch: 'YYYY-MM-DD',

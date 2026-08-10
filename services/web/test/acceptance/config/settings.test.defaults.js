@@ -116,6 +116,7 @@ module.exports = {
       trackChanges: false,
       symbolPalette: false,
       aiUsageQuota: 'basic',
+      offlineMode: false,
     },
     personal: {
       collaborators: 1,
@@ -133,6 +134,7 @@ module.exports = {
       trackChanges: false,
       symbolPalette: false,
       aiUsageQuota: 'basic',
+      offlineMode: false,
     },
     collaborator: {
       collaborators: 10,
@@ -150,6 +152,7 @@ module.exports = {
       trackChanges: true,
       symbolPalette: true,
       aiUsageQuota: 'basic',
+      offlineMode: true,
     },
     professional: {
       collaborators: -1,
@@ -167,6 +170,7 @@ module.exports = {
       trackChanges: true,
       symbolPalette: true,
       aiUsageQuota: 'basic',
+      offlineMode: true,
     },
   }),
 

@@ -34,7 +34,7 @@ export const UnsavedDocsProvider: FC<React.PropsWithChildren> = ({
   const { permissionsLevel, setPermissionsLevel } = useIdeReactContext()
   const [isLocked, setIsLocked] = useState(false)
   const [unsavedDocs, setUnsavedDocs] = useState(new Map<string, number>())
-  const isPremiumUser = Boolean(getMeta('ol-user')?.features?.versioning)
+  const isPremiumUser = Boolean(getMeta('ol-user')?.features?.offlineMode)
   const intermittentConnectionImprovementsEnabled = useFeatureFlag(
     'intermittent-connection-improvements'
   )

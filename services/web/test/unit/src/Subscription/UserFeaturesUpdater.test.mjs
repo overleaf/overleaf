@@ -20,6 +20,7 @@ describe('UserFeaturesUpdater', function () {
       zotero: true,
       mendeley: true,
       symbolPalette: true,
+      offlineMode: true,
     }
     ctx.User = {
       findByIdAndUpdate: sinon.stub().returns({

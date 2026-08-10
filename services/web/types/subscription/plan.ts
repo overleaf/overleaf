@@ -9,6 +9,7 @@ export type Features = {
   gitBridge: boolean
   github: boolean
   mendeley: boolean
+  offlineMode: boolean
   references: boolean
   referencesSearch: boolean
   symbolPalette: boolean

@@ -44,10 +44,9 @@ function mount(
     intermittentConnectionImprovementsEnabled?: boolean
   } = {}
 ) {
-  // the provider reads getMeta('ol-user') to decide the lock threshold; the
-  // `versioning` feature marks a premium user
+  // the provider reads getMeta('ol-user') to decide the lock threshold
   window.metaAttributesCache.set('ol-user', {
-    features: isPremiumUser ? { versioning: true } : {},
+    features: isPremiumUser ? { offlineMode: true } : {},
   })
   // the provider reads the split test variant via useFeatureFlag
   window.metaAttributesCache.set('ol-splitTestVariants', {

@@ -18,6 +18,7 @@ export type Features = {
   gitBridge?: boolean
   github?: boolean
   mendeley?: boolean
+  offlineMode?: boolean
   papers?: boolean
   references?: boolean
   referencesSearch?: boolean
