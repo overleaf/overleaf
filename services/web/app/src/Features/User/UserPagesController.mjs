@@ -34,6 +34,10 @@ async function settingsPage(req, res) {
     req.session,
     'projectSyncErrorMessage'
   )
+  const referenceLinkingErrorMessage = popSessionValue(
+    req.session,
+    'referenceLinkingErrorMessage'
+  )
   // Institution SSO
   let institutionLinked = _.get(req.session, ['saml', 'linked'])
   if (institutionLinked) {
@@ -171,6 +175,7 @@ async function settingsPage(req, res) {
     thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
     projectSyncSuccessMessage,
     projectSyncErrorMessage,
+    referenceLinkingErrorMessage,
     personalAccessTokens,
     emailAddressLimit: Settings.emailAddressLimit,
     isManagedAccount: !!req.managedBy,

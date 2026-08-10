@@ -289,6 +289,7 @@ export interface Meta {
       | 'zotero_multiple_collections'
       | null
   }
+  'ol-referenceLinkingErrorMessage': string
   'ol-ro-mirror-on-client-no-local-storage': boolean
   'ol-samlError': SAMLError | undefined
   'ol-script-log': ScriptLogType

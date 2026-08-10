@@ -25,6 +25,9 @@ function LinkingSection() {
   const cannotUseAi = getMeta('ol-cannot-use-ai')
   const projectSyncSuccessMessage = getMeta('ol-projectSyncSuccessMessage')
   const projectSyncErrorMessage = getMeta('ol-projectSyncErrorMessage')
+  const referenceLinkingErrorMessage = getMeta(
+    'ol-referenceLinkingErrorMessage'
+  )
 
   // hide linking widgets in CI
   const integrationLinkingWidgets = getMeta('ol-hideLinkingWidgets')
@@ -133,6 +136,14 @@ function LinkingSection() {
       {hasReferencesLinkingSection ? (
         <>
           <h3 id="references">{t('reference_managers')}</h3>
+          {referenceLinkingErrorMessage ? (
+            <div className="notification-list">
+              <Notification
+                type="error"
+                content={referenceLinkingErrorMessage}
+              />
+            </div>
+          ) : null}
           <div className="settings-widgets-container">
             {referenceLinkingWidgets.map(
               ({ import: importObject }, widgetIndex) => (

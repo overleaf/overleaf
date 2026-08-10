@@ -2130,6 +2130,8 @@
   "reference_count_plural": "__count__ references",
   "reference_error_relink_hint": "If this error persists, try re-linking your account here:",
   "reference_format": "Reference format",
+  "reference_manager_link_denied": "We couldn’t link your __provider__ account. To finish linking, allow __appName__ access when you’re asked.",
+  "reference_manager_link_error": "Sorry, we weren’t able to link your __provider__ account. Please try again in a few moments.",
   "reference_manager_linked": "Reference manager linked",
   "reference_manager_lowercase": "reference manager",
   "reference_manager_searched_groups": "__provider__ search groups",
