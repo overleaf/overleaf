@@ -1,6 +1,7 @@
 import { zz } from '../../../zodHelpers'
 import { describe, expect, it } from 'vitest'
 import mongodb from 'mongodb'
+import SafePath from '../../../../../services/web/app/src/Features/Project/SafePath.mjs'
 
 const { ObjectId } = mongodb
 
@@ -422,8 +423,10 @@ describe('zodHelpers', () => {
 
   describe('safePath', () => {
     it('fails to parse with empty input', () => {
-      const parsed = zz.safePath().safeParse('')
+      const inputPath = ''
+      const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
+      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path is empty',
@@ -435,14 +438,18 @@ describe('zodHelpers', () => {
       // unlike filepath(), a leading "/" is allowed -- project doc/file
       // paths are root-relative in production (see web's
       // ProjectEntityHandler.getAllEntitiesFromProject).
-      const parsed = zz.safePath().safeParse('/output.pdf')
+      const inputPath = '/output.pdf'
+      const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(true)
-      expect(parsed.data).toBe('/output.pdf')
+      expect(SafePath.isCleanPath(inputPath)).toBe(true)
+      expect(parsed.data).toBe(inputPath)
     })
 
     it('fails to parse a path ending in a slash (a folder, not a file)', () => {
-      const parsed = zz.safePath().safeParse('foo/')
+      const inputPath = 'foo/'
+      const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
+      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path is a folder, not a file',
@@ -451,8 +458,10 @@ describe('zodHelpers', () => {
     })
 
     it('fails to parse when provided with path traversal', () => {
-      const parsed = zz.safePath().safeParse('../output.pdf')
+      const inputPath = '../output.pdf'
+      const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
+      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path traversal detected',
@@ -464,8 +473,10 @@ describe('zodHelpers', () => {
       // matches SafePath.mjs's BADFILE_RX (^\.$), not just "..": a lone "."
       // component is also rejected there, cross-checked against
       // SafePath.test.mjs's isCleanFilename/isCleanPath cases.
-      const parsed = zz.safePath().safeParse('.')
+      const inputPath = '.'
+      const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
+      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path segment is "." or has leading/trailing whitespace',
@@ -474,8 +485,10 @@ describe('zodHelpers', () => {
     })
 
     it('fails to parse a path segment with leading whitespace', () => {
-      const parsed = zz.safePath().safeParse(' foobar.tex')
+      const inputPath = ' foobar.tex'
+      const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
+      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path segment is "." or has leading/trailing whitespace',
@@ -484,8 +497,10 @@ describe('zodHelpers', () => {
     })
 
     it('fails to parse a path segment with trailing whitespace', () => {
-      const parsed = zz.safePath().safeParse('foobar.tex ')
+      const inputPath = 'foobar.tex '
+      const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
+      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path segment is "." or has leading/trailing whitespace',
@@ -494,10 +509,10 @@ describe('zodHelpers', () => {
     })
 
     it('fails to parse a path containing a null byte', () => {
-      const parsed = zz
-        .safePath()
-        .safeParse('foo' + String.fromCharCode(0) + '.tex')
+      const inputPath = 'foo' + String.fromCharCode(0) + '.tex'
+      const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
+      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path contains a disallowed character',
@@ -507,10 +522,10 @@ describe('zodHelpers', () => {
 
     it('fails to parse a path containing a C1 control character', () => {
       // \x80-\x9F, per SafePath.mjs's BADCHAR_RX
-      const parsed = zz
-        .safePath()
-        .safeParse('foo' + String.fromCharCode(0x90) + '.tex')
+      const inputPath = 'foo' + String.fromCharCode(0x90) + '.tex'
+      const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
+      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path contains a disallowed character',
@@ -520,8 +535,10 @@ describe('zodHelpers', () => {
 
     it('fails to parse a path containing a lone surrogate', () => {
       // \uD800-\uDFFF, per SafePath.mjs's BADCHAR_RX
-      const parsed = zz.safePath().safeParse('foo\uD800.tex')
+      const inputPath = 'foo\uD800.tex'
+      const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
+      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path contains a disallowed character',
@@ -530,8 +547,10 @@ describe('zodHelpers', () => {
     })
 
     it('fails to parse a path containing an asterisk', () => {
-      const parsed = zz.safePath().safeParse('foo*.tex')
+      const inputPath = 'foo*.tex'
+      const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
+      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path contains a disallowed character',
@@ -540,8 +559,10 @@ describe('zodHelpers', () => {
     })
 
     it('fails to parse a path containing a backslash', () => {
-      const parsed = zz.safePath().safeParse('foo\\bar.tex')
+      const inputPath = 'foo\\bar.tex'
+      const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
+      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
           message: 'path contains a disallowed character',
@@ -549,53 +570,58 @@ describe('zodHelpers', () => {
       ])
     })
 
-    it('fails to parse a path with a __proto__ segment', () => {
-      const parsed = zz.safePath().safeParse('__proto__/output.pdf')
-      expect(parsed.success).toBe(false)
-      expect(parsed.error?.issues).toMatchObject([
-        expect.objectContaining({
-          message: 'path segment is an unsafe property name',
-        }),
-      ])
+    it('parses successfully with a nested __proto__ segment', () => {
+      // web's SafePath.mjs allows a reserved name below the top level (e.g.
+      // a folder literally named "__proto__" is permitted), so this schema
+      // must not reject a path web itself considers valid.
+      const inputPath = '__proto__/output.pdf'
+      const parsed = zz.safePath().safeParse(inputPath)
+      expect(parsed.success).toBe(true)
+      expect(SafePath.isCleanPath(inputPath)).toBe(true)
+      expect(parsed.data).toBe(inputPath)
     })
 
     it('fails to parse a path that is exactly "constructor"', () => {
-      const parsed = zz.safePath().safeParse('constructor')
+      const inputPath = 'constructor'
+      const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
+      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
-          message: 'path segment is an unsafe property name',
+          message: 'path is an unsafe property name',
         }),
       ])
     })
 
-    it('fails to parse a nested segment matching a built-in Object.prototype method name', () => {
+    it('parses successfully with a nested segment matching a built-in Object.prototype method name', () => {
       // full BLOCKEDFILE_RX parity, not just the prototype-pollution subset
-      // (__proto__/constructor/prototype) -- and checked per segment, not
-      // only the top-level path as SafePath.mjs's isCleanPath does.
-      const parsed = zz.safePath().safeParse('foo/toString')
-      expect(parsed.success).toBe(false)
-      expect(parsed.error?.issues).toMatchObject([
-        expect.objectContaining({
-          message: 'path segment is an unsafe property name',
-        }),
-      ])
+      // (__proto__/constructor/prototype) -- checked only against the
+      // top-level path, same as SafePath.mjs's isCleanPath.
+      const inputPath = 'foo/toString'
+      const parsed = zz.safePath().safeParse(inputPath)
+      expect(parsed.success).toBe(true)
+      expect(SafePath.isCleanPath(inputPath)).toBe(true)
+      expect(parsed.data).toBe(inputPath)
     })
 
     it('fails to parse a path that is exactly "hasOwnProperty"', () => {
-      const parsed = zz.safePath().safeParse('hasOwnProperty')
+      const inputPath = 'hasOwnProperty'
+      const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(false)
+      expect(SafePath.isCleanPath(inputPath)).toBe(false)
       expect(parsed.error?.issues).toMatchObject([
         expect.objectContaining({
-          message: 'path segment is an unsafe property name',
+          message: 'path is an unsafe property name',
         }),
       ])
     })
 
     it('parses successfully when provided a valid nested path', () => {
-      const parsed = zz.safePath().safeParse('foo/output.pdf')
+      const inputPath = 'foo/output.pdf'
+      const parsed = zz.safePath().safeParse(inputPath)
       expect(parsed.success).toBe(true)
-      expect(parsed.data).toBe('foo/output.pdf')
+      expect(SafePath.isCleanPath(inputPath)).toBe(true)
+      expect(parsed.data).toBe(inputPath)
     })
   })
 

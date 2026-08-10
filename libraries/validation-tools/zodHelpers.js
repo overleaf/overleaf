@@ -89,18 +89,18 @@ const zz = {
    * BADFILE_RX, and BLOCKEDFILE_RX), which every path in a project's file
    * tree is already validated against at the point of origin -- this
    * closes the gap for services that receive that path secondhand (e.g.
-   * forwarded into history-v1's archive/zip builder). Cross-checked
-   * against every case in web's SafePath.test.mjs (isCleanPath) via a
-   * throwaway script requiring both modules independently; the only
-   * remaining differences from that reference are two deliberate ones:
-   * (1) BADCHAR_RX's leading "/" is not ported -- here "/" is the segment
-   * separator, not a disallowed character, so a traversal payload is
-   * still caught (as "." or "..") per split segment below, just not via
-   * this character check; (2) BLOCKEDFILE_RX's property-name check is
-   * applied per segment, not only to the top-level path the way
-   * SafePath.mjs's isCleanPath does -- stricter on purpose, since any
-   * segment here (not just the first) could end up as an object key or
-   * archive/zip entry name downstream.
+   * forwarded into history-v1's archive/zip builder). Parity with
+   * isCleanPath is asserted directly in zodHelpers.test.ts, which imports
+   * SafePath.mjs and checks it against every safePath() test case; the only
+   * remaining difference from that reference is deliberate: BADCHAR_RX's
+   * leading "/" is not ported here, since "/" is the segment separator,
+   * not a disallowed character, so a traversal payload is still caught
+   * (as "." or "..") per split segment below, just not via this character
+   * check. The unsafe-property-name check (BLOCKEDFILE_RX) matches
+   * isCleanPath exactly -- only the top-level path, not nested segments --
+   * since web already allows a reserved name below the top level (e.g. a
+   * folder literally named "prototype" is permitted), and this schema
+   * shouldn't reject paths web itself considers valid.
    */
   safePath: () => {
     // eslint-disable-next-line no-control-regex
@@ -123,8 +123,8 @@ const zz = {
       .refine(s => !BAD_CHAR_RX.test(s), {
         message: 'path contains a disallowed character',
       })
-      .refine(s => !s.split('/').some(seg => UNSAFE_SEGMENT_RX.test(seg)), {
-        message: 'path segment is an unsafe property name',
+      .refine(s => !UNSAFE_SEGMENT_RX.test(s.replace(/^\//, '')), {
+        message: 'path is an unsafe property name',
       })
   },
   /**
